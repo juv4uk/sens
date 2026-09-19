@@ -1,0 +1,16 @@
+[package]
+name = "wsm-native-result-types"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Side-by-side producer-native result artifact for the WSM kernel archipelago"
+
+[features]
+default = []
+native-clips = ["wsm-clips-kernel/native-clips"]
+
+[dependencies]
+wsm-common-lisp-kernel = { path = "../wsm-common-lisp-kernel" }
+wsm-prolog-kernel = { path = "../wsm-prolog-kernel" }
+wsm-clips-kernel = { path = "../wsm-clips-kernel" }
+wsm-datalog-kernel = { path = "../wsm-datalog-kernel" }
