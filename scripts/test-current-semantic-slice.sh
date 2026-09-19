@@ -20,7 +20,7 @@ cargo test -p my-lisp \
   --test content_store_authority \
   --test decimal_comma_authority \
   --test authority_guard_contract \
-  --test semantic_ref_fail_closed
+  --test semantic_ref_fail_closed \
   --test semantic_coordinate_matrix_845
 
 # #291: quantity semantics live in Lisp. The shell observes only the named
