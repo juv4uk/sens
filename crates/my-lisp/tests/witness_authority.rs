@@ -642,203 +642,234 @@ fn primitive_budget_audit_734_accounts_for_197_ids_under_256_constraint() {
     );
 }
 
-// #735 — карта SID → kernel witness є Lisp-власним контрактом.
-// Перевіряє структуру contracts/sid-kernel-witness-735.lisp:
-//   - верхній тег sid-kernel-witness-map/1;
-//   - усі записи мають тег sid-witness;
-//   - усі п'ять ядер присутні хоча б раз;
-//   - SID не повторюються;
-//   - кожен зовнішній live witness має той самий probe-id і наявний ABI test.
+// #735/#853 — SID → kernel semantic witnesses and opaque ABI probes are
+// deliberately separate evidence classes.  A matching u8 is provenance, not
+// proof that the kernel executed the registry identity's semantics.
 #[test]
-fn sid_kernel_witness_735_maps_primitives_across_five_kernels() {
+fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
     let src = std::fs::read_to_string(repo_file("contracts/sid-kernel-witness-735.lisp"))
         .expect("contracts/sid-kernel-witness-735.lisp must exist");
     let exprs = parse(&src).expect("contract must parse as valid Lisp");
-
     assert!(
-        !exprs.is_empty(),
-        "contract must contain at least one expression"
+        exprs.len() >= 2,
+        "contract must contain semantic-witness map and opaque-probe evidence"
     );
 
-    // Верхня форма: (sid-kernel-witness-map/1 ...)
-    let map_expr = &exprs[0];
-    let map_items = match &map_expr.kind {
+    let map_items = match &exprs[0].kind {
         ExprKind::List(items) => items.clone(),
-        _ => panic!("top-level must be a list"),
+        _ => panic!("semantic witness map must be a list"),
     };
-    assert!(!map_items.is_empty(), "map must be non-empty");
-    let tag = match &map_items[0].kind {
-        ExprKind::Symbol(s) => &**s,
-        _ => panic!("first element must be the map tag symbol"),
-    };
-    assert_eq!(
-        tag, "sid-kernel-witness-map/1",
-        "tag must be sid-kernel-witness-map/1"
-    );
+    assert!(matches!(
+        &map_items[0].kind,
+        ExprKind::Symbol(s) if &**s == "sid-kernel-witness-map/1"
+    ));
 
-    let entries = &map_items[1..];
-    assert!(
-        !entries.is_empty(),
-        "map must contain at least one sid-witness entry"
-    );
-
-    let mut seen_sids: Vec<String> = Vec::new();
-    let mut kernels_seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let mut seen_sids = std::collections::HashSet::new();
+    let mut semantic_kernels = std::collections::HashSet::new();
     let mut live_count = 0usize;
-    let mut external_live_kernels: std::collections::HashSet<String> =
-        std::collections::HashSet::new();
 
-    for entry in entries {
+    for entry in &map_items[1..] {
         let fields = match &entry.kind {
             ExprKind::List(items) => items.clone(),
-            _ => panic!("each entry must be a list"),
+            _ => panic!("each semantic map entry must be a list"),
         };
-        assert!(!fields.is_empty(), "entry must be non-empty");
-        let entry_tag = match &fields[0].kind {
-            ExprKind::Symbol(s) => s.to_string(),
-            _ => panic!("entry tag must be a symbol"),
-        };
-        assert_eq!(
-            entry_tag, "sid-witness",
-            "each entry must be tagged sid-witness"
-        );
+        assert!(matches!(
+            &fields[0].kind,
+            ExprKind::Symbol(s) if &**s == "sid-witness"
+        ));
 
-        // Читаємо sid із dotted pair та witnesses із proper list.
-        let mut sid_val: Option<String> = None;
-        let mut witnesses_list: Vec<Expr> = Vec::new();
-
+        let mut sid: Option<String> = None;
+        let mut witnesses: Vec<Expr> = Vec::new();
         for field in &fields[1..] {
             match &field.kind {
-                ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
+                ExprKind::Pair(key, value)
+                    if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
                 {
-                    let val = match &value.kind {
-                        ExprKind::String(s) => s.to_string(),
-                        ExprKind::Symbol(s) => s.to_string(),
-                        _ => panic!("sid value must be a string"),
-                    };
-                    assert_eq!(val.len(), 8, "SID bitstring must be exactly 8 chars");
-                    assert!(
-                        val.chars().all(|c| c == '0' || c == '1'),
-                        "SID must be binary: {val}"
-                    );
-                    sid_val = Some(val);
+                    sid = Some(match &value.kind {
+                        ExprKind::String(s) | ExprKind::Symbol(s) => s.to_string(),
+                        _ => panic!("sid must be a bitstring"),
+                    });
                 }
-                ExprKind::List(items) if matches!(&items[0].kind, ExprKind::Symbol(s) if &**s == "witnesses") =>
+                ExprKind::List(items)
+                    if !items.is_empty()
+                        && matches!(&items[0].kind, ExprKind::Symbol(s) if &**s == "witnesses") =>
                 {
-                    witnesses_list = items[1..].to_vec();
+                    witnesses = items[1..].to_vec();
                 }
                 _ => {}
             }
         }
 
-        let sid = sid_val.expect("each sid-witness entry must have a (sid . ...) field");
-        assert!(
-            !seen_sids.contains(&sid),
-            "SID {sid} appears more than once in the mapping"
-        );
-        seen_sids.push(sid.clone());
+        let sid = sid.expect("every semantic witness row needs a SID");
+        assert_eq!(sid.len(), 8, "SID must stay an 8-bit bitstring");
+        assert!(sid.chars().all(|ch| ch == '0' || ch == '1'));
+        assert!(seen_sids.insert(sid.clone()), "duplicate SID {sid}");
 
-        for w in &witnesses_list {
-            let wfields = match &w.kind {
-                ExprKind::List(items) => items.clone(),
+        for witness in witnesses {
+            let fields = match witness.kind {
+                ExprKind::List(items) => items,
                 _ => continue,
             };
-            if wfields.is_empty() {
-                continue;
-            }
-            let wtag = match &wfields[0].kind {
-                ExprKind::Symbol(s) => &**s,
-                _ => continue,
-            };
-            if wtag != "witness" {
+            if fields.is_empty()
+                || !matches!(&fields[0].kind, ExprKind::Symbol(s) if &**s == "witness")
+            {
                 continue;
             }
 
-            let mut kernel_name: Option<String> = None;
-            let mut status_val: Option<String> = None;
+            let mut kernel: Option<String> = None;
+            let mut status: Option<String> = None;
             let mut probe_id: Option<String> = None;
-            let mut evidence_path: Option<String> = None;
+            let mut evidence_class: Option<String> = None;
+            let mut evidence: Option<String> = None;
 
-            for wf in &wfields[1..] {
-                match &wf.kind {
-                    ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "kernel") =>
-                    {
-                        kernel_name = Some(match &value.kind {
-                            ExprKind::Symbol(s) => s.to_string(),
-                            _ => continue,
-                        });
+            for field in &fields[1..] {
+                if let ExprKind::Pair(key, value) = &field.kind {
+                    let key = match &key.kind {
+                        ExprKind::Symbol(s) => &**s,
+                        _ => continue,
+                    };
+                    match key {
+                        "kernel" => {
+                            if let ExprKind::Symbol(s) = &value.kind {
+                                kernel = Some(s.to_string());
+                            }
+                        }
+                        "status" => {
+                            if let ExprKind::Symbol(s) = &value.kind {
+                                status = Some(s.to_string());
+                            }
+                        }
+                        "probe-id" => {
+                            if let ExprKind::String(s) = &value.kind {
+                                probe_id = Some(s.to_string());
+                            }
+                        }
+                        "evidence-class" => {
+                            if let ExprKind::Symbol(s) = &value.kind {
+                                evidence_class = Some(s.to_string());
+                            }
+                        }
+                        "evidence" => {
+                            if let ExprKind::String(s) = &value.kind {
+                                evidence = Some(s.to_string());
+                            }
+                        }
+                        _ => {}
                     }
-                    ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "status") =>
-                    {
-                        status_val = Some(match &value.kind {
-                            ExprKind::Symbol(s) => s.to_string(),
-                            _ => continue,
-                        });
-                    }
-                    ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "probe-id") =>
-                    {
-                        probe_id = Some(match &value.kind {
-                            ExprKind::String(s) => s.to_string(),
-                            _ => panic!("probe-id має бути рядком"),
-                        });
-                    }
-                    ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "evidence") =>
-                    {
-                        evidence_path = Some(match &value.kind {
-                            ExprKind::String(s) => s.to_string(),
-                            _ => panic!("evidence має бути рядком-шляхом"),
-                        });
-                    }
-                    _ => {}
                 }
             }
 
-            if let Some(k) = &kernel_name {
-                kernels_seen.insert(k.clone());
-            }
-            if status_val.as_deref() == Some("live") {
+            let kernel = kernel.expect("semantic witness needs a kernel");
+            semantic_kernels.insert(kernel.clone());
+            if status.as_deref() == Some("live") {
                 live_count += 1;
             }
 
-            if matches!(kernel_name.as_deref(), Some("prolog" | "datalog" | "clips"))
-                && status_val.as_deref() == Some("live")
+            if matches!(kernel.as_str(), "prolog" | "datalog" | "clips")
+                && status.as_deref() == Some("live")
             {
+                assert_eq!(
+                    evidence_class.as_deref(),
+                    Some("semantic-execution"),
+                    "external live semantic witness must explicitly prove semantic execution"
+                );
                 assert_eq!(
                     probe_id.as_deref(),
                     Some(sid.as_str()),
-                    "external live witness must receive its mapped SID"
+                    "semantic execution witness must intentionally receive the mapped SID"
                 );
-                let evidence =
-                    evidence_path.expect("external live witness needs ABI-test evidence");
+                let evidence = evidence.expect("semantic execution witness needs evidence");
                 assert!(
                     repo_file(&evidence).is_file(),
-                    "external live witness evidence must exist: {evidence}"
+                    "semantic witness evidence must exist: {evidence}"
                 );
-                external_live_kernels.insert(kernel_name.expect("external kernel name"));
             }
         }
     }
 
-    // Усі п'ять execution kernels мають бути відображені в карті.
-    for required_kernel in &["my-lisp", "common-lisp", "prolog", "clips", "datalog"] {
-        assert!(
-            kernels_seen.contains(*required_kernel),
-            "kernel '{required_kernel}' must appear in at least one witness entry"
+    assert!(semantic_kernels.contains("my-lisp"));
+    assert!(semantic_kernels.contains("common-lisp"));
+    assert!(live_count > 0);
+    assert!(seen_sids.len() >= 4);
+
+    let probe_items = match &exprs[1].kind {
+        ExprKind::List(items) => items.clone(),
+        _ => panic!("opaque probe evidence must be a list"),
+    };
+    assert!(matches!(
+        &probe_items[0].kind,
+        ExprKind::Symbol(s) if &**s == "opaque-kernel-probe-evidence/1"
+    ));
+
+    let mut probe_kernels = std::collections::HashSet::new();
+    for probe in &probe_items[1..] {
+        let fields = match &probe.kind {
+            ExprKind::List(items) => items,
+            _ => panic!("probe row must be a list"),
+        };
+        assert!(matches!(
+            &fields[0].kind,
+            ExprKind::Symbol(s) if &**s == "probe"
+        ));
+
+        let mut kernel: Option<String> = None;
+        let mut probe_id: Option<String> = None;
+        let mut semantic_witness: Option<String> = None;
+        let mut evidence: Option<String> = None;
+
+        for field in &fields[1..] {
+            if let ExprKind::Pair(key, value) = &field.kind {
+                let key = match &key.kind {
+                    ExprKind::Symbol(s) => &**s,
+                    _ => continue,
+                };
+                match key {
+                    "kernel" => {
+                        if let ExprKind::Symbol(s) = &value.kind {
+                            kernel = Some(s.to_string());
+                        }
+                    }
+                    "probe-id" => {
+                        if let ExprKind::String(s) = &value.kind {
+                            probe_id = Some(s.to_string());
+                        }
+                    }
+                    "semantic-witness" => {
+                        if let ExprKind::Symbol(s) = &value.kind {
+                            semantic_witness = Some(s.to_string());
+                        }
+                    }
+                    "evidence" => {
+                        if let ExprKind::String(s) = &value.kind {
+                            evidence = Some(s.to_string());
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        let kernel = kernel.expect("probe row needs kernel");
+        let probe_id = probe_id.expect("probe row needs opaque byte");
+        assert_eq!(probe_id.len(), 8);
+        assert!(probe_id.chars().all(|ch| ch == '0' || ch == '1'));
+        assert_eq!(
+            semantic_witness.as_deref(),
+            Some("no"),
+            "opaque transport probes must never masquerade as semantic witnesses"
         );
+        let evidence = evidence.expect("opaque probe needs mechanism evidence");
+        assert!(repo_file(&evidence).is_file(), "missing probe evidence: {evidence}");
+        probe_kernels.insert(kernel);
     }
 
-    assert!(live_count > 0, "at least one witness must have status live");
     assert_eq!(
-        external_live_kernels,
+        probe_kernels,
         std::collections::HashSet::from([
             "prolog".to_string(),
             "datalog".to_string(),
             "clips".to_string(),
         ]),
-        "every currently live external ABI kernel needs evidence"
-    );
-    assert!(
-        seen_sids.len() >= 4,
-        "at least 4 SIDs must be mapped (one vertical slice per issue)"
+        "all current opaque ABI probes must remain visible as transport evidence"
     );
 }
