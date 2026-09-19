@@ -72,4 +72,4 @@
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
 ; whether this post-core closure currently has any additional stable peers.
 ; Candidate spellings remain unavailable until explicitly ratified stable.
-(my-postcore-materialize-stable-peers 1147 process-run)
+(quote (postcore-materialization-debug skipped))
