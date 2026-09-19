@@ -56,7 +56,7 @@ crates/my-lisp/tests/machine_typed_operands.rs	typed_operands_are_explicit_lisp_
 crates/my-lisp/tests/machine_typed_operands.rs	invalid_operand_values_fail_closed_before_machine_form_creation	mechanism	machine-operand-type-fail-closed	lib/machine/operands/x86-64.lisp	migrated
 crates/my-lisp/tests/machine_typed_operands.rs	typed_registers_and_immediates_project_to_existing_176_forms	mechanism	machine-operand-projection	lib/machine/atoms/x86-64.lisp	migrated
 crates/my-lisp/tests/machine_typed_operands.rs	typed_memory_operands_project_to_existing_disp8_forms	mechanism	machine-memory-operand-projection	lib/machine/atoms/x86-64.lisp	migrated
-crates/my-lisp/tests/machine_typed_operands.rs	operand_type_success_does_not_bypass_instruction_admission	mechanism	machine-admission-separation	lib/machine/admission/x86-64.lisp	migrated
+crates/my-lisp/tests/machine_typed_operands.rs	operand_type_success_does_not_bypass_instruction_admission	mechanism	machine-admission-separation	lib/machine/operands/x86-64.lisp	migrated
 crates/my-lisp/tests/machine_typed_operands.rs	invalid_typed_operands_propagate_instead_of_becoming_instruction_forms	mechanism	machine-operand-rejection-propagation	lib/machine/atoms/x86-64.lisp	migrated
 crates/my-lisp/tests/machine_typed_operands.rs	typed_alu_atoms_follow_the_generalized_176_register_family	mechanism	machine-atom-projection	lib/machine/atoms/x86-64.lisp	migrated
 crates/my-lisp/tests/machine_typed_operands.rs	typed_unary_atoms_follow_current_push_pop_inc_dec_admission	mechanism	machine-atom-projection	lib/machine/atoms/x86-64.lisp	migrated
@@ -97,3 +97,4 @@ crates/my-lisp/tests/machine_capability_axis.rs	current_semantic_ids_project_to_
 crates/my-lisp/tests/machine_capability_axis.rs	capability_names_do_not_mint_semantic_identities	observer	machine-semantic-noninterference	lib/surface/semantic-registry.lisp + lib/machine/capability-axis.lisp	retained
 crates/my-lisp/tests/machine_capability_axis.rs	unsupported_targets_are_explicitly_unwitnessed	observer	target-witness-absence	lib/machine/capability-axis.lisp	retained
 crates/my-lisp/tests/machine_capability_axis.rs	x86_target_witnesses_reference_existing_lowering_names_without_owning_meaning	observer	x86-capability-provenance	lib/machine/capability-axis.lisp + lib/machine/lowering/semantic-x86-64.lisp	retained
+crates/wsm-native-result-types/tests/four_real_kernels.rs	one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_semantics	observer	four-kernel-invoke-sid-provenance	lib/surface/semantic-registry.lisp + shared C ABI	retained
