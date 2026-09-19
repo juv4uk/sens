@@ -119,7 +119,7 @@
                                   (- b2 128))
                                out)))
                       ((utf8-continuation-byte? b2) 0
-                       (list (quote rejected) (quote invalid-utf8)))))))
+                       (list (quote rejected) (quote invalid-utf8))))))))
               ((utf8-in-range? b1 194 223) 0
                (cond
                  ; 3-byte sequence with overlong/surrogate exclusions.
@@ -154,7 +154,7 @@
                                         (quote invalid-utf8)))))
                               ((utf8-three-byte-second-ok? b1 b2) 0
                                (list (quote rejected)
-                                     (quote invalid-utf8))))))))))
+                                     (quote invalid-utf8)))))))))))
                  ((utf8-in-range? b1 224 239) 0
                   (cond
                     ; 4-byte sequence, restricted to Unicode scalar <= 10FFFF.
@@ -200,7 +200,6 @@
                                        (list (quote rejected)
                                              (quote invalid-utf8))))))))))))
                          ))
-                       ))
                     ((utf8-in-range? b1 240 244) 0
                      (list (quote rejected) (quote invalid-utf8)))))
               )))
