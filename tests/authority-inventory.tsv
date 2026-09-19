@@ -97,3 +97,5 @@ crates/my-lisp/tests/machine_capability_axis.rs	current_semantic_ids_project_to_
 crates/my-lisp/tests/machine_capability_axis.rs	capability_names_do_not_mint_semantic_identities	observer	machine-semantic-noninterference	lib/surface/semantic-registry.lisp + lib/machine/capability-axis.lisp	retained
 crates/my-lisp/tests/machine_capability_axis.rs	unsupported_targets_are_explicitly_unwitnessed	observer	target-witness-absence	lib/machine/capability-axis.lisp	retained
 crates/my-lisp/tests/machine_capability_axis.rs	x86_target_witnesses_reference_existing_lowering_names_without_owning_meaning	observer	x86-capability-provenance	lib/machine/capability-axis.lisp + lib/machine/lowering/semantic-x86-64.lisp	retained
+crates/my-lisp/tests/semantic_coordinate_matrix_845.rs	matrix_is_a_view_over_existing_source_axes	observer	semantic-coordinate-matrix-noninterference	contracts/semantic-coordinate-matrix-845.lisp + canonical semantic/math/kernel/machine axes	retained
+crates/my-lisp/tests/semantic_coordinate_matrix_845.rs	coordinate_view_fixture_is_lisp_owned	observer	semantic-coordinate-matrix-witness	tests/fixtures/semantic-coordinate-matrix-845.lisp	retained
