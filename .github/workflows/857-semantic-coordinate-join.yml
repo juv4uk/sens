@@ -1,0 +1,20 @@
+name: #857 semantic coordinate join witness
+
+on:
+  pull_request:
+    paths:
+      - "crates/my-lisp/tests/semantic_coordinate_join.rs"
+      - "contracts/sid-kernel-witness-735.lisp"
+      - "tests/fixtures/semantic-coordinate-law-axis-v1.lisp"
+      - "lib/machine/capability-axis.lisp"
+      - ".github/workflows/857-semantic-coordinate-join.yml"
+
+jobs:
+  semantic-coordinate-join:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Prove one SID joins three orthogonal evidence axes
+        run: cargo test -p my-lisp --test semantic_coordinate_join -- --nocapture
