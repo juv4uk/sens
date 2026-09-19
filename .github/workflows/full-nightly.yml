@@ -26,7 +26,7 @@ jobs:
           shared-key: full-nightly-workspace
       - name: Check generated authority projections
         run: |
-          python3 scripts/generate-meta-semantic-registry.py --check
+          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
       - name: Full workspace tests
         run: cargo test --workspace
