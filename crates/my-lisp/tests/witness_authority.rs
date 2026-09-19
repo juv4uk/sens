@@ -539,3 +539,72 @@ fn semantic_ownership_audit_733_is_well_formed_lisp_inventory() {
         "audit must identify ambiguous items that require experiment before moving (found {unknown_count})"
     );
 }
+
+#[test]
+fn primitive_budget_audit_734_accounts_for_197_ids_under_256_constraint() {
+    let source = fs::read_to_string(repo_file("contracts/primitive-budget-audit-734.lisp"))
+        .expect("#734 requires contracts/primitive-budget-audit-734.lisp");
+    let forms = parse(&source).expect("primitive-budget-audit-734.lisp must be readable Lisp data");
+    assert_eq!(forms.len(), 1, "audit inventory must be a single root form");
+
+    let form = &forms[0];
+    let crate::ExprKind::List(items) = &form.kind else {
+        panic!("root form must be a list");
+    };
+    assert!(!items.is_empty(), "root form cannot be empty");
+    let crate::ExprKind::Symbol(tag) = &items[0].kind else {
+        panic!("root form must start with a tag symbol");
+    };
+    assert_eq!(&**tag, "primitive-budget-audit/1");
+
+    let mut total_ids = 0;
+    let mut reclaim_candidates = 0;
+    let mut has_second = false;
+    let mut has_cadr = false;
+    let mut fourth_is_reclaimable = false;
+
+    for entry_expr in items[1..].iter() {
+        let crate::ExprKind::List(fields) = &entry_expr.kind else {
+            panic!("each inventory entry must be an alist");
+        };
+        total_ids += 1;
+        let mut name = String::new();
+        let mut reclaim = false;
+
+        for field_expr in fields.iter() {
+            let crate::ExprKind::Pair(car, cdr) = &field_expr.kind else {
+                continue;
+            };
+            if let crate::ExprKind::Symbol(k) = &car.kind {
+                if &**k == "name" {
+                    if let crate::ExprKind::String(n) = &cdr.kind {
+                        name = n.to_string();
+                    } else if let crate::ExprKind::Symbol(n) = &cdr.kind {
+                        name = n.to_string();
+                    }
+                } else if &**k == "reclaim-candidate?" {
+                    if let crate::ExprKind::Symbol(r) = &cdr.kind {
+                        if &**r == "yes" {
+                            reclaim = true;
+                            reclaim_candidates += 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        if name == "second" {
+            has_second = true;
+        } else if name == "cadr" {
+            has_cadr = true;
+        } else if name == "fourth" && reclaim {
+            fourth_is_reclaimable = true;
+        }
+    }
+
+    assert_eq!(total_ids, 197, "audit must account for all 197 experimental IDs");
+    assert!(total_ids <= 256, "total IDs must satisfy <= 256 hard budget");
+    assert!(reclaim_candidates > 0, "audit must identify reclaim candidates");
+    assert!(has_second && has_cadr, "second and cadr must both be present and distinct");
+    assert!(fourth_is_reclaimable, "fourth must be identified as reclaim candidate");
+}
