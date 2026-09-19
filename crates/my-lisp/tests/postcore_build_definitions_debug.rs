@@ -29,7 +29,9 @@ fn macro_generated_define_arity_probe() {
     let mut session = Session::default();
     let result = eval_program(
         "(defmacro make-binding (name value)
-           (list (quote define) name value))
+           (cons (quote define)
+             (cons name
+               (cons value (quote ())))))
          (make-binding probe 42)",
         &mut session,
     )
