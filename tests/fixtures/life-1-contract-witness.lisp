@@ -128,4 +128,4 @@
                (list (quote status) (quote fail))
                (list (quote detail)
                      (list (quote schema)
-                           (life-1-schema)))))))))
+                           (life-1-schema))))))))
