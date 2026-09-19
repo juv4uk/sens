@@ -64,3 +64,4 @@
 (authority "crates/my-lisp/tests/machine_capability_axis.rs" observer)
 (authority "crates/my-lisp/tests/semantic_coordinate_join.rs" observer)
 (authority "crates/my-lisp/tests/error_kind_vocabulary_is_closed.rs" observer)
+(authority "crates/wsm-native-result-types/tests/kernel_availability.rs" observer)
