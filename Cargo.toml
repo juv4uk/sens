@@ -14,7 +14,7 @@ members = [
     "crates/wsm-guard-core",
     "crates/wsm-guard-slice",
     "crates/wsm-guard-facts",
-    "crates/wsm-prolog-kernel",
+    "crates/wsm-datalog-kernel",
     "crates/xtask",
 ]
 

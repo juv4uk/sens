@@ -1,0 +1,10 @@
+[package]
+name = "wsm-datalog-kernel"
+version = "0.1.0"
+edition = "2024"
+license-file = "../../LICENSE"
+description = "Standalone Datalog engine for WSM (relations, rules, fixpoint, provenance)."
+
+[dependencies]
+
+[dev-dependencies]
