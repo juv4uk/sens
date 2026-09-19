@@ -39,10 +39,24 @@ fn direct_native_clips_642_smoke() {
     environment
         .build("(defrule observe-signal (signal) => (assert (observed)))")
         .expect("build native CLIPS rule");
-    let _fact = environment
+    let fact = environment
         .assert_string("(signal)")
         .expect("assert native CLIPS fact");
-    assert_eq!(environment.run(-1), 1);
+    assert_eq!(environment.fact_count(), 1, "seed fact enters working memory");
+    assert_eq!(environment.run(-1), 1, "native CLIPS fires the rule");
+    assert_eq!(
+        environment.fact_count(),
+        2,
+        "rule firing asserts a second working-memory fact"
+    );
+    environment
+        .retract(fact)
+        .expect("retract the original seed fact");
+    assert_eq!(
+        environment.fact_count(),
+        1,
+        "retract visibly changes native CLIPS working memory"
+    );
 }
 
 #[test]
