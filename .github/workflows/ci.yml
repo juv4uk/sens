@@ -68,6 +68,12 @@ jobs:
         shell: bash
         run: bash scripts/rust-one-way-valve.sh "$BASE_SHA" "$HEAD_SHA"
 
+      - name: Debug post-core definition data shape for #771
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p my-lisp --test postcore_build_definitions_debug -- --nocapture
+
       - name: Lisp-owned semantic authority guard
         shell: bash
         run: |
