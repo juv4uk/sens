@@ -13,9 +13,9 @@
 //! a build that never calls the installer cannot reach it.
 
 use super::EvalStep;
-use crate::{Environment, Expr, LanguageError, Span, Value};
+use crate::{Environment, ErrorKind, Expr, LanguageError, Span, Value};
 use std::collections::BTreeMap;
-use std::sync::OnceLock;
+use std::sync::{OnceLock, RwLock};
 
 /// Signature of one installed capability handler. A plain function
 /// pointer keeps the registry `Copy`/`Send` and forbids stateful
@@ -23,9 +23,29 @@ use std::sync::OnceLock;
 /// the `Environment`, exactly like every kernel primitive.
 pub type HostFn = fn(&[Expr], &Environment, Span) -> Result<Value, LanguageError>;
 
-fn registry() -> &'static std::sync::RwLock<BTreeMap<String, HostFn>> {
-    static REGISTRY: OnceLock<std::sync::RwLock<BTreeMap<String, HostFn>>> = OnceLock::new();
-    REGISTRY.get_or_init(|| std::sync::RwLock::new(BTreeMap::new()))
+#[derive(Clone, Copy)]
+enum CapabilityLookup {
+    Present(HostFn),
+    Absent,
+    Unreadable,
+}
+
+fn lookup_capability(
+    source: &RwLock<BTreeMap<String, HostFn>>,
+    name: &str,
+) -> CapabilityLookup {
+    match source.read() {
+        Ok(map) => match map.get(name).copied() {
+            Some(handler) => CapabilityLookup::Present(handler),
+            None => CapabilityLookup::Absent,
+        },
+        Err(_) => CapabilityLookup::Unreadable,
+    }
+}
+
+fn registry() -> &'static RwLock<BTreeMap<String, HostFn>> {
+    static REGISTRY: OnceLock<RwLock<BTreeMap<String, HostFn>>> = OnceLock::new();
+    REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
 }
 
 /// Install one capability under its surface-form name (e.g. "read-file").
@@ -45,15 +65,20 @@ pub fn unregister_capability(name: &str) {
     }
 }
 
-/// True when a capability with this name is currently installed.
+/// Compatibility projection: true only when the richer lookup observes the
+/// capability as present. An unreadable registry is deliberately not treated
+/// as canonical evidence of absence; evaluator dispatch handles that state
+/// separately.
 pub fn capability_installed(name: &str) -> bool {
-    registry()
-        .read()
-        .map(|map| map.contains_key(name))
-        .unwrap_or(false)
+    matches!(
+        lookup_capability(registry(), name),
+        CapabilityLookup::Present(_)
+    )
 }
 
-/// Names of all installed capabilities, sorted (for diagnostics/UIs).
+/// Compatibility diagnostics projection. This legacy list-only API cannot
+/// represent an unreadable registry, so it retains its empty-list fallback.
+/// Canonical evaluator dispatch does not use this projection.
 pub fn installed_capabilities() -> Vec<String> {
     registry()
         .read()
@@ -61,17 +86,94 @@ pub fn installed_capabilities() -> Vec<String> {
         .unwrap_or_default()
 }
 
+fn dispatch_capability_from(
+    source: &RwLock<BTreeMap<String, HostFn>>,
+    name: &str,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<EvalStep, LanguageError>> {
+    match lookup_capability(source, name) {
+        CapabilityLookup::Present(handler) => {
+            Some(handler(arguments, environment, span).map(EvalStep::Value))
+        }
+        CapabilityLookup::Absent => None,
+        CapabilityLookup::Unreadable => Some(Err(LanguageError::new(
+            ErrorKind::MechanismUnavailable,
+            format!("capability registry unavailable while resolving: {name}"),
+            span,
+        ))),
+    }
+}
+
 /// Dispatch fallback in the evaluator: consulted after the kernel's own
 /// special forms and primitives, before ordinary function application.
+/// A readable registry may establish absence; an unreadable registry is a
+/// named mechanism failure and must never masquerade as `UnknownSymbol`.
 pub(crate) fn dispatch_capability(
     name: &str,
     arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Option<Result<EvalStep, LanguageError>> {
-    let handler = {
-        let map = registry().read().ok()?;
-        map.get(name).copied()?
-    };
-    Some(handler(arguments, environment, span).map(EvalStep::Value))
+    dispatch_capability_from(registry(), name, arguments, environment, span)
+}
+
+#[cfg(test)]
+mod honesty_tests {
+    use super::*;
+
+    fn dummy_handler(
+        _arguments: &[Expr],
+        _environment: &Environment,
+        _span: Span,
+    ) -> Result<Value, LanguageError> {
+        Ok(Value::Nil)
+    }
+
+    #[test]
+    fn lookup_distinguishes_present_absent_and_unreadable_registry() {
+        let lock = RwLock::new(BTreeMap::new());
+        lock.write()
+            .expect("fresh local registry")
+            .insert("demo".to_string(), dummy_handler as HostFn);
+
+        assert!(matches!(
+            lookup_capability(&lock, "demo"),
+            CapabilityLookup::Present(_)
+        ));
+        assert!(matches!(
+            lookup_capability(&lock, "missing"),
+            CapabilityLookup::Absent
+        ));
+
+        let poisoned = std::panic::catch_unwind(|| {
+            let _guard = lock.write().expect("lock is readable before poison");
+            panic!("poison local test registry");
+        });
+        assert!(poisoned.is_err());
+        assert!(matches!(
+            lookup_capability(&lock, "demo"),
+            CapabilityLookup::Unreadable
+        ));
+    }
+
+    #[test]
+    fn unreadable_registry_dispatch_is_named_mechanism_failure() {
+        let lock = RwLock::new(BTreeMap::new());
+        let poisoned = std::panic::catch_unwind(|| {
+            let _guard = lock.write().expect("lock is readable before poison");
+            panic!("poison local test registry");
+        });
+        assert!(poisoned.is_err());
+
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 4 };
+        let result = dispatch_capability_from(&lock, "demo", &[], &environment, span)
+            .expect("unreadable registry is an observed mechanism failure, not absence")
+            .expect_err("unreadable registry must fail named");
+
+        assert_eq!(result.kind, ErrorKind::MechanismUnavailable);
+        assert_ne!(result.kind, ErrorKind::UnknownSymbol);
+    }
 }
