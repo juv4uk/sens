@@ -218,6 +218,29 @@ fn load_island_compat_witness(session: &mut Session) {
     eval_program(&source, session).expect("island-compat-witness.lisp must load");
 }
 
+fn transport_life_1_document(session: &mut Session) {
+    let source = fs::read_to_string(repo_file("contracts/life-1-contract.lisp"))
+        .expect("#785 requires the Lisp-owned LIFE-1 contract");
+    let forms = parse(&source).expect("life-1-contract.lisp must be readable Lisp data");
+    assert_eq!(
+        forms.len(),
+        1,
+        "#785 LIFE-1 contract must remain one self-contained Lisp data document"
+    );
+
+    let form = &forms[0];
+    let exact_form_source = &source[form.span.start..form.span.end];
+    let transport = format!("(def life-1-document (quote {exact_form_source}))");
+    eval_program(&transport, session)
+        .expect("host observer must transport LIFE-1 contract bytes into Lisp data");
+}
+
+fn load_life_1_contract_witness(session: &mut Session) {
+    let source = fs::read_to_string(repo_file("tests/fixtures/life-1-contract-witness.lisp"))
+        .expect("#785 requires its Lisp-owned LIFE-1 witness");
+    eval_program(&source, session).expect("life-1-contract-witness.lisp must load");
+}
+
 fn escape_lisp_string(value: &str) -> String {
     value.replace('\\', "\\\\").replace('"', "\\\"")
 }
@@ -474,6 +497,24 @@ fn island_compat_semantics_are_owned_by_lisp_not_kernel_adapters() {
     assert!(
         verdict.starts_with("(island-compat-witness (status pass)"),
         "Lisp-owned #749 island compatibility witness rejected the contract: {verdict}"
+    );
+}
+
+#[test]
+fn life_1_liveness_semantics_are_owned_by_lisp_data() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    transport_life_1_document(&mut session);
+    load_life_1_contract_witness(&mut session);
+
+    let verdict = eval_program("(life-1-contract-witness)", &mut session)
+        .expect("Lisp-owned LIFE-1 witness must execute")
+        .value
+        .to_string();
+
+    assert!(
+        verdict.starts_with("(life-1-contract-witness (status pass)"),
+        "Lisp-owned #785 LIFE-1 witness rejected the contract: {verdict}"
     );
 }
 
