@@ -329,16 +329,22 @@ impl ClipsKernel {
             return Err(ClipsKernelError::CreateEnvironmentFailed);
         }
         Ok(ClipsEnvironment {
-            api: self.api.clone(),
-            raw,
+            inner: std::sync::Arc::new(EnvironmentInner {
+                api: self.api.clone(),
+                raw,
+            }),
         })
     }
 }
 
 #[cfg(feature = "native-clips")]
-pub struct ClipsEnvironment {
+struct EnvironmentInner {
     api: std::sync::Arc<native::NativeApi>,
     raw: *mut native::Environment,
+}
+
+pub struct ClipsEnvironment {
+    inner: std::sync::Arc<EnvironmentInner>,
 }
 
 #[cfg(feature = "native-clips")]
@@ -346,7 +352,7 @@ impl ClipsEnvironment {
     pub fn build(&self, construct: &str) -> Result<(), ClipsKernelError> {
         let construct =
             std::ffi::CString::new(construct).map_err(|_| ClipsKernelError::NulInput)?;
-        let code = unsafe { (self.api.build)(self.raw, construct.as_ptr()) };
+        let code = unsafe { (self.inner.api.build)(self.inner.raw, construct.as_ptr()) };
         if code == 0 {
             Ok(())
         } else {
@@ -354,19 +360,16 @@ impl ClipsEnvironment {
         }
     }
 
-    pub fn assert_string<'env>(
-        &'env self,
-        fact: &str,
-    ) -> Result<ClipsFact<'env>, ClipsKernelError> {
+    pub fn assert_string(&self, fact: &str) -> Result<ClipsFact, ClipsKernelError> {
         let fact = std::ffi::CString::new(fact).map_err(|_| ClipsKernelError::NulInput)?;
-        let raw = unsafe { (self.api.assert_string)(self.raw, fact.as_ptr()) };
+        let raw = unsafe { (self.inner.api.assert_string)(self.inner.raw, fact.as_ptr()) };
         if raw.is_null() {
             Err(ClipsKernelError::AssertFailed)
         } else {
-            unsafe { (self.api.retain_fact)(self.raw, raw) };
+            unsafe { (self.inner.api.retain_fact)(self.inner.raw, raw) };
             Ok(ClipsFact {
                 api: self.api.clone(),
-                env: self.raw,
+                env: self.inner.raw,
                 raw,
                 retained: true,
                 _environment: std::marker::PhantomData,
@@ -375,16 +378,16 @@ impl ClipsEnvironment {
     }
 
     pub fn run(&self, limit: i64) -> i64 {
-        unsafe { (self.api.run)(self.raw, limit) }
+        unsafe { (self.inner.api.run)(self.inner.raw, limit) }
     }
 
-    pub fn retract(&self, mut fact: ClipsFact<'_>) -> Result<(), ClipsKernelError> {
+    pub fn retract(&self, mut fact: ClipsFact) -> Result<(), ClipsKernelError> {
         let raw = fact.raw;
         if fact.retained {
-            unsafe { (self.api.release_fact)(self.raw, raw) };
+            unsafe { (self.inner.api.release_fact)(self.inner.raw, raw) };
             fact.retained = false;
         }
-        let code = unsafe { (self.api.retract)(raw) };
+        let code = unsafe { (self.inner.api.retract)(raw) };
         if code == 0 {
             Ok(())
         } else {
@@ -394,7 +397,7 @@ impl ClipsEnvironment {
 }
 
 #[cfg(feature = "native-clips")]
-impl Drop for ClipsEnvironment {
+impl Drop for EnvironmentInner {
     fn drop(&mut self) {
         if !self.raw.is_null() {
             let _ = unsafe { (self.api.destroy_environment)(self.raw) };
@@ -404,19 +407,19 @@ impl Drop for ClipsEnvironment {
 }
 
 #[cfg(feature = "native-clips")]
-pub struct ClipsFact<'env> {
-    api: std::sync::Arc<native::NativeApi>,
-    env: *mut native::Environment,
+pub struct ClipsFact {
+    environment: std::sync::Arc<EnvironmentInner>,
     raw: *mut native::Fact,
     retained: bool,
-    _environment: std::marker::PhantomData<&'env ClipsEnvironment>,
 }
 
 #[cfg(feature = "native-clips")]
-impl Drop for ClipsFact<'_> {
+impl Drop for ClipsFact {
     fn drop(&mut self) {
         if self.retained && !self.raw.is_null() {
-            unsafe { (self.api.release_fact)(self.env, self.raw) };
+            unsafe {
+                (self.environment.api.release_fact)(self.environment.raw, self.raw)
+            };
             self.retained = false;
         }
     }
