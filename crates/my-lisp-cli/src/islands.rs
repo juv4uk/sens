@@ -5,7 +5,15 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 struct Manifest {
     protocol: String,
+    #[serde(default)]
+    profiles: Vec<Profile>,
     islands: Vec<Island>,
+}
+
+#[derive(Deserialize)]
+struct Profile {
+    key: String,
+    islands: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -68,9 +76,16 @@ pub fn run(args: &[String]) -> Result<String, String> {
         .unwrap_or(current_target());
     match command {
         "plan" => {
-            let requested = value_after(args, "--with")?;
+            let requested: Vec<String> = if let Ok(keys) = value_after(args, "--with") {
+                keys.split(',').filter(|key| !key.is_empty()).map(str::to_string).collect()
+            } else {
+                let profile_key = value_after(args, "--profile")?;
+                manifest.profiles.iter().find(|profile| profile.key == profile_key)
+                    .ok_or_else(|| format!("unknown island profile: {profile_key}"))?
+                    .islands.clone()
+            };
             let mut rows = Vec::new();
-            for key in requested.split(',').filter(|key| !key.is_empty()) {
+            for key in requested {
                 let island = manifest.islands.iter().find(|island| island.key == key)
                     .ok_or_else(|| format!("unknown island: {key}"))?;
                 let entry = island.platforms.iter().find(|entry| entry.target == target);

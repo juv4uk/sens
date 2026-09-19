@@ -1,6 +1,7 @@
 {
   "protocol": "my-lisp-islands-manifest/1",
   "release_note": "Installation prepares independent runtimes; it never admits semantics.",
+  "profiles": [{"key": "four-kernel", "islands": ["prolog", "clips"]}],
   "islands": [
     {
       "key": "prolog",

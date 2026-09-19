@@ -1,5 +1,6 @@
 {
   "protocol": "my-lisp-islands-manifest/1",
+  "profiles": [{"key": "four-kernel", "islands": ["prolog", "clips"]}],
   "islands": [
     {
       "key": "prolog",
