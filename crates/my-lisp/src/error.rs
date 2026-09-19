@@ -8,6 +8,7 @@ pub enum ErrorKind {
     Arity,
     Type,
     InvalidForm,
+    MechanismUnavailable,
     /// A resource limit was hit, not a logic error — S3's own example
     /// ("4096 cons cells on an FPGA") named this category before it
     /// existed in code (found during a 2026-08-09 pre-ratification axiom
