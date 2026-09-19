@@ -38,15 +38,15 @@ These forms are equivalent:
 For example, `об'єкт` is one symbol, while `'об'єкт` means
 `(quote об'єкт)`.
 
-## Closed McCarthy semantic set
+## Canon 0 + McCarthy-7 as stable historical root
 
-The primitive semantic operation set is permanently closed by [`adr/ADR-004-CLOSED-MCCARTHY7-CORE.md`](adr/ADR-004-CLOSED-MCCARTHY7-CORE.md):
+Canon 0 + McCarthy-7 remain a stable historical/minimal root. Permanent closure of the primitive set is superseded by [`adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md`](adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md):
 
 ```text
 quote · atom · eq · cons · car · cdr · cond
 ```
 
-No later capability may acquire primitive status merely because it is useful or implemented in Rust.
+No later capability acquires primitive status merely because it is useful or implemented in Rust. A new primitive identity requires the evidence-based admission discipline of ADR-005.
 
 ### Canon 0
 
@@ -98,7 +98,7 @@ The evaluator still needs mechanisms for such things as:
 - structured errors;
 - a capability boundary to the external world.
 
-Those mechanisms do not become new members of the seven-operation semantic primitive set.
+Those mechanisms do not automatically become new semantic primitive identities.
 
 ### Necessary forms and derived forms
 
@@ -258,7 +258,8 @@ When current prose and executable evidence disagree, fix the prose or explicitly
 - [`../language-contract.lisp`](../language-contract.lisp) — machine-readable current Level 1/2 contract version;
 - [`semantic-authority-map.md`](semantic-authority-map.md) — authority hierarchy;
 - [`host-semantic-surface.md`](host-semantic-surface.md) — host/Lisp ownership audit;
-- [`adr/ADR-004-CLOSED-MCCARTHY7-CORE.md`](adr/ADR-004-CLOSED-MCCARTHY7-CORE.md) — closed primitive-set decision;
+- [`adr/ADR-004-CLOSED-MCCARTHY7-CORE.md`](adr/ADR-004-CLOSED-MCCARTHY7-CORE.md) — historical closed-set decision, partially superseded;
+- [`adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md`](adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md) — current primitive-admission and kernel-archipelago decision;
 - [`language-core-axioms.md`](language-core-axioms.md) — broader draft axioms and project principles;
 - [`../tests/fixtures/conformance.lisp`](../tests/fixtures/conformance.lisp) — executable fixtures;
 - [`../lib/canon.lisp`](../lib/canon.lisp) — language-owned Canon laws;
@@ -283,4 +284,4 @@ Lisp вирішує, що означає те, що через них прихо
 
 Semantische Autorität liegt beim Vertrag und ausführbarer Evidenz, nicht bei einer einzelnen Rust-Datei. Rust ist die Referenzimplementierung und stellt Mechanismen bereit; ableitbare Bedeutung und Policy sollen in der Sprache leben.
 
-Die sieben primitiven Operationen bleiben dauerhaft geschlossen. `()` ist Canon 0, kein achtes Primitiv. Oberflächennamen sind nicht mit semantischer Identität gleichzusetzen.
+Die sieben klassischen McCarthy-Operationen bleiben ein stabiler historischer/minimaler Ursprung. `()` ist Canon 0. Neue primitive Identitäten sind nach ADR-005 evidenzbasiert zulässig; Oberflächennamen sind weiterhin nicht mit semantischer Identität gleichzusetzen.
