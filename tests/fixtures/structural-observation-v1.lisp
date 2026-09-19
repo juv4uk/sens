@@ -103,3 +103,36 @@
  (active . t)
  (identity . "0003")
  (case . numeric-buffer-f32-signed-zero-distinct))
+
+; #369 — `symbol?` reports explicit class-membership data. These five rows
+; preserve every distinct classification case carried by the historical Rust
+; oracle before that oracle may be retired.
+((expr . "(symbol? (quote hello))")
+ (expected . "(class-membership symbol member)")
+ (active . t)
+ (identity . "1023")
+ (case . symbol-member))
+
+((expr . "(symbol? 5)")
+ (expected . "(class-membership symbol nonmember)")
+ (active . t)
+ (identity . "1023")
+ (case . number-nonmember))
+
+((expr . "(symbol? \"hello\")")
+ (expected . "(class-membership symbol nonmember)")
+ (active . t)
+ (identity . "1023")
+ (case . string-nonmember))
+
+((expr . "(symbol? (quote (hello)))")
+ (expected . "(class-membership symbol nonmember)")
+ (active . t)
+ (identity . "1023")
+ (case . pair-nonmember))
+
+((expr . "(symbol? (string->symbol \"strange symbol\"))")
+ (expected . "(class-membership symbol member)")
+ (active . t)
+ (identity . "1023")
+ (case . reconstructed-symbol-member))
