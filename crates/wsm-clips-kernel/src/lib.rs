@@ -19,11 +19,11 @@ pub enum ClipsKernelError {
     #[cfg(feature = "native-clips")]
     NulInput,
     #[cfg(feature = "native-clips")]
-    BuildFailed,
+    BuildFailed(i32),
     #[cfg(feature = "native-clips")]
     AssertFailed,
     #[cfg(feature = "native-clips")]
-    RetractFailed,
+    RetractFailed(i32),
 }
 
 impl fmt::Display for ClipsKernelError {
@@ -38,11 +38,11 @@ impl fmt::Display for ClipsKernelError {
             #[cfg(feature = "native-clips")]
             Self::NulInput => write!(f, "CLIPS input contains an interior NUL byte"),
             #[cfg(feature = "native-clips")]
-            Self::BuildFailed => write!(f, "CLIPS Build rejected the construct"),
+            Self::BuildFailed(code) => write!(f, "CLIPS Build failed with error code {code}"),
             #[cfg(feature = "native-clips")]
             Self::AssertFailed => write!(f, "CLIPS AssertString returned null"),
             #[cfg(feature = "native-clips")]
-            Self::RetractFailed => write!(f, "CLIPS Retract failed"),
+            Self::RetractFailed(code) => write!(f, "CLIPS Retract failed with error code {code}"),
         }
     }
 }
@@ -90,10 +90,12 @@ mod native {
     unsafe extern "C" {
         pub fn CreateEnvironment() -> *mut Environment;
         pub fn DestroyEnvironment(env: *mut Environment) -> bool;
-        pub fn Build(env: *mut Environment, construct: *const c_char) -> bool;
+        pub fn Build(env: *mut Environment, construct: *const c_char) -> i32;
         pub fn AssertString(env: *mut Environment, fact: *const c_char) -> *mut Fact;
         pub fn Run(env: *mut Environment, run_limit: c_longlong) -> c_longlong;
-        pub fn Retract(fact: *mut Fact) -> bool;
+        pub fn Retract(fact: *mut Fact) -> i32;
+        pub fn RetainFact(fact: *mut Fact);
+        pub fn ReleaseFact(fact: *mut Fact);
     }
 }
 
@@ -115,10 +117,11 @@ impl ClipsEnvironment {
     pub fn build(&mut self, construct: &str) -> Result<(), ClipsKernelError> {
         let construct =
             std::ffi::CString::new(construct).map_err(|_| ClipsKernelError::NulInput)?;
-        if unsafe { native::Build(self.raw, construct.as_ptr()) } {
+        let code = unsafe { native::Build(self.raw, construct.as_ptr()) };
+        if code == 0 {
             Ok(())
         } else {
-            Err(ClipsKernelError::BuildFailed)
+            Err(ClipsKernelError::BuildFailed(code))
         }
     }
 
@@ -128,6 +131,7 @@ impl ClipsEnvironment {
         if raw.is_null() {
             Err(ClipsKernelError::AssertFailed)
         } else {
+            unsafe { native::RetainFact(raw) };
             Ok(ClipsFact { raw })
         }
     }
@@ -139,10 +143,12 @@ impl ClipsEnvironment {
     pub fn retract(&mut self, fact: ClipsFact) -> Result<(), ClipsKernelError> {
         let raw = fact.raw;
         std::mem::forget(fact);
-        if unsafe { native::Retract(raw) } {
+        unsafe { native::ReleaseFact(raw) };
+        let code = unsafe { native::Retract(raw) };
+        if code == 0 {
             Ok(())
         } else {
-            Err(ClipsKernelError::RetractFailed)
+            Err(ClipsKernelError::RetractFailed(code))
         }
     }
 }
