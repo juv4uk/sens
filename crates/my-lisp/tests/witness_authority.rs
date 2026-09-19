@@ -476,3 +476,66 @@ fn island_compat_semantics_are_owned_by_lisp_not_kernel_adapters() {
         "Lisp-owned #749 island compatibility witness rejected the contract: {verdict}"
     );
 }
+
+#[test]
+fn semantic_ownership_audit_733_is_well_formed_lisp_inventory() {
+    let source = fs::read_to_string(repo_file("contracts/semantic-ownership-audit-733.lisp"))
+        .expect("#733 requires contracts/semantic-ownership-audit-733.lisp");
+    let forms = parse(&source).expect("semantic-ownership-audit-733.lisp must be readable Lisp data");
+    assert_eq!(forms.len(), 1, "audit inventory must be a single root form");
+
+    let form = &forms[0];
+    let crate::ExprKind::List(items) = &form.kind else {
+        panic!("root form must be a list");
+    };
+    assert!(!items.is_empty(), "root form cannot be empty");
+    let crate::ExprKind::Symbol(tag) = &items[0].kind else {
+        panic!("root form must start with a tag symbol");
+    };
+    assert_eq!(&**tag, "semantic-ownership-audit/1");
+
+    let mut semantic_authority_count = 0;
+    let mut semantic_witness_count = 0;
+    let mut execution_mechanism_count = 0;
+    let mut unknown_count = 0;
+
+    for entry_expr in items[1..].iter() {
+        let crate::ExprKind::List(fields) = &entry_expr.kind else {
+            panic!("each inventory entry must be an alist");
+        };
+        let mut category = None;
+        for field_expr in fields.iter() {
+            let crate::ExprKind::Pair(car, cdr) = &field_expr.kind else {
+                continue;
+            };
+            if let crate::ExprKind::Symbol(k) = &car.kind {
+                if &**k == "category" {
+                    if let crate::ExprKind::Symbol(cat) = &cdr.kind {
+                        category = Some(cat.to_string());
+                    }
+                }
+            }
+        }
+        match category.as_deref() {
+            Some("semantic-authority") => semantic_authority_count += 1,
+            Some("semantic-witness") => semantic_witness_count += 1,
+            Some("execution-mechanism") => execution_mechanism_count += 1,
+            Some("unknown") => unknown_count += 1,
+            _ => {}
+        }
+    }
+
+    assert!(
+        semantic_authority_count + semantic_witness_count >= 10,
+        "audit must identify at least 10 semantic authority/witness items (found {})",
+        semantic_authority_count + semantic_witness_count
+    );
+    assert!(
+        execution_mechanism_count >= 10,
+        "audit must identify at least 10 execution mechanism candidates (found {execution_mechanism_count})"
+    );
+    assert!(
+        unknown_count >= 1,
+        "audit must identify ambiguous items that require experiment before moving (found {unknown_count})"
+    );
+}
