@@ -41,8 +41,10 @@ jobs:
       - name: Run real CLIPS agenda and retract witnesses
         env:
           WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
+          LD_PRELOAD: /usr/lib64/libm.so.6
         run: cargo test -p wsm-clips-kernel --features native-clips --test c_abi_semantic_witness -- --nocapture
       - name: Clippy CLIPS adapter
         env:
           WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
+          LD_PRELOAD: /usr/lib64/libm.so.6
         run: cargo clippy -p wsm-clips-kernel --all-targets --features native-clips -- -D warnings
