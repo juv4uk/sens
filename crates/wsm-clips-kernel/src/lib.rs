@@ -4,16 +4,20 @@
 //! It does not reimplement CLIPS semantics and does not assign meaning to
 //! my-lisp semantic IDs.
 //!
-//! The default build deliberately does not link CLIPS. Enable the
-//! `native-clips` feature only in an environment that provides the CLIPS
-//! C library. This keeps the my-lisp release independent from the external
-//! runtime while preserving a direct native C boundary.
+//! The default build is runtime-independent. With the `native-clips` feature
+//! enabled, CLIPS is loaded dynamically at runtime rather than linked into the
+//! my-lisp binary. Set `WSM_CLIPS_LIBRARY` to an exact shared-library path,
+//! or let the platform loader try a conventional CLIPS library name.
 
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ClipsKernelError {
     NativeFeatureDisabled,
+    #[cfg(feature = "native-clips")]
+    LibraryLoad(String),
+    #[cfg(feature = "native-clips")]
+    MissingSymbol(String),
     #[cfg(feature = "native-clips")]
     CreateEnvironmentFailed,
     #[cfg(feature = "native-clips")]
@@ -34,6 +38,10 @@ impl fmt::Display for ClipsKernelError {
                 "native CLIPS support is not enabled; rebuild with feature native-clips"
             ),
             #[cfg(feature = "native-clips")]
+            Self::LibraryLoad(message) => write!(f, "unable to load CLIPS runtime: {message}"),
+            #[cfg(feature = "native-clips")]
+            Self::MissingSymbol(message) => write!(f, "CLIPS runtime is missing a required symbol: {message}"),
+            #[cfg(feature = "native-clips")]
             Self::CreateEnvironmentFailed => write!(f, "CLIPS CreateEnvironment returned null"),
             #[cfg(feature = "native-clips")]
             Self::NulInput => write!(f, "CLIPS input contains an interior NUL byte"),
@@ -49,32 +57,27 @@ impl fmt::Display for ClipsKernelError {
 
 impl std::error::Error for ClipsKernelError {}
 
-/// Mechanical CLIPS runtime boundary.
-///
-/// Without the `native-clips` feature this type is intentionally inert and
-/// reports a named unavailable state instead of pretending that CLIPS exists.
+#[cfg(not(feature = "native-clips"))]
 #[derive(Debug, Default)]
 pub struct ClipsKernel;
 
+#[cfg(not(feature = "native-clips"))]
 impl ClipsKernel {
     pub const fn native_feature_enabled() -> bool {
-        cfg!(feature = "native-clips")
+        false
     }
 
-    #[cfg(not(feature = "native-clips"))]
     pub fn create_environment(&self) -> Result<(), ClipsKernelError> {
         Err(ClipsKernelError::NativeFeatureDisabled)
-    }
-
-    #[cfg(feature = "native-clips")]
-    pub fn create_environment(&self) -> Result<ClipsEnvironment, ClipsKernelError> {
-        ClipsEnvironment::new()
     }
 }
 
 #[cfg(feature = "native-clips")]
 mod native {
-    use std::ffi::{c_char, c_longlong};
+    use super::ClipsKernelError;
+    use libloading::Library;
+    use std::ffi::{c_char, c_longlong, OsStr};
+    use std::sync::Arc;
 
     #[repr(C)]
     pub struct Environment {
@@ -86,38 +89,153 @@ mod native {
         _private: [u8; 0],
     }
 
-    #[link(name = "clips")]
-    unsafe extern "C" {
-        pub fn CreateEnvironment() -> *mut Environment;
-        pub fn DestroyEnvironment(env: *mut Environment) -> bool;
-        pub fn Build(env: *mut Environment, construct: *const c_char) -> i32;
-        pub fn AssertString(env: *mut Environment, fact: *const c_char) -> *mut Fact;
-        pub fn Run(env: *mut Environment, run_limit: c_longlong) -> c_longlong;
-        pub fn Retract(fact: *mut Fact) -> i32;
-        pub fn RetainFact(env: *mut Environment, fact: *mut Fact);
-        pub fn ReleaseFact(env: *mut Environment, fact: *mut Fact);
+    type CreateEnvironmentFn = unsafe extern "C" fn() -> *mut Environment;
+    type DestroyEnvironmentFn = unsafe extern "C" fn(*mut Environment) -> bool;
+    type BuildFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> i32;
+    type AssertStringFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> *mut Fact;
+    type RunFn = unsafe extern "C" fn(*mut Environment, c_longlong) -> c_longlong;
+    type RetractFn = unsafe extern "C" fn(*mut Fact) -> i32;
+    type RetainFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact);
+    type ReleaseFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact);
+
+    pub struct NativeApi {
+        _library: Library,
+        pub create_environment: CreateEnvironmentFn,
+        pub destroy_environment: DestroyEnvironmentFn,
+        pub build: BuildFn,
+        pub assert_string: AssertStringFn,
+        pub run: RunFn,
+        pub retract: RetractFn,
+        pub retain_fact: RetainFactFn,
+        pub release_fact: ReleaseFactFn,
+    }
+
+    impl NativeApi {
+        pub unsafe fn load(path: impl AsRef<OsStr>) -> Result<Arc<Self>, ClipsKernelError> {
+            let library = unsafe { Library::new(path.as_ref()) }
+                .map_err(|error| ClipsKernelError::LibraryLoad(error.to_string()))?;
+
+            unsafe fn load_symbol<T: Copy>(
+                library: &Library,
+                name: &'static [u8],
+            ) -> Result<T, ClipsKernelError> {
+                let symbol = unsafe { library.get::<T>(name) }.map_err(|error| {
+                    let printable = String::from_utf8_lossy(name)
+                        .trim_end_matches('\0')
+                        .to_string();
+                    ClipsKernelError::MissingSymbol(format!("{printable}: {error}"))
+                })?;
+                Ok(*symbol)
+            }
+
+            let create_environment =
+                unsafe { load_symbol(&library, b"CreateEnvironment\0")? };
+            let destroy_environment =
+                unsafe { load_symbol(&library, b"DestroyEnvironment\0")? };
+            let build = unsafe { load_symbol(&library, b"Build\0")? };
+            let assert_string = unsafe { load_symbol(&library, b"AssertString\0")? };
+            let run = unsafe { load_symbol(&library, b"Run\0")? };
+            let retract = unsafe { load_symbol(&library, b"Retract\0")? };
+            let retain_fact = unsafe { load_symbol(&library, b"RetainFact\0")? };
+            let release_fact = unsafe { load_symbol(&library, b"ReleaseFact\0")? };
+
+            Ok(Arc::new(Self {
+                _library: library,
+                create_environment,
+                destroy_environment,
+                build,
+                assert_string,
+                run,
+                retract,
+                retain_fact,
+                release_fact,
+            }))
+        }
+    }
+
+    pub fn candidate_library_names() -> &'static [&'static str] {
+        #[cfg(target_os = "windows")]
+        {
+            &["clips.dll", "libclips.dll"]
+        }
+        #[cfg(target_os = "macos")]
+        {
+            &["libclips.dylib", "clips.dylib"]
+        }
+        #[cfg(all(unix, not(target_os = "macos")))]
+        {
+            &["libclips.so", "clips.so"]
+        }
+        #[cfg(not(any(target_os = "windows", target_os = "macos", unix)))]
+        {
+            &[]
+        }
+    }
+}
+
+#[cfg(feature = "native-clips")]
+pub struct ClipsKernel {
+    api: std::sync::Arc<native::NativeApi>,
+}
+
+#[cfg(feature = "native-clips")]
+impl ClipsKernel {
+    pub const fn native_feature_enabled() -> bool {
+        true
+    }
+
+    pub fn load(path: impl AsRef<std::ffi::OsStr>) -> Result<Self, ClipsKernelError> {
+        let api = unsafe { native::NativeApi::load(path)? };
+        Ok(Self { api })
+    }
+
+    pub fn discover() -> Result<Self, ClipsKernelError> {
+        if let Some(path) = std::env::var_os("WSM_CLIPS_LIBRARY") {
+            return Self::load(path);
+        }
+
+        let mut failures = Vec::new();
+        for candidate in native::candidate_library_names() {
+            match Self::load(candidate) {
+                Ok(kernel) => return Ok(kernel),
+                Err(error) => failures.push(format!("{candidate}: {error}")),
+            }
+        }
+
+        Err(ClipsKernelError::LibraryLoad(if failures.is_empty() {
+            "no platform CLIPS library candidates are defined; set WSM_CLIPS_LIBRARY".to_string()
+        } else {
+            format!(
+                "{}; set WSM_CLIPS_LIBRARY to the exact shared-library path",
+                failures.join("; ")
+            )
+        }))
+    }
+
+    pub fn create_environment(&self) -> Result<ClipsEnvironment, ClipsKernelError> {
+        let raw = unsafe { (self.api.create_environment)() };
+        if raw.is_null() {
+            return Err(ClipsKernelError::CreateEnvironmentFailed);
+        }
+        Ok(ClipsEnvironment {
+            api: self.api.clone(),
+            raw,
+        })
     }
 }
 
 #[cfg(feature = "native-clips")]
 pub struct ClipsEnvironment {
+    api: std::sync::Arc<native::NativeApi>,
     raw: *mut native::Environment,
 }
 
 #[cfg(feature = "native-clips")]
 impl ClipsEnvironment {
-    fn new() -> Result<Self, ClipsKernelError> {
-        let raw = unsafe { native::CreateEnvironment() };
-        if raw.is_null() {
-            return Err(ClipsKernelError::CreateEnvironmentFailed);
-        }
-        Ok(Self { raw })
-    }
-
     pub fn build(&self, construct: &str) -> Result<(), ClipsKernelError> {
         let construct =
             std::ffi::CString::new(construct).map_err(|_| ClipsKernelError::NulInput)?;
-        let code = unsafe { native::Build(self.raw, construct.as_ptr()) };
+        let code = unsafe { (self.api.build)(self.raw, construct.as_ptr()) };
         if code == 0 {
             Ok(())
         } else {
@@ -125,14 +243,18 @@ impl ClipsEnvironment {
         }
     }
 
-    pub fn assert_string<'env>(&'env self, fact: &str) -> Result<ClipsFact<'env>, ClipsKernelError> {
+    pub fn assert_string<'env>(
+        &'env self,
+        fact: &str,
+    ) -> Result<ClipsFact<'env>, ClipsKernelError> {
         let fact = std::ffi::CString::new(fact).map_err(|_| ClipsKernelError::NulInput)?;
-        let raw = unsafe { native::AssertString(self.raw, fact.as_ptr()) };
+        let raw = unsafe { (self.api.assert_string)(self.raw, fact.as_ptr()) };
         if raw.is_null() {
             Err(ClipsKernelError::AssertFailed)
         } else {
-            unsafe { native::RetainFact(self.raw, raw) };
+            unsafe { (self.api.retain_fact)(self.raw, raw) };
             Ok(ClipsFact {
+                api: self.api.clone(),
                 env: self.raw,
                 raw,
                 retained: true,
@@ -142,16 +264,16 @@ impl ClipsEnvironment {
     }
 
     pub fn run(&self, limit: i64) -> i64 {
-        unsafe { native::Run(self.raw, limit) }
+        unsafe { (self.api.run)(self.raw, limit) }
     }
 
     pub fn retract(&self, mut fact: ClipsFact<'_>) -> Result<(), ClipsKernelError> {
         let raw = fact.raw;
         if fact.retained {
-            unsafe { native::ReleaseFact(self.raw, raw) };
+            unsafe { (self.api.release_fact)(self.raw, raw) };
             fact.retained = false;
         }
-        let code = unsafe { native::Retract(raw) };
+        let code = unsafe { (self.api.retract)(raw) };
         if code == 0 {
             Ok(())
         } else {
@@ -164,7 +286,7 @@ impl ClipsEnvironment {
 impl Drop for ClipsEnvironment {
     fn drop(&mut self) {
         if !self.raw.is_null() {
-            let _ = unsafe { native::DestroyEnvironment(self.raw) };
+            let _ = unsafe { (self.api.destroy_environment)(self.raw) };
             self.raw = std::ptr::null_mut();
         }
     }
@@ -172,6 +294,7 @@ impl Drop for ClipsEnvironment {
 
 #[cfg(feature = "native-clips")]
 pub struct ClipsFact<'env> {
+    api: std::sync::Arc<native::NativeApi>,
     env: *mut native::Environment,
     raw: *mut native::Fact,
     retained: bool,
@@ -182,7 +305,7 @@ pub struct ClipsFact<'env> {
 impl Drop for ClipsFact<'_> {
     fn drop(&mut self) {
         if self.retained && !self.raw.is_null() {
-            unsafe { native::ReleaseFact(self.env, self.raw) };
+            unsafe { (self.api.release_fact)(self.env, self.raw) };
             self.retained = false;
         }
     }
@@ -193,9 +316,19 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(not(feature = "native-clips"))]
     fn default_build_is_explicitly_runtime_independent() {
         assert!(!ClipsKernel::native_feature_enabled());
         let error = ClipsKernel.create_environment().unwrap_err();
         assert_eq!(error, ClipsKernelError::NativeFeatureDisabled);
+    }
+
+    #[test]
+    #[cfg(feature = "native-clips")]
+    fn native_feature_does_not_imply_a_bundled_runtime() {
+        assert!(ClipsKernel::native_feature_enabled());
+        if std::env::var_os("WSM_CLIPS_LIBRARY").is_none() {
+            let _ = ClipsKernel::discover();
+        }
     }
 }
