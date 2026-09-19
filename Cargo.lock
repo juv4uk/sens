@@ -821,6 +821,7 @@ dependencies = [
  "wsm-clips-kernel",
  "wsm-common-lisp-kernel",
  "wsm-datalog-kernel",
+ "wsm-kernel-c-abi",
  "wsm-prolog-kernel",
 ]
 
