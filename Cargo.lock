@@ -815,6 +815,7 @@ name = "wsm-native-result-types"
 version = "0.1.0"
 dependencies = [
  "wsm-clips-kernel",
+ "wsm-kernel-host",
  "wsm-common-lisp-kernel",
  "wsm-datalog-kernel",
  "wsm-prolog-kernel",
