@@ -19,6 +19,7 @@ members = [
     "crates/wsm-datalog-kernel",
     "crates/wsm-prolog-kernel",
     "crates/wsm-common-lisp-kernel",
+    "crates/wsm-clips-kernel",
     "crates/xtask",
 ]
 
