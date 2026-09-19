@@ -3,7 +3,7 @@ name: Surface Drift Check
 on:
   push:
     paths:
-      - 'lib/core.my'
+      - 'lib/core.lisp'   # canonical (my-lisp#81); legacy: lib/core.my
       - 'lib/surface/**'
       - 'crates/my-lisp/src/eval/builtins.rs'
       - 'crates/my-lisp/src/language_items.rs'
@@ -18,7 +18,7 @@ on:
       - 'docs/adr/ADR-008-NUMERIC-SURFACE-AUTHORITY.md'
   pull_request:
     paths:
-      - 'lib/core.my'
+      - 'lib/core.lisp'   # canonical (my-lisp#81); legacy: lib/core.my
       - 'lib/surface/**'
       - 'crates/my-lisp/src/eval/builtins.rs'
       - 'crates/my-lisp/src/language_items.rs'
