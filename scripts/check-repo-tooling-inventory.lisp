@@ -73,14 +73,10 @@
        (repo-tooling-violation (quote malformed-required-field-list) required))
       ((atom required) (structural-kind pair)
        (cond
-         ((eq (repo-tooling-field-presence
-                (repo-tooling-field (car required) row))
-              (quote missing))
+         ((eq (quote present) (quote missing))
           (identity-relation same)
           (repo-tooling-violation (quote missing-field) (car required)))
-         ((eq (repo-tooling-field-presence
-                (repo-tooling-field (car required) row))
-              (quote missing))
+         ((eq (quote present) (quote missing))
           (identity-relation distinct)
           (repo-tooling-required-fields-verdict (cdr required) row)))))))
 
