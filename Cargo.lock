@@ -221,6 +221,8 @@ dependencies = [
  "my-lisp-host",
  "my-lisp-lsp",
  "rustyline",
+ "serde",
+ "serde_json",
  "wsm-guard-core",
 ]
 

@@ -1,0 +1,39 @@
+{
+  "protocol": "my-lisp-islands-manifest/1",
+  "islands": [
+    {
+      "key": "prolog",
+      "runtime_version": "9.2.0",
+      "license": "BSD-2-Clause",
+      "provenance": "system package manager",
+      "platforms": [
+        {
+          "target": "linux-x86_64",
+          "provider": "apt",
+          "package": "swi-prolog",
+          "probe": ["swipl", "--version"]
+        }
+      ]
+    },
+    {
+      "key": "clips",
+      "runtime_version": "6.4.2",
+      "license": "CLIPS License",
+      "provenance": "release asset",
+      "platforms": [
+        {
+          "target": "linux-x86_64",
+          "provider": "release-asset",
+          "url": "https://example.invalid/clips-6.4.2-linux-x86_64.tar.gz",
+          "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "probe": ["clips", "--version"]
+        },
+        {
+          "target": "windows-x86_64",
+          "provider": "unsupported",
+          "reason": "No verified CLIPS release artifact for this target"
+        }
+      ]
+    }
+  ]
+}
