@@ -69,9 +69,9 @@
     (str+
       "    ("
       (write-to-string (car row))
-      " \\""
+      " \""
       (second row)
-      "\\") ; "
+      "\") ; "
       (write-to-string (third row))
       "\n")))
 
