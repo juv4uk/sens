@@ -779,6 +779,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "wsm-kernel-host"
+version = "0.1.0"
+
+[[package]]
 name = "xtask"
 version = "0.1.0"
 dependencies = [
