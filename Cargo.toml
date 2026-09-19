@@ -20,6 +20,7 @@ members = [
     "crates/wsm-prolog-kernel",
     "crates/wsm-common-lisp-kernel",
     "crates/wsm-clips-kernel",
+    "crates/wsm-native-result-types",
     "crates/xtask",
 ]
 
