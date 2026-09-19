@@ -27,6 +27,8 @@ pub enum ClipsKernelError {
     #[cfg(feature = "native-clips")]
     CreateEnvironmentFailed,
     #[cfg(feature = "native-clips")]
+    FiringCallbackRegistrationFailed,
+    #[cfg(feature = "native-clips")]
     NulInput,
     #[cfg(feature = "native-clips")]
     BuildFailed(i32),
@@ -49,6 +51,10 @@ impl fmt::Display for ClipsKernelError {
             Self::MissingSymbol(message) => write!(f, "CLIPS runtime is missing a required symbol: {message}"),
             #[cfg(feature = "native-clips")]
             Self::CreateEnvironmentFailed => write!(f, "CLIPS CreateEnvironment returned null"),
+            #[cfg(feature = "native-clips")]
+            Self::FiringCallbackRegistrationFailed => {
+                write!(f, "CLIPS rejected the after-rule-fires observation callback")
+            },
             #[cfg(feature = "native-clips")]
             Self::NulInput => write!(f, "CLIPS input contains an interior NUL byte"),
             #[cfg(feature = "native-clips")]
@@ -94,6 +100,14 @@ mod native {
         _private: [u8; 0],
     }
 
+    #[repr(C)]
+    pub struct Activation {
+        _private: [u8; 0],
+    }
+
+    pub type RuleFiredFunction =
+        unsafe extern "C" fn(*mut Environment, *mut Activation, *mut c_void);
+
     type CreateEnvironmentFn = unsafe extern "C" fn() -> *mut Environment;
     type DestroyEnvironmentFn = unsafe extern "C" fn(*mut Environment) -> bool;
     type BuildFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> i32;
@@ -102,6 +116,16 @@ mod native {
     type RetractFn = unsafe extern "C" fn(*mut Fact) -> i32;
     type RetainFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact);
     type ReleaseFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact);
+    type AddAfterRuleFiresFunctionFn = unsafe extern "C" fn(
+        *mut Environment,
+        *const c_char,
+        Option<RuleFiredFunction>,
+        i32,
+        *mut c_void,
+    ) -> bool;
+    type ActivationRuleNameFn = unsafe extern "C" fn(*mut Activation) -> *const c_char;
+    type GetNextFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact) -> *mut Fact;
+    type FactIndexFn = unsafe extern "C" fn(*mut Fact) -> c_longlong;
 
     #[cfg(unix)]
     mod loader {
@@ -252,6 +276,10 @@ mod native {
         pub retract: RetractFn,
         pub retain_fact: RetainFactFn,
         pub release_fact: ReleaseFactFn,
+        pub add_after_rule_fires_function: AddAfterRuleFiresFunctionFn,
+        pub activation_rule_name: ActivationRuleNameFn,
+        pub get_next_fact: GetNextFactFn,
+        pub fact_index: FactIndexFn,
     }
 
     impl NativeApi {
@@ -279,6 +307,12 @@ mod native {
             let retract = unsafe { load_symbol(&library, b"Retract\0")? };
             let retain_fact = unsafe { load_symbol(&library, b"RetainFact\0")? };
             let release_fact = unsafe { load_symbol(&library, b"ReleaseFact\0")? };
+            let add_after_rule_fires_function =
+                unsafe { load_symbol(&library, b"AddAfterRuleFiresFunction\0")? };
+            let activation_rule_name =
+                unsafe { load_symbol(&library, b"ActivationRuleName\0")? };
+            let get_next_fact = unsafe { load_symbol(&library, b"GetNextFact\0")? };
+            let fact_index = unsafe { load_symbol(&library, b"FactIndex\0")? };
 
             Ok(Rc::new(Self {
                 _library: library,
@@ -290,8 +324,49 @@ mod native {
                 retract,
                 retain_fact,
                 release_fact,
+                add_after_rule_fires_function,
+                activation_rule_name,
+                get_next_fact,
+                fact_index,
             }))
         }
+    }
+
+    pub struct FiringTraceContext {
+        activation_rule_name: ActivationRuleNameFn,
+        fired_rules: std::cell::RefCell<Vec<String>>,
+    }
+
+    impl FiringTraceContext {
+        pub fn new(activation_rule_name: ActivationRuleNameFn) -> Self {
+            Self {
+                activation_rule_name,
+                fired_rules: std::cell::RefCell::new(Vec::new()),
+            }
+        }
+
+        pub fn fired_rules(&self) -> Vec<String> {
+            self.fired_rules.borrow().clone()
+        }
+    }
+
+    pub unsafe extern "C" fn record_rule_fired(
+        _environment: *mut Environment,
+        activation: *mut Activation,
+        context: *mut c_void,
+    ) {
+        if activation.is_null() || context.is_null() {
+            return;
+        }
+        let trace = unsafe { &*(context as *const FiringTraceContext) };
+        let name = unsafe { (trace.activation_rule_name)(activation) };
+        if name.is_null() {
+            return;
+        }
+        trace
+            .fired_rules
+            .borrow_mut()
+            .push(unsafe { CStr::from_ptr(name) }.to_string_lossy().into_owned());
     }
 
     pub fn candidate_library_names() -> &'static [&'static str] {
