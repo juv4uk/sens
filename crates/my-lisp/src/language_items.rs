@@ -474,8 +474,10 @@ mod tests {
 
     #[test]
     fn registry_mutation_changes_discovered_surface_without_changing_metadata_key() {
-        const BEFORE: &str = "(\"00001000\" (en comet))";
-        const AFTER: &str = "(\"00001000\" (en meteor))";
+        const BEFORE: &str =
+            "(\"00001000\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))";
+        const AFTER: &str =
+            "(\"00001000\" (en meteor) (uk ()) (ukr ()) (sa ()) (sym ()))";
         let discover = |source: &'static str| {
             semantic_language_items_with(
                 |semantic_id| {
@@ -549,15 +551,18 @@ mod tests {
     }
 
     #[test]
-    fn def_remains_compatibility_only_in_registry_driven_discovery() {
+    fn def_is_a_present_status_free_registry_surface() {
         let items = language_items();
         let def = items
             .iter()
             .find(|item| item.name == "def")
-            .expect("compatibility def tooling item");
+            .expect("def tooling item");
         assert_eq!(def.semantic_id, Some(11));
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
-        assert!(semantic_registry::stable_surfaces_for_semantic_id(11).is_empty());
+        assert_eq!(
+            semantic_registry::stable_surfaces_for_semantic_id(11),
+            vec!["def"]
+        );
         assert_eq!(
             semantic_registry::admitted_surfaces_for_semantic_id(11),
             vec!["def"]
