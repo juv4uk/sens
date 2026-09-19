@@ -85,6 +85,3 @@ crates/wsm-datalog-kernel/tests/c_abi_semantic_witness.rs	opaque_semantic_id_cro
 crates/my-lisp/tests/witness_authority.rs	semantic_ownership_audit_733_is_well_formed_lisp_inventory	observer	semantic-ownership-audit	contracts/semantic-ownership-audit-733.lisp	retained
 crates/my-lisp/tests/witness_authority.rs	primitive_budget_audit_734_accounts_for_197_ids_under_256_constraint	observer	primitive-budget-audit	contracts/primitive-budget-audit-734.lisp	retained
 crates/my-lisp/tests/utf8.rs	utf8_layer_keeps_process_library_as_a_separate_top_level_load	observer	lisp-owned-utf8+process-load-boundary	lib/utf8.lisp + lib/process.lisp	retained
-crates/my-lisp/tests/library_load_stage_debug.rs	diagnostic_utf8_library_loads_independently	observer	library-load-stage-observation	lib/utf8.lisp	retained
-crates/my-lisp/tests/library_load_stage_debug.rs	diagnostic_process_library_loads_after_utf8	observer	library-load-stage-observation	lib/utf8.lisp + lib/process.lisp	retained
-crates/my-lisp/tests/library_load_stage_debug.rs	diagnostic_tcp_library_loads_after_utf8_and_process	observer	library-load-stage-observation	lib/utf8.lisp + lib/process.lisp + lib/tcp.lisp	retained
