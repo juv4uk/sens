@@ -79,3 +79,4 @@ crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs	opaque_semantic_id_cros
 crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs	opaque_semantic_id_crosses_shared_abi_into_native_clips_agenda	mechanism	opaque-sid-provenance+native-clips-agenda	remain host-owned transport witness	retained
 crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs	retracting_native_fact_changes_reachable_agenda_before_run	mechanism	native-clips-working-memory-change	remain host-owned transport witness	retained
 crates/wsm-kernel-host/tests/language_simplify_island_orchestration.rs	program_mixes_local_lisp_evaluation_with_two_autonomous_island_calls	observer	my-lisp-orchestration+autonomous-islands-dispatch	contracts/answer-contract.lisp	retained
+crates/wsm-native-result-types/tests/four_real_kernels.rs	four_real_kernels_keep_their_native_results_side_by_side	observer	four-kernel-native-result-domain-preservation	producer-owned kernel result types + #719	retained
