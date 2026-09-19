@@ -94,8 +94,8 @@ mod native {
         pub fn AssertString(env: *mut Environment, fact: *const c_char) -> *mut Fact;
         pub fn Run(env: *mut Environment, run_limit: c_longlong) -> c_longlong;
         pub fn Retract(fact: *mut Fact) -> i32;
-        pub fn RetainFact(fact: *mut Fact);
-        pub fn ReleaseFact(fact: *mut Fact);
+        pub fn RetainFact(env: *mut Environment, fact: *mut Fact);
+        pub fn ReleaseFact(env: *mut Environment, fact: *mut Fact);
     }
 }
 
@@ -131,7 +131,7 @@ impl ClipsEnvironment {
         if raw.is_null() {
             Err(ClipsKernelError::AssertFailed)
         } else {
-            unsafe { native::RetainFact(raw) };
+            unsafe { native::RetainFact(self.raw, raw) };
             Ok(ClipsFact { raw })
         }
     }
@@ -143,7 +143,7 @@ impl ClipsEnvironment {
     pub fn retract(&mut self, fact: ClipsFact) -> Result<(), ClipsKernelError> {
         let raw = fact.raw;
         std::mem::forget(fact);
-        unsafe { native::ReleaseFact(raw) };
+        unsafe { native::ReleaseFact(self.raw, raw) };
         let code = unsafe { native::Retract(raw) };
         if code == 0 {
             Ok(())
