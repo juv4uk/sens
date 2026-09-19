@@ -48,3 +48,4 @@
 (authority "crates/my-lisp/tests/uk_surface_equivalence.rs" observer)
 (authority "crates/my-lisp/tests/uk_surface_inventory.rs" observer)
 (authority "crates/my-lisp/tests/macro_derivation.rs" mechanism)
+(authority "crates/my-lisp/tests/meta_eval_advice_taker.rs" observer)
