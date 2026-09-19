@@ -41,3 +41,4 @@
 (authority "crates/my-lisp-host/tests/native_cond_profile.rs" mechanism)
 (authority "crates/xtask/tests/license_policy.rs" observer)
 (authority "crates/wsm-common-lisp-kernel/tests/c_abi_semantic_witness.rs" mechanism)
+(authority "crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs" mechanism)
