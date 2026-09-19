@@ -7,7 +7,7 @@
 //! Common authority here is limited to mechanism: lifecycle, request identity,
 //! transport metadata, snapshots, and measurements.
 
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::fmt;
 use std::time::Instant;
 
@@ -78,7 +78,7 @@ impl std::error::Error for KernelHostError {}
 
 /// Kernel-local mechanism. The host never asks the driver to convert a payload
 /// into a common semantic Rust type.
-pub trait KernelDriver {
+pub trait KernelDriver: Send {
     fn id(&self) -> KernelId;
     fn start(&mut self) -> Result<(), KernelHostError>;
     fn exchange(&mut self, payload: &[u8]) -> Result<Vec<u8>, KernelHostError>;
@@ -192,6 +192,77 @@ impl<D: KernelDriver> KernelHost<D> {
 
     pub fn into_driver(self) -> D {
         self.driver
+    }
+}
+
+impl<D: ?Sized + KernelDriver + Send> KernelDriver for Box<D> {
+    fn id(&self) -> KernelId {
+        (**self).id()
+    }
+
+    fn start(&mut self) -> Result<(), KernelHostError> {
+        (**self).start()
+    }
+
+    fn exchange(&mut self, payload: &[u8]) -> Result<Vec<u8>, KernelHostError> {
+        (**self).exchange(payload)
+    }
+
+    fn snapshot(&self) -> Result<Vec<u8>, KernelHostError> {
+        (**self).snapshot()
+    }
+
+    fn stop(&mut self) -> Result<(), KernelHostError> {
+        (**self).stop()
+    }
+}
+
+/// Multi-kernel router for mechanical dispatch across autonomous reasoning islands.
+///
+/// Owns no semantics, truth model, or payload translation. Opaque bytes in,
+/// opaque bytes out.
+#[derive(Default)]
+pub struct KernelRouter {
+    hosts: HashMap<String, KernelHost<Box<dyn KernelDriver + Send>>>,
+}
+
+impl KernelRouter {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn register(&mut self, driver: Box<dyn KernelDriver + Send>) {
+        let id = driver.id().as_str().to_string();
+        self.hosts.insert(id, KernelHost::new(driver));
+    }
+
+    pub fn is_registered(&self, target: &str) -> bool {
+        self.hosts.contains_key(target)
+    }
+
+    pub fn exchange(
+        &mut self,
+        target: &str,
+        payload: &[u8],
+        provenance: &[u8],
+    ) -> Result<Vec<u8>, KernelHostError> {
+        let host = self.hosts.get_mut(target).ok_or_else(|| {
+            KernelHostError::Driver(format!("target kernel '{target}' is not registered"))
+        })?;
+        if host.state() != LifecycleState::Running {
+            host.start()?;
+        }
+        let _req_id = host.submit(None, payload.to_vec(), provenance.to_vec())?;
+        let resp = host.receive().ok_or_else(|| {
+            KernelHostError::Driver(format!("no response received from kernel '{target}'"))
+        })?;
+        Ok(resp.payload)
+    }
+
+    pub fn registered_kernels(&self) -> Vec<String> {
+        let mut keys: Vec<String> = self.hosts.keys().cloned().collect();
+        keys.sort();
+        keys
     }
 }
 
@@ -320,5 +391,26 @@ mod tests {
         assert!(clips_result.working_memory_delta.starts_with(b"(wm-delta "));
         assert!(prolog_result.0[0].starts_with(b"substitutions:"));
         assert!(datalog_result.tuples[0].starts_with(b"closure:"));
+    }
+
+    #[test]
+    fn kernel_router_dispatches_across_multiple_islands() {
+        let mut router = KernelRouter::new();
+        router.register(Box::new(OpaqueDriver::new("prolog", b"prolog-out:")));
+        router.register(Box::new(OpaqueDriver::new("datalog", b"datalog-out:")));
+
+        assert!(router.is_registered("prolog"));
+        assert!(router.is_registered("datalog"));
+        assert!(!router.is_registered("clips"));
+        assert_eq!(router.registered_kernels(), vec!["datalog", "prolog"]);
+
+        let p_out = router.exchange("prolog", b"query1", b"prov1").unwrap();
+        assert_eq!(p_out, b"prolog-out:query1");
+
+        let d_out = router.exchange("datalog", b"facts1", b"prov2").unwrap();
+        assert_eq!(d_out, b"datalog-out:facts1");
+
+        let err = router.exchange("unknown", b"x", b"y");
+        assert!(err.is_err());
     }
 }
