@@ -16,6 +16,9 @@ members = [
     "crates/wsm-guard-facts",
     "crates/wsm-kernel-host",
     "crates/wsm-kernel-c-abi",
+    "crates/wsm-datalog-kernel",
+    "crates/wsm-prolog-kernel",
+    "crates/wsm-common-lisp-kernel",
     "crates/xtask",
 ]
 
