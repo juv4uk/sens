@@ -54,6 +54,17 @@
        (structural-relation distinct)
        (quote no)))))
 
+(def repo-tooling-field-presence
+  (lambda (value)
+    (cond
+      ((atom value) (structural-kind atom)
+       (cond
+         ((eq value (quote missing)) (identity-relation same)
+          (quote missing))
+         ((eq value (quote missing)) (identity-relation distinct)
+          (quote present))))
+      ((atom value) (structural-kind pair)
+       (quote present)))))
 (def repo-tooling-required-fields-verdict
   (lambda (required row)
     (cond
@@ -62,12 +73,17 @@
        (repo-tooling-violation (quote malformed-required-field-list) required))
       ((atom required) (structural-kind pair)
        (cond
-         ((atom (repo-tooling-field (car required) row))
-          (structural-kind atom)
-          (repo-tooling-required-fields-verdict (cdr required) row))
-         ((atom (repo-tooling-field (car required) row))
-          (structural-kind pair)
+         ((eq (repo-tooling-field-presence
+                (repo-tooling-field (car required) row))
+              (quote missing))
+          (identity-relation same)
+          (repo-tooling-violation (quote missing-field) (car required)))
+         ((eq (repo-tooling-field-presence
+                (repo-tooling-field (car required) row))
+              (quote missing))
+          (identity-relation distinct)
           (repo-tooling-required-fields-verdict (cdr required) row)))))))
+
 
 (def repo-tooling-row-required-verdict
   (lambda (row)
