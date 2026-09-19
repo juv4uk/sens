@@ -195,6 +195,183 @@ impl<D: KernelDriver> KernelHost<D> {
     }
 }
 
+impl<D: ?Sized + KernelDriver + Send> KernelDriver for Box<D> {
+    fn id(&self) -> KernelId {
+        (**self).id()
+    }
+
+    fn start(&mut self) -> Result<(), KernelHostError> {
+        (**self).start()
+    }
+
+    fn exchange(&mut self, payload: &[u8]) -> Result<Vec<u8>, KernelHostError> {
+        (**self).exchange(payload)
+    }
+
+    fn snapshot(&self) -> Result<Vec<u8>, KernelHostError> {
+        (**self).snapshot()
+    }
+
+    fn stop(&mut self) -> Result<(), KernelHostError> {
+        (**self).stop()
+    }
+}
+
+/// A router managing multiple registered autonomous kernel drivers.
+/// The router performs mechanical dispatch without imposing semantic interpretations.
+pub struct KernelRouter {
+    kernels: std::collections::HashMap<String, KernelHost<Box<dyn KernelDriver + Send>>>,
+}
+
+impl Default for KernelRouter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl KernelRouter {
+    pub fn new() -> Self {
+        Self {
+            kernels: std::collections::HashMap::new(),
+        }
+    }
+
+    pub fn register(&mut self, driver: Box<dyn KernelDriver + Send>) -> Result<(), KernelHostError> {
+        let name = driver.id().as_str().to_string();
+        let mut host = KernelHost::new(driver);
+        host.start()?;
+        self.kernels.insert(name, host);
+        Ok(())
+    }
+
+    pub fn exchange(
+        &mut self,
+        target: &str,
+        payload: &[u8],
+        provenance: &[u8],
+    ) -> Result<Vec<u8>, KernelHostError> {
+        let host = self
+            .kernels
+            .get_mut(target)
+            .ok_or_else(|| KernelHostError::Driver(format!("unknown target kernel: '{target}'")))?;
+        host.submit(None, payload.to_vec(), provenance.to_vec())?;
+        let response = host
+            .receive()
+            .ok_or_else(|| KernelHostError::Driver("no response received from kernel host".into()))?;
+        Ok(response.payload)
+    }
+
+    pub fn registered_kernels(&self) -> Vec<String> {
+        let mut keys: Vec<String> = self.kernels.keys().cloned().collect();
+        keys.sort();
+        keys
+    }
+}
+
+/// Status of an island call outcome under Issue #749 contract.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum IslandCallStatus {
+    /// 0 answers (goal unprovable / empty relation / failure).
+    None,
+    /// Exactly 1 answer (deterministic evaluation / single solution).
+    One,
+    /// N answers (multiple solutions / relation table / agenda firings).
+    Many,
+    /// Boundary transport or driver error.
+    Error(String),
+}
+
+/// A structured, honest response envelope representing an island call result.
+/// Distinguishes between zero answers and a single answer that is the literal `()`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct IslandResponseEnvelope {
+    pub status: IslandCallStatus,
+    pub count: usize,
+    pub items: Vec<String>,
+    pub raw_payload: Vec<u8>,
+    pub provenance: String,
+}
+
+impl IslandResponseEnvelope {
+    pub fn none(raw_payload: impl Into<Vec<u8>>, provenance: impl Into<String>) -> Self {
+        Self {
+            status: IslandCallStatus::None,
+            count: 0,
+            items: Vec::new(),
+            raw_payload: raw_payload.into(),
+            provenance: provenance.into(),
+        }
+    }
+
+    pub fn one(item: impl Into<String>, raw_payload: impl Into<Vec<u8>>, provenance: impl Into<String>) -> Self {
+        let item_str = item.into();
+        Self {
+            status: IslandCallStatus::One,
+            count: 1,
+            items: vec![item_str],
+            raw_payload: raw_payload.into(),
+            provenance: provenance.into(),
+        }
+    }
+
+    pub fn many(items: Vec<String>, raw_payload: impl Into<Vec<u8>>, provenance: impl Into<String>) -> Self {
+        let count = items.len();
+        Self {
+            status: IslandCallStatus::Many,
+            count,
+            items,
+            raw_payload: raw_payload.into(),
+            provenance: provenance.into(),
+        }
+    }
+
+    pub fn error(message: impl Into<String>, raw_payload: impl Into<Vec<u8>>, provenance: impl Into<String>) -> Self {
+        let msg = message.into();
+        Self {
+            status: IslandCallStatus::Error(msg),
+            count: 0,
+            items: Vec::new(),
+            raw_payload: raw_payload.into(),
+            provenance: provenance.into(),
+        }
+    }
+
+    /// Formats the envelope as a canonical my-lisp s-expression.
+    /// Distinguishes :none (items ()) from :one with empty list (items (())).
+    pub fn to_lisp_s_expression(&self) -> String {
+        match &self.status {
+            IslandCallStatus::None => {
+                format!(
+                    "(island-result :status :none :count 0 :items () :provenance \"{}\")",
+                    self.provenance
+                )
+            }
+            IslandCallStatus::One => {
+                format!(
+                    "(island-result :status :one :count 1 :items ({}) :provenance \"{}\")",
+                    self.items.first().map(|s| s.as_str()).unwrap_or("()"),
+                    self.provenance
+                )
+            }
+            IslandCallStatus::Many => {
+                let items_str = self.items.join(" ");
+                format!(
+                    "(island-result :status :many :count {} :items ({}) :provenance \"{}\")",
+                    self.count,
+                    items_str,
+                    self.provenance
+                )
+            }
+            IslandCallStatus::Error(msg) => {
+                format!(
+                    "(island-result :status :error :reason \"{}\" :count 0 :items () :provenance \"{}\")",
+                    msg, self.provenance
+                )
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -320,5 +497,85 @@ mod tests {
         assert!(clips_result.working_memory_delta.starts_with(b"(wm-delta "));
         assert!(prolog_result.0[0].starts_with(b"substitutions:"));
         assert!(datalog_result.tuples[0].starts_with(b"closure:"));
+    }
+
+    #[test]
+    fn kernel_router_dispatches_across_multiple_islands() {
+        let mut router = KernelRouter::new();
+        router
+            .register(Box::new(OpaqueDriver::new("prolog", b"prolog:")))
+            .unwrap();
+        router
+            .register(Box::new(OpaqueDriver::new("datalog", b"datalog:")))
+            .unwrap();
+
+        assert_eq!(
+            router.registered_kernels(),
+            vec!["datalog".to_string(), "prolog".to_string()]
+        );
+
+        let p_res = router
+            .exchange("prolog", b"query(1)", b"prov-1")
+            .unwrap();
+        assert_eq!(p_res, b"prolog:query(1)");
+
+        let d_res = router
+            .exchange("datalog", b"reach(a,b)", b"prov-2")
+            .unwrap();
+        assert_eq!(d_res, b"datalog:reach(a,b)");
+
+        let err = router.exchange("unknown", b"x", b"");
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn island_response_envelope_distinguishes_zero_one_and_many_answers() {
+        // 0-answers (failure / unprovable / empty relation)
+        let env_none = IslandResponseEnvelope::none(b"", "prolog");
+        assert_eq!(env_none.status, IslandCallStatus::None);
+        assert_eq!(env_none.count, 0);
+        assert_eq!(
+            env_none.to_lisp_s_expression(),
+            "(island-result :status :none :count 0 :items () :provenance \"prolog\")"
+        );
+
+        // 1-answer where the answer is the literal ()
+        let env_one_empty = IslandResponseEnvelope::one("()", b"()", "common-lisp");
+        assert_eq!(env_one_empty.status, IslandCallStatus::One);
+        assert_eq!(env_one_empty.count, 1);
+        assert_eq!(
+            env_one_empty.to_lisp_s_expression(),
+            "(island-result :status :one :count 1 :items (()) :provenance \"common-lisp\")"
+        );
+
+        // 1-answer with a concrete datum
+        let env_one = IslandResponseEnvelope::one("42", b"42", "common-lisp");
+        assert_eq!(env_one.status, IslandCallStatus::One);
+        assert_eq!(env_one.count, 1);
+        assert_eq!(
+            env_one.to_lisp_s_expression(),
+            "(island-result :status :one :count 1 :items (42) :provenance \"common-lisp\")"
+        );
+
+        // N-answers (multiple solutions from Prolog or tuples from Datalog)
+        let env_many = IslandResponseEnvelope::many(
+            vec!["(reach a b)".to_string(), "(reach b c)".to_string(), "(reach a c)".to_string()],
+            b"3-tuples",
+            "datalog",
+        );
+        assert_eq!(env_many.status, IslandCallStatus::Many);
+        assert_eq!(env_many.count, 3);
+        assert_eq!(
+            env_many.to_lisp_s_expression(),
+            "(island-result :status :many :count 3 :items ((reach a b) (reach b c) (reach a c)) :provenance \"datalog\")"
+        );
+
+        // Error path
+        let env_err = IslandResponseEnvelope::error("syntax error", b"err", "clips");
+        assert!(matches!(env_err.status, IslandCallStatus::Error(_)));
+        assert_eq!(
+            env_err.to_lisp_s_expression(),
+            "(island-result :status :error :reason \"syntax error\" :count 0 :items () :provenance \"clips\")"
+        );
     }
 }

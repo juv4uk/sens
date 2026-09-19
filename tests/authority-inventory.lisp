@@ -53,3 +53,4 @@
 (authority "crates/wsm-common-lisp-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs" mechanism)
+(authority "crates/wsm-kernel-host/tests/island_compatibility_language_contract.rs" observer)

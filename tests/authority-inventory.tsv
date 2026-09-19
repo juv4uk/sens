@@ -78,3 +78,4 @@ crates/wsm-common-lisp-kernel/tests/c_abi_semantic_witness.rs	semantic_id_crosse
 crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs	opaque_semantic_id_crosses_same_c_abi_into_real_prolog_backtracking	mechanism	opaque-sid-provenance+native-prolog-backtracking	remain host-owned transport witness	retained
 crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs	opaque_semantic_id_crosses_shared_abi_into_native_clips_agenda	mechanism	opaque-sid-provenance+native-clips-agenda	remain host-owned transport witness	retained
 crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs	retracting_native_fact_changes_reachable_agenda_before_run	mechanism	native-clips-working-memory-change	remain host-owned transport witness	retained
+crates/wsm-kernel-host/tests/island_compatibility_language_contract.rs	test_issue_749_island_compatibility_language_contract	observer	island-compatibility-language-contract	docs/architecture/ISLAND-COMPATIBILITY-LANGUAGE-CONTRACT-749.md	retained
