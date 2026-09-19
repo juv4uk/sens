@@ -29,11 +29,11 @@ pub enum ClipsKernelError {
     #[cfg(feature = "native-clips")]
     NulInput,
     #[cfg(feature = "native-clips")]
-    BuildFailed(i32),
+    BuildFailed(u32),
     #[cfg(feature = "native-clips")]
     AssertFailed,
     #[cfg(feature = "native-clips")]
-    RetractFailed(i32),
+    RetractFailed(u32),
 }
 
 impl fmt::Display for ClipsKernelError {
