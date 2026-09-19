@@ -72,6 +72,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core.lisp lib/core.lisp.fasl
           cargo build -p my-lisp-cli --bin my-lisp
           : > tests/changed-host-tests.lisp
           while IFS=$'\t' read -r additions deletions path; do
@@ -89,6 +90,21 @@ jobs:
           ./target/debug/my-lisp scripts/authority-guard.lisp > tests/authority-verdict.lisp
           cat tests/authority-verdict.lisp
           ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
+
+      - name: Upload regenerated core FASL for #771
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-fasl-771
+          path: lib/core.lisp.fasl
+          if-no-files-found: error
+
+      - name: Export regenerated core FASL for #771
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s lib/core.lisp.fasl
+          git diff --check
+        
 
       - name: Lisp-owned repo tooling inventory
         shell: bash
