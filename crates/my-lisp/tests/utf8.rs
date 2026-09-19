@@ -1,4 +1,4 @@
-use my_lisp::{eval_program, load_core_library, Session};
+use my_lisp::{eval_program, load_core_library, load_process_library, Session};
 
 fn utf8_session() -> Session {
     let mut session = Session::default();
@@ -86,4 +86,13 @@ fn utf8_rejects_non_bytes_before_protocol_interpretation() {
         eval("(utf8-decode (quote (65 -1 66)))"),
         "(rejected invalid-byte)"
     );
+}
+
+
+#[test]
+fn utf8_layer_keeps_process_library_as_a_separate_top_level_load() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    load_process_library(&mut session)
+        .expect("UTF-8, process and TCP language layers must load sequentially");
 }
