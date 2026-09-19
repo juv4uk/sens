@@ -368,11 +368,9 @@ impl ClipsEnvironment {
         } else {
             unsafe { (self.inner.api.retain_fact)(self.inner.raw, raw) };
             Ok(ClipsFact {
-                api: self.api.clone(),
-                env: self.inner.raw,
+                environment: self.inner.clone(),
                 raw,
                 retained: true,
-                _environment: std::marker::PhantomData,
             })
         }
     }
