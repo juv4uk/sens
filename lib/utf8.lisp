@@ -289,4 +289,4 @@
 
 (def utf8-encode-string
   (lambda (text)
-    (utf8-encode-string-onto text (quote ())))))
+    (utf8-encode-string-onto text (quote ()))))
