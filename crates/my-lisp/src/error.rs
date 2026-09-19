@@ -95,6 +95,7 @@ impl ErrorKind {
             | ErrorKind::Arity
             | ErrorKind::Type
             | ErrorKind::InvalidForm
+            | ErrorKind::MechanismUnavailable
             | ErrorKind::DivisionByZero => Classification::Fault,
         }
     }
