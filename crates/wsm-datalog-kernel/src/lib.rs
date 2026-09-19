@@ -468,6 +468,190 @@ impl Evaluator {
     }
 }
 
+
+// -----------------------------------------------------------------------------
+// Semantic-neutral C ABI adapter
+// -----------------------------------------------------------------------------
+//
+// The semantic ID below is opaque provenance owned by my-lisp. This crate does
+// not map IDs to Datalog relations or rules. The payload is a Datalog-native
+// relation query (currently a UTF-8 relation name), and the bytes returned are
+// a Datalog-owned textual projection of that relation after fixpoint.
+
+use std::ffi::c_void;
+use wsm_kernel_c_abi::{
+    WsmKernelKind, WsmKernelRequest, WsmKernelVTable, WsmMutableByteSpan, WsmStatus,
+    WSM_KERNEL_ABI_VERSION,
+};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct SemanticId(pub u8);
+
+#[derive(Debug)]
+struct DatalogAbiContext {
+    db: Database,
+    program: Program,
+    running: bool,
+    last_semantic_id: Option<SemanticId>,
+}
+
+pub struct DatalogAbiAdapter {
+    context: Box<DatalogAbiContext>,
+    vtable: WsmKernelVTable,
+}
+
+impl DatalogAbiAdapter {
+    pub fn new(db: Database, program: Program) -> Self {
+        let mut context = Box::new(DatalogAbiContext {
+            db,
+            program,
+            running: false,
+            last_semantic_id: None,
+        });
+        let context_ptr = (&mut *context) as *mut DatalogAbiContext as *mut c_void;
+
+        let vtable = WsmKernelVTable {
+            abi_version: WSM_KERNEL_ABI_VERSION,
+            kernel: WsmKernelKind::Datalog,
+            context: context_ptr,
+            start: Some(datalog_start),
+            exchange: Some(datalog_exchange),
+            snapshot: Some(datalog_snapshot),
+            stop: Some(datalog_stop),
+        };
+
+        Self { context, vtable }
+    }
+
+    pub fn vtable(&self) -> WsmKernelVTable {
+        self.vtable
+    }
+
+    pub fn last_semantic_id(&self) -> Option<SemanticId> {
+        self.context.last_semantic_id
+    }
+}
+
+fn value_text(value: &Value) -> String {
+    match value {
+        Value::Symbol(symbol) => symbol.clone(),
+        Value::Int(integer) => integer.to_string(),
+    }
+}
+
+fn relation_bytes(db: &Database, relation: &str) -> Vec<u8> {
+    let mut tuples: Vec<_> = db.relation(relation).iter().cloned().collect();
+    tuples.sort();
+
+    let mut output = String::new();
+    for tuple in tuples {
+        output.push_str(relation);
+        output.push('(');
+        for (index, value) in tuple.iter().enumerate() {
+            if index != 0 {
+                output.push(',');
+            }
+            output.push_str(&value_text(value));
+        }
+        output.push_str(")\n");
+    }
+    output.into_bytes()
+}
+
+unsafe fn datalog_context_mut<'a>(context: *mut c_void) -> Option<&'a mut DatalogAbiContext> {
+    unsafe { (context as *mut DatalogAbiContext).as_mut() }
+}
+
+unsafe extern "C" fn datalog_start(context: *mut c_void) -> WsmStatus {
+    let Some(context) = (unsafe { datalog_context_mut(context) }) else {
+        return WsmStatus::InvalidArgument;
+    };
+    context.running = true;
+    WsmStatus::Ok
+}
+
+unsafe extern "C" fn datalog_stop(context: *mut c_void) -> WsmStatus {
+    let Some(context) = (unsafe { datalog_context_mut(context) }) else {
+        return WsmStatus::InvalidArgument;
+    };
+    context.running = false;
+    WsmStatus::Ok
+}
+
+unsafe extern "C" fn datalog_snapshot(
+    context: *mut c_void,
+    _: WsmMutableByteSpan,
+    written: *mut usize,
+) -> WsmStatus {
+    if context.is_null() || written.is_null() {
+        return WsmStatus::InvalidArgument;
+    }
+    unsafe {
+        *written = 0;
+    }
+    WsmStatus::Ok
+}
+
+unsafe extern "C" fn datalog_exchange(
+    context: *mut c_void,
+    request: WsmKernelRequest,
+    response: WsmMutableByteSpan,
+    written: *mut usize,
+) -> WsmStatus {
+    if written.is_null() {
+        return WsmStatus::InvalidArgument;
+    }
+    unsafe {
+        *written = 0;
+    }
+
+    let Some(context) = (unsafe { datalog_context_mut(context) }) else {
+        return WsmStatus::InvalidArgument;
+    };
+    if !context.running {
+        return WsmStatus::NotRunning;
+    }
+    if request.payload.len != 0 && request.payload.ptr.is_null() {
+        return WsmStatus::InvalidArgument;
+    }
+
+    let payload = if request.payload.len == 0 {
+        &[]
+    } else {
+        unsafe { std::slice::from_raw_parts(request.payload.ptr, request.payload.len) }
+    };
+    let Ok(relation) = std::str::from_utf8(payload) else {
+        return WsmStatus::InvalidArgument;
+    };
+    if relation.is_empty() {
+        return WsmStatus::InvalidArgument;
+    }
+
+    Evaluator::semi_naive_fixpoint(&context.program, &mut context.db);
+    let output = relation_bytes(&context.db, relation);
+    context.last_semantic_id = Some(SemanticId(request.semantic_id));
+
+    if response.len < output.len() {
+        unsafe {
+            *written = output.len();
+        }
+        return WsmStatus::BufferTooSmall;
+    }
+    if !output.is_empty() && response.ptr.is_null() {
+        return WsmStatus::InvalidArgument;
+    }
+    if !output.is_empty() {
+        unsafe {
+            std::ptr::copy_nonoverlapping(output.as_ptr(), response.ptr, output.len());
+        }
+    }
+    unsafe {
+        *written = output.len();
+    }
+    WsmStatus::Ok
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
