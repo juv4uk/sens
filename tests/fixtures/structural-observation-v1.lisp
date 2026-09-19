@@ -103,3 +103,15 @@
  (active . t)
  (identity . "0003")
  (case . numeric-buffer-f32-signed-zero-distinct))
+
+
+; #218 regression: equal? must distinguish equal atomic values from distinct atoms.
+(def equal-atomic-structural-witness
+  (lambda ()
+    (cond
+      ((equal? (quote radio) (quote radio)) (structural-relation same)
+       (quote (equal-atomic-structural-witness (status pass))))
+      ((equal? (quote radio) (quote antenna)) (structural-relation distinct)
+       (quote (equal-atomic-structural-witness (status pass)))))))
+
+(equal-atomic-structural-witness)
