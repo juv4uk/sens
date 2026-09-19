@@ -114,7 +114,7 @@ impl ClipsEnvironment {
         Ok(Self { raw })
     }
 
-    pub fn build(&mut self, construct: &str) -> Result<(), ClipsKernelError> {
+    pub fn build(&self, construct: &str) -> Result<(), ClipsKernelError> {
         let construct =
             std::ffi::CString::new(construct).map_err(|_| ClipsKernelError::NulInput)?;
         let code = unsafe { native::Build(self.raw, construct.as_ptr()) };
@@ -125,25 +125,32 @@ impl ClipsEnvironment {
         }
     }
 
-    pub fn assert_string(&mut self, fact: &str) -> Result<ClipsFact, ClipsKernelError> {
+    pub fn assert_string<'env>(&'env self, fact: &str) -> Result<ClipsFact<'env>, ClipsKernelError> {
         let fact = std::ffi::CString::new(fact).map_err(|_| ClipsKernelError::NulInput)?;
         let raw = unsafe { native::AssertString(self.raw, fact.as_ptr()) };
         if raw.is_null() {
             Err(ClipsKernelError::AssertFailed)
         } else {
             unsafe { native::RetainFact(self.raw, raw) };
-            Ok(ClipsFact { raw })
+            Ok(ClipsFact {
+                env: self.raw,
+                raw,
+                retained: true,
+                _environment: std::marker::PhantomData,
+            })
         }
     }
 
-    pub fn run(&mut self, limit: i64) -> i64 {
+    pub fn run(&self, limit: i64) -> i64 {
         unsafe { native::Run(self.raw, limit) }
     }
 
-    pub fn retract(&mut self, fact: ClipsFact) -> Result<(), ClipsKernelError> {
+    pub fn retract(&self, mut fact: ClipsFact<'_>) -> Result<(), ClipsKernelError> {
         let raw = fact.raw;
-        std::mem::forget(fact);
-        unsafe { native::ReleaseFact(self.raw, raw) };
+        if fact.retained {
+            unsafe { native::ReleaseFact(self.raw, raw) };
+            fact.retained = false;
+        }
         let code = unsafe { native::Retract(raw) };
         if code == 0 {
             Ok(())
@@ -164,8 +171,21 @@ impl Drop for ClipsEnvironment {
 }
 
 #[cfg(feature = "native-clips")]
-pub struct ClipsFact {
+pub struct ClipsFact<'env> {
+    env: *mut native::Environment,
     raw: *mut native::Fact,
+    retained: bool,
+    _environment: std::marker::PhantomData<&'env ClipsEnvironment>,
+}
+
+#[cfg(feature = "native-clips")]
+impl Drop for ClipsFact<'_> {
+    fn drop(&mut self) {
+        if self.retained && !self.raw.is_null() {
+            unsafe { native::ReleaseFact(self.env, self.raw) };
+            self.retained = false;
+        }
+    }
 }
 
 #[cfg(test)]
