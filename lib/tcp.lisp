@@ -49,6 +49,6 @@
 
 ; #469: post-core public identities declare only numeric IDs plus the source
 ; binding they just defined. No human-language alias is encoded in this file.
-(my-postcore-materialize-stable-peers 1150 tcp-listen)
-(my-postcore-materialize-stable-peers 1148 tcp-read)
-(my-postcore-materialize-stable-peers 1149 tcp-write)
+(my-postcore-materialize-stable-peers 165 tcp-listen)
+(my-postcore-materialize-stable-peers 163 tcp-read)
+(my-postcore-materialize-stable-peers 164 tcp-write)
