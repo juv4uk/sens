@@ -765,6 +765,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "wsm-prolog-kernel"
+version = "0.1.0"
+
+[[package]]
+name = "wsm-datalog-kernel"
+version = "0.1.0"
+
+[[package]]
 name = "wsm-guard-core"
 version = "0.1.0"
 dependencies = [
