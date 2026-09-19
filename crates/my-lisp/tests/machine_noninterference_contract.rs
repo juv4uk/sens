@@ -47,7 +47,7 @@ fn public_api_discovery_uses_lisp_owned_machine_classification() {
 #[test]
 fn machine_evidence_cannot_mint_semantic_identity_or_peer_surfaces() {
     let registry = read("lib/surface/semantic-registry.lisp");
-    let generator = read("scripts/generate-meta-semantic-registry.py");
+    let generator = read("scripts/generate-meta-semantic-registry.lisp");
     let synthetic = "WSM-NOOP-150";
 
     assert!(
