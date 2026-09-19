@@ -62,11 +62,11 @@
        (repo-tooling-violation (quote malformed-required-field-list) required))
       ((atom required) (structural-kind pair)
        (cond
-         ((equal? (repo-tooling-field (car required) row) (quote missing))
-          (structural-relation same)
-          (repo-tooling-violation (quote missing-field) (car required)))
-         ((equal? (repo-tooling-field (car required) row) (quote missing))
-          (structural-relation distinct)
+         ((atom (repo-tooling-field (car required) row))
+          (structural-kind atom)
+          (repo-tooling-required-fields-verdict (cdr required) row))
+         ((atom (repo-tooling-field (car required) row))
+          (structural-kind pair)
           (repo-tooling-required-fields-verdict (cdr required) row)))))))
 
 (def repo-tooling-row-required-verdict
