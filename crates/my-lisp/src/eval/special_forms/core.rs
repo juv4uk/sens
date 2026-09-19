@@ -74,6 +74,16 @@ pub(crate) fn evaluate_definition(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    if arguments.len() != 2 {
+        eprintln!("DEBUG_EVALUATE_DEFINITION_ARGC={}", arguments.len());
+        for (index, argument) in arguments.iter().enumerate() {
+            if let ExprKind::Symbol(symbol) = &argument.kind {
+                eprintln!("DEBUG_EVALUATE_DEFINITION_PART[{index}]={symbol}");
+            } else {
+                eprintln!("DEBUG_EVALUATE_DEFINITION_PART[{index}]=<non-symbol>");
+            }
+        }
+    }
     exact_arity("def", arguments, 2, span)?;
     let ExprKind::Symbol(name) = &arguments[0].kind else {
         return Err(LanguageError::new(
