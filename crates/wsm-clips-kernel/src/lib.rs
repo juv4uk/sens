@@ -82,7 +82,7 @@ impl ClipsKernel {
 mod native {
     use super::ClipsKernelError;
     use std::ffi::{c_char, c_longlong, c_void, CStr, CString, OsStr};
-    use std::sync::Arc;
+    use std::rc::Rc;
 
     #[repr(C)]
     pub struct Environment {
@@ -255,7 +255,7 @@ mod native {
     }
 
     impl NativeApi {
-        pub unsafe fn load(path: impl AsRef<OsStr>) -> Result<Arc<Self>, ClipsKernelError> {
+        pub unsafe fn load(path: impl AsRef<OsStr>) -> Result<Rc<Self>, ClipsKernelError> {
             let library = unsafe { DynamicLibrary::open(path.as_ref()) }
                 .map_err(ClipsKernelError::LibraryLoad)?;
 
@@ -280,7 +280,7 @@ mod native {
             let retain_fact = unsafe { load_symbol(&library, b"RetainFact\0")? };
             let release_fact = unsafe { load_symbol(&library, b"ReleaseFact\0")? };
 
-            Ok(Arc::new(Self {
+            Ok(Rc::new(Self {
                 _library: library,
                 create_environment,
                 destroy_environment,
@@ -316,7 +316,7 @@ mod native {
 
 #[cfg(feature = "native-clips")]
 pub struct ClipsKernel {
-    api: std::sync::Arc<native::NativeApi>,
+    api: std::rc::Rc<native::NativeApi>,
 }
 
 #[cfg(feature = "native-clips")]
@@ -359,7 +359,7 @@ impl ClipsKernel {
             return Err(ClipsKernelError::CreateEnvironmentFailed);
         }
         Ok(ClipsEnvironment {
-            inner: std::sync::Arc::new(EnvironmentInner {
+            inner: std::rc::Rc::new(EnvironmentInner {
                 api: self.api.clone(),
                 raw,
             }),
@@ -369,13 +369,13 @@ impl ClipsKernel {
 
 #[cfg(feature = "native-clips")]
 struct EnvironmentInner {
-    api: std::sync::Arc<native::NativeApi>,
+    api: std::rc::Rc<native::NativeApi>,
     raw: *mut native::Environment,
 }
 
 #[cfg(feature = "native-clips")]
 pub struct ClipsEnvironment {
-    inner: std::sync::Arc<EnvironmentInner>,
+    inner: std::rc::Rc<EnvironmentInner>,
 }
 
 #[cfg(feature = "native-clips")]
@@ -437,7 +437,7 @@ impl Drop for EnvironmentInner {
 
 #[cfg(feature = "native-clips")]
 pub struct ClipsFact {
-    environment: std::sync::Arc<EnvironmentInner>,
+    environment: std::rc::Rc<EnvironmentInner>,
     raw: *mut native::Fact,
     retained: bool,
 }
