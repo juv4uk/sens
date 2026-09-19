@@ -427,8 +427,8 @@
       (cond
         ((my-rest-param? params)
          (cond
-           ((< received fixed) (quote ()))
-           (t t)))
+           ((< received fixed) 1 (quote ()))
+           ((< received fixed) 0 t)))
         (t (= received fixed))))))
 
 (def my-arity-detail
