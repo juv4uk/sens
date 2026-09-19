@@ -218,22 +218,69 @@
   (lambda (bytes)
     (eq (car (utf8-decode bytes)) (quote decoded))))
 
-; Keep text materialization in tail position.
-(def unicode-scalars->string-onto
+; Balanced text materialization from the historical #74 optimization; current UTF-8 decoder and encoder remain untouched.
+(def unicode-scalar-string-leaves-onto
   (lambda (scalars out)
     (cond
-      ((atom scalars)
-       (structural-kind empty-list)
-       out)
-      ((atom scalars)
-       (structural-kind pair)
-       (unicode-scalars->string-onto
+      ((atom scalars) (structural-kind empty-list)
+       (reverse out))
+      ((atom scalars) (structural-kind pair)
+       (unicode-scalar-string-leaves-onto
          (cdr scalars)
-         (string-append out (codepoint->string (car scalars))))))))
+         (cons (codepoint->string (car scalars)) out)))
+      ((atom scalars) (structural-kind atom)
+       (reverse out)))))
+
+(def string-pairs-onto
+  (lambda (strings out)
+    (cond
+      ((atom strings) (structural-kind empty-list)
+       (reverse out))
+      ((atom strings) (structural-kind pair)
+       (let ((rest (cdr strings)))
+         (cond
+           ((atom rest) (structural-kind empty-list)
+            (reverse (cons (car strings) out)))
+           ((atom rest) (structural-kind pair)
+            (string-pairs-onto
+              (cdr rest)
+              (cons (string-append (car strings) (car rest)) out)))
+           ((atom rest) (structural-kind atom)
+            (reverse (cons (car strings) out))))))
+      ((atom strings) (structural-kind atom)
+       (reverse out)))))
+
+(def collapse-string-leaves
+  (lambda (strings)
+    (cond
+      ((atom strings) (structural-kind empty-list)
+       "")
+      ((atom strings) (structural-kind pair)
+       (let ((rest (cdr strings)))
+         (cond
+           ((atom rest) (structural-kind empty-list)
+            (car strings))
+           ((atom rest) (structural-kind pair)
+            (collapse-string-leaves
+              (string-pairs-onto strings (quote ()))))
+           ((atom rest) (structural-kind atom)
+            (car strings)))))
+      ((atom strings) (structural-kind atom)
+       ""))))
+
+; Preserve the historical two-argument helper contract: OUT is a prefix.
+; Only one final append combines that prefix with the balanced materialization.
+(def unicode-scalars->string-onto
+  (lambda (scalars out)
+    (string-append
+      out
+      (collapse-string-leaves
+        (unicode-scalar-string-leaves-onto scalars (quote ()))))))
 
 (def unicode-scalars->string
   (lambda (scalars)
     (unicode-scalars->string-onto scalars "")))
+
 
 (def utf8-decode-string
   (lambda (bytes)
