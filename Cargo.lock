@@ -772,6 +772,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "wsm-prolog-kernel"
+version = "0.1.0"
+dependencies = [
+ "wsm-kernel-c-abi",
+]
+
+[[package]]
 name = "wsm-datalog-kernel"
 version = "0.1.0"
 
@@ -797,22 +804,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "wsm-kernel-c-abi"
-version = "0.1.0"
-
-[[package]]
 name = "wsm-kernel-host"
 version = "0.1.0"
-dependencies = [
- "my-lisp",
-]
 
 [[package]]
-name = "wsm-prolog-kernel"
+name = "wsm-kernel-c-abi"
 version = "0.1.0"
-dependencies = [
- "wsm-kernel-c-abi",
-]
 
 [[package]]
 name = "xtask"
