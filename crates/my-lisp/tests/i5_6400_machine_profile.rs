@@ -88,11 +88,11 @@ fn generated_function_table_has_i5_6400_column_without_replacing_semantic_author
         "human function table must expose the requested processor column"
     );
     assert!(
-        markdown.contains("| `00001100` | додати | додати | stable | — | yoga | stable | ADD"),
-        "byte SID 0104 must show the i5-6400 ADD fast path"
+        markdown.contains("| `00001100` | додати | додати | () | yoga | + | ADD / ADDSD |"),
+        "byte SID 00001100 must show the i5-6400 ADD fast path"
     );
     assert!(
-        markdown.contains("| `00000101` | перше | перше | stable | car | ādi | stable | LOAD-pair-head"),
+        markdown.contains("| `00000101` | перше | перше | car | ādi | :п | LOAD-pair-head |"),
         "Canon CAR identity must show its direct memory-load realization"
     );
 
