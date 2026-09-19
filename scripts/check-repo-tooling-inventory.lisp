@@ -66,7 +66,7 @@
            ((equal? value (quote missing)) (structural-relation same)
             (repo-tooling-violation (quote missing-field) (car required)))
            ((equal? value (quote missing)) (structural-relation distinct)
-            (repo-tooling-required-fields-verdict (cdr required) row))))))
+            (repo-tooling-required-fields-verdict (cdr required) row))))))))
 
 (def repo-tooling-row-required-verdict
   (lambda (row)
