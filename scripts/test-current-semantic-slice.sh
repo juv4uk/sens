@@ -22,6 +22,10 @@ cargo test -p my-lisp \
   --test authority_guard_contract \
   --test semantic_ref_fail_closed
 
+# #771: isolate the library layer that owns the current load regression.
+# This is diagnostic/observer-only: it does not define UTF-8/process/TCP semantics.
+cargo test -p my-lisp --test library_load_stage_debug -- --nocapture
+
 # #291: quantity semantics live in Lisp. The shell observes only the named
 # pass envelope; expected scientific quantities and relations stay in the
 # Lisp witness itself. No replacement Rust observer is introduced.
