@@ -163,7 +163,7 @@ jobs:
       - name: Exercise future main fast critical gate
         if: steps.changes.outputs.workflow == 'true'
         run: |
-          python3 scripts/generate-meta-semantic-registry.lisp --check
+          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           bash scripts/test-current-semantic-slice.sh
           cargo test -p my-lisp --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
@@ -184,7 +184,7 @@ jobs:
 
       - name: Check generated semantic registry
         if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
-        run: python3 scripts/generate-meta-semantic-registry.lisp --check
+        run: ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
 
       - name: Check public API discovery projection
         if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
@@ -267,7 +267,7 @@ jobs:
           shared-key: main-fast-critical
       - name: Generated authority projections
         run: |
-          python3 scripts/generate-meta-semantic-registry.lisp --check
+          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           cargo run -p xtask -- import-xed-evidence --check
           cargo run -p xtask -- generate-encoder-coverage --check
