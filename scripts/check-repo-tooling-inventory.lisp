@@ -54,6 +54,16 @@
        (structural-relation distinct)
        (quote no)))))
 
+(def repo-tooling-field-presence
+  (lambda (value)
+    (cond
+      ((atom value) (structural-kind empty-list) (quote present))
+      ((atom value) (structural-kind atom)
+       (cond
+         ((eq value (quote missing)) (identity-relation same) (quote missing))
+         ((eq value (quote missing)) (identity-relation distinct) (quote present))))
+      ((atom value) (structural-kind pair) (quote present)))))
+
 (def repo-tooling-required-fields-verdict
   (lambda (required row)
     (cond
@@ -62,11 +72,15 @@
        (repo-tooling-violation (quote malformed-required-field-list) required))
       ((atom required) (structural-kind pair)
        (cond
-         ((equal? (repo-tooling-field (car required) row) (quote missing))
-          (structural-relation same)
+         ((eq (repo-tooling-field-presence
+                (repo-tooling-field (car required) row))
+              (quote missing))
+          (identity-relation same)
           (repo-tooling-violation (quote missing-field) (car required)))
-         ((equal? (repo-tooling-field (car required) row) (quote missing))
-          (structural-relation distinct)
+         ((eq (repo-tooling-field-presence
+                (repo-tooling-field (car required) row))
+              (quote missing))
+          (identity-relation distinct)
           (repo-tooling-required-fields-verdict (cdr required) row)))))))
 
 (def repo-tooling-row-required-verdict
@@ -232,11 +246,11 @@
       ((atom rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
-           ((equal? path (repo-tooling-field (quote path) row))
-            (structural-relation same)
+           ((eq path (repo-tooling-field (quote path) row))
+            (identity-relation same)
             row)
-           ((equal? path (repo-tooling-field (quote path) row))
-            (structural-relation distinct)
+           ((eq path (repo-tooling-field (quote path) row))
+            (identity-relation distinct)
             (repo-tooling-find-row-by-path path (cdr rows)))))))))
 
 (def repo-tooling-duplicate-path-verdict
@@ -265,8 +279,8 @@
       ((atom observed) (structural-kind pair)
        (let ((observed-path (string-append "scripts/" (car observed))))
          (cond
-           ((equal? path observed-path) (structural-relation same) (quote present))
-           ((equal? path observed-path) (structural-relation distinct)
+           ((eq path observed-path) (identity-relation same) (quote present))
+           ((eq path observed-path) (identity-relation distinct)
             (repo-tooling-observed-path-state path (cdr observed)))))))))
 
 (def repo-tooling-stale-path-verdict
@@ -521,9 +535,9 @@
       ((atom entries) (structural-kind pair)
        (let ((name (car entries)))
          (cond
-           ((equal? name "tests") (structural-relation same)
+           ((eq name "tests") (identity-relation same)
             (repo-tooling-observed-scripts (cdr entries)))
-           ((equal? name "tests") (structural-relation distinct)
+           ((eq name "tests") (identity-relation distinct)
             (cons name (repo-tooling-observed-scripts (cdr entries))))))))))
 
 (def repo-tooling-live-forms
