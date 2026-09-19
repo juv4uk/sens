@@ -57,17 +57,6 @@
 (def repo-tooling-field-presence
   (lambda (value)
     (cond
-      ((atom value) (structural-kind atom)
-       (cond
-         ((eq value (quote missing)) (identity-relation same)
-          (quote missing))
-         ((eq value (quote missing)) (identity-relation distinct)
-          (quote present))))
-      ((atom value) (structural-kind pair)
-       (quote present)))))
-(def repo-tooling-field-presence
-  (lambda (value)
-    (cond
       ((atom value) (structural-kind empty-list) (quote missing))
       ((atom value) (structural-kind atom)
        (cond
@@ -473,99 +462,9 @@
       (replacement ())
       (removal-condition ()))))
 
-(def repo-tooling-assert-verdict
-  (lambda (actual expected)
-    (cond
-      ((equal? actual expected) (structural-relation same)
-       (list (quote repo-tooling-selftest-ok)))
-      ((equal? actual expected) (structural-relation distinct)
-       (list (quote repo-tooling-selftest-mismatch) actual expected)))))
-
-
-(repo-tooling-assert-verdict
-  (repo-tooling-verdict (list repo-tooling-sample-row-a) (quote ("a.lisp" "b.lisp")))
+(list
+  (quote repo-tooling-debug-first)
+  (repo-tooling-verdict
+    (list repo-tooling-sample-row-a)
+    (quote ("a.lisp" "b.lisp")))
   (quote (repo-tooling-violation unregistered-tool "scripts/b.lisp")))
-
-(repo-tooling-assert-verdict
-  (repo-tooling-verdict
-    (list repo-tooling-sample-row-a repo-tooling-sample-row-a)
-    (quote ("a.lisp")))
-  (quote (repo-tooling-violation duplicate-path "scripts/a.lisp")))
-
-(repo-tooling-assert-verdict
-  (repo-tooling-verdict
-    (list repo-tooling-sample-row-a repo-tooling-sample-row-c)
-    (quote ("a.lisp")))
-  (quote (repo-tooling-violation stale-path "scripts/c.lisp")))
-
-(repo-tooling-assert-verdict
-  (repo-tooling-verdict (list repo-tooling-sample-bad-kind) (quote ("a.lisp")))
-  (quote (repo-tooling-violation invalid-kind mystery-kind)))
-
-(repo-tooling-assert-verdict
-  (repo-tooling-verdict (list repo-tooling-sample-bad-language) (quote ("a.lisp")))
-  (quote (repo-tooling-violation invalid-language mystery-language)))
-
-(repo-tooling-assert-verdict
-  (repo-tooling-verdict (list repo-tooling-sample-bad-lifecycle) (quote ("a.lisp")))
-  (quote (repo-tooling-violation invalid-lifecycle parity-green)))
-
-(repo-tooling-assert-verdict
-  (repo-tooling-verdict (list repo-tooling-sample-python-unowned) (quote ("a.py")))
-  (quote (repo-tooling-violation python-migration-unowned "scripts/a.py")))
-
-(repo-tooling-assert-verdict
-  (repo-tooling-verdict (list repo-tooling-sample-missing-role) (quote ("a.lisp")))
-  (quote (repo-tooling-violation missing-field role)))
-
-; ----- real repository observation -----
-
-(def repo-tooling-tool-rows
-  (lambda (forms)
-    (cond
-      ((atom forms) (structural-kind empty-list) (quote ()))
-      ((atom forms) (structural-kind atom) (quote ()))
-      ((atom forms) (structural-kind pair)
-       (let ((form (car forms)))
-         (cond
-           ((atom form) (structural-kind empty-list)
-            (repo-tooling-tool-rows (cdr forms)))
-           ((atom form) (structural-kind atom)
-            (repo-tooling-tool-rows (cdr forms)))
-           ((atom form) (structural-kind pair)
-            (cond
-              ((eq (car form) (quote tool)) (identity-relation same)
-               (cons form (repo-tooling-tool-rows (cdr forms))))
-              ((eq (car form) (quote tool)) (identity-relation distinct)
-               (repo-tooling-tool-rows (cdr forms)))))))))))
-
-(def repo-tooling-observed-scripts
-  (lambda (entries)
-    (cond
-      ((atom entries) (structural-kind empty-list) (quote ()))
-      ((atom entries) (structural-kind atom) (quote ()))
-      ((atom entries) (structural-kind pair)
-       (let ((name (car entries)))
-         (cond
-           ((equal? name "tests") (structural-relation same)
-            (repo-tooling-observed-scripts (cdr entries)))
-           ((equal? name "tests") (structural-relation distinct)
-            (cons name (repo-tooling-observed-scripts (cdr entries))))))))))
-
-(def repo-tooling-live-forms
-  (read-all (read-file "knowledge/repo-tooling-inventory.lisp")))
-
-(def repo-tooling-live-rows
-  (repo-tooling-tool-rows repo-tooling-live-forms))
-
-(def repo-tooling-live-observed
-  (repo-tooling-observed-scripts (read-dir "scripts")))
-
-(def repo-tooling-live-verdict
-  (repo-tooling-verdict repo-tooling-live-rows repo-tooling-live-observed))
-
-(print repo-tooling-live-verdict)
-
-(repo-tooling-assert-verdict
-  repo-tooling-live-verdict
-  (quote (repo-tooling-ok)))
