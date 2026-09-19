@@ -54,3 +54,4 @@
 (authority "crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/wsm-kernel-host/tests/language_simplify_island_orchestration.rs" observer)
+(authority "crates/wsm-native-result-types/tests/four_real_kernels.rs" observer)
