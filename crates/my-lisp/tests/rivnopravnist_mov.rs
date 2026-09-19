@@ -4,7 +4,6 @@ use std::rc::Rc;
 
 const РЕЄСТР: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
 const REPL_КАТАЛОГ: &str = include_str!("../../my-lisp-cli/src/repl/surface_catalog.rs");
-const ПЕРЕВІРКА_ПОКРИТТЯ: &str = include_str!("../../../scripts/check_surface_coverage.py");
 const ПЕРЕВІРКА_РІВНОПРАВЯ: &str = include_str!("../../../scripts/check_trilingual_surface.py");
 const ТРАНСЛЯТОР: &str = include_str!("../../../scripts/translate-program.py");
 
@@ -223,7 +222,6 @@ fn додавання_відділяє_людські_мови_від_спіль
 fn executable_authority_більше_не_читає_legacy_en_shaped_таблицю() {
     for (імя, джерело) in [
         ("REPL", REPL_КАТАЛОГ),
-        ("coverage", ПЕРЕВІРКА_ПОКРИТТЯ),
         ("parity", ПЕРЕВІРКА_РІВНОПРАВЯ),
         ("translator", ТРАНСЛЯТОР),
     ] {

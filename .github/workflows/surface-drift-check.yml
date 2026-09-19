@@ -9,7 +9,7 @@ on:
       - 'crates/my-lisp/src/language_items.rs'
       - 'crates/my-lisp-cli/src/repl.rs'
       - 'crates/my-lisp-cli/src/repl/surface_catalog.rs'
-      - 'scripts/check_surface_coverage.py'
+      - 'scripts/check-surface-coverage.lisp'
       - 'scripts/check_trilingual_surface.py'
       - 'scripts/check_semantic_registry.py'
       - 'scripts/translate-program.py'
@@ -24,7 +24,7 @@ on:
       - 'crates/my-lisp/src/language_items.rs'
       - 'crates/my-lisp-cli/src/repl.rs'
       - 'crates/my-lisp-cli/src/repl/surface_catalog.rs'
-      - 'scripts/check_surface_coverage.py'
+      - 'scripts/check-surface-coverage.lisp'
       - 'scripts/check_trilingual_surface.py'
       - 'scripts/check_semantic_registry.py'
       - 'scripts/translate-program.py'
@@ -38,8 +38,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Build my-lisp for Lisp-owned surface checks
+        run: cargo build --release -p my-lisp-cli --bin my-lisp
+
       - name: Check runtime names against numeric authority
-        run: python3 scripts/check_surface_coverage.py
+        run: ./target/release/my-lisp scripts/check-surface-coverage.lisp
 
       - name: Check UK / EN / SA parity from numeric identities
         run: python3 scripts/check_trilingual_surface.py

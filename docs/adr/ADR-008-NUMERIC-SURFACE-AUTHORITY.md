@@ -101,7 +101,7 @@ Authority закрита не лише текстом ADR. CI виконує т�
 
 ```bash
 python3 scripts/check_semantic_registry.py
-python3 scripts/check_surface_coverage.py
+./target/release/my-lisp scripts/check-surface-coverage.lisp
 python3 scripts/check_trilingual_surface.py
 ```
 
