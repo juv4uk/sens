@@ -5,7 +5,19 @@ fn print_postcore_definition_data_shape() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core should load");
     let result = eval_program(
-        "(write-to-string (my-postcore-build-definitions (quote process-run) (quote (запустити-процес))))",
+        "(write-to-string
+            (list
+              (my-postcore-peer-group 162 my-postcore-stable-peer-projection)
+              (my-postcore-missing-peers
+                (quote process-run)
+                (cdr (my-postcore-peer-group 162 my-postcore-stable-peer-projection))
+                (env))
+              (my-postcore-build-definitions
+                (quote process-run)
+                (my-postcore-missing-peers
+                  (quote process-run)
+                  (cdr (my-postcore-peer-group 162 my-postcore-stable-peer-projection))
+                  (env)))))",
         &mut session,
     )
     .expect("core helper should evaluate");
