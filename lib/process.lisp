@@ -73,3 +73,6 @@
 ; whether this post-core closure currently has any additional stable peers.
 ; Candidate spellings remain unavailable until explicitly ratified stable.
 (quote (postcore-materialization-debug skipped))
+
+; #771: materialize the registry-authoritative Ukrainian peer after process-run exists.
+(my-postcore-materialize-stable-peers 162 process-run)
