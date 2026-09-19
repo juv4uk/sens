@@ -1,4 +1,4 @@
-use wsm_clips_kernel::{ClipsAbiAdapter, SemanticId};
+use wsm_clips_kernel::{ClipsAbiAdapter, ClipsKernel, SemanticId};
 use wsm_kernel_c_abi::{
     WsmByteSpan, WsmKernelKind, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
 };
@@ -28,6 +28,21 @@ fn exchange(adapter: &ClipsAbiAdapter, command: &[u8]) -> (WsmStatus, Vec<u8>) {
     };
     output.truncate(written.min(output.len()));
     (status, output)
+}
+
+#[test]
+fn direct_native_clips_642_smoke() {
+    let kernel = ClipsKernel::discover().expect("load external CLIPS 6.4 runtime");
+    let environment = kernel
+        .create_environment()
+        .expect("create native CLIPS environment");
+    environment
+        .build("(defrule observe-signal (signal) => (assert (observed)))")
+        .expect("build native CLIPS rule");
+    let _fact = environment
+        .assert_string("(signal)")
+        .expect("assert native CLIPS fact");
+    assert_eq!(environment.run(-1), 1);
 }
 
 #[test]
