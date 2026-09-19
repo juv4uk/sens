@@ -54,7 +54,7 @@ fn matrix_is_a_view_over_existing_source_axes() {
         if !matches!(&items.first()?.kind, ExprKind::Symbol(s) if &**s == "rows") { return None; }
         let row_container = items.get(1)?;
         let ExprKind::List(rows) = &row_container.kind else { return None; };
-        Some(rows.as_slice())
+        Some(rows)
     }).expect("#845 rows");
 
     let mut seen = HashSet::new();
