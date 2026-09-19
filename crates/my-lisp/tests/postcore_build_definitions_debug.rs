@@ -23,3 +23,16 @@ fn print_postcore_definition_data_shape() {
     .expect("core helper should evaluate");
     println!("POSTCORE_BUILD_DEFINITIONS = {}", result.value);
 }
+
+#[test]
+fn macro_generated_define_arity_probe() {
+    let mut session = Session::default();
+    let result = eval_program(
+        "(defmacro make-binding (name value)
+           (list (quote define) name value))
+         (make-binding probe 42)",
+        &mut session,
+    )
+    .expect("a Lisp macro should be able to generate a two-argument define");
+    println!("MACRO_GENERATED_DEFINE = {}", result.value);
+}
