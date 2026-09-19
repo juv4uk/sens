@@ -9,8 +9,9 @@ on:
       - 'crates/my-lisp/Cargo.toml'
       - 'crates/my-lisp-literate/**'
       - 'crates/my-lisp-lsp/**'
-      - 'lib/core.my'
-      - 'lib/core.my.fasl'
+      - 'lib/core.lisp'       # canonical (my-lisp#81)
+      - 'lib/core.lisp.fasl'  # canonical compiled snapshot
+      # legacy aliases kept for reference: lib/core.my, lib/core.my.fasl
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/wasm-browser-test.yml'
