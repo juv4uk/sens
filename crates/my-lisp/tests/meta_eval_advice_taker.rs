@@ -97,4 +97,3 @@ fn advice_taker_native_and_meta_preserve_expected_outcome_classes() {
     // Monolithic meta-eval Advice Taker execution is superseded by kernel archipelago execution (ADR-005).
     let _ = (&advice_program, &native_result, &meta_result);
 }
-
