@@ -468,6 +468,35 @@ impl Drop for ClipsFact {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SemanticId(pub u8);
 
+/// Producer-owned CLIPS execution observation.
+///
+/// Counts stay in the C API's native `c_ulong` domain and the agenda result
+/// stays as CLIPS' signed run count. This type records what CLIPS produced; it
+/// does not assign language meaning to those values.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ClipsExecutionResult {
+    pub semantic_id: Option<SemanticId>,
+    pub fired: i64,
+    pub facts_before: std::ffi::c_ulong,
+    pub facts_after: std::ffi::c_ulong,
+}
+
+impl ClipsExecutionResult {
+    pub const fn new(
+        semantic_id: Option<SemanticId>,
+        fired: i64,
+        facts_before: std::ffi::c_ulong,
+        facts_after: std::ffi::c_ulong,
+    ) -> Self {
+        Self {
+            semantic_id,
+            fired,
+            facts_before,
+            facts_after,
+        }
+    }
+}
+
 struct ClipsAbiContext {
     rule: String,
     fact_text: String,
