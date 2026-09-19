@@ -29,11 +29,11 @@ pub enum ClipsKernelError {
     #[cfg(feature = "native-clips")]
     NulInput,
     #[cfg(feature = "native-clips")]
-    BuildFailed(i32),
+    BuildFailed(u32),
     #[cfg(feature = "native-clips")]
     AssertFailed,
     #[cfg(feature = "native-clips")]
-    RetractFailed(i32),
+    RetractFailed(u32),
 }
 
 impl fmt::Display for ClipsKernelError {
@@ -96,12 +96,12 @@ mod native {
 
     type CreateEnvironmentFn = unsafe extern "C" fn() -> *mut Environment;
     type DestroyEnvironmentFn = unsafe extern "C" fn(*mut Environment) -> bool;
-    type BuildFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> i32;
+    type BuildFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> u32;
     type AssertStringFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> *mut Fact;
     type RunFn = unsafe extern "C" fn(*mut Environment, c_longlong) -> c_longlong;
-    type RetractFn = unsafe extern "C" fn(*mut Fact) -> i32;
-    type RetainFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact);
-    type ReleaseFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact);
+    type RetractFn = unsafe extern "C" fn(*mut Fact) -> u32;
+    type RetainFactFn = unsafe extern "C" fn(*mut Fact);
+    type ReleaseFactFn = unsafe extern "C" fn(*mut Fact);
 
     #[cfg(unix)]
     mod loader {
@@ -397,7 +397,7 @@ impl ClipsEnvironment {
         if raw.is_null() {
             Err(ClipsKernelError::AssertFailed)
         } else {
-            unsafe { (self.inner.api.retain_fact)(self.inner.raw, raw) };
+            unsafe { (self.inner.api.retain_fact)(raw) };
             Ok(ClipsFact {
                 environment: self.inner.clone(),
                 raw,
@@ -413,7 +413,7 @@ impl ClipsEnvironment {
     pub fn retract(&self, mut fact: ClipsFact) -> Result<(), ClipsKernelError> {
         let raw = fact.raw;
         if fact.retained {
-            unsafe { (self.inner.api.release_fact)(self.inner.raw, raw) };
+            unsafe { (self.inner.api.release_fact)(raw) };
             fact.retained = false;
         }
         let code = unsafe { (self.inner.api.retract)(raw) };
@@ -447,7 +447,7 @@ impl Drop for ClipsFact {
     fn drop(&mut self) {
         if self.retained && !self.raw.is_null() {
             unsafe {
-                (self.environment.api.release_fact)(self.environment.raw, self.raw)
+                (self.environment.api.release_fact)(self.raw)
             };
             self.retained = false;
         }
