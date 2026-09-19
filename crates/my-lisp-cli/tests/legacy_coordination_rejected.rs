@@ -35,17 +35,34 @@ fn spawn_oracle() -> (Child, u16) {
 
     let stderr = child.stderr.take().expect("stderr should be piped");
     let mut reader = BufReader::new(stderr);
-    let mut banner = String::new();
-    reader
-        .read_line(&mut banner)
-        .expect("oracle should print its listen address");
-    let port = banner
-        .trim()
-        .rsplit(':')
-        .next()
-        .expect("banner should end with a port")
-        .parse::<u16>()
-        .expect("oracle port should be numeric");
+    let deadline = std::time::Instant::now() + Duration::from_secs(5);
+    let mut diagnostics = Vec::new();
+
+    let port = loop {
+        assert!(
+            std::time::Instant::now() < deadline,
+            "semantic oracle did not announce a listening port within 5s; stderr={diagnostics:?}"
+        );
+
+        let mut line = String::new();
+        let bytes = reader
+            .read_line(&mut line)
+            .expect("oracle stderr should be readable");
+        if bytes == 0 {
+            panic!("semantic oracle exited before announcing a listening port; stderr={diagnostics:?}");
+        }
+
+        diagnostics.push(line.trim_end().to_string());
+        if let Some(port_text) = line
+            .strip_prefix("my-lisp TCP REPL ")
+            .and_then(|rest| rest.split_once(" listening on 127.0.0.1:"))
+            .map(|(_, port)| port.trim())
+        {
+            if let Ok(port) = port_text.parse::<u16>() {
+                break port;
+            }
+        }
+    };
 
     std::thread::spawn(move || {
         let mut reader = reader;
