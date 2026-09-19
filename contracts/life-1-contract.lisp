@@ -55,4 +55,3 @@
    (fresh-checkout . required)
    (manual-semantic-patching . forbidden)
    (focused-ci-question . does-life-1-still-live)))
-)
