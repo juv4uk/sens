@@ -1,3 +1,5 @@
+#![cfg(feature = "native-clips")]
+
 use wsm_clips_kernel::{ClipsAbiAdapter, ClipsKernel, SemanticId};
 use wsm_kernel_c_abi::{
     WsmByteSpan, WsmKernelKind, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
