@@ -414,8 +414,8 @@ impl ClipsEnvironment {
         unsafe { (self.inner.api.run)(self.inner.raw, limit) }
     }
 
-    pub fn fact_count(&self) -> u64 {
-        u64::from(unsafe { (self.inner.api.get_number_of_facts)(self.inner.raw) })
+    pub fn fact_count(&self) -> std::ffi::c_ulong {
+        unsafe { (self.inner.api.get_number_of_facts)(self.inner.raw) }
     }
 
     pub fn retract(&self, mut fact: ClipsFact) -> Result<(), ClipsKernelError> {
