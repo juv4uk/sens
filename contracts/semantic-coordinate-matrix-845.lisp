@@ -1,6 +1,7 @@
 ; #845 — read-only semantic coordinate matrix.
 ;
 ; This is a composition view only. It does not define meaning and does not
+; Final current-main replay: source references only; no duplicated axis truth.
 ; allocate semantic IDs. Each axis keeps its own authority and this matrix
 ; stores only source references for the same SID.
 ;
