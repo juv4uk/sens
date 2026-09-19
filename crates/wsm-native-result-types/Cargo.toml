@@ -10,6 +10,7 @@ default = []
 native-clips = ["wsm-clips-kernel/native-clips"]
 
 [dependencies]
+wsm-kernel-host = { path = "../wsm-kernel-host" }
 wsm-common-lisp-kernel = { path = "../wsm-common-lisp-kernel" }
 wsm-prolog-kernel = { path = "../wsm-prolog-kernel" }
 wsm-clips-kernel = { path = "../wsm-clips-kernel" }
