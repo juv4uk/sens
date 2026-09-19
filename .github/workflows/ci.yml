@@ -43,7 +43,7 @@ jobs:
             case "$path" in Cargo.toml|Cargo.lock|.cargo/*) workspace=true ;; esac
             case "$path" in .github/workflows/*) workflow=true ;; esac
             case "$path" in *.rs|Cargo.toml|Cargo.lock|crates/*/Cargo.toml) rust=true ;; esac
-            case "$path" in lib/surface/*|lib/generated/meta-semantic-registry.lisp|docs/ukrainian-api.md|docs/generated/public-api-discovery.md|scripts/public_api_inventory.py|scripts/generate-meta-semantic-registry.py|scripts/generate-ukrainian-api.py|scripts/перевірити-український-профіль.lisp|machine-lowering-boundary.lisp|repo.lisp|crates/my-lisp/tests/macro_derivation.rs|crates/my-lisp/tests/ukrainian_api_docs.rs|crates/my-lisp/tests/uk_surface_equivalence.rs|crates/my-lisp/tests/public_api_inventory_contract.rs|crates/my-lisp/tests/machine_lowering_boundary.rs) surface=true ;; esac
+            case "$path" in lib/surface/*|lib/generated/meta-semantic-registry.lisp|docs/ukrainian-api.md|docs/generated/public-api-discovery.md|scripts/public_api_inventory.py|scripts/generate-meta-semantic-registry.lisp|scripts/generate-ukrainian-api.py|scripts/перевірити-український-профіль.lisp|machine-lowering-boundary.lisp|repo.lisp|crates/my-lisp/tests/macro_derivation.rs|crates/my-lisp/tests/ukrainian_api_docs.rs|crates/my-lisp/tests/uk_surface_equivalence.rs|crates/my-lisp/tests/public_api_inventory_contract.rs|crates/my-lisp/tests/machine_lowering_boundary.rs) surface=true ;; esac
             case "$path" in crates/my-lisp/src/*|crates/my-lisp/tests/*|lib/*.lisp|lib/*/*.lisp) case "$path" in lib/surface/*|lib/generated/*) ;; *) core=true ;; esac ;; esac
             case "$path" in crates/my-lisp/src/value.rs|crates/my-lisp/src/eval/*|crates/my-lisp/tests/witness_authority.rs|crates/my-lisp/tests/structural_query_inventory.rs|lib/canon.lisp|lib/core.lisp|lib/meta-eval.lisp|contracts/*.lisp|tests/fixtures/conformance.lisp|tests/fixtures/*-witness.lisp|my-lisp-constitution.lisp) semantic=true ;; esac
             if bash scripts/is-current-semantic-fixture.sh "$path"; then semantic=true; fi
@@ -163,7 +163,7 @@ jobs:
       - name: Exercise future main fast critical gate
         if: steps.changes.outputs.workflow == 'true'
         run: |
-          python3 scripts/generate-meta-semantic-registry.py --check
+          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           bash scripts/test-current-semantic-slice.sh
           cargo test -p my-lisp --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
@@ -184,7 +184,7 @@ jobs:
 
       - name: Check generated semantic registry
         if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
-        run: python3 scripts/generate-meta-semantic-registry.py --check
+        run: ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
 
       - name: Check public API discovery projection
         if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
@@ -267,7 +267,7 @@ jobs:
           shared-key: main-fast-critical
       - name: Generated authority projections
         run: |
-          python3 scripts/generate-meta-semantic-registry.py --check
+          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           cargo run -p xtask -- import-xed-evidence --check
           cargo run -p xtask -- generate-encoder-coverage --check

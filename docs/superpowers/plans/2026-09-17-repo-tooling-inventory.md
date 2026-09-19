@@ -13,7 +13,7 @@
 ## Глобальні обмеження
 
 - #299: **нуль доданих Rust-рядків і нуль нових `.rs` файлів**.
-- #76 володіє Python→Lisp migration; #382 лише індексує `migration-issue`.
+- #76 володіє Python→Lisp migration; #382 лише індексує `migration-issue`. Цей replay переносить саме meta-registry generator на Lisp. Цей replay переносить саме meta-registry generator на Lisp.
 - `lifecycle` першого зрізу: `active | transitional | legacy | generated-helper | archive-candidate`.
 - Не записувати `parity-green`, `switched-to-lisp`, `removable` чи `bootstrap-exception` у `lifecycle`; це migration dimension #76.
 - Якщо реально знадобляться обидва виміри одночасно — окремо еволюціонувати schema до `lifecycle + migration-state`.
@@ -195,7 +195,7 @@ Language mapping:
 Відомі вузькі owners:
 
 ```text
-scripts/generate-meta-semantic-registry.py -> migration-issue 317
+scripts/generate-meta-semantic-registry.lisp -> migration-issue 76 (completed by current replay)
 scripts/generate-meta-eval-evidence.py     -> migration-issue 351
 ```
 
