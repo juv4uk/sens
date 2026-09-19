@@ -57,3 +57,5 @@
 (authority "crates/wsm-native-result-types/tests/four_real_kernels.rs" observer)
 (authority "crates/wsm-datalog-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/my-lisp/tests/utf8.rs" observer)
+(authority "crates/my-lisp-cli/tests/semantic_oracle_preservation.rs" observer)
+(authority "crates/my-lisp-cli/tests/legacy_coordination_rejected.rs" observer)
