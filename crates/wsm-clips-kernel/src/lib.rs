@@ -343,6 +343,7 @@ struct EnvironmentInner {
     raw: *mut native::Environment,
 }
 
+#[cfg(feature = "native-clips")]
 pub struct ClipsEnvironment {
     inner: std::sync::Arc<EnvironmentInner>,
 }
