@@ -1,0 +1,26 @@
+name: Datalog Kernel Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'crates/wsm-datalog-kernel/**'
+      - 'crates/wsm-kernel-c-abi/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/datalog-kernel-test.yml'
+
+jobs:
+  datalog-kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Test Datalog kernel and C ABI witness
+        run: cargo test -p wsm-datalog-kernel -- --nocapture
+
+      - name: Clippy Datalog kernel
+        run: cargo clippy -p wsm-datalog-kernel --all-targets -- -D warnings
