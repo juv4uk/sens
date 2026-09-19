@@ -1,6 +1,7 @@
 use my_lisp::{
-    eval_program, load_core_library, load_macro_library, load_process_library, load_time_library,
-    Environment, Session, PROCESS_LIBRARY_SOURCE, TCP_LIBRARY_SOURCE, UTF8_LIBRARY_SOURCE,
+    eval_parsed_expressions, eval_program, fasl_decode_program, load_core_library,
+    load_macro_library, load_process_library, load_time_library, Environment, Session,
+    CORE_LIBRARY_SOURCE, PROCESS_LIBRARY_SOURCE, TCP_LIBRARY_SOURCE, UTF8_LIBRARY_SOURCE,
 };
 
 fn core_session() -> Session {
@@ -47,4 +48,26 @@ fn diagnostic_cli_bootstrap_context_loads_process_stack() {
     load_time_library(&mut session).expect("time layer must load before process");
     load_process_library(&mut session)
         .expect("CLI bootstrap context must load UTF-8/process/TCP stack");
+}
+
+
+#[test]
+fn diagnostic_cli_fasl_core_path_loads_process_stack() {
+    let mut session = Session {
+        environment: Environment::root(),
+    };
+    load_macro_library(&mut session).expect("macro layer must load");
+
+    let fasl = include_bytes!("../../../lib/core.lisp.fasl");
+    let (core_ast, _hash) = fasl_decode_program(fasl).expect("core FASL must decode");
+    eval_parsed_expressions(&core_ast, &mut session)
+        .expect("CLI FASL core path must evaluate");
+
+    load_time_library(&mut session).expect("time layer must load after FASL core");
+    load_process_library(&mut session)
+        .expect("FASL CLI bootstrap context must load UTF-8/process/TCP stack");
+
+    // Keep source in scope so this diagnostic remains explicitly tied to the
+    // same compiled-in core source used by the CLI.
+    assert!(!CORE_LIBRARY_SOURCE.is_empty());
 }
