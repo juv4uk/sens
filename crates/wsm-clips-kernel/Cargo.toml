@@ -7,7 +7,6 @@ description = "Native CLIPS C-API adapter scaffold for the WSM kernel archipelag
 
 [features]
 default = []
-native-clips = ["dep:libloading"]
+native-clips = []
 
 [dependencies]
-libloading = { version = "0.8", optional = true }
