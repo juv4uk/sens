@@ -170,8 +170,12 @@ mod honesty_tests {
         let environment = Environment::root();
         let span = Span { start: 0, end: 4 };
         let result = dispatch_capability_from(&lock, "demo", &[], &environment, span)
-            .expect("unreadable registry is an observed mechanism failure, not absence")
-            .expect_err("unreadable registry must fail named");
+            .expect("unreadable registry is an observed mechanism failure, not absence");
+
+        let result = match result {
+            Err(error) => error,
+            Ok(_) => panic!("unreadable registry must fail named"),
+        };
 
         assert_eq!(result.kind, ErrorKind::MechanismUnavailable);
         assert_ne!(result.kind, ErrorKind::UnknownSymbol);
