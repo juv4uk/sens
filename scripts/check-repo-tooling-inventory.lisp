@@ -57,7 +57,7 @@
 (def repo-tooling-field-presence
   (lambda (value)
     (cond
-      ((atom value) (structural-kind empty-list) (quote missing))
+      ((atom value) (structural-kind empty-list) (quote present))
       ((atom value) (structural-kind atom)
        (cond
          ((eq value (quote missing)) (identity-relation same) (quote missing))
