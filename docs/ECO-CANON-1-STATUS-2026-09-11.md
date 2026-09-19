@@ -16,7 +16,7 @@ lib/surface/semantic-registry.lisp = sole surface↔ID authority
 |-------|------|
 | `lib/surface/semantic-registry.lisp` | Numeric semantic IDs + en/uk/sa/sym surfaces |
 | `scripts/check_semantic_registry.py` | Fail-closed schema checks |
-| `scripts/generate-meta-semantic-registry.py` | Runtime projection for meta-eval |
+| `scripts/generate-meta-semantic-registry.lisp` | Lisp-owned runtime projection for meta-eval |
 | `crates/my-lisp/src/semantic_registry.rs` + `eval/canon.rs` | In-process resolvers |
 | `docs/CANON-MIGRATION-PLAN-2026-09-11.md` | Consumer generator pattern |
 
