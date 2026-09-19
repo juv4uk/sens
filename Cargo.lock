@@ -772,13 +772,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "wsm-prolog-kernel"
-version = "0.1.0"
-dependencies = [
- "wsm-kernel-c-abi",
-]
-
-[[package]]
 name = "wsm-datalog-kernel"
 version = "0.1.0"
 dependencies = [
@@ -807,12 +800,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "wsm-kernel-host"
+name = "wsm-kernel-c-abi"
 version = "0.1.0"
 
 [[package]]
-name = "wsm-kernel-c-abi"
+name = "wsm-kernel-host"
 version = "0.1.0"
+dependencies = [
+ "my-lisp",
+]
 
 [[package]]
 name = "wsm-native-result-types"
@@ -823,6 +819,13 @@ dependencies = [
  "wsm-datalog-kernel",
  "wsm-kernel-c-abi",
  "wsm-prolog-kernel",
+]
+
+[[package]]
+name = "wsm-prolog-kernel"
+version = "0.1.0"
+dependencies = [
+ "wsm-kernel-c-abi",
 ]
 
 [[package]]
