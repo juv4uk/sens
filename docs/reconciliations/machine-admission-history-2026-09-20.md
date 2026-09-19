@@ -1,3 +1,7 @@
+# Узгодження machine-admission: короткий український опис
+
+Цей документ фіксує українською, що історичні machine-admission закони вже мають свідчення у поточному `main`; застарілий код із donor-гілок повторно не вноситься.
+
 # Machine-admission historical reconciliation — 2026-09-20
 
 Parent: #813
