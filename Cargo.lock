@@ -818,6 +818,7 @@ dependencies = [
  "wsm-common-lisp-kernel",
  "wsm-datalog-kernel",
  "wsm-kernel-c-abi",
+ "wsm-kernel-host",
  "wsm-prolog-kernel",
 ]
 
