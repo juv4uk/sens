@@ -766,12 +766,12 @@
 | `lib/unify.lisp` | function | `thread-conjunction` | unreviewed |
 | `lib/unify.lisp` | function | `thread-conjunction-branches` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-in-range?` | unreviewed |
-| `lib/utf8.lisp` | function | `utf8-three-byte-second-ok?` | unreviewed |
-| `lib/utf8.lisp` | function | `utf8-four-byte-second-ok?` | unreviewed |
-| `lib/utf8.lisp` | function | `utf8-two-continuations?` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-continuation-byte?` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-byte?` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-all-bytes?` | unreviewed |
+| `lib/utf8.lisp` | function | `utf8-three-byte-second-ok?` | unreviewed |
+| `lib/utf8.lisp` | function | `utf8-four-byte-second-ok?` | unreviewed |
+| `lib/utf8.lisp` | function | `utf8-two-continuations?` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-decode-onto` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-decode` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-valid?` | unreviewed |
