@@ -75,8 +75,7 @@ impl ClipsKernel {
 #[cfg(feature = "native-clips")]
 mod native {
     use super::ClipsKernelError;
-    use libloading::Library;
-    use std::ffi::{c_char, c_longlong, OsStr};
+    use std::ffi::{c_char, c_longlong, c_void, CStr, CString, OsStr};
     use std::sync::Arc;
 
     #[repr(C)]
@@ -98,8 +97,123 @@ mod native {
     type RetainFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact);
     type ReleaseFactFn = unsafe extern "C" fn(*mut Environment, *mut Fact);
 
+    #[cfg(unix)]
+    mod loader {
+        use super::*;
+
+        const RTLD_NOW: i32 = 2;
+
+        #[cfg_attr(not(target_os = "macos"), link(name = "dl"))]
+        unsafe extern "C" {
+            fn dlopen(filename: *const c_char, flags: i32) -> *mut c_void;
+            fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void;
+            fn dlclose(handle: *mut c_void) -> i32;
+            fn dlerror() -> *const c_char;
+        }
+
+        pub struct DynamicLibrary {
+            handle: *mut c_void,
+        }
+
+        impl DynamicLibrary {
+            pub unsafe fn open(path: &OsStr) -> Result<Self, String> {
+                use std::os::unix::ffi::OsStrExt;
+                let path = CString::new(path.as_bytes())
+                    .map_err(|_| "library path contains an interior NUL byte".to_string())?;
+                let handle = unsafe { dlopen(path.as_ptr(), RTLD_NOW) };
+                if handle.is_null() {
+                    return Err(last_error());
+                }
+                Ok(Self { handle })
+            }
+
+            pub unsafe fn symbol<T: Copy>(&self, name: &'static [u8]) -> Result<T, String> {
+                let symbol_name = CStr::from_bytes_with_nul(name)
+                    .map_err(|_| "symbol name is not NUL-terminated".to_string())?;
+                let ptr = unsafe { dlsym(self.handle, symbol_name.as_ptr()) };
+                if ptr.is_null() {
+                    return Err(last_error());
+                }
+                if std::mem::size_of::<T>() != std::mem::size_of::<*mut c_void>() {
+                    return Err("function pointer size does not match dynamic symbol pointer".to_string());
+                }
+                Ok(unsafe { std::mem::transmute_copy::<*mut c_void, T>(&ptr) })
+            }
+        }
+
+        impl Drop for DynamicLibrary {
+            fn drop(&mut self) {
+                if !self.handle.is_null() {
+                    let _ = unsafe { dlclose(self.handle) };
+                    self.handle = std::ptr::null_mut();
+                }
+            }
+        }
+
+        fn last_error() -> String {
+            let ptr = unsafe { dlerror() };
+            if ptr.is_null() {
+                "dynamic loader returned no error text".to_string()
+            } else {
+                unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned()
+            }
+        }
+    }
+
+    #[cfg(windows)]
+    mod loader {
+        use super::*;
+
+        #[link(name = "kernel32")]
+        unsafe extern "system" {
+            fn LoadLibraryW(name: *const u16) -> *mut c_void;
+            fn GetProcAddress(module: *mut c_void, name: *const u8) -> *mut c_void;
+            fn FreeLibrary(module: *mut c_void) -> i32;
+            fn GetLastError() -> u32;
+        }
+
+        pub struct DynamicLibrary {
+            handle: *mut c_void,
+        }
+
+        impl DynamicLibrary {
+            pub unsafe fn open(path: &OsStr) -> Result<Self, String> {
+                use std::os::windows::ffi::OsStrExt;
+                let mut wide: Vec<u16> = path.encode_wide().collect();
+                wide.push(0);
+                let handle = unsafe { LoadLibraryW(wide.as_ptr()) };
+                if handle.is_null() {
+                    return Err(format!("LoadLibraryW failed with code {}", unsafe { GetLastError() }));
+                }
+                Ok(Self { handle })
+            }
+
+            pub unsafe fn symbol<T: Copy>(&self, name: &'static [u8]) -> Result<T, String> {
+                let ptr = unsafe { GetProcAddress(self.handle, name.as_ptr()) };
+                if ptr.is_null() {
+                    return Err(format!("GetProcAddress failed with code {}", unsafe { GetLastError() }));
+                }
+                if std::mem::size_of::<T>() != std::mem::size_of::<*mut c_void>() {
+                    return Err("function pointer size does not match dynamic symbol pointer".to_string());
+                }
+                Ok(unsafe { std::mem::transmute_copy::<*mut c_void, T>(&ptr) })
+            }
+        }
+
+        impl Drop for DynamicLibrary {
+            fn drop(&mut self) {
+                if !self.handle.is_null() {
+                    let _ = unsafe { FreeLibrary(self.handle) };
+                    self.handle = std::ptr::null_mut();
+                }
+            }
+        }
+    }
+
+    use loader::DynamicLibrary;
+
     pub struct NativeApi {
-        _library: Library,
+        _library: DynamicLibrary,
         pub create_environment: CreateEnvironmentFn,
         pub destroy_environment: DestroyEnvironmentFn,
         pub build: BuildFn,
@@ -112,26 +226,23 @@ mod native {
 
     impl NativeApi {
         pub unsafe fn load(path: impl AsRef<OsStr>) -> Result<Arc<Self>, ClipsKernelError> {
-            let library = unsafe { Library::new(path.as_ref()) }
-                .map_err(|error| ClipsKernelError::LibraryLoad(error.to_string()))?;
+            let library = unsafe { DynamicLibrary::open(path.as_ref()) }
+                .map_err(ClipsKernelError::LibraryLoad)?;
 
             unsafe fn load_symbol<T: Copy>(
-                library: &Library,
+                library: &DynamicLibrary,
                 name: &'static [u8],
             ) -> Result<T, ClipsKernelError> {
-                let symbol = unsafe { library.get::<T>(name) }.map_err(|error| {
+                unsafe { library.symbol::<T>(name) }.map_err(|error| {
                     let printable = String::from_utf8_lossy(name)
                         .trim_end_matches('\0')
                         .to_string();
                     ClipsKernelError::MissingSymbol(format!("{printable}: {error}"))
-                })?;
-                Ok(*symbol)
+                })
             }
 
-            let create_environment =
-                unsafe { load_symbol(&library, b"CreateEnvironment\0")? };
-            let destroy_environment =
-                unsafe { load_symbol(&library, b"DestroyEnvironment\0")? };
+            let create_environment = unsafe { load_symbol(&library, b"CreateEnvironment\0")? };
+            let destroy_environment = unsafe { load_symbol(&library, b"DestroyEnvironment\0")? };
             let build = unsafe { load_symbol(&library, b"Build\0")? };
             let assert_string = unsafe { load_symbol(&library, b"AssertString\0")? };
             let run = unsafe { load_symbol(&library, b"Run\0")? };
