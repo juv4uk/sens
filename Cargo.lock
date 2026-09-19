@@ -781,6 +781,9 @@ dependencies = [
 [[package]]
 name = "wsm-datalog-kernel"
 version = "0.1.0"
+dependencies = [
+ "wsm-kernel-c-abi",
+]
 
 [[package]]
 name = "wsm-guard-core"
