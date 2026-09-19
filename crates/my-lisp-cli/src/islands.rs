@@ -113,19 +113,34 @@ pub fn run(args: &[String]) -> Result<String, String> {
             Ok(rows.join("\n---\n"))
         }
         "install" => {
-            if !args.iter().any(|arg| arg == "--dry-run") {
-                return Err("installer v1 requires --dry-run; verified download is not enabled yet".to_string());
-            }
             let root = value_after(args, "--root")?;
+            let apply = args.iter().any(|arg| arg == "--apply");
+            let dry_run = args.iter().any(|arg| arg == "--dry-run");
+            if !apply && !dry_run { return Err("install requires --dry-run or --apply".to_string()); }
             let mut rows = vec!["dry-run: no files will be created".to_string()];
+            if apply { rows[0] = "apply: verified artifacts will be published".to_string(); }
             for key in requested_keys(&manifest, args)? {
                 let island = manifest.islands.iter().find(|island| island.key == key)
                     .ok_or_else(|| format!("unknown island: {key}"))?;
                 let entry = island.platforms.iter().find(|entry| entry.target == target);
                 match entry {
+                    Some(entry) if entry.provider == "release-asset" && apply => {
+                        let url = entry.url.as_deref().ok_or_else(|| format!("release asset {} has no URL", island.key))?;
+                        let source = url.strip_prefix("file://").ok_or_else(|| "installer v1 supports verified file:// artifacts only".to_string())?;
+                        let bytes = fs::read(source).map_err(|error| format!("cannot read artifact {source}: {error}"))?;
+                        let actual = my_lisp::sha256_source(&bytes).iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+                        let expected = entry.sha256.as_deref().ok_or_else(|| format!("release asset {} has no SHA-256", island.key))?;
+                        if actual != expected { return Err(format!("checksum mismatch for {}", island.key)); }
+                        let target_dir = std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target);
+                        let temporary = target_dir.with_extension("tmp");
+                        fs::create_dir_all(&temporary).map_err(|error| error.to_string())?;
+                        fs::write(temporary.join("runtime.bin"), &bytes).map_err(|error| error.to_string())?;
+                        fs::create_dir_all(target_dir.parent().ok_or_else(|| "invalid install target".to_string())?).map_err(|error| error.to_string())?;
+                        fs::rename(&temporary, &target_dir).map_err(|error| error.to_string())?;
+                        rows.push(format!("installed {}", target_dir.display()));
+                    }
                     Some(entry) if entry.provider != "unsupported" => rows.push(format!(
-                        "install {}", std::path::Path::new(root)
-                            .join(&island.key).join(&island.runtime_version).join(target).display()
+                        "install {}", std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target).display()
                     )),
                     Some(entry) => rows.push(format!("skip {}: unsupported ({})", island.key, entry.reason.as_deref().unwrap_or("not supplied"))),
                     None => rows.push(format!("skip {}: unsupported target {target}", island.key)),

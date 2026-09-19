@@ -75,6 +75,24 @@ fn islands_install_dry_run_plans_versioned_paths_without_creating_them() {
 }
 
 #[test]
+fn islands_install_apply_verifies_file_artifact_before_publishing_it() {
+    let base = std::env::temp_dir().join(format!("my-lisp-islands-apply-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let artifact = base.join("runtime.bin");
+    std::fs::write(&artifact, b"island-runtime").expect("fixture artifact");
+    let digest = my_lisp::sha256_source(b"island-runtime").iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(&manifest_path, format!(r#"{{"protocol":"my-lisp-islands-manifest/1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"1","license":"test","provenance":"test","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","sha256":"{}"}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
+    let root = base.join("installed");
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--profile", "one", "--root", root.to_str().unwrap(), "--apply"])
+        .output().expect("CLI");
+    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert_eq!(std::fs::read(root.join("demo/1/linux-x86_64/runtime.bin")).unwrap(), b"island-runtime");
+}
+
+#[test]
 fn islands_status_keeps_absent_and_unsupported_distinct_for_selected_target() {
     let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
         .args([
