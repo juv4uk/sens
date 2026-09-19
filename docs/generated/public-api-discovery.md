@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 33
-- top-level функцій: 836
+- top-level функцій: 840
 - top-level макросів: 34
-- усього визначень: 870
+- усього визначень: 874
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -765,6 +765,10 @@
 | `lib/unify.lisp` | function | `apply-subst-walked` | unreviewed |
 | `lib/unify.lisp` | function | `thread-conjunction` | unreviewed |
 | `lib/unify.lisp` | function | `thread-conjunction-branches` | unreviewed |
+| `lib/utf8.lisp` | function | `utf8-in-range?` | unreviewed |
+| `lib/utf8.lisp` | function | `utf8-three-byte-second-ok?` | unreviewed |
+| `lib/utf8.lisp` | function | `utf8-four-byte-second-ok?` | unreviewed |
+| `lib/utf8.lisp` | function | `utf8-two-continuations?` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-continuation-byte?` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-byte?` | unreviewed |
 | `lib/utf8.lisp` | function | `utf8-all-bytes?` | unreviewed |
