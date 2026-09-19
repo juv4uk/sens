@@ -49,6 +49,15 @@ if [[ "$meta_registry_status" != "(meta-semantic-registry-witness (status pass))
   exit 1
 fi
 
+# #771: current compact-SID post-core process declaration must load cleanly
+# and preserve one runtime identity across the English/Ukrainian stable peer.
+process_load_status="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/process-load-witness.lisp)"
+if [[ "$process_load_status" != "(process-load-witness (status pass))" ]]; then
+  printf 'process-load Lisp witness failed: %s\n' "$process_load_status" >&2
+  exit 1
+fi
+
+
 # #305: `unknown` presentation is meaningful only for an explicitly
 # established unknown outcome. No-evidence honesty remains a separate Lisp law
 # and returns Canon 0; the shell observes only this witness's named envelope.
