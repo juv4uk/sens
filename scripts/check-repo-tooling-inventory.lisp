@@ -54,6 +54,13 @@
        (structural-relation distinct)
        (quote no)))))
 
+(def repo-tooling-required-field-state
+  (lambda (name row)
+    (let ((value (repo-tooling-field name row)))
+      (cond
+        ((equal? value (quote missing)) (structural-relation same) (quote missing))
+        ((equal? value (quote missing)) (structural-relation distinct) (quote present))))))
+
 (def repo-tooling-required-fields-verdict
   (lambda (required row)
     (cond
@@ -61,11 +68,11 @@
       ((atom required) (structural-kind atom)
        (repo-tooling-violation (quote malformed-required-field-list) required))
       ((atom required) (structural-kind pair)
-       (let ((value (repo-tooling-field (car required) row)))
+       (let ((state (repo-tooling-required-field-state (car required) row)))
          (cond
-           ((equal? value (quote missing)) (structural-relation same)
+           ((eq state (quote missing)) (identity-relation same)
             (repo-tooling-violation (quote missing-field) (car required)))
-           ((equal? value (quote missing)) (structural-relation distinct)
+           ((eq state (quote present)) (identity-relation same)
             (repo-tooling-required-fields-verdict (cdr required) row))))))))
 
 (def repo-tooling-row-required-verdict
