@@ -316,24 +316,38 @@
 (def equal?
   (lambda (a b)
     (cond
+      ((atom a) (structural-kind empty-list)
+       (cond
+         ((atom b) (structural-kind empty-list)
+          (quote (structural-relation same)))
+         ((atom b) (structural-kind atom)
+          (quote (structural-relation distinct)))
+         ((atom b) (structural-kind pair)
+          (quote (structural-relation distinct)))))
+      ((atom a) (structural-kind atom)
+       (cond
+         ((atom b) (structural-kind empty-list)
+          (quote (structural-relation distinct)))
+         ((atom b) (structural-kind atom)
+          (cond
+            ((eq a b) (identity-relation same)
+             (quote (structural-relation same)))
+            ((eq a b) (identity-relation distinct)
+             (quote (structural-relation distinct)))))
+         ((atom b) (structural-kind pair)
+          (quote (structural-relation distinct)))))
       ((atom a) (structural-kind pair)
        (cond
+         ((atom b) (structural-kind empty-list)
+          (quote (structural-relation distinct)))
+         ((atom b) (structural-kind atom)
+          (quote (structural-relation distinct)))
          ((atom b) (structural-kind pair)
           (cond
             ((equal? (car a) (car b)) (structural-relation same)
              (equal? (cdr a) (cdr b)))
             ((equal? (car a) (car b)) (structural-relation distinct)
-             (quote (structural-relation distinct)))))
-         ((atom b) (structural-kind empty-list)
-          (quote (structural-relation distinct)))
-         ((atom b) (structural-kind atom)
-          (quote (structural-relation distinct)))))
-      ((atom b) (structural-kind pair)
-       (quote (structural-relation distinct)))
-      ((eq a b) (identity-relation same)
-       (quote (structural-relation same)))
-      ((eq a b) (identity-relation distinct)
-       (quote (structural-relation distinct))))))
+             (quote (structural-relation distinct))))))))))
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
