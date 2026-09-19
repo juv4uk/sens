@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const WORKSPACE_MANIFESTS: [&str; 18] = [
+const WORKSPACE_MANIFESTS: [&str; 19] = [
     "crates/my-lisp/Cargo.toml",
     "crates/my-lisp-cli/Cargo.toml",
     "crates/my-lisp-embed/Cargo.toml",
@@ -19,6 +19,7 @@ const WORKSPACE_MANIFESTS: [&str; 18] = [
     "crates/wsm-datalog-kernel/Cargo.toml",
     "crates/wsm-prolog-kernel/Cargo.toml",
     "crates/wsm-common-lisp-kernel/Cargo.toml",
+    "crates/wsm-clips-kernel/Cargo.toml",
     "crates/xtask/Cargo.toml",
 ];
 

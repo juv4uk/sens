@@ -1,0 +1,12 @@
+[package]
+name = "wsm-clips-kernel"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Native CLIPS C-API adapter scaffold for the WSM kernel archipelago"
+
+[features]
+default = []
+native-clips = []
+
+[dependencies]
