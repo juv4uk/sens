@@ -6,5 +6,6 @@ license-file = "../../LICENSE"
 description = "Standalone Datalog engine for WSM (relations, rules, fixpoint, provenance)."
 
 [dependencies]
+wsm-kernel-c-abi = { path = "../wsm-kernel-c-abi" }
 
 [dev-dependencies]
