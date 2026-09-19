@@ -114,3 +114,21 @@ demotion decisions, а також evidence-backed island-composition candidate �
 
 Він **не** завершує #734, бо той вимагає обліку всіх identities, і **не** закриває
 #747, бо `invoke` ще не пройшов atomic registry admission.
+
+
+## Наступний крок admission — `invoke` тепер має executable evidence
+
+Replay на поточному main допускає `invoke` як SID `10101000` і зберігає
+атомарність admission:
+
+1. `10101000` — наступний вільний contiguous byte SID;
+2. authority лишається `sr/2`, generated projections походять із неї;
+3. exact-count/contiguity guards переходять на Canon 0 + 168 identities;
+4. один реальний integration witness проводить той самий SID через Common Lisp,
+   Prolog, CLIPS і Datalog через shared C ABI;
+5. кожне ядро зберігає власну інтерпретацію payload і native result domain;
+6. witness перевіряє opaque SID provenance і не переозначує `invoke` як CAR,
+   Prolog goal, CLIPS command чи Datalog relation.
+
+Ширший primitive-budget audit #734 уже завершено окремо; цей replay закриває
+лише atomic admission gap `invoke`, який відстежують #747/#779.
