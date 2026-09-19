@@ -2,104 +2,121 @@
 
 See Ukrainian sibling specification: [ISLAND-COMPATIBILITY-LANGUAGE-CONTRACT-749.uk.md](ISLAND-COMPATIBILITY-LANGUAGE-CONTRACT-749.uk.md).
 
-## 1. Context and Purpose
+## 1. Purpose
 
-As defined in ADR-005 and Issue #749 (`[P0][KERNEL-COMPAT-LANGUAGE-1]`), `my-lisp` does not implement monolithic, embedded reasoning engines for every formal discipline. Instead, the language serves as a small, honest semantic and coordination substrate, orchestrating autonomous execution islands:
-- **Common Lisp**: ANSI-standard rich symbolic execution runtime.
-- **Prolog**: SLD resolution, unification, and depth-first search/backtracking.
-- **Datalog**: Monotonic bottom-up fixpoint closure and relational queries.
-- **CLIPS**: Production rules and RETE agenda activation.
-- **Future Kernels**: Custom specialized domain provers.
+`my-lisp` owns its language semantics and coordinates autonomous execution islands:
 
-A language feature must be evaluated by whether it composes cleanly with these islands without imposing a foreign ontology or collapsing the boundaries between execution models.
+- **Common Lisp** — native Lisp execution/runtime;
+- **Prolog** — unification, search and backtracking;
+- **Datalog** — relational closure/fixpoint;
+- **CLIPS** — production rules, working memory and agenda.
 
-## 2. Core Architectural Invariants
+Compatibility must not require any island to adopt another island's internal ontology.
 
-### 2.1 The Identity and Execution Model
+## 2. Authority boundary
 
 ```text
-SID -> identity
-identity -> local Lisp meaning and/or execution witnesses
-kernel call -> opaque/native result
-result -> ordinary my-lisp data or explicit native handle/view
+SID -> my-lisp semantic identity
+identity -> zero / one / many execution witnesses
+kernel call -> native/opaque island observation
+explicit bridge/projection -> ordinary my-lisp data when justified
 ```
 
-1. **Semantic ID (SID) Sovereignty**:
-   Semantic IDs belong exclusively to the `my-lisp` continuous 8-bit registry (`00000000..10100111`) and language laws. A kernel never owns or renumbers an SID.
-2. **Witness Relationship**:
-   A kernel is an execution witness for zero, one, or multiple SIDs. Removal or failure of a kernel does not alter, renumber, or invalidate the `my-lisp` semantic registry.
-3. **Ontological Autonomy**:
-   No kernel is forced to adopt another kernel's internal result representation. Prolog deals in substitutions and choice points; Datalog deals in ground tuple relations; CLIPS deals in working memory assertions and rule activations; Common Lisp deals in ANSI s-expressions.
-4. **Uniform Mechanical Invocation**:
-   All communication across the boundary occurs through an opaque mechanical transport (`island-exchange` / `island-call` over byte spans and C-ABI vtables).
+The SID registry and Lisp-owned laws define what a my-lisp identity means. A kernel may execute, observe or witness an identity; it does not acquire authority to redefine it.
 
-## 3. Minimal Language-Facing Call/Result Contract
+Removing, replacing or failing a kernel does not renumber or reinterpret the SID registry.
 
-### 3.1 The Outer Contract
+## 3. Mechanical call boundary
 
-The outer invocation contract is defined as:
-
-```lisp
-(island-call target-kernel sid payload-bytes-or-expression [provenance])
-  -> (island-result :status <status> :count <n> :items (<item> ...) :raw-payload <bytes>)
-```
-
-### 3.2 Answer Multiplicity and Distinguishability
-
-A core design requirement of Issue #749 is handling the spectrum of answer multiplicities and resolving the ambiguity between "no answer" and "an answer that happens to be empty":
-
-1. **0-Answer (Failure / No Result)**:
-   - Status: `:none`
-   - Count: `0`
-   - Items: `()`
-   - Representation: `(island-result :status :none :count 0 :items ())`
-   - Semantics: The query failed, the goal is unprovable (negation-as-failure), or no matching relation exists.
-2. **1-Answer (Deterministic / Single Result)**:
-   - Status: `:one`
-   - Count: `1`
-   - Items: `(value)`
-   - Representation: `(island-result :status :one :count 1 :items (value))`
-   - **Crucial Invariant**: If the evaluated value is the literal empty list `()`, it is represented as:
-     `(island-result :status :one :count 1 :items (()))`
-     This distinguishes `0-answers` (`items ()`) from `1-answer of empty list` (`items (())`).
-3. **N-Answers (Multi-Solution / Stream / Relational Set)**:
-   - Status: `:many`
-   - Count: `N`
-   - Items: `(sol-1 sol-2 ... sol-N)`
-   - Representation: `(island-result :status :many :count N :items (...))`
-   - Semantics: Multiple variable bindings from Prolog backtracking, a set of derived tuples from Datalog fixpoint, or multiple rule firings from CLIPS.
-4. **Error / Malformed Boundary**:
-   - Status: `:error`
-   - Representation: `(island-result :status :error :reason "..." :raw-payload ...)`
-
-## 4. Cross-Island Data Flow and Bridges
-
-Islands do not share internal heap structures. When a result flows from Island A to Island B:
+The common boundary is deliberately smaller than a common result model:
 
 ```text
-[Island A: Datalog]
-       |
-       | derives reachability tuples
-       v
-[my-lisp Coordinator]  <-- receives (island-result :status :many :items ((reach a b) (reach b c) (reach a c)))
-       |
-       | inspects & formats ordinary s-expression data
-       v
-[Island B: Prolog]     <-- receives axioms + goal query
-       |
-       | executes SLD resolution with backtracking over Datalog-derived facts
-       v
-[my-lisp Coordinator]  <-- receives verified path or policy deduction
+target kernel
++ opaque SID
++ kernel-local payload
++ provenance
+        |
+        v
+native / opaque kernel observation
++ producer identity
++ preserved provenance
 ```
 
-- **Ordinary Data Projection**: S-expressions are the lingua franca of `my-lisp`. Data returned by one kernel is unpacked into ordinary Lisp pairs and symbols, which can be inspected, filtered, or passed into the input of a second kernel.
-- **Explicit Handles**: When payload sizes or opaque state require it, native handles are preserved without mutating or flattening internal kernel ontologies.
+The shared C ABI transports bytes and identity. It does **not** define a universal `island-result`, truth type, proof type, substitution type, tuple type or working-memory type.
 
-## 5. Summary of Compliance
+Examples remain native:
 
-- [x] Minimal language-facing kernel call/result contract defined.
-- [x] 0-answer, 1-answer, and N-answer paths distinguished deterministically.
-- [x] Literal `()` distinguished from no-result.
-- [x] Lisp -> Prolog and Lisp -> Datalog demonstrated without embedding their engines in `my-lisp`.
-- [x] Cross-island data flow demonstrated through ordinary data composition.
-- [x] Semantic authority remains anchored in `my-lisp` registry and laws.
+```text
+Common Lisp -> Lisp value / runtime observation
+Prolog      -> zero or more substitutions / search observations
+Datalog     -> relation tuples / closure observations
+CLIPS       -> facts / agenda firings / working-memory observations
+```
+
+An explicit bridge may project one native result into ordinary my-lisp data, but the projection is a separate operation and must retain enough producer/provenance information to remain auditable.
+
+## 4. Multiplicity is not truth
+
+When an island protocol exposes result cardinality, `0`, `1` and `N` are observations about that completed call.
+
+They are **not** a universal truth algebra.
+
+In particular:
+
+- zero Prolog substitutions means that invocation produced zero substitutions;
+- an empty Datalog relation means that relation observation contains zero tuples;
+- zero CLIPS firings means that run fired zero rules;
+- a Common Lisp call may legitimately return the Lisp value `()`.
+
+None of those facts, by itself, authorizes my-lisp to conclude `FALSE`, refutation, unknown, conflict, or negation-as-failure.
+
+Literal `()` remains Canon 0 in the language and must not be silently reused as a protocol-level "zero results" sentinel.
+
+## 5. 0 / 1 / N paths
+
+The outer compatibility requirement is only that my-lisp can preserve these cases without collapse:
+
+```text
+0 results -> explicit observation: producer + cardinality/native payload
+1 result  -> explicit observation: producer + one native result
+N results -> explicit observation: producer + native multiplicity
+```
+
+The concrete representation may differ by island. A Prolog substitution stream, Datalog tuple set and CLIPS agenda delta do not need to be wrapped into one invented semantic datatype merely because all three have cardinality.
+
+## 6. Cross-island flow
+
+Cross-island communication is explicit and partial:
+
+```text
+Island A native result
+        |
+        v
+my-lisp observes producer + provenance + native result
+        |
+        +-- explicit projection/bridge exists --> Island B input
+        |
+        `-- no justified bridge -------------> preserve result; stop there
+```
+
+A missing bridge is legal. It is better to preserve an untranslated native result than to invent semantic equivalence.
+
+Pairwise bridges are preferred when correspondence is known. No universal interchange semantics is assumed.
+
+## 7. What this contract forbids
+
+- kernel-owned SID meaning;
+- SID renumbering when a kernel changes;
+- a mandatory universal result ontology;
+- automatic native-result -> truth coercion;
+- treating zero answers as refutation;
+- treating literal `()` as protocol no-result;
+- claiming semantic equivalence merely because two islands can exchange bytes.
+
+## 8. Current evidence
+
+The Lisp-owned authority is `contracts/island-compat-contract.lisp`, executed by `tests/fixtures/island-compat-witness.lisp`.
+
+The existing kernel C ABI, kernel host and per-kernel integration tests remain **mechanical witnesses**. They demonstrate transport/execution; they do not define the semantics above.
+
+The next acceptance work for #749 should demonstrate real 0/1/N paths and an explicit cross-island bridge while preserving each producer's native result domain.
