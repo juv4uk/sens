@@ -61,3 +61,4 @@
 (authority "crates/my-lisp-cli/tests/legacy_coordination_rejected.rs" observer)
 (authority "tests/fixtures/semantic-coordinate-law-axis-v1.lisp" semantic-witness)
 (authority "crates/my-lisp/tests/semantic_coordinate_law_axis.rs" observer)
+(authority "crates/my-lisp/tests/error_kind_vocabulary_is_closed.rs" observer)
