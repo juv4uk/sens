@@ -54,6 +54,27 @@ fn islands_plan_expands_the_four_kernel_profile_from_manifest() {
 }
 
 #[test]
+fn islands_install_dry_run_plans_versioned_paths_without_creating_them() {
+    let root = std::env::temp_dir().join(format!("my-lisp-islands-test-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands", "install", "--manifest",
+            manifest().to_str().expect("UTF-8 manifest path"),
+            "--profile", "four-kernel", "--root",
+            root.to_str().expect("UTF-8 root path"), "--dry-run",
+        ])
+        .output()
+        .expect("my-lisp CLI must run");
+
+    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
+    assert!(stdout.contains("dry-run"), "{stdout}");
+    assert!(stdout.contains("prolog/9.2.0/linux-x86_64"), "{stdout}");
+    assert!(!root.exists(), "dry-run created {root:?}");
+}
+
+#[test]
 fn islands_status_keeps_absent_and_unsupported_distinct_for_selected_target() {
     let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
         .args([

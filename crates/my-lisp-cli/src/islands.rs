@@ -63,6 +63,16 @@ fn load_manifest(path: &str) -> Result<Manifest, String> {
     Ok(manifest)
 }
 
+fn requested_keys(manifest: &Manifest, args: &[String]) -> Result<Vec<String>, String> {
+    if let Ok(keys) = value_after(args, "--with") {
+        return Ok(keys.split(',').filter(|key| !key.is_empty()).map(str::to_string).collect());
+    }
+    let profile_key = value_after(args, "--profile")?;
+    manifest.profiles.iter().find(|profile| profile.key == profile_key)
+        .map(|profile| profile.islands.clone())
+        .ok_or_else(|| format!("unknown island profile: {profile_key}"))
+}
+
 pub fn run(args: &[String]) -> Result<String, String> {
     let Some(command) = args.first().map(String::as_str) else {
         return Err("usage: islands plan|status --manifest <path> [--with key,...]".to_string());
@@ -76,14 +86,7 @@ pub fn run(args: &[String]) -> Result<String, String> {
         .unwrap_or(current_target());
     match command {
         "plan" => {
-            let requested: Vec<String> = if let Ok(keys) = value_after(args, "--with") {
-                keys.split(',').filter(|key| !key.is_empty()).map(str::to_string).collect()
-            } else {
-                let profile_key = value_after(args, "--profile")?;
-                manifest.profiles.iter().find(|profile| profile.key == profile_key)
-                    .ok_or_else(|| format!("unknown island profile: {profile_key}"))?
-                    .islands.clone()
-            };
+            let requested = requested_keys(&manifest, args)?;
             let mut rows = Vec::new();
             for key in requested {
                 let island = manifest.islands.iter().find(|island| island.key == key)
@@ -108,6 +111,27 @@ pub fn run(args: &[String]) -> Result<String, String> {
                 rows.push(row);
             }
             Ok(rows.join("\n---\n"))
+        }
+        "install" => {
+            if !args.iter().any(|arg| arg == "--dry-run") {
+                return Err("installer v1 requires --dry-run; verified download is not enabled yet".to_string());
+            }
+            let root = value_after(args, "--root")?;
+            let mut rows = vec!["dry-run: no files will be created".to_string()];
+            for key in requested_keys(&manifest, args)? {
+                let island = manifest.islands.iter().find(|island| island.key == key)
+                    .ok_or_else(|| format!("unknown island: {key}"))?;
+                let entry = island.platforms.iter().find(|entry| entry.target == target);
+                match entry {
+                    Some(entry) if entry.provider != "unsupported" => rows.push(format!(
+                        "install {}", std::path::Path::new(root)
+                            .join(&island.key).join(&island.runtime_version).join(target).display()
+                    )),
+                    Some(entry) => rows.push(format!("skip {}: unsupported ({})", island.key, entry.reason.as_deref().unwrap_or("not supplied"))),
+                    None => rows.push(format!("skip {}: unsupported target {target}", island.key)),
+                }
+            }
+            Ok(rows.join("\n"))
         }
         "status" => Ok(manifest.islands.into_iter().map(|island| {
             let outcome = island.platforms.iter().any(|entry| entry.target == target && entry.provider != "unsupported");
