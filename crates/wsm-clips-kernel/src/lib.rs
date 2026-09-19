@@ -108,6 +108,7 @@ mod native {
         use super::*;
 
         const RTLD_NOW: i32 = 2;
+        const RTLD_GLOBAL: i32 = 0x100;
 
         #[cfg_attr(not(target_os = "macos"), link(name = "dl"))]
         unsafe extern "C" {
@@ -118,19 +119,39 @@ mod native {
         }
 
         pub struct DynamicLibrary {
+            dependencies: Vec<*mut c_void>,
             handle: *mut c_void,
         }
 
         impl DynamicLibrary {
             pub unsafe fn open(path: &OsStr) -> Result<Self, String> {
                 use std::os::unix::ffi::OsStrExt;
+
+                let mut dependencies = Vec::new();
+
+                #[cfg(all(target_os = "linux", target_env = "gnu"))]
+                {
+                    let libm = CString::new("libm.so.6").expect("static libm name has no NUL");
+                    let math_handle = unsafe { dlopen(libm.as_ptr(), RTLD_NOW | RTLD_GLOBAL) };
+                    if math_handle.is_null() {
+                        return Err(format!("unable to preload libm.so.6: {}", last_error()));
+                    }
+                    dependencies.push(math_handle);
+                }
+
                 let path = CString::new(path.as_bytes())
                     .map_err(|_| "library path contains an interior NUL byte".to_string())?;
                 let handle = unsafe { dlopen(path.as_ptr(), RTLD_NOW) };
                 if handle.is_null() {
+                    for dependency in dependencies.drain(..).rev() {
+                        let _ = unsafe { dlclose(dependency) };
+                    }
                     return Err(last_error());
                 }
-                Ok(Self { handle })
+                Ok(Self {
+                    dependencies,
+                    handle,
+                })
             }
 
             pub unsafe fn symbol<T: Copy>(&self, name: &'static [u8]) -> Result<T, String> {
@@ -152,6 +173,9 @@ mod native {
                 if !self.handle.is_null() {
                     let _ = unsafe { dlclose(self.handle) };
                     self.handle = std::ptr::null_mut();
+                }
+                for dependency in self.dependencies.drain(..).rev() {
+                    let _ = unsafe { dlclose(dependency) };
                 }
             }
         }
