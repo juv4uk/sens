@@ -285,7 +285,7 @@
                           (cons (+ 128 (mod (quotient scalar 64) 64))
                                 (cons (+ 128 (mod (quotient scalar 4096) 64))
                                       (cons (+ 240 (quotient scalar 262144))
-                                            out)))))))))))))))
+                                            out))))))))))))))))
 
 (def utf8-encode-string
   (lambda (text)
