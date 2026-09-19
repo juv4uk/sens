@@ -1,0 +1,8 @@
+[package]
+name = "wsm-kernel-host"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Mechanical lifecycle and opaque-byte transport substrate for autonomous reasoning kernels"
+
+[dependencies]
