@@ -9,7 +9,13 @@
 //! my-lisp binary. Set `WSM_CLIPS_LIBRARY` to an exact shared-library path,
 //! or let the platform loader try a conventional CLIPS library name.
 
+use std::ffi::c_void;
 use std::fmt;
+
+use wsm_kernel_c_abi::{
+    WsmKernelKind, WsmKernelRequest, WsmKernelVTable, WsmMutableByteSpan, WsmStatus,
+    WSM_KERNEL_ABI_VERSION,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ClipsKernelError {
@@ -423,6 +429,223 @@ impl Drop for ClipsFact {
     }
 }
 
+/// Opaque my-lisp semantic identity. The CLIPS adapter preserves this byte as
+/// provenance and never maps it to CLIPS constructs, facts, rules or agenda
+/// operations.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct SemanticId(pub u8);
+
+struct ClipsAbiContext {
+    rule: String,
+    fact_text: String,
+    running: bool,
+    last_semantic_id: Option<SemanticId>,
+    last_fired: Option<i64>,
+    #[cfg(feature = "native-clips")]
+    environment: Option<ClipsEnvironment>,
+    #[cfg(feature = "native-clips")]
+    fact: Option<ClipsFact>,
+}
+
+/// Mechanical adapter from the shared C ABI to one native CLIPS environment.
+///
+/// The payload is a kernel-local transport command (run or retract). The
+/// semantic ID is not interpreted by this crate.
+pub struct ClipsAbiAdapter {
+    context: Box<ClipsAbiContext>,
+    vtable: WsmKernelVTable,
+}
+
+impl ClipsAbiAdapter {
+    pub fn new(rule: impl Into<String>, fact: impl Into<String>) -> Self {
+        let mut context = Box::new(ClipsAbiContext {
+            rule: rule.into(),
+            fact_text: fact.into(),
+            running: false,
+            last_semantic_id: None,
+            last_fired: None,
+            #[cfg(feature = "native-clips")]
+            environment: None,
+            #[cfg(feature = "native-clips")]
+            fact: None,
+        });
+        let context_ptr = (&mut *context) as *mut ClipsAbiContext as *mut c_void;
+        let vtable = WsmKernelVTable {
+            abi_version: WSM_KERNEL_ABI_VERSION,
+            kernel: WsmKernelKind::Clips,
+            context: context_ptr,
+            start: Some(clips_start),
+            exchange: Some(clips_exchange),
+            snapshot: Some(clips_snapshot),
+            stop: Some(clips_stop),
+        };
+        Self { context, vtable }
+    }
+
+    pub fn vtable(&self) -> WsmKernelVTable {
+        self.vtable
+    }
+
+    pub fn last_semantic_id(&self) -> Option<SemanticId> {
+        self.context.last_semantic_id
+    }
+
+    pub fn last_fired(&self) -> Option<i64> {
+        self.context.last_fired
+    }
+}
+
+unsafe fn clips_context_mut<'a>(context: *mut c_void) -> Option<&'a mut ClipsAbiContext> {
+    unsafe { (context as *mut ClipsAbiContext).as_mut() }
+}
+
+unsafe extern "C" fn clips_start(context: *mut c_void) -> WsmStatus {
+    let Some(context) = (unsafe { clips_context_mut(context) }) else {
+        return WsmStatus::InvalidArgument;
+    };
+
+    #[cfg(not(feature = "native-clips"))]
+    {
+        let _ = context;
+        return WsmStatus::KernelFailure;
+    }
+
+    #[cfg(feature = "native-clips")]
+    {
+        let kernel = match ClipsKernel::discover() {
+            Ok(kernel) => kernel,
+            Err(_) => return WsmStatus::KernelFailure,
+        };
+        let environment = match kernel.create_environment() {
+            Ok(environment) => environment,
+            Err(_) => return WsmStatus::KernelFailure,
+        };
+        if environment.build(&context.rule).is_err() {
+            return WsmStatus::KernelFailure;
+        }
+        let fact = match environment.assert_string(&context.fact_text) {
+            Ok(fact) => fact,
+            Err(_) => return WsmStatus::KernelFailure,
+        };
+        context.environment = Some(environment);
+        context.fact = Some(fact);
+        context.running = true;
+        WsmStatus::Ok
+    }
+}
+
+unsafe extern "C" fn clips_stop(context: *mut c_void) -> WsmStatus {
+    let Some(context) = (unsafe { clips_context_mut(context) }) else {
+        return WsmStatus::InvalidArgument;
+    };
+    #[cfg(feature = "native-clips")]
+    {
+        context.fact = None;
+        context.environment = None;
+    }
+    context.running = false;
+    WsmStatus::Ok
+}
+
+fn copy_response(bytes: &[u8], response: WsmMutableByteSpan, written: *mut usize) -> WsmStatus {
+    if written.is_null() {
+        return WsmStatus::InvalidArgument;
+    }
+    unsafe { *written = 0; }
+    if response.len < bytes.len() {
+        unsafe { *written = bytes.len(); }
+        return WsmStatus::BufferTooSmall;
+    }
+    if !bytes.is_empty() && response.ptr.is_null() {
+        return WsmStatus::InvalidArgument;
+    }
+    if !bytes.is_empty() {
+        unsafe {
+            std::ptr::copy_nonoverlapping(bytes.as_ptr(), response.ptr, bytes.len());
+        }
+    }
+    unsafe { *written = bytes.len(); }
+    WsmStatus::Ok
+}
+
+unsafe extern "C" fn clips_exchange(
+    context: *mut c_void,
+    request: WsmKernelRequest,
+    response: WsmMutableByteSpan,
+    written: *mut usize,
+) -> WsmStatus {
+    if written.is_null() {
+        return WsmStatus::InvalidArgument;
+    }
+    unsafe { *written = 0; }
+
+    let Some(context) = (unsafe { clips_context_mut(context) }) else {
+        return WsmStatus::InvalidArgument;
+    };
+    if !context.running {
+        return WsmStatus::NotRunning;
+    }
+    if request.payload.len != 0 && request.payload.ptr.is_null() {
+        return WsmStatus::InvalidArgument;
+    }
+    let payload = if request.payload.len == 0 {
+        &[]
+    } else {
+        unsafe { std::slice::from_raw_parts(request.payload.ptr, request.payload.len) }
+    };
+    let Ok(command) = std::str::from_utf8(payload) else {
+        return WsmStatus::InvalidArgument;
+    };
+
+    #[cfg(not(feature = "native-clips"))]
+    {
+        let _ = (command, response);
+        return WsmStatus::KernelFailure;
+    }
+
+    #[cfg(feature = "native-clips")]
+    {
+        let Some(environment) = context.environment.as_mut() else {
+            return WsmStatus::NotRunning;
+        };
+        let output = match command {
+            "run" => {
+                let fired = environment.run(-1);
+                context.last_fired = Some(fired);
+                format!("fired={fired}\n").into_bytes()
+            }
+            "retract" => {
+                let Some(fact) = context.fact.take() else {
+                    return WsmStatus::KernelFailure;
+                };
+                if environment.retract(fact).is_err() {
+                    return WsmStatus::KernelFailure;
+                }
+                b"retracted\n".to_vec()
+            }
+            _ => return WsmStatus::InvalidArgument,
+        };
+        context.last_semantic_id = Some(SemanticId(request.semantic_id));
+        copy_response(&output, response, written)
+    }
+}
+
+unsafe extern "C" fn clips_snapshot(
+    context: *mut c_void,
+    response: WsmMutableByteSpan,
+    written: *mut usize,
+) -> WsmStatus {
+    let Some(context) = (unsafe { clips_context_mut(context) }) else {
+        return WsmStatus::InvalidArgument;
+    };
+    let bytes = match context.last_fired {
+        Some(value) => format!("last-fired={value}\n").into_bytes(),
+        None => Vec::new(),
+    };
+    copy_response(&bytes, response, written)
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -443,4 +666,18 @@ mod tests {
             let _ = ClipsKernel::discover();
         }
     }
+    #[test]
+    fn c_abi_adapter_declares_clips_without_semantic_mapping() {
+        let adapter = ClipsAbiAdapter::new(
+            "(defrule seen (signal) => (assert (observed)))",
+            "(signal)",
+        );
+        let vtable = adapter.vtable();
+        assert_eq!(vtable.abi_version, WSM_KERNEL_ABI_VERSION);
+        assert_eq!(vtable.kernel, WsmKernelKind::Clips);
+        assert!(vtable.is_mechanically_complete());
+        assert_eq!(adapter.last_semantic_id(), None);
+        assert_eq!(adapter.last_fired(), None);
+    }
+
 }
