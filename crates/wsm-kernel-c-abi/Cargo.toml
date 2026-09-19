@@ -1,0 +1,11 @@
+[package]
+name = "wsm-kernel-c-abi"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Semantic-neutral C ABI contract for the WSM four-kernel experiment"
+
+[lib]
+crate-type = ["rlib", "staticlib", "cdylib"]
+
+[dependencies]
