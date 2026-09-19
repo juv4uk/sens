@@ -52,7 +52,9 @@ fn matrix_is_a_view_over_existing_source_axes() {
     let rows = top.iter().find_map(|entry| {
         let ExprKind::List(items) = &entry.kind else { return None; };
         if !matches!(&items.first()?.kind, ExprKind::Symbol(s) if &**s == "rows") { return None; }
-        Some(&items[1..])
+        let row_container = items.get(1)?;
+        let ExprKind::List(rows) = &row_container.kind else { return None; };
+        Some(rows.as_slice())
     }).expect("#845 rows");
 
     let mut seen = HashSet::new();
