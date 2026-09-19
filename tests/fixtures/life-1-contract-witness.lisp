@@ -108,7 +108,7 @@
                               (quote forbidden))
                 (life-1-check (quote liveness)
                               (quote fresh-checkout)
-                              (quote required)))))))
+                              (quote required))))))
       (cond
         ((eq (life-1-schema) (quote life-1-contract/1))
          (identity-relation same)
@@ -128,4 +128,4 @@
                (list (quote status) (quote fail))
                (list (quote detail)
                      (list (quote schema)
-                           (life-1-schema))))))))
+                           (life-1-schema)))))))))
