@@ -1,0 +1,175 @@
+//! Native CLIPS island boundary.
+//!
+//! This crate owns only mechanical access to the external CLIPS C runtime.
+//! It does not reimplement CLIPS semantics and does not assign meaning to
+//! my-lisp semantic IDs.
+//!
+//! The default build deliberately does not link CLIPS. Enable the
+//! `native-clips` feature only in an environment that provides the CLIPS
+//! C library. This keeps the my-lisp release independent from the external
+//! runtime while preserving a direct native C boundary.
+
+use std::fmt;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ClipsKernelError {
+    NativeFeatureDisabled,
+    #[cfg(feature = "native-clips")]
+    CreateEnvironmentFailed,
+    #[cfg(feature = "native-clips")]
+    NulInput,
+    #[cfg(feature = "native-clips")]
+    BuildFailed,
+    #[cfg(feature = "native-clips")]
+    AssertFailed,
+    #[cfg(feature = "native-clips")]
+    RetractFailed,
+}
+
+impl fmt::Display for ClipsKernelError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NativeFeatureDisabled => write!(
+                f,
+                "native CLIPS support is not enabled; rebuild with feature native-clips"
+            ),
+            #[cfg(feature = "native-clips")]
+            Self::CreateEnvironmentFailed => write!(f, "CLIPS CreateEnvironment returned null"),
+            #[cfg(feature = "native-clips")]
+            Self::NulInput => write!(f, "CLIPS input contains an interior NUL byte"),
+            #[cfg(feature = "native-clips")]
+            Self::BuildFailed => write!(f, "CLIPS Build rejected the construct"),
+            #[cfg(feature = "native-clips")]
+            Self::AssertFailed => write!(f, "CLIPS AssertString returned null"),
+            #[cfg(feature = "native-clips")]
+            Self::RetractFailed => write!(f, "CLIPS Retract failed"),
+        }
+    }
+}
+
+impl std::error::Error for ClipsKernelError {}
+
+/// Mechanical CLIPS runtime boundary.
+///
+/// Without the `native-clips` feature this type is intentionally inert and
+/// reports a named unavailable state instead of pretending that CLIPS exists.
+#[derive(Debug, Default)]
+pub struct ClipsKernel;
+
+impl ClipsKernel {
+    pub const fn native_feature_enabled() -> bool {
+        cfg!(feature = "native-clips")
+    }
+
+    #[cfg(not(feature = "native-clips"))]
+    pub fn create_environment(&self) -> Result<(), ClipsKernelError> {
+        Err(ClipsKernelError::NativeFeatureDisabled)
+    }
+
+    #[cfg(feature = "native-clips")]
+    pub fn create_environment(&self) -> Result<ClipsEnvironment, ClipsKernelError> {
+        ClipsEnvironment::new()
+    }
+}
+
+#[cfg(feature = "native-clips")]
+mod native {
+    use std::ffi::{c_char, c_longlong};
+
+    #[repr(C)]
+    pub struct Environment {
+        _private: [u8; 0],
+    }
+
+    #[repr(C)]
+    pub struct Fact {
+        _private: [u8; 0],
+    }
+
+    #[link(name = "clips")]
+    unsafe extern "C" {
+        pub fn CreateEnvironment() -> *mut Environment;
+        pub fn DestroyEnvironment(env: *mut Environment) -> bool;
+        pub fn Build(env: *mut Environment, construct: *const c_char) -> bool;
+        pub fn AssertString(env: *mut Environment, fact: *const c_char) -> *mut Fact;
+        pub fn Run(env: *mut Environment, run_limit: c_longlong) -> c_longlong;
+        pub fn Retract(fact: *mut Fact) -> bool;
+    }
+}
+
+#[cfg(feature = "native-clips")]
+pub struct ClipsEnvironment {
+    raw: *mut native::Environment,
+}
+
+#[cfg(feature = "native-clips")]
+impl ClipsEnvironment {
+    fn new() -> Result<Self, ClipsKernelError> {
+        let raw = unsafe { native::CreateEnvironment() };
+        if raw.is_null() {
+            return Err(ClipsKernelError::CreateEnvironmentFailed);
+        }
+        Ok(Self { raw })
+    }
+
+    pub fn build(&mut self, construct: &str) -> Result<(), ClipsKernelError> {
+        let construct =
+            std::ffi::CString::new(construct).map_err(|_| ClipsKernelError::NulInput)?;
+        if unsafe { native::Build(self.raw, construct.as_ptr()) } {
+            Ok(())
+        } else {
+            Err(ClipsKernelError::BuildFailed)
+        }
+    }
+
+    pub fn assert_string(&mut self, fact: &str) -> Result<ClipsFact, ClipsKernelError> {
+        let fact = std::ffi::CString::new(fact).map_err(|_| ClipsKernelError::NulInput)?;
+        let raw = unsafe { native::AssertString(self.raw, fact.as_ptr()) };
+        if raw.is_null() {
+            Err(ClipsKernelError::AssertFailed)
+        } else {
+            Ok(ClipsFact { raw })
+        }
+    }
+
+    pub fn run(&mut self, limit: i64) -> i64 {
+        unsafe { native::Run(self.raw, limit) }
+    }
+
+    pub fn retract(&mut self, fact: ClipsFact) -> Result<(), ClipsKernelError> {
+        let raw = fact.raw;
+        std::mem::forget(fact);
+        if unsafe { native::Retract(raw) } {
+            Ok(())
+        } else {
+            Err(ClipsKernelError::RetractFailed)
+        }
+    }
+}
+
+#[cfg(feature = "native-clips")]
+impl Drop for ClipsEnvironment {
+    fn drop(&mut self) {
+        if !self.raw.is_null() {
+            let _ = unsafe { native::DestroyEnvironment(self.raw) };
+            self.raw = std::ptr::null_mut();
+        }
+    }
+}
+
+#[cfg(feature = "native-clips")]
+pub struct ClipsFact {
+    raw: *mut native::Fact,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_build_is_explicitly_runtime_independent() {
+        assert!(!ClipsKernel::native_feature_enabled());
+        let error = ClipsKernel.create_environment().unwrap_err();
+        assert_eq!(error, ClipsKernelError::NativeFeatureDisabled);
+    }
+}
