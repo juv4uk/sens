@@ -72,7 +72,8 @@
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
 ; whether this post-core closure currently has any additional stable peers.
 ; Candidate spellings remain unavailable until explicitly ratified stable.
-(print (write-to-string
-  (my-postcore-build-definitions
-    process-run
-    (quote (запустити-процес)))))
+(let ((expanded
+              (my-postcore-build-definitions
+                process-run
+                (quote (запустити-процес)))))
+  (print (write-to-string expanded)))
