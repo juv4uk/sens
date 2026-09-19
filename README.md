@@ -47,7 +47,7 @@ Rust лишається важливим механічним substrate/referenc
 
 Нова дисципліна проста: `my-lisp` має вміти **висловити, адресувати, передати, прийняти й композиційно використати** результат, але не зобов'язаний повторно реалізовувати всередині себе найкращий алгоритм кожного острова.
 
-Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **6.0**.
+Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **7.0**.
 
 
 ### Один Lisp, різні субстрати
@@ -84,7 +84,7 @@ semantic contract + executable laws
 
 На сьогодні README може чесно показати такі вже ратифіковані результати:
 
-- **Canon 0+7 має executable witnesses.** Закони замкненого ядра не лише описані прозою: вони виконуються в [`lib/canon.lisp`](lib/canon.lisp) і перевіряються conformance/Canon-тестами.
+- **Canon 0+7 має executable witnesses.** Закони стабільного історичного кореня не лише описані прозою: вони виконуються в [`lib/canon.lisp`](lib/canon.lisp) і перевіряються conformance/Canon-тестами.
 - **Українська поверхня є peer projection тих самих numeric semantic identities.** `uk`, `en`, `sa` та інші admitted spellings не створюють окремих значень і не перекладають «привілейовану англійську семантику»; authority лежить у numeric-only registry [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp).
 - **Vertical Day — bounded фізичний доказ.** Ратифікований зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) проводить `(перше (сполучити 2 3))` через structured machine forms → closed admission → Lisp-owned x86-64 encoding → semantics-blind host → physical CPU і отримує `2`. Це доказ конкретного bounded шляху, не твердження про повну native Lisp-машину.
 - **Canonical machine path fail-closed.** Ill-typed semantic input та raw/malformed/unadmitted, зокрема truncated, machine requests відхиляються до входу в host; негативні witnesses фіксують `HOST CALL COUNT = 0`, а не використовують crash як oracle.

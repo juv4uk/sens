@@ -27,7 +27,7 @@ If a lower item conflicts with a higher item, the lower item is stale until reco
 
 ## Semantic identity vs surface spelling
 
-A spelling is not a primitive identity. The closed semantic set remains exactly seven operations:
+A spelling is not a primitive identity. Canon 0 + McCarthy-7 remain the stable historical/minimal root:
 
 ```text
 quote · atom · eq · cons · car · cdr · cond
@@ -41,7 +41,7 @@ Natural-language and historical surfaces map onto semantic identities; changing 
 
 Do not collapse three different questions:
 
-- **semantic primitives** — permanently closed 0+7 model above;
+- **semantic primitives** — evidence-admitted identities under Contract 7.0 / ADR-005, with Canon 0 + McCarthy-7 retained as the stable historical root;
 - **evaluator-controlled bootstrap forms** — machinery needed to create language behavior;
 - **derived language forms** — behavior expressible by the language once the bootstrap substrate exists.
 
@@ -99,3 +99,6 @@ New prose that states a contract-level fact should link to the authoritative sou
 Dated reviews such as `docs/capabilities.md` snapshots may remain valuable evidence even after implementation advances; their date/status must not be mistaken for current authority. Current implementation claims should be rechecked against PLAN, current ADR status, source, and executable evidence.
 
 The goal is not fewer documents at any cost. The goal is one authority for each kind of claim.
+
+
+Current primitive-admission authority: [`adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md`](adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md).
