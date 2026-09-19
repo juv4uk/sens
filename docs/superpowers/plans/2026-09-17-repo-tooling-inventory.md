@@ -195,7 +195,7 @@ Language mapping:
 Відомі вузькі owners:
 
 ```text
-scripts/generate-meta-semantic-registry.py -> migration-issue 317
+scripts/generate-meta-semantic-registry.lisp -> migration-issue 76 (completed by current replay)
 scripts/generate-meta-eval-evidence.py     -> migration-issue 351
 ```
 
