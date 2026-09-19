@@ -16,3 +16,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Isolate UTF-8 process TCP load stage
         run: cargo test -p my-lisp --test library_load_stage_debug -- --nocapture
+      - name: Head-only CLI bootstrap smoke
+        run: |
+          cargo build -p my-lisp-cli --bin my-lisp
+          ./target/debug/my-lisp tests/fixtures/meta-semantic-registry-witness.lisp
