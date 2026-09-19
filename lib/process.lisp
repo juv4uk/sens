@@ -72,4 +72,6 @@
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
 ; whether this post-core closure currently has any additional stable peers.
 ; Candidate spellings remain unavailable until explicitly ratified stable.
-(quote (postcore-materialization-debug skipped))
+; #771: PROCESS-RUN is defined after core bootstrap, so its stable peer must
+; be materialized here against the canonical compact SID 162.
+(my-postcore-materialize-stable-peers 162 process-run)
