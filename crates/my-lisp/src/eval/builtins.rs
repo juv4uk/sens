@@ -44,7 +44,7 @@ fn builtin(name: &'static str, func: Native) -> Value {
 fn define_peer_builtin(
     environment: &Environment,
     diagnostic_name: &'static str,
-    semantic_id: &str,
+    semantic_id: u8,
     func: Native,
 ) {
     let names = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
@@ -433,7 +433,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "+",
-        "0104",
+        12,
         std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
             arithmetic_on_values("+", args, env, span)
         }),
@@ -441,7 +441,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "-",
-        "1001",
+        13,
         std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
             arithmetic_on_values("-", args, env, span)
         }),
@@ -449,7 +449,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "*",
-        "1002",
+        14,
         std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
             arithmetic_on_values("*", args, env, span)
         }),
@@ -457,7 +457,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "/",
-        "1003",
+        15,
         std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
             division_on_values(args, args.len(), env, span)
         }),
@@ -477,7 +477,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "<",
-        "1014",
+        26,
         std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
             comparison_on_values("<", args, span)
         }),
@@ -485,7 +485,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         ">",
-        "1015",
+        27,
         std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
             comparison_on_values(">", args, span)
         }),
@@ -493,7 +493,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "=",
-        "1016",
+        28,
         std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
             comparison_on_values("=", args, span)
         }),

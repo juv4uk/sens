@@ -79,14 +79,7 @@ impl NanBox {
             // Portable primitive identity is the numeric semantic ID itself,
             // not an address of whichever host implementation happens to run it.
             Value::SemanticRef(semantic_id) => {
-                let payload = semantic_id
-                    .parse::<u64>()
-                    .expect("semantic IDs admitted by Canon must be numeric");
-                assert!(
-                    payload <= 0x0FFF_FFFF,
-                    "semantic ID must fit the portable primitive payload"
-                );
-                NanBox(MASK_QNAN | (TAG_PRIMITIVE << 28) | payload)
+                NanBox(MASK_QNAN | (TAG_PRIMITIVE << 28) | u64::from(*semantic_id))
             }
             // Legacy non-Canon host builtins remain representable, but their
             // address is explicitly tagged as host mechanism, never primitive identity.
@@ -125,7 +118,7 @@ mod tests {
 
     #[test]
     fn semantic_ref_nanbox_payload_is_the_numeric_identity() {
-        let NanBox(bits) = NanBox::from_value(&Value::SemanticRef("0005"));
+        let NanBox(bits) = NanBox::from_value(&Value::SemanticRef(5));
         assert_eq!((bits >> 28) & 0xF, TAG_PRIMITIVE);
         assert_eq!(bits & 0x0FFF_FFFF, 5);
     }

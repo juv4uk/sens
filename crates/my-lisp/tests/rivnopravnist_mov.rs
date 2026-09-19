@@ -77,7 +77,7 @@ fn записи_реєстру(корінь: &Форма) -> &[Форма] {
     let Some(Форма::Атом(заголовок)) = елементи.first() else {
         panic!("semantic registry не має заголовка");
     };
-    assert_eq!(заголовок, "sr/1");
+    assert_eq!(заголовок, "sr/2");
     &елементи[1..]
 }
 
@@ -96,12 +96,18 @@ fn поверхні(запис: &Форма) -> (&str, &[Форма]) {
     (атом(&поля[0]), &поля[1..])
 }
 
-fn поля_поверхні(форма: &Форма) -> (&str, &str, &str) {
+fn поля_поверхні(форма: &Форма) -> (&str, Option<&str>) {
     let Форма::Список(поля) = форма else {
         panic!("опис surface повинен бути списком");
     };
-    assert_eq!(поля.len(), 3, "очікується (surface name status)");
-    (атом(&поля[0]), атом(&поля[1]), атом(&поля[2]))
+    assert_eq!(поля.len(), 2, "очікується (surface name-or-empty)");
+    let мова = атом(&поля[0]);
+    let назва = match &поля[1] {
+        Форма::Список(елементи) if елементи.is_empty() => None,
+        Форма::Атом(значення) => Some(значення.as_str()),
+        інше => panic!("неочікуване значення слота: {інше:?}"),
+    };
+    (мова, назва)
 }
 
 fn знайти<'a>(записи: &'a [Форма], ідентифікатор: &str) -> &'a Форма {
@@ -111,12 +117,12 @@ fn знайти<'a>(записи: &'a [Форма], ідентифікатор: 
         .unwrap_or_else(|| panic!("немає semantic identity {ідентифікатор}"))
 }
 
-fn рядок<'a>(запис: &'a Форма, surface: &str) -> (&'a str, &'a str, &'a str) {
+fn рядок<'a>(запис: &'a Форма, surface: &str) -> (&'a str, Option<&'a str>) {
     поверхні(запис)
         .1
         .iter()
         .map(поля_поверхні)
-        .find(|(мова, _, _)| *мова == surface)
+        .find(|(мова, _)| *мова == surface)
         .unwrap_or_else(|| panic!("немає surface {surface}"))
 }
 
@@ -136,17 +142,20 @@ fn семантичні_ідентифікатори_складаються_ті
     let mut побачені = HashSet::new();
     for запис in записи_реєстру(&корінь) {
         let (ідентифікатор, _) = поверхні(запис);
+        let bits = ідентифікатор
+            .strip_prefix('"')
+            .and_then(|value| value.strip_suffix('"'))
+            .expect("SID must be serialized as a quoted bitstring");
         assert!(
-            ідентифікатор.len() >= 4
-                && ідентифікатор.chars().all(|символ| символ.is_ascii_digit()),
-            "semantic ID {ідентифікатор:?} порушує мовну нейтральність"
+            bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')),
+            "byte SID {ідентифікатор:?} порушує sr/2"
         );
         assert!(побачені.insert(ідентифікатор), "дубль ID {ідентифікатор}");
     }
     // Intentional floor, not a restated fact: the registry only grows, so an
     // exact count would silently rot. 140 is the stable-UK-surface size at
     // the time this floor was written (TEST-ARCHITECTURE-1 step 2).
-    assert!(побачені.len() >= 140, "numeric authority має покривати весь public surface");
+    assert_eq!(побачені.len(), 168, "sr/2 має містити Canon 0 + 167 identities");
 }
 
 #[test]
@@ -155,6 +164,10 @@ fn кожна_тотожність_явно_описує_uk_en_sa_без_заб�
     let обовязкові = HashSet::from(["uk", "en", "sa"]);
     for запис in записи_реєстру(&корінь) {
         let (ідентифікатор, описи) = поверхні(запис);
+        if ідентифікатор == "\"00000000\"" {
+            assert!(описи.len() == 1 || описи.is_empty(), "Canon 0 is ground-only");
+            continue;
+        }
         let мови = описи
             .iter()
             .map(|опис| поля_поверхні(опис).0)
@@ -172,13 +185,20 @@ fn символічна_нотація_не_належить_людській_м
     let корінь = корінь_реєстру();
     for запис in записи_реєстру(&корінь) {
         let (ідентифікатор, описи) = поверхні(запис);
+        if ідентифікатор == "\"00000000\"" {
+            continue;
+        }
         for опис in описи {
-            let (surface, назва, _) = поля_поверхні(опис);
-            if surface == "sym" || назва == "—" {
+            let (surface, назва) = поля_поверхні(опис);
+            let Some(назва) = назва else {
+                continue;
+            };
+            if surface == "sym" {
                 continue;
             }
+            let чиста_назва = назва.trim_matches('"');
             assert!(
-                назва.chars().any(char::is_alphabetic),
+                чиста_назва.chars().any(char::is_alphabetic),
                 "{ідентифікатор}/{surface}: {назва:?} — символіка, а не людська мова"
             );
         }
@@ -188,11 +208,11 @@ fn символічна_нотація_не_належить_людській_м
 #[test]
 fn додавання_відділяє_людські_мови_від_спільного_символу() {
     let корінь = корінь_реєстру();
-    let запис = знайти(записи_реєстру(&корінь), "0104");
-    assert_eq!(рядок(запис, "uk"), ("uk", "додати", "stable"));
-    assert_eq!(рядок(запис, "en"), ("en", "—", "missing"));
-    assert_eq!(рядок(запис, "sa"), ("sa", "yoga", "stable"));
-    assert_eq!(рядок(запис, "sym"), ("sym", "+", "stable"));
+    let запис = знайти(записи_реєстру(&корінь), "\"00001100\"");
+    assert_eq!(рядок(запис, "uk"), ("uk", Some("додати")));
+    assert_eq!(рядок(запис, "en"), ("en", None));
+    assert_eq!(рядок(запис, "sa"), ("sa", Some("yoga")));
+    assert_eq!(рядок(запис, "sym"), ("sym", Some("+")));
 
     let mut сесія = Session::default();
     let українське = eval_program("додати", &mut сесія).unwrap().value;
@@ -207,7 +227,7 @@ fn додавання_відділяє_людські_мови_від_спіль
 }
 
 // `затінення_ordinary_peer_name_не_переналаштовує_інші` (shadowing одного
-// admitted 0104 peer не має зачіпати інші) та
+// admitted 00001100 peer не має зачіпати інші) та
 // `surface_files_не_будують_peer_names_через_англійську` (surface-файли не
 // повинні будувати peer через `(define додати +)`/`(define yoga +)`) were
 // removed here (TEST-ARCHITECTURE-1 step 2, triplicated-shadow-isolation
@@ -215,7 +235,7 @@ fn додавання_відділяє_людські_мови_від_спіль
 // `peer_surface_identity.rs`'s registry-driven
 // `shadowing_one_admitted_add_surface_does_not_retarget_its_peers` and
 // `human_surface_files_do_not_redefine_admitted_add_peers`, which cover the
-// same semantic ID (0104) generically over every admitted surface instead
+// same semantic ID (00001100) generically over every admitted surface instead
 // of a hardcoded three-name list, and the second is strictly stronger
 // (rejects `(define додати <anything>)`, not just the `+`-specific alias).
 
@@ -233,24 +253,24 @@ fn executable_authority_більше_не_читає_legacy_en_shaped_табли
         );
         assert!(
             джерело.contains("semantic-registry.lisp"),
-            "{імя}: має спиратися на numeric registry"
+            "{імя}: має спиратися на byte-SID registry"
         );
     }
 }
 
 #[test]
 #[ignore = "фінальний gate: увімкнути після завершення UK/EN/SA parity"]
-fn повне_рівноправя_вимагає_stable_для_всіх_людських_поверхонь() {
+fn повне_рівноправя_вимагає_наявності_для_всіх_людських_поверхонь() {
     let корінь = корінь_реєстру();
     for запис in записи_реєстру(&корінь) {
         let (ідентифікатор, _) = поверхні(запис);
-        let стани = ["uk", "en", "sa"].map(|surface| рядок(запис, surface).2);
-        if стани.iter().all(|стан| *стан == "compatibility-only") {
+        if ідентифікатор == "\"00000000\"" {
             continue;
         }
+        let наявні = ["uk", "en", "sa"].map(|surface| рядок(запис, surface).1.is_some());
         assert!(
-            стани.iter().all(|стан| *стан == "stable"),
-            "{ідентифікатор}: UK/EN/SA ще не stable одночасно: {стани:?}"
+            наявні.iter().all(|наявне| *наявне),
+            "{ідентифікатор}: UK/EN/SA ще не заповнені одночасно"
         );
     }
 }

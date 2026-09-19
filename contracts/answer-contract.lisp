@@ -42,7 +42,7 @@
                            conflict-collapse timeout-collapse error-collapse
                            generic-value->bool host-bool)))
 
-  ((identity . "0001")
+  ((identity . "00000001")
    (domain-owner . structure)
    (input-domain . syntax)
    (result-form . data)
@@ -50,7 +50,7 @@
    (allowed-coercions . ())
    (forbidden-coercions . (generic-value->bool host-bool)))
 
-  ((identity . "0004")
+  ((identity . "00000100")
    (domain-owner . structure)
    (input-domain . (value value))
    (result-form . pair)
@@ -58,7 +58,7 @@
    (allowed-coercions . ())
    (forbidden-coercions . (generic-value->bool host-bool)))
 
-  ((identity . "0005")
+  ((identity . "00000101")
    (domain-owner . structure)
    (input-domain . pair)
    (result-form . value)
@@ -66,7 +66,7 @@
    (allowed-coercions . ())
    (forbidden-coercions . (generic-value->bool host-bool)))
 
-  ((identity . "0006")
+  ((identity . "00000110")
    (domain-owner . structure)
    (input-domain . pair)
    (result-form . value)
@@ -77,7 +77,7 @@
   ; #218 has now selected explicit domain-owned result forms. PRIM_ATOM is a
   ; structural classifier over the actual value shape: Canon 0, pair, or other
   ; non-pair atom. It is not a universal proposition returning T/NIL.
-  ((identity . "0002")
+  ((identity . "00000010")
    (domain-owner . structural-observation)
    (input-domain . value)
    (result-form . structural-kind)
@@ -90,7 +90,7 @@
 
   ; PRIM_EQ remains atom-only. Its two cases belong to the atomic-identity
   ; domain, not to mathematical 0/1 and not to universal truthiness.
-  ((identity . "0003")
+  ((identity . "00000011")
    (domain-owner . structural-observation)
    (input-domain . (atom atom))
    (result-form . identity-relation)
@@ -104,7 +104,7 @@
   ; < is the first exact-Q decision witness. outside-domain=delegate is
   ; essential: a non-Q question is not binary NO. A lower appropriate domain
   ; may answer it, or the concrete query may remain unspecialized as ().
-  ((identity . "1014")
+  ((identity . "00011010")
    (domain-owner . exact-q-decision)
    (input-domain . exact-rational-sequence)
    (result-form . rational-binary-decision)
@@ -119,7 +119,7 @@
   ; does not become a truth status merely because it is non-binary or non-Q.
   ; If no justified mathematical specialization is produced, the answer may
   ; remain Canon 0 rather than being forced into another result algebra.
-  ((identity . "0104")
+  ((identity . "00001100")
    (domain-owner . mathematical-result)
    (input-domain . mathematical-values)
    (result-form . mathematical-value)
@@ -132,7 +132,7 @@
   ; (substitution proof) answers, or () when no proof/result is produced.
   ; `unknown`, conflict, or any future richer state remain explicit reasoning
   ; values; they are never aliases for the unspecialized accumulator.
-  ((identity . "1118")
+  ((identity . "10000101")
    (domain-owner . non-mathematical-reasoning)
    (input-domain . (goal rules-or-index))
    (result-form . reasoning-results)
@@ -143,7 +143,7 @@
 
   ; cond consumes an explicit answer/result domain; it does not own universal
   ; truth. If no clause selects a branch, the control result remains ().
-  ((identity . "0007")
+  ((identity . "00000111")
    (domain-owner . control-consumer)
    (input-domain . explicit-answer-result)
    (result-form . selected-branch-value)

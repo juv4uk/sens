@@ -17,29 +17,16 @@ fn names_after(source: &str, marker: &str) -> BTreeSet<String> {
 }
 
 fn semantic_registry_surface_names() -> BTreeSet<String> {
-    // `semantic-registry.wsm` deliberately keeps one numeric identity and all
-    // of its surface rows on the same physical line, for example:
-    //
-    // (0104 (en — missing) (uk додати stable) (sa yoga stable) (sym + stable))
-    //
-    // Do not parse it as the old one-row-per-line EN-shaped table. Every
-    // nested `(surface name status)` tuple is independently authoritative.
     SEMANTIC_REGISTRY
         .split('(')
         .filter_map(|fragment| {
             let tuple = fragment.split(')').next()?;
             let fields = tuple.split_whitespace().collect::<Vec<_>>();
-            if fields.len() != 3 {
+            let [_surface, name] = fields.as_slice() else {
                 return None;
-            }
-            let name = fields[1];
-            let status = fields[2];
-            // Discovery is status-governed, not limited to a closed list of
-            // human/symbolic surface labels. H.2 introduced an explicit
-            // `compat` surface, and future surface kinds must not require a
-            // second Rust schema here. Candidate/missing names are not live.
-            if matches!(status, "stable" | "compatibility-only") && name != "—" {
-                Some(name.to_owned())
+            };
+            if *name != "()" {
+                Some(name.trim_matches('"').to_owned())
             } else {
                 None
             }

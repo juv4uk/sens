@@ -348,7 +348,7 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::SemanticRef(semantic_id) => {
             return Err(LanguageError::new(
                 ErrorKind::Type,
-                format!("a semantic callable ({semantic_id}) is not executable code"),
+                format!("a semantic callable (SID {semantic_id:08b}) is not executable code"),
                 span,
             ));
         }

@@ -8,7 +8,6 @@ fn readme_explains_the_two_ukrainian_surfaces() {
         "`uk` — коротка, інтуїтивно зрозуміла українська поверхня",
         "`ukr` — повна українська поверхня",
         "docs/generated/function-table.md",
-        "candidate",
     ] {
         assert!(README.contains(required), "README missing Ukrainian surface contract: {required}");
     }
@@ -19,9 +18,7 @@ fn ukrainian_api_distinguishes_surface_names_from_function_meaning() {
     for required in [
         "`uk` — коротке ім'я",
         "`ukr` — повне ім'я",
-        "semantic ID",
-        "stable",
-        "candidate",
+        "byte SID",
         "generated/function-table.md",
     ] {
         assert!(
@@ -34,7 +31,7 @@ fn ukrainian_api_distinguishes_surface_names_from_function_meaning() {
 #[test]
 fn machine_docs_index_states_that_registry_owns_surface_spellings() {
     for required in [
-        "numeric semantic ID",
+        "byte SID",
         "uk/ukr",
         "semantic-registry.lisp",
         "опис функції не дублюється",
@@ -55,13 +52,15 @@ fn documented_ids() -> Vec<String> {
             let mut fields = rest.split_whitespace();
             fields.next()?;
             let id = fields.next()?;
-            id.chars().all(|character| character.is_ascii_digit()).then(|| id.to_string())
+            let bits = id.strip_prefix('"')?.strip_suffix('"')?;
+            (bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')))
+                .then(|| bits.to_string())
         })
         .collect()
 }
 
 #[test]
-fn every_documented_identity_shows_uk_ukr_status_and_one_behavior_description() {
+fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
     let (_, reference_and_tail) = UKRAINIAN_API
         .split_once("## Повний довідник")
         .expect("Ukrainian API must contain the detailed reference section");
@@ -70,7 +69,7 @@ fn every_documented_identity_shows_uk_ukr_status_and_one_behavior_description() 
         .expect("Ukrainian API detailed reference must end before the boundary section");
 
     assert!(
-        reference.contains("| semantic ID | `uk` | `ukr` | статус `ukr` | Виклик | Тип | Що робить | Основа |"),
+        reference.contains("| byte SID | `uk` | `ukr` | Виклик | Тип | Що робить | Основа |"),
         "detailed Ukrainian API must expose uk and ukr side by side"
     );
 
@@ -79,12 +78,12 @@ fn every_documented_identity_shows_uk_ukr_status_and_one_behavior_description() 
 
     let rows = reference
         .lines()
-        .filter(|line| line.starts_with("| `") && line.chars().filter(|character| *character == '|').count() == 9)
+        .filter(|line| line.starts_with("| `") && line.chars().filter(|character| *character == '|').count() == 8)
         .collect::<Vec<_>>();
     assert_eq!(
         rows.len(),
         ids.len(),
-        "detailed reference must contain exactly one eight-column row per documented semantic ID"
+        "detailed reference must contain exactly one seven-column row per documented byte SID"
     );
 
     for id in ids {
@@ -92,13 +91,13 @@ fn every_documented_identity_shows_uk_ukr_status_and_one_behavior_description() 
         let count = rows.iter().filter(|row| row.starts_with(&marker)).count();
         assert_eq!(
             count, 1,
-            "semantic ID {id} must appear exactly once in the detailed uk/ukr reference"
+            "byte SID {id} must appear exactly once in the detailed uk/ukr reference"
         );
     }
 
     for required_row_fragment in [
-        "| `1045` | `текст-порожній?` | `порожній-текст?` | stable |",
-        "| `1075` | `монотонний-нс` | `монотонний-час-у-наносекундах` | candidate |",
+        "| `00111100` | `текст-порожній?` | `порожній-текст?` |",
+        "| `01011010` | `монотонний-нс` | `монотонний-час-у-наносекундах` |",
     ] {
         assert!(
             reference.contains(required_row_fragment),

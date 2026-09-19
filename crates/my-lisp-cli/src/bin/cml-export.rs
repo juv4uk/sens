@@ -7,7 +7,7 @@
 //! repository or code — per docs/agent-doctrine.md rule 4, a neighboring
 //! repo is an external authority, not a file this repo edits.
 
-use my_lisp::semantic_registry_export::{admitted_surfaces_for_semantic_id, SurfaceRow};
+use my_lisp::semantic_registry_export::{admitted_surfaces_for_semantic_id, semantic_id_bits, SurfaceRow};
 
 /// Slice 1 (2026-09-10, unchanged): exactly the semantic IDs
 /// `tests/fixtures/conformance.my`'s fixture #69 (named def + recursion,
@@ -18,21 +18,21 @@ use my_lisp::semantic_registry_export::{admitted_surfaces_for_semantic_id, Surfa
 /// the full Canon 0+7 surface list instead of reading it from this export,
 /// because slice 1 never covered atom/cons/car/cdr/defmacro in the first
 /// place): adds the remaining Canon 0 identities (atom/cons/car/cdr) and
-/// defmacro (0012), so a consumer's own "which surfaces are Canon-reserved"
+/// defmacro (SID 00001010), so a consumer's own "which surfaces are Canon-reserved"
 /// table can be derived entirely from this file instead of staying a
 /// second hand-typed list that silently drifts if the registry changes.
-const EXPORTED_FORMS: &[(&str, Role, bool)] = &[
-    ("0001", Role::Syntax, false),    // quote
-    ("0002", Role::Primitive, true),  // atom
-    ("0003", Role::Primitive, true),  // eq
-    ("0004", Role::Primitive, true),  // cons
-    ("0005", Role::Primitive, true),  // car
-    ("0006", Role::Primitive, true),  // cdr
-    ("0007", Role::Syntax, false),    // cond
-    ("0010", Role::Syntax, false),    // lambda
-    ("0011", Role::Syntax, false),    // define
-    ("0012", Role::Syntax, false),    // defmacro
-    ("1001", Role::Library, true),    // subtraction
+const EXPORTED_FORMS: &[(u8, Role, bool)] = &[
+    (1, Role::Syntax, false),    // quote
+    (2, Role::Primitive, true),  // atom
+    (3, Role::Primitive, true),  // eq
+    (4, Role::Primitive, true),  // cons
+    (5, Role::Primitive, true),  // car
+    (6, Role::Primitive, true),  // cdr
+    (7, Role::Syntax, false),    // cond
+    (8, Role::Syntax, false),    // lambda
+    (9, Role::Syntax, false),    // define
+    (10, Role::Syntax, false),    // defmacro
+    (13, Role::Library, true),    // subtraction
 ];
 
 #[derive(Clone, Copy)]
@@ -66,7 +66,7 @@ fn fnv1a_hex(bytes: &[u8]) -> String {
 
 /// Surface names are rendered as string literals, not bare symbols.
 /// Real bug found extending this export to slice 2 (cml#9): the bare
-/// symbol `'` (quote's own `sym` surface, semantic ID 0001) fails to
+/// symbol `'` (quote's own `sym` surface, byte SID 00000001) fails to
 /// parse when it is the last token before a closing paren -- verified
 /// directly with the real reader (`--oracle-check`): `(a ')` errors
 /// with `unexpected-closing-parenthesis`, even though the identical
@@ -89,8 +89,9 @@ fn render_forms_block() -> String {
     let mut lines = Vec::new();
     for &(id, role, callable) in EXPORTED_FORMS {
         let surfaces = admitted_surfaces_for_semantic_id(id);
+        let id_bits = semantic_id_bits(id);
         lines.push(format!(
-            "    ({id} (surfaces {}) (role {}) (callable {}))",
+            "    (\\\"{id_bits}\\\" (surfaces {}) (role {}) (callable {}))",
             render_surfaces(&surfaces),
             role.as_str(),
             if callable { "t" } else { "nil" }

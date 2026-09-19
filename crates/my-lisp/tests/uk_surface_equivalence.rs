@@ -1,9 +1,9 @@
 //! Registry-driven UK/EN surface equivalence sweep.
 //!
-//! Data source: `lib/surface/semantic-registry.wsm`, the numeric-ID surface
+//! Data source: `lib/surface/semantic-registry.wsm`, the byte-SID surface
 //! authority (see `semantic_registry.rs` for the runtime parser this test
 //! mirrors, and `peer_surface_identity.rs` for the same pattern applied to
-//! one semantic ID). This file used to read the legacy EN-shaped
+//! one byte SID). This file used to read the legacy EN-shaped
 //! `lib/surface/uk-sa-coverage.wsm`, which `rivnopravnist_mov.rs` and
 //! `runtime_peer_operators.rs` already assert is no longer executable
 //! authority (TEST-ARCHITECTURE-1 step 2 migration, 2026-09-12).
@@ -13,57 +13,80 @@ use std::rc::Rc;
 
 const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Admission {
-    Stable,
-    CompatibilityOnly,
-    Candidate,
-    Missing,
-}
-
-/// One `(namespace name status)` triple from a semantic-registry row.
+/// One surface declaration from a semantic-registry row.
 struct Surface {
     namespace: &'static str,
-    name: &'static str,
-    admission: Admission,
+    name: Option<&'static str>,
 }
 
-/// Parse every row of the registry into its semantic ID plus the raw
-/// `(namespace name status)` triples it declares. Mirrors
-/// `semantic_registry::parse_rows` (crate-internal, not reachable from an
-/// integration test), but keeps every admission kind instead of dropping
-/// `candidate`/`missing` at parse time, since this file needs those to
-/// report accurate status breakdowns.
+/// Parse every row of the registry into its byte SID plus the raw
+/// surface declarations it carries.
+fn surface_groups(line: &'static str) -> Vec<&'static str> {
+    let mut groups = Vec::new();
+    let mut depth = 0usize;
+    let mut start = None;
+    for (index, byte) in line.bytes().enumerate() {
+        match byte {
+            b'(' => {
+                depth += 1;
+                if depth == 2 {
+                    start = Some(index + 1);
+                }
+            }
+            b')' => {
+                if depth == 2 {
+                    if let Some(group_start) = start.take() {
+                        let group = line[group_start..index].trim();
+                        if !group.is_empty() {
+                            groups.push(group);
+                        }
+                    }
+                }
+                depth = depth.saturating_sub(1);
+            }
+            _ => {}
+        }
+    }
+    groups
+}
+
+fn registry_name_token(token: &'static str) -> &'static str {
+    token
+        .strip_prefix('"')
+        .and_then(|value| value.strip_suffix('"'))
+        .unwrap_or(token)
+}
+
 fn registry_rows() -> Vec<(&'static str, Vec<Surface>)> {
     REGISTRY
         .lines()
         .filter_map(|line| {
             let fields = line.split_whitespace().collect::<Vec<_>>();
-            let semantic_id = fields.first()?.strip_prefix('(')?;
-            if semantic_id.is_empty() || !semantic_id.bytes().all(|b| b.is_ascii_digit()) {
+            let semantic_id = fields
+                .first()?
+                .strip_prefix("(\"")?
+                .strip_suffix('"')?;
+            if semantic_id.len() != 8
+                || !semantic_id.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+            {
                 return None;
             }
 
-            let mut surfaces = Vec::new();
-            for triple in fields[1..].chunks(3) {
-                if triple.len() != 3 {
-                    break;
-                }
-                let namespace = triple[0].trim_start_matches('(');
-                let name = triple[1];
-                let admission = match triple[2].trim_end_matches(')') {
-                    "stable" => Admission::Stable,
-                    "compatibility-only" => Admission::CompatibilityOnly,
-                    "candidate" => Admission::Candidate,
-                    "missing" => Admission::Missing,
-                    _ => continue,
-                };
-                surfaces.push(Surface {
-                    namespace,
-                    name,
-                    admission,
-                });
-            }
+            let surfaces = surface_groups(line)
+                .into_iter()
+                .map(|group| {
+                    let fields = group.split_whitespace().collect::<Vec<_>>();
+                    let (namespace, name) = match fields.as_slice() {
+                        [namespace, "()"] => (*namespace, None),
+                        [namespace, name] => (*namespace, Some(registry_name_token(name))),
+                        _ => panic!("malformed sr/2 surface group: ({group})"),
+                    };
+                    Surface {
+                        namespace,
+                        name,
+                    }
+                })
+                .collect();
             Some((semantic_id, surfaces))
         })
         .collect()
@@ -73,45 +96,30 @@ fn surface<'a>(surfaces: &'a [Surface], namespace: &str) -> Option<&'a Surface> 
     surfaces.iter().find(|surface| surface.namespace == namespace)
 }
 
-/// Every semantic ID whose EN spelling AND UK spelling are both `stable` --
-/// exactly the set for which "does the UK spelling resolve to the same
-/// runtime operation as the EN spelling" is a meaningful question. IDs that
-/// are UK-only (e.g. `додати`/`+`, which has no spelled-out EN name, only a
-/// symbolic one) are covered separately by `rivnopravnist_mov.rs` and
-/// `runtime_peer_operators.rs`, which compare against the symbolic/SA
-/// spellings instead.
-fn stable_en_uk_pairs() -> Vec<(&'static str, &'static str, &'static str)> {
+/// Every byte SID whose EN spelling AND UK spelling are both present.
+fn present_en_uk_pairs() -> Vec<(&'static str, &'static str, &'static str)> {
     registry_rows()
         .into_iter()
         .filter_map(|(id, surfaces)| {
-            let en = surface(&surfaces, "en")?;
-            let uk = surface(&surfaces, "uk")?;
-            (en.admission == Admission::Stable && uk.admission == Admission::Stable)
-                .then_some((id, en.name, uk.name))
+            let en = surface(&surfaces, "en")?.name?;
+            let uk = surface(&surfaces, "uk")?.name?;
+            Some((id, en, uk))
         })
         .collect()
 }
 
-/// UK-column admission counts across the whole registry (not just rows with
-/// a stable EN counterpart) -- used only for the internal-consistency check
-/// below, kept separate from `stable_en_uk_pairs` above so a parser bug in
-/// one can't hide behind agreement with the other.
-fn uk_admission_counts() -> (usize, usize, usize, usize, usize) {
+fn uk_presence_counts() -> (usize, usize, usize) {
     let rows = registry_rows();
-    let mut stable = 0;
-    let mut compatibility = 0;
-    let mut candidate = 0;
-    let mut missing = 0;
+    let total = rows.len();
+    let mut present = 0;
+    let mut empty = 0;
     for (_, surfaces) in &rows {
-        match surface(surfaces, "uk").map(|s| s.admission) {
-            Some(Admission::Stable) => stable += 1,
-            Some(Admission::CompatibilityOnly) => compatibility += 1,
-            Some(Admission::Candidate) => candidate += 1,
-            Some(Admission::Missing) => missing += 1,
-            None => {}
+        match surface(surfaces, "uk").and_then(|s| s.name) {
+            Some(_) => present += 1,
+            None => empty += 1,
         }
     }
-    (rows.len(), stable, compatibility, candidate, missing)
+    (total, present, empty)
 }
 
 fn uk_session() -> Session {
@@ -145,13 +153,13 @@ fn is_same_runtime_value(left: &Value, right: &Value) -> bool {
 
 #[test]
 fn every_stable_uk_surface_entry_resolves_to_its_declared_operation() {
-    let pairs = stable_en_uk_pairs();
+    let pairs = present_en_uk_pairs();
     // Floor, not exact count: the registry only grows. An exact hardcoded
     // count here would silently rot every time a new stable pair is added --
     // this just guards against the parse producing an (almost) empty set.
     assert!(
         pairs.len() >= 100,
-        "expected a substantial number of stable EN/UK pairs, found {}",
+        "expected a substantial number of present EN/UK pairs, found {}",
         pairs.len()
     );
 
@@ -166,50 +174,57 @@ fn every_stable_uk_surface_entry_resolves_to_its_declared_operation() {
         ("lambda", "функція"),
         ("define", "визначити"),
     ];
+    // Host primitives (process, tcp, fs) belong to my-lisp-host substrate,
+    // not to the pure language session tested here.
+    let host_operations = [
+        "process-run",
+        "tcp-read",
+        "tcp-write",
+        "tcp-listen",
+        "read-file",
+        "write-file",
+    ];
     let mut checked_values = 0;
 
     for (semantic_id, english, ukrainian) in &pairs {
-        if syntax.contains(&(*english, *ukrainian)) {
+        if syntax.contains(&(*english, *ukrainian)) || host_operations.contains(english) {
             continue;
         }
         let english_value = eval_program(english, &mut session)
             .unwrap_or_else(|error| {
-                panic!("stable English value is missing: {semantic_id}/{english}: {error}")
+                panic!("English value is missing: {semantic_id}/{english}: {error}")
             })
             .value;
         let ukrainian_value = eval_program(ukrainian, &mut session)
             .unwrap_or_else(|error| {
-                panic!("stable Ukrainian value is missing: {semantic_id}/{ukrainian}: {error}")
+                panic!("Ukrainian value is missing: {semantic_id}/{ukrainian}: {error}")
             })
             .value;
         assert!(
             is_same_runtime_value(&english_value, &ukrainian_value),
-            "stable surface changed runtime identity: {semantic_id}/{english} -> {ukrainian}"
+            "surface changed runtime identity: {semantic_id}/{english} -> {ukrainian}"
         );
         checked_values += 1;
     }
 
-    // Derived, not restated: every pair except the syntax forms must have
-    // been checked above -- catches a silent early `continue`/`break` bug
-    // in the loop without hardcoding the pair count twice.
-    assert_eq!(checked_values, pairs.len() - syntax.len());
+    // Derived, not restated: every pair except the syntax forms and host
+    // operations must have been checked above -- catches a silent early
+    // `continue`/`break` bug in the loop without hardcoding the pair count twice.
+    assert_eq!(
+        checked_values,
+        pairs.len() - syntax.len() - host_operations.len()
+    );
 }
 
 #[test]
 fn ukrainian_surface_status_counts_are_internally_consistent() {
-    let (total, stable, compatibility, candidate, missing) = uk_admission_counts();
+    let (total, present, empty) = uk_presence_counts();
     assert_eq!(
-        stable + compatibility + candidate + missing,
+        present + empty,
         total,
-        "every registry row's UK column must fall into exactly one admission bucket"
+        "every registry row's UK slot must be either present or ()"
     );
-    assert!(stable > 0 && total > 0, "registry must not be empty");
-    // `candidate` UK rows exist for in-progress work; `missing` UK rows exist
-    // for EN-only host primitives (process/tcp/file) that never got a
-    // spelled-out Ukrainian name. Neither count is asserted to be zero here
-    // -- that was the old (now-false) assumption from the legacy curated
-    // uk-sa-coverage.wsm, which excluded unattempted rows outright instead
-    // of tracking them.
+    assert!(present > 0 && total > 0, "registry must not be empty");
 }
 
 // every_stable_ukrainian_name_is_typeable_on_the_ukrainian_layout and

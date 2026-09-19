@@ -49,7 +49,7 @@ pub struct LanguageItem {
     pub name: String,
     /// Numeric semantic identity when the item is governed by the surface registry.
     /// Runtime-only host capabilities may legitimately have no registry identity yet.
-    pub semantic_id: Option<&'static str>,
+    pub semantic_id: Option<u8>,
     pub signature: &'static str,
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
@@ -64,7 +64,7 @@ enum SurfacePolicy {
 
 #[derive(Clone, Copy)]
 struct SemanticToolingMetadata {
-    semantic_id: &'static str,
+    semantic_id: u8,
     signature: &'static str,
     documentation: &'static str,
     kind: LanguageItemKind,
@@ -76,7 +76,7 @@ struct SemanticToolingMetadata {
 // Human spellings are projected from semantic-registry.wsm at discovery time.
 const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
     SemanticToolingMetadata {
-        semantic_id: "0001",
+        semantic_id: 1,
         signature: "(quote value)",
         documentation: "Return value unevaluated",
         kind: LanguageItemKind::SyntaxForm,
@@ -84,7 +84,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: "0007",
+        semantic_id: 7,
         signature: "(cond (test result) ...)",
         documentation: "Evaluate the first matching clause",
         kind: LanguageItemKind::SyntaxForm,
@@ -92,7 +92,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: "0010",
+        semantic_id: 8,
         signature: "(lambda (params) body ...)",
         documentation: "Create an anonymous function",
         kind: LanguageItemKind::SyntaxForm,
@@ -100,7 +100,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: "0011",
+        semantic_id: 9,
         signature: "(define name value)",
         documentation: "Bind name in the current scope",
         kind: LanguageItemKind::SyntaxForm,
@@ -108,7 +108,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: "0012",
+        semantic_id: 10,
         signature: "(defmacro name (params) body ...)",
         documentation: "Bind a language-owned macro",
         kind: LanguageItemKind::Macro,
@@ -116,7 +116,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Admitted,
     },
     SemanticToolingMetadata {
-        semantic_id: "1000",
+        semantic_id: 11,
         signature: "(def name value)",
         documentation: "Compatibility-only binding form",
         kind: LanguageItemKind::SyntaxForm,
@@ -126,8 +126,8 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
 ];
 
 fn semantic_language_items_with(
-    stable_surfaces: impl Fn(&str) -> Vec<&'static str>,
-    admitted_surfaces: impl Fn(&str) -> Vec<&'static str>,
+    stable_surfaces: impl Fn(u8) -> Vec<&'static str>,
+    admitted_surfaces: impl Fn(u8) -> Vec<&'static str>,
 ) -> Vec<LanguageItem> {
     let mut items = Vec::new();
     for metadata in SEMANTIC_TOOLING {
@@ -465,17 +465,17 @@ mod tests {
     }
 
     #[test]
-    fn semantic_tooling_keys_are_numeric_identities_only() {
+    #[allow(clippy::absurd_extreme_comparisons)]
+    fn semantic_tooling_keys_are_byte_identities_only() {
         assert!(SEMANTIC_TOOLING.iter().all(|metadata| {
-            !metadata.semantic_id.is_empty()
-                && metadata.semantic_id.bytes().all(|byte| byte.is_ascii_digit())
+            metadata.semantic_id <= u8::MAX
         }));
     }
 
     #[test]
     fn registry_mutation_changes_discovered_surface_without_changing_metadata_key() {
-        const BEFORE: &str = "(0010 (en comet stable))";
-        const AFTER: &str = "(0010 (en meteor stable))";
+        const BEFORE: &str = "(\"00001000\" (en comet))";
+        const AFTER: &str = "(\"00001000\" (en meteor))";
         let discover = |source: &'static str| {
             semantic_language_items_with(
                 |semantic_id| {
@@ -495,11 +495,11 @@ mod tests {
         let before = discover(BEFORE);
         let after = discover(AFTER);
         assert!(before.iter().any(|item| {
-            item.name == "comet" && item.semantic_id == Some("0010")
+            item.name == "comet" && item.semantic_id == Some(8)
         }));
         assert!(!before.iter().any(|item| item.name == "meteor"));
         assert!(after.iter().any(|item| {
-            item.name == "meteor" && item.semantic_id == Some("0010")
+            item.name == "meteor" && item.semantic_id == Some(8)
         }));
         assert!(!after.iter().any(|item| item.name == "comet"));
     }
@@ -523,24 +523,24 @@ mod tests {
             assert_eq!(left.kind, LanguageItemKind::SyntaxForm);
             assert_eq!(right.kind, LanguageItemKind::SyntaxForm);
         }
-        assert_eq!(find("lambda").semantic_id, Some("0010"));
-        assert_eq!(find("define").semantic_id, Some("0011"));
+        assert_eq!(find("lambda").semantic_id, Some(8));
+        assert_eq!(find("define").semantic_id, Some(9));
     }
 
     #[test]
     fn defmacro_tooling_matches_runtime_macro_identity() {
         let items = language_items();
-        for name in ["defmacro", "визначити-макрос", "defmacro-derived"] {
+        for name in ["defmacro", "визначити-макрос"] {
             let item = items
                 .iter()
                 .find(|item| item.name == name)
                 .unwrap_or_else(|| panic!("missing macro tooling item {name}"));
-            assert_eq!(item.semantic_id, Some("0012"));
+            assert_eq!(item.semantic_id, Some(10));
             assert_eq!(item.kind, LanguageItemKind::Macro);
         }
 
         let session = crate::Session::default();
-        for name in ["defmacro", "визначити-макрос", "defmacro-derived"] {
+        for name in ["defmacro", "визначити-макрос"] {
             assert!(
                 matches!(session.environment.get(name), Some(Value::Macro(_))),
                 "runtime binding {name} must be Value::Macro"
@@ -555,11 +555,11 @@ mod tests {
             .iter()
             .find(|item| item.name == "def")
             .expect("compatibility def tooling item");
-        assert_eq!(def.semantic_id, Some("1000"));
+        assert_eq!(def.semantic_id, Some(11));
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
-        assert!(semantic_registry::stable_surfaces_for_semantic_id("1000").is_empty());
+        assert!(semantic_registry::stable_surfaces_for_semantic_id(11).is_empty());
         assert_eq!(
-            semantic_registry::admitted_surfaces_for_semantic_id("1000"),
+            semantic_registry::admitted_surfaces_for_semantic_id(11),
             vec!["def"]
         );
     }

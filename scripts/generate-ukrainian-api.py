@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate the detailed Ukrainian API reference from numeric documentation + surface authority.
+"""Generate the detailed Ukrainian API reference from byte-SID documentation + surface authority.
 
-Behavior prose lives once in lib/surface/uk-docs.lisp, keyed by numeric semantic ID.
-Surface spellings/statuses come from lib/generated/function-table.lisp, itself a projection
+Behavior prose lives once in lib/surface/uk-docs.lisp, keyed by byte SID.
+Surface spellings come from lib/generated/function-table.lisp, itself a projection
 of lib/surface/semantic-registry.lisp. This script only joins those two projections.
 """
 
@@ -25,10 +25,10 @@ START = "## Повний довідник"
 END = "## Межа довідника"
 
 DOC_RE = re.compile(
-    r'^\s*\(doc\s+(\S+)\s+(\d+)\s+(\S+)\s+"((?:\\.|[^"\\])*)"\s+"((?:\\.|[^"\\])*)"\)\s*$'
+    r'^\s*\(doc\s+(\S+)\s+"([01]{8})"\s+(\S+)\s+"((?:\\.|[^"\\])*)"\s+"((?:\\.|[^"\\])*)"\)\s*$'
 )
-SURFACE_RE = re.compile(r"\((uk|ukr|en|sym)\s+(\S+)\s+(\S+)\)")
-ROW_RE = re.compile(r"^\s*\((\d+)\s")
+SURFACE_RE = re.compile(r"\((uk|ukr|en|sym)\s+(\(\)|[^\s)]+)\)")
+ROW_RE = re.compile(r'^\s*\("([01]{8})"\s')
 
 CATEGORY_TITLES = OrderedDict(
     [
@@ -75,7 +75,6 @@ class DocRow:
 @dataclass(frozen=True)
 class Surface:
     word: str
-    status: str
 
 
 def decode_string(raw: str) -> str:
@@ -113,7 +112,7 @@ def parse_docs_index() -> list[DocRow]:
     if len(rows) != 140:
         raise SystemExit(f"expected 140 documented stable uk identities, found {len(rows)}")
     if len(set(identities)) != len(identities):
-        raise SystemExit("documentation index contains duplicate numeric semantic IDs")
+        raise SystemExit("documentation index contains duplicate byte SIDs")
     return rows
 
 
@@ -125,8 +124,8 @@ def parse_function_table() -> dict[str, dict[str, Surface]]:
             continue
         identity = row_match.group(1)
         surfaces = {
-            namespace: Surface(word=word, status=status)
-            for namespace, word, status in SURFACE_RE.findall(line)
+            namespace: Surface(word=word.strip('"'))
+            for namespace, word in SURFACE_RE.findall(line)
         }
         result[identity] = surfaces
     return result
@@ -148,12 +147,12 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
     out = [
         "## Повний довідник `uk` / `ukr`",
         "",
-        "Нижче — згенерований join по **numeric semantic ID**. Опис поведінки береться один раз із `lib/surface/uk-docs.lisp`; `uk`, `ukr`, статус `ukr` та основа беруться з authoritative function-table projection. Ручне редагування рядків цієї секції буде перезаписано генератором.",
+        "Нижче — згенерований join по **byte SID**. Опис поведінки береться один раз із `lib/surface/uk-docs.lisp`; `uk`, `ukr` та основа беруться з authoritative function-table projection. Ручне редагування рядків цієї секції буде перезаписано генератором.",
         "",
     ]
 
-    header = "| semantic ID | `uk` | `ukr` | статус `ukr` | Виклик | Тип | Що робить | Основа |"
-    separator = "|---:|---|---|---|---|---|---|---|"
+    header = "| byte SID | `uk` | `ukr` | Виклик | Тип | Що робить | Основа |"
+    separator = "|---:|---|---|---|---|---|---|"
 
     for category, category_rows in grouped.items():
         if not category_rows:
@@ -167,12 +166,12 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
             ukr = surfaces.get("ukr")
             en = surfaces.get("en")
             sym = surfaces.get("sym")
-            if uk is None or uk.status != "stable" or uk.word == "—":
-                raise SystemExit(f"documented semantic ID {row.identity} has no stable uk surface")
-            if ukr is None:
+            if uk is None or uk.word == "()" or uk.word == "—":
+                raise SystemExit(f"documented semantic ID {row.identity} has no uk surface")
+            if ukr is None or ukr.word == "()" or ukr.word == "—":
                 raise SystemExit(f"function table missing ukr projection for {row.identity}")
-            basis = en.word if en is not None and en.word != "—" else (
-                sym.word if sym is not None and sym.word != "—" else "—"
+            basis = en.word if en is not None and en.word not in ("()", "—") else (
+                sym.word if sym is not None and sym.word not in ("()", "—") else "—"
             )
             out.append(
                 "| "
@@ -181,7 +180,6 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
                         code(row.identity),
                         code(uk.word),
                         code(ukr.word),
-                        ukr.status,
                         code(row.call),
                         KIND_UK[row.kind],
                         md_text(row.description),

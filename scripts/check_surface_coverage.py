@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Перевіряє, що runtime public names класифіковані numeric registry.
+"""Перевіряє, що runtime public names класифіковані byte-SID registry.
 
 Сире runtime inventory може містити історичні/host-oriented spellings. Воно не
 є semantic authority. Єдина authority — `semantic-registry.lisp`; кожна видима
-публічна назва повинна бути surface name деякої numeric identity.
+публічна назва повинна бути surface name деякої byte SID.
 """
 
 import re
@@ -14,16 +14,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY_FILE = REPO_ROOT / "lib" / "surface" / "semantic-registry.lisp"
 INVENTORY_FILE = REPO_ROOT / "lib" / "surface" / "uk-inventory.lisp"
 CORE_LIB = REPO_ROOT / "lib" / "core.lisp"
-SURFACE = re.compile(
-    r"\(([A-Za-z][A-Za-z0-9-]*)\s+([^\s()]+)\s+"
-    r"(stable|candidate|missing|compatibility-only)\)"
-)
+SURFACE = re.compile(r"\(([A-Za-z][A-Za-z0-9-]*)\s+(\(\)|[^\s()]+)\)")
 
 
 def extract_registry_names(path: Path) -> set[str]:
     names: set[str] = set()
-    for surface, name, _status in SURFACE.findall(path.read_text(encoding="utf-8")):
-        if name != "—":
+    for surface, name in SURFACE.findall(path.read_text(encoding="utf-8")):
+        if len(name) >= 2 and name[0] == name[-1] == '"':
+            name = name[1:-1]
+        if name not in ("—", "()"):
             names.add(name)
     return names
 
@@ -91,7 +90,7 @@ def main() -> int:
         print("Add them to lib/surface/semantic-registry.lisp with an explicit status.")
         return 1
 
-    print("OK: every eligible runtime name is classified by numeric semantic registry.")
+    print("OK: every eligible runtime name is classified by byte-SID semantic registry.")
     print(f"  Registry surface names: {len(registry_names)}")
     print(f"  Inventory names: {len(inventory_names)}")
     print(f"  Core public names: {len(core_names)}")

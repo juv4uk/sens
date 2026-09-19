@@ -1,7 +1,7 @@
 use my_lisp::{eval_program, semantic_registry_export, Session, Value};
 use std::rc::Rc;
 
-const ADD_SEMANTIC_ID: &str = "0104";
+const ADD_SEMANTIC_ID: u8 = 12;
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
 
@@ -28,7 +28,7 @@ fn admitted_add_surfaces_share_one_runtime_handle_before_surface_library_loads()
     let surfaces = add_surfaces();
     assert!(
         surfaces.len() >= 2,
-        "0104 must expose multiple admitted peer surfaces for this mechanism test"
+        "SID 00001100 must expose multiple admitted peer surfaces for this mechanism test"
     );
 
     let mut session = Session::default();
@@ -36,7 +36,7 @@ fn admitted_add_surfaces_share_one_runtime_handle_before_surface_library_loads()
 
     for (_, name) in &surfaces {
         let value = eval_program(name, &mut session)
-            .unwrap_or_else(|error| panic!("admitted 0104 surface is missing: {name}: {error}"))
+            .unwrap_or_else(|error| panic!("admitted SID 00001100 surface is missing: {name}: {error}"))
             .value;
         values.push((*name, value));
     }
@@ -113,7 +113,7 @@ fn human_surface_files_do_not_redefine_admitted_add_peers() {
         if let Some(source) = source {
             assert!(
                 !source.contains(&format!("(define {name} ")),
-                "admitted 0104 {namespace} surface {name} must be a direct runtime peer, not a surface-file alias"
+                "admitted SID 00001100 {namespace} surface {name} must be a direct runtime peer, not a surface-file alias"
             );
         }
     }

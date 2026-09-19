@@ -7,6 +7,7 @@
 
 use super::special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Span, Value};
+use crate::semantic_registry::SemanticId;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub(crate) enum CanonicalIdentity {
@@ -31,74 +32,76 @@ pub(crate) enum CanonicalKind {
 pub(crate) struct CanonEntry {
     pub identity: CanonicalIdentity,
     pub kind: CanonicalKind,
-    pub semantic_id: Option<&'static str>,
+    pub semantic_id: SemanticId,
 }
 
-pub(crate) const QUOTE_SEMANTIC_ID: &str = "0001";
-pub(crate) const ATOM_SEMANTIC_ID: &str = "0002";
-pub(crate) const EQ_SEMANTIC_ID: &str = "0003";
-pub(crate) const CONS_SEMANTIC_ID: &str = "0004";
-pub(crate) const CAR_SEMANTIC_ID: &str = "0005";
-pub(crate) const CDR_SEMANTIC_ID: &str = "0006";
-pub(crate) const COND_SEMANTIC_ID: &str = "0007";
+pub(crate) const EMPTY_LIST_SEMANTIC_ID: SemanticId = 0;
+pub(crate) const QUOTE_SEMANTIC_ID: SemanticId = 1;
+pub(crate) const ATOM_SEMANTIC_ID: SemanticId = 2;
+pub(crate) const EQ_SEMANTIC_ID: SemanticId = 3;
+pub(crate) const CONS_SEMANTIC_ID: SemanticId = 4;
+pub(crate) const CAR_SEMANTIC_ID: SemanticId = 5;
+pub(crate) const CDR_SEMANTIC_ID: SemanticId = 6;
+pub(crate) const COND_SEMANTIC_ID: SemanticId = 7;
 
-/// Canon 0 has no surface row: the empty list is the ground object itself.
-/// McCarthy7 meanings are keyed only by opaque numeric semantic IDs here.
+/// Canon 0 is SID 0 and is the empty-list ground object itself.
+/// McCarthy7 follow contiguously as SIDs 1..7.
 pub(crate) const CANON: [CanonEntry; 8] = [
     CanonEntry {
         identity: CanonicalIdentity::EmptyList,
         kind: CanonicalKind::GroundValue,
-        semantic_id: None,
+        semantic_id: EMPTY_LIST_SEMANTIC_ID,
     },
     CanonEntry {
         identity: CanonicalIdentity::Quote,
         kind: CanonicalKind::SpecialForm,
-        semantic_id: Some(QUOTE_SEMANTIC_ID),
+        semantic_id: QUOTE_SEMANTIC_ID,
     },
     CanonEntry {
         identity: CanonicalIdentity::Atom,
         kind: CanonicalKind::ValuePrimitive,
-        semantic_id: Some(ATOM_SEMANTIC_ID),
+        semantic_id: ATOM_SEMANTIC_ID,
     },
     CanonEntry {
         identity: CanonicalIdentity::Eq,
         kind: CanonicalKind::ValuePrimitive,
-        semantic_id: Some(EQ_SEMANTIC_ID),
+        semantic_id: EQ_SEMANTIC_ID,
     },
     CanonEntry {
         identity: CanonicalIdentity::Cons,
         kind: CanonicalKind::ValuePrimitive,
-        semantic_id: Some(CONS_SEMANTIC_ID),
+        semantic_id: CONS_SEMANTIC_ID,
     },
     CanonEntry {
         identity: CanonicalIdentity::Car,
         kind: CanonicalKind::ValuePrimitive,
-        semantic_id: Some(CAR_SEMANTIC_ID),
+        semantic_id: CAR_SEMANTIC_ID,
     },
     CanonEntry {
         identity: CanonicalIdentity::Cdr,
         kind: CanonicalKind::ValuePrimitive,
-        semantic_id: Some(CDR_SEMANTIC_ID),
+        semantic_id: CDR_SEMANTIC_ID,
     },
     CanonEntry {
         identity: CanonicalIdentity::Cond,
         kind: CanonicalKind::SpecialForm,
-        semantic_id: Some(COND_SEMANTIC_ID),
+        semantic_id: COND_SEMANTIC_ID,
     },
 ];
 
-fn identity_for_semantic_id(semantic_id: &str) -> Option<CanonicalIdentity> {
+fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<CanonicalIdentity> {
     CANON
         .iter()
-        .find(|entry| entry.semantic_id == Some(semantic_id))
+        .find(|entry| entry.semantic_id == semantic_id)
         .map(|entry| entry.identity)
 }
 
-fn semantic_id_for_identity(identity: CanonicalIdentity) -> Option<&'static str> {
+fn semantic_id_for_identity(identity: CanonicalIdentity) -> SemanticId {
     CANON
         .iter()
         .find(|entry| entry.identity == identity)
-        .and_then(|entry| entry.semantic_id)
+        .map(|entry| entry.semantic_id)
+        .expect("every Canon identity has one byte SID")
 }
 
 pub(crate) fn identity_for_surface(name: &str) -> Option<CanonicalIdentity> {
@@ -109,8 +112,8 @@ pub(crate) fn is_reserved_surface(name: &str) -> bool {
     identity_for_surface(name).is_some()
 }
 
-/// True for any admitted surface of `quote` specifically (semantic ID
-/// `0001`) — `quote`/`як-є`/`svarūpa`/`'`, not just the English spelling.
+/// True for any admitted surface of `quote` specifically (semantic ID 1) —
+/// `quote`/`як-є`/`svarūpa`/`'`, not just the English spelling.
 /// Exposed narrowly via `crate::is_quote_surface_name` for tooling that
 /// must distinguish "this list's head is quote" from "this list's head is
 /// some other Canon identity," per the same routing every surface already
@@ -164,7 +167,7 @@ fn exact_args(
 /// execution bridge from that identity to today's Rust mechanism; another
 /// backend may replace the projection without changing the value identity.
 pub(crate) fn invoke_semantic_ref(
-    semantic_id: &str,
+    semantic_id: SemanticId,
     args: &[Value],
     environment: &Environment,
     span: Span,
@@ -172,7 +175,7 @@ pub(crate) fn invoke_semantic_ref(
     let Some(identity) = identity_for_semantic_id(semantic_id) else {
         return Err(LanguageError::new(
             ErrorKind::Type,
-            format!("unknown semantic callable identity: {semantic_id}"),
+            format!("unknown semantic callable SID: {}", semantic_registry::semantic_id_bits(semantic_id)),
             span,
         ));
     };
@@ -201,7 +204,7 @@ pub(crate) fn invoke_semantic_ref(
         CanonicalIdentity::EmptyList | CanonicalIdentity::Quote | CanonicalIdentity::Cond => {
             Err(LanguageError::new(
                 ErrorKind::Type,
-                format!("semantic identity is not a callable value: {semantic_id}"),
+                format!("semantic identity is not a callable value: {}", semantic_registry::semantic_id_bits(semantic_id)),
                 span,
             ))
         }
@@ -217,7 +220,7 @@ pub(crate) fn value(identity: CanonicalIdentity) -> Option<Value> {
         | CanonicalIdentity::Eq
         | CanonicalIdentity::Cons
         | CanonicalIdentity::Car
-        | CanonicalIdentity::Cdr => semantic_id_for_identity(identity).map(Value::SemanticRef),
+        | CanonicalIdentity::Cdr => Some(Value::SemanticRef(semantic_id_for_identity(identity))),
         CanonicalIdentity::Quote | CanonicalIdentity::Cond => None,
     }
 }
@@ -235,7 +238,7 @@ mod tests {
         assert_eq!(CANON.len(), 8);
         assert_eq!(CANON[0].identity, CanonicalIdentity::EmptyList);
         assert_eq!(CANON[0].kind, CanonicalKind::GroundValue);
-        assert_eq!(CANON[0].semantic_id, None);
+        assert_eq!(CANON[0].semantic_id, EMPTY_LIST_SEMANTIC_ID);
     }
 
     #[test]
@@ -248,7 +251,7 @@ mod tests {
             identity_for_semantic_id(CAR_SEMANTIC_ID),
             Some(CanonicalIdentity::Car)
         );
-        assert_eq!(identity_for_semantic_id("0104"), None);
+        assert_eq!(identity_for_semantic_id(12), None);
     }
 
     #[test]
@@ -275,18 +278,18 @@ mod tests {
     #[test]
     fn numeric_canon_identity_is_the_runtime_value_identity() {
         assert_eq!(
-            identity_for_surface(CAR_SEMANTIC_ID),
+            identity_for_semantic_id(CAR_SEMANTIC_ID),
             Some(CanonicalIdentity::Car)
         );
         let human_surface = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID)
             .into_iter()
             .next()
-            .expect("0005 (car) should admit at least one human surface");
-        let numeric = value_for_surface(CAR_SEMANTIC_ID).expect("numeric Canon identity");
+            .expect("00000101 (car) should admit at least one human surface");
+        let direct = value(CanonicalIdentity::Car).expect("numeric Canon identity");
         let human = value_for_surface(human_surface).expect("registry-admitted Canon surface");
-        assert_eq!(numeric, Value::SemanticRef(CAR_SEMANTIC_ID));
+        assert_eq!(direct, Value::SemanticRef(CAR_SEMANTIC_ID));
         assert_eq!(human, Value::SemanticRef(CAR_SEMANTIC_ID));
-        assert_eq!(numeric, human);
+        assert_eq!(direct, human);
     }
 
     #[test]
@@ -309,7 +312,8 @@ mod tests {
 
     #[test]
     fn synthetic_registry_constructively_controls_canon_routing() {
-        const SYNTHETIC: &str = "(0001 (xx comet stable))\n(0005 (xx asteroid stable))";
+        const SYNTHETIC: &str =
+            "(sr/2\n  (\"00000000\" ())\n  (\"00000001\" (xx comet))\n  (\"00000101\" (xx asteroid))\n)";
         let index = semantic_registry::build_surface_index(SYNTHETIC);
         let route = |surface: &str| {
             index
@@ -326,7 +330,7 @@ mod tests {
 
     #[test]
     fn registry_rows_without_canon_meaning_do_not_become_canon() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some("0104"));
+        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(12));
         assert_eq!(identity_for_surface("+"), None);
     }
 

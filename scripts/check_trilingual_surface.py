@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Перевіряє рівноправність UK/EN/SA від numeric semantic authority.
+"""Перевіряє рівноправність UK/EN/SA від status-free byte-SID authority.
 
-Людські поверхні рахуються від semantic identities, а не від словника EN.
-`sym` є спільною немовною нотацією і не зараховується жодній людській мові.
+Кожна identity має фіксовані en/uk/ukr/sa/sym слоти.
+Слот містить spelling або (); окремої системи stable/candidate/missing немає.
 """
 
 from __future__ import annotations
@@ -14,19 +14,26 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = REPO_ROOT / "lib" / "surface" / "semantic-registry.lisp"
-ALLOWED_STATUSES = {"stable", "candidate", "missing", "compatibility-only"}
 HUMAN_SURFACES = ("uk", "en", "sa")
-ENTRY = re.compile(r"^\s*\(([0-9]{4,})\s+(.*)\)\s*$")
+ALL_SURFACES = ("en", "uk", "ukr", "sa", "sym")
+ENTRY = re.compile(r'^\s*\("([01]{8})"\s+(.*)\)\s*$')
 SURFACE = re.compile(
-    r"\(([A-Za-z][A-Za-z0-9-]*)\s+([^\s()]+)\s+"
-    r"(stable|candidate|missing|compatibility-only)\)"
+    r'\((en|uk|ukr|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)'
 )
 
 
 @dataclass(frozen=True)
 class Entry:
     identity: str
-    surfaces: dict[str, tuple[str, str]]
+    surfaces: dict[str, str | None]
+
+
+def decode_name(raw: str) -> str | None:
+    if raw == "()":
+        return None
+    if raw.startswith('"') and raw.endswith('"'):
+        return raw[1:-1]
+    return raw
 
 
 def parse_entries(source: str) -> list[Entry]:
@@ -37,90 +44,73 @@ def parse_entries(source: str) -> list[Entry]:
         if not match:
             continue
         identity, body = match.groups()
+        if identity == "00000000":
+            if body.strip() != "()":
+                raise ValueError("Canon 0 row must be exactly ground-only")
+            continue
         if identity in seen:
             raise ValueError(f"line {line_number}: duplicate semantic ID {identity}")
         seen.add(identity)
 
-        surfaces: dict[str, tuple[str, str]] = {}
         matches = list(SURFACE.finditer(body))
         residue = SURFACE.sub("", body).strip()
-        if not matches or residue:
+        if residue:
             raise ValueError(f"line {line_number}: malformed semantic entry {identity}")
+
+        surfaces: dict[str, str | None] = {}
         for item in matches:
-            language, name, status = item.groups()
+            language, raw_name = item.groups()
             if language in surfaces:
                 raise ValueError(f"line {line_number}: duplicate {language} in {identity}")
-            if status not in ALLOWED_STATUSES:
-                raise ValueError(f"{identity}/{language}: unknown status {status}")
-            surfaces[language] = (name, status)
-        missing = set(HUMAN_SURFACES) - surfaces.keys()
-        if missing:
-            raise ValueError(f"{identity}: missing explicit human surfaces {sorted(missing)}")
+            surfaces[language] = decode_name(raw_name)
+
+        if tuple(surfaces.keys()) != ALL_SURFACES:
+            raise ValueError(
+                f"{identity}: expected fixed surface order {ALL_SURFACES}, got {tuple(surfaces.keys())}"
+            )
         entries.append(Entry(identity, surfaces))
 
     if not entries:
-        raise ValueError("numeric semantic registry contains no entries")
+        raise ValueError("byte-SID semantic registry contains no entries")
     return entries
 
 
-def status(entry: Entry, language: str) -> str:
-    return entry.surfaces[language][1]
-
-
-def is_public(entry: Entry) -> bool:
-    # Нейтральний знаменник: identity є compatibility-only лише тоді, коли
-    # ВСІ людські поверхні явно кажуть compatibility-only.
-    return not all(status(entry, language) == "compatibility-only" for language in HUMAN_SURFACES)
-
-
-def counts(entries: list[Entry], language: str) -> dict[str, int]:
-    result = {item: 0 for item in ALLOWED_STATUSES}
-    for entry in entries:
-        result[status(entry, language)] += 1
-    return result
+def counts(entries: list[Entry], language: str) -> tuple[int, int]:
+    present = sum(entry.surfaces[language] is not None for entry in entries)
+    return present, len(entries) - present
 
 
 def is_release_complete(entries: list[Entry]) -> bool:
     return all(
-        all(status(entry, language) == "stable" for language in HUMAN_SURFACES)
+        all(entry.surfaces[language] is not None for language in HUMAN_SURFACES)
         for entry in entries
-        if is_public(entry)
     )
 
 
 def render_report(entries: list[Entry]) -> str:
-    public = [entry for entry in entries if is_public(entry)]
-    denominator = len(public)
-    by_language = {language: counts(entries, language) for language in HUMAN_SURFACES}
-    symbolic = sum("sym" in entry.surfaces for entry in entries)
-
+    denominator = len(entries)
+    symbolic = sum(entry.surfaces["sym"] is not None for entry in entries)
     lines = [
-        "Рівноправність людських поверхонь від numeric semantic authority",
-        f"public semantic identities: {denominator}",
+        "Рівноправність людських поверхонь від status-free byte-SID authority",
+        f"semantic identities: {denominator}",
         f"shared symbolic identities: {symbolic}",
         "",
-        "surface  stable  candidate  missing  compatibility  stable/public",
+        "surface  present  empty  present/total",
     ]
     for language in HUMAN_SURFACES:
-        current = by_language[language]
-        percent = 100.0 if denominator == 0 else 100.0 * current["stable"] / denominator
+        present, empty = counts(entries, language)
         lines.append(
-            f"{language.upper():<7}"
-            f"{current['stable']:>7}"
-            f"{current['candidate']:>11}"
-            f"{current['missing']:>9}"
-            f"{current['compatibility-only']:>15}"
-            f"{percent:>13.1f}%"
+            f"{language.upper():<7}{present:>7}{empty:>7}{present:>9}/{denominator}"
         )
 
-    common_stable = sum(
-        all(status(entry, language) == "stable" for language in HUMAN_SURFACES)
-        for entry in public
+    complete = sum(
+        all(entry.surfaces[language] is not None for language in HUMAN_SURFACES)
+        for entry in entries
     )
     lines.extend(
         [
             "",
-            f"trilingual stable identities: {common_stable}/{denominator}",
+            f"trilingual present identities: {complete}/{denominator}",
             f"release parity: {'CONFIRMED' if is_release_complete(entries) else 'OPEN'}",
         ]
     )
@@ -132,7 +122,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--require-complete",
         action="store_true",
-        help="fail until UK, EN and SA are stable for every public numeric identity",
+        help="fail until UK, EN and SA slots are non-empty for every byte SID",
     )
     return parser.parse_args()
 

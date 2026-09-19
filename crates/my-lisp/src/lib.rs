@@ -37,7 +37,7 @@ pub mod semantic_registry_export {
 
     /// Stable and compatibility-only spellings admitted for `semantic_id`,
     /// each tagged with which namespace (en/uk/sa/sym/...) it belongs to.
-    pub fn admitted_surfaces_for_semantic_id(semantic_id: &str) -> Vec<SurfaceRow> {
+    pub fn admitted_surfaces_for_semantic_id(semantic_id: u8) -> Vec<SurfaceRow> {
         super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
             .into_iter()
             .map(|(namespace, name)| SurfaceRow { namespace, name })
@@ -46,8 +46,13 @@ pub mod semantic_registry_export {
 
     /// Повертає opaque semantic ID для stable або compatibility-only surface.
     /// Значення операції лишається у мовному контракті, не в цій проєкції.
-    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<&'static str> {
+    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<u8> {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
+    }
+
+    /// Canonical 8-bit textual serialization for provenance/export.
+    pub fn semantic_id_bits(semantic_id: u8) -> String {
+        super::semantic_registry::semantic_id_bits(semantic_id)
     }
 }
 pub mod syntax;
@@ -81,8 +86,8 @@ pub use syntax::fasl::{
 /// no human surface name; `load_macro_library` installs peer spellings onto
 /// that same value after evaluation.
 pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
-const DEFMACRO_SEMANTIC_ID: &str = "0012";
-const LAMBDA_SEMANTIC_ID: &str = "0010";
+const DEFMACRO_SEMANTIC_ID: u8 = 10;
+const LAMBDA_SEMANTIC_ID: u8 = 8;
 
 /// The ordinary my-lisp bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
@@ -148,7 +153,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
     if admitted.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
-            "semantic registry must admit at least one macro-definition surface for 0012",
+            "semantic registry must admit at least one macro-definition surface for SID 10",
             Span { start: 0, end: 0 },
         ));
     }
@@ -261,7 +266,7 @@ pub fn is_canonical_surface_name(name: &str) -> bool {
 }
 
 /// Public hook for tooling that must recognize `quote`'s specific identity
-/// (semantic ID `0001`) across every admitted surface (`quote`/`як-є`/
+/// (byte SID 1) across every admitted surface (`quote`/`як-є`/
 /// `svarūpa`/`'`), not just the English spelling. Added after a real bug
 /// was found in `crates/my-lisp-lsp/src/analysis.rs`'s own quoted-data
 /// detection: it matched only the literal ASCII string `"quote"`, so a
@@ -275,11 +280,12 @@ pub fn is_quote_surface_name(name: &str) -> bool {
     eval::canon::is_quote_identity(name)
 }
 
-/// True for any admitted surface of `define`/`def` (semantic IDs `0011` and `1000`).
+/// True for any admitted surface of `define`/`def` (byte SIDs 9 and 11).
 pub fn is_define_surface_name(name: &str) -> bool {
     matches!(
         semantic_registry::admitted_semantic_id_for_surface(name),
-        Some("0011" | "1000")
+        Some(crate::eval::necessary_forms::DEFINE_SEMANTIC_ID
+            | crate::eval::necessary_forms::DEF_COMPATIBILITY_SEMANTIC_ID)
     )
 }
 

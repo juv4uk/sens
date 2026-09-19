@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Перекладає my-lisp між людськими поверхнями через numeric identities.
+"""Перекладає my-lisp між людськими поверхнями через byte SIDs.
 
 Джерело словника — `lib/surface/semantic-registry.lisp`. Жодна людська мова не
 є мостом до іншої. `sym` — спільна немовна нотація, а `compat` — службовий
@@ -15,32 +15,54 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = REPO_ROOT / "lib" / "surface" / "semantic-registry.lisp"
-ENTRY = re.compile(r"^\s*\(([0-9]{4,})\s+(.*)\)\s*$")
-SURFACE = re.compile(
-    r"\(([A-Za-z][A-Za-z0-9-]*)\s+([^\s()]+)\s+"
-    r"(stable|candidate|missing|compatibility-only)\)"
-)
+ENTRY = re.compile(r'^\s*\("([01]{8})"\s+(.*)\)\s*$')
+SURFACE = re.compile(r"\(([A-Za-z][A-Za-z0-9-]*)\s+(\(\)|[^\s()]+)\)")
 NON_HUMAN = {"sym", "compat"}
 
 
-def registry_rows() -> list[dict[str, tuple[str, str]]]:
+def decode_surface_token(token: str) -> str:
+    if len(token) >= 2 and token[0] == token[-1] == '"':
+        return token[1:-1]
+    return token
+
+
+def registry_rows() -> list[dict[str, str]]:
     rows = []
-    for line in REGISTRY.read_text(encoding="utf-8").splitlines():
+    for line_number, line in enumerate(
+        REGISTRY.read_text(encoding="utf-8").splitlines(), 1
+    ):
         match = ENTRY.match(line)
         if not match:
             continue
-        _identity, body = match.groups()
-        surfaces = {
-            language: (name, status)
-            for language, name, status in SURFACE.findall(body)
-        }
+        identity, body = match.groups()
+        if identity == "00000000":
+            continue
+
+        matches = list(SURFACE.finditer(body))
+        residue = SURFACE.sub("", body).strip()
+        if not matches or residue:
+            raise ValueError(
+                f"line {line_number}: malformed sr/2 row for SID {identity}"
+            )
+
+        surfaces: dict[str, str] = {}
+        for surface in matches:
+            language, raw_name = surface.groups()
+            name = decode_surface_token(raw_name)
+            if language in surfaces:
+                raise ValueError(
+                    f"line {line_number}: duplicate {language} surface for {identity}"
+                )
+            if name not in ("()", "—"):
+                surfaces[language] = name
         rows.append(surfaces)
+
     if not rows:
-        raise ValueError("numeric semantic registry has no entries")
+        raise ValueError("byte-SID semantic registry has no entries")
     return rows
 
 
-def human_languages(rows: list[dict[str, tuple[str, str]]]) -> set[str]:
+def human_languages(rows: list[dict[str, str]]) -> set[str]:
     return {
         language
         for row in rows
@@ -52,18 +74,9 @@ def human_languages(rows: list[dict[str, tuple[str, str]]]) -> set[str]:
 def translation_map(source_language: str, target_language: str) -> dict[str, str]:
     translations: dict[str, str] = {}
     for row in registry_rows():
-        source = row.get(source_language)
-        target = row.get(target_language)
-        if source is None or target is None:
-            continue
-        source_name, source_status = source
-        target_name, target_status = target
-        if (
-            source_name == "—"
-            or target_name == "—"
-            or source_status in {"missing", "compatibility-only"}
-            or target_status in {"missing", "compatibility-only"}
-        ):
+        source_name = row.get(source_language)
+        target_name = row.get(target_language)
+        if source_name is None or target_name is None:
             continue
         previous = translations.get(source_name)
         if previous is not None and previous != target_name:
@@ -137,7 +150,9 @@ def main() -> int:
         languages = human_languages(rows)
         unknown = {args.source_language, args.target_language} - languages
         if unknown:
-            raise ValueError("unknown human surface(s): " + ", ".join(sorted(unknown)))
+            raise ValueError(
+                "unknown human surface(s): " + ", ".join(sorted(unknown))
+            )
         if args.source_language == args.target_language:
             raise ValueError("source and target surfaces must differ")
         translations = translation_map(args.source_language, args.target_language)

@@ -11,19 +11,15 @@ fn eval_with_derived_macros(source: &str) -> String {
         .to_string()
 }
 
-fn assert_same_macro_value(values: [Value; 3]) {
-    match (&values[0], &values[1], &values[2]) {
-        (Value::Macro(defmacro), Value::Macro(uk), Value::Macro(compat)) => {
+fn assert_same_macro_value(values: [Value; 2]) {
+    match (&values[0], &values[1]) {
+        (Value::Macro(defmacro), Value::Macro(uk)) => {
             assert!(
                 Rc::ptr_eq(defmacro, uk),
                 "defmacro and визначити-макрос must share one Macro value"
             );
-            assert!(
-                Rc::ptr_eq(defmacro, compat),
-                "defmacro-derived must point to the same compatibility value"
-            );
         }
-        other => panic!("expected three Macro bindings, got {other:?}"),
+        other => panic!("expected two Macro bindings, got {other:?}"),
     }
 }
 
@@ -39,36 +35,32 @@ fn default_session_binds_all_defmacro_peers_to_one_value() {
             .environment
             .get("визначити-макрос")
             .expect("default session must bind визначити-макрос"),
-        session
-            .environment
-            .get("defmacro-derived")
-            .expect("default session must retain defmacro-derived"),
     ]);
 }
 
 #[test]
-fn macro_peer_admission_is_recorded_under_identity_0012_without_binding_the_machine_id() {
+fn macro_peer_admission_is_recorded_under_identity_00001010_without_binding_the_machine_id() {
     let row = REGISTRY
         .lines()
-        .find(|line| line.trim_start().starts_with("(0012 "))
-        .expect("semantic identity 0012 must remain present");
+        .find(|line| line.trim_start().starts_with("(\"00001010\" "))
+        .expect("semantic identity 00001010 must remain present");
 
     for expected in [
-        "(en defmacro stable)",
-        "(uk визначити-макрос stable)",
-        "(ukr визначити-макрос stable)",
-        "(sa — missing)",
-        "(compat defmacro-derived compatibility-only)",
+        "(en defmacro)",
+        "(uk визначити-макрос)",
+        "(ukr визначити-макрос)",
+        "(sa ())",
+        "(sym ())",
     ] {
         assert!(
             row.contains(expected),
-            "identity 0012 must preserve peer admission component {expected}: {row}"
+            "identity 00001010 must preserve peer admission component {expected}: {row}"
         );
     }
 
     let session = Session::default();
     assert!(
-        session.environment.get("0012").is_none(),
+        session.environment.get("00001010").is_none(),
         "opaque semantic IDs must never become ordinary lexical bindings"
     );
 }
@@ -78,7 +70,6 @@ fn bare_root_gains_peer_bindings_only_through_macro_loader() {
     let environment = Environment::root();
     assert!(environment.get("defmacro").is_none());
     assert!(environment.get("визначити-макрос").is_none());
-    assert!(environment.get("defmacro-derived").is_none());
 
     let mut session = Session { environment };
     let loaded = load_macro_library(&mut session).expect("macro library should bootstrap");
@@ -95,12 +86,8 @@ fn bare_root_gains_peer_bindings_only_through_macro_loader() {
         .environment
         .get("визначити-макрос")
         .expect("loader must bind визначити-макрос");
-    let compat = session
-        .environment
-        .get("defmacro-derived")
-        .expect("loader must bind defmacro-derived");
 
-    assert_same_macro_value([defmacro.clone(), uk, compat]);
+    assert_same_macro_value([defmacro.clone(), uk]);
     match &defmacro {
         Value::Macro(bound) => assert!(
             Rc::ptr_eq(loaded_macro, bound),
@@ -160,15 +147,4 @@ fn language_owned_defmacro_can_build_control_flow() {
         "#,
     );
     assert_eq!(value, "success");
-}
-
-#[test]
-fn transitional_defmacro_derived_name_still_works() {
-    let value = eval_with_derived_macros(
-        r#"
-        (defmacro-derived identity-old (x) x)
-        (identity-old 7)
-        "#,
-    );
-    assert_eq!(value, "7");
 }

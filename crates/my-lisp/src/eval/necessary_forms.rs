@@ -4,7 +4,7 @@
 //! This module owns only the mapping from opaque numeric semantic IDs to the
 //! evaluator mechanisms for DEFINE and LAMBDA.
 
-use crate::semantic_registry;
+use crate::semantic_registry::{self, SemanticId};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum NecessaryFormIdentity {
@@ -12,14 +12,14 @@ pub(crate) enum NecessaryFormIdentity {
     Lambda,
 }
 
-pub(crate) const LAMBDA_SEMANTIC_ID: &str = "0010";
-pub(crate) const DEFINE_SEMANTIC_ID: &str = "0011";
+pub(crate) const LAMBDA_SEMANTIC_ID: SemanticId = 8;
+pub(crate) const DEFINE_SEMANTIC_ID: SemanticId = 9;
 /// `def` -- a compatibility-only spelling for the same Define meaning as
 /// `define`/`визначити`, under its own semantic ID in
 /// `lib/surface/semantic-registry.wsm` rather than sharing 0011's row.
-pub(crate) const DEF_COMPATIBILITY_SEMANTIC_ID: &str = "1000";
+pub(crate) const DEF_COMPATIBILITY_SEMANTIC_ID: SemanticId = 11;
 
-fn identity_for_semantic_id(semantic_id: &str) -> Option<NecessaryFormIdentity> {
+fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<NecessaryFormIdentity> {
     match semantic_id {
         DEFINE_SEMANTIC_ID | DEF_COMPATIBILITY_SEMANTIC_ID => Some(NecessaryFormIdentity::Define),
         LAMBDA_SEMANTIC_ID => Some(NecessaryFormIdentity::Lambda),
@@ -44,15 +44,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn necessary_forms_are_selected_by_numeric_semantic_identity() {
-        assert_eq!(
-            identity_for_symbol(DEFINE_SEMANTIC_ID),
-            Some(NecessaryFormIdentity::Define)
-        );
-        assert_eq!(
-            identity_for_symbol(LAMBDA_SEMANTIC_ID),
-            Some(NecessaryFormIdentity::Lambda)
-        );
+    fn byte_sid_is_not_a_surface_spelling() {
+        assert_eq!(identity_for_symbol("00001001"), None);
+        assert_eq!(identity_for_symbol("0000SID 11"), None);
+        assert_eq!(identity_for_semantic_id(DEFINE_SEMANTIC_ID), Some(NecessaryFormIdentity::Define));
+        assert_eq!(identity_for_semantic_id(LAMBDA_SEMANTIC_ID), Some(NecessaryFormIdentity::Lambda));
     }
 
     #[test]
@@ -61,7 +57,7 @@ mod tests {
         // функція/lambda, ...) is a semantic-registry FACT, not Rust
         // knowledge to enumerate here -- this test asserts only the
         // implementation invariant: whatever surfaces the registry admits
-        // for 0011/0010 all route through this same numeric-ID dispatch,
+        // for SIDs 9/8 all route through this same numeric-ID dispatch,
         // regardless of which language they're spelled in.
         for (semantic_id, identity) in [
             (DEFINE_SEMANTIC_ID, NecessaryFormIdentity::Define),
@@ -86,7 +82,7 @@ mod tests {
 
     #[test]
     fn compatibility_only_def_still_resolves_to_define_through_the_registry() {
-        // `def`'s row (1000) is compatibility-only, not stable -- this is
+        // `def`'s row (SID 11) is compatibility-only, not stable -- this is
         // the fact that used to make dispatch fall back to a hardcoded
         // `"def"` literal in eval/mod.rs and a matching one in ir.rs,
         // because the stable-only surface index cannot see it. Both were
@@ -106,14 +102,15 @@ mod tests {
 
     #[test]
     fn non_stable_or_unrelated_spellings_do_not_gain_necessary_form_identity() {
-        assert_eq!(identity_for_symbol("#0010"), None);
-        assert_eq!(identity_for_symbol("id0010"), None);
+        assert_eq!(identity_for_symbol("00001000"), None);
+        assert_eq!(identity_for_symbol("id00001000"), None);
         assert_eq!(identity_for_symbol("quote"), None);
     }
 
     #[test]
     fn synthetic_registry_constructively_controls_necessary_form_routing() {
-        const SYNTHETIC: &str = "(0010 (xx comet stable))\n(0011 (xx asteroid stable))";
+        const SYNTHETIC: &str =
+            "(sr/2\n  (\"00000000\" ())\n  (\"00001000\" (xx comet))\n  (\"00001001\" (xx asteroid))\n)";
         let index = semantic_registry::build_surface_index(SYNTHETIC);
 
         let route = |surface: &str| {
@@ -131,7 +128,7 @@ mod tests {
 
     #[test]
     fn unrelated_registry_rows_do_not_gain_necessary_form_meaning() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some("0104"));
+        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(12));
         assert_eq!(identity_for_symbol("+"), None);
     }
 }

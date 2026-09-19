@@ -9,7 +9,7 @@
   (lowering-owner lib/machine/lowering/semantic-x86-64.lisp)
   (machine-witness crates/my-lisp-host/tests/native_lisp_bytes.rs)
   (reverse-edge forbidden)
-  (independent-semantic-witness (lisp-owned-expression 0104))
+  (independent-semantic-witness (lisp-owned-expression "00001100"))
   (representation-witness tests/fixtures/machine-representation-independence-witness.lisp))
 
 (capability-provenance
@@ -19,7 +19,7 @@
   (lowering-owner lib/machine/lowering/semantic-x86-64.lisp)
   (machine-witness crates/my-lisp-host/tests/native_cond_profile.rs)
   (reverse-edge forbidden)
-  (independent-semantic-witness (lisp-owned-expression 0003 0007))
+  (independent-semantic-witness (lisp-owned-expression "00000011" 00000111))
   (representation-witness not-yet-required))
 
 (capability-provenance
@@ -29,5 +29,5 @@
   (lowering-owner lib/machine/lowering/semantic-x86-64.lisp)
   (machine-witness crates/my-lisp-host/tests/native_lisp_bytes.rs)
   (reverse-edge forbidden)
-  (independent-semantic-witness (lisp-owned-expression 0004 0005))
+  (independent-semantic-witness (lisp-owned-expression "00000100" 00000101))
   (representation-witness crates/my-lisp-host/tests/native_guest_abi.rs))

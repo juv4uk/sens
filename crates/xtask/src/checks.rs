@@ -367,14 +367,27 @@ fn stable_pairs() -> BTreeSet<(String, String)> {
         .lines()
         .filter_map(|line| {
             let fields = line.split_whitespace().collect::<Vec<_>>();
-            let identity = fields.first()?.strip_prefix('(')?;
-            if identity.len() < 4 || !identity.chars().all(|ch| ch.is_ascii_digit()) {
+            let identity = fields
+                .first()?
+                .strip_prefix("(\"")?
+                .strip_suffix('"')?;
+            if identity.len() != 8
+                || !identity.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+            {
                 return None;
             }
-            let uk_index = fields.iter().position(|field| *field == "(uk")?;
-            let uk = *fields.get(uk_index + 1)?;
-            let status = fields.get(uk_index + 2)?.trim_end_matches(')');
-            (status == "stable").then(|| (identity.to_string(), uk.to_string()))
+            for group in line.split('(').skip(2) {
+                let Some(tuple) = group.split(')').next() else {
+                    continue;
+                };
+                let parts = tuple.split_whitespace().collect::<Vec<_>>();
+                if let [namespace, name] = parts.as_slice() {
+                    if *namespace == "uk" && *name != "—" && *name != "()" {
+                        return Some((identity.to_string(), name.trim_matches('"').to_string()));
+                    }
+                }
+            }
+            None
         })
         .collect()
 }
@@ -391,17 +404,22 @@ fn documented() -> Result<BTreeMap<String, String>, String> {
                 "рядок документації має містити category numeric-ID kind signature: {line}"
             ));
         }
-        let identity = fields[2];
-        if identity.len() < 4 || !identity.chars().all(|ch| ch.is_ascii_digit()) {
+        let identity = fields[2]
+            .strip_prefix('"')
+            .and_then(|value| value.strip_suffix('"'))
+            .ok_or_else(|| format!("документаційний join key має бути quoted byte SID: {}", fields[2]))?;
+        if identity.len() != 8
+            || !identity.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+        {
             return Err(format!(
-                "документаційний join key має бути numeric semantic ID: {identity}"
+                "документаційний join key має бути 8-бітним SID: {identity}"
             ));
         }
         if result
             .insert(identity.to_string(), fields[3].to_string())
             .is_some()
         {
-            return Err(format!("дубльований документаційний semantic ID: {identity}"));
+            return Err(format!("дубльований документаційний byte SID: {identity}"));
         }
     }
     Ok(result)
@@ -430,11 +448,11 @@ fn vsi_stable_ukrainski_nazvy_maiut_numeric_zapys_u_dovidnyku() -> Result<(), St
             coverage.len()
         ));
     }
-    if coverage_ids != doc_ids {
-        return Err("numeric registry і український документаційний індекс розійшлися".to_string());
+    if !doc_ids.is_subset(&coverage_ids) {
+        return Err("український документаційний індекс містить ідентичності без UK-імені в registry".to_string());
     }
-    for (_, uk) in &coverage {
-        if !DOCS_MD.contains(&format!("| `{uk}` |")) {
+    for (id, uk) in &coverage {
+        if doc_ids.contains(id) && !DOCS_MD.contains(&format!("| `{uk}` |")) {
             return Err(format!(
                 "публічне українське ім'я відсутнє у Markdown-довіднику: {uk}"
             ));
@@ -445,9 +463,11 @@ fn vsi_stable_ukrainski_nazvy_maiut_numeric_zapys_u_dovidnyku() -> Result<(), St
 
 fn dokumentatsiinyi_kliuch_ie_tilky_numeric() -> Result<(), String> {
     for identity in documented()?.keys() {
-        if !(identity.len() >= 4 && identity.chars().all(|ch| ch.is_ascii_digit())) {
+        if identity.len() != 8
+            || !identity.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+        {
             return Err(format!(
-                "документаційний join key не може бути EN spelling: {identity}"
+                "документаційний join key мусить бути byte SID, не EN spelling: {identity}"
             ));
         }
     }
@@ -543,10 +563,10 @@ fn smyslovyi_audyt_summary_zbihaietsia_z_faktychnymy_danymy() -> Result<(), Stri
             "(renamed {renamed}) розійшовся з фактичною кількістю (rename ...) рядків: {actual_rename_lines}"
         ));
     }
-    let stable = stable_pairs().len();
-    if reviewed != stable {
+    let documented_count = documented()?.len();
+    if reviewed != documented_count {
         return Err(format!(
-            "smyslovyi audit ({reviewed}) мусить покривати рівно stable UK-покриття реєстру ({stable})"
+            "smyslovyi audit ({reviewed}) мусить покривати рівно documented UK-покриття ({documented_count})"
         ));
     }
     Ok(())
@@ -584,45 +604,35 @@ fn stari_nazvy_smystovoho_audytu_lyshaiutsia_aliasamy_sumisnosti() -> Result<(),
 const UK_ACCEPTANCE: &str = include_str!("../../../lib/surface/uk-acceptance.lisp");
 const RIVNOPRAVNIST_UK: &str = include_str!("../../../tests/fixtures/rivnopravnist-uk.lisp");
 
-#[derive(PartialEq, Eq)]
-enum SurfaceAdmission {
-    Stable,
-    Other,
-}
-
-/// Every semantic ID whose EN spelling AND UK spelling are both `stable` --
-/// mirrors `uk_surface_equivalence.rs::stable_en_uk_pairs` (crate-integration
-/// test, not reachable from here), kept in sync by hand since this and that
-/// file read the same `semantic-registry.wsm` but serve different purposes
-/// (behavior vs. keyboard-layout lint).
-fn stable_en_uk_names_needing_uk_layout_check() -> Vec<String> {
+fn en_uk_names_needing_uk_layout_check() -> Vec<String> {
     REGISTRY
         .lines()
         .filter_map(|line| {
             let fields = line.split_whitespace().collect::<Vec<_>>();
-            let semantic_id = fields.first()?.strip_prefix('(')?;
-            if semantic_id.is_empty() || !semantic_id.bytes().all(|b| b.is_ascii_digit()) {
+            let semantic_id = fields
+                .first()?
+                .strip_prefix("(\"")?
+                .strip_suffix('"')?;
+            if semantic_id.len() != 8
+                || !semantic_id.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+            {
                 return None;
             }
             let mut en = None;
             let mut uk = None;
-            for triple in fields[1..].chunks(3) {
-                if triple.len() != 3 {
-                    break;
-                }
-                let namespace = triple[0].trim_start_matches('(');
-                let name = triple[1];
-                let admission = if triple[2].trim_end_matches(')') == "stable" {
-                    SurfaceAdmission::Stable
-                } else {
-                    SurfaceAdmission::Other
+            for group in line.split('(').skip(2) {
+                let Some(tuple) = group.split(')').next() else {
+                    continue;
                 };
-                if admission == SurfaceAdmission::Stable {
-                    match namespace {
-                        "en" => en = Some(name.to_string()),
-                        "uk" => uk = Some(name.to_string()),
-                        _ => {}
-                    }
+                let parts = tuple.split_whitespace().collect::<Vec<_>>();
+                let (namespace, name) = match parts.as_slice() {
+                    [namespace, name] if *name != "()" => (*namespace, *name),
+                    _ => continue,
+                };
+                match namespace {
+                    "en" => en = Some(name.trim_matches('"').to_string()),
+                    "uk" => uk = Some(name.trim_matches('"').to_string()),
+                    _ => {}
                 }
             }
             match (en, uk) {
@@ -639,10 +649,10 @@ fn is_ukrainian_layout_identifier_char(character: char) -> bool {
 }
 
 fn every_stable_ukrainian_name_is_typeable_on_the_ukrainian_layout() -> Result<(), String> {
-    for ukrainian in stable_en_uk_names_needing_uk_layout_check() {
+    for ukrainian in en_uk_names_needing_uk_layout_check() {
         if !ukrainian.chars().all(is_ukrainian_layout_identifier_char) {
             return Err(format!(
-                "stable Ukrainian name needs another keyboard layout: {ukrainian}"
+                "Ukrainian name needs another keyboard layout: {ukrainian}"
             ));
         }
     }

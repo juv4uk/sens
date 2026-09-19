@@ -383,7 +383,7 @@ fn peer_surface_witness_reads_semantic_registry_instead_of_copying_surface_truth
     .expect("generated semantic registry");
     load_witness_library(&mut session);
 
-    for semantic_id in ["0001", "0004", "0005", "0006"] {
+    for semantic_id in ["00000001", "00000100", "00000101", "00000110"] {
         let verdict = eval_program(
             &format!("(witness-peer-surface-verdict \"{semantic_id}\")"),
             &mut session,

@@ -114,102 +114,102 @@
                   (quote result-form)
                   (quote empty-list))
                 (answer-contract-witness-expect
-                  "0004"
+                  "00000100"
                   (quote domain-owner)
                   (quote structure))
                 (answer-contract-witness-expect
-                  "0004"
+                  "00000100"
                   (quote result-form)
                   (quote pair))
                 (answer-contract-witness-expect
-                  "0002"
+                  "00000010"
                   (quote domain-owner)
                   (quote structural-observation))
                 (answer-contract-witness-expect
-                  "0002"
+                  "00000010"
                   (quote result-form)
                   (quote structural-kind))
                 (answer-contract-witness-expect
-                  "0002"
+                  "00000010"
                   (quote result-values)
                   (quote ((structural-kind empty-list)
                           (structural-kind pair)
                           (structural-kind atom))))
                 (answer-contract-witness-expect
-                  "0002"
+                  "00000010"
                   (quote no-answer)
                   (quote not-applicable))
                 (answer-contract-witness-expect
-                  "0003"
+                  "00000011"
                   (quote domain-owner)
                   (quote structural-observation))
                 (answer-contract-witness-expect
-                  "0003"
+                  "00000011"
                   (quote input-domain)
                   (quote (atom atom)))
                 (answer-contract-witness-expect
-                  "0003"
+                  "00000011"
                   (quote result-form)
                   (quote identity-relation))
                 (answer-contract-witness-expect
-                  "0003"
+                  "00000011"
                   (quote result-values)
                   (quote ((identity-relation same)
                           (identity-relation distinct))))
                 (answer-contract-witness-expect
-                  "0003"
+                  "00000011"
                   (quote outside-domain)
                   (quote type-error))
                 (answer-contract-witness-expect
-                  "0003"
+                  "00000011"
                   (quote no-answer)
                   (quote not-applicable))
                 (answer-contract-witness-expect
-                  "1014"
+                  "00011010"
                   (quote domain-owner)
                   (quote exact-q-decision))
                 (answer-contract-witness-expect
-                  "1014"
+                  "00011010"
                   (quote binary-values)
                   (quote ("0/1" "1/1")))
                 (answer-contract-witness-expect
-                  "1014"
+                  "00011010"
                   (quote outside-domain)
                   (quote delegate))
                 (answer-contract-witness-expect
-                  "1014"
+                  "00011010"
                   (quote unspecialized-result)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "0104"
+                  "00001100"
                   (quote domain-owner)
                   (quote mathematical-result))
                 (answer-contract-witness-expect
-                  "0104"
+                  "00001100"
                   (quote unspecialized-result)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "1118"
+                  "10000101"
                   (quote domain-owner)
                   (quote non-mathematical-reasoning))
                 (answer-contract-witness-expect
-                  "1118"
+                  "10000101"
                   (quote unspecialized-result)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "1118"
+                  "10000101"
                   (quote no-answer)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "0007"
+                  "00000111"
                   (quote domain-owner)
                   (quote control-consumer))
                 (answer-contract-witness-expect
-                  "0007"
+                  "00000111"
                   (quote unspecialized-result)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "0007"
+                  "00000111"
                   (quote generic-value-coercion)
                   (quote forbidden))
 

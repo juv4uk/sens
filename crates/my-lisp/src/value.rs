@@ -457,9 +457,9 @@ pub enum Value {
     Pair(Rc<Value>, Rc<Value>),
     Closure(Rc<Closure>),
     Macro(Rc<Closure>),
-    /// Opaque numeric semantic identity as a first-class callable value.
+    /// Opaque one-byte semantic identity as a first-class callable value.
     /// The identity belongs to the language registry, not to a Rust object.
-    SemanticRef(&'static str),
+    SemanticRef(u8),
     /// Legacy host implementation closure as a first-class value. This is an
     /// implementation projection, never the language identity key.
     Builtin(std::rc::Rc<Builtin>),

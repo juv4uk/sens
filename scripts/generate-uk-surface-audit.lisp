@@ -22,15 +22,6 @@
 (def str+
   (lambda args (reduce (lambda (acc s) (string-append acc s)) "" args)))
 
-(def pad4
-  (lambda (n)
-    (let ((s (number->string n)))
-      (cond
-        ((eq (string-length s) 1) (string-append "000" s))
-        ((eq (string-length s) 2) (string-append "00" s))
-        ((eq (string-length s) 3) (string-append "0" s))
-        (t s)))))
-
 (def second (lambda (xs) (car (cdr xs))))
 (def third (lambda (xs) (car (cdr (cdr xs)))))
 (def fourth (lambda (xs) (car (cdr (cdr (cdr xs))))))
@@ -49,7 +40,7 @@
 (def join-newline (lambda (strings) (join-newline-onto strings "")))
 
 ; Function-table rows have the generated schema:
-; (id formal (uk word status) (full-uk word status) (en word status)
+; (sid-bitstring formal (uk word status) (full-uk word status) (en word status)
 ;     (sa word status) (sym word status) primary-status authority)
 (def ft-form (car (read-all (read-file "lib/generated/function-table.lisp"))))
 (def ft-rows (cdr ft-form))
@@ -75,7 +66,7 @@
   (lambda (sid rows)
     (cond
       ((atom rows) (quote ()))
-      ((eq (car (car rows)) sid) (car rows))
+      ((equal? (car (car rows)) sid) (car rows))
       (t (find-candidate-row sid (cdr rows))))))
 
 (def surface-word (lambda (surface) (second surface)))
@@ -133,7 +124,7 @@
            (candidate-status (candidate-evidence-status candidate))
            (ambiguity (ambiguity-status candidate)))
       (str+
-        "  (row " (pad4 sid)
+        "  (row " (write-to-string sid)
         " (current-uk " (write-to-string (surface-word uk)) " "
                          (write-to-string (surface-status uk)) ")"
         " (authoritative-full-uk " (write-to-string (surface-word full-authority)) " "
@@ -188,7 +179,7 @@
     "; Generator: scripts/generate-uk-surface-audit.lisp (my-lisp#85)"
     "; candidate-full-uk is NOT automatically promoted into authoritative full-uk"
     ""
-    "(uk-surface-audit/1"
+    "(uk-surface-audit/2"
     (str+ "  (summary (total " (number->string total) ")"
           " (full " (number->string full-count) ")"
           " (already-compact 0)"
