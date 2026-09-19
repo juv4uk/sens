@@ -81,17 +81,13 @@ mod tests {
     }
 
     #[test]
-    fn compatibility_only_def_still_resolves_to_define_through_the_registry() {
-        // `def`'s row (SID 11) is compatibility-only, not stable -- this is
-        // the fact that used to make dispatch fall back to a hardcoded
-        // `"def"` literal in eval/mod.rs and a matching one in ir.rs,
-        // because the stable-only surface index cannot see it. Both were
-        // removed once identity_for_symbol started using the admitted
-        // (stable-or-compatibility-only) index instead.
+    fn def_resolves_to_define_through_status_free_registry() {
+        // Status-free sr/2 has no compatibility-only admission class.
+        // A present spelling is directly routable; SID 11 still maps to the
+        // compatibility `def` form without any hardcoded spelling fallback.
         assert_eq!(
             semantic_registry::semantic_id_for_surface("def"),
-            None,
-            "def's row is deliberately compatibility-only, not stable"
+            Some(DEF_COMPATIBILITY_SEMANTIC_ID)
         );
         assert_eq!(
             semantic_registry::admitted_semantic_id_for_surface("def"),
@@ -110,7 +106,7 @@ mod tests {
     #[test]
     fn synthetic_registry_constructively_controls_necessary_form_routing() {
         const SYNTHETIC: &str =
-            "(sr/2\n  (\"00000000\" ())\n  (\"00001000\" (xx comet))\n  (\"00001001\" (xx asteroid))\n)";
+            "(sr/2\n  (\"00000000\" ())\n  (\"00001000\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001001\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ()))\n)";
         let index = semantic_registry::build_surface_index(SYNTHETIC);
 
         let route = |surface: &str| {
