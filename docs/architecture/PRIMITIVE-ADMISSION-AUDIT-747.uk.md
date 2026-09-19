@@ -114,3 +114,23 @@ demotion decisions, а також evidence-backed island-composition candidate �
 
 Він **не** завершує #734, бо той вимагає обліку всіх identities, і **не** закриває
 #747, бо `invoke` ще не пройшов atomic registry admission.
+
+
+## Наступний крок admission — `invoke` тепер має executable evidence
+
+Атомарна follow-up міграція допускає `invoke` як SID `10101000`.
+Вона виконує всі шість умов вище разом, а не частинами:
+
+1. `10101000` — наступний вільний contiguous byte SID;
+2. authority лишається `sr/2`, а generated projections синхронізовані з ним;
+3. exact-count/contiguity guards переходять на Canon 0 + 168 identities;
+4. один реальний integration witness проводить той самий SID `invoke` через
+   Common Lisp, Prolog, CLIPS і Datalog через спільний C ABI;
+5. кожне ядро й далі отримує власний native payload і повертає власне native
+   observation;
+6. witness перевіряє лише opaque SID provenance — він не переозначує
+   `invoke` як CAR, Prolog goal, CLIPS command чи Datalog relation.
+
+Цим закривається прогалина #747 «новий primitive admitted через island
+composition». #734 лишається відкритим, бо повний аудит усіх identities —
+ширша окрема робота.
