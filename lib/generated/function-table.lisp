@@ -174,4 +174,5 @@
   ("10100101" identity:10100101/surface:tcp-listen (uk слухати-порт-протоколу-керування-передаванням) (ukr слухати-порт-протоколу-керування-передаванням) (en tcp-listen) (sa ()) (sym ()) my-lisp)
   ("10100110" identity:10100110/surface:read-file (uk прочитати-файл) (ukr прочитати-файл) (en read-file) (sa ()) (sym ()) my-lisp)
   ("10100111" identity:10100111/surface:write-file (uk записати-файл) (ukr записати-файл) (en write-file) (sa ()) (sym ()) my-lisp)
+  ("10101000" identity:10101000/surface:invoke (uk викликати) (ukr викликати) (en invoke) (sa ()) (sym ()) my-lisp)
 )
