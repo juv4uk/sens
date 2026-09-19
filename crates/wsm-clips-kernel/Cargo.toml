@@ -10,3 +10,4 @@ default = []
 native-clips = []
 
 [dependencies]
+wsm-kernel-c-abi = { path = "../wsm-kernel-c-abi" }
