@@ -10,11 +10,15 @@
 ;     (witnesses  . LIST)              ; нуль або більше executable witness-ів
 ;     (note       . "STRING"))         ; необов'язкове пояснення
 ;
-; Кожен witness:
+; Кожен semantic witness:
 ;   (witness
 ;     (kernel    . SYMBOL)   ; my-lisp | common-lisp | prolog | clips | datalog
-;     (probe-id  . BITSTRING) ; байт u8 для ядра (має збігатися з ABI test)
+;     (probe-id  . BITSTRING) ; SID intentionally used by this semantic witness
 ;     (status    . SYMBOL))  ; live | integration-gated | historical | absent
+;
+; IMPORTANT: a mechanical ABI test that merely preserves an opaque byte is
+; NOT a semantic witness, even when that byte happens to equal a registry SID.
+; Such probes are recorded separately under opaque-kernel-probe-evidence/1.
 ;
 ; Відсутність witness-а коректна: вона фіксує, що жодне ядро поки не
 ; виконує цю ідентичність, а не те, що ідентичність не визначена.
@@ -56,20 +60,16 @@
     (sid      . "00000011")
     (en-name  . eq)
     (witnesses
-      (witness (kernel . my-lisp)     (probe-id . "00000011") (status . live))
-      (witness (kernel . prolog)      (probe-id . "00000011") (status . live)
-        (evidence . "crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs")))
-    (note . "eq: Prolog ABI witness live — PROBE_ID=0b00000011 у c_abi_semantic_witness.rs."))
+      (witness (kernel . my-lisp)     (probe-id . "00000011") (status . live)))
+    (note . "eq: current Prolog PROBE_ID=00000011 is transport provenance only; no Prolog EQ semantic witness is claimed."))
 
   (sid-witness
     (sid      . "00000100")
     (en-name  . cons)
     (witnesses
       (witness (kernel . my-lisp)     (probe-id . "00000100") (status . live))
-      (witness (kernel . common-lisp) (probe-id . "00000100") (status . integration-gated))
-      (witness (kernel . datalog)     (probe-id . "00000100") (status . live)
-        (evidence . "crates/wsm-datalog-kernel/tests/c_abi_semantic_witness.rs")))
-    (note . "cons: Datalog ABI live (PROBE_ID=0b00000100). CL gated через env var."))
+      (witness (kernel . common-lisp) (probe-id . "00000100") (status . integration-gated)))
+    (note . "cons: CL is a bounded semantic witness. Datalog PROBE_ID=00000100 is transport provenance only."))
 
   (sid-witness
     (sid      . "00000101")
@@ -84,10 +84,8 @@
     (en-name  . cdr)
     (witnesses
       (witness (kernel . my-lisp)     (probe-id . "00000110") (status . live))
-      (witness (kernel . common-lisp) (probe-id . "00000110") (status . integration-gated))
-      (witness (kernel . clips)       (probe-id . "00000110") (status . live)
-        (evidence . "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs")))
-    (note . "cdr: CLIPS ABI live (PROBE_ID=0b00000110). CL gated."))
+      (witness (kernel . common-lisp) (probe-id . "00000110") (status . integration-gated)))
+    (note . "cdr: CL is a bounded semantic witness. CLIPS PROBE_ID=00000110 is transport provenance only."))
 
   (sid-witness
     (sid      . "00000111")
@@ -135,3 +133,27 @@
     (note . "defmacro: CL має defmacro, але CL ABI witness ще його не виконує."))
 
 )
+
+
+; ---------------------------------------------------------------------------
+; Mechanical ABI provenance — explicitly NOT semantic execution witnesses.
+; These rows prove only that an opaque u8 survives the shared boundary while
+; the native payload is executed by the named kernel.
+; ---------------------------------------------------------------------------
+
+(opaque-kernel-probe-evidence/1
+  (probe
+    (kernel . prolog)
+    (probe-id . "00000011")
+    (semantic-witness . no)
+    (evidence . "crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs"))
+  (probe
+    (kernel . datalog)
+    (probe-id . "00000100")
+    (semantic-witness . no)
+    (evidence . "crates/wsm-datalog-kernel/tests/c_abi_semantic_witness.rs"))
+  (probe
+    (kernel . clips)
+    (probe-id . "00000110")
+    (semantic-witness . no)
+    (evidence . "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs")))
