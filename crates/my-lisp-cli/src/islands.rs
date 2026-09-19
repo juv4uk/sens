@@ -148,10 +148,18 @@ pub fn run(args: &[String]) -> Result<String, String> {
             }
             Ok(rows.join("\n"))
         }
-        "status" => Ok(manifest.islands.into_iter().map(|island| {
+        "status" => {
+            let root = args.iter().position(|arg| arg == "--root")
+                .and_then(|index| args.get(index + 1)).map(String::as_str);
+            Ok(manifest.islands.into_iter().map(|island| {
             let outcome = island.platforms.iter().any(|entry| entry.target == target && entry.provider != "unsupported");
-            format!("{}: {}", island.key, if outcome { "absent" } else { "unsupported" })
-        }).collect::<Vec<_>>().join("\n")),
+            let status = if let Some(root) = root {
+                let artifact = std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target).join("runtime.bin");
+                if artifact.is_file() { "available" } else if outcome { "absent" } else { "unsupported" }
+            } else if outcome { "absent" } else { "unsupported" };
+            format!("{}: {}", island.key, status)
+        }).collect::<Vec<_>>().join("\n"))
+        }
         _ => Err(format!("unknown islands command: {command}")),
     }
 }

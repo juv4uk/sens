@@ -90,6 +90,11 @@ fn islands_install_apply_verifies_file_artifact_before_publishing_it() {
         .output().expect("CLI");
     assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
     assert_eq!(std::fs::read(root.join("demo/1/linux-x86_64/runtime.bin")).unwrap(), b"island-runtime");
+    let status = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args(["islands", "status", "--manifest", manifest_path.to_str().unwrap(), "--root", root.to_str().unwrap()])
+        .output().expect("status CLI");
+    assert!(status.status.success(), "{}", String::from_utf8_lossy(&status.stderr));
+    assert!(String::from_utf8(status.stdout).unwrap().contains("demo: available"));
 }
 
 #[test]
