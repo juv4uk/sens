@@ -57,7 +57,7 @@ fn matrix_is_a_view_over_existing_source_axes() {
 
     let mut seen = HashSet::new();
     for row in rows {
-        let ExprKind::List(fields) = row else { panic!("#845 row must be a list"); };
+        let ExprKind::List(fields) = &row.kind else { panic!("#845 row must be a list"); };
         let sid = field_string(fields, "sid").expect("row SID");
         let math_sid = field_string(fields, "math-entry-sid").expect("math SID");
         let kernel_sid = field_string(fields, "kernel-entry-sid").expect("kernel SID");
