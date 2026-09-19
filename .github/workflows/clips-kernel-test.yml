@@ -1,0 +1,27 @@
+name: CLIPS kernel
+
+on:
+  pull_request:
+    paths:
+      - "crates/wsm-clips-kernel/**"
+      - ".github/workflows/clips-kernel-test.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+  push:
+    branches: [main]
+    paths:
+      - "crates/wsm-clips-kernel/**"
+      - ".github/workflows/clips-kernel-test.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+
+jobs:
+  clips-kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Default runtime-independent tests
+        run: cargo test -p wsm-clips-kernel -- --nocapture
+      - name: Type-check native CLIPS FFI surface
+        run: cargo check -p wsm-clips-kernel --features native-clips
