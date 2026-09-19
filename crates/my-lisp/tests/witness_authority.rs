@@ -195,6 +195,29 @@ fn load_answer_contract_witness(session: &mut Session) {
     eval_program(&source, session).expect("answer-contract-witness.lisp must load");
 }
 
+fn transport_island_compat_document(session: &mut Session) {
+    let source = fs::read_to_string(repo_file("contracts/island-compat-contract.lisp"))
+        .expect("#749 requires the Lisp-owned island compatibility contract");
+    let forms = parse(&source).expect("island-compat-contract.lisp must be readable Lisp data");
+    assert_eq!(
+        forms.len(),
+        1,
+        "#749 island compatibility contract must remain one self-contained Lisp data document"
+    );
+
+    let form = &forms[0];
+    let exact_form_source = &source[form.span.start..form.span.end];
+    let transport = format!("(def island-compat-document (quote {exact_form_source}))");
+    eval_program(&transport, session)
+        .expect("host observer must be able to transport island contract bytes into Lisp data");
+}
+
+fn load_island_compat_witness(session: &mut Session) {
+    let source = fs::read_to_string(repo_file("tests/fixtures/island-compat-witness.lisp"))
+        .expect("#749 requires its Lisp-owned island compatibility witness");
+    eval_program(&source, session).expect("island-compat-witness.lisp must load");
+}
+
 fn escape_lisp_string(value: &str) -> String {
     value.replace('\\', "\\\\").replace('"', "\\\"")
 }
@@ -433,5 +456,23 @@ fn answer_contract_semantics_are_owned_by_lisp_data_not_host_expectations() {
     assert!(
         verdict.starts_with("(answer-contract-witness (status pass)"),
         "Lisp-owned answer-contract witness rejected the first #228 slice: {verdict}"
+    );
+}
+
+#[test]
+fn island_compat_semantics_are_owned_by_lisp_not_kernel_adapters() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    transport_island_compat_document(&mut session);
+    load_island_compat_witness(&mut session);
+
+    let verdict = eval_program("(island-compat-witness)", &mut session)
+        .expect("Lisp-owned island compatibility witness must execute")
+        .value
+        .to_string();
+
+    assert!(
+        verdict.starts_with("(island-compat-witness (status pass)"),
+        "Lisp-owned #749 island compatibility witness rejected the contract: {verdict}"
     );
 }
