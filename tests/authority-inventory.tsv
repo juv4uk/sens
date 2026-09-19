@@ -88,3 +88,4 @@ crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs	prolog_native_substitut
 crates/my-lisp-cli/tests/semantic_oracle_preservation.rs\tsemantic_oracle_surface_survives_coordination_removal\tobserver\tsemantic-oracle-surface\tcrates/my-lisp-cli/src/swarm.rs\tretained
 crates/my-lisp-cli/tests/legacy_coordination_rejected.rs\tsemantic_oracle_rejects_retired_coordination_operations\tobserver\tsemantic-oracle-removal\ttests/fixtures/native-first-execution-witness.lisp\tretained
 crates/wsm-native-result-types/tests/four_real_kernels.rs	one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_semantics	observer	four-kernel-invoke-sid-provenance	lib/surface/semantic-registry.lisp + shared C ABI	retained
+crates/my-lisp/tests/witness_authority.rs	life_1_liveness_semantics_are_owned_by_lisp_data	observer	life-1-liveness+bridge-provenance	contracts/life-1-contract.lisp + tests/fixtures/life-1-contract-witness.lisp	migrated
