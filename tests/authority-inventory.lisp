@@ -57,4 +57,3 @@
 (authority "crates/wsm-native-result-types/tests/four_real_kernels.rs" observer)
 (authority "crates/wsm-datalog-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/my-lisp/tests/utf8.rs" observer)
-(authority "crates/my-lisp/tests/library_load_stage_debug.rs" observer)
