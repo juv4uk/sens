@@ -1,0 +1,8 @@
+[package]
+name = "wsm-common-lisp-kernel"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Independent Common Lisp process adapter for the WSM four-kernel experiment"
+
+[dependencies]

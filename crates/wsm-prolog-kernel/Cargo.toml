@@ -1,0 +1,8 @@
+[package]
+name = "wsm-prolog-kernel"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Independent SWI-Prolog process adapter for the WSM reasoning-kernel archipelago"
+
+[dependencies]

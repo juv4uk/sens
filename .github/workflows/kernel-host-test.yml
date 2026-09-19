@@ -1,0 +1,25 @@
+name: Kernel Host Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'crates/wsm-kernel-host/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/kernel-host-test.yml'
+
+jobs:
+  kernel-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Test mechanical kernel host
+        run: cargo test -p wsm-kernel-host -- --nocapture
+
+      - name: Clippy mechanical kernel host
+        run: cargo clippy -p wsm-kernel-host --all-targets -- -D warnings

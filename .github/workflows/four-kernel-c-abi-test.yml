@@ -1,0 +1,31 @@
+name: Four Kernel C ABI Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'crates/wsm-kernel-c-abi/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/four-kernel-c-abi-test.yml'
+
+jobs:
+  c-abi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Test ABI crate
+        run: cargo test -p wsm-kernel-c-abi -- --nocapture
+
+      - name: Clippy ABI crate
+        run: cargo clippy -p wsm-kernel-c-abi --all-targets -- -D warnings
+
+      - name: Compile C header smoke test
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror \
+            -I crates/wsm-kernel-c-abi/include \
+            -fsyntax-only crates/wsm-kernel-c-abi/tests/c_header_smoke.c
