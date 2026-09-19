@@ -83,5 +83,4 @@ crates/my-lisp/tests/witness_authority.rs	island_compat_semantics_are_owned_by_l
 crates/wsm-native-result-types/tests/four_real_kernels.rs	four_real_kernels_keep_their_native_results_side_by_side	observer	four-kernel-native-result-domain-preservation	producer-owned kernel result types + #719	retained
 crates/wsm-datalog-kernel/tests/c_abi_semantic_witness.rs	opaque_semantic_id_crosses_same_c_abi_into_datalog_fixpoint	mechanism	opaque-sid-provenance+native-datalog-fixpoint	remain host-owned transport witness	retained
 crates/my-lisp/tests/witness_authority.rs	semantic_ownership_audit_733_is_well_formed_lisp_inventory	observer	semantic-ownership-audit	contracts/semantic-ownership-audit-733.lisp	retained
-crates/my-lisp/tests/witness_authority.rs	primitive_budget_audit_734_accounts_for_197_ids_under_256_constraint	observer	primitive-budget-audit	contracts/primitive-budget-audit-734.lisp	retained
-crates/my-lisp/tests/utf8.rs	utf8_layer_keeps_process_library_as_a_separate_top_level_load	observer	lisp-owned-utf8+process-load-boundary	lib/utf8.lisp + lib/process.lisp	retained
+crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs	prolog_native_substitutions_preserve_zero_one_many_without_truth_projection	mechanism	native-prolog-cardinality-observation	remain host-owned native-result witness	retained
