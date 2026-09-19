@@ -59,6 +59,45 @@ pub enum LifecycleState {
     Running,
 }
 
+/// Mechanical execution availability reported by a producer-specific bounded probe.
+///
+/// This is not a truth value and carries no semantic authority. Unavailable
+/// means only that execution cannot currently be performed by that producer.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AvailabilityState {
+    Available,
+    Unavailable,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct KernelAvailabilityObservation {
+    pub producer: KernelId,
+    pub state: AvailabilityState,
+    pub started: bool,
+    /// Producer-supplied diagnostic/provenance text. The host never interprets it.
+    pub detail: Option<String>,
+}
+
+impl KernelAvailabilityObservation {
+    pub fn available(producer: impl Into<String>, detail: Option<String>) -> Self {
+        Self {
+            producer: KernelId::new(producer),
+            state: AvailabilityState::Available,
+            started: false,
+            detail,
+        }
+    }
+
+    pub fn unavailable(producer: impl Into<String>, detail: Option<String>) -> Self {
+        Self {
+            producer: KernelId::new(producer),
+            state: AvailabilityState::Unavailable,
+            started: false,
+            detail,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum KernelHostError {
     NotRunning,
@@ -224,6 +263,7 @@ impl<D: ?Sized + KernelDriver + Send> KernelDriver for Box<D> {
 #[derive(Default)]
 pub struct KernelRouter {
     hosts: HashMap<String, KernelHost<Box<dyn KernelDriver + Send>>>,
+    availability: HashMap<String, KernelAvailabilityObservation>,
 }
 
 impl KernelRouter {
@@ -238,6 +278,17 @@ impl KernelRouter {
 
     pub fn is_registered(&self, target: &str) -> bool {
         self.hosts.contains_key(target)
+    }
+
+    /// Record a producer-specific bounded availability probe through one
+    /// mechanical host path. Recording does not start a kernel.
+    pub fn record_availability(&mut self, observation: KernelAvailabilityObservation) {
+        self.availability
+            .insert(observation.producer.as_str().to_string(), observation);
+    }
+
+    pub fn availability(&self, target: &str) -> Option<&KernelAvailabilityObservation> {
+        self.availability.get(target)
     }
 
     pub fn exchange(
@@ -391,6 +442,32 @@ mod tests {
         assert!(clips_result.working_memory_delta.starts_with(b"(wm-delta "));
         assert!(prolog_result.0[0].starts_with(b"substitutions:"));
         assert!(datalog_result.tuples[0].starts_with(b"closure:"));
+    }
+
+    #[test]
+    fn availability_observation_is_mechanical_and_does_not_start_kernels() {
+        let mut router = KernelRouter::new();
+        router.record_availability(KernelAvailabilityObservation::available(
+            "prolog",
+            Some("bounded-version-probe".into()),
+        ));
+        router.record_availability(KernelAvailabilityObservation::unavailable(
+            "clips",
+            Some("runtime-not-installed".into()),
+        ));
+
+        let prolog = router.availability("prolog").expect("prolog observation");
+        assert_eq!(prolog.state, AvailabilityState::Available);
+        assert!(!prolog.started);
+        assert_eq!(prolog.detail.as_deref(), Some("bounded-version-probe"));
+
+        let clips = router.availability("clips").expect("clips observation");
+        assert_eq!(clips.state, AvailabilityState::Unavailable);
+        assert!(!clips.started);
+        assert_eq!(clips.detail.as_deref(), Some("runtime-not-installed"));
+
+        assert!(router.availability("datalog").is_none());
+        assert!(router.registered_kernels().is_empty());
     }
 
     #[test]
