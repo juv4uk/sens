@@ -1,0 +1,82 @@
+use wsm_clips_kernel::{ClipsAbiAdapter, SemanticId};
+use wsm_kernel_c_abi::{
+    WsmByteSpan, WsmKernelKind, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
+};
+
+const PROBE_ID: u8 = 0b0000_0110;
+
+fn exchange(adapter: &ClipsAbiAdapter, command: &[u8]) -> (WsmStatus, Vec<u8>) {
+    let vtable = adapter.vtable();
+    let mut output = vec![0u8; 128];
+    let mut written = 0usize;
+    let status = unsafe {
+        vtable.exchange.expect("exchange")(
+            vtable.context,
+            WsmKernelRequest {
+                semantic_id: PROBE_ID,
+                payload: WsmByteSpan {
+                    ptr: command.as_ptr(),
+                    len: command.len(),
+                },
+            },
+            WsmMutableByteSpan {
+                ptr: output.as_mut_ptr(),
+                len: output.len(),
+            },
+            &mut written,
+        )
+    };
+    output.truncate(written.min(output.len()));
+    (status, output)
+}
+
+#[test]
+fn opaque_semantic_id_crosses_shared_abi_into_native_clips_agenda() {
+    let adapter = ClipsAbiAdapter::new(
+        "(defrule observe-signal (signal) => (assert (observed)))",
+        "(signal)",
+    );
+    let vtable = adapter.vtable();
+    assert_eq!(vtable.kernel, WsmKernelKind::Clips);
+    assert_eq!(
+        unsafe { vtable.start.expect("start")(vtable.context) },
+        WsmStatus::Ok
+    );
+
+    let (status, output) = exchange(&adapter, b"run");
+    assert_eq!(status, WsmStatus::Ok);
+    assert_eq!(String::from_utf8_lossy(&output), "fired=1\n");
+    assert_eq!(adapter.last_semantic_id(), Some(SemanticId(PROBE_ID)));
+    assert_eq!(adapter.last_fired(), Some(1));
+
+    assert_eq!(
+        unsafe { vtable.stop.expect("stop")(vtable.context) },
+        WsmStatus::Ok
+    );
+}
+
+#[test]
+fn retracting_native_fact_changes_reachable_agenda_before_run() {
+    let adapter = ClipsAbiAdapter::new(
+        "(defrule observe-signal (signal) => (assert (observed)))",
+        "(signal)",
+    );
+    let vtable = adapter.vtable();
+    assert_eq!(
+        unsafe { vtable.start.expect("start")(vtable.context) },
+        WsmStatus::Ok
+    );
+
+    let (retract_status, retract_output) = exchange(&adapter, b"retract");
+    assert_eq!(retract_status, WsmStatus::Ok);
+    assert_eq!(String::from_utf8_lossy(&retract_output), "retracted\n");
+
+    let (run_status, run_output) = exchange(&adapter, b"run");
+    assert_eq!(run_status, WsmStatus::Ok);
+    assert_eq!(String::from_utf8_lossy(&run_output), "fired=0\n");
+
+    assert_eq!(
+        unsafe { vtable.stop.expect("stop")(vtable.context) },
+        WsmStatus::Ok
+    );
+}
