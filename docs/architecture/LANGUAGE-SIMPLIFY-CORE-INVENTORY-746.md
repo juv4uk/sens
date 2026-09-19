@@ -26,7 +26,7 @@ kernels = autonomous islands of native execution and reasoning
 
 Instead, `my-lisp` focuses on its primary responsibilities:
 1. **Canon 0 (`()`)** as absence-ground and list terminator;
-2. **Contiguous 8-bit Semantic ID (SID) registry** (`00000001..10100111`);
+2. **Contiguous 8-bit Semantic ID (SID) registry** (`00000001..10101000`);
 3. **Classical Lisp data structure operations** (`cons`, `car`, `cdr`, `atom`, `eq`);
 4. **Honest local evaluation** of expressions and first-class lexical functions (`lambda`);
 5. **Mechanical dispatch and coordination** of requests to autonomous islands via opaque bytes (C-ABI / KernelHost / KernelRouter);
@@ -45,7 +45,7 @@ Inventory categories:
 | Component / Operation | Category | Description | Target Island / Location |
 | :--- | :--- | :--- | :--- |
 | **Canon 0 `()`** | `KEEP` | Ground absence point, empty list, neutral sentinel | `my-lisp` canon |
-| **8-bit SID Registry** | `KEEP` | 167 contiguous byte semantic identities (`00000001..10100111`) | `semantic_registry.rs` |
+| **8-bit SID Registry** | `KEEP` | 168 contiguous byte semantic identities (`00000001..10101000`) | `semantic_registry.rs` |
 | **McCarthy-7 Primitives** | `KEEP` | `quote`, `atom`, `eq`, `car`, `cdr`, `cons`, `cond` | `my-lisp` core |
 | **Functions & Closures** | `KEEP` | `lambda`, lexical environments, parameter bindings | `environment.rs`, `closures.rs` |
 | **Exact Arithmetic** | `KEEP` | Reduced rationals and arbitrary-precision integers | `bignum.rs`, `arithmetic.rs` |
