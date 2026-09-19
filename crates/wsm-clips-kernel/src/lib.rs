@@ -415,7 +415,7 @@ impl ClipsEnvironment {
     }
 
     pub fn fact_count(&self) -> u64 {
-        unsafe { (self.inner.api.get_number_of_facts)(self.inner.raw) as u64 }
+        u64::from(unsafe { (self.inner.api.get_number_of_facts)(self.inner.raw) })
     }
 
     pub fn retract(&self, mut fact: ClipsFact) -> Result<(), ClipsKernelError> {
