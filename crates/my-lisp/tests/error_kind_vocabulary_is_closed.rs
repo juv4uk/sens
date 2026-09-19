@@ -32,6 +32,7 @@ fn name_of(kind: &ErrorKind) -> &'static str {
         ErrorKind::Arity => "Arity",
         ErrorKind::Type => "Type",
         ErrorKind::InvalidForm => "InvalidForm",
+        ErrorKind::MechanismUnavailable => "MechanismUnavailable",
         ErrorKind::OutOfMemory => "OutOfMemory",
         ErrorKind::NumericOverflow => "NumericOverflow",
         ErrorKind::DivisionByZero => "DivisionByZero",
