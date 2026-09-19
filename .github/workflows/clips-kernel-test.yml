@@ -1,9 +1,11 @@
 name: CLIPS kernel
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "crates/wsm-clips-kernel/**"
+      - "crates/wsm-kernel-c-abi/**"
       - ".github/workflows/clips-kernel-test.yml"
       - "Cargo.toml"
       - "Cargo.lock"
@@ -11,17 +13,36 @@ on:
     branches: [main]
     paths:
       - "crates/wsm-clips-kernel/**"
+      - "crates/wsm-kernel-c-abi/**"
       - ".github/workflows/clips-kernel-test.yml"
       - "Cargo.toml"
       - "Cargo.lock"
 
 jobs:
-  clips-kernel:
+  default-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Default runtime-independent tests
-        run: cargo test -p wsm-clips-kernel -- --nocapture
-      - name: Type-check native CLIPS FFI surface
+      - name: Prove default build does not require CLIPS
+        run: cargo test -p wsm-clips-kernel --no-default-features --lib
+      - name: Type-check runtime loader without installed CLIPS
         run: cargo check -p wsm-clips-kernel --features native-clips
+
+  native-clips-642:
+    runs-on: ubuntu-latest
+    container: fedora:45
+    steps:
+      - name: Install Git, Rust and CLIPS 6.4.2
+        run: dnf install -y git rust cargo clips-devel gcc
+      - uses: actions/checkout@v4
+      - name: Show native CLIPS package version
+        run: rpm -q clips-devel clips-libs
+      - name: Run real CLIPS agenda and retract witnesses
+        env:
+          WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
+        run: cargo test -p wsm-clips-kernel --features native-clips --test c_abi_semantic_witness -- --nocapture
+      - name: Clippy CLIPS adapter
+        env:
+          WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
+        run: cargo clippy -p wsm-clips-kernel --all-targets --features native-clips -- -D warnings
