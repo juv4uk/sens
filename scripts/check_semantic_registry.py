@@ -129,9 +129,9 @@ def check(root) -> tuple[int, set[str], int]:
             )
         symbolic_count += int("sym" in entry_surfaces)
 
-    if len(seen_ids) != 168:
+    if len(seen_ids) != 169:
         raise ValueError(
-            f"sr/2 migration expects exactly 168 identities (Canon 0 + 167), got {len(seen_ids)}"
+            f"sr/2 migration expects exactly 169 identities (Canon 0 + 168), got {len(seen_ids)}"
         )
     if len(seen_ids) > 256:
         raise ValueError("semantic registry no longer fits the declared 8-bit SID axis")
