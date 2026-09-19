@@ -81,7 +81,7 @@ impl ClipsKernel {
 #[cfg(feature = "native-clips")]
 mod native {
     use super::ClipsKernelError;
-    use std::ffi::{c_char, c_longlong, c_void, CStr, CString, OsStr};
+    use std::ffi::{c_char, c_longlong, c_ulong, c_void, CStr, CString, OsStr};
     use std::rc::Rc;
 
     #[repr(C)]
@@ -100,6 +100,7 @@ mod native {
     type AssertStringFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> *mut Fact;
     type RunFn = unsafe extern "C" fn(*mut Environment, c_longlong) -> c_longlong;
     type RetractFn = unsafe extern "C" fn(*mut Fact) -> u32;
+    type GetNumberOfFactsFn = unsafe extern "C" fn(*mut Environment) -> c_ulong;
     type RetainFactFn = unsafe extern "C" fn(*mut Fact);
     type ReleaseFactFn = unsafe extern "C" fn(*mut Fact);
 
@@ -250,6 +251,7 @@ mod native {
         pub assert_string: AssertStringFn,
         pub run: RunFn,
         pub retract: RetractFn,
+        pub get_number_of_facts: GetNumberOfFactsFn,
         pub retain_fact: RetainFactFn,
         pub release_fact: ReleaseFactFn,
     }
@@ -277,6 +279,7 @@ mod native {
             let assert_string = unsafe { load_symbol(&library, b"AssertString\0")? };
             let run = unsafe { load_symbol(&library, b"Run\0")? };
             let retract = unsafe { load_symbol(&library, b"Retract\0")? };
+            let get_number_of_facts = unsafe { load_symbol(&library, b"GetNumberOfFacts\0")? };
             let retain_fact = unsafe { load_symbol(&library, b"RetainFact\0")? };
             let release_fact = unsafe { load_symbol(&library, b"ReleaseFact\0")? };
 
@@ -288,6 +291,7 @@ mod native {
                 assert_string,
                 run,
                 retract,
+                get_number_of_facts,
                 retain_fact,
                 release_fact,
             }))
@@ -408,6 +412,10 @@ impl ClipsEnvironment {
 
     pub fn run(&self, limit: i64) -> i64 {
         unsafe { (self.inner.api.run)(self.inner.raw, limit) }
+    }
+
+    pub fn fact_count(&self) -> u64 {
+        unsafe { (self.inner.api.get_number_of_facts)(self.inner.raw) as u64 }
     }
 
     pub fn retract(&self, mut fact: ClipsFact) -> Result<(), ClipsKernelError> {
