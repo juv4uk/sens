@@ -37,7 +37,7 @@
    (semantic-role . semantic-identity-registry)
    (future-action . retain-in-core)
    (target-destination . "lib/surface/semantic-registry.lisp")
-   (rationale . "Single authoritative 8-bit SID schema (00000000..10100111) mapping bitstrings to semantic identities across Ukrainian, English, Sanskrit, and keyboard-symbol surfaces."))
+   (rationale . "Single authoritative 8-bit SID schema (00000000..10101000) mapping bitstrings to semantic identities across Ukrainian, English, Sanskrit, and keyboard-symbol surfaces."))
 
   ((key . answer-contract)
    (path . "contracts/answer-contract.lisp")
