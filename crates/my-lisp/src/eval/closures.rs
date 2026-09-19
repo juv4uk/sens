@@ -307,6 +307,25 @@ pub(super) fn apply_macro(
     let expanded_value = evaluate(last, &local_environment)?;
     let expanded_expr = value_to_expr(expanded_value, span)?;
 
+    if let ExprKind::List(parts) = &expanded_expr.kind {
+        if let Some(Expr {
+            kind: ExprKind::Symbol(name),
+            ..
+        }) = parts.first()
+        {
+            if name.as_ref() == "define" || name.as_ref() == "def" {
+                eprintln!("DEBUG_MACRO_DEFINE_ARGC={}", parts.len().saturating_sub(1));
+                for (index, part) in parts.iter().enumerate() {
+                    if let ExprKind::Symbol(symbol) = &part.kind {
+                        eprintln!("DEBUG_MACRO_DEFINE_PART[{index}]={symbol}");
+                    } else {
+                        eprintln!("DEBUG_MACRO_DEFINE_PART[{index}]=<non-symbol>");
+                    }
+                }
+            }
+        }
+    }
+
     Ok(EvalStep::TailCall {
         expression: expanded_expr,
         environment: calling_environment.clone(),
