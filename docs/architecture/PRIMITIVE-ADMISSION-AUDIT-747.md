@@ -119,3 +119,22 @@ island-composition admission candidate and an explicit rejected candidate.
 It does **not** complete #734, which requires accounting for every current
 identity, and it does **not** close #747 yet because `invoke` has not undergone
 the required atomic registry admission.
+
+
+## Admission follow-up — `invoke` is now evidence-backed
+
+The follow-up atomic migration admits `invoke` as SID `10101000`.
+It satisfies the six conditions listed above together rather than piecemeal:
+
+1. `10101000` is the next contiguous free byte SID;
+2. `sr/2` is the authority row and generated projections are updated from it;
+3. exact-count/contiguity guards advance to Canon 0 + 168 identities;
+4. one real integration witness sends the same `invoke` SID through Common Lisp,
+   Prolog, CLIPS and Datalog via the shared C ABI;
+5. each kernel still receives its own native payload and returns its own native
+   observation;
+6. the witness checks only opaque SID provenance — it does not redefine
+   `invoke` as CAR, a Prolog goal, a CLIPS command or a Datalog relation.
+
+This closes the “new primitive admitted because of island composition” gap in
+#747. It does not close #734, whose all-identity audit remains broader work.
