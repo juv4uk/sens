@@ -59,3 +59,4 @@
 (authority "crates/my-lisp/tests/utf8.rs" observer)
 (authority "crates/my-lisp-cli/tests/semantic_oracle_preservation.rs" observer)
 (authority "crates/my-lisp-cli/tests/legacy_coordination_rejected.rs" observer)
+(authority "crates/my-lisp/tests/error_kind_vocabulary_is_closed.rs" observer)
