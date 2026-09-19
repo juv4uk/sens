@@ -224,7 +224,10 @@ fn escape_lisp_string(value: &str) -> String {
 
 fn actual_form_from_native(row: &WitnessRow, session: &mut Session) -> String {
     match eval_program(&row.expr, session) {
-        Ok(result) => format!("(value \"{}\")", escape_lisp_string(&result.value.to_string())),
+        Ok(result) => format!(
+            "(value \"{}\")",
+            escape_lisp_string(&result.value.to_string())
+        ),
         Err(error) => format!("(error \"{:?}\")", error.kind),
     }
 }
@@ -322,7 +325,10 @@ fn compiler_corpus_native_actuals_are_judged_only_by_lisp_owned_witness_logic() 
 #[test]
 fn canon_zero_empty_list_is_data_not_false() {
     let rows = canon_zero_rows();
-    assert!(!rows.is_empty(), "#215 active Canon 0 witness slice must remain non-empty");
+    assert!(
+        !rows.is_empty(),
+        "#215 active Canon 0 witness slice must remain non-empty"
+    );
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
@@ -337,7 +343,10 @@ fn canon_zero_empty_list_is_data_not_false() {
 #[test]
 fn structure_core_stays_stable_across_native_and_meta_eval() {
     let rows = structure_core_rows();
-    assert!(!rows.is_empty(), "#230 structure-core witness slice must remain non-empty");
+    assert!(
+        !rows.is_empty(),
+        "#230 structure-core witness slice must remain non-empty"
+    );
 
     let mut native = Session::default();
     load_core_library(&mut native).expect("core library");
@@ -364,7 +373,10 @@ fn same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend() {
         .into_iter()
         .filter(|row| row.meta_eval)
         .collect();
-    assert!(!rows.is_empty(), "meta-eval witness slice must remain non-empty");
+    assert!(
+        !rows.is_empty(),
+        "meta-eval witness slice must remain non-empty"
+    );
 
     let mut session = init_meta_session();
     let mut checked_values = 0usize;
@@ -381,16 +393,21 @@ fn same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend() {
         }
     }
 
-    assert!(checked_values > 0, "meta witness slice must contain value witnesses");
+    assert!(
+        checked_values > 0,
+        "meta witness slice must contain value witnesses"
+    );
     for required_head in ["quote", "atom", "eq", "car", "cdr", "cons", "cond"] {
         let prefix = format!("({required_head}");
         assert!(
-            rows.iter().any(|row| row.expr.trim_start().starts_with(&prefix)),
+            rows.iter()
+                .any(|row| row.expr.trim_start().starts_with(&prefix)),
             "meta witness slice lost McCarthy-7/Canon-0 class `{required_head}`"
         );
     }
     assert!(
-        rows.iter().any(|row| row.expr.trim_start().starts_with("((lambda")),
+        rows.iter()
+            .any(|row| row.expr.trim_start().starts_with("((lambda")),
         "meta witness slice must contain lambda application"
     );
 }
@@ -481,7 +498,8 @@ fn island_compat_semantics_are_owned_by_lisp_not_kernel_adapters() {
 fn semantic_ownership_audit_733_is_well_formed_lisp_inventory() {
     let source = fs::read_to_string(repo_file("contracts/semantic-ownership-audit-733.lisp"))
         .expect("#733 requires contracts/semantic-ownership-audit-733.lisp");
-    let forms = parse(&source).expect("semantic-ownership-audit-733.lisp must be readable Lisp data");
+    let forms =
+        parse(&source).expect("semantic-ownership-audit-733.lisp must be readable Lisp data");
     assert_eq!(forms.len(), 1, "audit inventory must be a single root form");
 
     let form = &forms[0];
@@ -602,9 +620,225 @@ fn primitive_budget_audit_734_accounts_for_197_ids_under_256_constraint() {
         }
     }
 
-    assert_eq!(total_ids, 197, "audit must account for all 197 experimental IDs");
-    assert!(total_ids <= 256, "total IDs must satisfy <= 256 hard budget");
-    assert!(reclaim_candidates > 0, "audit must identify reclaim candidates");
-    assert!(has_second && has_cadr, "second and cadr must both be present and distinct");
-    assert!(fourth_is_reclaimable, "fourth must be identified as reclaim candidate");
+    assert_eq!(
+        total_ids, 197,
+        "audit must account for all 197 experimental IDs"
+    );
+    assert!(
+        total_ids <= 256,
+        "total IDs must satisfy <= 256 hard budget"
+    );
+    assert!(
+        reclaim_candidates > 0,
+        "audit must identify reclaim candidates"
+    );
+    assert!(
+        has_second && has_cadr,
+        "second and cadr must both be present and distinct"
+    );
+    assert!(
+        fourth_is_reclaimable,
+        "fourth must be identified as reclaim candidate"
+    );
+}
+
+// #735 — карта SID → kernel witness є Lisp-власним контрактом.
+// Перевіряє структуру contracts/sid-kernel-witness-735.lisp:
+//   - верхній тег sid-kernel-witness-map/1;
+//   - усі записи мають тег sid-witness;
+//   - усі п'ять ядер присутні хоча б раз;
+//   - SID не повторюються;
+//   - кожен зовнішній live witness має той самий probe-id і наявний ABI test.
+#[test]
+fn sid_kernel_witness_735_maps_primitives_across_five_kernels() {
+    let src = std::fs::read_to_string(repo_file("contracts/sid-kernel-witness-735.lisp"))
+        .expect("contracts/sid-kernel-witness-735.lisp must exist");
+    let exprs = parse(&src).expect("contract must parse as valid Lisp");
+
+    assert!(
+        !exprs.is_empty(),
+        "contract must contain at least one expression"
+    );
+
+    // Верхня форма: (sid-kernel-witness-map/1 ...)
+    let map_expr = &exprs[0];
+    let map_items = match &map_expr.kind {
+        ExprKind::List(items) => items.clone(),
+        _ => panic!("top-level must be a list"),
+    };
+    assert!(!map_items.is_empty(), "map must be non-empty");
+    let tag = match &map_items[0].kind {
+        ExprKind::Symbol(s) => &**s,
+        _ => panic!("first element must be the map tag symbol"),
+    };
+    assert_eq!(
+        tag, "sid-kernel-witness-map/1",
+        "tag must be sid-kernel-witness-map/1"
+    );
+
+    let entries = &map_items[1..];
+    assert!(
+        !entries.is_empty(),
+        "map must contain at least one sid-witness entry"
+    );
+
+    let mut seen_sids: Vec<String> = Vec::new();
+    let mut kernels_seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let mut live_count = 0usize;
+    let mut external_live_kernels: std::collections::HashSet<String> =
+        std::collections::HashSet::new();
+
+    for entry in entries {
+        let fields = match &entry.kind {
+            ExprKind::List(items) => items.clone(),
+            _ => panic!("each entry must be a list"),
+        };
+        assert!(!fields.is_empty(), "entry must be non-empty");
+        let entry_tag = match &fields[0].kind {
+            ExprKind::Symbol(s) => s.to_string(),
+            _ => panic!("entry tag must be a symbol"),
+        };
+        assert_eq!(
+            entry_tag, "sid-witness",
+            "each entry must be tagged sid-witness"
+        );
+
+        // Читаємо sid із dotted pair та witnesses із proper list.
+        let mut sid_val: Option<String> = None;
+        let mut witnesses_list: Vec<Expr> = Vec::new();
+
+        for field in &fields[1..] {
+            match &field.kind {
+                ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
+                {
+                    let val = match &value.kind {
+                        ExprKind::String(s) => s.to_string(),
+                        ExprKind::Symbol(s) => s.to_string(),
+                        _ => panic!("sid value must be a string"),
+                    };
+                    assert_eq!(val.len(), 8, "SID bitstring must be exactly 8 chars");
+                    assert!(
+                        val.chars().all(|c| c == '0' || c == '1'),
+                        "SID must be binary: {val}"
+                    );
+                    sid_val = Some(val);
+                }
+                ExprKind::List(items) if matches!(&items[0].kind, ExprKind::Symbol(s) if &**s == "witnesses") =>
+                {
+                    witnesses_list = items[1..].to_vec();
+                }
+                _ => {}
+            }
+        }
+
+        let sid = sid_val.expect("each sid-witness entry must have a (sid . ...) field");
+        assert!(
+            !seen_sids.contains(&sid),
+            "SID {sid} appears more than once in the mapping"
+        );
+        seen_sids.push(sid.clone());
+
+        for w in &witnesses_list {
+            let wfields = match &w.kind {
+                ExprKind::List(items) => items.clone(),
+                _ => continue,
+            };
+            if wfields.is_empty() {
+                continue;
+            }
+            let wtag = match &wfields[0].kind {
+                ExprKind::Symbol(s) => &**s,
+                _ => continue,
+            };
+            if wtag != "witness" {
+                continue;
+            }
+
+            let mut kernel_name: Option<String> = None;
+            let mut status_val: Option<String> = None;
+            let mut probe_id: Option<String> = None;
+            let mut evidence_path: Option<String> = None;
+
+            for wf in &wfields[1..] {
+                match &wf.kind {
+                    ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "kernel") =>
+                    {
+                        kernel_name = Some(match &value.kind {
+                            ExprKind::Symbol(s) => s.to_string(),
+                            _ => continue,
+                        });
+                    }
+                    ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "status") =>
+                    {
+                        status_val = Some(match &value.kind {
+                            ExprKind::Symbol(s) => s.to_string(),
+                            _ => continue,
+                        });
+                    }
+                    ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "probe-id") =>
+                    {
+                        probe_id = Some(match &value.kind {
+                            ExprKind::String(s) => s.to_string(),
+                            _ => panic!("probe-id має бути рядком"),
+                        });
+                    }
+                    ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "evidence") =>
+                    {
+                        evidence_path = Some(match &value.kind {
+                            ExprKind::String(s) => s.to_string(),
+                            _ => panic!("evidence має бути рядком-шляхом"),
+                        });
+                    }
+                    _ => {}
+                }
+            }
+
+            if let Some(k) = &kernel_name {
+                kernels_seen.insert(k.clone());
+            }
+            if status_val.as_deref() == Some("live") {
+                live_count += 1;
+            }
+
+            if matches!(kernel_name.as_deref(), Some("prolog" | "datalog" | "clips"))
+                && status_val.as_deref() == Some("live")
+            {
+                assert_eq!(
+                    probe_id.as_deref(),
+                    Some(sid.as_str()),
+                    "external live witness must receive its mapped SID"
+                );
+                let evidence =
+                    evidence_path.expect("external live witness needs ABI-test evidence");
+                assert!(
+                    repo_file(&evidence).is_file(),
+                    "external live witness evidence must exist: {evidence}"
+                );
+                external_live_kernels.insert(kernel_name.expect("external kernel name"));
+            }
+        }
+    }
+
+    // Усі п'ять execution kernels мають бути відображені в карті.
+    for required_kernel in &["my-lisp", "common-lisp", "prolog", "clips", "datalog"] {
+        assert!(
+            kernels_seen.contains(*required_kernel),
+            "kernel '{required_kernel}' must appear in at least one witness entry"
+        );
+    }
+
+    assert!(live_count > 0, "at least one witness must have status live");
+    assert_eq!(
+        external_live_kernels,
+        std::collections::HashSet::from([
+            "prolog".to_string(),
+            "datalog".to_string(),
+            "clips".to_string(),
+        ]),
+        "every currently live external ABI kernel needs evidence"
+    );
+    assert!(
+        seen_sids.len() >= 4,
+        "at least 4 SIDs must be mapped (one vertical slice per issue)"
+    );
 }
