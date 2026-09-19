@@ -10,6 +10,30 @@ use wsm_common_lisp_kernel::CommonLispResult;
 use wsm_datalog_kernel::Database;
 use wsm_prolog_kernel::PrologExecutionResult;
 
+
+/// Mechanical producer slot inside one four-kernel observation.
+///
+/// This identifies where a producer-native result is stored. It does not
+/// interpret, normalize, or copy that result.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ProducerSlot {
+    CommonLisp,
+    Prolog,
+    Clips,
+    Datalog,
+}
+
+/// Opaque address of one producer-owned result inside an observation.
+///
+/// Semantic graph relations may carry this value as ordinary data. Relation
+/// meaning remains outside this crate, and dereferencing the reference never
+/// changes the producer-native payload.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct NativeResultRef {
+    pub observation_id: u64,
+    pub producer: ProducerSlot,
+}
+
 /// One observation from each autonomous execution kernel.
 ///
 /// The concrete field types are the boundary: Common Lisp stays a Common Lisp
@@ -37,6 +61,21 @@ impl FourKernelObservation {
             clips,
             datalog,
         }
+    }
+
+
+    /// Return graph-safe references to the four producer-owned result slots.
+    ///
+    /// The caller chooses the observation identity. This crate only couples
+    /// that identity with a mechanical producer slot; it does not assign any
+    /// semantic relation to the references.
+    pub const fn result_refs(observation_id: u64) -> [NativeResultRef; 4] {
+        [
+            NativeResultRef { observation_id, producer: ProducerSlot::CommonLisp },
+            NativeResultRef { observation_id, producer: ProducerSlot::Prolog },
+            NativeResultRef { observation_id, producer: ProducerSlot::Clips },
+            NativeResultRef { observation_id, producer: ProducerSlot::Datalog },
+        ]
     }
 
     /// Producer identities are structural: each slot has a distinct concrete
@@ -78,5 +117,12 @@ mod tests {
         assert_eq!(observation.clips.facts_before, 1);
         assert_eq!(observation.clips.facts_after, 2);
         assert_eq!(observation.datalog.generation_count(), 0);
+
+        let refs = FourKernelObservation::result_refs(17);
+        assert_eq!(refs[0].observation_id, 17);
+        assert_eq!(refs[0].producer, ProducerSlot::CommonLisp);
+        assert_eq!(refs[1].producer, ProducerSlot::Prolog);
+        assert_eq!(refs[2].producer, ProducerSlot::Clips);
+        assert_eq!(refs[3].producer, ProducerSlot::Datalog);
     }
 }
