@@ -14,7 +14,7 @@ const WORKSPACE_MANIFESTS: [&str; 14] = [
     "crates/wsm-guard-core/Cargo.toml",
     "crates/wsm-guard-slice/Cargo.toml",
     "crates/wsm-guard-facts/Cargo.toml",
-    "crates/wsm-common-lisp-kernel/Cargo.toml",
+    "crates/wsm-prolog-kernel/Cargo.toml",
     "crates/xtask/Cargo.toml",
 ];
 

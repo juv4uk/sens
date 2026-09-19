@@ -1,0 +1,31 @@
+name: Prolog Kernel Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'crates/wsm-prolog-kernel/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/prolog-kernel-test.yml'
+
+jobs:
+  swi-prolog-kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install SWI-Prolog core
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends swi-prolog-nox
+          swipl --version
+
+      - name: Test independent Prolog kernel
+        run: cargo test -p wsm-prolog-kernel -- --nocapture
+
+      - name: Clippy independent Prolog kernel
+        run: cargo clippy -p wsm-prolog-kernel --all-targets -- -D warnings
