@@ -6,3 +6,6 @@ license-file = "../../LICENSE"
 description = "Mechanical lifecycle and opaque-byte transport substrate for autonomous reasoning kernels"
 
 [dependencies]
+
+[dev-dependencies]
+my-lisp = { path = "../my-lisp" }
