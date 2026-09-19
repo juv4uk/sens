@@ -5,7 +5,7 @@
 ; candidate-full-uk is NOT automatically promoted into authoritative full-uk
 
 (uk-surface-audit/2
-  (summary (total 167) (full 123) (already-compact 0) (ambiguous 0) (needs-research 23) (compatibility-only 21) (staging-evidence 167))
+  (summary (total 168) (full 124) (already-compact 0) (ambiguous 0) (needs-research 23) (compatibility-only 21) (staging-evidence 168))
   (rows
   (row "00000001" (current-uk як-є stable) (authoritative-full-uk як-є stable) (en quote stable) (sa svarūpa stable) (sym "'" stable) (primary-status stable) (class full) (candidate-full-uk "як-є") (candidate-full-status чинна) (candidate-compact-uk —) (ambiguity not-yet-assessed) (evidence generated-function-table staging-profile))
   (row "00000010" (current-uk атом? stable) (authoritative-full-uk атом? stable) (en atom stable) (sa aṇu stable) (sym .? stable) (primary-status stable) (class full) (candidate-full-uk "атом?") (candidate-full-status чинна) (candidate-compact-uk —) (ambiguity not-yet-assessed) (evidence generated-function-table staging-profile))
@@ -174,5 +174,6 @@
   (row "10100101" (current-uk слухати-порт-протоколу-керування-передаванням candidate) (authoritative-full-uk слухати-порт-протоколу-керування-передаванням candidate) (en tcp-listen stable) (sa — missing) (sym — missing) (primary-status stable) (class needs-research) (candidate-full-uk "слухати-порт-протоколу-керування-передаванням") (candidate-full-status кандидат-нової-stable-назви) (candidate-compact-uk —) (ambiguity not-yet-assessed) (evidence generated-function-table staging-profile))
   (row "10100110" (current-uk прочитати-файл candidate) (authoritative-full-uk прочитати-файл candidate) (en read-file stable) (sa — missing) (sym — missing) (primary-status stable) (class needs-research) (candidate-full-uk "прочитати-файл") (candidate-full-status кандидат-нової-stable-назви) (candidate-compact-uk —) (ambiguity not-yet-assessed) (evidence generated-function-table staging-profile))
   (row "10100111" (current-uk записати-файл candidate) (authoritative-full-uk записати-файл candidate) (en write-file stable) (sa — missing) (sym — missing) (primary-status stable) (class needs-research) (candidate-full-uk "записати-файл") (candidate-full-status кандидат-нової-stable-назви) (candidate-compact-uk —) (ambiguity not-yet-assessed) (evidence generated-function-table staging-profile))
+  (row "10101000" (current-uk викликати stable) (authoritative-full-uk викликати stable) (en invoke stable) (sa — missing) (sym — missing) (primary-status stable) (class full) (candidate-full-uk "викликати") (candidate-full-status чинна) (candidate-compact-uk —) (ambiguity not-yet-assessed) (evidence generated-function-table staging-profile))
   )
 )
