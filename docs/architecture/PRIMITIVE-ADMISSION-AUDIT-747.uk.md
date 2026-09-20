@@ -132,3 +132,33 @@ Replay на поточному main допускає `invoke` як SID `10101000
 
 Ширший primitive-budget audit #734 уже завершено окремо; цей replay закриває
 лише atomic admission gap `invoke`, який відстежують #747/#779.
+
+## Raw REPL `invoke` — це escape hatch, а не semantic routing
+
+Інтерактивна поверхня може давати `invoke / викликати` як низькорівневу
+native-boundary для діагностики, експериментів і прямого доступу до islands.
+Цей шлях **не** замінює звичайне семантичне виконання Lisp.
+
+Два шляхи навмисно різні:
+
+```text
+звичайний Lisp
+  surface -> Canon/function-table SID + meaning
+  -> admitted mechanism
+  -> mechanism selector
+  -> mechanical lowering
+  -> executor
+
+raw invoke
+  invoke SID
+  -> registered host capability
+  -> opaque producer-native payload
+  -> island
+  -> explicit island-native observation
+```
+
+Common Lisp form, Prolog goal, CLIPS command або Datalog relation, передані в
+raw `invoke`, лишаються native data. Їхнє написання не може створити Lisp SID,
+admit execution mechanism, встановити Canon law чи переозначити чинну Lisp
+identity. Raw result так само лишається producer-native observation і сам факт
+успішного виконання не робить його доказом semantic law.
