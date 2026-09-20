@@ -217,7 +217,7 @@ fn full_ukrainian_surface_reuses_uk_identity_and_exposes_full_spelling() {
     assert_eq!(compact.value.to_string(), "t");
     assert_eq!(full.value.to_string(), "t");
 
-    let compact_sid = semantic_registry_export::admitted_surfaces_for_semantic_id(0b00111100)
+    let compact_sid = my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(0b00111100)
         .into_iter()
         .find(|surface| surface.namespace == "uk")
         .map(|surface| surface.name.to_string());
