@@ -204,11 +204,17 @@ fn lisp_owned_encoder_is_part_of_the_vertical_boundary_proof() {
 #[test]
 #[ignore = "legacy-transition: hard-coded pre-rebuild ADD SID; keep machine lowering mechanics, not obsolete semantic numbering"]
 fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wrappers() {
-    assert!(
-        assert!(
-        lowering_source.contains("(\"00001100\" fast-path \"ADD / ADDSD\")"),
-        "lowering projection must map semantic SID 00001100 toward ADD"
+    let sid = my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("додати")
+        .expect("ADD semantic surface must remain admitted");
+    assert_eq!(
+        my_lisp::semantic_registry_export::semantic_id_bits(sid),
+        "00001100"
     );
+
+    let lowering_path = repo_root().join("lib/machine/lowering/semantic-x86-64.lisp");
+    let lowering_source = fs::read_to_string(&lowering_path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", lowering_path.display()));
+
     assert!(
         lowering_source.contains("(def x86-lower-add-u64-forms"),
         "semantic lowerer must expose structured machine forms"
@@ -237,7 +243,7 @@ fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wra
         .expect("semantic x86-64 lowering must load as ordinary my-lisp");
 
     let forms = eval_program("(x86-lower-add-u64-forms 2 3)", &mut session)
-        .expect("semantic SID 00001100 proof lowering must produce structured machine forms")
+        .expect("semantic ADD proof lowering must produce structured machine forms")
         .value
         .to_string();
     assert_eq!(
