@@ -15,8 +15,8 @@ No implementation file, README paragraph, agent note, benchmark, or historical p
 When two sources disagree, use this order:
 
 1. **`language-contract.lisp`** — machine-readable Level 1/2 contract version and ratified observable invariants.
-2. **Ratified ADRs under `docs/adr/`** — closed decisions whose scope is explicitly stated, especially `ADR-004-CLOSED-MCCARTHY7-CORE.md`.
-3. **Executable conformance evidence** — `tests/fixtures/conformance.lisp`, `tests/fixtures/macro-conformance.lisp`, `lib/canon.lisp`, and the tests that execute those contracts.
+2. **Canon `()` / Lisp-owned function-table identity sources** — `lib/surface/semantic-registry.lisp`, executable Canon/law sources such as `lib/canon.lisp`, and ratified Lisp-owned function-table metadata. Downstream mechanism/generated tables are projections, never peers of this authority.
+3. **Ratified ADRs and executable conformance evidence** — closed decisions within their stated scope plus `tests/fixtures/conformance.lisp`, `tests/fixtures/macro-conformance.lisp`, and the tests that execute those contracts.
 4. **Reference implementation** — `crates/my-lisp`. It is the mature software oracle used to test behavior, not the owner of semantics merely because it is Rust.
 5. **Independent implementations** — `fpga-lisp`, `c-runtime/`, and other declared substrates. Their value is that they can falsify implementation-specific assumptions.
 6. **Generated reference** — for example `docs/FUNCTIONS.md`. Generated output describes the current implementation surface but does not redefine the contract.
@@ -27,13 +27,13 @@ If a lower item conflicts with a higher item, the lower item is stale until reco
 
 ## Semantic identity vs surface spelling
 
-A spelling is not a primitive identity. Canon 0 + McCarthy-7 remain the stable historical/minimal root:
+A spelling is not a primitive identity. Canon `()` / the Lisp-owned function table is the current semantic-dispatch root. McCarthy-7 remains a stable historical/minimal root inside that authority, not a parallel table:
 
 ```text
 quote · atom · eq · cons · car · cdr · cond
 ```
 
-The project also treats the concrete empty proper list `()` as Canon 0: a value/syntax identity, not an eighth operation and not a lexical alias.
+The concrete empty proper list `()` is the Canon ground/list identity. It is not an executor result sentinel, not an eighth operation, and not a lexical alias. Native “no result” observations do not become Canon `()` unless a Lisp-owned law explicitly projects them that way.
 
 Natural-language and historical surfaces map onto semantic identities; changing a surface name does not create a new primitive.
 
@@ -41,7 +41,7 @@ Natural-language and historical surfaces map onto semantic identities; changing 
 
 Do not collapse three different questions:
 
-- **semantic primitives** — evidence-admitted identities under Contract 7.0 / ADR-005, with Canon 0 + McCarthy-7 retained as the stable historical root;
+- **semantic primitives** — evidence-admitted identities under the current language contract / ADR-005; Canon `()` / the function table owns identity and meaning, while McCarthy-7 remains historical/minimal context;
 - **evaluator-controlled bootstrap forms** — machinery needed to create language behavior;
 - **derived language forms** — behavior expressible by the language once the bootstrap substrate exists.
 
@@ -58,12 +58,13 @@ The current canonical source extension is **`.lisp`** (per [my-lisp#81](https://
 Use these terms consistently:
 
 ```text
-semantic authority       = contract + ratified decisions + executable conformance
+semantic authority       = contract + Canon () / Lisp-owned function table + ratified laws/conformance
+mechanism projection     = admitted executor/lowering metadata derived from that authority
 reference implementation = crates/my-lisp (Rust)
 independent substrate     = fpga-lisp / c-runtime / other conformance target
 ```
 
-Avoid “canonical Rust implementation” when the intended meaning is “reference implementation”. A canonical implementation would imply that Rust itself defines semantics, which contradicts the conformance architecture.
+Avoid “canonical Rust implementation” when the intended meaning is “reference implementation”. A canonical implementation would imply that Rust itself defines semantics, which contradicts the conformance architecture. Likewise, do not call executor/mechanism maps semantic authority: mechanism selection happens only after Canon/function-table identity and meaning are fixed.
 
 ## Host boundary
 
