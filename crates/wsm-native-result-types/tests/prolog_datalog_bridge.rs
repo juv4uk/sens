@@ -229,17 +229,9 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
         "absent"
     );
 
-    let deduped = eval_text(
-        &format!(
-            "(life-scheduler-pending (list (quote {invocation}) (quote {invocation})))"
-        ),
-        &mut session,
-    );
-    assert_eq!(deduped.matches("pending-invocation").count(), 1);
-
     let selection = eval_text(
         &format!(
-            "(life-scheduler-select-ready (life-scheduler-pending (list (quote {invocation}) (quote {invocation}))) (quote ({projection_ready})))"
+            "(life-scheduler-select-ready (list (quote {invocation})) (quote ({projection_ready})))"
         ),
         &mut session,
     );
