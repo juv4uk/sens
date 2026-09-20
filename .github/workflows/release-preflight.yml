@@ -10,17 +10,52 @@ on:
       - ".github/workflows/release-preflight.yml"
   workflow_dispatch:
 
+concurrency:
+  group: release-preflight-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release-preflight:
-    name: cargo test + full workspace clippy
+    # Той самий focused набір, що тег-гейт `test` у `release.yml`: тег-час
+    # гарантує ці чеки серверно, тут вони ловлять проблему ще в PR. Повний
+    # `cargo test --workspace` + `clippy --workspace` належить `full-nightly`,
+    # не PR-гейту випуску: релізний скрипт тепер вимагає саме зелений CI на
+    # злитому SHA, а не локальний повний прогон.
+    name: focused release preflight
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: release-preflight
-      - name: Full workspace tests
-        run: cargo test --workspace
-      - name: Full workspace clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Build CLI for release-script stop tests
+        run: cargo build -p my-lisp-cli --bin my-lisp
+
+      - name: Версійна паритетність релізних crates
+        run: cargo test --locked -p my-lisp-lsp --test release_parity
+
+      - name: Ізольовані перевірки інсталятора
+        run: python3 -m unittest discover -s packaging/tests -p test_install.py -v
+
+      - name: Перевірки зупинки релізного скрипта
+        run: MY_LISP_RELEASE_TEST_BINARY="$PWD/target/debug/my-lisp" python3 -m unittest discover -s packaging/tests -p test_release.py -v
+
+      - name: translation boundary regression
+        run: cargo test --locked -p my-lisp --test translation_boundary
+
+      - name: Ukrainian/Sanskrit surface regression
+        run: cargo test --locked -p my-lisp --test uk_sa_surface
+
+      - name: island installer CLI
+        run: cargo test --locked -p my-lisp-cli --test islands_cli
+
+      - name: release asset contract
+        run: cargo test --locked -p my-lisp-cli --test islands_release_asset
+
+      - name: focused release clippy
+        run: cargo clippy -p my-lisp -p my-lisp-cli --all-targets -- -D warnings
