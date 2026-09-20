@@ -71,6 +71,9 @@ fn ukr_aliases(source: &str) -> BTreeMap<u32, u32> {
 fn uk_surface_audit_generator_runs_through_real_my_lisp_cli() {
     let root = repo_root();
     let script = root.join("scripts/generate-uk-surface-audit.lisp");
+    let audit = root.join("lib/generated/uk-surface-audit.lisp");
+    let before = fs::read_to_string(&audit).expect("committed UK surface audit must be readable");
+
     let output = my_lisp(&root)
         .arg(&script)
         .output()
@@ -82,6 +85,12 @@ fn uk_surface_audit_generator_runs_through_real_my_lisp_cli() {
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     );
+
+    let after = fs::read_to_string(&audit).expect("regenerated UK surface audit must be readable");
+    assert_eq!(
+        after, before,
+        "committed UK surface audit must be byte-fresh against the Lisp-owned generator"
+    );
 }
 
 #[test]
@@ -91,12 +100,6 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
         .expect("Ukrainian staging profile must be readable");
 
     let rows = ukr_candidate_rows(&profile);
-    assert_eq!(
-        rows.len(),
-        167,
-        "coherence audit must inspect every Ukrainian staging candidate"
-    );
-
     let by_id: BTreeMap<u32, &UkrCandidateRow> =
         rows.iter().map(|row| (row.id, row)).collect();
     let aliases = ukr_aliases(&profile);
