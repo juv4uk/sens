@@ -5,7 +5,7 @@
 //! The evaluator is split by concern: this module owns the trampoline loop and
 //! dispatch table, `arithmetic` owns exact/inexact number handling, `special_forms`
 //! owns the McCarthy primitives plus compatibility `def`/`cond`,
-//! `necessary_forms` owns the immutable DEFINE/LAMBDA identities, and `closures`
+//! `evaluator_dispatch_generated` projects Lisp-owned operation classes, `necessary_forms` maps those classes onto DEFINE/LAMBDA mechanisms, and `closures`
 //! owns lambda construction and function/macro application.
 pub(crate) use special_forms::digest::sha256 as digest_sha256;
 
@@ -14,6 +14,7 @@ pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
 mod closures;
+pub(crate) mod evaluator_dispatch_generated;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
 mod special_forms;
