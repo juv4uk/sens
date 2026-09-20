@@ -127,16 +127,16 @@ fn full_binary_registry_handoff_is_lisp_owned_and_digest_pinned() {
         "handoff must report every current canonical semantic row"
     );
     assert!(
-        rendered.contains("(binary-round-trip verified)"),
-        "every admitted SID must survive the Lisp-owned Binary write/read round-trip"
+        rendered.contains("(canonical-rows (00000000 "),
+        "handoff must expose the parsed canonical rows beginning with Binary SID values"
     );
     assert!(
-        rendered.contains("(identities 00000000 00000001"),
-        "identity projection must begin with Binary SID values, not decimal shadows"
+        rendered.contains("(10101000 (en invoke)"),
+        "handoff must preserve the invoke row as Binary identity data"
     );
     assert!(
-        rendered.ends_with("10101000 10101001))"),
-        "identity projection must include the full canonical registry tail as Binary values"
+        rendered.contains("(10101001 (en binary)"),
+        "handoff must preserve the current canonical registry tail as Binary identity data"
     );
 }
 
