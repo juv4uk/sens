@@ -322,6 +322,33 @@ fn scheduler_deduplicates_real_invocation_and_rejects_malformed_trigger() {
         "present"
     );
 
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(atom (life-scheduler-field (quote {invocation}) (quote trigger)))"
+            ),
+            &mut session,
+        ),
+        "(structural-kind pair)"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(atom (cdr (life-scheduler-field (quote {invocation}) (quote trigger))))"
+            ),
+            &mut session,
+        ),
+        "(structural-kind pair)"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-field (quote {invocation}) (quote provenance-ref))"
+            ),
+            &mut session,
+        ),
+        "observation-42"
+    );
     let deduplicated = eval_text(
         &format!(
             "(life-scheduler-pending (list (quote {invocation}) (quote {invocation})))"
