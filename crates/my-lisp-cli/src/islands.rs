@@ -631,6 +631,47 @@ fn running_as_root() -> bool {
     false
 }
 
+fn install_embedded_island(
+    island: &Island,
+    entry: &PlatformEntry,
+    root: &Path,
+) -> Result<String, String> {
+    let executable = std::env::current_exe()
+        .map_err(|error| format!("cannot locate my-lisp distribution executable: {error}"))?;
+    if !executable.is_file() {
+        return Err(format!(
+            "embedded island {} is unavailable: my-lisp executable is missing at {}",
+            island.key,
+            executable.display()
+        ));
+    }
+
+    let target_dir = install_dir(root, island, &entry.target);
+    let record = target_dir.join("install-record.txt");
+
+    if record.is_file() {
+        return Ok(format!(
+            "already installed {} {}: available (embedded)",
+            island.key, island.runtime_version
+        ));
+    }
+
+    let _lock = acquire_install_lock(&target_dir)?;
+    if record.is_file() {
+        return Ok(format!(
+            "already installed {} {}: available (embedded)",
+            island.key, island.runtime_version
+        ));
+    }
+
+    write_install_record(&target_dir, island, entry)?;
+
+    Ok(format!(
+        "installed {} {}: available (embedded)",
+        island.key, island.runtime_version
+    ))
+}
+
 fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<String, String> {
     let package = entry
         .package
@@ -1080,9 +1121,22 @@ pub fn run(args: &[String]) -> Result<String, String> {
                 }
 
                 match entry {
+                    Some(entry) if entry.provider == "embedded" && !dry_run => {
+                        write_install_state(&root, island, target, "installing")?;
+                        match install_embedded_island(island, entry, &root) {
+                            Ok(message) => {
+                                write_install_state(&root, island, target, "available")?;
+                                rows.push(message);
+                            }
+                            Err(error) => {
+                                write_install_state(&root, island, target, "failed-install")?;
+                                return Err(error);
+                            }
+                        }
+                    }
                     Some(entry) if entry.provider == "embedded" => {
                         rows.push(format!(
-                            "embedded {} {}: available with the my-lisp distribution",
+                            "install {} {} as part of the my-lisp distribution",
                             island.key, island.runtime_version
                         ));
                     }
