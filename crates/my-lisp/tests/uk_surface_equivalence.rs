@@ -244,8 +244,14 @@ fn admitted_invoke_surfaces_materialize_from_the_single_registry() {
     let ukrainian = eval_program("викликати", &mut session)
         .expect("registry-admitted Ukrainian invoke surface must resolve")
         .value;
+    let invoke_sid = my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("invoke")
+        .expect("invoke must be admitted by sr/2");
+    let ukrainian_sid =
+        my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("викликати")
+            .expect("викликати must be admitted by sr/2");
 
-    assert_eq!(english, Value::SemanticRef(0b1010_1000));
-    assert_eq!(ukrainian, Value::SemanticRef(0b1010_1000));
+    assert_eq!(invoke_sid, ukrainian_sid);
+    assert_eq!(english, Value::SemanticRef(invoke_sid));
+    assert_eq!(ukrainian, Value::SemanticRef(ukrainian_sid));
     assert_eq!(english, ukrainian);
 }
