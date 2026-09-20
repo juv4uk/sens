@@ -1,6 +1,14 @@
 {
   "protocol": "my-lisp-islands-manifest/1",
-  "profiles": [{"key": "four-kernel", "islands": ["prolog", "clips"]}],
+  "profiles": [
+    {
+      "key": "four-kernel",
+      "islands": [
+        "prolog",
+        "clips"
+      ]
+    }
+  ],
   "islands": [
     {
       "key": "prolog",
@@ -12,9 +20,16 @@
           "target": "linux-x86_64",
           "provider": "apt",
           "package": "swi-prolog",
-          "probe": ["swipl", "--version"]
+          "probe": [
+            "swipl",
+            "--version"
+          ],
+          "entrypoint": "swipl"
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "prolog",
+      "license_acceptance_required": false
     },
     {
       "key": "clips",
@@ -27,14 +42,23 @@
           "provider": "release-asset",
           "url": "https://example.invalid/clips-6.4.2-linux-x86_64.tar.gz",
           "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-          "probe": ["clips", "--version"]
+          "probe": [
+            "clips",
+            "--version"
+          ],
+          "checksum_algorithm": "sha256",
+          "artifact_format": "raw-binary",
+          "entrypoint": "clips"
         },
         {
           "target": "windows-x86_64",
           "provider": "unsupported",
           "reason": "No verified CLIPS release artifact for this target"
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "clips",
+      "license_acceptance_required": true
     }
   ]
 }
