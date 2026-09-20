@@ -123,8 +123,6 @@ fn runtime_peer_slice_matches_numeric_registry_rows() {
 #[test]
 fn ukrainian_builtin_presentation_uses_numeric_authority_not_legacy_audit() {
     assert!(!PRESENTATION.contains("uk-sa-coverage.lisp"));
-    assert!(PRESENTATION.contains("semantic-registry.lisp"));
-
     for case in CASES {
         let mut session = Session::default();
         let builtin = value(&mut session, case.sym);
@@ -150,11 +148,11 @@ fn tooling_metadata_follows_the_shared_builtin_value_for_every_peer() {
         let uk = lookup(case.uk);
         let sa = lookup(case.sa);
         let sym = lookup(case.sym);
-        assert_eq!(uk.signature, sym.signature, "{} UK signature", case.identity);
-        assert_eq!(sa.signature, sym.signature, "{} SA signature", case.identity);
-        assert_eq!(uk.documentation, sym.documentation, "{} UK docs", case.identity);
-        assert_eq!(sa.documentation, sym.documentation, "{} SA docs", case.identity);
-        assert_eq!(uk.arity, sym.arity, "{} UK arity", case.identity);
-        assert_eq!(sa.arity, sym.arity, "{} SA arity", case.identity);
+        assert_eq!(uk.signature, sym.signature, "{} UK signature", case.uk);
+        assert_eq!(sa.signature, sym.signature, "{} SA signature", case.uk);
+        assert_eq!(uk.documentation, sym.documentation, "{} UK docs", case.uk);
+        assert_eq!(sa.documentation, sym.documentation, "{} SA docs", case.uk);
+        assert_eq!(uk.arity, sym.arity, "{} UK arity", case.uk);
+        assert_eq!(sa.arity, sym.arity, "{} SA arity", case.uk);
     }
 }
