@@ -14,6 +14,7 @@ pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
 mod closures;
+pub(crate) mod evaluator_dispatch_generated;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
 mod special_forms;
