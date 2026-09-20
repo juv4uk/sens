@@ -94,6 +94,8 @@ pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
 
 /// The ordinary my-lisp bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
+/// Language-owned fixed-width byte algebra layered over the native Binary value.
+pub const U8_LIBRARY_SOURCE: &str = include_str!("../../../lib/u8.lisp");
 
 /// Generated runtime projection of admitted surface spellings to opaque numeric
 /// semantic IDs. semantic-registry.lisp remains the only spelling authority.
@@ -239,6 +241,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     load_macro_library(session)?;
     let result = eval_program(CORE_LIBRARY_SOURCE, session)?;
+    eval_program(U8_LIBRARY_SOURCE, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
