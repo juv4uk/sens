@@ -85,6 +85,7 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
 }
 
 #[test]
+// Stable surface admission is visible as a SemanticRef before the capability layer loads.
 fn utc_now_is_admitted_before_language_time_layer_loads() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
