@@ -46,7 +46,7 @@ impl ReplSurface {
         match value.trim().to_lowercase().as_str() {
             "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
-            "uk" | "ук" | "українська" => Some(Self::Ukrainian),
+            "ук" | "українська" => Some(Self::Ukrainian),
             "sa" | "sanskrit" | "санскрит" => Some(Self::Sanskrit),
             _ => None,
         }
