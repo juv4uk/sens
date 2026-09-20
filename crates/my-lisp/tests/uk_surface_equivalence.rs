@@ -63,10 +63,10 @@ fn registry_rows() -> Vec<(&'static str, Vec<Surface>)> {
         .filter_map(|line| {
             let fields = line.split_whitespace().collect::<Vec<_>>();
             let semantic_id = fields
-                .first()?
-                .strip_prefix("(\"")?
-                .strip_suffix('"')?;
-            if semantic_id.len() != 8
+            let semantic_token = fields.first()?;
+            let semantic_id = semantic_token.strip_prefix('(')?;
+            let semantic_id = semantic_id.strip_prefix('"').unwrap_or(semantic_id);
+            let semantic_id = semantic_id.strip_suffix('"').unwrap_or(semantic_id);
                 || !semantic_id.bytes().all(|byte| matches!(byte, b'0' | b'1'))
             {
                 return None;
