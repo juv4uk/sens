@@ -16,3 +16,6 @@ wsm-prolog-kernel = { path = "../wsm-prolog-kernel" }
 wsm-clips-kernel = { path = "../wsm-clips-kernel" }
 wsm-datalog-kernel = { path = "../wsm-datalog-kernel" }
 wsm-kernel-c-abi = { path = "../wsm-kernel-c-abi" }
+
+[dev-dependencies]
+my-lisp = { path = "../my-lisp" }
