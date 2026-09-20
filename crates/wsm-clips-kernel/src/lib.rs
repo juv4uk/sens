@@ -570,7 +570,9 @@ impl ClipsExecutionResult {
 }
 
 struct ClipsAbiContext {
+    #[allow(dead_code)]
     rule: String,
+    #[allow(dead_code)]
     fact_text: String,
     running: bool,
     last_semantic_id: Option<SemanticId>,
@@ -641,7 +643,7 @@ unsafe extern "C" fn clips_start(context: *mut c_void) -> WsmStatus {
     #[cfg(not(feature = "native-clips"))]
     {
         let _ = context;
-        return WsmStatus::KernelFailure;
+        WsmStatus::KernelFailure
     }
 
     #[cfg(feature = "native-clips")]
@@ -734,7 +736,7 @@ unsafe extern "C" fn clips_exchange(
     #[cfg(not(feature = "native-clips"))]
     {
         let _ = (command, response);
-        return WsmStatus::KernelFailure;
+        WsmStatus::KernelFailure
     }
 
     #[cfg(feature = "native-clips")]

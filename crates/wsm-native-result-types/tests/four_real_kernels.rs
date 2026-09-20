@@ -1,3 +1,5 @@
+#![cfg(feature = "native-clips")]
+
 use std::path::PathBuf;
 
 use wsm_clips_kernel::{
