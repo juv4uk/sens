@@ -350,6 +350,9 @@
            ((equal? path observed-path) (structural-relation distinct)
             (repo-tooling-observed-path-state path (cdr observed)))))))))
 
+; Stale-path coverage is scoped to immediate scripts/* entries.
+; Non-script rows are still subject to required-field/enum/duplicate validation
+; but are checked for physical presence by their explicit non-script witnesses.
 (def repo-tooling-stale-path-verdict
   (lambda (rows observed)
     (cond
@@ -358,15 +361,19 @@
        (repo-tooling-violation (quote malformed-inventory-list) rows))
       ((atom rows) (structural-kind pair)
        (let* ((row (car rows))
-              (path (repo-tooling-field (quote path) row))
-              (state (repo-tooling-observed-path-state path observed)))
+              (path (repo-tooling-field (quote path) row)))
          (cond
-           ((eq state (quote present)) (identity-relation same)
-            (repo-tooling-stale-path-verdict (cdr rows) observed))
-           ((eq state (quote absent)) (identity-relation same)
-            (repo-tooling-violation (quote stale-path) path))
-           ((eq state (quote malformed)) (identity-relation same)
-            (repo-tooling-violation (quote malformed-observed-list) observed))))))))
+           ((string-prefix? "scripts/" path) (structural-relation same)
+            (let ((state (repo-tooling-observed-path-state path observed)))
+              (cond
+                ((eq state (quote present)) (identity-relation same)
+                 (repo-tooling-stale-path-verdict (cdr rows) observed))
+                ((eq state (quote absent)) (identity-relation same)
+                 (repo-tooling-violation (quote stale-path) path))
+                ((eq state (quote malformed)) (identity-relation same)
+                 (repo-tooling-violation (quote malformed-observed-list) observed))))
+           ((string-prefix? "scripts/" path) (structural-relation distinct)
+            (repo-tooling-stale-path-verdict (cdr rows) observed)))))))
 
 (def repo-tooling-observed-coverage-verdict
   (lambda (rows observed)
@@ -621,24 +628,12 @@
 (def repo-tooling-live-observed
   (repo-tooling-observed-scripts (read-dir "scripts")))
 
-(def repo-tooling-script-rows
-  (lambda (rows)
-    (cond
-      ((atom rows) (structural-kind empty-list) (quote ()))
-      ((atom rows) (structural-kind atom) (quote ()))
-      ((atom rows) (structural-kind pair)
-       (let ((row (car rows)))
-         (cond
-           ((string-prefix? "scripts/" (repo-tooling-field (quote path) row))
-            (structural-relation same)
-            (cons row (repo-tooling-script-rows (cdr rows))))
-           ((string-prefix? "scripts/" (repo-tooling-field (quote path) row))
-            (structural-relation distinct)
-            (repo-tooling-script-rows (cdr rows)))))))))
-
 (def repo-tooling-live-scripts-verdict
+  ; Historical name retained for compatibility with the existing live witness;
+  ; the verdict now validates all registered rows while stale-path coverage
+  ; itself remains scoped to scripts/* above.
   (repo-tooling-verdict
-    (repo-tooling-script-rows repo-tooling-live-rows)
+    repo-tooling-live-rows
     repo-tooling-live-observed))
 
 (def repo-tooling-assert-scripts-stage
