@@ -49,6 +49,21 @@ fn eval(source: &str) -> Value {
 }
 
 #[test]
+fn native_binary_value_round_trips_through_eval_and_print() {
+    let mut session = Session::default();
+    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("core library loads");
+    let first = eval_program("(binary 8) 00000101", &mut session)
+        .expect("binary value evaluates");
+    assert_eq!(first.value.to_string(), "00000101");
+
+    let printed = first.value.to_string();
+    let second = eval_program(&format!("(binary 8) {printed}"), &mut session)
+        .expect("printed binary value reads again");
+    assert_eq!(second.value, first.value);
+}
+
+#[test]
 fn division_is_an_exact_reduced_rational() {
     assert_eq!(
         eval("(/ 5 6 8 7)"),
