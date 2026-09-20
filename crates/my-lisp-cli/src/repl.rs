@@ -31,6 +31,7 @@ const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
     ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
 ];
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
+const UKR_SURFACE: &str = include_str!("../../../lib/surface/ukr.lisp");
 const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -108,7 +109,8 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
             })?;
         }
         let (name, source) = match surface {
-            ReplSurface::Ukrainian | ReplSurface::UkrainianFull => ("uk.lisp", UK_SURFACE),
+            ReplSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
+            ReplSurface::UkrainianFull => ("ukr.lisp", UKR_SURFACE),
             ReplSurface::Sanskrit => ("sa.lisp", SA_SURFACE),
             ReplSurface::Core | ReplSurface::English => unreachable!(),
         };
@@ -430,6 +432,9 @@ mod tests {
         assert!(en.contains("surface en: stable 137 · candidate 0 · missing 9"));
         assert!(uk.contains("surface uk: stable 140"));
         assert!(ukr.contains("surface ukr:"));
+        let mut state = core_state();
+        state.switch_surface(ReplSurface::UkrainianFull).expect("ukr");
+        assert_eq!(value(&mut state, "(порожній-текст? \"\")"), "t");
         assert!(sa.contains("surface sa: stable 36 · candidate 88 · missing 22"));
     }
 
