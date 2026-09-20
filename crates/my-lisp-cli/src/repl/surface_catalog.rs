@@ -124,7 +124,7 @@ fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
                 ),
                 _ => {
                     return Err(format!(
-                        "registry line {}: malformed status-free sr/2 surface ({group})",
+                        "registry line {}: malformed semantic registry surface ({group})",
                         index + 1
                     ));
                 }
