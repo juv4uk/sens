@@ -108,6 +108,10 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
                 format!("не вдалося завантажити {name}: {}", error.render(source))
             })?;
         }
+        if matches!(surface, ReplSurface::UkrainianFull) {
+            eval_program(UK_SURFACE, &mut session)
+                .map_err(|error| format!("не вдалося завантажити uk.lisp: {}", error.render(UK_SURFACE)))?;
+        }
         let (name, source) = match surface {
             ReplSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
             ReplSurface::UkrainianFull => ("ukr.lisp", UKR_SURFACE),
