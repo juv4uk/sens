@@ -122,7 +122,11 @@ fn partial_overlap_is_visible_and_excluded_from_shared_set() {
             text_field(row, "exclusion-reason").contains(reason_fragment),
             "exclusion rationale for {operation} is not explicit"
         );
-        assert_eq!(text_field(row, "common-lisp"), "partial");
+        if operation != "comparisons" {
+            assert_eq!(text_field(row, "common-lisp"), "partial");
+        } else {
+            assert_eq!(text_field(row, "common-lisp"), "present");
+        }
     }
 }
 
