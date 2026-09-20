@@ -14,11 +14,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = REPO_ROOT / "lib" / "surface" / "semantic-registry.lisp"
-HUMAN_SURFACES = ("uk", "en", "sa")
-ALL_SURFACES = ("en", "uk", "ukr", "sa", "sym")
+HUMAN_SURFACES = ("ук", "en", "sa")
+ALL_SURFACES = ("en", "ук", "укр", "sa", "sym")
 ENTRY = re.compile(r"^\s*\(([01]{8})\s+(.*)\)\s*$")
 SURFACE = re.compile(
-    r'\((en|uk|ukr|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)'
+    r'\((en|ук|укр|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)'
 )
 
 
