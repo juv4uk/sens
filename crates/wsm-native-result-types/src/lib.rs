@@ -289,6 +289,32 @@ mod tests {
     use wsm_prolog_kernel::SemanticId as PrologSemanticId;
 
     #[test]
+    fn provenance_edge_preserves_source_and_target_identity() {
+        let source = ObservationRef::new(11, ProducerSlot::Prolog, 3, ProducerSlot::Prolog)
+            .with_metadata_ref(101);
+        let target = ObservationRef::new(12, ProducerSlot::Datalog, 4, ProducerSlot::Datalog);
+        let edge = ProvenanceEdge::projected_into(source, 801, target);
+
+        assert_eq!(edge.edge_type, ProvenanceEdgeType::ProjectedInto);
+        assert_eq!(edge.from, source);
+        assert_eq!(edge.to, target);
+        assert_eq!(edge.via_bridge_contract_ref, 801);
+        assert_eq!(edge.from.metadata_ref, Some(101));
+        assert_eq!(edge.from.native_slot, ProducerSlot::Prolog);
+        assert_eq!(edge.to.native_slot, ProducerSlot::Datalog);
+    }
+
+    #[test]
+    fn provenance_edge_does_not_claim_round_trip_or_truth() {
+        let source = ObservationRef::new(20, ProducerSlot::Prolog, 3, ProducerSlot::Prolog);
+        let target = ObservationRef::new(21, ProducerSlot::Datalog, 4, ProducerSlot::Datalog);
+        let edge = ProvenanceEdge::projected_into(source, 801, target);
+
+        assert_eq!(edge.edge_type, ProvenanceEdgeType::ProjectedInto);
+        assert_ne!(edge.from.observation_id, edge.to.observation_id);
+    }
+
+    #[test]
     fn artifact_preserves_four_concrete_producer_types() {
         let observation = FourKernelObservation::new(
             CommonLispResult {
