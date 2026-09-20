@@ -316,6 +316,7 @@ fn load_manifest_file(path: &str) -> Result<Manifest, String> {
             || island.abi_compatibility.is_empty()
             || island.install_key.is_empty()
             || island.license.is_empty()
+            || island.provenance.is_empty()
         {
             return Err(format!(
                 "island {} is missing required release metadata",
@@ -890,13 +891,28 @@ pub fn run(args: &[String]) -> Result<String, String> {
                     .find(|island| island.key == key)
                     .ok_or_else(|| format!("unknown island: {key}"))?;
                 let entry = island.platforms.iter().find(|entry| entry.target == target);
+                let destination = root
+                    .join(&island.install_key)
+                    .join(&island.runtime_version)
+                    .join(target);
+                let verified_installed = destination.join("install-record.txt").is_file();
+
                 let mut row = format!(
-                    "island: {}\nversion: {}\nlicense: {}\nprovenance: {}\ntarget: {}",
+                    "island: {}\nversion: {}\nabi: {}\ninstall-key: {}\nlicense: {}\nlicense-acceptance: {}\nprovenance: {}\ntarget: {}\ndestination: {}\nverified-installed: {}",
                     island.key,
                     island.runtime_version,
+                    island.abi_compatibility,
+                    island.install_key,
                     island.license,
+                    if island.license_acceptance_required {
+                        "required"
+                    } else {
+                        "not-required"
+                    },
                     island.provenance,
-                    target
+                    target,
+                    destination.display(),
+                    if verified_installed { "yes" } else { "no" }
                 );
                 match entry {
                     Some(entry) if entry.provider == "unsupported" => {
@@ -919,8 +935,17 @@ pub fn run(args: &[String]) -> Result<String, String> {
                         if let Some(url) = &entry.url {
                             row.push_str(&format!("\nurl: {url}"));
                         }
+                        if let Some(algorithm) = &entry.checksum_algorithm {
+                            row.push_str(&format!("\nchecksum-algorithm: {algorithm}"));
+                        }
                         if let Some(sha256) = &entry.sha256 {
                             row.push_str(&format!("\nsha256:{sha256}"));
+                        }
+                        if let Some(format) = &entry.artifact_format {
+                            row.push_str(&format!("\nartifact-format: {format}"));
+                        }
+                        if let Some(entrypoint) = &entry.entrypoint {
+                            row.push_str(&format!("\nentrypoint: {entrypoint}"));
                         }
                     }
                     None => row.push_str(
