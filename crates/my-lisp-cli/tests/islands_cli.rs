@@ -132,6 +132,11 @@ fn islands_status_reports_probe_failure_without_hiding_version_identity() {
     let root = base.join("installed");
     let install = Command::new(env!("CARGO_BIN_EXE_my-lisp")).args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--with", "demo", "--root", root.to_str().unwrap(), "--apply"]).output().expect("install");
     assert!(install.status.success(), "{}", String::from_utf8_lossy(&install.stderr));
+    let install_stdout = String::from_utf8(install.stdout).unwrap();
+    assert!(install_stdout.contains("published"));
+    assert!(install_stdout.contains(": probe-failed"));
+    assert!(!install_stdout.contains(": available"));
+
     let status = Command::new(env!("CARGO_BIN_EXE_my-lisp")).args(["islands", "status", "--manifest", manifest_path.to_str().unwrap(), "--root", root.to_str().unwrap()]).output().expect("status");
     let stdout = String::from_utf8(status.stdout).unwrap();
     assert!(stdout.contains("demo 2 linux-x86_64 release: probe-failed"), "{stdout}");
