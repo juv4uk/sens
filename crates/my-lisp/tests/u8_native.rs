@@ -51,13 +51,15 @@ fn semantic_id_10101000_travels_as_lisp_u8_without_decimal_authority() {
     )
     .expect("Lisp-owned semantic registry API");
 
-    let result = eval_program(
-        "(binary 8) (semantic-registry-surface-name (quote en) (semantic-registry-row (u8 10101000)))",
-        &mut session,
-    )
-    .expect("Binary semantic ID should resolve through the Lisp registry")
-    .value
-    .to_string();
+    let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
+    let program = format!(
+        "(binary 8) (let ((registry (semantic-registry-read-source {}))) (semantic-registry-surface-name (quote en) (semantic-registry-row-in registry (u8 10101000))))",
+        format!("{registry_source:?}")
+    );
+    let result = eval_program(&program, &mut session)
+        .expect("Binary semantic ID should resolve through the Lisp registry")
+        .value
+        .to_string();
     assert_eq!(result, "invoke");
 
     let round_trip = eval_program(
