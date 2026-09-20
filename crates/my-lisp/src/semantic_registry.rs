@@ -105,7 +105,10 @@ fn parse_rows(source: &'static str) -> Vec<SemanticRow> {
         .filter_map(|line| {
             let fields = line.split_whitespace().collect::<Vec<_>>();
             let first = fields.first()?;
-            let sid_token = first.strip_prefix("(\"")?.strip_suffix('\"')?;
+            let sid_token = first
+                .strip_prefix("(\"")
+                .and_then(|value| value.strip_suffix('\"'))
+                .or_else(|| first.strip_prefix('('))?;
             let semantic_id = parse_sid_bits(sid_token)?;
             let groups = surface_groups(line);
 
