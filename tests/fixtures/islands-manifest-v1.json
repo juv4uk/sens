@@ -1,6 +1,16 @@
 {
   "protocol": "my-lisp-islands-manifest/1",
-  "profiles": [{"key": "four-kernel", "islands": ["common-lisp", "prolog", "clips", "datalog"]}],
+  "profiles": [
+    {
+      "key": "four-kernel",
+      "islands": [
+        "common-lisp",
+        "prolog",
+        "clips",
+        "datalog"
+      ]
+    }
+  ],
   "islands": [
     {
       "key": "common-lisp",
@@ -8,8 +18,21 @@
       "license": "BSD-2-Clause",
       "provenance": "system package manager",
       "platforms": [
-        {"target": "linux-x86_64", "provider": "apt", "package": "sbcl", "probe": ["sbcl", "--version"], "probe_expect": "SBCL"}
-      ]
+        {
+          "target": "linux-x86_64",
+          "provider": "apt",
+          "package": "sbcl",
+          "probe": [
+            "sbcl",
+            "--version"
+          ],
+          "probe_expect": "SBCL",
+          "entrypoint": "sbcl"
+        }
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "common-lisp",
+      "license_acceptance_required": false
     },
     {
       "key": "prolog",
@@ -17,8 +40,21 @@
       "license": "BSD-2-Clause",
       "provenance": "system package manager",
       "platforms": [
-        {"target": "linux-x86_64", "provider": "apt", "package": "swi-prolog", "probe": ["swipl", "--version"], "probe_expect": "SWI-Prolog"}
-      ]
+        {
+          "target": "linux-x86_64",
+          "provider": "apt",
+          "package": "swi-prolog",
+          "probe": [
+            "swipl",
+            "--version"
+          ],
+          "probe_expect": "SWI-Prolog",
+          "entrypoint": "swipl"
+        }
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "prolog",
+      "license_acceptance_required": false
     },
     {
       "key": "clips",
@@ -31,14 +67,23 @@
           "provider": "release-asset",
           "url": "https://example.invalid/clips-6.4.2-linux-x86_64.tar.gz",
           "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-          "probe": ["clips", "--version"]
+          "probe": [
+            "clips",
+            "--version"
+          ],
+          "checksum_algorithm": "sha256",
+          "artifact_format": "file",
+          "entrypoint": "clips.dll"
         },
         {
           "target": "windows-x86_64",
           "provider": "unsupported",
           "reason": "No verified CLIPS release artifact for this target"
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "clips",
+      "license_acceptance_required": false
     },
     {
       "key": "datalog",
@@ -46,9 +91,20 @@
       "license": "my-lisp distribution",
       "provenance": "embedded kernel",
       "platforms": [
-        {"target": "linux-x86_64", "provider": "embedded", "probe": []},
-        {"target": "windows-x86_64", "provider": "embedded", "probe": []}
-      ]
+        {
+          "target": "linux-x86_64",
+          "provider": "embedded",
+          "probe": []
+        },
+        {
+          "target": "windows-x86_64",
+          "provider": "embedded",
+          "probe": []
+        }
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "datalog",
+      "license_acceptance_required": false
     }
   ]
 }
