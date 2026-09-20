@@ -31,4 +31,4 @@
              (violation-class
                semantic-authority-debug-path
                semantic-authority-debug-source))
-            (t (quote unreadable)))))))
+            (t (quote unreadable))))))
