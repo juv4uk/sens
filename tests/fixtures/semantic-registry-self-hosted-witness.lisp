@@ -43,5 +43,4 @@
         (list (quote source-digest) (sha256-hex source))
         (list (quote binary-width) 8)
         (list (quote row-count) (length rows))
-        (list (quote binary-round-trip) (semantic-registry-all-ids-round-trip rows))
-        (cons (quote identities) (semantic-registry-row-ids rows))))))
+        (cons (quote canonical-rows) rows))))))
