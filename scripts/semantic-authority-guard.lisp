@@ -67,7 +67,7 @@
 (def scan
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list) (quote semantic-authority-ok))
+      ((atom rows) (structural-kind empty-list) (quote (semantic-authority-ok)))
       ((atom rows) (structural-kind pair)
        (let* ((row (car rows))
               (path (second row))
@@ -89,4 +89,4 @@
                   path class
                   "new host-side semantic authority requires explicit review"))))))))
 
-(scan changed)
+(print (scan changed))
