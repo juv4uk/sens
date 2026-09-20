@@ -43,10 +43,7 @@ impl Counts {
 }
 
 fn normalize_surface(surface: &str) -> &str {
-    match surface {
-        "ук" => "ук",
-        other => other,
-    }
+    surface
 }
 
 fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
