@@ -140,8 +140,8 @@ mod tests {
     fn generated_registry_contains_fixed_surface_namespaces() {
         let quote = &SEMANTIC_ROWS[1].surfaces;
         assert!(quote.contains(&SemanticSurface { namespace: "en", name: "quote" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "uk", name: "як-є" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "ukr", name: "як-є" }));
+        assert!(quote.contains(&SemanticSurface { namespace: "ук", name: "як-є" }));
+        assert!(quote.contains(&SemanticSurface { namespace: "укр", name: "як-є" }));
         assert!(quote.contains(&SemanticSurface { namespace: "sa", name: "svarūpa" }));
         assert!(quote.contains(&SemanticSurface { namespace: "sym", name: "'" }));
     }
@@ -177,7 +177,7 @@ mod tests {
         let names_only = admitted_surfaces_for_semantic_id(1);
         assert_eq!(with_namespace.len(), names_only.len());
         assert!(with_namespace.contains(&("en", "quote")));
-        assert!(with_namespace.contains(&("uk", "як-є")));
+        assert!(with_namespace.contains&("ук", "як-є")));
         assert!(with_namespace.contains(&("sym", "'")));
     }
 }
