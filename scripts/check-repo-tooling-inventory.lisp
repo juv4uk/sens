@@ -246,10 +246,10 @@
       ((atom rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
-           ((eq path (repo-tooling-field (quote path) row))
+           ((equal? path (repo-tooling-field (quote path) row))
             (identity-relation same)
             row)
-           ((eq path (repo-tooling-field (quote path) row))
+           ((equal? path (repo-tooling-field (quote path) row))
             (identity-relation distinct)
             (repo-tooling-find-row-by-path path (cdr rows)))))))))
 
@@ -279,8 +279,8 @@
       ((atom observed) (structural-kind pair)
        (let ((observed-path (string-append "scripts/" (car observed))))
          (cond
-           ((eq path observed-path) (identity-relation same) (quote present))
-           ((eq path observed-path) (identity-relation distinct)
+           ((equal? path observed-path) (identity-relation same) (quote present))
+           ((equal? path observed-path) (identity-relation distinct)
             (repo-tooling-observed-path-state path (cdr observed)))))))))
 
 (def repo-tooling-stale-path-verdict
@@ -535,9 +535,9 @@
       ((atom entries) (structural-kind pair)
        (let ((name (car entries)))
          (cond
-           ((eq name "tests") (identity-relation same)
+           ((equal? name "tests") (identity-relation same)
             (repo-tooling-observed-scripts (cdr entries)))
-           ((eq name "tests") (identity-relation distinct)
+           ((equal? name "tests") (identity-relation distinct)
             (cons name (repo-tooling-observed-scripts (cdr entries))))))))))
 
 (def repo-tooling-live-forms
