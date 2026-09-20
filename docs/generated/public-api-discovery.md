@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 35
-- top-level функцій: 852
+- top-level функцій: 854
 - top-level макросів: 34
-- усього визначень: 886
+- усього визначень: 888
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -79,6 +79,7 @@
 | `lib/content-store.lisp` | function | `content-store-put-world` | unreviewed |
 | `lib/content-store.lisp` | function | `content-store-size` | unreviewed |
 | `lib/core.lisp` | function | `identity` | unreviewed |
+| `lib/core.lisp` | function | `binary` | unreviewed |
 | `lib/core.lisp` | function | `list` | unreviewed |
 | `lib/core.lisp` | function | `not` | unreviewed |
 | `lib/core.lisp` | macro | `and` | unreviewed |
@@ -318,6 +319,7 @@
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-key-present?` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-dedup-pending` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-pending` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-projection-match?` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-projection-ready?` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-select-ready` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-quiescence-state` | unreviewed |
