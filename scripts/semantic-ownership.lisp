@@ -128,12 +128,33 @@
                (t (join-path-components parent-parts "")))))
       (member? name (read-dir parent)))))
 
+(def path-parent-and-name
+  (lambda (path)
+    (let* ((parts (split-char path "/"))
+           (name (path-last parts))
+           (parent-parts (path-parent-parts parts))
+           (parent
+             (cond
+               ((atom parent-parts) ".")
+               (t (join-path-components parent-parts "")))))
+      (list parent name))))
+
+(def observed-path-present?
+  (lambda (path observations)
+    (let* ((where (path-parent-and-name path))
+           (parent (car where))
+           (name (second where))
+           (entry (assoc parent observations)))
+      (cond
+        ((atom entry) (quote ()))
+        (t (member? name (second entry)))))))
+
 (def paths-present-verdict
-  (lambda (paths context)
+  (lambda (paths context observations)
     (cond
       ((atom paths) (ownership-ok))
-      ((path-present? (car paths))
-       (paths-present-verdict (cdr paths) context))
+      ((observed-path-present? (car paths) observations)
+       (paths-present-verdict (cdr paths) context observations))
       (t
        (ownership-violation
          (quote missing-referenced-path)
@@ -204,6 +225,57 @@
       ((ownership-row? row) (ownership-key row))
       ((migration-row? row) (migration-key row))
       (t (quote unknown)))))
+
+(def observe-path-parent
+  (lambda (path observations)
+    (let* ((where (path-parent-and-name path))
+           (parent (car where))
+           (existing (assoc parent observations)))
+      (cond
+        ((atom existing)
+         (cons (list parent (read-dir parent)) observations))
+        (t observations)))))
+
+(def observe-path-list
+  (lambda (paths observations)
+    (cond
+      ((atom paths) observations)
+      (t
+       (observe-path-list
+         (cdr paths)
+         (observe-path-parent (car paths) observations))))))
+
+(def observe-ownership-row-paths
+  (lambda (row observations)
+    (observe-path-list
+      (path-items (ownership-evidence-paths row))
+      (observe-path-list
+        (path-items (ownership-implementation-paths row))
+        observations))))
+
+(def observe-ownership-paths
+  (lambda (rows observations)
+    (cond
+      ((atom rows) observations)
+      (t
+       (observe-ownership-paths
+         (cdr rows)
+         (observe-ownership-row-paths (car rows) observations))))))
+
+(def observe-migration-row-paths
+  (lambda (row observations)
+    (observe-path-list
+      (path-items (migration-evidence-paths row))
+      observations)))
+
+(def observe-migration-paths
+  (lambda (rows observations)
+    (cond
+      ((atom rows) observations)
+      (t
+       (observe-migration-paths
+         (cdr rows)
+         (observe-migration-row-paths (car rows) observations))))))
 
 (def ownership-row-shape-verdict
   (lambda (row)
@@ -279,14 +351,20 @@
          (ownership-violation
            (quote confirmed-ownership-missing-evidence)
            (ownership-key row)))
-        (check-paths
+        ((atom check-paths) (ownership-ok))
+        (t
          (let ((implementation-verdict
-                 (paths-present-verdict implementation (ownership-key row))))
+                 (paths-present-verdict
+                   implementation
+                   (ownership-key row)
+                   check-paths)))
            (cond
              ((ownership-ok? implementation-verdict)
-              (paths-present-verdict evidence (ownership-key row)))
-             (t implementation-verdict))))
-        (t (ownership-ok))))))
+              (paths-present-verdict
+                evidence
+                (ownership-key row)
+                check-paths))
+             (t implementation-verdict))))))))
 
 (def migration-row-verdict
   (lambda (row check-paths)
@@ -310,9 +388,12 @@
             (ownership-violation
               (quote confirmed-migration-missing-evidence)
               (migration-key row)))
-           (check-paths
-            (paths-present-verdict evidence (migration-key row)))
-           (t (ownership-ok))))))))
+           ((atom check-paths) (ownership-ok))
+           (t
+            (paths-present-verdict
+              evidence
+              (migration-key row)
+              check-paths))))))))
 
 (def ownership-row-static-verdict
   (lambda (row check-paths)
@@ -876,8 +957,16 @@
 (def live-migrations
   (collect-tagged live-forms migration-row?))
 
+(def live-path-observations
+  (observe-migration-paths
+    live-migrations
+    (observe-ownership-paths live-ownership (quote ()))))
+
 (def live-verdict
-  (validate-ownership-inventory live-forms live-meta-forms t))
+  (validate-ownership-inventory
+    live-forms
+    live-meta-forms
+    live-path-observations))
 
 (def semantic-ownership-live-run
   (lambda ()
