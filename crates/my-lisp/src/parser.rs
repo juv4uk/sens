@@ -1,4 +1,5 @@
 use crate::{ErrorKind, Exactness, Expr, ExprKind, LanguageError, Span};
+use crate::Binary;
 use std::rc::Rc;
 
 /// `true` for a token that is exactly the single character `.` — the reader
@@ -24,20 +25,56 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
         source,
         cursor: 0,
         depth: 0,
+        binary_width: None,
     };
     let mut expressions = Vec::new();
     parser.skip_ignored();
     while parser.cursor < source.len() {
-        expressions.push(parser.expression()?);
+        let expression = parser.expression()?;
+        if expressions.is_empty() {
+            parser.binary_width = binary_format_width(&expression)?;
+        }
+        expressions.push(expression);
         parser.skip_ignored();
     }
     Ok(expressions)
+}
+
+fn binary_format_width(expression: &Expr) -> Result<Option<u8>, LanguageError> {
+    let ExprKind::List(items) = &expression.kind else {
+        return Ok(None);
+    };
+    if items.len() != 2 {
+        return Ok(None);
+    }
+    let ExprKind::Symbol(name) = &items[0].kind else {
+        return Ok(None);
+    };
+    if &**name != "binary" {
+        return Ok(None);
+    }
+    let ExprKind::Number(width, Exactness::Exact) = items[1].kind else {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "(binary WIDTH) expects an exact integer width",
+            items[1].span,
+        ));
+    };
+    if width.fract() != 0.0 || !(1.0..=64.0).contains(&width) {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "(binary WIDTH) width must be an integer from 1 to 64",
+            items[1].span,
+        ));
+    }
+    Ok(Some(width as u8))
 }
 
 struct Parser<'a> {
     source: &'a str,
     cursor: usize,
     depth: u32,
+    binary_width: Option<u8>,
 }
 
 impl Parser<'_> {
@@ -340,6 +377,39 @@ impl Parser<'_> {
             self.bump();
         }
         let token = &self.source[start..self.cursor];
+
+        if let Some(width) = self.binary_width {
+            if token.bytes().all(|byte| byte.is_ascii_digit()) {
+                let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
+                if all_binary {
+                    if token.len() != usize::from(width) {
+                        return Err(self.error(
+                            "binary literal has the wrong width",
+                            start,
+                            self.cursor,
+                        ));
+                    }
+                    let binary = Binary::from_bits(token, width).ok_or_else(|| {
+                        self.error("malformed binary literal", start, self.cursor)
+                    })?;
+                    return Ok(Expr {
+                        kind: ExprKind::Binary(binary),
+                        span: Span {
+                            start,
+                            end: self.cursor,
+                        },
+                    });
+                }
+                if token.len() == usize::from(width) {
+                    return Err(self.error(
+                        "binary literal contains a non-binary digit",
+                        start,
+                        self.cursor,
+                    ));
+                }
+            }
+        }
+
         let decimal_with_dot = if token.contains(',') && !token.contains('.') {
             Some(token.replace(',', "."))
         } else {
