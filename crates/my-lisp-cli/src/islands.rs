@@ -304,6 +304,8 @@ fn load_manifest_str(source: &str, origin: &str) -> Result<Manifest, String> {
     let known_providers = [
         "apt",
         "dnf",
+        "pacman",
+        "guix",
         "brew",
         "winget",
         "release-asset",
@@ -717,6 +719,76 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
                 &format!("automatic package installation failed for {package}"),
             )?;
         }
+        ("macos", "brew") => {
+            if !Command::new("brew")
+                .arg("--version")
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false)
+            {
+                return Err(
+                    "Homebrew (brew) is required for automatic macOS island bootstrap. \
+                     Install from https://brew.sh".to_string(),
+                );
+            }
+            let mut install = Command::new("brew");
+            install.args(["install", package]);
+            run_status_command(
+                &mut install,
+                &format!("brew install {package} failed"),
+            )?;
+        }
+        ("linux", "dnf") => {
+            let dnf_bin = if Command::new("dnf5")
+                .arg("--version")
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false)
+            {
+                "dnf5"
+            } else {
+                "dnf"
+            };
+            let mut install = if running_as_root() {
+                Command::new(dnf_bin)
+            } else {
+                let mut c = Command::new("sudo");
+                c.arg(dnf_bin);
+                c
+            };
+            install.args(["install", "-y", package]);
+            run_status_command(
+                &mut install,
+                &format!("{dnf_bin} install {package} failed"),
+            )?;
+        }
+        ("linux", "pacman") => {
+            let mut install = if running_as_root() {
+                Command::new("pacman")
+            } else {
+                let mut c = Command::new("sudo");
+                c.arg("pacman");
+                c
+            };
+            install.args(["-S", "--noconfirm", package]);
+            run_status_command(
+                &mut install,
+                &format!("pacman -S {package} failed"),
+            )?;
+        }
+        ("linux", "guix") => {
+            // Guix always runs as the current user — no sudo needed.
+            let mut install = Command::new("guix");
+            install.args(["install", package]);
+            run_status_command(
+                &mut install,
+                &format!("guix install {package} failed"),
+            )?;
+        }
         _ => {
             return Err(format!(
                 "unsupported automatic package provider {} on {}",
@@ -733,11 +805,121 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
             island.key, island.runtime_version
         ))
     } else {
+        if island.key == "clips" {
+            return build_clips_from_source();
+        }
         Err(format!(
             "installed {} but bounded probe failed",
             island.key
         ))
     }
+}
+
+/// Build CLIPS 6.4.2 from source and install libclips.so / libclips.dylib
+/// into $HOME/.local/lib and $HOME/.local/bin.  Called automatically when
+/// the package-manager entry for the `clips` island fails to produce a
+/// working probe.
+fn build_clips_from_source() -> Result<String, String> {
+    let home = std::env::var_os("HOME")
+        .map(PathBuf::from)
+        .ok_or_else(|| "$HOME is not set; cannot locate install prefix".to_string())?;
+    let prefix = home.join(".local");
+    let lib_dir = prefix.join("lib");
+    let bin_dir = prefix.join("bin");
+    fs::create_dir_all(&lib_dir).map_err(|e| e.to_string())?;
+    fs::create_dir_all(&bin_dir).map_err(|e| e.to_string())?;
+
+    // Decide on the shared-library file name for this platform.
+    let (lib_name, so_flag) = if cfg!(target_os = "macos") {
+        ("libclips.dylib", "-dynamiclib")
+    } else {
+        ("libclips.so", "-shared")
+    };
+    let lib_path = lib_dir.join(lib_name);
+    let clips_bin = bin_dir.join("clips");
+
+    // Already built?
+    if lib_path.is_file() && clips_bin.is_file() {
+        return Ok(format!(
+            "clips 6.4.2 already built at {}",
+            lib_path.display()
+        ));
+    }
+
+    let build_dir = std::env::temp_dir().join(format!("clips-build-{}", std::process::id()));
+    fs::create_dir_all(&build_dir).map_err(|e| e.to_string())?;
+
+    let tarball = build_dir.join("clips_core_source_642.tar.gz");
+    let clips_url =
+        "https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_core_source_642.tar.gz/download";
+    fetch_artifact(clips_url, &tarball)?;
+
+    // Extract
+    let mut tar = Command::new("tar");
+    tar.args([
+        "-xzf",
+        &tarball.to_string_lossy(),
+        "-C",
+        &build_dir.to_string_lossy(),
+    ]);
+    run_status_command(&mut tar, "CLIPS source extraction failed")?;
+
+    // Locate the clips_core_source directory (the tarball has a subdirectory).
+    let src_dir = {
+        let mut found: Option<PathBuf> = None;
+        for entry in fs::read_dir(&build_dir).map_err(|e| e.to_string())?.flatten() {
+            let p = entry.path();
+            if p.is_dir()
+                && p.file_name()
+                    .map(|n| n.to_string_lossy().contains("clips"))
+                    .unwrap_or(false)
+            {
+                found = Some(p);
+                break;
+            }
+        }
+        found.unwrap_or_else(|| build_dir.join("clips_core_source_642"))
+    };
+
+    let cc = if cfg!(target_os = "macos") { "clang" } else { "gcc" };
+    let cflags = "-std=c99 -O3 -fPIC -fno-strict-aliasing";
+
+    // Build shared library via shell for *.c glob expansion.
+    let mut link_sh = Command::new("sh");
+    link_sh.current_dir(&src_dir);
+    link_sh.arg("-c");
+    link_sh.arg(format!(
+        "{cc} {so_flag} -o '{}' {cflags} *.c -lm",
+        lib_path.to_string_lossy()
+    ));
+    run_status_command(&mut link_sh, "CLIPS shared library compilation failed")?;
+
+
+    // Build standalone CLI executable
+    let mut cli_sh = Command::new("sh");
+    cli_sh.current_dir(&src_dir);
+    cli_sh.arg("-c");
+    cli_sh.arg(format!(
+        "{cc} -o '{}' {cflags} *.c -lm",
+        clips_bin.to_string_lossy()
+    ));
+    run_status_command(&mut cli_sh, "CLIPS CLI executable compilation failed")?;
+
+    // Make executable bit explicit
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = fs::set_permissions(&clips_bin, fs::Permissions::from_mode(0o755));
+    }
+
+    // Cleanup
+    let _ = fs::remove_file(&tarball);
+
+    Ok(format!(
+        "clips 6.4.2 built from source → {} and {}",
+        lib_path.display(),
+        clips_bin.display()
+    ))
 }
 
 fn extract_archive(artifact: &str, temporary: &Path, destination: &Path) -> Result<(), String> {
@@ -1135,7 +1317,10 @@ pub fn run(args: &[String]) -> Result<String, String> {
                         island.key, island.runtime_version
                     )),
                     Some(entry)
-                        if matches!(entry.provider.as_str(), "apt" | "winget") && !dry_run =>
+                        if matches!(
+                            entry.provider.as_str(),
+                            "apt" | "winget" | "brew" | "dnf" | "pacman" | "guix"
+                        ) && !dry_run =>
                     {
                         write_install_state(&root, island, target, "installing")?;
                         match install_system_package(island, entry) {
@@ -1149,14 +1334,20 @@ pub fn run(args: &[String]) -> Result<String, String> {
                             }
                         }
                     }
-                    Some(entry) if matches!(entry.provider.as_str(), "apt" | "winget") => rows.push(
-                        format!(
+                    Some(entry)
+                        if matches!(
+                            entry.provider.as_str(),
+                            "apt" | "winget" | "brew" | "dnf" | "pacman" | "guix"
+                        ) =>
+                    {
+                        rows.push(format!(
                             "install {} via {} package {}",
                             island.key,
                             entry.provider,
                             entry.package.as_deref().unwrap_or("unknown")
-                        ),
-                    ),
+                        ));
+                    }
+
                     Some(entry) if entry.provider == "release-asset" && !dry_run => {
                         write_install_state(&root, island, target, "installing")?;
                         match install_release_asset(island, entry, &root) {

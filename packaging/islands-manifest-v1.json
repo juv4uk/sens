@@ -23,10 +23,23 @@
           "target": "linux-x86_64",
           "provider": "apt",
           "package": "sbcl",
-          "probe": [
-            "sbcl",
-            "--version"
-          ],
+          "probe": ["sbcl", "--version"],
+          "probe_expect": "SBCL",
+          "entrypoint": "sbcl"
+        },
+        {
+          "target": "macos-x86_64",
+          "provider": "brew",
+          "package": "sbcl",
+          "probe": ["sbcl", "--version"],
+          "probe_expect": "SBCL",
+          "entrypoint": "sbcl"
+        },
+        {
+          "target": "macos-aarch64",
+          "provider": "brew",
+          "package": "sbcl",
+          "probe": ["sbcl", "--version"],
           "probe_expect": "SBCL",
           "entrypoint": "sbcl"
         },
@@ -63,10 +76,23 @@
           "target": "linux-x86_64",
           "provider": "apt",
           "package": "swi-prolog",
-          "probe": [
-            "swipl",
-            "--version"
-          ],
+          "probe": ["swipl", "--version"],
+          "probe_expect": "SWI-Prolog",
+          "entrypoint": "swipl"
+        },
+        {
+          "target": "macos-x86_64",
+          "provider": "brew",
+          "package": "swi-prolog",
+          "probe": ["swipl", "--version"],
+          "probe_expect": "SWI-Prolog",
+          "entrypoint": "swipl"
+        },
+        {
+          "target": "macos-aarch64",
+          "provider": "brew",
+          "package": "swi-prolog",
+          "probe": ["swipl", "--version"],
           "probe_expect": "SWI-Prolog",
           "entrypoint": "swipl"
         },
@@ -77,9 +103,7 @@
           "url": "https://www.swi-prolog.org/download/stable/bin/swipl-10.0.2-1.x64.exe",
           "sha256": "2ec1f25be0eafb92e559004782b130774c12573fb4b7e8a917e534754a641ad6",
           "artifact": "nsis",
-          "installer_args": [
-            "/S"
-          ],
+          "installer_args": ["/S"],
           "probe": [
             "powershell",
             "-NoProfile",
@@ -114,6 +138,28 @@
           "entrypoint": "clips"
         },
         {
+          "target": "macos-x86_64",
+          "provider": "brew",
+          "package": "clips",
+          "probe": [
+            "sh",
+            "-c",
+            "test -f /usr/local/lib/libclips.dylib || test -f \"$HOME/.local/lib/libclips.dylib\""
+          ],
+          "entrypoint": "clips"
+        },
+        {
+          "target": "macos-aarch64",
+          "provider": "brew",
+          "package": "clips",
+          "probe": [
+            "sh",
+            "-c",
+            "test -f /opt/homebrew/lib/libclips.dylib || test -f \"$HOME/.local/lib/libclips.dylib\""
+          ],
+          "entrypoint": "clips"
+        },
+        {
           "target": "windows-x86_64",
           "provider": "release-asset",
           "package": "CLIPS 6.4.2",
@@ -144,6 +190,16 @@
       "platforms": [
         {
           "target": "linux-x86_64",
+          "provider": "embedded",
+          "probe": []
+        },
+        {
+          "target": "macos-x86_64",
+          "provider": "embedded",
+          "probe": []
+        },
+        {
+          "target": "macos-aarch64",
           "provider": "embedded",
           "probe": []
         },
