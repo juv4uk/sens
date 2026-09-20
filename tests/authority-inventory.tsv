@@ -111,3 +111,6 @@ crates/wsm-kernel-host/src/lib.rs	explicit_handles_keep_kernel_lifecycles_isolat
 crates/wsm-native-result-types/tests/observation_capabilities.rs	producer_capability_sets_remain_distinct	observer	producer-specific-observation-capabilities	wsm-native-result-types concrete producer domains	retained
 crates/wsm-native-result-types/tests/observation_capabilities.rs	supported_operations_inspect_native_domains_without_normalization	observer	native-observation-inspection	producer-owned result fields	retained
 crates/wsm-native-result-types/tests/observation_capabilities.rs	unsupported_operation_is_named_not_false_or_empty	observer	observation-capability-failure	wsm-native-result-types capability boundary	retained
+crates/wsm-native-result-types/tests/observation_provenance.rs	observation_refs_preserve_producer_identity_and_native_slot	observer	life-1-observation-ref	crates/wsm-native-result-types/src/lib.rs	retained
+crates/wsm-native-result-types/tests/observation_provenance.rs	projection_edge_connects_observations_without_normalizing_results	observer	life-1-provenance-edge	crates/wsm-native-result-types/src/lib.rs + contracts/life-1-contract.lisp	retained
+crates/wsm-native-result-types/tests/observation_provenance.rs	native_result_refs_remain_source_compatible	observer	native-result-ref-compatibility	crates/wsm-native-result-types/src/lib.rs	retained
