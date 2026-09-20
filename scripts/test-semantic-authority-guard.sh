@@ -5,10 +5,17 @@ if (($# != 1)); then
   exit 2
 fi
 my_lisp=$1
+probe=tests/semantic-authority-guard-probe.rs
+cleanup() {
+  rm -f "$probe"
+}
+trap cleanup EXIT
+
 run_case() {
   local fixture=$1
   local expected=$2
-  printf '(changed "%s")\n' "$fixture" > tests/semantic-authority-changes.lisp
+  cp "$fixture" "$probe"
+  printf '(changed "%s")\n' "$probe" > tests/semantic-authority-changes.lisp
   "$my_lisp" scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
   cat tests/semantic-authority-verdict.lisp
   if [[ "$expected" == "violation" ]]; then
@@ -22,6 +29,7 @@ run_case() {
     grep -q "semantic-authority-ok" tests/semantic-authority-verdict.lisp
   fi
 }
+
 run_case tests/fixtures/semantic-authority-guard/forbidden-sid-meaning.rs violation
 run_case tests/fixtures/semantic-authority-guard/forbidden-island-sid.rs violation
 run_case tests/fixtures/semantic-authority-guard/forbidden-isa-sid.rs violation
