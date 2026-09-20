@@ -44,10 +44,6 @@ def parse_entries(source: str) -> list[Entry]:
         if not match:
             continue
         identity, body = match.groups()
-        if identity == "00000000":
-            if body.strip() != "()":
-                raise ValueError("Canon 0 row must be exactly ground-only")
-            continue
         if identity in seen:
             raise ValueError(f"line {line_number}: duplicate semantic ID {identity}")
         seen.add(identity)
