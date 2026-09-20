@@ -9,8 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 SID_TOKEN = re.compile(r"^[01]{8}$")
-FIRST_WAVE = {"uk", "en", "sa"}
-ALL_SURFACES = {"en", "uk", "ukr", "sa", "sym"}
+FIRST_WAVE = {"ук", "en", "sa"}
+ALL_SURFACES = {"en", "ук", "укр", "sa", "sym"}
 NON_HUMAN = {"sym"}
 
 
@@ -116,7 +116,7 @@ def check(root) -> tuple[int, set[str], int]:
 
         if entry_surfaces != ALL_SURFACES:
             raise ValueError(
-                f"{identity}: expected fixed en/uk/ukr/sa/sym slots, got "
+                f"{identity}: expected fixed en/ук/укр/sa/sym slots, got "
                 f"{sorted(entry_surfaces)}"
             )
 
