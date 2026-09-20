@@ -294,6 +294,34 @@ fn scheduler_deduplicates_real_invocation_and_rejects_malformed_trigger() {
         source_ref, INVOKE_ID
     );
 
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-key-present? (life-scheduler-invocation-key (quote {invocation})) (quote ()))"
+            ),
+            &mut session,
+        ),
+        "absent"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-field (quote {invocation}) (quote trigger))"
+            ),
+            &mut session,
+        ),
+        "(projection-ready prolog-substitutions-to-datalog-facts)"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-projection-match? (quote (projection-ready prolog-substitutions-to-datalog-facts observation-42)) (quote ((projection-ready prolog-substitutions-to-datalog-facts observation-42))))"
+            ),
+            &mut session,
+        ),
+        "present"
+    );
+
     let deduplicated = eval_text(
         &format!(
             "(life-scheduler-pending (list (quote {invocation}) (quote {invocation})))"
