@@ -46,7 +46,6 @@ def parse_entries(source: str) -> list[Entry]:
         identity, body = match.groups()
         if identity in seen:
             raise ValueError(f"line {line_number}: duplicate semantic ID {identity}")
-            raise ValueError(f"line {line_number}: duplicate semantic ID {identity}")
         seen.add(identity)
 
         matches = list(SURFACE.finditer(body))
