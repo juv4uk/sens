@@ -434,6 +434,31 @@ mod tests {
     }
 
     #[test]
+    fn bounded_canonical_atom_list_decoder_preserves_wire_atoms_only() {
+        assert_eq!(
+            decode_canonical_atom_list(b"[bob,dave,carol]\n").unwrap(),
+            vec!["bob", "dave", "carol"]
+        );
+        assert_eq!(decode_canonical_atom_list(b"[]").unwrap(), Vec::<String>::new());
+    }
+
+    #[test]
+    fn bounded_canonical_atom_list_decoder_fails_named_on_unadmitted_shapes() {
+        assert_eq!(
+            decode_canonical_atom_list(b"ancestor(bob,carol)"),
+            Err(PrologCanonicalListError::ExpectedList)
+        );
+        assert!(matches!(
+            decode_canonical_atom_list(b"[bob,(dave,carol)]"),
+            Err(PrologCanonicalListError::UnsupportedAtom(_))
+        ));
+        assert!(matches!(
+            decode_canonical_atom_list(b"['bob']"),
+            Err(PrologCanonicalListError::UnsupportedAtom(_))
+        ));
+    }
+
+    #[test]
     fn abi_adapter_is_mechanically_prolog() {
         let adapter = PrologAbiAdapter::new(
             PrologKernel::new("__runtime_not_used__"),
