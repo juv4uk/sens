@@ -85,3 +85,5 @@
 
 (authority "crates/my-lisp/tests/semantic_registry_lisp.rs" observer)
 (authority "crates/my-lisp/tests/runtime_peer_operators.rs" observer)
+
+(authority "crates/my-lisp/tests/cml_bootstrap_frontend.rs" observer)
