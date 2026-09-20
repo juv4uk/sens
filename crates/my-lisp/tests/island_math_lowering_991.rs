@@ -11,7 +11,7 @@ fn shared_math_lowering_contract_is_fail_closed_until_ratified() {
 
     for required in [
         "(ratification-authority \"#990\")",
-        "(ratification-candidate \"#1039\")",
+        "(ratification-candidate \"#1042\")",
         "(capability-evidence \"#988/#993\")",
         "(execution-evidence \"#992\")",
         "(machine-profile \"lib/machine/intel-core-i5-6400.lisp\")",
@@ -36,7 +36,7 @@ fn shared_math_lowering_contract_is_fail_closed_until_ratified() {
     for (sid, operation) in admitted_candidates {
         assert!(
             contract.contains(&format!("(semantic-id \"{sid}\")")),
-            "missing #1039 candidate SID {sid} ({operation})"
+            "missing #1042 candidate SID {sid} ({operation})"
         );
         assert!(
             profile.contains(&format!("(\"{sid}\" ")),
@@ -47,11 +47,11 @@ fn shared_math_lowering_contract_is_fail_closed_until_ratified() {
     assert_eq!(
         contract.matches("(ratification-status candidate-pending-990-merge)").count(),
         6,
-        "all six #1039 candidate rows must remain explicitly pending until #990 lands"
+        "all six #1042 candidate rows must remain explicitly pending until #990 lands"
     );
     assert!(
         !contract.contains("(ratification-status ratified)"),
-        "#991 must not promote #1039 candidate evidence before #990 lands"
+        "#991 must not promote #1042 candidate evidence before #990 lands"
     );
 
     for excluded_sid in ["00001111", "00010011", "00010100", "00010101"] {
