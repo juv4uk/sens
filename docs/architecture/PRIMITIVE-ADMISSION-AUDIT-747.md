@@ -137,3 +137,33 @@ admission atomic:
 
 The broader primitive-budget audit #734 has already been completed separately;
 this replay only closes the atomic `invoke` admission gap tracked by #747/#779.
+
+## Raw REPL `invoke` is an escape hatch, not semantic routing
+
+The released/interactive surface may expose `invoke / викликати` as a low-level
+native boundary for diagnostics, experiments, and direct island access. That
+path does **not** replace ordinary Lisp semantic execution.
+
+The two paths are intentionally different:
+
+```text
+ordinary Lisp
+  surface -> Canon/function-table SID + meaning
+  -> admitted mechanism
+  -> mechanism selector
+  -> mechanical lowering
+  -> executor
+
+raw invoke
+  invoke SID
+  -> registered host capability
+  -> opaque producer-native payload
+  -> island
+  -> explicit island-native observation
+```
+
+A Common Lisp form, Prolog goal, CLIPS command, or Datalog relation supplied to
+raw `invoke` remains native data. Its spelling cannot mint a Lisp SID, admit an
+execution mechanism, establish a Canon law, or redefine an existing Lisp
+identity. Raw results likewise remain producer-native observations and are not
+accepted as semantic-law evidence merely because execution succeeded.
