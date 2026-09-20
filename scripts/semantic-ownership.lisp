@@ -32,16 +32,56 @@
   (lambda args
     (reduce (lambda (acc part) (string-append acc part)) "" args)))
 
+(def ownership-empty-list?
+  (lambda (value)
+    (cond
+      ((atom value) (structural-kind empty-list) t)
+      ((atom value) (structural-kind atom) (quote ()))
+      ((atom value) (structural-kind pair) (quote ())))))
+
+(def ownership-pair?
+  (lambda (value)
+    (cond
+      ((atom value) (structural-kind empty-list) (quote ()))
+      ((atom value) (structural-kind atom) (quote ()))
+      ((atom value) (structural-kind pair) t))))
+
+(def ownership-identity-same?
+  (lambda (left right)
+    (cond
+      ((eq left right) (identity-relation same) t)
+      ((eq left right) (identity-relation distinct) (quote ())))))
+
+(def ownership-structural-same?
+  (lambda (left right)
+    (cond
+      ((equal? left right) (structural-relation same) t)
+      ((equal? left right) (structural-relation distinct) (quote ())))))
+
+(def ownership-text?
+  (lambda (value)
+    (cond
+      ((string-membership-helper value)
+       (class-membership string member)
+       t)
+      ((string-membership-helper value)
+       (class-membership string nonmember)
+       (quote ())))))
+
+(def ownership-text-empty?
+  (lambda (value)
+    (ownership-identity-same? value "")))
+
 (def token-text
   (lambda (value)
     (cond
-      ((string? value) value)
+      ((ownership-text? value) value)
       ((symbol? value) (symbol->string value))
       (t (write-to-string value)))))
 
 (def dash?
   (lambda (value)
-    (or (equal? value (quote -)) (equal? value "-"))))
+    (or (ownership-structural-same? value (quote -)) (ownership-structural-same? value "-"))))
 
 (def ownership-ok (lambda () (list (quote semantic-ownership-ok))))
 
@@ -51,7 +91,7 @@
 
 (def ownership-ok?
   (lambda (verdict)
-    (equal? verdict (ownership-ok))))
+    (ownership-structural-same? verdict (ownership-ok))))
 
 (def admitted?
   (lambda (value choices)
@@ -60,17 +100,17 @@
 (def split-char-onto
   (lambda (text separator current out)
     (cond
-      ((string-empty? text)
+      ((ownership-text-empty? text)
        (cond
-         ((string-empty? current) (reverse out))
+         ((ownership-text-empty? current) (reverse out))
          (t (reverse (cons current out)))))
-      ((equal? (string-first text) separator)
+      ((ownership-structural-same? (string-first text) separator)
        (split-char-onto
          (string-rest text)
          separator
          ""
          (cond
-           ((string-empty? current) out)
+           ((ownership-text-empty? current) out)
            (t (cons current out)))))
       (t
        (split-char-onto
@@ -87,20 +127,20 @@
   (lambda (value)
     (cond
       ((dash? value) (quote ()))
-      ((string? value) (split-char value ";"))
+      ((ownership-text? value) (split-char value ";"))
       (t (quote ())))))
 
 (def path-join
   (lambda (prefix name)
     (cond
-      ((string-empty? prefix) name)
+      ((ownership-text-empty? prefix) name)
       (t (str+ prefix "/" name)))))
 
 (def join-path-components
   (lambda (parts acc)
     (cond
-      ((atom parts) acc)
-      ((string-empty? acc)
+      ((ownership-empty-list? parts) acc)
+      ((ownership-text-empty? acc)
        (join-path-components (cdr parts) (car parts)))
       (t
        (join-path-components
@@ -110,7 +150,7 @@
 (def path-last
   (lambda (parts)
     (cond
-      ((atom (cdr parts)) (car parts))
+      ((ownership-empty-list? (cdr parts)) (car parts))
       (t (path-last (cdr parts))))))
 
 (def path-parent-parts
@@ -124,7 +164,7 @@
            (parent-parts (path-parent-parts parts))
            (parent
              (cond
-               ((atom parent-parts) ".")
+               ((ownership-empty-list? parent-parts) ".")
                (t (join-path-components parent-parts "")))))
       (member? name (read-dir parent)))))
 
@@ -135,7 +175,7 @@
            (parent-parts (path-parent-parts parts))
            (parent
              (cond
-               ((atom parent-parts) ".")
+               ((ownership-empty-list? parent-parts) ".")
                (t (join-path-components parent-parts "")))))
       (list parent name))))
 
@@ -146,13 +186,13 @@
            (name (second where))
            (entry (assoc parent observations)))
       (cond
-        ((atom entry) (quote ()))
+        ((ownership-empty-list? entry) (quote ()))
         (t (member? name (second entry)))))))
 
 (def paths-present-verdict
   (lambda (paths context observations)
     (cond
-      ((atom paths) (ownership-ok))
+      ((ownership-empty-list? paths) (ownership-ok))
       ((observed-path-present? (car paths) observations)
        (paths-present-verdict (cdr paths) context observations))
       (t
@@ -168,33 +208,33 @@
 (def all-hex?
   (lambda (text)
     (cond
-      ((string-empty? text) t)
+      ((ownership-text-empty? text) t)
       ((hex-char? (string-first text)) (all-hex? (string-rest text)))
       (t (quote ())))))
 
 (def hex40?
   (lambda (value)
     (and
-      (string? value)
-      (equal? (string-length value) 40)
+      (ownership-text? value)
+      (ownership-structural-same? (string-length value) 40)
       (all-hex? value))))
 
 (def ownership-row?
   (lambda (form)
-    (and (not (atom form)) (eq (car form) (quote ownership)))))
+    (and (ownership-pair? form) (ownership-identity-same? (car form) (quote ownership)))))
 
 (def migration-row?
   (lambda (form)
-    (and (not (atom form)) (eq (car form) (quote migration)))))
+    (and (ownership-pair? form) (ownership-identity-same? (car form) (quote migration)))))
 
 (def meta-row?
   (lambda (form)
-    (and (not (atom form)) (eq (car form) (quote row)))))
+    (and (ownership-pair? form) (ownership-identity-same? (car form) (quote row)))))
 
 (def collect-tagged
   (lambda (forms predicate)
     (cond
-      ((atom forms) (quote ()))
+      ((ownership-empty-list? forms) (quote ()))
       ((predicate (car forms))
        (cons (car forms) (collect-tagged (cdr forms) predicate)))
       (t (collect-tagged (cdr forms) predicate)))))
@@ -232,14 +272,14 @@
            (parent (car where))
            (existing (assoc parent observations)))
       (cond
-        ((atom existing)
+        ((ownership-empty-list? existing)
          (cons (list parent (read-dir parent)) observations))
         (t observations)))))
 
 (def observe-path-list
   (lambda (paths observations)
     (cond
-      ((atom paths) observations)
+      ((ownership-empty-list? paths) observations)
       (t
        (observe-path-list
          (cdr paths)
@@ -256,7 +296,7 @@
 (def observe-ownership-paths
   (lambda (rows observations)
     (cond
-      ((atom rows) observations)
+      ((ownership-empty-list? rows) observations)
       (t
        (observe-ownership-paths
          (cdr rows)
@@ -271,7 +311,7 @@
 (def observe-migration-paths
   (lambda (rows observations)
     (cond
-      ((atom rows) observations)
+      ((ownership-empty-list? rows) observations)
       (t
        (observe-migration-paths
          (cdr rows)
@@ -280,24 +320,20 @@
 (def ownership-row-shape-verdict
   (lambda (row)
     (cond
-      ((equal? (length row) 12) (ownership-ok))
+      ((ownership-structural-same? (length row) 12) (ownership-ok))
       (t
        (ownership-violation
          (quote malformed-ownership-row)
-         (cond
-           ((> (length row) 1) (ownership-key row))
-           (t (quote ?))))))))
+         row)))))
 
 (def migration-row-shape-verdict
   (lambda (row)
     (cond
-      ((equal? (length row) 8) (ownership-ok))
+      ((ownership-structural-same? (length row) 8) (ownership-ok))
       (t
        (ownership-violation
          (quote malformed-migration-row)
-         (cond
-           ((> (length row) 1) (migration-key row))
-           (t (quote ?))))))))
+         row)))))
 
 (def ownership-row-enum-verdict
   (lambda (row)
@@ -346,12 +382,12 @@
             (path-items (ownership-evidence-paths row))))
       (cond
         ((and
-           (eq (ownership-status row) (quote confirmed))
+           (ownership-identity-same? (ownership-status row) (quote confirmed))
            (atom evidence))
          (ownership-violation
            (quote confirmed-ownership-missing-evidence)
            (ownership-key row)))
-        ((atom check-paths) (ownership-ok))
+        ((ownership-empty-list? check-paths) (ownership-ok))
         (t
          (let ((implementation-verdict
                  (paths-present-verdict
@@ -374,7 +410,7 @@
          (quote invalid-migration-status)
          (list (migration-key row) (migration-status row))))
       ((and
-         (eq (migration-status row) (quote confirmed))
+         (ownership-identity-same? (migration-status row) (quote confirmed))
          (not (hex40? (migration-commit row))))
        (ownership-violation
          (quote confirmed-migration-invalid-sha)
@@ -383,12 +419,12 @@
        (let ((evidence (path-items (migration-evidence-paths row))))
          (cond
            ((and
-              (eq (migration-status row) (quote confirmed))
+              (ownership-identity-same? (migration-status row) (quote confirmed))
               (atom evidence))
             (ownership-violation
               (quote confirmed-migration-missing-evidence)
               (migration-key row)))
-           ((atom check-paths) (ownership-ok))
+           ((ownership-empty-list? check-paths) (ownership-ok))
            (t
             (paths-present-verdict
               evidence
@@ -414,7 +450,7 @@
 (def validate-ownership-rows
   (lambda (rows seen-keys seen-semantic check-paths)
     (cond
-      ((atom rows) (ownership-ok))
+      ((ownership-empty-list? rows) (ownership-ok))
       (t
        (let* ((row (car rows))
               (static-verdict
@@ -446,13 +482,13 @@
 (def collect-keys
   (lambda (rows)
     (cond
-      ((atom rows) (quote ()))
+      ((ownership-empty-list? rows) (quote ()))
       (t (cons (row-key (car rows)) (collect-keys (cdr rows)))))))
 
 (def validate-migration-rows
   (lambda (rows seen-keys check-paths)
     (cond
-      ((atom rows) (ownership-ok))
+      ((ownership-empty-list? rows) (ownership-ok))
       (t
        (let* ((row (car rows))
               (shape (migration-row-shape-verdict row)))
@@ -475,18 +511,18 @@
 (def meta-unresolved-required
   (lambda (forms out)
     (cond
-      ((atom forms) (reverse out))
+      ((ownership-empty-list? forms) (reverse out))
       ((meta-row? (car forms))
        (let ((row (car forms)))
          (cond
-           ((not (equal? (length row) 8))
+           ((not (ownership-structural-same? (length row) 8))
             (list
               (list
                 (quote malformed-meta-eval-row)
-                (cond ((> (length row) 1) (nth 1 row)) (t (quote ?))))))
+                row)))
            ((and
-              (eq (nth 2 row) (quote yes))
-              (not (eq (nth 3 row) (quote confirmed))))
+              (ownership-identity-same? (nth 2 row) (quote yes))
+              (not (ownership-identity-same? (nth 3 row) (quote confirmed))))
             (meta-unresolved-required
               (cdr forms)
               (cons (list (nth 1 row) (nth 3 row)) out)))
@@ -496,23 +532,23 @@
 (def find-ownership-key
   (lambda (key rows)
     (cond
-      ((atom rows) (quote ()))
-      ((eq key (ownership-key (car rows))) (car rows))
+      ((ownership-empty-list? rows) (quote ()))
+      ((ownership-identity-same? key (ownership-key (car rows))) (car rows))
       (t (find-ownership-key key (cdr rows))))))
 
 (def cross-evidence-verdict
   (lambda (ownership meta-forms)
     (let ((meta-owner (find-ownership-key (quote meta-evaluator) ownership)))
       (cond
-        ((atom meta-owner) (ownership-ok))
-        ((not (eq (ownership-status meta-owner) (quote confirmed)))
+        ((ownership-empty-list? meta-owner) (ownership-ok))
+        ((not (ownership-identity-same? (ownership-status meta-owner) (quote confirmed)))
          (ownership-ok))
         (t
          (let ((unresolved
                  (meta-unresolved-required meta-forms (quote ()))))
            (cond
-             ((atom unresolved) (ownership-ok))
-             ((eq (car (car unresolved)) (quote malformed-meta-eval-row))
+             ((ownership-empty-list? unresolved) (ownership-ok))
+             ((ownership-identity-same? (car (car unresolved)) (quote malformed-meta-eval-row))
               (ownership-violation
                 (quote malformed-meta-eval-row)
                 (car unresolved)))
@@ -526,7 +562,7 @@
     (let* ((ownership (collect-tagged forms ownership-row?))
            (migrations (collect-tagged forms migration-row?)))
       (cond
-        ((atom ownership)
+        ((ownership-empty-list? ownership)
          (ownership-violation (quote empty-ownership-inventory) (quote ())))
         (t
          (let ((ownership-verdict
@@ -559,7 +595,7 @@
 (def insert-row-sorted-onto
   (lambda (row before after)
     (cond
-      ((atom after) (reverse-onto before (list row)))
+      ((ownership-empty-list? after) (reverse-onto before (list row)))
       ((string<? (row-key-text row) (row-key-text (car after)))
        (reverse-onto before (cons row after)))
       (t
@@ -575,7 +611,7 @@
 (def sort-rows-onto
   (lambda (rows sorted)
     (cond
-      ((atom rows) sorted)
+      ((ownership-empty-list? rows) sorted)
       (t
        (sort-rows-onto
          (cdr rows)
@@ -588,8 +624,8 @@
 (def count-owner-attr
   (lambda (rows accessor wanted count)
     (cond
-      ((atom rows) count)
-      ((eq (accessor (car rows)) wanted)
+      ((ownership-empty-list? rows) count)
+      ((ownership-identity-same? (accessor (car rows)) wanted)
        (count-owner-attr (cdr rows) accessor wanted (+ count 1)))
       (t
        (count-owner-attr (cdr rows) accessor wanted count)))))
@@ -597,13 +633,13 @@
 (def render-count-table-rows
   (lambda (categories rows accessor)
     (cond
-      ((atom categories) "")
+      ((ownership-empty-list? categories) "")
       (t
        (let* ((category (car categories))
               (count (count-owner-attr rows accessor category 0)))
          (str+
            (cond
-             ((equal? count 0) "")
+             ((ownership-structural-same? count 0) "")
              (t
               (str+
                 "| `" (token-text category) "` | "
@@ -624,7 +660,7 @@
 (def select-ownership
   (lambda (rows predicate out)
     (cond
-      ((atom rows) (reverse out))
+      ((ownership-empty-list? rows) (reverse out))
       ((predicate (car rows))
        (select-ownership (cdr rows) predicate (cons (car rows) out)))
       (t (select-ownership (cdr rows) predicate out)))))
@@ -632,49 +668,49 @@
 (def select-migrations
   (lambda (rows predicate out)
     (cond
-      ((atom rows) (reverse out))
+      ((ownership-empty-list? rows) (reverse out))
       ((predicate (car rows))
        (select-migrations (cdr rows) predicate (cons (car rows) out)))
       (t (select-migrations (cdr rows) predicate out)))))
 
 (def ownership-confirmed?
   (lambda (row)
-    (eq (ownership-status row) (quote confirmed))))
+    (ownership-identity-same? (ownership-status row) (quote confirmed))))
 
 (def migration-confirmed?
   (lambda (row)
-    (eq (migration-status row) (quote confirmed))))
+    (ownership-identity-same? (migration-status row) (quote confirmed))))
 
 (def migration-host-to-lisp?
   (lambda (row)
     (and
       (migration-confirmed? row)
-      (eq (migration-to-owner row) (quote lisp-owned))
-      (not (eq (migration-from-owner row) (quote lisp-owned))))))
+      (ownership-identity-same? (migration-to-owner row) (quote lisp-owned))
+      (not (ownership-identity-same? (migration-from-owner row) (quote lisp-owned))))))
 
 (def ownership-host-policy-candidate?
   (lambda (row)
     (and
-      (eq (ownership-class row) (quote host-mechanism))
-      (eq (ownership-policy row) (quote yes)))))
+      (ownership-identity-same? (ownership-class row) (quote host-mechanism))
+      (ownership-identity-same? (ownership-policy row) (quote yes)))))
 
 (def ownership-legitimate-host?
   (lambda (row)
     (and
-      (eq (ownership-status row) (quote confirmed))
-      (eq (ownership-policy row) (quote no))
+      (ownership-identity-same? (ownership-status row) (quote confirmed))
+      (ownership-identity-same? (ownership-policy row) (quote no))
       (member?
         (ownership-class row)
         (quote (host-observation host-authorization host-mechanism))))))
 
 (def ownership-unknown?
   (lambda (row)
-    (eq (ownership-status row) (quote unknown))))
+    (ownership-identity-same? (ownership-status row) (quote unknown))))
 
 (def render-host-policy
   (lambda (rows)
     (cond
-      ((atom rows) "- немає\n")
+      ((ownership-empty-list? rows) "- немає\n")
       (t
        (str+
          "- `" (token-text (ownership-key (car rows))) "` — "
@@ -685,7 +721,7 @@
 (def render-migrations
   (lambda (rows)
     (cond
-      ((atom rows) "- немає\n")
+      ((ownership-empty-list? rows) "- немає\n")
       (t
        (str+
          "- `" (token-text (migration-key (car rows))) "` — `"
@@ -699,7 +735,7 @@
 (def render-ownership-rows
   (lambda (rows)
     (cond
-      ((atom rows) "")
+      ((ownership-empty-list? rows) "")
       (t
        (let ((row (car rows)))
          (str+
@@ -838,7 +874,7 @@
 (def semantic-ownership-assert
   (lambda (actual expected)
     (cond
-      ((equal? actual expected)
+      ((ownership-structural-same? actual expected)
        (list (quote semantic-ownership-selftest-ok)))
       (t
        (let ((shown
@@ -979,8 +1015,8 @@
               (report-path "docs/semantic-ownership-report.md"))
          (cond
            ((and
-              (not (atom *argv*))
-              (equal? (car *argv*) "--write"))
+              (ownership-pair? *argv*)
+              (ownership-structural-same? (car *argv*) "--write"))
             (write-file report-path generated)
             (print
               (str+
@@ -992,7 +1028,7 @@
            (t
             (let ((current (read-file report-path)))
               (cond
-                ((equal? current generated)
+                ((ownership-structural-same? current generated)
                  (print
                    (str+
                      "semantic ownership: "
