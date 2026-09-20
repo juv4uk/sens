@@ -18,8 +18,6 @@ mod generated {
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = u8;
-pub(crate) const EMPTY_LIST_SEMANTIC_ID: SemanticId = 0;
-
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     format!("{semantic_id:08b}")
 }
