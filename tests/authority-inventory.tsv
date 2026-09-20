@@ -139,3 +139,5 @@ crates/my-lisp/tests/canon_authority_inventory.rs	inventory_is_structured_comple
 crates/my-lisp/tests/canon_authority_inventory.rs	every_known_active_sid_mapping_hotspot_has_an_inventory_classification	observer	canon-authority-inventory	knowledge/canon-authority-inventory.lisp	migrated
 crates/my-lisp/tests/canon_authority_inventory.rs	generated_projections_name_their_real_source_instead_of_claiming_authority	observer	canon-authority-inventory	knowledge/canon-authority-inventory.lisp	migrated
 crates/my-lisp/tests/semantic_authority_guard_1049.rs	semantic_authority_guard_is_lisp_owned	observer	semantic-authority-boundary	scripts/semantic-authority-guard.lisp + scripts/semantic-authority-guard-enforce.lisp	retained
+crates/my-lisp-cli/tests/cli.rs	repl_executes_ukr_registry_name_before_any_language_selector	observer	repl-canon-name-routing	lib/surface/semantic-registry.lisp + crates/my-lisp-cli/src/repl.rs	migrated
+crates/my-lisp-cli/tests/cli.rs	repl_language_selector_preserves_user_closure_across_ukr_and_en	observer	repl-presentation-selector-noninterference	crates/my-lisp-cli/src/repl.rs + existing user Environment	migrated
