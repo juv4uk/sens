@@ -96,27 +96,16 @@
   (lambda (value)
     (cond
       ((atom value) (structural-kind empty-list) (quote no))
+      ((atom value) (structural-kind pair) (quote no))
       ((atom value) (structural-kind atom)
        (cond
          ((eq value (quote operation)) (identity-relation same) (quote yes))
-         ((eq value (quote operation)) (identity-relation distinct)
-          (cond
-            ((eq value (quote meaning)) (identity-relation same) (quote yes))
-            ((eq value (quote meaning)) (identity-relation distinct)
-             (cond
-               ((eq value (quote law)) (identity-relation same) (quote yes))
-               ((eq value (quote law)) (identity-relation distinct)
-                (cond
-                  ((eq value (quote domain)) (identity-relation same) (quote yes))
-                  ((eq value (quote domain)) (identity-relation distinct)
-                   (cond
-                     ((eq value (quote operand-domain)) (identity-relation same) (quote yes))
-                     ((eq value (quote operand-domain)) (identity-relation distinct)
-                      (cond
-                        ((eq value (quote result-domain)) (identity-relation same) (quote yes))
-                        ((eq value (quote result-domain)) (identity-relation distinct)
-                         (quote no)))))))))))))))
-      ((atom value) (structural-kind pair) (quote no)))))
+         ((eq value (quote meaning)) (identity-relation same) (quote yes))
+         ((eq value (quote law)) (identity-relation same) (quote yes))
+         ((eq value (quote domain)) (identity-relation same) (quote yes))
+         ((eq value (quote operand-domain)) (identity-relation same) (quote yes))
+         ((eq value (quote result-domain)) (identity-relation same) (quote yes))
+         (t (quote no))))))))
 
 (def contains-forbidden-semantic-symbol?
   (lambda (value)
