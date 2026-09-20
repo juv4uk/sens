@@ -68,6 +68,24 @@ fn ukr_aliases(source: &str) -> BTreeMap<u32, u32> {
 }
 
 #[test]
+fn function_table_projection_is_fresh_from_canonical_registry() {
+    let root = repo_root();
+    let script = root.join("scripts/generate-function-table.lisp");
+    let output = my_lisp(&root)
+        .arg(&script)
+        .arg("--check")
+        .output()
+        .expect("function-table generator freshness check should run through real my-lisp CLI");
+
+    assert!(
+        output.status.success(),
+        "generated function-table projections must be reproducible from canonical registry\nstdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+#[test]
 fn uk_surface_audit_generator_runs_through_real_my_lisp_cli() {
     let root = repo_root();
     let script = root.join("scripts/generate-uk-surface-audit.lisp");
