@@ -1,10 +1,10 @@
-; #76 — Lisp-owned meta semantic registry projection for sr/2.
+; #76 — Lisp-owned meta semantic registry projection from the canonical semantic registry.
 ;
 ; Authority stays in lib/surface/semantic-registry.lisp.
 ; This script owns projection mechanics only: it reads the registry as
 ; ordinary my-lisp data and never re-parses source text with host regexes.
 ;
-; sr/2 rows are:
+; Registry rows are:
 ;   ("SID" (namespace surface) ...)
 ; Empty surfaces are omitted. The reader-only apostrophe is represented as
 ; a string and is omitted because the reader consumes it as quote syntax.
@@ -92,7 +92,7 @@
       "; GENERATED FILE — DO NOT EDIT.\n"
       "; Source authority: lib/surface/semantic-registry.lisp\n"
       "; Generator: scripts/generate-meta-semantic-registry.lisp\n"
-      "; sr/2 surfaces; empty and reader-only apostrophe surfaces omitted.\n\n"
+      "; Registry surfaces; empty and reader-only apostrophe surfaces omitted.\n\n"
       "(def my-semantic-surface-registry\n"
       "  (quote (\n"
       (join-rows (reverse rows))
@@ -107,16 +107,8 @@
 (def registry-form
   (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
 
-(cond
-  ((eq (car registry-form) (quote sr/2))
-   (identity-relation same)
-   ())
-  (t
-   (print "meta semantic registry: expected sr/2")
-   (car (quote ()))))
-
 (def projection-rows
-  (collect-entries (cdr registry-form) (quote ())))
+  (collect-entries registry-form (quote ())))
 
 (def generated
   (render-projection projection-rows))
