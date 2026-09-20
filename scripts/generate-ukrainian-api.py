@@ -27,7 +27,7 @@ END = "## Межа довідника"
 DOC_RE = re.compile(
     r'^\s*\(doc\s+(\S+)\s+"([01]{8})"\s+(\S+)\s+"((?:\\.|[^"\\])*)"\s+"((?:\\.|[^"\\])*)"\)\s*$'
 )
-SURFACE_RE = re.compile(r"\((uk|ukr|en|sym)\s+(\(\)|[^\s)]+)\)")
+SURFACE_RE = re.compile(r"\((ук|укр|en|sym)\s+(\(\)|[^\s)]+)\)")
 ROW_RE = re.compile(r'^\s*\("([01]{8})"\s')
 
 CATEGORY_TITLES = OrderedDict(
@@ -145,13 +145,13 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
         grouped[row.category].append(row)
 
     out = [
-        "## Повний довідник `uk` / `ukr`",
+        "## Повний довідник `ук` / `укр`",
         "",
-        "Нижче — згенерований join по **byte SID**. Опис поведінки береться один раз із `lib/surface/uk-docs.lisp`; `uk`, `ukr` та основа беруться з authoritative function-table projection. Ручне редагування рядків цієї секції буде перезаписано генератором.",
+        "Нижче — згенерований join по **byte SID**. Опис поведінки береться один раз із `lib/surface/uk-docs.lisp`; `ук`, `укр` та основа беруться з authoritative function-table projection. Ручне редагування рядків цієї секції буде перезаписано генератором.",
         "",
     ]
 
-    header = "| byte SID | `uk` | `ukr` | Виклик | Тип | Що робить | Основа |"
+    header = "| byte SID | `ук` | `укр` | Виклик | Тип | Що робить | Основа |"
     separator = "|---:|---|---|---|---|---|---|"
 
     for category, category_rows in grouped.items():
@@ -162,14 +162,14 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
             surfaces = table.get(row.identity)
             if surfaces is None:
                 raise SystemExit(f"function table missing documented semantic ID {row.identity}")
-            uk = surfaces.get("uk")
-            ukr = surfaces.get("ukr")
+            uk = surfaces.get("ук")
+            ukr = surfaces.get("укр")
             en = surfaces.get("en")
             sym = surfaces.get("sym")
             if uk is None or uk.word == "()" or uk.word == "—":
-                raise SystemExit(f"documented semantic ID {row.identity} has no uk surface")
+                raise SystemExit(f"documented semantic ID {row.identity} has no ук surface")
             if ukr is None or ukr.word == "()" or ukr.word == "—":
-                raise SystemExit(f"function table missing ukr projection for {row.identity}")
+                raise SystemExit(f"function table missing укр projection for {row.identity}")
             basis = en.word if en is not None and en.word not in ("()", "—") else (
                 sym.word if sym is not None and sym.word not in ("()", "—") else "—"
             )
