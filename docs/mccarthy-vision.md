@@ -1,6 +1,5 @@
 # McCarthy's Lisp: from 1958 to a lifetime · Lisp Маккарті: від 1958-го до кінця життя · McCarthys Lisp: von 1958 bis zum Lebensende
 
-
 ## Доповнення 2026-09-20: COND, невизначеність і межа з my-lisp
 
 Первинні джерела дають корисне, але вузьке історичне обґрунтування. У ["Recursive Functions of Symbolic Expressions" (1960)](https://www-formal.stanford.edu/jmc/recursive.pdf) Маккарті задає conditional expression як впорядкований перегляд предикатів зліва направо: значенням стає вираз при першому істинному предикаті, а якщо всі предикати хибні — значення **невизначене**. У математичному викладі предикати мають значення `T` або `F`; це не сучасна generic truthiness.
@@ -8,48 +7,6 @@
 Практичний LISP I того ж періоду робить цю частковість спостережуваною як named failure: [*LISP I Programmer's Manual*, 1 March 1960](https://softwarepreservation.computerhistory.org/LISP/book/LISP%20I%20Programmers%20Manual.pdf) має помилку `A3 CONDITIONAL UNSATISFIED -EVCON-` для випадку, коли жодна умова не обчислилася як істинна. У ["History of Lisp" (1978)](https://www-formal.stanford.edu/jmc/history/lisp/lisp.html) Маккарті також пояснює походження conditional expressions роботою над шаховими процедурами у FORTRAN для IBM 704 у 1957–58 роках: на відміну від eager `XIF`, справжній conditional expression не обчислює непотрібну гілку.
 
 **Межа аналогії:** канонічний my-lisp `COND` — не реконструкція синтаксису Маккарті. Власне розширення my-lisp має клаузу `(query expected-result expression)` і робить вибір через явне зіставлення observed result з expected datum. Історичний корінь тут лише у двох принципах: ordered/selective evaluation та легітимність відсутності значення при вичерпанні умов. Contract 8.0 робить другий принцип явним як `UnsatisfiedConditional`, а не як тихий `()`.
-
-### English note
-
-McCarthy's 1960 conditional expression is ordered and partial: predicates are examined left-to-right, only the selected branch is evaluated, and exhaustion is undefined. The March 1960 LISP I manual exposes the same boundary as `A3 CONDITIONAL UNSATISFIED -EVCON-`. my-lisp's three-part expected-result matching is its own extension, not a historical claim; Contract 8.0 preserves ordered selective evaluation and makes canonical exhaustion a named `UnsatisfiedConditional` failure.
-
-## English
-
-This document lays out how John McCarthy himself described Lisp's origin and evolution — mainly from his own 1978 retrospective ["History of Lisp"](https://www-formal.stanford.edu/jmc/history/lisp/lisp.html) (written for the ACM SIGPLAN History of Programming Languages conference) and his public writing over the following decades — and where this project deliberately follows or departs from that account. It's history, not a design spec; [`docs/language-core.md`](language-core.md) and [`PLAN.md`](../PLAN.md) are where this project's own decisions live.
-
-### A notation, not a plan for an interpreter
-
-McCarthy's actual starting point was 1958's "Programs with Common Sense" — the "Advice Taker" proposal — an argument that a program could take symbolic facts and derive new ones through formal reasoning, the way a person "takes advice." Lisp grew out of the search for the right notation to write that kind of program: a mathematical formalism for recursive functions on symbolic expressions, not, at first, a programming language meant to be run.
-
-`eval`, the function that could interpret any Lisp expression given as data, started as a *proof* — a demonstration that the notation was expressive enough to describe its own semantics — written on paper, not intended as an implementation. McCarthy said plainly that he hadn't planned to turn it into an interpreter; Steve Russell, one of his students, read the paper's `eval` and hand-coded it into IBM 704 assembly, and Lisp became a running system somewhat by accident.
-
-### Homoiconicity: the "temporary" choice that stuck
-
-Representing programs as the same S-expressions Lisp already used for data was meant to be provisional — a working stand-in until "M-expressions," a more conventional-looking surface syntax, could be designed. M-expressions were never finished. The S-expression notation turned out to be sufficient on its own, and its side effect — code and data sharing one representation — became the property Lisp is best known for: `quote`/`eval` as a pair, macros, programs that write programs. McCarthy's own account frames this as something closer to a fortunate accident than a planned feature.
-
-### The funarg problem: an early bug he lived with
-
-The original LISP 1.5 implementation used dynamic scoping for free variables inside a function — a decision that produced the well-documented "funarg problem": a function passed as an argument and called far from where it was written could pick up bindings from the *caller's* environment instead of the one it was written in, producing surprising, hard-to-predict behavior. McCarthy acknowledged this as a real source of confusion in early Lisp systems. It was Scheme (Guy Steele and Gerald Sussman, from 1975) that fixed it with consistent lexical scoping — a correction to the original design, not something McCarthy changed in real time within LISP 1.5 itself.
-
-### Garbage collection: the mechanism he was proudest of
-
-Lisp was among the first languages with automatic memory management, freeing programmers from manually tracking the lifetime of symbolic data structures. McCarthy treated this as one of Lisp's most durable contributions — an idea that went on to become close to universal in later languages, well beyond Lisp's own lineage.
-
-### Watching the dialects drift apart
-
-By the late 1970s, Lisp had split into a family of mutually incompatible implementations — MacLisp, InterLisp, and eventually a dozen Scheme variants, each with its own idioms and extensions. McCarthy's own history-of-Lisp account treats this fragmentation candidly, neither hiding it nor pretending it was costless: a single language had become a scattered ecosystem. Common Lisp (standardized 1984, ANSI in 1994) was the community's attempt to reunify the split — a consolidation McCarthy regarded as necessary, even though his own instincts ran toward something smaller and closer to the original core than Common Lisp's large specification became.
-
-### Symbolic AI, held to for a lifetime
-
-Lisp was never, for McCarthy, a general-purpose programming language that happened to be good at AI — it was built *for* AI research, specifically the Advice-Taker vision of symbolic, logical reasoning over formally represented knowledge. He continued developing that thread for the rest of his career — circumscription, situation calculus, formalized common-sense reasoning — even as statistical and neural approaches to AI grew to dominate the field commercially and academically. He didn't reject those approaches outright, but his own research stayed with the symbolic, logic-based tradition Lisp was built to serve, up to his death in 2011.
-
-### What he got to see land elsewhere
-
-Late in his life, ideas that started in Lisp — recursion as a first-class tool, conditionals as expressions, garbage collection, higher-order functions, dynamic typing, the read-eval-print loop — had become ordinary features of mainstream languages that owed Lisp no direct lineage. McCarthy's own writing reflects satisfaction at that spread, even where Lisp itself never became the dominant commercial language.
-
-### Where this project follows, and where it doesn't
-
-Per [`PLAN.md`](../PLAN.md)'s Крок 9 and the Philosophy section of the root [`README.md`](../README.md): [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) makes the eval/apply-describes-itself idea literal, not metaphorical; [`lib/unify.lisp`](../lib/unify.lisp) is in the spirit of the Advice Taker's symbolic reasoning; [`tests/fixtures/conformance.lisp`](../tests/fixtures/conformance.lisp) exists specifically so `fpga-lisp`, the project's second implementation, doesn't become "one more incompatible dialect" the way MacLisp/InterLisp/Scheme did (a previously planned third, C-based implementation was dropped 2026-08-09 — see `private/CLAUDE.md`); and the recurring refusal to grow the Rust primitive surface when the existing kernel already suffices is the same instinct that left M-expressions unfinished once S-expressions turned out to be enough. Where this project deliberately departs from LISP 1.5: lexical scoping from the start (the Scheme fix, not the funarg-problem original), and exact rational arithmetic as a stated core purpose — McCarthy's original LISP 1.5 had fixnums and flonums, no exact fractions; that ambition is this project's own, not inherited.
 
 ## Українська
 
@@ -88,6 +45,48 @@ Lisp ніколи не був для Маккарті мовою загальн�
 ### Де цей проєкт іде за ним, а де ні
 
 За Кроком 9 [`PLAN.md`](../PLAN.md) і розділом Philosophy кореневого [`README.md`](../README.md): [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) робить ідею "eval/apply описує самих себе" буквальною, не метафоричною; [`lib/unify.lisp`](../lib/unify.lisp) — у дусі символьного міркування Advice Taker; [`tests/fixtures/conformance.lisp`](../tests/fixtures/conformance.lisp) існує саме тому, щоб `fpga-lisp`, друга реалізація проєкту, не стала "ще одним несумісним діалектом", як MacLisp/InterLisp/Scheme (раніше запланована третя, C-реалізація прибрана 2026-08-09 — див. `private/CLAUDE.md`); а повторювана відмова розширювати примітивну поверхню Rust, коли наявне ядро вже достатнє — той самий інстинкт, що лишив M-expressions незавершеними, коли S-виразів виявилось достатньо. Де цей проєкт свідомо відходить від LISP 1.5: лексичний скоуп з самого початку (виправлення Scheme, не оригінал з funarg problem), і точна раціональна арифметика як заявлена базова мета — оригінальний LISP 1.5 мав fixnum і flonum, жодних точних дробів; ця амбіція — власна для цього проєкту, не успадкована.
+
+## English
+
+### English note
+
+McCarthy's 1960 conditional expression is ordered and partial: predicates are examined left-to-right, only the selected branch is evaluated, and exhaustion is undefined. The March 1960 LISP I manual exposes the same boundary as `A3 CONDITIONAL UNSATISFIED -EVCON-`. my-lisp's three-part expected-result matching is its own extension, not a historical claim; Contract 8.0 preserves ordered selective evaluation and makes canonical exhaustion a named `UnsatisfiedConditional` failure.
+
+This document lays out how John McCarthy himself described Lisp's origin and evolution — mainly from his own 1978 retrospective ["History of Lisp"](https://www-formal.stanford.edu/jmc/history/lisp/lisp.html) (written for the ACM SIGPLAN History of Programming Languages conference) and his public writing over the following decades — and where this project deliberately follows or departs from that account. It's history, not a design spec; [`docs/language-core.md`](language-core.md) and [`PLAN.md`](../PLAN.md) are where this project's own decisions live.
+
+### A notation, not a plan for an interpreter
+
+McCarthy's actual starting point was 1958's "Programs with Common Sense" — the "Advice Taker" proposal — an argument that a program could take symbolic facts and derive new ones through formal reasoning, the way a person "takes advice." Lisp grew out of the search for the right notation to write that kind of program: a mathematical formalism for recursive functions on symbolic expressions, not, at first, a programming language meant to be run.
+
+`eval`, the function that could interpret any Lisp expression given as data, started as a *proof* — a demonstration that the notation was expressive enough to describe its own semantics — written on paper, not intended as an implementation. McCarthy said plainly that he hadn't planned to turn it into an interpreter; Steve Russell, one of his students, read the paper's `eval` and hand-coded it into IBM 704 assembly, and Lisp became a running system somewhat by accident.
+
+### Homoiconicity: the "temporary" choice that stuck
+
+Representing programs as the same S-expressions Lisp already used for data was meant to be provisional — a working stand-in until "M-expressions," a more conventional-looking surface syntax, could be designed. M-expressions were never finished. The S-expression notation turned out to be sufficient on its own, and its side effect — code and data sharing one representation — became the property Lisp is best known for: `quote`/`eval` as a pair, macros, programs that write programs. McCarthy's own account frames this as something closer to a fortunate accident than a planned feature.
+
+### The funarg problem: an early bug he lived with
+
+The original LISP 1.5 implementation used dynamic scoping for free variables inside a function — a decision that produced the well-documented "funarg problem": a function passed as an argument and called far from where it was written could pick up bindings from the *caller's* environment instead of the one it was written in, producing surprising, hard-to-predict behavior. McCarthy acknowledged this as a real source of confusion in early Lisp systems. It was Scheme (Guy Steele and Gerald Sussman, from 1975) that fixed it with consistent lexical scoping — a correction to the original design, not something McCarthy changed in real time within LISP 1.5 itself.
+
+### Garbage collection: the mechanism he was proudest of
+
+Lisp was among the first languages with automatic memory management, freeing programmers from manually tracking the lifetime of symbolic data structures. McCarthy treated this as one of Lisp's most durable contributions — an idea that went on to become close to universal in later languages, well beyond Lisp's own lineage.
+
+### Watching the dialects drift apart
+
+By the late 1970s, Lisp had split into a family of mutually incompatible implementations — MacLisp, InterLisp, and eventually a dozen Scheme variants, each with its own idioms and extensions. McCarthy's own history-of-Lisp account treats this fragmentation candidly, neither hiding it nor pretending it was costless: a single language had become a scattered ecosystem. Common Lisp (standardized 1984, ANSI in 1994) was the community's attempt to reunify the split — a consolidation McCarthy regarded as necessary, even though his own instincts ran toward something smaller and closer to the original core than Common Lisp's large specification became.
+
+### Symbolic AI, held to for a lifetime
+
+Lisp was never, for McCarthy, a general-purpose programming language that happened to be good at AI — it was built *for* AI research, specifically the Advice-Taker vision of symbolic, logical reasoning over formally represented knowledge. He continued developing that thread for the rest of his career — circumscription, situation calculus, formalized common-sense reasoning — even as statistical and neural approaches to AI grew to dominate the field commercially and academically. He didn't reject those approaches outright, but his own research stayed with the symbolic, logic-based tradition Lisp was built to serve, up to his death in 2011.
+
+### What he got to see land elsewhere
+
+Late in his life, ideas that started in Lisp — recursion as a first-class tool, conditionals as expressions, garbage collection, higher-order functions, dynamic typing, the read-eval-print loop — had become ordinary features of mainstream languages that owed Lisp no direct lineage. McCarthy's own writing reflects satisfaction at that spread, even where Lisp itself never became the dominant commercial language.
+
+### Where this project follows, and where it doesn't
+
+Per [`PLAN.md`](../PLAN.md)'s Крок 9 and the Philosophy section of the root [`README.md`](../README.md): [`lib/meta-eval.lisp`](../lib/meta-eval.lisp) makes the eval/apply-describes-itself idea literal, not metaphorical; [`lib/unify.lisp`](../lib/unify.lisp) is in the spirit of the Advice Taker's symbolic reasoning; [`tests/fixtures/conformance.lisp`](../tests/fixtures/conformance.lisp) exists specifically so `fpga-lisp`, the project's second implementation, doesn't become "one more incompatible dialect" the way MacLisp/InterLisp/Scheme did (a previously planned third, C-based implementation was dropped 2026-08-09 — see `private/CLAUDE.md`); and the recurring refusal to grow the Rust primitive surface when the existing kernel already suffices is the same instinct that left M-expressions unfinished once S-expressions turned out to be enough. Where this project deliberately departs from LISP 1.5: lexical scoping from the start (the Scheme fix, not the funarg-problem original), and exact rational arithmetic as a stated core purpose — McCarthy's original LISP 1.5 had fixnums and flonums, no exact fractions; that ambition is this project's own, not inherited.
 
 ## Deutsch
 
