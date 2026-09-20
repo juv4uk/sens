@@ -5,6 +5,7 @@ use std::io::Read;
 use std::process;
 use std::rc::Rc;
 mod lsp_entry;
+mod islands;
 mod repl;
 mod swarm;
 mod tcp_repl;
@@ -227,6 +228,17 @@ fn main() {
     if args.len() > 1 {
         let arg = &args[1];
 
+        if arg == "islands" {
+            match islands::run(&args[2..]) {
+                Ok(output) => println!("{output}"),
+                Err(error) => {
+                    eprintln!("my-lisp islands: {error}");
+                    process::exit(2);
+                }
+            }
+            return;
+        }
+
         // LSP mode: forwards to the my-lisp-lsp crate's stdio entrypoint.
         if arg == "lsp" {
             lsp_entry::run();
@@ -244,6 +256,7 @@ fn main() {
             println!("Canonical source extension: .lisp (per my-lisp#81 -- extension != semantics); .wsm/.my remain supported legacy aliases; .всм/.мій/.лісп are equal-standing Ukrainian spellings of the same aliases");
             println!("\nOptions:");
             println!("  lsp                          Run the Language Server (LSP over stdio)");
+            println!("  islands plan|status           Inspect release-island availability without semantic admission");
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
             println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
