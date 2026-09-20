@@ -57,23 +57,52 @@ fn bounded_probe(command: &[String]) -> &'static str {
 
 fn fetch_artifact(url: &str, temporary: &std::path::Path) -> Result<(), String> {
     if let Some(source) = url.strip_prefix("file://") {
-        fs::copy(source, temporary).map_err(|error| format!("cannot read artifact {source}: {error}"))?;
+        fs::copy(source, temporary)
+            .map_err(|error| format!("cannot read artifact {source}: {error}"))?;
         return Ok(());
     }
     if !(url.starts_with("https://") || url.starts_with("http://")) {
         return Err("installer supports file:// and http(s):// release assets only".to_string());
     }
-    let response = ureq::AgentBuilder::new()
-        .timeout(std::time::Duration::from_secs(60))
-        .redirects(5)
-        .build()
-        .get(url)
-        .call()
-        .map_err(|error| format!("download failed for {url}: {error}"))?;
-    let mut reader = response.into_reader();
-    let mut output = fs::File::create(temporary).map_err(|error| error.to_string())?;
-    std::io::copy(&mut reader, &mut output).map_err(|error| error.to_string())?;
-    Ok(())
+
+    let output = temporary.to_string_lossy().into_owned();
+    match Command::new("curl")
+        .args([
+            "--fail",
+            "--location",
+            "--silent",
+            "--show-error",
+            "--max-time",
+            "60",
+            "--output",
+            &output,
+            url,
+        ])
+        .status()
+    {
+        Ok(status) if status.success() => return Ok(()),
+        Ok(status) => {
+            return Err(format!("download failed for {url}: curl exit {}", status));
+        }
+        Err(curl_error) if cfg!(windows) => {
+            let status = Command::new("powershell")
+                .args([
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-Command",
+                    "$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri $env:MY_LISP_URL -OutFile $env:MY_LISP_OUT",
+                ])
+                .env("MY_LISP_URL", url)
+                .env("MY_LISP_OUT", &output)
+                .status()
+                .map_err(|error| format!("download failed for {url}: curl unavailable ({curl_error}); powershell failed: {error}"))?;
+            if status.success() {
+                return Ok(());
+            }
+            return Err(format!("download failed for {url}: powershell exit {status}"));
+        }
+        Err(error) => return Err(format!("download failed for {url}: curl unavailable: {error}")),
+    }
 }
 
 fn current_target() -> &'static str {
