@@ -25,6 +25,9 @@
 (def rust-string
   (lambda (value)
     (cond
+      ((atom value)
+       (structural-kind empty-list)
+       (write-to-string "()"))
       ((string? value)
        (identity-relation same)
        (write-to-string value))
