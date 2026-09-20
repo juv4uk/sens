@@ -82,10 +82,7 @@
                      (cond
                        ((string? raw-source) raw-source)
                        (t (write-to-string raw-source))))
-                   (class (violation-class path source))
-                   (debug
-                     (print
-                       (list (quote semantic-authority-scan-debug) path class))))
+                   (class (violation-class path source)))
               (cond
            ((eq class (quote allowed)) (identity-relation same)
             (scan (cdr rows)))
@@ -94,8 +91,6 @@
            ((eq class (quote allowed-generated-projection)) (identity-relation same)
             (scan (cdr rows)))
            ((eq class (quote allowed-adversarial-fixture)) (identity-relation same)
-            (scan (cdr rows)))
-           ((eq class (quote allowed)) (identity-relation distinct)
             (scan (cdr rows)))
                 (t
                  (list (quote semantic-authority-violation)
