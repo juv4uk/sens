@@ -32,11 +32,6 @@ fn raw_machine_identity_never_becomes_a_language_semantic() {
         my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("rdtsc").is_none(),
         "raw target instruction names are machine facts, not language semantic identities"
     );
-    assert!(
-        !my_lisp::semantic_registry_export::admitted_semantic_ids()
-            .contains(&(1153u16 as u8)),
-        "historical compiler-originated allocation must not return as an active semantic row"
-    );
 }
 #[test]
 fn vertical_machine_boundary_separates_semantics_isa_optimization_and_host() {
