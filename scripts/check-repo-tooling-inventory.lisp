@@ -641,6 +641,22 @@
     (repo-tooling-script-rows repo-tooling-live-rows)
     repo-tooling-live-observed))
 
+(repo-tooling-assert-verdict
+  repo-tooling-live-scripts-verdict
+  (quote (repo-tooling-ok)))
+
+(repo-tooling-assert-verdict
+  (repo-tooling-extra-entrypoint-verdict
+    "crates/xtask/src/main.rs"
+    repo-tooling-live-rows)
+  (quote (repo-tooling-ok)))
+
+(repo-tooling-assert-verdict
+  (repo-tooling-extra-entrypoint-verdict
+    "githooks/pre-commit"
+    repo-tooling-live-rows)
+  (quote (repo-tooling-ok)))
+
 (def repo-tooling-live-verdict
   (cond
     ((eq (repo-tooling-verdict-ok-state repo-tooling-live-scripts-verdict)
