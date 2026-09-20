@@ -47,8 +47,8 @@ fn macro_peer_admission_is_recorded_under_identity_00001010_without_binding_the_
 
     let surfaces = my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(id);
     assert!(surfaces.iter().any(|row| row.namespace == "en" && row.name == "defmacro"));
-    assert!(surfaces.iter().any(|row| row.namespace == "uk" && row.name == "визначити-макрос"));
-    assert!(surfaces.iter().any(|row| row.namespace == "ukr" && row.name == "визначити-макрос"));
+    assert!(surfaces.iter().any(|row| row.namespace == "ук" && row.name == "визначити-макрос"));
+    assert!(surfaces.iter().any(|row| row.namespace == "укр" && row.name == "визначити-макрос"));
     assert!(surfaces.iter().all(|row| row.namespace != "sa" && row.namespace != "sym"));
 
     let session = Session::default();
