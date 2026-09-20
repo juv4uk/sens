@@ -24,13 +24,13 @@ fn ratified_ukr_name_resolves_to_same_identity_as_current_uk() {
     assert!(
         surfaces
             .iter()
-            .any(|row| row.namespace == "uk" && row.name == CURRENT_UK_STRING_EMPTY),
+            .any(|row| row.namespace == "ук" && row.name == CURRENT_UK_STRING_EMPTY),
         "current uk surface must remain present"
     );
     assert!(
         surfaces
             .iter()
-            .any(|row| row.namespace == "ukr" && row.name == UKR_STRING_EMPTY),
+            .any(|row| row.namespace == "укр" && row.name == UKR_STRING_EMPTY),
         "ukr must be the authoritative full Ukrainian peer namespace"
     );
     assert!(
@@ -45,7 +45,7 @@ fn admitted_ukr_registry_spellings_never_require_latin_layout() {
     for semantic_id in my_lisp::semantic_registry_export::admitted_semantic_ids() {
         for row in my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
         {
-            if row.namespace == "ukr" {
+            if row.namespace == "укр" {
                 admitted += 1;
                 assert!(
                     !row.name.chars().any(|character| character.is_ascii_alphabetic()),
@@ -76,7 +76,7 @@ fn full_ukr_names_preserve_action_protocol_and_representation_semantics() {
         assert!(
             my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(id)
                 .iter()
-                .any(|row| row.namespace == "ukr" && row.name == name),
+                .any(|row| row.namespace == "укр" && row.name == name),
             "semantic SID {semantic_id} must keep the explicit ukr meaning {name:?}"
         );
     }
@@ -107,10 +107,10 @@ fn generated_function_table_uses_uk_then_ukr_without_duplicate_full_uk_column() 
         .expect("generated function table must contain byte SID 00111100");
 
     let uk = row
-        .find("(uk текст-порожній?)")
+        .find("(ук текст-порожній?)")
         .expect("row must contain current uk column");
     let ukr = row
-        .find("(ukr порожній-текст?)")
+        .find("(укр порожній-текст?)")
         .expect("row must contain authoritative full Ukrainian ukr column");
     let en = row
         .find("(en string-empty?)")
@@ -127,7 +127,7 @@ fn generated_function_table_uses_uk_then_ukr_without_duplicate_full_uk_column() 
 
     let markdown = include_str!("../../../docs/generated/function-table.md");
     assert!(
-        markdown.contains("| ID | uk | ukr | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |"),
+        markdown.contains("| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |"),
         "human function table must expose exactly uk and ukr Ukrainian columns"
     );
     assert!(
