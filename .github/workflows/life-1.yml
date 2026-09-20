@@ -1,0 +1,51 @@
+name: LIFE-1 real spine
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/life-1.yml"
+      - "contracts/life-1-contract.lisp"
+      - "lib/bridge/prolog-to-datalog.lisp"
+      - "lib/life-1-scheduler.lisp"
+      - "crates/wsm-native-result-types/**"
+      - "crates/wsm-prolog-kernel/**"
+      - "crates/wsm-datalog-kernel/**"
+      - "crates/my-lisp/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/life-1.yml"
+      - "contracts/life-1-contract.lisp"
+      - "lib/bridge/prolog-to-datalog.lisp"
+      - "lib/life-1-scheduler.lisp"
+      - "crates/wsm-native-result-types/**"
+      - "crates/wsm-prolog-kernel/**"
+      - "crates/wsm-datalog-kernel/**"
+      - "crates/my-lisp/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+  workflow_dispatch:
+
+jobs:
+  life-1:
+    name: does LIFE-1 still live?
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: life-1-real-spine
+
+      - name: Install the first-slice external runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y swi-prolog-nox
+          swipl --version
+
+      - name: Prove the canonical real LIFE-1 spine
+        run: |
+          cargo test -p wsm-native-result-types --test prolog_datalog_bridge -- --nocapture
