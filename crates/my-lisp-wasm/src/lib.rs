@@ -83,6 +83,10 @@ fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Enviro
             eval_program(source, &mut session)
                 .map_err(|error| format!("failed to load {name}: {}", error.render(source)))?;
         }
+        if matches!(surface, WebSurface::UkrainianFull) {
+            eval_program(UK_SURFACE, &mut session)
+                .map_err(|error| format!("failed to load uk.lisp: {}", error.render(UK_SURFACE)))?;
+        }
         let (name, source) = match surface {
             WebSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
             WebSurface::UkrainianFull => ("ukr.lisp", UKR_SURFACE),
