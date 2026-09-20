@@ -107,7 +107,7 @@
                   Return="ignore" />
 
     <InstallExecuteSequence>
-      <Custom Action="InstallExecutionIslands" After="InstallFiles">NOT Installed</Custom>
+      <Custom Action="InstallExecutionIslands" After="InstallFiles" Condition="NOT Installed" />
     </InstallExecuteSequence>
 
   </Package>
