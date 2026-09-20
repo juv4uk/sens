@@ -128,4 +128,6 @@ crates/my-lisp/tests/timezone_ownership.rs	timezone_detect_public_binding_is_lan
 crates/my-lisp/tests/semantic_coordinate_join_2.rs	remaining_bounded_scope_preserves_asymmetric_coordinates	observer	semantic-coordinate-cross-axis-join-v2	contracts/semantic-coordinate-matrix-845.lisp + math/kernel/machine axes	retained
 crates/my-lisp/tests/semantic_coordinate_join_2.rs	coordinate_axes_do_not_leak_each_others_payloads	observer	semantic-coordinate-axis-noninterference	math/kernel/machine axis sources	retained
 crates/my-lisp/tests/life_1_scheduler.rs	life_1_scheduler_witness_is_lisp_owned	observer	life-1-scheduler	lib/life-1-scheduler.lisp + tests/fixtures/life-1-scheduler-witness.lisp + contracts/life-1-contract.lisp	retained
-crates/my-lisp/tests/semantic_registry_lisp.rs	semantic_registry_is_read_and_queried_by_lisp_itself	observer	semantic-registry-lisp-query	lib/surface/semantic-registry.lisp + lib/surface/semantic-registry-api.lisp + tests/fixtures/semantic-registry-self-hosted-witness.lisp	retained
+
+crates/my-lisp/tests/semantic_registry_lisp.rs	lisp_owned_semantic_registry_witness	observer	semantic-registry-lisp-query	lib/surface/semantic-registry.lisp + tests/fixtures/semantic-registry-self-hosted-witness.lisp	migrated
+crates/my-lisp/tests/runtime_peer_operators.rs	runtime_peer_surface_projection_remains_lisp_owned	observer	peer-surface-runtime-projection	lib/surface/semantic-registry.lisp via generated projection	migrated
