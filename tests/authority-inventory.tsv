@@ -131,3 +131,4 @@ crates/my-lisp/tests/life_1_scheduler.rs	life_1_scheduler_witness_is_lisp_owned	
 
 crates/my-lisp/tests/semantic_registry_lisp.rs	lisp_owned_semantic_registry_witness	observer	semantic-registry-lisp-query	lib/surface/semantic-registry.lisp + tests/fixtures/semantic-registry-self-hosted-witness.lisp	migrated
 crates/my-lisp/tests/runtime_peer_operators.rs	runtime_peer_surface_projection_remains_lisp_owned	observer	peer-surface-runtime-projection	lib/surface/semantic-registry.lisp via generated projection	migrated
+crates/my-lisp/tests/u8_native.rs	u8_binary_value_domain_remains_lisp_owned_through_binary_and_integer_operations	observer	native-u8-language-witness	lib/u8.lisp + crates/my-lisp/src/eval/builtins.rs + lib/surface/semantic-registry.lisp	retained
