@@ -26,7 +26,7 @@
        (let ((found (assoc field (cdr entry))))
          (cond
            ((atom found) (structural-kind empty-list) (quote ()))
-           ((atom found) (structural-kind pair) (cdr found)))))))
+           ((atom found) (structural-kind pair) (cdr found))))))))
 
 (def life-scheduler-invocation-key
   (lambda (invocation)
@@ -127,7 +127,7 @@
          ((atom projections) (structural-kind pair)
           (quote (quiescence-state active))))
       ((atom pending) (structural-kind pair)
-       (quote (quiescence-state active)))))
+       (quote (quiescence-state active)))))))
 
 (def life-scheduler-state
   (lambda (pending projections lifecycle-state)
