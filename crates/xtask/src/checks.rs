@@ -367,10 +367,8 @@ fn stable_pairs() -> BTreeSet<(String, String)> {
         .lines()
         .filter_map(|line| {
             let fields = line.split_whitespace().collect::<Vec<_>>();
-            let identity = fields
-                .first()?
-                .strip_prefix("(\"")?
-                .strip_suffix('"')?;
+            let token = *fields.first()?;
+            let identity = token.strip_prefix('(')?.trim_matches('"');
             if identity.len() != 8
                 || !identity.bytes().all(|byte| matches!(byte, b'0' | b'1'))
             {
@@ -609,10 +607,8 @@ fn en_uk_names_needing_uk_layout_check() -> Vec<String> {
         .lines()
         .filter_map(|line| {
             let fields = line.split_whitespace().collect::<Vec<_>>();
-            let semantic_id = fields
-                .first()?
-                .strip_prefix("(\"")?
-                .strip_suffix('"')?;
+            let token = *fields.first()?;
+            let semantic_id = token.strip_prefix('(')?.trim_matches('"');
             if semantic_id.len() != 8
                 || !semantic_id.bytes().all(|byte| matches!(byte, b'0' | b'1'))
             {
