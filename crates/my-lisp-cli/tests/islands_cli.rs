@@ -512,6 +512,73 @@ fn islands_missing_probe_executable_is_probe_failed_not_available() {
 }
 
 #[test]
+fn concurrent_install_requests_publish_one_verified_runtime_without_corruption() {
+    let base = std::env::temp_dir().join(format!(
+        "my-lisp-islands-concurrent-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+
+    let artifact = base.join("runtime.bin");
+    std::fs::write(&artifact, b"concurrent-runtime").expect("artifact");
+    let digest = my_lisp::sha256_source(b"concurrent-runtime")
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(
+        &manifest_path,
+        format!(
+            r#"{{"protocol":"my-lisp-islands-manifest/1","islands":[{{"key":"demo","runtime_version":"7","abi_compatibility":"test-abi","install_key":"demo","license":"test","license_acceptance_required":false,"provenance":"release","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","checksum_algorithm":"sha256","sha256":"{}","artifact_format":"raw-binary","entrypoint":"runtime.bin","probe":["/bin/sh","-c","exit 0"]}}]}}]}}"#,
+            artifact.display(),
+            digest
+        ),
+    )
+    .expect("manifest");
+
+    let root = base.join("installed");
+    let args = [
+        "islands",
+        "install",
+        "--manifest",
+        manifest_path.to_str().unwrap(),
+        "--with",
+        "demo",
+        "--root",
+        root.to_str().unwrap(),
+        "--apply",
+    ];
+
+    let first = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args(args)
+        .spawn()
+        .expect("first concurrent install");
+    let second = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args(args)
+        .spawn()
+        .expect("second concurrent install");
+
+    let first = first.wait_with_output().expect("first install output");
+    let second = second.wait_with_output().expect("second install output");
+    assert!(
+        first.status.success(),
+        "first stderr: {}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    assert!(
+        second.status.success(),
+        "second stderr: {}",
+        String::from_utf8_lossy(&second.stderr)
+    );
+
+    assert_eq!(
+        std::fs::read(root.join("demo/7/linux-x86_64/runtime.bin")).unwrap(),
+        b"concurrent-runtime"
+    );
+}
+
+#[test]
 fn islands_status_keeps_absent_and_unsupported_distinct_for_selected_target() {
     let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
         .args([
