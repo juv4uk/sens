@@ -17,11 +17,15 @@
 (def semantic-registry-source-path
   "lib/surface/semantic-registry.lisp")
 
+(def semantic-registry-read-source
+  (lambda (source)
+    (car
+      (read-all source))))
+
 (def semantic-registry-read
   (lambda ()
-    (car
-      (read-all
-        (read-file semantic-registry-source-path)))))
+    (semantic-registry-read-source
+      (read-file semantic-registry-source-path))))
 
 (def semantic-registry-format
   (lambda (registry)
