@@ -5,11 +5,9 @@ use std::rc::Rc;
 
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
-const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
 const PRESENTATION: &str = include_str!("../src/presentation.rs");
 
 struct PeerCase {
-    identity: &'static str,
     uk: &'static str,
     sa: &'static str,
     sym: &'static str,
@@ -17,37 +15,31 @@ struct PeerCase {
 
 const CASES: &[PeerCase] = &[
     PeerCase {
-        identity: "1001",
         uk: "відняти",
         sa: "viyoga",
         sym: "-",
     },
     PeerCase {
-        identity: "1002",
         uk: "помножити",
         sa: "guṇana",
         sym: "*",
     },
     PeerCase {
-        identity: "1003",
         uk: "поділити",
         sa: "haraṇa",
         sym: "/",
     },
     PeerCase {
-        identity: "1014",
         uk: "менше?",
         sa: "hīna?",
         sym: "<",
     },
     PeerCase {
-        identity: "1015",
         uk: "більше?",
         sa: "adhika?",
         sym: ">",
     },
     PeerCase {
-        identity: "1016",
         uk: "рівне?",
         sa: "sama?",
         sym: "=",
@@ -111,10 +103,20 @@ fn migrated_surface_files_do_not_build_stable_operator_peers_through_symbols() {
 #[test]
 fn runtime_peer_slice_matches_numeric_registry_rows() {
     for case in CASES {
-        assert!(REGISTRY.contains(&format!("({}", case.identity)));
-        assert!(REGISTRY.contains(&format!("(uk {} stable)", case.uk)));
-        assert!(REGISTRY.contains(&format!("(sa {} stable)", case.sa)));
-        assert!(REGISTRY.contains(&format!("(sym {} stable)", case.sym)));
+        let sid = my_lisp::semantic_registry_export::semantic_id_for_admitted_surface(case.uk)
+            .expect("UK peer must be registry-admitted");
+        assert_eq!(
+            my_lisp::semantic_registry_export::semantic_id_for_admitted_surface(case.sa),
+            Some(sid)
+        );
+        assert_eq!(
+            my_lisp::semantic_registry_export::semantic_id_for_admitted_surface(case.sym),
+            Some(sid)
+        );
+        let surfaces = my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(sid);
+        assert!(surfaces.iter().any(|row| row.namespace == "uk" && row.name == case.uk));
+        assert!(surfaces.iter().any(|row| row.namespace == "sa" && row.name == case.sa));
+        assert!(surfaces.iter().any(|row| row.namespace == "sym" && row.name == case.sym));
     }
 }
 
@@ -130,7 +132,7 @@ fn ukrainian_builtin_presentation_uses_numeric_authority_not_legacy_audit() {
             render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
             format!("#<вбудована {}>", case.uk),
             "{} presentation",
-            case.identity
+            case.uk
         );
     }
 }
