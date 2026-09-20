@@ -25,9 +25,11 @@
 (def rust-string
   (lambda (value)
     (cond
-      ((string? value)
+      ((string-membership-helper value)
+       (class-membership string member)
        (write-to-string value))
-      (t
+      ((string-membership-helper value)
+       (class-membership string nonmember)
        (write-to-string (symbol->string value))))))
 
 (def render-surface
