@@ -118,6 +118,11 @@ jobs:
           set -euo pipefail
           ./target/debug/my-lisp scripts/check-repo-tooling-inventory.lisp
 
+      - name: Lisp-owned encoder coverage parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! grep -Eq '^(lib/machine/encoding/(x86-64\.lisp|coverage\.lisp|coverage-generator\.lisp|admitted-iclass-index\.lisp)|lib/machine/xed/generated/machine-evidence\.lisp|scripts/(check|generate)-encoder-coverage\.lisp|crates/xtask/src/encoder_coverage\.rs|crates/xtask/tests/encoder_coverage_cli\.rs)
       - name: Lisp-owned machine non-interference guard
         shell: bash
         run: |
@@ -293,6 +298,251 @@ jobs:
         run: |
           cargo build -p my-lisp-cli --bin my-lisp
           ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
+          python3 scripts/public_api_inventory.py --check
+          cargo run -p xtask -- import-xed-evidence --check
+          cargo run -p xtask -- generate-encoder-coverage --check
+      - name: Machine non-interference guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build -p my-lisp-cli --bin my-lisp
+          ./target/debug/my-lisp scripts/machine-authority-guard.lisp
+
+          representation_status="$(./target/debug/my-lisp tests/fixtures/machine-representation-independence-witness.lisp)"
+          if [[ "$representation_status" != "(machine-representation-independence-witness (status pass))" ]]; then
+            printf 'machine representation-independence witness failed: %s\n' "$representation_status" >&2
+            exit 1
+          fi
+
+          restore_machine_layer() {
+            if [[ -d /tmp/my-lisp-machine-211 ]]; then
+              mv /tmp/my-lisp-machine-211 lib/machine
+            fi
+          }
+          trap restore_machine_layer EXIT
+          rm -rf /tmp/my-lisp-machine-211
+          mv lib/machine /tmp/my-lisp-machine-211
+          replaceability_status="$(./target/debug/my-lisp tests/fixtures/machine-replaceability-witness.lisp)"
+          restore_machine_layer
+          trap - EXIT
+          if [[ "$replaceability_status" != "(machine-replaceability-witness (status pass))" ]]; then
+            printf 'machine replaceability witness failed: %s\n' "$replaceability_status" >&2
+            exit 1
+          fi
+      - name: Current Lisp-owned semantic witnesses
+        run: bash scripts/test-current-semantic-slice.sh
+      - name: Critical machine and surface witnesses
+        run: cargo test -p my-lisp --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
+      - name: Native CPU vertical witnesses
+        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+      - name: CLI smoke
+        run: cargo test -p my-lisp-cli --test cli
+      - name: Governance and policy checks
+        run: |
+          cargo test -p xtask --test license_policy
+          cargo run -p xtask -- verify
+
+  main-fast-clippy:
+    name: main fast clippy
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: main-fast-clippy
+      - run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+ /tmp/changed.txt; then
+            echo 'encoder coverage inputs unchanged; skipping Lisp parity'
+            exit 0
+          fi
+          status="$(./target/debug/my-lisp scripts/check-encoder-coverage.lisp)"
+          if [[ "$status" != "(encoder-coverage-check (status pass))" ]]; then
+            printf 'Lisp encoder coverage parity failed: %s\n' "$status" >&2
+            exit 1
+          fi
+
+      - name: Lisp-owned machine non-interference guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build -p my-lisp-cli --bin my-lisp
+
+          # #150: the admitted authority graph is one-way.
+          ./target/debug/my-lisp scripts/machine-authority-guard.lisp
+
+          cp tests/machine-authority-edges.lisp /tmp/machine-authority-edges.lisp
+          cp tests/fixtures/machine-authority/reverse-edge.lisp tests/machine-authority-edges.lisp
+          if ./target/debug/my-lisp scripts/machine-authority-guard.lisp > /tmp/machine-reverse-edge.log 2>&1; then
+            echo "ERROR: #150 reverse machine->semantic authority edge was accepted"
+            exit 1
+          fi
+          grep -q 'machine-authority-boundary-violation' /tmp/machine-reverse-edge.log
+          cp /tmp/machine-authority-edges.lisp tests/machine-authority-edges.lisp
+
+          # #211: a native result may not become its own semantic authority
+          # or the only semantic answer key.
+          cp lib/machine/capability-provenance.lisp /tmp/machine-capability-provenance.lisp
+          cp tests/fixtures/machine-authority/hybrid-capability.lisp lib/machine/capability-provenance.lisp
+          if ./target/debug/my-lisp scripts/machine-authority-guard.lisp > /tmp/machine-hybrid.log 2>&1; then
+            echo "ERROR: #211 machine/native semantic answer key was accepted"
+            exit 1
+          fi
+          grep -q 'machine-semantic-hybrid-violation' /tmp/machine-hybrid.log
+          cp /tmp/machine-capability-provenance.lisp lib/machine/capability-provenance.lisp
+
+          # Same Lisp addition, two admitted register realizations.
+          representation_status="$(./target/debug/my-lisp tests/fixtures/machine-representation-independence-witness.lisp)"
+          if [[ "$representation_status" != "(machine-representation-independence-witness (status pass))" ]]; then
+            printf 'machine representation-independence witness failed: %s\n' "$representation_status" >&2
+            exit 1
+          fi
+
+          # Meaning must remain executable when the whole target-specific
+          # machine layer is physically absent from the checkout.
+          restore_machine_layer() {
+            if [[ -d /tmp/my-lisp-machine-211 ]]; then
+              mv /tmp/my-lisp-machine-211 lib/machine
+            fi
+          }
+          trap restore_machine_layer EXIT
+          rm -rf /tmp/my-lisp-machine-211
+          mv lib/machine /tmp/my-lisp-machine-211
+          replaceability_status="$(./target/debug/my-lisp tests/fixtures/machine-replaceability-witness.lisp)"
+          restore_machine_layer
+          trap - EXIT
+          if [[ "$replaceability_status" != "(machine-replaceability-witness (status pass))" ]]; then
+            printf 'machine replaceability witness failed: %s\n' "$replaceability_status" >&2
+            exit 1
+          fi
+
+      - name: Diff hygiene
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: git diff --check "$BASE_SHA" "$HEAD_SHA"
+
+      - name: Validate workflow YAML syntax
+        if: steps.changes.outputs.workflow == 'true'
+        run: ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
+
+      - name: Exercise future main fast critical gate
+        if: steps.changes.outputs.workflow == 'true'
+        run: |
+          python3 scripts/generate-meta-semantic-registry.py --check
+          python3 scripts/public_api_inventory.py --check
+          bash scripts/test-current-semantic-slice.sh
+          cargo test -p my-lisp --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
+          cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+          cargo test -p my-lisp-cli --test cli
+          cargo test -p xtask --test license_policy
+          cargo run -p xtask -- verify
+
+      - name: Exercise future main fast clippy
+        if: steps.changes.outputs.workflow == 'true'
+        run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+
+      - name: Workspace dependency-graph fallback
+        if: steps.changes.outputs.workspace == 'true'
+        run: |
+          cargo test --workspace
+          cargo build --workspace
+
+      - name: Check generated semantic registry
+        if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
+        run: python3 scripts/generate-meta-semantic-registry.py --check
+
+      - name: Check public API discovery projection
+        if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
+        run: python3 scripts/public_api_inventory.py --check
+
+      - name: Focused surface contracts
+        if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tests=(macro_derivation ukrainian_api_docs uk_surface_equivalence public_api_inventory_contract machine_noninterference_contract)
+          if [[ -f crates/my-lisp/tests/machine_lowering_boundary.rs ]]; then tests+=(machine_lowering_boundary); fi
+          args=(); for test_name in "${tests[@]}"; do args+=(--test "$test_name"); done
+          cargo test -p my-lisp "${args[@]}"
+
+      - name: Current Lisp-owned semantic slice
+        if: steps.changes.outputs.semantic == 'true' && steps.changes.outputs.workspace != 'true'
+        run: bash scripts/test-current-semantic-slice.sh
+
+      - name: Core language package tests
+        if: steps.changes.outputs.core == 'true' && steps.changes.outputs.surface != 'true' && steps.changes.outputs.semantic != 'true' && steps.changes.outputs.workspace != 'true'
+        run: cargo test -p my-lisp
+
+      - name: Native host vertical witness
+        if: steps.changes.outputs.host == 'true' && steps.changes.outputs.workspace != 'true'
+        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+
+      - name: CLI black-box tests
+        if: (steps.changes.outputs.cli == 'true' || steps.changes.outputs.surface == 'true') && steps.changes.outputs.workspace != 'true'
+        run: cargo test -p my-lisp-cli --test cli
+
+      - name: xtask policy tests
+        if: (steps.changes.outputs.xtask == 'true' || steps.changes.outputs.surface == 'true') && steps.changes.outputs.workspace != 'true'
+        run: |
+          cargo test -p xtask --test external_oracle_cli
+          cargo test -p xtask --test xed_import_cli
+          cargo test -p xtask --test encoder_coverage_cli
+          cargo test -p xtask --test license_policy
+          cargo run -p xtask -- verify
+          cargo run -p xtask -- import-xed-evidence --check
+          cargo run -p xtask -- generate-encoder-coverage --check
+          coverage_status="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/check-encoder-coverage.lisp)"
+          if [[ "$coverage_status" != "(encoder-coverage-check (status pass))" ]]; then
+            printf 'Lisp encoder coverage parity failed: %s\n' "$coverage_status" >&2
+            exit 1
+          fi
+
+      - name: Focused Advice Taker witness
+        if: steps.changes.outputs.meta == 'true' && steps.changes.outputs.workspace != 'true'
+        run: cargo test --profile ci-meta -p my-lisp --test meta_eval_advice_taker advice_taker_native_and_meta_preserve_expected_outcome_classes -- --ignored --nocapture
+
+      - name: Clippy changed Rust surfaces
+        if: steps.changes.outputs.rust == 'true' && steps.changes.outputs.workspace != 'true'
+        run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+
+  windows-native-exec-witness:
+    name: Windows native-exec ABI witness
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: windows-native-exec-witness
+      - name: Windows guest-ABI witness (sysv64 vs win64)
+        run: cargo test -p my-lisp-host --test windows_native_exec_abi
+      - name: Native CPU vertical witnesses on Windows
+        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+      - name: Clippy my-lisp-host on Windows
+        run: cargo clippy -p my-lisp-host --all-targets -- -D warnings
+
+  main-fast-critical:
+    name: main fast critical gate
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: main-fast-critical
+      - name: Generated authority projections
+        run: |
+          python3 scripts/generate-meta-semantic-registry.py --check
           python3 scripts/public_api_inventory.py --check
           cargo run -p xtask -- import-xed-evidence --check
           cargo run -p xtask -- generate-encoder-coverage --check
