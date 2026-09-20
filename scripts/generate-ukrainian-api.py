@@ -2,8 +2,8 @@
 """Generate the detailed Ukrainian API reference from byte-SID documentation + surface authority.
 
 Behavior prose lives once in lib/surface/uk-docs.lisp, keyed by byte SID.
-Surface spellings come from lib/generated/function-table.lisp, itself a projection
-of lib/surface/semantic-registry.lisp. This script only joins those two projections.
+Surface spellings come directly from lib/surface/semantic-registry.lisp.
+The generated function table is a review projection and is not an input API.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_INDEX = ROOT / "lib/surface/uk-docs.lisp"
-FUNCTION_TABLE = ROOT / "lib/generated/function-table.lisp"
+SEMANTIC_REGISTRY = ROOT / "lib/surface/semantic-registry.lisp"
 API_DOC = ROOT / "docs/ukrainian-api.md"
 
 START = "## Повний довідник"
@@ -28,7 +28,7 @@ DOC_RE = re.compile(
     r'^\s*\(doc\s+(\S+)\s+"([01]{8})"\s+(\S+)\s+"((?:\\.|[^"\\])*)"\s+"((?:\\.|[^"\\])*)"\)\s*$'
 )
 SURFACE_RE = re.compile(r"\((uk|ukr|en|sym)\s+(\(\)|[^\s)]+)\)")
-ROW_RE = re.compile(r'^\s*\("([01]{8})"\s')
+ROW_RE = re.compile(r'^\s*\(([01]{8})\s')
 
 CATEGORY_TITLES = OrderedDict(
     [
@@ -116,9 +116,9 @@ def parse_docs_index() -> list[DocRow]:
     return rows
 
 
-def parse_function_table() -> dict[str, dict[str, Surface]]:
+def parse_semantic_registry() -> dict[str, dict[str, Surface]]:
     result: dict[str, dict[str, Surface]] = {}
-    for line in FUNCTION_TABLE.read_text(encoding="utf-8").splitlines():
+    for line in SEMANTIC_REGISTRY.read_text(encoding="utf-8").splitlines():
         row_match = ROW_RE.match(line)
         if not row_match:
             continue
@@ -147,7 +147,7 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
     out = [
         "## Повний довідник `uk` / `ukr`",
         "",
-        "Нижче — згенерований join по **byte SID**. Опис поведінки береться один раз із `lib/surface/uk-docs.lisp`; `uk`, `ukr` та основа беруться з authoritative function-table projection. Ручне редагування рядків цієї секції буде перезаписано генератором.",
+        "Нижче — згенерований join по **byte SID**. Опис поведінки береться один раз із `lib/surface/uk-docs.lisp`; `uk`, `ukr` та основа беруться безпосередньо з `lib/surface/semantic-registry.lisp`. Generated function-table лишається лише оглядовою проєкцією. Ручне редагування рядків цієї секції буде перезаписано генератором.",
         "",
     ]
 
@@ -161,7 +161,7 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
         for row in category_rows:
             surfaces = table.get(row.identity)
             if surfaces is None:
-                raise SystemExit(f"function table missing documented semantic ID {row.identity}")
+                raise SystemExit(f"semantic registry missing documented semantic ID {row.identity}")
             uk = surfaces.get("uk")
             ukr = surfaces.get("ukr")
             en = surfaces.get("en")
@@ -169,7 +169,7 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
             if uk is None or uk.word == "()" or uk.word == "—":
                 raise SystemExit(f"documented semantic ID {row.identity} has no uk surface")
             if ukr is None or ukr.word == "()" or ukr.word == "—":
-                raise SystemExit(f"function table missing ukr projection for {row.identity}")
+                raise SystemExit(f"semantic registry missing ukr surface for {row.identity}")
             basis = en.word if en is not None and en.word not in ("()", "—") else (
                 sym.word if sym is not None and sym.word not in ("()", "—") else "—"
             )
@@ -199,7 +199,7 @@ def desired_document() -> str:
     end = current.find(END)
     if start < 0 or end < 0 or end <= start:
         raise SystemExit("docs/ukrainian-api.md is missing detailed-reference boundaries")
-    generated = render_reference(parse_docs_index(), parse_function_table())
+    generated = render_reference(parse_docs_index(), parse_semantic_registry())
     return current[:start] + generated + current[end:]
 
 
