@@ -198,113 +198,124 @@ pub(crate) fn value_for_surface(name: &str) -> Option<Value> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn canon_has_exactly_ground_plus_seven() {
-        assert_eq!(CANON.len(), 8);
-        assert_eq!(CANON[0].identity, CanonicalIdentity::EmptyList);
-        assert_eq!(CANON[0].kind, CanonicalKind::GroundValue);
-        assert_eq!(CANON[0].semantic_id, EMPTY_LIST_SEMANTIC_ID);
+    fn canon_identities() -> [CanonicalIdentity; 8] {
+        [
+            CanonicalIdentity::EmptyList,
+            CanonicalIdentity::Quote,
+            CanonicalIdentity::Atom,
+            CanonicalIdentity::Eq,
+            CanonicalIdentity::Cons,
+            CanonicalIdentity::Car,
+            CanonicalIdentity::Cdr,
+            CanonicalIdentity::Cond,
+        ]
     }
 
     #[test]
-    fn canon_meanings_are_selected_only_by_numeric_semantic_identity() {
-        assert_eq!(
-            identity_for_semantic_id(QUOTE_SEMANTIC_ID),
-            Some(CanonicalIdentity::Quote)
-        );
-        assert_eq!(
-            identity_for_semantic_id(CAR_SEMANTIC_ID),
-            Some(CanonicalIdentity::Car)
-        );
-        assert_eq!(identity_for_semantic_id(12), None);
+    fn canon_has_exactly_ground_plus_seven_in_lisp_owned_dispatch() {
+        let projected = dispatch::EVALUATOR_DISPATCH
+            .iter()
+            .filter_map(|row| {
+                canonical_identity_for_mechanism(row.mechanism)
+                    .map(|identity| (row.semantic_id, identity))
+            })
+            .collect::<Vec<_>>();
+
+        assert_eq!(projected.len(), 8);
+        for identity in canon_identities() {
+            assert!(
+                projected.iter().any(|(_, candidate)| *candidate == identity),
+                "Lisp-owned evaluator dispatch must project every Canon identity: {identity:?}"
+            );
+        }
     }
 
     #[test]
-    fn every_admitted_surface_for_one_semantic_id_resolves_to_one_identity() {
-        // Which spellings mean "car" is a registry FACT, not a Rust literal
-        // to enumerate here -- read them from the registry so this test
-        // keeps meaning "Canon routes every admitted surface for 0005 to
-        // the same identity" even if the admitted spellings change.
-        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID);
+    fn canon_meanings_are_selected_only_by_projected_semantic_identity() {
+        for identity in canon_identities() {
+            let semantic_id = semantic_id_for_identity(identity);
+            assert_eq!(identity_for_semantic_id(semantic_id), Some(identity));
+        }
+
+        let lambda_id = semantic_registry::semantic_id_for_surface("lambda")
+            .expect("lambda must remain a registry identity");
+        assert_eq!(identity_for_semantic_id(lambda_id), None);
+    }
+
+    #[test]
+    fn every_admitted_surface_for_car_resolves_to_projected_identity() {
+        let car_id = semantic_id_for_identity(CanonicalIdentity::Car);
+        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(car_id);
         assert!(
             surfaces.len() >= 2,
-            "0005 (car) should admit at least two surfaces for this invariant to be meaningful, \
-             got {surfaces:?}"
+            "car should admit peer surfaces for this invariant to be meaningful, got {surfaces:?}"
         );
         for surface in &surfaces {
             assert_eq!(
                 identity_for_surface(surface),
                 Some(CanonicalIdentity::Car),
-                "registry-admitted surface {surface:?} did not route to CanonicalIdentity::Car"
+                "registry-admitted surface {surface:?} did not route to projected Car mechanism"
             );
         }
     }
 
     #[test]
-    fn numeric_canon_identity_is_the_runtime_value_identity() {
-        assert_eq!(
-            identity_for_semantic_id(CAR_SEMANTIC_ID),
-            Some(CanonicalIdentity::Car)
-        );
-        let human_surface = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID)
+    fn projected_canon_identity_is_the_runtime_value_identity() {
+        let car_id = semantic_id_for_identity(CanonicalIdentity::Car);
+        let human_surface = semantic_registry::admitted_surfaces_for_semantic_id(car_id)
             .into_iter()
             .next()
-            .expect("00000101 (car) should admit at least one human surface");
-        let direct = value(CanonicalIdentity::Car).expect("numeric Canon identity");
+            .expect("projected car identity should admit at least one human surface");
+        let direct = value(CanonicalIdentity::Car).expect("projected Canon identity");
         let human = value_for_surface(human_surface).expect("registry-admitted Canon surface");
-        assert_eq!(direct, Value::SemanticRef(CAR_SEMANTIC_ID));
-        assert_eq!(human, Value::SemanticRef(CAR_SEMANTIC_ID));
+
+        assert_eq!(direct, Value::SemanticRef(car_id));
+        assert_eq!(human, Value::SemanticRef(car_id));
         assert_eq!(direct, human);
     }
 
     #[test]
-    fn every_admitted_surface_for_one_semantic_id_materializes_one_semantic_reference() {
-        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID);
-        assert!(
-            surfaces.len() >= 2,
-            "0005 (car) should admit at least two surfaces for this invariant to be meaningful, \
-             got {surfaces:?}"
-        );
+    fn every_admitted_surface_materializes_one_projected_semantic_reference() {
+        let car_id = semantic_id_for_identity(CanonicalIdentity::Car);
+        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(car_id);
 
         for surface in &surfaces {
             assert_eq!(
                 value_for_surface(surface),
-                Some(Value::SemanticRef(CAR_SEMANTIC_ID)),
-                "registry-admitted surface {surface:?} must materialize semantic identity 0005"
+                Some(Value::SemanticRef(car_id)),
+                "registry-admitted surface {surface:?} must materialize its projected Binary SID"
             );
         }
     }
 
     #[test]
-    fn semantic_ids_control_canon_routing() {
-        assert_eq!(
-            identity_for_semantic_id(QUOTE_SEMANTIC_ID),
-            Some(CanonicalIdentity::Quote)
-        );
-        assert_eq!(
-            identity_for_semantic_id(CAR_SEMANTIC_ID),
-            Some(CanonicalIdentity::Car)
-        );
-        assert_eq!(identity_for_semantic_id(12), None);
-    }
-
-    #[test]
-    fn registry_rows_without_canon_meaning_do_not_become_canon() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(12));
+    fn unrelated_registry_rows_do_not_gain_canon_meaning() {
+        let plus_id = semantic_registry::semantic_id_for_surface("+")
+            .expect("+ must remain an admitted registry surface");
+        assert_eq!(identity_for_semantic_id(plus_id), None);
         assert_eq!(identity_for_surface("+"), None);
     }
 
     #[test]
-    fn canonical_surface_names_are_reserved() {
-        for name in [
-            "quote", "як-є", "svarūpa", "atom", "атом?", "aṇu", "eq", "тотожне?",
-            "abheda", "cons", "сполучити", "saṃyuj", "car", "перше", "ādi", "cdr",
-            "решта", "śeṣa", "cond", "за-умовою", "anukrama",
-        ] {
-            assert!(is_reserved_surface(name), "Canon spelling must be reserved: {name}");
+    fn all_registry_surfaces_of_projected_canon_identities_are_reserved() {
+        for identity in canon_identities().into_iter().filter(|identity| {
+            *identity != CanonicalIdentity::EmptyList
+        }) {
+            let semantic_id = semantic_id_for_identity(identity);
+            let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(semantic_id);
+            assert!(
+                !surfaces.is_empty(),
+                "projected Canon identity {identity:?} should have admitted registry surfaces"
+            );
+            for surface in surfaces {
+                assert!(
+                    is_reserved_surface(surface),
+                    "registry surface {surface:?} for {identity:?} must stay immutable"
+                );
+            }
         }
+
         assert!(!is_reserved_surface("map"));
-        assert!(!is_reserved_surface("відобразити"));
     }
 
     #[test]
