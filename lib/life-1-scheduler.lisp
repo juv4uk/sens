@@ -39,9 +39,9 @@
                    field))
                 ((atom row) (quote (structural-kind pair))
                  (cond
-                   ((eq field (car row)) (quote (identity-relation same))
+                   ((equal? field (car row)) (quote (structural-relation same))
                     (car (cdr row)))
-                   ((eq field (car row)) (quote (identity-relation distinct))
+                   ((equal? field (car row)) (quote (structural-relation distinct))
                     (life-scheduler-field
                       (cons (car entry) (cdr rows))
                       field)))))))))))))
