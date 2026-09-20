@@ -85,6 +85,63 @@ pub struct ObservationRef {
     pub metadata_ref: Option<u64>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ObservationStorageError {
+    ProducerSlotMismatch {
+        producer: ProducerSlot,
+        native_slot: ProducerSlot,
+    },
+    MissingNativePayload(NativeResultRef),
+}
+
+impl std::fmt::Display for ObservationStorageError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ProducerSlotMismatch {
+                producer,
+                native_slot,
+            } => write!(
+                formatter,
+                "observation-ref-slot-mismatch:{producer:?}:{native_slot:?}"
+            ),
+            Self::MissingNativePayload(reference) => write!(
+                formatter,
+                "observation-native-payload-missing:{}:{:?}",
+                reference.observation_id, reference.producer
+            ),
+        }
+    }
+}
+
+impl std::error::Error for ObservationStorageError {}
+
+impl ObservationRef {
+    /// Resolve this stable observation identity only to an available native
+    /// storage handle. No producer payload is decoded or normalized here.
+    pub fn resolve_native_ref(
+        self,
+        available: &[NativeResultRef],
+    ) -> Result<NativeResultRef, ObservationStorageError> {
+        if self.producer != self.native_slot {
+            return Err(ObservationStorageError::ProducerSlotMismatch {
+                producer: self.producer,
+                native_slot: self.native_slot,
+            });
+        }
+
+        let native = NativeResultRef {
+            observation_id: self.observation_id,
+            producer: self.native_slot,
+        };
+
+        if available.contains(&native) {
+            Ok(native)
+        } else {
+            Err(ObservationStorageError::MissingNativePayload(native))
+        }
+    }
+}
+
 /// The narrow first provenance relation admitted by LIFE-1.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum ProvenanceEdgeType {

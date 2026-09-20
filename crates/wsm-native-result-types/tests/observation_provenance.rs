@@ -1,5 +1,6 @@
 use wsm_native_result_types::{
-    FourKernelObservation, ObservationRef, ProducerSlot, ProvenanceEdge, ProvenanceEdgeType,
+    FourKernelObservation, NativeResultRef, ObservationRef, ObservationStorageError, ProducerSlot,
+    ProvenanceEdge, ProvenanceEdgeType,
 };
 
 #[test]
@@ -55,4 +56,43 @@ fn native_result_refs_remain_source_compatible() {
         assert_eq!(observation.producer, native.producer);
         assert_eq!(observation.native_slot, native.producer);
     }
+}
+
+#[test]
+fn missing_or_mismatched_native_storage_is_named_not_semantic_falsehood() {
+    let refs = FourKernelObservation::observation_refs(42, Some(0b1010_1000));
+    let available = FourKernelObservation::result_refs(42);
+
+    let prolog = refs[1];
+    assert_eq!(
+        prolog.resolve_native_ref(&available),
+        Ok(NativeResultRef {
+            observation_id: 42,
+            producer: ProducerSlot::Prolog,
+        })
+    );
+
+    let without_prolog: Vec<_> = available
+        .into_iter()
+        .filter(|reference| reference.producer != ProducerSlot::Prolog)
+        .collect();
+    assert_eq!(
+        prolog.resolve_native_ref(&without_prolog),
+        Err(ObservationStorageError::MissingNativePayload(NativeResultRef {
+            observation_id: 42,
+            producer: ProducerSlot::Prolog,
+        }))
+    );
+
+    let mismatched = ObservationRef {
+        native_slot: ProducerSlot::Datalog,
+        ..prolog
+    };
+    assert_eq!(
+        mismatched.resolve_native_ref(&FourKernelObservation::result_refs(42)),
+        Err(ObservationStorageError::ProducerSlotMismatch {
+            producer: ProducerSlot::Prolog,
+            native_slot: ProducerSlot::Datalog,
+        })
+    );
 }
