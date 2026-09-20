@@ -647,7 +647,6 @@ fn install_release_asset(
     }
 
     let _ = fs::remove_file(&temporary);
-    write_install_record(&target_dir, island, entry)?;
 
     let final_probe = interpolate_command(&entry.probe, &target_dir);
     let outcome = bounded_probe(&final_probe, entry.probe_expect.as_deref());
@@ -657,6 +656,8 @@ fn install_release_asset(
             island.key
         ));
     }
+
+    write_install_record(&target_dir, island, entry)?;
 
     Ok(format!(
         "installed {} {}: available",
