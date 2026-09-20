@@ -33,7 +33,7 @@ wsm-my-lisp щодо того, як ключ статусу з боку спож
 
 | Обов'язкова категорія | Фікстури корпусу (з `conformance.lisp`) |
 |---|---|
-| McCarthy-7 + Canon 0 | `(quote radio)`, `(atom (quote radio))`, `(eq (quote radio) (quote radio))`, `(car ...)`, `(cdr ...)`, `(cons ...)`, `(cond ...)` |
+| McCarthy-7 + канон() | `(quote radio)`, `(atom (quote radio))`, `(eq (quote radio) (quote radio))`, `(car ...)`, `(cdr ...)`, `(cons ...)`, `(cond ...)` |
 | Точні раціональні числа, без float-приведення | `(/ 5 6 8 7)` → `5/336` |
 | Лексичне затінення, замикання, dotted/variadic зв'язування | `(eq (lambda (x) x) (lambda (x) x))` (ідентичність замикання), dotted-rest lambda, bare-symbol variadic lambda, помилка variadic-арності, `let`-затінення, відхилення незмінності Canon |
 | Макроси, поширення помилок | помилка арності `defmacro`, успішний шлях variadic `defmacro` |

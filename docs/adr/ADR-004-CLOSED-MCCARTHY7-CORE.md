@@ -4,7 +4,7 @@
 **Статус:** Частково замінено ADR-005 / Partially superseded by ADR-005
 **Дата / Date:** 2026-09-05
 **Автор / Authority:** Volodymyr / Vova (Owner directive) & Antigravity
-**Обсяг / Scope:** Історичне нормативне рішення. Постійне замикання множини примітивів на семи замінене ADR-005; стабільна тотожність Canon 0 + McCarthy-7 та розрізнення семантики й реалізації лишаються чинними. / Historical normative decision. The permanent seven-primitive closure is superseded by ADR-005; the stable identity of Canon 0 + McCarthy-7 and the distinction between semantics and implementation remain in force.
+**Обсяг / Scope:** Історичне нормативне рішення. Постійне замикання множини примітивів на семи замінене ADR-005; стабільна тотожність канон() + McCarthy-7 та розрізнення семантики й реалізації лишаються чинними. / Historical normative decision. The permanent seven-primitive closure is superseded by ADR-005; the stable identity of canon() + McCarthy-7 and the distinction between semantics and implementation remain in force.
 
 ---
 
@@ -150,20 +150,20 @@ The canonical identity table is an autonomous normative entity separate from any
 #### Scope & Semantics Disclaimer / Застереження щодо області визначення
 > **Normative Scope:** Semantic equations in this ADR define the canonical `my-lisp` interpretation of McCarthy7 identities and do not claim implementation equivalence with every historical Lisp dialect.
 
-### 4.0 Canon 0: The Empty List / Канон 0: Порожній список
+### 4.0 canon(): The Empty List / канон(): Порожній список
 
 Before any operation can construct, deconstruct, or evaluate, there exists the **canonical ground**: the empty list `()`.
 
 До того як будь-яка операція може сполучити, розібрати чи обчислити, існує **первинний канонічний ґрунт**: порожній список `()`.
 
 ```text
-CANON 0: CANON_EMPTY_LIST
+canon(): CANON_EMPTY_LIST
 Surface representation: ()
 Semantic class: Canonical Value (Ground Object)
 Meaning: The list containing zero elements. The recursive origin of all proper lists.
 ```
 
-#### Structural Laws of Canon 0 / Структурні закони Канону 0:
+#### Structural Laws of canon() / Структурні закони канон():
 1. `(атом? ())` $\to$ `#t` (дискретний булевий факт: `()` не є cons-коміркою, його не можна розібрати на координати).
 2. `(pair? ())` $\to$ `#f` (`()` не має лівої чи правої частини).
 3. `(proper-list? ())` $\to$ `#t` (базовий випадок індуктивного визначення списку).
@@ -185,7 +185,7 @@ Meaning: The list containing zero elements. The recursive origin of all proper l
 Повернення до ґрунту (через решта):
 (решта (a b c)) → (b c)
 (решта (b c))   → (c)
-(решта (c))     → ()  <-- Досягнуто Канон 0!
+(решта (c))     → ()  <-- Досягнуто канон()!
 ```
 
 > **Epistemic Principle on NIL:** `()` is the sole canonical empty list. In `my-lisp`, `NIL` is **not** a canonical identity, not a truth-value, and not an autonomous primitive. Any historical spelling `nil` is at most a foreign compatibility alias, never the foundation of the language.
@@ -315,9 +315,9 @@ An operation or syntactic form cannot be declared `L2 DERIVED` simply because it
 ## 8. Closed: Canon Access Architecture (2026-09-06)
 ## 8. Закрито: Архітектура доступу до канону (2026-09-06)
 
-> **Superseded for Canon 0+7 binding semantics by ADR-006 / Contract 6.0 (2026-09-08).** The text below is retained as historical evidence of the earlier Variant-A decision; it is no longer normative where it permits shadowing Canon spellings.
+> **Superseded for canon()+7 binding semantics by ADR-006 / Contract 6.0 (2026-09-08).** The text below is retained as historical evidence of the earlier Variant-A decision; it is no longer normative where it permits shadowing Canon spellings.
 >
-> **Замінено для семантики зв’язування Canon 0+7 рішенням ADR-006 / Contract 6.0 (2026-09-08).** Текст нижче збережено як історію попереднього Variant A; дозвіл затінювати канонічні написання більше не є нормативним.
+> **Замінено для семантики зв’язування канон()+7 рішенням ADR-006 / Contract 6.0 (2026-09-08).** Текст нижче збережено як історію попереднього Variant A; дозвіл затінювати канонічні написання більше не є нормативним.
 
 The question of canonical access semantics (initiated during the canon-namespace-shadowing research cycle, `docs/research/canon-namespace-shadowing.md`) is **closed with the following decision:**
 

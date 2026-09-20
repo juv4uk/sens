@@ -19,7 +19,7 @@ execution witnesses. Якщо поведінку чесно виражають �
 
 | SID | Identity | Клас аудиту | Доказ / рішення |
 |---|---|---|---|
-| 00000000 | Canon 0 / `()` | **primitive-essential** | Основа порожнього списку/відсутності й термінатор списку; Contract 7.0 лишає його незмінним. |
+| 00000000 | канон() / `()` | **primitive-essential** | Основа порожнього списку/відсутності й термінатор списку; Contract 7.0 лишає його незмінним. |
 | 00000001 | `quote` | **primitive-essential** | Історичний корінь Маккарті; керує обчисленням, а не є convenience-функцією. |
 | 00000010 | `atom` | **primitive-essential** | Структурна відмінність на межі мови; є executable Canon witnesses. |
 | 00000011 | `eq` | **primitive-essential** | Стабільне identity relation історичного кореня; не замінюється host equality. |
@@ -30,8 +30,8 @@ execution witnesses. Якщо поведінку чесно виражають �
 | 00001000 | `lambda` | **primitive-essential** | Побудова first-class lexical function; має спостережувану binding/evaluation поведінку. |
 | 00001001 | `define` | **primitive-essential** | Операція binding з видимим для програми ефектом на environment. |
 | 00001100 | `+` | **primitive-shared** | Публічна exact-arithmetic operation з незалежними semantic witnesses; залишити до повного арифметичного аудиту. |
-| 00100111 | `list` | **derived-operation** | Чесно будується з `cons` + Canon 0; SID не видаляється до compatibility witness. |
-| 00101000 | `length` | **derived-operation** | Рекурсивний обхід списку через `cdr`/Canon 0; кандидат на демоцію. |
+| 00100111 | `list` | **derived-operation** | Чесно будується з `cons` + канон(); SID не видаляється до compatibility witness. |
+| 00101000 | `length` | **derived-operation** | Рекурсивний обхід списку через `cdr`/канон(); кандидат на демоцію. |
 | 00101001 | `append` | **derived-operation** | Звичайна рекурсивна list construction через `cons`/`car`/`cdr`. |
 | 00101010 | `reverse` | **derived-operation** | Виражається list primitives; convenience/performance сам по собі не створює ontology. |
 | 00101011 | `nth` | **derived-operation** | Повторний `cdr` + `car`; кандидат на демоцію після compatibility evidence. |
@@ -85,7 +85,7 @@ agenda execution чи Datalog fixpoint evaluation.
 Тому `invoke` — перший evidence-backed **new primitive candidate** за #747.
 
 У цьому PR він навмисно **не admitted**. Чинна registry migration має generated
-projections і guards, зафіксовані на Canon 0 + 167 identities. Правильний
+projections і guards, зафіксовані на канон() + 167 identities. Правильний
 admission мусить бути атомарним:
 
 1. додати один наступний contiguous free byte SID;
@@ -123,7 +123,7 @@ Replay на поточному main допускає `invoke` як SID `10101000
 
 1. `10101000` — наступний вільний contiguous byte SID;
 2. authority лишається `sr/2`, generated projections походять із неї;
-3. exact-count/contiguity guards переходять на Canon 0 + 168 identities;
+3. exact-count/contiguity guards переходять на канон() + 168 identities;
 4. один реальний integration witness проводить той самий SID через Common Lisp,
    Prolog, CLIPS і Datalog через shared C ABI;
 5. кожне ядро зберігає власну інтерпретацію payload і native result domain;

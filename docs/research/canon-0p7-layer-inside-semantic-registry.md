@@ -1,4 +1,4 @@
-# Canon 0+7 layer history inside semantic-registry — archaeological note
+# canon()+7 layer history inside semantic-registry — archaeological note
 
 **Date:** 2026-09-18
 **Status:** design note / provenance finding; does not change semantics

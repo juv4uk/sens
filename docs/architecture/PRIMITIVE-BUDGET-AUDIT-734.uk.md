@@ -36,7 +36,7 @@
 
 | Категорія | Кількість | Опис та типові представники |
 | :--- | :---: | :--- |
-| **`primitive-essential`** | **37** | Фундаментальні операції: Canon 0 `()`, 7 примітивів Маккарті (`quote`, `atom`, `eq`, `cons`, `car`, `cdr`, `cond`), зв'язування обчислювача (`lambda`, `define`, `defmacro`), точна арифметика (`+`, `-`, `*`, `/`, `mod`, `quotient`), порівняння (`<`, `=`), предикати (`symbol?`, `string?`, `string<?`), базові операції з рядками та векторами, `read`, `eval`. |
+| **`primitive-essential`** | **37** | Фундаментальні операції: канон() `()`, 7 примітивів Маккарті (`quote`, `atom`, `eq`, `cons`, `car`, `cdr`, `cond`), зв'язування обчислювача (`lambda`, `define`, `defmacro`), точна арифметика (`+`, `-`, `*`, `/`, `mod`, `quotient`), порівняння (`<`, `=`), предикати (`symbol?`, `string?`, `string<?`), базові операції з рядками та векторами, `read`, `eval`. |
 | **`primitive-shared`** | **25** | Між'ядерні операційні примітиви: `kernel`, `callable`, `request`, `response`, `source`, `target`, `payload`, `invoke`, `observe`, `route`, `relation`, `bridge`, `transport`, `result`, `status`, `start`, `stop`, `restart`, `snapshot`, `measure`, `producer`, `owns-callable`, `can-call`, `can-observe`, `has-transport`. |
 | **`derived-operation`** | **60** | Виведені в чистому Lisp поверх примітивів: `second`, `third`, `fourth`, `fifth`, `caar`, `cadr`, `cddr`, `cadddr`, `list`, `not`, `and`, `or`, `let`, `let*`, `min-list`, `max-list`, `abs`, `min`, `max`, `isqrt`, `map`, `filter`, `reduce`. |
 | **`surface-only`** | **1** | Синтаксичні синоніми: `def` (синонім для `define`). |
@@ -76,7 +76,7 @@
 Злиття `cadr` із `second` спотворило б алгебру пар і нав'язало б семантику списків бінарним парам. Тому вони **зобов'язані залишатися різними ідентичностями**.
 
 Додаткові приклади:
-- **`empty-list` `()` (`00000000`) проти `quote` (`00000001`):** `()` є базовим об'єктом відсутності (Canon 0); `quote` — спеціальною формою керування обчисленням.
+- **`empty-list` `()` (`00000000`) проти `quote` (`00000001`):** `()` є базовим об'єктом відсутності (канон()); `quote` — спеціальною формою керування обчисленням.
 - **`pair` (`00101110`) проти `list` (`00100111`):** `pair` має фіксовану бінарну арність 2; `list` є відкритим варіадичним конструктором `(lambda args args)`.
 
 ---

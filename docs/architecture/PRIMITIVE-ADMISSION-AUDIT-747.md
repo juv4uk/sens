@@ -19,7 +19,7 @@ needs them.
 
 | SID | Identity | Audit class | Evidence / decision |
 |---|---|---|---|
-| 00000000 | Canon 0 / `()` | **primitive-essential** | Ground empty list / absence point and list terminator; Contract 7.0 keeps it immutable. |
+| 00000000 | canon() / `()` | **primitive-essential** | Ground empty list / absence point and list terminator; Contract 7.0 keeps it immutable. |
 | 00000001 | `quote` | **primitive-essential** | Historical McCarthy root; controls evaluation rather than being a convenience function. |
 | 00000010 | `atom` | **primitive-essential** | Structural distinction at the language boundary; executable Canon witnesses exist. |
 | 00000011 | `eq` | **primitive-essential** | Stable identity relation in the historical root; not replaced by host equality. |
@@ -30,8 +30,8 @@ needs them.
 | 00001000 | `lambda` | **primitive-essential** | First-class lexical function construction; observable binding/evaluation behavior. |
 | 00001001 | `define` | **primitive-essential** | Language binding operation; retains program-visible environment effect. |
 | 00001100 | `+` | **primitive-shared** | Public exact arithmetic operation with independent semantic evidence; keep pending full arithmetic audit. |
-| 00100111 | `list` | **derived-operation** | Can be constructed from `cons` + Canon 0; useful public operation, but derivability is executable and explicit. No deletion yet. |
-| 00101000 | `length` | **derived-operation** | Recursive list traversal over `cdr`/Canon 0 can define it honestly. Keep SID until compatibility impact is measured. |
+| 00100111 | `list` | **derived-operation** | Can be constructed from `cons` + canon(); useful public operation, but derivability is executable and explicit. No deletion yet. |
+| 00101000 | `length` | **derived-operation** | Recursive list traversal over `cdr`/canon() can define it honestly. Keep SID until compatibility impact is measured. |
 | 00101001 | `append` | **derived-operation** | Ordinary recursive list construction using `cons`/`car`/`cdr`; not inherently kernel-private. |
 | 00101010 | `reverse` | **derived-operation** | Constructible from list primitives; convenience/performance does not by itself justify primitive status. |
 | 00101011 | `nth` | **derived-operation** | Repeated `cdr` + `car`; candidate for demotion after compatibility witness. |
@@ -88,7 +88,7 @@ Therefore `invoke` is the first evidence-backed **new primitive candidate**
 under #747.
 
 It is deliberately **not admitted in this PR**. The current registry migration
-has generated projections and guards pinned to Canon 0 + 167 identities. A
+has generated projections and guards pinned to canon() + 167 identities. A
 correct admission must be atomic:
 
 1. append one contiguous free byte SID;
@@ -128,7 +128,7 @@ admission atomic:
 
 1. `10101000` is the next contiguous free byte SID;
 2. `sr/2` remains the authority row and generated projections follow it;
-3. exact-count/contiguity guards advance to Canon 0 + 168 identities;
+3. exact-count/contiguity guards advance to canon() + 168 identities;
 4. one real integration witness sends the same `invoke` SID through Common Lisp,
    Prolog, CLIPS and Datalog via the shared C ABI;
 5. every kernel keeps its own payload interpretation and native result domain;

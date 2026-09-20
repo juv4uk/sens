@@ -2,9 +2,9 @@
 
 ## Українська
 
-**Мета:** повернути `lib/canon.lisp` у повну відповідність із уже ратифікованими #217/#218/#244: явний контроль, структурні результати `atom/eq` і Canon 0 як `()`, а не FALSE.
+**Мета:** повернути `lib/canon.lisp` у повну відповідність із уже ратифікованими #217/#218/#244: явний контроль, структурні результати `atom/eq` і канон() як `()`, а не FALSE.
 
-**Архітектура:** ідентичності Canon 0+7 та їхні peer surfaces залишаються незмінними. Історичні T/NIL-вердикти замінюються явними Lisp-даними. Окрема Canon-law повертає `(canon-law-result <law> satisfied|violated)`, а агрегований результат — `(canon-conformance satisfied|violated)`. Канонічний трикомпонентний `cond` робить явне зіставлення результату. Host-тести лише транспортують фактичний результат у вже наявний Lisp-owned witness protocol.
+**Архітектура:** ідентичності канон()+7 та їхні peer surfaces залишаються незмінними. Історичні T/NIL-вердикти замінюються явними Lisp-даними. Окрема Canon-law повертає `(canon-law-result <law> satisfied|violated)`, а агрегований результат — `(canon-conformance satisfied|violated)`. Канонічний трикомпонентний `cond` робить явне зіставлення результату. Host-тести лише транспортують фактичний результат у вже наявний Lisp-owned witness protocol.
 
 ### Крок 1 — RED executable witness для Canon V2
 
@@ -15,12 +15,12 @@
 - класифікувати observer у authority inventory.
 
 Дії:
-1. Зафіксувати Lisp-owned очікування для Canon 0, `atom/eq`, `car/cdr`, quote suppression, explicit-control short-circuit, symbolic peer surface та aggregate conformance.
+1. Зафіксувати Lisp-owned очікування для канон(), `atom/eq`, `car/cdr`, quote suppression, explicit-control short-circuit, symbolic peer surface та aggregate conformance.
 2. Очікувані результати — явні Canon records, ніколи не `t/()` як pass/fail.
 3. Rust observer завантажує core + `lib/canon.lisp`, виконує рядки і передає actual у `witness-verdict`/`witness-status`.
 4. Спочатку довести RED на поточному історичному Canon.
 
-### Крок 2 — GREEN: Canon 0 + structure + structural observation + control
+### Крок 2 — GREEN: канон() + structure + structural observation + control
 
 1. Зберегти `canon-empty-list` буквально як структурне `()`.
 2. Додати Canon-owned record constructors зі звичайних Lisp-даних.
@@ -55,8 +55,8 @@
 
 ## English
 
-**Goal:** bring `lib/canon.lisp` back into semantic authority after #217/#218/#244 changed control, structural observation, and Canon 0 semantics.
+**Goal:** bring `lib/canon.lisp` back into semantic authority after #217/#218/#244 changed control, structural observation, and canon() semantics.
 
-**Architecture:** keep Canon 0+7 identities and surfaces immutable. Replace historical T/NIL conformance verdicts with explicit Lisp data. Individual laws return `(canon-law-result <law> satisfied|violated)`; aggregate conformance returns `(canon-conformance satisfied|violated)`. Canonical three-part `cond` performs explicit result matching. Host tests only transport outcomes into the existing Lisp-owned witness protocol.
+**Architecture:** keep canon()+7 identities and surfaces immutable. Replace historical T/NIL conformance verdicts with explicit Lisp data. Individual laws return `(canon-law-result <law> satisfied|violated)`; aggregate conformance returns `(canon-conformance satisfied|violated)`. Canonical three-part `cond` performs explicit result matching. Host tests only transport outcomes into the existing Lisp-owned witness protocol.
 
-Implementation order: RED Lisp-owned Canon V2 witness → GREEN Canon 0/structure/atom/eq/control rewrite → focused semantic verification → separate harvest of #216/research/open-PR branch value. No branch is deleted until its unique commits are proven merged or explicitly harvested.
+Implementation order: RED Lisp-owned Canon V2 witness → GREEN canon()/structure/atom/eq/control rewrite → focused semantic verification → separate harvest of #216/research/open-PR branch value. No branch is deleted until its unique commits are proven merged or explicitly harvested.

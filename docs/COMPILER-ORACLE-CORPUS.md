@@ -29,7 +29,7 @@ the recorded `expected` value or `error` kind still holds.
 
 | Required category | Corpus fixtures (from `conformance.lisp`) |
 |---|---|
-| McCarthy-7 + Canon 0 | `(quote radio)`, `(atom (quote radio))`, `(eq (quote radio) (quote radio))`, `(car ...)`, `(cdr ...)`, `(cons ...)`, `(cond ...)` |
+| McCarthy-7 + canon() | `(quote radio)`, `(atom (quote radio))`, `(eq (quote radio) (quote radio))`, `(car ...)`, `(cdr ...)`, `(cons ...)`, `(cond ...)` |
 | Exact rationals, no float coercion | `(/ 5 6 8 7)` → `5/336` |
 | Lexical shadowing, closures, dotted/variadic binding | `(eq (lambda (x) x) (lambda (x) x))` (closure identity), dotted-rest lambda, bare-symbol variadic lambda, variadic-arity error, `let`-shadowing, Canon-immutability rejection |
 | Macros, error propagation | `defmacro` arity error, variadic `defmacro` success path |

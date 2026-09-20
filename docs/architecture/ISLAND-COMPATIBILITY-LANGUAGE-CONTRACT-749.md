@@ -70,7 +70,7 @@ In particular:
 
 None of those facts, by itself, authorizes my-lisp to conclude `FALSE`, refutation, unknown, conflict, or negation-as-failure.
 
-Literal `()` remains Canon 0 in the language and must not be silently reused as a protocol-level "zero results" sentinel.
+Literal `()` remains canon() in the language and must not be silently reused as a protocol-level "zero results" sentinel.
 
 ## 5. 0 / 1 / N paths
 

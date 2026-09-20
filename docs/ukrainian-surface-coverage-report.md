@@ -13,7 +13,7 @@ USC = stable mappings / eligible public names
 
 | Layer | Eligible | UK stable | UK missing | UK compatibility-only |
 |:---|---:|---:|---:|---:|
-| Canon 0+7 | 7 | 7 | 0 | 0 |
+| canon()+7 | 7 | 7 | 0 | 0 |
 | Necessary forms | 2 | 2 | 0 | 0 |
 | Language macros | 1 | 1 | 0 | 0 |
 | Arithmetic + comparisons + predicates | 27 | 24 | 0 | 3 |

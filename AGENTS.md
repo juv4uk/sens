@@ -168,7 +168,7 @@ Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lis
 - `docs/semantic-authority-map.md` — precedence map when sources disagree.
 - ratified ADRs under `docs/adr/` — closed decisions within their stated scope.
 - `tests/fixtures/conformance.lisp` — executable observable facts for conformance.
-- `lib/canon.lisp` — executable Canon 0 + McCarthy-7 witness.
+- `lib/canon.lisp` — виконуваний канон() + McCarthy-7 witness.
 - `ecosystem-status.lisp` — curated snapshot pointer, not semantic authority by itself.
 
 ## How to run tests

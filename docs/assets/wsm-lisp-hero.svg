@@ -102,7 +102,7 @@
     <circle cx="732" cy="161" r="8"/>
   </g>
 
-  <!-- пульс Canon 0 -->
+  <!-- пульс канон() -->
   <g transform="translate(600,58)">
     <circle r="26" fill="#38bdf8" opacity="0.08">
       <animate attributeName="r" values="18;34;18" dur="3s" repeatCount="indefinite"/>
@@ -139,7 +139,7 @@
   <!-- pills -->
   <g transform="translate(292, 350)">
     <rect x="0" y="0" width="160" height="34" rx="8" fill="#111827" stroke="#334155"/>
-    <text x="80" y="22" text-anchor="middle" font-family="monospace" font-size="12" fill="#e2e8f0">◌ CANON 0 + 7</text>
+    <text x="80" y="22" text-anchor="middle" font-family="monospace" font-size="12" fill="#e2e8f0">◌ canon() + 7</text>
 
     <rect x="176" y="0" width="170" height="34" rx="8" fill="#111827" stroke="#334155"/>
     <text x="261" y="22" text-anchor="middle" font-family="monospace" font-size="12" fill="#67e8f9">? УКРАЇНСЬКА API</text>

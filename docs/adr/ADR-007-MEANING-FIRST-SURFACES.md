@@ -25,7 +25,7 @@ Semantic identity первинна. Людські написання є surface
              UK            EN            SA
 ```
 
-Та сама топологія застосовується до Canon 0+7, ordinary builtins,
+Та сама топологія застосовується до канон()+7, ordinary builtins,
 Lisp-визначених public functions, macros і майбутніх public semantic identities.
 
 Для Canon значення незмінне. Для ordinary public API значення може еволюціонувати

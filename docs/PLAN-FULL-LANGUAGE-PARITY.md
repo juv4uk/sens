@@ -75,7 +75,7 @@ SA --/
 5. **Жодного cross-language alias як реалізації.** На кшталт
    `(define додати +)` або `(define yoga +)` не може бути способом побудови
    рівноправної поверхні.
-6. **Canon 0+7 сильніший за ordinary API.** Його peer names незмінні; ordinary
+6. **канон()+7 сильніший за ordinary API.** Його peer names незмінні; ordinary
    public names можуть лишатися лексично shadowable відповідно до Contract 6.
 7. **Відсутність перекладу не приховується.** `missing` і `candidate` є чесними
    станами, а не приводом використовувати EN як мовчазний fallback.

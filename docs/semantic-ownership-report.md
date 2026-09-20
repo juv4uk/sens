@@ -72,7 +72,7 @@
 | `canon-cdr` | `00000110` | `canon-operation` | `canon` | `confirmed` | CDR: канонічна операція структурного залишку |
 | `canon-cond` | `00000111` | `canon-operation` | `canon` | `confirmed` | COND: канонічна short-circuit syntax |
 | `canon-cons` | `00000100` | `canon-operation` | `canon` | `confirmed` | CONS: канонічна операція побудови |
-| `canon-empty-list` | `—` | `canon-ground` | `canon` | `confirmed` | Canon 0: порожній список як ground object |
+| `canon-empty-list` | `—` | `canon-ground` | `canon` | `confirmed` | канон(): порожній список як ground object |
 | `canon-eq` | `00000011` | `canon-operation` | `canon` | `confirmed` | EQ: канонічна операція тотожності |
 | `canon-quote` | `00000001` | `canon-operation` | `canon` | `confirmed` | QUOTE: evaluator meaning і зарезервована surface resolution |
 | `filesystem-authorization` | `—` | `host-authorization` | `host-capability` | `confirmed` | Per-session filesystem read/write scope і host canonicalization enforcement |

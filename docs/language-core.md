@@ -72,9 +72,9 @@ For semantic IDs, the canonical authority remains the Binary spelling in
 machine byte internally, but they must be derived from that Lisp-owned Binary
 identity.
 
-## Canon 0 + McCarthy-7 as stable historical root
+## canon() + McCarthy-7 as stable historical root
 
-Canon 0 + McCarthy-7 remain a stable historical/minimal root. Permanent closure of the primitive set is superseded by [`adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md`](adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md):
+canon() + McCarthy-7 remain a stable historical/minimal root. Permanent closure of the primitive set is superseded by [`adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md`](adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md):
 
 ```text
 quote · atom · eq · cons · car · cdr · cond
@@ -82,7 +82,7 @@ quote · atom · eq · cons · car · cdr · cond
 
 No later capability acquires primitive status merely because it is useful or implemented in Rust. A new primitive identity requires the evidence-based admission discipline of ADR-005.
 
-### Canon 0
+### canon()
 
 The concrete empty proper list is:
 
@@ -90,7 +90,7 @@ The concrete empty proper list is:
 ()
 ```
 
-It is Canon 0: a concrete value/syntax identity and the inductive base of proper lists. It is **not an eighth operation** and has no canonical lexical alias.
+It is canon(): a concrete value/syntax identity and the inductive base of proper lists. It is **not an eighth operation** and has no canonical lexical alias.
 
 The intended structural laws include:
 
@@ -268,7 +268,7 @@ A useful current map is:
 
 ```text
 L0  runtime/substrate mechanisms
-L1  closed semantic core (Canon 0 + seven operations)
+L1  closed semantic core (canon() + seven operations)
 L2  bootstrap / standard language
 L3  semantic libraries
 L4  reasoning
@@ -310,7 +310,7 @@ Rust дає світові двері.
 Lisp вирішує, що означає те, що через них приходить.
 ```
 
-Сім примітивних операцій замкнені назавжди. `()` — Canon 0, а не восьмий примітив. Поверхневі назви не є семантичними identity. Нові можливості мають виростати над ядром, не розширювати його без доказу.
+Сім примітивних операцій замкнені назавжди. `()` — канон(), а не восьмий примітив. Поверхневі назви не є семантичними identity. Нові можливості мають виростати над ядром, не розширювати його без доказу.
 
 ---
 
@@ -318,4 +318,4 @@ Lisp вирішує, що означає те, що через них прихо
 
 Semantische Autorität liegt beim Vertrag und ausführbarer Evidenz, nicht bei einer einzelnen Rust-Datei. Rust ist die Referenzimplementierung und stellt Mechanismen bereit; ableitbare Bedeutung und Policy sollen in der Sprache leben.
 
-Die sieben klassischen McCarthy-Operationen bleiben ein stabiler historischer/minimaler Ursprung. `()` ist Canon 0. Neue primitive Identitäten sind nach ADR-005 evidenzbasiert zulässig; Oberflächennamen sind weiterhin nicht mit semantischer Identität gleichzusetzen.
+Die sieben klassischen McCarthy-Operationen bleiben ein stabiler historischer/minimaler Ursprung. `()` ist canon(). Neue primitive Identitäten sind nach ADR-005 evidenzbasiert zulässig; Oberflächennamen sind weiterhin nicht mit semantischer Identität gleichzusetzen.

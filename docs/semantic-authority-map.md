@@ -27,13 +27,13 @@ If a lower item conflicts with a higher item, the lower item is stale until reco
 
 ## Semantic identity vs surface spelling
 
-A spelling is not a primitive identity. Canon 0 + McCarthy-7 remain the stable historical/minimal root:
+A spelling is not a primitive identity. canon() + McCarthy-7 remain the stable historical/minimal root:
 
 ```text
 quote · atom · eq · cons · car · cdr · cond
 ```
 
-The project also treats the concrete empty proper list `()` as Canon 0: a value/syntax identity, not an eighth operation and not a lexical alias.
+The project also treats the concrete empty proper list `()` as canon(): a value/syntax identity, not an eighth operation and not a lexical alias.
 
 Natural-language and historical surfaces map onto semantic identities; changing a surface name does not create a new primitive.
 
@@ -41,7 +41,7 @@ Natural-language and historical surfaces map onto semantic identities; changing 
 
 Do not collapse three different questions:
 
-- **semantic primitives** — evidence-admitted identities under Contract 7.0 / ADR-005, with Canon 0 + McCarthy-7 retained as the stable historical root;
+- **semantic primitives** — evidence-admitted identities under Contract 7.0 / ADR-005, with canon() + McCarthy-7 retained as the stable historical root;
 - **evaluator-controlled bootstrap forms** — machinery needed to create language behavior;
 - **derived language forms** — behavior expressible by the language once the bootstrap substrate exists.
 

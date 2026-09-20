@@ -36,7 +36,7 @@ Every single one of the 197 experimental identities is accounted for and classif
 
 | Category | Count | Description & Representative Entries |
 | :--- | :---: | :--- |
-| **`primitive-essential`** | **37** | Foundational operations: Canon 0 `()`, McCarthy 7 (`quote`, `atom`, `eq`, `cons`, `car`, `cdr`, `cond`), evaluator binders (`lambda`, `define`, `defmacro`), exact arithmetic (`+`, `-`, `*`, `/`, `mod`, `quotient`), order/equality (`<`, `=`), predicates (`symbol?`, `string?`, `string<?`), core strings, vectors, `read`, `eval`. |
+| **`primitive-essential`** | **37** | Foundational operations: canon() `()`, McCarthy 7 (`quote`, `atom`, `eq`, `cons`, `car`, `cdr`, `cond`), evaluator binders (`lambda`, `define`, `defmacro`), exact arithmetic (`+`, `-`, `*`, `/`, `mod`, `quotient`), order/equality (`<`, `=`), predicates (`symbol?`, `string?`, `string<?`), core strings, vectors, `read`, `eval`. |
 | **`primitive-shared`** | **25** | Cross-kernel operational primitives: `kernel`, `callable`, `request`, `response`, `source`, `target`, `payload`, `invoke`, `observe`, `route`, `relation`, `bridge`, `transport`, `result`, `status`, `start`, `stop`, `restart`, `snapshot`, `measure`, `producer`, `owns-callable`, `can-call`, `can-observe`, `has-transport`. |
 | **`derived-operation`** | **60** | Derivable in pure Lisp on top of primitives: `second`, `third`, `fourth`, `fifth`, `caar`, `cadr`, `cddr`, `cadddr`, `list`, `not`, `and`, `or`, `let`, `let*`, `min-list`, `max-list`, `abs`, `min`, `max`, `isqrt`, `map`, `filter`, `reduce`. |
 | **`surface-only`** | **1** | Syntactic aliases: `def` (alias for `define`). |

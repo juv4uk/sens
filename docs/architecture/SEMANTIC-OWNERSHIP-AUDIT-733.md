@@ -23,7 +23,7 @@ No component is classified by historical location or file naming alone. A `.lisp
 ```text
 +------------------------------------------------------------------------+
 |                          WHAT THE LANGUAGE MEANS                       |
-|   (Semantic Authority: Canon 0, McCarthy 7, SID Registry, Laws)        |
+|   (Semantic Authority: canon(), McCarthy 7, SID Registry, Laws)        |
 +------------------------------------------------------------------------+
                                     |
                                     v
@@ -127,7 +127,7 @@ No component is classified by historical location or file naming alone. A `.lisp
 ### 3.12 Semantic Registry & Canon Laws
 - **Files:** `lib/canon.lisp`, `lib/surface/semantic-registry.lisp`, `crates/my-lisp/src/eval/canon.rs`
 - **Classification:** `semantic-authority`
-- **Rationale:** Canon 0 `()`, McCarthy 7 axioms, and the contiguous 8-bit SID registry constitute the immutable foundation of `my-lisp`.
+- **Rationale:** canon() `()`, McCarthy 7 axioms, and the contiguous 8-bit SID registry constitute the immutable foundation of `my-lisp`.
 
 ### 3.13 Surface Mappings
 - **Files:** `lib/surface/uk.lisp`, `lib/surface/sa.lisp`, `lib/surface/український-профіль-джерела.lisp`

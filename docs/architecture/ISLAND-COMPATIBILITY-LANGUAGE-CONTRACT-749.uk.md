@@ -70,7 +70,7 @@ CLIPS       -> facts / agenda firings / working-memory observations
 
 Жоден із цих фактів сам по собі не дає my-lisp права робити висновок `FALSE`, refutation, unknown, conflict чи negation-as-failure.
 
-Літеральне `()` лишається Canon 0 мови й не повинно мовчки використовуватися як protocol sentinel «нуль результатів».
+Літеральне `()` лишається канон() мови й не повинно мовчки використовуватися як protocol sentinel «нуль результатів».
 
 ## 5. Шляхи 0 / 1 / N
 

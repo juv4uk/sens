@@ -35,7 +35,7 @@ file already covers.
 the native Rust evaluator and `lib/meta-eval.lisp`'s Lisp-owned
 meta-evaluator, with byte-identical results, right now:
 
-- All 7 McCarthy-7/Canon 0 fixtures (`quote`/`atom`/`eq`/`car`/`cdr`/
+- All 7 McCarthy-7/canon() fixtures (`quote`/`atom`/`eq`/`car`/`cdr`/
   `cons`/`cond`) that overlap with the fixtures tagged `meta-eval` for
   `meta_eval_corpus.rs`'s self-hosting sweep.
 - 2 more from the closure-identity and dotted-lambda-list categories

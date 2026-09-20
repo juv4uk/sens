@@ -25,7 +25,7 @@ kernels = autonomous islands of native execution and reasoning
 - Common Lisp's extensive ANSI runtime and compiler environment.
 
 Instead, `my-lisp` focuses on its primary responsibilities:
-1. **Canon 0 (`()`)** as absence-ground and list terminator;
+1. **canon() (`()`)** as absence-ground and list terminator;
 2. **Contiguous 8-bit Semantic ID (SID) registry** (`00000001..10101000`);
 3. **Classical Lisp data structure operations** (`cons`, `car`, `cdr`, `atom`, `eq`);
 4. **Honest local evaluation** of expressions and first-class lexical functions (`lambda`);
@@ -44,7 +44,7 @@ Inventory categories:
 
 | Component / Operation | Category | Description | Target Island / Location |
 | :--- | :--- | :--- | :--- |
-| **Canon 0 `()`** | `KEEP` | Ground absence point, empty list, neutral sentinel | `my-lisp` canon |
+| **canon() `()`** | `KEEP` | Ground absence point, empty list, neutral sentinel | `my-lisp` canon |
 | **8-bit SID Registry** | `KEEP` | 168 contiguous byte semantic identities (`00000001..10101000`) | `semantic_registry.rs` |
 | **McCarthy-7 Primitives** | `KEEP` | `quote`, `atom`, `eq`, `car`, `cdr`, `cons`, `cond` | `my-lisp` core |
 | **Functions & Closures** | `KEEP` | `lambda`, lexical environments, parameter bindings | `environment.rs`, `closures.rs` |

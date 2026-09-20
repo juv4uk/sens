@@ -34,7 +34,7 @@ conformance-тестах та evidence-документах, а не повер�
 
 ## A1. Closed semantic core
 
-- ✅ Canon 0: `()` як ground object.
+- ✅ канон(): `()` як ground object.
 - ✅ Закритий McCarthy-7 semantic operation set.
 - ✅ `lambda` / `define` — evaluator capabilities, не primitive identities.
 - ✅ Language-owned похідні операції не повинні тихо повертатися в Rust builtins.

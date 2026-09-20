@@ -44,7 +44,7 @@ or ordinary structure, never inventing a new one:
 
 Every `Literal`/`VariableRef` carries a `Provenance`:
 
-- `Canon(CanonicalIdentity)` — one of the seven immutable Canon 0
+- `Canon(CanonicalIdentity)` — one of the seven immutable canon()
   identities (quote/atom/eq/cons/car/cdr/cond), resolved via
   `eval::canon::identity_for_surface`.
 - `NecessaryForm(NecessaryFormIdentity)` — `lambda`/`define` (0010/0011),
@@ -92,7 +92,7 @@ resolvers before assuming they'd behave as expected:
    routing through a registry lookup that structurally cannot see it.
 2. **`(cond (() (quote wrong)) (t (quote right)))` initially failed to
    lower at all.** An earlier draft of `lower_list` treated *every*
-   empty list as a malformed zero-argument call. `()` is Canon 0's
+   empty list as a malformed zero-argument call. `()` is canon()'s
    `EmptyList` ground value — self-evaluating, per G8 (absence-of-
    element and absence-of-truth are the same value) — not a call.
    Fixed by lowering a bare `()` to a `Literal` with

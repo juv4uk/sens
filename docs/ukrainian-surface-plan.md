@@ -22,7 +22,7 @@ Principle:
 
 > A word is not the semantics. A surface name maps to an existing semantic identity or existing public definition.
 
-This follows the same separation already used by Canon 0+7: canonical identity is distinct from spelling.
+This follows the same separation already used by canon()+7: canonical identity is distinct from spelling.
 
 ## Non-goals
 
@@ -38,7 +38,7 @@ The coverage inventory must be generated or checked against live public names ra
 
 Public names come from these classes:
 
-1. Canon 0+7 surfaces.
+1. canon()+7 surfaces.
 2. Necessary evaluator forms.
 3. Root builtins exposed through `language_items()` / the live root environment.
 4. Public definitions in `lib/core.lisp`.
@@ -86,7 +86,7 @@ USC = stable Ukrainian public mappings / eligible public names
 Report it by layer, not only as one total number:
 
 ```text
-Canon 0+7
+canon()+7
 Necessary forms
 Root builtins
 Core library
@@ -186,7 +186,7 @@ For ordinary library functions where there is no immutable Canon identity, the m
 1. Inventory all live public English names.
 2. Define eligibility rules: public API vs internal helper.
 3. Create the first machine-readable English↔Ukrainian coverage table.
-4. Seed it with Canon 0+7 and `функція` / `визначити` as `stable`.
+4. Seed it with canon()+7 and `функція` / `визначити` as `stable`.
 5. Generate the first USC report by layer.
 6. Review the first batch: arithmetic, comparisons, lists, strings, higher-order core functions.
 7. Implement aliases/mappings only after names are reviewed.

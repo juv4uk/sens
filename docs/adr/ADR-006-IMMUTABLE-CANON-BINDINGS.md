@@ -4,11 +4,11 @@
 **Status:** Accepted / Прийнято  
 **Date:** 2026-09-08  
 **Authority:** Volodymyr / Vova (Owner directive)  
-**Supersedes:** the 2026-09-06 Variant-A shadowing decision in `docs/research/canon-namespace-shadowing.md` for Canon 0+7 names only.
+**Supersedes:** the 2026-09-06 Variant-A shadowing decision in `docs/research/canon-namespace-shadowing.md` for canon()+7 names only.
 
 ## 1. Decision / Рішення
 
-`my-lisp` distinguishes ordinary lexical names from the finite set of ratified Canon 0+7 surface spellings.
+`my-lisp` distinguishes ordinary lexical names from the finite set of ratified canon()+7 surface spellings.
 
 The Canon set remains exactly:
 
@@ -84,7 +84,7 @@ For an FPGA/C implementation this can be represented as a small fixed table of i
 
 ## 4. Scope boundary / Межа дії
 
-The protected set is **only Canon 0+7**.
+The protected set is **only canon()+7**.
 
 Ordinary builtins and derived/library operations remain lexically shadowable, including examples such as:
 
