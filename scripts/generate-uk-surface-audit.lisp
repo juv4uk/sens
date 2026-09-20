@@ -82,24 +82,9 @@
        (let* ((sid (write-to-string (car (car rows))))
               (count (candidate-id-count sid candidate-rows 0)))
          (cond
-           ((= count 1) (registry-coverage-verdict (cdr rows)))
-           (t (list (quote registry-coverage-violation) sid count))))))))
-
-(def staging-extra-verdict
-  (lambda (rows)
-    (cond
-      ((atom rows) (quote staging-extra-ok))
-      (t
-       (let* ((sid (candidate-row-id (car rows)))
-              (present (find-candidate-row sid
-                         (map
-                           (lambda (row)
-                             (list (write-to-string (car row))))
-                           registry-rows))))
-         (cond
-           ((atom present)
-            (list (quote staging-extra-identity) sid))
-           (t (staging-extra-verdict (cdr rows)))))))))
+           ((= count 1) 1 (registry-coverage-verdict (cdr rows)))
+           ((= count 1) 0
+            (list (quote registry-coverage-violation) sid count))))))))
 
 (def fail-closed
   (lambda (verdict expected)
@@ -114,8 +99,11 @@
   (quote registry-coverage-ok))
 
 (cond
-  ((= (length candidate-rows) (length registry-rows)) (quote staging-count-ok))
-  (t
+  ((= (length candidate-rows) (length registry-rows))
+   1
+   (quote staging-count-ok))
+  ((= (length candidate-rows) (length registry-rows))
+   0
    (let ((shown
            (print
              (list
