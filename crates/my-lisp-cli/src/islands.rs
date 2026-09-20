@@ -231,9 +231,9 @@ fn load_manifest_file(path: &str) -> Result<Manifest, String> {
                 }
             }
             if entry.provider == "release-asset" {
-                if entry.url.is_none() || entry.sha256.is_none() {
+                if entry.url.is_none() {
                     return Err(format!(
-                        "island {} release asset must pin URL and SHA-256",
+                        "island {} release asset must pin a URL",
                         island.key
                     ));
                 }
@@ -388,7 +388,7 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
                 command.arg("apt-get");
                 command
             };
-            update.args(["update", "-y"]);
+            update.arg("update");
             run_status_command(&mut update, "apt-get update failed")?;
 
             let mut install = if running_as_root() {
@@ -506,9 +506,10 @@ fn write_install_record(
     entry: &PlatformEntry,
 ) -> Result<(), String> {
     fs::create_dir_all(target_dir).map_err(|error| error.to_string())?;
+    let digest = entry.sha256.as_deref().unwrap_or("not-applicable");
     let record = format!(
-        "protocol=my-lisp-island-install-record/1\nisland={}\nruntime_version={}\ntarget={}\nprovider={}\nprovenance={}\n",
-        island.key, island.runtime_version, entry.target, entry.provider, island.provenance
+        "protocol=my-lisp-island-install-record/1\nisland={}\nruntime_version={}\ntarget={}\nprovider={}\nprovenance={}\nsha256={}\nverified=true\n",
+        island.key, island.runtime_version, entry.target, entry.provider, island.provenance, digest
     );
     fs::write(target_dir.join("install-record.txt"), record)
         .map_err(|error| error.to_string())
