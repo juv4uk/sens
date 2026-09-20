@@ -139,10 +139,7 @@ fn семантичні_ідентифікатори_складаються_ті
     let mut побачені = HashSet::new();
     for запис in записи_реєстру(&корінь) {
         let (ідентифікатор, _) = поверхні(запис);
-        let bits = ідентифікатор
-            .strip_prefix('"')
-            .and_then(|value| value.strip_suffix('"'))
-            .expect("SID must be serialized as an 8-bit binary token");
+        let bits = ідентифікатор;
         assert!(
             bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')),
             "byte SID {ідентифікатор:?} порушує canonical semantic registry"
