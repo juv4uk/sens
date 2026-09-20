@@ -82,3 +82,5 @@
 (authority "crates/my-lisp/tests/timezone_ownership.rs" observer)
 (authority "crates/my-lisp/tests/semantic_coordinate_join_2.rs" observer)
 (authority "crates/my-lisp/tests/life_1_scheduler.rs" observer)
+
+(authority "crates/my-lisp/tests/semantic_registry_lisp.rs" observer)
