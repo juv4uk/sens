@@ -69,7 +69,9 @@
       ((atom rows) (structural-kind pair)
        (let* ((row (car rows))
               (path (second row))
-              (source (read-file path))
+              ; Scan a stable textual representation so bootstrap/host file
+              ; result wrappers cannot disable structural authority detection.
+              (source (write-to-string (read-file path)))
               (class (violation-class path source)))
          (cond
            ((eq class (quote allowed)) (identity-relation same)
