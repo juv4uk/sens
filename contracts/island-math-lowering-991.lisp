@@ -15,7 +15,7 @@
 (island-math-lowering/1
   (semantic-authority "lib/surface/semantic-registry.lisp")
   (ratification-authority "#990")
-  (ratification-candidate "#1039")
+  (ratification-candidate "#1042")
   (capability-evidence "#988/#993")
   (execution-evidence "#992")
   (machine-profile "lib/machine/intel-core-i5-6400.lisp")
@@ -26,7 +26,7 @@
   (unratified-operation-policy reject)
   (missing-machine-row-policy not-yet-lowered)
   (rows
-    ; Candidate projection from #1039. These rows do not become final shared
+    ; Candidate projection from #1042. These rows do not become final shared
     ; lowering claims until #990 lands; the machine side is joined only by the
     ; already-existing semantic ID into lib/machine/intel-core-i5-6400.lisp.
     (row
