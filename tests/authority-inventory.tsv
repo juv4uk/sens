@@ -111,3 +111,5 @@ crates/wsm-kernel-host/src/lib.rs	explicit_handles_keep_kernel_lifecycles_isolat
 crates/wsm-native-result-types/tests/observation_capabilities.rs	producer_capability_sets_remain_distinct	observer	producer-specific-observation-capabilities	wsm-native-result-types concrete producer domains	retained
 crates/wsm-native-result-types/tests/observation_capabilities.rs	supported_operations_inspect_native_domains_without_normalization	observer	native-observation-inspection	producer-owned result fields	retained
 crates/wsm-native-result-types/tests/observation_capabilities.rs	unsupported_operation_is_named_not_false_or_empty	observer	observation-capability-failure	wsm-native-result-types capability boundary	retained
+lib/bridge/prolog-to-datalog.lisp	prolog_substitutions_to_datalog_facts	semantic-witness	prolog-datalog-bridge	contracts/life-1-contract.lisp + experiments/kif-bridge-audit-792.lisp	migrated
+tests/fixtures/prolog-datalog-bridge-witness.lisp	prolog_datalog_bridge_preserves_admitted_fields_and_named_failures	semantic-witness	prolog-datalog-bridge	lib/bridge/prolog-to-datalog.lisp	migrated
