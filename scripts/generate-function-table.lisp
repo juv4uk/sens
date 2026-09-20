@@ -168,7 +168,7 @@
            (sym (get-surface (quote sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
-        "  ("" (sid-text sid) "\" " formal
+        "  (\"" (sid-text sid) "\" " formal
         " (uk " (surface-word-wsm-text uk) ")"
         " (ukr " (surface-word-wsm-text ukr) ")"
         " (en " (surface-word-wsm-text en) ")"
