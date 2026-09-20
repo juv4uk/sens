@@ -340,3 +340,147 @@ fn islands_manifest_rejects_empty_provenance() {
         String::from_utf8_lossy(&output.stderr).contains("missing required release metadata")
     );
 }
+
+#[test]
+fn islands_install_requires_explicit_license_acceptance_before_download() {
+    let base = std::env::temp_dir().join(format!(
+        "my-lisp-islands-license-contract-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let artifact = base.join("runtime.bin");
+    std::fs::write(&artifact, b"licensed-runtime").expect("artifact");
+    let digest = my_lisp::sha256_source(b"licensed-runtime")
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(
+        &manifest_path,
+        format!(
+            r#"{{"protocol":"my-lisp-islands-manifest/1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"3","abi_compatibility":"test-abi","install_key":"demo","license":"Example-License","license_acceptance_required":true,"provenance":"release","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","checksum_algorithm":"sha256","sha256":"{}","artifact":"file","artifact_format":"raw-binary","entrypoint":"runtime.bin","probe":["/bin/sh","-c","exit 0"]}}]}}]}}"#,
+            artifact.display(),
+            digest
+        ),
+    )
+    .expect("manifest");
+    let root = base.join("installed");
+
+    let rejected = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands","install","--manifest",manifest_path.to_str().unwrap(),
+            "--profile","one","--root",root.to_str().unwrap(),"--apply",
+        ])
+        .output()
+        .expect("install without acceptance");
+    assert!(!rejected.status.success());
+    assert!(String::from_utf8_lossy(&rejected.stderr).contains("license acceptance required"));
+    assert!(!root.join("demo/3/linux-x86_64/runtime.bin").exists());
+
+    let status = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args(["islands","status","--manifest",manifest_path.to_str().unwrap(),"--root",root.to_str().unwrap()])
+        .output()
+        .expect("status");
+    assert!(String::from_utf8(status.stdout).unwrap().contains("demo 3 linux-x86_64 release: failed-install"));
+
+    let accepted = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands","install","--manifest",manifest_path.to_str().unwrap(),
+            "--profile","one","--root",root.to_str().unwrap(),"--apply",
+            "--accept-license","demo",
+        ])
+        .output()
+        .expect("install with acceptance");
+    assert!(accepted.status.success(), "{}", String::from_utf8_lossy(&accepted.stderr));
+    assert!(root.join("demo/3/linux-x86_64/runtime.bin").is_file());
+}
+
+#[test]
+fn islands_verified_artifact_survives_probe_failure_and_status_is_explicit() {
+    let base = std::env::temp_dir().join(format!(
+        "my-lisp-islands-probe-contract-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let artifact = base.join("runtime.bin");
+    std::fs::write(&artifact, b"probe-runtime").expect("artifact");
+    let digest = my_lisp::sha256_source(b"probe-runtime")
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(
+        &manifest_path,
+        format!(
+            r#"{{"protocol":"my-lisp-islands-manifest/1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"4","abi_compatibility":"test-abi","install_key":"demo","license":"test","license_acceptance_required":false,"provenance":"release","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","checksum_algorithm":"sha256","sha256":"{}","artifact":"file","artifact_format":"raw-binary","entrypoint":"runtime.bin","probe":["/bin/sh","-c","exit 7"]}}]}}]}}"#,
+            artifact.display(),
+            digest
+        ),
+    )
+    .expect("manifest");
+    let root = base.join("installed");
+
+    let install = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands","install","--manifest",manifest_path.to_str().unwrap(),
+            "--profile","one","--root",root.to_str().unwrap(),"--apply",
+        ])
+        .output()
+        .expect("install");
+    assert!(install.status.success(), "{}", String::from_utf8_lossy(&install.stderr));
+    let stdout = String::from_utf8(install.stdout).unwrap();
+    assert!(stdout.contains(": probe-failed"), "{stdout}");
+    assert!(root.join("demo/4/linux-x86_64/runtime.bin").is_file());
+    assert!(root.join("demo/4/linux-x86_64/install-record.txt").is_file());
+
+    let status = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args(["islands","status","--manifest",manifest_path.to_str().unwrap(),"--root",root.to_str().unwrap()])
+        .output()
+        .expect("status");
+    assert!(String::from_utf8(status.stdout).unwrap().contains("demo 4 linux-x86_64 release: probe-failed"));
+}
+
+#[test]
+fn concurrent_release_asset_installs_publish_one_verified_runtime() {
+    let base = std::env::temp_dir().join(format!(
+        "my-lisp-islands-concurrent-contract-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let artifact = base.join("runtime.bin");
+    std::fs::write(&artifact, b"concurrent-runtime").expect("artifact");
+    let digest = my_lisp::sha256_source(b"concurrent-runtime")
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(
+        &manifest_path,
+        format!(
+            r#"{{"protocol":"my-lisp-islands-manifest/1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"5","abi_compatibility":"test-abi","install_key":"demo","license":"test","license_acceptance_required":false,"provenance":"release","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","checksum_algorithm":"sha256","sha256":"{}","artifact":"file","artifact_format":"raw-binary","entrypoint":"runtime.bin","probe":["/bin/sh","-c","exit 0"]}}]}}]}}"#,
+            artifact.display(),
+            digest
+        ),
+    )
+    .expect("manifest");
+    let root = base.join("installed");
+    let args = [
+        "islands","install","--manifest",manifest_path.to_str().unwrap(),
+        "--profile","one","--root",root.to_str().unwrap(),"--apply",
+    ];
+
+    let first = Command::new(env!("CARGO_BIN_EXE_my-lisp")).args(args).spawn().expect("first");
+    let second = Command::new(env!("CARGO_BIN_EXE_my-lisp")).args(args).spawn().expect("second");
+    let first = first.wait_with_output().expect("first output");
+    let second = second.wait_with_output().expect("second output");
+    assert!(first.status.success(), "{}", String::from_utf8_lossy(&first.stderr));
+    assert!(second.status.success(), "{}", String::from_utf8_lossy(&second.stderr));
+    assert_eq!(
+        std::fs::read(root.join("demo/5/linux-x86_64/runtime.bin")).unwrap(),
+        b"concurrent-runtime"
+    );
+    assert!(root.join("demo/5/linux-x86_64/install-record.txt").is_file());
+}
