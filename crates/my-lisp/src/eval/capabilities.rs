@@ -48,6 +48,11 @@ fn registry() -> &'static RwLock<BTreeMap<String, HostFn>> {
     REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
 }
 
+fn semantic_registry() -> &'static RwLock<BTreeMap<u8, HostFn>> {
+    static REGISTRY: OnceLock<RwLock<BTreeMap<u8, HostFn>>> = OnceLock::new();
+    REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
+}
+
 /// Install one capability under its surface-form name (e.g. "read-file").
 /// Re-registering the same name replaces the previous handler, so an
 /// embedder can override or withdraw capabilities deliberately.
@@ -62,6 +67,26 @@ pub fn register_capability(name: &str, handler: HostFn) {
 pub fn unregister_capability(name: &str) {
     if let Ok(mut map) = registry().write() {
         map.remove(name);
+    }
+}
+
+/** Register a host implementation for one Lisp-owned semantic identity.
+ *
+ * The evaluator resolves surfaces to the opaque semantic ID first; this
+ * registry contains only the implementation projection supplied by an
+ * embedder. It never creates or renumbers semantic IDs.
+ */
+pub fn register_semantic_capability(semantic_id: u8, handler: HostFn) {
+    semantic_registry()
+        .write()
+        .expect("semantic capability registry poisoned")
+        .insert(semantic_id, handler);
+}
+
+/// Remove one implementation projection previously registered for a semantic ID.
+pub fn unregister_semantic_capability(semantic_id: u8) {
+    if let Ok(mut map) = semantic_registry().write() {
+        map.remove(&semantic_id);
     }
 }
 
@@ -119,9 +144,50 @@ pub(crate) fn dispatch_capability(
     dispatch_capability_from(registry(), name, arguments, environment, span)
 }
 
+fn dispatch_semantic_capability(
+    semantic_id: u8,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<EvalStep, LanguageError>> {
+    match semantic_registry().read() {
+        Ok(map) => match map.get(&semantic_id).copied() {
+            Some(handler) => Some(handler(arguments, environment, span).map(EvalStep::Value)),
+            None => None,
+        },
+        Err(_) => Some(Err(LanguageError::new(
+            ErrorKind::MechanismUnavailable,
+            format!(
+                "semantic capability registry unavailable while resolving SID: {semantic_id}"
+            ),
+            span,
+        ))),
+    }
+}
+
+pub(crate) fn dispatch_semantic_capability_for_surface(
+    name: &str,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<EvalStep, LanguageError>> {
+    let semantic_id = crate::semantic_registry::semantic_id_for_surface(name)?;
+    dispatch_semantic_capability(semantic_id, arguments, environment, span)
+}
+
 #[cfg(test)]
 mod honesty_tests {
     use super::*;
+
+    #[test]
+    fn semantic_dispatch_is_keyed_by_id_not_surface_spelling() {
+        register_semantic_capability(250, dummy_handler);
+        let environment = Environment::root();
+        let result = dispatch_semantic_capability(250, &[], &environment, Span { start: 0, end: 0 })
+            .expect("semantic capability should be found");
+        assert!(result.is_ok());
+        unregister_semantic_capability(250);
+    }
 
     fn dummy_handler(
         _arguments: &[Expr],
