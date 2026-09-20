@@ -320,6 +320,88 @@ fn repl_history_persists_across_separate_sessions() {
     assert!(history.contains("(+ 3 4)"));
 }
 
+fn run_repl_with_input(case: &str, input: &str) -> std::process::Output {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let dir = std::env::temp_dir().join(format!(
+        "my-lisp-cli-test-repl-{case}-{}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&dir).expect("should create temp home dir");
+
+    let mut child = my_lisp()
+        .env("HOME", &dir)
+        .env("USERPROFILE", &dir)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("binary should spawn");
+    child
+        .stdin
+        .take()
+        .expect("stdin should be piped")
+        .write_all(input.as_bytes())
+        .expect("should write REPL input");
+    let output = child.wait_with_output().expect("binary should run");
+    let _ = std::fs::remove_dir_all(&dir);
+    output
+}
+
+#[test]
+fn repl_executes_ukr_registry_name_before_any_language_selector() {
+    let output = run_repl_with_input("ukr-without-selector", "(порожній-текст? \"\")\n");
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        stdout.lines().any(|line| line.trim() == "t"),
+        "registry-admitted укр spelling must execute from the default REPL: {stdout:?}"
+    );
+    assert!(
+        !stderr.contains("unknown symbol"),
+        "укр spelling must resolve through Canon/SID without a runtime surface: {stderr:?}"
+    );
+}
+
+#[test]
+fn repl_language_selector_preserves_user_closure_across_ukr_and_en() {
+    let output = run_repl_with_input(
+        "selector-preserves-closure",
+        "(define крок 1)\n\
+         (define додай-крок (lambda (x) (+ x крок)))\n\
+         :мова укр\n\
+         (додай-крок 5)\n\
+         :мова en\n\
+         (додай-крок 5)\n",
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let sixes = stdout.lines().filter(|line| line.trim() == "6").count();
+
+    assert!(
+        stdout.contains("Мова назв: українська (укр)"),
+        "укр selector must be presentation-only and visible: {stdout:?}"
+    );
+    assert!(
+        stdout.contains("Мова назв: англійська (en)"),
+        "en selector must be presentation-only and visible: {stdout:?}"
+    );
+    assert_eq!(
+        sixes, 2,
+        "the same user closure must survive укр → en selector changes: {stdout:?}"
+    );
+    assert!(
+        !stderr.contains("unknown symbol"),
+        "selector changes must not lose user bindings: {stderr:?}"
+    );
+}
+
 #[test]
 fn repl_echoes_a_lone_unknown_symbol_as_a_greeting_not_an_error() {
     // Isolated HOME, like repl_history_persists_across_separate_sessions.
