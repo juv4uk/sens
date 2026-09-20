@@ -1,6 +1,7 @@
 ; #382 — Lisp-owned machine-readable inventory of immediate scripts/* tooling.
 ; Це governance metadata, а не semantic authority.
-; Scope: immediate entries under scripts/, except the tests/ directory.
+; Scope: immediate entries under scripts/, except the tests/ directory,
+; plus the two explicit non-script entrypoints declared by #1030.
 ; Unknown facts stay explicit as unknown; do not infer callers or authority.
 
 (about
