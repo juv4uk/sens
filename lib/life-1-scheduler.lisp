@@ -92,7 +92,7 @@
 (def life-scheduler-select-ready
   (lambda (pending projections)
     (cond
-      ((atom pending) (structural-kind empty-list)
+      ((atom pending) (quote (structural-kind empty-list))
        (quote (scheduler-selection none)))
       ((atom pending) (quote (structural-kind pair))
        (let ((invocation (car pending)))
