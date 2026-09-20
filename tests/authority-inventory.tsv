@@ -131,3 +131,6 @@ crates/my-lisp/tests/life_1_scheduler.rs	life_1_scheduler_witness_is_lisp_owned	
 
 crates/my-lisp/tests/semantic_registry_lisp.rs	lisp_owned_semantic_registry_witness	observer	semantic-registry-lisp-query	lib/surface/semantic-registry.lisp + tests/fixtures/semantic-registry-self-hosted-witness.lisp	migrated
 crates/my-lisp/tests/runtime_peer_operators.rs	runtime_peer_surface_projection_remains_lisp_owned	observer	peer-surface-runtime-projection	lib/surface/semantic-registry.lisp via generated projection	migrated
+crates/my-lisp-cli/tests/uk_surface_audit_projection.rs	uk_surface_audit_generator_runs_through_real_my_lisp_cli	observer	uk-audit-generation-freshness	scripts/generate-uk-surface-audit.lisp + lib/generated/uk-surface-audit.lisp	retained
+crates/my-lisp-cli/tests/uk_surface_audit_projection.rs	ukr_candidate_collisions_require_explicit_alias_targets	observer	ukr-staging-collision-observation	lib/surface/український-профіль-джерела.lisp	retained
+crates/my-lisp-cli/tests/uk_surface_audit_projection.rs	ukr_candidates_need_no_latin_keyboard_layout	observer	ukr-staging-layout-observation	lib/surface/український-профіль-джерела.lisp	retained
