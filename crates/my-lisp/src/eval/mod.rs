@@ -225,6 +225,16 @@ fn evaluate_list(
                 {
                     return result;
                 }
+                if let Some(result) =
+                    capabilities::dispatch_semantic_capability_for_surface(
+                        name,
+                        arguments,
+                        environment,
+                        span,
+                    )
+                {
+                    return result;
+                }
             }
             let function = evaluate(&items[0], environment)?;
             match &function {
