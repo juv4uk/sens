@@ -383,7 +383,7 @@
       (cond
         ((and
            (ownership-identity-same? (ownership-status row) (quote confirmed))
-           (atom evidence))
+           (ownership-empty-list? evidence))
          (ownership-violation
            (quote confirmed-ownership-missing-evidence)
            (ownership-key row)))
@@ -420,7 +420,7 @@
          (cond
            ((and
               (ownership-identity-same? (migration-status row) (quote confirmed))
-              (atom evidence))
+              (ownership-empty-list? evidence))
             (ownership-violation
               (quote confirmed-migration-missing-evidence)
               (migration-key row)))
