@@ -1,12 +1,16 @@
 use my_lisp::{eval_program, semantic_registry_export, Session, Value};
 use std::rc::Rc;
 
-const ADD_SEMANTIC_ID: u8 = 12;
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
 
+fn add_semantic_id() -> u8 {
+    semantic_registry_export::semantic_id_for_admitted_surface("додати")
+        .expect("canonical add surface must be admitted by the registry projection")
+}
+
 fn add_surfaces() -> Vec<(&'static str, &'static str)> {
-    semantic_registry_export::admitted_surfaces_for_semantic_id(ADD_SEMANTIC_ID)
+    semantic_registry_export::admitted_surfaces_for_semantic_id(add_semantic_id())
         .into_iter()
         .map(|row| (row.namespace, row.name))
         .collect()
