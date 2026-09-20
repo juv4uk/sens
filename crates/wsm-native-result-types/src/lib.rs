@@ -71,6 +71,39 @@ pub struct NativeResultRef {
     pub producer: ProducerSlot,
 }
 
+/// Stable graph identity for one producer-owned native observation slot.
+///
+/// This is an identity/provenance record, not a semantic value and not a
+/// normalized foreign result. The optional semantic id is opaque provenance
+/// supplied by the caller.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct ObservationRef {
+    pub observation_id: u64,
+    pub producer: ProducerSlot,
+    pub semantic_id: Option<u8>,
+    pub native_slot: ProducerSlot,
+    pub metadata_ref: Option<u64>,
+}
+
+/// The narrow first provenance relation admitted by LIFE-1.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ProvenanceEdgeType {
+    ProjectedInto,
+}
+
+/// Explicit provenance edge between producer-native observations.
+///
+/// The bridge contract reference is deliberately opaque text; this type does
+/// not interpret bridge semantics or claim result equivalence.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ProvenanceEdge {
+    pub edge_id: u64,
+    pub edge_type: ProvenanceEdgeType,
+    pub from_observation: ObservationRef,
+    pub bridge_contract_ref: String,
+    pub to_observation: ObservationRef,
+}
+
 /// One observation from each autonomous execution kernel.
 ///
 /// The concrete field types are the boundary: Common Lisp stays a Common Lisp
@@ -112,6 +145,45 @@ impl FourKernelObservation {
             NativeResultRef { observation_id, producer: ProducerSlot::Prolog },
             NativeResultRef { observation_id, producer: ProducerSlot::Clips },
             NativeResultRef { observation_id, producer: ProducerSlot::Datalog },
+        ]
+    }
+
+    /// Return stable graph identities for the four producer-native observation slots.
+    ///
+    /// All four refs share one observation id; each retains its producer slot.
+    pub const fn observation_refs(
+        observation_id: u64,
+        semantic_id: Option<u8>,
+    ) -> [ObservationRef; 4] {
+        [
+            ObservationRef {
+                observation_id,
+                producer: ProducerSlot::CommonLisp,
+                semantic_id,
+                native_slot: ProducerSlot::CommonLisp,
+                metadata_ref: None,
+            },
+            ObservationRef {
+                observation_id,
+                producer: ProducerSlot::Prolog,
+                semantic_id,
+                native_slot: ProducerSlot::Prolog,
+                metadata_ref: None,
+            },
+            ObservationRef {
+                observation_id,
+                producer: ProducerSlot::Clips,
+                semantic_id,
+                native_slot: ProducerSlot::Clips,
+                metadata_ref: None,
+            },
+            ObservationRef {
+                observation_id,
+                producer: ProducerSlot::Datalog,
+                semantic_id,
+                native_slot: ProducerSlot::Datalog,
+                metadata_ref: None,
+            },
         ]
     }
 
