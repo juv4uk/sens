@@ -641,29 +641,45 @@
     (repo-tooling-script-rows repo-tooling-live-rows)
     repo-tooling-live-observed))
 
-(def repo-tooling-stage-assert
-  (lambda (label actual)
+(def repo-tooling-assert-scripts-stage
+  (lambda (actual)
     (cond
       ((equal? actual (quote (repo-tooling-ok)))
        (structural-relation same)
-       (list (quote repo-tooling-stage-ok) label))
+       (list (quote repo-tooling-scripts-stage-ok)))
       ((equal? actual (quote (repo-tooling-ok)))
        (structural-relation distinct)
-       (let ((shown (print (list (quote repo-tooling-stage-failed) label actual))))
-         (car (quote ())))))))
+       (car (quote ()))))))
 
-(repo-tooling-stage-assert
-  (quote scripts)
+(def repo-tooling-assert-xtask-stage
+  (lambda (actual)
+    (cond
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation same)
+       (list (quote repo-tooling-xtask-stage-ok)))
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation distinct)
+       (car (quote ()))))))
+
+(def repo-tooling-assert-precommit-stage
+  (lambda (actual)
+    (cond
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation same)
+       (list (quote repo-tooling-precommit-stage-ok)))
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation distinct)
+       (car (quote ()))))))
+
+(repo-tooling-assert-scripts-stage
   repo-tooling-live-scripts-verdict)
 
-(repo-tooling-stage-assert
-  (quote xtask-entrypoint)
+(repo-tooling-assert-xtask-stage
   (repo-tooling-extra-entrypoint-verdict
     "crates/xtask/src/main.rs"
     repo-tooling-live-rows))
 
-(repo-tooling-stage-assert
-  (quote pre-commit-entrypoint)
+(repo-tooling-assert-precommit-stage
   (repo-tooling-extra-entrypoint-verdict
     "githooks/pre-commit"
     repo-tooling-live-rows))
