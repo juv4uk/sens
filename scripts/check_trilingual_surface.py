@@ -16,9 +16,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = REPO_ROOT / "lib" / "surface" / "semantic-registry.lisp"
 HUMAN_SURFACES = ("uk", "en", "sa")
 ALL_SURFACES = ("en", "uk", "ukr", "sa", "sym")
+ENTRY = re.compile(r"^\s*\(([01]{8})\s+(.*)\)\s*$")
 SURFACE = re.compile(
     r'\((en|uk|ukr|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)'
-)
 )
 
 
@@ -138,5 +138,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())) = re.compile(
-    r'\((en|uk|ukr|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)'
+    raise SystemExit(main())
