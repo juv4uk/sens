@@ -58,4 +58,4 @@
                  (list (quote facts)
                        (prolog-values-to-datalog-facts
                          (car (cdr variable-row))
-                         (cdr values-row))))))))))))))
+                         (cdr values-row)))))))))))))
