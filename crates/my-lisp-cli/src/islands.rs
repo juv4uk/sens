@@ -125,7 +125,6 @@ fn fetch_artifact(url: &str, temporary: &Path) -> Result<(), String> {
             "--fail",
             "--location",
             "--silent",
-            "--show-error",
             "--max-time",
             "120",
             "--output",
@@ -216,7 +215,6 @@ fn fetch_artifact(url: &str, temporary: &Path) -> Result<(), String> {
                     "--fail",
                     "--location",
                     "--silent",
-                    "--show-error",
                     "--max-time",
                     "120",
                     "--output",
@@ -286,12 +284,12 @@ fn install_root(args: &[String]) -> String {
         .into_owned()
 }
 
+const EMBEDDED_MANIFEST: &str = include_str!("../../../packaging/islands-manifest-v1.json");
+
 // Manifest validation is distribution contract validation only; it cannot mint semantic authority.
-fn load_manifest_file(path: &str) -> Result<Manifest, String> {
-    let source =
-        fs::read_to_string(path).map_err(|error| format!("cannot read manifest {path}: {error}"))?;
-    let manifest: Manifest = serde_json::from_str(&source)
-        .map_err(|error| format!("invalid manifest {path}: {error}"))?;
+fn load_manifest_str(source: &str, origin: &str) -> Result<Manifest, String> {
+    let manifest: Manifest = serde_json::from_str(source)
+        .map_err(|error| format!("invalid manifest {origin}: {error}"))?;
 
     if manifest.protocol != "my-lisp-islands-manifest/1" {
         return Err(format!("unsupported manifest protocol: {}", manifest.protocol));
@@ -445,6 +443,12 @@ fn load_manifest_file(path: &str) -> Result<Manifest, String> {
     Ok(manifest)
 }
 
+fn load_manifest_file(path: &str) -> Result<Manifest, String> {
+    let source =
+        fs::read_to_string(path).map_err(|error| format!("cannot read manifest {path}: {error}"))?;
+    load_manifest_str(&source, path)
+}
+
 fn load_manifest(args: &[String]) -> Result<Manifest, String> {
     if let Some(path) = value_after(args, "--manifest") {
         return load_manifest_file(path);
@@ -458,10 +462,15 @@ fn load_manifest(args: &[String]) -> Result<Manifest, String> {
             .map(|duration| duration.as_nanos())
             .unwrap_or_default()
     ));
-    fetch_artifact(REMOTE_MANIFEST_URL, &temporary)?;
-    let result = load_manifest_file(temporary.to_str().unwrap_or_default());
-    let _ = fs::remove_file(&temporary);
-    result
+    if let Ok(()) = fetch_artifact(REMOTE_MANIFEST_URL, &temporary) {
+        if let Ok(manifest) = load_manifest_file(temporary.to_str().unwrap_or_default()) {
+            let _ = fs::remove_file(&temporary);
+            return Ok(manifest);
+        }
+        let _ = fs::remove_file(&temporary);
+    }
+
+    load_manifest_str(EMBEDDED_MANIFEST, "embedded-default")
 }
 
 fn requested_keys(manifest: &Manifest, args: &[String]) -> Result<Vec<String>, String> {
