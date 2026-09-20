@@ -370,11 +370,14 @@
 ; Chained comparison semantics are Lisp-owned: values arrive already
 ; evaluated, adjacent pairs are compared left-to-right, and evaluation stops
 ; at the first false pair.
+; NOTE: my-compare-two returns exact-Q 1/0, not t/(). Since 0 is truthy
+; in my-lisp (only Nil and Bool(false) are falsy), we MUST use a 3-part
+; clause matching the exact-Q YES result (1) — not a 2-part clause.
 (def my-compare-chain
   (lambda (operator values)
     (cond
       ((atom (cdr values)) t)
-      ((my-compare-two operator (car values) (second values))
+      ((eq (my-compare-two operator (car values) (second values)) 1)
        (my-compare-chain operator (cdr values)))
       (t (quote ())))))
 
