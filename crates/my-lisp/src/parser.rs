@@ -317,8 +317,16 @@ impl Parser<'_> {
                             )),
                         };
                     }
+
+                    if items.is_empty() {
+                        // A leading (binary 8) declaration activates the
+                        // prefix-free fixed-width binary syntax for the
+                        // remaining data in this source form.
+                        if let Some(width) = binary_format_width(&item)? {
+                            self.binary_width = Some(width);
+                        }
+                    }
                     items.push(item);
-                }
                 None => {
                     return Err(self.error(
                         "unclosed list · nezakrytyi spysok · nicht geschlossene Liste",
