@@ -11,7 +11,7 @@
       "platforms": [
         {
           "target": "linux-x86_64",
-          "provider": "system-package",
+          "provider": "apt",
           "package": "sbcl",
           "probe": ["sbcl", "--version"],
           "probe_expect": "SBCL"
@@ -41,7 +41,7 @@
       "platforms": [
         {
           "target": "linux-x86_64",
-          "provider": "system-package",
+          "provider": "apt",
           "package": "swi-prolog",
           "probe": ["swipl", "--version"],
           "probe_expect": "SWI-Prolog"
@@ -72,7 +72,7 @@
       "platforms": [
         {
           "target": "linux-x86_64",
-          "provider": "system-package",
+          "provider": "apt",
           "package": "libclips-dev",
           "probe": [
             "sh",
