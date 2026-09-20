@@ -277,6 +277,7 @@ fn install_root(args: &[String]) -> String {
         .into_owned()
 }
 
+// Manifest validation is distribution contract validation only; it cannot mint semantic authority.
 fn load_manifest_file(path: &str) -> Result<Manifest, String> {
     let source =
         fs::read_to_string(path).map_err(|error| format!("cannot read manifest {path}: {error}"))?;
