@@ -57,12 +57,18 @@
 (def life-scheduler-key-present?
   (lambda (key keys)
     (cond
-      ((atom keys) (quote (structural-kind empty-list)) (quote absent))
-      ((atom keys) (quote (structural-kind pair))
-       (cond
-         ((equal? key (car keys)) (quote (structural-relation same)) (quote present))
-         ((equal? key (car keys)) (quote (structural-relation distinct))
-          (life-scheduler-key-present? key (cdr keys))))))))
+      ((atom keys)
+       (quote absent))
+      ((atom keys)
+       (let ((head (car keys)))
+         (cond
+           ((equal? key head)
+            (quote (identity-relation same))
+            (quote present))
+           ((equal? key head)
+            (quote (identity-relation distinct))
+            (life-scheduler-key-present? key (cdr keys)))))))))
+
 
 (def life-scheduler-dedup-pending
   (lambda (pending seen-keys)
