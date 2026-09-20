@@ -58,6 +58,7 @@
 (authority "crates/wsm-datalog-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/my-lisp/tests/utf8.rs" observer)
 (authority "crates/my-lisp-cli/tests/semantic_oracle_preservation.rs" observer)
+(authority "crates/my-lisp-cli/tests/uk_surface_audit_projection.rs" observer)
 (authority "crates/my-lisp-cli/tests/legacy_coordination_rejected.rs" observer)
 (authority "crates/my-lisp-cli/tests/islands_cli.rs" mechanism)
 (authority "tests/fixtures/semantic-coordinate-law-axis-v1.lisp" semantic-witness)
