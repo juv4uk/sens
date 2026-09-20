@@ -2,7 +2,7 @@ use my_lisp::syntax::Expr;
 use my_lisp::{parse, ExprKind};
 
 const UK_API_DOCS: &str = include_str!("../../../../lib/surface/uk-docs.lisp");
-const HUMAN_NAMESPACES: [&str; 3] = ["укр", "en", "sa"];
+const HUMAN_SURFACES: [&str; 3] = ["ук", "en", "sa"];
 const FIXED_SURFACES: [&str; 5] = ["en", "ук", "укр", "sa", "sym"];
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -42,6 +42,10 @@ impl Counts {
     }
 }
 
+fn normalize_surface(surface: &str) -> &str {
+    surface
+}
+
 fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     let mut entries = Vec::new();
 
@@ -78,8 +82,9 @@ fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     Ok(entries)
 }
 
-fn surface_name<'a>(entry: &'a SurfaceEntry, namespace: &str) -> Option<&'a SurfaceName> {
-    entry.names.iter().find(|name| name.surface == namespace)
+fn surface_name<'a>(entry: &'a SurfaceEntry, surface: &str) -> Option<&'a SurfaceName> {
+    let surface = normalize_surface(surface);
+    entry.names.iter().find(|name| name.surface == surface)
 }
 
 fn counts_for(entries: &[SurfaceEntry], surface: &str) -> Counts {
@@ -190,8 +195,7 @@ fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
 pub(crate) fn render_status() -> Result<String, String> {
     let entries = registry_entries()?;
     let denominator = public_denominator(&entries);
-    let ukr = counts_for(&entries, "укр");
-    let uk_compat = counts_for(&entries, "ук");
+    let uk = counts_for(&entries, "ук");
     let en = counts_for(&entries, "en");
     let sa = counts_for(&entries, "sa");
     let symbolic = entries
@@ -201,7 +205,7 @@ pub(crate) fn render_status() -> Result<String, String> {
     let trilingual_present = entries
         .iter()
         .filter(|entry| {
-            HUMAN_NAMESPACES.iter().all(|surface| {
+            HUMAN_SURFACES.iter().all(|surface| {
                 surface_name(entry, surface)
                     .and_then(|name| name.name.as_deref())
                     .is_some()
@@ -210,18 +214,15 @@ pub(crate) fn render_status() -> Result<String, String> {
         .count();
 
     Ok(format!(
-        "Єдина таблиця назв Canon · byte identities: {denominator}\n\
-         УКР  present {:>3} · empty {:>3}\n\
-         УК   present {:>3} · empty {:>3} · compatibility/compact column\n\
-         EN   present {:>3} · empty {:>3}\n\
-         SA   present {:>3} · empty {:>3}\n\
+        "Рівноправні людські поверхні · byte identities: {denominator}\n\
+         UK  present {:>3} · empty {:>3}\n\
+         EN  present {:>3} · empty {:>3}\n\
+         SA  present {:>3} · empty {:>3}\n\
          shared sym identities: {symbolic}\n\
-         trilingual present (укр/en/sa): {trilingual_present}/{denominator}\n\
+         trilingual present: {trilingual_present}/{denominator}\n\
          release parity: {}",
-        ukr.present,
-        ukr.empty,
-        uk_compat.present,
-        uk_compat.empty,
+        uk.present,
+        uk.empty,
         en.present,
         en.empty,
         sa.present,
@@ -251,9 +252,10 @@ pub(crate) fn render_names(surface: &str) -> Result<String, String> {
         return Ok(output);
     }
 
+    let surface = normalize_surface(surface);
     let counts = counts_for(&entries, surface);
     let mut output = format!(
-        "namespace {surface}: present {} · empty {} · total {}\n  ",
+        "surface {surface}: present {} · empty {} · total {}\n  ",
         counts.present,
         counts.empty,
         entries.len()
@@ -288,9 +290,8 @@ pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, Stri
     };
 
     let mut output = format!(
-        "identity: {}\n  УКР: {}\n  УК (compat): {}\n  EN: {}\n  SA: {}",
+        "identity: {}\n  UK: {}\n  EN: {}\n  SA: {}",
         entry.identity,
-        rendered_name(surface_name(entry, "укр")),
         rendered_name(surface_name(entry, "ук")),
         rendered_name(surface_name(entry, "en")),
         rendered_name(surface_name(entry, "sa")),
@@ -302,7 +303,7 @@ pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, Stri
     output.push_str("\n  current: ");
     output.push_str(surface);
 
-    if surface == "укр" {
+    if normalize_surface(surface) == "ук" {
         if let Some(doc) = ukrainian_docs()?
             .into_iter()
             .find(|doc| doc.identity == entry.identity)
@@ -336,39 +337,23 @@ mod tests {
     }
 
     #[test]
-    fn ukr_is_primary_ukrainian_name_namespace() {
-        let entries = registry_entries().expect("numeric registry");
-        let entry = find_entry(&entries, "порожній-текст?").expect("ukr identity");
-        assert_eq!(entry.identity, "00111100");
-        assert_eq!(
-            surface_name(entry, "укр").and_then(|item| item.name.as_deref()),
-            Some("порожній-текст?")
-        );
-        assert_eq!(
-            surface_name(entry, "ук").and_then(|item| item.name.as_deref()),
-            Some("текст-порожній?")
-        );
-    }
-
-    #[test]
     fn plus_is_shared_symbol_not_english() {
         let entries = registry_entries().expect("numeric registry");
         let entry = find_entry(&entries, "+").expect("+ identity");
         assert_eq!(entry.identity, "00001100");
         assert_eq!(surface_name(entry, "en").and_then(|item| item.name.as_deref()), None);
-        assert_eq!(surface_name(entry, "укр").and_then(|item| item.name.as_deref()), Some("додати"));
+        assert_eq!(surface_name(entry, "ук").and_then(|item| item.name.as_deref()), Some("додати"));
         assert_eq!(surface_name(entry, "sa").and_then(|item| item.name.as_deref()), Some("yoga"));
         assert_eq!(surface_name(entry, "sym").and_then(|item| item.name.as_deref()), Some("+"));
     }
 
     #[test]
     fn repl_never_reports_a_human_spelling_as_identity() {
-        let output = render_name("укр", "map").expect("render map");
+        let output = render_name("ук", "map").expect("render map");
         assert!(output.starts_with("identity: 00110111\n"));
         assert!(!output.contains("identity: map"));
-        assert!(output.contains("УКР: відобразити"));
 
-        let plus = render_name("укр", "+").expect("render +");
+        let plus = render_name("ук", "+").expect("render +");
         assert!(plus.starts_with("identity: 00001100\n"));
         assert!(plus.contains("EN: ()"));
         assert!(plus.contains("SYM: +"));
@@ -380,13 +365,6 @@ mod tests {
         assert!(output.contains("00110111"));
         assert!(output.contains("00001100"));
         assert!(!output.contains(" · map"));
-    }
-
-    #[test]
-    fn ukr_catalog_is_registry_projection_not_runtime_environment() {
-        let output = render_names("укр").expect("ukr catalog");
-        assert!(output.starts_with("namespace укр:"));
-        assert!(output.contains("порожній-текст?"));
     }
 
     #[test]
