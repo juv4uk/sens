@@ -14,6 +14,11 @@
 (def repo-tooling-lifecycles
   (quote (active transitional legacy generated-helper archive-candidate)))
 
+; Bounded second scope slice for repo-owned tooling outside immediate scripts/*.
+; These are explicit entrypoints, not a recursive inventory of their directories.
+(def repo-tooling-extra-entrypoints
+  (quote ("crates/xtask/src/main.rs" "githooks/pre-commit")))
+
 (def repo-tooling-violation
   (lambda (kind detail)
     (list (quote repo-tooling-violation) kind detail)))
@@ -252,6 +257,68 @@
            ((equal? path (repo-tooling-field (quote path) row))
             (structural-relation distinct)
             (repo-tooling-find-row-by-path path (cdr rows)))))))))
+
+(def repo-tooling-extra-entrypoint-present-state
+  (lambda (path)
+    (cond
+      ((equal? path "crates/xtask/src/main.rs") (structural-relation same)
+       (let ((entries (read-dir "crates/xtask/src")))
+         (repo-tooling-extra-entry-name-state "main.rs" entries)))
+      ((equal? path "crates/xtask/src/main.rs") (structural-relation distinct)
+       (repo-tooling-extra-entrypoint-present-state "githooks/pre-commit"))
+      ((equal? path "githooks/pre-commit") (structural-relation same)
+       (let ((entries (read-dir "githooks")))
+         (repo-tooling-extra-entry-name-state "pre-commit" entries)))
+      ((equal? path "githooks/pre-commit") (structural-relation distinct)
+       (quote unsupported)))))
+
+(def repo-tooling-extra-entry-name-state
+  (lambda (name entries)
+    (cond
+      ((atom entries) (structural-kind empty-list) (quote absent))
+      ((atom entries) (structural-kind atom) (quote malformed))
+      ((atom entries) (structural-kind pair)
+       (cond
+         ((equal? name (car entries)) (structural-relation same) (quote present))
+         ((equal? name (car entries)) (structural-relation distinct)
+          (repo-tooling-extra-entry-name-state name (cdr entries))))))))
+
+(def repo-tooling-extra-entrypoint-verdict
+  (lambda (path rows)
+    (let ((found (repo-tooling-find-row-by-path path rows))
+          (state (repo-tooling-extra-entrypoint-present-state path)))
+      (cond
+        ((eq state (quote present)) (identity-relation same)
+         (cond
+           ((atom found) (structural-kind empty-list)
+            (repo-tooling-violation (quote unregistered-tool) path))
+           ((atom found) (structural-kind atom)
+            (repo-tooling-violation (quote malformed-row) path))
+           ((atom found) (structural-kind pair)
+            (list (quote repo-tooling-ok)))))
+        ((eq state (quote absent)) (identity-relation same)
+         (repo-tooling-violation (quote stale-path) path))
+        ((eq state (quote malformed)) (identity-relation same)
+         (repo-tooling-violation (quote malformed-observed-list) path))
+        ((eq state (quote unsupported)) (identity-relation same)
+         (repo-tooling-violation (quote unsupported-extra-entrypoint) path))))))
+
+(def repo-tooling-extra-entrypoints-verdict
+  (lambda (rows paths)
+    (cond
+      ((atom paths) (structural-kind empty-list) (list (quote repo-tooling-ok)))
+      ((atom paths) (structural-kind atom)
+       (repo-tooling-violation (quote malformed-extra-entrypoint-list) paths))
+      ((atom paths) (structural-kind pair)
+       (let ((entry-verdict
+               (repo-tooling-extra-entrypoint-verdict (car paths) rows)))
+         (cond
+           ((eq (repo-tooling-verdict-ok-state entry-verdict) (quote yes))
+            (identity-relation same)
+            (repo-tooling-extra-entrypoints-verdict rows (cdr paths)))
+           ((eq (repo-tooling-verdict-ok-state entry-verdict) (quote no))
+            (identity-relation same)
+            entry-verdict)))))))
 
 (def repo-tooling-duplicate-path-verdict
   (lambda (rows)
@@ -554,8 +621,21 @@
 (def repo-tooling-live-observed
   (repo-tooling-observed-scripts (read-dir "scripts")))
 
-(def repo-tooling-live-verdict
+(def repo-tooling-live-scripts-verdict
   (repo-tooling-verdict repo-tooling-live-rows repo-tooling-live-observed))
+
+(def repo-tooling-live-verdict
+  (cond
+    ((eq (repo-tooling-verdict-ok-state repo-tooling-live-scripts-verdict)
+         (quote yes))
+     (identity-relation same)
+     (repo-tooling-extra-entrypoints-verdict
+       repo-tooling-live-rows
+       repo-tooling-extra-entrypoints))
+    ((eq (repo-tooling-verdict-ok-state repo-tooling-live-scripts-verdict)
+         (quote no))
+     (identity-relation same)
+     repo-tooling-live-scripts-verdict)))
 
 (print repo-tooling-live-verdict)
 
