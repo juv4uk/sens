@@ -1,5 +1,5 @@
 (sr/2
-  ("00000000" ())
+  ("00000000" (en ()) (uk ()) (ukr ()) (sa ()) (sym ()))
   ("00000001" (en quote) (uk як-є) (ukr як-є) (sa svarūpa) (sym "'"))
   ("00000010" (en atom) (uk атом?) (ukr атом?) (sa aṇu) (sym .?))
   ("00000011" (en eq) (uk тотожне?) (ukr тотожне?) (sa abheda) (sym =?))
