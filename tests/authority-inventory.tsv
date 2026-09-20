@@ -127,3 +127,4 @@ crates/my-lisp/tests/clock.rs	internet_time_sync_is_language_owned_after_time_li
 crates/my-lisp/tests/timezone_ownership.rs	timezone_detect_public_binding_is_language_owned_over_raw_declarations	observer	time-semanticref-ownership	lib/time.lisp + sr/2 + load_core_library/load_time_library	retained
 crates/my-lisp/tests/semantic_coordinate_join_2.rs	remaining_bounded_scope_preserves_asymmetric_coordinates	observer	semantic-coordinate-cross-axis-join-v2	contracts/semantic-coordinate-matrix-845.lisp + math/kernel/machine axes	retained
 crates/my-lisp/tests/semantic_coordinate_join_2.rs	coordinate_axes_do_not_leak_each_others_payloads	observer	semantic-coordinate-axis-noninterference	math/kernel/machine axis sources	retained
+crates/my-lisp/tests/life_1_scheduler.rs	life_1_scheduler_witness_is_lisp_owned	observer	life-1-scheduler	lib/life-1-scheduler.lisp + tests/fixtures/life-1-scheduler-witness.lisp + contracts/life-1-contract.lisp	retained
