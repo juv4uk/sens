@@ -98,9 +98,42 @@ impl KernelAvailabilityObservation {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct KernelHandle(u64);
+
+impl KernelHandle {
+    pub const fn new(id: u64) -> Self {
+        Self(id)
+    }
+
+    pub const fn id(self) -> u64 {
+        self.0
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum KernelLifecycleState {
+    Loaded,
+    Started,
+    Stopped,
+    Unloaded,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct KernelLifecycleObservation {
+    pub handle: KernelHandle,
+    pub producer: KernelId,
+    pub state: KernelLifecycleState,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum KernelHostError {
     NotRunning,
+    UnknownHandle(u64),
+    InvalidLifecycle {
+        action: &'static str,
+        state: KernelLifecycleState,
+    },
     Driver(String),
 }
 
@@ -108,6 +141,10 @@ impl fmt::Display for KernelHostError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::NotRunning => write!(formatter, "kernel is not running"),
+            Self::UnknownHandle(handle) => write!(formatter, "unknown kernel handle {handle}"),
+            Self::InvalidLifecycle { action, state } => {
+                write!(formatter, "cannot {action} kernel while lifecycle state is {state:?}")
+            }
             Self::Driver(message) => write!(formatter, "kernel driver error: {message}"),
         }
     }
@@ -264,6 +301,9 @@ impl<D: ?Sized + KernelDriver + Send> KernelDriver for Box<D> {
 pub struct KernelRouter {
     hosts: HashMap<String, KernelHost<Box<dyn KernelDriver + Send>>>,
     availability: HashMap<String, KernelAvailabilityObservation>,
+    next_handle_id: u64,
+    handles: HashMap<KernelHandle, KernelLifecycleObservation>,
+    target_handles: HashMap<String, KernelHandle>,
 }
 
 impl KernelRouter {
@@ -271,13 +311,187 @@ impl KernelRouter {
         Self::default()
     }
 
+    pub fn load(&mut self, driver: Box<dyn KernelDriver + Send>) -> KernelHandle {
+        let producer = driver.id();
+        let target = producer.as_str().to_string();
+
+        if let Some(previous) = self.target_handles.remove(&target) {
+            self.hosts.remove(&target);
+            if let Some(observation) = self.handles.get_mut(&previous) {
+                observation.state = KernelLifecycleState::Unloaded;
+            }
+        }
+
+        self.next_handle_id = self
+            .next_handle_id
+            .checked_add(1)
+            .expect("kernel handle counter exhausted");
+        let handle = KernelHandle::new(self.next_handle_id);
+
+        self.hosts.insert(target.clone(), KernelHost::new(driver));
+        self.target_handles.insert(target, handle);
+        self.handles.insert(
+            handle,
+            KernelLifecycleObservation {
+                handle,
+                producer,
+                state: KernelLifecycleState::Loaded,
+            },
+        );
+        handle
+    }
+
+    /// Compatibility entry point. New orchestration should prefer load so
+    /// the mechanical runtime instance remains addressable by handle.
     pub fn register(&mut self, driver: Box<dyn KernelDriver + Send>) {
-        let id = driver.id().as_str().to_string();
-        self.hosts.insert(id, KernelHost::new(driver));
+        let _ = self.load(driver);
     }
 
     pub fn is_registered(&self, target: &str) -> bool {
         self.hosts.contains_key(target)
+    }
+
+    pub fn handle_for(&self, target: &str) -> Option<KernelHandle> {
+        self.target_handles.get(target).copied()
+    }
+
+    pub fn lifecycle(&self, handle: KernelHandle) -> Option<&KernelLifecycleObservation> {
+        self.handles.get(&handle)
+    }
+
+    pub fn start_handle(&mut self, handle: KernelHandle) -> Result<(), KernelHostError> {
+        let (target, state) = {
+            let observation = self
+                .handles
+                .get(&handle)
+                .ok_or(KernelHostError::UnknownHandle(handle.id()))?;
+            (
+                observation.producer.as_str().to_string(),
+                observation.state,
+            )
+        };
+
+        match state {
+            KernelLifecycleState::Started => return Ok(()),
+            KernelLifecycleState::Unloaded => {
+                return Err(KernelHostError::InvalidLifecycle {
+                    action: "start",
+                    state,
+                });
+            }
+            KernelLifecycleState::Loaded | KernelLifecycleState::Stopped => {}
+        }
+
+        let host = self.hosts.get_mut(&target).ok_or_else(|| {
+            KernelHostError::Driver(format!("loaded kernel '{target}' has no host"))
+        })?;
+        host.start()?;
+        self.handles
+            .get_mut(&handle)
+            .expect("checked handle must still exist")
+            .state = KernelLifecycleState::Started;
+        Ok(())
+    }
+
+    pub fn invoke_handle(
+        &mut self,
+        handle: KernelHandle,
+        payload: &[u8],
+        provenance: &[u8],
+    ) -> Result<KernelResponse, KernelHostError> {
+        let (target, state) = {
+            let observation = self
+                .handles
+                .get(&handle)
+                .ok_or(KernelHostError::UnknownHandle(handle.id()))?;
+            (
+                observation.producer.as_str().to_string(),
+                observation.state,
+            )
+        };
+
+        if state != KernelLifecycleState::Started {
+            return Err(KernelHostError::InvalidLifecycle {
+                action: "invoke",
+                state,
+            });
+        }
+
+        let host = self.hosts.get_mut(&target).ok_or_else(|| {
+            KernelHostError::Driver(format!("started kernel '{target}' has no host"))
+        })?;
+        let _request_id = host.submit(None, payload.to_vec(), provenance.to_vec())?;
+        host.receive().ok_or_else(|| {
+            KernelHostError::Driver(format!("no response received from kernel '{target}'"))
+        })
+    }
+
+    pub fn stop_handle(&mut self, handle: KernelHandle) -> Result<(), KernelHostError> {
+        let (target, state) = {
+            let observation = self
+                .handles
+                .get(&handle)
+                .ok_or(KernelHostError::UnknownHandle(handle.id()))?;
+            (
+                observation.producer.as_str().to_string(),
+                observation.state,
+            )
+        };
+
+        match state {
+            KernelLifecycleState::Unloaded => return Ok(()),
+            KernelLifecycleState::Loaded | KernelLifecycleState::Stopped => {
+                self.handles
+                    .get_mut(&handle)
+                    .expect("checked handle must still exist")
+                    .state = KernelLifecycleState::Stopped;
+                return Ok(());
+            }
+            KernelLifecycleState::Started => {}
+        }
+
+        let host = self.hosts.get_mut(&target).ok_or_else(|| {
+            KernelHostError::Driver(format!("started kernel '{target}' has no host"))
+        })?;
+        host.stop()?;
+        self.handles
+            .get_mut(&handle)
+            .expect("checked handle must still exist")
+            .state = KernelLifecycleState::Stopped;
+        Ok(())
+    }
+
+    pub fn unload_handle(&mut self, handle: KernelHandle) -> Result<(), KernelHostError> {
+        let (target, state) = {
+            let observation = self
+                .handles
+                .get(&handle)
+                .ok_or(KernelHostError::UnknownHandle(handle.id()))?;
+            (
+                observation.producer.as_str().to_string(),
+                observation.state,
+            )
+        };
+
+        if state == KernelLifecycleState::Unloaded {
+            return Ok(());
+        }
+        if state == KernelLifecycleState::Started {
+            return Err(KernelHostError::InvalidLifecycle {
+                action: "unload",
+                state,
+            });
+        }
+
+        self.hosts.remove(&target);
+        if self.target_handles.get(&target).copied() == Some(handle) {
+            self.target_handles.remove(&target);
+        }
+        self.handles
+            .get_mut(&handle)
+            .expect("checked handle must still exist")
+            .state = KernelLifecycleState::Unloaded;
+        Ok(())
     }
 
     /// Record a producer-specific bounded availability probe through one
@@ -468,6 +682,83 @@ mod tests {
 
         assert!(router.availability("datalog").is_none());
         assert!(router.registered_kernels().is_empty());
+    }
+
+    #[test]
+    fn explicit_handles_keep_kernel_lifecycles_isolated_and_provenance_opaque() {
+        let mut router = KernelRouter::new();
+        let prolog = router.load(Box::new(OpaqueDriver::new("prolog", b"answers:")));
+        let datalog = router.load(Box::new(OpaqueDriver::new("datalog", b"closure:")));
+
+        assert_eq!(
+            router.lifecycle(prolog).map(|o| o.state),
+            Some(KernelLifecycleState::Loaded)
+        );
+        assert_eq!(
+            router.lifecycle(datalog).map(|o| o.state),
+            Some(KernelLifecycleState::Loaded)
+        );
+        assert_eq!(
+            router.invoke_handle(prolog, b"goal", b"sid:10000111"),
+            Err(KernelHostError::InvalidLifecycle {
+                action: "invoke",
+                state: KernelLifecycleState::Loaded,
+            })
+        );
+
+        router.start_handle(prolog).unwrap();
+        assert_eq!(
+            router.lifecycle(prolog).map(|o| o.state),
+            Some(KernelLifecycleState::Started)
+        );
+        assert_eq!(
+            router.lifecycle(datalog).map(|o| o.state),
+            Some(KernelLifecycleState::Loaded),
+            "starting Prolog must not mutate Datalog lifecycle"
+        );
+
+        let response = router
+            .invoke_handle(prolog, b"ancestor(alice,X)", b"sid:10000111")
+            .unwrap();
+        assert_eq!(response.kernel.as_str(), "prolog");
+        assert_eq!(response.payload, b"answers:ancestor(alice,X)");
+        assert_eq!(
+            response.provenance,
+            b"sid:10000111",
+            "host must transport SID/provenance bytes without interpretation"
+        );
+
+        assert_eq!(
+            router.unload_handle(prolog),
+            Err(KernelHostError::InvalidLifecycle {
+                action: "unload",
+                state: KernelLifecycleState::Started,
+            })
+        );
+        router.stop_handle(prolog).unwrap();
+        router.stop_handle(prolog).unwrap();
+        assert_eq!(
+            router.lifecycle(prolog).map(|o| o.state),
+            Some(KernelLifecycleState::Stopped)
+        );
+        router.unload_handle(prolog).unwrap();
+        router.unload_handle(prolog).unwrap();
+        assert_eq!(
+            router.lifecycle(prolog).map(|o| o.state),
+            Some(KernelLifecycleState::Unloaded)
+        );
+        assert_eq!(
+            router.lifecycle(datalog).map(|o| o.state),
+            Some(KernelLifecycleState::Loaded),
+            "unloading Prolog must not mutate Datalog lifecycle"
+        );
+        assert!(matches!(
+            router.start_handle(prolog),
+            Err(KernelHostError::InvalidLifecycle {
+                action: "start",
+                state: KernelLifecycleState::Unloaded,
+            })
+        ));
     }
 
     #[test]
