@@ -15,7 +15,7 @@ mod generated {
     include!("semantic_registry_generated.rs");
 }
 
-use generated::{SemanticRow, SemanticSurface, SEMANTIC_ROWS};
+use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = u8;
 pub(crate) const EMPTY_LIST_SEMANTIC_ID: SemanticId = 0;
@@ -126,6 +126,7 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use generated::SemanticSurface;
 
     #[test]
     fn generated_registry_is_one_contiguous_byte_axis() {
