@@ -23,11 +23,28 @@
     (cond
       ((atom entry) (quote (structural-kind empty-list)) (quote ()))
       ((atom entry) (quote (structural-kind pair))
-       (let ((found (assoc field (cdr entry))))
+       (let ((rows (cdr entry)))
          (cond
-           ((atom found) (quote (structural-kind empty-list)) (quote ()))
-           ((atom found) (quote (structural-kind pair))
-            (car (cdr found)))))))))
+           ((atom rows) (quote (structural-kind empty-list)) (quote ()))
+           ((atom rows) (quote (structural-kind pair))
+            (let ((row (car rows)))
+              (cond
+                ((atom row) (quote (structural-kind empty-list))
+                 (life-scheduler-field
+                   (cons (car entry) (cdr rows))
+                   field))
+                ((atom row) (quote (structural-kind atom))
+                 (life-scheduler-field
+                   (cons (car entry) (cdr rows))
+                   field))
+                ((atom row) (quote (structural-kind pair))
+                 (cond
+                   ((eq field (car row)) (quote (identity-relation same))
+                    (car (cdr row)))
+                   ((eq field (car row)) (quote (identity-relation distinct))
+                    (life-scheduler-field
+                      (cons (car entry) (cdr rows))
+                      field))))))))))))
 
 (def life-scheduler-invocation-key
   (lambda (invocation)
