@@ -38,6 +38,40 @@ These forms are equivalent:
 For example, `об'єкт` is one symbol, while `'об'єкт` means
 `(quote об'єкт)`.
 
+## Native binary format
+
+The reader supports an explicit fixed-width binary mode:
+
+```lisp
+(binary 8)
+00000001
+10101000
+```
+
+`(binary 8)` is a reader format descriptor, not a per-value constructor. After
+the descriptor is active, an 8-character token made only of `0` and `1` is
+read as a native Binary value. Width is part of that value's representation, so
+leading zeroes are preserved.
+
+The canonical printer emits Binary values as their bit string, not as a decimal
+integer. Therefore an 8-bit value such as `00000101` prints as exactly
+`00000101`, and the printed form can be read again under `(binary 8)` without
+changing identity.
+
+Wrong-width literals fail in the reader with the named error
+`binary literal has the wrong width`. An 8-character numeric token containing
+a digit other than `0` or `1` fails with
+`binary literal contains a non-binary digit`.
+
+Decimal integers remain ordinary decimal values. The fact that Binary
+`00001100` may lower to machine byte 12 does not make decimal `12` a second
+semantic spelling or authority.
+
+For semantic IDs, the canonical authority remains the Binary spelling in
+`lib/surface/semantic-registry.lisp`. Generated host projections may carry a
+machine byte internally, but they must be derived from that Lisp-owned Binary
+identity.
+
 ## Canon 0 + McCarthy-7 as stable historical root
 
 Canon 0 + McCarthy-7 remain a stable historical/minimal root. Permanent closure of the primitive set is superseded by [`adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md`](adr/ADR-005-OPEN-PRIMITIVE-ARCHIPELAGO.md):
