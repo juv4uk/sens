@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 38
-- top-level функцій: 856
+- top-level функцій: 858
 - top-level макросів: 34
-- усього визначень: 890
+- усього визначень: 892
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -709,6 +709,8 @@
 | `lib/time.lisp` | function | `utc-from-unix` | unreviewed |
 | `lib/time.lisp` | function | `unix-time-observation->utc` | unreviewed |
 | `lib/time.lisp` | function | `utc-now` | unreviewed |
+| `lib/time.lisp` | function | `internet-time-mode-valid?` | unreviewed |
+| `lib/time.lisp` | function | `internet-time-stratum-valid?` | unreviewed |
 | `lib/time.lisp` | function | `internet-time-fields->observation` | unreviewed |
 | `lib/time.lisp` | function | `internet-time-raw->observation` | unreviewed |
 | `lib/time.lisp` | function | `internet-time-sync` | unreviewed |
