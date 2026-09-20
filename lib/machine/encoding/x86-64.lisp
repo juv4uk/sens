@@ -559,14 +559,17 @@
 (def x86-encode-setcc-r8
   (lambda (condition-code register)
     (let ((code (x86-reg-code register)))
+      ; two-part `((> code 3) REX ...)` mis-branched once exact-Q made
+      ; false comparisons answer 0 (which is truthy): REX was emitted for
+      ; every register. E1 (#216): explicit expected-result domains.
       (cond
-        ((> code 3)
+        ((> code 3) 1
          (list
            (x86-encode-rex 0 0 0 (x86-high1 code))
            15
            (+ 144 condition-code)
            (x86-encode-modrm 3 0 (x86-low3 code))))
-        (t
+        ((> code 3) 0
          (list
            15
            (+ 144 condition-code)

@@ -232,32 +232,45 @@
               (t (x86-admission-decimal-digits? (string-rest text)))))
            (t (x86-admission-decimal-digits? text))))))))
 
+(def x86-admission-within-inclusive-integer-range?
+  (lambda (value lower upper)
+    ; Exact-Q comparisons answer 1 (так) / 0 (ні), and 0 is truthy -- so a
+    ; bare `and` over comparison results (the pre-exact-Q idiom) admitted
+    ; every operand, overflowing disp8/imm slots. E1 (#216): explicit
+    ; expected-result domains.
+    (cond
+      ((>= value lower) 1
+        (cond
+          ((<= value upper) 1 t)
+          ((<= value upper) 0 (quote ()))))
+      ((>= value lower) 0 (quote ())))))
+
 (def x86-admission-disp8?
   (lambda (value)
     (cond
       ((x86-admission-exact-integer? value)
-       (and (>= value -128) (<= value 127)))
+       (x86-admission-within-inclusive-integer-range? value -128 127))
       (t (quote ())))))
 
 (def x86-admission-imm32?
   (lambda (value)
     (cond
       ((x86-admission-exact-integer? value)
-       (and (>= value -2147483648) (<= value 2147483647)))
+       (x86-admission-within-inclusive-integer-range? value -2147483648 2147483647))
       (t (quote ())))))
 
 (def x86-admission-uimm8?
   (lambda (value)
     (cond
       ((x86-admission-exact-integer? value)
-       (and (>= value 0) (<= value 255)))
+       (x86-admission-within-inclusive-integer-range? value 0 255))
       (t (quote ())))))
 
 (def x86-admission-rel32?
   (lambda (value)
     (cond
       ((x86-admission-exact-integer? value)
-       (and (>= value -2147483648) (<= value 2147483647)))
+       (x86-admission-within-inclusive-integer-range? value -2147483648 2147483647))
       (t (quote ())))))
 
 ; `immediate`, `register`, and `disp8` are operand-slot wildcards, not

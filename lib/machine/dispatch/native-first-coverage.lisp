@@ -37,10 +37,10 @@
        (evidence native-first-dispatch-witness))
 
      (native-coverage
-       (class car-cons-outside-u64-literal-domain)
-       (representative (car (cons -1 3)))
+       (class car-cons-outside-native-literal-domain)
+       (representative (car (cons "native-limits" 3)))
        (status fallback-required)
-       (reason current-native-island-requires-u64-literals)
+       (reason current-native-island-holds-all-exact-integers)
        (evidence native-first-dispatch-witness))
 
      (native-coverage

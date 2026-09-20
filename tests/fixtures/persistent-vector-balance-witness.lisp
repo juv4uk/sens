@@ -7,11 +7,15 @@
 (load "lib/core.lisp")
 (load "lib/persistent-vector.lisp")
 
+; #613 migrated lib sites to canonical three-part cond but left this
+; witness's two-part gate: (< n 0) answers exact-Q 0 for n >= 0, and 0 is
+; truthy -- so range-list returned the empty accumulator immediately.
+; E1 (#216): explicit expected-result domains under the current 1/0 answers.
 (def range-list
   (lambda (n acc)
     (cond
-      ((< n 0) acc)
-      (t (range-list (- n 1) (cons n acc))))))
+      ((< n 0) 1 acc)
+      ((< n 0) 0 (range-list (- n 1) (cons n acc))))))
 
 (def persistent-vector-balance-check
   (lambda ()
