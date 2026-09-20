@@ -87,3 +87,4 @@
 (authority "crates/my-lisp/tests/runtime_peer_operators.rs" observer)
 
 (authority "crates/my-lisp/tests/cml_bootstrap_frontend.rs" observer)
+(authority "tests/fixtures/cml-bootstrap-frontend-witness.lisp" semantic-witness)\n
