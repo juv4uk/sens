@@ -1,0 +1,16 @@
+name: verify #949 embedded Datalog installer
+
+on:
+  push:
+    branches:
+      - verify/949-embedded-datalog-targeted
+
+jobs:
+  embedded-datalog-installer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run island CLI installer tests
+        run: cargo test -p my-lisp-cli --test islands_cli -- --nocapture
