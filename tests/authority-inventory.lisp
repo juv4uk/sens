@@ -87,3 +87,4 @@
 (authority "crates/my-lisp/tests/runtime_peer_operators.rs" observer)
 (authority "crates/my-lisp/tests/canon_authority_inventory.rs" observer)
 (authority "crates/my-lisp/tests/semantic_authority_guard_1049.rs" observer)
+(authority "crates/my-lisp-cli/tests/cli.rs" observer)
