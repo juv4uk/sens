@@ -26,7 +26,6 @@
   (lambda (value)
     (cond
       ((string? value)
-       (identity-relation same)
        (write-to-string value))
       (t
        (write-to-string (symbol->string value))))))
