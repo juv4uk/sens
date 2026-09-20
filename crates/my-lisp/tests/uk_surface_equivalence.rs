@@ -43,7 +43,7 @@ fn present_en_uk_pairs() -> Vec<(String, String, String)> {
         .into_iter()
         .filter_map(|(id, surfaces)| {
             let en = surface(&surfaces, "en")?.name.clone()?;
-            let uk = surface(&surfaces, "uk")?.name.clone()?;
+            let uk = surface(&surfaces, "ук")?.name.clone()?;
             Some((id, en, uk))
         })
         .collect()
@@ -55,7 +55,7 @@ fn uk_presence_counts() -> (usize, usize, usize) {
     let mut present = 0;
     let mut empty = 0;
     for (_, surfaces) in &rows {
-        match surface(surfaces, "uk").and_then(|s| s.name.as_deref()) {
+        match surface(surfaces, "ук").and_then(|s| s.name.as_deref()) {
             Some(_) => present += 1,
             None => empty += 1,
         }
