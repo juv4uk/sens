@@ -210,9 +210,9 @@ fn full_ukrainian_surface_reuses_uk_identity_and_exposes_full_spelling() {
     eval_program(UKR_SURFACE, &mut session)
         .expect("full Ukrainian peer surface should load");
 
-    let compact = eval_program("(текст-порожній? "")", &mut session)
+    let compact = eval_program("(текст-порожній? \"\")", &mut session)
         .expect("compact spelling should resolve");
-    let full = eval_program("(порожній-текст? "")", &mut session)
+    let full = eval_program("(порожній-текст? \"\")", &mut session)
         .expect("full spelling should resolve");
     assert_eq!(compact.value.to_string(), "t");
     assert_eq!(full.value.to_string(), "t");
