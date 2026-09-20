@@ -2,8 +2,6 @@ use my_lisp::{eval_program, load_core_library, Session};
 use std::fs;
 use std::path::PathBuf;
 
-const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
-
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
@@ -107,16 +105,10 @@ fn unadmitted_machine_atom_fails_closed_before_byte_materialization() {
 
 #[test]
 fn machine_atom_names_do_not_mint_public_semantic_surfaces() {
-    let lower = REGISTRY.to_ascii_lowercase();
-    for machine_only in [
-        "x86-ret",
-        "x86-mov-r64-imm64",
-        "x86-add-r64-r64",
-        "x86-jnz-rel8",
-        "machine-block",
-    ] {
+    for machine_only in ["x86-ret","x86-mov-r64-imm64","x86-add-r64-r64","x86-jnz-rel8","machine-block"] {
         assert!(
-            !lower.contains(machine_only),
+            my_lisp::semantic_registry_export::semantic_id_for_admitted_surface(machine_only)
+                .is_none(),
             "machine-only constructor {machine_only} must not become a semantic registry surface"
         );
     }
