@@ -17,12 +17,11 @@ fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<NecessaryFormIden
     generated::EVALUATOR_DISPATCH
         .iter()
         .find(|row| row.semantic_id == semantic_id)
-        .filter_map(|row| match row.mechanism {
+        .and_then(|row| match row.mechanism {
             EvaluatorMechanism::DefineForm => Some(NecessaryFormIdentity::Define),
             EvaluatorMechanism::LambdaForm => Some(NecessaryFormIdentity::Lambda),
             _ => None,
         })
-        .next()
 }
 
 /// Resolve an executable list-head symbol through the shared authority
