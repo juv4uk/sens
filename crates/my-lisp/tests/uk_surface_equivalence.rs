@@ -231,3 +231,27 @@ fn ukrainian_surface_status_counts_are_internally_consistent() {
 // ukrainian_acceptance_program_code_never_requires_latin_layout were
 // keyboard/text-policy lints, relocated to `cargo xtask verify` per
 // TEST-ARCHITECTURE-1 step 4 -- see crates/xtask/src/checks.rs.
+
+
+#[test]
+fn admitted_invoke_surfaces_materialize_from_the_single_registry() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core bootstrap");
+
+    let english = eval_program("invoke", &mut session)
+        .expect("registry-admitted invoke surface must resolve")
+        .value;
+    let ukrainian = eval_program("викликати", &mut session)
+        .expect("registry-admitted Ukrainian invoke surface must resolve")
+        .value;
+    let invoke_sid = my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("invoke")
+        .expect("invoke must be admitted by sr/2");
+    let ukrainian_sid =
+        my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("викликати")
+            .expect("викликати must be admitted by sr/2");
+
+    assert_eq!(invoke_sid, ukrainian_sid);
+    assert_eq!(english, Value::SemanticRef(invoke_sid));
+    assert_eq!(ukrainian, Value::SemanticRef(ukrainian_sid));
+    assert_eq!(english, ukrainian);
+}
