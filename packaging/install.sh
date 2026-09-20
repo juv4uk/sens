@@ -185,11 +185,11 @@ ensure_clips
 # ──────────────────────────────────────────────────────────────────────────────
 
 if [ "$OS" = "Linux" ] && [ "$ARCH" = "x86_64" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.0_linux_amd64"
+    ASSET_NAME="my-lisp-cli_0.40.1_linux_amd64"
 elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.0_macos_arm64"
+    ASSET_NAME="my-lisp-cli_0.40.1_macos_arm64"
 elif [ "$OS" = "Darwin" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.0_macos_x64"
+    ASSET_NAME="my-lisp-cli_0.40.1_macos_x64"
 else
     echo "Помилка: непідтримувана платформа: $OS $ARCH" >&2
     exit 1
@@ -201,8 +201,8 @@ if ! has my-lisp; then
     echo "==> Завантаження my-lisp (${ASSET_NAME})..."
     DOWNLOAD_URL="https://github.com/juv4uk/my-lisp/releases/latest/download/${ASSET_NAME}"
     if ! curl -fL --silent "$DOWNLOAD_URL" -o "$MY_LISP_TARGET" 2>/dev/null; then
-        # Fallback до релізу l0.40.0
-        curl -fL "https://github.com/juv4uk/my-lisp/releases/download/l0.40.0/${ASSET_NAME}" -o "$MY_LISP_TARGET"
+        # Fallback до релізу l0.40.1
+        curl -fL "https://github.com/juv4uk/my-lisp/releases/download/l0.40.1/${ASSET_NAME}" -o "$MY_LISP_TARGET"
     fi
     chmod +x "$MY_LISP_TARGET"
     export PATH="${INSTALL_DIR}:${PATH}"
