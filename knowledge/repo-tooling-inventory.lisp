@@ -11,6 +11,9 @@
   (python-migration-authority 76)
   (rust-retirement-valve 299))
 
+(tool (path "crates/xtask/src/main.rs") (kind check) (language other) (role project-verification-and-policy-entrypoint) (lifecycle active) (callers (".cargo/config.toml" ".github/workflows/ci.yml" ".github/workflows/full-nightly.yml")) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
+(tool (path "githooks/pre-commit") (kind check) (language shell) (role versioned-pre-commit-policy-hook) (lifecycle active) (callers ("scripts/install-hooks.sh" git)) (authority-source "knowledge/language-policy.lisp") (migration-issue ()) (replacement ()) (removal-condition explicit-review))
+
 (tool (path "scripts/authority-guard-enforce.lisp") (kind check) (language lisp) (role authority-guard-enforcement) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
 (tool (path "scripts/authority-guard.lisp") (kind check) (language lisp) (role authority-guard-verdict) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
 (tool (path "scripts/benchmark-semantic-registry-read.lisp") (kind benchmark) (language lisp) (role semantic-registry-read-benchmark) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
