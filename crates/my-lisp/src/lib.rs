@@ -55,19 +55,6 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_ids()
     }
 
-    /// Admitted surface rows for one semantic identity, tagged by namespace.
-    pub fn admitted_surfaces_for_semantic_id(semantic_id: u8) -> Vec<SurfaceRow> {
-        super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
-            .into_iter()
-            .map(|(namespace, name)| SurfaceRow { namespace, name })
-            .collect()
-    }
-
-    /// Opaque semantic ID for one admitted surface.
-    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<u8> {
-        super::semantic_registry::admitted_semantic_id_for_surface(name)
-    }
-
     /// Canonical 8-bit textual serialization for provenance/export.
     pub fn semantic_id_bits(semantic_id: u8) -> String {
         super::semantic_registry::semantic_id_bits(semantic_id)
