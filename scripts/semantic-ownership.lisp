@@ -96,27 +96,37 @@
       ((string-empty? prefix) name)
       (t (str+ prefix "/" name)))))
 
-(def path-components-present?
-  (lambda (prefix parts)
+(def join-path-components
+  (lambda (parts acc)
     (cond
-      ((atom parts) t)
+      ((atom parts) acc)
+      ((string-empty? acc)
+       (join-path-components (cdr parts) (car parts)))
       (t
-       (let* ((dir (cond ((string-empty? prefix) ".") (t prefix)))
-              (entries (read-dir dir))
-              (name (car parts)))
-         (cond
-           ((member? name entries)
-            (cond
-              ((atom (cdr parts)) t)
-              (t
-               (path-components-present?
-                 (path-join prefix name)
-                 (cdr parts)))))
-           (t (quote ()))))))))
+       (join-path-components
+         (cdr parts)
+         (path-join acc (car parts)))))))
+
+(def path-last
+  (lambda (parts)
+    (cond
+      ((atom (cdr parts)) (car parts))
+      (t (path-last (cdr parts))))))
+
+(def path-parent-parts
+  (lambda (parts)
+    (reverse (cdr (reverse parts)))))
 
 (def path-present?
   (lambda (path)
-    (path-components-present? "" (split-char path "/"))))
+    (let* ((parts (split-char path "/"))
+           (name (path-last parts))
+           (parent-parts (path-parent-parts parts))
+           (parent
+             (cond
+               ((atom parent-parts) ".")
+               (t (join-path-components parent-parts "")))))
+      (member? name (read-dir parent)))))
 
 (def paths-present-verdict
   (lambda (paths context)
