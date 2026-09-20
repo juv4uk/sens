@@ -27,7 +27,7 @@ END = "## Межа довідника"
 DOC_RE = re.compile(
     r'^\s*\(doc\s+(\S+)\s+"([01]{8})"\s+(\S+)\s+"((?:\\.|[^"\\])*)"\s+"((?:\\.|[^"\\])*)"\)\s*$'
 )
-SURFACE_RE = re.compile(r"\((uk|ukr|en|sym)\s+(\(\)|[^\s)]+)\)")
+SURFACE_RE = re.compile(r"\((ук|укр|en|sym)\s+(\(\)|[^\s)]+)\)")
 ROW_RE = re.compile(r'^\s*\("([01]{8})"\s')
 
 CATEGORY_TITLES = OrderedDict(
@@ -162,8 +162,8 @@ def render_reference(rows: list[DocRow], table: dict[str, dict[str, Surface]]) -
             surfaces = table.get(row.identity)
             if surfaces is None:
                 raise SystemExit(f"function table missing documented semantic ID {row.identity}")
-            uk = surfaces.get("uk")
-            ukr = surfaces.get("ukr")
+            uk = surfaces.get("ук")
+            ukr = surfaces.get("укр")
             en = surfaces.get("en")
             sym = surfaces.get("sym")
             if uk is None or uk.word == "()" or uk.word == "—":
