@@ -3,7 +3,8 @@
 ; This is a composition view only. It does not define meaning and does not
 ; Final current-main replay: source references only; no duplicated axis truth.
 ; allocate semantic IDs. Each axis keeps its own authority and this matrix
-; stores only source references for the same SID.
+; stores only source references for the same SID. An axis with no admitted
+; row is represented explicitly as `absent`; absence does not mint evidence.
 ;
 (semantic-coordinate-matrix/1
   (identity-source . "lib/surface/semantic-registry.lisp")
@@ -13,7 +14,7 @@
   (rows
     (((sid . "00001100")
       (math-entry-sid . "00001100")
-      (kernel-entry-sid . "00001100")
+      (kernel-entry-sid . absent)
       (machine-entry-sid . "00001100"))
      ((sid . "00000011")
       (math-entry-sid . "00000011")
