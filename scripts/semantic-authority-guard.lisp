@@ -83,6 +83,7 @@
                        ((string? raw-source) raw-source)
                        (t (write-to-string raw-source))))
                    (class (violation-class path source)))
+              (print (list (quote semantic-authority-scan-debug) path class))
               (cond
            ((eq class (quote allowed)) (identity-relation same)
             (scan (cdr rows)))
