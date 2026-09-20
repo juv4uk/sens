@@ -31,7 +31,7 @@
   (дозволені-міжнародні-позначення
     (utf-8 abi api elf uefi x86_64 json http tcp udp sha256))
 
-  ; Повний staging-прохід: усі 168 semantic identity з function table.
+  ; Повний staging-прохід: усі 169 callable semantic identity з Canon/function-table registry.
   ; `чинна` = поточна stable UK surface вже відповідає повнослівному стилю.
   ; `кандидат-власника` = прямо запропоновано власником.
   ; `кандидат-повної-назви` = запропоновано для ручного огляду власником.
