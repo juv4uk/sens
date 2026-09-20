@@ -869,43 +869,47 @@
 (def live-verdict
   (validate-ownership-inventory live-forms live-meta-forms t))
 
-(cond
-  ((ownership-ok? live-verdict)
-   (let* ((generated
-            (render-semantic-ownership-report
-              live-ownership
-              live-migrations))
-          (report-path "docs/semantic-ownership-report.md"))
-     (cond
-       ((and
-          (not (atom *argv*))
-          (equal? (car *argv*) "--write"))
-        (write-file report-path generated)
-        (print
-          (str+
-            "semantic ownership: "
-            (number->string (length live-ownership))
-            " rows, "
-            (number->string (length live-migrations))
-            " migrations, report written")))
-       (t
-        (let ((current (read-file report-path)))
-          (cond
-            ((equal? current generated)
-             (print
-               (str+
-                 "semantic ownership: "
-                 (number->string (length live-ownership))
-                 " rows, "
-                 (number->string (length live-migrations))
-                 " migrations, report synchronized")))
-            (t
-             (let ((shown
-                     (print
-                       (ownership-violation
-                         (quote report-drift)
-                         "docs/semantic-ownership-report.md"))))
-               (car (quote ())))))))))
-  (t
-   (let ((shown (print live-verdict)))
-     (car (quote ())))))
+(def semantic-ownership-live-run
+  (lambda ()
+    (cond
+      ((ownership-ok? live-verdict)
+       (let* ((generated
+                (render-semantic-ownership-report
+                  live-ownership
+                  live-migrations))
+              (report-path "docs/semantic-ownership-report.md"))
+         (cond
+           ((and
+              (not (atom *argv*))
+              (equal? (car *argv*) "--write"))
+            (write-file report-path generated)
+            (print
+              (str+
+                "semantic ownership: "
+                (number->string (length live-ownership))
+                " rows, "
+                (number->string (length live-migrations))
+                " migrations, report written")))
+           (t
+            (let ((current (read-file report-path)))
+              (cond
+                ((equal? current generated)
+                 (print
+                   (str+
+                     "semantic ownership: "
+                     (number->string (length live-ownership))
+                     " rows, "
+                     (number->string (length live-migrations))
+                     " migrations, report synchronized")))
+                (t
+                 (let ((shown
+                         (print
+                           (ownership-violation
+                             (quote report-drift)
+                             "docs/semantic-ownership-report.md"))))
+                   (car (quote ()))))))))))
+      (t
+       (let ((shown (print live-verdict)))
+         (car (quote ())))))))
+
+(semantic-ownership-live-run)
