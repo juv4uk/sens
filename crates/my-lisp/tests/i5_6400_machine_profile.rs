@@ -49,37 +49,32 @@ fn i5_6400_profile_projects_existing_semantic_identities() {
 #[test]
 fn every_i5_6400_row_is_a_unique_existing_semantic_identity() {
     let profile = include_str!("../../../lib/machine/intel-core-i5-6400.lisp");
-    let registry = include_str!("../../../lib/surface/semantic-registry.lisp");
     let mut seen = HashSet::new();
     let mut projected = 0usize;
 
     for line in profile.lines().map(str::trim_start) {
-        let Some(rest) = line.strip_prefix("(\"") else {
+        let Some(rest) = line.strip_prefix("("") else {
             continue;
         };
-        let Some((id, after_id)) = rest.split_once("\" ") else {
+        let Some((id, after_id)) = rest.split_once("" ") else {
             continue;
         };
         if id.len() != 8 || !id.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
             continue;
         }
         assert!(!after_id.is_empty(), "machine row must continue after SID");
-
         projected += 1;
+        assert!(seen.insert(id), "i5-6400 projection must not contain duplicate byte SID {id}");
+
+        let numeric_id = u8::from_str_radix(id, 2).expect("binary SID");
         assert!(
-            seen.insert(id),
-            "i5-6400 projection must not contain duplicate byte SID {id}"
-        );
-        let registry_prefix = format!("  (\"{id}\" ");
-        assert!(
-            registry.lines().any(|row| row.starts_with(&registry_prefix)),
+            my_lisp::semantic_registry_export::admitted_semantic_ids().contains(&numeric_id),
             "i5-6400 projection may only reference semantic-registry identities; unknown ID {id}"
         );
     }
 
     assert!(projected >= 50, "processor profile should cover a meaningful existing subset");
 }
-
 #[test]
 fn generated_function_table_has_i5_6400_column_without_replacing_semantic_authority() {
     let markdown = include_str!("../../../docs/generated/function-table.md");
