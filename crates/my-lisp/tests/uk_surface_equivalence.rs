@@ -197,3 +197,29 @@ fn admitted_invoke_surfaces_materialize_from_the_single_registry() {
     assert_eq!(ukrainian, Value::SemanticRef(ukrainian_sid));
     assert_eq!(english, ukrainian);
 }
+
+
+#[test]
+fn full_ukrainian_surface_reuses_uk_identity_and_exposes_full_spelling() {
+    const UKR_SURFACE: &str = include_str!("../../../lib/surface/ukr.lisp");
+    let mut session = Session::default();
+    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("core should load");
+    eval_program(include_str!("../../../lib/surface/uk.lisp"), &mut session)
+        .expect("compact Ukrainian surface should load");
+    eval_program(UKR_SURFACE, &mut session)
+        .expect("full Ukrainian peer surface should load");
+
+    let compact = eval_program("(текст-порожній? "")", &mut session)
+        .expect("compact spelling should resolve");
+    let full = eval_program("(порожній-текст? "")", &mut session)
+        .expect("full spelling should resolve");
+    assert_eq!(compact.value.to_string(), "t");
+    assert_eq!(full.value.to_string(), "t");
+
+    let compact_sid = semantic_registry_export::admitted_surfaces_for_semantic_id(0b00111100)
+        .into_iter()
+        .find(|surface| surface.namespace == "uk")
+        .map(|surface| surface.name.to_string());
+    assert_eq!(compact_sid.as_deref(), Some("текст-порожній?"));
+}
