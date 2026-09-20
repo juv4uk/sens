@@ -144,6 +144,79 @@ fn fetch_artifact(url: &str, temporary: &Path) -> Result<(), String> {
                 Err(format!("download failed for {url}: powershell exit {status}"))
             }
         }
+        Err(curl_error) if cfg!(target_os = "linux") => {
+            if let Ok(status) = Command::new("wget")
+                .args(["--quiet", "--output-document", &output, url])
+                .status()
+            {
+                if status.success() {
+                    return Ok(());
+                }
+            }
+
+            let apt_available = Command::new("apt-get")
+                .arg("--version")
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .map(|status| status.success())
+                .unwrap_or(false);
+            if !apt_available {
+                return Err(format!(
+                    "download failed for {url}: curl unavailable ({curl_error}), wget unavailable, and apt-get is unavailable"
+                ));
+            }
+
+            let mut install = if running_as_root() {
+                Command::new("apt-get")
+            } else {
+                let mut command = Command::new("sudo");
+                command.arg("env");
+                command.arg("DEBIAN_FRONTEND=noninteractive");
+                command.arg("apt-get");
+                command
+            };
+            if running_as_root() {
+                install.env("DEBIAN_FRONTEND", "noninteractive");
+            }
+            install.args(["update"]);
+            run_status_command(&mut install, "apt-get update for curl bootstrap failed")?;
+
+            let mut install = if running_as_root() {
+                Command::new("apt-get")
+            } else {
+                let mut command = Command::new("sudo");
+                command.arg("env");
+                command.arg("DEBIAN_FRONTEND=noninteractive");
+                command.arg("apt-get");
+                command
+            };
+            if running_as_root() {
+                install.env("DEBIAN_FRONTEND", "noninteractive");
+            }
+            install.args(["install", "-y", "curl"]);
+            run_status_command(&mut install, "automatic curl bootstrap failed")?;
+
+            let status = Command::new("curl")
+                .args([
+                    "--fail",
+                    "--location",
+                    "--silent",
+                    "--show-error",
+                    "--max-time",
+                    "120",
+                    "--output",
+                    &output,
+                    url,
+                ])
+                .status()
+                .map_err(|error| format!("curl bootstrap succeeded but download failed for {url}: {error}"))?;
+            if status.success() {
+                Ok(())
+            } else {
+                Err(format!("download failed for {url}: curl exit {status}"))
+            }
+        }
         Err(error) => Err(format!("download failed for {url}: curl unavailable: {error}")),
     }
 }
