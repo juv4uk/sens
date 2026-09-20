@@ -44,4 +44,4 @@
         (list (quote source-digest) (sha256-hex source))
         (list (quote binary-width) 8)
         (list (quote row-count) (length rows))
-        (cons (quote canonical-rows) rows))))))
+        (cons (quote canonical-rows) rows)))))
