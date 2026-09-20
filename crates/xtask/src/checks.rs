@@ -356,42 +356,23 @@ fn s2_explicitly_contracts_category_not_error_wording() -> Result<(), String> {
 
 use std::collections::{BTreeMap, BTreeSet};
 
-const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
 const DOCS_INDEX: &str = include_str!("../../../lib/surface/uk-docs.lisp");
 const DOCS_MD: &str = include_str!("../../../docs/ukrainian-api.md");
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const NAME_AUDIT: &str = include_str!("../../../lib/surface/uk-name-audit.lisp");
 
 fn stable_pairs() -> BTreeSet<(String, String)> {
-    REGISTRY
-        .lines()
-        .filter_map(|line| {
-            let fields = line.split_whitespace().collect::<Vec<_>>();
-            let token = fields.first()?;
-            let identity = token.strip_prefix('(')?;
-            let identity = identity.strip_prefix('"').unwrap_or(identity);
-            let identity = identity.strip_suffix('"').unwrap_or(identity);
-            if identity.len() != 8
-                || !identity.bytes().all(|byte| matches!(byte, b'0' | b'1'))
-            {
-                return None;
-            }
-            for group in line.split('(').skip(2) {
-                let Some(tuple) = group.split(')').next() else {
-                    continue;
-                };
-                let parts = tuple.split_whitespace().collect::<Vec<_>>();
-                if let [namespace, name] = parts.as_slice() {
-                    if *namespace == "uk" && *name != "—" && *name != "()" {
-                        return Some((identity.to_string(), name.trim_matches('"').to_string()));
-                    }
-                }
-            }
-            None
+    my_lisp::semantic_registry_export::admitted_semantic_ids()
+        .into_iter()
+        .filter_map(|semantic_id| {
+            let identity = my_lisp::semantic_registry_export::semantic_id_bits(semantic_id);
+            my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
+                .into_iter()
+                .find(|surface| surface.namespace == "uk")
+                .map(|surface| (identity, surface.name.to_string()))
         })
         .collect()
 }
-
 fn documented() -> Result<BTreeMap<String, String>, String> {
     let mut result = BTreeMap::new();
     for line in DOCS_INDEX.lines() {
@@ -605,44 +586,20 @@ const UK_ACCEPTANCE: &str = include_str!("../../../lib/surface/uk-acceptance.lis
 const RIVNOPRAVNIST_UK: &str = include_str!("../../../tests/fixtures/rivnopravnist-uk.lisp");
 
 fn en_uk_names_needing_uk_layout_check() -> Vec<String> {
-    REGISTRY
-        .lines()
-        .filter_map(|line| {
-            let fields = line.split_whitespace().collect::<Vec<_>>();
-            let token = fields.first()?;
-            let semantic_id = token.strip_prefix('(')?;
-            let semantic_id = semantic_id.strip_prefix('"').unwrap_or(semantic_id);
-            let semantic_id = semantic_id.strip_suffix('"').unwrap_or(semantic_id);
-            if semantic_id.len() != 8
-                || !semantic_id.bytes().all(|byte| matches!(byte, b'0' | b'1'))
-            {
-                return None;
-            }
-            let mut en = None;
-            let mut uk = None;
-            for group in line.split('(').skip(2) {
-                let Some(tuple) = group.split(')').next() else {
-                    continue;
-                };
-                let parts = tuple.split_whitespace().collect::<Vec<_>>();
-                let (namespace, name) = match parts.as_slice() {
-                    [namespace, name] if *name != "()" => (*namespace, *name),
-                    _ => continue,
-                };
-                match namespace {
-                    "en" => en = Some(name.trim_matches('"').to_string()),
-                    "uk" => uk = Some(name.trim_matches('"').to_string()),
-                    _ => {}
-                }
-            }
-            match (en, uk) {
-                (Some(_en), Some(uk)) => Some(uk),
-                _ => None,
-            }
-        })
-        .collect()
+    let mut names = Vec::new();
+    for semantic_id in my_lisp::semantic_registry_export::admitted_semantic_ids() {
+        let surfaces =
+            my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id);
+        if let Some(uk) = surfaces
+            .iter()
+            .find(|surface| surface.namespace == "uk")
+            .map(|surface| surface.name.to_string())
+        {
+            names.push(uk);
+        }
+    }
+    names
 }
-
 fn is_ukrainian_layout_identifier_char(character: char) -> bool {
     "абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ0123456789-?!'*"
         .contains(character)
