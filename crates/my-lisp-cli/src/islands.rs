@@ -60,6 +60,23 @@ fn load_manifest(path: &str) -> Result<Manifest, String> {
     if manifest.protocol != "my-lisp-islands-manifest/1" {
         return Err(format!("unsupported manifest protocol: {}", manifest.protocol));
     }
+    let mut island_keys = std::collections::HashSet::new();
+    for island in &manifest.islands {
+        if island.key.is_empty() || !island_keys.insert(&island.key) {
+            return Err(format!("manifest has duplicate or empty island key: {}", island.key));
+        }
+        let mut targets = std::collections::HashSet::new();
+        for entry in &island.platforms {
+            if !targets.insert(&entry.target) {
+                return Err(format!("island {} has duplicate target {}", island.key, entry.target));
+            }
+            if let Some(sha256) = &entry.sha256 {
+                if sha256.len() != 64 || !sha256.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+                    return Err(format!("island {} has invalid SHA-256", island.key));
+                }
+            }
+        }
+    }
     Ok(manifest)
 }
 
@@ -132,6 +149,16 @@ pub fn run(args: &[String]) -> Result<String, String> {
                         let expected = entry.sha256.as_deref().ok_or_else(|| format!("release asset {} has no SHA-256", island.key))?;
                         if actual != expected { return Err(format!("checksum mismatch for {}", island.key)); }
                         let target_dir = std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target);
+                        let runtime = target_dir.join("runtime.bin");
+                        if runtime.is_file() {
+                            let existing = fs::read(&runtime).map_err(|error| error.to_string())?;
+                            let existing_digest = my_lisp::sha256_source(&existing).iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+                            if existing_digest != expected {
+                                return Err(format!("existing installation checksum mismatch for {}", island.key));
+                            }
+                            rows.push(format!("already installed {}", target_dir.display()));
+                            continue;
+                        }
                         let temporary = target_dir.with_extension("tmp");
                         fs::create_dir_all(&temporary).map_err(|error| error.to_string())?;
                         fs::write(temporary.join("runtime.bin"), &bytes).map_err(|error| error.to_string())?;

@@ -95,6 +95,26 @@ fn islands_install_apply_verifies_file_artifact_before_publishing_it() {
         .output().expect("status CLI");
     assert!(status.status.success(), "{}", String::from_utf8_lossy(&status.stderr));
     assert!(String::from_utf8(status.stdout).unwrap().contains("demo: available"));
+
+    let second = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--profile", "one", "--root", root.to_str().unwrap(), "--apply"])
+        .output().expect("idempotent install CLI");
+    assert!(second.status.success(), "{}", String::from_utf8_lossy(&second.stderr));
+    assert!(String::from_utf8(second.stdout).unwrap().contains("already installed"));
+}
+
+#[test]
+fn islands_manifest_rejects_malformed_release_checksum() {
+    let base = std::env::temp_dir().join(format!("my-lisp-islands-invalid-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(&manifest_path, r#"{"protocol":"my-lisp-islands-manifest/1","islands":[{"key":"demo","runtime_version":"1","license":"test","provenance":"test","platforms":[{"target":"linux-x86_64","provider":"release-asset","sha256":"bad"}]}]}"#).expect("manifest");
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args(["islands", "plan", "--manifest", manifest_path.to_str().unwrap(), "--with", "demo"])
+        .output().expect("CLI");
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("invalid SHA-256"));
 }
 
 #[test]

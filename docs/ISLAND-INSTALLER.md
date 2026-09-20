@@ -27,6 +27,11 @@ foreign truth/result domain і не запускає silent fallback до інш
 
 ## Межа v1
 
-Поточний v1 реалізує read-only `plan` і `status`. Команда `install`, download,
-package-manager invocation, checksum verification та license acceptance
-будуть наступним окремим security/provenance зрізом.
+Поточний v1 підтримує read-only `plan`, спостереження `status` та явний
+`install --dry-run`/`install --apply` лише для локальних `file://` release
+артефактів. Перед публікацією артефакт читається повністю, SHA-256 порівнюється
+з manifest, а versioned directory публікується транзакційно; повторний запуск
+для того самого перевіреного артефакту є ідемпотентним. Package-manager
+виклик, network download, license acceptance та bounded executable probe ще не
+виконуються: для таких записів installer показує план, а `status` чесно лишає
+стан `absent` або `unsupported`.
