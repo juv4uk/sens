@@ -288,6 +288,7 @@ jobs:
         with:
           shared-key: main-fast-critical
       - name: Build Lisp CLI for authority projections
+        # The following projection checks execute the Lisp CLI directly.
         run: cargo build -p my-lisp-cli --bin my-lisp
       - name: Generated authority projections
         run: |
