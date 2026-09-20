@@ -82,9 +82,16 @@ def check(root) -> tuple[int, set[str], int]:
         seen_ids.add(identity)
 
         if sid == 0:
-            if entry != [identity, []]:
+            expected_ground = [
+                ["en", []],
+                ["uk", []],
+                ["ukr", []],
+                ["sa", []],
+                ["sym", []],
+            ]
+            if entry[1:] != expected_ground:
                 raise ValueError(
-                    'SID 00000000 мусить бути рівно ground row ("00000000" ())'
+                    'SID 00000000 мусить мати той самий fixed en/uk/ukr/sa/sym schema з порожніми слотами'
                 )
             continue
 
