@@ -151,7 +151,7 @@ fn семантичні_ідентифікатори_складаються_ті
     // Intentional floor, not a restated fact: the registry only grows, so an
     // exact count would silently rot. 140 is the stable-UK-surface size at
     // the time this floor was written (TEST-ARCHITECTURE-1 step 2).
-    assert_eq!(побачені.len(), 169, "sr/2 має містити Canon 0 + 168 identities");
+    assert_eq!(побачені.len(), 169, "canonical semantic registry має містити Canon 0 + 168 identities");
 }
 
 #[test]
@@ -160,10 +160,6 @@ fn кожна_тотожність_явно_описує_uk_en_sa_без_заб�
     let обовязкові = HashSet::from(["uk", "en", "sa"]);
     for запис in записи_реєстру(&корінь) {
         let (ідентифікатор, описи) = поверхні(запис);
-        if ідентифікатор == "\"00000000\"" {
-            assert!(описи.len() == 1 || описи.is_empty(), "Canon 0 is ground-only");
-            continue;
-        }
         let мови = описи
             .iter()
             .map(|опис| поля_поверхні(опис).0)
