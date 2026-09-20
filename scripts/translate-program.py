@@ -42,7 +42,7 @@ def registry_rows() -> list[dict[str, str]]:
         residue = SURFACE.sub("", body).strip()
         if not matches or residue:
             raise ValueError(
-                f"line {line_number}: malformed sr/2 row for SID {identity}"
+                f"line {line_number}: malformed semantic registry row for SID {identity}"
             )
 
         surfaces: dict[str, str] = {}
