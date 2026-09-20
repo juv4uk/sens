@@ -108,3 +108,6 @@ crates/wsm-native-result-types/tests/kernel_availability.rs	missing_external_run
 crates/wsm-native-result-types/tests/kernel_availability.rs	four_real_kernels_share_one_availability_observation_path_before_invocation	observer	four-kernel-execution-availability	producer bounded probes + wsm-kernel-host availability observation	retained
 crates/wsm-native-result-types/tests/kernel_lifecycle.rs	real_prolog_runs_through_explicit_load_start_invoke_stop_unload_lifecycle	mechanism	kernel-handle-lifecycle+opaque-sid-provenance	wsm-kernel-host + real SWI-Prolog	retained
 crates/wsm-kernel-host/src/lib.rs	explicit_handles_keep_kernel_lifecycles_isolated_and_provenance_opaque	mechanism	kernel-handle-lifecycle-isolation	wsm-kernel-host	retained
+crates/wsm-native-result-types/tests/observation_capabilities.rs	producer_capability_sets_remain_distinct	observer	producer-specific-observation-capabilities	wsm-native-result-types concrete producer domains	retained
+crates/wsm-native-result-types/tests/observation_capabilities.rs	supported_operations_inspect_native_domains_without_normalization	observer	native-observation-inspection	producer-owned result fields	retained
+crates/wsm-native-result-types/tests/observation_capabilities.rs	unsupported_operation_is_named_not_false_or_empty	observer	observation-capability-failure	wsm-native-result-types capability boundary	retained
