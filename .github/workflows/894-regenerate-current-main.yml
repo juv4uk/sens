@@ -1,9 +1,10 @@
 name: #894 regenerate current-main generated artifacts
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
     branches:
-      - fix/894-core-fasl-current-main
+      - main
 
 permissions:
   contents: write
