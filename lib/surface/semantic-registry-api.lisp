@@ -172,3 +172,33 @@
     (semantic-registry-id-in
       (semantic-registry-read)
       surface)))
+
+
+; Return every canonical semantic identity exactly as Binary values, preserving
+; the registry's source order. This is a projection of the already-read
+; authority, not a second SID table.
+(def semantic-registry-row-ids
+  (lambda (rows)
+    (cond
+      ((atom rows) (structural-kind empty-list)
+       (quote ()))
+      ((atom rows) (structural-kind pair)
+       (cons
+         (semantic-registry-row-id (car rows))
+         (semantic-registry-row-ids (cdr rows)))))))
+
+; Prove, in Lisp, that every admitted Binary SID survives the language's own
+; write/read round-trip without collapsing into an ordinary decimal value.
+(def semantic-registry-all-ids-round-trip
+  (lambda (rows)
+    (cond
+      ((atom rows) (structural-kind empty-list)
+       (structural-relation same))
+      ((atom rows) (structural-kind pair)
+       (let* ((identity (semantic-registry-row-id (car rows)))
+              (round-tripped (semantic-registry-round-trip identity)))
+         (cond
+           ((equal? identity round-tripped) (structural-relation same)
+            (semantic-registry-all-ids-round-trip (cdr rows)))
+           ((equal? identity round-tripped) (structural-relation distinct)
+            (structural-relation distinct))))))))
