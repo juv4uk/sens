@@ -191,12 +191,24 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     // as an opaque SemanticRef so the admitted surface remains discoverable
     // without inventing a second table or pretending the implementation exists.
     for semantic_id in semantic_registry::admitted_semantic_ids() {
+        let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
+
+        // Canonical special forms and evaluator-owned necessary forms are
+        // routed by their dedicated syntax mechanisms, not as first-class
+        // SemanticRef values.
+        if peers.iter().any(|peer| {
+            eval::canon::identity_for_surface(peer).is_some()
+                || eval::necessary_forms::identity_for_symbol(peer).is_some()
+        }) {
+            continue;
+        }
+
         let value = values_by_semantic_id
             .get(&semantic_id)
             .cloned()
             .unwrap_or(Value::SemanticRef(semantic_id));
 
-        for peer in semantic_registry::stable_surfaces_for_semantic_id(semantic_id) {
+        for peer in peers {
             if environment.get(peer).is_none() {
                 environment.define(peer, value.clone());
             }
