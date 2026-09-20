@@ -1,4 +1,4 @@
-use crate::value::{NumericBuffer, Rational};
+use crate::value::{Binary, NumericBuffer, Rational};
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -48,6 +48,7 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
+    Binary(Binary),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -88,7 +89,7 @@ pub(crate) mod fasl {
     use crate::value::Rational;
     use std::rc::Rc;
 
-    pub const FASL_FORMAT_VERSION: u32 = 1;
+    pub const FASL_FORMAT_VERSION: u32 = 2;
 
     const TAG_NUMBER: u8 = 1;
     const TAG_RATIONAL: u8 = 2;
@@ -96,6 +97,7 @@ pub(crate) mod fasl {
     const TAG_SYMBOL: u8 = 4;
     const TAG_LIST: u8 = 5;
     const TAG_PAIR: u8 = 6;
+    const TAG_BINARY: u8 = 7;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -129,6 +131,11 @@ pub(crate) mod fasl {
             ExprKind::Rational(rational) => {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
+            }
+            ExprKind::Binary(binary) => {
+                out.push(TAG_BINARY);
+                out.push(binary.width());
+                out.extend_from_slice(&binary.value().to_le_bytes());
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -175,6 +182,13 @@ pub(crate) mod fasl {
                 ExprKind::Number(f64::from_le_bytes(bits.try_into().ok()?), exact)
             }
             TAG_RATIONAL => ExprKind::Rational(Rational::read_fasl(bytes, pos)?),
+            TAG_BINARY => {
+                let width = *bytes.get(*pos)?;
+                *pos += 1;
+                let bits = bytes.get(*pos..*pos + 8)?;
+                *pos += 8;
+                ExprKind::Binary(Binary::from_u64(u64::from_le_bytes(bits.try_into().ok()?), width)?)
+            }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
             TAG_LIST => {
