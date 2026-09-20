@@ -127,7 +127,7 @@ fn full_binary_registry_handoff_is_lisp_owned_and_digest_pinned() {
         "handoff must report every current canonical semantic row"
     );
     assert!(
-        rendered.contains("(binary-round-trip (structural-relation same))"),
+        rendered.contains("(binary-round-trip verified)"),
         "every admitted SID must survive the Lisp-owned Binary write/read round-trip"
     );
     assert!(
