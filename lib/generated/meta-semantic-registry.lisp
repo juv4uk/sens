@@ -1,7 +1,7 @@
 ; GENERATED FILE — DO NOT EDIT.
 ; Source authority: lib/surface/semantic-registry.lisp
 ; Generator: scripts/generate-meta-semantic-registry.lisp
-; sr/2 surfaces; empty and reader-only apostrophe surfaces omitted.
+; Registry surfaces; empty and reader-only apostrophe surfaces omitted.
 
 (def my-semantic-surface-registry
   (quote (
