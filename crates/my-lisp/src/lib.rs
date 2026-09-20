@@ -91,8 +91,6 @@ pub use syntax::fasl::{
 /// no human surface name; `load_macro_library` installs peer spellings onto
 /// that same value after evaluation.
 pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
-const DEFMACRO_SEMANTIC_ID: u8 = 10;
-const LAMBDA_SEMANTIC_ID: u8 = 8;
 
 /// The ordinary my-lisp bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
@@ -131,13 +129,13 @@ pub const FS_LIBRARY_SOURCE: &str = include_str!("../../../lib/fs.lisp");
 
 /// Install the one primitive macro-construction mechanism required by the
 /// language-owned macro layer, evaluate the Lisp derivation exactly once, and
-/// bind every stable or compatibility-only spelling admitted for semantic
-/// identity 0012 directly to the resulting Macro value.
+/// bind every admitted peer spelling for the registry identity selected by
+/// the canonical `defmacro` surface directly to the resulting Macro value.
 ///
 /// The loader owns only binding mechanics. Macro-definition behavior remains
 /// in `lib/macro.lisp`; there is still no evaluator head-name fallback for any
-/// human macro-definition spelling. Surface admission belongs to the numeric
-/// semantic registry, not to this Rust loader.
+/// human macro-definition spelling. Surface admission belongs to the Lisp-owned
+/// semantic registry projection, not to this Rust loader.
 ///
 /// Embedders that deliberately construct a custom/bare `Environment` must use
 /// this function before evaluating source that depends on the macro-definition
@@ -154,11 +152,19 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
         ));
     }
 
-    let admitted = semantic_registry::admitted_surfaces_for_semantic_id(DEFMACRO_SEMANTIC_ID);
+    let defmacro_semantic_id = semantic_registry::admitted_semantic_id_for_surface("defmacro")
+        .ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                "semantic registry must admit the canonical defmacro surface",
+                Span { start: 0, end: 0 },
+            )
+        })?;
+    let admitted = semantic_registry::admitted_surfaces_for_semantic_id(defmacro_semantic_id);
     if admitted.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
-            "semantic registry must admit at least one macro-definition surface for SID 10",
+            "semantic registry identity selected by defmacro must admit at least one surface",
             Span { start: 0, end: 0 },
         ));
     }
@@ -315,14 +321,28 @@ pub fn is_define_surface_name(name: &str) -> bool {
     )
 }
 
-/// True for any admitted surface of `defmacro` (semantic ID `0012`).
+/// True when `name` resolves to the same registry identity as the canonical
+/// `defmacro` surface. No decimal SID is maintained here.
 pub fn is_defmacro_surface_name(name: &str) -> bool {
-    semantic_registry::admitted_semantic_id_for_surface(name) == Some(DEFMACRO_SEMANTIC_ID)
+    match (
+        semantic_registry::admitted_semantic_id_for_surface(name),
+        semantic_registry::admitted_semantic_id_for_surface("defmacro"),
+    ) {
+        (Some(candidate), Some(defmacro)) => candidate == defmacro,
+        _ => false,
+    }
 }
 
-/// True for any admitted surface of `lambda` (semantic ID `0010`).
+/// True when `name` resolves to the same registry identity as the canonical
+/// `lambda` surface. No decimal SID is maintained here.
 pub fn is_lambda_surface_name(name: &str) -> bool {
-    semantic_registry::admitted_semantic_id_for_surface(name) == Some(LAMBDA_SEMANTIC_ID)
+    match (
+        semantic_registry::admitted_semantic_id_for_surface(name),
+        semantic_registry::admitted_semantic_id_for_surface("lambda"),
+    ) {
+        (Some(candidate), Some(lambda)) => candidate == lambda,
+        _ => false,
+    }
 }
 
 /// Convenience: FASL-encode already-parsed expressions bound to a source hash.
