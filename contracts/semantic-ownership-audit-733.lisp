@@ -102,14 +102,14 @@
    (target-destination . "lib/result-status.lisp")
    (rationale . "Defines outcome vocabulary: ok, err, pass, fail, halt, pending."))
 
-  ((key . canon-evaluator-mapping)
-   (path . "crates/my-lisp/src/eval/canon.rs")
+  ((key . evaluator-dispatch-contract)
+   (path . "lib/evaluator-dispatch.lisp")
    (category . semantic-authority)
    (question-answer . what-language-means)
-   (semantic-role . evaluator-identity-bindings)
+   (semantic-role . evaluator-operation-classification)
    (future-action . retain-in-core)
-   (target-destination . "crates/my-lisp/src/eval/canon.rs")
-   (rationale . "Specifies immutable binding from SIDs 0..7 to ground empty list, value primitives, and special forms."))
+   (target-destination . "lib/evaluator-dispatch.lisp")
+   (rationale . "Owns the language-level mapping from semantic identities to evaluator operation classes; host runtimes may project this data to mechanisms but must not recreate the mapping."))
 
   ; --------------------------------------------------------------------------
   ; SECTION 2: SEMANTIC WITNESSES (Proves in Lisp data that laws hold)
@@ -172,6 +172,16 @@
   ; --------------------------------------------------------------------------
   ; SECTION 3: EXECUTION MECHANISMS (HOW an implementation executes the language)
   ; --------------------------------------------------------------------------
+
+  ((key . rust-canon-dispatch)
+   (path . "crates/my-lisp/src/eval/canon.rs")
+   (category . execution-mechanism)
+   (question-answer . how-implementation-executes-it)
+   (semantic-role . canonical-operation-execution)
+   (future-action . project-from-language-authority)
+   (target-destination . "crates/my-lisp/src/eval/canon.rs")
+   (rationale . "Executes Canon mechanisms in Rust. It is a reference implementation projection and must not independently own SID-to-meaning authority."))
+
 
   ((key . rust-reader-parser)
    (path . "crates/my-lisp/src/parser.rs")
