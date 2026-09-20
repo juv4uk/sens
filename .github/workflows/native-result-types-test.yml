@@ -49,6 +49,10 @@ jobs:
         env:
           WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
         run: cargo test -p wsm-native-result-types --features native-clips --test four_real_kernels -- --nocapture
+      - name: LIFE-1 Prolog to Datalog bridge stays alive
+        env:
+          WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
+        run: cargo test -p wsm-native-result-types --features native-clips --test prolog_datalog_bridge -- --nocapture
       - name: Clippy result-domain artifact
         env:
           WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so

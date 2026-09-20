@@ -46,6 +46,64 @@ pub struct PrologResult {
     pub stderr: Vec<u8>,
 }
 
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PrologCanonicalListError {
+    Utf8,
+    ExpectedList,
+    UnsupportedAtom(String),
+}
+
+impl fmt::Display for PrologCanonicalListError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Utf8 => write!(formatter, "prolog-canonical-list-invalid-utf8"),
+            Self::ExpectedList => write!(formatter, "prolog-canonical-list-expected-list"),
+            Self::UnsupportedAtom(atom) => {
+                write!(formatter, "prolog-canonical-list-unsupported-atom:{atom}")
+            }
+        }
+    }
+}
+
+impl std::error::Error for PrologCanonicalListError {}
+
+/// Decode the deliberately bounded canonical wire shape used by LIFE-1.
+///
+/// This is producer protocol mechanics, not a semantic projection. It accepts
+/// only a flat list of unquoted lowercase Prolog atoms such as
+/// `[bob,dave,carol]`.
+pub fn decode_canonical_atom_list(
+    bytes: &[u8],
+) -> Result<Vec<String>, PrologCanonicalListError> {
+    let text = std::str::from_utf8(bytes)
+        .map_err(|_| PrologCanonicalListError::Utf8)?
+        .trim();
+
+    let inner = text
+        .strip_prefix('[')
+        .and_then(|value| value.strip_suffix(']'))
+        .ok_or(PrologCanonicalListError::ExpectedList)?;
+
+    if inner.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+
+    inner
+        .split(',')
+        .map(|raw| {
+            let atom = raw.trim();
+            let mut chars = atom.chars();
+            let valid_head = chars.next().is_some_and(|ch| ch.is_ascii_lowercase());
+            let valid_tail = chars.all(|ch| ch.is_ascii_alphanumeric() || ch == '_');
+            if !valid_head || !valid_tail {
+                return Err(PrologCanonicalListError::UnsupportedAtom(atom.to_string()));
+            }
+            Ok(atom.to_string())
+        })
+        .collect()
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PrologRequest {
     pub semantic_id: SemanticId,
@@ -373,6 +431,35 @@ mod tests {
     fn missing_swipl_is_a_named_transport_failure() {
         let kernel = PrologKernel::new("__wsm_swipl_that_does_not_exist__");
         assert!(matches!(kernel.version(), Err(PrologKernelError::Spawn(_))));
+    }
+
+    #[test]
+    fn bounded_canonical_atom_list_decoder_preserves_wire_atoms_only() {
+        assert_eq!(
+            decode_canonical_atom_list(b"[bob,dave,carol]\n").unwrap(),
+            vec!["bob", "dave", "carol"]
+        );
+        assert_eq!(decode_canonical_atom_list(b"[]").unwrap(), Vec::<String>::new());
+    }
+
+    #[test]
+    fn bounded_canonical_atom_list_decoder_fails_named_on_unadmitted_shapes() {
+        assert_eq!(
+            decode_canonical_atom_list(b"ancestor(bob,carol)"),
+            Err(PrologCanonicalListError::ExpectedList)
+        );
+        assert!(matches!(
+            decode_canonical_atom_list(b"[bob,(dave,carol)]"),
+            Err(PrologCanonicalListError::UnsupportedAtom(_))
+        ));
+        assert!(matches!(
+            decode_canonical_atom_list(b"['bob']"),
+            Err(PrologCanonicalListError::UnsupportedAtom(_))
+        ));
+        assert_eq!(
+            decode_canonical_atom_list(&[0xff, 0xfe]),
+            Err(PrologCanonicalListError::Utf8)
+        );
     }
 
     #[test]
