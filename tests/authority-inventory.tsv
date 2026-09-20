@@ -131,3 +131,7 @@ crates/my-lisp/tests/life_1_scheduler.rs	life_1_scheduler_witness_is_lisp_owned	
 
 crates/my-lisp/tests/semantic_registry_lisp.rs	lisp_owned_semantic_registry_witness	observer	semantic-registry-lisp-query	lib/surface/semantic-registry.lisp + tests/fixtures/semantic-registry-self-hosted-witness.lisp	migrated
 crates/my-lisp/tests/runtime_peer_operators.rs	runtime_peer_surface_projection_remains_lisp_owned	observer	peer-surface-runtime-projection	lib/surface/semantic-registry.lisp via generated projection	migrated
+crates/my-lisp/tests/sid_registry_handoff_996.rs	binary_sid_handoff_points_only_to_the_canonical_lisp_registry	observer	binary-sid-authority-handoff	lib/surface/semantic-registry.lisp + contracts/sid-registry-handoff-996.lisp	retained
+crates/my-lisp/tests/sid_registry_handoff_996.rs	canonical_registry_preserves_one_contiguous_8_bit_binary_axis	observer	binary-sid-axis	lib/surface/semantic-registry.lisp	retained
+crates/my-lisp/tests/sid_registry_handoff_996.rs	pinned_registry_content_revision_matches_git_blob_identity	observer	registry-content-revision	lib/surface/semantic-registry.lisp + contracts/sid-registry-handoff-996.lisp	retained
+crates/my-lisp/tests/sid_registry_handoff_996.rs	handoff_does_not_copy_any_semantic_row_table	observer	registry-shadow-table-negative	contracts/sid-registry-handoff-996.lisp	retained
