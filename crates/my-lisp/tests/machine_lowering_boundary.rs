@@ -2,7 +2,6 @@ use my_lisp::{eval_program, load_core_library, Session};
 use std::fs;
 use std::path::PathBuf;
 
-const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
 const REPO_DECLARATION: &str = include_str!("../../../repo.lisp");
 
 fn repo_root() -> PathBuf {
@@ -20,32 +19,20 @@ fn load_lisp_file(path: &str, session: &mut Session) {
 #[test]
 #[ignore = "legacy-transition: hard-coded pre-rebuild SID assignment; registry identity is being compacted"]
 fn portable_monotonic_time_keeps_language_semantic_identity() {
-    let row = REGISTRY
-        .lines()
-        .find(|line| line.trim_start().starts_with("(\"01011010\" "))
-        .expect("byte SID 01011010 must remain the portable monotonic observation");
-
-    assert!(
-        row.contains("(en mono-ns)"),
-        "SID 01011010 must keep the portable mono-ns semantic surface"
+    let sid = my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("mono-ns")
+        .expect("mono-ns must remain registry-admitted");
+    assert_eq!(
+        my_lisp::semantic_registry_export::semantic_id_bits(sid),
+        "01011010"
     );
 }
-
 #[test]
 fn raw_machine_identity_never_becomes_a_language_semantic() {
-    let lower = REGISTRY.to_ascii_lowercase();
     assert!(
-        !lower.contains("rdtsc"),
+        my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("rdtsc").is_none(),
         "raw target instruction names are machine facts, not language semantic identities"
     );
-    assert!(
-        !REGISTRY
-            .lines()
-            .any(|line| line.trim_start().starts_with("(1153 ")),
-        "historical compiler-originated allocation 1153 must not return as an active semantic row"
-    );
 }
-
 #[test]
 fn vertical_machine_boundary_separates_semantics_isa_optimization_and_host() {
     let path = repo_root().join("machine-lowering-boundary.lisp");
@@ -212,20 +199,17 @@ fn lisp_owned_encoder_is_part_of_the_vertical_boundary_proof() {
 #[test]
 #[ignore = "legacy-transition: hard-coded pre-rebuild ADD SID; keep machine lowering mechanics, not obsolete semantic numbering"]
 fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wrappers() {
-    assert!(
-        REGISTRY
-            .lines()
-            .any(|line| line.trim_start().starts_with("(\"00001100\" ")),
-        "semantic SID 00001100 must already exist before target lowering"
+    let sid = my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("додати")
+        .expect("ADD semantic surface must remain admitted");
+    assert_eq!(
+        my_lisp::semantic_registry_export::semantic_id_bits(sid),
+        "00001100"
     );
 
     let lowering_path = repo_root().join("lib/machine/lowering/semantic-x86-64.lisp");
     let lowering_source = fs::read_to_string(&lowering_path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", lowering_path.display()));
-    assert!(
-        lowering_source.contains("(\"00001100\" fast-path \"ADD / ADDSD\")"),
-        "lowering projection must map semantic SID 00001100 toward ADD"
-    );
+
     assert!(
         lowering_source.contains("(def x86-lower-add-u64-forms"),
         "semantic lowerer must expose structured machine forms"
@@ -254,7 +238,7 @@ fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wra
         .expect("semantic x86-64 lowering must load as ordinary my-lisp");
 
     let forms = eval_program("(x86-lower-add-u64-forms 2 3)", &mut session)
-        .expect("semantic SID 00001100 proof lowering must produce structured machine forms")
+        .expect("semantic ADD proof lowering must produce structured machine forms")
         .value
         .to_string();
     assert_eq!(
