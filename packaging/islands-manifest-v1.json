@@ -84,14 +84,15 @@
           "target": "windows-x86_64",
           "provider": "release-asset",
           "package": "CLIPS 6.4.2",
-          "url": "https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_64_bit_installer_642.msi/download",
+          "url": "https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_projects_642.zip/download",
           "sha256": null,
-          "artifact": "msi",
+          "artifact": "zip",
           "probe": [
             "powershell",
             "-NoProfile",
+            "-NonInteractive",
             "-Command",
-            "$roots=@($env:ProgramFiles); $found=$roots | ForEach-Object { Get-ChildItem $_ -Filter clips.exe -Recurse -ErrorAction SilentlyContinue } | Select-Object -First 1; if($found){exit 0}else{exit 1}"
+            "$found=Get-ChildItem -Path '{install_root}' -Filter clips.dll -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1; if($found){exit 0}else{exit 1}"
           ]
         }
       ]
