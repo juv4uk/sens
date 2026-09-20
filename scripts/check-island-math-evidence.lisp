@@ -105,7 +105,7 @@
          ((eq value (quote domain)) (identity-relation same) (quote yes))
          ((eq value (quote operand-domain)) (identity-relation same) (quote yes))
          ((eq value (quote result-domain)) (identity-relation same) (quote yes))
-         (t (quote no))))))))
+         (t (quote no)))))))
 
 (def contains-forbidden-semantic-symbol?
   (lambda (value)
