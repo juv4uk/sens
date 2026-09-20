@@ -621,8 +621,25 @@
 (def repo-tooling-live-observed
   (repo-tooling-observed-scripts (read-dir "scripts")))
 
+(def repo-tooling-script-rows
+  (lambda (rows)
+    (cond
+      ((atom rows) (structural-kind empty-list) (quote ()))
+      ((atom rows) (structural-kind atom) (quote ()))
+      ((atom rows) (structural-kind pair)
+       (let ((row (car rows)))
+         (cond
+           ((string-prefix? "scripts/" (repo-tooling-field (quote path) row))
+            (structural-relation same)
+            (cons row (repo-tooling-script-rows (cdr rows))))
+           ((string-prefix? "scripts/" (repo-tooling-field (quote path) row))
+            (structural-relation distinct)
+            (repo-tooling-script-rows (cdr rows)))))))))
+
 (def repo-tooling-live-scripts-verdict
-  (repo-tooling-verdict repo-tooling-live-rows repo-tooling-live-observed))
+  (repo-tooling-verdict
+    (repo-tooling-script-rows repo-tooling-live-rows)
+    repo-tooling-live-observed))
 
 (def repo-tooling-live-verdict
   (cond
