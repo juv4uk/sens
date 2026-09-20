@@ -287,6 +287,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: main-fast-critical
+      - name: Build Lisp CLI for authority projections
+        # Projection checks execute the Lisp CLI directly.
+        run: cargo build -p my-lisp-cli --bin my-lisp
       - name: Generated authority projections
         run: |
           ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
