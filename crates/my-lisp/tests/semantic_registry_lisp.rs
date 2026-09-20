@@ -16,10 +16,7 @@ fn semantic_registry_is_read_and_queried_by_lisp_itself() {
     .expect("Lisp-owned semantic registry witness should load");
 
     let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
-    let program = format!(
-        "(semantic-registry-self-hosted-witness {})",
-        format!("{registry_source:?}")
-    );
+    let program = format!("(semantic-registry-self-hosted-witness {registry_source:?})");
     let result = eval_program(&program, &mut session)
         .expect("Lisp-owned semantic registry witness should evaluate")
         .value

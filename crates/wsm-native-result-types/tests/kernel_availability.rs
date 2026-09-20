@@ -2,7 +2,6 @@ use wsm_common_lisp_kernel::CommonLispKernel;
 use wsm_kernel_host::{
     AvailabilityState, KernelAvailabilityObservation, KernelRouter,
 };
-use wsm_prolog_kernel::PrologKernel;
 
 fn record_probe(
     router: &mut KernelRouter,
@@ -46,6 +45,7 @@ fn missing_external_runtime_is_named_unavailable_without_start_or_semantic_mutat
 #[cfg(feature = "native-clips")]
 fn four_real_kernels_share_one_availability_observation_path_before_invocation() {
     use wsm_clips_kernel::ClipsKernel;
+    use wsm_prolog_kernel::PrologKernel;
 
     let mut router = KernelRouter::new();
 

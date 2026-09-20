@@ -474,28 +474,26 @@ mod tests {
 
     #[test]
     fn registry_mutation_changes_discovered_surface_without_changing_metadata_key() {
-        const BEFORE: &str =
-            "(\"00001000\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))";
-        const AFTER: &str =
-            "(\"00001000\" (en meteor) (uk ()) (ukr ()) (sa ()) (sym ()))";
-        let discover = |source: &'static str| {
+        let discover = |sid8_surface: &'static str| {
             semantic_language_items_with(
                 |semantic_id| {
-                    semantic_registry::stable_surfaces_for_semantic_id_from_source(
-                        source,
-                        semantic_id,
-                    )
+                    if semantic_id == 8 {
+                        vec![sid8_surface]
+                    } else {
+                        vec![]
+                    }
                 },
                 |semantic_id| {
-                    semantic_registry::admitted_surfaces_for_semantic_id_from_source(
-                        source,
-                        semantic_id,
-                    )
+                    if semantic_id == 8 {
+                        vec![sid8_surface]
+                    } else {
+                        vec![]
+                    }
                 },
             )
         };
-        let before = discover(BEFORE);
-        let after = discover(AFTER);
+        let before = discover("comet");
+        let after = discover("meteor");
         assert!(before.iter().any(|item| {
             item.name == "comet" && item.semantic_id == Some(8)
         }));
