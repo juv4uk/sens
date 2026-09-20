@@ -8,6 +8,12 @@ on:
       - "scripts/authority-guard-enforce.lisp"
       - "tests/authority-inventory.lisp"
       - "tests/fixtures/authority-guard/**"
+      - "lib/life-1-scheduler.lisp"
+      - "tests/fixtures/life-1-scheduler-witness.lisp"
+      - "crates/my-lisp/tests/life_1_scheduler.rs"
+      - "lib/life-1-scheduler.lisp"
+      - "tests/fixtures/life-1-scheduler-witness.lisp"
+      - "crates/my-lisp/tests/life_1_scheduler.rs"
   push:
     branches: [main]
     paths:
@@ -64,3 +70,6 @@ jobs:
           cat tests/authority-verdict.lisp
           grep -q 'authority-ok' tests/authority-verdict.lisp
           ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
+
+      - name: Focused LIFE-1 scheduler witness
+        run: cargo test -p my-lisp --test life_1_scheduler
