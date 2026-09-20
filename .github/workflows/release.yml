@@ -11,13 +11,13 @@ permissions:
 jobs:
   retag-unpublished-release:
     name: Retag unpublished release snapshot
-    if: github.ref_type == 'branch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Move unpublished release tag to this exact commit
+        if: github.ref_type == 'branch'
         shell: bash
         run: |
           set -euo pipefail
@@ -25,7 +25,7 @@ jobs:
           git push --force origin "refs/tags/$GITHUB_REF_NAME"
 
   test:
-    if: github.ref_type == 'tag'
+    needs: retag-unpublished-release
     name: focused release smoke before publish
     runs-on: ubuntu-latest
     steps:
