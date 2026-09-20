@@ -1,37 +1,19 @@
 //! Інтерактивний stdio REPL: історія, interaction-only echo fallback і
-//! перемикання програмних поверхонь. `:мова` / `:surface` не є Lisp syntax:
-//! це команди оболонки над одним і тим самим семантичним ядром.
+//! вибір namespace для назв/подання. `:мова` / `:surface` не є Lisp syntax:
+//! вони не змінюють середовище виконання — усі admitted spellings ідуть
+//! semantic registry → SID → одна семантика.
 
 mod surface_catalog;
 
 use my_lisp::{
-    eval_parsed_expressions_incremental, eval_program, parse, render_error_for_presentation,
-    render_value_for_presentation, Environment, ErrorKind, ExprKind, PresentationLanguage, Session,
+    eval_parsed_expressions_incremental, parse, render_error_for_presentation,
+    render_value_for_presentation, ErrorKind, ExprKind, PresentationLanguage, Session,
 };
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
 use std::env;
 use std::path::PathBuf;
 use std::process;
-
-const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
-    ("unify.lisp", include_str!("../../../lib/unify.lisp")),
-    ("reason.lisp", include_str!("../../../lib/reason.lisp")),
-    ("forward.lisp", include_str!("../../../lib/forward.lisp")),
-    ("knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
-    (
-        "persistent-map.lisp",
-        include_str!("../../../lib/persistent-map.lisp"),
-    ),
-    (
-        "persistent-vector.lisp",
-        include_str!("../../../lib/persistent-vector.lisp"),
-    ),
-    ("time.lisp", include_str!("../../../lib/time.lisp")),
-    ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
-];
-const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
-const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ReplSurface {
@@ -46,7 +28,7 @@ impl ReplSurface {
         match value.trim().to_lowercase().as_str() {
             "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
-            "ук" | "українська" => Some(Self::Ukrainian),
+            "укр" | "ук" | "українська" => Some(Self::Ukrainian),
             "sa" | "sanskrit" | "санскрит" => Some(Self::Sanskrit),
             _ => None,
         }
@@ -56,7 +38,7 @@ impl ReplSurface {
         match self {
             Self::Core => "core",
             Self::English => "en",
-            Self::Ukrainian => "ук",
+            Self::Ukrainian => "укр",
             Self::Sanskrit => "sa",
         }
     }
@@ -92,59 +74,18 @@ fn render_surface_status() -> Result<String, String> {
     surface_catalog::render_status()
 }
 
-fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Environment, String> {
-    let layer = base.child();
-    if matches!(surface, ReplSurface::Ukrainian | ReplSurface::Sanskrit) {
-        let mut session = Session {
-            environment: layer.clone(),
-        };
-        for (name, source) in SURFACE_PREREQUISITES {
-            eval_program(source, &mut session).map_err(|error| {
-                format!("не вдалося завантажити {name}: {}", error.render(source))
-            })?;
-        }
-        let (name, source) = match surface {
-            ReplSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
-            ReplSurface::Sanskrit => ("sa.lisp", SA_SURFACE),
-            ReplSurface::Core | ReplSurface::English => unreachable!(),
-        };
-        eval_program(source, &mut session)
-            .map_err(|error| format!("не вдалося завантажити {name}: {}", error.render(source)))?;
-    }
-    Ok(layer)
-}
-
 struct ReplState {
     session: Session,
-    base_environment: Environment,
-    user_environment: Environment,
     surface: ReplSurface,
 }
 
 impl ReplState {
-    fn new(mut session: Session, surface: ReplSurface) -> Result<Self, String> {
-        let base_environment = session.environment.clone();
-        let surface_environment = build_surface_layer(&base_environment, surface)?;
-        let user_environment = surface_environment.child();
-        session.environment = user_environment.clone();
-        Ok(Self {
-            session,
-            base_environment,
-            user_environment,
-            surface,
-        })
+    fn new(session: Session, surface: ReplSurface) -> Self {
+        Self { session, surface }
     }
 
-    fn switch_surface(&mut self, surface: ReplSurface) -> Result<(), String> {
-        if self.surface == surface {
-            return Ok(());
-        }
-        let surface_environment = build_surface_layer(&self.base_environment, surface)?;
-        self.user_environment
-            .reparent(surface_environment)
-            .map_err(str::to_string)?;
+    fn switch_surface(&mut self, surface: ReplSurface) {
         self.surface = surface;
-        Ok(())
     }
 }
 
@@ -155,14 +96,15 @@ pub(crate) fn history_path() -> Option<PathBuf> {
 }
 
 fn print_surface_help() {
-    println!("Поверхні: :мова ук | en | sa | core");
-    println!("Технічний alias: :surface uk | en | sa | core");
-    println!("Каталог поточної людської поверхні: :імена / :names");
-    println!("Одна semantic identity у всіх трьох мовах: :ім'я <назва> / :name <name>");
-    println!("Стан триєдиної поверхні: :поверхні / :surfaces");
-    println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
-    println!("core — канонічний машинний шар, не четверта людська мова.");
-    println!("Перемикання змінює лише surface-frame; ваші define/closures лишаються живими.");
+    println!("Мови назв: :мова укр | en | sa | core");
+    println!("Compatibility selector: :мова ук також обирає укр.");
+    println!("Технічний alias: :surface укр | en | sa | core");
+    println!("Каталог поточного namespace: :імена / :names");
+    println!("Одна semantic identity у всіх namespace: :ім'я <назва> / :name <name>");
+    println!("Стан таблиці назв: :поверхні / :surfaces");
+    println!("Сире лексичне середовище: (середовище) / (env)");
+    println!("core — канонічні SID; укр/en/sa лише вибирають назви й подання.");
+    println!("Перемикання :мова не завантажує бібліотеки й не змінює Environment.");
 }
 
 fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
@@ -175,7 +117,7 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
         ":мова" | ":surface" => {
             let Some(requested) = parts.next() else {
                 println!(
-                    "Поточна поверхня: {} ({})",
+                    "Поточна мова назв: {} ({})",
                     state.surface.title(),
                     state.surface.code()
                 );
@@ -183,19 +125,17 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
                 return true;
             };
             if parts.next().is_some() {
-                eprintln!("Поверхня приймає рівно одне ім'я.");
+                eprintln!(":мова приймає рівно один namespace.");
                 print_surface_help();
                 return true;
             }
             let Some(surface) = ReplSurface::parse(requested) else {
-                eprintln!("Невідома поверхня: {requested}");
+                eprintln!("Невідома мова назв: {requested}");
                 print_surface_help();
                 return true;
             };
-            match state.switch_surface(surface) {
-                Ok(()) => println!("Поверхня: {} ({})", surface.title(), surface.code()),
-                Err(error) => eprintln!("Помилка перемикання поверхні: {error}"),
-            }
+            state.switch_surface(surface);
+            println!("Мова назв: {} ({})", surface.title(), surface.code());
             true
         }
         ":імена" | ":names" => {
@@ -244,17 +184,11 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
 }
 
 pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
-    let mut state = match ReplState::new(session, initial_surface) {
-        Ok(state) => state,
-        Err(error) => {
-            eprintln!("Error: could not initialize REPL surface: {error}");
-            process::exit(1);
-        }
-    };
+    let mut state = ReplState::new(session, initial_surface);
 
     println!("my-lisp REPL v{} (pure Rust)", env!("CARGO_PKG_VERSION"));
     println!(
-        "Поверхня: {} ({}) · змінити: :мова ук|en|sa|core · :допомога",
+        "Мова назв: {} ({}) · змінити: :мова укр|en|sa|core · :допомога",
         state.surface.title(),
         state.surface.code()
     );
@@ -347,11 +281,12 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use my_lisp::eval_program;
 
     fn core_state() -> ReplState {
         let mut session = Session::default();
         my_lisp::load_core_library(&mut session).expect("core bootstrap");
-        ReplState::new(session, ReplSurface::Core).expect("REPL state")
+        ReplState::new(session, ReplSurface::Core)
     }
 
     fn value(state: &mut ReplState, source: &str) -> String {
@@ -361,87 +296,107 @@ mod tests {
             .to_string()
     }
 
-    #[test]
-    fn ukrainian_surface_adds_derived_vocabulary_but_not_canon_bindings() {
-        let mut state = core_state();
-        assert!(state.session.environment.get("атом?").is_none());
+    fn environment_names(state: &ReplState) -> Vec<String> {
+        let mut names: Vec<String> = state
+            .session
+            .environment
+            .snapshot()
+            .into_iter()
+            .map(|(name, _)| name.to_string())
+            .collect();
+        names.sort();
+        names
+    }
 
-        state.switch_surface(ReplSurface::Ukrainian).expect("uk");
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "t");
-        let truth = eval_program("(атом? 'мама)", &mut state.session)
-            .expect("immutable Ukrainian Canon predicate")
+    #[test]
+    fn ukr_registry_name_executes_without_runtime_surface_layer() {
+        let mut state = core_state();
+
+        assert!(
+            state.session.environment.get("порожній-текст?").is_none(),
+            "registry spelling must not need a mutable alias binding"
+        );
+        assert_eq!(value(&mut state, "(порожній-текст? \"\")"), "t");
+
+        let before = environment_names(&state);
+        state.switch_surface(ReplSurface::Ukrainian);
+        let after = environment_names(&state);
+
+        assert_eq!(state.surface.code(), "укр");
+        assert_eq!(before, after, ":мова must not mutate/reparent Environment");
+
+        let truth = eval_program("(порожній-текст? \"\")", &mut state.session)
+            .expect("ukr registry spelling")
             .value;
         assert_eq!(
             render_value_for_presentation(&truth, state.surface.presentation()),
             "істина"
         );
-        // Contract 6.0: canonical spelling is resolver-owned, never a mutable
-        // surface-frame alias. Derived Ukrainian vocabulary remains a binding.
-        assert!(state.session.environment.get("атом?").is_none());
-        assert!(state.session.environment.get("додати").is_some());
-        assert_eq!(value(&mut state, "істина"), "t");
-        assert_eq!(value(&mut state, "хиба"), "()");
-
-        state.switch_surface(ReplSurface::Core).expect("core");
-        assert!(state.session.environment.get("атом?").is_none());
-        assert_eq!(value(&mut state, "(atom 'мама)"), "t");
-        // Canon is not a UI layer: registered spellings still denote Canon
-        // even when no human surface frame is loaded.
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "t");
     }
 
     #[test]
-    fn switching_surface_preserves_user_frame_and_closure_view() {
+    fn switching_name_namespace_preserves_user_frame_and_closure_view() {
         let mut state = core_state();
         value(&mut state, "(define крок 1)");
         value(&mut state, "(define додай-крок (lambda (x) (+ x крок)))");
         assert_eq!(value(&mut state, "(додай-крок 5)"), "6");
 
-        state.switch_surface(ReplSurface::Ukrainian).expect("uk");
+        let before = environment_names(&state);
+        state.switch_surface(ReplSurface::Ukrainian);
+        assert_eq!(before, environment_names(&state));
+
         value(&mut state, "(define крок 2)");
         assert_eq!(value(&mut state, "(додай-крок 5)"), "7");
 
-        state.switch_surface(ReplSurface::English).expect("en");
+        state.switch_surface(ReplSurface::English);
         assert_eq!(value(&mut state, "(додай-крок 5)"), "7");
     }
 
     #[test]
-    fn all_three_human_surfaces_have_catalogs() {
+    fn human_name_namespaces_have_registry_catalogs() {
         let en = render_surface_names(ReplSurface::English).expect("EN catalog");
-        let uk = render_surface_names(ReplSurface::Ukrainian).expect("UK catalog");
+        let ukr = render_surface_names(ReplSurface::Ukrainian).expect("UKR catalog");
         let sa = render_surface_names(ReplSurface::Sanskrit).expect("SA catalog");
-        assert!(en.contains("surface en: stable 137 · candidate 0 · missing 9"));
-        assert!(uk.contains("surface uk: stable 140"));
-        assert!(sa.contains("surface sa: stable 36 · candidate 88 · missing 22"));
+        assert!(en.contains("surface en:"));
+        assert!(ukr.contains("surface укр:"));
+        assert!(sa.contains("surface sa:"));
     }
 
     #[test]
-    fn one_name_help_resolves_across_en_uk_sa() {
+    fn one_name_help_exposes_same_sid_across_namespaces() {
         for requested in ["map", "відобразити", "āvartana"] {
             let help = render_surface_name(ReplSurface::Ukrainian, requested).expect("name help");
-            assert!(help.contains("identity: 0101"));
-            assert!(help.contains("EN: map [stable]"));
-            assert!(help.contains("UK: відобразити [stable]"));
-            assert!(help.contains("SA: āvartana [candidate]"));
+            assert!(help.contains("identity: 00110111"));
+            assert!(help.contains("EN: map"));
+            assert!(help.contains("SA: āvartana"));
         }
     }
 
     #[test]
-    fn trilingual_status_is_measured_not_claimed() {
-        let status = render_surface_status().expect("surface status");
-        assert!(status.contains("trilingual stable: 29/146"));
-        assert!(status.contains("release parity: OPEN"));
+    fn table_status_is_measured_not_claimed() {
+        let status = render_surface_status().expect("name table status");
+        assert!(status.contains("release parity:"));
     }
 
     #[test]
-    fn raw_environment_distinguishes_bootstrap_bindings_from_canon_resolution() {
+    fn language_selector_does_not_install_surface_vocabulary() {
         let mut state = core_state();
-        state.switch_surface(ReplSurface::Ukrainian).expect("uk");
-        let snapshot = state.session.environment.snapshot();
-        // Historical bootstrap spelling may still be visible in raw env;
-        // Ukrainian Canon spelling is never introduced as a mutable alias.
-        assert!(snapshot.iter().any(|(name, _)| name.as_ref() == "atom"));
-        assert!(!snapshot.iter().any(|(name, _)| name.as_ref() == "атом?"));
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "t");
+        let before = environment_names(&state);
+
+        state.switch_surface(ReplSurface::Ukrainian);
+
+        assert_eq!(before, environment_names(&state));
+        assert!(
+            state.session.environment.get("порожній-текст?").is_none(),
+            "Canon name must remain resolver-owned, not a mutable REPL alias"
+        );
+        assert_eq!(value(&mut state, "(порожній-текст? \"\")"), "t");
+    }
+
+    #[test]
+    fn compact_uk_selector_is_only_a_compatibility_name_for_ukr() {
+        assert_eq!(ReplSurface::parse("ук"), Some(ReplSurface::Ukrainian));
+        assert_eq!(ReplSurface::parse("укр"), Some(ReplSurface::Ukrainian));
+        assert_eq!(ReplSurface::parse("ук").unwrap().code(), "укр");
     }
 }
