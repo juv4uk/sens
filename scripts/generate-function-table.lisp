@@ -63,7 +63,7 @@
 
 (def machine-path
   (lambda (sid)
-    (let ((row (find-machine-row sid machine-rows)))
+    (let ((row (find-machine-row (sid-text sid) machine-rows)))
       (cond
         ((atom row) "()")
         (t (third row))))))
@@ -123,6 +123,10 @@
     (not (equal? word (quote ())))))
 
 ; --- formal identity stub: first present name among en/uk/sa, else bare id ---
+(def sid-text
+  (lambda (sid)
+    (write-to-string sid)))
+
 (def formal-stub
   (lambda (sid surfaces)
     (let* ((en (get-surface (quote en) surfaces))
@@ -130,12 +134,12 @@
            (sa (get-surface (quote sa) surfaces)))
       (cond
         ((surface-usable? en)
-         (str+ "identity:" sid "/surface:" (surface-word-text en)))
+         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text en)))
         ((surface-usable? uk)
-         (str+ "identity:" sid "/surface:" (surface-word-text uk)))
+         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text uk)))
         ((surface-usable? sa)
          (str+ "identity:" sid "/surface:" (surface-word-text sa)))
-        (t (string-append "identity:" sid))))))
+        (t (string-append "identity:" (sid-text sid)))))))
 
 ; --- string-join with newline, since core.lisp has none yet. Accumulator-
 ; based (not "car + recurse-in-argument-position"), matching core.lisp's own
@@ -164,7 +168,7 @@
            (sym (get-surface (quote sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
-        "  (" (write-to-string sid) " " formal
+        "  ("" (sid-text sid) "\" " formal
         " (uk " (surface-word-wsm-text uk) ")"
         " (ukr " (surface-word-wsm-text ukr) ")"
         " (en " (surface-word-wsm-text en) ")"
@@ -182,7 +186,7 @@
            (sa (get-surface (quote sa) surfaces))
            (sym (get-surface (quote sym) surfaces)))
       (str+
-        "| `" sid "` | " (surface-word-text uk)
+        "| `" (sid-text sid) "` | " (surface-word-text uk)
         " | " (surface-word-text ukr)
         " | " (surface-word-text en)
         " | " (surface-word-text sa)
