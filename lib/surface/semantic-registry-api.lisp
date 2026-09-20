@@ -133,7 +133,7 @@
                  (quote (en uk ukr sa sym)))))
          (cond
            ((atom identity) (structural-kind empty-list)
-            (quote ()))
+            (semantic-registry-id-for-surface name (cdr rows)))
            ((atom identity) (structural-kind atom)
             identity)
            ((atom identity) (structural-kind pair)
