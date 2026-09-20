@@ -126,6 +126,37 @@ jobs:
           cat tests/function-table-mechanisms-verdict.lisp
           ./target/debug/my-lisp scripts/enforce-function-table-mechanisms.lisp
 
+      - name: Canon-subordinate island math evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > tests/island-math-evidence-verdict.lisp
+          cat tests/island-math-evidence-verdict.lisp
+          ./target/debug/my-lisp scripts/enforce-island-math-evidence.lisp
+
+          cp lib/island-math-evidence.lisp /tmp/island-math-evidence.lisp
+          restore_evidence() { cp /tmp/island-math-evidence.lisp lib/island-math-evidence.lisp; }
+          trap restore_evidence EXIT
+
+          cp tests/fixtures/island-math-evidence/unadmitted-route.lisp lib/island-math-evidence.lisp
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-unadmitted.lisp
+          grep -q 'executor-route-not-admitted-by-canon-projection' /tmp/island-math-unadmitted.lisp
+
+          cp tests/fixtures/island-math-evidence/unsupported-executor.lisp lib/island-math-evidence.lisp
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-executor.lisp
+          grep -q 'unsupported-executor' /tmp/island-math-executor.lisp
+
+          cp tests/fixtures/island-math-evidence/duplicate-route.lisp lib/island-math-evidence.lisp
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-duplicate.lisp
+          grep -q 'duplicate-executor-evidence' /tmp/island-math-duplicate.lisp
+
+          cp tests/fixtures/island-math-evidence/semantic-field-leak.lisp lib/island-math-evidence.lisp
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-semantic-leak.lisp
+          grep -q 'semantic-field-forbidden' /tmp/island-math-semantic-leak.lisp
+
+          restore_evidence
+          trap - EXIT
+
       - name: Lisp-owned machine non-interference guard
         shell: bash
         run: |
