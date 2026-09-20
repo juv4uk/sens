@@ -1,4 +1,4 @@
-use my_lisp::{eval_program, load_core_library, load_time_library, Session, Value};
+use my_lisp::{\n    eval_program, load_core_library, load_time_library, semantic_registry_export, ErrorKind,\n    Session, Value,\n};
 
 fn time_session() -> Session {
     let mut session = Session::default();
@@ -89,7 +89,16 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
-    assert!(session.environment.get("utc-now").is_none());
+    let utc_sid = semantic_registry_export::semantic_id_for_admitted_surface("utc-now")
+        .expect("utc-now must remain admitted by sr/2");
+    assert_eq!(
+        session.environment.get("utc-now"),
+        Some(Value::SemanticRef(utc_sid)),
+        "core exposes semantic identity without pretending time implementation exists"
+    );
+    let error = eval_program("(utc-now)", &mut session)
+        .expect_err("unimplemented SemanticRef must fail closed before time library loads");
+    assert_eq!(error.kind, ErrorKind::Type);
     assert!(matches!(
         session.environment.get("unix-time-now"),
         Some(Value::Builtin(_))
@@ -212,7 +221,20 @@ fn internet_time_sync_is_language_owned_after_time_library_loads() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
-    assert!(session.environment.get("internet-time-sync").is_none());
+    let internet_time_sid =
+        semantic_registry_export::semantic_id_for_admitted_surface("internet-time-sync")
+            .expect("internet-time-sync must remain admitted by sr/2");
+    assert_eq!(
+        session.environment.get("internet-time-sync"),
+        Some(Value::SemanticRef(internet_time_sid)),
+        "core exposes semantic identity without installing the Lisp time implementation"
+    );
+    let error = eval_program(
+        "(internet-time-sync \"clock.example\" 1)",
+        &mut session,
+    )
+    .expect_err("unimplemented SemanticRef must fail closed before time library loads");
+    assert_eq!(error.kind, ErrorKind::Type);
     assert!(matches!(
         session.environment.get("ntp-query-raw"),
         Some(Value::Builtin(_))
