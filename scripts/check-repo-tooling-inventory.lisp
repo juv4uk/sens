@@ -467,11 +467,8 @@
       ((equal? actual expected) (structural-relation same)
        (list (quote repo-tooling-selftest-ok)))
       ((equal? actual expected) (structural-relation distinct)
-       (print
-         (list
-           (quote repo-tooling-selftest-mismatch)
-           actual
-           expected))))))
+       (let ((shown (print actual)))
+         (car (quote ())))))))
 
 (repo-tooling-assert-verdict
   (repo-tooling-verdict (list repo-tooling-sample-row-a) (quote ("a.lisp" "b.lisp")))
