@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn synthetic_registry_constructively_controls_necessary_form_routing() {
         const SYNTHETIC: &str =
-            "((\"00000000\" (en ()) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001000\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001001\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ())))";
+            "(\n  (\"00000000\" (en ()) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001000\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001001\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ())))";
         let index = semantic_registry::build_surface_index(SYNTHETIC);
 
         let route = |surface: &str| {
