@@ -597,15 +597,8 @@ fn install_release_asset(
             if artifact_kind == "tar-bz2" {
                 let install_script = find_named_file(&staging, "install.sh", 3)
                     .ok_or_else(|| format!("{} archive has no install.sh", island.key))?;
-                let mut command = if cfg!(windows) {
-                    let mut command = Command::new("sh");
-                    command.arg(&install_script);
-                    command
-                } else {
-                    let mut command = Command::new("sh");
-                    command.arg(&install_script);
-                    command
-                };
+                let mut command = Command::new("sh");
+                command.arg(&install_script);
                 command.env("INSTALL_ROOT", &target_dir);
                 command.current_dir(
                     install_script
@@ -622,6 +615,35 @@ fn install_release_asset(
                 }
                 fs::rename(&staging, &target_dir).map_err(|error| error.to_string())?;
             }
+        }
+        "zip" => {
+            let staging = target_dir.with_extension(format!("stage-{}", std::process::id()));
+            if staging.exists() {
+                let _ = fs::remove_dir_all(&staging);
+            }
+            fs::create_dir_all(&staging).map_err(|error| error.to_string())?;
+
+            if cfg!(windows) {
+                let mut command = Command::new("powershell");
+                command.args([
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-Command",
+                    "Expand-Archive -LiteralPath $env:MY_LISP_ZIP -DestinationPath $env:MY_LISP_DEST -Force",
+                ]);
+                command.env("MY_LISP_ZIP", &temporary);
+                command.env("MY_LISP_DEST", &staging);
+                run_status_command(&mut command, "Windows ZIP extraction failed")?;
+            } else {
+                let mut command = Command::new("unzip");
+                command.args(["-q", &temporary.to_string_lossy(), "-d", &staging.to_string_lossy()]);
+                run_status_command(&mut command, "ZIP extraction failed")?;
+            }
+
+            if target_dir.exists() {
+                let _ = fs::remove_dir_all(&target_dir);
+            }
+            fs::rename(&staging, &target_dir).map_err(|error| error.to_string())?;
         }
         "msi" => {
             if !cfg!(windows) {
