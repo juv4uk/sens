@@ -33,6 +33,24 @@ fn life_1_scheduler_witness_is_lisp_owned() {
     assert_eq!(
         eval_text(
             &format!(
+                "(life-scheduler-field (quote {invocation}) (quote trigger))"
+            ),
+            &mut session,
+        ),
+        "((projection-ready prolog-substitutions-to-datalog-facts))"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-field (quote {invocation}) (quote provenance-ref))"
+            ),
+            &mut session,
+        ),
+        "(observation-42)"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
                 "(life-scheduler-projection-ready?                    (quote {invocation})                    (quote ((projection-ready                      prolog-substitutions-to-datalog-facts observation-42))))"
             ),
             &mut session,
