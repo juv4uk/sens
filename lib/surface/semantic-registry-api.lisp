@@ -147,18 +147,28 @@
                (string-append "(binary 8) " printed))))
       (second forms))))
 
-; Return the complete row for a binary identity.
-(def semantic-registry-row
-  (lambda (identity)
+; Query already-read registry data without re-entering host I/O.
+(def semantic-registry-row-in
+  (lambda (registry identity)
     (semantic-registry-find-row
       identity
-      (semantic-registry-rows
-        (semantic-registry-read)))))
+      (semantic-registry-rows registry))))
 
-; Return the identity for any admitted EN/UK/UKR/SA/SYM surface.
-(def semantic-registry-id
-  (lambda (surface)
+(def semantic-registry-id-in
+  (lambda (registry surface)
     (semantic-registry-id-for-surface
       surface
-      (semantic-registry-rows
-        (semantic-registry-read)))))
+      (semantic-registry-rows registry))))
+
+; Convenience wrappers for ordinary runtime use.
+(def semantic-registry-row
+  (lambda (identity)
+    (semantic-registry-row-in
+      (semantic-registry-read)
+      identity)))
+
+(def semantic-registry-id
+  (lambda (surface)
+    (semantic-registry-id-in
+      (semantic-registry-read)
+      surface)))
