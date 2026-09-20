@@ -1,0 +1,27 @@
+name: Canon Naming
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "CURRENT.md"
+      - "docs/language-core.md"
+      - "docs/semantic-authority-map.md"
+      - "docs/semantic-authority-map.uk.md"
+      - "docs/ukrainian-api.md"
+      - "language-contract.lisp"
+      - "scripts/generate-ukrainian-api.py"
+      - "scripts/check-canon-naming.lisp"
+      - ".github/workflows/canon-naming.yml"
+  workflow_dispatch:
+
+jobs:
+  canon-naming:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build my-lisp CLI
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Check current-facing canon() terminology
+        run: ./target/debug/my-lisp scripts/check-canon-naming.lisp
