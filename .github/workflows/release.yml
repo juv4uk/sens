@@ -52,7 +52,62 @@ jobs:
         with:
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
-          files: packaging/islands-manifest-v1.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-island-manifest:
+    name: Publish generated self-bootstrap island manifest
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download and hash CLIPS 6.4.2 Windows installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_64_bit_installer_642.msi/download'
+          curl --fail --location --silent --show-error --max-time 120 "$url" -o clips_windows_64_bit_installer_642.msi
+          test -s clips_windows_64_bit_installer_642.msi
+          echo "CLIPS_SHA256=$(sha256sum clips_windows_64_bit_installer_642.msi | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - name: Materialize release manifest with verified asset hashes
+        shell: python
+        run: |
+          import json
+          import os
+          from pathlib import Path
+
+          source = Path("packaging/islands-manifest-v1.json")
+          destination = Path("islands-manifest-v1.json")
+          manifest = json.loads(source.read_text(encoding="utf-8"))
+
+          for island in manifest["islands"]:
+              for entry in island["platforms"]:
+                  if entry.get("provider") != "release-asset":
+                      continue
+                  if not entry.get("url"):
+                      raise SystemExit(f"{island['key']} release asset has no URL")
+                  if entry.get("sha256") is None:
+                      if island["key"] == "clips":
+                          entry["sha256"] = os.environ["CLIPS_SHA256"]
+                      else:
+                          raise SystemExit(f"{island['key']} release asset has no pinned SHA-256")
+                  if len(entry["sha256"]) != 64:
+                      raise SystemExit(f"{island['key']} has invalid generated SHA-256")
+
+          destination.write_text(
+              json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+              encoding="utf-8",
+          )
+          print(destination.read_text(encoding="utf-8"))
+
+      - name: Upload generated manifest
+        uses: softprops/action-gh-release@v1
+        with:
+          files: islands-manifest-v1.json
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
