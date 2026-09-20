@@ -158,7 +158,7 @@ contract-version                       claim-task / release-task
 
 ## Role
 
-Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lisp`, `cml`, `my-idea`). Defines what a my-lisp program means; every other repository must match this, not the reverse.
+Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lisp`, `cml`, `my-idea`). Within this repo, Canon `()` / the Lisp-owned function table determines semantic identity/meaning before any executor or substrate is selected; every other repository and mechanism must match this, not the reverse.
 
 `my-lisp-panini` and `shiva-sutras` research Pāṇinian Sanskrit grammar as a formal system feeding this repo's semantic-atom experiments. They do not become semantic authority for `my-lisp` until their own evidence gates pass.
 
@@ -168,7 +168,8 @@ Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lis
 - `docs/semantic-authority-map.md` — precedence map when sources disagree.
 - ratified ADRs under `docs/adr/` — closed decisions within their stated scope.
 - `tests/fixtures/conformance.lisp` — executable observable facts for conformance.
-- `lib/canon.lisp` — executable Canon 0 + McCarthy-7 witness.
+- `lib/canon.lisp` — executable witnesses for Canon `()` and the historical/minimal McCarthy root; not a second authority table.
+- `lib/surface/semantic-registry.lisp` — Lisp-owned semantic identity/function-table source; generated/mechanism projections must remain subordinate to it.
 - `ecosystem-status.lisp` — curated snapshot pointer, not semantic authority by itself.
 
 ## How to run tests
