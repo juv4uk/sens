@@ -68,3 +68,4 @@
 (authority "crates/my-lisp/tests/semantic_coordinate_matrix_845.rs" observer)
 (authority "tests/fixtures/semantic-coordinate-matrix-845.lisp" semantic-witness)
 (authority "crates/wsm-native-result-types/tests/kernel_availability.rs" observer)
+(authority "crates/wsm-native-result-types/tests/kernel_lifecycle.rs" mechanism)
