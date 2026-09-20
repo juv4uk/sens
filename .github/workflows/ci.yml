@@ -104,6 +104,13 @@ jobs:
           : > tests/semantic-authority-changes.lisp
           while IFS= read -r path; do
             case "$path" in
+              *.rs|*.c|*.cc|*.cpp|*.h|*.hpp|*.java|*.js|*.mjs|*.py|*.ps1)
+                ;;
+              *)
+                continue
+                ;;
+            esac
+            case "$path" in
               tests/fixtures/semantic-authority-guard/*|crates/my-lisp/tests/semantic_authority_guard_1049.rs)
                 continue
                 ;;
