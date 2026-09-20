@@ -9,6 +9,7 @@
 ; - u8-add rejects overflow;
 ; - u8-sub rejects underflow;
 ; - shifts accept counts 0..7 and reject 8 or larger counts;
+; - left shift is fixed-width: bits shifted past bit 7 are discarded;
 ; - printing a u8 is the canonical 8-bit binary spelling.
 (def u8?
   (lambda (value)
