@@ -15,11 +15,11 @@ fi
 
 # Перевіряємо платформу до створення каталогів або встановлення пакетів.
 if [ "$OS" = "Linux" ] && [ "$ARCH" = "x86_64" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.1_linux_amd64"
+    ASSET_NAME="my-lisp-cli_0.40.2_linux_amd64"
 elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.1_macos_arm64"
+    ASSET_NAME="my-lisp-cli_0.40.2_macos_arm64"
 elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "x86_64" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.1_macos_x64"
+    ASSET_NAME="my-lisp-cli_0.40.2_macos_x64"
 else
     echo "Помилка: непідтримувана платформа: $OS $ARCH" >&2
     exit 1
@@ -201,7 +201,7 @@ MY_LISP_TARGET="${INSTALL_DIR}/my-lisp"
 # Оновлюємо саме користувацьку копію, незалежно від старих CLI у PATH.
 # Тимчасовий файл поруч із ціллю дозволяє замінити її одним rename.
 echo "==> Завантаження my-lisp (${ASSET_NAME})..."
-DOWNLOAD_URL="https://github.com/juv4uk/my-lisp/releases/download/l0.40.1/${ASSET_NAME}"
+DOWNLOAD_URL="https://github.com/juv4uk/my-lisp/releases/download/l0.40.2/${ASSET_NAME}"
 CLI_TEMP="$(mktemp "${INSTALL_DIR}/.my-lisp.XXXXXX")"
 trap 'rm -f "$CLI_TEMP"' EXIT
 curl -fL --silent --show-error --connect-timeout 15 --max-time 120 \

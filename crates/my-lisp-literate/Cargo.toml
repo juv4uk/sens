@@ -1,6 +1,6 @@
 [package]
 name = "my-lisp-literate"
-version = "0.40.1"
+version = "0.40.2"
 edition = "2021"
 license-file = "../../LICENSE"
 description = "Literate markdown extraction wrapper for the my-lisp engine"

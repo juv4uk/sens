@@ -1,6 +1,6 @@
 [package]
 name = "my-lisp"
-version = "0.40.1"
+version = "0.40.2"
 edition = "2021"
 license-file = "../../LICENSE"
 description = "Independent my-lisp core · Незалежне ядро my-lisp · Unabhängiger my-lisp-Kern"
