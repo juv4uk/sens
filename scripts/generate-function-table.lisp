@@ -227,7 +227,40 @@
 (def md-output (string-append md-body "
 "))
 
-(write-file "lib/generated/function-table.lisp" wsm-output)
-(write-file "docs/generated/function-table.md" md-output)
+(def function-table-wsm-path "lib/generated/function-table.lisp")
+(def function-table-md-path "docs/generated/function-table.md")
 
-(print (str+ "function-table: " (number->string (length entries)) " identities written"))
+(def function-table-write
+  (lambda ()
+    (write-file function-table-wsm-path wsm-output)
+    (write-file function-table-md-path md-output)
+    (print (str+ "function-table: " (number->string (length entries)) " identities written"))))
+
+(def function-table-check
+  (lambda ()
+    (let ((current-wsm (read-file function-table-wsm-path))
+          (current-md (read-file function-table-md-path)))
+      (cond
+        ((equal? current-wsm wsm-output)
+         (structural-relation same)
+         (cond
+           ((equal? current-md md-output)
+            (structural-relation same)
+            (print "function-table: projections are current"))
+           ((equal? current-md md-output)
+            (structural-relation distinct)
+            (let ((shown (print "function-table: markdown projection is stale")))
+              (car (quote ()))))))
+        ((equal? current-wsm wsm-output)
+         (structural-relation distinct)
+         (let ((shown (print "function-table: Lisp projection is stale")))
+           (car (quote ()))))))))
+
+(cond
+  ((atom *argv*) (function-table-write))
+  ((equal? (car *argv*) "--check")
+   (structural-relation same)
+   (function-table-check))
+  ((equal? (car *argv*) "--check")
+   (structural-relation distinct)
+   (function-table-write)))
