@@ -1,7 +1,17 @@
 {
   "protocol": "my-lisp-islands-manifest/1",
   "release_note": "Self-bootstrap prepares independent runtimes; it never admits semantics.",
-  "profiles": [{"key": "four-kernel", "islands": ["common-lisp", "prolog", "clips", "datalog"]}],
+  "profiles": [
+    {
+      "key": "four-kernel",
+      "islands": [
+        "common-lisp",
+        "prolog",
+        "clips",
+        "datalog"
+      ]
+    }
+  ],
   "islands": [
     {
       "key": "common-lisp",
@@ -13,8 +23,12 @@
           "target": "linux-x86_64",
           "provider": "apt",
           "package": "sbcl",
-          "probe": ["sbcl", "--version"],
-          "probe_expect": "SBCL"
+          "probe": [
+            "sbcl",
+            "--version"
+          ],
+          "probe_expect": "SBCL",
+          "entrypoint": "sbcl"
         },
         {
           "target": "windows-x86_64",
@@ -29,9 +43,15 @@
             "-Command",
             "$env:Path=[Environment]::GetEnvironmentVariable('Path','Machine')+';'+[Environment]::GetEnvironmentVariable('Path','User'); & sbcl.exe --version"
           ],
-          "probe_expect": "SBCL"
+          "probe_expect": "SBCL",
+          "checksum_algorithm": "sha256",
+          "artifact_format": "msi",
+          "entrypoint": "sbcl.exe"
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "common-lisp",
+      "license_acceptance_required": false
     },
     {
       "key": "prolog",
@@ -43,8 +63,12 @@
           "target": "linux-x86_64",
           "provider": "apt",
           "package": "swi-prolog",
-          "probe": ["swipl", "--version"],
-          "probe_expect": "SWI-Prolog"
+          "probe": [
+            "swipl",
+            "--version"
+          ],
+          "probe_expect": "SWI-Prolog",
+          "entrypoint": "swipl"
         },
         {
           "target": "windows-x86_64",
@@ -53,16 +77,24 @@
           "url": "https://www.swi-prolog.org/download/stable/bin/swipl-10.0.2-1.x64.exe",
           "sha256": "2ec1f25be0eafb92e559004782b130774c12573fb4b7e8a917e534754a641ad6",
           "artifact": "nsis",
-          "installer_args": ["/S"],
+          "installer_args": [
+            "/S"
+          ],
           "probe": [
             "powershell",
             "-NoProfile",
             "-Command",
             "$env:Path=[Environment]::GetEnvironmentVariable('Path','Machine')+';'+[Environment]::GetEnvironmentVariable('Path','User'); & swipl.exe --version"
           ],
-          "probe_expect": "SWI-Prolog"
+          "probe_expect": "SWI-Prolog",
+          "checksum_algorithm": "sha256",
+          "artifact_format": "nsis",
+          "entrypoint": "swipl.exe"
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "prolog",
+      "license_acceptance_required": false
     },
     {
       "key": "clips",
@@ -78,7 +110,8 @@
             "sh",
             "-c",
             "ldconfig -p 2>/dev/null | grep -q 'libclips\\.so'"
-          ]
+          ],
+          "entrypoint": "libclips"
         },
         {
           "target": "windows-x86_64",
@@ -93,9 +126,15 @@
             "-NonInteractive",
             "-Command",
             "$found=Get-ChildItem -Path '{install_root}' -Filter clips.dll -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1; if($found){exit 0}else{exit 1}"
-          ]
+          ],
+          "checksum_algorithm": "sha256",
+          "artifact_format": "zip",
+          "entrypoint": "clips.dll"
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "clips",
+      "license_acceptance_required": true
     },
     {
       "key": "datalog",
@@ -113,7 +152,10 @@
           "provider": "embedded",
           "probe": []
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "datalog",
+      "license_acceptance_required": false
     }
   ]
 }
