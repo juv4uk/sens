@@ -120,7 +120,7 @@
           (quote yes))
          ((eq (contains-forbidden-semantic-symbol? (car value)) (quote no))
           (identity-relation same)
-          (contains-forbidden-semantic-symbol? (cdr value)))))))))
+          (contains-forbidden-semantic-symbol? (cdr value))))))))
 
 (def validate-rows
   (lambda (rows)
