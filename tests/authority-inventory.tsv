@@ -139,3 +139,4 @@ crates/my-lisp/tests/semantic_coordinate_join.rs	cond_sid_keeps_negative_math_ev
 crates/my-lisp/tests/cml_bootstrap_frontend.rs	lisp_authored_frontend_emits_bounded_add_envelope	observer	cml-bootstrap-frontend-envelope	lib/compiler/cml-bootstrap.lisp	retained
 crates/my-lisp/tests/cml_bootstrap_frontend.rs	lisp_authored_frontend_fails_closed_outside_bounded_shape	observer	cml-bootstrap-frontend-rejection	lib/compiler/cml-bootstrap.lisp	retained
 crates/my-lisp/tests/cml_bootstrap_frontend.rs	frontend_source_contains_no_semantic_id_table_or_machine_encoding	observer	cml-bootstrap-authority-boundary	lib/compiler/cml-bootstrap.lisp + lib/surface/semantic-registry.lisp	retained
+tests/fixtures/cml-bootstrap-frontend-witness.lisp\tcml-bootstrap-frontend-v0\tsemantic-witness\tcml-bootstrap-frontend-envelope\tlib/compiler/cml-bootstrap.lisp\tretained\n
