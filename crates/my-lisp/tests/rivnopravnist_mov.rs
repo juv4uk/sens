@@ -74,11 +74,7 @@ fn записи_реєстру(корінь: &Форма) -> &[Форма] {
     let Форма::Список(елементи) = корінь else {
         panic!("semantic registry повинен бути списком");
     };
-    let Some(Форма::Атом(заголовок)) = елементи.first() else {
-        panic!("semantic registry не має заголовка");
-    };
-    assert_eq!(заголовок, "sr/2");
-    &елементи[1..]
+    елементи
 }
 
 fn атом(форма: &Форма) -> &str {
@@ -148,7 +144,7 @@ fn семантичні_ідентифікатори_складаються_ті
             .expect("SID must be serialized as a quoted bitstring");
         assert!(
             bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')),
-            "byte SID {ідентифікатор:?} порушує sr/2"
+            "byte SID {ідентифікатор:?} порушує canonical semantic registry"
         );
         assert!(побачені.insert(ідентифікатор), "дубль ID {ідентифікатор}");
     }
