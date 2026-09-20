@@ -1,4 +1,7 @@
-use my_lisp::{\n    eval_program, load_core_library, load_time_library, semantic_registry_export, ErrorKind,\n    Session, Value,\n};
+use my_lisp::{
+    eval_program, load_core_library, load_time_library, semantic_registry_export, ErrorKind,
+    Session, Value,
+};
 
 #[test]
 fn timezone_detect_public_binding_is_language_owned_over_raw_declarations() {
