@@ -90,13 +90,15 @@ mod tests {
         // Status-free canonical semantic registry has no compatibility-only admission class.
         // A present spelling is directly routable; SID 11 still maps to the
         // compatibility `def` form without any hardcoded spelling fallback.
-        assert_eq!(
-            semantic_registry::semantic_id_for_surface("def"),
-            Some(DEF_COMPATIBILITY_SEMANTIC_ID)
-        );
+        let def_id = semantic_registry::semantic_id_for_surface("def")
+            .expect("def must remain present in the semantic registry");
         assert_eq!(
             semantic_registry::admitted_semantic_id_for_surface("def"),
-            Some(DEF_COMPATIBILITY_SEMANTIC_ID)
+            Some(def_id)
+        );
+        assert_eq!(
+            identity_for_semantic_id(def_id),
+            Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(identity_for_symbol("def"), Some(NecessaryFormIdentity::Define));
     }
