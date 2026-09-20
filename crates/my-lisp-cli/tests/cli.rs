@@ -630,3 +630,98 @@ fn sexpr_protocol_connections_do_not_share_state() {
         "a def on one connection leaked into another: {second_response}"
     );
 }
+
+
+#[test]
+fn repl_executes_registry_admitted_ukr_name_without_runtime_surface_selection() {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let dir =
+        std::env::temp_dir().join(format!("my-lisp-cli-test-ukr-canon-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).expect("should create temp home dir");
+
+    let mut child = my_lisp()
+        .env("HOME", &dir)
+        .env("USERPROFILE", &dir)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("binary should spawn");
+    child
+        .stdin
+        .take()
+        .expect("stdin should be piped")
+        .write_all("(порожній-текст? \"\")\n".as_bytes())
+        .expect("should write to stdin");
+    let output = child.wait_with_output().expect("binary should run");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("unknown symbol"),
+        "registry-admitted укр name did not resolve through Canon: {stderr:?}"
+    );
+    assert!(
+        stdout.contains("> t\n") || stdout.lines().any(|line| line.trim() == "t"),
+        "expected true result without selecting a runtime surface: {stdout:?}"
+    );
+}
+
+#[test]
+fn repl_name_namespace_switch_preserves_user_closure_black_box() {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let dir =
+        std::env::temp_dir().join(format!("my-lisp-cli-test-name-switch-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).expect("should create temp home dir");
+
+    let mut child = my_lisp()
+        .env("HOME", &dir)
+        .env("USERPROFILE", &dir)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("binary should spawn");
+    child
+        .stdin
+        .take()
+        .expect("stdin should be piped")
+        .write_all(
+            "(define база 617282)\n\
+             (define наступне (lambda () (+ база 1)))\n\
+             :мова укр\n\
+             (наступне)\n\
+             :мова en\n\
+             (наступне)\n"
+                .as_bytes(),
+        )
+        .expect("should write to stdin");
+    let output = child.wait_with_output().expect("binary should run");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !stderr.contains("unknown symbol"),
+        "namespace selection lost a user binding/closure: {stderr:?}"
+    );
+    assert!(
+        stdout.contains("Мова назв: українська (укр)"),
+        "Ukrainian name namespace was not selected: {stdout:?}"
+    );
+    assert!(
+        stdout.contains("Мова назв: англійська (en)"),
+        "English name namespace was not selected: {stdout:?}"
+    );
+    assert!(
+        stdout.matches("617283").count() >= 2,
+        "closure result was not preserved across both namespace switches: {stdout:?}"
+    );
+}
