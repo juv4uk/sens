@@ -70,7 +70,7 @@ fn every_i5_6400_row_is_a_unique_existing_semantic_identity() {
             seen.insert(id),
             "i5-6400 projection must not contain duplicate byte SID {id}"
         );
-        let registry_prefix = format!("  (\"{id}\" ");
+        let registry_prefix = format!("  ({id} ");
         assert!(
             registry.lines().any(|row| row.starts_with(&registry_prefix)),
             "i5-6400 projection may only reference semantic-registry identities; unknown ID {id}"
