@@ -4,35 +4,53 @@
 islands — Common Lisp, Prolog, CLIPS і Datalog — є окремими runtimes, які
 можна підготувати для виконання, але не можна «встановити в семантику».
 
-## План без побічних дій
+## Один автоматичний шлях
+
+Після встановлення самого `my-lisp` достатньо:
 
 ```bash
-my-lisp islands plan --manifest islands-manifest-v1.json --with prolog,clips
-my-lisp islands status --manifest islands-manifest-v1.json
+my-lisp install --profile four-kernel
 ```
 
-`plan` лише показує версію, provider, provenance, license, platform і, для
-release artifact, SHA-256. Він не завантажує файлів і не запускає package
-manager.
+Без `--manifest` CLI сам завантажує останній release manifest з GitHub Release.
+Без `--root` використовується platform data directory користувача.
 
-`status` описує capability observation:
+Linux автоматично використовує `apt-get` через `sudo`, коли це потрібно.
+Windows автоматично запускає pinned release MSI/NSIS assets у тихих режимах.
+Datalog є embedded kernel і окремо не завантажується.
 
-- `available` — runtime встановлений і пройшов bounded availability probe;
-- `absent` — target підтриманий manifest, але runtime ще не встановлений;
-- `unsupported` — для target немає verified способу установки;
-- `failed-install` — спроба установки не завершилася verified probe.
+Installer не вимагає ручного `curl`, `apt`, `winget` або копіювання runtime.
+Release assets проходять SHA-256 verification перед установкою, а після
+встановлення кожен runtime проходить bounded availability probe.
 
-Жоден із цих станів не додає SID, не змінює значення SID, не нормалізує
-foreign truth/result domain і не запускає silent fallback до іншого island.
+## Що саме встановлюється
 
-## Межа v1
+Профіль `four-kernel` містить чотири ядра:
 
-Поточний v1 підтримує read-only `plan`, спостереження `status` та явний
-`install --dry-run`/`install --apply` для локальних `file://` і HTTP(S)
-release-артефактів. Download має timeout, працює через тимчасовий файл,
-а перед публікацією артефакт читається повністю і SHA-256 порівнюється
-з manifest, а versioned directory публікується транзакційно; повторний запуск
-для того самого перевіреного артефакту є ідемпотентним. Package-manager
-package-manager виклик і license acceptance ще не виконуються; для таких
-записів installer показує план. Bounded executable probe підтримується для
-manifest entrypoint і повертає `available` або `probe-failed`.
+- Common Lisp — SBCL runtime; Linux через distro package, Windows через pinned MSI.
+- Prolog — SWI-Prolog; Linux через distro package, Windows через pinned official executable.
+- CLIPS — Linux через shared-library development package, Windows через pinned 64-bit official runtime archive that contains the shared library.
+- Datalog — вбудоване ядро my-lisp, без окремого runtime download.
+
+Відсутній або невірно перевірений runtime не маскується під `available`.
+Installer fail-closed і не підміняє один island іншим.
+
+## Перевірка
+
+```bash
+my-lisp islands plan --profile four-kernel
+my-lisp islands status
+```
+
+`plan` не має побічних дій. `status` лише спостерігає capability:
+`available`, `absent`, `unsupported` або `probe-failed`.
+
+Для CI та локальних тестів залишається явний `--manifest` та `--root`.
+Fixture manifests можуть містити `file://` assets; release manifest має pinned
+SHA-256 для кожного `release-asset`. Source manifest у репозиторії є шаблоном:
+release workflow обчислює відсутній checksum CLIPS і публікує вже повністю
+перевірений manifest.
+
+Installation ≠ semantic admission: встановлення runtime ніколи не створює,
+не змінює і не перепризначає SID, не нормалізує foreign truth/result domains
+і не додає semantic authority.

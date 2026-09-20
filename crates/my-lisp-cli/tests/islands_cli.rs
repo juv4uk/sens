@@ -37,6 +37,49 @@ fn islands_plan_describes_requested_runtimes_without_installing_them() {
 }
 
 #[test]
+fn islands_plan_uses_four_kernel_profile_by_default() {
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands",
+            "plan",
+            "--manifest",
+            manifest().to_str().expect("UTF-8 manifest path"),
+        ])
+        .output()
+        .expect("my-lisp CLI must run");
+
+    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
+    for required in ["common-lisp", "prolog", "clips", "datalog"] {
+        assert!(stdout.contains(required), "default four-kernel plan omits {required}: {stdout}");
+    }
+}
+
+#[test]
+fn top_level_install_alias_delegates_to_island_bootstrap() {
+    let root = std::env::temp_dir().join(format!("my-lisp-install-alias-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "install",
+            "--manifest",
+            manifest().to_str().expect("UTF-8 manifest path"),
+            "--profile",
+            "four-kernel",
+            "--root",
+            root.to_str().expect("UTF-8 root path"),
+            "--dry-run",
+        ])
+        .output()
+        .expect("my-lisp CLI must run");
+
+    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
+    assert!(stdout.contains("dry-run"));
+    assert!(!root.exists(), "dry-run created {root:?}");
+}
+
+#[test]
 fn islands_plan_expands_the_four_kernel_profile_from_manifest() {
     let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
         .args([

@@ -82,6 +82,7 @@ impl ClipsKernel {
 mod native {
     use super::ClipsKernelError;
     use std::ffi::{c_char, c_longlong, c_ulong, c_void, CStr, CString, OsStr};
+    use std::path::{Path, PathBuf};
     use std::rc::Rc;
 
     #[repr(C)]
@@ -316,6 +317,74 @@ mod native {
             &[]
         }
     }
+
+    fn collect_installed_libraries(
+        root: &Path,
+        names: &[&str],
+        depth: usize,
+        output: &mut Vec<PathBuf>,
+    ) {
+        if depth == 0 {
+            return;
+        }
+        let Ok(entries) = std::fs::read_dir(root) else {
+            return;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() {
+                if path
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .is_some_and(|name| names.iter().any(|candidate| candidate.eq_ignore_ascii_case(name)))
+                {
+                    output.push(path);
+                }
+                continue;
+            }
+            if path.is_dir() {
+                collect_installed_libraries(&path, names, depth - 1, output);
+            }
+        }
+    }
+
+    pub fn installed_library_candidates() -> Vec<PathBuf> {
+        let mut roots = Vec::new();
+
+        #[cfg(windows)]
+        {
+            if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
+                roots.push(PathBuf::from(local_app_data).join("my-lisp").join("islands").join("clips"));
+            }
+            if let Ok(executable) = std::env::current_exe() {
+                if let Some(parent) = executable.parent() {
+                    roots.push(parent.join("islands").join("clips"));
+                }
+            }
+        }
+
+        #[cfg(not(windows))]
+        {
+            if let Some(data_home) = std::env::var_os("XDG_DATA_HOME") {
+                roots.push(PathBuf::from(data_home).join("my-lisp").join("islands").join("clips"));
+            } else if let Some(home) = std::env::var_os("HOME") {
+                roots.push(
+                    PathBuf::from(home)
+                        .join(".local")
+                        .join("share")
+                        .join("my-lisp")
+                        .join("islands")
+                        .join("clips"),
+                );
+            }
+        }
+
+        let mut candidates = Vec::new();
+        for root in roots {
+            collect_installed_libraries(&root, candidate_library_names(), 5, &mut candidates);
+        }
+        candidates
+    }
 }
 
 #[cfg(feature = "native-clips")]
@@ -340,6 +409,14 @@ impl ClipsKernel {
         }
 
         let mut failures = Vec::new();
+
+        for candidate in native::installed_library_candidates() {
+            match Self::load(&candidate) {
+                Ok(kernel) => return Ok(kernel),
+                Err(error) => failures.push(format!("{}: {error}", candidate.display())),
+            }
+        }
+
         for candidate in native::candidate_library_names() {
             match Self::load(candidate) {
                 Ok(kernel) => return Ok(kernel),

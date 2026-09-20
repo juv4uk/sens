@@ -228,8 +228,10 @@ fn main() {
     if args.len() > 1 {
         let arg = &args[1];
 
-        if arg == "islands" {
-            match islands::run(&args[2..]) {
+        if arg == "install" {
+            let mut island_args = vec!["install".to_string()];
+            island_args.extend_from_slice(&args[2..]);
+            match islands::run(&island_args) {
                 Ok(output) => println!("{output}"),
                 Err(error) => {
                     eprintln!("my-lisp islands: {error}");
@@ -256,7 +258,8 @@ fn main() {
             println!("Canonical source extension: .lisp (per my-lisp#81 -- extension != semantics); .wsm/.my remain supported legacy aliases; .всм/.мій/.лісп are equal-standing Ukrainian spellings of the same aliases");
             println!("\nOptions:");
             println!("  lsp                          Run the Language Server (LSP over stdio)");
-            println!("  islands plan|status           Inspect release-island availability without semantic admission");
+            println!("  install [--profile four-kernel]  Automatically bootstrap the execution-island runtimes for the current host");
+            println!("  islands plan|install|status      Inspect, install, or observe execution islands without semantic admission");
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
             println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
