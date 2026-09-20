@@ -1,0 +1,26 @@
+name: Release Preflight
+
+on:
+  pull_request:
+    paths:
+      - "Cargo.lock"
+      - "Cargo.toml"
+      - "crates/**/Cargo.toml"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-preflight.yml"
+  workflow_dispatch:
+
+jobs:
+  release-preflight:
+    name: cargo test + full workspace clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release-preflight
+      - name: Full workspace tests
+        run: cargo test --workspace
+      - name: Full workspace clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
