@@ -97,4 +97,3 @@ fn full_ukr_names_preserve_action_protocol_and_representation_semantics() {
         );
     }
 }
-
