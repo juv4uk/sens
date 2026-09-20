@@ -579,7 +579,7 @@
        (my-cond-has-migration-clause? (cdr clauses)))
       ((eq (length (car clauses)) 2) (identity-relation same) t)
       ((eq (length (car clauses)) 2) (identity-relation distinct)
-       (my-cond-has-migration-clause? (cdr clauses)))))))
+       (my-cond-has-migration-clause? (cdr clauses))))))
 
 (def my-eval-cond-result-mode
   (lambda (clauses env migration-compatibility?)
