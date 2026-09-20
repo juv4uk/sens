@@ -1,4 +1,4 @@
-use my_lisp::{eval_program, Session};
+use my_lisp::{eval_program, parse, Session};
 
 #[test]
 fn semantic_registry_is_read_and_queried_by_lisp_itself() {
@@ -27,6 +27,12 @@ fn semantic_registry_is_read_and_queried_by_lisp_itself() {
 
     assert_eq!(
         result,
-        r#"((binary 8) 170 "00000001" quote "00000001" "10101000" "00000101" "11111111" () "10101000" (structural-relation same))"#
+        r#"((binary 8) 170 (structural-relation same) "00000001" quote як-є як-є svarūpa "'" "00000001" "00000001" "00000001" "10101000" "10101000" "00000101" "11111111" "10101000" (structural-relation same))"#
     );
+}
+
+#[test]
+fn rust_semantic_registry_generator_is_valid_lisp() {
+    parse(include_str!("../../../scripts/generate-rust-semantic-registry.lisp"))
+        .expect("Rust semantic-registry generator must remain valid Lisp source");
 }
