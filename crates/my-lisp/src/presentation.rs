@@ -29,7 +29,7 @@ fn uk_operation_name(name: &str) -> String {
 fn uk_semantic_name(semantic_id: u8) -> String {
     semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
         .into_iter()
-        .find_map(|(namespace, name)| (namespace == "uk").then_some(name.to_string()))
+        .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
         .unwrap_or_else(|| format!("SID {}", semantic_registry::semantic_id_bits(semantic_id)))
 }
 
