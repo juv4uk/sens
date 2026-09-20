@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Перевіряє рівноправність UK/EN/SA від status-free byte-SID authority.
+"""Перевіряє рівноправність УК/EN/SA від status-free byte-SID authority.
 
-Кожна identity має фіксовані en/uk/ukr/sa/sym слоти.
+Кожна identity має фіксовані en/ук/укр/sa/sym слоти.
 Слот містить spelling або (); окремої системи stable/candidate/missing немає.
 """
 
@@ -14,11 +14,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = REPO_ROOT / "lib" / "surface" / "semantic-registry.lisp"
-HUMAN_SURFACES = ("uk", "en", "sa")
-ALL_SURFACES = ("en", "uk", "ukr", "sa", "sym")
+HUMAN_SURFACES = ("ук", "en", "sa")
+ALL_SURFACES = ("en", "ук", "укр", "sa", "sym")
 ENTRY = re.compile(r"^\s*\(([01]{8})\s+(.*)\)\s*$")
 SURFACE = re.compile(
-    r'\((en|uk|ukr|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)'
+    r'\((en|ук|укр|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)'
 )
 
 
