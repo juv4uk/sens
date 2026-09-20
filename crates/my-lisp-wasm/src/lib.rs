@@ -44,7 +44,7 @@ impl WebSurface {
         match value.trim().to_lowercase().as_str() {
             "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
-            "ук" | "ук" | "українська" => Some(Self::Ukrainian),
+            "ук" | "українська" => Some(Self::Ukrainian),
             "sa" | "sanskrit" | "санскрит" => Some(Self::Sanskrit),
             _ => None,
         }
@@ -214,7 +214,7 @@ pub fn reset_session() {
 fn set_surface_impl(name: &str) -> Result<String, String> {
     init_if_needed()?;
     let surface = WebSurface::parse(name)
-        .ok_or_else(|| format!("unknown surface: {name}; expected uk|en|sa|core"))?;
+        .ok_or_else(|| format!("unknown surface: {name}; expected ук|en|sa|core"))?;
     SESSION.with(|slot| {
         let mut guard = slot.borrow_mut();
         let state = guard.as_mut().expect("session set by init_if_needed");
