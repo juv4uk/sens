@@ -859,7 +859,7 @@ fn install_release_asset(
     }
 
     match artifact_kind {
-        "file" => {
+        "file" | "raw-binary" => {
             let staging = target_dir.with_extension(format!("stage-{}", std::process::id()));
             if staging.exists() {
                 let _ = fs::remove_dir_all(&staging);
@@ -1183,17 +1183,20 @@ pub fn run(args: &[String]) -> Result<String, String> {
                 } else {
                     bounded_probe(&probe, entry.probe_expect.as_deref())
                 };
-                let status = if observed == "available" {
+                let installed_locally = target_dir.join("install-record.txt").is_file();
+                let status = if (installed_locally || entry.provider != "release-asset")
+                    && observed == "available"
+                {
                     "available".to_string()
                 } else if let Some(state) = read_install_state(&root, &island, target) {
                     if matches!(state.as_str(), "installing" | "failed-install" | "probe-failed") {
                         state
-                    } else if target_dir.join("install-record.txt").is_file() {
+                    } else if installed_locally {
                         "probe-failed".to_string()
                     } else {
                         "absent".to_string()
                     }
-                } else if target_dir.join("install-record.txt").is_file() {
+                } else if installed_locally {
                     "probe-failed".to_string()
                 } else {
                     "absent".to_string()
