@@ -27,3 +27,21 @@
         (semantic-registry-row-in registry 11111111)
         (write-to-string invoke-roundtrip)
         (equal? invoke-roundtrip (semantic-registry-row-id (semantic-registry-row-in registry 10101000)))))))
+
+; Machine-readable handoff for downstream consumers.
+; Git commit pinning is provenance and stays outside language semantics.
+; The digest is content identity of the exact canonical source bytes; identities
+; are projected directly from the parsed authority and remain Binary values.
+(def semantic-registry-handoff-witness
+  (lambda (source)
+    (let* ((registry (semantic-registry-read-source source))
+           (rows (semantic-registry-rows registry)))
+      (list
+        (quote semantic-registry-handoff/1)
+        (list (quote authority) semantic-registry-source-path)
+        (list (quote revision-policy) (quote pin-git-commit-containing-authority))
+        (list (quote source-digest) (sha256-hex source))
+        (list (quote binary-width) 8)
+        (list (quote row-count) (length rows))
+        (list (quote binary-round-trip) (semantic-registry-all-ids-round-trip rows))
+        (cons (quote identities) (semantic-registry-row-ids rows))))))
