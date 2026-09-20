@@ -105,14 +105,14 @@ fn uk_le_ge_comparisons_work() {
             .unwrap()
             .value
             .to_string(),
-        "t"
+        "1"
     );
     assert_eq!(
         eval_program("(не-менше? 3 3)", &mut s)
             .unwrap()
             .value
             .to_string(),
-        "t"
+        "1"
     );
 }
 
