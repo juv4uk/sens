@@ -106,10 +106,3 @@
 
 (def verdict (validate-rows metadata-rows))
 (print verdict)
-
-(cond
-  ((equal? verdict (quote (function-table-mechanisms-ok)))
-   (structural-relation same)
-   verdict)
-  (t
-   (car (quote ()))))
