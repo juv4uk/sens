@@ -212,6 +212,19 @@
               (t (x86-decimal-digits? (string-rest text)))))
            (t (x86-decimal-digits? text))))))))
 
+(def x86-operand-in-inclusive-range?
+  (lambda (value lower upper)
+    ; Exact-Q comparisons answer 1 (так) / 0 (ні), and 0 is truthy -- so a
+    ; bare `and` over comparison results accepted every operand, overflowing
+    ; u64-imm/disp8 slots. E1 (#216): explicit expected-result domains,
+    ; reduced to a t/() structural predicate so it is safe as a cond query.
+    (cond
+      ((>= value lower) 1
+        (cond
+          ((<= value upper) 1 t)
+          ((<= value upper) 0 (quote ()))))
+      ((>= value lower) 0 (quote ())))))
+
 (def x86-u64-imm?
   (lambda (operand)
     (cond
@@ -223,7 +236,7 @@
           (let ((value (second operand)))
             (cond
               ((x86-exact-integer? value)
-               (and (>= value 0) (<= value 18446744073709551615)))
+               (x86-operand-in-inclusive-range? value 0 18446744073709551615))
               (t (quote ())))))
          (t (quote ()))))
       (t (quote ())))))
@@ -233,7 +246,7 @@
     (cond
       ((x86-exact-integer? value)
        (cond
-         ((and (>= value 0) (<= value 18446744073709551615))
+         ((x86-operand-in-inclusive-range? value 0 18446744073709551615)
           (list (quote u64-imm) value))
          (t (x86-machine-operand-rejection (quote u64-imm) value))))
       (t (x86-machine-operand-rejection (quote u64-imm) value)))))
@@ -260,7 +273,7 @@
           (let ((value (second operand)))
             (cond
               ((x86-exact-integer? value)
-               (and (>= value -128) (<= value 127)))
+               (x86-operand-in-inclusive-range? value -128 127))
               (t (quote ())))))
          (t (quote ()))))
       (t (quote ())))))
@@ -270,7 +283,7 @@
     (cond
       ((x86-exact-integer? value)
        (cond
-         ((and (>= value -128) (<= value 127))
+         ((x86-operand-in-inclusive-range? value -128 127)
           (list (quote disp8) value))
          (t (x86-machine-operand-rejection (quote disp8) value))))
       (t (x86-machine-operand-rejection (quote disp8) value)))))

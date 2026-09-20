@@ -221,6 +221,7 @@
   (lambda (f values acc)
     (cond
       ((atom values) (structural-kind empty-list) (reverse acc))
+      ((atom values) (structural-kind atom) (quote ()))
       ((atom values) (structural-kind pair)
        (map-onto f (cdr values) (cons (f (car values)) acc))))))
 

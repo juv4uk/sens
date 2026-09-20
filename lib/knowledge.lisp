@@ -282,10 +282,10 @@
       ((atom term) t)
       ((atom (car term))
        (cond
-         ((eq (car term) (quote var))
-          (cond
-            ((= (length term) 2) (symbol? (second term)))
-            (t (quote ()))))
+((eq (car term) (quote var))
+           (cond
+             ((= (length term) 2) 1 (symbol? (second term)))
+             ((= (length term) 2) 0 (quote ()))))
          ((knowledge-proper-list? term) (knowledge-terms-valid? term))
          (t (quote ()))))
       (t (quote ())))))

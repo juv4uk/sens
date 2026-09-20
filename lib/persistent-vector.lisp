@@ -62,7 +62,10 @@
   (lambda (n) (cond ((atom n) 0) (t (vnode-height n)))))
 
 (def vmax2
-  (lambda (a b) (cond ((< a b) b) (t a))))
+  (lambda (a b)
+    (cond
+      ((< a b) 1 b)
+      ((< a b) 0 a))))
 
 (def vmake-balanced-node
   (lambda (index value left right)

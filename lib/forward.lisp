@@ -1014,9 +1014,23 @@
 
 (def match-test-condition
   (lambda (expression subst)
-    (cond
-      ((eval (apply-subst expression subst)) (list subst))
-      (t (quote ())))))
+    (let ((result (eval (apply-subst expression subst))))
+      ; E1 (#216): under exact-Q a false comparison answers 0, and 0 is
+      ; truthy -- the pre-exact-Q two-part `(cond (result (list subst)) (t ()))`
+      ; treated a falsy test as a success. A test condition is falsy when its
+      ; evaluation returns () or the exact-Q 0 answer; equal?-driven clauses
+      ; keep this faithful for structural truth values too (t, (structural-
+      ; relation same/distinct)) without feeding comparison results to cond
+      ; as numeric clauses.
+      (cond
+        ((equal? result (quote ())) (structural-relation same)
+         (quote ()))
+        ((equal? result (quote ())) (structural-relation distinct)
+         (cond
+           ((equal? result 0) (structural-relation same)
+            (quote ()))
+           ((equal? result 0) (structural-relation distinct)
+            (list subst))))))))
 
 ; Step 15: `(exists <CE>+)`/`(forall <first-CE> <CE>+)` — the same class of
 ; bug as `not`/`or`/`and`/`test` (Steps 7/10-12), found by importing a

@@ -19,8 +19,8 @@
                            (- (quotient yoe 4) (quotient yoe 100)))))
            (mp (quotient (+ (* 5 doy) 2) 153))
            (day (+ (- doy (quotient (+ (* 153 mp) 2) 5)) 1))
-           (month (+ mp (cond ((< mp 10) 3) (t -9))))
-           (year (+ y (cond ((<= month 2) 1) (t 0)))))
+           (month (+ mp (cond ((< mp 10) 1 3) ((< mp 10) 0 -9))))
+           (year (+ y (cond ((<= month 2) 1 1) ((<= month 2) 0 0)))))
       (list year month day))))
 
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
@@ -65,20 +65,47 @@
 ;   host, mode, stratum, ntp-seconds, fraction
 ; Successful interpretation preserves the existing public observation shape:
 ;   (accepted host unix-seconds nanosecond)
+; Exact-Q answers 1 (так) / 0 (ні), and 0 is truthy, so `or` / `and` / `not`
+; over comparison results no longer decide anything (or collapses every
+; operand, falsy or not, to t). E1 (#216): validity is decided by explicit
+; three-part gates whose queries answer 1/0 and are consumed by expected
+; 1/0 slots; canonical cond accepts no bare t/() clause query.
+(def internet-time-mode-valid?
+  (lambda (mode)
+    (cond
+      ((= mode 4) 1 1)
+      ((= mode 4) 0
+       (cond
+         ((= mode 5) 1 1)
+         ((= mode 5) 0 0))))))
+
+(def internet-time-stratum-valid?
+  (lambda (stratum)
+    (cond
+      ((= stratum 0) 1 0)
+      ((= stratum 0) 0
+       (cond
+         ((> stratum 15) 1 0)
+         ((> stratum 15) 0 1))))))
+
 (def internet-time-fields->observation
   (lambda (host mode stratum ntp-seconds fraction)
     (cond
-      ((not (or (= mode 4) (= mode 5)))
-       (list (quote rejected) (quote invalid-response)))
-      ((or (= stratum 0) (> stratum 15))
-       (list (quote rejected) (quote invalid-response)))
-      ((< ntp-seconds 2208988800)
-       (list (quote rejected) (quote invalid-epoch)))
-      (t
-       (list (quote accepted)
-             host
-             (- ntp-seconds 2208988800)
-             (quotient (* fraction 1000000000) 4294967296))))))
+      ((internet-time-mode-valid? mode) 1
+        (cond
+          ((internet-time-stratum-valid? stratum) 1
+            (cond
+              ((< ntp-seconds 2208988800) 1
+               (list (quote rejected) (quote invalid-epoch)))
+              ((< ntp-seconds 2208988800) 0
+               (list (quote accepted)
+                     host
+                     (- ntp-seconds 2208988800)
+                     (quotient (* fraction 1000000000) 4294967296)))))
+          ((internet-time-stratum-valid? stratum) 0
+            (list (quote rejected) (quote invalid-response)))))
+      ((internet-time-mode-valid? mode) 0
+        (list (quote rejected) (quote invalid-response))))))
 
 ; Adapter for the raw host boundary. The host returns either:
 ;   (ntp-fields host mode stratum ntp-seconds fraction)
@@ -189,11 +216,14 @@
       ((string-membership-helper name)
        (class-membership string nonmember)
        (list (quote rejected) (quote invalid-name)))
-      ((not (and (= offset-seconds offset-seconds)
-                 (>= offset-seconds -86400)
-                 (<= offset-seconds 86400)))
+      ((< offset-seconds -86400) 1
        (list (quote rejected) (quote invalid-offset)))
-      (t (list (quote accepted) (list (quote timezone) name offset-seconds))))))
+      ((< offset-seconds -86400) 0
+       (cond
+         ((> offset-seconds 86400) 1
+          (list (quote rejected) (quote invalid-offset)))
+         ((> offset-seconds 86400) 0
+          (list (quote accepted) (list (quote timezone) name offset-seconds))))))))
 
 (def timezone-name
   (lambda (config)

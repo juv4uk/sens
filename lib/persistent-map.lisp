@@ -67,7 +67,10 @@
   (lambda (n) (cond ((atom n) 0) (t (node-height n)))))
 
 (def max2
-  (lambda (a b) (cond ((< a b) b) (t a))))
+  (lambda (a b)
+    (cond
+      ((< a b) 1 b)
+      ((< a b) 0 a))))
 
 ; Rebuilds a node with a recomputed height from its (possibly new)
 ; children — every insert/rotation goes through this, never hand-tracks
