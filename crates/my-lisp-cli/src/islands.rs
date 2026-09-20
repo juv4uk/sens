@@ -55,6 +55,24 @@ fn bounded_probe(command: &[String]) -> &'static str {
     }
 }
 
+fn fetch_artifact(url: &str, temporary: &std::path::Path) -> Result<(), String> {
+    if let Some(source) = url.strip_prefix("file://") {
+        fs::copy(source, temporary).map_err(|error| format!("cannot read artifact {source}: {error}"))?;
+        return Ok(());
+    }
+    if !(url.starts_with("https://") || url.starts_with("http://")) {
+        return Err("installer supports file:// and http(s):// release assets only".to_string());
+    }
+    let status = Command::new("curl")
+        .args(["--fail", "--silent", "--show-error", "--location", "--max-time", "60", "--output"])
+        .arg(temporary)
+        .arg(url)
+        .status()
+        .map_err(|error| format!("cannot start curl: {error}"))?;
+    if !status.success() { return Err(format!("download failed for {url}")); }
+    Ok(())
+}
+
 fn current_target() -> &'static str {
     match (std::env::consts::OS, std::env::consts::ARCH) {
         ("linux", "x86_64") => "linux-x86_64",
@@ -163,11 +181,7 @@ pub fn run(args: &[String]) -> Result<String, String> {
                 match entry {
                     Some(entry) if entry.provider == "release-asset" && apply => {
                         let url = entry.url.as_deref().ok_or_else(|| format!("release asset {} has no URL", island.key))?;
-                        let source = url.strip_prefix("file://").ok_or_else(|| "installer v1 supports verified file:// artifacts only".to_string())?;
-                        let bytes = fs::read(source).map_err(|error| format!("cannot read artifact {source}: {error}"))?;
-                        let actual = my_lisp::sha256_source(&bytes).iter().map(|byte| format!("{byte:02x}")).collect::<String>();
                         let expected = entry.sha256.as_deref().ok_or_else(|| format!("release asset {} has no SHA-256", island.key))?;
-                        if actual != expected { return Err(format!("checksum mismatch for {}", island.key)); }
                         let target_dir = std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target);
                         let runtime = target_dir.join("runtime.bin");
                         if runtime.is_file() {
@@ -179,11 +193,21 @@ pub fn run(args: &[String]) -> Result<String, String> {
                             rows.push(format!("already installed {}", target_dir.display()));
                             continue;
                         }
-                        let temporary = target_dir.with_extension("tmp");
-                        fs::create_dir_all(&temporary).map_err(|error| error.to_string())?;
-                        fs::write(temporary.join("runtime.bin"), &bytes).map_err(|error| error.to_string())?;
+                        let temporary = std::path::PathBuf::from(format!("{}.tmp-{}", target_dir.display(), std::process::id()));
+                        if temporary.exists() { let _ = fs::remove_file(&temporary); }
                         fs::create_dir_all(target_dir.parent().ok_or_else(|| "invalid install target".to_string())?).map_err(|error| error.to_string())?;
-                        fs::rename(&temporary, &target_dir).map_err(|error| error.to_string())?;
+                        if let Err(error) = fetch_artifact(url, &temporary) {
+                            let _ = fs::remove_file(&temporary);
+                            return Err(error);
+                        }
+                        let bytes = fs::read(&temporary).map_err(|error| error.to_string())?;
+                        let actual = my_lisp::sha256_source(&bytes).iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+                        if actual != expected { let _ = fs::remove_file(&temporary); return Err(format!("checksum mismatch for {}", island.key)); }
+                        let staging = target_dir.with_extension(format!("stage-{}", std::process::id()));
+                        if staging.exists() { let _ = fs::remove_dir_all(&staging); }
+                        fs::create_dir_all(&staging).map_err(|error| error.to_string())?;
+                        fs::rename(&temporary, staging.join("runtime.bin")).map_err(|error| error.to_string())?;
+                        fs::rename(&staging, &target_dir).map_err(|error| error.to_string())?;
                         rows.push(format!("installed {}", target_dir.display()));
                     }
                     Some(entry) if entry.provider != "unsupported" => rows.push(format!(
