@@ -13,6 +13,18 @@ if [ "$OS" != "Linux" ] && [ "$OS" != "Darwin" ]; then
     exit 1
 fi
 
+# Перевіряємо платформу до створення каталогів або встановлення пакетів.
+if [ "$OS" = "Linux" ] && [ "$ARCH" = "x86_64" ]; then
+    ASSET_NAME="my-lisp-cli_0.40.2_linux_amd64"
+elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ]; then
+    ASSET_NAME="my-lisp-cli_0.40.2_macos_arm64"
+elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "x86_64" ]; then
+    ASSET_NAME="my-lisp-cli_0.40.2_macos_x64"
+else
+    echo "Помилка: непідтримувана платформа: $OS $ARCH" >&2
+    exit 1
+fi
+
 INSTALL_DIR="${HOME}/.local/bin"
 LOCAL_LIB="${HOME}/.local/lib"
 mkdir -p "$INSTALL_DIR" "$LOCAL_LIB"
@@ -184,32 +196,26 @@ ensure_clips
 # Завантаження my-lisp
 # ──────────────────────────────────────────────────────────────────────────────
 
-if [ "$OS" = "Linux" ] && [ "$ARCH" = "x86_64" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.1_linux_amd64"
-elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.1_macos_arm64"
-elif [ "$OS" = "Darwin" ]; then
-    ASSET_NAME="my-lisp-cli_0.40.1_macos_x64"
-else
-    echo "Помилка: непідтримувана платформа: $OS $ARCH" >&2
-    exit 1
-fi
-
 MY_LISP_TARGET="${INSTALL_DIR}/my-lisp"
 
-if ! has my-lisp; then
-    echo "==> Завантаження my-lisp (${ASSET_NAME})..."
-    DOWNLOAD_URL="https://github.com/juv4uk/my-lisp/releases/latest/download/${ASSET_NAME}"
-    if ! curl -fL --silent "$DOWNLOAD_URL" -o "$MY_LISP_TARGET" 2>/dev/null; then
-        # Fallback до релізу l0.40.1
-        curl -fL "https://github.com/juv4uk/my-lisp/releases/download/l0.40.1/${ASSET_NAME}" -o "$MY_LISP_TARGET"
-    fi
-    chmod +x "$MY_LISP_TARGET"
-    export PATH="${INSTALL_DIR}:${PATH}"
-fi
+# Оновлюємо саме користувацьку копію, незалежно від старих CLI у PATH.
+# Тимчасовий файл поруч із ціллю дозволяє замінити її одним rename.
+echo "==> Завантаження my-lisp (${ASSET_NAME})..."
+DOWNLOAD_URL="https://github.com/juv4uk/my-lisp/releases/download/l0.40.2/${ASSET_NAME}"
+CLI_TEMP="$(mktemp "${INSTALL_DIR}/.my-lisp.XXXXXX")"
+trap 'rm -f "$CLI_TEMP"' EXIT
+curl -fL --silent --show-error --connect-timeout 15 --max-time 120 \
+    "$DOWNLOAD_URL" -o "$CLI_TEMP"
+test -s "$CLI_TEMP"
+chmod 755 "$CLI_TEMP"
+# Не замінюємо попередній файл, якщо новий CLI навіть не запускається.
+CLI_VERSION="$("$CLI_TEMP" --version)"
+mv -f "$CLI_TEMP" "$MY_LISP_TARGET"
+trap - EXIT
+export PATH="${INSTALL_DIR}:${PATH}"
 
-EXE="$(command -v my-lisp || echo "$MY_LISP_TARGET")"
-echo "==> my-lisp готовий до роботи: $("$EXE" --version)"
+EXE="$MY_LISP_TARGET"
+echo "==> my-lisp готовий до роботи: ${CLI_VERSION}"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Встановлення решти островів через my-lisp install

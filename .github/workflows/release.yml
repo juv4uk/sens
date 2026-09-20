@@ -3,35 +3,30 @@ name: Release
 on:
   push:
     tags: ['l*']
-    branches: ['l*']
 
 permissions:
   contents: write
 
 jobs:
-  retag-unpublished-release:
-    name: Retag unpublished release snapshot
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - name: Move unpublished release tag to this exact commit
-        if: github.ref_type == 'branch'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git tag -f "$GITHUB_REF_NAME" "$GITHUB_SHA"
-          git push --force origin "refs/tags/$GITHUB_REF_NAME"
-
   test:
-    needs: retag-unpublished-release
     name: focused release smoke before publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - name: Перевірити версію тегу та інсталятор
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, tomllib
+          package = tomllib.loads(pathlib.Path("crates/my-lisp-cli/Cargo.toml").read_text())["package"]
+          assert os.environ["RELEASE_TAG"] == "l" + package["version"], "tag/package version mismatch"
+          PY
+          python3 -m unittest discover -s packaging/tests -v
+      - name: Узгодженість версій усіх релізних crates
+        run: cargo test --locked -p my-lisp-lsp --test release_parity
       - name: translation boundary regression
         run: cargo test -p my-lisp --test translation_boundary
       - name: Ukrainian/Sanskrit surface regression
@@ -40,6 +35,8 @@ jobs:
         run: cargo test -p my-lisp-cli --test islands_cli
       - name: release asset contract
         run: cargo test -p my-lisp-cli --test islands_release_asset
+      - name: Перевірити зупинку релізного скрипта на помилках
+        run: MY_LISP_RELEASE_TEST_BINARY="$PWD/target/debug/my-lisp" python3 -m unittest discover -s packaging/tests -p test_release.py -v
       - name: focused release clippy
         run: cargo clippy -p my-lisp -p my-lisp-cli --all-targets -- -D warnings
 

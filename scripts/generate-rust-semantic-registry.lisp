@@ -25,22 +25,28 @@
 (def rust-string
   (lambda (value)
     (cond
-      ((string? value)
-       (identity-relation same)
+      ((string-membership-helper value)
+       (class-membership string member)
        (write-to-string value))
-      ((equal? value (quote ()))
-       (write-to-string ""))
-      (t
-       (str+ "\"" (write-to-string value) "\""))))))
+      ((string-membership-helper value)
+       (class-membership string nonmember)
+       (write-to-string (symbol->string value))))))
+
 
 (def render-surface
   (lambda (entry)
-    (str+
-      "SemanticSurface { namespace: "
-      (rust-string (car entry))
-      ", name: "
-      (rust-string (second entry))
-      " }, ")))
+    (let ((name (second entry)))
+      (cond
+        ((equal? name (quote ()))
+         (structural-relation same)
+         "")
+        (t
+         (str+
+           "SemanticSurface { namespace: "
+           (rust-string (car entry))
+           ", name: "
+           (rust-string name)
+           " }, "))))))
 
 (def render-surfaces
   (lambda (surfaces)

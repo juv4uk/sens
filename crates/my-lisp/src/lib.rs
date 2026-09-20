@@ -312,12 +312,11 @@ pub fn is_quote_surface_name(name: &str) -> bool {
     eval::canon::is_quote_identity(name)
 }
 
-/// True for any admitted surface of `define`/`def` (byte SIDs 9 and 11).
+/// True for any admitted surface whose Lisp-owned evaluator dispatch class is Define.
 pub fn is_define_surface_name(name: &str) -> bool {
     matches!(
-        semantic_registry::admitted_semantic_id_for_surface(name),
-        Some(crate::eval::necessary_forms::DEFINE_SEMANTIC_ID
-            | crate::eval::necessary_forms::DEF_COMPATIBILITY_SEMANTIC_ID)
+        crate::eval::necessary_forms::identity_for_symbol(name),
+        Some(crate::eval::necessary_forms::NecessaryFormIdentity::Define)
     )
 }
 

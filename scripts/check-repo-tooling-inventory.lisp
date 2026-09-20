@@ -467,7 +467,12 @@
       ((equal? actual expected) (structural-relation same)
        (list (quote repo-tooling-selftest-ok)))
       ((equal? actual expected) (structural-relation distinct)
-       (let ((shown (print actual)))
+       (let ((shown
+               (print
+                 (list
+                   (quote repo-tooling-selftest-failed)
+                   actual
+                   expected))))
          (car (quote ())))))))
 
 (repo-tooling-assert-verdict
