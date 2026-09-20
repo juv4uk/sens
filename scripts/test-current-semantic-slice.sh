@@ -168,3 +168,12 @@ if [[ "$science_projection_status" != "(scientific-constant-knowledge-projection
   printf 'scientific constant knowledge-projection witness failed: %s\n' "$science_projection_status" >&2
   exit 1
 fi
+
+
+# #1047: mechanism selection occurs only after surface->SID resolution and may
+# choose only executor routes already admitted by Canon/function-table metadata.
+mechanism_selector_status="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/mechanism-selector-1047-witness.lisp)"
+if [[ "$mechanism_selector_status" != "(mechanism-selector-1047 (status pass))" ]]; then
+  printf 'mechanism selector Lisp witness failed: %s\n' "$mechanism_selector_status" >&2
+  exit 1
+fi
