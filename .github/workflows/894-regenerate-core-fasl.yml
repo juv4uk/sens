@@ -1,0 +1,36 @@
+name: #894 regenerate core FASL
+
+on:
+  push:
+    branches:
+      - fix/894-core-fasl-parity
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-core-fasl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/894-core-fasl-parity
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Regenerate current core FASL
+        run: |
+          set -euo pipefail
+          cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core.lisp lib/core.lisp.fasl
+          git diff -- lib/core.lisp.fasl
+      - name: Commit regenerated snapshot when changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- lib/core.lisp.fasl; then
+            echo "core FASL already matches current source"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/core.lisp.fasl
+          git commit -m "fix(#894): regenerate core FASL from current source"
+          git push origin HEAD:fix/894-core-fasl-parity
