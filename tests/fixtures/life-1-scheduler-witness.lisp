@@ -66,7 +66,7 @@
          (cond
            ((eq (car (cdr selection)) (quote ready))
             (identity-relation same)
-            (let ((remaining (cdr (cdr (cdr selection)))))
+            (let ((remaining (car (cdr (cdr (cdr selection))))))
               (cond
                 ((equal? remaining (list second))
                  (structural-relation same)
