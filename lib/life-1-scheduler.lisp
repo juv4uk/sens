@@ -105,24 +105,14 @@
     (let* ((trigger (life-scheduler-field invocation (quote trigger)))
            (provenance (life-scheduler-field invocation (quote provenance-ref))))
       (cond
-        ((equal? (atom trigger) (quote (structural-kind empty-list)))
-         (quote (structural-relation same))
+        ((atom trigger)
          (quote absent))
-        ((equal? (atom trigger) (quote (structural-kind atom)))
-         (quote (structural-relation same))
-         (quote absent))
-        ((equal? (atom trigger) (quote (structural-kind pair)))
-         (quote (structural-relation same))
+        ((atom trigger)
          (let ((tail (cdr trigger)))
            (cond
-             ((equal? (atom tail) (quote (structural-kind empty-list)))
-              (quote (structural-relation same))
+             ((atom tail)
               (quote absent))
-             ((equal? (atom tail) (quote (structural-kind atom)))
-              (quote (structural-relation same))
-              (quote absent))
-             ((equal? (atom tail) (quote (structural-kind pair)))
-              (quote (structural-relation same))
+             ((atom tail)
               (life-scheduler-projection-match?
                 (list
                   (quote projection-ready)
