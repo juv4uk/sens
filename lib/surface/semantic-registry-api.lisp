@@ -193,7 +193,7 @@
   (lambda (rows)
     (cond
       ((atom rows) (structural-kind empty-list)
-       (structural-relation same))
+       (quote verified))
       ((atom rows) (structural-kind pair)
        (let* ((identity (semantic-registry-row-id (car rows)))
               (round-tripped (semantic-registry-round-trip identity)))
@@ -201,4 +201,4 @@
            ((equal? identity round-tripped) (structural-relation same)
             (semantic-registry-all-ids-round-trip (cdr rows)))
            ((equal? identity round-tripped) (structural-relation distinct)
-            (structural-relation distinct))))))))
+            (quote mismatch))))))))
