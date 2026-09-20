@@ -38,4 +38,4 @@
         (write-to-string (semantic-registry-row-id leading-zero-row))
         (write-to-string (semantic-registry-row-id max-row))
         (write-to-string roundtrip)
-        (equal? roundtrip (semantic-registry-row-id invoke-row)))))))
+        (equal? roundtrip (semantic-registry-row-id invoke-row))))))
