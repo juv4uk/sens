@@ -23,6 +23,11 @@ use std::sync::{OnceLock, RwLock};
 /// the `Environment`, exactly like every kernel primitive.
 pub type HostFn = fn(&[Expr], &Environment, Span) -> Result<Value, LanguageError>;
 
+/// Host implementation projection keyed by an already-resolved Canon/function-table SID.
+/// The semantic ID is passed through as provenance; the handler cannot mint or reinterpret it.
+pub type SemanticHostFn =
+    fn(u8, &[Expr], &Environment, Span) -> Result<Value, LanguageError>;
+
 #[derive(Clone, Copy)]
 enum CapabilityLookup {
     Present(HostFn),
@@ -48,6 +53,12 @@ fn registry() -> &'static RwLock<BTreeMap<String, HostFn>> {
     REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
 }
 
+/// Mechanical implementation registry only: SID meaning remains owned by Canon/function table.
+fn semantic_registry() -> &'static RwLock<BTreeMap<u8, SemanticHostFn>> {
+    static REGISTRY: OnceLock<RwLock<BTreeMap<u8, SemanticHostFn>>> = OnceLock::new();
+    REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
+}
+
 /// Install one capability under its surface-form name (e.g. "read-file").
 /// Re-registering the same name replaces the previous handler, so an
 /// embedder can override or withdraw capabilities deliberately.
@@ -62,6 +73,22 @@ pub fn register_capability(name: &str, handler: HostFn) {
 pub fn unregister_capability(name: &str) {
     if let Ok(mut map) = registry().write() {
         map.remove(name);
+    }
+}
+
+/// Register only an implementation for an existing semantic identity.
+/// This map is incapable of defining what the SID means.
+pub fn register_semantic_capability(semantic_id: u8, handler: SemanticHostFn) {
+    semantic_registry()
+        .write()
+        .expect("semantic capability registry poisoned")
+        .insert(semantic_id, handler);
+}
+
+/// Remove one implementation projection previously registered for a semantic ID.
+pub fn unregister_semantic_capability(semantic_id: u8) {
+    if let Ok(mut map) = semantic_registry().write() {
+        map.remove(&semantic_id);
     }
 }
 
@@ -119,9 +146,50 @@ pub(crate) fn dispatch_capability(
     dispatch_capability_from(registry(), name, arguments, environment, span)
 }
 
+fn dispatch_semantic_capability(
+    semantic_id: u8,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<EvalStep, LanguageError>> {
+    match semantic_registry().read() {
+        Ok(map) => map.get(&semantic_id).copied().map(|handler| {
+            handler(semantic_id, arguments, environment, span).map(EvalStep::Value)
+        }),
+        Err(_) => Some(Err(LanguageError::new(
+            ErrorKind::MechanismUnavailable,
+            format!(
+                "semantic capability registry unavailable while resolving SID: {semantic_id}"
+            ),
+            span,
+        ))),
+    }
+}
+
+/// Resolve surface -> existing SID through the canonical registry projection first,
+/// then consult only the host implementation map for that SID.
+pub(crate) fn dispatch_semantic_capability_for_surface(
+    name: &str,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<EvalStep, LanguageError>> {
+    let semantic_id = crate::semantic_registry::semantic_id_for_surface(name)?;
+    dispatch_semantic_capability(semantic_id, arguments, environment, span)
+}
+
 #[cfg(test)]
 mod honesty_tests {
     use super::*;
+
+    fn dummy_semantic_handler(
+        _semantic_id: u8,
+        _arguments: &[Expr],
+        _environment: &Environment,
+        _span: Span,
+    ) -> Result<Value, LanguageError> {
+        Ok(Value::Nil)
+    }
 
     fn dummy_handler(
         _arguments: &[Expr],
@@ -129,6 +197,21 @@ mod honesty_tests {
         _span: Span,
     ) -> Result<Value, LanguageError> {
         Ok(Value::Nil)
+    }
+
+    #[test]
+    fn semantic_dispatch_is_keyed_by_resolved_id() {
+        register_semantic_capability(250, dummy_semantic_handler);
+        let environment = Environment::root();
+        let result = dispatch_semantic_capability(
+            250,
+            &[],
+            &environment,
+            Span { start: 0, end: 0 },
+        )
+        .expect("semantic capability should be found");
+        assert!(result.is_ok());
+        unregister_semantic_capability(250);
     }
 
     #[test]
