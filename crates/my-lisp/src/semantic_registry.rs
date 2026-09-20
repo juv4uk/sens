@@ -177,7 +177,7 @@ mod tests {
         let names_only = admitted_surfaces_for_semantic_id(1);
         assert_eq!(with_namespace.len(), names_only.len());
         assert!(with_namespace.contains(&("en", "quote")));
-        assert!(with_namespace.contains&("ук", "як-є")));
+        assert!(with_namespace.contains(&("ук", "як-є")));
         assert!(with_namespace.contains(&("sym", "'")));
     }
 }
