@@ -1,8 +1,6 @@
 use my_lisp::{eval_program, load_macro_library, Environment, Session, Value};
 use std::rc::Rc;
 
-const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
-
 fn eval_with_derived_macros(source: &str) -> String {
     let mut session = Session::default();
     eval_program(source, &mut session)
@@ -40,23 +38,18 @@ fn default_session_binds_all_defmacro_peers_to_one_value() {
 
 #[test]
 fn macro_peer_admission_is_recorded_under_identity_00001010_without_binding_the_machine_id() {
-    let row = REGISTRY
-        .lines()
-        .find(|line| line.trim_start().starts_with("(\"00001010\" "))
-        .expect("semantic identity 00001010 must remain present");
+    let id = my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("defmacro")
+        .expect("defmacro must be registry-admitted");
+    assert_eq!(
+        my_lisp::semantic_registry_export::semantic_id_bits(id),
+        "00001010"
+    );
 
-    for expected in [
-        "(en defmacro)",
-        "(uk визначити-макрос)",
-        "(ukr визначити-макрос)",
-        "(sa ())",
-        "(sym ())",
-    ] {
-        assert!(
-            row.contains(expected),
-            "identity 00001010 must preserve peer admission component {expected}: {row}"
-        );
-    }
+    let surfaces = my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(id);
+    assert!(surfaces.iter().any(|row| row.namespace == "en" && row.name == "defmacro"));
+    assert!(surfaces.iter().any(|row| row.namespace == "uk" && row.name == "визначити-макрос"));
+    assert!(surfaces.iter().any(|row| row.namespace == "ukr" && row.name == "визначити-макрос"));
+    assert!(surfaces.iter().all(|row| row.namespace != "sa" && row.namespace != "sym"));
 
     let session = Session::default();
     assert!(
@@ -64,7 +57,6 @@ fn macro_peer_admission_is_recorded_under_identity_00001010_without_binding_the_
         "opaque semantic IDs must never become ordinary lexical bindings"
     );
 }
-
 #[test]
 fn bare_root_gains_peer_bindings_only_through_macro_loader() {
     let environment = Environment::root();
