@@ -327,6 +327,7 @@ impl Parser<'_> {
                         }
                     }
                     items.push(item);
+                }
                 None => {
                     return Err(self.error(
                         "unclosed list · nezakrytyi spysok · nicht geschlossene Liste",
