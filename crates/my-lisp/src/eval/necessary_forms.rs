@@ -1,10 +1,14 @@
 //! Immutable routing for evaluator mechanisms necessary beyond Canon 0 + McCarthy7.
 //!
 //! Stable human/symbolic spellings are resolved by the shared semantic registry.
-//! This module owns only the mapping from opaque numeric semantic IDs to the
-//! evaluator mechanisms for DEFINE and LAMBDA.
+//! Lisp owns the SID-to-operation mapping in `lib/evaluator-dispatch.lisp`.
+//! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry::{self, SemanticId};
+
+mod generated {
+    include!("necessary_forms_generated.rs");
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum NecessaryFormIdentity {
@@ -12,19 +16,14 @@ pub(crate) enum NecessaryFormIdentity {
     Lambda,
 }
 
-pub(crate) const LAMBDA_SEMANTIC_ID: SemanticId = 8;
-pub(crate) const DEFINE_SEMANTIC_ID: SemanticId = 9;
-/// `def` -- a compatibility-only spelling for the same Define meaning as
-/// `define`/`визначити`, under its own semantic ID in
-/// `lib/surface/semantic-registry.wsm` rather than sharing 0011's row.
-pub(crate) const DEF_COMPATIBILITY_SEMANTIC_ID: SemanticId = 11;
-
 fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<NecessaryFormIdentity> {
-    match semantic_id {
-        DEFINE_SEMANTIC_ID | DEF_COMPATIBILITY_SEMANTIC_ID => Some(NecessaryFormIdentity::Define),
-        LAMBDA_SEMANTIC_ID => Some(NecessaryFormIdentity::Lambda),
-        _ => None,
-    }
+    generated::NECESSARY_FORM_DISPATCH
+        .iter()
+        .find(|row| row.semantic_id == semantic_id)
+        .map(|row| match row.mechanism {
+            generated::NecessaryFormMechanism::Define => NecessaryFormIdentity::Define,
+            generated::NecessaryFormMechanism::Lambda => NecessaryFormIdentity::Lambda,
+        })
 }
 
 /// Resolve an executable list-head symbol through the shared authority
@@ -47,8 +46,12 @@ mod tests {
     fn byte_sid_is_not_a_surface_spelling() {
         assert_eq!(identity_for_symbol("00001001"), None);
         assert_eq!(identity_for_symbol("0000SID 11"), None);
-        assert_eq!(identity_for_semantic_id(DEFINE_SEMANTIC_ID), Some(NecessaryFormIdentity::Define));
-        assert_eq!(identity_for_semantic_id(LAMBDA_SEMANTIC_ID), Some(NecessaryFormIdentity::Lambda));
+        let define_id = semantic_registry::admitted_semantic_id_for_surface("define")
+            .expect("define must have one admitted semantic identity");
+        let lambda_id = semantic_registry::admitted_semantic_id_for_surface("lambda")
+            .expect("lambda must have one admitted semantic identity");
+        assert_eq!(identity_for_semantic_id(define_id), Some(NecessaryFormIdentity::Define));
+        assert_eq!(identity_for_semantic_id(lambda_id), Some(NecessaryFormIdentity::Lambda));
     }
 
     #[test]
@@ -59,10 +62,12 @@ mod tests {
         // implementation invariant: whatever surfaces the registry admits
         // for SIDs 9/8 all route through this same numeric-ID dispatch,
         // regardless of which language they're spelled in.
-        for (semantic_id, identity) in [
-            (DEFINE_SEMANTIC_ID, NecessaryFormIdentity::Define),
-            (LAMBDA_SEMANTIC_ID, NecessaryFormIdentity::Lambda),
+        for (surface, identity) in [
+            ("define", NecessaryFormIdentity::Define),
+            ("lambda", NecessaryFormIdentity::Lambda),
         ] {
+            let semantic_id = semantic_registry::admitted_semantic_id_for_surface(surface)
+                .expect("necessary form must have one admitted semantic identity");
             let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(semantic_id);
             assert!(
                 surfaces.len() >= 2,
@@ -85,13 +90,15 @@ mod tests {
         // Status-free canonical semantic registry has no compatibility-only admission class.
         // A present spelling is directly routable; SID 11 still maps to the
         // compatibility `def` form without any hardcoded spelling fallback.
-        assert_eq!(
-            semantic_registry::semantic_id_for_surface("def"),
-            Some(DEF_COMPATIBILITY_SEMANTIC_ID)
-        );
+        let def_id = semantic_registry::semantic_id_for_surface("def")
+            .expect("def must remain present in the semantic registry");
         assert_eq!(
             semantic_registry::admitted_semantic_id_for_surface("def"),
-            Some(DEF_COMPATIBILITY_SEMANTIC_ID)
+            Some(def_id)
+        );
+        assert_eq!(
+            identity_for_semantic_id(def_id),
+            Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(identity_for_symbol("def"), Some(NecessaryFormIdentity::Define));
     }
@@ -106,15 +113,24 @@ mod tests {
     #[test]
     fn semantic_ids_control_necessary_form_routing() {
         assert_eq!(
-            identity_for_semantic_id(LAMBDA_SEMANTIC_ID),
+            identity_for_semantic_id(
+                semantic_registry::admitted_semantic_id_for_surface("lambda")
+                    .expect("lambda semantic identity")
+            ),
             Some(NecessaryFormIdentity::Lambda)
         );
         assert_eq!(
-            identity_for_semantic_id(DEFINE_SEMANTIC_ID),
+            identity_for_semantic_id(
+                semantic_registry::admitted_semantic_id_for_surface("define")
+                    .expect("define semantic identity")
+            ),
             Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(
-            identity_for_semantic_id(DEF_COMPATIBILITY_SEMANTIC_ID),
+            identity_for_semantic_id(
+                semantic_registry::admitted_semantic_id_for_surface("def")
+                    .expect("def compatibility semantic identity")
+            ),
             Some(NecessaryFormIdentity::Define)
         );
     }
