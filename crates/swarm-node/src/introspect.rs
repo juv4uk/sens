@@ -19,7 +19,7 @@ use std::time::Instant;
 /// connections rather than the event log — unlike claims and evidence,
 /// "is this node up right now" is inherently ephemeral and shouldn't
 /// survive a restart as a stale fact, so it deliberately isn't durable.
-fn handle_presence(node: &Arc<Node>, stream: &mut TcpStream) {
+pub(crate) fn handle_presence(node: &Arc<Node>, stream: &mut TcpStream) {
     send(stream, &presence_sexp(node));
 }
 
@@ -43,7 +43,7 @@ fn presence_sexp(node: &Arc<Node>) -> Sexp {
 /// `presence` + `list-members` + `list-task-state` bundled together, for
 /// whoever's checking swarm health (a human, or an agent deciding what to
 /// do next) without stitching three separate replies together by hand.
-fn handle_status(node: &Arc<Node>, stream: &mut TcpStream) {
+pub(crate) fn handle_status(node: &Arc<Node>, stream: &mut TcpStream) {
     let presence = presence_sexp(node);
 
     let journal = node
@@ -117,7 +117,7 @@ fn handle_status(node: &Arc<Node>, stream: &mut TcpStream) {
 /// -- nothing sits here longer than that before the sweep moves it to
 /// `recent-failures` or an ack removes it); `recent-failures` is the
 /// bounded diagnostic ring of deliveries that timed out unacked.
-fn handle_delivery_status(node: &Arc<Node>, stream: &mut TcpStream) {
+pub(crate) fn handle_delivery_status(node: &Arc<Node>, stream: &mut TcpStream) {
     let now = Instant::now();
     let pending: Vec<Sexp> = node
         .pending_acks
@@ -193,7 +193,7 @@ fn handle_delivery_status(node: &Arc<Node>, stream: &mut TcpStream) {
 /// more expensive as the swarm grows. No new derived-state computation
 /// beyond what `(status)`/`(presence)` already do; this just bundles the
 /// cheap scalar facts on their own.
-fn handle_metrics(node: &Arc<Node>, stream: &mut TcpStream) {
+pub(crate) fn handle_metrics(node: &Arc<Node>, stream: &mut TcpStream) {
     let journal = node
         .journal
         .lock()
@@ -273,7 +273,7 @@ fn handle_metrics(node: &Arc<Node>, stream: &mut TcpStream) {
 /// what I can do", independent of any one connection. Roles default to
 /// `(worker)` when omitted; only a node with an explicit `voter` role
 /// counts toward `claim-task` quorum (see `handle_claim_task`).
-fn handle_join(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
+pub(crate) fn handle_join(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
     let capabilities = msg
         .field("capabilities")
         .and_then(|f| f.first())
@@ -332,7 +332,7 @@ fn handle_join(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
 /// Local client op: `(leave)`. Records `agent-left` — membership history is
 /// kept, not erased, matching the immutable-facts philosophy; `present`
 /// just flips to false in the derived view.
-fn handle_leave(node: &Arc<Node>, stream: &mut TcpStream) {
+pub(crate) fn handle_leave(node: &Arc<Node>, stream: &mut TcpStream) {
     let payload = Sexp::list(vec![
         Sexp::list(vec![Sexp::atom("node"), Sexp::atom(&node.identity.node_id)]),
         Sexp::list(vec![
@@ -384,7 +384,7 @@ fn handle_leave(node: &Arc<Node>, stream: &mut TcpStream) {
 /// held by that id (zombie sockets from fast restarts). Trust model
 /// identical to every other op: the plane assumes a trusted network;
 /// crypto identity remains M1.3 proper work.
-fn handle_evict(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
+pub(crate) fn handle_evict(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
     let Some(target) = msg.field_atom("node") else {
         send(
             stream,
@@ -459,7 +459,7 @@ fn handle_evict(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
 /// peer's view even though it changes what's on disk. Broadcasts nothing:
 /// peers only ever pull via `sync-hello`/`sync-events`, and after
 /// compaction that path already serves the smaller equivalent set.
-fn handle_compact(node: &Arc<Node>, stream: &mut TcpStream) {
+pub(crate) fn handle_compact(node: &Arc<Node>, stream: &mut TcpStream) {
     let mut journal = node
         .journal
         .lock()
@@ -494,7 +494,7 @@ fn handle_compact(node: &Arc<Node>, stream: &mut TcpStream) {
     }
 }
 
-fn handle_list_members(node: &Arc<Node>, stream: &mut TcpStream) {
+pub(crate) fn handle_list_members(node: &Arc<Node>, stream: &mut TcpStream) {
     let journal = node
         .journal
         .lock()
