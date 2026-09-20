@@ -242,4 +242,5 @@
 (fixture (id . "F-662e4ad192b0b38e") (tier . 3) (axioms G5) (declared-requires) (observed-forms application quote) (outcome-kind . expected) (outcome-value . "8") (role) (note))
 (fixture (id . "F-d800bd16dd3060b5") (tier . 3) (axioms G5 G8) (declared-requires) (observed-forms application quote) (outcome-kind . expected) (outcome-value . "()") (role) (note . "empty list argument is Nil, distinct from min/max's own zero-argument Arity error above"))
 (fixture (id . "F-583ddc87e614edae") (tier . 3) (axioms G5 G8) (declared-requires) (observed-forms application quote) (outcome-kind . expected) (outcome-value . "()") (role) (note))
+(fixture (id . "F-d1b2d90ece9d22d0") (tier . 1) (axioms G8 S2) (declared-requires) (observed-forms cond quote) (outcome-kind . error) (outcome-value . "UnsatisfiedConditional") (role . "constitutive") (note . "Contract 8.0: canonical three-part COND exhausts to a named failure; migration-only two-part truthiness remains a bounded compatibility bridge."))
 ()

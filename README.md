@@ -47,7 +47,7 @@ Rust лишається важливим механічним substrate/referenc
 
 Нова дисципліна проста: `my-lisp` має вміти **висловити, адресувати, передати, прийняти й композиційно використати** результат, але не зобов'язаний повторно реалізовувати всередині себе найкращий алгоритм кожного острова.
 
-Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **7.0**.
+Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **8.0**.
 
 
 ### Один Lisp, різні субстрати
@@ -70,7 +70,7 @@ semantic contract + executable laws
 
 Особливо це стосується bootstrap: `lib/macro.lisp` і `lib/core.lisp` є Lisp-owned behavior. Якщо для запуску на іншому субстраті потрібен новий host-механізм, він має бути вузьким, незвідним і semantics-blind; переписування `COND`, `defmacro`, `let`, `equal?` чи іншої Lisp-поведінки в Java/Rust не є еквівалентним substrate switch.
 
-Поточний bootstrap рухається до канонічного **тричленного `COND`** — `(query expected-result expression)`: структурні та identity-рішення порівнюються з явним результатом, а не через загальну truthiness. Перший upstream-крок для `lib/macro.lisp` проходить через PR [`#615`](https://github.com/juv4uk/my-lisp/pull/615); це ще не є оголошенням зеленого CI.
+Поточний bootstrap рухається до канонічного **тричленного `COND`** — `(query expected-result expression)`: структурні та identity-рішення порівнюються з явним результатом, а не через загальну truthiness. Contract 8.0 також робить вичерпання явним: якщо жоден query не збігся зі своїм expected-result, канонічний `COND` завершується named failure `UnsatisfiedConditional`, а не тихим `()`. Перший upstream-крок для `lib/macro.lisp` проходить через PR [`#615`](https://github.com/juv4uk/my-lisp/pull/615); це ще не є оголошенням зеленого CI.
 
 ---
 

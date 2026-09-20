@@ -96,6 +96,7 @@ pub(crate) fn evaluate_cond(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    let mut migration_compatibility_seen = false;
     for clause in clauses {
         let ExprKind::List(parts) = &clause.kind else {
             return Err(LanguageError::new(
@@ -120,6 +121,7 @@ pub(crate) fn evaluate_cond(
             // to preserve historical callers while source migrates to the
             // canonical three-part form. This path owns no language semantics.
             2 => {
+                migration_compatibility_seen = true;
                 let value = evaluate(&parts[0], environment)?;
                 if migration_only_cond_truthy(&value) {
                     return evaluate_step(&parts[1], environment);
@@ -134,13 +136,15 @@ pub(crate) fn evaluate_cond(
             }
         }
     }
-    if clauses.is_empty() {
-        // The span is retained for future strict empty-cond diagnostics.
-        // Diapazon zberezheno dlia maibutnoi strohoi diahnostyky porozhnoho `cond`.
-        // Der Bereich bleibt für eine künftige strikte Diagnose eines leeren `cond` erhalten.
-        let _ = span;
+    if migration_compatibility_seen {
+        return Ok(EvalStep::Value(Value::Nil));
     }
-    Ok(EvalStep::Value(Value::Nil))
+
+    Err(LanguageError::new(
+        ErrorKind::UnsatisfiedConditional,
+        "канонічний cond: жоден query не збігся з expected-result · canonical cond: no query matched its expected result · kanonisches cond: keine Abfrage entsprach ihrem erwarteten Ergebnis",
+        span,
+    ))
 }
 
 pub fn exact_arity(

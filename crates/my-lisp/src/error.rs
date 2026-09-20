@@ -8,6 +8,9 @@ pub enum ErrorKind {
     Arity,
     Type,
     InvalidForm,
+    /// A structurally valid canonical three-part `cond` exhausted without
+    /// any query result matching its explicit expected datum.
+    UnsatisfiedConditional,
     MechanismUnavailable,
     /// A resource limit was hit, not a logic error — S3's own example
     /// ("4096 cons cells on an FPGA") named this category before it
@@ -95,6 +98,7 @@ impl ErrorKind {
             | ErrorKind::Arity
             | ErrorKind::Type
             | ErrorKind::InvalidForm
+            | ErrorKind::UnsatisfiedConditional
             | ErrorKind::MechanismUnavailable
             | ErrorKind::DivisionByZero => Classification::Fault,
         }

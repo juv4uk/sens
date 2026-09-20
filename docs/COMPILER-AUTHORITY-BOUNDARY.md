@@ -25,8 +25,9 @@ because they are meaning, not implementation:
    `docs/cyberpunk-numeric-representation.md`).
 2. **Error kind, where currently contractual.** The finite `ErrorKind`
    enum (`crates/my-lisp/src/error.rs`: `Parse`, `UnknownSymbol`,
-   `Arity`, `Type`, `InvalidForm`, `OutOfMemory`, `NumericOverflow`,
-   `DivisionByZero` — 8 variants, verified directly, not assumed) is
+   `Arity`, `Type`, `InvalidForm`, `UnsatisfiedConditional`,
+   `MechanismUnavailable`, `OutOfMemory`, `NumericOverflow`,
+   `DivisionByZero` — 10 variants, deliberately admitted) is
    the *entire* admitted vocabulary. A compiler backend may use its own
    internal error representation, but whatever it *observably*
    surfaces for a given program must map onto one of these categories
@@ -166,7 +167,7 @@ exhaustive list of `ErrorKind` variant names via Rust's own exhaustive
 `match` (compile error, not a runtime check, if a variant is added or
 removed without updating the pinned list) plus a runtime assertion
 that the pinned list's `Debug` names match reality. This makes
-"introduce a 7th error category" a change that must touch this test
+"introduce another error category" a change that must touch this test
 file explicitly — it cannot land silently as a side effect of
 unrelated compiler work in this or another repo that merely imports
 `ErrorKind`.
@@ -184,7 +185,7 @@ now does.
 
 ## Negative fixture (acceptance evidence)
 
-Verified directly: temporarily adding a 9th `ErrorKind` variant
+Verified directly: temporarily adding an additional `ErrorKind` variant
 (`NotCallable`) to `crates/my-lisp/src/error.rs` fails the crate build
 outright — not just this test — because an existing exhaustive `match`
 elsewhere in `error.rs` itself also has no wildcard arm. This is even

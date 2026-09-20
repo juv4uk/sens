@@ -468,6 +468,7 @@ fn error_kind_symbol(kind: &ErrorKind) -> &'static str {
         ErrorKind::Arity => "arity-error",
         ErrorKind::Type => "type-error",
         ErrorKind::InvalidForm => "invalid-form",
+        ErrorKind::UnsatisfiedConditional => "unsatisfied-conditional",
         ErrorKind::MechanismUnavailable => "mechanism-unavailable",
         ErrorKind::OutOfMemory => "out-of-memory",
         ErrorKind::NumericOverflow => "numeric-overflow",

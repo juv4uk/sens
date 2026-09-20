@@ -268,6 +268,9 @@ fn uk_error_line(error: &LanguageError) -> String {
         ErrorKind::Arity => format!("Помилка кількості аргументів: {message}"),
         ErrorKind::Type => format!("Помилка типу: {message}"),
         ErrorKind::InvalidForm => format!("Некоректна форма: {message}"),
+        ErrorKind::UnsatisfiedConditional => {
+            format!("Умовний вираз не має відповідної гілки: {message}")
+        }
         ErrorKind::MechanismUnavailable => format!("Механізм недоступний: {message}"),
         ErrorKind::OutOfMemory => format!("Вичерпано ресурс пам'яті: {message}"),
         ErrorKind::NumericOverflow => format!("Перевищено числову межу: {message}"),

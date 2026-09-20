@@ -65,7 +65,7 @@ fn explicit_dispatch_and_bounded_migration_compatibility_follow_lisp_witnesses()
     assert_eq!(
         rows.len(),
         10,
-        "#217/#218 slice must keep six canonical and four migration-only rows"
+        "Contract 8.0 slice must keep six canonical and four migration-only active rows"
     );
 
     let mut session = Session::default();

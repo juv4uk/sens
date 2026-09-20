@@ -571,10 +571,25 @@
   (lambda (body env)
     (my-result-value (my-eval-body-result body env))))
 
-(def my-eval-cond-result
-  (lambda (clauses env)
+(def my-cond-has-migration-clause?
+  (lambda (clauses)
     (cond
-      ((atom clauses) (my-result-ok (quote ())))
+      ((atom clauses) (quote ()))
+      ((atom (car clauses))
+       (my-cond-has-migration-clause? (cdr clauses)))
+      ((eq (length (car clauses)) 2) (identity-relation same) t)
+      ((eq (length (car clauses)) 2) (identity-relation distinct)
+       (my-cond-has-migration-clause? (cdr clauses)))))))
+
+(def my-eval-cond-result-mode
+  (lambda (clauses env migration-compatibility?)
+    (cond
+      ((atom clauses)
+       (cond
+         (migration-compatibility? (my-result-ok (quote ())))
+         (t
+          (my-result-fail
+            (my-error (quote unsatisfied-conditional) (quote cond))))))
       (t
        (let ((clause (car clauses)))
          (cond
@@ -590,7 +605,8 @@
                  (my-eval-result (third clause) env))
                 ((equal? (my-result-value test-result) (second clause))
                  (structural-relation distinct)
-                 (my-eval-cond-result (cdr clauses) env)))))
+                 (my-eval-cond-result-mode
+                   (cdr clauses) env migration-compatibility?)))))
            ; Historical two-part clauses remain migration-only, mirroring the
            ; native evaluator until their callers are moved to explicit result
            ; matching. This path intentionally retains old truthiness.
@@ -600,12 +616,19 @@
                 ((my-result-fail? test-result) test-result)
                 ((my-result-value test-result)
                  (my-eval-result (second clause) env))
-                (t (my-eval-cond-result (cdr clauses) env)))))
+                (t
+                 (my-eval-cond-result-mode
+                   (cdr clauses) env migration-compatibility?)))))
            (t
             (my-result-fail
               (my-error
                 (quote invalid-form)
                 (list (quote cond-clause) clause))))))))))
+
+(def my-eval-cond-result
+  (lambda (clauses env)
+    (my-eval-cond-result-mode
+      clauses env (my-cond-has-migration-clause? clauses))))
 
 (def my-eval-cond
   (lambda (clauses env)

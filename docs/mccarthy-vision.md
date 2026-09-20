@@ -1,5 +1,18 @@
 # McCarthy's Lisp: from 1958 to a lifetime · Lisp Маккарті: від 1958-го до кінця життя · McCarthys Lisp: von 1958 bis zum Lebensende
 
+
+## Доповнення 2026-09-20: COND, невизначеність і межа з my-lisp
+
+Первинні джерела дають корисне, але вузьке історичне обґрунтування. У ["Recursive Functions of Symbolic Expressions" (1960)](https://www-formal.stanford.edu/jmc/recursive.pdf) Маккарті задає conditional expression як впорядкований перегляд предикатів зліва направо: значенням стає вираз при першому істинному предикаті, а якщо всі предикати хибні — значення **невизначене**. У математичному викладі предикати мають значення `T` або `F`; це не сучасна generic truthiness.
+
+Практичний LISP I того ж періоду робить цю частковість спостережуваною як named failure: [*LISP I Programmer's Manual*, 1 March 1960](https://softwarepreservation.computerhistory.org/LISP/book/LISP%20I%20Programmers%20Manual.pdf) має помилку `A3 CONDITIONAL UNSATISFIED -EVCON-` для випадку, коли жодна умова не обчислилася як істинна. У ["History of Lisp" (1978)](https://www-formal.stanford.edu/jmc/history/lisp/lisp.html) Маккарті також пояснює походження conditional expressions роботою над шаховими процедурами у FORTRAN для IBM 704 у 1957–58 роках: на відміну від eager `XIF`, справжній conditional expression не обчислює непотрібну гілку.
+
+**Межа аналогії:** канонічний my-lisp `COND` — не реконструкція синтаксису Маккарті. Власне розширення my-lisp має клаузу `(query expected-result expression)` і робить вибір через явне зіставлення observed result з expected datum. Історичний корінь тут лише у двох принципах: ordered/selective evaluation та легітимність відсутності значення при вичерпанні умов. Contract 8.0 робить другий принцип явним як `UnsatisfiedConditional`, а не як тихий `()`.
+
+### English note
+
+McCarthy's 1960 conditional expression is ordered and partial: predicates are examined left-to-right, only the selected branch is evaluated, and exhaustion is undefined. The March 1960 LISP I manual exposes the same boundary as `A3 CONDITIONAL UNSATISFIED -EVCON-`. my-lisp's three-part expected-result matching is its own extension, not a historical claim; Contract 8.0 preserves ordered selective evaluation and makes canonical exhaustion a named `UnsatisfiedConditional` failure.
+
 ## English
 
 This document lays out how John McCarthy himself described Lisp's origin and evolution — mainly from his own 1978 retrospective ["History of Lisp"](https://www-formal.stanford.edu/jmc/history/lisp/lisp.html) (written for the ACM SIGPLAN History of Programming Languages conference) and his public writing over the following decades — and where this project deliberately follows or departs from that account. It's history, not a design spec; [`docs/language-core.md`](language-core.md) and [`PLAN.md`](../PLAN.md) are where this project's own decisions live.

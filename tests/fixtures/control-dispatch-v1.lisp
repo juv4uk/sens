@@ -24,10 +24,17 @@
  (expected . "yes")
  (active . t))
 
-; No matching clause means no answer, not FALSE.
+; Historical Contract <=7 observation, retained but no longer active authority.
 ((expr . "(cond ((quote radio) antenna (quote wrong)))")
  (expected . "()")
- (active . t))
+ (active . ())
+ (superseded-by . "Contract 8.0"))
+
+; Contract 8.0: canonical three-part dispatch fails named on exhaustion.
+((expr . "(cond ((quote radio) antenna (quote wrong)))")
+ (error . "UnsatisfiedConditional")
+ (active . t)
+ (since-contract . (8 0)))
 
 ; Migration-only two-part clauses preserve historical atom/eq branching while
 ; library source is moved to canonical three-part dispatch. These rows are NOT
