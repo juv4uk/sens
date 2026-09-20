@@ -130,7 +130,8 @@
                   provenance)
                 projections)))))))))
 
- #801 — minimal LIFE-1 orchestration scheduler.
+
+; #801 — minimal LIFE-1 orchestration scheduler.
 ;
 ; Scheduler state is ordinary Lisp data. It controls activation timing only:
 ; it does not interpret Prolog, Datalog, CLIPS or Common Lisp semantics.
