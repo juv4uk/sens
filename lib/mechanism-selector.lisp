@@ -1,4 +1,5 @@
 ; #1047 — mechanism selection after Canon()/function-table identity resolution.
+; Exact parent: #1046 function-table mechanism authority.
 ; This file never decides what a SID means. It only selects among executor
 ; routes already admitted by transitional #1046 mechanism metadata.
 
