@@ -2,16 +2,14 @@
 ; for my-lisp#85. This is an AUDIT PROJECTION, never semantic authority.
 ;
 ; Authority path:
-;   semantic-registry.lisp
-;       -> scripts/generate-function-table.lisp
-;       -> lib/generated/function-table.lisp
+;   lib/surface/semantic-registry.lisp
 ;       -> this audit projection
 ;
 ; Candidate evidence path:
 ;   lib/surface/український-профіль-джерела.lisp
-; Candidate spellings remain proposals. `lib/generated/function-table.lisp`
-; is a checked projection, not a second semantic authority. This generator
-; MUST NOT promote staging candidates into that current `full-uk` projection.
+; Candidate spellings remain proposals. The generated function-table is only
+; a review projection and is deliberately NOT read by this generator.
+; This generator MUST NOT promote staging candidates into Canon authority.
 ;
 ; Output:
 ;   lib/generated/uk-surface-audit.lisp
@@ -39,11 +37,13 @@
       (t (join-newline-onto (cdr strings) (str+ acc "\n" (car strings)))))))
 (def join-newline (lambda (strings) (join-newline-onto strings "")))
 
-; Function-table rows have the generated schema:
-; (sid-bitstring formal (uk word status) (full-uk word status) (en word status)
-;     (sa word status) (sym word status) primary-status authority)
-(def ft-form (car (read-all (read-file "lib/generated/function-table.lisp"))))
-(def ft-rows (cdr ft-form))
+; Canon/function-table authority rows come directly from semantic-registry.lisp:
+; (sid-bitstring (en word-or-()) (uk word-or-()) (ukr word-or-())
+;     (sa word-or-()) (sym word-or-()))
+; SID 00000000 is structural (), not a callable surface row, so the audit skips it.
+(def registry-form
+  (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
+(def registry-rows (cdr (cdr registry-form)))
 
 (def profile-form
   (car (read-all (read-file "lib/surface/український-профіль-джерела.lisp"))))
@@ -69,13 +69,38 @@
       ((equal? (car (car rows)) sid) (car rows))
       (t (find-candidate-row sid (cdr rows))))))
 
-(def surface-word (lambda (surface) (second surface)))
-(def surface-status (lambda (surface) (third surface)))
+(def find-surface
+  (lambda (name surfaces)
+    (cond
+      ((atom surfaces) (quote ()))
+      ((eq (car (car surfaces)) name) (car surfaces))
+      (t (find-surface name (cdr surfaces))))))
+
+(def surface-word
+  (lambda (surface)
+    (cond
+      ((atom surface) (quote ()))
+      (t (second surface)))))
+
+(def registry-surface-word
+  (lambda (name row)
+    (surface-word (find-surface name (cdr row)))))
+
+(def surface-status
+  (lambda (word)
+    (cond
+      ((equal? word (quote ())) (quote missing))
+      (t (quote stable)))))
+
+(def display-surface-word
+  (lambda (word)
+    (cond
+      ((equal? word (quote ())) (quote —))
+      (t word))))
 
 (def missing-surface?
-  (lambda (surface)
-    (or (eq (surface-status surface) (quote missing))
-        (eq (surface-word surface) (quote —)))))
+  (lambda (word)
+    (equal? word (quote ()))))
 
 ; Classification here is intentionally conservative. The audit may report a
 ; candidate, but only an explicit later review may classify it as compact,
@@ -83,7 +108,9 @@
 (def audit-class
   (lambda (uk candidate)
     (cond
-      ((eq (surface-status uk) (quote compatibility-only)) (quote compatibility-only))
+      ((and (not (atom candidate))
+            (eq (fourth candidate) (quote кандидат-сумісності)))
+       (quote compatibility-only))
       ((missing-surface? uk) (quote needs-research))
       ((atom candidate) (quote needs-research))
       ((eq (second candidate) (third candidate)) (quote full))
@@ -112,12 +139,11 @@
 (def render-row
   (lambda (row)
     (let* ((sid (car row))
-           (uk (third row))
-           (full-authority (fourth row))
-           (en (fifth row))
-           (sa (sixth row))
-           (sym (seventh row))
-           (primary (eighth row))
+           (uk (registry-surface-word (quote uk) row))
+           (full-authority (registry-surface-word (quote ukr) row))
+           (en (registry-surface-word (quote en) row))
+           (sa (registry-surface-word (quote sa) row))
+           (sym (registry-surface-word (quote sym) row))
            (candidate (find-candidate-row sid candidate-rows))
            (class (audit-class uk candidate))
            (candidate-full (candidate-full-word candidate))
@@ -125,23 +151,23 @@
            (ambiguity (ambiguity-status candidate)))
       (str+
         "  (row " (write-to-string sid)
-        " (current-uk " (write-to-string (surface-word uk)) " "
+        " (current-uk " (write-to-string (display-surface-word uk)) " "
                          (write-to-string (surface-status uk)) ")"
-        " (authoritative-full-uk " (write-to-string (surface-word full-authority)) " "
+        " (authoritative-full-uk " (write-to-string (display-surface-word full-authority)) " "
                                   (write-to-string (surface-status full-authority)) ")"
-        " (en " (write-to-string (surface-word en)) " "
+        " (en " (write-to-string (display-surface-word en)) " "
                  (write-to-string (surface-status en)) ")"
-        " (sa " (write-to-string (surface-word sa)) " "
+        " (sa " (write-to-string (display-surface-word sa)) " "
                  (write-to-string (surface-status sa)) ")"
-        " (sym " (write-to-string (surface-word sym)) " "
+        " (sym " (write-to-string (display-surface-word sym)) " "
                   (write-to-string (surface-status sym)) ")"
-        " (primary-status " (write-to-string primary) ")"
+        " (primary-status stable)"
         " (class " (write-to-string class) ")"
         " (candidate-full-uk " (write-to-string candidate-full) ")"
         " (candidate-full-status " (write-to-string candidate-status) ")"
         " (candidate-compact-uk " (write-to-string (candidate-compact-word)) ")"
         " (ambiguity " (write-to-string ambiguity) ")"
-        " (evidence generated-function-table staging-profile))"))))
+        " (evidence semantic-registry staging-profile))"))))
 
 (def count-class
   (lambda (wanted rows acc)
@@ -149,7 +175,7 @@
       ((atom rows) acc)
       (t
        (let* ((sid (car (car rows)))
-              (uk (third (car rows)))
+              (uk (registry-surface-word (quote uk) (car rows)))
               (candidate (find-candidate-row sid candidate-rows))
               (class (audit-class uk candidate)))
          (count-class wanted (cdr rows)
@@ -165,16 +191,16 @@
          (cond ((atom (find-candidate-row (car (car rows)) candidate-rows)) acc)
                (t (+ acc 1))))))))
 
-(def total (length ft-rows))
-(def full-count (count-class (quote full) ft-rows 0))
-(def compatibility-count (count-class (quote compatibility-only) ft-rows 0))
-(def needs-research-count (count-class (quote needs-research) ft-rows 0))
-(def candidate-count (count-candidates ft-rows 0))
+(def total (length registry-rows))
+(def full-count (count-class (quote full) registry-rows 0))
+(def compatibility-count (count-class (quote compatibility-only) registry-rows 0))
+(def needs-research-count (count-class (quote needs-research) registry-rows 0))
+(def candidate-count (count-candidates registry-rows 0))
 
 (def header
   (list
     "; GENERATED — DO NOT EDIT BY HAND"
-    "; Semantic authority: lib/surface/semantic-registry.lisp via lib/generated/function-table.lisp"
+    "; Semantic authority: lib/surface/semantic-registry.lisp (direct input)"
     "; Candidate evidence only: lib/surface/український-профіль-джерела.lisp"
     "; Generator: scripts/generate-uk-surface-audit.lisp (my-lisp#85)"
     "; candidate-full-uk is NOT automatically promoted into authoritative full-uk"
@@ -189,7 +215,7 @@
           " (staging-evidence " (number->string candidate-count) "))")
     "  (rows"))
 
-(def body (join-newline (append header (map render-row ft-rows))))
+(def body (join-newline (append header (map render-row registry-rows))))
 (def output (str+ body "\n  )\n)\n"))
 
 (write-file "lib/generated/uk-surface-audit.lisp" output)
