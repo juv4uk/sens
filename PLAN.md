@@ -32,10 +32,11 @@ conformance-тестах та evidence-документах, а не повер�
 
 # A. Підтверджений фундамент — не розширювати без причини
 
-## A1. Closed semantic core
+## A1. Canon ground і historical/minimal root
 
-- ✅ Canon 0: `()` як ground object.
-- ✅ Закритий McCarthy-7 semantic operation set.
+- ✅ Canon `()` / Lisp-owned function table — semantic-dispatch root; meaning фіксується до вибору механізму.
+- ✅ McCarthy-7 — стабільний historical/minimal root, **не закритий operation set і не постійна верхня межа primitive admission**.
+- ✅ Нові semantic identities допускаються лише через evidence discipline чинного contract / ADR-005, а не з runtime helper, island vocabulary чи opcode.
 - ✅ `lambda` / `define` — evaluator capabilities, не primitive identities.
 - ✅ Language-owned похідні операції не повинні тихо повертатися в Rust builtins.
 
