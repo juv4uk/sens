@@ -22,6 +22,16 @@
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
 (def list (lambda args args))
 
+; #953 — Lisp-owned binary format descriptor.
+; The canonical semantic data stays as bare 0/1 strings; this function
+; records the two format facts without introducing a per-value prefix:
+;   (binary 8) => (binary 8)
+; It is language data owned by Lisp, not a Rust u8 primitive and not a
+; replacement spelling for the canonical SID itself.
+(def binary
+  (lambda (width)
+    (list (quote binary) width)))
+
 (def not
   (lambda (value)
     (cond
