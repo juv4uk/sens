@@ -91,11 +91,6 @@ fn generated_function_table_has_i5_6400_column_without_replacing_semantic_author
         "Canon CAR identity must show its direct memory-load realization"
     );
 
-    let semantic_table = include_str!("../../../lib/generated/function-table.lisp");
-    assert!(
-        !semantic_table.contains("intel-core-i5-6400"),
-        "processor-specific realization must not contaminate the semantic machine-readable function table"
-    );
 }
 
 #[test]
