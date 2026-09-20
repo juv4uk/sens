@@ -1,5 +1,13 @@
 (
   (binary 8)
+  (00000000 empty-list-ground)
+  (00000001 quote-form)
+  (00000010 atom-primitive)
+  (00000011 eq-primitive)
+  (00000100 cons-primitive)
+  (00000101 car-primitive)
+  (00000110 cdr-primitive)
+  (00000111 cond-form)
   (00001000 lambda-form)
   (00001001 define-form)
   (00001011 define-form)
