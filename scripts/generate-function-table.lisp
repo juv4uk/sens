@@ -31,13 +31,13 @@
 ; Both are read directly from semantic-registry.lisp; this generator never
 ; invents names and never duplicates `ukr` under another full-UK column.
 
-; sr/2 surfaces are fixed two-element rows: (namespace spelling-or-()).
+; Registry surfaces are fixed two-element rows: (namespace spelling-or-()).
 ; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
 (def registry-form (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
 ; SID 00000000 is Canon 0 / (), a semantic ground value rather than a function.
 ; The function table projects only callable/form identities, so skip that first row.
-(def entries (cdr (cdr registry-form)))
+(def entries (cdr registry-form))
 
 ; Processor realization projection. Its rows never create an identity: they
 ; may only annotate IDs that already exist in `entries` above.
@@ -97,7 +97,7 @@
 (def str+
   (lambda args (reduce (lambda (acc s) (string-append acc s)) "" args)))
 
-; SID already arrives from sr/2 as an exact 8-bit string. This generator
+; SID already arrives from the registry as an exact 8-bit string. This generator
 ; must preserve it verbatim; formatting identity is owned by the registry.
 
 ; --- surfaces are fixed (lang word) slots; word is spelling or () ---
