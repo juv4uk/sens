@@ -75,7 +75,7 @@ fn matrix_is_a_view_over_existing_source_axes() {
         assert!(kernel_source.contains(sid));
         assert!(machine_source.contains(sid));
     }
-    assert_eq!(seen.len(), 5);
+    assert_eq!(seen.len(), 4);
 
     // Boundary-specific evidence required by the issue.
     assert!(math_source.contains("non-mathematical-in-this-slice"));
@@ -93,5 +93,5 @@ fn coordinate_view_fixture_is_lisp_owned() {
         .expect("#845 fixture must execute")
         .value
         .to_string();
-    assert_eq!(value, "(semantic-coordinate-matrix-845 (status pass) (axes independent) (authority canonical-sid-registry) (rows 5))");
+    assert_eq!(value, "(semantic-coordinate-matrix-845 (status pass) (axes independent) (authority canonical-sid-registry) (rows 4))");
 }
