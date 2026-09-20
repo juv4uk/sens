@@ -36,17 +36,20 @@
     (quote (en uk ukr sa sym))))
 
 (def semantic-registry-row-namespaces
+  (lambda (surfaces)
+    (cond
+      ((atom surfaces) (structural-kind empty-list)
+       (quote ()))
+      ((atom surfaces) (structural-kind pair)
+       (cons
+         (car (car surfaces))
+         (semantic-registry-row-namespaces
+           (cdr surfaces)))))))
+
+(def semantic-registry-row-namespaces-from-row
   (lambda (row)
-    (let ((surfaces (semantic-registry-row-surfaces row)))
-      (cond
-        ((atom surfaces) (structural-kind empty-list)
-         (quote ()))
-        ((atom surfaces) (structural-kind pair)
-         (cons
-           (car (car surfaces))
-           (semantic-registry-row-namespaces
-             (cons (car (cdr surfaces))
-                   (cdr (cdr surfaces))))))))))
+    (semantic-registry-row-namespaces
+      (semantic-registry-row-surfaces row))))
 
 (def semantic-registry-row-id
   (lambda (row)
