@@ -113,6 +113,9 @@ fn load_manifest(path: &str) -> Result<Manifest, String> {
                     return Err(format!("island {} has invalid SHA-256", island.key));
                 }
             }
+            if entry.provider == "release-asset" && entry.probe.is_empty() {
+                return Err(format!("island {} release asset is missing a bounded probe", island.key));
+            }
         }
     }
     Ok(manifest)
@@ -208,7 +211,8 @@ pub fn run(args: &[String]) -> Result<String, String> {
                         fs::create_dir_all(&staging).map_err(|error| error.to_string())?;
                         fs::rename(&temporary, staging.join("runtime.bin")).map_err(|error| error.to_string())?;
                         fs::rename(&staging, &target_dir).map_err(|error| error.to_string())?;
-                        rows.push(format!("installed {}", target_dir.display()));
+                        let probe = bounded_probe(&entry.probe);
+                        rows.push(format!("published {}: {probe}", target_dir.display()));
                     }
                     Some(entry) if entry.provider != "unsupported" => rows.push(format!(
                         "install {}", std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target).display()
