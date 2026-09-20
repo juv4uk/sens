@@ -2,8 +2,8 @@ use my_lisp::syntax::Expr;
 use my_lisp::{parse, ExprKind};
 
 const UK_API_DOCS: &str = include_str!("../../../../lib/surface/uk-docs.lisp");
-const HUMAN_SURFACES: [&str; 3] = ["uk", "en", "sa"];
-const FIXED_SURFACES: [&str; 5] = ["en", "uk", "ukr", "sa", "sym"];
+const HUMAN_SURFACES: [&str; 3] = ["ук", "en", "sa"];
+const FIXED_SURFACES: [&str; 5] = ["en", "ук", "укр", "sa", "sym"];
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct SurfaceName {
@@ -44,7 +44,8 @@ impl Counts {
 
 fn normalize_surface(surface: &str) -> &str {
     match surface {
-        "ук" => "uk",
+        "uk" => "ук",
+        "ukr" => "укр",
         other => other,
     }
 }
@@ -198,7 +199,7 @@ fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
 pub(crate) fn render_status() -> Result<String, String> {
     let entries = registry_entries()?;
     let denominator = public_denominator(&entries);
-    let uk = counts_for(&entries, "uk");
+    let uk = counts_for(&entries, "ук");
     let en = counts_for(&entries, "en");
     let sa = counts_for(&entries, "sa");
     let symbolic = entries
@@ -295,7 +296,7 @@ pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, Stri
     let mut output = format!(
         "identity: {}\n  UK: {}\n  EN: {}\n  SA: {}",
         entry.identity,
-        rendered_name(surface_name(entry, "uk")),
+        rendered_name(surface_name(entry, "ук")),
         rendered_name(surface_name(entry, "en")),
         rendered_name(surface_name(entry, "sa")),
     );
@@ -306,7 +307,7 @@ pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, Stri
     output.push_str("\n  current: ");
     output.push_str(surface);
 
-    if normalize_surface(surface) == "uk" {
+    if normalize_surface(surface) == "ук" {
         if let Some(doc) = ukrainian_docs()?
             .into_iter()
             .find(|doc| doc.identity == entry.identity)
@@ -345,18 +346,18 @@ mod tests {
         let entry = find_entry(&entries, "+").expect("+ identity");
         assert_eq!(entry.identity, "00001100");
         assert_eq!(surface_name(entry, "en").and_then(|item| item.name.as_deref()), None);
-        assert_eq!(surface_name(entry, "uk").and_then(|item| item.name.as_deref()), Some("додати"));
+        assert_eq!(surface_name(entry, "ук").and_then(|item| item.name.as_deref()), Some("додати"));
         assert_eq!(surface_name(entry, "sa").and_then(|item| item.name.as_deref()), Some("yoga"));
         assert_eq!(surface_name(entry, "sym").and_then(|item| item.name.as_deref()), Some("+"));
     }
 
     #[test]
     fn repl_never_reports_a_human_spelling_as_identity() {
-        let output = render_name("uk", "map").expect("render map");
+        let output = render_name("ук", "map").expect("render map");
         assert!(output.starts_with("identity: 00110111\n"));
         assert!(!output.contains("identity: map"));
 
-        let plus = render_name("uk", "+").expect("render +");
+        let plus = render_name("ук", "+").expect("render +");
         assert!(plus.starts_with("identity: 00001100\n"));
         assert!(plus.contains("EN: ()"));
         assert!(plus.contains("SYM: +"));
