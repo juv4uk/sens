@@ -103,6 +103,17 @@
            ((> count 1) 1
             (workflow-inventory-violation (quote duplicate-workflow-row) path))))))))
 
+(def workflow-observed-path-state
+  (lambda (path observed)
+    (cond
+      ((atom observed) (structural-kind empty-list) (quote absent))
+      ((atom observed) (structural-kind atom) (quote malformed))
+      ((atom observed) (structural-kind pair)
+       (cond
+         ((equal? path (car observed)) (structural-relation same) (quote present))
+         ((equal? path (car observed)) (structural-relation distinct)
+          (workflow-observed-path-state path (cdr observed))))))))
+
 (def workflow-stale-verdict
   (lambda (rows observed)
     (cond
@@ -112,12 +123,14 @@
       ((atom rows) (structural-kind pair)
        (let* ((row (car rows))
               (path (workflow-field (quote path) row))
-              (found (member? path observed)))
+              (state (workflow-observed-path-state path observed)))
          (cond
-           ((equal? found (quote ())) (structural-relation same)
+           ((eq state (quote present)) (identity-relation same)
+            (workflow-stale-verdict (cdr rows) observed))
+           ((eq state (quote absent)) (identity-relation same)
             (workflow-inventory-violation (quote stale-workflow-row) path))
-           ((equal? found (quote ())) (structural-relation distinct)
-            (workflow-stale-verdict (cdr rows) observed))))))))
+           ((eq state (quote malformed)) (identity-relation same)
+            (workflow-inventory-violation (quote malformed-observed-workflows) observed))))))))
 
 (def workflow-verdict
   (lambda (observed rows)
