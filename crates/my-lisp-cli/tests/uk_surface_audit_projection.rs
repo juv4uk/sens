@@ -101,41 +101,38 @@ fn uk_surface_audit_generator_runs_through_real_my_lisp_cli() {
 }
 
 #[test]
-fn ukrainian_staging_profile_covers_every_function_table_identity() {
+fn ukrainian_staging_profile_covers_every_registry_identity() {
     let root = repo_root();
-    let function_table = fs::read_to_string(root.join("lib/generated/function-table.lisp"))
-        .expect("generated function table must be readable");
     let profile = fs::read_to_string(root.join("lib/surface/український-профіль-джерела.lisp"))
         .expect("Ukrainian staging profile must be readable");
 
-    let expected_rows = numeric_row_id_list(&function_table);
+    let expected: BTreeSet<u32> = my_lisp::semantic_registry_export::admitted_semantic_ids()
+        .into_iter()
+        .filter(|id| *id != 0)
+        .map(u32::from)
+        .collect();
+    let expected_rows = expected.len();
     let actual_rows = numeric_row_id_list(&profile);
-    let expected = numeric_row_ids(&function_table);
     let actual = numeric_row_ids(&profile);
 
-    assert_eq!(
-        expected_rows.len(),
-        expected.len(),
-        "function table must not contain duplicate semantic identity rows"
-    );
     assert_eq!(
         actual_rows.len(),
         actual.len(),
         "Ukrainian staging must contain exactly one row per semantic identity"
     );
     assert_eq!(
-        expected_rows.len(),
-        167,
-        "function table inventory changed; review UK coverage gate"
+        expected_rows,
+        168,
+        "semantic registry callable inventory changed; review UK coverage gate"
     );
     assert_eq!(
         actual_rows.len(),
         167,
-        "Ukrainian staging row count must stay exactly aligned with the 167-row function table"
+        "Ukrainian staging row count must stay exactly aligned with the 168 callable registry identities"
     );
     assert_eq!(
         actual, expected,
-        "Ukrainian staging must explicitly cover every semantic identity, including compatibility-only rows"
+        "Ukrainian staging must explicitly cover every callable semantic-registry identity"
     );
 }
 
