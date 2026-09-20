@@ -730,3 +730,23 @@ fn ukrainska_prohrama_pryinnyattia_ne_potrebuie_latynskoi_rozkladky() -> Result<
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod bare_binary_sid_reader_tests {
+    use super::{en_uk_names_needing_uk_layout_check, stable_pairs};
+
+    #[test]
+    fn canonical_bare_sid_rows_are_visible_to_both_registry_readers() {
+        let stable = stable_pairs();
+        assert!(
+            stable.contains(&("00000010".to_string(), "атом?".to_string())),
+            "stable_pairs must read the canonical bare binary SID row for atom"
+        );
+
+        let uk_names = en_uk_names_needing_uk_layout_check();
+        assert!(
+            uk_names.iter().any(|name| name == "атом?"),
+            "en_uk_names_needing_uk_layout_check must read the canonical bare binary SID row for atom"
+        );
+    }
+}
