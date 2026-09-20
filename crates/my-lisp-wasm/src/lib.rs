@@ -44,7 +44,7 @@ impl WebSurface {
         match value.trim().to_lowercase().as_str() {
             "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
-            "uk" | "ук" | "українська" => Some(Self::Ukrainian),
+            "ук" | "ук" | "українська" => Some(Self::Ukrainian),
             "sa" | "sanskrit" | "санскрит" => Some(Self::Sanskrit),
             _ => None,
         }
@@ -356,7 +356,7 @@ mod tests {
                 .expect("closure def");
         });
 
-        assert_eq!(set_surface_impl("uk").expect("uk"), "ук");
+        assert_eq!(set_surface_impl("ук").expect("ук"), "ук");
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
