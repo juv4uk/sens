@@ -66,7 +66,7 @@ fn кожна_тотожність_явно_описує_uk_en_sa_без_заб�
         assert!(
             namespaces
                 .iter()
-                .all(|namespace| ["en", "uk", "ukr", "sa", "sym"].contains(namespace)),
+                .all(|namespace| ["en", "ук", "укр", "sa", "sym"].contains(namespace)),
             "{}: unexpected surface namespace set: {namespaces:?}",
             registry_id_bits(id)
         );
@@ -114,7 +114,7 @@ fn додавання_відділяє_людські_мови_від_спіль
             .map(|row| row.name)
     };
 
-    assert_eq!(surface("uk"), Some("додати"));
+    assert_eq!(surface("ук"), Some("додати"));
     assert_eq!(surface("en"), None);
     assert_eq!(surface("sa"), Some("yoga"));
     assert_eq!(surface("sym"), Some("+"));
@@ -165,7 +165,7 @@ fn повне_рівноправя_вимагає_наявності_для_вс
         }
 
         let rows = registry_surfaces(id);
-        let present = ["uk", "en", "sa"]
+        let present = ["ук", "en", "sa"]
             .iter()
             .all(|namespace| rows.iter().any(|row| row.namespace == *namespace));
 
