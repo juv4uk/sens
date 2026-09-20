@@ -29,7 +29,7 @@ Release assets проходять SHA-256 verification перед установ
 
 - Common Lisp — SBCL runtime; Linux через distro package, Windows через pinned MSI.
 - Prolog — SWI-Prolog; Linux через distro package, Windows через pinned official executable.
-- CLIPS — Linux через shared-library development package, Windows через pinned 64-bit MSI.
+- CLIPS — Linux через shared-library development package, Windows через pinned 64-bit official runtime archive that contains the shared library.
 - Datalog — вбудоване ядро my-lisp, без окремого runtime download.
 
 Відсутній або невірно перевірений runtime не маскується під `available`.
