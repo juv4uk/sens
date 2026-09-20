@@ -1,11 +1,14 @@
 //! Immutable evaluator meaning for Canon 0 + McCarthy7.
 //!
 //! Canon is deliberately *not* an `Environment`. Stable human/symbolic
-//! spellings live in `lib/surface/semantic-registry.wsm` and are projected to
-//! opaque numeric IDs by the shared registry module. This module owns only the
-//! finite mapping from those IDs to canonical evaluator meaning, plus Canon 0.
+//! spellings live in the semantic registry and SID-to-operation classification
+//! lives in `lib/evaluator-dispatch.lisp`. This Rust module only maps the
+//! Lisp-selected operation class onto concrete evaluator mechanisms.
 
-use super::special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values};
+use super::{
+    evaluator_dispatch_generated::{self as dispatch, EvaluatorMechanism},
+    special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values},
+};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Span, Value};
 use crate::semantic_registry::SemanticId;
 
@@ -21,87 +24,49 @@ pub(crate) enum CanonicalIdentity {
     Cond,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum CanonicalKind {
-    GroundValue,
-    ValuePrimitive,
-    SpecialForm,
+fn canonical_identity_for_mechanism(
+    mechanism: EvaluatorMechanism,
+) -> Option<CanonicalIdentity> {
+    match mechanism {
+        EvaluatorMechanism::EmptyListGround => Some(CanonicalIdentity::EmptyList),
+        EvaluatorMechanism::QuoteForm => Some(CanonicalIdentity::Quote),
+        EvaluatorMechanism::AtomPrimitive => Some(CanonicalIdentity::Atom),
+        EvaluatorMechanism::EqPrimitive => Some(CanonicalIdentity::Eq),
+        EvaluatorMechanism::ConsPrimitive => Some(CanonicalIdentity::Cons),
+        EvaluatorMechanism::CarPrimitive => Some(CanonicalIdentity::Car),
+        EvaluatorMechanism::CdrPrimitive => Some(CanonicalIdentity::Cdr),
+        EvaluatorMechanism::CondForm => Some(CanonicalIdentity::Cond),
+        EvaluatorMechanism::LambdaForm | EvaluatorMechanism::DefineForm => None,
+    }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) struct CanonEntry {
-    pub identity: CanonicalIdentity,
-    pub kind: CanonicalKind,
-    pub semantic_id: SemanticId,
+fn mechanism_for_identity(identity: CanonicalIdentity) -> EvaluatorMechanism {
+    match identity {
+        CanonicalIdentity::EmptyList => EvaluatorMechanism::EmptyListGround,
+        CanonicalIdentity::Quote => EvaluatorMechanism::QuoteForm,
+        CanonicalIdentity::Atom => EvaluatorMechanism::AtomPrimitive,
+        CanonicalIdentity::Eq => EvaluatorMechanism::EqPrimitive,
+        CanonicalIdentity::Cons => EvaluatorMechanism::ConsPrimitive,
+        CanonicalIdentity::Car => EvaluatorMechanism::CarPrimitive,
+        CanonicalIdentity::Cdr => EvaluatorMechanism::CdrPrimitive,
+        CanonicalIdentity::Cond => EvaluatorMechanism::CondForm,
+    }
 }
-
-pub(crate) const EMPTY_LIST_SEMANTIC_ID: SemanticId = 0;
-pub(crate) const QUOTE_SEMANTIC_ID: SemanticId = 1;
-pub(crate) const ATOM_SEMANTIC_ID: SemanticId = 2;
-pub(crate) const EQ_SEMANTIC_ID: SemanticId = 3;
-pub(crate) const CONS_SEMANTIC_ID: SemanticId = 4;
-pub(crate) const CAR_SEMANTIC_ID: SemanticId = 5;
-pub(crate) const CDR_SEMANTIC_ID: SemanticId = 6;
-pub(crate) const COND_SEMANTIC_ID: SemanticId = 7;
-
-/// Canon 0 is SID 0 and is the empty-list ground object itself.
-/// McCarthy7 follow contiguously as SIDs 1..7.
-pub(crate) const CANON: [CanonEntry; 8] = [
-    CanonEntry {
-        identity: CanonicalIdentity::EmptyList,
-        kind: CanonicalKind::GroundValue,
-        semantic_id: EMPTY_LIST_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Quote,
-        kind: CanonicalKind::SpecialForm,
-        semantic_id: QUOTE_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Atom,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: ATOM_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Eq,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: EQ_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Cons,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: CONS_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Car,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: CAR_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Cdr,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: CDR_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Cond,
-        kind: CanonicalKind::SpecialForm,
-        semantic_id: COND_SEMANTIC_ID,
-    },
-];
 
 fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<CanonicalIdentity> {
-    CANON
+    dispatch::EVALUATOR_DISPATCH
         .iter()
-        .find(|entry| entry.semantic_id == semantic_id)
-        .map(|entry| entry.identity)
+        .find(|row| row.semantic_id == semantic_id)
+        .and_then(|row| canonical_identity_for_mechanism(row.mechanism))
 }
 
 fn semantic_id_for_identity(identity: CanonicalIdentity) -> SemanticId {
-    CANON
+    let mechanism = mechanism_for_identity(identity);
+    dispatch::EVALUATOR_DISPATCH
         .iter()
-        .find(|entry| entry.identity == identity)
-        .map(|entry| entry.semantic_id)
-        .expect("every Canon identity has one byte SID")
+        .find(|row| row.mechanism == mechanism)
+        .map(|row| row.semantic_id)
+        .expect("every Canon mechanism must be projected from Lisp-owned evaluator dispatch")
 }
 
 pub(crate) fn identity_for_surface(name: &str) -> Option<CanonicalIdentity> {
