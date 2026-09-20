@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/wsm-lisp-hero.svg" alt="my-lisp — CANON 0+7 · META-EVAL · WASM" width="100%">
+<img src="docs/assets/wsm-lisp-hero.svg" alt="my-lisp — CANON () · FUNCTION TABLE · META-EVAL · WASM" width="100%">
 
 # my-lisp
 
@@ -33,7 +33,7 @@ Rust лишається важливим механічним substrate/referenc
 
 ```text
                   my-lisp
-        Canon / SID / laws / data
+        Canon () / function table / SID / laws
                      |
        +-------------+-------------+
        |             |             |
@@ -70,7 +70,7 @@ semantic contract + executable laws
 
 Особливо це стосується bootstrap: `lib/macro.lisp` і `lib/core.lisp` є Lisp-owned behavior. Якщо для запуску на іншому субстраті потрібен новий host-механізм, він має бути вузьким, незвідним і semantics-blind; переписування `COND`, `defmacro`, `let`, `equal?` чи іншої Lisp-поведінки в Java/Rust не є еквівалентним substrate switch.
 
-Поточний bootstrap рухається до канонічного **тричленного `COND`** — `(query expected-result expression)`: структурні та identity-рішення порівнюються з явним результатом, а не через загальну truthiness. Contract 8.0 також робить вичерпання явним: якщо жоден query не збігся зі своїм expected-result, канонічний `COND` завершується named failure `UnsatisfiedConditional`, а не тихим `()`. Перший upstream-крок для `lib/macro.lisp` проходить через PR [`#615`](https://github.com/juv4uk/my-lisp/pull/615); це ще не є оголошенням зеленого CI.
+Поточний bootstrap використовує канонічний **тричленний `COND`** — `(query expected-result expression)`: структурні та identity-рішення порівнюються з явним результатом, а не через загальну truthiness. Contract 8.0 також робить вичерпання явним: якщо жоден query не збігся зі своїм expected-result, канонічний `COND` завершується named failure `UnsatisfiedConditional`, а не тихим `()`. Свіжий M1-зріз clear-domain споживачів уже landed через merged PR [`#633`](https://github.com/juv4uk/my-lisp/pull/633); старий `#615` лишається історичним donor-шляхом, а не поточним bootstrap-кроком.
 
 ---
 
@@ -84,7 +84,7 @@ semantic contract + executable laws
 
 На сьогодні README може чесно показати такі вже ратифіковані результати:
 
-- **Canon 0+7 має executable witnesses.** Закони стабільного історичного кореня не лише описані прозою: вони виконуються в [`lib/canon.lisp`](lib/canon.lisp) і перевіряються conformance/Canon-тестами.
+- **Canon `()` / Lisp-owned function table є семантичним коренем, а McCarthy-7 має executable historical/minimal witnesses.** `()` ідентифікує канонічний ground/list root; semantic identities, закони й admitted meaning належать Lisp-owned authority. Класичний історичний корінь продовжує перевірятися через [`lib/canon.lisp`](lib/canon.lisp) і conformance/Canon-тести, але не є другою глобальною таблицею значень.
 - **Українська поверхня є peer projection тих самих numeric semantic identities.** `uk`, `en`, `sa` та інші admitted spellings не створюють окремих значень і не перекладають «привілейовану англійську семантику»; authority лежить у numeric-only registry [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp).
 - **Vertical Day — bounded фізичний доказ.** Ратифікований зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) проводить `(перше (сполучити 2 3))` через structured machine forms → closed admission → Lisp-owned x86-64 encoding → semantics-blind host → physical CPU і отримує `2`. Це доказ конкретного bounded шляху, не твердження про повну native Lisp-машину.
 - **Canonical machine path fail-closed.** Ill-typed semantic input та raw/malformed/unadmitted, зокрема truncated, machine requests відхиляються до входу в host; негативні witnesses фіксують `HOST CALL COUNT = 0`, а не використовують crash як oracle.
@@ -113,11 +113,11 @@ README лише показує вже зароблені докази; він н
 
 ---
 
-## Canon 0 і історичний корінь Маккарті
+## Canon `()` / таблиця функцій і історичний корінь Маккарті
 
-`()` лишається **Canon 0** — первинним порожнім правильним списком і базою індукції для спискової структури.
+`()` лишається канонічним ground/list root. У поточній архітектурі **Canon `()` / Lisp-owned function table** є єдиним коренем semantic dispatch: SID, meaning/law/domain визначаються до вибору executor-а. Таблиці механізмів, machine lowering та island adapters є лише downstream projections/виконавцями.
 
-Сім класичних операцій Маккарті лишаються важливим історичним і мінімальним коренем:
+Сім класичних операцій Маккарті лишаються важливим історичним і мінімальним коренем, але не утворюють окремої сучасної semantic authority:
 
 | Канонічна тотожність | Українська поверхня | Символ | Історичне ім'я |
 |---|---|---:|---|
@@ -263,11 +263,11 @@ README пояснює проєкт, але не визначає його сем
 ```text
 language-contract.lisp
         ↓
-ратифіковані ADR
+Canon () / Lisp-owned function table + semantic registry
         ↓
-виконувані закони та conformance fixtures
+ратифіковані ADR + виконувані laws/conformance
         ↓
-референсна реалізація Rust
+механічні projections / reference implementation Rust
         ↓
 незалежні реалізації
         ↓
@@ -292,7 +292,7 @@ README / tutorials / історичні плани
 
 ```text
 my-lisp
-  ├─ Canon / SID / surfaces / laws
+  ├─ Canon () / function table / SID / surfaces / laws
   ├─ локальна Lisp-поведінка
   ├─ ordinary data
   ├─ композиція
@@ -417,7 +417,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 1. [`language-contract.lisp`](language-contract.lisp) — що саме обіцяє мова;
 2. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — хто має право визначати істину;
-3. [`lib/canon.lisp`](lib/canon.lisp) — виконуваний Canon 0+7;
+3. [`lib/canon.lisp`](lib/canon.lisp) — executable witnesses для Canon `()` і historical/minimal McCarthy root;
 4. [`docs/language-core.md`](docs/language-core.md) — компактна архітектура ядра;
 5. [`lib/surface/uk-acceptance.lisp`](lib/surface/uk-acceptance.lisp) — українська мова як виконуваний програмний інтерфейс;
 6. [`lib/meta-eval.lisp`](lib/meta-eval.lisp) — як мова починає обчислювати саму себе;
@@ -437,7 +437,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · auxiliary
 
-`my-lisp` is a Lisp research language built around Canon 0, an experimental 8-bit semantic identity space, exact arithmetic, executable conformance, and an archipelago of autonomous execution kernels. The classical McCarthy primitives remain a historical/minimal root, but no longer form a permanent limit on what may become a primitive.
+`my-lisp` is a Lisp research language built around Canon `()` / a Lisp-owned function-table authority, an experimental 8-bit semantic identity space, exact arithmetic, executable conformance, and an archipelago of autonomous execution kernels. The classical McCarthy primitives remain a historical/minimal root, not a second global semantic authority.
 
 Ukrainian is the project's primary human language. English and German are auxiliary. The Rust runtime is the reference implementation, not semantic authority; start with [`language-contract.lisp`](language-contract.lisp) and [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
 
@@ -445,7 +445,7 @@ The central research question is now: **how simple can the language remain while
 
 ## Deutsch · ergänzend
 
-`my-lisp` ist eine Lisp-Forschungssprache mit Canon 0, einem experimentellen 8-Bit-Raum semantischer Identitäten, exakter Arithmetik, ausführbarer Konformität und einem Archipel autonomer Ausführungskerne. Die klassischen McCarthy-Primitive bleiben ein historischer/minimaler Ursprung, sind aber keine dauerhafte Obergrenze mehr.
+`my-lisp` ist eine Lisp-Forschungssprache mit Canon `()` / einer Lisp-eigenen Function-Table-Autorität, einem experimentellen 8-Bit-Raum semantischer Identitäten, exakter Arithmetik, ausführbarer Konformität und einem Archipel autonomer Ausführungskerne. Die klassischen McCarthy-Primitive bleiben ein historischer/minimaler Ursprung, nicht eine zweite globale semantische Autorität.
 
 Ukrainisch ist die primäre menschliche Sprache des Projekts; Englisch und Deutsch sind Hilfssprachen. Rust ist die Referenzimplementierung, aber nicht die semantische Autorität. Maßgeblich sind [`language-contract.lisp`](language-contract.lisp), ratifizierte Entscheidungen und ausführbare Konformitätsbelege.
 
