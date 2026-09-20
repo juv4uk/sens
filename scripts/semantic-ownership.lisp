@@ -620,7 +620,7 @@
            "` | `" (token-text (ownership-layer row))
            "` | `" (token-text (ownership-status row))
            "` | " (ownership-behavior row) " |\n"
-           (render-ownership-rows (cdr rows)))))))
+           (render-ownership-rows (cdr rows))))))))
 
 (def render-semantic-ownership-report
   (lambda (ownership migrations)
