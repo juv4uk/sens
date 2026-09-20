@@ -21,4 +21,10 @@
     (00000111 evaluator cond-form)
     (00001000 evaluator lambda-form)
     (00001001 evaluator define-form)
-    (00001011 evaluator define-form)))
+    (00001011 evaluator define-form)
+    ; Existing SID + only. These rows admit executors; they do not define +.
+    ; Evidence donors: #988/#1042; Datalog execution replay: #1052.
+    (00001100 common-lisp bounded-exact-add)
+    (00001100 prolog bounded-exact-add)
+    (00001100 clips bounded-exact-add)
+    (00001100 datalog bounded-exact-add)))
