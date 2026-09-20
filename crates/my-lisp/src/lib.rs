@@ -28,7 +28,7 @@ mod semantic_registry;
 /// See docs/cml-semantic-export-v1-design.md.
 pub mod semantic_registry_export {
     /// One admitted (namespace, spelling) pair for a semantic ID — e.g.
-    /// `SurfaceRow { namespace: "uk", name: "як-є" }` for `quote`'s Ukrainian
+    /// `SurfaceRow { namespace: "ук", name: "як-є" }` for `quote`'s Ukrainian
     /// surface.
     pub struct SurfaceRow {
         pub namespace: &'static str,
