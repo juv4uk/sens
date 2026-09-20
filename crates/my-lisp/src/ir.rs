@@ -23,7 +23,7 @@ use crate::eval::canon::{self, CanonicalIdentity};
 use crate::eval::necessary_forms::{self, NecessaryFormIdentity};
 use crate::semantic_registry::{self, SemanticId};
 use crate::syntax::{Exactness, Expr, ExprKind, Span};
-use crate::value::Rational;
+use crate::value::{Binary, Rational};
 
 /// Byte SID 10 (defmacro) is owned by `lib/macro.my`'s bootstrap, not
 /// `necessary_forms.rs` — mirrored here as its own constant rather than
@@ -145,6 +145,7 @@ pub struct CondClause {
 pub enum LiteralValue {
     Number(f64, Exactness),
     Rational(Rational),
+    Binary(Binary),
     String(String),
     Symbol(String),
 }
@@ -211,6 +212,11 @@ pub fn lower(expr: &Expr) -> Result<IrNode, LoweringError> {
         }),
         ExprKind::Rational(r) => Ok(IrNode::Literal {
             value: LiteralValue::Rational(r.clone()),
+            span: expr.span,
+            provenance: Provenance::Literal,
+        }),
+        ExprKind::Binary(binary) => Ok(IrNode::Literal {
+            value: LiteralValue::Binary(*binary),
             span: expr.span,
             provenance: Provenance::Literal,
         }),
