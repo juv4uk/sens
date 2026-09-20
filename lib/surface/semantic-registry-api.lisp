@@ -31,6 +31,23 @@
   (lambda (registry)
     (cdr registry)))
 
+(def semantic-registry-namespaces
+  (lambda ()
+    (quote (en uk ukr sa sym))))
+
+(def semantic-registry-row-namespaces
+  (lambda (row)
+    (let ((surfaces (semantic-registry-row-surfaces row)))
+      (cond
+        ((atom surfaces) (structural-kind empty-list)
+         (quote ()))
+        ((atom surfaces) (structural-kind pair)
+         (cons
+           (car (car surfaces))
+           (semantic-registry-row-namespaces
+             (cons (car (cdr surfaces))
+                   (cdr (cdr surfaces))))))))))
+
 (def semantic-registry-row-id
   (lambda (row)
     (car row)))
