@@ -456,6 +456,10 @@ mod tests {
             decode_canonical_atom_list(b"['bob']"),
             Err(PrologCanonicalListError::UnsupportedAtom(_))
         ));
+        assert_eq!(
+            decode_canonical_atom_list(&[0xff, 0xfe]),
+            Err(PrologCanonicalListError::Utf8)
+        );
     }
 
     #[test]
