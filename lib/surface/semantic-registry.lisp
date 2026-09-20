@@ -1,7 +1,7 @@
-; Єдина машинна authority мовних поверхонь — compact byte-SID schema.
+; Єдина машинна authority мовних поверхонь — canonical binary SID schema (8 bits).
 ; Значення первинне. Мови рівноправні.
 ;
-; Перший елемент кожного рядка — string із рівно 8 біт opaque semantic ID (SID).
+; Формат SID оголошений у мові як `(binary 8)`; у самій таблиці SID лишається чистим 8-бітним рядком з 0/1.
 ; SID — машинна identity, НЕ Lisp surface spelling і НЕ арифметичне значення.
 ; Bare numeric tokens у програмі завжди лишаються exact numbers; semantic routing:
 ; surface -> registry bitstring -> u8 SID.
