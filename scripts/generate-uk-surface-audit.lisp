@@ -64,6 +64,66 @@
     ((atom candidate-section) (quote ()))
     (t (cdr candidate-section))))
 
+(def candidate-row-id (lambda (row) (car row)))
+
+(def candidate-id-count
+  (lambda (sid rows acc)
+    (cond
+      ((atom rows) acc)
+      ((equal? sid (candidate-row-id (car rows)))
+       (candidate-id-count sid (cdr rows) (+ acc 1)))
+      (t (candidate-id-count sid (cdr rows) acc)))))
+
+(def registry-coverage-verdict
+  (lambda (rows)
+    (cond
+      ((atom rows) (quote registry-coverage-ok))
+      (t
+       (let* ((sid (write-to-string (car (car rows))))
+              (count (candidate-id-count sid candidate-rows 0)))
+         (cond
+           ((= count 1) (registry-coverage-verdict (cdr rows)))
+           (t (list (quote registry-coverage-violation) sid count))))))))
+
+(def staging-extra-verdict
+  (lambda (rows)
+    (cond
+      ((atom rows) (quote staging-extra-ok))
+      (t
+       (let* ((sid (candidate-row-id (car rows)))
+              (present (find-candidate-row sid
+                         (map
+                           (lambda (row)
+                             (list (write-to-string (car row))))
+                           registry-rows))))
+         (cond
+           ((atom present)
+            (list (quote staging-extra-identity) sid))
+           (t (staging-extra-verdict (cdr rows)))))))))
+
+(def fail-closed
+  (lambda (verdict expected)
+    (cond
+      ((equal? verdict expected) (quote ok))
+      (t
+       (let ((shown (print verdict)))
+         (car (quote ())))))))
+
+(fail-closed
+  (registry-coverage-verdict registry-rows)
+  (quote registry-coverage-ok))
+
+(cond
+  ((= (length candidate-rows) (length registry-rows)) (quote staging-count-ok))
+  (t
+   (let ((shown
+           (print
+             (list
+               (quote staging-count-mismatch)
+               (length candidate-rows)
+               (length registry-rows)))))
+     (car (quote ())))))
+
 (def find-candidate-row
   (lambda (sid rows)
     (cond
