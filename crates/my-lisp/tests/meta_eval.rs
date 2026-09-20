@@ -76,6 +76,18 @@ fn list_primitives_dispatch_to_the_real_primitives() {
 }
 
 #[test]
+fn stage2_list_body_and_parameter_binding_helpers_have_lisp_owned_parity() {
+    assert_eq!(
+        eval_meta("((lambda (x y) (quote first) (cons x y)) 1 (quote (2)))", "(quote ())"),
+        "(1 2)"
+    );
+    assert_eq!(
+        eval_meta("((lambda (x) (quote first) (quote last)) 7)", "(quote ())"),
+        "last"
+    );
+}
+
+#[test]
 fn lambda_application_binds_parameters_and_evaluates_the_body() {
     assert_eq!(eval_meta("((lambda (x) (+ x 1)) 5)", "(quote ())"), "6");
 }
