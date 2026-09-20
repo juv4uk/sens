@@ -122,11 +122,17 @@ fn partial_overlap_is_visible_and_excluded_from_shared_set() {
             text_field(row, "exclusion-reason").contains(reason_fragment),
             "exclusion rationale for {operation} is not explicit"
         );
-        if operation != "comparisons" {
-            assert_eq!(text_field(row, "common-lisp"), "partial");
-        } else {
-            assert_eq!(text_field(row, "common-lisp"), "present");
-        }
+        let expected_common_lisp = match operation {
+            "/" | "mod" => "partial",
+            "quotient" => "derivable",
+            "sqrt" | "comparisons" => "present",
+            _ => unreachable!("covered excluded operation"),
+        };
+        assert_eq!(
+            text_field(row, "common-lisp"),
+            expected_common_lisp,
+            "excluded operation {operation} must preserve its actual Common Lisp capability class"
+        );
     }
 }
 
