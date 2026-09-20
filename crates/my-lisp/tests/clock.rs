@@ -85,11 +85,14 @@ fn raw_unix_clock_observation_is_interpreted_by_lisp() {
 }
 
 #[test]
-fn utc_now_exists_only_after_language_time_layer_loads() {
+fn utc_now_is_admitted_before_language_time_layer_loads() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
-    assert!(session.environment.get("utc-now").is_none());
+    assert_eq!(
+        session.environment.get("utc-now"),
+        Some(&Value::SemanticRef(94))
+    );
     assert!(matches!(
         session.environment.get("unix-time-now"),
         Some(Value::Builtin(_))
@@ -208,11 +211,14 @@ fn raw_ntp_observation_boundary_is_interpreted_by_lisp() {
 }
 
 #[test]
-fn internet_time_sync_is_language_owned_after_time_library_loads() {
+fn internet_time_sync_is_admitted_before_time_library_loads() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
-    assert!(session.environment.get("internet-time-sync").is_none());
+    assert_eq!(
+        session.environment.get("internet-time-sync"),
+        Some(&Value::SemanticRef(107))
+    );
     assert!(matches!(
         session.environment.get("ntp-query-raw"),
         Some(Value::Builtin(_))
