@@ -94,7 +94,9 @@ fn islands_install_apply_verifies_file_artifact_before_publishing_it() {
         .args(["islands", "status", "--manifest", manifest_path.to_str().unwrap(), "--root", root.to_str().unwrap()])
         .output().expect("status CLI");
     assert!(status.status.success(), "{}", String::from_utf8_lossy(&status.stderr));
-    assert!(String::from_utf8(status.stdout).unwrap().contains("demo: available"));
+    let status_stdout = String::from_utf8(status.stdout).unwrap();
+    assert!(status_stdout.contains("demo 1 linux-x86_64"));
+    assert!(status_stdout.contains(": available"));
 
     let second = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
         .args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--profile", "one", "--root", root.to_str().unwrap(), "--apply"])
@@ -115,6 +117,24 @@ fn islands_manifest_rejects_malformed_release_checksum() {
         .output().expect("CLI");
     assert!(!output.status.success());
     assert!(String::from_utf8_lossy(&output.stderr).contains("invalid SHA-256"));
+}
+
+#[test]
+fn islands_status_reports_probe_failure_without_hiding_version_identity() {
+    let base = std::env::temp_dir().join(format!("my-lisp-islands-probe-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let artifact = base.join("runtime.bin");
+    std::fs::write(&artifact, b"runtime").expect("artifact");
+    let digest = my_lisp::sha256_source(b"runtime").iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(&manifest_path, format!(r#"{{"protocol":"my-lisp-islands-manifest/1","islands":[{{"key":"demo","runtime_version":"2","license":"test","provenance":"release","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","sha256":"{}","probe":["/bin/sh","-c","exit 7"]}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
+    let root = base.join("installed");
+    let install = Command::new(env!("CARGO_BIN_EXE_my-lisp")).args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--with", "demo", "--root", root.to_str().unwrap(), "--apply"]).output().expect("install");
+    assert!(install.status.success(), "{}", String::from_utf8_lossy(&install.stderr));
+    let status = Command::new(env!("CARGO_BIN_EXE_my-lisp")).args(["islands", "status", "--manifest", manifest_path.to_str().unwrap(), "--root", root.to_str().unwrap()]).output().expect("status");
+    let stdout = String::from_utf8(status.stdout).unwrap();
+    assert!(stdout.contains("demo 2 linux-x86_64 release: probe-failed"), "{stdout}");
 }
 
 #[test]

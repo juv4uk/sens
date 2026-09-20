@@ -1,4 +1,6 @@
 use std::fs;
+use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 
@@ -33,6 +35,24 @@ struct PlatformEntry {
     url: Option<String>,
     sha256: Option<String>,
     reason: Option<String>,
+    #[serde(default)]
+    probe: Vec<String>,
+}
+
+fn bounded_probe(command: &[String]) -> &'static str {
+    let Some(program) = command.first() else { return "probe-failed" };
+    let mut child = match Command::new(program).args(&command[1..]).stdout(Stdio::null()).stderr(Stdio::null()).spawn() {
+        Ok(child) => child,
+        Err(_) => return "probe-failed",
+    };
+    let deadline = Instant::now() + Duration::from_secs(2);
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => return if status.success() { "available" } else { "probe-failed" },
+            Ok(None) if Instant::now() < deadline => std::thread::sleep(Duration::from_millis(20)),
+            _ => { let _ = child.kill(); let _ = child.wait(); return "probe-failed"; }
+        }
+    }
 }
 
 fn current_target() -> &'static str {
@@ -179,12 +199,14 @@ pub fn run(args: &[String]) -> Result<String, String> {
             let root = args.iter().position(|arg| arg == "--root")
                 .and_then(|index| args.get(index + 1)).map(String::as_str);
             Ok(manifest.islands.into_iter().map(|island| {
-            let outcome = island.platforms.iter().any(|entry| entry.target == target && entry.provider != "unsupported");
-            let status = if let Some(root) = root {
-                let artifact = std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target).join("runtime.bin");
-                if artifact.is_file() { "available" } else if outcome { "absent" } else { "unsupported" }
-            } else if outcome { "absent" } else { "unsupported" };
-            format!("{}: {}", island.key, status)
+            let entry = island.platforms.iter().find(|entry| entry.target == target);
+            let Some(entry) = entry else { return format!("{}: unsupported", island.key) };
+            if entry.provider == "unsupported" { return format!("{}: unsupported", island.key); }
+            let artifact = root.map(|base| std::path::Path::new(base).join(&island.key).join(&island.runtime_version).join(target).join("runtime.bin"));
+            let status = if let Some(_path) = artifact.filter(|path| path.is_file()) {
+                if entry.probe.is_empty() { "available" } else { bounded_probe(&entry.probe) }
+            } else { "absent" };
+            format!("{} {} {} {}: {}", island.key, island.runtime_version, target, island.provenance, status)
         }).collect::<Vec<_>>().join("\n"))
         }
         _ => Err(format!("unknown islands command: {command}")),
