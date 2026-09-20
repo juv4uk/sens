@@ -1,11 +1,41 @@
 {
   "protocol": "my-lisp-islands-manifest/1",
-  "release_note": "Installation prepares independent runtimes; it never admits semantics.",
-  "profiles": [{"key": "four-kernel", "islands": ["prolog", "clips"]}],
+  "release_note": "Self-bootstrap prepares independent runtimes; it never admits semantics.",
+  "profiles": [{"key": "four-kernel", "islands": ["common-lisp", "prolog", "clips", "datalog"]}],
   "islands": [
     {
+      "key": "common-lisp",
+      "runtime_version": "distro-managed",
+      "license": "BSD-2-Clause",
+      "provenance": "system package manager",
+      "platforms": [
+        {
+          "target": "linux-x86_64",
+          "provider": "apt",
+          "package": "sbcl",
+          "probe": ["sbcl", "--version"],
+          "probe_expect": "SBCL"
+        },
+        {
+          "target": "windows-x86_64",
+          "provider": "release-asset",
+          "package": "SBCL",
+          "url": "https://sourceforge.net/projects/sbcl/files/sbcl/2.6.8/sbcl-2.6.8-x86-64-windows-binary.msi/download",
+          "sha256": "2cbb0a46d2693084bb3c14fa35d8102ae5635afcd7978425b296ef7542be4b3c",
+          "artifact": "msi",
+          "probe": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "$env:Path=[Environment]::GetEnvironmentVariable('Path','Machine')+';'+[Environment]::GetEnvironmentVariable('Path','User'); & sbcl.exe --version"
+          ],
+          "probe_expect": "SBCL"
+        }
+      ]
+    },
+    {
       "key": "prolog",
-      "runtime_version": "9.2.0",
+      "runtime_version": "distro-managed",
       "license": "BSD-2-Clause",
       "provenance": "system package manager",
       "platforms": [
@@ -13,20 +43,74 @@
           "target": "linux-x86_64",
           "provider": "apt",
           "package": "swi-prolog",
-          "probe": ["swipl", "--version"]
+          "probe": ["swipl", "--version"],
+          "probe_expect": "SWI-Prolog"
+        },
+        {
+          "target": "windows-x86_64",
+          "provider": "release-asset",
+          "package": "SWI-Prolog",
+          "url": "https://www.swi-prolog.org/download/stable/bin/swipl-10.0.2-1.x64.exe",
+          "sha256": "2ec1f25be0eafb92e559004782b130774c12573fb4b7e8a917e534754a641ad6",
+          "artifact": "nsis",
+          "installer_args": ["/S"],
+          "probe": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "$env:Path=[Environment]::GetEnvironmentVariable('Path','Machine')+';'+[Environment]::GetEnvironmentVariable('Path','User'); & swipl.exe --version"
+          ],
+          "probe_expect": "SWI-Prolog"
         }
       ]
     },
     {
       "key": "clips",
-      "runtime_version": "6.4.2",
+      "runtime_version": "6.30-distro-or-6.4.2-windows",
       "license": "CLIPS License",
-      "provenance": "release asset",
+      "provenance": "system package manager or official release asset",
       "platforms": [
         {
           "target": "linux-x86_64",
-          "provider": "unsupported",
-          "reason": "A verified release artifact is not published in installer v1"
+          "provider": "apt",
+          "package": "libclips-dev",
+          "probe": [
+            "sh",
+            "-c",
+            "ldconfig -p 2>/dev/null | grep -q 'libclips\\.so'"
+          ]
+        },
+        {
+          "target": "windows-x86_64",
+          "provider": "release-asset",
+          "package": "CLIPS 6.4.2",
+          "url": "https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_64_bit_installer_642.msi/download",
+          "sha256": null,
+          "artifact": "msi",
+          "probe": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "$roots=@($env:ProgramFiles); $found=$roots | ForEach-Object { Get-ChildItem $_ -Filter clips.exe -Recurse -ErrorAction SilentlyContinue } | Select-Object -First 1; if($found){exit 0}else{exit 1}"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "datalog",
+      "runtime_version": "builtin",
+      "license": "my-lisp distribution",
+      "provenance": "embedded kernel",
+      "platforms": [
+        {
+          "target": "linux-x86_64",
+          "provider": "embedded",
+          "probe": []
+        },
+        {
+          "target": "windows-x86_64",
+          "provider": "embedded",
+          "probe": []
         }
       ]
     }
