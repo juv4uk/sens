@@ -28,8 +28,10 @@
       ((string? value)
        (identity-relation same)
        (write-to-string value))
+      ((equal? value (quote ()))
+       (write-to-string ""))
       (t
-       (write-to-string (symbol->string value))))))
+       (str+ """ (write-to-string value) """))))))
 
 (def render-surface
   (lambda (entry)
