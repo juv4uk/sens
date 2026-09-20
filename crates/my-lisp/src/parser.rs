@@ -539,6 +539,38 @@ mod tests {
     }
 
     #[test]
+    fn binary_declaration_preserves_fixed_width_and_leading_zeroes() {
+        let expressions = parse("(binary 8) 00000101").expect("binary source parses");
+        assert_eq!(expressions.len(), 2);
+        assert!(matches!(
+            &expressions[1].kind,
+            ExprKind::Binary(binary)
+                if binary.width() == 8 && binary.bits() == "00000101"
+        ));
+    }
+
+    #[test]
+    fn ordinary_decimal_10101000_stays_decimal_without_binary_declaration() {
+        assert!(matches!(
+            parse_one("10101000").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 10_101_000.0
+        ));
+    }
+
+    #[test]
+    fn wrong_width_binary_literal_is_rejected_by_the_reader() {
+        let error = parse("(binary 8) 101").expect_err("wrong-width binary must fail");
+        assert!(error.message.contains("wrong width"));
+    }
+
+    #[test]
+    fn non_binary_digit_in_fixed_width_binary_literal_is_rejected() {
+        let error = parse("(binary 8) 00000102").expect_err("non-binary digit must fail");
+        assert!(error.message.contains("non-binary digit"));
+    }
+
+
+    #[test]
     fn decimal_literal_is_parsed_as_exact_rational_or_exact_integer() {
         assert!(matches!(parse_one("3").kind, ExprKind::Number(n, Exactness::Exact) if n == 3.0));
         assert!(matches!(parse_one("3.0").kind, ExprKind::Number(n, Exactness::Exact) if n == 3.0));
