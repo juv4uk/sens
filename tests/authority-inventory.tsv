@@ -118,3 +118,4 @@ crates/wsm-native-result-types/tests/prolog_datalog_bridge.rs	malformed_projecti
 crates/wsm-native-result-types/tests/observation_provenance.rs	observation_refs_preserve_producer_identity_and_native_slot	observer	life-1-observation-ref	crates/wsm-native-result-types/src/lib.rs	retained
 crates/wsm-native-result-types/tests/observation_provenance.rs	projection_edge_connects_observations_without_normalizing_results	observer	life-1-provenance-edge	crates/wsm-native-result-types/src/lib.rs + contracts/life-1-contract.lisp	retained
 crates/wsm-native-result-types/tests/observation_provenance.rs	native_result_refs_remain_source_compatible	observer	native-result-ref-compatibility	crates/wsm-native-result-types/src/lib.rs	retained
+crates/wsm-native-result-types/tests/prolog_datalog_bridge.rs	real_prolog_lisp_projection_real_datalog_preserves_domains	observer	life-1-prolog-datalog-provenance-trace	#803/#880 Lisp bridge + #805 ObservationRef/ProvenanceEdge	retained
