@@ -168,8 +168,8 @@ fn print_surface_help() {
     println!("Поверхні: :мова ук | укр | en | sa | core");
     println!("Технічний alias: :surface uk | ukr | en | sa | core");
     println!("Каталог поточної людської поверхні: :імена / :names");
-    println!("Одна semantic identity у всіх трьох мовах: :ім'я <назва> / :name <name>");
-    println!("Стан триєдиної поверхні: :поверхні / :surfaces");
+    println!("Одна semantic identity у всіх людських поверхнях: :ім'я <назва> / :name <name>");
+    println!("Стан людських поверхонь: :поверхні / :surfaces");
     println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
     println!("core — канонічний машинний шар, не четверта людська мова.");
     println!("Перемикання змінює лише surface-frame; ваші define/closures лишаються живими.");
