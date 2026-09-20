@@ -368,7 +368,7 @@ fn stable_pairs() -> BTreeSet<(String, String)> {
             let identity = my_lisp::semantic_registry_export::semantic_id_bits(semantic_id);
             my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
                 .into_iter()
-                .find(|surface| surface.namespace == "uk")
+                .find(|surface| surface.namespace == "ук")
                 .map(|surface| (identity, surface.name.to_string()))
         })
         .collect()
@@ -592,7 +592,7 @@ fn en_uk_names_needing_uk_layout_check() -> Vec<String> {
             my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id);
         if let Some(uk) = surfaces
             .iter()
-            .find(|surface| surface.namespace == "uk")
+            .find(|surface| surface.namespace == "ук")
             .map(|surface| surface.name.to_string())
         {
             names.push(uk);
