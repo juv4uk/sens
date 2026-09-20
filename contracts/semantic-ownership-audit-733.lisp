@@ -178,9 +178,9 @@
    (category . execution-mechanism)
    (question-answer . how-implementation-executes-it)
    (semantic-role . canonical-operation-execution)
-   (future-action . project-from-language-authority)
+   (future-action . retain-as-generated-projection)
    (target-destination . "crates/my-lisp/src/eval/canon.rs")
-   (rationale . "Executes Canon mechanisms in Rust. It is a reference implementation projection and must not independently own SID-to-meaning authority."))
+   (rationale . "Executes Canon mechanisms in Rust after operation class selection by the Lisp-owned evaluator dispatch projection; it no longer owns a SID-to-meaning table."))
 
 
   ((key . rust-reader-parser)
