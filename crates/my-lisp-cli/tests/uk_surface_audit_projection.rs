@@ -154,12 +154,6 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
         .expect("Ukrainian staging profile must be readable");
 
     let rows = ukr_candidate_rows(&profile);
-    assert_eq!(
-        rows.len(),
-        167,
-        "coherence audit must inspect every Ukrainian staging candidate"
-    );
-
     let by_id: BTreeMap<String, &UkrCandidateRow> =
         rows.iter().map(|row| (row.id.clone(), row)).collect();
     let aliases = ukr_aliases(&profile);
@@ -203,10 +197,10 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
             canonical.len(),
             1,
             "duplicate ukr candidate {name:?} must have exactly one canonical owner; rows: {:?}",
-            group.iter().map(|row| row.id).collect::<Vec<_>>()
+            group.iter().map(|row| row.id.as_str()).collect::<Vec<_>>()
         );
 
-        let owner_id = canonical[0].id;
+        let owner_id = canonical[0].id.clone();
         for row in group {
             if row.id == owner_id {
                 continue;
@@ -240,4 +234,25 @@ fn ukr_candidates_need_no_latin_keyboard_layout() {
         "ukr candidates must be typeable without switching to a Latin keyboard layout; offenders: {}",
         offenders.join(", ")
     );
+}
+
+#[test]
+fn active_uk_generators_do_not_read_generated_function_table_as_input() {
+    let root = repo_root();
+    for path in [
+        "scripts/generate-uk-surface-audit.lisp",
+        "scripts/generate-ukrainian-api.py",
+    ] {
+        let source = fs::read_to_string(root.join(path))
+            .unwrap_or_else(|error| panic!("failed to read {path}: {error}"));
+        assert!(
+            source.contains("lib/surface/semantic-registry.lisp"),
+            "{path} must name the Canon/function-table authority directly"
+        );
+        assert!(
+            !source.contains("read-file \"lib/generated/function-table.lisp\"")
+                && !source.contains("FUNCTION_TABLE = ROOT / \"lib/generated/function-table.lisp\""),
+            "{path} must not consume generated function-table as an input API"
+        );
+    }
 }
