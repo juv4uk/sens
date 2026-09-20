@@ -1,9 +1,9 @@
 use my_lisp::syntax::Expr;
 use my_lisp::{parse, ExprKind};
 
-const REGISTRY: &str = include_str!("../../../../lib/surface/semantic-registry.lisp");
 const UK_API_DOCS: &str = include_str!("../../../../lib/surface/uk-docs.lisp");
 const HUMAN_SURFACES: [&str; 3] = ["uk", "en", "sa"];
+const FIXED_SURFACES: [&str; 5] = ["en", "uk", "ukr", "sa", "sym"];
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct SurfaceName {
@@ -49,110 +49,32 @@ fn normalize_surface(surface: &str) -> &str {
     }
 }
 
-fn surface_groups(line: &str) -> Vec<&str> {
-    let mut groups = Vec::new();
-    let mut depth = 0usize;
-    let mut start = None;
-
-    for (index, byte) in line.bytes().enumerate() {
-        match byte {
-            b'(' => {
-                depth += 1;
-                if depth == 2 {
-                    start = Some(index + 1);
-                }
-            }
-            b')' => {
-                if depth == 2 {
-                    if let Some(group_start) = start.take() {
-                        let group = line[group_start..index].trim();
-                        if !group.is_empty() {
-                            groups.push(group);
-                        }
-                    }
-                }
-                depth = depth.saturating_sub(1);
-            }
-            _ => {}
-        }
-    }
-    groups
-}
-
-fn registry_name_token(token: &str) -> &str {
-    token
-        .strip_prefix('"')
-        .and_then(|value| value.strip_suffix('"'))
-        .unwrap_or(token)
-}
-
 fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     let mut entries = Vec::new();
-    const FIXED_SURFACES: [&str; 5] = ["en", "uk", "ukr", "sa", "sym"];
 
-    for (index, line) in REGISTRY.lines().enumerate() {
-        let fields = line.split_whitespace().collect::<Vec<_>>();
-        let Some(first) = fields.first() else {
-            continue;
-        };
-        if !first.starts_with('(') {
-            continue;
-        }
-        let Some(identity) = first
-            .strip_prefix("(\"")
-            .and_then(|value| value.strip_suffix('\"'))
-            .or_else(|| first.strip_prefix('('))
-        else {
-            continue;
-        };
-        if identity.len() != 8
-            || !identity.bytes().all(|byte| matches!(byte, b'0' | b'1'))
-        {
-            return Err(format!("registry line {}: invalid byte SID", index + 1));
-        }
-        if identity == "00000000" {
+    for semantic_id in my_lisp::semantic_registry_export::admitted_semantic_ids() {
+        if semantic_id == 0 {
             continue;
         }
 
-        let mut names = Vec::new();
-        for group in surface_groups(line) {
-            let fields = group.split_whitespace().collect::<Vec<_>>();
-            let (surface, name) = match fields.as_slice() {
-                [surface, "()"] => ((*surface).to_string(), None),
-                [surface, raw_name] => (
-                    (*surface).to_string(),
-                    Some(registry_name_token(raw_name).to_string()),
-                ),
-                _ => {
-                    return Err(format!(
-                        "registry line {}: malformed semantic registry surface ({group})",
-                        index + 1
-                    ));
-                }
-            };
-
-            if names.iter().any(|item: &SurfaceName| item.surface == surface) {
-                return Err(format!(
-                    "registry line {}: duplicate surface {surface}",
-                    index + 1
-                ));
-            }
-            names.push(SurfaceName { surface, name });
-        }
-
-        let actual = names
+        let admitted =
+            my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id);
+        let names = FIXED_SURFACES
             .iter()
-            .map(|item| item.surface.as_str())
-            .collect::<Vec<_>>();
-        if actual != FIXED_SURFACES {
-            return Err(format!(
-                "registry line {}: {identity} must contain fixed en/uk/ukr/sa/sym slots",
-                index + 1
-            ));
-        }
+            .map(|namespace| {
+                let name = admitted
+                    .iter()
+                    .find(|surface| surface.namespace == *namespace)
+                    .map(|surface| surface.name.to_string());
+                SurfaceName {
+                    surface: (*namespace).to_string(),
+                    name,
+                }
+            })
+            .collect();
 
         entries.push(SurfaceEntry {
-            identity: identity.to_string(),
+            identity: my_lisp::semantic_registry_export::semantic_id_bits(semantic_id),
             names,
         });
     }
