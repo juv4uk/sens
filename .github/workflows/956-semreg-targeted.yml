@@ -1,0 +1,19 @@
+name: #956 Lisp semantic registry targeted
+
+on:
+  pull_request:
+    paths:
+      - "lib/surface/semantic-registry-api.lisp"
+      - "crates/my-lisp/tests/semantic_registry_lisp.rs"
+      - "tests/fixtures/semantic-registry-self-hosted-witness.lisp"
+      - ".github/workflows/956-semreg-targeted.yml"
+
+jobs:
+  semantic-registry-lisp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run Lisp-owned semantic registry witness
+        run: cargo test -p my-lisp --test semantic_registry_lisp -- --nocapture
