@@ -4,6 +4,13 @@
 
 (def identity (lambda (value) value))
 
+; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
+; The reader treats the following source forms as binary data until the next
+; top-level source is read; decimal integers remain ordinary decimal values.
+(def binary
+  (lambda (width)
+    (list (quote binary) width)))
+
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
 ; symbol as the parameter list binds every argument, evaluated left to
