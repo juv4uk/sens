@@ -150,10 +150,16 @@ fn u8_binary(value: &Value, span: Span, operation: &str) -> Result<Binary, crate
 
 fn u8_integer(value: &Value, span: Span, operation: &str) -> Result<u8, crate::LanguageError> {
     match value {
-        Value::Number(number, Exactness::Exact)
-            if number.fract() == 0.0 && *number >= 0.0 && *number <= 255.0 =>
-        {
-            Ok(*number as u8)
+        Value::Number(number, Exactness::Exact) if number.fract() == 0.0 => {
+            if *number >= 0.0 && *number <= 255.0 {
+                Ok(*number as u8)
+            } else {
+                Err(crate::LanguageError::new(
+                    crate::ErrorKind::NumericOverflow,
+                    format!("{operation} integer must be in 0..255"),
+                    span,
+                ))
+            }
         }
         Value::Rational(rational) if rational.is_integer() => {
             let integer = rational.as_precise_i64().ok_or_else(|| {
@@ -193,10 +199,16 @@ fn u8_binary_value(value: u8, span: Span, operation: &str) -> Result<Value, crat
 
 fn u8_shift_count(value: &Value, span: Span, operation: &str) -> Result<u32, crate::LanguageError> {
     let count = match value {
-        Value::Number(number, Exactness::Exact)
-            if number.fract() == 0.0 && *number >= 0.0 && *number <= 255.0 =>
-        {
-            *number as u32
+        Value::Number(number, Exactness::Exact) if number.fract() == 0.0 => {
+            if *number >= 0.0 && *number <= 7.0 {
+                *number as u32
+            } else {
+                return Err(crate::LanguageError::new(
+                    crate::ErrorKind::InvalidForm,
+                    format!("{operation} shift count must be in 0..7"),
+                    span,
+                ));
+            }
         }
         Value::Rational(rational) if rational.is_integer() => {
             let integer = rational.as_precise_i64().ok_or_else(|| {
