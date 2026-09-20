@@ -21,30 +21,31 @@
 (def life-scheduler-field
   (lambda (entry field)
     (cond
-      ((atom entry) (quote (structural-kind empty-list)) (quote ()))
-      ((atom entry) (quote (structural-kind pair))
+      ((atom entry) (structural-kind empty-list) (quote ()))
+      ((atom entry) (structural-kind pair)
        (let ((rows (cdr entry)))
          (cond
-           ((atom rows) (quote (structural-kind empty-list)) (quote ()))
-           ((atom rows) (quote (structural-kind pair))
+           ((atom rows) (structural-kind empty-list) (quote ()))
+           ((atom rows) (structural-kind pair)
             (let ((row (car rows)))
               (cond
-                ((atom row) (quote (structural-kind empty-list))
+                ((atom row) (structural-kind empty-list)
                  (life-scheduler-field
                    (cons (car entry) (cdr rows))
                    field))
-                ((atom row) (quote (structural-kind atom))
+                ((atom row) (structural-kind atom)
                  (life-scheduler-field
                    (cons (car entry) (cdr rows))
                    field))
-                ((atom row) (quote (structural-kind pair))
+                ((atom row) (structural-kind pair)
                  (cond
-                   ((eq field (car row)) (quote (identity-relation same))
+                   ((eq field (car row)) (identity-relation same)
                     (car (cdr row)))
-                   ((eq field (car row)) (quote (identity-relation distinct))
+                   ((eq field (car row)) (identity-relation distinct)
                     (life-scheduler-field
                       (cons (car entry) (cdr rows))
-                      field)))))))))))))
+                      field)))))))))))
+))
 
 (def life-scheduler-invocation-key
   (lambda (invocation)
@@ -57,38 +58,33 @@
 (def life-scheduler-key-present?
   (lambda (key keys)
     (cond
-      ((equal? keys (quote ()))
-       (quote (structural-relation same))
-       (quote absent))
-      ((equal? (atom keys) (quote (structural-kind pair)))
-       (quote (structural-relation same))
+      ((atom keys) (structural-kind empty-list) (quote absent))
+      ((atom keys) (structural-kind pair)
        (let ((head (car keys)))
          (cond
-           ((equal? key head)
-            (quote (structural-relation same))
-            (quote present))
-           ((equal? key head)
-            (quote (structural-relation distinct))
-            (life-scheduler-key-present? key (cdr keys)))))))))
-
+           ((equal? key head) (structural-relation same) (quote present))
+           ((equal? key head) (structural-relation distinct)
+            (life-scheduler-key-present? key (cdr keys))))))))
+)
 
 (def life-scheduler-dedup-pending
   (lambda (pending seen-keys)
     (cond
-      ((atom pending) (quote (structural-kind empty-list)) (quote ()))
-      ((atom pending) (quote (structural-kind pair))
+      ((atom pending) (structural-kind empty-list) (quote ()))
+      ((atom pending) (structural-kind pair)
        (let* ((invocation (car pending))
               (key (life-scheduler-invocation-key invocation)))
          (cond
            ((eq (life-scheduler-key-present? key seen-keys) (quote present))
-            (quote (identity-relation same))
+            (identity-relation same)
             (life-scheduler-dedup-pending (cdr pending) seen-keys))
            ((eq (life-scheduler-key-present? key seen-keys) (quote absent))
-            (quote (identity-relation distinct))
+            (identity-relation distinct)
             (cons invocation
                   (life-scheduler-dedup-pending
                     (cdr pending)
                     (cons key seen-keys))))))))))
+
 
 (def life-scheduler-pending
   (lambda (pending)
@@ -97,65 +93,36 @@
 (def life-scheduler-projection-match?
   (lambda (expected projections)
     (cond
-      ((atom projections) (quote (structural-kind empty-list)) (quote absent))
-      ((atom projections) (quote (structural-kind pair))
+      ((atom projections) (structural-kind empty-list) (quote absent))
+      ((atom projections) (structural-kind pair)
        (let ((projection (car projections)))
          (cond
-           ((equal? expected projection)
-            (quote (structural-relation same))
+           ((equal? expected projection) (structural-relation same)
             (quote present))
-           ((equal? expected projection)
-            (quote (structural-relation distinct))
+           ((equal? expected projection) (structural-relation distinct)
             (life-scheduler-projection-match? expected (cdr projections)))))))))
+
 
 (def life-scheduler-projection-ready?
   (lambda (invocation projections)
-    (let* ((trigger-row (life-scheduler-field invocation (quote trigger)))
-           (provenance-row (life-scheduler-field invocation (quote provenance-ref))))
+    (let* ((trigger (life-scheduler-field invocation (quote trigger)))
+           (provenance (life-scheduler-field invocation (quote provenance-ref))))
       (cond
-        ((atom trigger-row)
-         (quote absent))
-        ((atom provenance-row)
-         (quote absent))
-        ((atom trigger-row)
-         (let* ((trigger (car trigger-row))
-                (provenance (car provenance-row)))
+        ((atom trigger) (structural-kind empty-list) (quote absent))
+        ((atom trigger) (structural-kind atom) (quote absent))
+        ((atom trigger) (structural-kind pair)
+         (let ((tail (cdr trigger)))
            (cond
-             ((atom trigger)
-              (quote absent))
-             ((atom trigger)
-              (let ((tail (cdr trigger)))
-                (cond
-                  ((atom tail)
-                   (quote absent))
-                  ((atom tail)
-                   (life-scheduler-projection-match?
-                     (list
-                       (quote projection-ready)
-                       (car tail)
-                       provenance)
-                     projections))))))))))))
+             ((atom tail) (structural-kind empty-list) (quote absent))
+             ((atom tail) (structural-kind atom) (quote absent))
+             ((atom tail) (structural-kind pair)
+              (life-scheduler-projection-match?
+                (list
+                  (quote projection-ready)
+                  (car tail)
+                  provenance)
+                projections)))))))))
 
-
-; #801 — minimal LIFE-1 orchestration scheduler.
-;
-; Scheduler state is ordinary Lisp data. It controls activation timing only:
-; it does not interpret Prolog, Datalog, CLIPS or Common Lisp semantics.
-;
-; Pending invocation shape:
-;   (pending-invocation
-;     (producer datalog)
-;     (trigger (projection-ready prolog-substitutions-to-datalog-facts))
-;     (provenance-ref observation-42)
-;     (priority ordinary)
-;     (semantic-id "00001100"))
-;
-; Projection availability shape:
-;   (projection-ready
-;     prolog-substitutions-to-datalog-facts
-;     observation-42)
-;
-; Quiescence is liveness/control data, never truth.
 
 (def life-scheduler-field
   (lambda (entry field)
@@ -259,14 +226,14 @@
 (def life-scheduler-select-ready
   (lambda (pending projections)
     (cond
-      ((atom pending) (quote (structural-kind empty-list))
+      ((atom pending) (structural-kind empty-list)
        (quote (scheduler-selection none)))
-      ((atom pending) (quote (structural-kind pair))
+      ((atom pending) (structural-kind pair)
        (let ((invocation (car pending)))
          (cond
            ((eq (life-scheduler-projection-ready? invocation projections)
                 (quote present))
-            (quote (identity-relation same))
+            (identity-relation same)
             (list
               (quote scheduler-selection)
               (quote ready)
@@ -274,22 +241,18 @@
               (cdr pending)))
            ((eq (life-scheduler-projection-ready? invocation projections)
                 (quote absent))
-            (quote (identity-relation distinct))
+            (identity-relation distinct)
             (life-scheduler-select-ready (cdr pending) projections))))))))
 
-(def life-scheduler-quiescence-state
-  (lambda (projections lifecycle-state)
+
+(def life-scheduler-quiescence
+  (lambda (pending projections lifecycle-state)
     (cond
-      ((atom projections) (quote (structural-kind empty-list))
-       (cond
-         ((eq lifecycle-state (quote no-transition-required))
-          (quote (identity-relation same))
-          (quote (quiescence-state quiescent)))
-         ((eq lifecycle-state (quote no-transition-required))
-          (quote (identity-relation distinct))
-          (quote (quiescence-state active)))))
-      ((atom projections) (quote (structural-kind pair))
+      ((atom pending) (structural-kind empty-list)
+       (life-scheduler-quiescence-state projections lifecycle-state))
+      ((atom pending) (structural-kind pair)
        (quote (quiescence-state active))))))
+
 
 (def life-scheduler-quiescence
   (lambda (pending projections lifecycle-state)
