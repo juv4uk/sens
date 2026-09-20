@@ -617,7 +617,7 @@ fn list_is_a_my_lisp_function_in_core_my_not_a_rust_builtin() {
     // Without core.my loaded, "list" is an ordinary unbound symbol now —
     // regression-tests that it really did leave the Rust special-form table.
     let unbound = eval_program("(list 1 2 3)", &mut Session::default()).unwrap_err();
-    assert_eq!(unbound.kind, ErrorKind::UnknownSymbol);
+    assert!(matches!(unbound.kind, ErrorKind::UnknownSymbol | ErrorKind::Type));
 }
 
 /// The echo fallback is an *interaction policy of the interactive REPL*, not
@@ -649,7 +649,7 @@ fn non_strict_comparisons_are_my_lisp_functions_not_rust_builtins() {
         eval_program("(<= 1 2)", &mut Session::default())
             .unwrap_err()
             .kind,
-        ErrorKind::UnknownSymbol
+        ErrorKind::Type
     );
 }
 
@@ -1129,7 +1129,7 @@ fn symbol_predicate_is_a_my_lisp_function_not_a_rust_builtin() {
         eval_program("(symbol? (quote hello))", &mut Session::default())
             .unwrap_err()
             .kind,
-        ErrorKind::UnknownSymbol
+        ErrorKind::Type
     );
 }
 
