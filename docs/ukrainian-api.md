@@ -3,7 +3,7 @@
 **Статус:** публічний довідник української програмної поверхні.
 **Семантична authority:** [`lib/surface/semantic-registry.lisp`](../lib/surface/semantic-registry.lisp), де `ук` і `укр` приєднані до numeric semantic IDs.
 **Повна жива таблиця назв і статусів:** [`docs/generated/function-table.md`](generated/function-table.md).
-**Машинні описи поведінки цього довідника:** [`lib/surface/ук-docs.lisp`](../lib/surface/ук-docs.lisp).
+**Машинні описи поведінки цього довідника:** [`lib/surface/uk-docs.lisp`](../lib/surface/uk-docs.lisp).
 
 Цей документ пояснює поведінку публічних українських функцій **один раз на semantic ID**. Він не створює окремої реалізації й не дублює опис тільки тому, що одна операція має два українські написання.
 
@@ -98,7 +98,7 @@ byte SID              — тотожність
 
 ## Повний довідник `ук` / `укр`
 
-Нижче — згенерований join по **byte SID**. Опис поведінки береться один раз із `lib/surface/ук-docs.lisp`; `ук`, `укр` та основа беруться з authoritative function-table projection. Ручне редагування рядків цієї секції буде перезаписано генератором.
+Нижче — згенерований join по **byte SID**. Опис поведінки береться один раз із `lib/surface/uk-docs.lisp`; `ук`, `укр` та основа беруться з authoritative function-table projection. Ручне редагування рядків цієї секції буде перезаписано генератором.
 
 ### Канон 0+7
 
