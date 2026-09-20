@@ -244,9 +244,9 @@ fn load_manifest_file(path: &str) -> Result<Manifest, String> {
                     ));
                 }
             }
-            if entry.provider == "system-package" && entry.package.is_none() {
+            if matches!(entry.provider.as_str(), "apt" | "winget") && entry.package.is_none() {
                 return Err(format!(
-                    "island {} system package is missing a package id",
+                    "island {} package-manager entry is missing a package id",
                     island.key
                 ));
             }
@@ -752,10 +752,10 @@ pub fn run(args: &[String]) -> Result<String, String> {
                             island.key, island.runtime_version
                         ));
                     }
-                    Some(entry) if entry.provider == "system-package" && !dry_run => {
+                    Some(entry) if matches!(entry.provider.as_str(), "apt" | "winget") && !dry_run => {
                         rows.push(install_system_package(island, entry)?);
                     }
-                    Some(entry) if entry.provider == "system-package" => rows.push(format!(
+                    Some(entry) if matches!(entry.provider.as_str(), "apt" | "winget") => rows.push(format!(
                         "install {} via {} package {}",
                         island.key,
                         entry.provider,
