@@ -63,13 +63,16 @@ fn fetch_artifact(url: &str, temporary: &std::path::Path) -> Result<(), String> 
     if !(url.starts_with("https://") || url.starts_with("http://")) {
         return Err("installer supports file:// and http(s):// release assets only".to_string());
     }
-    let status = Command::new("curl")
-        .args(["--fail", "--silent", "--show-error", "--location", "--max-time", "60", "--output"])
-        .arg(temporary)
-        .arg(url)
-        .status()
-        .map_err(|error| format!("cannot start curl: {error}"))?;
-    if !status.success() { return Err(format!("download failed for {url}")); }
+    let response = ureq::AgentBuilder::new()
+        .timeout(std::time::Duration::from_secs(60))
+        .redirects(5)
+        .build()
+        .get(url)
+        .call()
+        .map_err(|error| format!("download failed for {url}: {error}"))?;
+    let mut reader = response.into_reader();
+    let mut output = fs::File::create(temporary).map_err(|error| error.to_string())?;
+    std::io::copy(&mut reader, &mut output).map_err(|error| error.to_string())?;
     Ok(())
 }
 

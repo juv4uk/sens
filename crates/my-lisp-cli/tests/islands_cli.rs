@@ -83,7 +83,7 @@ fn islands_install_apply_verifies_file_artifact_before_publishing_it() {
     std::fs::write(&artifact, b"island-runtime").expect("fixture artifact");
     let digest = my_lisp::sha256_source(b"island-runtime").iter().map(|byte| format!("{byte:02x}")).collect::<String>();
     let manifest_path = base.join("manifest.json");
-    std::fs::write(&manifest_path, format!(r#"{{"protocol":"my-lisp-islands-manifest/1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"1","license":"test","provenance":"test","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","sha256":"{}"}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
+    std::fs::write(&manifest_path, format!(r#"{{"protocol":"my-lisp-islands-manifest/1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"1","license":"test","provenance":"test","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","sha256":"{}","probe":["/bin/sh","-c","exit 0"]}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
     let root = base.join("installed");
     let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
         .args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--profile", "one", "--root", root.to_str().unwrap(), "--apply"])
