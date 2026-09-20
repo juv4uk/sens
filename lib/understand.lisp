@@ -87,9 +87,15 @@
 (def strip-article
   (lambda (words)
     (cond
-      ((eq (car words) (quote a)) (cdr words))
-      ((eq (car words) (quote an)) (cdr words))
-      (t words))))
+      ((eq (car words) (quote a))
+       (identity-relation same)
+       (cdr words))
+      ((eq (car words) (quote an))
+       (identity-relation same)
+       (cdr words))
+      ((eq (car words) (quote an))
+       (identity-relation distinct)
+       words))))
 
 (def understand-is
   (lambda (words)
@@ -111,9 +117,15 @@
 (def understand
   (lambda (words)
     (cond
-      ((eq (car words) (quote all)) (understand-universal words))
-      ((eq (second words) (quote is)) (understand-is words))
-      (t (understand-relation words)))))
+      ((eq (car words) (quote all))
+       (identity-relation same)
+       (understand-universal words))
+      ((eq (second words) (quote is))
+       (identity-relation same)
+       (understand-is words))
+      ((eq (second words) (quote is))
+       (identity-relation distinct)
+       (understand-relation words)))))
 
 ; `understand-query` is the goal-shaped complement of `understand`: it turns
 ; a fixed *question* shape into a goal `(head . args)` that `reason` can be
@@ -150,6 +162,12 @@
 (def understand-query
   (lambda (words)
     (cond
-      ((eq (car words) (quote is)) (understand-query-is words))
-      ((eq (car words) (quote does)) (understand-query-relation words))
-      (t (quote ())))))
+      ((eq (car words) (quote is))
+       (identity-relation same)
+       (understand-query-is words))
+      ((eq (car words) (quote does))
+       (identity-relation same)
+       (understand-query-relation words))
+      ((eq (car words) (quote does))
+       (identity-relation distinct)
+       (quote ())))))
