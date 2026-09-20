@@ -29,6 +29,7 @@ const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
     ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
 ];
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
+const UKR_SURFACE: &str = include_str!("../../../lib/surface/ukr.lisp");
 const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -36,6 +37,7 @@ enum WebSurface {
     Core,
     English,
     Ukrainian,
+    UkrainianFull,
     Sanskrit,
 }
 
@@ -45,6 +47,7 @@ impl WebSurface {
             "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
             "uk" | "ук" | "українська" => Some(Self::Ukrainian),
+            "ukr" | "укр" | "українська-повна" => Some(Self::UkrainianFull),
             "sa" | "sanskrit" | "санскрит" => Some(Self::Sanskrit),
             _ => None,
         }
@@ -55,6 +58,7 @@ impl WebSurface {
             Self::Core => "core",
             Self::English => "en",
             Self::Ukrainian => "ук",
+            Self::UkrainianFull => "укр",
             Self::Sanskrit => "sa",
         }
     }
@@ -63,7 +67,7 @@ impl WebSurface {
         match self {
             Self::Core => PresentationLanguage::Canonical,
             Self::English => PresentationLanguage::English,
-            Self::Ukrainian => PresentationLanguage::Ukrainian,
+            Self::Ukrainian | Self::UkrainianFull => PresentationLanguage::Ukrainian,
             Self::Sanskrit => PresentationLanguage::Sanskrit,
         }
     }
@@ -71,7 +75,7 @@ impl WebSurface {
 
 fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Environment, String> {
     let layer = base.child();
-    if matches!(surface, WebSurface::Ukrainian | WebSurface::Sanskrit) {
+    if matches!(surface, WebSurface::Ukrainian | WebSurface::UkrainianFull | WebSurface::Sanskrit) {
         let mut session = Session {
             environment: layer.clone(),
         };
@@ -81,6 +85,7 @@ fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Enviro
         }
         let (name, source) = match surface {
             WebSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
+            WebSurface::UkrainianFull => ("ukr.lisp", UKR_SURFACE),
             WebSurface::Sanskrit => ("sa.lisp", SA_SURFACE),
             WebSurface::Core | WebSurface::English => unreachable!(),
         };
@@ -214,7 +219,7 @@ pub fn reset_session() {
 fn set_surface_impl(name: &str) -> Result<String, String> {
     init_if_needed()?;
     let surface = WebSurface::parse(name)
-        .ok_or_else(|| format!("unknown surface: {name}; expected uk|en|sa|core"))?;
+        .ok_or_else(|| format!("unknown surface: {name}; expected uk|ukr|en|sa|core"))?;
     SESSION.with(|slot| {
         let mut guard = slot.borrow_mut();
         let state = guard.as_mut().expect("session set by init_if_needed");
@@ -369,6 +374,14 @@ mod tests {
             eval_program("(define крок 2)", session).expect("redefine user value");
             let closure = eval_program("(додай-крок 5)", session).expect("closure");
             assert_eq!(closure.value.to_string(), "7");
+        });
+
+        assert_eq!(set_surface_impl("ukr").expect("ukr"), "укр");
+        SESSION.with(|slot| {
+            let mut guard = slot.borrow_mut();
+            let session = &mut guard.as_mut().unwrap().session;
+            let full = eval_program("(порожній-текст? \"\")", session).expect("ukr full spelling");
+            assert_eq!(full.value.to_string(), "t");
         });
 
         assert_eq!(set_surface_impl("core").expect("core"), "core");
