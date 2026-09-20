@@ -70,7 +70,8 @@ pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 pub use eval::exact_arity;
 pub use eval::parse_json;
 pub use eval::{
-    capability_installed, installed_capabilities, register_capability, unregister_capability,
+    capability_installed, installed_capabilities, register_capability, register_semantic_capability,
+    unregister_capability, unregister_semantic_capability,
 };
 pub use eval::{
     eval_parsed_expressions, eval_parsed_expressions_incremental, eval_program,
