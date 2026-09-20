@@ -1,6 +1,6 @@
 (cml-export/1
   (contract (major 6) (minor 0))
-  (digest "160466afb8067147")
+  (digest "757726a29d06b1b8")
   (forms
     (\"00000001\" (surfaces (en "quote") (sa "svarūpa") (sym "'") (ук "як-є") (укр "як-є")) (role syntax) (callable nil))
     (\"00000010\" (surfaces (en "atom") (sa "aṇu") (sym ".?") (ук "атом?") (укр "атом?")) (role primitive) (callable t))
