@@ -11,7 +11,7 @@ use std::fmt;
 
 use crate::Value;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum NumericExpr {
     Literal(i64),
     Variable(String),
