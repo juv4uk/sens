@@ -73,3 +73,4 @@
 
 (authority "lib/bridge/prolog-to-datalog.lisp" semantic-witness)
 (authority "tests/fixtures/prolog-datalog-bridge-witness.lisp" semantic-witness)
+(authority "crates/wsm-native-result-types/tests/prolog_datalog_bridge.rs" observer)
