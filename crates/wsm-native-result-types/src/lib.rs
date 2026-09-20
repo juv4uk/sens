@@ -71,6 +71,74 @@ pub struct NativeResultRef {
     pub producer: ProducerSlot,
 }
 
+/// Stable identity for one producer-native observation slot.
+///
+/// This is deliberately ordinary metadata: it identifies an observation and
+/// its producer-owned slot without copying or normalizing the native result.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct ObservationRef {
+    pub observation_id: u64,
+    pub producer: ProducerSlot,
+    pub semantic_id: u8,
+    pub native_slot: ProducerSlot,
+    pub metadata_ref: Option<u64>,
+}
+
+impl ObservationRef {
+    pub const fn new(
+        observation_id: u64,
+        producer: ProducerSlot,
+        semantic_id: u8,
+        native_slot: ProducerSlot,
+    ) -> Self {
+        Self {
+            observation_id,
+            producer,
+            semantic_id,
+            native_slot,
+            metadata_ref: None,
+        }
+    }
+
+    pub const fn with_metadata_ref(mut self, metadata_ref: u64) -> Self {
+        self.metadata_ref = Some(metadata_ref);
+        self
+    }
+}
+
+/// The minimal provenance relation needed by LIFE-1.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ProvenanceEdgeType {
+    ProjectedInto,
+}
+
+/// Explicit relation between two producer-native observations.
+///
+/// The bridge contract is identified, but its semantics remain owned by the
+/// Lisp-side contract. This record never asserts truth or semantic equivalence.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct ProvenanceEdge {
+    pub edge_type: ProvenanceEdgeType,
+    pub from: ObservationRef,
+    pub via_bridge_contract_ref: u64,
+    pub to: ObservationRef,
+}
+
+impl ProvenanceEdge {
+    pub const fn projected_into(
+        from: ObservationRef,
+        bridge_contract_ref: u64,
+        to: ObservationRef,
+    ) -> Self {
+        Self {
+            edge_type: ProvenanceEdgeType::ProjectedInto,
+            from,
+            via_bridge_contract_ref: bridge_contract_ref,
+            to,
+        }
+    }
+}
+
 /// One observation from each autonomous execution kernel.
 ///
 /// The concrete field types are the boundary: Common Lisp stays a Common Lisp
