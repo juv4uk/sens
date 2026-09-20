@@ -110,24 +110,27 @@
             (identity-relation distinct)
             (life-scheduler-select-ready (cdr pending) projections))))))))
 
+(def life-scheduler-quiescence-state
+  (lambda (projections lifecycle-state)
+    (cond
+      ((atom projections) (structural-kind empty-list)
+       (cond
+         ((eq lifecycle-state (quote no-transition-required))
+          (identity-relation same)
+          (quote (quiescence-state quiescent)))
+         ((eq lifecycle-state (quote no-transition-required))
+          (identity-relation distinct)
+          (quote (quiescence-state active)))))
+      ((atom projections) (structural-kind pair)
+       (quote (quiescence-state active))))))
+
 (def life-scheduler-quiescence
   (lambda (pending projections lifecycle-state)
     (cond
       ((atom pending) (structural-kind empty-list)
-       (cond
-         ((atom projections) (structural-kind empty-list)
-          (cond
-            ((eq lifecycle-state (quote no-transition-required))
-             (identity-relation same)
-             (quote (quiescence-state quiescent)))
-            ((eq lifecycle-state (quote no-transition-required))
-             (identity-relation distinct)
-             (quote (quiescence-state active)))))
-         ((atom projections) (structural-kind pair)
-          (quote (quiescence-state active))))
+       (life-scheduler-quiescence-state projections lifecycle-state))
       ((atom pending) (structural-kind pair)
-       (quote (quiescence-state active)))))))
-
+       (quote (quiescence-state active))))))
 (def life-scheduler-state
   (lambda (pending projections lifecycle-state)
     (list
