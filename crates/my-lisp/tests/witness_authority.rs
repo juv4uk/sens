@@ -538,6 +538,70 @@ fn life_1_liveness_semantics_are_owned_by_lisp_data() {
 }
 
 #[test]
+fn clips_datalog_bridge_preserves_fact_data_and_names_unrepresentable_loss() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+
+    eval_program(
+        include_str!("../../../lib/bridge/clips-to-datalog.lisp"),
+        &mut session,
+    )
+    .expect("#718 CLIPS-Datalog bridge must load");
+
+    eval_program(
+        include_str!("../../../tests/fixtures/clips-datalog-bridge-witness.lisp"),
+        &mut session,
+    )
+    .expect("#718 bridge witness must load");
+
+    let verdict = eval_program("(clips-datalog-bridge-witness)", &mut session)
+        .expect("#718 bridge witness must execute")
+        .value
+        .to_string();
+
+    assert!(
+        verdict.contains(
+            "(projection-result (projection clips-working-memory-to-datalog-facts) \
+(source-ref clips:17) (facts ((person alice) (person bob))) \
+(loss ((agenda-fired not-preserved-as-datalog-semantics))))"
+        ),
+        "explicit decoded CLIPS facts must project as ordinary Datalog candidates: {verdict}"
+    );
+    assert!(
+        verdict.contains("(projection-failure count-only-observation-insufficient)"),
+        "native CLIPS count-only evidence must fail closed rather than fabricate Datalog tuples: {verdict}"
+    );
+    assert!(
+        verdict.contains("(projection-failure malformed-facts)"),
+        "malformed CLIPS fact observations must stay named failures: {verdict}"
+    );
+    assert!(
+        verdict.contains(
+            "(projection-result (projection datalog-relation-to-clips-facts) \
+(source-ref datalog:21) (facts ((person alice) (person bob))) \
+(loss ((derivation-generation not-preserved-as-clips-agenda-semantics))))"
+        ),
+        "decoded Datalog tuples must become CLIPS fact candidates without inventing agenda semantics: {verdict}"
+    );
+    assert!(
+        verdict.matches("(projection-failure count-only-observation-insufficient)").count() >= 2,
+        "both CLIPS and Datalog count-only observations must fail closed: {verdict}"
+    );
+    assert!(
+        verdict.contains(
+            "(projection-result (projection lisp-data-to-clips-fact) \
+(fact (sensor temperature 21)) \
+(loss ((lisp-evaluation-history not-preserved))))"
+        ),
+        "ordinary Lisp data must project only to a CLIPS fact candidate: {verdict}"
+    );
+    assert!(
+        verdict.contains("(projection-failure missing-arguments)"),
+        "incomplete Lisp fact candidates must fail closed: {verdict}"
+    );
+}
+
+#[test]
 fn semantic_ownership_audit_733_is_well_formed_lisp_inventory() {
     let source = fs::read_to_string(repo_file("contracts/semantic-ownership-audit-733.lisp"))
         .expect("#733 requires contracts/semantic-ownership-audit-733.lisp");

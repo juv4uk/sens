@@ -85,3 +85,5 @@
 
 (authority "crates/my-lisp/tests/semantic_registry_lisp.rs" observer)
 (authority "crates/my-lisp/tests/runtime_peer_operators.rs" observer)
+(authority "lib/bridge/clips-to-datalog.lisp" semantic-witness)
+(authority "tests/fixtures/clips-datalog-bridge-witness.lisp" semantic-witness)
