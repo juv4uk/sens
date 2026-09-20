@@ -425,7 +425,7 @@ pub struct Binary {
 
 impl Binary {
     pub fn from_bits(bits: &str, width: u8) -> Option<Self> {
-        if !(1..=64).contains(&width) || bits.len() != usize::from(width) {
+        if width != 8 || bits.len() != 8 {
             return None;
         }
         if !bits.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
@@ -439,10 +439,7 @@ impl Binary {
     }
 
     pub fn from_u64(value: u64, width: u8) -> Option<Self> {
-        if !(1..=64).contains(&width) {
-            return None;
-        }
-        if width < 64 && value >= (1u64 << width) {
+        if width != 8 || value > u8::MAX as u64 {
             return None;
         }
         Some(Self { value, width })
