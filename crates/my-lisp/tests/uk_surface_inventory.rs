@@ -2,7 +2,6 @@ use my_lisp::{language_items, parse, LanguageItemKind, CORE_LIBRARY_SOURCE};
 use std::collections::BTreeSet;
 
 const INVENTORY: &str = include_str!("../../../lib/surface/uk-inventory.lisp");
-const SEMANTIC_REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
 
 fn names_after(source: &str, marker: &str) -> BTreeSet<String> {
     let start = source.find(marker).expect("inventory marker must exist") + marker.len();
@@ -17,20 +16,10 @@ fn names_after(source: &str, marker: &str) -> BTreeSet<String> {
 }
 
 fn semantic_registry_surface_names() -> BTreeSet<String> {
-    SEMANTIC_REGISTRY
-        .split('(')
-        .filter_map(|fragment| {
-            let tuple = fragment.split(')').next()?;
-            let fields = tuple.split_whitespace().collect::<Vec<_>>();
-            let [_surface, name] = fields.as_slice() else {
-                return None;
-            };
-            if *name != "()" {
-                Some(name.trim_matches('"').to_owned())
-            } else {
-                None
-            }
-        })
+    my_lisp::semantic_registry_export::admitted_semantic_ids()
+        .into_iter()
+        .flat_map(my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id)
+        .map(|row| row.name.to_owned())
         .collect()
 }
 
