@@ -28,11 +28,15 @@
       ((atom value)
        (structural-kind empty-list)
        (write-to-string "()"))
-      ((string? value)
-       (identity-relation same)
-       (write-to-string value))
-      (t
-       (write-to-string (symbol->string value))))))
+      ((atom value)
+       (structural-kind atom)
+       (cond
+         ((string? value)
+          (identity-relation same)
+          (write-to-string value))
+         ((string? value)
+          (identity-relation distinct)
+          (write-to-string (symbol->string value))))))))
 
 (def render-surface
   (lambda (entry)
