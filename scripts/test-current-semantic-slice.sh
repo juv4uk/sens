@@ -168,3 +168,6 @@ if [[ "$science_projection_status" != "(scientific-constant-knowledge-projection
   printf 'scientific constant knowledge-projection witness failed: %s\n' "$science_projection_status" >&2
   exit 1
 fi
+
+# #1048: lowering is mechanism evidence downstream of Canon/function-table selection.
+./target/debug/my-lisp tests/fixtures/island-lowering-1048-witness.lisp >/dev/null
