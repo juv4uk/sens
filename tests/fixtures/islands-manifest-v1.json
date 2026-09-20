@@ -1,19 +1,23 @@
 {
   "protocol": "my-lisp-islands-manifest/1",
-  "profiles": [{"key": "four-kernel", "islands": ["prolog", "clips"]}],
+  "profiles": [{"key": "four-kernel", "islands": ["common-lisp", "prolog", "clips", "datalog"]}],
   "islands": [
+    {
+      "key": "common-lisp",
+      "runtime_version": "distro-managed",
+      "license": "BSD-2-Clause",
+      "provenance": "system package manager",
+      "platforms": [
+        {"target": "linux-x86_64", "provider": "apt", "package": "sbcl", "probe": ["sbcl", "--version"], "probe_expect": "SBCL"}
+      ]
+    },
     {
       "key": "prolog",
       "runtime_version": "9.2.0",
       "license": "BSD-2-Clause",
       "provenance": "system package manager",
       "platforms": [
-        {
-          "target": "linux-x86_64",
-          "provider": "apt",
-          "package": "swi-prolog",
-          "probe": ["swipl", "--version"]
-        }
+        {"target": "linux-x86_64", "provider": "apt", "package": "swi-prolog", "probe": ["swipl", "--version"], "probe_expect": "SWI-Prolog"}
       ]
     },
     {
@@ -34,6 +38,16 @@
           "provider": "unsupported",
           "reason": "No verified CLIPS release artifact for this target"
         }
+      ]
+    },
+    {
+      "key": "datalog",
+      "runtime_version": "builtin",
+      "license": "my-lisp distribution",
+      "provenance": "embedded kernel",
+      "platforms": [
+        {"target": "linux-x86_64", "provider": "embedded", "probe": []},
+        {"target": "windows-x86_64", "provider": "embedded", "probe": []}
       ]
     }
   ]
