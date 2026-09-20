@@ -85,7 +85,7 @@ pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 /// Deterministic, versioned; decode returns None on ANY inconsistency so
 /// callers fall back to text parsing (never a wrong program).
 pub(crate) mod fasl {
-    use super::{Exactness, Expr, ExprKind};
+    use super::{Binary, Exactness, Expr, ExprKind};
     use crate::value::Rational;
     use std::rc::Rc;
 
