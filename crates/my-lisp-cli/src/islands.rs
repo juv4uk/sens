@@ -26,7 +26,10 @@ struct Profile {
 struct Island {
     key: String,
     runtime_version: String,
+    abi_compatibility: String,
+    install_key: String,
     license: String,
+    license_acceptance_required: bool,
     provenance: String,
     platforms: Vec<PlatformEntry>,
 }
@@ -38,7 +41,10 @@ struct PlatformEntry {
     package: Option<String>,
     package_version: Option<String>,
     url: Option<String>,
+    checksum_algorithm: Option<String>,
     sha256: Option<String>,
+    artifact_format: Option<String>,
+    entrypoint: Option<String>,
     reason: Option<String>,
     artifact: Option<String>,
     #[serde(default)]
@@ -271,6 +277,7 @@ fn install_root(args: &[String]) -> String {
         .into_owned()
 }
 
+// Manifest validation is distribution contract validation only; it cannot mint semantic authority.
 fn load_manifest_file(path: &str) -> Result<Manifest, String> {
     let source =
         fs::read_to_string(path).map_err(|error| format!("cannot read manifest {path}: {error}"))?;
@@ -281,12 +288,44 @@ fn load_manifest_file(path: &str) -> Result<Manifest, String> {
         return Err(format!("unsupported manifest protocol: {}", manifest.protocol));
     }
 
+    let known_targets = [
+        "linux-x86_64",
+        "windows-x86_64",
+        "macos-x86_64",
+        "macos-aarch64",
+    ];
+    let known_providers = [
+        "apt",
+        "dnf",
+        "brew",
+        "winget",
+        "release-asset",
+        "embedded",
+        "unsupported",
+    ];
     let mut island_keys = std::collections::HashSet::new();
+    let mut install_keys = std::collections::HashSet::new();
     for island in &manifest.islands {
         if island.key.is_empty() || !island_keys.insert(&island.key) {
             return Err(format!(
                 "manifest has duplicate or empty island key: {}",
                 island.key
+            ));
+        }
+        if island.runtime_version.is_empty()
+            || island.abi_compatibility.is_empty()
+            || island.install_key.is_empty()
+            || island.license.is_empty()
+        {
+            return Err(format!(
+                "island {} is missing required release metadata",
+                island.key
+            ));
+        }
+        if !install_keys.insert(&island.install_key) {
+            return Err(format!(
+                "manifest has duplicate install key: {}",
+                island.install_key
             ));
         }
         let mut targets = std::collections::HashSet::new();
@@ -297,30 +336,99 @@ fn load_manifest_file(path: &str) -> Result<Manifest, String> {
                     island.key, entry.target
                 ));
             }
-            if let Some(sha256) = &entry.sha256 {
-                if sha256.len() != 64 || !sha256.bytes().all(|byte| byte.is_ascii_hexdigit()) {
-                    return Err(format!("island {} has invalid SHA-256", island.key));
-                }
-            }
-            if entry.provider == "release-asset" {
-                if entry.url.is_none() {
-                    return Err(format!(
-                        "island {} release asset must pin a URL",
-                        island.key
-                    ));
-                }
-                if entry.probe.is_empty() {
-                    return Err(format!(
-                        "island {} release asset is missing a bounded probe",
-                        island.key
-                    ));
-                }
-            }
-            if matches!(entry.provider.as_str(), "apt" | "winget") && entry.package.is_none() {
+            if !known_targets.contains(&entry.target.as_str()) {
                 return Err(format!(
-                    "island {} package-manager entry is missing a package id",
-                    island.key
+                    "island {} has unsupported target {}",
+                    island.key, entry.target
                 ));
+            }
+            if !known_providers.contains(&entry.provider.as_str()) {
+                return Err(format!(
+                    "island {} has unsupported provider {}",
+                    island.key, entry.provider
+                ));
+            }
+
+            match entry.provider.as_str() {
+                "release-asset" => {
+                    let url = entry.url.as_deref().ok_or_else(|| {
+                        format!("island {} release asset is missing URL", island.key)
+                    })?;
+                    if !(url.starts_with("https://")
+                        || url.starts_with("http://")
+                        || url.starts_with("file://"))
+                    {
+                        return Err(format!(
+                            "island {} release asset has unsupported URL",
+                            island.key
+                        ));
+                    }
+                    if entry.checksum_algorithm.as_deref() != Some("sha256") {
+                        return Err(format!(
+                            "island {} release asset must declare sha256 checksum algorithm",
+                            island.key
+                        ));
+                    }
+                    let sha256 = entry.sha256.as_deref().ok_or_else(|| {
+                        format!("island {} release asset is missing SHA-256", island.key)
+                    })?;
+                    if sha256.len() != 64
+                        || !sha256.bytes().all(|byte| byte.is_ascii_hexdigit())
+                    {
+                        return Err(format!("island {} has invalid SHA-256", island.key));
+                    }
+                    if entry
+                        .artifact_format
+                        .as_deref()
+                        .is_none_or(str::is_empty)
+                    {
+                        return Err(format!(
+                            "island {} release asset is missing artifact format",
+                            island.key
+                        ));
+                    }
+                    if entry.entrypoint.as_deref().is_none_or(str::is_empty) {
+                        return Err(format!(
+                            "island {} release asset is missing entrypoint",
+                            island.key
+                        ));
+                    }
+                    if entry.probe.is_empty() {
+                        return Err(format!(
+                            "island {} release asset is missing a bounded probe",
+                            island.key
+                        ));
+                    }
+                }
+                "unsupported" => {
+                    if entry.reason.as_deref().is_none_or(str::is_empty) {
+                        return Err(format!(
+                            "island {} unsupported target is missing reason",
+                            island.key
+                        ));
+                    }
+                }
+                "embedded" => {}
+                _ => {
+                    if entry.package.as_deref().is_none_or(str::is_empty) {
+                        return Err(format!(
+                            "island {} package provider is missing package name",
+                            island.key
+                        ));
+                    }
+                    if entry.entrypoint.as_deref().is_none_or(str::is_empty) {
+                        return Err(format!(
+                            "island {} package provider is missing entrypoint",
+                            island.key
+                        ));
+                    }
+                    if entry.probe.is_empty() {
+                        return Err(format!(
+                            "island {} package provider is missing a bounded probe",
+                            island.key
+                        ));
+                    }
+                }
             }
         }
     }
