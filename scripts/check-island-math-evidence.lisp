@@ -107,20 +107,20 @@
          ((eq value (quote result-domain)) (identity-relation same) (quote yes))
          (t (quote no)))))))
 
-(def contains-forbidden-semantic-symbol?
-  (lambda (value)
+(def contains-forbidden-semantic-section?
+  (lambda (sections)
     (cond
-      ((atom value) (structural-kind empty-list) (quote no))
-      ((atom value) (structural-kind atom)
-       (forbidden-semantic-symbol? value))
-      ((atom value) (structural-kind pair)
-       (cond
-         ((eq (contains-forbidden-semantic-symbol? (car value)) (quote yes))
-          (identity-relation same)
-          (quote yes))
-         ((eq (contains-forbidden-semantic-symbol? (car value)) (quote no))
-          (identity-relation same)
-          (contains-forbidden-semantic-symbol? (cdr value))))))))
+      ((atom sections) (structural-kind empty-list) (quote no))
+      ((atom sections) (structural-kind pair)
+       (let ((section (car sections)))
+         (cond
+           ((atom section) (structural-kind pair)
+            (cond
+              ((eq (forbidden-semantic-symbol? (car section)) (quote yes))
+               (identity-relation same)
+               (quote yes))
+              (t (contains-forbidden-semantic-section? (cdr sections)))))
+           (t (contains-forbidden-semantic-section? (cdr sections)))))))))
 
 (def validate-rows
   (lambda (rows)
@@ -131,8 +131,17 @@
        (let* ((row (car rows))
               (sid (car row))
               (executor (second row))
-              (status (third row)))
+              (status (third row))
+              (provenance (fourth row)))
          (cond
+           ((equal? (length row) 4)
+            (structural-relation distinct)
+            (list (quote island-math-evidence-violation)
+                  (quote invalid-evidence-row-shape) sid))
+           ((string? provenance)
+            (identity-relation distinct)
+            (list (quote island-math-evidence-violation)
+                  (quote provenance-must-be-string) sid executor))
            ((eq (registry-has-sid? sid registry-rows) (quote no))
             (identity-relation same)
             (list (quote island-math-evidence-violation)
@@ -183,7 +192,7 @@
 
 (def verdict
   (cond
-    ((eq (contains-forbidden-semantic-symbol? evidence) (quote yes))
+    ((eq (contains-forbidden-semantic-section? evidence) (quote yes))
      (identity-relation same)
      (quote (island-math-evidence-violation semantic-field-forbidden)))
     ((atom evidence-rows) (structural-kind empty-list)
