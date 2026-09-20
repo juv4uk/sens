@@ -28,6 +28,12 @@ fn load_bridge(session: &mut Session) {
     eval_program(&source, session).expect("#803 bridge Lisp must load");
 }
 
+fn load_scheduler(session: &mut Session) {
+    let source = fs::read_to_string(repo_file("lib/life-1-scheduler.lisp"))
+        .expect("#801 scheduler Lisp source");
+    eval_program(&source, session).expect("#801 scheduler Lisp must load");
+}
+
 fn list_items(expr: &Expr) -> &[Expr] {
     match &expr.kind {
         ExprKind::List(items) => items,
@@ -174,6 +180,93 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
         edge.bridge_contract_ref,
         "prolog-substitutions-to-datalog-facts"
     );
+
+    // The scheduler consumes only explicit readiness/provenance data produced
+    // by the already-admitted bridge path. It never inspects either native
+    // producer payload.
+    load_scheduler(&mut session);
+
+    let pending_invocation = format!(
+        "(pending-invocation            (producer datalog)            (trigger (projection-ready {}))            (provenance-ref {})            (priority ordinary)            (semantic-id \"{:08b}\"))",
+        edge.bridge_contract_ref, source_ref, INVOKE_ID
+    );
+    let projection_ready = format!(
+        "(projection-ready {} {})",
+        edge.bridge_contract_ref, source_ref
+    );
+
+    let ready = eval_program(
+        &format!(
+            "(life-scheduler-projection-ready?                (quote {pending_invocation})                (quote ({projection_ready})))"
+        ),
+        &mut session,
+    )
+    .expect("real bridge readiness must be scheduler-readable")
+    .value
+    .to_string();
+    assert_eq!(ready, "present");
+
+    let wrong_provenance = eval_program(
+        &format!(
+            "(life-scheduler-projection-ready?                (quote {pending_invocation})                (quote ((projection-ready {} observation-999))))",
+            edge.bridge_contract_ref
+        ),
+        &mut session,
+    )
+    .expect("wrong provenance remains ordinary scheduler data")
+    .value
+    .to_string();
+    assert_eq!(wrong_provenance, "absent");
+
+    let wrong_bridge = eval_program(
+        &format!(
+            "(life-scheduler-projection-ready?                (quote {pending_invocation})                (quote ((projection-ready different-bridge-contract {}))))",
+            source_ref
+        ),
+        &mut session,
+    )
+    .expect("wrong bridge remains ordinary scheduler data")
+    .value
+    .to_string();
+    assert_eq!(wrong_bridge, "absent");
+
+    let deduplicated = eval_program(
+        &format!(
+            "(life-scheduler-pending                (list (quote {pending_invocation}) (quote {pending_invocation})))"
+        ),
+        &mut session,
+    )
+    .expect("duplicate activation must be bounded")
+    .value
+    .to_string();
+    assert_eq!(deduplicated, format!("({pending_invocation})"));
+
+    let selection = eval_program(
+        &format!(
+            "(life-scheduler-select-ready                (list (quote {pending_invocation}))                (quote ({projection_ready})))"
+        ),
+        &mut session,
+    )
+    .expect("real bridge readiness must activate Datalog pending invocation")
+    .value
+    .to_string();
+    assert!(
+        selection.starts_with("(scheduler-selection ready "),
+        "unexpected scheduler selection: {selection}"
+    );
+    assert!(
+        selection.contains(&pending_invocation),
+        "selection lost the real pending invocation: {selection}"
+    );
+
+    let quiescence = eval_program(
+        "(life-scheduler-quiescence            (quote ())            (quote ())            (quote no-transition-required))",
+        &mut session,
+    )
+    .expect("consumed LIFE-1 path must reach quiescence")
+    .value
+    .to_string();
+    assert_eq!(quiescence, "(quiescence-state quiescent)");
 
     // Projection did not normalize or mutate the producer-native observation.
     assert_eq!(
