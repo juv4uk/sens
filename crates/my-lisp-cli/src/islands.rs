@@ -410,14 +410,11 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
             )?;
         }
         ("windows", "winget") => {
-            let Some(_) = command_output_contains(
-                Command::new("winget").arg("--version"),
-                "v",
-            )
-            .then_some(())
-            else {
+            let mut winget_version = Command::new("winget");
+            winget_version.arg("--version");
+            if !command_output_contains(&mut winget_version, "v") {
                 return Err("winget is required for automatic Windows package bootstrap".to_string());
-            };
+            }
 
             let mut install = Command::new("winget");
             install.args([
