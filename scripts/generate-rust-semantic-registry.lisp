@@ -25,18 +25,17 @@
 (def rust-string
   (lambda (value)
     (cond
-      ((atom value)
-       (structural-kind empty-list)
+      ((atom value) (structural-kind empty-list)
        (write-to-string "()"))
-      ((atom value)
-       (structural-kind atom)
+      ((atom value) (structural-kind atom)
        (cond
-         ((string? value)
-          (identity-relation same)
+         ((string? value) (identity-relation same)
           (write-to-string value))
-         ((string? value)
-          (identity-relation distinct)
-          (write-to-string (symbol->string value))))))))
+         ((string? value) (identity-relation distinct)
+          (write-to-string (symbol->string value)))))
+      ((atom value) (structural-kind pair)
+       (let ((shown (print (list (quote invalid-registry-surface) value))))
+         (car (quote ())))))))
 
 (def render-surface
   (lambda (entry)
