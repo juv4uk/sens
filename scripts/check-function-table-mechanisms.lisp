@@ -49,6 +49,16 @@
            ((equal? sid (car row)) (structural-relation distinct)
             (metadata-has-route? sid executor (cdr rows)))))))))
 
+(def admitted-executor?
+  (lambda (executor)
+    (cond
+      ((eq executor (quote evaluator)) (identity-relation same) (quote yes))
+      ((eq executor (quote common-lisp)) (identity-relation same) (quote yes))
+      ((eq executor (quote prolog)) (identity-relation same) (quote yes))
+      ((eq executor (quote clips)) (identity-relation same) (quote yes))
+      ((eq executor (quote datalog)) (identity-relation same) (quote yes))
+      (t (quote no)))))
+
 (def admitted-mechanism?
   (lambda (mechanism)
     (cond
@@ -62,6 +72,7 @@
       ((eq mechanism (quote cond-form)) (identity-relation same) (quote yes))
       ((eq mechanism (quote lambda-form)) (identity-relation same) (quote yes))
       ((eq mechanism (quote define-form)) (identity-relation same) (quote yes))
+      ((eq mechanism (quote bounded-exact-add)) (identity-relation same) (quote yes))
       (t (quote no)))))
 
 (def validate-rows
@@ -75,7 +86,8 @@
               (executor (second row))
               (mechanism (third row)))
          (cond
-           ((eq executor (quote evaluator)) (identity-relation distinct)
+           ((eq (admitted-executor? executor) (quote no))
+            (identity-relation same)
             (list (quote function-table-mechanisms-violation)
                   (quote unsupported-executor) sid executor))
            ((eq (registry-has-sid? sid registry-rows) (quote no))
