@@ -121,3 +121,35 @@ fn u8_rejects_invalid_conversions_and_shift_counts() {
     let negative_shift = eval_error("(binary 8) (u8-shl 00000001 -1)");
     assert_eq!(negative_shift.kind, ErrorKind::InvalidForm);
 }
+
+
+#[test]
+fn u8_boundary_audit_keeps_raw_transport_distinct() {
+    let audit = include_str!("../../../contracts/u8-boundary-audit-954.lisp");
+    my_lisp::parse(audit).expect("u8 boundary audit must remain readable Lisp data");
+
+    for required in [
+        "(classification language-value)",
+        "(classification semantic-binary-identity-projection)",
+        "(classification raw-host-mechanism)",
+        "(classification machine-mechanism)",
+        "(classification opaque-semantic-id-transport)",
+        "(name lisp-u8)",
+        "(current-representation binary-width-8)",
+    ] {
+        assert!(
+            audit.contains(required),
+            "u8 boundary audit lost required classification: {required}"
+        );
+    }
+
+    assert!(
+        audit.contains("(name file-raw-bytes)") && audit.contains("(action retain)"),
+        "raw file-byte transport must not be silently redefined as Lisp u8 semantics"
+    );
+    assert!(
+        audit.contains("(name kernel-c-abi-semantic-id)")
+            && audit.contains("(language-u8-domain no)"),
+        "opaque C ABI SID transport must remain distinct from the Lisp u8 value domain"
+    );
+}
