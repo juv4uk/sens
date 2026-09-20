@@ -109,7 +109,7 @@ fn human_surface_files_do_not_redefine_admitted_add_peers() {
 
     for (namespace, name) in surfaces {
         let source = match namespace {
-            "uk" => Some(UK_SURFACE),
+            "ук" => Some(UK_SURFACE),
             "sa" => Some(SA_SURFACE),
             _ => None,
         };
