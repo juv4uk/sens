@@ -35,7 +35,7 @@
            ((atom fact) (structural-kind pair)
             (clips-datalog-fact-list-valid? (cdr facts)))
            ((atom fact) (structural-kind empty-list) (quote ()))
-           ((atom fact) (structural-kind atom) (quote ())))))))))
+           ((atom fact) (structural-kind atom) (quote ()))))))))
 
 (def clips-working-memory-to-datalog-facts
   (lambda (observation)
@@ -121,7 +121,7 @@
             (datalog-clips-tuple-list-valid? (cdr tuples)))
            ((atom tuple) (structural-kind empty-list)
             (datalog-clips-tuple-list-valid? (cdr tuples)))
-           ((atom tuple) (structural-kind atom) (quote ())))))))))
+           ((atom tuple) (structural-kind atom) (quote ())))))))
 
 (def datalog-tuples-to-clips-facts
   (lambda (relation tuples)
