@@ -33,6 +33,8 @@
 (def violation-class
   (lambda (path source)
     (cond
+      ((string-prefix? "tests/fixtures/semantic-authority-guard/" path)
+       (quote allowed-adversarial-fixture))
       ((generated-projection? source) (quote allowed-generated-projection))
       ((not (active-host-source? path)) (quote not-active-host-source))
       ((and
@@ -77,6 +79,8 @@
            ((eq class (quote not-active-host-source)) (identity-relation same)
             (scan (cdr rows)))
            ((eq class (quote allowed-generated-projection)) (identity-relation same)
+            (scan (cdr rows)))
+           ((eq class (quote allowed-adversarial-fixture)) (identity-relation same)
             (scan (cdr rows)))
            ((eq class (quote allowed)) (identity-relation distinct)
             (scan (cdr rows)))
