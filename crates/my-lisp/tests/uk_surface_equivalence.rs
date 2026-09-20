@@ -231,3 +231,21 @@ fn ukrainian_surface_status_counts_are_internally_consistent() {
 // ukrainian_acceptance_program_code_never_requires_latin_layout were
 // keyboard/text-policy lints, relocated to `cargo xtask verify` per
 // TEST-ARCHITECTURE-1 step 4 -- see crates/xtask/src/checks.rs.
+
+
+#[test]
+fn admitted_invoke_surfaces_materialize_from_the_single_registry() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core bootstrap");
+
+    let english = eval_program("invoke", &mut session)
+        .expect("registry-admitted invoke surface must resolve")
+        .value;
+    let ukrainian = eval_program("викликати", &mut session)
+        .expect("registry-admitted Ukrainian invoke surface must resolve")
+        .value;
+
+    assert_eq!(english, Value::SemanticRef(0b1010_1000));
+    assert_eq!(ukrainian, Value::SemanticRef(0b1010_1000));
+    assert_eq!(english, ukrainian);
+}
