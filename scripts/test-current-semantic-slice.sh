@@ -171,3 +171,6 @@ fi
 
 # #1047: selector may choose only Canon-admitted mechanism routes.
 ./target/debug/my-lisp tests/fixtures/mechanism-selector-1047-witness.lisp >/dev/null
+
+# #1048: lowering is mechanical evidence after Canon-owned mechanism selection.
+./target/debug/my-lisp tests/fixtures/island-lowering-1048-witness.lisp >/dev/null
