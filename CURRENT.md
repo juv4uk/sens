@@ -8,7 +8,7 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 
 1. **Machine-readable contracts and Canon** — these are executable, not prose:
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — the numeric semantic-ID registry; the single source of truth for which spellings (en/uk/sa/sym) mean which semantic identity.
-   - `crates/my-lisp/src/eval/canon.rs` / `necessary_forms.rs` — Canon 0+7 and DEFINE/LAMBDA evaluator meaning, keyed only by numeric semantic ID.
+   - `crates/my-lisp/src/eval/canon.rs` / `necessary_forms.rs` — canon() + McCarthy-7 and DEFINE/LAMBDA evaluator meaning, keyed only by numeric semantic ID.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) — the implementation-independent behavioral contract (the "oracle corpus"); `my-lisp-constitution.lisp` and `tests/fixtures/inventory.lisp` are GENERATED projections over it, never hand-edited.
    - `language-contract.lisp` (this repo), and the sibling repos' own `isa-contract.lisp` (`fpga-lisp`) / `compatibility.lisp` (`cml`) for cross-repo compatibility.
 2. **Active ADRs and ratified design decisions** — see [`docs/adr/`](docs/adr) (if present) and any doc explicitly marked ratified/accepted, not proposed.
