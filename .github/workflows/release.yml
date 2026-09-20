@@ -73,10 +73,9 @@ jobs:
 
       - name: Materialize release manifest with verified asset hashes
         shell: python
-        env:
-          CLIPS_SHA256: ${{ env.CLIPS_SHA256 }}
         run: |
           import json
+          import os
           from pathlib import Path
 
           source = Path("packaging/islands-manifest-v1.json")
@@ -91,7 +90,7 @@ jobs:
                       raise SystemExit(f"{island['key']} release asset has no URL")
                   if entry.get("sha256") is None:
                       if island["key"] == "clips":
-                          entry["sha256"] = ${{ toJson(env.CLIPS_SHA256) }}
+                          entry["sha256"] = os.environ["CLIPS_SHA256"]
                       else:
                           raise SystemExit(f"{island['key']} release asset has no pinned SHA-256")
                   if len(entry["sha256"]) != 64:
