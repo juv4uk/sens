@@ -814,6 +814,7 @@ dependencies = [
 name = "wsm-native-result-types"
 version = "0.1.0"
 dependencies = [
+ "my-lisp",
  "wsm-kernel-host",
  "wsm-clips-kernel",
  "wsm-common-lisp-kernel",
