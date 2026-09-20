@@ -163,6 +163,68 @@ fn islands_manifest_rejects_malformed_release_checksum() {
 }
 
 #[test]
+fn islands_manifest_rejects_missing_release_metadata() {
+    let base = std::env::temp_dir().join(format!(
+        "my-lisp-islands-missing-meta-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(
+        &manifest_path,
+        r#"{"protocol":"my-lisp-islands-manifest/1","islands":[{"key":"demo","runtime_version":"1","license":"test","provenance":"test","platforms":[]}]}"#,
+    )
+    .expect("manifest");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands",
+            "plan",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--with",
+            "demo",
+        ])
+        .output()
+        .expect("CLI");
+
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("missing required release metadata"));
+}
+
+#[test]
+fn islands_manifest_rejects_unknown_provider_without_fallback() {
+    let base = std::env::temp_dir().join(format!(
+        "my-lisp-islands-provider-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(
+        &manifest_path,
+        r#"{"protocol":"my-lisp-islands-manifest/1","islands":[{"key":"demo","runtime_version":"1","abi_compatibility":"test-abi","install_key":"demo","license":"test","license_acceptance_required":false,"provenance":"test","platforms":[{"target":"linux-x86_64","provider":"magic","entrypoint":"demo","probe":["demo","--version"]}]}]}"#,
+    )
+    .expect("manifest");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands",
+            "plan",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--with",
+            "demo",
+        ])
+        .output()
+        .expect("CLI");
+
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("unsupported provider"));
+}
+
+#[test]
 fn islands_status_reports_probe_failure_without_hiding_version_identity() {
     let base = std::env::temp_dir().join(format!("my-lisp-islands-probe-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&base);
