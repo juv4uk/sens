@@ -1,7 +1,15 @@
 {
   "protocol": "my-lisp-islands-manifest/1",
   "release_note": "Installation prepares independent runtimes; it never admits semantics.",
-  "profiles": [{"key": "four-kernel", "islands": ["prolog", "clips"]}],
+  "profiles": [
+    {
+      "key": "four-kernel",
+      "islands": [
+        "prolog",
+        "clips"
+      ]
+    }
+  ],
   "islands": [
     {
       "key": "prolog",
@@ -13,9 +21,16 @@
           "target": "linux-x86_64",
           "provider": "apt",
           "package": "swi-prolog",
-          "probe": ["swipl", "--version"]
+          "probe": [
+            "swipl",
+            "--version"
+          ],
+          "entrypoint": "swipl"
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "prolog",
+      "license_acceptance_required": false
     },
     {
       "key": "clips",
@@ -28,7 +43,10 @@
           "provider": "unsupported",
           "reason": "A verified release artifact is not published in installer v1"
         }
-      ]
+      ],
+      "abi_compatibility": "wsm-kernel-c-abi/1",
+      "install_key": "clips",
+      "license_acceptance_required": false
     }
   ]
 }
