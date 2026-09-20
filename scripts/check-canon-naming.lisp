@@ -1,5 +1,5 @@
 ; scripts/check-canon-naming.lisp
-; Focused terminology guard for current human-facing documents.
+; Focused terminology guard for current human-facing documents (#1011).
 ; Historical/archive material and machine identifiers are intentionally out of scope.
 
 (def current-facing-canon-files
