@@ -116,7 +116,7 @@
     (cond
       ((atom dimensions)
        (cond
-         ((= (dimension-exponent dimension) 0) (quote ()))
+         ((= (dimension-exponent dimension) 0) 1 (quote ()))
          (t (list dimension))))
       ((eq (dimension-base dimension)
            (dimension-base (car dimensions)))
@@ -124,7 +124,7 @@
                (+ (dimension-exponent dimension)
                   (dimension-exponent (car dimensions)))))
          (cond
-           ((= sum 0) (cdr dimensions))
+           ((= sum 0) 1 (cdr dimensions))
            (t
             (cons
               (make-dimension (dimension-base dimension) sum)

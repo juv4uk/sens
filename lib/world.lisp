@@ -410,8 +410,8 @@
 (def world-at-depth-from
   (lambda (world current-depth target-depth)
     (cond
-      ((= current-depth target-depth) world)
-      ((< current-depth target-depth) (quote World-not-found))
+      ((= current-depth target-depth) 1 world)
+      ((< current-depth target-depth) 1 (quote World-not-found))
       ((atom (world-parent world)) (quote World-not-found))
       (t (world-at-depth-from (world-parent world)
                               (- current-depth 1)
@@ -420,7 +420,7 @@
 (def world-at-depth
   (lambda (world target-depth)
     (cond
-      ((< target-depth 0) (quote World-not-found))
+      ((< target-depth 0) 1 (quote World-not-found))
       (t (world-at-depth-from world (world-depth world) target-depth)))))
 
 (def world-journal-prefix
@@ -476,7 +476,7 @@
 (def world-climb-to-depth
   (lambda (world current-depth target-depth)
     (cond
-      ((= current-depth target-depth) world)
+      ((= current-depth target-depth) 1 world)
       (t (world-climb-to-depth (world-parent world)
                                (- current-depth 1)
                                target-depth)))))
@@ -495,7 +495,7 @@
     (let ((left-depth (world-depth left))
           (right-depth (world-depth right)))
       (let ((target-depth (cond
-                            ((< left-depth right-depth) left-depth)
+                            ((< left-depth right-depth) 1 left-depth)
                             (t right-depth))))
         (world-common-ancestor-aligned
           (world-climb-to-depth left left-depth target-depth)

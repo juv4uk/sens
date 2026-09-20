@@ -4,8 +4,9 @@
 (def lint-max2
   (lambda (a b)
     (cond
-      ((> a b) a)
+      ((> a b) 1 a)
       (t b))))
+
 
 ; 1. Size: Total number of nodes (atoms + pairs)
 (def lint-size
@@ -149,16 +150,16 @@
             (effects (second (fourth metrics)))
             (globals (second (fifth metrics))))
         (append
-          (cond ((> size (get-threshold (quote max-size) thresholds 99999))
+          (cond ((> size (get-threshold (quote max-size) thresholds 99999)) 1
                  (list (list (quote size-exceeded) size))) (t (quote ())))
           (append
-            (cond ((> nesting (get-threshold (quote max-nesting) thresholds 99999))
+            (cond ((> nesting (get-threshold (quote max-nesting) thresholds 99999)) 1
                    (list (list (quote nesting-exceeded) nesting))) (t (quote ())))
             (append
-              (cond ((> complexity (get-threshold (quote max-complexity) thresholds 99999))
+              (cond ((> complexity (get-threshold (quote max-complexity) thresholds 99999)) 1
                      (list (list (quote complexity-exceeded) complexity))) (t (quote ())))
               (append
-                (cond ((> (length globals) (get-threshold (quote max-globals) thresholds 99999))
+                (cond ((> (length globals) (get-threshold (quote max-globals) thresholds 99999)) 1
                        (list (list (quote globals-exceeded) globals))) (t (quote ())))
-                (cond ((> (length effects) (get-threshold (quote max-effects) thresholds 99999))
+                (cond ((> (length effects) (get-threshold (quote max-effects) thresholds 99999)) 1
                        (list (list (quote effects-exceeded) effects))) (t (quote ())))))))))))

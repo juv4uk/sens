@@ -106,15 +106,15 @@
   (lambda (n)
     (cond
       ((atom n) n)
-      ((> (balance-factor n) 1)
+      ((> (balance-factor n) 1) 1
        (cond
-         ((< (balance-factor (node-left n)) 0)
+         ((< (balance-factor (node-left n)) 0) 1
           (rotate-right (make-balanced-node (node-key n) (node-value n)
                           (rotate-left (node-left n)) (node-right n))))
          (t (rotate-right n))))
-      ((< (balance-factor n) -1)
+      ((< (balance-factor n) -1) 1
        (cond
-         ((> (balance-factor (node-right n)) 0)
+         ((> (balance-factor (node-right n)) 0) 1
           (rotate-left (make-balanced-node (node-key n) (node-value n)
                          (node-left n) (rotate-right (node-right n)))))
          (t (rotate-left n))))

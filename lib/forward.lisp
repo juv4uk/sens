@@ -202,7 +202,7 @@
   (lambda (rules facts)
     (let ((merged (append-new (fire-rules-on-facts rules facts) facts)))
       (cond
-        ((= (length merged) (length facts)) facts)
+        ((= (length merged) (length facts)) 1 facts)
         (t (run rules merged))))))
 
 (defmacro assert-facts! (facts)
@@ -370,7 +370,7 @@
     (let ((new-entries (fire-rules-on-facts-tms rules (map-fact-of entries))))
       (let ((merged (add-new-justified new-entries entries)))
         (cond
-          ((= (length merged) (length entries)) entries)
+          ((= (length merged) (length entries)) 1 entries)
           (t (run-tms rules merged)))))))
 
 (def *justified-memory* (quote ()))
@@ -1194,5 +1194,6 @@
   (lambda (rules facts)
     (let ((merged (append-new (fire-rules-multi rules facts) facts)))
       (cond
-        ((= (length merged) (length facts)) facts)
+        ((= (length merged) (length facts)) 1 facts)
         (t (run-multi rules merged))))))
+

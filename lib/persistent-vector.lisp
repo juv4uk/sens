@@ -89,17 +89,18 @@
   (lambda (n)
     (cond
       ((atom n) n)
-      ((> (vbalance-factor n) 1)
+      ((> (vbalance-factor n) 1) 1
        (cond
-         ((< (vbalance-factor (vnode-left n)) 0)
+         ((< (vbalance-factor (vnode-left n)) 0) 1
           (vrotate-right (vmake-balanced-node (vnode-index n) (vnode-value n)
                            (vrotate-left (vnode-left n)) (vnode-right n))))
          (t (vrotate-right n))))
-      ((< (vbalance-factor n) -1)
+      ((< (vbalance-factor n) -1) 1
        (cond
-         ((> (vbalance-factor (vnode-right n)) 0)
+         ((> (vbalance-factor (vnode-right n)) 0) 1
           (vrotate-left (vmake-balanced-node (vnode-index n) (vnode-value n)
                           (vnode-left n) (vrotate-right (vnode-right n)))))
+
          (t (vrotate-left n))))
       (t n))))
 
@@ -111,7 +112,7 @@
       ((atom tree) (vmake-balanced-node index value (quote ()) (quote ())))
       ((eq index (vnode-index tree))
        (vmake-balanced-node index value (vnode-left tree) (vnode-right tree)))
-      ((< index (vnode-index tree))
+      ((< index (vnode-index tree)) 1
        (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
                    (vtree-insert index value (vnode-left tree))
                    (vnode-right tree))))
@@ -127,7 +128,7 @@
     (cond
       ((atom tree) (quote ()))
       ((eq index (vnode-index tree)) (list (vnode-value tree)))
-      ((< index (vnode-index tree)) (vtree-get index (vnode-left tree)))
+      ((< index (vnode-index tree)) 1 (vtree-get index (vnode-left tree)))
       (t (vtree-get index (vnode-right tree))))))
 
 ; `vec-nth` returns the classic "maybe" shape ('() or (value)), the same

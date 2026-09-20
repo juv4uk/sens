@@ -4,7 +4,8 @@
 
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
-use crate::{Environment, ErrorKind, Exactness, Expr, ExprKind, LanguageError, Span, Value};
+use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
+
 use std::rc::Rc;
 
 fn semantic_record(kind: &str, state: &str) -> Value {
@@ -50,22 +51,14 @@ fn two_symbol_record(value: &Value) -> Option<(&str, &str)> {
 /// explicit domain-result matching. Once two-part `cond` is retired, this
 /// adapter disappears with it.
 fn migration_only_cond_truthy(value: &Value) -> bool {
-    match value {
-        // #216 exact comparison answers are mathematical data, not general
-        // truth values. This mapping exists only so historical two-part cond
-        // callers survive until they are rewritten to explicit three-part
-        // result matching; canonical #217 control never passes through here.
-        Value::Number(number, Exactness::Exact) if *number == 0.0 => false,
-        Value::Number(number, Exactness::Exact) if *number == 1.0 => true,
-        _ => match two_symbol_record(value) {
-            Some(("structural-kind", "empty-list" | "atom")) => true,
-            Some(("structural-kind", "pair")) => false,
-            Some(("identity-relation", "same")) => true,
-            Some(("identity-relation", "distinct")) => false,
-            Some(("structural-relation", "same")) => true,
-            Some(("structural-relation", "distinct")) => false,
-            _ => value.is_truthy(),
-        },
+    match two_symbol_record(value) {
+        Some(("structural-kind", "empty-list" | "atom")) => true,
+        Some(("structural-kind", "pair")) => false,
+        Some(("identity-relation", "same")) => true,
+        Some(("identity-relation", "distinct")) => false,
+        Some(("structural-relation", "same")) => true,
+        Some(("structural-relation", "distinct")) => false,
+        _ => value.is_truthy(),
     }
 }
 

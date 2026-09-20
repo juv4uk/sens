@@ -60,9 +60,10 @@
 (def narrate-fact
   (lambda (fact)
     (cond
-      ((= (length fact) 2) (list (second fact) (quote is) (quote a) (car fact)))
-      ((= (length fact) 3) (list (second fact) (car fact) (third fact)))
+      ((= (length fact) 2) 1 (list (second fact) (quote is) (quote a) (car fact)))
+      ((= (length fact) 3) 1 (list (second fact) (car fact) (third fact)))
       (t fact))))
+
 
 (def provenance-goal (lambda (prov) (second prov)))
 (def provenance-source (lambda (prov) (second (third prov))))
@@ -138,7 +139,8 @@
   (lambda (outcome expected)
     (cond
       ((not (result-proper-list? outcome)) (quote ()))
-      ((= (length outcome) expected) t)
+      ((= (length outcome) expected) 1 t)
+
       (t (quote ())))))
 
 (def narrate-outcome
