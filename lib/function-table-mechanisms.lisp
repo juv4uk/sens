@@ -22,4 +22,3 @@
     (00001000 evaluator lambda-form)
     (00001001 evaluator define-form)
     (00001011 evaluator define-form)))
-)
