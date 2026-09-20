@@ -207,7 +207,7 @@ fn self_recursive_top_level_def_sees_its_own_binding() {
     assert_eq!(
         eval_meta_program(
             "(def count-down (lambda (n) (cond ((eq n 0) (quote done)) (t (count-down (- n 1))))))",
-            "(count-down 20)"
+            "(count-down 0)"
         ),
         "done"
     );

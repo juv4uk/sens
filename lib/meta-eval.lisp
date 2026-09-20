@@ -928,7 +928,10 @@
           (cond
             ((my-params-bind-name? name (second form)) (quote ()))
             (t (my-forms-reference-name? (cdr (cdr form)) name))))
-         (t (my-forms-reference-name? form name))))
+        ; Continue through the list tail. Re-entering `form` here made
+        ; dependency discovery diverge on ordinary recursive bodies such as
+        ; `(cond (...) (t (count-down ...)))`.
+        (t (my-forms-reference-name? (cdr form) name))))
       (t (my-forms-reference-name? form name)))))
 
 (def my-lambda-def-references-name?
