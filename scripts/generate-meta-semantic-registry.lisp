@@ -108,7 +108,7 @@
   (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
 
 (def projection-rows
-  (collect-entries registry-form (quote ())))
+  (collect-entries (cdr registry-form) (quote ())))
 
 (def generated
   (render-projection projection-rows))
