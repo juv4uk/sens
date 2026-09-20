@@ -6,6 +6,10 @@ on:
       - ".github/workflows/authority-guard-self-test.yml"
       - "scripts/authority-guard.lisp"
       - "scripts/authority-guard-enforce.lisp"
+      - "tests/fixtures/semantic-authority-guard/**"
+      - "scripts/test-semantic-authority-guard.sh"
+      - "scripts/semantic-authority-guard-enforce.lisp"
+      - "scripts/semantic-authority-guard.lisp"
       - "tests/authority-inventory.lisp"
       - "tests/fixtures/authority-guard/**"
       - "lib/life-1-scheduler.lisp"
@@ -67,6 +71,12 @@ jobs:
           cat tests/authority-verdict.lisp
           grep -q 'authority-ok' tests/authority-verdict.lisp
           ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
+
+      - name: Semantic authority leakage fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/test-semantic-authority-guard.sh ./target/debug/my-lisp
 
       - name: Focused LIFE-1 scheduler witness
         run: cargo test -p my-lisp --test life_1_scheduler
