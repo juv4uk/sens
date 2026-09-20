@@ -134,3 +134,4 @@ crates/my-lisp/tests/runtime_peer_operators.rs	runtime_peer_surface_projection_r
 crates/my-lisp-cli/tests/uk_surface_audit_projection.rs	uk_surface_audit_generator_runs_through_real_my_lisp_cli	observer	uk-audit-generation-freshness	scripts/generate-uk-surface-audit.lisp + lib/generated/uk-surface-audit.lisp	retained
 crates/my-lisp-cli/tests/uk_surface_audit_projection.rs	ukr_candidate_collisions_require_explicit_alias_targets	observer	ukr-staging-collision-observation	lib/surface/український-профіль-джерела.lisp	retained
 crates/my-lisp-cli/tests/uk_surface_audit_projection.rs	ukr_candidates_need_no_latin_keyboard_layout	observer	ukr-staging-layout-observation	lib/surface/український-профіль-джерела.lisp	retained
+crates/my-lisp-cli/tests/uk_surface_audit_projection.rs	function_table_projection_is_fresh_from_canonical_registry	observer	function-table-reproducibility	scripts/generate-function-table.lisp + lib/surface/semantic-registry.lisp	retained
