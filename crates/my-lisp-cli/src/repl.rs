@@ -6,7 +6,7 @@
 mod surface_catalog;
 
 use my_lisp::{
-    eval_parsed_expressions_incremental, eval_program, parse, render_error_for_presentation,
+    eval_parsed_expressions_incremental, parse, render_error_for_presentation,
     render_value_for_presentation, ErrorKind, ExprKind, PresentationLanguage, Session,
 };
 use rustyline::error::ReadlineError;
@@ -281,6 +281,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use my_lisp::eval_program;
 
     fn core_state() -> ReplState {
         let mut session = Session::default();
