@@ -343,6 +343,24 @@ fn scheduler_deduplicates_real_invocation_and_rejects_malformed_trigger() {
     assert_eq!(
         eval_text(
             &format!(
+                "(equal? (atom (life-scheduler-field (quote {invocation}) (quote trigger))) (quote (structural-kind pair)))"
+            ),
+            &mut session,
+        ),
+        "(structural-relation same)"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(equal? (atom (cdr (life-scheduler-field (quote {invocation}) (quote trigger)))) (quote (structural-kind pair)))"
+            ),
+            &mut session,
+        ),
+        "(structural-relation same)"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
                 "(life-scheduler-field (quote {invocation}) (quote provenance-ref))"
             ),
             &mut session,
