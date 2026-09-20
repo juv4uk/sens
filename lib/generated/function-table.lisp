@@ -175,4 +175,5 @@
   ("10100110" identity:10100110/surface:read-file (uk прочитати-файл) (ukr прочитати-файл) (en read-file) (sa ()) (sym ()) my-lisp)
   ("10100111" identity:10100111/surface:write-file (uk записати-файл) (ukr записати-файл) (en write-file) (sa ()) (sym ()) my-lisp)
   ("10101000" identity:10101000/surface:invoke (uk викликати) (ukr викликати) (en invoke) (sa ()) (sym ()) my-lisp)
+  ("10101001" identity:10101001/surface:binary (uk двійковий) (ukr двійковий) (en binary) (sa ()) (sym ()) my-lisp)
 )
