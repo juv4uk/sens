@@ -21,8 +21,7 @@ fn integer_values_are_relational_payloads_not_implicit_arithmetic() {
     Evaluator::semi_naive_fixpoint(&program, &mut db);
 
     assert!(
-        db.relation("copied")
-            .is_some_and(|relation| relation.contains(&vec![Value::int(3)])),
+        db.relation("copied").contains(&vec![Value::int(3)]),
         "Datalog must preserve integer payloads through ordinary relational substitution"
     );
 }
@@ -37,7 +36,7 @@ fn arithmetic_spellings_remain_ordinary_relations_without_an_evaluator() {
 
     for spelling in ["+", "-", "*", "/", "abs", "sqrt", "sin", "cos", "exp", "log"] {
         assert!(
-            db.relation(spelling).is_none(),
+            db.relation(spelling).is_empty(),
             "{spelling} must not appear merely because integer payloads exist"
         );
     }
@@ -61,21 +60,19 @@ fn relation_names_that_look_like_math_do_not_gain_operator_semantics() {
     Evaluator::naive_fixpoint(&program, &mut db);
 
     assert!(
-        db.relation("observed")
-            .is_some_and(|relation| relation.contains(&vec![
-                Value::int(2),
-                Value::int(3),
-                Value::int(99),
-            ])),
+        db.relation("observed").contains(&vec![
+            Value::int(2),
+            Value::int(3),
+            Value::int(99),
+        ]),
         "a relation named '+' must preserve supplied data verbatim, not compute 2 + 3"
     );
     assert!(
-        !db.relation("observed")
-            .is_some_and(|relation| relation.contains(&vec![
-                Value::int(2),
-                Value::int(3),
-                Value::int(5),
-            ])),
+        !db.relation("observed").contains(&vec![
+            Value::int(2),
+            Value::int(3),
+            Value::int(5),
+        ]),
         "current Datalog must not synthesize arithmetic results from a relation spelling"
     );
 }
