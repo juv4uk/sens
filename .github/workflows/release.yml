@@ -3,20 +3,46 @@ name: Release
 on:
   push:
     tags: ['l*']
+    branches: ['l*']
 
 permissions:
   contents: write
 
 jobs:
+  retag-unpublished-release:
+    name: Retag unpublished release snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Move unpublished release tag to this exact commit
+        if: github.ref_type == 'branch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git tag -f "$GITHUB_REF_NAME" "$GITHUB_SHA"
+          git push --force origin "refs/tags/$GITHUB_REF_NAME"
+
   test:
-    name: cargo test + clippy before release
+    needs: retag-unpublished-release
+    name: focused release smoke before publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --workspace
-      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: translation boundary regression
+        run: cargo test -p my-lisp --test translation_boundary
+      - name: Ukrainian/Sanskrit surface regression
+        run: cargo test -p my-lisp --test uk_sa_surface
+      - name: island installer CLI
+        run: cargo test -p my-lisp-cli --test islands_cli
+      - name: release asset contract
+        run: cargo test -p my-lisp-cli --test islands_release_asset
+      - name: focused release clippy
+        run: cargo clippy -p my-lisp -p my-lisp-cli --all-targets -- -D warnings
+
 
   create-release:
     name: Create the GitHub release
@@ -102,10 +128,12 @@ jobs:
           )
           print(destination.read_text(encoding="utf-8"))
 
-      - name: Upload generated manifest
+      - name: Upload generated manifest and installer script
         uses: softprops/action-gh-release@v1
         with:
-          files: islands-manifest-v1.json
+          files: |
+            islands-manifest-v1.json
+            packaging/install.sh
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
         env:

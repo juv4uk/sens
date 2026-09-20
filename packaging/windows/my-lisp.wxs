@@ -99,6 +99,17 @@
       </Directory>
     </StandardDirectory>
 
+    <!-- Automatically install four-kernel execution islands on initial installation -->
+    <CustomAction Id="InstallExecutionIslands"
+                  FileRef="MyLispExe"
+                  ExeCommand="install --profile four-kernel"
+                  Execute="deferred"
+                  Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="InstallExecutionIslands" After="InstallFiles" Condition="NOT Installed" />
+    </InstallExecuteSequence>
+
   </Package>
 
 </Wix>

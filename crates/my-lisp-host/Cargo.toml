@@ -1,6 +1,6 @@
 [package]
 name = "my-lisp-host"
-version = "0.40.0"
+version = "0.40.1"
 edition = "2021"
 license-file = "../../LICENSE"
 description = "Host capability layer for my-lisp: filesystem, processes, TCP"

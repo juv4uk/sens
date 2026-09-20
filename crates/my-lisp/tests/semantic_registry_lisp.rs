@@ -85,3 +85,73 @@ fn binary_reader_rejects_non_binary_digit_with_named_error() {
         "malformed binary input must retain its named reader error: {error}"
     );
 }
+
+
+#[test]
+fn full_binary_registry_handoff_is_lisp_owned_and_digest_pinned() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library should load");
+    eval_program(
+        include_str!("../../../lib/surface/semantic-registry-api.lisp"),
+        &mut session,
+    )
+    .expect("Lisp-owned semantic registry API should load");
+    eval_program(
+        include_str!("../../../tests/fixtures/semantic-registry-self-hosted-witness.lisp"),
+        &mut session,
+    )
+    .expect("Lisp-owned semantic registry witness should load");
+
+    let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
+    let program = format!("(semantic-registry-handoff-witness {registry_source:?})");
+    let rendered = eval_program(&program, &mut session)
+        .expect("Lisp-owned registry handoff should evaluate")
+        .value
+        .to_string();
+
+    let digest = my_lisp::sha256_source(registry_source.as_bytes())
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+
+    assert!(
+        rendered.starts_with("(semantic-registry-handoff/1 "),
+        "handoff must remain an explicit versioned Lisp record: {rendered}"
+    );
+    assert!(
+        rendered.contains(&format!("(source-digest \"{digest}\")")),
+        "Lisp handoff digest must identify the exact canonical source bytes"
+    );
+    assert!(
+        rendered.contains("(row-count 170)"),
+        "handoff must report every current canonical semantic row"
+    );
+    assert!(
+        rendered.contains("(canonical-rows (00000000 "),
+        "handoff must expose the parsed canonical rows beginning with Binary SID values"
+    );
+    assert!(
+        rendered.contains("(10101000 (en invoke)"),
+        "handoff must preserve the invoke row as Binary identity data"
+    );
+    assert!(
+        rendered.contains("(10101001 (en binary)"),
+        "handoff must preserve the current canonical registry tail as Binary identity data"
+    );
+}
+
+#[test]
+fn registry_handoff_contract_names_authority_without_copying_rows() {
+    let contract = include_str!("../../../contracts/semantic-registry-handoff-996.lisp");
+    parse(contract).expect("registry handoff contract must remain valid Lisp data");
+
+    assert!(contract.contains("(authority \"lib/surface/semantic-registry.lisp\")"));
+    assert!(contract.contains("(revision-pin git-commit-containing-authority)"));
+    assert!(contract.contains("(content-digest sha256-utf8-source)"));
+    assert!(contract.contains("decimal-sid-shadow-table"));
+    assert!(contract.contains("string-sid-shadow-table"));
+    assert!(
+        !contract.contains("00000001"),
+        "handoff policy must not become a second semantic registry"
+    );
+}

@@ -208,14 +208,14 @@ dependencies = [
 
 [[package]]
 name = "my-lisp"
-version = "0.40.0"
+version = "0.40.1"
 dependencies = [
  "my-lisp-host",
 ]
 
 [[package]]
 name = "my-lisp-cli"
-version = "0.40.0"
+version = "0.40.1"
 dependencies = [
  "my-lisp",
  "my-lisp-host",
@@ -235,14 +235,14 @@ dependencies = [
 
 [[package]]
 name = "my-lisp-host"
-version = "0.40.0"
+version = "0.40.1"
 dependencies = [
  "my-lisp",
 ]
 
 [[package]]
 name = "my-lisp-literate"
-version = "0.40.0"
+version = "0.40.1"
 dependencies = [
  "my-lisp",
  "pulldown-cmark",
@@ -250,21 +250,21 @@ dependencies = [
 
 [[package]]
 name = "my-lisp-lsp"
-version = "0.40.0"
+version = "0.40.1"
 dependencies = [
  "my-lisp",
 ]
 
 [[package]]
 name = "my-lisp-semantic"
-version = "0.40.0"
+version = "0.40.1"
 dependencies = [
  "my-lisp",
 ]
 
 [[package]]
 name = "my-lisp-wasm"
-version = "0.40.0"
+version = "0.40.1"
 dependencies = [
  "my-lisp",
  "my-lisp-literate",

@@ -38,6 +38,15 @@
        (provenance "owner directive 2026-09-07; executable documentation gate")
        (unknown-route ask-owner))
      (reference
+       (topic repo-tooling)
+       (summary "Lisp-owned навігація по інвентарю repo tooling; registry зберігає governance metadata і не є semantic authority | Lisp-owned navigation for the repo tooling inventory; the registry stores governance metadata and is not semantic authority")
+       (authority (knowledge/repo-tooling-inventory.lisp scripts/check-repo-tooling-inventory.lisp docs/superpowers/specs/2026-09-17-repo-tooling-inventory-design.md))
+       (how-to (read-repo-tooling-inventory run-repo-tooling-inventory-check follow-migration-issue-for-python-tooling))
+       (verify (repo-tooling-inventory-ci-gate issue-382))
+       (lifecycle current-governance)
+       (provenance "issue #382; Lisp-owned repo tooling inventory")
+       (unknown-route ask-agent))
+     (reference
        (topic language-semantics)
        (summary "Meaning of WSM programs and conformance obligations | Значення WSM-програм і зобов'язання конформності")
        (authority (language-contract.lisp docs/language-core-axioms.md tests/fixtures/conformance.lisp))

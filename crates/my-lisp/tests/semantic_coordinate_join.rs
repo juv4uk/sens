@@ -103,6 +103,97 @@ fn kernel_names_for_sid(source: &str, wanted_sid: &str) -> HashSet<String> {
     panic!("SID {wanted_sid} missing from kernel witness map");
 }
 
+
+fn kernel_statuses_for_sid(source: &str, wanted_sid: &str) -> Vec<(String, String)> {
+    let exprs = parse(source).expect("kernel witness contract must parse");
+    let ExprKind::List(items) = &exprs[0].kind else {
+        panic!("kernel witness map must be a list");
+    };
+
+    for entry in &items[1..] {
+        let ExprKind::List(fields) = &entry.kind else {
+            continue;
+        };
+        if !matches!(
+            fields.first().map(|expr| &expr.kind),
+            Some(ExprKind::Symbol(symbol)) if &**symbol == "sid-witness"
+        ) {
+            continue;
+        }
+
+        let mut sid = None;
+        let mut witnesses = Vec::new();
+        for field in &fields[1..] {
+            match &field.kind {
+                ExprKind::Pair(key, value)
+                    if matches!(&key.kind, ExprKind::Symbol(symbol) if &**symbol == "sid") =>
+                {
+                    sid = Some(match &value.kind {
+                        ExprKind::String(value) | ExprKind::Symbol(value) => value.to_string(),
+                        other => panic!("SID must be string/symbol, got {other:?}"),
+                    });
+                }
+                ExprKind::List(w)
+                    if matches!(
+                        w.first().map(|expr| &expr.kind),
+                        Some(ExprKind::Symbol(symbol)) if &**symbol == "witnesses"
+                    ) =>
+                {
+                    witnesses = w[1..].to_vec();
+                }
+                _ => {}
+            }
+        }
+
+        if sid.as_deref() != Some(wanted_sid) {
+            continue;
+        }
+
+        let mut out = Vec::new();
+        for witness in witnesses {
+            let ExprKind::List(fields) = witness.kind else {
+                continue;
+            };
+            let mut kernel = None;
+            let mut status = None;
+            for field in &fields[1..] {
+                let ExprKind::Pair(key, value) = &field.kind else {
+                    continue;
+                };
+                let ExprKind::Symbol(key) = &key.kind else {
+                    continue;
+                };
+                match &**key {
+                    "kernel" => {
+                        if let ExprKind::Symbol(value) = &value.kind {
+                            kernel = Some(value.to_string());
+                        }
+                    }
+                    "status" => {
+                        if let ExprKind::Symbol(value) = &value.kind {
+                            status = Some(value.to_string());
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            if let (Some(kernel), Some(status)) = (kernel, status) {
+                out.push((kernel, status));
+            }
+        }
+        return out;
+    }
+
+    Vec::new()
+}
+
+fn coordinate_value(session: &mut Session, function: &str, sid: &str) -> String {
+    eval_program(&format!(r#"({function} "{sid}")"#), session)
+        .unwrap_or_else(|error| panic!("{function} failed for {sid}: {error:?}"))
+        .value
+        .to_string()
+}
+
 fn kernel_car_block(source: &str) -> &str {
     let marker = "(sid      . \"00000101\")";
     let sid_pos = source.find(marker).expect("CAR SID row");
@@ -160,4 +251,88 @@ fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
     assert!(!car_block.contains("mov-"));
     assert!(!car_block.contains("pair-field-load"));
     assert!(!car_block.contains("car-cons-left-inverse"));
+}
+
+
+#[test]
+fn add_sid_preserves_math_and_machine_evidence_with_explicit_kernel_gap() {
+    const SID: &str = "00001100";
+    assert_eq!(semantic_id_for_admitted_surface("+"), Some(0b0000_1100));
+
+    let mut session = load_coordinate_session();
+    let math = coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
+    let machine = coordinate_value(&mut session, "machine-capabilities-for-sid", SID);
+    let kernel_source =
+        fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
+            .expect("kernel witness contract");
+    let kernels = kernel_statuses_for_sid(&kernel_source, SID);
+
+    assert!(math.contains("exact-rational-sum"));
+    assert_eq!(machine, "((integer-add bounded-u64))");
+    assert!(kernels.is_empty(), "absence must remain explicit, not guessed");
+    assert!(!math.contains("add-r64-r64"));
+    assert!(!machine.contains("exact-rational-sum"));
+}
+
+#[test]
+fn eq_sid_joins_relation_my_lisp_and_compare_capability() {
+    const SID: &str = "00000011";
+    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(0b0000_0011));
+
+    let mut session = load_coordinate_session();
+    let math = coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
+    let machine = coordinate_value(&mut session, "machine-capabilities-for-sid", SID);
+    let kernel_source =
+        fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
+            .expect("kernel witness contract");
+    let kernels = kernel_statuses_for_sid(&kernel_source, SID);
+
+    assert!(math.contains("same-atom-identity"));
+    assert_eq!(machine, "((identity-compare bounded-u64))");
+    assert_eq!(kernels, vec![("my-lisp".into(), "live".into())]);
+}
+
+#[test]
+fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
+    const SID: &str = "00000100";
+    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(0b0000_0100));
+
+    let mut session = load_coordinate_session();
+    let math = coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
+    let machine = coordinate_value(&mut session, "machine-capabilities-for-sid", SID);
+    let kernel_source =
+        fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
+            .expect("kernel witness contract");
+    let kernels = kernel_statuses_for_sid(&kernel_source, SID);
+
+    assert!(math.contains("car-cons-left-inverse"));
+    assert_eq!(
+        machine,
+        "((pair-field-store head bounded-u64) (pair-field-store tail bounded-u64))"
+    );
+    assert!(kernels.contains(&("my-lisp".into(), "live".into())));
+    assert!(kernels.contains(&("common-lisp".into(), "integration-gated".into())));
+    assert_eq!(kernels.len(), 2);
+}
+
+#[test]
+fn cond_sid_keeps_negative_math_evidence_and_absent_external_kernels_visible() {
+    const SID: &str = "00000111";
+    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(0b0000_0111));
+
+    let mut session = load_coordinate_session();
+    let math = coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
+    let machine = coordinate_value(&mut session, "machine-capabilities-for-sid", SID);
+    let kernel_source =
+        fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
+            .expect("kernel witness contract");
+    let kernels = kernel_statuses_for_sid(&kernel_source, SID);
+
+    assert!(math.contains("non-mathematical-in-this-slice"));
+    assert!(math.contains("no-mathematical-law-claimed"));
+    assert_eq!(machine, "((conditional-branch bounded-u64))");
+    assert!(kernels.contains(&("my-lisp".into(), "live".into())));
+    assert!(kernels.contains(&("prolog".into(), "absent".into())));
+    assert!(kernels.contains(&("clips".into(), "absent".into())));
+    assert_eq!(kernels.len(), 3);
 }
