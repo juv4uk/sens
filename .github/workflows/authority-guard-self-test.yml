@@ -6,6 +6,10 @@ on:
       - ".github/workflows/authority-guard-self-test.yml"
       - "scripts/authority-guard.lisp"
       - "scripts/authority-guard-enforce.lisp"
+      - "scripts/semantic-authority-guard.lisp"
+      - "scripts/semantic-authority-guard-enforce.lisp"
+      - "scripts/test-semantic-authority-guard.sh"
+      - "tests/fixtures/semantic-authority-guard/**"
       - "tests/authority-inventory.lisp"
       - "tests/fixtures/authority-guard/**"
       - "lib/life-1-scheduler.lisp"
@@ -54,6 +58,12 @@ jobs:
             exit 1
           fi
           cat /tmp/authority-forbidden.log
+
+      - name: Semantic authority guard self-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/test-semantic-authority-guard.sh ./target/debug/my-lisp
 
       - name: Allowed mechanism fixture is accepted
         shell: bash
