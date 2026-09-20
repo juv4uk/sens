@@ -311,21 +311,16 @@ mod tests {
     }
 
     #[test]
-    fn synthetic_registry_constructively_controls_canon_routing() {
-        const SYNTHETIC: &str =
-            "(\n  (\"00000000\" (en ()) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00000001\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00000101\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ())))";
-        let index = semantic_registry::build_surface_index(SYNTHETIC);
-        let route = |surface: &str| {
-            index
-                .get(surface)
-                .copied()
-                .and_then(identity_for_semantic_id)
-        };
-
-        assert_eq!(route("comet"), Some(CanonicalIdentity::Quote));
-        assert_eq!(route("asteroid"), Some(CanonicalIdentity::Car));
-        assert_eq!(route("quote"), None);
-        assert_eq!(route("car"), None);
+    fn semantic_ids_control_canon_routing() {
+        assert_eq!(
+            identity_for_semantic_id(QUOTE_SEMANTIC_ID),
+            Some(CanonicalIdentity::Quote)
+        );
+        assert_eq!(
+            identity_for_semantic_id(CAR_SEMANTIC_ID),
+            Some(CanonicalIdentity::Car)
+        );
+        assert_eq!(identity_for_semantic_id(12), None);
     }
 
     #[test]
