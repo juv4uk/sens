@@ -41,6 +41,7 @@
 (authority "crates/my-lisp-host/tests/native_cond_profile.rs" mechanism)
 (authority "crates/xtask/tests/license_policy.rs" observer)
 (authority "crates/my-lisp/tests/full_uk_surface.rs" observer)
+(authority "crates/my-lisp-cli/tests/uk_surface_audit_projection.rs" observer)
 
 (authority "crates/my-lisp/tests/i5_6400_machine_profile.rs" observer)
 (authority "crates/my-lisp/tests/peer_surface_identity.rs" observer)
