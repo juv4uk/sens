@@ -1,6 +1,6 @@
 //! Registry-driven UK/EN surface equivalence sweep.
 //!
-//! Data source: `lib/surface/semantic-registry.wsm`, the byte-SID surface
+//! Data source: `lib/surface/semantic-registry.lisp`, the byte-SID surface
 //! authority (see `semantic_registry.rs` for the runtime parser this test
 //! mirrors, and `peer_surface_identity.rs` for the same pattern applied to
 //! one byte SID). This file used to read the legacy EN-shaped
@@ -127,10 +127,14 @@ fn every_stable_uk_surface_entry_resolves_to_its_declared_operation() {
     ];
     let mut checked_values = 0;
 
+    let mut expected_checked = 0usize;
     for (semantic_id, english, ukrainian) in &pairs {
-        if syntax.contains(&(*english, *ukrainian)) || host_operations.contains(english) {
+        if syntax.iter().any(|(en, uk)| en == english && uk == ukrainian)
+            || host_operations.iter().any(|name| *name == english)
+        {
             continue;
         }
+        expected_checked += 1;
         let english_value = eval_program(english, &mut session)
             .unwrap_or_else(|error| {
                 panic!("English value is missing: {semantic_id}/{english}: {error}")
@@ -151,10 +155,7 @@ fn every_stable_uk_surface_entry_resolves_to_its_declared_operation() {
     // Derived, not restated: every pair except the syntax forms and host
     // operations must have been checked above -- catches a silent early
     // `continue`/`break` bug in the loop without hardcoding the pair count twice.
-    assert_eq!(
-        checked_values,
-        pairs.len() - syntax.len() - host_operations.len()
-    );
+    assert_eq!(checked_values, expected_checked);
 }
 
 #[test]
