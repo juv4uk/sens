@@ -11,85 +11,26 @@
 use my_lisp::{eval_program, load_core_library, Session, Value};
 use std::rc::Rc;
 
-const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
-
-/// One surface declaration from a semantic-registry row.
-struct Surface {
-    namespace: &'static str,
-    name: Option<&'static str>,
-}
-
-/// Parse every row of the registry into its byte SID plus the raw
-/// surface declarations it carries.
-fn surface_groups(line: &'static str) -> Vec<&'static str> {
-    let mut groups = Vec::new();
-    let mut depth = 0usize;
-    let mut start = None;
-    for (index, byte) in line.bytes().enumerate() {
-        match byte {
-            b'(' => {
-                depth += 1;
-                if depth == 2 {
-                    start = Some(index + 1);
-                }
-            }
-            b')' => {
-                if depth == 2 {
-                    if let Some(group_start) = start.take() {
-                        let group = line[group_start..index].trim();
-                        if !group.is_empty() {
-                            groups.push(group);
-                        }
-                    }
-                }
-                depth = depth.saturating_sub(1);
-            }
-            _ => {}
-        }
-    }
-    groups
-}
-
-fn registry_name_token(token: &'static str) -> &'static str {
-    token
-        .strip_prefix('"')
-        .and_then(|value| value.strip_suffix('"'))
-        .unwrap_or(token)
-}
-
-fn registry_rows() -> Vec<(&'static str, Vec<Surface>)> {
-    REGISTRY
-        .lines()
-        .filter_map(|line| {
-            let fields = line.split_whitespace().collect::<Vec<_>>();
-            let semantic_id = fields
-                .first()?
-                .strip_prefix("(\"")?
-                .strip_suffix('"')?;
-            if semantic_id.len() != 8
-                || !semantic_id.bytes().all(|byte| matches!(byte, b'0' | b'1'))
-            {
-                return None;
-            }
-
-            let surfaces = surface_groups(line)
+fn registry_rows() -> Vec<(String, Vec<Surface>)> {
+    my_lisp::semantic_registry_export::admitted_semantic_ids()
+        .into_iter()
+        .map(|semantic_id| {
+            let id = my_lisp::semantic_registry_export::semantic_id_bits(semantic_id);
+            let surfaces = my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
                 .into_iter()
-                .map(|group| {
-                    let fields = group.split_whitespace().collect::<Vec<_>>();
-                    let (namespace, name) = match fields.as_slice() {
-                        [namespace, "()"] => (*namespace, None),
-                        [namespace, name] => (*namespace, Some(registry_name_token(name))),
-                        _ => panic!("malformed sr/2 surface group: ({group})"),
-                    };
-                    Surface {
-                        namespace,
-                        name,
-                    }
+                .map(|row| Surface {
+                    namespace: row.namespace.to_owned(),
+                    name: Some(row.name.to_owned()),
                 })
                 .collect();
-            Some((semantic_id, surfaces))
+            (id, surfaces)
         })
         .collect()
+}
+
+struct Surface {
+    namespace: String,
+    name: Option<String>,
 }
 
 fn surface<'a>(surfaces: &'a [Surface], namespace: &str) -> Option<&'a Surface> {
@@ -97,12 +38,12 @@ fn surface<'a>(surfaces: &'a [Surface], namespace: &str) -> Option<&'a Surface> 
 }
 
 /// Every byte SID whose EN spelling AND UK spelling are both present.
-fn present_en_uk_pairs() -> Vec<(&'static str, &'static str, &'static str)> {
+fn present_en_uk_pairs() -> Vec<(String, String, String)> {
     registry_rows()
         .into_iter()
         .filter_map(|(id, surfaces)| {
-            let en = surface(&surfaces, "en")?.name?;
-            let uk = surface(&surfaces, "uk")?.name?;
+            let en = surface(&surfaces, "en")?.name.clone()?;
+            let uk = surface(&surfaces, "uk")?.name.clone()?;
             Some((id, en, uk))
         })
         .collect()
@@ -114,7 +55,7 @@ fn uk_presence_counts() -> (usize, usize, usize) {
     let mut present = 0;
     let mut empty = 0;
     for (_, surfaces) in &rows {
-        match surface(surfaces, "uk").and_then(|s| s.name) {
+        match surface(surfaces, "uk").and_then(|s| s.name.as_deref()) {
             Some(_) => present += 1,
             None => empty += 1,
         }
