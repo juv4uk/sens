@@ -9,7 +9,7 @@
 ; The first element of the canonical table is the format descriptor:
 ;   (binary 8)
 ; All remaining elements are semantic rows:
-;   (Binary identity (en ...) (uk ...) (ukr ...) (sa ...) (sym ...))
+;   (Binary identity (en ...) (ук ...) (укр ...) (sa ...) (sym ...))
 ;
 ; Runtime implementations may project the Binary identity to an internal byte,
 ; but the meaning and lookup rules below belong to Lisp.
@@ -37,7 +37,7 @@
 
 (def semantic-registry-namespaces
   (lambda ()
-    (quote (en uk ukr sa sym))))
+    (quote (en ук укр sa sym))))
 
 (def semantic-registry-row-namespaces
   (lambda (surfaces)
@@ -130,7 +130,7 @@
                (semantic-registry-find-id-in-namespaces
                  name
                  (car rows)
-                 (quote (en uk ukr sa sym)))))
+                 (quote (en ук укр sa sym)))))
          (cond
            ((atom identity) (structural-kind empty-list)
             (semantic-registry-id-for-surface name (cdr rows)))
