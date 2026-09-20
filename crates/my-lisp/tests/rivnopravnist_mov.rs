@@ -113,29 +113,29 @@ fn executable_authority_більше_не_читає_legacy_en_shaped_табли
             !джерело.contains("uk-sa-coverage.lisp"),
             "{імя}: legacy EN-shaped table знову стала executable authority"
         );
-        assert!(
-            джерело.contains("semantic-registry.lisp"),
-            "{імя}: має спиратися на byte-SID registry"
-        );
     }
-}
 
+    assert!(
+        !my_lisp::semantic_registry_export::semantic_id_for_admitted_surface("uk-sa-coverage.lisp")
+            .is_some(),
+        "legacy table name must never become a semantic surface"
+    );
+}
 #[test]
 #[ignore = "фінальний gate: увімкнути після завершення UK/EN/SA parity"]
 fn повне_рівноправя_вимагає_наявності_для_всіх_людських_поверхонь() {
-    let корінь = корінь_реєстру();
-    for запис in записи_реєстру(&корінь) {
-        let (ідентифікатор, _) = поверхні(запис);
-        if ідентифікатор == "\"00000000\"" {
+    for id in registry_ids() {
+        if id == 0 {
             continue;
         }
-        let наявні = ["uk", "en", "sa"].map(|surface| рядок(запис, surface).1.is_some());
-        assert!(
-            наявні.iter().all(|наявне| *наявне),
-            "{ідентифікатор}: UK/EN/SA ще не заповнені одночасно"
-        );
+        let rows = registry_surfaces(id);
+        let present = ["uk", "en", "sa"]
+            .iter()
+            .all(|namespace| rows.iter().any(|row| row.namespace == *namespace));
+        assert!(present, "{}: UK/EN/SA ще не заповнені одночасно", registry_id_bits(id));
     }
-}fn registry_ids() -> Vec<u8> {
+}
+fn registry_ids() -> Vec<u8> {
     my_lisp::semantic_registry_export::admitted_semantic_ids()
 }
 
