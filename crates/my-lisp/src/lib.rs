@@ -50,6 +50,11 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
+    /// All admitted semantic identities from the Lisp-owned registry projection.
+    pub fn admitted_semantic_ids() -> Vec<u8> {
+        super::semantic_registry::admitted_semantic_ids()
+    }
+
     /// Canonical 8-bit textual serialization for provenance/export.
     pub fn semantic_id_bits(semantic_id: u8) -> String {
         super::semantic_registry::semantic_id_bits(semantic_id)
