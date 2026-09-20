@@ -37,10 +37,11 @@
        (quote allowed-adversarial-fixture))
       ((generated-projection? source) (quote allowed-generated-projection))
       ((not (active-host-source? path)) (quote not-active-host-source))
+      ; High-risk authority shapes are deliberately structural and conservative:
+      ; this guard requests review; it does not attempt to understand Rust semantics.
       ((and
          (string-contains? "SemanticId" source)
-         (contains-any? source (quote ("CanonicalIdentity" "semantic_id" "Meaning" "Operation")))
-         (contains-any? source (quote ("match" "HashMap" "BTreeMap" "enum"))))
+         (string-contains? "CanonicalIdentity" source))
        (quote sid-to-meaning-authority))
       ((and
          (contains-any? source (quote ("surface" "surface_name" "namespace")))
@@ -49,18 +50,15 @@
        (quote surface-name-to-meaning-dispatch))
       ((and
          (contains-any? source (quote ("prolog" "datalog" "clips" "common-lisp")))
-         (contains-any? source (quote ("SemanticId" "semantic_id")))
-         (contains-any? source (quote ("match" "operator" "opcode"))))
+         (contains-any? source (quote ("SemanticId" "semantic_id"))))
        (quote island-native-operator-to-sid))
       ((and
          (contains-any? source (quote ("opcode" "mnemonic" "x86")))
-         (contains-any? source (quote ("SemanticId" "semantic_id")))
-         (contains-any? source (quote ("match" "HashMap" "BTreeMap"))))
+         (contains-any? source (quote ("SemanticId" "semantic_id"))))
        (quote isa-to-sid-authority))
       ((and
          (contains-any? source (quote ("unwrap_or" "unwrap_or_else" "fallback" "default")))
-         (contains-any? source (quote ("SemanticId" "semantic_id" "CanonicalIdentity")))
-         (contains-any? source (quote ("unknown" "meaning" "operation" "canonical"))))
+         (string-contains? "CanonicalIdentity" source))
        (quote host-fallback-meaning))
       (t (quote allowed)))))
 
