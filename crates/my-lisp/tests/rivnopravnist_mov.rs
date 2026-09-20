@@ -74,7 +74,8 @@ fn записи_реєстру(корінь: &Форма) -> &[Форма] {
     let Форма::Список(елементи) = корінь else {
         panic!("semantic registry повинен бути списком");
     };
-    елементи
+    assert_eq!(елементи.first(), Some(&Форма::Список(vec![Форма::Атом("binary".into()), Форма::Атом("8".into())])));
+    &елементи[1..]
 }
 
 fn атом(форма: &Форма) -> &str {
@@ -141,7 +142,7 @@ fn семантичні_ідентифікатори_складаються_ті
         let bits = ідентифікатор
             .strip_prefix('"')
             .and_then(|value| value.strip_suffix('"'))
-            .expect("SID must be serialized as a quoted bitstring");
+            .expect("SID must be serialized as an 8-bit binary token");
         assert!(
             bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')),
             "byte SID {ідентифікатор:?} порушує canonical semantic registry"
@@ -151,7 +152,7 @@ fn семантичні_ідентифікатори_складаються_ті
     // Intentional floor, not a restated fact: the registry only grows, so an
     // exact count would silently rot. 140 is the stable-UK-surface size at
     // the time this floor was written (TEST-ARCHITECTURE-1 step 2).
-    assert_eq!(побачені.len(), 169, "canonical semantic registry має містити Canon 0 + 168 identities");
+    assert_eq!(побачені.len(), 170, "canonical semantic registry має містити Canon 0 + 169 identities");
 }
 
 #[test]
