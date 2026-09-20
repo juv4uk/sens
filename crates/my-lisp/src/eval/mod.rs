@@ -19,7 +19,8 @@ pub(crate) mod necessary_forms;
 mod special_forms;
 
 pub use capabilities::{
-    capability_installed, installed_capabilities, register_capability, unregister_capability,
+    capability_installed, installed_capabilities, register_capability, register_semantic_capability,
+    unregister_capability, unregister_semantic_capability,
 };
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
@@ -220,6 +221,16 @@ fn evaluate_list(
         }
         _ => {
             if let Some(name) = items[0].kind.as_symbol() {
+                // Resolve through Canon/function-table SID first. Only if no SID-keyed
+                // implementation is installed do legacy named host capabilities get a chance.
+                if let Some(result) = capabilities::dispatch_semantic_capability_for_surface(
+                    name,
+                    arguments,
+                    environment,
+                    span,
+                ) {
+                    return result;
+                }
                 if let Some(result) =
                     capabilities::dispatch_capability(name, arguments, environment, span)
                 {
