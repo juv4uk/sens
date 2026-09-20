@@ -3,6 +3,9 @@ use std::path::PathBuf;
 
 use my_lisp::{eval_program, load_core_library, parse, Expr, ExprKind, Session};
 use wsm_datalog_kernel::{Atom, Database, Evaluator, Program, Rule, Term, Value};
+use wsm_native_result_types::{
+    FourKernelObservation, ProducerSlot, ProvenanceEdge, ProvenanceEdgeType,
+};
 use wsm_prolog_kernel::{
     decode_canonical_atom_list, PrologKernel, PrologQuery, PrologRequest,
 };
@@ -144,6 +147,33 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     assert!(db.relation("life-ancestor").contains(&vec![Value::sym("dave")]));
     assert!(db.relation("life-ancestor").contains(&vec![Value::sym("carol")]));
     assert!(db.generation_count() >= 2);
+
+    // LIFE-1 trace mechanics retain only stable identities and the admitted
+    // bridge contract. They do not decode or normalize either native domain.
+    let refs = FourKernelObservation::observation_refs(42, Some(INVOKE_ID));
+    let prolog_ref = refs[1];
+    let datalog_ref = refs[3];
+    let edge = ProvenanceEdge {
+        edge_id: 1,
+        edge_type: ProvenanceEdgeType::ProjectedInto,
+        from_observation: prolog_ref,
+        bridge_contract_ref: "prolog-substitutions-to-datalog-facts".to_string(),
+        to_observation: datalog_ref,
+    };
+
+    assert_eq!(edge.from_observation.producer, ProducerSlot::Prolog);
+    assert_eq!(edge.from_observation.native_slot, ProducerSlot::Prolog);
+    assert_eq!(edge.to_observation.producer, ProducerSlot::Datalog);
+    assert_eq!(edge.to_observation.native_slot, ProducerSlot::Datalog);
+    assert_eq!(edge.from_observation.observation_id, 42);
+    assert_eq!(edge.to_observation.observation_id, 42);
+    assert_eq!(edge.from_observation.semantic_id, Some(INVOKE_ID));
+    assert_eq!(edge.to_observation.semantic_id, Some(INVOKE_ID));
+    assert_eq!(edge.edge_type, ProvenanceEdgeType::ProjectedInto);
+    assert_eq!(
+        edge.bridge_contract_ref,
+        "prolog-substitutions-to-datalog-facts"
+    );
 
     // Projection did not normalize or mutate the producer-native observation.
     assert_eq!(
