@@ -21,6 +21,9 @@
       (list
         (semantic-registry-format registry)
         (length rows)
+        (equal?
+          (semantic-registry-row-namespaces quote-row)
+          (semantic-registry-namespaces))
         (write-to-string (semantic-registry-row-id quote-row))
         (semantic-registry-surface-name 'en quote-row)
         (semantic-registry-surface-name 'uk quote-row)
