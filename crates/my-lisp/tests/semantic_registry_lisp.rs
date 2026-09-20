@@ -1,12 +1,9 @@
-use my_lisp::{eval_program, load_core_library, load_fs_library, Session};
-use my_lisp_host::install;
+use my_lisp::{eval_program, load_core_library, Session};
 
 #[test]
 fn semantic_registry_is_read_and_queried_by_lisp_itself() {
-    install();
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library should load");
-    load_fs_library(&mut session).expect("Lisp-owned file layer should load");
     eval_program(
         include_str!("../../../lib/surface/semantic-registry-api.lisp"),
         &mut session,
