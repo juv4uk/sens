@@ -99,10 +99,10 @@
          (let ((projection (car projections)))
            (cond
              ((equal? expected projection)
-              (quote (structural-relation same))
+              (structural-relation same)
               (quote present))
              ((equal? expected projection)
-              (quote (structural-relation distinct))
+              (structural-relation distinct)
               (life-scheduler-projection-ready? invocation (cdr projections))))))))))
 
 (def life-scheduler-select-ready
@@ -115,7 +115,7 @@
          (cond
            ((eq (life-scheduler-projection-ready? invocation projections)
                 (quote present))
-            (quote (identity-relation same))
+            (identity-relation same)
             (list
               (quote scheduler-selection)
               (quote ready)
@@ -123,7 +123,7 @@
               (cdr pending)))
            ((eq (life-scheduler-projection-ready? invocation projections)
                 (quote absent))
-            (quote (identity-relation distinct))
+            (identity-relation distinct)
             (life-scheduler-select-ready (cdr pending) projections))))))))
 
 (def life-scheduler-quiescence-state
@@ -132,10 +132,10 @@
       ((atom projections) (structural-kind empty-list)
        (cond
          ((eq lifecycle-state (quote no-transition-required))
-          (quote (identity-relation same))
+          (identity-relation same)
           (quote (quiescence-state quiescent)))
          ((eq lifecycle-state (quote no-transition-required))
-          (quote (identity-relation distinct))
+          (identity-relation distinct)
           (quote (quiescence-state active)))))
       ((atom projections) (structural-kind pair)
        (quote (quiescence-state active))))))
