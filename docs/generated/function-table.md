@@ -6,7 +6,7 @@
 
 Regenerate: `cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function-table.lisp`
 
-| ID | uk | ukr | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |
+| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |
 |----|----|-----|---------|----------|--------|------------------------------|
 | `00000001` | як-є | як-є | quote | svarūpa | ' | () |
 | `00000010` | атом? | атом? | atom | aṇu | .? | tag-test: TEST/AND/CMP |
