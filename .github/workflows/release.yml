@@ -52,6 +52,7 @@ jobs:
         with:
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          files: packaging/islands-manifest-v1.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
