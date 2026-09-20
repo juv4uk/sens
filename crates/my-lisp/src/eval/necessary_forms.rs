@@ -4,11 +4,8 @@
 //! Lisp owns the SID-to-operation mapping in `lib/evaluator-dispatch.lisp`.
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
+use super::evaluator_dispatch_generated::{self as generated, EvaluatorMechanism};
 use crate::semantic_registry::{self, SemanticId};
-
-mod generated {
-    include!("necessary_forms_generated.rs");
-}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum NecessaryFormIdentity {
@@ -17,12 +14,13 @@ pub(crate) enum NecessaryFormIdentity {
 }
 
 fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<NecessaryFormIdentity> {
-    generated::NECESSARY_FORM_DISPATCH
+    generated::EVALUATOR_DISPATCH
         .iter()
         .find(|row| row.semantic_id == semantic_id)
-        .map(|row| match row.mechanism {
-            generated::NecessaryFormMechanism::Define => NecessaryFormIdentity::Define,
-            generated::NecessaryFormMechanism::Lambda => NecessaryFormIdentity::Lambda,
+        .and_then(|row| match row.mechanism {
+            EvaluatorMechanism::DefineForm => Some(NecessaryFormIdentity::Define),
+            EvaluatorMechanism::LambdaForm => Some(NecessaryFormIdentity::Lambda),
+            _ => None,
         })
 }
 
