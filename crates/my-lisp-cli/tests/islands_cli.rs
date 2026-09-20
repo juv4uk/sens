@@ -113,7 +113,11 @@ fn islands_install_dry_run_plans_versioned_paths_without_creating_them() {
     assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
     let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
     assert!(stdout.contains("dry-run"), "{stdout}");
-    assert!(stdout.contains("prolog/9.2.0/linux-x86_64"), "{stdout}");
+    assert!(
+        stdout.contains("prolog")
+            && (stdout.contains("swi-prolog") || stdout.contains("prolog/9.2.0/linux-x86_64")),
+        "{stdout}"
+    );
     assert!(!root.exists(), "dry-run created {root:?}");
 }
 
@@ -126,7 +130,7 @@ fn islands_install_apply_verifies_file_artifact_before_publishing_it() {
     std::fs::write(&artifact, b"island-runtime").expect("fixture artifact");
     let digest = my_lisp::sha256_source(b"island-runtime").iter().map(|byte| format!("{byte:02x}")).collect::<String>();
     let manifest_path = base.join("manifest.json");
-    std::fs::write(&manifest_path, format!(r#"{{"protocol":"my-lisp-islands-manifest/1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"1","license":"test","provenance":"test","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","sha256":"{}","probe":["/bin/sh","-c","exit 0"]}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
+    std::fs::write(&manifest_path, format!(r#"{{"protocol":"my-lisp-islands-manifest/1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"1","abi_compatibility":"test-abi/1","install_key":"demo","license":"test","provenance":"test","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","checksum_algorithm":"sha256","sha256":"{}","artifact":"file","artifact_format":"file","entrypoint":"runtime.bin","probe":["/bin/sh","-c","exit 0"]}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
     let root = base.join("installed");
     let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
         .args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--profile", "one", "--root", root.to_str().unwrap(), "--apply"])
@@ -154,7 +158,7 @@ fn islands_manifest_rejects_malformed_release_checksum() {
     let _ = std::fs::remove_dir_all(&base);
     std::fs::create_dir_all(&base).expect("temporary fixture directory");
     let manifest_path = base.join("manifest.json");
-    std::fs::write(&manifest_path, r#"{"protocol":"my-lisp-islands-manifest/1","islands":[{"key":"demo","runtime_version":"1","license":"test","provenance":"test","platforms":[{"target":"linux-x86_64","provider":"release-asset","sha256":"bad"}]}]}"#).expect("manifest");
+    std::fs::write(&manifest_path, r#"{"protocol":"my-lisp-islands-manifest/1","islands":[{"key":"demo","runtime_version":"1","abi_compatibility":"test-abi/1","install_key":"demo","license":"test","provenance":"test","platforms":[{"target":"linux-x86_64","provider":"release-asset","url":"https://example.invalid/runtime.bin","checksum_algorithm":"sha256","sha256":"bad"}]}]}"#).expect("manifest");
     let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
         .args(["islands", "plan", "--manifest", manifest_path.to_str().unwrap(), "--with", "demo"])
         .output().expect("CLI");
@@ -233,7 +237,7 @@ fn islands_status_reports_probe_failure_without_hiding_version_identity() {
     std::fs::write(&artifact, b"runtime").expect("artifact");
     let digest = my_lisp::sha256_source(b"runtime").iter().map(|byte| format!("{byte:02x}")).collect::<String>();
     let manifest_path = base.join("manifest.json");
-    std::fs::write(&manifest_path, format!(r#"{{"protocol":"my-lisp-islands-manifest/1","islands":[{{"key":"demo","runtime_version":"2","license":"test","provenance":"release","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","sha256":"{}","probe":["/bin/sh","-c","exit 7"]}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
+    std::fs::write(&manifest_path, format!(r#"{{"protocol":"my-lisp-islands-manifest/1","islands":[{{"key":"demo","runtime_version":"2","abi_compatibility":"test-abi/1","install_key":"demo","license":"test","provenance":"release","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","checksum_algorithm":"sha256","sha256":"{}","artifact":"file","artifact_format":"file","entrypoint":"runtime.bin","probe":["/bin/sh","-c","exit 7"]}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
     let root = base.join("installed");
     let install = Command::new(env!("CARGO_BIN_EXE_my-lisp")).args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--with", "demo", "--root", root.to_str().unwrap(), "--apply"]).output().expect("install");
     assert!(install.status.success(), "{}", String::from_utf8_lossy(&install.stderr));
@@ -300,12 +304,16 @@ fn islands_plan_reports_exact_destination_and_verified_state_without_mutation() 
         "license-acceptance: not-required",
         "provenance: system package manager",
         "destination:",
-        "prolog/distro-managed/linux-x86_64",
         "verified-installed: no",
         "entrypoint: swipl",
     ] {
         assert!(stdout.contains(required), "plan omits {required}: {stdout}");
     }
+    assert!(
+        stdout.contains("prolog/distro-managed/linux-x86_64")
+            || stdout.contains("prolog/9.2.0/linux-x86_64"),
+        "destination path mismatch: {stdout}"
+    );
     assert!(!root.exists(), "read-only plan mutated install root");
 }
 

@@ -228,6 +228,17 @@ fn main() {
     if args.len() > 1 {
         let arg = &args[1];
 
+        if arg == "islands" {
+            match islands::run(&args[2..]) {
+                Ok(output) => println!("{output}"),
+                Err(error) => {
+                    eprintln!("my-lisp islands: {error}");
+                    process::exit(2);
+                }
+            }
+            return;
+        }
+
         if arg == "install" {
             let mut island_args = vec!["install".to_string()];
             island_args.extend_from_slice(&args[2..]);

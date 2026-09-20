@@ -24,13 +24,22 @@ struct Profile {
 
 #[derive(Deserialize)]
 struct Island {
+    #[serde(default)]
     key: String,
+    #[serde(default)]
     runtime_version: String,
+    #[serde(default)]
     abi_compatibility: String,
+    #[serde(default)]
     install_key: String,
+    #[serde(default)]
     license: String,
+    #[serde(default)]
+    #[allow(dead_code)]
     license_acceptance_required: bool,
+    #[serde(default)]
     provenance: String,
+    #[serde(default)]
     platforms: Vec<PlatformEntry>,
 }
 
@@ -792,7 +801,11 @@ fn install_release_asset(
         .sha256
         .as_deref()
         .ok_or_else(|| format!("release asset {} has no SHA-256", island.key))?;
-    let artifact_kind = entry.artifact.as_deref().unwrap_or("file");
+    let artifact_kind = entry
+        .artifact_format
+        .as_deref()
+        .or(entry.artifact.as_deref())
+        .unwrap_or("file");
     let target_dir = install_dir(root, island, &entry.target);
 
     if entry.probe.is_empty() {
@@ -846,7 +859,7 @@ fn install_release_asset(
     }
 
     match artifact_kind {
-        "file" => {
+        "file" | "raw-binary" => {
             let staging = target_dir.with_extension(format!("stage-{}", std::process::id()));
             if staging.exists() {
                 let _ = fs::remove_dir_all(&staging);
@@ -947,10 +960,7 @@ fn install_release_asset(
     let final_probe = interpolate_command(&entry.probe, &target_dir);
     let outcome = bounded_probe(&final_probe, entry.probe_expect.as_deref());
 
-    Ok(format!(
-        "installed {} {}: {outcome}",
-        island.key, island.runtime_version
-    ))
+    Ok(format!("published {}: {outcome}", target_dir.display()))
 }
 
 pub fn run(args: &[String]) -> Result<String, String> {
@@ -1173,17 +1183,20 @@ pub fn run(args: &[String]) -> Result<String, String> {
                 } else {
                     bounded_probe(&probe, entry.probe_expect.as_deref())
                 };
-                let status = if observed == "available" {
+                let installed_locally = target_dir.join("install-record.txt").is_file();
+                let status = if (installed_locally || entry.provider != "release-asset")
+                    && observed == "available"
+                {
                     "available".to_string()
                 } else if let Some(state) = read_install_state(&root, &island, target) {
                     if matches!(state.as_str(), "installing" | "failed-install" | "probe-failed") {
                         state
-                    } else if target_dir.join("install-record.txt").is_file() {
+                    } else if installed_locally {
                         "probe-failed".to_string()
                     } else {
                         "absent".to_string()
                     }
-                } else if target_dir.join("install-record.txt").is_file() {
+                } else if installed_locally {
                     "probe-failed".to_string()
                 } else {
                     "absent".to_string()
