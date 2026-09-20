@@ -297,6 +297,24 @@ fn scheduler_deduplicates_real_invocation_and_rejects_malformed_trigger() {
     assert_eq!(
         eval_text(
             &format!(
+                "(life-scheduler-field (quote {invocation}) (quote trigger))"
+            ),
+            &mut session,
+        ),
+        "(projection-ready prolog-substitutions-to-datalog-facts)"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-field (quote {invocation}) (quote provenance-ref))"
+            ),
+            &mut session,
+        ),
+        "observation-42"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
                 "(life-scheduler-key-present? (life-scheduler-invocation-key (quote {invocation})) (quote ()))"
             ),
             &mut session,
