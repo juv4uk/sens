@@ -1,4 +1,4 @@
-; Lisp-owned generator for the evaluator necessary-form dispatch projection.
+; Lisp-owned generator for the evaluator dispatch execution projection.
 ;
 ; Authority: lib/evaluator-dispatch.lisp
 ; Rust receives only a mechanical execution projection.
@@ -8,7 +8,7 @@
 ;   cargo run -p my-lisp-cli -- scripts/generate-rust-evaluator-dispatch.lisp --check
 
 (def source-path "lib/evaluator-dispatch.lisp")
-(def output-path "crates/my-lisp/src/eval/necessary_forms_generated.rs")
+(def output-path "crates/my-lisp/src/eval/evaluator_dispatch_generated.rs")
 
 (def str+
   (lambda args
@@ -22,10 +22,26 @@
 (def rust-mechanism
   (lambda (name)
     (cond
+      ((equal? name (quote empty-list-ground))
+       "EvaluatorMechanism::EmptyListGround")
+      ((equal? name (quote quote-form))
+       "EvaluatorMechanism::QuoteForm")
+      ((equal? name (quote atom-primitive))
+       "EvaluatorMechanism::AtomPrimitive")
+      ((equal? name (quote eq-primitive))
+       "EvaluatorMechanism::EqPrimitive")
+      ((equal? name (quote cons-primitive))
+       "EvaluatorMechanism::ConsPrimitive")
+      ((equal? name (quote car-primitive))
+       "EvaluatorMechanism::CarPrimitive")
+      ((equal? name (quote cdr-primitive))
+       "EvaluatorMechanism::CdrPrimitive")
+      ((equal? name (quote cond-form))
+       "EvaluatorMechanism::CondForm")
       ((equal? name (quote lambda-form))
-       "NecessaryFormMechanism::Lambda")
+       "EvaluatorMechanism::LambdaForm")
       ((equal? name (quote define-form))
-       "NecessaryFormMechanism::Define")
+       "EvaluatorMechanism::DefineForm")
       (t
        (car (quote ()))))))
 
@@ -38,7 +54,7 @@
          (car (quote ())))
         (t
          (str+
-           "    NecessaryFormDispatchRow { semantic_id: 0b"
+           "    EvaluatorDispatchRow { semantic_id: 0b"
            (write-to-string (car row))
            ", mechanism: "
            mechanism
@@ -61,16 +77,24 @@
     "// Authority: lib/evaluator-dispatch.lisp\n"
     "// Generator: scripts/generate-rust-evaluator-dispatch.lisp\n\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
-    "pub(super) enum NecessaryFormMechanism {\n"
-    "    Define,\n"
-    "    Lambda,\n"
+    "pub(crate) enum EvaluatorMechanism {\n"
+    "    EmptyListGround,\n"
+    "    QuoteForm,\n"
+    "    AtomPrimitive,\n"
+    "    EqPrimitive,\n"
+    "    ConsPrimitive,\n"
+    "    CarPrimitive,\n"
+    "    CdrPrimitive,\n"
+    "    CondForm,\n"
+    "    LambdaForm,\n"
+    "    DefineForm,\n"
     "}\n\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
-    "pub(super) struct NecessaryFormDispatchRow {\n"
-    "    pub(super) semantic_id: u8,\n"
-    "    pub(super) mechanism: NecessaryFormMechanism,\n"
+    "pub(crate) struct EvaluatorDispatchRow {\n"
+    "    pub(crate) semantic_id: u8,\n"
+    "    pub(crate) mechanism: EvaluatorMechanism,\n"
     "}\n\n"
-    "pub(super) const NECESSARY_FORM_DISPATCH: &[NecessaryFormDispatchRow] = &[\n"))
+    "pub(crate) const EVALUATOR_DISPATCH: &[EvaluatorDispatchRow] = &[\n"))
 
 (def generated
   (str+ header (render-rows rows) "];\n"))
