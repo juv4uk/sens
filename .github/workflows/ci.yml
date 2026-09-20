@@ -118,6 +118,13 @@ jobs:
           set -euo pipefail
           ./target/debug/my-lisp scripts/check-repo-tooling-inventory.lisp
 
+      - name: Temporary #553 semantic ownership Python-Lisp parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/semantic-ownership.py --check
+          ./target/debug/my-lisp scripts/semantic-ownership.lisp --check
+
       - name: Lisp-owned machine non-interference guard
         shell: bash
         run: |

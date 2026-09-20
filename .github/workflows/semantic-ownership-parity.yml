@@ -1,0 +1,37 @@
+name: Semantic Ownership Parity
+
+on:
+  pull_request:
+    paths:
+      - "scripts/semantic-ownership.py"
+      - "scripts/semantic-ownership.lisp"
+      - "knowledge/semantic-ownership.lisp"
+      - "knowledge/meta-eval-evidence.lisp"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - "docs/semantic-ownership-report.md"
+      - ".github/workflows/semantic-ownership-parity.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: semantic-ownership-parity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity:
+    name: Python ↔ Lisp semantic ownership parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: semantic-ownership-parity
+      - name: Build my-lisp runner
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Python baseline is synchronized
+        run: python3 scripts/semantic-ownership.py --check
+      - name: Lisp candidate is synchronized
+        run: ./target/debug/my-lisp scripts/semantic-ownership.lisp --check
+      - name: Working tree stays clean
+        run: git diff --check
