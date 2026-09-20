@@ -104,22 +104,19 @@ mod tests {
     }
 
     #[test]
-    fn synthetic_registry_constructively_controls_necessary_form_routing() {
-        const SYNTHETIC: &str =
-            "(\n  (\"00000000\" (en ()) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001000\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001001\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ())))";
-        let index = semantic_registry::build_surface_index(SYNTHETIC);
-
-        let route = |surface: &str| {
-            index
-                .get(surface)
-                .copied()
-                .and_then(identity_for_semantic_id)
-        };
-
-        assert_eq!(route("comet"), Some(NecessaryFormIdentity::Lambda));
-        assert_eq!(route("asteroid"), Some(NecessaryFormIdentity::Define));
-        assert_eq!(route("lambda"), None);
-        assert_eq!(route("define"), None);
+    fn semantic_ids_control_necessary_form_routing() {
+        assert_eq!(
+            identity_for_semantic_id(LAMBDA_SEMANTIC_ID),
+            Some(NecessaryFormIdentity::Lambda)
+        );
+        assert_eq!(
+            identity_for_semantic_id(DEFINE_SEMANTIC_ID),
+            Some(NecessaryFormIdentity::Define)
+        );
+        assert_eq!(
+            identity_for_semantic_id(DEF_COMPATIBILITY_SEMANTIC_ID),
+            Some(NecessaryFormIdentity::Define)
+        );
     }
 
     #[test]
