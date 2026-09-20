@@ -1,20 +1,3 @@
-; Єдина машинна authority мовних поверхонь — canonical binary SID schema (8 bits).
-; Значення первинне. Мови рівноправні.
-;
-; Формат SID оголошений у мові як `(binary 8)`; у самій таблиці SID лишається чистим 8-бітним рядком з 0/1.
-; SID — машинна identity, НЕ Lisp surface spelling і НЕ арифметичне значення.
-; Bare numeric tokens у програмі завжди лишаються exact numbers; semantic routing:
-; surface -> registry bitstring -> u8 SID.
-;
-; 00000000 — Canon 0, порожній список (), primordial ground object.
-; Далі всі identities йдуть щільно та послідовно без дірок у semantic/group order.
-; Кожна identity має однакові namespace-поля: en / uk / ukr / sa / sym.
-; Значення — або surface spelling, або () якщо surface для цього namespace відсутня.
-; Статусів stable / candidate / compatibility-only / missing у схемі немає.
-; Surface spelling, що конфліктує з reader syntax (зокрема апостроф), серіалізується string-ом.
-; Порядок surface-форм усередині identity не має семантичного значення.
-; Старий decimal-ID простір 0001/0104/1000... superseded цією sr/2 authority.
-;
 (sr/2
   ("00000000" (en ()) (uk ()) (ukr ()) (sa ()) (sym ()))
   ("00000001" (en quote) (uk як-є) (ukr як-є) (sa svarūpa) (sym "'"))
