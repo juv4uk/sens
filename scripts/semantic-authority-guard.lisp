@@ -37,6 +37,15 @@
        (quote allowed-adversarial-fixture))
       ((generated-projection? source) (quote allowed-generated-projection))
       ((not (active-host-source? path)) (quote not-active-host-source))
+      ; Every currently forbidden authority shape below requires at least one
+      ; explicit semantic-identity marker.  Large ordinary host files without
+      ; any such marker cannot match a later violation class, so stop here
+      ; instead of rescanning the complete source for every category.
+      ((not
+         (contains-any?
+           source
+           (quote ("SemanticId" "semantic_id" "CanonicalIdentity"))))
+       (quote allowed))
       ; High-risk authority shapes are deliberately structural and conservative:
       ; this guard requests review; it does not attempt to understand Rust semantics.
       ((and
