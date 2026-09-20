@@ -84,26 +84,52 @@
   (lambda (pending)
     (life-scheduler-dedup-pending pending (quote ()))))
 
+(def life-scheduler-trigger-contract
+  (lambda (trigger)
+    (cond
+      ((atom trigger) (quote (structural-kind empty-list))
+       (quote (scheduler-trigger-absent)))
+      ((atom trigger) (quote (structural-kind pair))
+       (let ((tail (cdr trigger)))
+         (cond
+           ((atom tail) (quote (structural-kind empty-list))
+            (quote (scheduler-trigger-absent)))
+           ((atom tail) (quote (structural-kind pair))
+            (list
+              (quote scheduler-trigger-present)
+              (car tail))))))))
+
+(def life-scheduler-projection-match?
+  (lambda (expected projections)
+    (cond
+      ((atom projections) (quote (structural-kind empty-list)) (quote absent))
+      ((atom projections) (quote (structural-kind pair))
+       (let ((projection (car projections)))
+         (cond
+           ((equal? expected projection)
+            (quote (structural-relation same))
+            (quote present))
+           ((equal? expected projection)
+            (quote (structural-relation distinct))
+            (life-scheduler-projection-match? expected (cdr projections)))))))))
+
 (def life-scheduler-projection-ready?
   (lambda (invocation projections)
     (let* ((trigger (life-scheduler-field invocation (quote trigger)))
-           (provenance (life-scheduler-field invocation (quote provenance-ref)))
-           (expected
-             (list
-               (quote projection-ready)
-               (car (cdr trigger))
-               provenance)))
+           (trigger-contract (life-scheduler-trigger-contract trigger))
+           (provenance (life-scheduler-field invocation (quote provenance-ref))))
       (cond
-        ((atom projections) (quote (structural-kind empty-list)) (quote absent))
-        ((atom projections) (quote (structural-kind pair))
-         (let ((projection (car projections)))
-           (cond
-             ((equal? expected projection)
-              (quote (structural-relation same))
-              (quote present))
-             ((equal? expected projection)
-              (quote (structural-relation distinct))
-              (life-scheduler-projection-ready? invocation (cdr projections))))))))))
+        ((eq (car trigger-contract) (quote scheduler-trigger-absent))
+         (quote (identity-relation same))
+         (quote absent))
+        ((eq (car trigger-contract) (quote scheduler-trigger-present))
+         (quote (identity-relation same))
+         (life-scheduler-projection-match?
+           (list
+             (quote projection-ready)
+             (car (cdr trigger-contract))
+             provenance)
+           projections)))))))
 
 (def life-scheduler-select-ready
   (lambda (pending projections)
