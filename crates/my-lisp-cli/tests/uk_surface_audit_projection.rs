@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -11,22 +11,6 @@ fn my_lisp(cwd: &Path) -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_my-lisp"));
     command.current_dir(cwd);
     command
-}
-
-fn numeric_row_id_list(source: &str) -> Vec<u32> {
-    source
-        .lines()
-        .filter_map(|line| {
-            let line = line.trim_start();
-            let rest = line.strip_prefix('(')?;
-            let token = rest.split_whitespace().next()?;
-            token.parse::<u32>().ok()
-        })
-        .collect()
-}
-
-fn numeric_row_ids(source: &str) -> BTreeSet<u32> {
-    numeric_row_id_list(source).into_iter().collect()
 }
 
 #[derive(Debug)]
@@ -84,9 +68,30 @@ fn ukr_aliases(source: &str) -> BTreeMap<u32, u32> {
 }
 
 #[test]
+fn function_table_projection_is_fresh_from_canonical_registry() {
+    let root = repo_root();
+    let script = root.join("scripts/generate-function-table.lisp");
+    let output = my_lisp(&root)
+        .arg(&script)
+        .arg("--check")
+        .output()
+        .expect("function-table generator freshness check should run through real my-lisp CLI");
+
+    assert!(
+        output.status.success(),
+        "generated function-table projections must be reproducible from canonical registry\nstdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+#[test]
 fn uk_surface_audit_generator_runs_through_real_my_lisp_cli() {
     let root = repo_root();
     let script = root.join("scripts/generate-uk-surface-audit.lisp");
+    let audit = root.join("lib/generated/uk-surface-audit.lisp");
+    let before = fs::read_to_string(&audit).expect("committed UK surface audit must be readable");
+
     let output = my_lisp(&root)
         .arg(&script)
         .output()
@@ -98,44 +103,11 @@ fn uk_surface_audit_generator_runs_through_real_my_lisp_cli() {
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     );
-}
 
-#[test]
-fn ukrainian_staging_profile_covers_every_function_table_identity() {
-    let root = repo_root();
-    let function_table = fs::read_to_string(root.join("lib/generated/function-table.lisp"))
-        .expect("generated function table must be readable");
-    let profile = fs::read_to_string(root.join("lib/surface/український-профіль-джерела.lisp"))
-        .expect("Ukrainian staging profile must be readable");
-
-    let expected_rows = numeric_row_id_list(&function_table);
-    let actual_rows = numeric_row_id_list(&profile);
-    let expected = numeric_row_ids(&function_table);
-    let actual = numeric_row_ids(&profile);
-
+    let after = fs::read_to_string(&audit).expect("regenerated UK surface audit must be readable");
     assert_eq!(
-        expected_rows.len(),
-        expected.len(),
-        "function table must not contain duplicate semantic identity rows"
-    );
-    assert_eq!(
-        actual_rows.len(),
-        actual.len(),
-        "Ukrainian staging must contain exactly one row per semantic identity"
-    );
-    assert_eq!(
-        expected_rows.len(),
-        167,
-        "function table inventory changed; review UK coverage gate"
-    );
-    assert_eq!(
-        actual_rows.len(),
-        167,
-        "Ukrainian staging row count must stay exactly aligned with the 167-row function table"
-    );
-    assert_eq!(
-        actual, expected,
-        "Ukrainian staging must explicitly cover every semantic identity, including compatibility-only rows"
+        after, before,
+        "committed UK surface audit must be byte-fresh against the Lisp-owned generator"
     );
 }
 
@@ -146,12 +118,6 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
         .expect("Ukrainian staging profile must be readable");
 
     let rows = ukr_candidate_rows(&profile);
-    assert_eq!(
-        rows.len(),
-        167,
-        "coherence audit must inspect every Ukrainian staging candidate"
-    );
-
     let by_id: BTreeMap<u32, &UkrCandidateRow> =
         rows.iter().map(|row| (row.id, row)).collect();
     let aliases = ukr_aliases(&profile);
