@@ -38,6 +38,7 @@ pub(crate) enum ReplSurface {
     Core,
     English,
     Ukrainian,
+    UkrainianFull,
     Sanskrit,
 }
 
@@ -47,6 +48,7 @@ impl ReplSurface {
             "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
             "uk" | "ук" | "українська" => Some(Self::Ukrainian),
+            "ukr" | "укр" | "українська-повна" => Some(Self::UkrainianFull),
             "sa" | "sanskrit" | "санскрит" => Some(Self::Sanskrit),
             _ => None,
         }
@@ -57,6 +59,7 @@ impl ReplSurface {
             Self::Core => "core",
             Self::English => "en",
             Self::Ukrainian => "ук",
+            Self::UkrainianFull => "укр",
             Self::Sanskrit => "sa",
         }
     }
@@ -66,6 +69,7 @@ impl ReplSurface {
             Self::Core => "ядро",
             Self::English => "англійська",
             Self::Ukrainian => "українська",
+            Self::UkrainianFull => "українська (повна)",
             Self::Sanskrit => "санскрит",
         }
     }
@@ -74,7 +78,7 @@ impl ReplSurface {
         match self {
             Self::Core => PresentationLanguage::Canonical,
             Self::English => PresentationLanguage::English,
-            Self::Ukrainian => PresentationLanguage::Ukrainian,
+            Self::Ukrainian | Self::UkrainianFull => PresentationLanguage::Ukrainian,
             Self::Sanskrit => PresentationLanguage::Sanskrit,
         }
     }
@@ -94,7 +98,7 @@ fn render_surface_status() -> Result<String, String> {
 
 fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Environment, String> {
     let layer = base.child();
-    if matches!(surface, ReplSurface::Ukrainian | ReplSurface::Sanskrit) {
+    if matches!(surface, ReplSurface::Ukrainian | ReplSurface::UkrainianFull | ReplSurface::Sanskrit) {
         let mut session = Session {
             environment: layer.clone(),
         };
@@ -104,7 +108,7 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
             })?;
         }
         let (name, source) = match surface {
-            ReplSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
+            ReplSurface::Ukrainian | ReplSurface::UkrainianFull => ("uk.lisp", UK_SURFACE),
             ReplSurface::Sanskrit => ("sa.lisp", SA_SURFACE),
             ReplSurface::Core | ReplSurface::English => unreachable!(),
         };
@@ -155,8 +159,8 @@ pub(crate) fn history_path() -> Option<PathBuf> {
 }
 
 fn print_surface_help() {
-    println!("Поверхні: :мова ук | en | sa | core");
-    println!("Технічний alias: :surface uk | en | sa | core");
+    println!("Поверхні: :мова ук | укр | en | sa | core");
+    println!("Технічний alias: :surface uk | ukr | en | sa | core");
     println!("Каталог поточної людської поверхні: :імена / :names");
     println!("Одна semantic identity у всіх трьох мовах: :ім'я <назва> / :name <name>");
     println!("Стан триєдиної поверхні: :поверхні / :surfaces");
@@ -254,7 +258,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
 
     println!("my-lisp REPL v{} (pure Rust)", env!("CARGO_PKG_VERSION"));
     println!(
-        "Поверхня: {} ({}) · змінити: :мова ук|en|sa|core · :допомога",
+        "Поверхня: {} ({}) · змінити: :мова ук|укр|en|sa|core · :допомога",
         state.surface.title(),
         state.surface.code()
     );
@@ -406,12 +410,26 @@ mod tests {
     }
 
     #[test]
-    fn all_three_human_surfaces_have_catalogs() {
+    fn uk_and_ukr_are_distinct_repl_selectors_over_one_registry() {
+        assert_eq!(ReplSurface::parse("ук"), Some(ReplSurface::Ukrainian));
+        assert_eq!(ReplSurface::parse("uk"), Some(ReplSurface::Ukrainian));
+        assert_eq!(ReplSurface::parse("укр"), Some(ReplSurface::UkrainianFull));
+        assert_eq!(ReplSurface::parse("ukr"), Some(ReplSurface::UkrainianFull));
+        assert_ne!(ReplSurface::Ukrainian.code(), ReplSurface::UkrainianFull.code());
+        assert!(surface_catalog::render_name("ukr", "додати")
+            .expect("UKR registry lookup")
+            .contains("identity: 00001100"));
+    }
+
+    #[test]
+    fn all_human_surfaces_have_catalogs() {
         let en = render_surface_names(ReplSurface::English).expect("EN catalog");
         let uk = render_surface_names(ReplSurface::Ukrainian).expect("UK catalog");
+        let ukr = render_surface_names(ReplSurface::UkrainianFull).expect("UKR catalog");
         let sa = render_surface_names(ReplSurface::Sanskrit).expect("SA catalog");
         assert!(en.contains("surface en: stable 137 · candidate 0 · missing 9"));
         assert!(uk.contains("surface uk: stable 140"));
+        assert!(ukr.contains("surface ukr:"));
         assert!(sa.contains("surface sa: stable 36 · candidate 88 · missing 22"));
     }
 
