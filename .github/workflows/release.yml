@@ -3,12 +3,29 @@ name: Release
 on:
   push:
     tags: ['l*']
+    branches: ['l*']
 
 permissions:
   contents: write
 
 jobs:
+  retag-unpublished-release:
+    name: Retag unpublished release snapshot
+    if: github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Move unpublished release tag to this exact commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git tag -f "$GITHUB_REF_NAME" "$GITHUB_SHA"
+          git push --force origin "refs/tags/$GITHUB_REF_NAME"
+
   test:
+    if: github.ref_type == 'tag'
     name: focused release smoke before publish
     runs-on: ubuntu-latest
     steps:
@@ -17,6 +34,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: translation boundary regression
         run: cargo test -p my-lisp --test translation_boundary
+      - name: Ukrainian/Sanskrit surface regression
+        run: cargo test -p my-lisp --test uk_sa_surface
       - name: island installer CLI
         run: cargo test -p my-lisp-cli --test islands_cli
       - name: release asset contract
