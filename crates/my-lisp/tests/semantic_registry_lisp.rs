@@ -36,3 +36,32 @@ fn rust_semantic_registry_generator_is_valid_lisp() {
     parse(include_str!("../../../scripts/generate-rust-semantic-registry.lisp"))
         .expect("Rust semantic-registry generator must remain valid Lisp source");
 }
+
+
+#[test]
+fn decimal_values_do_not_mint_semantic_identity() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library should load");
+    let result = eval_program(
+        "(binary 8) (equal? 00001100 12)",
+        &mut session,
+    )
+    .expect("Binary-vs-decimal distinction must be executable")
+    .value
+    .to_string();
+
+    assert_eq!(
+        result,
+        "(structural-relation distinct)",
+        "decimal 12 must remain ordinary numeric data, not mint Binary SID 00001100"
+    );
+}
+
+#[test]
+fn primitive_budget_audit_has_no_decimal_identity_shadow() {
+    let audit = include_str!("../../../contracts/primitive-budget-audit-734.lisp");
+    assert!(
+        !audit.contains("(index ."),
+        "primitive budget audit must not duplicate Binary SID identity as a decimal index"
+    );
+}
