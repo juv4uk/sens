@@ -87,6 +87,6 @@
            (t
             (list (quote semantic-authority-violation)
                   path class
-                  "new host-side semantic authority requires explicit review")))))))))
+                  "new host-side semantic authority requires explicit review"))))))))
 
 (scan changed)
