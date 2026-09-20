@@ -68,8 +68,8 @@ jobs:
           set -euo pipefail
           url='https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_projects_642.zip/download'
           curl --fail --location --silent --show-error --max-time 120 "$url" -o clips_windows_projects_642.zip
-          test -s clips_windows_64_bit_installer_642.msi
-          echo "CLIPS_SHA256=$(sha256sum clips_windows_64_bit_installer_642.msi | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          test -s clips_windows_projects_642.zip
+          echo "CLIPS_SHA256=$(sha256sum clips_windows_projects_642.zip | cut -d' ' -f1)" >> "$GITHUB_ENV"
 
       - name: Materialize release manifest with verified asset hashes
         shell: python
