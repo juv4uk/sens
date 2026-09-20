@@ -97,7 +97,7 @@
            ((atom tail) (quote (structural-kind pair))
             (list
               (quote scheduler-trigger-present)
-              (car tail))))))))
+              (car tail)))))))))
 
 (def life-scheduler-projection-match?
   (lambda (expected projections)
@@ -129,7 +129,7 @@
              (quote projection-ready)
              (car (cdr trigger-contract))
              provenance)
-           projections)))))))
+           projections))))))
 
 (def life-scheduler-select-ready
   (lambda (pending projections)
