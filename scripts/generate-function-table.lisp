@@ -37,7 +37,7 @@
 (def registry-form (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
 ; SID 00000000 is Canon 0 / (), a semantic ground value rather than a function.
 ; The function table projects only callable/form identities, so skip that first row.
-(def entries (cdr registry-form))
+(def entries (cdr (cdr registry-form)))
 
 ; Processor realization projection. Its rows never create an identity: they
 ; may only annotate IDs that already exist in `entries` above.
