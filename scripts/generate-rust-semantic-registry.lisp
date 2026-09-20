@@ -33,12 +33,18 @@
 
 (def render-surface
   (lambda (entry)
-    (str+
-      "SemanticSurface { namespace: "
-      (rust-string (car entry))
-      ", name: "
-      (rust-string (second entry))
-      " }, ")))
+    (let ((name (second entry)))
+      (cond
+        ((atom name)
+         (structural-kind empty-list)
+         "")
+        (t
+         (str+
+           "SemanticSurface { namespace: "
+           (rust-string (car entry))
+           ", name: "
+           (rust-string name)
+           " }, "))))))
 
 (def render-surfaces
   (lambda (surfaces)
