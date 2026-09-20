@@ -66,7 +66,7 @@
     },
     {
       "key": "clips",
-      "runtime_version": "6.30-distro-or-6.4.2-windows",
+      "runtime_version": "platform-managed",
       "license": "CLIPS License",
       "provenance": "system package manager or official release asset",
       "platforms": [
