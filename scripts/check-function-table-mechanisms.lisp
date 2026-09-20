@@ -34,15 +34,20 @@
          ((equal? sid (car (car rows))) (structural-relation distinct)
           (registry-has-sid? sid (cdr rows))))))))
 
-(def metadata-has-sid?
-  (lambda (sid rows)
+(def metadata-has-route?
+  (lambda (sid executor rows)
     (cond
       ((atom rows) (structural-kind empty-list) (quote no))
       ((atom rows) (structural-kind pair)
-       (cond
-         ((equal? sid (car (car rows))) (structural-relation same) (quote yes))
-         ((equal? sid (car (car rows))) (structural-relation distinct)
-          (metadata-has-sid? sid (cdr rows))))))))
+       (let ((row (car rows)))
+         (cond
+           ((equal? sid (car row)) (structural-relation same)
+            (cond
+              ((eq executor (second row)) (identity-relation same) (quote yes))
+              ((eq executor (second row)) (identity-relation distinct)
+               (metadata-has-route? sid executor (cdr rows)))))
+           ((equal? sid (car row)) (structural-relation distinct)
+            (metadata-has-route? sid executor (cdr rows)))))))))
 
 (def admitted-mechanism?
   (lambda (mechanism)
@@ -77,10 +82,10 @@
             (identity-relation same)
             (list (quote function-table-mechanisms-violation)
                   (quote sid-not-in-canon-function-table) sid))
-           ((eq (metadata-has-sid? sid (cdr rows)) (quote yes))
+           ((eq (metadata-has-route? sid executor (cdr rows)) (quote yes))
             (identity-relation same)
             (list (quote function-table-mechanisms-violation)
-                  (quote duplicate-sid) sid))
+                  (quote duplicate-executor-route) sid executor))
            ((eq (admitted-mechanism? mechanism) (quote no))
             (identity-relation same)
             (list (quote function-table-mechanisms-violation)
