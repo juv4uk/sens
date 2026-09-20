@@ -60,7 +60,7 @@ fn binary_format_width(expression: &Expr) -> Result<Option<u8>, LanguageError> {
             items[1].span,
         ));
     };
-    if width.fract() != 0.0 || !(1.0..=64.0).contains(&width) {
+    if width.fract() != 0.0 || width != 8.0 {
         return Err(LanguageError::new(
             ErrorKind::Parse,
             "(binary WIDTH) width must be an integer from 1 to 64",
