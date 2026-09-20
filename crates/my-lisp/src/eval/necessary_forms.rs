@@ -82,7 +82,7 @@ mod tests {
 
     #[test]
     fn def_resolves_to_define_through_status_free_registry() {
-        // Status-free sr/2 has no compatibility-only admission class.
+        // Status-free canonical semantic registry has no compatibility-only admission class.
         // A present spelling is directly routable; SID 11 still maps to the
         // compatibility `def` form without any hardcoded spelling fallback.
         assert_eq!(
@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn synthetic_registry_constructively_controls_necessary_form_routing() {
         const SYNTHETIC: &str =
-            "(sr/2\n  (\"00000000\" ())\n  (\"00001000\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001001\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ()))\n)";
+            "(semantic-registry\n  (\"00000000\" ())\n  (\"00001000\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00001001\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ()))\n)";
         let index = semantic_registry::build_surface_index(SYNTHETIC);
 
         let route = |surface: &str| {
