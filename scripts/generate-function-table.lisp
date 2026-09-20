@@ -21,15 +21,15 @@
 ; lib/fs.lisp, over the host's read-file-bytes/write-file-bytes):
 ;   lib/generated/function-table.lisp  (schema ft/2, machine-readable projection)
 ;   docs/generated/function-table.md  (human table, column order
-;     uk -> ukr -> English -> Sanskrit -> Intel Core i5-6400 / Skylake)
+;     ук -> укр -> English -> Sanskrit -> Intel Core i5-6400 / Skylake)
 ;
 ; Usage (from the repo root):
 ;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function-table.lisp
 ;
-; `uk` is the current/compact Ukrainian surface.
-; `ukr` is the full Ukrainian peer surface of the SAME semantic identity.
+; `ук` is the current/compact Ukrainian surface.
+; `укр` is the full Ukrainian peer surface of the SAME semantic identity.
 ; Both are read directly from semantic-registry.lisp; this generator never
-; invents names and never duplicates `ukr` under another full-UK column.
+; invents names and never duplicates `укр` under another full-UK column.
 
 ; Registry surfaces are fixed two-element rows: (namespace spelling-or-()).
 ; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
@@ -122,7 +122,7 @@
   (lambda (word)
     (not (equal? word (quote ())))))
 
-; --- formal identity stub: first present name among en/uk/sa, else bare id ---
+; --- formal identity stub: first present name among en/ук/sa, else bare id ---
 (def sid-text
   (lambda (sid)
     (write-to-string sid)))
@@ -130,13 +130,13 @@
 (def formal-stub
   (lambda (sid surfaces)
     (let* ((en (get-surface (quote en) surfaces))
-           (uk (get-surface (quote uk) surfaces))
+           (ук (get-surface (quote ук) surfaces))
            (sa (get-surface (quote sa) surfaces)))
       (cond
         ((surface-usable? en)
          (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text en)))
-        ((surface-usable? uk)
-         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text uk)))
+        ((surface-usable? ук)
+         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text ук)))
         ((surface-usable? sa)
          (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text sa)))
         (t (string-append "identity:" (sid-text sid)))))))
@@ -161,16 +161,16 @@
   (lambda (entry)
     (let* ((sid (car entry))
            (surfaces (cdr entry))
-           (uk (get-surface (quote uk) surfaces))
-           (ukr (get-surface (quote ukr) surfaces))
+           (ук (get-surface (quote ук) surfaces))
+           (укр (get-surface (quote укр) surfaces))
            (en (get-surface (quote en) surfaces))
            (sa (get-surface (quote sa) surfaces))
            (sym (get-surface (quote sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
         "  (\"" (sid-text sid) "\" " formal
-        " (uk " (surface-word-wsm-text uk) ")"
-        " (ukr " (surface-word-wsm-text ukr) ")"
+        " (ук " (surface-word-wsm-text ук) ")"
+        " (укр " (surface-word-wsm-text укр) ")"
         " (en " (surface-word-wsm-text en) ")"
         " (sa " (surface-word-wsm-text sa) ")"
         " (sym " (surface-word-wsm-text sym) ")"
@@ -180,14 +180,14 @@
   (lambda (entry)
     (let* ((sid (car entry))
            (surfaces (cdr entry))
-           (uk (get-surface (quote uk) surfaces))
-           (ukr (get-surface (quote ukr) surfaces))
+           (ук (get-surface (quote ук) surfaces))
+           (укр (get-surface (quote укр) surfaces))
            (en (get-surface (quote en) surfaces))
            (sa (get-surface (quote sa) surfaces))
            (sym (get-surface (quote sym) surfaces)))
       (str+
-        "| `" (sid-text sid) "` | " (surface-word-text uk)
-        " | " (surface-word-text ukr)
+        "| `" (sid-text sid) "` | " (surface-word-text ук)
+        " | " (surface-word-text укр)
         " | " (surface-word-text en)
         " | " (surface-word-text sa)
         " | " (surface-word-text sym)
@@ -198,9 +198,9 @@
     "; GENERATED — DO NOT EDIT BY HAND"
     "; Authority: lib/surface/semantic-registry.lisp"
     "; Generator: scripts/generate-function-table.lisp (ECO-CANON-1 / my-lisp#75)"
-    "; Schema ft/2: (sid-bitstring formal uk ukr en sa sym authority)"
-    "; uk = current Ukrainian; ukr = full Ukrainian peer surface"
-    "; Display order for humans: uk → ukr → English → Sanskrit"
+    "; Schema ft/2: (sid-bitstring formal ук укр en sa sym authority)"
+    "; ук = current Ukrainian; укр = full Ukrainian peer surface"
+    "; Display order for humans: ук → укр → English → Sanskrit"
     "; authority = my-lisp (semantic)"
     ""
     "(ft/2"))
@@ -220,7 +220,7 @@
     ""
     "Regenerate: `cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function-table.lisp`"
     ""
-    "| ID | uk | ukr | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |"
+    "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |"
     "|----|----|-----|---------|----------|--------|------------------------------|"))
 
 (def md-body (join-newline (append md-header (map render-md-row entries))))
