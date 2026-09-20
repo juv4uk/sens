@@ -76,7 +76,7 @@
             (identity-relation same)
             (life-scheduler-dedup-pending (cdr pending) seen-keys))
            ((eq (life-scheduler-key-present? key seen-keys) (quote absent))
-            (identity-relation distinct)
+            (identity-relation same)
             (cons invocation
                   (life-scheduler-dedup-pending
                     (cdr pending)
@@ -142,7 +142,7 @@
               (cdr pending)))
            ((eq (life-scheduler-projection-ready? invocation projections)
                 (quote absent))
-            (identity-relation distinct)
+            (identity-relation same)
             (life-scheduler-select-ready (cdr pending) projections))))))))
 
 (def life-scheduler-quiescence-state
