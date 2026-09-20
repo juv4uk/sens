@@ -50,7 +50,7 @@ impl NumericExpr {
             Div(left, right) | Quotient(left, right) => {
                 let lhs = integer(left)?;
                 let rhs = integer(right)?;
-                lhs.checked_div(rhs).ok_or_else(|| {
+                lhs.checked_div(rhs).ok_or({
                     if rhs == 0 {
                         DatalogMathError::DivisionByZero
                     } else {
@@ -61,7 +61,7 @@ impl NumericExpr {
             Mod(left, right) => {
                 let lhs = integer(left)?;
                 let rhs = integer(right)?;
-                lhs.checked_rem(rhs).ok_or_else(|| {
+                lhs.checked_rem(rhs).ok_or({
                     if rhs == 0 {
                         DatalogMathError::DivisionByZero
                     } else {
