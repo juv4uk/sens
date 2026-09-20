@@ -24,7 +24,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Span, Value};
+use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -156,16 +156,24 @@ pub(crate) fn evaluate_step(
                     expression.span,
                 ));
             }
-            environment
-                .get(symbol)
-                .map(EvalStep::Value)
-                .ok_or_else(|| {
-                    LanguageError::new(
-                        ErrorKind::UnknownSymbol,
-                        format!("unknown symbol · nevidomyi symvol · unbekanntes Symbol: {symbol}"),
-                        expression.span,
-                    )
-                })
+            if necessary_forms::identity_for_symbol(symbol).is_some() {
+                return Err(LanguageError::new(
+                    ErrorKind::UnknownSymbol,
+                    format!("evaluator-owned necessary form is syntax-only: {symbol}"),
+                    expression.span,
+                ));
+            }
+            if let Some(value) = environment.get(symbol) {
+                return Ok(EvalStep::Value(value));
+            }
+            if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(symbol) {
+                return Ok(EvalStep::Value(Value::SemanticRef(semantic_id)));
+            }
+            Err(LanguageError::new(
+                ErrorKind::UnknownSymbol,
+                format!("unknown symbol · nevidomyi symvol · unbekanntes Symbol: {symbol}"),
+                expression.span,
+            ))
         }
         ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(
             canon::ground_value(canon::CanonicalIdentity::EmptyList)
