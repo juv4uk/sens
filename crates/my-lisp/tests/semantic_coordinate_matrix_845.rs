@@ -1,25 +1,38 @@
-//! #845 observer for the read-only SID coordinate matrix.
-//! The observer composes existing source artifacts; it does not define semantics.
+//! #845 v2 observer for the read-only SID coordinate matrix.
+//!
+//! Coordinates are derived from the existing axis sources. This observer does
+//! not define SID meaning and does not maintain a copied semantic table.
 
 use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-use my_lisp::{eval_program, load_core_library, parse, Expr, ExprKind, Session};
+use my_lisp::{parse, Expr, ExprKind};
 
-fn repo_file(relative: &str) -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..").join(relative)
+fn repo_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("repo root")
+        .to_path_buf()
 }
 
 fn read(relative: &str) -> String {
-    fs::read_to_string(repo_file(relative)).unwrap_or_else(|e| panic!("{relative}: {e}"))
+    fs::read_to_string(repo_root().join(relative))
+        .unwrap_or_else(|error| panic!("{relative}: {error}"))
 }
 
 fn field_string<'a>(fields: &'a [Expr], key: &str) -> Option<&'a str> {
     fields.iter().find_map(|entry| {
-        let ExprKind::Pair(k, v) = &entry.kind else { return None; };
-        let ExprKind::Symbol(name) = &k.kind else { return None; };
-        if &**name != key { return None; }
+        let ExprKind::Pair(k, v) = &entry.kind else {
+            return None;
+        };
+        let ExprKind::Symbol(name) = &k.kind else {
+            return None;
+        };
+        if &**name != key {
+            return None;
+        }
         match &v.kind {
             ExprKind::String(value) | ExprKind::Symbol(value) => Some(value.as_ref()),
             _ => None,
@@ -27,74 +40,180 @@ fn field_string<'a>(fields: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
-#[test]
-fn matrix_is_a_view_over_existing_source_axes() {
+fn matrix_sources_and_scope() -> (String, String, String, String, Vec<String>) {
     let source = read("contracts/semantic-coordinate-matrix-845.lisp");
-    let forms = parse(&source).expect("#845 matrix must parse");
+    let forms = parse(&source).expect("#845 matrix v2 must parse");
     assert_eq!(forms.len(), 1);
-    let ExprKind::List(top) = &forms[0].kind else { panic!("#845 top form must be a list"); };
-    assert!(matches!(&top[0].kind, ExprKind::Symbol(s) if &**s == "semantic-coordinate-matrix/1"));
 
-    let identity = field_string(top, "identity-source").expect("identity source");
-    let math = field_string(top, "math-axis-source").expect("math source");
-    let kernel = field_string(top, "kernel-axis-source").expect("kernel source");
-    let machine = field_string(top, "machine-axis-source").expect("machine source");
-    assert_eq!(identity, "lib/surface/semantic-registry.lisp");
-    assert_eq!(math, "tests/fixtures/semantic-coordinate-law-axis-v1.lisp");
-    assert_eq!(kernel, "contracts/sid-kernel-witness-735.lisp");
-    assert_eq!(machine, "lib/machine/capability-axis.lisp");
+    let ExprKind::List(top) = &forms[0].kind else {
+        panic!("matrix v2 top form must be a list");
+    };
+    assert!(matches!(
+        &top[0].kind,
+        ExprKind::Symbol(symbol) if &**symbol == "semantic-coordinate-matrix/2"
+    ));
 
-    let registry = read(identity);
-    let math_source = read(math);
-    let kernel_source = read(kernel);
-    let machine_source = read(machine);
+    let identity = field_string(top, "identity-source")
+        .expect("identity-source")
+        .to_string();
+    let math = field_string(top, "math-axis-source")
+        .expect("math-axis-source")
+        .to_string();
+    let kernel = field_string(top, "kernel-axis-source")
+        .expect("kernel-axis-source")
+        .to_string();
+    let machine = field_string(top, "machine-axis-source")
+        .expect("machine-axis-source")
+        .to_string();
 
-    let rows = top.iter().find_map(|entry| {
-        let ExprKind::List(items) = &entry.kind else { return None; };
-        if !matches!(&items.first()?.kind, ExprKind::Symbol(s) if &**s == "rows") { return None; }
-        let row_container = items.get(1)?;
-        let ExprKind::List(rows) = &row_container.kind else { return None; };
-        Some(rows)
-    }).expect("#845 rows");
+    assert_eq!(
+        field_string(top, "missing-axis-policy"),
+        Some("explicit"),
+        "missing axis evidence must stay explicit"
+    );
 
-    let mut seen = HashSet::new();
-    for row in rows.iter() {
-        let ExprKind::List(fields) = &row.kind else { panic!("#845 row must be a list"); };
-        let sid = field_string(fields, "sid").expect("row SID");
-        let math_sid = field_string(fields, "math-entry-sid").expect("math SID");
-        let kernel_sid = field_string(fields, "kernel-entry-sid").expect("kernel SID");
-        let machine_sid = field_string(fields, "machine-entry-sid").expect("machine SID");
-        let kernel_status = field_string(fields, "kernel-entry-status");
-        assert!(seen.insert(sid.to_string()), "duplicate matrix SID {sid}");
-        assert_eq!(sid, math_sid);
-        assert_eq!(sid, kernel_sid);
-        assert_eq!(sid, machine_sid);
-        assert_eq!(sid.len(), 8);
-        assert!(sid.chars().all(|c| c == '0' || c == '1'));
-        assert!(registry.contains(&format!("(\"{sid}\" ")), "SID {sid} absent from sr/2");
-        assert!(math_source.contains(sid));
-        if kernel_status != Some("absent") {
-            assert!(kernel_source.contains(sid));
+    let scope = top
+        .iter()
+        .find_map(|entry| {
+            let ExprKind::List(items) = &entry.kind else {
+                return None;
+            };
+            if !matches!(
+                items.first().map(|expr| &expr.kind),
+                Some(ExprKind::Symbol(symbol)) if &**symbol == "scope"
+            ) {
+                return None;
+            }
+            Some(
+                items[1..]
+                    .iter()
+                    .map(|expr| match &expr.kind {
+                        ExprKind::String(value) => value.to_string(),
+                        other => panic!("scope SID must be a string, got {other:?}"),
+                    })
+                    .collect::<Vec<_>>(),
+            )
+        })
+        .expect("scope");
+
+    (identity, math, kernel, machine, scope)
+}
+
+fn source_has_sid(source: &str, sid: &str) -> bool {
+    source.contains(&format!("\"{sid}\""))
+}
+
+fn kernel_map_has_sid(source: &str, wanted_sid: &str) -> bool {
+    let exprs = parse(source).expect("kernel witness contract must parse");
+    let ExprKind::List(items) = &exprs[0].kind else {
+        panic!("kernel witness map must be a list");
+    };
+
+    items[1..].iter().any(|entry| {
+        let ExprKind::List(fields) = &entry.kind else {
+            return false;
+        };
+        if !matches!(
+            fields.first().map(|expr| &expr.kind),
+            Some(ExprKind::Symbol(symbol)) if &**symbol == "sid-witness"
+        ) {
+            return false;
         }
-        assert!(machine_source.contains(sid));
-    }
-    assert_eq!(seen.len(), 5);
 
-    // Boundary-specific evidence required by the issue.
-    assert!(math_source.contains("non-mathematical-in-this-slice"));
-    assert!(kernel_source.contains("(kernel . common-lisp)"));
-    assert!(machine_source.contains("pair-field-load head"));
-    assert!(machine_source.contains("conditional-branch bounded-u64"));
+        fields.iter().any(|field| {
+            let ExprKind::Pair(key, value) = &field.kind else {
+                return false;
+            };
+            matches!(&key.kind, ExprKind::Symbol(symbol) if &**symbol == "sid")
+                && matches!(&value.kind, ExprKind::String(sid) if &**sid == wanted_sid)
+        })
+    })
 }
 
 #[test]
-fn coordinate_view_fixture_is_lisp_owned() {
-    let source = read("tests/fixtures/semantic-coordinate-matrix-845.lisp");
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library");
-    let value = eval_program(&source, &mut session)
-        .expect("#845 fixture must execute")
-        .value
-        .to_string();
-    assert_eq!(value, "(semantic-coordinate-matrix-845 (status pass) (axes independent) (authority canonical-sid-registry) (rows 5))");
+fn bounded_matrix_derives_coordinates_from_live_axes() {
+    let (identity_path, math_path, kernel_path, machine_path, scope) =
+        matrix_sources_and_scope();
+
+    assert_eq!(scope.len(), 5);
+    assert_eq!(scope.iter().collect::<HashSet<_>>().len(), 5);
+
+    let identity = read(&identity_path);
+    let math = read(&math_path);
+    let kernel = read(&kernel_path);
+    let machine = read(&machine_path);
+
+    for sid in &scope {
+        assert_eq!(sid.len(), 8);
+        assert!(sid.chars().all(|bit| bit == '0' || bit == '1'));
+        assert!(
+            identity.contains(&format!("(\"{sid}\" ")),
+            "SID {sid} must exist in canonical sr/2"
+        );
+
+        // Presence is derived, never copied into the matrix contract.
+        let _math_present = source_has_sid(&math, sid);
+        let _kernel_present = kernel_map_has_sid(&kernel, sid);
+        let _machine_present = source_has_sid(&machine, sid);
+    }
+
+    // Current bounded slice has math + machine coordinates for all five SIDs.
+    for sid in &scope {
+        assert!(source_has_sid(&math, sid), "math axis missing scoped SID {sid}");
+        assert!(
+            source_has_sid(&machine, sid),
+            "machine axis missing scoped SID {sid}"
+        );
+    }
+
+    // Kernel evidence is intentionally asymmetric: + currently has no
+    // sid-witness row, while eq/cons/car/cond do.
+    assert!(!kernel_map_has_sid(&kernel, "00001100"));
+    for sid in ["00000011", "00000100", "00000101", "00000111"] {
+        assert!(kernel_map_has_sid(&kernel, sid), "kernel axis missing {sid}");
+    }
+
+    // COND's math coordinate is negative evidence, not a fabricated law.
+    assert!(math.contains("non-mathematical-in-this-slice"));
+    assert!(math.contains("no-mathematical-law-claimed"));
+}
+
+#[test]
+fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
+    let (identity_path, math_path, kernel_path, machine_path, _) =
+        matrix_sources_and_scope();
+
+    const LAMBDA_SID: &str = "00001000";
+
+    let identity = read(&identity_path);
+    let math = read(&math_path);
+    let kernel = read(&kernel_path);
+    let machine = read(&machine_path);
+
+    assert!(identity.contains(&format!("(\"{LAMBDA_SID}\" ")));
+    assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
+    assert!(!source_has_sid(&math, LAMBDA_SID));
+    assert!(!source_has_sid(&machine, LAMBDA_SID));
+}
+
+#[test]
+fn matrix_contract_does_not_copy_axis_payloads() {
+    let source = read("contracts/semantic-coordinate-matrix-845.lisp");
+
+    for forbidden in [
+        "kernel-entry-status",
+        "math-entry-sid",
+        "machine-entry-sid",
+        "pair-field-load",
+        "integer-add",
+        "common-lisp",
+        "car-cons-left-inverse",
+        "x86-lower-",
+        "admitted-form",
+    ] {
+        assert!(
+            !source.contains(forbidden),
+            "matrix contract must not copy axis payload {forbidden}"
+        );
+    }
 }
