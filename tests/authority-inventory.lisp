@@ -78,3 +78,7 @@
 
 (authority "crates/wsm-native-result-types/tests/observation_provenance.rs" observer)
 (authority "crates/my-lisp-cli/tests/islands_release_asset.rs" mechanism)
+(authority "crates/my-lisp/tests/clock.rs" observer)
+(authority "crates/my-lisp/tests/timezone_ownership.rs" observer)
+(authority "crates/my-lisp/tests/semantic_coordinate_join_2.rs" observer)
+(authority "crates/my-lisp/tests/life_1_scheduler.rs" observer)
