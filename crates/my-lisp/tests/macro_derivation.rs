@@ -42,7 +42,10 @@ fn default_session_binds_all_defmacro_peers_to_one_value() {
 fn macro_peer_admission_is_recorded_under_identity_00001010_without_binding_the_machine_id() {
     let row = REGISTRY
         .lines()
-        .find(|line| line.trim_start().starts_with("(\"00001010\" "))
+        .find(|line| {
+            let trimmed = line.trim_start();
+            trimmed.starts_with("(00001010 ") || trimmed.starts_with("(\"00001010\" ")
+        })
         .expect("semantic identity 00001010 must remain present");
 
     for expected in [

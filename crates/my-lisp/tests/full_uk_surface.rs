@@ -106,11 +106,12 @@ fn full_ukr_names_preserve_action_protocol_and_representation_semantics() {
     ];
 
     for (semantic_id, expected_surface) in expected {
-        let prefix = format!("(\"{semantic_id}\" ");
+        let prefix_bare = format!("({semantic_id} ");
+        let prefix_quoted = format!("(\"{semantic_id}\" ");
         let row = source
             .lines()
             .map(str::trim_start)
-            .find(|line| line.starts_with(&prefix))
+            .find(|line| line.starts_with(&prefix_bare) || line.starts_with(&prefix_quoted))
             .unwrap_or_else(|| panic!("semantic registry is missing ID {semantic_id}"));
         assert!(
             row.contains(expected_surface),

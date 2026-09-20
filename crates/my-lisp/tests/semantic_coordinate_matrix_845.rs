@@ -147,8 +147,8 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
         assert_eq!(sid.len(), 8);
         assert!(sid.chars().all(|bit| bit == '0' || bit == '1'));
         assert!(
-            identity.contains(&format!("(\"{sid}\" ")),
-            "SID {sid} must exist in canonical sr/2"
+            identity.contains(&format!("({sid} ")) || identity.contains(&format!("(\"{sid}\" ")),
+            "SID {sid} must exist in canonical semantic registry"
         );
 
         // Presence is derived, never copied into the matrix contract.
@@ -190,7 +190,7 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
     let kernel = read(&kernel_path);
     let machine = read(&machine_path);
 
-    assert!(identity.contains(&format!("(\"{LAMBDA_SID}\" ")));
+    assert!(identity.contains(&format!("({LAMBDA_SID} ")) || identity.contains(&format!("(\"{LAMBDA_SID}\" ")));
     assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
     assert!(!source_has_sid(&math, LAMBDA_SID));
     assert!(!source_has_sid(&machine, LAMBDA_SID));
