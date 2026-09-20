@@ -138,7 +138,7 @@
         ((surface-usable? uk)
          (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text uk)))
         ((surface-usable? sa)
-         (str+ "identity:" sid "/surface:" (surface-word-text sa)))
+         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text sa)))
         (t (string-append "identity:" (sid-text sid)))))))
 
 ; --- string-join with newline, since core.lisp has none yet. Accumulator-
@@ -191,7 +191,7 @@
         " | " (surface-word-text en)
         " | " (surface-word-text sa)
         " | " (surface-word-text sym)
-        " | " (machine-path sid) " |"))))
+        " | " (machine-path (sid-text sid)) " |"))))
 
 (def wsm-header
   (list
