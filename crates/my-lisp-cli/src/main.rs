@@ -273,7 +273,7 @@ fn main() {
             println!("  islands plan|install|status      Inspect, install, or observe execution islands without semantic admission");
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
-            println!("  --surface=укр|en|sa|core      Start the interactive REPL with this programming surface");
+            println!("  --surface=укр|en|sa|core      Compatibility option: choose REPL name namespace/presentation");
             println!(
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
             );
