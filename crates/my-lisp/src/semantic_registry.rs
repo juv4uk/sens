@@ -37,6 +37,18 @@ pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     format!("{semantic_id:08b}")
 }
 
+/// All admitted semantic identities in canonical registry order.
+///
+/// The registry is the sole authority; this is a mechanical projection used
+/// only to materialize stable runtime surface values when an implementation
+/// has not yet been installed for that identity.
+pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
+    parse_rows(SEMANTIC_REGISTRY)
+        .into_iter()
+        .map(|row| row.semantic_id)
+        .collect()
+}
+
 fn surface_groups(line: &'static str) -> Vec<&'static str> {
     let mut groups = Vec::new();
     let mut depth = 0usize;

@@ -3,10 +3,10 @@
 > Згенеровано `scripts/public_api_inventory.py`. Цей звіт знаходить
 > top-level визначення, але **не** оголошує їх публічним API.
 
-- проскановано бібліотечних файлів: 34
-- top-level функцій: 842
+- проскановано бібліотечних файлів: 35
+- top-level функцій: 852
 - top-level макросів: 34
-- усього визначень: 876
+- усього визначень: 886
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -313,6 +313,16 @@
 | `lib/knowledge.lisp` | function | `*usage-counts*` | unreviewed |
 | `lib/knowledge.lisp` | macro | `record-usage!` | unreviewed |
 | `lib/knowledge.lisp` | function | `usage-of` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-field` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-invocation-key` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-key-present?` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-dedup-pending` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-pending` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-projection-ready?` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-select-ready` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-quiescence-state` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-quiescence` | unreviewed |
+| `lib/life-1-scheduler.lisp` | function | `life-scheduler-state` | unreviewed |
 | `lib/linter.lisp` | function | `lint-max2` | unreviewed |
 | `lib/linter.lisp` | function | `lint-size` | unreviewed |
 | `lib/linter.lisp` | function | `lint-nesting` | unreviewed |

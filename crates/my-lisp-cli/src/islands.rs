@@ -80,10 +80,8 @@ fn fetch_artifact(url: &str, temporary: &std::path::Path) -> Result<(), String> 
         ])
         .status()
     {
-        Ok(status) if status.success() => return Ok(()),
-        Ok(status) => {
-            return Err(format!("download failed for {url}: curl exit {}", status));
-        }
+        Ok(status) if status.success() => Ok(()),
+        Ok(status) => Err(format!("download failed for {url}: curl exit {}", status)),
         Err(curl_error) if cfg!(windows) => {
             let status = Command::new("powershell")
                 .args([
@@ -99,9 +97,9 @@ fn fetch_artifact(url: &str, temporary: &std::path::Path) -> Result<(), String> 
             if status.success() {
                 return Ok(());
             }
-            return Err(format!("download failed for {url}: powershell exit {status}"));
+            Err(format!("download failed for {url}: powershell exit {status}"))
         }
-        Err(error) => return Err(format!("download failed for {url}: curl unavailable: {error}")),
+        Err(error) => Err(format!("download failed for {url}: curl unavailable: {error}")),
     }
 }
 
