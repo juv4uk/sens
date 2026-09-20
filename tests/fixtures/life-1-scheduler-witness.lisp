@@ -4,9 +4,6 @@
 ; a Prolog projection becoming ready activates a Datalog pending invocation.
 ; No kernel is called here; invocation routing remains a later mechanism step.
 
-(load "lib/core.lisp")
-(load "lib/life-1-scheduler.lisp")
-
 (def life-1-scheduler-witness
   (lambda ()
     (let* ((first
