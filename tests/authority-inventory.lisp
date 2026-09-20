@@ -70,3 +70,5 @@
 (authority "crates/wsm-native-result-types/tests/kernel_availability.rs" observer)
 (authority "crates/wsm-native-result-types/tests/kernel_lifecycle.rs" mechanism)
 (authority "crates/wsm-native-result-types/tests/observation_capabilities.rs" observer)
+
+(authority "crates/wsm-native-result-types/tests/observation_provenance.rs" observer)
