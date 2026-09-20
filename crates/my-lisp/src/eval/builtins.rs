@@ -32,7 +32,7 @@ use crate::eval::special_forms::{
     string_rest_values, string_to_codepoint_values, string_to_symbol_values,
     symbol_to_string_values, write_to_string_values,
 };
-use crate::{semantic_registry, Exactness, NumericBuffer, Rational, Span, Value};
+use crate::{semantic_registry, Binary, Exactness, NumericBuffer, Rational, Span, Value};
 
 type Native =
     std::rc::Rc<dyn Fn(&[Value], &Environment, Span) -> Result<Value, crate::LanguageError>>;
@@ -135,6 +135,101 @@ fn ntp_query_raw_value(
         exact_value(Rational::integer(i64::from(seconds))),
         exact_value(Rational::integer(i64::from(fraction))),
     ]))
+}
+
+fn u8_binary(value: &Value, span: Span, operation: &str) -> Result<Binary, crate::LanguageError> {
+    match value {
+        Value::Binary(binary) if binary.width() == 8 => Ok(*binary),
+        _ => Err(crate::LanguageError::new(
+            crate::ErrorKind::Type,
+            format!("{operation} expects an 8-bit binary/u8 value"),
+            span,
+        )),
+    }
+}
+
+fn u8_integer(value: &Value, span: Span, operation: &str) -> Result<u8, crate::LanguageError> {
+    match value {
+        Value::Number(number, Exactness::Exact)
+            if number.fract() == 0.0 && *number >= 0.0 && *number <= 255.0 =>
+        {
+            Ok(*number as u8)
+        }
+        Value::Rational(rational) if rational.is_integer() => {
+            let integer = rational.as_precise_i64().ok_or_else(|| {
+                crate::LanguageError::new(
+                    crate::ErrorKind::NumericOverflow,
+                    format!("{operation} integer is outside the exact integer range"),
+                    span,
+                )
+            })?;
+            u8::try_from(integer).map_err(|_| {
+                crate::LanguageError::new(
+                    crate::ErrorKind::NumericOverflow,
+                    format!("{operation} integer must be in 0..255"),
+                    span,
+                )
+            })
+        }
+        _ => Err(crate::LanguageError::new(
+            crate::ErrorKind::Type,
+            format!("{operation} expects an exact integer in 0..255"),
+            span,
+        )),
+    }
+}
+
+fn u8_binary_value(value: u8, span: Span, operation: &str) -> Result<Value, crate::LanguageError> {
+    Binary::from_u64(u64::from(value), 8)
+        .map(Value::Binary)
+        .ok_or_else(|| {
+            crate::LanguageError::new(
+                crate::ErrorKind::NumericOverflow,
+                format!("{operation} produced a value outside the 8-bit domain"),
+                span,
+            )
+        })
+}
+
+fn u8_shift_count(value: &Value, span: Span, operation: &str) -> Result<u32, crate::LanguageError> {
+    let count = match value {
+        Value::Number(number, Exactness::Exact)
+            if number.fract() == 0.0 && *number >= 0.0 && *number <= 255.0 =>
+        {
+            *number as u32
+        }
+        Value::Rational(rational) if rational.is_integer() => {
+            let integer = rational.as_precise_i64().ok_or_else(|| {
+                crate::LanguageError::new(
+                    crate::ErrorKind::NumericOverflow,
+                    format!("{operation} shift count is outside the exact integer range"),
+                    span,
+                )
+            })?;
+            u32::try_from(integer).map_err(|_| {
+                crate::LanguageError::new(
+                    crate::ErrorKind::InvalidForm,
+                    format!("{operation} shift count must be in 0..7"),
+                    span,
+                )
+            })?
+        }
+        _ => {
+            return Err(crate::LanguageError::new(
+                crate::ErrorKind::Type,
+                format!("{operation} expects an exact non-negative integer shift count"),
+                span,
+            ))
+        }
+    };
+    if count > 7 {
+        return Err(crate::LanguageError::new(
+            crate::ErrorKind::InvalidForm,
+            format!("{operation} shift count must be in 0..7"),
+            span,
+        ));
+    }
+    Ok(count)
 }
 
 pub(crate) fn install(environment: &Environment) {
@@ -425,6 +520,97 @@ pub(crate) fn install(environment: &Environment) {
         }
     });
 
+    // Native u8 mechanism: width-8 Binary is the one language value domain for
+    // bytes. These bindings do not create a second semantic representation;
+    // the public Lisp API in lib/core.lisp defines the language-facing law.
+    define!(environment, "u8-native?", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native?", args, 1, span)?;
+        Ok(if matches!(args[0], Value::Binary(binary) if binary.width() == 8) {
+            Value::truth(true)
+        } else {
+            Value::Nil
+        })
+    });
+    define!(environment, "u8-native-from-binary", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-from-binary", args, 1, span)?;
+        Ok(Value::Binary(u8_binary(&args[0], span, "binary->u8")?))
+    });
+    define!(environment, "u8-native-to-binary", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-to-binary", args, 1, span)?;
+        Ok(Value::Binary(u8_binary(&args[0], span, "u8->binary")?))
+    });
+    define!(environment, "u8-native-to-integer", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-to-integer", args, 1, span)?;
+        let binary = u8_binary(&args[0], span, "u8->integer")?;
+        Ok(Value::Number(binary.value() as f64, Exactness::Exact))
+    });
+    define!(environment, "u8-native-from-integer", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-from-integer", args, 1, span)?;
+        let value = u8_integer(&args[0], span, "integer->u8")?;
+        u8_binary_value(value, span, "integer->u8")
+    });
+    define!(environment, "u8-native-and", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-and", args, 2, span)?;
+        let left = u8_binary(&args[0], span, "u8-and")?;
+        let right = u8_binary(&args[1], span, "u8-and")?;
+        u8_binary_value((left.value() as u8) & (right.value() as u8), span, "u8-and")
+    });
+    define!(environment, "u8-native-or", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-or", args, 2, span)?;
+        let left = u8_binary(&args[0], span, "u8-or")?;
+        let right = u8_binary(&args[1], span, "u8-or")?;
+        u8_binary_value((left.value() as u8) | (right.value() as u8), span, "u8-or")
+    });
+    define!(environment, "u8-native-xor", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-xor", args, 2, span)?;
+        let left = u8_binary(&args[0], span, "u8-xor")?;
+        let right = u8_binary(&args[1], span, "u8-xor")?;
+        u8_binary_value((left.value() as u8) ^ (right.value() as u8), span, "u8-xor")
+    });
+    define!(environment, "u8-native-not", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-not", args, 1, span)?;
+        let value = u8_binary(&args[0], span, "u8-not")?;
+        u8_binary_value(!(value.value() as u8), span, "u8-not")
+    });
+    define!(environment, "u8-native-shl", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-shl", args, 2, span)?;
+        let value = u8_binary(&args[0], span, "u8-shl")?;
+        let count = u8_shift_count(&args[1], span, "u8-shl")?;
+        u8_binary_value((value.value() as u8) << count, span, "u8-shl")
+    });
+    define!(environment, "u8-native-shr", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-shr", args, 2, span)?;
+        let value = u8_binary(&args[0], span, "u8-shr")?;
+        let count = u8_shift_count(&args[1], span, "u8-shr")?;
+        u8_binary_value((value.value() as u8) >> count, span, "u8-shr")
+    });
+    define!(environment, "u8-native-add", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-add", args, 2, span)?;
+        let left = u8_binary(&args[0], span, "u8-add")?.value();
+        let right = u8_binary(&args[1], span, "u8-add")?.value();
+        let sum = left + right;
+        if sum > u64::from(u8::MAX) {
+            return Err(crate::LanguageError::new(
+                crate::ErrorKind::NumericOverflow,
+                "u8-add overflow: result must remain in 0..255",
+                span,
+            ));
+        }
+        u8_binary_value(sum as u8, span, "u8-add")
+    });
+    define!(environment, "u8-native-sub", |args: &[Value], _env: &Environment, span: Span| {
+        exact_args("u8-native-sub", args, 2, span)?;
+        let left = u8_binary(&args[0], span, "u8-sub")?.value();
+        let right = u8_binary(&args[1], span, "u8-sub")?.value();
+        if left < right {
+            return Err(crate::LanguageError::new(
+                crate::ErrorKind::NumericOverflow,
+                "u8-sub underflow: result must remain in 0..255",
+                span,
+            ));
+        }
+        u8_binary_value((left - right) as u8, span, "u8-sub")
+    });
     // ADR-007/008 runtime peer slices: each identity below allocates one
     // callable value, then binds every ratified stable spelling projected from
     // the numeric semantic registry. Human spellings are not duplicated here.
