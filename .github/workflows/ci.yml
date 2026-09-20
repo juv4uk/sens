@@ -103,7 +103,7 @@ jobs:
           set -euo pipefail
           : > tests/semantic-authority-changes.lisp
           while IFS= read -r path; do
-            printf '(changed "%s")\\n' "$path" >> tests/semantic-authority-changes.lisp
+            printf '(changed "%s")\n' "$path" >> tests/semantic-authority-changes.lisp
           done < /tmp/changed.txt
           ./target/debug/my-lisp scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
           cat tests/semantic-authority-verdict.lisp
