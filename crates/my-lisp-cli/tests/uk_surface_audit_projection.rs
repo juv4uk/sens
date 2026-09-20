@@ -13,7 +13,7 @@ fn my_lisp(cwd: &Path) -> Command {
     command
 }
 
-fn semantic_id_list(source: &str) -> Vec<String> {
+fn sid_list(source: &str) -> Vec<String> {
     source
         .lines()
         .filter_map(|line| {
@@ -29,8 +29,8 @@ fn semantic_id_list(source: &str) -> Vec<String> {
         .collect()
 }
 
-fn semantic_ids(source: &str) -> BTreeSet<String> {
-    semantic_id_list(source).into_iter().collect()
+fn sids(source: &str) -> BTreeSet<String> {
+    sid_list(source).into_iter().collect()
 }
 
 #[derive(Debug)]
@@ -150,13 +150,13 @@ fn ukrainian_staging_profile_covers_every_registry_callable_identity() {
     let profile = fs::read_to_string(root.join("lib/surface/український-профіль-джерела.lisp"))
         .expect("Ukrainian staging profile must be readable");
 
-    let expected_rows = semantic_id_list(&registry)
+    let expected_rows = sid_list(&registry)
         .into_iter()
         .filter(|id| id != "00000000")
         .collect::<Vec<_>>();
-    let actual_rows = semantic_id_list(&profile);
+    let actual_rows = sid_list(&profile);
     let expected = expected_rows.iter().cloned().collect::<BTreeSet<_>>();
-    let actual = semantic_ids(&profile);
+    let actual = sids(&profile);
 
     assert_eq!(
         expected_rows.len(),
