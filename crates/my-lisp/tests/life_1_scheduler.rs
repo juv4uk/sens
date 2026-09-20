@@ -104,3 +104,50 @@ fn life_1_scheduler_witness_is_lisp_owned() {
         "(life-1-scheduler-witness (status pass) (detail deduplicated-activation-and-quiescence))"
     );
 }
+
+
+#[test]
+fn malformed_trigger_is_absent_not_cdr_failure() {
+    let scheduler =
+        fs::read_to_string(repo_file("lib/life-1-scheduler.lisp"))
+            .expect("scheduler source");
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    eval_program(&scheduler, &mut session).expect("scheduler source must execute");
+
+    let malformed =
+        "(pending-invocation (producer datalog) (trigger ()) \
+          (provenance-ref observation-42) (priority ordinary) \
+          (semantic-id \"10101000\"))";
+
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-projection-ready? \
+                   (quote {malformed}) \
+                   (quote ((projection-ready prolog-substitutions-to-datalog-facts observation-42))))"
+            ),
+            &mut session,
+        ),
+        "absent"
+    );
+
+    let valid =
+        "(pending-invocation (producer datalog) \
+          (trigger (projection-ready prolog-substitutions-to-datalog-facts)) \
+          (provenance-ref observation-42) (priority ordinary) \
+          (semantic-id \"10101000\"))";
+
+    let selection = eval_text(
+        &format!(
+            "(life-scheduler-select-ready \
+               (list (quote {malformed}) (quote {valid})) \
+               (quote ((projection-ready prolog-substitutions-to-datalog-facts observation-42))))"
+        ),
+        &mut session,
+    );
+    assert!(
+        selection.starts_with("(scheduler-selection ready "),
+        "malformed pending entry must be skipped: {selection}"
+    );
+}

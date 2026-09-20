@@ -105,6 +105,6 @@
               (list
                 (quote life-1-scheduler-witness)
                 (list (quote status) (quote fail))
-                (list (quote detail) (quote adversarial-readiness-mismatch))))))))))))
+                (list (quote detail) (quote adversarial-readiness-mismatch)))))))))))
 
 (life-1-scheduler-witness)
