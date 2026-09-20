@@ -34,3 +34,5 @@ jobs:
           git add lib/core.lisp.fasl docs/generated/public-api-discovery.md
           git commit -m "fix(#894): regenerate current-main generated artifacts"
           git push origin HEAD:fix/894-core-fasl-current-main
+
+# trigger generated-artifact regeneration on an existing workflow revision
