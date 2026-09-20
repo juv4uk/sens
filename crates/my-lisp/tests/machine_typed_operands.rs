@@ -2,8 +2,6 @@ use my_lisp::{eval_program, load_core_library, Session};
 use std::fs;
 use std::path::PathBuf;
 
-const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
-
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
@@ -229,17 +227,11 @@ fn new_family_atoms_keep_typed_rejection_fail_closed() {
 
 #[test]
 fn machine_operand_type_names_do_not_mint_semantic_surfaces() {
-    let lower = REGISTRY.to_ascii_lowercase();
-    for machine_only in [
-        "x86-gpr64",
-        "x86-u64-imm",
-        "x86-disp8",
-        "x86-mem64-disp8",
-        "mem64-disp8",
-    ] {
+    for machine_only in ["x86-gpr64","x86-u64-imm","x86-disp8","x86-mem64-disp8","mem64-disp8"] {
         assert!(
-            !lower.contains(machine_only),
-            "machine-only operand type {machine_only} must not become a semantic registry surface"
+            my_lisp::semantic_registry_export::semantic_id_for_admitted_surface(machine_only)
+                .is_none(),
+            "machine-only constructor {machine_only} must not become a semantic registry surface"
         );
     }
 }
