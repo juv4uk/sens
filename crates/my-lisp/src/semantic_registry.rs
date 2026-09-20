@@ -1,7 +1,7 @@
 //! Shared projection from the language surface authority to compact byte SIDs.
 //!
-//! `lib/surface/semantic-registry.lisp` owns human/symbolic spellings. Its sr/2
-//! rows carry exactly eight binary digits plus fixed en/uk/ukr/sa/sym slots.
+//! `lib/surface/semantic-registry.lisp` owns human/symbolic spellings. Its
+//! canonical rows carry exactly eight binary digits plus fixed en/uk/ukr/sa/sym slots.
 //! A slot contains either one spelling or (); there are no admission statuses.
 //! Runtime code stores that identity as one `u8`; the textual bit spelling is
 //! provenance/serialization only and is never itself admitted as Lisp surface.
@@ -95,7 +95,7 @@ fn parse_surface_group(group: &'static str) -> Option<SemanticSurface> {
             namespace,
             name: surface_name_token(name),
         }),
-        _ => panic!("malformed sr/2 surface group: ({group}); expected (namespace spelling) or (namespace ())"),
+        _ => panic!("malformed semantic registry surface group: ({group}); expected (namespace spelling) or (namespace ())"),
     }
 }
 
@@ -109,17 +109,15 @@ fn parse_rows(source: &'static str) -> Vec<SemanticRow> {
             let semantic_id = parse_sid_bits(sid_token)?;
             let groups = surface_groups(line);
 
-            if semantic_id != EMPTY_LIST_SEMANTIC_ID {
-                let namespaces = groups
-                    .iter()
-                    .filter_map(|group| group.split_whitespace().next())
-                    .collect::<Vec<_>>();
-                assert_eq!(
-                    namespaces,
-                    vec!["en", "uk", "ukr", "sa", "sym"],
-                    "sr/2 rows must contain exactly en/uk/ukr/sa/sym in fixed order"
-                );
-            }
+            let namespaces = groups
+                .iter()
+                .filter_map(|group| group.split_whitespace().next())
+                .collect::<Vec<_>>();
+            assert_eq!(
+                namespaces,
+                vec!["en", "uk", "ukr", "sa", "sym"],
+                "canonical rows must contain exactly en/uk/ukr/sa/sym in fixed order"
+            );
 
             let surfaces = groups
                 .into_iter()
@@ -185,7 +183,7 @@ pub(crate) fn build_surface_index(
 pub(crate) fn build_admitted_surface_index(
     source: &'static str,
 ) -> HashMap<&'static str, SemanticId> {
-    // Historical API name retained while callers migrate. In status-free sr/2,
+    // Historical API name retained while callers migrate. In status-free canonical semantic registry,
     // every non-empty surface is simply present and therefore routable.
     build_surface_index(source)
 }
@@ -272,7 +270,7 @@ pub(crate) fn stable_surfaces_for_semantic_id(
 }
 
 /// Historical API name retained while callers migrate.
-/// In status-free sr/2 every non-empty spelling is directly routable; () is absence.
+/// In status-free canonical semantic registry every non-empty spelling is directly routable; () is absence.
 pub(crate) fn admitted_surfaces_for_semantic_id(
     semantic_id: SemanticId,
 ) -> Vec<&'static str> {
