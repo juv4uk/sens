@@ -97,6 +97,19 @@ jobs:
           cat tests/authority-verdict.lisp
           ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
 
+      - name: Lisp-owned semantic authority leakage guard #1049
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > tests/semantic-authority-changes.lisp
+          while IFS= read -r path; do
+            printf '(changed "%s")\\n' "$path" >> tests/semantic-authority-changes.lisp
+          done < /tmp/changed.txt
+          ./target/debug/my-lisp scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
+          cat tests/semantic-authority-verdict.lisp
+          ./target/debug/my-lisp scripts/semantic-authority-guard-enforce.lisp
+          bash scripts/test-semantic-authority-guard.sh ./target/debug/my-lisp
+
       - name: Upload regenerated core FASL for #771
         uses: actions/upload-artifact@v4
         with:
