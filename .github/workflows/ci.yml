@@ -118,6 +118,12 @@ jobs:
           set -euo pipefail
           ./target/debug/my-lisp scripts/check-repo-tooling-inventory.lisp
 
+      - name: Canon function-table mechanism provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./target/debug/my-lisp scripts/check-function-table-mechanisms.lisp
+
       - name: Lisp-owned machine non-interference guard
         shell: bash
         run: |
