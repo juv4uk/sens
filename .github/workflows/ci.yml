@@ -112,11 +112,12 @@ jobs:
           git diff --check
         
 
-      - name: Lisp-owned repo tooling inventory
+      - name: Lisp-owned governance inventories
         shell: bash
         run: |
           set -euo pipefail
           ./target/debug/my-lisp scripts/check-repo-tooling-inventory.lisp
+          ./target/debug/my-lisp scripts/check-workflow-inventory.lisp
 
       - name: Lisp-owned machine non-interference guard
         shell: bash
