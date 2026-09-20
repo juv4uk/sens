@@ -370,7 +370,6 @@ dependencies = [
  "rustyline",
  "serde",
  "serde_json",
- "ureq",
  "wsm-guard-core",
 ]
 
