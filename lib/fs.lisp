@@ -15,8 +15,12 @@
   (lambda (path)
     (let ((decoded (utf8-decode-string (read-file-bytes path))))
       (cond
-        ((eq (car decoded) (quote decoded)) (second decoded))
-        (t decoded)))))
+        ((eq (car decoded) (quote decoded))
+         (identity-relation same)
+         (second decoded))
+        ((eq (car decoded) (quote decoded))
+         (identity-relation distinct)
+         decoded)))))
 
 ; Historical `write-file` returns the text it was given after a successful
 ; write; encoding policy belongs to Lisp, the host only persists bytes.

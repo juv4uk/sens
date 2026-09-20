@@ -7,8 +7,13 @@ still no new evaluator exception mechanism and no new Rust `Value` variant.
 
 The original design named `unknown / partial / blocked / disputed`. The Advice
 Taker B1 implementation completed the algebra with the success and malformed-
-input observations it also needed: `proved` and `invalid`. Existing `reason`
-and `reason-in` remain backward-compatible; callers opt into the new semantics
+input observations it also needed: `proved` and `invalid`. **Current authority
+has since narrowed when `unknown` may be asserted.** Under
+`contracts/reasoning-honesty-contract.lisp`, absence of proof by itself does
+not justify `unknown`: neither-side-proved remains unspecialized as `()`
+unless a named completeness/search contract warrants a stronger conclusion.
+A missing named module is `blocked`, not `unknown`. Existing `reason` and
+`reason-in` remain backward-compatible; callers opt into structured outcomes
 through `reason-observe` / `reason-in-observe`.
 
 ## The problem
@@ -18,8 +23,9 @@ failure. That compatibility API is useful, but `()` by itself cannot state why
 there is no ordinary proof result. Several materially different situations
 must not be reported as the same claim:
 
-1. **Unknown** — no proof or explicit opposite proof was found for the question,
-   or a named knowledge module does not exist.
+1. **Unknown** — a named completeness/search contract positively establishes
+   that the relevant search space has been exhausted without proof. Mere
+   absence of proof is not sufficient.
 2. **Partial** — a bounded search produced only a bounded result; this is not a
    proof that no answer exists outside the bound.
 3. **Blocked** — evaluation deliberately did not proceed because an operational
@@ -31,9 +37,11 @@ must not be reported as the same claim:
 6. **Proved** — one or more proof results exist and must remain available rather
    than being collapsed to a boolean.
 
-Collapsing these states into `()` violates the repository's evidence discipline:
-"no proof found", "could not finish", "could not run", "both sides have
-proofs", and "malformed question" are not synonyms for false.
+These states must not be conflated with each other or with false. At the same
+time, the current honesty contract deliberately leaves **mere absence of
+evidence** unspecialized as `()`: it is not silently promoted to `unknown`.
+Thus `()` here means "no stronger justified reasoning outcome was established",
+not FALSE.
 
 ## Decision: one tagged-result algebra, no parallel vocabulary
 
@@ -79,13 +87,16 @@ The adapters currently observe explicit positive/opposite proofs as follows:
 positive only   -> (proved positive-goal all-positive-results)
 opposite only   -> (proved opposite-goal all-opposite-results)
 both            -> (disputed ((proved ...) (proved ...)))
-neither         -> (unknown goal)
+neither         -> ()
+                    unless a named completeness/search contract justifies unknown
 malformed goal  -> (invalid invalid-goal payload)
-missing module  -> (unknown (module-not-found name))
+missing module  -> (blocked (module-not-found name))
 ```
 
 The opposite check uses explicit knowledge, not negation-as-failure: absence of
-a positive proof never manufactures a negative fact.
+a positive proof never manufactures a negative fact. Likewise, absence of both
+positive and opposite proof does not manufacture `unknown`; that stronger
+status requires its own completeness/search evidence.
 
 ## Presentation boundary
 
@@ -100,12 +111,13 @@ collapse back into one "cannot prove" phrase.
 
 - all six constructors/tags;
 - positive proof observation;
-- unknown distinct from false;
 - explicit negative/opposite proof;
 - disputed two-sided evidence;
 - preservation of multiple successful alternatives;
 - malformed goal as `invalid`;
-- missing module as a named `unknown` subject.
+- unspecialized `()` when neither side is proved and no completeness/search
+  contract is available;
+- missing module as `blocked (module-not-found name)`.
 
 `crates/my-lisp/tests/narrate_outcomes.rs` covers the presentation boundary for
 proved, unknown, disputed, partial, blocked, invalid, and malformed outcome
@@ -121,6 +133,7 @@ shapes.
   that observation.
 - No silent conversion of operational faults into `unknown`.
 
-This ADR records the implemented library convention. Any future change that
-makes these outcomes part of Level 1/2 language conformance would require its
-own deliberate contract process.
+This ADR records the implemented library convention, as superseded where
+necessary by the current Lisp-owned reasoning-honesty contract (#219/#244).
+Any future change that makes these outcomes part of Level 1/2 language
+conformance would require its own deliberate contract process.

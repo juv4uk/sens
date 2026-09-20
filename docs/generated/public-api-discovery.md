@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 38
-- top-level функцій: 854
+- top-level функцій: 856
 - top-level макросів: 34
-- усього визначень: 888
+- усього визначень: 890
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -474,6 +474,8 @@
 | `lib/meta-eval.lisp` | function | `my-eval-list` | unreviewed |
 | `lib/meta-eval.lisp` | function | `my-eval-body-result` | unreviewed |
 | `lib/meta-eval.lisp` | function | `my-eval-body` | unreviewed |
+| `lib/meta-eval.lisp` | function | `my-cond-has-migration-clause?` | unreviewed |
+| `lib/meta-eval.lisp` | function | `my-eval-cond-result-mode` | unreviewed |
 | `lib/meta-eval.lisp` | function | `my-eval-cond-result` | unreviewed |
 | `lib/meta-eval.lisp` | function | `my-eval-cond` | unreviewed |
 | `lib/meta-eval.lisp` | function | `my-take-lambda-def-group` | unreviewed |

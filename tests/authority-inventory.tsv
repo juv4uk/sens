@@ -138,3 +138,4 @@ crates/my-lisp/tests/semantic_coordinate_join.rs	cond_sid_keeps_negative_math_ev
 crates/my-lisp/tests/canon_authority_inventory.rs	inventory_is_structured_complete_data_not_a_second_semantic_table	observer	canon-authority-inventory	knowledge/canon-authority-inventory.lisp	migrated
 crates/my-lisp/tests/canon_authority_inventory.rs	every_known_active_sid_mapping_hotspot_has_an_inventory_classification	observer	canon-authority-inventory	knowledge/canon-authority-inventory.lisp	migrated
 crates/my-lisp/tests/canon_authority_inventory.rs	generated_projections_name_their_real_source_instead_of_claiming_authority	observer	canon-authority-inventory	knowledge/canon-authority-inventory.lisp	migrated
+crates/my-lisp/tests/semantic_authority_guard_1049.rs	semantic_authority_guard_is_lisp_owned	observer	semantic-authority-boundary	scripts/semantic-authority-guard.lisp + scripts/semantic-authority-guard-enforce.lisp	retained
