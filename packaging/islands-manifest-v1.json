@@ -109,7 +109,7 @@
           "probe": [
             "sh",
             "-c",
-            "ldconfig -p 2>/dev/null | grep -q 'libclips\\.so'"
+            "ldconfig -p 2>/dev/null | grep -q 'libclips\\.so' || test -f \"$HOME/.local/lib/libclips.so\""
           ],
           "entrypoint": "clips"
         },
@@ -118,7 +118,7 @@
           "provider": "release-asset",
           "package": "CLIPS 6.4.2",
           "url": "https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_projects_642.zip/download",
-          "sha256": null,
+          "sha256": "f72f93ca8137d773c1f3c77d57c80c2c886b87b0318b6383d29965a45de776f5",
           "artifact": "zip",
           "probe": [
             "powershell",

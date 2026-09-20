@@ -1,22 +1,6 @@
-use my_lisp::{
-    eval_parsed_expressions, eval_program, parse, ErrorKind, Expr, ExprKind, Session, Span,
-};
+use my_lisp::{eval_program, parse, ErrorKind, Expr, ExprKind, Session};
 
 const MACRO_LIBRARY: &str = include_str!("../../../lib/macro.lisp");
-
-fn symbol(name: &str) -> Expr {
-    Expr {
-        kind: ExprKind::Symbol(name.into()),
-        span: Span { start: 0, end: 0 },
-    }
-}
-
-fn list(items: Vec<Expr>) -> Expr {
-    Expr {
-        kind: ExprKind::List(items.into()),
-        span: Span { start: 0, end: 0 },
-    }
-}
 
 fn walk_symbols(expression: &Expr, symbols: &mut Vec<String>) {
     match &expression.kind {
@@ -44,52 +28,26 @@ fn existing_vertical_bar_atoms_remain_reader_compatible() {
 }
 
 #[test]
-fn first_class_eval_can_bootstrap_lambda_from_pure_numeric_identity() {
+fn byte_sid_symbols_do_not_execute_as_surface_spellings() {
     let mut session = Session::default();
-    let result = eval_program(
+    let error = eval_program(
         "((eval (cons (string->symbol \"0010\") (quote ((x) x)))) 41)",
         &mut session,
     )
-    .expect("eval must turn a pure 0010-headed datum into a closure");
-    assert_eq!(result.value.to_string(), "41");
+    .expect_err("bare SID text is metadata and deliberately not executable spelling");
+    assert_eq!(error.kind, ErrorKind::UnknownSymbol);
 }
 
 #[test]
-fn pure_numeric_symbols_execute_as_semantic_form_heads() {
-    let definition = list(vec![
-        symbol("0011"),
-        symbol("identity-by-id"),
-        list(vec![
-            symbol("0010"),
-            list(vec![symbol("x")]),
-            symbol("x"),
-        ]),
-    ]);
-    let mut forms = vec![definition];
-    forms.extend(parse("(identity-by-id 43)").expect("call should parse"));
-
-    let mut session = Session::default();
-    let result = eval_parsed_expressions(&forms, &mut session)
-        .expect("pure numeric semantic symbols must execute directly");
-    assert_eq!(result.value.to_string(), "43");
-}
-
-#[test]
-fn macro_library_selects_no_human_or_transport_spelling_for_necessary_forms() {
+fn macro_library_uses_admitted_source_spellings_for_necessary_forms() {
     let parsed = parse(MACRO_LIBRARY).expect("embedded macro library should parse");
     let mut symbols = Vec::new();
     for expression in &parsed {
         walk_symbols(expression, &mut symbols);
     }
 
-    assert!(MACRO_LIBRARY.contains("\"0010\""));
-    assert!(MACRO_LIBRARY.contains("\"0011\""));
-    for forbidden in ["lambda", "функція", "define", "визначити", "#0010", "#0011"] {
-        assert!(
-            !symbols.iter().any(|symbol| symbol == forbidden),
-            "macro.my must not select necessary-form spelling {forbidden}"
-        );
-    }
+    assert!(symbols.iter().any(|symbol| symbol == "lambda"));
+    assert!(symbols.iter().any(|symbol| symbol == "define"));
 }
 
 #[test]

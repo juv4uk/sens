@@ -773,6 +773,44 @@ fn find_named_file(root: &Path, filename: &str, remaining_depth: usize) -> Optio
     None
 }
 
+fn install_embedded_island(
+    island: &Island,
+    entry: &PlatformEntry,
+    root: &Path,
+) -> Result<String, String> {
+    let executable = std::env::current_exe()
+        .map_err(|error| format!("cannot locate my-lisp distribution executable: {error}"))?;
+    if !executable.is_file() {
+        return Err(format!(
+            "embedded island {} is unavailable: my-lisp executable is missing at {}",
+            island.key,
+            executable.display()
+        ));
+    }
+
+    let target_dir = root
+        .join(&island.install_key)
+        .join(&island.runtime_version)
+        .join(&entry.target);
+    let record = target_dir.join("install-record.txt");
+
+    if record.is_file() {
+        write_install_state(root, island, &entry.target, "available")?;
+        return Ok(format!(
+            "already installed {} {}: available (embedded)",
+            island.key, island.runtime_version
+        ));
+    }
+
+    write_install_record(&target_dir, island, entry)?;
+    write_install_state(root, island, &entry.target, "available")?;
+
+    Ok(format!(
+        "installed {} {}: available (embedded)",
+        island.key, island.runtime_version
+    ))
+}
+
 fn write_install_record(
     target_dir: &Path,
     island: &Island,
@@ -1080,12 +1118,13 @@ pub fn run(args: &[String]) -> Result<String, String> {
                 }
 
                 match entry {
-                    Some(entry) if entry.provider == "embedded" => {
-                        rows.push(format!(
-                            "embedded {} {}: available with the my-lisp distribution",
-                            island.key, island.runtime_version
-                        ));
+                    Some(entry) if entry.provider == "embedded" && !dry_run => {
+                        rows.push(install_embedded_island(island, entry, &root)?);
                     }
+                    Some(entry) if entry.provider == "embedded" => rows.push(format!(
+                        "install {} {} as part of the my-lisp distribution",
+                        island.key, island.runtime_version
+                    )),
                     Some(entry)
                         if matches!(entry.provider.as_str(), "apt" | "winget") && !dry_run =>
                     {
