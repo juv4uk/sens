@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "crates/my-lisp/tests/semantic_coordinate_join.rs"
+      - "crates/my-lisp/tests/semantic_coordinate_join_2.rs"
+      - "contracts/semantic-coordinate-matrix-845.lisp"
       - "contracts/sid-kernel-witness-735.lisp"
       - "tests/fixtures/semantic-coordinate-law-axis-v1.lisp"
       - "lib/machine/capability-axis.lisp"
@@ -16,5 +18,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Prove one SID joins three orthogonal evidence axes
-        run: cargo test -p my-lisp --test semantic_coordinate_join -- --nocapture
+      - name: Prove bounded SIDs join three orthogonal evidence axes
+        run: |
+          cargo test -p my-lisp --test semantic_coordinate_join -- --nocapture
+          cargo test -p my-lisp --test semantic_coordinate_join_2 -- --nocapture
