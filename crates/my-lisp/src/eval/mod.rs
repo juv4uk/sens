@@ -18,6 +18,8 @@ mod macro_substrate;
 pub(crate) mod necessary_forms;
 mod special_forms;
 
+// Host adapters may register implementation projections by opaque semantic ID;
+// the canonical registry remains the only source of identity and surface meaning.
 pub use capabilities::{
     capability_installed, installed_capabilities, register_capability, register_semantic_capability,
     unregister_capability, unregister_semantic_capability,
