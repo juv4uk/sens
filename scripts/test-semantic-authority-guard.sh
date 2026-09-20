@@ -21,6 +21,7 @@ run_case() {
   if [[ "$expected" == "violation" ]]; then
     if "$my_lisp" scripts/semantic-authority-guard-enforce.lisp; then
       echo "ERROR: expected semantic-authority guard failure for $fixture" >&2
+      "$my_lisp" scripts/semantic-authority-guard-debug.lisp || true
       exit 1
     fi
     grep -q "semantic-authority-violation" tests/semantic-authority-verdict.lisp
