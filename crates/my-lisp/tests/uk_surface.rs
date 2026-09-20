@@ -61,7 +61,7 @@ fn canonical_ukrainian_syntax_and_batch_one_aliases_preserve_results() {
         &mut session,
     )
     .expect("word-first aliases should execute through existing operations");
-    assert_eq!(aliases.value.to_string(), "(5 t t t 7)");
+    assert_eq!(aliases.value.to_string(), "(5 1 t (identity-relation same) 7)");
 }
 
 #[test]
