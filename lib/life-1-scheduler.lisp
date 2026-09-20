@@ -44,7 +44,7 @@
                    ((eq field (car row)) (quote (identity-relation distinct))
                     (life-scheduler-field
                       (cons (car entry) (cdr rows))
-                      field))))))))))))
+                      field)))))))))))))
 
 (def life-scheduler-invocation-key
   (lambda (invocation)
