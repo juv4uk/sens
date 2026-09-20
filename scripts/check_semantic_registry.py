@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Перевіряє єдину sr/2 byte-SID authority мовних поверхонь.
+"""Перевіряє canonical byte-SID authority мовних поверхонь.
 
 SID серіалізується як string із рівно 8 біт. UK/EN/SA є рівноправними
 людськими поверхнями; sym — окрема спільна немовна нотація.
 
-Ключове правило sr/2: SID є metadata, а не Lisp surface spelling.
+Ключове правило: SID є metadata, а не Lisp surface spelling.
 """
 
 from __future__ import annotations
@@ -53,14 +53,14 @@ def parse(items: list[str]):
 
 
 def check(root) -> tuple[int, set[str], int]:
-    if not isinstance(root, list) or not root or root[0] != "sr/2":
-        raise ValueError("реєстр повинен починатися з (sr/2 ...)")
+    if not isinstance(root, list) or not root:
+        raise ValueError("реєстр повинен бути непорожнім списком semantic rows")
 
     seen_ids: set[str] = set()
     all_surfaces: set[str] = set()
     symbolic_count = 0
 
-    for ordinal, entry in enumerate(root[1:]):
+    for ordinal, entry in enumerate(root):
         if not isinstance(entry, list) or len(entry) < 2:
             raise ValueError(f"некоректний semantic-запис: {entry!r}")
 
@@ -80,13 +80,6 @@ def check(root) -> tuple[int, set[str], int]:
         if identity in seen_ids:
             raise ValueError(f"дубль semantic identity: {identity}")
         seen_ids.add(identity)
-
-        if sid == 0:
-            if entry != [identity, []]:
-                raise ValueError(
-                    'SID 00000000 мусить бути рівно ground row ("00000000" ())'
-                )
-            continue
 
         entry_surfaces: set[str] = set()
         for surface in entry[1:]:
@@ -121,6 +114,11 @@ def check(root) -> tuple[int, set[str], int]:
                         f"{bits}/{language}: символічне написання {name!r} мусить жити під sym"
                     )
 
+        if entry_surfaces != {"en", "uk", "ukr", "sa", "sym"}:
+            raise ValueError(
+                f"{bits}: expected fixed en/uk/ukr/sa/sym slots, got {sorted(entry_surfaces)}"
+            )
+
         missing_first_wave = FIRST_WAVE - entry_surfaces
         if missing_first_wave:
             raise ValueError(
@@ -131,7 +129,7 @@ def check(root) -> tuple[int, set[str], int]:
 
     if len(seen_ids) != 169:
         raise ValueError(
-            f"sr/2 migration expects exactly 169 identities (Canon 0 + 168), got {len(seen_ids)}"
+            f"expected exactly 169 identities (Canon 0 + 168), got {len(seen_ids)}"
         )
     if len(seen_ids) > 256:
         raise ValueError("semantic registry no longer fits the declared 8-bit SID axis")
