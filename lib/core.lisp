@@ -29,11 +29,23 @@
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
 (def list (lambda args args))
 
+; cond-truthy-helper — migration-only implementation helper for the
+; historical two-part COND bridge. It is intentionally not a semantic
+; authority and must not acquire a numeric semantic SID.
+(def cond-truthy-helper
+  (lambda (v)
+    (cond
+      ((equal? v (quote ())) (structural-relation same) (quote ()))
+      ((equal? v (quote (structural-kind pair))) (structural-relation same) (quote ()))
+      ((equal? v (quote (identity-relation distinct))) (structural-relation same) (quote ()))
+      ((equal? v (quote (structural-relation distinct))) (structural-relation same) (quote ()))
+      ((equal? v (quote ())) (structural-relation distinct) t))))
+
 (def not
   (lambda (value)
     (cond
-      (value (quote ()))
-      (t t))))
+      ((cond-truthy-helper value) t (quote ()))
+      ((cond-truthy-helper value) () t))))
 
 ; and/or — раніше були відсутні і в цьому файлі, і як Rust-білтіни
 ; (перевірено: обидва grep дають нуль збігів), тож кожен, хто підключав
@@ -54,14 +66,21 @@
     (t
      ; Build the short-circuit cond AST from the primitive tree substrate.
      ; AND remains Lisp-owned; generic macro frontends need no private LIST
-     ; semantic just to execute this law.
+     ; semantic just to execute this law. Canonical three-part clauses use
+     ; the migration-only helper, which is deliberately not semantic authority.
      (cons (quote cond)
-           (cons (cons (car rest)
-                       (cons (cons (quote and) (cdr rest))
-                             (quote ())))
-                 (cons (cons t
-                             (cons (quote ())
+           (cons (cons (cons (quote cond-truthy-helper)
+                             (cons (car rest)
                                    (quote ())))
+                       (cons t
+                             (cons (cons (quote and) (cdr rest))
+                                   (quote ()))))
+                 (cons (cons (cons (quote cond-truthy-helper)
+                                   (cons (car rest)
+                                         (quote ())))
+                             (cons (quote ())
+                                   (cons (quote ())
+                                         (quote ()))))
                        (quote ())))))))
 
 (defmacro or rest
@@ -71,12 +90,20 @@
     (t
      ; Same primitive constructor discipline as AND above: preserve lazy
      ; short-circuit expansion without importing LIST into compiler authority.
+     ; The helper is migration-only and does not introduce a new semantic SID.
      (cons (quote cond)
-           (cons (cons (car rest)
-                       (cons t (quote ())))
-                 (cons (cons t
-                             (cons (cons (quote or) (cdr rest))
+           (cons (cons (cons (quote cond-truthy-helper)
+                             (cons (car rest)
                                    (quote ())))
+                       (cons t
+                             (cons t
+                                   (quote ()))))
+                 (cons (cons (cons (quote cond-truthy-helper)
+                                   (cons (car rest)
+                                         (quote ())))
+                             (cons (quote ())
+                                   (cons (cons (quote or) (cdr rest))
+                                         (quote ()))))
                        (quote ())))))))
 
 ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
@@ -231,9 +258,10 @@
 (def filter-onto
   (lambda (predicate values acc)
     (cond
-      ((atom values) (reverse acc))
-      ((predicate (car values)) (filter-onto predicate (cdr values) (cons (car values) acc)))
-      (t (filter-onto predicate (cdr values) acc)))))
+      ((atom values) (structural-kind empty-list) (reverse acc))
+      ((atom values) (structural-kind atom) (reverse acc))
+      ((cond-truthy-helper (predicate (car values))) t (filter-onto predicate (cdr values) (cons (car values) acc)))
+      ((cond-truthy-helper (predicate (car values))) () (filter-onto predicate (cdr values) acc)))))
 
 (def filter
   (lambda (predicate values)
