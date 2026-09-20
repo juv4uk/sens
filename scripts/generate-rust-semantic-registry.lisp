@@ -35,8 +35,8 @@
   (lambda (entry)
     (let ((name (second entry)))
       (cond
-        ((atom name)
-         (structural-kind empty-list)
+        ((equal? name (quote ()))
+         (structural-relation same)
          "")
         (t
          (str+
