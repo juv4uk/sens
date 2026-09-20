@@ -101,8 +101,8 @@
       "  (lambda (name)\n"
       "    (let ((entry (assoc name my-semantic-surface-registry)))\n"
       "      (cond\n"
-      "        ((atom entry) (quote ()))\n"
-      "        (t (second entry))))))\n")))
+      "        ((atom entry) (structural-kind empty-list) (quote ()))\n"
+      "        ((atom entry) (structural-kind pair) (second entry))))))\n")))
 
 (def registry-form
   (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
@@ -117,16 +117,33 @@
 
 (cond
   ((atom *argv*)
-   (write-file output-path generated)
-   (print "meta semantic registry projection written"))
+   (structural-kind empty-list)
+   (second
+     (list
+       (write-file output-path generated)
+       (print "meta semantic registry projection written"))))
+  ((atom *argv*)
+   (structural-kind atom)
+   (second
+     (list
+       (write-file output-path generated)
+       (print "meta semantic registry projection written"))))
   ((equal? (car *argv*) "--check")
+   (structural-relation same)
    (let ((current (read-file output-path)))
      (cond
        ((equal? current generated)
+        (structural-relation same)
         (print "meta semantic registry projection is current"))
-       (t
-        (print "meta semantic registry projection is stale")
-        (car (quote ())))))
-  (t
-   (write-file output-path generated)
-   (print "meta semantic registry projection written"))))
+       ((equal? current generated)
+        (structural-relation distinct)
+        (second
+          (list
+            (print "meta semantic registry projection is stale")
+            (car (quote ()))))))))
+  ((equal? (car *argv*) "--check")
+   (structural-relation distinct)
+   (second
+     (list
+       (write-file output-path generated)
+       (print "meta semantic registry projection written")))))
