@@ -85,3 +85,5 @@
 
 (authority "crates/my-lisp/tests/semantic_registry_lisp.rs" observer)
 (authority "crates/my-lisp/tests/runtime_peer_operators.rs" observer)
+(authority "contracts/datalog-math-capability-989.lisp" semantic-witness)
+(authority "crates/wsm-datalog-kernel/tests/arithmetic_capability_989.rs" observer)
