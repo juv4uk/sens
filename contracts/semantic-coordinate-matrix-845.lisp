@@ -11,11 +11,7 @@
   (kernel-axis-source . "contracts/sid-kernel-witness-735.lisp")
   (machine-axis-source . "lib/machine/capability-axis.lisp")
   (rows
-    (((sid . "00001100")
-      (math-entry-sid . "00001100")
-      (kernel-entry-sid . "00001100")
-      (machine-entry-sid . "00001100"))
-     ((sid . "00000011")
+    (((sid . "00000011")
       (math-entry-sid . "00000011")
       (kernel-entry-sid . "00000011")
       (machine-entry-sid . "00000011"))
