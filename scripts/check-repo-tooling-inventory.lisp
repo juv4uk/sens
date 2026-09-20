@@ -258,6 +258,17 @@
             (structural-relation distinct)
             (repo-tooling-find-row-by-path path (cdr rows)))))))))
 
+(def repo-tooling-extra-entry-name-state
+  (lambda (name entries)
+    (cond
+      ((atom entries) (structural-kind empty-list) (quote absent))
+      ((atom entries) (structural-kind atom) (quote malformed))
+      ((atom entries) (structural-kind pair)
+       (cond
+         ((equal? name (car entries)) (structural-relation same) (quote present))
+         ((equal? name (car entries)) (structural-relation distinct)
+          (repo-tooling-extra-entry-name-state name (cdr entries))))))))
+
 (def repo-tooling-extra-entrypoint-present-state
   (lambda (path)
     (cond
@@ -271,17 +282,6 @@
          (repo-tooling-extra-entry-name-state "pre-commit" entries)))
       ((equal? path "githooks/pre-commit") (structural-relation distinct)
        (quote unsupported)))))
-
-(def repo-tooling-extra-entry-name-state
-  (lambda (name entries)
-    (cond
-      ((atom entries) (structural-kind empty-list) (quote absent))
-      ((atom entries) (structural-kind atom) (quote malformed))
-      ((atom entries) (structural-kind pair)
-       (cond
-         ((equal? name (car entries)) (structural-relation same) (quote present))
-         ((equal? name (car entries)) (structural-relation distinct)
-          (repo-tooling-extra-entry-name-state name (cdr entries))))))))
 
 (def repo-tooling-extra-entrypoint-verdict
   (lambda (path rows)
