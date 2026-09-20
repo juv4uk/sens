@@ -7,8 +7,9 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable contracts and Canon** — these are executable, not prose:
-   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — the numeric semantic-ID registry; the single source of truth for which spellings (en/uk/sa/sym) mean which semantic identity.
-   - `crates/my-lisp/src/eval/canon.rs` / `necessary_forms.rs` — Canon 0+7 and DEFINE/LAMBDA evaluator meaning, keyed only by numeric semantic ID.
+   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — the Lisp-owned semantic-ID/function-table identity registry; the source of identity/surface authority used by downstream projections.
+   - [`lib/function-table-mechanisms.lisp`](lib/function-table-mechanisms.lisp) — transitional **mechanism projection only** over already-existing Canon/function-table SIDs; it cannot mint meaning, law, domain, or identity.
+   - `crates/my-lisp/src/eval/canon.rs` / `necessary_forms.rs` — reference/evaluator implementation surfaces under active authority-retirement audit, **not** semantic authority and never a reason to override the Lisp-owned Canon/function-table sources.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) — the implementation-independent behavioral contract (the "oracle corpus"); `my-lisp-constitution.lisp` and `tests/fixtures/inventory.lisp` are GENERATED projections over it, never hand-edited.
    - `language-contract.lisp` (this repo), and the sibling repos' own `isa-contract.lisp` (`fpga-lisp`) / `compatibility.lisp` (`cml`) for cross-repo compatibility.
 2. **Active ADRs and ratified design decisions** — see [`docs/adr/`](docs/adr) (if present) and any doc explicitly marked ratified/accepted, not proposed.
