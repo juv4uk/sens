@@ -12,6 +12,12 @@
 (def mechanism-selector-registry-rows
   (cdr mechanism-selector-registry))
 
+(def mechanism-selector-sid-text
+  (lambda (sid)
+    (cond
+      ((string? sid) sid)
+      (t (write-to-string sid)))))
+
 (def mechanism-selector-find-section
   (lambda (name sections)
     (cond
@@ -34,8 +40,8 @@
       ((atom rows) (structural-kind empty-list) (quote no))
       ((atom rows) (structural-kind pair)
        (cond
-         ((equal? sid (car (car rows))) (structural-relation same) (quote yes))
-         ((equal? sid (car (car rows))) (structural-relation distinct)
+         ((equal? (mechanism-selector-sid-text sid) (mechanism-selector-sid-text (car (car rows)))) (structural-relation same) (quote yes))
+         ((equal? (mechanism-selector-sid-text sid) (mechanism-selector-sid-text (car (car rows)))) (structural-relation distinct)
           (mechanism-selector-registry-has-sid? sid (cdr rows))))))))
 
 (def mechanism-selector-find-route
@@ -45,12 +51,12 @@
       ((atom rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
-           ((equal? sid (car row)) (structural-relation same)
+           ((equal? (mechanism-selector-sid-text sid) (mechanism-selector-sid-text (car row))) (structural-relation same)
             (cond
               ((eq executor (second row)) (identity-relation same) row)
               ((eq executor (second row)) (identity-relation distinct)
                (mechanism-selector-find-route sid executor (cdr rows)))))
-           ((equal? sid (car row)) (structural-relation distinct)
+           ((equal? (mechanism-selector-sid-text sid) (mechanism-selector-sid-text (car row))) (structural-relation distinct)
             (mechanism-selector-find-route sid executor (cdr rows)))))))))
 
 (def mechanism-select
