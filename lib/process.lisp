@@ -20,24 +20,32 @@
 (def process-result->text
   (lambda (raw)
     (cond
-      ((not (eq (car raw) (quote process-result)))
+      ((eq (car raw) (quote process-result))
+       (identity-relation distinct)
        (list (quote rejected) (quote invalid-process-result)))
-      (t
+      ((eq (car raw) (quote process-result))
+       (identity-relation same)
        (let* ((stdout-result
                 (utf8-decode-string (process-raw-stdout-bytes raw)))
               (stderr-result
                 (utf8-decode-string (process-raw-stderr-bytes raw))))
          (cond
-           ((not (eq (car stdout-result) (quote decoded)))
+           ((eq (car stdout-result) (quote decoded))
+            (identity-relation distinct)
             (list (quote rejected) (quote stdout-invalid-utf8)))
-           ((not (eq (car stderr-result) (quote decoded)))
-            (list (quote rejected) (quote stderr-invalid-utf8)))
-           (t
-            (list
-              (quote decoded-process)
-              (process-raw-exit-code raw)
-              (second stdout-result)
-              (second stderr-result)))))))))
+           ((eq (car stdout-result) (quote decoded))
+            (identity-relation same)
+            (cond
+              ((eq (car stderr-result) (quote decoded))
+               (identity-relation distinct)
+               (list (quote rejected) (quote stderr-invalid-utf8)))
+              ((eq (car stderr-result) (quote decoded))
+               (identity-relation same)
+               (list
+                 (quote decoded-process)
+                 (process-raw-exit-code raw)
+                 (second stdout-result)
+                 (second stderr-result)))))))))))
 
 (def process-run-text
   (lambda (program args)
@@ -54,19 +62,22 @@
 (def process-public-exit-code
   (lambda (code)
     (cond
-      ((eq code (quote ())) -1)
-      (t code))))
+      ((eq code (quote ())) (identity-relation same) -1)
+      ((eq code (quote ())) (identity-relation distinct) code))))
 
 (def process-run
   (lambda (program args)
     (let ((result (process-run-text program args)))
       (cond
         ((eq (car result) (quote decoded-process))
+         (identity-relation same)
          (list
            (process-public-exit-code (second result))
            (third result)
            (car (cdr (cdr (cdr result))))))
-        (t result)))))
+        ((eq (car result) (quote decoded-process))
+         (identity-relation distinct)
+         result)))))
 
 
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
