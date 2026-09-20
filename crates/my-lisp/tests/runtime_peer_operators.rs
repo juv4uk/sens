@@ -114,7 +114,7 @@ fn runtime_peer_slice_matches_numeric_registry_rows() {
             Some(sid)
         );
         let surfaces = my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(sid);
-        assert!(surfaces.iter().any(|row| row.namespace == "uk" && row.name == case.uk));
+        assert!(surfaces.iter().any(|row| row.namespace == "ук" && row.name == case.uk));
         assert!(surfaces.iter().any(|row| row.namespace == "sa" && row.name == case.sa));
         assert!(surfaces.iter().any(|row| row.namespace == "sym" && row.name == case.sym));
     }
