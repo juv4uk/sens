@@ -13,6 +13,7 @@
   (role mechanism-evidence-only)
   (parent-issue 990)
   (canon-convergence-issue 1046)
+  (mechanism-source "lib/function-table-mechanisms.lisp")
   (ratification-state blocked-until-canon-law-domain)
   (rows
     (00001100 common-lisp execution-witness "#1042-donor")
