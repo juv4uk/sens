@@ -28,6 +28,19 @@ fn load_bridge(session: &mut Session) {
     eval_program(&source, session).expect("#803 bridge Lisp must load");
 }
 
+fn load_scheduler(session: &mut Session) {
+    let source = fs::read_to_string(repo_file("lib/life-1-scheduler.lisp"))
+        .expect("#801 scheduler Lisp source");
+    eval_program(&source, session).expect("#801 scheduler Lisp must load");
+}
+
+fn eval_text(source: &str, session: &mut Session) -> String {
+    eval_program(source, session)
+        .expect("LIFE scheduler expression must execute")
+        .value
+        .to_string()
+}
+
 fn list_items(expr: &Expr) -> &[Expr] {
     match &expr.kind {
         ExprKind::List(items) => items,
@@ -173,6 +186,99 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     assert_eq!(
         edge.bridge_contract_ref,
         "prolog-substitutions-to-datalog-facts"
+    );
+
+    // #903: the scheduler consumes only explicit readiness/provenance data
+    // derived from the already-recorded projection edge. It never inspects
+    // either producer-native result domain.
+    load_scheduler(&mut session);
+    let invocation = format!(
+        "(pending-invocation \
+           (producer datalog) \
+           (trigger (projection-ready {})) \
+           (provenance-ref {}) \
+           (priority ordinary) \
+           (semantic-id \"{:08b}\"))",
+        edge.bridge_contract_ref,
+        source_ref,
+        INVOKE_ID
+    );
+    let projection_ready = format!(
+        "(projection-ready {} {})",
+        edge.bridge_contract_ref, source_ref
+    );
+
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-projection-ready? (quote {invocation}) (quote ({projection_ready})))"
+            ),
+            &mut session,
+        ),
+        "present"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-projection-ready? \
+                   (quote {invocation}) \
+                   (quote ((projection-ready {} observation-99))))",
+                edge.bridge_contract_ref
+            ),
+            &mut session,
+        ),
+        "absent"
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-projection-ready? \
+                   (quote {invocation}) \
+                   (quote ((projection-ready different-bridge-contract {}))))",
+                source_ref
+            ),
+            &mut session,
+        ),
+        "absent"
+    );
+
+    let deduped = eval_text(
+        &format!(
+            "(life-scheduler-pending (list (quote {invocation}) (quote {invocation})))"
+        ),
+        &mut session,
+    );
+    assert_eq!(
+        deduped.matches("pending-invocation").count(),
+        1,
+        "duplicate activation must collapse by scheduler key: {deduped}"
+    );
+
+    let selection = eval_text(
+        &format!(
+            "(life-scheduler-select-ready \
+               (life-scheduler-pending (list (quote {invocation}) (quote {invocation}))) \
+               (quote ({projection_ready})))"
+        ),
+        &mut session,
+    );
+    assert!(
+        selection.starts_with("(scheduler-selection ready "),
+        "real LIFE readiness did not activate Datalog: {selection}"
+    );
+
+    // After the selected Datalog invocation has been consumed, the explicit
+    // projection readiness has been consumed, and no lifecycle transition is
+    // required, LIFE-1 reaches named scheduler quiescence.
+    assert_eq!(
+        eval_text(
+            "(life-scheduler-quiescence \
+               (quote ()) \
+               (quote ()) \
+               (quote no-transition-required))",
+            &mut session,
+        ),
+        "(quiescence-state quiescent)"
     );
 
     // Projection did not normalize or mutate the producer-native observation.
