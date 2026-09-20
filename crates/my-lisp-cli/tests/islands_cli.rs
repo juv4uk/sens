@@ -266,3 +266,84 @@ fn islands_status_keeps_absent_and_unsupported_distinct_for_selected_target() {
     assert!(stdout.contains("prolog: unsupported"), "{stdout}");
     assert!(stdout.contains("clips: unsupported"), "{stdout}");
 }
+
+
+#[test]
+fn islands_install_provisions_embedded_datalog_through_the_installer() {
+    let root = std::env::temp_dir().join(format!(
+        "my-lisp-islands-embedded-datalog-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+
+    let dry_run = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands",
+            "install",
+            "--manifest",
+            manifest().to_str().expect("UTF-8 manifest path"),
+            "--with",
+            "datalog",
+            "--root",
+            root.to_str().expect("UTF-8 root"),
+            "--dry-run",
+        ])
+        .output()
+        .expect("dry-run");
+    assert!(
+        dry_run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&dry_run.stderr)
+    );
+    assert!(
+        String::from_utf8_lossy(&dry_run.stdout)
+            .contains("install datalog builtin as part of the my-lisp distribution")
+    );
+    assert!(!root.exists(), "embedded dry-run created {root:?}");
+
+    let apply = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands",
+            "install",
+            "--manifest",
+            manifest().to_str().expect("UTF-8 manifest path"),
+            "--with",
+            "datalog",
+            "--root",
+            root.to_str().expect("UTF-8 root"),
+            "--apply",
+        ])
+        .output()
+        .expect("apply");
+    assert!(
+        apply.status.success(),
+        "{}",
+        String::from_utf8_lossy(&apply.stderr)
+    );
+    assert!(
+        String::from_utf8_lossy(&apply.stdout)
+            .contains("installed datalog builtin: available (embedded)")
+    );
+
+    let target = if cfg!(target_os = "windows") {
+        "windows-x86_64"
+    } else if cfg!(target_os = "macos") {
+        if cfg!(target_arch = "aarch64") {
+            "macos-aarch64"
+        } else {
+            "macos-x86_64"
+        }
+    } else {
+        "linux-x86_64"
+    };
+    let record = root
+        .join("datalog")
+        .join("builtin")
+        .join(target)
+        .join("install-record.txt");
+    assert!(record.is_file(), "installer did not provision Datalog record at {record:?}");
+    let record_text = std::fs::read_to_string(&record).expect("Datalog install record");
+    assert!(record_text.contains("island=datalog"));
+    assert!(record_text.contains("provider=embedded"));
+    assert!(record_text.contains("verified=true"));
+}
