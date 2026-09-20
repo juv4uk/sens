@@ -1,81 +1,108 @@
-# ECO-CANON-1 status — 2026-09-11 (updated 2026-09-12)
+# ECO-CANON-1 status — 2026-09-11 (updated 2026-09-20)
 
-Issue: [my-lisp#75](https://github.com/juv4uk/my-lisp/issues/75)
+Issue: [my-lisp#75](https://github.com/juv4uk/my-lisp/issues/75)  
+Projection-input retirement: [my-lisp#1004](https://github.com/juv4uk/my-lisp/issues/1004)
 
-## Principle (unchanged)
+## Principle
 
 ```text
-CANON = immutable identity / meaning
+Canon / function-table identity lives in lib/surface/semantic-registry.lisp
 display spelling ≠ identity
-lib/surface/semantic-registry.lisp = sole surface↔ID authority
+generated function-table = reproducible projection, not semantic input authority
 ```
 
-## What already existed
+## Current authority and projections
 
 | Piece | Role |
-|-------|------|
-| `lib/surface/semantic-registry.lisp` | Numeric semantic IDs + en/uk/sa/sym surfaces |
-| `scripts/check_semantic_registry.py` | Fail-closed schema checks |
-| `scripts/generate-meta-semantic-registry.lisp` | Lisp-owned runtime projection for meta-eval |
-| `crates/my-lisp/src/semantic_registry.rs` + `eval/canon.rs` | In-process resolvers |
-| `docs/CANON-MIGRATION-PLAN-2026-09-11.md` | Consumer generator pattern |
+|---|---|
+| `lib/surface/semantic-registry.lisp` | Sole numeric identity + peer-surface authority |
+| `scripts/generate-function-table.lisp` | Lisp-owned projection generator; reads the registry directly |
+| `lib/generated/function-table.lisp` | Machine-readable review/output projection (`ft/2`) |
+| `docs/generated/function-table.md` | Human review projection, optionally joined with machine realization metadata |
+| `lib/machine/intel-core-i5-6400.lisp` | Physical execution/mechanism projection only; cannot mint meaning |
 
-## Deliverable status (honest, verified 2026-09-12)
+The live registry currently contains **170 identities total**:
 
-1. **`scripts/generate-function-table.lisp`** — projects registry → function
-   table (`ft/1`), written in my-lisp itself (2026-09-12), replacing the
-   originally-committed Python version per issue #76
-   (ECO-LISP-SCRIPTS-1: no new Python tooling; existing tooling migrates
-   to my-lisp/wsm). Reads the registry as ordinary my-lisp data
-   (`read-file`/`read-all`), not text/regex.
-2. **`lib/generated/function-table.lisp`** — machine-readable table, **all
-   161 identities actually generated and committed** (the prior version
-   of this file was a 1-row placeholder despite this status doc's own
-   earlier claim of "161 identities" — verified directly, not assumed,
-   before writing this update).
-3. **`docs/generated/function-table.md`** — human view, **all 161 rows**
-   (the prior version had only a 10-row sample), column order:
-   **Українська → Повна українська → English → Sanskrit**
+- `00000000` — structural `()`;
+- **169 callable/form identities** projected by the generated function table.
 
-### A real edge case the migration surfaced
+The generated table schema is:
 
-Identity `0001`'s `sym` surface is the literal apostrophe character
-(`'`). The ordinary my-lisp reader treats a bare `'` as its own
-quote-shorthand macro (reads the *next* datum), not a plain 3-token
-symbol — so `(sym ' stable)` in the registry source parses as
-`(sym (quote stable))`, a 2-element list, not the intended 3-element
-`(lang word status)` shape every other row has. The generator
-reconstructs the intended shape on read, and emits the word as a
-quoted string literal (`"'"`) in the generated `.lisp` output
-specifically — a bare `'` there would hit the exact same collision for
-the next reader. The generated `.md` table keeps it as a plain
-character (prose has no such ambiguity).
+```text
+ft/2:
+(sid-bitstring formal (uk ...) (ukr ...) (en ...) (sa ...) (sym ...) authority)
+```
 
-### Column policy (honest, unchanged)
+`ukr` is the full Ukrainian peer surface of the same SID. There is no independent
+`full-uk` identity namespace.
+
+## Direction of authority
+
+```text
+lib/surface/semantic-registry.lisp
+        ↓
+one Canon/function-table SID
+        ↓
+generated/review projections
+        ├─ lib/generated/function-table.lisp
+        └─ docs/generated/function-table.md
+        ↓
+inspection / tooling that explicitly treats them as projections
+```
+
+The reverse direction is forbidden for semantic ownership:
+
+```text
+generated projection
+        ✗
+reconstruct / redefine SID meaning
+```
+
+Under #1004, active UK generators and coverage checks are being moved off
+`lib/generated/function-table.lisp` as an input API and onto
+`lib/surface/semantic-registry.lisp` directly.
+
+## Ukrainian surface columns
 
 | Column | Source |
-|--------|--------|
-| `uk` | registry `uk` surface as-is |
-| `full-uk` | **mirrors** stable/candidate `uk` until a separate ratification pass; **does not invent** names |
-| `full-uk-status` | `stable` / `candidate` / `needs-review` / `missing` |
-| `en` / `sa` / `sym` | registry |
-| `authority` | always `my-lisp` for language identities |
+|---|---|
+| `uk` | registry `uk` surface |
+| `ukr` | registry `ukr` peer surface |
+| `en` | registry `en` surface |
+| `sa` | registry `sa` surface |
+| `sym` | registry `sym` surface |
+| `authority` | `my-lisp` in the generated review projection |
 
-At generation (2026-09-12, verified against the committed files, not
-estimated): **161** identities projected.
+The generator does not invent a missing peer spelling and does not derive one
+surface namespace from another.
 
-### Not done yet (remaining #75)
+## Reader-sensitive apostrophe case
 
-- Formal semantic *action* prose per ID (still stub — `formal-stub`
-  only names the identity/surface, not the behavior)
-- Executable witness column per row
-- CI job with a `--check` mode proving the committed projection is
-  current (the retired Python script had one; the my-lisp replacement
-  does not yet — regeneration is currently a manual step)
-- Distinct ratification of «Повна українська» where it should differ
-  from `uk` (currently 100% mirror, zero rows have an independently
-  ratified full-word spelling yet)
-- Consumer-repo projections (must not hand-copy)
+The quote identity's symbolic surface is stored in the registry as a string:
+
+```lisp
+(sym "'")
+```
+
+This keeps the registry ordinary re-readable Lisp data without colliding with
+reader quote shorthand. Generated projections preserve that representation
+mechanically; no special semantic reconstruction is required.
+
+## What generated-table consumers may do
+
+Allowed:
+
+- inspect the generated artifact as an output under test;
+- compare formatting/schema of that projection;
+- verify that machine-specific realization metadata has not contaminated it;
+- publish or pin it explicitly as a derived artifact.
+
+Not allowed:
+
+- derive semantic identity coverage from it when the registry is available;
+- treat a generated row as an independent SID→meaning authority;
+- use it to reconstruct meaning missing from Canon/function-table authority;
+- create a hand-maintained replacement table.
 
 ## Commands
 
@@ -84,20 +111,18 @@ cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function-table.lisp
 python3 scripts/check_semantic_registry.py
 ```
 
-## Consumer rule
+## Remaining work
 
-Other repos **must not** hand-copy this table. Generate from
-`semantic-registry.lisp` or pin a published projection; unknown ID →
-fail-closed.
+- #1046 owns convergence of meaning/domain/law + admitted mechanisms onto the
+  existing Canon/function-table identity row.
+- #1049 owns the general structural guard against host/island SID→meaning
+  authority outside Canon.
+- #1004 retires the generated function-table specifically as an active input API
+  while preserving it as a reproducible output/review projection.
 
-## Readiness verdict for other repos switching to Canon + this table
+## Readiness rule for other repositories
 
-**Not yet.** The registry itself (`semantic-registry.lisp`) has been a
-safe dependency for a while and several repos already generate their
-own projections from it directly (`docs/CANON-MIGRATION-PLAN-2026-09-11.md`).
-This specific function-table artifact is now real (161 rows, not a
-stub) and its tooling no longer conflicts with issue #76, but it still
-lacks the formal-action prose, executable witnesses, and a CI
-freshness check the original issue asks for — a consumer depending on
-it today would be depending on an artifact this repo cannot yet prove
-stays in sync with its own source automatically.
+Prefer the authoritative registry when semantic identity or peer-surface data is
+required. A consumer may use a published generated function-table only as an
+explicitly pinned **derived projection**; it must never become an independent
+source of Lisp meaning.
