@@ -476,6 +476,89 @@ fn requested_keys(manifest: &Manifest, args: &[String]) -> Result<Vec<String>, S
         .ok_or_else(|| "manifest has no default four-kernel profile".to_string())
 }
 
+fn license_accepted(args: &[String], island_key: &str) -> bool {
+    args.iter()
+        .position(|arg| arg == "--accept-license")
+        .and_then(|index| args.get(index + 1))
+        .is_some_and(|value| value.split(',').any(|key| key == island_key))
+}
+
+fn install_dir(root: &Path, island: &Island, target: &str) -> PathBuf {
+    root.join(&island.install_key)
+        .join(&island.runtime_version)
+        .join(target)
+}
+
+fn state_file(root: &Path, island: &Island, target: &str) -> PathBuf {
+    root.join(".state")
+        .join(&island.install_key)
+        .join(&island.runtime_version)
+        .join(format!("{target}.status"))
+}
+
+fn write_install_state(
+    root: &Path,
+    island: &Island,
+    target: &str,
+    state: &str,
+) -> Result<(), String> {
+    let path = state_file(root, island, target);
+    let parent = path
+        .parent()
+        .ok_or_else(|| "invalid installer state path".to_string())?;
+    fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+    let temporary = path.with_extension(format!("tmp-{}", std::process::id()));
+    fs::write(&temporary, state).map_err(|error| error.to_string())?;
+    if path.exists() {
+        fs::remove_file(&path).map_err(|error| error.to_string())?;
+    }
+    fs::rename(&temporary, &path).map_err(|error| error.to_string())
+}
+
+fn read_install_state(root: &Path, island: &Island, target: &str) -> Option<String> {
+    fs::read_to_string(state_file(root, island, target))
+        .ok()
+        .map(|state| state.trim().to_string())
+}
+
+struct InstallLock {
+    path: PathBuf,
+}
+
+impl Drop for InstallLock {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir(&self.path);
+    }
+}
+
+fn acquire_install_lock(target_dir: &Path) -> Result<InstallLock, String> {
+    let lock = target_dir.with_extension("install-lock");
+    if let Some(parent) = lock.parent() {
+        fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+    }
+    let deadline = Instant::now() + Duration::from_secs(120);
+    loop {
+        match fs::create_dir(&lock) {
+            Ok(()) => return Ok(InstallLock { path: lock }),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
+                if Instant::now() >= deadline {
+                    return Err(format!(
+                        "timed out waiting for concurrent install lock {}",
+                        lock.display()
+                    ));
+                }
+                std::thread::sleep(Duration::from_millis(50));
+            }
+            Err(error) => {
+                return Err(format!(
+                    "cannot acquire install lock {}: {error}",
+                    lock.display()
+                ));
+            }
+        }
+    }
+}
+
 fn interpolate_command(command: &[String], root: &Path) -> Vec<String> {
     let root = root.to_string_lossy();
     command
@@ -701,19 +784,27 @@ fn install_release_asset(
         .as_deref()
         .ok_or_else(|| format!("release asset {} has no SHA-256", island.key))?;
     let artifact_kind = entry.artifact.as_deref().unwrap_or("file");
-    let target_dir = root
-        .join(&island.key)
-        .join(&island.runtime_version)
-        .join(&entry.target);
+    let target_dir = install_dir(root, island, &entry.target);
 
     if entry.probe.is_empty() {
         return Err(format!("release asset {} has no bounded probe", island.key));
     }
 
     let probe = interpolate_command(&entry.probe, &target_dir);
-    if bounded_probe(&probe, entry.probe_expect.as_deref()) == "available" {
+    let existing_record = target_dir.join("install-record.txt");
+    if existing_record.is_file() {
+        let outcome = bounded_probe(&probe, entry.probe_expect.as_deref());
         return Ok(format!(
-            "already available {} {}",
+            "already installed {} {}: {outcome}",
+            island.key, island.runtime_version
+        ));
+    }
+
+    let _lock = acquire_install_lock(&target_dir)?;
+    if existing_record.is_file() {
+        let outcome = bounded_probe(&probe, entry.probe_expect.as_deref());
+        return Ok(format!(
+            "already installed {} {}: {outcome}",
             island.key, island.runtime_version
         ));
     }
@@ -842,19 +933,12 @@ fn install_release_asset(
 
     let _ = fs::remove_file(&temporary);
 
-    let final_probe = interpolate_command(&entry.probe, &target_dir);
-    let outcome = bounded_probe(&final_probe, entry.probe_expect.as_deref());
-    if outcome != "available" {
-        return Err(format!(
-            "published {} but bounded probe failed",
-            island.key
-        ));
-    }
-
     write_install_record(&target_dir, island, entry)?;
 
+    let final_probe = interpolate_command(&entry.probe, &target_dir);
+    let outcome = bounded_probe(&final_probe, entry.probe_expect.as_deref());
     Ok(format!(
-        "installed {} {}: available",
+        "installed {} {}: {outcome}",
         island.key, island.runtime_version
     ))
 }
@@ -964,6 +1048,18 @@ pub fn run(args: &[String]) -> Result<String, String> {
                     .find(|island| island.key == key)
                     .ok_or_else(|| format!("unknown island: {key}"))?;
                 let entry = island.platforms.iter().find(|entry| entry.target == target);
+
+                if !dry_run
+                    && island.license_acceptance_required
+                    && !license_accepted(args, &island.key)
+                {
+                    write_install_state(&root, island, target, "failed-install")?;
+                    return Err(format!(
+                        "license acceptance required for {}; pass --accept-license {}",
+                        island.key, island.key
+                    ));
+                }
+
                 match entry {
                     Some(entry) if entry.provider == "embedded" => {
                         rows.push(format!(
@@ -971,17 +1067,48 @@ pub fn run(args: &[String]) -> Result<String, String> {
                             island.key, island.runtime_version
                         ));
                     }
-                    Some(entry) if matches!(entry.provider.as_str(), "apt" | "winget") && !dry_run => {
-                        rows.push(install_system_package(island, entry)?);
+                    Some(entry)
+                        if matches!(entry.provider.as_str(), "apt" | "winget") && !dry_run =>
+                    {
+                        write_install_state(&root, island, target, "installing")?;
+                        match install_system_package(island, entry) {
+                            Ok(message) => {
+                                write_install_state(&root, island, target, "available")?;
+                                rows.push(message);
+                            }
+                            Err(error) => {
+                                write_install_state(&root, island, target, "failed-install")?;
+                                return Err(error);
+                            }
+                        }
                     }
-                    Some(entry) if matches!(entry.provider.as_str(), "apt" | "winget") => rows.push(format!(
-                        "install {} via {} package {}",
-                        island.key,
-                        entry.provider,
-                        entry.package.as_deref().unwrap_or("unknown")
-                    )),
+                    Some(entry) if matches!(entry.provider.as_str(), "apt" | "winget") => rows.push(
+                        format!(
+                            "install {} via {} package {}",
+                            island.key,
+                            entry.provider,
+                            entry.package.as_deref().unwrap_or("unknown")
+                        ),
+                    ),
                     Some(entry) if entry.provider == "release-asset" && !dry_run => {
-                        rows.push(install_release_asset(island, entry, &root)?);
+                        write_install_state(&root, island, target, "installing")?;
+                        match install_release_asset(island, entry, &root) {
+                            Ok(message) => {
+                                let state = if message.ends_with(": available") {
+                                    "available"
+                                } else if message.ends_with(": probe-failed") {
+                                    "probe-failed"
+                                } else {
+                                    "available"
+                                };
+                                write_install_state(&root, island, target, state)?;
+                                rows.push(message);
+                            }
+                            Err(error) => {
+                                write_install_state(&root, island, target, "failed-install")?;
+                                return Err(error);
+                            }
+                        }
                     }
                     Some(entry) if entry.provider == "release-asset" => rows.push(format!(
                         "download + verify + install {} {}",
@@ -1032,18 +1159,29 @@ pub fn run(args: &[String]) -> Result<String, String> {
                     continue;
                 }
 
-                let probe = interpolate_command(
-                    &entry.probe,
-                    &root
-                        .join(&island.key)
-                        .join(&island.runtime_version)
-                        .join(target),
-                );
-                let status = if probe.is_empty() {
+                let target_dir = install_dir(&root, &island, target);
+                let probe = interpolate_command(&entry.probe, &target_dir);
+                let observed = if probe.is_empty() {
                     "absent"
                 } else {
                     bounded_probe(&probe, entry.probe_expect.as_deref())
                 };
+                let status = if observed == "available" {
+                    "available".to_string()
+                } else if let Some(state) = read_install_state(&root, &island, target) {
+                    if matches!(state.as_str(), "installing" | "failed-install" | "probe-failed") {
+                        state
+                    } else if target_dir.join("install-record.txt").is_file() {
+                        "probe-failed".to_string()
+                    } else {
+                        "absent".to_string()
+                    }
+                } else if target_dir.join("install-record.txt").is_file() {
+                    "probe-failed".to_string()
+                } else {
+                    "absent".to_string()
+                };
+
                 rows.push(format!(
                     "{} {} {} {}: {}",
                     island.key, island.runtime_version, target, island.provenance, status
