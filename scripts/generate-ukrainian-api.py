@@ -32,7 +32,7 @@ ROW_RE = re.compile(r'^\s*\("([01]{8})"\s')
 
 CATEGORY_TITLES = OrderedDict(
     [
-        ("canon", "Канон 0+7"),
+        ("canon", "canon() + McCarthy-7"),
         ("forms", "Форми та макроси визначення"),
         ("arithmetic", "Арифметика"),
         ("comparison", "Порівняння"),
