@@ -6,6 +6,7 @@ on:
       - "lib/surface/semantic-registry-api.lisp"
       - "crates/my-lisp/tests/semantic_registry_lisp.rs"
       - "tests/fixtures/semantic-registry-self-hosted-witness.lisp"
+      - "scripts/generate-rust-semantic-registry.lisp"
       - ".github/workflows/956-semreg-targeted.yml"
 
 jobs:
