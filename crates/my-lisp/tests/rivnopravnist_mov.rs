@@ -155,7 +155,7 @@ fn семантичні_ідентифікатори_складаються_ті
     // Intentional floor, not a restated fact: the registry only grows, so an
     // exact count would silently rot. 140 is the stable-UK-surface size at
     // the time this floor was written (TEST-ARCHITECTURE-1 step 2).
-    assert_eq!(побачені.len(), 169, "sr/2 має містити Canon 0 + 168 identities");
+    assert_eq!(побачені.len(), 170, "semantic registry має містити Canon 0 + 169 identities");
 }
 
 #[test]
