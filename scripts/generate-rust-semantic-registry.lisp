@@ -114,3 +114,4 @@
   (t
    (write-file output-path generated)
    (print "Rust semantic registry projection written")))
+)
