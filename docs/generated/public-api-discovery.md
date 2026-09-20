@@ -3,10 +3,10 @@
 > Згенеровано `scripts/public_api_inventory.py`. Цей звіт знаходить
 > top-level визначення, але **не** оголошує їх публічним API.
 
-- проскановано бібліотечних файлів: 35
-- top-level функцій: 854
+- проскановано бібліотечних файлів: 36
+- top-level функцій: 868
 - top-level макросів: 34
-- усього визначень: 888
+- усього визначень: 902
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -755,6 +755,20 @@
 | `lib/translation.lisp` | function | `translation-evidence-entry` | unreviewed |
 | `lib/translation.lisp` | function | `translation-evidence-next` | unreviewed |
 | `lib/translation.lisp` | function | `translation-review-with-evidence` | unreviewed |
+| `lib/u8.lisp` | function | `u8?` | unreviewed |
+| `lib/u8.lisp` | function | `binary->u8` | unreviewed |
+| `lib/u8.lisp` | function | `u8->binary` | unreviewed |
+| `lib/u8.lisp` | function | `u8->integer` | unreviewed |
+| `lib/u8.lisp` | function | `integer->u8` | unreviewed |
+| `lib/u8.lisp` | function | `u8` | unreviewed |
+| `lib/u8.lisp` | function | `u8-and` | unreviewed |
+| `lib/u8.lisp` | function | `u8-or` | unreviewed |
+| `lib/u8.lisp` | function | `u8-xor` | unreviewed |
+| `lib/u8.lisp` | function | `u8-not` | unreviewed |
+| `lib/u8.lisp` | function | `u8-shl` | unreviewed |
+| `lib/u8.lisp` | function | `u8-shr` | unreviewed |
+| `lib/u8.lisp` | function | `u8-add` | unreviewed |
+| `lib/u8.lisp` | function | `u8-sub` | unreviewed |
 | `lib/understand.lisp` | function | `strip-article` | unreviewed |
 | `lib/understand.lisp` | function | `understand-is` | unreviewed |
 | `lib/understand.lisp` | function | `understand-relation` | unreviewed |
