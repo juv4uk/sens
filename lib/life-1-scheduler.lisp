@@ -113,7 +113,7 @@
 (def life-scheduler-quiescence-state
   (lambda (projections lifecycle-state)
     (cond
-      ((atom projections) (structural-kind empty-list)
+      ((atom projections) (quote (structural-kind empty-list))
        (cond
          ((eq lifecycle-state (quote no-transition-required))
           (quote (identity-relation same))
@@ -127,7 +127,7 @@
 (def life-scheduler-quiescence
   (lambda (pending projections lifecycle-state)
     (cond
-      ((atom pending) (structural-kind empty-list)
+      ((atom pending) (quote (structural-kind empty-list))
        (life-scheduler-quiescence-state projections lifecycle-state))
       ((atom pending) (quote (structural-kind pair))
        (quote (quiescence-state active))))))
