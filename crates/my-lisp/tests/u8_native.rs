@@ -89,6 +89,7 @@ fn bitwise_operations_are_fixed_width_and_self_hosted() {
     assert_eq!(eval("(binary 8) (u8-shl 00000001 0)").unwrap(), "00000001");
     assert_eq!(eval("(binary 8) (u8-shl 00000001 1)").unwrap(), "00000010");
     assert_eq!(eval("(binary 8) (u8-shl 00000001 7)").unwrap(), "10000000");
+    assert_eq!(eval("(binary 8) (u8-shl 10000000 1)").unwrap(), "00000000");
     assert_eq!(eval("(binary 8) (u8-shr 10000000 7)").unwrap(), "00000001");
 }
 
