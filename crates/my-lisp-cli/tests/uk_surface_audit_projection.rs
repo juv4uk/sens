@@ -13,25 +13,29 @@ fn my_lisp(cwd: &Path) -> Command {
     command
 }
 
-fn numeric_row_id_list(source: &str) -> Vec<u32> {
+fn semantic_id_list(source: &str) -> Vec<String> {
     source
         .lines()
         .filter_map(|line| {
             let line = line.trim_start();
             let rest = line.strip_prefix('(')?;
-            let token = rest.split_whitespace().next()?;
-            token.parse::<u32>().ok()
+            let token = rest.split_whitespace().next()?.trim_matches('"');
+            if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+                Some(token.to_string())
+            } else {
+                None
+            }
         })
         .collect()
 }
 
-fn numeric_row_ids(source: &str) -> BTreeSet<u32> {
-    numeric_row_id_list(source).into_iter().collect()
+fn semantic_ids(source: &str) -> BTreeSet<String> {
+    semantic_id_list(source).into_iter().collect()
 }
 
 #[derive(Debug)]
 struct UkrCandidateRow {
-    id: u32,
+    id: String,
     ukr: String,
 }
 
@@ -41,8 +45,11 @@ fn ukr_candidate_rows(source: &str) -> Vec<UkrCandidateRow> {
         .filter_map(|line| {
             let line = line.trim_start();
             let rest = line.strip_prefix('(')?;
-            let token = rest.split_whitespace().next()?;
-            let id = token.parse::<u32>().ok()?;
+            let token = rest.split_whitespace().next()?.trim_matches('"');
+            if token.len() != 8 || !token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+                return None;
+            }
+            let id = token.to_string();
 
             let mut quoted = line.split('"');
             quoted.next()?;
@@ -55,7 +62,7 @@ fn ukr_candidate_rows(source: &str) -> Vec<UkrCandidateRow> {
         .collect()
 }
 
-fn ukr_aliases(source: &str) -> BTreeMap<u32, u32> {
+fn ukr_aliases(source: &str) -> BTreeMap<String, String> {
     let mut aliases = BTreeMap::new();
     for line in source.lines() {
         let line = line.trim_start();
@@ -65,18 +72,26 @@ fn ukr_aliases(source: &str) -> BTreeMap<u32, u32> {
         let mut fields = rest.trim_end_matches(')').split_whitespace();
         let from = fields
             .next()
-            .and_then(|field| field.parse::<u32>().ok())
-            .expect("ukr alias source must be a numeric semantic ID");
+            .map(|field| field.trim_matches('"').to_string())
+            .expect("ukr alias source must be a semantic ID");
         let to = fields
             .next()
-            .and_then(|field| field.parse::<u32>().ok())
-            .expect("ukr alias target must be a numeric semantic ID");
+            .map(|field| field.trim_matches('"').to_string())
+            .expect("ukr alias target must be a semantic ID");
         assert!(
             fields.next().is_none(),
             "ukr alias rows must have exactly source and target IDs"
         );
         assert!(
-            aliases.insert(from, to).is_none(),
+            from.len() == 8 && from.bytes().all(|byte| matches!(byte, b'0' | b'1')),
+            "ukr alias source must be an 8-bit semantic ID: {from}"
+        );
+        assert!(
+            to.len() == 8 && to.bytes().all(|byte| matches!(byte, b'0' | b'1')),
+            "ukr alias target must be an 8-bit semantic ID: {to}"
+        );
+        assert!(
+            aliases.insert(from.clone(), to).is_none(),
             "ukr alias source {from} must be declared only once"
         );
     }
@@ -84,9 +99,30 @@ fn ukr_aliases(source: &str) -> BTreeMap<u32, u32> {
 }
 
 #[test]
+fn function_table_projection_is_fresh_from_canonical_registry() {
+    let root = repo_root();
+    let script = root.join("scripts/generate-function-table.lisp");
+    let output = my_lisp(&root)
+        .arg(&script)
+        .arg("--check")
+        .output()
+        .expect("function-table generator freshness check should run through real my-lisp CLI");
+
+    assert!(
+        output.status.success(),
+        "generated function-table projections must be reproducible from canonical registry\nstdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+#[test]
 fn uk_surface_audit_generator_runs_through_real_my_lisp_cli() {
     let root = repo_root();
     let script = root.join("scripts/generate-uk-surface-audit.lisp");
+    let audit = root.join("lib/generated/uk-surface-audit.lisp");
+    let before = fs::read_to_string(&audit).expect("committed UK surface audit must be readable");
+
     let output = my_lisp(&root)
         .arg(&script)
         .output()
@@ -98,44 +134,43 @@ fn uk_surface_audit_generator_runs_through_real_my_lisp_cli() {
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     );
+
+    let after = fs::read_to_string(&audit).expect("regenerated UK surface audit must be readable");
+    assert_eq!(
+        after, before,
+        "committed UK surface audit must be byte-fresh against the Lisp-owned generator"
+    );
 }
 
 #[test]
-fn ukrainian_staging_profile_covers_every_function_table_identity() {
+fn ukrainian_staging_profile_covers_every_registry_callable_identity() {
     let root = repo_root();
-    let function_table = fs::read_to_string(root.join("lib/generated/function-table.lisp"))
-        .expect("generated function table must be readable");
+    let registry = fs::read_to_string(root.join("lib/surface/semantic-registry.lisp"))
+        .expect("semantic registry must be readable");
     let profile = fs::read_to_string(root.join("lib/surface/український-профіль-джерела.lisp"))
         .expect("Ukrainian staging profile must be readable");
 
-    let expected_rows = numeric_row_id_list(&function_table);
-    let actual_rows = numeric_row_id_list(&profile);
-    let expected = numeric_row_ids(&function_table);
-    let actual = numeric_row_ids(&profile);
+    let expected_rows = semantic_id_list(&registry)
+        .into_iter()
+        .filter(|id| id != "00000000")
+        .collect::<Vec<_>>();
+    let actual_rows = semantic_id_list(&profile);
+    let expected = expected_rows.iter().cloned().collect::<BTreeSet<_>>();
+    let actual = semantic_ids(&profile);
 
     assert_eq!(
         expected_rows.len(),
         expected.len(),
-        "function table must not contain duplicate semantic identity rows"
+        "semantic registry must not contain duplicate callable identity rows"
     );
     assert_eq!(
         actual_rows.len(),
         actual.len(),
-        "Ukrainian staging must contain exactly one row per semantic identity"
-    );
-    assert_eq!(
-        expected_rows.len(),
-        167,
-        "function table inventory changed; review UK coverage gate"
-    );
-    assert_eq!(
-        actual_rows.len(),
-        167,
-        "Ukrainian staging row count must stay exactly aligned with the 167-row function table"
+        "Ukrainian staging must contain exactly one row per callable semantic identity"
     );
     assert_eq!(
         actual, expected,
-        "Ukrainian staging must explicitly cover every semantic identity, including compatibility-only rows"
+        "Ukrainian staging must explicitly cover every Canon/function-table callable identity, including compatibility-only rows"
     );
 }
 
@@ -146,27 +181,21 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
         .expect("Ukrainian staging profile must be readable");
 
     let rows = ukr_candidate_rows(&profile);
-    assert_eq!(
-        rows.len(),
-        167,
-        "coherence audit must inspect every Ukrainian staging candidate"
-    );
-
-    let by_id: BTreeMap<u32, &UkrCandidateRow> =
-        rows.iter().map(|row| (row.id, row)).collect();
+    let by_id: BTreeMap<String, &UkrCandidateRow> =
+        rows.iter().map(|row| (row.id.clone(), row)).collect();
     let aliases = ukr_aliases(&profile);
 
-    for (&source_id, &target_id) in &aliases {
+    for (source_id, target_id) in &aliases {
         let source = by_id
-            .get(&source_id)
+            .get(source_id)
             .copied()
             .unwrap_or_else(|| panic!("ukr alias source {source_id} is not a staging identity"));
         let target = by_id
-            .get(&target_id)
+            .get(target_id)
             .copied()
             .unwrap_or_else(|| panic!("ukr alias target {target_id} is not a staging identity"));
         assert!(
-            !aliases.contains_key(&target_id),
+            !aliases.contains_key(target_id),
             "ukr alias {source_id} -> {target_id} must point directly to a canonical owner"
         );
         assert_eq!(
@@ -195,17 +224,17 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
             canonical.len(),
             1,
             "duplicate ukr candidate {name:?} must have exactly one canonical owner; rows: {:?}",
-            group.iter().map(|row| row.id).collect::<Vec<_>>()
+            group.iter().map(|row| row.id.as_str()).collect::<Vec<_>>()
         );
 
-        let owner_id = canonical[0].id;
+        let owner_id = canonical[0].id.clone();
         for row in group {
             if row.id == owner_id {
                 continue;
             }
             assert_eq!(
-                aliases.get(&row.id).copied(),
-                Some(owner_id),
+                aliases.get(&row.id),
+                Some(&owner_id),
                 "duplicate ukr candidate {name:?} on row {} must explicitly alias canonical owner {}",
                 row.id,
                 owner_id
