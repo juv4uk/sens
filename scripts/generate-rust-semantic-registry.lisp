@@ -31,7 +31,7 @@
       ((equal? value (quote ()))
        (write-to-string ""))
       (t
-       (str+ """ (write-to-string value) """))))))
+       (str+ "\"" (write-to-string value) "\""))))))
 
 (def render-surface
   (lambda (entry)
