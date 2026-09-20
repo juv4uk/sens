@@ -69,11 +69,21 @@
       ((atom rows) (structural-kind pair)
        (let* ((row (car rows))
               (path (second row))
-              ; Scan a stable textual representation so bootstrap/host file
-              ; result wrappers cannot disable structural authority detection.
-              (source (write-to-string (read-file path)))
-              (class (violation-class path source)))
+              (raw-source (read-file path)))
          (cond
+           ((and (active-host-source? path)
+                 (not (string? raw-source)))
+            (list (quote semantic-authority-violation)
+                  path
+                  (quote unreadable-active-host-source)
+                  "active host source must be readable text for authority review"))
+           (t
+            (let* ((source
+                     (cond
+                       ((string? raw-source) raw-source)
+                       (t (write-to-string raw-source))))
+                   (class (violation-class path source)))
+              (cond
            ((eq class (quote allowed)) (identity-relation same)
             (scan (cdr rows)))
            ((eq class (quote not-active-host-source)) (identity-relation same)
@@ -84,9 +94,9 @@
             (scan (cdr rows)))
            ((eq class (quote allowed)) (identity-relation distinct)
             (scan (cdr rows)))
-           (t
-            (list (quote semantic-authority-violation)
-                  path class
-                  "new host-side semantic authority requires explicit review"))))))))
+                (t
+                 (list (quote semantic-authority-violation)
+                       path class
+                       "new host-side semantic authority requires explicit review"))))))))))
 
 (print (scan changed))
