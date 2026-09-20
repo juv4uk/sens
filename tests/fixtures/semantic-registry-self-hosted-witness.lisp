@@ -30,8 +30,9 @@
 
 ; Machine-readable handoff for downstream consumers.
 ; Git commit pinning is provenance and stays outside language semantics.
-; The digest is content identity of the exact canonical source bytes; identities
-; are projected directly from the parsed authority and remain Binary values.
+; The digest is content identity of the exact canonical source bytes. The full
+; parsed canonical rows are handed off directly, so Binary SID values are
+; preserved without building a second identity projection or recursive shadow table.
 (def semantic-registry-handoff-witness
   (lambda (source)
     (let* ((registry (semantic-registry-read-source source))
