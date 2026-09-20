@@ -6,8 +6,8 @@
 ; an admitted semantic-registry row.
 
 (def semantic-registry-self-hosted-witness
-  (lambda ()
-    (let* ((registry (semantic-registry-read))
+  (lambda (source)
+    (let* ((registry (semantic-registry-read-source source))
            (rows (semantic-registry-rows registry))
            (quote-row (semantic-registry-row 00000001))
            (quote-id (semantic-registry-id 'quote))
