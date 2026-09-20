@@ -254,6 +254,74 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     );
 }
 
+
+#[test]
+fn scheduler_deduplicates_real_invocation_and_rejects_malformed_trigger() {
+    let prolog = PrologKernel::default()
+        .execute(
+            prolog_fixture(),
+            &PrologRequest::new(
+                INVOKE_ID,
+                PrologQuery::new("ancestor(alice, X)", "X"),
+            ),
+        )
+        .expect("real SWI-Prolog runtime");
+    let values = decode_canonical_atom_list(&prolog.stdout)
+        .expect("bounded Prolog canonical atom list");
+    let source_observation = format!(
+        "(prolog-substitution-observation (source-ref observation-42) (variable ancestor-answer) (values {}))",
+        values.join(" ")
+    );
+
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    load_bridge(&mut session);
+    load_scheduler(&mut session);
+
+    let projected = eval_program(
+        &format!(
+            "(prolog-substitutions-to-datalog-facts (quote {source_observation}))"
+        ),
+        &mut session,
+    )
+    .expect("Lisp-owned projection must execute")
+    .value
+    .to_string();
+    let (source_ref, _) = projected_facts(&projected);
+
+    let invocation = format!(
+        "(pending-invocation (producer datalog) (trigger (projection-ready prolog-substitutions-to-datalog-facts)) (provenance-ref {}) (priority ordinary) (semantic-id "{:08b}"))",
+        source_ref, INVOKE_ID
+    );
+
+    let deduplicated = eval_text(
+        &format!(
+            "(life-scheduler-pending (list (quote {invocation}) (quote {invocation})))"
+        ),
+        &mut session,
+    );
+    let expected_deduplicated = eval_text(
+        &format!("(list (quote {invocation}))"),
+        &mut session,
+    );
+    assert_eq!(deduplicated, expected_deduplicated);
+
+    let malformed = format!(
+        "(pending-invocation (producer datalog) (trigger ()) (provenance-ref {}) (priority ordinary) (semantic-id "{:08b}"))",
+        source_ref, INVOKE_ID
+    );
+    assert_eq!(
+        eval_text(
+            &format!(
+                "(life-scheduler-projection-ready? (quote {malformed}) (quote ((projection-ready prolog-substitutions-to-datalog-facts {}))))",
+                source_ref
+            ),
+            &mut session,
+        ),
+        "absent"
+    );
+}
+
 #[test]
 fn malformed_projection_input_is_named_failure_not_false() {
     let mut session = Session::default();
