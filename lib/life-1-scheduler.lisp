@@ -26,7 +26,8 @@
        (let ((found (assoc field (cdr entry))))
          (cond
            ((atom found) (quote (structural-kind empty-list)) (quote ()))
-           ((atom found) (quote (structural-kind pair)) (cdr found))))))))
+           ((atom found) (quote (structural-kind pair))
+            (car (cdr found)))))))))
 
 (def life-scheduler-invocation-key
   (lambda (invocation)
@@ -68,10 +69,8 @@
 
 (def life-scheduler-projection-ready?
   (lambda (invocation projections)
-    (let* ((trigger-row (life-scheduler-field invocation (quote trigger)))
-           (provenance-row (life-scheduler-field invocation (quote provenance-ref)))
-           (trigger (car trigger-row))
-           (provenance (car provenance-row))
+    (let* ((trigger (life-scheduler-field invocation (quote trigger)))
+           (provenance (life-scheduler-field invocation (quote provenance-ref)))
            (expected
              (list
                (quote projection-ready)
