@@ -59,64 +59,52 @@
                     observation-42))))))
       (cond
         ((atom selection) (structural-kind empty-list)
-         (list (quote life-1-scheduler-witness)
-               (list (quote status) (quote fail))
-               (list (quote detail) (quote missing-selection))))
+         (list
+           (quote life-1-scheduler-witness)
+           (list (quote status) (quote fail))
+           (list (quote detail) (quote missing-selection))))
         ((atom selection) (structural-kind pair)
-         (cond
-           ((eq (car (cdr selection)) (quote ready))
-            (identity-relation same)
-            (let ((remaining (car (cdr (cdr (cdr selection))))))
-              (cond
-                ((equal? remaining (list second))
-                 (structural-relation same)
-                 (cond
-                   ((equal?
-                      (life-scheduler-quiescence
-                        (quote ())
-                        (quote ())
-                        (quote no-transition-required))
-                      (quote (quiescence-state quiescent)))
+         (let* ((ready (car (cdr selection)))
+                (remaining (car (cdr (cdr (cdr selection)))))
+                (dedup-ok (equal? remaining (list second)))
+                (quiescence-ok
+                  (equal?
+                    (life-scheduler-quiescence
+                      (quote ())
+                      (quote ())
+                      (quote no-transition-required))
+                    (quote (quiescence-state quiescent))))
+                (adversarial-ok
+                  (equal?
+                    (list wrong-provenance wrong-bridge)
+                    (quote (absent absent)))))
+           (cond
+             ((equal?
+                (list ready dedup-ok quiescence-ok adversarial-ok)
+                (quote
+                  (ready
                     (structural-relation same)
-                    (cond
-                      ((equal? (list wrong-provenance wrong-bridge)
-                               (quote (absent absent)))
-                       (structural-relation same)
-                       (list
-                         (quote life-1-scheduler-witness)
-                         (list (quote status) (quote pass))
-                         (list (quote detail)
-                               (quote deduplicated-activation-and-quiescence))))
-                      ((equal? (list wrong-provenance wrong-bridge)
-                               (quote (absent absent)))
-                       (structural-relation distinct)
-                       (list
-                         (quote life-1-scheduler-witness)
-                         (list (quote status) (quote fail))
-                         (list (quote detail)
-                               (quote adversarial-readiness-mismatch))))))
-                   ((equal?
-                      (life-scheduler-quiescence
-                        (quote ())
-                        (quote ())
-                        (quote no-transition-required))
-                      (quote (quiescence-state quiescent)))
-                    (structural-relation distinct)
-                    (list
-                      (quote life-1-scheduler-witness)
-                      (list (quote status) (quote fail))
-                      (list (quote detail) (quote quiescence-mismatch)))))
-                ((equal? remaining (list second))
-                 (structural-relation distinct)
-                 (list
-                   (quote life-1-scheduler-witness)
-                   (list (quote status) (quote fail))
-                   (list (quote detail) (quote deduplication-mismatch))))))
-           ((eq (car (cdr selection)) (quote ready))
-            (identity-relation distinct)
-            (list
-              (quote life-1-scheduler-witness)
-              (list (quote status) (quote fail))
-              (list (quote detail) (quote readiness-mismatch))))))))))))
+                    (structural-relation same)
+                    (structural-relation same))))
+              (structural-relation same)
+              (list
+                (quote life-1-scheduler-witness)
+                (list (quote status) (quote pass))
+                (list (quote detail)
+                      (quote deduplicated-activation-and-quiescence))))
+             ((equal? (list wrong-provenance wrong-bridge)
+                      (quote (absent absent)))
+              (structural-relation same)
+              (list
+                (quote life-1-scheduler-witness)
+                (list (quote status) (quote fail))
+                (list (quote detail) (quote scheduler-invariant-mismatch))))
+             ((equal? (list wrong-provenance wrong-bridge)
+                      (quote (absent absent)))
+              (structural-relation distinct)
+              (list
+                (quote life-1-scheduler-witness)
+                (list (quote status) (quote fail))
+                (list (quote detail) (quote adversarial-readiness-mismatch))))))))))))
 
 (life-1-scheduler-witness)
