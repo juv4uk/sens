@@ -66,16 +66,32 @@ fn matrix_is_a_view_over_existing_source_axes() {
         let machine_sid = field_string(&fields, "machine-entry-sid").expect("machine SID");
         assert!(seen.insert(sid.to_string()), "duplicate matrix SID {sid}");
         assert_eq!(sid, math_sid);
-        assert_eq!(sid, kernel_sid);
         assert_eq!(sid, machine_sid);
         assert_eq!(sid.len(), 8);
         assert!(sid.chars().all(|c| c == '0' || c == '1'));
         assert!(registry.contains(&format!("(\"{sid}\" ")), "SID {sid} absent from sr/2");
         assert!(math_source.contains(sid));
-        assert!(kernel_source.contains(sid));
+        match kernel_sid {
+            "absent" => {}
+            present => {
+                assert_eq!(sid, present);
+                assert!(kernel_source.contains(sid));
+            }
+        }
         assert!(machine_source.contains(sid));
     }
     assert_eq!(seen.len(), 5);
+
+    let exact_add = rows.iter().find(|row| {
+        let ExprKind::List(fields) = &row.kind else { return false; };
+        field_string(fields, "sid") == Some("00001100")
+    }).expect("#845 exact-add row");
+    let ExprKind::List(exact_add_fields) = &exact_add.kind else { unreachable!() };
+    assert_eq!(
+        field_string(exact_add_fields, "kernel-entry-sid"),
+        Some("absent"),
+        "no kernel witness is a valid explicit coordinate, not fabricated evidence"
+    );
 
     // Boundary-specific evidence required by the issue.
     assert!(math_source.contains("non-mathematical-in-this-slice"));
