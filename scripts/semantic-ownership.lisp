@@ -304,15 +304,32 @@
             (paths-present-verdict evidence (migration-key row)))
            (t (ownership-ok))))))))
 
+(def ownership-row-static-verdict
+  (lambda (row check-paths)
+    (let ((shape (ownership-row-shape-verdict row)))
+      (cond
+        ((not (ownership-ok? shape)) shape)
+        (t
+         (let ((enum-verdict (ownership-row-enum-verdict row)))
+           (cond
+             ((not (ownership-ok? enum-verdict)) enum-verdict)
+             (t
+              (let ((pairing-verdict (ownership-row-pairing-verdict row)))
+                (cond
+                  ((not (ownership-ok? pairing-verdict)) pairing-verdict)
+                  (t
+                   (ownership-row-evidence-verdict row check-paths))))))))))))
+
 (def validate-ownership-rows
   (lambda (rows seen-keys seen-semantic check-paths)
     (cond
       ((atom rows) (ownership-ok))
       (t
        (let* ((row (car rows))
-              (shape (ownership-row-shape-verdict row)))
+              (static-verdict
+                (ownership-row-static-verdict row check-paths)))
          (cond
-           ((not (ownership-ok? shape)) shape)
+           ((not (ownership-ok? static-verdict)) static-verdict)
            ((member? (ownership-key row) seen-keys)
             (ownership-violation
               (quote duplicate-key)
@@ -324,33 +341,16 @@
               (quote duplicate-semantic-id)
               (ownership-semantic-id row)))
            (t
-            (let ((enum-verdict (ownership-row-enum-verdict row)))
+            (validate-ownership-rows
+              (cdr rows)
+              (cons (ownership-key row) seen-keys)
               (cond
-                ((not (ownership-ok? enum-verdict)) enum-verdict)
+                ((dash? (ownership-semantic-id row)) seen-semantic)
                 (t
-                 (let ((pairing-verdict
-                         (ownership-row-pairing-verdict row)))
-                   (cond
-                     ((not (ownership-ok? pairing-verdict))
-                      pairing-verdict)
-                     (t
-                      (let ((evidence-verdict
-                              (ownership-row-evidence-verdict row check-paths)))
-                        (cond
-                          ((not (ownership-ok? evidence-verdict))
-                           evidence-verdict)
-                          (t
-                           (validate-ownership-rows
-                             (cdr rows)
-                             (cons (ownership-key row) seen-keys)
-                             (cond
-                               ((dash? (ownership-semantic-id row))
-                                seen-semantic)
-                               (t
-                                (cons
-                                  (ownership-semantic-id row)
-                                  seen-semantic)))
-                             check-paths))))))))))))))))))
+                 (cons
+                   (ownership-semantic-id row)
+                   seen-semantic)))
+              check-paths))))))))
 
 (def collect-keys
   (lambda (rows)
