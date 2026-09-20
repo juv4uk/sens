@@ -40,96 +40,58 @@ fn ratified_ukr_name_resolves_to_same_identity_as_current_uk() {
 
 #[test]
 fn admitted_ukr_registry_spellings_never_require_latin_layout() {
-    let source = include_str!("../../../lib/surface/semantic-registry.lisp");
     let mut admitted = 0usize;
-
-    assert!(
-        !source.contains("(full-uk "),
-        "registry must use ukr, not a duplicate full-uk namespace"
-    );
-
-    for line in source.lines() {
-        let mut rest = line;
-        while let Some(offset) = rest.find("(ukr ") {
-            rest = &rest[offset + "(ukr ".len()..];
-            let Some(end) = rest.find(')') else {
-                panic!("unterminated ukr surface entry: {line}");
-            };
-            let fields = rest[..end].split_whitespace().collect::<Vec<_>>();
-            assert_eq!(
-                fields.len(),
-                1,
-                "ukr surface entry must be (ukr spelling) or (ukr ()): {line}"
-            );
-            let name = fields[0];
-            if name != "()" {
+    for semantic_id in my_lisp::semantic_registry_export::admitted_semantic_ids() {
+        for row in my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
+        {
+            if row.namespace == "ukr" {
                 admitted += 1;
                 assert!(
-                    !name.chars().any(|character| character.is_ascii_alphabetic()),
-                    "admitted ukr spelling requires Latin layout: {name}"
+                    !row.name.chars().any(|character| character.is_ascii_alphabetic()),
+                    "admitted ukr spelling requires Latin layout: {}",
+                    row.name
                 );
             }
-            rest = &rest[end + 1..];
         }
     }
-
-    assert!(
-        admitted > 0,
-        "registry must contain at least one admitted ukr spelling"
-    );
+    assert!(admitted > 0, "registry must contain at least one admitted ukr spelling");
 }
 
 #[test]
 fn full_ukr_names_preserve_action_protocol_and_representation_semantics() {
-    let source = include_str!("../../../lib/surface/semantic-registry.lisp");
     let expected = [
-        ("00001100", "(ukr додати)"),
-        ("00001101", "(ukr відняти)"),
-        ("01010100", "(ukr буфер-32-бітних-цілих-зі-знаком)"),
-        ("10100000", "(ukr розібрати-текст-формату-джейсон)"),
-        (
-            "10100001",
-            "(ukr обчислити-хеш-ша-256-тексту-у-шістнадцятковому-записі)",
-        ),
-        (
-            "10100011",
-            "(ukr прочитати-текст-з-з'єднання-протоколу-керування-передаванням)",
-        ),
-        (
-            "10100100",
-            "(ukr записати-текст-у-з'єднання-протоколу-керування-передаванням)",
-        ),
-        (
-            "10100101",
-            "(ukr слухати-порт-протоколу-керування-передаванням)",
-        ),
+        ("00001100", "додати"),
+        ("00001101", "відняти"),
+        ("01010100", "буфер-32-бітних-цілих-зі-знаком"),
+        ("10100000", "розібрати-текст-формату-джейсон"),
+        ("10100001", "обчислити-хеш-ша-256-тексту-у-шістнадцятковому-записі"),
+        ("10100011", "прочитати-текст-з-з'єднання-протоколу-керування-передаванням"),
+        ("10100100", "записати-текст-у-з'єднання-протоколу-керування-передаванням"),
+        ("10100101", "слухати-порт-протоколу-керування-передаванням"),
     ];
 
-    for (semantic_id, expected_surface) in expected {
-        let prefix = format!("(\"{semantic_id}\" ");
-        let row = source
-            .lines()
-            .map(str::trim_start)
-            .find(|line| line.starts_with(&prefix))
-            .unwrap_or_else(|| panic!("semantic registry is missing ID {semantic_id}"));
+    for (semantic_id, name) in expected {
+        let id = u8::from_str_radix(semantic_id, 2).expect("binary SID");
         assert!(
-            row.contains(expected_surface),
-            "byte SID {semantic_id} must keep the explicit ukr meaning {expected_surface:?}; row: {row}"
+            my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(id)
+                .iter()
+                .any(|row| row.namespace == "ukr" && row.name == name),
+            "semantic SID {semantic_id} must keep the explicit ukr meaning {name:?}"
         );
     }
 
     for rejected in [
-        "(ukr плюс)",
-        "(ukr мінус)",
-        "(ukr буфер-32-бітних-цілих)",
-        "(ukr розібрати-джейсон)",
-        "(ukr геш-ша-256-у-шістнадцятковий-текст)",
-        "(ukr прочитати-з-мережевого-з'єднання)",
-        "(ukr записати-у-мережеве-з'єднання)",
-        "(ukr слухати-мережеві-з'єднання)",
+        "плюс",
+        "мінус",
+        "буфер-32-бітних-цілих",
+        "розібрати-джейсон",
+        "геш-ша-256-у-шістнадцятковий-текст",
+        "прочитати-з-мережевого-з'єднання",
+        "записати-у-мережеве-з'єднання",
+        "слухати-мережеві-з'єднання",
     ] {
         assert!(
-            !source.contains(rejected),
+            my_lisp::semantic_registry_export::semantic_id_for_admitted_surface(rejected).is_none(),
             "lossy or rejected ukr wording must not return: {rejected}"
         );
     }
