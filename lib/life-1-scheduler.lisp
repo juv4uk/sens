@@ -102,23 +102,31 @@
 
 (def life-scheduler-projection-ready?
   (lambda (invocation projections)
-    (let* ((trigger (life-scheduler-field invocation (quote trigger)))
-           (provenance (life-scheduler-field invocation (quote provenance-ref))))
+    (let* ((trigger-row (life-scheduler-field invocation (quote trigger)))
+           (provenance-row (life-scheduler-field invocation (quote provenance-ref))))
       (cond
-        ((atom trigger)
+        ((atom trigger-row)
          (quote absent))
-        ((atom trigger)
-         (let ((tail (cdr trigger)))
+        ((atom provenance-row)
+         (quote absent))
+        ((atom trigger-row)
+         (let* ((trigger (car trigger-row))
+                (provenance (car provenance-row)))
            (cond
-             ((atom tail)
+             ((atom trigger)
               (quote absent))
-             ((atom tail)
-              (life-scheduler-projection-match?
-                (list
-                  (quote projection-ready)
-                  (car tail)
-                  provenance)
-                projections)))))))))
+             ((atom trigger)
+              (let ((tail (cdr trigger)))
+                (cond
+                  ((atom tail)
+                   (quote absent))
+                  ((atom tail)
+                   (life-scheduler-projection-match?
+                     (list
+                       (quote projection-ready)
+                       (car tail)
+                       provenance)
+                     projections))))))))))))
 
 
 ; #801 — minimal LIFE-1 orchestration scheduler.
