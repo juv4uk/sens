@@ -49,6 +49,10 @@ impl NanBox {
                 let payload = (i as u32) & 0x0FFF_FFFF;
                 NanBox(MASK_QNAN | (TAG_FIXNUM << 28) | (payload as u64))
             }
+            Value::Binary(binary) => {
+                assert_eq!(binary.width(), 8, "fpga layout currently supports only 8-bit binary values");
+                NanBox(MASK_QNAN | (12 << 28) | binary.value())
+            }
             Value::Rational(r) => {
                 let ptr = r as *const Rational as u64;
                 NanBox(Self::pack_ptr(TAG_RATIONAL, ptr))
