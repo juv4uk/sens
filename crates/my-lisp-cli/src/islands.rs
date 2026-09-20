@@ -227,6 +227,53 @@ fn requested_keys(manifest: &Manifest, args: &[String]) -> Result<Vec<String>, S
         .ok_or_else(|| format!("unknown island profile: {profile_key}"))
 }
 
+fn license_accepted(args: &[String], island_key: &str) -> bool {
+    args.iter()
+        .position(|arg| arg == "--accept-license")
+        .and_then(|index| args.get(index + 1))
+        .is_some_and(|value| value.split(',').any(|key| key == island_key))
+}
+
+fn install_dir(root: &str, island: &Island, target: &str) -> std::path::PathBuf {
+    std::path::Path::new(root)
+        .join(&island.install_key)
+        .join(&island.runtime_version)
+        .join(target)
+}
+
+fn state_file(root: &str, island: &Island, target: &str) -> std::path::PathBuf {
+    std::path::Path::new(root)
+        .join(".state")
+        .join(&island.install_key)
+        .join(&island.runtime_version)
+        .join(format!("{target}.status"))
+}
+
+fn write_install_state(
+    root: &str,
+    island: &Island,
+    target: &str,
+    state: &str,
+) -> Result<(), String> {
+    let path = state_file(root, island, target);
+    let parent = path
+        .parent()
+        .ok_or_else(|| "invalid installer state path".to_string())?;
+    fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+    let temporary = path.with_extension(format!("tmp-{}", std::process::id()));
+    fs::write(&temporary, state).map_err(|error| error.to_string())?;
+    if path.exists() {
+        fs::remove_file(&path).map_err(|error| error.to_string())?;
+    }
+    fs::rename(&temporary, &path).map_err(|error| error.to_string())
+}
+
+fn read_install_state(root: &str, island: &Island, target: &str) -> Option<String> {
+    fs::read_to_string(state_file(root, island, target))
+        .ok()
+        .map(|state| state.trim().to_string())
+}
+
 pub fn run(args: &[String]) -> Result<String, String> {
     let Some(command) = args.first().map(String::as_str) else {
         return Err("usage: islands plan|status --manifest <path> [--with key,...]".to_string());
@@ -304,68 +351,215 @@ pub fn run(args: &[String]) -> Result<String, String> {
             let root = value_after(args, "--root")?;
             let apply = args.iter().any(|arg| arg == "--apply");
             let dry_run = args.iter().any(|arg| arg == "--dry-run");
-            if !apply && !dry_run { return Err("install requires --dry-run or --apply".to_string()); }
+            if apply == dry_run {
+                return Err("install requires exactly one of --dry-run or --apply".to_string());
+            }
+
             let mut rows = vec!["dry-run: no files will be created".to_string()];
-            if apply { rows[0] = "apply: verified artifacts will be published".to_string(); }
+            if apply {
+                rows[0] = "apply: verified artifacts will be published".to_string();
+            }
+
             for key in requested_keys(&manifest, args)? {
-                let island = manifest.islands.iter().find(|island| island.key == key)
+                let island = manifest
+                    .islands
+                    .iter()
+                    .find(|island| island.key == key)
                     .ok_or_else(|| format!("unknown island: {key}"))?;
-                let entry = island.platforms.iter().find(|entry| entry.target == target);
+                let entry = island
+                    .platforms
+                    .iter()
+                    .find(|entry| entry.target == target);
+
                 match entry {
                     Some(entry) if entry.provider == "release-asset" && apply => {
-                        let url = entry.url.as_deref().ok_or_else(|| format!("release asset {} has no URL", island.key))?;
-                        let expected = entry.sha256.as_deref().ok_or_else(|| format!("release asset {} has no SHA-256", island.key))?;
-                        let target_dir = std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target);
+                        if island.license_acceptance_required
+                            && !license_accepted(args, &island.key)
+                        {
+                            write_install_state(root, island, target, "failed-install")?;
+                            return Err(format!(
+                                "license acceptance required for {}; pass --accept-license {}",
+                                island.key, island.key
+                            ));
+                        }
+                        if entry.artifact_format.as_deref() != Some("raw-binary") {
+                            write_install_state(root, island, target, "failed-install")?;
+                            return Err(format!(
+                                "unsupported artifact format for {}: {}",
+                                island.key,
+                                entry.artifact_format.as_deref().unwrap_or("<missing>")
+                            ));
+                        }
+
+                        let url = entry
+                            .url
+                            .as_deref()
+                            .ok_or_else(|| format!("release asset {} has no URL", island.key))?;
+                        let expected = entry
+                            .sha256
+                            .as_deref()
+                            .ok_or_else(|| format!("release asset {} has no SHA-256", island.key))?;
+                        let target_dir = install_dir(root, island, target);
                         let runtime = target_dir.join("runtime.bin");
+
                         if runtime.is_file() {
-                            let existing = fs::read(&runtime).map_err(|error| error.to_string())?;
-                            let existing_digest = my_lisp::sha256_source(&existing).iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+                            let existing =
+                                fs::read(&runtime).map_err(|error| error.to_string())?;
+                            let existing_digest = my_lisp::sha256_source(&existing)
+                                .iter()
+                                .map(|byte| format!("{byte:02x}"))
+                                .collect::<String>();
                             if existing_digest != expected {
-                                return Err(format!("existing installation checksum mismatch for {}", island.key));
+                                write_install_state(root, island, target, "failed-install")?;
+                                return Err(format!(
+                                    "existing installation checksum mismatch for {}",
+                                    island.key
+                                ));
                             }
                             rows.push(format!("already installed {}", target_dir.display()));
                             continue;
                         }
-                        let temporary = std::path::PathBuf::from(format!("{}.tmp-{}", target_dir.display(), std::process::id()));
-                        if temporary.exists() { let _ = fs::remove_file(&temporary); }
-                        fs::create_dir_all(target_dir.parent().ok_or_else(|| "invalid install target".to_string())?).map_err(|error| error.to_string())?;
+
+                        write_install_state(root, island, target, "installing")?;
+                        let temporary = std::path::PathBuf::from(format!(
+                            "{}.tmp-{}",
+                            target_dir.display(),
+                            std::process::id()
+                        ));
+                        if temporary.exists() {
+                            let _ = fs::remove_file(&temporary);
+                        }
+                        fs::create_dir_all(
+                            target_dir
+                                .parent()
+                                .ok_or_else(|| "invalid install target".to_string())?,
+                        )
+                        .map_err(|error| error.to_string())?;
+
                         if let Err(error) = fetch_artifact(url, &temporary) {
                             let _ = fs::remove_file(&temporary);
+                            write_install_state(root, island, target, "failed-install")?;
                             return Err(error);
                         }
+
                         let bytes = fs::read(&temporary).map_err(|error| error.to_string())?;
-                        let actual = my_lisp::sha256_source(&bytes).iter().map(|byte| format!("{byte:02x}")).collect::<String>();
-                        if actual != expected { let _ = fs::remove_file(&temporary); return Err(format!("checksum mismatch for {}", island.key)); }
-                        let staging = target_dir.with_extension(format!("stage-{}", std::process::id()));
-                        if staging.exists() { let _ = fs::remove_dir_all(&staging); }
+                        let actual = my_lisp::sha256_source(&bytes)
+                            .iter()
+                            .map(|byte| format!("{byte:02x}"))
+                            .collect::<String>();
+                        if actual != expected {
+                            let _ = fs::remove_file(&temporary);
+                            write_install_state(root, island, target, "failed-install")?;
+                            return Err(format!("checksum mismatch for {}", island.key));
+                        }
+
+                        let staging =
+                            target_dir.with_extension(format!("stage-{}", std::process::id()));
+                        if staging.exists() {
+                            let _ = fs::remove_dir_all(&staging);
+                        }
                         fs::create_dir_all(&staging).map_err(|error| error.to_string())?;
-                        fs::rename(&temporary, staging.join("runtime.bin")).map_err(|error| error.to_string())?;
-                        fs::rename(&staging, &target_dir).map_err(|error| error.to_string())?;
+                        if let Err(error) = fs::rename(&temporary, staging.join("runtime.bin")) {
+                            let _ = fs::remove_file(&temporary);
+                            let _ = fs::remove_dir_all(&staging);
+                            write_install_state(root, island, target, "failed-install")?;
+                            return Err(format!(
+                                "cannot stage {}: {error}",
+                                island.key
+                            ));
+                        }
+
+                        if let Err(error) = fs::rename(&staging, &target_dir) {
+                            let _ = fs::remove_dir_all(&staging);
+                            if runtime.is_file() {
+                                let existing =
+                                    fs::read(&runtime).map_err(|read_error| read_error.to_string())?;
+                                let existing_digest = my_lisp::sha256_source(&existing)
+                                    .iter()
+                                    .map(|byte| format!("{byte:02x}"))
+                                    .collect::<String>();
+                                if existing_digest == expected {
+                                    rows.push(format!(
+                                        "already installed {}",
+                                        target_dir.display()
+                                    ));
+                                    continue;
+                                }
+                            }
+                            write_install_state(root, island, target, "failed-install")?;
+                            return Err(format!(
+                                "cannot publish {} atomically: {error}",
+                                island.key
+                            ));
+                        }
+
                         let probe = bounded_probe(&entry.probe);
+                        write_install_state(root, island, target, probe)?;
                         rows.push(format!("published {}: {probe}", target_dir.display()));
                     }
-                    Some(entry) if entry.provider != "unsupported" => rows.push(format!(
-                        "install {}", std::path::Path::new(root).join(&island.key).join(&island.runtime_version).join(target).display()
+                    Some(entry) if entry.provider == "release-asset" => {
+                        rows.push(format!("install {}", install_dir(root, island, target).display()));
+                    }
+                    Some(entry) if entry.provider != "unsupported" => {
+                        rows.push(format!(
+                            "provider {} for {} requires external package-manager action; no automatic fallback",
+                            entry.provider, island.key
+                        ));
+                    }
+                    Some(entry) => rows.push(format!(
+                        "skip {}: unsupported ({})",
+                        island.key,
+                        entry.reason.as_deref().unwrap_or("not supplied")
                     )),
-                    Some(entry) => rows.push(format!("skip {}: unsupported ({})", island.key, entry.reason.as_deref().unwrap_or("not supplied"))),
-                    None => rows.push(format!("skip {}: unsupported target {target}", island.key)),
+                    None => rows.push(format!(
+                        "skip {}: unsupported target {target}",
+                        island.key
+                    )),
                 }
             }
             Ok(rows.join("\n"))
         }
         "status" => {
-            let root = args.iter().position(|arg| arg == "--root")
-                .and_then(|index| args.get(index + 1)).map(String::as_str);
-            Ok(manifest.islands.into_iter().map(|island| {
-            let entry = island.platforms.iter().find(|entry| entry.target == target);
-            let Some(entry) = entry else { return format!("{}: unsupported", island.key) };
-            if entry.provider == "unsupported" { return format!("{}: unsupported", island.key); }
-            let artifact = root.map(|base| std::path::Path::new(base).join(&island.key).join(&island.runtime_version).join(target).join("runtime.bin"));
-            let status = if let Some(_path) = artifact.filter(|path| path.is_file()) {
-                if entry.probe.is_empty() { "available" } else { bounded_probe(&entry.probe) }
-            } else { "absent" };
-            format!("{} {} {} {}: {}", island.key, island.runtime_version, target, island.provenance, status)
-        }).collect::<Vec<_>>().join("\n"))
+            let root = args
+                .iter()
+                .position(|arg| arg == "--root")
+                .and_then(|index| args.get(index + 1))
+                .map(String::as_str);
+
+            Ok(manifest
+                .islands
+                .into_iter()
+                .map(|island| {
+                    let entry = island.platforms.iter().find(|entry| entry.target == target);
+                    let Some(entry) = entry else {
+                        return format!("{}: unsupported", island.key);
+                    };
+                    if entry.provider == "unsupported" {
+                        return format!("{}: unsupported", island.key);
+                    }
+
+                    let runtime = root.map(|base| install_dir(base, &island, target).join("runtime.bin"));
+                    let status = if let Some(_path) = runtime.filter(|path| path.is_file()) {
+                        if entry.probe.is_empty() {
+                            "available".to_string()
+                        } else {
+                            bounded_probe(&entry.probe).to_string()
+                        }
+                    } else if let Some(base) = root {
+                        read_install_state(base, &island, target)
+                            .filter(|state| state == "installing" || state == "failed-install")
+                            .unwrap_or_else(|| "absent".to_string())
+                    } else {
+                        "absent".to_string()
+                    };
+
+                    format!(
+                        "{} {} {} {}: {}",
+                        island.key, island.runtime_version, target, island.provenance, status
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("\n"))
         }
         _ => Err(format!("unknown islands command: {command}")),
     }
