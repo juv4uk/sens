@@ -125,3 +125,5 @@ crates/my-lisp-cli/tests/islands_release_asset.rs	release_workflow_publishes_the
 crates/my-lisp/tests/clock.rs	utc_now_exists_only_after_language_time_layer_loads	observer	time-semanticref-ownership	lib/time.lisp + sr/2 + load_core_library/load_time_library	retained
 crates/my-lisp/tests/clock.rs	internet_time_sync_is_language_owned_after_time_library_loads	observer	time-semanticref-ownership	lib/time.lisp + sr/2 + load_core_library/load_time_library	retained
 crates/my-lisp/tests/timezone_ownership.rs	timezone_detect_public_binding_is_language_owned_over_raw_declarations	observer	time-semanticref-ownership	lib/time.lisp + sr/2 + load_core_library/load_time_library	retained
+crates/my-lisp/tests/semantic_coordinate_join_2.rs	remaining_bounded_scope_preserves_asymmetric_coordinates	observer	semantic-coordinate-cross-axis-join-v2	contracts/semantic-coordinate-matrix-845.lisp + math/kernel/machine axes	retained
+crates/my-lisp/tests/semantic_coordinate_join_2.rs	coordinate_axes_do_not_leak_each_others_payloads	observer	semantic-coordinate-axis-noninterference	math/kernel/machine axis sources	retained
