@@ -320,10 +320,20 @@ fn scheduler_deduplicates_real_invocation_and_rejects_malformed_trigger() {
         ),
         "absent"
     );
-}
 
-#[test]
-fn malformed_projection_input_is_named_failure_not_false() {
+    let mixed_selection = eval_text(
+        &format!(
+            "(life-scheduler-select-ready (list (quote {malformed}) (quote {invocation})) (quote ((projection-ready prolog-substitutions-to-datalog-facts {}))))",
+            source_ref
+        ),
+        &mut session,
+    );
+    assert!(
+        mixed_selection.starts_with("(scheduler-selection ready "),
+        "malformed pending entry must be skipped without a cdr failure: {mixed_selection}"
+    );
+}
+ {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
     load_bridge(&mut session);
