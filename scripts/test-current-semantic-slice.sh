@@ -168,3 +168,6 @@ if [[ "$science_projection_status" != "(scientific-constant-knowledge-projection
   printf 'scientific constant knowledge-projection witness failed: %s\n' "$science_projection_status" >&2
   exit 1
 fi
+
+# #1047: selector may choose only Canon-admitted mechanism routes.
+./target/debug/my-lisp tests/fixtures/mechanism-selector-1047-witness.lisp >/dev/null
