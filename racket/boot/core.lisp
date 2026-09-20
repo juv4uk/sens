@@ -22,6 +22,13 @@
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
 (def list (lambda args args))
 
+; #953 — keep the Racket bootstrap mirror aligned with the Lisp-owned core.
+; (binary 8) is format data: binary encoding plus declared width; it is not
+; a host byte type and does not change the canonical SID spelling.
+(def binary
+  (lambda (width)
+    (list (quote binary) width)))
+
 (def not
   (lambda (value)
     (cond
