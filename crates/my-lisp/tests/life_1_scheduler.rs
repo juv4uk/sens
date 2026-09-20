@@ -9,11 +9,18 @@ fn repo_file(relative: &str) -> PathBuf {
 
 #[test]
 fn life_1_scheduler_witness_is_lisp_owned() {
-    let source = fs::read_to_string(repo_file("tests/fixtures/life-1-scheduler-witness.lisp"))
-        .expect("#801 scheduler witness must be readable");
+    let scheduler =
+        fs::read_to_string(repo_file("lib/life-1-scheduler.lisp"))
+            .expect("#801 scheduler source must be readable");
+    let witness =
+        fs::read_to_string(repo_file("tests/fixtures/life-1-scheduler-witness.lisp"))
+            .expect("#801 scheduler witness must be readable");
+
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
-    let result = eval_program(&source, &mut session).expect("#801 scheduler witness must execute");
+    eval_program(&scheduler, &mut session).expect("#801 scheduler source must execute");
+    let result =
+        eval_program(&witness, &mut session).expect("#801 scheduler witness must execute");
 
     assert_eq!(
         result.value.to_string(),
