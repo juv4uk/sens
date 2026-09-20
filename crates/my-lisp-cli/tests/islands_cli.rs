@@ -204,3 +204,113 @@ fn islands_status_keeps_absent_and_unsupported_distinct_for_selected_target() {
     assert!(stdout.contains("prolog: unsupported"), "{stdout}");
     assert!(stdout.contains("clips: unsupported"), "{stdout}");
 }
+
+
+#[test]
+fn islands_plan_exposes_complete_release_contract_without_mutation() {
+    let root = std::env::temp_dir().join(format!(
+        "my-lisp-islands-plan-contract-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands",
+            "plan",
+            "--manifest",
+            manifest().to_str().expect("UTF-8 manifest path"),
+            "--with",
+            "prolog",
+            "--target",
+            "linux-x86_64",
+            "--root",
+            root.to_str().expect("UTF-8 root"),
+        ])
+        .output()
+        .expect("CLI");
+
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
+    for required in [
+        "abi: wsm-kernel-c-abi/1",
+        "install-key: prolog",
+        "license-acceptance: not-required",
+        "entrypoint: swipl",
+        "destination:",
+        "verified-installed: no",
+    ] {
+        assert!(stdout.contains(required), "plan omits {required}: {stdout}");
+    }
+    assert!(!root.exists(), "read-only plan mutated install root");
+}
+
+#[test]
+fn islands_manifest_fails_closed_on_missing_release_metadata() {
+    let base = std::env::temp_dir().join(format!(
+        "my-lisp-islands-missing-contract-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(
+        &manifest_path,
+        r#"{"protocol":"my-lisp-islands-manifest/1","islands":[{"key":"demo","runtime_version":"1","license":"test","license_acceptance_required":false,"provenance":"test","platforms":[]}]}"#,
+    )
+    .expect("manifest");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands",
+            "plan",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--with",
+            "demo",
+        ])
+        .output()
+        .expect("CLI");
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("missing field") || stderr.contains("missing required release metadata"),
+        "{stderr}"
+    );
+}
+
+#[test]
+fn islands_manifest_rejects_unknown_provider_without_fallback() {
+    let base = std::env::temp_dir().join(format!(
+        "my-lisp-islands-provider-contract-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("temporary fixture directory");
+    let manifest_path = base.join("manifest.json");
+    std::fs::write(
+        &manifest_path,
+        r#"{"protocol":"my-lisp-islands-manifest/1","islands":[{"key":"demo","runtime_version":"1","abi_compatibility":"test-abi","install_key":"demo","license":"test","license_acceptance_required":false,"provenance":"test","platforms":[{"target":"linux-x86_64","provider":"magic","entrypoint":"demo","probe":["demo","--version"]}]}]}"#,
+    )
+    .expect("manifest");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_my-lisp"))
+        .args([
+            "islands",
+            "plan",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--with",
+            "demo",
+        ])
+        .output()
+        .expect("CLI");
+
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("unsupported provider"));
+}
