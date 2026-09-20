@@ -165,10 +165,6 @@ pub fn parse_abi_request(text: &str) -> Result<NumericExpr, DatalogMathError> {
         _ => return Err(DatalogMathError::MissingVariable(format!("unsupported-operation:{operation}"))),
     };
 
-    if parts.next().is_some() {
-        return Err(DatalogMathError::MissingVariable("trailing-operands".to_string()));
-    }
-
     Ok(expr)
 }
 
