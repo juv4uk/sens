@@ -313,7 +313,7 @@ mod tests {
     #[test]
     fn synthetic_registry_constructively_controls_canon_routing() {
         const SYNTHETIC: &str =
-            "(semantic-registry\n  (\"00000000\" ())\n  (\"00000001\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00000101\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ()))\n)";
+            "((\"00000000\" (en ()) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00000001\" (en comet) (uk ()) (ukr ()) (sa ()) (sym ()))\n  (\"00000101\" (en asteroid) (uk ()) (ukr ()) (sa ()) (sym ())))";
         let index = semantic_registry::build_surface_index(SYNTHETIC);
         let route = |surface: &str| {
             index
