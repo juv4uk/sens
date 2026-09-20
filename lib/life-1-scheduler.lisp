@@ -72,9 +72,9 @@
        (let* ((invocation (car pending))
               (key (life-scheduler-invocation-key invocation)))
          (cond
-           ((life-scheduler-key-present? key seen-keys) (quote (identity-relation same))
+           ((life-scheduler-key-present? key seen-keys) (quote present)
             (life-scheduler-dedup-pending (cdr pending) seen-keys))
-           ((life-scheduler-key-present? key seen-keys) (quote (identity-relation distinct))
+           ((life-scheduler-key-present? key seen-keys) (quote absent)
             (cons invocation
                   (life-scheduler-dedup-pending
                     (cdr pending)
@@ -83,21 +83,6 @@
 (def life-scheduler-pending
   (lambda (pending)
     (life-scheduler-dedup-pending pending (quote ()))))
-
-(def life-scheduler-trigger-contract
-  (lambda (trigger)
-    (cond
-      ((atom trigger) (quote (structural-kind empty-list))
-       (quote (scheduler-trigger-absent)))
-      ((atom trigger) (quote (structural-kind pair))
-       (let ((tail (cdr trigger)))
-         (cond
-           ((atom tail) (quote (structural-kind empty-list))
-            (quote (scheduler-trigger-absent)))
-           ((atom tail) (quote (structural-kind pair))
-            (list
-              (quote scheduler-trigger-present)
-              (car tail)))))))))
 
 (def life-scheduler-projection-match?
   (lambda (expected projections)
@@ -116,21 +101,22 @@
 (def life-scheduler-projection-ready?
   (lambda (invocation projections)
     (let* ((trigger (life-scheduler-field invocation (quote trigger)))
-           (trigger-contract (life-scheduler-trigger-contract trigger))
            (provenance (life-scheduler-field invocation (quote provenance-ref))))
       (cond
-        ((eq (car trigger-contract) (quote scheduler-trigger-absent))
-         (quote (identity-relation same))
+        ((atom trigger) (quote (structural-kind empty-list))
          (quote absent))
-        ((eq (car trigger-contract) (quote scheduler-trigger-present))
-         (quote (identity-relation same))
-         (life-scheduler-projection-match?
-           (list
-             (quote projection-ready)
-             (car (cdr trigger-contract))
-             provenance)
-           projections))))))
-
+        ((atom trigger) (quote (structural-kind pair))
+         (let ((tail (cdr trigger)))
+           (cond
+             ((atom tail) (quote (structural-kind empty-list))
+              (quote absent))
+             ((atom tail) (quote (structural-kind pair))
+              (life-scheduler-projection-match?
+                (list
+                  (quote projection-ready)
+                  (car tail)
+                  provenance)
+                projections)))))))))
 (def life-scheduler-select-ready
   (lambda (pending projections)
     (cond
