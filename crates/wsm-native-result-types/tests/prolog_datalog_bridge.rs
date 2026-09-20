@@ -290,7 +290,7 @@ fn scheduler_deduplicates_real_invocation_and_rejects_malformed_trigger() {
     let (source_ref, _) = projected_facts(&projected);
 
     let invocation = format!(
-        "(pending-invocation (producer datalog) (trigger (projection-ready prolog-substitutions-to-datalog-facts)) (provenance-ref {}) (priority ordinary) (semantic-id "{:08b}"))",
+        "(pending-invocation (producer datalog) (trigger (projection-ready prolog-substitutions-to-datalog-facts)) (provenance-ref {}) (priority ordinary) (semantic-id \"{:08b}\"))",
         source_ref, INVOKE_ID
     );
 
@@ -307,7 +307,7 @@ fn scheduler_deduplicates_real_invocation_and_rejects_malformed_trigger() {
     assert_eq!(deduplicated, expected_deduplicated);
 
     let malformed = format!(
-        "(pending-invocation (producer datalog) (trigger ()) (provenance-ref {}) (priority ordinary) (semantic-id "{:08b}"))",
+        "(pending-invocation (producer datalog) (trigger ()) (provenance-ref {}) (priority ordinary) (semantic-id \"{:08b}\"))",
         source_ref, INVOKE_ID
     );
     assert_eq!(
