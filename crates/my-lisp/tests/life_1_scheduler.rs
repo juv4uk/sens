@@ -27,6 +27,7 @@ fn life_1_scheduler_witness_is_lisp_owned() {
     load_core_library(&mut session).expect("core library");
     eval_program(&scheduler, &mut session).expect("#801 scheduler source must execute");
 
+    // Duplicate pending-invocation dedup is tracked separately in #942.
     let invocation =
         "(pending-invocation (producer datalog)           (trigger (projection-ready prolog-substitutions-to-datalog-facts))           (provenance-ref observation-42)           (priority ordinary)           (semantic-id \"00001100\"))";
 
