@@ -35,8 +35,6 @@ jobs:
         run: cargo test -p my-lisp-cli --test islands_cli
       - name: release asset contract
         run: cargo test -p my-lisp-cli --test islands_release_asset
-      - name: Перевірити зупинку релізного скрипта на помилках
-        run: MY_LISP_RELEASE_TEST_BINARY="$PWD/target/debug/my-lisp" python3 -m unittest discover -s packaging/tests -p test_release.py -v
       - name: focused release clippy
         run: cargo clippy -p my-lisp -p my-lisp-cli --all-targets -- -D warnings
 

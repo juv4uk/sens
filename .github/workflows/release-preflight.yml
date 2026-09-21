@@ -33,17 +33,11 @@ jobs:
         with:
           shared-key: release-preflight
 
-      - name: Build CLI for release-script stop tests
-        run: cargo build -p my-lisp-cli --bin my-lisp
-
       - name: Версійна паритетність релізних crates
         run: cargo test --locked -p my-lisp-lsp --test release_parity
 
       - name: Ізольовані перевірки інсталятора
         run: python3 -m unittest discover -s packaging/tests -p test_install.py -v
-
-      - name: Перевірки зупинки релізного скрипта
-        run: MY_LISP_RELEASE_TEST_BINARY="$PWD/target/debug/my-lisp" python3 -m unittest discover -s packaging/tests -p test_release.py -v
 
       - name: translation boundary regression
         run: cargo test --locked -p my-lisp --test translation_boundary

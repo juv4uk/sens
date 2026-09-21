@@ -1,6 +1,6 @@
 [package]
 name = "my-lisp-wasm"
-version = "0.40.2"
+version = "0.41.0"
 edition = "2021"
 license-file = "../../LICENSE"
 description = "WebAssembly bindings for the my-lisp engine · WASM-прив'язки до рушія my-lisp · WebAssembly-Bindungen für die my-lisp-Engine"
