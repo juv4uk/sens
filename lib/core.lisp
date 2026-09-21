@@ -6,12 +6,32 @@
 
 (00001001 identity (00001000 (value) value))
 
-; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
-; The reader treats the following source forms as binary data until the next
-; top-level source is read; decimal integers remain ordinary decimal values.
+; BINARY has two deliberately separate roles at one existing identity.
+;
+; 1. Reader metadata: the evaluator intercepts the exact source form
+;    (binary 8) before ordinary application, preserving the historical
+;    fixed-width registry/data-file descriptor.
+;
+; 2. Explicit numeric interpretation: ordinary application receives a value,
+;    prints its canonical spelling, and folds 0/1 digits into an exact integer.
+;    This is the explicit escape from the reserved bare-SID namespace:
+;      00001100          => SID/function identity
+;      (binary 00001100) => 12
+;
+; The fold is Lisp-owned. Rust exposes no SID->integer semantic converter.
+(00001001 binary-fold
+  (00001000 (bits acc)
+    (00000111
+      ((00000011 bits "") (identity-relation same) acc)
+      ((00000011 (string-first bits) "0") (identity-relation same)
+       (binary-fold (string-rest bits) (* acc 2)))
+      ((00000011 (string-first bits) "1") (identity-relation same)
+       (binary-fold (string-rest bits) (+ (* acc 2) 1)))
+      (t t (00000001 ())))))
+
 (00001001 binary
-  (00001000 (width)
-    (list (00000001 binary) width)))
+  (00001000 (value)
+    (binary-fold (write-to-string value) 0)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
