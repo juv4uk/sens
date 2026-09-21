@@ -53,20 +53,54 @@
 ; (simplified: just collect all symbols used as variables that aren't in standard core)
 ; A true global dependency checker requires walking `let` and `lambda` bindings.
 (def collect-free-vars-let*
-  (lambda (bindings body bound-vars)
+  (lambda (ast bound-vars)
     (cond
-      ((equal? bindings (quote ())) (collect-free-vars body bound-vars))
-      (t (let ((b-name (symbol->string (car (car bindings))))
-               (b-val (second (car bindings))))
-           (append (collect-free-vars b-val bound-vars)
-                   (collect-free-vars-let* (cdr bindings) body (cons b-name bound-vars))))))))
+      ((atom (cdr ast))
+       (append (collect-free-vars (car ast) bound-vars)
+               (collect-free-vars (cdr ast) bound-vars)))
+      ((atom (cdr (cdr ast)))
+       (append (collect-free-vars (car ast) bound-vars)
+               (collect-free-vars (cdr ast) bound-vars)))
+      (t
+       (let ((bindings (car (cdr ast)))
+             (body (car (cdr (cdr ast)))))
+         (let loop ((remaining bindings)
+                    (current-bound bound-vars)
+                    (free (quote ())))
+           (cond
+             ((equal? remaining (quote ()))
+              (append free (collect-free-vars body current-bound)))
+             (t
+              (let ((binding (car remaining)))
+                (let ((name (symbol->string (car binding)))
+                      (value (second binding)))
+                  (loop
+                    (cdr remaining)
+                    (cons name current-bound)
+                    (append free
+                            (collect-free-vars value current-bound)))))))))))))
 
 (def collect-free-vars-letrec
-  (lambda (bindings body bound-vars)
-    (let ((all-names (map (lambda (b) (symbol->string (car b))) bindings)))
-      (let ((new-bound (append all-names bound-vars)))
-        (append (reduce append (quote ()) (map (lambda (b) (collect-free-vars (second b) new-bound)) bindings))
-                (collect-free-vars body new-bound))))))
+  (lambda (ast bound-vars)
+    (cond
+      ((atom (cdr ast))
+       (append (collect-free-vars (car ast) bound-vars)
+               (collect-free-vars (cdr ast) bound-vars)))
+      ((atom (cdr (cdr ast)))
+       (append (collect-free-vars (car ast) bound-vars)
+               (collect-free-vars (cdr ast) bound-vars)))
+      (t
+       (let ((bindings (car (cdr ast)))
+             (body (car (cdr (cdr ast)))))
+         (let ((all-names
+                 (map (lambda (b) (symbol->string (car b))) bindings)))
+           (let ((new-bound (append all-names bound-vars)))
+             (append
+               (reduce append (quote ())
+                       (map (lambda (b)
+                              (collect-free-vars (second b) new-bound))
+                            bindings))
+               (collect-free-vars body new-bound)))))))))
 
 (def collect-free-vars
   (lambda (ast bound-vars)
@@ -85,13 +119,13 @@
       ((equal? (car ast) (quote lambda))
        (let ((params (car (cdr ast)))
              (body (car (cdr (cdr ast)))))
-         (let ((param-names (cond ((atom params) (cond ((symbol? params) (list (symbol->string params))) (t (quote ()))))
+         (let ((param-names (cond ((symbol? params) (list (symbol->string params)))
                                   (t (map (lambda (p) (symbol->string p)) params)))))
            (collect-free-vars body (append param-names bound-vars)))))
       ((equal? (car ast) (quote defmacro))
        (let ((params (car (cdr (cdr ast))))
              (body (car (cdr (cdr (cdr ast))))))
-         (let ((param-names (cond ((atom params) (cond ((symbol? params) (list (symbol->string params))) (t (quote ()))))
+         (let ((param-names (cond ((symbol? params) (list (symbol->string params)))
                                   (t (map (lambda (p) (symbol->string p)) params)))))
            (collect-free-vars body (append param-names bound-vars)))))
       ((equal? (car ast) (quote let))
@@ -118,39 +152,21 @@
               (append (reduce append (quote ()) (map (lambda (b) (collect-free-vars (second b) bound-vars)) bindings))
                       (collect-free-vars body new-bound)))))))
       ((equal? (car ast) (quote let*))
-       (cond
-         ((atom (cdr ast))
-          ; Structural tails such as (let*) are data, not executable forms.
-          (append (collect-free-vars (car ast) bound-vars)
-                  (collect-free-vars (cdr ast) bound-vars)))
-         ((atom (cdr (cdr ast)))
-          ; A form without a body has no binding/body shape to destructure.
-          (append (collect-free-vars (car ast) bound-vars)
-                  (collect-free-vars (cdr ast) bound-vars)))
-         (t
-          (let ((bindings (car (cdr ast)))
-                (body (car (cdr (cdr ast)))))
-            (collect-free-vars-let* bindings body bound-vars)))))
+       (collect-free-vars-let* ast bound-vars))
       ((equal? (car ast) (quote letrec))
-       (cond
-         ((atom (cdr ast))
-          ; Structural tails such as (letrec) are data, not executable forms.
-          (append (collect-free-vars (car ast) bound-vars)
-                  (collect-free-vars (cdr ast) bound-vars)))
-         ((atom (cdr (cdr ast)))
-          ; A form without a body has no binding/body shape to destructure.
-          (append (collect-free-vars (car ast) bound-vars)
-                  (collect-free-vars (cdr ast) bound-vars)))
-         (t
-          (let ((bindings (car (cdr ast)))
-                (body (car (cdr (cdr ast)))))
-            (collect-free-vars-letrec bindings body bound-vars)))))
+       (collect-free-vars-letrec ast bound-vars))
       (t (append (collect-free-vars (car ast) bound-vars)
                  (collect-free-vars (cdr ast) bound-vars))))))
 
 (def lint-globals
   (lambda (ast)
-    (collect-free-vars ast (quote ()))))
+    (reduce
+      (lambda (unique item)
+        (cond
+          ((member? item unique) unique)
+          (t (cons item unique))))
+      (quote ())
+      (collect-free-vars ast (quote ())))))
 
 (def lint-all
   (lambda (ast)
