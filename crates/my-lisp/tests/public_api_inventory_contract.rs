@@ -22,6 +22,7 @@ fn scanner_finds_only_top_level_defs_and_macros() {
     let source = r#"
 (def visible-fn (lambda (x) x))
 (defmacro visible-macro args args)
+(00001001 visible-sid (00001000 (x) x))
 ; (def commented-out (lambda () 'no))
 "(def text-only (lambda () 'no))"
 (def wrapper
@@ -49,7 +50,7 @@ fn scanner_finds_only_top_level_defs_and_macros() {
         .lines()
         .filter_map(|line| line.split('\t').nth(2))
         .collect::<Vec<_>>();
-    assert_eq!(names, vec!["visible-fn", "visible-macro", "wrapper"]);
+    assert_eq!(names, vec!["visible-fn", "visible-macro", "visible-sid", "wrapper"]);
     assert!(!stdout.contains("commented-out"));
     assert!(!stdout.contains("text-only"));
     assert!(!stdout.contains("nested-definition"));

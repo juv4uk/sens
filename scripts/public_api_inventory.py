@@ -2,7 +2,8 @@
 """Discover top-level Lisp definitions without assigning API visibility.
 
 This is a discovery tool, not semantic authority.  It observes canonical
-``lib/**/*.lisp`` source and reports top-level ``def`` / ``defmacro`` forms.
+``lib/**/*.lisp`` source and reports top-level DEFINE/``def`` / ``defmacro``
+forms. DEFINE's byte-SID spellings come from the Lisp-owned evaluator dispatch.
 Visibility (public/internal/compatibility) is a separate governance decision.
 Surface spellings remain owned exclusively by ``lib/surface/semantic-registry.lisp``.
 Machine/ISA exclusion is read from the Lisp-owned machine authority contract;
@@ -22,10 +23,12 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 LIB_ROOT = REPO_ROOT / "lib"
 REPORT = REPO_ROOT / "docs" / "generated" / "public-api-discovery.md"
 MACHINE_AUTHORITY = LIB_ROOT / "machine" / "authority-boundary.lisp"
+EVALUATOR_DISPATCH = LIB_ROOT / "evaluator-dispatch.lisp"
 STATIC_EXCLUDED_TOP_LEVEL_DIRS = {"generated", "surface"}
 PUBLIC_API_EXCLUDED_ROOT = re.compile(
     r"^\s*\(public-api-excluded-root\s+lib/([^/\s()]+)\)\s*$"
 )
+DEFINE_DISPATCH_ROW = re.compile(r"^\s*\(([01]{8})\s+define-form\)\s*$")
 
 
 @dataclass(frozen=True, order=True)
@@ -94,9 +97,22 @@ def _atom(text: str, index: int) -> tuple[str | None, int]:
     return text[start:index], index
 
 
+def define_operators() -> set[str]:
+    """Read DEFINE's byte spellings from Lisp-owned evaluator dispatch."""
+    operators = {
+        match.group(1)
+        for line in EVALUATOR_DISPATCH.read_text(encoding="utf-8").splitlines()
+        if (match := DEFINE_DISPATCH_ROW.match(line)) is not None
+    }
+    if not operators:
+        raise ValueError(f"{EVALUATOR_DISPATCH.relative_to(REPO_ROOT)} has no define-form rows")
+    return operators
+
+
 def scan_source(source: str, source_name: str) -> list[Definition]:
     masked = _mask_strings_and_comments(source)
     definitions: list[Definition] = []
+    function_operators = {"def"} | define_operators()
     depth = 0
     line = 1
     index = 0
@@ -111,7 +127,7 @@ def scan_source(source: str, source_name: str) -> list[Definition]:
         if char == "(":
             if depth == 0:
                 operator, after_operator = _atom(masked, index + 1)
-                if operator in {"def", "defmacro"}:
+                if operator in function_operators | {"defmacro"}:
                     name, _after_name = _atom(masked, after_operator)
                     if name is not None:
                         definitions.append(
