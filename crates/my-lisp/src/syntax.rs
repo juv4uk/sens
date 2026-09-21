@@ -185,7 +185,7 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(Sid8::from_packed_byte(value))
+                ExprKind::Sid(crate::Sid8::from_packed_byte(value))
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
