@@ -25,3 +25,4 @@
 (review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "49328492430e58e516ce926d77808a111992fdd586356c517c462db7c222baeb" issue-1098 sid8-witness-migration)
 (review "crates/my-lisp/tests/semantic_coordinate_law_axis.rs" "b75443a411c225a7075e2c3f2eede1b2f5887c8d94b8a33e6ee0b826544a3c55" issue-1098 sid8-witness-migration)
 (review "crates/xtask/src/external_oracle.rs" "9ad5faa5003a3e440ffc1408f4f4e7f4d3985508c34933d0425e796bab4e7f05" issue-1098 sid8-tooling-migration)
+(review "crates/my-lisp/tests/peer_surface_identity.rs" "ac66056cda917c2104b4e62d126587a067b9acd6bacff7ad658b3ee905addc8e" issue-1098 sid8-observer-migration)
