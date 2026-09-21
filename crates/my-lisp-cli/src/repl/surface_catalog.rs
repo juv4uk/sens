@@ -50,7 +50,7 @@ fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     let mut entries = Vec::new();
 
     for semantic_id in my_lisp::semantic_registry_export::admitted_semantic_ids() {
-        if semantic_id == 0 {
+        if semantic_id == my_lisp::sid!(00000000) {
             continue;
         }
 
@@ -77,7 +77,7 @@ fn registry_entries() -> Result<Vec<SurfaceEntry>, String> {
     }
 
     if entries.is_empty() {
-        return Err("byte-SID semantic registry contains no surface entries".to_string());
+        return Err("Sid8 semantic registry contains no surface entries".to_string());
     }
     Ok(entries)
 }
@@ -285,7 +285,7 @@ pub(crate) fn render_name(surface: &str, requested: &str) -> Result<String, Stri
     let entries = registry_entries()?;
     let Some(entry) = find_entry(&entries, requested) else {
         return Ok(format!(
-            "«{requested}» не знайдено у byte-SID semantic registry; сире середовище перевіряється через (env)/(середовище)."
+            "«{requested}» не знайдено у Sid8 semantic registry; сире середовище перевіряється через (env)/(середовище)."
         ));
     };
 
