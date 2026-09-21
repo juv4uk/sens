@@ -118,13 +118,33 @@
               (append (reduce append (quote ()) (map (lambda (b) (collect-free-vars (second b) bound-vars)) bindings))
                       (collect-free-vars body new-bound)))))))
       ((equal? (car ast) (quote let*))
-       (let ((bindings (car (cdr ast)))
-             (body (car (cdr (cdr ast)))))
-         (collect-free-vars-let* bindings body bound-vars)))
+       (cond
+         ((atom (cdr ast))
+          ; Structural tails such as (let*) are data, not executable forms.
+          (append (collect-free-vars (car ast) bound-vars)
+                  (collect-free-vars (cdr ast) bound-vars)))
+         ((atom (cdr (cdr ast)))
+          ; A form without a body has no binding/body shape to destructure.
+          (append (collect-free-vars (car ast) bound-vars)
+                  (collect-free-vars (cdr ast) bound-vars)))
+         (t
+          (let ((bindings (car (cdr ast)))
+                (body (car (cdr (cdr ast)))))
+            (collect-free-vars-let* bindings body bound-vars)))))
       ((equal? (car ast) (quote letrec))
-       (let ((bindings (car (cdr ast)))
-             (body (car (cdr (cdr ast)))))
-         (collect-free-vars-letrec bindings body bound-vars)))
+       (cond
+         ((atom (cdr ast))
+          ; Structural tails such as (letrec) are data, not executable forms.
+          (append (collect-free-vars (car ast) bound-vars)
+                  (collect-free-vars (cdr ast) bound-vars)))
+         ((atom (cdr (cdr ast)))
+          ; A form without a body has no binding/body shape to destructure.
+          (append (collect-free-vars (car ast) bound-vars)
+                  (collect-free-vars (cdr ast) bound-vars)))
+         (t
+          (let ((bindings (car (cdr ast)))
+                (body (car (cdr (cdr ast)))))
+            (collect-free-vars-letrec bindings body bound-vars)))))
       (t (append (collect-free-vars (car ast) bound-vars)
                  (collect-free-vars (cdr ast) bound-vars))))))
 
