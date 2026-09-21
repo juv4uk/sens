@@ -10,15 +10,19 @@
       ((equal? left right) (structural-relation same) t)
       (t t ()))))
 
-(def reviewed-source?
-  (lambda (path source rows)
+(def reviewed-digest?
+  (lambda (path digest rows)
     (cond
       ((atom rows) (structural-kind empty-list) ())
       ((exact-text? path (second (car rows))) t
        (cond
-         ((exact-text? (sha256-hex source) (third (car rows))) t t)
-         (t t (reviewed-source? path source (cdr rows)))))
-      (t t (reviewed-source? path source (cdr rows))))))
+         ((exact-text? digest (third (car rows))) t t)
+         (t t (reviewed-digest? path digest (cdr rows)))))
+      (t t (reviewed-digest? path digest (cdr rows))))))
+
+(def reviewed-source?
+  (lambda (path source rows)
+    (reviewed-digest? path (sha256-hex source) rows)))
 
 (def contains-any?
   (lambda (source needles)
@@ -97,28 +101,35 @@
       ((atom rows) (structural-kind pair)
        (let* ((row (car rows))
               (path (second row))
-              (raw-source (read-file path)))
+              (transport-digest (third row)))
          (cond
-           ((and (active-host-source? path)
-                 (not (string? raw-source)))
-            (list (quote semantic-authority-violation)
-                  path
-                  (quote unreadable-active-host-source)
-                  "active host source must be readable text for authority review"))
+           ; CI may transport a mechanical SHA-256 digest. Lisp still owns
+           ; whether that exact path+digest pair is reviewed. A matching
+           ; digest can be accepted without reading or scanning the source.
+           ((and (string? transport-digest)
+                 (reviewed-digest? path transport-digest authority-reviews))
+            (scan (cdr rows)))
            (t
-            (let ((source
-                    (cond
-                      ((string? raw-source) raw-source)
-                      (t (write-to-string raw-source)))))
+            (let ((raw-source (read-file path)))
               (cond
-                ; Exact content-addressed review is stronger than heuristic
-                ; classification and cheaper: one digest check replaces many
-                ; whole-source scans. Any later byte change invalidates the
-                ; digest and falls through to the full structural classifier.
-                ((reviewed-source? path source authority-reviews) t
-                 (scan (cdr rows)))
+                ((and (active-host-source? path)
+                      (not (string? raw-source)))
+                 (list (quote semantic-authority-violation)
+                       path
+                       (quote unreadable-active-host-source)
+                       "active host source must be readable text for authority review"))
                 (t
-                 (let ((class (violation-class path source)))
+                 (let ((source
+                         (cond
+                           ((string? raw-source) raw-source)
+                           (t (write-to-string raw-source)))))
+                   (cond
+                     ; Backward-compatible fallback for manually produced
+                     ; change rows without a transported digest.
+                     ((reviewed-source? path source authority-reviews) t
+                      (scan (cdr rows)))
+                     (t
+                      (let ((class (violation-class path source)))
                    (cond
                      ((eq class (quote allowed)) (identity-relation same)
                       (scan (cdr rows)))
@@ -131,6 +142,6 @@
                      (t
                       (list (quote semantic-authority-violation)
                             path class
-                            "new host-side semantic authority requires explicit review"))))))))))))))
+                            "new host-side semantic authority requires explicit review"))))))))))))))))))
 
 (print (scan changed))
