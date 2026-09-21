@@ -32,6 +32,13 @@ if [[ "$bare_sid_status" != "(bare-sid-literal-witness (status pass))" ]]; then
   exit 1
 fi
 
+# #954 stacked on #1096: numeric binary interpretation is explicit.
+binary_numeric_status="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/binary-numeric-v1.lisp)"
+if [[ "$binary_numeric_status" != "(binary-numeric-witness (status pass))" ]]; then
+  printf 'binary numeric Lisp witness failed: %s\n' "$binary_numeric_status" >&2
+  exit 1
+fi
+
 # #291: quantity semantics live in Lisp. The shell observes only the named
 # pass envelope; expected scientific quantities and relations stay in the
 # Lisp witness itself. No replacement Rust observer is introduced.
