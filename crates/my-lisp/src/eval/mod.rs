@@ -208,7 +208,7 @@ fn evaluate_list(
         .or_else(|| head_sid.and_then(canon::identity_for_semantic_id));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(|sid| necessary_forms::identity_for_semantic_id(sid.packed_byte())));
+        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
     match (canonical_head, necessary_head) {
         (Some(canon::CanonicalIdentity::Quote), _) => {
