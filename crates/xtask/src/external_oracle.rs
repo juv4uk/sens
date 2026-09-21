@@ -377,7 +377,7 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
             }
         }
         ExprKind::Rational(rational) => Ok(rational.to_string()),
-        ExprKind::Binary(binary) => Ok(binary.bits()),
+        ExprKind::Sid(sid) => Ok(format!("{sid:08b}")),
         ExprKind::String(_) => Err(Unsupported::new("external-oracle/string")),
         ExprKind::Pair(_, _) => Err(Unsupported::new("external-oracle/pair")),
         ExprKind::NumericBuffer(_) => Err(Unsupported::new("external-oracle/numeric-buffer")),
