@@ -5,6 +5,10 @@
 ; Після push тегу workflow Release повторює focused test/clippy gates.
 ; Потрібні git, gh, timeout і cargo. Лише довірена CLI-сесія.
 
+(def release-preflight-failed
+  (lambda ()
+    (car (quote ()))))
+
 (def release-require
   (lambda (label actual expected)
     (cond
