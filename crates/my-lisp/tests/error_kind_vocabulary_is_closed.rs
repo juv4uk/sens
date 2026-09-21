@@ -1,30 +1,13 @@
-//! Machine-checkable gate for GitHub issue juv4uk/my-lisp#66 (compiler
-//! authority boundary): pins the exhaustive set of `ErrorKind` variants a
-//! compiler backend is allowed to observe. See
-//! docs/COMPILER-AUTHORITY-BOUNDARY.md for the full boundary this test is
-//! one piece of.
+//! #1104 observer for the Lisp-owned current ErrorKind vocabulary.
 //!
-//! The exhaustive `match` below is the actual enforcement mechanism: adding
-//! or removing an `ErrorKind` variant without updating this file is a Rust
-//! compile error ("non-exhaustive patterns" / "no variant named ... in this
-//! enum"), not a silent pass. This makes "a compiler-facing change quietly
-//! grows the observable error vocabulary" something that must touch this
-//! file explicitly, in this repo, under this repo's own review — it cannot
-//! land as a side effect of unrelated work here or in a consumer repo that
-//! merely imports `ErrorKind`.
-//!
-//! Mekhanizm perevirky dlia issue #66 (mezha vlady kompiliatora): fiksuie
-//! vycherpnyi nabir variantiv `ErrorKind`, yaki compiler-backend maie pravo
-//! sposterihaty. Divysia docs/COMPILER-AUTHORITY-BOUNDARY.md dlia povnoi
-//! mezhi, chastynoiu yakoi ye tsei test.
+//! The admitted names live in contracts/error-kind-vocabulary.lisp.
+//! Rust remains an exhaustive implementation observer: adding/removing an
+//! ErrorKind still requires handling every variant here, but the expected
+//! vocabulary is read from Lisp-owned contract data rather than duplicated as
+//! a Rust constant.
 
-use my_lisp::ErrorKind;
+use my_lisp::{parse, ErrorKind, Expr, ExprKind};
 
-/// Every variant `ErrorKind` currently has, named exactly once. If a variant
-/// is added or removed in `crates/my-lisp/src/error.rs` without updating
-/// this list, `name_of` below fails to compile (non-exhaustive match) --
-/// verified directly by temporarily adding a `NotCallable` variant and
-/// confirming this file then fails to build, not just fails at runtime.
 fn name_of(kind: &ErrorKind) -> &'static str {
     match kind {
         ErrorKind::Parse => "Parse",
@@ -40,21 +23,54 @@ fn name_of(kind: &ErrorKind) -> &'static str {
     }
 }
 
-const ADMITTED_ERROR_KINDS: &[&str] = &[
-    "Parse",
-    "UnknownSymbol",
-    "Arity",
-    "Type",
-    "InvalidForm",
-    "UnsatisfiedConditional",
-    "MechanismUnavailable",
-    "OutOfMemory",
-    "NumericOverflow",
-    "DivisionByZero",
-];
+fn pair_value<'a>(entries: &'a [Expr], key: &str) -> Option<&'a Expr> {
+    entries.iter().find_map(|entry| {
+        let ExprKind::Pair(k, v) = &entry.kind else {
+            return None;
+        };
+        let ExprKind::Symbol(name) = &k.kind else {
+            return None;
+        };
+        (&**name == key).then_some(v.as_ref())
+    })
+}
+
+fn contract_names() -> Vec<String> {
+    let source = include_str!("../../../contracts/error-kind-vocabulary.lisp");
+    let forms = parse(source).expect("error-kind-vocabulary.lisp must parse");
+    assert_eq!(forms.len(), 1, "error vocabulary must remain one Lisp data document");
+
+    let ExprKind::List(document) = &forms[0].kind else {
+        panic!("error vocabulary document must be a list");
+    };
+    assert_eq!(document.len(), 2, "error vocabulary document shape drifted");
+
+    let ExprKind::Symbol(tag) = &document[0].kind else {
+        panic!("error vocabulary document must start with a symbolic tag");
+    };
+    assert_eq!(&**tag, "error-kind-vocabulary/1");
+
+    let ExprKind::List(entries) = &document[1].kind else {
+        panic!("error vocabulary body must be an alist");
+    };
+    let categories = pair_value(entries, "categories")
+        .expect("error vocabulary must define categories");
+
+    let ExprKind::List(values) = &categories.kind else {
+        panic!("error vocabulary categories must be a list");
+    };
+
+    values
+        .iter()
+        .map(|value| match &value.kind {
+            ExprKind::String(name) => name.to_string(),
+            _ => panic!("error vocabulary categories must be strings"),
+        })
+        .collect()
+}
 
 #[test]
-fn error_kind_vocabulary_matches_the_pinned_admitted_list() {
+fn error_kind_vocabulary_matches_lisp_owned_contract() {
     let all_kinds = [
         ErrorKind::Parse,
         ErrorKind::UnknownSymbol,
@@ -67,13 +83,15 @@ fn error_kind_vocabulary_matches_the_pinned_admitted_list() {
         ErrorKind::NumericOverflow,
         ErrorKind::DivisionByZero,
     ];
-    let observed: Vec<&str> = all_kinds.iter().map(name_of).collect();
+
+    let observed: Vec<String> = all_kinds
+        .iter()
+        .map(|kind| name_of(kind).to_string())
+        .collect();
+    let expected = contract_names();
+
     assert_eq!(
-        observed, ADMITTED_ERROR_KINDS,
-        "ErrorKind's variant set drifted from the admitted vocabulary this \
-         compiler-authority gate pins (docs/COMPILER-AUTHORITY-BOUNDARY.md). \
-         A new variant here must be a deliberate, reviewed decision about \
-         what a compiler backend is now allowed to observe -- update this \
-         test's ADMITTED_ERROR_KINDS and name_of together, not either alone."
+        observed, expected,
+        "Rust ErrorKind drifted from contracts/error-kind-vocabulary.lisp;          change language-owned admission/provenance first, then update the          exhaustive implementation observer"
     );
 }
