@@ -10,7 +10,7 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry, Environment, Value};
+use crate::{semantic_registry, Environment, Sid8, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -47,9 +47,9 @@ impl Arity {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LanguageItem {
     pub name: String,
-    /// Numeric semantic identity when the item is governed by the surface registry.
+    /// Exact eight-bit semantic identity when governed by the surface registry.
     /// Runtime-only host capabilities may legitimately have no registry identity yet.
-    pub semantic_id: Option<u8>,
+    pub semantic_id: Option<Sid8>,
     pub signature: &'static str,
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
@@ -64,7 +64,7 @@ enum SurfacePolicy {
 
 #[derive(Clone, Copy)]
 struct SemanticToolingMetadata {
-    semantic_id: u8,
+    semantic_id: Sid8,
     signature: &'static str,
     documentation: &'static str,
     kind: LanguageItemKind,
@@ -72,11 +72,11 @@ struct SemanticToolingMetadata {
     surface_policy: SurfacePolicy,
 }
 
-// Tooling meaning is keyed only by opaque numeric semantic identity.
-// Human spellings are projected from semantic-registry.wsm at discovery time.
+// Tooling meaning is keyed only by opaque exact Sid8 identity.
+// Human spellings are projected from semantic-registry.lisp at discovery time.
 const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
     SemanticToolingMetadata {
-        semantic_id: 0b00000001,
+        semantic_id: crate::sid!(00000001),
         signature: "(quote value)",
         documentation: "Return value unevaluated",
         kind: LanguageItemKind::SyntaxForm,
@@ -84,7 +84,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: 0b00000111,
+        semantic_id: crate::sid!(00000111),
         signature: "(cond (test result) ...)",
         documentation: "Evaluate the first matching clause",
         kind: LanguageItemKind::SyntaxForm,
@@ -92,7 +92,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: 0b00001000,
+        semantic_id: crate::sid!(00001000),
         signature: "(lambda (params) body ...)",
         documentation: "Create an anonymous function",
         kind: LanguageItemKind::SyntaxForm,
@@ -100,7 +100,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: 0b00001001,
+        semantic_id: crate::sid!(00001001),
         signature: "(define name value)",
         documentation: "Bind name in the current scope",
         kind: LanguageItemKind::SyntaxForm,
@@ -108,7 +108,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: 0b00001010,
+        semantic_id: crate::sid!(00001010),
         signature: "(defmacro name (params) body ...)",
         documentation: "Bind a language-owned macro",
         kind: LanguageItemKind::Macro,
@@ -116,7 +116,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Admitted,
     },
     SemanticToolingMetadata {
-        semantic_id: 0b00001011,
+        semantic_id: crate::sid!(00001011),
         signature: "(def name value)",
         documentation: "Compatibility-only binding form",
         kind: LanguageItemKind::SyntaxForm,
@@ -126,8 +126,8 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
 ];
 
 fn semantic_language_items_with(
-    stable_surfaces: impl Fn(u8) -> Vec<&'static str>,
-    admitted_surfaces: impl Fn(u8) -> Vec<&'static str>,
+    stable_surfaces: impl Fn(Sid8) -> Vec<&'static str>,
+    admitted_surfaces: impl Fn(Sid8) -> Vec<&'static str>,
 ) -> Vec<LanguageItem> {
     let mut items = Vec::new();
     for metadata in SEMANTIC_TOOLING {
@@ -555,14 +555,14 @@ mod tests {
             .iter()
             .find(|item| item.name == "def")
             .expect("def tooling item");
-        assert_eq!(def.semantic_id, Some(11));
+        assert_eq!(def.semantic_id, Some(crate::sid!(00001011)));
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
         assert_eq!(
-            semantic_registry::stable_surfaces_for_semantic_id(11),
+            semantic_registry::stable_surfaces_for_semantic_id(crate::sid!(00001011)),
             vec!["def"]
         );
         assert_eq!(
-            semantic_registry::admitted_surfaces_for_semantic_id(11),
+            semantic_registry::admitted_surfaces_for_semantic_id(crate::sid!(00001011)),
             vec!["def"]
         );
     }
