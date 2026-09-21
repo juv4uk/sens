@@ -97,14 +97,13 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::SemanticRef(semantic_id) => {
-            canon::invoke_semantic_ref(*semantic_id, arguments, environment, span)
-        }
+        Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::SemanticRef(semantic_id) => canon::invoke_semantic_ref(*semantic_id, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
-            "numeric-buffer-map expects a callable function",
+            "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar",
             span,
         )),
     }

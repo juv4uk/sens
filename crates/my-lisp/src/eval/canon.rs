@@ -10,6 +10,7 @@
 //! lambda, define, defmacro, def) are handled before this table in evaluate_list.
 
 use super::special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values};
+use super::arithmetic;
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Span, Value};
 use crate::semantic_registry::SemanticId;
 
@@ -47,6 +48,13 @@ pub(crate) const CONS_SEMANTIC_ID: SemanticId = 0b00000100;
 pub(crate) const CAR_SEMANTIC_ID: SemanticId = 0b00000101;
 pub(crate) const CDR_SEMANTIC_ID: SemanticId = 0b00000110;
 pub(crate) const COND_SEMANTIC_ID: SemanticId = 0b00000111;
+
+/// Arithmetic primitives (admitted via semantic registry, not Canon 0).
+/// SID 00001100 = +, 00001101 = -, 00001110 = *, 00001111 = /
+pub(crate) const ADD_SEMANTIC_ID: SemanticId = 0b00001100;
+pub(crate) const SUB_SEMANTIC_ID: SemanticId = 0b00001101;
+pub(crate) const MUL_SEMANTIC_ID: SemanticId = 0b00001110;
+pub(crate) const DIV_SEMANTIC_ID: SemanticId = 0b00001111;
 
 /// Canon 00000000 is the empty-list ground object itself.
 /// McCarthy7 follow contiguously through 00000111.
@@ -178,6 +186,10 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     table[CONS_SEMANTIC_ID as usize] = Some(prim_cons);
     table[CAR_SEMANTIC_ID as usize] = Some(prim_car);
     table[CDR_SEMANTIC_ID as usize] = Some(prim_cdr);
+    table[ADD_SEMANTIC_ID as usize] = Some(prim_add);
+    table[SUB_SEMANTIC_ID as usize] = Some(prim_sub);
+    table[MUL_SEMANTIC_ID as usize] = Some(prim_mul);
+    table[DIV_SEMANTIC_ID as usize] = Some(prim_div);
     table
 };
 
@@ -204,6 +216,26 @@ fn prim_car(args: &[Value], _env: &Environment, span: Span) -> Result<Value, Lan
 fn prim_cdr(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
     exact_args("cdr", args, 1, span)?;
     cdr_value(&args[0], span)
+}
+
+fn prim_add(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("+", args, 2, span)?;
+    arithmetic::arithmetic_on_values("+", args, env, span)
+}
+
+fn prim_sub(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("-", args, 2, span)?;
+    arithmetic::arithmetic_on_values("-", args, env, span)
+}
+
+fn prim_mul(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("*", args, 2, span)?;
+    arithmetic::arithmetic_on_values("*", args, env, span)
+}
+
+fn prim_div(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("/", args, 2, span)?;
+    arithmetic::arithmetic_on_values("/", args, env, span)
 }
 
 /// Invoke the current implementation projection for a semantic callable.

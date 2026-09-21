@@ -173,44 +173,53 @@ pub(super) fn apply(
     calling_environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    let Value::Closure(ref closure) = function else {
-        return Err(LanguageError::new(
+    match function {
+        Value::Sid(sid) => {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, calling_environment)?);
+            }
+            canon::invoke_semantic_ref(sid, &values, calling_environment, span).map(EvalStep::Value)
+        }
+        Value::Closure(ref closure) => {
+            check_arity(
+                "lambda",
+                closure.parameters.len(),
+                closure.rest.is_some(),
+                arguments.len(),
+                span,
+            )?;
+
+            // Arguments belong to the caller; parameters belong to the captured lexical frame.
+            // Arhumenty nalezhat vyklyku, a parametry — zakhoplenomu leksychnomu freimu.
+            // Argumente gehören zum Aufrufer, Parameter zum erfassten lexikalischen Frame.
+            let local_environment = closure.environment.child();
+            for (parameter, argument) in closure.parameters.iter().zip(arguments.iter()) {
+                let value = evaluate(argument, calling_environment)?;
+                local_environment.define(parameter.clone(), value);
+            }
+            if let Some(rest_name) = &closure.rest {
+                let mut rest_values = Vec::with_capacity(arguments.len() - closure.parameters.len());
+                for argument in &arguments[closure.parameters.len()..] {
+                    rest_values.push(evaluate(argument, calling_environment)?);
+                }
+                local_environment.define(rest_name.clone(), Value::list(rest_values));
+            }
+            let last = last_body_expression(&closure.body, &local_environment, span)?;
+            // Tail positions become data for the evaluator loop instead of recursive Rust calls.
+            // Khvostovi pozytsii staiut danymy dlia tsyklu evaluator, a ne rekursyvnymy vyklykamy Rust.
+            // Tail-Positionen werden zu Daten für den Evaluator-Schleife statt zu rekursiven Rust-Aufrufen.
+            Ok(EvalStep::TailCall {
+                expression: last.clone(),
+                environment: local_environment,
+            })
+        }
+        _ => Err(LanguageError::new(
             ErrorKind::Type,
             "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar",
             span,
-        ));
-    };
-    check_arity(
-        "lambda",
-        closure.parameters.len(),
-        closure.rest.is_some(),
-        arguments.len(),
-        span,
-    )?;
-
-    // Arguments belong to the caller; parameters belong to the captured lexical frame.
-    // Arhumenty nalezhat vyklyku, a parametry — zakhoplenomu leksychnomu freimu.
-    // Argumente gehören zum Aufrufer, Parameter zum erfassten lexikalischen Frame.
-    let local_environment = closure.environment.child();
-    for (parameter, argument) in closure.parameters.iter().zip(arguments.iter()) {
-        let value = evaluate(argument, calling_environment)?;
-        local_environment.define(parameter.clone(), value);
+        )),
     }
-    if let Some(rest_name) = &closure.rest {
-        let mut rest_values = Vec::with_capacity(arguments.len() - closure.parameters.len());
-        for argument in &arguments[closure.parameters.len()..] {
-            rest_values.push(evaluate(argument, calling_environment)?);
-        }
-        local_environment.define(rest_name.clone(), Value::list(rest_values));
-    }
-    let last = last_body_expression(&closure.body, &local_environment, span)?;
-    // Tail positions become data for the evaluator loop instead of recursive Rust calls.
-    // Khvostovi pozytsii staiut danymy dlia tsyklu evaluator, a ne rekursyvnymy vyklykamy Rust.
-    // Tail-Positionen werden zu Daten für den Evaluator-Schleife statt zu rekursiven Rust-Aufrufen.
-    Ok(EvalStep::TailCall {
-        expression: last.clone(),
-        environment: local_environment,
-    })
 }
 
 /// Apply an ordinary closure to values that are already evaluated. Bulk
