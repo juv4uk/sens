@@ -386,6 +386,25 @@ impl Parser<'_> {
         }
         let token = &self.source[start..self.cursor];
 
+        // The complete 8-bit bitstring space is reserved for Canon semantic
+        // identities. This is a lexical distinction, not numeric conversion:
+        // `00001100` is SID 00001100, while decimal `12` remains a number.
+        // The historical `(binary 8)` declaration remains supported below
+        // for compatibility/data files, including its named malformed-bit error.
+        if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+            let mut sid = 0u8;
+            for bit in token.bytes() {
+                sid = (sid << 1) | (bit - b'0');
+            }
+            return Ok(Expr {
+                kind: ExprKind::Sid(sid),
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
+            });
+        }
+
         if let Some(width) = self.binary_width {
             if token.bytes().all(|byte| byte.is_ascii_digit())
                 && token.len() == usize::from(width)
@@ -543,10 +562,36 @@ mod tests {
     }
 
     #[test]
-    fn ordinary_decimal_10101000_stays_decimal_without_binary_declaration() {
+    fn bare_eight_bit_bitstrings_are_reserved_sid_literals() {
+        assert!(matches!(parse_one("00000000").kind, ExprKind::Sid(0)));
+        assert!(matches!(parse_one("00000001").kind, ExprKind::Sid(1)));
+        assert!(matches!(
+            parse_one("00001100").kind,
+            ExprKind::Sid(0b00001100)
+        ));
         assert!(matches!(
             parse_one("10101000").kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 10_101_000.0
+            ExprKind::Sid(0b10101000)
+        ));
+        assert!(matches!(
+            parse_one("11111111").kind,
+            ExprKind::Sid(0b11111111)
+        ));
+    }
+
+    #[test]
+    fn non_eight_bit_numeric_tokens_remain_ordinary_decimal_numbers() {
+        assert!(matches!(
+            parse_one("101").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 101.0
+        ));
+        assert!(matches!(
+            parse_one("101010000").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 101_010_000.0
+        ));
+        assert!(matches!(
+            parse_one("12").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 12.0
         ));
     }
 
