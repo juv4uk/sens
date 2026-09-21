@@ -36,13 +36,40 @@ pub mod semantic_registry_export {
         pub name: &'static str,
     }
 
+    /// Mechanical input accepted by the external projection boundary.
+    ///
+    /// Runtime/source semantics use `Sid8`. The `u8` implementation exists
+    /// only so the pre-#1098 CML export can remain byte-for-byte unchanged in
+    /// this first vertical slice; it must not be used as a SID constructor.
+    #[doc(hidden)]
+    pub trait ProjectionSidInput {
+        #[doc(hidden)]
+        fn into_projection_sid(self) -> super::Sid8;
+    }
+
+    impl ProjectionSidInput for super::Sid8 {
+        fn into_projection_sid(self) -> super::Sid8 {
+            self
+        }
+    }
+
+    impl ProjectionSidInput for u8 {
+        fn into_projection_sid(self) -> super::Sid8 {
+            super::Sid8::from_packed_byte(self)
+        }
+    }
+
     /// Stable and compatibility-only spellings admitted for `semantic_id`,
     /// each tagged with which namespace (en/uk/sa/sym/...) it belongs to.
-    pub fn admitted_surfaces_for_semantic_id(semantic_id: super::Sid8) -> Vec<SurfaceRow> {
-        super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
-            .into_iter()
-            .map(|(namespace, name)| SurfaceRow { namespace, name })
-            .collect()
+    pub fn admitted_surfaces_for_semantic_id(
+        semantic_id: impl ProjectionSidInput,
+    ) -> Vec<SurfaceRow> {
+        super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(
+            semantic_id.into_projection_sid(),
+        )
+        .into_iter()
+        .map(|(namespace, name)| SurfaceRow { namespace, name })
+        .collect()
     }
 
     /// Повертає opaque semantic ID для stable або compatibility-only surface.
@@ -57,8 +84,8 @@ pub mod semantic_registry_export {
     }
 
     /// Canonical 8-bit textual serialization for provenance/export.
-    pub fn semantic_id_bits(semantic_id: super::Sid8) -> String {
-        super::semantic_registry::semantic_id_bits(semantic_id)
+    pub fn semantic_id_bits(semantic_id: impl ProjectionSidInput) -> String {
+        super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())
     }
 }
 pub mod syntax;
