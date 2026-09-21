@@ -415,3 +415,33 @@ jobs:
         with:
           shared-key: main-fast-clippy
       - run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+
+  oracle-deploy:
+    name: Deploy mylisp-oracle to desktop-1
+    if: github.event_name != 'pull_request'
+    needs: [main-fast-critical, main-fast-clippy]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Deploy and restart oracle
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          set -euo pipefail
+          ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$SSH_HOST" '
+            cd /home/agents/GitHub/my-lisp &&
+            git fetch origin &&
+            git reset --hard origin/main &&
+            cargo build --release -p my-lisp-cli &&
+            systemctl --user restart mylisp-oracle &&
+            sleep 3 &&
+            systemctl --user status mylisp-oracle --no-pager
+          '
