@@ -78,9 +78,17 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
-    /// All admitted semantic identities from the Lisp-owned registry projection.
-    pub fn admitted_semantic_ids() -> Vec<super::Sid8> {
+    /// Legacy packed-byte export for external projection consumers.
+    ///
+    /// Runtime/source semantics use opaque `Sid8`; this function deliberately
+    /// preserves the pre-#1098 projection ABI so untouched observers do not
+    /// become semantic participants merely because the runtime identity type
+    /// changed.
+    pub fn admitted_semantic_ids() -> Vec<u8> {
         super::semantic_registry::admitted_semantic_ids()
+            .into_iter()
+            .map(super::Sid8::packed_byte)
+            .collect()
     }
 
     /// Canonical 8-bit textual serialization for provenance/export.
