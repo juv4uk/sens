@@ -117,9 +117,7 @@ fn semantic_id_for_identity(identity: CanonicalIdentity) -> Sid8 {
 }
 
 pub(crate) fn identity_for_surface(name: &str) -> Option<CanonicalIdentity> {
-    semantic_registry::semantic_id_for_surface(name)
-        .map(Sid8::from_packed_byte)
-        .and_then(identity_for_semantic_id)
+    semantic_registry::semantic_id_for_surface(name).and_then(identity_for_semantic_id)
 }
 
 pub(crate) fn is_reserved_surface(name: &str) -> bool {
@@ -310,7 +308,7 @@ mod tests {
         // to enumerate here -- read them from the registry so this test
         // keeps meaning "Canon routes every admitted surface for 0005 to
         // the same identity" even if the admitted spellings change.
-        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID.packed_byte());
+        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID);
         assert!(
             surfaces.len() >= 2,
             "0005 (car) should admit at least two surfaces for this invariant to be meaningful, \
@@ -331,7 +329,7 @@ mod tests {
             identity_for_semantic_id(CAR_SEMANTIC_ID),
             Some(CanonicalIdentity::Car)
         );
-        let human_surface = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID.packed_byte())
+        let human_surface = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID)
             .into_iter()
             .next()
             .expect("00000101 (car) should admit at least one human surface");
@@ -344,7 +342,7 @@ mod tests {
 
     #[test]
     fn every_admitted_surface_for_one_semantic_id_materializes_one_sid8_value() {
-        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID.packed_byte());
+        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID);
         assert!(
             surfaces.len() >= 2,
             "0005 (car) should admit at least two surfaces for this invariant to be meaningful, \
@@ -375,7 +373,7 @@ mod tests {
 
     #[test]
     fn registry_rows_without_canon_meaning_do_not_become_canon() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(ADD_SEMANTIC_ID.packed_byte()));
+        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(ADD_SEMANTIC_ID));
         assert_eq!(identity_for_surface("+"), None);
     }
 
