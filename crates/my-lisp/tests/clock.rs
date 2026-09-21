@@ -96,11 +96,11 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
         .expect("utc-now must remain admitted by sr/2");
     assert_eq!(
         session.environment.get("utc-now"),
-        Some(Value::SemanticRef(utc_sid)),
+        Some(Value::Sid(utc_sid)),
         "core exposes semantic identity without pretending time implementation exists"
     );
     let error = eval_program("(utc-now)", &mut session)
-        .expect_err("unimplemented SemanticRef must fail closed before time library loads");
+        .expect_err("unadmitted SID must fail closed before time library loads");
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(matches!(
         session.environment.get("unix-time-now"),
@@ -229,14 +229,14 @@ fn internet_time_sync_is_language_owned_after_time_library_loads() {
             .expect("internet-time-sync must remain admitted by sr/2");
     assert_eq!(
         session.environment.get("internet-time-sync"),
-        Some(Value::SemanticRef(internet_time_sid)),
+        Some(Value::Sid(internet_time_sid)),
         "core exposes semantic identity without installing the Lisp time implementation"
     );
     let error = eval_program(
         "(internet-time-sync \"clock.example\" 1)",
         &mut session,
     )
-    .expect_err("unimplemented SemanticRef must fail closed before time library loads");
+    .expect_err("unadmitted SID must fail closed before time library loads");
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(matches!(
         session.environment.get("ntp-query-raw"),

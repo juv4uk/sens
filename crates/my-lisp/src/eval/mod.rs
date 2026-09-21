@@ -98,7 +98,6 @@ pub(crate) fn invoke_value(
 ) -> Result<Value, LanguageError> {
     match function {
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
-        Value::SemanticRef(semantic_id) => canon::invoke_semantic_ref(*semantic_id, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -167,7 +166,7 @@ pub(crate) fn evaluate_step(
                 return Ok(EvalStep::Value(value));
             }
             if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(symbol) {
-                return Ok(EvalStep::Value(Value::SemanticRef(semantic_id)));
+                return Ok(EvalStep::Value(Value::Sid(semantic_id)));
             }
             Err(LanguageError::new(
                 ErrorKind::UnknownSymbol,
@@ -244,14 +243,6 @@ fn evaluate_list(
                         values.push(evaluate(argument, environment)?);
                     }
                     canon::invoke_semantic_ref(*sid, &values, environment, span)
-                        .map(EvalStep::Value)
-                }
-                Value::SemanticRef(semantic_id) => {
-                    let mut values = Vec::with_capacity(arguments.len());
-                    for argument in arguments {
-                        values.push(evaluate(argument, environment)?);
-                    }
-                    canon::invoke_semantic_ref(*semantic_id, &values, environment, span)
                         .map(EvalStep::Value)
                 }
                 Value::Builtin(builtin) => {

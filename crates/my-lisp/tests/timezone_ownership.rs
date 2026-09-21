@@ -13,11 +13,11 @@ fn timezone_detect_public_binding_is_language_owned_over_raw_declarations() {
             .expect("timezone-detect must remain admitted by sr/2");
     assert_eq!(
         session.environment.get("timezone-detect"),
-        Some(Value::SemanticRef(timezone_sid)),
+        Some(Value::Sid(timezone_sid)),
         "core exposes semantic identity without installing timezone policy"
     );
     let error = eval_program("(timezone-detect)", &mut session)
-        .expect_err("unimplemented SemanticRef must fail closed before time library loads");
+        .expect_err("unadmitted SID must fail closed before time library loads");
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(session.environment.get("timezone-detect-raw").is_none());
     assert!(matches!(

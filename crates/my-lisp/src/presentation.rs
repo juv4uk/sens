@@ -47,9 +47,6 @@ fn uk_decimal(text: String) -> String {
 
 fn render_uk(value: &Value) -> String {
     match value {
-        Value::SemanticRef(semantic_id) => {
-            format!("#<вбудована {}>", uk_semantic_name(*semantic_id))
-        }
         Value::Builtin(builtin) => {
             format!("#<вбудована {}>", uk_operation_name(builtin.name))
         }
@@ -81,7 +78,9 @@ fn render_uk(value: &Value) -> String {
         Value::Number(number, Exactness::Exact) => number.to_string(),
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
         Value::Rational(number) => number.to_string(),
-        Value::Sid(sid) => sid.to_string(),
+        Value::Sid(sid) => {
+            format!("#<вбудована {}>", uk_semantic_name(*sid))
+        }
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
             escaped.push('"');
