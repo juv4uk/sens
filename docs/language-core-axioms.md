@@ -191,9 +191,9 @@ The unifying possibility all the others serve. Rust, `fpga-lisp` — implementat
 
 ### S2 — Never fail silently — every failure is a named, observable outcome · Ніколи не провалюватись мовчки — кожен провал є названим, спостережуваним результатом
 
-`(car 'a)` doesn't just "not work" — it produces a specific, named kind of failure (`Type`). The wording may differ; the *category* is the contract. Contract 3.0 recognizes eight observable categories: `Parse`, `UnknownSymbol`, `Arity`, `Type`, `InvalidForm`, `NumericOverflow`, `OutOfMemory`, and `DivisionByZero`.
+`(car 'a)` doesn't just "not work" — it produces a specific, named kind of failure (`Type`). The wording may differ; the *category* is the contract. Historically, Contract 3.0 recognized eight observable categories: `Parse`, `UnknownSymbol`, `Arity`, `Type`, `InvalidForm`, `NumericOverflow`, `OutOfMemory`, and `DivisionByZero`. The **current** machine-readable vocabulary is maintained in [`contracts/error-kind-vocabulary.lisp`](../contracts/error-kind-vocabulary.lisp), which consolidates later admitted categories without making Rust the authority.
 
-`(car 'a)` не просто "не працює" — вона видає конкретний, названий вид провалу (`Type`). Формулювання може відрізнятись; контракт — саме *категорія*. Контракт 3.0 визнає вісім спостережуваних категорій: `Parse`, `UnknownSymbol`, `Arity`, `Type`, `InvalidForm`, `NumericOverflow`, `OutOfMemory` і `DivisionByZero`.
+`(car 'a)` не просто "не працює" — вона видає конкретний, названий вид провалу (`Type`). Формулювання може відрізнятись; контракт — саме *категорія*. Історично Contract 3.0 визнавав вісім спостережуваних категорій: `Parse`, `UnknownSymbol`, `Arity`, `Type`, `InvalidForm`, `NumericOverflow`, `OutOfMemory` і `DivisionByZero`. **Поточний** машинно-читаний словник підтримується в [`contracts/error-kind-vocabulary.lisp`](../contracts/error-kind-vocabulary.lisp): він зводить пізніше допущені категорії, не роблячи Rust джерелом семантичної влади.
 
 **Еволюція.** Початкові п'ять категорій отримали `NumericOverflow` і `OutOfMemory` разом з опційними ресурсними межами 2026-08-09. Контракт 3.0 додає `DivisionByZero` і формально розділяє арифметичні логічні помилки, ресурсні/числові межі, помилки декодування та невалідні форми. Перелік версіонується, а не проголошується назавжди замкненим.
 
