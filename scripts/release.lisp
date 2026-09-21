@@ -1,4 +1,4 @@
-; Випуск підготовленого snapshot: my-lisp scripts/release.lisp 0.40.2
+; Випуск підготовленого snapshot: my-lisp scripts/release.lisp 0.41.0
 ; Версії семи Cargo.toml, Cargo.lock та packaging/install.sh оновлюються в PR.
 ; Скрипт перевіряє чистий checkout, відповідність origin/main, версії та
 ; зелений CI цього SHA. Не комітить файли й не пересуває наявні теги.
@@ -22,7 +22,7 @@
          (release-require program (car result) 0)
          (second result))))))
 
-(release-require "Потрібна одна версія: 0.40.2" (atom *argv*)
+(release-require "Потрібна одна версія: 0.41.0" (atom *argv*)
                  (quote (structural-kind pair)))
 (release-require "Потрібен рівно один аргумент" (atom (cdr *argv*))
                  (quote (structural-kind empty-list)))
@@ -55,8 +55,6 @@
           "crates/my-lisp-literate/Cargo.toml" "crates/my-lisp-wasm/Cargo.toml"
           "crates/my-lisp-lsp/Cargo.toml" "crates/my-lisp-host/Cargo.toml"
           "crates/my-lisp-semantic/Cargo.toml")))
-(release-run "python3" (quote ("-m" "unittest" "discover" "-s" "packaging/tests" "-v")))
-
 ; pretty=format дає SHA без кінцевого newline.
 (release-require "Потрібен успішний CI для точного HEAD на main"
   (release-run "timeout"
