@@ -551,25 +551,25 @@ mod tests {
         assert_eq!(expressions.len(), 2);
         assert!(matches!(
             &expressions[1].kind,
-            ExprKind::Sid(crate::sid!(00000101))
+            ExprKind::Sid(sid) if *sid == crate::sid!(00000101)
         ));
     }
 
     #[test]
     fn bare_eight_bit_bitstrings_are_reserved_sid_literals() {
-        assert!(matches!(parse_one("00000000").kind, ExprKind::Sid(crate::sid!(00000000))));
-        assert!(matches!(parse_one("00000001").kind, ExprKind::Sid(crate::sid!(00000001))));
+        assert!(matches!(parse_one("00000000").kind, ExprKind::Sid(sid) if sid == crate::sid!(00000000)));
+        assert!(matches!(parse_one("00000001").kind, ExprKind::Sid(sid) if sid == crate::sid!(00000001)));
         assert!(matches!(
             parse_one("00001100").kind,
-            ExprKind::Sid(crate::sid!(00001100))
+            ExprKind::Sid(sid) if sid == crate::sid!(00001100)
         ));
         assert!(matches!(
             parse_one("10101000").kind,
-            ExprKind::Sid(crate::sid!(10101000))
+            ExprKind::Sid(sid) if sid == crate::sid!(10101000)
         ));
         assert!(matches!(
             parse_one("11111111").kind,
-            ExprKind::Sid(crate::sid!(11111111))
+            ExprKind::Sid(sid) if sid == crate::sid!(11111111)
         ));
     }
 
