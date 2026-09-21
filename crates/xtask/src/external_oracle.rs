@@ -377,7 +377,7 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
             }
         }
         ExprKind::Rational(rational) => Ok(rational.to_string()),
-        ExprKind::Sid(sid) => Ok(format!("{sid:08b}")),
+        ExprKind::Sid(sid) => Ok(sid.to_string()),
         ExprKind::String(_) => Err(Unsupported::new("external-oracle/string")),
         ExprKind::Pair(_, _) => Err(Unsupported::new("external-oracle/pair")),
         ExprKind::NumericBuffer(_) => Err(Unsupported::new("external-oracle/numeric-buffer")),
@@ -402,20 +402,24 @@ fn translate_call(items: &[Expr]) -> Result<String, Unsupported> {
         .map(translate_expr)
         .collect::<Result<Vec<_>, _>>()?;
 
-    match semantic_id {
-        12 => Ok(format!("Total[{{{}}}]", translated.join(", "))),
-        13 => match translated.as_slice() {
+    if semantic_id == my_lisp::sid!(00001100) {
+        Ok(format!("Total[{{{}}}]", translated.join(", ")))
+    } else if semantic_id == my_lisp::sid!(00001101) {
+        match translated.as_slice() {
             [] => Err(Unsupported::new("external-oracle/arity")),
             [only] => Ok(format!("Minus[{only}]")),
             _ => Ok(format!("Fold[Subtract, {{{}}}]", translated.join(", "))),
-        },
-        14 => Ok(format!("Times[{}]", translated.join(", "))),
-        15 => match translated.as_slice() {
+        }
+    } else if semantic_id == my_lisp::sid!(00001110) {
+        Ok(format!("Times[{}]", translated.join(", ")))
+    } else if semantic_id == my_lisp::sid!(00001111) {
+        match translated.as_slice() {
             [] => Err(Unsupported::new("external-oracle/arity")),
             [only] => Ok(format!("Divide[1, {only}]")),
             _ => Ok(format!("Fold[Divide, {{{}}}]", translated.join(", "))),
-        },
-        _ => Err(Unsupported::new("external-oracle/unknown-semantic-id")),
+        }
+    } else {
+        Err(Unsupported::new("external-oracle/unknown-semantic-id"))
     }
 }
 
@@ -470,10 +474,10 @@ mod tests {
     #[test]
     fn all_admitted_arithmetic_surfaces_project_by_semantic_identity() {
         let cases = [
-            (12, "Total[{8, 2}]"),
-            (13, "Fold[Subtract, {8, 2}]"),
-            (14, "Times[8, 2]"),
-            (15, "Fold[Divide, {8, 2}]"),
+            (my_lisp::sid!(00001100), "Total[{8, 2}]"),
+            (my_lisp::sid!(00001101), "Fold[Subtract, {8, 2}]"),
+            (my_lisp::sid!(00001110), "Times[8, 2]"),
+            (my_lisp::sid!(00001111), "Fold[Divide, {8, 2}]"),
         ];
 
         for (semantic_id, expected) in cases {
