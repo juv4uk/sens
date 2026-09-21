@@ -64,21 +64,17 @@
       (t
        (let ((bindings (car (cdr ast)))
              (body (car (cdr (cdr ast)))))
-         (let loop ((remaining bindings)
-                    (current-bound bound-vars)
-                    (free (quote ())))
-           (cond
-             ((equal? remaining (quote ()))
-              (append free (collect-free-vars body current-bound)))
-             (t
-              (let ((binding (car remaining)))
-                (let ((name (symbol->string (car binding)))
-                      (value (second binding)))
-                  (loop
-                    (cdr remaining)
-                    (cons name current-bound)
-                    (append free
-                            (collect-free-vars value current-bound)))))))))))))
+         (cond
+           ((equal? bindings (quote ()))
+            (collect-free-vars body bound-vars))
+           (t
+            (let ((binding (car bindings)))
+              (append
+                (collect-free-vars (second binding) bound-vars)
+                (collect-free-vars-let*
+                  (list (quote let*) (cdr bindings) body)
+                  (cons (symbol->string (car binding))
+                        bound-vars)))))))))))
 
 (def collect-free-vars-letrec
   (lambda (ast bound-vars)
