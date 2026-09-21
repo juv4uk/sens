@@ -16,7 +16,7 @@ When two sources disagree, use this order:
 
 1. **`language-contract.lisp`** — machine-readable Level 1/2 contract version and ratified observable invariants.
 2. **Ratified ADRs under `docs/adr/`** — closed decisions whose scope is explicitly stated, especially `ADR-004-CLOSED-MCCARTHY7-CORE.md`.
-3. **Executable conformance evidence** — `tests/fixtures/conformance.lisp`, `tests/fixtures/macro-conformance.lisp`, `lib/canon.lisp`, and the tests that execute those contracts.
+3. **Executable conformance evidence** — Lisp-owned contract/inventory data under `contracts/`, `tests/fixtures/conformance.lisp`, `tests/fixtures/macro-conformance.lisp`, `lib/canon.lisp`, and the tests that execute or mechanically check those artifacts.
 4. **Reference implementation** — `crates/my-lisp`. It is the mature software oracle used to test behavior, not the owner of semantics merely because it is Rust.
 5. **Independent implementations** — `fpga-lisp`, `c-runtime/`, and other declared substrates. Their value is that they can falsify implementation-specific assumptions.
 6. **Generated reference** — for example `docs/FUNCTIONS.md`. Generated output describes the current implementation surface but does not redefine the contract.
