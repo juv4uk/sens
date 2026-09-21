@@ -2,17 +2,17 @@
 //!
 //! Canon is deliberately *not* an `Environment`. Stable human/symbolic
 //! spellings live in `lib/surface/semantic-registry.wsm` and are projected to
-//! opaque numeric IDs by the shared registry module. This module owns only the
-//! finite mapping from those IDs to canonical evaluator meaning, plus Canon 0.
+//! opaque runtime projections by the shared registry module. This module owns
+//! only the finite mapping from exact eight-bit SID identities to canonical
+//! evaluator meaning, plus Canon 0.
 //!
-//! Primitive dispatch is a direct u8-indexed function table. Each SemanticId
-//! (0..255) either has a callable primitive or not. Special forms (quote, cond,
+//! Primitive dispatch may pack a Sid8 into one byte to index a 256-entry table,
+//! but that byte is mechanism only; the identity remains the exact bit spelling. Special forms (quote, cond,
 //! lambda, define, defmacro, def) are handled before this table in evaluate_list.
 
 use super::special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values};
 use super::arithmetic;
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Span, Value};
-use crate::semantic_registry::SemanticId;
+use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sid8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub(crate) enum CanonicalIdentity {
@@ -37,24 +37,24 @@ pub(crate) enum CanonicalKind {
 pub(crate) struct CanonEntry {
     pub identity: CanonicalIdentity,
     pub kind: CanonicalKind,
-    pub semantic_id: SemanticId,
+    pub semantic_id: Sid8,
 }
 
-pub(crate) const EMPTY_LIST_SEMANTIC_ID: SemanticId = 0b00000000;
-pub(crate) const QUOTE_SEMANTIC_ID: SemanticId = 0b00000001;
-pub(crate) const ATOM_SEMANTIC_ID: SemanticId = 0b00000010;
-pub(crate) const EQ_SEMANTIC_ID: SemanticId = 0b00000011;
-pub(crate) const CONS_SEMANTIC_ID: SemanticId = 0b00000100;
-pub(crate) const CAR_SEMANTIC_ID: SemanticId = 0b00000101;
-pub(crate) const CDR_SEMANTIC_ID: SemanticId = 0b00000110;
-pub(crate) const COND_SEMANTIC_ID: SemanticId = 0b00000111;
+pub(crate) const EMPTY_LIST_SEMANTIC_ID: Sid8 = crate::sid!(00000000);
+pub(crate) const QUOTE_SEMANTIC_ID: Sid8 = crate::sid!(00000001);
+pub(crate) const ATOM_SEMANTIC_ID: Sid8 = crate::sid!(00000010);
+pub(crate) const EQ_SEMANTIC_ID: Sid8 = crate::sid!(00000011);
+pub(crate) const CONS_SEMANTIC_ID: Sid8 = crate::sid!(00000100);
+pub(crate) const CAR_SEMANTIC_ID: Sid8 = crate::sid!(00000101);
+pub(crate) const CDR_SEMANTIC_ID: Sid8 = crate::sid!(00000110);
+pub(crate) const COND_SEMANTIC_ID: Sid8 = crate::sid!(00000111);
 
 /// Arithmetic primitives (admitted via semantic registry, not Canon 0).
-/// SID 00001100 = +, 00001101 = -, 00001110 = *, 00001111 = /
-pub(crate) const ADD_SEMANTIC_ID: SemanticId = 0b00001100;
-pub(crate) const SUB_SEMANTIC_ID: SemanticId = 0b00001101;
-pub(crate) const MUL_SEMANTIC_ID: SemanticId = 0b00001110;
-pub(crate) const DIV_SEMANTIC_ID: SemanticId = 0b00001111;
+/// Their canonical identities are the exact bit spellings themselves.
+pub(crate) const ADD_SEMANTIC_ID: Sid8 = crate::sid!(00001100);
+pub(crate) const SUB_SEMANTIC_ID: Sid8 = crate::sid!(00001101);
+pub(crate) const MUL_SEMANTIC_ID: Sid8 = crate::sid!(00001110);
+pub(crate) const DIV_SEMANTIC_ID: Sid8 = crate::sid!(00001111);
 
 /// Canon 00000000 is the empty-list ground object itself.
 /// McCarthy7 follow contiguously through 00000111.
@@ -101,14 +101,14 @@ pub(crate) const CANON: [CanonEntry; 8] = [
     },
 ];
 
-pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<CanonicalIdentity> {
+pub(crate) fn identity_for_semantic_id(semantic_id: Sid8) -> Option<CanonicalIdentity> {
     CANON
         .iter()
         .find(|entry| entry.semantic_id == semantic_id)
         .map(|entry| entry.identity)
 }
 
-fn semantic_id_for_identity(identity: CanonicalIdentity) -> SemanticId {
+fn semantic_id_for_identity(identity: CanonicalIdentity) -> Sid8 {
     CANON
         .iter()
         .find(|entry| entry.identity == identity)
@@ -117,7 +117,9 @@ fn semantic_id_for_identity(identity: CanonicalIdentity) -> SemanticId {
 }
 
 pub(crate) fn identity_for_surface(name: &str) -> Option<CanonicalIdentity> {
-    semantic_registry::semantic_id_for_surface(name).and_then(identity_for_semantic_id)
+    semantic_registry::semantic_id_for_surface(name)
+        .map(Sid8::from_packed_byte)
+        .and_then(identity_for_semantic_id)
 }
 
 pub(crate) fn is_reserved_surface(name: &str) -> bool {
@@ -181,15 +183,15 @@ type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageErr
 /// they are handled in evaluate_list before reaching here.
 const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     let mut table: [Option<PrimitiveFn>; 256] = [None; 256];
-    table[ATOM_SEMANTIC_ID as usize] = Some(prim_atom);
-    table[EQ_SEMANTIC_ID as usize] = Some(prim_eq);
-    table[CONS_SEMANTIC_ID as usize] = Some(prim_cons);
-    table[CAR_SEMANTIC_ID as usize] = Some(prim_car);
-    table[CDR_SEMANTIC_ID as usize] = Some(prim_cdr);
-    table[ADD_SEMANTIC_ID as usize] = Some(prim_add);
-    table[SUB_SEMANTIC_ID as usize] = Some(prim_sub);
-    table[MUL_SEMANTIC_ID as usize] = Some(prim_mul);
-    table[DIV_SEMANTIC_ID as usize] = Some(prim_div);
+    table[ATOM_SEMANTIC_ID.packed_byte() as usize] = Some(prim_atom);
+    table[EQ_SEMANTIC_ID.packed_byte() as usize] = Some(prim_eq);
+    table[CONS_SEMANTIC_ID.packed_byte() as usize] = Some(prim_cons);
+    table[CAR_SEMANTIC_ID.packed_byte() as usize] = Some(prim_car);
+    table[CDR_SEMANTIC_ID.packed_byte() as usize] = Some(prim_cdr);
+    table[ADD_SEMANTIC_ID.packed_byte() as usize] = Some(prim_add);
+    table[SUB_SEMANTIC_ID.packed_byte() as usize] = Some(prim_sub);
+    table[MUL_SEMANTIC_ID.packed_byte() as usize] = Some(prim_mul);
+    table[DIV_SEMANTIC_ID.packed_byte() as usize] = Some(prim_div);
     table
 };
 
@@ -244,15 +246,15 @@ fn prim_div(args: &[Value], env: &Environment, span: Span) -> Result<Value, Lang
 /// execution bridge from that identity to today's Rust mechanism; another
 /// backend may replace the projection without changing the value identity.
 pub(crate) fn invoke_semantic_ref(
-    semantic_id: SemanticId,
+    semantic_id: Sid8,
     args: &[Value],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let Some(primitive) = PRIMITIVE_TABLE.get(semantic_id as usize).and_then(|f| *f) else {
+    let Some(primitive) = PRIMITIVE_TABLE.get(semantic_id.packed_byte() as usize).and_then(|f| *f) else {
         return Err(LanguageError::new(
             ErrorKind::Type,
-            format!("unknown semantic callable SID: {}", semantic_registry::semantic_id_bits(semantic_id)),
+            format!("unknown semantic callable SID: {semantic_id}"),
             span,
         ));
     };
@@ -290,7 +292,7 @@ mod tests {
     }
 
     #[test]
-    fn canon_meanings_are_selected_only_by_numeric_semantic_identity() {
+    fn canon_meanings_are_selected_only_by_exact_binary_semantic_identity() {
         assert_eq!(
             identity_for_semantic_id(QUOTE_SEMANTIC_ID),
             Some(CanonicalIdentity::Quote)
@@ -299,7 +301,7 @@ mod tests {
             identity_for_semantic_id(CAR_SEMANTIC_ID),
             Some(CanonicalIdentity::Car)
         );
-        assert_eq!(identity_for_semantic_id(12), None);
+        assert_eq!(identity_for_semantic_id(crate::sid!(00001100)), None);
     }
 
     #[test]
@@ -324,7 +326,7 @@ mod tests {
     }
 
     #[test]
-    fn numeric_canon_identity_is_the_runtime_value_identity() {
+    fn canon_bit_identity_is_the_runtime_value_identity() {
         assert_eq!(
             identity_for_semantic_id(CAR_SEMANTIC_ID),
             Some(CanonicalIdentity::Car)
@@ -368,12 +370,12 @@ mod tests {
             identity_for_semantic_id(CAR_SEMANTIC_ID),
             Some(CanonicalIdentity::Car)
         );
-        assert_eq!(identity_for_semantic_id(12), None);
+        assert_eq!(identity_for_semantic_id(crate::sid!(00001100)), None);
     }
 
     #[test]
     fn registry_rows_without_canon_meaning_do_not_become_canon() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(12));
+        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(ADD_SEMANTIC_ID.packed_byte()));
         assert_eq!(identity_for_surface("+"), None);
     }
 
