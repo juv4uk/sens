@@ -33,11 +33,29 @@
 (release-run "git" (list "check-ref-format" release-tag-ref))
 (release-require "Checkout має бути чистим"
   (release-run "git" (quote ("status" "--porcelain" "--untracked-files=normal"))) "")
+(release-require "Release запускається тільки з main"
+  (release-run "git" (quote ("branch" "--show-current"))) "main\n")
+(release-run "timeout" (quote ("60" "git" "fetch" "origin" "main")))
+(release-require "HEAD має дорівнювати свіжому origin/main"
+  (release-run "git" (quote ("log" "-1" "--pretty=format:%H" "HEAD")))
+  (release-run "git" (quote ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
 (release-run "cargo"
   (quote ("run" "--release" "--locked" "-p" "my-lisp-cli" "--bin" "gen-fasl"
           "--" "lib/core.lisp" "lib/core.lisp.fasl")))
-(release-require "FASL змінився; закоміть regenerated snapshot перед релізом"
-  (release-run "git" (quote ("status" "--porcelain" "--untracked-files=normal"))) "")
+(def release-fasl-diff-status
+  (car (process-run "git" (quote ("diff" "--quiet" "--" "lib/core.lisp.fasl")))))
+(cond
+  ((eq release-fasl-diff-status 0) (identity-relation same) (quote ()))
+  ((eq release-fasl-diff-status 1) (identity-relation same)
+   ((lambda ()
+      (release-run "git" (quote ("add" "lib/core.lisp.fasl")))
+      (release-run "git" (quote ("commit" "-m" "chore(fasl): regenerate core snapshot")))
+      (release-run "timeout" (quote ("60" "git" "push" "origin" "main")))))
+  (t
+   ((lambda ()
+      (print "Не вдалося визначити стан regenerated FASL")
+      (print release-fasl-diff-status)
+      (release-preflight-failed))))))
 (release-run "timeout" (quote ("60" "git" "fetch" "origin" "main")))
 (def release-head (release-run "git" (quote ("log" "-1" "--pretty=format:%H" "HEAD"))))
 (release-require "HEAD має дорівнювати свіжому origin/main"
