@@ -316,7 +316,7 @@ fn lower_list(items: &[Expr], span: Span) -> Result<IrNode, LoweringError> {
     if necessary_forms::identity_for_symbol(head_name) == Some(NecessaryFormIdentity::Lambda) {
         return lower_lambda(items, span);
     }
-    if semantic_registry::semantic_id_for_surface(head_name) == Some(DEFMACRO_SEMANTIC_ID) {
+    if semantic_registry::semantic_id_for_surface(head_name) == Some(DEFMACRO_SEMANTIC_ID.packed_byte()) {
         return lower_defmacro(items, span);
     }
 
