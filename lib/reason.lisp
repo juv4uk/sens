@@ -97,14 +97,15 @@
               (cond
                 ((atom entry)
                  (cond
-                   ((< predicate-count *reason-index-max-predicates*)
+                   ((< predicate-count *reason-index-max-predicates*) 1
                     (reason-index-build-scan
                       (cdr remaining)
                       original
                       (reason-index-add-reversed
                         predicate (car remaining) buckets)
                       (+ predicate-count 1)))
-                   (t (reason-index-linear original))))
+                   ((< predicate-count *reason-index-max-predicates*) 0
+                    (reason-index-linear original))))
                 (t
                  (reason-index-build-scan
                    (cdr remaining)
