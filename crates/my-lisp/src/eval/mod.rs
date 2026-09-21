@@ -98,7 +98,7 @@ pub(crate) fn invoke_value(
 ) -> Result<Value, LanguageError> {
     match function {
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
-        Value::SemanticRef(semantic_id) => canon::invoke_semantic_ref(Sid8::from_packed_byte(*semantic_id), arguments, environment, span),
+        Value::SemanticRef(semantic_id) => canon::invoke_semantic_ref(*semantic_id, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -251,7 +251,7 @@ fn evaluate_list(
                     for argument in arguments {
                         values.push(evaluate(argument, environment)?);
                     }
-                    canon::invoke_semantic_ref(Sid8::from_packed_byte(*semantic_id), &values, environment, span)
+                    canon::invoke_semantic_ref(*semantic_id, &values, environment, span)
                         .map(EvalStep::Value)
                 }
                 Value::Builtin(builtin) => {
