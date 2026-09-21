@@ -193,7 +193,7 @@ fn admitted_invoke_surfaces_materialize_from_the_single_registry() {
             .expect("викликати must be admitted by sr/2");
 
     assert_eq!(invoke_sid, ukrainian_sid);
-    assert_eq!(english, Value::SemanticRef(invoke_sid));
-    assert_eq!(ukrainian, Value::SemanticRef(ukrainian_sid));
+    assert_eq!(english, Value::Sid(invoke_sid));
+    assert_eq!(ukrainian, Value::Sid(ukrainian_sid));
     assert_eq!(english, ukrainian);
 }
