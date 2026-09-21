@@ -106,25 +106,31 @@
                   (quote unreadable-active-host-source)
                   "active host source must be readable text for authority review"))
            (t
-            (let* ((source
-                     (cond
-                       ((string? raw-source) raw-source)
-                       (t (write-to-string raw-source))))
-                   (class (violation-class path source)))
+            (let ((source
+                    (cond
+                      ((string? raw-source) raw-source)
+                      (t (write-to-string raw-source)))))
               (cond
-           ((eq class (quote allowed)) (identity-relation same)
-            (scan (cdr rows)))
-           ((eq class (quote not-active-host-source)) (identity-relation same)
-            (scan (cdr rows)))
-           ((eq class (quote allowed-generated-projection)) (identity-relation same)
-            (scan (cdr rows)))
-           ((eq class (quote allowed-adversarial-fixture)) (identity-relation same)
-            (scan (cdr rows)))
-           ((reviewed-source? path source authority-reviews) t
-            (scan (cdr rows)))
+                ; Exact content-addressed review is stronger than heuristic
+                ; classification and cheaper: one digest check replaces many
+                ; whole-source scans. Any later byte change invalidates the
+                ; digest and falls through to the full structural classifier.
+                ((reviewed-source? path source authority-reviews) t
+                 (scan (cdr rows)))
                 (t
-                 (list (quote semantic-authority-violation)
-                       path class
-                       "new host-side semantic authority requires explicit review")))))))))))
+                 (let ((class (violation-class path source)))
+                   (cond
+                     ((eq class (quote allowed)) (identity-relation same)
+                      (scan (cdr rows)))
+                     ((eq class (quote not-active-host-source)) (identity-relation same)
+                      (scan (cdr rows)))
+                     ((eq class (quote allowed-generated-projection)) (identity-relation same)
+                      (scan (cdr rows)))
+                     ((eq class (quote allowed-adversarial-fixture)) (identity-relation same)
+                      (scan (cdr rows)))
+                     (t
+                      (list (quote semantic-authority-violation)
+                            path class
+                            "new host-side semantic authority requires explicit review"))))))))))))))
 
 (print (scan changed))
