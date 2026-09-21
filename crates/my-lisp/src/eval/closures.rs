@@ -179,7 +179,7 @@ pub(super) fn apply(
             for argument in arguments {
                 values.push(evaluate(argument, calling_environment)?);
             }
-            canon::invoke_semantic_ref(sid.packed_byte(), &values, calling_environment, span).map(EvalStep::Value)
+            canon::invoke_semantic_ref(sid, &values, calling_environment, span).map(EvalStep::Value)
         }
         Value::Closure(ref closure) => {
             check_arity(
