@@ -388,27 +388,26 @@ impl Parser<'_> {
         let token = &self.source[start..self.cursor];
 
         if let Some(width) = self.binary_width {
-            if token.bytes().all(|byte| byte.is_ascii_digit()) {
-                if token.len() == usize::from(width) {
-                    let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
-                    if !all_binary {
-                        return Err(self.error(
-                            "binary literal contains a non-binary digit",
-                            start,
-                            self.cursor,
-                        ));
-                    }
-                    let binary = Binary::from_bits(token, width).ok_or_else(|| {
-                        self.error("malformed binary literal", start, self.cursor)
-                    })?;
-                    return Ok(Expr {
-                        kind: ExprKind::Binary(binary),
-                        span: Span {
-                            start,
-                            end: self.cursor,
-                        },
-                    });
+            if token.bytes().all(|byte| byte.is_ascii_digit())
+                && token.len() == usize::from(width)
+            {
+                let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
+                if !all_binary {
+                    return Err(self.error(
+                        "binary literal contains a non-binary digit",
+                        start,
+                        self.cursor,
+                    ));
                 }
+                let binary = Binary::from_bits(token, width)
+                    .ok_or_else(|| self.error("malformed binary literal", start, self.cursor))?;
+                return Ok(Expr {
+                    kind: ExprKind::Binary(binary),
+                    span: Span {
+                        start,
+                        end: self.cursor,
+                    },
+                });
             }
         }
 
