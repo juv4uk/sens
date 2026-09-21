@@ -163,29 +163,6 @@ jobs:
           cat tests/island-math-evidence-verdict.lisp
           ./target/debug/my-lisp scripts/enforce-island-math-evidence.lisp
 
-          cp lib/island-math-evidence.lisp /tmp/island-math-evidence.lisp
-          restore_evidence() { cp /tmp/island-math-evidence.lisp lib/island-math-evidence.lisp; }
-          trap restore_evidence EXIT
-
-          cp tests/fixtures/island-math-evidence/unadmitted-route.lisp lib/island-math-evidence.lisp
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-unadmitted.lisp
-          grep -q 'executor-route-not-admitted-by-canon-projection' /tmp/island-math-unadmitted.lisp
-
-          cp tests/fixtures/island-math-evidence/unsupported-executor.lisp lib/island-math-evidence.lisp
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-executor.lisp
-          grep -q 'unsupported-executor' /tmp/island-math-executor.lisp
-
-          cp tests/fixtures/island-math-evidence/duplicate-route.lisp lib/island-math-evidence.lisp
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-duplicate.lisp
-          grep -q 'duplicate-executor-evidence' /tmp/island-math-duplicate.lisp
-
-          cp tests/fixtures/island-math-evidence/semantic-field-leak.lisp lib/island-math-evidence.lisp
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-semantic-leak.lisp
-          grep -q 'semantic-field-forbidden' /tmp/island-math-semantic-leak.lisp
-
-          restore_evidence
-          trap - EXIT
-
       - name: Lisp-owned machine non-interference guard
         shell: bash
         run: |
@@ -327,6 +304,46 @@ jobs:
       - name: Clippy changed Rust surfaces
         if: steps.changes.outputs.rust == 'true' && steps.changes.outputs.workspace != 'true'
         run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+
+  island-math-adversarial:
+    name: island math adversarial matrix
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: island-math-adversarial
+      - name: Build Lisp checker runtime
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Canon-subordinate island math adversarial matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp lib/island-math-evidence.lisp /tmp/island-math-evidence.lisp
+          restore_evidence() { cp /tmp/island-math-evidence.lisp lib/island-math-evidence.lisp; }
+          trap restore_evidence EXIT
+
+          cp tests/fixtures/island-math-evidence/unadmitted-route.lisp lib/island-math-evidence.lisp
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-unadmitted.lisp
+          grep -q 'executor-route-not-admitted-by-canon-projection' /tmp/island-math-unadmitted.lisp
+
+          cp tests/fixtures/island-math-evidence/unsupported-executor.lisp lib/island-math-evidence.lisp
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-executor.lisp
+          grep -q 'unsupported-executor' /tmp/island-math-executor.lisp
+
+          cp tests/fixtures/island-math-evidence/duplicate-route.lisp lib/island-math-evidence.lisp
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-duplicate.lisp
+          grep -q 'duplicate-executor-evidence' /tmp/island-math-duplicate.lisp
+
+          cp tests/fixtures/island-math-evidence/semantic-field-leak.lisp lib/island-math-evidence.lisp
+          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-semantic-leak.lisp
+          grep -q 'semantic-field-forbidden' /tmp/island-math-semantic-leak.lisp
+
+          restore_evidence
+          trap - EXIT
 
   windows-native-exec-witness:
     name: Windows native-exec ABI witness
