@@ -1,4 +1,4 @@
-use my_lisp::{eval_program, Session, Sid8, Value};
+use my_lisp::{eval_program, Session, Value};
 use std::collections::HashSet;
 use std::rc::Rc;
 
@@ -7,15 +7,19 @@ const ПЕРЕВІРКА_ПОКРИТТЯ: &str = include_str!("../../../scripts
 const ПЕРЕВІРКА_РІВНОПРАВЯ: &str = include_str!("../../../scripts/check_trilingual_surface.py");
 const ТРАНСЛЯТОР: &str = include_str!("../../../scripts/translate-program.py");
 
-fn registry_ids() -> Vec<Sid8> {
+fn registry_ids() -> Vec<u8> {
     my_lisp::semantic_registry_export::admitted_semantic_ids()
 }
 
-fn registry_surfaces(id: Sid8) -> Vec<my_lisp::semantic_registry_export::SurfaceRow> {
+fn registry_surfaces(
+    id: impl my_lisp::semantic_registry_export::ProjectionSidInput,
+) -> Vec<my_lisp::semantic_registry_export::SurfaceRow> {
     my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(id)
 }
 
-fn registry_id_bits(id: Sid8) -> String {
+fn registry_id_bits(
+    id: impl my_lisp::semantic_registry_export::ProjectionSidInput,
+) -> String {
     my_lisp::semantic_registry_export::semantic_id_bits(id)
 }
 
@@ -53,7 +57,7 @@ fn семантичні_ідентифікатори_складаються_ті
 #[test]
 fn кожна_тотожність_явно_описує_uk_en_sa_без_заборони_майбутніх_мов() {
     for id in registry_ids() {
-        if id == my_lisp::sid!(00000000) {
+        if registry_id_bits(id) == "00000000" {
             continue;
         }
 
@@ -82,7 +86,7 @@ fn кожна_тотожність_явно_описує_uk_en_sa_без_заб�
 #[test]
 fn символічна_нотація_не_належить_людській_мові() {
     for id in registry_ids() {
-        if id == my_lisp::sid!(00000000) {
+        if registry_id_bits(id) == "00000000" {
             continue;
         }
 
@@ -160,7 +164,7 @@ fn executable_authority_більше_не_читає_legacy_en_shaped_табли
 #[ignore = "фінальний gate: увімкнути після завершення UK/EN/SA parity"]
 fn повне_рівноправя_вимагає_наявності_для_всіх_людських_поверхонь() {
     for id in registry_ids() {
-        if id == my_lisp::sid!(00000000) {
+        if registry_id_bits(id) == "00000000" {
             continue;
         }
 
