@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr};
+use crate::{Environment, Exactness, Expr, Sid8};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -414,9 +414,6 @@ pub struct Builtin {
     pub func: BuiltinFunction,
 }
 
-/// Canonical semantic identity: exactly one byte.
-pub type Sid = u8;
-
 /// Immutable contiguous numeric storage for portable bulk-compute lowering.
 #[derive(Clone, Debug)]
 pub enum NumericBuffer {
@@ -455,7 +452,7 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sid),
+    Sid(Sid8),
     String(Rc<str>),
     Symbol(Rc<str>),
     Pair(Rc<Value>, Rc<Value>),
@@ -739,7 +736,7 @@ fn render(value: &Value, quote_strings: bool) -> String {
             }
         }
         Value::Rational(number) => number.to_string(),
-        Value::Sid(sid) => format!("{sid:08b}"),
+        Value::Sid(sid) => sid.to_string(),
         Value::String(text) => {
             if quote_strings {
                 let mut escaped = String::with_capacity(text.len() + 2);
