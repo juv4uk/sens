@@ -465,10 +465,11 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::absurd_extreme_comparisons)]
-    fn semantic_tooling_keys_are_byte_identities_only() {
+    fn semantic_tooling_keys_keep_exact_eight_bit_identity() {
         assert!(SEMANTIC_TOOLING.iter().all(|metadata| {
-            metadata.semantic_id <= u8::MAX
+            let spelling = metadata.semantic_id.to_string();
+            spelling.len() == 8
+                && spelling.bytes().all(|byte| matches!(byte, b'0' | b'1'))
         }));
     }
 
@@ -477,14 +478,14 @@ mod tests {
         let discover = |sid8_surface: &'static str| {
             semantic_language_items_with(
                 |semantic_id| {
-                    if semantic_id == 8 {
+                    if semantic_id == crate::sid!(00001000) {
                         vec![sid8_surface]
                     } else {
                         vec![]
                     }
                 },
                 |semantic_id| {
-                    if semantic_id == 8 {
+                    if semantic_id == crate::sid!(00001000) {
                         vec![sid8_surface]
                     } else {
                         vec![]
@@ -495,17 +496,17 @@ mod tests {
         let before = discover("comet");
         let after = discover("meteor");
         assert!(before.iter().any(|item| {
-            item.name == "comet" && item.semantic_id == Some(8)
+            item.name == "comet" && item.semantic_id == Some(crate::sid!(00001000))
         }));
         assert!(!before.iter().any(|item| item.name == "meteor"));
         assert!(after.iter().any(|item| {
-            item.name == "meteor" && item.semantic_id == Some(8)
+            item.name == "meteor" && item.semantic_id == Some(crate::sid!(00001000))
         }));
         assert!(!after.iter().any(|item| item.name == "comet"));
     }
 
     #[test]
-    fn necessary_form_peers_share_numeric_tooling_identity() {
+    fn necessary_form_peers_share_sid8_tooling_identity() {
         let items = language_items();
         let find = |name: &str| {
             items
@@ -523,8 +524,8 @@ mod tests {
             assert_eq!(left.kind, LanguageItemKind::SyntaxForm);
             assert_eq!(right.kind, LanguageItemKind::SyntaxForm);
         }
-        assert_eq!(find("lambda").semantic_id, Some(8));
-        assert_eq!(find("define").semantic_id, Some(9));
+        assert_eq!(find("lambda").semantic_id, Some(crate::sid!(00001000)));
+        assert_eq!(find("define").semantic_id, Some(crate::sid!(00001001)));
     }
 
     #[test]
@@ -535,7 +536,7 @@ mod tests {
                 .iter()
                 .find(|item| item.name == name)
                 .unwrap_or_else(|| panic!("missing macro tooling item {name}"));
-            assert_eq!(item.semantic_id, Some(10));
+            assert_eq!(item.semantic_id, Some(crate::sid!(00001010)));
             assert_eq!(item.kind, LanguageItemKind::Macro);
         }
 
