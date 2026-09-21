@@ -17,6 +17,7 @@ fn semantic_authority_guard_is_lisp_owned() {
     assert!(guard.contains("isa-to-sid-authority"));
     assert!(guard.contains("host-fallback-meaning"));
     assert!(guard.contains("allowed-generated-projection"));
+    assert!(guard.contains("\"SemanticId\" \"semantic_id\" \"CanonicalIdentity\""));
     assert!(guard.contains("authority-reviews"));
     assert!(guard.contains("reviewed-source?"));
     assert!(guard.contains("sha256-hex source"));
