@@ -41,7 +41,7 @@
   (internal
     ((bootstrap (make-macro))
      (core-library
-       (length-onto reverse-onto map-onto filter-onto largest-chunk
+       (length-onto reverse-onto map-onto filter-onto largest-chunk binary-fold
         nondecreasing-from? nonincreasing-from? digit->string
         number->string-onto sqrt-iter isqrt-step))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
