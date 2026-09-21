@@ -11,8 +11,11 @@ files=(
   crates/my-lisp/src/eval/mod.rs
   crates/my-lisp/src/eval/closures.rs
   crates/my-lisp/src/ir.rs
+  crates/my-lisp/src/language_items.rs
+  crates/my-lisp/src/lib.rs
   crates/my-lisp/src/parser.rs
   crates/my-lisp/src/presentation.rs
+  crates/my-lisp/src/semantic_registry.rs
   crates/my-lisp/src/syntax.rs
   crates/my-lisp/src/value.rs
 )
