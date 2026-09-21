@@ -4,7 +4,7 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Value};
+use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Sid8, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -26,7 +26,7 @@ fn uk_operation_name(name: &str) -> String {
     }
 }
 
-fn uk_semantic_name(semantic_id: u8) -> String {
+fn uk_semantic_name(semantic_id: Sid8) -> String {
     semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
         .into_iter()
         .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
