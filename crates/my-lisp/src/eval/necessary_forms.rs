@@ -37,7 +37,6 @@ pub(crate) fn identity_for_semantic_id(semantic_id: Sid8) -> Option<NecessaryFor
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
     semantic_registry::admitted_semantic_id_for_surface(name)
-        .map(Sid8::from_packed_byte)
         .and_then(identity_for_semantic_id)
 }
 
@@ -53,8 +52,8 @@ mod tests {
             .expect("define must have one admitted semantic identity");
         let lambda_id = semantic_registry::admitted_semantic_id_for_surface("lambda")
             .expect("lambda must have one admitted semantic identity");
-        assert_eq!(identity_for_semantic_id(Sid8::from_packed_byte(define_id)), Some(NecessaryFormIdentity::Define));
-        assert_eq!(identity_for_semantic_id(Sid8::from_packed_byte(lambda_id)), Some(NecessaryFormIdentity::Lambda));
+        assert_eq!(identity_for_semantic_id(define_id), Some(NecessaryFormIdentity::Define));
+        assert_eq!(identity_for_semantic_id(lambda_id), Some(NecessaryFormIdentity::Lambda));
     }
 
     #[test]
@@ -63,7 +62,7 @@ mod tests {
         // функція/lambda, ...) is a semantic-registry FACT, not Rust
         // knowledge to enumerate here -- this test asserts only the
         // implementation invariant: whatever surfaces the registry admits
-        // for SIDs 9/8 all route through this same numeric-ID dispatch,
+        // for SIDs 9/8 all route through this same SID dispatch,
         // regardless of which language they're spelled in.
         for (surface, identity) in [
             ("define", NecessaryFormIdentity::Define),
@@ -100,7 +99,7 @@ mod tests {
             Some(def_id)
         );
         assert_eq!(
-            identity_for_semantic_id(Sid8::from_packed_byte(def_id)),
+            identity_for_semantic_id(def_id),
             Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(identity_for_symbol("def"), Some(NecessaryFormIdentity::Define));
@@ -116,31 +115,31 @@ mod tests {
     #[test]
     fn exact_sid_identities_control_necessary_form_routing() {
         assert_eq!(
-            identity_for_semantic_id(Sid8::from_packed_byte(
+            identity_for_semantic_id(
                 semantic_registry::admitted_semantic_id_for_surface("lambda")
                     .expect("lambda semantic identity")
-            )),
+            ),
             Some(NecessaryFormIdentity::Lambda)
         );
         assert_eq!(
-            identity_for_semantic_id(Sid8::from_packed_byte(
+            identity_for_semantic_id(
                 semantic_registry::admitted_semantic_id_for_surface("define")
                     .expect("define semantic identity")
-            )),
+            ),
             Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(
-            identity_for_semantic_id(Sid8::from_packed_byte(
+            identity_for_semantic_id(
                 semantic_registry::admitted_semantic_id_for_surface("def")
                     .expect("def compatibility semantic identity")
-            )),
+            ),
             Some(NecessaryFormIdentity::Define)
         );
     }
 
     #[test]
     fn unrelated_registry_rows_do_not_gain_necessary_form_meaning() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(crate::sid!(00001100).packed_byte()));
+        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(crate::sid!(00001100)));
         assert_eq!(identity_for_symbol("+"), None);
     }
 }
