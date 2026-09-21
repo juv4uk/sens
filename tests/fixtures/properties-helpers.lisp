@@ -15,8 +15,8 @@
 (def fib
   (lambda (n)
     (cond
-      ((< n 2) n)
-      (t (+ (fib (+ n -1)) (fib (+ n -2)))))))
+      ((< n 2) 1 n)
+      ((< n 2) 0 (+ (fib (+ n -1)) (fib (+ n -2)))))))
 
 (def build-world
   (lambda (events w)
