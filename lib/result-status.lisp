@@ -85,8 +85,8 @@
       ((not (symbol? (car goal))) (quote ()))
       ((eq (car goal) (quote not))
        (cond
-         ((= (length goal) 2) (result-goal? (second goal)))
-         (t (quote ()))))
+         ((= (length goal) 2) 1 (result-goal? (second goal)))
+         ((= (length goal) 2) 0 (quote ()))))
       (t t))))
 
 ; `(not goal)` is the explicit logical opposite used by the knowledge layer.
