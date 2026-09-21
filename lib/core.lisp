@@ -31,12 +31,6 @@
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
 (00001001 list (00001000 args args))
 
-(00001001 not
-  (00001000 (value)
-    (00000111
-      (value (00000001 ()))
-      (t t))))
-
 ; and/or — раніше були відсутні і в цьому файлі, і як Rust-білтіни
 ; (перевірено: обидва grep дають нуль збігів), тож кожен, хто підключав
 ; my-lisp, мусив бутстрапити власні (знайдено живцем 2026-08-27 у
@@ -234,9 +228,15 @@
 (00001001 filter-onto
   (00001000 (predicate values acc)
     (00000111
-      ((00000010 values) (reverse acc))
-      ((predicate (00000101 values)) (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-      (t (filter-onto predicate (00000110 values) acc)))))
+      ((00000010 values) (structural-kind empty-list) (reverse acc))
+      ((00000010 values) (structural-kind atom) (reverse acc))
+      (t t
+       (let ((decision (predicate (00000101 values))))
+         (00000111
+           ((truthy? decision) t
+            (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
+           ((truthy? decision) ()
+            (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
   (00001000 (predicate values)
@@ -358,6 +358,29 @@
              (equal? (00000110 a) (00000110 b)))
             ((equal? (00000101 a) (00000101 b)) (structural-relation distinct)
              (00000001 (structural-relation distinct))))))))))
+
+; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
+; retain their own result domains, so predicate consumers normalize them here.
+(00001001 truthy?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (structural-kind empty-list) (00000001 ()))
+      ((00000010 value) (structural-kind atom)
+       (00000111
+         ((00000011 value 0) (identity-relation same) (00000001 ()))
+         ((00000011 value 0) (identity-relation distinct) t)))
+      ((00000010 value) (structural-kind pair)
+       (00000111
+         ((equal? value (00000001 (structural-kind pair))) (structural-relation same) (00000001 ()))
+         ((equal? value (00000001 (identity-relation distinct))) (structural-relation same) (00000001 ()))
+         ((equal? value (00000001 (structural-relation distinct))) (structural-relation same) (00000001 ()))
+         (t t t))))))
+
+(00001001 not
+  (00001000 (value)
+    (00000111
+      ((truthy? value) t (00000001 ()))
+      ((truthy? value) () t))))
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
