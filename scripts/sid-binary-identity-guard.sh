@@ -43,10 +43,10 @@ report_forbidden \
 
 report_forbidden \
   'Value::Sid / ExprKind::Sid constructed directly from decimal, 0b, or quoted text' \
-  '(Value|ExprKind)::Sid\\((0b[01_]+|[0-9]+|"[^"]*")\\)' \
+  '(Value|ExprKind)::Sid\((0b[01_]+|[0-9]+|"[^"]*")\)' \
   "${files[@]}"
 
-direct_sid8="$(grep -REn 'Sid8\\((0b[01_]+|[0-9]+|"[^"]*")\\)' crates/my-lisp/src \
+direct_sid8="$(grep -REn 'Sid8\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/my-lisp/src \
   --exclude=sid.rs || true)"
 if [[ -n "$direct_sid8" ]]; then
   printf 'SID-BINARY-IDENTITY violation: direct Sid8 constructor outside sid.rs\n%s\n' \
