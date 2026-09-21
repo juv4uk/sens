@@ -1,4 +1,4 @@
-use crate::{ErrorKind, Exactness, Expr, ExprKind, LanguageError, Span};
+use crate::{ErrorKind, Exactness, Expr, ExprKind, LanguageError, Sid8, Span};
 use std::rc::Rc;
 
 /// `true` for a token that is exactly the single character `.` — the reader
@@ -391,11 +391,7 @@ impl Parser<'_> {
         // `00001100` is SID 00001100, while decimal `12` remains a number.
         // The historical `(binary 8)` declaration remains supported below
         // for compatibility/data files, including its named malformed-bit error.
-        if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            let mut sid = 0u8;
-            for bit in token.bytes() {
-                sid = (sid << 1) | (bit - b'0');
-            }
+        if let Some(sid) = Sid8::from_canonical_spelling(token) {
             return Ok(Expr {
                 kind: ExprKind::Sid(sid),
                 span: Span {
@@ -417,10 +413,8 @@ impl Parser<'_> {
                         self.cursor,
                     ));
                 }
-                let mut sid = 0u8;
-                for bit in token.bytes() {
-                    sid = (sid << 1) | (bit - b'0');
-                }
+                let sid = Sid8::from_canonical_spelling(token)
+                    .expect("validated fixed-width binary SID spelling");
                 return Ok(Expr {
                     kind: ExprKind::Sid(sid),
                     span: Span {
@@ -557,25 +551,25 @@ mod tests {
         assert_eq!(expressions.len(), 2);
         assert!(matches!(
             &expressions[1].kind,
-            ExprKind::Sid(0b00000101)
+            ExprKind::Sid(crate::sid!(00000101))
         ));
     }
 
     #[test]
     fn bare_eight_bit_bitstrings_are_reserved_sid_literals() {
-        assert!(matches!(parse_one("00000000").kind, ExprKind::Sid(0)));
-        assert!(matches!(parse_one("00000001").kind, ExprKind::Sid(1)));
+        assert!(matches!(parse_one("00000000").kind, ExprKind::Sid(crate::sid!(00000000))));
+        assert!(matches!(parse_one("00000001").kind, ExprKind::Sid(crate::sid!(00000001))));
         assert!(matches!(
             parse_one("00001100").kind,
-            ExprKind::Sid(0b00001100)
+            ExprKind::Sid(crate::sid!(00001100))
         ));
         assert!(matches!(
             parse_one("10101000").kind,
-            ExprKind::Sid(0b10101000)
+            ExprKind::Sid(crate::sid!(10101000))
         ));
         assert!(matches!(
             parse_one("11111111").kind,
-            ExprKind::Sid(0b11111111)
+            ExprKind::Sid(crate::sid!(11111111))
         ));
     }
 
