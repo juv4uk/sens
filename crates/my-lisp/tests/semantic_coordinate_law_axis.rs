@@ -25,11 +25,11 @@ fn session() -> Session {
 
 #[test]
 fn coordinate_rows_use_current_semantic_ids_without_minting_new_identity() {
-    assert_eq!(semantic_id_for_admitted_surface("+"), Some(0b0000_1100));
-    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(0b0000_0011));
-    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(0b0000_0100));
-    assert_eq!(semantic_id_for_admitted_surface("car"), Some(0b0000_0101));
-    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(0b0000_0111));
+    assert_eq!(semantic_id_for_admitted_surface("+"), Some(my_lisp::sid!(00001100)));
+    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(my_lisp::sid!(00000011)));
+    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(my_lisp::sid!(00000100)));
+    assert_eq!(semantic_id_for_admitted_surface("car"), Some(my_lisp::sid!(00000101)));
+    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(my_lisp::sid!(00000111)));
 
     for label in [
         "exact-rational-arithmetic",
