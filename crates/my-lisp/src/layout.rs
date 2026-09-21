@@ -50,7 +50,7 @@ impl NanBox {
                 NanBox(MASK_QNAN | (TAG_FIXNUM << 28) | (payload as u64))
             }
             Value::Sid(sid) => {
-                NanBox(MASK_QNAN | (12 << 28) | u64::from(*sid))
+                NanBox(MASK_QNAN | (12 << 28) | u64::from(sid.packed_byte()))
             }
             Value::Rational(r) => {
                 let ptr = r as *const Rational as u64;
