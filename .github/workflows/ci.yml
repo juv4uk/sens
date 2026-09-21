@@ -120,7 +120,8 @@ jobs:
                 continue
                 ;;
             esac
-            printf '(changed "%s")\n' "$path" >> tests/semantic-authority-changes.lisp
+            digest="$(sha256sum "$path" | awk '{print $1}')"
+            printf '(changed "%s" "%s")\n' "$path" "$digest" >> tests/semantic-authority-changes.lisp
           done < /tmp/changed.txt
           ./target/debug/my-lisp scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
           cat tests/semantic-authority-verdict.lisp
