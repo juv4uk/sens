@@ -22,6 +22,7 @@ mod language_items;
 mod parser;
 mod presentation;
 mod semantic_registry;
+mod sid;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
 /// exactly the (namespace, spelling) pairs a consumer like the CML semantic
 /// export needs, without making the internal parsing/index machinery public.
@@ -66,6 +67,7 @@ mod value;
 pub use environment::{Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
+pub use sid::Sid8;
 
 pub use eval::exact_arity;
 pub use eval::parse_json;
