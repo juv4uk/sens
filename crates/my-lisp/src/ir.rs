@@ -23,7 +23,8 @@ use crate::eval::canon::{self, CanonicalIdentity};
 use crate::eval::necessary_forms::{self, NecessaryFormIdentity};
 use crate::semantic_registry::{self, SemanticId};
 use crate::syntax::{Exactness, Expr, ExprKind, Span};
-use crate::value::{Rational, Sid};
+use crate::value::Rational;
+use crate::Sid8;
 
 /// Byte SID 00001010 (defmacro) is owned by `lib/macro.my`'s bootstrap, not
 /// `necessary_forms.rs` — mirrored here as its own constant rather than
@@ -150,7 +151,7 @@ pub struct CondClause {
 pub enum LiteralValue {
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sid),
+    Sid(Sid8),
     String(String),
     Symbol(String),
 }
@@ -208,7 +209,7 @@ fn symbol_text(expr: &Expr) -> Option<&str> {
 
 fn sid_of_head(expr: &Expr) -> Option<u8> {
     match &expr.kind {
-        ExprKind::Sid(sid) => Some(*sid),
+        ExprKind::Sid(sid) => Some(sid.packed_byte()),
         _ => None,
     }
 }
