@@ -101,7 +101,10 @@
       ((atom rows) (structural-kind pair)
        (let* ((row (car rows))
               (path (second row))
-              (transport-digest (third row)))
+              (transport-digest
+                (cond
+                  ((atom (cdr (cdr row))) (structural-kind empty-list) ())
+                  (t t (third row)))))
          (cond
            ; CI may transport a mechanical SHA-256 digest. Lisp still owns
            ; whether that exact path+digest pair is reviewed. A matching
