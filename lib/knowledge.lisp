@@ -298,8 +298,8 @@
       ((eq (symbol? (car goal)) (quote ())) (quote ()))
       ((eq (car goal) (quote not))
        (cond
-         ((= (length goal) 2) (knowledge-goal-valid? (second goal)))
-         (t (quote ()))))
+         ((= (length goal) 2) 1 (knowledge-goal-valid? (second goal)))
+         ((= (length goal) 2) 0 (quote ()))))
       (t (knowledge-terms-valid? (cdr goal))))))
 
 (def knowledge-goals-valid?
