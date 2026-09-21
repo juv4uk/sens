@@ -502,10 +502,11 @@
   (lambda (messages)
     (let ((r (http-post-json ollama-url
                              (build-request-body ollama-model messages))))
-      (cond ((= (http-transport-exit r) 0)
+      (cond ((= (http-transport-exit r) 0) 1
              (json->message
               (extract-assistant-message
-               (json-parse (http-transport-body r))))))
+               (json-parse (http-transport-body r)))))
+            ((= (http-transport-exit r) 0) 0
             ; Non-zero curl exit: a BLOCKED result (result-status.lisp
             ;; convention) carrying the evidence — never an empty body
             ;; fed to json-parse.
@@ -514,4 +515,4 @@
                                     (number->string (http-transport-exit r))
                                     (let ((e (http-transport-stderr r)))
                                       (cond ((string-empty? e) "")
-                                            (t (string-append "\n" e))))))))))
+                                            (t (string-append "\n" e))))))))))))
