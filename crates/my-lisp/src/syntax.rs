@@ -1,4 +1,5 @@
-use crate::value::{NumericBuffer, Rational, Sid};
+use crate::value::{NumericBuffer, Rational};
+use crate::Sid8;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -48,7 +49,7 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
-    Sid(Sid),
+    Sid(Sid8),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -134,7 +135,7 @@ pub(crate) mod fasl {
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
-                out.push(*sid);
+                out.push(sid.packed_byte());
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -184,7 +185,7 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(value)
+                ExprKind::Sid(Sid8::from_packed_byte(value))
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
