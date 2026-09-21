@@ -19,7 +19,7 @@
 
 (def word-nonspace (lambda (s i) (cond ((>= i (string-length s)) "") ((has " " (string-first s)) "") (t (string-append (string-first s) (word-nonspace s (+ i 1)))))))
 
-(def split-lines (lambda (s) (cond ((= (pos-of s "\n" 0) -1) (cons s (quote ()))) (t (cons (string-slice s 0 (pos-of s "\n" 0)) (split-lines (slice-from s (+ 1 (pos-of s "\n" 0)))))))))
+(def split-lines (lambda (s) (cond ((= (pos-of s "\n" 0) -1) 1 (cons s (quote ()))) ((= (pos-of s "\n" 0) -1) 0 (cons (string-slice s 0 (pos-of s "\n" 0)) (split-lines (slice-from s (+ 1 (pos-of s "\n" 0)))))))))
 
 (def reverse-acc (lambda (lst acc) (cond ((atom lst) acc) (t (reverse-acc (cdr lst) (cons (car lst) acc))))))
 
