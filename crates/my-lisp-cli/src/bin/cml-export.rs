@@ -8,8 +8,9 @@
 //! repo is an external authority, not a file this repo edits.
 
 use my_lisp::semantic_registry_export::{admitted_surfaces_for_semantic_id, semantic_id_bits, SurfaceRow};
+use my_lisp::Sid8;
 
-/// Slice 1 (2026-09-10, unchanged): exactly the semantic IDs
+/// Slice 1 (2026-09-10, unchanged): exactly the SID identities
 /// `tests/fixtures/conformance.my`'s fixture #69 (named def + recursion,
 /// `count-down`) exercises.
 ///
@@ -21,18 +22,18 @@ use my_lisp::semantic_registry_export::{admitted_surfaces_for_semantic_id, seman
 /// defmacro (SID 00001010), so a consumer's own "which surfaces are Canon-reserved"
 /// table can be derived entirely from this file instead of staying a
 /// second hand-typed list that silently drifts if the registry changes.
-const EXPORTED_FORMS: &[(u8, Role, bool)] = &[
-    (1, Role::Syntax, false),    // quote
-    (2, Role::Primitive, true),  // atom
-    (3, Role::Primitive, true),  // eq
-    (4, Role::Primitive, true),  // cons
-    (5, Role::Primitive, true),  // car
-    (6, Role::Primitive, true),  // cdr
-    (7, Role::Syntax, false),    // cond
-    (8, Role::Syntax, false),    // lambda
-    (9, Role::Syntax, false),    // define
-    (10, Role::Syntax, false),    // defmacro
-    (13, Role::Library, true),    // subtraction
+const EXPORTED_FORMS: &[(Sid8, Role, bool)] = &[
+    (my_lisp::sid!(00000001), Role::Syntax, false),   // quote
+    (my_lisp::sid!(00000010), Role::Primitive, true), // atom
+    (my_lisp::sid!(00000011), Role::Primitive, true), // eq
+    (my_lisp::sid!(00000100), Role::Primitive, true), // cons
+    (my_lisp::sid!(00000101), Role::Primitive, true), // car
+    (my_lisp::sid!(00000110), Role::Primitive, true), // cdr
+    (my_lisp::sid!(00000111), Role::Syntax, false),   // cond
+    (my_lisp::sid!(00001000), Role::Syntax, false),   // lambda
+    (my_lisp::sid!(00001001), Role::Syntax, false),   // define
+    (my_lisp::sid!(00001010), Role::Syntax, false),   // defmacro
+    (my_lisp::sid!(00001101), Role::Library, true),   // subtraction
 ];
 
 #[derive(Clone, Copy)]
