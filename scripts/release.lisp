@@ -3,7 +3,7 @@
 ; Скрипт перевіряє чистий checkout, відповідність origin/main, версії та
 ; зелений CI цього SHA. Не комітить файли й не пересуває наявні теги.
 ; Після push тегу workflow Release повторює focused test/clippy gates.
-; Потрібні git, gh, timeout і python3 (3.11+). Лише довірена CLI-сесія.
+; Потрібні git, gh, timeout і cargo. Лише довірена CLI-сесія.
 
 (def release-require
   (lambda (label actual expected)
@@ -32,6 +32,11 @@
 
 (release-run "git" (list "check-ref-format" release-tag-ref))
 (release-require "Checkout має бути чистим"
+  (release-run "git" (quote ("status" "--porcelain" "--untracked-files=normal"))) "")
+(release-run "cargo"
+  (quote ("run" "--release" "--locked" "-p" "my-lisp-cli" "--bin" "gen-fasl"
+          "--" "lib/core.lisp" "lib/core.lisp.fasl")))
+(release-require "FASL змінився; закоміть regenerated snapshot перед релізом"
   (release-run "git" (quote ("status" "--porcelain" "--untracked-files=normal"))) "")
 (release-run "timeout" (quote ("60" "git" "fetch" "origin" "main")))
 (def release-head (release-run "git" (quote ("log" "-1" "--pretty=format:%H" "HEAD"))))
