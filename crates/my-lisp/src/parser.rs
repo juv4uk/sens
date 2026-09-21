@@ -389,11 +389,11 @@ impl Parser<'_> {
 
         if let Some(width) = self.binary_width {
             if token.bytes().all(|byte| byte.is_ascii_digit()) {
-                let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
-                if all_binary {
-                    if token.len() != usize::from(width) {
+                if token.len() == usize::from(width) {
+                    let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
+                    if !all_binary {
                         return Err(self.error(
-                            "binary literal has the wrong width",
+                            "binary literal contains a non-binary digit",
                             start,
                             self.cursor,
                         ));
@@ -408,13 +408,6 @@ impl Parser<'_> {
                             end: self.cursor,
                         },
                     });
-                }
-                if token.len() == usize::from(width) {
-                    return Err(self.error(
-                        "binary literal contains a non-binary digit",
-                        start,
-                        self.cursor,
-                    ));
                 }
             }
         }
@@ -559,9 +552,16 @@ mod tests {
     }
 
     #[test]
-    fn wrong_width_binary_literal_is_rejected_by_the_reader() {
-        let error = parse("(binary 8) 101").expect_err("wrong-width binary must fail");
-        assert!(error.message.contains("wrong width"));
+    fn binary_mode_keeps_non_sid_decimal_literals_as_numbers() {
+        let expressions = parse("(binary 8) 101 1").expect("ordinary decimals must parse");
+        assert!(matches!(
+            expressions[1].kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 101.0
+        ));
+        assert!(matches!(
+            expressions[2].kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 1.0
+        ));
     }
 
     #[test]

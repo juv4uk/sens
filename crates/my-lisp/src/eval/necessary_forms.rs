@@ -16,7 +16,7 @@ pub(crate) enum NecessaryFormIdentity {
     Lambda,
 }
 
-fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<NecessaryFormIdentity> {
+pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<NecessaryFormIdentity> {
     generated::NECESSARY_FORM_DISPATCH
         .iter()
         .find(|row| row.semantic_id == semantic_id)

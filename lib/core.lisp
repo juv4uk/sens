@@ -1,15 +1,17 @@
+(binary 8)
+
 ; my-lisp bootstrap library: derived behavior belongs in the language itself.
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(def identity (lambda (value) value))
+(00001001 identity (00001000 (value) value))
 
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
-(def binary
-  (lambda (width)
-    (list (quote binary) width)))
+(00001001 binary
+  (00001000 (width)
+    (list (00000001 binary) width)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -27,12 +29,12 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(def list (lambda args args))
+(00001001 list (00001000 args args))
 
-(def not
-  (lambda (value)
-    (cond
-      (value (quote ()))
+(00001001 not
+  (00001000 (value)
+    (00000111
+      (value (00000001 ()))
       (t t))))
 
 ; and/or — раніше були відсутні і в цьому файлі, і як Rust-білтіни
@@ -48,36 +50,36 @@
 ; аргумент дійсно не обчислюється), варіативність на 3+ аргументах,
 ; передача самого значення, не лише t/() (напр. (and t 42) -> 42).
 (defmacro and rest
-  (cond
-    ((atom rest) t)
-    ((atom (cdr rest)) (car rest))
+  (00000111
+    ((00000010 rest) t)
+    ((00000010 (00000110 rest)) (00000101 rest))
     (t
      ; Build the short-circuit cond AST from the primitive tree substrate.
      ; AND remains Lisp-owned; generic macro frontends need no private LIST
      ; semantic just to execute this law.
-     (cons (quote cond)
-           (cons (cons (car rest)
-                       (cons (cons (quote and) (cdr rest))
-                             (quote ())))
-                 (cons (cons t
-                             (cons (quote ())
-                                   (quote ())))
-                       (quote ())))))))
+     (00000100 (00000001 00000111)
+           (00000100 (00000100 (00000101 rest)
+                       (00000100 (00000100 (00000001 and) (00000110 rest))
+                             (00000001 ())))
+                 (00000100 (00000100 t
+                             (00000100 (00000001 ())
+                                   (00000001 ())))
+                       (00000001 ())))))))
 
 (defmacro or rest
-  (cond
-    ((atom rest) (quote ()))
-    ((atom (cdr rest)) (car rest))
+  (00000111
+    ((00000010 rest) (00000001 ()))
+    ((00000010 (00000110 rest)) (00000101 rest))
     (t
      ; Same primitive constructor discipline as AND above: preserve lazy
      ; short-circuit expansion without importing LIST into compiler authority.
-     (cons (quote cond)
-           (cons (cons (car rest)
-                       (cons t (quote ())))
-                 (cons (cons t
-                             (cons (cons (quote or) (cdr rest))
-                                   (quote ())))
-                       (quote ())))))))
+     (00000100 (00000001 00000111)
+           (00000100 (00000100 (00000101 rest)
+                       (00000100 t (00000001 ())))
+                 (00000100 (00000100 t
+                             (00000100 (00000100 (00000001 or) (00000110 rest))
+                                   (00000001 ())))
+                       (00000001 ())))))))
 
 ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
 ; protection against accidental variable capture; verified live
@@ -90,25 +92,25 @@
 ; string->symbol assemble it into a real symbol. Requires an explicit
 ; prefix (no default-prefix convenience yet -- G5: earn that later if
 ; a real caller needs it, don't build it speculatively now).
-(def gensym
-  (lambda (prefix)
+(00001001 gensym
+  (00001000 (prefix)
     (string->symbol (string-append prefix (write-to-string (mono-ns))))))
 
-(def pair
-  (lambda (left right)
-    (cons left (cons right (quote ())))))
+(00001001 pair
+  (00001000 (left right)
+    (00000100 left (00000100 right (00000001 ())))))
 
-(def second
-  (lambda (values)
-    (car (cdr values))))
+(00001001 second
+  (00001000 (values)
+    (00000101 (00000110 values))))
 
-(def third
-  (lambda (values)
-    (car (cdr (cdr values)))))
+(00001001 third
+  (00001000 (values)
+    (00000101 (00000110 (00000110 values)))))
 
-(def fourth
-  (lambda (values)
-    (car (cdr (cdr (cdr values))))))
+(00001001 fourth
+  (00001000 (values)
+    (00000101 (00000110 (00000110 (00000110 values))))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -120,7 +122,7 @@
 ; не друге визначення), бо реальні виклики вже пишуть саме так
 ; (lib/reason.lisp мав власний локальний (def cadddr ...) до цього,
 ; посимвольно ідентичний тілу fourth).
-(def cadddr fourth)
+(00001001 cadddr fourth)
 
 ; fifth — same single-parameter primitive-chain pattern as second/third/
 ; fourth, one step deeper. Found duplicated in two places at once:
@@ -132,21 +134,21 @@
 ; у двох місцях: власний локальний (def fifth ...) у lib/narrate.lisp,
 ; посимвольно ідентичний, і node-right у lib/persistent-map.lisp — та
 ; сама операція, виписана вручну замість названа.
-(def fifth
-  (lambda (values)
-    (car (cdr (cdr (cdr (cdr values)))))))
+(00001001 fifth
+  (00001000 (values)
+    (00000101 (00000110 (00000110 (00000110 (00000110 values)))))))
 
-(def caar
-  (lambda (values)
-    (car (car values))))
+(00001001 caar
+  (00001000 (values)
+    (00000101 (00000101 values))))
 
-(def cadr
-  (lambda (values)
-    (car (cdr values))))
+(00001001 cadr
+  (00001000 (values)
+    (00000101 (00000110 values))))
 
-(def cddr
-  (lambda (values)
-    (cdr (cdr values))))
+(00001001 cddr
+  (00001000 (values)
+    (00000110 (00000110 values))))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
@@ -176,28 +178,28 @@
 ; umgekehrter Reihenfolge und rufen daher am Ende einmal `reverse` auf, um
 ; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
 ; einfach seinen Akkumulator zurück.
-(def length-onto
-  (lambda (values acc)
-    (cond
-      ((atom values) (structural-kind empty-list) acc)
-      ((atom values) (structural-kind pair)
-       (length-onto (cdr values) (+ acc 1))))))
+(00001001 length-onto
+  (00001000 (values acc)
+    (00000111
+      ((00000010 values) (structural-kind empty-list) acc)
+      ((00000010 values) (structural-kind pair)
+       (length-onto (00000110 values) (+ acc 1))))))
 
 
-(def length
-  (lambda (values)
+(00001001 length
+  (00001000 (values)
     (length-onto values 0)))
 
-(def reverse-onto
-  (lambda (values acc)
-    (cond
-      ((atom values) (structural-kind empty-list) acc)
-      ((atom values) (structural-kind pair)
-       (reverse-onto (cdr values) (cons (car values) acc))))))
+(00001001 reverse-onto
+  (00001000 (values acc)
+    (00000111
+      ((00000010 values) (structural-kind empty-list) acc)
+      ((00000010 values) (structural-kind pair)
+       (reverse-onto (00000110 values) (00000100 (00000101 values) acc))))))
 
-(def reverse
-  (lambda (values)
-    (reverse-onto values (quote ()))))
+(00001001 reverse
+  (00001000 (values)
+    (reverse-onto values (00000001 ()))))
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
@@ -213,39 +215,39 @@
 ; korrekter Reihenfolge wieder auf — zwei endrekursive Durchläufe statt
 ; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
 ; Rust-Stack-sicheres append.
-(def append
-  (lambda (left right)
+(00001001 append
+  (00001000 (left right)
     (reverse-onto (reverse left) right)))
 
-(def map-onto
-  (lambda (f values acc)
-    (cond
-      ((atom values) (structural-kind empty-list) (reverse acc))
-      ((atom values) (structural-kind atom) (quote ()))
-      ((atom values) (structural-kind pair)
-       (map-onto f (cdr values) (cons (f (car values)) acc))))))
+(00001001 map-onto
+  (00001000 (f values acc)
+    (00000111
+      ((00000010 values) (structural-kind empty-list) (reverse acc))
+      ((00000010 values) (structural-kind atom) (00000001 ()))
+      ((00000010 values) (structural-kind pair)
+       (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
 
-(def map
-  (lambda (f values)
-    (map-onto f values (quote ()))))
+(00001001 map
+  (00001000 (f values)
+    (map-onto f values (00000001 ()))))
 
-(def filter-onto
-  (lambda (predicate values acc)
-    (cond
-      ((atom values) (reverse acc))
-      ((predicate (car values)) (filter-onto predicate (cdr values) (cons (car values) acc)))
-      (t (filter-onto predicate (cdr values) acc)))))
+(00001001 filter-onto
+  (00001000 (predicate values acc)
+    (00000111
+      ((00000010 values) (reverse acc))
+      ((predicate (00000101 values)) (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
+      (t (filter-onto predicate (00000110 values) acc)))))
 
-(def filter
-  (lambda (predicate values)
-    (filter-onto predicate values (quote ()))))
+(00001001 filter
+  (00001000 (predicate values)
+    (filter-onto predicate values (00000001 ()))))
 
-(def reduce
-  (lambda (f acc values)
-    (cond
-      ((atom values) (structural-kind empty-list) acc)
-      ((atom values) (structural-kind pair)
-       (reduce f (f acc (car values)) (cdr values))))))
+(00001001 reduce
+  (00001000 (f acc values)
+    (00000111
+      ((00000010 values) (structural-kind empty-list) acc)
+      ((00000010 values) (structural-kind pair)
+       (reduce f (f acc (00000101 values)) (00000110 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -282,8 +284,8 @@
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
 (defmacro let (bindings body)
-  (cons (list (quote lambda) (map (lambda (binding) (car binding)) bindings) body)
-        (map (lambda (binding) (second binding)) bindings)))
+  (00000100 (list (00000001 00001000) (map (00001000 (binding) (00000101 binding)) bindings) body)
+        (map (00001000 (binding) (second binding)) bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -321,41 +323,41 @@
 ; universal truth sentinel. Canonical three-part `cond` consumes the domain
 ; results explicitly; the historical two-part bridge exists only for callers
 ; not yet migrated.
-(def equal?
-  (lambda (a b)
-    (cond
-      ((atom a) (structural-kind empty-list)
-       (cond
-         ((atom b) (structural-kind empty-list)
-          (quote (structural-relation same)))
-         ((atom b) (structural-kind atom)
-          (quote (structural-relation distinct)))
-         ((atom b) (structural-kind pair)
-          (quote (structural-relation distinct)))))
-      ((atom a) (structural-kind atom)
-       (cond
-         ((atom b) (structural-kind empty-list)
-          (quote (structural-relation distinct)))
-         ((atom b) (structural-kind atom)
-          (cond
-            ((eq a b) (identity-relation same)
-             (quote (structural-relation same)))
-            ((eq a b) (identity-relation distinct)
-             (quote (structural-relation distinct)))))
-         ((atom b) (structural-kind pair)
-          (quote (structural-relation distinct)))))
-      ((atom a) (structural-kind pair)
-       (cond
-         ((atom b) (structural-kind empty-list)
-          (quote (structural-relation distinct)))
-         ((atom b) (structural-kind atom)
-          (quote (structural-relation distinct)))
-         ((atom b) (structural-kind pair)
-          (cond
-            ((equal? (car a) (car b)) (structural-relation same)
-             (equal? (cdr a) (cdr b)))
-            ((equal? (car a) (car b)) (structural-relation distinct)
-             (quote (structural-relation distinct))))))))))
+(00001001 equal?
+  (00001000 (a b)
+    (00000111
+      ((00000010 a) (structural-kind empty-list)
+       (00000111
+         ((00000010 b) (structural-kind empty-list)
+          (00000001 (structural-relation same)))
+         ((00000010 b) (structural-kind atom)
+          (00000001 (structural-relation distinct)))
+         ((00000010 b) (structural-kind pair)
+          (00000001 (structural-relation distinct)))))
+      ((00000010 a) (structural-kind atom)
+       (00000111
+         ((00000010 b) (structural-kind empty-list)
+          (00000001 (structural-relation distinct)))
+         ((00000010 b) (structural-kind atom)
+          (00000111
+            ((00000011 a b) (identity-relation same)
+             (00000001 (structural-relation same)))
+            ((00000011 a b) (identity-relation distinct)
+             (00000001 (structural-relation distinct)))))
+         ((00000010 b) (structural-kind pair)
+          (00000001 (structural-relation distinct)))))
+      ((00000010 a) (structural-kind pair)
+       (00000111
+         ((00000010 b) (structural-kind empty-list)
+          (00000001 (structural-relation distinct)))
+         ((00000010 b) (structural-kind atom)
+          (00000001 (structural-relation distinct)))
+         ((00000010 b) (structural-kind pair)
+          (00000111
+            ((equal? (00000101 a) (00000101 b)) (structural-relation same)
+             (equal? (00000110 a) (00000110 b)))
+            ((equal? (00000101 a) (00000101 b)) (structural-relation distinct)
+             (00000001 (structural-relation distinct))))))))))
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
@@ -373,47 +375,47 @@
 ; спекулятивна прогалина. Узагальнений assoc тут також збігається з
 ; формою, яку lib/meta-eval.lisp's власний env-lookup уже вручну пише для
 ; свого специфічного випадку asoc-списку (symbol . value).
-(def nth
-  (lambda (i lst)
-    (cond
-      ((eq i 0) (identity-relation same) (car lst))
-      ((eq i 0) (identity-relation distinct)
-       (nth (- i 1) (cdr lst))))))
+(00001001 nth
+  (00001000 (i lst)
+    (00000111
+      ((00000011 i 0) (identity-relation same) (00000101 lst))
+      ((00000011 i 0) (identity-relation distinct)
+       (nth (- i 1) (00000110 lst))))))
 
-(def member?
-  (lambda (item lst)
-    (cond
-      ((atom lst) (structural-kind empty-list) (quote ()))
-      ((atom lst) (structural-kind pair)
-       (cond
-         ((equal? item (car lst)) (structural-relation same) t)
-         ((equal? item (car lst)) (structural-relation distinct)
-          (member? item (cdr lst))))))))
+(00001001 member?
+  (00001000 (item lst)
+    (00000111
+      ((00000010 lst) (structural-kind empty-list) (00000001 ()))
+      ((00000010 lst) (structural-kind pair)
+       (00000111
+         ((equal? item (00000101 lst)) (structural-relation same) t)
+         ((equal? item (00000101 lst)) (structural-relation distinct)
+          (member? item (00000110 lst))))))))
 
-(def assoc
-  (lambda (key alist)
-    (cond
-      ((atom alist) (structural-kind empty-list) (quote ()))
-      ((atom alist) (structural-kind pair)
-       (cond
-         ((equal? key (car (car alist))) (structural-relation same) (car alist))
-         ((equal? key (car (car alist))) (structural-relation distinct)
-          (assoc key (cdr alist))))))))
+(00001001 assoc
+  (00001000 (key alist)
+    (00000111
+      ((00000010 alist) (structural-kind empty-list) (00000001 ()))
+      ((00000010 alist) (structural-kind pair)
+       (00000111
+         ((equal? key (00000101 (00000101 alist))) (structural-relation same) (00000101 alist))
+         ((equal? key (00000101 (00000101 alist))) (structural-relation distinct)
+          (assoc key (00000110 alist))))))))
 
 (defmacro let* (bindings body)
-  (cond
-    ((atom bindings) (structural-kind empty-list) body)
-    ((atom bindings) (structural-kind pair)
+  (00000111
+    ((00000010 bindings) (structural-kind empty-list) body)
+    ((00000010 bindings) (structural-kind pair)
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
      ; helper as host/compiler semantic authority.
-     (cons (quote let)
-           (cons (cons (car bindings) (quote ()))
-                 (cons (cons (quote let*)
-                             (cons (cdr bindings)
-                                   (cons body (quote ()))))
-                       (quote ())))))))
+     (00000100 (00000001 let)
+           (00000100 (00000100 (00000101 bindings) (00000001 ()))
+                 (00000100 (00000100 (00000001 let*)
+                             (00000100 (00000110 bindings)
+                                   (00000100 body (00000001 ()))))
+                       (00000001 ())))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
@@ -434,65 +436,65 @@
 ; лише по рядку, не по ланцюжку пар. string-append (справді невиразний
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
-(def string-empty?
-  (lambda (s) (eq s "")))
+(00001001 string-empty?
+  (00001000 (s) (00000011 s "")))
 
-(def string-membership-helper
-  (lambda (value)
-    (cond
-      ((atom value) (structural-kind empty-list)
-       (quote (class-membership string nonmember)))
-      ((atom value) (structural-kind atom)
-       (cond
-         ((eq (string-first (write-to-string value))
+(00001001 string-membership-helper
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (structural-kind empty-list)
+       (00000001 (class-membership string nonmember)))
+      ((00000010 value) (structural-kind atom)
+       (00000111
+         ((00000011 (string-first (write-to-string value))
               (string-first (write-to-string "")))
           (identity-relation same)
-          (quote (class-membership string member)))
-         ((eq (string-first (write-to-string value))
+          (00000001 (class-membership string member)))
+         ((00000011 (string-first (write-to-string value))
               (string-first (write-to-string "")))
           (identity-relation distinct)
-          (quote (class-membership string nonmember)))))
-      ((atom value) (structural-kind pair)
-       (quote (class-membership string nonmember))))))
+          (00000001 (class-membership string nonmember)))))
+      ((00000010 value) (structural-kind pair)
+       (00000001 (class-membership string nonmember))))))
 
-(def nonempty-string-membership-helper
-  (lambda (value)
-    (cond
+(00001001 nonempty-string-membership-helper
+  (00001000 (value)
+    (00000111
       ((string-membership-helper value)
        (class-membership string member)
-       (cond
+       (00000111
          ((string-empty? value)
           (identity-relation distinct)
-          (quote (class-membership string nonempty-member)))
+          (00000001 (class-membership string nonempty-member)))
          ((string-empty? value)
           (identity-relation same)
-          (quote (class-membership string member)))))
+          (00000001 (class-membership string member)))))
       ((string-membership-helper value)
        (class-membership string nonmember)
-       (quote (class-membership string nonmember))))))
+       (00000001 (class-membership string nonmember))))))
 
-(def string-length
-  (lambda (s)
-    (cond
+(00001001 string-length
+  (00001000 (s)
+    (00000111
       ((string-empty? s) (identity-relation same) 0)
       (t t (+ 1 (string-length (string-rest s)))))))
 
-(def string-prefix?
-  (lambda (prefix s)
-    (cond
+(00001001 string-prefix?
+  (00001000 (prefix s)
+    (00000111
       ((string-empty? prefix) (identity-relation same) t)
-      ((string-empty? s) (identity-relation same) (quote ()))
-      ((eq (string-first prefix) (string-first s))
+      ((string-empty? s) (identity-relation same) (00000001 ()))
+      ((00000011 (string-first prefix) (string-first s))
        (identity-relation same)
        (string-prefix? (string-rest prefix) (string-rest s)))
-      (t t (quote ())))))
+      (t t (00000001 ())))))
 
 
-(def string-contains?
-  (lambda (needle s)
-    (cond
+(00001001 string-contains?
+  (00001000 (needle s)
+    (00000111
       ((string-prefix? needle s) t t)
-      ((string-empty? s) (identity-relation same) (quote ()))
+      ((string-empty? s) (identity-relation same) (00000001 ()))
       (t t (string-contains? needle (string-rest s))))))
 
 
@@ -505,16 +507,16 @@
 ; відновленому з його канонічного тексту. `atom` не допускає пари до `eq`.
 ; `symbol?` wurde aus Rust verschoben: Unter Atomen ist nur ein Symbol mit dem
 ; aus seinem kanonischen Text rekonstruierten Symbol identisch; `atom` schützt `eq`.
-(def symbol?
-  (lambda (value)
-    (cond
-      ((atom value) (structural-kind empty-list) (quote ()))
-      ((atom value) (structural-kind atom)
-       (cond
-         ((eq value (string->symbol (write-to-string value)))
+(00001001 symbol?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (structural-kind empty-list) (00000001 ()))
+      ((00000010 value) (structural-kind atom)
+       (00000111
+         ((00000011 value (string->symbol (write-to-string value)))
           (identity-relation same) t)
-         (t t (quote ()))))
-      ((atom value) (structural-kind pair) (quote ())))))
+         (t t (00000001 ()))))
+      ((00000010 value) (structural-kind pair) (00000001 ())))))
 
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
@@ -571,10 +573,10 @@
 ; відняти, повторити) — стандартний трюк бінарного довгого ділення,
 ; глибина рекурсії O(log(a/b)) як у `largest-chunk`, так і в самому
 ; `quotient`, перевірено на 13-розрядному діленому без проблем.
-(def largest-chunk
-  (lambda (a b chunk mult)
-    (cond
-      ((< a (+ chunk chunk)) 1 (cons chunk mult))
+(00001001 largest-chunk
+  (00001000 (a b chunk mult)
+    (00000111
+      ((< a (+ chunk chunk)) 1 (00000100 chunk mult))
       ((< a (+ chunk chunk)) 0
        (largest-chunk a b (+ chunk chunk) (+ mult mult))))))
 
@@ -595,20 +597,20 @@
 ; нуль (`ErrorKind::InvalidForm`) — маршрутизація через нього тут
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
-(def quotient
-  (lambda (a b)
-    (cond
-      ((eq b 0) (identity-relation same) (/ a b))
-      ((eq b 0) (identity-relation distinct)
-       (cond
+(00001001 quotient
+  (00001000 (a b)
+    (00000111
+      ((00000011 b 0) (identity-relation same) (/ a b))
+      ((00000011 b 0) (identity-relation distinct)
+       (00000111
          ((< a b) 1 0)
          ((< a b) 0
           (let ((chunk+mult (largest-chunk a b b 1)))
-            (+ (cdr chunk+mult)
-               (quotient (- a (car chunk+mult)) b)))))))))
+            (+ (00000110 chunk+mult)
+               (quotient (- a (00000101 chunk+mult)) b)))))))))
 
-(def mod
-  (lambda (a b)
+(00001001 mod
+  (00001000 (a b)
     (- a (* b (quotient a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
@@ -616,32 +618,32 @@
 ; exact YES -> 1/1, exact NO -> 0/1, and any inexact operand -> Canon 0 `()`.
 ; Canonical three-part `cond` distinguishes exact NO (0) from no-answer `()`
 ; without routing either through generic truthiness.
-(def nondecreasing-from?
-  (lambda (current remaining)
-    (cond
-      ((atom remaining) (structural-kind empty-list) 1)
-      ((< current (car remaining)) 1
-       (nondecreasing-from? (car remaining) (cdr remaining)))
-      ((= current (car remaining)) 1
-       (nondecreasing-from? (car remaining) (cdr remaining)))
-      ((= current (car remaining)) 0 0))))
+(00001001 nondecreasing-from?
+  (00001000 (current remaining)
+    (00000111
+      ((00000010 remaining) (structural-kind empty-list) 1)
+      ((< current (00000101 remaining)) 1
+       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((= current (00000101 remaining)) 1
+       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((= current (00000101 remaining)) 0 0))))
 
-(def nonincreasing-from?
-  (lambda (current remaining)
-    (cond
-      ((atom remaining) (structural-kind empty-list) 1)
-      ((> current (car remaining)) 1
-       (nonincreasing-from? (car remaining) (cdr remaining)))
-      ((= current (car remaining)) 1
-       (nonincreasing-from? (car remaining) (cdr remaining)))
-      ((= current (car remaining)) 0 0))))
+(00001001 nonincreasing-from?
+  (00001000 (current remaining)
+    (00000111
+      ((00000010 remaining) (structural-kind empty-list) 1)
+      ((> current (00000101 remaining)) 1
+       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((= current (00000101 remaining)) 1
+       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((= current (00000101 remaining)) 0 0))))
 
-(def <=
-  (lambda (first . remaining)
+(00001001 <=
+  (00001000 (first . remaining)
     (nondecreasing-from? first remaining)))
 
-(def >=
-  (lambda (first . remaining)
+(00001001 >=
+  (00001000 (first . remaining)
     (nonincreasing-from? first remaining)))
 
 ; number->string (G5 test: already expressible via existing means?) —
@@ -661,26 +663,26 @@
 ; quotient/mod, та сама -onto-форма акумулятора, що й length-onto/
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
-(def digit->string
+(00001001 digit->string
   ; Superseded by number->string's canonical delegation to write-to-string
   ; (FIX-NUMBER-TO-STRING-RATIONAL). Retained because racket/boot/core.lisp
   ; mirrors this file and fpga-lisp's assembler.lisp carries its own local
   ; variant — removal is a separate mirrored-surface decision, not a
   ; silent one.
-  (lambda (d)
-    (nth d (quote ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+  (00001000 (d)
+    (nth d (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
-(def number->string-onto
-  (lambda (n acc)
-    (cond
-      ((eq n 0) (identity-relation same) acc)
-      ((eq n 0) (identity-relation distinct)
+(00001001 number->string-onto
+  (00001000 (n acc)
+    (00000111
+      ((00000011 n 0) (identity-relation same) acc)
+      ((00000011 n 0) (identity-relation distinct)
        (number->string-onto
          (quotient n 10)
          (string-append (digit->string (mod n 10)) acc))))))
 
-(def number->string
-  (lambda (n)
+(00001001 number->string
+  (00001000 (n)
     ; Canonical serialization for every number (FIX-NUMBER-TO-STRING-
     ; RATIONAL, docs/BUG-number-to-string-rational.md): integers render
     ; as themselves, non-integer rationals render REDUCED exactly —
@@ -706,46 +708,46 @@
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
 (defmacro -> forms
-  (cond
-    ((atom forms) (structural-kind empty-list) (quote ()))
-    ((atom forms) (structural-kind pair)
-     (cond
-       ((atom (cdr forms)) (structural-kind empty-list) (car forms))
-       ((atom (cdr forms)) (structural-kind pair)
-        (let* ((x (car forms))
-               (next (car (cdr forms)))
-               (rest (cdr (cdr forms)))
+  (00000111
+    ((00000010 forms) (structural-kind empty-list) (00000001 ()))
+    ((00000010 forms) (structural-kind pair)
+     (00000111
+       ((00000010 (00000110 forms)) (structural-kind empty-list) (00000101 forms))
+       ((00000010 (00000110 forms)) (structural-kind pair)
+        (let* ((x (00000101 forms))
+               (next (00000101 (00000110 forms)))
+               (rest (00000110 (00000110 forms)))
                (step
-                 (cond
-                   ((atom next) (structural-kind empty-list) (list next x))
-                   ((atom next) (structural-kind atom) (list next x))
-                   ((atom next) (structural-kind pair)
-                    (cons (car next) (cons x (cdr next)))))))
-          (cond
-            ((atom rest) (structural-kind empty-list) step)
-            ((atom rest) (structural-kind pair)
-             (cons (quote ->) (cons step rest))))))))))
+                 (00000111
+                   ((00000010 next) (structural-kind empty-list) (list next x))
+                   ((00000010 next) (structural-kind atom) (list next x))
+                   ((00000010 next) (structural-kind pair)
+                    (00000100 (00000101 next) (00000100 x (00000110 next)))))))
+          (00000111
+            ((00000010 rest) (structural-kind empty-list) step)
+            ((00000010 rest) (structural-kind pair)
+             (00000100 (00000001 ->) (00000100 step rest))))))))))
 
 (defmacro ->> forms
-  (cond
-    ((atom forms) (structural-kind empty-list) (quote ()))
-    ((atom forms) (structural-kind pair)
-     (cond
-       ((atom (cdr forms)) (structural-kind empty-list) (car forms))
-       ((atom (cdr forms)) (structural-kind pair)
-        (let* ((x (car forms))
-               (next (car (cdr forms)))
-               (rest (cdr (cdr forms)))
+  (00000111
+    ((00000010 forms) (structural-kind empty-list) (00000001 ()))
+    ((00000010 forms) (structural-kind pair)
+     (00000111
+       ((00000010 (00000110 forms)) (structural-kind empty-list) (00000101 forms))
+       ((00000010 (00000110 forms)) (structural-kind pair)
+        (let* ((x (00000101 forms))
+               (next (00000101 (00000110 forms)))
+               (rest (00000110 (00000110 forms)))
                (step
-                 (cond
-                   ((atom next) (structural-kind empty-list) (list next x))
-                   ((atom next) (structural-kind atom) (list next x))
-                   ((atom next) (structural-kind pair)
+                 (00000111
+                   ((00000010 next) (structural-kind empty-list) (list next x))
+                   ((00000010 next) (structural-kind atom) (list next x))
+                   ((00000010 next) (structural-kind pair)
                     (append next (list x))))))
-          (cond
-            ((atom rest) (structural-kind empty-list) step)
-            ((atom rest) (structural-kind pair)
-             (cons (quote ->>) (cons step rest))))))))))
+          (00000111
+            ((00000010 rest) (structural-kind empty-list) step)
+            ((00000010 rest) (structural-kind pair)
+             (00000100 (00000001 ->>) (00000100 step rest))))))))))
 
 ;; ── Numeric library additions (M0, 2026-08-22) ─────────────────────
 ;; Додано для реальних задач (WSM-24 shape comparison): abs/min/max/
@@ -759,36 +761,36 @@
 ;;                      наближення, дробове — дробовий результат
 ;;                      (S1 inexact promotion). Відʼємний вхід → nil.
 
-(def sqrt-iter
-  (lambda (guess x n)
-    (cond
+(00001001 sqrt-iter
+  (00001000 (guess x n)
+    (00000111
       ((= n 0) 1 guess)
       ((= n 0) 0
        (sqrt-iter (/ (+ guess (/ x guess)) 2) x (- n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
-(def isqrt
-  (lambda (n)
-    (cond
+(00001001 isqrt
+  (00001000 (n)
+    (00000111
       ((< n 2) 1 n)
       ((< n 2) 0
        (isqrt-step n (quotient n 2))))))
 
-(def isqrt-step
-  (lambda (n g)
+(00001001 isqrt-step
+  (00001000 (n g)
     (let ((next (quotient (+ g (quotient n g)) 2)))
-      (cond
+      (00000111
         ((< next g) 1 (isqrt-step n next))
         ((< next g) 0 g)))))
 
-(def sqrt
-  (lambda (x)
-    (cond
-      ((< x 0) 1 (quote ()))
+(00001001 sqrt
+  (00001000 (x)
+    (00000111
+      ((< x 0) 1 (00000001 ()))
       ((= x 0) 1 0)
       ((= x (quotient x 1)) 1
        (let ((r (isqrt x)))
-         (cond
+         (00000111
            ((= (* r r) x) t r)
            (t t (sqrt-iter (/ x 2) x 8)))))
       (t t (sqrt-iter (/ x 2.0) x 5)))))
@@ -816,9 +818,9 @@
 ; volodiie lyshe nezvidnym mekhanizmom") — ni odyn iz piaty ne torkaietsia
 ; OS/host-mozhlyvosti, lyshe aryfmetychne porivniannia ta obkhid cons-spysku,
 ; vzhe vyrazhuvani samoiu movoiu.
-(def abs
-  (lambda (x)
-    (cond
+(00001001 abs
+  (00001000 (x)
+    (00000111
       ((< x 0) 1 (- x))
       ((< x 0) 0 x))))
 
@@ -827,13 +829,13 @@
 ; evaluator's own lambda-binding check -- matching the removed Rust
 ; builtin's explicit "min/max expects at least one argument" error --
 ; without this Lisp definition needing to raise a custom error itself.
-(def min
-  (lambda (first . rest)
-    (min-list (cons first rest))))
+(00001001 min
+  (00001000 (first . rest)
+    (min-list (00000100 first rest))))
 
-(def max
-  (lambda (first . rest)
-    (max-list (cons first rest))))
+(00001001 max
+  (00001000 (first . rest)
+    (max-list (00000100 first rest))))
 
 ; Two real bugs found live via oracle testing before this landed, not
 ; assumed from reading the removed Rust source:
@@ -847,33 +849,33 @@
 ;    the base-case branch. `items` itself is safe to test with `atom`
 ;    (it's always a list or (), never itself a bare number), but the
 ;    accumulator must use structural `equal?` against `(quote ())`.
-(def min-list
-  (lambda (items)
-    (cond
-      ((atom items) (structural-kind empty-list) (quote ()))
-      ((atom items) (structural-kind pair)
-       (let ((rest-min (min-list (cdr items))))
-         (cond
-           ((equal? rest-min (quote ())) (structural-relation same)
-            (car items))
-           ((equal? rest-min (quote ())) (structural-relation distinct)
-            (cond
-              ((< (car items) rest-min) 1 (car items))
-              ((< (car items) rest-min) 0 rest-min)))))))))
+(00001001 min-list
+  (00001000 (items)
+    (00000111
+      ((00000010 items) (structural-kind empty-list) (00000001 ()))
+      ((00000010 items) (structural-kind pair)
+       (let ((rest-min (min-list (00000110 items))))
+         (00000111
+           ((equal? rest-min (00000001 ())) (structural-relation same)
+            (00000101 items))
+           ((equal? rest-min (00000001 ())) (structural-relation distinct)
+            (00000111
+              ((< (00000101 items) rest-min) 1 (00000101 items))
+              ((< (00000101 items) rest-min) 0 rest-min)))))))))
 
-(def max-list
-  (lambda (items)
-    (cond
-      ((atom items) (structural-kind empty-list) (quote ()))
-      ((atom items) (structural-kind pair)
-       (let ((rest-max (max-list (cdr items))))
-         (cond
-           ((equal? rest-max (quote ())) (structural-relation same)
-            (car items))
-           ((equal? rest-max (quote ())) (structural-relation distinct)
-            (cond
-              ((> (car items) rest-max) 1 (car items))
-              ((> (car items) rest-max) 0 rest-max)))))))))
+(00001001 max-list
+  (00001000 (items)
+    (00000111
+      ((00000010 items) (structural-kind empty-list) (00000001 ()))
+      ((00000010 items) (structural-kind pair)
+       (let ((rest-max (max-list (00000110 items))))
+         (00000111
+           ((equal? rest-max (00000001 ())) (structural-relation same)
+            (00000101 items))
+           ((equal? rest-max (00000001 ())) (structural-relation distinct)
+            (00000111
+              ((> (00000101 items) rest-max) 1 (00000101 items))
+              ((> (00000101 items) rest-max) 0 rest-max)))))))))
 
 ; #469 — post-core stable peer materialization.
 ;
@@ -885,8 +887,8 @@
 ; Keep only unique stable spellings from lib/surface/semantic-registry.lisp.
 ; Candidate spellings are deliberately absent and therefore cannot become
 ; executable merely by appearing in documentation.
-(def my-postcore-stable-peer-projection
-  (quote (
+(00001001 my-postcore-stable-peer-projection
+  (00000001 (
     (1079 utc-now поточний-всч)
     (1080 utc-from-unix всч-із-юнікс)
     (1081 unix-time-observation->utc юнікс-спостереження-у-всч)
@@ -909,79 +911,79 @@
     (167 write-file записати-файл)
   )))
 
-(def my-postcore-peer-group
-  (lambda (semantic-id groups)
-    (cond
-      ((atom groups) (structural-kind empty-list)
-       (quote ()))
-      ((atom groups) (structural-kind pair)
-       (let ((group (car groups)))
-         (cond
-           ((eq semantic-id (car group)) (identity-relation same)
+(00001001 my-postcore-peer-group
+  (00001000 (semantic-id groups)
+    (00000111
+      ((00000010 groups) (structural-kind empty-list)
+       (00000001 ()))
+      ((00000010 groups) (structural-kind pair)
+       (let ((group (00000101 groups)))
+         (00000111
+           ((00000011 semantic-id (00000101 group)) (identity-relation same)
             group)
-           ((eq semantic-id (car group)) (identity-relation distinct)
-            (my-postcore-peer-group semantic-id (cdr groups)))))))))
+           ((00000011 semantic-id (00000101 group)) (identity-relation distinct)
+            (my-postcore-peer-group semantic-id (00000110 groups)))))))))
 
-(def my-postcore-binding-status
-  (lambda (surface bindings)
-    (cond
-      ((atom bindings) (structural-kind empty-list)
-       (quote absent))
-      ((atom bindings) (structural-kind pair)
-       (let ((binding (car bindings)))
-         (cond
-           ((eq (symbol->string surface) (car binding)) (identity-relation same)
-            (quote present))
-           ((eq (symbol->string surface) (car binding)) (identity-relation distinct)
-            (my-postcore-binding-status surface (cdr bindings)))))))))
+(00001001 my-postcore-binding-status
+  (00001000 (surface bindings)
+    (00000111
+      ((00000010 bindings) (structural-kind empty-list)
+       (00000001 absent))
+      ((00000010 bindings) (structural-kind pair)
+       (let ((binding (00000101 bindings)))
+         (00000111
+           ((00000011 (symbol->string surface) (00000101 binding)) (identity-relation same)
+            (00000001 present))
+           ((00000011 (symbol->string surface) (00000101 binding)) (identity-relation distinct)
+            (my-postcore-binding-status surface (00000110 bindings)))))))))
 
-(def my-postcore-missing-peers
-  (lambda (source peers bindings)
-    (cond
-      ((atom peers) (structural-kind empty-list)
-       (quote ()))
-      ((atom peers) (structural-kind pair)
-       (let ((peer (car peers)))
-         (cond
-           ((eq source peer) (identity-relation same)
-            (my-postcore-missing-peers source (cdr peers) bindings))
-           ((eq source peer) (identity-relation distinct)
-            (cond
-              ((eq (my-postcore-binding-status peer bindings) (quote present))
+(00001001 my-postcore-missing-peers
+  (00001000 (source peers bindings)
+    (00000111
+      ((00000010 peers) (structural-kind empty-list)
+       (00000001 ()))
+      ((00000010 peers) (structural-kind pair)
+       (let ((peer (00000101 peers)))
+         (00000111
+           ((00000011 source peer) (identity-relation same)
+            (my-postcore-missing-peers source (00000110 peers) bindings))
+           ((00000011 source peer) (identity-relation distinct)
+            (00000111
+              ((00000011 (my-postcore-binding-status peer bindings) (00000001 present))
                (identity-relation same)
-               (my-postcore-missing-peers source (cdr peers) bindings))
-              ((eq (my-postcore-binding-status peer bindings) (quote absent))
+               (my-postcore-missing-peers source (00000110 peers) bindings))
+              ((00000011 (my-postcore-binding-status peer bindings) (00000001 absent))
                (identity-relation same)
-               (cons peer
+               (00000100 peer
                      (my-postcore-missing-peers
                        source
-                       (cdr peers)
+                       (00000110 peers)
                        bindings)))))))))))
 
 ; Build one expression whose nested DEFINE forms all execute in the caller's
 ; environment. This is why materialization is a macro rather than a function:
 ; an ordinary function would define peers only in its temporary child frame.
-(def my-postcore-build-definitions
-  (lambda (source peers)
-    (cond
-      ((atom peers) (structural-kind empty-list)
+(00001001 my-postcore-build-definitions
+  (00001000 (source peers)
+    (00000111
+      ((00000010 peers) (structural-kind empty-list)
        source)
-      ((atom peers) (structural-kind pair)
-       (list (quote define)
-             (car peers)
-             (my-postcore-build-definitions source (cdr peers)))))))
+      ((00000010 peers) (structural-kind pair)
+       (list (00000001 define)
+             (00000101 peers)
+             (my-postcore-build-definitions source (00000110 peers)))))))
 
 (defmacro my-postcore-materialize-stable-peers args
-  (let* ((semantic-id (car args))
+  (let* ((semantic-id (00000101 args))
          (source (second args))
          (group
            (my-postcore-peer-group
              semantic-id
              my-postcore-stable-peer-projection)))
-    (cond
-      ((atom group) (structural-kind empty-list)
+    (00000111
+      ((00000010 group) (structural-kind empty-list)
        source)
-      ((atom group) (structural-kind pair)
+      ((00000010 group) (structural-kind pair)
        (my-postcore-build-definitions
          source
-         (my-postcore-missing-peers source (cdr group) (env)))))))
+         (my-postcore-missing-peers source (00000110 group) (env)))))))

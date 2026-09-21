@@ -89,7 +89,7 @@ pub(crate) const CANON: [CanonEntry; 8] = [
     },
 ];
 
-fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<CanonicalIdentity> {
+pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<CanonicalIdentity> {
     CANON
         .iter()
         .find(|entry| entry.semantic_id == semantic_id)

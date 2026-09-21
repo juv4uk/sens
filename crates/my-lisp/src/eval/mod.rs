@@ -195,27 +195,35 @@ fn evaluate_list(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     let arguments = &items[1..];
-    match items[0].kind.as_symbol() {
-        Some(name)
-            if canon::identity_for_surface(name) == Some(canon::CanonicalIdentity::Quote) =>
-        {
-            special_forms::exact_arity(name, arguments, 1, span)?;
+    if is_binary_format_declaration(items) {
+        // `(binary 8)` is reader metadata. It must evaluate before core.lisp
+        // defines its historical descriptor helper, otherwise a SID-native
+        // source file could not declare its own encoding.
+        return Ok(EvalStep::Value(Value::Nil));
+    }
+
+    let head_name = items[0].kind.as_symbol();
+    let head_sid = binary_head_sid(&items[0]);
+    let canonical_head = head_name
+        .and_then(canon::identity_for_surface)
+        .or_else(|| head_sid.and_then(canon::identity_for_semantic_id));
+    let necessary_head = head_name
+        .and_then(necessary_forms::identity_for_symbol)
+        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+
+    match (canonical_head, necessary_head) {
+        (Some(canon::CanonicalIdentity::Quote), _) => {
+            special_forms::exact_arity(head_name.unwrap_or("00000001"), arguments, 1, span)?;
             let value = special_forms::quoted(&arguments[0])?;
             Ok(EvalStep::Value(value))
         }
-        Some(name)
-            if necessary_forms::identity_for_symbol(name)
-                == Some(necessary_forms::NecessaryFormIdentity::Lambda) =>
-        {
+        (_, Some(necessary_forms::NecessaryFormIdentity::Lambda)) => {
             closures::create_lambda(arguments, environment, span).map(EvalStep::Value)
         }
-        Some(name)
-            if necessary_forms::identity_for_symbol(name)
-                == Some(necessary_forms::NecessaryFormIdentity::Define) =>
-        {
+        (_, Some(necessary_forms::NecessaryFormIdentity::Define)) => {
             special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value)
         }
-        Some(name) if canon::identity_for_surface(name) == Some(canon::CanonicalIdentity::Cond) => {
+        (Some(canon::CanonicalIdentity::Cond), _) => {
             special_forms::evaluate_cond(arguments, environment, span)
         }
         _ => {
@@ -226,7 +234,10 @@ fn evaluate_list(
                     return result;
                 }
             }
-            let function = evaluate(&items[0], environment)?;
+            let function = match head_sid {
+                Some(semantic_id) => Value::SemanticRef(semantic_id),
+                None => evaluate(&items[0], environment)?,
+            };
             match &function {
                 Value::SemanticRef(semantic_id) => {
                     let mut values = Vec::with_capacity(arguments.len());
@@ -250,6 +261,24 @@ fn evaluate_list(
             }
         }
     }
+}
+
+/// A fixed-width binary token names a semantic identity only as a list head.
+/// The same token remains `Value::Binary` when it occurs as data or under
+/// QUOTE, so a source file can carry bit data without making it executable.
+fn binary_head_sid(expression: &Expr) -> Option<u8> {
+    let ExprKind::Binary(binary) = expression.kind else {
+        return None;
+    };
+    u8::try_from(binary.value()).ok()
+}
+
+fn is_binary_format_declaration(items: &[Expr]) -> bool {
+    matches!(
+        items,
+        [Expr { kind: ExprKind::Symbol(name), .. }, Expr { kind: ExprKind::Number(width, crate::Exactness::Exact), .. }]
+            if &**name == "binary" && *width == 8.0
+    )
 }
 
 trait ExprKindExt {
@@ -285,6 +314,35 @@ mod single_pass_eval_tests {
         let mut session = Session::default();
         let result = eval_program(source, &mut session).expect("define should bind x");
         assert_eq!(result.value.to_string(), "42");
+    }
+
+    #[test]
+    fn binary_sids_dispatch_canon_and_necessary_forms_in_list_head() {
+        let source = r#"
+            (binary 8)
+            (00001001 make-pair
+              (00001000 (left right)
+                (00000100 left (00000100 right ()))))
+            (00000101 (make-pair 1 2))
+        "#;
+        let mut session = Session::default();
+        let result = eval_program(source, &mut session)
+            .expect("8-bit SID list heads should execute their registered meaning");
+        assert_eq!(result.value.to_string(), "1");
+    }
+
+    #[test]
+    fn binary_sids_keep_quote_and_cond_as_syntax() {
+        let source = r#"
+            (binary 8)
+            (00000111
+              ((00000010 (00000001 atom)) (structural-kind atom) (00000001 selected))
+              (t t (00000001 missed)))
+        "#;
+        let mut session = Session::default();
+        let result = eval_program(source, &mut session)
+            .expect("SID QUOTE and COND should retain their syntax-only behavior");
+        assert_eq!(result.value.to_string(), "selected");
     }
 
     #[test]
