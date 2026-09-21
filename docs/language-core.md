@@ -38,9 +38,38 @@ These forms are equivalent:
 For example, `об'єкт` is one symbol, while `'об'єкт` means
 `(quote об'єкт)`.
 
-## Native binary format
+## Native binary format and bare SID literals
 
-The reader supports an explicit fixed-width binary mode:
+The complete lexical space of exactly eight bare binary digits is reserved for
+Canon semantic identities:
+
+```lisp
+00000000
+00000001
+00001100
+10101000
+11111111
+```
+
+A token matching exactly eight characters from `0` and `1` is read directly
+as a native SID value everywhere in source. It is not an ordinary decimal
+integer and no preceding format declaration is required.
+
+For example:
+
+```text
+00001100  -> Canon SID 00001100
+12        -> ordinary exact decimal integer
+101       -> ordinary exact decimal integer
+```
+
+When an admitted SID is used in function position, execution resolves through
+the existing Canon/function-table identity. The spelling itself does not create
+meaning: an unadmitted SID remains a value and invocation fails closed through
+the normal SID-call boundary.
+
+The historical fixed-width reader descriptor remains supported for compatible
+registry/data files:
 
 ```lisp
 (binary 8)
@@ -48,29 +77,25 @@ The reader supports an explicit fixed-width binary mode:
 10101000
 ```
 
-`(binary 8)` is a reader format descriptor, not a per-value constructor. After
-the descriptor is active, an 8-character token made only of `0` and `1` is
-read as a native Binary value. Width is part of that value's representation, so
-leading zeroes are preserved.
+Inside that explicit mode, an eight-character numeric token containing a digit
+other than `0` or `1` still fails with the named reader error
+`binary literal contains a non-binary digit`. Outside that mode, non-binary
+numeric tokens continue through ordinary decimal parsing.
 
-The canonical printer emits Binary values as their bit string, not as a decimal
-integer. Therefore an 8-bit value such as `00000101` prints as exactly
-`00000101`, and the printed form can be read again under `(binary 8)` without
-changing identity.
+The canonical printer emits SID/Binary values as their eight-bit spelling, not
+as a decimal integer, so leading zeroes and read/print/read identity are
+preserved.
 
-Wrong-width literals fail in the reader with the named error
-`binary literal has the wrong width`. An 8-character numeric token containing
-a digit other than `0` or `1` fails with
-`binary literal contains a non-binary digit`.
+Numeric binary interpretation is a separate, explicit language operation. Bare
+eight-bit SID syntax must never be silently converted into a mathematical
+integer merely because the same bit pattern could encode one. The `binary`
+identity owns explicit binary-data/representation work; Canon SID spelling owns
+function identity.
 
-Decimal integers remain ordinary decimal values. The fact that Binary
-`00001100` may lower to machine byte 12 does not make decimal `12` a second
-semantic spelling or authority.
-
-For semantic IDs, the canonical authority remains the Binary spelling in
+For semantic IDs, the canonical authority remains the binary spelling in
 `lib/surface/semantic-registry.lisp`. Generated host projections may carry a
-machine byte internally, but they must be derived from that Lisp-owned Binary
-identity.
+machine byte internally, but they must be derived from that Lisp-owned identity
+and cannot mint semantic meaning.
 
 ## Canon 0 + McCarthy-7 as stable historical root
 
