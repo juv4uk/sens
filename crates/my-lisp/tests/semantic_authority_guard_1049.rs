@@ -21,6 +21,8 @@ fn semantic_authority_guard_is_lisp_owned() {
     assert!(guard.contains("authority-reviews"));
     assert!(guard.contains("reviewed-source?"));
     assert!(guard.contains("sha256-hex source"));
+    assert!(guard.contains("reviewed-digest?"));
+    assert!(guard.contains("transport-digest"));
     let review_pos = guard.find("((reviewed-source? path source authority-reviews)")
         .expect("content-addressed review fast path must exist");
     let classify_pos = guard.find("(let ((class (violation-class path source)))")
