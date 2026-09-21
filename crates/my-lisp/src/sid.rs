@@ -88,6 +88,34 @@ impl fmt::Debug for Sid8 {
 /// The macro never asks Rust for the token's numeric value. `stringify!`
 /// captures the spelling and the const constructor validates exactly eight
 /// bare `0`/`1` characters at compile time.
+///
+/// ```
+/// let sid = my_lisp::sid!(00001100);
+/// assert_eq!(sid.to_string(), "00001100");
+/// ```
+///
+/// Wrong width, numeric prefixes, separators, suffixes and quoted strings are
+/// compile-time errors rather than alternate SID spellings.
+///
+/// ```compile_fail
+/// let _ = my_lisp::sid!(0000110);
+/// ```
+///
+/// ```compile_fail
+/// let _ = my_lisp::sid!(0b00001100);
+/// ```
+///
+/// ```compile_fail
+/// let _ = my_lisp::sid!(0000_1100);
+/// ```
+///
+/// ```compile_fail
+/// let _ = my_lisp::sid!(00001100u8);
+/// ```
+///
+/// ```compile_fail
+/// let _ = my_lisp::sid!("00001100");
+/// ```
 #[macro_export]
 macro_rules! sid {
     ($bits:literal) => {{
