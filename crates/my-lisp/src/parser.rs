@@ -409,7 +409,7 @@ impl Parser<'_> {
             let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
             if all_binary && token.len() != usize::from(width) {
                 return Err(self.error(
-                    "binary value width does not match the declared format",
+                    "binary literal has the wrong width",
                     start,
                     self.cursor,
                 ));
