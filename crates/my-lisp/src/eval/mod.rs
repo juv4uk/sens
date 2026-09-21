@@ -344,6 +344,20 @@ mod single_pass_eval_tests {
     }
 
     #[test]
+    fn bare_unadmitted_sid_is_a_value_but_does_not_mint_callable_meaning() {
+        let mut value_session = Session::default();
+        let value = eval_program("11111111", &mut value_session)
+            .expect("bare 8-bit SID should remain a first-class SID value");
+        assert_eq!(value.value, Value::Sid(0b11111111));
+
+        let mut call_session = Session::default();
+        let error = eval_program("(11111111)", &mut call_session)
+            .expect_err("unadmitted SID invocation must fail closed");
+        assert_eq!(error.kind, ErrorKind::Type);
+        assert!(error.message.contains("unknown semantic callable SID: 11111111"));
+    }
+
+    #[test]
     fn binary_sids_keep_quote_and_cond_as_syntax() {
         let source = r#"
             (binary 8)
