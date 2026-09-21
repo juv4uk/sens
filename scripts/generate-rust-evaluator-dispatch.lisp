@@ -38,9 +38,9 @@
          (car (quote ())))
         (t
          (str+
-           "    NecessaryFormDispatchRow { semantic_id: 0b"
+           "    NecessaryFormDispatchRow { semantic_id: crate::sid!("
            (write-to-string (car row))
-           ", mechanism: "
+           "), mechanism: "
            mechanism
            " },\n"))))))
 

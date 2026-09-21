@@ -23,16 +23,16 @@ use crate::eval::canon::{self, CanonicalIdentity};
 use crate::eval::necessary_forms::{self, NecessaryFormIdentity};
 use crate::semantic_registry::{self, SemanticId};
 use crate::syntax::{Exactness, Expr, ExprKind, Span};
-use crate::value::{Binary, Rational};
+use crate::value::{Rational, Sid};
 
-/// Byte SID 10 (defmacro) is owned by `lib/macro.my`'s bootstrap, not
+/// Byte SID 00001010 (defmacro) is owned by `lib/macro.my`'s bootstrap, not
 /// `necessary_forms.rs` — mirrored here as its own constant rather than
 /// importing a private one, matching how `crates/my-lisp-cli/src/bin/cml-export.rs`
 /// already names this identity independently.
-const DEFMACRO_SEMANTIC_ID: SemanticId = 10;
+const DEFMACRO_SEMANTIC_ID: SemanticId = 0b00001010;
 
 /// `def` is a compatibility-only spelling for the same Define meaning as
-/// `define`/`визначити` (SID 9), under its own byte SID 11 in
+/// `define`/`визначити` (SID 00001001), under its own byte SID 00001011 in
 /// `lib/surface/semantic-registry.wsm`. `necessary_forms::identity_for_symbol`
 /// resolves it directly (via the admitted stable-or-compatibility-only
 /// surface index) as of 2026-09-12 -- this used to need its own `name ==
@@ -52,10 +52,10 @@ pub enum Provenance {
     /// One of the seven immutable Canon 0 identities (quote/atom/eq/cons/
     /// car/cdr/cond) — resolved directly, never through ordinary lookup.
     Canon(CanonicalIdentity),
-    /// `lambda` (SID 8) or `define`/`def` (SIDs 9/11) — evaluator-owned mechanism
+    /// `lambda` (SID 00001000) or `define`/`def` (SIDs 00001001/00001011) — evaluator-owned mechanism
     /// beyond Canon, resolved by numeric semantic ID.
     NecessaryForm(NecessaryFormIdentity),
-    /// `defmacro` (SID 10) — language-owned macro-construction mechanism.
+    /// `defmacro` (SID 00001010) — language-owned macro-construction mechanism.
     Defmacro,
     /// An admitted semantic registry entry that is an ordinary callable
     /// value (arithmetic, comparisons, library functions) — carries the
@@ -145,7 +145,7 @@ pub struct CondClause {
 pub enum LiteralValue {
     Number(f64, Exactness),
     Rational(Rational),
-    Binary(Binary),
+    Sid(Sid),
     String(String),
     Symbol(String),
 }
@@ -215,8 +215,8 @@ pub fn lower(expr: &Expr) -> Result<IrNode, LoweringError> {
             span: expr.span,
             provenance: Provenance::Literal,
         }),
-        ExprKind::Binary(binary) => Ok(IrNode::Literal {
-            value: LiteralValue::Binary(*binary),
+        ExprKind::Sid(sid) => Ok(IrNode::Literal {
+            value: LiteralValue::Sid(*sid),
             span: expr.span,
             provenance: Provenance::Literal,
         }),

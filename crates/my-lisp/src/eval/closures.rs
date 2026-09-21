@@ -341,7 +341,7 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Bool(false) => ExprKind::List(Rc::new([])),
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
-        Value::Binary(binary) => ExprKind::Binary(*binary),
+        Value::Sid(sid) => ExprKind::Sid(*sid),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
         Value::String(val) => ExprKind::String(val.clone()),
         // A semantic callable is a runtime identity, not source syntax. It

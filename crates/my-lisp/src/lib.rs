@@ -298,7 +298,7 @@ pub fn is_canonical_surface_name(name: &str) -> bool {
 }
 
 /// Public hook for tooling that must recognize `quote`'s specific identity
-/// (byte SID 1) across every admitted surface (`quote`/`як-є`/
+/// (byte SID 00000001) across every admitted surface (`quote`/`як-є`/
 /// `svarūpa`/`'`), not just the English spelling. Added after a real bug
 /// was found in `crates/my-lisp-lsp/src/analysis.rs`'s own quoted-data
 /// detection: it matched only the literal ASCII string `"quote"`, so a
@@ -354,7 +354,7 @@ pub fn sha256_source(input: &[u8]) -> [u8; 32] {
     eval::digest_sha256(input)
 }
 pub use syntax::{Exactness, Expr, ExprKind, Span};
-pub use value::{Binary, Closure, NumericBuffer, Rational, Value};
+pub use value::{Closure, NumericBuffer, Rational, Sid, Value};
 
 /// Return a half-open, Unicode-scalar-indexed substring with clamped bounds.
 ///

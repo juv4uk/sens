@@ -141,7 +141,7 @@ pub(crate) fn evaluate_step(
     match &expression.kind {
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
-        ExprKind::Binary(binary) => Ok(EvalStep::Value(Value::Binary(*binary))),
+        ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
@@ -264,13 +264,13 @@ fn evaluate_list(
 }
 
 /// A fixed-width binary token names a semantic identity only as a list head.
-/// The same token remains `Value::Binary` when it occurs as data or under
+/// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
 fn binary_head_sid(expression: &Expr) -> Option<u8> {
-    let ExprKind::Binary(binary) = expression.kind else {
+    let ExprKind::Sid(sid) = expression.kind else {
         return None;
     };
-    u8::try_from(binary.value()).ok()
+    Some(sid)
 }
 
 fn is_binary_format_declaration(items: &[Expr]) -> bool {

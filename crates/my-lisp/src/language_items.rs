@@ -76,7 +76,7 @@ struct SemanticToolingMetadata {
 // Human spellings are projected from semantic-registry.wsm at discovery time.
 const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
     SemanticToolingMetadata {
-        semantic_id: 1,
+        semantic_id: 0b00000001,
         signature: "(quote value)",
         documentation: "Return value unevaluated",
         kind: LanguageItemKind::SyntaxForm,
@@ -84,7 +84,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: 7,
+        semantic_id: 0b00000111,
         signature: "(cond (test result) ...)",
         documentation: "Evaluate the first matching clause",
         kind: LanguageItemKind::SyntaxForm,
@@ -92,7 +92,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: 8,
+        semantic_id: 0b00001000,
         signature: "(lambda (params) body ...)",
         documentation: "Create an anonymous function",
         kind: LanguageItemKind::SyntaxForm,
@@ -100,7 +100,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: 9,
+        semantic_id: 0b00001001,
         signature: "(define name value)",
         documentation: "Bind name in the current scope",
         kind: LanguageItemKind::SyntaxForm,
@@ -108,7 +108,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: 10,
+        semantic_id: 0b00001010,
         signature: "(defmacro name (params) body ...)",
         documentation: "Bind a language-owned macro",
         kind: LanguageItemKind::Macro,
@@ -116,7 +116,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Admitted,
     },
     SemanticToolingMetadata {
-        semantic_id: 11,
+        semantic_id: 0b00001011,
         signature: "(def name value)",
         documentation: "Compatibility-only binding form",
         kind: LanguageItemKind::SyntaxForm,

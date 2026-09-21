@@ -1,4 +1,4 @@
-use crate::value::{Binary, NumericBuffer, Rational};
+use crate::value::{NumericBuffer, Rational, Sid};
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -48,7 +48,7 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
-    Binary(Binary),
+    Sid(Sid),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -85,11 +85,11 @@ pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 /// Deterministic, versioned; decode returns None on ANY inconsistency so
 /// callers fall back to text parsing (never a wrong program).
 pub(crate) mod fasl {
-    use super::{Binary, Exactness, Expr, ExprKind};
+    use super::{Exactness, Expr, ExprKind};
     use crate::value::Rational;
     use std::rc::Rc;
 
-    pub const FASL_FORMAT_VERSION: u32 = 2;
+    pub const FASL_FORMAT_VERSION: u32 = 3;
 
     const TAG_NUMBER: u8 = 1;
     const TAG_RATIONAL: u8 = 2;
@@ -132,10 +132,9 @@ pub(crate) mod fasl {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
             }
-            ExprKind::Binary(binary) => {
+            ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
-                out.push(binary.width());
-                out.extend_from_slice(&binary.value().to_le_bytes());
+                out.push(*sid);
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -183,11 +182,9 @@ pub(crate) mod fasl {
             }
             TAG_RATIONAL => ExprKind::Rational(Rational::read_fasl(bytes, pos)?),
             TAG_BINARY => {
-                let width = *bytes.get(*pos)?;
+                let value = *bytes.get(*pos)?;
                 *pos += 1;
-                let bits = bytes.get(*pos..*pos + 8)?;
-                *pos += 8;
-                ExprKind::Binary(Binary::from_u64(u64::from_le_bytes(bits.try_into().ok()?), width)?)
+                ExprKind::Sid(value)
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),

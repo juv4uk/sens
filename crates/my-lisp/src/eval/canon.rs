@@ -35,17 +35,17 @@ pub(crate) struct CanonEntry {
     pub semantic_id: SemanticId,
 }
 
-pub(crate) const EMPTY_LIST_SEMANTIC_ID: SemanticId = 0;
-pub(crate) const QUOTE_SEMANTIC_ID: SemanticId = 1;
-pub(crate) const ATOM_SEMANTIC_ID: SemanticId = 2;
-pub(crate) const EQ_SEMANTIC_ID: SemanticId = 3;
-pub(crate) const CONS_SEMANTIC_ID: SemanticId = 4;
-pub(crate) const CAR_SEMANTIC_ID: SemanticId = 5;
-pub(crate) const CDR_SEMANTIC_ID: SemanticId = 6;
-pub(crate) const COND_SEMANTIC_ID: SemanticId = 7;
+pub(crate) const EMPTY_LIST_SEMANTIC_ID: SemanticId = 0b00000000;
+pub(crate) const QUOTE_SEMANTIC_ID: SemanticId = 0b00000001;
+pub(crate) const ATOM_SEMANTIC_ID: SemanticId = 0b00000010;
+pub(crate) const EQ_SEMANTIC_ID: SemanticId = 0b00000011;
+pub(crate) const CONS_SEMANTIC_ID: SemanticId = 0b00000100;
+pub(crate) const CAR_SEMANTIC_ID: SemanticId = 0b00000101;
+pub(crate) const CDR_SEMANTIC_ID: SemanticId = 0b00000110;
+pub(crate) const COND_SEMANTIC_ID: SemanticId = 0b00000111;
 
-/// Canon 0 is SID 0 and is the empty-list ground object itself.
-/// McCarthy7 follow contiguously as SIDs 1..7.
+/// Canon 00000000 is the empty-list ground object itself.
+/// McCarthy7 follow contiguously through 00000111.
 pub(crate) const CANON: [CanonEntry; 8] = [
     CanonEntry {
         identity: CanonicalIdentity::EmptyList,

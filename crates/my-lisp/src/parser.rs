@@ -1,5 +1,4 @@
 use crate::{ErrorKind, Exactness, Expr, ExprKind, LanguageError, Span};
-use crate::Binary;
 use std::rc::Rc;
 
 /// `true` for a token that is exactly the single character `.` — the reader
@@ -399,10 +398,12 @@ impl Parser<'_> {
                         self.cursor,
                     ));
                 }
-                let binary = Binary::from_bits(token, width)
-                    .ok_or_else(|| self.error("malformed binary literal", start, self.cursor))?;
+                let mut sid = 0u8;
+                for bit in token.bytes() {
+                    sid = (sid << 1) | (bit - b'0');
+                }
                 return Ok(Expr {
-                    kind: ExprKind::Binary(binary),
+                    kind: ExprKind::Sid(sid),
                     span: Span {
                         start,
                         end: self.cursor,
@@ -537,8 +538,7 @@ mod tests {
         assert_eq!(expressions.len(), 2);
         assert!(matches!(
             &expressions[1].kind,
-            ExprKind::Binary(binary)
-                if binary.width() == 8 && binary.bits() == "00000101"
+            ExprKind::Sid(0b00000101)
         ));
     }
 

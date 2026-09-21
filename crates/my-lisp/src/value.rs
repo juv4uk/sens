@@ -414,49 +414,8 @@ pub struct Builtin {
     pub func: BuiltinFunction,
 }
 
-/// A native fixed-width binary scalar. The numeric payload is only an
-/// implementation mechanism; canonical source/rendering stays as the exact bit
-/// string with its declared width.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Binary {
-    value: u64,
-    width: u8,
-}
-
-impl Binary {
-    pub fn from_bits(bits: &str, width: u8) -> Option<Self> {
-        if width != 8 || bits.len() != 8 {
-            return None;
-        }
-        if !bits.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            return None;
-        }
-        let mut value = 0u64;
-        for byte in bits.bytes() {
-            value = (value << 1) | u64::from(byte - b'0');
-        }
-        Some(Self { value, width })
-    }
-
-    pub fn from_u64(value: u64, width: u8) -> Option<Self> {
-        if width != 8 || value > u8::MAX as u64 {
-            return None;
-        }
-        Some(Self { value, width })
-    }
-
-    pub fn width(self) -> u8 {
-        self.width
-    }
-
-    pub fn value(self) -> u64 {
-        self.value
-    }
-
-    pub fn bits(self) -> String {
-        format!("{:0width$b}", self.value, width = usize::from(self.width))
-    }
-}
+/// Canonical semantic identity: exactly one byte.
+pub type Sid = u8;
 
 /// Immutable contiguous numeric storage for portable bulk-compute lowering.
 #[derive(Clone, Debug)]
@@ -496,7 +455,7 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
-    Binary(Binary),
+    Sid(Sid),
     String(Rc<str>),
     Symbol(Rc<str>),
     Pair(Rc<Value>, Rc<Value>),
@@ -569,7 +528,7 @@ impl PartialEq for Value {
                 left == right && left_exactness == right_exactness
             }
             (Value::Rational(left), Value::Rational(right)) => left == right,
-            (Value::Binary(left), Value::Binary(right)) => left == right,
+            (Value::Sid(left), Value::Sid(right)) => left == right,
             (Value::String(left), Value::String(right)) => left == right,
             (Value::Symbol(left), Value::Symbol(right)) => left == right,
             (Value::Pair(left_head, left_tail), Value::Pair(right_head, right_tail)) => {
@@ -780,7 +739,7 @@ fn render(value: &Value, quote_strings: bool) -> String {
             }
         }
         Value::Rational(number) => number.to_string(),
-        Value::Binary(binary) => binary.bits(),
+        Value::Sid(sid) => format!("{sid:08b}"),
         Value::String(text) => {
             if quote_strings {
                 let mut escaped = String::with_capacity(text.len() + 2);
