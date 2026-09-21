@@ -88,9 +88,22 @@ preserved.
 
 Numeric binary interpretation is a separate, explicit language operation. Bare
 eight-bit SID syntax must never be silently converted into a mathematical
-integer merely because the same bit pattern could encode one. The `binary`
-identity owns explicit binary-data/representation work; Canon SID spelling owns
-function identity.
+integer merely because the same bit pattern could encode one. Ordinary
+application of the existing `binary` identity makes that intent explicit:
+
+```lisp
+00001100          ; Canon SID/function identity
+(binary 00001100) ; exact integer 12
+(binary 00000000) ; exact integer 0
+(binary 11111111) ; exact integer 255
+(binary 12)       ; () — decimal 12 is not a binary spelling
+```
+
+The numeric fold is defined in Lisp over the SID's canonical printed bits; the
+host does not expose a SID-to-integer semantic converter. The historical exact
+form `(binary 8)` remains reader metadata and is intercepted before ordinary
+function application. Thus Canon SID spelling owns function identity while an
+explicit `binary` call owns numeric interpretation.
 
 For semantic IDs, the canonical authority remains the binary spelling in
 `lib/surface/semantic-registry.lisp`. Generated host projections may carry a
