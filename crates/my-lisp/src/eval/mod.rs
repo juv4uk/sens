@@ -24,7 +24,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Span, Value};
+use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sid8, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -97,7 +97,7 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::Sid(sid) => canon::invoke_semantic_ref(sid.packed_byte(), arguments, environment, span),
         Value::SemanticRef(semantic_id) => canon::invoke_semantic_ref(*semantic_id, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
@@ -205,10 +205,10 @@ fn evaluate_list(
     let head_sid = binary_head_sid(&items[0]);
     let canonical_head = head_name
         .and_then(canon::identity_for_surface)
-        .or_else(|| head_sid.and_then(canon::identity_for_semantic_id));
+        .or_else(|| head_sid.and_then(|sid| canon::identity_for_semantic_id(sid.packed_byte())));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+        .or_else(|| head_sid.and_then(|sid| necessary_forms::identity_for_semantic_id(sid.packed_byte())));
 
     match (canonical_head, necessary_head) {
         (Some(canon::CanonicalIdentity::Quote), _) => {
@@ -234,10 +234,18 @@ fn evaluate_list(
                 }
             }
             let function = match head_sid {
-                Some(semantic_id) => Value::SemanticRef(semantic_id),
+                Some(sid) => Value::Sid(sid),
                 None => evaluate(&items[0], environment)?,
             };
             match &function {
+                Value::Sid(sid) => {
+                    let mut values = Vec::with_capacity(arguments.len());
+                    for argument in arguments {
+                        values.push(evaluate(argument, environment)?);
+                    }
+                    canon::invoke_semantic_ref(sid.packed_byte(), &values, environment, span)
+                        .map(EvalStep::Value)
+                }
                 Value::SemanticRef(semantic_id) => {
                     let mut values = Vec::with_capacity(arguments.len());
                     for argument in arguments {
@@ -265,7 +273,7 @@ fn evaluate_list(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_sid(expression: &Expr) -> Option<u8> {
+fn binary_head_sid(expression: &Expr) -> Option<Sid8> {
     let ExprKind::Sid(sid) = expression.kind else {
         return None;
     };
