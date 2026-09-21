@@ -91,7 +91,12 @@ fn error_kind_vocabulary_matches_lisp_owned_contract() {
     let expected = contract_names();
 
     assert_eq!(
-        observed, expected,
-        "Rust ErrorKind drifted from contracts/error-kind-vocabulary.lisp;          change language-owned admission/provenance first, then update the          exhaustive implementation observer"
+        observed,
+        expected,
+        concat!(
+            "Rust ErrorKind drifted from contracts/error-kind-vocabulary.lisp; ",
+            "change language-owned admission/provenance first, then update the ",
+            "exhaustive implementation observer"
+        )
     );
 }
