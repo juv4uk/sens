@@ -180,10 +180,10 @@ fn machine_coordinate(session: &mut Session, sid: &str) -> String {
 
 #[test]
 fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
-    assert_eq!(semantic_id_for_admitted_surface("+"), Some(0b0000_1100));
-    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(0b0000_0011));
-    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(0b0000_0100));
-    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(0b0000_0111));
+    assert_eq!(semantic_id_for_admitted_surface("+"), Some(my_lisp::sid!(00001100)));
+    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(my_lisp::sid!(00000011)));
+    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(my_lisp::sid!(00000100)));
+    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(my_lisp::sid!(00000111)));
 
     let kernel_path = matrix_source_path("kernel-axis-source");
     let kernel_source = read(&kernel_path);
