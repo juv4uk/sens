@@ -97,8 +97,8 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::Sid(sid) => canon::invoke_semantic_ref(sid.packed_byte(), arguments, environment, span),
-        Value::SemanticRef(semantic_id) => canon::invoke_semantic_ref(*semantic_id, arguments, environment, span),
+        Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::SemanticRef(semantic_id) => canon::invoke_semantic_ref(Sid8::from_packed_byte(*semantic_id), arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -205,7 +205,7 @@ fn evaluate_list(
     let head_sid = binary_head_sid(&items[0]);
     let canonical_head = head_name
         .and_then(canon::identity_for_surface)
-        .or_else(|| head_sid.and_then(|sid| canon::identity_for_semantic_id(sid.packed_byte())));
+        .or_else(|| head_sid.and_then(canon::identity_for_semantic_id));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
         .or_else(|| head_sid.and_then(|sid| necessary_forms::identity_for_semantic_id(sid.packed_byte())));
@@ -243,7 +243,7 @@ fn evaluate_list(
                     for argument in arguments {
                         values.push(evaluate(argument, environment)?);
                     }
-                    canon::invoke_semantic_ref(sid.packed_byte(), &values, environment, span)
+                    canon::invoke_semantic_ref(*sid, &values, environment, span)
                         .map(EvalStep::Value)
                 }
                 Value::SemanticRef(semantic_id) => {
@@ -251,7 +251,7 @@ fn evaluate_list(
                     for argument in arguments {
                         values.push(evaluate(argument, environment)?);
                     }
-                    canon::invoke_semantic_ref(*semantic_id, &values, environment, span)
+                    canon::invoke_semantic_ref(Sid8::from_packed_byte(*semantic_id), &values, environment, span)
                         .map(EvalStep::Value)
                 }
                 Value::Builtin(builtin) => {
