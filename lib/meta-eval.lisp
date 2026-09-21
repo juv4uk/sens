@@ -432,7 +432,10 @@
          (cond
            ((< received fixed) 1 (quote ()))
            ((< received fixed) 0 t)))
-        (t (= received fixed))))))
+        (t
+         (cond
+           ((= received fixed) 1 t)
+           ((= received fixed) 0 (quote ()))))))))
 
 (def my-arity-detail
   (lambda (params args)
