@@ -6,10 +6,13 @@
 //! scripts/generate-rust-semantic-registry.lisp and is only a mechanical
 //! runtime projection for fast lookup.
 //
-//! An internal u8 is allowed here as substrate representation of an already
-//! understood Lisp Binary identity. It is not a second semantic authority.
+//! Generated rows may carry a packed byte as substrate representation of an
+//! already understood Lisp Binary identity. This wrapper converts that byte to
+//! opaque Sid8 immediately; runtime registry APIs never expose decimal IDs.
 
 use std::{collections::HashMap, sync::OnceLock};
+
+use crate::Sid8;
 
 mod generated {
     include!("semantic_registry_generated.rs");
@@ -17,9 +20,9 @@ mod generated {
 
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
-pub(crate) type SemanticId = u8;
+pub(crate) type SemanticId = Sid8;
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
-    format!("{semantic_id:08b}")
+    semantic_id.to_string()
 }
 
 fn live_rows() -> &'static [SemanticRow] {
@@ -29,7 +32,7 @@ fn live_rows() -> &'static [SemanticRow] {
 pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
     live_rows()
         .iter()
-        .map(|row| row.semantic_id)
+        .map(|row| Sid8::from_packed_byte(row.semantic_id))
         .collect()
 }
 
@@ -55,7 +58,7 @@ fn surface_index() -> &'static HashMap<&'static str, SemanticId> {
         let mut index = HashMap::new();
         for row in live_rows() {
             for surface in row.surfaces {
-                insert_surface_mapping(&mut index, surface.name, row.semantic_id);
+                insert_surface_mapping(&mut index, surface.name, Sid8::from_packed_byte(row.semantic_id));
             }
         }
         index
@@ -84,7 +87,7 @@ fn admitted_surfaces_from_rows(
 ) -> Vec<&'static str> {
     let mut surfaces = rows
         .iter()
-        .find(|row| row.semantic_id == semantic_id)
+        .find(|row| row.semantic_id == semantic_id.packed_byte())
         .into_iter()
         .flat_map(|row| row.surfaces.iter().map(|surface| surface.name))
         .collect::<Vec<_>>();
@@ -113,7 +116,7 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 ) -> Vec<(&'static str, &'static str)> {
     let mut surfaces = live_rows()
         .iter()
-        .find(|row| row.semantic_id == semantic_id)
+        .find(|row| row.semantic_id == semantic_id.packed_byte())
         .into_iter()
         .flat_map(|row| row.surfaces.iter().map(|s| (s.namespace, s.name)))
         .collect::<Vec<_>>();
@@ -154,10 +157,10 @@ mod tests {
 
     #[test]
     fn public_reverse_projection_preserves_identity() {
-        for surface in admitted_surfaces_for_semantic_id(15) {
+        for surface in admitted_surfaces_for_semantic_id(crate::sid!(00001111)) {
             assert_eq!(
                 crate::semantic_registry_export::semantic_id_for_admitted_surface(surface),
-                Some(15)
+                Some(crate::sid!(00001111))
             );
         }
         assert_eq!(
@@ -168,13 +171,13 @@ mod tests {
 
     #[test]
     fn unrelated_rows_are_projected_without_assigning_evaluator_meaning() {
-        assert_eq!(semantic_id_for_surface("+"), Some(12));
+        assert_eq!(semantic_id_for_surface("+"), Some(crate::sid!(00001100)));
     }
 
     #[test]
     fn surfaces_with_namespace_match_present_names_and_keep_namespace() {
-        let with_namespace = admitted_surfaces_with_namespace_for_semantic_id(1);
-        let names_only = admitted_surfaces_for_semantic_id(1);
+        let with_namespace = admitted_surfaces_with_namespace_for_semantic_id(crate::sid!(00000001));
+        let names_only = admitted_surfaces_for_semantic_id(crate::sid!(00000001));
         assert_eq!(with_namespace.len(), names_only.len());
         assert!(with_namespace.contains(&("en", "quote")));
         assert!(with_namespace.contains(&("ук", "як-є")));

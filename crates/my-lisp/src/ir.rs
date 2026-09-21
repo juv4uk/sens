@@ -21,20 +21,19 @@
 
 use crate::eval::canon::{self, CanonicalIdentity};
 use crate::eval::necessary_forms::{self, NecessaryFormIdentity};
-use crate::semantic_registry::{self, SemanticId};
+use crate::semantic_registry;
 use crate::syntax::{Exactness, Expr, ExprKind, Span};
-use crate::value::{Rational, Sid};
+use crate::value::Rational;
+use crate::Sid8;
 
-/// Byte SID 00001010 (defmacro) is owned by `lib/macro.my`'s bootstrap, not
-/// `necessary_forms.rs` — mirrored here as its own constant rather than
-/// importing a private one, matching how `crates/my-lisp-cli/src/bin/cml-export.rs`
-/// already names this identity independently.
-const DEFMACRO_SEMANTIC_ID: SemanticId = 0b00001010;
+/// SID 00001010 (defmacro) is owned by `lib/macro.my`'s bootstrap, not
+/// `necessary_forms.rs` — mirrored here as the same exact eight-bit identity.
+const DEFMACRO_SEMANTIC_ID: Sid8 = crate::sid!(00001010);
 
-/// Lambda SID 00001000 and Define SIDs 00001001/00001011 (def compat)
-const LAMBDA_SEMANTIC_ID: SemanticId = 0b00001000;
-const DEFINE_SEMANTIC_ID: SemanticId = 0b00001001;
-const DEF_COMPAT_SEMANTIC_ID: SemanticId = 0b00001011;
+/// Lambda SID 00001000 and Define SIDs 00001001/00001011 (def compat).
+const LAMBDA_SEMANTIC_ID: Sid8 = crate::sid!(00001000);
+const DEFINE_SEMANTIC_ID: Sid8 = crate::sid!(00001001);
+const DEF_COMPAT_SEMANTIC_ID: Sid8 = crate::sid!(00001011);
 
 /// `def` is a compatibility-only spelling for the same Define meaning as
 /// `define`/`визначити` (SID 00001001), under its own byte SID 00001011 in
@@ -58,15 +57,15 @@ pub enum Provenance {
     /// car/cdr/cond) — resolved directly, never through ordinary lookup.
     Canon(CanonicalIdentity),
     /// `lambda` (SID 00001000) or `define`/`def` (SIDs 00001001/00001011) — evaluator-owned mechanism
-    /// beyond Canon, resolved by numeric semantic ID.
+    /// beyond Canon, resolved by exact SID identity.
     NecessaryForm(NecessaryFormIdentity),
     /// `defmacro` (SID 00001010) — language-owned macro-construction mechanism.
     Defmacro,
     /// An admitted semantic registry entry that is an ordinary callable
     /// value (arithmetic, comparisons, library functions) — carries the
-    /// numeric semantic ID so a backend can look up the same authority
-    /// `crates/my-lisp-cli/src/bin/cml-export.rs` already exports.
-    AdmittedSemanticIdentity(SemanticId),
+    /// exact eight-bit SID identity. Backends may pack it only at a transport
+    /// boundary; the IR never renames it to a decimal ID.
+    AdmittedSemanticIdentity(Sid8),
     /// A binding this lowering pass has no registry entry for — an
     /// ordinary user-defined function/variable. This is NOT a failure:
     /// most real programs are built from bindings the registry has no
@@ -150,7 +149,7 @@ pub struct CondClause {
 pub enum LiteralValue {
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sid),
+    Sid(Sid8),
     String(String),
     Symbol(String),
 }
@@ -159,7 +158,7 @@ pub enum LiteralValue {
 /// is the fail-closed side of #66's authority boundary applied to IR.
 #[derive(Clone, Debug, PartialEq)]
 pub enum LoweringError {
-    /// A form whose head resolves to a numeric semantic identity this
+    /// A form whose head resolves to a exact SID identity this
     /// lowering pass has never been taught how to handle as a special
     /// form shape. Recognized syntax identities (quote/cond/lambda/
     /// define/defmacro) are exhaustively matched in `classify_syntax_id`;
@@ -179,14 +178,19 @@ pub enum LoweringError {
 /// Exhaustive by construction: adding a new syntax identity here without
 /// a matching `IrNode` variant is a compile-time reminder, the same
 /// discipline as #66's `error_kind_vocabulary_is_closed.rs`.
-fn classify_syntax_id(semantic_id: SemanticId) -> Option<KnownSyntaxId> {
-    match semantic_id {
-        1 => Some(KnownSyntaxId::Quote),
-        7 => Some(KnownSyntaxId::Cond),
-        8 => Some(KnownSyntaxId::Lambda),
-        9 => Some(KnownSyntaxId::Define),
-        10 => Some(KnownSyntaxId::Defmacro),
-        _ => None,
+fn classify_syntax_id(semantic_id: Sid8) -> Option<KnownSyntaxId> {
+    if semantic_id == canon::QUOTE_SEMANTIC_ID {
+        Some(KnownSyntaxId::Quote)
+    } else if semantic_id == canon::COND_SEMANTIC_ID {
+        Some(KnownSyntaxId::Cond)
+    } else if semantic_id == LAMBDA_SEMANTIC_ID {
+        Some(KnownSyntaxId::Lambda)
+    } else if semantic_id == DEFINE_SEMANTIC_ID {
+        Some(KnownSyntaxId::Define)
+    } else if semantic_id == DEFMACRO_SEMANTIC_ID {
+        Some(KnownSyntaxId::Defmacro)
+    } else {
+        None
     }
 }
 
@@ -206,7 +210,7 @@ fn symbol_text(expr: &Expr) -> Option<&str> {
     }
 }
 
-fn sid_of_head(expr: &Expr) -> Option<u8> {
+fn sid_of_head(expr: &Expr) -> Option<Sid8> {
     match &expr.kind {
         ExprKind::Sid(sid) => Some(*sid),
         _ => None,
@@ -557,7 +561,7 @@ mod tests {
 
     #[test]
     fn ordinary_admitted_semantic_identity_is_tagged_not_special_cased() {
-        // `+` (byte SID 00001100) is an ordinary callable, not a special
+        // `+` (SID 00001100) is an ordinary callable, not a special
         // form -- lowering must produce a plain Apply, with the callee's
         // provenance naming the admitted identity for a backend to use.
         let node = lower_source("(+ 1 2)");
@@ -569,7 +573,7 @@ mod tests {
         };
         assert_eq!(
             provenance,
-            Provenance::AdmittedSemanticIdentity(12)
+            Provenance::AdmittedSemanticIdentity(crate::sid!(00001100))
         );
     }
 
@@ -605,8 +609,8 @@ mod tests {
     /// to some guessed shape.
     #[test]
     fn an_unrecognized_syntax_identity_is_rejected_not_guessed() {
-        assert_eq!(classify_syntax_id(1), Some(KnownSyntaxId::Quote));
-        assert_eq!(classify_syntax_id(255), None);
+        assert_eq!(classify_syntax_id(crate::sid!(00000001)), Some(KnownSyntaxId::Quote));
+        assert_eq!(classify_syntax_id(crate::sid!(11111111)), None);
     }
 
     /// #68's own acceptance criterion: "lower a small but nontrivial corpus

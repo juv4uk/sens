@@ -32,7 +32,7 @@ use crate::eval::special_forms::{
     string_rest_values, string_to_codepoint_values, string_to_symbol_values,
     symbol_to_string_values, write_to_string_values,
 };
-use crate::{semantic_registry, Exactness, NumericBuffer, Rational, Span, Value};
+use crate::{semantic_registry, Exactness, NumericBuffer, Rational, Sid8, Span, Value};
 
 type Native =
     std::rc::Rc<dyn Fn(&[Value], &Environment, Span) -> Result<Value, crate::LanguageError>>;
@@ -44,7 +44,7 @@ fn builtin(name: &'static str, func: Native) -> Value {
 fn define_peer_builtin(
     environment: &Environment,
     diagnostic_name: &'static str,
-    semantic_id: u8,
+    semantic_id: Sid8,
     func: Native,
 ) {
     let names = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
@@ -427,13 +427,13 @@ pub(crate) fn install(environment: &Environment) {
 
     // ADR-007/008 runtime peer slices: each identity below allocates one
     // callable value, then binds every ratified stable spelling projected from
-    // the numeric semantic registry. Human spellings are not duplicated here.
+    // the Sid8 semantic registry projection. Human spellings are not duplicated here.
     // The builtin diagnostic token remains the historical symbolic spelling
     // for Contract 2.1 display compatibility; it is NOT semantic identity.
     define_peer_builtin(
         environment,
         "+",
-        12,
+        crate::sid!(00001100),
         std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
             arithmetic_on_values("+", args, env, span)
         }),
@@ -441,7 +441,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "-",
-        13,
+        crate::sid!(00001101),
         std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
             arithmetic_on_values("-", args, env, span)
         }),
@@ -449,7 +449,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "*",
-        14,
+        crate::sid!(00001110),
         std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
             arithmetic_on_values("*", args, env, span)
         }),
@@ -457,7 +457,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "/",
-        15,
+        crate::sid!(00001111),
         std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
             division_on_values(args, args.len(), env, span)
         }),
@@ -477,7 +477,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "<",
-        26,
+        crate::sid!(00011010),
         std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
             comparison_on_values("<", args, span)
         }),
@@ -485,7 +485,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         ">",
-        27,
+        crate::sid!(00011011),
         std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
             comparison_on_values(">", args, span)
         }),
@@ -493,7 +493,7 @@ pub(crate) fn install(environment: &Environment) {
     define_peer_builtin(
         environment,
         "=",
-        28,
+        crate::sid!(00011100),
         std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
             comparison_on_values("=", args, span)
         }),

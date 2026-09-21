@@ -4,7 +4,8 @@
 //! Lisp owns the SID-to-operation mapping in `lib/evaluator-dispatch.lisp`.
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
-use crate::semantic_registry::{self, SemanticId};
+use crate::semantic_registry;
+use crate::Sid8;
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -16,10 +17,10 @@ pub(crate) enum NecessaryFormIdentity {
     Lambda,
 }
 
-pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<NecessaryFormIdentity> {
+pub(crate) fn identity_for_semantic_id(semantic_id: Sid8) -> Option<NecessaryFormIdentity> {
     generated::NECESSARY_FORM_DISPATCH
         .iter()
-        .find(|row| row.semantic_id == semantic_id)
+        .find(|row| row.semantic_id == semantic_id.packed_byte())
         .map(|row| match row.mechanism {
             generated::NecessaryFormMechanism::Define => NecessaryFormIdentity::Define,
             generated::NecessaryFormMechanism::Lambda => NecessaryFormIdentity::Lambda,
@@ -27,7 +28,7 @@ pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<Necess
 }
 
 /// Resolve an executable list-head symbol through the shared authority
-/// registry, then select the evaluator mechanism by numeric semantic ID.
+/// registry, then select the evaluator mechanism by exact SID identity.
 /// Uses the admitted (stable OR compatibility-only) surface index, not the
 /// stable-only one `canon.rs`/tooling use elsewhere: `def`'s row is
 /// compatibility-only, and dispatch must still see it as Define through
@@ -35,7 +36,8 @@ pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<Necess
 /// (previously duplicated in both `eval/mod.rs` and `ir.rs` for exactly
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
-    semantic_registry::admitted_semantic_id_for_surface(name).and_then(identity_for_semantic_id)
+    semantic_registry::admitted_semantic_id_for_surface(name)
+        .and_then(identity_for_semantic_id)
 }
 
 #[cfg(test)]
@@ -60,7 +62,7 @@ mod tests {
         // функція/lambda, ...) is a semantic-registry FACT, not Rust
         // knowledge to enumerate here -- this test asserts only the
         // implementation invariant: whatever surfaces the registry admits
-        // for SIDs 9/8 all route through this same numeric-ID dispatch,
+        // for SIDs 9/8 all route through this same SID dispatch,
         // regardless of which language they're spelled in.
         for (surface, identity) in [
             ("define", NecessaryFormIdentity::Define),
@@ -111,7 +113,7 @@ mod tests {
     }
 
     #[test]
-    fn semantic_ids_control_necessary_form_routing() {
+    fn exact_sid_identities_control_necessary_form_routing() {
         assert_eq!(
             identity_for_semantic_id(
                 semantic_registry::admitted_semantic_id_for_surface("lambda")
@@ -137,7 +139,7 @@ mod tests {
 
     #[test]
     fn unrelated_registry_rows_do_not_gain_necessary_form_meaning() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(12));
+        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(crate::sid!(00001100)));
         assert_eq!(identity_for_symbol("+"), None);
     }
 }

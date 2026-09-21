@@ -15,7 +15,9 @@ run_case() {
   local fixture=$1
   local expected=$2
   cp "$fixture" "$probe"
-  printf '(changed "%s")\n' "$probe" > tests/semantic-authority-changes.lisp
+  local digest
+  digest="$(sha256sum "$probe" | awk '{print $1}')"
+  printf '(changed "%s" "%s")\n' "$probe" "$digest" > tests/semantic-authority-changes.lisp
   "$my_lisp" scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
   cat tests/semantic-authority-verdict.lisp
   if [[ "$expected" == "violation" ]]; then

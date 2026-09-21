@@ -24,7 +24,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Span, Value};
+use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sid8, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -234,10 +234,18 @@ fn evaluate_list(
                 }
             }
             let function = match head_sid {
-                Some(semantic_id) => Value::SemanticRef(semantic_id),
+                Some(sid) => Value::Sid(sid),
                 None => evaluate(&items[0], environment)?,
             };
             match &function {
+                Value::Sid(sid) => {
+                    let mut values = Vec::with_capacity(arguments.len());
+                    for argument in arguments {
+                        values.push(evaluate(argument, environment)?);
+                    }
+                    canon::invoke_semantic_ref(*sid, &values, environment, span)
+                        .map(EvalStep::Value)
+                }
                 Value::SemanticRef(semantic_id) => {
                     let mut values = Vec::with_capacity(arguments.len());
                     for argument in arguments {
@@ -265,7 +273,7 @@ fn evaluate_list(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_sid(expression: &Expr) -> Option<u8> {
+fn binary_head_sid(expression: &Expr) -> Option<Sid8> {
     let ExprKind::Sid(sid) = expression.kind else {
         return None;
     };

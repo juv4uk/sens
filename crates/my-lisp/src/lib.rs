@@ -22,6 +22,7 @@ mod language_items;
 mod parser;
 mod presentation;
 mod semantic_registry;
+mod sid;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
 /// exactly the (namespace, spelling) pairs a consumer like the CML semantic
 /// export needs, without making the internal parsing/index machinery public.
@@ -35,29 +36,64 @@ pub mod semantic_registry_export {
         pub name: &'static str,
     }
 
+    /// Mechanical input accepted by the external projection boundary.
+    ///
+    /// Runtime/source semantics use `Sid8`. The `u8` implementation exists
+    /// only so the pre-#1098 CML export can remain byte-for-byte unchanged in
+    /// this first vertical slice; it must not be used as a SID constructor.
+    #[doc(hidden)]
+    pub trait ProjectionSidInput {
+        #[doc(hidden)]
+        fn into_projection_sid(self) -> super::Sid8;
+    }
+
+    impl ProjectionSidInput for super::Sid8 {
+        fn into_projection_sid(self) -> super::Sid8 {
+            self
+        }
+    }
+
+    impl ProjectionSidInput for u8 {
+        fn into_projection_sid(self) -> super::Sid8 {
+            super::Sid8::from_packed_byte(self)
+        }
+    }
+
     /// Stable and compatibility-only spellings admitted for `semantic_id`,
     /// each tagged with which namespace (en/uk/sa/sym/...) it belongs to.
-    pub fn admitted_surfaces_for_semantic_id(semantic_id: u8) -> Vec<SurfaceRow> {
-        super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
-            .into_iter()
-            .map(|(namespace, name)| SurfaceRow { namespace, name })
-            .collect()
+    pub fn admitted_surfaces_for_semantic_id(
+        semantic_id: impl ProjectionSidInput,
+    ) -> Vec<SurfaceRow> {
+        super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(
+            semantic_id.into_projection_sid(),
+        )
+        .into_iter()
+        .map(|(namespace, name)| SurfaceRow { namespace, name })
+        .collect()
     }
 
     /// Повертає opaque semantic ID для stable або compatibility-only surface.
     /// Значення операції лишається у мовному контракті, не в цій проєкції.
-    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<u8> {
+    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sid8> {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
-    /// All admitted semantic identities from the Lisp-owned registry projection.
+    /// Legacy packed-byte export for external projection consumers.
+    ///
+    /// Runtime/source semantics use opaque `Sid8`; this function deliberately
+    /// preserves the pre-#1098 projection ABI so untouched observers do not
+    /// become semantic participants merely because the runtime identity type
+    /// changed.
     pub fn admitted_semantic_ids() -> Vec<u8> {
         super::semantic_registry::admitted_semantic_ids()
+            .into_iter()
+            .map(super::Sid8::packed_byte)
+            .collect()
     }
 
     /// Canonical 8-bit textual serialization for provenance/export.
-    pub fn semantic_id_bits(semantic_id: u8) -> String {
-        super::semantic_registry::semantic_id_bits(semantic_id)
+    pub fn semantic_id_bits(semantic_id: impl ProjectionSidInput) -> String {
+        super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())
     }
 }
 pub mod syntax;
@@ -66,6 +102,7 @@ mod value;
 pub use environment::{Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
+pub use sid::Sid8;
 
 pub use eval::exact_arity;
 pub use eval::parse_json;
@@ -95,8 +132,8 @@ pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
 /// The ordinary my-lisp bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
 
-/// Generated runtime projection of admitted surface spellings to opaque numeric
-/// semantic IDs. semantic-registry.lisp remains the only spelling authority.
+/// Generated runtime projection of admitted surface spellings to opaque Sid8
+/// identities. semantic-registry.lisp remains the only spelling authority.
 pub const META_SEMANTIC_REGISTRY_SOURCE: &str =
     include_str!("../../../lib/generated/meta-semantic-registry.lisp");
 
@@ -198,15 +235,15 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     }
 
     // The semantic registry is the only surface/SID authority. If a stable
-    // identity has no implementation binding yet, expose the identity itself
-    // as an opaque SemanticRef so the admitted surface remains discoverable
-    // without inventing a second table or pretending the implementation exists.
+    // identity has no implementation binding yet, expose the Sid8 identity
+    // itself so the admitted surface remains discoverable without inventing a
+    // second table or pretending the implementation exists.
     for semantic_id in semantic_registry::admitted_semantic_ids() {
         let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
 
         // Canonical special forms and evaluator-owned necessary forms are
         // routed by their dedicated syntax mechanisms, not as first-class
-        // SemanticRef values.
+        // SID values.
         if peers.iter().any(|peer| {
             eval::canon::identity_for_surface(peer).is_some()
                 || eval::necessary_forms::identity_for_symbol(peer).is_some()
@@ -217,7 +254,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         let value = values_by_semantic_id
             .get(&semantic_id)
             .cloned()
-            .unwrap_or(Value::SemanticRef(semantic_id));
+            .unwrap_or(Value::Sid(semantic_id));
 
         for peer in peers {
             if environment.get(peer).is_none() {
@@ -354,7 +391,7 @@ pub fn sha256_source(input: &[u8]) -> [u8; 32] {
     eval::digest_sha256(input)
 }
 pub use syntax::{Exactness, Expr, ExprKind, Span};
-pub use value::{Closure, NumericBuffer, Rational, Sid, Value};
+pub use value::{Closure, NumericBuffer, Rational, Value};
 
 /// Return a half-open, Unicode-scalar-indexed substring with clamped bounds.
 ///

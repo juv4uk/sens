@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr};
+use crate::{Environment, Exactness, Expr, Sid8};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -414,9 +414,6 @@ pub struct Builtin {
     pub func: BuiltinFunction,
 }
 
-/// Canonical semantic identity: exactly one byte.
-pub type Sid = u8;
-
 /// Immutable contiguous numeric storage for portable bulk-compute lowering.
 #[derive(Clone, Debug)]
 pub enum NumericBuffer {
@@ -455,15 +452,16 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sid),
+    Sid(Sid8),
     String(Rc<str>),
     Symbol(Rc<str>),
     Pair(Rc<Value>, Rc<Value>),
     Closure(Rc<Closure>),
     Macro(Rc<Closure>),
-    /// Opaque one-byte semantic identity as a first-class callable value.
-    /// The identity belongs to the language registry, not to a Rust object.
-    SemanticRef(u8),
+    /// Legacy-named semantic reference carrying the same opaque Sid8 identity.
+    /// Kept as a value variant while callers migrate; it no longer carries a
+    /// decimal/raw-byte semantic ID.
+    SemanticRef(Sid8),
     /// Legacy host implementation closure as a first-class value. This is an
     /// implementation projection, never the language identity key.
     Builtin(std::rc::Rc<Builtin>),
@@ -545,7 +543,7 @@ impl PartialEq for Value {
                 left.len() == right.len() && left.iter().zip(right.iter()).all(|(l, r)| l == r)
             }
             (Value::NumericBuffer(left), Value::NumericBuffer(right)) => left == right,
-            // Semantic references compare by language-owned numeric identity,
+            // Semantic references compare by the same language-owned Sid8 identity,
             // never by an implementation allocation or diagnostic spelling.
             (Value::SemanticRef(left), Value::SemanticRef(right)) => left == right,
             (
@@ -739,7 +737,7 @@ fn render(value: &Value, quote_strings: bool) -> String {
             }
         }
         Value::Rational(number) => number.to_string(),
-        Value::Sid(sid) => format!("{sid:08b}"),
+        Value::Sid(sid) => sid.to_string(),
         Value::String(text) => {
             if quote_strings {
                 let mut escaped = String::with_capacity(text.len() + 2);

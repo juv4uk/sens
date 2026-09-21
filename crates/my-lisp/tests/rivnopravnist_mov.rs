@@ -11,11 +11,15 @@ fn registry_ids() -> Vec<u8> {
     my_lisp::semantic_registry_export::admitted_semantic_ids()
 }
 
-fn registry_surfaces(id: u8) -> Vec<my_lisp::semantic_registry_export::SurfaceRow> {
+fn registry_surfaces(
+    id: impl my_lisp::semantic_registry_export::ProjectionSidInput,
+) -> Vec<my_lisp::semantic_registry_export::SurfaceRow> {
     my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(id)
 }
 
-fn registry_id_bits(id: u8) -> String {
+fn registry_id_bits(
+    id: impl my_lisp::semantic_registry_export::ProjectionSidInput,
+) -> String {
     my_lisp::semantic_registry_export::semantic_id_bits(id)
 }
 
@@ -38,7 +42,7 @@ fn семантичні_ідентифікатори_складаються_ті
         let bits = registry_id_bits(*id);
         assert!(
             bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')),
-            "byte SID {bits:?} порушує canonical semantic registry"
+            "SID {bits:?} порушує canonical semantic registry"
         );
         assert!(seen.insert(*id), "дубль ID {bits}");
     }
@@ -53,7 +57,7 @@ fn семантичні_ідентифікатори_складаються_ті
 #[test]
 fn кожна_тотожність_явно_описує_uk_en_sa_без_заборони_майбутніх_мов() {
     for id in registry_ids() {
-        if id == 0 {
+        if registry_id_bits(id) == "00000000" {
             continue;
         }
 
@@ -82,7 +86,7 @@ fn кожна_тотожність_явно_описує_uk_en_sa_без_заб�
 #[test]
 fn символічна_нотація_не_належить_людській_мові() {
     for id in registry_ids() {
-        if id == 0 {
+        if registry_id_bits(id) == "00000000" {
             continue;
         }
 
@@ -160,7 +164,7 @@ fn executable_authority_більше_не_читає_legacy_en_shaped_табли
 #[ignore = "фінальний gate: увімкнути після завершення UK/EN/SA parity"]
 fn повне_рівноправя_вимагає_наявності_для_всіх_людських_поверхонь() {
     for id in registry_ids() {
-        if id == 0 {
+        if registry_id_bits(id) == "00000000" {
             continue;
         }
 
