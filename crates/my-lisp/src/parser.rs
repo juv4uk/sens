@@ -392,10 +392,8 @@ impl Parser<'_> {
         // The historical `(binary 8)` declaration remains supported below
         // for compatibility/data files, including its named malformed-bit error.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            let mut sid = 0u8;
-            for bit in token.bytes() {
-                sid = (sid << 1) | (bit - b'0');
-            }
+            let sid = crate::Sid8::from_canonical_spelling(token)
+                .expect("exact eight-bit SID spelling validated above");
             return Ok(Expr {
                 kind: ExprKind::Sid(sid),
                 span: Span {
@@ -418,10 +416,8 @@ impl Parser<'_> {
                     ));
                 }
 
-                let mut sid = 0u8;
-                for bit in token.bytes() {
-                    sid = (sid << 1) | (bit - b'0');
-                }
+                let sid = crate::Sid8::from_canonical_spelling(token)
+                    .expect("fixed-width binary SID spelling validated above");
                 return Ok(Expr {
                     kind: ExprKind::Sid(sid),
                     span: Span {
