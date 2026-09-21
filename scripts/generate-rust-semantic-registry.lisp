@@ -63,9 +63,9 @@
 (def render-row
   (lambda (row)
     (str+
-      "    SemanticRow { semantic_id: crate::sid!("
+      "    SemanticRow { semantic_id: 0b"
       (write-to-string (car row))
-      "), surfaces: &["
+      ", surfaces: &["
       (render-surfaces (cdr row))
       "] },\n")))
 
