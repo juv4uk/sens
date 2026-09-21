@@ -10,12 +10,15 @@
       ((equal? left right) (structural-relation same) t)
       (t t ()))))
 
-(def reviewed-path?
-  (lambda (path rows)
+(def reviewed-source?
+  (lambda (path source rows)
     (cond
       ((atom rows) (structural-kind empty-list) ())
-      ((exact-text? path (second (car rows))) t t)
-      (t t (reviewed-path? path (cdr rows))))))
+      ((exact-text? path (second (car rows))) t
+       (cond
+         ((exact-text? (sha256-hex source) (third (car rows))) t t)
+         (t t (reviewed-source? path source (cdr rows)))))
+      (t t (reviewed-source? path source (cdr rows))))))
 
 (def contains-any?
   (lambda (source needles)
@@ -108,7 +111,7 @@
             (scan (cdr rows)))
            ((eq class (quote allowed-adversarial-fixture)) (identity-relation same)
             (scan (cdr rows)))
-           ((reviewed-path? path authority-reviews) t
+           ((reviewed-source? path source authority-reviews) t
             (scan (cdr rows)))
                 (t
                  (list (quote semantic-authority-violation)
