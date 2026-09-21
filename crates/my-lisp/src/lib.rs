@@ -38,7 +38,7 @@ pub mod semantic_registry_export {
 
     /// Stable and compatibility-only spellings admitted for `semantic_id`,
     /// each tagged with which namespace (en/uk/sa/sym/...) it belongs to.
-    pub fn admitted_surfaces_for_semantic_id(semantic_id: u8) -> Vec<SurfaceRow> {
+    pub fn admitted_surfaces_for_semantic_id(semantic_id: super::Sid8) -> Vec<SurfaceRow> {
         super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
             .into_iter()
             .map(|(namespace, name)| SurfaceRow { namespace, name })
@@ -47,17 +47,17 @@ pub mod semantic_registry_export {
 
     /// Повертає opaque semantic ID для stable або compatibility-only surface.
     /// Значення операції лишається у мовному контракті, не в цій проєкції.
-    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<u8> {
+    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sid8> {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
     /// All admitted semantic identities from the Lisp-owned registry projection.
-    pub fn admitted_semantic_ids() -> Vec<u8> {
+    pub fn admitted_semantic_ids() -> Vec<super::Sid8> {
         super::semantic_registry::admitted_semantic_ids()
     }
 
     /// Canonical 8-bit textual serialization for provenance/export.
-    pub fn semantic_id_bits(semantic_id: u8) -> String {
+    pub fn semantic_id_bits(semantic_id: super::Sid8) -> String {
         super::semantic_registry::semantic_id_bits(semantic_id)
     }
 }
@@ -97,8 +97,8 @@ pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
 /// The ordinary my-lisp bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
 
-/// Generated runtime projection of admitted surface spellings to opaque numeric
-/// semantic IDs. semantic-registry.lisp remains the only spelling authority.
+/// Generated runtime projection of admitted surface spellings to opaque Sid8
+/// identities. semantic-registry.lisp remains the only spelling authority.
 pub const META_SEMANTIC_REGISTRY_SOURCE: &str =
     include_str!("../../../lib/generated/meta-semantic-registry.lisp");
 
@@ -200,15 +200,15 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     }
 
     // The semantic registry is the only surface/SID authority. If a stable
-    // identity has no implementation binding yet, expose the identity itself
-    // as an opaque SemanticRef so the admitted surface remains discoverable
-    // without inventing a second table or pretending the implementation exists.
+    // identity has no implementation binding yet, expose the Sid8 identity
+    // itself so the admitted surface remains discoverable without inventing a
+    // second table or pretending the implementation exists.
     for semantic_id in semantic_registry::admitted_semantic_ids() {
         let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
 
         // Canonical special forms and evaluator-owned necessary forms are
         // routed by their dedicated syntax mechanisms, not as first-class
-        // SemanticRef values.
+        // SID values.
         if peers.iter().any(|peer| {
             eval::canon::identity_for_surface(peer).is_some()
                 || eval::necessary_forms::identity_for_symbol(peer).is_some()
@@ -219,7 +219,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         let value = values_by_semantic_id
             .get(&semantic_id)
             .cloned()
-            .unwrap_or(Value::SemanticRef(semantic_id));
+            .unwrap_or(Value::Sid(semantic_id));
 
         for peer in peers {
             if environment.get(peer).is_none() {
