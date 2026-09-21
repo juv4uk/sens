@@ -270,7 +270,7 @@ pub(crate) fn value(identity: CanonicalIdentity) -> Option<Value> {
         | CanonicalIdentity::Eq
         | CanonicalIdentity::Cons
         | CanonicalIdentity::Car
-        | CanonicalIdentity::Cdr => Some(Value::SemanticRef(semantic_id_for_identity(identity))),
+        | CanonicalIdentity::Cdr => Some(Value::Sid(semantic_id_for_identity(identity))),
         CanonicalIdentity::Quote | CanonicalIdentity::Cond => None,
     }
 }
@@ -310,7 +310,7 @@ mod tests {
         // to enumerate here -- read them from the registry so this test
         // keeps meaning "Canon routes every admitted surface for 0005 to
         // the same identity" even if the admitted spellings change.
-        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID);
+        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID.packed_byte());
         assert!(
             surfaces.len() >= 2,
             "0005 (car) should admit at least two surfaces for this invariant to be meaningful, \
@@ -331,20 +331,20 @@ mod tests {
             identity_for_semantic_id(CAR_SEMANTIC_ID),
             Some(CanonicalIdentity::Car)
         );
-        let human_surface = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID)
+        let human_surface = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID.packed_byte())
             .into_iter()
             .next()
             .expect("00000101 (car) should admit at least one human surface");
-        let direct = value(CanonicalIdentity::Car).expect("numeric Canon identity");
+        let direct = value(CanonicalIdentity::Car).expect("binary Canon identity");
         let human = value_for_surface(human_surface).expect("registry-admitted Canon surface");
-        assert_eq!(direct, Value::SemanticRef(CAR_SEMANTIC_ID));
-        assert_eq!(human, Value::SemanticRef(CAR_SEMANTIC_ID));
+        assert_eq!(direct, Value::Sid(CAR_SEMANTIC_ID));
+        assert_eq!(human, Value::Sid(CAR_SEMANTIC_ID));
         assert_eq!(direct, human);
     }
 
     #[test]
-    fn every_admitted_surface_for_one_semantic_id_materializes_one_semantic_reference() {
-        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID);
+    fn every_admitted_surface_for_one_semantic_id_materializes_one_sid8_value() {
+        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID.packed_byte());
         assert!(
             surfaces.len() >= 2,
             "0005 (car) should admit at least two surfaces for this invariant to be meaningful, \
@@ -354,8 +354,8 @@ mod tests {
         for surface in &surfaces {
             assert_eq!(
                 value_for_surface(surface),
-                Some(Value::SemanticRef(CAR_SEMANTIC_ID)),
-                "registry-admitted surface {surface:?} must materialize semantic identity 0005"
+                Some(Value::Sid(CAR_SEMANTIC_ID)),
+                "registry-admitted surface {surface:?} must materialize SID 00000101"
             );
         }
     }
