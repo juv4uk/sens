@@ -9,6 +9,7 @@ if [[ ! -f "$classifier" ]]; then
 fi
 
 positive_paths=(
+  tests/fixtures/binary-numeric-v1.lisp
   tests/fixtures/bare-sid-literal-v1.lisp
   tests/fixtures/canon-zero-v2.lisp
   tests/fixtures/control-dispatch-v1.lisp
