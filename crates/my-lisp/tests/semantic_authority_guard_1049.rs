@@ -9,13 +9,19 @@ fn semantic_authority_guard_is_lisp_owned() {
         .expect("#1049 enforcer must exist");
     let runner = fs::read_to_string(root.join("scripts/test-semantic-authority-guard.sh"))
         .expect("#1049 witness runner must exist");
+    let reviews = fs::read_to_string(root.join("tests/semantic-authority-reviews.lisp"))
+        .expect("explicit semantic-authority review manifest must exist");
     assert!(guard.contains("sid-to-meaning-authority"));
     assert!(guard.contains("surface-name-to-meaning-dispatch"));
     assert!(guard.contains("island-native-operator-to-sid"));
     assert!(guard.contains("isa-to-sid-authority"));
     assert!(guard.contains("host-fallback-meaning"));
     assert!(guard.contains("allowed-generated-projection"));
+    assert!(guard.contains("authority-reviews"));
+    assert!(guard.contains("reviewed-path?"));
     assert!(guard.contains("(read-file path)"));
+    assert!(reviews.contains("issue-1098"));
+    assert!(!reviews.contains("*"));
     assert!(enforcer.contains("semantic-authority-violation"));
     assert!(enforcer.contains("(car ())"));
     assert!(runner.contains("forbidden-sid-meaning.rs"));
