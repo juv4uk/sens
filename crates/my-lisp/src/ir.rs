@@ -258,10 +258,10 @@ fn lower_symbol_reference(name: &str, span: Span) -> IrNode {
         Provenance::NecessaryForm(NecessaryFormIdentity::Define)
     } else if let Some(identity) = necessary_forms::identity_for_symbol(name) {
         Provenance::NecessaryForm(identity)
-    } else if semantic_registry::semantic_id_for_surface(name) == Some(DEFMACRO_SEMANTIC_ID.packed_byte()) {
+    } else if semantic_registry::semantic_id_for_surface(name) == Some(DEFMACRO_SEMANTIC_ID) {
         Provenance::Defmacro
     } else if let Some(id) = semantic_registry::semantic_id_for_surface(name) {
-        Provenance::AdmittedSemanticIdentity(Sid8::from_packed_byte(id))
+        Provenance::AdmittedSemanticIdentity(id)
     } else {
         Provenance::OrdinaryBinding
     };
@@ -316,7 +316,7 @@ fn lower_list(items: &[Expr], span: Span) -> Result<IrNode, LoweringError> {
     if necessary_forms::identity_for_symbol(head_name) == Some(NecessaryFormIdentity::Lambda) {
         return lower_lambda(items, span);
     }
-    if semantic_registry::semantic_id_for_surface(head_name) == Some(DEFMACRO_SEMANTIC_ID.packed_byte()) {
+    if semantic_registry::semantic_id_for_surface(head_name) == Some(DEFMACRO_SEMANTIC_ID) {
         return lower_defmacro(items, span);
     }
 
