@@ -22,8 +22,17 @@ fn semantic_authority_guard_is_lisp_owned() {
     assert!(guard.contains("sha256-hex source"));
     assert!(guard.contains("(read-file path)"));
     assert!(reviews.contains("issue-1098"));
-    assert!(reviews.contains("64a") || reviews.contains("sha")); // manifest carries content digests
     assert!(!reviews.contains("*"));
+    for line in reviews.lines().filter(|line| line.starts_with("(review ")) {
+        let quoted = line.split('"').collect::<Vec<_>>();
+        assert!(quoted.len() >= 4, "review row must carry quoted path and digest: {line}");
+        let digest = quoted[3];
+        assert_eq!(digest.len(), 64, "review digest must be full SHA-256: {line}");
+        assert!(
+            digest.bytes().all(|byte| byte.is_ascii_hexdigit()),
+            "review digest must be hexadecimal: {line}"
+        );
+    }
     assert!(enforcer.contains("semantic-authority-violation"));
     assert!(enforcer.contains("(car ())"));
     assert!(runner.contains("forbidden-sid-meaning.rs"));
