@@ -31,6 +31,11 @@ use crate::value::{Rational, Sid};
 /// already names this identity independently.
 const DEFMACRO_SEMANTIC_ID: SemanticId = 0b00001010;
 
+/// Lambda SID 00001000 and Define SIDs 00001001/00001011 (def compat)
+const LAMBDA_SEMANTIC_ID: SemanticId = 0b00001000;
+const DEFINE_SEMANTIC_ID: SemanticId = 0b00001001;
+const DEF_COMPAT_SEMANTIC_ID: SemanticId = 0b00001011;
+
 /// `def` is a compatibility-only spelling for the same Define meaning as
 /// `define`/`визначити` (SID 00001001), under its own byte SID 00001011 in
 /// `lib/surface/semantic-registry.wsm`. `necessary_forms::identity_for_symbol`
@@ -201,6 +206,13 @@ fn symbol_text(expr: &Expr) -> Option<&str> {
     }
 }
 
+fn sid_of_head(expr: &Expr) -> Option<u8> {
+    match &expr.kind {
+        ExprKind::Sid(sid) => Some(*sid),
+        _ => None,
+    }
+}
+
 /// Lower one parsed expression into IR. The only entry point this module
 /// exposes for turning source into data.
 pub fn lower(expr: &Expr) -> Result<IrNode, LoweringError> {
@@ -271,6 +283,20 @@ fn lower_list(items: &[Expr], span: Span) -> Result<IrNode, LoweringError> {
             provenance: Provenance::Canon(CanonicalIdentity::EmptyList),
         });
     };
+    // Check for bare SID token as head (e.g. 00001000 for lambda, 00001001 for define)
+    if let Some(head_sid) = sid_of_head(head) {
+        if head_sid == LAMBDA_SEMANTIC_ID {
+            return lower_lambda(items, span);
+        }
+        if head_sid == DEFINE_SEMANTIC_ID || head_sid == DEF_COMPAT_SEMANTIC_ID {
+            return lower_define(items, span);
+        }
+        if head_sid == DEFMACRO_SEMANTIC_ID {
+            return lower_defmacro(items, span);
+        }
+        // Other SIDs are ordinary applications (e.g. +, car, etc.)
+        return lower_ordinary_application(head, &items[1..], span);
+    }
     let Some(head_name) = symbol_text(head) else {
         // A non-symbol operator (e.g. `((lambda (x) x) 1)`) is an ordinary
         // application of a computed callee -- valid, just not a named form.
@@ -330,7 +356,7 @@ fn lower_canon_form(
 
 /// Only `quote` and `cond` are Canon identities that are ALSO
 /// special-form-shaped; atom/eq/cons/car/cdr are ordinary callable Canon
-/// values. Exhaustive over `CanonicalIdentity` so a future 8th Canon
+/// values. Exhaustive over `CanonicalIdentity` so a future Canon
 /// identity forces a decision here, not a silent default.
 fn classify_syntax_id_for_canon(identity: CanonicalIdentity) -> Option<KnownSyntaxId> {
     match identity {

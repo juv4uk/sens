@@ -4,6 +4,10 @@
 //! spellings live in `lib/surface/semantic-registry.wsm` and are projected to
 //! opaque numeric IDs by the shared registry module. This module owns only the
 //! finite mapping from those IDs to canonical evaluator meaning, plus Canon 0.
+//!
+//! Primitive dispatch is a direct u8-indexed function table. Each SemanticId
+//! (0..255) either has a callable primitive or not. Special forms (quote, cond,
+//! lambda, define, defmacro, def) are handled before this table in evaluate_list.
 
 use super::special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Span, Value};
@@ -161,6 +165,47 @@ fn exact_args(
     ))
 }
 
+/// Primitive function signature: pre-evaluated args + env + span -> Value.
+type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageError>;
+
+/// Direct u8-indexed primitive table. SemanticId -> callable or None.
+/// Special forms (quote, cond, lambda, define, defmacro, def) are NOT in this table;
+/// they are handled in evaluate_list before reaching here.
+const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
+    let mut table: [Option<PrimitiveFn>; 256] = [None; 256];
+    table[ATOM_SEMANTIC_ID as usize] = Some(prim_atom);
+    table[EQ_SEMANTIC_ID as usize] = Some(prim_eq);
+    table[CONS_SEMANTIC_ID as usize] = Some(prim_cons);
+    table[CAR_SEMANTIC_ID as usize] = Some(prim_car);
+    table[CDR_SEMANTIC_ID as usize] = Some(prim_cdr);
+    table
+};
+
+fn prim_atom(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("atom", args, 1, span)?;
+    Ok(atom_value(&args[0]))
+}
+
+fn prim_eq(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("eq", args, 2, span)?;
+    eq_values(args[0].clone(), args[1].clone(), span)
+}
+
+fn prim_cons(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("cons", args, 2, span)?;
+    cons_values(args[0].clone(), args[1].clone(), env, span)
+}
+
+fn prim_car(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("car", args, 1, span)?;
+    car_value(&args[0], span)
+}
+
+fn prim_cdr(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    exact_args("cdr", args, 1, span)?;
+    cdr_value(&args[0], span)
+}
+
 /// Invoke the current implementation projection for a semantic callable.
 ///
 /// The semantic ID is the language identity. This function is only the
@@ -172,43 +217,14 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let Some(identity) = identity_for_semantic_id(semantic_id) else {
+    let Some(primitive) = PRIMITIVE_TABLE.get(semantic_id as usize).and_then(|f| *f) else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             format!("unknown semantic callable SID: {}", semantic_registry::semantic_id_bits(semantic_id)),
             span,
         ));
     };
-
-    match identity {
-        CanonicalIdentity::Atom => {
-            exact_args("PRIM_ATOM", args, 1, span)?;
-            Ok(atom_value(&args[0]))
-        }
-        CanonicalIdentity::Eq => {
-            exact_args("PRIM_EQ", args, 2, span)?;
-            eq_values(args[0].clone(), args[1].clone(), span)
-        }
-        CanonicalIdentity::Cons => {
-            exact_args("PRIM_CONS", args, 2, span)?;
-            cons_values(args[0].clone(), args[1].clone(), environment, span)
-        }
-        CanonicalIdentity::Car => {
-            exact_args("PRIM_CAR", args, 1, span)?;
-            car_value(&args[0], span)
-        }
-        CanonicalIdentity::Cdr => {
-            exact_args("PRIM_CDR", args, 1, span)?;
-            cdr_value(&args[0], span)
-        }
-        CanonicalIdentity::EmptyList | CanonicalIdentity::Quote | CanonicalIdentity::Cond => {
-            Err(LanguageError::new(
-                ErrorKind::Type,
-                format!("semantic identity is not a callable value: {}", semantic_registry::semantic_id_bits(semantic_id)),
-                span,
-            ))
-        }
-    }
+    primitive(args, environment, span)
 }
 
 /// Return the first-class semantic value for a canonical identity. Special

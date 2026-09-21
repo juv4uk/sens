@@ -123,9 +123,20 @@
     (not (equal? word (quote ())))))
 
 ; --- formal identity stub: first present name among en/ук/sa, else bare id ---
+; format as 8-bit binary string: 12 -> "00001100"
+; using quotient/mod since no bitwise ops in core
+(def sid-to-binary
+  (lambda (n bits acc)
+    (cond
+      ((eq bits 0) acc)
+      (t (sid-to-binary
+          (quotient n 2)
+          (- bits 1)
+          (string-append (number->string (mod n 2)) acc))))))
+
 (def sid-text
   (lambda (sid)
-    (write-to-string sid)))
+    (sid-to-binary sid 8 "")))
 
 (def formal-stub
   (lambda (sid surfaces)
