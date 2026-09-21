@@ -96,6 +96,12 @@
            (collect-free-vars body (append param-names bound-vars)))))
       ((equal? (car ast) (quote let))
        (cond
+         ((atom (cdr ast))
+          ; Structural cdr-walks can legitimately expose a tail shaped as
+          ; (let), for example while visiting quoted AST-construction data.
+          ; That tail is not a let form and has no binding slots to destructure.
+          (append (collect-free-vars (car ast) bound-vars)
+                  (collect-free-vars (cdr ast) bound-vars)))
          ((symbol? (car (cdr ast)))
           ; Named let
           (let ((name (symbol->string (car (cdr ast))))
