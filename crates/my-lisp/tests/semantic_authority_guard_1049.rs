@@ -21,6 +21,14 @@ fn semantic_authority_guard_is_lisp_owned() {
     assert!(guard.contains("authority-reviews"));
     assert!(guard.contains("reviewed-source?"));
     assert!(guard.contains("sha256-hex source"));
+    let review_pos = guard.find("((reviewed-source? path source authority-reviews)")
+        .expect("content-addressed review fast path must exist");
+    let classify_pos = guard.find("(let ((class (violation-class path source)))")
+        .expect("structural classifier fallback must exist");
+    assert!(
+        review_pos < classify_pos,
+        "exact reviewed content must short-circuit before expensive structural classification"
+    );
     assert!(guard.contains("(read-file path)"));
     assert!(reviews.contains("issue-1098"));
     assert!(!reviews.contains("*"));
