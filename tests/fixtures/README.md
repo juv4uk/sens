@@ -14,7 +14,7 @@ One flat alist per fixture, one fixture per top-level form (read via `read-all`,
 
 **Success fixture** — `((expr . "...") (expected . "...") ...)`. `expr` is my-lisp source (a string); `expected` is the exact string `Display`-formatting of the resulting value would produce (`t` for true, `()` for nil/false, `(a b c)` for lists, `5/336` for a reduced rational, etc — see the `Display` impl for `Value` in `crates/my-lisp/src/value.rs` for the exact grammar). String comparison is intentional: an implementation only needs to match *observable printed output*, not any particular internal representation.
 
-**Error fixture** — `((expr . "...") (error . "...") ...)`. `expr` must fail to evaluate; `error` is one of the eight `ErrorKind` variant names — `Parse`, `UnknownSymbol`, `Arity`, `Type`, `InvalidForm`, `NumericOverflow`, `OutOfMemory`, `DivisionByZero` (see `docs/language-core.md` and `crates/my-lisp/src/error.rs`). This checks the *kind* of failure, not the message text — the *category* of failure is the contract.
+**Error fixture** — `((expr . "...") (error . "...") ...)`. `expr` must fail to evaluate; `error` must be one of the current language-owned category names in [`contracts/error-kind-vocabulary.lisp`](../../contracts/error-kind-vocabulary.lisp). This checks the *kind* of failure, not the message text — the *category* of failure is the contract.
 
 ### Rules an implementation must follow to be conformant
 
@@ -39,7 +39,7 @@ One flat alist per fixture, one fixture per top-level form (read via `read-all`,
 
 **Фікстура успіху** — `((expr . "...") (expected . "...") ...)`. `expr` — код my-lisp (рядок); `expected` — точний рядок, який видасть `Display`-форматування результату (`t` для істини, `()` для nil/хиби, `(a b c)` для списків, `5/336` для скороченого раціонального — точну граматику див. у `Display`-реалізації `Value` в `crates/my-lisp/src/value.rs`). Порівняння рядків навмисне: реалізація має збігатись лише за *спостережуваним друкованим виводом*, не за якимось конкретним внутрішнім представленням.
 
-**Фікстура помилки** — `((expr . "...") (error . "...") ...)`. `expr` має провалитись при обчисленні; `error` — одна з восьми назв `ErrorKind`: `Parse`, `UnknownSymbol`, `Arity`, `Type`, `InvalidForm`, `NumericOverflow`, `OutOfMemory`, `DivisionByZero`. Перевіряється вид провалу, а не текст; контрактом є саме категорія.
+**Фікстура помилки** — `((expr . "...") (error . "...") ...)`. `expr` має провалитись при обчисленні; `error` має бути однією з поточних language-owned назв категорій у [`contracts/error-kind-vocabulary.lisp`](../../contracts/error-kind-vocabulary.lisp). Перевіряється вид провалу, а не текст; контрактом є саме категорія.
 
 ### Правила, яких має дотримуватись реалізація для конформності
 
@@ -64,7 +64,7 @@ Eine flache Assoziationsliste pro Fixture, eine Fixture pro Top-Level-Form (gele
 
 **Erfolgs-Fixture** — `((expr . "...") (expected . "...") ...)`. `expr` ist my-lisp-Quellcode (ein String); `expected` ist genau der String, den die `Display`-Formatierung des resultierenden Werts erzeugen würde (`t` für wahr, `()` für nil/falsch, `(a b c)` für Listen, `5/336` für ein gekürztes Rational usw. — die genaue Grammatik siehe die `Display`-Implementierung von `Value` in `crates/my-lisp/src/value.rs`). Der String-Vergleich ist beabsichtigt: eine Implementierung muss nur der *beobachtbaren gedruckten Ausgabe* entsprechen, keiner bestimmten internen Repräsentation.
 
-**Fehler-Fixture** — `((expr . "...") (error . "...") ...)`. `expr` muss fehlschlagen; `error` ist einer von acht `ErrorKind`-Namen: `Parse`, `UnknownSymbol`, `Arity`, `Type`, `InvalidForm`, `NumericOverflow`, `OutOfMemory`, `DivisionByZero`. Geprüft wird die Fehlerkategorie, nicht der Meldungstext.
+**Fehler-Fixture** — `((expr . "...") (error . "...") ...)`. `expr` muss fehlschlagen; `error` muss einer der aktuellen sprach-eigenen Kategorienamen in [`contracts/error-kind-vocabulary.lisp`](../../contracts/error-kind-vocabulary.lisp) sein. Geprüft wird die Fehlerkategorie, nicht der Meldungstext.
 
 ### Regeln, die eine Implementierung für Konformität einhalten muss
 
