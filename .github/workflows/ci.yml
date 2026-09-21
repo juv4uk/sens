@@ -68,6 +68,11 @@ jobs:
         shell: bash
         run: bash scripts/rust-one-way-valve.sh "$BASE_SHA" "$HEAD_SHA"
 
+      - name: SID exact-binary identity guard
+        if: steps.changes.outputs.rust == 'true'
+        shell: bash
+        run: bash scripts/sid-binary-identity-guard.sh
+
       - name: Debug post-core definition data shape for #771
         shell: bash
         run: |
