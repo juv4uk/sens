@@ -4,7 +4,8 @@
 //! Lisp owns the SID-to-operation mapping in `lib/evaluator-dispatch.lisp`.
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
-use crate::semantic_registry::{self, SemanticId};
+use crate::semantic_registry;
+use crate::Sid8;
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -16,10 +17,10 @@ pub(crate) enum NecessaryFormIdentity {
     Lambda,
 }
 
-pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<NecessaryFormIdentity> {
+pub(crate) fn identity_for_semantic_id(semantic_id: Sid8) -> Option<NecessaryFormIdentity> {
     generated::NECESSARY_FORM_DISPATCH
         .iter()
-        .find(|row| row.semantic_id == semantic_id)
+        .find(|row| row.semantic_id == semantic_id.packed_byte())
         .map(|row| match row.mechanism {
             generated::NecessaryFormMechanism::Define => NecessaryFormIdentity::Define,
             generated::NecessaryFormMechanism::Lambda => NecessaryFormIdentity::Lambda,
@@ -27,7 +28,7 @@ pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<Necess
 }
 
 /// Resolve an executable list-head symbol through the shared authority
-/// registry, then select the evaluator mechanism by numeric semantic ID.
+/// registry, then select the evaluator mechanism by exact SID identity.
 /// Uses the admitted (stable OR compatibility-only) surface index, not the
 /// stable-only one `canon.rs`/tooling use elsewhere: `def`'s row is
 /// compatibility-only, and dispatch must still see it as Define through
@@ -35,7 +36,9 @@ pub(crate) fn identity_for_semantic_id(semantic_id: SemanticId) -> Option<Necess
 /// (previously duplicated in both `eval/mod.rs` and `ir.rs` for exactly
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
-    semantic_registry::admitted_semantic_id_for_surface(name).and_then(identity_for_semantic_id)
+    semantic_registry::admitted_semantic_id_for_surface(name)
+        .map(Sid8::from_packed_byte)
+        .and_then(identity_for_semantic_id)
 }
 
 #[cfg(test)]
@@ -50,8 +53,8 @@ mod tests {
             .expect("define must have one admitted semantic identity");
         let lambda_id = semantic_registry::admitted_semantic_id_for_surface("lambda")
             .expect("lambda must have one admitted semantic identity");
-        assert_eq!(identity_for_semantic_id(define_id), Some(NecessaryFormIdentity::Define));
-        assert_eq!(identity_for_semantic_id(lambda_id), Some(NecessaryFormIdentity::Lambda));
+        assert_eq!(identity_for_semantic_id(Sid8::from_packed_byte(define_id)), Some(NecessaryFormIdentity::Define));
+        assert_eq!(identity_for_semantic_id(Sid8::from_packed_byte(lambda_id)), Some(NecessaryFormIdentity::Lambda));
     }
 
     #[test]
@@ -97,7 +100,7 @@ mod tests {
             Some(def_id)
         );
         assert_eq!(
-            identity_for_semantic_id(def_id),
+            identity_for_semantic_id(Sid8::from_packed_byte(def_id)),
             Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(identity_for_symbol("def"), Some(NecessaryFormIdentity::Define));
@@ -111,33 +114,33 @@ mod tests {
     }
 
     #[test]
-    fn semantic_ids_control_necessary_form_routing() {
+    fn exact_sid_identities_control_necessary_form_routing() {
         assert_eq!(
-            identity_for_semantic_id(
+            identity_for_semantic_id(Sid8::from_packed_byte(
                 semantic_registry::admitted_semantic_id_for_surface("lambda")
                     .expect("lambda semantic identity")
-            ),
+            )),
             Some(NecessaryFormIdentity::Lambda)
         );
         assert_eq!(
-            identity_for_semantic_id(
+            identity_for_semantic_id(Sid8::from_packed_byte(
                 semantic_registry::admitted_semantic_id_for_surface("define")
                     .expect("define semantic identity")
-            ),
+            )),
             Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(
-            identity_for_semantic_id(
+            identity_for_semantic_id(Sid8::from_packed_byte(
                 semantic_registry::admitted_semantic_id_for_surface("def")
                     .expect("def compatibility semantic identity")
-            ),
+            )),
             Some(NecessaryFormIdentity::Define)
         );
     }
 
     #[test]
     fn unrelated_registry_rows_do_not_gain_necessary_form_meaning() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(12));
+        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(crate::sid!(00001100).packed_byte()));
         assert_eq!(identity_for_symbol("+"), None);
     }
 }
