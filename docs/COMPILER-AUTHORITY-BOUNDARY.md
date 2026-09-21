@@ -23,17 +23,16 @@ because they are meaning, not implementation:
    distinction (`Exactness`), and exact-rational normalization (never
    silently coerced to float — this repo's own standing rule, see
    `docs/cyberpunk-numeric-representation.md`).
-2. **Error kind, where currently contractual.** The finite `ErrorKind`
-   enum (`crates/my-lisp/src/error.rs`: `Parse`, `UnknownSymbol`,
-   `Arity`, `Type`, `InvalidForm`, `UnsatisfiedConditional`,
-   `MechanismUnavailable`, `OutOfMemory`, `NumericOverflow`,
-   `DivisionByZero` — 10 variants, deliberately admitted) is
-   the *entire* admitted vocabulary. A compiler backend may use its own
-   internal error representation, but whatever it *observably*
-   surfaces for a given program must map onto one of these categories
-   — never a new one invented by the compiler (this is exactly the
-   `NotCallable`-vs-`Type` question already resolved for cml: internal
-   naming is free, external observation must match the authority).
+2. **Error kind, where currently contractual.** The current admitted
+   vocabulary is language-owned data in
+   [`contracts/error-kind-vocabulary.lisp`](../contracts/error-kind-vocabulary.lisp).
+   `crates/my-lisp/src/error.rs` is an implementation of that vocabulary,
+   not its authority. A compiler backend may use its own internal error
+   representation, but whatever it *observably* surfaces for a given program
+   must map onto one of the admitted categories — never a new one invented by
+   the compiler (this is exactly the `NotCallable`-vs-`Type` question
+   already resolved for cml: internal naming is free, external observation
+   must match the language-owned vocabulary).
 3. **Error detail, only where ADR-011 already ratifies it as
    contractual.** Per `docs/adr/ADR-011-ERROR-DETAIL-CONTRACT-BOUNDARY.md`,
    message text/span are diagnostic, not contractual, unless a future
@@ -162,15 +161,13 @@ weaker than one that can fail when a *future* change tries to smuggle
 in a new semantic identity. The concrete, minimal gate landing with
 this doc:
 
-`crates/my-lisp/tests/error_kind_vocabulary_is_closed.rs` — pins the
-exhaustive list of `ErrorKind` variant names via Rust's own exhaustive
-`match` (compile error, not a runtime check, if a variant is added or
-removed without updating the pinned list) plus a runtime assertion
-that the pinned list's `Debug` names match reality. This makes
-"introduce another error category" a change that must touch this test
-file explicitly — it cannot land silently as a side effect of
-unrelated compiler work in this or another repo that merely imports
-`ErrorKind`.
+`crates/my-lisp/tests/error_kind_vocabulary_is_closed.rs` keeps an
+exhaustive Rust `match` so implementation coverage still fails to compile
+when a variant is added or removed, but its **expected names are loaded from
+`contracts/error-kind-vocabulary.lisp`**. This makes Rust an observer rather
+than the vocabulary owner: a language-level admission must first change the
+Lisp-owned ledger/provenance, after which implementation consumers are updated
+to match it.
 
 This is deliberately narrow — it enforces closure of the *error-kind*
 vocabulary specifically, the piece of "admitted registry" a compiler
