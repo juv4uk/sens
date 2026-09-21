@@ -404,18 +404,17 @@ impl Parser<'_> {
         }
 
         if let Some(width) = self.binary_width {
-            let all_digits = token.bytes().all(|byte| byte.is_ascii_digit());
-            let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
-
-            if all_binary {
-                if token.len() != usize::from(width) {
+            if token.bytes().all(|byte| byte.is_ascii_digit())
+                && token.len() == usize::from(width)
+            {
+                let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
+                if !all_binary {
                     return Err(self.error(
-                        "binary literal has the wrong width",
+                        "binary literal contains a non-binary digit",
                         start,
                         self.cursor,
                     ));
                 }
-
                 let sid = crate::Sid8::from_canonical_spelling(token)
                     .expect("fixed-width binary SID spelling validated above");
                 return Ok(Expr {
@@ -425,14 +424,6 @@ impl Parser<'_> {
                         end: self.cursor,
                     },
                 });
-            }
-
-            if all_digits && token.len() == usize::from(width) {
-                return Err(self.error(
-                    "binary literal contains a non-binary digit",
-                    start,
-                    self.cursor,
-                ));
             }
         }
 

@@ -65,12 +65,15 @@ fn primitive_budget_audit_has_no_decimal_identity_shadow() {
 
 
 #[test]
-fn binary_reader_rejects_wrong_width_with_named_error() {
-    let error = my_lisp::parse("(binary 8) 000101")
-        .expect_err("6-bit literal must fail under an 8-bit binary descriptor");
-    assert!(
-        error.to_string().contains("binary literal has the wrong width"),
-        "wrong-width binary input must retain its named reader error: {error}"
+fn shorter_bit_only_spelling_remains_ordinary_numeric_data() {
+    let mut session = Session::default();
+    let rendered = eval_program("000101", &mut session)
+        .expect("shorter bit-only spelling must remain under ordinary numeric rules")
+        .value
+        .to_string();
+    assert_eq!(
+        rendered, "101",
+        "only exact eight-bit bare 0/1 spellings are reserved as SID identity"
     );
 }
 
