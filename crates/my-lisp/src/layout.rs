@@ -49,8 +49,10 @@ impl NanBox {
                 let payload = (i as u32) & 0x0FFF_FFFF;
                 NanBox(MASK_QNAN | (TAG_FIXNUM << 28) | (payload as u64))
             }
+            // A SID has one portable transport tag regardless of whether the
+            // surrounding evaluator later attempts to invoke it.
             Value::Sid(sid) => {
-                NanBox(MASK_QNAN | (12 << 28) | u64::from(sid.packed_byte()))
+                NanBox(MASK_QNAN | (TAG_PRIMITIVE << 28) | u64::from(sid.packed_byte()))
             }
             Value::Rational(r) => {
                 let ptr = r as *const Rational as u64;
@@ -78,11 +80,6 @@ impl NanBox {
             Value::Macro(m) => {
                 let ptr = Rc::as_ptr(m) as u64;
                 NanBox(Self::pack_ptr(TAG_MACRO, ptr))
-            }
-            // Portable primitive identity is the Sid8 itself; the packed byte below is
-            // only the NaN-box transport payload, never the semantic name.
-            Value::SemanticRef(semantic_id) => {
-                NanBox(MASK_QNAN | (TAG_PRIMITIVE << 28) | u64::from(semantic_id.packed_byte()))
             }
             // Legacy non-Canon host builtins remain representable, but their
             // address is explicitly tagged as host mechanism, never primitive identity.
@@ -120,9 +117,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn semantic_ref_nanbox_payload_is_only_the_packed_sid8_transport() {
-        let NanBox(bits) = NanBox::from_value(&Value::SemanticRef(crate::sid!(00000101)));
+    fn sid_nanbox_payload_is_only_the_packed_sid8_transport() {
+        let NanBox(bits) = NanBox::from_value(&Value::Sid(crate::sid!(00000101)));
         assert_eq!((bits >> 28) & 0xF, TAG_PRIMITIVE);
         assert_eq!(bits & 0x0FFF_FFFF, 5);
+    }
+
+    #[test]
+    fn sid_and_vector_use_distinct_nanbox_tags() {
+        let NanBox(sid_bits) = NanBox::from_value(&Value::Sid(crate::sid!(00000101)));
+        let NanBox(vector_bits) = NanBox::from_value(&Value::vector([Value::Number(
+            1.0,
+            Exactness::Exact,
+        )]));
+
+        assert_eq!((sid_bits >> 28) & 0xF, TAG_PRIMITIVE);
+        assert_eq!((vector_bits >> 28) & 0xF, 12);
+        assert_ne!((sid_bits >> 28) & 0xF, (vector_bits >> 28) & 0xF);
     }
 }
