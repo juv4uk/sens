@@ -77,14 +77,11 @@
 
 (def join-rows
   (lambda (rows)
-    (cond
-      ((atom rows) "")
-      ((atom (cdr rows))
-       (render-row (car rows)))
-      (t
-       (str+
-         (render-row (car rows))
-         (join-rows (cdr rows)))))))
+    (reduce
+      (lambda (acc row)
+        (string-append acc (render-row row)))
+      ""
+      rows)))
 
 (def render-projection
   (lambda (rows)
