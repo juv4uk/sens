@@ -18,9 +18,11 @@ fn semantic_authority_guard_is_lisp_owned() {
     assert!(guard.contains("host-fallback-meaning"));
     assert!(guard.contains("allowed-generated-projection"));
     assert!(guard.contains("authority-reviews"));
-    assert!(guard.contains("reviewed-path?"));
+    assert!(guard.contains("reviewed-source?"));
+    assert!(guard.contains("sha256-hex source"));
     assert!(guard.contains("(read-file path)"));
     assert!(reviews.contains("issue-1098"));
+    assert!(reviews.contains("64a") || reviews.contains("sha")); // manifest carries content digests
     assert!(!reviews.contains("*"));
     assert!(enforcer.contains("semantic-authority-violation"));
     assert!(enforcer.contains("(car ())"));
