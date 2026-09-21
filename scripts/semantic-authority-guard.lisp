@@ -1,6 +1,22 @@
 (def changed
   (read-all (read-file "tests/semantic-authority-changes.lisp")))
 
+(def authority-reviews
+  (read-all (read-file "tests/semantic-authority-reviews.lisp")))
+
+(def exact-text?
+  (lambda (left right)
+    (cond
+      ((equal? left right) (structural-relation same) t)
+      (t t ()))))
+
+(def reviewed-path?
+  (lambda (path rows)
+    (cond
+      ((atom rows) (structural-kind empty-list) ())
+      ((exact-text? path (second (car rows))) t t)
+      (t t (reviewed-path? path (cdr rows))))))
+
 (def contains-any?
   (lambda (source needles)
     (cond
@@ -91,6 +107,8 @@
            ((eq class (quote allowed-generated-projection)) (identity-relation same)
             (scan (cdr rows)))
            ((eq class (quote allowed-adversarial-fixture)) (identity-relation same)
+            (scan (cdr rows)))
+           ((reviewed-path? path authority-reviews) t
             (scan (cdr rows)))
                 (t
                  (list (quote semantic-authority-violation)
