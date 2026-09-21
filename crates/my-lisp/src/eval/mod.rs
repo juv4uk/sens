@@ -316,9 +316,8 @@ mod single_pass_eval_tests {
     }
 
     #[test]
-    fn binary_sids_dispatch_canon_and_necessary_forms_in_list_head() {
+    fn bare_binary_sids_dispatch_canon_and_necessary_forms_in_list_head() {
         let source = r#"
-            (binary 8)
             (00001001 make-pair
               (00001000 (left right)
                 (00000100 left (00000100 right ()))))
@@ -326,8 +325,22 @@ mod single_pass_eval_tests {
         "#;
         let mut session = Session::default();
         let result = eval_program(source, &mut session)
-            .expect("8-bit SID list heads should execute their registered meaning");
+            .expect("bare 8-bit SID list heads should execute their registered meaning");
         assert_eq!(result.value.to_string(), "1");
+    }
+
+    #[test]
+    fn bare_arithmetic_sid_invokes_the_same_canon_function_identity_as_surface_name() {
+        let mut sid_session = Session::default();
+        let sid = eval_program("(00001100 2 3)", &mut sid_session)
+            .expect("SID 00001100 should invoke the admitted + meaning");
+
+        let mut surface_session = Session::default();
+        let surface = eval_program("(+ 2 3)", &mut surface_session)
+            .expect("surface + should invoke the same admitted meaning");
+
+        assert_eq!(sid.value.to_string(), "5");
+        assert_eq!(sid.value, surface.value);
     }
 
     #[test]
