@@ -120,11 +120,20 @@ jobs:
           printf '%s\n' "$actual"
           test "$actual" = '(var FOO)'
 
-
       - name: Execute Core1 S3 compiler prelude through S0/Core1
         shell: bash
         run: |
           set -euo pipefail
+
+          contract="contracts/core1-s3-compiler-prelude.lisp"
+          grep -F '(profile . core1)' "$contract"
+          grep -F '(sid . 00100001)' "$contract"
+          grep -F '(core1-result-domain . historical-t-nil)' "$contract"
+          grep -F '(cml-hidden-not-primitive . forbidden)' "$contract"
+          grep -F '(semantic-evaluator-fallback . forbidden)' "$contract"
+
+          printf 'Core1 S3 prelude SHA-256: '
+          sha256sum lib/core1-compiler-prelude.lisp | cut -d' ' -f1
 
           {
             printf '%s\n' '(C1-EVAL-PROGRAM-THEN'
