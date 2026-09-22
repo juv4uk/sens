@@ -42,19 +42,13 @@
    (unsupported-form-policy . fail-closed))
 
   ((identity . s0-surface-boundary)
-   (kind . bootstrap-spelling-projection)
+   (kind . sid-owned-historical-mechanism-projection)
    (semantic-alias-claim . forbidden-without-witness)
-   (observed-related-current-identities .
-     ((QUOTE 00000001 spelling-correspondence-only)
-      (ATOM 00000010 semantic-equivalence-not-claimed)
-      (EQ 00000011 semantic-equivalence-not-claimed)
-      (COND 00000111 semantic-equivalence-not-claimed)
-      (CAR 00000101 semantic-equivalence-not-claimed)
-      (CDR 00000110 semantic-equivalence-not-claimed)
-      (CONS 00000100 semantic-equivalence-not-claimed)
-      (LAMBDA 00001000 semantic-equivalence-not-claimed)
-      (DEFINE 00001001 semantic-equivalence-not-claimed)))
-   (seed-only-mechanisms . (LABEL T NIL)))
+   (sid-mechanism-map . "contracts/core1-historical-sid-map.lisp")
+   (identity-source . semantic-registry-sid)
+   (historical-name-authority . no)
+   (projection-must-be-explicit . yes)
+   (seed-only-mechanisms . (LABEL apply appq evcon evlis FUNCTION FUNARG T)))
 
   ((identity . historical-root)
    (mccarthy-1960-mechanisms-consumed .
