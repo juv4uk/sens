@@ -71,13 +71,20 @@
                 (t 1 (quote ())))))
            (t 1 (quote ())))))))
 
+(def pd-distribution-labels
+  (lambda (distribution)
+    (cond
+      ((atom distribution) 1 (quote ()))
+      (t (cons (car (car distribution))
+               (pd-distribution-labels (cdr distribution)))))))
+
 (def pd-all-options-present?
   (lambda (options distribution)
     (cond
       ((atom options) 1 t)
       (t
        (cond
-         ((pd-member? (car options) (map car distribution)) 1
+         ((pd-member? (car options) (pd-distribution-labels distribution)) 1
           (pd-all-options-present? (cdr options) distribution))
          (t 1 (quote ())))))))
 
