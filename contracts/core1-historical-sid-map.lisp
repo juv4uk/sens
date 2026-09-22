@@ -1,21 +1,24 @@
 ; Core1 SID -> historical Lisp mechanism comparison.
 ;
 ; Semantic direction is one-way:
-;   my-lisp SID / law -> admitted historical mechanism
+;   my-lisp SID identity + Core1 profile law -> admitted historical mechanism
 ; Never:
 ;   historical name / implementation -> new my-lisp semantic identity
+;
+; SID identifies the operation. The selected Core profile owns the law/result
+; domain. Core1 uses the historical T/NIL-oriented law where applicable.
+; Core4-only result records such as identity-relation/structural-kind are
+; outside this file's profile and are not projected here.
 ;
 ; A row is:
 ;   (row SID my-lisp-name historical-name source fit core1-status)
 ;
 ; fit:
-;   direct                 same bounded mechanism can be consumed directly
-;   value-projection       same value/mechanism, representation/profile projection required
-;   result-projection      historical T/NIL result is not the current my-lisp result record
-;   control-projection     historical control law differs from the current general contract
-;   closure-adapter        historical FUNCTION/FUNARG supplies the closure mechanism
+;   direct                 historical mechanism is native to the Core1 profile
+;   value-adapter          representation/surface adaptation only; Core1 law is unchanged
+;   closure-adapter        historical FUNCTION/FUNARG supplies the Core1 closure mechanism
 ;   surface-adapter        historical surface/calling convention differs
-;   profile-adapter        historical evaluator is a mechanism under the Core1 profile
+;   profile-support        historical evaluator helper supports Core1 but is not a public identity
 ;
 ; core1-status:
 ;   admitted               used by the current Core1 bootstrap
@@ -34,14 +37,14 @@
     (historical-name-may-mint-sid . no))
 
   (rows
-    (row 00000000 empty-list NIL mccarthy-1960 value-projection admitted)
+    (row 00000000 empty-list NIL mccarthy-1960 direct admitted)
     (row 00000001 quote QUOTE mccarthy-1960 direct admitted)
-    (row 00000010 atom ATOM mccarthy-1960 result-projection admitted)
-    (row 00000011 eq EQ mccarthy-1960 result-projection admitted)
+    (row 00000010 atom ATOM mccarthy-1960 direct admitted)
+    (row 00000011 eq EQ mccarthy-1960 direct admitted)
     (row 00000100 cons CONS mccarthy-1960 direct admitted)
     (row 00000101 car CAR mccarthy-1960 direct admitted)
     (row 00000110 cdr CDR mccarthy-1960 direct admitted)
-    (row 00000111 cond COND mccarthy-1960 control-projection admitted)
+    (row 00000111 cond COND mccarthy-1960 direct admitted)
     (row 00001000 lambda LAMBDA mccarthy-1960 closure-adapter admitted)
     (row 00001001 define DEFINE lisp-i-1960 surface-adapter admitted)
     (row 00001011 def DEFINE lisp-i-1960 surface-adapter admitted)
@@ -53,23 +56,23 @@
     (row 00010010 max MAX lisp15-1962 direct available-not-admitted)
     (row 00010011 mod REMAINDER lisp15-1962 surface-adapter available-not-admitted)
     (row 00010100 quotient QUOTIENT lisp15-1962 direct available-not-admitted)
-    (row 00011010 < LESSP lisp15-1962 result-projection available-not-admitted)
-    (row 00011011 > GREATERP lisp15-1962 result-projection available-not-admitted)
+    (row 00011010 < LESSP lisp15-1962 direct available-not-admitted)
+    (row 00011011 > GREATERP lisp15-1962 direct available-not-admitted)
 
-    (row 00100001 not NOT lisp15-1962 result-projection admitted)
-    (row 00100010 equal? EQUAL lisp15-1962 result-projection available-not-admitted)
+    (row 00100001 not NOT lisp15-1962 direct admitted)
+    (row 00100010 equal? EQUAL lisp15-1962 direct available-not-admitted)
     (row 00100111 list LIST lisp15-1962 direct admitted)
     (row 00101000 length LENGTH lisp15-1962 direct available-not-admitted)
     (row 00101001 append APPEND mccarthy-1960 direct support)
     (row 00101010 reverse REVERSE lisp15-1962 direct available-not-admitted)
-    (row 00101100 member? MEMBER lisp15-1962 result-projection available-not-admitted)
-    (row 00101101 assoc assoc mccarthy-1960 profile-adapter support)
-    (row 00101110 pair PAIR mccarthy-1960 profile-adapter support)
+    (row 00101100 member? MEMBER lisp15-1962 direct available-not-admitted)
+    (row 00101101 assoc assoc mccarthy-1960 profile-support support)
+    (row 00101110 pair PAIR mccarthy-1960 profile-support support)
 
-    (row 01001101 eval eval mccarthy-1960 profile-adapter support)
+    (row 01001101 eval eval mccarthy-1960 profile-support support)
 
-    (row 10011010 and AND lisp15-1962 result-projection available-not-admitted)
-    (row 10011011 or OR lisp15-1962 result-projection available-not-admitted))
+    (row 10011010 and AND lisp15-1962 direct available-not-admitted)
+    (row 10011011 or OR lisp15-1962 direct available-not-admitted))
 
   (historical-support-without-my-lisp-sid
     (mechanism LABEL mccarthy-1960 named-recursion)
@@ -82,9 +85,12 @@
     (value T mccarthy-1960 historical-control-value))
 
   (rules
-    (sid-selects-meaning . yes)
+    (sid-selects-identity . yes)
+    (profile-selects-law . core1)
+    (core1-result-domain . historical-t-nil)
+    (core4-result-records-in-core1 . forbidden)
     (historical-name-selects-meaning . no)
     (mechanism-may-be-replaced . yes)
-    (projection-must-be-explicit . yes)
+    (cross-profile-projection-must-be-explicit . yes)
     (unmapped-historical-function-becomes-language-feature . no)
     (unmapped-my-lisp-sid-falls-back-to-historical-name . no)))
