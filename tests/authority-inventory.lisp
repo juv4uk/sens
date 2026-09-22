@@ -89,3 +89,4 @@
 (authority "crates/my-lisp/tests/semantic_authority_guard_1049.rs" observer)
 (authority "crates/my-lisp/tests/program_surface_translation.rs" observer)
 (authority "crates/my-lisp/tests/core_profiles.rs" observer)
+(authority "crates/my-lisp/tests/core_profile_contract.rs" observer)
