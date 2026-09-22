@@ -3,10 +3,10 @@
 > Згенеровано `scripts/public_api_inventory.py`. Цей звіт знаходить
 > top-level визначення, але **не** оголошує їх публічним API.
 
-- проскановано бібліотечних файлів: 39
-- top-level функцій: 859
+- проскановано бібліотечних файлів: 40
+- top-level функцій: 860
 - top-level макросів: 34
-- усього визначень: 893
+- усього визначень: 894
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -145,6 +145,7 @@
 | `lib/core.lisp` | function | `my-postcore-missing-peers` | unreviewed |
 | `lib/core.lisp` | function | `my-postcore-build-definitions` | unreviewed |
 | `lib/core.lisp` | macro | `my-postcore-materialize-stable-peers` | unreviewed |
+| `lib/core1-compiler-prelude.lisp` | function | `not` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-observation` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-claim` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-evidence` | unreviewed |
