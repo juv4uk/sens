@@ -13,7 +13,7 @@
 //! a build that never calls the installer cannot reach it.
 
 use super::EvalStep;
-use crate::{Environment, ErrorKind, Expr, LanguageError, Span, Value};
+use crate::{Environment, ErrorKind, Expr, LanguageError, Sid8, Span, Value};
 use std::collections::BTreeMap;
 use std::sync::{OnceLock, RwLock};
 
@@ -22,6 +22,13 @@ use std::sync::{OnceLock, RwLock};
 /// closures - capabilities get their state (allowlists, etc.) through
 /// the `Environment`, exactly like every kernel primitive.
 pub type HostFn = fn(&[Expr], &Environment, Span) -> Result<Value, LanguageError>;
+
+
+/// Host execution mechanism keyed by an already-resolved exact Sid8.
+/// This registry cannot define SID meaning; it can only provide an implementation
+/// for a semantic identity that already exists in the Lisp-owned function table.
+pub type SemanticHostFn =
+    fn(Sid8, &[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
 #[derive(Clone, Copy)]
 enum CapabilityLookup {
@@ -48,6 +55,12 @@ fn registry() -> &'static RwLock<BTreeMap<String, HostFn>> {
     REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
 }
 
+
+fn semantic_registry() -> &'static RwLock<BTreeMap<Sid8, SemanticHostFn>> {
+    static REGISTRY: OnceLock<RwLock<BTreeMap<Sid8, SemanticHostFn>>> = OnceLock::new();
+    REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
+}
+
 /// Install one capability under its surface-form name (e.g. "read-file").
 /// Re-registering the same name replaces the previous handler, so an
 /// embedder can override or withdraw capabilities deliberately.
@@ -62,6 +75,23 @@ pub fn register_capability(name: &str, handler: HostFn) {
 pub fn unregister_capability(name: &str) {
     if let Ok(mut map) = registry().write() {
         map.remove(name);
+    }
+}
+
+
+/// Register a host implementation for one already-resolved semantic identity.
+/// The exact Sid8 remains the key; no decimal/u8 identity is introduced here.
+pub fn register_semantic_capability(semantic_id: Sid8, handler: SemanticHostFn) {
+    semantic_registry()
+        .write()
+        .expect("semantic capability registry poisoned")
+        .insert(semantic_id, handler);
+}
+
+/// Remove one host implementation projection without changing the semantic identity.
+pub fn unregister_semantic_capability(semantic_id: Sid8) {
+    if let Ok(mut map) = semantic_registry().write() {
+        map.remove(&semantic_id);
     }
 }
 
@@ -117,6 +147,31 @@ pub(crate) fn dispatch_capability(
     span: Span,
 ) -> Option<Result<EvalStep, LanguageError>> {
     dispatch_capability_from(registry(), name, arguments, environment, span)
+}
+
+
+/// Mechanical host-implementation fallback for an exact semantic identity.
+/// Canon/evaluator mechanisms get first chance; this is consulted only when
+/// the local semantic callable table has no implementation for that Sid8.
+pub(crate) fn dispatch_semantic_capability(
+    semantic_id: Sid8,
+    arguments: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    match semantic_registry().read() {
+        Ok(map) => map
+            .get(&semantic_id)
+            .copied()
+            .map(|handler| handler(semantic_id, arguments, environment, span)),
+        Err(_) => Some(Err(LanguageError::new(
+            ErrorKind::MechanismUnavailable,
+            format!(
+                "semantic capability registry unavailable while resolving SID: {semantic_id}"
+            ),
+            span,
+        ))),
+    }
 }
 
 #[cfg(test)]
