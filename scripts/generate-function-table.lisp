@@ -35,14 +35,7 @@
 ; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
 (def registry-form (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
-(def registry-rows
-  (cond
-    ((equal? (car registry-form) (quote (binary 8)))
-     (structural-relation same)
-     (cdr registry-form))
-    ((equal? (car registry-form) (quote (binary 8)))
-     (structural-relation distinct)
-     registry-form)))
+(def registry-rows registry-form)
 ; SID 00000000 is Canon 0 / (), a semantic ground value rather than a function.
 ; The function table projects only callable/form identities, so skip that first row.
 (def entries (cdr registry-rows))
@@ -202,7 +195,7 @@
         " | " (surface-word-text en)
         " | " (surface-word-text sa)
         " | " (surface-word-text sym)
-        " | " (machine-path (sid-text sid)) " |"))))
+        " | " (machine-path sid) " |"))))
 
 (def wsm-header
   (list

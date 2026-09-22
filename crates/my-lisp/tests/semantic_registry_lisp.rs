@@ -24,7 +24,7 @@ fn semantic_registry_is_read_and_queried_by_lisp_itself() {
 
     assert_eq!(
         result,
-        r#"((binary 8) 170 "00000001" quote "00000001" "10101000" "00000101" "11111111" () "10101000" (structural-relation same))"#
+        r#"(170 "00000001" quote "00000001" "10101000" "00000101" "11111111" () "10101000" (structural-relation same))"#
     );
 }
 
@@ -39,9 +39,8 @@ fn lisp_registry_api_accepts_headerless_canonical_rows() {
     .expect("Lisp-owned semantic registry API should load");
 
     let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
-    let headerless = registry_source.replacen("  (binary 8)\n", "", 1);
     let result = eval_program(
-        &format!("(length (semantic-registry-rows (semantic-registry-read-source {headerless:?})))"),
+        &format!("(length (semantic-registry-rows (semantic-registry-read-source {registry_source:?})))"),
         &mut session,
     )
     .expect("headerless Canon rows should load")

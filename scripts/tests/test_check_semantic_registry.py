@@ -14,7 +14,11 @@ class HeaderlessRegistryTests(unittest.TestCase):
     def test_canonical_rows_are_valid_without_legacy_binary_header(self):
         source = (Path(__file__).resolve().parents[2] / "lib" / "surface" / "semantic-registry.lisp").read_text(encoding="utf-8")
         registry = MODULE.parse_all(MODULE.tokens(source))[0]
-        self.assertEqual(MODULE.check(registry[1:])[0], 170)
+        self.assertEqual(MODULE.check(registry)[0], 170)
+
+    def test_legacy_binary_header_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "застарілий заголовок"):
+            MODULE.check([["binary", "8"], ["00000000", ["en", "nil"]]])
 
 
 if __name__ == "__main__":
