@@ -31,13 +31,14 @@
 
   ((identity . s0-substrate)
    (repository . juv4uk/mccarthy-eval)
-   (pinned-commit . "1c6acdb9dac890b2a0535ec0453bd83dfdda7248")
+   (pinned-commit . "1ae9745b66a1439c1929b0d9038c680567118a58")
    (surface-case . exact-uppercase)
    (historical-forms .
-     (QUOTE ATOM EQ COND CAR CDR CONS LABEL LAMBDA DEFINE))
+     (QUOTE ATOM EQ COND CAR CDR CONS LABEL LAMBDA DEFINE FUNCTION FUNARG))
    (historical-control-values . (T NIL))
-   (first-class-closures . unavailable)
-   (closure-gap-policy . implement-in-core1-lisp-not-assembly)
+   (first-class-closures . explicit-function-funarg)
+   (naked-lambda-as-value . historically-unavailable)
+   (closure-gap-policy . consume-lisp15-function-funarg)
    (unsupported-form-policy . fail-closed))
 
   ((identity . s0-surface-boundary)
@@ -55,11 +56,21 @@
       (DEFINE 00001001 semantic-equivalence-not-claimed)))
    (seed-only-mechanisms . (LABEL T NIL)))
 
+  ((identity . historical-root)
+   (mccarthy-1960-mechanisms-consumed .
+     (apply appq eval evcon evlis assoc pair append
+      QUOTE ATOM EQ COND CAR CDR CONS LABEL LAMBDA))
+   (lisp15-mechanisms-consumed . (FUNCTION FUNARG))
+   (closure-provenance . lisp15-appendix-b)
+   (closure-representation . (FUNARG fn captured-environment))
+   (semantic-authority . my-lisp)
+   (mechanism-provenance . mccarthy-eval))
+
   ((identity . s1-source)
    (path . "lib/core1.lisp")
    (source-surface . historical-uppercase-s0)
    (host-arithmetic-required . no)
-   (host-first-class-functions-required . no)
+   (host-first-class-functions-required . historical-function-funarg)
    (host-mutation-required . no)
    (host-strings-required . no))
 
@@ -70,10 +81,10 @@
       argument-evaluation
       application
       explicit-top-level-frame
-      first-class-closure-as-data
+      function-funarg-adapter
       program-evaluation
       named-bootstrap-error-data))
-   (closure-representation . (C1-CLOSURE params body lexical-env))
+   (closure-representation . historical-FUNARG)
    (world-representation . (C1-WORLD last-value global-frame))
    (error-representation . (C1-ERROR kind detail)))
 
@@ -114,7 +125,9 @@
 
   ((identity . acceptance)
    (s0-loads-core1-source . required)
-   (closure-witness-runs-without-seed-native-closure . required)
+   (historical-function-funarg-witness . required)
+   (core1-lambda-produces-funarg . required)
+   (closure-witness-runs-through-historical-funarg . required)
    (recursive-definition-witness . required)
    (compiler-source-load-witness . required)
    (unsupported-modern-operation-fails-closed . required)
