@@ -1,0 +1,103 @@
+name: Core1 S2 compiler admission
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1.lisp"
+      - "contracts/core1-s2-compiler-admission.lisp"
+      - ".github/workflows/core1-s2-compiler.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core1-s2:
+    name: Core1 executes pinned Lisp compiler seed
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout my-lisp Core1
+        uses: actions/checkout@v5
+
+      - name: Checkout unchanged S0 seed
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ref: 1c6acdb9dac890b2a0535ec0453bd83dfdda7248
+          path: .core1-s2/mccarthy-eval
+
+      - name: Checkout pinned S2 compiler source
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/wsm-my-lisp
+          ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
+          path: .core1-s2/wsm-my-lisp
+
+      - name: Build historical seed unchanged
+        working-directory: .core1-s2/mccarthy-eval
+        run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+
+      - name: Build zero-copy Core1 S2 probes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          build_probe() {
+            local name="$1"
+            local expr="$2"
+            {
+              cat lib/core1.lisp
+              cat <<'LISP'
+          (C1-EVAL-PROGRAM-THEN
+            (QUOTE (
+          LISP
+              sed '/^[[:space:]]*;/d' .core1-s2/wsm-my-lisp/lib/compiler.lisp
+              cat <<'LISP'
+            ))
+          LISP
+              printf '  (QUOTE %s))\n' "$expr"
+            } > ".core1-s2/$name.lisp"
+          }
+
+          build_probe primitive-p '(compiler-primitive? (quote cons))'
+          build_probe quote-p '(compiler-quote? (quote (quote A)))'
+          build_probe form-atom '(compiler-form (quote A))'
+          build_probe form-quote '(compiler-form (quote (quote A)))'
+          build_probe map-quotes '(compiler-map compiler-form (quote ((quote A) (quote B))))'
+          build_probe form-cons '(compiler-form (quote (cons (quote A) (quote B))))'
+
+          sha256sum .core1-s2/wsm-my-lisp/lib/compiler.lisp
+          sha256sum lib/core1.lisp
+
+      - name: Require zero-copy compiler execution parity
+        shell: bash
+        run: |
+          set -uo pipefail
+          failures=0
+
+          for probe in primitive-p quote-p form-atom form-quote map-quotes form-cons; do
+            case "$probe" in
+              primitive-p) expected='T' ;;
+              quote-p) expected='T' ;;
+              form-atom) expected='(var A)' ;;
+              form-quote) expected='(quote A)' ;;
+              map-quotes) expected='((quote A) (quote B))' ;;
+              form-cons) expected='(prim cons ((quote A) (quote B)))' ;;
+            esac
+
+            echo "=== $probe ==="
+            actual="$(
+              cd .core1-s2/mccarthy-eval
+              ./mccarthy-kernel "../$probe.lisp"
+            )"
+            status=$?
+            printf 'status=%s\n' "$status"
+            printf 'expected=%s\n' "$expected"
+            printf 'actual=%s\n' "$actual"
+
+            if [[ "$status" -ne 0 || "$actual" != "$expected" ]]; then
+              failures=$((failures + 1))
+            fi
+          done
+
+          exit "$failures"
