@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - "lib/core1.lisp"
+      - "lib/core1-compiler-prelude.lisp"
       - "contracts/core1-bootstrap-contract.lisp"
+      - "contracts/core1-historical-sid-map.lisp"
+      - "contracts/core1-s3-compiler-prelude.lisp"
       - "contracts/core1-generation-manifest.lisp"
       - "tests/fixtures/core1-s0-witness.lisp"
       - ".github/workflows/core1-s0.yml"
@@ -117,3 +120,46 @@ jobs:
 
           printf '%s\n' "$actual"
           test "$actual" = '(var FOO)'
+
+      - name: Execute Core1 S3 compiler prelude through S0/Core1
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          contract="contracts/core1-s3-compiler-prelude.lisp"
+          grep -F '(profile . core1)' "$contract"
+          grep -F '(sid . 00100001)' "$contract"
+          grep -F '(core1-result-domain . historical-t-nil)' "$contract"
+          grep -F '(cml-hidden-not-primitive . forbidden)' "$contract"
+          grep -F '(semantic-evaluator-fallback . forbidden)' "$contract"
+
+          core1_blob="$(git hash-object lib/core1.lisp)"
+          sid_map_blob="$(git hash-object contracts/core1-historical-sid-map.lisp)"
+          prelude_blob="$(git hash-object lib/core1-compiler-prelude.lisp)"
+          grep -F "(law-source-git-blob . \"$core1_blob\")" "$contract"
+          grep -F "(identity-source-git-blob . \"$sid_map_blob\")" "$contract"
+          grep -F "(prelude-git-blob . \"$prelude_blob\")" "$contract"
+          printf 'Core1 source Git blob: %s\n' "$core1_blob"
+          printf 'Core1 SID map Git blob: %s\n' "$sid_map_blob"
+          printf 'Core1 S3 prelude Git blob: %s\n' "$prelude_blob"
+
+          printf 'Core1 S3 prelude SHA-256: '
+          sha256sum lib/core1-compiler-prelude.lisp | cut -d' ' -f1
+
+          {
+            printf '%s\n' '(C1-EVAL-PROGRAM-THEN'
+            printf '%s\n' '  (QUOTE ('
+            sed '/^[[:space:]]*;/d' lib/core1-compiler-prelude.lisp
+            printf '%s\n' '  ))'
+            printf '%s\n' '  (QUOTE (list (not (quote ())) (not (quote A)))))'
+          } > .core1-s0/compiler-prelude-smoke.lisp
+
+          cat lib/core1.lisp .core1-s0/compiler-prelude-smoke.lisp > .core1-s0/core1-prelude-full.lisp
+
+          actual="$(
+            cd .core1-s0/mccarthy-eval
+            ./mccarthy-kernel ../core1-prelude-full.lisp
+          )"
+
+          printf '%s\n' "$actual"
+          test "$actual" = '(T NIL)'
