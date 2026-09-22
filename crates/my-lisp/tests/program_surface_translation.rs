@@ -31,22 +31,29 @@ fn translate(source: &str, from: &str, to: &str) -> String {
 }
 
 #[test]
-fn translated_programs_execute_with_the_same_result_on_all_three_surfaces() {
+fn translated_programs_execute_with_the_same_result_on_all_table_surfaces() {
     let english = "(car (cons 'cat 'dog))";
-    let ukrainian = translate(english, "en", "uk");
+    let ukrainian_compact = translate(english, "en", "ук");
+    let ukrainian_full = translate(english, "en", "укр");
     let sanskrit = translate(english, "en", "sa");
 
     let mut english_session = Session::default();
-    let mut ukrainian_session = Session::default();
+    let mut ukrainian_compact_session = Session::default();
+    let mut ukrainian_full_session = Session::default();
     let mut sanskrit_session = Session::default();
 
     let english_result = eval_program(english, &mut english_session).expect("English program");
-    let ukrainian_result =
-        eval_program(&ukrainian, &mut ukrainian_session).expect("Ukrainian program");
+    let ukrainian_compact_result =
+        eval_program(&ukrainian_compact, &mut ukrainian_compact_session)
+            .expect("compact Ukrainian program");
+    let ukrainian_full_result =
+        eval_program(&ukrainian_full, &mut ukrainian_full_session)
+            .expect("full Ukrainian program");
     let sanskrit_result =
         eval_program(&sanskrit, &mut sanskrit_session).expect("Sanskrit program");
 
     assert_eq!(english_result.value.to_string(), "cat");
-    assert_eq!(ukrainian_result.value.to_string(), "cat");
+    assert_eq!(ukrainian_compact_result.value.to_string(), "cat");
+    assert_eq!(ukrainian_full_result.value.to_string(), "cat");
     assert_eq!(sanskrit_result.value.to_string(), "cat");
 }
