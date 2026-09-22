@@ -24,56 +24,21 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
         source,
         cursor: 0,
         depth: 0,
-        binary_width: None,
     };
     let mut expressions = Vec::new();
     parser.skip_ignored();
     while parser.cursor < source.len() {
         let expression = parser.expression()?;
-        if expressions.is_empty() {
-            parser.binary_width = binary_format_width(&expression)?;
-        }
         expressions.push(expression);
         parser.skip_ignored();
     }
     Ok(expressions)
 }
 
-fn binary_format_width(expression: &Expr) -> Result<Option<u8>, LanguageError> {
-    let ExprKind::List(items) = &expression.kind else {
-        return Ok(None);
-    };
-    if items.len() != 2 {
-        return Ok(None);
-    }
-    let ExprKind::Symbol(name) = &items[0].kind else {
-        return Ok(None);
-    };
-    if &**name != "binary" {
-        return Ok(None);
-    }
-    let ExprKind::Number(width, Exactness::Exact) = items[1].kind else {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "(binary WIDTH) expects an exact integer width",
-            items[1].span,
-        ));
-    };
-    if width.fract() != 0.0 || width != 8.0 {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "(binary WIDTH) width must be an integer from 1 to 64",
-            items[1].span,
-        ));
-    }
-    Ok(Some(width as u8))
-}
-
 struct Parser<'a> {
     source: &'a str,
     cursor: usize,
     depth: u32,
-    binary_width: Option<u8>,
 }
 
 impl Parser<'_> {
@@ -317,14 +282,6 @@ impl Parser<'_> {
                         };
                     }
 
-                    if items.is_empty() {
-                        // A leading (binary 8) declaration activates the
-                        // prefix-free fixed-width binary syntax for the
-                        // remaining data in this source form.
-                        if let Some(width) = binary_format_width(&item)? {
-                            self.binary_width = Some(width);
-                        }
-                    }
                     items.push(item);
                 }
                 None => {
@@ -389,8 +346,6 @@ impl Parser<'_> {
         // The complete 8-bit bitstring space is reserved for Canon semantic
         // identities. This is a lexical distinction, not numeric conversion:
         // `00001100` is SID 00001100, while decimal `12` remains a number.
-        // The historical `(binary 8)` declaration remains supported below
-        // for compatibility/data files, including its named malformed-bit error.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
             let sid = crate::Sid8::from_canonical_spelling(token)
                 .expect("exact eight-bit SID spelling validated above");
@@ -401,30 +356,6 @@ impl Parser<'_> {
                     end: self.cursor,
                 },
             });
-        }
-
-        if let Some(width) = self.binary_width {
-            if token.bytes().all(|byte| byte.is_ascii_digit())
-                && token.len() == usize::from(width)
-            {
-                let all_binary = token.bytes().all(|byte| matches!(byte, b'0' | b'1'));
-                if !all_binary {
-                    return Err(self.error(
-                        "binary literal contains a non-binary digit",
-                        start,
-                        self.cursor,
-                    ));
-                }
-                let sid = crate::Sid8::from_canonical_spelling(token)
-                    .expect("fixed-width binary SID spelling validated above");
-                return Ok(Expr {
-                    kind: ExprKind::Sid(sid),
-                    span: Span {
-                        start,
-                        end: self.cursor,
-                    },
-                });
-            }
         }
 
         let decimal_with_dot = if token.contains(',') && !token.contains('.') {
@@ -548,12 +479,12 @@ mod tests {
     }
 
     #[test]
-    fn binary_declaration_preserves_fixed_width_and_leading_zeroes() {
-        let expressions = parse("(binary 8) 00000101").expect("binary source parses");
+    fn binary_form_does_not_change_reader_mode() {
+        let expressions = parse("(binary 8) 00000102").expect("ordinary forms parse");
         assert_eq!(expressions.len(), 2);
         assert!(matches!(
             &expressions[1].kind,
-            ExprKind::Sid(sid) if *sid == crate::sid!(00000101)
+            ExprKind::Number(value, Exactness::Exact) if *value == 102.0
         ));
     }
 
@@ -596,26 +527,6 @@ mod tests {
             ExprKind::Number(value, Exactness::Exact) if value == 12.0
         ));
     }
-
-    #[test]
-    fn binary_mode_keeps_non_sid_decimal_literals_as_numbers() {
-        let expressions = parse("(binary 8) 101 1").expect("ordinary decimals must parse");
-        assert!(matches!(
-            expressions[1].kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 101.0
-        ));
-        assert!(matches!(
-            expressions[2].kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 1.0
-        ));
-    }
-
-    #[test]
-    fn non_binary_digit_in_fixed_width_binary_literal_is_rejected() {
-        let error = parse("(binary 8) 00000102").expect_err("non-binary digit must fail");
-        assert!(error.message.contains("non-binary digit"));
-    }
-
 
     #[test]
     fn decimal_literal_is_parsed_as_exact_rational_or_exact_integer() {

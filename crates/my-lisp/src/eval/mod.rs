@@ -193,13 +193,6 @@ fn evaluate_list(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     let arguments = &items[1..];
-    if is_binary_format_declaration(items) {
-        // `(binary 8)` is reader metadata. It must evaluate before core.lisp
-        // defines its historical descriptor helper, otherwise a SID-native
-        // source file could not declare its own encoding.
-        return Ok(EvalStep::Value(Value::Nil));
-    }
-
     let head_name = items[0].kind.as_symbol();
     let head_sid = binary_head_sid(&items[0]);
     let canonical_head = head_name
@@ -271,14 +264,6 @@ fn binary_head_sid(expression: &Expr) -> Option<Sid8> {
     Some(sid)
 }
 
-fn is_binary_format_declaration(items: &[Expr]) -> bool {
-    matches!(
-        items,
-        [Expr { kind: ExprKind::Symbol(name), .. }, Expr { kind: ExprKind::Number(width, crate::Exactness::Exact), .. }]
-            if &**name == "binary" && *width == 8.0
-    )
-}
-
 trait ExprKindExt {
     fn as_symbol(&self) -> Option<&str>;
 }
@@ -317,7 +302,6 @@ mod single_pass_eval_tests {
     #[test]
     fn binary_sids_dispatch_canon_and_necessary_forms_in_list_head() {
         let source = r#"
-            (binary 8)
             (00001001 make-pair
               (00001000 (left right)
                 (00000100 left (00000100 right ()))))
@@ -332,7 +316,6 @@ mod single_pass_eval_tests {
     #[test]
     fn binary_sids_keep_quote_and_cond_as_syntax() {
         let source = r#"
-            (binary 8)
             (00000111
               ((00000010 (00000001 atom)) (structural-kind atom) (00000001 selected))
               (t t (00000001 missed)))

@@ -5,17 +5,14 @@
 ## Форма reader
 
 `lib/surface/semantic-registry.lisp` задає восьмибітний SID як канонічну
-ідентичність: наприклад, `define` має `00001001`. У SID-файлі перша форма
-`(binary 8)` вмикає це читання для решти файлу:
+ідентичність: наприклад, `define` має `00001001`. Рівно вісім цифр `0`/`1` утворюють SID без заголовка чи reader-режиму:
 
 ```lisp
-(binary 8)
 (00001001 x 41) ; SID 9: define
 (00000100 x ()) ; SID 4: cons
 ```
 
-Префікс не потрібний: заголовок файлу однозначно встановлює режим. Рівно вісім
-цифр `0`/`1` утворюють `Binary` token. У позиції голови списку routed SID є
+Рівно вісім цифр `0`/`1` утворюють SID token. У позиції голови списку routed SID є
 виконуваною identity; у даних або під `quote` той самий token лишається
 бінарним значенням. Отже `00000000` є SID нуль у голові списку і 8-бітним
 значенням поза нею.
@@ -44,8 +41,7 @@ symbolic surface-и) лишаються рівноправними поверх�
 
 ## English summary
 
-This is a proposal, not a language-contract change. A SID file starts with
-`(binary 8)` and uses bare tokens of exactly eight binary digits. A routed SID
+This is a proposal, not a language-contract change. A SID file uses bare tokens of exactly eight binary digits without a reader declaration. A routed SID
 is executable only in list-head position; elsewhere it remains binary data.
 Shorter decimal literals remain ordinary exact numbers. The current core slice
 covers Canon and evaluator-owned necessary forms; broader registry dispatch

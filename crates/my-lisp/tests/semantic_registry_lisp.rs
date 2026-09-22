@@ -62,7 +62,7 @@ fn decimal_values_do_not_mint_semantic_identity() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library should load");
     let result = eval_program(
-        "(binary 8) (equal? 00001100 12)",
+        "(equal? 00001100 12)",
         &mut session,
     )
     .expect("Binary-vs-decimal distinction must be executable")
@@ -100,15 +100,10 @@ fn shorter_bit_only_spelling_remains_ordinary_numeric_data() {
 }
 
 #[test]
-fn binary_reader_rejects_non_binary_digit_with_named_error() {
-    let error = my_lisp::parse("(binary 8) 00000102")
-        .expect_err("non-binary digit must fail under binary mode");
-    assert!(
-        error
-            .to_string()
-            .contains("binary literal contains a non-binary digit"),
-        "malformed binary input must retain its named reader error: {error}"
-    );
+fn former_binary_header_does_not_change_decimal_reading() {
+    let expressions = my_lisp::parse("(binary 8) 00000102")
+        .expect("ordinary parser must not have a binary reader mode");
+    assert!(matches!(expressions[1].kind, my_lisp::ExprKind::Number(value, _) if value == 102.0));
 }
 
 
