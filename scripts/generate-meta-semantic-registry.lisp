@@ -105,7 +105,15 @@
   (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
 
 (def projection-rows
-  (collect-entries (cdr registry-form) (quote ())))
+  (collect-entries
+    (cond
+      ((equal? (car registry-form) (quote (binary 8)))
+       (structural-relation same)
+       (cdr registry-form))
+      ((equal? (car registry-form) (quote (binary 8)))
+       (structural-relation distinct)
+       registry-form))
+    (quote ())))
 
 (def generated
   (render-projection projection-rows))
