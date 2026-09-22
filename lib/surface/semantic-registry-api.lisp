@@ -29,11 +29,23 @@
 
 (def semantic-registry-format
   (lambda (registry)
-    (car registry)))
+    (cond
+      ((equal? (car registry) (quote (binary 8)))
+       (structural-relation same)
+       (car registry))
+      ((equal? (car registry) (quote (binary 8)))
+       (structural-relation distinct)
+       (quote (binary 8))))))
 
 (def semantic-registry-rows
   (lambda (registry)
-    (cdr registry)))
+    (cond
+      ((equal? (car registry) (quote (binary 8)))
+       (structural-relation same)
+       (cdr registry))
+      ((equal? (car registry) (quote (binary 8)))
+       (structural-relation distinct)
+       registry))))
 
 (def semantic-registry-namespaces
   (lambda ()
@@ -172,5 +184,4 @@
     (semantic-registry-id-in
       (semantic-registry-read)
       surface)))
-
 

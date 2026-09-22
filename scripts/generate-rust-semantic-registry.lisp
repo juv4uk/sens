@@ -20,7 +20,14 @@
 (def registry-form
   (car (read-all (read-file source-path))))
 
-(def rows (cdr registry-form))
+(def rows
+  (cond
+    ((equal? (car registry-form) (quote (binary 8)))
+     (structural-relation same)
+     (cdr registry-form))
+    ((equal? (car registry-form) (quote (binary 8)))
+     (structural-relation distinct)
+     registry-form)))
 
 (def rust-string
   (lambda (value)

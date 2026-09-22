@@ -50,14 +50,13 @@ def check(root) -> tuple[int, set[str], int]:
     if not isinstance(root, list) or not root:
         raise ValueError("реєстр повинен бути непорожнім списком")
 
-    if root[0] != ["binary", "8"]:
-        raise ValueError("реєстр повинен починатися з декларації (binary 8)")
+    entries = root[1:] if root[0] == ["binary", "8"] else root
 
     seen_ids: set[str] = set()
     all_surfaces: set[str] = set()
     symbolic_count = 0
 
-    for ordinal, entry in enumerate(root[1:]):
+    for ordinal, entry in enumerate(entries):
         if not isinstance(entry, list) or len(entry) < 2:
             raise ValueError(f"некоректний semantic-запис: {entry!r}")
 
