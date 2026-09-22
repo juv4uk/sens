@@ -108,31 +108,12 @@
            (C1-LOOKUP-IN NAME GLOBAL)))))
      (C1-LOOKUP-IN NAME ENV))))
 
-(DEFINE C1-MAKE-CLOSURE
-  (LAMBDA (PARAMS BODY ENV)
-    (CONS (QUOTE C1-CLOSURE)
-      (CONS PARAMS
-        (CONS BODY
-          (CONS ENV NIL))))))
-
-(DEFINE C1-CLOSUREP
+(DEFINE C1-FUNARGP
   (LAMBDA (VALUE)
     (COND
       ((ATOM VALUE) NIL)
-      ((EQ (CAR VALUE) (QUOTE C1-CLOSURE)) T)
+      ((EQ (CAR VALUE) (QUOTE FUNARG)) T)
       (T NIL))))
-
-(DEFINE C1-CLOSURE-PARAMS
-  (LAMBDA (VALUE)
-    (C1-SECOND VALUE)))
-
-(DEFINE C1-CLOSURE-BODY
-  (LAMBDA (VALUE)
-    (C1-THIRD VALUE)))
-
-(DEFINE C1-CLOSURE-ENV
-  (LAMBDA (VALUE)
-    (C1-FOURTH VALUE)))
 
 (DEFINE C1-ONE-ARGP
   (LAMBDA (ARGS)
@@ -252,19 +233,8 @@
       ((C1-ERRORP FN) FN)
       ((C1-PRIMITIVEP FN)
        (C1-APPLY-PRIMITIVE (C1-PRIMITIVE-NAME FN) ARGS))
-      ((C1-CLOSUREP FN)
-       ((LAMBDA (BOUND)
-          (COND
-            ((C1-ERRORP BOUND) BOUND)
-            (T
-             (C1-EVAL
-               (C1-CLOSURE-BODY FN)
-               BOUND
-               GLOBAL))))
-        (C1-BIND
-          (C1-CLOSURE-PARAMS FN)
-          ARGS
-          (C1-CLOSURE-ENV FN))))
+      ((C1-FUNARGP FN)
+       (FN ARGS GLOBAL))
       (T
        (C1-MAKE-ERROR (QUOTE NOT-CALLABLE) FN)))))
 
@@ -313,10 +283,20 @@
         ((C1-COND-NAMEP (CAR EXPR))
          (C1-EVCON (CDR EXPR) ENV GLOBAL))
         ((C1-LAMBDA-NAMEP (CAR EXPR))
-         (C1-MAKE-CLOSURE
-           (C1-SECOND EXPR)
-           (C1-THIRD EXPR)
-           ENV))
+         (FUNCTION
+           (LAMBDA (ARGS GLOBAL-AT-CALL)
+             ((LAMBDA (BOUND)
+                (COND
+                  ((C1-ERRORP BOUND) BOUND)
+                  (T
+                   (C1-EVAL
+                     (C1-THIRD EXPR)
+                     BOUND
+                     GLOBAL-AT-CALL))))
+              (C1-BIND
+                (C1-SECOND EXPR)
+                ARGS
+                ENV)))))
         ((C1-DEFINE-NAMEP (CAR EXPR))
          (C1-MAKE-ERROR
            (QUOTE INVALID-FORM)
