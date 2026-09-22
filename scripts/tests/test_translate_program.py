@@ -21,18 +21,18 @@ class TranslateProgramTests(unittest.TestCase):
     def test_program_round_trip_preserves_source(self):
         english = "(car (cons 'cat (quote ())))\n"
         ukrainian = MODULE.translate_program(
-            english, MODULE.translation_map("en", "uk")
+            english, MODULE.translation_map("en", "ук")
         )
         self.assertEqual(ukrainian, "(перше (сполучити 'cat (як-є ())))\n")
         restored = MODULE.translate_program(
-            ukrainian, MODULE.translation_map("uk", "en")
+            ukrainian, MODULE.translation_map("ук", "en")
         )
         self.assertEqual(restored, english)
 
     def test_comments_strings_and_unknown_names_are_preserved(self):
         source = '(print "car atom") ; car atom\n(my-function об\'єкт)\n'
         result = MODULE.translate_program(
-            source, MODULE.translation_map("en", "uk")
+            source, MODULE.translation_map("en", "ук")
         )
         self.assertEqual(
             result,
@@ -42,9 +42,22 @@ class TranslateProgramTests(unittest.TestCase):
     def test_ukrainian_to_sanskrit_uses_the_shared_table(self):
         source = "(перше (сполучити 'кіт 'пес))"
         result = MODULE.translate_program(
-            source, MODULE.translation_map("uk", "sa")
+            source, MODULE.translation_map("ук", "sa")
         )
         self.assertEqual(result, "(ādi (saṃyuj 'кіт 'пес))")
+
+
+    def test_uk_and_ukr_are_distinct_table_namespaces_of_one_identity(self):
+        compact = MODULE.translation_map("en", "ук")
+        full = MODULE.translation_map("en", "укр")
+        self.assertEqual(compact["utc-now"], "поточний-всч")
+        self.assertEqual(
+            full["utc-now"], "поточний-всесвітній-координований-час"
+        )
+        self.assertEqual(
+            MODULE.translation_map("ук", "укр")["поточний-всч"],
+            "поточний-всесвітній-координований-час",
+        )
 
 
 if __name__ == "__main__":
