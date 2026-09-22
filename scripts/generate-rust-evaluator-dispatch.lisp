@@ -23,10 +23,13 @@
   (lambda (name)
     (cond
       ((equal? name (quote lambda-form))
+       (structural-relation same)
        "NecessaryFormMechanism::Lambda")
       ((equal? name (quote define-form))
+       (structural-relation same)
        "NecessaryFormMechanism::Define")
-      (t
+      ((quote no-known-mechanism)
+       (quote no-known-mechanism)
        (car (quote ()))))))
 
 (def render-row
@@ -36,7 +39,8 @@
         ((atom mechanism)
          (structural-kind empty-list)
          (car (quote ())))
-        (t
+        ((atom mechanism)
+         (structural-kind atom)
          (str+
            "    NecessaryFormDispatchRow { semantic_id: 0b"
            (write-to-string (car row))
