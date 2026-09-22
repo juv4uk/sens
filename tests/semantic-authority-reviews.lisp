@@ -34,3 +34,15 @@
 (review "crates/my-lisp/tests/clock.rs" "035fd471b3b9a1f30fb77d8d92eb84986f2461d9899d7a7b1ffff7ea9ce9d9e2" issue-1101 sid-witness-migration)
 (review "crates/my-lisp/tests/timezone_ownership.rs" "72ad98691141e7dbdf496bd300ecb5a3dc26aed7e580a5021643ed256663aa23" issue-1101 sid-witness-migration)
 (review "crates/my-lisp/src/presentation.rs" "235c7ff4d8c76fb72c0eaaf5663bf690395f6216c52d625d73f6dc86a521c510" issue-1101 single-sid-presentation-projection)
+
+; #1006 raw invoke fresh replay: exact reviewed mechanism boundary only.
+; These reviews do not admit meaning. They approve the exact source texts as:
+; - Sid8-preserving host implementation registration;
+; - primitive-first fallback to a registered mechanism;
+; - public seam/export plumbing;
+; - raw native executor routing that remains outside ordinary semantic lowering.
+(review "crates/my-lisp-cli/src/island_invoke.rs" "0613832e6218f413d6f3d9ebb3e27aeb2d2a5d93d3f5c00dee4f4427c8dcf0e6" issue-1006 raw-invoke-executor-mechanism)
+(review "crates/my-lisp/src/eval/canon.rs" "c71c2b0f7e67919ac562c3fa8e1307f8f714b9cc7a38564682f7bdab26b6c690" issue-1006 primitive-first-sid8-mechanism-fallback)
+(review "crates/my-lisp/src/eval/capabilities.rs" "e5fee11d75f61c381631ef03fdaff6c0cd0ee528ff432bb8b51655a15c9afad4" issue-1006 sid8-host-mechanism-registry)
+(review "crates/my-lisp/src/eval/mod.rs" "fb104551341d81d16e44397dc56428fb5491326e785b393c9d7c4492021c1825" issue-1006 sid8-host-mechanism-export)
+(review "crates/my-lisp/src/lib.rs" "fb73a2c3ac103e2b5bedd98dcf78b96f286b8ba7165a455df5214cb30e9e72a8" issue-1006 sid8-host-mechanism-public-seam)
