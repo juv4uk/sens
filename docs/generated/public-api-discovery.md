@@ -3,10 +3,10 @@
 > Згенеровано `scripts/public_api_inventory.py`. Цей звіт знаходить
 > top-level визначення, але **не** оголошує їх публічним API.
 
-- проскановано бібліотечних файлів: 38
-- top-level функцій: 859
+- проскановано бібліотечних файлів: 39
+- top-level функцій: 868
 - top-level макросів: 34
-- усього визначень: 893
+- усього визначень: 902
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -382,6 +382,15 @@
 | `lib/lisp-fs.lisp` | function | `fs-commit-stage?` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-recover-commit` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-recover-root-package` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-selector-registry` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-selector-metadata` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-selector-registry-rows` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-selector-sid-text` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-selector-find-section` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-selector-routes` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-selector-registry-has-sid?` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-selector-find-route` | unreviewed |
+| `lib/mechanism-selector.lisp` | function | `mechanism-select` | unreviewed |
 | `lib/meta-eval-first-class.lisp` | function | `my-fc-primitive` | unreviewed |
 | `lib/meta-eval-first-class.lisp` | function | `my-fc-root-env` | unreviewed |
 | `lib/meta-eval-first-class.lisp` | function | `my-fc-env-lookup` | unreviewed |
