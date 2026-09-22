@@ -34,3 +34,8 @@
 (review "crates/my-lisp/tests/clock.rs" "035fd471b3b9a1f30fb77d8d92eb84986f2461d9899d7a7b1ffff7ea9ce9d9e2" issue-1101 sid-witness-migration)
 (review "crates/my-lisp/tests/timezone_ownership.rs" "72ad98691141e7dbdf496bd300ecb5a3dc26aed7e580a5021643ed256663aa23" issue-1101 sid-witness-migration)
 (review "crates/my-lisp/src/presentation.rs" "235c7ff4d8c76fb72c0eaaf5663bf690395f6216c52d625d73f6dc86a521c510" issue-1101 single-sid-presentation-projection)
+
+; #1131 FOUR-CORE-ARCH-1 adds only the mechanical CoreProfile module/export
+; boundary to lib.rs. Profile meaning remains in contracts/core-profile-contract.lisp;
+; this exact digest review does not permit any later lib.rs edit.
+(review "crates/my-lisp/src/lib.rs" "cbfed785afac51fe3ee96c12260039825bc644b8daf0320bce86bca294fa62c9" issue-1131 core-profile-mechanical-boundary)
