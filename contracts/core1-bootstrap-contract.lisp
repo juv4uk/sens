@@ -93,6 +93,11 @@
    (whole-ast-copy . forbidden)
    (recursive-definition-mechanism . explicit-global-frame)
    (conditional-policy . historical-two-part-truthiness)
+   (predicate-result-domain . historical-t-nil)
+   (eq-result-domain . historical-t-nil)
+   (atom-result-domain . historical-t-nil)
+   (core4-identity-relation . out-of-profile)
+   (core4-structural-kind . out-of-profile)
    (exhausted-cond . named-bootstrap-error)
    (modern-core4-structural-results . forbidden))
 
