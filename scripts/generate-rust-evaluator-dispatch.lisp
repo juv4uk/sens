@@ -17,7 +17,7 @@
 (def dispatch-form
   (car (read-all (read-file source-path))))
 
-(def rows (cdr dispatch-form))
+(def rows dispatch-form)
 
 (def rust-mechanism
   (lambda (name)
