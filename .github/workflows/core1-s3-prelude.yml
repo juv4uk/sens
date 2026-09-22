@@ -1,0 +1,84 @@
+name: Core1 S3 compiler prelude
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1-compiler-prelude.lisp"
+      - "contracts/core1-s3-compiler-prelude.lisp"
+      - "lib/core1.lisp"
+      - ".github/workflows/core1-s3-prelude.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core1-s3-prelude:
+    name: Historical S0 executes Core1 compiler prelude
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout my-lisp Core1 prelude
+        uses: actions/checkout@v5
+
+      - name: Checkout unchanged historical S0 seed
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ref: 1ae9745b66a1439c1929b0d9038c680567118a58
+          path: .core1-s3/mccarthy-eval
+
+      - name: Build historical seed unchanged
+        working-directory: .core1-s3/mccarthy-eval
+        run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+
+      - name: Verify prelude authority metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          contract="contracts/core1-s3-compiler-prelude.lisp"
+          grep -F '(profile . core1)' "$contract"
+          grep -F '(sid . 00100001)' "$contract"
+          grep -F '(core1-result-domain . historical-t-nil)' "$contract"
+          grep -F '(cml-hidden-not-primitive . forbidden)' "$contract"
+          grep -F '(semantic-evaluator-fallback . forbidden)' "$contract"
+
+      - name: Build exact Core1 prelude witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            cat lib/core1.lisp
+            cat <<'LISP'
+          (C1-EVAL-PROGRAM-THEN
+            (QUOTE (
+          LISP
+            sed '/^[[:space:]]*;/d' lib/core1-compiler-prelude.lisp
+            cat <<'LISP'
+            ))
+            (QUOTE
+              (list
+                (not NIL)
+                (not T)
+                (not (quote X)))))
+          )
+          LISP
+          } > .core1-s3/prelude-witness.lisp
+
+          printf 'Core1 source SHA-256: '
+          sha256sum lib/core1.lisp | cut -d' ' -f1
+          printf 'Core1 S3 prelude SHA-256: '
+          sha256sum lib/core1-compiler-prelude.lisp | cut -d' ' -f1
+
+      - name: Require historical Core1 NOT behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(
+            cd .core1-s3/mccarthy-eval
+            ./mccarthy-kernel ../prelude-witness.lisp
+          )"
+
+          expected='(T () ())'
+          printf 'expected=%s\n' "$expected"
+          printf 'actual=%s\n' "$actual"
+          test "$actual" = "$expected"
