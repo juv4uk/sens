@@ -10,6 +10,7 @@
 pub mod layout;
 
 mod bignum;
+mod core_profile;
 mod environment;
 mod error;
 pub(crate) mod eval;
@@ -99,6 +100,7 @@ pub mod semantic_registry_export {
 pub mod syntax;
 mod value;
 
+pub use core_profile::{load_core_profile, CoreProfile};
 pub use environment::{Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
