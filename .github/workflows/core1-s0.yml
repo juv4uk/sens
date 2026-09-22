@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - "lib/core1.lisp"
+      - "lib/core1-compiler-prelude.lisp"
       - "contracts/core1-bootstrap-contract.lisp"
+      - "contracts/core1-s3-compiler-prelude.lisp"
       - "contracts/core1-generation-manifest.lisp"
       - "tests/fixtures/core1-s0-witness.lisp"
       - ".github/workflows/core1-s0.yml"
@@ -117,3 +119,27 @@ jobs:
 
           printf '%s\n' "$actual"
           test "$actual" = '(var FOO)'
+
+
+      - name: Execute Core1 S3 compiler prelude through S0/Core1
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          {
+            printf '%s\n' '(C1-EVAL-PROGRAM-THEN'
+            printf '%s\n' '  (QUOTE ('
+            sed '/^[[:space:]]*;/d' lib/core1-compiler-prelude.lisp
+            printf '%s\n' '  ))'
+            printf '%s\n' '  (QUOTE (list (not (quote ())) (not (quote A)))))'
+          } > .core1-s0/compiler-prelude-smoke.lisp
+
+          cat lib/core1.lisp .core1-s0/compiler-prelude-smoke.lisp > .core1-s0/core1-prelude-full.lisp
+
+          actual="$(
+            cd .core1-s0/mccarthy-eval
+            ./mccarthy-kernel ../core1-prelude-full.lisp
+          )"
+
+          printf '%s\n' "$actual"
+          test "$actual" = '(T ())'
