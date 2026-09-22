@@ -5,7 +5,7 @@
    (commit . "c7d4d6fa56e97c860c567fb809a719e3c79778fc")
    (source-path . "mccarthy-kernel.s")
    (source-sha256 . "93d481637577fd6d3427d9a33fb44037ad43891005cc26faa64267d6ec36d945")
-   (binary-sha256 . "2ab06b830a42a69c22217a679369b95c59aac7cd807b04a2fca776e533a12227")
+   (binary-sha256 . "03bf566aa21228fe16cab3a56b775bb80b2d43b648223c87cb67fe2396039f66")
    (semantic-authority . no)
    (status . witnessed))
 
