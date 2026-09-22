@@ -86,12 +86,6 @@
      (list
        (write-file output-path generated)
        (print "Rust evaluator dispatch projection written"))))
-  ((atom *argv*)
-   (structural-kind atom)
-   (second
-     (list
-       (write-file output-path generated)
-       (print "Rust evaluator dispatch projection written"))))
   ((equal? (car *argv*) "--check")
    (structural-relation same)
    (let ((current (read-file output-path)))
@@ -104,11 +98,9 @@
         (second
           (list
             (print "Rust evaluator dispatch projection is stale")
-            (print current)
-            (print generated)
-            (quote stale-debug))))))))
-  ((equal? (car *argv*) "--check")
-   (structural-relation distinct)
+            (car (quote ()))))))))
+  ((quote write-projection)
+   write-projection
    (second
      (list
        (write-file output-path generated)
