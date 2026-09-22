@@ -29,7 +29,7 @@
        (structural-relation same)
        "NecessaryFormMechanism::Define")
       ((quote no-known-mechanism)
-       (quote no-known-mechanism)
+       no-known-mechanism
        (car (quote ()))))))
 
 (def render-row
@@ -106,7 +106,7 @@
             (print "Rust evaluator dispatch projection is stale")
             (print current)
             (print generated)
-            (car (quote ()))))))))
+            (quote stale-debug))))))))
   ((equal? (car *argv*) "--check")
    (structural-relation distinct)
    (second
