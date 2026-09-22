@@ -29,6 +29,29 @@ fn semantic_registry_is_read_and_queried_by_lisp_itself() {
 }
 
 #[test]
+fn lisp_registry_api_accepts_headerless_canonical_rows() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library should load");
+    eval_program(
+        include_str!("../../../lib/surface/semantic-registry-api.lisp"),
+        &mut session,
+    )
+    .expect("Lisp-owned semantic registry API should load");
+
+    let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
+    let headerless = registry_source.replacen("  (binary 8)\n", "", 1);
+    let result = eval_program(
+        &format!("(length (semantic-registry-rows (semantic-registry-read-source {headerless:?})))"),
+        &mut session,
+    )
+    .expect("headerless Canon rows should load")
+    .value
+    .to_string();
+
+    assert_eq!(result, "170");
+}
+
+#[test]
 fn rust_semantic_registry_generator_is_valid_lisp() {
     parse(include_str!("../../../scripts/generate-rust-semantic-registry.lisp"))
         .expect("Rust semantic-registry generator must remain valid Lisp source");
