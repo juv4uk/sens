@@ -21,7 +21,7 @@
   (lambda (value values)
     (cond
       ((atom values) 1 (quote ()))
-      ((equal? value (car values)) 1 t)
+      ((equal? value (car values)) (structural-relation same) t)
       (t 1 (pd-member? value (cdr values))))))
 
 (def pd-proper-list?
@@ -175,7 +175,7 @@
 (def pd-noul-policy
   (lambda (observation threshold)
     (cond
-      ((equal? (car observation) (quote noul-observation/1)) 1
+      ((eq (car observation) (quote noul-observation/1)) 1
        (let ((probability (second (car (third observation)))))
          (cond
            ((< probability threshold) 1
@@ -196,7 +196,7 @@
 (def pd-choice-policy
   (lambda (observation option threshold)
     (cond
-      ((equal? (car observation) (quote choice-observation/1)) 1
+      ((eq (car observation) (quote choice-observation/1)) 1
        (let ((entry (pd-find-option option (third observation))))
          (cond
            ((atom entry) 1
@@ -224,21 +224,21 @@
   (lambda (option distribution)
     (cond
       ((atom distribution) 1 (quote ()))
-      ((equal? option (car (car distribution))) 1 (car distribution))
+      ((equal? option (car (car distribution))) (structural-relation same) (car distribution))
       (t 1 (pd-find-option option (cdr distribution))))))
 
 (def pd-two-question-consistency
   (lambda (left right relation)
     (cond
-      ((equal? relation (quote independent)) 1
+      ((eq relation (quote independent)) 1
        (list
          (quote decision-relation/1)
          (quote independent)
          left
          right))
-      ((equal? relation (quote agree)) 1
+      ((eq relation (quote agree)) 1
        (cond
-         ((equal? (third left) (third right)) 1
+         ((equal? (third left) (third right)) (structural-relation same)
           (list (quote decision-relation/1) (quote agree) left right))
          (t 1 (make-disputed (list left right)))))
       (t 1
