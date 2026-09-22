@@ -22,7 +22,10 @@
 (def postcore-authority-form
   (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
 
-(def postcore-authority-rows (cdr postcore-authority-form))
+(def postcore-authority-rows
+  (cond
+    ((equal? (car postcore-authority-form) (quote (binary 8))) (structural-relation same) (cdr postcore-authority-form))
+    ((equal? (car postcore-authority-form) (quote (binary 8))) (structural-relation distinct) postcore-authority-form)))
 
 (def postcore-member-status
   (lambda (needle items)
