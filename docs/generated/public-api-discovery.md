@@ -3,10 +3,10 @@
 > Згенеровано `scripts/public_api_inventory.py`. Цей звіт знаходить
 > top-level визначення, але **не** оголошує їх публічним API.
 
-- проскановано бібліотечних файлів: 39
-- top-level функцій: 868
+- проскановано бібліотечних файлів: 40
+- top-level функцій: 871
 - top-level макросів: 34
-- усього визначень: 902
+- усього визначень: 905
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -326,6 +326,9 @@
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-quiescence-state` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-quiescence` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-state` | unreviewed |
+| `lib/island-lowering.lisp` | function | `island-lowering-append4` | unreviewed |
+| `lib/island-lowering.lisp` | function | `island-lowering-add-payload` | unreviewed |
+| `lib/island-lowering.lisp` | function | `island-lower-binary` | unreviewed |
 | `lib/linter.lisp` | function | `lint-max2` | unreviewed |
 | `lib/linter.lisp` | function | `lint-size` | unreviewed |
 | `lib/linter.lisp` | function | `lint-nesting` | unreviewed |
