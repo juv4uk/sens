@@ -44,6 +44,7 @@
     (row 00000111 cond COND mccarthy-1960 control-projection admitted)
     (row 00001000 lambda LAMBDA mccarthy-1960 closure-adapter admitted)
     (row 00001001 define DEFINE lisp-i-1960 surface-adapter admitted)
+    (row 00001011 def DEFINE lisp-i-1960 surface-adapter admitted)
 
     (row 00001100 + PLUS lisp15-1962 direct available-not-admitted)
     (row 00001101 - DIFFERENCE lisp15-1962 surface-adapter available-not-admitted)
