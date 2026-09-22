@@ -1,14 +1,10 @@
-(binary 8)
-
 ; Lisp-owned semantic-registry API.
 ;
 ; Authority is lib/surface/semantic-registry.lisp itself. This library does
 ; not recreate the registry in another representation: it reads the canonical
 ; Lisp table with the ordinary Lisp reader and queries that resulting value.
 ;
-; The first element of the canonical table is the format descriptor:
-;   (binary 8)
-; All remaining elements are semantic rows:
+; Every element of the canonical table is a semantic row:
 ;   (Binary identity (en ...) (ук ...) (укр ...) (sa ...) (sym ...))
 ;
 ; Runtime implementations may project the Binary identity to an internal byte,
@@ -27,25 +23,9 @@
     (semantic-registry-read-source
       (read-file semantic-registry-source-path))))
 
-(def semantic-registry-format
-  (lambda (registry)
-    (cond
-      ((equal? (car registry) (quote (binary 8)))
-       (structural-relation same)
-       (car registry))
-      ((equal? (car registry) (quote (binary 8)))
-       (structural-relation distinct)
-       (quote (binary 8))))))
-
 (def semantic-registry-rows
   (lambda (registry)
-    (cond
-      ((equal? (car registry) (quote (binary 8)))
-       (structural-relation same)
-       (cdr registry))
-      ((equal? (car registry) (quote (binary 8)))
-       (structural-relation distinct)
-       registry))))
+    registry))
 
 (def semantic-registry-namespaces
   (lambda ()
@@ -155,9 +135,8 @@
   (lambda (identity)
     (let* ((printed (write-to-string identity))
            (forms
-             (read-all
-               (string-append "(binary 8) " printed))))
-      (second forms))))
+             (read-all printed)))
+      (car forms))))
 
 ; Query already-read registry data without re-entering host I/O.
 (def semantic-registry-row-in
@@ -184,4 +163,3 @@
     (semantic-registry-id-in
       (semantic-registry-read)
       surface)))
-

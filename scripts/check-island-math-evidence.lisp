@@ -12,10 +12,7 @@
 (def evidence
   (car (read-all (read-file "lib/island-math-evidence.lisp"))))
 
-(def registry-rows
-  (cond
-    ((equal? (car registry) (quote (binary 8))) (structural-relation same) (cdr registry))
-    ((equal? (car registry) (quote (binary 8))) (structural-relation distinct) registry)))
+(def registry-rows registry)
 
 (def evidence-sid-text
   (lambda (sid)

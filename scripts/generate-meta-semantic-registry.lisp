@@ -106,13 +106,7 @@
 
 (def projection-rows
   (collect-entries
-    (cond
-      ((equal? (car registry-form) (quote (binary 8)))
-       (structural-relation same)
-       (cdr registry-form))
-      ((equal? (car registry-form) (quote (binary 8)))
-       (structural-relation distinct)
-       registry-form))
+    registry-form
     (quote ())))
 
 (def generated

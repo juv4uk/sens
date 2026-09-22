@@ -1,5 +1,3 @@
-(binary 8)
-
 ; Executable Lisp-owned witness for the canonical semantic registry.
 ; Registry occupancy and the full 8-bit Binary value domain are deliberately
 ; separate: 11111111 must round-trip as Binary even though it is not currently
@@ -16,7 +14,6 @@
            (max-roundtrip (semantic-registry-round-trip 11111111))
            (invoke-roundtrip (semantic-registry-round-trip 10101000)))
       (list
-        (semantic-registry-format registry)
         (length rows)
         (write-to-string (semantic-registry-row-id quote-row))
         (semantic-registry-surface-name 'en quote-row)

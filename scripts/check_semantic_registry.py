@@ -50,7 +50,10 @@ def check(root) -> tuple[int, set[str], int]:
     if not isinstance(root, list) or not root:
         raise ValueError("реєстр повинен бути непорожнім списком")
 
-    entries = root[1:] if root[0] == ["binary", "8"] else root
+    if root[0] == ["binary", "8"]:
+        raise ValueError("застарілий заголовок (binary 8) не є рядком Canon")
+
+    entries = root
 
     seen_ids: set[str] = set()
     all_surfaces: set[str] = set()
