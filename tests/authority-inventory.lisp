@@ -88,3 +88,4 @@
 (authority "crates/my-lisp/tests/canon_authority_inventory.rs" observer)
 (authority "crates/my-lisp/tests/semantic_authority_guard_1049.rs" observer)
 (authority "crates/my-lisp/tests/program_surface_translation.rs" observer)
+(authority "crates/my-lisp/tests/core_profiles.rs" observer)
