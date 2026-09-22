@@ -104,6 +104,8 @@
         (second
           (list
             (print "Rust evaluator dispatch projection is stale")
+            (print current)
+            (print generated)
             (car (quote ()))))))))
   ((equal? (car *argv*) "--check")
    (structural-relation distinct)
