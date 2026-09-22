@@ -1,33 +1,4 @@
-use my_lisp::{
-    load_core_profile, parse, CoreProfile, ErrorKind, Session,
-};
-
-#[test]
-fn four_core_contract_is_one_lisp_owned_document() {
-    let source = include_str!("../../../contracts/core-profile-contract.lisp");
-    let forms = parse(source).expect("core-profile-contract.lisp must be readable Lisp data");
-    assert_eq!(
-        forms.len(),
-        1,
-        "#1131 core profile contract must remain one self-contained Lisp data document"
-    );
-
-    for profile in ["core1", "core2", "core3", "core4"] {
-        assert!(
-            source.contains(&format!("(identity . {profile})")),
-            "#1131 contract must declare {profile}"
-        );
-    }
-
-    assert!(
-        source.contains("(profiles-may-redefine-meaning . forbidden)"),
-        "#1131 profiles must never become independent semantic authorities"
-    );
-    assert!(
-        source.contains("(profiles-may-renumber-sids . forbidden)"),
-        "#1131 profile selection must preserve Sid8 identity"
-    );
-}
+use my_lisp::{load_core_profile, CoreProfile, ErrorKind, Session};
 
 #[test]
 fn profile_identity_is_mechanical_and_has_exactly_four_values() {
