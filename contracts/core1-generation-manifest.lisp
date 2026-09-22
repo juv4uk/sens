@@ -4,8 +4,8 @@
    (repository . juv4uk/mccarthy-eval)
    (commit . "1ae9745b66a1439c1929b0d9038c680567118a58")
    (source-path . "mccarthy-kernel.s")
-   (source-sha256 . "PENDING-S0-SOURCE-REMEASURE")
-   (binary-sha256 . "PENDING-S0-BINARY-REMEASURE")
+   (source-sha256 . "1fb0724145cb77f6fd226903238286517bd64fbec5c82e72d19f53934657a46a")
+   (binary-sha256 . "9fe7c97b6affa42a12764c29f1e7a4656d188a61d4f84f44ce9d4e4186e3e0b6")
    (semantic-authority . no)
    (status . witnessed))
 
@@ -13,7 +13,7 @@
    (role . lisp-owned-bootstrap)
    (repository . juv4uk/my-lisp)
    (path . "lib/core1.lisp")
-   (source-sha256 . "PENDING-S1-SOURCE-REMEASURE")
+   (source-sha256 . "bb83e5148d642aab3aceca558a2b9a6338ee41a9cac710169baeee7405cd893a")
    (executed-by . s0)
    (mechanism . historical-function-funarg-plus-zero-copy-lisp-owned-dispatch)
    (witnesses .
