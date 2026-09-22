@@ -1,0 +1,24 @@
+name: verify 362 -> 1078 read-file timeout
+
+on:
+  pull_request:
+    paths:
+      - "lib/fs.lisp"
+      - "tests/fixtures/verify-362-1078-readfile.lisp"
+      - ".github/workflows/verify-362-1078-readfile.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-readfile-prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build CLI
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Prove #1078 read-file prefix fits under 60 seconds
+        run: |
+          output="$(timeout 60 target/debug/my-lisp tests/fixtures/verify-362-1078-readfile.lisp)"
+          test "$output" = "(verify-362-1078-readfile (status pass))"
