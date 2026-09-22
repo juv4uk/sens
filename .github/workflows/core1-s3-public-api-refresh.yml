@@ -1,0 +1,27 @@
+name: Temporary Core1 S3 public API refresh
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1-compiler-prelude.lisp"
+      - "contracts/core1-s3-compiler-prelude.lisp"
+      - ".github/workflows/core1-s0.yml"
+      - ".github/workflows/core1-s3-public-api-refresh.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Render canonical report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/public_api_inventory.py --write-report
+          echo '===PUBLIC_API_REPORT_BEGIN==='
+          cat docs/generated/public-api-discovery.md
+          echo '===PUBLIC_API_REPORT_END==='
