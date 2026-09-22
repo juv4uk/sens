@@ -140,3 +140,7 @@ crates/my-lisp/tests/canon_authority_inventory.rs	every_known_active_sid_mapping
 crates/my-lisp/tests/canon_authority_inventory.rs	generated_projections_name_their_real_source_instead_of_claiming_authority	observer	canon-authority-inventory	knowledge/canon-authority-inventory.lisp	migrated
 crates/my-lisp/tests/semantic_authority_guard_1049.rs	semantic_authority_guard_is_lisp_owned	observer	semantic-authority-boundary	scripts/semantic-authority-guard.lisp + scripts/semantic-authority-guard-enforce.lisp	retained
 crates/my-lisp/tests/program_surface_translation.rs	translated_programs_execute_with_the_same_result_on_all_table_surfaces	observer	surface-namespace-translation-parity	lib/surface/semantic-registry.lisp + scripts/translate-program.py	retained
+crates/my-lisp/tests/core_profiles.rs	four_core_contract_is_one_lisp_owned_document	observer	core-profile-contract-shape	contracts/core-profile-contract.lisp	retained
+crates/my-lisp/tests/core_profiles.rs	profile_identity_is_mechanical_and_has_exactly_four_values	observer	core-profile-transport-identity	contracts/core-profile-contract.lisp	retained
+crates/my-lisp/tests/core_profiles.rs	undeclared_profile_implementations_fail_closed	observer	core-profile-availability	contracts/core-profile-contract.lisp + mechanical loader	retained
+crates/my-lisp/tests/core_profiles.rs	migration_default_is_explicitly_core4	observer	core4-migration-availability	contracts/core-profile-contract.lisp + lib/core.lisp	transition
