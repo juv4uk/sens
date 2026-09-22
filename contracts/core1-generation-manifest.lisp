@@ -2,10 +2,10 @@
   ((generation . s0)
    (role . historical-physical-seed)
    (repository . juv4uk/mccarthy-eval)
-   (commit . "1ae9745b66a1439c1929b0d9038c680567118a58")
+   (commit . "c7d4d6fa56e97c860c567fb809a719e3c79778fc")
    (source-path . "mccarthy-kernel.s")
-   (source-sha256 . "1fb0724145cb77f6fd226903238286517bd64fbec5c82e72d19f53934657a46a")
-   (binary-sha256 . "9fe7c97b6affa42a12764c29f1e7a4656d188a61d4f84f44ce9d4e4186e3e0b6")
+   (source-sha256 . "93d481637577fd6d3427d9a33fb44037ad43891005cc26faa64267d6ec36d945")
+   (binary-sha256 . "03bf566aa21228fe16cab3a56b775bb80b2d43b648223c87cb67fe2396039f66")
    (semantic-authority . no)
    (status . witnessed))
 
