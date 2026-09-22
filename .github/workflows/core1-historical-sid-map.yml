@@ -37,6 +37,15 @@ jobs:
 
           test -f "$map"
           grep -F '(historical-mechanism-pin . "1ae9745b66a1439c1929b0d9038c680567118a58")' "$map"
+          grep -F '(sid-selects-identity . yes)' "$map"
+          grep -F '(profile-selects-law . core1)' "$map"
+          grep -F '(core1-result-domain . historical-t-nil)' "$map"
+          grep -F '(core4-result-records-in-core1 . forbidden)' "$map"
+
+          if grep -E -q 'result-projection|control-projection|sid-selects-meaning' "$map"; then
+            echo "Core1 SID map contains pre-correction Core4/general-law coupling" >&2
+            exit 1
+          fi
           test "$(git -C "$hist" rev-parse HEAD)" = "1ae9745b66a1439c1929b0d9038c680567118a58"
 
           rows="$(grep '^    (row ' "$map")"
