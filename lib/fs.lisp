@@ -8,16 +8,24 @@
 ; for `process-run` (lib/process.lisp) and `tcp-read`/`tcp-write` (lib/tcp.lisp).
 ; Load `lib/utf8.lisp` before this file.
 
-; Historical `read-file` returns the decoded text directly. Invalid UTF-8 is
-; no longer a raw Rust IO error: it returns the same explicit rejection value
-; `utf8-decode-string` already produces for process/TCP bytes.
+; Historical `read-file` returns the decoded text directly. `read-file-bytes`
+; constructively returns a proper list of exact u8 values, so this specific
+; filesystem composition can enter the existing Lisp-owned UTF-8 sequence
+; decoder directly instead of re-running the generic `utf8-all-bytes?` domain
+; proof. Public `utf8-decode` remains unchanged for arbitrary Lisp lists.
+; Invalid UTF-8 still returns the same explicit rejection value because
+; sequence validity and byte->scalar interpretation remain in
+; `utf8-decode-onto`.
 (def read-file
   (lambda (path)
-    (let ((decoded (utf8-decode-string (read-file-bytes path))))
+    (let ((decoded
+            (utf8-decode-onto
+              (read-file-bytes path)
+              (quote ()))))
       (cond
         ((eq (car decoded) (quote decoded))
          (identity-relation same)
-         (second decoded))
+         (unicode-scalars->string (second decoded)))
         ((eq (car decoded) (quote decoded))
          (identity-relation distinct)
          decoded)))))
