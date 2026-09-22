@@ -177,3 +177,13 @@ if [[ "$science_projection_status" != "(scientific-constant-knowledge-projection
   printf 'scientific constant knowledge-projection witness failed: %s\n' "$science_projection_status" >&2
   exit 1
 fi
+
+# Verification-only #362/#1125 -> #1078 blocker witness. Before the proven-byte
+# read-file specialization, this exact prefix exceeded 60s on the real Canon
+# registry. The fixture deliberately tests only the load/read path, not selector
+# semantics, so a pass attributes the timeout removal to the filesystem pipeline.
+verify_362_1078_status="$(timeout 60 cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/verify-362-1078-readfile.lisp)"
+if [[ "$verify_362_1078_status" != "(verify-362-1078-readfile (status pass))" ]]; then
+  printf 'verify #362/#1078 read-file timeout witness failed: %s\n' "$verify_362_1078_status" >&2
+  exit 1
+fi
