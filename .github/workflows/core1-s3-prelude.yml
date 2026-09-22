@@ -78,7 +78,7 @@ jobs:
             ./mccarthy-kernel ../prelude-witness.lisp
           )"
 
-          expected='(T () ())'
+          expected='(T NIL NIL)'
           printf 'expected=%s\n' "$expected"
           printf 'actual=%s\n' "$actual"
           test "$actual" = "$expected"
