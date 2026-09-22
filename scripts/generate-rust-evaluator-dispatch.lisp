@@ -17,16 +17,19 @@
 (def dispatch-form
   (car (read-all (read-file source-path))))
 
-(def rows (cdr dispatch-form))
+(def rows dispatch-form)
 
 (def rust-mechanism
   (lambda (name)
     (cond
       ((equal? name (quote lambda-form))
+       (structural-relation same)
        "NecessaryFormMechanism::Lambda")
       ((equal? name (quote define-form))
+       (structural-relation same)
        "NecessaryFormMechanism::Define")
-      (t
+      ((quote no-known-mechanism)
+       no-known-mechanism
        (car (quote ()))))))
 
 (def render-row
@@ -36,7 +39,8 @@
         ((atom mechanism)
          (structural-kind empty-list)
          (car (quote ())))
-        (t
+        ((atom mechanism)
+         (structural-kind atom)
          (str+
            "    NecessaryFormDispatchRow { semantic_id: 0b"
            (write-to-string (car row))
@@ -82,12 +86,6 @@
      (list
        (write-file output-path generated)
        (print "Rust evaluator dispatch projection written"))))
-  ((atom *argv*)
-   (structural-kind atom)
-   (second
-     (list
-       (write-file output-path generated)
-       (print "Rust evaluator dispatch projection written"))))
   ((equal? (car *argv*) "--check")
    (structural-relation same)
    (let ((current (read-file output-path)))
@@ -101,8 +99,8 @@
           (list
             (print "Rust evaluator dispatch projection is stale")
             (car (quote ()))))))))
-  ((equal? (car *argv*) "--check")
-   (structural-relation distinct)
+  ((quote write-projection)
+   write-projection
    (second
      (list
        (write-file output-path generated)
