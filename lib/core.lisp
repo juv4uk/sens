@@ -1,4 +1,3 @@
-(binary 8)
 
 ; my-lisp bootstrap library: derived behavior belongs in the language itself.
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.

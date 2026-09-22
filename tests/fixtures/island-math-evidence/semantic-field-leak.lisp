@@ -1,6 +1,5 @@
 (
-  (binary 8)
-  (schema island-math-evidence/1)
+    (schema island-math-evidence/1)
   (authority "lib/surface/semantic-registry.lisp")
   (role mechanism-evidence-only)
   (law "synthetic copied semantic law")

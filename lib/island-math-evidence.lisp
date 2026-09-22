@@ -7,8 +7,7 @@
 ; until law/domain are available from the one Canon/function-table authority row.
 
 (
-  (binary 8)
-  (schema island-math-evidence/1)
+    (schema island-math-evidence/1)
   (authority "lib/surface/semantic-registry.lisp")
   (role mechanism-evidence-only)
   (parent-issue 990)

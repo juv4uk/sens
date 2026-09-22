@@ -68,19 +68,16 @@ the existing Canon/function-table identity. The spelling itself does not create
 meaning: an unadmitted SID remains a value and invocation fails closed through
 the normal SID-call boundary.
 
-The historical fixed-width reader descriptor remains supported for compatible
-registry/data files:
+Exact bare eight-bit spellings are the complete SID identity space:
 
 ```lisp
-(binary 8)
 00000001
 10101000
 ```
 
-Inside that explicit mode, an eight-character numeric token containing a digit
-other than `0` or `1` still fails with the named reader error
-`binary literal contains a non-binary digit`. Outside that mode, non-binary
-numeric tokens continue through ordinary decimal parsing.
+There is no `(binary 8)` reader mode. An eight-character token made only of
+`0` and `1` is always a SID; other numeric tokens continue through ordinary
+decimal parsing.
 
 The canonical printer emits SID/Binary values as their eight-bit spelling, not
 as a decimal integer, so leading zeroes and read/print/read identity are

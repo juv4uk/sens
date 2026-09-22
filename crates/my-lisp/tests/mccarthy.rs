@@ -53,13 +53,13 @@ fn native_binary_value_round_trips_through_eval_and_print() {
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session)
         .expect("core library loads");
-    let first = eval_program("(binary 8) 00000101", &mut session)
-        .expect("binary value evaluates");
+    let first = eval_program("00000101", &mut session)
+        .expect("SID value evaluates");
     assert_eq!(first.value.to_string(), "00000101");
 
     let printed = first.value.to_string();
-    let second = eval_program(&format!("(binary 8) {printed}"), &mut session)
-        .expect("printed binary value reads again");
+    let second = eval_program(&printed, &mut session)
+        .expect("printed SID reads again");
     assert_eq!(second.value, first.value);
 }
 
@@ -1587,4 +1587,3 @@ fn meta_eval_lambda_witness_env_capture_and_application() {
     let original_res = eval_program("(my-apply closure-val (cons 0 (quote ())))", &mut session).unwrap().value;
     assert_eq!(original_res.to_string(), "7");
 }
-
