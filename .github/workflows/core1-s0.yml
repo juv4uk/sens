@@ -142,4 +142,4 @@ jobs:
           )"
 
           printf '%s\n' "$actual"
-          test "$actual" = '(T ())'
+          test "$actual" = '(T NIL)'
