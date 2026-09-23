@@ -120,4 +120,4 @@
                   (quote fail)
                   verdict))))))))
 
-(print (core1-sid8-clauses-verdict core1-sid8-resolver-clauses))
+(core1-sid8-clauses-verdict core1-sid8-resolver-clauses)
