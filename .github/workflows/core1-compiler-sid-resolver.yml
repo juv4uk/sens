@@ -1,0 +1,70 @@
+name: Core1 compiler SID8 resolver
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1-compiler-sid-resolver.lisp"
+      - "contracts/core1-historical-sid-map.lisp"
+      - "scripts/check-core1-compiler-sid-resolver.py"
+      - ".github/workflows/core1-compiler-sid-resolver.yml"
+  workflow_dispatch:
+
+jobs:
+  core1-sid8-resolver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout my-lisp
+        uses: actions/checkout@v5
+
+      - name: Authority projection guard
+        run: python3 scripts/check-core1-compiler-sid-resolver.py
+
+      - name: Checkout SID8-aware historical S0
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ref: 770ae6ce5d8c13d5a970f2b496fc74d944f480a5
+          path: mccarthy-eval
+          fetch-depth: 1
+
+      - name: Build historical S0
+        run: gcc -no-pie -O0 -s -o mccarthy-eval/mccarthy-kernel mccarthy-eval/mccarthy-kernel.s
+
+      - name: Execute bare SID8 resolver witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$(mktemp)"
+          expected="$(mktemp)"
+          trap 'rm -f "$fixture" "$expected"' EXIT
+
+          cat lib/core1-compiler-sid-resolver.lisp > "$fixture"
+          cat >> "$fixture" <<'LISP'
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE CONS))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE CAR))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE ATOM))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE EQ))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE +))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE -))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE NOT))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE LIST))
+          (EQ (C1-COMPILER-SID-FOR-SURFACE (QUOTE CONS)) (QUOTE 00000100))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE UNKNOWN))
+          LISP
+
+          cat > "$expected" <<'OUT'
+          00000100
+          00000101
+          00000010
+          00000011
+          00001100
+          00001101
+          00100001
+          00100111
+          NIL
+          NIL
+          OUT
+
+          (cd mccarthy-eval && ./mccarthy-kernel "$fixture") > actual.txt
+          diff -u "$expected" actual.txt
+          cat actual.txt
