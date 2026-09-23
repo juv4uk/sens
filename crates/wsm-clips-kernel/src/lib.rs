@@ -37,7 +37,9 @@ pub enum ClipsKernelError {
     #[cfg(feature = "native-clips")]
     EvalFailed(u32),
     #[cfg(feature = "native-clips")]
-    EvalReturnedNull,
+    RouterInstallFailed,
+    #[cfg(feature = "native-clips")]
+    RouterRemoveFailed,
 }
 
 impl fmt::Display for ClipsKernelError {
@@ -64,7 +66,9 @@ impl fmt::Display for ClipsKernelError {
             #[cfg(feature = "native-clips")]
             Self::EvalFailed(code) => write!(f, "CLIPS Eval failed with error code {code}"),
             #[cfg(feature = "native-clips")]
-            Self::EvalReturnedNull => write!(f, "CLIPS Eval returned a null text value"),
+            Self::RouterInstallFailed => write!(f, "CLIPS AddRouter failed for eval observation"),
+            #[cfg(feature = "native-clips")]
+            Self::RouterRemoveFailed => write!(f, "CLIPS DeleteRouter failed for eval observation"),
         }
     }
 }
@@ -103,28 +107,31 @@ mod native {
         _private: [u8; 0],
     }
 
-    #[repr(C)]
-    pub struct TypeHeader {
-        pub type_: u16,
-    }
-
-    #[repr(C)]
-    pub struct CLIPSLexeme {
-        pub header: TypeHeader,
-        pub contents: *const c_char,
-    }
-
-    #[repr(C)]
-    pub union CLIPSValue {
-        pub value: *mut c_void,
-        pub header: *mut TypeHeader,
-        pub lexeme_value: *mut CLIPSLexeme,
-    }
-
     type CreateEnvironmentFn = unsafe extern "C" fn() -> *mut Environment;
     type DestroyEnvironmentFn = unsafe extern "C" fn(*mut Environment) -> bool;
     type BuildFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> u32;
-    type EvalFn = unsafe extern "C" fn(*mut Environment, *const c_char, *mut CLIPSValue) -> u32;
+    type EvalFn = unsafe extern "C" fn(*mut Environment, *const c_char, *mut c_void) -> u32;
+    type RouterQueryFn =
+        unsafe extern "C" fn(*mut Environment, *const c_char, *mut c_void) -> bool;
+    type RouterWriteFn =
+        unsafe extern "C" fn(*mut Environment, *const c_char, *const c_char, *mut c_void);
+    type RouterReadFn =
+        unsafe extern "C" fn(*mut Environment, *const c_char, *mut c_void) -> i32;
+    type RouterUnreadFn =
+        unsafe extern "C" fn(*mut Environment, *const c_char, i32, *mut c_void) -> i32;
+    type RouterExitFn = unsafe extern "C" fn(*mut Environment, i32, *mut c_void);
+    type AddRouterFn = unsafe extern "C" fn(
+        *mut Environment,
+        *const c_char,
+        i32,
+        Option<RouterQueryFn>,
+        Option<RouterWriteFn>,
+        Option<RouterReadFn>,
+        Option<RouterUnreadFn>,
+        Option<RouterExitFn>,
+        *mut c_void,
+    ) -> bool;
+    type DeleteRouterFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> bool;
     type AssertStringFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> *mut Fact;
     type RunFn = unsafe extern "C" fn(*mut Environment, c_longlong) -> c_longlong;
     type RetractFn = unsafe extern "C" fn(*mut Fact) -> u32;
@@ -277,6 +284,8 @@ mod native {
         pub destroy_environment: DestroyEnvironmentFn,
         pub build: BuildFn,
         pub eval: EvalFn,
+        pub add_router: AddRouterFn,
+        pub delete_router: DeleteRouterFn,
         pub assert_string: AssertStringFn,
         pub run: RunFn,
         pub retract: RetractFn,
@@ -306,6 +315,8 @@ mod native {
             let destroy_environment = unsafe { load_symbol(&library, b"DestroyEnvironment\0")? };
             let build = unsafe { load_symbol(&library, b"Build\0")? };
             let eval = unsafe { load_symbol(&library, b"Eval\0")? };
+            let add_router = unsafe { load_symbol(&library, b"AddRouter\0")? };
+            let delete_router = unsafe { load_symbol(&library, b"DeleteRouter\0")? };
             let assert_string = unsafe { load_symbol(&library, b"AssertString\0")? };
             let run = unsafe { load_symbol(&library, b"Run\0")? };
             let retract = unsafe { load_symbol(&library, b"Retract\0")? };
@@ -319,6 +330,8 @@ mod native {
                 destroy_environment,
                 build,
                 eval,
+                add_router,
+                delete_router,
                 assert_string,
                 run,
                 retract,
@@ -376,6 +389,38 @@ mod native {
                 collect_installed_libraries(&path, names, depth - 1, output);
             }
         }
+    }
+
+    pub struct RouterCapture {
+        pub bytes: Vec<u8>,
+    }
+
+    const EVAL_ROUTER_LOGICAL_NAME: &[u8] = b"my-lisp-eval-capture";
+
+    pub unsafe extern "C" fn eval_router_query(
+        _environment: *mut Environment,
+        logical_name: *const c_char,
+        _context: *mut c_void,
+    ) -> bool {
+        if logical_name.is_null() {
+            return false;
+        }
+        unsafe { CStr::from_ptr(logical_name) }.to_bytes() == EVAL_ROUTER_LOGICAL_NAME
+    }
+
+    pub unsafe extern "C" fn eval_router_write(
+        _environment: *mut Environment,
+        _logical_name: *const c_char,
+        text: *const c_char,
+        context: *mut c_void,
+    ) {
+        if text.is_null() || context.is_null() {
+            return;
+        }
+        let capture = unsafe { &mut *(context as *mut RouterCapture) };
+        capture
+            .bytes
+            .extend_from_slice(unsafe { CStr::from_ptr(text) }.to_bytes());
     }
 
     pub fn installed_library_candidates() -> Vec<PathBuf> {
@@ -521,35 +566,53 @@ impl ClipsEnvironment {
         unsafe { (self.inner.api.run)(self.inner.raw, limit) }
     }
 
-    /// Ask the native CLIPS runtime to evaluate an expression and return
-    /// CLIPS' own textual observation of the resulting value.
-    /// Rust does not interpret the expression or reconstruct its semantics.
-    pub fn eval_text(&self, expression: &str) -> Result<String, ClipsKernelError> {
-        let request = format!("(str-cat {expression})");
+    /// Ask native CLIPS to evaluate an expression and capture exactly what
+    /// CLIPS prints for that value through a dedicated I/O router.
+    ///
+    /// Rust never decodes a CLIPS value or reconstructs its semantics.
+    pub fn eval_bytes(&self, expression: &str) -> Result<Vec<u8>, ClipsKernelError> {
+        let request = format!("(printout my-lisp-eval-capture {expression})");
         let request =
             std::ffi::CString::new(request).map_err(|_| ClipsKernelError::NulInput)?;
-        let mut value = native::CLIPSValue {
-            value: std::ptr::null_mut(),
+        let router_name =
+            std::ffi::CString::new("my-lisp-eval-capture").expect("static router name");
+        let mut capture = native::RouterCapture { bytes: Vec::new() };
+
+        let installed = unsafe {
+            (self.inner.api.add_router)(
+                self.inner.raw,
+                router_name.as_ptr(),
+                100,
+                Some(native::eval_router_query),
+                Some(native::eval_router_write),
+                None,
+                None,
+                None,
+                (&mut capture as *mut native::RouterCapture).cast(),
+            )
         };
+        if !installed {
+            return Err(ClipsKernelError::RouterInstallFailed);
+        }
+
         let code = unsafe {
-            (self.inner.api.eval)(self.inner.raw, request.as_ptr(), &mut value)
+            (self.inner.api.eval)(
+                self.inner.raw,
+                request.as_ptr(),
+                std::ptr::null_mut(),
+            )
         };
+        let removed =
+            unsafe { (self.inner.api.delete_router)(self.inner.raw, router_name.as_ptr()) };
+
         if code != 0 {
             return Err(ClipsKernelError::EvalFailed(code));
         }
-
-        let lexeme = unsafe { value.lexeme_value };
-        if lexeme.is_null() {
-            return Err(ClipsKernelError::EvalReturnedNull);
-        }
-        let contents = unsafe { (*lexeme).contents };
-        if contents.is_null() {
-            return Err(ClipsKernelError::EvalReturnedNull);
+        if !removed {
+            return Err(ClipsKernelError::RouterRemoveFailed);
         }
 
-        Ok(unsafe { std::ffi::CStr::from_ptr(contents) }
-            .to_string_lossy()
-            .into_owned())
+        Ok(capture.bytes)
     }
 
     pub fn fact_count(&self) -> std::ffi::c_ulong {
@@ -638,7 +701,7 @@ struct ClipsAbiContext {
     running: bool,
     last_semantic_id: Option<SemanticId>,
     last_fired: Option<i64>,
-    last_eval_text: Option<String>,
+    last_eval_output: Option<Vec<u8>>,
     #[cfg(feature = "native-clips")]
     environment: Option<ClipsEnvironment>,
     #[cfg(feature = "native-clips")]
@@ -662,7 +725,7 @@ impl ClipsAbiAdapter {
             running: false,
             last_semantic_id: None,
             last_fired: None,
-            last_eval_text: None,
+            last_eval_output: None,
             #[cfg(feature = "native-clips")]
             environment: None,
             #[cfg(feature = "native-clips")]
@@ -693,8 +756,8 @@ impl ClipsAbiAdapter {
         self.context.last_fired
     }
 
-    pub fn last_eval_text(&self) -> Option<&str> {
-        self.context.last_eval_text.as_deref()
+    pub fn last_eval_output(&self) -> Option<&[u8]> {
+        self.context.last_eval_output.as_deref()
     }
 }
 
@@ -824,12 +887,15 @@ unsafe extern "C" fn clips_exchange(
             }
             b"retracted\n".to_vec()
         } else if let Some(expression) = command.strip_prefix("eval:") {
-            let value = match environment.eval_text(expression) {
+            let value = match environment.eval_bytes(expression) {
                 Ok(value) => value,
                 Err(_) => return WsmStatus::KernelFailure,
             };
-            context.last_eval_text = Some(value.clone());
-            format!("result={value}\n").into_bytes()
+            context.last_eval_output = Some(value.clone());
+            let mut output = b"result=".to_vec();
+            output.extend_from_slice(&value);
+            output.push(b'\n');
+            output
         } else {
             return WsmStatus::InvalidArgument;
         };
@@ -887,7 +953,7 @@ mod tests {
         assert!(vtable.is_mechanically_complete());
         assert_eq!(adapter.last_semantic_id(), None);
         assert_eq!(adapter.last_fired(), None);
-        assert_eq!(adapter.last_eval_text(), None);
+        assert_eq!(adapter.last_eval_output(), None);
     }
 
 }
