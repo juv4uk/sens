@@ -1,38 +1,30 @@
 ; Core1 SID8 bootstrap transport overlay.
 ;
-; Historical Core1 source remains unchanged. This file is loaded only by the
-; SID8-aware bootstrap lane after mccarthy-eval#55. It does not define new
-; function meaning; it only lets exact already-authoritative SID8 identity
-; values cross the Core1 meta-evaluator lookup boundary without being mistaken
-; for ordinary unbound symbols.
+; Historical Core1 evaluator source remains unchanged. The SID8-aware S0 can
+; already carry exact bare SID8 values. This overlay only supplies an initial
+; Core1 global environment in which each admitted compiler-output SID is bound
+; to itself, so ordinary C1-LOOKUP returns the exact identity value.
 ;
-; + and - appear here as compiler-output data identities only. This does not
-; admit arithmetic execution into the Core1 profile.
+; There is no SID predicate, no quoted/string wrapper and no surface-name
+; function key after resolution. + and - are present only as compiler-output
+; data identities; this does not admit arithmetic execution into Core1.
 
-(DEFINE C1-SID-VALUEP
-  (LAMBDA (VALUE)
-    (COND
-      ((EQ VALUE 00000010) T)
-      ((EQ VALUE 00000011) T)
-      ((EQ VALUE 00000100) T)
-      ((EQ VALUE 00000101) T)
-      ((EQ VALUE 00000110) T)
-      ((EQ VALUE 00001100) T)
-      ((EQ VALUE 00001101) T)
-      (T NIL))))
+(DEFINE C1-SID8-BOOTSTRAP-GLOBAL
+  (LAMBDA ()
+    (CONS (CONS 00000010 00000010)
+      (CONS (CONS 00000011 00000011)
+        (CONS (CONS 00000100 00000100)
+          (CONS (CONS 00000101 00000101)
+            (CONS (CONS 00000110 00000110)
+              (CONS (CONS 00001100 00001100)
+                (CONS (CONS 00001101 00001101)
+                  NIL)))))))))
 
-(DEFINE C1-LOOKUP
-  (LAMBDA (NAME ENV GLOBAL)
-    (COND
-      ((C1-SID-VALUEP NAME) NAME)
-      (T
-       ((LAMBDA (LOCAL)
-          (COND
-            ((C1-FOUNDP LOCAL) (C1-FOUND-VALUE LOCAL))
-            (T
-             ((LAMBDA (TOP)
-                (COND
-                  ((C1-FOUNDP TOP) (C1-FOUND-VALUE TOP))
-                  (T (C1-DEFAULT NAME))))
-              (C1-LOOKUP-IN NAME GLOBAL)))))
-        (C1-LOOKUP-IN NAME ENV))))))
+(DEFINE C1-EVAL-PROGRAM-THEN-SID8
+  (LAMBDA (FORMS EXPR)
+    ((LAMBDA (WORLD)
+       (C1-WORLD-VALUE
+         (C1-WORLD-EVAL WORLD EXPR)))
+     (C1-EVAL-PROGRAM
+       FORMS
+       (C1-SID8-BOOTSTRAP-GLOBAL)))))
