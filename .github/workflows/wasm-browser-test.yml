@@ -9,8 +9,8 @@ on:
       - 'crates/my-lisp/Cargo.toml'
       - 'crates/my-lisp-literate/**'
       - 'crates/my-lisp-lsp/**'
-      - 'lib/core.lisp'       # canonical (my-lisp#81)
-      - 'lib/core.lisp.fasl'  # canonical compiled snapshot
+      - 'lib/core4.lisp'      # current Core4 profile (#1135)
+      - 'lib/core4.lisp.fasl' # current Core4 compiled snapshot
       # legacy aliases kept for reference: lib/core.my, lib/core.my.fasl
       - 'Cargo.toml'
       - 'Cargo.lock'
