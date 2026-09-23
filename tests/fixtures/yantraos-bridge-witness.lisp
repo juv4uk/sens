@@ -9,27 +9,39 @@
   (lambda (value)
     (cond
       ((atom value)
+       (structural-kind atom)
        (cond
-         ((eq value (quote ())) (structural-relation same)
-          t)
-         (t (structural-relation distinct)
-          (quote ()))))
-      (t (yo-proper-list? (cdr value))))))
+         ((equal? value (quote ()))
+          (structural-relation same)
+          (quote yes))
+         (t
+          (quote always)
+          (quote invalid))))
+      (t
+       (quote always)
+       (yo-proper-list? (cdr value))))))
 
 (def yo-field
   (lambda (name record)
     (let ((found (assoc name record)))
       (cond
-        ((atom found) (quote ()))
-        (t (cdr found))))))
+        ((equal? found (quote ()))
+         (structural-relation same)
+         (quote ()))
+        (t
+         (quote always)
+         (cdr found))))))
 
 (def yo-has-field?
   (lambda (name record)
-    (cond
-      ((atom (assoc name record)) (identity-relation distinct)
-       (quote ()))
-      (t (identity-relation same)
-       t))))
+    (let ((found (assoc name record)))
+      (cond
+        ((equal? found (quote ()))
+         (structural-relation same)
+         (quote no))
+        (t
+         (quote always)
+         (quote yes))))))
 
 (def yo-no-raw-shell?
   (lambda (envelope)
@@ -39,9 +51,10 @@
                    (yo-field (quote action) envelope))
          (quote shell))
        (structural-relation same)
-       (quote ()))
-      (t (structural-relation distinct)
-       t))))
+       (quote no))
+      (t
+       (quote always)
+       (quote yes)))))
 
 (def yo-action-envelope
   (lambda (goal capability operation target parameters verification provenance approval)
@@ -66,30 +79,54 @@
 (def yo-action-envelope?
   (lambda (value)
     (cond
-      ((yo-proper-list? value) (identity-relation same)
+      ((yo-proper-list? value)
+       (quote yes)
        (cond
-         ((yo-has-field? (quote protocol) value) (identity-relation same)
+         ((yo-has-field? (quote protocol) value)
+          (quote yes)
           (cond
-            ((yo-has-field? (quote intent) value) (identity-relation same)
+            ((yo-has-field? (quote intent) value)
+             (quote yes)
              (cond
-               ((yo-has-field? (quote action) value) (identity-relation same)
+               ((yo-has-field? (quote action) value)
+                (quote yes)
                 (cond
-                  ((yo-has-field? (quote parameters) value) (identity-relation same)
+                  ((yo-has-field? (quote parameters) value)
+                   (quote yes)
                    (cond
-                     ((yo-has-field? (quote verification) value) (identity-relation same)
+                     ((yo-has-field? (quote verification) value)
+                      (quote yes)
                       (cond
-                        ((yo-has-field? (quote provenance) value) (identity-relation same)
+                        ((yo-has-field? (quote provenance) value)
+                         (quote yes)
                          (cond
-                           ((yo-has-field? (quote approval) value) (identity-relation same)
+                           ((yo-has-field? (quote approval) value)
+                            (quote yes)
                             (yo-no-raw-shell? value))
-                           (t (quote ()))))
-                        (t (quote ()))))
-                     (t (quote ()))))
-                  (t (quote ()))))
-               (t (quote ()))))
-            (t (quote ()))))
-         (t (quote ()))))
-      (t (quote ())))))
+                           (t
+                            (quote always)
+                            (quote no))))
+                        (t
+                         (quote always)
+                         (quote no))))
+                     (t
+                      (quote always)
+                      (quote no))))
+                  (t
+                   (quote always)
+                   (quote no))))
+               (t
+                (quote always)
+                (quote no))))
+            (t
+             (quote always)
+             (quote no))))
+         (t
+          (quote always)
+          (quote no))))
+      (t
+       (quote always)
+       (quote no)))))
 
 (def yo-execution-observation
   (lambda (result route evidence audit-ref provenance)
@@ -104,21 +141,39 @@
 (def yo-execution-observation?
   (lambda (value)
     (cond
-      ((yo-proper-list? value) (identity-relation same)
+      ((yo-proper-list? value)
+       (quote yes)
        (cond
-         ((yo-has-field? (quote protocol) value) (identity-relation same)
+         ((yo-has-field? (quote protocol) value)
+          (quote yes)
           (cond
-            ((yo-has-field? (quote result) value) (identity-relation same)
+            ((yo-has-field? (quote result) value)
+             (quote yes)
              (cond
-               ((yo-has-field? (quote route) value) (identity-relation same)
+               ((yo-has-field? (quote route) value)
+                (quote yes)
                 (cond
-                  ((yo-has-field? (quote evidence) value) (identity-relation same)
+                  ((yo-has-field? (quote evidence) value)
+                   (quote yes)
                    (cond
-                     ((yo-has-field? (quote audit-ref) value) (identity-relation same)
+                     ((yo-has-field? (quote audit-ref) value)
+                      (quote yes)
                       (yo-has-field? (quote provenance) value))
-                     (t (quote ()))))
-                  (t (quote ()))))
-               (t (quote ()))))
-            (t (quote ()))))
-         (t (quote ()))))
-      (t (quote ()))))
+                     (t
+                      (quote always)
+                      (quote no))))
+                  (t
+                   (quote always)
+                   (quote no))))
+               (t
+                (quote always)
+                (quote no))))
+            (t
+             (quote always)
+             (quote no))))
+         (t
+          (quote always)
+          (quote no))))
+      (t
+       (quote always)
+       (quote no)))))
