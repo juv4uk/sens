@@ -4,11 +4,10 @@
 ; result from lib/mechanism-selector.lisp and serializes only an admitted
 ; mechanism projection.
 ;
-; Important current CLIPS boundary:
-; ClipsAbiAdapter accepts transport commands "run"/"retract" after rule/fact
-; setup and exposes fired-count, not the arithmetic result value. Therefore the
-; historical "(+ L R)" payload is NOT emitted as if executable. The selected
-; CLIPS route fails closed until a bounded result-observing mechanism exists.
+; CLIPS boundary after #1164:
+; the native adapter admits an opaque `eval:<expr>` transport and returns the
+; producer-native printed result bytes through a dedicated CLIPS I/O router.
+; This file owns only the Lisp-side serialization into that admitted mechanism.
 
 (def island-lowering-append4
   (lambda (a b c d)
@@ -26,7 +25,8 @@
         ((eq executor (quote datalog)) (identity-relation same)
          (island-lowering-append4 "math + " l " " r))
         ((eq executor (quote clips)) (identity-relation same)
-         (quote ()))
+         (string-append "eval:"
+           (island-lowering-append4 "(+ " l " " (string-append r ")"))))
         ((quote island-lowering-fallback) island-lowering-fallback
          (quote ()))))))
 
@@ -42,26 +42,18 @@
               (cond
                 ((eq mechanism (quote bounded-exact-add))
                  (identity-relation same)
-                 (cond
-                   ((eq executor (quote clips))
-                    (identity-relation same)
-                    (list
-                      (quote island-lowering-failure)
-                      (quote clips-result-observation-unavailable)
-                      sid executor mechanism))
-                   ((quote island-lowering-non-clips) island-lowering-non-clips
-                    (let ((payload
-                            (island-lowering-add-payload executor left right)))
-                      (cond
-                        ((atom payload) (structural-kind empty-list)
-                         (list
-                           (quote island-lowering-failure)
-                           (quote unsupported-executor)
-                           sid executor mechanism))
-                        ((atom payload) (structural-kind atom)
-                         (list
-                           (quote island-lowering-result)
-                           sid executor mechanism payload)))))))
+                 (let ((payload
+                         (island-lowering-add-payload executor left right)))
+                   (cond
+                     ((atom payload) (structural-kind empty-list)
+                      (list
+                        (quote island-lowering-failure)
+                        (quote unsupported-executor)
+                        sid executor mechanism))
+                     ((atom payload) (structural-kind atom)
+                      (list
+                        (quote island-lowering-result)
+                        sid executor mechanism payload))))
                 ((quote island-lowering-other-mechanism) island-lowering-other-mechanism
                  (list
                    (quote island-lowering-failure)
