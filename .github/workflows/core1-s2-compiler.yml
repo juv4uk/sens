@@ -123,7 +123,7 @@ jobs:
               sid-direct-cons) expected='(A . B)' ;;
               sid-name-identity) expected='00000100' ;;
               sid-direct-identity) expected='00000100' ;;
-              sid-unsupported-call) expected='(C1-ERROR NOT-CALLABLE 11111111)' ;;
+              sid-unsupported-call) expected='(C1-ERROR UNBOUND 11111111)' ;;
             esac
 
             echo "=== $probe ==="
