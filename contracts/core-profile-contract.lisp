@@ -68,7 +68,7 @@
    (profile-number . 3)
    (role . experimental-kernel-laboratory)
    (target-source . "lib/core3.lisp")
-   (status . partial-selector-admitted-round-trip-pending)
+   (status . partial-native-observation-admitted-canon-operation-pending)
    (law-source . "contracts/core3-profile-contract.lisp")
    (execution-source . "lib/core3.lisp")
    (historical-contract . (7 0))
