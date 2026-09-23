@@ -121,7 +121,10 @@
                    (cp-check (quote core4) (quote profile-number) 4)
                    (cp-check (quote core4) (quote role) (quote current-creative-language))
                    (cp-check (quote core4) (quote historical-contract) (quote (8 0)))
-                   (cp-check (quote core4) (quote migration-donor) "lib/core.lisp")
+                   (cp-check (quote core4) (quote execution-source) "lib/core4.lisp")
+                   (cp-check (quote core4) (quote fasl-source) "lib/core4.lisp.fasl")
+                   (cp-check (quote core4) (quote compatibility-donor) "lib/core.lisp")
+                   (cp-check (quote core4) (quote status) (quote admitted))
 
                    (cp-check
                      (quote profile-selection)
@@ -150,8 +153,12 @@
 
                    (cp-check
                      (quote migration-state)
+                     (quote core4-source)
+                     (quote admitted))
+                   (cp-check
+                     (quote migration-state)
                      (quote current-lib-core-role)
-                     (quote core4-migration-donor))
+                     (quote core4-compatibility-donor))
                    (cp-check
                      (quote migration-state)
                      (quote current-lib-core-is-core1)
