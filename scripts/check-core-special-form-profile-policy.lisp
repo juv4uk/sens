@@ -1,0 +1,127 @@
+; #1133 — executable witness for Lisp-owned special-form profile policy.
+
+(def csp-policy
+  (car
+    (read-all
+      (read-file "contracts/core-special-form-profile-policy.lisp"))))
+
+(def csp-rows (cdr csp-policy))
+
+(def csp-find
+  (lambda (name rows)
+    (cond
+      ((atom rows)
+       (structural-kind empty-list)
+       (quote ()))
+      ((atom rows)
+       (structural-kind pair)
+       (cond
+         ((eq (car (car rows)) name)
+          (identity-relation same)
+          (car rows))
+         ((eq (car (car rows)) name)
+          (identity-relation distinct)
+          (csp-find name (cdr rows))))))))
+
+(def csp-row-check
+  (lambda (name expected)
+    (let ((actual (csp-find name csp-rows)))
+      (cond
+        ((equal? actual expected)
+         (structural-relation same)
+         (quote ()))
+        ((equal? actual expected)
+         (structural-relation distinct)
+         (list (quote mismatch) name expected actual))))))
+
+(def csp-first-failure
+  (lambda (checks)
+    (cond
+      ((atom checks)
+       (structural-kind empty-list)
+       (quote ()))
+      ((atom (car checks))
+       (structural-kind empty-list)
+       (csp-first-failure (cdr checks)))
+      ((atom (car checks))
+       (structural-kind pair)
+       (car checks))
+      ((atom (car checks))
+       (structural-kind atom)
+       (car checks))))))
+
+(def csp-verdict
+  (lambda ()
+    (let ((failure
+            (csp-first-failure
+              (list
+                (csp-row-check
+                  (quote owner)
+                  (quote (owner my-lisp)))
+                (csp-row-check
+                  (quote cond-sid)
+                  (quote (cond-sid 00000111)))
+                (csp-row-check
+                  (quote identity)
+                  (quote (identity shared-across-profiles)))
+                (csp-row-check
+                  (quote selection-order)
+                  (quote (selection-order profile-before-special-form-mechanism)))
+                (csp-row-check
+                  (quote core2)
+                  (quote
+                    (core2
+                      clause-family two-part
+                      selection-rule historical-truthiness
+                      exhaustion-result ()
+                      contract (6 0)
+                      law-source contracts/core2-profile-contract.lisp
+                      activation runtime-profile-hook-required)))
+                (csp-row-check
+                  (quote core3)
+                  (quote
+                    (core3
+                      clause-family two-part
+                      selection-rule historical-truthiness
+                      exhaustion-result ()
+                      contract (7 0)
+                      law-source contracts/core3-profile-contract.lisp
+                      activation experimental-profile)))
+                (csp-row-check
+                  (quote core4)
+                  (quote
+                    (core4
+                      clause-family three-part
+                      selection-rule explicit-result-match
+                      exhaustion-result UnsatisfiedConditional
+                      contract (8 0)
+                      law-source language-contract.lisp
+                      activation current)))
+                (csp-row-check
+                  (quote implicit-profile-selection)
+                  (quote (implicit-profile-selection forbidden)))
+                (csp-row-check
+                  (quote host-profile-law-table)
+                  (quote (host-profile-law-table forbidden)))
+                (csp-row-check
+                  (quote runtime-profile-selector)
+                  (quote
+                    (runtime-profile-selector
+                      owner my-lisp
+                      state pending-mechanical-hook)))))))
+      (cond
+        ((atom failure)
+         (structural-kind empty-list)
+         (quote (core-special-form-profile-policy-ok)))
+        ((atom failure)
+         (structural-kind pair)
+         (list
+           (quote core-special-form-profile-policy-violation)
+           failure))
+        ((atom failure)
+         (structural-kind atom)
+         (list
+           (quote core-special-form-profile-policy-violation)
+           failure))))))
+
+(csp-verdict)
