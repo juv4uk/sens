@@ -1,0 +1,45 @@
+name: Core special-form profile policy
+
+on:
+  pull_request:
+    paths:
+      - "contracts/core-special-form-profile-policy.lisp"
+      - "contracts/core2-profile-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "scripts/check-core-special-form-profile-policy.lisp"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/core-special-form-profile-policy.yml"
+  push:
+    branches: [main]
+    paths:
+      - "contracts/core-special-form-profile-policy.lisp"
+      - "contracts/core2-profile-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "scripts/check-core-special-form-profile-policy.lisp"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/core-special-form-profile-policy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    name: Lisp-owned COND profile policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build semantic oracle
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Execute special-form profile policy witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          verdict="$(./target/debug/my-lisp scripts/check-core-special-form-profile-policy.lisp)"
+          printf '%s\n' "$verdict"
+          test "$verdict" = "(core-special-form-profile-policy-ok)"
+      - name: Diff hygiene
+        run: git diff --check
