@@ -24,6 +24,7 @@ LIB_ROOT = REPO_ROOT / "lib"
 REPORT = REPO_ROOT / "docs" / "generated" / "public-api-discovery.md"
 MACHINE_AUTHORITY = LIB_ROOT / "machine" / "authority-boundary.lisp"
 EVALUATOR_DISPATCH = LIB_ROOT / "evaluator-dispatch.lisp"
+CORE_PROFILE_AUTHORITY = REPO_ROOT / "contracts" / "core-profile-contract.lisp"
 STATIC_EXCLUDED_TOP_LEVEL_DIRS = {"generated", "surface"}
 PUBLIC_API_EXCLUDED_ROOT = re.compile(
     r"^\s*\(public-api-excluded-root\s+lib/([^/\s()]+)\)\s*$"
@@ -173,12 +174,32 @@ def classified_excluded_top_level_dirs() -> set[str]:
     return STATIC_EXCLUDED_TOP_LEVEL_DIRS | classified
 
 
+def classified_excluded_source_files() -> set[str]:
+    """Read profile-source exclusions from the Lisp-owned four-core contract."""
+    source = CORE_PROFILE_AUTHORITY.read_text(encoding="utf-8")
+    excluded = {
+        match.group(1)
+        for line in source.splitlines()
+        if (match := PUBLIC_API_EXCLUDED_SOURCE.match(line)) is not None
+    }
+    if not excluded:
+        raise ValueError(
+            f"{CORE_PROFILE_AUTHORITY.relative_to(REPO_ROOT)} has no "
+            "public-api-excluded-source classification"
+        )
+    return excluded
+
+
 def library_files() -> list[Path]:
     excluded_top_level_dirs = classified_excluded_top_level_dirs()
+    excluded_source_files = classified_excluded_source_files()
     files = []
     for path in LIB_ROOT.rglob("*.lisp"):
         relative = path.relative_to(LIB_ROOT)
+        repo_relative = path.relative_to(REPO_ROOT).as_posix()
         if relative.parts and relative.parts[0] in excluded_top_level_dirs:
+            continue
+        if repo_relative in excluded_source_files:
             continue
         files.append(path)
     return sorted(files, key=lambda path: path.relative_to(REPO_ROOT).as_posix())
