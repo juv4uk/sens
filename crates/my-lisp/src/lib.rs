@@ -277,6 +277,9 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// `Environment::root()`: the root itself stays smaller, while the bootstrap
 /// explicitly gains `make-macro` before evaluating `lib/macro.lisp`.
 pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    session
+        .environment
+        .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
     let result = eval_program(CORE_LIBRARY_SOURCE, session)?;
     bind_missing_stable_surface_peers(&session.environment);
