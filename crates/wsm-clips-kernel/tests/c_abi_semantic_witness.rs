@@ -52,6 +52,10 @@ fn direct_native_clips_642_smoke() {
         2,
         "rule firing asserts a second working-memory fact"
     );
+    assert_eq!(
+        environment.eval_text("(+ 2 3)").expect("native CLIPS Eval"),
+        "5"
+    );
     environment
         .retract(fact)
         .expect("retract the original seed fact");
@@ -80,6 +84,30 @@ fn opaque_semantic_id_crosses_shared_abi_into_native_clips_agenda() {
     assert_eq!(String::from_utf8_lossy(&output), "fired=1\n");
     assert_eq!(adapter.last_semantic_id(), Some(SemanticId(PROBE_ID)));
     assert_eq!(adapter.last_fired(), Some(1));
+
+    assert_eq!(
+        unsafe { vtable.stop.expect("stop")(vtable.context) },
+        WsmStatus::Ok
+    );
+}
+
+#[test]
+fn abi_eval_text_preserves_sid_and_returns_native_clips_result() {
+    let adapter = ClipsAbiAdapter::new(
+        "(defrule observe-signal (signal) => (assert (observed)))",
+        "(signal)",
+    );
+    let vtable = adapter.vtable();
+    assert_eq!(
+        unsafe { vtable.start.expect("start")(vtable.context) },
+        WsmStatus::Ok
+    );
+
+    let (status, output) = exchange(&adapter, b"eval:(+ 2 3)");
+    assert_eq!(status, WsmStatus::Ok);
+    assert_eq!(String::from_utf8_lossy(&output), "result=5\n");
+    assert_eq!(adapter.last_semantic_id(), Some(SemanticId(PROBE_ID)));
+    assert_eq!(adapter.last_eval_text(), Some("5"));
 
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
