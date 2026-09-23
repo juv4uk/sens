@@ -78,6 +78,11 @@
 | `lib/content-store.lisp` | function | `content-store-contains?` | unreviewed |
 | `lib/content-store.lisp` | function | `content-store-put-world` | unreviewed |
 | `lib/content-store.lisp` | function | `content-store-size` | unreviewed |
+| `lib/core1-compiler-prelude.lisp` | function | `not` | unreviewed |
+| `lib/core3.lisp` | function | `core3-executors` | unreviewed |
+| `lib/core3.lisp` | function | `core3-route` | unreviewed |
+| `lib/core3.lisp` | function | `core3-add-routes` | unreviewed |
+| `lib/core3.lisp` | function | `core3-profile-status` | unreviewed |
 | `lib/core4.lisp` | function | `identity` | unreviewed |
 | `lib/core4.lisp` | function | `binary` | unreviewed |
 | `lib/core4.lisp` | function | `list` | unreviewed |
@@ -145,11 +150,6 @@
 | `lib/core4.lisp` | function | `my-postcore-missing-peers` | unreviewed |
 | `lib/core4.lisp` | function | `my-postcore-build-definitions` | unreviewed |
 | `lib/core4.lisp` | macro | `my-postcore-materialize-stable-peers` | unreviewed |
-| `lib/core1-compiler-prelude.lisp` | function | `not` | unreviewed |
-| `lib/core3.lisp` | function | `core3-executors` | unreviewed |
-| `lib/core3.lisp` | function | `core3-route` | unreviewed |
-| `lib/core3.lisp` | function | `core3-add-routes` | unreviewed |
-| `lib/core3.lisp` | function | `core3-profile-status` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-observation` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-claim` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-evidence` | unreviewed |
@@ -268,6 +268,9 @@
 | `lib/guard.lisp` | function | `guard-compare` | unreviewed |
 | `lib/guard.lisp` | function | `guard-sync-window` | unreviewed |
 | `lib/guard.lisp` | function | `guard-reference-field` | unreviewed |
+| `lib/island-lowering.lisp` | function | `island-lowering-append4` | unreviewed |
+| `lib/island-lowering.lisp` | function | `island-lowering-add-payload` | unreviewed |
+| `lib/island-lowering.lisp` | function | `island-lower-binary` | unreviewed |
 | `lib/knowledge.lisp` | function | `*knowledge-journal*` | unreviewed |
 | `lib/knowledge.lisp` | function | `clauses->tell-events` | unreviewed |
 | `lib/knowledge.lisp` | macro | `defmodule` | unreviewed |
@@ -320,9 +323,6 @@
 | `lib/knowledge.lisp` | function | `*usage-counts*` | unreviewed |
 | `lib/knowledge.lisp` | macro | `record-usage!` | unreviewed |
 | `lib/knowledge.lisp` | function | `usage-of` | unreviewed |
-| `lib/island-lowering.lisp` | function | `island-lowering-append4` | unreviewed |
-| `lib/island-lowering.lisp` | function | `island-lowering-add-payload` | unreviewed |
-| `lib/island-lowering.lisp` | function | `island-lower-binary` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-field` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-invocation-key` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-key-present?` | unreviewed |
