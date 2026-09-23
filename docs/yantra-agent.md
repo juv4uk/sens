@@ -108,3 +108,8 @@ agreed typed-intent endpoint exists. The current yantraOS alpha exposes local
 instruction injection and host-owned validation/routing/confirmation, so the
 bridge must not silently turn that natural-language injection path into a
 semantic authority boundary.
+
+The Yantra test suite now also exercises the bridge fixture deterministically:
+`yantraos_bridge_builds_typed_action_envelope`,
+`yantraos_bridge_rejects_raw_shell_capability`, and
+`yantraos_bridge_keeps_execution_observation_and_provenance`.
