@@ -30,6 +30,9 @@ PUBLIC_API_EXCLUDED_ROOT = re.compile(
     r"^\s*\(public-api-excluded-root\s+lib/([^/\s()]+)\)\s*$"
 )
 DEFINE_DISPATCH_ROW = re.compile(r"^\s*\(([01]{8})\s+define-form\)\s*$")
+PUBLIC_API_EXCLUDED_SOURCE = re.compile(
+    r'^\s*\(public-api-excluded-source\s+\.\s+"([^"]+)"\)\s*$'
+)
 
 
 @dataclass(frozen=True, order=True)
