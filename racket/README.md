@@ -20,7 +20,7 @@ racket/
 ├── interpreter.rkt   ← ядро: my-eval, середовища, runtime-макроси, примітиви
 ├── reader-lib.rkt    ← reader: S-вирази, ' як символ, exact decimal literals
 ├── reader.rkt        ← syntax/module-reader обгортка над reader-lib
-├── boot/core4.lisp     ← копія поточного lib/core4.lisp для встановленого пакета
+├── boot/core.lisp      ← compatibility-named packaged copy of current Core4 source
 ├── lang/
 │   └── reader.rkt    ← точка входу, яку шукає `#lang my-lisp`
 └── README.md         ← ця інструкція
