@@ -113,7 +113,7 @@
 
                    (cp-check (quote core3) (quote profile-number) 3)
                    (cp-check (quote core3) (quote role) (quote experimental-kernel-laboratory))
-                   (cp-check (quote core3) (quote status) (quote partial-selector-admitted-round-trip-pending))
+                   (cp-check (quote core3) (quote status) (quote partial-native-observation-admitted-canon-operation-pending))
                    (cp-check (quote core3) (quote law-source) "contracts/core3-profile-contract.lisp")
                    (cp-check (quote core3) (quote execution-source) "lib/core3.lisp")
                    (cp-check (quote core3) (quote historical-contract) (quote (7 0)))
