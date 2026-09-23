@@ -372,6 +372,25 @@ fn yantraos_bridge_rejects_raw_shell_capability() {
 }
 
 #[test]
+fn yantraos_bridge_rejects_raw_command_field_under_non_shell_capability() {
+    let source = r#"
+        (let ((envelope
+                (yo-action-envelope
+                  (quote (archive report))
+                  (quote file-management)
+                  (quote create)
+                  (quote client/report.txt)
+                  (quote ((command "rm -rf /tmp/x")))
+                  (quote (verified))
+                  (quote ((source my-lisp)))
+                  (quote required))))
+          (yo-action-envelope? envelope))
+    "#;
+
+    assert_eq!(eval_bridge_with_agent(source), "no");
+}
+
+#[test]
 fn yantraos_bridge_keeps_execution_observation_and_provenance() {
     let source = r#"
         (let ((request-provenance
