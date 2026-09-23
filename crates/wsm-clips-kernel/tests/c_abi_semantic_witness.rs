@@ -92,7 +92,7 @@ fn opaque_semantic_id_crosses_shared_abi_into_native_clips_agenda() {
 }
 
 #[test]
-fn abi_eval_text_preserves_sid_and_returns_native_clips_result() {
+fn semantic_abi_rejects_text_function_dispatch_even_when_native_clips_can_eval_it() {
     let adapter = ClipsAbiAdapter::new(
         "(defrule observe-signal (signal) => (assert (observed)))",
         "(signal)",
@@ -104,10 +104,20 @@ fn abi_eval_text_preserves_sid_and_returns_native_clips_result() {
     );
 
     let (status, output) = exchange(&adapter, b"eval:(+ 2 3)");
-    assert_eq!(status, WsmStatus::Ok);
-    assert_eq!(String::from_utf8_lossy(&output), "result=5\n");
-    assert_eq!(adapter.last_semantic_id(), Some(SemanticId(PROBE_ID)));
-    assert_eq!(adapter.last_eval_output(), Some(&b"5"[..]));
+    assert_eq!(
+        status,
+        WsmStatus::InvalidArgument,
+        "semantic ABI must not accept a function identity encoded as operator text"
+    );
+    assert!(
+        output.is_empty(),
+        "rejected semantic text-dispatch must not produce a semantic result"
+    );
+    assert_eq!(
+        adapter.last_eval_output(),
+        None,
+        "raw native Eval observation must stay outside the semantic SID8 ABI"
+    );
 
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
