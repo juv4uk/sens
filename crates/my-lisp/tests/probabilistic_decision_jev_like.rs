@@ -153,3 +153,37 @@ fn declared_agreement_with_different_distributions_is_disputed() {
 
     assert_eq!(eval_probabilistic_decision(source), "disputed");
 }
+#[test]
+fn noul_policy_rejects_out_of_domain_threshold() {
+    let source = r#"
+        (let ((question (pd-question-noul (quote urgent)))
+              (observation
+                (pd-noul-observe
+                  question
+                  3/4
+                  (quote ((source synthetic))))))
+          (result-status
+            (pd-noul-policy observation 3/2)))
+    "#;
+
+    assert_eq!(eval_probabilistic_decision(source), "invalid");
+}
+
+#[test]
+fn choice_policy_rejects_out_of_domain_threshold() {
+    let source = r#"
+        (let ((question
+                (pd-question-choice
+                  (quote route)
+                  (quote (billing technical))))
+              (observation
+                (pd-choice-observe
+                  question
+                  (quote ((billing 3/4) (technical 1/4)))
+                  (quote ((source synthetic))))))
+          (result-status
+            (pd-choice-policy observation (quote billing) (quote (bad-threshold)))))
+    "#;
+
+    assert_eq!(eval_probabilistic_decision(source), "invalid");
+}
