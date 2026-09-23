@@ -23,9 +23,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          actual="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/check-core1-compiler-sid-resolver.lisp)"
-          test "$actual" = "(core1-compiler-sid-resolver-check pass)"
+          set +e
+          actual="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/check-core1-compiler-sid-resolver.lisp 2>&1)"
+          status=$?
+          set -e
           printf '%s\n' "$actual"
+          test "$status" -eq 0
+          test "$actual" = "(core1-compiler-sid-resolver-check pass)"
 
       - name: Checkout SID8-aware historical S0
         uses: actions/checkout@v5
