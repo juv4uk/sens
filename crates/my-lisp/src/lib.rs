@@ -129,8 +129,8 @@ pub use syntax::fasl::{
 /// that same value after evaluation.
 pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
 
-/// The ordinary my-lisp bootstrap library, evaluated after the macro layer.
-pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
+/// The current Core4 my-lisp bootstrap library, evaluated after the macro layer.
+pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
 /// Generated runtime projection of admitted surface spellings to opaque Sid8
 /// identities. semantic-registry.lisp remains the only spelling authority.
