@@ -53,7 +53,7 @@
                      ((atom payload) (structural-kind atom)
                       (list
                         (quote island-lowering-result)
-                        sid executor mechanism payload))))
+                        sid executor mechanism payload)))))
                 ((quote island-lowering-other-mechanism) island-lowering-other-mechanism
                  (list
                    (quote island-lowering-failure)
