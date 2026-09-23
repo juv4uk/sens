@@ -3,8 +3,8 @@
 Платформенна підтримка мови **my-lisp** як повноцінного `#lang`-плагіна
 для Racket (Racket CS, версія 8+). Racket тут — **субстрат, а не
 специфікація**: вся семантика живе у власному tree-walking evaluator
-(`interpreter.rkt`), а бібліотечний код — у тому самому `lib/core.lisp`,
-що й для Rust-реалізації. JIT Chez Scheme компілює сам evaluator;
+(`interpreter.rkt`), а поточний бібліотечний профіль — `lib/core4.lisp`, той самий
+Contract-8 source, який використовує Rust-реалізація. JIT Chez Scheme компілює сам evaluator;
 my-lisp-форми виконує `my-eval`.
 
 > Важлива деталь діалекту: `quote` записується **явно** — `(quote x)` —
@@ -20,7 +20,7 @@ racket/
 ├── interpreter.rkt   ← ядро: my-eval, середовища, runtime-макроси, примітиви
 ├── reader-lib.rkt    ← reader: S-вирази, ' як символ, exact decimal literals
 ├── reader.rkt        ← syntax/module-reader обгортка над reader-lib
-├── boot/core.lisp      ← копія lib/core.lisp для встановленого пакета
+├── boot/core4.lisp     ← копія поточного lib/core4.lisp для встановленого пакета
 ├── lang/
 │   └── reader.rkt    ← точка входу, яку шукає `#lang my-lisp`
 └── README.md         ← ця інструкція
@@ -28,10 +28,7 @@ racket/
 
 ## Архітектура: source is sacred
 
-`lib/core.lisp` — єдине джерело бібліотечної семантики для обох
-реалізацій. `interpreter.rkt` реалізує **машину** (evaluator,
-середовища, примітиви), а не бібліотечне знання: жоден алгоритм з
-`lib/*.lisp` не переписується у `.rkt`.
+`lib/core4.lisp` — авторитетне бібліотечне джерело **поточного Core4/Contract-8 профілю** для обох реалізацій. Воно не є «єдиним можливим core»: Core1/Core2/Core3 мають окремі профільні ролі під спільною SID/Canon authority. `interpreter.rkt` реалізує **машину** (evaluator, середовища, примітиви), а не бібліотечне знання: жоден алгоритм з `lib/*.lisp` не переписується у `.rkt`.
 
 Макроси — **runtime-замикання над сирими datum** (традиційна
 unhygienic модель, як у Rust-реалізації): при виклику макроса
@@ -189,8 +186,8 @@ echo мама
 
 * Reader не підтримує quasiquote/unquote (як і сама мова наразі) —
   macro transformers будують форми явно через `cons`/`list`, так само
-  як це робить `lib/core.lisp`.
-* За замовчуванням завантажується лише `lib/core.lisp`; інші
+  як це робить поточний `lib/core4.lisp`.
+* За замовчуванням цей Racket-профіль завантажує поточний `lib/core4.lisp`; інші
   бібліотеки (`lib/reason.lisp`, `lib/unify.lisp` тощо) доступні через
   `(load "шлях")`, але conformance-покриття цього порту ще не
   зафіксоване в `evidence/`.
