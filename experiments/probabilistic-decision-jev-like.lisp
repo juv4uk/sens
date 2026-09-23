@@ -176,18 +176,24 @@
   (lambda (observation threshold)
     (cond
       ((equal? (car observation) (quote noul-observation/1)) 1
-       (let ((probability (second (car (third observation)))))
-         (cond
-           ((< probability threshold) 1
-            (list (quote decision/1)
-                  (quote defer)
-                  observation
-                  (list (quote threshold) threshold)))
-           (t 1
-            (list (quote decision/1)
-                  (quote accept)
-                  observation
-                  (list (quote threshold) threshold))))))
+       (cond
+         ((pd-probability-valid? threshold) 1
+          (let ((probability (second (car (third observation)))))
+            (cond
+              ((< probability threshold) 1
+               (list (quote decision/1)
+                     (quote defer)
+                     observation
+                     (list (quote threshold) threshold)))
+              (t 1
+               (list (quote decision/1)
+                     (quote accept)
+                     observation
+                     (list (quote threshold) threshold))))))
+         (t 1
+          (make-invalid
+            (quote malformed-policy-threshold)
+            threshold))))
       (t 1
        (make-invalid
          (quote unsupported-decision-observation)
@@ -197,24 +203,30 @@
   (lambda (observation option threshold)
     (cond
       ((equal? (car observation) (quote choice-observation/1)) 1
-       (let ((entry (pd-find-option option (third observation))))
-         (cond
-           ((atom entry) 1
-            (make-invalid
-              (quote option-not-observed)
-              (list option observation)))
-           ((< (second entry) threshold) 1
-            (list (quote decision/1)
-                  (quote defer)
-                  observation
-                  (list (quote option) option)
-                  (list (quote threshold) threshold)))
-           (t 1
-            (list (quote decision/1)
-                  (quote accept)
-                  observation
-                  (list (quote option) option)
-                  (list (quote threshold) threshold))))))
+       (cond
+         ((pd-probability-valid? threshold) 1
+          (let ((entry (pd-find-option option (third observation))))
+            (cond
+              ((atom entry) 1
+               (make-invalid
+                 (quote option-not-observed)
+                 (list option observation)))
+              ((< (second entry) threshold) 1
+               (list (quote decision/1)
+                     (quote defer)
+                     observation
+                     (list (quote option) option)
+                     (list (quote threshold) threshold)))
+              (t 1
+               (list (quote decision/1)
+                     (quote accept)
+                     observation
+                     (list (quote option) option)
+                     (list (quote threshold) threshold))))))
+         (t 1
+          (make-invalid
+            (quote malformed-policy-threshold)
+            threshold))))
       (t 1
        (make-invalid
          (quote unsupported-decision-observation)
@@ -245,3 +257,30 @@
        (make-invalid
          (quote unsupported-question-relation)
          (list relation left right))))))
+
+(def pd-synthetic-witness
+  (lambda (state choice-question noul-question score-question)
+    (list
+      (quote probabilistic-witness/1)
+      state
+      (pd-choice-observe
+        choice-question
+        (quote ((billing 3/4) (technical 1/4)))
+        (list (quote source)
+              (quote synthetic-witness)
+              (quote state)
+              state))
+      (pd-noul-observe
+        noul-question
+        2/3
+        (list (quote source)
+              (quote synthetic-witness)
+              (quote state)
+              state))
+      (pd-score-observe
+        score-question
+        (quote ((low 1/4) (medium 1/2) (high 1/4)))
+        (list (quote source)
+              (quote synthetic-witness)
+              (quote state)
+              state)))))
