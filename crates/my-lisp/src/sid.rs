@@ -19,6 +19,51 @@ use std::fmt;
 /// free via `derive`). `Eq`/`Hash`/`PartialEq` remain: identity comparison
 /// and use as a hash-map/hash-set key are the only meaningful operations on
 /// a SID, matching TSid8's own `=`/`<>` and nothing else.
+///
+/// ```
+/// let a = my_lisp::sid!(00000001);
+/// let b = my_lisp::sid!(00000010);
+/// assert!(a != b);
+/// assert_eq!(a, my_lisp::sid!(00000001));
+/// ```
+///
+/// No ordering or arithmetic operator exists on `Sid8` at all -- each of
+/// these fails to compile, not merely at runtime:
+///
+/// ```compile_fail
+/// let a = my_lisp::sid!(00000001);
+/// let b = my_lisp::sid!(00000010);
+/// let _ = a < b;
+/// ```
+///
+/// ```compile_fail
+/// let a = my_lisp::sid!(00000001);
+/// let b = my_lisp::sid!(00000010);
+/// let _ = a > b;
+/// ```
+///
+/// ```compile_fail
+/// let a = my_lisp::sid!(00000001);
+/// let b = my_lisp::sid!(00000010);
+/// let _ = a + b;
+/// ```
+///
+/// ```compile_fail
+/// let a = my_lisp::sid!(00000001);
+/// let b = my_lisp::sid!(00000010);
+/// let _ = a - b;
+/// ```
+///
+/// ```compile_fail
+/// let a = my_lisp::sid!(00000001);
+/// let b = my_lisp::sid!(00000010);
+/// let _ = a * b;
+/// ```
+///
+/// ```compile_fail
+/// let mut v = vec![my_lisp::sid!(00000010), my_lisp::sid!(00000001)];
+/// v.sort();
+/// ```
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Sid8(u8);
@@ -168,5 +213,41 @@ mod tests {
         let sid = crate::sid!(11111111);
         assert_eq!(Sid8::from_packed_byte(sid.packed_byte()), sid);
         assert_eq!(sid.to_string(), "11111111");
+    }
+
+    /// Exhaustive u8 non-loss proof (owner, 2026-09-23: "чи всюди сід це
+    /// 8-бітне двійкове і чи десь це не втрачається" -- whether SID is
+    /// 8-bit binary everywhere, and whether it's lost somewhere).
+    /// Every one of the 256 possible byte values survives
+    /// from_packed_byte -> packed_byte unchanged, renders as the exact
+    /// eight-character binary spelling matching that byte, and is
+    /// pairwise distinct from every other value -- Sid8 is total and
+    /// faithful across the full closed domain, not narrowed or lossy
+    /// anywhere in this round trip.
+    #[test]
+    fn every_possible_byte_round_trips_through_sid8_without_loss() {
+        let mut seen = std::collections::HashSet::new();
+
+        for byte in 0u16..=255 {
+            let byte = byte as u8;
+            let sid = Sid8::from_packed_byte(byte);
+
+            assert_eq!(
+                sid.packed_byte(),
+                byte,
+                "byte {byte:#010b} did not round-trip through Sid8 unchanged"
+            );
+            assert_eq!(
+                sid.to_string(),
+                format!("{byte:08b}"),
+                "byte {byte:#010b} rendered as a different spelling than its own bit pattern"
+            );
+            assert!(
+                seen.insert(sid.packed_byte()),
+                "byte {byte:#010b} collided with a previously seen SID -- domain is not faithfully total"
+            );
+        }
+
+        assert_eq!(seen.len(), 256, "all 256 possible SID8 values must be distinct and reachable");
     }
 }
