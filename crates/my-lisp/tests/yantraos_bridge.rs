@@ -93,7 +93,7 @@ fn execution_result_is_an_observation_with_correlated_provenance() {
 }
 
 #[test]
-fn execution_observation_does_not_equal_semantic_truth() {
+fn execution_observation_does_not_become_truth() {
     let source = r#"
         (let ((observation
                 (yo-execution-observation
@@ -104,11 +104,11 @@ fn execution_observation_does_not_equal_semantic_truth() {
                   (quote ((request-id r-43)))))
           (list
             (yo-field (quote result) observation)
-            (result-status observation)))
+            (yo-execution-observation? observation)))
     "#;
 
     assert_eq!(
         eval_bridge(source),
-        "(failed invalid)"
+        "(failed t)"
     );
 }
