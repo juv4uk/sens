@@ -1,6 +1,7 @@
-; #1048 — current honest lowering witness.
-; Four executor payloads are serialized mechanically. CLIPS uses the exact
-; opaque eval transport admitted by the native adapter merged in #1164.
+; #1048 / #1169 — current honest lowering witness.
+; Common Lisp, Prolog and Datalog retain their admitted mechanism payloads.
+; CLIPS must fail closed until a direct SID8 + arguments mechanism exists;
+; raw operator-text Eval is diagnostic-only and cannot satisfy semantic lowering.
 
 (load "lib/core4.lisp")
 (load "lib/surface/semantic-registry-api.lisp")
@@ -44,13 +45,13 @@
                (cond
                  ((equal?
                     clips-result
-                    (list (quote island-lowering-result)
+                    (list (quote island-lowering-failure)
+                          (quote unsupported-executor)
                           plus-sid
                           (quote clips)
-                          (quote bounded-exact-add)
-                          "eval:(+ 2 3)"))
+                          (quote bounded-exact-add)))
                   (structural-relation same)
-                  (quote (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted))))
+                  (quote (island-lowering-1048 (status pass) (executable-payloads 3) (clips fail-closed))))
                  ((quote witness-clips-fail) witness-clips-fail
                   (car (quote ())))))
               ((quote witness-datalog-fail) witness-datalog-fail
