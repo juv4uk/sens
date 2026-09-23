@@ -24,3 +24,29 @@ fn bare_unadmitted_sid_literal_fails_closed_through_existing_call_boundary() {
     assert_eq!(error.kind, ErrorKind::Type);
     assert_eq!(error.message, "unknown semantic callable SID: 11111111");
 }
+
+
+#[test]
+fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
+    let mut session = Session::default();
+    eval_program(
+        include_str!("../../../lib/surface/semantic-registry-api.lisp"),
+        &mut session,
+    )
+    .expect("semantic-registry-api.lisp must load");
+    eval_program(
+        include_str!("../../../tests/fixtures/early-sid-lowering-witness.lisp"),
+        &mut session,
+    )
+    .expect("early SID witness must load");
+
+    let rendered = eval_program(
+        "(early-sid-lowering-witness)",
+        &mut session,
+    )
+    .expect("early SID lowering witness must execute")
+    .value
+    .to_string();
+
+    assert_eq!(rendered, "((same 00000010) yes no t t t t ())");
+}
