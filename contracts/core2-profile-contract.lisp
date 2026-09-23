@@ -49,7 +49,7 @@
    (non-nil-test-selects . yes)
    (core4-three-part-cond . out-of-profile)
    (core4-unsatisfied-conditional . out-of-profile)
-   (activation-boundary . profile-aware-special-form-dispatch-required))
+   (activation-boundary . session-shared-mechanical-cond-mode))
 
   ((identity . projection)
    (source . "lib/core2.lisp")
@@ -74,5 +74,6 @@
    (legacy-t-nil-witnesses . yes)
    (legacy-two-part-cond-law-recorded . yes)
    (core2-library-source . present)
-   (full-profile-special-form-selection . pending)
+   (native-two-part-cond-activation . yes)
+   (full-profile-special-form-selection . active)
    (core4-differences-machine-readable . yes)))
