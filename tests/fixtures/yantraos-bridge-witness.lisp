@@ -14,7 +14,7 @@
          ((equal? value (quote ()))
           (structural-relation same)
           (quote yes))
-         (t
+         ((quote always)
           (quote always)
           (quote invalid))))
       ((quote always)
@@ -106,7 +106,7 @@
                            ((quote always)
                             (quote always)
                             (quote no))))
-                        (t
+                        ((quote always)
                          (quote always)
                          (quote no))))
                      ((quote always)
@@ -118,10 +118,10 @@
                ((quote always)
                 (quote always)
                 (quote no))))
-            (t
+            ((quote always)
              (quote always)
              (quote no))))
-         (t
+         ((quote always)
           (quote always)
           (quote no))))
       ((quote always)
@@ -168,10 +168,10 @@
                ((quote always)
                 (quote always)
                 (quote no))))
-            (t
+            ((quote always)
              (quote always)
              (quote no))))
-         (t
+         ((quote always)
           (quote always)
           (quote no))))
       ((quote always)
