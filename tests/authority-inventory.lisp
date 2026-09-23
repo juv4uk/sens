@@ -50,6 +50,7 @@
 (authority "crates/my-lisp/tests/uk_surface_inventory.rs" observer)
 (authority "crates/my-lisp/tests/macro_derivation.rs" mechanism)
 (authority "crates/my-lisp/tests/meta_eval_advice_taker.rs" observer)
+(authority "crates/my-lisp/tests/yantra.rs" observer)
 (authority "crates/wsm-common-lisp-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs" mechanism)
 (authority "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs" mechanism)
