@@ -283,12 +283,12 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     Ok(result)
 }
 
-//// Activate the frozen Core2/Contract-6 compatibility profile.
-////
-//// This loader deliberately does not install the current Core4 macro layer:
-//// Core2 is a historical compatibility profile, not Core4 plus legacy answers.
-//// The environment mode is shared by lexical children, so lazy COND behavior
-//// remains stable across closures without exposing a shadowable Lisp binding.
+/// Activate the frozen Core2/Contract-6 compatibility profile.
+///
+/// This loader deliberately does not install the current Core4 macro layer:
+/// Core2 is a historical compatibility profile, not Core4 plus legacy answers.
+/// The environment mode is shared by lexical children, so lazy COND behavior
+/// remains stable across closures without exposing a shadowable Lisp binding.
 pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     session
         .environment
