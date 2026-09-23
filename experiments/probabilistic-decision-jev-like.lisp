@@ -69,7 +69,7 @@
                       (cons label seen)))
                    (t 1 (quote ()))))
                 (t 1 (quote ())))))
-           (t 1 (quote ())))))))
+           (t 1 (quote ()))))))))
 
 (def pd-all-options-present?
   (lambda (options distribution)
@@ -97,7 +97,7 @@
                (t 1 (quote ()))))
             (t 1 (quote ()))))
          (t 1 (quote ()))))
-      (t 1 (quote ()))))
+      (t 1 (quote ())))))
 
 (def pd-max-probability
   (lambda (distribution current)
