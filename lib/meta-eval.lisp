@@ -68,30 +68,30 @@
   (lambda (name)
     (let ((semantic-id (my-semantic-id-for-surface name)))
       (cond
-        ((equal? semantic-id "00000001") (quote quote))
-        ((equal? semantic-id "00000010") (quote atom))
-        ((equal? semantic-id "00000011") (quote eq))
-        ((equal? semantic-id "00000100") (quote cons))
-        ((equal? semantic-id "00000101") (quote car))
-        ((equal? semantic-id "00000110") (quote cdr))
-        ((equal? semantic-id "00000111") (quote cond))
+        ((equal? semantic-id 00000001) (quote quote))
+        ((equal? semantic-id 00000010) (quote atom))
+        ((equal? semantic-id 00000011) (quote eq))
+        ((equal? semantic-id 00000100) (quote cons))
+        ((equal? semantic-id 00000101) (quote car))
+        ((equal? semantic-id 00000110) (quote cdr))
+        ((equal? semantic-id 00000111) (quote cond))
         (t (quote ()))))))
 
 (def my-lambda-name?
   (lambda (name)
-    (my-semantic-id? name "00001000")))
+    (my-semantic-id? name 00001000)))
 
 (def my-define-name?
   (lambda (name)
-    (my-semantic-id? name "00001001")))
+    (my-semantic-id? name 00001001)))
 
 (def my-defmacro-name?
   (lambda (name)
-    (my-semantic-id? name "00001010")))
+    (my-semantic-id? name 00001010)))
 
 (def my-def-compat-name?
   (lambda (name)
-    (my-semantic-id? name "00001011")))
+    (my-semantic-id? name 00001011)))
 
 (def my-definition-name?
   (lambda (name)
