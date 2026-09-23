@@ -74,7 +74,8 @@
                 (c2-check (quote conditional) (quote selection-rule) (quote historical-truthiness))
                 (c2-check (quote conditional) (quote special-form-profile-policy) "contracts/core-special-form-profile-policy.lisp")
                 (c2-check (quote acceptance-state) (quote special-form-profile-policy-recorded) (quote yes))
-                (c2-check (quote acceptance-state) (quote full-profile-special-form-selection) (quote pending))))))
+                (c2-check (quote acceptance-state) (quote native-two-part-cond-activation) (quote yes))
+                (c2-check (quote acceptance-state) (quote full-profile-special-form-selection) (quote active))))))
       (cond
         ((atom failure) (structural-kind empty-list)
          (cond
