@@ -1,0 +1,63 @@
+name: Core1 SID8 value transport
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1.lisp"
+      - ".github/workflows/core1-sid8-value-transport.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core1-sid8-value:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout my-lisp
+        uses: actions/checkout@v5
+
+      - name: Checkout SID8-aware historical S0
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ref: 770ae6ce5d8c13d5a970f2b496fc74d944f480a5
+          path: .core1-sid8/mccarthy-eval
+          fetch-depth: 1
+
+      - name: Build historical kernel
+        working-directory: .core1-sid8/mccarthy-eval
+        run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+
+      - name: Prove exact SID values self-evaluate only at the Core1 SID boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat lib/core1.lisp > .core1-sid8/witness.lisp
+          cat >> .core1-sid8/witness.lisp <<'LISP'
+          (C1-EVAL 00000100 NIL NIL)
+          (C1-EVAL 00000101 NIL NIL)
+          (C1-EVAL 00001100 NIL NIL)
+          (C1-EVAL (QUOTE FOO) NIL NIL)
+          LISP
+
+          actual="$(
+            cd .core1-sid8/mccarthy-eval
+            ./mccarthy-kernel ../witness.lisp
+          )"
+
+          expected='00000100
+          00000101
+          00001100
+          (C1-ERROR UNBOUND FOO)'
+
+          printf '%s
+' "$actual"
+          test "$actual" = "$expected"
+
+      - name: Guard against quoted or string SID compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E '\(QUOTE[[:space:]]+00000(010|011|100|101|110)\)' lib/core1.lisp
+          ! grep -E '"[01]{8}"' lib/core1.lisp
