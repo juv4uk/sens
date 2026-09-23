@@ -36,6 +36,7 @@
      (policy-owner my-lisp)
      (audit-owner yantraos)
      (raw-shell-in-envelope forbidden)
+     (raw-shell-command-field forbidden)
      (generic-value->bool forbidden)
      (new-semantic-sid forbidden)
      (new-rust-value-variant forbidden))
