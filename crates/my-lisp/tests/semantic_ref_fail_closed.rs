@@ -14,7 +14,6 @@ fn unknown_sid_identity_fails_closed_when_invoked() {
     assert_eq!(error.message, "unknown semantic callable SID: 11111111");
 }
 
-
 #[test]
 fn bare_unadmitted_sid_literal_fails_closed_through_existing_call_boundary() {
     let mut session = Session::default();
@@ -25,11 +24,11 @@ fn bare_unadmitted_sid_literal_fails_closed_through_existing_call_boundary() {
     assert_eq!(error.message, "unknown semantic callable SID: 11111111");
 }
 
-
 #[test]
 fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
     let mut session = Session::default();
-    my_lisp::load_core_library(&mut session).expect("core library must load before Lisp-owned registry API");
+    my_lisp::load_core_library(&mut session)
+        .expect("core library must load before Lisp-owned registry API");
     eval_program(
         include_str!("../../../lib/surface/semantic-registry-api.lisp"),
         &mut session,
@@ -41,13 +40,15 @@ fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
     )
     .expect("early SID witness must load");
 
-    let rendered = eval_program(
-        "(early-sid-lowering-witness)",
-        &mut session,
-    )
-    .expect("early SID lowering witness must execute")
-    .value
-    .to_string();
+    let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
+    let program = format!("(early-sid-lowering-witness {registry_source:?})");
+    let rendered = eval_program(&program, &mut session)
+        .expect("early SID lowering witness must execute")
+        .value
+        .to_string();
 
-    assert_eq!(rendered, "((same 00000010) yes no (structural-relation same) (structural-relation same) (structural-relation same) (structural-relation same) ())");
+    assert_eq!(
+        rendered,
+        "((same 00000010) yes no (structural-relation same) (structural-relation same) (structural-relation same) (structural-relation same) ())"
+    );
 }
