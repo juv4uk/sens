@@ -37,4 +37,4 @@
 
 ; #992 CLIPS native result observation: reviewed mechanism-only adapter.
 (review "crates/wsm-clips-kernel/src/lib.rs" "2ea4eb418c1ac76820145236773caa212a72e39f3d27211bf5608278437a5a0e" issue-992 clips-result-observation-mechanism)
-(review "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs" "0a29e3823b221e34094493e38b5d0a060816e7849154a852a9f0a446f3df62f0" issue-992 clips-result-observation-witness)
+(review "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs" "9498c9ab5018b9d0270c72d3906d2f202053a489f4ac4128c3859c2cd33019f0" issue-992 clips-result-observation-witness)
