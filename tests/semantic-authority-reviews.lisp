@@ -43,3 +43,4 @@
 (review "crates/my-lisp/tests/witness_authority.rs" "bc5d4b359a169a5edc1cf3e2d0fb90e3bd7daa87e2d7e4d335ab467f9c76d492" issue-1173 sid8-identity-field-observer)
 (review "crates/my-lisp/tests/semantic_coordinate_join.rs" "02cf206794a877fa894b8baf21c2b3a7ff8d97908b8896648005de30b69586a8" issue-1173 sid8-identity-field-observer)
 (review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "ff0709c7ddf2dcd31be16e6ecf2572d154a51e36512f86910ee5338c09276aeb" issue-1173 sid8-identity-field-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_matrix_845.rs" "510f3c0ede3407dbc502815db845efdb1a90f7e4e5d5259123851c0d5cd03541" issue-1173 sid8-identity-field-observer)
