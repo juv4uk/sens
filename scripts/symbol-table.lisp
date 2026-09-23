@@ -1,5 +1,5 @@
 ; scripts/symbol-table.lisp — a canonical, deterministic symbol-name → numeric-id
-; table for every symbol atom that appears anywhere in lib/core.lisp, requested
+; table for every symbol atom that appears anywhere in lib/core4.lisp, requested
 ; by the fpga-lisp session (2026-08-10).
 ;
 ; Problem this solves: each hand-written bootstrap .asm file (M19-M26) invents
@@ -17,7 +17,7 @@
 ; simplest to audit by eye and re-derive by hand if this script's output is
 ; ever unavailable.
 ;
-; Walks every top-level form in lib/core.lisp recursively, collecting every
+; Walks every top-level form in lib/core4.lisp recursively, collecting every
 ; symbol atom encountered — function names (def targets), parameter names in
 ; lambda-lists, special-form keywords (quote/cond/lambda/def/...), and any
 ; symbol referenced in a body — not just the ~36 top-level `def` names.
@@ -86,7 +86,7 @@
             (print (cons (symbol->string (car symbols)) id))
             (print-table-onto (cdr symbols) (+ id 1))))))))
 
-(def core-forms (read-all (read-file "lib/core.lisp")))
+(def core-forms (read-all (read-file "lib/core4.lisp")))
 (def all-symbols (collect-all-symbols core-forms (quote ())))
 (def sorted-symbols (sort-symbols all-symbols))
 
