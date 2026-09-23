@@ -19,11 +19,11 @@ jobs:
       - name: Checkout my-lisp Core1
         uses: actions/checkout@v5
 
-      - name: Checkout unchanged S0 seed
+      - name: Checkout typed-SID8 S0
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
-          ref: 1ae9745b66a1439c1929b0d9038c680567118a58
+          ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
           path: .core1-s2/mccarthy-eval
 
       - name: Checkout pinned S2 compiler source
@@ -33,7 +33,7 @@ jobs:
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           path: .core1-s2/wsm-my-lisp
 
-      - name: Build historical seed unchanged
+      - name: Build typed-SID8 S0
         working-directory: .core1-s2/mccarthy-eval
         run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
 
