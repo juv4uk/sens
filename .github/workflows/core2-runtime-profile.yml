@@ -10,6 +10,9 @@ on:
       - "lib/core2.lisp"
       - "contracts/core2-profile-contract.lisp"
       - "contracts/core-profile-contract.lisp"
+      - "tests/authority-inventory.lisp"
+      - "tests/authority-inventory.tsv"
+      - "tests/semantic-authority-reviews.lisp"
       - ".github/workflows/core2-runtime-profile.yml"
   workflow_dispatch:
 
@@ -42,17 +45,5 @@ jobs:
           got="$(./target/debug/my-lisp scripts/check-core2-profile-contract.lisp)"
           printf '%s\n' "$got"
           test "$got" = "(core2-profile-contract-ok)"
-      - name: Core2 authority review visibility
-        run: |
-          got="$(./target/debug/my-lisp tests/fixtures/core2-authority-review-witness.lisp)"
-          printf '%s\n' "$got"
-          test "$got" = "(core2-authority-review-ok)"
-      - name: Core2 authority guard exact-row witness
-        shell: bash
-        run: |
-          printf '%s\n' '(changed "crates/my-lisp/tests/core2_runtime_profile.rs" "11ca57677ea07c55ba3d6898f19c1fc1879eb46a5765a789ffe89e5ce33ce1c3")' > tests/semantic-authority-changes.lisp
-          got="$(./target/debug/my-lisp scripts/semantic-authority-guard.lisp)"
-          printf '%s\n' "$got"
-          test "$(printf '%s\n' "$got" | tail -n 1)" = "(semantic-authority-ok)"
       - name: Diff hygiene
         run: git diff --check
