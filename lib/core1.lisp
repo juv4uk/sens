@@ -267,18 +267,6 @@
       ((EQ NAME (QUOTE def)) T)
       (T NIL))))
 
-(DEFINE C1-SID-VALUEP
-  (LAMBDA (VALUE)
-    (COND
-      ((EQ VALUE 00000010) T)
-      ((EQ VALUE 00000011) T)
-      ((EQ VALUE 00000100) T)
-      ((EQ VALUE 00000101) T)
-      ((EQ VALUE 00000110) T)
-      ((EQ VALUE 00001100) T)
-      ((EQ VALUE 00001101) T)
-      (T NIL))))
-
 (DEFINE C1-EVAL
   (LABEL C1-EVAL
     (LAMBDA (EXPR ENV GLOBAL)
@@ -289,7 +277,6 @@
            ((EQ EXPR (QUOTE nil)) NIL)
            ((EQ EXPR T) T)
            ((EQ EXPR (QUOTE t)) T)
-           ((C1-SID-VALUEP EXPR) EXPR)
            (T (C1-LOOKUP EXPR ENV GLOBAL))))
         ((C1-QUOTE-NAMEP (CAR EXPR))
          (C1-SECOND EXPR))
