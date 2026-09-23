@@ -157,7 +157,7 @@
                    (cp-check
                      (quote migration-state)
                      (quote core2-source)
-                     (quote present-activation-pending))
+                     (quote admitted))
                    (cp-check
                      (quote migration-state)
                      (quote core4-source)
