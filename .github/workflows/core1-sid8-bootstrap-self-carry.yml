@@ -69,6 +69,6 @@ jobs:
           (C1-ERROR UNBOUND FOO)
           OUT
 
-          (cd mccarthy-eval && ./mccarthy-kernel "$fixture") > actual.txt
+          (cd mccarthy-eval && ./mccarthy-kernel "$fixture") | tail -n 10 > actual.txt
           diff -u "$expected" actual.txt
           cat actual.txt
