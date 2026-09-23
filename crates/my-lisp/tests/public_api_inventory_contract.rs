@@ -73,3 +73,35 @@ fn discovery_check_allows_unreviewed_baseline() {
     assert!(stdout.contains("classification: unreviewed"));
     assert!(stdout.contains("top-level definitions:"));
 }
+
+#[test]
+fn profile_exclusion_parser_keeps_the_last_closed_pair() {
+    let script = repo_root().join("scripts/public_api_inventory.py");
+    let script_literal = format!("{:?}", script.to_string_lossy());
+    let python = format!(
+        "import runpy; ns=runpy.run_path({script_literal}); print('\\n'.join(sorted(ns['classified_excluded_source_files']())))"
+    );
+    let output = Command::new("python3")
+        .arg("-c")
+        .arg(python)
+        .output()
+        .expect("python3 must inspect profile exclusions");
+
+    assert!(
+        output.status.success(),
+        "profile exclusion inspection failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("exclusion output must be UTF-8");
+    let exclusions = stdout.lines().collect::<Vec<_>>();
+    assert_eq!(
+        exclusions,
+        vec![
+            "lib/core.lisp",
+            "lib/core1.lisp",
+            "lib/core2.lisp",
+            "lib/core3.lisp",
+        ]
+    );
+}
+
