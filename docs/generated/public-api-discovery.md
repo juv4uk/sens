@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 41
-- top-level функцій: 869
+- top-level функцій: 873
 - top-level макросів: 34
-- усього визначень: 903
+- усього визначень: 907
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -78,6 +78,11 @@
 | `lib/content-store.lisp` | function | `content-store-contains?` | unreviewed |
 | `lib/content-store.lisp` | function | `content-store-put-world` | unreviewed |
 | `lib/content-store.lisp` | function | `content-store-size` | unreviewed |
+| `lib/core1-compiler-prelude.lisp` | function | `not` | unreviewed |
+| `lib/core3.lisp` | function | `core3-executors` | unreviewed |
+| `lib/core3.lisp` | function | `core3-route` | unreviewed |
+| `lib/core3.lisp` | function | `core3-add-routes` | unreviewed |
+| `lib/core3.lisp` | function | `core3-profile-status` | unreviewed |
 | `lib/core4.lisp` | function | `identity` | unreviewed |
 | `lib/core4.lisp` | function | `binary` | unreviewed |
 | `lib/core4.lisp` | function | `list` | unreviewed |
@@ -145,7 +150,6 @@
 | `lib/core4.lisp` | function | `my-postcore-missing-peers` | unreviewed |
 | `lib/core4.lisp` | function | `my-postcore-build-definitions` | unreviewed |
 | `lib/core4.lisp` | macro | `my-postcore-materialize-stable-peers` | unreviewed |
-| `lib/core1-compiler-prelude.lisp` | function | `not` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-observation` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-claim` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-evidence` | unreviewed |
