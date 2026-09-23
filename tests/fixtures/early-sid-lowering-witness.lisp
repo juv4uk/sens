@@ -89,7 +89,7 @@
             (quote (x))
             (quote (portable-result-domain structural-relation))))
         (early-sid-lowering-backend-request?
-          (quote (surface atom)))
+          (quote (surface atom?)))
         (equal? atom-en atom-uk)
         (equal? atom-en atom-ukr)
         (equal? atom-en atom-sa)
