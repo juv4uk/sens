@@ -31,7 +31,7 @@
                     (quote yes))
                    ((quote always)
                     (quote always)
-                    (quote no)))))))))))
+                    (quote no)))))))))))))
 
 (def early-sid-lower
   (lambda (surface arguments contract)
@@ -71,7 +71,7 @@
             (quote distinct))))
         ((quote always)
          (quote always)
-         (quote distinct)))))
+         (quote distinct))))))
 
 (def early-sid-lowering-witness
   (lambda ()
