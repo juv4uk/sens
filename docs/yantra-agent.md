@@ -73,3 +73,38 @@ printf '%s\n' '(load "lib/yantra.lisp")' \
 filesystem question invokes real bash; textual-claim-only reply can never
 finish (MAX_TURNS); tool results correlated by `tool_call_id`; hard
 MAX_TURNS limit; JSON encode/parse round trip.
+
+## yantraOS execution-plane bridge
+
+The local `lib/yantra.lisp` agent remains Lisp-owned. The external
+`AIYantra/yantraOS` project can be used as an execution plane rather than
+as a semantic authority.
+
+The v1 bridge contract is `contracts/yantraos-bridge-contract.lisp`:
+
+```text
+my-lisp:
+  World / intent / probabilistic decision / policy / provenance
+        ↓
+  typed action envelope
+        ↓
+yantraOS:
+  route / confirmation / sandbox / host execution / audit
+        ↓
+  typed execution observation
+        ↓
+my-lisp:
+  interpret observation / update World / continue or stop
+```
+
+The contract deliberately excludes raw shell semantics and does not mint a
+new semantic SID or runtime Value variant. The execution response is an
+observation correlated with the original provenance; it is not treated as
+proof or truth merely because yantraOS reports `executed`.
+
+The first bridge slice is data-only and network-free. A future transport
+adapter may use yantraOS's documented local control plane after a mutually
+agreed typed-intent endpoint exists. The current yantraOS alpha exposes local
+instruction injection and host-owned validation/routing/confirmation, so the
+bridge must not silently turn that natural-language injection path into a
+semantic authority boundary.
