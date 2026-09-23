@@ -109,7 +109,7 @@
                    (cp-check (quote core2) (quote profile-number) 2)
                    (cp-check (quote core2) (quote role) (quote frozen-legacy-compatibility))
                    (cp-check (quote core2) (quote historical-contract) (quote (6 0)))
-                   (cp-check (quote core2) (quote status) (quote source-admitted-activation-pending))
+                   (cp-check (quote core2) (quote status) (quote admitted))
 
                    (cp-check (quote core3) (quote profile-number) 3)
                    (cp-check (quote core3) (quote role) (quote experimental-kernel-laboratory))
