@@ -38,3 +38,9 @@
 ; #992 CLIPS native result observation: reviewed mechanism-only adapter.
 (review "crates/wsm-clips-kernel/src/lib.rs" "2ea4eb418c1ac76820145236773caa212a72e39f3d27211bf5608278437a5a0e" issue-992 clips-result-observation-mechanism)
 (review "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs" "9498c9ab5018b9d0270c72d3906d2f202053a489f4ac4128c3859c2cd33019f0" issue-992 clips-result-observation-witness)
+
+; #1133 Core2 runtime profile: reviewed profile-selection mechanism and observer witness.
+(review "crates/my-lisp/src/environment.rs" "9477dfa4f673a1e490d13d7d9512c919ddbfb18f65028402e0af14702037460d" issue-1133 core2-session-cond-mode)
+(review "crates/my-lisp/src/eval/special_forms/core.rs" "96c35aaae7bb11c53138bbc080590c86daad2ea3fe4ae2555106e0b356ef8024" issue-1133 core2-cond-dispatch-mechanism)
+(review "crates/my-lisp/src/lib.rs" "a4a37a9e086222440ac438b6c20590f573337037c1063e638b57c1ef0a9b5651" issue-1133 core2-loader-mechanism)
+(review "crates/my-lisp/tests/core2_runtime_profile.rs" "718d19aa7681fc60aa90d7846548c727c9ea33feb0aa021555b978babd74c211" issue-1133 core2-runtime-observer)
