@@ -1,11 +1,11 @@
 (core1-generation-manifest/1
   ((generation . s0)
-   (role . historical-physical-seed)
+   (role . typed-sid8-historical-physical-seed)
    (repository . juv4uk/mccarthy-eval)
-   (commit . "c7d4d6fa56e97c860c567fb809a719e3c79778fc")
+   (commit . "79f2f38f2a8da22a5bbcb39312da5f726ab2471f")
    (source-path . "mccarthy-kernel.s")
-   (source-sha256 . "93d481637577fd6d3427d9a33fb44037ad43891005cc26faa64267d6ec36d945")
-   (binary-sha256 . "03bf566aa21228fe16cab3a56b775bb80b2d43b648223c87cb67fe2396039f66")
+   (source-sha256 . "edeba0c40d32a828b1a468db211c923347d93911d9ffff6279c7324cf08d092d")
+   (binary-sha256 . "c34c972720c16511f436d93b28b0014f0daf142e4ac35c266ba9c7e6ea97561a")
    (semantic-authority . no)
    (status . witnessed))
 
@@ -13,7 +13,7 @@
    (role . lisp-owned-bootstrap)
    (repository . juv4uk/my-lisp)
    (path . "lib/core1.lisp")
-   (source-sha256 . "bb83e5148d642aab3aceca558a2b9a6338ee41a9cac710169baeee7405cd893a")
+   (source-sha256 . "647e6de1b15d22a66bd4c47e2e8869962824c36ec043864866e40b3fc5f3e3b1")
    (executed-by . s0)
    (mechanism . historical-function-funarg-plus-zero-copy-lisp-owned-dispatch)
    (witnesses .
