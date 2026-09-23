@@ -27,6 +27,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Core2 runtime witness
         run: cargo test -p my-lisp --test core2_runtime_profile
+      - name: Core2 authority digest evidence
+        shell: bash
+        run: |
+          sha256sum crates/my-lisp/src/environment.rs
+          sha256sum crates/my-lisp/src/eval/special_forms/core.rs
+          sha256sum crates/my-lisp/src/lib.rs
+          sha256sum crates/my-lisp/tests/core2_runtime_profile.rs
+          grep 'core2-' tests/semantic-authority-reviews.lisp
+
       - name: Core2 Lisp-owned contract witness
         run: |
           cargo build -p my-lisp-cli --bin my-lisp
