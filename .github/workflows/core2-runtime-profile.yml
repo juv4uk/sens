@@ -1,0 +1,58 @@
+name: Core2 runtime profile
+
+on:
+  pull_request:
+    paths:
+      - "crates/my-lisp/src/environment.rs"
+      - "crates/my-lisp/src/eval/special_forms/core.rs"
+      - "crates/my-lisp/src/lib.rs"
+      - "crates/my-lisp/tests/core2_runtime_profile.rs"
+      - "lib/core2.lisp"
+      - "contracts/core2-profile-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - ".github/workflows/core2-runtime-profile.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core2-runtime:
+    name: Native Contract-6 profile selection
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Core2 runtime witness
+        run: cargo test -p my-lisp --test core2_runtime_profile
+      - name: Core2 authority digest evidence
+        shell: bash
+        run: |
+          sha256sum crates/my-lisp/src/environment.rs
+          sha256sum crates/my-lisp/src/eval/special_forms/core.rs
+          sha256sum crates/my-lisp/src/lib.rs
+          sha256sum crates/my-lisp/tests/core2_runtime_profile.rs
+          grep 'core2-' tests/semantic-authority-reviews.lisp
+
+      - name: Core2 Lisp-owned contract witness
+        run: |
+          cargo build -p my-lisp-cli --bin my-lisp
+          got="$(./target/debug/my-lisp scripts/check-core2-profile-contract.lisp)"
+          printf '%s\n' "$got"
+          test "$got" = "(core2-profile-contract-ok)"
+      - name: Core2 authority review visibility
+        run: |
+          got="$(./target/debug/my-lisp tests/fixtures/core2-authority-review-witness.lisp)"
+          printf '%s\n' "$got"
+          test "$got" = "(core2-authority-review-ok)"
+      - name: Core2 authority guard exact-row witness
+        shell: bash
+        run: |
+          printf '%s\n' '(changed "crates/my-lisp/tests/core2_runtime_profile.rs" "11ca57677ea07c55ba3d6898f19c1fc1879eb46a5765a789ffe89e5ce33ce1c3")' > tests/semantic-authority-changes.lisp
+          got="$(./target/debug/my-lisp scripts/semantic-authority-guard.lisp)"
+          printf '%s\n' "$got"
+          test "$(printf '%s\n' "$got" | tail -n 1)" = "(semantic-authority-ok)"
+      - name: Diff hygiene
+        run: git diff --check
