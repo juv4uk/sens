@@ -5,7 +5,7 @@ on:
     paths:
       - "lib/core1-compiler-sid-resolver.lisp"
       - "contracts/core1-historical-sid-map.lisp"
-      - "scripts/check-core1-compiler-sid-resolver.py"
+      - "scripts/check-core1-compiler-sid-resolver.lisp"
       - ".github/workflows/core1-compiler-sid-resolver.yml"
   workflow_dispatch:
 
@@ -16,8 +16,16 @@ jobs:
       - name: Checkout my-lisp
         uses: actions/checkout@v5
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Authority projection guard
-        run: python3 scripts/check-core1-compiler-sid-resolver.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/check-core1-compiler-sid-resolver.lisp)"
+          test "$actual" = "(core1-compiler-sid-resolver-check pass)"
+          printf '%s\n' "$actual"
 
       - name: Checkout SID8-aware historical S0
         uses: actions/checkout@v5
