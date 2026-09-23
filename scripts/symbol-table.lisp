@@ -60,9 +60,15 @@
   (lambda (sym before after)
     (cond
       ((atom after) (reverse-onto before (list sym)))
-      ((string<? (symbol->string sym) (symbol->string (car after)))
+      ((string-order-helper (symbol->string sym) (symbol->string (car after)))
+       (text-order before)
        (reverse-onto before (cons sym after)))
-      (t (insert-sorted-onto sym (cons (car after) before) (cdr after))))))
+      ((string-order-helper (symbol->string sym) (symbol->string (car after)))
+       (text-order same)
+       (insert-sorted-onto sym (cons (car after) before) (cdr after)))
+      ((string-order-helper (symbol->string sym) (symbol->string (car after)))
+       (text-order after)
+       (insert-sorted-onto sym (cons (car after) before) (cdr after))))))
 
 (def insert-sorted
   (lambda (sym sorted)
