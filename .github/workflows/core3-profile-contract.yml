@@ -1,0 +1,48 @@
+name: Core3 profile contract
+
+on:
+  pull_request:
+    paths:
+      - "contracts/core3-profile-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "lib/core3.lisp"
+      - "lib/mechanism-selector.lisp"
+      - "scripts/check-core3-profile-contract.lisp"
+      - ".github/workflows/core3-profile-contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "contracts/core3-profile-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "lib/core3.lisp"
+      - "lib/mechanism-selector.lisp"
+      - "scripts/check-core3-profile-contract.lisp"
+      - ".github/workflows/core3-profile-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core3:
+    name: Contract 7 experimental kernel profile
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build semantic oracle
+        run: cargo build -p my-lisp-cli --bin my-lisp
+
+      - name: Verify Core3 route selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          verdict="$(./target/debug/my-lisp scripts/check-core3-profile-contract.lisp)"
+          printf '%s\n' "$verdict"
+          test "$verdict" = "(core3-profile-contract-ok (routes 4) (round-trip partial) (clips-result blocked))"
+
+      - name: Diff hygiene
+        run: git diff --check
