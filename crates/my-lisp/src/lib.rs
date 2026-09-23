@@ -129,6 +129,9 @@ pub use syntax::fasl::{
 /// that same value after evaluation.
 pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
 
+/// Frozen Contract-6 compatibility profile.
+pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
+
 /// The current Core4 my-lisp bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
@@ -274,8 +277,26 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// `Environment::root()`: the root itself stays smaller, while the bootstrap
 /// explicitly gains `make-macro` before evaluating `lib/macro.lisp`.
 pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    session
+        .environment
+        .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
     let result = eval_program(CORE_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
+}
+
+/// Activate the frozen Core2/Contract-6 compatibility profile.
+///
+/// This loader deliberately does not install the current Core4 macro layer:
+/// Core2 is a historical compatibility profile, not Core4 plus legacy answers.
+/// The environment mode is shared by lexical children, so lazy COND behavior
+/// remains stable across closures without exposing a shadowable Lisp binding.
+pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    session
+        .environment
+        .set_cond_clause_mode(environment::CondClauseMode::Core2LegacyTwoPart);
+    let result = eval_program(CORE2_LIBRARY_SOURCE, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
