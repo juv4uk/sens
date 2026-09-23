@@ -49,7 +49,7 @@
                section-name
                field-name
                expected
-               (c2-field section field-name))))))))
+               (c2-field section field-name)))))))
 
 (def c2-first-failure
   (lambda (checks)
