@@ -45,7 +45,7 @@ jobs:
             case "$path" in *.rs|Cargo.toml|Cargo.lock|crates/*/Cargo.toml) rust=true ;; esac
             case "$path" in lib/surface/*|lib/generated/meta-semantic-registry.lisp|docs/ukrainian-api.md|docs/generated/public-api-discovery.md|scripts/public_api_inventory.py|scripts/generate-meta-semantic-registry.lisp|scripts/generate-ukrainian-api.py|scripts/перевірити-український-профіль.lisp|machine-lowering-boundary.lisp|repo.lisp|crates/my-lisp/tests/macro_derivation.rs|crates/my-lisp/tests/ukrainian_api_docs.rs|crates/my-lisp/tests/uk_surface_equivalence.rs|crates/my-lisp/tests/public_api_inventory_contract.rs|crates/my-lisp/tests/machine_lowering_boundary.rs) surface=true ;; esac
             case "$path" in crates/my-lisp/src/*|crates/my-lisp/tests/*|lib/*.lisp|lib/*/*.lisp) case "$path" in lib/surface/*|lib/generated/*) ;; *) core=true ;; esac ;; esac
-            case "$path" in crates/my-lisp/src/value.rs|crates/my-lisp/src/eval/*|crates/my-lisp/src/semantic_registry.rs|crates/my-lisp/src/semantic_registry_generated.rs|lib/evaluator-dispatch.lisp|scripts/generate-rust-evaluator-dispatch.lisp|scripts/generate-rust-semantic-registry.lisp|crates/my-lisp/tests/witness_authority.rs|crates/my-lisp/tests/structural_query_inventory.rs|lib/canon.lisp|lib/core.lisp|lib/meta-eval.lisp|lib/process.lisp|contracts/*.lisp|tests/fixtures/conformance.lisp|tests/fixtures/*-witness.lisp|my-lisp-constitution.lisp) semantic=true ;; esac
+            case "$path" in crates/my-lisp/src/value.rs|crates/my-lisp/src/eval/*|crates/my-lisp/src/semantic_registry.rs|crates/my-lisp/src/semantic_registry_generated.rs|lib/evaluator-dispatch.lisp|scripts/generate-rust-evaluator-dispatch.lisp|scripts/generate-rust-semantic-registry.lisp|crates/my-lisp/tests/witness_authority.rs|crates/my-lisp/tests/structural_query_inventory.rs|lib/canon.lisp|lib/core.lisp|lib/core4.lisp|lib/meta-eval.lisp|lib/process.lisp|contracts/*.lisp|tests/fixtures/conformance.lisp|tests/fixtures/*-witness.lisp|my-lisp-constitution.lisp) semantic=true ;; esac
             if bash scripts/is-current-semantic-fixture.sh "$path"; then semantic=true; fi
             case "$path" in crates/my-lisp-host/src/*|crates/my-lisp-host/tests/*) host=true ;; esac
             case "$path" in crates/my-lisp-cli/src/*|crates/my-lisp-cli/tests/*) cli=true ;; esac
@@ -93,7 +93,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core.lisp lib/core.lisp.fasl
+          cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
           cargo build -p my-lisp-cli --bin my-lisp
           : > tests/changed-host-tests.lisp
           while IFS=$'\t' read -r additions deletions path; do
@@ -141,14 +141,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: core-fasl-771
-          path: lib/core.lisp.fasl
+          path: lib/core4.lisp.fasl
           if-no-files-found: error
 
       - name: Export regenerated core FASL for #771
         shell: bash
         run: |
           set -euo pipefail
-          test -s lib/core.lisp.fasl
+          test -s lib/core4.lisp.fasl
           git diff --check
         
 
