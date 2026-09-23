@@ -42,7 +42,7 @@ jobs:
           set -euo pipefail
           verdict="$(./target/debug/my-lisp scripts/check-core3-profile-contract.lisp)"
           printf '%s\n' "$verdict"
-          test "$verdict" = "(core3-profile-contract-ok (routes 4) (round-trip partial) (clips-result blocked))"
+          test "$verdict" = "(core3-profile-contract-ok (routes 4) (canon-round-trip pending-992) (clips-result available))"
 
       - name: Diff hygiene
         run: git diff --check
