@@ -45,16 +45,20 @@
 
 (def yo-no-raw-shell?
   (lambda (envelope)
-    (cond
-      ((equal?
-         (yo-field (quote capability)
-                   (yo-field (quote action) envelope))
-         (quote shell))
-       (structural-relation same)
-       (quote no))
-      ((quote always)
-       (quote always)
-       (quote yes)))))
+    (let ((action (yo-field (quote action) envelope))
+          (parameters (yo-field (quote parameters) envelope)))
+      (cond
+        ((equal?
+           (yo-field (quote capability) action)
+           (quote shell))
+         (structural-relation same)
+         (quote no))
+        ((yo-has-field? (quote command) parameters)
+         (quote yes)
+         (quote no))
+        ((quote always)
+         (quote always)
+         (quote yes))))))
 
 (def yo-action-envelope
   (lambda (goal capability operation target parameters verification provenance approval)
