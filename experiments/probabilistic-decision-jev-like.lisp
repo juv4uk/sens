@@ -257,3 +257,30 @@
        (make-invalid
          (quote unsupported-question-relation)
          (list relation left right))))))
+
+(def pd-synthetic-witness
+  (lambda (state choice-question noul-question score-question)
+    (list
+      (quote probabilistic-witness/1)
+      state
+      (pd-choice-observe
+        choice-question
+        (quote ((billing 3/4) (technical 1/4)))
+        (list (quote source)
+              (quote synthetic-witness)
+              (quote state)
+              state))
+      (pd-noul-observe
+        noul-question
+        2/3
+        (list (quote source)
+              (quote synthetic-witness)
+              (quote state)
+              state))
+      (pd-score-observe
+        score-question
+        (quote ((low 1/4) (medium 1/2) (high 1/4)))
+        (list (quote source)
+              (quote synthetic-witness)
+              (quote state)
+              state)))))
