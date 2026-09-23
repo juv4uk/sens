@@ -128,10 +128,10 @@ jobs:
           set -euo pipefail
           cat lib/core1.lisp lib/core1-sid8-transport.lisp > .core1-sid8/witness.lisp
           cat >> .core1-sid8/witness.lisp <<'LISP'
-          (C1-EVAL 00000100 NIL NIL)
-          (C1-EVAL 00000101 NIL NIL)
-          (C1-EVAL 00001100 NIL NIL)
-          (C1-EVAL (QUOTE FOO) NIL NIL)
+          (C1-EVAL 00000100 NIL (C1-SID8-BOOTSTRAP-GLOBAL))
+          (C1-EVAL 00000101 NIL (C1-SID8-BOOTSTRAP-GLOBAL))
+          (C1-EVAL 00001100 NIL (C1-SID8-BOOTSTRAP-GLOBAL))
+          (C1-EVAL (QUOTE FOO) NIL (C1-SID8-BOOTSTRAP-GLOBAL))
           LISP
 
           actual="$(
