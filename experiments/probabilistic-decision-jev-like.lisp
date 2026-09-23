@@ -183,18 +183,24 @@
   (lambda (observation threshold)
     (cond
       ((eq (car observation) (quote noul-observation/1)) 1
-       (let ((probability (second (car (third observation)))))
-         (cond
-           ((< probability threshold) 1
-            (list (quote decision/1)
-                  (quote defer)
-                  observation
-                  (list (quote threshold) threshold)))
-           (t 1
-            (list (quote decision/1)
-                  (quote accept)
-                  observation
-                  (list (quote threshold) threshold))))))
+       (cond
+         ((pd-probability-valid? threshold) 1
+          (let ((probability (second (car (third observation)))))
+            (cond
+              ((< probability threshold) 1
+               (list (quote decision/1)
+                     (quote defer)
+                     observation
+                     (list (quote threshold) threshold)))
+              (t 1
+               (list (quote decision/1)
+                     (quote accept)
+                     observation
+                     (list (quote threshold) threshold))))))
+         (t 1
+          (make-invalid
+            (quote malformed-policy-threshold)
+            threshold))))
       (t 1
        (make-invalid
          (quote unsupported-decision-observation)
@@ -204,24 +210,30 @@
   (lambda (observation option threshold)
     (cond
       ((eq (car observation) (quote choice-observation/1)) 1
-       (let ((entry (pd-find-option option (third observation))))
-         (cond
-           ((atom entry) 1
-            (make-invalid
-              (quote option-not-observed)
-              (list option observation)))
-           ((< (second entry) threshold) 1
-            (list (quote decision/1)
-                  (quote defer)
-                  observation
-                  (list (quote option) option)
-                  (list (quote threshold) threshold)))
-           (t 1
-            (list (quote decision/1)
-                  (quote accept)
-                  observation
-                  (list (quote option) option)
-                  (list (quote threshold) threshold))))))
+       (cond
+         ((pd-probability-valid? threshold) 1
+          (let ((entry (pd-find-option option (third observation))))
+            (cond
+              ((atom entry) 1
+               (make-invalid
+                 (quote option-not-observed)
+                 (list option observation)))
+              ((< (second entry) threshold) 1
+               (list (quote decision/1)
+                     (quote defer)
+                     observation
+                     (list (quote option) option)
+                     (list (quote threshold) threshold)))
+              (t 1
+               (list (quote decision/1)
+                     (quote accept)
+                     observation
+                     (list (quote option) option)
+                     (list (quote threshold) threshold))))))
+         (t 1
+          (make-invalid
+            (quote malformed-policy-threshold)
+            threshold))))
       (t 1
        (make-invalid
          (quote unsupported-decision-observation)
