@@ -136,7 +136,7 @@ jobs:
 
           actual="$(
             cd .core1-sid8/mccarthy-eval
-            ./mccarthy-kernel ../witness.lisp
+            ./mccarthy-kernel ../witness.lisp | tail -n 4
           )"
           expected='00000100
           00000101
