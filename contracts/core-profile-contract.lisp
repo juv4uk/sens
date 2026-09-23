@@ -60,6 +60,7 @@
    (compatibility-projection . explicit)
    (legacy-truth-domain . historical-t-nil)
    (legacy-two-part-cond . admitted-profile-behavior)
+   (special-form-profile-policy . "contracts/core-special-form-profile-policy.lisp")
    (core4-law-import . forbidden)
    (unsupported-operation . fail-closed))
 
