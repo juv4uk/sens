@@ -148,3 +148,4 @@ crates/my-lisp/tests/core2_runtime_profile.rs	core2_two_part_cond_short_circuits
 crates/my-lisp/tests/core2_runtime_profile.rs	core2_exhaustion_returns_nil	observer	core2-contract6-cond-exhaustion	contracts/core2-profile-contract.lisp + lib/core2.lisp	migrated
 crates/my-lisp/tests/core2_runtime_profile.rs	core2_rejects_core4_three_part_clause_shape	observer	core2-core4-profile-separation	contracts/core2-profile-contract.lisp + contracts/core-profile-contract.lisp	migrated
 crates/my-lisp/tests/core2_runtime_profile.rs	core2_library_projects_structural_results_back_to_t_nil	observer	core2-contract6-result-projection	lib/core2.lisp	migrated
+crates/my-lisp/tests/core2_runtime_profile.rs	loading_core4_after_core2_restores_current_cond_profile	observer	core2-core4-profile-switch-noninterference	contracts/core-profile-contract.lisp + lib/core2.lisp + lib/core4.lisp	migrated
