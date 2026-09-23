@@ -42,5 +42,5 @@
 ; #1133 Core2 runtime profile: reviewed profile-selection mechanism and observer witness.
 (review "crates/my-lisp/src/environment.rs" "9477dfa4f673a1e490d13d7d9512c919ddbfb18f65028402e0af14702037460d" issue-1133 core2-session-cond-mode)
 (review "crates/my-lisp/src/eval/special_forms/core.rs" "96c35aaae7bb11c53138bbc080590c86daad2ea3fe4ae2555106e0b356ef8024" issue-1133 core2-cond-dispatch-mechanism)
-(review "crates/my-lisp/src/lib.rs" "9aeb0c218cba9cc9cf33d43d7540185e26fb577176f6fa29b7e09747c513b6f1" issue-1133 core2-loader-mechanism)
-(review "crates/my-lisp/tests/core2_runtime_profile.rs" "11ca57677ea07c55ba3d6898f19c1fc1879eb46a5765a789ffe89e5ce33ce1c3" issue-1133 core2-runtime-observer)
+(review "crates/my-lisp/src/lib.rs" "a4a37a9e086222440ac438b6c20590f573337037c1063e638b57c1ef0a9b5651" issue-1133 core2-loader-mechanism)
+(review "crates/my-lisp/tests/core2_runtime_profile.rs" "718d19aa7681fc60aa90d7846548c727c9ea33feb0aa021555b978babd74c211" issue-1133 core2-runtime-observer)
