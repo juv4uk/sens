@@ -54,7 +54,7 @@
    (profile-number . 2)
    (role . frozen-legacy-compatibility)
    (target-source . "lib/core2.lisp")
-   (status . not-yet-admitted)
+   (status . source-admitted-activation-pending)
    (historical-contract . (6 0))
    (historical-source-pin . "35c88142548dad137689cd69ca91c430da148bea")
    (compatibility-projection . explicit)
@@ -106,11 +106,11 @@
 
   ((identity . migration-state)
    (core1-source . admitted)
-   (core2-source . pending)
+   (core2-source . present-activation-pending)
    (core3-source . pending)
    (core4-source . admitted)
    (current-lib-core-role . core4-compatibility-donor)
    (current-lib-core-is-core1 . no)
    (copy-current-core-four-times . forbidden)
    (next-authoritative-profile-files .
-     ("lib/core2.lisp" "lib/core3.lisp"))))
+     ("lib/core3.lisp"))))
