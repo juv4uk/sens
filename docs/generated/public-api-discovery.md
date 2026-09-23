@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 42
-- top-level функцій: 872
+- top-level функцій: 876
 - top-level макросів: 34
-- усього визначень: 906
+- усього визначень: 910
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -146,6 +146,10 @@
 | `lib/core4.lisp` | function | `my-postcore-build-definitions` | unreviewed |
 | `lib/core4.lisp` | macro | `my-postcore-materialize-stable-peers` | unreviewed |
 | `lib/core1-compiler-prelude.lisp` | function | `not` | unreviewed |
+| `lib/core3.lisp` | function | `core3-executors` | unreviewed |
+| `lib/core3.lisp` | function | `core3-route` | unreviewed |
+| `lib/core3.lisp` | function | `core3-add-routes` | unreviewed |
+| `lib/core3.lisp` | function | `core3-profile-status` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-observation` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-claim` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-evidence` | unreviewed |
