@@ -182,7 +182,7 @@ fn choice_policy_rejects_out_of_domain_threshold() {
                   (quote ((billing 3/4) (technical 1/4)))
                   (quote ((source synthetic))))))
           (result-status
-            (pd-choice-policy observation (quote billing) (quote (bad-threshold)))))
+            (pd-choice-policy observation (quote billing) 3/2)))
     "#;
 
     assert_eq!(eval_probabilistic_decision(source), "invalid");
