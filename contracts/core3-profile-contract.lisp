@@ -6,9 +6,12 @@
 ;
 ; Current implementation status is intentionally PARTIAL:
 ; - mechanism selection is merged in lib/mechanism-selector.lisp (#1047/#1152);
-; - Common Lisp / Prolog / Datalog lowering is implemented in #1048/#1154;
-; - CLIPS can currently expose fired-count but not the arithmetic result value,
-;   so a complete four-island round trip is not yet admitted.
+; - Lisp-owned lowering is merged on main via #1158;
+; - CLIPS producer-native result observation is merged via #1164;
+; - four real kernels preserve native domains and the shared invocation SID;
+; - #992 is still required because the current four-kernel witness uses one
+;   opaque INVOKE_ID plus mechanism-specific native payloads, not one
+;   Canon/function-table operation lowered from one Lisp-owned corpus row.
 ;
 ; This file is Lisp-owned authority data.
 
@@ -49,8 +52,10 @@
    (prolog-route . available)
    (datalog-route . available)
    (clips-route-selection . available)
-   (clips-result-observation . blocked)
-   (four-island-round-trip . pending))
+   (clips-result-observation . available)
+   (four-real-kernel-native-domains . available)
+   (shared-invoke-sid-provenance . available)
+   (canon-operation-four-island-round-trip . pending-issue-992))
 
   ((identity . library)
    (source . "lib/core3.lisp")
@@ -63,7 +68,8 @@
    (core3-library-source . present)
    (selector-reused . yes)
    (all-four-routes-selectable . yes)
-   (all-four-real-result-round-trips . pending)
-   (native-result-provenance-round-trip . pending)
+   (all-four-real-native-result-observations . yes)
+   (native-result-provenance-across-kernel-boundary . yes)
+   (canon-operation-four-island-round-trip . pending-issue-992)
    (zero-semantic-tables-duplicated-in-hosts . required)
-   (status . partial)))
+   (status . partial-native-observation-admitted-canon-operation-pending)))
