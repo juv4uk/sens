@@ -38,7 +38,7 @@ jobs:
           expected="$(mktemp)"
           trap 'rm -f "$fixture" "$expected"' EXIT
 
-          cat lib/core1-compiler-sid-resolver.lisp > "$fixture"
+          sed '/^[[:space:]]*;/d' lib/core1-compiler-sid-resolver.lisp > "$fixture"
           cat >> "$fixture" <<'LISP'
           (C1-COMPILER-SID-FOR-SURFACE (QUOTE CONS))
           (C1-COMPILER-SID-FOR-SURFACE (QUOTE CAR))
