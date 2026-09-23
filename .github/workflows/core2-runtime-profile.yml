@@ -1,0 +1,37 @@
+name: Core2 runtime profile
+
+on:
+  pull_request:
+    paths:
+      - "crates/my-lisp/src/environment.rs"
+      - "crates/my-lisp/src/eval/special_forms/core.rs"
+      - "crates/my-lisp/src/lib.rs"
+      - "crates/my-lisp/tests/core2_runtime_profile.rs"
+      - "lib/core2.lisp"
+      - "contracts/core2-profile-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - ".github/workflows/core2-runtime-profile.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core2-runtime:
+    name: Native Contract-6 profile selection
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Core2 runtime witness
+        run: cargo test -p my-lisp --test core2_runtime_profile
+      - name: Core2 Lisp-owned contract witness
+        run: |
+          cargo build -p my-lisp-cli --bin my-lisp
+          got="$(./target/debug/my-lisp scripts/check-core2-profile-contract.lisp)"
+          printf '%s\n' "$got"
+          test "$got" = "(core2-profile-contract-ok)"
+      - name: Diff hygiene
+        run: git diff --check
