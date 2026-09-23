@@ -1,10 +1,9 @@
-; #369 — external translation boundary outcomes are preserved as Lisp-owned
-; evidence before the historical symbol? producer is retired.
+; #369 — external translation decisions must survive the symbol? result-domain
+; migration without preserving the historical t/() predicate sentinel.
 ;
-; These rows cover the public boundary cases:
-;   non-symbol module name -> rejected/invalid-module
-;   symbolic translator refusal -> rejected/translator-rejected
-;   non-symbol refusal payload -> rejected/invalid-rejection
+; These are public boundary outcomes: a non-symbol module name is invalid, a
+; translator refusal with a symbolic reason is recordable evidence, and a
+; refusal carrying a non-symbol reason is rejected as malformed.
 
 (load "lib/unify.lisp")
 (load "lib/reason.lisp")
@@ -54,24 +53,30 @@
 (def translation-symbol-boundary-check
   (lambda (rows)
     (cond
-      ((atom rows) t)
-      ((equal? (second (car rows)) (third (car rows)))
-       (translation-symbol-boundary-check (cdr rows)))
-      (t
+      ((atom rows) (structural-kind empty-list)
+       (quote (translation-symbol-boundary-witness (status pass))))
+      ((atom rows) (structural-kind atom)
        (list
          (quote translation-symbol-boundary-witness)
          (list (quote status) (quote fail))
-         (list (quote case) (car (car rows)))
-         (list (quote actual) (second (car rows)))
-         (list (quote expected) (third (car rows))))))))
+         (list (quote case) (quote malformed-row-tail))
+         (list (quote actual) rows)))
+      ((atom rows) (structural-kind pair)
+       (let ((row (car rows)))
+         (cond
+           ((equal? (second row) (third row)) (structural-relation same)
+            (translation-symbol-boundary-check (cdr rows)))
+           ((equal? (second row) (third row)) (structural-relation distinct)
+            (list
+              (quote translation-symbol-boundary-witness)
+              (list (quote status) (quote fail))
+              (list (quote case) (car row))
+              (list (quote actual) (second row))
+              (list (quote expected) (third row))))))))))
 
 (def translation-symbol-boundary-witness
   (lambda ()
     (translation-symbol-boundary-check
       (translation-symbol-boundary-rows))))
 
-(cond
-  ((equal? (translation-symbol-boundary-witness)
-            (quote ())))
-  (t
-   (translation-symbol-boundary-witness)))
+(translation-symbol-boundary-witness)
