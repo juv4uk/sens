@@ -48,7 +48,7 @@
        (car checks))
       ((atom (car checks))
        (structural-kind atom)
-       (car checks))))))
+       (car checks)))))
 
 (def csp-verdict
   (lambda ()
