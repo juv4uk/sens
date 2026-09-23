@@ -29,6 +29,6 @@ jobs:
           set -euo pipefail
           got="$(./target/debug/my-lisp tests/fixtures/island-lowering-1048-witness.lisp)"
           printf '%s\n' "$got"
-          test "$got" = "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted))"
+          test "$got" = "(island-lowering-1048 (status pass) (executable-payloads 3) (clips fail-closed))"
       - name: Diff hygiene
         run: git diff --check
