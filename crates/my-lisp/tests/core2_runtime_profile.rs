@@ -1,5 +1,5 @@
 use my_lisp::{
-    eval_program, load_core2_library, Environment, ErrorKind, Session, Value,
+    eval_program, load_core2_library, load_core_library, Environment, ErrorKind, Session, Value,
 };
 
 fn core2_session() -> Session {
@@ -90,4 +90,22 @@ fn core2_library_projects_structural_results_back_to_t_nil() {
             .value,
         Value::Symbol("t".into())
     );
+}
+
+#[test]
+fn loading_core4_after_core2_restores_current_cond_profile() {
+    let mut session = core2_session();
+
+    eval_program("(cond ((quote t) t (quote yes)))", &mut session)
+        .expect_err("Core2 must reject Core4 three-part COND before profile switch");
+
+    load_core_library(&mut session).expect("Core4 loader must select current COND mode");
+
+    let result = eval_program(
+        "(cond ((quote t) t (quote yes)))",
+        &mut session,
+    )
+    .expect("Core4 three-part COND must work after profile switch");
+
+    assert_eq!(result.value, Value::Symbol("yes".into()));
 }
