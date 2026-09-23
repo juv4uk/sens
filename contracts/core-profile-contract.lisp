@@ -100,6 +100,7 @@
    (current-profile-source . "lib/core4.lisp")
    (public-api-excluded-source . "lib/core.lisp")
    (public-api-excluded-source . "lib/core1.lisp")
+   (public-api-excluded-source . "lib/core1-compiler-sid-resolver.lisp")
    (public-api-excluded-source . "lib/core2.lisp")
    (public-api-excluded-source . "lib/core3.lisp"))
 
