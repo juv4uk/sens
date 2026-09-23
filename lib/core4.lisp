@@ -479,6 +479,29 @@
       ((00000010 value) (structural-kind pair)
        (00000001 (class-membership string nonmember))))))
 
+(00001001 string-order-helper
+  (00001000 (left right)
+    (00000111
+      ((string-empty? left) (identity-relation same)
+       (00000111
+         ((string-empty? right) (identity-relation same)
+          (00000001 (text-order same)))
+         ((string-empty? right) (identity-relation distinct)
+          (00000001 (text-order before)))))
+      ((string-empty? left) (identity-relation distinct)
+       (00000001 (text-order after)))
+      ((00000011 (string-first left) (string-first right))
+       (identity-relation same)
+       (string-order-helper (string-rest left) (string-rest right)))
+      ((< (string->codepoint (string-first left))
+          (string->codepoint (string-first right)))
+       1
+       (00000001 (text-order before)))
+      ((< (string->codepoint (string-first left))
+          (string->codepoint (string-first right)))
+       0
+       (00000001 (text-order after))))))
+
 (00001001 nonempty-string-membership-helper
   (00001000 (value)
     (00000111
