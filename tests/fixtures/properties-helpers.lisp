@@ -7,10 +7,17 @@
 (def map-keys-sorted?
   (lambda (l)
     (cond
-      ((atom l) t)
-      ((atom (cdr l)) t)
-      ((string<? (car (car (cdr l))) (car (car l))) (quote ()))
-      (t (map-keys-sorted? (cdr l))))))
+      ((atom l) (structural-kind empty-list) t)
+      ((atom (cdr l)) (structural-kind empty-list) t)
+      ((identity-relation same) (identity-relation same)
+       (let ((order (string-order-helper (car (car (cdr l))) (car (car l)))))
+         (cond
+           (order (text-order before)
+            (quote ()))
+           (order (text-order same)
+            (map-keys-sorted? (cdr l)))
+           (order (text-order after)
+            (map-keys-sorted? (cdr l)))))))))
 
 (def fib
   (lambda (n)

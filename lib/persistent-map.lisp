@@ -135,11 +135,13 @@
       ((atom tree) (make-balanced-node key value (quote ()) (quote ())))
       ((eq key (node-key tree))
        (make-balanced-node key value (node-left tree) (node-right tree)))
-      ((string<? key (node-key tree))
+      ((string-order-helper key (node-key tree))
+       (text-order before)
        (balance (make-balanced-node (node-key tree) (node-value tree)
                   (map-insert key value (node-left tree))
                   (node-right tree))))
-      (t
+      ((string-order-helper key (node-key tree))
+       (text-order after)
        (balance (make-balanced-node (node-key tree) (node-value tree)
                   (node-left tree)
                   (map-insert key value (node-right tree))))))))
@@ -158,8 +160,12 @@
     (cond
       ((atom tree) (quote ()))
       ((eq key (node-key tree)) (list (node-value tree)))
-      ((string<? key (node-key tree)) (map-get key (node-left tree)))
-      (t (map-get key (node-right tree))))))
+      ((string-order-helper key (node-key tree))
+       (text-order before)
+       (map-get key (node-left tree)))
+      ((string-order-helper key (node-key tree))
+       (text-order after)
+       (map-get key (node-right tree))))))
 
 (def map-contains?
   (lambda (key tree) (not (atom (map-get key tree)))))
