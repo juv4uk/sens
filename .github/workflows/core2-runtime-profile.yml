@@ -42,5 +42,10 @@ jobs:
           got="$(./target/debug/my-lisp scripts/check-core2-profile-contract.lisp)"
           printf '%s\n' "$got"
           test "$got" = "(core2-profile-contract-ok)"
+      - name: Core2 authority review visibility
+        run: |
+          got="$(./target/debug/my-lisp tests/fixtures/core2-authority-review-witness.lisp)"
+          printf '%s\n' "$got"
+          test "$got" = "(core2-authority-review-ok)"
       - name: Diff hygiene
         run: git diff --check
