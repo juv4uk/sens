@@ -53,8 +53,8 @@ fn direct_native_clips_642_smoke() {
         "rule firing asserts a second working-memory fact"
     );
     assert_eq!(
-        environment.eval_text("(+ 2 3)").expect("native CLIPS Eval"),
-        "5"
+        environment.eval_bytes("(+ 2 3)").expect("native CLIPS Eval"),
+        b"5"
     );
     environment
         .retract(fact)
@@ -107,7 +107,7 @@ fn abi_eval_text_preserves_sid_and_returns_native_clips_result() {
     assert_eq!(status, WsmStatus::Ok);
     assert_eq!(String::from_utf8_lossy(&output), "result=5\n");
     assert_eq!(adapter.last_semantic_id(), Some(SemanticId(PROBE_ID)));
-    assert_eq!(adapter.last_eval_text(), Some("5"));
+    assert_eq!(adapter.last_eval_output(), Some(&b"5"[..]));
 
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
