@@ -1,6 +1,9 @@
 name: Core1 SID8 value transport
 
 on:
+  push:
+    branches:
+      - agent/1167-core1-sid8-value-transport
   pull_request:
     paths:
       - "lib/core1-sid8-transport.lisp"
