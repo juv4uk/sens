@@ -89,3 +89,5 @@
 (authority "crates/my-lisp/tests/canon_authority_inventory.rs" observer)
 (authority "crates/my-lisp/tests/semantic_authority_guard_1049.rs" observer)
 (authority "crates/my-lisp/tests/program_surface_translation.rs" observer)
+(authority "contracts/datalog-math-capability-1001.lisp" semantic-witness)
+(authority "crates/wsm-datalog-kernel/tests/arithmetic_execution_1001.rs" observer)
