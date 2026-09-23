@@ -17,7 +17,7 @@
          (t
           (quote always)
           (quote invalid))))
-      (t
+      ((quote always)
        (quote always)
        (yo-proper-list? (cdr value))))))
 
@@ -28,7 +28,7 @@
         ((equal? found (quote ()))
          (structural-relation same)
          (quote ()))
-        (t
+        ((quote always)
          (quote always)
          (cdr found))))))
 
@@ -39,7 +39,7 @@
         ((equal? found (quote ()))
          (structural-relation same)
          (quote no))
-        (t
+        ((quote always)
          (quote always)
          (quote yes))))))
 
@@ -52,7 +52,7 @@
          (quote shell))
        (structural-relation same)
        (quote no))
-      (t
+      ((quote always)
        (quote always)
        (quote yes)))))
 
@@ -103,19 +103,19 @@
                            ((yo-has-field? (quote approval) value)
                             (quote yes)
                             (yo-no-raw-shell? value))
-                           (t
+                           ((quote always)
                             (quote always)
                             (quote no))))
                         (t
                          (quote always)
                          (quote no))))
-                     (t
+                     ((quote always)
                       (quote always)
                       (quote no))))
-                  (t
+                  ((quote always)
                    (quote always)
                    (quote no))))
-               (t
+               ((quote always)
                 (quote always)
                 (quote no))))
             (t
@@ -124,7 +124,7 @@
          (t
           (quote always)
           (quote no))))
-      (t
+      ((quote always)
        (quote always)
        (quote no)))))
 
@@ -159,13 +159,13 @@
                      ((yo-has-field? (quote audit-ref) value)
                       (quote yes)
                       (yo-has-field? (quote provenance) value))
-                     (t
+                     ((quote always)
                       (quote always)
                       (quote no))))
-                  (t
+                  ((quote always)
                    (quote always)
                    (quote no))))
-               (t
+               ((quote always)
                 (quote always)
                 (quote no))))
             (t
@@ -174,6 +174,6 @@
          (t
           (quote always)
           (quote no))))
-      (t
+      ((quote always)
        (quote always)
        (quote no)))))
