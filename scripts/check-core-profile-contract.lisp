@@ -159,7 +159,7 @@
                    (cp-check
                      (quote migration-state)
                      (quote copy-current-core-four-times)
-                     (quote forbidden)))))))
+                     (quote forbidden))))))
          (cond
            ((atom failure) (structural-kind empty-list)
             (list (quote core-profile-contract-ok)))
