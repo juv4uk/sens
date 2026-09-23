@@ -109,7 +109,7 @@
                    (cp-check (quote core2) (quote profile-number) 2)
                    (cp-check (quote core2) (quote role) (quote frozen-legacy-compatibility))
                    (cp-check (quote core2) (quote historical-contract) (quote (6 0)))
-                   (cp-check (quote core2) (quote status) (quote not-yet-admitted))
+                   (cp-check (quote core2) (quote status) (quote source-admitted-activation-pending))
 
                    (cp-check (quote core3) (quote profile-number) 3)
                    (cp-check (quote core3) (quote role) (quote experimental-kernel-laboratory))
@@ -121,7 +121,10 @@
                    (cp-check (quote core4) (quote profile-number) 4)
                    (cp-check (quote core4) (quote role) (quote current-creative-language))
                    (cp-check (quote core4) (quote historical-contract) (quote (8 0)))
-                   (cp-check (quote core4) (quote migration-donor) "lib/core.lisp")
+                   (cp-check (quote core4) (quote execution-source) "lib/core4.lisp")
+                   (cp-check (quote core4) (quote fasl-source) "lib/core4.lisp.fasl")
+                   (cp-check (quote core4) (quote compatibility-donor) "lib/core.lisp")
+                   (cp-check (quote core4) (quote status) (quote admitted))
 
                    (cp-check
                      (quote profile-selection)
@@ -150,8 +153,16 @@
 
                    (cp-check
                      (quote migration-state)
+                     (quote core2-source)
+                     (quote present-activation-pending))
+                   (cp-check
+                     (quote migration-state)
+                     (quote core4-source)
+                     (quote admitted))
+                   (cp-check
+                     (quote migration-state)
                      (quote current-lib-core-role)
-                     (quote core4-migration-donor))
+                     (quote core4-compatibility-donor))
                    (cp-check
                      (quote migration-state)
                      (quote current-lib-core-is-core1)

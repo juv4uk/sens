@@ -1,7 +1,7 @@
 # FASL snapshot — дизайн-чернетка (OPT item #4)
 
 **Статус:** DRAFT · 2026-08-24 · Vyasa
-**Проблема:** `Session::default()` і кожен CLI-запуск парсять `lib/core.lisp`
+**Проблема:** `Session::default()` і кожен CLI-запуск парсять `lib/core4.lisp`
 (644 рядки, 49 def-ів) через `include_str!` (main.rs:76). Fresh-session
 бенчмарки показують 24–89µs/op з домінуючим parse+load. Для one-shot батчів
 (WSM-24: тисячі процесів-яєць) це ×N системної втрати.
@@ -33,13 +33,13 @@ Loader ПЕРЕВІРЯЄ sha256 джерел проти вбудованого;
 Fallback логується. Це робить механізм безпечним при будь-якому дрейфі.
 
 ## Інтеграція
-1. `scripts/gen-fasl.sh`: читає lib/*.lisp → пише `lib/core.lisp.fasl` (+sha)
+1. `scripts/gen-fasl.sh`: читає lib/*.lisp → пише `lib/core4.lisp.fasl` (+sha)
 2. build.rs АБО include_bytes! фікс-артефакту в my-lisp-cli
 3. CLI прапорець `--no-fasl` — завжди доступний чистий parse-шлях (debuggability)
 
 ## Очікуваний ефект
 Cold-session бенчмарк-кейси (arithmetic/closures/lists/recursion — усі
-платять core.lisp parse щоразу) мають впасти пропорційно частці парсинга;
+платять core4.lisp parse щоразу) мають впасти пропорційно частці парсинга;
 one-shot батчі — головний виграш. Замір: той самий harness, A/B з/без fasl.
 
 ## Не-цілі
@@ -50,14 +50,14 @@ one-shot батчі — головний виграш. Замір: той сам
 - Розмір бінарника +~50–100KB (несуттєво)
 - Хибне відчуття «ще один формат» → формат приватний для бінарника, не контрактний
 
-## ⚠️ Регенерація після зміни lib/core.lisp
+## ⚠️ Регенерація після зміни lib/core4.lisp
 
-Якщо хтось редагує `lib/core.lisp` — FASL-снапшот (`lib/core.lisp.fasl`)
+Якщо хтось редагує `lib/core4.lisp` — FASL-снапшот (`lib/core4.lisp.fasl`)
 автоматично стає невалідним (sha256 mismatch). Це БЕЗПЕЧНО: CLI
 мовчки падає на text-parse fallback. Але перформанс-виграш втрачається.
 
 Перегенерувати:
 ```bash
-cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core.lisp lib/core.lisp.fasl
-git add lib/core.lisp.fasl && git commit -m "chore(fasl): regenerate after core.lisp change"
+cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+git add lib/core4.lisp.fasl && git commit -m "chore(fasl): regenerate after core.lisp change"
 ```

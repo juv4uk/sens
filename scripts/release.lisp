@@ -45,15 +45,15 @@
   (release-run "git" (quote ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
 (release-run "cargo"
   (quote ("run" "--release" "--locked" "-p" "my-lisp-cli" "--bin" "gen-fasl"
-          "--" "lib/core.lisp" "lib/core.lisp.fasl")))
+          "--" "lib/core4.lisp" "lib/core4.lisp.fasl")))
 (def release-fasl-diff-status
-  (car (process-run "git" (quote ("diff" "--quiet" "--" "lib/core.lisp.fasl")))))
+  (car (process-run "git" (quote ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
 (cond
   ((eq release-fasl-diff-status 0) (identity-relation same) (quote ()))
   ((eq release-fasl-diff-status 1) (identity-relation same)
    ((lambda ()
-      (release-run "git" (quote ("add" "lib/core.lisp.fasl")))
-      (release-run "git" (quote ("commit" "-m" "chore(fasl): regenerate core snapshot")))
+      (release-run "git" (quote ("add" "lib/core4.lisp.fasl")))
+      (release-run "git" (quote ("commit" "-m" "chore(fasl): regenerate Core4 snapshot")))
       (release-run "timeout" (quote ("60" "git" "push" "origin" "main")))))
   (t
    ((lambda ()
