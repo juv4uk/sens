@@ -29,6 +29,7 @@ fn bare_unadmitted_sid_literal_fails_closed_through_existing_call_boundary() {
 #[test]
 fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
     let mut session = Session::default();
+    my_lisp::load_core_library(&mut session).expect("core library must load before Lisp-owned registry API");
     eval_program(
         include_str!("../../../lib/surface/semantic-registry-api.lisp"),
         &mut session,
