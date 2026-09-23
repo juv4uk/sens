@@ -69,6 +69,30 @@
         ((atom row) "()")
         (t (third row))))))
 
+; Historical (McCarthy 1960 / Lisp 1.5) realization projection. Its rows
+; never create an identity: they may only annotate IDs that already exist
+; in `entries` above. Reverse-authority is forbidden by the contract file
+; itself -- a historical name never mints a new my-lisp SID.
+(def historical-profile-form
+  (car (read-all (read-file "contracts/core1-historical-sid-map.lisp"))))
+
+(def historical-rows
+  (cdr (find-section (quote rows) (cdr historical-profile-form))))
+
+(def find-historical-row
+  (lambda (sid rows)
+    (cond
+      ((atom rows) (quote ()))
+      ((equal? (sid-text (second (car rows))) sid) (car rows))
+      (t (find-historical-row sid (cdr rows))))))
+
+(def mccarthy-label
+  (lambda (sid)
+    (let ((row (find-historical-row (sid-text sid) historical-rows)))
+      (cond
+        ((atom row) "()")
+        (t (str+ (write-to-string (fourth row)) " (" (write-to-string (fifth row)) ")"))))))
+
 ; A surface word is usually a symbol (write-to-string strips the
 ; Lisp-level Symbol wrapping down to bare text); the reconstructed
 ; apostrophe case above is already a plain string. For prose contexts
@@ -195,7 +219,8 @@
         " | " (surface-word-text en)
         " | " (surface-word-text sa)
         " | " (surface-word-text sym)
-        " | " (machine-path sid) " |"))))
+        " | " (machine-path sid)
+        " | " (mccarthy-label sid) " |"))))
 
 (def wsm-header
   (list
@@ -222,10 +247,12 @@
     ""
     "**Machine projection:** `lib/machine/intel-core-i5-6400.lisp` — physical execution paths only; it does not create language meaning."
     ""
+    "**Historical projection:** `contracts/core1-historical-sid-map.lisp` — one-way SID → McCarthy 1960 / Lisp 1.5 mechanism comparison, pinned against `juv4uk/mccarthy-eval`; it never mints a new identity and does not create language meaning."
+    ""
     "Regenerate: `cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function-table.lisp`"
     ""
-    "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |"
-    "|----|----|-----|---------|----------|--------|------------------------------|"))
+    "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake | McCarthy 1960 / Lisp 1.5 (Core1) |"
+    "|----|----|-----|---------|----------|--------|------------------------------|-----------------------------------|"))
 
 (def md-body (join-newline (append md-header (map render-md-row entries))))
 (def md-output (string-append md-body "
