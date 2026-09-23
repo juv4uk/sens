@@ -311,3 +311,88 @@ fn transport_failure_becomes_blocked_result_with_evidence() {
     let rendered = eval_with_agent(src);
     assert!(!rendered.contains("UNEXPECTED-SUCCESS"), "{rendered}");
 }
+
+
+fn eval_bridge_with_agent(source: &str) -> String {
+    let mut session = agent_session();
+    eval_program(
+        include_str!("../../../tests/fixtures/yantraos-bridge-witness.lisp"),
+        &mut session,
+    )
+    .expect("yantraOS bridge witness should load");
+    eval_program(source, &mut session)
+        .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
+        .value
+        .to_string()
+}
+
+#[test]
+fn yantraos_bridge_builds_typed_action_envelope() {
+    let source = r#"
+        (let ((envelope
+                (yo-action-envelope
+                  (quote (draft brief))
+                  (quote file-management)
+                  (quote create)
+                  (quote client/brief.txt)
+                  (quote ((content "hello") (overwrite 0)))
+                  (quote (created-and-verified))
+                  (quote ((source my-lisp) (revision 1)))
+                  (quote required))))
+          (list
+            (yo-action-envelope? envelope)
+            (yo-field (quote capability) (yo-field (quote action) envelope))
+            (yo-field (quote operation) (yo-field (quote action) envelope))
+            (yo-field (quote approval) envelope)))
+    "#;
+
+    assert_eq!(
+        eval_bridge_with_agent(source),
+        "(yes file-management create required)"
+    );
+}
+
+#[test]
+fn yantraos_bridge_rejects_raw_shell_capability() {
+    let source = r#"
+        (let ((envelope
+                (yo-action-envelope
+                  (quote (delete temp))
+                  (quote shell)
+                  (quote execute)
+                  (quote rm)
+                  (quote ((command "rm -rf /tmp/x")))
+                  (quote (verified))
+                  (quote ((source my-lisp)))
+                  (quote required))))
+          (yo-action-envelope? envelope))
+    "#;
+
+    assert_eq!(eval_bridge_with_agent(source), "no");
+}
+
+#[test]
+fn yantraos_bridge_keeps_execution_observation_and_provenance() {
+    let source = r#"
+        (let ((request-provenance
+                (quote ((request-id r-42)
+                        (state revision-7))))
+              (observation
+                (yo-execution-observation
+                  (quote executed)
+                  (quote CLI_FAST_PATH)
+                  (quote ((exit-code 0)))
+                  (quote ((audit-id a-99)))
+                  request-provenance)))
+          (list
+            (yo-execution-observation? observation)
+            (yo-field (quote result) observation)
+            (yo-field (quote route) observation)
+            (yo-field (quote provenance) observation)))
+    "#;
+
+    assert_eq!(
+        eval_bridge_with_agent(source),
+        "(yes executed CLI_FAST_PATH ((request-id r-42) (state revision-7)))"
+    );
+}
