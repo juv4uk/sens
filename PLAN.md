@@ -113,7 +113,7 @@ Evidence: `narrate_outcomes.rs`, `advice_corpus.rs`, CI #1020/#1030.
 
 ## A5. Portability / Guard / documentation hardening
 
-- ✅ committed `core.lisp.fasl` перевіряється exact source hash;
+- ✅ committed `core4.lisp.fasl` перевіряється exact source hash;
 - ✅ semantic changes trigger WASM browser workflow;
 - ✅ Chrome + Firefox пройшли після trigger expansion;
 - ✅ Guard Rust boundary перевіряє exact `guard/1` structure, не rendered substring;
