@@ -49,5 +49,5 @@ fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
     .value
     .to_string();
 
-    assert_eq!(rendered, "((same 00000010) yes no t t t t ())");
+    assert_eq!(rendered, "((same 00000010) yes no (structural-relation same) (structural-relation same) (structural-relation same) (structural-relation same) ())");
 }
