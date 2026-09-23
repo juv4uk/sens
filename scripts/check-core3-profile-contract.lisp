@@ -38,6 +38,6 @@
 
 (cond
   ((eq (c3-all-routes?) (quote yes)) (identity-relation same)
-   (quote (core3-profile-contract-ok (routes 4) (round-trip partial) (clips-result blocked))))
+   (quote (core3-profile-contract-ok (routes 4) (canon-round-trip pending-992) (clips-result available))))
   ((quote c3-fail) c3-fail
    (quote (core3-profile-contract-violation))))
