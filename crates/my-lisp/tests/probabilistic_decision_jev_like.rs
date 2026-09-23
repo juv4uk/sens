@@ -188,3 +188,30 @@ fn choice_policy_rejects_out_of_domain_threshold() {
 
     assert_eq!(eval_probabilistic_decision(source), "invalid");
 }
+
+#[test]
+fn synthetic_witness_carries_one_state_through_three_typed_questions() {
+    let source = r#"
+        (let ((witness
+                (pd-synthetic-witness
+                  (quote ((case billing) (revision 1)))
+                  (pd-question-choice
+                    (quote route)
+                    (quote (billing technical)))
+                  (pd-question-noul (quote urgent))
+                  (pd-question-score
+                    (quote severity)
+                    (quote (low medium high))))))
+          (list
+            (car witness)
+            (second witness)
+            (car (third witness))
+            (pd-observation-confidence (fourth witness))
+            (pd-observation-confidence (fifth witness))))
+    "#;
+
+    assert_eq!(
+        eval_probabilistic_decision(source),
+        "(probabilistic-witness/1 ((case billing) (revision 1)) choice-observation/1 3/4 2/3)"
+    );
+}
