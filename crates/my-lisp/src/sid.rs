@@ -5,8 +5,22 @@ use std::fmt;
 /// The canonical identity is the bit spelling itself (`00000000..11111111`).
 /// The packed byte is a private runtime/transport mechanism and is never the
 /// public semantic name of the SID.
+///
+/// Deliberately NOT `Ord`/`PartialOrd` (wsm-lazarus owner, 2026-09-23:
+/// "треба заборонити математичні операції над нашим сідом" -- mathematical
+/// operations on our SID must be forbidden). `Ord`/`PartialOrd` were derived
+/// here until this commit with zero actual use anywhere in this codebase
+/// (verified by search), meaning `sid1 < sid2`, `.sort()`, and
+/// `BTreeMap<Sid8, _>`/`BTreeSet<Sid8>` all compiled and worked with no
+/// `unsafe` at all -- treating an opaque identity as a numerically ordered
+/// quantity, exactly the same class of gap wsm-lazarus's TSid8 closed on
+/// the Pascal side (there, the exploit was a same-size `Byte(sid)` ordinal
+/// typecast bypassing `strict private`; here, it was simply available for
+/// free via `derive`). `Eq`/`Hash`/`PartialEq` remain: identity comparison
+/// and use as a hash-map/hash-set key are the only meaningful operations on
+/// a SID, matching TSid8's own `=`/`<>` and nothing else.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Sid8(u8);
 
 impl Sid8 {

@@ -226,7 +226,10 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
 /// lexical environment.
 fn bind_missing_stable_surface_peers(environment: &Environment) {
     let snapshot = environment.snapshot();
-    let mut values_by_semantic_id = std::collections::BTreeMap::new();
+    // HashMap, not BTreeMap: Sid8 is deliberately not Ord (identity
+    // comparison/hashing only, no ordering -- see sid.rs's own header).
+    // Iteration order here is irrelevant; this is a lookup table.
+    let mut values_by_semantic_id = std::collections::HashMap::new();
 
     for (name, value) in snapshot {
         if eval::canon::identity_for_surface(&name).is_some() {
