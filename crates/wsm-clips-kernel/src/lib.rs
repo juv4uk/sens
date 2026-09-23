@@ -34,6 +34,10 @@ pub enum ClipsKernelError {
     AssertFailed,
     #[cfg(feature = "native-clips")]
     RetractFailed(u32),
+    #[cfg(feature = "native-clips")]
+    EvalFailed(u32),
+    #[cfg(feature = "native-clips")]
+    EvalReturnedNull,
 }
 
 impl fmt::Display for ClipsKernelError {
@@ -57,6 +61,10 @@ impl fmt::Display for ClipsKernelError {
             Self::AssertFailed => write!(f, "CLIPS AssertString returned null"),
             #[cfg(feature = "native-clips")]
             Self::RetractFailed(code) => write!(f, "CLIPS Retract failed with error code {code}"),
+            #[cfg(feature = "native-clips")]
+            Self::EvalFailed(code) => write!(f, "CLIPS Eval failed with error code {code}"),
+            #[cfg(feature = "native-clips")]
+            Self::EvalReturnedNull => write!(f, "CLIPS Eval returned a null text value"),
         }
     }
 }
@@ -95,9 +103,28 @@ mod native {
         _private: [u8; 0],
     }
 
+    #[repr(C)]
+    pub struct TypeHeader {
+        pub type_: u16,
+    }
+
+    #[repr(C)]
+    pub struct CLIPSLexeme {
+        pub header: TypeHeader,
+        pub contents: *const c_char,
+    }
+
+    #[repr(C)]
+    pub union CLIPSValue {
+        pub value: *mut c_void,
+        pub header: *mut TypeHeader,
+        pub lexeme_value: *mut CLIPSLexeme,
+    }
+
     type CreateEnvironmentFn = unsafe extern "C" fn() -> *mut Environment;
     type DestroyEnvironmentFn = unsafe extern "C" fn(*mut Environment) -> bool;
     type BuildFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> u32;
+    type EvalFn = unsafe extern "C" fn(*mut Environment, *const c_char, *mut CLIPSValue) -> u32;
     type AssertStringFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> *mut Fact;
     type RunFn = unsafe extern "C" fn(*mut Environment, c_longlong) -> c_longlong;
     type RetractFn = unsafe extern "C" fn(*mut Fact) -> u32;
@@ -249,6 +276,7 @@ mod native {
         pub create_environment: CreateEnvironmentFn,
         pub destroy_environment: DestroyEnvironmentFn,
         pub build: BuildFn,
+        pub eval: EvalFn,
         pub assert_string: AssertStringFn,
         pub run: RunFn,
         pub retract: RetractFn,
@@ -277,6 +305,7 @@ mod native {
             let create_environment = unsafe { load_symbol(&library, b"CreateEnvironment\0")? };
             let destroy_environment = unsafe { load_symbol(&library, b"DestroyEnvironment\0")? };
             let build = unsafe { load_symbol(&library, b"Build\0")? };
+            let eval = unsafe { load_symbol(&library, b"Eval\0")? };
             let assert_string = unsafe { load_symbol(&library, b"AssertString\0")? };
             let run = unsafe { load_symbol(&library, b"Run\0")? };
             let retract = unsafe { load_symbol(&library, b"Retract\0")? };
@@ -289,6 +318,7 @@ mod native {
                 create_environment,
                 destroy_environment,
                 build,
+                eval,
                 assert_string,
                 run,
                 retract,
@@ -491,6 +521,37 @@ impl ClipsEnvironment {
         unsafe { (self.inner.api.run)(self.inner.raw, limit) }
     }
 
+    /// Ask the native CLIPS runtime to evaluate an expression and return
+    /// CLIPS' own textual observation of the resulting value.
+    /// Rust does not interpret the expression or reconstruct its semantics.
+    pub fn eval_text(&self, expression: &str) -> Result<String, ClipsKernelError> {
+        let request = format!("(str-cat {expression})");
+        let request =
+            std::ffi::CString::new(request).map_err(|_| ClipsKernelError::NulInput)?;
+        let mut value = native::CLIPSValue {
+            value: std::ptr::null_mut(),
+        };
+        let code = unsafe {
+            (self.inner.api.eval)(self.inner.raw, request.as_ptr(), &mut value)
+        };
+        if code != 0 {
+            return Err(ClipsKernelError::EvalFailed(code));
+        }
+
+        let lexeme = unsafe { value.lexeme_value };
+        if lexeme.is_null() {
+            return Err(ClipsKernelError::EvalReturnedNull);
+        }
+        let contents = unsafe { (*lexeme).contents };
+        if contents.is_null() {
+            return Err(ClipsKernelError::EvalReturnedNull);
+        }
+
+        Ok(unsafe { std::ffi::CStr::from_ptr(contents) }
+            .to_string_lossy()
+            .into_owned())
+    }
+
     pub fn fact_count(&self) -> std::ffi::c_ulong {
         unsafe { (self.inner.api.get_number_of_facts)(self.inner.raw) }
     }
@@ -577,6 +638,7 @@ struct ClipsAbiContext {
     running: bool,
     last_semantic_id: Option<SemanticId>,
     last_fired: Option<i64>,
+    last_eval_text: Option<String>,
     #[cfg(feature = "native-clips")]
     environment: Option<ClipsEnvironment>,
     #[cfg(feature = "native-clips")]
@@ -600,6 +662,7 @@ impl ClipsAbiAdapter {
             running: false,
             last_semantic_id: None,
             last_fired: None,
+            last_eval_text: None,
             #[cfg(feature = "native-clips")]
             environment: None,
             #[cfg(feature = "native-clips")]
@@ -628,6 +691,10 @@ impl ClipsAbiAdapter {
 
     pub fn last_fired(&self) -> Option<i64> {
         self.context.last_fired
+    }
+
+    pub fn last_eval_text(&self) -> Option<&str> {
+        self.context.last_eval_text.as_deref()
     }
 }
 
@@ -744,22 +811,27 @@ unsafe extern "C" fn clips_exchange(
         let Some(environment) = context.environment.as_mut() else {
             return WsmStatus::NotRunning;
         };
-        let output = match command {
-            "run" => {
-                let fired = environment.run(-1);
-                context.last_fired = Some(fired);
-                format!("fired={fired}\n").into_bytes()
+        let output = if command == "run" {
+            let fired = environment.run(-1);
+            context.last_fired = Some(fired);
+            format!("fired={fired}\n").into_bytes()
+        } else if command == "retract" {
+            let Some(fact) = context.fact.take() else {
+                return WsmStatus::KernelFailure;
+            };
+            if environment.retract(fact).is_err() {
+                return WsmStatus::KernelFailure;
             }
-            "retract" => {
-                let Some(fact) = context.fact.take() else {
-                    return WsmStatus::KernelFailure;
-                };
-                if environment.retract(fact).is_err() {
-                    return WsmStatus::KernelFailure;
-                }
-                b"retracted\n".to_vec()
-            }
-            _ => return WsmStatus::InvalidArgument,
+            b"retracted\n".to_vec()
+        } else if let Some(expression) = command.strip_prefix("eval:") {
+            let value = match environment.eval_text(expression) {
+                Ok(value) => value,
+                Err(_) => return WsmStatus::KernelFailure,
+            };
+            context.last_eval_text = Some(value.clone());
+            format!("result={value}\n").into_bytes()
+        } else {
+            return WsmStatus::InvalidArgument;
         };
         context.last_semantic_id = Some(SemanticId(request.semantic_id));
         copy_response(&output, response, written)
@@ -815,6 +887,7 @@ mod tests {
         assert!(vtable.is_mechanically_complete());
         assert_eq!(adapter.last_semantic_id(), None);
         assert_eq!(adapter.last_fired(), None);
+        assert_eq!(adapter.last_eval_text(), None);
     }
 
 }
