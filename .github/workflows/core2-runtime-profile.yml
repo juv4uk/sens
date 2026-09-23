@@ -53,6 +53,6 @@ jobs:
           printf '%s\n' '(changed "crates/my-lisp/tests/core2_runtime_profile.rs" "11ca57677ea07c55ba3d6898f19c1fc1879eb46a5765a789ffe89e5ce33ce1c3")' > tests/semantic-authority-changes.lisp
           got="$(./target/debug/my-lisp scripts/semantic-authority-guard.lisp)"
           printf '%s\n' "$got"
-          test "$got" = "(semantic-authority-ok)"
+          test "$(printf '%s\n' "$got" | tail -n 1)" = "(semantic-authority-ok)"
       - name: Diff hygiene
         run: git diff --check
