@@ -197,8 +197,8 @@ fi
 # #369: external translation boundary semantics are Lisp-owned. The shell
 # observes only the named pass envelope; invalid-module/refusal classification
 # stays in the Lisp witness rather than becoming a new Rust oracle.
-translation_symbol_status="\$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/translation-symbol-boundary-witness.lisp)"
-if [[ "\$translation_symbol_status" != "(translation-symbol-boundary-witness (status pass))" ]]; then
-  printf 'translation symbol-boundary Lisp witness failed: %s\\n' "\$translation_symbol_status" >&2
+translation_symbol_status="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/translation-symbol-boundary-witness.lisp)"
+if [[ "$translation_symbol_status" != "(translation-symbol-boundary-witness (status pass))" ]]; then
+  printf 'translation symbol-boundary Lisp witness failed: %s\n' "$translation_symbol_status" >&2
   exit 1
 fi
