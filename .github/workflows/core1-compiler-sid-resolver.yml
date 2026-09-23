@@ -1,0 +1,82 @@
+name: Core1 compiler SID8 resolver
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1-compiler-sid-resolver.lisp"
+      - "contracts/core1-historical-sid-map.lisp"
+      - "scripts/check-core1-compiler-sid-resolver.lisp"
+      - ".github/workflows/core1-compiler-sid-resolver.yml"
+  workflow_dispatch:
+
+jobs:
+  core1-sid8-resolver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout my-lisp
+        uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Authority projection guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          actual="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/check-core1-compiler-sid-resolver.lisp 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$actual"
+          test "$status" -eq 0
+          test "$actual" = "(core1-compiler-sid-resolver-check pass)"
+
+      - name: Checkout SID8-aware historical S0
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
+          path: mccarthy-eval
+          fetch-depth: 1
+
+      - name: Build historical S0
+        run: gcc -no-pie -O0 -s -o mccarthy-eval/mccarthy-kernel mccarthy-eval/mccarthy-kernel.s
+
+      - name: Execute bare SID8 resolver witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$(mktemp)"
+          expected="$(mktemp)"
+          trap 'rm -f "$fixture" "$expected"' EXIT
+
+          sed '/^[[:space:]]*;/d' lib/core1-compiler-sid-resolver.lisp > "$fixture"
+          cat >> "$fixture" <<'LISP'
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE CONS))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE CAR))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE ATOM))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE EQ))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE +))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE -))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE NOT))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE LIST))
+          (EQ (C1-COMPILER-SID-FOR-SURFACE (QUOTE CONS)) (QUOTE 00000100))
+          (C1-COMPILER-SID-FOR-SURFACE (QUOTE UNKNOWN))
+          LISP
+
+          cat > "$expected" <<'OUT'
+          00000100
+          00000101
+          00000010
+          00000011
+          00001100
+          00001101
+          00100001
+          00100111
+          T
+          NIL
+          OUT
+
+          (cd mccarthy-eval && ./mccarthy-kernel "$fixture") > actual.txt
+          diff -u "$expected" actual.txt
+          cat actual.txt
