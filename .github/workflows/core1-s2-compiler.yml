@@ -19,11 +19,11 @@ jobs:
       - name: Checkout my-lisp Core1
         uses: actions/checkout@v5
 
-      - name: Checkout unchanged S0 seed
+      - name: Checkout typed-SID8 S0
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
-          ref: 1ae9745b66a1439c1929b0d9038c680567118a58
+          ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
           path: .core1-s2/mccarthy-eval
 
       - name: Checkout pinned S2 compiler source
@@ -33,7 +33,7 @@ jobs:
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           path: .core1-s2/wsm-my-lisp
 
-      - name: Build historical seed unchanged
+      - name: Build typed-SID8 S0
         working-directory: .core1-s2/mccarthy-eval
         run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
 
@@ -66,6 +66,22 @@ jobs:
           build_probe map-quotes '(compiler-map compiler-form (quote ((quote A) (quote B))))'
           build_probe form-cons '(compiler-form (quote (cons (quote A) (quote B))))'
 
+          build_core1_probe() {
+            local name="$1"
+            local expr="$2"
+            {
+              cat lib/core1.lisp
+              printf '%s\n' "$expr"
+            } > ".core1-s2/$name.lisp"
+          }
+
+          build_core1_probe sid-self '(C1-EVAL 00000100 NIL NIL)'
+          build_core1_probe sid-name-cons '(C1-EVAL (QUOTE (CONS (QUOTE A) (QUOTE B))) NIL NIL)'
+          build_core1_probe sid-direct-cons '(C1-EVAL (QUOTE (00000100 (QUOTE A) (QUOTE B))) NIL NIL)'
+          build_core1_probe sid-name-identity '(C1-PRIMITIVE-IDENTITY (QUOTE CONS))'
+          build_core1_probe sid-direct-identity '(C1-PRIMITIVE-IDENTITY 00000100)'
+          build_core1_probe sid-unsupported-call '(C1-EVAL (QUOTE (11111111 (QUOTE A))) NIL NIL)'
+
           sha256sum .core1-s2/wsm-my-lisp/lib/compiler.lisp
           sha256sum lib/core1.lisp
 
@@ -83,6 +99,31 @@ jobs:
               form-quote) expected='(quote A)' ;;
               map-quotes) expected='((quote A) (quote B))' ;;
               form-cons) expected='(prim cons ((quote A) (quote B)))' ;;
+            esac
+
+            echo "=== $probe ==="
+            actual="$(
+              cd .core1-s2/mccarthy-eval
+              ./mccarthy-kernel "../$probe.lisp"
+            )"
+            status=$?
+            printf 'status=%s\n' "$status"
+            printf 'expected=%s\n' "$expected"
+            printf 'actual=%s\n' "$actual"
+
+            if [[ "$status" -ne 0 || "$actual" != "$expected" ]]; then
+              failures=$((failures + 1))
+            fi
+          done
+
+          for probe in sid-self sid-name-cons sid-direct-cons sid-name-identity sid-direct-identity sid-unsupported-call; do
+            case "$probe" in
+              sid-self) expected='00000100' ;;
+              sid-name-cons) expected='(A . B)' ;;
+              sid-direct-cons) expected='(A . B)' ;;
+              sid-name-identity) expected='00000100' ;;
+              sid-direct-identity) expected='00000100' ;;
+              sid-unsupported-call) expected='(C1-ERROR UNBOUND 11111111)' ;;
             esac
 
             echo "=== $probe ==="
