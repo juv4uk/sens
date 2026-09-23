@@ -49,7 +49,8 @@
    (non-nil-test-selects . yes)
    (core4-three-part-cond . out-of-profile)
    (core4-unsatisfied-conditional . out-of-profile)
-   (activation-boundary . profile-aware-special-form-dispatch-required))
+   (activation-boundary . profile-aware-special-form-dispatch-required)
+   (special-form-profile-policy . "contracts/core-special-form-profile-policy.lisp"))
 
   ((identity . projection)
    (source . "lib/core2.lisp")
@@ -74,5 +75,6 @@
    (legacy-t-nil-witnesses . yes)
    (legacy-two-part-cond-law-recorded . yes)
    (core2-library-source . present)
+   (special-form-profile-policy-recorded . yes)
    (full-profile-special-form-selection . pending)
    (core4-differences-machine-readable . yes)))
