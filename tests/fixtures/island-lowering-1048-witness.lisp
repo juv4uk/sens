@@ -1,7 +1,6 @@
 ; #1048 — current honest lowering witness.
-; Three executor payloads are serialized mechanically. CLIPS is deliberately
-; fail-closed until the adapter can observe the numeric result, not merely a
-; fired-rule count.
+; Four executor payloads are serialized mechanically. CLIPS uses the exact
+; opaque eval transport admitted by the native adapter merged in #1164.
 
 (load "lib/core4.lisp")
 (load "lib/surface/semantic-registry-api.lisp")
@@ -45,13 +44,13 @@
                (cond
                  ((equal?
                     clips-result
-                    (list (quote island-lowering-failure)
-                          (quote clips-result-observation-unavailable)
+                    (list (quote island-lowering-result)
                           plus-sid
                           (quote clips)
-                          (quote bounded-exact-add)))
+                          (quote bounded-exact-add)
+                          "eval:(+ 2 3)"))
                   (structural-relation same)
-                  (quote (island-lowering-1048 (status pass) (executable-payloads 3) (clips blocked))))
+                  (quote (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted))))
                  ((quote witness-clips-fail) witness-clips-fail
                   (car (quote ())))))
               ((quote witness-datalog-fail) witness-datalog-fail
