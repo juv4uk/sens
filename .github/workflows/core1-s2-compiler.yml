@@ -128,27 +128,33 @@ jobs:
           set -euo pipefail
           cat lib/core1.lisp lib/core1-sid8-transport.lisp > .core1-sid8/witness.lisp
           cat >> .core1-sid8/witness.lisp <<'LISP'
-          (C1-EVAL 00000100 NIL (C1-SID8-BOOTSTRAP-GLOBAL))
-          (C1-EVAL 00000101 NIL (C1-SID8-BOOTSTRAP-GLOBAL))
-          (C1-EVAL 00001100 NIL (C1-SID8-BOOTSTRAP-GLOBAL))
+          (C1-EVAL (QUOTE 00000100) NIL (C1-SID8-BOOTSTRAP-GLOBAL))
+          (C1-EVAL (QUOTE 00000101) NIL (C1-SID8-BOOTSTRAP-GLOBAL))
+          (C1-EVAL (QUOTE 00001100) NIL (C1-SID8-BOOTSTRAP-GLOBAL))
+          (EQ
+            (C1-EVAL (QUOTE (QUOTE 00000100)) NIL (C1-SID8-BOOTSTRAP-GLOBAL))
+            00000100)
           (C1-EVAL (QUOTE FOO) NIL (C1-SID8-BOOTSTRAP-GLOBAL))
           LISP
 
           actual="$(
             cd .core1-sid8/mccarthy-eval
-            ./mccarthy-kernel ../witness.lisp | tail -n 4
+            ./mccarthy-kernel ../witness.lisp | tail -n 5
           )"
           expected='00000100
           00000101
           00001100
+          NIL
           (C1-ERROR UNBOUND FOO)'
 
           printf '%s\n' "$actual"
           test "$actual" = "$expected"
 
-      - name: Reject SID wrappers in transport overlay
+      - name: Guard one-way source-token to bare-SID resolution
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -E '\(QUOTE[[:space:]]+[01]{8}\)' lib/core1-sid8-transport.lisp
           ! grep -E '"[01]{8}"' lib/core1-sid8-transport.lisp
+          grep -F '(CONS (CONS (QUOTE 00000100) 00000100)' lib/core1-sid8-transport.lisp
+          grep -F '(CONS (CONS (QUOTE 00000101) 00000101)' lib/core1-sid8-transport.lisp
+          ! grep -E '\(CONS \(CONS \(QUOTE [01]{8}\) \(QUOTE [01]{8}\)\)' lib/core1-sid8-transport.lisp
