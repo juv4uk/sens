@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "lib/core1.lisp"
+      - "lib/core1-sid8-transport.lisp"
       - "contracts/core1-s2-compiler-admission.lisp"
       - ".github/workflows/core1-s2-compiler.yml"
   workflow_dispatch:
@@ -101,3 +102,53 @@ jobs:
           done
 
           exit "$failures"
+
+
+  core1-sid8-transport:
+    name: Core1 carries exact SID8 on SID-aware S0
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout my-lisp Core1 transport
+        uses: actions/checkout@v5
+
+      - name: Checkout SID8-aware S0
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ref: 770ae6ce5d8c13d5a970f2b496fc74d944f480a5
+          path: .core1-sid8/mccarthy-eval
+
+      - name: Build SID8-aware historical kernel
+        working-directory: .core1-sid8/mccarthy-eval
+        run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+
+      - name: Execute exact SID8 transport witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat lib/core1.lisp lib/core1-sid8-transport.lisp > .core1-sid8/witness.lisp
+          cat >> .core1-sid8/witness.lisp <<'LISP'
+          (C1-EVAL 00000100 NIL NIL)
+          (C1-EVAL 00000101 NIL NIL)
+          (C1-EVAL 00001100 NIL NIL)
+          (C1-EVAL (QUOTE FOO) NIL NIL)
+          LISP
+
+          actual="$(
+            cd .core1-sid8/mccarthy-eval
+            ./mccarthy-kernel ../witness.lisp
+          )"
+          expected='00000100
+          00000101
+          00001100
+          (C1-ERROR UNBOUND FOO)'
+
+          printf '%s\n' "$actual"
+          test "$actual" = "$expected"
+
+      - name: Reject SID wrappers in transport overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E '\(QUOTE[[:space:]]+[01]{8}\)' lib/core1-sid8-transport.lisp
+          ! grep -E '"[01]{8}"' lib/core1-sid8-transport.lisp
