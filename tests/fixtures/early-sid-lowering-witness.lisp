@@ -74,19 +74,19 @@
 (def early-sid-lowering-witness
   (lambda (registry-source)
     (let ((registry (semantic-registry-read-source registry-source)))
-      (let ((atom-en (semantic-registry-id-in registry "atom"))
-            (atom-uk (semantic-registry-id-in registry "атом?"))
-            (atom-ukr (semantic-registry-id-in registry "атом?"))
-            (atom-sa (semantic-registry-id-in registry "aṇu"))
-            (atom-sym (semantic-registry-id-in registry ".?")))
+      (let ((atom-en (semantic-registry-id-in registry (quote atom)))
+            (atom-uk (semantic-registry-id-in registry (quote атом?)))
+            (atom-ukr (semantic-registry-id-in registry (quote атом?)))
+            (atom-sa (semantic-registry-id-in registry (quote aṇu)))
+            (atom-sym (semantic-registry-id-in registry (quote .?))))
         (list
           (early-sid-lowering-peer-check
             registry
-            "atom" "атом?" "aṇu" ".?")
+            (quote atom) (quote атом?) (quote aṇu) (quote .?))
           (early-sid-lowering-backend-request?
             (early-sid-lower
               registry
-              "atom"
+              (quote atom)
               (quote (x))
               (quote (portable-result-domain structural-relation))))
           (early-sid-lowering-backend-request?
@@ -95,4 +95,4 @@
           (equal? atom-en atom-ukr)
           (equal? atom-en atom-sa)
           (equal? atom-en atom-sym)
-          (semantic-registry-id-in registry "not-admitted-by-language"))))))
+          (semantic-registry-id-in registry (quote not-admitted-by-language)))))))
