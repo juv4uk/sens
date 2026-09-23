@@ -94,6 +94,13 @@
    (core3-native-observation-as-law . forbidden)
    (unsupported-operation . fail-closed))
 
+  ((identity . public-api-discovery)
+   (current-profile-source . "lib/core4.lisp")
+   (public-api-excluded-source . "lib/core.lisp")
+   (public-api-excluded-source . "lib/core1.lisp")
+   (public-api-excluded-source . "lib/core2.lisp")
+   (public-api-excluded-source . "lib/core3.lisp"))
+
   ((identity . profile-selection)
    (same-sid-across-profiles . required)
    (same-sid-may-select-profile-specific-law . yes)
