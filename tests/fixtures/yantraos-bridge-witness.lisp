@@ -32,20 +32,16 @@
        t))))
 
 (def yo-no-raw-shell?
-  (lambda (value)
+  (lambda (envelope)
     (cond
-      ((atom value) t)
-      ((equal? (car value) (quote shell)) (structural-relation same)
+      ((equal?
+         (yo-field (quote capability)
+                   (yo-field (quote action) envelope))
+         (quote shell))
+       (structural-relation same)
        (quote ()))
-      (t (yo-no-raw-shell-list? value)))))
-
-(def yo-no-raw-shell-list?
-  (lambda (values)
-    (cond
-      ((atom values) t)
-      ((yo-no-raw-shell? (car values)) t
-       (yo-no-raw-shell-list? (cdr values)))
-      (t (quote ())))))
+      (t (structural-relation distinct)
+       t))))
 
 (def yo-action-envelope
   (lambda (goal capability operation target parameters verification provenance approval)
