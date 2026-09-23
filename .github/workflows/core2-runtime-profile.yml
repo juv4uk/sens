@@ -47,5 +47,12 @@ jobs:
           got="$(./target/debug/my-lisp tests/fixtures/core2-authority-review-witness.lisp)"
           printf '%s\n' "$got"
           test "$got" = "(core2-authority-review-ok)"
+      - name: Core2 authority guard exact-row witness
+        shell: bash
+        run: |
+          printf '%s\n' '(changed "crates/my-lisp/tests/core2_runtime_profile.rs" "11ca57677ea07c55ba3d6898f19c1fc1879eb46a5765a789ffe89e5ce33ce1c3")' > tests/semantic-authority-changes.lisp
+          got="$(./target/debug/my-lisp scripts/semantic-authority-guard.lisp)"
+          printf '%s\n' "$got"
+          test "$got" = "(semantic-authority-ok)"
       - name: Diff hygiene
         run: git diff --check
