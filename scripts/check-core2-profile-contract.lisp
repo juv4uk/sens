@@ -72,7 +72,7 @@
                 (c2-check (quote result-domain) (quote atom-result) (quote historical-t-nil))
                 (c2-check (quote conditional) (quote native-clause-shape) (quote two-part))
                 (c2-check (quote conditional) (quote selection-rule) (quote historical-truthiness))
-                (c2-check (quote acceptance-state) (quote full-profile-special-form-selection) (quote pending))))))
+                (c2-check (quote acceptance-state) (quote full-profile-special-form-selection) (quote active))))))
       (cond
         ((atom failure) (structural-kind empty-list)
          (cond
