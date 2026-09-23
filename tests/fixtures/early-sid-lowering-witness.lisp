@@ -12,27 +12,27 @@
        (structural-kind empty-list)
        (quote no))
       ((quote always)
-       (quote always)
+       always
        (cond
          ((equal? (car request) (quote surface))
           (structural-relation same)
           (quote no))
          ((quote always)
-          (quote always)
+          always
           (let ((fields (cdr request)))
             (cond
               ((atom fields)
                (structural-kind empty-list)
                (quote no))
               ((quote always)
-               (quote always)
+               always
                (let ((first-field (car fields)))
                  (cond
                    ((equal? (car first-field) (quote sid))
                     (structural-relation same)
                     (quote yes))
                    ((quote always)
-                    (quote always)
+                    always
                     (quote no)))))))))))))
 
 (def early-sid-lower
@@ -43,7 +43,7 @@
          (structural-kind empty-list)
          (quote rejected))
         ((quote always)
-         (quote always)
+         always
          (list
            (cons (quote sid) sid)
            (cons (quote arguments) arguments)
@@ -66,13 +66,13 @@
                (structural-relation same)
                (list (quote same) a))
               ((quote always)
-               (quote always)
+               always
                (quote distinct))))
            ((quote always)
-            (quote always)
+            always
             (quote distinct))))
         ((quote always)
-         (quote always)
+         always
          (quote distinct))))))
 
 (def early-sid-lowering-witness
