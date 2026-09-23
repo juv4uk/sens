@@ -10,12 +10,6 @@
 
 (def registry-rows registry)
 
-(def mechanism-sid-text
-  (lambda (sid)
-    (cond
-      ((string? sid) sid)
-      (t (write-to-string sid)))))
-
 (def find-section
   (lambda (name sections)
     (cond
@@ -36,8 +30,8 @@
       ((atom rows) (structural-kind empty-list) (quote no))
       ((atom rows) (structural-kind pair)
        (cond
-         ((equal? (mechanism-sid-text sid) (mechanism-sid-text (car (car rows)))) (structural-relation same) (quote yes))
-         ((equal? (mechanism-sid-text sid) (mechanism-sid-text (car (car rows)))) (structural-relation distinct)
+         ((eq sid (car (car rows))) (identity-relation same) (quote yes))
+         ((eq sid (car (car rows))) (identity-relation distinct)
           (registry-has-sid? sid (cdr rows))))))))
 
 (def metadata-has-route?
@@ -47,12 +41,12 @@
       ((atom rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
-           ((equal? (mechanism-sid-text sid) (mechanism-sid-text (car row))) (structural-relation same)
+           ((eq sid (car row)) (identity-relation same)
             (cond
               ((eq executor (second row)) (identity-relation same) (quote yes))
               ((eq executor (second row)) (identity-relation distinct)
                (metadata-has-route? sid executor (cdr rows)))))
-           ((equal? (mechanism-sid-text sid) (mechanism-sid-text (car row))) (structural-relation distinct)
+           ((eq sid (car row)) (identity-relation distinct)
             (metadata-has-route? sid executor (cdr rows)))))))))
 
 (def admitted-executor?
