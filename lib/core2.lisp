@@ -11,15 +11,15 @@
 (def core2-truthy?
   (lambda (value)
     (cond
-      ((atom? value) (structural-kind empty-list) (quote ()))
+      ((atom value) (structural-kind empty-list) (quote ()))
       ((quote core2-fallback) core2-fallback (quote t)))))
 
 (def core2-atom
   (lambda (value)
     (cond
-      ((atom? value) (structural-kind atom) (quote t))
-      ((atom? value) (structural-kind empty-list) (quote t))
-      ((atom? value) (structural-kind pair) (quote ())))))
+      ((atom value) (structural-kind atom) (quote t))
+      ((atom value) (structural-kind empty-list) (quote t))
+      ((atom value) (structural-kind pair) (quote ())))))
 
 (def core2-eq
   (lambda (left right)
