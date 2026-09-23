@@ -4,6 +4,7 @@
 
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
+use crate::environment::CondClauseMode;
 use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 
 use std::rc::Rc;
@@ -89,7 +90,9 @@ pub(crate) fn evaluate_cond(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    let mode = environment.cond_clause_mode();
     let mut migration_compatibility_seen = false;
+
     for clause in clauses {
         let ExprKind::List(parts) = &clause.kind else {
             return Err(LanguageError::new(
@@ -98,38 +101,53 @@ pub(crate) fn evaluate_cond(
                 clause.span,
             ));
         };
-        match parts.len() {
-            // #217 canonical path: the clause explicitly names the domain
-            // result that selects it. The expected form is data, not code.
-            // No Value -> bool conversion occurs on this path.
-            3 => {
-                let actual = evaluate(&parts[0], environment)?;
-                let expected = quoted(&parts[1])?;
-                if actual == expected {
-                    return evaluate_step(&parts[2], environment);
+
+        match mode {
+            CondClauseMode::Core2LegacyTwoPart => {
+                if parts.len() != 2 {
+                    return Err(LanguageError::new(
+                        ErrorKind::InvalidForm,
+                        "Core2 cond expects historical (test expression) clauses",
+                        clause.span,
+                    ));
                 }
-            }
-            // Migration-only compatibility path for the existing library
-            // bootstrap. It understands the new #218 structural records only
-            // to preserve historical callers while source migrates to the
-            // canonical three-part form. This path owns no language semantics.
-            2 => {
-                migration_compatibility_seen = true;
                 let value = evaluate(&parts[0], environment)?;
                 if migration_only_cond_truthy(&value) {
                     return evaluate_step(&parts[1], environment);
                 }
             }
-            _ => {
-                return Err(LanguageError::new(
-                    ErrorKind::InvalidForm,
-                    "cond expects canonical (query expected-result expression) clauses or migration-only (test expression) clauses · cond ochikuie kanonichni (zapyt ochikuvanyi-rezultat vyraz) abo tymchasovi (perevirka vyraz) · cond erwartet kanonische (Abfrage erwartetes-Ergebnis Ausdruck)- oder voruebergehende (Test Ausdruck)-Klauseln",
-                    clause.span,
-                ));
-            }
+            CondClauseMode::CurrentMigration => match parts.len() {
+                // #217 canonical path: the clause explicitly names the domain
+                // result that selects it. The expected form is data, not code.
+                // No Value -> bool conversion occurs on this path.
+                3 => {
+                    let actual = evaluate(&parts[0], environment)?;
+                    let expected = quoted(&parts[1])?;
+                    if actual == expected {
+                        return evaluate_step(&parts[2], environment);
+                    }
+                }
+                // Migration-only compatibility path for callers not yet moved
+                // to the canonical three-part form.
+                2 => {
+                    migration_compatibility_seen = true;
+                    let value = evaluate(&parts[0], environment)?;
+                    if migration_only_cond_truthy(&value) {
+                        return evaluate_step(&parts[1], environment);
+                    }
+                }
+                _ => {
+                    return Err(LanguageError::new(
+                        ErrorKind::InvalidForm,
+                        "cond expects canonical (query expected-result expression) clauses or migration-only (test expression) clauses · cond ochikuie kanonichni (zapyt ochikuvanyi-rezultat vyraz) abo tymchasovi (perevirka vyraz) · cond erwartet kanonische (Abfrage erwartetes-Ergebnis Ausdruck)- oder voruebergehende (Test Ausdruck)-Klauseln",
+                        clause.span,
+                    ));
+                }
+            },
         }
     }
-    if migration_compatibility_seen {
+
+    if mode == CondClauseMode::Core2LegacyTwoPart || migration_compatibility_seen {
         return Ok(EvalStep::Value(Value::Nil));
     }
 
