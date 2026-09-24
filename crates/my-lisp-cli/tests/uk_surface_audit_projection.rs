@@ -125,13 +125,13 @@ fn ukrainian_staging_profile_covers_every_function_table_identity() {
     );
     assert_eq!(
         expected_rows.len(),
-        167,
+        169,
         "function table inventory changed; review UK coverage gate"
     );
     assert_eq!(
         actual_rows.len(),
-        167,
-        "Ukrainian staging row count must stay exactly aligned with the 167-row function table"
+        169,
+        "Ukrainian staging row count must stay exactly aligned with the 169-row function table"
     );
     assert_eq!(
         actual, expected,
@@ -148,7 +148,7 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
     let rows = ukr_candidate_rows(&profile);
     assert_eq!(
         rows.len(),
-        167,
+        169,
         "coherence audit must inspect every Ukrainian staging candidate"
     );
 
