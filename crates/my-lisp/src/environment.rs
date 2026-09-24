@@ -1,5 +1,5 @@
-use crate::{Expr, Sid8, Value};
-use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::{Rc, Weak}};
+use crate::Value;
+use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
 /// levels) would otherwise recurse through `Rc<RefCell<Frame>>`'s default
@@ -21,25 +21,12 @@ pub struct Environment(
     Rc<RefCell<Frame>>,
     Rc<RefCell<Transcript>>,
     Rc<RefCell<Limits>>,
-    Rc<RefCell<ResolvedHeadCache>>,
 );
 
 #[derive(Debug)]
 struct Frame {
     values: HashMap<Rc<str>, Value>,
     parent: Option<Environment>,
-}
-
-/// Session-local mechanical cache for executable-list heads that have already
-/// crossed the immutable surface -> Sid8 boundary.
-///
-/// The cache owns no spelling-to-meaning rule. The evaluator may insert only a
-/// Sid8 already proven to be an immutable Canon/necessary-form identity by the
-/// existing language-owned projections. The Weak list owner prevents an
-/// address reused after an AST is dropped from inheriting an older resolution.
-#[derive(Debug, Default)]
-struct ResolvedHeadCache {
-    by_list: HashMap<usize, (Weak<[Expr]>, Sid8)>,
 }
 
 /// Opt-in resource/capability limits for one session, shared across every
@@ -82,7 +69,6 @@ impl Environment {
                 taken: 0,
             })),
             Rc::new(RefCell::new(Limits::default())),
-            Rc::new(RefCell::new(ResolvedHeadCache::default())),
         );
         // `t` is the canonical truth value itself, not a variable that
         // merely holds one: bound to the symbol `t` (self-referential),
@@ -215,7 +201,6 @@ impl Environment {
             })),
             self.1.clone(),
             self.2.clone(),
-            self.3.clone(),
         )
     }
 
@@ -224,11 +209,8 @@ impl Environment {
     /// програмної поверхні; Lisp-семантику він не розширює.
     /// Відхиляє цикли та parent з іншими transcript/limits.
     pub fn reparent(&self, parent: Environment) -> Result<(), &'static str> {
-        if !Rc::ptr_eq(&self.1, &parent.1)
-            || !Rc::ptr_eq(&self.2, &parent.2)
-            || !Rc::ptr_eq(&self.3, &parent.3)
-        {
-            return Err("new parent must share transcript, limits, and resolved-head cache");
+        if !Rc::ptr_eq(&self.1, &parent.1) || !Rc::ptr_eq(&self.2, &parent.2) {
+            return Err("new parent must share transcript and limits");
         }
 
         let mut current = Some(parent.clone());
@@ -241,33 +223,6 @@ impl Environment {
 
         self.0.borrow_mut().parent = Some(parent);
         Ok(())
-    }
-
-    /// Return the already-resolved immutable SID for this exact executable
-    /// list allocation, if this session has seen it before.
-    pub(crate) fn cached_immutable_head_sid(&self, items: &Rc<[Expr]>) -> Option<Sid8> {
-        let key = items.as_ptr() as usize;
-        let mut cache = self.3.borrow_mut();
-        let (owner, sid) = cache.by_list.get(&key).cloned()?;
-        match owner.upgrade() {
-            Some(live) if Rc::ptr_eq(&live, items) => Some(sid),
-            _ => {
-                cache.by_list.remove(&key);
-                None
-            }
-        }
-    }
-
-    /// Remember an immutable executable head after the existing resolver has
-    /// produced its exact Sid8. This stores identity only; no human spelling is
-    /// copied into the cache and no reverse projection exists here.
-    pub(crate) fn cache_immutable_head_sid(&self, items: &Rc<[Expr]>, sid: Sid8) {
-        let key = items.as_ptr() as usize;
-        let mut cache = self.3.borrow_mut();
-        if cache.by_list.len() >= 4096 {
-            cache.by_list.retain(|_, (owner, _)| owner.upgrade().is_some());
-        }
-        cache.by_list.insert(key, (Rc::downgrade(items), sid));
     }
 
     pub fn print(&self, line: String) {
@@ -340,7 +295,6 @@ impl Drop for Environment {
                     taken: 0,
                 })),
                 Rc::new(RefCell::new(Limits::default())),
-                Rc::new(RefCell::new(ResolvedHeadCache::default())),
             ),
         );
 
@@ -351,10 +305,8 @@ impl Drop for Environment {
             let frame_rc = unsafe { std::ptr::read(&env.0) };
             let transcript_rc = unsafe { std::ptr::read(&env.1) };
             let limits_rc = unsafe { std::ptr::read(&env.2) };
-            let resolved_head_cache_rc = unsafe { std::ptr::read(&env.3) };
             drop(transcript_rc);
             drop(limits_rc);
-            drop(resolved_head_cache_rc);
 
             if let Ok(cell) = Rc::try_unwrap(frame_rc) {
                 let mut frame = cell.into_inner();
