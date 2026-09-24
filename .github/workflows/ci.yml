@@ -112,7 +112,7 @@ jobs:
           cat tests/authority-verdict.lisp
           ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
 
-      - name: Lisp-owned semantic authority leakage guard
+      - name: Asymmetric semantic firewall (host -> Lisp)
         shell: bash
         run: |
           set -euo pipefail
