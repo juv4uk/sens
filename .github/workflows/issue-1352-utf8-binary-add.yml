@@ -1,0 +1,20 @@
+name: Issue 1352 UTF-8 binary plus contract
+
+on:
+  pull_request:
+    paths:
+      - lib/utf8.lisp
+      - crates/my-lisp/tests/utf8.rs
+      - .github/workflows/issue-1352-utf8-binary-add.yml
+
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: UTF-8 semantic regression
+        run: cargo test -p my-lisp --test utf8 -- --nocapture
+      - name: UTF-8 stack regression
+        run: cargo test -p my-lisp --test utf8_stack -- --nocapture
