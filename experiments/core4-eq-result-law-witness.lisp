@@ -44,7 +44,7 @@
        (eqr-first-failure (cdr checks)))
       ((quote eqr-failure) eqr-failure (car checks)))))
 
-(def eqr-meta (first eqr-law-sections))
+(def eqr-meta (car eqr-law-sections))
 (def eqr-same (second eqr-law-sections))
 (def eqr-distinct (third eqr-law-sections))
 (def eqr-outside (fourth eqr-law-sections))
@@ -57,8 +57,8 @@
 (def eqr-yes-section (fourth eqr-scale-sections))
 (def eqr-no-levels (eqr-field eqr-no-section (quote levels)))
 (def eqr-yes-levels (eqr-field eqr-yes-section (quote levels)))
-(def eqr-strong-no (first eqr-no-levels))
-(def eqr-strong-yes (first eqr-yes-levels))
+(def eqr-strong-no (car eqr-no-levels))
+(def eqr-strong-yes (car eqr-yes-levels))
 
 (def eqr-verdict
   (lambda ()
@@ -114,10 +114,10 @@
                            (eqr-field eqr-distinct (quote contradiction))
                            0)
                 (eqr-check (quote strongest-yes-spelling)
-                           (first eqr-strong-yes)
+                           (car eqr-strong-yes)
                            "1")
                 (eqr-check (quote strongest-no-spelling)
-                           (first eqr-strong-no)
+                           (car eqr-strong-no)
                            "0")
                 (eqr-check (quote outside-domain)
                            (eqr-field eqr-outside (quote outside-domain))
