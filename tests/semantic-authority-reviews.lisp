@@ -109,3 +109,9 @@
 ; #1325 SID8-only transition: existing eval mechanism becomes directly callable by existing SID 01001101.
 ; No new function meaning is created in Rust; this removes a name-only execution path from the bootstrap.
 (review "crates/my-lisp/src/eval/canon.rs" "8e6e9239bdb42c203d315282a2200e364a586092c0ff717bdeb51a495a299769" issue-1325 sid8-01001101-existing-mechanism)
+
+; #1332 Contract-9 migration: empty structure is not function SID 00000000.
+; Rust removes the historical EmptyList<->SID0 coupling; no new function meaning is minted.
+(review "crates/my-lisp/src/eval/canon.rs" "98ea7a845a4ba6335a84021929f340581192d3416eb1a3c780c16386ed2c9304" issue-1332 sid0-empty-list-decoupling)
+(review "crates/my-lisp/src/eval/mod.rs" "172b273f58cd65e63a2d81e549ea4838de227b559059dc05bb7e4dc33ddba706" issue-1332 empty-structure-direct-value)
+(review "crates/my-lisp/src/ir.rs" "92102163b52f71fe37d9e5f4ae6b48fec4525ed674ea334918249a723f9a23dc" issue-1332 empty-structure-ir-outside-sid-space)
