@@ -1,4 +1,6 @@
-; #1117 — executable proof that kernel ABI identity is transport-only.
+; #1117 — executable Lisp-owned policy for kernel ABI identity scope.
+; Host tooling may mechanically inspect files, but the admitted direction and
+; forbidden reverse authority are owned here.
 
 (def second (lambda (x) (car (cdr x))))
 (def third (lambda (x) (car (cdr (cdr x)))))
@@ -27,6 +29,29 @@
           (identity-relation distinct)
           (kab-find name (cdr rows))))))))
 
+(def kab-find-kernel
+  (lambda (kernel-name rows)
+    (cond
+      ((atom rows)
+       (structural-kind empty-list)
+       (quote ()))
+      ((atom rows)
+       (structural-kind pair)
+       (let ((row (car rows)))
+         (cond
+           ((eq (car row) (quote kernel))
+            (identity-relation same)
+            (cond
+              ((eq (second row) kernel-name)
+               (identity-relation same)
+               row)
+              ((eq (second row) kernel-name)
+               (identity-relation distinct)
+               (kab-find-kernel kernel-name (cdr rows)))))
+           ((eq (car row) (quote kernel))
+            (identity-relation distinct)
+            (kab-find-kernel kernel-name (cdr rows)))))))))
+
 (def kab-row-check
   (lambda (name expected)
     (let ((actual (kab-find name kab-rows)))
@@ -38,123 +63,16 @@
          (structural-relation distinct)
          (list (quote policy-mismatch) name expected actual))))))
 
-(def kab-kernel-source-state
-  (lambda (source manifest)
-    (cond
-      ((not (string? source)) t (quote unreadable-source))
-      ((not (string? manifest)) t (quote unreadable-manifest))
-      ((not (string-contains? "pub struct SemanticId(pub u8);" source))
-       t
-       (quote missing-transport-wrapper))
-      ((string-contains? "Sid8" source)
-       t
-       (quote imports-language-sid-type))
-      ((string-contains? "my_lisp::" source)
-       t
-       (quote language-crate-coupling))
-      ((string-contains? "use my_lisp" source)
-       t
-       (quote language-crate-coupling))
-      ((string-contains? "semantic_registry" source)
-       t
-       (quote reverse-registry-authority))
-      ((string-contains? "CanonicalIdentity" source)
-       t
-       (quote reverse-canon-authority))
-      ((string-contains? "my-lisp" manifest)
-       t
-       (quote language-crate-dependency))
-      (t t (quote admitted)))))
-
-(def kab-shared-abi-state
-  (lambda (source manifest)
-    (cond
-      ((not (string? source)) t (quote unreadable-shared-abi-source))
-      ((not (string? manifest)) t (quote unreadable-shared-abi-manifest))
-      ((not (string-contains? "pub semantic_id: u8," source))
-       t
-       (quote shared-abi-not-opaque-u8))
-      ((string-contains? "Sid8" source)
-       t
-       (quote shared-abi-imports-language-sid))
-      ((string-contains? "my_lisp::" source)
-       t
-       (quote shared-abi-language-coupling))
-      ((string-contains? "semantic_registry" source)
-       t
-       (quote shared-abi-registry-coupling))
-      ((string-contains? "CanonicalIdentity" source)
-       t
-       (quote shared-abi-canon-coupling))
-      ((string-contains? "my-lisp" manifest)
-       t
-       (quote shared-abi-language-dependency))
-      (t t (quote admitted)))))
-
-(def kab-check-kernel-row
-  (lambda (row)
-    (let* ((kernel-name (second row))
-           (source-path (third row))
-           (manifest-path (fourth row))
-           (state
-             (kab-kernel-source-state
-               (read-file source-path)
-               (read-file manifest-path))))
+(def kab-kernel-row-check
+  (lambda (kernel-name expected)
+    (let ((actual (kab-find-kernel kernel-name kab-rows)))
       (cond
-        ((eq state (quote admitted))
-         (identity-relation same)
+        ((equal? actual expected)
+         (structural-relation same)
          (quote ()))
-        ((eq state (quote admitted))
-         (identity-relation distinct)
-         (list
-           (quote kernel-boundary-violation)
-           kernel-name
-           state
-           source-path))))))
-
-(def kab-check-kernels
-  (lambda (rows)
-    (cond
-      ((atom rows)
-       (structural-kind empty-list)
-       (quote ()))
-      ((atom rows)
-       (structural-kind pair)
-       (let ((row (car rows)))
-         (cond
-           ((eq (car row) (quote kernel))
-            (identity-relation same)
-            (let ((failure (kab-check-kernel-row row)))
-              (cond
-                ((atom failure)
-                 (structural-kind empty-list)
-                 (kab-check-kernels (cdr rows)))
-                ((atom failure)
-                 (structural-kind pair)
-                 failure))))
-           ((eq (car row) (quote kernel))
-            (identity-relation distinct)
-            (kab-check-kernels (cdr rows)))))))))
-
-(def kab-check-shared-abi
-  (lambda ()
-    (let* ((row (kab-find (quote shared-abi-source) kab-rows))
-           (source-path (second row))
-           (manifest-path (third row))
-           (state
-             (kab-shared-abi-state
-               (read-file source-path)
-               (read-file manifest-path))))
-      (cond
-        ((eq state (quote admitted))
-         (identity-relation same)
-         (quote ()))
-        ((eq state (quote admitted))
-         (identity-relation distinct)
-         (list
-           (quote shared-abi-boundary-violation)
-           state
-           source-path))))))
+        ((equal? actual expected)
+         (structural-relation distinct)
+         (list (quote kernel-row-mismatch) kernel-name expected actual))))))
 
 (def kab-first-failure
   (lambda (checks)
@@ -184,6 +102,12 @@
                   (quote language-identity-type)
                   (quote (language-identity-type Sid8)))
                 (kab-row-check
+                  (quote shared-abi-type)
+                  (quote (shared-abi-type WsmKernelRequest)))
+                (kab-row-check
+                  (quote shared-abi-field)
+                  (quote (shared-abi-field semantic_id)))
+                (kab-row-check
                   (quote shared-abi-storage)
                   (quote (shared-abi-storage opaque-u8)))
                 (kab-row-check
@@ -205,32 +129,47 @@
                   (quote kernel-may-import-language-sid-type)
                   (quote (kernel-may-import-language-sid-type forbidden)))
                 (kab-row-check
+                  (quote kernel-may-mint-semantic-identity)
+                  (quote (kernel-may-mint-semantic-identity forbidden)))
+                (kab-row-check
                   (quote reverse-direction)
                   (quote
                     (reverse-direction
                       kernel-transport-to-language-meaning
                       forbidden)))
-                (kab-check-shared-abi)
-                (kab-check-kernels kab-rows)
-                ; Guard self-tests: language coupling must be rejected.
-                (cond
-                  ((eq
-                     (kab-kernel-source-state
-                       "pub struct SemanticId(pub u8); use my_lisp::Sid8;"
-                       "[dependencies]")
-                     (quote imports-language-sid-type))
-                   (identity-relation same)
-                   (quote ()))
-                  (t t (quote self-test-language-sid-import-not-rejected)))
-                (cond
-                  ((eq
-                     (kab-kernel-source-state
-                       "pub struct SemanticId(pub u8); semantic_registry::lookup();"
-                       "[dependencies]")
-                     (quote reverse-registry-authority))
-                   (identity-relation same)
-                   (quote ()))
-                  (t t (quote self-test-registry-edge-not-rejected)))))))
+                (kab-row-check
+                  (quote native-result-role)
+                  (quote (native-result-role observation-only)))
+                (kab-row-check
+                  (quote shared-abi-source)
+                  (quote
+                    (shared-abi-source
+                      "crates/wsm-kernel-c-abi/src/lib.rs"
+                      "crates/wsm-kernel-c-abi/Cargo.toml")))
+                (kab-kernel-row-check
+                  (quote common-lisp)
+                  (quote
+                    (kernel common-lisp
+                      "crates/wsm-common-lisp-kernel/src/lib.rs"
+                      "crates/wsm-common-lisp-kernel/Cargo.toml")))
+                (kab-kernel-row-check
+                  (quote prolog)
+                  (quote
+                    (kernel prolog
+                      "crates/wsm-prolog-kernel/src/lib.rs"
+                      "crates/wsm-prolog-kernel/Cargo.toml")))
+                (kab-kernel-row-check
+                  (quote clips)
+                  (quote
+                    (kernel clips
+                      "crates/wsm-clips-kernel/src/lib.rs"
+                      "crates/wsm-clips-kernel/Cargo.toml")))
+                (kab-kernel-row-check
+                  (quote datalog)
+                  (quote
+                    (kernel datalog
+                      "crates/wsm-datalog-kernel/src/lib.rs"
+                      "crates/wsm-datalog-kernel/Cargo.toml")))))))
       (cond
         ((atom failure)
          (structural-kind empty-list)
