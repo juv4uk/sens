@@ -81,3 +81,9 @@
 ; exchange binds SID 00001100 to bounded addition and accepts arguments only.
 (review "crates/wsm-clips-kernel/src/lib.rs" "c32f92feca2eec1a762a9e73143ad9fc7e8bd07886d5c1a3b2bcdae9e19c7866" issue-1169 clips-direct-sid8-add-mechanism)
 (review "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs" "dfcb1b5ec8458c750d2e55b5fd9bdbc3d1601939e6644727f18db68a258a36cf" issue-1169 clips-direct-sid8-observer)
+
+; #1173 machine capability axis: reviewed observer-only SID8 migration.
+(review "crates/my-lisp/tests/machine_capability_axis.rs" "bddbb702a652f3bee692bde36d1d3a3d8253d82a4836fd1900e95a6719efc091" issue-1173 sid8-machine-capability-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_join.rs" "2fcfb8d8a2f0d624d37edc85744c456d614b862c54094792939302cf9914509c" issue-1173 sid8-machine-capability-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "11ea19e3132fb4dcc57ce6f9eadc689afda1665c39b43ed4bccadab0fe9bbc92" issue-1173 sid8-machine-capability-observer)
+
