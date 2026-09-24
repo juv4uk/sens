@@ -117,7 +117,7 @@
                            (quote control-consumer))
                 (pri-check (quote compatibility-00000111)
                            (pri-field pri-00000111 (quote compatibility-role))
-                           (quote compatibility-only)))))))
+                           (quote compatibility-only))))))
       (cond
         ((atom failure) (structural-kind empty-list)
          (quote (core4-predicate-record-inventory-ok)))
