@@ -4,10 +4,12 @@ on:
   pull_request:
     paths:
       - "contracts/core4-predicate-answer-scale.lisp"
+      - "knowledge/core4-predicate-record-inventory.lisp"
       - "contracts/core4-predicate-answer-boundary.lisp"
       - "contracts/core4-predicate-output-boundary.lisp"
       - "contracts/core4-eq-result-law.lisp"
       - "scripts/check-core4-predicate-answer-scale.lisp"
+      - "scripts/check-core4-predicate-record-inventory.lisp"
       - "scripts/check-core4-predicate-answer-boundary.lisp"
       - "scripts/check-core4-predicate-output-boundary.lisp"
       - "tests/fixtures/core4-predicate-output-allowed.lisp"
@@ -91,6 +93,14 @@ jobs:
           verdict="$(./target/debug/my-lisp scripts/check-core4-predicate-output-boundary.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-predicate-output-boundary-ok)"
+
+      - name: Verify exact-8-bit predicate/record inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          verdict="$(./target/debug/my-lisp scripts/check-core4-predicate-record-inventory.lisp)"
+          printf '%s\n' "$verdict"
+          test "$verdict" = "(core4-predicate-record-inventory-ok)"
 
       - name: Keep this slice Lisp-owned
         shell: bash
