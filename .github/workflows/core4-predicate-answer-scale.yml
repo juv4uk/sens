@@ -5,9 +5,13 @@ on:
     paths:
       - "contracts/core4-predicate-answer-scale.lisp"
       - "contracts/core4-predicate-answer-boundary.lisp"
+      - "contracts/core4-predicate-output-boundary.lisp"
       - "contracts/core4-eq-result-law.lisp"
       - "scripts/check-core4-predicate-answer-scale.lisp"
       - "scripts/check-core4-predicate-answer-boundary.lisp"
+      - "scripts/check-core4-predicate-output-boundary.lisp"
+      - "tests/fixtures/core4-predicate-output-allowed.lisp"
+      - "tests/fixtures/core4-predicate-output-forbidden.lisp"
       - "experiments/core4-mechanical-answer-grade.lisp"
       - "experiments/core4-eq-result-law-witness.lisp"
       - "experiments/core4-predicate-answer-carrier-matrix.lisp"
@@ -79,6 +83,14 @@ jobs:
           verdict="$(./target/debug/my-lisp experiments/core4-eq-result-law-witness.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-eq-result-law-ok)"
+
+      - name: Verify final predicate-answer output boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          verdict="$(./target/debug/my-lisp scripts/check-core4-predicate-output-boundary.lisp)"
+          printf '%s\n' "$verdict"
+          test "$verdict" = "(core4-predicate-output-boundary-ok)"
 
       - name: Keep this slice Lisp-owned
         shell: bash
