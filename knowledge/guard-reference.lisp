@@ -265,12 +265,13 @@
        (unknown-route ask-agent))
      (reference
        (topic reference-learning)
-       (summary "Persist a useful answer missing from the directory as a reviewable candidate for future agents | Зберегти корисну відсутню відповідь як reviewable candidate для майбутніх агентів")
-       (authority (../ecosystem/knowledge/guard-reference-inbox.lisplog ../ecosystem/docs/guard/GUARD-REFERENCE-DIRECTORY.md crates/my-lisp-cli/src/bin/guard-reference.rs))
-       (how-to (search-directory choose-unknown-route collect-source-and-evidence append-pending-review review promote-or-reject))
-       (verify (candidate-record provenance review-status curated-entry-or-rejection))
+       (summary "Знайдена корисна відповідь одразу дописується як (reference ...) у *guard-reference-directory* з explicit evidence-status -- жодного окремого gatekeeper-кроку, жодної черги pending-review для самого куратованого файлу. Якщо для тієї самої теми вже існує запис і нова відповідь має сильнішу доказовість (тести/бенчмарки/пряма перевірка -- вищий evidence-status: confirmed > partial > unresolved > broken), старий запис НЕ видаляється й не відхиляється -- guard-reference-find/guard-reference повертають найсильніший за evidence-status, а guard-reference-all показує всі, включно з пониженими. Owner's own words: 'якщо хтось додає в довідник і зразу поступає в основний, якщо хтось знайшов сильніше рішення то старий просто понижується в рейтингу... якщо реальність каже що нова сильніша то ок... тобто доказовість, тести, аргументи, бенчмарки'. Окремий, нижчого тертя механізм лишається для попереднього фіксування: guard-reference propose --inbox (crates/my-lisp-cli/src/bin/guard-reference.rs, PR my-lisp#1299) дописує provenance-запис у knowledge/guard-reference-inbox.mylog, коли автор ще не готовий написати повний reference entry з authority/how-to/verify -- це доповнення, не заміна прямого запису | A found useful answer is written directly as a (reference ...) entry into *guard-reference-directory* with an explicit evidence-status -- no separate gatekeeper step, no pending-review queue for the curated file itself. If a topic already has an entry and a new answer has stronger evidence (tests/benchmarks/direct verification -- a higher evidence-status: confirmed > partial > unresolved > broken), the older entry is neither deleted nor rejected -- guard-reference-find/guard-reference return the strongest by evidence-status, and guard-reference-all shows every entry including outranked ones. A separate, lower-friction capture mechanism remains for provisional notes not yet written as a full entry: guard-reference propose --inbox appends a provenance-bearing record to the inbox log -- this is additive, not a replacement for writing directly")
+       (authority (crates/my-lisp-cli/src/bin/guard-reference.rs ../ecosystem/knowledge/guard-reference-inbox.lisplog ../ecosystem/docs/guard/GUARD-REFERENCE-DIRECTORY.md))
+       (how-to (search-directory-and-guard-reference-all-for-existing-entries state-evidence-status-honestly-confirmed-only-with-real-tests-or-benchmarks write-reference-directly-into-guard-reference-directory never-delete-or-edit-a-superseded-entry-just-let-evidence-status-outrank-it use-propose-inbox-only-for-provisional-notes-not-yet-full-entries))
+       (verify (guard-reference-returns-highest-evidence-status-for-a-topic guard-reference-all-still-lists-outranked-entries evidence-status-defaults-to-unresolved-never-to-confirmed))
+       (evidence-status confirmed)
        (lifecycle current-contract)
-       (provenance "ecosystem commit 8a5a99a+6e60790+8a5a99a")
+       (provenance "owner direction 2026-09-24, this exact session: 'гваурд мав працювати зовсім по іншій схемі, якщо хтось додає в довідник і зразу поступає в основний, якщо хтось знайшов сильніше рішення то старий просто понижується в рейтингу' + 'не числова а просто співвідношення з реальністю' + 'якщо реальність каже що нова сильніша то ок' + 'тобто доказовість, тести, аргументи, бенчмарки'; replaces the earlier pending-review/promote-or-reject description this same topic carried, sourced from ecosystem commit 8a5a99a+6e60790+8a5a99a")
        (unknown-route ask-agent))
      (reference
        (topic licenses)
@@ -791,6 +792,7 @@
         (authority (tests/fixtures/island-lowering-1048-witness.lisp .github/workflows/island-lowering-1048.yml contracts/core4-predicate-answer-scale.lisp contracts/core4-predicate-answer-boundary.lisp experiments/core4-mechanical-answer-grade.lisp))
         (how-to (state-falsifier-before-trusting-constraint measure-or-execute-the-check re-check-after-relevant-change keep-negative-evidence when-claim-crosses-substrates-require-executable-round-trip))
         (verify (read-file-benchmark-evidence-in-333-and-1238 bare-token-collision-evidence-in-1257-and-1264 core4-mechanical-answer-grade-ok no-cross-substrate-claim-without-round-trip-witness))
+        (evidence-status confirmed)
         (lifecycle standing-invariant-never-closed)
         (provenance "owner direction 2026-09-24: обмеження мають перевірятися доказом тобто реальність; evidence links: my-lisp#333 PR#1238 issue#1257 PR#1264 issue#1266 PR#1268")
         (unknown-route ask-owner))
@@ -800,6 +802,7 @@
         (authority (crates/my-lisp/src/eval/canon.rs crates/my-lisp/src/eval/mod.rs crates/my-lisp/src/eval/special_forms/core.rs lib/canon.lisp docs/research/canon-resolution-semantics.md docs/adr/ADR-004-CLOSED-MCCARTHY7-CORE.md ../ecosystem/docs/research/MY-LISP-CANON-SID-ARCHEOLOGY-2026-09-24.uk.md))
         (how-to (read-canon-rs-for-current-sid-dispatch read-ecosystem-archeology-doc-for-full-timeline never-assume-sid-was-the-original-design check-invoke-semantic-ref-vs-canonical-identity-before-claiming-uniform-sid-operation distinguish-immutability-ensure-bindable-from-value-dispatch-eligibility))
         (verify (eval-canon-9-unit-tests-ok canon-adversarial-and-70-more-tests-ok-post-1293 identity-for-semantic-id-now-array-indexed))
+        (evidence-status confirmed)
         (lifecycle current-contract)
         (provenance "git commits 85640bd6 516b5954 0bcefcf9 c3dad2c0 35497fb1 71d5aa96 c4b2e96d 53df58b7..7d91dad9 15abbc4b ec8e4659; issue #1292 PR #1293, 2026-09-24, owner-directed archeology investigation")
         (unknown-route ask-owner)))))
@@ -978,13 +981,69 @@
       (t (cons (guard-reference-field (quote name) (car tools))
                (guard-scripts (cdr tools)))))))
 
-(def guard-reference-find
+; A topic may have more than one (reference ...) entry. Adding a stronger
+; answer never deletes or rejects the older one -- it stays in the
+; directory, still readable, just outranked. Strength is not an arbitrary
+; number an author picks -- it is the same evidence-status vocabulary
+; guard-evidence-status? already uses everywhere else in this system:
+; confirmed > partial > unresolved > broken. A reference with no stated
+; evidence-status defaults to unresolved, never to confirmed -- absence of
+; a claim is not evidence for it. Own words: "якщо реальність каже що нова
+; сильніша то ок" -- reality decides which entry wins the lookup; neither
+; entry is deleted.
+(def guard-reference-evidence-status
+  (lambda (reference)
+    (let ((status (guard-reference-field (quote evidence-status) reference)))
+      (cond
+        ; A missing field and a found bare-symbol value (e.g. `confirmed`)
+        ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
+        ; them apart. Only the empty list means "missing"; any other atom is
+        ; a real found status and must be returned as-is.
+        ((atom status) (structural-kind empty-list) (quote unresolved))
+        ((atom status) (structural-kind atom) status)
+        ((atom status) (structural-kind pair) status)))))
+
+(def guard-evidence-status-strength
+  (lambda (status)
+    (cond
+      ((eq status (quote confirmed)) 4)
+      ((eq status (quote partial)) 3)
+      ((eq status (quote unresolved)) 2)
+      ((eq status (quote broken)) 1)
+      (t 0))))
+
+(def guard-reference-stronger
+  (lambda (best candidate)
+    (cond
+      ((atom best) candidate)
+      (t
+       (let ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
+             (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
+         (cond
+           ((> candidate-strength best-strength) 1 candidate)
+           ((> candidate-strength best-strength) 0 best)))))))
+
+(def guard-reference-all
   (lambda (topic references)
     (cond
       ((atom references) (quote ()))
       ((eq (guard-reference-field (quote topic) (car references)) topic)
-       (car references))
-      (t (guard-reference-find topic (cdr references))))))
+       (cons (car references) (guard-reference-all topic (cdr references))))
+      (t (guard-reference-all topic (cdr references))))))
+
+(def guard-reference-find-strongest
+  (lambda (topic references best)
+    (cond
+      ((atom references) best)
+      ((eq (guard-reference-field (quote topic) (car references)) topic)
+       (guard-reference-find-strongest
+         topic (cdr references)
+         (guard-reference-stronger best (car references))))
+      (t (guard-reference-find-strongest topic (cdr references) best)))))
+
+(def guard-reference-find
+  (lambda (topic references)
+    (guard-reference-find-strongest topic references (quote ()))))
 
 (def guard-reference
   (lambda (topic)
