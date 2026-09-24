@@ -248,9 +248,7 @@ impl Environment {
     pub(crate) fn cached_immutable_head_sid(&self, items: &Rc<[Expr]>) -> Option<Sid8> {
         let key = items.as_ptr() as usize;
         let mut cache = self.3.borrow_mut();
-        let Some((owner, sid)) = cache.by_list.get(&key).cloned() else {
-            return None;
-        };
+        let (owner, sid) = cache.by_list.get(&key).cloned()?;
         match owner.upgrade() {
             Some(live) if Rc::ptr_eq(&live, items) => Some(sid),
             _ => {
