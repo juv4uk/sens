@@ -24,8 +24,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sid8, Span, Value};
-use std::rc::Rc;
+use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, ExprList, LanguageError, Session, Sid8, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -189,13 +188,13 @@ pub(crate) fn evaluate_step(
 }
 
 fn evaluate_list(
-    items: &Rc<[Expr]>,
+    items: &ExprList,
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     let arguments = &items[1..];
     let head_name = items[0].kind.as_symbol();
-    let head_sid = resolved_immutable_head_sid(items, environment);
+    let head_sid = resolved_immutable_head_sid(items);
     let canonical_head = head_sid.and_then(canon::identity_for_semantic_id);
     let necessary_head = head_sid.and_then(necessary_forms::identity_for_semantic_id);
 
@@ -267,11 +266,11 @@ fn evaluate_list(
 /// `+`, `map`, capabilities, user functions and macros may still be shadowed
 /// or rebound by current language law. Quoted/macro data never reaches this
 /// function as an executable list, so no data symbol is rewritten.
-fn resolved_immutable_head_sid(items: &Rc<[Expr]>, environment: &Environment) -> Option<Sid8> {
+fn resolved_immutable_head_sid(items: &ExprList) -> Option<Sid8> {
     if let Some(sid) = binary_head_sid(&items[0]) {
         return Some(sid);
     }
-    if let Some(sid) = environment.cached_immutable_head_sid(items) {
+    if let Some(sid) = items.resolved_head_sid() {
         return Some(sid);
     }
 
@@ -283,7 +282,7 @@ fn resolved_immutable_head_sid(items: &Rc<[Expr]>, environment: &Environment) ->
         return None;
     }
 
-    environment.cache_immutable_head_sid(items, sid);
+    items.cache_resolved_head_sid(sid);
     Some(sid)
 }
 
@@ -314,7 +313,7 @@ impl ExprKindExt for ExprKind {
 mod single_pass_eval_tests {
     use super::*;
 
-    fn list_items(expression: &Expr) -> &Rc<[Expr]> {
+    fn list_items(expression: &Expr) -> &ExprList {
         let ExprKind::List(items) = &expression.kind else {
             panic!("expected list expression");
         };
@@ -328,18 +327,18 @@ mod single_pass_eval_tests {
         let inner = list_items(&outer[1]);
 
         let mut session = Session::default();
-        assert_eq!(session.environment.cached_immutable_head_sid(outer), None);
-        assert_eq!(session.environment.cached_immutable_head_sid(inner), None);
+        assert_eq!(outer.resolved_head_sid(), None);
+        assert_eq!(inner.resolved_head_sid(), None);
 
         let first = eval_parsed_expressions(&forms, &mut session)
             .expect("first execution resolves immutable heads");
         assert_eq!(first.value.to_string(), "1");
         assert_eq!(
-            session.environment.cached_immutable_head_sid(outer),
+            outer.resolved_head_sid(),
             Some(crate::sid!(00000101))
         );
         assert_eq!(
-            session.environment.cached_immutable_head_sid(inner),
+            inner.resolved_head_sid(),
             Some(crate::sid!(00000100))
         );
 
@@ -347,7 +346,7 @@ mod single_pass_eval_tests {
             .expect("second execution reuses exact SID identities");
         assert_eq!(second.value, first.value);
         assert_eq!(
-            session.environment.cached_immutable_head_sid(outer),
+            outer.resolved_head_sid(),
             Some(crate::sid!(00000101))
         );
     }
@@ -367,7 +366,7 @@ mod single_pass_eval_tests {
                 .value;
             assert_eq!(value.to_string(), "1");
             assert_eq!(
-                session.environment.cached_immutable_head_sid(outer),
+                outer.resolved_head_sid(),
                 Some(crate::sid!(00000101)),
                 "source: {source}"
             );
@@ -387,12 +386,12 @@ mod single_pass_eval_tests {
         assert_eq!(value.to_string(), "(car (cons 1 ()))");
 
         assert_eq!(
-            session.environment.cached_immutable_head_sid(quote_items),
+            quote_items.resolved_head_sid(),
             Some(crate::sid!(00000001)),
             "executable QUOTE head itself may resolve once"
         );
         assert_eq!(
-            session.environment.cached_immutable_head_sid(quoted_car),
+            quoted_car.resolved_head_sid(),
             None,
             "quoted data must never cross the executable surface->SID boundary"
         );
@@ -408,7 +407,7 @@ mod single_pass_eval_tests {
             .expect("ordinary builtin evaluates");
         assert_eq!(first.value.to_string(), "3");
         assert_eq!(
-            session.environment.cached_immutable_head_sid(items),
+            items.resolved_head_sid(),
             None,
             "ordinary shadowable bindings must stay outside immutable SID cache"
         );
@@ -418,7 +417,7 @@ mod single_pass_eval_tests {
         let second = eval_parsed_expressions(&forms, &mut session)
             .expect("same parsed AST must observe lexical rebinding");
         assert_eq!(second.value.to_string(), "shadowed");
-        assert_eq!(session.environment.cached_immutable_head_sid(items), None);
+        assert_eq!(items.resolved_head_sid(), None);
     }
 
     #[test]
