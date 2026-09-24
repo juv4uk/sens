@@ -5,15 +5,18 @@ if (($# != 1)); then
   exit 2
 fi
 my_lisp=$1
-probe=tests/semantic-authority-guard-probe.rs
+probe=
 cleanup() {
-  rm -f "$probe"
+  rm -f tests/semantic-authority-guard-probe.rs
+  rm -f tests/semantic-authority-guard-probe.lisp
 }
 trap cleanup EXIT
 
 run_case() {
   local fixture=$1
   local expected=$2
+  local extension="${fixture##*.}"
+  probe="tests/semantic-authority-guard-probe.${extension}"
   cp "$fixture" "$probe"
   local digest
   digest="$(sha256sum "$probe" | awk '{print $1}')"
@@ -25,15 +28,24 @@ run_case() {
       echo "ERROR: expected semantic-authority guard failure for $fixture" >&2
       exit 1
     fi
-    grep -q "semantic-authority-violation" tests/semantic-authority-verdict.lisp
+    grep -q "host-to-language-authority-leak" tests/semantic-authority-verdict.lisp
   else
     "$my_lisp" scripts/semantic-authority-guard-enforce.lisp
     grep -q "semantic-authority-ok" tests/semantic-authority-verdict.lisp
   fi
+  rm -f "$probe"
 }
 
-run_case tests/fixtures/semantic-authority-guard/forbidden-sid-meaning.rs violation
-run_case tests/fixtures/semantic-authority-guard/forbidden-island-sid.rs violation
-run_case tests/fixtures/semantic-authority-guard/forbidden-isa-sid.rs violation
-run_case tests/fixtures/semantic-authority-guard/forbidden-fallback.rs violation
+# Legacy #1049 RED fixtures are now deliberately GREEN: Rust/local executor
+# semantics are no longer restricted by this guard.
+run_case tests/fixtures/semantic-authority-guard/forbidden-sid-meaning.rs allowed
+run_case tests/fixtures/semantic-authority-guard/forbidden-island-sid.rs allowed
+run_case tests/fixtures/semantic-authority-guard/forbidden-isa-sid.rs allowed
+run_case tests/fixtures/semantic-authority-guard/forbidden-fallback.rs allowed
 run_case tests/fixtures/semantic-authority-guard/allowed-generated-projection.rs allowed
+
+# The new RED is the reverse authority edge into Lisp-owned semantic source.
+run_case tests/fixtures/semantic-authority-guard/forbidden-lisp-host-authority.lisp violation
+
+# Rust may be cited as observation/evidence without becoming language authority.
+run_case tests/fixtures/semantic-authority-guard/allowed-lisp-host-evidence.lisp allowed
