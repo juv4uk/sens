@@ -215,11 +215,19 @@ fn evaluate_list(
             special_forms::evaluate_cond(arguments, environment, span)
         }
         _ => {
-            if let Some(name) = items[0].kind.as_symbol() {
-                if let Some(result) =
-                    capabilities::dispatch_capability(name, arguments, environment, span)
-                {
-                    return result;
+            // Once an executable head is known to be immutable Canon, its SID
+            // already decides the operation. Falling through to the
+            // text-keyed capability registry here would re-introduce a
+            // post-resolution surface path and could let a host capability
+            // compete with Canon. Ordinary/shadowable names still use the
+            // capability fallback exactly as before.
+            if canonical_head.is_none() {
+                if let Some(name) = items[0].kind.as_symbol() {
+                    if let Some(result) =
+                        capabilities::dispatch_capability(name, arguments, environment, span)
+                    {
+                        return result;
+                    }
                 }
             }
             let function = match head_sid {
