@@ -1,5 +1,5 @@
 ; #1048 / #1169 — current honest lowering witness.
-; Common Lisp, Prolog and Datalog retain their admitted mechanism payloads.
+; Common Lisp and Prolog retain native text payloads; Datalog carries arguments only under exact SID8 identity.
 ; CLIPS must fail closed until a direct SID8 + arguments mechanism exists;
 ; raw operator-text Eval is diagnostic-only and cannot satisfy semantic lowering.
 
@@ -40,7 +40,7 @@
                        plus-sid
                        (quote datalog)
                        (quote bounded-exact-add)
-                       "math + 2 3"))
+                       "2 3"))
                (structural-relation same)
                (cond
                  ((equal?
