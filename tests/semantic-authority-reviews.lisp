@@ -99,5 +99,8 @@
 ; #1173 UK surface audit projection: observer-only bare SID8 migration.
 (review "crates/my-lisp-cli/tests/uk_surface_audit_projection.rs" "0f260f4b62fc804760d230b0bc97bff6b53e2a8c79d41378b704f53918d05ce2" issue-1173 sid8-uk-surface-audit-observer)
 
-; #1173 i5-6400 machine projection: observer-only SID8 representation migration.\n(review "crates/my-lisp/tests/i5_6400_machine_profile.rs" "5cfa6ecb2e417375da567349a28f0bbca7186d38d00a9e85e94a72c942ee543d" issue-1173 sid8-machine-profile-observer)\n\n; #1173 structure-core identity-field migration: observer requires exact Sid8.
+; #1173 i5-6400 machine projection: observer-only SID8 representation migration.
+(review "crates/my-lisp/tests/i5_6400_machine_profile.rs" "5cfa6ecb2e417375da567349a28f0bbca7186d38d00a9e85e94a72c942ee543d" issue-1173 sid8-machine-profile-observer)
+
+; #1173 structure-core identity-field migration: observer requires exact Sid8.
 (review "crates/my-lisp/tests/witness_authority.rs" "1fc6670a70d5392b7a2188133c8b911781614bb1dff763cff552281d3669d43c" issue-1173 structure-core-sid8-observer)
