@@ -1,0 +1,28 @@
+name: Regenerate public API report artifact
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/regenerate-public-api-report-artifact.yml"
+      - "scripts/public_api_inventory.py"
+      - "contracts/core-profile-contract.lisp"
+      - "lib/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Regenerate report
+        run: python3 scripts/public_api_inventory.py --write-report
+      - name: Show diff
+        run: git diff -- docs/generated/public-api-discovery.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-public-api-report
+          path: docs/generated/public-api-discovery.md
+          if-no-files-found: error
