@@ -115,3 +115,9 @@
 (review "crates/my-lisp/src/eval/canon.rs" "98ea7a845a4ba6335a84021929f340581192d3416eb1a3c780c16386ed2c9304" issue-1332 sid0-empty-list-decoupling)
 (review "crates/my-lisp/src/eval/mod.rs" "172b273f58cd65e63a2d81e549ea4838de227b559059dc05bb7e4dc33ddba706" issue-1332 empty-structure-direct-value)
 (review "crates/my-lisp/src/ir.rs" "92102163b52f71fe37d9e5f4ae6b48fec4525ed674ea334918249a723f9a23dc" issue-1332 empty-structure-ir-outside-sid-space)
+
+; #1327 Contract-9 cleanup: remove named CanonicalIdentity; function identity remains only Sid8.
+(review "crates/my-lisp/src/eval/canon.rs" "d642c304fce80a2bbdc2d918c61bd25bef6c2421e5b3c5eea80cad53c47119e8" issue-1327 sid8-only-mechanism-routing)
+(review "crates/my-lisp/src/eval/mod.rs" "ca275ceafcb8052a69d92891930566f51c349ec257adf024e19571d712b31de1" issue-1327 sid8-only-special-route-selection)
+(review "crates/my-lisp/src/lib.rs" "276d5e4371f8aa407eb8d05224c9fad43a95c0eceb5d7defb6e0625214b71d49" issue-1327 generic-surface-to-sid-routing)
+(review "crates/my-lisp/src/ir.rs" "b9b03ec511d8f1e6f78608311cf3301ceeccfd862cd9d717d04460d16430225c" issue-1327 sid8-only-ir-provenance)
