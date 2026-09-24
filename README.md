@@ -376,7 +376,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 Ukrainian is the project's primary human language. English and German are auxiliary. The Rust runtime is the reference implementation, not semantic authority; start with [`language-contract.lisp`](language-contract.lisp) and [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
 
-The central research question is now: **how simple can the language remain while directly composing independent execution models without surrendering semantic identity to any of them?**
+The central research question is now: **how simple can the language remain while directly composing independent execution models without letting any mechanism redefine the eight-bit function space?**
 
 ## Deutsch · ergänzend
 
