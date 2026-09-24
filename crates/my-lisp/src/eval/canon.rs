@@ -260,14 +260,24 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let Some(primitive) = PRIMITIVE_TABLE.get(semantic_id.packed_byte() as usize).and_then(|f| *f) else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            format!("unknown semantic callable SID: {semantic_id}"),
-            span,
-        ));
-    };
-    primitive(args, environment, span)
+    if let Some(primitive) = PRIMITIVE_TABLE
+        .get(semantic_id.packed_byte() as usize)
+        .and_then(|function| *function)
+    {
+        return primitive(args, environment, span);
+    }
+
+    if let Some(result) =
+        super::capabilities::dispatch_semantic_capability(semantic_id, args, environment, span)
+    {
+        return result;
+    }
+
+    Err(LanguageError::new(
+        ErrorKind::Type,
+        format!("unknown semantic callable SID: {semantic_id}"),
+        span,
+    ))
 }
 
 /// Return the first-class semantic value for a canonical identity. Special
