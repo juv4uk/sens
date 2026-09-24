@@ -95,3 +95,8 @@
 
 ; #1173 structure-core identity-field migration: observer requires exact Sid8.
 (review "crates/my-lisp/tests/witness_authority.rs" "1fc6670a70d5392b7a2188133c8b911781614bb1dff763cff552281d3669d43c" issue-1173 structure-core-sid8-observer)
+
+; #1272 selected-Core runtime signal: reviewed mechanism-only profile transport.
+; The loaders carry only which Lisp-owned Core profile was selected; they do not
+; map surfaces/SIDs to meanings and contain no host-side profile law table.
+(review "crates/my-lisp/src/lib.rs" "20bdb609a9967ba2ec84768b8cd37d07d23afa5130639beb6dd414bd83269079" issue-1272 selected-core-profile-transport-mechanism)
