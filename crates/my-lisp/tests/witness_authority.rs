@@ -37,6 +37,24 @@ fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
+fn alist_sid(entries: &[Expr], key: &str) -> Option<Sid8> {
+    entries.iter().find_map(|entry| {
+        let ExprKind::Pair(k, v) = &entry.kind else {
+            return None;
+        };
+        let ExprKind::Symbol(name) = &k.kind else {
+            return None;
+        };
+        if &**name != key {
+            return None;
+        }
+        match &v.kind {
+            ExprKind::Sid(sid) => Some(*sid),
+            other => panic!("{key} must be exact bare Sid8, got {other:?}"),
+        }
+    })
+}
+
 fn alist_flag(entries: &[Expr], key: &str) -> bool {
     entries.iter().any(|entry| {
         let ExprKind::Pair(k, v) = &entry.kind else {
@@ -149,6 +167,8 @@ fn structure_core_rows() -> Vec<WitnessRow> {
             if !alist_flag(entries, "structure-core") {
                 return None;
             }
+            alist_sid(entries, "semantic-id")
+                .expect("every structure-core row must carry exact bare Sid8 identity");
             Some(WitnessRow {
                 source: source[form.span.start..form.span.end].to_string(),
                 expr: alist_str(entries, "expr")?.to_string(),
