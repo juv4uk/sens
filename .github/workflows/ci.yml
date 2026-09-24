@@ -339,7 +339,7 @@ jobs:
 
           cp tests/fixtures/island-math-evidence/unadmitted-route.lisp lib/island-math-evidence.lisp
           ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-unadmitted.lisp
-          grep -q 'executor-route-not-admitted-by-canon-projection' /tmp/island-math-unadmitted.lisp
+          grep -q 'executor-route-not-admitted-by-function-projection' /tmp/island-math-unadmitted.lisp
 
           cp tests/fixtures/island-math-evidence/unsupported-executor.lisp lib/island-math-evidence.lisp
           ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-executor.lisp
