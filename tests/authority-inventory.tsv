@@ -176,3 +176,7 @@ crates/my-lisp/tests/uk_surface.rs	canonical_ukrainian_syntax_and_batch_one_alia
 crates/my-lisp/tests/guard.rs	reference_learning_writes_directly_and_lets_evidence_status_rank_entries	observer	guard-reference-evidence-status-ranking	knowledge/guard-reference.lisp	migrated
 crates/my-lisp/tests/guard.rs	a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it	observer	guard-reference-evidence-status-ranking	knowledge/guard-reference.lisp	migrated
 crates/my-lisp/tests/guard.rs	evidence_status_defaults_to_unresolved_not_confirmed_when_absent	observer	guard-reference-evidence-status-ranking	knowledge/guard-reference.lisp	migrated
+
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	inventory_is_explicitly_core4_only_and_non_semantic	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	semantic_roots_have_distinct_roles_instead_of_one_bulk_rewrite_class	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	inventory_uses_only_the_ratified_role_vocabulary	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
