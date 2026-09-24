@@ -102,3 +102,6 @@
 ; records win by evidence-status through guard-reference-find/-all; Lisp (knowledge/guard-reference.lisp)
 ; owns the ranking law, this file only observes its output.
 (review "crates/my-lisp/tests/guard.rs" "8c56e37f5ea4044e8f1afe6db57e437fde00bfed7a0304fc4509500b17f2a2b5" issue-guard-evidence-ranking guard-reference-evidence-status-observer)
+; #1312 world.rs observer: tests world transitions, snapshots, and content addresses
+; observing Lisp-owned contracts/world-transition-contract.lisp.
+(review "crates/my-lisp/tests/world.rs" "bcddce8a78c6182fadb92528e7bf8f3889e0ec4c3ee295ef56ae1cb8c0b3efe3" issue-1312 world-transition-observer)

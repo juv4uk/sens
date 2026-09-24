@@ -1,3 +1,12 @@
+//! #1312 observer for world system transitions, history preservation, and relations.
+//!
+//! Rust observes mechanism; Lisp owns semantic meaning (see #112/#113, #1312).
+//! Tests observe four distinct classes of laws defined in contracts/world-transition-contract.lisp:
+//! 1. World snapshot parentage and historical preservation: verified via structural-relation (equal?).
+//! 2. Content address identity: verified via identity-relation (eq).
+//! 3. Transaction receipts: embed structural-relation records (conflict, rejected, accepted).
+//! 4. Compatibility wrappers: maintain journal transitions without universal-T authority.
+
 use my_lisp::{eval_program, Session};
 
 fn eval_world(source: &str) -> String {
@@ -37,6 +46,7 @@ fn tell_returns_a_new_world_without_changing_the_old_one() {
 
 #[test]
 fn each_world_keeps_its_immediate_parent() {
+    // #1312: parent equality observed as structural-relation same, not universal-t
     assert_eq!(
         eval_world(
             r#"
@@ -45,7 +55,7 @@ fn each_world_keeps_its_immediate_parent() {
                 (equal? before (world-parent after))))
             "#
         ),
-        "t"
+        "(structural-relation same)"
     );
 }
 
@@ -68,6 +78,7 @@ fn later_versions_preserve_every_earlier_snapshot() {
 
 #[test]
 fn defmodule_compatibility_wrapper_uses_the_world_transition() {
+    // #1312: wrapper journal convergence observed as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -83,7 +94,7 @@ fn defmodule_compatibility_wrapper_uses_the_world_transition() {
                    (equal? *knowledge-journal* expected)))))
             "#
         ),
-        "t"
+        "(structural-relation same)"
     );
 }
 
@@ -116,6 +127,7 @@ fn repeated_compatible_defmodule_calls_still_accumulate() {
 
 #[test]
 fn tell_knowledge_compatibility_wrapper_uses_the_world_transition() {
+    // #1312: tell wrapper journal convergence observed as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -131,12 +143,13 @@ fn tell_knowledge_compatibility_wrapper_uses_the_world_transition() {
             (equal? *knowledge-journal* expected-journal)
             "#
         ),
-        "t"
+        "(structural-relation same)"
     );
 }
 
 #[test]
 fn conflicting_tell_knowledge_keeps_the_legacy_journal_unchanged() {
+    // #1312: tell conflict journal preservation observed as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -146,12 +159,13 @@ fn conflicting_tell_knowledge_keeps_the_legacy_journal_unchanged() {
                     (equal? before *knowledge-journal*)))
             "#
         ),
-        "(Conflict-detected t)"
+        "(Conflict-detected (structural-relation same))"
     );
 }
 
 #[test]
 fn retract_knowledge_compatibility_wrapper_uses_the_world_transition() {
+    // #1312: retract wrapper journal observed as structural-relation same and query as ()
     assert_eq!(
         eval_world(
             r#"
@@ -167,7 +181,7 @@ fn retract_knowledge_compatibility_wrapper_uses_the_world_transition() {
                   (reason-in (quote space) (quote (planet earth))))
             "#
         ),
-        "(t ())"
+        "((structural-relation same) ())"
     );
 }
 
@@ -186,6 +200,7 @@ fn advise_compatibility_wrapper_commits_only_the_accepted_world() {
 
 #[test]
 fn advise_compatibility_wrapper_preserves_journal_on_conflict() {
+    // #1312: advise conflict receipt preserves journal as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -195,7 +210,7 @@ fn advise_compatibility_wrapper_preserves_journal_on_conflict() {
             (list (car decision) (equal? before *knowledge-journal*))
             "#
         ),
-        "(conflict t)"
+        "(conflict (structural-relation same))"
     );
 }
 
@@ -236,6 +251,7 @@ fn advise_all_compatibility_wrapper_keeps_atomic_world_transition() {
 
 #[test]
 fn advise_all_compatibility_wrapper_rolls_back_invalid_batch() {
+    // #1312: advise-all rollback preserves journal as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -244,7 +260,7 @@ fn advise_all_compatibility_wrapper_rolls_back_invalid_batch() {
             (list (car decision) (equal? before *knowledge-journal*))
             "#
         ),
-        "(rejected t)"
+        "(rejected (structural-relation same))"
     );
 }
 
@@ -283,6 +299,7 @@ fn package_import_compatibility_wrapper_commits_the_accepted_world() {
 
 #[test]
 fn package_import_compatibility_wrapper_preserves_journal_on_rejection() {
+    // #1312: package rejection preserves journal as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -296,12 +313,13 @@ fn package_import_compatibility_wrapper_preserves_journal_on_rejection() {
             (list (car decision) (equal? before *knowledge-journal*))
             "#
         ),
-        "(rejected t)"
+        "(rejected (structural-relation same))"
     );
 }
 
 #[test]
 fn package_import_compatibility_wrapper_preserves_journal_on_conflict() {
+    // #1312: package conflict preserves journal as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -313,7 +331,7 @@ fn package_import_compatibility_wrapper_preserves_journal_on_conflict() {
             (list (car decision) (equal? before *knowledge-journal*))
             "#
         ),
-        "(conflict t)"
+        "(conflict (structural-relation same))"
     );
 }
 
@@ -467,6 +485,7 @@ fn advise_world_accepts_into_a_new_queryable_world() {
 
 #[test]
 fn advise_world_rejection_returns_the_unchanged_world() {
+    // #1312: advise-world rejection preserves snapshot as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -477,12 +496,13 @@ fn advise_world_rejection_returns_the_unchanged_world() {
                       (world-module-known? (second result) (quote astronomy)))))
             "#
         ),
-        "(rejected t ())"
+        "(rejected (structural-relation same) ())"
     );
 }
 
 #[test]
 fn advise_world_conflict_preserves_the_existing_snapshot() {
+    // #1312: advise-world conflict preserves snapshot as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -495,7 +515,7 @@ fn advise_world_conflict_preserves_the_existing_snapshot() {
                       (world-clauses (second result) (quote astronomy)))))
             "#
         ),
-        "(conflict t (((not (planet pluto)))))"
+        "(conflict (structural-relation same) (((not (planet pluto)))))"
     );
 }
 
@@ -518,6 +538,7 @@ fn advise_world_does_not_read_the_global_knowledge_journal() {
 
 #[test]
 fn advise_all_world_accepts_one_atomic_dependent_batch() {
+    // #1312: advise-all atomic accept preserves parent as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -538,12 +559,13 @@ fn advise_all_world_accepts_one_atomic_dependent_batch() {
                         (equal? before (world-parent after))))))
             "#
         ),
-        "(accepted () yes t)"
+        "(accepted () yes (structural-relation same))"
     );
 }
 
 #[test]
 fn advise_all_world_rejects_the_whole_malformed_batch() {
+    // #1312: malformed batch rejection preserves snapshot as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -556,12 +578,13 @@ fn advise_all_world_rejects_the_whole_malformed_batch() {
                       (world-module-known? (second result) (quote astronomy)))))
             "#
         ),
-        "(rejected t ())"
+        "(rejected (structural-relation same) ())"
     );
 }
 
 #[test]
 fn advise_all_world_rejects_an_empty_batch_without_a_new_world() {
+    // #1312: empty batch rejection preserves snapshot as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -572,12 +595,13 @@ fn advise_all_world_rejects_an_empty_batch_without_a_new_world() {
                       (equal? before (second result)))))
             "#
         ),
-        "(rejected invalid-batch t)"
+        "(rejected invalid-batch (structural-relation same))"
     );
 }
 
 #[test]
 fn advise_all_world_detects_internal_conflict_without_partial_writes() {
+    // #1312: internal batch conflict preserves snapshot as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -592,7 +616,7 @@ fn advise_all_world_detects_internal_conflict_without_partial_writes() {
                       (world-module-known? (second result) (quote astronomy)))))
             "#
         ),
-        "(conflict t ())"
+        "(conflict (structural-relation same) ())"
     );
 }
 
@@ -633,6 +657,7 @@ fn world_package_export_reads_the_selected_snapshot_only() {
 
 #[test]
 fn world_package_import_atomically_creates_a_queryable_child() {
+    // #1312: package import creates child with parent as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -652,12 +677,13 @@ fn world_package_import_atomically_creates_a_queryable_child() {
                             (t (quote yes))))))))
             "#
         ),
-        "(accepted t yes)"
+        "(accepted (structural-relation same) yes)"
     );
 }
 
 #[test]
 fn world_package_import_rejects_unsupported_versions_without_transition() {
+    // #1312: unsupported version rejection preserves snapshot as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -674,12 +700,13 @@ fn world_package_import_rejects_unsupported_versions_without_transition() {
                   (equal? before (second result)))
             "#
         ),
-        "(rejected unsupported-version t)"
+        "(rejected unsupported-version (structural-relation same))"
     );
 }
 
 #[test]
 fn world_package_import_conflict_preserves_the_target_snapshot() {
+    // #1312: package import conflict preserves snapshot as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -696,7 +723,7 @@ fn world_package_import_conflict_preserves_the_target_snapshot() {
                         (world-clauses (second result) (quote astronomy))))))
             "#
         ),
-        "(conflict t (((not (planet pluto)))))"
+        "(conflict (structural-relation same) (((not (planet pluto)))))"
     );
 }
 
@@ -741,6 +768,7 @@ fn world_depth_counts_transitions_from_the_root() {
 
 #[test]
 fn world_at_depth_recovers_an_exact_historical_snapshot() {
+    // #1312: historical recovery observed as triple structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -752,7 +780,7 @@ fn world_at_depth_recovers_an_exact_historical_snapshot() {
                         (equal? w2 (world-at-depth w2 2))))))
             "#
         ),
-        "(t t t)"
+        "((structural-relation same) (structural-relation same) (structural-relation same))"
     );
 }
 
@@ -799,6 +827,7 @@ fn world_diff_refuses_to_invent_a_path_between_sibling_branches() {
 
 #[test]
 fn world_common_ancestor_finds_the_branch_point() {
+    // #1312: common ancestor branch point observed as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -809,12 +838,13 @@ fn world_common_ancestor_finds_the_branch_point() {
                   (equal? base (world-common-ancestor left right)))))
             "#
         ),
-        "t"
+        "(structural-relation same)"
     );
 }
 
 #[test]
 fn world_common_ancestor_aligns_unequal_branch_depths() {
+    // #1312: common ancestor alignment observed as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -826,7 +856,7 @@ fn world_common_ancestor_aligns_unequal_branch_depths() {
                     (equal? base (world-common-ancestor left2 right))))))
             "#
         ),
-        "t"
+        "(structural-relation same)"
     );
 }
 
@@ -870,6 +900,7 @@ fn reconstructed_equal_worlds_have_no_branch_delta() {
 
 #[test]
 fn equal_knowledge_has_the_same_canonical_content_address() {
+    // #1312: content address identity observed as identity-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -877,12 +908,13 @@ fn equal_knowledge_has_the_same_canonical_content_address() {
                 (knowledge-content-address (quote ((planet earth)))))
             "#
         ),
-        "t"
+        "(identity-relation same)"
     );
 }
 
 #[test]
 fn different_knowledge_has_a_different_content_address() {
+    // #1312: content address divergence observed as identity-relation distinct
     assert_eq!(
         eval_world(
             r#"
@@ -890,12 +922,13 @@ fn different_knowledge_has_a_different_content_address() {
                 (knowledge-content-address (quote ((planet mars)))))
             "#
         ),
-        "()"
+        "(identity-relation distinct)"
     );
 }
 
 #[test]
 fn knowledge_content_addresses_round_trip_to_the_same_structure() {
+    // #1312: round-trip structure preservation observed as structural-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -905,12 +938,13 @@ fn knowledge_content_addresses_round_trip_to_the_same_structure() {
                       (read (knowledge-content-address knowledge))))
             "#
         ),
-        "t"
+        "(structural-relation same)"
     );
 }
 
 #[test]
 fn independently_reconstructed_worlds_have_the_same_content_address() {
+    // #1312: reconstructed world address identity observed as identity-relation same
     assert_eq!(
         eval_world(
             r#"
@@ -925,12 +959,13 @@ fn independently_reconstructed_worlds_have_the_same_content_address() {
                     (world-content-address copy))))
             "#
         ),
-        "t"
+        "(identity-relation same)"
     );
 }
 
 #[test]
 fn equal_current_clauses_do_not_erase_distinct_world_histories() {
+    // #1312: identical clauses (structural same) paired with distinct history addresses (identity distinct)
     assert_eq!(
         eval_world(
             r#"
@@ -948,6 +983,30 @@ fn equal_current_clauses_do_not_erase_distinct_world_histories() {
                               (world-content-address retold)))))))
             "#
         ),
-        "(t ())"
+        "((structural-relation same) (identity-relation distinct))"
+    );
+}
+
+#[test]
+fn world_transition_witness_proves_contract_in_lisp() {
+    let mut session = Session::default();
+    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
+    eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
+    eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
+    eval_program(include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
+    eval_program(include_str!("../../../lib/world.lisp"), &mut session).unwrap();
+    eval_program(
+        include_str!("../../../tests/fixtures/world-transition-witness.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    let verdict = eval_program("(wt-run-witness)", &mut session)
+        .unwrap()
+        .value
+        .to_string();
+    assert_eq!(
+        verdict,
+        "((ok parent-relation) (ok address-identity-same) (ok address-identity-distinct) (ok depth-recovery) (ok universal-t-forbidden))"
     );
 }
