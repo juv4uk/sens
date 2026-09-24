@@ -67,6 +67,35 @@ fn opaque_semantic_id_crosses_same_c_abi_into_real_prolog_backtracking() {
 }
 
 
+fn exchange_with_sid(
+    adapter: &PrologAbiAdapter,
+    semantic_id: u8,
+    payload: &[u8],
+) -> (WsmStatus, Vec<u8>) {
+    let vtable = adapter.vtable();
+    let mut output = vec![0u8; 128];
+    let mut written = 0usize;
+    let status = unsafe {
+        vtable.exchange.expect("exchange")(
+            vtable.context,
+            WsmKernelRequest {
+                semantic_id,
+                payload: WsmByteSpan {
+                    ptr: payload.as_ptr(),
+                    len: payload.len(),
+                },
+            },
+            WsmMutableByteSpan {
+                ptr: output.as_mut_ptr(),
+                len: output.len(),
+            },
+            &mut written,
+        )
+    };
+    output.truncate(written.min(output.len()));
+    (status, output)
+}
+
 fn exchange_goal(adapter: &PrologAbiAdapter, goal: &[u8]) -> (WsmStatus, Vec<u8>) {
     let vtable = adapter.vtable();
     let mut output = vec![0u8; 128];
@@ -100,6 +129,28 @@ fn started_adapter() -> PrologAbiAdapter {
         WsmStatus::Ok
     );
     adapter
+}
+
+#[test]
+fn semantic_add_uses_sid8_and_arguments_only() {
+    if !swipl_available() {
+        eprintln!("SKIP: swipl is not installed on this machine");
+        return;
+    }
+
+    let adapter = started_adapter();
+    let (status, output) = exchange_with_sid(&adapter, 0b0000_1100, b"2 3");
+    assert_eq!(status, WsmStatus::Ok);
+    assert_eq!(String::from_utf8_lossy(&output).trim(), "[5]");
+
+    let (status, output) =
+        exchange_with_sid(&adapter, 0b0000_1100, b"X is 7 - 3");
+    assert_eq!(
+        status,
+        WsmStatus::InvalidArgument,
+        "goal/operator text must not override the + SID"
+    );
+    assert!(output.is_empty());
 }
 
 #[test]

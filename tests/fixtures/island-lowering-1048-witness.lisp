@@ -31,7 +31,7 @@
                     plus-sid
                     (quote prolog)
                     (quote bounded-exact-add)
-                    "Result is 2 + 3"))
+                    "2 3"))
             (structural-relation same)
             (cond
               ((equal?

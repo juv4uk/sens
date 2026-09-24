@@ -3,6 +3,9 @@
 ; This layer never defines SID meaning. It consumes a mechanism-selected
 ; result from lib/mechanism-selector.lisp and serializes only an admitted
 ; mechanism projection.
+; For bounded exact addition, admitted semantic transports carry arguments only.
+; The operation itself is never serialized as "+", "add", a Lisp form, or a
+; Prolog goal: exact SID8 plus the selected mechanism already owns that choice.
 ;
 ; CLIPS semantic boundary under #1169:
 ; raw native Eval remains diagnostic-only. Until the CLIPS adapter exposes a
@@ -21,7 +24,7 @@
         ((eq executor (quote common-lisp)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
         ((eq executor (quote prolog)) (identity-relation same)
-         (island-lowering-append4 "Result is " l " + " r))
+         (island-lowering-append4 "" l " " r))
         ((eq executor (quote datalog)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
         ((quote island-lowering-fallback) island-lowering-fallback

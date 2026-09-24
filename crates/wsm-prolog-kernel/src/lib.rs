@@ -18,6 +18,8 @@ use wsm_kernel_c_abi::{
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SemanticId(pub u8);
 
+const SID_ADD: u8 = 0b0000_1100;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PrologQuery {
     pub goal: String,
@@ -38,6 +40,28 @@ impl PrologQuery {
             self.template, self.goal
         )
     }
+}
+
+fn semantic_query_for_request(
+    semantic_id: u8,
+    payload: &str,
+    template: &str,
+) -> Result<PrologQuery, ()> {
+    if semantic_id != SID_ADD {
+        return Ok(PrologQuery::new(payload, template));
+    }
+
+    let mut parts = payload.split_whitespace();
+    let left = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    let right = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    if parts.next().is_some() {
+        return Err(());
+    }
+
+    Ok(PrologQuery::new(
+        format!("{template} is {left} + {right}"),
+        template,
+    ))
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -362,14 +386,16 @@ unsafe extern "C" fn prolog_exchange(
     } else {
         unsafe { std::slice::from_raw_parts(request.payload.ptr, request.payload.len) }
     };
-    let Ok(goal) = std::str::from_utf8(payload) else {
+    let Ok(payload_text) = std::str::from_utf8(payload) else {
+        return WsmStatus::InvalidArgument;
+    };
+    let Ok(query) =
+        semantic_query_for_request(request.semantic_id, payload_text, &context.template)
+    else {
         return WsmStatus::InvalidArgument;
     };
 
-    let kernel_request = PrologRequest::new(
-        request.semantic_id,
-        PrologQuery::new(goal, context.template.clone()),
-    );
+    let kernel_request = PrologRequest::new(request.semantic_id, query);
     let result = match context.kernel.execute(&context.program, &kernel_request) {
         Ok(result) => result,
         Err(_) => return WsmStatus::KernelFailure,
