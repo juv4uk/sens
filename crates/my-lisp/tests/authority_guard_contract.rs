@@ -22,7 +22,7 @@ fn legacy_host_authority_guard_is_non_restrictive() {
         .expect("legacy Lisp authority enforcer must exist");
 
     assert!(guard.contains("#1347 supersedes the old deny policy"));
-    assert!(guard.contains("deliberately imposes no semantic restriction on host files"));
+    assert!(guard.contains("Host/runtime/compiler/backend code and tests may contain local semantics."));
     assert!(guard.contains("(quote (authority-ok))"));
 
     assert!(!guard.contains("allowed-authority?"));
