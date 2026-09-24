@@ -33,7 +33,7 @@ fn i5_6400_profile_projects_existing_semantic_identities() {
         ("01010111", "LOAD-buffer-length"),
         ("01011000", "LOAD-buffer-element"),
     ] {
-        let row_prefix = format!("(\"{semantic_id}\" ");
+        let row_prefix = format!("({semantic_id} ");
         let row = profile
             .lines()
             .map(str::trim_start)
@@ -53,10 +53,10 @@ fn every_i5_6400_row_is_a_unique_existing_semantic_identity() {
     let mut projected = 0usize;
 
     for line in profile.lines().map(str::trim_start) {
-        let Some(rest) = line.strip_prefix("(\"") else {
+        let Some(rest) = line.strip_prefix("(") else {
             continue;
         };
-        let Some((id, after_id)) = rest.split_once("\" ") else {
+        let Some((id, after_id)) = rest.split_once(" ") else {
             continue;
         };
         if id.len() != 8 || !id.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
@@ -73,7 +73,14 @@ fn every_i5_6400_row_is_a_unique_existing_semantic_identity() {
         );
     }
 
-    assert!(projected >= 50, "processor profile should cover a meaningful existing subset");
+    assert_eq!(
+        projected, 62,
+        "processor profile must preserve all 62 projected SID8 rows"
+    );
+    assert!(
+        !profile.lines().any(|line| line.trim_start().starts_with("(\\\"")),
+        "machine profile must not preserve quoted SID identity rows"
+    );
 }
 #[test]
 fn generated_function_table_has_i5_6400_column_without_replacing_semantic_authority() {
