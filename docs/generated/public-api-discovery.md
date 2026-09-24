@@ -114,6 +114,7 @@
 | `lib/core4.lisp` | macro | `let*` | unreviewed |
 | `lib/core4.lisp` | function | `string-empty?` | unreviewed |
 | `lib/core4.lisp` | function | `string-membership-helper` | unreviewed |
+| `lib/core4.lisp` | function | `string-order-helper` | unreviewed |
 | `lib/core4.lisp` | function | `nonempty-string-membership-helper` | unreviewed |
 | `lib/core4.lisp` | function | `string-length` | unreviewed |
 | `lib/core4.lisp` | function | `string-prefix?` | unreviewed |
@@ -389,7 +390,6 @@
 | `lib/mechanism-selector.lisp` | function | `mechanism-selector-registry` | unreviewed |
 | `lib/mechanism-selector.lisp` | function | `mechanism-selector-metadata` | unreviewed |
 | `lib/mechanism-selector.lisp` | function | `mechanism-selector-registry-rows` | unreviewed |
-| `lib/mechanism-selector.lisp` | function | `mechanism-selector-sid-text` | unreviewed |
 | `lib/mechanism-selector.lisp` | function | `mechanism-selector-find-section` | unreviewed |
 | `lib/mechanism-selector.lisp` | function | `mechanism-selector-routes` | unreviewed |
 | `lib/mechanism-selector.lisp` | function | `mechanism-selector-registry-has-sid?` | unreviewed |
