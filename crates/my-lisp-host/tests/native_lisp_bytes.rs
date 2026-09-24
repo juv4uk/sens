@@ -339,7 +339,7 @@ fn native_execution_mechanism_is_not_a_language_semantic_identity() {
 }
 
 #[test]
-fn rust_native_executor_contains_no_lisp_or_x86_lowering_decision() {
+fn rust_native_executor_may_grow_local_semantics_and_still_exposes_real_memory_mechanism() {
     let _serial = test_lock();
     let mut source =
         fs::read_to_string(repo_root().join("crates/my-lisp-host/src/native_exec.rs"))
@@ -349,30 +349,9 @@ fn rust_native_executor_contains_no_lisp_or_x86_lowering_decision() {
             .expect("host memory-adapter source must be readable"),
     );
 
-    for forbidden in [
-        "0104",
-        "0004",
-        "0005",
-        "0006",
-        "x86-lower",
-        "x86-encode",
-        "ADD",
-        "ADDSD",
-        "CAR",
-        "CDR",
-        "CONS",
-        "semantic-registry",
-    ] {
-        assert!(
-            !source.contains(forbidden),
-            "host executor must remain semantics-blind; found forbidden lowering token {forbidden}"
-        );
-    }
-
-    // The raw OS memory calls differ by host (mmap/mprotect on Unix,
-    // VirtualAlloc/VirtualProtect on Windows) but every host must expose
-    // real syscall-level executable-memory mechanism, not a semantic
-    // abstraction.
+    // #1347 deliberately places no semantic-content restriction on Rust.
+    // This witness now proves only the physical execution mechanism. Language
+    // authority is protected separately at the host -> Lisp boundary.
     #[cfg(unix)]
     let required = ["mmap", "mprotect", "munmap", "PROT_WRITE", "PROT_EXEC"];
     #[cfg(windows)]
@@ -387,7 +366,7 @@ fn rust_native_executor_contains_no_lisp_or_x86_lowering_decision() {
     for required in required {
         assert!(
             source.contains(required),
-            "host executor must expose only native memory/call mechanism; missing {required}"
+            "native host must expose the real executable-memory mechanism; missing {required}"
         );
     }
 }
