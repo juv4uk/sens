@@ -345,9 +345,9 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
 
     fn go_inner(value: &Value, span: Span, depth: u32) -> Result<Expr, LanguageError> {
         let kind = match &value {
-        Value::Nil => ExprKind::List(Rc::new([])),
+        Value::Nil => ExprKind::List(Vec::new().into()),
         Value::Bool(true) => ExprKind::Symbol("t".into()),
-        Value::Bool(false) => ExprKind::List(Rc::new([])),
+        Value::Bool(false) => ExprKind::List(Vec::new().into()),
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
         Value::Sid(sid) => ExprKind::Sid(*sid),
