@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use my_lisp::semantic_registry_export::semantic_id_for_admitted_surface;
-use my_lisp::{eval_program, load_core_library, parse, Expr, ExprKind, Session};
+use my_lisp::{eval_program, load_core_library, parse, Expr, ExprKind, Session, Sid8};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -62,7 +62,7 @@ fn load_axis_session() -> Session {
 
 fn kernel_statuses_for_sid(
     source: &str,
-    wanted_sid: &str,
+    wanted_sid: Sid8,
 ) -> Option<BTreeMap<String, String>> {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let ExprKind::List(items) = &exprs[0].kind else {
@@ -92,10 +92,8 @@ fn kernel_statuses_for_sid(
                     ) =>
                 {
                     sid = match &value.kind {
-                        ExprKind::String(value) | ExprKind::Symbol(value) => {
-                            Some(value.to_string())
-                        }
-                        _ => None,
+                        ExprKind::Sid(sid) => Some(*sid),
+                        other => panic!("kernel witness SID must be exact bare Sid8, got {other:?}"),
                     };
                 }
                 ExprKind::List(items)
@@ -111,7 +109,7 @@ fn kernel_statuses_for_sid(
             }
         }
 
-        if sid.as_deref() != Some(wanted_sid) {
+        if sid != Some(wanted_sid) {
             continue;
         }
 
@@ -197,13 +195,13 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
         machine_coordinate(&mut session, "00001100"),
         "((integer-add bounded-u64))"
     );
-    assert_eq!(kernel_statuses_for_sid(&kernel_source, "00001100"), None);
+    assert_eq!(kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00001100)), None);
 
     // EQ : identity-relation law, my-lisp execution witness, bounded compare.
     let eq_math = math_coordinate(&mut session, "00000011");
     assert!(eq_math.contains("same-atom-identity"));
     let eq_kernels =
-        kernel_statuses_for_sid(&kernel_source, "00000011").expect("EQ kernel row");
+        kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00000011)).expect("EQ kernel row");
     assert_eq!(eq_kernels.len(), 1);
     assert_eq!(eq_kernels.get("my-lisp").map(String::as_str), Some("live"));
     assert_eq!(
@@ -215,7 +213,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     let cons_math = math_coordinate(&mut session, "00000100");
     assert!(cons_math.contains("car-cons-left-inverse"));
     let cons_kernels =
-        kernel_statuses_for_sid(&kernel_source, "00000100").expect("CONS kernel row");
+        kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00000100)).expect("CONS kernel row");
     assert_eq!(cons_kernels.get("my-lisp").map(String::as_str), Some("live"));
     assert_eq!(
         cons_kernels.get("common-lisp").map(String::as_str),
@@ -233,7 +231,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert!(cond_math.contains("non-mathematical-in-this-slice"));
     assert!(cond_math.contains("no-mathematical-law-claimed"));
     let cond_kernels =
-        kernel_statuses_for_sid(&kernel_source, "00000111").expect("COND kernel row");
+        kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00000111)).expect("COND kernel row");
     assert_eq!(cond_kernels.get("my-lisp").map(String::as_str), Some("live"));
     assert_eq!(cond_kernels.get("prolog").map(String::as_str), Some("absent"));
     assert_eq!(cond_kernels.get("clips").map(String::as_str), Some("absent"));
