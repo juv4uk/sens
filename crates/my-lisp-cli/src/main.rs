@@ -4,6 +4,7 @@ use std::fs;
 use std::io::Read;
 use std::process;
 use std::rc::Rc;
+mod island_invoke;
 mod lsp_entry;
 mod islands;
 mod repl;
@@ -62,6 +63,8 @@ fn main() {
     // capability layer (filesystem, process execution, TCP). The semantic
     // core itself ships none.
     my_lisp_host::install();
+    // Raw diagnostic escape hatch: the semantic SID comes from the Lisp-owned registry.
+    island_invoke::install();
     let args: Vec<String> = env::args().collect();
     let allowed = allowed_processes(&args);
     let sexpr_protocol = args.iter().any(|a| a == "--protocol=sexpr");
