@@ -414,7 +414,7 @@ pub fn fasl_encode(expressions: &[Expr], source_hash: &[u8; 32]) -> Vec<u8> {
 pub fn sha256_source(input: &[u8]) -> [u8; 32] {
     eval::digest_sha256(input)
 }
-pub use syntax::{Exactness, Expr, ExprKind, Span};
+pub use syntax::{Exactness, Expr, ExprKind, ExprList, Span};
 pub use value::{Closure, NumericBuffer, Rational, Value};
 
 /// Return a half-open, Unicode-scalar-indexed substring with clamped bounds.
