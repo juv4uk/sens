@@ -68,7 +68,7 @@ semantic contract + executable laws
  Rust   GraalVM   WASM / C / FPGA
 ```
 
-Особливо це стосується bootstrap: `lib/macro.lisp` і поточний профіль `lib/core4.lisp` є Lisp-owned behavior. `lib/core.lisp` лишається bounded compatibility donor/entry point під час міграції чотирьох Core. Якщо іншому субстрату потрібен host-механізм, він має бути вузьким і semantics-blind; backend не має права замінювати 8-бітний function SID словесною або власною identity.
+Особливо це стосується bootstrap: `lib/macro.lisp` і поточний профіль `lib/core4.lisp` є Lisp-owned behavior. `lib/core.lisp` лишається bounded compatibility donor/entry point під час міграції чотирьох Core. Інший субстрат або Rust-host може мати власну локальну семантику, таблиці, lowering, dispatch і fallback. Межа асиметрична: ця implementation semantics не має ставати джерелом мовної істини для my-lisp або замінювати 8-бітний function SID словесною чи іншою language identity.
 
 Для Core4 функція SID `00000111` має тричленний закон `(query expected-result expression)`: спостережений результат порівнюється з явним expected datum, а вичерпання дає `UnsatisfiedConditional`. Інші Core можуть мати інший ратифікований закон для того самого SID. Contract 9.0 не створює для цього жодної словесної identity.
 
@@ -86,7 +86,7 @@ semantic contract + executable laws
 
 - **Є один function-ID space:** `00000000..11111111`.
 - **Surface не є функцією.** Українські, англійські, санскритські й символьні підказки можуть лише механічно маршрутизувати до SID8.
-- **Vertical Day — bounded фізичний доказ.** Ратифікований зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) проводить `(00000101 (00000100 2 3))` через structured machine forms → closed admission → Lisp-owned x86-64 encoding → semantics-blind host → physical CPU і отримує `2`.
+- **Vertical Day — bounded фізичний доказ.** Ратифікований зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) проводить `(00000101 (00000100 2 3))` через structured machine forms → closed admission → Lisp-owned x86-64 encoding → host execution → physical CPU і отримує `2`.
 - **Machine path fail-closed.** Raw/malformed/unadmitted requests відхиляються до входу в host.
 
 ```text
@@ -98,7 +98,7 @@ Core-owned law / mechanism selection
         ↓
 structured machine forms
         ↓
-semantics-blind host
+host execution
         ↓
 physical CPU
         ↓
