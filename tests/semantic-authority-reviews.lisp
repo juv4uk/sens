@@ -93,6 +93,9 @@
 (review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "b86a8cafd47ab28485fead3b286d1f7538301fc4a85c6448ff978e415e10a1b1" issue-1173 sid8-coordinate-law-observer)
 (review "crates/my-lisp/tests/semantic_coordinate_matrix_845.rs" "40e887899288624ffb1ffd9d2d105792bc13f8edeed974b142b83a2a38035380" issue-1173 sid8-coordinate-law-observer)
 
+; #1173 generated function-table surface projection: observer-only bare SID8 migration.
+(review "crates/my-lisp/tests/full_uk_surface.rs" "8797bb254d3b3b78dd34ca3d47a74fc51db99f8176481bafa0e1309e86b05493" issue-1173 sid8-function-table-surface-observer)
+
 ; #1173 i5-6400 machine projection: observer-only SID8 representation migration.
 (review "crates/my-lisp/tests/i5_6400_machine_profile.rs" "5cfa6ecb2e417375da567349a28f0bbca7186d38d00a9e85e94a72c942ee543d" issue-1173 sid8-machine-profile-observer)
 
