@@ -111,4 +111,5 @@
 ; meaning independently: it accepts only identities already admitted by the
 ; existing semantic-registry + Canon/necessary-form projections, stores only
 ; exact Sid8 in ExprList, and preserves ordinary lexical/shadowable names.
+; Performance witness: #1324 converges warm surface AST with direct SID in three release runs.
 (review "crates/my-lisp/src/eval/mod.rs" "508f557ec1e9d4b18ffe9eae24dddf8c9afe2e17b6a7c281c9a11936db349d0d" issue-1320 immutable-head-sid-one-way-cache-mechanism)
