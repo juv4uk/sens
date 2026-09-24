@@ -16,7 +16,7 @@
 
 use my_lisp::{
     eval_parsed_expressions, eval_program, load_core_library, parse,
-    semantic_registry_export, Expr, ExprKind, Session, Sid8,
+    semantic_registry_export, Expr, ExprKind, Session,
 };
 use std::{env, hint::black_box, rc::Rc, time::Instant};
 
@@ -193,8 +193,8 @@ fn main() {
         .expect("car has admitted SID");
     let cons_sid = semantic_registry_export::semantic_id_for_admitted_surface("cons")
         .expect("cons has admitted SID");
-    assert_eq!(car_sid, Sid8::from_canonical_spelling("00000101").unwrap());
-    assert_eq!(cons_sid, Sid8::from_canonical_spelling("00000100").unwrap());
+    assert_eq!(car_sid, my_lisp::sid!(00000101));
+    assert_eq!(cons_sid, my_lisp::sid!(00000100));
 
     let (resolve_surface_ns, ready_sid_ns) = sampled_pair(
         samples,
