@@ -1,17 +1,17 @@
-; #1256 — executable witness for the Core4 predicate-answer boundary.
+; #1336 — executable witness for Core4 directed function-SID endpoints.
 ;
-; This script proves the narrow law only.  It does not change Sid8 evaluation,
-; callable dispatch, or Canon identity.
+; Proves:
+;   NO  -> 00000000
+;   YES -> 11111111
+; while () remains a distinct structural empty value outside function-SID space.
 
-(def pab-boundary-forms
-  (read-all (read-file "contracts/core4-predicate-answer-boundary.lisp")))
-(def pab-boundary-contract (car pab-boundary-forms))
-(def pab-boundary-schema (car pab-boundary-contract))
-(def pab-boundary-sections (cdr pab-boundary-contract))
+(def pab-boundary-contract
+  (car (read-all (read-file "contracts/core4-predicate-answer-boundary.lisp"))))
+(def pab-schema (car pab-boundary-contract))
+(def pab-sections (cdr pab-boundary-contract))
 
-(def pab-scale-forms
-  (read-all (read-file "contracts/core4-predicate-answer-scale.lisp")))
-(def pab-scale-contract (car pab-scale-forms))
+(def pab-scale-contract
+  (car (read-all (read-file "contracts/core4-predicate-answer-scale.lisp"))))
 (def pab-scale-sections (cdr pab-scale-contract))
 
 (def pab-field-from
@@ -39,9 +39,7 @@
       ((equal? actual expected) (structural-relation same) (quote ()))
       ((quote pab-fail) pab-fail
        (list (quote predicate-answer-boundary-mismatch)
-             label
-             expected
-             actual)))))
+             label expected actual)))))
 
 (def pab-first-failure
   (lambda (checks)
@@ -51,19 +49,16 @@
        (pab-first-failure (cdr checks)))
       ((quote pab-failure) pab-failure (car checks)))))
 
-(def pab-meta (car pab-boundary-sections))
-(def pab-lower (second pab-boundary-sections))
-(def pab-upper (third pab-boundary-sections))
-(def pab-laws (fourth pab-boundary-sections))
+(def pab-meta (car pab-sections))
+(def pab-no (second pab-sections))
+(def pab-yes (third pab-sections))
+(def pab-undirected (fourth pab-sections))
+(def pab-laws (fifth pab-sections))
 
-; #1255 scale layout is intentionally small and fixed:
-; meta, no, boundary, yes, algebra.
 (def pab-scale-boundary (third pab-scale-sections))
 
-(def pab-lower-sid (pab-field pab-lower (quote sid-anchor)))
-(def pab-upper-sid (pab-field pab-upper (quote sid-anchor)))
-(def pab-lower-projection (pab-field pab-lower (quote projection)))
-(def pab-upper-projection (pab-field pab-upper (quote projection)))
+(def pab-no-sid (pab-field pab-no (quote sid-endpoint)))
+(def pab-yes-sid (pab-field pab-yes (quote sid-endpoint)))
 
 (def pab-verdict
   (lambda ()
@@ -71,62 +66,74 @@
             (pab-first-failure
               (list
                 (pab-check (quote schema)
-                           pab-boundary-schema
-                           (quote core4-predicate-answer-boundary/1))
+                           pab-schema
+                           (quote core4-predicate-answer-boundary/2))
                 (pab-check (quote profile)
                            (pab-field pab-meta (quote profile))
                            (quote core4))
-                (pab-check (quote sid-identity)
-                           (pab-field pab-meta (quote sid-identity))
-                           (quote preserved))
-                (pab-check (quote bare-sid-evaluation)
-                           (pab-field pab-meta (quote bare-sid-evaluation))
-                           (quote unchanged))
-                (pab-check (quote callable-dispatch)
-                           (pab-field pab-meta (quote callable-dispatch))
-                           (quote unchanged))
-                (pab-check (quote fail-closed)
-                           (pab-field pab-meta (quote unknown-callable-fail-closed))
-                           (quote preserved))
-                (pab-check (quote lower-last-answer)
-                           (pab-field pab-lower (quote last-directed-answer-spelling))
+                (pab-check (quote sid-space)
+                           (pab-field pab-meta (quote sid-space))
+                           (quote function-only))
+                (pab-check (quote empty-list-space)
+                           (pab-field pab-meta (quote empty-list-space))
+                           (quote structural-value))
+                (pab-check (quote no-direction)
+                           (pab-field pab-no (quote direction))
+                           (quote no))
+                (pab-check (quote no-last-short-answer)
+                           (pab-field pab-no (quote last-directed-answer-spelling))
                            "0000000")
-                (pab-check (quote upper-last-answer)
-                           (pab-field pab-upper (quote last-directed-answer-spelling))
-                           "1111111")
-                (pab-check (quote lower-sid)
-                           pab-lower-sid
+                (pab-check (quote no-endpoint)
+                           pab-no-sid
                            (quote 00000000))
-                (pab-check (quote upper-sid)
-                           pab-upper-sid
+                (pab-check (quote no-endpoint-kind)
+                           (pab-field pab-no (quote endpoint-kind))
+                           (quote function-sid))
+                (pab-check (quote yes-direction)
+                           (pab-field pab-yes (quote direction))
+                           (quote yes))
+                (pab-check (quote yes-last-short-answer)
+                           (pab-field pab-yes (quote last-directed-answer-spelling))
+                           "1111111")
+                (pab-check (quote yes-endpoint)
+                           pab-yes-sid
                            (quote 11111111))
-                (pab-check (quote lower-projection)
-                           pab-lower-projection
+                (pab-check (quote yes-endpoint-kind)
+                           (pab-field pab-yes (quote endpoint-kind))
+                           (quote function-sid))
+                (pab-check (quote undirected-answer)
+                           (pab-field pab-undirected (quote undirected-answer))
                            (quote ()))
-                (pab-check (quote upper-projection)
-                           pab-upper-projection
-                           (quote ()))
-                (pab-check (quote projections-equal)
-                           (equal? pab-lower-projection pab-upper-projection)
-                           (quote (structural-relation same)))
-                (pab-check (quote sid-identities-distinct)
-                           (equal? pab-lower-sid pab-upper-sid)
+                (pab-check (quote undirected-kind)
+                           (pab-field pab-undirected (quote kind))
+                           (quote structural-empty-value))
+                (pab-check (quote endpoint-sids-distinct)
+                           (equal? pab-no-sid pab-yes-sid)
                            (quote (structural-relation distinct)))
-                (pab-check (quote scale-lower-anchor)
-                           (pab-field pab-scale-boundary (quote lower-sid-anchor))
-                           pab-lower-sid)
-                (pab-check (quote scale-upper-anchor)
-                           (pab-field pab-scale-boundary (quote upper-sid-anchor))
-                           pab-upper-sid)
-                (pab-check (quote sid-alias-forbidden)
-                           (pab-field pab-laws (quote sid-alias))
+                (pab-check (quote no-sid-not-empty-list)
+                           (equal? pab-no-sid (quote ()))
+                           (quote (structural-relation distinct)))
+                (pab-check (quote yes-sid-not-empty-list)
+                           (equal? pab-yes-sid (quote ()))
+                           (quote (structural-relation distinct)))
+                (pab-check (quote endpoint-projection-forbidden)
+                           (pab-field pab-laws (quote endpoint-to-empty-list-projection))
                            (quote forbidden))
-                (pab-check (quote other-sid-projection-forbidden)
-                           (pab-field pab-laws (quote other-sid-ground-projection))
+                (pab-check (quote eighth-step)
+                           (pab-field pab-laws (quote eighth-directed-step))
+                           (quote reaches-function-sid-endpoint))
+                (pab-check (quote scale-no-endpoint)
+                           (pab-field pab-scale-boundary (quote no-sid-endpoint))
+                           pab-no-sid)
+                (pab-check (quote scale-yes-endpoint)
+                           (pab-field pab-scale-boundary (quote yes-sid-endpoint))
+                           pab-yes-sid)
+                (pab-check (quote scale-empty-list-alias)
+                           (pab-field pab-scale-boundary (quote empty-list-alias))
                            (quote forbidden))
                 (pab-check (quote older-core-impact)
                            (pab-field pab-laws (quote core1-core2-core3-impact))
-                           (quote none))))))
+                           (quote none)))))))
       (cond
         ((atom failure) (structural-kind empty-list)
          (quote (core4-predicate-answer-boundary-ok)))
