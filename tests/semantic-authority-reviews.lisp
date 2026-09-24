@@ -64,3 +64,8 @@
 (review "crates/wsm-datalog-kernel/src/arithmetic.rs" "79f10471d3b80f988496bb41b1a406a5b20788d386bfa710d0918eebbba8fbf2" issue-1001 datalog-direct-sid8-arithmetic-mechanism)
 (review "crates/wsm-datalog-kernel/src/lib.rs" "e5c29f665637b802df1b1f8eb7283ab21ce5b0690690e831c7d4afa1ee2acabd" issue-1001 datalog-direct-sid8-abi-mechanism)
 (review "crates/wsm-datalog-kernel/tests/arithmetic_execution_1001.rs" "91bbd2992e344bcae083d38edd96de30fa0b523c4376c8a430c1fc2f661d93ca" issue-1001 datalog-direct-sid8-observer)
+
+; #1217 Common Lisp + semantic ABI: reviewed exact-SID8 mechanism binding.
+; Raw CommonLispKernel::evaluate remains diagnostic/native; the shared semantic
+; ABI binds SID 00001100 to bounded addition and accepts arguments only.
+(review "crates/wsm-common-lisp-kernel/src/lib.rs" "d1c04c59757776a059981110a6622a1923ecf9b0be70b784448a3407f4e6f6f0" issue-1217 common-lisp-direct-sid8-add-mechanism)
