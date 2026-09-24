@@ -98,3 +98,8 @@
 
 ; #1294 observer only: compare canonical Core4 definition membership with Lisp-owned public/internal inventory.
 (review "crates/my-lisp/tests/uk_surface_inventory.rs" "eb1973408cfd59ecccc9dd746b24da72361a6892c8aade40f17a8d6b1998d031" issue-1294 canonical-core4-definition-observer)
+
+; #1272 selected-Core runtime signal: reviewed mechanism-only profile transport.
+; The loaders carry only which Lisp-owned Core profile was selected; they do not
+; map surfaces/SIDs to meanings and contain no host-side profile law table.
+(review "crates/my-lisp/src/lib.rs" "20bdb609a9967ba2ec84768b8cd37d07d23afa5130639beb6dd414bd83269079" issue-1272 selected-core-profile-transport-mechanism)
