@@ -57,6 +57,11 @@ if [[ -n "$direct_sid8" ]]; then
   fail=1
 fi
 
+report_forbidden \
+  'primitive-budget SID identity stored as quoted String' \
+  '\(sid[[:space:]]*\.[[:space:]]*"[01]{8}"\)' \
+  contracts/primitive-budget-audit-734.lisp
+
 if (( fail != 0 )); then
   exit 1
 fi
