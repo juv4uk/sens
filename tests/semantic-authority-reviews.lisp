@@ -100,4 +100,4 @@
 (review "crates/my-lisp/tests/uk_surface_inventory.rs" "eb1973408cfd59ecccc9dd746b24da72361a6892c8aade40f17a8d6b1998d031" issue-1294 canonical-core4-definition-observer)
 
 ; #1298 baseline blocker: Ukrainian peer-shadowing acceptance is observer-only.
-(review "crates/my-lisp/tests/ukr_acceptance.rs" "937b98d4785a904b896cf6f21988eb0cb59eef690eb2c09499eab6767ff8291c" issue-1298 ukr-peer-shadowing-current-eq-observer)
+(review "crates/my-lisp/tests/ukr_acceptance.rs" "ab6ab84e658a2222c418d5990e18dc6f32d7ef8b3581ab8e8c27f49c37e8fd9c" issue-1298 ukr-peer-shadowing-current-eq-observer)
