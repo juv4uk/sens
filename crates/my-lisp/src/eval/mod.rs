@@ -430,7 +430,7 @@ mod single_pass_eval_tests {
     }
 
     #[test]
-    fn canonical_names_cannot_be_redefined() {
+    fn surfaces_routing_to_function_sids_cannot_be_redefined() {
         for source in [
             "(def car 42)",
             "(def перше 42)",
@@ -440,14 +440,14 @@ mod single_pass_eval_tests {
         ] {
             let mut session = Session::default();
             let error = eval_program(source, &mut session)
-                .expect_err("Canon spelling must reject redefinition");
+                .expect_err("surface routing to a function SID must reject redefinition");
             assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
-            assert!(error.message.contains("canonical name is immutable"));
+            assert!(error.message.contains("surface routes to immutable function SID"));
         }
     }
 
     #[test]
-    fn canonical_names_cannot_be_lambda_parameters() {
+    fn surfaces_routing_to_function_sids_cannot_be_lambda_parameters() {
         for source in [
             "(lambda (car) car)",
             "(lambda (перше) перше)",
@@ -456,9 +456,9 @@ mod single_pass_eval_tests {
         ] {
             let mut session = Session::default();
             let error = eval_program(source, &mut session)
-                .expect_err("Canon spelling must reject parameter binding");
+                .expect_err("surface routing to a function SID must reject parameter binding");
             assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
-            assert!(error.message.contains("canonical name is immutable"));
+            assert!(error.message.contains("surface routes to immutable function SID"));
         }
     }
 
