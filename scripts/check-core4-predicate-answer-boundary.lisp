@@ -133,7 +133,7 @@
                            (quote forbidden))
                 (pab-check (quote older-core-impact)
                            (pab-field pab-laws (quote core1-core2-core3-impact))
-                           (quote none)))))))
+                           (quote none))))))
       (cond
         ((atom failure) (structural-kind empty-list)
          (quote (core4-predicate-answer-boundary-ok)))
