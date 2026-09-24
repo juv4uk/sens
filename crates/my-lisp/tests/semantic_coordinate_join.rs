@@ -3,9 +3,9 @@ use std::fs;
 use std::path::PathBuf;
 
 use my_lisp::semantic_registry_export::semantic_id_for_admitted_surface;
-use my_lisp::{eval_program, load_core_library, parse, Expr, ExprKind, Session};
+use my_lisp::{eval_program, load_core_library, parse, Expr, ExprKind, Session, Sid8};
 
-const CAR_SID_BITS: &str = "00000101";
+const CAR_SID: Sid8 = my_lisp::sid!(00000101);
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -31,7 +31,7 @@ fn load_coordinate_session() -> Session {
     session
 }
 
-fn kernel_names_for_sid(source: &str, wanted_sid: &str) -> HashSet<String> {
+fn kernel_names_for_sid(source: &str, wanted_sid: Sid8) -> HashSet<String> {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let map_items = match &exprs[0].kind {
         ExprKind::List(items) => items,
@@ -49,7 +49,7 @@ fn kernel_names_for_sid(source: &str, wanted_sid: &str) -> HashSet<String> {
             continue;
         }
 
-        let mut sid: Option<String> = None;
+        let mut sid: Option<Sid8> = None;
         let mut witnesses: Vec<Expr> = Vec::new();
 
         for field in &fields[1..] {
@@ -58,8 +58,8 @@ fn kernel_names_for_sid(source: &str, wanted_sid: &str) -> HashSet<String> {
                     if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
                 {
                     sid = Some(match &value.kind {
-                        ExprKind::String(s) | ExprKind::Symbol(s) => s.to_string(),
-                        _ => panic!("sid must be a string/bitstring"),
+                        ExprKind::Sid(sid) => *sid,
+                        other => panic!("kernel witness SID must be exact bare Sid8, got {other:?}"),
                     });
                 }
                 ExprKind::List(items)
@@ -72,7 +72,7 @@ fn kernel_names_for_sid(source: &str, wanted_sid: &str) -> HashSet<String> {
             }
         }
 
-        if sid.as_deref() != Some(wanted_sid) {
+        if sid != Some(wanted_sid) {
             continue;
         }
 
@@ -104,7 +104,7 @@ fn kernel_names_for_sid(source: &str, wanted_sid: &str) -> HashSet<String> {
 }
 
 
-fn kernel_statuses_for_sid(source: &str, wanted_sid: &str) -> Vec<(String, String)> {
+fn kernel_statuses_for_sid(source: &str, wanted_sid: Sid8) -> Vec<(String, String)> {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let ExprKind::List(items) = &exprs[0].kind else {
         panic!("kernel witness map must be a list");
@@ -129,8 +129,8 @@ fn kernel_statuses_for_sid(source: &str, wanted_sid: &str) -> Vec<(String, Strin
                     if matches!(&key.kind, ExprKind::Symbol(symbol) if &**symbol == "sid") =>
                 {
                     sid = Some(match &value.kind {
-                        ExprKind::String(value) | ExprKind::Symbol(value) => value.to_string(),
-                        other => panic!("SID must be string/symbol, got {other:?}"),
+                        ExprKind::Sid(sid) => *sid,
+                        other => panic!("kernel witness SID must be exact bare Sid8, got {other:?}"),
                     });
                 }
                 ExprKind::List(w)
@@ -145,7 +145,7 @@ fn kernel_statuses_for_sid(source: &str, wanted_sid: &str) -> Vec<(String, Strin
             }
         }
 
-        if sid.as_deref() != Some(wanted_sid) {
+        if sid != Some(wanted_sid) {
             continue;
         }
 
@@ -195,7 +195,7 @@ fn coordinate_value(session: &mut Session, function: &str, sid: &str) -> String 
 }
 
 fn kernel_car_block(source: &str) -> &str {
-    let marker = "(sid      . \"00000101\")";
+    let marker = "(sid      . 00000101)";
     let sid_pos = source.find(marker).expect("CAR SID row");
     let start = source[..sid_pos]
         .rfind("(sid-witness")
@@ -239,7 +239,7 @@ fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
 
     let kernel_source = fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
         .expect("kernel witness contract");
-    let kernels = kernel_names_for_sid(&kernel_source, CAR_SID_BITS);
+    let kernels = kernel_names_for_sid(&kernel_source, CAR_SID);
     assert!(kernels.contains("my-lisp"));
     assert!(kernels.contains("common-lisp"));
     assert!(!kernels.contains("prolog"));
@@ -265,7 +265,7 @@ fn add_sid_preserves_math_and_machine_evidence_with_explicit_kernel_gap() {
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
-    let kernels = kernel_statuses_for_sid(&kernel_source, SID);
+    let kernels = kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00001100));
 
     assert!(math.contains("exact-rational-sum"));
     assert_eq!(machine, "((integer-add bounded-u64))");
@@ -285,7 +285,7 @@ fn eq_sid_joins_relation_my_lisp_and_compare_capability() {
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
-    let kernels = kernel_statuses_for_sid(&kernel_source, SID);
+    let kernels = kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00000011));
 
     assert!(math.contains("same-atom-identity"));
     assert_eq!(machine, "((identity-compare bounded-u64))");
@@ -303,7 +303,7 @@ fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
-    let kernels = kernel_statuses_for_sid(&kernel_source, SID);
+    let kernels = kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00000100));
 
     assert!(math.contains("car-cons-left-inverse"));
     assert_eq!(
@@ -326,7 +326,7 @@ fn cond_sid_keeps_negative_math_evidence_and_absent_external_kernels_visible() {
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
-    let kernels = kernel_statuses_for_sid(&kernel_source, SID);
+    let kernels = kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00000111));
 
     assert!(math.contains("non-mathematical-in-this-slice"));
     assert!(math.contains("no-mathematical-law-claimed"));
