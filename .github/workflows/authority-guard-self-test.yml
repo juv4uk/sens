@@ -72,7 +72,7 @@ jobs:
           grep -q 'authority-ok' tests/authority-verdict.lisp
           ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
 
-      - name: Semantic authority leakage fixtures
+      - name: Asymmetric semantic firewall fixtures
         shell: bash
         run: |
           set -euo pipefail
