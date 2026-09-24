@@ -98,3 +98,5 @@
 (authority "crates/wsm-datalog-kernel/tests/arithmetic_execution_1001.rs" observer)
 
 (authority "crates/my-lisp/tests/uk_surface.rs" observer)
+
+(authority "crates/my-lisp/tests/ukr_acceptance.rs" observer)
