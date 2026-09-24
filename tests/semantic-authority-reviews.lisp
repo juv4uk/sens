@@ -87,3 +87,9 @@
 (review "crates/my-lisp/tests/semantic_coordinate_join.rs" "2fcfb8d8a2f0d624d37edc85744c456d614b862c54094792939302cf9914509c" issue-1173 sid8-machine-capability-observer)
 (review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "11ea19e3132fb4dcc57ce6f9eadc689afda1665c39b43ed4bccadab0fe9bbc92" issue-1173 sid8-machine-capability-observer)
 
+; #1173 semantic coordinate law/matrix: reviewed observer-only SID8 migration.
+(review "crates/my-lisp/tests/semantic_coordinate_law_axis.rs" "5447d885e1dbbc5c01e249a15bcaa39feceab82e156f8f86d3e50bf0f942fe7a" issue-1173 sid8-coordinate-law-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_join.rs" "e4fcb7565113c9ef00625291407e58c859147a642ee0b9318e0a0eb5ad93fa06" issue-1173 sid8-coordinate-law-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "b86a8cafd47ab28485fead3b286d1f7538301fc4a85c6448ff978e415e10a1b1" issue-1173 sid8-coordinate-law-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_matrix_845.rs" "40e887899288624ffb1ffd9d2d105792bc13f8edeed974b142b83a2a38035380" issue-1173 sid8-coordinate-law-observer)
+
