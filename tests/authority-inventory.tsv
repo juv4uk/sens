@@ -176,3 +176,11 @@ crates/my-lisp/tests/uk_surface.rs	canonical_ukrainian_syntax_and_batch_one_alia
 crates/my-lisp/tests/guard.rs	reference_learning_writes_directly_and_lets_evidence_status_rank_entries	observer	guard-reference-evidence-status-ranking	knowledge/guard-reference.lisp	migrated
 crates/my-lisp/tests/guard.rs	a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it	observer	guard-reference-evidence-status-ranking	knowledge/guard-reference.lisp	migrated
 crates/my-lisp/tests/guard.rs	evidence_status_defaults_to_unresolved_not_confirmed_when_absent	observer	guard-reference-evidence-status-ranking	knowledge/guard-reference.lisp	migrated
+
+crates/my-lisp-cli/src/island_invoke.rs	evaluate_invoke	mechanism	SID8-keyed raw invoke host seam	semantic registry SID 10101000	migrated
+
+crates/my-lisp-cli/tests/invoke_repl.rs	invoke_surfaces_and_direct_sid_share_the_same_datalog_escape_hatch	observer	invoke SID8 surface parity	lib/surface/semantic-registry.lisp	migrated
+
+crates/my-lisp-cli/tests/invoke_repl.rs	invoke_unknown_kernel_fails_named	observer	raw invoke fail-closed kernel boundary	crates/my-lisp-cli/src/island_invoke.rs	migrated
+
+crates/my-lisp-cli/tests/invoke_repl.rs	invoke_rejects_wrong_bounded_native_payload_named	observer	raw invoke fail-closed payload boundary	crates/my-lisp-cli/src/island_invoke.rs	migrated
