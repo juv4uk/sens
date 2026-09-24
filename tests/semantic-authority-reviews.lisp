@@ -105,7 +105,6 @@
 ; #1312 world.rs observer: tests world transitions, snapshots, and content addresses
 ; observing Lisp-owned contracts/world-transition-contract.lisp.
 (review "crates/my-lisp/tests/world.rs" "bcddce8a78c6182fadb92528e7bf8f3889e0ec4c3ee295ef56ae1cb8c0b3efe3" issue-1312 world-transition-observer)
-
 ; #1325 SID8-only transition: existing eval mechanism becomes directly callable by existing SID 01001101.
 ; No new function meaning is created in Rust; this removes a name-only execution path from the bootstrap.
 (review "crates/my-lisp/src/eval/canon.rs" "8e6e9239bdb42c203d315282a2200e364a586092c0ff717bdeb51a495a299769" issue-1325 sid8-01001101-existing-mechanism)
@@ -118,3 +117,6 @@
 ; #1344 Sens vocabulary foundation: exports Sens8, Sens, sens! alongside Sid8.
 (review "crates/my-lisp/src/lib.rs" "340674a9c5bd7cbd6ef5b6716955bfb28e9ddd3da6ce42fd0486110954ae4370" issue-1344 sens-vocabulary-foundation-export)
 (review "crates/my-lisp/tests/sens_foundation.rs" "3fbba9fff5cd2e04581fa45e31d1141ebcb15804650f56e70aaf24e7525e8d35" issue-1344 sens-foundation-observer)
+
+; #1301 Ukrainian peer-shadowing acceptance: reviewed observer-only expectation alignment.
+(review "crates/my-lisp/tests/ukr_acceptance.rs" "ab6ab84e658a2222c418d5990e18dc6f32d7ef8b3581ab8e8c27f49c37e8fd9c" issue-1301 ukr-peer-shadowing-current-eq-observer)
