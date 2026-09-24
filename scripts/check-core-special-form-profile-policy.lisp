@@ -108,7 +108,7 @@
                   (quote
                     (runtime-profile-selector
                       owner my-lisp
-                      state pending-mechanical-hook)))))))
+                      state active-mechanical-hook)))))))
       (cond
         ((atom failure)
          (structural-kind empty-list)
