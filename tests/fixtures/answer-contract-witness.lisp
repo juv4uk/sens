@@ -114,102 +114,102 @@
                   (quote result-form)
                   (quote empty-list))
                 (answer-contract-witness-expect
-                  "00000100"
+                  00000100
                   (quote domain-owner)
                   (quote structure))
                 (answer-contract-witness-expect
-                  "00000100"
+                  00000100
                   (quote result-form)
                   (quote pair))
                 (answer-contract-witness-expect
-                  "00000010"
+                  00000010
                   (quote domain-owner)
                   (quote structural-observation))
                 (answer-contract-witness-expect
-                  "00000010"
+                  00000010
                   (quote result-form)
                   (quote structural-kind))
                 (answer-contract-witness-expect
-                  "00000010"
+                  00000010
                   (quote result-values)
                   (quote ((structural-kind empty-list)
                           (structural-kind pair)
                           (structural-kind atom))))
                 (answer-contract-witness-expect
-                  "00000010"
+                  00000010
                   (quote no-answer)
                   (quote not-applicable))
                 (answer-contract-witness-expect
-                  "00000011"
+                  00000011
                   (quote domain-owner)
                   (quote structural-observation))
                 (answer-contract-witness-expect
-                  "00000011"
+                  00000011
                   (quote input-domain)
                   (quote (atom atom)))
                 (answer-contract-witness-expect
-                  "00000011"
+                  00000011
                   (quote result-form)
                   (quote identity-relation))
                 (answer-contract-witness-expect
-                  "00000011"
+                  00000011
                   (quote result-values)
                   (quote ((identity-relation same)
                           (identity-relation distinct))))
                 (answer-contract-witness-expect
-                  "00000011"
+                  00000011
                   (quote outside-domain)
                   (quote type-error))
                 (answer-contract-witness-expect
-                  "00000011"
+                  00000011
                   (quote no-answer)
                   (quote not-applicable))
                 (answer-contract-witness-expect
-                  "00011010"
+                  00011010
                   (quote domain-owner)
                   (quote exact-q-decision))
                 (answer-contract-witness-expect
-                  "00011010"
+                  00011010
                   (quote binary-values)
                   (quote ("0/1" "1/1")))
                 (answer-contract-witness-expect
-                  "00011010"
+                  00011010
                   (quote outside-domain)
                   (quote delegate))
                 (answer-contract-witness-expect
-                  "00011010"
+                  00011010
                   (quote unspecialized-result)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "00001100"
+                  00001100
                   (quote domain-owner)
                   (quote mathematical-result))
                 (answer-contract-witness-expect
-                  "00001100"
+                  00001100
                   (quote unspecialized-result)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "10000101"
+                  10000101
                   (quote domain-owner)
                   (quote non-mathematical-reasoning))
                 (answer-contract-witness-expect
-                  "10000101"
+                  10000101
                   (quote unspecialized-result)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "10000101"
+                  10000101
                   (quote no-answer)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "00000111"
+                  00000111
                   (quote domain-owner)
                   (quote control-consumer))
                 (answer-contract-witness-expect
-                  "00000111"
+                  00000111
                   (quote unspecialized-result)
                   (quote ()))
                 (answer-contract-witness-expect
-                  "00000111"
+                  00000111
                   (quote generic-value-coercion)
                   (quote forbidden))
 
@@ -231,7 +231,9 @@
                 ; is keyed by semantic identity only. Canon 0 is the one special
                 ; non-ID entry because the empty list has no lexical Canon ID.
                 (answer-contract-witness-expect-missing (quote cons))
-                (answer-contract-witness-expect-missing (quote reason))))))
+                (answer-contract-witness-expect-missing (quote reason))
+                ; A String that looks like an SID is still ordinary String data.
+                (answer-contract-witness-expect-missing "00000100")))))
       (cond
         ((eq (answer-contract-schema) (quote answer-contract/1))
          (cond
