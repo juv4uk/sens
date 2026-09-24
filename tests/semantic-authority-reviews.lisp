@@ -98,3 +98,6 @@
 
 ; #1294 observer only: compare canonical Core4 definition membership with Lisp-owned public/internal inventory.
 (review "crates/my-lisp/tests/uk_surface_inventory.rs" "eb1973408cfd59ecccc9dd746b24da72361a6892c8aade40f17a8d6b1998d031" issue-1294 canonical-core4-definition-observer)
+
+; #1302 Ukrainian peer-shadowing acceptance: reviewed observer-only expectation alignment.
+(review "crates/my-lisp/tests/ukr_acceptance.rs" "937b98d4785a904b896cf6f21988eb0cb59eef690eb2c09499eab6767ff8291c" issue-1302 ukr-peer-shadowing-current-eq-observer)
