@@ -102,3 +102,13 @@
 ; records win by evidence-status through guard-reference-find/-all; Lisp (knowledge/guard-reference.lisp)
 ; owns the ranking law, this file only observes its output.
 (review "crates/my-lisp/tests/guard.rs" "8c56e37f5ea4044e8f1afe6db57e437fde00bfed7a0304fc4509500b17f2a2b5" issue-guard-evidence-ranking guard-reference-evidence-status-observer)
+; #1312 world.rs observer: tests world transitions, snapshots, and content addresses
+; observing Lisp-owned contracts/world-transition-contract.lisp.
+(review "crates/my-lisp/tests/world.rs" "bcddce8a78c6182fadb92528e7bf8f3889e0ec4c3ee295ef56ae1cb8c0b3efe3" issue-1312 world-transition-observer)
+
+; #1320 SID one-way valve: reviewed mechanism-only cache for already-resolved
+; immutable executable heads. The evaluator does not assign a SID or operation
+; meaning independently: it accepts only identities already admitted by the
+; existing semantic-registry + Canon/necessary-form projections, stores only
+; exact Sid8 in ExprList, and preserves ordinary lexical/shadowable names.
+(review "crates/my-lisp/src/eval/mod.rs" "508f557ec1e9d4b18ffe9eae24dddf8c9afe2e17b6a7c281c9a11936db349d0d" issue-1320 immutable-head-sid-one-way-cache-mechanism)
