@@ -113,3 +113,8 @@
 ; exact Sid8 in ExprList, and preserves ordinary lexical/shadowable names.
 ; Performance witness: #1324 converges warm surface AST with direct SID in three release runs.
 (review "crates/my-lisp/src/eval/mod.rs" "508f557ec1e9d4b18ffe9eae24dddf8c9afe2e17b6a7c281c9a11936db349d0d" issue-1320 immutable-head-sid-one-way-cache-mechanism)
+; #1320 public AST API exposure: ExprList is exported so existing crate consumers can
+; treat List payloads as a slice-like structure. This export assigns no meaning,
+; SID or surface mapping; the exact digest is reviewed because lib.rs is itself a
+; protected projection boundary.
+(review "crates/my-lisp/src/lib.rs" "7f93704eec777a27eb3d89a633150b243f4075939425f0938037b5cb4cb3e4dd" issue-1320 exprlist-sid-cache-api-export)
