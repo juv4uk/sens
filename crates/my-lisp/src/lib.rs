@@ -253,7 +253,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         // SID values.
         if peers.iter().any(|peer| {
             eval::canon::routed_sid_for_surface(peer).is_some()
-                || eval::necessary_forms::identity_for_symbol(peer).is_some()
+                || eval::necessary_forms::routed_sid_for_symbol(peer).is_some()
         }) {
             continue;
         }
@@ -364,10 +364,8 @@ pub fn surface_has_sid(name: &str, sid: Sid8) -> bool {
 
 /// True for any admitted surface whose Lisp-owned evaluator dispatch class is Define.
 pub fn is_define_surface_name(name: &str) -> bool {
-    matches!(
-        crate::eval::necessary_forms::identity_for_symbol(name),
-        Some(crate::eval::necessary_forms::NecessaryFormIdentity::Define)
-    )
+    crate::eval::necessary_forms::routed_sid_for_symbol(name)
+        .is_some_and(crate::eval::necessary_forms::is_define_sid)
 }
 
 /// True when `name` resolves to the same registry identity as the canonical
@@ -385,13 +383,8 @@ pub fn is_defmacro_surface_name(name: &str) -> bool {
 /// True when `name` resolves to the same registry identity as the canonical
 /// `lambda` surface. No decimal SID is maintained here.
 pub fn is_lambda_surface_name(name: &str) -> bool {
-    match (
-        semantic_registry::admitted_semantic_id_for_surface(name),
-        semantic_registry::admitted_semantic_id_for_surface("lambda"),
-    ) {
-        (Some(candidate), Some(lambda)) => candidate == lambda,
-        _ => false,
-    }
+    crate::eval::necessary_forms::routed_sid_for_symbol(name)
+        .is_some_and(crate::eval::necessary_forms::is_lambda_sid)
 }
 
 /// Convenience: FASL-encode already-parsed expressions bound to a source hash.
