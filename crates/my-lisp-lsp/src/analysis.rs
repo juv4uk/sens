@@ -156,15 +156,14 @@ fn collect_arity_diagnostics(
                     }
                 }
             }
-            // Same bug class as `symbol_occurrences`' quote check, found in
-            // the same audit: this used to compare against the literal
-            // English string, so `(як-є ...)` never suppressed arity
-            // diagnostics for its own quoted data.
-            let head_is_quote = head_name.is_some_and(my_lisp::is_quote_surface_name);
+            // Same bug class as the symbol-occurrence data-preservation check: routing
+            // must be by exact SID, never by one human surface.
+            let head_is_data_preserving_sid = head_name
+                .is_some_and(|name| my_lisp::surface_has_sid(name, my_lisp::sid!(00000001)));
             for (index, element) in elements.iter().enumerate() {
                 collect_arity_diagnostics(
                     element,
-                    head_is_quote && index > 0,
+                    head_is_data_preserving_sid && index > 0,
                     local_defs,
                     items,
                     diagnostics,
@@ -203,23 +202,25 @@ fn walk_symbols(expr: &Expr, in_quote: bool, out: &mut Vec<SymbolOccurrence>) {
             }
         }
         ExprKind::List(items) => {
-            // `(quote data)` / `'data`: the whole subtree is data. The
-            // reader-macro was removed in contract 2.0, so quote is the
-            // only form to guard here. Checked via `is_quote_surface_name`
-            // (semantic ID 0001 across every admitted surface), not a
-            // hardcoded `"quote"` string comparison -- an earlier version
-            // of this function matched only the English spelling, so a
-            // program written `(як-є (a b c))` would have its quoted
-            // symbols wrongly treated as live code references by
-            // go-to-definition/rename. Found while auditing for exactly
-            // this class of bug after wsm-my-lisp caught the same mistake
-            // in their own FFI dispatcher.
-            let head_is_quote = items
+            // SID 00000001 preserves its argument as data. Accept either
+            // the SID directly or a source/UI surface that mechanically routes
+            // to it; no named function identity participates.
+            let head_is_data_preserving_sid = items
                 .first()
-                .map(|h| matches!(&h.kind, ExprKind::Symbol(n) if my_lisp::is_quote_surface_name(n)))
+                .map(|h| match &h.kind {
+                    ExprKind::Sid(sid) => *sid == my_lisp::sid!(00000001),
+                    ExprKind::Symbol(surface) => {
+                        my_lisp::surface_has_sid(surface, my_lisp::sid!(00000001))
+                    }
+                    _ => false,
+                })
                 .unwrap_or(false);
             for (i, item) in items.iter().enumerate() {
-                walk_symbols(item, in_quote || (head_is_quote && i > 0), out);
+                walk_symbols(
+                    item,
+                    in_quote || (head_is_data_preserving_sid && i > 0),
+                    out,
+                );
             }
         }
         ExprKind::Pair(head, tail) => {
