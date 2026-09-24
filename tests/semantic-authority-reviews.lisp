@@ -98,3 +98,6 @@
 
 ; #1294 observer only: compare canonical Core4 definition membership with Lisp-owned public/internal inventory.
 (review "crates/my-lisp/tests/uk_surface_inventory.rs" "eb1973408cfd59ecccc9dd746b24da72361a6892c8aade40f17a8d6b1998d031" issue-1294 canonical-core4-definition-observer)
+
+; #1173 i5-6400 machine projection: observer-only SID8 representation migration.
+(review "crates/my-lisp/tests/i5_6400_machine_profile.rs" "5cfa6ecb2e417375da567349a28f0bbca7186d38d00a9e85e94a72c942ee543d" issue-1173 sid8-machine-profile-observer)
