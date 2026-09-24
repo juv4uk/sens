@@ -23,6 +23,23 @@ use wsm_kernel_c_abi::{
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SemanticId(pub u8);
 
+const SID_ADD: u8 = 0b0000_1100;
+
+fn semantic_form_for_request(semantic_id: u8, payload: &str) -> Result<String, ()> {
+    if semantic_id != SID_ADD {
+        return Ok(payload.to_string());
+    }
+
+    let mut parts = payload.split_whitespace();
+    let left = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    let right = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    if parts.next().is_some() {
+        return Err(());
+    }
+
+    Ok(format!("(+ {left} {right})"))
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CommonLispRequest {
     pub semantic_id: SemanticId,
@@ -179,8 +196,10 @@ struct CommonLispAbiContext {
 
 /// Owns the stable context behind the semantic-neutral C ABI vtable.
 ///
-/// The vtable transports a semantic ID byte and opaque payload. This adapter
-/// does not interpret the ID; it only forwards the byte into CommonLispRequest.
+/// The vtable transports a semantic ID byte plus mechanism arguments.
+/// Raw Common Lisp forms remain available through CommonLispKernel::evaluate,
+/// but the semantic ABI may bind an admitted SID directly to a native mechanism.
+/// The payload never redefines semantic identity.
 pub struct CommonLispAbiAdapter {
     context: Box<CommonLispAbiContext>,
     vtable: WsmKernelVTable,
@@ -285,7 +304,10 @@ unsafe extern "C" fn common_lisp_exchange(
     } else {
         unsafe { std::slice::from_raw_parts(request.payload.ptr, request.payload.len) }
     };
-    let Ok(form) = std::str::from_utf8(payload) else {
+    let Ok(payload_text) = std::str::from_utf8(payload) else {
+        return WsmStatus::InvalidArgument;
+    };
+    let Ok(form) = semantic_form_for_request(request.semantic_id, payload_text) else {
         return WsmStatus::InvalidArgument;
     };
 
@@ -334,6 +356,23 @@ mod tests {
         let request = CommonLispRequest::new(0b0000_0101, "(car '(left right))");
         assert_eq!(request.semantic_id, SemanticId(0b0000_0101));
         assert!(request.printable_eval_form().contains("(car '(left right))"));
+    }
+
+    #[test]
+    fn semantic_add_uses_exact_sid8_and_arguments_only() {
+        assert_eq!(
+            semantic_form_for_request(SID_ADD, "2 3"),
+            Ok("(+ 2 3)".to_string())
+        );
+        assert!(
+            semantic_form_for_request(SID_ADD, "(- 7 3)").is_err(),
+            "operator/form text must not override the + SID"
+        );
+        assert_eq!(
+            semantic_form_for_request(0b0000_0101, "(car '(left right))"),
+            Ok("(car '(left right))".to_string()),
+            "raw legacy semantic paths are unchanged in this first slice"
+        );
     }
 
     #[test]
