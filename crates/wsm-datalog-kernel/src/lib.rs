@@ -9,6 +9,9 @@
 
 use std::collections::{HashMap, HashSet};
 
+pub mod arithmetic;
+pub use arithmetic::{DatalogMathError, NumericExpr};
+
 /// A ground value that may appear in a tuple.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Value {
@@ -38,6 +41,8 @@ pub type Tuple = Vec<Value>;
 pub enum Term {
     Const(Value),
     Var(String),
+    /// A numeric expression evaluated after referenced variables are bound.
+    Numeric(NumericExpr),
 }
 
 impl Term {
@@ -252,6 +257,10 @@ fn unify_atom_with_tuple(
                     sub.insert(name.clone(), value.clone());
                 }
             },
+            Term::Numeric(expression) => match expression.evaluate(&sub) {
+                Ok(evaluated) if &evaluated == value => {}
+                _ => return None,
+            },
         }
     }
     Some(sub)
@@ -264,6 +273,7 @@ fn apply_substitution(atom: &Atom, substitution: &Substitution) -> Option<Tuple>
         .map(|term| match term {
             Term::Const(v) => Some(v.clone()),
             Term::Var(name) => substitution.get(name).cloned(),
+            Term::Numeric(expression) => expression.evaluate(substitution).ok(),
         })
         .collect()
 }
@@ -627,8 +637,19 @@ unsafe extern "C" fn datalog_exchange(
         return WsmStatus::InvalidArgument;
     }
 
-    Evaluator::semi_naive_fixpoint(&context.program, &mut context.db);
-    let output = relation_bytes(&context.db, relation);
+    let output = if arithmetic::is_math_sid(request.semantic_id) {
+        match arithmetic::parse_semantic_request(request.semantic_id, relation)
+            .and_then(|expression| expression.evaluate(&HashMap::new()))
+        {
+            Ok(Value::Int(value)) => value.to_string().into_bytes(),
+            Ok(_) => return WsmStatus::KernelFailure,
+            Err(_) => return WsmStatus::KernelFailure,
+        }
+    } else {
+        Evaluator::semi_naive_fixpoint(&context.program, &mut context.db);
+        relation_bytes(&context.db, relation)
+    };
+
     context.last_semantic_id = Some(SemanticId(request.semantic_id));
 
     if response.len < output.len() {
