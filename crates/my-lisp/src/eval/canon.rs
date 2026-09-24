@@ -16,7 +16,6 @@ use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sid8, Span
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub(crate) enum CanonicalIdentity {
-    EmptyList,
     Quote,
     Atom,
     Eq,
@@ -28,7 +27,6 @@ pub(crate) enum CanonicalIdentity {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum CanonicalKind {
-    GroundValue,
     ValuePrimitive,
     SpecialForm,
 }
@@ -44,7 +42,6 @@ pub(crate) struct CanonEntry {
     pub identity: CanonicalIdentity,
 }
 
-pub(crate) const EMPTY_LIST_SEMANTIC_ID: Sid8 = crate::sid!(00000000);
 pub(crate) const QUOTE_SEMANTIC_ID: Sid8 = crate::sid!(00000001);
 pub(crate) const ATOM_SEMANTIC_ID: Sid8 = crate::sid!(00000010);
 pub(crate) const EQ_SEMANTIC_ID: Sid8 = crate::sid!(00000011);
@@ -63,12 +60,7 @@ pub(crate) const DIV_SEMANTIC_ID: Sid8 = crate::sid!(00001111);
 /// Declared in ascending SID order (00000000..00000111) — `identity_for_semantic_id`
 /// indexes this array directly by SID byte, so that order is load-bearing,
 /// not incidental.
-pub(crate) const CANON: [CanonEntry; 8] = [
-    CanonEntry {
-        semantic_id: EMPTY_LIST_SEMANTIC_ID,
-        kind: CanonicalKind::GroundValue,
-        identity: CanonicalIdentity::EmptyList,
-    },
+pub(crate) const CANON: [CanonEntry; 7] = [
     CanonEntry {
         semantic_id: QUOTE_SEMANTIC_ID,
         kind: CanonicalKind::SpecialForm,
@@ -106,15 +98,15 @@ pub(crate) const CANON: [CanonEntry; 8] = [
     },
 ];
 
-/// CANON is declared in exact SID order (index 0 = 00000000 ... index 7 =
-/// 00000111), so resolution indexes directly by the SID byte instead of
-/// scanning for an equal field — the same mechanism PRIMITIVE_TABLE already
-/// uses, now applied to identity resolution too.
+/// This legacy routing table covers only SIDs 00000001..00000111.
+/// SID 00000000 is a function identity too, but has no mechanism/law in this
+/// table and is never the empty-list value. #1327 removes this named table.
 pub(crate) fn identity_for_semantic_id(semantic_id: Sid8) -> Option<CanonicalIdentity> {
-    let entry = CANON.get(semantic_id.packed_byte() as usize)?;
+    let index = semantic_id.packed_byte().checked_sub(1)? as usize;
+    let entry = CANON.get(index)?;
     debug_assert_eq!(
         entry.semantic_id, semantic_id,
-        "CANON must stay declared in ascending SID order for direct indexing to hold"
+        "legacy routing table must stay aligned with SIDs 00000001..00000111"
     );
     Some(entry.identity)
 }
@@ -156,13 +148,6 @@ pub(crate) fn ensure_bindable(name: &str, span: Span) -> Result<(), LanguageErro
         ),
         span,
     ))
-}
-
-pub(crate) fn ground_value(identity: CanonicalIdentity) -> Option<Value> {
-    match identity {
-        CanonicalIdentity::EmptyList => Some(Value::Nil),
-        _ => None,
-    }
 }
 
 fn exact_args(
@@ -286,7 +271,6 @@ pub(crate) fn invoke_semantic_ref(
 /// forms deliberately have no value representation; they remain syntax-only.
 pub(crate) fn value(identity: CanonicalIdentity) -> Option<Value> {
     match identity {
-        CanonicalIdentity::EmptyList => Some(Value::Nil),
         CanonicalIdentity::Atom
         | CanonicalIdentity::Eq
         | CanonicalIdentity::Cons
@@ -305,11 +289,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn canon_has_exactly_ground_plus_seven() {
-        assert_eq!(CANON.len(), 8);
-        assert_eq!(CANON[0].identity, CanonicalIdentity::EmptyList);
-        assert_eq!(CANON[0].kind, CanonicalKind::GroundValue);
-        assert_eq!(CANON[0].semantic_id, EMPTY_LIST_SEMANTIC_ID);
+    fn legacy_named_table_does_not_own_sid_00000000() {
+        assert_eq!(CANON.len(), 7);
+        assert_eq!(identity_for_semantic_id(crate::sid!(00000000)), None);
+        assert_eq!(CANON[0].semantic_id, crate::sid!(00000001));
     }
 
     #[test]
@@ -414,8 +397,8 @@ mod tests {
     }
 
     #[test]
-    fn empty_list_is_a_value_not_a_primitive_operation() {
-        assert_eq!(ground_value(CanonicalIdentity::EmptyList), Some(Value::Nil));
+    fn sid_00000000_is_not_the_empty_list_value() {
+        assert_eq!(identity_for_semantic_id(crate::sid!(00000000)), None);
         assert!(value(CanonicalIdentity::Quote).is_none());
         assert!(value(CanonicalIdentity::Cond).is_none());
     }
