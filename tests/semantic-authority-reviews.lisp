@@ -118,3 +118,9 @@
 ; #1344 Sens vocabulary foundation: exports Sens8, Sens, sens! alongside Sid8.
 (review "crates/my-lisp/src/lib.rs" "340674a9c5bd7cbd6ef5b6716955bfb28e9ddd3da6ce42fd0486110954ae4370" issue-1344 sens-vocabulary-foundation-export)
 (review "crates/my-lisp/tests/sens_foundation.rs" "3fbba9fff5cd2e04581fa45e31d1141ebcb15804650f56e70aaf24e7525e8d35" issue-1344 sens-foundation-observer)
+
+; #1327 Contract-9 cleanup: exact-8-bit runtime routing only.
+(review "crates/my-lisp/src/eval/canon.rs" "11435b6091c0e1c13d2e842cc4e634cbc684ec749547c4e45ea437c85def446c" issue-1327 sid8-only-mechanism-routing)
+(review "crates/my-lisp/src/eval/mod.rs" "26576c611ebaeccea91dac00ac79e1ebf694af8efe10280b45d92427e6b175d3" issue-1327 sid8-only-special-route-selection)
+(review "crates/my-lisp/src/lib.rs" "edc4948041a9574cb233faad8a7a5829c7533fded9a438e37c27e77f065217d2" issue-1327 generic-surface-to-sid-routing)
+(review "crates/my-lisp/src/ir.rs" "72ad065142bf0b94f8d1dc1cdcdfcca32b698879d6a5333dd145529eba9bcc9f" issue-1327 sid8-only-ir-provenance)
