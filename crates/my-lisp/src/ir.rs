@@ -19,33 +19,16 @@
 //! from outside this module's tests.
 #![allow(dead_code)]
 
-use crate::eval::necessary_forms::{self, NecessaryFormIdentity};
 use crate::semantic_registry;
 use crate::syntax::{Exactness, Expr, ExprKind, Span};
 use crate::value::Rational;
 use crate::Sid8;
-
-/// `def` is a compatibility-only spelling for the same Define meaning as
-/// `define`/`визначити` (SID 00001001), under its own byte SID 00001011 in
-/// `lib/surface/semantic-registry.wsm`. `necessary_forms::identity_for_symbol`
-/// resolves it directly (via the admitted stable-or-compatibility-only
-/// surface index) as of 2026-09-12 -- this used to need its own `name ==
-/// "def"` special case here, mirroring an equivalent hardcoded literal in
-/// `eval/mod.rs`'s real dispatch, because the registry lookup those two
-/// call sites used could not see a compatibility-only row at all. Both
-/// hardcoded literals are gone now that the lookup itself can see it.
-fn is_define_spelling(name: &str) -> bool {
-    necessary_forms::identity_for_symbol(name) == Some(NecessaryFormIdentity::Define)
-}
 
 /// How a lowered node's meaning is justified — the "provenance" #68
 /// requires. Every `IrNode` carries one of these, so `explain` can always
 /// answer "why does this data mean what it means" without re-deriving it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Provenance {
-    /// `lambda` (SID 00001000) or `define`/`def` (SIDs 00001001/00001011) — evaluator-owned mechanism
-    /// beyond Canon, resolved by exact SID identity.
-    NecessaryForm(NecessaryFormIdentity),
     /// A function selected by its exact eight-bit identity.
     /// No word/enum label is retained as a second identity.
     FunctionSid(Sid8),
@@ -204,15 +187,9 @@ pub fn lower(expr: &Expr) -> Result<IrNode, LoweringError> {
 }
 
 fn lower_symbol_reference(name: &str, span: Span) -> IrNode {
-    let provenance = if is_define_spelling(name) {
-        Provenance::NecessaryForm(NecessaryFormIdentity::Define)
-    } else if let Some(identity) = necessary_forms::identity_for_symbol(name) {
-        Provenance::NecessaryForm(identity)
-    } else if let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) {
-        Provenance::FunctionSid(sid)
-    } else {
-        Provenance::OrdinaryBinding
-    };
+    let provenance = semantic_registry::admitted_semantic_id_for_surface(name)
+        .map(Provenance::FunctionSid)
+        .unwrap_or(Provenance::OrdinaryBinding);
     IrNode::VariableRef {
         name: name.to_string(),
         span,
