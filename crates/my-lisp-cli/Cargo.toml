@@ -9,6 +9,10 @@ name = "my-lisp"
 path = "src/main.rs"
 
 [[bin]]
+name = "sens"
+path = "src/main.rs"
+
+[[bin]]
 name = "guard-reference"
 path = "src/bin/guard-reference.rs"
 
