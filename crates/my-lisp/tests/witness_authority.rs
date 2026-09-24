@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 use my_lisp::{
     eval_program, load_core_library, load_meta_evaluator_library, parse, Expr, ExprKind, Session,
+    Sid8,
 };
 
 #[derive(Clone)]
@@ -721,7 +722,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
             ExprKind::Symbol(s) if &**s == "sid-witness"
         ));
 
-        let mut sid: Option<String> = None;
+        let mut sid: Option<Sid8> = None;
         let mut witnesses: Vec<Expr> = Vec::new();
         for field in &fields[1..] {
             match &field.kind {
@@ -729,8 +730,8 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                     if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
                 {
                     sid = Some(match &value.kind {
-                        ExprKind::String(s) | ExprKind::Symbol(s) => s.to_string(),
-                        _ => panic!("sid must be a bitstring"),
+                        ExprKind::Sid(sid) => *sid,
+                        other => panic!("semantic sid must be exact bare Sid8, got {other:?}"),
                     });
                 }
                 ExprKind::List(items)
@@ -744,9 +745,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
         }
 
         let sid = sid.expect("every semantic witness row needs a SID");
-        assert_eq!(sid.len(), 8, "SID must stay an 8-bit bitstring");
-        assert!(sid.chars().all(|ch| ch == '0' || ch == '1'));
-        assert!(seen_sids.insert(sid.clone()), "duplicate SID {sid}");
+        assert!(seen_sids.insert(sid), "duplicate SID {sid}");
 
         for witness in witnesses {
             let fields = match witness.kind {
@@ -761,7 +760,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
 
             let mut kernel: Option<String> = None;
             let mut status: Option<String> = None;
-            let mut probe_id: Option<String> = None;
+            let mut probe_id: Option<Sid8> = None;
             let mut evidence_class: Option<String> = None;
             let mut evidence: Option<String> = None;
 
@@ -783,9 +782,12 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                             }
                         }
                         "probe-id" => {
-                            if let ExprKind::String(s) = &value.kind {
-                                probe_id = Some(s.to_string());
-                            }
+                            probe_id = Some(match &value.kind {
+                                ExprKind::Sid(sid) => *sid,
+                                other => panic!(
+                                    "semantic witness probe-id must be exact bare Sid8, got {other:?}"
+                                ),
+                            });
                         }
                         "evidence-class" => {
                             if let ExprKind::Symbol(s) = &value.kind {
@@ -817,8 +819,8 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                     "external live semantic witness must explicitly prove semantic execution"
                 );
                 assert_eq!(
-                    probe_id.as_deref(),
-                    Some(sid.as_str()),
+                    probe_id,
+                    Some(sid),
                     "semantic execution witness must intentionally receive the mapped SID"
                 );
                 let evidence = evidence.expect("semantic execution witness needs evidence");
