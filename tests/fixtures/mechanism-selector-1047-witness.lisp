@@ -12,7 +12,8 @@
            (selected (mechanism-select atom-sid (quote evaluator)))
            (plus-prolog (mechanism-select plus-sid (quote prolog)))
            (missing (mechanism-select atom-sid (quote prolog)))
-           (unknown (mechanism-select 11111111 (quote evaluator))))
+           (unknown (mechanism-select 11111111 (quote evaluator)))
+           (quoted-shadow (mechanism-select "00001100" (quote prolog))))
       (cond
         ((equal?
            selected
@@ -47,7 +48,16 @@
                       (quote sid-not-in-function-table)
                       11111111))
                   (structural-relation same)
-                  (quote (mechanism-selector-1047 (status pass))))
+                  (cond
+                    ((equal?
+                       quoted-shadow
+                       (list
+                         (quote mechanism-selection-failure)
+                         (quote sid-not-in-function-table)
+                         "00001100"))
+                     (structural-relation same)
+                     (quote (mechanism-selector-1047 (status pass))))
+                    (t (car (quote ())))))
                  (t (car (quote ())))))
               (t (car (quote ())))))
            (t (car (quote ())))))
