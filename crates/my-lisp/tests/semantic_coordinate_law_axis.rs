@@ -74,7 +74,7 @@ fn pair_equation_is_executable_and_independent_of_machine_representation() {
     assert_eq!(value, "left");
 
     let row = eval_program(
-        r#"(semantic-coordinate-law-for-sid "00000101")"#,
+        r#"(semantic-coordinate-law-for-sid 00000101)"#,
         &mut s,
     )
     .expect("CAR law row")
@@ -95,7 +95,7 @@ fn eq_relation_law_stays_separate_from_exact_q_binary_policy() {
     assert_eq!(value, "(identity-relation same)");
 
     let row = eval_program(
-        r#"(semantic-coordinate-law-for-sid "00000011")"#,
+        r#"(semantic-coordinate-law-for-sid 00000011)"#,
         &mut s,
     )
     .expect("EQ law row")
@@ -110,7 +110,7 @@ fn eq_relation_law_stays_separate_from_exact_q_binary_policy() {
 fn cond_proves_that_not_every_semantic_identity_is_a_mathematical_law() {
     let mut s = session();
     let row = eval_program(
-        r#"(semantic-coordinate-law-for-sid "00000111")"#,
+        r#"(semantic-coordinate-law-for-sid 00000111)"#,
         &mut s,
     )
     .expect("COND coordinate row")
@@ -118,4 +118,13 @@ fn cond_proves_that_not_every_semantic_identity_is_a_mathematical_law() {
     .to_string();
     assert!(row.contains("non-mathematical-in-this-slice"));
     assert!(row.contains("no-mathematical-law-claimed"));
+
+    let quoted_shadow = eval_program(
+        r#"(semantic-coordinate-law-for-sid "00000111")"#,
+        &mut s,
+    )
+    .expect("quoted SID shadow stays ordinary String data")
+    .value
+    .to_string();
+    assert_eq!(quoted_shadow, "()");
 }

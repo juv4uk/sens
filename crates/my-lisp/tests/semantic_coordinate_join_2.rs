@@ -156,9 +156,9 @@ fn kernel_statuses_for_sid(
     None
 }
 
-fn math_coordinate(session: &mut Session, sid: &str) -> String {
+fn math_coordinate(session: &mut Session, sid: Sid8) -> String {
     eval_program(
-        &format!(r#"(semantic-coordinate-law-for-sid "{sid}")"#),
+        &format!("(semantic-coordinate-law-for-sid {sid})"),
         session,
     )
     .expect("math coordinate query")
@@ -189,7 +189,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
 
     // + : mathematical law + physical capability exist, but #735 has no
     // semantic kernel witness row yet. Absence is evidence, not an error.
-    let add_math = math_coordinate(&mut session, "00001100");
+    let add_math = math_coordinate(&mut session, my_lisp::sid!(00001100));
     assert!(add_math.contains("exact-rational-sum"));
     assert_eq!(
         machine_coordinate(&mut session, my_lisp::sid!(00001100)),
@@ -198,7 +198,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert_eq!(kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00001100)), None);
 
     // EQ : identity-relation law, my-lisp execution witness, bounded compare.
-    let eq_math = math_coordinate(&mut session, "00000011");
+    let eq_math = math_coordinate(&mut session, my_lisp::sid!(00000011));
     assert!(eq_math.contains("same-atom-identity"));
     let eq_kernels =
         kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00000011)).expect("EQ kernel row");
@@ -210,7 +210,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     );
 
     // CONS : equational pair law + two execution witnesses + two field stores.
-    let cons_math = math_coordinate(&mut session, "00000100");
+    let cons_math = math_coordinate(&mut session, my_lisp::sid!(00000100));
     assert!(cons_math.contains("car-cons-left-inverse"));
     let cons_kernels =
         kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00000100)).expect("CONS kernel row");
@@ -227,7 +227,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     // COND : the math axis explicitly refuses to invent a mathematical law;
     // kernel map records live my-lisp and explicit absent foreign witnesses;
     // machine axis records only the bounded conditional branch capability.
-    let cond_math = math_coordinate(&mut session, "00000111");
+    let cond_math = math_coordinate(&mut session, my_lisp::sid!(00000111));
     assert!(cond_math.contains("non-mathematical-in-this-slice"));
     assert!(cond_math.contains("no-mathematical-law-claimed"));
     let cond_kernels =

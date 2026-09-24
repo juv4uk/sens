@@ -9,27 +9,27 @@
 
 (def semantic-coordinate-law-axis-v1
   (quote
-    (("00001100"
+    ((00001100
        (axis mathematical)
        (domain exact-rational-arithmetic)
        (witness exact-rational-sum)
        (evidence tests/fixtures/mathematical-result-v1.lisp))
-     ("00000011"
+     (00000011
        (axis relation-law)
        (domain identity-relation)
        (witness same-atom-identity)
        (evidence contracts/structural-observation-contract.lisp))
-     ("00000100"
+     (00000100
        (axis equational-structure)
        (domain pair-construction)
        (witness car-cons-left-inverse)
        (evidence lib/canon.lisp))
-     ("00000101"
+     (00000101
        (axis equational-structure)
        (domain pair-elimination)
        (witness car-cons-left-inverse)
        (evidence lib/canon.lisp))
-     ("00000111"
+     (00000111
        (axis semantic-control)
        (domain non-mathematical-in-this-slice)
        (witness no-mathematical-law-claimed)

@@ -40,7 +40,7 @@ fn field_string<'a>(fields: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
-fn matrix_sources_and_scope() -> (String, String, String, String, Vec<String>) {
+fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sid8>) {
     let source = read("contracts/semantic-coordinate-matrix-845.lisp");
     let forms = parse(&source).expect("#845 matrix v2 must parse");
     assert_eq!(forms.len(), 1);
@@ -88,8 +88,8 @@ fn matrix_sources_and_scope() -> (String, String, String, String, Vec<String>) {
                 items[1..]
                     .iter()
                     .map(|expr| match &expr.kind {
-                        ExprKind::String(value) => value.to_string(),
-                        other => panic!("scope SID must be a string, got {other:?}"),
+                        ExprKind::Sid(sid) => *sid,
+                        other => panic!("scope SID must be exact bare Sid8, got {other:?}"),
                     })
                     .collect::<Vec<_>>(),
             )
@@ -99,8 +99,8 @@ fn matrix_sources_and_scope() -> (String, String, String, String, Vec<String>) {
     (identity, math, kernel, machine, scope)
 }
 
-fn source_has_sid(source: &str, sid: &str) -> bool {
-    source.contains(&format!("\"{sid}\""))
+fn source_has_bare_sid(source: &str, sid: Sid8) -> bool {
+    source.contains(&format!("({sid}"))
 }
 
 fn kernel_map_has_sid(source: &str, wanted_sid: Sid8) -> bool {
@@ -144,26 +144,24 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
     let machine = read(&machine_path);
 
     for sid in &scope {
-        assert_eq!(sid.len(), 8);
-        assert!(sid.chars().all(|bit| bit == '0' || bit == '1'));
         assert!(
-            identity.contains(&format!("({sid} ")) || identity.contains(&format!("(\"{sid}\" ")),
+            identity.contains(&format!("({sid} ")),
             "SID {sid} must exist in canonical semantic registry"
         );
 
         // Presence is derived, never copied into the matrix contract.
-        let _math_present = source_has_sid(&math, sid);
-        // Kernel identity fields are typed Sid8. This generic scope loop
-        // intentionally does not reinterpret the matrix's legacy text scope
-        // as function identity; explicit typed checks below cover kernel rows.
-        let _machine_present = source_has_sid(&machine, sid);
+        let _math_present = source_has_bare_sid(&math, *sid);
+        let _machine_present = source_has_bare_sid(&machine, *sid);
     }
 
     // Current bounded slice has math + machine coordinates for all five SIDs.
     for sid in &scope {
-        assert!(source_has_sid(&math, sid), "math axis missing scoped SID {sid}");
         assert!(
-            source_has_sid(&machine, sid),
+            source_has_bare_sid(&math, *sid),
+            "math axis missing scoped SID {sid}"
+        );
+        assert!(
+            source_has_bare_sid(&machine, *sid),
             "machine axis missing scoped SID {sid}"
         );
     }
@@ -190,17 +188,17 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
     let (identity_path, math_path, kernel_path, machine_path, _) =
         matrix_sources_and_scope();
 
-    const LAMBDA_SID: &str = "00001000";
+    const LAMBDA_SID: Sid8 = my_lisp::sid!(00001000);
 
     let identity = read(&identity_path);
     let math = read(&math_path);
     let kernel = read(&kernel_path);
     let machine = read(&machine_path);
 
-    assert!(identity.contains(&format!("({LAMBDA_SID} ")) || identity.contains(&format!("(\"{LAMBDA_SID}\" ")));
-    assert!(kernel_map_has_sid(&kernel, my_lisp::sid!(00001000)));
-    assert!(!source_has_sid(&math, LAMBDA_SID));
-    assert!(!source_has_sid(&machine, LAMBDA_SID));
+    assert!(identity.contains(&format!("({LAMBDA_SID} ")));
+    assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
+    assert!(!source_has_bare_sid(&math, LAMBDA_SID));
+    assert!(!source_has_bare_sid(&machine, LAMBDA_SID));
 }
 
 #[test]
