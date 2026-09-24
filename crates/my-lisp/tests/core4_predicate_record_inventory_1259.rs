@@ -29,7 +29,7 @@ fn row_fields(expr: &Expr) -> Option<HashMap<String, String>> {
         return None;
     };
     let mut fields = HashMap::new();
-    for entry in entries {
+    for entry in entries.iter() {
         for key in [
             "surface",
             "current-role",
