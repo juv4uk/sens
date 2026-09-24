@@ -1,15 +1,39 @@
 //! Named, concrete evidence for a real gap #997 already documents:
-//! "name-based capability fallback exists beside SID routing". Host
-//! capabilities (`read-file-bytes`, `read-file-utf8-raw`,
+//! "name-based capability fallback exists beside SID routing". "Backend"
+//! here means any execution mechanism, regardless of implementation
+//! language — a Rust host capability and a Lisp-owned metacircular
+//! evaluator are both backends in the sense that matters (#997's "Rust
+//! owns mechanism, Lisp owns meaning" cuts across implementation
+//! language, not along it).
+//!
+//! Part 1: Host capabilities (`read-file-bytes`, `read-file-utf8-raw`,
 //! `write-file-bytes`, `process-run-raw`, `tcp-connect`, ...) are the
 //! entire `my-lisp-host` crate's surface, dispatched by
 //! `eval/capabilities.rs`'s `BTreeMap<String, HostFn>` on the literal
-//! spelling of the calling symbol — never through `Sid8`. This is the
-//! concrete backend that is NOT on SID: it depends on exact text, so a
-//! surface-encoding change (Ukrainian/English/KOI-8/SLP1/anything) that
-//! altered how a name is written could silently break dispatch, unlike
-//! genuine SID-routed forms (`quote`/`cond`/`+`/...) which are
-//! encoding-invariant by construction.
+//! spelling of the calling symbol — never through `Sid8`.
+//!
+//! Part 2: `lib/meta-eval.lisp`'s metacircular evaluator has the exact
+//! same shape, written in Lisp instead of Rust. Its Canon-identity
+//! primitives (`quote`/`atom`/`eq`/`cons`/`car`/`cdr`/`cond`) correctly
+//! resolve through `my-semantic-id-for-surface`, so any admitted surface
+//! spelling in any language works. But `my-default-binding`'s fallback
+//! for "ordinary" primitives (`+`/`-`/`*`/`<`/`=`/`>`/`write-to-string`/
+//! `string->symbol`) is a literal `(eq name (quote +))` chain — hardcoded
+//! to one spelling, never routed through the SID that same operation
+//! already has (`+` is SID `00001100`, whose own admitted Ukrainian
+//! surface name `додати` resolves correctly in the *native* evaluator but
+//! is `unbound-symbol` inside meta-eval).
+//!
+//! Both are the concrete backend that is NOT on SID: they depend on
+//! exact text, so a surface-encoding change (Ukrainian/English/KOI-8/
+//! SLP1/anything) that altered how a name is written could silently
+//! break dispatch, unlike genuine SID-routed forms (`quote`/`cond`/the
+//! Canon-identity primitives) which are encoding-invariant by
+//! construction. This mismatch is also a plausible contributor to
+//! `meta_eval_mutual`'s measured 79-291s-per-file cost (2026-09-24):
+//! every ordinary-primitive dispatch pays a linear `eq`-chain walk,
+//! itself paid through the same expensive per-call tree-walking
+//! interpreter overhead found in my-lisp#333/#1228.
 //!
 //! This is observational evidence, not a call to fix it in this test —
 //! #997/#1048/#1049 already own the direction (host may transport, never
@@ -117,5 +141,90 @@ fn capability_dispatch_is_exact_string_match_not_identity_based() {
          capability through ordinary function application — dispatch never \
          resolves an identity here, confirming this backend path is textual, \
          not SID-routed"
+    );
+}
+
+fn eval_via_meta(expr: &str, session: &mut Session) -> Result<String, LanguageError> {
+    let escaped = expr.replace('\\', "\\\\").replace('"', "\\\"");
+    let source = format!(r#"(my-eval (read "{escaped}") (quote ()))"#);
+    eval_program(&source, session).map(|v| v.value.to_string())
+}
+
+#[test]
+fn meta_eval_resolves_canon_identity_primitives_through_any_admitted_surface_name() {
+    // atom is SID 00000010; "атом?" is its own admitted Ukrainian surface
+    // spelling, per lib/surface/semantic-registry.lisp. Canon-identity
+    // primitives go through my-semantic-id-for-surface first, so both
+    // spellings must resolve identically inside the metacircular evaluator.
+    let mut session = Session::default();
+    eval_program(
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("core.lisp should load");
+    my_lisp::load_meta_evaluator_library(&mut session).expect("meta-evaluator should load");
+
+    let english = eval_via_meta("(atom 5)", &mut session).expect("english spelling resolves");
+    let ukrainian =
+        eval_via_meta("(атом? 5)", &mut session).expect("Canon identity is spelling-invariant");
+    assert_eq!(
+        english, ukrainian,
+        "a genuinely SID-routed Canon primitive must give the same answer \
+         under every admitted surface spelling"
+    );
+}
+
+#[test]
+fn meta_eval_ordinary_primitive_dispatch_is_hardcoded_to_one_spelling_not_sid() {
+    // `+` is SID 00001100; `додати` is its own admitted Ukrainian surface
+    // spelling for the exact same identity (see
+    // lib/surface/semantic-registry.lisp and #1228's own read-file work
+    // this session, which read that very table). The NATIVE evaluator
+    // resolves both spellings to the same SID and gives the same answer.
+    let mut native_session = Session::default();
+    let native_english = eval_program("(+ 2 3)", &mut native_session)
+        .expect("native + resolves")
+        .value
+        .to_string();
+    let native_ukrainian = eval_program("(додати 2 3)", &mut native_session)
+        .expect("native evaluator is SID-routed for + regardless of surface spelling")
+        .value
+        .to_string();
+    assert_eq!(
+        native_english, native_ukrainian,
+        "the native evaluator must be spelling-invariant for a SID-routed primitive"
+    );
+
+    // The metacircular evaluator's `my-default-binding` fallback for
+    // "ordinary" primitives is a literal `(eq name (quote +))` chain
+    // (lib/meta-eval.lisp) — hardcoded to the English spelling only, never
+    // consulting the SID that `+` and `додати` already share. This is the
+    // concrete, named confirmation that this specific backend path is
+    // textual, not SID-routed, exactly like the host-capability registry
+    // above, just written in Lisp instead of Rust.
+    let mut meta_session = Session::default();
+    eval_program(
+        include_str!("../../../lib/core.lisp"),
+        &mut meta_session,
+    )
+    .expect("core.lisp should load");
+    my_lisp::load_meta_evaluator_library(&mut meta_session)
+        .expect("meta-evaluator should load");
+
+    let meta_english = eval_via_meta("((lambda (a b) (+ a b)) 2 3)", &mut meta_session)
+        .expect("meta-eval resolves the hardcoded English spelling");
+    assert_eq!(meta_english, "5");
+
+    let meta_ukrainian = eval_via_meta("((lambda (a b) (додати a b)) 2 3)", &mut meta_session);
+    assert!(
+        meta_ukrainian.is_err()
+            || meta_ukrainian
+                .as_deref()
+                .map(|v| v.contains("unbound"))
+                .unwrap_or(false),
+        "meta-eval must fail to resolve додати even though it is the exact \
+         same SID as +, proving this dispatch path ignores SID identity \
+         entirely and depends on the literal English spelling baked into \
+         lib/meta-eval.lisp's eq-chain: got {meta_ukrainian:?}"
     );
 }
