@@ -116,7 +116,7 @@ fn oracle_check_file_is_agent_friendly_and_side_effect_free() {
 
 #[test]
 fn oracle_check_valid_file_returns_zero_without_evaluating_it() {
-    let path = std::env::temp_dir().join("my-lisp-oracle-check-valid.lisp");
+    let path = std::env::temp_dir().join("sens-oracle-check-valid.sens");
     // Unknown symbol would fail evaluation, but syntax-only preflight must
     // accept it. This proves the command does not silently become eval.
     std::fs::write(&path, "(not-defined-here 1)").expect("should write fixture");
@@ -239,16 +239,15 @@ fn running_a_source_file_prints_its_result() {
     assert_eq!(stdout.trim(), "3");
 }
 
-/// Smoke test: all three documented source extensions (.wsm canonical, .my and .lisp aliases)
-/// run the same code and produce identical output. No parser semantics change — only extension
-/// acceptance is verified.
+/// Smoke test: .sens and the three existing Latin source extensions all execute the
+/// same program identically. No parser semantics change — only filename-surface acceptance.
 #[test]
-fn all_three_source_extensions_run_identically() {
+fn sens_and_existing_source_extensions_run_identically() {
     let dir = std::env::temp_dir();
     let code = "(+ 1 2)";
     let mut results = Vec::new();
 
-    for ext in [".wsm", ".my", ".lisp"] {
+    for ext in [".sens", ".wsm", ".my", ".lisp"] {
         let path = dir.join(format!("my-lisp-cli-test-ext{ext}"));
         std::fs::write(&path, code).expect("should write temp file");
 
@@ -260,9 +259,10 @@ fn all_three_source_extensions_run_identically() {
         results.push((ext, stdout.trim().to_string()));
     }
 
-    assert_eq!(results[0].1, "3", ".wsm output");
-    assert_eq!(results[1].1, "3", ".my output");
-    assert_eq!(results[2].1, "3", ".lisp output");
+    assert_eq!(results[0].1, "3", ".sens output");
+    assert_eq!(results[1].1, "3", ".wsm output");
+    assert_eq!(results[2].1, "3", ".my output");
+    assert_eq!(results[3].1, "3", ".lisp output");
 }
 
 #[test]
