@@ -145,8 +145,8 @@
                                  ((utf8-continuation-byte? b3) 1
                                   (utf8-decode-onto
                                     (cdr r2)
-                                    (cons (+ (* (- b1 224) 4096)
-                                             (* (- b2 128) 64)
+                                    (cons (+ (+ (* (- b1 224) 4096)
+                                                (* (- b2 128) 64))
                                              (- b3 128))
                                           out)))
                                  ((utf8-continuation-byte? b3) 0
@@ -188,9 +188,9 @@
                                          ((utf8-two-continuations? b3 b4) 1
                                           (utf8-decode-onto
                                             (cdr r3)
-                                            (cons (+ (* (- b1 240) 262144)
-                                                     (* (- b2 128) 4096)
-                                                     (* (- b3 128) 64)
+                                            (cons (+ (+ (+ (* (- b1 240) 262144)
+                                                           (* (- b2 128) 4096))
+                                                        (* (- b3 128) 64))
                                                      (- b4 128))
                                                   out)))
                                          ((utf8-two-continuations? b3 b4) 0
