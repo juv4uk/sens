@@ -56,3 +56,11 @@
 (review "crates/my-lisp/tests/semantic_coordinate_join.rs" "02cf206794a877fa894b8baf21c2b3a7ff8d97908b8896648005de30b69586a8" issue-1173 sid8-identity-field-observer)
 (review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "ff0709c7ddf2dcd31be16e6ecf2572d154a51e36512f86910ee5338c09276aeb" issue-1173 sid8-identity-field-observer)
 (review "crates/my-lisp/tests/semantic_coordinate_matrix_845.rs" "510f3c0ede3407dbc502815db845efdb1a90f7e4e5d5259123851c0d5cd03541" issue-1173 sid8-identity-field-observer)
+;
+; #1001 Datalog direct-SID8 arithmetic: reviewed mechanism-only host mapping.
+; Exact SID8 chooses bounded native integer machinery; payload carries arguments
+; only. These host files may execute an already-owned SID but cannot mint or
+; reinterpret semantic identity.
+(review "crates/wsm-datalog-kernel/src/arithmetic.rs" "79f10471d3b80f988496bb41b1a406a5b20788d386bfa710d0918eebbba8fbf2" issue-1001 datalog-direct-sid8-arithmetic-mechanism)
+(review "crates/wsm-datalog-kernel/src/lib.rs" "e5c29f665637b802df1b1f8eb7283ab21ce5b0690690e831c7d4afa1ee2acabd" issue-1001 datalog-direct-sid8-abi-mechanism)
+(review "crates/wsm-datalog-kernel/tests/arithmetic_execution_1001.rs" "91bbd2992e344bcae083d38edd96de30fa0b523c4376c8a430c1fc2f661d93ca" issue-1001 datalog-direct-sid8-observer)
