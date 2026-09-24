@@ -51,6 +51,28 @@ def extract_inventory_names(path: Path) -> set[str]:
     return names
 
 
+def extract_last_inventory_group_names(path: Path, group: str) -> set[str]:
+    text = path.read_text(encoding="utf-8")
+    marker = f"({group}"
+    start = text.rfind(marker)
+    if start < 0:
+        return set()
+    start += len(marker)
+    depth = 1
+    index = start
+    while index < len(text) and depth > 0:
+        if text[index] == "(":
+            depth += 1
+        elif text[index] == ")":
+            depth -= 1
+        index += 1
+    return {
+        word.strip("()")
+        for word in text[start:index - 1].split()
+        if word.strip("()") and not word.startswith(";")
+    }
+
+
 def extract_core_public_names(path: Path) -> set[str]:
     text = path.read_text(encoding="utf-8")
     names = set()
@@ -74,9 +96,13 @@ def main() -> int:
     core_names = extract_core_public_names(CORE_LIB)
     eligible = inventory_names | core_names
 
+    # Public/internal classification is Lisp-owned by uk-inventory.lisp.
+    # Naming heuristics remain only a compatibility fallback for legacy names;
+    # they must not force an explicitly internal helper into semantic-registry.
+    internal_names = extract_last_inventory_group_names(INVENTORY_FILE, "core-library")
     internal_markers = {"-onto", "-iter", "-step", "make-", "-helper", "-aux", "my-postcore-"}
     unclassified = {
-        name for name in eligible - registry_names
+        name for name in eligible - registry_names - internal_names
         if not any(marker in name for marker in internal_markers)
     }
 
@@ -94,6 +120,7 @@ def main() -> int:
     print(f"  Registry surface names: {len(registry_names)}")
     print(f"  Inventory names: {len(inventory_names)}")
     print(f"  Core public names: {len(core_names)}")
+    print(f"  Explicit internal core names: {len(internal_names)}")
     print(f"  Total eligible: {len(eligible)}")
     return 0
 

@@ -8,7 +8,7 @@
     ((public (user-program-name documented-or-exercised-as-api))
      (internal (implementation-helper accumulator-worker bootstrap-mechanism))
      (compatibility (supported-historical-user-name))
-     (predicate (returns-only-t-or-empty-for-its-valid-domain))
+     (predicate (public-question-with-domain-owned-result))
      (symbolic-sugar (compact-notation-over-word-first-public-name))))
   (public
     ((canon (quote atom eq cons car cdr cond))
@@ -16,7 +16,7 @@
      (language-macros (defmacro))
      (compatibility-forms (def))
      (root-builtins
-       (+ - * / < = > atom car cdr cons env eq
+       (+ - * / < = > car cdr cons env eq
         eval f32-buffer i32-buffer json-parse make-vector
         mono-ns ntp-query-raw numeric-buffer-length numeric-buffer-map
         numeric-buffer-ref numeric-buffer-type numeric-buffer? princ print read
@@ -30,7 +30,7 @@
      ; had gone stale relative to the actual implementation until
      ; corrected.
      (core-library
-       (abs identity list not and or gensym pair second third fourth cadddr fifth
+       (abs identity binary list not and or gensym pair second third fourth cadddr fifth
         caar cadr cddr length reverse append map filter reduce let equal? max
         max-list member? min min-list assoc let* nth string-empty? string-length
         string-prefix? string-contains? symbol? quotient mod <= >= number->string
@@ -43,7 +43,11 @@
      (core-library
        (length-onto reverse-onto map-onto filter-onto largest-chunk
         nondecreasing-from? nonincreasing-from? digit->string
-        number->string-onto sqrt-iter isqrt-step))))
+        number->string-onto sqrt-iter isqrt-step truthy?
+        string-membership-helper string-order-helper nonempty-string-membership-helper
+        my-postcore-stable-peer-projection my-postcore-peer-group
+        my-postcore-binding-status my-postcore-missing-peers
+        my-postcore-build-definitions my-postcore-materialize-stable-peers))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
   (public-predicates
     (atom eq < = > numeric-buffer? string<? string? not equal? member?
