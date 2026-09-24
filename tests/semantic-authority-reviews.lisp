@@ -93,3 +93,5 @@
 (review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "b86a8cafd47ab28485fead3b286d1f7538301fc4a85c6448ff978e415e10a1b1" issue-1173 sid8-coordinate-law-observer)
 (review "crates/my-lisp/tests/semantic_coordinate_matrix_845.rs" "40e887899288624ffb1ffd9d2d105792bc13f8edeed974b142b83a2a38035380" issue-1173 sid8-coordinate-law-observer)
 
+; #1173 structure-core identity-field migration: observer requires exact Sid8.
+(review "crates/my-lisp/tests/witness_authority.rs" "1fc6670a70d5392b7a2188133c8b911781614bb1dff763cff552281d3669d43c" issue-1173 structure-core-sid8-observer)
