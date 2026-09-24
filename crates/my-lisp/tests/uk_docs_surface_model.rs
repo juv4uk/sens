@@ -5,8 +5,8 @@ const DOCS_INDEX: &str = include_str!("../../../lib/surface/uk-docs.lisp");
 #[test]
 fn readme_explains_the_two_ukrainian_surfaces() {
     for required in [
-        "`uk` — коротка, інтуїтивно зрозуміла українська поверхня",
-        "`ukr` — повна українська поверхня",
+        "`ук` — коротка, інтуїтивно зрозуміла українська поверхня",
+        "`укр` — повна українська поверхня",
         "docs/generated/function-table.md",
     ] {
         assert!(README.contains(required), "README missing Ukrainian surface contract: {required}");
@@ -16,14 +16,14 @@ fn readme_explains_the_two_ukrainian_surfaces() {
 #[test]
 fn ukrainian_api_distinguishes_surface_names_from_function_meaning() {
     for required in [
-        "`uk` — коротке ім'я",
-        "`ukr` — повне ім'я",
+        "`ук` — коротке ім'я",
+        "`укр` — повне ім'я",
         "byte SID",
         "generated/function-table.md",
     ] {
         assert!(
             UKRAINIAN_API.contains(required),
-            "docs/ukrainian-api.md missing uk/ukr documentation rule: {required}"
+            "docs/ukrainian-api.md missing ук/укр documentation rule: {required}"
         );
     }
 }
@@ -32,7 +32,7 @@ fn ukrainian_api_distinguishes_surface_names_from_function_meaning() {
 fn machine_docs_index_states_that_registry_owns_surface_spellings() {
     for required in [
         "byte SID",
-        "uk/ukr",
+        "ук/укр",
         "semantic-registry.lisp",
         "опис функції не дублюється",
     ] {
@@ -69,8 +69,8 @@ fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
         .expect("Ukrainian API detailed reference must end before the boundary section");
 
     assert!(
-        reference.contains("| byte SID | `uk` | `ukr` | Виклик | Тип | Що робить | Основа |"),
-        "detailed Ukrainian API must expose uk and ukr side by side"
+        reference.contains("| byte SID | `ук` | `укр` | Виклик | Тип | Що робить | Основа |"),
+        "detailed Ukrainian API must expose ук and укр side by side"
     );
 
     let ids = documented_ids();
@@ -83,7 +83,7 @@ fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
     assert_eq!(
         rows.len(),
         ids.len(),
-        "detailed reference must contain exactly one seven-column row per documented byte SID"
+        "detailed reference must contain exactly one row per documented byte SID"
     );
 
     for id in ids {
@@ -91,7 +91,7 @@ fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
         let count = rows.iter().filter(|row| row.starts_with(&marker)).count();
         assert_eq!(
             count, 1,
-            "byte SID {id} must appear exactly once in the detailed uk/ukr reference"
+            "byte SID {id} must appear exactly once in the detailed ук/укр reference"
         );
     }
 
@@ -101,7 +101,7 @@ fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
     ] {
         assert!(
             reference.contains(required_row_fragment),
-            "detailed reference missing representative uk/ukr row: {required_row_fragment}"
+            "detailed reference missing representative ук/укр row: {required_row_fragment}"
         );
     }
 }
