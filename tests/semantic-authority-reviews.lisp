@@ -69,3 +69,9 @@
 ; Raw CommonLispKernel::evaluate remains diagnostic/native; the shared semantic
 ; ABI binds SID 00001100 to bounded addition and accepts arguments only.
 (review "crates/wsm-common-lisp-kernel/src/lib.rs" "d1c04c59757776a059981110a6622a1923ecf9b0be70b784448a3407f4e6f6f0" issue-1217 common-lisp-direct-sid8-add-mechanism)
+;
+; #1218 Prolog + semantic ABI: reviewed exact-SID8 mechanism binding.
+; Raw/native Prolog query APIs remain available; shared semantic exchange binds
+; SID 00001100 to bounded addition and accepts arguments only.
+(review "crates/wsm-prolog-kernel/src/lib.rs" "dc79cdbfd2544671cc3aace6ba0b1dac5ae0dc0632b41a7370f8aafe137cd2b6" issue-1218 prolog-direct-sid8-add-mechanism)
+(review "crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs" "58e811d00961470f7f1d7ff5591aa5eeadc339f9dd0ef5a1d26727661350a245" issue-1218 prolog-direct-sid8-observer)
