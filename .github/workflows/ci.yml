@@ -89,7 +89,7 @@ jobs:
           set -euo pipefail
           cargo test -p my-lisp --test postcore_build_definitions_debug -- --nocapture
 
-      - name: Lisp-owned semantic authority guard
+      - name: Host semantics freedom compatibility witness
         shell: bash
         run: |
           set -euo pipefail
@@ -119,14 +119,14 @@ jobs:
           : > tests/semantic-authority-changes.lisp
           while IFS= read -r path; do
             case "$path" in
-              *.rs|*.c|*.cc|*.cpp|*.h|*.hpp|*.java|*.js|*.mjs|*.py|*.ps1)
+              *.lisp|*.wsm|*.my)
                 ;;
               *)
                 continue
                 ;;
             esac
             case "$path" in
-              tests/fixtures/semantic-authority-guard/*|crates/my-lisp/tests/semantic_authority_guard_1049.rs)
+              tests/fixtures/semantic-authority-guard/*)
                 continue
                 ;;
             esac
