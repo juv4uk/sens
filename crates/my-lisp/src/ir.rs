@@ -19,7 +19,6 @@
 //! from outside this module's tests.
 #![allow(dead_code)]
 
-use crate::eval::canon;
 use crate::eval::necessary_forms::{self, NecessaryFormIdentity};
 use crate::semantic_registry;
 use crate::syntax::{Exactness, Expr, ExprKind, Span};
