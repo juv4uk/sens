@@ -32,7 +32,7 @@ fn current_semantic_ids_project_to_target_neutral_capabilities() {
 
     let mut s = session();
     let add = eval_program(
-        r#"(machine-capabilities-for-sid "00001100")"#,
+        r#"(machine-capabilities-for-sid 00001100)"#,
         &mut s,
     )
     .expect("add capability lookup")
@@ -41,13 +41,25 @@ fn current_semantic_ids_project_to_target_neutral_capabilities() {
     assert_eq!(add, "((integer-add bounded-u64))");
 
     let car = eval_program(
-        r#"(machine-capabilities-for-sid "00000101")"#,
+        r#"(machine-capabilities-for-sid 00000101)"#,
         &mut s,
     )
     .expect("car capability lookup")
     .value
     .to_string();
     assert_eq!(car, "((pair-field-load head bounded-u64))");
+
+    let quoted_shadow = eval_program(
+        r#"(machine-capabilities-for-sid "00001100")"#,
+        &mut s,
+    )
+    .expect("quoted SID shadow must remain ordinary String data")
+    .value
+    .to_string();
+    assert_eq!(
+        quoted_shadow, "()",
+        "String data must not act as machine-capability SID identity"
+    );
 }
 
 #[test]

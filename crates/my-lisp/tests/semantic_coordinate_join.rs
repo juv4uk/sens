@@ -187,11 +187,21 @@ fn kernel_statuses_for_sid(source: &str, wanted_sid: Sid8) -> Vec<(String, Strin
     Vec::new()
 }
 
-fn coordinate_value(session: &mut Session, function: &str, sid: &str) -> String {
+fn string_coordinate_value(session: &mut Session, function: &str, sid: &str) -> String {
     eval_program(&format!(r#"({function} "{sid}")"#), session)
         .unwrap_or_else(|error| panic!("{function} failed for {sid}: {error:?}"))
         .value
         .to_string()
+}
+
+fn machine_coordinate_value(session: &mut Session, sid: Sid8) -> String {
+    eval_program(
+        &format!("(machine-capabilities-for-sid {sid})"),
+        session,
+    )
+    .unwrap_or_else(|error| panic!("machine capability lookup failed for {sid}: {error:?}"))
+    .value
+    .to_string()
 }
 
 fn kernel_car_block(source: &str) -> &str {
@@ -227,7 +237,7 @@ fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
     assert!(!math.contains("common-lisp"));
 
     let machine = eval_program(
-        r#"(machine-capabilities-for-sid "00000101")"#,
+        r#"(machine-capabilities-for-sid 00000101)"#,
         &mut session,
     )
     .expect("CAR machine capability coordinate")
@@ -260,8 +270,8 @@ fn add_sid_preserves_math_and_machine_evidence_with_explicit_kernel_gap() {
     assert_eq!(semantic_id_for_admitted_surface("+"), Some(my_lisp::sid!(00001100)));
 
     let mut session = load_coordinate_session();
-    let math = coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
-    let machine = coordinate_value(&mut session, "machine-capabilities-for-sid", SID);
+    let math = string_coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
+    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00001100));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
@@ -280,8 +290,8 @@ fn eq_sid_joins_relation_my_lisp_and_compare_capability() {
     assert_eq!(semantic_id_for_admitted_surface("eq"), Some(my_lisp::sid!(00000011)));
 
     let mut session = load_coordinate_session();
-    let math = coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
-    let machine = coordinate_value(&mut session, "machine-capabilities-for-sid", SID);
+    let math = string_coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
+    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00000011));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
@@ -298,8 +308,8 @@ fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
     assert_eq!(semantic_id_for_admitted_surface("cons"), Some(my_lisp::sid!(00000100)));
 
     let mut session = load_coordinate_session();
-    let math = coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
-    let machine = coordinate_value(&mut session, "machine-capabilities-for-sid", SID);
+    let math = string_coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
+    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00000100));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
@@ -321,8 +331,8 @@ fn cond_sid_keeps_negative_math_evidence_and_absent_external_kernels_visible() {
     assert_eq!(semantic_id_for_admitted_surface("cond"), Some(my_lisp::sid!(00000111)));
 
     let mut session = load_coordinate_session();
-    let math = coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
-    let machine = coordinate_value(&mut session, "machine-capabilities-for-sid", SID);
+    let math = string_coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
+    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00000111));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
