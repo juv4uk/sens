@@ -13,9 +13,9 @@ upstream-проєкти до неї не входять. Межу встанов
 3. **Коментарі в коді писати українською кирилицею в UTF-8.** Репозиторій працює в UTF-8; `uk-latynka/1` не є штатним стилем коментарів і застосовується лише на явно не-Unicode/ASCII межі.
 4. Старі неукраїнські коментарі й prose не переписувати масово як побічний ефект. Коли коментар суттєво редагується — переводити його українською; масова міграція є окремою перевірюваною задачею.
 5. Точні upstream-назви, API, identifiers, protocol literals, filenames і цитати зберігають оригінальне написання.
-6. Ця політика **не скасовує програмні surface мови**: Sanskrit surface, канонічні ідентичності та інші предметні представлення лишаються у своїх семантичних ролях. Політика визначає мову людського пояснення, а не перелік допустимих програмних символів.
+6. Людські UI/source-підказки не є функціями мови. Чинний функціональний простір — тільки точні 8 бітів `00000000..11111111`; жодне слово або локалізація не створює другої функціональної онтології.
 
-7. **Публічні українські предикати пишуться як питання із `?`**, а публічні мутації — з `!`. Предикат на своїй припустимій області повертає лише канонічне `t` або `()`. Повний перевірюваний каталог: `lib/surface/uk-docs.lisp`; довідник: `docs/ukrainian-api.md`; Guard-тема: `(guard-reference (quote ukrainian-programming-surface))`.
+7. У поточній семантичній роботі функції позначаються тільки точними 8 бітами. Людський UI може мати пояснювальні підписи, але агент не має права називати такий підпис функцією, предикатом або semantic identity.
 
 Guard також реєструє інструмент `(guard-script (quote uk-latynka))`. Канонічний self-test:
 
@@ -117,7 +117,7 @@ typedef uintptr_t Value;
 7. WHAT IS ESSENTIAL   — що належить мові, а що належить субстрату?
 ```
 
-Мета — щоб після знайомства з однією ідеєю (наприклад, `cons`/pair) власник бачив не лише "що це працює", а що саме лишається незмінним у самій ідеї, а що є лише способом її представити на конкретному фізичному чи мовному субстраті. Це не обов'язковий ритуал для кожного репозиторію — застосовується там, де справді є кілька субстратів/реалізацій тієї самої ідеї для порівняння.
+Мета — щоб після знайомства з однією 8-бітною функцією та її механізмом власник бачив не лише «що це працює», а що саме належить закону Core, а що є лише способом реалізації на конкретному фізичному чи мовному субстраті. Це не обов'язковий ритуал для кожного репозиторію — застосовується там, де справді є кілька субстратів/реалізацій тієї самої ідеї для порівняння.
 
 ### Резюме принципу
 
@@ -160,7 +160,7 @@ contract-version                       claim-task / release-task
 
 Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lisp`, `cml`, `my-idea`). Defines what a my-lisp program means; every other repository must match this, not the reverse.
 
-`my-lisp-panini` and `shiva-sutras` research Pāṇinian Sanskrit grammar as a formal system feeding this repo's semantic-atom experiments. They do not become semantic authority for `my-lisp` until their own evidence gates pass.
+`my-lisp-panini` and `shiva-sutras` research Pāṇinian Sanskrit grammar as a formal system feeding experiments in this repository. They do not become semantic authority for `my-lisp` until their own evidence gates pass.
 
 ## Authoritative files
 
@@ -168,7 +168,7 @@ Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lis
 - `docs/semantic-authority-map.md` — precedence map when sources disagree.
 - ratified ADRs under `docs/adr/` — closed decisions within their stated scope.
 - `tests/fixtures/conformance.lisp` — executable observable facts for conformance.
-- `lib/canon.lisp` — executable Canon 0 + McCarthy-7 witness.
+- `language-contract.lisp` Contract 9 + standing invariant #1325 — єдина функціональна онтологія: `00000000..11111111`.
 - `ecosystem-status.lisp` — curated snapshot pointer, not semantic authority by itself.
 
 ## How to run tests
@@ -185,7 +185,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 - Do not edit `language-contract.lisp` or ratified semantic axioms as a side effect of implementation cleanup.
 - `tests/fixtures/conformance.lisp` entries are append-only historical facts: add a new fixture instead of silently changing an old expected observation.
-- Do not promote a Rust helper, host capability, Guard rule, or coordination operation to semantic primitive identity by implementation accident.
+- Do not promote a Rust helper, host capability, Guard rule, coordination operation or human label into a language function. Function identity is only the exact 8 bits.
 
 ## How to create evidence
 
