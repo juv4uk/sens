@@ -164,3 +164,6 @@ crates/my-lisp/tests/core4_eq_answer_1258.rs	outside_domain_is_a_named_error_not
 crates/my-lisp/tests/core4_eq_answer_1258.rs	not_is_a_clean_bit_flip_between_the_two_admitted_answers	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
 crates/my-lisp/tests/core4_eq_answer_1258.rs	sid_identity_plays_no_role_in_the_answer	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
 crates/my-lisp/tests/core4_eq_answer_1258.rs	historical_core1_eq_is_completely_unchanged	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
+crates/my-lisp/tests/member_named_vs_sid_cost_1278.rs	equal_has_an_admitted_sid_but_no_native_callable_mechanism	observer	named-vs-sid-real-function-cost	lib/core.lisp	migrated
+crates/my-lisp/tests/member_named_vs_sid_cost_1278.rs	named_eq_call_and_bare_sid_call_agree_on_every_answer	observer	named-vs-sid-real-function-cost	lib/core.lisp	migrated
+crates/my-lisp/tests/member_named_vs_sid_cost_1278.rs	repeated_lookups_through_a_real_shaped_member_cost_more_by_name_than_by_sid	observer	named-vs-sid-real-function-cost	lib/core.lisp	migrated
