@@ -19,7 +19,7 @@
           (r (write-to-string right)))
       (cond
         ((eq executor (quote common-lisp)) (identity-relation same)
-         (island-lowering-append4 "(+ " l " " (string-append r ")")))
+         (island-lowering-append4 "" l " " r))
         ((eq executor (quote prolog)) (identity-relation same)
          (island-lowering-append4 "Result is " l " + " r))
         ((eq executor (quote datalog)) (identity-relation same)
