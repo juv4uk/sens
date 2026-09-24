@@ -98,3 +98,7 @@
 
 ; #1294 observer only: compare canonical Core4 definition membership with Lisp-owned public/internal inventory.
 (review "crates/my-lisp/tests/uk_surface_inventory.rs" "eb1973408cfd59ecccc9dd746b24da72361a6892c8aade40f17a8d6b1998d031" issue-1294 canonical-core4-definition-observer)
+; guard-reference evidence-status ranking tests: host asserts synthetic (reference ...)
+; records win by evidence-status through guard-reference-find/-all; Lisp (knowledge/guard-reference.lisp)
+; owns the ranking law, this file only observes its output.
+(review "crates/my-lisp/tests/guard.rs" "8c56e37f5ea4044e8f1afe6db57e437fde00bfed7a0304fc4509500b17f2a2b5" issue-guard-evidence-ranking guard-reference-evidence-status-observer)
