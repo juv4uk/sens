@@ -171,3 +171,5 @@ crates/my-lisp/tests/backend_not_on_sid_gap.rs	every_installed_my_lisp_host_capa
 crates/my-lisp/tests/backend_not_on_sid_gap.rs	capability_dispatch_is_exact_string_match_not_identity_based	observer	backend-name-based-capability-dispatch-not-sid	crates/my-lisp/src/eval/capabilities.rs	migrated
 crates/my-lisp/tests/backend_not_on_sid_gap.rs	meta_eval_resolves_canon_identity_primitives_through_any_admitted_surface_name	observer	backend-name-based-capability-dispatch-not-sid	lib/meta-eval.lisp	migrated
 crates/my-lisp/tests/backend_not_on_sid_gap.rs	meta_eval_ordinary_primitive_dispatch_is_hardcoded_to_one_spelling_not_sid	observer	backend-name-based-capability-dispatch-not-sid	lib/meta-eval.lisp	migrated
+
+crates/my-lisp/tests/uk_surface.rs	canonical_ukrainian_syntax_and_batch_one_aliases_preserve_results	observer	ukrainian-surface-preserves-current-result-domains	lib/surface/uk.lisp + contracts/answer-contract.lisp	migrated
