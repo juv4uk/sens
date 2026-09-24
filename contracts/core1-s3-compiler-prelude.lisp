@@ -7,7 +7,7 @@
   ((profile . core1)
    (law-base-pin . "5a99136bf7a2e9ab5792bdc945ad53c3774802cd")
    (law-source . "lib/core1.lisp")
-   (law-source-git-blob . "c134b01bb37e45e0b9f29c098d7791538565b8e7")
+   (law-source-git-blob . "eaaf753df4f9408fa42866fd0b412095f3a84cf3")
    (identity-source . "contracts/core1-historical-sid-map.lisp")
    (identity-source-git-blob . "9edb8c2e658e0e0dd6f6972536f29bf8bcad432a")
    (semantic-authority . my-lisp)
