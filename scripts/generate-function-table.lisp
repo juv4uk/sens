@@ -64,7 +64,7 @@
 
 (def machine-path
   (lambda (sid)
-    (let ((row (find-machine-row (sid-text sid) machine-rows)))
+    (let ((row (find-machine-row (sid-bits sid) machine-rows)))
       (cond
         ((atom row) "()")
         (t (third row))))))
@@ -83,12 +83,12 @@
   (lambda (sid rows)
     (cond
       ((atom rows) (quote ()))
-      ((equal? (sid-text (second (car rows))) sid) (car rows))
+      ((equal? (sid-bits (second (car rows))) sid) (car rows))
       (t (find-historical-row sid (cdr rows))))))
 
 (def mccarthy-label
   (lambda (sid)
-    (let ((row (find-historical-row (sid-text sid) historical-rows)))
+    (let ((row (find-historical-row (sid-bits sid) historical-rows)))
       (cond
         ((atom row) "()")
         (t (str+ (write-to-string (fourth row)) " (" (write-to-string (fifth row)) ")"))))))
@@ -122,8 +122,7 @@
 (def str+
   (lambda args (reduce (lambda (acc s) (string-append acc s)) "" args)))
 
-; SID already arrives from the registry as an exact 8-bit string. This generator
-; must preserve it verbatim; formatting identity is owned by the registry.
+; SID already arrives as one exact 8-bit value. This generator preserves those bits without inventing another function identity.
 
 ; --- surfaces are fixed (lang word) slots; word is spelling or () ---
 (def find-surface
@@ -148,10 +147,8 @@
     (not (equal? word (quote ())))))
 
 ; --- formal identity stub: first present name among en/ук/sa, else bare id ---
-; SID is already a first-class exact eight-bit identity. Its canonical printer
-; preserves the exact spelling including leading zeroes; do not reinterpret it
-; as arithmetic data merely to reconstruct the same source identity.
-(def sid-text
+; SID is already the exact eight-bit function identity. Rendering those bits for a generated view must not create a second identity.
+(def sid-bits
   (lambda (sid)
     (write-to-string sid)))
 
@@ -162,12 +159,12 @@
            (sa (get-surface (quote sa) surfaces)))
       (cond
         ((surface-usable? en)
-         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text en)))
+         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text en)))
         ((surface-usable? ук)
-         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text ук)))
+         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text ук)))
         ((surface-usable? sa)
-         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text sa)))
-        (t (string-append "identity:" (sid-text sid)))))))
+         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text sa)))
+        (t (string-append "identity:" (sid-bits sid)))))))
 
 ; --- string-join with newline, since core.lisp has none yet. Accumulator-
 ; based (not "car + recurse-in-argument-position"), matching core.lisp's own
@@ -196,7 +193,7 @@
            (sym (get-surface (quote sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
-        "  (\"" (sid-text sid) "\" " formal
+        "  (\"" (sid-bits sid) "\" " formal
         " (ук " (surface-word-wsm-text ук) ")"
         " (укр " (surface-word-wsm-text укр) ")"
         " (en " (surface-word-wsm-text en) ")"
@@ -214,7 +211,7 @@
            (sa (get-surface (quote sa) surfaces))
            (sym (get-surface (quote sym) surfaces)))
       (str+
-        "| `" (sid-text sid) "` | " (surface-word-text ук)
+        "| `" (sid-bits sid) "` | " (surface-word-text ук)
         " | " (surface-word-text укр)
         " | " (surface-word-text en)
         " | " (surface-word-text sa)
