@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   lowering:
-    name: Lisp-owned lowering with explicit CLIPS blocker
+    name: Lisp-owned arguments-only island lowering
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -29,6 +29,6 @@ jobs:
           set -euo pipefail
           got="$(./target/debug/my-lisp tests/fixtures/island-lowering-1048-witness.lisp)"
           printf '%s\n' "$got"
-          test "$got" = "(island-lowering-1048 (status pass) (executable-payloads 3) (clips fail-closed))"
+          test "$got" = "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))"
       - name: Diff hygiene
         run: git diff --check

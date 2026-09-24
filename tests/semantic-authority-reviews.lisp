@@ -75,3 +75,9 @@
 ; SID 00001100 to bounded addition and accepts arguments only.
 (review "crates/wsm-prolog-kernel/src/lib.rs" "dc79cdbfd2544671cc3aace6ba0b1dac5ae0dc0632b41a7370f8aafe137cd2b6" issue-1218 prolog-direct-sid8-add-mechanism)
 (review "crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs" "58e811d00961470f7f1d7ff5591aa5eeadc339f9dd0ef5a1d26727661350a245" issue-1218 prolog-direct-sid8-observer)
+;
+; #1169 CLIPS + semantic ABI: reviewed exact-SID8 mechanism binding.
+; Raw ClipsEnvironment::eval_bytes remains diagnostic/native. Shared semantic
+; exchange binds SID 00001100 to bounded addition and accepts arguments only.
+(review "crates/wsm-clips-kernel/src/lib.rs" "c32f92feca2eec1a762a9e73143ad9fc7e8bd07886d5c1a3b2bcdae9e19c7866" issue-1169 clips-direct-sid8-add-mechanism)
+(review "crates/wsm-clips-kernel/tests/c_abi_semantic_witness.rs" "dfcb1b5ec8458c750d2e55b5fd9bdbc3d1601939e6644727f18db68a258a36cf" issue-1169 clips-direct-sid8-observer)

@@ -186,10 +186,10 @@ if [[ "$mechanism_selector_status" != "(mechanism-selector-1047 (status pass))" 
   exit 1
 fi
 
-# #1048: lowering consumes only Lisp-selected mechanisms. CLIPS remains
-# explicitly blocked until its adapter can return the bounded arithmetic value.
+# #1048/#1169: lowering consumes only Lisp-selected mechanisms. All admitted
+# bounded-add transports carry arguments only; operation identity remains SID8.
 island_lowering_status="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/island-lowering-1048-witness.lisp)"
-if [[ "$island_lowering_status" != "(island-lowering-1048 (status pass) (executable-payloads 3) (clips fail-closed))" ]]; then
+if [[ "$island_lowering_status" != "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))" ]]; then
   printf 'island lowering Lisp witness failed: %s\n' "$island_lowering_status" >&2
   exit 1
 fi

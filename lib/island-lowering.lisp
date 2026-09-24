@@ -8,9 +8,9 @@
 ; Prolog goal: exact SID8 plus the selected mechanism already owns that choice.
 ;
 ; CLIPS semantic boundary under #1169:
-; raw native Eval remains diagnostic-only. Until the CLIPS adapter exposes a
-; direct exact-SID8 + arguments mechanism, semantic CLIPS lowering fails
-; closed rather than serializing a human operator spelling into `eval:<expr>`.
+; raw native Eval remains diagnostic-only. Semantic CLIPS addition is admitted
+; only as exact SID8 + arguments; the adapter builds private native syntax after
+; SID selection and never accepts operator text across this boundary.
 
 (def island-lowering-append4
   (lambda (a b c d)
@@ -26,6 +26,8 @@
         ((eq executor (quote prolog)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
         ((eq executor (quote datalog)) (identity-relation same)
+         (island-lowering-append4 "" l " " r))
+        ((eq executor (quote clips)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
         ((quote island-lowering-fallback) island-lowering-fallback
          (quote ()))))))
