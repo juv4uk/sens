@@ -110,3 +110,16 @@ No replacement SID is to be allocated to ().
 The reference Rust implementation is evidence/mechanism, not semantic
 authority. New code must make the eight-bit function identity visible instead
 of replacing it with a word.
+
+## Project boundary
+
+Rust is a **reference implementation** and mechanism witness; Contract 9 and
+the Lisp-owned executable evidence remain the language authority.
+
+The current canonical source extension is **`.lisp`**. `.wsm` and `.my` are
+legacy aliases only; file suffixes do not create language identity.
+
+Authority precedence is documented in
+[`semantic-authority-map.md`](semantic-authority-map.md). Under Contract 9,
+older named-function descriptions in that map are migration debt/history where
+they conflict with the SID8-only function-space law.
