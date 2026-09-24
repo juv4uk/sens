@@ -1,7 +1,7 @@
 ; #1048 / #1169 — current honest lowering witness.
-; Common Lisp and Prolog retain native text payloads; Datalog carries arguments only under exact SID8 identity.
-; CLIPS must fail closed until a direct SID8 + arguments mechanism exists;
-; raw operator-text Eval is diagnostic-only and cannot satisfy semantic lowering.
+; All admitted bounded-add transports carry arguments only under exact SID8 identity.
+; CLIPS raw operator-text Eval remains diagnostic-only; semantic addition uses
+; the same arguments-only payload as Common Lisp, Prolog and Datalog.
 
 (load "lib/core4.lisp")
 (load "lib/surface/semantic-registry-api.lisp")
@@ -45,13 +45,13 @@
                (cond
                  ((equal?
                     clips-result
-                    (list (quote island-lowering-failure)
-                          (quote unsupported-executor)
+                    (list (quote island-lowering-result)
                           plus-sid
                           (quote clips)
-                          (quote bounded-exact-add)))
+                          (quote bounded-exact-add)
+                          "2 3"))
                   (structural-relation same)
-                  (quote (island-lowering-1048 (status pass) (executable-payloads 3) (clips fail-closed))))
+                  (quote (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))))
                  ((quote witness-clips-fail) witness-clips-fail
                   (car (quote ())))))
               ((quote witness-datalog-fail) witness-datalog-fail
