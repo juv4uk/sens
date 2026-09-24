@@ -4,10 +4,10 @@
 ; result from lib/mechanism-selector.lisp and serializes only an admitted
 ; mechanism projection.
 ;
-; CLIPS boundary after #1164:
-; the native adapter admits an opaque `eval:<expr>` transport and returns the
-; producer-native printed result bytes through a dedicated CLIPS I/O router.
-; This file owns only the Lisp-side serialization into that admitted mechanism.
+; CLIPS semantic boundary under #1169:
+; raw native Eval remains diagnostic-only. Until the CLIPS adapter exposes a
+; direct exact-SID8 + arguments mechanism, semantic CLIPS lowering fails
+; closed rather than serializing a human operator spelling into `eval:<expr>`.
 
 (def island-lowering-append4
   (lambda (a b c d)
@@ -24,9 +24,6 @@
          (island-lowering-append4 "Result is " l " + " r))
         ((eq executor (quote datalog)) (identity-relation same)
          (island-lowering-append4 "math + " l " " r))
-        ((eq executor (quote clips)) (identity-relation same)
-         (string-append "eval:"
-           (island-lowering-append4 "(+ " l " " (string-append r ")"))))
         ((quote island-lowering-fallback) island-lowering-fallback
          (quote ()))))))
 
