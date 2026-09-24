@@ -5,9 +5,11 @@ on:
     paths:
       - "contracts/core4-predicate-answer-scale.lisp"
       - "contracts/core4-predicate-answer-boundary.lisp"
+      - "contracts/core4-eq-result-law.lisp"
       - "scripts/check-core4-predicate-answer-scale.lisp"
       - "scripts/check-core4-predicate-answer-boundary.lisp"
       - "experiments/core4-mechanical-answer-grade.lisp"
+      - "experiments/core4-eq-result-law-witness.lisp"
       - "experiments/core4-predicate-answer-carrier-matrix.lisp"
       - ".github/workflows/core4-predicate-answer-scale.yml"
   push:
@@ -69,6 +71,14 @@ jobs:
           verdict="$(./target/debug/my-lisp experiments/core4-predicate-answer-carrier-matrix.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-answer-carrier-matrix-ok)"
+
+      - name: Verify Core4 EQ result law
+        shell: bash
+        run: |
+          set -euo pipefail
+          verdict="$(./target/debug/my-lisp experiments/core4-eq-result-law-witness.lisp)"
+          printf '%s\n' "$verdict"
+          test "$verdict" = "(core4-eq-result-law-ok)"
 
       - name: Keep this slice Lisp-owned
         shell: bash
