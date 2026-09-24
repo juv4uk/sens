@@ -118,6 +118,6 @@
 
 ; #1327 Contract-9 cleanup: remove named CanonicalIdentity; function identity remains only Sid8.
 (review "crates/my-lisp/src/eval/canon.rs" "d642c304fce80a2bbdc2d918c61bd25bef6c2421e5b3c5eea80cad53c47119e8" issue-1327 sid8-only-mechanism-routing)
-(review "crates/my-lisp/src/eval/mod.rs" "ca275ceafcb8052a69d92891930566f51c349ec257adf024e19571d712b31de1" issue-1327 sid8-only-special-route-selection)
+(review "crates/my-lisp/src/eval/mod.rs" "26576c611ebaeccea91dac00ac79e1ebf694af8efe10280b45d92427e6b175d3" issue-1327 sid8-only-special-route-selection)
 (review "crates/my-lisp/src/lib.rs" "276d5e4371f8aa407eb8d05224c9fad43a95c0eceb5d7defb6e0625214b71d49" issue-1327 generic-surface-to-sid-routing)
-(review "crates/my-lisp/src/ir.rs" "b9b03ec511d8f1e6f78608311cf3301ceeccfd862cd9d717d04460d16430225c" issue-1327 sid8-only-ir-provenance)
+(review "crates/my-lisp/src/ir.rs" "72ad065142bf0b94f8d1dc1cdcdfcca32b698879d6a5333dd145529eba9bcc9f" issue-1327 sid8-only-ir-provenance)
