@@ -50,39 +50,49 @@
         (T
          (C1-LOOKUP-IN NAME (CDR ENV)))))))
 
-(DEFINE C1-MAKE-PRIMITIVE
-  (LAMBDA (NAME)
-    (CONS (QUOTE C1-PRIMITIVE)
-      (CONS NAME NIL))))
-
-(DEFINE C1-PRIMITIVEP
+(DEFINE C1-ADMITTED-SID-VALUEP
   (LAMBDA (VALUE)
     (COND
-      ((ATOM VALUE) NIL)
-      ((EQ (CAR VALUE) (QUOTE C1-PRIMITIVE)) T)
+      ((EQ VALUE 00000001) T)
+      ((EQ VALUE 00000010) T)
+      ((EQ VALUE 00000011) T)
+      ((EQ VALUE 00000100) T)
+      ((EQ VALUE 00000101) T)
+      ((EQ VALUE 00000110) T)
+      ((EQ VALUE 00000111) T)
+      ((EQ VALUE 00001000) T)
+      ((EQ VALUE 00001001) T)
+      ((EQ VALUE 00001011) T)
+      ((EQ VALUE 00001100) T)
+      ((EQ VALUE 00001101) T)
+      ((EQ VALUE 00100001) T)
+      ((EQ VALUE 00100111) T)
       (T NIL))))
-
-(DEFINE C1-PRIMITIVE-NAME
-  (LAMBDA (VALUE)
-    (C1-SECOND VALUE)))
 
 (DEFINE C1-PRIMITIVE-IDENTITY
   (LAMBDA (NAME)
     (COND
-      ((EQ NAME (QUOTE ATOM)) (QUOTE ATOM))
-      ((EQ NAME (QUOTE atom)) (QUOTE ATOM))
-      ((EQ NAME (QUOTE EQ))   (QUOTE EQ))
-      ((EQ NAME (QUOTE eq))   (QUOTE EQ))
-      ((EQ NAME (QUOTE CONS)) (QUOTE CONS))
-      ((EQ NAME (QUOTE cons)) (QUOTE CONS))
-      ((EQ NAME (QUOTE CAR))  (QUOTE CAR))
-      ((EQ NAME (QUOTE car))  (QUOTE CAR))
-      ((EQ NAME (QUOTE CDR))  (QUOTE CDR))
-      ((EQ NAME (QUOTE cdr))  (QUOTE CDR))
-      ((EQ NAME (QUOTE LIST)) (QUOTE LIST))
-      ((EQ NAME (QUOTE list)) (QUOTE LIST))
-      ((EQ NAME (QUOTE NOT))  (QUOTE NOT))
-      ((EQ NAME (QUOTE not))  (QUOTE NOT))
+      ((EQ NAME 00000010) 00000010)
+      ((EQ NAME 00000011) 00000011)
+      ((EQ NAME 00000100) 00000100)
+      ((EQ NAME 00000101) 00000101)
+      ((EQ NAME 00000110) 00000110)
+      ((EQ NAME 00100001) 00100001)
+      ((EQ NAME 00100111) 00100111)
+      ((EQ NAME (QUOTE ATOM)) 00000010)
+      ((EQ NAME (QUOTE atom)) 00000010)
+      ((EQ NAME (QUOTE EQ))   00000011)
+      ((EQ NAME (QUOTE eq))   00000011)
+      ((EQ NAME (QUOTE CONS)) 00000100)
+      ((EQ NAME (QUOTE cons)) 00000100)
+      ((EQ NAME (QUOTE CAR))  00000101)
+      ((EQ NAME (QUOTE car))  00000101)
+      ((EQ NAME (QUOTE CDR))  00000110)
+      ((EQ NAME (QUOTE cdr))  00000110)
+      ((EQ NAME (QUOTE LIST)) 00100111)
+      ((EQ NAME (QUOTE list)) 00100111)
+      ((EQ NAME (QUOTE NOT))  00100001)
+      ((EQ NAME (QUOTE not))  00100001)
       (T NIL))))
 
 (DEFINE C1-DEFAULT
@@ -91,8 +101,7 @@
        (COND
          ((EQ IDENTITY NIL)
           (C1-MAKE-ERROR (QUOTE UNBOUND) NAME))
-         (T
-          (C1-MAKE-PRIMITIVE IDENTITY))))
+         (T IDENTITY)))
      (C1-PRIMITIVE-IDENTITY NAME))))
 
 (DEFINE C1-LOOKUP
@@ -147,46 +156,46 @@
            (CONS (CONS (CAR PARAMS) (CAR ARGS)) ENV)))))))
 
 (DEFINE C1-APPLY-PRIMITIVE
-  (LAMBDA (NAME ARGS)
+  (LAMBDA (SID ARGS)
     (COND
-      ((EQ NAME (QUOTE LIST)) ARGS)
-      ((EQ NAME (QUOTE NOT))
+      ((EQ SID 00100111) ARGS)
+      ((EQ SID 00100001)
        (COND
          ((C1-ONE-ARGP ARGS)
           (COND
             ((EQ (CAR ARGS) NIL) T)
             (T NIL)))
-         (T (C1-MAKE-ERROR (QUOTE ARITY) NAME))))
-      ((EQ NAME (QUOTE ATOM))
+         (T (C1-MAKE-ERROR (QUOTE ARITY) SID))))
+      ((EQ SID 00000010)
        (COND
          ((C1-ONE-ARGP ARGS) (ATOM (CAR ARGS)))
-         (T (C1-MAKE-ERROR (QUOTE ARITY) NAME))))
-      ((EQ NAME (QUOTE EQ))
+         (T (C1-MAKE-ERROR (QUOTE ARITY) SID))))
+      ((EQ SID 00000011)
        (COND
          ((C1-TWO-ARGP ARGS) (EQ (CAR ARGS) (CAR (CDR ARGS))))
-         (T (C1-MAKE-ERROR (QUOTE ARITY) NAME))))
-      ((EQ NAME (QUOTE CONS))
+         (T (C1-MAKE-ERROR (QUOTE ARITY) SID))))
+      ((EQ SID 00000100)
        (COND
          ((C1-TWO-ARGP ARGS) (CONS (CAR ARGS) (CAR (CDR ARGS))))
-         (T (C1-MAKE-ERROR (QUOTE ARITY) NAME))))
-      ((EQ NAME (QUOTE CAR))
+         (T (C1-MAKE-ERROR (QUOTE ARITY) SID))))
+      ((EQ SID 00000101)
        (COND
          ((C1-ONE-ARGP ARGS)
           (COND
             ((ATOM (CAR ARGS))
              (C1-MAKE-ERROR (QUOTE TYPE) (QUOTE CAR-REQUIRES-PAIR)))
             (T (CAR (CAR ARGS)))))
-         (T (C1-MAKE-ERROR (QUOTE ARITY) NAME))))
-      ((EQ NAME (QUOTE CDR))
+         (T (C1-MAKE-ERROR (QUOTE ARITY) SID))))
+      ((EQ SID 00000110)
        (COND
          ((C1-ONE-ARGP ARGS)
           (COND
             ((ATOM (CAR ARGS))
              (C1-MAKE-ERROR (QUOTE TYPE) (QUOTE CDR-REQUIRES-PAIR)))
             (T (CDR (CAR ARGS)))))
-         (T (C1-MAKE-ERROR (QUOTE ARITY) NAME))))
+         (T (C1-MAKE-ERROR (QUOTE ARITY) SID))))
       (T
-       (C1-MAKE-ERROR (QUOTE UNSUPPORTED-PRIMITIVE) NAME)))))
+       (C1-MAKE-ERROR (QUOTE UNSUPPORTED-PRIMITIVE) SID)))))
 
 (DEFINE C1-EVLIS
   (LABEL C1-EVLIS
@@ -231,8 +240,8 @@
   (LAMBDA (FN ARGS GLOBAL)
     (COND
       ((C1-ERRORP FN) FN)
-      ((C1-PRIMITIVEP FN)
-       (C1-APPLY-PRIMITIVE (C1-PRIMITIVE-NAME FN) ARGS))
+      ((C1-PRIMITIVE-IDENTITY FN)
+       (C1-APPLY-PRIMITIVE (C1-PRIMITIVE-IDENTITY FN) ARGS))
       ((C1-FUNARGP FN)
        (FN ARGS GLOBAL))
       (T
@@ -277,6 +286,7 @@
            ((EQ EXPR (QUOTE nil)) NIL)
            ((EQ EXPR T) T)
            ((EQ EXPR (QUOTE t)) T)
+           ((C1-ADMITTED-SID-VALUEP EXPR) EXPR)
            (T (C1-LOOKUP EXPR ENV GLOBAL))))
         ((C1-QUOTE-NAMEP (CAR EXPR))
          (C1-SECOND EXPR))
