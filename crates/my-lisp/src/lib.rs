@@ -223,9 +223,8 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
 ///
 /// Existing bindings are never overwritten. That matters for ordinary
 /// shadowable operations: peers begin with the same value, but shadowing one
-/// name later must not retarget the others. Canon identities are skipped here
-/// because their resolver already owns surface routing independently of the
-/// lexical environment.
+/// name later must not retarget the others. SID-routed syntax/value slots are skipped here because their resolver already
+/// owns source/UI routing independently of the lexical environment.
 fn bind_missing_stable_surface_peers(environment: &Environment) {
     let snapshot = environment.snapshot();
     // HashMap, not BTreeMap: Sid8 is deliberately not Ord (identity
@@ -234,7 +233,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     let mut values_by_semantic_id = std::collections::HashMap::new();
 
     for (name, value) in snapshot {
-        if eval::canon::identity_for_surface(&name).is_some() {
+        if eval::canon::routed_sid_for_surface(&name).is_some() {
             continue;
         }
         if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(&name) {
@@ -253,7 +252,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         // routed by their dedicated syntax mechanisms, not as first-class
         // SID values.
         if peers.iter().any(|peer| {
-            eval::canon::identity_for_surface(peer).is_some()
+            eval::canon::routed_sid_for_surface(peer).is_some()
                 || eval::necessary_forms::identity_for_symbol(peer).is_some()
         }) {
             continue;
@@ -350,29 +349,17 @@ pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageErro
     eval_program(FS_LIBRARY_SOURCE, session)
 }
 
-/// Public Contract 6.0 classification hook for tooling and embedders.
-///
-/// This does not expose or mutate the Canon registry. It only answers whether
-/// a source spelling belongs to the finite reserved Canon 0+7 name set, so
-/// LSPs/linters can follow the same binder rule as the evaluator without
-/// duplicating EN/UK/SA tables.
-pub fn is_canonical_surface_name(name: &str) -> bool {
+/// Public mechanical routing hook for tooling and embedders.
+/// It answers only whether a source/UI surface belongs to a currently reserved
+/// SID-routed evaluator slot; no named function identity is materialized.
+pub fn is_reserved_surface_name(name: &str) -> bool {
     eval::canon::is_reserved_surface(name)
 }
 
-/// Public hook for tooling that must recognize `quote`'s specific identity
-/// (byte SID 00000001) across every admitted surface (`quote`/`як-є`/
-/// `svarūpa`/`'`), not just the English spelling. Added after a real bug
-/// was found in `crates/my-lisp-lsp/src/analysis.rs`'s own quoted-data
-/// detection: it matched only the literal ASCII string `"quote"`, so a
-/// program written `(як-є (a b c))` would have its quoted symbols
-/// mis-treated as live code references by go-to-definition/rename —
-/// silently breaking exactly the multilingual guarantee this ecosystem's
-/// Canon 0 routing exists to provide. Mirrors `is_canonical_surface_name`'s
-/// minimal-surface-area pattern rather than exposing the whole
-/// `CanonicalIdentity` enum.
-pub fn is_quote_surface_name(name: &str) -> bool {
-    eval::canon::is_quote_identity(name)
+/// Mechanical source/UI routing query: does this surface resolve to this exact
+/// eight-bit function SID?
+pub fn surface_has_sid(name: &str, sid: Sid8) -> bool {
+    eval::canon::surface_has_sid(name, sid)
 }
 
 /// True for any admitted surface whose Lisp-owned evaluator dispatch class is Define.
