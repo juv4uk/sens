@@ -150,6 +150,7 @@ pub enum LiteralValue {
     Number(f64, Exactness),
     Rational(Rational),
     Sid(Sid8),
+    EmptyList,
     String(String),
     Symbol(String),
 }
@@ -274,17 +275,12 @@ fn lower_symbol_reference(name: &str, span: Span) -> IrNode {
 
 fn lower_list(items: &[Expr], span: Span) -> Result<IrNode, LoweringError> {
     let Some(head) = items.first() else {
-        // `()` is Canon 0's EmptyList ground value, self-evaluating like
-        // any other literal (G8: absence-of-element and absence-of-truth
-        // are the same value) -- NOT an operator call with zero elements.
-        // An earlier draft of this module treated every empty list as a
-        // malformed call and failed to lower `(cond (() ...) ...)`'s own
-        // test clause; found via the corpus-lowering test below, fixed
-        // here rather than silently mis-classifying a real value.
+        // Empty structure is a literal structural value outside the complete
+        // function-SID space. It carries no function identity and receives no SID.
         return Ok(IrNode::Literal {
-            value: LiteralValue::Symbol("()".to_string()),
+            value: LiteralValue::EmptyList,
             span,
-            provenance: Provenance::Canon(CanonicalIdentity::EmptyList),
+            provenance: Provenance::Literal,
         });
     };
     // Check for bare SID token as head (e.g. 00001000 for lambda, 00001001 for define)
@@ -366,8 +362,7 @@ fn classify_syntax_id_for_canon(identity: CanonicalIdentity) -> Option<KnownSynt
     match identity {
         CanonicalIdentity::Quote => Some(KnownSyntaxId::Quote),
         CanonicalIdentity::Cond => Some(KnownSyntaxId::Cond),
-        CanonicalIdentity::EmptyList
-        | CanonicalIdentity::Atom
+        CanonicalIdentity::Atom
         | CanonicalIdentity::Eq
         | CanonicalIdentity::Cons
         | CanonicalIdentity::Car
@@ -590,16 +585,13 @@ mod tests {
     }
 
     #[test]
-    fn empty_list_lowers_as_the_canon_empty_list_literal() {
-        // `()` is a self-evaluating ground value (Canon 0's EmptyList, G8),
-        // not a zero-argument call -- an earlier draft of this module got
-        // this wrong and failed to lower `(cond (() ...) ...)`'s own test
-        // clause; the corpus-lowering test below is what caught it.
+    fn empty_list_lowers_as_structural_literal_without_function_sid() {
         let node = lower_source("()");
-        let IrNode::Literal { provenance, .. } = node else {
+        let IrNode::Literal { value, provenance, .. } = node else {
             panic!("expected Literal");
         };
-        assert_eq!(provenance, Provenance::Canon(CanonicalIdentity::EmptyList));
+        assert_eq!(value, LiteralValue::EmptyList);
+        assert_eq!(provenance, Provenance::Literal);
     }
 
     /// #68's own acceptance criterion: "a fixture with an unknown/
