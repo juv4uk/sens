@@ -24,11 +24,11 @@ jobs:
       - name: Checkout my-lisp Core1 source
         uses: actions/checkout@v5
 
-      - name: Checkout pinned historical S0 seed
+      - name: Checkout pinned typed-SID8 S0 seed
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
-          ref: c7d4d6fa56e97c860c567fb809a719e3c79778fc
+          ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
           path: .core1-s0/mccarthy-eval
 
       - name: Checkout pinned Lisp-authored compiler seed
@@ -38,7 +38,7 @@ jobs:
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           path: .core1-s0/wsm-my-lisp
 
-      - name: Build pinned historical seed
+      - name: Build pinned typed-SID8 seed
         working-directory: .core1-s0/mccarthy-eval
         run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
 
@@ -48,7 +48,7 @@ jobs:
           set -euo pipefail
           seed_sha="$(git -C .core1-s0/mccarthy-eval rev-parse HEAD)"
           compiler_sha="$(git -C .core1-s0/wsm-my-lisp rev-parse HEAD)"
-          test "$seed_sha" = "c7d4d6fa56e97c860c567fb809a719e3c79778fc"
+          test "$seed_sha" = "79f2f38f2a8da22a5bbcb39312da5f726ab2471f"
           test "$compiler_sha" = "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947"
           printf 'S0 seed commit: %s\n' "$seed_sha"
           printf 'S2 compiler seed commit: %s\n' "$compiler_sha"
@@ -71,7 +71,7 @@ jobs:
           s1_source="$(sha256sum lib/core1.lisp | cut -d' ' -f1)"
           s2_source="$(sha256sum .core1-s0/wsm-my-lisp/lib/compiler.lisp | cut -d' ' -f1)"
 
-          grep -F "(commit . \"c7d4d6fa56e97c860c567fb809a719e3c79778fc\")" "$manifest"
+          grep -F "(commit . \"79f2f38f2a8da22a5bbcb39312da5f726ab2471f\")" "$manifest"
           grep -F "(source-sha256 . \"$s0_source\")" "$manifest"
           grep -F "(binary-sha256 . \"$s0_binary\")" "$manifest"
           grep -F "(source-sha256 . \"$s1_source\")" "$manifest"
