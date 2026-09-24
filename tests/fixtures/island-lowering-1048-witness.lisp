@@ -22,7 +22,7 @@
                  plus-sid
                  (quote common-lisp)
                  (quote bounded-exact-add)
-                 "(+ 2 3)"))
+                 "2 3"))
          (structural-relation same)
          (cond
            ((equal?
