@@ -215,40 +215,37 @@ fn evaluate_list(
         return special_forms::evaluate_cond(arguments, environment, span);
     }
 
-    {
-            if let Some(name) = items[0].kind.as_symbol() {
-                if let Some(result) =
-                    capabilities::dispatch_capability(name, arguments, environment, span)
-                {
-                    return result;
-                }
-            }
-            let function = match head_sid {
-                Some(sid) => Value::Sid(sid),
-                None => evaluate(&items[0], environment)?,
-            };
-            match &function {
-                Value::Sid(sid) => {
-                    let mut values = Vec::with_capacity(arguments.len());
-                    for argument in arguments {
-                        values.push(evaluate(argument, environment)?);
-                    }
-                    canon::invoke_semantic_ref(*sid, &values, environment, span)
-                        .map(EvalStep::Value)
-                }
-                Value::Builtin(builtin) => {
-                    let mut values = Vec::with_capacity(arguments.len());
-                    for argument in arguments {
-                        values.push(evaluate(argument, environment)?);
-                    }
-                    (builtin.func)(&values, environment, span).map(EvalStep::Value)
-                }
-                Value::Macro(closure) => {
-                    closures::apply_macro(closure.clone(), arguments, environment, span)
-                }
-                _ => closures::apply(function, arguments, environment, span),
-            }
+    if let Some(name) = items[0].kind.as_symbol() {
+        if let Some(result) =
+            capabilities::dispatch_capability(name, arguments, environment, span)
+        {
+            return result;
         }
+    }
+    let function = match head_sid {
+        Some(sid) => Value::Sid(sid),
+        None => evaluate(&items[0], environment)?,
+    };
+    match &function {
+        Value::Sid(sid) => {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, environment)?);
+            }
+            canon::invoke_semantic_ref(*sid, &values, environment, span)
+                .map(EvalStep::Value)
+        }
+        Value::Builtin(builtin) => {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, environment)?);
+            }
+            (builtin.func)(&values, environment, span).map(EvalStep::Value)
+        }
+        Value::Macro(closure) => {
+            closures::apply_macro(closure.clone(), arguments, environment, span)
+        }
+        _ => closures::apply(function, arguments, environment, span),
     }
 }
 
