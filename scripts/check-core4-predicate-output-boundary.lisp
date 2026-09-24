@@ -80,7 +80,7 @@
                  ((quote projection-present) projection-present
                   (quote pass))))
               ((quote raw-domain-not-rich) raw-domain-not-rich
-               (quote pass)))))))
+               (quote pass))))
         ((quote non-predicate-row) non-predicate-row
          (quote pass))))))
 
