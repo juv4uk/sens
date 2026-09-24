@@ -378,7 +378,7 @@ mod single_pass_eval_tests {
     #[test]
     fn canon_zero_empty_list_evaluates_directly() {
         let mut session = Session::default();
-        let result = eval_program("()", &mut session).expect("Canon 0 should evaluate");
+        let result = eval_program("()", &mut session).expect("empty structure should evaluate");
         assert_eq!(result.value.to_string(), "()");
     }
 
