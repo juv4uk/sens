@@ -61,7 +61,16 @@ fn canonical_ukrainian_syntax_and_batch_one_aliases_preserve_results() {
         &mut session,
     )
     .expect("word-first aliases should execute through existing operations");
-    assert_eq!(aliases.value.to_string(), "(5 t t t 7)");
+    // Surface aliases must preserve each operation's CURRENT result domain;
+    // they do not coerce unrelated predicate-like answers back into a
+    // historical universal T/NIL model. In this mixed-domain witness:
+    //   менше?         -> exact-Q binary decision 1
+    //   хибне?         -> current compatibility/helper result t
+    //   текст-порожній? -> explicit identity-relation observation
+    assert_eq!(
+        aliases.value.to_string(),
+        "(5 1 t (identity-relation same) 7)"
+    );
 }
 
 #[test]

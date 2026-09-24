@@ -164,3 +164,5 @@ crates/my-lisp/tests/core4_eq_answer_1258.rs	outside_domain_is_a_named_error_not
 crates/my-lisp/tests/core4_eq_answer_1258.rs	not_is_a_clean_bit_flip_between_the_two_admitted_answers	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
 crates/my-lisp/tests/core4_eq_answer_1258.rs	sid_identity_plays_no_role_in_the_answer	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
 crates/my-lisp/tests/core4_eq_answer_1258.rs	historical_core1_eq_is_completely_unchanged	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
+
+crates/my-lisp/tests/uk_surface.rs	canonical_ukrainian_syntax_and_batch_one_aliases_preserve_results	observer	ukrainian-surface-preserves-current-result-domains	lib/surface/uk.lisp + contracts/answer-contract.lisp	migrated
