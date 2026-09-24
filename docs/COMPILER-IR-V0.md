@@ -44,20 +44,18 @@ or ordinary structure, never inventing a new one:
 
 Every `Literal`/`VariableRef` carries a `Provenance`:
 
-- `Canon(CanonicalIdentity)` — one of the seven immutable Canon 0
-  identities (quote/atom/eq/cons/car/cdr/cond), resolved via
-  `eval::canon::identity_for_surface`.
-- `NecessaryForm(NecessaryFormIdentity)` — `lambda`/`define` (0010/0011),
-  via `eval::necessary_forms::identity_for_symbol`.
-- `Defmacro` — semantic ID `0012`.
-- `AdmittedSemanticIdentity(String)` — an ordinary callable admitted in
-  `lib/surface/semantic-registry.lisp` (arithmetic, comparisons, library
-  functions), carrying the numeric ID the same way
-  `crates/my-lisp-cli/src/bin/cml-export.rs` already does.
+- `FunctionSid(Sid8)` — any registry-admitted function reference is
+  identified only by its exact eight-bit SID. No Canon/necessary-form/name
+  enum survives in IR provenance.
 - `OrdinaryBinding` — a plain user-defined function/variable with no
   registry entry. **Not a failure** — most real programs are built from
   bindings the registry has no opinion about.
 - `Literal` — a value read directly from source.
+
+Special evaluation shapes such as quote/cond/lambda/define remain distinct
+`IrNode` structures where execution order requires it, but those shapes are
+not function identities. The function identity, whenever present, is only
+`Sid8`.
 
 `explain(&IrNode) -> String` turns any node into a one-line human trace
 — #68's own acceptance criterion ("an agent or test can explain how a
@@ -75,32 +73,14 @@ Structurally incomplete forms (empty operator position *that isn't*
 fail via `LoweringError::MalformedForm`. Neither error path invents a
 lowering for something it doesn't understand.
 
-## Real bugs this module's own tests caught (not invented, not assumed)
+## Historical bugs caught by this module
 
-Two, both found by running the corpus test against the real registry
-resolvers before assuming they'd behave as expected:
-
-1. **`(def x 1)` initially failed to lower as `Define`.** Two facts,
-   both verified directly rather than assumed: `necessary_forms::identity_for_symbol("def")`
-   returns `None` (asserted in that module's own tests), and
-   `semantic_registry::semantic_id_for_surface("def")` *also* returns
-   `None` — `build_surface_index` only indexes `Stable`-admission
-   surfaces, and `def`'s row-1000 entry is `compatibility-only`. The
-   real evaluator (`eval/mod.rs`) dispatches `"def"` as its own
-   hardcoded literal string match for exactly this reason. Fixed by
-   mirroring that same hardcoded check in `is_define_spelling`, not by
-   routing through a registry lookup that structurally cannot see it.
-2. **`(cond (() (quote wrong)) (t (quote right)))` initially failed to
-   lower at all.** An earlier draft of `lower_list` treated *every*
-   empty list as a malformed zero-argument call. `()` is Canon 0's
-   `EmptyList` ground value — self-evaluating, per G8 (absence-of-
-   element and absence-of-truth are the same value) — not a call.
-   Fixed by lowering a bare `()` to a `Literal` with
-   `Provenance::Canon(CanonicalIdentity::EmptyList)`.
-
-Both are recorded as comments at their fix sites in `ir.rs`, not just
-here — so a future reader hitting the same case again finds the
-explanation at the code, not only in this document.
+Older IR versions exposed two useful failure modes: compatibility surface
+routing for `def`, and the former collision between empty structure and SID
+`00000000`. Under Contract 9 both are now expressed without a second named
+function ontology: `def` retains its own admitted SID and selects the define
+mechanism mechanically, while `()` is a structural literal outside the
+function-SID space.
 
 ## Acceptance evidence (#68's own criteria)
 
