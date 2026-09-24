@@ -10,7 +10,7 @@
 ; semantic identity changes from host numeric aliases to opaque exact 8-bit Sid8.
 
 (review "crates/my-lisp/src/eval/builtins.rs" "4ca9b106abd671eccc1abd0c8c9401d219b898c6df72801ab67cb1dea9a0b4f1" issue-1098 sid8-type-migration)
-(review "crates/my-lisp/src/eval/canon.rs" "6ba3c72cb8d14552642b8c76dacb680d1c5d2d27712eb498f2454fc32d5f3015" issue-1098 sid8-type-migration)
+(review "crates/my-lisp/src/eval/canon.rs" "fe6778da084a92806e7a589592aae13bf250876bba429ea2dd0e8f00a4c5409c" issue-1292 sid-primary-index-over-canon-identity)
 (review "crates/my-lisp/src/eval/mod.rs" "b82488395827e94ef910ca554962bc9008811d8cae4121dbe6d3533849d7293e" issue-1098 sid8-type-migration)
 (review "crates/my-lisp/src/eval/necessary_forms.rs" "6876d0aeec8b7d26b0014a51e194af8cd68ce3bcc84ecaffd974ce27557b55f5" issue-1098 sid8-type-migration)
 (review "crates/my-lisp/src/ir.rs" "619143298b56b4788c4c2de1c84023e1cc19449dea8729bdf4e9ccbb07128410" issue-1098 sid8-type-migration)

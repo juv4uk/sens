@@ -33,11 +33,15 @@ pub(crate) enum CanonicalKind {
     SpecialForm,
 }
 
+/// The SID is the primary key. `identity` is a human-readable label carried
+/// *over* that SID for the rest of this module to match on, not a separate
+/// identity SID happens to also have — Canon is a named subset of the SID
+/// space, not the other way around.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct CanonEntry {
-    pub identity: CanonicalIdentity,
-    pub kind: CanonicalKind,
     pub semantic_id: Sid8,
+    pub kind: CanonicalKind,
+    pub identity: CanonicalIdentity,
 }
 
 pub(crate) const EMPTY_LIST_SEMANTIC_ID: Sid8 = crate::sid!(00000000);
@@ -56,56 +60,63 @@ pub(crate) const SUB_SEMANTIC_ID: Sid8 = crate::sid!(00001101);
 pub(crate) const MUL_SEMANTIC_ID: Sid8 = crate::sid!(00001110);
 pub(crate) const DIV_SEMANTIC_ID: Sid8 = crate::sid!(00001111);
 
-/// Canon 00000000 is the empty-list ground object itself.
-/// McCarthy7 follow contiguously through 00000111.
+/// Declared in ascending SID order (00000000..00000111) — `identity_for_semantic_id`
+/// indexes this array directly by SID byte, so that order is load-bearing,
+/// not incidental.
 pub(crate) const CANON: [CanonEntry; 8] = [
     CanonEntry {
-        identity: CanonicalIdentity::EmptyList,
-        kind: CanonicalKind::GroundValue,
         semantic_id: EMPTY_LIST_SEMANTIC_ID,
+        kind: CanonicalKind::GroundValue,
+        identity: CanonicalIdentity::EmptyList,
     },
     CanonEntry {
-        identity: CanonicalIdentity::Quote,
-        kind: CanonicalKind::SpecialForm,
         semantic_id: QUOTE_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Atom,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: ATOM_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Eq,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: EQ_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Cons,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: CONS_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Car,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: CAR_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Cdr,
-        kind: CanonicalKind::ValuePrimitive,
-        semantic_id: CDR_SEMANTIC_ID,
-    },
-    CanonEntry {
-        identity: CanonicalIdentity::Cond,
         kind: CanonicalKind::SpecialForm,
+        identity: CanonicalIdentity::Quote,
+    },
+    CanonEntry {
+        semantic_id: ATOM_SEMANTIC_ID,
+        kind: CanonicalKind::ValuePrimitive,
+        identity: CanonicalIdentity::Atom,
+    },
+    CanonEntry {
+        semantic_id: EQ_SEMANTIC_ID,
+        kind: CanonicalKind::ValuePrimitive,
+        identity: CanonicalIdentity::Eq,
+    },
+    CanonEntry {
+        semantic_id: CONS_SEMANTIC_ID,
+        kind: CanonicalKind::ValuePrimitive,
+        identity: CanonicalIdentity::Cons,
+    },
+    CanonEntry {
+        semantic_id: CAR_SEMANTIC_ID,
+        kind: CanonicalKind::ValuePrimitive,
+        identity: CanonicalIdentity::Car,
+    },
+    CanonEntry {
+        semantic_id: CDR_SEMANTIC_ID,
+        kind: CanonicalKind::ValuePrimitive,
+        identity: CanonicalIdentity::Cdr,
+    },
+    CanonEntry {
         semantic_id: COND_SEMANTIC_ID,
+        kind: CanonicalKind::SpecialForm,
+        identity: CanonicalIdentity::Cond,
     },
 ];
 
+/// CANON is declared in exact SID order (index 0 = 00000000 ... index 7 =
+/// 00000111), so resolution indexes directly by the SID byte instead of
+/// scanning for an equal field — the same mechanism PRIMITIVE_TABLE already
+/// uses, now applied to identity resolution too.
 pub(crate) fn identity_for_semantic_id(semantic_id: Sid8) -> Option<CanonicalIdentity> {
-    CANON
-        .iter()
-        .find(|entry| entry.semantic_id == semantic_id)
-        .map(|entry| entry.identity)
+    let entry = CANON.get(semantic_id.packed_byte() as usize)?;
+    debug_assert_eq!(
+        entry.semantic_id, semantic_id,
+        "CANON must stay declared in ascending SID order for direct indexing to hold"
+    );
+    Some(entry.identity)
 }
 
 fn semantic_id_for_identity(identity: CanonicalIdentity) -> Sid8 {
