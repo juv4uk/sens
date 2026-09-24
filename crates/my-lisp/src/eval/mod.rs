@@ -25,6 +25,7 @@ pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
 use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sid8, Span, Value};
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -188,19 +189,15 @@ pub(crate) fn evaluate_step(
 }
 
 fn evaluate_list(
-    items: &[Expr],
+    items: &Rc<[Expr]>,
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     let arguments = &items[1..];
     let head_name = items[0].kind.as_symbol();
-    let head_sid = binary_head_sid(&items[0]);
-    let canonical_head = head_name
-        .and_then(canon::identity_for_surface)
-        .or_else(|| head_sid.and_then(canon::identity_for_semantic_id));
-    let necessary_head = head_name
-        .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+    let head_sid = resolved_immutable_head_sid(items, environment);
+    let canonical_head = head_sid.and_then(canon::identity_for_semantic_id);
+    let necessary_head = head_sid.and_then(necessary_forms::identity_for_semantic_id);
 
     match (canonical_head, necessary_head) {
         (Some(canon::CanonicalIdentity::Quote), _) => {
@@ -254,6 +251,34 @@ fn evaluate_list(
     }
 }
 
+/// Resolve an executable list head once per session when — and only when —
+/// the existing language rules prove that the surface denotes an immutable
+/// Canon or necessary-form identity.
+///
+/// Ordinary registry entries stay lexical and are deliberately not cached:
+/// `+`, `map`, capabilities, user functions and macros may still be shadowed
+/// or rebound by current language law. Quoted/macro data never reaches this
+/// function as an executable list, so no data symbol is rewritten.
+fn resolved_immutable_head_sid(items: &Rc<[Expr]>, environment: &Environment) -> Option<Sid8> {
+    if let Some(sid) = binary_head_sid(&items[0]) {
+        return Some(sid);
+    }
+    if let Some(sid) = environment.cached_immutable_head_sid(items) {
+        return Some(sid);
+    }
+
+    let name = items[0].kind.as_symbol()?;
+    let sid = semantic_registry::semantic_id_for_surface(name)?;
+    let immutable = canon::identity_for_semantic_id(sid).is_some()
+        || necessary_forms::identity_for_semantic_id(sid).is_some();
+    if !immutable {
+        return None;
+    }
+
+    environment.cache_immutable_head_sid(items, sid);
+    Some(sid)
+}
+
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
@@ -280,6 +305,113 @@ impl ExprKindExt for ExprKind {
 #[cfg(test)]
 mod single_pass_eval_tests {
     use super::*;
+
+    fn list_items(expression: &Expr) -> &Rc<[Expr]> {
+        let ExprKind::List(items) = &expression.kind else {
+            panic!("expected list expression");
+        };
+        items
+    }
+
+    #[test]
+    fn immutable_surface_head_is_resolved_to_sid_once_per_executable_list() {
+        let forms = parse("(car (cons 1 ()))").expect("source parses");
+        let outer = list_items(&forms[0]);
+        let inner = list_items(&outer[1]);
+
+        let mut session = Session::default();
+        assert_eq!(session.environment.cached_immutable_head_sid(outer), None);
+        assert_eq!(session.environment.cached_immutable_head_sid(inner), None);
+
+        let first = eval_parsed_expressions(&forms, &mut session)
+            .expect("first execution resolves immutable heads");
+        assert_eq!(first.value.to_string(), "1");
+        assert_eq!(
+            session.environment.cached_immutable_head_sid(outer),
+            Some(crate::sid!(00000101))
+        );
+        assert_eq!(
+            session.environment.cached_immutable_head_sid(inner),
+            Some(crate::sid!(00000100))
+        );
+
+        let second = eval_parsed_expressions(&forms, &mut session)
+            .expect("second execution reuses exact SID identities");
+        assert_eq!(second.value, first.value);
+        assert_eq!(
+            session.environment.cached_immutable_head_sid(outer),
+            Some(crate::sid!(00000101))
+        );
+    }
+
+    #[test]
+    fn peer_canon_surfaces_cache_the_same_sid_identity() {
+        let mut session = Session::default();
+        for source in [
+            "(car (quote (1 2)))",
+            "(перше (як-є (1 2)))",
+            "(ādi (svarūpa (1 2)))",
+        ] {
+            let forms = parse(source).expect("peer surface parses");
+            let outer = list_items(&forms[0]);
+            let value = eval_parsed_expressions(&forms, &mut session)
+                .expect("peer surface evaluates")
+                .value;
+            assert_eq!(value.to_string(), "1");
+            assert_eq!(
+                session.environment.cached_immutable_head_sid(outer),
+                Some(crate::sid!(00000101)),
+                "source: {source}"
+            );
+        }
+    }
+
+    #[test]
+    fn quoted_surface_like_list_never_enters_the_resolved_head_cache() {
+        let forms = parse("(quote (car (cons 1 ())))").expect("quote parses");
+        let quote_items = list_items(&forms[0]);
+        let quoted_car = list_items(&quote_items[1]);
+
+        let mut session = Session::default();
+        let value = eval_parsed_expressions(&forms, &mut session)
+            .expect("quoted data evaluates")
+            .value;
+        assert_eq!(value.to_string(), "(car (cons 1 ()))");
+
+        assert_eq!(
+            session.environment.cached_immutable_head_sid(quote_items),
+            Some(crate::sid!(00000001)),
+            "executable QUOTE head itself may resolve once"
+        );
+        assert_eq!(
+            session.environment.cached_immutable_head_sid(quoted_car),
+            None,
+            "quoted data must never cross the executable surface->SID boundary"
+        );
+    }
+
+    #[test]
+    fn shadowable_noncanon_surface_is_never_cached_as_sid() {
+        let forms = parse("(+ 1 2)").expect("ordinary builtin parses");
+        let items = list_items(&forms[0]);
+        let mut session = Session::default();
+
+        let first = eval_parsed_expressions(&forms, &mut session)
+            .expect("ordinary builtin evaluates");
+        assert_eq!(first.value.to_string(), "3");
+        assert_eq!(
+            session.environment.cached_immutable_head_sid(items),
+            None,
+            "ordinary shadowable bindings must stay outside immutable SID cache"
+        );
+
+        eval_program("(def + (lambda (a b) (quote shadowed)))", &mut session)
+            .expect("ordinary builtin remains shadowable");
+        let second = eval_parsed_expressions(&forms, &mut session)
+            .expect("same parsed AST must observe lexical rebinding");
+        assert_eq!(second.value.to_string(), "shadowed");
+        assert_eq!(session.environment.cached_immutable_head_sid(items), None);
+    }
 
     #[test]
     fn single_pass_eval_parsed_expressions_evaluates_preparsed_ast() {
