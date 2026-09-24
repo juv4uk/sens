@@ -1,0 +1,51 @@
+name: Core4 predicate answer scale
+
+on:
+  pull_request:
+    paths:
+      - "contracts/core4-predicate-answer-scale.lisp"
+      - "scripts/check-core4-predicate-answer-scale.lisp"
+      - ".github/workflows/core4-predicate-answer-scale.yml"
+  push:
+    branches: [main]
+    paths:
+      - "contracts/core4-predicate-answer-scale.lisp"
+      - "scripts/check-core4-predicate-answer-scale.lisp"
+      - ".github/workflows/core4-predicate-answer-scale.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  predicate-answer-scale:
+    name: Lisp-owned Core4 predicate answer scale
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build semantic oracle
+        run: cargo build -p my-lisp-cli --bin my-lisp
+
+      - name: Verify predicate answer scale
+        shell: bash
+        run: |
+          set -euo pipefail
+          verdict="$(./target/debug/my-lisp scripts/check-core4-predicate-answer-scale.lisp)"
+          printf '%s\n' "$verdict"
+          test "$verdict" = "(core4-predicate-answer-scale-ok)"
+
+      - name: Keep this slice Lisp-owned
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --name-only "${{ github.event.pull_request.base.sha || github.event.before }}" HEAD 2>/dev/null | grep -E '\.rs$'; then
+            echo "Predicate-answer authority slice must not grow Rust" >&2
+            exit 1
+          fi
+
+      - name: Diff hygiene
+        run: git diff --check
