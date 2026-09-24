@@ -95,3 +95,8 @@
 
 ; #1173 structure-core identity-field migration: observer requires exact Sid8.
 (review "crates/my-lisp/tests/witness_authority.rs" "1fc6670a70d5392b7a2188133c8b911781614bb1dff763cff552281d3669d43c" issue-1173 structure-core-sid8-observer)
+
+; #1294 Ukrainian surface inventory: observer parses top-level Core4 definitions
+; only to compare live source membership against Lisp-owned public/internal classification.
+; It may not define meaning, mint SID identity, or classify result domains.
+(review "crates/my-lisp/tests/uk_surface_inventory.rs" "eb1973408cfd59ecccc9dd746b24da72361a6892c8aade40f17a8d6b1998d031" issue-1294 canonical-core4-definition-observer)
