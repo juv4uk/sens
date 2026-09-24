@@ -55,8 +55,8 @@
 
 (def pas-no-levels (pas-field pas-no (quote levels)))
 (def pas-yes-levels (pas-field pas-yes (quote levels)))
-(def pas-lower-sid (pas-field pas-boundary (quote lower-sid-anchor)))
-(def pas-upper-sid (pas-field pas-boundary (quote upper-sid-anchor)))
+(def pas-lower-sid (pas-field pas-boundary (quote no-sid-endpoint)))
+(def pas-upper-sid (pas-field pas-boundary (quote yes-sid-endpoint)))
 
 (def pas-verdict
   (lambda ()
@@ -99,18 +99,24 @@
                               ("0000000" 7 ajñāta-sīmā))))
                 (pas-check (quote boundary)
                            (pas-field pas-boundary (quote boundary))
+                           (quote directed-endpoints))
+                (pas-check (quote undirected-answer)
+                           (pas-field pas-boundary (quote undirected-answer))
                            (quote ()))
                 (pas-check (quote boundary-sanskrit)
                            (pas-field pas-boundary (quote sanskrit))
                            (quote ajñāta))
-                (pas-check (quote lower-sid-anchor)
+                (pas-check (quote no-sid-endpoint)
                            pas-lower-sid
                            (quote 00000000))
-                (pas-check (quote upper-sid-anchor)
+                (pas-check (quote yes-sid-endpoint)
                            pas-upper-sid
                            (quote 11111111))
                 (pas-check (quote sid-alias)
                            (pas-field pas-boundary (quote sid-alias))
+                           (quote forbidden))
+                (pas-check (quote empty-list-alias)
+                           (pas-field pas-boundary (quote empty-list-alias))
                            (quote forbidden))
                 (pas-check (quote sid-anchors-distinct)
                            (equal? pas-lower-sid pas-upper-sid)
@@ -142,7 +148,7 @@
                            (quote append-same-bit))
                 (pas-check (quote boundary-law)
                            (pas-field pas-algebra (quote boundary-law))
-                           (quote eighth-directed-step-projects-to-empty-list))))))
+                           (quote eighth-directed-step-reaches-function-sid-endpoint))))))
       (cond
         ((atom failure) (structural-kind empty-list)
          (quote (core4-predicate-answer-scale-ok)))
