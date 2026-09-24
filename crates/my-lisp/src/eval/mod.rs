@@ -146,11 +146,11 @@ pub(crate) fn evaluate_step(
             if let Some(value) = canon::value_for_surface(symbol) {
                 return Ok(EvalStep::Value(value));
             }
-            if canon::identity_for_surface(symbol).is_some() {
+            if let Some(sid) = canon::routed_sid_for_surface(symbol) {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
                     format!(
-                        "canonical special form is syntax-only · канонічна спеціальна форма є лише синтаксисом · kanonische Sonderform ist nur Syntax: {symbol}"
+                        "function SID is syntax-only in this position · function SID тут лише синтаксис · Funktions-SID ist hier nur Syntax: {sid}"
                     ),
                     expression.span,
                 ));
@@ -193,29 +193,29 @@ fn evaluate_list(
     let arguments = &items[1..];
     let head_name = items[0].kind.as_symbol();
     let head_sid = binary_head_sid(&items[0]);
-    let canonical_head = head_name
-        .and_then(canon::identity_for_surface)
-        .or_else(|| head_sid.and_then(canon::identity_for_semantic_id));
+    let routed_head_sid = head_sid
+        .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
+        .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
         .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
-    match (canonical_head, necessary_head) {
-        (Some(canon::CanonicalIdentity::Quote), _) => {
-            special_forms::exact_arity(head_name.unwrap_or("00000001"), arguments, 1, span)?;
-            let value = special_forms::quoted(&arguments[0])?;
-            Ok(EvalStep::Value(value))
-        }
-        (_, Some(necessary_forms::NecessaryFormIdentity::Lambda)) => {
-            closures::create_lambda(arguments, environment, span).map(EvalStep::Value)
-        }
-        (_, Some(necessary_forms::NecessaryFormIdentity::Define)) => {
-            special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value)
-        }
-        (Some(canon::CanonicalIdentity::Cond), _) => {
-            special_forms::evaluate_cond(arguments, environment, span)
-        }
-        _ => {
+    if routed_head_sid == Some(crate::sid!(00000001)) {
+        special_forms::exact_arity("00000001", arguments, 1, span)?;
+        let value = special_forms::quoted(&arguments[0])?;
+        return Ok(EvalStep::Value(value));
+    }
+    if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Lambda) {
+        return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
+    }
+    if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Define) {
+        return special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value);
+    }
+    if routed_head_sid == Some(crate::sid!(00000111)) {
+        return special_forms::evaluate_cond(arguments, environment, span);
+    }
+
+    {
             if let Some(name) = items[0].kind.as_symbol() {
                 if let Some(result) =
                     capabilities::dispatch_capability(name, arguments, environment, span)
