@@ -158,6 +158,43 @@ fn evaluate_read_file_bytes(
     ))
 }
 
+/// Raw host mechanism only: reads a file and validates it as UTF-8 in one
+/// native pass, using Rust's own `str::from_utf8` (the same complete
+/// validation `lib/utf8.lisp` hand-implements byte-by-byte in Lisp). This
+/// mechanism decides nothing about language meaning — it returns exactly the
+/// two-tag domain `lib/utf8.lisp::utf8-decode-string` already defines
+/// (`(decoded text)` / `(rejected invalid-utf8)`), so Lisp keeps owning that
+/// rejection domain and every caller of `read-file` sees an unchanged
+/// contract. Introduced under my-lisp#1228: high-load byte/text processing
+/// belongs in a Rust mechanism, not in a per-byte recursive Lisp walk.
+fn evaluate_read_file_utf8_raw(
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_arity("read-file-utf8-raw", arguments, 1, span)?;
+    let evaluated = eval_expr(&arguments[0], environment)?;
+    let Value::String(ref path) = evaluated else {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "read-file-utf8-raw expects a string path · read-file-utf8-raw ochikuie riadok-shliakh · read-file-utf8-raw erwartet einen String-Pfad",
+            span,
+        ));
+    };
+    ensure_fs_read_allowed(environment, "read-file-utf8-raw", path, span)?;
+    let bytes = read_file_bytes(path, span)?;
+    match std::str::from_utf8(&bytes) {
+        Ok(text) => Ok(Value::list([
+            Value::Symbol(Rc::from("decoded")),
+            Value::String(Rc::from(text)),
+        ])),
+        Err(_) => Ok(Value::list([
+            Value::Symbol(Rc::from("rejected")),
+            Value::Symbol(Rc::from("invalid-utf8")),
+        ])),
+    }
+}
+
 fn expect_byte_list(value: &Value, span: Span) -> Result<Vec<u8>, LanguageError> {
     let mut bytes = Vec::new();
     let mut current = value;
@@ -588,6 +625,7 @@ fn evaluate_load(
 pub fn install() {
     register_capability("read-dir", evaluate_read_dir);
     register_capability("read-file-bytes", evaluate_read_file_bytes);
+    register_capability("read-file-utf8-raw", evaluate_read_file_utf8_raw);
     register_capability("write-file-bytes", evaluate_write_file_bytes);
     register_capability("process-run-raw", process_raw::evaluate_process_run_raw);
     register_capability("load", evaluate_load);
@@ -613,6 +651,7 @@ mod install_tests {
         for name in [
             "read-dir",
             "read-file-bytes",
+            "read-file-utf8-raw",
             "write-file-bytes",
             "process-run-raw",
             "load",

@@ -8,12 +8,24 @@
 ; for `process-run` (lib/process.lisp) and `tcp-read`/`tcp-write` (lib/tcp.lisp).
 ; Load `lib/utf8.lisp` before this file.
 
+; #1228: `read-file` on a real multi-kilobyte file drove the pure-Lisp
+; byte-by-byte path (`utf8-decode-string` over `read-file-bytes`) to ~47s
+; (release) / ~100s (debug) for a single ~20KB registry file — see my-lisp
+; issue #333. `read-file-utf8-raw` is a raw host mechanism, high-load
+; execution only: it does not decide UTF-8 meaning, it returns the exact
+; same two-tag domain (`decoded`/`rejected invalid-utf8`) that
+; `utf8-decode-string` already defines, so this rewiring changes no
+; language-facing contract. `utf8-decode-string`/`utf8-decode`/
+; `utf8-all-bytes?` in lib/utf8.lisp are kept, unchanged, as the semantic
+; reference this mechanism is checked against (see
+; tests/utf8-fast-path-parity.lisp).
+;
 ; Historical `read-file` returns the decoded text directly. Invalid UTF-8 is
 ; no longer a raw Rust IO error: it returns the same explicit rejection value
 ; `utf8-decode-string` already produces for process/TCP bytes.
 (def read-file
   (lambda (path)
-    (let ((decoded (utf8-decode-string (read-file-bytes path))))
+    (let ((decoded (read-file-utf8-raw path)))
       (cond
         ((eq (car decoded) (quote decoded))
          (identity-relation same)
