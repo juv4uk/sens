@@ -384,6 +384,30 @@ mod fasl_tests {
     }
 
     #[test]
+    fn resolved_head_cache_is_not_ast_identity_or_fasl_data() {
+        const SOURCE: &str = "(car (quote (1 2)))";
+        let source_hash = sha256_source(SOURCE.as_bytes());
+        let expressions = parse(SOURCE).expect("source parses");
+        let structurally_equal = expressions.clone();
+        let before = encode_program(&expressions, &source_hash);
+
+        let ExprKind::List(items) = &expressions[0].kind else {
+            panic!("expected executable list");
+        };
+        items.cache_resolved_head_sid(crate::sid!(00000101));
+
+        assert_eq!(
+            expressions, structurally_equal,
+            "mechanical resolved-head cache must not change AST identity"
+        );
+        assert_eq!(
+            encode_program(&expressions, &source_hash),
+            before,
+            "FASL must serialize source structure, never runtime resolution cache"
+        );
+    }
+
+    #[test]
     fn fasl_preserves_large_exact_integer_past_f64_boundary() {
         const SOURCE: &str = "9007199254740993";
         let source_hash = sha256_source(SOURCE.as_bytes());
