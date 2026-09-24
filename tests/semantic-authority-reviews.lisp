@@ -115,3 +115,6 @@
 (review "crates/my-lisp/src/eval/canon.rs" "98ea7a845a4ba6335a84021929f340581192d3416eb1a3c780c16386ed2c9304" issue-1332 sid0-empty-list-decoupling)
 (review "crates/my-lisp/src/eval/mod.rs" "172b273f58cd65e63a2d81e549ea4838de227b559059dc05bb7e4dc33ddba706" issue-1332 empty-structure-direct-value)
 (review "crates/my-lisp/src/ir.rs" "92102163b52f71fe37d9e5f4ae6b48fec4525ed674ea334918249a723f9a23dc" issue-1332 empty-structure-ir-outside-sid-space)
+; #1344 Sens vocabulary foundation: exports Sens8, Sens, sens! alongside Sid8.
+(review "crates/my-lisp/src/lib.rs" "340674a9c5bd7cbd6ef5b6716955bfb28e9ddd3da6ce42fd0486110954ae4370" issue-1344 sens-vocabulary-foundation-export)
+(review "crates/my-lisp/tests/sens_foundation.rs" "3fbba9fff5cd2e04581fa45e31d1141ebcb15804650f56e70aaf24e7525e8d35" issue-1344 sens-foundation-observer)
