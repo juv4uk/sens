@@ -26,6 +26,9 @@
    (status . inventory-only)
    (semantic-change . forbidden)
    (mass-string-replacement . forbidden)
+   (performance-wrapper-audit . separate-axis-1277-1278)
+   (host-capability-sid-gap . separate-axis-1276)
+   (table-first-bootstrap-vision . out-of-scope-1281)
    (core1-core2-core3 . out-of-scope))
 
   ((surface . atom)
