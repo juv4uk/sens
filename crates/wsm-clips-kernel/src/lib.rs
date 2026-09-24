@@ -669,6 +669,18 @@ impl Drop for ClipsFact {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SemanticId(pub u8);
 
+const SID_ADD: u8 = 0b0000_1100;
+
+fn semantic_add_expression(payload: &str) -> Result<String, ()> {
+    let mut parts = payload.split_whitespace();
+    let left = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    let right = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    if parts.next().is_some() {
+        return Err(());
+    }
+    Ok(format!("(+ {left} {right})"))
+}
+
 /// Producer-owned CLIPS execution observation.
 ///
 /// Counts stay in the C API's native `c_ulong` domain and the agenda result
@@ -710,10 +722,10 @@ struct ClipsAbiContext {
 
 /// Mechanical adapter from the shared C ABI to one native CLIPS environment.
 ///
-/// The shared semantic payload accepts only kernel-local mechanical commands
-/// (run or retract). Raw CLIPS Eval is intentionally not exposed through this
-/// semantic exchange boundary: operator text is not a function identity.
-/// The semantic ID is transported opaquely and is not re-resolved from text.
+/// The shared semantic payload accepts kernel-local mechanical commands and,
+/// for explicitly admitted semantic SIDs, arguments-only data. Raw CLIPS Eval
+/// remains outside this boundary: operator text is not a function identity.
+/// Exact SID8 selects the admitted mechanism before private native syntax is built.
 pub struct ClipsAbiAdapter {
     context: Box<ClipsAbiContext>,
     vtable: WsmKernelVTable,
@@ -876,7 +888,17 @@ unsafe extern "C" fn clips_exchange(
         let Some(environment) = context.environment.as_mut() else {
             return WsmStatus::NotRunning;
         };
-        let output = if command == "run" {
+        let output = if request.semantic_id == SID_ADD {
+            let Ok(expression) = semantic_add_expression(command) else {
+                return WsmStatus::InvalidArgument;
+            };
+            let value = match environment.eval_bytes(&expression) {
+                Ok(value) => value,
+                Err(_) => return WsmStatus::KernelFailure,
+            };
+            context.last_eval_output = Some(value.clone());
+            value
+        } else if command == "run" {
             let fired = environment.run(-1);
             context.last_fired = Some(fired);
             format!("fired={fired}\n").into_bytes()
@@ -933,6 +955,19 @@ mod tests {
             let _ = ClipsKernel::discover();
         }
     }
+    #[test]
+    fn semantic_add_expression_is_arguments_only() {
+        assert_eq!(semantic_add_expression("2 3"), Ok("(+ 2 3)".to_string()));
+        assert!(
+            semantic_add_expression("eval:(+ 2 3)").is_err(),
+            "eval/operator text must never be semantic identity"
+        );
+        assert!(
+            semantic_add_expression("- 7 3").is_err(),
+            "operator text must not override the + SID"
+        );
+    }
+
     #[test]
     fn c_abi_adapter_declares_clips_without_semantic_mapping() {
         let adapter = ClipsAbiAdapter::new(
