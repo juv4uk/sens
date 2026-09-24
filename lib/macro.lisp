@@ -1,51 +1,40 @@
-; lib/macro.lisp — macro definition derived inside my-lisp.
-; lib/macro.lisp — визначення макросів, виведене всередині my-lisp.
+; lib/macro.lisp — bootstrap derivation on exact 8-bit function identities.
 ;
-; This file is the executable reduction proof for DEFMACRO:
+; #1325: the language has one function-identity space: 00000000..11111111.
+; Human words are not function identities.
 ;
-;   DEFMACRO = DEFINE + LAMBDA + MAKE_MACRO + list construction
+; SID 00001010 is derived here from mechanisms already selected by:
+;   00001001 + 00001000 + 00000100 + the narrow host Closure->Macro mechanism.
 ;
-; `make-macro` is the narrow host substrate Closure -> Macro. The behavior of
-; macro definition is still constructed here in the language itself.
+; `make-macro` below is NOT a my-lisp function identity. It is an explicit
+; temporary host substrate with no SID and is tracked by #1330/#1328 until that
+; boundary is removed or represented without creating a second function ontology.
 ;
-; This source deliberately binds NO human surface name. It evaluates to one
-; first-class Macro value; the bootstrap loader then exposes that same value
-; directly under the ratified peer spellings `defmacro` and
-; `визначити-макрос`. Thus no human surface is implemented as an alias of another.
-;
-; Necessary forms are selected by semantic identity after ordinary source
-; resolution. Byte SID text is metadata and is deliberately NOT executable
-; spelling, so this data->code boundary uses the admitted source spellings
-; `lambda` and `define`; the evaluator resolves them through the registry to
-; SIDs 8 and 9 before selecting mechanisms. They are not host semantic constants.
-; The bootstrap lambda uses the Lisp-family bare-symbol rest form (`args`) so
-; the data->code boundary stays a proper list throughout. Its minimum-arity
-; contract (name + parameter form) is preserved here in Lisp; `?:` and `.?`
-; are language-neutral Canon spellings, and a deliberately wrong-arity
-; `make-macro` call retains the named Arity failure class.
+; Every actual my-lisp function used below is invoked only by its eight bits.
+; No SID is wrapped in a string, symbol, quote-label, or named identity.
 
 (make-macro
-  (eval
-    (cons (quote lambda)
-      (cons (quote args)
-        (quote
-          ((?:
-             ((.? args)
+  (01001101
+    (00000100 (00000001 00001000)
+      (00000100 (00000001 args)
+        (00000001
+          ((00000111
+             ((00000010 args)
               (structural-kind empty-list)
               (make-macro))
-             ((.? (cdr args))
+             ((00000010 (00000110 args))
               (structural-kind empty-list)
               (make-macro))
              (t
               t
-              (cons (quote define)
-                (cons (car args)
-                  (cons
-                    (cons (quote make-macro)
-                      (cons
-                        (cons (quote lambda)
-                          (cons
-                            (car (cdr args))
-                            (cdr (cdr args))))
-                        (quote ())))
-                    (quote ()))))))))))))
+              (00000100 (00000001 00001001)
+                (00000100 (00000101 args)
+                  (00000100
+                    (00000100 (00000001 make-macro)
+                      (00000100
+                        (00000100 (00000001 00001000)
+                          (00000100
+                            (00000101 (00000110 args))
+                            (00000110 (00000110 args))))
+                        (00000001 ())))
+                    (00000001 ()))))))))))))
