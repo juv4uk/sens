@@ -81,6 +81,11 @@ fn render_uk(value: &Value) -> String {
         Value::Sid(sid) => {
             format!("#<вбудована {}>", uk_semantic_name(*sid))
         }
+        Value::PredicateAnswer(bit, width) => {
+            std::iter::repeat(if *bit { '1' } else { '0' })
+                .take(*width as usize)
+                .collect()
+        }
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
             escaped.push('"');

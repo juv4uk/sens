@@ -453,6 +453,8 @@ pub enum Value {
     Number(f64, Exactness),
     Rational(Rational),
     Sid(Sid8),
+    /// #1257 research mechanism — see `syntax::ExprKind::PredicateAnswer`.
+    PredicateAnswer(bool, u8),
     String(Rc<str>),
     Symbol(Rc<str>),
     Pair(Rc<Value>, Rc<Value>),
@@ -523,6 +525,10 @@ impl PartialEq for Value {
             }
             (Value::Rational(left), Value::Rational(right)) => left == right,
             (Value::Sid(left), Value::Sid(right)) => left == right,
+            (
+                Value::PredicateAnswer(left_bit, left_width),
+                Value::PredicateAnswer(right_bit, right_width),
+            ) => left_bit == right_bit && left_width == right_width,
             (Value::String(left), Value::String(right)) => left == right,
             (Value::Symbol(left), Value::Symbol(right)) => left == right,
             (Value::Pair(left_head, left_tail), Value::Pair(right_head, right_tail)) => {
@@ -730,6 +736,11 @@ fn render(value: &Value, quote_strings: bool) -> String {
         }
         Value::Rational(number) => number.to_string(),
         Value::Sid(sid) => sid.to_string(),
+        Value::PredicateAnswer(bit, width) => {
+            std::iter::repeat(if *bit { '1' } else { '0' })
+                .take(*width as usize)
+                .collect()
+        }
         Value::String(text) => {
             if quote_strings {
                 let mut escaped = String::with_capacity(text.len() + 2);

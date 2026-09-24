@@ -358,6 +358,34 @@ impl Parser<'_> {
             });
         }
 
+        // #1257 research: a homogeneous 2..7-digit `0`/`1` run is a
+        // predicate-answer literal, not a decimal number — `00` and `111`
+        // must keep their exact written form and digit count rather than
+        // collapsing to the numbers 0/111. Width 1 (`0`, `1`) is left as an
+        // ordinary number: #1254/#1257 only ask that `00`.. `0000000` and
+        // `11`..`1111111` stop losing their length, and single-digit `0`/`1`
+        // already serve as the existing exact-Q boolean convention used
+        // pervasively (`<`, `=`, `utf8-in-range?`, ...) — redefining single
+        // digits here would be a much larger, unrequested, breaking change.
+        if (2..=7).contains(&token.len()) && token.bytes().all(|byte| byte == b'0') {
+            return Ok(Expr {
+                kind: ExprKind::PredicateAnswer(false, token.len() as u8),
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
+            });
+        }
+        if (2..=7).contains(&token.len()) && token.bytes().all(|byte| byte == b'1') {
+            return Ok(Expr {
+                kind: ExprKind::PredicateAnswer(true, token.len() as u8),
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
+            });
+        }
+
         let decimal_with_dot = if token.contains(',') && !token.contains('.') {
             Some(token.replace(',', "."))
         } else {

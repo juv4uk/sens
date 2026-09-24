@@ -50,6 +50,15 @@ pub enum ExprKind {
     Rational(Rational),
     NumericBuffer(NumericBuffer),
     Sid(Sid8),
+    /// #1257 research: a homogeneous 1..7-bit predicate-answer literal
+    /// (`0`, `00`, ..., `0000000` / `1`, `11`, ..., `1111111`). `bit` is the
+    /// direction (false = `0`-family, true = `1`-family); `width` is the
+    /// exact digit count (1..=7), never collapsed to a decimal number and
+    /// never confused with the reserved 8-bit `Sid` lexical space. Reader
+    /// and printer round-trip only — no cond/eq/structural-kind semantics
+    /// are wired to this yet; that is #1258/#1259's job once #1255 lands
+    /// the Lisp-owned answer table.
+    PredicateAnswer(bool, u8),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -99,6 +108,7 @@ pub(crate) mod fasl {
     const TAG_LIST: u8 = 5;
     const TAG_PAIR: u8 = 6;
     const TAG_BINARY: u8 = 7;
+    const TAG_PREDICATE_ANSWER: u8 = 8;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -136,6 +146,11 @@ pub(crate) mod fasl {
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
+            }
+            ExprKind::PredicateAnswer(bit, width) => {
+                out.push(TAG_PREDICATE_ANSWER);
+                out.push(*bit as u8);
+                out.push(*width);
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -186,6 +201,13 @@ pub(crate) mod fasl {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
                 ExprKind::Sid(crate::Sid8::from_packed_byte(value))
+            }
+            TAG_PREDICATE_ANSWER => {
+                let bit = *bytes.get(*pos)? != 0;
+                *pos += 1;
+                let width = *bytes.get(*pos)?;
+                *pos += 1;
+                ExprKind::PredicateAnswer(bit, width)
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),

@@ -150,6 +150,8 @@ pub enum LiteralValue {
     Number(f64, Exactness),
     Rational(Rational),
     Sid(Sid8),
+    /// #1257 research mechanism — see `syntax::ExprKind::PredicateAnswer`.
+    PredicateAnswer(bool, u8),
     String(String),
     Symbol(String),
 }
@@ -233,6 +235,11 @@ pub fn lower(expr: &Expr) -> Result<IrNode, LoweringError> {
         }),
         ExprKind::Sid(sid) => Ok(IrNode::Literal {
             value: LiteralValue::Sid(*sid),
+            span: expr.span,
+            provenance: Provenance::Literal,
+        }),
+        ExprKind::PredicateAnswer(bit, width) => Ok(IrNode::Literal {
+            value: LiteralValue::PredicateAnswer(*bit, *width),
             span: expr.span,
             provenance: Provenance::Literal,
         }),

@@ -140,6 +140,9 @@ pub(crate) fn evaluate_step(
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
         ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
+        ExprKind::PredicateAnswer(bit, width) => {
+            Ok(EvalStep::Value(Value::PredicateAnswer(*bit, *width)))
+        }
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {

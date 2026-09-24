@@ -54,6 +54,20 @@ impl NanBox {
             Value::Sid(sid) => {
                 NanBox(MASK_QNAN | (TAG_PRIMITIVE << 28) | u64::from(sid.packed_byte()))
             }
+            // #1257 research mechanism: the fpga-lisp NaN-box tag space (4
+            // bits, 0..15) is already fully assigned to the other 16 Value
+            // variants — there is no free tag left. Native/FPGA ABI
+            // transport for predicate-answer literals is out of scope for
+            // #1257 (reader/printer round-trip only); this deliberately
+            // panics rather than silently reusing another variant's tag or
+            // dropping the width, so the gap stays visible instead of
+            // becoming a quiet data-corruption bug the first time this path
+            // is exercised.
+            Value::PredicateAnswer(_, _) => {
+                unimplemented!(
+                    "PredicateAnswer has no native/FPGA ABI transport tag yet (#1257 is reader/printer-only)"
+                )
+            }
             Value::Rational(r) => {
                 let ptr = r as *const Rational as u64;
                 NanBox(Self::pack_ptr(TAG_RATIONAL, ptr))
