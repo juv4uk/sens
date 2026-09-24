@@ -52,7 +52,7 @@ jobs:
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-predicate-answer-scale-ok)"
 
-      - name: Verify distinct-SID boundary projection
+      - name: Verify function-SID endpoint boundary
         shell: bash
         run: |
           set -euo pipefail
