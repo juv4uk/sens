@@ -710,8 +710,10 @@ struct ClipsAbiContext {
 
 /// Mechanical adapter from the shared C ABI to one native CLIPS environment.
 ///
-/// The payload is a kernel-local transport command (run or retract). The
-/// semantic ID is not interpreted by this crate.
+/// The shared semantic payload accepts only kernel-local mechanical commands
+/// (run or retract). Raw CLIPS Eval is intentionally not exposed through this
+/// semantic exchange boundary: operator text is not a function identity.
+/// The semantic ID is transported opaquely and is not re-resolved from text.
 pub struct ClipsAbiAdapter {
     context: Box<ClipsAbiContext>,
     vtable: WsmKernelVTable,
@@ -886,16 +888,6 @@ unsafe extern "C" fn clips_exchange(
                 return WsmStatus::KernelFailure;
             }
             b"retracted\n".to_vec()
-        } else if let Some(expression) = command.strip_prefix("eval:") {
-            let value = match environment.eval_bytes(expression) {
-                Ok(value) => value,
-                Err(_) => return WsmStatus::KernelFailure,
-            };
-            context.last_eval_output = Some(value.clone());
-            let mut output = b"result=".to_vec();
-            output.extend_from_slice(&value);
-            output.push(b'\n');
-            output
         } else {
             return WsmStatus::InvalidArgument;
         };
