@@ -53,8 +53,8 @@ fn is_define_spelling(name: &str) -> bool {
 /// answer "why does this data mean what it means" without re-deriving it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Provenance {
-    /// One of the seven immutable Canon 0 identities (quote/atom/eq/cons/
-    /// car/cdr/cond) — resolved directly, never through ordinary lookup.
+    /// Legacy named provenance for the seven routed SIDs 00000001..00000111.
+    /// #1327 removes this named layer in favor of Sid8-only provenance.
     Canon(CanonicalIdentity),
     /// `lambda` (SID 00001000) or `define`/`def` (SIDs 00001001/00001011) — evaluator-owned mechanism
     /// beyond Canon, resolved by exact SID identity.
@@ -491,7 +491,7 @@ pub fn explain(node: &IrNode) -> String {
         } => format!("reference to `{name}` ({provenance:?})"),
         IrNode::Quote { .. } => "quote: datum preserved as unlowered source data (G3)".to_string(),
         IrNode::Cond { clauses, .. } => {
-            format!("cond: {} clause(s), Canon 0 special form", clauses.len())
+            format!("SID 00000111: {} clause(s), special-form shape", clauses.len())
         }
         IrNode::Lambda { body, .. } => format!(
             "lambda: {} body expression(s), byte SID 00001000",
