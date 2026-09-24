@@ -175,3 +175,7 @@ crates/my-lisp/tests/backend_not_on_sid_gap.rs	meta_eval_ordinary_primitive_disp
 crates/my-lisp/tests/uk_surface.rs	canonical_ukrainian_syntax_and_batch_one_aliases_preserve_results	observer	ukrainian-surface-preserves-current-result-domains	lib/surface/uk.lisp + contracts/answer-contract.lisp	migrated
 
 crates/my-lisp/tests/ukr_acceptance.rs	shadowing_ukr_peer_does_not_retarget_english_peer	observer	ukr-peer-shadowing-preserves-current-result-domain	lib/surface/semantic-registry.lisp	migrated
+
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	inventory_is_explicitly_core4_only_and_non_semantic	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	semantic_roots_have_distinct_roles_instead_of_one_bulk_rewrite_class	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	inventory_uses_only_the_ratified_role_vocabulary	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
