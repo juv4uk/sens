@@ -1,5 +1,5 @@
 ; #990 — fail-closed validation for mechanism evidence.
-; Evidence may only attach to an existing Canon/function-table SID and to an
+; Evidence may only attach to an existing 8-bit function SID and to an
 ; executor route already admitted by #1046 mechanism metadata. This checker does
 ; not define operation names, meaning, law, domain, or semantic equivalence.
 
@@ -14,7 +14,7 @@
 
 (def registry-rows registry)
 
-(def evidence-sid-text
+(def evidence-sid-bits
   (lambda (sid)
     (cond
       ((string? sid) sid)
@@ -54,12 +54,12 @@
       ((atom rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
-           ((equal? (evidence-sid-text sid) (evidence-sid-text (car row))) (structural-relation same)
+           ((equal? (evidence-sid-bits sid) (evidence-sid-bits (car row))) (structural-relation same)
             (cond
               ((eq executor (second row)) (identity-relation same) (quote yes))
               ((eq executor (second row)) (identity-relation distinct)
                (mechanism-has-route? sid executor (cdr rows)))))
-           ((equal? (evidence-sid-text sid) (evidence-sid-text (car row))) (structural-relation distinct)
+           ((equal? (evidence-sid-bits sid) (evidence-sid-bits (car row))) (structural-relation distinct)
             (mechanism-has-route? sid executor (cdr rows)))))))))
 
 (def evidence-has-route?
@@ -145,7 +145,7 @@
            ((eq (registry-has-sid? sid registry-rows) (quote no))
             (identity-relation same)
             (list (quote island-math-evidence-violation)
-                  (quote sid-not-in-canon-function-table) sid))
+                  (quote sid-not-in-function-table) sid))
            ((eq (admitted-executor? executor) (quote no))
             (identity-relation same)
             (list (quote island-math-evidence-violation)
@@ -153,7 +153,7 @@
            ((eq (mechanism-has-route? sid executor mechanism-rows) (quote no))
             (identity-relation same)
             (list (quote island-math-evidence-violation)
-                  (quote executor-route-not-admitted-by-canon-projection) sid executor))
+                  (quote executor-route-not-admitted-by-function-projection) sid executor))
            ((eq (admitted-status? status) (quote no))
             (identity-relation same)
             (list (quote island-math-evidence-violation)
