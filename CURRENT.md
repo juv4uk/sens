@@ -5,11 +5,11 @@
 ## Authority order
 
 1. **`language-contract.lisp` Contract 9** — у мові є рівно 256 функцій `00000000..11111111`; самі 8 бітів є функціональною тотожністю.
-2. **Standing invariant #1325 + executable guard #1331** — жодної другої named-function ontology, жодного `SID text/literal/spelling`, quoted/string/symbol wrapper або host label як функції.
+2. **Standing invariant #1325 + executable guard #1331** — жодної другої словесної функціональної онтології, жодної оболонки або host label замість самих 8 бітів.
 3. **Lisp-owned Core contracts and executable conformance evidence** — вони визначають закони/результати над уже вибраними 8 бітами, але не створюють нових функціональних тотожностей.
 4. **Reference runtime `crates/my-lisp`** — механізми виконання та перевірка conformance. Host/runtime може мати локальні таблиці й оптимізації, але вони не стають владою мови.
 5. **Independent substrates** — FPGA, C, WASM, GraalVM, Common Lisp, Prolog, Datalog, CLIPS та інші механізми. Вони споживають уже вибрані 8 бітів.
-6. **UI/source routing metadata** — людські підказки та локалізації можуть допомагати вводу, але не є функціями, meaning або semantic identity.
+6. **UI/source routing metadata** — людські підказки та локалізації можуть допомагати вводу, але не є функціями й не володіють законом.
 7. **Активні плани й task DAG** — `tasks.lisp`, `PLAN.md`, `STATUS.md` та явно чинні implementation plans.
 8. **Tests/CI/evidence** — доводять поточний стан; claim без виконуваного доказу лишається гіпотезою.
 
