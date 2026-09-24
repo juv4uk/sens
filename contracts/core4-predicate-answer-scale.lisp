@@ -24,16 +24,17 @@
 ;   aniścaya      — uncertainty / indecision
 ;   ajñāta        — unknown
 ; Level 7 uses the my-lisp compound ajñāta-sīmā ("unknown-boundary") to mark
-; the last directed answer immediately before the shared () boundary.
+; the last short directed answer immediately before its function-SID endpoint.
 ;
 ; Lexical sources consulted for the Sanskrit anchors:
 ; Monier-Williams / Macdonell / Apte entries surfaced by SanskritDictionary:
 ; niścaya, aniścaya, saṃśaya, saṃbhāvanā, ajñāta, sīmā.
 ;
 ; IMPORTANT:
-;   00000000 and 11111111 below are Sid8 boundary anchors only.
-;   They remain distinct SID identities.  Their relation to () is a projection
-;   question owned by #1256, not an equality/alias law in this table.
+;   00000000 and 11111111 below are function-SID endpoints of the directed
+;   NO/YES paths. They remain distinct function identities.
+;   () is an independent structural/undirected answer outside function-SID
+;   space. No endpoint SID projects or aliases to ().
 
 (core4-predicate-answer-scale/1
 
@@ -59,13 +60,15 @@
       ("000000"  6 aniścaya)
       ("0000000" 7 ajñāta-sīmā))))
 
-  ((boundary . ())
+  ((boundary . directed-endpoints)
+   (undirected-answer . ())
    (sanskrit . ajñāta)
    (meaning-uk . "невідомо")
-   (lower-sid-anchor . 00000000)
-   (upper-sid-anchor . 11111111)
+   (no-sid-endpoint . 00000000)
+   (yes-sid-endpoint . 11111111)
    (sid-alias . forbidden)
-   (projection-owner . issue-1256))
+   (empty-list-alias . forbidden)
+   (boundary-owner . issue-1336))
 
   ((direction . yes)
    (bit . "1")
@@ -81,5 +84,5 @@
   ((algebra . minimal)
    (not-law . same-width-bit-inversion)
    (weakening-law . append-same-bit)
-   (boundary-law . eighth-directed-step-projects-to-empty-list)
+   (boundary-law . eighth-directed-step-reaches-function-sid-endpoint)
    (and-or-cond-law . deliberately-unratified)))
