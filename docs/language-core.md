@@ -49,7 +49,6 @@ They are not functions and do not own meaning.
 The forbidden model is:
 
     name -> meaning -> SID
-    SID  -> named semantic identity
 
 Runtime and compiler logic must operate on Sid8 after source/UI routing.
 
