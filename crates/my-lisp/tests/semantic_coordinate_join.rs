@@ -291,7 +291,7 @@ fn eq_sid_joins_relation_my_lisp_and_compare_capability() {
 
     let mut session = load_coordinate_session();
     let math = string_coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
-    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00001100));
+    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00000011));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
@@ -309,7 +309,7 @@ fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
 
     let mut session = load_coordinate_session();
     let math = string_coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
-    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00001100));
+    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00000100));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
@@ -332,7 +332,7 @@ fn cond_sid_keeps_negative_math_evidence_and_absent_external_kernels_visible() {
 
     let mut session = load_coordinate_session();
     let math = string_coordinate_value(&mut session, "semantic-coordinate-law-for-sid", SID);
-    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00001100));
+    let machine = machine_coordinate_value(&mut session, my_lisp::sid!(00000111));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
