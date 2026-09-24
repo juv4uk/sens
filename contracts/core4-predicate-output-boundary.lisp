@@ -42,7 +42,7 @@
    (independent-axis-may-change-semantic-verdict . no))
 
   ((endpoint-flow .
-     ((no  00000000 ()))
-     ((yes 11111111 ())))
+     ((no  00000000 ())
+      (yes 11111111 ())))
    (endpoint-sid-identity . distinct)
    (endpoint-projection . shared-empty-list)))
