@@ -39,6 +39,8 @@ LAYERS = {
     "tooling",
 }
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
+SID8 = re.compile(r"^[01]{8}$")
+QUOTED_SID8_OWNERSHIP = re.compile(r'^\(ownership\s+\S+\s+"[01]{8}"(?:\s|\))')
 
 
 @dataclass(frozen=True)
@@ -82,6 +84,15 @@ def forms(path: Path) -> list[list[str]]:
         if tokens:
             parsed.append(tokens)
     return parsed
+
+
+def require_bare_semantic_identity_syntax() -> None:
+    for number, raw in enumerate(MAP_PATH.read_text(encoding="utf-8").splitlines(), 1):
+        line = raw.strip()
+        if QUOTED_SID8_OWNERSHIP.match(line):
+            raise ValueError(
+                f"{MAP_PATH}:{number}: semantic identity must be exact bare SID8, not a quoted String"
+            )
 
 
 def split_paths(text: str) -> list[str]:
@@ -128,6 +139,7 @@ def require_cross_evidence_gates(ownership: list[Ownership]) -> None:
 
 
 def load() -> tuple[list[Ownership], list[Migration]]:
+    require_bare_semantic_identity_syntax()
     ownership: list[Ownership] = []
     migrations: list[Migration] = []
     seen_keys: set[str] = set()
@@ -155,6 +167,10 @@ def load() -> tuple[list[Ownership], list[Migration]]:
             if row.policy_candidate not in {"yes", "no"}:
                 raise ValueError(f"{row.key}: policy candidate мусить бути yes/no")
             if row.semantic_id != "-":
+                if not SID8.fullmatch(row.semantic_id):
+                    raise ValueError(
+                        f"{row.key}: semantic identity must be exactly 8 binary digits or -"
+                    )
                 previous = seen_semantic.get(row.semantic_id)
                 if previous is not None:
                     raise ValueError(
