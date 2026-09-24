@@ -2,9 +2,9 @@ use std::fmt;
 
 /// Exact eight-bit semantic identity.
 ///
-/// The canonical identity is the bit spelling itself (`00000000..11111111`).
+/// The function identity is exactly the eight bits themselves (`00000000..11111111`).
 /// The packed byte is a private runtime/transport mechanism and is never the
-/// public semantic name of the SID.
+/// alternate identity of the SID.
 ///
 /// Deliberately NOT `Ord`/`PartialOrd` (wsm-lazarus owner, 2026-09-23:
 /// "треба заборонити математичні операції над нашим сідом" -- mathematical
@@ -69,15 +69,15 @@ use std::fmt;
 pub struct Sid8(u8);
 
 impl Sid8 {
-    /// Macro-only constructor from the exact token spelling captured by
-    /// `sid!(........)`. This deliberately validates text instead of asking
-    /// Rust to evaluate the token as a number.
+    /// Macro-only bridge from exactly eight source 0/1 characters captured by
+    /// `sid!(........)`. The characters are validated only to construct the
+    /// eight bits; they are not a second SID representation or identity.
     ///
     /// Public only because an exported macro may expand in another crate.
     /// It is not a user-facing constructor; use `sid!(00001100)`.
     #[doc(hidden)]
-    pub const fn __from_macro_spelling(spelling: &str) -> Self {
-        let bytes = spelling.as_bytes();
+    pub const fn __from_macro_bits(bits: &str) -> Self {
+        let bytes = bits.as_bytes();
         assert!(
             bytes.len() == 8,
             "sid! requires exactly eight bare binary digits"
@@ -98,9 +98,9 @@ impl Sid8 {
         Self(packed)
     }
 
-    /// Reader-side construction from canonical my-lisp SID spelling.
-    pub(crate) const fn from_canonical_spelling(spelling: &str) -> Option<Self> {
-        let bytes = spelling.as_bytes();
+    /// Reader-side construction of Sid8 from exactly eight 0/1 source characters.
+    pub(crate) const fn from_exact_bits(bits: &str) -> Option<Self> {
+        let bytes = bits.as_bytes();
         if bytes.len() != 8 {
             return None;
         }
@@ -142,11 +142,11 @@ impl fmt::Debug for Sid8 {
     }
 }
 
-/// Construct an exact-width SID from the literal token spelling itself.
+/// Construct one exact eight-bit function identity.
 ///
-/// The macro never asks Rust for the token's numeric value. `stringify!`
-/// captures the spelling and the const constructor validates exactly eight
-/// bare `0`/`1` characters at compile time.
+/// The macro never uses a decimal or prefixed numeric identity. `stringify!`
+/// is only a Rust macro bridge: the const constructor accepts exactly eight
+/// `0`/`1` source characters and returns Sid8.
 ///
 /// ```
 /// let sid = my_lisp::sid!(00001100);
@@ -154,7 +154,7 @@ impl fmt::Debug for Sid8 {
 /// ```
 ///
 /// Wrong width, numeric prefixes, separators, suffixes and quoted strings are
-/// compile-time errors rather than alternate SID spellings.
+/// compile-time errors rather than alternate identities.
 ///
 /// ```compile_fail
 /// let _ = my_lisp::sid!(0000110);
@@ -179,7 +179,7 @@ impl fmt::Debug for Sid8 {
 macro_rules! sid {
     ($bits:literal) => {{
         const SID: $crate::Sid8 =
-            $crate::Sid8::__from_macro_spelling(stringify!($bits));
+            $crate::Sid8::__from_macro_bits(stringify!($bits));
         SID
     }};
 }
@@ -189,7 +189,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn canonical_spelling_round_trips_without_decimal_identity() {
+    fn exact_eight_bits_round_trip_without_decimal_identity() {
         let sid = crate::sid!(00001100);
         assert_eq!(sid.to_string(), "00001100");
         assert_eq!(format!("{sid:?}"), "Sid8(00001100)");
@@ -198,14 +198,14 @@ mod tests {
     #[test]
     fn reader_constructor_accepts_only_exact_eight_bits() {
         assert_eq!(
-            Sid8::from_canonical_spelling("00001100"),
+            Sid8::from_exact_bits("00001100"),
             Some(crate::sid!(00001100))
         );
-        assert_eq!(Sid8::from_canonical_spelling("0000110"), None);
-        assert_eq!(Sid8::from_canonical_spelling("000011000"), None);
-        assert_eq!(Sid8::from_canonical_spelling("00001200"), None);
-        assert_eq!(Sid8::from_canonical_spelling("0b001100"), None);
-        assert_eq!(Sid8::from_canonical_spelling("0000_1100"), None);
+        assert_eq!(Sid8::from_exact_bits("0000110"), None);
+        assert_eq!(Sid8::from_exact_bits("000011000"), None);
+        assert_eq!(Sid8::from_exact_bits("00001200"), None);
+        assert_eq!(Sid8::from_exact_bits("0b001100"), None);
+        assert_eq!(Sid8::from_exact_bits("0000_1100"), None);
     }
 
     #[test]
@@ -240,7 +240,7 @@ mod tests {
             assert_eq!(
                 sid.to_string(),
                 format!("{byte:08b}"),
-                "byte {byte:#010b} rendered as a different spelling than its own bit pattern"
+                "byte {byte:#010b} rendered as bits different from its own identity"
             );
             assert!(
                 seen.insert(sid.packed_byte()),
