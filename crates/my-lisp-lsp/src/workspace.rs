@@ -6,9 +6,8 @@
 //! just remembers them per-file so go-to-definition can cross document
 //! boundaries. No grep-based detection, no invented semantics.
 //!
-//! Recognized extensions: `.wsm` (canonical, per
-//! ECO-DECISION-2026-08-27-MYLISP-WSM-RENAME), `.my` and `.lisp`
-//! (supported, not deprecated — the decision explicitly keeps both), plus
+//! Recognized extensions include `.sens` as the canonical project-name surface,
+//! plus the existing `.wsm`, `.my`, and `.lisp` source aliases, and
 //! the equal-standing Ukrainian Cyrillic spellings `.всм`/`.мій`/`.лісп`
 //! (issue #62, 2026-09-10 owner decision: file-naming surface policy, not
 //! a new semantic authority — a `.мій` file means exactly what a `.my`
@@ -72,7 +71,7 @@ impl WorkspaceIndex {
                 }
                 let is_source = matches!(
                     path.extension().and_then(|e| e.to_str()),
-                    Some("wsm") | Some("my") | Some("lisp")
+                    Some("sens") | Some("wsm") | Some("my") | Some("lisp")
                         | Some("всм") | Some("мій") | Some("лісп")
                 );
                 if !is_source {
@@ -192,6 +191,39 @@ impl WorkspaceIndex {
     /// All definitions in the index, in insertion order.
     pub fn lookup_all(&self) -> Vec<WorkspaceDef> {
         self.by_name.values().flatten().cloned().collect()
+    }
+}
+
+#[cfg(test)]
+mod sens_extension_tests {
+    use super::*;
+
+    #[test]
+    fn scan_root_recognizes_sens_extension_without_widening_filter() {
+        let dir = std::env::temp_dir().join(format!(
+            "sens-lsp-extension-test-{}",
+            std::process::id()
+        ));
+        std::fs::create_dir_all(&dir).expect("create temp workspace dir");
+
+        std::fs::write(dir.join("example.sens"), "(def sens-example 42)")
+            .expect("write .sens fixture");
+        std::fs::write(dir.join("ignored.txt"), "(def ignored-example 0)")
+            .expect("write non-source control file");
+
+        let mut index = WorkspaceIndex::new();
+        index.set_root(dir.clone());
+
+        assert!(
+            !index.lookup("sens-example").is_empty(),
+            ".sens file was not scanned"
+        );
+        assert!(
+            index.lookup("ignored-example").is_empty(),
+            ".txt file must remain outside the source allowlist"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }
 
