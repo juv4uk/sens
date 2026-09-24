@@ -8,6 +8,7 @@
 (authority "crates/my-lisp/tests/core4_eq_answer_1258.rs" observer)
 (authority "crates/my-lisp/tests/member_named_vs_sid_cost_1278.rs" observer)
 (authority "crates/my-lisp/tests/backend_not_on_sid_gap.rs" observer)
+(authority "crates/my-lisp/tests/guard.rs" observer)
 (authority "crates/my-lisp/tests/structural_query_inventory.rs" observer)
 (authority "crates/my-lisp/tests/structural_observation_contract.rs" observer)
 (authority "crates/my-lisp/tests/deep_structural_relation_contract.rs" observer)
