@@ -45,7 +45,7 @@ report_forbidden \
   "${files[@]}"
 
 report_forbidden \
-  'Value::Sid / ExprKind::Sid constructed directly from decimal, 0b, or quoted text' \
+  'Value::Sid / ExprKind::Sid constructed through alternate decimal, prefixed, or quoted wrappers' \
   '(Value|ExprKind)::Sid\((0b[01_]+|[0-9]+|"[^"]*")\)' \
   "${files[@]}"
 
@@ -58,7 +58,7 @@ if [[ -n "$direct_sid8" ]]; then
 fi
 
 report_forbidden \
-  'primitive-budget SID identity stored as quoted String' \
+  'function SID wrapped in quoted String' \
   '\(sid[[:space:]]*\.[[:space:]]*"[01]{8}"\)' \
   contracts/primitive-budget-audit-734.lisp
 

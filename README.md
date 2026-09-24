@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/wsm-lisp-hero.svg" alt="my-lisp — CANON 0+7 · META-EVAL · WASM" width="100%">
+<img src="docs/assets/wsm-lisp-hero.svg" alt="my-lisp — SID8 · CORE PROFILES · MULTI-SUBSTRATE" width="100%">
 
 # my-lisp
 
@@ -68,9 +68,9 @@ semantic contract + executable laws
  Rust   GraalVM   WASM / C / FPGA
 ```
 
-Особливо це стосується bootstrap: `lib/macro.lisp` і поточний профіль `lib/core4.lisp` є Lisp-owned behavior. `lib/core.lisp` лишається лише bounded compatibility donor/entry point під час міграції чотирьох Core. Якщо для запуску на іншому субстраті потрібен новий host-механізм, він має бути вузьким, незвідним і semantics-blind; переписування `COND`, `defmacro`, `let`, `equal?` чи іншої Lisp-поведінки в Java/Rust не є еквівалентним substrate switch.
+Особливо це стосується bootstrap: `lib/macro.lisp` і поточний профіль `lib/core4.lisp` є Lisp-owned behavior. `lib/core.lisp` лишається bounded compatibility donor/entry point під час міграції чотирьох Core. Якщо іншому субстрату потрібен host-механізм, він має бути вузьким і semantics-blind; backend не має права замінювати 8-бітний function SID словесною або власною identity.
 
-Поточний bootstrap рухається до канонічного **тричленного `COND`** — `(query expected-result expression)`: структурні та identity-рішення порівнюються з явним результатом, а не через загальну truthiness. Contract 8.0 також робить вичерпання явним: якщо жоден query не збігся зі своїм expected-result, канонічний `COND` завершується named failure `UnsatisfiedConditional`, а не тихим `()`. Перший upstream-крок для `lib/macro.lisp` проходить через PR [`#615`](https://github.com/juv4uk/my-lisp/pull/615); це ще не є оголошенням зеленого CI.
+Для Core4 функція SID `00000111` має тричленний закон `(query expected-result expression)`: спостережений результат порівнюється з явним expected datum, а вичерпання дає `UnsatisfiedConditional`. Інші Core можуть мати інший ратифікований закон для того самого SID. Contract 9.0 не створює для цього жодної словесної identity.
 
 ---
 
@@ -78,27 +78,25 @@ semantic contract + executable laws
 
 Три терміни, на яких тримається evidence layer:
 
-- **semantic ID** — стабільна числова тотожність значення, незалежна від написання імені;
-- **surface** — шар написань/проєкцій, який відображає імена на semantic IDs;
-- **witness** — виконуваний доказ, що перевіряє конкретне обмежене семантичне твердження.
+- **SID8** — сама 8-бітна function identity;
+- **surface** — необов'язковий source/UI routing до SID8, але не функція і не meaning;
+- **witness** — виконуваний доказ конкретного обмеженого твердження.
 
-На сьогодні README може чесно показати такі вже ратифіковані результати:
+На сьогодні README може чесно показати такі результати:
 
-- **Canon 0+7 має executable witnesses.** Закони стабільного історичного кореня не лише описані прозою: вони виконуються в [`lib/canon.lisp`](lib/canon.lisp) і перевіряються conformance/Canon-тестами.
-- **Українська поверхня є peer projection тих самих numeric semantic identities.** `uk`, `en`, `sa` та інші admitted spellings не створюють окремих значень і не перекладають «привілейовану англійську семантику»; authority лежить у numeric-only registry [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp).
-- **Vertical Day — bounded фізичний доказ.** Ратифікований зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) проводить `(перше (сполучити 2 3))` через structured machine forms → closed admission → Lisp-owned x86-64 encoding → semantics-blind host → physical CPU і отримує `2`. Це доказ конкретного bounded шляху, не твердження про повну native Lisp-машину.
-- **Canonical machine path fail-closed.** Ill-typed semantic input та raw/malformed/unadmitted, зокрема truncated, machine requests відхиляються до входу в host; негативні witnesses фіксують `HOST CALL COUNT = 0`, а не використовують crash як oracle.
+- **Є один function-ID space:** `00000000..11111111`.
+- **Surface не є функцією.** Українські, англійські, санскритські й символьні підказки можуть лише механічно маршрутизувати до SID8.
+- **Vertical Day — bounded фізичний доказ.** Ратифікований зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) проводить `(00000101 (00000100 2 3))` через structured machine forms → closed admission → Lisp-owned x86-64 encoding → semantics-blind host → physical CPU і отримує `2`.
+- **Machine path fail-closed.** Raw/malformed/unadmitted requests відхиляються до входу в host.
 
 ```text
-(перше (сполучити 2 3))
+(00000101 (00000100 2 3))
         ↓
-semantic identity
+Sid8
+        ↓
+Core-owned law / mechanism selection
         ↓
 structured machine forms
-        ↓
-closed admission
-        ↓
-Lisp-owned x86-64 encoding
         ↓
 semantics-blind host
         ↓
@@ -113,32 +111,27 @@ README лише показує вже зароблені докази; він н
 
 ---
 
-## Canon 0 і історичний корінь Маккарті
+## Єдиний функціональний простір
 
-`()` лишається **Canon 0** — первинним порожнім правильним списком і базою індукції для спискової структури.
+Поточний закон мови простий:
 
-Сім класичних операцій Маккарті лишаються важливим історичним і мінімальним коренем:
+```text
+00000000
+...
+11111111
+```
 
-| Канонічна тотожність | Українська поверхня | Символ | Історичне ім'я |
-|---|---|---:|---|
-| Canon 0 | `()` | `()` | `()` |
-| QUOTE | `як-є` | `'` | `quote` |
-| ATOM | `атом?` | `.?` | `atom` |
-| EQ | `тотожне?` | `=?` | `eq` |
-| CONS | `сполучити` | `:` | `cons` |
-| CAR | `перше` | `:п` | `car` |
-| CDR | `решта` | `:р` | `cdr` |
-| COND | `за-умовою` | `?:` | `cond` |
+Це рівно 256 **функціональних** SID. Жодного другого набору іменованих
+функцій немає. Слова, символи, enum-мітки, opcode-и та backend-назви не
+можуть бути identity функції.
 
-Але проєкт **більше не обмежує мову сімома примітивами**.
+Core1–Core4 — це профілі законів над тими самими SID, а не чотири набори
+названих функцій.
 
-Новий критерій інший:
-
-> **Примітив має заслужити окрему identity тим, що він є реально окремою базовою операцією системи.**
-
-Тому нові first-class identities допустимі, якщо вони потрібні для чесної композиції мови, островів, даних або спостережень. Водночас ми не додаємо окремий SID лише тому, що якийсь kernel має багату внутрішню онтологію.
-
-Кількість примітивів не задається наперед як 7, 20 чи 40. Вона визначається експериментально всередині одного 8-бітного простору semantic identities.
+Історична реалізація ще використовує `00000000` для `()`; Contract 9
+визнає це міграційним боргом #1332. Ціль: `()` лишається структурним
+значенням поза function-SID space, а `00000000` повертається виключно
+функціональному простору.
 
 ### Апостроф
 
@@ -152,17 +145,17 @@ README лише показує вже зароблені докази; він н
 зв'язок     ; один ідентифікатор
 ```
 
-Апостроф на початку виразу — reader syntax для `QUOTE`; апостроф усередині слова — звичайна частина ідентифікатора.
+Апостроф на початку виразу — reader syntax, що ставить SID `00000001` без проміжної словесної identity; апостроф усередині слова — звичайна частина ідентифікатора.
 
 ### Десяткова кома
 
 На українській розкладці десятковий роздільник можна набирати комою. Крапка й кома є двома написаннями **того самого точного числового значення**:
 
 ```lisp
-(eq 12,455 12.455)   ; t
-(+ 1,5 2,5)          ; 4
-(eq -0,25 -0.25)     ; t
-(eq 1,5e3 1500)      ; t
+(00000011 12,455 12.455)   ; t
+(00001100 1,5 2,5)          ; 4
+(00000011 -0,25 -0.25)     ; t
+(00000011 1,5e3 1500)      ; t
 ```
 
 Кома отримує числовий сенс лише тоді, коли весь токен є коректним числом. Тому `а,б` і `версія1,2` лишаються звичайними символами.
@@ -171,7 +164,7 @@ README лише показує вже зароблені докази; він н
 
 ## Українською можна програмувати
 
-Українська — не лише мова README. Українські імена є peer-проєкціями тих самих numeric semantic IDs у [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp); вони не створюють окремої реалізації функцій.
+Українська — не лише мова README. Українські слова можуть бути source/UI-підказками до SID8 у [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp), але не є функціями, meaning або identity.
 
 У проєкті розрізняються **дві українські поверхні**:
 
@@ -417,8 +410,8 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 1. [`language-contract.lisp`](language-contract.lisp) — що саме обіцяє мова;
 2. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — хто має право визначати істину;
-3. [`lib/canon.lisp`](lib/canon.lisp) — виконуваний Canon 0+7;
-4. [`docs/language-core.md`](docs/language-core.md) — компактна архітектура ядра;
+3. [`docs/language-core.md`](docs/language-core.md) — SID8-only архітектура ядра;
+4. [`lib/canon.lisp`](lib/canon.lisp) — legacy law witness під міграцією #1325;
 5. [`lib/surface/uk-acceptance.lisp`](lib/surface/uk-acceptance.lisp) — українська мова як виконуваний програмний інтерфейс;
 6. [`lib/meta-eval.lisp`](lib/meta-eval.lisp) — як мова починає обчислювати саму себе;
 7. [`lib/reason.lisp`](lib/reason.lisp) — reasoning-напрям;
@@ -428,7 +421,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 - [`docs/testing.md`](docs/testing.md) — карта тестів;
 - [`docs/benchmarks.md`](docs/benchmarks.md) — методика вимірювань;
-- [`docs/adr/ADR-004-CLOSED-MCCARTHY7-CORE.md`](docs/adr/ADR-004-CLOSED-MCCARTHY7-CORE.md) — чому ядро 0+7 замкнене;
+- [`docs/adr/ADR-004-CLOSED-MCCARTHY7-CORE.md`](docs/adr/ADR-004-CLOSED-MCCARTHY7-CORE.md) — історичний, не-нормативний документ;
 - [`docs/mccarthy-vision.md`](docs/mccarthy-vision.md) — історичний контекст і свідомі відхилення;
 - [`AGENTS.md`](AGENTS.md) — правила роботи агентів у репозиторії;
 - [`knowledge/guard-reference.lisp`](knowledge/guard-reference.lisp) — машинно-читане довідкове бюро Guard.
@@ -437,7 +430,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · auxiliary
 
-`my-lisp` is a Lisp research language built around Canon 0, an experimental 8-bit semantic identity space, exact arithmetic, executable conformance, and an archipelago of autonomous execution kernels. The classical McCarthy primitives remain a historical/minimal root, but no longer form a permanent limit on what may become a primitive.
+`my-lisp` is a Lisp research language with one exact 8-bit function-identity space (`00000000..11111111`), Core-specific laws, executable conformance, and multiple execution substrates. Human names are routing/UI metadata only, never function identities.
 
 Ukrainian is the project's primary human language. English and German are auxiliary. The Rust runtime is the reference implementation, not semantic authority; start with [`language-contract.lisp`](language-contract.lisp) and [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
 
@@ -445,7 +438,7 @@ The central research question is now: **how simple can the language remain while
 
 ## Deutsch · ergänzend
 
-`my-lisp` ist eine Lisp-Forschungssprache mit Canon 0, einem experimentellen 8-Bit-Raum semantischer Identitäten, exakter Arithmetik, ausführbarer Konformität und einem Archipel autonomer Ausführungskerne. Die klassischen McCarthy-Primitive bleiben ein historischer/minimaler Ursprung, sind aber keine dauerhafte Obergrenze mehr.
+`my-lisp` ist eine Lisp-Forschungssprache mit genau einem 8-Bit-Funktionsidentitätsraum (`00000000..11111111`), Core-spezifischen Gesetzen, ausführbarer Konformität und mehreren Ausführungssubstraten. Menschliche Namen sind nur Routing/UI-Metadaten.
 
 Ukrainisch ist die primäre menschliche Sprache des Projekts; Englisch und Deutsch sind Hilfssprachen. Rust ist die Referenzimplementierung, aber nicht die semantische Autorität. Maßgeblich sind [`language-contract.lisp`](language-contract.lisp), ratifizierte Entscheidungen und ausführbare Konformitätsbelege.
 

@@ -60,7 +60,7 @@ impl Parser<'_> {
             )),
             Some('"') => self.string(start),
             Some('\'') => self.quote_sugar(start),
-            Some(_) => self.atom(start),
+            Some(_) => self.token(start),
             None => Err(self.error(
                 "expected an expression · ochikuvavsia vyraz · Ausdruck erwartet",
                 start,
@@ -69,9 +69,8 @@ impl Parser<'_> {
         }
     }
 
-    /// Reader sugar: `'form` is exactly `(quote form)` in the produced AST.
-    /// The evaluator therefore sees the existing canonical QUOTE identity;
-    /// the apostrophe introduces no eighth primitive and no duplicate semantics.
+    /// Reader sugar: `'form` produces a list headed directly by SID 00000001.
+    /// No named function identity is introduced by the reader.
     fn quote_sugar(&mut self, start: usize) -> Result<Expr, LanguageError> {
         self.bump();
         self.skip_ignored();
@@ -87,7 +86,7 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Symbol("quote".into()),
+                        kind: ExprKind::Sid(crate::sid!(00000001)),
                         span: Span {
                             start,
                             end: start + 1,
@@ -334,7 +333,7 @@ impl Parser<'_> {
         ))
     }
 
-    fn atom(&mut self, start: usize) -> Result<Expr, LanguageError> {
+    fn token(&mut self, start: usize) -> Result<Expr, LanguageError> {
         while let Some(character) = self.peek() {
             if character.is_whitespace() || matches!(character, '(' | ')' | ';') {
                 break;
@@ -343,12 +342,12 @@ impl Parser<'_> {
         }
         let token = &self.source[start..self.cursor];
 
-        // The complete 8-bit bitstring space is reserved for Canon semantic
-        // identities. This is a lexical distinction, not numeric conversion:
-        // `00001100` is SID 00001100, while decimal `12` remains a number.
+        // The complete 8-bit space is reserved for function identities.
+        // This is a direct SID read, not numeric conversion:
+        // `00001100` is function SID 00001100; decimal `12` remains a number.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            let sid = crate::Sid8::from_canonical_spelling(token)
-                .expect("exact eight-bit SID spelling validated above");
+            let sid = crate::Sid8::from_exact_bits(token)
+                .expect("exact eight-bit SID validated above");
             return Ok(Expr {
                 kind: ExprKind::Sid(sid),
                 span: Span {
@@ -489,7 +488,7 @@ mod tests {
     }
 
     #[test]
-    fn bare_eight_bit_bitstrings_are_reserved_sid_literals() {
+    fn exact_eight_bit_sequences_are_sid_values() {
         assert!(matches!(
             parse_one("00000000").kind,
             ExprKind::Sid(sid) if sid == crate::sid!(00000000)
@@ -680,11 +679,11 @@ mod tests {
     }
 
     #[test]
-    fn apostrophe_desugars_to_canonical_quote_form() {
+    fn apostrophe_desugars_to_sid_00000001_form() {
         let ExprKind::List(items) = parse_one("'кіт").kind else {
-            panic!("apostrophe should produce a quote form");
+            panic!("apostrophe should produce a SID 00000001 form");
         };
-        assert!(matches!(&items[0].kind, ExprKind::Symbol(s) if &**s == "quote"));
+        assert!(matches!(&items[0].kind, ExprKind::Sid(sid) if *sid == crate::sid!(00000001)));
         assert!(matches!(&items[1].kind, ExprKind::Symbol(s) if &**s == "кіт"));
     }
 
