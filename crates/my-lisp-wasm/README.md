@@ -6,6 +6,7 @@ WASM-прив'язка тримає сталу `Session` між викликам
 
 ```javascript
 wasm.set_surface("uk");
+wasm.set_surface("ukr");
 wasm.set_surface("en");
 wasm.set_surface("sa");
 wasm.set_surface("core");
