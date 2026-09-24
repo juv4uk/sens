@@ -39,15 +39,15 @@ fn byte_sid_symbols_do_not_execute_as_surface_spellings() {
 }
 
 #[test]
-fn macro_library_uses_admitted_source_spellings_for_necessary_forms() {
+fn macro_library_uses_eight_bit_identities_without_named_necessary_forms() {
     let parsed = parse(MACRO_LIBRARY).expect("embedded macro library should parse");
     let mut symbols = Vec::new();
     for expression in &parsed {
         walk_symbols(expression, &mut symbols);
     }
 
-    assert!(symbols.iter().any(|symbol| symbol == "lambda"));
-    assert!(symbols.iter().any(|symbol| symbol == "define"));
+    assert!(!symbols.iter().any(|symbol| symbol == "lambda"));
+    assert!(!symbols.iter().any(|symbol| symbol == "define"));
 }
 
 #[test]
