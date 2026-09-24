@@ -11,10 +11,51 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: sid-runtime-cache-evidence
+
+      - name: Verify exact semantic-authority review against main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          BASE_SHA="$(git merge-base HEAD origin/main)"
+          cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo build -p my-lisp-cli --bin my-lisp
+          git diff --name-only "$BASE_SHA" HEAD > /tmp/changed.txt
+          : > tests/semantic-authority-changes.lisp
+          while IFS= read -r path; do
+            case "$path" in
+              *.rs|*.c|*.cc|*.cpp|*.h|*.hpp|*.java|*.js|*.mjs|*.py|*.ps1)
+                ;;
+              *)
+                continue
+                ;;
+            esac
+            case "$path" in
+              tests/fixtures/semantic-authority-guard/*|crates/my-lisp/tests/semantic_authority_guard_1049.rs)
+                continue
+                ;;
+            esac
+            digest="$(sha256sum "$path" | awk '{print $1}')"
+            printf '(changed "%s" "%s")\n' "$path" "$digest" >> tests/semantic-authority-changes.lisp
+          done < /tmp/changed.txt
+          ./target/debug/my-lisp scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
+          cat tests/semantic-authority-verdict.lisp
+          ./target/debug/my-lisp scripts/semantic-authority-guard-enforce.lisp
+
+      - name: Core package regression suite
+        run: cargo test -p my-lisp
+
+      - name: Changed Rust clippy gate
+        run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+
       - name: Run release benchmark
         env:
           SID_CACHE_SAMPLES: "7"
@@ -22,6 +63,7 @@ jobs:
         run: |
           set -o pipefail
           cargo run --release -p my-lisp --example sid_runtime_cache_benchmark 2>&1 | tee sid-cache-results.txt
+
       - name: Show evidence
         if: always()
         run: grep '^SID_CACHE' sid-cache-results.txt || true
