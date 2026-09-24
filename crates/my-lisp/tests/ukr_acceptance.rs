@@ -32,5 +32,8 @@ fn shadowing_ukr_peer_does_not_retarget_english_peer() {
     )
     .expect("ordinary ukr peer must remain independently shadowable");
 
-    assert_eq!(result.value.to_string(), "t");
+    // This is an identity-routing/shadowing observer, not a truth-domain authority.
+    // The English peer must remain independently routed and preserve its current
+    // result domain rather than being coerced back to historical universal t.
+    assert_eq!(result.value.to_string(), "(identity-relation same)");
 }
