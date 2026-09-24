@@ -276,7 +276,7 @@ my-lisp
 
 ```text
             my-lisp
-       identity / Canon
+       identity / eight-bit functions
           /   |   \
          /    |    \
    Prolog  Datalog  CLIPS  Common Lisp
