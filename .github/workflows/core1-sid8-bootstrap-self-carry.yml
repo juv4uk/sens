@@ -1,0 +1,74 @@
+name: Core1 SID8 bootstrap self-carry
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1-sid8-bootstrap-overlay.lisp"
+      - ".github/workflows/core1-sid8-bootstrap-self-carry.yml"
+  workflow_dispatch:
+
+jobs:
+  core1-sid8-self-carry:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout my-lisp
+        uses: actions/checkout@v5
+
+      - name: Guard historical Core1 source is untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object lib/core1.lisp)" = "c134b01bb37e45e0b9f29c098d7791538565b8e7"
+          ! grep -E '"[01]{8}"' lib/core1-sid8-bootstrap-overlay.lisp
+          ! grep -E '\(QUOTE[[:space:]]+[01]{8}\)' lib/core1-sid8-bootstrap-overlay.lisp
+          ! grep -E '\(CONS[[:space:]]+\(CONS[[:space:]]+[01]{8}' lib/core1-sid8-bootstrap-overlay.lisp
+
+      - name: Checkout reader-corrected SID8 S0
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
+          path: mccarthy-eval
+          fetch-depth: 1
+
+      - name: Build historical S0
+        run: gcc -no-pie -O0 -s -o mccarthy-eval/mccarthy-kernel mccarthy-eval/mccarthy-kernel.s
+
+      - name: Execute direct Core1 SID8 self-carry witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$(mktemp)"
+          expected="$(mktemp)"
+          trap 'rm -f "$fixture" "$expected"' EXIT
+
+          cat lib/core1.lisp lib/core1-sid8-bootstrap-overlay.lisp > "$fixture"
+          cat >> "$fixture" <<'LISP'
+          (C1-EVAL 00000010 NIL NIL)
+          (C1-EVAL 00000011 NIL NIL)
+          (C1-EVAL 00000100 NIL NIL)
+          (C1-EVAL 00000101 NIL NIL)
+          (C1-EVAL 00000110 NIL NIL)
+          (C1-EVAL 00001100 NIL NIL)
+          (C1-EVAL 00001101 NIL NIL)
+          (EQ (C1-EVAL (QUOTE 00000100) NIL NIL) 00000100)
+          (C1-EVAL 11111111 NIL NIL)
+          (C1-EVAL (QUOTE FOO) NIL NIL)
+          LISP
+
+          cat > "$expected" <<'OUT'
+          00000010
+          00000011
+          00000100
+          00000101
+          00000110
+          00001100
+          00001101
+          T
+          (C1-ERROR UNBOUND 11111111)
+          (C1-ERROR UNBOUND FOO)
+          OUT
+
+          (cd mccarthy-eval && ./mccarthy-kernel "$fixture") | tail -n 10 > actual.txt
+          diff -u "$expected" actual.txt
+          cat actual.txt
