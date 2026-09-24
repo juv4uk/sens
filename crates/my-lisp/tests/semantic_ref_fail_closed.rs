@@ -21,7 +21,10 @@ fn bare_function_sid_without_mechanism_fails_closed_through_existing_call_bounda
         .expect_err("a bare function SID without a mechanism must not mint a callable mechanism");
 
     assert_eq!(error.kind, ErrorKind::Type);
-    assert_eq!(error.message, "unknown semantic callable SID: 11111111");
+    assert_eq!(
+        error.message,
+        "function SID has no callable mechanism: 11111111"
+    );
 }
 
 #[test]
