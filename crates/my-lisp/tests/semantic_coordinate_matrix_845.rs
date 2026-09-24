@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-use my_lisp::{parse, Expr, ExprKind};
+use my_lisp::{parse, Expr, ExprKind, Sid8};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -103,7 +103,7 @@ fn source_has_sid(source: &str, sid: &str) -> bool {
     source.contains(&format!("\"{sid}\""))
 }
 
-fn kernel_map_has_sid(source: &str, wanted_sid: &str) -> bool {
+fn kernel_map_has_sid(source: &str, wanted_sid: Sid8) -> bool {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let ExprKind::List(items) = &exprs[0].kind else {
         panic!("kernel witness map must be a list");
@@ -125,7 +125,7 @@ fn kernel_map_has_sid(source: &str, wanted_sid: &str) -> bool {
                 return false;
             };
             matches!(&key.kind, ExprKind::Symbol(symbol) if &**symbol == "sid")
-                && matches!(&value.kind, ExprKind::String(sid) if &**sid == wanted_sid)
+                && matches!(&value.kind, ExprKind::Sid(sid) if *sid == wanted_sid)
         })
     })
 }
@@ -153,7 +153,9 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
 
         // Presence is derived, never copied into the matrix contract.
         let _math_present = source_has_sid(&math, sid);
-        let _kernel_present = kernel_map_has_sid(&kernel, sid);
+        // Kernel identity fields are typed Sid8. This generic scope loop
+        // intentionally does not reinterpret the matrix's legacy text scope
+        // as function identity; explicit typed checks below cover kernel rows.
         let _machine_present = source_has_sid(&machine, sid);
     }
 
@@ -168,8 +170,13 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
 
     // Kernel evidence is intentionally asymmetric: + currently has no
     // sid-witness row, while eq/cons/car/cond do.
-    assert!(!kernel_map_has_sid(&kernel, "00001100"));
-    for sid in ["00000011", "00000100", "00000101", "00000111"] {
+    assert!(!kernel_map_has_sid(&kernel, my_lisp::sid!(00001100)));
+    for sid in [
+        my_lisp::sid!(00000011),
+        my_lisp::sid!(00000100),
+        my_lisp::sid!(00000101),
+        my_lisp::sid!(00000111),
+    ] {
         assert!(kernel_map_has_sid(&kernel, sid), "kernel axis missing {sid}");
     }
 
@@ -191,7 +198,7 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
     let machine = read(&machine_path);
 
     assert!(identity.contains(&format!("({LAMBDA_SID} ")) || identity.contains(&format!("(\"{LAMBDA_SID}\" ")));
-    assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
+    assert!(kernel_map_has_sid(&kernel, my_lisp::sid!(00001000)));
     assert!(!source_has_sid(&math, LAMBDA_SID));
     assert!(!source_has_sid(&machine, LAMBDA_SID));
 }
