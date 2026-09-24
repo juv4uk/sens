@@ -23,15 +23,23 @@ fn semantic_authority_guard_is_lisp_owned() {
     assert!(guard.contains("sha256-hex source"));
     assert!(guard.contains("reviewed-digest?"));
     assert!(guard.contains("transport-digest"));
-    let review_pos = guard.find("((reviewed-source? path source authority-reviews)")
-        .expect("content-addressed review fast path must exist");
-    let classify_pos = guard.find("(let ((class (violation-class path source)))")
+    let digest_fast_path_pos = guard
+        .find("(reviewed-digest? path transport-digest authority-reviews)")
+        .expect("transported-digest review fast path must exist");
+    let read_pos = guard
+        .find("(read-file path)")
+        .expect("source fallback must still read changed/unreviewed content");
+    let classify_pos = guard
+        .find("(let ((class (violation-class path source)))")
         .expect("structural classifier fallback must exist");
     assert!(
-        review_pos < classify_pos,
-        "exact reviewed content must short-circuit before expensive structural classification"
+        digest_fast_path_pos < read_pos,
+        "an exact reviewed transported digest must short-circuit before source I/O"
     );
-    assert!(guard.contains("(read-file path)"));
+    assert!(
+        read_pos < classify_pos,
+        "unreviewed content must be read before structural authority classification"
+    );
     assert!(reviews.contains("issue-1098"));
     assert!(!reviews.contains("*"));
     for line in reviews.lines().filter(|line| line.starts_with("(review ")) {
