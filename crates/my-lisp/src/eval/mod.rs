@@ -174,10 +174,8 @@ pub(crate) fn evaluate_step(
                 expression.span,
             ))
         }
-        ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(
-            canon::ground_value(canon::CanonicalIdentity::EmptyList)
-                .expect("Canon 0 must always materialize"),
-        )),
+        // Empty structure is a structural value, not any function SID.
+        ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
         ExprKind::List(items) => evaluate_list(items, environment, expression.span),
         ExprKind::Pair(_, _) => Err(LanguageError::new(
             ErrorKind::InvalidForm,
