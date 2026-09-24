@@ -121,8 +121,8 @@
         const parts = line.split(/\s+/);
         const command = parts[0];
         if (command === ":допомога" || command === ":help") {
-          printLine("Поверхні: :мова ук | en | sa | core", "line-system");
-          printLine("Технічний alias: :surface uk | en | sa | core", "line-system");
+          printLine("Поверхні: :мова ук | укр | en | sa | core", "line-system");
+          printLine("Технічний alias: :surface ук | укр | en | sa | core", "line-system");
           return true;
         }
         if (command !== ":мова" && command !== ":surface") return false;
