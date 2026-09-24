@@ -62,11 +62,21 @@
 ; those opaque IDs to evaluator mechanisms.
 (def my-semantic-id?
   (lambda (name semantic-id)
-    (equal? (my-semantic-id-for-surface name) semantic-id)))
+    (cond
+      ((equal? name semantic-id) t)
+      (t (equal? (my-semantic-id-for-surface name) semantic-id)))))
 
 (def my-canon-identity
   (lambda (name)
-    (let ((semantic-id (my-semantic-id-for-surface name)))
+    (let ((semantic-id (cond
+                         ((equal? name 00000001) 00000001)
+                         ((equal? name 00000010) 00000010)
+                         ((equal? name 00000011) 00000011)
+                         ((equal? name 00000100) 00000100)
+                         ((equal? name 00000101) 00000101)
+                         ((equal? name 00000110) 00000110)
+                         ((equal? name 00000111) 00000111)
+                         (t (my-semantic-id-for-surface name)))))
       (cond
         ((equal? semantic-id 00000001) (quote quote))
         ((equal? semantic-id 00000010) (quote atom))
