@@ -4,6 +4,15 @@
 ; does not add a runtime Value variant, and does not treat probability/confidence
 ; as truth. A future model adapter may produce these observations, but my-lisp
 ; owns the typed question, validation, provenance and deterministic policy.
+;
+; Fixed 2026-09-24: `atom`/`eq`/`equal?` and the custom `pd-*?` predicates below
+; return structural records (`(structural-kind ...)`, `(identity-relation ...)`)
+; or the classic `t`/`()` pair — never exact-Q 1/0. Every canonical-cond clause
+; that tested one of those against a literal `1`/`0` tag could never match,
+; surfacing as "canonical cond: no query matched" at runtime. Only the raw
+; arithmetic comparisons (`<`, `=`) genuinely return exact-Q 1/0, and keep their
+; literal tag. Every other clause below uses the two-part migration-compatible
+; form instead, which `evaluate_cond` resolves via generic/structural truthiness.
 
 (def pd-question-choice
   (lambda (name options)
@@ -20,30 +29,30 @@
 (def pd-member?
   (lambda (value values)
     (cond
-      ((atom values) 1 (quote ()))
+      ((atom values) (quote ()))
       ((equal? value (car values)) (structural-relation same) t)
-      (t 1 (pd-member? value (cdr values))))))
+      (t (pd-member? value (cdr values))))))
 
 (def pd-proper-list?
   (lambda (value)
     (cond
       ((atom value)
        (cond
-         ((eq value (quote ())) 1 t)
-         (t 1 (quote ()))))
-      (t 1 (pd-proper-list? (cdr value))))))
+         ((eq value (quote ())) t)
+         (t (quote ()))))
+      (t (pd-proper-list? (cdr value))))))
 
 (def pd-probability-valid?
   (lambda (probability)
     (cond
       ((< probability 0) 1 (quote ()))
       ((< 1 probability) 1 (quote ()))
-      (t 1 t))))
+      (t t))))
 
 (def pd-sum-probabilities
   (lambda (distribution)
     (cond
-      ((atom distribution) 1 0)
+      ((atom distribution) 0)
       (t
        (+ (second (car distribution))
           (pd-sum-probabilities (cdr distribution)))))))
@@ -51,7 +60,7 @@
 (def pd-distribution-entries-valid?
   (lambda (distribution options seen)
     (cond
-      ((atom distribution) 1 t)
+      ((atom distribution) t)
       (t
        (let ((entry (car distribution)))
          (cond
@@ -59,56 +68,56 @@
             (let ((label (car entry))
                   (probability (second entry)))
               (cond
-                ((pd-member? label options) 1
+                ((pd-member? label options)
                  (cond
-                   ((pd-member? label seen) 1 (quote ()))
-                   ((pd-probability-valid? probability) 1
+                   ((pd-member? label seen) (quote ()))
+                   ((pd-probability-valid? probability)
                     (pd-distribution-entries-valid?
                       (cdr distribution)
                       options
                       (cons label seen)))
-                   (t 1 (quote ()))))
-                (t 1 (quote ())))))
-           (t 1 (quote ()))))))))
+                   (t (quote ()))))
+                (t (quote ())))))
+           (t (quote ()))))))))
 
 (def pd-all-options-present?
   (lambda (options distribution)
     (cond
-      ((atom options) 1 t)
+      ((atom options) t)
       (t
        (cond
-         ((pd-member? (car options) (map car distribution)) 1
+         ((pd-member? (car options) (map car distribution))
           (pd-all-options-present? (cdr options) distribution))
-         (t 1 (quote ())))))))
+         (t (quote ())))))))
 
 (def pd-distribution-valid?
   (lambda (options distribution)
     (cond
-      ((pd-proper-list? options) 1
+      ((pd-proper-list? options)
        (cond
-         ((pd-proper-list? distribution) 1
+         ((pd-proper-list? distribution)
           (cond
-            ((atom options) 1 (quote ()))
-            ((atom distribution) 1 (quote ()))
-            ((pd-distribution-entries-valid? distribution options (quote ())) 1
+            ((atom options) (quote ()))
+            ((atom distribution) (quote ()))
+            ((pd-distribution-entries-valid? distribution options (quote ()))
              (cond
                ((= (pd-sum-probabilities distribution) 1) 1
                 (pd-all-options-present? options distribution))
-               (t 1 (quote ()))))
-            (t 1 (quote ()))))
-         (t 1 (quote ()))))
-      (t 1 (quote ())))))
+               (t (quote ()))))
+            (t (quote ()))))
+         (t (quote ()))))
+      (t (quote ())))))
 
 (def pd-max-probability
   (lambda (distribution current)
     (cond
-      ((atom distribution) 1 current)
+      ((atom distribution) current)
       (t
        (let ((probability (second (car distribution))))
          (cond
            ((< current probability) 1
             (pd-max-probability (cdr distribution) probability))
-           (t 1
+           (t
             (pd-max-probability (cdr distribution) current))))))))
 
 (def pd-confidence
@@ -118,14 +127,14 @@
 (def pd-choice-observe
   (lambda (question distribution source)
     (cond
-      ((pd-distribution-valid? (third question) distribution) 1
+      ((pd-distribution-valid? (third question) distribution)
        (list
          (quote choice-observation/1)
          question
          distribution
          (pd-confidence distribution)
          source))
-      (t 1
+      (t
        (make-invalid
          (quote malformed-choice-distribution)
          (list question distribution))))))
@@ -133,7 +142,7 @@
 (def pd-noul-observe
   (lambda (question yes-probability source)
     (cond
-      ((pd-probability-valid? yes-probability) 1
+      ((pd-probability-valid? yes-probability)
        (let ((distribution
                (list
                  (list (quote yes) yes-probability)
@@ -144,7 +153,7 @@
            distribution
            (pd-confidence distribution)
            source)))
-      (t 1
+      (t
        (make-invalid
          (quote malformed-noul-probability)
          (list question yes-probability))))))
@@ -152,14 +161,14 @@
 (def pd-score-observe
   (lambda (question distribution source)
     (cond
-      ((pd-distribution-valid? (third question) distribution) 1
+      ((pd-distribution-valid? (third question) distribution)
        (list
          (quote score-observation/1)
          question
          distribution
          (pd-confidence distribution)
          source))
-      (t 1
+      (t
        (make-invalid
          (quote malformed-score-distribution)
          (list question distribution))))))
@@ -175,9 +184,9 @@
 (def pd-noul-policy
   (lambda (observation threshold)
     (cond
-      ((equal? (car observation) (quote noul-observation/1)) 1
+      ((equal? (car observation) (quote noul-observation/1)) (structural-relation same)
        (cond
-         ((pd-probability-valid? threshold) 1
+         ((pd-probability-valid? threshold)
           (let ((probability (second (car (third observation)))))
             (cond
               ((< probability threshold) 1
@@ -185,16 +194,16 @@
                      (quote defer)
                      observation
                      (list (quote threshold) threshold)))
-              (t 1
+              (t
                (list (quote decision/1)
                      (quote accept)
                      observation
                      (list (quote threshold) threshold))))))
-         (t 1
+         (t
           (make-invalid
             (quote malformed-policy-threshold)
             threshold))))
-      (t 1
+      (t
        (make-invalid
          (quote unsupported-decision-observation)
          observation)))))
@@ -202,12 +211,12 @@
 (def pd-choice-policy
   (lambda (observation option threshold)
     (cond
-      ((equal? (car observation) (quote choice-observation/1)) 1
+      ((equal? (car observation) (quote choice-observation/1)) (structural-relation same)
        (cond
-         ((pd-probability-valid? threshold) 1
+         ((pd-probability-valid? threshold)
           (let ((entry (pd-find-option option (third observation))))
             (cond
-              ((atom entry) 1
+              ((atom entry)
                (make-invalid
                  (quote option-not-observed)
                  (list option observation)))
@@ -217,17 +226,17 @@
                      observation
                      (list (quote option) option)
                      (list (quote threshold) threshold)))
-              (t 1
+              (t
                (list (quote decision/1)
                      (quote accept)
                      observation
                      (list (quote option) option)
                      (list (quote threshold) threshold))))))
-         (t 1
+         (t
           (make-invalid
             (quote malformed-policy-threshold)
             threshold))))
-      (t 1
+      (t
        (make-invalid
          (quote unsupported-decision-observation)
          observation)))))
@@ -235,25 +244,25 @@
 (def pd-find-option
   (lambda (option distribution)
     (cond
-      ((atom distribution) 1 (quote ()))
-      ((equal? option (car (car distribution))) 1 (car distribution))
-      (t 1 (pd-find-option option (cdr distribution))))))
+      ((atom distribution) (quote ()))
+      ((equal? option (car (car distribution))) (structural-relation same) (car distribution))
+      (t (pd-find-option option (cdr distribution))))))
 
 (def pd-two-question-consistency
   (lambda (left right relation)
     (cond
-      ((eq relation (quote independent)) 1
+      ((eq relation (quote independent)) (identity-relation same)
        (list
          (quote decision-relation/1)
          (quote independent)
          left
          right))
-      ((eq relation (quote agree)) 1
+      ((eq relation (quote agree)) (identity-relation same)
        (cond
          ((equal? (third left) (third right)) (structural-relation same)
           (list (quote decision-relation/1) (quote agree) left right))
-         (t 1 (make-disputed (list left right)))))
-      (t 1
+         (t (make-disputed (list left right)))))
+      (t
        (make-invalid
          (quote unsupported-question-relation)
          (list relation left right))))))

@@ -27,7 +27,7 @@ fn eval_probabilistic_decision(source: &str) -> String {
 #[test]
 fn choice_observation_keeps_probability_confidence_and_provenance() {
     let source = r#"
-        (let ((question
+        (let* ((question
                 (pd-question-choice
                   (quote route)
                   (quote (billing technical))))
@@ -51,7 +51,7 @@ fn choice_observation_keeps_probability_confidence_and_provenance() {
 #[test]
 fn invalid_choice_distribution_fails_closed_when_not_normalized() {
     let source = r#"
-        (let ((question
+        (let* ((question
                 (pd-question-choice
                   (quote route)
                   (quote (billing technical)))))
@@ -68,7 +68,7 @@ fn invalid_choice_distribution_fails_closed_when_not_normalized() {
 #[test]
 fn noul_policy_is_explicit_threshold_control_not_truthiness() {
     let source = r#"
-        (let ((question (pd-question-noul (quote urgent)))
+        (let* ((question (pd-question-noul (quote urgent)))
               (observation
                 (pd-noul-observe
                   question
@@ -86,7 +86,7 @@ fn noul_policy_is_explicit_threshold_control_not_truthiness() {
 #[test]
 fn score_observation_uses_the_same_typed_distribution_contract() {
     let source = r#"
-        (let ((question
+        (let* ((question
                 (pd-question-score
                   (quote severity)
                   (quote (low medium high))))
@@ -123,7 +123,7 @@ fn independent_questions_do_not_invent_joint_consistency() {
                     (quote route-2)
                     (quote (billing technical)))
                   (quote ((billing 1/4) (technical 3/4)))
-                  (quote ((source b)))))
+                  (quote ((source b))))))
           (car (pd-two-question-consistency left right (quote independent))))
     "#;
 
@@ -146,7 +146,7 @@ fn declared_agreement_with_different_distributions_is_disputed() {
                     (quote route)
                     (quote (billing technical)))
                   (quote ((billing 1/4) (technical 3/4)))
-                  (quote ((source b)))))
+                  (quote ((source b))))))
           (result-status
             (pd-two-question-consistency left right (quote agree))))
     "#;
@@ -157,7 +157,7 @@ fn declared_agreement_with_different_distributions_is_disputed() {
 #[test]
 fn noul_policy_rejects_out_of_domain_threshold() {
     let source = r#"
-        (let ((question (pd-question-noul (quote urgent)))
+        (let* ((question (pd-question-noul (quote urgent)))
               (observation
                 (pd-noul-observe
                   question
@@ -173,7 +173,7 @@ fn noul_policy_rejects_out_of_domain_threshold() {
 #[test]
 fn choice_policy_rejects_out_of_domain_threshold() {
     let source = r#"
-        (let ((question
+        (let* ((question
                 (pd-question-choice
                   (quote route)
                   (quote (billing technical))))
@@ -212,6 +212,6 @@ fn synthetic_witness_carries_one_state_through_three_typed_questions() {
 
     assert_eq!(
         eval_probabilistic_decision(source),
-        "(probabilistic-witness/1 ((case billing) (revision 1)) choice-observation/1 3/4 2/3)"
+        "(probabilistic-witness/1 ((case billing) (revision 1)) choice-observation/1 2/3 1/2)"
     );
 }

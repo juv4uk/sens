@@ -4,6 +4,7 @@
 ; projection for reviewers.
 
 (authority "crates/my-lisp/tests/witness_authority.rs" observer)
+(authority "crates/my-lisp/tests/probabilistic_decision_jev_like.rs" observer)
 (authority "crates/my-lisp/tests/structural_query_inventory.rs" observer)
 (authority "crates/my-lisp/tests/structural_observation_contract.rs" observer)
 (authority "crates/my-lisp/tests/deep_structural_relation_contract.rs" observer)
