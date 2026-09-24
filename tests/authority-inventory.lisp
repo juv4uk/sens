@@ -99,3 +99,7 @@
 (authority "crates/wsm-datalog-kernel/tests/arithmetic_execution_1001.rs" observer)
 
 (authority "crates/my-lisp/tests/uk_surface.rs" observer)
+
+(authority "crates/my-lisp-cli/src/island_invoke.rs" mechanism)
+(authority "crates/my-lisp-cli/tests/invoke_repl.rs" observer)
+
