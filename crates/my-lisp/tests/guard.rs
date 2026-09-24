@@ -124,19 +124,55 @@ fn spawn_node_reference_requires_exclusive_state_ownership() {
 }
 
 #[test]
-fn reference_learning_preserves_review_and_provenance_boundaries() {
+fn reference_learning_writes_directly_and_lets_evidence_status_rank_entries() {
     assert_eq!(
         eval_guard(r#"(guard-how-to (quote reference-learning))"#),
-        "(search-directory choose-unknown-route collect-source-and-evidence append-pending-review review promote-or-reject)"
+        "(search-directory-and-guard-reference-all-for-existing-entries state-evidence-status-honestly-confirmed-only-with-real-tests-or-benchmarks write-reference-directly-into-guard-reference-directory never-delete-or-edit-a-superseded-entry-just-let-evidence-status-outrank-it use-propose-inbox-only-for-provisional-notes-not-yet-full-entries)"
     );
     assert_eq!(
         eval_guard(r#"(guard-verify (quote reference-learning))"#),
-        "(candidate-record provenance review-status curated-entry-or-rejection)"
+        "(guard-reference-returns-highest-evidence-status-for-a-topic guard-reference-all-still-lists-outranked-entries evidence-status-defaults-to-unresolved-never-to-confirmed)"
     );
     assert_eq!(
         eval_guard(r#"(guard-authority (quote guix))"#),
         "(../ecosystem/docs/sessions/VIVEKA-FINDINGS-2026-08-24.md manifest.scm channels.scm guix.scm evidence/GUIX-WITNESS-01)"
     );
+}
+
+#[test]
+fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
+    // Two competing entries for the same topic, neither in the real
+    // *guard-reference-directory* -- proves the ranking mechanism itself,
+    // independent of any real content.
+    let source = r#"
+        (let ((weak (list (quote reference) (list (quote topic) (quote demo))
+                           (list (quote evidence-status) (quote unresolved))
+                           (list (quote summary) "old guess")))
+              (strong (list (quote reference) (list (quote topic) (quote demo))
+                            (list (quote evidence-status) (quote confirmed))
+                            (list (quote summary) "measured and tested"))))
+          (list
+            (guard-reference-field (quote summary) (guard-reference-find (quote demo) (list weak strong)))
+            (guard-reference-field (quote summary) (guard-reference-find (quote demo) (list strong weak)))
+            (length (guard-reference-all (quote demo) (list weak strong)))))
+    "#;
+    let value = eval_guard(source);
+    assert!(
+        value.contains("\"measured and tested\" \"measured and tested\""),
+        "the confirmed entry must win regardless of file order: {value}"
+    );
+    assert!(
+        value.contains(" 2)"),
+        "both entries must still be present via guard-reference-all, not just the winner: {value}"
+    );
+}
+
+#[test]
+fn evidence_status_defaults_to_unresolved_not_confirmed_when_absent() {
+    let value = eval_guard(
+        r#"(guard-reference-evidence-status (list (quote reference) (list (quote topic) (quote demo))))"#,
+    );
+    assert_eq!(value, "unresolved");
 }
 
 #[test]
