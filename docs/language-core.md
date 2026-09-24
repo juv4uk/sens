@@ -102,7 +102,7 @@ No replacement SID is to be allocated to ().
 - #1325 — permanent SID8-only language law
 - #1327 — remove named runtime identity ontology
 - #1328 — remove named necessary-form identity ontology
-- #1329 — remove SID text/literal/spelling terminology
+- #1329 — remove alternate-identity terminology
 - #1330 — keep surfaces outside function ontology
 - #1331 — executable standing guard
 - #1332 — remove the empty-list collision from SID 00000000
