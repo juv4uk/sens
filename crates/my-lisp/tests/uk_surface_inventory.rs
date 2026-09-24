@@ -1,4 +1,4 @@
-use my_lisp::{language_items, parse, LanguageItemKind, CORE_LIBRARY_SOURCE};
+use my_lisp::{language_items, parse, ExprKind, LanguageItemKind, CORE_LIBRARY_SOURCE};
 use std::collections::BTreeSet;
 
 const INVENTORY: &str = include_str!("../../../lib/surface/uk-inventory.lisp");
@@ -24,14 +24,30 @@ fn semantic_registry_surface_names() -> BTreeSet<String> {
 }
 
 fn core_definition_names() -> BTreeSet<String> {
-    CORE_LIBRARY_SOURCE
-        .lines()
-        .filter_map(|line| {
-            let line = line.trim_start();
-            line.strip_prefix("(defmacro ")
-                .or_else(|| line.strip_prefix("(def "))
-                .and_then(|rest| rest.split_whitespace().next())
-                .map(|name| name.trim_matches(|c| c == '(' || c == ')').to_owned())
+    parse(CORE_LIBRARY_SOURCE)
+        .expect("Core4 library must parse")
+        .into_iter()
+        .filter_map(|form| {
+            let ExprKind::List(entries) = &form.kind else {
+                return None;
+            };
+            let [head, name, ..] = entries.as_ref() else {
+                return None;
+            };
+
+            let is_definition = match &head.kind {
+                ExprKind::Sid(sid) => sid.to_string() == "00001001",
+                ExprKind::Symbol(symbol) => matches!(symbol.as_ref(), "def" | "defmacro"),
+                _ => false,
+            };
+            if !is_definition {
+                return None;
+            }
+
+            match &name.kind {
+                ExprKind::Symbol(symbol) => Some(symbol.to_string()),
+                _ => None,
+            }
         })
         .collect()
 }
