@@ -176,3 +176,7 @@ crates/my-lisp/tests/uk_surface.rs	canonical_ukrainian_syntax_and_batch_one_alia
 crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	inventory_is_explicitly_core4_only_and_non_semantic	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
 crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	semantic_roots_have_distinct_roles_instead_of_one_bulk_rewrite_class	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
 crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	inventory_uses_only_the_ratified_role_vocabulary	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
+crates/my-lisp/tests/core_profile_runtime_1272.rs	bare_root_has_no_implicit_core_profile	observer	core-profile-runtime-selection	contracts/core-profile-contract.lisp	retained
+crates/my-lisp/tests/core_profile_runtime_1272.rs	core4_loader_selects_core4_explicitly	observer	core-profile-runtime-selection	contracts/core-profile-contract.lisp	retained
+crates/my-lisp/tests/core_profile_runtime_1272.rs	core2_loader_selects_core2_explicitly	observer	core-profile-runtime-selection	contracts/core-profile-contract.lisp	retained
+crates/my-lisp/tests/core_profile_runtime_1272.rs	lexical_child_shares_the_selected_profile_signal	observer	core-profile-runtime-selection	contracts/core-profile-contract.lisp	retained
