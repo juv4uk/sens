@@ -180,3 +180,4 @@ crates/my-lisp/tests/world.rs	world_transition_witness_proves_contract_in_lisp	o
 crates/my-lisp/tests/world.rs	each_world_keeps_its_immediate_parent	observer	world-snapshot-parent-structural-relation	contracts/world-transition-contract.lisp + lib/world.lisp	migrated
 crates/my-lisp/tests/world.rs	equal_knowledge_has_the_same_canonical_content_address	observer	world-content-address-identity-relation	contracts/world-transition-contract.lisp + lib/world.lisp	migrated
 crates/my-lisp/tests/world.rs	advise_world_accepts_into_a_new_queryable_world	observer	world-transaction-receipt-structural-relation	contracts/world-transition-contract.lisp + lib/world.lisp	migrated
+crates/my-lisp/tests/sens_foundation.rs	sens_macro_produces_identical_bit_representation_as_sid	observer	sens-vocabulary-foundation	crates/my-lisp/src/sens.rs	migrated

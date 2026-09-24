@@ -100,3 +100,4 @@
 
 (authority "crates/my-lisp/tests/uk_surface.rs" observer)
 (authority "crates/my-lisp/tests/world.rs" observer)
+(authority "crates/my-lisp/tests/sens_foundation.rs" observer)
