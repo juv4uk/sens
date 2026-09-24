@@ -50,3 +50,9 @@
 (review "crates/my-lisp/src/eval/special_forms/core.rs" "96c35aaae7bb11c53138bbc080590c86daad2ea3fe4ae2555106e0b356ef8024" issue-1133 core2-cond-dispatch-mechanism)
 (review "crates/my-lisp/src/lib.rs" "a4a37a9e086222440ac438b6c20590f573337037c1063e638b57c1ef0a9b5651" issue-1133 core2-loader-mechanism)
 (review "crates/my-lisp/tests/core2_runtime_profile.rs" "718d19aa7681fc60aa90d7846548c727c9ea33feb0aa021555b978babd74c211" issue-1133 core2-runtime-observer)
+
+; #1173 SID8 identity-field migration: reviewed observer-only test updates.
+(review "crates/my-lisp/tests/witness_authority.rs" "bc5d4b359a169a5edc1cf3e2d0fb90e3bd7daa87e2d7e4d335ab467f9c76d492" issue-1173 sid8-identity-field-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_join.rs" "02cf206794a877fa894b8baf21c2b3a7ff8d97908b8896648005de30b69586a8" issue-1173 sid8-identity-field-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "ff0709c7ddf2dcd31be16e6ecf2572d154a51e36512f86910ee5338c09276aeb" issue-1173 sid8-identity-field-observer)
+(review "crates/my-lisp/tests/semantic_coordinate_matrix_845.rs" "510f3c0ede3407dbc502815db845efdb1a90f7e4e5d5259123851c0d5cd03541" issue-1173 sid8-identity-field-observer)
