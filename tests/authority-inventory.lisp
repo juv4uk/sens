@@ -100,3 +100,5 @@
 (authority "crates/my-lisp/tests/uk_surface.rs" observer)
 
 (authority "crates/my-lisp/tests/ukr_acceptance.rs" observer)
+
+(authority "crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs" observer)
