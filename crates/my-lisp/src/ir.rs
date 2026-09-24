@@ -19,21 +19,11 @@
 //! from outside this module's tests.
 #![allow(dead_code)]
 
-use crate::eval::canon::{self, CanonicalIdentity};
 use crate::eval::necessary_forms::{self, NecessaryFormIdentity};
 use crate::semantic_registry;
 use crate::syntax::{Exactness, Expr, ExprKind, Span};
 use crate::value::Rational;
 use crate::Sid8;
-
-/// SID 00001010 (defmacro) is owned by `lib/macro.my`'s bootstrap, not
-/// `necessary_forms.rs` — mirrored here as the same exact eight-bit identity.
-const DEFMACRO_SEMANTIC_ID: Sid8 = crate::sid!(00001010);
-
-/// Lambda SID 00001000 and Define SIDs 00001001/00001011 (def compat).
-const LAMBDA_SEMANTIC_ID: Sid8 = crate::sid!(00001000);
-const DEFINE_SEMANTIC_ID: Sid8 = crate::sid!(00001001);
-const DEF_COMPAT_SEMANTIC_ID: Sid8 = crate::sid!(00001011);
 
 /// `def` is a compatibility-only spelling for the same Define meaning as
 /// `define`/`визначити` (SID 00001001), under its own byte SID 00001011 in
@@ -53,24 +43,17 @@ fn is_define_spelling(name: &str) -> bool {
 /// answer "why does this data mean what it means" without re-deriving it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Provenance {
-    /// Legacy named provenance for the seven routed SIDs 00000001..00000111.
-    /// #1327 removes this named layer in favor of Sid8-only provenance.
-    Canon(CanonicalIdentity),
     /// `lambda` (SID 00001000) or `define`/`def` (SIDs 00001001/00001011) — evaluator-owned mechanism
     /// beyond Canon, resolved by exact SID identity.
     NecessaryForm(NecessaryFormIdentity),
-    /// `defmacro` (SID 00001010) — language-owned macro-construction mechanism.
-    Defmacro,
-    /// An admitted semantic registry entry that is an ordinary callable
-    /// value (arithmetic, comparisons, library functions) — carries the
-    /// exact eight-bit SID identity. Backends may pack it only at a transport
-    /// boundary; the IR never renames it to a decimal ID.
-    AdmittedSemanticIdentity(Sid8),
+    /// A function selected by its exact eight-bit identity.
+    /// No word/enum label is retained as a second identity.
+    FunctionSid(Sid8),
     /// A binding this lowering pass has no registry entry for — an
     /// ordinary user-defined function/variable. This is NOT a failure:
     /// most real programs are built from bindings the registry has no
     /// opinion about (a user's own `count-down`, say). Distinct from
-    /// `AdmittedSemanticIdentity` only so `explain` can say which is which.
+    /// `FunctionSid` only so `explain` can say which is which.
     OrdinaryBinding,
     /// A literal value read directly from source — its own provenance.
     Literal,
@@ -127,7 +110,7 @@ pub enum IrNode {
         span: Span,
     },
     /// An ordinary function/primitive application — the callee's
-    /// provenance says whether it's an admitted semantic identity or an
+    /// provenance says whether it's an admitted function SID or an
     /// ordinary binding; this node never guesses which.
     Apply {
         callee: Box<IrNode>,
@@ -170,38 +153,6 @@ pub enum LoweringError {
     /// an empty list in operator position, or a special-form call with
     /// the wrong argument count for what its identity requires).
     MalformedForm { detail: String, span: Span },
-}
-
-/// The fixed set of semantic identities this IR module knows are
-/// special-form-shaped (not ordinary callable values), independent of
-/// `CanonicalIdentity`/`NecessaryFormIdentity` so a caller can ask "is this
-/// ID one IR already handles specially" without constructing an `Expr`.
-/// Exhaustive by construction: adding a new syntax identity here without
-/// a matching `IrNode` variant is a compile-time reminder, the same
-/// discipline as #66's `error_kind_vocabulary_is_closed.rs`.
-fn classify_syntax_id(semantic_id: Sid8) -> Option<KnownSyntaxId> {
-    if semantic_id == canon::QUOTE_SEMANTIC_ID {
-        Some(KnownSyntaxId::Quote)
-    } else if semantic_id == canon::COND_SEMANTIC_ID {
-        Some(KnownSyntaxId::Cond)
-    } else if semantic_id == LAMBDA_SEMANTIC_ID {
-        Some(KnownSyntaxId::Lambda)
-    } else if semantic_id == DEFINE_SEMANTIC_ID {
-        Some(KnownSyntaxId::Define)
-    } else if semantic_id == DEFMACRO_SEMANTIC_ID {
-        Some(KnownSyntaxId::Defmacro)
-    } else {
-        None
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum KnownSyntaxId {
-    Quote,
-    Cond,
-    Lambda,
-    Define,
-    Defmacro,
 }
 
 fn symbol_text(expr: &Expr) -> Option<&str> {
@@ -253,16 +204,12 @@ pub fn lower(expr: &Expr) -> Result<IrNode, LoweringError> {
 }
 
 fn lower_symbol_reference(name: &str, span: Span) -> IrNode {
-    let provenance = if let Some(identity) = canon::identity_for_surface(name) {
-        Provenance::Canon(identity)
-    } else if is_define_spelling(name) {
+    let provenance = if is_define_spelling(name) {
         Provenance::NecessaryForm(NecessaryFormIdentity::Define)
     } else if let Some(identity) = necessary_forms::identity_for_symbol(name) {
         Provenance::NecessaryForm(identity)
-    } else if semantic_registry::semantic_id_for_surface(name) == Some(DEFMACRO_SEMANTIC_ID) {
-        Provenance::Defmacro
-    } else if let Some(id) = semantic_registry::semantic_id_for_surface(name) {
-        Provenance::AdmittedSemanticIdentity(id)
+    } else if let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) {
+        Provenance::FunctionSid(sid)
     } else {
         Provenance::OrdinaryBinding
     };
@@ -283,91 +230,43 @@ fn lower_list(items: &[Expr], span: Span) -> Result<IrNode, LoweringError> {
             provenance: Provenance::Literal,
         });
     };
-    // Check for bare SID token as head (e.g. 00001000 for lambda, 00001001 for define)
-    if let Some(head_sid) = sid_of_head(head) {
-        if head_sid == LAMBDA_SEMANTIC_ID {
-            return lower_lambda(items, span);
-        }
-        if head_sid == DEFINE_SEMANTIC_ID || head_sid == DEF_COMPAT_SEMANTIC_ID {
-            return lower_define(items, span);
-        }
-        if head_sid == DEFMACRO_SEMANTIC_ID {
-            return lower_defmacro(items, span);
-        }
-        // Other SIDs are ordinary applications (e.g. +, car, etc.)
-        return lower_ordinary_application(head, &items[1..], span);
-    }
-    let Some(head_name) = symbol_text(head) else {
-        // A non-symbol operator (e.g. `((lambda (x) x) 1)`) is an ordinary
-        // application of a computed callee -- valid, just not a named form.
-        return lower_ordinary_application(head, &items[1..], span);
-    };
+    let head_sid = sid_of_head(head).or_else(|| {
+        symbol_text(head).and_then(semantic_registry::admitted_semantic_id_for_surface)
+    });
 
-    if let Some(identity) = canon::identity_for_surface(head_name) {
-        return lower_canon_form(identity, items, span);
-    }
-    if is_define_spelling(head_name) {
-        return lower_define(items, span);
-    }
-    if necessary_forms::identity_for_symbol(head_name) == Some(NecessaryFormIdentity::Lambda) {
-        return lower_lambda(items, span);
-    }
-    if semantic_registry::semantic_id_for_surface(head_name) == Some(DEFMACRO_SEMANTIC_ID) {
-        return lower_defmacro(items, span);
-    }
-
-    // Not a form this module treats specially -- an ordinary application,
-    // whether the callee is an admitted semantic identity (e.g. `+`) or a
-    // plain user binding. This is the common case, not a failure.
-    lower_ordinary_application(head, &items[1..], span)
-}
-
-fn lower_canon_form(
-    identity: CanonicalIdentity,
-    items: &[Expr],
-    span: Span,
-) -> Result<IrNode, LoweringError> {
-    match classify_syntax_id_for_canon(identity) {
-        Some(KnownSyntaxId::Quote) => {
+    if let Some(sid) = head_sid {
+        if sid == crate::sid!(00000001) {
             let [_, datum] = items else {
                 return Err(LoweringError::MalformedForm {
-                    detail: format!("quote takes exactly one argument, got {}", items.len() - 1),
+                    detail: format!(
+                        "SID 00000001 takes exactly one argument, got {}",
+                        items.len() - 1
+                    ),
                     span,
                 });
             };
-            Ok(IrNode::Quote {
+            return Ok(IrNode::Quote {
                 datum: datum.clone(),
                 span,
-            })
+            });
         }
-        Some(KnownSyntaxId::Cond) => lower_cond(items, span),
-        // atom/eq/cons/car/cdr are ordinary Canon *values* (callable
-        // primitives), not special forms -- Contract 6.0's own
-        // special-forms-boundary names only quote/cond/lambda/def/defmacro
-        // as non-callable. Everything else here is an ordinary application
-        // whose callee's provenance is `Provenance::Canon`.
-        None => lower_ordinary_application(&items[0], &items[1..], span),
-        Some(other) => Err(LoweringError::UnrecognizedSyntaxIdentity {
-            semantic_id: format!("{other:?} (unexpected Canon routing)"),
-            span,
-        }),
+        if sid == crate::sid!(00000111) {
+            return lower_cond(items, span);
+        }
+        if sid == crate::sid!(00001000) {
+            return lower_lambda(items, span);
+        }
+        if sid == crate::sid!(00001001) || sid == crate::sid!(00001011) {
+            return lower_define(items, span);
+        }
+        if sid == crate::sid!(00001010) {
+            return lower_defmacro(items, span);
+        }
+        return lower_ordinary_application(head, &items[1..], span);
     }
-}
 
-/// Only `quote` and `cond` are Canon identities that are ALSO
-/// special-form-shaped; atom/eq/cons/car/cdr are ordinary callable Canon
-/// values. Exhaustive over `CanonicalIdentity` so a future Canon
-/// identity forces a decision here, not a silent default.
-fn classify_syntax_id_for_canon(identity: CanonicalIdentity) -> Option<KnownSyntaxId> {
-    match identity {
-        CanonicalIdentity::Quote => Some(KnownSyntaxId::Quote),
-        CanonicalIdentity::Cond => Some(KnownSyntaxId::Cond),
-        CanonicalIdentity::Atom
-        | CanonicalIdentity::Eq
-        | CanonicalIdentity::Cons
-        | CanonicalIdentity::Car
-        | CanonicalIdentity::Cdr => None,
-    }
+    // No function SID was selected: this is an ordinary computed/user binding.
+    lower_ordinary_application(head, &items[1..], span)
 }
 
 fn lower_cond(items: &[Expr], span: Span) -> Result<IrNode, LoweringError> {
@@ -533,7 +432,7 @@ mod tests {
         let IrNode::VariableRef { provenance, .. } = *callee else {
             panic!("expected VariableRef callee");
         };
-        assert_eq!(provenance, Provenance::Canon(CanonicalIdentity::Car));
+        assert_eq!(provenance, Provenance::FunctionSid(crate::sid!(00000101)));
     }
 
     #[test]
@@ -568,7 +467,7 @@ mod tests {
         };
         assert_eq!(
             provenance,
-            Provenance::AdmittedSemanticIdentity(crate::sid!(00001100))
+            Provenance::FunctionSid(crate::sid!(00001100))
         );
     }
 
@@ -599,12 +498,6 @@ mod tests {
     /// lowering." `classify_syntax_id` is the exhaustive gate; this proves
     /// it rejects an identity it was never taught, rather than defaulting
     /// to some guessed shape.
-    #[test]
-    fn an_unrecognized_syntax_identity_is_rejected_not_guessed() {
-        assert_eq!(classify_syntax_id(crate::sid!(00000001)), Some(KnownSyntaxId::Quote));
-        assert_eq!(classify_syntax_id(crate::sid!(11111111)), None);
-    }
-
     /// #68's own acceptance criterion: "lower a small but nontrivial corpus
     /// from source/canonical forms to IR and reconstruct enough provenance
     /// to explain each step." Reuses #67's own frozen compiler-corpus
