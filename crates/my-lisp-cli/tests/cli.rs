@@ -28,6 +28,13 @@ fn my_lisp() -> Command {
     command
 }
 
+fn sens() -> Command {
+    let repo_root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+    let mut command = Command::new(env!("CARGO_BIN_EXE_sens"));
+    command.current_dir(repo_root);
+    command
+}
+
 #[test]
 fn version_flag_prints_the_crate_version() {
     let output = my_lisp()
@@ -40,6 +47,28 @@ fn version_flag_prints_the_crate_version() {
         stdout.trim(),
         format!("my-lisp {}", env!("CARGO_PKG_VERSION"))
     );
+}
+
+#[test]
+fn sens_and_my_lisp_binaries_execute_the_same_direct_8_bit_program() {
+    let path = std::env::temp_dir().join("sens-cli-parity-direct-8-bit.lisp");
+    std::fs::write(&path, "(00000001 42)").expect("should write parity fixture");
+
+    let legacy = my_lisp()
+        .arg(&path)
+        .output()
+        .expect("my-lisp binary should run");
+    let canonical = sens()
+        .arg(&path)
+        .output()
+        .expect("sens binary should run");
+    let _ = std::fs::remove_file(&path);
+
+    assert_eq!(canonical.status.code(), legacy.status.code());
+    assert_eq!(canonical.stdout, legacy.stdout);
+    assert_eq!(canonical.stderr, legacy.stderr);
+    assert!(canonical.status.success());
+    assert_eq!(String::from_utf8_lossy(&canonical.stdout).trim(), "42");
 }
 
 #[test]
