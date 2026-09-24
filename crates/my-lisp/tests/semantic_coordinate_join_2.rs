@@ -166,9 +166,9 @@ fn math_coordinate(session: &mut Session, sid: &str) -> String {
     .to_string()
 }
 
-fn machine_coordinate(session: &mut Session, sid: &str) -> String {
+fn machine_coordinate(session: &mut Session, sid: Sid8) -> String {
     eval_program(
-        &format!(r#"(machine-capabilities-for-sid "{sid}")"#),
+        &format!("(machine-capabilities-for-sid {sid})"),
         session,
     )
     .expect("machine coordinate query")
@@ -192,7 +192,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     let add_math = math_coordinate(&mut session, "00001100");
     assert!(add_math.contains("exact-rational-sum"));
     assert_eq!(
-        machine_coordinate(&mut session, "00001100"),
+        machine_coordinate(&mut session, my_lisp::sid!(00001100)),
         "((integer-add bounded-u64))"
     );
     assert_eq!(kernel_statuses_for_sid(&kernel_source, my_lisp::sid!(00001100)), None);
@@ -205,7 +205,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert_eq!(eq_kernels.len(), 1);
     assert_eq!(eq_kernels.get("my-lisp").map(String::as_str), Some("live"));
     assert_eq!(
-        machine_coordinate(&mut session, "00000011"),
+        machine_coordinate(&mut session, my_lisp::sid!(00000011)),
         "((identity-compare bounded-u64))"
     );
 
@@ -220,7 +220,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
         Some("integration-gated")
     );
     assert_eq!(
-        machine_coordinate(&mut session, "00000100"),
+        machine_coordinate(&mut session, my_lisp::sid!(00000100)),
         "((pair-field-store head bounded-u64) (pair-field-store tail bounded-u64))"
     );
 
@@ -236,7 +236,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert_eq!(cond_kernels.get("prolog").map(String::as_str), Some("absent"));
     assert_eq!(cond_kernels.get("clips").map(String::as_str), Some("absent"));
     assert_eq!(
-        machine_coordinate(&mut session, "00000111"),
+        machine_coordinate(&mut session, my_lisp::sid!(00000111)),
         "((conditional-branch bounded-u64))"
     );
 }
