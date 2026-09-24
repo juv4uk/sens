@@ -1,10 +1,10 @@
-; Explicit semantic-authority reviews.
-; Lisp-owned policy data consumed by scripts/semantic-authority-guard.lisp.
+; Historical/focused semantic-review evidence.
+; Since #1347 this file is NOT a permission list for Rust/host semantics and
+; scripts/semantic-authority-guard.lisp no longer consumes it.
 ;
-; Every review is bound to BOTH an exact repository path and the SHA-256 of
-; the exact reviewed source text. No prefixes, directories, globs, or
-; permanent path exemptions exist. Any later edit changes the digest and
-; requires a new explicit review row.
+; Some focused workflows (for example Core2 evidence) still use exact
+; path+SHA rows as reproducibility evidence. Those rows do not grant or deny
+; semantic authority.
 ;
 ; #1098 SID-BINARY-IDENTITY-1 is a reviewed representation migration:
 ; semantic identity changes from host numeric aliases to opaque exact 8-bit Sid8.
