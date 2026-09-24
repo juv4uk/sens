@@ -38,6 +38,9 @@ fn row_fields(expr: &Expr) -> Option<HashMap<String, String>> {
             "profile",
             "status",
             "semantic-change",
+            "performance-wrapper-audit",
+            "host-capability-sid-gap",
+            "table-first-bootstrap-vision",
             "core1-core2-core3",
         ] {
             if let Some(value) = pair_symbol(entry, key) {
@@ -80,6 +83,18 @@ fn inventory_is_explicitly_core4_only_and_non_semantic() {
 
     assert_eq!(header.get("status").map(String::as_str), Some("inventory-only"));
     assert_eq!(header.get("semantic-change").map(String::as_str), Some("forbidden"));
+    assert_eq!(
+        header.get("performance-wrapper-audit").map(String::as_str),
+        Some("separate-axis-1277-1278")
+    );
+    assert_eq!(
+        header.get("host-capability-sid-gap").map(String::as_str),
+        Some("separate-axis-1276")
+    );
+    assert_eq!(
+        header.get("table-first-bootstrap-vision").map(String::as_str),
+        Some("out-of-scope-1281")
+    );
     assert_eq!(
         header.get("core1-core2-core3").map(String::as_str),
         Some("out-of-scope")
