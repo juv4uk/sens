@@ -127,7 +127,7 @@
                            (quote forbidden))
                 (eqr-check (quote integration)
                            (eqr-field eqr-integration (quote integration))
-                           (quote pending-selected-core)))))))
+                           (quote pending-selected-core))))))
       (cond
         ((atom failure) (structural-kind empty-list)
          (quote (core4-eq-result-law-ok)))
