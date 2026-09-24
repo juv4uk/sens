@@ -13,18 +13,18 @@
 
 (def machine-capability-axis-v1
   (quote
-    (("00001100"
+    ((00001100
        ((integer-add bounded-u64)))
-     ("00000011"
+     (00000011
        ((identity-compare bounded-u64)))
-     ("00000111"
+     (00000111
        ((conditional-branch bounded-u64)))
-     ("00000100"
+     (00000100
        ((pair-field-store head bounded-u64)
         (pair-field-store tail bounded-u64)))
-     ("00000101"
+     (00000101
        ((pair-field-load head bounded-u64)))
-     ("00000110"
+     (00000110
        ((pair-field-load tail bounded-u64))))))
 
 (def machine-capability-target-witnesses-v1
