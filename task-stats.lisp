@@ -7,8 +7,8 @@
 ; Total tasks across all repos
 ; Загальна кількість задач у всіх репо
 
-; From Python analysis of tasks.my files
-; З Python аналізу files tasks.my
+; From Python analysis of tasks.lisp files
+; З Python аналізу файлів tasks.lisp
 
 ; 457 total tasks
 ; 457 загальних задач

@@ -1,8 +1,8 @@
 ; My-Lisp swarm tasks summary script
 ; Підсумок задач roe My-Lisp
 
-; Summary statistics (from Python analysis of all tasks.my files)
-; Статистика зі аналізу всіх tasks.my файлів
+; Summary statistics (from Python analysis of all tasks.lisp files)
+; Статистика з аналізу всіх файлів tasks.lisp
 
 ; Total tasks across all repos: 457
 ; Загальна кількість задач у всіх репо: 457
