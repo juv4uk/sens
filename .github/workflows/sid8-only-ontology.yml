@@ -1,0 +1,22 @@
+name: SID8-only ontology
+
+on:
+  pull_request:
+    paths:
+      - language-contract.lisp
+      - docs/language-core.md
+      - README.md
+      - crates/my-lisp/src/sid.rs
+      - crates/my-lisp/src/parser.rs
+      - lib/macro.lisp
+      - scripts/sid8-only-ontology-guard.sh
+      - .github/workflows/sid8-only-ontology.yml
+  workflow_dispatch:
+
+jobs:
+  sid8-only:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Enforce one function ontology
+        run: bash scripts/sid8-only-ontology-guard.sh
