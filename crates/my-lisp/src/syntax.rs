@@ -1,6 +1,6 @@
 use crate::value::{NumericBuffer, Rational};
 use crate::Sid8;
-use std::rc::Rc;
+use std::{cell::Cell, fmt, ops::Deref, rc::Rc};
 
 /// Byte range in the original UTF-8 source.
 /// Diapazon baitiv u pochatkovomu teksti UTF-8.
@@ -15,6 +15,101 @@ pub struct Span {
 pub struct Expr {
     pub kind: ExprKind,
     pub span: Span,
+}
+
+
+/// Proper-list reader/executable structure.
+///
+/// `resolved_head_sid` is deliberately not semantic data and is excluded
+/// from equality, debug output and FASL serialization. It is a one-way
+/// mechanical cache populated only after the evaluator has proved that this
+/// executable list head denotes an immutable language identity.
+///
+/// The source spelling remains in `items` for diagnostics/source fidelity;
+/// execution may stop consulting it once `resolved_head_sid` is present.
+pub struct ExprList {
+    items: Rc<[Expr]>,
+    resolved_head_sid: Cell<Option<Sid8>>,
+}
+
+impl ExprList {
+    pub(crate) fn resolved_head_sid(&self) -> Option<Sid8> {
+        self.resolved_head_sid.get()
+    }
+
+    pub(crate) fn cache_resolved_head_sid(&self, sid: Sid8) {
+        match self.resolved_head_sid.get() {
+            Some(existing) => {
+                debug_assert_eq!(
+                    existing, sid,
+                    "one executable list must never resolve to two SID identities"
+                );
+            }
+            None => self.resolved_head_sid.set(Some(sid)),
+        }
+    }
+}
+
+impl Clone for ExprList {
+    fn clone(&self) -> Self {
+        Self {
+            items: self.items.clone(),
+            resolved_head_sid: Cell::new(self.resolved_head_sid.get()),
+        }
+    }
+}
+
+impl PartialEq for ExprList {
+    fn eq(&self, other: &Self) -> bool {
+        self.items == other.items
+    }
+}
+
+impl fmt::Debug for ExprList {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.debug_tuple("ExprList").field(&self.items).finish()
+    }
+}
+
+impl Deref for ExprList {
+    type Target = [Expr];
+
+    fn deref(&self) -> &Self::Target {
+        &self.items
+    }
+}
+
+impl AsRef<[Expr]> for ExprList {
+    fn as_ref(&self) -> &[Expr] {
+        &self.items
+    }
+}
+
+impl From<Vec<Expr>> for ExprList {
+    fn from(items: Vec<Expr>) -> Self {
+        Self {
+            items: items.into(),
+            resolved_head_sid: Cell::new(None),
+        }
+    }
+}
+
+impl From<Box<[Expr]>> for ExprList {
+    fn from(items: Box<[Expr]>) -> Self {
+        Self {
+            items: items.into(),
+            resolved_head_sid: Cell::new(None),
+        }
+    }
+}
+
+impl From<Rc<[Expr]>> for ExprList {
+    fn from(items: Rc<[Expr]>) -> Self {
+        Self {
+            items,
+            resolved_head_sid: Cell::new(None),
+        }
+    }
 }
 
 /// Whether a numeric value is a precise quantity or a floating-point
@@ -52,7 +147,7 @@ pub enum ExprKind {
     Sid(Sid8),
     String(Rc<str>),
     Symbol(Rc<str>),
-    List(Rc<[Expr]>),
+    List(ExprList),
     /// A reader-level dotted pair, `(a . b)` — distinct from `List` because a
     /// proper list is nil-terminated and an improper one isn't. Only ever
     /// produced by a literal `.` between exactly two sub-expressions inside
