@@ -5,7 +5,7 @@
 //! The evaluator is split by concern: this module owns the trampoline loop and
 //! dispatch table, `arithmetic` owns exact/inexact number handling, `special_forms`
 //! owns the McCarthy primitives plus compatibility `def`/`cond`,
-//! `necessary_forms` owns the immutable DEFINE/LAMBDA identities, and `closures`
+//! `necessary_forms` projects SID-keyed evaluation-order mechanisms, and `closures`
 //! owns lambda construction and function/macro application.
 pub(crate) use special_forms::digest::sha256 as digest_sha256;
 
@@ -155,10 +155,10 @@ pub(crate) fn evaluate_step(
                     expression.span,
                 ));
             }
-            if necessary_forms::identity_for_symbol(symbol).is_some() {
+            if let Some(sid) = necessary_forms::routed_sid_for_symbol(symbol) {
                 return Err(LanguageError::new(
                     ErrorKind::UnknownSymbol,
-                    format!("evaluator-owned necessary form is syntax-only: {symbol}"),
+                    format!("function SID is syntax-only in this position: {sid}"),
                     expression.span,
                 ));
             }
@@ -196,19 +196,19 @@ fn evaluate_list(
     let routed_head_sid = head_sid
         .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
-    let necessary_head = head_name
-        .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+    let necessary_head_sid = head_name
+        .and_then(necessary_forms::routed_sid_for_symbol)
+        .or_else(|| head_sid.filter(|sid| necessary_forms::is_necessary_form_sid(*sid)));
 
     if routed_head_sid == Some(crate::sid!(00000001)) {
         special_forms::exact_arity("00000001", arguments, 1, span)?;
         let value = special_forms::quoted(&arguments[0])?;
         return Ok(EvalStep::Value(value));
     }
-    if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Lambda) {
+    if necessary_head_sid.is_some_and(necessary_forms::is_lambda_sid) {
         return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
     }
-    if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Define) {
+    if necessary_head_sid.is_some_and(necessary_forms::is_define_sid) {
         return special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value);
     }
     if routed_head_sid == Some(crate::sid!(00000111)) {
