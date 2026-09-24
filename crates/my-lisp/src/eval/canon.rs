@@ -10,7 +10,7 @@
 //! but that byte is mechanism only; the identity remains the exact bit spelling. Special forms (quote, cond,
 //! lambda, define, defmacro, def) are handled before this table in evaluate_list.
 
-use super::special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values};
+use super::special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values, eval_values};
 use super::arithmetic;
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sid8, Span, Value};
 
@@ -201,6 +201,7 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     table[SUB_SEMANTIC_ID.packed_byte() as usize] = Some(prim_sub);
     table[MUL_SEMANTIC_ID.packed_byte() as usize] = Some(prim_mul);
     table[DIV_SEMANTIC_ID.packed_byte() as usize] = Some(prim_div);
+    table[crate::sid!(01001101).packed_byte() as usize] = Some(prim_01001101);
     table
 };
 
@@ -247,6 +248,17 @@ fn prim_mul(args: &[Value], env: &Environment, span: Span) -> Result<Value, Lang
 fn prim_div(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
     exact_args("/", args, 2, span)?;
     arithmetic::arithmetic_on_values("/", args, env, span)
+}
+
+/// Existing evaluation mechanism selected directly by function SID 01001101.
+/// No surface/name participates in this execution path.
+fn prim_01001101(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("01001101", args, 1, span)?;
+    eval_values(args, env, span)
 }
 
 /// Invoke the current implementation projection for a semantic callable.
