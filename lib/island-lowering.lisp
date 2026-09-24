@@ -21,7 +21,7 @@
         ((eq executor (quote common-lisp)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
         ((eq executor (quote prolog)) (identity-relation same)
-         (island-lowering-append4 "Result is " l " + " r))
+         (island-lowering-append4 "" l " " r))
         ((eq executor (quote datalog)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
         ((quote island-lowering-fallback) island-lowering-fallback
