@@ -1,0 +1,27 @@
+name: SID runtime cache evidence
+
+on:
+  pull_request:
+    paths:
+      - crates/my-lisp/examples/sid_runtime_cache_benchmark.rs
+      - .github/workflows/sid-runtime-cache-evidence.yml
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: sid-runtime-cache-evidence
+      - name: Run release benchmark
+        env:
+          SID_CACHE_SAMPLES: "7"
+          SID_CACHE_ITERATIONS: "50000"
+        run: |
+          set -o pipefail
+          cargo run --release -p my-lisp --example sid_runtime_cache_benchmark 2>&1 | tee sid-cache-results.txt
+      - name: Show evidence
+        if: always()
+        run: grep '^SID_CACHE' sid-cache-results.txt || true
