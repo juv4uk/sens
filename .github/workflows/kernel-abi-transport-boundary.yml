@@ -1,0 +1,51 @@
+name: Kernel ABI transport boundary
+
+on:
+  pull_request:
+    paths:
+      - "contracts/kernel-abi-transport-boundary.lisp"
+      - "scripts/check-kernel-abi-transport-boundary.lisp"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - "crates/wsm-kernel-c-abi/**"
+      - "crates/wsm-common-lisp-kernel/**"
+      - "crates/wsm-prolog-kernel/**"
+      - "crates/wsm-clips-kernel/**"
+      - "crates/wsm-datalog-kernel/**"
+      - ".github/workflows/kernel-abi-transport-boundary.yml"
+  push:
+    branches: [main]
+    paths:
+      - "contracts/kernel-abi-transport-boundary.lisp"
+      - "scripts/check-kernel-abi-transport-boundary.lisp"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - "crates/wsm-kernel-c-abi/**"
+      - "crates/wsm-common-lisp-kernel/**"
+      - "crates/wsm-prolog-kernel/**"
+      - "crates/wsm-clips-kernel/**"
+      - "crates/wsm-datalog-kernel/**"
+      - ".github/workflows/kernel-abi-transport-boundary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  boundary:
+    name: Kernel ABI remains transport-only
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build semantic oracle
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Execute Lisp-owned kernel ABI boundary guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          got="$(./target/debug/my-lisp scripts/check-kernel-abi-transport-boundary.lisp)"
+          printf '%s\n' "$got"
+          test "$got" = "(kernel-abi-transport-boundary-ok (kernels 4) (language-type Sid8) (abi-wrapper SemanticId))"
+      - name: Diff hygiene
+        run: git diff --check
