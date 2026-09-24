@@ -120,3 +120,6 @@
 
 ; #1301 Ukrainian peer-shadowing acceptance: reviewed observer-only expectation alignment.
 (review "crates/my-lisp/tests/ukr_acceptance.rs" "ab6ab84e658a2222c418d5990e18dc6f32d7ef8b3581ab8e8c27f49c37e8fd9c" issue-1301 ukr-peer-shadowing-current-eq-observer)
+
+; #1325 Contract-9 macro library eight-bit identity review:
+(review "crates/my-lisp/tests/semantic_form_identity.rs" "ecee4498adefa81fb4617678bc0859d15d42ce09e4567e56e059ddeb3b6274b4" issue-1325 semantic-form-identity-contract-9)
