@@ -282,7 +282,7 @@ my-lisp
    Prolog  Datalog  CLIPS  Common Lisp
 ```
 
-`my-lisp` є центральною мовою не тому, що виконує все сам, а тому, що зберігає **цілісність identity, Canon, композицію й прямий контакт із різними execution models**.
+`my-lisp` є центральною мовою не тому, що виконує все сам, а тому, що зберігає **цілісність восьмибітного функціонального простору, Core-законів, композиції й прямий контакт із різними execution models**.
 
 Кожен острів говорить із мовою прямо й повертає власний результат без обов'язкового переписування під одну універсальну семантику.
 
@@ -354,7 +354,6 @@ cargo clippy --workspace --all-targets -- -D warnings
 1. [`language-contract.lisp`](language-contract.lisp) — що саме обіцяє мова;
 2. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — хто має право визначати істину;
 3. [`docs/language-core.md`](docs/language-core.md) — SID8-only архітектура ядра;
-4. [`lib/canon.lisp`](lib/canon.lisp) — legacy law witness під міграцією #1325;
 5. [`lib/surface/uk-acceptance.lisp`](lib/surface/uk-acceptance.lisp) — українська мова як виконуваний програмний інтерфейс;
 6. [`lib/meta-eval.lisp`](lib/meta-eval.lisp) — як мова починає обчислювати саму себе;
 7. [`lib/reason.lisp`](lib/reason.lisp) — reasoning-напрям;
