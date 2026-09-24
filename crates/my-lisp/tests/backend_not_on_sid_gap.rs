@@ -29,11 +29,18 @@
 //! SLP1/anything) that altered how a name is written could silently
 //! break dispatch, unlike genuine SID-routed forms (`quote`/`cond`/the
 //! Canon-identity primitives) which are encoding-invariant by
-//! construction. This mismatch is also a plausible contributor to
-//! `meta_eval_mutual`'s measured 79-291s-per-file cost (2026-09-24):
-//! every ordinary-primitive dispatch pays a linear `eq`-chain walk,
-//! itself paid through the same expensive per-call tree-walking
-//! interpreter overhead found in my-lisp#333/#1228.
+//! construction.
+//!
+//! Checked and corrected (2026-09-24): an earlier version of this
+//! comment speculated that the ordinary-primitive `eq`-chain was a
+//! "plausible contributor" to `meta_eval_mutual`'s measured 79-291s cost.
+//! Direct benchmark (500 dispatches of a Canon/SID-routed primitive vs.
+//! the chain's first entry `+` vs. its last entry `string->symbol`)
+//! showed no measurable difference (ratio 0.977-0.981, within noise) —
+//! the ~8-entry chain is far too short to matter against `my-eval`'s own
+//! per-call cost. The correctness gap above is real and independently
+//! confirmed by the tests below; the performance speculation was not,
+//! and is retracted rather than left standing unverified.
 //!
 //! This is observational evidence, not a call to fix it in this test —
 //! #997/#1048/#1049 already own the direction (host may transport, never
