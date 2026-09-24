@@ -164,3 +164,7 @@ crates/my-lisp/tests/core4_eq_answer_1258.rs	outside_domain_is_a_named_error_not
 crates/my-lisp/tests/core4_eq_answer_1258.rs	not_is_a_clean_bit_flip_between_the_two_admitted_answers	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
 crates/my-lisp/tests/core4_eq_answer_1258.rs	sid_identity_plays_no_role_in_the_answer	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
 crates/my-lisp/tests/core4_eq_answer_1258.rs	historical_core1_eq_is_completely_unchanged	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
+
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	inventory_is_explicitly_core4_only_and_non_semantic	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	semantic_roots_have_distinct_roles_instead_of_one_bulk_rewrite_class	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
+crates/my-lisp/tests/core4_predicate_record_inventory_1259.rs	inventory_uses_only_the_ratified_role_vocabulary	observer	core4-predicate-record-inventory	knowledge/core4-predicate-record-inventory.lisp	retained
