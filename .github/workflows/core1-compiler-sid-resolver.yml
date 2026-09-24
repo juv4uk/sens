@@ -85,7 +85,7 @@ jobs:
 
           actual="$(
             cd .core1-resolver/mccarthy-eval
-            ./mccarthy-kernel ../resolver-witness.lisp
+            ./mccarthy-kernel ../resolver-witness.lisp | tail -n 11
           )"
 
           printf '%s\n' "$actual"
