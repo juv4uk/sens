@@ -9,6 +9,13 @@
 (def pob-policy-sections (cdr pob-policy-form))
 (def pob-policy-raw (second pob-policy-sections))
 (def pob-policy-final (third pob-policy-sections))
+(def pob-policy-endpoint (fifth pob-policy-sections))
+
+(def pob-boundary-form
+  (car (read-all (read-file "contracts/core4-predicate-answer-boundary.lisp"))))
+(def pob-boundary-sections (cdr pob-boundary-form))
+(def pob-boundary-lower (second pob-boundary-sections))
+(def pob-boundary-upper (third pob-boundary-sections))
 
 (def pob-field-from
   (lambda (name fields)
@@ -81,13 +88,34 @@
   (pob-check-case
     (pob-load-row "tests/fixtures/core4-predicate-output-forbidden.lisp")))
 
+(def pob-policy-endpoint-flow
+  (pob-field pob-policy-endpoint (quote endpoint-flow)))
+
+(def pob-boundary-endpoint-flow
+  (list
+    (list
+      (pob-field pob-boundary-lower (quote direction))
+      (pob-field pob-boundary-lower (quote sid-anchor))
+      (pob-field pob-boundary-lower (quote projection)))
+    (list
+      (pob-field pob-boundary-upper (quote direction))
+      (pob-field pob-boundary-upper (quote sid-anchor))
+      (pob-field pob-boundary-upper (quote projection)))))
+
 (cond
   ((eq pob-allowed (quote pass)) (identity-relation same)
    (cond
      ((equal? pob-forbidden
               (quote (violation rich-observation-as-final)))
       (structural-relation same)
-      (quote (core4-predicate-output-boundary-ok)))
+      (cond
+        ((equal? pob-policy-endpoint-flow pob-boundary-endpoint-flow)
+         (structural-relation same)
+         (quote (core4-predicate-output-boundary-ok)))
+        ((quote endpoint-flow-mismatch) endpoint-flow-mismatch
+         (list (quote core4-predicate-output-endpoint-flow-mismatch)
+               pob-boundary-endpoint-flow
+               pob-policy-endpoint-flow))))
      ((quote negative-fixture-failed) negative-fixture-failed
       (list (quote core4-predicate-output-negative-fixture-mismatch)
             pob-forbidden))))
