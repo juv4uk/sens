@@ -1,10 +1,10 @@
-//! Immutable evaluator meaning for Canon 0 + McCarthy7.
+//! Legacy named routing table for function SIDs 00000001..00000111.
 //!
 //! Canon is deliberately *not* an `Environment`. Stable human/symbolic
 //! spellings live in `lib/surface/semantic-registry.wsm` and are projected to
 //! opaque runtime projections by the shared registry module. This module owns
 //! only the finite mapping from exact eight-bit SID identities to canonical
-//! evaluator meaning, plus Canon 0.
+//! evaluator mechanism metadata. SID 00000000 is not an empty-list identity.
 //!
 //! Primitive dispatch may pack a Sid8 into one byte to index a 256-entry table,
 //! but that byte is mechanism only; the identity remains the exact bit spelling. Special forms (quote, cond,
@@ -50,14 +50,14 @@ pub(crate) const CAR_SEMANTIC_ID: Sid8 = crate::sid!(00000101);
 pub(crate) const CDR_SEMANTIC_ID: Sid8 = crate::sid!(00000110);
 pub(crate) const COND_SEMANTIC_ID: Sid8 = crate::sid!(00000111);
 
-/// Arithmetic primitives (admitted via semantic registry, not Canon 0).
+/// Arithmetic mechanisms outside this legacy seven-entry routing table.
 /// Their canonical identities are the exact bit spellings themselves.
 pub(crate) const ADD_SEMANTIC_ID: Sid8 = crate::sid!(00001100);
 pub(crate) const SUB_SEMANTIC_ID: Sid8 = crate::sid!(00001101);
 pub(crate) const MUL_SEMANTIC_ID: Sid8 = crate::sid!(00001110);
 pub(crate) const DIV_SEMANTIC_ID: Sid8 = crate::sid!(00001111);
 
-/// Declared in ascending SID order (00000000..00000111) — `identity_for_semantic_id`
+/// Declared in ascending SID order (00000001..00000111) — `identity_for_semantic_id`
 /// indexes this array directly by SID byte, so that order is load-bearing,
 /// not incidental.
 pub(crate) const CANON: [CanonEntry; 7] = [
