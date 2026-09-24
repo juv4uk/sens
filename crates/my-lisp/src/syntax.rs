@@ -27,6 +27,7 @@ pub struct Expr {
 ///
 /// The source spelling remains in `items` for diagnostics/source fidelity;
 /// execution may stop consulting it once `resolved_head_sid` is present.
+/// See issue #1320 for the one-way surface -> SID execution invariant.
 pub struct ExprList {
     items: Rc<[Expr]>,
     resolved_head_sid: Cell<Option<Sid8>>,
