@@ -1,21 +1,15 @@
 // GENERATED — DO NOT EDIT BY HAND.
 // Authority: lib/evaluator-dispatch.lisp
 // Generator: scripts/generate-rust-evaluator-dispatch.lisp
+//
+// Function identity remains only Sid8. These arrays are mechanical
+// evaluator-routing facts keyed by the exact SID byte.
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum NecessaryFormMechanism {
-    Define,
-    Lambda,
-}
+pub(super) const LAMBDA_FORM_SIDS: &[u8] = &[
+    0b00001000,
+];
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) struct NecessaryFormDispatchRow {
-    pub(super) semantic_id: u8,
-    pub(super) mechanism: NecessaryFormMechanism,
-}
-
-pub(super) const NECESSARY_FORM_DISPATCH: &[NecessaryFormDispatchRow] = &[
-    NecessaryFormDispatchRow { semantic_id: 0b00001000, mechanism: NecessaryFormMechanism::Lambda },
-    NecessaryFormDispatchRow { semantic_id: 0b00001001, mechanism: NecessaryFormMechanism::Define },
-    NecessaryFormDispatchRow { semantic_id: 0b00001011, mechanism: NecessaryFormMechanism::Define },
+pub(super) const DEFINE_FORM_SIDS: &[u8] = &[
+    0b00001001,
+    0b00001011,
 ];
