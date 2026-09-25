@@ -190,3 +190,8 @@ crates/my-lisp/tests/ukr_acceptance.rs	ukr_acceptance_program_executes_through_r
 crates/my-lisp/tests/ukr_acceptance.rs	shadowing_ukr_peer_does_not_retarget_english_peer	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
 
 crates/my-lisp/tests/core_profile_runtime_1272.rs	selected_core_profile_signal_is_shared_mechanically	observer	selected-core-profile-mechanism	contracts/core-special-form-profile-policy.lisp	migrated
+
+crates/my-lisp-cli/src/island_invoke.rs	evaluate_raw_invoke	mechanism	exact-SENS raw island mechanism	SENS 10101000 + producer-native kernel APIs	migrated
+crates/my-lisp-cli/tests/invoke_repl.rs	exact_sens_10101000_reaches_datalog_raw_adapter	observer	exact-SENS raw invoke witness	crates/my-lisp-cli/src/island_invoke.rs	migrated
+crates/my-lisp-cli/tests/invoke_repl.rs	admitted_surfaces_are_only_ui_routes_to_the_same_exact_sens	observer	surface-to-SENS raw invoke parity	lib/surface/semantic-registry.lisp + SENS 10101000	migrated
+crates/my-lisp-cli/tests/invoke_repl.rs	unknown_kernel_fails_named	observer	raw invoke fail-closed mechanism boundary	crates/my-lisp-cli/src/island_invoke.rs	migrated
