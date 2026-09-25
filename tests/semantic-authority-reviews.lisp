@@ -141,3 +141,8 @@
 (review "crates/my-lisp/src/eval/canon.rs" "0fc923c893012610a6aad60edbdcaf70e9a78b67b7b63fbba6eb18d0c512fece" issue-1406 registration-is-not-admission-repair)
 (review "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" "729d3a741df2b4f2fd7cb278b09107e449c6b19eaf58241a5e5b25bdd58cf248" issue-1406 sens-host-registration-admission-observer)
 (review "crates/my-lisp/src/eval/capabilities.rs" "263e6fcfeb94974a8a6d102df296ee25d6fa23888015cd73b6d3654d14062347" issue-1406 dormant-host-registry-mechanism)
+
+; #1006 direct-SENS raw island adapter: reviewed mechanism-only changes.
+(review "crates/my-lisp/src/sens.rs" "27461dd83b35a141222ce73e48581831ee6d881148869291769c4326e3d6faab" issue-1006 explicit-sens-transport-byte-boundary)
+(review "crates/my-lisp-cli/src/island_invoke.rs" "e35f85c1d45a297afa15f341f56f7a8efbaba3f64e021be14cc3179d971349bd" issue-1006 direct-sens-raw-island-mechanism)
+(review "crates/my-lisp-cli/src/main.rs" "1fd8414fe92f11dd7d540e15e91e6856c9671233f854e8ccfae10a173f6d4f17" issue-1006 install-exact-sens-raw-invoke-mechanism)
