@@ -145,3 +145,8 @@
 (review "crates/my-lisp/src/lib.rs" "0703de0b28fd95533a9ca28473e933de0397d998dec6900403d25f4dd793cff9" issue-1417 canonical-core4-fasl-loader-mechanism)
 (review "crates/my-lisp-cli/src/main.rs" "d00f8460376ff7acc112db472e3ae3e1ff6791cd89e82cd10969b1055210ccef" issue-1417 cli-bootstrap-consumes-canonical-loader)
 (review "crates/my-lisp/tests/postcore_peer_staging_1417.rs" "9aa81e4335c2262ceb4ed1ec13ef5dc99971baafb68324a4aad9349218d01231" issue-1417 postcore-peer-staging-observer)
+
+; #1424 follow-up: keep registry identity non-lexical during Core4 bootstrap,
+; then materialize stable peers only after post-core Lisp implementations exist.
+(review "crates/my-lisp/src/lib.rs" "34c11b1dd0b59736fdbf95d9d8800a78e90fe5e4777c735102026ab753fd7bcf" issue-1424 postcore-peer-materialization-mechanism)
+(review "crates/my-lisp/tests/clock.rs" "59fa3787c21f2e77ba013e0b5376c2cf3af7efe78776244a9b191b4d9548b0ac" issue-1424 nonlexical-sens-identity-observer)
