@@ -82,6 +82,15 @@ impl Sens8 {
     pub(crate) const fn packed_byte(self) -> u8 {
         self.0
     }
+
+    /// Opaque one-byte transport of this exact SENS for external kernel ABIs.
+    ///
+    /// This is mechanism-only: the byte is not an alternate function identity,
+    /// is not ordered/arithmetic SENS, and must never be used to mint meaning.
+    #[doc(hidden)]
+    pub const fn transport_byte(self) -> u8 {
+        self.0
+    }
 }
 
 impl fmt::Display for Sens8 {
