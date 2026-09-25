@@ -33,9 +33,14 @@ name = "cml-export"
 path = "src/bin/cml-export.rs"
 
 [dependencies]
+sens = { path = "../sens" }
 my-lisp = { path = "../my-lisp" }
 my-lisp-host = { path = "../my-lisp-host" }
 my-lisp-lsp = { path = "../my-lisp-lsp" }
+wsm-common-lisp-kernel = { path = "../wsm-common-lisp-kernel" }
+wsm-prolog-kernel = { path = "../wsm-prolog-kernel" }
+wsm-clips-kernel = { path = "../wsm-clips-kernel", features = ["native-clips"] }
+wsm-datalog-kernel = { path = "../wsm-datalog-kernel" }
 wsm-guard-core = { path = "../wsm-guard-core" }
 rustyline = { version = "14.0.0", features = ["with-file-history"] }
 serde = { version = "1", features = ["derive"] }
