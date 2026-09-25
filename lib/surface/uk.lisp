@@ -234,8 +234,8 @@
 (define логічний-висновок reason-in)
 ; Публічний предикат читається як питання; стара дієслівна назва лишається
 ; compatibility alias, щоб наявні українські програми не ламалися.
-(define конфлікт? check-conflict?)
-(define перевірити-конфлікт check-conflict?)
+(define конфлікт? check-conflict)
+(define перевірити-конфлікт check-conflict)
 (define модуль-відомий? module-known?)
 (define поточні-клаузи-модуля module-clauses-now)
 
