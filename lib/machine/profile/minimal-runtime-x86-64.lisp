@@ -12,8 +12,8 @@
 ; None is a full allocator, GC, label resolver, calling convention, compiler,
 ; or self-hosting claim.
 
-(def x86-minimal-structural-car-dependencies
-  (quote
+(00001001 x86-minimal-structural-car-dependencies
+  (00000001
     ((materialize-value
        mov-r64-imm64
        required-for-minimal-runtime
@@ -31,8 +31,8 @@
        required-for-minimal-runtime
        "return the bounded result through the host ABI"))))
 
-(def x86-minimal-eq-cond-dependencies
-  (quote
+(00001001 x86-minimal-eq-cond-dependencies
+  (00000001
     ((materialize-value
        mov-r64-imm64
        required-for-minimal-runtime
@@ -50,8 +50,8 @@
        required-for-minimal-runtime
        "return the selected bounded result through the guest ABI"))))
 
-(def x86-minimal-eq-cond-car-cons-dependencies
-  (quote
+(00001001 x86-minimal-eq-cond-car-cons-dependencies
+  (00000001
     ((materialize-values
        mov-r64-imm64
        required-for-minimal-runtime
@@ -77,151 +77,151 @@
        required-for-minimal-runtime
        "return the selected structural result through the guest ABI"))))
 
-(def x86-minimal-family-member?
-  (lambda (family families)
-    (cond
-      ((atom? families) ())
-      ((eq? family (car families)) t)
-      (t (x86-minimal-family-member? family (cdr families))))))
+(00001001 x86-minimal-family-member?
+  (00001000 (family families)
+    (00000111
+      ((00000010 families) ())
+      ((00000011 family (00000101 families)) t)
+      (t (x86-minimal-family-member? family (00000110 families))))))
 
-(def x86-minimal-unique-form-families
-  (lambda (forms seen)
-    (cond
-      ((atom? forms) seen)
+(00001001 x86-minimal-unique-form-families
+  (00001000 (forms seen)
+    (00000111
+      ((00000010 forms) seen)
       (t
-       (let ((family (car (car forms))))
-         (cond
+       (let ((family (00000101 (00000101 forms))))
+         (00000111
            ((x86-minimal-family-member? family seen)
-            (x86-minimal-unique-form-families (cdr forms) seen))
+            (x86-minimal-unique-form-families (00000110 forms) seen))
            (t
             (x86-minimal-unique-form-families
-              (cdr forms)
+              (00000110 forms)
               (append seen (list family))))))))))
 
-(def x86-minimal-row-second
-  (lambda (row)
-    (car (cdr row))))
+(00001001 x86-minimal-row-second
+  (00001000 (row)
+    (00000101 (00000110 row))))
 
-(def x86-minimal-row-third
-  (lambda (row)
-    (car (cdr (cdr row)))))
+(00001001 x86-minimal-row-third
+  (00001000 (row)
+    (00000101 (00000110 (00000110 row)))))
 
-(def x86-minimal-map-row-second
-  (lambda (rows)
-    (cond
-      ((atom? rows) (quote ()))
+(00001001 x86-minimal-map-row-second
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) (00000001 ()))
       (t
-       (cons
-         (x86-minimal-row-second (car rows))
-         (x86-minimal-map-row-second (cdr rows)))))))
+       (00000100
+         (x86-minimal-row-second (00000101 rows))
+         (x86-minimal-map-row-second (00000110 rows)))))))
 
-(def x86-minimal-map-row-third
-  (lambda (rows)
-    (cond
-      ((atom? rows) (quote ()))
+(00001001 x86-minimal-map-row-third
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) (00000001 ()))
       (t
-       (cons
-         (x86-minimal-row-third (car rows))
-         (x86-minimal-map-row-third (cdr rows)))))))
+       (00000100
+         (x86-minimal-row-third (00000101 rows))
+         (x86-minimal-map-row-third (00000110 rows)))))))
 
-(def x86-minimal-structural-car-forms
-  (lambda (left right)
+(00001001 x86-minimal-structural-car-forms
+  (00001000 (left right)
     (x86-lower-cons-car-u64-forms left right)))
 
-(def x86-minimal-structural-car-observed-families
-  (lambda (left right)
+(00001001 x86-minimal-structural-car-observed-families
+  (00001000 (left right)
     (x86-minimal-unique-form-families
       (x86-minimal-structural-car-forms left right)
-      (quote ()))))
+      (00000001 ()))))
 
-(def x86-minimal-structural-car-dependency-families
-  (lambda ()
+(00001001 x86-minimal-structural-car-dependency-families
+  (00001000 ()
     (x86-minimal-map-row-second x86-minimal-structural-car-dependencies)))
 
-(def x86-minimal-structural-car-dependency-classes
-  (lambda ()
+(00001001 x86-minimal-structural-car-dependency-classes
+  (00001000 ()
     (x86-minimal-map-row-third x86-minimal-structural-car-dependencies)))
 
-(def x86-minimal-structural-car-profile
-  (lambda (left right)
+(00001001 x86-minimal-structural-car-profile
+  (00001000 (left right)
     (list
-      (list (quote witness) (quote bounded-car-cons-u64))
-      (list (quote forms) (x86-minimal-structural-car-forms left right))
+      (list (00000001 witness) (00000001 bounded-car-cons-u64))
+      (list (00000001 forms) (x86-minimal-structural-car-forms left right))
       (list
-        (quote observed-families)
+        (00000001 observed-families)
         (x86-minimal-structural-car-observed-families left right))
-      (list (quote dependencies) x86-minimal-structural-car-dependencies)
-      (list (quote arena-lifetime) (quote native-call))
-      (list (quote escape) (quote forbidden))
-      (list (quote claim) (quote bounded-structural-lower-bound)))))
+      (list (00000001 dependencies) x86-minimal-structural-car-dependencies)
+      (list (00000001 arena-lifetime) (00000001 native-call))
+      (list (00000001 escape) (00000001 forbidden))
+      (list (00000001 claim) (00000001 bounded-structural-lower-bound)))))
 
-(def x86-minimal-eq-cond-forms
-  (lambda (left right then-value else-value)
+(00001001 x86-minimal-eq-cond-forms
+  (00001000 (left right then-value else-value)
     (x86-lower-eq-cond-u64-forms left right then-value else-value)))
 
-(def x86-minimal-eq-cond-observed-families
-  (lambda (left right then-value else-value)
+(00001001 x86-minimal-eq-cond-observed-families
+  (00001000 (left right then-value else-value)
     (x86-minimal-unique-form-families
       (x86-minimal-eq-cond-forms left right then-value else-value)
-      (quote ()))))
+      (00000001 ()))))
 
-(def x86-minimal-eq-cond-dependency-families
-  (lambda ()
+(00001001 x86-minimal-eq-cond-dependency-families
+  (00001000 ()
     (x86-minimal-map-row-second x86-minimal-eq-cond-dependencies)))
 
-(def x86-minimal-eq-cond-dependency-classes
-  (lambda ()
+(00001001 x86-minimal-eq-cond-dependency-classes
+  (00001000 ()
     (x86-minimal-map-row-third x86-minimal-eq-cond-dependencies)))
 
-(def x86-minimal-eq-cond-profile
-  (lambda (left right then-value else-value)
+(00001001 x86-minimal-eq-cond-profile
+  (00001000 (left right then-value else-value)
     (list
-      (list (quote witness) (quote bounded-eq-cond-u64))
+      (list (00000001 witness) (00000001 bounded-eq-cond-u64))
       (list
-        (quote forms)
+        (00000001 forms)
         (x86-minimal-eq-cond-forms left right then-value else-value))
       (list
-        (quote observed-families)
+        (00000001 observed-families)
         (x86-minimal-eq-cond-observed-families
           left right then-value else-value))
-      (list (quote dependencies) x86-minimal-eq-cond-dependencies)
-      (list (quote claim) (quote bounded-conditional-growth-lower-bound)))))
+      (list (00000001 dependencies) x86-minimal-eq-cond-dependencies)
+      (list (00000001 claim) (00000001 bounded-conditional-growth-lower-bound)))))
 
-(def x86-minimal-eq-cond-car-cons-forms
-  (lambda (left right then-car then-cdr else-car else-cdr)
+(00001001 x86-minimal-eq-cond-car-cons-forms
+  (00001000 (left right then-car then-cdr else-car else-cdr)
     (x86-lower-eq-cond-car-cons-u64-forms
       left right then-car then-cdr else-car else-cdr)))
 
-(def x86-minimal-eq-cond-car-cons-observed-families
-  (lambda (left right then-car then-cdr else-car else-cdr)
+(00001001 x86-minimal-eq-cond-car-cons-observed-families
+  (00001000 (left right then-car then-cdr else-car else-cdr)
     (x86-minimal-unique-form-families
       (x86-minimal-eq-cond-car-cons-forms
         left right then-car then-cdr else-car else-cdr)
-      (quote ()))))
+      (00000001 ()))))
 
-(def x86-minimal-eq-cond-car-cons-dependency-families
-  (lambda ()
+(00001001 x86-minimal-eq-cond-car-cons-dependency-families
+  (00001000 ()
     (x86-minimal-map-row-second x86-minimal-eq-cond-car-cons-dependencies)))
 
-(def x86-minimal-eq-cond-car-cons-dependency-classes
-  (lambda ()
+(00001001 x86-minimal-eq-cond-car-cons-dependency-classes
+  (00001000 ()
     (x86-minimal-map-row-third x86-minimal-eq-cond-car-cons-dependencies)))
 
-(def x86-minimal-eq-cond-car-cons-profile
-  (lambda (left right then-car then-cdr else-car else-cdr)
+(00001001 x86-minimal-eq-cond-car-cons-profile
+  (00001000 (left right then-car then-cdr else-car else-cdr)
     (list
-      (list (quote witness) (quote bounded-eq-cond-car-cons-u64))
+      (list (00000001 witness) (00000001 bounded-eq-cond-car-cons-u64))
       (list
-        (quote forms)
+        (00000001 forms)
         (x86-minimal-eq-cond-car-cons-forms
           left right then-car then-cdr else-car else-cdr))
       (list
-        (quote observed-families)
+        (00000001 observed-families)
         (x86-minimal-eq-cond-car-cons-observed-families
           left right then-car then-cdr else-car else-cdr))
-      (list (quote dependencies) x86-minimal-eq-cond-car-cons-dependencies)
-      (list (quote arena-lifetime) (quote native-call))
-      (list (quote escape) (quote forbidden))
+      (list (00000001 dependencies) x86-minimal-eq-cond-car-cons-dependencies)
+      (list (00000001 arena-lifetime) (00000001 native-call))
+      (list (00000001 escape) (00000001 forbidden))
       (list
-        (quote claim)
-        (quote bounded-conditional-structural-composition-lower-bound)))))
+        (00000001 claim)
+        (00000001 bounded-conditional-structural-composition-lower-bound)))))

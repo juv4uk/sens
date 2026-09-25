@@ -7,12 +7,12 @@
 ; This is deliberately not a general heap or GC ABI yet. The cell exists only
 ; for one native-call-u64-raw invocation and must not escape that call.
 
-(def x86-pair-cell-bytes 16)
-(def x86-pair-car-offset 0)
-(def x86-pair-cdr-offset 8)
+(00001001 x86-pair-cell-bytes 16)
+(00001001 x86-pair-car-offset 0)
+(00001001 x86-pair-cdr-offset 8)
 
-(def x86-pair-layout
-  (quote
+(00001001 x86-pair-layout
+  (00000001
     (machine-pair-layout/1
       (target x86-64)
       (word-bits 64)
