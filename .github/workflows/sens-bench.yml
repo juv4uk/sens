@@ -42,6 +42,8 @@ jobs:
       - name: Measure change on this runner
         run: |
           git checkout --detach "$HEAD_SHA"
+          # Гілка може бути старшою за сам харнес — міряємо тим самим файлом.
+          cp /tmp/bench/ci_bench.rs crates/my-lisp/examples/ci_bench.rs
           cargo build --release -p my-lisp --example ci_bench
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/head.tsv
       - name: Compare base -> change
