@@ -431,14 +431,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sens"
-version = "0.41.0"
-dependencies = [
- "my-lisp",
- "my-lisp-host",
-]
-
-[[package]]
 name = "serde"
 version = "1.0.229"
 source = "registry+https://github.com/rust-lang/crates.io-index"
