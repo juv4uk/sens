@@ -333,6 +333,56 @@ fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
 }
 
 #[test]
+fn three_execution_paths_share_one_lisp_owned_witness() {
+    let adapters = fs::read_to_string(repo_file("tests/fixtures/backend-adapters.lisp"))
+        .expect("#116 requires Lisp-owned backend adapter declarations");
+    assert!(
+        adapters.contains("tests/fixtures/conformance.lisp"),
+        "#116 adapters must point at the committed Lisp witness corpus"
+    );
+    for declaration in [
+        "(backend native)",
+        "(backend meta)",
+        "(backend cml)",
+        "(adapter cml-execution)",
+    ] {
+        assert!(
+            adapters.contains(declaration),
+            "#116 missing transport declaration `{declaration}`"
+        );
+    }
+
+    let row = witness_rows()
+        .into_iter()
+        .find(|row| row.compiler_corpus && row.meta_eval)
+        .expect("#116 requires one row admitted to native/meta/CML transport");
+
+    let mut native = Session::default();
+    load_core_library(&mut native).expect("core library");
+    load_witness_library(&mut native);
+    let actual = actual_form_from_native(&row, &mut native);
+    assert_lisp_owned_verdict_passes(&mut native, &row, &actual);
+
+    let mut meta = init_meta_session();
+    let verdict = meta_verdict(&mut meta, &row);
+    assert!(
+        verdict.starts_with("(witness-result (status pass)"),
+        "meta path disagreed with the shared Lisp-owned witness {}: {verdict}",
+        row.expr
+    );
+
+    // CML independently consumes the same first compiler-corpus row from this
+    // committed corpus. my-lisp deliberately does not depend on CML: the
+    // adapter declaration is transport metadata, while CML's sibling-repo test
+    // is the executable parser -> lowering -> x86 backend consumer and carries
+    // no expected semantic answer of its own.
+    assert!(
+        row.compiler_corpus,
+        "shared row must remain admitted to compiler transport"
+    );
+}
+
+#[test]
 fn compiler_corpus_native_actuals_are_judged_only_by_lisp_owned_witness_logic() {
     let rows: Vec<_> = witness_rows()
         .into_iter()
