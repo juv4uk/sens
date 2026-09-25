@@ -93,6 +93,8 @@ fn help_flag_prints_usage() {
     assert!(stdout.contains(".wsm"));
     assert!(stdout.contains(".my"));
     assert!(stdout.contains(".lisp"));
+    assert!(stdout.contains(".sens"));
+    assert!(stdout.contains(".сенс"));
     assert!(stdout.contains("--oracle-check <file|->"));
 }
 
@@ -239,15 +241,16 @@ fn running_a_source_file_prints_its_result() {
     assert_eq!(stdout.trim(), "3");
 }
 
-/// Smoke test: .sens and the three existing Latin source extensions all execute the
-/// same program identically. No parser semantics change — only filename-surface acceptance.
+/// Smoke test: supported SENS aliases (.sens/.сенс) and the three existing Latin source
+/// extensions all execute the same program identically. .lisp stays canonical.
+/// No parser semantics change — only filename-surface acceptance.
 #[test]
 fn sens_and_existing_source_extensions_run_identically() {
     let dir = std::env::temp_dir();
     let code = "(+ 1 2)";
     let mut results = Vec::new();
 
-    for ext in [".sens", ".wsm", ".my", ".lisp"] {
+    for ext in [".sens", ".wsm", ".my", ".lisp", ".сенс"] {
         let path = dir.join(format!("my-lisp-cli-test-ext{ext}"));
         std::fs::write(&path, code).expect("should write temp file");
 
@@ -263,6 +266,7 @@ fn sens_and_existing_source_extensions_run_identically() {
     assert_eq!(results[1].1, "3", ".wsm output");
     assert_eq!(results[2].1, "3", ".my output");
     assert_eq!(results[3].1, "3", ".lisp output");
+    assert_eq!(results[4].1, "3", ".сенс output");
 }
 
 #[test]

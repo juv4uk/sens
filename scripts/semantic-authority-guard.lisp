@@ -32,7 +32,9 @@
       (exact-text? path "language-contract.lisp")
       (exact-text? path "my-lisp-constitution.lisp")
       ; Synthetic protected path used only by the guard self-test.
-      (exact-text? path "tests/semantic-authority-guard-probe.lisp"))))
+      (exact-text? path "tests/semantic-authority-guard-probe.lisp")
+      ; Підтримувані (не канонічні) розширення СЕНС теж захищені.
+      (exact-text? path "tests/semantic-authority-guard-probe.сенс"))))
 
 (def host-marker?
   (lambda (source)

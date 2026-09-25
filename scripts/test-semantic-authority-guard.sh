@@ -9,6 +9,7 @@ probe=
 cleanup() {
   rm -f tests/semantic-authority-guard-probe.rs
   rm -f tests/semantic-authority-guard-probe.lisp
+  rm -f tests/semantic-authority-guard-probe.сенс
 }
 trap cleanup EXIT
 
@@ -46,6 +47,8 @@ run_case tests/fixtures/semantic-authority-guard/allowed-generated-projection.rs
 
 # The new RED is the reverse authority edge into Lisp-owned semantic source.
 run_case tests/fixtures/semantic-authority-guard/forbidden-lisp-host-authority.lisp violation
+# Supported SENS alias with a Cyrillic extension is protected the same way.
+run_case tests/fixtures/semantic-authority-guard/forbidden-lisp-host-authority.сенс violation
 
 # Rust may be cited as observation/evidence without becoming language authority.
 run_case tests/fixtures/semantic-authority-guard/allowed-lisp-host-evidence.lisp allowed
