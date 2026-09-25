@@ -35,18 +35,31 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             canon::ensure_bindable(name, expr.span)?;
             Ok((Vec::new(), Some(name.clone())))
         }
+        ExprKind::Sid(sid) => {
+            canon::ensure_bindable_sid(*sid, expr.span)?;
+            Ok((Vec::new(), Some(sid.to_string().into())))
+        }
         ExprKind::List(parameter_forms) => {
             let mut parameters = Vec::with_capacity(parameter_forms.len());
             let mut unique = HashSet::new();
             for parameter in parameter_forms.iter() {
-                let ExprKind::Symbol(name) = &parameter.kind else {
-                    return Err(LanguageError::new(
-                        ErrorKind::InvalidForm,
-                        "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
-                        parameter.span,
-                    ));
+                let name = match &parameter.kind {
+                    ExprKind::Symbol(name) => {
+                        canon::ensure_bindable(name, parameter.span)?;
+                        name.clone()
+                    }
+                    ExprKind::Sid(sid) => {
+                        canon::ensure_bindable_sid(*sid, parameter.span)?;
+                        sid.to_string().into()
+                    }
+                    _ => {
+                        return Err(LanguageError::new(
+                            ErrorKind::InvalidForm,
+                            "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
+                            parameter.span,
+                        ));
+                    }
                 };
-                canon::ensure_bindable(name, parameter.span)?;
                 if !unique.insert(name.clone()) {
                     return Err(LanguageError::new(
                         ErrorKind::InvalidForm,
@@ -54,7 +67,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                         parameter.span,
                     ));
                 }
-                parameters.push(name.clone());
+                parameters.push(name);
             }
             Ok((parameters, None))
         }
@@ -65,14 +78,23 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             let rest = loop {
                 match &current.kind {
                     ExprKind::Pair(head, tail) => {
-                        let ExprKind::Symbol(name) = &head.kind else {
-                            return Err(LanguageError::new(
-                                ErrorKind::InvalidForm,
-                                "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
-                                head.span,
-                            ));
+                        let name = match &head.kind {
+                            ExprKind::Symbol(name) => {
+                                canon::ensure_bindable(name, head.span)?;
+                                name.clone()
+                            }
+                            ExprKind::Sid(sid) => {
+                                canon::ensure_bindable_sid(*sid, head.span)?;
+                                sid.to_string().into()
+                            }
+                            _ => {
+                                return Err(LanguageError::new(
+                                    ErrorKind::InvalidForm,
+                                    "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
+                                    head.span,
+                                ));
+                            }
                         };
-                        canon::ensure_bindable(name, head.span)?;
                         if !unique.insert(name.clone()) {
                             return Err(LanguageError::new(
                                 ErrorKind::InvalidForm,
@@ -80,7 +102,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                                 head.span,
                             ));
                         }
-                        parameters.push(name.clone());
+                        parameters.push(name);
                         current = tail;
                     }
                     ExprKind::Symbol(name) => {
@@ -94,12 +116,16 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                         }
                         break name.clone();
                     }
+                    ExprKind::Sid(sid) => {
+                        canon::ensure_bindable_sid(*sid, current.span)?;
+                        break sid.to_string().into();
+                    }
                     _ => {
                         return Err(LanguageError::new(
                             ErrorKind::InvalidForm,
                             "rest parameter must be a symbol · rest-parametr maie buty symvolom · Rest-Parameter muss ein Symbol sein",
                             current.span,
-                        ))
+                        ));
                     }
                 }
             };
