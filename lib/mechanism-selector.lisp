@@ -10,7 +10,7 @@
   (car (read-all (read-file "lib/function-table-mechanisms.lisp"))))
 
 (def mechanism-selector-registry-rows
-  (cdr mechanism-selector-registry))
+  mechanism-selector-registry)
 
 (def mechanism-selector-find-section
   (lambda (name sections)
