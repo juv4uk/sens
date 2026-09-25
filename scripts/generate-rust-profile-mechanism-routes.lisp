@@ -36,7 +36,7 @@
   (lambda (profile)
     (cond
       ((eq profile (quote core3)) (identity-relation same) "CoreProfile::Core3")
-      (t (car (quote ()))))))
+      (t t (car (quote ()))))))
 
 (def rust-route-kind
   (lambda (mechanism)
@@ -44,7 +44,7 @@
       ((eq mechanism (quote registered-host-mechanism))
        (identity-relation same)
        "ProfileMechanismRouteKind::RegisteredHostMechanism")
-      (t (car (quote ()))))))
+      (t t (car (quote ()))))))
 
 (def render-row
   (lambda (row)
@@ -54,7 +54,7 @@
       (cond
         ((atom profile) (structural-kind empty-list) "")
         ((atom kind) (structural-kind empty-list) "")
-        (t
+        (t t
          (str+
            "    ProfileMechanismRoute { profile: "
            profile
