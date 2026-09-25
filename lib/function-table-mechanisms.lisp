@@ -1,9 +1,12 @@
 ; #1046 — transitional executor metadata subordinate to Canon()/function table.
 ; Identity authority: lib/surface/semantic-registry.lisp
 ; This file cannot mint semantic identities or define language meaning.
-; Every SID below must already exist in the canonical function table.
+; Every exact function below must already exist in the canonical function table.
 ; Retirement: fold these mechanism descriptors into the unified function-table
 ; row model once #1046 completes.
+;
+; #1332/#1403: () is a structural value outside the 256-function space.
+; Function 00000000 therefore has no empty-list-ground route here.
 
 (
   (schema function-table-mechanisms/1)
@@ -11,7 +14,6 @@
   (lifecycle transitional)
   (retirement-issue 1046)
   (rows
-    (00000000 evaluator empty-list-ground)
     (00000001 evaluator quote-form)
     (00000010 evaluator atom-primitive)
     (00000011 evaluator eq-primitive)
@@ -22,7 +24,7 @@
     (00001000 evaluator lambda-form)
     (00001001 evaluator define-form)
     (00001011 evaluator define-form)
-    ; Existing SID + only. These rows admit executors; they do not define +.
+    ; Existing function + only. These rows admit executors; they do not define +.
     ; Evidence donors: #988/#1042; Datalog execution replay: #1052.
     (00001100 common-lisp bounded-exact-add)
     (00001100 prolog bounded-exact-add)
