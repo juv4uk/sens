@@ -146,3 +146,7 @@
 (review "crates/my-lisp/src/sens.rs" "27461dd83b35a141222ce73e48581831ee6d881148869291769c4326e3d6faab" issue-1006 explicit-sens-transport-byte-boundary)
 (review "crates/my-lisp-cli/src/island_invoke.rs" "e35f85c1d45a297afa15f341f56f7a8efbaba3f64e021be14cc3179d971349bd" issue-1006 direct-sens-raw-island-mechanism)
 (review "crates/my-lisp-cli/src/main.rs" "1fd8414fe92f11dd7d540e15e91e6856c9671233f854e8ccfae10a173f6d4f17" issue-1006 install-exact-sens-raw-invoke-mechanism)
+
+; #1006 SENS-native routing observer API; legacy SID helper remains compatibility-only.
+(review "crates/my-lisp/src/eval/canon.rs" "663e5d7ff8d62e392b48d9735b5af1a1599c263e9fa692a59abc610dce2d9cb0" issue-1006 sens-native-surface-routing-observer)
+(review "crates/my-lisp/src/lib.rs" "426be947d937d7d3afac42cda1f89cb7e8054c1d86523e2ee9875e1a64fb4b0f" issue-1006 sens-native-surface-observer-public-api)
