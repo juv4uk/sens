@@ -28,6 +28,7 @@ jobs:
         run: |
           cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/generate-meta-semantic-registry.lisp --check
           cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/generate-rust-semantic-registry.lisp --check
+          cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/generate-rust-profile-mechanisms.lisp --check
           python3 scripts/public_api_inventory.py --check
       - name: Full workspace tests
         run: cargo test --workspace
