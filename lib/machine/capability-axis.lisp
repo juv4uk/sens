@@ -11,8 +11,8 @@
 ; A capability name never mints a semantic SID. A target may honestly have no
 ; witness yet. Target-specific lowering remains under lib/machine/lowering/*.
 
-(def machine-capability-axis-v1
-  (quote
+(00001001 machine-capability-axis-v1
+  (00000001
     ((00001100
        ((integer-add bounded-u64)))
      (00000011
@@ -27,8 +27,8 @@
      (00000110
        ((pair-field-load tail bounded-u64))))))
 
-(def machine-capability-target-witnesses-v1
-  (quote
+(00001001 machine-capability-target-witnesses-v1
+  (00000001
     ((x86-64
        (integer-add bounded-u64
          (admitted-form add-r64-r64)
@@ -52,30 +52,30 @@
          (admitted-form mov-r64-mem-disp8)
          (lowering x86-lower-cons-cdr-u64-forms))))))
 
-(def machine-target-witness-status-v1
-  (quote
+(00001001 machine-target-witness-status-v1
+  (00000001
     ((x86-64 witnessed)
      (arm64 absent)
      (risc-v absent)
      (fpga absent))))
 
-(def machine-capability-find-row
-  (lambda (key rows)
-    (cond
-      ((atom? rows) ())
-      ((equal? key (car (car rows))) (car rows))
-      (t (machine-capability-find-row key (cdr rows))))))
+(00001001 machine-capability-find-row
+  (00001000 (key rows)
+    (00000111
+      ((00000010 rows) ())
+      ((equal? key (00000101 (00000101 rows))) (00000101 rows))
+      (t (machine-capability-find-row key (00000110 rows))))))
 
-(def machine-capabilities-for-sid
-  (lambda (sid)
+(00001001 machine-capabilities-for-sid
+  (00001000 (sid)
     (let ((row (machine-capability-find-row sid machine-capability-axis-v1)))
-      (cond
-        ((atom? row) ())
-        (t (car (cdr row)))))))
+      (00000111
+        ((00000010 row) ())
+        (t (00000101 (00000110 row)))))))
 
-(def machine-target-witness-status
-  (lambda (target)
+(00001001 machine-target-witness-status
+  (00001000 (target)
     (let ((row (machine-capability-find-row target machine-target-witness-status-v1)))
-      (cond
-        ((atom? row) (quote absent))
-        (t (car (cdr row)))))))
+      (00000111
+        ((00000010 row) (00000001 absent))
+        (t (00000101 (00000110 row)))))))

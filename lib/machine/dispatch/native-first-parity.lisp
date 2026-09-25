@@ -5,28 +5,28 @@
 ; expected evidence. Route provenance is part of the observation so evaluator
 ; fallback cannot impersonate native success.
 
-(def native-first-parity-pass
-  (lambda (name effect-class error-class)
+(00001001 native-first-parity-pass
+  (00001000 (name effect-class error-class)
     (list
-      (quote native-parity-case)
+      (00000001 native-parity-case)
       name
-      (quote pass)
-      (list (quote effect) effect-class)
-      (list (quote error) error-class))))
+      (00000001 pass)
+      (list (00000001 effect) effect-class)
+      (list (00000001 error) error-class))))
 
-(def native-first-parity-fail
-  (lambda (name kind expected actual)
+(00001001 native-first-parity-fail
+  (00001000 (name kind expected actual)
     (list
-      (quote native-parity-case)
+      (00000001 native-parity-case)
       name
-      (quote fail)
-      (list (quote kind) kind)
-      (list (quote expected) expected)
-      (list (quote actual) actual))))
+      (00000001 fail)
+      (list (00000001 kind) kind)
+      (list (00000001 expected) expected)
+      (list (00000001 actual) actual))))
 
-(def native-first-parity-case
-  (lambda (row)
-    (let* ((name (car row))
+(00001001 native-first-parity-case
+  (00001000 (row)
+    (let* ((name (00000101 row))
            (expression (second row))
            (expected (third row))
            (effect-class (fourth row))
@@ -36,14 +36,14 @@
              (native-first-execute-expression expression))
            (expected-native-outcome
              (list
-               (quote execution-route)
-               (quote native)
-               (quote (status completed))
-               (list (quote value) expected))))
-      (cond
+               (00000001 execution-route)
+               (00000001 native)
+               (00000001 (status completed))
+               (list (00000001 value) expected))))
+      (00000111
         ((equal? evaluator-value expected)
          (structural-relation same)
-         (cond
+         (00000111
            ((equal? native-outcome expected-native-outcome)
             (structural-relation same)
             (native-first-parity-pass
@@ -54,58 +54,58 @@
             (structural-relation distinct)
             (native-first-parity-fail
               name
-              (quote native-or-route-mismatch)
+              (00000001 native-or-route-mismatch)
               expected-native-outcome
               native-outcome))))
         ((equal? evaluator-value expected)
          (structural-relation distinct)
          (native-first-parity-fail
            name
-           (quote evaluator-evidence-mismatch)
+           (00000001 evaluator-evidence-mismatch)
            expected
            evaluator-value))))))
 
-(def native-first-parity-run
-  (lambda (rows)
-    (cond
-      ((atom? rows) (structural-kind empty-list) (quote ()))
-      ((atom? rows) (structural-kind atom)
+(00001001 native-first-parity-run
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) (structural-kind empty-list) (00000001 ()))
+      ((00000010 rows) (structural-kind atom)
        (list
          (native-first-parity-fail
-           (quote malformed-corpus)
-           (quote malformed-tail)
-           (quote ())
+           (00000001 malformed-corpus)
+           (00000001 malformed-tail)
+           (00000001 ())
            rows)))
-      ((atom? rows) (structural-kind pair)
-       (cons
-         (native-first-parity-case (car rows))
-         (native-first-parity-run (cdr rows)))))))
+      ((00000010 rows) (structural-kind pair)
+       (00000100
+         (native-first-parity-case (00000101 rows))
+         (native-first-parity-run (00000110 rows)))))))
 
-(def native-first-parity-verdict-pass?
-  (lambda (verdict)
-    (cond
-      ((atom? verdict) (structural-kind pair)
-       (cond
-         ((equal? (third verdict) (quote pass))
+(00001001 native-first-parity-verdict-pass?
+  (00001000 (verdict)
+    (00000111
+      ((00000010 verdict) (structural-kind pair)
+       (00000111
+         ((equal? (third verdict) (00000001 pass))
           (structural-relation same)
           t)
-         ((equal? (third verdict) (quote pass))
+         ((equal? (third verdict) (00000001 pass))
           (structural-relation distinct)
-          (quote ()))))
-      ((quote native-first-parity-verdict-fallback)
+          (00000001 ()))))
+      ((00000001 native-first-parity-verdict-fallback)
        native-first-parity-verdict-fallback
-       (quote ())))))
+       (00000001 ())))))
 
-(def native-first-parity-all-pass?
-  (lambda (verdicts)
-    (cond
-      ((atom? verdicts) (structural-kind empty-list) t)
-      ((atom? verdicts) (structural-kind atom) (quote ()))
-      ((atom? verdicts) (structural-kind pair)
-       (cond
-         ((equal? (native-first-parity-verdict-pass? (car verdicts)) t)
+(00001001 native-first-parity-all-pass?
+  (00001000 (verdicts)
+    (00000111
+      ((00000010 verdicts) (structural-kind empty-list) t)
+      ((00000010 verdicts) (structural-kind atom) (00000001 ()))
+      ((00000010 verdicts) (structural-kind pair)
+       (00000111
+         ((equal? (native-first-parity-verdict-pass? (00000101 verdicts)) t)
           (structural-relation same)
-          (native-first-parity-all-pass? (cdr verdicts)))
-         ((equal? (native-first-parity-verdict-pass? (car verdicts)) t)
+          (native-first-parity-all-pass? (00000110 verdicts)))
+         ((equal? (native-first-parity-verdict-pass? (00000101 verdicts)) t)
           (structural-relation distinct)
-          (quote ())))))))
+          (00000001 ())))))))
