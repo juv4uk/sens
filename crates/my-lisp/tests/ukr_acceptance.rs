@@ -32,5 +32,5 @@ fn shadowing_ukr_peer_does_not_retarget_english_peer() {
     )
     .expect("ordinary ukr peer must remain independently shadowable");
 
-    assert_eq!(result.value.to_string(), "t");
+    assert_eq!(result.value.to_string(), "(identity-relation same)");
 }
