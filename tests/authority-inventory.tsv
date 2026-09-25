@@ -188,3 +188,5 @@ crates/my-lisp/tests/semantic_form_identity.rs	macro_library_uses_admitted_sourc
 crates/my-lisp/tests/ukr_acceptance.rs	ukr_acceptance_program_needs_no_latin_keyboard_layout	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
 crates/my-lisp/tests/ukr_acceptance.rs	ukr_acceptance_program_executes_through_real_runtime	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
 crates/my-lisp/tests/ukr_acceptance.rs	shadowing_ukr_peer_does_not_retarget_english_peer	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
+
+crates/my-lisp/tests/core_profile_runtime_1272.rs	selected_core_profile_signal_is_shared_mechanically	observer	selected-core-profile-mechanism	contracts/core-special-form-profile-policy.lisp	migrated
