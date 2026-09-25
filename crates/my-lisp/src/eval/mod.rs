@@ -146,11 +146,11 @@ pub(crate) fn evaluate_step(
             if let Some(value) = canon::value_for_surface(symbol) {
                 return Ok(EvalStep::Value(value));
             }
-            if canon::identity_for_surface(symbol).is_some() {
+            if let Some(sid) = canon::routed_sid_for_surface(symbol) {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
                     format!(
-                        "canonical special form is syntax-only · канонічна спеціальна форма є лише синтаксисом · kanonische Sonderform ist nur Syntax: {symbol}"
+                        "function SID is syntax-only in this position · function SID тут лише синтаксис · Funktions-SID ist hier nur Syntax: {sid}"
                     ),
                     expression.span,
                 ));
@@ -193,62 +193,59 @@ fn evaluate_list(
     let arguments = &items[1..];
     let head_name = items[0].kind.as_symbol();
     let head_sid = binary_head_sid(&items[0]);
-    let canonical_head = head_name
-        .and_then(canon::identity_for_surface)
-        .or_else(|| head_sid.and_then(canon::identity_for_semantic_id));
+    let routed_head_sid = head_sid
+        .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
+        .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
         .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
-    match (canonical_head, necessary_head) {
-        (Some(canon::CanonicalIdentity::Quote), _) => {
-            special_forms::exact_arity(head_name.unwrap_or("00000001"), arguments, 1, span)?;
-            let value = special_forms::quoted(&arguments[0])?;
-            Ok(EvalStep::Value(value))
+    if routed_head_sid == Some(crate::sid!(00000001)) {
+        special_forms::exact_arity("00000001", arguments, 1, span)?;
+        let value = special_forms::quoted(&arguments[0])?;
+        return Ok(EvalStep::Value(value));
+    }
+    if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Lambda) {
+        return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
+    }
+    if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Define) {
+        return special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value);
+    }
+    if routed_head_sid == Some(crate::sid!(00000111)) {
+        return special_forms::evaluate_cond(arguments, environment, span);
+    }
+
+    if let Some(name) = items[0].kind.as_symbol() {
+        if let Some(result) =
+            capabilities::dispatch_capability(name, arguments, environment, span)
+        {
+            return result;
         }
-        (_, Some(necessary_forms::NecessaryFormIdentity::Lambda)) => {
-            closures::create_lambda(arguments, environment, span).map(EvalStep::Value)
-        }
-        (_, Some(necessary_forms::NecessaryFormIdentity::Define)) => {
-            special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value)
-        }
-        (Some(canon::CanonicalIdentity::Cond), _) => {
-            special_forms::evaluate_cond(arguments, environment, span)
-        }
-        _ => {
-            if let Some(name) = items[0].kind.as_symbol() {
-                if let Some(result) =
-                    capabilities::dispatch_capability(name, arguments, environment, span)
-                {
-                    return result;
-                }
+    }
+    let function = match head_sid {
+        Some(sid) => Value::Sid(sid),
+        None => evaluate(&items[0], environment)?,
+    };
+    match &function {
+        Value::Sid(sid) => {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, environment)?);
             }
-            let function = match head_sid {
-                Some(sid) => Value::Sid(sid),
-                None => evaluate(&items[0], environment)?,
-            };
-            match &function {
-                Value::Sid(sid) => {
-                    let mut values = Vec::with_capacity(arguments.len());
-                    for argument in arguments {
-                        values.push(evaluate(argument, environment)?);
-                    }
-                    canon::invoke_semantic_ref(*sid, &values, environment, span)
-                        .map(EvalStep::Value)
-                }
-                Value::Builtin(builtin) => {
-                    let mut values = Vec::with_capacity(arguments.len());
-                    for argument in arguments {
-                        values.push(evaluate(argument, environment)?);
-                    }
-                    (builtin.func)(&values, environment, span).map(EvalStep::Value)
-                }
-                Value::Macro(closure) => {
-                    closures::apply_macro(closure.clone(), arguments, environment, span)
-                }
-                _ => closures::apply(function, arguments, environment, span),
-            }
+            canon::invoke_semantic_ref(*sid, &values, environment, span)
+                .map(EvalStep::Value)
         }
+        Value::Builtin(builtin) => {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, environment)?);
+            }
+            (builtin.func)(&values, environment, span).map(EvalStep::Value)
+        }
+        Value::Macro(closure) => {
+            closures::apply_macro(closure.clone(), arguments, environment, span)
+        }
+        _ => closures::apply(function, arguments, environment, span),
     }
 }
 
@@ -433,7 +430,7 @@ mod single_pass_eval_tests {
     }
 
     #[test]
-    fn canonical_names_cannot_be_redefined() {
+    fn surfaces_routing_to_function_sids_cannot_be_redefined() {
         for source in [
             "(def car 42)",
             "(def перше 42)",
@@ -443,14 +440,14 @@ mod single_pass_eval_tests {
         ] {
             let mut session = Session::default();
             let error = eval_program(source, &mut session)
-                .expect_err("Canon spelling must reject redefinition");
+                .expect_err("surface routing to a function SID must reject redefinition");
             assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
-            assert!(error.message.contains("canonical name is immutable"));
+            assert!(error.message.contains("surface routes to immutable function SID"));
         }
     }
 
     #[test]
-    fn canonical_names_cannot_be_lambda_parameters() {
+    fn surfaces_routing_to_function_sids_cannot_be_lambda_parameters() {
         for source in [
             "(lambda (car) car)",
             "(lambda (перше) перше)",
@@ -459,9 +456,9 @@ mod single_pass_eval_tests {
         ] {
             let mut session = Session::default();
             let error = eval_program(source, &mut session)
-                .expect_err("Canon spelling must reject parameter binding");
+                .expect_err("surface routing to a function SID must reject parameter binding");
             assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
-            assert!(error.message.contains("canonical name is immutable"));
+            assert!(error.message.contains("surface routes to immutable function SID"));
         }
     }
 

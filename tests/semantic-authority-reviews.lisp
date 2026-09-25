@@ -115,6 +115,13 @@
 (review "crates/my-lisp/src/eval/canon.rs" "98ea7a845a4ba6335a84021929f340581192d3416eb1a3c780c16386ed2c9304" issue-1332 sid0-empty-list-decoupling)
 (review "crates/my-lisp/src/eval/mod.rs" "172b273f58cd65e63a2d81e549ea4838de227b559059dc05bb7e4dc33ddba706" issue-1332 empty-structure-direct-value)
 (review "crates/my-lisp/src/ir.rs" "92102163b52f71fe37d9e5f4ae6b48fec4525ed674ea334918249a723f9a23dc" issue-1332 empty-structure-ir-outside-sid-space)
+
+; #1327 Contract-9 cleanup: remove named CanonicalIdentity; function identity remains only Sid8.
+(review "crates/my-lisp/src/eval/canon.rs" "11435b6091c0e1c13d2e842cc4e634cbc684ec749547c4e45ea437c85def446c" issue-1327 sid8-only-mechanism-routing)
+(review "crates/my-lisp/src/eval/mod.rs" "86a1ec5f2d052e8b4ba3422485cdb701962d902be55e76045966bcb2290e04f7" issue-1327 sid8-only-special-route-selection)
+(review "crates/my-lisp/src/lib.rs" "edc4948041a9574cb233faad8a7a5829c7533fded9a438e37c27e77f065217d2" issue-1327 generic-surface-to-sid-routing)
+(review "crates/my-lisp/src/ir.rs" "72ad065142bf0b94f8d1dc1cdcdfcca32b698879d6a5333dd145529eba9bcc9f" issue-1327 sid8-only-ir-provenance)
 ; #1344 Sens vocabulary foundation: exports Sens8, Sens, sens! alongside Sid8.
 (review "crates/my-lisp/src/lib.rs" "340674a9c5bd7cbd6ef5b6716955bfb28e9ddd3da6ce42fd0486110954ae4370" issue-1344 sens-vocabulary-foundation-export)
 (review "crates/my-lisp/tests/sens_foundation.rs" "3fbba9fff5cd2e04581fa45e31d1141ebcb15804650f56e70aaf24e7525e8d35" issue-1344 sens-foundation-observer)
+(review "crates/my-lisp/src/presentation.rs" "7f1815c6adeea63e2246f1d5a9fe9eb7f58660ac6c399f440f1139a68762b68b" issue-1327 sid8-diagnostic-observer-alignment)

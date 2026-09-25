@@ -1,157 +1,77 @@
-//! Legacy named routing table for function SIDs 00000001..00000111.
+//! SID-keyed evaluator mechanism routing.
 //!
-//! Canon is deliberately *not* an `Environment`. Stable human/symbolic
-//! spellings live in `lib/surface/semantic-registry.wsm` and are projected to
-//! opaque runtime projections by the shared registry module. This module owns
-//! only the finite mapping from exact eight-bit SID identities to canonical
-//! evaluator mechanism metadata. SID 00000000 is not an empty-list identity.
-//!
-//! Primitive dispatch may pack a Sid8 into one byte to index a 256-entry table,
-//! but that byte is mechanism only; the identity remains the exact bit spelling. Special forms (quote, cond,
-//! lambda, define, defmacro, def) are handled before this table in evaluate_list.
+//! Contract 9 / #1325: function identity is only Sid8. This module may record
+//! mechanism shape for an already-selected SID, but it must never invent a
+//! second named function identity.
 
-use super::special_forms::{atom_value, car_value, cdr_value, cons_values, eq_values, eval_values};
-use super::arithmetic;
+use super::{arithmetic, special_forms};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sid8, Span, Value};
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub(crate) enum CanonicalIdentity {
-    Quote,
-    Atom,
-    Eq,
-    Cons,
-    Car,
-    Cdr,
-    Cond,
-}
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum CanonicalKind {
-    ValuePrimitive,
+pub(crate) enum SidRouteKind {
+    ValueCall,
     SpecialForm,
 }
 
-/// The SID is the primary key. `identity` is a human-readable label carried
-/// *over* that SID for the rest of this module to match on, not a separate
-/// identity SID happens to also have — Canon is a named subset of the SID
-/// space, not the other way around.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) struct CanonEntry {
-    pub semantic_id: Sid8,
-    pub kind: CanonicalKind,
-    pub identity: CanonicalIdentity,
+pub(crate) struct SidRoute {
+    pub sid: Sid8,
+    pub kind: SidRouteKind,
 }
 
-pub(crate) const QUOTE_SEMANTIC_ID: Sid8 = crate::sid!(00000001);
-pub(crate) const ATOM_SEMANTIC_ID: Sid8 = crate::sid!(00000010);
-pub(crate) const EQ_SEMANTIC_ID: Sid8 = crate::sid!(00000011);
-pub(crate) const CONS_SEMANTIC_ID: Sid8 = crate::sid!(00000100);
-pub(crate) const CAR_SEMANTIC_ID: Sid8 = crate::sid!(00000101);
-pub(crate) const CDR_SEMANTIC_ID: Sid8 = crate::sid!(00000110);
-pub(crate) const COND_SEMANTIC_ID: Sid8 = crate::sid!(00000111);
-
-/// Arithmetic mechanisms outside this legacy seven-entry routing table.
-/// Their canonical identities are the exact bit spellings themselves.
-pub(crate) const ADD_SEMANTIC_ID: Sid8 = crate::sid!(00001100);
-pub(crate) const SUB_SEMANTIC_ID: Sid8 = crate::sid!(00001101);
-pub(crate) const MUL_SEMANTIC_ID: Sid8 = crate::sid!(00001110);
-pub(crate) const DIV_SEMANTIC_ID: Sid8 = crate::sid!(00001111);
-
-/// Declared in ascending SID order (00000001..00000111) — `identity_for_semantic_id`
-/// indexes this array directly by SID byte, so that order is load-bearing,
-/// not incidental.
-pub(crate) const CANON: [CanonEntry; 7] = [
-    CanonEntry {
-        semantic_id: QUOTE_SEMANTIC_ID,
-        kind: CanonicalKind::SpecialForm,
-        identity: CanonicalIdentity::Quote,
-    },
-    CanonEntry {
-        semantic_id: ATOM_SEMANTIC_ID,
-        kind: CanonicalKind::ValuePrimitive,
-        identity: CanonicalIdentity::Atom,
-    },
-    CanonEntry {
-        semantic_id: EQ_SEMANTIC_ID,
-        kind: CanonicalKind::ValuePrimitive,
-        identity: CanonicalIdentity::Eq,
-    },
-    CanonEntry {
-        semantic_id: CONS_SEMANTIC_ID,
-        kind: CanonicalKind::ValuePrimitive,
-        identity: CanonicalIdentity::Cons,
-    },
-    CanonEntry {
-        semantic_id: CAR_SEMANTIC_ID,
-        kind: CanonicalKind::ValuePrimitive,
-        identity: CanonicalIdentity::Car,
-    },
-    CanonEntry {
-        semantic_id: CDR_SEMANTIC_ID,
-        kind: CanonicalKind::ValuePrimitive,
-        identity: CanonicalIdentity::Cdr,
-    },
-    CanonEntry {
-        semantic_id: COND_SEMANTIC_ID,
-        kind: CanonicalKind::SpecialForm,
-        identity: CanonicalIdentity::Cond,
-    },
+/// Mechanical route metadata for the historical seven slots that currently
+/// need special evaluator handling. The rows are keyed only by Sid8.
+pub(crate) const SID_ROUTES: [SidRoute; 7] = [
+    SidRoute { sid: crate::sid!(00000001), kind: SidRouteKind::SpecialForm },
+    SidRoute { sid: crate::sid!(00000010), kind: SidRouteKind::ValueCall },
+    SidRoute { sid: crate::sid!(00000011), kind: SidRouteKind::ValueCall },
+    SidRoute { sid: crate::sid!(00000100), kind: SidRouteKind::ValueCall },
+    SidRoute { sid: crate::sid!(00000101), kind: SidRouteKind::ValueCall },
+    SidRoute { sid: crate::sid!(00000110), kind: SidRouteKind::ValueCall },
+    SidRoute { sid: crate::sid!(00000111), kind: SidRouteKind::SpecialForm },
 ];
 
-/// This legacy routing table covers only SIDs 00000001..00000111.
-/// SID 00000000 is a function identity too, but has no mechanism/law in this
-/// table and is never the empty-list value. #1327 removes this named table.
-pub(crate) fn identity_for_semantic_id(semantic_id: Sid8) -> Option<CanonicalIdentity> {
-    let index = semantic_id.packed_byte().checked_sub(1)? as usize;
-    let entry = CANON.get(index)?;
+pub(crate) fn route_kind_for_sid(sid: Sid8) -> Option<SidRouteKind> {
+    let index = sid.packed_byte().checked_sub(1)? as usize;
+    let row = SID_ROUTES.get(index)?;
     debug_assert_eq!(
-        entry.semantic_id, semantic_id,
-        "legacy routing table must stay aligned with SIDs 00000001..00000111"
+        row.sid, sid,
+        "SID route rows must stay aligned with 00000001..00000111"
     );
-    Some(entry.identity)
+    Some(row.kind)
 }
 
-fn semantic_id_for_identity(identity: CanonicalIdentity) -> Sid8 {
-    CANON
-        .iter()
-        .find(|entry| entry.identity == identity)
-        .map(|entry| entry.semantic_id)
-        .expect("every Canon identity has one byte SID")
+/// Optional source/UI routing only. The returned value is the function SID;
+/// no named meaning is materialized.
+pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<Sid8> {
+    let sid = semantic_registry::semantic_id_for_surface(surface)?;
+    route_kind_for_sid(sid)?;
+    Some(sid)
 }
 
-pub(crate) fn identity_for_surface(name: &str) -> Option<CanonicalIdentity> {
-    semantic_registry::semantic_id_for_surface(name).and_then(identity_for_semantic_id)
+pub(crate) fn is_reserved_surface(surface: &str) -> bool {
+    routed_sid_for_surface(surface).is_some()
 }
 
-pub(crate) fn is_reserved_surface(name: &str) -> bool {
-    identity_for_surface(name).is_some()
+pub(crate) fn surface_has_sid(surface: &str, sid: Sid8) -> bool {
+    semantic_registry::semantic_id_for_surface(surface) == Some(sid)
 }
 
-/// True for any admitted surface of `quote` specifically (semantic ID 1) —
-/// `quote`/`як-є`/`svarūpa`/`'`, not just the English spelling.
-/// Exposed narrowly via `crate::is_quote_surface_name` for tooling that
-/// must distinguish "this list's head is quote" from "this list's head is
-/// some other Canon identity," per the same routing every surface already
-/// shares.
-pub(crate) fn is_quote_identity(name: &str) -> bool {
-    identity_for_surface(name) == Some(CanonicalIdentity::Quote)
-}
-
-pub(crate) fn ensure_bindable(name: &str, span: Span) -> Result<(), LanguageError> {
-    let Some(identity) = identity_for_surface(name) else {
+pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageError> {
+    let Some(sid) = routed_sid_for_surface(surface) else {
         return Ok(());
     };
     Err(LanguageError::new(
         ErrorKind::InvalidForm,
         format!(
-            "canonical name is immutable · канонічне ім'я незмінне · kanonischer Name ist unveränderlich: {name} -> {identity:?}"
+            "surface routes to immutable function SID · surface маршрутизується до незмінного function SID · Surface verweist auf unveränderliche Funktions-SID: {surface} -> {sid}"
         ),
         span,
     ))
 }
 
 fn exact_args(
-    identity: &'static str,
+    sid: &'static str,
     args: &[Value],
     expected: usize,
     span: Span,
@@ -162,126 +82,149 @@ fn exact_args(
     Err(LanguageError::new(
         ErrorKind::Arity,
         format!(
-            "{identity}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            "{sid}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
             args.len()
         ),
         span,
     ))
 }
 
-/// Primitive function signature: pre-evaluated args + env + span -> Value.
 type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
-/// Direct u8-indexed primitive table. SemanticId -> callable or None.
-/// Special forms (quote, cond, lambda, define, defmacro, def) are NOT in this table;
-/// they are handled in evaluate_list before reaching here.
 const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     let mut table: [Option<PrimitiveFn>; 256] = [None; 256];
-    table[ATOM_SEMANTIC_ID.packed_byte() as usize] = Some(prim_atom);
-    table[EQ_SEMANTIC_ID.packed_byte() as usize] = Some(prim_eq);
-    table[CONS_SEMANTIC_ID.packed_byte() as usize] = Some(prim_cons);
-    table[CAR_SEMANTIC_ID.packed_byte() as usize] = Some(prim_car);
-    table[CDR_SEMANTIC_ID.packed_byte() as usize] = Some(prim_cdr);
-    table[ADD_SEMANTIC_ID.packed_byte() as usize] = Some(prim_add);
-    table[SUB_SEMANTIC_ID.packed_byte() as usize] = Some(prim_sub);
-    table[MUL_SEMANTIC_ID.packed_byte() as usize] = Some(prim_mul);
-    table[DIV_SEMANTIC_ID.packed_byte() as usize] = Some(prim_div);
+    table[crate::sid!(00000010).packed_byte() as usize] = Some(prim_00000010);
+    table[crate::sid!(00000011).packed_byte() as usize] = Some(prim_00000011);
+    table[crate::sid!(00000100).packed_byte() as usize] = Some(prim_00000100);
+    table[crate::sid!(00000101).packed_byte() as usize] = Some(prim_00000101);
+    table[crate::sid!(00000110).packed_byte() as usize] = Some(prim_00000110);
+    table[crate::sid!(00001100).packed_byte() as usize] = Some(prim_00001100);
+    table[crate::sid!(00001101).packed_byte() as usize] = Some(prim_00001101);
+    table[crate::sid!(00001110).packed_byte() as usize] = Some(prim_00001110);
+    table[crate::sid!(00001111).packed_byte() as usize] = Some(prim_00001111);
     table[crate::sid!(01001101).packed_byte() as usize] = Some(prim_01001101);
     table
 };
 
-fn prim_atom(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("atom", args, 1, span)?;
-    Ok(atom_value(&args[0]))
+fn prim_00000010(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00000010", args, 1, span)?;
+    Ok(special_forms::atom_value(&args[0]))
 }
 
-fn prim_eq(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("eq", args, 2, span)?;
-    eq_values(args[0].clone(), args[1].clone(), span)
+fn prim_00000011(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00000011", args, 2, span)?;
+    special_forms::eq_values(args[0].clone(), args[1].clone(), span)
 }
 
-fn prim_cons(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("cons", args, 2, span)?;
-    cons_values(args[0].clone(), args[1].clone(), env, span)
+fn prim_00000100(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00000100", args, 2, span)?;
+    special_forms::cons_values(args[0].clone(), args[1].clone(), env, span)
 }
 
-fn prim_car(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("car", args, 1, span)?;
-    car_value(&args[0], span)
+fn prim_00000101(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00000101", args, 1, span)?;
+    special_forms::car_value(&args[0], span)
 }
 
-fn prim_cdr(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("cdr", args, 1, span)?;
-    cdr_value(&args[0], span)
+fn prim_00000110(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00000110", args, 1, span)?;
+    special_forms::cdr_value(&args[0], span)
 }
 
-fn prim_add(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("+", args, 2, span)?;
+fn prim_00001100(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00001100", args, 2, span)?;
     arithmetic::arithmetic_on_values("+", args, env, span)
 }
 
-fn prim_sub(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("-", args, 2, span)?;
+fn prim_00001101(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00001101", args, 2, span)?;
     arithmetic::arithmetic_on_values("-", args, env, span)
 }
 
-fn prim_mul(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("*", args, 2, span)?;
+fn prim_00001110(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00001110", args, 2, span)?;
     arithmetic::arithmetic_on_values("*", args, env, span)
 }
 
-fn prim_div(args: &[Value], env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    exact_args("/", args, 2, span)?;
+fn prim_00001111(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args("00001111", args, 2, span)?;
     arithmetic::arithmetic_on_values("/", args, env, span)
 }
 
-/// Existing evaluation mechanism selected directly by function SID 01001101.
-/// No surface/name participates in this execution path.
 fn prim_01001101(
     args: &[Value],
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_args("01001101", args, 1, span)?;
-    eval_values(args, env, span)
+    special_forms::eval_values(args, env, span)
 }
 
-/// Invoke the current implementation projection for a semantic callable.
-///
-/// The semantic ID is the language identity. This function is only the
-/// execution bridge from that identity to today's Rust mechanism; another
-/// backend may replace the projection without changing the value identity.
+/// Mechanism bridge selected only by Sid8.
 pub(crate) fn invoke_semantic_ref(
-    semantic_id: Sid8,
+    sid: Sid8,
     args: &[Value],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let Some(primitive) = PRIMITIVE_TABLE.get(semantic_id.packed_byte() as usize).and_then(|f| *f) else {
+    let Some(primitive) = PRIMITIVE_TABLE
+        .get(sid.packed_byte() as usize)
+        .and_then(|f| *f)
+    else {
         return Err(LanguageError::new(
             ErrorKind::Type,
-            format!("unknown semantic callable SID: {semantic_id}"),
+            format!("function SID has no callable mechanism: {sid}"),
             span,
         ));
     };
     primitive(args, environment, span)
 }
 
-/// Return the first-class semantic value for a canonical identity. Special
-/// forms deliberately have no value representation; they remain syntax-only.
-pub(crate) fn value(identity: CanonicalIdentity) -> Option<Value> {
-    match identity {
-        CanonicalIdentity::Atom
-        | CanonicalIdentity::Eq
-        | CanonicalIdentity::Cons
-        | CanonicalIdentity::Car
-        | CanonicalIdentity::Cdr => Some(Value::Sid(semantic_id_for_identity(identity))),
-        CanonicalIdentity::Quote | CanonicalIdentity::Cond => None,
+pub(crate) fn value_for_sid(sid: Sid8) -> Option<Value> {
+    match route_kind_for_sid(sid)? {
+        SidRouteKind::ValueCall => Some(Value::Sid(sid)),
+        SidRouteKind::SpecialForm => None,
     }
 }
 
-pub(crate) fn value_for_surface(name: &str) -> Option<Value> {
-    identity_for_surface(name).and_then(value)
+pub(crate) fn value_for_surface(surface: &str) -> Option<Value> {
+    routed_sid_for_surface(surface).and_then(value_for_sid)
 }
 
 #[cfg(test)]
@@ -289,117 +232,73 @@ mod tests {
     use super::*;
 
     #[test]
-    fn legacy_named_table_does_not_own_sid_00000000() {
-        assert_eq!(CANON.len(), 7);
-        assert_eq!(identity_for_semantic_id(crate::sid!(00000000)), None);
-        assert_eq!(CANON[0].semantic_id, crate::sid!(00000001));
+    fn sid_zero_is_not_owned_by_route_metadata() {
+        assert_eq!(route_kind_for_sid(crate::sid!(00000000)), None);
+        assert_eq!(SID_ROUTES[0].sid, crate::sid!(00000001));
     }
 
     #[test]
-    fn canon_meanings_are_selected_only_by_exact_binary_semantic_identity() {
+    fn route_metadata_is_keyed_only_by_exact_sid() {
         assert_eq!(
-            identity_for_semantic_id(QUOTE_SEMANTIC_ID),
-            Some(CanonicalIdentity::Quote)
+            route_kind_for_sid(crate::sid!(00000001)),
+            Some(SidRouteKind::SpecialForm)
         );
         assert_eq!(
-            identity_for_semantic_id(CAR_SEMANTIC_ID),
-            Some(CanonicalIdentity::Car)
+            route_kind_for_sid(crate::sid!(00000101)),
+            Some(SidRouteKind::ValueCall)
         );
-        assert_eq!(identity_for_semantic_id(crate::sid!(00001100)), None);
+        assert_eq!(route_kind_for_sid(crate::sid!(00001100)), None);
     }
 
     #[test]
-    fn every_admitted_surface_for_one_semantic_id_resolves_to_one_identity() {
-        // Which spellings mean "car" is a registry FACT, not a Rust literal
-        // to enumerate here -- read them from the registry so this test
-        // keeps meaning "Canon routes every admitted surface for 0005 to
-        // the same identity" even if the admitted spellings change.
-        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID);
-        assert!(
-            surfaces.len() >= 2,
-            "0005 (car) should admit at least two surfaces for this invariant to be meaningful, \
-             got {surfaces:?}"
-        );
+    fn every_surface_for_sid_00000101_routes_back_to_that_sid() {
+        let surfaces =
+            semantic_registry::admitted_surfaces_for_semantic_id(crate::sid!(00000101));
+        assert!(surfaces.len() >= 2, "expected multiple routing surfaces");
         for surface in &surfaces {
             assert_eq!(
-                identity_for_surface(surface),
-                Some(CanonicalIdentity::Car),
-                "registry-admitted surface {surface:?} did not route to CanonicalIdentity::Car"
+                routed_sid_for_surface(surface),
+                Some(crate::sid!(00000101))
             );
         }
     }
 
     #[test]
-    fn canon_bit_identity_is_the_runtime_value_identity() {
+    fn routed_value_surface_materializes_only_the_sid() {
+        let surface = semantic_registry::admitted_surfaces_for_semantic_id(
+            crate::sid!(00000101),
+        )
+        .into_iter()
+        .next()
+        .expect("SID 00000101 should have a routing surface");
         assert_eq!(
-            identity_for_semantic_id(CAR_SEMANTIC_ID),
-            Some(CanonicalIdentity::Car)
+            value_for_surface(surface),
+            Some(Value::Sid(crate::sid!(00000101)))
         );
-        let human_surface = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID)
-            .into_iter()
-            .next()
-            .expect("00000101 (car) should admit at least one human surface");
-        let direct = value(CanonicalIdentity::Car).expect("binary Canon identity");
-        let human = value_for_surface(human_surface).expect("registry-admitted Canon surface");
-        assert_eq!(direct, Value::Sid(CAR_SEMANTIC_ID));
-        assert_eq!(human, Value::Sid(CAR_SEMANTIC_ID));
-        assert_eq!(direct, human);
     }
 
     #[test]
-    fn every_admitted_surface_for_one_semantic_id_materializes_one_sid8_value() {
-        let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(CAR_SEMANTIC_ID);
-        assert!(
-            surfaces.len() >= 2,
-            "0005 (car) should admit at least two surfaces for this invariant to be meaningful, \
-             got {surfaces:?}"
-        );
-
-        for surface in &surfaces {
-            assert_eq!(
-                value_for_surface(surface),
-                Some(Value::Sid(CAR_SEMANTIC_ID)),
-                "registry-admitted surface {surface:?} must materialize SID 00000101"
-            );
-        }
-    }
-
-    #[test]
-    fn semantic_ids_control_canon_routing() {
-        assert_eq!(
-            identity_for_semantic_id(QUOTE_SEMANTIC_ID),
-            Some(CanonicalIdentity::Quote)
-        );
-        assert_eq!(
-            identity_for_semantic_id(CAR_SEMANTIC_ID),
-            Some(CanonicalIdentity::Car)
-        );
-        assert_eq!(identity_for_semantic_id(crate::sid!(00001100)), None);
-    }
-
-    #[test]
-    fn registry_rows_without_canon_meaning_do_not_become_canon() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(ADD_SEMANTIC_ID));
-        assert_eq!(identity_for_surface("+"), None);
-    }
-
-    #[test]
-    fn canonical_surface_names_are_reserved() {
-        for name in [
-            "quote", "як-є", "svarūpa", "atom", "атом?", "aṇu", "eq", "тотожне?",
-            "abheda", "cons", "сполучити", "saṃyuj", "car", "перше", "ādi", "cdr",
-            "решта", "śeṣa", "cond", "за-умовою", "anukrama",
+    fn surfaces_for_sid_routes_are_reserved_mechanically() {
+        for sid in [
+            crate::sid!(00000001),
+            crate::sid!(00000010),
+            crate::sid!(00000011),
+            crate::sid!(00000100),
+            crate::sid!(00000101),
+            crate::sid!(00000110),
+            crate::sid!(00000111),
         ] {
-            assert!(is_reserved_surface(name), "Canon spelling must be reserved: {name}");
+            for surface in semantic_registry::admitted_surfaces_for_semantic_id(sid) {
+                assert!(is_reserved_surface(surface));
+                assert!(surface_has_sid(surface, sid));
+            }
         }
         assert!(!is_reserved_surface("map"));
-        assert!(!is_reserved_surface("відобразити"));
     }
 
     #[test]
-    fn sid_00000000_is_not_the_empty_list_value() {
-        assert_eq!(identity_for_semantic_id(crate::sid!(00000000)), None);
-        assert!(value(CanonicalIdentity::Quote).is_none());
-        assert!(value(CanonicalIdentity::Cond).is_none());
+    fn special_form_routes_do_not_materialize_callable_values() {
+        assert_eq!(value_for_sid(crate::sid!(00000001)), None);
+        assert_eq!(value_for_sid(crate::sid!(00000111)), None);
     }
 }

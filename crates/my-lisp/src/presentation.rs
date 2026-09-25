@@ -401,14 +401,14 @@ mod tests {
     }
 
     #[test]
-    fn ukrainian_exact_arity_names_canonical_primitive_by_surface_name() {
+    fn ukrainian_exact_arity_preserves_function_sid_diagnostic() {
         let source = "(атом?)";
         let mut session = Session::default();
         let error = eval_program(source, &mut session).expect_err("arity");
         let rendered =
             render_error_for_presentation(&error, source, PresentationLanguage::Ukrainian);
         assert!(
-            rendered.contains("атом?: очікувалося 1; отримано 0"),
+            rendered.contains("00000010: очікувалося 1; отримано 0"),
             "{rendered}"
         );
     }
