@@ -583,6 +583,19 @@ impl Value {
         }
     }
 
+    /// Returns the exact eight-bit function sense (СЕНС) if this value is one.
+    pub fn as_sens8(&self) -> Option<crate::Sens8> {
+        match self {
+            Self::Sid(s) => Some(*s),
+            _ => None,
+        }
+    }
+
+    /// Legacy alias for [`Self::as_sens8`].
+    pub fn as_sid8(&self) -> Option<crate::Sid8> {
+        self.as_sens8()
+    }
+
     /// Builds one host-provided callable value without adding a new evaluator
     /// form.  The host chooses only the mechanism behind a binding; Lisp still
     /// decides whether and when to call the value through ordinary evaluation.

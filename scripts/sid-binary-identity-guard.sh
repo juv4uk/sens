@@ -49,10 +49,10 @@ report_forbidden \
   '(Value|ExprKind)::Sid\((0b[01_]+|[0-9]+|"[^"]*")\)' \
   "${files[@]}"
 
-direct_sid8="$(grep -REn 'Sid8\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/my-lisp/src \
-  --exclude=sid.rs || true)"
+direct_sid8="$(grep -REn '(Sid8|Sens8)\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/my-lisp/src \
+  --exclude=sid.rs --exclude=sens.rs || true)"
 if [[ -n "$direct_sid8" ]]; then
-  printf 'SID-BINARY-IDENTITY violation: direct Sid8 constructor outside sid.rs\n%s\n' \
+  printf 'SID-BINARY-IDENTITY violation: direct Sid8/Sens8 constructor outside sid.rs/sens.rs\n%s\n' \
     "$direct_sid8" >&2
   fail=1
 fi
