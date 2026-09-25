@@ -137,3 +137,7 @@
 (review "crates/my-lisp/src/eval/canon.rs" "ec4ee0f848166f5ea5891204f3f09e9bc37112cc82e25017bc7051d6a71f3ac3" issue-1006 sens-mechanism-fallback-after-local-function)
 (review "crates/my-lisp/src/eval/mod.rs" "3730c906dc384b9bd6bc56fe215202251d846db68d3a5cadc1e9ef8058a25b8f" issue-1006 sens-mechanism-api-export)
 (review "crates/my-lisp/src/lib.rs" "c6fb80f302fb0e138f2515cf9e5ba433a23f4bdda968aafc19d4cd043b59cb2e" issue-1006 sens-mechanism-public-export)
+
+; #1006 exact-SENS raw invoke adapter: mechanism-only host wiring.
+(review "crates/my-lisp-cli/src/island_invoke.rs" "d1271de8167ff1889cbb7ccbfd610e9ce25cbc5eff2c3e7de977d4c56c738327" issue-1006 exact-sens-raw-island-mechanism)
+(review "crates/my-lisp-cli/src/main.rs" "8c2784106d818fbcbc94575866e10b4063b6e161195d7c1412ed45b7f02beb76" issue-1006 install-exact-sens-raw-island-mechanism)
