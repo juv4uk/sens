@@ -147,10 +147,9 @@ pub(crate) fn dispatch_capability(
 
 /// Mechanical lookup/execution seam for one already-registered exact SENS function.
 ///
-/// #1406: production has no caller until #1411 supplies an explicit SENS-owned
-/// raw-invoke mechanism admission. The direct seam exists only for its mechanical
-/// unit witness in this slice; registration/storage remain production availability.
-#[cfg(test)]
+/// #1406/#1422: registration/storage are availability only. Production may call
+/// this seam only after the generated SENS-owned (selected Core, function)
+/// admission projection has selected RegisteredHostMechanism.
 pub(crate) fn dispatch_sens_capability(
     sens: Sens8,
     arguments: &[Value],
