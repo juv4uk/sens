@@ -125,3 +125,6 @@
 (review "crates/my-lisp/src/lib.rs" "340674a9c5bd7cbd6ef5b6716955bfb28e9ddd3da6ce42fd0486110954ae4370" issue-1344 sens-vocabulary-foundation-export)
 (review "crates/my-lisp/tests/sens_foundation.rs" "3fbba9fff5cd2e04581fa45e31d1141ebcb15804650f56e70aaf24e7525e8d35" issue-1344 sens-foundation-observer)
 (review "crates/my-lisp/src/presentation.rs" "7f1815c6adeea63e2246f1d5a9fe9eb7f58660ac6c399f440f1139a68762b68b" issue-1327 sid8-diagnostic-observer-alignment)
+
+; #1272 selected-Core transport: loader sets only the mechanical profile signal; Lisp contracts own laws.
+(review "crates/my-lisp/src/lib.rs" "464bfce89601a1fb3146d8d7b4b748f34192f00971700b2060a8947d151a113a" issue-1272 selected-core-profile-mechanical-loader)
