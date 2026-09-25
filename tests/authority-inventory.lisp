@@ -108,3 +108,6 @@
 (authority "crates/my-lisp/tests/ukr_acceptance.rs" observer)
 
 (authority "crates/my-lisp/tests/core_profile_runtime_1272.rs" observer)
+
+(authority "crates/my-lisp-cli/src/island_invoke.rs" mechanism)
+(authority "crates/my-lisp-cli/tests/invoke_repl.rs" observer)
