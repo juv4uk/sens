@@ -22,7 +22,7 @@ fn guard_keeps_decision_and_evidence_status_separate() {
               (quote warn) (quote confirmed) (quote swarm/tasks)
               (quote auto-sync-disabled) (quote tasks-materialized)
               (quote tasks-not-materialized) (quote stale-projection)
-              (quote sync-tasks) (quote (systemd tasks.my journal)))"#,
+              (quote sync-tasks) (quote (systemd tasks.lisp journal)))"#,
     );
     assert!(value.contains("(decision warn)"));
     assert!(value.contains("(evidence-status confirmed)"));
@@ -67,7 +67,7 @@ fn oracle_and_observation_agreement_allows() {
 #[test]
 fn disagreement_warns_and_preserves_both_values() {
     let value = eval_guard(
-        r#"(guard-compare (quote task-state) (quote ready) (quote missing) (quote (tasks.my journal)))"#,
+        r#"(guard-compare (quote task-state) (quote ready) (quote missing) (quote (tasks.lisp journal)))"#,
     );
     assert!(value.contains("(decision warn)"));
     assert!(value.contains("(expected ready observed missing)"));
