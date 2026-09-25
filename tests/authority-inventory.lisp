@@ -108,3 +108,4 @@
 (authority "crates/my-lisp/tests/ukr_acceptance.rs" observer)
 
 (authority "crates/my-lisp/tests/core_profile_runtime_1272.rs" observer)
+(authority "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" observer)

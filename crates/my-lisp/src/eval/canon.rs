@@ -203,24 +203,18 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    if let Some(primitive) = PRIMITIVE_TABLE
+    let Some(primitive) = PRIMITIVE_TABLE
         .get(sid.packed_byte() as usize)
         .and_then(|function| *function)
-    {
-        return primitive(args, environment, span);
-    }
+    else {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            format!("SENS function has no admitted callable mechanism: {sid}"),
+            span,
+        ));
+    };
 
-    if let Some(result) =
-        super::capabilities::dispatch_sens_capability(sid, args, environment, span)
-    {
-        return result;
-    }
-
-    Err(LanguageError::new(
-        ErrorKind::Type,
-        format!("function SID has no callable mechanism: {sid}"),
-        span,
-    ))
+    primitive(args, environment, span)
 }
 
 pub(crate) fn value_for_sid(sid: Sid8) -> Option<Value> {

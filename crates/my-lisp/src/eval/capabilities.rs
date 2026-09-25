@@ -145,7 +145,12 @@ pub(crate) fn dispatch_capability(
     dispatch_capability_from(registry(), name, arguments, environment, span)
 }
 
-/// Mechanical fallback for one exact SENS function after built-in mechanisms declined it.
+/// Mechanical lookup/execution seam for one already-registered exact SENS function.
+///
+/// #1406: production has no caller until #1411 supplies an explicit SENS-owned
+/// raw-invoke mechanism admission. The direct seam exists only for its mechanical
+/// unit witness in this slice; registration/storage remain production availability.
+#[cfg(test)]
 pub(crate) fn dispatch_sens_capability(
     sens: Sens8,
     arguments: &[Value],

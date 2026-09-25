@@ -137,3 +137,7 @@
 (review "crates/my-lisp/src/eval/canon.rs" "ec4ee0f848166f5ea5891204f3f09e9bc37112cc82e25017bc7051d6a71f3ac3" issue-1006 sens-mechanism-fallback-after-local-function)
 (review "crates/my-lisp/src/eval/mod.rs" "3730c906dc384b9bd6bc56fe215202251d846db68d3a5cadc1e9ef8058a25b8f" issue-1006 sens-mechanism-api-export)
 (review "crates/my-lisp/src/lib.rs" "c6fb80f302fb0e138f2515cf9e5ba433a23f4bdda968aafc19d4cd043b59cb2e" issue-1006 sens-mechanism-public-export)
+; #1406: generic host availability must not become ordinary SENS admission.
+(review "crates/my-lisp/src/eval/canon.rs" "0fc923c893012610a6aad60edbdcaf70e9a78b67b7b63fbba6eb18d0c512fece" issue-1406 registration-is-not-admission-repair)
+(review "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" "729d3a741df2b4f2fd7cb278b09107e449c6b19eaf58241a5e5b25bdd58cf248" issue-1406 sens-host-registration-admission-observer)
+(review "crates/my-lisp/src/eval/capabilities.rs" "263e6fcfeb94974a8a6d102df296ee25d6fa23888015cd73b6d3654d14062347" issue-1406 dormant-host-registry-mechanism)

@@ -1,7 +1,7 @@
 use my_lisp::{eval_program, ErrorKind, Session, Value};
 
 #[test]
-fn function_without_callable_mechanism_fails_closed_when_invoked() {
+fn function_without_admitted_callable_mechanism_fails_closed_when_invoked() {
     let mut session = Session::default();
     session
         .environment
@@ -11,17 +11,17 @@ fn function_without_callable_mechanism_fails_closed_when_invoked() {
         .expect_err("a function without a callable mechanism must fail closed");
 
     assert_eq!(error.kind, ErrorKind::Type);
-    assert_eq!(error.message, "function SID has no callable mechanism: 11111111");
+    assert_eq!(error.message, "SENS function has no admitted callable mechanism: 11111111");
 }
 
 #[test]
-fn bare_function_sid_without_mechanism_fails_closed_through_existing_call_boundary() {
+fn bare_sens_function_without_mechanism_fails_closed_through_existing_call_boundary() {
     let mut session = Session::default();
     let error = eval_program("(11111111)", &mut session)
-        .expect_err("a bare function SID without a mechanism must not mint a callable mechanism");
+        .expect_err("a bare SENS function without a mechanism must not mint a callable mechanism");
 
     assert_eq!(error.kind, ErrorKind::Type);
-    assert_eq!(error.message, "function SID has no callable mechanism: 11111111");
+    assert_eq!(error.message, "SENS function has no admitted callable mechanism: 11111111");
 }
 
 #[test]
