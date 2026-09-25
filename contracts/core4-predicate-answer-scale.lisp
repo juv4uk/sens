@@ -37,7 +37,9 @@
    (sanskrit . ajñāta)
    (meaning-uk . "невідомо")
    (direction . none)
-   (sens-function . none))
+   (sens-function . none)
+   (convergence-functions . (00000000 11111111))
+   (function-result . ()))
 
   ((direction . yes)
    (bit . "1")
@@ -55,4 +57,5 @@
    (weakening-law . append-same-bit)
    (boundary-law . seven-directed-grades-converge-to-empty-list)
    (eighth-bit-law . belongs-to-sens-function-space)
+   (function-convergence-law . distinct-functions-same-empty-result)
    (and-or-cond-law . deliberately-unratified)))
