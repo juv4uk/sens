@@ -338,8 +338,8 @@ mod tests {
     #[test]
     fn ukrainian_presentation_localizes_builtin_and_function_markers() {
         let mut session = Session::default();
-        let builtin = eval_program("atom", &mut session)
-            .expect("atom value")
+        let builtin = eval_program("atom?", &mut session)
+            .expect("atom? value")
             .value;
         assert_eq!(
             render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),

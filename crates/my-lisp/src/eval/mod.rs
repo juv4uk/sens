@@ -486,7 +486,7 @@ mod single_pass_eval_tests {
             "(lambda (car) car)",
             "(lambda (перше) перше)",
             "(lambda (ādi) ādi)",
-            "(lambda atom atom)",
+            "(lambda atom? atom?)",
         ] {
             let mut session = Session::default();
             let error = eval_program(source, &mut session)
