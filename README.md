@@ -1,19 +1,21 @@
 <div align="center">
 
-<img src="docs/assets/wsm-lisp-hero.svg" alt="my-lisp — SID8 · CORE PROFILES · MULTI-SUBSTRATE" width="100%">
+<img src="docs/assets/wsm-lisp-hero.svg" alt="sens — SENS8 · 256 СЕНСІВ · MULTI-SUBSTRATE" width="100%">
 
-# my-lisp
+# sens (СЕНС)
 
-**Проста Lisp-мова, що координує різні способи обчислення**
+**Чиста сутнісна мова обчислення з 256 канонічними функціями**
 
-*Дослідження мови, яка зберігає власний Canon та semantic identities, але не намагається підмінити собою Prolog, Datalog, CLIPS, Common Lisp чи інші незалежні ядра.*
+*A pure essential computing language with 256 canonical functions*
 
-<p><a href="https://github.com/juv4uk/my-lisp/releases/latest/download/my-lisp-cli-web.html"><strong>▶ Спробувати my-lisp у вебі</strong></a></p>
+*Lisp був початковим синтаксичним носієм і прототипом. СЕНС є сутнісним онтологічним ядром: 256 чистих функцій `00000000..11111111` без рядкових імен у рантаймі, із симетричними людськими проєкціями (укр / en / sa / sym).*
+
+<p><a href="https://github.com/juv4uk/sens/releases/latest/download/my-lisp-cli-web.html"><strong>▶ Спробувати sens у вебі</strong></a></p>
 <sub>Один автономний portable-файл <code>.html</code> · без встановлення · працює локально у браузері</sub>
 
-[![CI](https://github.com/juv4uk/my-lisp/actions/workflows/ci.yml/badge.svg)](https://github.com/juv4uk/my-lisp/actions/workflows/ci.yml)
-[![WASM](https://github.com/juv4uk/my-lisp/actions/workflows/wasm-browser-test.yml/badge.svg)](https://github.com/juv4uk/my-lisp/actions/workflows/wasm-browser-test.yml)
-[![Surface drift](https://github.com/juv4uk/my-lisp/actions/workflows/surface-drift-check.yml/badge.svg)](https://github.com/juv4uk/my-lisp/actions/workflows/surface-drift-check.yml)
+[![CI](https://github.com/juv4uk/sens/actions/workflows/ci.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/ci.yml)
+[![WASM](https://github.com/juv4uk/sens/actions/workflows/wasm-browser-test.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/wasm-browser-test.yml)
+[![Surface drift](https://github.com/juv4uk/sens/actions/workflows/surface-drift-check.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/surface-drift-check.yml)
 
 **Українська — перша мова проєкту.** Англійська й німецька — допоміжні.
 
@@ -21,9 +23,11 @@
 
 ---
 
-## Що таке `my-lisp`
+## Що таке `sens` (СЕНС)
 
-`my-lisp` — дослідницька Lisp-мова з власним Canon, 8-бітним простором semantic identities, точною арифметикою, виконуваними законами та архіпелагом незалежних execution kernels.
+`sens` (СЕНС) — фундаментальна онтологічна мова обчислення з точно визначеним 8-бітним простором функцій, точною арифметикою, виконуваними законами та архіпелагом незалежних execution kernels.
+
+Історично проєкт розвивався під робочою назвою `my-lisp`, де Lisp слугував початковим синтаксичним носієм і середовищем прототипування. У ході еволюції відбувся якісний онтологічний зсув: синтаксичний носій поступився місцем сутнісному ядру. Мова більше не залежить від текстових назв функцій чи конкретного діалекту — вона складається з 256 точних 8-бітних функцій-сенсів (`00000000..11111111`), над якими люди взаємодіють через симетричні мовні проєкції (українську, англійську, санскрит, символьну).
 
 Головний архітектурний принцип:
 
@@ -32,34 +36,34 @@
 Rust лишається важливим механічним substrate/reference implementation, але не джерелом семантичної істини. Так само Prolog, Datalog, CLIPS і Common Lisp не стають глобальною semantic authority лише тому, що вони краще виконують свій клас задач.
 
 ```text
-                  my-lisp
-        Canon / SID / laws / data
-                     |
-       +-------------+-------------+
-       |             |             |
-   local Lisp      routing       observation
-       |             |             |
-       +------+------+------+------+
-              |      |      |
-          Common   Prolog  Datalog  CLIPS
-           Lisp
+                     sens
+          Canon / Sens8 / laws / data
+                      |
+        +-------------+-------------+
+        |             |             |
+    local sens      routing       observation
+        |             |             |
+        +------+------+------+------+
+               |      |      |
+           Common   Prolog  Datalog  CLIPS
+            Lisp
 ```
 
-Нова дисципліна проста: `my-lisp` має вміти **висловити, адресувати, передати, прийняти й композиційно використати** результат, але не зобов'язаний повторно реалізовувати всередині себе найкращий алгоритм кожного острова.
+Нова дисципліна проста: `sens` має вміти **висловити, адресувати, передати, прийняти й композиційно використати** результат, але не зобов'язаний повторно реалізовувати всередині себе найкращий алгоритм кожного острова.
 
-Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **8.0**.
+Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **9.0**.
 
 
-### Один Lisp, різні субстрати
+### Одна мова, різні субстрати
 
 Поточний напрям substrate switch фіксує ще жорсткішу межу:
 
-> **`my-lisp` лишається семантичною владою; субстрат змінюється без міграції значення.**
+> **`sens` лишається семантичною владою; субстрат змінюється без міграції значення.**
 
-Тобто перенесення виконання на GraalVM, WASM, C, FPGA чи інший host не повинно породжувати другу реалізацію мови. Новий субстрат має виконувати той самий pinned Lisp source і доводити це незалежним witness-шаром.
+Тобто перенесення виконання на GraalVM, WASM, C, FPGA чи інший host не повинно породжувати другу реалізацію мови. Новий субстрат має виконувати той самий pinned sens source і доводити це незалежним witness-шаром.
 
 ```text
-pinned my-lisp source
+pinned sens source
         ↓
 semantic contract + executable laws
         ↓
@@ -68,7 +72,7 @@ semantic contract + executable laws
  Rust   GraalVM   WASM / C / FPGA
 ```
 
-Особливо це стосується bootstrap: `lib/macro.lisp` і поточний профіль `lib/core4.lisp` є Lisp-owned behavior. `lib/core.lisp` лишається bounded compatibility donor/entry point під час міграції чотирьох Core. Якщо іншому субстрату потрібен host-механізм, він має бути вузьким і semantics-blind; backend не має права замінювати 8-бітний function SID словесною або власною identity.
+Особливо це стосується bootstrap: `lib/macro.lisp` і поточний профіль `lib/core4.lisp` є Lisp/sens-owned behavior. `lib/core.lisp` лишається bounded compatibility donor/entry point під час міграції чотирьох Core. Якщо іншому субстрату потрібен host-механізм, він має бути вузьким і semantics-blind; backend не має права замінювати 8-бітний function SID словесною або власною identity.
 
 Для Core4 функція SID `00000111` має тричленний закон `(query expected-result expression)`: спостережений результат порівнюється з явним expected datum, а вичерпання дає `UnsatisfiedConditional`. Інші Core можуть мати інший ратифікований закон для того самого SID. Contract 9.0 не створює для цього жодної словесної identity.
 
@@ -123,9 +127,11 @@ README лише показує вже зароблені докази; він н
 
 **У СЕНС зарезервовано рівно 256 функцій — усі значення від `00000000` до `11111111`.**
 
-Ці функції є точними 8-бітними двійковими формами мови. Не існує другого
-функціонального шару над ними. Core1–Core4 можуть задавати різні закони
-для тих самих 256 функцій, але не створюють іншого набору функцій.
+Ці функції є точними 8-бітними двійковими формами мови (`Sens8`). Не існує другого
+функціонального шару над ними, і в рантаймі немає рядкових імен функцій.
+Core1–Core4 можуть задавати різні закони для тих самих 256 функцій, але не створюють
+іншого набору функцій. Людські проєкції (українська `ук`/`укр`, англійська `en`,
+санскрит `sa`, символьна `sym`) є лише симетричними поверхнями маршрутизації до цих 256 функцій.
 
 `()` є окремим структурним значенням і не займає жодної з 256 функцій.
 
@@ -275,14 +281,14 @@ README / tutorials / історичні плани
 
 ## Мова і архіпелаг ядер
 
-Раніше центральним дослідницьким питанням було: скільки поведінки можна повернути всередину самого Lisp.
+Раніше центральним дослідницьким питанням було: скільки поведінки можна повернути всередину самого evaluator.
 
-Цей напрям дав важливі результати, але тепер проєкт рухається далі: **не все корисне повинно жити всередині одного Lisp evaluator**.
+Цей напрям дав важливі результати, але тепер проєкт рухається далі: **не все корисне повинно жити всередині одного evaluator**.
 
 ```text
-my-lisp
-  ├─ Canon / SID / surfaces / laws
-  ├─ локальна Lisp-поведінка
+sens
+  ├─ Canon / Sens8 / surfaces / laws
+  ├─ локальна sens-поведінка
   ├─ ordinary data
   ├─ композиція
   └─ kernel boundary
@@ -303,7 +309,7 @@ my-lisp
 
 ### Пірамідальна та множинна логіка
 
-Попередня пірамідальна модель була корисною як спосіб вийти з замкненої Lisp-бульбашки й перестати зводити всі відповіді до одного наперед заданого truth model.
+Попередня пірамідальна модель була корисною як спосіб вийти з замкненої бульбашки й перестати зводити всі відповіді до одного наперед заданого truth model.
 
 Тепер її роль спрощується.
 
@@ -312,7 +318,7 @@ my-lisp
 - інструмент для incomplete/conflicting evidence;
 - compatibility/research layer.
 
-Але Prolog, Datalog і CLIPS отримують право лишатися собою. `my-lisp` не має перетворювати їхні native результати на одну універсальну логічну шкалу.
+Але Prolog, Datalog і CLIPS отримують право лишатися собою. `sens` не має перетворювати їхні native результати на одну універсальну логічну шкалу.
 
 Принцип:
 
@@ -328,14 +334,14 @@ my-lisp
 Історична метафора проєкту тепер отримує точніший зміст:
 
 ```text
-            my-lisp
+             sens
        identity / Canon
           /   |   \
          /    |    \
    Prolog  Datalog  CLIPS  Common Lisp
 ```
 
-`my-lisp` є центральною мовою не тому, що виконує все сам, а тому, що зберігає **цілісність identity, Canon, композицію й прямий контакт із різними execution models**.
+`sens` є центральною мовою не тому, що виконує все сам, а тому, що зберігає **цілісність identity, Canon, композицію й прямий контакт із різними execution models**.
 
 Кожен острів говорить із мовою прямо й повертає власний результат без обов'язкового переписування під одну універсальну семантику.
 
@@ -343,16 +349,16 @@ my-lisp
 
 ## Хост не є семантикою
 
-`my-lisp` не ставить собі за мету механічно «переписати Rust на Lisp». Межа інша:
+`sens` не ставить собі за мету механічно «переписати Rust на Lisp». Межа інша:
 
 ```text
 OS / hardware
       ↓
 спостереження та capability-механізми
       ↓
-значення my-lisp
+значення sens
       ↓
-Lisp-визначена інтерпретація / політика / протокол
+Lisp/sens-визначена інтерпретація / політика / протокол
 ```
 
 Тому низькорівнева операція може чесно лишатися в Rust, C або FPGA, якщо вона є механізмом. Але semantic policy не повинна випадково ставати властивістю конкретного хоста.
@@ -365,15 +371,16 @@ Lisp-визначена інтерпретація / політика / прот
 
 Різні реалізації потрібні не для того, щоб копіювати одну архітектуру, а щоб **ламати приховані припущення одна одної**.
 
-- [`crates/my-lisp`](crates/my-lisp) — референсний Rust runtime;
-- [`crates/my-lisp-cli`](crates/my-lisp-cli) — CLI, REPL і semantic oracle;
+- [`crates/sens`](crates/sens) — канонічний Rust crate мови sens (Sens, Sens8, sens! macro);
+- [`crates/my-lisp`](crates/my-lisp) — референсний Rust runtime (перехідний сумісний шар);
+- [`crates/my-lisp-cli`](crates/my-lisp-cli) — CLI, REPL і semantic oracle (sens-oracle);
 - [`crates/my-lisp-wasm`](crates/my-lisp-wasm) — WebAssembly;
 - [`crates/my-lisp-lsp`](crates/my-lisp-lsp) — LSP;
 - [`crates/my-lisp-host`](crates/my-lisp-host) — явна межа OS capabilities;
 - [`c-runtime/`](c-runtime/) — C + x86_64 substrate;
-- [`racket/`](racket/) — `#lang my-lisp` для Racket/DrRacket;
+- [`racket/`](racket/) — `#lang sens` для Racket/DrRacket;
 - [`juv4uk/cml`](https://github.com/juv4uk/cml) — AOT / heterogeneous compiler напрям;
-- [`juv4uk/fpga-lisp`](https://github.com/juv4uk/fpga-lisp) — фізично інша Lisp-машина на FPGA.
+- [`juv4uk/fpga-lisp`](https://github.com/juv4uk/fpga-lisp) — фізично інша Lisp/sens-машина на FPGA.
 
 Сумісність визначається контрактами, а не тим, наскільки схожий код реалізацій.
 
@@ -384,8 +391,8 @@ Lisp-визначена інтерпретація / політика / прот
 Потрібні Rust toolchain і залежності workspace. У репозиторії також є Guix manifest для відтворюваного середовища.
 
 ```bash
-# REPL
-cargo run -p my-lisp-cli
+# REPL (через sens або my-lisp-cli)
+cargo run -p sens --example repl # або: cargo run -p my-lisp-cli
 
 # виконати файл
 cargo run -p my-lisp-cli -- path/to/file.lisp
@@ -396,13 +403,13 @@ cargo build --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Канонічне розширення вихідного коду — **`.lisp`** (згідно з [my-lisp#81](https://github.com/juv4uk/my-lisp/issues/81)). **`.wsm`** і **`.my`** лишаються повністю підтримуваними legacy aliases.
+Канонічне розширення вихідного коду — **`.lisp`** (згідно з [my-lisp#81](https://github.com/juv4uk/sens/issues/81)). **`.wsm`** і **`.my`** лишаються повністю підтримуваними legacy aliases.
 
 ---
 
 ## З чого читати проєкт
 
-Якщо відкриваєте `my-lisp` уперше, цей порядок дає найменше плутанини:
+Якщо відкриваєте `sens` уперше, цей порядок дає найменше плутанини:
 
 1. [`language-contract.lisp`](language-contract.lisp) — що саме обіцяє мова;
 2. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — хто має право визначати істину;
@@ -426,7 +433,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · auxiliary
 
-`SENS` reserves exactly 256 language functions: `00000000..11111111`. These exact 8-bit binary forms are the functions of the language. Core profiles may assign different laws to the same 256 functions; human names are only optional routing/UI metadata.
+`sens` (СЕНС) reserves exactly 256 language functions: `00000000..11111111` (`Sens8`). These exact 8-bit binary forms are the ontological core functions of the language, with zero string names at runtime. Lisp served as the initial syntactic carrier and prototyping substrate; SENS has emerged as the essential ontological computing language. Core profiles may assign different laws to the same 256 functions; human names (Ukrainian, English, Sanskrit, symbols) are purely non-authoritative routing and UI projections.
 
 Ukrainian is the project's primary human language. English and German are auxiliary. The Rust runtime is the reference implementation, not semantic authority; start with [`language-contract.lisp`](language-contract.lisp) and [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
 
@@ -434,7 +441,7 @@ The central research question is now: **how simple can the language remain while
 
 ## Deutsch · ergänzend
 
-`SENS` reserviert genau 256 Sprachfunktionen: `00000000..11111111`. Diese exakten 8-Bit-Binärformen sind die Funktionen der Sprache. Core-Profile können denselben 256 Funktionen unterschiedliche Gesetze zuweisen; menschliche Namen sind nur optionale Routing/UI-Metadaten.
+`sens` (СЕНС) reserviert genau 256 Sprachfunktionen: `00000000..11111111` (`Sens8`). Diese exakten 8-Bit-Binärformen bilden den ontologischen Kern der Sprache ohne String-Namen zur Laufzeit. Lisp diente als ursprünglicher syntaktischer Träger und Prototyp; SENS ist als eigentliche essentielle Sprache hervorgegangen. Core-Profile können denselben 256 Funktionen unterschiedliche Gesetze zuweisen; menschliche Namen (Ukrainisch, Englisch, Sanskrit, Symbole) sind reine nicht-autoritative Projektionen für Routing und UI.
 
 Ukrainisch ist die primäre menschliche Sprache des Projekts; Englisch und Deutsch sind Hilfssprachen. Rust ist die Referenzimplementierung, aber nicht die semantische Autorität. Maßgeblich sind [`language-contract.lisp`](language-contract.lisp), ratifizierte Entscheidungen und ausführbare Konformitätsbelege.
 

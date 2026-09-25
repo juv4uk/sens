@@ -1,4 +1,4 @@
-# my-lisp semantic authority map
+# sens (СЕНС) semantic authority map
 
 Status: CURRENT ARCHITECTURE MAP. This file does not create new language semantics. It defines where an existing claim must be checked before prose is trusted.
 
@@ -49,9 +49,9 @@ The current implementation is actively reducing host-owned bootstrap behavior. `
 
 ## Project identity and source extensions
 
-The project/repository name is **`my-lisp`**.
+The project/repository name is **`sens`** (historical: `my-lisp`).
 
-The current canonical source extension is **`.lisp`** (per [my-lisp#81](https://github.com/juv4uk/my-lisp/issues/81) — extension is never semantics). **`.lisp`** and **`.lisp`** remain fully supported legacy aliases. The separate repository named `wsm` is unrelated foundational research; the shared letters do not rename this language project.
+The current canonical source extension is **`.lisp`** (per [my-lisp#81](https://github.com/juv4uk/sens/issues/81) — extension is never semantics). **`.wsm`** and **`.my`** remain fully supported legacy aliases. The separate repository named `wsm` is unrelated foundational research; the shared letters do not rename this language project.
 
 ## Reference implementation terminology
 
@@ -59,6 +59,7 @@ Use these terms consistently:
 
 ```text
 semantic authority       = contract + ratified decisions + executable conformance
+canonical crate          = crates/sens (Rust)
 reference implementation = crates/my-lisp (Rust)
 independent substrate     = fpga-lisp / c-runtime / other conformance target
 ```
