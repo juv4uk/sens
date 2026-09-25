@@ -14,6 +14,11 @@
 (def repo-tooling-lifecycles
   (quote (active transitional legacy generated-helper archive-candidate)))
 
+; Bounded second scope slice for repo-owned tooling outside immediate scripts/*.
+; These are explicit entrypoints, not a recursive inventory of their directories.
+(def repo-tooling-extra-entrypoints
+  (quote ("crates/xtask/src/main.rs" "githooks/pre-commit")))
+
 (def repo-tooling-violation
   (lambda (kind detail)
     (list (quote repo-tooling-violation) kind detail)))
@@ -253,6 +258,68 @@
             (structural-relation distinct)
             (repo-tooling-find-row-by-path path (cdr rows)))))))))
 
+(def repo-tooling-extra-entry-name-state
+  (lambda (name entries)
+    (cond
+      ((atom entries) (structural-kind empty-list) (quote absent))
+      ((atom entries) (structural-kind atom) (quote malformed))
+      ((atom entries) (structural-kind pair)
+       (cond
+         ((equal? name (car entries)) (structural-relation same) (quote present))
+         ((equal? name (car entries)) (structural-relation distinct)
+          (repo-tooling-extra-entry-name-state name (cdr entries))))))))
+
+(def repo-tooling-extra-entrypoint-present-state
+  (lambda (path)
+    (cond
+      ((equal? path "crates/xtask/src/main.rs") (structural-relation same)
+       (let ((entries (read-dir "crates/xtask/src")))
+         (repo-tooling-extra-entry-name-state "main.rs" entries)))
+      ((equal? path "crates/xtask/src/main.rs") (structural-relation distinct)
+       (repo-tooling-extra-entrypoint-present-state "githooks/pre-commit"))
+      ((equal? path "githooks/pre-commit") (structural-relation same)
+       (let ((entries (read-dir "githooks")))
+         (repo-tooling-extra-entry-name-state "pre-commit" entries)))
+      ((equal? path "githooks/pre-commit") (structural-relation distinct)
+       (quote unsupported)))))
+
+(def repo-tooling-extra-entrypoint-verdict
+  (lambda (path rows)
+    (let ((found (repo-tooling-find-row-by-path path rows))
+          (state (repo-tooling-extra-entrypoint-present-state path)))
+      (cond
+        ((eq state (quote present)) (identity-relation same)
+         (cond
+           ((atom found) (structural-kind empty-list)
+            (repo-tooling-violation (quote unregistered-tool) path))
+           ((atom found) (structural-kind atom)
+            (repo-tooling-violation (quote malformed-row) path))
+           ((atom found) (structural-kind pair)
+            (list (quote repo-tooling-ok)))))
+        ((eq state (quote absent)) (identity-relation same)
+         (repo-tooling-violation (quote stale-path) path))
+        ((eq state (quote malformed)) (identity-relation same)
+         (repo-tooling-violation (quote malformed-observed-list) path))
+        ((eq state (quote unsupported)) (identity-relation same)
+         (repo-tooling-violation (quote unsupported-extra-entrypoint) path))))))
+
+(def repo-tooling-extra-entrypoints-verdict
+  (lambda (rows paths)
+    (cond
+      ((atom paths) (structural-kind empty-list) (list (quote repo-tooling-ok)))
+      ((atom paths) (structural-kind atom)
+       (repo-tooling-violation (quote malformed-extra-entrypoint-list) paths))
+      ((atom paths) (structural-kind pair)
+       (let ((entry-verdict
+               (repo-tooling-extra-entrypoint-verdict (car paths) rows)))
+         (cond
+           ((eq (repo-tooling-verdict-ok-state entry-verdict) (quote yes))
+            (identity-relation same)
+            (repo-tooling-extra-entrypoints-verdict rows (cdr paths)))
+           ((eq (repo-tooling-verdict-ok-state entry-verdict) (quote no))
+            (identity-relation same)
+            entry-verdict)))))))
+
 (def repo-tooling-duplicate-path-verdict
   (lambda (rows)
     (cond
@@ -283,6 +350,9 @@
            ((equal? path observed-path) (structural-relation distinct)
             (repo-tooling-observed-path-state path (cdr observed)))))))))
 
+; Stale-path coverage is scoped to immediate scripts/* entries.
+; Non-script rows are still subject to required-field/enum/duplicate validation
+; but are checked for physical presence by their explicit non-script witnesses.
 (def repo-tooling-stale-path-verdict
   (lambda (rows observed)
     (cond
@@ -291,15 +361,19 @@
        (repo-tooling-violation (quote malformed-inventory-list) rows))
       ((atom rows) (structural-kind pair)
        (let* ((row (car rows))
-              (path (repo-tooling-field (quote path) row))
-              (state (repo-tooling-observed-path-state path observed)))
+              (path (repo-tooling-field (quote path) row)))
          (cond
-           ((eq state (quote present)) (identity-relation same)
-            (repo-tooling-stale-path-verdict (cdr rows) observed))
-           ((eq state (quote absent)) (identity-relation same)
-            (repo-tooling-violation (quote stale-path) path))
-           ((eq state (quote malformed)) (identity-relation same)
-            (repo-tooling-violation (quote malformed-observed-list) observed))))))))
+           ((string-prefix? "scripts/" path) (structural-relation same)
+            (let ((state (repo-tooling-observed-path-state path observed)))
+              (cond
+                ((eq state (quote present)) (identity-relation same)
+                 (repo-tooling-stale-path-verdict (cdr rows) observed))
+                ((eq state (quote absent)) (identity-relation same)
+                 (repo-tooling-violation (quote stale-path) path))
+                ((eq state (quote malformed)) (identity-relation same)
+                 (repo-tooling-violation (quote malformed-observed-list) observed))))
+           ((string-prefix? "scripts/" path) (structural-relation distinct)
+            (repo-tooling-stale-path-verdict (cdr rows) observed)))))))
 
 (def repo-tooling-observed-coverage-verdict
   (lambda (rows observed)
@@ -554,8 +628,69 @@
 (def repo-tooling-live-observed
   (repo-tooling-observed-scripts (read-dir "scripts")))
 
+(def repo-tooling-live-scripts-verdict
+  ; Historical name retained for compatibility with the existing live witness;
+  ; the verdict now validates all registered rows while stale-path coverage
+  ; itself remains scoped to scripts/* above.
+  (repo-tooling-verdict
+    repo-tooling-live-rows
+    repo-tooling-live-observed))
+
+(def repo-tooling-assert-scripts-stage
+  (lambda (actual)
+    (cond
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation same)
+       (list (quote repo-tooling-scripts-stage-ok)))
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation distinct)
+       (car (quote ()))))))
+
+(def repo-tooling-assert-xtask-stage
+  (lambda (actual)
+    (cond
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation same)
+       (list (quote repo-tooling-xtask-stage-ok)))
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation distinct)
+       (car (quote ()))))))
+
+(def repo-tooling-assert-precommit-stage
+  (lambda (actual)
+    (cond
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation same)
+       (list (quote repo-tooling-precommit-stage-ok)))
+      ((equal? actual (quote (repo-tooling-ok)))
+       (structural-relation distinct)
+       (car (quote ()))))))
+
+(repo-tooling-assert-scripts-stage
+  repo-tooling-live-scripts-verdict)
+
+(repo-tooling-assert-xtask-stage
+  (repo-tooling-extra-entrypoint-verdict
+    "crates/xtask/src/main.rs"
+    repo-tooling-live-rows))
+
+(repo-tooling-assert-precommit-stage
+  (repo-tooling-extra-entrypoint-verdict
+    "githooks/pre-commit"
+    repo-tooling-live-rows))
+
 (def repo-tooling-live-verdict
-  (repo-tooling-verdict repo-tooling-live-rows repo-tooling-live-observed))
+  (cond
+    ((eq (repo-tooling-verdict-ok-state repo-tooling-live-scripts-verdict)
+         (quote yes))
+     (identity-relation same)
+     (repo-tooling-extra-entrypoints-verdict
+       repo-tooling-live-rows
+       repo-tooling-extra-entrypoints))
+    ((eq (repo-tooling-verdict-ok-state repo-tooling-live-scripts-verdict)
+         (quote no))
+     (identity-relation same)
+     repo-tooling-live-scripts-verdict)))
 
 (print repo-tooling-live-verdict)
 
