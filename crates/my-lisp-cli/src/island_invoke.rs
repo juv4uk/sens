@@ -259,3 +259,58 @@ fn evaluate_raw_invoke(
 pub fn install() {
     register_sens_capability(RAW_INVOKE_SENS, evaluate_raw_invoke);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn datalog_adapter_preserves_native_closure_observation() {
+        let bytes = invoke_datalog("path").expect("bounded Datalog adapter");
+        let text = String::from_utf8(bytes).expect("Datalog witness is UTF-8");
+        assert!(text.contains("path(1,4)"), "{text}");
+    }
+
+    #[test]
+    fn common_lisp_adapter_reaches_real_runtime_when_available() {
+        if CommonLispKernel::default().version().is_err() {
+            eprintln!("SKIP: Common Lisp runtime unavailable");
+            return;
+        }
+        let bytes = invoke_common_lisp("(+ 2 3)").expect("real Common Lisp adapter");
+        assert_eq!(String::from_utf8_lossy(&bytes).trim(), "5");
+    }
+
+    #[test]
+    fn prolog_adapter_preserves_producer_order_when_available() {
+        if PrologKernel::default().version().is_err() {
+            eprintln!("SKIP: SWI-Prolog unavailable");
+            return;
+        }
+        let bytes = invoke_prolog("ancestor(alice, X)").expect("real Prolog adapter");
+        assert_eq!(String::from_utf8_lossy(&bytes).trim(), "[bob,carol,dave]");
+    }
+
+    #[test]
+    fn clips_adapter_reaches_real_runtime_when_available() {
+        if ClipsKernel::discover().is_err() {
+            eprintln!("SKIP: CLIPS runtime unavailable");
+            return;
+        }
+        let bytes = invoke_clips("run").expect("real CLIPS adapter");
+        assert_eq!(String::from_utf8_lossy(&bytes), "fired=1\n");
+    }
+
+    #[test]
+    fn bounded_payloads_fail_closed() {
+        assert!(invoke_datalog("not-path").is_err());
+        assert!(invoke_clips("not-run").is_err());
+    }
+
+    #[test]
+    fn raw_invoke_function_is_exact_sens_10101000() {
+        assert_eq!(RAW_INVOKE_SENS, sens!(10101000));
+        assert_eq!(RAW_INVOKE_SENS.to_string(), "10101000");
+        assert_eq!(RAW_INVOKE_TRANSPORT_BYTE, 0b1010_1000);
+    }
+}
