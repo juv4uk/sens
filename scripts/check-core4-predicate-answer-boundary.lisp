@@ -14,7 +14,7 @@
 (def pab-yes (third pab-sections))
 (def pab-undirected (fourth pab-sections))
 (def pab-function-convergence (fifth pab-sections))
-(def pab-laws (sixth pab-sections))
+(def pab-laws (nth 5 pab-sections))
 
 (def pab-observed
   (list
