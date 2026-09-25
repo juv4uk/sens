@@ -106,3 +106,5 @@
 (authority "crates/my-lisp/tests/canon_adversarial.rs" observer)
 (authority "crates/my-lisp/tests/semantic_form_identity.rs" observer)
 (authority "crates/my-lisp/tests/ukr_acceptance.rs" observer)
+
+(authority "crates/my-lisp/tests/core_profile_runtime_1272.rs" observer)
