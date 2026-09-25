@@ -34,9 +34,9 @@
 (def semantic-registry-row-namespaces
   (lambda (surfaces)
     (cond
-      ((atom surfaces) (structural-kind empty-list)
+      ((atom? surfaces) (structural-kind empty-list)
        (quote ()))
-      ((atom surfaces) (structural-kind pair)
+      ((atom? surfaces) (structural-kind pair)
        (cons
          (car (car surfaces))
          (semantic-registry-row-namespaces
@@ -58,13 +58,13 @@
 (def semantic-registry-find-surface
   (lambda (namespace surfaces)
     (cond
-      ((atom surfaces) (structural-kind empty-list)
+      ((atom? surfaces) (structural-kind empty-list)
        (quote ()))
-      ((atom surfaces) (structural-kind pair)
+      ((atom? surfaces) (structural-kind pair)
        (cond
-         ((eq namespace (car (car surfaces))) (identity-relation same)
+         ((eq? namespace (car (car surfaces))) (identity-relation same)
           (car surfaces))
-         ((eq namespace (car (car surfaces))) (identity-relation distinct)
+         ((eq? namespace (car (car surfaces))) (identity-relation distinct)
           (semantic-registry-find-surface namespace (cdr surfaces))))))))
 
 (def semantic-registry-surface-name
@@ -74,17 +74,17 @@
               namespace
               (semantic-registry-row-surfaces row))))
       (cond
-        ((atom entry) (structural-kind empty-list)
+        ((atom? entry) (structural-kind empty-list)
          (quote ()))
-        ((atom entry) (structural-kind pair)
+        ((atom? entry) (structural-kind pair)
          (second entry))))))
 
 (def semantic-registry-find-row
   (lambda (identity rows)
     (cond
-      ((atom rows) (structural-kind empty-list)
+      ((atom? rows) (structural-kind empty-list)
        (quote ()))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (cond
          ((equal? identity (semantic-registry-row-id (car rows)))
           (structural-relation same)
@@ -96,9 +96,9 @@
 (def semantic-registry-find-id-in-namespaces
   (lambda (name row namespaces)
     (cond
-      ((atom namespaces) (structural-kind empty-list)
+      ((atom? namespaces) (structural-kind empty-list)
        (quote ()))
-      ((atom namespaces) (structural-kind pair)
+      ((atom? namespaces) (structural-kind pair)
        (let ((candidate
                (semantic-registry-surface-name
                  (car namespaces)
@@ -115,20 +115,20 @@
 (def semantic-registry-id-for-surface
   (lambda (name rows)
     (cond
-      ((atom rows) (structural-kind empty-list)
+      ((atom? rows) (structural-kind empty-list)
        (quote ()))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (let ((identity
                (semantic-registry-find-id-in-namespaces
                  name
                  (car rows)
                  (quote (en ук укр sa sym)))))
          (cond
-           ((atom identity) (structural-kind empty-list)
+           ((atom? identity) (structural-kind empty-list)
             (semantic-registry-id-for-surface name (cdr rows)))
-           ((atom identity) (structural-kind atom)
+           ((atom? identity) (structural-kind atom)
             identity)
-           ((atom identity) (structural-kind pair)
+           ((atom? identity) (structural-kind pair)
             (semantic-registry-id-for-surface name (cdr rows)))))))))
 
 (def semantic-registry-round-trip

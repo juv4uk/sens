@@ -22,7 +22,7 @@ fn listener_handles_expose_only_class_and_identity() {
     let source = r#"
         (def a (tcp-listen-on "127.0.0.1" 0))
         (def b (tcp-listen-on "127.0.0.1" 0))
-        (list (eq a a) (eq a b) a b)
+        (list (eq? a a) (eq? a b) a b)
     "#;
 
     let value = eval_program(source, &mut tcp_session())
@@ -48,7 +48,7 @@ fn connection_handle_keeps_identity_and_display_across_close() {
     let source = format!(
         r#"
         (def c (tcp-connect "127.0.0.1" {port}))
-        (def same (eq c c))
+        (def same (eq? c c))
         (tcp-close c)
         (list same c)
         "#

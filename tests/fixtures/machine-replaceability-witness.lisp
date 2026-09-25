@@ -13,8 +13,8 @@
        5)
      (eq-cond
        (cond
-         ((eq 2 2) (identity-relation same) 111)
-         ((eq 2 2) (identity-relation distinct) 222))
+         ((eq? 2 2) (identity-relation same) 111)
+         ((eq? 2 2) (identity-relation distinct) 222))
        111)
      (car-cons
        (car (cons 2 3))
@@ -23,14 +23,14 @@
 (def machine-replaceability-run
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list)
+      ((atom? rows) (structural-kind empty-list)
        (quote (machine-replaceability-witness (status pass))))
-      ((atom rows) (structural-kind atom)
+      ((atom? rows) (structural-kind atom)
        (list
          (quote machine-replaceability-witness)
          (quote (status fail))
          (list (quote case) (quote malformed-row-tail))))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (let* ((row (car rows))
               (name (car row))
               (actual (eval (second row)))

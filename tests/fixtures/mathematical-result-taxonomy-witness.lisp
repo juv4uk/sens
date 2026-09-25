@@ -6,13 +6,13 @@
   (lambda (entry field)
     (let ((found (assoc field entry)))
       (cond
-        ((atom found) (quote ()))
+        ((atom? found) (quote ()))
         (t (cdr found))))))
 
 (def mrt-find
   (lambda (identity entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       ((equal? (mrt-field (car entries) (quote identity)) identity)
        (car entries))
       (t (mrt-find identity (cdr entries))))))
@@ -25,7 +25,7 @@
   (lambda (identity field expected)
     (let ((entry (mrt-entry identity)))
       (cond
-        ((atom entry) (list (quote missing-entry) identity))
+        ((atom? entry) (list (quote missing-entry) identity))
         ((equal? (mrt-field entry field) expected) (quote ()))
         (t
          (list
@@ -38,8 +38,8 @@
 (def mrt-first-failure
   (lambda (checks)
     (cond
-      ((atom checks) (quote ()))
-      ((atom (car checks)) (mrt-first-failure (cdr checks)))
+      ((atom? checks) (quote ()))
+      ((atom? (car checks)) (mrt-first-failure (cdr checks)))
       (t (car checks)))))
 
 (def mathematical-result-taxonomy-witness
@@ -108,12 +108,12 @@
                             (quote many-valued-status)
                             (quote forbidden))))))
       (cond
-        ((not (eq (car mathematical-result-taxonomy-document)
+        ((not? (eq? (car mathematical-result-taxonomy-document)
                   (quote mathematical-result-taxonomy/1)))
          (list (quote mathematical-result-taxonomy-witness)
                (list (quote status) (quote fail))
                (list (quote detail) (quote schema))))
-        ((atom failure)
+        ((atom? failure)
          (list (quote mathematical-result-taxonomy-witness)
                (list (quote status) (quote pass))
                (list (quote detail) (quote standard-math-classification))))

@@ -8,14 +8,14 @@
 (def early-sid-lowering-backend-request?
   (lambda (request)
     (cond
-      ((atom request)
+      ((atom? request)
        (structural-kind empty-list)
        (quote no))
-      ((atom request)
+      ((atom? request)
        (structural-kind pair)
        (let ((first-field (car request)))
          (cond
-           ((atom first-field)
+           ((atom? first-field)
             (structural-kind pair)
             (cond
               ((equal? (car first-field) (quote sid))
@@ -24,10 +24,10 @@
               ((equal? (car first-field) (quote sid))
                (structural-relation distinct)
                (quote no))))
-           ((atom first-field)
+           ((atom? first-field)
             (structural-kind atom)
             (quote no))
-           ((atom first-field)
+           ((atom? first-field)
             (structural-kind empty-list)
             (quote no))))))))
 
@@ -35,10 +35,10 @@
   (lambda (registry surface arguments contract)
     (let ((sid (semantic-registry-id-in registry surface)))
       (cond
-        ((atom sid)
+        ((atom? sid)
          (structural-kind empty-list)
          (quote rejected))
-        ((atom sid)
+        ((atom? sid)
          (structural-kind atom)
          (list
            (cons (quote sid) sid)

@@ -40,8 +40,8 @@ const SCRIPTED_COMPLETE: &str = r#"
 (def script-nth
   (lambda (i script)
     (cond
-      ((eq i 0) (car script))
-      ((atom (cdr script)) (car script))
+      ((eq? i 0) (car script))
+      ((atom? (cdr script)) (car script))
       (t (script-nth (- i 1) (cdr script))))))
 (def make-scripted-complete
   (lambda (script)
@@ -68,7 +68,7 @@ const FIRST_TOOL_RESULT: &str = r#"
 (def first-tool-result
   (lambda (messages)
     (cond
-      ((atom messages) "")
+      ((atom? messages) "")
       ((equal? (msg-role (car messages)) "tool") (msg-content (car messages)))
       (t (first-tool-result (cdr messages))))))
 "#;
@@ -230,7 +230,7 @@ fn tool_result_correlated_by_tool_call_id() {
         (def correlated?
           (lambda (messages)
             (cond
-              ((atom messages) ())
+              ((atom? messages) ())
               ((equal? (msg-role (car messages)) "tool")
                (equal? (msg-tool-call-id (car messages)) "call_pwd_42"))
               (t (correlated? (cdr messages))))))

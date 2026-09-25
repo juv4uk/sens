@@ -29,7 +29,7 @@ fn bounded_eq_cond_native_execution_matches_lisp_reference_in_both_directions() 
     let mut references = Vec::new();
 
     for (left, right) in [(2_u64, 2_u64), (2_u64, 3_u64)] {
-        let reference_source = format!("(cond ((eq {left} {right}) 111) (t 222))");
+        let reference_source = format!("(cond ((eq? {left} {right}) 111) (t 222))");
         let reference = eval_program(&reference_source, &mut session)
             .expect("Lisp COND reference must evaluate")
             .value;

@@ -202,7 +202,7 @@ fn framed_exchange_returns_conflict_and_does_not_install_the_new_fact() {
         load_knowledge(&mut session);
         let source = format!(
             r#"
-            (defmodule exchange (quote (((not (planet pluto))))))
+            (defmodule exchange (quote (((not? (planet pluto))))))
             (def listener (tcp-listen {port}))
             (def connection (tcp-accept listener))
             (def decision (accept-knowledge-exchange connection))

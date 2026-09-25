@@ -16,39 +16,39 @@
 (def kab-find
   (lambda (name rows)
     (cond
-      ((atom rows)
+      ((atom? rows)
        (structural-kind empty-list)
        (quote ()))
-      ((atom rows)
+      ((atom? rows)
        (structural-kind pair)
        (cond
-         ((eq (car (car rows)) name)
+         ((eq? (car (car rows)) name)
           (identity-relation same)
           (car rows))
-         ((eq (car (car rows)) name)
+         ((eq? (car (car rows)) name)
           (identity-relation distinct)
           (kab-find name (cdr rows))))))))
 
 (def kab-find-kernel
   (lambda (kernel-name rows)
     (cond
-      ((atom rows)
+      ((atom? rows)
        (structural-kind empty-list)
        (quote ()))
-      ((atom rows)
+      ((atom? rows)
        (structural-kind pair)
        (let ((row (car rows)))
          (cond
-           ((eq (car row) (quote kernel))
+           ((eq? (car row) (quote kernel))
             (identity-relation same)
             (cond
-              ((eq (second row) kernel-name)
+              ((eq? (second row) kernel-name)
                (identity-relation same)
                row)
-              ((eq (second row) kernel-name)
+              ((eq? (second row) kernel-name)
                (identity-relation distinct)
                (kab-find-kernel kernel-name (cdr rows)))))
-           ((eq (car row) (quote kernel))
+           ((eq? (car row) (quote kernel))
             (identity-relation distinct)
             (kab-find-kernel kernel-name (cdr rows)))))))))
 
@@ -77,16 +77,16 @@
 (def kab-first-failure
   (lambda (checks)
     (cond
-      ((atom checks)
+      ((atom? checks)
        (structural-kind empty-list)
        (quote ()))
-      ((atom (car checks))
+      ((atom? (car checks))
        (structural-kind empty-list)
        (kab-first-failure (cdr checks)))
-      ((atom (car checks))
+      ((atom? (car checks))
        (structural-kind pair)
        (car checks))
-      ((atom (car checks))
+      ((atom? (car checks))
        (structural-kind atom)
        (car checks)))))
 
@@ -171,19 +171,19 @@
                       "crates/wsm-datalog-kernel/src/lib.rs"
                       "crates/wsm-datalog-kernel/Cargo.toml")))))))
       (cond
-        ((atom failure)
+        ((atom? failure)
          (structural-kind empty-list)
          (quote
            (kernel-abi-transport-boundary-ok
              (kernels 4)
              (language-type Sid8)
              (abi-wrapper SemanticId))))
-        ((atom failure)
+        ((atom? failure)
          (structural-kind pair)
          (list
            (quote kernel-abi-transport-boundary-violation)
            failure))
-        ((atom failure)
+        ((atom? failure)
          (structural-kind atom)
          (list
            (quote kernel-abi-transport-boundary-violation)

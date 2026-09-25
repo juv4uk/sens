@@ -13,7 +13,7 @@
 (def reviewed-digest?
   (lambda (path digest rows)
     (cond
-      ((atom rows) (structural-kind empty-list) ())
+      ((atom? rows) (structural-kind empty-list) ())
       ((exact-text? path (second (car rows))) t
        (cond
          ((exact-text? digest (third (car rows))) t t)
@@ -27,7 +27,7 @@
 (def contains-any?
   (lambda (source needles)
     (cond
-      ((atom needles) (structural-kind empty-list) ())
+      ((atom? needles) (structural-kind empty-list) ())
       ((string-contains? (car needles) source) t)
       (t (contains-any? source (cdr needles))))))
 
@@ -59,12 +59,12 @@
       ((string-prefix? "tests/fixtures/semantic-authority-guard/" path)
        (quote allowed-adversarial-fixture))
       ((generated-projection? source) (quote allowed-generated-projection))
-      ((not (active-host-source? path)) (quote not-active-host-source))
+      ((not? (active-host-source? path)) (quote not-active-host-source))
       ; #1091: every forbidden authority shape below needs at least one
       ; semantic-identity marker. Large ordinary host files without one can
       ; be accepted now instead of rescanning their complete source for every
       ; later authority category. This is performance-only.
-      ((not
+      ((not?
          (contains-any?
            source
            (quote ("SemanticId" "semantic_id" "CanonicalIdentity"))))
@@ -97,7 +97,7 @@
 (def scan
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list) (quote (semantic-authority-ok)))
+      ((atom? rows) (structural-kind empty-list) (quote (semantic-authority-ok)))
       (t
        (let* ((row (car rows))
               (path (second row))
@@ -113,7 +113,7 @@
             (let ((raw-source (read-file path)))
               (cond
                 ((and (active-host-source? path)
-                      (not (string? raw-source)))
+                      (not? (string? raw-source)))
                  (list (quote semantic-authority-violation)
                        path
                        (quote unreadable-active-host-source)
@@ -127,13 +127,13 @@
                      (t
                       (let ((class (violation-class path source)))
                    (cond
-                     ((eq class (quote allowed)) (identity-relation same)
+                     ((eq? class (quote allowed)) (identity-relation same)
                       (scan (cdr rows)))
-                     ((eq class (quote not-active-host-source)) (identity-relation same)
+                     ((eq? class (quote not-active-host-source)) (identity-relation same)
                       (scan (cdr rows)))
-                     ((eq class (quote allowed-generated-projection)) (identity-relation same)
+                     ((eq? class (quote allowed-generated-projection)) (identity-relation same)
                       (scan (cdr rows)))
-                     ((eq class (quote allowed-adversarial-fixture)) (identity-relation same)
+                     ((eq? class (quote allowed-adversarial-fixture)) (identity-relation same)
                       (scan (cdr rows)))
                      (t
                       (list (quote semantic-authority-violation)

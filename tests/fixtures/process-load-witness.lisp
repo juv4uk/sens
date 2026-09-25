@@ -6,10 +6,10 @@
 (def process-load-witness
   (lambda ()
     (cond
-      ((eq process-run запустити-процес)
+      ((eq? process-run запустити-процес)
        (identity-relation same)
        (quote (process-load-witness (status pass))))
-      ((eq process-run запустити-процес)
+      ((eq? process-run запустити-процес)
        (identity-relation distinct)
        (quote (process-load-witness (status fail)))))))
 

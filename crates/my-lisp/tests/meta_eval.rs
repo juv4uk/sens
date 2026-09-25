@@ -183,7 +183,7 @@ fn loads_a_real_verbatim_slice_of_lib_core_my_and_runs_it_through_my_eval() {
         eval_meta_program(core_slice, "(third (quote (a b c)))"),
         "c"
     );
-    assert_eq!(eval_meta_program(core_slice, "(not (quote ()))"), "t");
+    assert_eq!(eval_meta_program(core_slice, "(not? (quote ()))"), "t");
     assert_eq!(
         eval_meta_program(core_slice, "(identity (quote radio))"),
         "radio"
@@ -194,7 +194,7 @@ fn loads_a_real_verbatim_slice_of_lib_core_my_and_runs_it_through_my_eval() {
 fn self_recursive_top_level_def_sees_its_own_binding() {
     assert_eq!(
         eval_meta_program(
-            "(def count-down (lambda (n) (cond ((eq n 0) (quote done)) (t (count-down (- n 1))))))",
+            "(def count-down (lambda (n) (cond ((eq? n 0) (quote done)) (t (count-down (- n 1))))))",
             "(count-down 20)"
         ),
         "done"
@@ -203,7 +203,7 @@ fn self_recursive_top_level_def_sees_its_own_binding() {
 
 #[test]
 fn recursive_factorial_matches_native_language_meaning() {
-    let program = "(def fact (lambda (n) (cond ((eq n 0) 1) (t (* n (fact (- n 1)))))))";
+    let program = "(def fact (lambda (n) (cond ((eq? n 0) 1) (t (* n (fact (- n 1)))))))";
     let via_meta = eval_meta_program(program, "(fact 6)");
 
     let mut native = Session::default();

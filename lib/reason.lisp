@@ -21,10 +21,10 @@
 (def reason-index?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((atom (car value))
+      ((atom? value) (quote ()))
+      ((atom? (car value))
        (cond
-         ((eq (car value) *reason-index-schema*) t)
+         ((eq? (car value) *reason-index-schema*) t)
          (t (quote ()))))
       (t (quote ())))))
 
@@ -38,9 +38,9 @@
 (def reason-term-predicate
   (lambda (term)
     (cond
-      ((atom term) (quote ()))
+      ((atom? term) (quote ()))
       ((var? term) (quote ()))
-      ((atom (car term))
+      ((atom? (car term))
        (cond
          ((symbol? (car term)) (car term))
          (t (quote ()))))
@@ -49,7 +49,7 @@
 (def reason-rule-predicate
   (lambda (rule)
     (cond
-      ((atom rule) (quote ()))
+      ((atom? rule) (quote ()))
       (t (reason-term-predicate (car rule))))))
 
 ; Buckets are accumulated with each bucket's rules reversed. Predicate count
@@ -58,8 +58,8 @@
 (def reason-index-add-reversed
   (lambda (predicate rule buckets)
     (cond
-      ((atom buckets) (list (list predicate rule)))
-      ((eq predicate (car (car buckets)))
+      ((atom? buckets) (list (list predicate rule)))
+      ((eq? predicate (car (car buckets)))
        (cons
          (cons predicate (cons rule (cdr (car buckets))))
          (cdr buckets)))
@@ -71,7 +71,7 @@
 (def reason-index-normalize-buckets
   (lambda (buckets)
     (cond
-      ((atom buckets) (quote ()))
+      ((atom? buckets) (quote ()))
       (t
        (cons
          (cons (car (car buckets)) (reverse (cdr (car buckets))))
@@ -80,7 +80,7 @@
 (def reason-index-build-scan
   (lambda (remaining original buckets predicate-count)
     (cond
-      ((atom remaining)
+      ((atom? remaining)
        (list
          *reason-index-schema*
          (quote indexed)
@@ -91,11 +91,11 @@
          (cond
            ; One non-indexable head is enough to require the exact historical
            ; scan, because that head may unify with predicates outside a bucket.
-           ((eq predicate (quote ())) (reason-index-linear original))
+           ((eq? predicate (quote ())) (reason-index-linear original))
            (t
             (let ((entry (assoc predicate buckets)))
               (cond
-                ((atom entry)
+                ((atom? entry)
                  (cond
                    ((< predicate-count *reason-index-max-predicates*) 1
                     (reason-index-build-scan
@@ -131,16 +131,16 @@
   (lambda (goal rules-or-index)
     (let ((index (reason-ensure-index rules-or-index)))
       (cond
-        ((eq (reason-index-mode index) (quote linear))
+        ((eq? (reason-index-mode index) (quote linear))
          (reason-index-rules index))
         (t
          (let ((predicate (reason-term-predicate goal)))
            (cond
-             ((eq predicate (quote ())) (reason-index-rules index))
+             ((eq? predicate (quote ())) (reason-index-rules index))
              (t
               (let ((entry (assoc predicate (reason-index-buckets index))))
                 (cond
-                  ((atom entry) (quote ()))
+                  ((atom? entry) (quote ()))
                   (t (cdr entry))))))))))))
 
 ; Public `reason` accepts either the historical rule list or an already-built
@@ -164,7 +164,7 @@
 (def prove-goal-accumulate
   (lambda (results acc)
     (cond
-      ((atom results) acc)
+      ((atom? results) acc)
       (t (prove-goal-accumulate
            (cdr results)
            (cons (car results) acc))))))
@@ -185,7 +185,7 @@
 (def prove-goal-scan
   (lambda (goal rules subst all-rules depth acc)
     (cond
-      ((atom rules) (reverse acc))
+      ((atom? rules) (reverse acc))
       (t
        (let ((rule-results
                (prove-rule goal (car rules) subst all-rules depth)))
@@ -201,7 +201,7 @@
 (def rename-vars
   (lambda (term depth)
     (cond
-      ((atom term) term)
+      ((atom? term) term)
       ((var? term) (list (quote var) (cons (second term) depth)))
       (t (cons (rename-vars (car term) depth)
                (rename-vars (cdr term) depth))))))
@@ -209,7 +209,7 @@
 (def map-proofs
   (lambda (f lst)
     (cond
-      ((atom lst) (quote ()))
+      ((atom? lst) (quote ()))
       (t (cons (f (car lst)) (map-proofs f (cdr lst)))))))
 
 ; Try one rule, then wrap every successful body result in its proof node.
@@ -268,7 +268,7 @@
 (def map-goal-results
   (lambda (results proofs)
     (cond
-      ((atom results) (quote ()))
+      ((atom? results) (quote ()))
       (t
        (cons
          (list
@@ -283,14 +283,14 @@
 (def explain-proof-node
   (lambda (node level)
     (cond
-      ((eq (car node) (quote proved))
+      ((eq? (car node) (quote proved))
        (let* ((_2 (print (quote Proved:)))
               (_3 (print (second node)))
               (_4 (print (quote using)))
               (_5 (print (quote rule:)))
               (_6 (print (third node))))
          (explain-proof-list (cadddr node) (+ level 1))))
-      ((eq (car node) (quote proved-not))
+      ((eq? (car node) (quote proved-not))
        (let* ((_2 (print (quote Proved)))
               (_3 (print (quote by)))
               (_4 (print (quote failure:)))
@@ -302,7 +302,7 @@
 (def explain-proof-list
   (lambda (nodes level)
     (cond
-      ((atom nodes) (quote ()))
+      ((atom? nodes) (quote ()))
       (t
        (let* ((_1 (print-indent level))
               (_2 (print (quote |-)))
@@ -312,7 +312,7 @@
 (def print-indent
   (lambda (level)
     (cond
-      ((eq level 0) (quote ()))
+      ((eq? level 0) (quote ()))
       (t
        (let ((_ (print (quote ..))))
          (print-indent (- level 1)))))))
@@ -323,7 +323,7 @@
   (lambda (goal rules)
     (let ((results (reason goal rules)))
       (cond
-        ((atom results)
+        ((atom? results)
          (let* ((_1 (print (quote Cannot)))
                 (_2 (print (quote prove:)))
                 (_3 (print goal)))
@@ -333,7 +333,7 @@
 (def add-usage
   (lambda (entry alist)
     (cond
-      ((atom alist) (list entry))
+      ((atom? alist) (list entry))
       ((equal? (car (car alist)) (car entry))
        (cons
          (cons
@@ -345,13 +345,13 @@
 (def merge-usage
   (lambda (a b)
     (cond
-      ((atom a) b)
+      ((atom? a) b)
       (t (merge-usage (cdr a) (add-usage (car a) b))))))
 
 (def count-usage
   (lambda (node)
     (cond
-      ((eq (car node) (quote proved))
+      ((eq? (car node) (quote proved))
        (add-usage
          (cons (third node) 1)
          (count-usage-list (cadddr node))))
@@ -360,7 +360,7 @@
 (def count-usage-list
   (lambda (nodes)
     (cond
-      ((atom nodes) (quote ()))
+      ((atom? nodes) (quote ()))
       (t
        (merge-usage
          (count-usage (car nodes))
@@ -369,13 +369,13 @@
 (def source-of
   (lambda (node)
     (cond
-      ((atom (cadddr node)) (quote fact))
+      ((atom? (cadddr node)) (quote fact))
       (t (quote rule)))))
 
 (def provenance
   (lambda (node)
     (cond
-      ((eq (car node) (quote proved))
+      ((eq? (car node) (quote proved))
        (list
          (quote statement)
          (second node)
@@ -393,7 +393,7 @@
 (def provenance-list
   (lambda (nodes)
     (cond
-      ((atom nodes) (quote ()))
+      ((atom? nodes) (quote ()))
       (t
        (cons
          (provenance (car nodes))

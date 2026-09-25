@@ -47,7 +47,7 @@ fn core_lib_list_utilities_stay_stack_safe_on_a_long_list() {
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     let source = r#"
-        (def build (lambda (n acc) (cond ((eq n 0) acc) (t (build (- n 1) (cons n acc))))))
+        (def build (lambda (n acc) (cond ((eq? n 0) acc) (t (build (- n 1) (cons n acc))))))
         (def big (build 100000 (quote ())))
         (length (map (lambda (x) (+ x 1)) (filter (lambda (x) (> x 50000)) (append big (quote ())))))
     "#;
@@ -78,17 +78,17 @@ fn symbol_table_sort_stays_stack_safe() {
           (lambda (expr acc)
             (cond
               ((symbol? expr) (cond ((member? expr acc) acc) (t (cons expr acc))))
-              ((atom expr) acc)
+              ((atom? expr) acc)
               (t (collect-symbols-onto (cdr expr) (collect-symbols-onto (car expr) acc))))))
         (def collect-all-symbols
           (lambda (forms acc)
             (cond
-              ((atom forms) acc)
+              ((atom? forms) acc)
               (t (collect-all-symbols (cdr forms) (collect-symbols-onto (car forms) acc))))))
         (def insert-sorted-onto
           (lambda (sym before after)
             (cond
-              ((atom after) (reverse-onto before (list sym)))
+              ((atom? after) (reverse-onto before (list sym)))
               ((string<? (symbol->string sym) (symbol->string (car after)))
                (reverse-onto before (cons sym after)))
               (t (insert-sorted-onto sym (cons (car after) before) (cdr after))))))
@@ -96,7 +96,7 @@ fn symbol_table_sort_stays_stack_safe() {
         (def sort-symbols-onto
           (lambda (remaining sorted)
             (cond
-              ((atom remaining) sorted)
+              ((atom? remaining) sorted)
               (t (sort-symbols-onto (cdr remaining) (insert-sorted (car remaining) sorted))))))
         (def sort-symbols (lambda (symbols) (sort-symbols-onto symbols (quote ()))))
     "#;

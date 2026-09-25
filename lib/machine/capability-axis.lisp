@@ -62,7 +62,7 @@
 (def machine-capability-find-row
   (lambda (key rows)
     (cond
-      ((atom rows) ())
+      ((atom? rows) ())
       ((equal? key (car (car rows))) (car rows))
       (t (machine-capability-find-row key (cdr rows))))))
 
@@ -70,12 +70,12 @@
   (lambda (sid)
     (let ((row (machine-capability-find-row sid machine-capability-axis-v1)))
       (cond
-        ((atom row) ())
+        ((atom? row) ())
         (t (car (cdr row)))))))
 
 (def machine-target-witness-status
   (lambda (target)
     (let ((row (machine-capability-find-row target machine-target-witness-status-v1)))
       (cond
-        ((atom row) (quote absent))
+        ((atom? row) (quote absent))
         (t (car (cdr row)))))))

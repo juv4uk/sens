@@ -50,5 +50,5 @@
         my-postcore-build-definitions my-postcore-materialize-stable-peers))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
   (public-predicates
-    (atom eq < = > numeric-buffer? string<? string? not equal? member?
+    (atom? eq < = > numeric-buffer? string<? string? not equal? member?
      string-empty? string-prefix? string-contains? symbol? <= >=)))

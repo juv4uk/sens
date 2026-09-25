@@ -73,12 +73,12 @@ fn historical_core1_eq_is_completely_unchanged() {
     load_core_library(&mut session).unwrap();
     // No eq? definition loaded here at all — proves `eq` itself needs no
     // change to support #1258.
-    let result = eval_program("(eq (quote a) (quote a))", &mut session)
+    let result = eval_program("(eq? (quote a) (quote a))", &mut session)
         .unwrap()
         .value
         .to_string();
     assert_eq!(result, "(identity-relation same)");
-    let result = eval_program("(eq (quote a) (quote b))", &mut session)
+    let result = eval_program("(eq? (quote a) (quote b))", &mut session)
         .unwrap()
         .value
         .to_string();

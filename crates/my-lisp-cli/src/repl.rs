@@ -390,7 +390,7 @@ mod tests {
 
         state.switch_surface(ReplSurface::Core).expect("core");
         assert!(state.session.environment.get("атом?").is_none());
-        assert_eq!(value(&mut state, "(atom 'мама)"), "t");
+        assert_eq!(value(&mut state, "(atom? 'мама)"), "t");
         // Canon is not a UI layer: registered spellings still denote Canon
         // even when no human surface frame is loaded.
         assert_eq!(value(&mut state, "(атом? 'мама)"), "t");

@@ -79,7 +79,7 @@ runtime	00011111	en	nondecreasing-from?	Lisp-замикання	1
 runtime	00011111	укр	неспадне-починаючи-з?	Lisp-замикання	1
 runtime	00100000	en	nonincreasing-from?	Lisp-замикання	1
 runtime	00100000	укр	незростаюче-починаючи-з?	Lisp-замикання	1
-runtime	00100001	en	not	Lisp-замикання	1
+runtime	00100001	en	not?	Lisp-замикання	1
 runtime	00100001	sa	na	Lisp-замикання	1
 runtime	00100001	ук	хибне?	Lisp-замикання	1
 runtime	00100001	укр	хибне?	Lisp-замикання	1

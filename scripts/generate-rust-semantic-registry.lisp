@@ -52,10 +52,10 @@
 (def render-surfaces
   (lambda (surfaces)
     (cond
-      ((atom surfaces)
+      ((atom? surfaces)
        (structural-kind empty-list)
        "")
-      ((atom surfaces)
+      ((atom? surfaces)
        (structural-kind pair)
        (str+
          (render-surface (car surfaces))
@@ -73,10 +73,10 @@
 (def render-rows
   (lambda (remaining)
     (cond
-      ((atom remaining)
+      ((atom? remaining)
        (structural-kind empty-list)
        "")
-      ((atom remaining)
+      ((atom? remaining)
        (structural-kind pair)
        (str+
          (render-row (car remaining))
@@ -109,7 +109,7 @@
   (str+ header (render-rows rows) "];\n"))
 
 (cond
-  ((atom *argv*)
+  ((atom? *argv*)
    (structural-kind empty-list)
    (second
      (list

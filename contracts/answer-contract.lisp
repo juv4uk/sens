@@ -92,7 +92,7 @@
   ; domain, not to mathematical 0/1 and not to universal truthiness.
   ((identity . 00000011)
    (domain-owner . structural-observation)
-   (input-domain . (atom atom))
+   (input-domain . (atom? atom))
    (result-form . identity-relation)
    (result-values . ((identity-relation same)
                      (identity-relation distinct)))

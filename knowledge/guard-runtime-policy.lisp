@@ -9,18 +9,18 @@
 (def guard-evaluate
   (lambda (kind subject evidence)
     (cond
-      ((eq evidence (quote missing))
+      ((eq? evidence (quote missing))
        (guard-unknown subject (quote runtime-evidence) (quote ask-agent)))
-      ((eq kind (quote read))
+      ((eq? kind (quote read))
        (make-guard-finding
          (quote allow) (quote confirmed) subject kind (quote read-only)
          (quote ()) (quote no-state-change) (quote continue) (list evidence)))
-      ((eq kind (quote write))
+      ((eq? kind (quote write))
        (make-guard-finding
          (quote warn) (quote partial) subject kind (quote review-write-scope)
          (quote mutation-requested) (quote state-may-change)
          (quote verify-authority-and-target) (list evidence)))
-      ((eq kind (quote destructive))
+      ((eq? kind (quote destructive))
        (make-guard-finding
          (quote reject) (quote confirmed) subject kind
          (quote explicit-owner-authority-required)

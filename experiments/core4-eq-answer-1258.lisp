@@ -15,5 +15,5 @@
 (def eq?
   (lambda (a b)
     (cond
-      ((eq a b) (identity-relation same) "1")
-      ((eq a b) (identity-relation distinct) "0"))))
+      ((eq? a b) (identity-relation same) "1")
+      ((eq? a b) (identity-relation distinct) "0"))))

@@ -194,7 +194,7 @@ fn prim_00001111(
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_args("00001111", args, 2, span)?;
-    arithmetic::arithmetic_on_values("/", args, env, span)
+    arithmetic::division_on_values(args, args.len(), env, span)
 }
 
 fn prim_01001101(

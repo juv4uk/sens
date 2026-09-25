@@ -17,19 +17,19 @@
 
 ;; --- Сім примітивів Маккарті ---
 (displayln (quote constitution))              ; quote
-(displayln (atom (quote x)))                  ; atom ⇒ t
-(displayln (atom (quote (x))))                ;      ⇒ ()
-(displayln (eq (quote a) (quote a)))          ; eq   ⇒ t
-(displayln (eq (quote a) (quote b)))          ;      ⇒ ()
+(displayln (atom? (quote x)))                  ; atom ⇒ t
+(displayln (atom? (quote (x))))                ;      ⇒ ()
+(displayln (eq? (quote a) (quote a)))          ; eq   ⇒ t
+(displayln (eq? (quote a) (quote b)))          ;      ⇒ ()
 (displayln (car (quote (a b))))               ; car  ⇒ a
 (displayln (cdr (quote (a b))))               ; cdr  ⇒ (b)
 (displayln (cons (quote a) (quote (b))))      ; cons ⇒ (a b)
-(displayln (cond ((eq (quote a) (quote b)) (quote ні))
+(displayln (cond ((eq? (quote a) (quote b)) (quote ні))
              (t (quote так))))            ; cond ⇒ так
 
 ;; --- Макроси в традиційному Lisp-стилі ---
 (defmacro (when test . body)
   `(if ,test (begin ,@body)))
 
-(when (eq (quote lisp) (quote lisp))
+(when (eq? (quote lisp) (quote lisp))
   (displayln (quote my-lisp-works-on-chez-scheme-jit)))

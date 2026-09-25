@@ -20,26 +20,26 @@
 (def process-result->text
   (lambda (raw)
     (cond
-      ((eq (car raw) (quote process-result))
+      ((eq? (car raw) (quote process-result))
        (identity-relation distinct)
        (list (quote rejected) (quote invalid-process-result)))
-      ((eq (car raw) (quote process-result))
+      ((eq? (car raw) (quote process-result))
        (identity-relation same)
        (let* ((stdout-result
                 (utf8-decode-string (process-raw-stdout-bytes raw)))
               (stderr-result
                 (utf8-decode-string (process-raw-stderr-bytes raw))))
          (cond
-           ((eq (car stdout-result) (quote decoded))
+           ((eq? (car stdout-result) (quote decoded))
             (identity-relation distinct)
             (list (quote rejected) (quote stdout-invalid-utf8)))
-           ((eq (car stdout-result) (quote decoded))
+           ((eq? (car stdout-result) (quote decoded))
             (identity-relation same)
             (cond
-              ((eq (car stderr-result) (quote decoded))
+              ((eq? (car stderr-result) (quote decoded))
                (identity-relation distinct)
                (list (quote rejected) (quote stderr-invalid-utf8)))
-              ((eq (car stderr-result) (quote decoded))
+              ((eq? (car stderr-result) (quote decoded))
                (identity-relation same)
                (list
                  (quote decoded-process)
@@ -62,20 +62,20 @@
 (def process-public-exit-code
   (lambda (code)
     (cond
-      ((eq code (quote ())) (identity-relation same) -1)
-      ((eq code (quote ())) (identity-relation distinct) code))))
+      ((eq? code (quote ())) (identity-relation same) -1)
+      ((eq? code (quote ())) (identity-relation distinct) code))))
 
 (def process-run
   (lambda (program args)
     (let ((result (process-run-text program args)))
       (cond
-        ((eq (car result) (quote decoded-process))
+        ((eq? (car result) (quote decoded-process))
          (identity-relation same)
          (list
            (process-public-exit-code (second result))
            (third result)
            (car (cdr (cdr (cdr result))))))
-        ((eq (car result) (quote decoded-process))
+        ((eq? (car result) (quote decoded-process))
          (identity-relation distinct)
          result)))))
 

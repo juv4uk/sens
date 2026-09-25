@@ -180,7 +180,7 @@ fn builtin_metadata(name: &str) -> (&'static str, &'static str, Arity) {
         ),
         "=" => ("(= number ...)", "Numeric equality", Arity::AtLeast(1)),
         "atom" => (
-            "(atom value)",
+            "(atom? value)",
             "Test whether value is not a pair",
             Arity::Exact(1),
         ),
@@ -192,7 +192,7 @@ fn builtin_metadata(name: &str) -> (&'static str, &'static str, Arity) {
         "cdr" => ("(cdr pair)", "Return the tail of a pair", Arity::Exact(1)),
         "cons" => ("(cons head tail)", "Create a pair", Arity::Exact(2)),
         "eq" => (
-            "(eq left right)",
+            "(eq? left right)",
             "Test structural or identity equality",
             Arity::Exact(2),
         ),

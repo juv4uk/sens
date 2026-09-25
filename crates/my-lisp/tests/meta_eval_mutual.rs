@@ -33,12 +33,12 @@ fn consecutive_top_level_functions_can_refer_to_each_other_in_main_meta_eval() {
 (def even?
   (lambda (n)
     (cond
-      ((eq n 0) t)
+      ((eq? n 0) t)
       (t (odd? (- n 1))))))
 (def odd?
   (lambda (n)
     (cond
-      ((eq n 0) (quote ()))
+      ((eq? n 0) (quote ()))
       (t (even? (- n 1))))))
 "#;
 
@@ -70,17 +70,17 @@ fn three_member_recursive_group_is_finite_lisp_data_in_main_meta_eval() {
 (def mod0?
   (lambda (n)
     (cond
-      ((eq n 0) t)
+      ((eq? n 0) t)
       (t (mod1? (- n 1))))))
 (def mod1?
   (lambda (n)
     (cond
-      ((eq n 0) (quote ()))
+      ((eq? n 0) (quote ()))
       (t (mod2? (- n 1))))))
 (def mod2?
   (lambda (n)
     (cond
-      ((eq n 0) (quote ()))
+      ((eq? n 0) (quote ()))
       (t (mod0? (- n 1))))))
 "#;
 

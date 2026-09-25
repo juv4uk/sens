@@ -28,22 +28,22 @@
 (def native-first-coverage-all-pass-state
   (lambda (states)
     (cond
-      ((atom states) (structural-kind empty-list) (quote pass))
-      ((atom states) (structural-kind atom) (quote fail))
-      ((atom states) (structural-kind pair)
+      ((atom? states) (structural-kind empty-list) (quote pass))
+      ((atom? states) (structural-kind atom) (quote fail))
+      ((atom? states) (structural-kind pair)
        (cond
-         ((eq (car states) (quote pass)) (identity-relation same)
+         ((eq? (car states) (quote pass)) (identity-relation same)
           (native-first-coverage-all-pass-state (cdr states)))
-         ((eq (car states) (quote pass)) (identity-relation distinct)
+         ((eq? (car states) (quote pass)) (identity-relation distinct)
           (quote fail)))))))
 
 (def native-first-coverage-field
   (lambda (name row)
     (let ((found (assoc name (cdr row))))
       (cond
-        ((atom found) (structural-kind empty-list) (quote ()))
-        ((atom found) (structural-kind atom) (quote ()))
-        ((atom found) (structural-kind pair) (second found))))))
+        ((atom? found) (structural-kind empty-list) (quote ()))
+        ((atom? found) (structural-kind atom) (quote ()))
+        ((atom? found) (structural-kind pair) (second found))))))
 
 (def native-first-coverage-present-state
   (lambda (value)
@@ -60,9 +60,9 @@
 (def native-first-coverage-native-plan-state
   (lambda (plan)
     (cond
-      ((atom plan) (structural-kind empty-list) (quote fail))
-      ((atom plan) (structural-kind atom) (quote fail))
-      ((atom plan) (structural-kind pair)
+      ((atom? plan) (structural-kind empty-list) (quote fail))
+      ((atom? plan) (structural-kind atom) (quote fail))
+      ((atom? plan) (structural-kind pair)
        (native-first-coverage-check
          (car plan)
          (quote native-plan))))))
@@ -70,9 +70,9 @@
 (def native-first-coverage-parity-state
   (lambda (parity)
     (cond
-      ((atom parity) (structural-kind empty-list) (quote fail))
-      ((atom parity) (structural-kind atom) (quote fail))
-      ((atom parity) (structural-kind pair)
+      ((atom? parity) (structural-kind empty-list) (quote fail))
+      ((atom? parity) (structural-kind atom) (quote fail))
+      ((atom? parity) (structural-kind pair)
        (native-first-coverage-check
          (third parity)
          (quote pass))))))
@@ -163,9 +163,9 @@
 (def native-first-coverage-row-state
   (lambda (row)
     (cond
-      ((atom row) (structural-kind empty-list) (quote fail))
-      ((atom row) (structural-kind atom) (quote fail))
-      ((atom row) (structural-kind pair)
+      ((atom? row) (structural-kind empty-list) (quote fail))
+      ((atom? row) (structural-kind atom) (quote fail))
+      ((atom? row) (structural-kind pair)
        (cond
          ((equal? (car row) (quote native-coverage))
           (structural-relation same)
@@ -191,15 +191,15 @@
 (def native-first-coverage-all-valid-state
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list) (quote pass))
-      ((atom rows) (structural-kind atom) (quote fail))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind empty-list) (quote pass))
+      ((atom? rows) (structural-kind atom) (quote fail))
+      ((atom? rows) (structural-kind pair)
        (let ((row-state
                (native-first-coverage-row-state (car rows))))
          (cond
-           ((eq row-state (quote pass)) (identity-relation same)
+           ((eq? row-state (quote pass)) (identity-relation same)
             (native-first-coverage-all-valid-state (cdr rows)))
-           ((eq row-state (quote pass)) (identity-relation distinct)
+           ((eq? row-state (quote pass)) (identity-relation distinct)
             (quote fail))))))))
 
 (def native-first-coverage-expected-authority-row-state
@@ -223,24 +223,24 @@
 (def native-first-coverage-expected-authority-state
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list) (quote pass))
-      ((atom rows) (structural-kind atom) (quote fail))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind empty-list) (quote pass))
+      ((atom? rows) (structural-kind atom) (quote fail))
+      ((atom? rows) (structural-kind pair)
        (let ((row-state
                (native-first-coverage-expected-authority-row-state
                  (car rows))))
          (cond
-           ((eq row-state (quote pass)) (identity-relation same)
+           ((eq? row-state (quote pass)) (identity-relation same)
             (native-first-coverage-expected-authority-state (cdr rows)))
-           ((eq row-state (quote pass)) (identity-relation distinct)
+           ((eq? row-state (quote pass)) (identity-relation distinct)
             (quote fail))))))))
 
 (def native-first-coverage-count-status-onto
   (lambda (rows status count)
     (cond
-      ((atom rows) (structural-kind empty-list) count)
-      ((atom rows) (structural-kind atom) count)
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind empty-list) count)
+      ((atom? rows) (structural-kind atom) count)
+      ((atom? rows) (structural-kind pair)
        (cond
          ((equal?
             (native-first-coverage-field
@@ -315,7 +315,7 @@
                   (native-first-coverage-check fallback-count 2)
                   (native-first-coverage-check blocked-count 3)))))
         (cond
-          ((eq verdict (quote pass)) (identity-relation same)
+          ((eq? verdict (quote pass)) (identity-relation same)
            (list
              (quote native-first-coverage-ledger-witness)
              (quote (status pass))
@@ -323,7 +323,7 @@
              (list (quote native) native-count)
              (list (quote fallback) fallback-count)
              (list (quote blocked) blocked-count)))
-          ((eq verdict (quote pass)) (identity-relation distinct)
+          ((eq? verdict (quote pass)) (identity-relation distinct)
            (list
              (quote native-first-coverage-ledger-witness)
              (quote (status fail))

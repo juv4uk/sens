@@ -91,13 +91,13 @@
 (def top-level-def-names
   (lambda (forms)
     (cond
-      ((atom forms) (quote ()))
+      ((atom? forms) (quote ()))
       (t (let* ((form (car forms))
                 (rest (top-level-def-names (cdr forms))))
            (cond
-             ((atom form) rest)
-             ((eq (car form) (quote def)) (cons (car (cdr form)) rest))
-             ((eq (car form) (quote defmacro)) (cons (car (cdr form)) rest))
+             ((atom? form) rest)
+             ((eq? (car form) (quote def)) (cons (car (cdr form)) rest))
+             ((eq? (car form) (quote defmacro)) (cons (car (cdr form)) rest))
              (t rest)))))))
 
 (def symbol-names-from-file
@@ -115,7 +115,7 @@
            (relevant (filter
                        (lambda (name)
                          (and (string-prefix? ".lisp" (string-slice name (- (string-length name) 3) (string-length name)))
-                              (not (equal? name "core.lisp"))))
+                              (not? (equal? name "core.lisp"))))
                        entries)))
       (map (lambda (name)
              (cons name (symbol-names-from-file (string-append "lib/" name))))
@@ -137,28 +137,28 @@
 ; below that assumes a minimum shape uses these instead of raw car/cdr,
 ; degrading a missing piece to () rather than erroring.
 (def safe-car
-  (lambda (lst) (cond ((atom lst) (quote ())) (t (car lst)))))
+  (lambda (lst) (cond ((atom? lst) (quote ())) (t (car lst)))))
 (def safe-cdr
-  (lambda (lst) (cond ((atom lst) (quote ())) (t (cdr lst)))))
+  (lambda (lst) (cond ((atom? lst) (quote ())) (t (cdr lst)))))
 
 (def collect-symbols-leaf
   (lambda (form)
     (cond
       ((symbol? form) (list form))
-      ((atom form) (quote ()))
+      ((atom? form) (quote ()))
       (t (append (collect-symbols-leaf (car form)) (collect-symbols-leaf (cdr form)))))))
 
 (def collect-heads-each
   (lambda (forms bound)
     (cond
-      ((atom forms) (quote ()))
+      ((atom? forms) (quote ()))
       (t (append (collect-heads (car forms) bound)
                  (collect-heads-each (cdr forms) bound))))))
 
 (def collect-heads-cond-clauses
   (lambda (clauses bound)
     (cond
-      ((atom clauses) (quote ()))
+      ((atom? clauses) (quote ()))
       (t (let* ((clause (car clauses))
                 (test-form (safe-car clause))
                 (body-form (safe-car (safe-cdr clause)))
@@ -170,7 +170,7 @@
 (def collect-heads-let*-seq
   (lambda (bindings body bound)
     (cond
-      ((atom bindings) (collect-heads body bound))
+      ((atom? bindings) (collect-heads body bound))
       (t (let* ((binding (car bindings))
                 (name (safe-car binding))
                 (value-form (safe-car (safe-cdr binding)))
@@ -182,18 +182,18 @@
 (def collect-heads
   (lambda (form bound)
     (cond
-      ((atom form) (quote ()))
+      ((atom? form) (quote ()))
       (t (let ((head (car form)))
            (cond
-             ((and (symbol? head) (eq head (quote quote)))
+             ((and (symbol? head) (eq? head (quote quote)))
               (quote ()))
-             ((and (symbol? head) (eq head (quote lambda)))
+             ((and (symbol? head) (eq? head (quote lambda)))
               (let* ((params (safe-car (safe-cdr form)))
                      (body (safe-cdr (safe-cdr form)))
                      (param-names (collect-symbols-leaf params))
                      (new-bound (append param-names bound)))
                 (cons (quote %uses-lambda) (collect-heads-each body new-bound))))
-             ((and (symbol? head) (eq head (quote let)))
+             ((and (symbol? head) (eq? head (quote let)))
               (let* ((bindings (safe-car (safe-cdr form)))
                      (body (safe-car (safe-cdr (safe-cdr form))))
                      (names (map (lambda (b) (safe-car b)) bindings))
@@ -203,13 +203,13 @@
                      (body-deps (collect-heads body new-bound)))
                 (cons (quote %uses-lambda)
                       (cons (quote %uses-let-family) (append value-deps body-deps)))))
-             ((and (symbol? head) (eq head (quote let*)))
+             ((and (symbol? head) (eq? head (quote let*)))
               (let* ((bindings (safe-car (safe-cdr form)))
                      (body (safe-car (safe-cdr (safe-cdr form)))))
                 (cons (quote %uses-lambda)
                       (cons (quote %uses-let-family)
                             (collect-heads-let*-seq bindings body bound)))))
-             ((and (symbol? head) (eq head (quote def)))
+             ((and (symbol? head) (eq? head (quote def)))
               (let* ((name (safe-car (safe-cdr form)))
                      (value-form (safe-car (safe-cdr (safe-cdr form))))
                      ; def's own name is visible inside its own value-expr:
@@ -221,20 +221,20 @@
                      ; evaluate_definition's own comment documents this).
                      (new-bound (cons name bound)))
                 (collect-heads value-form new-bound)))
-             ((and (symbol? head) (eq head (quote defmacro)))
+             ((and (symbol? head) (eq? head (quote defmacro)))
               (let* ((params (safe-car (safe-cdr (safe-cdr form))))
                      (body (safe-cdr (safe-cdr (safe-cdr form))))
                      (param-names (collect-symbols-leaf params))
                      (new-bound (append param-names bound)))
                 (cons (quote %uses-lambda) (collect-heads-each body new-bound))))
-             ((and (symbol? head) (eq head (quote cond)))
+             ((and (symbol? head) (eq? head (quote cond)))
               (collect-heads-cond-clauses (cdr form) bound))
              (t
               (let* ((head-dep (cond
-                                  ((not (symbol? head)) (quote ()))
+                                  ((not? (symbol? head)) (quote ()))
                                   ((member? head bound) (quote ()))
                                   (t (list head))))
-                     (head-recurse (cond ((atom head) (quote ())) (t (collect-heads head bound))))
+                     (head-recurse (cond ((atom? head) (quote ())) (t (collect-heads head bound))))
                      (args-deps (collect-heads-each (cdr form) bound)))
                 (append head-dep (append head-recurse args-deps))))))))))
 
@@ -253,14 +253,14 @@
 (def collect-deps-top-seq
   (lambda (forms bound)
     (cond
-      ((atom forms) (quote ()))
+      ((atom? forms) (quote ()))
       (t (let* ((form (car forms))
                 (deps (collect-deps-one form bound))
                 (new-bound (cond
-                             ((atom form) bound)
-                             ((and (symbol? (car form)) (eq (car form) (quote def)))
+                             ((atom? form) bound)
+                             ((and (symbol? (car form)) (eq? (car form) (quote def)))
                               (cons (car (cdr form)) bound))
-                             ((and (symbol? (car form)) (eq (car form) (quote defmacro)))
+                             ((and (symbol? (car form)) (eq? (car form) (quote defmacro)))
                               (cons (car (cdr form)) bound))
                              (t bound))))
            (append deps (collect-deps-top-seq (cdr forms) new-bound)))))))
@@ -276,12 +276,12 @@
 
 (def is-marker?
   (lambda (s)
-    (or (eq s (quote %uses-lambda)) (eq s (quote %uses-let-family)))))
+    (or (eq? s (quote %uses-lambda)) (eq? s (quote %uses-let-family)))))
 
 (def unique-onto
   (lambda (items acc)
     (cond
-      ((atom items) acc)
+      ((atom? items) acc)
       ((member? (car items) acc) (unique-onto (cdr items) acc))
       (t (unique-onto (cdr items) (cons (car items) acc))))))
 
@@ -290,7 +290,7 @@
 (def owning-library
   (lambda (sym tables)
     (cond
-      ((atom tables) (quote ()))
+      ((atom? tables) (quote ()))
       ((member? sym (cdr (car tables))) (car (car tables)))
       (t (owning-library sym (cdr tables))))))
 
@@ -346,25 +346,25 @@
     (let* ((parsed-forms (read-all expr-str))
            (raw (collect-deps-top parsed-forms))
            (markers (filter is-marker? raw))
-           (real-syms (uniq (filter (lambda (s) (not (is-marker? s))) raw)))
+           (real-syms (uniq (filter (lambda (s) (not? (is-marker? s))) raw)))
            (classified (map (lambda (s) (cons s (classify-symbol s other-tables))) real-syms))
-           (bucket-of (lambda (tag) (map (lambda (c) (car c)) (filter (lambda (c) (eq (car (cdr c)) tag)) classified))))
+           (bucket-of (lambda (tag) (map (lambda (c) (car c)) (filter (lambda (c) (eq? (car (cdr c)) tag)) classified))))
            (unknowns (bucket-of (quote unknown)))
            (uses-core (or (member? (quote core) (map (lambda (c) (car (cdr c))) classified))
-                          (atom real-syms)))
+                          (atom? real-syms)))
            (uses-macro-core (member? (quote macro-expanded-core) (map (lambda (c) (car (cdr c))) classified)))
            (uses-world-host (member? (quote reasoning-world-or-host) (map (lambda (c) (car (cdr c))) classified)))
            (uses-lambda (member? (quote %uses-lambda) markers))
            (uses-let-family (member? (quote %uses-let-family) markers))
            (uses-strings-reader (filter (lambda (s) (member? s strings-reader-subset)) real-syms))
-           (world-host-libraries (uniq (filter (lambda (x) (not (equal? x (quote ()))))
+           (world-host-libraries (uniq (filter (lambda (x) (not? (equal? x (quote ()))))
                                                 (map (lambda (c) (cdr (cdr c))) classified))))
-           (buckets (filter (lambda (x) (not (equal? x (quote ()))))
+           (buckets (filter (lambda (x) (not? (equal? x (quote ()))))
                       (list
                         (cond (uses-core (quote core)) (t (quote ())))
                         (cond ((or uses-lambda uses-let-family) (quote closure-application)) (t (quote ())))
                         (cond ((member? (quote S1) axioms-list) (quote exact-numbers)) (t (quote ())))
-                        (cond ((not (atom uses-strings-reader)) (quote strings-reader)) (t (quote ())))
+                        (cond ((not? (atom? uses-strings-reader)) (quote strings-reader)) (t (quote ())))
                         (cond ((or uses-macro-core uses-let-family) (quote macro-expanded-core)) (t (quote ())))
                         (cond (uses-world-host (quote reasoning-world-or-host)) (t (quote ())))))))
       (list (quote dependency-classification)
@@ -381,24 +381,24 @@
 (def fixtures-only
   (lambda (entries)
     (cond
-      ((atom entries) (quote ()))
-      ((atom (car entries)) (fixtures-only (cdr entries)))
+      ((atom? entries) (quote ()))
+      ((atom? (car entries)) (fixtures-only (cdr entries)))
       (t (cond
-           ((eq (car (car entries)) (quote fixture))
+           ((eq? (car (car entries)) (quote fixture))
             (cons (car entries) (fixtures-only (cdr entries))))
            (t (fixtures-only (cdr entries))))))))
 
 (def process-pair
   (lambda (inventory-remaining conformance-remaining other-tables)
     (cond
-      ((atom inventory-remaining) (quote ()))
-      ((atom conformance-remaining) (quote ()))
+      ((atom? inventory-remaining) (quote ()))
+      ((atom? conformance-remaining) (quote ()))
       (t (let* ((invf (car inventory-remaining))
                 (id (cdr (assoc (quote id) (cdr invf))))
                 (conff (car conformance-remaining))
                 (expr-str (cdr (assoc (quote expr) conff)))
                 (axioms-entry (assoc (quote axioms) conff))
-                (axioms-list (cond ((atom axioms-entry) (quote ())) (t (cdr axioms-entry))))
+                (axioms-list (cond ((atom? axioms-entry) (quote ())) (t (cdr axioms-entry))))
                 (record (classify-fixture id expr-str axioms-list other-tables))
                 (emitted (print record)))
            (process-pair (cdr inventory-remaining) (cdr conformance-remaining) other-tables))))))

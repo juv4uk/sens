@@ -102,7 +102,7 @@ fn sorted_insertion_order_stays_balanced_instead_of_degenerating_into_a_list() {
         (def insert-all
           (lambda (pairs tree)
             (cond
-              ((atom pairs) tree)
+              ((atom? pairs) tree)
               (t (insert-all (cdr pairs) (map-insert (car (car pairs)) (second (car pairs)) tree))))))
         (def m (insert-all (list (list "a" 1) (list "b" 2) (list "c" 3) (list "d" 4)
                                   (list "e" 5) (list "f" 6) (list "g" 7))
@@ -118,7 +118,7 @@ fn map_to_list_stays_sorted_after_many_out_of_order_inserts() {
         (def insert-all
           (lambda (pairs tree)
             (cond
-              ((atom pairs) tree)
+              ((atom? pairs) tree)
               (t (insert-all (cdr pairs) (map-insert (car (car pairs)) (second (car pairs)) tree))))))
         (def m (insert-all (list (list "g" 7) (list "c" 3) (list "e" 5) (list "a" 1)
                                   (list "f" 6) (list "b" 2) (list "d" 4))

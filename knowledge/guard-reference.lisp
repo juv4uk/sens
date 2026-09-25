@@ -965,31 +965,31 @@
         (verify (exit-0-clean no-forbidden-teleology no-paraphrase-drift))))))
 
 
-(def guard-script-find
-  (lambda (name tools)
-    (cond
-      ((atom tools) (quote ()))
-      ((eq (guard-reference-field (quote name) (car tools)) name) (car tools))
-      (t (guard-script-find name (cdr tools))))))
+(00001011 guard-script-find
+  (00001000 (name tools)
+    (00000111
+      ((00000010 tools) (00000001 ()))
+      ((00000011 (guard-reference-field (00000001 name) (00000101 tools)) name) (00000101 tools))
+      (t (guard-script-find name (00000110 tools))))))
 
-(def guard-script
-  (lambda (name)
+(00001011 guard-script
+  (00001000 (name)
     (let ((tool (guard-script-find name *guard-script-directory*)))
-      (cond
-        ((atom tool)
+      (00000111
+        ((00000010 tool)
          (list
-           (quote tool-missing)
-           (list (quote name) name)
-           (list (quote decision) (quote unknown))
-           (list (quote unknown-routes) (guard-unknown-routes))))
+           (00000001 tool-missing)
+           (list (00000001 name) name)
+           (list (00000001 decision) (00000001 unknown))
+           (list (00000001 unknown-routes) (guard-unknown-routes))))
         (t tool)))))
 
-(def guard-scripts
-  (lambda (tools)
-    (cond
-      ((atom tools) (quote ()))
-      (t (cons (guard-reference-field (quote name) (car tools))
-               (guard-scripts (cdr tools)))))))
+(00001011 guard-scripts
+  (00001000 (tools)
+    (00000111
+      ((00000010 tools) (00000001 ()))
+      (t (00000100 (guard-reference-field (00000001 name) (00000101 tools))
+               (guard-scripts (00000110 tools)))))))
 
 ; A topic may have more than one (reference ...) entry. Adding a stronger
 ; answer never deletes or rejects the older one -- it stays in the
@@ -1001,65 +1001,65 @@
 ; a claim is not evidence for it. Own words: "якщо реальність каже що нова
 ; сильніша то ок" -- reality decides which entry wins the lookup; neither
 ; entry is deleted.
-(def guard-reference-evidence-status
-  (lambda (reference)
-    (let ((status (guard-reference-field (quote evidence-status) reference)))
-      (cond
+(00001011 guard-reference-evidence-status
+  (00001000 (reference)
+    (let ((status (guard-reference-field (00000001 evidence-status) reference)))
+      (00000111
         ; A missing field and a found bare-symbol value (e.g. `confirmed`)
         ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
         ; them apart. Only the empty list means "missing"; any other atom is
         ; a real found status and must be returned as-is.
-        ((atom status) (structural-kind empty-list) (quote unresolved))
-        ((atom status) (structural-kind atom) status)
-        ((atom status) (structural-kind pair) status)))))
+        ((00000010 status) (structural-kind empty-list) (00000001 unresolved))
+        ((00000010 status) (structural-kind atom) status)
+        ((00000010 status) (structural-kind pair) status)))))
 
-(def guard-evidence-status-strength
-  (lambda (status)
-    (cond
-      ((eq status (quote confirmed)) 4)
-      ((eq status (quote partial)) 3)
-      ((eq status (quote unresolved)) 2)
-      ((eq status (quote broken)) 1)
+(00001011 guard-evidence-status-strength
+  (00001000 (status)
+    (00000111
+      ((00000011 status (00000001 confirmed)) 4)
+      ((00000011 status (00000001 partial)) 3)
+      ((00000011 status (00000001 unresolved)) 2)
+      ((00000011 status (00000001 broken)) 1)
       (t 0))))
 
-(def guard-reference-stronger
-  (lambda (best candidate)
-    (cond
-      ((atom best) candidate)
+(00001011 guard-reference-stronger
+  (00001000 (best candidate)
+    (00000111
+      ((00000010 best) candidate)
       (t
        (let ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
              (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
-         (cond
+         (00000111
            ((> candidate-strength best-strength) 1 candidate)
            ((> candidate-strength best-strength) 0 best)))))))
 
-(def guard-reference-all
-  (lambda (topic references)
-    (cond
-      ((atom references) (quote ()))
-      ((eq (guard-reference-field (quote topic) (car references)) topic)
-       (cons (car references) (guard-reference-all topic (cdr references))))
-      (t (guard-reference-all topic (cdr references))))))
+(00001011 guard-reference-all
+  (00001000 (topic references)
+    (00000111
+      ((00000010 references) (00000001 ()))
+      ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
+       (00000100 (00000101 references) (guard-reference-all topic (00000110 references))))
+      (t (guard-reference-all topic (00000110 references))))))
 
-(def guard-reference-find-strongest
-  (lambda (topic references best)
-    (cond
-      ((atom references) best)
-      ((eq (guard-reference-field (quote topic) (car references)) topic)
+(00001011 guard-reference-find-strongest
+  (00001000 (topic references best)
+    (00000111
+      ((00000010 references) best)
+      ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
        (guard-reference-find-strongest
-         topic (cdr references)
-         (guard-reference-stronger best (car references))))
-      (t (guard-reference-find-strongest topic (cdr references) best)))))
+         topic (00000110 references)
+         (guard-reference-stronger best (00000101 references))))
+      (t (guard-reference-find-strongest topic (00000110 references) best)))))
 
-(def guard-reference-find
-  (lambda (topic references)
-    (guard-reference-find-strongest topic references (quote ()))))
+(00001011 guard-reference-find
+  (00001000 (topic references)
+    (guard-reference-find-strongest topic references (00000001 ()))))
 
 (def guard-reference
   (lambda (topic)
     (let ((reference (guard-reference-find topic *guard-reference-directory*)))
       (cond
-        ((atom reference)
+        ((atom? reference)
          (list
            (quote reference-missing)
            (list (quote schema) (quote guard-reference/1))
@@ -1089,7 +1089,7 @@
 (def guard-topics
   (lambda (references)
     (cond
-      ((atom references) (quote ()))
+      ((atom? references) (quote ()))
       (t
        (cons
          (guard-reference-field (quote topic) (car references))
@@ -1110,9 +1110,9 @@
     (let* ((tool (guard-script-find name *guard-script-directory*))
            (reference (guard-reference-find name *guard-reference-directory*)))
       (cond
-        ((atom tool)
+        ((atom? tool)
          (cond
-           ((atom reference)
+           ((atom? reference)
             (list (quote not-found)
                   (list (quote query) name)
                   (list (quote decision) (quote unknown))
@@ -1124,7 +1124,7 @@
                   (list (quote entry) reference)))))
         (t
          (cond
-           ((atom reference)
+           ((atom? reference)
             (list (quote result)
                   (list (quote type) (quote tool))
                   (list (quote source) (quote guard-script-directory))

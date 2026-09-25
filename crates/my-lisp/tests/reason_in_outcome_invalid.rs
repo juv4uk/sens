@@ -32,7 +32,7 @@ fn malformed_module_name_is_invalid_not_unknown() {
 #[test]
 fn malformed_goal_is_invalid_even_when_module_is_missing() {
     assert_eq!(
-        observe_in(r#"(reason-in-observe (quote missing) (quote (not)))"#),
-        "(invalid invalid-goal (not))"
+        observe_in(r#"(reason-in-observe (quote missing) (quote (not?)))"#),
+        "(invalid invalid-goal (not?))"
     );
 }

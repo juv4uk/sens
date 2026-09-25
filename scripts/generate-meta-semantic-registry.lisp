@@ -21,7 +21,7 @@
 (def surface-included?
   (lambda (surface)
     (cond
-      ((atom surface) ())
+      ((atom? surface) ())
       ((equal? (surface-word surface) (quote ())) ())
       ((equal? (surface-word surface) "'") ())
       (t t))))
@@ -29,7 +29,7 @@
 (def collect-surfaces
   (lambda (sid surfaces rows)
     (cond
-      ((atom surfaces) rows)
+      ((atom? surfaces) rows)
       (t
        (let ((surface (car surfaces)))
          (cond
@@ -49,7 +49,7 @@
 (def collect-entries
   (lambda (entries rows)
     (cond
-      ((atom entries) rows)
+      ((atom? entries) rows)
       (t
        (let ((entry (car entries)))
          (collect-entries
@@ -115,13 +115,13 @@
 (def output-path "lib/generated/meta-semantic-registry.lisp")
 
 (cond
-  ((atom *argv*)
+  ((atom? *argv*)
    (structural-kind empty-list)
    (second
      (list
        (write-file output-path generated)
        (print "meta semantic registry projection written"))))
-  ((atom *argv*)
+  ((atom? *argv*)
    (structural-kind atom)
    (second
      (list

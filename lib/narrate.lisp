@@ -73,15 +73,15 @@
 (def narrate-derivation
   (lambda (derivations)
     (cond
-      ((atom derivations) (quote ()))
-      ((atom (cdr derivations)) (narrate-provenance (car derivations)))
+      ((atom? derivations) (quote ()))
+      ((atom? (cdr derivations)) (narrate-provenance (car derivations)))
       (t (append (narrate-provenance (car derivations))
                   (cons (quote and) (narrate-derivation (cdr derivations))))))))
 
 (def narrate-provenance
   (lambda (prov)
     (cond
-      ((eq (provenance-source prov) (quote fact)) (narrate-fact (provenance-rule prov)))
+      ((eq? (provenance-source prov) (quote fact)) (narrate-fact (provenance-rule prov)))
       (t (append (narrate-fact (provenance-rule prov))
                   (cons (quote because) (narrate-derivation (provenance-derived-from prov))))))))
 
@@ -106,7 +106,7 @@
   (lambda (goal proof)
     (let ((derivations (provenance-derived-from (provenance proof))))
       (cond
-        ((atom derivations) (narrate-fact goal))
+        ((atom? derivations) (narrate-fact goal))
         (t (append (narrate-fact goal)
                    (cons (quote because) (narrate-derivation derivations))))))))
 
@@ -124,7 +124,7 @@
     (let ((statement (second outcome))
           (results (third outcome)))
       (cond
-        ((atom results)
+        ((atom? results)
          (list (quote proved) statement (quote without-proof-result)))
         (t
          (append
@@ -138,7 +138,7 @@
 (def narrate-outcome-arity?
   (lambda (outcome expected)
     (cond
-      ((not (result-proper-list? outcome)) (quote ()))
+      ((not? (result-proper-list? outcome)) (quote ()))
       ((= (length outcome) expected) 1 t)
 
       (t (quote ())))))
@@ -146,21 +146,21 @@
 (def narrate-outcome
   (lambda (outcome)
     (cond
-      ((atom outcome)
+      ((atom? outcome)
        (narrate-invalid-outcome-shape outcome))
-      ((not (result-proper-list? outcome))
+      ((not? (result-proper-list? outcome))
        (narrate-invalid-outcome-shape outcome))
-      ((atom (car outcome)) (structural-kind pair)
+      ((atom? (car outcome)) (structural-kind pair)
        (list (quote invalid) (quote outcome-tag) (car outcome)))
-      ((atom (car outcome)) (structural-kind empty-list)
+      ((atom? (car outcome)) (structural-kind empty-list)
        (list (quote invalid) (quote outcome-tag) (car outcome)))
       ((symbol? (car outcome)) (class-membership symbol nonmember)
        (list (quote invalid) (quote outcome-tag) (car outcome)))
-      ((eq (car outcome) (quote proved))
+      ((eq? (car outcome) (quote proved))
        (cond
          ((narrate-outcome-arity? outcome 3) (narrate-proved-outcome outcome))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq (car outcome) (quote unknown))
+      ((eq? (car outcome) (quote unknown))
        (cond
          ((narrate-outcome-arity? outcome 2)
           (list
@@ -169,7 +169,7 @@
             (quote no-proof-found-for)
             (second outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq (car outcome) (quote partial))
+      ((eq? (car outcome) (quote partial))
        (cond
          ((narrate-outcome-arity? outcome 3)
           (list
@@ -179,7 +179,7 @@
             (quote bound)
             (third outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq (car outcome) (quote blocked))
+      ((eq? (car outcome) (quote blocked))
        (cond
          ((narrate-outcome-arity? outcome 2)
           (list
@@ -187,7 +187,7 @@
             (quote because)
             (second outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq (car outcome) (quote disputed))
+      ((eq? (car outcome) (quote disputed))
        (cond
          ((narrate-outcome-arity? outcome 2)
           (list
@@ -196,7 +196,7 @@
             (quote both-sides-have-evidence)
             (second outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq (car outcome) (quote invalid))
+      ((eq? (car outcome) (quote invalid))
        (cond
          ((narrate-outcome-arity? outcome 3)
           (list

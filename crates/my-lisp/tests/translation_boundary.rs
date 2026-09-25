@@ -137,7 +137,7 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
 #[test]
 fn existing_explicit_opposite_overrules_an_external_candidate() {
     let source = r#"
-        (advise corpus (quote ((not (human socrates)))))
+        (advise corpus (quote ((not? (human socrates)))))
         (def before *knowledge-journal*)
         (def proposal
           (quote (translation/1 candidate clause

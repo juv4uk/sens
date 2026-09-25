@@ -59,7 +59,7 @@
 (def vnode-right fifth)
 
 (def vheight-of
-  (lambda (n) (cond ((atom n) 0) (t (vnode-height n)))))
+  (lambda (n) (cond ((atom? n) 0) (t (vnode-height n)))))
 
 (def vmax2
   (lambda (a b)
@@ -91,7 +91,7 @@
 (def vbalance
   (lambda (n)
     (cond
-      ((atom n) n)
+      ((atom? n) n)
       ((> (vbalance-factor n) 1) 1
        (cond
          ((< (vbalance-factor (vnode-left n)) 0) 1
@@ -112,8 +112,8 @@
 (def vtree-insert
   (lambda (index value tree)
     (cond
-      ((atom tree) (vmake-balanced-node index value (quote ()) (quote ())))
-      ((eq index (vnode-index tree))
+      ((atom? tree) (vmake-balanced-node index value (quote ()) (quote ())))
+      ((eq? index (vnode-index tree))
        (vmake-balanced-node index value (vnode-left tree) (vnode-right tree)))
       ((< index (vnode-index tree)) 1
        (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
@@ -129,8 +129,8 @@
 (def vtree-get
   (lambda (index tree)
     (cond
-      ((atom tree) (quote ()))
-      ((eq index (vnode-index tree)) (list (vnode-value tree)))
+      ((atom? tree) (quote ()))
+      ((eq? index (vnode-index tree)) (list (vnode-value tree)))
       ((< index (vnode-index tree)) 1 (vtree-get index (vnode-left tree)))
       (t (vtree-get index (vnode-right tree))))))
 
@@ -159,7 +159,7 @@
 (def vtree->list
   (lambda (tree)
     (cond
-      ((atom tree) (quote ()))
+      ((atom? tree) (quote ()))
       (t (append (vtree->list (vnode-left tree))
                  (cons (vnode-value tree)
                        (vtree->list (vnode-right tree))))))))
@@ -178,7 +178,7 @@
 (def vec-from-list-onto
   (lambda (lst acc)
     (cond
-      ((atom lst) acc)
+      ((atom? lst) acc)
       (t (vec-from-list-onto (cdr lst) (vec-conj (car lst) acc))))))
 
 (def vec-from-list

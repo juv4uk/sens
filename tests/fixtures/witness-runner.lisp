@@ -15,7 +15,7 @@
   (lambda (key witness)
     (let ((entry (assoc key witness)))
       (cond
-        ((atom entry) (quote ()))
+        ((atom? entry) (quote ()))
         (t (cdr entry))))))
 
 (def witness-malformed-result
@@ -39,8 +39,8 @@
 (def witness-superseded-outcome
   (lambda (witness expected-entry)
     (cond
-      ((atom expected-entry) (structural-kind empty-list) (quote ()))
-      ((atom expected-entry) (structural-kind pair)
+      ((atom? expected-entry) (structural-kind empty-list) (quote ()))
+      ((atom? expected-entry) (structural-kind pair)
        (let ((expr (witness-field (quote expr) witness)))
          (cond
            ((equal? expr "(atom (quote radio))")
@@ -67,10 +67,10 @@
           (error-entry (assoc (quote error) witness)))
       (let ((superseded (witness-superseded-outcome witness expected-entry)))
         (cond
-          ((atom superseded) (structural-kind pair) superseded)
+          ((atom? superseded) (structural-kind pair) superseded)
           ((and expected-entry error-entry)
            (list (quote malformed) (quote expected-and-error)))
-          ((and (atom expected-entry) (atom error-entry))
+          ((and (atom? expected-entry) (atom? error-entry))
            (list (quote malformed) (quote missing-outcome)))
           (expected-entry
            (list (quote value) (cdr expected-entry)))
@@ -83,7 +83,7 @@
   (lambda (witness actual)
     (let ((expected (witness-expected-outcome witness)))
       (cond
-        ((eq (car expected) (quote malformed))
+        ((eq? (car expected) (quote malformed))
          (witness-malformed-result (second expected) actual))
         ((equal? expected actual)
          (witness-result-record (quote pass) expected actual))
@@ -113,17 +113,17 @@
 (def witness-meta-error-kind
   (lambda (kind)
     (cond
-      ((eq kind (quote unbound-symbol)) "UnknownSymbol")
-      ((eq kind (quote not-callable)) "Type")
-      ((eq kind (quote arity)) "Arity")
-      ((eq kind (quote invalid-form)) "InvalidForm")
+      ((eq? kind (quote unbound-symbol)) "UnknownSymbol")
+      ((eq? kind (quote not-callable)) "Type")
+      ((eq? kind (quote arity)) "Arity")
+      ((eq? kind (quote invalid-form)) "InvalidForm")
       (t "UnsupportedMetaError"))))
 
 (def witness-meta-error?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((atom (car value)) (eq (car value) (quote error)))
+      ((atom? value) (quote ()))
+      ((atom? (car value)) (eq? (car value) (quote error)))
       (t (quote ())))))
 
 (def witness-meta-outcome
@@ -139,7 +139,7 @@
 (def witness-peer-surface-count
   (lambda (semantic-id entries)
     (cond
-      ((atom entries) 0)
+      ((atom? entries) 0)
       ((equal? (second (car entries)) semantic-id)
        (+ 1 (witness-peer-surface-count semantic-id (cdr entries))))
       (t
@@ -148,7 +148,7 @@
 (def witness-peer-surfaces-consistent?
   (lambda (semantic-id entries)
     (cond
-      ((atom entries) t)
+      ((atom? entries) t)
       ((equal? (second (car entries)) semantic-id)
        (cond
          ((equal? (my-semantic-id-for-surface (car (car entries))) semantic-id)
