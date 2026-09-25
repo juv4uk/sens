@@ -9,7 +9,7 @@
 ; Function 00000000 therefore has no empty-list-ground route here.
 
 (
-  (schema function-table-mechanisms/1)
+  (schema function-table-mechanisms/2)
   (authority "lib/surface/semantic-registry.lisp")
   (lifecycle transitional)
   (retirement-issue 1046)
@@ -29,4 +29,9 @@
     (00001100 common-lisp bounded-exact-add)
     (00001100 prolog bounded-exact-add)
     (00001100 clips bounded-exact-add)
-    (00001100 datalog bounded-exact-add)))
+    (00001100 datalog bounded-exact-add))
+  ; #1422 — profile-scoped admissions are SENS-owned. A row admits only
+  ; mechanical lookup of the named mechanism class after this Core is selected.
+  ; It does not prove that a host handler/runtime is currently available.
+  (profile-rows
+    (core3 10101000 registered-host-mechanism)))
