@@ -4,7 +4,7 @@
 //! mechanism shape for an already-selected SID, but it must never invent a
 //! second named function identity.
 
-use super::{arithmetic, special_forms};
+use super::{arithmetic, profile_mechanisms_generated, special_forms};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sid8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -203,18 +203,40 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let Some(primitive) = PRIMITIVE_TABLE
+    if let Some(primitive) = PRIMITIVE_TABLE
         .get(sid.packed_byte() as usize)
         .and_then(|function| *function)
-    else {
-        return Err(LanguageError::new(
+    {
+        return primitive(args, environment, span);
+    }
+
+    match profile_mechanisms_generated::profile_mechanism_route(
+        environment.selected_core_profile(),
+        sid,
+    ) {
+        Some(
+            profile_mechanisms_generated::ProfileMechanismRoute::RegisteredHostMechanism,
+        ) => match super::capabilities::dispatch_sens_capability(
+            sid,
+            args,
+            environment,
+            span,
+        ) {
+            Some(result) => result,
+            None => Err(LanguageError::new(
+                ErrorKind::MechanismUnavailable,
+                format!(
+                    "admitted SENS host mechanism is not currently available: {sid}"
+                ),
+                span,
+            )),
+        },
+        None => Err(LanguageError::new(
             ErrorKind::Type,
             format!("SENS function has no admitted callable mechanism: {sid}"),
             span,
-        ));
-    };
-
-    primitive(args, environment, span)
+        )),
+    }
 }
 
 pub(crate) fn value_for_sid(sid: Sid8) -> Option<Value> {
