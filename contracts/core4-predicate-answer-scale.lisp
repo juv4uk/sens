@@ -1,52 +1,25 @@
-; Core4 predicate-answer scale — Lisp-owned semantic data for #1255.
+; Core4 15-state predicate-answer scale — Lisp-owned law for #1391.
 ;
-; This file defines ONLY the answer domain for Core4 predicates.
-; It is not a function/SID registry and does not mint or alias any SID.
+; Two orthogonal spaces:
+;   logic answers: 0^n | 1^n | (), n=1..7
+;   SENS functions: 00000000..11111111
 ;
-; Core law:
-;   answer ::= 0^n | 1^n | ()
-;   n = 1..7
+; The grading path never enters the 8-bit SENS function space.
+; More repeated bits mean less determination and convergence toward ().
 ;
-; Exactly eight bare bits remain the independent Sid8 lexical space.
-; Until #1257 teaches the reader to preserve 1..7-bit homogeneous spellings,
-; the short answers below are stored as exact spelling strings.  The strings
-; are transport for this contract only; the intended public values are the
-; bit spellings themselves, never (truth ...), confidence records, percentages,
-; or a fifteen-case semantic enum.
-;
-; Sanskrit notes are terminology anchors, not a claim that a historical
-; eight-level Nyaya scale existed.  The vocabulary is deliberately modest:
-;   dṛḍha-niścaya — firm certainty / firm conviction
-;   niścaya       — ascertainment, conviction, certainty
-;   nirṇaya       — decision / ascertainment
-;   saṃbhāvanā    — supposition / possibility
-;   saṃśaya       — doubt / uncertainty
-;   aniścaya      — uncertainty / indecision
-;   ajñāta        — unknown
-; Level 7 uses the my-lisp compound ajñāta-sīmā ("unknown-boundary") to mark
-; the last short directed answer immediately before its function-SID endpoint.
-;
-; Lexical sources consulted for the Sanskrit anchors:
-; Monier-Williams / Macdonell / Apte entries surfaced by SanskritDictionary:
-; niścaya, aniścaya, saṃśaya, saṃbhāvanā, ajñāta, sīmā.
-;
-; IMPORTANT:
-;   00000000 and 11111111 below are function-SID endpoints of the directed
-;   NO/YES paths. They remain distinct function identities.
-;   () is an independent structural/undirected answer outside function-SID
-;   space. No endpoint SID projects or aliases to ().
+; Sanskrit labels are SENS/Core4 terminology anchors, not a claim that
+; historical Nyāya defined this exact 15-state scale.
 
-(core4-predicate-answer-scale/1
+(core4-predicate-answer-scale/2
 
   ((identity . predicate-answer-domain)
    (profile . core4)
-   (status . proposed-1255)
    (answer-grammar . "0^n | 1^n | (), n=1..7")
+   (answer-count . 15)
    (semantic-form . homogeneous-bits)
-   (runtime-cutover . pending-1257)
-   (sid-space . unchanged-00000000-through-11111111)
+   (sens-function-space . separate-00000000-through-11111111)
    (probability-model . forbidden)
-   (host-bool-authority . forbidden)
+   (confidence-score . forbidden)
    (record-wrapper . forbidden))
 
   ((direction . no)
@@ -60,15 +33,13 @@
       ("000000"  6 aniścaya)
       ("0000000" 7 ajñāta-sīmā))))
 
-  ((boundary . directed-endpoints)
-   (undirected-answer . ())
+  ((boundary . ())
    (sanskrit . ajñāta)
    (meaning-uk . "невідомо")
-   (no-sid-endpoint . 00000000)
-   (yes-sid-endpoint . 11111111)
-   (sid-alias . forbidden)
-   (empty-list-alias . forbidden)
-   (boundary-owner . issue-1336))
+   (direction . none)
+   (sens-function . none)
+   (convergence-functions . (00000000 11111111))
+   (function-result . ()))
 
   ((direction . yes)
    (bit . "1")
@@ -84,5 +55,7 @@
   ((algebra . minimal)
    (not-law . same-width-bit-inversion)
    (weakening-law . append-same-bit)
-   (boundary-law . eighth-directed-step-reaches-function-sid-endpoint)
+   (boundary-law . seven-directed-grades-converge-to-empty-list)
+   (eighth-bit-law . belongs-to-sens-function-space)
+   (function-convergence-law . distinct-functions-same-empty-result)
    (and-or-cond-law . deliberately-unratified)))
