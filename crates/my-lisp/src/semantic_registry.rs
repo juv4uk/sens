@@ -175,7 +175,7 @@ mod tests {
     }
 
     #[test]
-    fn surfaces_with_namespace_match_present_names_and_keep_namespace() {
+    fn surfaces_with_namespace_align_with_present_names_and_keep_namespace() {
         let with_namespace = admitted_surfaces_with_namespace_for_semantic_id(crate::sid!(00000001));
         let names_only = admitted_surfaces_for_semantic_id(crate::sid!(00000001));
         assert_eq!(with_namespace.len(), names_only.len());
