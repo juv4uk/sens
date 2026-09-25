@@ -142,3 +142,5 @@
 (review "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" "729d3a741df2b4f2fd7cb278b09107e449c6b19eaf58241a5e5b25bdd58cf248" issue-1406 sens-host-registration-admission-observer)
 (review "crates/my-lisp/src/eval/capabilities.rs" "263e6fcfeb94974a8a6d102df296ee25d6fa23888015cd73b6d3654d14062347" issue-1406 dormant-host-registry-mechanism)
 (review "crates/my-lisp/src/lib.rs" "f898bce28b2fec3210c71fb2e230ea3041c18f4f9f499618abf09b01c66f8b68" issue-1414 explicit-core3-profile-loader-mechanism)
+(review "crates/my-lisp/src/lib.rs" "1dbe976a8758f8ba5671804251e92f700e465dc8ca1ccfa95f940cecc5c6a5dc" issue-1417 canonical-core4-fasl-loader-mechanism)
+(review "crates/my-lisp-cli/src/main.rs" "d00f8460376ff7acc112db472e3ae3e1ff6791cd89e82cd10969b1055210ccef" issue-1417 cli-bootstrap-consumes-canonical-loader)
