@@ -147,13 +147,10 @@ pub(crate) fn dispatch_capability(
 
 /// Mechanical lookup/execution seam for one already-registered exact SENS function.
 ///
-/// #1406: this function is deliberately NOT called by ordinary evaluator dispatch.
-/// Registration is availability only. #1006 may consume this seam later, but only
-/// downstream of an explicit SENS-owned raw-invoke mechanism admission.
-#[expect(
-    dead_code,
-    reason = "#1406 keeps the registry mechanism dormant until #1006 supplies an admitted caller"
-)]
+/// #1406: production has no caller until #1411 supplies an explicit SENS-owned
+/// raw-invoke mechanism admission. The direct seam exists only for its mechanical
+/// unit witness in this slice; registration/storage remain production availability.
+#[cfg(test)]
 pub(crate) fn dispatch_sens_capability(
     sens: Sens8,
     arguments: &[Value],
