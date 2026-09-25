@@ -1,4 +1,4 @@
-; #1391 — executable witness for orthogonal Core4 logic/SENS spaces.
+; #1391 — executable witness for Core4 logic/SENS boundary.
 
 (def pab-contract
   (car (read-all (read-file "contracts/core4-predicate-answer-boundary.lisp"))))
@@ -13,7 +13,8 @@
 (def pab-no (second pab-sections))
 (def pab-yes (third pab-sections))
 (def pab-undirected (fourth pab-sections))
-(def pab-laws (fifth pab-sections))
+(def pab-function-convergence (fifth pab-sections))
+(def pab-laws (sixth pab-sections))
 
 (def pab-observed
   (list
@@ -26,13 +27,16 @@
     (length (pab-field pab-yes (quote yes-path)))
     (pab-field pab-yes (quote converges-to))
     (pab-field pab-undirected (quote undirected-answer))
+    (pab-field pab-function-convergence (quote function-convergence))
+    (pab-field pab-function-convergence (quote function-identities))
+    (pab-field pab-function-convergence (quote result-value))
     (pab-field pab-laws (quote short-answer-to-sens-function))
     (pab-field pab-laws (quote sens-function-to-answer))
     (pab-field pab-laws (quote eighth-bit-in-grading))))
 
 (def pab-expected
   (list
-    (quote core4-predicate-answer-boundary/3)
+    (quote core4-predicate-answer-boundary/4)
     15
     256
     (quote orthogonal)
@@ -41,6 +45,9 @@
     7
     (quote ())
     (quote ())
+    (quote ((00000000 ()) (11111111 ())))
+    (quote distinct)
+    (quote one-empty-list)
     (quote forbidden)
     (quote forbidden)
     (quote forbidden)))
