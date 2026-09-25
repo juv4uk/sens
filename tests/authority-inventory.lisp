@@ -104,3 +104,4 @@
 (authority "crates/my-lisp-cli/tests/cli.rs" observer)
 (authority "crates/sens/tests/sens_smoke.rs" observer)
 (authority "crates/my-lisp/tests/canon_adversarial.rs" observer)
+(authority "crates/my-lisp/tests/semantic_form_identity.rs" observer)

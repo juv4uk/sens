@@ -5,6 +5,7 @@ const MACRO_LIBRARY: &str = include_str!("../../../lib/macro.lisp");
 fn walk_symbols(expression: &Expr, symbols: &mut Vec<String>) {
     match &expression.kind {
         ExprKind::Symbol(symbol) => symbols.push(symbol.to_string()),
+        ExprKind::Sid(sid) => symbols.push(sid.to_string()),
         ExprKind::List(items) => {
             for item in items.iter() {
                 walk_symbols(item, symbols);
@@ -46,8 +47,8 @@ fn macro_library_uses_admitted_source_spellings_for_necessary_forms() {
         walk_symbols(expression, &mut symbols);
     }
 
-    assert!(symbols.iter().any(|symbol| symbol == "lambda"));
-    assert!(symbols.iter().any(|symbol| symbol == "define"));
+    assert!(symbols.iter().any(|symbol| symbol == "00001000" || symbol == "lambda"));
+    assert!(symbols.iter().any(|symbol| symbol == "00001001" || symbol == "define"));
 }
 
 #[test]
