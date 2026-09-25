@@ -1,4 +1,4 @@
-//! Reads the ecosystem's durable `tasks.my` format (the same dotted-alist
+//! Reads the ecosystem's durable `tasks.lisp` format (the same dotted-alist
 //! convention `my-lisp`'s `:9999` `sync-tasks`/`sync-milestone` ops read) so
 //! `swarm-node` can absorb the same durable plan files as part of the M0.5
 //! migration off `:9999` for coordination traffic.
@@ -53,7 +53,7 @@ fn atom_text(sexp: &Sexp) -> Option<String> {
 }
 
 /// A task's `done` value is `t` in two shapes actually used across this
-/// ecosystem's `tasks.my` files: the bare `(done . t)`, and the
+/// ecosystem's `tasks.lisp` files: the bare `(done . t)`, and the
 /// evidence-carrying `(done . (t . "who/when/what happened"))` -- the
 /// dotted pair's own car is still the atom `t`, its cdr is just a record
 /// of proof rather than nothing. Treat both as done; only `(done . ())`
@@ -68,7 +68,7 @@ fn is_done_value(sexp: &Sexp) -> bool {
     matches!(items.as_slice(), [Sexp::Atom(t), Sexp::Atom(dot), _] if t == "t" && dot == ".")
 }
 
-/// Parses a whole `tasks.my` document: `((kind . tasks-my) (tasks . ((ID .
+/// Parses a whole `tasks.lisp` document: `((kind . tasks-my) (tasks . ((ID .
 /// ((priority . N) (capabilities . (a b)) (depends-on . (x y)) (done . t)
 /// (description . "..."))) ...)))`. Returns `Err` with a human-readable
 /// reason (not a `(line, column)` location — that level of precision was
@@ -176,7 +176,7 @@ mod tests {
     #[test]
     fn recognizes_done_with_evidence_not_just_bare_t() {
         // (done . (t . "who/when/what happened")) is the predominant shape
-        // real completed tasks use across this ecosystem's tasks.my files
+        // real completed tasks use across this ecosystem's tasks.lisp files
         // (5 of them in my-lisp's own file alone as of 2026-09-01) -- only
         // the older bare (done . t) had ever been tested here.
         let text = r#"
