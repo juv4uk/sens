@@ -5,19 +5,19 @@
 ; domain-result rows are active again. Historical two-part cond remains only a
 ; migration compatibility path while bootstrap/library callers are converted.
 
-((expr . "(atom (quote ()))")
+((expr . "(00000010 (quote ()))")
  (expected . "(structural-kind empty-list)")
  (active . t)
  (identity . "0002")
  (case . canon-zero))
 
-((expr . "(atom (quote radio))")
+((expr . "(00000010 (quote radio))")
  (expected . "(structural-kind atom)")
  (active . t)
  (identity . "0002")
  (case . non-pair-atom))
 
-((expr . "(atom (quote (radio antenna)))")
+((expr . "(00000010 (quote (radio antenna)))")
  (expected . "(structural-kind pair)")
  (active . t)
  (identity . "0002")

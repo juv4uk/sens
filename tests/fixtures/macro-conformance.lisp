@@ -74,7 +74,7 @@
 ; --- macro producing different forms based on argument shape ---
 
 ; Макрос, що вибирає форму за типом аргументу
-((expr . "(defmacro smart-quote (x) (cond ((atom x) (list (quote quote) x)) (t x))) (smart-quote hello)") (expected . "hello") (tier . 2) (axioms . (G4 G8)) (note . "macro inspects argument shape at expansion time: atom gets quoted via (list (quote quote) x)"))
+((expr . "(defmacro smart-quote (x) (cond ((00000010 x) (list (quote quote) x)) (t x))) (smart-quote hello)") (expected . "hello") (tier . 2) (axioms . (G4 G8)) (note . "macro inspects argument shape at expansion time: atom gets quoted via (list (quote quote) x)"))
 
 ; --- macro shadowing: def overwrites macro binding ---
 
