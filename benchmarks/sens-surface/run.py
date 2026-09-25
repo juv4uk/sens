@@ -79,57 +79,83 @@ def fib_py(n):
     return a
 
 
+def ack_py(m, n):
+    # Ітеративний Аккерман через стек — незалежний від рекурсії оракул.
+    stack = [m]
+    while stack:
+        m = stack.pop()
+        if m == 0:
+            n += 1
+        elif n == 0:
+            stack.append(m - 1)
+            n = 1
+        else:
+            stack.append(m - 1)
+            stack.append(m)
+            n -= 1
+    return n
+
+
+BUILD = """\
+({def} build ({lambda} (n acc)
+  ({cond} (({eq} n 0) acc)
+        (t (build ({-} n 1) ({cons} n acc))))))
+"""
+LEN = """\
+({def} len ({lambda} (xs n)
+  ({cond} (({atom} xs) n)
+        (t (len ({cdr} xs) ({+} n 1))))))
+"""
+TREE = """\
+({def} mk ({lambda} (d)
+  ({cond} (({eq} d 0) ({quote} leaf))
+        (t ({cons} (mk ({-} d 1)) (mk ({-} d 1)))))))
+"""
+
+# Кожне навантаження: setup (визначення), call (вираз-відповідь),
+# params (повний розмір), small (для valgrind), expected (оракул).
 WORKLOADS = {
     # Дерево рекурсивних викликів: переважає вартість виклику функції.
     "fib": {
-        "params": {"N": 25},
-        "src": """\
+        "params": {"N": 25}, "small": {"N": 16},
+        "setup": """\
 ({def} fib ({lambda} (n)
   ({cond} (({eq} n 0) 0)
         (({eq} n 1) 1)
         (t ({+} (fib ({-} n 1)) (fib ({-} n 2)))))))
-(print (fib {N}))
 """,
+        "call": "(fib {N})",
         "expected": lambda p: str(fib_py(p["N"])),
     },
     # Хвостовий цикл: арифметика + eq на кожному кроці.
     "loop": {
-        "params": {"N": 300000},
-        "src": """\
+        "params": {"N": 300000}, "small": {"N": 5000},
+        "setup": """\
 ({def} loop ({lambda} (n acc)
   ({cond} (({eq} n 0) acc)
         (t (loop ({-} n 1) ({+} acc 2))))))
-(print (loop {N} 0))
 """,
+        "call": "(loop {N} 0)",
         "expected": lambda p: str(2 * p["N"]),
     },
     # Списки: побудова cons-ами, розворот акумулятором, підрахунок довжини.
     "lists": {
-        "params": {"N": 1000, "R": 120},
-        "src": """\
-({def} build ({lambda} (n acc)
-  ({cond} (({eq} n 0) acc)
-        (t (build ({-} n 1) ({cons} n acc))))))
+        "params": {"N": 1000, "R": 120}, "small": {"N": 200, "R": 10},
+        "setup": BUILD + LEN + """\
 ({def} rev ({lambda} (xs acc)
   ({cond} (({atom} xs) acc)
         (t (rev ({cdr} xs) ({cons} ({car} xs) acc))))))
-({def} len ({lambda} (xs n)
-  ({cond} (({atom} xs) n)
-        (t (len ({cdr} xs) ({+} n 1))))))
 ({def} work ({lambda} (r total)
   ({cond} (({eq} r 0) total)
         (t (work ({-} r 1) ({+} total (len (rev (build {N} ({quote} ())) ({quote} ())) 0)))))))
-(print (work {R} 0))
 """,
+        "call": "(work {R} 0)",
         "expected": lambda p: str(p["N"] * p["R"]),
     },
     # Пошук eq у списку (форма реального member?, #1278), найгірший випадок.
     "member": {
-        "params": {"N": 100, "R": 5000},
-        "src": """\
-({def} build ({lambda} (n acc)
-  ({cond} (({eq} n 0) acc)
-        (t (build ({-} n 1) ({cons} n acc))))))
+        "params": {"N": 100, "R": 5000}, "small": {"N": 100, "R": 50},
+        "setup": BUILD + """\
 ({def} mem ({lambda} (x xs)
   ({cond} (({atom} xs) 0)
         (({eq} x ({car} xs)) 1)
@@ -138,24 +164,114 @@ WORKLOADS = {
 ({def} work ({lambda} (r hits)
   ({cond} (({eq} r 0) hits)
         (t (work ({-} r 1) ({+} hits (mem {N} xs)))))))
-(print (work {R} 0))
 """,
+        "call": "(work {R} 0)",
         "expected": lambda p: str(p["R"]),
     },
     # Замикання: створення і виклик lambda з захопленою змінною.
     "closures": {
-        "params": {"N": 200000},
-        "src": """\
+        "params": {"N": 200000}, "small": {"N": 5000},
+        "setup": """\
 ({def} make-adder ({lambda} (k) ({lambda} (x) ({+} x k))))
 ({def} add3 (make-adder 3))
 ({def} loop ({lambda} (n acc)
   ({cond} (({eq} n 0) acc)
         (t (loop ({-} n 1) (add3 acc))))))
-(print (loop {N} 0))
 """,
+        "call": "(loop {N} 0)",
         "expected": lambda p: str(3 * p["N"]),
     },
+    # Аккерман: глибока не-хвостова рекурсія з вкладеним викликом.
+    "ackermann": {
+        "params": {"N": 7}, "small": {"N": 3},
+        "setup": """\
+({def} ack ({lambda} (m n)
+  ({cond} (({eq} m 0) ({+} n 1))
+        (({eq} n 0) (ack ({-} m 1) 1))
+        (t (ack ({-} m 1) (ack m ({-} n 1)))))))
+""",
+        "call": "(ack 3 {N})",
+        "expected": lambda p: str(ack_py(3, p["N"])),
+    },
+    # Бінарне дерево: алокація пар і обхід обох гілок.
+    "tree": {
+        "params": {"N": 16}, "small": {"N": 10},
+        "setup": TREE + """\
+({def} cnt ({lambda} (x)
+  ({cond} (({atom} x) 1)
+        (t ({+} (cnt ({car} x)) (cnt ({cdr} x)))))))
+""",
+        "call": "(cnt (mk {N}))",
+        "expected": lambda p: str(2 ** p["N"]),
+    },
+    # Асоціативний список: пошук за ключем eq, O(N^2).
+    "assoc": {
+        "params": {"N": 400}, "small": {"N": 30},
+        "setup": """\
+({def} mkal ({lambda} (n acc)
+  ({cond} (({eq} n 0) acc)
+        (t (mkal ({-} n 1) ({cons} ({cons} n ({+} n n)) acc))))))
+({def} look ({lambda} (k al)
+  ({cond} (({atom} al) 0)
+        (({eq} k ({car} ({car} al))) ({cdr} ({car} al)))
+        (t (look k ({cdr} al))))))
+({def} sumall ({lambda} (k al acc)
+  ({cond} (({eq} k 0) acc)
+        (t (sumall ({-} k 1) al ({+} acc (look k al)))))))
+""",
+        "call": "(sumall {N} (mkal {N} ({quote} ())) 0)",
+        "expected": lambda p: str(p["N"] * (p["N"] + 1)),
+    },
+    # Функції вищого порядку: map/fold з анонімними lambda.
+    "mapfold": {
+        "params": {"N": 1000, "R": 60}, "small": {"N": 200, "R": 5},
+        "setup": BUILD + """\
+({def} mymap ({lambda} (f xs)
+  ({cond} (({atom} xs) xs)
+        (t ({cons} (f ({car} xs)) (mymap f ({cdr} xs)))))))
+({def} myfold ({lambda} (f acc xs)
+  ({cond} (({atom} xs) acc)
+        (t (myfold f (f acc ({car} xs)) ({cdr} xs))))))
+({def} work ({lambda} (r total)
+  ({cond} (({eq} r 0) total)
+        (t (work ({-} r 1)
+                 ({+} total (myfold ({lambda} (a b) ({+} a b)) 0
+                                   (mymap ({lambda} (x) ({+} x x)) (build {N} ({quote} ()))))))))))
+""",
+        "call": "(work {R} 0)",
+        "expected": lambda p: str(p["R"] * p["N"] * (p["N"] + 1)),
+    },
+    # Взаємна рекурсія двох функцій.
+    "evenodd": {
+        "params": {"N": 300000}, "small": {"N": 5000},
+        "setup": """\
+({def} is-even ({lambda} (n)
+  ({cond} (({eq} n 0) 1)
+        (t (is-odd ({-} n 1))))))
+({def} is-odd ({lambda} (n)
+  ({cond} (({eq} n 0) 0)
+        (t (is-even ({-} n 1))))))
+""",
+        "call": "(is-even {N})",
+        "expected": lambda p: "1" if p["N"] % 2 == 0 else "0",
+    },
+    # Розгортання вкладеної структури в плаский список.
+    "flatten": {
+        "params": {"N": 15}, "small": {"N": 9},
+        "setup": TREE + LEN + """\
+({def} flat ({lambda} (x acc)
+  ({cond} (({atom} x) ({cons} x acc))
+        (t (flat ({car} x) (flat ({cdr} x) acc))))))
+""",
+        "call": "(len (flat (mk {N}) ({quote} ())) 0)",
+        "expected": lambda p: str(2 ** p["N"]),
+    },
 }
+
+
+def program_text(wl, params):
+    return wl["setup"] + "(print " + wl["call"] + ")\n"
+
 
 EMPTY_SRC = "(print 0)\n"
 
@@ -254,6 +370,10 @@ def main():
     ap.add_argument("--check-only", action="store_true",
                     help="лише перевірити правильність усіх форм, без замірів")
     ap.add_argument("--out", default=None, help="каталог результатів")
+    ap.add_argument("--small", action="store_true",
+                    help="малі розміри навантажень (для valgrind)")
+    ap.add_argument("--emit", default=None,
+                    help="лише записати setup/call/expected кожної форми в каталог і вийти")
     ap.add_argument("--forms", default="en,sens",
                     help="кома-список форм з en,sens,uk,wrap (за замовч. en,sens)")
     args = ap.parse_args()
@@ -264,12 +384,29 @@ def main():
     names = args.only.split(",") if args.only else list(WORKLOADS)
     workdir = Path(tempfile.mkdtemp(prefix="sens-bench-"))
 
+    if args.emit:
+        emit = Path(args.emit)
+        emit.mkdir(parents=True, exist_ok=True)
+        for name in names:
+            wl = WORKLOADS[name]
+            params = wl["small"] if args.small else wl["params"]
+            for form in FORMS:
+                (emit / f"{name}-{form}.setup.lisp").write_text(
+                    render(wl["setup"], form, params), encoding="utf-8")
+                (emit / f"{name}-{form}.call.lisp").write_text(
+                    render(wl["call"], form, params) + "\n", encoding="utf-8")
+            (emit / f"{name}.expected").write_text(wl["expected"](params) + "\n")
+        print(f"записано в {emit}")
+        return
+
     programs = {}  # (workload, form) -> path
     for name in names:
         wl = WORKLOADS[name]
+        params = wl["small"] if args.small else wl["params"]
+        wl["active"] = params
         for form in FORMS:
             path = workdir / f"{name}-{form}.lisp"
-            path.write_text(render(wl["src"], form, wl["params"]), encoding="utf-8")
+            path.write_text(render(program_text(wl, params), form, params), encoding="utf-8")
             programs[(name, form)] = path
     empty = workdir / "empty.lisp"
     empty.write_text(EMPTY_SRC, encoding="utf-8")
@@ -277,7 +414,7 @@ def main():
     # 1. Правильність — до будь-якого заміру часу.
     failures = []
     for name in names:
-        expected = WORKLOADS[name]["expected"](WORKLOADS[name]["params"])
+        expected = WORKLOADS[name]["expected"](WORKLOADS[name]["active"])
         for form in FORMS:
             r = run_once(args.sens, programs[(name, form)], args.cpu)
             got = answer_of(r["stdout"])
@@ -310,7 +447,7 @@ def main():
         for name in names:
             for form in order:
                 r = run_once(args.sens, programs[(name, form)], args.cpu)
-                expected = WORKLOADS[name]["expected"](WORKLOADS[name]["params"])
+                expected = WORKLOADS[name]["expected"](WORKLOADS[name]["active"])
                 if answer_of(r["stdout"]) != expected or r["exit"] != 0:
                     print(f"ПОМИЛКА в раунді {rnd}: {name}/{form}", r["stderr"][:300])
                     sys.exit(3)
@@ -357,7 +494,7 @@ def main():
                     vals.append((pick(form) - st) / base)
             ratios[form] = {"median": median(vals), "min": min(vals),
                             "max": max(vals)} if vals else None
-        summary["workloads"][name] = {"params": WORKLOADS[name]["params"],
+        summary["workloads"][name] = {"params": WORKLOADS[name]["active"],
                                       "forms": per_form, "ratio_vs_sens": ratios}
 
     facts = env_facts(args.sens, repo)

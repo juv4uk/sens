@@ -7,5 +7,6 @@
 ;;       python3 benchmarks/sens-surface/run.py --sens target-guix/release/sens
 (specifications->manifest
  (quote ("python"
+         "valgrind"       ; icount.sh — детермінована кількість інструкцій
          "util-linux"     ; taskset
          "coreutils")))   ; sha256sum
