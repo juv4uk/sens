@@ -265,7 +265,7 @@ jobs:
         run: |
           ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
           ./target/debug/my-lisp scripts/generate-rust-semantic-registry.lisp --check
-          ./target/debug/my-lisp scripts/generate-rust-evaluator-dispatch.lisp --check
+          ./target/debug/my-lisp scripts/generate-rust-evaluator-dispatch.lisp --check\n          ./target/debug/my-lisp scripts/generate-rust-profile-mechanism-routes.lisp --check
 
       - name: Check public API discovery projection
         if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
