@@ -9,7 +9,7 @@
 ; These spaces are orthogonal. The grading path never turns a short answer
 ; into an 8-bit function and never turns an 8-bit function into ().
 
-(core4-predicate-answer-boundary/3
+(core4-predicate-answer-boundary/4
 
   ((profile . core4)
    (scope . predicate-answer-space)
@@ -27,6 +27,12 @@
   ((undirected-answer . ())
    (sanskrit . ajñāta)
    (direction . none))
+
+  ((function-convergence .
+     ((00000000 ())
+      (11111111 ())))
+   (function-identities . distinct)
+   (result-value . one-empty-list))
 
   ((laws . boundary)
    (short-answer-to-sens-function . forbidden)
