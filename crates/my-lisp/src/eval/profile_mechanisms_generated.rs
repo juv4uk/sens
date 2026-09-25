@@ -17,11 +17,7 @@ struct ProfileMechanismRoute {
 }
 
 const PROFILE_MECHANISM_ROUTES: &[ProfileMechanismRoute] = &[
-    ProfileMechanismRoute {
-        profile: CoreProfile::Core3,
-        sens: crate::sens!(10101000),
-        kind: ProfileMechanismRouteKind::RegisteredHostMechanism,
-    },
+    ProfileMechanismRoute { profile: CoreProfile::Core3, sens: crate::sens!(10101000), kind: ProfileMechanismRouteKind::RegisteredHostMechanism },
 ];
 
 pub(crate) fn profile_mechanism_route(
