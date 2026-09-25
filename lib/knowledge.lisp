@@ -300,6 +300,10 @@
        (cond
          ((= (length goal) 2) 1 (knowledge-goal-valid? (second goal)))
          ((= (length goal) 2) 0 (quote ()))))
+      ((eq? (car goal) (quote not?))
+       (cond
+         ((= (length goal) 2) 1 (knowledge-goal-valid? (second goal)))
+         ((= (length goal) 2) 0 (quote ()))))
       (t (knowledge-terms-valid? (cdr goal))))))
 
 (def knowledge-goals-valid?
@@ -329,13 +333,21 @@
   (lambda (head)
     (cond
       ((eq? (car head) (quote not)) (second head))
+      ((eq? (car head) (quote not?)) (second head))
       (t (list (quote not) head)))))
 
 (def advice-conflict-proof
   (lambda (module-name clause)
     (cond
       ((module-known? module-name)
-       (reason-in module-name (opposite-knowledge-head (car clause))))
+       (let ((proofs (reason-in module-name (opposite-knowledge-head (car clause)))))
+         (cond
+           ((atom? proofs)
+            (cond
+              ((eq? (car (car clause)) (quote not)) (quote ()))
+              ((eq? (car (car clause)) (quote not?)) (quote ()))
+              (t (reason-in module-name (list (quote not?) (car clause))))))
+           (t proofs))))
       (t (quote ())))))
 
 (def advice-decision
