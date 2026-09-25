@@ -76,7 +76,7 @@ fn process_run(
 ///   (process-result exit-code-or-() stdout-bytes stderr-bytes)
 ///
 /// Process selection and allowlisting remain host capability policy. Text
-/// decoding belongs to the language layer (`lib/utf8.my`).
+/// decoding belongs to the language layer (`lib/utf8.lisp`).
 pub(super) fn evaluate_process_run_raw(
     arguments: &[Expr],
     environment: &Environment,

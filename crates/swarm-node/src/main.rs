@@ -145,7 +145,7 @@ struct Node {
     /// `sync-events` or `sync-complete`) since startup — see `synced()`.
     caught_up_with: Mutex<HashSet<String>>,
     /// Durable per-task voting promises. A YES is published to
-    /// `<data-dir>/claim-promises.my` before it can leave this process, so
+    /// `<data-dir>/claim-promises.lisp` before it can leave this process, so
     /// crash/restart cannot erase a same-generation single-vote fence.
     claim_promises: Mutex<claim_promise::ClaimPromiseStore>,
     /// Last time we received *any* message (heartbeat or otherwise) from
@@ -195,7 +195,7 @@ struct Node {
     /// path of `broadcast_to_peers`).
     recent_delivery_failures: Mutex<VecDeque<(String, String, String)>>,
     /// Durable per-peer redelivery of `push-event`s that failed. Persisted
-    /// at `<data-dir>/retry-queue.my`, drained back onto a peer's fresh
+    /// at `<data-dir>/retry-queue.lisp`, drained back onto a peer's fresh
     /// stream when it reconnects (`register_peer`) -- see `retry.rs`.
     retry_queue: Mutex<retry::RetryQueue>,
 }

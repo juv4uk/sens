@@ -103,7 +103,7 @@ impl Event {
 }
 
 /// Stable node-id + restart-counting epoch + durable incarnation id,
-/// persisted at `<data-dir>/node.my`.
+/// persisted at `<data-dir>/node.lisp`.
 ///
 /// Identity model (M1.1a):
 /// - `node_id` — logical actor name, stable across lifetimes;
@@ -192,7 +192,7 @@ pub fn load_or_init_identity(data_dir: &Path, node_id: &str) -> std::io::Result<
                 path.display()
             ))
         })?;
-        // A pre-M1.1a node.my has no incarnation: generate one now and
+        // A pre-M1.1a node.lisp has no incarnation: generate one now and
         // persist it — this upgrade keeps the journal's legacy events
         // (incarnation-less) distinct from everything this process will
         // emit from here on. If an incarnation field is present, however,

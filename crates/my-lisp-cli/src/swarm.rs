@@ -74,7 +74,7 @@ fn read_request_frame(reader: &mut BufReader<TcpStream>, limit: usize) -> io::Re
 }
 
 /// Looks up `(key . value)` in a dotted-pair alist like
-/// `language-contract.my`'s `((major . 1) (minor . 0) ...)` — distinct
+/// `language-contract.lisp`'s `((major . 1) (minor . 0) ...)` — distinct
 /// from `list_items`' 2-element-list reading of the request/response
 /// envelope, since a dotted pair's cdr is the value directly, not a
 /// nested one-element list.
@@ -413,7 +413,7 @@ pub(crate) fn oracle_check(source: &str, contract_version: &Value) -> (Value, bo
 }
 
 /// Query the WSM-owned reference directory without duplicating its entries in
-/// Rust. The session already contains core.my; Guard is the one shared
+/// Rust. The session already contains core.lisp; Guard is the one shared
 /// embed in `wsm-guard-core` (same library every Guard consumer uses), but
 /// its reference directory is read fresh from disk on every call, exactly
 /// like the LSP's `guard_knowledge.rs` already does — adding or editing a

@@ -1,6 +1,6 @@
 //! The McCarthy primitives (`eq`, `car`, `cdr`, `cons`, `cond`, `quote`'s
 //! helper), plus the compatibility `def` surface. Language-owned `defmacro`
-//! is bootstrapped from `lib/macro.my`; the Rust kernel no longer implements it.
+//! is bootstrapped from `lib/macro.lisp`; the Rust kernel no longer implements it.
 
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};

@@ -26,7 +26,7 @@ struct Promise {
 }
 
 /// Local, crash-recoverable single-vote fence at
-/// `<data-dir>/claim-promises.my`.
+/// `<data-dir>/claim-promises.lisp`.
 pub struct ClaimPromiseStore {
     path: PathBuf,
     promises: BTreeMap<String, Promise>,
@@ -352,7 +352,7 @@ mod tests {
         drop(store);
 
         fs::write(
-            dir.join("claim-promises.my.tmp"),
+            dir.join("claim-promises.lisp.tmp"),
             "(claim-promises/1 (promise",
         )
         .unwrap();

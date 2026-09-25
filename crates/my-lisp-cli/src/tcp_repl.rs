@@ -18,7 +18,7 @@ use std::process;
 /// `process-run` if `--allow-process` was also passed. Loopback-only keeps
 /// that blast radius to "processes already running as this user on this
 /// machine", matching what the stdio REPL already allows.
-/// Each connection gets its own fresh `Session` (core.my reloaded from
+/// Each connection gets its own fresh `Session` (core.lisp reloaded from
 /// scratch) rather than sharing one across every caller — tried the shared
 /// version first, and it let one connection's `def` (accidental or not)
 /// corrupt every other caller's environment with no way to trace it back.
@@ -63,7 +63,7 @@ pub(crate) fn run_tcp_repl(port: u16, core_lib: &str, allowed: &[String]) {
 
         // Keep the same language bootstrap invariant as the local CLI:
         // explicitly install the narrow make-macro mechanism, then let Lisp
-        // own defmacro before core.my defines its derived forms. No evaluator
+        // own defmacro before core.lisp defines its derived forms. No evaluator
         // head-name fallback is allowed to rescue a bare custom Environment.
         if load_macro_library(&mut session).is_ok() {
             if let Ok(core_ast) = parse(core_lib) {

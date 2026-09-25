@@ -10,7 +10,7 @@
 //! redelivery path is now warranted.
 //!
 //! This queue stores only `(peer_id, event_id)` pairs in a small persisted
-//! file (`<data-dir>/retry-queue.my`). The full event payload is *not*
+//! file (`<data-dir>/retry-queue.lisp`). The full event payload is *not*
 //! duplicated here: it is re-read from the durable journal to which the
 //! event was already appended (journal = authoritative event store). If a
 //! queued event has since been compacted out of the journal, the entry is
@@ -44,7 +44,7 @@ pub struct RetryQueue {
 }
 
 impl RetryQueue {
-    /// Opens the queue persisted at `data_dir/retry-queue.my`, creating an
+    /// Opens the queue persisted at `data_dir/retry-queue.lisp`, creating an
     /// empty in-memory queue if the file is absent or unreadable (a corrupt
     /// queue must not take the node down -- it only affects retries).
     pub fn open(data_dir: &Path) -> RetryQueue {
