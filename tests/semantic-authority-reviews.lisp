@@ -138,4 +138,4 @@
 (review "crates/my-lisp/src/eval/mod.rs" "3730c906dc384b9bd6bc56fe215202251d846db68d3a5cadc1e9ef8058a25b8f" issue-1006 sens-mechanism-api-export)
 (review "crates/my-lisp/src/lib.rs" "c6fb80f302fb0e138f2515cf9e5ba433a23f4bdda968aafc19d4cd043b59cb2e" issue-1006 sens-mechanism-public-export)
 ; #1406 observer-only RED witness: host availability must not become SENS admission.
-(review "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" "6029b05d80438d4dc6076dc40d4213957149abde8823077877a5d747c8646f3e" issue-1406 sens-host-registration-admission-observer)
+(review "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" "729d3a741df2b4f2fd7cb278b09107e449c6b19eaf58241a5e5b25bdd58cf248" issue-1406 sens-host-registration-admission-observer)
