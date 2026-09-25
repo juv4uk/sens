@@ -1,7 +1,7 @@
 use std::fs;
 use std::process::Command;
 
-use my_lisp::{sens, surface_has_sid};
+use my_lisp::{sens, surface_has_sens};
 use wsm_clips_kernel::ClipsKernel;
 use wsm_common_lisp_kernel::CommonLispKernel;
 use wsm_prolog_kernel::PrologKernel;
@@ -28,8 +28,8 @@ fn run_source(source: &str) -> (bool, String, String) {
 #[test]
 fn human_surfaces_only_route_to_exact_raw_invoke_sens() {
     let invoke = sens!(10101000);
-    assert!(surface_has_sid("invoke", invoke));
-    assert!(surface_has_sid("викликати", invoke));
+    assert!(surface_has_sens("invoke", invoke));
+    assert!(surface_has_sens("викликати", invoke));
 }
 
 #[test]
