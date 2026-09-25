@@ -375,7 +375,9 @@ pub fn load_meta_evaluator_library(
 /// preserves the closed language core while giving embedders one canonical
 /// time-layer loader instead of ad-hoc `include_str!` calls.
 pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    eval_program(TIME_LIBRARY_SOURCE, session)
+    let result = eval_program(TIME_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load the shared byte/text adapters used by process and TCP boundaries.
@@ -386,14 +388,18 @@ pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
     eval_program(PROCESS_LIBRARY_SOURCE, session)?;
-    eval_program(TCP_LIBRARY_SOURCE, session)
+    let result = eval_program(TCP_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load language-owned TCP text semantics explicitly when an embedder does
 /// not otherwise need the process adapter.
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    eval_program(TCP_LIBRARY_SOURCE, session)
+    let result = eval_program(TCP_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load language-owned file text semantics: public `read-file`/`write-file`
@@ -402,7 +408,9 @@ pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageErr
 /// introduced for this migration.
 pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    eval_program(FS_LIBRARY_SOURCE, session)
+    let result = eval_program(FS_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Public mechanical routing hook for tooling and embedders.
