@@ -190,4 +190,4 @@ crates/my-lisp/tests/ukr_acceptance.rs	ukr_acceptance_program_executes_through_r
 crates/my-lisp/tests/ukr_acceptance.rs	shadowing_ukr_peer_does_not_retarget_english_peer	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
 
 crates/my-lisp/tests/core_profile_runtime_1272.rs	selected_core_profile_signal_is_shared_mechanically	observer	selected-core-profile-mechanism	contracts/core-special-form-profile-policy.lisp	migrated
-crates/my-lisp/tests/sens_host_registration_admission_1406.rs	host_registration_alone_must_not_make_an_unadmitted_sens_function_callable	observer	sens-host-registration-admission	#997 + #1006 + #1406	migrated
+crates/my-lisp/tests/sens_host_registration_admission_1406.rs	host_registration_alone_must_not_make_function_without_admitted_mechanism_callable	observer	sens-host-registration-admission	#997 + #1006 + #1406	migrated
