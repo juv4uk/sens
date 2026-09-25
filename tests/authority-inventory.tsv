@@ -195,3 +195,6 @@ crates/my-lisp/tests/core3_profile_runtime_1414.rs	core3_loader_selects_core3_on
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	lexical_child_shares_selected_core3_signal	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	later_explicit_core4_load_replaces_core3_signal_without_implicit_fallback	observer	selected-core3-profile-mechanism	contracts/core-profile-contract.lisp	migrated
 crates/my-lisp-cli/src/main.rs	cli_core_bootstrap_selects_core4_through_the_canonical_loader	observer	cli-selected-core4-bootstrap	#1272 + #1417	migrated
+
+crates/my-lisp-cli/src/island_invoke.rs	evaluate_raw_invoke	mechanism	exact-SENS raw island availability	function SENS 10101000	migrated
+crates/my-lisp-cli/src/island_invoke.rs	datalog_adapter_preserves_native_closure_observation	observer	raw island adapter evidence	crates/my-lisp-cli/src/island_invoke.rs	migrated
