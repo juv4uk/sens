@@ -339,6 +339,22 @@ impl Rational {
     /// verlieren. Alles Größere bleibt `Value::Rational` (siehe `Display`,
     /// das `/1` bei Ganzzahlen weglässt), statt genau die stille Approximation
     /// zu riskieren, die das Prinzip exakter Zahlen verbietet.
+    /// Чисельник і знаменник, якщо обидва влазять у `i64` — вхід швидкого
+    /// шляху точної арифметики (`eval/arithmetic.rs`).
+    pub(crate) fn small_parts(&self) -> Option<(i64, i64)> {
+        Some((self.numerator.to_i64()?, self.denominator.to_i64()?))
+    }
+
+    /// Дріб із уже скорочених частин (`denominator > 0`, `gcd == 1`) — без
+    /// повторного `gcd` на `BigInt`. Лише для швидкого шляху, що сам скоротив.
+    pub(crate) fn from_reduced_small(numerator: i64, denominator: i64) -> Self {
+        debug_assert!(denominator > 0);
+        Self {
+            numerator: BigInt::from_i64(numerator),
+            denominator: BigInt::from_i64(denominator),
+        }
+    }
+
     pub fn as_precise_i64(&self) -> Option<i64> {
         if !self.is_integer() {
             return None;

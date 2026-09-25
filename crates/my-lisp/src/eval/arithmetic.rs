@@ -137,6 +137,93 @@ fn division_error(span: Span) -> LanguageError {
     )
 }
 
+// ── швидкий шлях точної раціональної арифметики ──
+// Коли чисельник і знаменник кожного операнда влазять у i64, дріб
+// рахується в i128 і скорочується на gcd — без BigInt і без купи. Якщо
+// будь-який проміжний результат не влазить у i64 (або ділення на нуль),
+// повертається None і рахує звичайний шлях. Результат побітово той самий,
+// що й у звичайного шляху (диференційний тест нижче): точність S1 не
+// змінюється, змінюється лише спосіб обчислення.
+
+fn small_exact(value: &Value) -> Option<(i128, i128)> {
+    match value {
+        // Точний Number — завжди ціле в межах ±2^53 (див. exact_value).
+        Value::Number(number, Exactness::Exact) => Some((*number as i64 as i128, 1)),
+        Value::Rational(rational) => rational
+            .small_parts()
+            .map(|(numerator, denominator)| (numerator as i128, denominator as i128)),
+        _ => None,
+    }
+}
+
+fn gcd_u128(mut a: u128, mut b: u128) -> u128 {
+    while b != 0 {
+        let rest = a % b;
+        a = b;
+        b = rest;
+    }
+    a
+}
+
+fn fits_i64(value: i128) -> bool {
+    (i64::MIN as i128..=i64::MAX as i128).contains(&value)
+}
+
+/// Нормальна форма: знаменник > 0, дріб скорочений, нуль — 0/1.
+fn reduce_small(numerator: i128, denominator: i128) -> Option<(i128, i128)> {
+    if denominator == 0 {
+        return None;
+    }
+    let (numerator, denominator) = if denominator < 0 {
+        (numerator.checked_neg()?, denominator.checked_neg()?)
+    } else {
+        (numerator, denominator)
+    };
+    let divisor = gcd_u128(numerator.unsigned_abs(), denominator as u128) as i128;
+    let (numerator, denominator) = (numerator / divisor, denominator / divisor);
+    (fits_i64(numerator) && fits_i64(denominator)).then_some((numerator, denominator))
+}
+
+fn small_step(operator: char, left: (i128, i128), right: (i128, i128)) -> Option<(i128, i128)> {
+    let ((n1, d1), (n2, d2)) = (left, right);
+    let (numerator, denominator) = match operator {
+        '+' => (n1.checked_mul(d2)?.checked_add(n2.checked_mul(d1)?)?, d1.checked_mul(d2)?),
+        '-' => (n1.checked_mul(d2)?.checked_sub(n2.checked_mul(d1)?)?, d1.checked_mul(d2)?),
+        '*' => (n1.checked_mul(n2)?, d1.checked_mul(d2)?),
+        '/' => (n1.checked_mul(d2)?, d1.checked_mul(n2)?),
+        _ => return None,
+    };
+    reduce_small(numerator, denominator)
+}
+
+fn small_rational_fast_path(
+    operator: char,
+    values: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let parts = values.iter().map(small_exact).collect::<Option<Vec<_>>>()?;
+    let (numerator, denominator) = match (operator, parts.len()) {
+        (_, 0) => return None,
+        ('-', 1) => reduce_small(parts[0].0.checked_neg()?, parts[0].1)?,
+        ('/', 1) => small_step('/', (1, 1), parts[0])?,
+        ('+', _) => parts.iter().try_fold((0, 1), |acc, &part| small_step('+', acc, part))?,
+        ('*', _) => parts.iter().try_fold((1, 1), |acc, &part| small_step('*', acc, part))?,
+        _ => parts[1..]
+            .iter()
+            .try_fold(parts[0], |acc, &part| small_step(operator, acc, part))?,
+    };
+    const MAX_EXACT: i128 = 1 << 53;
+    if denominator == 1
+        && (-MAX_EXACT..=MAX_EXACT).contains(&numerator)
+        && environment.numeric_bit_limit().is_none()
+    {
+        return Some(Ok(Value::Number(numerator as f64, Exactness::Exact)));
+    }
+    let rational = Rational::from_reduced_small(numerator as i64, denominator as i64);
+    Some(check_numeric_limit(environment, &rational, span).map(|()| exact_value(rational)))
+}
+
 // ── contract 2.1: value-level entry points (first-class builtins) ──
 // The expr-handlers above evaluate arguments then delegate here; the
 // builtin closures in eval/builtins.rs call these directly with
@@ -198,6 +285,11 @@ pub(super) fn arithmetic_on_values(
         // overflow: fall through to bignum path below
     }
 
+    let operator_char = operator.chars().next().unwrap_or(' ');
+    if let Some(result) = small_rational_fast_path(operator_char, values, environment, span) {
+        return result;
+    }
+
     let numerics = values
         .iter()
         .map(|value| numeric_value(value.clone(), span))
@@ -254,6 +346,12 @@ pub(super) fn division_on_values(
             span,
         ));
     }
+    if argument_count == values.len() {
+        if let Some(result) = small_rational_fast_path('/', values, environment, span) {
+            return result;
+        }
+    }
+
     let numerics = values
         .iter()
         .map(|value| numeric_value(value.clone(), span))
@@ -334,4 +432,120 @@ pub(super) fn comparison_on_values(
     // #216 exact-rational decisions stay mathematical data: 1/1 for YES,
     // 0/1 for NO. `exact_value` writes those canonically as exact 1 and 0.
     Ok(exact_value(Rational::integer(if holds { 1 } else { 0 })))
+}
+
+#[cfg(test)]
+mod rational_fast_path_tests {
+    use super::*;
+
+    /// Еталон: повільний шлях на BigRational, без швидкого шляху.
+    fn reference(operator: char, values: &[Value]) -> Option<Value> {
+        let exact = values
+            .iter()
+            .map(|value| match numeric_value(value.clone(), Span::default()).ok()? {
+                Numeric::Exact(rational) => Some(rational),
+                Numeric::Inexact(_) => None,
+            })
+            .collect::<Option<Vec<_>>>()?;
+        let result = match (operator, exact.len()) {
+            (_, 0) => return None,
+            ('-', 1) => exact[0].clone().checked_neg()?,
+            ('/', 1) => Rational::integer(1).checked_div(exact[0].clone())?,
+            ('+', _) => exact.into_iter().try_fold(Rational::integer(0), Rational::checked_add)?,
+            ('*', _) => exact.into_iter().try_fold(Rational::integer(1), Rational::checked_mul)?,
+            ('-', _) => exact[1..].iter().try_fold(exact[0].clone(), |r, v| r.checked_sub(v.clone()))?,
+            ('/', _) => exact[1..].iter().try_fold(exact[0].clone(), |r, v| r.checked_div(v.clone()))?,
+            _ => return None,
+        };
+        Some(exact_value(result))
+    }
+
+    struct Lcg(u64);
+    impl Lcg {
+        fn next(&mut self) -> u64 {
+            self.0 = self.0.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            self.0 >> 11
+        }
+        fn int(&mut self) -> i64 {
+            match self.next() % 8 {
+                0 => 0,
+                1 => i64::MAX - (self.next() % 3) as i64,
+                2 => i64::MIN + (self.next() % 3) as i64,
+                3 => (self.next() as i64) >> (self.next() % 60),
+                _ => (self.next() % 2001) as i64 - 1000,
+            }
+        }
+        fn value(&mut self) -> Value {
+            let numerator = self.int();
+            let denominator = match self.next() % 3 {
+                0 => 1,
+                _ => self.int(),
+            };
+            match Rational::new(numerator, denominator) {
+                Some(rational) => exact_value(rational),
+                None => exact_value(Rational::integer(numerator)),
+            }
+        }
+    }
+
+    fn same(left: &Value, right: &Value) -> bool {
+        match (left, right) {
+            (Value::Number(a, ea), Value::Number(b, eb)) => a == b && ea == eb,
+            (Value::Rational(a), Value::Rational(b)) => a == b,
+            _ => false,
+        }
+    }
+
+    #[test]
+    fn fast_path_is_identical_to_bigrational_reference() {
+        let environment = Environment::root();
+        let mut random = Lcg(0x5e45_1413);
+        let (mut fast_hits, mut fallbacks) = (0usize, 0usize);
+        for _ in 0..200_000 {
+            let operator = ['+', '-', '*', '/'][(random.next() % 4) as usize];
+            let arity = 1 + (random.next() % 4) as usize;
+            let values: Vec<Value> = (0..arity).map(|_| random.value()).collect();
+            match small_rational_fast_path(operator, &values, &environment, Span::default()) {
+                Some(Ok(fast)) => {
+                    fast_hits += 1;
+                    let expected = reference(operator, &values)
+                        .unwrap_or_else(|| panic!("fast path answered where reference failed: {operator} {values:?}"));
+                    assert!(same(&fast, &expected), "{operator} {values:?}: fast={fast} reference={expected}");
+                }
+                Some(Err(error)) => panic!("fast path error without limit: {error:?}"),
+                None => fallbacks += 1,
+            }
+        }
+        assert!(fast_hits > 100_000, "швидкий шлях має покривати більшість малих випадків: {fast_hits}");
+        eprintln!("швидкий шлях: {fast_hits}, передано повільному: {fallbacks}");
+    }
+
+    #[test]
+    fn fast_path_matches_conformance_examples() {
+        let environment = Environment::root();
+        let q = |n, d| exact_value(Rational::new(n, d).unwrap());
+        let cases = [
+            ('/', vec![q(5, 1), q(6, 1), q(8, 1), q(7, 1)], "5/336"),
+            ('+', vec![q(1, 3), q(1, 3)], "2/3"),
+            ('-', vec![q(1, 1), q(1, 3)], "2/3"),
+            ('*', vec![q(2, 3), q(9, 4)], "3/2"),
+            ('-', vec![q(1, 3)], "-1/3"),
+            ('+', vec![q(1, 3), q(1, 6)], "1/2"),
+            ('/', vec![q(6, 1), q(3, 1)], "2"),
+        ];
+        for (operator, values, expected) in cases {
+            let result = small_rational_fast_path(operator, &values, &environment, Span::default())
+                .expect("small case takes the fast path")
+                .unwrap();
+            assert_eq!(result.to_string(), expected, "{operator} {values:?}");
+        }
+    }
+
+    #[test]
+    fn division_by_zero_falls_back_to_the_named_error() {
+        let environment = Environment::root();
+        let values = [exact_value(Rational::integer(1)), exact_value(Rational::integer(0))];
+        assert!(small_rational_fast_path('/', &values, &environment, Span::default()).is_none());
+        assert!(division_on_values(&values, 2, &environment, Span::default()).is_err());
+    }
 }
