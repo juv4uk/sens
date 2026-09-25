@@ -24,6 +24,7 @@ jobs:
         with:
           repository: juv4uk/mccarthy-eval
           ref: 1ae9745b66a1439c1929b0d9038c680567118a58
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_DEPLOY_KEY }}
           path: .core1-historical/mccarthy-eval
 
       - name: Verify one-way SID mapping

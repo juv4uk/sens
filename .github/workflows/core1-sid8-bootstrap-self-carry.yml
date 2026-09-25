@@ -28,6 +28,7 @@ jobs:
         with:
           repository: juv4uk/mccarthy-eval
           ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_DEPLOY_KEY }}
           path: mccarthy-eval
           fetch-depth: 1
 
