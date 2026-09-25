@@ -1169,7 +1169,7 @@ fn evict_marks_dead_member_absent_everywhere() {
 }
 
 // ---------------------------------------------------------------------------
-// M1.2 auto-sync: periodic tasks.my file re-read
+// M1.2 auto-sync: periodic tasks.lisp file re-read
 // ---------------------------------------------------------------------------
 
 fn spawn_with_auto_sync(
@@ -1198,7 +1198,7 @@ fn spawn_with_auto_sync(
     node
 }
 
-/// M1.2: a tasks.my file registered via --auto-sync is periodically
+/// M1.2: a tasks.lisp file registered via --auto-sync is periodically
 /// re-read and its task definitions imported into the registry without
 /// any manual (sync-tasks) call. Modifying the file mid-flight must be
 /// picked up on the next cycle.
@@ -1211,7 +1211,7 @@ fn auto_sync_periodically_imports_tasks_my_file() {
     // Create the directory first (data_dir() only removes, doesn't recreate).
     std::fs::create_dir_all(&dir).unwrap();
 
-    // Write an initial tasks.my BEFORE starting the node.
+    // Write an initial tasks.lisp BEFORE starting the node.
     std::fs::write(
         &tasks_file,
         r#"
@@ -1512,7 +1512,7 @@ fn gossip_falls_back_to_observed_ip_when_peer_omits_advertise_host() {
 
 // --- push-event delivery confirmation ---------------------------------
 //
-// Original bug (SWARM-PUSH-EVENT-SILENT-LOSS, ecosystem/plans/tasks.my,
+// Original bug (SWARM-PUSH-EVENT-SILENT-LOSS, ecosystem/plans/tasks.lisp,
 // still open as of 2026-09-01): a socket write succeeding only proves the
 // bytes reached this machine's kernel send buffer -- it was silently
 // treated as "delivered." The owner's framing: event-created !=
