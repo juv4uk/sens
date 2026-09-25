@@ -154,6 +154,9 @@ premise three repos downstream with no traceable evidence chain.
     `blocked-current-tech` when live web access is unavailable unless
     the owner explicitly waives the scan.
 
+16. **Асиметричний semantic firewall (#1347): Rust може рости, Lisp не копіює Rust як істину.** Попередні правила про `library before primitive`, зменшення Rust або винесення поведінки в Lisp **не є вимогою міграції** і не можуть блокувати локальну Rust/runtime/compiler semantics. Rust може мати власні таблиці SID→meaning, enums, dispatch, fallback, optimization metadata й експериментальні закони. Самодостатність my-lisp означає інше: коли мовний закон існує в Lisp, він має бути сформульований і перевірений незалежно від структури поточного Rust implementation. Заборонений лише зворотний напрямок — `Rust/host/backend semantics -> Lisp language authority`. Не перенось Rust type names, match arms, tables або fallback rules у Lisp лише для того, щоб "забрати семантику з Rust"; це саме і є contamination, від якого ми захищаємо мову.
+
+
 ## Rule 0 for coordination specifically
 
 **Verify the swarm protocol before joining it.** Don't trust a cached

@@ -67,6 +67,17 @@ run_green rust-new-file
 printf '\n// substrate instrumentation is allowed\n' >> src/new.rs
 run_green rust-comment-growth
 
+# GREEN: local Rust semantics may grow too. #1347 forbids only feeding
+# implementation semantics back into Lisp language authority.
+cat > src/local_semantics.rs <<'EOF'
+pub enum LocalMeaning { Car, Cons }
+pub const LOCAL_SID_MEANING: &[(u8, LocalMeaning)] = &[
+    (0b00000101, LocalMeaning::Car),
+    (0b00000100, LocalMeaning::Cons),
+];
+EOF
+run_green rust-local-semantic-table
+
 # GREEN: non-Rust changes remain valid too.
 printf '(quote non-rust-change)\n' >> lib/core.lisp
 run_green non-rust-change

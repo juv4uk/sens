@@ -40,7 +40,7 @@ jobs:
       - name: Build my-lisp transport
         run: cargo build -p my-lisp-cli --bin my-lisp
 
-      - name: Forbidden semantic fixture is diagnosed and rejected
+      - name: Host semantic fixture is accepted
         shell: bash
         run: |
           set -euo pipefail
@@ -50,16 +50,10 @@ jobs:
 
           ./target/debug/my-lisp scripts/authority-guard.lisp > tests/authority-verdict.lisp
           cat tests/authority-verdict.lisp
-          grep -q 'semantic-authority-violation' tests/authority-verdict.lisp
+          grep -q 'authority-ok' tests/authority-verdict.lisp
+          ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
 
-          if ./target/debug/my-lisp scripts/authority-guard-enforce.lisp > /tmp/authority-forbidden.log 2>&1; then
-            echo 'ERROR: forbidden semantic fixture was accepted'
-            cat /tmp/authority-forbidden.log
-            exit 1
-          fi
-          cat /tmp/authority-forbidden.log
-
-      - name: Allowed mechanism fixture is accepted
+      - name: Host mechanism fixture is accepted
         shell: bash
         run: |
           set -euo pipefail
@@ -72,7 +66,7 @@ jobs:
           grep -q 'authority-ok' tests/authority-verdict.lisp
           ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
 
-      - name: Semantic authority leakage fixtures
+      - name: Asymmetric semantic firewall fixtures
         shell: bash
         run: |
           set -euo pipefail

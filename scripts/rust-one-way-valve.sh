@@ -23,4 +23,4 @@ else
   echo 'RUST-GROWTH-ALLOWED: no Rust source changes.'
 fi
 
-echo 'Rust growth is permitted for substrate/mechanism work. Semantic authority remains subject to architecture/conformance review. See #299, #695, #706.'
+echo 'Rust growth is unrestricted by semantic-content policy. Local meaning tables, enums, dispatch, fallbacks and experiments are allowed. Only host -> Lisp language-authority leakage is guarded by #1347.'
