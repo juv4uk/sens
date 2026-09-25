@@ -329,7 +329,7 @@ impl Default for Session {
             environment: Environment::root(),
         };
         crate::load_macro_library(&mut session)
-            .expect("embedded lib/macro.my must bootstrap a default Session");
+            .expect("embedded lib/macro.lisp must bootstrap a default Session");
         session
     }
 }

@@ -1,5 +1,5 @@
 //! WebAssembly bindings exposing the canonical my-lisp engine to the browser.
-//! Persistent session with core.my preloaded on first call.
+//! Persistent session with core.lisp preloaded on first call.
 
 use my_lisp::{
     eval_program, present_system_message, render_error_for_presentation,
@@ -151,7 +151,7 @@ struct Diagnostic {
     message: String,
 }
 
-/// Ensures the shared session exists and has core.my preloaded.
+/// Ensures the shared session exists and has core.lisp preloaded.
 /// Idempotent — subsequent calls are no-ops.
 fn init_if_needed() -> Result<(), String> {
     SESSION.with(|slot| {
@@ -168,7 +168,7 @@ fn session_with_core_fasl(fasl_bytes: &[u8]) -> Result<Session, String> {
     let (expressions, _) = my_lisp::fasl_decode_program(fasl_bytes)
         .ok_or_else(|| "failed to decode core4.lisp.fasl (format or hash mismatch)".to_string())?;
     my_lisp::eval_parsed_expressions(&expressions, &mut session)
-        .map_err(|error| format!("failed to preload core.my: {error}"))?;
+        .map_err(|error| format!("failed to preload core.lisp: {error}"))?;
     Ok(session)
 }
 
@@ -333,8 +333,8 @@ mod tests {
     use wasm_bindgen_test::wasm_bindgen_test;
 
     #[test]
-    fn core_my_definitions_available_after_init() {
-        init_if_needed().expect("core.my preload must succeed");
+    fn core_lisp_definitions_available_after_init() {
+        init_if_needed().expect("core.lisp preload must succeed");
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
@@ -343,7 +343,7 @@ mod tests {
                 SourceMode::PureLisp,
                 session,
             )
-            .expect("length should work after core.my preload");
+            .expect("length should work after core.lisp preload");
             assert_eq!(result.value.to_string(), "3");
         });
     }
@@ -412,7 +412,7 @@ mod tests {
     #[test]
     fn wasm_session_exposes_unicode_string_slice_with_clamped_bounds() {
         reset_session();
-        init_if_needed().expect("core.my preload must succeed");
+        init_if_needed().expect("core.lisp preload must succeed");
 
         SESSION.with(|slot| {
             let mut guard = slot.borrow_mut();
@@ -439,7 +439,7 @@ mod tests {
     #[test]
     fn persistent_session_preserves_definitions_across_calls() {
         reset_session();
-        init_if_needed().expect("core.my preload must succeed");
+        init_if_needed().expect("core.lisp preload must succeed");
 
         // Define foo in one call
         SESSION.with(|slot| {
@@ -474,7 +474,7 @@ mod tests {
     #[wasm_bindgen_test]
     fn wasm32_evaluate_keeps_definitions_across_calls() {
         reset_session();
-        init_if_needed().expect("core.my preload must succeed");
+        init_if_needed().expect("core.lisp preload must succeed");
 
         let mode = JsValue::from_str("my-lisp");
         evaluate("(def foo (lambda (x) (+ x 1)))", mode.clone()).expect("def should succeed");

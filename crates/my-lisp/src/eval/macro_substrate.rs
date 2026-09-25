@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 /// Install the narrow bootstrap mechanism that turns an evaluated closure
 /// into a macro value. `defmacro` itself remains language-owned in
-/// `lib/macro.my`; this binding only supplies Closure -> Macro materialization.
+/// `lib/macro.lisp`; this binding only supplies Closure -> Macro materialization.
 pub(crate) fn install(environment: &Environment) {
     environment.define(
         "make-macro",

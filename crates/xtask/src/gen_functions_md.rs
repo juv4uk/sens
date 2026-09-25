@@ -6,10 +6,10 @@
 //! to merely detect after the fact.
 //!
 //! This intentionally covers only the same 5 files that test covered
-//! (`result-status.my`, `narrate.my`, `translation.my`, `quantity.my`,
-//! `si.my`) — regenerating the *entire* FUNCTIONS.md (builtins table,
+//! (`result-status.lisp`, `narrate.lisp`, `translation.lisp`, `quantity.lisp`,
+//! `si.lisp`) — regenerating the *entire* FUNCTIONS.md (builtins table,
 //! all library sections, prose) from scratch is a larger project-owned
-//! generator rewrite (in the spirit of `scripts/generate-function-table.my`
+//! generator rewrite (in the spirit of `scripts/generate-function-table.lisp`
 //! replacing the retired Python generator) that is out of scope for this
 //! pass. That is left as a follow-up; see TEST-ARCHITECTURE-1 step 4 notes.
 //!

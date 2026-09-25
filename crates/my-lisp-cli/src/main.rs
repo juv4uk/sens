@@ -113,7 +113,7 @@ fn main() {
     // the evaluator no longer has a `make-macro` head-name escape hatch.
     if let Err(e) = my_lisp::load_macro_library(&mut session) {
         eprintln!(
-            "Error loading bootstrap macro.my: {}",
+            "Error loading bootstrap macro.lisp: {}",
             e.render(my_lisp::MACRO_LIBRARY_SOURCE)
         );
         process::exit(1);
@@ -142,27 +142,27 @@ fn main() {
     // MYLISP-CLI-BOOTSTRAP-ERROR-VISIBILITY (Manus AI review P1): this used
     // to be `let _ = eval_parsed_expressions(...)`, silently discarding the
     // result on both the FASL and text-parse paths. Low risk today (CORE_SRC
-    // is a static include_str! of the real, tested lib/core.my), but a
+    // is a static include_str! of the real, tested lib/core.lisp), but a
     // future broken snapshot would silently degrade every session's startup
-    // -- every def in core.my simply wouldn't exist, with no error printed,
+    // -- every def in core.lisp simply wouldn't exist, with no error printed,
     // failing far from the actual cause. Same fail-fast style the --lint
     // path already uses for lib/linter.lisp's own bootstrap below.
     match core_expressions {
         Some(core_ast) => {
             if let Err(e) = eval_parsed_expressions(&core_ast, &mut session) {
-                eprintln!("Error loading bootstrap core.my: {}", e.render(CORE_SRC));
+                eprintln!("Error loading bootstrap core.lisp: {}", e.render(CORE_SRC));
                 process::exit(1);
             }
         }
         None => match parse(CORE_SRC) {
             Ok(core_ast) => {
                 if let Err(e) = eval_parsed_expressions(&core_ast, &mut session) {
-                    eprintln!("Error loading bootstrap core.my: {}", e.render(CORE_SRC));
+                    eprintln!("Error loading bootstrap core.lisp: {}", e.render(CORE_SRC));
                     process::exit(1);
                 }
             }
             Err(e) => {
-                eprintln!("Failed to parse bootstrap core.my: {}", e.render(CORE_SRC));
+                eprintln!("Failed to parse bootstrap core.lisp: {}", e.render(CORE_SRC));
                 process::exit(1);
             }
         },
@@ -173,7 +173,7 @@ fn main() {
     // even after the old Rust calendar builtin is removed.
     if let Err(e) = my_lisp::load_time_library(&mut session) {
         eprintln!(
-            "Error loading time.my: {}",
+            "Error loading time.lisp: {}",
             e.render(my_lisp::TIME_LIBRARY_SOURCE)
         );
         process::exit(1);
@@ -185,7 +185,7 @@ fn main() {
     // removed safely.
     if let Err(e) = my_lisp::load_process_library(&mut session) {
         eprintln!(
-            "Error loading process.my: {}",
+            "Error loading process.lisp: {}",
             e.render(my_lisp::PROCESS_LIBRARY_SOURCE)
         );
         process::exit(1);
@@ -209,7 +209,7 @@ fn main() {
 
     // The sexpr/oracle server creates a fresh custom Environment per connection.
     // Its handler now establishes the macro substrate explicitly before this
-    // remaining language-owned seed is evaluated, so macro.my need not be
+    // remaining language-owned seed is evaluated, so macro.lisp need not be
     // duplicated into the seed string.
     static SEXPR_BOOTSTRAP: std::sync::OnceLock<String> = std::sync::OnceLock::new();
     let sexpr_bootstrap_lib: &'static str = SEXPR_BOOTSTRAP
@@ -452,14 +452,14 @@ fn main() {
         // Run file
         let filename = arg;
 
-        // `*argv*` (PLAN.md item 21's follow-up, for scripts/release.my
+        // `*argv*` (PLAN.md item 21's follow-up, for scripts/release.lisp
         // taking a version on the command line) — everything after the
         // filename, as a my-lisp list of strings, defined before the
         // script runs. Empty when nothing follows the filename, not an
         // error — a script that wants an argument checks for that itself
         // (`(atom *argv*)`), the same way any other missing-input case in
         // this language is handled, not a special CLI-only mechanism.
-        // `*argv*` (продовження PLAN.md, пункту 21, для scripts/release.my,
+        // `*argv*` (продовження PLAN.md, пункту 21, для scripts/release.lisp,
         // яка бере версію з командного рядка) — усе після імені файлу, як
         // my-lisp-список рядків, визначений до запуску скрипта. Порожній,
         // якщо нічого не йде після імені файлу, не помилка — скрипт, якому
