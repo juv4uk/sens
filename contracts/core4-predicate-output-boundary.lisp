@@ -36,7 +36,7 @@
      ((no-path  "0..0000000")
       (yes-path "1..1111111")
       (center   ())))
-   (center-count . one)
+   (center-count . 1)
    (center-direction . none))
 
   ((function-convergence .
@@ -44,4 +44,4 @@
       (11111111 ())))
    (function-identities . distinct)
    (shared-result . ())
-   (shared-result-count . one)))
+   (shared-result-count . 1)))
