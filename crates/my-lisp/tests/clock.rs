@@ -96,8 +96,13 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
         .expect("utc-now must remain admitted by sr/2");
     assert_eq!(
         session.environment.get("utc-now"),
-        Some(Value::Sid(utc_sid)),
-        "core exposes semantic identity without pretending time implementation exists"
+        None,
+        "Core4 must not install a lexical SENS placeholder before the time layer"
+    );
+    assert_eq!(
+        semantic_registry_export::semantic_id_for_admitted_surface("utc-now"),
+        Some(utc_sid),
+        "surface admission still resolves to the exact SENS identity"
     );
     let error = eval_program("(utc-now)", &mut session)
         .expect_err("unadmitted SID must fail closed before time library loads");
@@ -229,8 +234,13 @@ fn internet_time_sync_is_language_owned_after_time_library_loads() {
             .expect("internet-time-sync must remain admitted by sr/2");
     assert_eq!(
         session.environment.get("internet-time-sync"),
-        Some(Value::Sid(internet_time_sid)),
-        "core exposes semantic identity without installing the Lisp time implementation"
+        None,
+        "Core4 must not install a lexical SENS placeholder before the time layer"
+    );
+    assert_eq!(
+        semantic_registry_export::semantic_id_for_admitted_surface("internet-time-sync"),
+        Some(internet_time_sid),
+        "surface admission still resolves to the exact SENS identity"
     );
     let error = eval_program(
         "(internet-time-sync \"clock.example\" 1)",
