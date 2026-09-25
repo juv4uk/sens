@@ -33,7 +33,6 @@ name = "cml-export"
 path = "src/bin/cml-export.rs"
 
 [dependencies]
-sens = { path = "../sens" }
 my-lisp = { path = "../my-lisp" }
 my-lisp-host = { path = "../my-lisp-host" }
 my-lisp-lsp = { path = "../my-lisp-lsp" }
