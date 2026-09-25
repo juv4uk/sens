@@ -128,3 +128,6 @@
 ; #1368 Sens 256 identities alignment in observer tests.
 (review "crates/my-lisp/tests/rivnopravnist_mov.rs" "d20b06306ff4089fd2e5174304bc2464d5b6b883d0ad4eab995dde8deed10a8e" issue-1368 sens-256-identities-observer)
 (review "crates/my-lisp/tests/semantic_registry_lisp.rs" "0c6df2ec3c679d2cb9bb55b54e47231757dc7b5285c313f8c8f1c0d459f17569" issue-1368 sens-256-identities-observer)
+
+; #1272 selected-Core transport: loader sets only the mechanical profile signal; Lisp contracts own laws.
+(review "crates/my-lisp/src/lib.rs" "464bfce89601a1fb3146d8d7b4b748f34192f00971700b2060a8947d151a113a" issue-1272 selected-core-profile-mechanical-loader)
