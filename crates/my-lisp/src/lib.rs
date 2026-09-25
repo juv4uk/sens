@@ -136,15 +136,10 @@ pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
 pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
 
 /// Core3 experimental kernel-laboratory profile layered over the current
-/// shared bootstrap substrate and SENS-owned mechanism selector.
+/// shared bootstrap substrate. Mechanism selection is loaded separately by
+/// the execution layer because the current selector reads SENS-owned files and
+/// therefore does not belong in this capability-free core crate.
 pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
-
-/// SENS-owned surface registry API required by the current Core3 tools.
-const SEMANTIC_REGISTRY_API_SOURCE: &str =
-    include_str!("../../../lib/surface/semantic-registry-api.lisp");
-
-/// SENS-owned mechanism selector reused by Core3 without duplicating authority.
-const MECHANISM_SELECTOR_SOURCE: &str = include_str!("../../../lib/mechanism-selector.lisp");
 
 /// The current Core4 my-lisp bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
@@ -321,19 +316,19 @@ pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageE
 
 /// Activate the Core3 experimental kernel-laboratory profile.
 ///
-/// Core3 currently reuses the Core4 bootstrap as a shared execution substrate,
-/// then loads the SENS-owned registry API and mechanism selector before its
-/// thin profile layer. The temporary Core4 selection performed by
-/// `load_core_library` is therefore substrate setup only: Core3 becomes the
-/// mechanically selected profile only after every required layer loads
-/// successfully.
+/// Core3 currently reuses the Core4 bootstrap as a shared execution substrate.
+/// The temporary Core4 selection performed by `load_core_library` is substrate
+/// setup only: Core3 becomes the mechanically selected profile only after its
+/// thin profile layer loads successfully.
+///
+/// The SENS-owned mechanism selector is deliberately NOT loaded here. Its
+/// current implementation reads authority files through the filesystem, while
+/// this crate is capability-free. #1411 owns the later admitted execution path.
 ///
 /// This loader carries only the selected-profile fact. Core3 laws, result
 /// domains, and mechanism admission remain owned by SENS contracts/Lisp.
 pub fn load_core3_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     load_core_library(session)?;
-    eval_program(SEMANTIC_REGISTRY_API_SOURCE, session)?;
-    eval_program(MECHANISM_SELECTOR_SOURCE, session)?;
     let result = eval_program(CORE3_LIBRARY_SOURCE, session)?;
     session.environment.select_core_profile(CoreProfile::Core3);
     Ok(result)
