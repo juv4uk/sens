@@ -13,8 +13,8 @@
 //! a build that never calls the installer cannot reach it.
 
 use super::EvalStep;
-use crate::{Environment, ErrorKind, Expr, LanguageError, Span, Value};
-use std::collections::BTreeMap;
+use crate::{Environment, ErrorKind, Expr, LanguageError, Sens8, Span, Value};
+use std::collections::{BTreeMap, HashMap};
 use std::sync::{OnceLock, RwLock};
 
 /// Signature of one installed capability handler. A plain function
@@ -22,6 +22,11 @@ use std::sync::{OnceLock, RwLock};
 /// closures - capabilities get their state (allowlists, etc.) through
 /// the `Environment`, exactly like every kernel primitive.
 pub type HostFn = fn(&[Expr], &Environment, Span) -> Result<Value, LanguageError>;
+
+/// Host mechanism for one already-existing exact SENS function.
+/// The key is the eight-bit function itself; this registry owns no function meaning.
+pub type SensHostFn =
+    fn(Sens8, &[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
 #[derive(Clone, Copy)]
 enum CapabilityLookup {
@@ -48,6 +53,11 @@ fn registry() -> &'static RwLock<BTreeMap<String, HostFn>> {
     REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
 }
 
+fn sens_registry() -> &'static RwLock<HashMap<Sens8, SensHostFn>> {
+    static REGISTRY: OnceLock<RwLock<HashMap<Sens8, SensHostFn>>> = OnceLock::new();
+    REGISTRY.get_or_init(|| RwLock::new(HashMap::new()))
+}
+
 /// Install one capability under its surface-form name (e.g. "read-file").
 /// Re-registering the same name replaces the previous handler, so an
 /// embedder can override or withdraw capabilities deliberately.
@@ -62,6 +72,22 @@ pub fn register_capability(name: &str, handler: HostFn) {
 pub fn unregister_capability(name: &str) {
     if let Ok(mut map) = registry().write() {
         map.remove(name);
+    }
+}
+
+/// Attach a host mechanism to one exact SENS function.
+/// Re-registering replaces only the mechanism; it cannot mint or reinterpret SENS.
+pub fn register_sens_capability(sens: Sens8, handler: SensHostFn) {
+    sens_registry()
+        .write()
+        .expect("SENS capability registry poisoned")
+        .insert(sens, handler);
+}
+
+/// Detach a host mechanism without changing the function itself.
+pub fn unregister_sens_capability(sens: Sens8) {
+    if let Ok(mut map) = sens_registry().write() {
+        map.remove(&sens);
     }
 }
 
@@ -119,6 +145,26 @@ pub(crate) fn dispatch_capability(
     dispatch_capability_from(registry(), name, arguments, environment, span)
 }
 
+/// Mechanical fallback for one exact SENS function after built-in mechanisms declined it.
+pub(crate) fn dispatch_sens_capability(
+    sens: Sens8,
+    arguments: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    match sens_registry().read() {
+        Ok(map) => map
+            .get(&sens)
+            .copied()
+            .map(|handler| handler(sens, arguments, environment, span)),
+        Err(_) => Some(Err(LanguageError::new(
+            ErrorKind::MechanismUnavailable,
+            format!("SENS capability registry unavailable while resolving: {sens}"),
+            span,
+        ))),
+    }
+}
+
 #[cfg(test)]
 mod honesty_tests {
     use super::*;
@@ -156,6 +202,41 @@ mod honesty_tests {
             lookup_capability(&lock, "demo"),
             CapabilityLookup::Unreadable
         ));
+    }
+
+    fn sens_handler(
+        sens: Sens8,
+        _arguments: &[Value],
+        _environment: &Environment,
+        _span: Span,
+    ) -> Result<Value, LanguageError> {
+        Ok(Value::Symbol(std::rc::Rc::from(sens.to_string())))
+    }
+
+    #[test]
+    fn sens_registry_is_keyed_by_exact_identity_without_ordering() {
+        let sens = crate::sens!(10101000);
+        unregister_sens_capability(sens);
+        register_sens_capability(sens, sens_handler);
+
+        let result = dispatch_sens_capability(
+            sens,
+            &[],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("registered SENS mechanism")
+        .expect("mechanism succeeds");
+        assert_eq!(result.to_string(), "10101000");
+
+        unregister_sens_capability(sens);
+        assert!(dispatch_sens_capability(
+            sens,
+            &[],
+            &Environment::root(),
+            Span::default(),
+        )
+        .is_none());
     }
 
     #[test]

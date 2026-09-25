@@ -131,3 +131,9 @@
 
 ; #1272 selected-Core transport: loader sets only the mechanical profile signal; Lisp contracts own laws.
 (review "crates/my-lisp/src/lib.rs" "464bfce89601a1fb3146d8d7b4b748f34192f00971700b2060a8947d151a113a" issue-1272 selected-core-profile-mechanical-loader)
+
+; #1006 SENS-first raw invoke foundation: reviewed mechanism-only host seam.
+(review "crates/my-lisp/src/eval/capabilities.rs" "657d49756897d6c8ec6a9ef7f644822f491eb504bc13a78d5b9f2f3c1e9cec16" issue-1006 exact-sens-host-mechanism-registry)
+(review "crates/my-lisp/src/eval/canon.rs" "ec4ee0f848166f5ea5891204f3f09e9bc37112cc82e25017bc7051d6a71f3ac3" issue-1006 sens-mechanism-fallback-after-local-function)
+(review "crates/my-lisp/src/eval/mod.rs" "3730c906dc384b9bd6bc56fe215202251d846db68d3a5cadc1e9ef8058a25b8f" issue-1006 sens-mechanism-api-export)
+(review "crates/my-lisp/src/lib.rs" "c6fb80f302fb0e138f2515cf9e5ba433a23f4bdda968aafc19d4cd043b59cb2e" issue-1006 sens-mechanism-public-export)
