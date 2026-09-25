@@ -52,4 +52,4 @@
   (host-profile-law-table forbidden)
   (runtime-profile-selector
     owner my-lisp
-    state pending-mechanical-hook))
+    state active-mechanical-hook))
