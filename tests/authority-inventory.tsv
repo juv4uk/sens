@@ -191,3 +191,7 @@ crates/my-lisp/tests/ukr_acceptance.rs	shadowing_ukr_peer_does_not_retarget_engl
 
 crates/my-lisp/tests/core_profile_runtime_1272.rs	selected_core_profile_signal_is_shared_mechanically	observer	selected-core-profile-mechanism	contracts/core-special-form-profile-policy.lisp	migrated
 crates/my-lisp/tests/sens_host_registration_admission_1406.rs	host_registration_alone_must_not_make_function_without_admitted_mechanism_callable	observer	sens-host-registration-admission	#997 + #1006 + #1406	migrated
+
+crates/my-lisp-cli/src/island_invoke.rs	evaluate_raw_invoke	mechanism	exact-SENS raw island host seam	function SENS 10101000	migrated
+crates/my-lisp-cli/tests/raw_invoke_sens.rs	direct_sens_reaches_datalog_without_named_function_dispatch	observer	direct-SENS raw invoke evidence	crates/my-lisp-cli/src/island_invoke.rs	migrated
+crates/my-lisp-cli/tests/raw_invoke_sens.rs	human_surfaces_only_route_to_exact_raw_invoke_sens	observer	surface-to-SENS routing observation	lib/surface/semantic-registry.lisp	migrated
