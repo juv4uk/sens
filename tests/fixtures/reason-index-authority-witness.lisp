@@ -55,7 +55,7 @@
                 ((ancestor (var x) (var y))
                   (parent (var x) (var z))
                   (ancestor (var z) (var y)))
-                ((safe (var x)) (not (blocked (var x))))
+                ((safe (var x)) (not? (blocked (var x))))
                 ((noise irrelevant)))))
            (goal (quote (ancestor alice carol)))
            (recursive-indexed (reason goal recursive-rules))

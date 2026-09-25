@@ -88,7 +88,7 @@ fn pair_equation_is_executable_and_independent_of_machine_representation() {
 #[test]
 fn eq_relation_law_stays_separate_from_exact_q_binary_policy() {
     let mut s = session();
-    let value = eval_program("(eq (quote radio) (quote radio))", &mut s)
+    let value = eval_program("(eq? (quote radio) (quote radio))", &mut s)
         .expect("identity relation witness")
         .value
         .to_string();

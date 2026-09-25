@@ -34,7 +34,7 @@ fn proved_outcome_keeps_the_ground_answer_and_real_premise() {
 fn disputed_outcome_keeps_both_evidence_sides_visible() {
     let source = r#"
         (let* ((rules (quote (((mortal socrates))
-                              ((not (mortal socrates))))))
+                              ((not? (mortal socrates))))))
                (narration
                  (narrate-outcome
                    (reason-observe (quote (mortal socrates)) rules))))

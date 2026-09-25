@@ -18,16 +18,16 @@ fn observe(source: &str) -> String {
 #[test]
 fn not_without_nested_goal_is_invalid() {
     assert_eq!(
-        observe(r#"(reason-observe (quote (not)) (quote ()))"#),
-        "(invalid invalid-goal (not))"
+        observe(r#"(reason-observe (quote (not?)) (quote ()))"#),
+        "(invalid invalid-goal (not?))"
     );
 }
 
 #[test]
 fn not_with_multiple_nested_forms_is_invalid() {
     assert_eq!(
-        observe(r#"(reason-observe (quote (not (planet earth) extra)) (quote ()))"#),
-        "(invalid invalid-goal (not (planet earth) extra))"
+        observe(r#"(reason-observe (quote (not? (planet earth) extra)) (quote ()))"#),
+        "(invalid invalid-goal (not? (planet earth) extra))"
     );
 }
 

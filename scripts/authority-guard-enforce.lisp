@@ -8,11 +8,11 @@
 (def verdict-tag (car verdict))
 
 (cond
-  ((eq verdict-tag (quote authority-ok)) (identity-relation same)
+  ((eq? verdict-tag (quote authority-ok)) (identity-relation same)
    (quote authority-ok))
-  ((eq verdict-tag (quote authority-ok)) (identity-relation distinct)
+  ((eq? verdict-tag (quote authority-ok)) (identity-relation distinct)
    (cond
-     ((eq verdict-tag (quote semantic-authority-violation)) (identity-relation same)
+     ((eq? verdict-tag (quote semantic-authority-violation)) (identity-relation same)
       (car ()))
-     ((eq verdict-tag (quote semantic-authority-violation)) (identity-relation distinct)
+     ((eq? verdict-tag (quote semantic-authority-violation)) (identity-relation distinct)
       (car ())))))

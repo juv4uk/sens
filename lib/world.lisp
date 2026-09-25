@@ -27,8 +27,8 @@
 (def world?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((eq (car value) (quote world)) t)
+      ((atom? value) (quote ()))
+      ((eq? (car value) (quote world)) t)
       (t (quote ())))))
 
 (def world-parent (lambda (world) (second world)))
@@ -61,22 +61,22 @@
 (def world-remove-first
   (lambda (value values)
     (cond
-      ((atom values) (quote ()))
+      ((atom? values) (quote ()))
       ((equal? value (car values)) (cdr values))
       (t (cons (car values) (world-remove-first value (cdr values)))))))
 
 (def world-apply-event
   (lambda (clauses event)
     (cond
-      ((eq (car event) (quote tell)) (cons (third event) clauses))
-      ((eq (car event) (quote retract))
+      ((eq? (car event) (quote tell)) (cons (third event) clauses))
+      ((eq? (car event) (quote retract))
        (world-remove-first (third event) clauses))
       (t clauses))))
 
 (def world-module-known?
   (lambda (world module-name)
     (cond
-      ((atom (world-module-events world module-name)) (quote ()))
+      ((atom? (world-module-events world module-name)) (quote ()))
       (t t))))
 
 (def world-clauses
@@ -123,9 +123,9 @@
 (def advice-decision-in-world
   (lambda (world module-name clause)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) clause)))
-      ((eq (knowledge-clause-valid? clause) (quote ()))
+      ((eq? (knowledge-clause-valid? clause) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-clause)) (list (quote input) clause)))
       (t
        (let ((opposite (opposite-knowledge-head (car clause))))
@@ -134,7 +134,7 @@
                           (reason-in-world world module-name opposite))
                          (t (quote ())))))
            (cond
-             ((atom proofs)
+             ((atom? proofs)
               (list (quote accepted)
                     (list (quote module) module-name)
                     (list (quote knowledge) clause)))
@@ -148,7 +148,7 @@
   (lambda (world module-name clause)
     (let ((decision (advice-decision-in-world world module-name clause)))
       (cond
-        ((eq (car decision) (quote accepted))
+        ((eq? (car decision) (quote accepted))
          (list decision (world-tell world module-name clause)))
         (t (list decision world))))))
 
@@ -162,13 +162,13 @@
 (def advice-all-decision-in-world
   (lambda (world module-name clauses)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) clauses)))
-      ((atom clauses)
+      ((atom? clauses)
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-proper-list? clauses) (quote ()))
+      ((eq? (knowledge-proper-list? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-clauses-valid? clauses) (quote ()))
+      ((eq? (knowledge-clauses-valid? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-clause)) (list (quote input) clauses)))
       (t
        (let ((existing (cond
@@ -178,7 +178,7 @@
          (let ((conflict (advice-batch-conflict
                            clauses clauses (append clauses existing))))
            (cond
-             ((atom conflict)
+             ((atom? conflict)
               (list (quote accepted)
                     (list (quote module) module-name)
                     (list (quote knowledge) clauses)))
@@ -263,7 +263,7 @@
   (lambda (world module-name clauses)
     (let ((decision (advice-all-decision-in-world world module-name clauses)))
       (cond
-        ((eq (car decision) (quote accepted))
+        ((eq? (car decision) (quote accepted))
          (list decision (world-tell-all world module-name clauses)))
         (t (list decision world))))))
 
@@ -325,35 +325,35 @@
 (def make-world-knowledge-package
   (lambda (world module-name)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) module-name)))
-      ((eq (world-module-known? world module-name) (quote ())) (quote Module-not-found))
+      ((eq? (world-module-known? world module-name) (quote ())) (quote Module-not-found))
       (t
        (let ((clauses (world-clauses world module-name)))
          (cond
-           ((atom clauses)
+           ((atom? clauses)
             (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
            (t (make-knowledge-package module-name clauses))))))))
 
 (def import-knowledge-package-world
   (lambda (world package)
     (cond
-      ((atom package)
+      ((atom? package)
        (list (list (quote rejected)
                    (list (quote reason) (quote invalid-package))
                    (list (quote input) package))
              world))
-      ((eq (knowledge-proper-list? package) (quote ()))
+      ((eq? (knowledge-proper-list? package) (quote ()))
        (list (list (quote rejected)
                    (list (quote reason) (quote invalid-package))
                    (list (quote input) package))
              world))
-      ((eq (knowledge-package-entries-valid? package) (quote ()))
+      ((eq? (knowledge-package-entries-valid? package) (quote ()))
        (list (list (quote rejected)
                    (list (quote reason) (quote invalid-package))
                    (list (quote input) package))
              world))
-      ((eq (knowledge-package-field (quote format) package) (quote my-lisp-knowledge))
+      ((eq? (knowledge-package-field (quote format) package) (quote my-lisp-knowledge))
        (cond
          ((equal? (knowledge-package-field (quote version) package)
                   *knowledge-package-version*)
@@ -404,7 +404,7 @@
 (def world-depth
   (lambda (world)
     (cond
-      ((atom (world-parent world)) 0)
+      ((atom? (world-parent world)) 0)
       (t (+ 1 (world-depth (world-parent world)))))))
 
 (def world-at-depth-from
@@ -412,7 +412,7 @@
     (cond
       ((= current-depth target-depth) 1 world)
       ((< current-depth target-depth) 1 (quote World-not-found))
-      ((atom (world-parent world)) (quote World-not-found))
+      ((atom? (world-parent world)) (quote World-not-found))
       (t (world-at-depth-from (world-parent world)
                               (- current-depth 1)
                               target-depth)))))
@@ -427,7 +427,7 @@
   (lambda (journal old-journal)
     (cond
       ((equal? journal old-journal) (quote ()))
-      ((atom journal) (quote World-not-ancestor))
+      ((atom? journal) (quote World-not-ancestor))
       (t
        (let ((rest (world-journal-prefix (cdr journal) old-journal)))
          (cond
@@ -437,14 +437,14 @@
 (def world-not-ancestor?
   (lambda (value)
     (cond
-      ((atom value) (eq value (quote World-not-ancestor)))
+      ((atom? value) (eq? value (quote World-not-ancestor)))
       (t (quote ())))))
 
 (def world-diff
   (lambda (from to)
     (cond
       ((equal? from to) (quote ()))
-      ((atom (world-parent to)) (quote World-not-ancestor))
+      ((atom? (world-parent to)) (quote World-not-ancestor))
       (t
        (let ((earlier (world-diff from (world-parent to))))
          (cond
@@ -485,8 +485,8 @@
   (lambda (left right)
     (cond
       ((equal? left right) left)
-      ((atom (world-parent left)) (quote World-no-common-ancestor))
-      ((atom (world-parent right)) (quote World-no-common-ancestor))
+      ((atom? (world-parent left)) (quote World-no-common-ancestor))
+      ((atom? (world-parent right)) (quote World-no-common-ancestor))
       (t (world-common-ancestor-aligned (world-parent left)
                                         (world-parent right))))))
 
@@ -504,7 +504,7 @@
 (def world-no-common-ancestor?
   (lambda (value)
     (cond
-      ((atom value) (eq value (quote World-no-common-ancestor)))
+      ((atom? value) (eq? value (quote World-no-common-ancestor)))
       (t (quote ())))))
 
 (def world-branch-diff

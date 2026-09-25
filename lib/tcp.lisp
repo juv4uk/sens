@@ -22,10 +22,10 @@
   (lambda (bytes)
     (let ((decoded (utf8-decode-string bytes)))
       (cond
-        ((eq (car decoded) (quote decoded))
+        ((eq? (car decoded) (quote decoded))
          (identity-relation same)
          (second decoded))
-        ((eq (car decoded) (quote decoded))
+        ((eq? (car decoded) (quote decoded))
          (identity-relation distinct)
          decoded)))))
 

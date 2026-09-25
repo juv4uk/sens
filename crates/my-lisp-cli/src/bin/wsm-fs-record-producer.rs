@@ -40,9 +40,9 @@ fn main() {
              (object (fs-object-package value))
              (rebuilt (fs-reconstruct-root root (list object))))
         (cond
-          ((not (eq (car rebuilt) (quote accepted)))
+          ((not? (eq? (car rebuilt) (quote accepted)))
            (quote reconstruction-rejected))
-          ((not (equal? (second (fs-read (second rebuilt) "code")) value))
+          ((not? (equal? (second (fs-read (second rebuilt) "code")) value))
            (quote reconstruction-mismatch))
           (t (list (fs-serialize-root fs) (fs-serialize-object value)))))
     "#;

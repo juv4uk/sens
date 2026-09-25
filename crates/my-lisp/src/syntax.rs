@@ -70,7 +70,19 @@ pub enum ExprKind {
     /// (nur innerhalb von `quote`, oder wo ein Aufrufer es über `read` als
     /// Daten liest).
     Pair(Rc<Expr>, Rc<Expr>),
+    /// Виклик функції СЕНС: функція займає рівно 1 байт (`Sid8`), без
+    /// тексту імені. Створюється лише `eval::lower` після розбору — з голови
+    /// `(00000010 x)` або з написання, яке неможливо перевизначити
+    /// (`atom`, `атом?`, `aṇu` ...), тож усі написання однієї функції
+    /// дають один і той самий вузол. Парсер цей варіант не породжує.
+    /// SENS call: the function slot is exactly one byte (`Sid8`), no name
+    /// text. Produced only by `eval::lower` after parsing.
+    Call(Sid8, Rc<[Expr]>),
 }
+
+// Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
+// збірка має впасти, а не мовчки розійтися з таблицею функцій.
+const _: () = assert!(std::mem::size_of::<Sid8>() == 1);
 
 /// Shared nesting cap for every recursive structure walk over reader
 /// output: the parser itself, `quote`d-data conversion (`quoted`) and
@@ -156,6 +168,16 @@ pub(crate) mod fasl {
                 out.push(TAG_PAIR);
                 encode_expr(head, out);
                 encode_expr(tail, out);
+            }
+            // Зведений виклик зберігається як список із 1-байтовою головою.
+            ExprKind::Call(sid, arguments) => {
+                out.push(TAG_LIST);
+                put_u32(out, arguments.len() as u32 + 1);
+                out.push(TAG_BINARY);
+                out.push(sid.packed_byte());
+                for argument in arguments.iter() {
+                    encode_expr(argument, out);
+                }
             }
             // Runtime-constructed buffers are not source syntax; a program
             // containing one cannot come from lib/*.my text, so snapshots

@@ -113,9 +113,10 @@ pub use eval::{
     unregister_capability, unregister_sens_capability,
 };
 pub use eval::{
-    eval_parsed_expressions, eval_parsed_expressions_incremental, eval_program,
-    eval_program_incremental, evaluate as eval_expr, EvalResult,
+    eval_lowered_expressions, eval_parsed_expressions, eval_parsed_expressions_incremental,
+    eval_program, eval_program_incremental, evaluate as eval_expr, EvalResult,
 };
+pub use eval::lower::lower_program;
 pub use parser::parse;
 pub use presentation::{
     present_system_message, render_error_for_presentation, render_value_for_presentation,

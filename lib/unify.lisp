@@ -81,8 +81,8 @@
 (def var?
   (lambda (term)
     (cond
-      ((atom term) (quote ()))
-      ((atom (car term)) (eq (car term) (quote var)))
+      ((atom? term) (quote ()))
+      ((atom? (car term)) (eq? (car term) (quote var)))
       (t (quote ())))))
 
 ; subst is an alist of (name . term) pairs, keyed by the variable's
@@ -91,7 +91,7 @@
 (def lookup-subst
   (lambda (variable subst)
     (cond
-      ((atom subst) variable)
+      ((atom? subst) variable)
       ((equal? (car (car subst)) (second variable)) (cdr (car subst)))
       (t (lookup-subst variable (cdr subst))))))
 
@@ -137,7 +137,7 @@
 (def failed-subst?
   (lambda (subst)
     (cond
-      ((atom subst) (eq subst (quote fail)))
+      ((atom? subst) (eq? subst (quote fail)))
       (t (quote ())))))
 
 (def unify-walked
@@ -145,8 +145,8 @@
     (cond
       ((var? a) (unify-var a b subst))
       ((var? b) (unify-var b a subst))
-      ((atom a) (cond ((atom b) (cond ((eq a b) subst) (t (quote fail)))) (t (quote fail))))
-      ((atom b) (quote fail))
+      ((atom? a) (cond ((atom? b) (cond ((eq? a b) subst) (t (quote fail)))) (t (quote fail))))
+      ((atom? b) (quote fail))
       (t (unify (cdr a) (cdr b) (unify (car a) (car b) subst))))))
 
 (def occurs-check
@@ -154,10 +154,10 @@
     (let ((resolved (walk term subst)))
       (cond
         ((var? resolved) (equal? (second variable) (second resolved)))
-        ((atom resolved) (quote ()))
+        ((atom? resolved) (quote ()))
         (t (cond
-             ((occurs-check variable (car resolved) subst) t)
-             (t (occurs-check variable (cdr resolved) subst))))))))
+             ((occurs-check? variable (car resolved) subst) t)
+             (t (occurs-check? variable (cdr resolved) subst))))))))
 
 (def unify-var
   (lambda (variable term subst)
@@ -166,7 +166,7 @@
        (cond
          ((equal? (second variable) (second term)) subst)
          (t (extend-subst variable term subst))))
-      ((occurs-check variable term subst) (quote fail))
+      ((occurs-check? variable term subst) (quote fail))
       (t (extend-subst variable term subst)))))
 
 ; Fully resolves every variable in `term` (recursively, through chained
@@ -180,7 +180,7 @@
 (def apply-subst-walked
   (lambda (term subst)
     (cond
-      ((atom term) term)
+      ((atom? term) term)
       (t (cons (apply-subst (car term) subst) (apply-subst (cdr term) subst))))))
 
 ; The shared kernel behind proving/matching a *conjunction* of conditions:
@@ -237,12 +237,12 @@
 (def thread-conjunction
   (lambda (conditions state try-one)
     (cond
-      ((atom conditions) (list state))
+      ((atom? conditions) (list state))
       (t (thread-conjunction-branches (cdr conditions) try-one (try-one (car conditions) state))))))
 
 (def thread-conjunction-branches
   (lambda (remaining try-one states)
     (cond
-      ((atom states) (quote ()))
+      ((atom? states) (quote ()))
       (t (append (thread-conjunction remaining (car states) try-one)
                   (thread-conjunction-branches remaining try-one (cdr states)))))))

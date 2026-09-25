@@ -38,7 +38,7 @@
 (def semantic-coordinate-law-row
   (lambda (sid rows)
     (cond
-      ((atom rows) ())
+      ((atom? rows) ())
       ((equal? sid (car (car rows))) (car rows))
       (t (semantic-coordinate-law-row sid (cdr rows))))))
 

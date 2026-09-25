@@ -40,14 +40,14 @@
 (def registry-check-rows
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list)
+      ((atom? rows) (structural-kind empty-list)
        (quote (meta-semantic-registry-witness (status pass))))
-      ((atom rows) (structural-kind atom)
+      ((atom? rows) (structural-kind atom)
        (registry-witness-failure
          (quote malformed-row-tail)
          rows
          (quote ())))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
            ((equal? (second row) (third row)) (structural-relation same)
@@ -87,7 +87,7 @@
             (my-semantic-id-for-surface (quote rūpa))
             00010000)
       (list (quote unmapped-surface-fails-closed)
-            (atom (my-semantic-id-for-surface (quote unmapped-surface)))
+            (atom? (my-semantic-id-for-surface (quote unmapped-surface)))
             (quote (structural-kind empty-list)))
 
       ; Canon ATOM peer surfaces: native evaluator.

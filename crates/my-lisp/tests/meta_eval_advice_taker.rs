@@ -36,7 +36,7 @@ fn advice_program() -> String {
       (middle (var x) (var y))
       (parent (var y) (var z)))
     ((safe sky))
-    ((not (safe sky)))
+    ((not? (safe sky)))
   )))
 
 (def meta-advice-observe
@@ -58,7 +58,7 @@ fn advice_program() -> String {
           (reason-observe (quote (safe ocean)) meta-advice-rules))
         (list
           (quote invalid-outcome)
-          (reason-observe (quote (not)) meta-advice-rules))))))
+          (reason-observe (quote (not?)) meta-advice-rules))))))
 
 (meta-advice-observe)
 "#,

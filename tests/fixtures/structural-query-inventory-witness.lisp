@@ -12,15 +12,15 @@
   (lambda (key row)
     (let ((entry (assoc key row)))
       (cond
-        ((atom entry) (quote ()))
+        ((atom? entry) (quote ()))
         (t (cdr entry))))))
 
 (def sqi-find-tag
   (lambda (tag entries)
     (cond
-      ((atom entries) (quote ()))
-      ((and (not (atom (car entries)))
-            (eq (car (car entries)) tag))
+      ((atom? entries) (quote ()))
+      ((and (not? (atom? (car entries)))
+            (eq? (car (car entries)) tag))
        (car entries))
       (t (sqi-find-tag tag (cdr entries))))))
 
@@ -29,7 +29,7 @@
     (let ((entry (sqi-find-tag (quote public-predicates)
                                (cdr public-surface-inventory-document))))
       (cond
-        ((atom entry) (quote ()))
+        ((atom? entry) (quote ()))
         (t (car (cdr entry)))))))
 
 (def sqi-rows
@@ -39,8 +39,8 @@
 (def sqi-count-surface
   (lambda (surface rows)
     (cond
-      ((atom rows) 0)
-      ((eq (sqi-field (quote surface) (car rows)) surface)
+      ((atom? rows) 0)
+      ((eq? (sqi-field (quote surface) (car rows)) surface)
        (+ 1 (sqi-count-surface surface (cdr rows))))
       (t
        (sqi-count-surface surface (cdr rows))))))
@@ -48,29 +48,29 @@
 (def sqi-required-row?
   (lambda (row)
     (and
-      (not (atom (assoc (quote identity) row)))
-      (not (atom (assoc (quote surface) row)))
-      (not (atom (assoc (quote producer) row)))
-      (not (atom (assoc (quote current-result) row)))
-      (not (atom (assoc (quote question-domain) row)))
-      (not (atom (assoc (quote mathematical-binary?) row)))
-      (not (atom (assoc (quote owner) row)))
-      (not (atom (assoc (quote consumer-class) row)))
-      (not (atom (assoc (quote compatibility-impact) row)))
-      (not (atom (assoc (quote migration) row))))))
+      (not? (atom? (assoc (quote identity) row)))
+      (not? (atom? (assoc (quote surface) row)))
+      (not? (atom? (assoc (quote producer) row)))
+      (not? (atom? (assoc (quote current-result) row)))
+      (not? (atom? (assoc (quote question-domain) row)))
+      (not? (atom? (assoc (quote mathematical-binary?) row)))
+      (not? (atom? (assoc (quote owner) row)))
+      (not? (atom? (assoc (quote consumer-class) row)))
+      (not? (atom? (assoc (quote compatibility-impact) row)))
+      (not? (atom? (assoc (quote migration) row))))))
 
 (def sqi-all-public-covered-once?
   (lambda (predicates rows)
     (cond
-      ((atom predicates) t)
-      ((eq (sqi-count-surface (car predicates) rows) 1)
+      ((atom? predicates) t)
+      ((eq? (sqi-count-surface (car predicates) rows) 1)
        (sqi-all-public-covered-once? (cdr predicates) rows))
       (t (quote ())))))
 
 (def sqi-no-extra-surfaces?
   (lambda (rows predicates)
     (cond
-      ((atom rows) t)
+      ((atom? rows) t)
       ((and (sqi-required-row? (car rows))
             (member? (sqi-field (quote surface) (car rows)) predicates))
        (sqi-no-extra-surfaces? (cdr rows) predicates))
@@ -79,13 +79,13 @@
 (def sqi-math-delegation-valid?
   (lambda (rows)
     (cond
-      ((atom rows) t)
+      ((atom? rows) t)
       (t
        (let ((row (car rows)))
          (cond
-           ((eq (sqi-field (quote mathematical-binary?) row) (quote yes-domain-bounded))
+           ((eq? (sqi-field (quote mathematical-binary?) row) (quote yes-domain-bounded))
             (cond
-              ((eq (sqi-field (quote owner) row) (quote exact-q-decision-216))
+              ((eq? (sqi-field (quote owner) row) (quote exact-q-decision-216))
                (sqi-math-delegation-valid? (cdr rows)))
               (t (quote ()))))
            (t (sqi-math-delegation-valid? (cdr rows)))))))))
@@ -95,8 +95,8 @@
     (let ((predicates (sqi-public-predicates))
           (rows (sqi-rows)))
       (cond
-        ((and (eq (length predicates) 17)
-              (eq (length rows) 17)
+        ((and (eq? (length predicates) 17)
+              (eq? (length rows) 17)
               (sqi-all-public-covered-once? predicates rows)
               (sqi-no-extra-surfaces? rows predicates)
               (sqi-math-delegation-valid? rows))

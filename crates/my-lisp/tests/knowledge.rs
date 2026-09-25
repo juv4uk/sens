@@ -389,13 +389,13 @@ fn advise_rejects_a_malformed_logic_variable() {
 #[test]
 fn advise_reports_an_explicit_conflict_without_recording_it() {
     let source = r#"
-        (advise astronomy (quote ((not (planet pluto)))))
+        (advise astronomy (quote ((not? (planet pluto)))))
         (def result (advise astronomy (quote ((planet pluto)))))
         (list (car result)
               (second (third result))
               (reason-in (quote astronomy) (quote (planet pluto))))
     "#;
-    assert_eq!(eval_knowledge(source), "(conflict (not (planet pluto)) ())");
+    assert_eq!(eval_knowledge(source), "(conflict (not? (planet pluto)) ())");
 }
 
 #[test]
@@ -448,7 +448,7 @@ fn advise_all_detects_an_internal_explicit_conflict_without_writing() {
     let source = r#"
         (list
           (car (advise-all astronomy
-                 (quote (((planet pluto)) ((not (planet pluto)))))))
+                 (quote (((planet pluto)) ((not? (planet pluto)))))))
           (reason-in (quote astronomy) (quote (planet pluto))))
     "#;
     assert_eq!(eval_knowledge(source), "(conflict Module-not-found)");
@@ -460,7 +460,7 @@ fn advise_all_detects_a_conflict_derived_by_the_proposed_rules() {
         (list
           (car (advise-all astronomy
                  (quote (((planet pluto))
-                   ((not (dwarf pluto)))
+                   ((not? (dwarf pluto)))
                    ((dwarf (var x)) (planet (var x)))))))
           (reason-in (quote astronomy) (quote (planet pluto))))
     "#;
@@ -471,7 +471,7 @@ fn advise_all_detects_a_conflict_derived_by_the_proposed_rules() {
 fn advise_all_detects_a_conflict_activated_across_existing_and_new_knowledge() {
     let source = r#"
         (defmodule astronomy
-          (quote (((not (has-mass pluto)))
+          (quote (((not? (has-mass pluto)))
             ((has-mass (var x)) (planet (var x))))))
         (list
           (car (advise-all astronomy (quote (((planet pluto))))))

@@ -8,14 +8,14 @@
 (def c2-field-from
   (lambda (name fields)
     (cond
-      ((atom fields) (structural-kind empty-list) (quote missing))
-      ((atom fields) (structural-kind pair)
+      ((atom? fields) (structural-kind empty-list) (quote missing))
+      ((atom? fields) (structural-kind pair)
        (let ((field (car fields)))
          (cond
-           ((atom field) (structural-kind pair)
+           ((atom? field) (structural-kind pair)
             (cond
-              ((eq (car field) name) (identity-relation same) (cdr field))
-              ((eq (car field) name) (identity-relation distinct)
+              ((eq? (car field) name) (identity-relation same) (cdr field))
+              ((eq? (car field) name) (identity-relation distinct)
                (c2-field-from name (cdr fields)))))
            ((quote c2-next) c2-next
             (c2-field-from name (cdr fields)))))))))
@@ -27,11 +27,11 @@
 (def c2-find
   (lambda (wanted sections)
     (cond
-      ((atom sections) (structural-kind empty-list) (quote ()))
-      ((atom sections) (structural-kind pair)
+      ((atom? sections) (structural-kind empty-list) (quote ()))
+      ((atom? sections) (structural-kind pair)
        (let ((section (car sections)))
          (cond
-           ((eq (c2-field section (quote identity)) wanted)
+           ((eq? (c2-field section (quote identity)) wanted)
             (identity-relation same)
             section)
            ((quote c2-next) c2-next
@@ -54,8 +54,8 @@
 (def c2-first-failure
   (lambda (checks)
     (cond
-      ((atom checks) (structural-kind empty-list) (quote ()))
-      ((atom (car checks)) (structural-kind empty-list)
+      ((atom? checks) (structural-kind empty-list) (quote ()))
+      ((atom? (car checks)) (structural-kind empty-list)
        (c2-first-failure (cdr checks)))
       ((quote c2-failure) c2-failure (car checks)))))
 
@@ -77,15 +77,15 @@
                 (c2-check (quote acceptance-state) (quote native-two-part-cond-activation) (quote yes))
                 (c2-check (quote acceptance-state) (quote full-profile-special-form-selection) (quote active))))))
       (cond
-        ((atom failure) (structural-kind empty-list)
+        ((atom? failure) (structural-kind empty-list)
          (cond
-           ((eq (core2-atom (quote radio)) (quote t)) (identity-relation same)
+           ((eq? (core2-atom (quote radio)) (quote t)) (identity-relation same)
             (cond
-              ((eq (core2-atom (quote (radio antenna))) (quote ())) (identity-relation same)
+              ((eq? (core2-atom (quote (radio antenna))) (quote ())) (identity-relation same)
                (cond
-                 ((eq (core2-eq (quote radio) (quote radio)) (quote t)) (identity-relation same)
+                 ((eq? (core2-eq (quote radio) (quote radio)) (quote t)) (identity-relation same)
                   (cond
-                    ((eq (core2-truthy? 0) (quote t)) (identity-relation same)
+                    ((eq? (core2-truthy? 0) (quote t)) (identity-relation same)
                      (quote (core2-profile-contract-ok)))
                     ((quote witness-fail) witness-fail
                      (quote (core2-profile-contract-violation zero-truthy)))))

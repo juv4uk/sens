@@ -23,11 +23,11 @@
                              (quote (structural-relation same)))
               ; 2. Content address self-identity (atoms compare via eq)
               (wt-verify-law (quote address-identity-same)
-                             (eq addr1 addr1)
+                             (eq? addr1 addr1)
                              (quote (identity-relation same)))
               ; 3. Distinct world histories produce distinct content address identity
               (wt-verify-law (quote address-identity-distinct)
-                             (eq addr1 addr2)
+                             (eq? addr1 addr2)
                              (quote (identity-relation distinct)))
               ; 4. World at depth recovery
               (wt-verify-law (quote depth-recovery)

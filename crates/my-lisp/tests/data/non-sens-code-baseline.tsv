@@ -1,0 +1,632 @@
+# #1413: код не на СЕНС — храповик (див. tests/non_sens_code_inventory.rs)
+# вид	файл-або-функція	кількість
+runtime	00001010	en	defmacro	макрос	1
+runtime	00001010	ук	визначити-макрос	макрос	1
+runtime	00001010	укр	визначити-макрос	макрос	1
+runtime	00001100	sa	yoga	Rust-функція за іменем (builtin)	1
+runtime	00001100	sym	+	Rust-функція за іменем (builtin)	1
+runtime	00001100	ук	додати	Rust-функція за іменем (builtin)	1
+runtime	00001100	укр	додати	Rust-функція за іменем (builtin)	1
+runtime	00001101	sa	viyoga	Rust-функція за іменем (builtin)	1
+runtime	00001101	sym	-	Rust-функція за іменем (builtin)	1
+runtime	00001101	ук	відняти	Rust-функція за іменем (builtin)	1
+runtime	00001101	укр	відняти	Rust-функція за іменем (builtin)	1
+runtime	00001110	sa	guṇana	Rust-функція за іменем (builtin)	1
+runtime	00001110	sym	*	Rust-функція за іменем (builtin)	1
+runtime	00001110	ук	помножити	Rust-функція за іменем (builtin)	1
+runtime	00001110	укр	помножити	Rust-функція за іменем (builtin)	1
+runtime	00001111	sa	haraṇa	Rust-функція за іменем (builtin)	1
+runtime	00001111	sym	/	Rust-функція за іменем (builtin)	1
+runtime	00001111	ук	поділити	Rust-функція за іменем (builtin)	1
+runtime	00001111	укр	поділити	Rust-функція за іменем (builtin)	1
+runtime	00010000	en	abs	Lisp-замикання	1
+runtime	00010000	sa	rūpa	Lisp-замикання	1
+runtime	00010000	ук	модуль	Lisp-замикання	1
+runtime	00010000	укр	модуль	Lisp-замикання	1
+runtime	00010001	en	min	Lisp-замикання	1
+runtime	00010001	sa	alpatara	Lisp-замикання	1
+runtime	00010001	ук	найменше	Lisp-замикання	1
+runtime	00010001	укр	найменше	Lisp-замикання	1
+runtime	00010010	en	max	Lisp-замикання	1
+runtime	00010010	sa	brhattara	Lisp-замикання	1
+runtime	00010010	ук	найбільше	Lisp-замикання	1
+runtime	00010010	укр	найбільше	Lisp-замикання	1
+runtime	00010011	en	mod	Lisp-замикання	1
+runtime	00010011	sa	avasiṣṭa	Lisp-замикання	1
+runtime	00010011	ук	остача	Lisp-замикання	1
+runtime	00010011	укр	остача	Lisp-замикання	1
+runtime	00010100	en	quotient	Lisp-замикання	1
+runtime	00010100	sa	bhāga	Lisp-замикання	1
+runtime	00010100	ук	частка	Lisp-замикання	1
+runtime	00010100	укр	частка	Lisp-замикання	1
+runtime	00010101	en	sqrt	Lisp-замикання	1
+runtime	00010101	sa	mūla	Lisp-замикання	1
+runtime	00010101	ук	корінь	Lisp-замикання	1
+runtime	00010101	укр	корінь	Lisp-замикання	1
+runtime	00010110	en	isqrt	Lisp-замикання	1
+runtime	00010110	sa	sakalamūla	Lisp-замикання	1
+runtime	00010110	ук	цілий-корінь	Lisp-замикання	1
+runtime	00010110	укр	цілий-корінь	Lisp-замикання	1
+runtime	00010111	en	min-list	Lisp-замикання	1
+runtime	00010111	ук	найменше-у-списку	Lisp-замикання	1
+runtime	00010111	укр	найменше-у-списку	Lisp-замикання	1
+runtime	00011000	en	max-list	Lisp-замикання	1
+runtime	00011000	ук	найбільше-у-списку	Lisp-замикання	1
+runtime	00011000	укр	найбільше-у-списку	Lisp-замикання	1
+runtime	00011001	en	largest-chunk	Lisp-замикання	1
+runtime	00011001	укр	найбільший-фрагмент	Lisp-замикання	1
+runtime	00011010	sa	hīna?	Rust-функція за іменем (builtin)	1
+runtime	00011010	sym	<	Rust-функція за іменем (builtin)	1
+runtime	00011010	ук	менше?	Rust-функція за іменем (builtin)	1
+runtime	00011010	укр	менше?	Rust-функція за іменем (builtin)	1
+runtime	00011011	sa	adhika?	Rust-функція за іменем (builtin)	1
+runtime	00011011	sym	>	Rust-функція за іменем (builtin)	1
+runtime	00011011	ук	більше?	Rust-функція за іменем (builtin)	1
+runtime	00011011	укр	більше?	Rust-функція за іменем (builtin)	1
+runtime	00011100	sa	sama?	Rust-функція за іменем (builtin)	1
+runtime	00011100	sym	=	Rust-функція за іменем (builtin)	1
+runtime	00011100	ук	рівне?	Rust-функція за іменем (builtin)	1
+runtime	00011100	укр	рівне?	Rust-функція за іменем (builtin)	1
+runtime	00011101	sa	na-adhika?	Lisp-замикання	1
+runtime	00011101	sym	<=	Lisp-замикання	1
+runtime	00011101	ук	не-більше?	Lisp-замикання	1
+runtime	00011101	укр	не-більше?	Lisp-замикання	1
+runtime	00011110	sa	na-hīna?	Lisp-замикання	1
+runtime	00011110	sym	>=	Lisp-замикання	1
+runtime	00011110	ук	не-менше?	Lisp-замикання	1
+runtime	00011110	укр	не-менше?	Lisp-замикання	1
+runtime	00011111	en	nondecreasing-from?	Lisp-замикання	1
+runtime	00011111	укр	неспадне-починаючи-з?	Lisp-замикання	1
+runtime	00100000	en	nonincreasing-from?	Lisp-замикання	1
+runtime	00100000	укр	незростаюче-починаючи-з?	Lisp-замикання	1
+runtime	00100001	en	not?	Lisp-замикання	1
+runtime	00100001	sa	na	Lisp-замикання	1
+runtime	00100001	ук	хибне?	Lisp-замикання	1
+runtime	00100001	укр	хибне?	Lisp-замикання	1
+runtime	00100010	en	equal?	Lisp-замикання	1
+runtime	00100010	sa	tulya?	Lisp-замикання	1
+runtime	00100010	ук	однакові?	Lisp-замикання	1
+runtime	00100010	укр	однакові?	Lisp-замикання	1
+runtime	00100011	en	symbol?	Lisp-замикання	1
+runtime	00100011	sa	nāman?	Lisp-замикання	1
+runtime	00100011	ук	символ?	Lisp-замикання	1
+runtime	00100011	укр	символ?	Lisp-замикання	1
+runtime	00100100	en	string?	Rust-функція за іменем (builtin)	1
+runtime	00100100	sa	śabda?	Rust-функція за іменем (builtin)	1
+runtime	00100100	ук	текст?	Rust-функція за іменем (builtin)	1
+runtime	00100100	укр	текст?	Rust-функція за іменем (builtin)	1
+runtime	00100101	en	string<?	Rust-функція за іменем (builtin)	1
+runtime	00100101	sa	śabda-hīna?	Rust-функція за іменем (builtin)	1
+runtime	00100101	ук	текст-передує?	Rust-функція за іменем (builtin)	1
+runtime	00100101	укр	текст-передує?	Rust-функція за іменем (builtin)	1
+runtime	00100110	en	numeric-buffer?	Rust-функція за іменем (builtin)	1
+runtime	00100110	ук	числовий-буфер?	Rust-функція за іменем (builtin)	1
+runtime	00100110	укр	числовий-буфер?	Rust-функція за іменем (builtin)	1
+runtime	00100111	en	list	Lisp-замикання	1
+runtime	00100111	sa	śreṇī	Lisp-замикання	1
+runtime	00100111	ук	список	Lisp-замикання	1
+runtime	00100111	укр	список	Lisp-замикання	1
+runtime	00101000	en	length	Lisp-замикання	1
+runtime	00101000	sa	pramāṇa	Lisp-замикання	1
+runtime	00101000	ук	довжина	Lisp-замикання	1
+runtime	00101000	укр	довжина	Lisp-замикання	1
+runtime	00101001	en	append	Lisp-замикання	1
+runtime	00101001	sa	saṅkalana	Lisp-замикання	1
+runtime	00101001	ук	приєднати	Lisp-замикання	1
+runtime	00101001	укр	приєднати	Lisp-замикання	1
+runtime	00101010	en	reverse	Lisp-замикання	1
+runtime	00101010	sa	viloma	Lisp-замикання	1
+runtime	00101010	ук	зворот	Lisp-замикання	1
+runtime	00101010	укр	зворот	Lisp-замикання	1
+runtime	00101011	en	nth	Lisp-замикання	1
+runtime	00101011	sa	kramāṅka	Lisp-замикання	1
+runtime	00101011	ук	елемент-списку-за-індексом	Lisp-замикання	1
+runtime	00101011	укр	елемент-списку-за-індексом	Lisp-замикання	1
+runtime	00101100	en	member?	Lisp-замикання	1
+runtime	00101100	sa	sambaddha?	Lisp-замикання	1
+runtime	00101100	ук	значення-у-списку?	Lisp-замикання	1
+runtime	00101100	укр	значення-у-списку?	Lisp-замикання	1
+runtime	00101101	en	assoc	Lisp-замикання	1
+runtime	00101101	sa	saṃbandha	Lisp-замикання	1
+runtime	00101101	ук	знайти-за-ключем	Lisp-замикання	1
+runtime	00101101	укр	знайти-за-ключем	Lisp-замикання	1
+runtime	00101110	en	pair	Lisp-замикання	1
+runtime	00101110	sa	dvandva	Lisp-замикання	1
+runtime	00101110	ук	пара	Lisp-замикання	1
+runtime	00101110	укр	пара	Lisp-замикання	1
+runtime	00101111	en	second	Lisp-замикання	1
+runtime	00101111	sa	dvitīya	Lisp-замикання	1
+runtime	00101111	ук	друге	Lisp-замикання	1
+runtime	00101111	укр	друге	Lisp-замикання	1
+runtime	00110000	en	third	Lisp-замикання	1
+runtime	00110000	sa	tṛtīya	Lisp-замикання	1
+runtime	00110000	ук	третє	Lisp-замикання	1
+runtime	00110000	укр	третє	Lisp-замикання	1
+runtime	00110001	en	fourth	Lisp-замикання	1
+runtime	00110001	sa	caturtha	Lisp-замикання	1
+runtime	00110001	ук	четверте	Lisp-замикання	1
+runtime	00110001	укр	четверте	Lisp-замикання	1
+runtime	00110010	en	fifth	Lisp-замикання	1
+runtime	00110010	sa	pañcama	Lisp-замикання	1
+runtime	00110010	ук	п'яте	Lisp-замикання	1
+runtime	00110010	укр	п'яте	Lisp-замикання	1
+runtime	00110011	en	caar	Lisp-замикання	1
+runtime	00110011	укр	перше-від-першого	Lisp-замикання	1
+runtime	00110100	en	cadr	Lisp-замикання	1
+runtime	00110100	укр	перше-від-решти	Lisp-замикання	1
+runtime	00110101	en	cddr	Lisp-замикання	1
+runtime	00110101	укр	решта-від-решти	Lisp-замикання	1
+runtime	00110110	en	cadddr	Lisp-замикання	1
+runtime	00110110	укр	перше-після-трьох-решт	Lisp-замикання	1
+runtime	00110111	en	map	Lisp-замикання	1
+runtime	00110111	sa	āvartana	Lisp-замикання	1
+runtime	00110111	ук	відобразити	Lisp-замикання	1
+runtime	00110111	укр	відобразити	Lisp-замикання	1
+runtime	00111000	en	filter	Lisp-замикання	1
+runtime	00111000	sa	kalpana	Lisp-замикання	1
+runtime	00111000	ук	відсіяти	Lisp-замикання	1
+runtime	00111000	укр	відсіяти	Lisp-замикання	1
+runtime	00111001	en	reduce	Lisp-замикання	1
+runtime	00111001	sa	saṅgraha	Lisp-замикання	1
+runtime	00111001	ук	згорнути	Lisp-замикання	1
+runtime	00111001	укр	згорнути	Lisp-замикання	1
+runtime	00111010	en	string-append	Rust-функція за іменем (builtin)	1
+runtime	00111010	sa	śabdasaṃyoga	Rust-функція за іменем (builtin)	1
+runtime	00111010	ук	зчепити	Rust-функція за іменем (builtin)	1
+runtime	00111010	укр	зчепити	Rust-функція за іменем (builtin)	1
+runtime	00111011	en	string-length	Lisp-замикання	1
+runtime	00111011	sa	śabdapramāṇa	Lisp-замикання	1
+runtime	00111011	ук	довжина-тексту	Lisp-замикання	1
+runtime	00111011	укр	довжина-тексту	Lisp-замикання	1
+runtime	00111100	en	string-empty?	Lisp-замикання	1
+runtime	00111100	sa	śūnya?	Lisp-замикання	1
+runtime	00111100	ук	текст-порожній?	Lisp-замикання	1
+runtime	00111100	укр	порожній-текст?	Lisp-замикання	1
+runtime	00111101	en	string-prefix?	Lisp-замикання	1
+runtime	00111101	sa	pūrva?	Lisp-замикання	1
+runtime	00111101	ук	префікс-тексту?	Lisp-замикання	1
+runtime	00111101	укр	текст-починається-з?	Lisp-замикання	1
+runtime	00111110	en	string-contains?	Lisp-замикання	1
+runtime	00111110	sa	śabdasambaddha?	Lisp-замикання	1
+runtime	00111110	ук	фрагмент-у-тексті?	Lisp-замикання	1
+runtime	00111110	укр	фрагмент-у-тексті?	Lisp-замикання	1
+runtime	00111111	en	string-first	Rust-функція за іменем (builtin)	1
+runtime	00111111	sa	prathamavarṇa	Rust-функція за іменем (builtin)	1
+runtime	00111111	ук	перший-символ-тексту	Rust-функція за іменем (builtin)	1
+runtime	00111111	укр	перший-символ-тексту	Rust-функція за іменем (builtin)	1
+runtime	01000000	en	string-rest	Rust-функція за іменем (builtin)	1
+runtime	01000000	sa	śeṣavarṇa	Rust-функція за іменем (builtin)	1
+runtime	01000000	ук	решта-символів-тексту	Rust-функція за іменем (builtin)	1
+runtime	01000000	укр	решта-символів-тексту	Rust-функція за іменем (builtin)	1
+runtime	01000001	en	string-slice	Rust-функція за іменем (builtin)	1
+runtime	01000001	sa	cheda	Rust-функція за іменем (builtin)	1
+runtime	01000001	ук	відрізати	Rust-функція за іменем (builtin)	1
+runtime	01000001	укр	відрізати	Rust-функція за іменем (builtin)	1
+runtime	01000010	en	symbol->string	Rust-функція за іменем (builtin)	1
+runtime	01000010	sa	nāman-śabda	Rust-функція за іменем (builtin)	1
+runtime	01000010	ук	символ-у-текст	Rust-функція за іменем (builtin)	1
+runtime	01000010	укр	символ-у-текст	Rust-функція за іменем (builtin)	1
+runtime	01000011	en	string->symbol	Rust-функція за іменем (builtin)	1
+runtime	01000011	sa	śabda-nāman	Rust-функція за іменем (builtin)	1
+runtime	01000011	ук	текст-у-символ	Rust-функція за іменем (builtin)	1
+runtime	01000011	укр	текст-у-символ	Rust-функція за іменем (builtin)	1
+runtime	01000100	en	codepoint->string	Rust-функція за іменем (builtin)	1
+runtime	01000100	sa	varṇa-śabda	Rust-функція за іменем (builtin)	1
+runtime	01000100	ук	кодова-точка-у-текст	Rust-функція за іменем (builtin)	1
+runtime	01000100	укр	кодова-точка-у-текст	Rust-функція за іменем (builtin)	1
+runtime	01000101	en	string->codepoint	Rust-функція за іменем (builtin)	1
+runtime	01000101	sa	śabda-varṇa	Rust-функція за іменем (builtin)	1
+runtime	01000101	ук	текст-у-кодову-точку	Rust-функція за іменем (builtin)	1
+runtime	01000101	укр	текст-у-кодову-точку	Rust-функція за іменем (builtin)	1
+runtime	01000110	en	number->string	Lisp-замикання	1
+runtime	01000110	sa	saṅkhyā-śabda	Lisp-замикання	1
+runtime	01000110	ук	число-у-текст	Lisp-замикання	1
+runtime	01000110	укр	число-у-текст	Lisp-замикання	1
+runtime	01000111	en	digit->string	Lisp-замикання	1
+runtime	01000111	укр	цифра-у-текст	Lisp-замикання	1
+runtime	01001000	en	print	Rust-функція за іменем (builtin)	1
+runtime	01001000	sa	mudraṇa	Rust-функція за іменем (builtin)	1
+runtime	01001000	ук	друкувати	Rust-функція за іменем (builtin)	1
+runtime	01001000	укр	друкувати	Rust-функція за іменем (builtin)	1
+runtime	01001001	en	princ	Rust-функція за іменем (builtin)	1
+runtime	01001001	sa	darśana	Rust-функція за іменем (builtin)	1
+runtime	01001001	ук	показати	Rust-функція за іменем (builtin)	1
+runtime	01001001	укр	показати	Rust-функція за іменем (builtin)	1
+runtime	01001010	en	read	Rust-функція за іменем (builtin)	1
+runtime	01001010	sa	pāṭhana	Rust-функція за іменем (builtin)	1
+runtime	01001010	ук	прочитати	Rust-функція за іменем (builtin)	1
+runtime	01001010	укр	прочитати	Rust-функція за іменем (builtin)	1
+runtime	01001011	en	read-all	Rust-функція за іменем (builtin)	1
+runtime	01001011	sa	pāṭhana-sarva	Rust-функція за іменем (builtin)	1
+runtime	01001011	ук	прочитати-усе	Rust-функція за іменем (builtin)	1
+runtime	01001011	укр	прочитати-усе	Rust-функція за іменем (builtin)	1
+runtime	01001100	en	write-to-string	Rust-функція за іменем (builtin)	1
+runtime	01001100	sa	likhana	Rust-функція за іменем (builtin)	1
+runtime	01001100	ук	значення-у-текст	Rust-функція за іменем (builtin)	1
+runtime	01001100	укр	значення-у-текст	Rust-функція за іменем (builtin)	1
+runtime	01001101	en	eval	Rust-функція за іменем (builtin)	1
+runtime	01001101	sa	vicāraṇa	Rust-функція за іменем (builtin)	1
+runtime	01001101	ук	обчислити	Rust-функція за іменем (builtin)	1
+runtime	01001101	укр	обчислити	Rust-функція за іменем (builtin)	1
+runtime	01001110	en	env	Rust-функція за іменем (builtin)	1
+runtime	01001110	sa	āśraya	Rust-функція за іменем (builtin)	1
+runtime	01001110	ук	середовище	Rust-функція за іменем (builtin)	1
+runtime	01001110	укр	середовище	Rust-функція за іменем (builtin)	1
+runtime	01001111	en	vector	Rust-функція за іменем (builtin)	1
+runtime	01001111	sa	samūha	Rust-функція за іменем (builtin)	1
+runtime	01001111	ук	вектор	Rust-функція за іменем (builtin)	1
+runtime	01001111	укр	вектор	Rust-функція за іменем (builtin)	1
+runtime	01010000	en	make-vector	Rust-функція за іменем (builtin)	1
+runtime	01010000	sa	samūha-nirmāṇa	Rust-функція за іменем (builtin)	1
+runtime	01010000	ук	створити-вектор	Rust-функція за іменем (builtin)	1
+runtime	01010000	укр	створити-вектор	Rust-функція за іменем (builtin)	1
+runtime	01010001	en	vector-length	Rust-функція за іменем (builtin)	1
+runtime	01010001	sa	samūha-pramāṇa	Rust-функція за іменем (builtin)	1
+runtime	01010001	ук	довжина-вектора	Rust-функція за іменем (builtin)	1
+runtime	01010001	укр	довжина-вектора	Rust-функція за іменем (builtin)	1
+runtime	01010010	en	vector-ref	Rust-функція за іменем (builtin)	1
+runtime	01010010	sa	samūha-āvartana	Rust-функція за іменем (builtin)	1
+runtime	01010010	ук	елемент-вектора	Rust-функція за іменем (builtin)	1
+runtime	01010010	укр	елемент-вектора	Rust-функція за іменем (builtin)	1
+runtime	01010011	en	vector-set!	Rust-функція за іменем (builtin)	1
+runtime	01010011	ук	встановити-елемент-вектора!	Rust-функція за іменем (builtin)	1
+runtime	01010011	укр	встановити-елемент-вектора!	Rust-функція за іменем (builtin)	1
+runtime	01010100	en	i32-buffer	Rust-функція за іменем (builtin)	1
+runtime	01010100	укр	буфер-32-бітних-цілих-зі-знаком	Rust-функція за іменем (builtin)	1
+runtime	01010101	en	f32-buffer	Rust-функція за іменем (builtin)	1
+runtime	01010101	укр	буфер-32-бітних-чисел-з-плавною-комою	Rust-функція за іменем (builtin)	1
+runtime	01010110	en	numeric-buffer-type	Rust-функція за іменем (builtin)	1
+runtime	01010110	укр	тип-числового-буфера	Rust-функція за іменем (builtin)	1
+runtime	01010111	en	numeric-buffer-length	Rust-функція за іменем (builtin)	1
+runtime	01010111	укр	довжина-числового-буфера	Rust-функція за іменем (builtin)	1
+runtime	01011000	en	numeric-buffer-ref	Rust-функція за іменем (builtin)	1
+runtime	01011000	укр	елемент-числового-буфера	Rust-функція за іменем (builtin)	1
+runtime	01011001	en	numeric-buffer-map	Rust-функція за іменем (builtin)	1
+runtime	01011001	укр	відобразити-числовий-буфер	Rust-функція за іменем (builtin)	1
+runtime	01011010	en	mono-ns	Rust-функція за іменем (builtin)	1
+runtime	01011010	sa	kāla-mono	Rust-функція за іменем (builtin)	1
+runtime	01011010	ук	монотонний-нс	Rust-функція за іменем (builtin)	1
+runtime	01011010	укр	монотонний-час-у-наносекундах	Rust-функція за іменем (builtin)	1
+runtime	01011011	en	unix-time-now	Rust-функція за іменем (builtin)	1
+runtime	01011011	sa	kāla-unix	Rust-функція за іменем (builtin)	1
+runtime	01011011	ук	поточний-юнікс-час	Rust-функція за іменем (builtin)	1
+runtime	01011011	укр	поточний-юнікс-час	Rust-функція за іменем (builtin)	1
+runtime	01011100	en	ntp-query-raw	Rust-функція за іменем (builtin)	1
+runtime	01011100	укр	сирий-запит-мережевого-часу	Rust-функція за іменем (builtin)	1
+runtime	01011101	en	timezone-declarations-raw	Rust-функція за іменем (builtin)	1
+runtime	01011101	укр	сирі-декларації-часових-поясів	Rust-функція за іменем (builtin)	1
+runtime	10011000	en	identity	Lisp-замикання	1
+runtime	10011000	sa	svabhāva	Lisp-замикання	1
+runtime	10011000	ук	без-змін	Lisp-замикання	1
+runtime	10011000	укр	повернути-без-змін	Lisp-замикання	1
+runtime	10011001	en	gensym	Lisp-замикання	1
+runtime	10011001	sa	nāman-nirmāṇa	Lisp-замикання	1
+runtime	10011001	ук	генерувати-символ	Lisp-замикання	1
+runtime	10011001	укр	створити-унікальний-символ	Lisp-замикання	1
+runtime	10011010	en	and	макрос	1
+runtime	10011010	ук	та	макрос	1
+runtime	10011010	укр	та	макрос	1
+runtime	10011011	en	or	макрос	1
+runtime	10011011	ук	або	макрос	1
+runtime	10011011	укр	або	макрос	1
+runtime	10011100	en	let	макрос	1
+runtime	10011100	ук	нехай	макрос	1
+runtime	10011100	укр	нехай	макрос	1
+runtime	10011101	en	let*	макрос	1
+runtime	10011101	ук	нехай*	макрос	1
+runtime	10011101	укр	нехай-послідовно	макрос	1
+runtime	10011110	sym	->	макрос	1
+runtime	10011110	укр	ланцюжок-першого-аргументу	макрос	1
+runtime	10011111	sym	->>	макрос	1
+runtime	10011111	укр	ланцюжок-останнього-аргументу	макрос	1
+runtime	10100000	en	json-parse	Rust-функція за іменем (builtin)	1
+runtime	10100000	укр	розібрати-текст-формату-джейсон	Rust-функція за іменем (builtin)	1
+runtime	10100001	en	sha256-hex	Rust-функція за іменем (builtin)	1
+runtime	10100001	укр	обчислити-хеш-ша-256-тексту-у-шістнадцятковому-записі	Rust-функція за іменем (builtin)	1
+runtime	10101001	en	binary	Lisp-замикання	1
+runtime	10101001	ук	двійковий	Lisp-замикання	1
+runtime	10101001	укр	двійковий	Lisp-замикання	1
+source	benchmarks/arithmetic.lisp	5
+source	benchmarks/closures.lisp	8
+source	benchmarks/lists.lisp	9
+source	benchmarks/parser.lisp	10
+source	benchmarks/recursion.lisp	9
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-en.lisp	11
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-uk.lisp	11
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-wrap.lisp	29
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-en.lisp	9
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-uk.lisp	9
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-wrap.lisp	25
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/lists-en.lisp	28
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/lists-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/lists-uk.lisp	28
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/lists-wrap.lisp	36
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/loop-en.lisp	7
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/loop-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/loop-uk.lisp	7
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/loop-wrap.lisp	25
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/member-en.lisp	22
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/member-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/member-uk.lisp	22
+source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/member-wrap.lisp	33
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/closures-en.lisp	11
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/closures-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/fib-en.lisp	9
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/fib-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/lists-en.lisp	28
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/lists-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/loop-en.lisp	7
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/loop-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/member-en.lisp	22
+source	benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/member-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/ackermann-en.lisp	10
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/ackermann-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/assoc-en.lisp	26
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/assoc-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/closures-en.lisp	11
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/closures-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/evenodd-en.lisp	11
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/evenodd-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/fib-en.lisp	9
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/fib-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/flatten-en.lisp	23
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/flatten-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/lists-en.lisp	28
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/lists-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/loop-en.lisp	7
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/loop-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/mapfold-en.lisp	31
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/mapfold-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/member-en.lisp	22
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/member-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/tree-en.lisp	16
+source	benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/tree-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/ackermann-en.lisp	10
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/ackermann-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/assoc-en.lisp	26
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/assoc-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/closures-en.lisp	11
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/closures-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/empty-en.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/evenodd-en.lisp	11
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/evenodd-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/fib-en.lisp	9
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/fib-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/flatten-en.lisp	23
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/flatten-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/lists-en.lisp	28
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/lists-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/loop-en.lisp	7
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/loop-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/mapfold-en.lisp	31
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/mapfold-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/member-en.lisp	22
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/member-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/tree-en.lisp	16
+source	benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/tree-sens.lisp	1
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/ackermann-en.setup.lisp	9
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/assoc-en.call.lisp	1
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/assoc-en.setup.lisp	24
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/closures-en.setup.lisp	10
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/evenodd-en.setup.lisp	10
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/fib-en.setup.lisp	8
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/flatten-en.call.lisp	1
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/flatten-en.setup.lisp	21
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/lists-en.setup.lisp	27
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/loop-en.setup.lisp	6
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/mapfold-en.setup.lisp	30
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/member-en.setup.lisp	21
+source	benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/tree-en.setup.lisp	15
+source	contract-consumers.lisp	1
+source	contracts/answer-contract.lisp	12
+source	contracts/control-dispatch-contract.lisp	1
+source	contracts/core-profile-contract.lisp	8
+source	contracts/core-special-form-profile-policy.lisp	1
+source	contracts/core1-bootstrap-contract.lisp	12
+source	contracts/core1-generation-manifest.lisp	1
+source	contracts/core1-s2-compiler-admission.lisp	3
+source	contracts/core1-s3-compiler-prelude.lisp	1
+source	contracts/core2-profile-contract.lisp	7
+source	contracts/core3-profile-contract.lisp	6
+source	contracts/core4-predicate-answer-scale.lisp	1
+source	contracts/datalog-math-capability-1001.lisp	2
+source	contracts/exact-q-binary-contract.lisp	5
+source	contracts/island-compat-contract.lisp	8
+source	contracts/life-1-contract.lisp	7
+source	contracts/life-2-pattern-catalog.lisp	5
+source	contracts/mathematical-result-taxonomy.lisp	8
+source	contracts/structural-observation-contract.lisp	7
+source	contracts/structural-query-inventory.lisp	17
+source	contracts/world-transition-contract.lisp	2
+source	demo-tasks.lisp	4
+source	evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp	1
+source	examples/ukrainian-greeting.lisp	14
+source	experiments/atomspace-pattern-audit-791.lisp	7
+source	experiments/blackboard-pattern-audit-790.lisp	8
+source	experiments/core4-eq-answer-1258.lisp	5
+source	experiments/core4-eq-result-law-witness.lisp	139
+source	experiments/core4-mechanical-answer-grade.lisp	49
+source	experiments/core4-predicate-answer-carrier-matrix.lisp	76
+source	experiments/function-genealogy.lisp	231
+source	experiments/graal-interop-pattern-audit-788.lisp	7
+source	experiments/kif-bridge-audit-792.lisp	4
+source	experiments/metacall-pattern-audit-789.lisp	7
+source	experiments/poplog-pattern-audit-787.lisp	8
+source	experiments/probabilistic-decision-jev-like.lisp	242
+source	knowledge/astronomy.lisp	1
+source	knowledge/canon-authority-inventory.lisp	30
+source	knowledge/family.lisp	1
+source	knowledge/guard-fact-policy.lisp	115
+source	knowledge/guard-reference.lisp	290
+source	knowledge/guard-runtime-policy.lisp	36
+source	knowledge/language-detection-probe.lisp	1
+source	knowledge/language-policy.lisp	2
+source	knowledge/physics.lisp	1
+source	knowledge/sanskrit-cyrillic-audit.lisp	1
+source	knowledge/sanskrit-cyrillic-keyboard.lisp	1
+source	knowledge/sanskrit-cyrillic-phoneme-map.lisp	10
+source	knowledge/semantic-lineage-core-v1.lisp	18
+source	knowledge/swarm-legacy-deprecation.lisp	2
+source	knowledge/swarm-no-live-callers-audit.lisp	3
+source	lib/bridge/prolog-to-datalog.lisp	66
+source	lib/canon.lisp	197
+source	lib/clips-import.lisp	358
+source	lib/content-store.lisp	18
+source	lib/core.lisp	177
+source	lib/core1-compiler-prelude.lisp	7
+source	lib/core2.lisp	25
+source	lib/core3.lisp	14
+source	lib/core4.lisp	177
+source	lib/epistemic.lisp	454
+source	lib/forward.lisp	645
+source	lib/fs.lisp	15
+source	lib/generated/meta-semantic-registry.lisp	620
+source	lib/guard.lisp	148
+source	lib/island-lowering.lisp	53
+source	lib/knowledge.lisp	944
+source	lib/life-1-scheduler.lisp	157
+source	lib/linter.lisp	337
+source	lib/lisp-fs.lisp	501
+source	lib/machine/admission/x86-64.lisp	631
+source	lib/machine/atoms/x86-64.lisp	454
+source	lib/machine/block.lisp	17
+source	lib/machine/capability-axis.lisp	30
+source	lib/machine/cpu/intel-core-i5-6400-inventory.lisp	3
+source	lib/machine/dispatch/native-first-coverage.lisp	18
+source	lib/machine/dispatch/native-first-execute.lisp	96
+source	lib/machine/dispatch/native-first-parity.lisp	85
+source	lib/machine/dispatch/native-first.lisp	83
+source	lib/machine/encoding/coverage.lisp	1175
+source	lib/machine/encoding/x86-64.lisp	749
+source	lib/machine/layout/pair-x86-64.lisp	7
+source	lib/machine/lowering/semantic-x86-64.lisp	124
+source	lib/machine/operands/x86-64.lisp	325
+source	lib/machine/profile/minimal-runtime-x86-64.lisp	134
+source	lib/mechanism-selector.lisp	79
+source	lib/meta-eval-first-class.lisp	218
+source	lib/meta-eval-mutual.lisp	171
+source	lib/meta-eval.lisp	1019
+source	lib/narrate.lisp	166
+source	lib/persistent-map.lisp	80
+source	lib/persistent-vector.lisp	94
+source	lib/process.lisp	76
+source	lib/quantity.lisp	313
+source	lib/reason.lisp	362
+source	lib/result-status.lisp	139
+source	lib/si-derived.lisp	18
+source	lib/si.lisp	42
+source	lib/surface/peer-identity-acceptance.lisp	20
+source	lib/surface/sa.lisp	110
+source	lib/surface/semantic-registry-api.lisp	112
+source	lib/surface/uk-acceptance.lisp	109
+source	lib/surface/uk-inventory.lisp	8
+source	lib/surface/uk-sa-coverage.lisp	21
+source	lib/surface/uk.lisp	160
+source	lib/surface/ukr-acceptance.lisp	6
+source	lib/surface/ukr.lisp	1
+source	lib/tcp.lisp	24
+source	lib/time.lisp	225
+source	lib/translation.lisp	302
+source	lib/understand.lisp	82
+source	lib/unify-observe.lisp	21
+source	lib/unify.lisp	130
+source	lib/utf8.lisp	262
+source	lib/world.lisp	521
+source	lib/yantra.lisp	417
+source	memory-layout-contract.lisp	1
+source	prototype/lisp_core_phonetics/prototype_phonetics.lisp	6
+source	racket/boot/core.lisp	345
+source	racket/examples/constitution.lisp	31
+source	scripts/authority-guard-enforce.lisp	20
+source	scripts/authority-guard.lisp	74
+source	scripts/benchmark-semantic-registry-read.lisp	26
+source	scripts/build-constitution.lisp	117
+source	scripts/build-dependency-classification.lisp	462
+source	scripts/build-inventory.lisp	196
+source	scripts/check-core-profile-contract.lisp	222
+source	scripts/check-core-special-form-profile-policy.lisp	78
+source	scripts/check-core1-compiler-sid-resolver.lisp	118
+source	scripts/check-core2-profile-contract.lisp	124
+source	scripts/check-core3-profile-contract.lisp	49
+source	scripts/check-core4-predicate-answer-boundary.lisp	61
+source	scripts/check-core4-predicate-answer-scale.lisp	68
+source	scripts/check-core4-predicate-output-boundary.lisp	49
+source	scripts/check-core4-predicate-record-inventory.lisp	133
+source	scripts/check-function-table-mechanisms.lisp	155
+source	scripts/check-island-math-evidence.lisp	271
+source	scripts/check-kernel-abi-transport-boundary.lisp	141
+source	scripts/check-repo-tooling-inventory.lisp	497
+source	scripts/enforce-function-table-mechanisms.lisp	11
+source	scripts/enforce-island-math-evidence.lisp	11
+source	scripts/fixtures-for-tier.lisp	25
+source	scripts/gen-functions.lisp	19
+source	scripts/generate-function-table.lisp	165
+source	scripts/generate-meta-semantic-registry.lisp	93
+source	scripts/generate-rust-evaluator-dispatch.lisp	66
+source	scripts/generate-rust-semantic-registry.lisp	73
+source	scripts/generate-uk-surface-audit.lisp	236
+source	scripts/machine-authority-guard.lisp	211
+source	scripts/oracle-batch.lisp	73
+source	scripts/program-symbol-table.lisp	164
+source	scripts/release.lisp	80
+source	scripts/semantic-authority-guard-enforce.lisp	20
+source	scripts/semantic-authority-guard.lisp	128
+source	scripts/symbol-table.lisp	60
+source	scripts/перевірити-український-профіль.lisp	239
+source	task-demo.lisp	9
+source	task-stats.lisp	2
+source	tasks-info.lisp	2
+source	tasks-summary.lisp	2
+source	tasks-summary2.lisp	2
+source	tests/fixtures/answer-contract-witness.lisp	169
+source	tests/fixtures/bare-sid-literal-v1.lisp	13
+source	tests/fixtures/conformance-transition-witness.lisp	3
+source	tests/fixtures/content-store-authority-witness.lisp	26
+source	tests/fixtures/decimal-comma-authority-witness.lisp	65
+source	tests/fixtures/early-sid-lowering-witness.lisp	77
+source	tests/fixtures/exact-q-binary-contract-witness.lisp	153
+source	tests/fixtures/exact-q-binary-v1.lisp	12
+source	tests/fixtures/exact-quantity-arithmetic-witness.lisp	90
+source	tests/fixtures/explicit-negative-reason-observe-witness.lisp	19
+source	tests/fixtures/island-compat-witness.lisp	134
+source	tests/fixtures/island-lowering-1048-witness.lisp	45
+source	tests/fixtures/life-1-contract-witness.lisp	137
+source	tests/fixtures/life-1-scheduler-witness.lisp	73
+source	tests/fixtures/lisp-fs-conformance.lisp	10
+source	tests/fixtures/machine-current-gpr-atoms-witness.lisp	432
+source	tests/fixtures/machine-register-width-witness.lisp	77
+source	tests/fixtures/machine-replaceability-witness.lisp	40
+source	tests/fixtures/machine-representation-independence-witness.lisp	34
+source	tests/fixtures/mathematical-result-taxonomy-witness.lisp	125
+source	tests/fixtures/mechanism-selector-1047-witness.lisp	48
+source	tests/fixtures/meta-eval-empty-program-witness.lisp	36
+source	tests/fixtures/meta-semantic-registry-witness.lisp	122
+source	tests/fixtures/narrate-outcome-authority-witness.lisp	56
+source	tests/fixtures/native-first-coverage-ledger-witness.lisp	241
+source	tests/fixtures/native-first-dispatch-witness.lisp	38
+source	tests/fixtures/native-first-execution-witness.lisp	23
+source	tests/fixtures/native-first-parity-witness.lisp	27
+source	tests/fixtures/native-first-totality-witness.lisp	18
+source	tests/fixtures/oracle-results.lisp	227
+source	tests/fixtures/persistent-vector-balance-witness.lisp	23
+source	tests/fixtures/postcore-peer-materialization-witness.lisp	408
+source	tests/fixtures/process-load-witness.lisp	7
+source	tests/fixtures/prolog-datalog-bridge-witness.lisp	11
+source	tests/fixtures/properties-helpers.lisp	44
+source	tests/fixtures/reason-index-authority-witness.lisp	52
+source	tests/fixtures/rivnopravnist-uk.lisp	8
+source	tests/fixtures/scientific-constant-knowledge-projection-witness.lisp	21
+source	tests/fixtures/semantic-coordinate-law-axis-v1.lisp	13
+source	tests/fixtures/semantic-coordinate-matrix-845.lisp	3
+source	tests/fixtures/semantic-registry-self-hosted-witness.lisp	32
+source	tests/fixtures/structural-observation-contract-witness.lisp	186
+source	tests/fixtures/structural-observation-v1.lisp	26
+source	tests/fixtures/structural-query-inventory-witness.lisp	155
+source	tests/fixtures/translation-symbol-boundary-witness.lisp	63
+source	tests/fixtures/witness-runner.lisp	186
+source	tests/fixtures/world-transition-witness.lisp	38
+source	tests/fixtures/x86-64-instruction-set-witness.lisp	211
+source	tests/fixtures/yantraos-bridge-witness.lisp	192
+source	tests/fixtures/приклад.lisp	1

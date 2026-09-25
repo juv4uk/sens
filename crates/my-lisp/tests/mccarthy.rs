@@ -139,7 +139,7 @@ fn exact_arithmetic_computes_factorials_past_i64_range() {
         (def fact
           (lambda (n acc)
             (cond
-              ((eq n 0) acc)
+              ((eq? n 0) acc)
               (t (fact (- n 1) (* acc n))))))
         (fact 30 (/ 1 1))
     "#;
@@ -287,7 +287,7 @@ fn bootstrap_library_is_written_and_executed_in_my_lisp() {
         Value::Symbol("antenna".into())
     );
     assert_eq!(
-        eval_program("(not (quote ()))", &mut session)
+        eval_program("(not? (quote ()))", &mut session)
             .unwrap()
             .value,
         Value::Symbol("t".into())
@@ -317,7 +317,7 @@ fn bootstrap_library_provides_list_utilities() {
     );
     assert_eq!(
         run(
-            "(filter (lambda (x) (eq x 2)) (quote (1 2 3 2)))",
+            "(filter (lambda (x) (eq? x 2)) (quote (1 2 3 2)))",
             &mut session
         ),
         "(2 2)"
@@ -536,12 +536,12 @@ fn variadic_defmacro_binds_unevaluated_rest_arguments() {
 #[test]
 fn print_escapes_embedded_quotes_and_backslashes_so_read_can_reconstruct_the_string() {
     // A string value containing a literal " and \, built via my-lisp source
-    // escaping — the *value* itself is `(eq "radio" "radio")`, 22 chars,
+    // escaping — the *value* itself is `(eq? "radio" "radio")`, 22 chars,
     // no backslashes in the value, just in how it's written here.
-    let source = r#""(eq \"radio\" \"radio\")""#;
+    let source = r#""(eq? \"radio\" \"radio\")""#;
     let value = eval_program(source, &mut Session::default()).unwrap().value;
     // `to_string()` is now valid my-lisp source for that same string literal
-    // — parsing it again (not wrapping in another layer of quoting) should
+    // — parsing it again (not? wrapping in another layer of quoting) should
     // reconstruct the identical value.
     let printed = value.to_string();
     let reread = eval_program(&printed, &mut Session::default())
@@ -565,7 +565,7 @@ fn print_escapes_embedded_quotes_and_backslashes_so_read_can_reconstruct_the_str
 #[test]
 fn princ_outputs_a_string_raw_without_quotes_or_escapes() {
     let mut session = Session::default();
-    let result = eval_program(r#"(princ "(eq \"radio\" \"radio\")")"#, &mut session).unwrap();
+    let result = eval_program(r#"(princ "(eq? \"radio\" \"radio\")")"#, &mut session).unwrap();
     assert_eq!(result.output, vec![r#"(eq "radio" "radio")"#.to_string()]);
     // princ still returns the string value itself, just like print does —
     // composes the same way, only the transcript text differs.
@@ -1382,7 +1382,7 @@ fn division_respects_the_same_opt_in_numeric_bit_limit() {
 fn arithmetic_stays_unbounded_by_default_matching_every_conformance_fixture() {
     let mut session = Session::default();
     eval_program(
-        "(def big (lambda (n acc) (cond ((eq n 0) acc) (t (big (- n 1) (* acc 2)))))) (big 100 1)",
+        "(def big (lambda (n acc) (cond ((eq? n 0) acc) (t (big (- n 1) (* acc 2)))))) (big 100 1)",
         &mut session,
     )
     .expect("unbounded session should compute a 100-bit result without a limit error");

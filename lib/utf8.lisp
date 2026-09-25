@@ -41,12 +41,12 @@
 (def utf8-all-bytes?
   (lambda (bytes)
     (cond
-      ((atom bytes)
+      ((atom? bytes)
        (structural-kind empty-list)
        (cond
-         ((eq bytes (quote ())) (identity-relation same) 1)
-         ((eq bytes (quote ())) (identity-relation distinct) 0)))
-      ((atom bytes)
+         ((eq? bytes (quote ())) (identity-relation same) 1)
+         ((eq? bytes (quote ())) (identity-relation distinct) 0)))
+      ((atom? bytes)
        (structural-kind pair)
        (cond
          ((utf8-byte? (car bytes)) 1
@@ -89,10 +89,10 @@
 (def utf8-decode-onto
   (lambda (bytes out)
     (cond
-      ((atom bytes)
+      ((atom? bytes)
        (structural-kind empty-list)
        (list (quote decoded) (reverse out)))
-      ((atom bytes)
+      ((atom? bytes)
        (structural-kind pair)
        (let* ((b1 (car bytes))
               (r1 (cdr bytes)))
@@ -105,10 +105,10 @@
               ; 2-byte sequence: C2..DF 80..BF
               ((utf8-in-range? b1 194 223) 1
                (cond
-                 ((atom r1)
+                 ((atom? r1)
                   (structural-kind empty-list)
                   (list (quote rejected) (quote invalid-utf8)))
-                 ((atom r1)
+                 ((atom? r1)
                   (structural-kind pair)
                   (let ((b2 (car r1)))
                     (cond
@@ -125,17 +125,17 @@
                  ; 3-byte sequence with overlong/surrogate exclusions.
                  ((utf8-in-range? b1 224 239) 1
                   (cond
-                    ((atom r1)
+                    ((atom? r1)
                      (structural-kind empty-list)
                      (list (quote rejected) (quote invalid-utf8)))
-                    ((atom r1)
+                    ((atom? r1)
                      (structural-kind pair)
                      (let ((r2 (cdr r1)))
                        (cond
-                         ((atom r2)
+                         ((atom? r2)
                           (structural-kind empty-list)
                           (list (quote rejected) (quote invalid-utf8)))
-                         ((atom r2)
+                         ((atom? r2)
                           (structural-kind pair)
                           (let* ((b2 (car r1))
                                  (b3 (car r2)))
@@ -160,24 +160,24 @@
                     ; 4-byte sequence, restricted to Unicode scalar <= 10FFFF.
                     ((utf8-in-range? b1 240 244) 1
                      (cond
-                       ((atom r1)
+                       ((atom? r1)
                         (structural-kind empty-list)
                         (list (quote rejected) (quote invalid-utf8)))
-                       ((atom r1)
+                       ((atom? r1)
                         (structural-kind pair)
                         (let ((r2 (cdr r1)))
                           (cond
-                            ((atom r2)
+                            ((atom? r2)
                              (structural-kind empty-list)
                              (list (quote rejected) (quote invalid-utf8)))
-                            ((atom r2)
+                            ((atom? r2)
                              (structural-kind pair)
                              (let ((r3 (cdr r2)))
                                (cond
-                                 ((atom r3)
+                                 ((atom? r3)
                                   (structural-kind empty-list)
                                   (list (quote rejected) (quote invalid-utf8)))
-                                 ((atom r3)
+                                 ((atom? r3)
                                   (structural-kind pair)
                                   (let* ((b2 (car r1))
                                          (b3 (car r2))
@@ -216,16 +216,16 @@
 
 (def utf8-valid?
   (lambda (bytes)
-    (eq (car (utf8-decode bytes)) (quote decoded))))
+    (eq? (car (utf8-decode bytes)) (quote decoded))))
 
 ; Keep text materialization in tail position.
 (def unicode-scalars->string-onto
   (lambda (scalars out)
     (cond
-      ((atom scalars)
+      ((atom? scalars)
        (structural-kind empty-list)
        out)
-      ((atom scalars)
+      ((atom? scalars)
        (structural-kind pair)
        (unicode-scalars->string-onto
          (cdr scalars)
@@ -239,11 +239,11 @@
   (lambda (bytes)
     (let ((decoded (utf8-decode bytes)))
       (cond
-        ((eq (car decoded) (quote decoded))
+        ((eq? (car decoded) (quote decoded))
          (identity-relation same)
          (list (quote decoded)
                (unicode-scalars->string (car (cdr decoded)))))
-        ((eq (car decoded) (quote decoded))
+        ((eq? (car decoded) (quote decoded))
          (identity-relation distinct)
          decoded)))))
 

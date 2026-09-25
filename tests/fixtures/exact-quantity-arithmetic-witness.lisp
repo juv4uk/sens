@@ -124,15 +124,15 @@
 (def exact-quantity-arithmetic-check
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list)
+      ((atom? rows) (structural-kind empty-list)
        (quote (exact-quantity-arithmetic-witness (status pass))))
-      ((atom rows) (structural-kind atom)
+      ((atom? rows) (structural-kind atom)
        (list
          (quote exact-quantity-arithmetic-witness)
          (list (quote status) (quote fail))
          (list (quote case) (quote malformed-row-tail))
          (list (quote actual) rows)))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
            ((equal? (second row) (third row)) (structural-relation same)

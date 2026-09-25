@@ -176,7 +176,7 @@
     (00000111
       ((00000010 values) (structural-kind empty-list) acc)
       ((00000010 values) (structural-kind pair)
-       (length-onto (00000110 values) (+ acc 1))))))
+       (length-onto (00000110 values) (00001100 acc 1))))))
 
 
 (00001001 length
@@ -375,11 +375,13 @@
          ((equal? value (00000001 (structural-relation distinct))) (structural-relation same) (00000001 ()))
          (t t t))))))
 
-(00001001 not
+(00001001 not?
   (00001000 (value)
     (00000111
       ((truthy? value) t (00000001 ()))
       ((truthy? value) () t))))
+
+(00001001 not not?)
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
@@ -402,7 +404,7 @@
     (00000111
       ((00000011 i 0) (identity-relation same) (00000101 lst))
       ((00000011 i 0) (identity-relation distinct)
-       (nth (- i 1) (00000110 lst))))))
+       (nth (00001101 i 1) (00000110 lst))))))
 
 (00001001 member?
   (00001000 (item lst)
@@ -522,7 +524,7 @@
   (00001000 (s)
     (00000111
       ((string-empty? s) (identity-relation same) 0)
-      (t t (+ 1 (string-length (string-rest s)))))))
+      (t t (00001100 1 (string-length (string-rest s)))))))
 
 (00001001 string-prefix?
   (00001000 (prefix s)
@@ -621,9 +623,9 @@
 (00001001 largest-chunk
   (00001000 (a b chunk mult)
     (00000111
-      ((< a (+ chunk chunk)) 1 (00000100 chunk mult))
-      ((< a (+ chunk chunk)) 0
-       (largest-chunk a b (+ chunk chunk) (+ mult mult))))))
+      ((< a (00001100 chunk chunk)) 1 (00000100 chunk mult))
+      ((< a (00001100 chunk chunk)) 0
+       (largest-chunk a b (00001100 chunk chunk) (00001100 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -645,18 +647,18 @@
 (00001001 quotient
   (00001000 (a b)
     (00000111
-      ((00000011 b 0) (identity-relation same) (/ a b))
+      ((00000011 b 0) (identity-relation same) (00001111 a b))
       ((00000011 b 0) (identity-relation distinct)
        (00000111
          ((< a b) 1 0)
          ((< a b) 0
           (let ((chunk+mult (largest-chunk a b b 1)))
-            (+ (00000110 chunk+mult)
-               (quotient (- a (00000101 chunk+mult)) b)))))))))
+            (00001100 (00000110 chunk+mult)
+               (quotient (00001101 a (00000101 chunk+mult)) b)))))))))
 
 (00001001 mod
   (00001000 (a b)
-    (- a (* b (quotient a b)))))
+    (00001101 a (00001110 b (quotient a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
@@ -811,7 +813,7 @@
     (00000111
       ((= n 0) 1 guess)
       ((= n 0) 0
-       (sqrt-iter (/ (+ guess (/ x guess)) 2) x (- n 1))))))
+       (sqrt-iter (00001111 (00001100 guess (00001111 x guess)) 2) x (00001101 n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
 (00001001 isqrt
@@ -823,7 +825,7 @@
 
 (00001001 isqrt-step
   (00001000 (n g)
-    (let ((next (quotient (+ g (quotient n g)) 2)))
+    (let ((next (quotient (00001100 g (quotient n g)) 2)))
       (00000111
         ((< next g) 1 (isqrt-step n next))
         ((< next g) 0 g)))))
@@ -836,9 +838,9 @@
       ((= x (quotient x 1)) 1
        (let ((r (isqrt x)))
          (00000111
-           ((= (* r r) x) t r)
-           (t t (sqrt-iter (/ x 2) x 8)))))
-      (t t (sqrt-iter (/ x 2.0) x 5)))))
+           ((= (00001110 r r) x) t r)
+           (t t (sqrt-iter (00001111 x 2) x 8)))))
+      (t t (sqrt-iter (00001111 x 2.0) x 5)))))
 
 ; abs/min/max/min-list/max-list — migrated from Rust builtins.rs to
 ; lib/core.lisp (owner directive 2026-09-11: "Lisp owns meaning, Rust owns
@@ -866,7 +868,7 @@
 (00001001 abs
   (00001000 (x)
     (00000111
-      ((< x 0) 1 (- x))
+      ((< x 0) 1 (00001101 0 x))
       ((< x 0) 0 x))))
 
 ; Required first parameter (dotted lambda-list, same pattern as

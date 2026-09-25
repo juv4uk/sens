@@ -1,0 +1,6 @@
+(def make-adder (lambda (k) (lambda (x) (+ x k))))
+(def add3 (make-adder 3))
+(def loop (lambda (n acc)
+  (cond ((eq n 0) acc)
+        (t (loop (- n 1) (add3 acc))))))
+(print (loop 5000 0))

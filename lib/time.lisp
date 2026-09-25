@@ -46,7 +46,7 @@
 (def unix-time-observation->utc
   (lambda (observation)
     (cond
-      ((eq (car observation) (quote unix-time))
+      ((eq? (car observation) (quote unix-time))
        (utc-from-unix (second observation) (third observation)))
       (t (list (quote rejected) (quote invalid-unix-time-observation))))))
 
@@ -114,7 +114,7 @@
 (def internet-time-raw->observation
   (lambda (raw)
     (cond
-      ((eq (car raw) (quote ntp-fields))
+      ((eq? (car raw) (quote ntp-fields))
        (internet-time-fields->observation
          (second raw)
          (third raw)
@@ -134,7 +134,7 @@
 (def internet-time-observation->utc
   (lambda (observation)
     (cond
-      ((eq (car observation) (quote accepted))
+      ((eq? (car observation) (quote accepted))
        (list (quote accepted)
              (second observation)
              (utc-from-unix
@@ -198,7 +198,7 @@
 (def timezone-raw->observation
   (lambda (raw)
     (cond
-      ((eq (car raw) (quote timezone-declarations))
+      ((eq? (car raw) (quote timezone-declarations))
        (timezone-declarations->observation
          (second raw)
          (third raw)))

@@ -133,11 +133,11 @@ fn bounded_cond_profile_is_projected_from_lisp_runtime_decision_need() {
     let mut session = profile_session();
 
     assert_eq!(
-        eval_value("(cond ((eq 2 2) 111) (t 222))", &mut session),
+        eval_value("(cond ((eq? 2 2) 111) (t 222))", &mut session),
         "111"
     );
     assert_eq!(
-        eval_value("(cond ((eq 2 3) 111) (t 222))", &mut session),
+        eval_value("(cond ((eq? 2 3) 111) (t 222))", &mut session),
         "222"
     );
 

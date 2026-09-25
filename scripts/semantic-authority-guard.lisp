@@ -20,7 +20,7 @@
 (def contains-any?
   (lambda (source needles)
     (cond
-      ((atom needles) (structural-kind empty-list) ())
+      ((atom? needles) (structural-kind empty-list) ())
       ((string-contains? (car needles) source) t)
       (t (contains-any? source (cdr needles))))))
 
@@ -67,7 +67,7 @@
     (cond
       ; Host/runtime/compiler/backend files are intentionally unrestricted.
       ; They may have local meaning tables, enums, fallbacks, dispatch, etc.
-      ((not (language-authority-source? path))
+      ((not? (language-authority-source? path))
        (quote allowed-local-implementation))
       ; A protected Lisp-owned source may mention Rust as evidence/history.
       ; It becomes a violation only when host implementation is explicitly
@@ -81,18 +81,18 @@
 (def scan
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list) (quote (semantic-authority-ok)))
+      ((atom? rows) (structural-kind empty-list) (quote (semantic-authority-ok)))
       (t
        (let* ((row (car rows))
               (path (second row)))
          (cond
            ; Crucial asymmetry: do not even inspect host implementation text.
-           ((not (language-authority-source? path))
+           ((not? (language-authority-source? path))
             (scan (cdr rows)))
            (t
             (let ((raw-source (read-file path)))
               (cond
-                ((not (string? raw-source))
+                ((not? (string? raw-source))
                  (list
                    (quote semantic-authority-violation)
                    path
@@ -101,7 +101,7 @@
                 (t
                  (let ((class (violation-class path raw-source)))
                    (cond
-                     ((eq class (quote host-to-language-authority-leak))
+                     ((eq? class (quote host-to-language-authority-leak))
                       (list
                         (quote semantic-authority-violation)
                         path

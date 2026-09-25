@@ -383,6 +383,8 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
         ExprKind::NumericBuffer(_) => Err(Unsupported::new("external-oracle/numeric-buffer")),
         ExprKind::Symbol(_) => Err(Unsupported::new("external-oracle/bare-symbol")),
         ExprKind::List(items) => translate_call(items),
+        // Парсер не породжує зведених викликів; сюди надходить лише parse().
+        ExprKind::Call(_, _) => Err(Unsupported::new("external-oracle/lowered-call")),
     }
 }
 

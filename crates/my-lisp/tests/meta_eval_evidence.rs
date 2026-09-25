@@ -158,12 +158,12 @@ fn recursive_group_captures_outer_lexical_environment() {
 (def left
   (lambda (n)
     (cond
-      ((eq n 0) offset)
+      ((eq? n 0) offset)
       (t (right (- n 1))))))
 (def right
   (lambda (n)
     (cond
-      ((eq n 0) offset)
+      ((eq? n 0) offset)
       (t (left (- n 1))))))
 "#;
     // offset=7, and left/right alternate purely on parity of n down to 0,
@@ -183,7 +183,7 @@ fn recursive_group_members_can_create_nested_closures_with_capture() {
 (def make-step
   (lambda (n)
     (cond
-      ((eq n 0) (lambda (x) (+ x offset)))
+      ((eq? n 0) (lambda (x) (+ x offset)))
       (t (bounce (- n 1))))))
 (def bounce (lambda (n) (make-step n)))
 "#;
@@ -251,13 +251,13 @@ fn a_real_recursive_scc_can_skip_an_independent_interleaved_definition() {
 (def left
   (lambda (n)
     (cond
-      ((eq n 0) t)
+      ((eq? n 0) t)
       (t (right (- n 1))))))
 (def helper (lambda (x) (+ x 100)))
 (def right
   (lambda (n)
     (cond
-      ((eq n 0) (quote ()))
+      ((eq? n 0) (quote ()))
       (t (left (- n 1))))))
 "#;
 

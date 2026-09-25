@@ -52,19 +52,19 @@
 (def translation-status-valid?
   (lambda (status)
     (cond
-      ((eq (symbol? status) (quote ())) (quote ()))
-      ((eq status (quote candidate)) t)
-      ((eq status (quote ambiguous)) t)
-      ((eq status (quote rejected)) t)
+      ((eq? (symbol? status) (quote ())) (quote ()))
+      ((eq? status (quote candidate)) t)
+      ((eq? status (quote ambiguous)) t)
+      ((eq? status (quote rejected)) t)
       (t (quote ())))))
 
 (def translation-kind-valid?
   (lambda (kind)
     (cond
-      ((eq (symbol? kind) (quote ())) (quote ()))
-      ((eq kind (quote clause)) t)
-      ((eq kind (quote batch)) t)
-      ((eq kind (quote query)) t)
+      ((eq? (symbol? kind) (quote ())) (quote ()))
+      ((eq? kind (quote clause)) t)
+      ((eq? kind (quote batch)) t)
+      ((eq? kind (quote query)) t)
       (t (quote ())))))
 
 ; Envelope validation owns only the protocol shell. Payload meaning is checked
@@ -74,15 +74,15 @@
 (def translation-envelope-valid?
   (lambda (proposal)
     (cond
-      ((atom proposal) (quote ()))
-      ((eq (knowledge-proper-list? proposal) (quote ())) (quote ()))
-      ((eq (= (length proposal) 5) (quote ())) (quote ()))
-      ((eq (symbol? (car proposal)) (quote ())) (quote ()))
-      ((eq (car proposal) *translation-schema*)
+      ((atom? proposal) (quote ()))
+      ((eq? (knowledge-proper-list? proposal) (quote ())) (quote ()))
+      ((eq? (= (length proposal) 5) (quote ())) (quote ()))
+      ((eq? (symbol? (car proposal)) (quote ())) (quote ()))
+      ((eq? (car proposal) *translation-schema*)
        (cond
-         ((eq (translation-status-valid? (translation-status proposal)) (quote ()))
+         ((eq? (translation-status-valid? (translation-status proposal)) (quote ()))
           (quote ()))
-         ((eq (translation-kind-valid? (translation-kind proposal)) (quote ()))
+         ((eq? (translation-kind-valid? (translation-kind proposal)) (quote ()))
           (quote ()))
          ((string-membership-helper (translation-source proposal))
           (class-membership string nonmember)
@@ -93,25 +93,25 @@
 (def translation-batch-valid?
   (lambda (payload)
     (cond
-      ((atom payload) (quote ()))
-      ((eq (knowledge-proper-list? payload) (quote ())) (quote ()))
+      ((atom? payload) (quote ()))
+      ((eq? (knowledge-proper-list? payload) (quote ())) (quote ()))
       (t (knowledge-clauses-valid? payload)))))
 
 (def translation-candidate-payload-valid?
   (lambda (kind payload)
     (cond
-      ((eq kind (quote clause)) (knowledge-clause-valid? payload))
-      ((eq kind (quote batch)) (translation-batch-valid? payload))
-      ((eq kind (quote query)) (knowledge-goal-valid? payload))
+      ((eq? kind (quote clause)) (knowledge-clause-valid? payload))
+      ((eq? kind (quote batch)) (translation-batch-valid? payload))
+      ((eq? kind (quote query)) (knowledge-goal-valid? payload))
       (t (quote ())))))
 
 (def translation-alternatives-valid?
   (lambda (kind alternatives)
     (cond
-      ((atom alternatives) (quote ()))
+      ((atom? alternatives) (quote ()))
       ((translation-candidate-payload-valid? kind (car alternatives))
        (cond
-         ((atom (cdr alternatives)) t)
+         ((atom? (cdr alternatives)) t)
          (t (translation-alternatives-valid? kind (cdr alternatives)))))
       (t (quote ())))))
 
@@ -120,9 +120,9 @@
 (def translation-ambiguity-valid?
   (lambda (kind payload)
     (cond
-      ((atom payload) (quote ()))
-      ((eq (knowledge-proper-list? payload) (quote ())) (quote ()))
-      ((atom (cdr payload)) (quote ()))
+      ((atom? payload) (quote ()))
+      ((eq? (knowledge-proper-list? payload) (quote ())) (quote ()))
+      ((atom? (cdr payload)) (quote ()))
       (t (translation-alternatives-valid? kind payload)))))
 
 (def make-translation-review
@@ -144,24 +144,24 @@
 (def translation-review-status-valid?
   (lambda (status)
     (cond
-      ((eq (symbol? status) (quote ())) (quote ()))
-      ((eq status (quote accepted)) t)
-      ((eq status (quote rejected)) t)
-      ((eq status (quote ambiguous)) t)
+      ((eq? (symbol? status) (quote ())) (quote ()))
+      ((eq? status (quote accepted)) t)
+      ((eq? status (quote rejected)) t)
+      ((eq? status (quote ambiguous)) t)
       (t (quote ())))))
 
 (def translation-review-valid?
   (lambda (review)
     (cond
-      ((atom review) (quote ()))
-      ((eq (knowledge-proper-list? review) (quote ())) (quote ()))
-      ((eq (= (length review) 5) (quote ())) (quote ()))
-      ((eq (symbol? (car review)) (quote ())) (quote ()))
-      ((eq (car review) *translation-review-schema*)
+      ((atom? review) (quote ()))
+      ((eq? (knowledge-proper-list? review) (quote ())) (quote ()))
+      ((eq? (= (length review) 5) (quote ())) (quote ()))
+      ((eq? (symbol? (car review)) (quote ())) (quote ()))
+      ((eq? (car review) *translation-review-schema*)
        (cond
-         ((eq (translation-review-status-valid? (translation-review-status review)) (quote ()))
+         ((eq? (translation-review-status-valid? (translation-review-status review)) (quote ()))
           (quote ()))
-         ((eq (symbol? (translation-review-code review)) (quote ()))
+         ((eq? (symbol? (translation-review-code review)) (quote ()))
           (quote ()))
          (t t)))
       (t (quote ())))))
@@ -169,19 +169,19 @@
 (def translation-review-advice-decision
   (lambda (proposal decision)
     (cond
-      ((atom decision)
+      ((atom? decision)
        (make-translation-review
          (quote rejected) (quote malformed-advice-decision) proposal decision))
-      ((eq (symbol? (car decision)) (quote ()))
+      ((eq? (symbol? (car decision)) (quote ()))
        (make-translation-review
          (quote rejected) (quote malformed-advice-decision) proposal decision))
-      ((eq (car decision) (quote accepted))
+      ((eq? (car decision) (quote accepted))
        (make-translation-review
          (quote accepted) (quote knowledge-accepted) proposal decision))
-      ((eq (car decision) (quote conflict))
+      ((eq? (car decision) (quote conflict))
        (make-translation-review
          (quote rejected) (quote knowledge-conflict) proposal decision))
-      ((eq (car decision) (quote rejected))
+      ((eq? (car decision) (quote rejected))
        (make-translation-review
          (quote rejected) (quote knowledge-rejected) proposal decision))
       (t
@@ -193,16 +193,16 @@
     (let ((kind (translation-kind proposal))
           (payload (translation-payload proposal)))
       (cond
-        ((eq (translation-candidate-payload-valid? kind payload) (quote ()))
+        ((eq? (translation-candidate-payload-valid? kind payload) (quote ()))
          (make-translation-review
            (quote rejected) (quote invalid-candidate) proposal payload))
-        ((eq kind (quote query))
+        ((eq? kind (quote query))
          (make-translation-review
            (quote accepted) (quote query) proposal payload))
-        ((eq kind (quote clause))
+        ((eq? kind (quote clause))
          (translation-review-advice-decision
            proposal (advice-decision module-name payload)))
-        ((eq kind (quote batch))
+        ((eq? kind (quote batch))
          (translation-review-advice-decision
            proposal (advice-all-decision module-name payload)))
         (t
@@ -215,15 +215,15 @@
 (def translation-review
   (lambda (module-name proposal)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (make-translation-review
          (quote rejected) (quote invalid-module) proposal module-name))
-      ((eq (translation-envelope-valid? proposal) (quote ()))
+      ((eq? (translation-envelope-valid? proposal) (quote ()))
        (make-translation-review
          (quote rejected) (quote invalid-translation) proposal proposal))
-      ((eq (translation-status proposal) (quote candidate))
+      ((eq? (translation-status proposal) (quote candidate))
        (translation-review-candidate module-name proposal))
-      ((eq (translation-status proposal) (quote ambiguous))
+      ((eq? (translation-status proposal) (quote ambiguous))
        (cond
          ((translation-ambiguity-valid?
             (translation-kind proposal) (translation-payload proposal))
@@ -234,7 +234,7 @@
           (make-translation-review
             (quote rejected) (quote invalid-ambiguity)
             proposal (translation-payload proposal)))))
-      ((eq (translation-status proposal) (quote rejected))
+      ((eq? (translation-status proposal) (quote rejected))
        (cond
          ((symbol? (translation-payload proposal))
           (make-translation-review
@@ -254,15 +254,15 @@
 (def translation-admittable?
   (lambda (review)
     (cond
-      ((eq (translation-review-valid? review) (quote ())) (quote ()))
-      ((eq (translation-review-status review) (quote accepted))
+      ((eq? (translation-review-valid? review) (quote ())) (quote ()))
+      ((eq? (translation-review-status review) (quote accepted))
        (let ((proposal (translation-review-proposal review)))
          (cond
-           ((eq (translation-envelope-valid? proposal) (quote ())) (quote ()))
-           ((eq (translation-status proposal) (quote candidate))
+           ((eq? (translation-envelope-valid? proposal) (quote ())) (quote ()))
+           ((eq? (translation-status proposal) (quote candidate))
             (cond
-              ((eq (translation-kind proposal) (quote clause)) t)
-              ((eq (translation-kind proposal) (quote batch)) t)
+              ((eq? (translation-kind proposal) (quote clause)) t)
+              ((eq? (translation-kind proposal) (quote batch)) t)
               (t (quote ()))))
            (t (quote ())))))
       (t (quote ())))))
@@ -280,9 +280,9 @@
 (def translation-evidence-worthy?
   (lambda (review)
     (cond
-      ((eq (translation-review-valid? review) (quote ())) (quote ()))
-      ((eq (translation-review-status review) (quote rejected)) t)
-      ((eq (translation-review-status review) (quote ambiguous)) t)
+      ((eq? (translation-review-valid? review) (quote ())) (quote ()))
+      ((eq? (translation-review-status review) (quote rejected)) t)
+      ((eq? (translation-review-status review) (quote ambiguous)) t)
       (t (quote ())))))
 
 (def translation-evidence-entry

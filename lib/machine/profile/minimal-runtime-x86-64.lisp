@@ -80,14 +80,14 @@
 (def x86-minimal-family-member?
   (lambda (family families)
     (cond
-      ((atom families) ())
-      ((eq family (car families)) t)
+      ((atom? families) ())
+      ((eq? family (car families)) t)
       (t (x86-minimal-family-member? family (cdr families))))))
 
 (def x86-minimal-unique-form-families
   (lambda (forms seen)
     (cond
-      ((atom forms) seen)
+      ((atom? forms) seen)
       (t
        (let ((family (car (car forms))))
          (cond
@@ -109,7 +109,7 @@
 (def x86-minimal-map-row-second
   (lambda (rows)
     (cond
-      ((atom rows) (quote ()))
+      ((atom? rows) (quote ()))
       (t
        (cons
          (x86-minimal-row-second (car rows))
@@ -118,7 +118,7 @@
 (def x86-minimal-map-row-third
   (lambda (rows)
     (cond
-      ((atom rows) (quote ()))
+      ((atom? rows) (quote ()))
       (t
        (cons
          (x86-minimal-row-third (car rows))

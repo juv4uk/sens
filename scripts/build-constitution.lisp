@@ -64,7 +64,7 @@
 (def print-fixtures
   (lambda (remaining)
     (cond
-      ((atom remaining) (quote ()))
+      ((atom? remaining) (quote ()))
       (t ((lambda ()
             (print-fixture (car remaining))
             (print-fixtures (cdr remaining))))))))

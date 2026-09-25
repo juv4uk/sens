@@ -36,10 +36,10 @@
   (lambda (row)
     (let ((mechanism (rust-mechanism (second row))))
       (cond
-        ((atom mechanism)
+        ((atom? mechanism)
          (structural-kind empty-list)
          (car (quote ())))
-        ((atom mechanism)
+        ((atom? mechanism)
          (structural-kind atom)
          (str+
            "    NecessaryFormDispatchRow { semantic_id: 0b"
@@ -51,10 +51,10 @@
 (def render-rows
   (lambda (remaining)
     (cond
-      ((atom remaining)
+      ((atom? remaining)
        (structural-kind empty-list)
        "")
-      ((atom remaining)
+      ((atom? remaining)
        (structural-kind pair)
        (str+ (render-row (car remaining))
              (render-rows (cdr remaining)))))))
@@ -80,7 +80,7 @@
   (str+ header (render-rows rows) "];\n"))
 
 (cond
-  ((atom *argv*)
+  ((atom? *argv*)
    (structural-kind empty-list)
    (second
      (list

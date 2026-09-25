@@ -247,7 +247,7 @@ mod tests {
     #[test]
     fn corrupt_file_degrades_to_empty() {
         let dir = tmpdir("corrupt");
-        fs::write(dir.join("retry-queue.lisp"), "((not valid sexp").unwrap();
+        fs::write(dir.join("retry-queue.lisp"), "((not? valid sexp").unwrap();
         let q = RetryQueue::open(&dir);
         assert_eq!(q.len(), 0);
         fs::remove_dir_all(&dir).unwrap();

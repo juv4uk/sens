@@ -49,16 +49,16 @@
 (def fixtures-only
   (lambda (entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       ; inventory.lisp's own last top-level form is a bare () -- the CLI's
       ; auto-printed final script return value, captured by the shell
       ; redirect that originally generated the file, not a real record.
       ; (car (car entries)) on that entry would car an atom and error, so
       ; skip any non-Pair top-level form defensively instead of assuming
       ; every entry is shaped like a tagged record.
-      ((atom (car entries)) (fixtures-only (cdr entries)))
+      ((atom? (car entries)) (fixtures-only (cdr entries)))
       (t (cond
-           ((eq (car (car entries)) (quote fixture))
+           ((eq? (car (car entries)) (quote fixture))
             (cons (car entries) (fixtures-only (cdr entries))))
            (t (fixtures-only (cdr entries))))))))
 
@@ -67,8 +67,8 @@
 (def process-pair
   (lambda (inventory-remaining conformance-remaining)
     (cond
-      ((atom inventory-remaining) (quote ()))
-      ((atom conformance-remaining) (quote ()))
+      ((atom? inventory-remaining) (quote ()))
+      ((atom? conformance-remaining) (quote ()))
       (t
        (let* ((inventory-fixture (car inventory-remaining))
               (id (cdr (assoc (quote id) (cdr inventory-fixture))))

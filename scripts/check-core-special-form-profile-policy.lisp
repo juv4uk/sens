@@ -10,16 +10,16 @@
 (def csp-find
   (lambda (name rows)
     (cond
-      ((atom rows)
+      ((atom? rows)
        (structural-kind empty-list)
        (quote ()))
-      ((atom rows)
+      ((atom? rows)
        (structural-kind pair)
        (cond
-         ((eq (car (car rows)) name)
+         ((eq? (car (car rows)) name)
           (identity-relation same)
           (car rows))
-         ((eq (car (car rows)) name)
+         ((eq? (car (car rows)) name)
           (identity-relation distinct)
           (csp-find name (cdr rows))))))))
 
@@ -37,16 +37,16 @@
 (def csp-first-failure
   (lambda (checks)
     (cond
-      ((atom checks)
+      ((atom? checks)
        (structural-kind empty-list)
        (quote ()))
-      ((atom (car checks))
+      ((atom? (car checks))
        (structural-kind empty-list)
        (csp-first-failure (cdr checks)))
-      ((atom (car checks))
+      ((atom? (car checks))
        (structural-kind pair)
        (car checks))
-      ((atom (car checks))
+      ((atom? (car checks))
        (structural-kind atom)
        (car checks)))))
 
@@ -110,15 +110,15 @@
                       owner my-lisp
                       state active-mechanical-hook)))))))
       (cond
-        ((atom failure)
+        ((atom? failure)
          (structural-kind empty-list)
          (quote (core-special-form-profile-policy-ok)))
-        ((atom failure)
+        ((atom? failure)
          (structural-kind pair)
          (list
            (quote core-special-form-profile-policy-violation)
            failure))
-        ((atom failure)
+        ((atom? failure)
          (structural-kind atom)
          (list
            (quote core-special-form-profile-policy-violation)

@@ -9,12 +9,12 @@
     (як-є 00000001) ; ук
     (як-є 00000001) ; укр
     (svarūpa 00000001) ; sa
-    (atom 00000010) ; en
+    (atom? 00000010) ; en
     (атом? 00000010) ; ук
     (атом? 00000010) ; укр
     (aṇu 00000010) ; sa
     (.? 00000010) ; sym
-    (eq 00000011) ; en
+    (eq? 00000011) ; en
     (тотожне? 00000011) ; ук
     (тотожне? 00000011) ; укр
     (abheda 00000011) ; sa
@@ -125,7 +125,7 @@
     (неспадне-починаючи-з? 00011111) ; укр
     (nonincreasing-from? 00100000) ; en
     (незростаюче-починаючи-з? 00100000) ; укр
-    (not 00100001) ; en
+    (not? 00100001) ; en
     (хибне? 00100001) ; ук
     (хибне? 00100001) ; укр
     (na 00100001) ; sa
@@ -462,7 +462,7 @@
     (логічний-висновок 01111100) ; ук
     (логічний-висновок 01111100) ; укр
     (anumāna 01111100) ; sa
-    (check-conflict 01111101) ; en
+    (check-conflict? 01111101) ; en
     (конфлікт? 01111101) ; ук
     (є-конфлікт? 01111101) ; укр
     (virodha-parīkṣā 01111101) ; sa
@@ -520,7 +520,7 @@
     (розіменувати 10001011) ; ук
     (розіменувати 10001011) ; укр
     (vicāraṇa-gamana 10001011) ; sa
-    (occurs-check 10001100) ; en
+    (occurs-check? 10001100) ; en
     (змінна-зустрічається? 10001100) ; ук
     (змінна-зустрічається? 10001100) ; укр
     (parivṛtti-parīkṣā 10001100) ; sa
@@ -626,5 +626,5 @@
   (lambda (name)
     (let ((entry (assoc name my-semantic-surface-registry)))
       (cond
-        ((atom entry) (structural-kind empty-list) (quote ()))
-        ((atom entry) (structural-kind pair) (second entry))))))
+        ((atom? entry) (structural-kind empty-list) (quote ()))
+        ((atom? entry) (structural-kind pair) (second entry))))))

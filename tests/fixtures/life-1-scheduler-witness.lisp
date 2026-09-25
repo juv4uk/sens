@@ -58,12 +58,12 @@
                     different-bridge-contract
                     observation-42))))))
       (cond
-        ((atom selection) (structural-kind empty-list)
+        ((atom? selection) (structural-kind empty-list)
          (list
            (quote life-1-scheduler-witness)
            (list (quote status) (quote fail))
            (list (quote detail) (quote missing-selection))))
-        ((atom selection) (structural-kind pair)
+        ((atom? selection) (structural-kind pair)
          (let* ((ready (car (cdr selection)))
                 (remaining (car (cdr (cdr (cdr selection)))))
                 (dedup-ok (equal? remaining (list second)))

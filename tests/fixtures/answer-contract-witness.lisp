@@ -16,13 +16,13 @@
   (lambda (entry field)
     (let ((found (assoc field entry)))
       (cond
-        ((atom found) (quote ()))
+        ((atom? found) (quote ()))
         (t (cdr found))))))
 
 (def answer-contract-find
   (lambda (identity entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       ((equal?
          (answer-contract-field (car entries) (quote identity))
          identity)
@@ -44,7 +44,7 @@
   (lambda (identity field expected)
     (let ((entry (answer-contract-entry identity)))
       (cond
-        ((atom entry)
+        ((atom? entry)
          (list (quote missing-entry) identity field expected))
         ((equal? (answer-contract-field entry field) expected)
          (quote ()))
@@ -69,14 +69,14 @@
 (def answer-contract-witness-expect-missing
   (lambda (identity)
     (cond
-      ((atom (answer-contract-entry identity)) (quote ()))
+      ((atom? (answer-contract-entry identity)) (quote ()))
       (t (list (quote unexpected-entry) identity)))))
 
 (def answer-contract-witness-first-failure
   (lambda (checks)
     (cond
-      ((atom checks) (quote ()))
-      ((atom (car checks))
+      ((atom? checks) (quote ()))
+      ((atom? (car checks))
        (answer-contract-witness-first-failure (cdr checks)))
       (t (car checks)))))
 
@@ -146,7 +146,7 @@
                 (answer-contract-witness-expect
                   00000011
                   (quote input-domain)
-                  (quote (atom atom)))
+                  (quote (atom? atom)))
                 (answer-contract-witness-expect
                   00000011
                   (quote result-form)
@@ -235,9 +235,9 @@
                 ; A String that looks like an SID is still ordinary String data.
                 (answer-contract-witness-expect-missing "00000100")))))
       (cond
-        ((eq (answer-contract-schema) (quote answer-contract/1))
+        ((eq? (answer-contract-schema) (quote answer-contract/1))
          (cond
-           ((atom failure)
+           ((atom? failure)
             (answer-contract-witness-record
               (quote pass)
               (quote canon-zero-unspecialized-accumulator)))

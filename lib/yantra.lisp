@@ -50,11 +50,11 @@
 (def json-escape-char
   (lambda (ch)
     (cond
-      ((eq ch "\"") "\\\"")
-      ((eq ch "\\") "\\\\")
-      ((eq ch "\n") "\\n")
-      ((eq ch "\r") "\\r")
-      ((eq ch "\t") "\\t")
+      ((eq? ch "\"") "\\\"")
+      ((eq? ch "\\") "\\\\")
+      ((eq? ch "\n") "\\n")
+      ((eq? ch "\r") "\\r")
+      ((eq? ch "\t") "\\t")
       (t ch))))
 
 (def json-escape-onto
@@ -73,7 +73,7 @@
 (def strcat-onto
   (lambda (items acc)
     (cond
-      ((atom items) acc)
+      ((atom? items) acc)
       (t (strcat-onto (cdr items) (string-append acc (car items)))))))
 
 (def strcat
@@ -98,18 +98,18 @@
 (def json-object?
   (lambda (v)
     (cond
-      ((atom v) (quote ()))
-      ((atom (car v)) (quote ()))
-      ((atom (car (car v))) t)
+      ((atom? v) (quote ()))
+      ((atom? (car v)) (quote ()))
+      ((atom? (car (car v))) t)
       (t (quote ())))))
 
 (def json-encode-value
   (lambda (v)
     (cond
-      ((atom v)
+      ((atom? v)
        (cond
-         ((eq v t) "true")
-         ((eq v (quote ())) "null")
+         ((eq? v t) "true")
+         ((eq? v (quote ())) "null")
          ((string-membership-helper v)
           (class-membership string member)
           (json-encode-string v))
@@ -120,7 +120,7 @@
 (def json-encode-object-entries
   (lambda (entries acc)
     (cond
-      ((atom entries) acc)
+      ((atom? entries) acc)
       (t (let ((entry (car entries)))
            (json-encode-object-entries
             (cdr entries)
@@ -138,7 +138,7 @@
 (def json-encode-array-items
   (lambda (items acc)
     (cond
-      ((atom items) acc)
+      ((atom? items) acc)
       (t (json-encode-array-items
           (cdr items)
           (strcat acc
@@ -180,7 +180,7 @@
   (lambda (jm)
     (let ((c (alist-ref "content" jm)))
       (cond
-        ((eq c (quote ())) "")
+        ((eq? c (quote ())) "")
         (t c)))))
 
 (def json->tool-call
@@ -324,7 +324,7 @@
 (def append-tool-results
   (lambda (tcs acc)
     (cond
-      ((atom tcs) acc)
+      ((atom? tcs) acc)
       (t (append-tool-results
           (cdr tcs)
           (append acc
@@ -342,7 +342,7 @@
 (def markers-contained?
   (lambda (markers text)
     (cond
-      ((atom markers) (quote ()))
+      ((atom? markers) (quote ()))
       ((string-contains? (car markers) text) t)
       (t (markers-contained? (cdr markers) text)))))
 
@@ -356,7 +356,7 @@
 (def has-tool-result?
   (lambda (messages)
     (cond
-      ((atom messages) (quote ()))
+      ((atom? messages) (quote ()))
       ((equal? (msg-role (car messages)) "tool") t)
       (t (has-tool-result? (cdr messages))))))
 
@@ -381,14 +381,14 @@
 (def id-in-list?
   (lambda (id ids)
     (cond
-      ((atom ids) (quote ()))
+      ((atom? ids) (quote ()))
       ((equal? id (car ids)) t)
       (t (id-in-list? id (cdr ids))))))
 
 (def all-covered?
   (lambda (ids candidates)
     (cond
-      ((atom ids) t)
+      ((atom? ids) t)
       ((id-in-list? (car ids) candidates) (all-covered? (cdr ids) candidates))
       (t (quote ())))))
 
@@ -399,7 +399,7 @@
 (def ends-with-owned-tool-results?
   (lambda (messages)
     (cond
-      ((atom messages) (quote ()))
+      ((atom? messages) (quote ()))
       (t (collect-trailing-tools
           (cdr (reverse messages))
           (quote ()))))))
@@ -409,15 +409,15 @@
 (def collect-trailing-tools
   (lambda (reversed collected)
     (cond
-      ((atom reversed) (quote ()))
+      ((atom? reversed) (quote ()))
       ((equal? (msg-role (car reversed)) "tool")
        (collect-trailing-tools (cdr reversed)
                                (cons (msg-tool-call-id (car reversed)) collected)))
       (t
        (let ((issuer (car reversed)))
          (cond
-           ((not (equal? (msg-role issuer) "assistant")) (quote ()))
-           ((atom (msg-tool-calls issuer)) (quote ()))
+           ((not? (equal? (msg-role issuer) "assistant")) (quote ()))
+           ((atom? (msg-tool-calls issuer)) (quote ()))
            (t (all-covered? collected (msg-call-ids issuer)))))))))
 
 ; A turn may finish only if its text claims no execution - or if its
@@ -444,7 +444,7 @@
 (def count-with-role
   (lambda (role messages)
     (cond
-      ((atom messages) 0)
+      ((atom? messages) 0)
       ((equal? (msg-role (car messages)) role) (+ 1 (count-with-role role (cdr messages))))
       (t (count-with-role role (cdr messages))))))
 
@@ -460,7 +460,7 @@
               (with-reply (append messages (list assistant-msg)))
               (tcs (msg-tool-calls assistant-msg)))
          (cond
-           ((atom tcs)
+           ((atom? tcs)
             (cond
               ((valid-final? assistant-msg with-reply)
                (list (cons (quote status) (quote completed))

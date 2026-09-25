@@ -1,0 +1,6 @@
+(def is-even (lambda (n)
+  (cond ((eq n 0) 1)
+        (t (is-odd (- n 1))))))
+(def is-odd (lambda (n)
+  (cond ((eq n 0) 0)
+        (t (is-even (- n 1))))))

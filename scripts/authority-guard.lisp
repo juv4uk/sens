@@ -15,9 +15,9 @@
 ; Consume the transported facts so malformed/unreadable transport still stays
 ; visible to the Lisp process, but do not classify host semantics.
 (cond
-  ((atom changed-host-tests)
+  ((atom? changed-host-tests)
    (structural-kind empty-list)
    (quote (authority-ok)))
-  ((atom changed-host-tests)
+  ((atom? changed-host-tests)
    (structural-kind pair)
    (quote (authority-ok))))

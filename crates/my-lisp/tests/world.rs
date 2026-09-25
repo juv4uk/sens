@@ -153,7 +153,7 @@ fn conflicting_tell_knowledge_keeps_the_legacy_journal_unchanged() {
     assert_eq!(
         eval_world(
             r#"
-            (defmodule space (quote (((not (planet earth))))))
+            (defmodule space (quote (((not? (planet earth))))))
             (let ((before *knowledge-journal*))
               (list (tell-knowledge space (quote (((planet earth)))))
                     (equal? before *knowledge-journal*)))
@@ -204,7 +204,7 @@ fn advise_compatibility_wrapper_preserves_journal_on_conflict() {
     assert_eq!(
         eval_world(
             r#"
-            (defmodule space (quote (((not (planet earth))))))
+            (defmodule space (quote (((not? (planet earth))))))
             (def before *knowledge-journal*)
             (def decision (advise space (quote ((planet earth)))))
             (list (car decision) (equal? before *knowledge-journal*))
@@ -323,7 +323,7 @@ fn package_import_compatibility_wrapper_preserves_journal_on_conflict() {
     assert_eq!(
         eval_world(
             r#"
-            (defmodule space (quote (((not (planet earth))))))
+            (defmodule space (quote (((not? (planet earth))))))
             (def before *knowledge-journal*)
             (def package
               (make-knowledge-package (quote space) (quote (((planet earth))))))
@@ -397,10 +397,10 @@ fn backward_reasoning_reads_the_selected_world_snapshot() {
               (let ((w1 (world-tell w0 (quote family) (quote ((parent tom bob))))))
                 (let ((w2 (world-retract w1 (quote family) (quote ((parent tom bob))))))
                   (list (cond
-                          ((atom (reason-in-world w1 (quote family) (quote (parent tom bob)))) (quote no))
+                          ((atom? (reason-in-world w1 (quote family) (quote (parent tom bob)))) (quote no))
                           (t (quote yes)))
                         (cond
-                          ((atom (reason-in-world w2 (quote family) (quote (parent tom bob)))) (quote no))
+                          ((atom? (reason-in-world w2 (quote family) (quote (parent tom bob)))) (quote no))
                           (t (quote yes)))))))
             "#
         ),
@@ -417,16 +417,16 @@ fn backward_reasoning_keeps_independent_branches_isolated() {
               (let ((cats (world-tell root (quote zoo) (quote ((likes alice cats)))))
                     (dogs (world-tell root (quote zoo) (quote ((likes alice dogs))))))
                 (list (cond
-                        ((atom (reason-in-world cats (quote zoo) (quote (likes alice cats)))) (quote no))
+                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice cats)))) (quote no))
                         (t (quote yes)))
                       (cond
-                        ((atom (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) (quote no))
+                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) (quote no))
                         (t (quote yes)))
                       (cond
-                        ((atom (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) (quote no))
+                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) (quote no))
                         (t (quote yes)))
                       (cond
-                        ((atom (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) (quote no))
+                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) (quote no))
                         (t (quote yes))))))
             "#
         ),
@@ -475,7 +475,7 @@ fn advise_world_accepts_into_a_new_queryable_world() {
                   (list (car (car result))
                         (world-clauses before (quote astronomy))
                         (cond
-                          ((atom (reason-in-world after (quote astronomy) (quote (planet venus)))) (quote no))
+                          ((atom? (reason-in-world after (quote astronomy) (quote (planet venus)))) (quote no))
                           (t (quote yes)))))))
             "#
         ),
@@ -508,14 +508,14 @@ fn advise_world_conflict_preserves_the_existing_snapshot() {
             r#"
             (let ((w1 (world-tell (empty-world)
                                   (quote astronomy)
-                                  (quote ((not (planet pluto)))))))
+                                  (quote ((not? (planet pluto)))))))
               (let ((result (advise-world w1 (quote astronomy) (quote ((planet pluto))))))
                 (list (car (car result))
                       (equal? w1 (second result))
                       (world-clauses (second result) (quote astronomy)))))
             "#
         ),
-        "(conflict (structural-relation same) (((not (planet pluto)))))"
+        "(conflict (structural-relation same) (((not? (planet pluto)))))"
     );
 }
 
@@ -524,7 +524,7 @@ fn advise_world_does_not_read_the_global_knowledge_journal() {
     assert_eq!(
         eval_world(
             r#"
-            (advise astronomy (quote ((not (planet mars)))))
+            (advise astronomy (quote ((not? (planet mars)))))
             (let ((result (advise-world (empty-world)
                                         (quote astronomy)
                                         (quote ((planet mars))))))
@@ -553,7 +553,7 @@ fn advise_all_world_accepts_one_atomic_dependent_batch() {
                   (list (car (car result))
                         (world-clauses before (quote astronomy))
                         (cond
-                          ((atom (reason-in-world after (quote astronomy)
+                          ((atom? (reason-in-world after (quote astronomy)
                                                  (quote (has-mass earth)))) (quote no))
                           (t (quote yes)))
                         (equal? before (world-parent after))))))
@@ -610,7 +610,7 @@ fn advise_all_world_detects_internal_conflict_without_partial_writes() {
                       (advise-all-world
                         before
                         (quote astronomy)
-                        (quote (((planet pluto)) ((not (planet pluto))))))))
+                        (quote (((planet pluto)) ((not? (planet pluto))))))))
                 (list (car (car result))
                       (equal? before (second result))
                       (world-module-known? (second result) (quote astronomy)))))
@@ -625,7 +625,7 @@ fn advise_all_world_ignores_conflicts_in_the_global_journal() {
     assert_eq!(
         eval_world(
             r#"
-            (advise astronomy (quote ((not (planet mars)))))
+            (advise astronomy (quote ((not? (planet mars)))))
             (let ((result
                     (advise-all-world (empty-world)
                                       (quote astronomy)
@@ -672,7 +672,7 @@ fn world_package_import_atomically_creates_a_queryable_child() {
                     (list (car (car result))
                           (equal? before (world-parent after))
                           (cond
-                            ((atom (reason-in-world after (quote astronomy)
+                            ((atom? (reason-in-world after (quote astronomy)
                                                    (quote (has-mass earth)))) (quote no))
                             (t (quote yes))))))))
             "#
@@ -713,7 +713,7 @@ fn world_package_import_conflict_preserves_the_target_snapshot() {
             (let ((before
                     (world-tell (empty-world)
                                 (quote astronomy)
-                                (quote ((not (planet pluto)))))))
+                                (quote ((not? (planet pluto)))))))
               (let ((package
                       (make-knowledge-package (quote astronomy)
                                               (quote (((planet pluto)))))))
@@ -723,7 +723,7 @@ fn world_package_import_conflict_preserves_the_target_snapshot() {
                         (world-clauses (second result) (quote astronomy))))))
             "#
         ),
-        "(conflict (structural-relation same) (((not (planet pluto)))))"
+        "(conflict (structural-relation same) (((not? (planet pluto)))))"
     );
 }
 
@@ -904,7 +904,7 @@ fn equal_knowledge_has_the_same_canonical_content_address() {
     assert_eq!(
         eval_world(
             r#"
-            (eq (knowledge-content-address (quote ((planet earth))))
+            (eq? (knowledge-content-address (quote ((planet earth))))
                 (knowledge-content-address (quote ((planet earth)))))
             "#
         ),
@@ -918,7 +918,7 @@ fn different_knowledge_has_a_different_content_address() {
     assert_eq!(
         eval_world(
             r#"
-            (eq (knowledge-content-address (quote ((planet earth))))
+            (eq? (knowledge-content-address (quote ((planet earth))))
                 (knowledge-content-address (quote ((planet mars)))))
             "#
         ),
@@ -955,7 +955,7 @@ fn independently_reconstructed_worlds_have_the_same_content_address() {
                         (import-knowledge-package-world
                           (empty-world)
                           (make-world-knowledge-package source (quote zoo))))))
-                (eq (world-content-address source)
+                (eq? (world-content-address source)
                     (world-content-address copy))))
             "#
         ),
@@ -979,7 +979,7 @@ fn equal_current_clauses_do_not_erase_distinct_world_histories() {
                           (world-tell retracted (quote zoo) (quote ((has-fur cat))))))
                     (list (equal? (world-clauses direct (quote zoo))
                                   (world-clauses retold (quote zoo)))
-                          (eq (world-content-address direct)
+                          (eq? (world-content-address direct)
                               (world-content-address retold)))))))
             "#
         ),

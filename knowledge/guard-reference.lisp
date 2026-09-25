@@ -797,6 +797,16 @@
         (provenance "owner direction 2026-09-24: обмеження мають перевірятися доказом тобто реальність; evidence links: my-lisp#333 PR#1238 issue#1257 PR#1264 issue#1266 PR#1268")
         (unknown-route ask-owner))
       (reference
+        (topic all-project-code-is-written-in-sens)
+        (summary "Постійний закон власника: увесь наш код пишеться СЕНС-кодами (рівно 8 двійкових біт на функцію), і новий код не на СЕНС заборонено. Функція СЕНС має окрему коробку рівно 1 байт (Sens8; ExprKind::Call(Sens8, args)); ім'я (en/ук/укр/sa/sym) ніколи не має пріоритету над СЕНС і не може бути перевизначене вище за функцію СЕНС. Кожен англійський предикат закінчується на `?`, повернення старих написань заборонено. Стан на 2026-09-25 (#1413): 25 790 викликів іменем проти 2 262 кодом СЕНС у коді мови; 326 імен реєстру виконуються не як СЕНС (146 Rust-функцій за іменем, 161 Lisp-замикання, 19 макросів). Храповик non_sens_code_inventory забороняє збільшення; суворі тести sens_priority_over_names і english_predicates_question_mark червоні, доки код не переписано. | Standing owner law: all our code is written in SENS codes (exactly eight binary bits per function) and new non-SENS code is forbidden. A SENS function has its own exactly-one-byte box; a name never has priority over SENS and can never be rebound above it. Every English predicate ends with `?`; reverting to old spellings is forbidden.")
+        (authority (crates/my-lisp/tests/sens_exactly_eight_bits.rs crates/my-lisp/tests/non_sens_code_inventory.rs crates/my-lisp/tests/sens_priority_over_names.rs crates/my-lisp/tests/english_predicates_question_mark.rs crates/my-lisp/tests/data/non-sens-code-baseline.tsv crates/my-lisp/src/eval/lower.rs crates/my-lisp/src/syntax.rs))
+        (how-to (write-every-call-head-as-eight-bit-sens-code never-add-a-name-based-call-to-a-sens-function never-bind-or-rebind-a-registry-name english-predicates-end-with-question-mark run-non-sens-code-inventory-before-commit never-raise-the-baseline-to-hide-new-non-sens-code))
+        (verify (sens-exactly-eight-bits-green non-sens-code-never-grows-green sens-priority-over-names-trend-to-zero english-predicates-question-mark-green-after-migration))
+        (evidence-status confirmed)
+        (lifecycle standing-invariant-never-closed)
+        (provenance "owner direction 2026-09-25: коробка для наших функцій має мати 1 байт; всі англійські предикати мають мати ?; в гвард заборонити написання нового коду не на сенсі, весь наш код має бути на сенсі; evidence: issue #1413, PR #1430")
+        (unknown-route ask-owner))
+      (reference
         (topic canon-sid-archeology)
         (summary "Canon 0+7 (quote/atom/eq/cons/car/cdr/cond) НЕ був задуманий одразу як SID-простір -- SID прийшов пізніше як виправлення власної регресії, не як первісний дизайн. Хронологія за прямим git show/log: 05.08.2026 (коміт 516b5954, день народження crate my-lisp) -- усі 7 примітивів + lambda були одним хардкодженим англомовним рядковим match в evaluate_list, без Canon і без SID; до 24.08 -- регресія: atom/eq/car/cdr/cons перенесені у звичайні мутабельні Environment-біндинги ((def atom 42) реально стирав примітив); 05-06.09 (ADR-004, docs/research/canon-resolution-semantics.md, написаний за 6 годин до самого canon.rs) -- ця регресія названа Model B (Pure Environment Mutability) і відкинута на користь Model C (незмінний Canon + fallback), народжується canon.rs ще з рядковими трійками en/uk/sa, без SID; 19-21.09 (issue #1098) -- рядкові трійки замінені на Sid8; 24.09 (issue #1292, PR #1293) -- SID стає структурним первинним ключем (identity_for_semantic_id індексує масив CANON напряму байтом SID замість лінійного .find(), CanonEntry.semantic_id -- перше поле). Окрема знахідка: Canon не оперує SID однорідно для всіх 7 -- atom/eq/cons/car/cdr викликаються напряму по байту SID через PRIMITIVE_TABLE (CanonicalIdentity в цьому шляху не консультується), а quote/cond навмисно виведені з-під SID-диспетчеризації через порядок обчислення (quote не повинен обчислювати аргумент, cond мусить мати коротке замикання), не через незмінність -- усі 7 однаково immutable через ensure_bindable. | Canon 0+7 was NOT designed as a SID space from the start -- SID arrived later as a fix for a self-inflicted regression, not an original design choice. Timeline verified directly against git show/log: 2026-08-05 (crate birth) all 7 primitives + lambda were one hardcoded English-only string match with no Canon and no SID; before 2026-08-24 a regression moved atom/eq/car/cdr/cons into ordinary mutable Environment bindings; 2026-09-05/06 (ADR-004) named that regression Model B and chose Model C instead, birthing canon.rs with string triples, still no SID; 2026-09-19/21 (#1098) replaced string triples with Sid8; 2026-09-24 (#1292/PR#1293) made SID the structural primary key. Canon does not operate on SID uniformly: quote/cond are deliberately excluded from SID-value dispatch for evaluation-order reasons, not immutability -- all 7 are equally immutable.")
         (authority (crates/my-lisp/src/eval/canon.rs crates/my-lisp/src/eval/mod.rs crates/my-lisp/src/eval/special_forms/core.rs lib/canon.lisp docs/research/canon-resolution-semantics.md docs/adr/ADR-004-CLOSED-MCCARTHY7-CORE.md ../ecosystem/docs/research/MY-LISP-CANON-SID-ARCHEOLOGY-2026-09-24.uk.md))
@@ -955,31 +965,31 @@
         (verify (exit-0-clean no-forbidden-teleology no-paraphrase-drift))))))
 
 
-(def guard-script-find
-  (lambda (name tools)
-    (cond
-      ((atom tools) (quote ()))
-      ((eq (guard-reference-field (quote name) (car tools)) name) (car tools))
-      (t (guard-script-find name (cdr tools))))))
+(00001011 guard-script-find
+  (00001000 (name tools)
+    (00000111
+      ((00000010 tools) (00000001 ()))
+      ((00000011 (guard-reference-field (00000001 name) (00000101 tools)) name) (00000101 tools))
+      (t (guard-script-find name (00000110 tools))))))
 
-(def guard-script
-  (lambda (name)
+(00001011 guard-script
+  (00001000 (name)
     (let ((tool (guard-script-find name *guard-script-directory*)))
-      (cond
-        ((atom tool)
+      (00000111
+        ((00000010 tool)
          (list
-           (quote tool-missing)
-           (list (quote name) name)
-           (list (quote decision) (quote unknown))
-           (list (quote unknown-routes) (guard-unknown-routes))))
+           (00000001 tool-missing)
+           (list (00000001 name) name)
+           (list (00000001 decision) (00000001 unknown))
+           (list (00000001 unknown-routes) (guard-unknown-routes))))
         (t tool)))))
 
-(def guard-scripts
-  (lambda (tools)
-    (cond
-      ((atom tools) (quote ()))
-      (t (cons (guard-reference-field (quote name) (car tools))
-               (guard-scripts (cdr tools)))))))
+(00001011 guard-scripts
+  (00001000 (tools)
+    (00000111
+      ((00000010 tools) (00000001 ()))
+      (t (00000100 (guard-reference-field (00000001 name) (00000101 tools))
+               (guard-scripts (00000110 tools)))))))
 
 ; A topic may have more than one (reference ...) entry. Adding a stronger
 ; answer never deletes or rejects the older one -- it stays in the
@@ -991,65 +1001,65 @@
 ; a claim is not evidence for it. Own words: "якщо реальність каже що нова
 ; сильніша то ок" -- reality decides which entry wins the lookup; neither
 ; entry is deleted.
-(def guard-reference-evidence-status
-  (lambda (reference)
-    (let ((status (guard-reference-field (quote evidence-status) reference)))
-      (cond
+(00001011 guard-reference-evidence-status
+  (00001000 (reference)
+    (let ((status (guard-reference-field (00000001 evidence-status) reference)))
+      (00000111
         ; A missing field and a found bare-symbol value (e.g. `confirmed`)
         ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
         ; them apart. Only the empty list means "missing"; any other atom is
         ; a real found status and must be returned as-is.
-        ((atom status) (structural-kind empty-list) (quote unresolved))
-        ((atom status) (structural-kind atom) status)
-        ((atom status) (structural-kind pair) status)))))
+        ((00000010 status) (structural-kind empty-list) (00000001 unresolved))
+        ((00000010 status) (structural-kind atom) status)
+        ((00000010 status) (structural-kind pair) status)))))
 
-(def guard-evidence-status-strength
-  (lambda (status)
-    (cond
-      ((eq status (quote confirmed)) 4)
-      ((eq status (quote partial)) 3)
-      ((eq status (quote unresolved)) 2)
-      ((eq status (quote broken)) 1)
+(00001011 guard-evidence-status-strength
+  (00001000 (status)
+    (00000111
+      ((00000011 status (00000001 confirmed)) 4)
+      ((00000011 status (00000001 partial)) 3)
+      ((00000011 status (00000001 unresolved)) 2)
+      ((00000011 status (00000001 broken)) 1)
       (t 0))))
 
-(def guard-reference-stronger
-  (lambda (best candidate)
-    (cond
-      ((atom best) candidate)
+(00001011 guard-reference-stronger
+  (00001000 (best candidate)
+    (00000111
+      ((00000010 best) candidate)
       (t
        (let ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
              (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
-         (cond
+         (00000111
            ((> candidate-strength best-strength) 1 candidate)
            ((> candidate-strength best-strength) 0 best)))))))
 
-(def guard-reference-all
-  (lambda (topic references)
-    (cond
-      ((atom references) (quote ()))
-      ((eq (guard-reference-field (quote topic) (car references)) topic)
-       (cons (car references) (guard-reference-all topic (cdr references))))
-      (t (guard-reference-all topic (cdr references))))))
+(00001011 guard-reference-all
+  (00001000 (topic references)
+    (00000111
+      ((00000010 references) (00000001 ()))
+      ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
+       (00000100 (00000101 references) (guard-reference-all topic (00000110 references))))
+      (t (guard-reference-all topic (00000110 references))))))
 
-(def guard-reference-find-strongest
-  (lambda (topic references best)
-    (cond
-      ((atom references) best)
-      ((eq (guard-reference-field (quote topic) (car references)) topic)
+(00001011 guard-reference-find-strongest
+  (00001000 (topic references best)
+    (00000111
+      ((00000010 references) best)
+      ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
        (guard-reference-find-strongest
-         topic (cdr references)
-         (guard-reference-stronger best (car references))))
-      (t (guard-reference-find-strongest topic (cdr references) best)))))
+         topic (00000110 references)
+         (guard-reference-stronger best (00000101 references))))
+      (t (guard-reference-find-strongest topic (00000110 references) best)))))
 
-(def guard-reference-find
-  (lambda (topic references)
-    (guard-reference-find-strongest topic references (quote ()))))
+(00001011 guard-reference-find
+  (00001000 (topic references)
+    (guard-reference-find-strongest topic references (00000001 ()))))
 
 (def guard-reference
   (lambda (topic)
     (let ((reference (guard-reference-find topic *guard-reference-directory*)))
       (cond
-        ((atom reference)
+        ((atom? reference)
          (list
            (quote reference-missing)
            (list (quote schema) (quote guard-reference/1))
@@ -1079,7 +1089,7 @@
 (def guard-topics
   (lambda (references)
     (cond
-      ((atom references) (quote ()))
+      ((atom? references) (quote ()))
       (t
        (cons
          (guard-reference-field (quote topic) (car references))
@@ -1100,9 +1110,9 @@
     (let* ((tool (guard-script-find name *guard-script-directory*))
            (reference (guard-reference-find name *guard-reference-directory*)))
       (cond
-        ((atom tool)
+        ((atom? tool)
          (cond
-           ((atom reference)
+           ((atom? reference)
             (list (quote not-found)
                   (list (quote query) name)
                   (list (quote decision) (quote unknown))
@@ -1114,7 +1124,7 @@
                   (list (quote entry) reference)))))
         (t
          (cond
-           ((atom reference)
+           ((atom? reference)
             (list (quote result)
                   (list (quote type) (quote tool))
                   (list (quote source) (quote guard-script-directory))
