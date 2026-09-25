@@ -131,12 +131,12 @@ mod tests {
 
     #[test]
     fn generated_registry_is_one_contiguous_byte_axis() {
-        assert_eq!(SEMANTIC_ROWS.len(), 170);
+        assert_eq!(SEMANTIC_ROWS.len(), 256);
         for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
             assert_eq!(usize::from(row.semantic_id), expected);
         }
         assert_eq!(SEMANTIC_ROWS.first().map(|row| row.semantic_id), Some(0));
-        assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(169));
+        assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(255));
     }
 
     #[test]
