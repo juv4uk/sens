@@ -100,7 +100,7 @@ pub mod semantic_registry_export {
 pub mod syntax;
 mod value;
 
-pub use environment::{Environment, Session};
+pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 pub use sid::Sid8;
@@ -281,6 +281,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// `Environment::root()`: the root itself stays smaller, while the bootstrap
 /// explicitly gains `make-macro` before evaluating `lib/macro.lisp`.
 pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    session.environment.select_core_profile(CoreProfile::Core4);
     session
         .environment
         .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
@@ -297,6 +298,7 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 /// The environment mode is shared by lexical children, so lazy COND behavior
 /// remains stable across closures without exposing a shadowable Lisp binding.
 pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    session.environment.select_core_profile(CoreProfile::Core2);
     session
         .environment
         .set_cond_clause_mode(environment::CondClauseMode::Core2LegacyTwoPart);
