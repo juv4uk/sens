@@ -27,7 +27,7 @@
 (00001011 core2-equal?
   (00001000 (left right)
     (00000111
-      ((equal? left right) (00000001 t))
+      ((00100010 left right) (00000001 t))
       (t (00000001 ())))))
 
 (00001011 core2-cond-test?
