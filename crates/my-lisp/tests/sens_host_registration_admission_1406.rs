@@ -2,7 +2,7 @@
 //!
 //! This test intentionally describes the required architecture. On the current
 //! post-#1402 main it is expected to fail until generic host registration can no
-//! longer mint ordinary callability for an SENS function with no admitted ordinary callable mechanism.
+//! longer mint ordinary callability for a SENS function with no admitted ordinary callable mechanism.
 
 use my_lisp::{
     eval_program, register_sens_capability, unregister_sens_capability, Environment, LanguageError,
@@ -27,7 +27,7 @@ fn host_handler(
 }
 
 #[test]
-fn host_registration_alone_must_not_make_an_unadmitted_sens_function_callable() {
+fn host_registration_alone_must_not_make_function_without_admitted_mechanism_callable() {
     let sens = my_lisp::sens!(11111111);
     unregister_sens_capability(sens);
 
