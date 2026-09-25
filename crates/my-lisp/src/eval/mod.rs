@@ -14,6 +14,7 @@ pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
 mod closures;
+pub(crate) mod lower;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
 mod special_forms;
@@ -37,6 +38,15 @@ pub fn eval_parsed_expressions(
     expressions: &[Expr],
     session: &mut Session,
 ) -> Result<EvalResult, LanguageError> {
+    eval_lowered_expressions(&lower::lower_program(expressions), session)
+}
+
+/// Виконати програму, вже зведену `lower_program` (функції — 1 байт).
+/// Дозволяє звести один раз і виконувати багато разів.
+pub fn eval_lowered_expressions(
+    expressions: &[Expr],
+    session: &mut Session,
+) -> Result<EvalResult, LanguageError> {
     let mut value = Value::Nil;
     for expression in expressions {
         value = evaluate(expression, &session.environment)?;
@@ -53,7 +63,7 @@ pub fn eval_parsed_expressions_incremental(
 ) -> Result<EvalResult, LanguageError> {
     session.environment.output_take_new();
     let mut value = Value::Nil;
-    for expression in expressions {
+    for expression in lower::lower_program(expressions).iter() {
         value = evaluate(expression, &session.environment)?;
     }
     Ok(EvalResult {
@@ -178,6 +188,9 @@ pub(crate) fn evaluate_step(
         // Empty structure is a structural value, not any function SID.
         ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
         ExprKind::List(items) => evaluate_list(items, environment, expression.span),
+        ExprKind::Call(sid, arguments) => {
+            dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
+        }
         ExprKind::Pair(_, _) => Err(LanguageError::new(
             ErrorKind::InvalidForm,
             "a dotted pair is not executable code · dotted-para ne ye vykonuvanym kodom · ein Dotted Pair ist kein ausführbarer Code",
@@ -191,9 +204,26 @@ fn evaluate_list(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    let arguments = &items[1..];
-    let head_name = items[0].kind.as_symbol();
-    let head_sid = binary_head_sid(&items[0]);
+    dispatch_call(
+        items[0].kind.as_symbol(),
+        binary_head_sid(&items[0]),
+        Some(&items[0]),
+        &items[1..],
+        environment,
+        span,
+    )
+}
+
+/// Спільний диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
+/// функція — лише 1 байт `head_sid`.
+fn dispatch_call(
+    head_name: Option<&str>,
+    head_sid: Option<Sid8>,
+    head_expr: Option<&Expr>,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
     let routed_head_sid = head_sid
         .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
@@ -216,7 +246,7 @@ fn evaluate_list(
         return special_forms::evaluate_cond(arguments, environment, span);
     }
 
-    if let Some(name) = items[0].kind.as_symbol() {
+    if let Some(name) = head_name {
         if let Some(result) =
             capabilities::dispatch_capability(name, arguments, environment, span)
         {
@@ -225,7 +255,10 @@ fn evaluate_list(
     }
     let function = match head_sid {
         Some(sid) => Value::Sid(sid),
-        None => evaluate(&items[0], environment)?,
+        None => evaluate(
+            head_expr.expect("a call without a SID head keeps its head expression"),
+            environment,
+        )?,
     };
     match &function {
         Value::Sid(sid) => {

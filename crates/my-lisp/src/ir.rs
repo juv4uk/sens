@@ -200,6 +200,16 @@ pub fn lower(expr: &Expr) -> Result<IrNode, LoweringError> {
             span: expr.span,
         }),
         ExprKind::List(items) => lower_list(items, expr.span),
+        // Зведений виклик — той самий список із функцією СЕНС у голові.
+        ExprKind::Call(sid, arguments) => {
+            let mut items = Vec::with_capacity(arguments.len() + 1);
+            items.push(Expr {
+                kind: ExprKind::Sid(*sid),
+                span: expr.span,
+            });
+            items.extend(arguments.iter().cloned());
+            lower_list(&items, expr.span)
+        }
     }
 }
 

@@ -203,6 +203,15 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             ExprKind::Pair(head, tail) => {
                 Value::Pair(Rc::new(go(head, depth + 1)?), Rc::new(go(tail, depth + 1)?))
             }
+            // Зведений виклик як дані — список із функцією СЕНС у голові.
+            ExprKind::Call(sid, arguments) => {
+                let mut out = Vec::with_capacity(arguments.len() + 1);
+                out.push(Value::Sid(*sid));
+                for argument in arguments.iter() {
+                    out.push(go(argument, depth + 1)?);
+                }
+                Value::list(out)
+            }
         })
     }
     go(expression, 0)
