@@ -71,3 +71,20 @@ fn completed_unification_queries_report_explicit_outcomes() {
         );
     }
 }
+
+#[test]
+fn reasoning_consumers_do_not_branch_on_private_fail_sentinel() {
+    for (name, source) in [
+        ("reason", include_str!("../../../lib/reason.lisp")),
+        ("forward", include_str!("../../../lib/forward.lisp")),
+    ] {
+        assert!(
+            !source.contains("(failed-subst?"),
+            "#219 {name} must consume explicit unification outcomes, not branch on failed-subst?"
+        );
+        assert!(
+            source.contains("(unify-observe"),
+            "#219 {name} must consume the Lisp-owned unify-observe boundary"
+        );
+    }
+}
