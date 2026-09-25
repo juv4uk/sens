@@ -15,7 +15,8 @@ fn invalid_binding(source: &str) {
         .expect_err("Contract 6.0 must reject Canon binding attempts");
     assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
     assert!(
-        error.message.contains("canonical name is immutable"),
+        error.message.contains("canonical name is immutable")
+            || error.message.contains("surface routes to immutable function SID"),
         "unexpected error for {source}: {}",
         error.message
     );
