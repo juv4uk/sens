@@ -131,12 +131,10 @@ def check(root) -> tuple[int, set[str], int]:
 
         symbolic_count += int("sym" in entry_surfaces)
 
-    if len(seen_ids) != 170:
+    if len(seen_ids) != 256:
         raise ValueError(
-            f"expected exactly 170 identities (Canon 0 + 169), got {len(seen_ids)}"
+            f"expected exactly 256 SENS functions (00000000..11111111), got {len(seen_ids)}"
         )
-    if len(seen_ids) > 256:
-        raise ValueError("semantic registry no longer fits the declared 8-bit SID axis")
 
     return len(seen_ids), all_surfaces, symbolic_count
 
@@ -155,7 +153,7 @@ def main() -> int:
     print("surfaces: " + " ".join(sorted(surfaces)))
     print(f"shared symbolic identities: {symbolic_count}")
     print("8-bit binary SID authority: CONFIRMED")
-    print("Canon 0 + contiguous byte axis: CONFIRMED")
+    print("All 256 SENS function rows are present: CONFIRMED")
     print("Bare binary tokens are canonical: CONFIRMED")
     return 0
 
