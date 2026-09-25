@@ -1,54 +1,35 @@
-; Core4 predicate-answer endpoint law — Lisp-owned authority for #1336.
+; #1391 — separation law between Core4 15-state answers and SENS functions.
 ;
-; Scope:
-;   * the directed NO/YES paths terminate at distinct function-SID endpoints;
-;   * () is an independent structural/undirected value outside function-SID space;
-;   * bare endpoint SID evaluation and callable dispatch are not redefined here.
+; Logic answers:
+;   0^n | 1^n | (), n=1..7
 ;
-; Directed law:
-;   NO  : 0 -> 00 -> ... -> 0000000 -> 00000000
-;   YES : 1 -> 11 -> ... -> 1111111 -> 11111111
+; SENS functions:
+;   00000000..11111111
 ;
-; This contract MUST NOT be interpreted as:
-;   00000000 == ()
-;   11111111 == ()
-;   00000000 == 11111111
-;
-; What either endpoint function returns when invoked is a separate function law.
+; These spaces are orthogonal. The grading path never turns a short answer
+; into an 8-bit function and never turns an 8-bit function into ().
 
-(core4-predicate-answer-boundary/2
+(core4-predicate-answer-boundary/3
 
   ((profile . core4)
-   (scope . predicate-answer-endpoints)
+   (scope . predicate-answer-space)
    (answer-scale . "contracts/core4-predicate-answer-scale.lisp")
-   (sid-space . function-only)
-   (empty-list-space . structural-value)
-   (sid-identity . preserved)
-   (bare-sid-evaluation . unchanged)
-   (callable-dispatch . unchanged))
+   (answer-count . 15)
+   (sens-function-count . 256)
+   (spaces . orthogonal))
 
-  ((endpoint . no)
-   (direction . no)
-   (last-directed-answer-spelling . "0000000")
-   (sid-endpoint . 00000000)
-   (endpoint-kind . function-sid)
-   (empty-list-alias . forbidden))
+  ((no-path . ("0" "00" "000" "0000" "00000" "000000" "0000000"))
+   (converges-to . ()))
 
-  ((endpoint . yes)
-   (direction . yes)
-   (last-directed-answer-spelling . "1111111")
-   (sid-endpoint . 11111111)
-   (endpoint-kind . function-sid)
-   (empty-list-alias . forbidden))
+  ((yes-path . ("1" "11" "111" "1111" "11111" "111111" "1111111"))
+   (converges-to . ()))
 
   ((undirected-answer . ())
-   (kind . structural-empty-value)
-   (function-sid . none))
+   (sanskrit . ajñāta)
+   (direction . none))
 
   ((laws . boundary)
-   (sid-alias . forbidden)
-   (sid-equality . forbidden)
-   (endpoint-to-empty-list-projection . forbidden)
-   (eighth-directed-step . reaches-function-sid-endpoint)
-   (endpoint-invocation-law . separate)
+   (short-answer-to-sens-function . forbidden)
+   (sens-function-to-answer . forbidden)
+   (eighth-bit-in-grading . forbidden)
    (core1-core2-core3-impact . none)))
