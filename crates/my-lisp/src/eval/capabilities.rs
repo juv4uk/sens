@@ -204,7 +204,6 @@ mod honesty_tests {
         ));
     }
 
-    #[test]
     fn sens_handler(
         sens: Sens8,
         _arguments: &[Value],
