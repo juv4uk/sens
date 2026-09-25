@@ -11,7 +11,7 @@
 //! To join an already-running swarm from a brand-new agent, run e.g.:
 //!   swarm-node --port 9105 --node-id my-agent-1 --project my-project \
 //!              --data-dir ~/.swarm-node/my-agent-1 --connect 127.0.0.1:9101 \
-//!              --auto-sync /absolute/path/to/tasks.my
+//!              --auto-sync /absolute/path/to/tasks.lisp
 //! No need to know every other member's address up front.
 
 mod claim_promise;
@@ -166,7 +166,7 @@ struct Node {
     /// trains silently). Heartbeat marks them caught-up after the idle
     /// window — their train is over, silence is their "complete".
     sync_train_last: Mutex<HashMap<String, Instant>>,
-    /// M1.2 auto-sync: tasks.my files to periodically re-read and import
+    /// M1.2 auto-sync: tasks.lisp files to periodically re-read and import
     /// into the registry without manual `(sync-tasks ...)` calls.
     auto_sync_paths: Mutex<Vec<std::path::PathBuf>>,
     /// Last successfully imported text per auto-sync path. Exact source-text
@@ -183,7 +183,7 @@ struct Node {
     /// event_id)`; the heartbeat sweep (`ACK_TIMEOUT`) turns a stale
     /// entry into a `recent_delivery_failures` record instead of letting
     /// it vanish. Confirmed live via the original bug report
-    /// (SWARM-PUSH-EVENT-SILENT-LOSS, ecosystem/plans/tasks.my): the seed
+    /// (SWARM-PUSH-EVENT-SILENT-LOSS, ecosystem/plans/tasks.lisp): the seed
     /// connection cycling closed/reconnected every ~25s, and events
     /// written into that window were never seen again by anyone.
     pending_acks: Mutex<HashMap<(String, String), Instant>>,
@@ -264,7 +264,7 @@ struct Args {
     /// `--bind 0.0.0.0` has no single correct default and requires
     /// `--advertise-host` explicitly (see `validate_startup_args`).
     advertise_host: Option<String>,
-    /// M1.2 auto-sync: absolute paths to `tasks.my` files to periodically
+    /// M1.2 auto-sync: absolute paths to `tasks.lisp` files to periodically
     /// re-read and import into the task registry (same format as
     /// `(sync-tasks)`). Each path is re-read every `AUTO_SYNC_INTERVAL`;
     /// file parse/IO errors are logged and skipped without crashing the
@@ -411,7 +411,7 @@ fn validate_startup_args(args: &Args) -> std::io::Result<()> {
     }
     if args.auto_sync.is_empty() && !args.no_auto_sync {
         return Err(invalid(
-            "pass at least one --auto-sync tasks.my path, or explicitly pass --no-auto-sync",
+            "pass at least one --auto-sync tasks.lisp path, or explicitly pass --no-auto-sync",
         ));
     }
     if !args.auto_sync.is_empty() && args.no_auto_sync {
@@ -422,7 +422,7 @@ fn validate_startup_args(args: &Args) -> std::io::Result<()> {
     for path in &args.auto_sync {
         if !path.is_file() {
             return Err(invalid(
-                "every --auto-sync path must name an existing tasks.my file",
+                "every --auto-sync path must name an existing tasks.lisp file",
             ));
         }
     }
@@ -458,7 +458,7 @@ fn print_usage_and_exit() -> ! {
          \x20\x20                       a wildcard bind has no single correct dial-back address)\n\
          \x20\x20--connect <HOST:PORT>  Bootstrap peer to dial on startup (repeatable; one is enough,\n\
          \x20\x20                       gossip discovers the rest of the mesh)\n\
-         \x20\x20--auto-sync <PATH>     Absolute path to a tasks.my file to periodically re-read and\n\
+         \x20\x20--auto-sync <PATH>     Absolute path to a tasks.lisp file to periodically re-read and\n\
          \x20\x20                       import into the task registry (repeatable; same format as\n\
          \x20\x20                       (sync-tasks); interval is ~30 s, override via\n\
          \x20\x20                       SWARM_AUTO_SYNC_INTERVAL_MS)\n\
@@ -777,7 +777,7 @@ fn spawn_heartbeat(node: &Arc<Node>) {
 }
 
 /// M1.2 auto-sync: background thread that periodically re-reads every
-/// `tasks.my` file registered via `--auto-sync` and imports any new or
+/// `tasks.lisp` file registered via `--auto-sync` and imports any new or
 /// changed task definitions. Errors (missing file, parse failure, IO)
 /// are logged and skipped — the node keeps running and retries on the
 /// next cycle. Unchanged files are skipped so polling cannot append an
@@ -3344,7 +3344,7 @@ fn require_absolute_path(path: &str) -> Result<(), String> {
 }
 
 /// How often the auto-sync background thread re-reads each registered
-/// `tasks.my` file. Overridden for integration tests via
+/// `tasks.lisp` file. Overridden for integration tests via
 /// `SWARM_AUTO_SYNC_INTERVAL_MS` (same pattern as `hello_deadline`).
 const AUTO_SYNC_INTERVAL: Duration = Duration::from_secs(30);
 
@@ -3362,7 +3362,7 @@ fn auto_sync_interval() -> Duration {
 }
 
 /// Core logic shared by `handle_sync_tasks` (explicit client op) and
-/// the background auto-sync thread: reads one `tasks.my` file, parses
+/// the background auto-sync thread: reads one `tasks.lisp` file, parses
 /// it, and emits `task-defined` / `task-completed` facts for every
 /// entry. `msg_origin` is an optional default origin for tasks that
 /// don't declare their own (used by the explicit `(sync-tasks)` op's
@@ -3432,7 +3432,7 @@ fn sync_tasks_from_text(
 }
 
 /// Local client op: `(sync-tasks (file "/absolute/path/to/tasks.lisp"))`.
-/// Reads the same durable `tasks.my` format `:9999` reads, and emits a
+/// Reads the same durable `tasks.lisp` format `:9999` reads, and emits a
 /// `task-defined` fact per entry (plus a `task-completed` fact for any
 /// entry already marked `done` — bulk-importing pre-existing ground truth
 /// from durable evidence bypasses the live claim/quorum flow entirely,
