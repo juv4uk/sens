@@ -124,4 +124,3 @@
       "незалежно перевіряє main@55fd55c: runtime () vs 00000000, шукає інші contract/runtime drift; будує read-only runner, production не редагує")
     (reviewer
       "шукає circularity, semantic ordering, host oracle leaks і підміну evidence красивою моделлю")))
-
