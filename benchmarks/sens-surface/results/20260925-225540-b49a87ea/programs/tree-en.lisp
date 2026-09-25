@@ -1,0 +1,7 @@
+(def mk (lambda (d)
+  (cond ((eq d 0) (quote leaf))
+        (t (cons (mk (- d 1)) (mk (- d 1)))))))
+(def cnt (lambda (x)
+  (cond ((atom x) 1)
+        (t (+ (cnt (car x)) (cnt (cdr x)))))))
+(print (cnt (mk 16)))

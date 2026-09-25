@@ -1,0 +1,397 @@
+{
+  "startup_s": {
+    "median": 0.6608427364990348,
+    "min": 0.6002082579943817,
+    "max": 1.8243834000022616
+  },
+  "workloads": {
+    "fib": {
+      "params": {
+        "N": 25
+      },
+      "forms": {
+        "en": {
+          "wall_median": 1.9966027760019642,
+          "wall_min": 1.8233621140097966,
+          "wall_max": 7.694403571003932,
+          "compute_median": 1.3357600395029294,
+          "cpu_median": 2.0975479999999997,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 1.747434749508102,
+          "wall_min": 1.5269788839941612,
+          "wall_max": 5.427137545993901,
+          "compute_median": 1.0865920130090672,
+          "cpu_median": 1.826014,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.2974140697021563,
+          "min": 0.7359957974520669,
+          "max": 1.629314666817482
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "loop": {
+      "params": {
+        "N": 300000
+      },
+      "forms": {
+        "en": {
+          "wall_median": 2.493480582998018,
+          "wall_min": 2.1411632649978856,
+          "wall_max": 7.35360528799356,
+          "compute_median": 1.832637846498983,
+          "cpu_median": 2.6194295,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 1.9703764709920506,
+          "wall_min": 1.7256532799947308,
+          "wall_max": 6.0160883639910026,
+          "compute_median": 1.3095337344930158,
+          "cpu_median": 2.0609135,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.4309367997743783,
+          "min": 0.529055479541361,
+          "max": 1.699772318739533
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "lists": {
+      "params": {
+        "N": 1000,
+        "R": 120
+      },
+      "forms": {
+        "en": {
+          "wall_median": 2.606694949499797,
+          "wall_min": 2.382469342992408,
+          "wall_max": 11.330276535998564,
+          "compute_median": 1.9458522130007623,
+          "cpu_median": 2.7001255,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 2.2492373374989256,
+          "wall_min": 2.0731399090000195,
+          "wall_max": 7.068482172995573,
+          "compute_median": 1.5883946009998908,
+          "cpu_median": 2.350498,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.2144589806844803,
+          "min": 0.8878563090724929,
+          "max": 7.142097595512618
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "member": {
+      "params": {
+        "N": 100,
+        "R": 5000
+      },
+      "forms": {
+        "en": {
+          "wall_median": 3.548067394993268,
+          "wall_min": 3.4345865240029525,
+          "wall_max": 7.882433695995132,
+          "compute_median": 2.887224658494233,
+          "cpu_median": 3.7324789999999997,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 3.237772609500098,
+          "wall_min": 3.0552775880059926,
+          "wall_max": 6.387524370991741,
+          "compute_median": 2.5769298730010632,
+          "cpu_median": 3.4135945000000003,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.1466687811130956,
+          "min": 0.7268535790830837,
+          "max": 2.4125393130872035
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "closures": {
+      "params": {
+        "N": 200000
+      },
+      "forms": {
+        "en": {
+          "wall_median": 2.2749203284984105,
+          "wall_min": 2.134095129003981,
+          "wall_max": 4.301601501007099,
+          "compute_median": 1.6140775919993757,
+          "cpu_median": 2.3851965,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 1.8803914514937787,
+          "wall_min": 1.7326278520049527,
+          "wall_max": 4.150668007001514,
+          "compute_median": 1.219548714994744,
+          "cpu_median": 1.9700799999999998,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.282403171053157,
+          "min": 0.5684115743084369,
+          "max": 1.4953673690691653
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "ackermann": {
+      "params": {
+        "N": 7
+      },
+      "forms": {
+        "en": {
+          "wall_median": 4.894920181999623,
+          "wall_min": 4.613174459998845,
+          "wall_max": 9.36495987100352,
+          "compute_median": 4.2340774455005885,
+          "cpu_median": 5.154892,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 3.9706522339911317,
+          "wall_min": 3.561138940989622,
+          "wall_max": 10.74084326501179,
+          "compute_median": 3.309809497492097,
+          "cpu_median": 4.171987,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.266660903137425,
+          "min": 0.828888456819995,
+          "max": 1.4388398226821664
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "tree": {
+      "params": {
+        "N": 16
+      },
+      "forms": {
+        "en": {
+          "wall_median": 1.8004956314980518,
+          "wall_min": 1.6459494489972712,
+          "wall_max": 4.450599963995046,
+          "compute_median": 1.139652894999017,
+          "cpu_median": 1.88667,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 1.5379650959948776,
+          "wall_min": 1.4111938700079918,
+          "wall_max": 3.5121617279946804,
+          "compute_median": 0.8771223594958428,
+          "cpu_median": 1.6157395,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.35440081811677,
+          "min": 1.1162820306517567,
+          "max": 1.874964515801797
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "assoc": {
+      "params": {
+        "N": 400
+      },
+      "forms": {
+        "en": {
+          "wall_median": 1.2609302939963527,
+          "wall_min": 1.1123745450022398,
+          "wall_max": 2.8805511460086564,
+          "compute_median": 0.6000875574973179,
+          "cpu_median": 1.326135,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 1.1250334685028065,
+          "wall_min": 0.9910333750012796,
+          "wall_max": 2.0661631599941757,
+          "compute_median": 0.4641907320037717,
+          "cpu_median": 1.182893,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.312952444716291,
+          "min": 0.707651993651406,
+          "max": 2.2491342861890407
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "mapfold": {
+      "params": {
+        "N": 1000,
+        "R": 60
+      },
+      "forms": {
+        "en": {
+          "wall_median": 2.034986766993825,
+          "wall_min": 1.9163462660071673,
+          "wall_max": 4.357256565999705,
+          "compute_median": 1.37414403049479,
+          "cpu_median": 2.1395685,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 1.8293127694923896,
+          "wall_min": 1.6981607620109571,
+          "wall_max": 4.363041700009489,
+          "compute_median": 1.1684700329933548,
+          "cpu_median": 1.925392,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.1735452557381185,
+          "min": 0.8369261450380839,
+          "max": 1.3574948943592013
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "evenodd": {
+      "params": {
+        "N": 300000
+      },
+      "forms": {
+        "en": {
+          "wall_median": 1.9443169689984643,
+          "wall_min": 1.8409128679923015,
+          "wall_max": 4.51972222099721,
+          "compute_median": 1.2834742324994295,
+          "cpu_median": 2.0412885000000003,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 1.6394642049999675,
+          "wall_min": 1.5729249980067834,
+          "wall_max": 4.195897564000916,
+          "compute_median": 0.9786214685009327,
+          "cpu_median": 1.7200455,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.321163874025459,
+          "min": 0.5794564932325247,
+          "max": 503.8259611576678
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    },
+    "flatten": {
+      "params": {
+        "N": 15
+      },
+      "forms": {
+        "en": {
+          "wall_median": 1.5035067194985459,
+          "wall_min": 1.3654155020049075,
+          "wall_max": 4.298921370005701,
+          "compute_median": 0.8426639829995111,
+          "cpu_median": 1.56547,
+          "maxrss_kb_max": 17228
+        },
+        "sens": {
+          "wall_median": 1.2451361314961105,
+          "wall_min": 1.1727814840123756,
+          "wall_max": 4.051924180006608,
+          "compute_median": 0.5842933949970757,
+          "cpu_median": 1.3042915,
+          "maxrss_kb_max": 17228
+        }
+      },
+      "ratio_vs_sens": {
+        "en": {
+          "median": 1.3510598488755998,
+          "min": 1.0715577977967266,
+          "max": 1.742444528634607
+        },
+        "sens": {
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      }
+    }
+  }
+}
