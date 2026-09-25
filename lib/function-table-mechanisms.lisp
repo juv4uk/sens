@@ -9,7 +9,7 @@
 ; Function 00000000 therefore has no empty-list-ground route here.
 
 (
-  (schema function-table-mechanisms/1)
+  (schema function-table-mechanisms/2)
   (authority "lib/surface/semantic-registry.lisp")
   (lifecycle transitional)
   (retirement-issue 1046)
@@ -29,4 +29,9 @@
     (00001100 common-lisp bounded-exact-add)
     (00001100 prolog bounded-exact-add)
     (00001100 clips bounded-exact-add)
-    (00001100 datalog bounded-exact-add)))
+    (00001100 datalog bounded-exact-add))
+  ; #1422 — profile-scoped mechanism admission. These rows do not define
+  ; function meaning or host availability. They only permit a mechanism class
+  ; for an already-existing exact SENS under one explicitly selected Core.
+  (profile-rows
+    (core3 10101000 registered-host-mechanism)))
