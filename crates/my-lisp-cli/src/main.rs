@@ -57,6 +57,10 @@ fn extract_repl_surface(args: Vec<String>) -> Result<(Vec<String>, repl::ReplSur
     }
     Ok((output, surface))
 }
+fn bootstrap_core4(session: &mut Session) -> Result<my_lisp::EvalResult, my_lisp::LanguageError> {
+    my_lisp::load_core_library(session)
+}
+
 fn main() {
     // The CLI is a trusted local Lisp-machine surface: install the OS
     // capability layer (filesystem, process execution, TCP). The semantic
@@ -116,7 +120,7 @@ fn main() {
             "warning: lib/core4.lisp.fasl is stale (source changed); run gen-fasl to regenerate"
         );
     }
-    if let Err(e) = my_lisp::load_core_library(&mut session) {
+    if let Err(e) = bootstrap_core4(&mut session) {
         eprintln!("Error loading bootstrap Core4: {}", e.render(CORE_SRC));
         process::exit(1);
     }
@@ -453,5 +457,26 @@ fn main() {
     } else {
         // REPL mode
         repl::run_repl(session, repl_surface);
+    }
+}
+
+
+#[cfg(test)]
+mod core_profile_bootstrap_tests {
+    use super::*;
+
+    #[test]
+    fn cli_core_bootstrap_selects_core4_through_the_canonical_loader() {
+        let mut session = Session {
+            environment: Environment::root(),
+        };
+        assert_eq!(session.environment.selected_core_profile(), None);
+
+        bootstrap_core4(&mut session).expect("CLI Core4 bootstrap must succeed");
+
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(my_lisp::CoreProfile::Core4)
+        );
     }
 }
