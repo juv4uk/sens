@@ -4,7 +4,8 @@
 //! exact SENS -> bounded kernel selector + opaque native payload -> producer bytes.
 //! Kernel names are mechanism data, never function identities.
 
-use sens::{
+use my_lisp as sens_core;
+use sens_core::{
     register_sens_capability, ErrorKind, Environment, LanguageError, Sens8, Span, Value,
 };
 use std::fs;
@@ -19,7 +20,7 @@ use wsm_datalog_kernel::{
 };
 use wsm_prolog_kernel::{PrologKernel, PrologQuery, PrologRequest};
 
-const INVOKE_SENS: Sens8 = sens::sens!(10101000);
+const INVOKE_SENS: Sens8 = sens_core::sens!(10101000);
 
 /// Legacy kernel APIs still transport one opaque byte.
 /// This byte is mechanism/provenance only; it is not a second SENS identity.
