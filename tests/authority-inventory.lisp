@@ -16,6 +16,7 @@
 (authority "crates/my-lisp/tests/mathematical_result_taxonomy.rs" observer)
 (authority "crates/my-lisp/tests/control_dispatch_contract.rs" observer)
 (authority "crates/my-lisp/tests/core2_runtime_profile.rs" observer)
+(authority "crates/my-lisp/tests/core_profile_runtime_1272.rs" observer)
 (authority "crates/my-lisp/tests/canon_laws_v2_contract.rs" observer)
 (authority "crates/my-lisp/tests/reason_honesty_contract.rs" observer)
 (authority "crates/my-lisp/tests/unification_outcome_contract.rs" observer)
