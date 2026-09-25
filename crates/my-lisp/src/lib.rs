@@ -253,16 +253,22 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         }
     }
 
-    // The semantic registry is the only surface/SID authority. If a stable
-    // identity has no implementation binding yet, expose the Sid8 identity
-    // itself so the admitted surface remains discoverable without inventing a
-    // second table or pretending the implementation exists.
+    // The semantic registry remains the surface/SENS authority even when
+    // no lexical implementation binding exists: evaluator fallback can still
+    // resolve an admitted surface to the exact SENS function. Therefore this
+    // bootstrap helper must NOT pre-bind a lexical SENS placeholder. Doing so
+    // would block post-core Lisp libraries from materializing their stable
+    // peers after the real closure is defined (for example process-run).
+    //
+    // Only copy peers when this bootstrap environment already contains a real
+    // value for the same exact SENS function. Existing bindings remain
+    // untouched so ordinary lexical shadowing stays independent.
     for semantic_id in semantic_registry::admitted_semantic_ids() {
         let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
 
         // Canonical special forms and evaluator-owned necessary forms are
         // routed by their dedicated syntax mechanisms, not as first-class
-        // SID values.
+        // lexical values.
         if peers.iter().any(|peer| {
             eval::canon::routed_sid_for_surface(peer).is_some()
                 || eval::necessary_forms::identity_for_symbol(peer).is_some()
@@ -270,10 +276,9 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
             continue;
         }
 
-        let value = values_by_semantic_id
-            .get(&semantic_id)
-            .cloned()
-            .unwrap_or(Value::Sid(semantic_id));
+        let Some(value) = values_by_semantic_id.get(&semantic_id).cloned() else {
+            continue;
+        };
 
         for peer in peers {
             if environment.get(peer).is_none() {
