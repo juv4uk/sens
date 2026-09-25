@@ -33,6 +33,15 @@ struct Frame {
 /// lexical child. `None` remains the trusted native profile: unrestricted for
 /// that dimension once the host capability layer is installed. Embeddings can
 /// opt into narrower policies without changing language semantics.
+/// Mechanically selected language Core profile.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CoreProfile {
+    Core1,
+    Core2,
+    Core3,
+    Core4,
+}
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(crate) enum CondClauseMode {
     #[default]
@@ -42,6 +51,7 @@ pub(crate) enum CondClauseMode {
 
 #[derive(Debug, Default)]
 struct Limits {
+    selected_core_profile: Option<CoreProfile>,
     cond_clause_mode: CondClauseMode,
     cons_limit: Option<usize>,
     cons_count: usize,
@@ -172,6 +182,16 @@ impl Environment {
 
     pub(crate) fn numeric_bit_limit(&self) -> Option<usize> {
         self.2.borrow().numeric_bit_limit
+    }
+
+    /// Return the explicitly selected Core profile, if a profile loader selected one.
+    pub fn selected_core_profile(&self) -> Option<CoreProfile> {
+        self.2.borrow().selected_core_profile
+    }
+
+    /// Mechanism-only selector. Core meaning remains owned by SENS contracts.
+    pub(crate) fn select_core_profile(&self, profile: CoreProfile) {
+        self.2.borrow_mut().selected_core_profile = Some(profile);
     }
 
     pub(crate) fn set_cond_clause_mode(&self, mode: CondClauseMode) {
