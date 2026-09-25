@@ -98,8 +98,8 @@
       "  (lambda (name)\n"
       "    (let ((entry (assoc name my-semantic-surface-registry)))\n"
       "      (cond\n"
-      "        ((atom entry) (structural-kind empty-list) (quote ()))\n"
-      "        ((atom entry) (structural-kind pair) (second entry))))))\n")))
+      "        ((atom? entry) (structural-kind empty-list) (quote ()))\n"
+      "        ((atom? entry) (structural-kind pair) (second entry))))))\n")))
 
 (def registry-form
   (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
