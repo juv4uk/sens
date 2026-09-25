@@ -76,23 +76,23 @@ semantic contract + executable laws
 
 ## Що вже доведено
 
-Три терміни, на яких тримається evidence layer:
+Для evidence layer достатньо простої межі:
 
-- **SID8** — сама 8-бітна function identity;
-- **surface** — необов'язковий source/UI routing до SID8, але не функція і не meaning;
-- **witness** — виконуваний доказ конкретного обмеженого твердження.
+- у СЕНС зарезервовано рівно 256 функцій: `00000000..11111111`;
+- surface — лише необов'язковий source/UI routing до цих функцій;
+- witness — виконуваний доказ конкретного обмеженого твердження.
 
 На сьогодні README може чесно показати такі результати:
 
-- **Є один function-ID space:** `00000000..11111111`.
-- **Surface не є функцією.** Українські, англійські, санскритські й символьні підказки можуть лише механічно маршрутизувати до SID8.
+- **У СЕНС є рівно 256 функцій:** `00000000..11111111`.
+- **Surface не є функцією.** Українські, англійські, санскритські й символьні підказки можуть лише механічно маршрутизувати до однієї з цих 256 функцій.
 - **Vertical Day — bounded фізичний доказ.** Ратифікований зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) проводить `(00000101 (00000100 2 3))` через structured machine forms → closed admission → Lisp-owned x86-64 encoding → semantics-blind host → physical CPU і отримує `2`.
 - **Machine path fail-closed.** Raw/malformed/unadmitted requests відхиляються до входу в host.
 
 ```text
 (00000101 (00000100 2 3))
         ↓
-Sid8
+точна 8-бітна функція СЕНС
         ↓
 Core-owned law / mechanism selection
         ↓
@@ -121,17 +121,13 @@ README лише показує вже зароблені докази; він н
 11111111
 ```
 
-Це рівно 256 **функціональних** SID. Жодного другого набору іменованих
-функцій немає. Слова, символи, enum-мітки, opcode-и та backend-назви не
-можуть бути identity функції.
+**У СЕНС зарезервовано рівно 256 функцій — усі значення від `00000000` до `11111111`.**
 
-Core1–Core4 — це профілі законів над тими самими SID, а не чотири набори
-названих функцій.
+Ці функції є точними 8-бітними двійковими формами мови. Не існує другого
+функціонального шару над ними. Core1–Core4 можуть задавати різні закони
+для тих самих 256 функцій, але не створюють іншого набору функцій.
 
-Історична реалізація ще використовує `00000000` для `()`; Contract 9
-визнає це міграційним боргом #1332. Ціль: `()` лишається структурним
-значенням поза function-SID space, а `00000000` повертається виключно
-функціональному простору.
+`()` є окремим структурним значенням і не займає жодної з 256 функцій.
 
 ### Апостроф
 
@@ -430,7 +426,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · auxiliary
 
-`my-lisp` is a Lisp research language with one exact 8-bit function-identity space (`00000000..11111111`), Core-specific laws, executable conformance, and multiple execution substrates. Human names are routing/UI metadata only, never function identities.
+`SENS` reserves exactly 256 language functions: `00000000..11111111`. These exact 8-bit binary forms are the functions of the language. Core profiles may assign different laws to the same 256 functions; human names are only optional routing/UI metadata.
 
 Ukrainian is the project's primary human language. English and German are auxiliary. The Rust runtime is the reference implementation, not semantic authority; start with [`language-contract.lisp`](language-contract.lisp) and [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
 
@@ -438,7 +434,7 @@ The central research question is now: **how simple can the language remain while
 
 ## Deutsch · ergänzend
 
-`my-lisp` ist eine Lisp-Forschungssprache mit genau einem 8-Bit-Funktionsidentitätsraum (`00000000..11111111`), Core-spezifischen Gesetzen, ausführbarer Konformität und mehreren Ausführungssubstraten. Menschliche Namen sind nur Routing/UI-Metadaten.
+`SENS` reserviert genau 256 Sprachfunktionen: `00000000..11111111`. Diese exakten 8-Bit-Binärformen sind die Funktionen der Sprache. Core-Profile können denselben 256 Funktionen unterschiedliche Gesetze zuweisen; menschliche Namen sind nur optionale Routing/UI-Metadaten.
 
 Ukrainisch ist die primäre menschliche Sprache des Projekts; Englisch und Deutsch sind Hilfssprachen. Rust ist die Referenzimplementierung, aber nicht die semantische Autorität. Maßgeblich sind [`language-contract.lisp`](language-contract.lisp), ratifizierte Entscheidungen und ausführbare Konformitätsbelege.
 
