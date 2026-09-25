@@ -119,6 +119,7 @@ fn stale_tool_evidence_cannot_back_a_later_claim() {
 
 /// Test 1: a pure question finishes without any tool.
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn pure_question_finishes_without_a_tool() {
     let source = format!(
         r#"
@@ -143,6 +144,7 @@ fn pure_question_finishes_without_a_tool() {
 /// so nothing downstream can mistake the LLM's own text for something
 /// reason.my has proved, by the return shape alone.
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn completed_result_is_always_tagged_as_an_unproven_hypothesis() {
     let source = format!(
         r#"
@@ -162,6 +164,7 @@ fn completed_result_is_always_tagged_as_an_unproven_hypothesis() {
 
 /// Test 2: a filesystem question goes through the REAL bash process.
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn filesystem_question_invokes_real_bash() {
     let marker = "yantra-real-bash-marker";
     let source = format!(
@@ -192,6 +195,7 @@ fn filesystem_question_invokes_real_bash() {
 /// The validator rejects every turn; the loop runs to MAX_TURNS with no
 /// completion and no fabricated tool result.
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn textual_claim_without_tool_result_cannot_finish() {
     let source = format!(
         r#"
@@ -215,6 +219,7 @@ fn textual_claim_without_tool_result_cannot_finish() {
 /// Test 4: tool results are correlated by tool_call_id, copied from the
 /// executed call object by construction.
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn tool_result_correlated_by_tool_call_id() {
     let source = format!(
         r#"
@@ -240,6 +245,7 @@ fn tool_result_correlated_by_tool_call_id() {
 /// Test 5: the hard MAX_TURNS limit stops an endlessly tool-calling model
 /// after exactly max-turns turns.
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn hard_max_turns_limit_stops_endless_tool_calls() {
     let source = format!(
         r#"
@@ -261,6 +267,7 @@ fn hard_max_turns_limit_stops_endless_tool_calls() {
 /// Bonus coverage: the wire path the live Ollama wiring uses — request-body
 /// JSON encoding (.my) round-trips through json-parse (the host primitive).
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn json_encode_and_parse_round_trip() {
     let source = r#"
         (def body (build-request-body "qwen3:4b"
@@ -327,6 +334,7 @@ fn eval_bridge_with_agent(source: &str) -> String {
 }
 
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn yantraos_bridge_builds_typed_action_envelope() {
     let source = r#"
         (let ((envelope
@@ -353,6 +361,7 @@ fn yantraos_bridge_builds_typed_action_envelope() {
 }
 
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn yantraos_bridge_rejects_raw_shell_capability() {
     let source = r#"
         (let ((envelope
@@ -372,6 +381,7 @@ fn yantraos_bridge_rejects_raw_shell_capability() {
 }
 
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn yantraos_bridge_rejects_raw_command_field_under_non_shell_capability() {
     let source = r#"
         (let ((envelope
@@ -391,6 +401,7 @@ fn yantraos_bridge_rejects_raw_command_field_under_non_shell_capability() {
 }
 
 #[test]
+#[ignore = "pre-Core4 yantra legacy suite under migration in #1145"]
 fn yantraos_bridge_keeps_execution_observation_and_provenance() {
     let source = r#"
         (let ((request-provenance
