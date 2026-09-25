@@ -28,6 +28,11 @@
          (quote rows)
          mechanism-selector-metadata)))
 
+(def mechanism-selector-profile-routes
+  (cdr (mechanism-selector-find-section
+         (quote profile-rows)
+         mechanism-selector-metadata)))
+
 (def mechanism-selector-registry-has-sid?
   (lambda (sid rows)
     (cond
@@ -77,4 +82,52 @@
               (quote mechanism-selected)
               sid
               executor
+              (third route)))))))))
+
+
+; #1422 — selected-Core-aware admission. This consumes only profile-scoped
+; SENS-owned mechanism metadata; host availability is intentionally absent here.
+(def mechanism-selector-find-profile-route
+  (lambda (profile function rows)
+    (cond
+      ((atom rows) (structural-kind empty-list) (quote ()))
+      ((atom rows) (structural-kind pair)
+       (let ((row (car rows)))
+         (cond
+           ((eq profile (car row)) (identity-relation same)
+            (cond
+              ((eq function (second row)) (identity-relation same) row)
+              ((eq function (second row)) (identity-relation distinct)
+               (mechanism-selector-find-profile-route
+                 profile function (cdr rows)))))
+           ((eq profile (car row)) (identity-relation distinct)
+            (mechanism-selector-find-profile-route
+              profile function (cdr rows)))))))))
+
+(def mechanism-select-for-core
+  (lambda (profile function)
+    (cond
+      ((eq
+         (mechanism-selector-registry-has-sid?
+           function mechanism-selector-registry-rows)
+         (quote no))
+       (identity-relation same)
+       (list
+         (quote profile-mechanism-selection-failure)
+         (quote function-not-in-function-table)
+         profile function))
+      (t
+       (let ((route
+               (mechanism-selector-find-profile-route
+                 profile function mechanism-selector-profile-routes)))
+         (cond
+           ((atom route) (structural-kind empty-list)
+            (list
+              (quote profile-mechanism-unavailable)
+              profile function))
+           ((atom route) (structural-kind pair)
+            (list
+              (quote profile-mechanism-selected)
+              profile
+              function
               (third route)))))))))
