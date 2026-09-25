@@ -29,12 +29,15 @@
     (pas-field pas-boundary (quote sanskrit))
     (pas-field pas-boundary (quote direction))
     (pas-field pas-boundary (quote sens-function))
+    (pas-field pas-boundary (quote convergence-functions))
+    (pas-field pas-boundary (quote function-result))
     pas-yes-levels
     (+ (length pas-no-levels) (length pas-yes-levels) 1)
     (pas-field pas-algebra (quote not-law))
     (pas-field pas-algebra (quote weakening-law))
     (pas-field pas-algebra (quote boundary-law))
-    (pas-field pas-algebra (quote eighth-bit-law))))
+    (pas-field pas-algebra (quote eighth-bit-law))
+    (pas-field pas-algebra (quote function-convergence-law))))
 
 (def pas-expected
   (list
@@ -54,6 +57,8 @@
     (quote ajñāta)
     (quote none)
     (quote none)
+    (quote (00000000 11111111))
+    (quote ())
     (quote
       (("1"       1 dṛḍha-niścaya)
        ("11"      2 niścaya)
@@ -66,7 +71,8 @@
     (quote same-width-bit-inversion)
     (quote append-same-bit)
     (quote seven-directed-grades-converge-to-empty-list)
-    (quote belongs-to-sens-function-space)))
+    (quote belongs-to-sens-function-space)
+    (quote distinct-functions-same-empty-result)))
 
 (cond
   ((equal? pas-observed pas-expected)
