@@ -140,3 +140,4 @@
 ; #1406: generic host availability must not become ordinary SENS admission.
 (review "crates/my-lisp/src/eval/canon.rs" "0fc923c893012610a6aad60edbdcaf70e9a78b67b7b63fbba6eb18d0c512fece" issue-1406 registration-is-not-admission-repair)
 (review "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" "729d3a741df2b4f2fd7cb278b09107e449c6b19eaf58241a5e5b25bdd58cf248" issue-1406 sens-host-registration-admission-observer)
+(review "crates/my-lisp/src/eval/capabilities.rs" "d3b11e39c76f245c2d0e0c8f356baff59823f187e6eec5242479f4b77605a1c6" issue-1406 dormant-host-registry-mechanism)
