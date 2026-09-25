@@ -129,12 +129,12 @@ fn reason_observe_reports_positive_proof_without_changing_reason() {
 #[test]
 fn reason_observe_reports_an_explicit_negative_as_proved_opposite() {
     let source = r#"
-        (let ((rules (quote (((not (mortal socrates)))))))
+        (let ((rules (quote (((not? (mortal socrates)))))))
           (second (reason-observe (quote (mortal socrates)) rules)))
     "#;
     assert_eq!(
         eval_reason_observation(source),
-        "(not (mortal socrates))"
+        "(not? (mortal socrates))"
     );
 }
 
@@ -143,7 +143,7 @@ fn reason_observe_reports_dispute_when_both_sides_are_provable() {
     let source = r#"
         (let ((rules (quote (
                  ((mortal socrates))
-                 ((not (mortal socrates)))
+                 ((not? (mortal socrates)))
                ))))
           (let ((outcome (reason-observe (quote (mortal socrates)) rules)))
             (list (result-status outcome) (length (second outcome)))))

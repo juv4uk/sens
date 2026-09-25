@@ -221,12 +221,12 @@
   (lambda (value)
     (cond
       ((symbol? value) (quote ()))
-      ((not (atom value)) (quote ()))
+      ((not? (atom? value)) (quote ()))
       (t
        (let ((text (write-to-string value)))
          (cond
            ((string-empty? text) (quote ()))
-           ((eq (string-first text) "-")
+           ((eq? (string-first text) "-")
             (cond
               ((string-empty? (string-rest text)) (quote ()))
               (t (x86-admission-decimal-digits? (string-rest text)))))
@@ -282,36 +282,36 @@
 (def x86-admission-pattern-match?
   (lambda (pattern form)
     (cond
-      ((atom pattern)
+      ((atom? pattern)
        (cond
-         ((eq pattern (quote immediate)) t)
-         ((eq pattern (quote register))
+         ((eq? pattern (quote immediate)) t)
+         ((eq? pattern (quote register))
           (cond
-            ((atom form) (not (eq (x86-reg-code form) (quote ()))))
+            ((atom? form) (not? (eq? (x86-reg-code form) (quote ()))))
             (t (quote ()))))
-         ((eq pattern (quote xmm-register))
+         ((eq? pattern (quote xmm-register))
           (cond
-            ((atom form) (not (eq (x86-xmm-reg-code form) (quote ()))))
+            ((atom? form) (not? (eq? (x86-xmm-reg-code form) (quote ()))))
             (t (quote ()))))
-         ((eq pattern (quote disp8))
+         ((eq? pattern (quote disp8))
           (cond
-            ((atom form) (x86-admission-disp8? form))
+            ((atom? form) (x86-admission-disp8? form))
             (t (quote ()))))
-         ((eq pattern (quote imm32))
+         ((eq? pattern (quote imm32))
           (cond
-            ((atom form) (x86-admission-imm32? form))
+            ((atom? form) (x86-admission-imm32? form))
             (t (quote ()))))
-         ((eq pattern (quote uimm8))
+         ((eq? pattern (quote uimm8))
           (cond
-            ((atom form) (x86-admission-uimm8? form))
+            ((atom? form) (x86-admission-uimm8? form))
             (t (quote ()))))
-         ((eq pattern (quote rel32))
+         ((eq? pattern (quote rel32))
           (cond
-            ((atom form) (x86-admission-rel32? form))
+            ((atom? form) (x86-admission-rel32? form))
             (t (quote ()))))
-         ((atom form) (eq pattern form))
+         ((atom? form) (eq? pattern form))
          (t (quote ()))))
-      ((atom form) (quote ()))
+      ((atom? form) (quote ()))
       ((x86-admission-pattern-match? (car pattern) (car form))
        (x86-admission-pattern-match? (cdr pattern) (cdr form)))
       (t (quote ())))))
@@ -319,7 +319,7 @@
 (def x86-admitted-instruction-against?
   (lambda (patterns form)
     (cond
-      ((atom patterns) (quote ()))
+      ((atom? patterns) (quote ()))
       ((x86-admission-pattern-match? (car patterns) form) t)
       (t (x86-admitted-instruction-against? (cdr patterns) form)))))
 
@@ -330,9 +330,9 @@
 (def x86-first-unadmitted-form
   (lambda (forms)
     (cond
-      ((atom forms)
+      ((atom? forms)
        (cond
-         ((eq forms (quote ())) (quote ()))
+         ((eq? forms (quote ())) (quote ()))
          (t forms)))
       ((x86-admitted-instruction? (car forms))
        (x86-first-unadmitted-form (cdr forms)))
@@ -341,7 +341,7 @@
 (def x86-admitted-program?
   (lambda (forms)
     (cond
-      ((atom forms) (eq forms (quote ())))
+      ((atom? forms) (eq? forms (quote ())))
       ((x86-admitted-instruction? (car forms))
        (x86-admitted-program? (cdr forms)))
       (t (quote ())))))
@@ -762,7 +762,7 @@
     (cond
       ((x86-admitted-program? forms)
        (cond
-         ((eq arena-bytes 0)
+         ((eq? arena-bytes 0)
           (native-call-u64-raw (x86-encode-admitted-program forms)))
          (t
           (native-call-u64-raw (x86-encode-admitted-program forms) arena-bytes))))

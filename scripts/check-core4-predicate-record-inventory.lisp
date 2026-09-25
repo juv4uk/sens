@@ -13,14 +13,14 @@
 (def pri-field-from
   (lambda (name fields)
     (cond
-      ((atom fields) (structural-kind empty-list) (quote missing))
-      ((atom fields) (structural-kind pair)
+      ((atom? fields) (structural-kind empty-list) (quote missing))
+      ((atom? fields) (structural-kind pair)
        (let ((field (car fields)))
          (cond
-           ((atom field) (structural-kind pair)
+           ((atom? field) (structural-kind pair)
             (cond
-              ((eq (car field) name) (identity-relation same) (cdr field))
-              ((eq (car field) name) (identity-relation distinct)
+              ((eq? (car field) name) (identity-relation same) (cdr field))
+              ((eq? (car field) name) (identity-relation distinct)
                (pri-field-from name (cdr fields)))))
            ((quote pri-next) pri-next
             (pri-field-from name (cdr fields)))))))))
@@ -32,8 +32,8 @@
 (def pri-row-by-function
   (lambda (function rows)
     (cond
-      ((atom rows) (structural-kind empty-list) (quote missing))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind empty-list) (quote missing))
+      ((atom? rows) (structural-kind pair)
        (cond
          ((equal? (pri-field (car rows) (quote function)) function)
           (structural-relation same)
@@ -52,8 +52,8 @@
 (def pri-first-failure
   (lambda (checks)
     (cond
-      ((atom checks) (structural-kind empty-list) (quote ()))
-      ((atom (car checks)) (structural-kind empty-list)
+      ((atom? checks) (structural-kind empty-list) (quote ()))
+      ((atom? (car checks)) (structural-kind empty-list)
        (pri-first-failure (cdr checks)))
       ((quote pri-failure) pri-failure (car checks)))))
 
@@ -119,7 +119,7 @@
                            (pri-field pri-00000111 (quote compatibility-role))
                            (quote compatibility-only))))))
       (cond
-        ((atom failure) (structural-kind empty-list)
+        ((atom? failure) (structural-kind empty-list)
          (quote (core4-predicate-record-inventory-ok)))
         ((quote pri-contract-failure) pri-contract-failure failure)))))
 

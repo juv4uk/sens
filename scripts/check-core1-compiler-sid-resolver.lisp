@@ -12,12 +12,12 @@
 (def c1r-find-section
   (lambda (name sections)
     (cond
-      ((atom sections) (structural-kind empty-list) (quote ()))
-      ((atom sections) (structural-kind pair)
+      ((atom? sections) (structural-kind empty-list) (quote ()))
+      ((atom? sections) (structural-kind pair)
        (cond
-         ((eq (car (car sections)) name) (identity-relation same)
+         ((eq? (car (car sections)) name) (identity-relation same)
           (car sections))
-         ((eq (car (car sections)) name) (identity-relation distinct)
+         ((eq? (car (car sections)) name) (identity-relation distinct)
           (c1r-find-section name (cdr sections))))))))
 
 (def c1r-authority
@@ -33,8 +33,8 @@
 (def c1r-row-status
   (lambda (surface sid rows)
     (cond
-      ((atom rows) (structural-kind empty-list) (quote missing))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind empty-list) (quote missing))
+      ((atom? rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
            ((equal? (second row) sid) (structural-relation same)
@@ -49,14 +49,14 @@
 (def c1r-check-required
   (lambda (pairs)
     (cond
-      ((atom pairs) (structural-kind empty-list) (quote ()))
-      ((atom pairs) (structural-kind pair)
+      ((atom? pairs) (structural-kind empty-list) (quote ()))
+      ((atom? pairs) (structural-kind pair)
        (let* ((pair (car pairs))
               (surface (car pair))
               (sid (second pair))
               (status (c1r-row-status surface sid c1r-authority-rows)))
          (cond
-           ((eq status (quote admitted)) (identity-relation same)
+           ((eq? status (quote admitted)) (identity-relation same)
             (c1r-check-required (cdr pairs)))
            ((quote c1r-required-fail) c1r-required-fail
             (list (quote required-row-not-admitted) surface sid status))))))))
@@ -64,8 +64,8 @@
 (def c1r-first-failure
   (lambda (checks)
     (cond
-      ((atom checks) (structural-kind empty-list) (quote ()))
-      ((atom (car checks)) (structural-kind empty-list)
+      ((atom? checks) (structural-kind empty-list) (quote ()))
+      ((atom? (car checks)) (structural-kind empty-list)
        (c1r-first-failure (cdr checks)))
       ((quote c1r-failure) c1r-failure (car checks)))))
 
@@ -91,7 +91,7 @@
                      (NOT 00100001)
                      (LIST 00100111))))
                 (cond
-                  ((eq
+                  ((eq?
                      (c1r-row-status
                        (quote PLUS) 00001100 c1r-authority-rows)
                      (quote available-not-admitted))
@@ -100,7 +100,7 @@
                   ((quote c1r-plus-fail) c1r-plus-fail
                    (quote (plus-must-remain-not-admitted))))
                 (cond
-                  ((eq
+                  ((eq?
                      (c1r-row-status
                        (quote DIFFERENCE) 00001101 c1r-authority-rows)
                      (quote available-not-admitted))
@@ -109,7 +109,7 @@
                   ((quote c1r-minus-fail) c1r-minus-fail
                    (quote (minus-must-remain-not-admitted))))))))
       (cond
-        ((atom failure) (structural-kind empty-list)
+        ((atom? failure) (structural-kind empty-list)
          (quote (core1-compiler-sid-resolver-check pass)))
         ((quote c1r-contract-fail) c1r-contract-fail
          (list (quote core1-compiler-sid-resolver-check)

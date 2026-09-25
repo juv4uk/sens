@@ -171,7 +171,7 @@ fn meta_eval_resolves_canon_identity_primitives_through_any_admitted_surface_nam
     .expect("core.lisp should load");
     my_lisp::load_meta_evaluator_library(&mut session).expect("meta-evaluator should load");
 
-    let english = eval_via_meta("(atom 5)", &mut session).expect("english spelling resolves");
+    let english = eval_via_meta("(atom? 5)", &mut session).expect("english spelling resolves");
     let ukrainian =
         eval_via_meta("(атом? 5)", &mut session).expect("Canon identity is spelling-invariant");
     assert_eq!(

@@ -68,15 +68,15 @@
 (def native-first-parity-run
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list) (quote ()))
-      ((atom rows) (structural-kind atom)
+      ((atom? rows) (structural-kind empty-list) (quote ()))
+      ((atom? rows) (structural-kind atom)
        (list
          (native-first-parity-fail
            (quote malformed-corpus)
            (quote malformed-tail)
            (quote ())
            rows)))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (cons
          (native-first-parity-case (car rows))
          (native-first-parity-run (cdr rows)))))))
@@ -84,7 +84,7 @@
 (def native-first-parity-verdict-pass?
   (lambda (verdict)
     (cond
-      ((atom verdict) (structural-kind pair)
+      ((atom? verdict) (structural-kind pair)
        (cond
          ((equal? (third verdict) (quote pass))
           (structural-relation same)
@@ -99,9 +99,9 @@
 (def native-first-parity-all-pass?
   (lambda (verdicts)
     (cond
-      ((atom verdicts) (structural-kind empty-list) t)
-      ((atom verdicts) (structural-kind atom) (quote ()))
-      ((atom verdicts) (structural-kind pair)
+      ((atom? verdicts) (structural-kind empty-list) t)
+      ((atom? verdicts) (structural-kind atom) (quote ()))
+      ((atom? verdicts) (structural-kind pair)
        (cond
          ((equal? (native-first-parity-verdict-pass? (car verdicts)) t)
           (structural-relation same)

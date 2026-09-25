@@ -21,20 +21,20 @@
   (lambda (expression cons-expression)
     (let ((cons-arguments (cdr cons-expression)))
       (cond
-        ((atom cons-arguments) (structural-kind pair)
+        ((atom? cons-arguments) (structural-kind pair)
          (let ((rest-after-left (cdr cons-arguments)))
            (cond
-             ((atom rest-after-left) (structural-kind pair)
+             ((atom? rest-after-left) (structural-kind pair)
               (let ((rest-after-right (cdr rest-after-left)))
                 (cond
-                  ((atom rest-after-right) (structural-kind empty-list)
+                  ((atom? rest-after-right) (structural-kind empty-list)
                    (let ((typed-left (x86-as-u64-imm (car cons-arguments))))
                      (cond
-                       ((eq (car typed-left) (quote u64-imm))
+                       ((eq? (car typed-left) (quote u64-imm))
                         (identity-relation same)
                         (let ((typed-right (x86-as-u64-imm (car rest-after-left))))
                           (cond
-                            ((eq (car typed-right) (quote u64-imm))
+                            ((eq? (car typed-right) (quote u64-imm))
                              (identity-relation same)
                              (native-first-native-plan
                                (x86-lower-cons-car-u64-forms
@@ -60,18 +60,18 @@
 (def native-first-plan-car-argument
   (lambda (expression argument)
     (cond
-      ((atom argument) (structural-kind pair)
+      ((atom? argument) (structural-kind pair)
        (let ((head (car argument)))
          (cond
-           ((atom head) (structural-kind empty-list)
+           ((atom? head) (structural-kind empty-list)
             (native-first-fallback expression))
-           ((atom head) (structural-kind pair)
+           ((atom? head) (structural-kind pair)
             (native-first-fallback expression))
-           ((atom head) (structural-kind atom)
+           ((atom? head) (structural-kind atom)
             (cond
-              ((eq head (quote cons)) (identity-relation same)
+              ((eq? head (quote cons)) (identity-relation same)
                (native-first-plan-car-cons-u64 expression argument))
-              ((eq head (quote cons)) (identity-relation distinct)
+              ((eq? head (quote cons)) (identity-relation distinct)
                (native-first-fallback expression)))))))
       ((quote native-first-fallback)
        native-first-fallback
@@ -81,9 +81,9 @@
   (lambda (expression)
     (let ((arguments (cdr expression)))
       (cond
-        ((atom arguments) (structural-kind pair)
+        ((atom? arguments) (structural-kind pair)
          (cond
-           ((atom (cdr arguments)) (structural-kind empty-list)
+           ((atom? (cdr arguments)) (structural-kind empty-list)
             (native-first-plan-car-argument expression (car arguments)))
            ((quote native-first-fallback)
             native-first-fallback
@@ -95,18 +95,18 @@
 (def native-first-plan
   (lambda (expression)
     (cond
-      ((atom expression) (structural-kind pair)
+      ((atom? expression) (structural-kind pair)
        (let ((head (car expression)))
          (cond
-           ((atom head) (structural-kind empty-list)
+           ((atom? head) (structural-kind empty-list)
             (native-first-fallback expression))
-           ((atom head) (structural-kind pair)
+           ((atom? head) (structural-kind pair)
             (native-first-fallback expression))
-           ((atom head) (structural-kind atom)
+           ((atom? head) (structural-kind atom)
             (cond
-              ((eq head (quote car)) (identity-relation same)
+              ((eq? head (quote car)) (identity-relation same)
                (native-first-plan-car expression))
-              ((eq head (quote car)) (identity-relation distinct)
+              ((eq? head (quote car)) (identity-relation distinct)
                (native-first-fallback expression)))))))
       ((quote native-first-fallback)
        native-first-fallback

@@ -8,7 +8,7 @@
 
   ((runtime-required . core1)
    (special-forms . (quote lambda cond define))
-   (primitive-operations . (atom eq cons car cdr list not))
+   (primitive-operations . (atom? eq cons car cdr list not))
    (mechanisms . (recursion lexical-closure top-level-definition-frame))
    (arithmetic . not-required)
    (strings . not-required)

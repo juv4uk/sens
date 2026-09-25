@@ -13,7 +13,7 @@
 
 (def explicit-negative-reason-observe-check
   (lambda ()
-    (let* ((goal (quote (not (planet earth))))
+    (let* ((goal (quote (not? (planet earth))))
            (actual (reason-observe goal (quote ())))
            (expected (quote ())))
       (cond

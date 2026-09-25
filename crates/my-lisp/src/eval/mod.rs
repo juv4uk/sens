@@ -361,7 +361,7 @@ mod single_pass_eval_tests {
             (define count-down
               (lambda (n)
                 (cond
-                  ((eq n 0) (quote done))
+                  ((eq? n 0) (quote done))
                   (t (count-down (- n 1))))))
             (count-down 1000)
         "#;

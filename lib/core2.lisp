@@ -6,30 +6,30 @@
 ;
 ; Core2 does not import Core4's three-part explicit-result COND law.
 
-(def core2-truthy?
-  (lambda (value)
-    (cond
-      (value (quote t))
-      (t (quote ())))))
+(00001011 core2-truthy?
+  (00001000 (value)
+    (00000111
+      (value (00000001 t))
+      (t (00000001 ())))))
 
-(def core2-atom
-  (lambda (value)
-    (cond
-      ((atom value) (quote t))
-      (t (quote ())))))
+(00001011 core2-atom
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (00000001 t))
+      (t (00000001 ())))))
 
-(def core2-eq
-  (lambda (left right)
-    (cond
-      ((eq left right) (quote t))
-      (t (quote ())))))
+(00001011 core2-eq
+  (00001000 (left right)
+    (00000111
+      ((00000011 left right) (00000001 t))
+      (t (00000001 ())))))
 
-(def core2-equal?
-  (lambda (left right)
-    (cond
-      ((equal? left right) (quote t))
-      (t (quote ())))))
+(00001011 core2-equal?
+  (00001000 (left right)
+    (00000111
+      ((00100010 left right) (00000001 t))
+      (t (00000001 ())))))
 
-(def core2-cond-test?
-  (lambda (test-value)
+(00001011 core2-cond-test?
+  (00001000 (test-value)
     (core2-truthy? test-value)))

@@ -30,8 +30,8 @@ fn inner_binding_shadows_outer_lexical_binding() {
 #[test]
 fn mutually_recursive_group_keeps_bindings_inside_lisp_data() {
     let program = r#"
-(def even? (lambda (n) (cond ((eq n 0) t) (t (odd? (- n 1))))))
-(def odd? (lambda (n) (cond ((eq n 0) ()) (t (even? (- n 1))))))
+(def even? (lambda (n) (cond ((eq? n 0) t) (t (odd? (- n 1))))))
+(def odd? (lambda (n) (cond ((eq? n 0) ()) (t (even? (- n 1))))))
 "#;
 
     assert_eq!(eval_meta_program(program, "(even? 20)"), "t");

@@ -46,14 +46,14 @@
 (def machine-register-width-check
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list)
+      ((atom? rows) (structural-kind empty-list)
        (quote (machine-register-width-witness (status pass))))
-      ((atom rows) (structural-kind atom)
+      ((atom? rows) (structural-kind atom)
        (list
          (quote machine-register-width-witness)
          (quote (status fail))
          (list (quote malformed-tail) rows)))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (let* ((row (car rows))
               (name (car row))
               (actual (second row))

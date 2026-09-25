@@ -11,12 +11,12 @@
      (predicate (public-question-with-domain-owned-result))
      (symbolic-sugar (compact-notation-over-word-first-public-name))))
   (public
-    ((canon (quote atom eq cons car cdr cond))
+    ((canon (quote atom? eq? cons car cdr cond))
      (necessary-forms (define lambda))
      (language-macros (defmacro))
      (compatibility-forms (def))
      (root-builtins
-       (+ - * / < = > car cdr cons env eq
+       (+ - * / < = > car cdr cons env eq?
         eval f32-buffer i32-buffer json-parse make-vector
         mono-ns ntp-query-raw numeric-buffer-length numeric-buffer-map
         numeric-buffer-ref numeric-buffer-type numeric-buffer? princ print read
@@ -30,7 +30,7 @@
      ; had gone stale relative to the actual implementation until
      ; corrected.
      (core-library
-       (abs identity binary list not and or gensym pair second third fourth cadddr fifth
+       (abs identity binary list not? and or gensym pair second third fourth cadddr fifth
         caar cadr cddr length reverse append map filter reduce let equal? max
         max-list member? min min-list assoc let* nth string-empty? string-length
         string-prefix? string-contains? symbol? quotient mod <= >= number->string
@@ -50,5 +50,5 @@
         my-postcore-build-definitions my-postcore-materialize-stable-peers))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
   (public-predicates
-    (atom eq < = > numeric-buffer? string<? string? not equal? member?
+    (atom? eq? < = > numeric-buffer? string<? string? not? equal? member?
      string-empty? string-prefix? string-contains? symbol? <= >=)))

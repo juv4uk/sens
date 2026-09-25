@@ -27,10 +27,10 @@
   (lambda (path)
     (let ((decoded (read-file-utf8-raw path)))
       (cond
-        ((eq (car decoded) (quote decoded))
+        ((eq? (car decoded) (quote decoded))
          (identity-relation same)
          (second decoded))
-        ((eq (car decoded) (quote decoded))
+        ((eq? (car decoded) (quote decoded))
          (identity-relation distinct)
          decoded)))))
 

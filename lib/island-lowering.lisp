@@ -21,13 +21,13 @@
     (let ((l (write-to-string left))
           (r (write-to-string right)))
       (cond
-        ((eq executor (quote common-lisp)) (identity-relation same)
+        ((eq? executor (quote common-lisp)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
-        ((eq executor (quote prolog)) (identity-relation same)
+        ((eq? executor (quote prolog)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
-        ((eq executor (quote datalog)) (identity-relation same)
+        ((eq? executor (quote datalog)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
-        ((eq executor (quote clips)) (identity-relation same)
+        ((eq? executor (quote clips)) (identity-relation same)
          (island-lowering-append4 "" l " " r))
         ((quote island-lowering-fallback) island-lowering-fallback
          (quote ()))))))
@@ -36,23 +36,23 @@
   (lambda (sid executor left right)
     (let ((selection (mechanism-select sid executor)))
       (cond
-        ((atom selection) (structural-kind pair)
+        ((atom? selection) (structural-kind pair)
          (cond
-           ((eq (car selection) (quote mechanism-selected))
+           ((eq? (car selection) (quote mechanism-selected))
             (identity-relation same)
             (let ((mechanism (fourth selection)))
               (cond
-                ((eq mechanism (quote bounded-exact-add))
+                ((eq? mechanism (quote bounded-exact-add))
                  (identity-relation same)
                  (let ((payload
                          (island-lowering-add-payload executor left right)))
                    (cond
-                     ((atom payload) (structural-kind empty-list)
+                     ((atom? payload) (structural-kind empty-list)
                       (list
                         (quote island-lowering-failure)
                         (quote unsupported-executor)
                         sid executor mechanism))
-                     ((atom payload) (structural-kind atom)
+                     ((atom? payload) (structural-kind atom)
                       (list
                         (quote island-lowering-result)
                         sid executor mechanism payload)))))

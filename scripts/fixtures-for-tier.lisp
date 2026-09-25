@@ -21,7 +21,7 @@
 
 (def target-tier
   (cond
-    ((atom *argv*) (missing-tier-argument))
+    ((atom? *argv*) (missing-tier-argument))
     (t (read (car *argv*)))))
 
 ; `missing-tier-argument` is deliberately unbound — calling it is a real
@@ -40,10 +40,10 @@
 (def print-matching
   (lambda (remaining)
     (cond
-      ((atom remaining) (quote ()))
+      ((atom? remaining) (quote ()))
       (t ((lambda ()
             (cond
-              ((eq (fixture-tier (car remaining)) target-tier)
+              ((eq? (fixture-tier (car remaining)) target-tier)
                (print (car remaining)))
               (t (quote ())))
             (print-matching (cdr remaining))))))))

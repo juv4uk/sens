@@ -24,9 +24,9 @@
 (def science-proper-list?
   (lambda (x)
     (cond
-      ((atom x)
+      ((atom? x)
        (cond
-         ((eq x (quote ())) t)
+         ((eq? x (quote ())) t)
          (t (quote ()))))
       (t (science-proper-list? (cdr x))))))
 
@@ -45,13 +45,13 @@
 (def dimension?
   (lambda (x)
     (cond
-      ((atom x) (quote ()))
-      ((eq (science-proper-list? x) (quote ())) (quote ()))
-      ((eq (= (length x) 3) (quote ())) (quote ()))
-      ((eq (car x) *dimension-schema*)
+      ((atom? x) (quote ()))
+      ((eq? (science-proper-list? x) (quote ())) (quote ()))
+      ((eq? (= (length x) 3) (quote ())) (quote ()))
+      ((eq? (car x) *dimension-schema*)
        (cond
-         ((eq (symbol? (second x)) (quote ())) (quote ()))
-         ((atom (third x)) t)
+         ((eq? (symbol? (second x)) (quote ())) (quote ()))
+         ((atom? (third x)) t)
          (t (quote ()))))
       (t (quote ())))))
 
@@ -64,9 +64,9 @@
 (def science-dimensions-valid?
   (lambda (dimensions)
     (cond
-      ((atom dimensions)
+      ((atom? dimensions)
        (cond
-         ((eq dimensions (quote ())) t)
+         ((eq? dimensions (quote ())) t)
          (t (quote ()))))
       ((dimension? (car dimensions))
        (science-dimensions-valid? (cdr dimensions)))
@@ -79,9 +79,9 @@
 (def unit?
   (lambda (x)
     (cond
-      ((atom x) (quote ()))
-      ((eq (science-proper-list? x) (quote ())) (quote ()))
-      ((eq (car x) *unit-schema*)
+      ((atom? x) (quote ()))
+      ((eq? (science-proper-list? x) (quote ())) (quote ()))
+      ((eq? (car x) *unit-schema*)
        (science-dimensions-valid? (cdr x)))
       (t (quote ())))))
 
@@ -95,10 +95,10 @@
 (def quantity?
   (lambda (x)
     (cond
-      ((atom x) (quote ()))
-      ((eq (science-proper-list? x) (quote ())) (quote ()))
-      ((eq (= (length x) 3) (quote ())) (quote ()))
-      ((eq (car x) *quantity-schema*)
+      ((atom? x) (quote ()))
+      ((eq? (science-proper-list? x) (quote ())) (quote ()))
+      ((eq? (= (length x) 3) (quote ())) (quote ()))
+      ((eq? (car x) *quantity-schema*)
        (unit? (third x)))
       (t (quote ())))))
 
@@ -114,11 +114,11 @@
 (def science-add-dimension
   (lambda (dimension dimensions)
     (cond
-      ((atom dimensions)
+      ((atom? dimensions)
        (cond
          ((= (dimension-exponent dimension) 0) 1 (quote ()))
          (t (list dimension))))
-      ((eq (dimension-base dimension)
+      ((eq? (dimension-base dimension)
            (dimension-base (car dimensions)))
        (let ((sum
                (+ (dimension-exponent dimension)
@@ -137,7 +137,7 @@
 (def science-merge-dimensions
   (lambda (from into)
     (cond
-      ((atom from) into)
+      ((atom? from) into)
       (t
        (science-merge-dimensions
          (cdr from)
@@ -146,7 +146,7 @@
 (def science-negate-dimensions
   (lambda (dimensions)
     (cond
-      ((atom dimensions) (quote ()))
+      ((atom? dimensions) (quote ()))
       (t
        (cons
          (make-dimension
@@ -187,31 +187,31 @@
 (def science-source?
   (lambda (x)
     (cond
-      ((atom x) (quote ()))
-      ((eq (science-proper-list? x) (quote ())) (quote ()))
-      ((eq (= (length x) 3) (quote ())) (quote ()))
-      ((eq (car x) *science-source-schema*)
+      ((atom? x) (quote ()))
+      ((eq? (science-proper-list? x) (quote ())) (quote ()))
+      ((eq? (= (length x) 3) (quote ())) (quote ()))
+      ((eq? (car x) *science-source-schema*)
        (cond
-         ((eq (symbol? (second x)) (quote ())) (quote ()))
-         ((atom (third x)) t)
+         ((eq? (symbol? (second x)) (quote ())) (quote ()))
+         ((atom? (third x)) t)
          (t (quote ()))))
       (t (quote ())))))
 
 (def scientific-constant-status-valid?
   (lambda (status)
     (cond
-      ((eq status (quote exact-by-definition)) t)
-      ((eq status (quote exact-derived)) t)
-      ((eq status (quote measured)) t)
+      ((eq? status (quote exact-by-definition)) t)
+      ((eq? status (quote exact-derived)) t)
+      ((eq? status (quote measured)) t)
       (t (quote ())))))
 
 (def scientific-constant-kind-valid?
   (lambda (kind)
     (cond
-      ((eq kind (quote physical-defining)) t)
-      ((eq kind (quote physical-derived)) t)
-      ((eq kind (quote physical-measured)) t)
-      ((eq kind (quote mathematical)) t)
+      ((eq? kind (quote physical-defining)) t)
+      ((eq? kind (quote physical-derived)) t)
+      ((eq? kind (quote physical-measured)) t)
+      ((eq? kind (quote mathematical)) t)
       (t (quote ())))))
 
 (def make-scientific-constant
@@ -228,17 +228,17 @@
 (def scientific-constant?
   (lambda (x)
     (cond
-      ((atom x) (quote ()))
-      ((eq (science-proper-list? x) (quote ())) (quote ()))
+      ((atom? x) (quote ()))
+      ((eq? (science-proper-list? x) (quote ())) (quote ()))
       ((= (length x) 7) 0 (quote ()))
-      ((eq (car x) *scientific-constant-schema*)
+      ((eq? (car x) *scientific-constant-schema*)
        (cond
-         ((eq (symbol? (second x)) (quote ())) (quote ()))
-         ((eq (quantity? (third x)) (quote ())) (quote ()))
-         ((eq (scientific-constant-status-valid? (fourth x)) (quote ())) (quote ()))
-         ((eq (scientific-constant-kind-valid? (fifth x)) (quote ())) (quote ()))
-         ((eq (symbol? (science-sixth x)) (quote ())) (quote ()))
-         ((eq (science-source? (science-seventh x)) (quote ())) (quote ()))
+         ((eq? (symbol? (second x)) (quote ())) (quote ()))
+         ((eq? (quantity? (third x)) (quote ())) (quote ()))
+         ((eq? (scientific-constant-status-valid? (fourth x)) (quote ())) (quote ()))
+         ((eq? (scientific-constant-kind-valid? (fifth x)) (quote ())) (quote ()))
+         ((eq? (symbol? (science-sixth x)) (quote ())) (quote ()))
+         ((eq? (science-source? (science-seventh x)) (quote ())) (quote ()))
          (t t)))
       (t (quote ())))))
 
@@ -274,7 +274,7 @@
 (def scientific-constant->clauses
   (lambda (constant)
     (cond
-      ((eq (scientific-constant? constant) (quote ())) (quote ()))
+      ((eq? (scientific-constant? constant) (quote ())) (quote ()))
       (t
        (let ((name (scientific-constant-name constant)))
          (list

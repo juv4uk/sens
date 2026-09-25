@@ -26,9 +26,9 @@
          (release-require program (car result) 0)
          (second result))))))
 
-(release-require "Потрібна одна версія: 0.41.0" (atom *argv*)
+(release-require "Потрібна одна версія: 0.41.0" (atom? *argv*)
                  (quote (structural-kind pair)))
-(release-require "Потрібен рівно один аргумент" (atom (cdr *argv*))
+(release-require "Потрібен рівно один аргумент" (atom? (cdr *argv*))
                  (quote (structural-kind empty-list)))
 (def release-version (car *argv*))
 (def release-tag (string-append "l" release-version))
@@ -49,8 +49,8 @@
 (def release-fasl-diff-status
   (car (process-run "git" (quote ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
 (cond
-  ((eq release-fasl-diff-status 0) (identity-relation same) (quote ()))
-  ((eq release-fasl-diff-status 1) (identity-relation same)
+  ((eq? release-fasl-diff-status 0) (identity-relation same) (quote ()))
+  ((eq? release-fasl-diff-status 1) (identity-relation same)
    ((lambda ()
       (release-run "git" (quote ("add" "lib/core4.lisp.fasl")))
       (release-run "git" (quote ("commit" "-m" "chore(fasl): regenerate Core4 snapshot")))
@@ -68,8 +68,8 @@
 (def release-check-manifests
   (lambda (paths)
     (cond
-      ((atom paths) (structural-kind empty-list) (quote ()))
-      ((atom paths) (structural-kind pair)
+      ((atom? paths) (structural-kind empty-list) (quote ()))
+      ((atom? paths) (structural-kind pair)
        ((lambda ()
           (release-require (car paths)
             (string-contains?

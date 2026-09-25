@@ -88,13 +88,13 @@ fn vec_nth_over_a_large_vector_returns_correct_values_at_every_index() {
     let source = r#"
         (def build-range
           (lambda (n acc)
-            (cond ((eq n 0) acc)
+            (cond ((eq? n 0) acc)
                   (t (build-range (- n 1) (cons n acc))))))
         (def big (vec-from-list (build-range 4607 (quote ()))))
         (def check-all
           (lambda (i n v)
-            (cond ((eq i n) t)
-                  ((eq (car (vec-nth i v)) (+ i 1)) (check-all (+ i 1) n v))
+            (cond ((eq? i n) t)
+                  ((eq? (car (vec-nth i v)) (+ i 1)) (check-all (+ i 1) n v))
                   (t (quote ())))))
         (list (vec-count big) (check-all 0 4607 big))
     "#;

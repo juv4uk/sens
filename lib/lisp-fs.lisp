@@ -48,11 +48,11 @@
   (lambda (fs name)
     (let ((binding (map-get name (fs-bindings fs))))
       (cond
-        ((atom binding) (list (quote not-found) name))
+        ((atom? binding) (list (quote not-found) name))
         (t
           (let ((address (car binding)))
             (cond
-              ((not (content-store-contains? (fs-objects fs) address))
+              ((not? (content-store-contains? (fs-objects fs) address))
                (list (quote not-found) name))
               (t
                 ; map-get is a maybe-list, so unwrap exactly once. This
@@ -69,7 +69,7 @@
 
 (def fs-contains?
   (lambda (fs name)
-    (not (atom (map-get name (fs-bindings fs))))))
+    (not? (atom? (map-get name (fs-bindings fs))))))
 
 ; Versioned data-only envelopes. They are ordinary alists and are never
 ; evaluated by the filesystem layer.
@@ -96,24 +96,24 @@
 (def fs-object-addresses
   (lambda (entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       (t (cons (car (car entries))
                (fs-object-addresses (cdr entries)))))))
 
 (def fs-package-field
   (lambda (name package)
     (let ((entry (assoc name package)))
-      (cond ((atom entry) (quote ())) (t (cdr entry))))))
+      (cond ((atom? entry) (quote ())) (t (cdr entry))))))
 
 (def fs-object-package-decision
   (lambda (package)
     (cond
-      ((atom package) (list (quote rejected) (quote invalid-package)))
-      ((not (eq (fs-package-field (quote format) package) (quote wsm-fs-object)))
+      ((atom? package) (list (quote rejected) (quote invalid-package)))
+      ((not? (eq? (fs-package-field (quote format) package) (quote wsm-fs-object)))
        (list (quote rejected) (quote invalid-format)))
-      ((not (equal? (fs-package-field (quote version) package) *fs-format-version*))
+      ((not? (equal? (fs-package-field (quote version) package) *fs-format-version*))
        (list (quote rejected) (quote unsupported-version)))
-      ((not (equal? (fs-package-field (quote address) package)
+      ((not? (equal? (fs-package-field (quote address) package)
                     (knowledge-content-address (fs-package-field (quote value) package))))
        (list (quote rejected) (quote address-mismatch)))
       (t (list (quote accepted) (fs-package-field (quote value) package))))))
@@ -129,16 +129,16 @@
 (def fs-root-package-decision
   (lambda (package)
     (cond
-      ((atom package) (list (quote rejected) (quote invalid-package)))
-      ((not (eq (fs-package-field (quote format) package) (quote wsm-fs-root)))
+      ((atom? package) (list (quote rejected) (quote invalid-package)))
+      ((not? (eq? (fs-package-field (quote format) package) (quote wsm-fs-root)))
        (list (quote rejected) (quote invalid-format)))
-      ((not (equal? (fs-package-field (quote version) package) *fs-format-version*))
+      ((not? (equal? (fs-package-field (quote version) package) *fs-format-version*))
        (list (quote rejected) (quote unsupported-version)))
-      ((eq (fs-package-field (quote revision) package) (quote ()))
+      ((eq? (fs-package-field (quote revision) package) (quote ()))
        (list (quote rejected) (quote invalid-revision)))
-      ((not (knowledge-proper-list? (fs-package-field (quote bindings) package)))
+      ((not? (knowledge-proper-list? (fs-package-field (quote bindings) package)))
        (list (quote rejected) (quote invalid-bindings)))
-      ((not (knowledge-proper-list? (fs-package-field (quote objects) package)))
+      ((not? (knowledge-proper-list? (fs-package-field (quote objects) package)))
        (list (quote rejected) (quote invalid-objects)))
       (t (list (quote accepted) package)))))
 
@@ -159,11 +159,11 @@
 (def fs-build-object-store
   (lambda (packages store)
     (cond
-      ((atom packages) (list (quote accepted) store))
+      ((atom? packages) (list (quote accepted) store))
       (t
         (let ((decision (fs-object-package-decision (car packages))))
           (cond
-            ((not (eq (car decision) (quote accepted))) decision)
+            ((not? (eq? (car decision) (quote accepted))) decision)
             (t (fs-build-object-store
                  (cdr packages)
                  (content-store-put store (second decision))))))))))
@@ -171,32 +171,32 @@
 (def fs-all-addresses-present?
   (lambda (addresses store)
     (cond
-      ((atom addresses) t)
-      ((not (content-store-contains? store (car addresses))) (quote ()))
+      ((atom? addresses) t)
+      ((not? (content-store-contains? store (car addresses))) (quote ()))
       (t (fs-all-addresses-present? (cdr addresses) store)))))
 
 (def fs-binding-addresses-present?
   (lambda (entries store)
     (cond
-      ((atom entries) t)
-      ((not (content-store-contains? store (cdr (car entries)))) (quote ()))
+      ((atom? entries) t)
+      ((not? (content-store-contains? store (cdr (car entries)))) (quote ()))
       (t (fs-binding-addresses-present? (cdr entries) store)))))
 
 (def fs-reconstruct-root
   (lambda (root-package object-packages)
     (let ((root-decision (fs-root-package-decision root-package)))
       (cond
-        ((not (eq (car root-decision) (quote accepted))) root-decision)
+        ((not? (eq? (car root-decision) (quote accepted))) root-decision)
         (t
           (let ((objects-decision
                   (fs-build-object-store object-packages (empty-content-store))))
             (cond
-              ((not (eq (car objects-decision) (quote accepted))) objects-decision)
-              ((not (fs-all-addresses-present?
+              ((not? (eq? (car objects-decision) (quote accepted))) objects-decision)
+              ((not? (fs-all-addresses-present?
                       (fs-package-field (quote objects) root-package)
                       (second objects-decision)))
                (list (quote rejected) (quote missing-object)))
-              ((not (fs-binding-addresses-present?
+              ((not? (fs-binding-addresses-present?
                       (fs-package-field (quote bindings) root-package)
                       (second objects-decision)))
                (list (quote rejected) (quote missing-object)))
@@ -212,7 +212,7 @@
 (def fs-bindings-from-list
   (lambda (entries bindings)
     (cond
-      ((atom entries) bindings)
+      ((atom? entries) bindings)
       (t (fs-bindings-from-list
            (cdr entries)
            (map-insert (car (car entries)) (cdr (car entries)) bindings))))))
@@ -262,33 +262,33 @@
 (def fs-journal-event-decision
   (lambda (event)
     (cond
-      ((atom event) (list (quote rejected) (quote invalid-event)))
-      ((not (eq (fs-package-field (quote format) event) (quote wsm-fs-event)))
+      ((atom? event) (list (quote rejected) (quote invalid-event)))
+      ((not? (eq? (fs-package-field (quote format) event) (quote wsm-fs-event)))
        (list (quote rejected) (quote invalid-format)))
-      ((not (equal? (fs-package-field (quote version) event) *fs-journal-version*))
+      ((not? (equal? (fs-package-field (quote version) event) *fs-journal-version*))
        (list (quote rejected) (quote unsupported-version)))
-      ((eq (fs-package-field (quote op) event) (quote ()))
+      ((eq? (fs-package-field (quote op) event) (quote ()))
        (list (quote rejected) (quote missing-operation)))
-      ((and (eq (fs-package-field (quote op) event) (quote write))
-            (or (atom (assoc (quote name) event))
-                (atom (assoc (quote value) event))))
+      ((and (eq? (fs-package-field (quote op) event) (quote write))
+            (or (atom? (assoc (quote name) event))
+                (atom? (assoc (quote value) event))))
        (list (quote rejected) (quote incomplete-write)))
-      ((and (eq (fs-package-field (quote op) event) (quote bind))
-            (or (atom (assoc (quote name) event))
-                (atom (assoc (quote address) event))))
+      ((and (eq? (fs-package-field (quote op) event) (quote bind))
+            (or (atom? (assoc (quote name) event))
+                (atom? (assoc (quote address) event))))
        (list (quote rejected) (quote incomplete-bind)))
-      ((and (eq (fs-package-field (quote op) event) (quote unbind))
-            (atom (assoc (quote name) event)))
+      ((and (eq? (fs-package-field (quote op) event) (quote unbind))
+            (atom? (assoc (quote name) event)))
        (list (quote rejected) (quote incomplete-unbind)))
-      ((and (eq (fs-package-field (quote op) event) (quote root-commit))
-            (atom (assoc (quote root) event)))
+      ((and (eq? (fs-package-field (quote op) event) (quote root-commit))
+            (atom? (assoc (quote root) event)))
        (list (quote rejected) (quote incomplete-root-commit)))
       (t (list (quote accepted) event)))))
 
 (def fs-bindings-without
   (lambda (entries name result)
     (cond
-      ((atom entries) result)
+      ((atom? entries) result)
       ((equal? (car (car entries)) name)
        (fs-bindings-without (cdr entries) name result))
       (t
@@ -308,19 +308,19 @@
   (lambda (fs event)
     (let ((decision (fs-journal-event-decision event)))
       (cond
-        ((not (eq (car decision) (quote accepted))) decision)
+        ((not? (eq? (car decision) (quote accepted))) decision)
         (t
           (let ((op (fs-package-field (quote op) event)))
             (cond
-              ((eq op (quote write))
+              ((eq? op (quote write))
                (let ((written (fs-write fs
                                         (fs-package-field (quote name) event)
                                         (fs-package-field (quote value) event))))
                  (list (quote accepted) (car written))))
-              ((eq op (quote bind))
+              ((eq? op (quote bind))
                (let ((address (fs-package-field (quote address) event)))
                  (cond
-                   ((not (content-store-contains? (fs-objects fs) address))
+                   ((not? (content-store-contains? (fs-objects fs) address))
                     (list (quote rejected) (quote missing-object)))
                    (t
                      (list
@@ -331,10 +331,10 @@
                                      address
                                      (fs-bindings fs))
                          (+ 1 (fs-revision fs))))))))
-              ((eq op (quote unbind))
+              ((eq? op (quote unbind))
                (list (quote accepted)
                      (fs-unbind fs (fs-package-field (quote name) event))))
-              ((eq op (quote root-commit))
+              ((eq? op (quote root-commit))
                (cond
                  ((equal? (fs-root-package fs)
                           (fs-package-field (quote root) event))
@@ -345,11 +345,11 @@
 (def fs-journal-replay-onto
   (lambda (journal fs)
     (cond
-      ((atom journal) (list (quote accepted) fs))
+      ((atom? journal) (list (quote accepted) fs))
       (t
         (let ((decision (fs-journal-replay-event fs (car journal))))
           (cond
-            ((not (eq (car decision) (quote accepted))) decision)
+            ((not? (eq? (car decision) (quote accepted))) decision)
             (t (fs-journal-replay-onto (cdr journal) (second decision)))))))))
 
 (def fs-journal-replay
@@ -371,28 +371,28 @@
 (def fs-commit-stage?
   (lambda (stage)
     (cond
-      ((eq stage (quote objects)) t)
-      ((eq stage (quote journal)) t)
-      ((eq stage (quote root-pointer)) t)
+      ((eq? stage (quote objects)) t)
+      ((eq? stage (quote journal)) t)
+      ((eq? stage (quote root-pointer)) t)
       (t (quote ())))))
 
 (def fs-recover-commit
   (lambda (old-fs new-fs completed-stage)
     (cond
-      ((not (fs-commit-stage? completed-stage))
+      ((not? (fs-commit-stage? completed-stage))
        (list (quote rejected) (quote unknown-commit-stage)))
-      ((eq completed-stage (quote root-pointer))
+      ((eq? completed-stage (quote root-pointer))
        (list (quote recovered) new-fs))
       (t (list (quote recovered) old-fs)))))
 
 (def fs-recover-root-package
   (lambda (old-package candidate-package completed-stage)
     (cond
-      ((not (eq completed-stage (quote root-pointer)))
+      ((not? (eq? completed-stage (quote root-pointer)))
        (list (quote recovered) old-package))
       (t
         (let ((decision (fs-root-package-decision candidate-package)))
           (cond
-            ((eq (car decision) (quote accepted))
+            ((eq? (car decision) (quote accepted))
              (list (quote recovered) candidate-package))
             (t (list (quote recovered) old-package (quote rejected-candidate)))))))))

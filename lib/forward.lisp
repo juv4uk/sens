@@ -107,12 +107,12 @@
 (def fire-rule-on-facts
   (lambda (rule facts)
     (cond
-      ((atom facts) (quote ()))
+      ((atom? facts) (quote ()))
       (t (let ((result (fire-rule rule (car facts))))
            (cond
-             ((atom result)
+             ((atom? result)
               (cond
-                ((eq result (quote no-match)) (fire-rule-on-facts rule (cdr facts)))
+                ((eq? result (quote no-match)) (fire-rule-on-facts rule (cdr facts)))
                 (t (cons result (fire-rule-on-facts rule (cdr facts))))))
              (t (cons result (fire-rule-on-facts rule (cdr facts))))))))))
 
@@ -143,7 +143,7 @@
 (def fire-rules-on-facts
   (lambda (rules facts)
     (cond
-      ((atom rules) (quote ()))
+      ((atom? rules) (quote ()))
       (t (append (fire-rule-on-facts (car rules) facts)
                   (fire-rules-on-facts (cdr rules) facts))))))
 
@@ -194,7 +194,7 @@
 (def append-new
   (lambda (facts wm)
     (cond
-      ((atom facts) wm)
+      ((atom? facts) wm)
       ((member? (car facts) wm) (append-new (cdr facts) wm))
       (t (append-new (cdr facts) (cons (car facts) wm))))))
 
@@ -241,7 +241,7 @@
 (def retract-fact
   (lambda (fact facts)
     (cond
-      ((atom facts) (quote ()))
+      ((atom? facts) (quote ()))
       ((equal? fact (car facts)) (cdr facts))
       (t (cons (car facts) (retract-fact fact (cdr facts)))))))
 
@@ -318,7 +318,7 @@
 (def map-fact-of
   (lambda (entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       (t (cons (fact-of (car entries)) (map-fact-of (cdr entries)))))))
 
 ; Same `fire-rule` as Step 1, but wraps a successful result with the
@@ -327,39 +327,39 @@
   (lambda (rule fact)
     (let ((result (fire-rule rule fact)))
       (cond
-        ((atom result)
+        ((atom? result)
          (cond
-           ((eq result (quote no-match)) (quote no-match))
+           ((eq? result (quote no-match)) (quote no-match))
            (t (make-justified result (list fact)))))
         (t (make-justified result (list fact)))))))
 
 (def fire-rule-on-facts-tms
   (lambda (rule facts)
     (cond
-      ((atom facts) (quote ()))
+      ((atom? facts) (quote ()))
       (t (let ((result (fire-rule-tms rule (car facts))))
            (cond
-             ((atom result) (fire-rule-on-facts-tms rule (cdr facts)))
+             ((atom? result) (fire-rule-on-facts-tms rule (cdr facts)))
              (t (cons result (fire-rule-on-facts-tms rule (cdr facts))))))))))
 
 (def fire-rules-on-facts-tms
   (lambda (rules facts)
     (cond
-      ((atom rules) (quote ()))
+      ((atom? rules) (quote ()))
       (t (append (fire-rule-on-facts-tms (car rules) facts)
                   (fire-rules-on-facts-tms (cdr rules) facts))))))
 
 (def justified-member?
   (lambda (fact entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       ((equal? fact (fact-of (car entries))) t)
       (t (justified-member? fact (cdr entries))))))
 
 (def add-new-justified
   (lambda (new-entries entries)
     (cond
-      ((atom new-entries) entries)
+      ((atom? new-entries) entries)
       ((justified-member? (fact-of (car new-entries)) entries)
        (add-new-justified (cdr new-entries) entries))
       (t (add-new-justified (cdr new-entries) (cons (car new-entries) entries))))))
@@ -384,14 +384,14 @@
 (def remove-justified
   (lambda (fact entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       ((equal? fact (fact-of (car entries))) (remove-justified fact (cdr entries)))
       (t (cons (car entries) (remove-justified fact (cdr entries)))))))
 
 (def dependents-of
   (lambda (fact entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       ((member? fact (supports-of (car entries)))
        (cons (fact-of (car entries)) (dependents-of fact (cdr entries))))
       (t (dependents-of fact (cdr entries))))))
@@ -405,7 +405,7 @@
 (def retract-facts-tms
   (lambda (facts entries)
     (cond
-      ((atom facts) entries)
+      ((atom? facts) entries)
       (t (retract-facts-tms (cdr facts) (retract-fact-tms (car facts) entries))))))
 
 (defmacro retract-fact-tms! (fact)
@@ -465,39 +465,39 @@
   (lambda (rule fact)
     (let ((result (fire-rule rule fact)))
       (cond
-        ((atom result)
+        ((atom? result)
          (cond
-           ((eq result (quote no-match)) (quote no-match))
+           ((eq? result (quote no-match)) (quote no-match))
            (t (list result (list fact)))))
         (t (list result (list fact)))))))
 
 (def fire-rule-on-facts-jtms
   (lambda (rule facts)
     (cond
-      ((atom facts) (quote ()))
+      ((atom? facts) (quote ()))
       (t (let ((result (fire-rule-jtms rule (car facts))))
            (cond
-             ((atom result) (fire-rule-on-facts-jtms rule (cdr facts)))
+             ((atom? result) (fire-rule-on-facts-jtms rule (cdr facts)))
              (t (cons result (fire-rule-on-facts-jtms rule (cdr facts))))))))))
 
 (def fire-rules-on-facts-jtms
   (lambda (rules facts)
     (cond
-      ((atom rules) (quote ()))
+      ((atom? rules) (quote ()))
       (t (append (fire-rule-on-facts-jtms (car rules) facts)
                   (fire-rules-on-facts-jtms (cdr rules) facts))))))
 
 (def find-entry
   (lambda (fact entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       ((equal? fact (fact-of (car entries))) (car entries))
       (t (find-entry fact (cdr entries))))))
 
 (def remove-entry-jtms
   (lambda (fact entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       ((equal? fact (fact-of (car entries))) (remove-entry-jtms fact (cdr entries)))
       (t (cons (car entries) (remove-entry-jtms fact (cdr entries)))))))
 
@@ -509,7 +509,7 @@
   (lambda (fact justification entries)
     (let ((existing (find-entry fact entries)))
       (cond
-        ((atom existing) (cons (list fact justification) entries))
+        ((atom? existing) (cons (list fact justification) entries))
         ((member? justification (justifications-of existing)) entries)
         (t (cons (cons fact (cons justification (justifications-of existing)))
                  (remove-entry-jtms fact entries)))))))
@@ -517,7 +517,7 @@
 (def add-new-entries-jtms
   (lambda (new-entries entries)
     (cond
-      ((atom new-entries) entries)
+      ((atom? new-entries) entries)
       (t (add-new-entries-jtms
            (cdr new-entries)
            (add-justification (fact-of (car new-entries)) (second (car new-entries)) entries))))))
@@ -624,7 +624,7 @@
 (def match-plain-condition-jtms
   (lambda (condition facts state)
     (cond
-      ((atom facts) (quote ()))
+      ((atom? facts) (quote ()))
       (t (let ((s (unify condition (car facts) (jtms-state-subst state))))
            (cond
              ((failed-subst? s) (match-plain-condition-jtms condition (cdr facts) state))
@@ -634,7 +634,7 @@
 (def match-or-condition-jtms
   (lambda (alternatives facts state)
     (cond
-      ((atom alternatives) (quote ()))
+      ((atom? alternatives) (quote ()))
       (t (append (match-one-condition-jtms (car alternatives) facts state)
                   (match-or-condition-jtms (cdr alternatives) facts state))))))
 
@@ -643,7 +643,7 @@
     (cond
       ((condition-is-not? condition)
        (cond
-         ((atom (match-condition-against-facts (second condition) facts (jtms-state-subst state)))
+         ((atom? (match-condition-against-facts (second condition) facts (jtms-state-subst state)))
           (list state))
          (t (quote ()))))
       ((condition-is-or? condition) (match-or-condition-jtms (cdr condition) facts state))
@@ -662,7 +662,7 @@
 (def map-apply-head-jtms
   (lambda (head states)
     (cond
-      ((atom states) (quote ()))
+      ((atom? states) (quote ()))
       (t (cons (list (apply-subst head (jtms-state-subst (car states))) (jtms-state-used (car states)))
                 (map-apply-head-jtms head (cdr states)))))))
 
@@ -673,7 +673,7 @@
 (def fire-rules-jtms-multi
   (lambda (rules facts)
     (cond
-      ((atom rules) (quote ()))
+      ((atom? rules) (quote ()))
       (t (append (fire-rule-jtms-multi (car rules) facts)
                   (fire-rules-jtms-multi (cdr rules) facts))))))
 
@@ -690,7 +690,7 @@
 (def prune-justifications
   (lambda (fact justifications)
     (cond
-      ((atom justifications) (quote ()))
+      ((atom? justifications) (quote ()))
       ((member? fact (car justifications)) (prune-justifications fact (cdr justifications)))
       (t (cons (car justifications) (prune-justifications fact (cdr justifications)))))))
 
@@ -701,21 +701,21 @@
 (def prune-all-entries
   (lambda (fact entries)
     (cond
-      ((atom entries) (quote ()))
+      ((atom? entries) (quote ()))
       (t (cons (prune-entry fact (car entries)) (prune-all-entries fact (cdr entries)))))))
 
 (def unsupported-facts
   (lambda (entries)
     (cond
-      ((atom entries) (quote ()))
-      ((atom (justifications-of (car entries))) (cons (fact-of (car entries)) (unsupported-facts (cdr entries))))
+      ((atom? entries) (quote ()))
+      ((atom? (justifications-of (car entries))) (cons (fact-of (car entries)) (unsupported-facts (cdr entries))))
       (t (unsupported-facts (cdr entries))))))
 
 (def drop-unsupported
   (lambda (entries)
     (cond
-      ((atom entries) (quote ()))
-      ((atom (justifications-of (car entries))) (drop-unsupported (cdr entries)))
+      ((atom? entries) (quote ()))
+      ((atom? (justifications-of (car entries))) (drop-unsupported (cdr entries)))
       (t (cons (car entries) (drop-unsupported (cdr entries)))))))
 
 ; Removes `fact`'s own entry outright, then prunes every justification-set
@@ -729,13 +729,13 @@
       (let ((newly-unsupported (unsupported-facts pruned))
             (remaining (drop-unsupported pruned)))
         (cond
-          ((atom newly-unsupported) remaining)
+          ((atom? newly-unsupported) remaining)
           (t (retract-facts-jtms newly-unsupported remaining)))))))
 
 (def retract-facts-jtms
   (lambda (facts entries)
     (cond
-      ((atom facts) entries)
+      ((atom? facts) entries)
       (t (retract-facts-jtms (cdr facts) (retract-fact-jtms (car facts) entries))))))
 
 (defmacro retract-fact-jtms! (fact)
@@ -820,7 +820,7 @@
 (def match-condition-against-facts
   (lambda (condition facts subst)
     (cond
-      ((atom facts) (quote ()))
+      ((atom? facts) (quote ()))
       (t (let ((s (unify condition (car facts) subst)))
            (cond
              ((failed-subst? s) (match-condition-against-facts condition (cdr facts) subst))
@@ -856,14 +856,14 @@
 (def condition-is-not?
   (lambda (condition)
     (cond
-      ((atom condition) (quote ()))
-      ((atom (car condition)) (eq (car condition) (quote not)))
+      ((atom? condition) (quote ()))
+      ((atom? (car condition)) (eq? (car condition) (quote not)))
       (t (quote ())))))
 
 (def match-negated-condition
   (lambda (inner-pattern facts subst)
     (cond
-      ((atom (match-condition-against-facts inner-pattern facts subst)) (list subst))
+      ((atom? (match-condition-against-facts inner-pattern facts subst)) (list subst))
       (t (quote ())))))
 
 ; Step 10: `(or (pattern1) (pattern2) ...)` conditions — verified missing
@@ -902,14 +902,14 @@
 (def condition-is-or?
   (lambda (condition)
     (cond
-      ((atom condition) (quote ()))
-      ((atom (car condition)) (eq (car condition) (quote or)))
+      ((atom? condition) (quote ()))
+      ((atom? (car condition)) (eq? (car condition) (quote or)))
       (t (quote ())))))
 
 (def match-or-condition
   (lambda (alternatives facts subst)
     (cond
-      ((atom alternatives) (quote ()))
+      ((atom? alternatives) (quote ()))
       (t (append (match-one-condition (car alternatives) facts subst)
                   (match-or-condition (cdr alternatives) facts subst))))))
 
@@ -954,8 +954,8 @@
 (def condition-is-and?
   (lambda (condition)
     (cond
-      ((atom condition) (quote ()))
-      ((atom (car condition)) (eq (car condition) (quote and)))
+      ((atom? condition) (quote ()))
+      ((atom? (car condition)) (eq? (car condition) (quote and)))
       (t (quote ())))))
 
 (def match-and-condition
@@ -1008,8 +1008,8 @@
 (def condition-is-test?
   (lambda (condition)
     (cond
-      ((atom condition) (quote ()))
-      ((atom (car condition)) (eq (car condition) (quote test)))
+      ((atom? condition) (quote ()))
+      ((atom? (car condition)) (eq? (car condition) (quote test)))
       (t (quote ())))))
 
 (def match-test-condition
@@ -1127,28 +1127,28 @@
 (def condition-is-exists?
   (lambda (condition)
     (cond
-      ((atom condition) (quote ()))
-      ((atom (car condition)) (eq (car condition) (quote exists)))
+      ((atom? condition) (quote ()))
+      ((atom? (car condition)) (eq? (car condition) (quote exists)))
       (t (quote ())))))
 
 (def match-exists-condition
   (lambda (sub-conditions facts subst)
     (cond
-      ((atom (match-conditions sub-conditions facts subst)) (quote ()))
+      ((atom? (match-conditions sub-conditions facts subst)) (quote ()))
       (t (list subst)))))
 
 (def condition-is-forall?
   (lambda (condition)
     (cond
-      ((atom condition) (quote ()))
-      ((atom (car condition)) (eq (car condition) (quote forall)))
+      ((atom? condition) (quote ()))
+      ((atom? (car condition)) (eq? (car condition) (quote forall)))
       (t (quote ())))))
 
 (def forall-every-candidate-satisfies?
   (lambda (candidates rest-conditions facts)
     (cond
-      ((atom candidates) t)
-      ((atom (match-conditions rest-conditions facts (car candidates))) (quote ()))
+      ((atom? candidates) t)
+      ((atom? (match-conditions rest-conditions facts (car candidates))) (quote ()))
       (t (forall-every-candidate-satisfies? (cdr candidates) rest-conditions facts)))))
 
 (def match-forall-condition
@@ -1185,7 +1185,7 @@
 (def map-apply-head
   (lambda (head substs)
     (cond
-      ((atom substs) (quote ()))
+      ((atom? substs) (quote ()))
       (t (cons (apply-subst head (car substs)) (map-apply-head head (cdr substs)))))))
 
 ; Fires a `(head cond1 cond2 ...)` rule against a fact list: finds every
@@ -1200,7 +1200,7 @@
 (def fire-rules-multi
   (lambda (rules facts)
     (cond
-      ((atom rules) (quote ()))
+      ((atom? rules) (quote ()))
       (t (append (fire-rule-multi (car rules) facts)
                   (fire-rules-multi (cdr rules) facts))))))
 

@@ -18,8 +18,8 @@
 (def my-group-closure?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      (t (eq (car value) (quote recursive-group-closure))))))
+      ((atom? value) (quote ()))
+      (t (eq? (car value) (quote recursive-group-closure))))))
 
 (def my-sixth
   (lambda (values)
@@ -28,15 +28,15 @@
 (def my-lambda-def-form?
   (lambda (form)
     (cond
-      ((atom form) (quote ()))
-      ((eq (car form) (quote def))
+      ((atom? form) (quote ()))
+      ((eq? (car form) (quote def))
        (my-lambda-form? (third form)))
       (t (quote ())))))
 
 (def my-take-lambda-def-group
   (lambda (forms)
     (cond
-      ((atom forms) (quote ()))
+      ((atom? forms) (quote ()))
       ((my-lambda-def-form? (car forms))
        (cons (car forms)
              (my-take-lambda-def-group (cdr forms))))
@@ -45,7 +45,7 @@
 (def my-drop-lambda-def-group
   (lambda (forms)
     (cond
-      ((atom forms) (quote ()))
+      ((atom? forms) (quote ()))
       ((my-lambda-def-form? (car forms))
        (my-drop-lambda-def-group (cdr forms)))
       (t forms))))
@@ -65,7 +65,7 @@
 (def my-build-group-env-onto
   (lambda (forms group captured-env out)
     (cond
-      ((atom forms) out)
+      ((atom? forms) out)
       (t
        (let ((form (car forms)))
          (my-build-group-env-onto
@@ -105,14 +105,14 @@
 (def my-group-eval-list
   (lambda (exprs env)
     (cond
-      ((atom exprs) (quote ()))
+      ((atom? exprs) (quote ()))
       (t (cons (my-group-eval (car exprs) env)
                (my-group-eval-list (cdr exprs) env))))))
 
 (def my-group-eval-body
   (lambda (body env)
     (cond
-      ((atom (cdr body)) (my-group-eval (car body) env))
+      ((atom? (cdr body)) (my-group-eval (car body) env))
       (t ((lambda ()
             (my-group-eval (car body) env)
             (my-group-eval-body (cdr body) env)))))))
@@ -120,7 +120,7 @@
 (def my-group-eval-cond
   (lambda (clauses env)
     (cond
-      ((atom clauses) (quote ()))
+      ((atom? clauses) (quote ()))
       ((my-group-eval (car (car clauses)) env)
        (my-group-eval (second (car clauses)) env))
       (t (my-group-eval-cond (cdr clauses) env)))))
@@ -139,13 +139,13 @@
 (def my-group-eval
   (lambda (expr env)
     (cond
-      ((atom expr) (env-lookup expr env))
-      ((atom (car expr))
+      ((atom? expr) (env-lookup expr env))
+      ((atom? (car expr))
        (cond
-         ((eq (car expr) (quote quote)) (second expr))
-         ((eq (car expr) (quote cond))
+         ((eq? (car expr) (quote quote)) (second expr))
+         ((eq? (car expr) (quote cond))
           (my-group-eval-cond (cdr expr) env))
-         ((eq (car expr) (quote lambda))
+         ((eq? (car expr) (quote lambda))
           (list (quote closure) (second expr) (cdr (cdr expr)) env))
          (t
           (let ((fn (my-group-eval (car expr) env)))
@@ -164,11 +164,11 @@
 (def my-group-eval-top-form
   (lambda (form env)
     (cond
-      ((atom form) (cons env (my-group-eval form env)))
-      ((eq (car form) (quote def))
+      ((atom? form) (cons env (my-group-eval form env)))
+      ((eq? (car form) (quote def))
        (let ((value (my-group-eval (third form) env)))
          (cons (cons (cons (second form) value) env) value)))
-      ((eq (car form) (quote defmacro))
+      ((eq? (car form) (quote defmacro))
        (my-eval-top-form form env))
       (t (cons env (my-group-eval form env))))))
 
@@ -180,13 +180,13 @@
          (let ((rest (my-drop-lambda-def-group forms)))
            (let ((group-env (my-build-group-env group env)))
              (cond
-               ((atom rest)
+               ((atom? rest)
                 (cons group-env (cdr (car group-env))))
                (t (my-eval-program-with-groups rest group-env)))))))
       (t
        (let ((result (my-group-eval-top-form (car forms) env)))
          (cond
-           ((atom (cdr forms)) result)
+           ((atom? (cdr forms)) result)
            (t (my-eval-program-with-groups
                 (cdr forms)
                 (car result)))))))))

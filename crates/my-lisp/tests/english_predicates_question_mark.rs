@@ -112,7 +112,15 @@ fn no_project_code_calls_an_english_predicate_without_question_mark() {
         .into_iter()
         .flat_map(|row| row.into_iter().skip(1))
         .collect();
-    let olds: Vec<String> = olds.into_iter().filter(|o| !registry_names.contains(o)).collect();
+    // Дані та схеми, які не є викликами функцій-предикатів:
+    // (var x) — логічна змінна Datalog;
+    // (claim ...), (evidence ...), (observation ...), (intent ...) — епістемічні записи;
+    // (string ...), (symbol ...) — специфікатори типів у контрактах та параметри lambda.
+    let non_predicate_forms = ["var", "claim", "evidence", "observation", "intent", "string", "symbol"];
+    let olds: Vec<String> = olds
+        .into_iter()
+        .filter(|o| !registry_names.contains(o) && !non_predicate_forms.contains(&o.as_str()))
+        .collect();
 
     fn walk(dir: &Path, root: &Path, out: &mut Vec<PathBuf>) {
         let Ok(entries) = fs::read_dir(dir) else { return };
@@ -142,12 +150,12 @@ fn no_project_code_calls_an_english_predicate_without_question_mark() {
     let mut offenders = Vec::new();
     for path in files {
         let Ok(text) = fs::read_to_string(&path) else { continue };
-        for (line_no, line) in text.lines().enumerate() {
-            let code = strip_comment_and_strings(line);
+        let stripped = strip_comments_and_strings(&text);
+        for (line_no, line) in stripped.lines().enumerate() {
             for old in &olds {
                 let needle = format!("({old}");
-                for (pos, _) in code.match_indices(&needle) {
-                    let next = code[pos + needle.len()..].chars().next();
+                for (pos, _) in line.match_indices(&needle) {
+                    let next = line[pos + needle.len()..].chars().next();
                     if matches!(next, None | Some(' ' | '\t' | ')' | '(')) {
                         offenders.push(format!(
                             "{}:{}: ({old} ...) — має бути ({old}? ...)",
@@ -167,25 +175,40 @@ fn no_project_code_calls_an_english_predicate_without_question_mark() {
     );
 }
 
-fn strip_comment_and_strings(line: &str) -> String {
-    let mut out = String::with_capacity(line.len());
+fn strip_comments_and_strings(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
     let mut in_str = false;
+    let mut in_comment = false;
     let mut escaped = false;
-    for c in line.chars() {
-        if in_str {
+    for c in text.chars() {
+        if in_comment {
+            if c == '\n' {
+                in_comment = false;
+                out.push('\n');
+            } else {
+                out.push(' ');
+            }
+        } else if in_str {
             if escaped {
                 escaped = false;
+                out.push(' ');
             } else if c == '\\' {
                 escaped = true;
+                out.push(' ');
             } else if c == '"' {
                 in_str = false;
+                out.push(' ');
+            } else if c == '\n' {
+                out.push('\n');
+            } else {
+                out.push(' ');
             }
-            out.push(' ');
         } else if c == '"' {
             in_str = true;
             out.push(' ');
         } else if c == ';' {
-            break;
+            in_comment = true;
+            out.push(' ');
         } else {
             out.push(c);
         }

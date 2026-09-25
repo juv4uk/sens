@@ -61,7 +61,7 @@ fn sens_function_is_exactly_one_byte_in_memory() {
     assert_eq!(std::mem::size_of::<Sens8>(), 1, "функція СЕНС має займати рівно 1 байт");
 
     // Усі написання однієї функції зводяться до того самого 1-байтового вузла.
-    for source in ["(atom x)", "(атом? x)", "(aṇu x)", "(00000010 x)"] {
+    for source in ["(atom? x)", "(атом? x)", "(aṇu x)", "(00000010 x)"] {
         let lowered = lower_program(&parse(source).unwrap());
         let ExprKind::Call(function, arguments) = &lowered[0].kind else {
             panic!("{source}: очікувався зведений виклик, отримано {:?}", lowered[0].kind);

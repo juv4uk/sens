@@ -13,8 +13,8 @@
 (def x86-machine-rejected?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((eq (car value) (quote rejected)) t)
+      ((atom? value) (quote ()))
+      ((eq? (car value) (quote rejected)) t)
       (t (quote ())))))
 
 (def x86-gpr8-name?
@@ -33,17 +33,17 @@
     (cond
       ((symbol? name)
        (and
-         (not (eq (x86-reg-code name) (quote ())))
-         (not (x86-gpr8-name? name))))
+         (not? (eq? (x86-reg-code name) (quote ())))
+         (not? (x86-gpr8-name? name))))
       (t (quote ())))))
 
 (def x86-gpr8?
   (lambda (operand)
     (cond
-      ((atom operand) (quote ()))
-      ((eq (car operand) (quote gpr8))
+      ((atom? operand) (quote ()))
+      ((eq? (car operand) (quote gpr8))
        (cond
-         ((atom (cdr operand)) (quote ()))
+         ((atom? (cdr operand)) (quote ()))
          ((equal? (cdr (cdr operand)) (quote ()))
           (x86-gpr8-name? (second operand)))
          (t (quote ()))))
@@ -69,10 +69,10 @@
 (def x86-gpr64?
   (lambda (operand)
     (cond
-      ((atom operand) (quote ()))
-      ((eq (car operand) (quote gpr64))
+      ((atom? operand) (quote ()))
+      ((eq? (car operand) (quote gpr64))
        (cond
-         ((atom (cdr operand)) (quote ()))
+         ((atom? (cdr operand)) (quote ()))
          ((equal? (cdr (cdr operand)) (quote ()))
           (x86-gpr64-name? (second operand)))
          (t (quote ()))))
@@ -107,10 +107,10 @@
 (def x86-gpr32?
   (lambda (operand)
     (cond
-      ((atom operand) (quote ()))
-      ((eq (car operand) (quote gpr32))
+      ((atom? operand) (quote ()))
+      ((eq? (car operand) (quote gpr32))
        (cond
-         ((atom (cdr operand)) (quote ()))
+         ((atom? (cdr operand)) (quote ()))
          ((equal? (cdr (cdr operand)) (quote ()))
           (x86-gpr32-name? (second operand)))
          (t (quote ()))))
@@ -152,10 +152,10 @@
 (def x86-xmm?
   (lambda (operand)
     (cond
-      ((atom operand) (quote ()))
-      ((eq (car operand) (quote xmm))
+      ((atom? operand) (quote ()))
+      ((eq? (car operand) (quote xmm))
        (cond
-         ((atom (cdr operand)) (quote ()))
+         ((atom? (cdr operand)) (quote ()))
          ((equal? (cdr (cdr operand)) (quote ()))
           (x86-xmm-name? (second operand)))
          (t (quote ()))))
@@ -200,13 +200,13 @@
 (def x86-exact-integer?
   (lambda (value)
     (cond
-      ((not (atom value)) (quote ()))
+      ((not? (atom? value)) (quote ()))
       ((symbol? value) (quote ()))
       (t
        (let ((text (write-to-string value)))
          (cond
            ((string-empty? text) (quote ()))
-           ((eq (string-first text) "-")
+           ((eq? (string-first text) "-")
             (cond
               ((string-empty? (string-rest text)) (quote ()))
               (t (x86-decimal-digits? (string-rest text)))))
@@ -228,10 +228,10 @@
 (def x86-u64-imm?
   (lambda (operand)
     (cond
-      ((atom operand) (quote ()))
-      ((eq (car operand) (quote u64-imm))
+      ((atom? operand) (quote ()))
+      ((eq? (car operand) (quote u64-imm))
        (cond
-         ((atom (cdr operand)) (quote ()))
+         ((atom? (cdr operand)) (quote ()))
          ((equal? (cdr (cdr operand)) (quote ()))
           (let ((value (second operand)))
             (cond
@@ -265,10 +265,10 @@
 (def x86-disp8?
   (lambda (operand)
     (cond
-      ((atom operand) (quote ()))
-      ((eq (car operand) (quote disp8))
+      ((atom? operand) (quote ()))
+      ((eq? (car operand) (quote disp8))
        (cond
-         ((atom (cdr operand)) (quote ()))
+         ((atom? (cdr operand)) (quote ()))
          ((equal? (cdr (cdr operand)) (quote ()))
           (let ((value (second operand)))
             (cond
@@ -302,11 +302,11 @@
 (def x86-mem64-disp8?
   (lambda (operand)
     (cond
-      ((atom operand) (quote ()))
-      ((eq (car operand) (quote mem64-disp8))
+      ((atom? operand) (quote ()))
+      ((eq? (car operand) (quote mem64-disp8))
        (cond
-         ((atom (cdr operand)) (quote ()))
-         ((atom (cdr (cdr operand))) (quote ()))
+         ((atom? (cdr operand)) (quote ()))
+         ((atom? (cdr (cdr operand))) (quote ()))
          ((equal? (cdr (cdr (cdr operand))) (quote ()))
           (and (x86-gpr64? (second operand))
                (x86-disp8? (third operand))))

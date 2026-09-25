@@ -91,7 +91,7 @@
 (def module-journal-events-onto
   (lambda (module-name journal acc)
     (cond
-      ((atom journal) (reverse acc))
+      ((atom? journal) (reverse acc))
       ((equal? (second (car journal)) module-name)
        (module-journal-events-onto
          module-name
@@ -113,7 +113,7 @@
 (def module-journal-has-module?
   (lambda (module-name journal)
     (cond
-      ((atom journal) (quote ()))
+      ((atom? journal) (quote ()))
       ((equal? (second (car journal)) module-name) t)
       (t (module-journal-has-module? module-name (cdr journal))))))
 
@@ -135,8 +135,8 @@
 (def apply-journal-event
   (lambda (clauses event)
     (cond
-      ((eq (car event) (quote tell)) (cons (third event) clauses))
-      ((eq (car event) (quote retract)) (retract-fact (third event) clauses))
+      ((eq? (car event) (quote tell)) (cons (third event) clauses))
+      ((eq? (car event) (quote retract)) (retract-fact (third event) clauses))
       (t clauses))))
 
 ;; module-clauses-now is the projection itself: a module's events, put
@@ -215,7 +215,7 @@
        (let ((head (car (car rules))))
          (let ((proofs (reason-in module-name (list (quote not) head))))
            (cond
-             ((atom proofs) (quote ()))
+             ((atom? proofs) (quote ()))
              (t t)))))
       (t (quote ())))))
 
@@ -263,15 +263,15 @@
 (def knowledge-proper-list?
   (lambda (value)
     (cond
-      ((atom value)
-       (cond ((eq value (quote ())) t) (t (quote ()))))
+      ((atom? value)
+       (cond ((eq? value (quote ())) t) (t (quote ()))))
       (t (knowledge-proper-list? (cdr value))))))
 
 (def knowledge-terms-valid?
   (lambda (terms)
     (cond
-      ((atom terms)
-       (cond ((eq terms (quote ())) t) (t (quote ()))))
+      ((atom? terms)
+       (cond ((eq? terms (quote ())) t) (t (quote ()))))
       ((knowledge-term-valid? (car terms))
        (knowledge-terms-valid? (cdr terms)))
       (t (quote ())))))
@@ -279,10 +279,10 @@
 (def knowledge-term-valid?
   (lambda (term)
     (cond
-      ((atom term) t)
-      ((atom (car term))
+      ((atom? term) t)
+      ((atom? (car term))
        (cond
-((eq (car term) (quote var))
+((eq? (car term) (quote var))
            (cond
              ((= (length term) 2) 1 (symbol? (second term)))
              ((= (length term) 2) 0 (quote ()))))
@@ -293,10 +293,10 @@
 (def knowledge-goal-valid?
   (lambda (goal)
     (cond
-      ((atom goal) (quote ()))
-      ((eq (knowledge-proper-list? goal) (quote ())) (quote ()))
-      ((eq (symbol? (car goal)) (quote ())) (quote ()))
-      ((eq (car goal) (quote not))
+      ((atom? goal) (quote ()))
+      ((eq? (knowledge-proper-list? goal) (quote ())) (quote ()))
+      ((eq? (symbol? (car goal)) (quote ())) (quote ()))
+      ((eq? (car goal) (quote not))
        (cond
          ((= (length goal) 2) 1 (knowledge-goal-valid? (second goal)))
          ((= (length goal) 2) 0 (quote ()))))
@@ -305,8 +305,8 @@
 (def knowledge-goals-valid?
   (lambda (goals)
     (cond
-      ((atom goals)
-       (cond ((eq goals (quote ())) t) (t (quote ()))))
+      ((atom? goals)
+       (cond ((eq? goals (quote ())) t) (t (quote ()))))
       ((knowledge-goal-valid? (car goals))
        (knowledge-goals-valid? (cdr goals)))
       (t (quote ())))))
@@ -314,9 +314,9 @@
 (def knowledge-clause-valid?
   (lambda (clause)
     (cond
-      ((atom clause) (quote ()))
-      ((eq (knowledge-proper-list? clause) (quote ())) (quote ()))
-      ((eq (knowledge-goal-valid? (car clause)) (quote ())) (quote ()))
+      ((atom? clause) (quote ()))
+      ((eq? (knowledge-proper-list? clause) (quote ())) (quote ()))
+      ((eq? (knowledge-goal-valid? (car clause)) (quote ())) (quote ()))
       (t (knowledge-goals-valid? (cdr clause))))))
 
 ;; Explicit opposites operate on heads, not whole clauses: a rule and a fact
@@ -328,7 +328,7 @@
 (def opposite-knowledge-head
   (lambda (head)
     (cond
-      ((eq (car head) (quote not)) (second head))
+      ((eq? (car head) (quote not)) (second head))
       (t (list (quote not) head)))))
 
 (def advice-conflict-proof
@@ -341,15 +341,15 @@
 (def advice-decision
   (lambda (module-name clause)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) clause)))
-      ((eq (knowledge-clause-valid? clause) (quote ()))
+      ((eq? (knowledge-clause-valid? clause) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-clause)) (list (quote input) clause)))
       (t
        (let ((opposite (opposite-knowledge-head (car clause)))
              (proofs (advice-conflict-proof module-name clause)))
          (cond
-           ((atom proofs)
+           ((atom? proofs)
             (list (quote accepted) (list (quote module) module-name) (list (quote knowledge) clause)))
            (t
             (list (quote conflict)
@@ -409,9 +409,9 @@
 (def knowledge-clauses-valid?
   (lambda (clauses)
     (cond
-      ((atom clauses) (structural-kind empty-list) t)
-      ((atom clauses) (structural-kind atom) (quote ()))
-      ((atom clauses) (structural-kind pair)
+      ((atom? clauses) (structural-kind empty-list) t)
+      ((atom? clauses) (structural-kind atom) (quote ()))
+      ((atom? clauses) (structural-kind pair)
        (cond
          ((knowledge-clause-valid? (car clauses))
           (knowledge-clauses-valid? (cdr clauses)))
@@ -420,15 +420,15 @@
 (def advice-negative-head-conflict
   (lambda (rules all-rules)
     (cond
-      ((atom rules) (quote ()))
+      ((atom? rules) (quote ()))
       (t
        (let ((head (car (car rules))))
          (cond
-           ((eq (car head) (quote not))
+           ((eq? (car head) (quote not))
             (let ((positive (second head)))
               (let ((proofs (reason positive all-rules)))
                 (cond
-                  ((atom proofs)
+                  ((atom? proofs)
                    (advice-negative-head-conflict (cdr rules) all-rules))
                   (t (list head positive (car proofs)))))))
            (t (advice-negative-head-conflict (cdr rules) all-rules))))))))
@@ -436,29 +436,29 @@
 (def advice-batch-conflict
   (lambda (clauses remaining all-rules)
     (cond
-      ((atom remaining)
+      ((atom? remaining)
        (let ((global (advice-negative-head-conflict all-rules all-rules)))
          (cond
-           ((atom global) (quote ()))
+           ((atom? global) (quote ()))
            (t (list (car clauses) (car global) (third global))))))
       (t
        (let ((opposite (opposite-knowledge-head (car (car remaining)))))
          (let ((proofs (reason opposite all-rules)))
            (cond
-             ((atom proofs)
+             ((atom? proofs)
               (advice-batch-conflict clauses (cdr remaining) all-rules))
              (t (list (car remaining) opposite (car proofs))))))))))
 
 (def advice-all-decision
   (lambda (module-name clauses)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) clauses)))
-      ((atom clauses)
+      ((atom? clauses)
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-proper-list? clauses) (quote ()))
+      ((eq? (knowledge-proper-list? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-clauses-valid? clauses) (quote ()))
+      ((eq? (knowledge-clauses-valid? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-clause)) (list (quote input) clauses)))
       (t
        (let ((existing (cond
@@ -468,7 +468,7 @@
          (let ((conflict (advice-batch-conflict clauses clauses
                                                 (append clauses existing))))
            (cond
-             ((atom conflict)
+             ((atom? conflict)
               (list (quote accepted)
                     (list (quote module) module-name)
                     (list (quote knowledge) clauses)))
@@ -531,11 +531,11 @@
 (def knowledge-package-entries-valid?
   (lambda (entries)
     (cond
-      ((atom entries) (structural-kind empty-list) t)
-      ((atom entries) (structural-kind atom) (quote ()))
-      ((atom entries) (structural-kind pair)
+      ((atom? entries) (structural-kind empty-list) t)
+      ((atom? entries) (structural-kind atom) (quote ()))
+      ((atom? entries) (structural-kind pair)
        (cond
-         ((atom (car entries)) (quote ()))
+         ((atom? (car entries)) (quote ()))
          ((symbol? (car (car entries)))
           (knowledge-package-entries-valid? (cdr entries)))
          (t (quote ())))))))
@@ -543,7 +543,7 @@
 (def knowledge-package-field
   (lambda (name package)
     (let ((entry (assoc name package)))
-      (cond ((atom entry) (quote ())) (t (cdr entry))))))
+      (cond ((atom? entry) (quote ())) (t (cdr entry))))))
 
 (def make-knowledge-package
   (lambda (module-name clauses)
@@ -555,13 +555,13 @@
 (def knowledge-package-decision
   (lambda (package)
     (cond
-      ((atom package)
+      ((atom? package)
        (list (quote rejected) (list (quote reason) (quote invalid-package)) (list (quote input) package)))
-      ((eq (knowledge-proper-list? package) (quote ()))
+      ((eq? (knowledge-proper-list? package) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-package)) (list (quote input) package)))
-      ((eq (knowledge-package-entries-valid? package) (quote ()))
+      ((eq? (knowledge-package-entries-valid? package) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-package)) (list (quote input) package)))
-      ((eq (knowledge-package-field (quote format) package) (quote my-lisp-knowledge))
+      ((eq? (knowledge-package-field (quote format) package) (quote my-lisp-knowledge))
        (cond
          ((equal? (knowledge-package-field (quote version) package)
                   *knowledge-package-version*)
@@ -612,13 +612,13 @@
 (def write-knowledge-package
   (lambda (path module-name clauses)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) module-name)))
-      ((atom clauses)
+      ((atom? clauses)
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-proper-list? clauses) (quote ()))
+      ((eq? (knowledge-proper-list? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-clauses-valid? clauses) (quote ()))
+      ((eq? (knowledge-clauses-valid? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-clause)) (list (quote input) clauses)))
       (t
        (let ((package (make-knowledge-package module-name clauses)))
@@ -641,13 +641,13 @@
 (def send-knowledge-package
   (lambda (connection module-name clauses)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) module-name)))
-      ((atom clauses)
+      ((atom? clauses)
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-proper-list? clauses) (quote ()))
+      ((eq? (knowledge-proper-list? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-clauses-valid? clauses) (quote ()))
+      ((eq? (knowledge-clauses-valid? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-clause)) (list (quote input) clauses)))
       (t
        (let ((package (make-knowledge-package module-name clauses)))
@@ -673,7 +673,7 @@
   (lambda (text accumulated)
     (cond
       ((string-empty? text) (quote ()))
-      ((eq (string-first text) "\n") (list accumulated))
+      ((eq? (string-first text) "\n") (list accumulated))
       (t (string-through-line
            (string-rest text)
            (string-append accumulated (string-first text)))))))
@@ -687,20 +687,20 @@
          (let ((line (string-through-line
                        (string-append accumulated chunk) "")))
            (cond
-             ((atom line)
+             ((atom? line)
               (tcp-read-frame connection (string-append accumulated chunk)))
              (t (car line)))))))))
 
 (def exchange-knowledge-package
   (lambda (connection module-name clauses)
     (cond
-      ((eq (symbol? module-name) (quote ()))
+      ((eq? (symbol? module-name) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) module-name)))
-      ((atom clauses)
+      ((atom? clauses)
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-proper-list? clauses) (quote ()))
+      ((eq? (knowledge-proper-list? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-batch)) (list (quote input) clauses)))
-      ((eq (knowledge-clauses-valid? clauses) (quote ()))
+      ((eq? (knowledge-clauses-valid? clauses) (quote ()))
        (list (quote rejected) (list (quote reason) (quote invalid-clause)) (list (quote input) clauses)))
       (t
        (let ((package (make-knowledge-package module-name clauses)))
@@ -748,10 +748,10 @@
 (def contains-atom?
   (lambda (item lst)
     (cond
-      ((atom lst) (quote ()))
-      ((atom (car lst))
+      ((atom? lst) (quote ()))
+      ((atom? (car lst))
        (cond
-         ((eq (car lst) item) t)
+         ((eq? (car lst) item) t)
          (t (contains-atom? item (cdr lst)))))
       (t (contains-atom? item (cdr lst))))))
 
@@ -762,9 +762,9 @@
 (def is-fact?
   (lambda (clause)
     (cond
-      ((atom (cdr clause)) (structural-kind empty-list)
+      ((atom? (cdr clause)) (structural-kind empty-list)
        (list (quote clause-kind) (quote fact)))
-      ((atom (cdr clause)) (structural-kind pair)
+      ((atom? (cdr clause)) (structural-kind pair)
        (list (quote clause-kind) (quote rule))))))
 
 ;; collect-facts-about consumes the explicit clause-domain result. Its list
@@ -774,9 +774,9 @@
 (def collect-facts-about
   (lambda (item clauses)
     (cond
-      ((atom clauses) (structural-kind empty-list) (quote ()))
-      ((atom clauses) (structural-kind atom) (quote ()))
-      ((atom clauses) (structural-kind pair)
+      ((atom? clauses) (structural-kind empty-list) (quote ()))
+      ((atom? clauses) (structural-kind atom) (quote ()))
+      ((atom? clauses) (structural-kind pair)
        (let ((clause (car clauses)))
          (let ((head (car clause)))
            (cond
@@ -785,9 +785,9 @@
              ((is-fact? clause) (clause-kind fact)
               (let ((contains (contains-atom? item head)))
                 (cond
-                  ((eq contains (quote ())) (identity-relation same)
+                  ((eq? contains (quote ())) (identity-relation same)
                    (collect-facts-about item (cdr clauses)))
-                  ((eq contains (quote ())) (identity-relation distinct)
+                  ((eq? contains (quote ())) (identity-relation distinct)
                    (cons head (collect-facts-about item (cdr clauses))))))))))))))
 
 ;; describe returns every known fact about `item` within `module-name`,
@@ -837,5 +837,5 @@
   (lambda (rule-head)
     (let ((entry (assoc rule-head *usage-counts*)))
       (cond
-        ((atom entry) 0)
+        ((atom? entry) 0)
         (t (cdr entry))))))

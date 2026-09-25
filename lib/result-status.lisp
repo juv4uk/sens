@@ -39,13 +39,13 @@
 (def result-tagged?
   (lambda (result)
     (cond
-      ((atom result) (quote ()))
-      ((eq (car result) (quote proved)) t)
-      ((eq (car result) (quote unknown)) t)
-      ((eq (car result) (quote partial)) t)
-      ((eq (car result) (quote blocked)) t)
-      ((eq (car result) (quote disputed)) t)
-      ((eq (car result) (quote invalid)) t)
+      ((atom? result) (quote ()))
+      ((eq? (car result) (quote proved)) t)
+      ((eq? (car result) (quote unknown)) t)
+      ((eq? (car result) (quote partial)) t)
+      ((eq? (car result) (quote blocked)) t)
+      ((eq? (car result) (quote disputed)) t)
+      ((eq? (car result) (quote invalid)) t)
       (t (quote ())))))
 
 (def result-status
@@ -66,9 +66,9 @@
 (def result-proper-list?
   (lambda (value)
     (cond
-      ((atom value)
+      ((atom? value)
        (cond
-         ((eq value (quote ())) t)
+         ((eq? value (quote ())) t)
          (t (quote ()))))
       (t (result-proper-list? (cdr value))))))
 
@@ -80,10 +80,10 @@
 (def result-goal?
   (lambda (goal)
     (cond
-      ((atom goal) (quote ()))
-      ((not (result-proper-list? goal)) (quote ()))
-      ((not (symbol? (car goal))) (quote ()))
-      ((eq (car goal) (quote not))
+      ((atom? goal) (quote ()))
+      ((not? (result-proper-list? goal)) (quote ()))
+      ((not? (symbol? (car goal))) (quote ()))
+      ((eq? (car goal) (quote not))
        (cond
          ((= (length goal) 2) 1 (result-goal? (second goal)))
          ((= (length goal) 2) 0 (quote ()))))
@@ -95,8 +95,8 @@
 (def result-negated-goal?
   (lambda (goal)
     (cond
-      ((not (result-goal? goal)) (quote ()))
-      ((eq (car goal) (quote not)) t)
+      ((not? (result-goal? goal)) (quote ()))
+      ((eq? (car goal) (quote not)) t)
       (t (quote ())))))
 
 (def result-opposite-goal
@@ -121,7 +121,7 @@
 (def reason-observe
   (lambda (goal rules-or-index)
     (cond
-      ((not (result-goal? goal))
+      ((not? (result-goal? goal))
        (make-invalid (quote invalid-goal) goal))
       (t
        (let* ((opposite (result-opposite-goal goal))
@@ -141,15 +141,15 @@
                   index
                   0)))
          (cond
-           ((and (not (atom positive-results))
-                 (not (atom opposite-results)))
+           ((and (not? (atom? positive-results))
+                 (not? (atom? opposite-results)))
             (make-disputed
               (list
                 (make-proved goal positive-results)
                 (make-proved opposite opposite-results))))
-           ((not (atom positive-results))
+           ((not? (atom? positive-results))
             (make-proved goal positive-results))
-           ((not (atom opposite-results))
+           ((not? (atom? opposite-results))
             (make-proved opposite opposite-results))
            (t (quote ()))))))))
 
@@ -161,9 +161,9 @@
 (def reason-in-observe
   (lambda (module-name goal)
     (cond
-      ((not (symbol? module-name))
+      ((not? (symbol? module-name))
        (make-invalid (quote invalid-module) module-name))
-      ((not (result-goal? goal))
+      ((not? (result-goal? goal))
        (make-invalid (quote invalid-goal) goal))
       ((module-known? module-name)
        (reason-observe goal (module-clauses-now module-name)))

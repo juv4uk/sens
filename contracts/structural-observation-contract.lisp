@@ -33,7 +33,7 @@
   ((identity . "0003")
    (surface . eq)
    (domain-owner . structural-observation)
-   (input-domain . (atom atom))
+   (input-domain . (atom? atom))
    (result-form . identity-relation)
    (cases .
      (((when . same-atom)

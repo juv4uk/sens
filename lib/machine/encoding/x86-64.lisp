@@ -1,59 +1,59 @@
 (def x86-reg-code
   (lambda (register)
     (cond
-      ((eq register (quote rax)) 0)
-      ((eq register (quote al)) 0)
-      ((eq register (quote rcx)) 1)
-      ((eq register (quote cl)) 1)
-      ((eq register (quote rdx)) 2)
-      ((eq register (quote dl)) 2)
-      ((eq register (quote rbx)) 3)
-      ((eq register (quote bl)) 3)
-      ((eq register (quote rsp)) 4)
-      ((eq register (quote spl)) 4)
-      ((eq register (quote rbp)) 5)
-      ((eq register (quote bpl)) 5)
-      ((eq register (quote rsi)) 6)
-      ((eq register (quote sil)) 6)
-      ((eq register (quote rdi)) 7)
-      ((eq register (quote dil)) 7)
-      ((eq register (quote r8)) 8)
-      ((eq register (quote r8b)) 8)
-      ((eq register (quote r9)) 9)
-      ((eq register (quote r9b)) 9)
-      ((eq register (quote r10)) 10)
-      ((eq register (quote r10b)) 10)
-      ((eq register (quote r11)) 11)
-      ((eq register (quote r11b)) 11)
-      ((eq register (quote r12)) 12)
-      ((eq register (quote r12b)) 12)
-      ((eq register (quote r13)) 13)
-      ((eq register (quote r13b)) 13)
-      ((eq register (quote r14)) 14)
-      ((eq register (quote r14b)) 14)
-      ((eq register (quote r15)) 15)
-      ((eq register (quote r15b)) 15)
+      ((eq? register (quote rax)) 0)
+      ((eq? register (quote al)) 0)
+      ((eq? register (quote rcx)) 1)
+      ((eq? register (quote cl)) 1)
+      ((eq? register (quote rdx)) 2)
+      ((eq? register (quote dl)) 2)
+      ((eq? register (quote rbx)) 3)
+      ((eq? register (quote bl)) 3)
+      ((eq? register (quote rsp)) 4)
+      ((eq? register (quote spl)) 4)
+      ((eq? register (quote rbp)) 5)
+      ((eq? register (quote bpl)) 5)
+      ((eq? register (quote rsi)) 6)
+      ((eq? register (quote sil)) 6)
+      ((eq? register (quote rdi)) 7)
+      ((eq? register (quote dil)) 7)
+      ((eq? register (quote r8)) 8)
+      ((eq? register (quote r8b)) 8)
+      ((eq? register (quote r9)) 9)
+      ((eq? register (quote r9b)) 9)
+      ((eq? register (quote r10)) 10)
+      ((eq? register (quote r10b)) 10)
+      ((eq? register (quote r11)) 11)
+      ((eq? register (quote r11b)) 11)
+      ((eq? register (quote r12)) 12)
+      ((eq? register (quote r12b)) 12)
+      ((eq? register (quote r13)) 13)
+      ((eq? register (quote r13b)) 13)
+      ((eq? register (quote r14)) 14)
+      ((eq? register (quote r14b)) 14)
+      ((eq? register (quote r15)) 15)
+      ((eq? register (quote r15b)) 15)
       (t (quote ())))))
 
 (def x86-xmm-reg-code
   (lambda (register)
     (cond
-      ((eq register (quote xmm0)) 0)
-      ((eq register (quote xmm1)) 1)
-      ((eq register (quote xmm2)) 2)
-      ((eq register (quote xmm3)) 3)
-      ((eq register (quote xmm4)) 4)
-      ((eq register (quote xmm5)) 5)
-      ((eq register (quote xmm6)) 6)
-      ((eq register (quote xmm7)) 7)
-      ((eq register (quote xmm8)) 8)
-      ((eq register (quote xmm9)) 9)
-      ((eq register (quote xmm10)) 10)
-      ((eq register (quote xmm11)) 11)
-      ((eq register (quote xmm12)) 12)
-      ((eq register (quote xmm13)) 13)
-      ((eq register (quote xmm14)) 14)
-      ((eq register (quote xmm15)) 15)
+      ((eq? register (quote xmm0)) 0)
+      ((eq? register (quote xmm1)) 1)
+      ((eq? register (quote xmm2)) 2)
+      ((eq? register (quote xmm3)) 3)
+      ((eq? register (quote xmm4)) 4)
+      ((eq? register (quote xmm5)) 5)
+      ((eq? register (quote xmm6)) 6)
+      ((eq? register (quote xmm7)) 7)
+      ((eq? register (quote xmm8)) 8)
+      ((eq? register (quote xmm9)) 9)
+      ((eq? register (quote xmm10)) 10)
+      ((eq? register (quote xmm11)) 11)
+      ((eq? register (quote xmm12)) 12)
+      ((eq? register (quote xmm13)) 13)
+      ((eq? register (quote xmm14)) 14)
+      ((eq? register (quote xmm15)) 15)
       (t (quote ())))))
 
 (def x86-low3
@@ -139,7 +139,7 @@
         (let ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
           (let ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
             (cond
-              ((eq (x86-low3 base-code) 4)
+              ((eq? (x86-low3 base-code) 4)
                 (list
                   rex
                   139
@@ -157,7 +157,7 @@
         (let ((rex (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 base-code))))
           (let ((modrm (x86-encode-modrm 1 (x86-low3 src) (x86-low3 base-code))))
             (cond
-              ((eq (x86-low3 base-code) 4)
+              ((eq? (x86-low3 base-code) 4)
                 (list
                   rex
                   137
@@ -184,7 +184,7 @@
         (let ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
           (let ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
             (cond
-              ((eq (x86-low3 base-code) 4)
+              ((eq? (x86-low3 base-code) 4)
                 (list
                   rex
                   141
@@ -316,7 +316,7 @@
   (lambda (register)
     (let ((code (x86-reg-code register)))
       (cond
-        ((eq (x86-high1 code) 1)
+        ((eq? (x86-high1 code) 1)
           (list (x86-encode-rex 0 0 0 1) (+ 80 (x86-low3 code))))
         (t
           (list (+ 80 (x86-low3 code))))))))
@@ -325,7 +325,7 @@
   (lambda (register)
     (let ((code (x86-reg-code register)))
       (cond
-        ((eq (x86-high1 code) 1)
+        ((eq? (x86-high1 code) 1)
           (list (x86-encode-rex 0 0 0 1) (+ 88 (x86-low3 code))))
         (t
           (list (+ 88 (x86-low3 code))))))))
@@ -532,7 +532,7 @@
   (lambda (opcode-extension register)
     (let ((code (x86-reg-code register)))
       (cond
-        ((eq (x86-high1 code) 1)
+        ((eq? (x86-high1 code) 1)
           (list
             (x86-encode-rex 0 0 0 1)
             255
@@ -893,7 +893,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (cond
-        ((and (eq (x86-high1 dst-code) 0) (eq (x86-high1 src-code) 0))
+        ((and (eq? (x86-high1 dst-code) 0) (eq? (x86-high1 src-code) 0))
          (list 242 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
         (t
          (list 242 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -904,7 +904,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (cond
-        ((and (eq (x86-high1 dst-code) 0) (eq (x86-high1 src-code) 0))
+        ((and (eq? (x86-high1 dst-code) 0) (eq? (x86-high1 src-code) 0))
          (list 102 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
         (t
          (list 102 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -919,7 +919,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (cond
-        ((and (eq (x86-high1 dst-code) 0) (eq (x86-high1 src-code) 0))
+        ((and (eq? (x86-high1 dst-code) 0) (eq? (x86-high1 src-code) 0))
          (list
            102
            15
@@ -984,14 +984,14 @@
             (disp-byte (x86-disp8-byte displacement)))
         (let ((address-tail
                 (cond
-                  ((eq (x86-low3 base-code) 4)
+                  ((eq? (x86-low3 base-code) 4)
                    (list modrm (x86-encode-sib 0 4 4) disp-byte))
                   (t
                    (list modrm disp-byte)))))
           (cond
             ((and
-               (eq (x86-high1 dst-code) 0)
-               (eq (x86-high1 base-code) 0))
+               (eq? (x86-high1 dst-code) 0)
+               (eq? (x86-high1 base-code) 0))
              (append
                (list 102 15 map-byte opcode-byte)
                address-tail))
@@ -1139,7 +1139,7 @@
 (def x86-encode-program
   (lambda (instructions)
     (cond
-      ((atom instructions) (quote ()))
+      ((atom? instructions) (quote ()))
       (t
         (append
           (car instructions)

@@ -8,7 +8,7 @@
 (def yo-proper-list?
   (lambda (value)
     (cond
-      ((atom value)
+      ((atom? value)
        (structural-kind atom)
        (cond
          ((equal? value (quote ()))

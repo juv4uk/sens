@@ -120,7 +120,7 @@
 (def length-onto
   (lambda (values acc)
     (cond
-      ((atom values) acc)
+      ((atom? values) acc)
       (t (length-onto (cdr values) (+ acc 1))))))
 
 (def length
@@ -130,7 +130,7 @@
 (def reverse-onto
   (lambda (values acc)
     (cond
-      ((atom values) acc)
+      ((atom? values) acc)
       (t (reverse-onto (cdr values) (cons (car values) acc))))))
 
 (def reverse
@@ -158,7 +158,7 @@
 (def map-onto
   (lambda (f values acc)
     (cond
-      ((atom values) (reverse acc))
+      ((atom? values) (reverse acc))
       (t (map-onto f (cdr values) (cons (f (car values)) acc))))))
 
 (def map
@@ -168,7 +168,7 @@
 (def filter-onto
   (lambda (predicate values acc)
     (cond
-      ((atom values) (reverse acc))
+      ((atom? values) (reverse acc))
       ((predicate (car values)) (filter-onto predicate (cdr values) (cons (car values) acc)))
       (t (filter-onto predicate (cdr values) acc)))))
 
@@ -179,7 +179,7 @@
 (def reduce
   (lambda (f acc values)
     (cond
-      ((atom values) acc)
+      ((atom? values) acc)
       (t (reduce f (f acc (car values)) (cdr values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
@@ -280,8 +280,8 @@
 (def equal?
   (lambda (a b)
     (cond
-      ((atom a) (cond ((atom b) (eq a b)) (t (quote ()))))
-      ((atom b) (quote ()))
+      ((atom? a) (cond ((atom? b) (eq? a b)) (t (quote ()))))
+      ((atom? b) (quote ()))
       (t (cond
            ((equal? (car a) (car b)) (equal? (cdr a) (cdr b)))
            (t (quote ())))))))
@@ -305,26 +305,26 @@
 (def nth
   (lambda (i lst)
     (cond
-      ((eq i 0) (car lst))
+      ((eq? i 0) (car lst))
       (t (nth (- i 1) (cdr lst))))))
 
 (def member?
   (lambda (item lst)
     (cond
-      ((atom lst) (quote ()))
+      ((atom? lst) (quote ()))
       ((equal? item (car lst)) t)
       (t (member? item (cdr lst))))))
 
 (def assoc
   (lambda (key alist)
     (cond
-      ((atom alist) (quote ()))
+      ((atom? alist) (quote ()))
       ((equal? key (car (car alist))) (car alist))
       (t (assoc key (cdr alist))))))
 
 (defmacro let* (bindings body)
   (cond
-    ((atom bindings) body)
+    ((atom? bindings) body)
     (t
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
@@ -357,7 +357,7 @@
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
 (def string-empty?
-  (lambda (s) (eq s "")))
+  (lambda (s) (eq? s "")))
 
 (def string-length
   (lambda (s)
@@ -370,7 +370,7 @@
     (cond
       ((string-empty? prefix) t)
       ((string-empty? s) (quote ()))
-      ((eq (string-first prefix) (string-first s))
+      ((eq? (string-first prefix) (string-first s))
        (string-prefix? (string-rest prefix) (string-rest s)))
       (t (quote ())))))
 
@@ -393,9 +393,9 @@
 (def symbol?
   (lambda (value)
     (cond
-      ((atom value)
+      ((atom? value)
        (cond
-         ((eq value (string->symbol (write-to-string value))) t)
+         ((eq? value (string->symbol (write-to-string value))) t)
          (t (quote ()))))
       (t (quote ())))))
 
@@ -479,7 +479,7 @@
 (def quotient
   (lambda (a b)
     (cond
-      ((eq b 0) (/ a b))
+      ((eq? b 0) (/ a b))
       ((< a b) 0)
       (t (let ((chunk+mult (largest-chunk a b b 1)))
            (+ (cdr chunk+mult) (quotient (- a (car chunk+mult)) b)))))))
@@ -501,7 +501,7 @@
 (def nondecreasing-from?
   (lambda (current remaining)
     (cond
-      ((atom remaining) t)
+      ((atom? remaining) t)
       ((< current (car remaining))
        (nondecreasing-from? (car remaining) (cdr remaining)))
       ((= current (car remaining))
@@ -511,7 +511,7 @@
 (def nonincreasing-from?
   (lambda (current remaining)
     (cond
-      ((atom remaining) t)
+      ((atom? remaining) t)
       ((> current (car remaining))
        (nonincreasing-from? (car remaining) (cdr remaining)))
       ((= current (car remaining))
@@ -550,13 +550,13 @@
 (def number->string-onto
   (lambda (n acc)
     (cond
-      ((eq n 0) acc)
+      ((eq? n 0) acc)
       (t (number->string-onto (quotient n 10) (string-append (digit->string (mod n 10)) acc))))))
 
 (def number->string
   (lambda (n)
     (cond
-      ((eq n 0) "0")
+      ((eq? n 0) "0")
       (t (number->string-onto n "")))))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
@@ -574,26 +574,26 @@
 ; Verschachtelung aus.
 (defmacro -> forms
   (cond
-    ((atom forms) (quote ()))
-    ((atom (cdr forms)) (car forms))
+    ((atom? forms) (quote ()))
+    ((atom? (cdr forms)) (car forms))
     (t (let* ((x (car forms))
               (next (car (cdr forms)))
               (rest (cdr (cdr forms)))
-              (step (cond ((atom next) (list next x))
+              (step (cond ((atom? next) (list next x))
                           (t (cons (car next) (cons x (cdr next)))))))
          (cond
-           ((atom rest) step)
+           ((atom? rest) step)
            (t (cons (quote ->) (cons step rest))))))))
 
 (defmacro ->> forms
   (cond
-    ((atom forms) (quote ()))
-    ((atom (cdr forms)) (car forms))
+    ((atom? forms) (quote ()))
+    ((atom? (cdr forms)) (car forms))
     (t (let* ((x (car forms))
               (next (car (cdr forms)))
               (rest (cdr (cdr forms)))
-              (step (cond ((atom next) (list next x))
+              (step (cond ((atom? next) (list next x))
                           (t (append next (list x))))))
          (cond
-           ((atom rest) step)
+           ((atom? rest) step)
            (t (cons (quote ->>) (cons step rest))))))))

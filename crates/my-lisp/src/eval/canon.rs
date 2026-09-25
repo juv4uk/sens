@@ -70,6 +70,16 @@ pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageE
     ))
 }
 
+pub(crate) fn ensure_bindable_sid(sid: Sid8, span: Span) -> Result<(), LanguageError> {
+    Err(LanguageError::new(
+        ErrorKind::InvalidForm,
+        format!(
+            "surface routes to immutable function SID · surface маршрутизується до незмінного function SID · Surface verweist auf unveränderliche Funktions-SID: {sid} -> {sid}"
+        ),
+        span,
+    ))
+}
+
 fn exact_args(
     sid: &'static str,
     args: &[Value],
@@ -184,7 +194,7 @@ fn prim_00001111(
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_args("00001111", args, 2, span)?;
-    arithmetic::arithmetic_on_values("/", args, env, span)
+    arithmetic::division_on_values(args, args.len(), env, span)
 }
 
 fn prim_01001101(

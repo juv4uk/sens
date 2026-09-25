@@ -12,8 +12,8 @@ fn eval(source: &str) -> String {
 fn historical_ukrainian_and_sanskrit_surfaces_are_observationally_equal() {
     let cases = [
         ("(quote (1 2 3))", "(як-є (1 2 3))", "(svarūpa (1 2 3))"),
-        ("(atom (quote кіт))", "(атом? (як-є кіт))", "(aṇu (svarūpa кіт))"),
-        ("(eq (quote кіт) (quote кіт))", "(тотожне? (як-є кіт) (як-є кіт))", "(abheda (svarūpa кіт) (svarūpa кіт))"),
+        ("(atom? (quote кіт))", "(атом? (як-є кіт))", "(aṇu (svarūpa кіт))"),
+        ("(eq? (quote кіт) (quote кіт))", "(тотожне? (як-є кіт) (як-є кіт))", "(abheda (svarūpa кіт) (svarūpa кіт))"),
         ("(cons 1 2)", "(сполучити 1 2)", "(saṃyuj 1 2)"),
         ("(car (cons 1 2))", "(перше (сполучити 1 2))", "(ādi (saṃyuj 1 2))"),
         ("(cdr (quote (1 2 3)))", "(решта (як-є (1 2 3)))", "(śeṣa (svarūpa (1 2 3)))"),

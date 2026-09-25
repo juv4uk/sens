@@ -446,7 +446,7 @@ fn cons_wrong_arity_is_an_arity_error() {
 
 #[test]
 fn eq_rejects_non_atom_arguments() {
-    let error = eval_program("(eq (quote (1 2)) (quote (1 2)))", &mut Session::default())
+    let error = eval_program("(eq? (quote (1 2)) (quote (1 2)))", &mut Session::default())
         .expect_err("eq on two non-atom lists must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
 }

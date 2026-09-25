@@ -24,9 +24,9 @@
 (def find-authority
   (lambda (path rows)
     (cond
-      ((atom rows) (structural-kind empty-list)
+      ((atom? rows) (structural-kind empty-list)
        (quote unclassified))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (cond
          ((equal? path (second (car rows))) (structural-relation same)
           (third (car rows)))
@@ -36,21 +36,21 @@
 (def allowed-authority?
   (lambda (class)
     (cond
-      ((eq class (quote observer)) (identity-relation same)
+      ((eq? class (quote observer)) (identity-relation same)
        (quote allowed))
-      ((eq class (quote observer)) (identity-relation distinct)
+      ((eq? class (quote observer)) (identity-relation distinct)
        (cond
-         ((eq class (quote mechanism)) (identity-relation same)
+         ((eq? class (quote mechanism)) (identity-relation same)
           (quote allowed))
-         ((eq class (quote mechanism)) (identity-relation distinct)
+         ((eq? class (quote mechanism)) (identity-relation distinct)
           (quote denied)))))))
 
 (def authority-verdict-for
   (lambda (changes)
     (cond
-      ((atom changes) (structural-kind empty-list)
+      ((atom? changes) (structural-kind empty-list)
        (quote (authority-ok)))
-      ((atom changes) (structural-kind pair)
+      ((atom? changes) (structural-kind pair)
        (let ((change (car changes)))
          (let ((path (second change)))
            (let ((direction (third change)))
@@ -58,15 +58,15 @@
                ; One-way migration valve: deleting host semantic authority can
                ; only reduce authority, so it may pass regardless of its old
                ; inventory class.  This is not a new allowed authority class.
-               ((eq direction (quote deletion-only)) (identity-relation same)
+               ((eq? direction (quote deletion-only)) (identity-relation same)
                 (authority-verdict-for (cdr changes)))
-               ((eq direction (quote deletion-only)) (identity-relation distinct)
+               ((eq? direction (quote deletion-only)) (identity-relation distinct)
                 (let ((class (find-authority path authority-rows)))
                   (let ((permission (allowed-authority? class)))
                     (cond
-                      ((eq permission (quote allowed)) (identity-relation same)
+                      ((eq? permission (quote allowed)) (identity-relation same)
                        (authority-verdict-for (cdr changes)))
-                      ((eq permission (quote allowed)) (identity-relation distinct)
+                      ((eq? permission (quote allowed)) (identity-relation distinct)
                        (list
                          (quote semantic-authority-violation)
                          path

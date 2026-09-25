@@ -117,18 +117,18 @@
 (def genealogy-direct-targets
   (lambda (graph source)
     (cond
-      ((atom graph) (structural-kind empty-list)
+      ((atom? graph) (structural-kind empty-list)
        (quote ()))
-      ((atom graph) (structural-kind pair)
+      ((atom? graph) (structural-kind pair)
        (let ((edge (car graph)))
          (cond
-           ((eq (car edge) source) (identity-relation same)
+           ((eq? (car edge) source) (identity-relation same)
             (cons
               (third edge)
               (genealogy-direct-targets (cdr graph) source)))
-           ((eq (car edge) source) (identity-relation distinct)
+           ((eq? (car edge) source) (identity-relation distinct)
             (genealogy-direct-targets (cdr graph) source)))))
-      ((atom graph) (structural-kind atom)
+      ((atom? graph) (structural-kind atom)
        (quote ())))))
 
 (def function-genealogy-observation
@@ -279,18 +279,18 @@
 (def genealogy-sources-for
   (lambda (graph target)
     (cond
-      ((atom graph) (structural-kind empty-list)
+      ((atom? graph) (structural-kind empty-list)
        (quote ()))
-      ((atom graph) (structural-kind pair)
+      ((atom? graph) (structural-kind pair)
        (let ((edge (car graph)))
          (cond
-           ((eq (third edge) target) (identity-relation same)
+           ((eq? (third edge) target) (identity-relation same)
             (cons
               (car edge)
               (genealogy-sources-for (cdr graph) target)))
-           ((eq (third edge) target) (identity-relation distinct)
+           ((eq? (third edge) target) (identity-relation distinct)
             (genealogy-sources-for (cdr graph) target)))))
-      ((atom graph) (structural-kind atom)
+      ((atom? graph) (structural-kind atom)
        (quote ())))))
 
 (def unification-genealogy-witness

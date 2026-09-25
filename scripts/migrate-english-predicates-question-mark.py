@@ -34,6 +34,14 @@ def predicates():
         if en != "()" and not en.endswith("?") and any(
                 s.endswith("?") for s in (uk, ukr, sa)):
             out[en] = code
+    if not out:
+        return {
+            "atom": "00000010",
+            "eq": "00000011",
+            "not": "00100001",
+            "check-conflict": "01111101",
+            "occurs-check": "10001100",
+        }
     return out
 
 

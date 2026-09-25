@@ -148,7 +148,7 @@ fn clips_import_file_imports_a_fifth_real_external_clp_file_with_mostly_disquali
     "#;
     assert_eq!(
         eval_import(source),
-        "(((path (var id) (var n1) (var s)) (context make_path) (seating () () () () (var id) (var pid) no) (path (var pid) (var n1) (var s)) (not (path (var id) (var n1) ()))))"
+        "(((path (var id) (var n1) (var s)) (context make_path) (seating () () () () (var id) (var pid) no) (path (var pid) (var n1) (var s)) (not? (path (var id) (var n1) ()))))"
     );
 }
 

@@ -67,12 +67,12 @@
 (def source-ref?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((atom (cdr value)) (quote ()))
-      ((eq (car value) (quote digest)) t)
-      ((eq (car value) (quote proof)) t)
-      ((eq (car value) (quote test)) t)
-      ((eq (car value) (quote observation)) t)
+      ((atom? value) (quote ()))
+      ((atom? (cdr value)) (quote ()))
+      ((eq? (car value) (quote digest)) t)
+      ((eq? (car value) (quote proof)) t)
+      ((eq? (car value) (quote test)) t)
+      ((eq? (car value) (quote observation)) t)
       (t (quote ())))))
 
 ; claim-ref shape check — no claim-ref? predicate is spec-mandated (and
@@ -84,9 +84,9 @@
 (def epistemic--claim-ref?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((atom (cdr value)) (quote ()))
-      ((eq (car value) (quote claim-ref)) t)
+      ((atom? value) (quote ()))
+      ((atom? (cdr value)) (quote ()))
+      ((eq? (car value) (quote claim-ref)) t)
       (t (quote ())))))
 
 ; observation? must NOT be tag-only: the `observation` tag is reused both
@@ -103,15 +103,15 @@
 (def observation?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((not (eq (car value) (quote observation))) (quote ()))
-      ((atom (cdr value)) (quote ()))
-      ((atom (cadr value)) (quote ()))
-      ((not (eq (car (cadr value)) (quote source))) (quote ()))
-      ((atom (cddr value)) (quote ()))
-      ((atom (car (cddr value))) (quote ()))
-      ((not (eq (car (car (cddr value))) (quote statement))) (quote ()))
-      ((not (atom (cdr (cddr value)))) (quote ()))
+      ((atom? value) (quote ()))
+      ((not? (eq? (car value) (quote observation))) (quote ()))
+      ((atom? (cdr value)) (quote ()))
+      ((atom? (cadr value)) (quote ()))
+      ((not? (eq? (car (cadr value)) (quote source))) (quote ()))
+      ((atom? (cddr value)) (quote ()))
+      ((atom? (car (cddr value))) (quote ()))
+      ((not? (eq? (car (car (cddr value))) (quote statement))) (quote ()))
+      ((not? (atom? (cdr (cddr value)))) (quote ()))
       (t t))))
 
 ; claim? — also validates `review` strictly against its finite enum
@@ -123,19 +123,19 @@
 (def claim?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((not (eq (car value) (quote claim))) (quote ()))
-      ((atom (cdr value)) (quote ()))
-      ((atom (cadr value)) (quote ()))
-      ((not (eq (car (cadr value)) (quote statement))) (quote ()))
-      ((atom (cddr value)) (quote ()))
-      ((atom (car (cddr value))) (quote ()))
-      ((not (eq (car (car (cddr value))) (quote source))) (quote ()))
-      ((atom (cdr (cddr value))) (quote ()))
-      ((atom (car (cdr (cddr value)))) (quote ()))
-      ((not (eq (car (car (cdr (cddr value)))) (quote review))) (quote ()))
-      ((not (member? (cadr (car (cdr (cddr value)))) (quote (proposed reviewed rejected)))) (quote ()))
-      ((not (atom (cdr (cdr (cddr value))))) (quote ()))
+      ((atom? value) (quote ()))
+      ((not? (eq? (car value) (quote claim))) (quote ()))
+      ((atom? (cdr value)) (quote ()))
+      ((atom? (cadr value)) (quote ()))
+      ((not? (eq? (car (cadr value)) (quote statement))) (quote ()))
+      ((atom? (cddr value)) (quote ()))
+      ((atom? (car (cddr value))) (quote ()))
+      ((not? (eq? (car (car (cddr value))) (quote source))) (quote ()))
+      ((atom? (cdr (cddr value))) (quote ()))
+      ((atom? (car (cdr (cddr value)))) (quote ()))
+      ((not? (eq? (car (car (cdr (cddr value)))) (quote review))) (quote ()))
+      ((not? (member? (cadr (car (cdr (cddr value)))) (quote (proposed reviewed rejected)))) (quote ()))
+      ((not? (atom? (cdr (cdr (cddr value))))) (quote ()))
       (t t))))
 
 ; evidence? — same reasoning as claim? for the finite outcome enum
@@ -143,42 +143,42 @@
 (def evidence?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((not (eq (car value) (quote evidence))) (quote ()))
-      ((atom (cdr value)) (quote ()))
-      ((atom (cadr value)) (quote ()))
-      ((not (eq (car (cadr value)) (quote claim-ref))) (quote ()))
-      ((atom (cddr value)) (quote ()))
-      ((atom (car (cddr value))) (quote ()))
-      ((not (eq (car (car (cddr value))) (quote method))) (quote ()))
-      ((atom (cdr (cddr value))) (quote ()))
-      ((atom (car (cdr (cddr value)))) (quote ()))
-      ((not (eq (car (car (cdr (cddr value)))) (quote outcome))) (quote ()))
-      ((not (member? (cadr (car (cdr (cddr value)))) (quote (supports contradicts inconclusive)))) (quote ()))
-      ((atom (cdr (cdr (cddr value)))) (quote ()))
-      ((atom (car (cdr (cdr (cddr value))))) (quote ()))
-      ((not (eq (car (car (cdr (cdr (cddr value))))) (quote source-ref))) (quote ()))
-      ((not (atom (cdr (cdr (cdr (cddr value)))))) (quote ()))
+      ((atom? value) (quote ()))
+      ((not? (eq? (car value) (quote evidence))) (quote ()))
+      ((atom? (cdr value)) (quote ()))
+      ((atom? (cadr value)) (quote ()))
+      ((not? (eq? (car (cadr value)) (quote claim-ref))) (quote ()))
+      ((atom? (cddr value)) (quote ()))
+      ((atom? (car (cddr value))) (quote ()))
+      ((not? (eq? (car (car (cddr value))) (quote method))) (quote ()))
+      ((atom? (cdr (cddr value))) (quote ()))
+      ((atom? (car (cdr (cddr value)))) (quote ()))
+      ((not? (eq? (car (car (cdr (cddr value)))) (quote outcome))) (quote ()))
+      ((not? (member? (cadr (car (cdr (cddr value)))) (quote (supports contradicts inconclusive)))) (quote ()))
+      ((atom? (cdr (cdr (cddr value)))) (quote ()))
+      ((atom? (car (cdr (cdr (cddr value))))) (quote ()))
+      ((not? (eq? (car (car (cdr (cdr (cddr value))))) (quote source-ref))) (quote ()))
+      ((not? (atom? (cdr (cdr (cdr (cddr value)))))) (quote ()))
       (t t))))
 
 (def intent?
   (lambda (value)
     (cond
-      ((atom value) (quote ()))
-      ((not (eq (car value) (quote intent))) (quote ()))
-      ((atom (cdr value)) (quote ()))
-      ((atom (cadr value)) (quote ()))
-      ((not (eq (car (cadr value)) (quote goal))) (quote ()))
-      ((atom (cddr value)) (quote ()))
-      ((atom (car (cddr value))) (quote ()))
-      ((not (eq (car (car (cddr value))) (quote requires))) (quote ()))
-      ((atom (cdr (cddr value))) (quote ()))
-      ((atom (car (cdr (cddr value)))) (quote ()))
-      ((not (eq (car (car (cdr (cddr value)))) (quote stop-on))) (quote ()))
-      ((atom (cdr (cdr (cddr value)))) (quote ()))
-      ((atom (car (cdr (cdr (cddr value))))) (quote ()))
-      ((not (eq (car (car (cdr (cdr (cddr value))))) (quote produces))) (quote ()))
-      ((not (atom (cdr (cdr (cdr (cddr value)))))) (quote ()))
+      ((atom? value) (quote ()))
+      ((not? (eq? (car value) (quote intent))) (quote ()))
+      ((atom? (cdr value)) (quote ()))
+      ((atom? (cadr value)) (quote ()))
+      ((not? (eq? (car (cadr value)) (quote goal))) (quote ()))
+      ((atom? (cddr value)) (quote ()))
+      ((atom? (car (cddr value))) (quote ()))
+      ((not? (eq? (car (car (cddr value))) (quote requires))) (quote ()))
+      ((atom? (cdr (cddr value))) (quote ()))
+      ((atom? (car (cdr (cddr value)))) (quote ()))
+      ((not? (eq? (car (car (cdr (cddr value)))) (quote stop-on))) (quote ()))
+      ((atom? (cdr (cdr (cddr value)))) (quote ()))
+      ((atom? (car (cdr (cdr (cddr value))))) (quote ()))
+      ((not? (eq? (car (car (cdr (cdr (cddr value))))) (quote produces))) (quote ()))
+      ((not? (atom? (cdr (cdr (cdr (cddr value)))))) (quote ()))
       (t t))))
 
 ; --- Accessors ------------------------------------------------------------
@@ -233,10 +233,10 @@
 (def supporting-evidence
   (lambda (evidence claim-ref)
     (cond
-      ((not (evidence? evidence)) (quote ()))
-      ((not (epistemic--claim-ref? claim-ref)) (quote ()))
-      ((not (eq (evidence-outcome evidence) (quote supports))) (quote ()))
-      ((not (equal? (evidence-claim-ref evidence) claim-ref)) (quote ()))
+      ((not? (evidence? evidence)) (quote ()))
+      ((not? (epistemic--claim-ref? claim-ref)) (quote ()))
+      ((not? (eq? (evidence-outcome evidence) (quote supports))) (quote ()))
+      ((not? (equal? (evidence-claim-ref evidence) claim-ref)) (quote ()))
       (t evidence))))
 
 ; local helper for intent-capabilities-satisfied? — no every?/all? helper
@@ -245,8 +245,8 @@
 (def epistemic--all-required-present?
   (lambda (requirements effective-capabilities)
     (cond
-      ((atom requirements) t)
-      ((not (member? (car requirements) effective-capabilities)) (quote ()))
+      ((atom? requirements) t)
+      ((not? (member? (car requirements) effective-capabilities)) (quote ()))
       (t (epistemic--all-required-present? (cdr requirements) effective-capabilities)))))
 
 ; intent-capabilities-satisfied? checks ONLY the requires-subset
@@ -267,5 +267,5 @@
 (def intent-capabilities-satisfied?
   (lambda (intent effective-capabilities)
     (cond
-      ((not (intent? intent)) (quote ()))
+      ((not? (intent? intent)) (quote ()))
       (t (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))

@@ -21,8 +21,8 @@
 (def prolog-values-to-datalog-facts
   (lambda (role values)
     (cond
-      ((atom values) (structural-kind empty-list) (quote ()))
-      ((atom values) (structural-kind pair)
+      ((atom? values) (structural-kind empty-list) (quote ()))
+      ((atom? values) (structural-kind pair)
        (cons (list role (car values))
              (prolog-values-to-datalog-facts role (cdr values)))))))
 
@@ -32,23 +32,23 @@
           (variable-row (assoc (quote variable) (cdr observation)))
           (values-row (assoc (quote values) (cdr observation))))
       (cond
-        ((atom source-ref-row) (structural-kind empty-list)
+        ((atom? source-ref-row) (structural-kind empty-list)
          (list (quote projection-failure) (quote missing-source-ref)))
-        ((atom source-ref-row) (structural-kind atom)
+        ((atom? source-ref-row) (structural-kind atom)
          (list (quote projection-failure) (quote malformed-source-ref)))
-        ((atom source-ref-row) (structural-kind pair)
+        ((atom? source-ref-row) (structural-kind pair)
          (cond
-           ((atom variable-row) (structural-kind empty-list)
+           ((atom? variable-row) (structural-kind empty-list)
             (list (quote projection-failure) (quote missing-variable-role)))
-           ((atom variable-row) (structural-kind atom)
+           ((atom? variable-row) (structural-kind atom)
             (list (quote projection-failure) (quote malformed-variable-role)))
-           ((atom variable-row) (structural-kind pair)
+           ((atom? variable-row) (structural-kind pair)
             (cond
-              ((atom values-row) (structural-kind empty-list)
+              ((atom? values-row) (structural-kind empty-list)
                (list (quote projection-failure) (quote missing-values)))
-              ((atom values-row) (structural-kind atom)
+              ((atom? values-row) (structural-kind atom)
                (list (quote projection-failure) (quote malformed-values)))
-              ((atom values-row) (structural-kind pair)
+              ((atom? values-row) (structural-kind pair)
                (list
                  (quote projection-result)
                  (list (quote projection)

@@ -34,13 +34,13 @@
   (lambda (expr acc)
     (cond
       ((symbol? expr) (cond ((member? expr acc) acc) (t (cons expr acc))))
-      ((atom expr) acc)
+      ((atom? expr) acc)
       (t (collect-symbols-onto (cdr expr) (collect-symbols-onto (car expr) acc))))))
 
 (def collect-all-symbols
   (lambda (forms acc)
     (cond
-      ((atom forms) acc)
+      ((atom? forms) acc)
       (t (collect-all-symbols (cdr forms) (collect-symbols-onto (car forms) acc))))))
 
 ; Tail-recursive on purpose, not the more obvious `(cons (car sorted)
@@ -59,7 +59,7 @@
 (def insert-sorted-onto
   (lambda (sym before after)
     (cond
-      ((atom after) (reverse-onto before (list sym)))
+      ((atom? after) (reverse-onto before (list sym)))
       ((string<? (symbol->string sym) (symbol->string (car after)))
        (reverse-onto before (cons sym after)))
       (t (insert-sorted-onto sym (cons (car after) before) (cdr after))))))
@@ -71,7 +71,7 @@
 (def sort-symbols-onto
   (lambda (remaining sorted)
     (cond
-      ((atom remaining) sorted)
+      ((atom? remaining) sorted)
       (t (sort-symbols-onto (cdr remaining) (insert-sorted (car remaining) sorted))))))
 
 (def sort-symbols
@@ -81,7 +81,7 @@
 (def print-table-onto
   (lambda (symbols id)
     (cond
-      ((atom symbols) (quote ()))
+      ((atom? symbols) (quote ()))
       (t ((lambda ()
             (print (cons (symbol->string (car symbols)) id))
             (print-table-onto (cdr symbols) (+ id 1))))))))

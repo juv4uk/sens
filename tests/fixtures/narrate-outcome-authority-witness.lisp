@@ -41,15 +41,15 @@
 (def narrate-outcome-authority-check-rows
   (lambda (rows)
     (cond
-      ((atom rows) (structural-kind empty-list)
+      ((atom? rows) (structural-kind empty-list)
        (quote (narrate-outcome-authority-witness (status pass))))
-      ((atom rows) (structural-kind atom)
+      ((atom? rows) (structural-kind atom)
        (list
          (quote narrate-outcome-authority-witness)
          (quote (status fail))
          (quote (law malformed-row-tail))
          (list (quote actual) rows)))
-      ((atom rows) (structural-kind pair)
+      ((atom? rows) (structural-kind pair)
        (let ((row (car rows)))
          (cond
            ((equal? (second row) (third row)) (structural-relation same)

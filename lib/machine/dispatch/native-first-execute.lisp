@@ -34,10 +34,10 @@
 (def native-first-plan-tag-state
   (lambda (plan tag)
     (cond
-      ((atom plan) (structural-kind pair)
+      ((atom? plan) (structural-kind pair)
        (cond
-         ((eq (car plan) tag) (identity-relation same) (quote same))
-         ((eq (car plan) tag) (identity-relation distinct) (quote distinct))))
+         ((eq? (car plan) tag) (identity-relation same) (quote same))
+         ((eq? (car plan) tag) (identity-relation distinct) (quote distinct))))
       ((quote native-first-plan-tag-state-fallback)
        native-first-plan-tag-state-fallback
        (quote distinct)))))
@@ -61,7 +61,7 @@
     (let ((native-state
             (native-first-plan-tag-state plan (quote native-plan))))
       (cond
-        ((eq native-state (quote same)) (identity-relation same)
+        ((eq? native-state (quote same)) (identity-relation same)
          (cond
            ((equal? (length plan) 3) (structural-relation same)
             (native-first-execute-native-plan plan))
@@ -69,13 +69,13 @@
             (native-first-execution-rejected
               (quote native)
               (list (quote malformed-native-plan) plan)))))
-        ((eq native-state (quote distinct)) (identity-relation same)
+        ((eq? native-state (quote distinct)) (identity-relation same)
          (let ((fallback-state
                  (native-first-plan-tag-state
                    plan
                    (quote evaluator-fallback))))
            (cond
-             ((eq fallback-state (quote same)) (identity-relation same)
+             ((eq? fallback-state (quote same)) (identity-relation same)
               (cond
                 ((equal? (length plan) 2) (structural-relation same)
                  (native-first-execution-completed
@@ -85,7 +85,7 @@
                  (native-first-execution-rejected
                    (quote evaluator)
                    (list (quote malformed-evaluator-fallback) plan)))))
-             ((eq fallback-state (quote distinct)) (identity-relation same)
+             ((eq? fallback-state (quote distinct)) (identity-relation same)
               (native-first-execution-rejected
                 (quote invalid-plan)
                 (list (quote unknown-native-first-plan) plan))))))))))
@@ -98,13 +98,13 @@
 (def native-first-execute-source-forms
   (lambda (forms)
     (cond
-      ((atom forms) (structural-kind empty-list) (quote ()))
-      ((atom forms) (structural-kind atom)
+      ((atom? forms) (structural-kind empty-list) (quote ()))
+      ((atom? forms) (structural-kind atom)
        (list
          (native-first-execution-rejected
            (quote evaluator)
            (list (quote malformed-source-form-tail) forms))))
-      ((atom forms) (structural-kind pair)
+      ((atom? forms) (structural-kind pair)
        (cons
          (native-first-execute-expression (car forms))
          (native-first-execute-source-forms (cdr forms)))))))

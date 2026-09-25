@@ -7,31 +7,31 @@
 ; contract, their difference, impact, guidance, and evidence as one stable
 ; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
 
-(def guard-decision?
-  (lambda (decision)
-    (cond
-      ((eq decision (quote allow)) t)
-      ((eq decision (quote warn)) t)
-      ((eq decision (quote reject)) t)
-      ((eq decision (quote unknown)) t)
-      (t (quote ())))))
+(00001011 guard-decision?
+  (00001000 (decision)
+    (00000111
+      ((00000011 decision (00000001 allow)) t)
+      ((00000011 decision (00000001 warn)) t)
+      ((00000011 decision (00000001 reject)) t)
+      ((00000011 decision (00000001 unknown)) t)
+      (t (00000001 ())))))
 
-(def guard-evidence-status?
-  (lambda (status)
-    (cond
-      ((eq status (quote confirmed)) t)
-      ((eq status (quote partial)) t)
-      ((eq status (quote unresolved)) t)
-      ((eq status (quote broken)) t)
-      (t (quote ())))))
+(00001011 guard-evidence-status?
+  (00001000 (status)
+    (00000111
+      ((00000011 status (00000001 confirmed)) t)
+      ((00000011 status (00000001 partial)) t)
+      ((00000011 status (00000001 unresolved)) t)
+      ((00000011 status (00000001 broken)) t)
+      (t (00000001 ())))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
 ; UNKNOWN — це стан маршрутизації, а не глухий кут. Маршрути розрізняють
 ; розподілене локальне знання, владу власника і зовнішнє дослідження.
-(def guard-unknown-routes
-  (lambda ()
-    (quote
+(00001011 guard-unknown-routes
+  (00001000 ()
+    (00000001
       (((route ask-agent)
         (when ecosystem-local-or-component-owned)
         (action ask-responsible-live-agent)
@@ -45,64 +45,64 @@
         (action search-authoritative-external-sources)
         (verify citations-and-access-date))))))
 
-(def make-guard-finding
-  (lambda (decision evidence-status subject state contract difference impact guidance evidence)
-    (cond
-      ((not (guard-decision? decision))
-       (list (quote invalid-guard-decision) decision))
-      ((not (guard-evidence-status? evidence-status))
-       (list (quote invalid-evidence-status) evidence-status))
+(00001011 make-guard-finding
+  (00001000 (decision evidence-status subject state contract difference impact guidance evidence)
+    (00000111
+      ((not? (guard-decision? decision))
+       (list (00000001 invalid-guard-decision) decision))
+      ((not? (guard-evidence-status? evidence-status))
+       (list (00000001 invalid-evidence-status) evidence-status))
       (t
        (list
-         (quote guard-finding)
-         (list (quote schema) (quote guard/1))
-         (list (quote decision) decision)
-         (list (quote evidence-status) evidence-status)
-         (list (quote subject) subject)
-         (list (quote state) state)
-         (list (quote contract) contract)
-         (list (quote difference) difference)
-         (list (quote impact) impact)
-         (list (quote guidance) guidance)
-         (list (quote evidence) evidence)
+         (00000001 guard-finding)
+         (list (00000001 schema) (00000001 guard/1))
+         (list (00000001 decision) decision)
+         (list (00000001 evidence-status) evidence-status)
+         (list (00000001 subject) subject)
+         (list (00000001 state) state)
+         (list (00000001 contract) contract)
+         (list (00000001 difference) difference)
+         (list (00000001 impact) impact)
+         (list (00000001 guidance) guidance)
+         (list (00000001 evidence) evidence)
          (list
-           (quote unknown-routes)
-           (cond
-             ((eq decision (quote unknown)) (guard-unknown-routes))
-             (t (quote ())))))))))
+           (00000001 unknown-routes)
+           (00000111
+             ((00000011 decision (00000001 unknown)) (guard-unknown-routes))
+             (t (00000001 ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
-(def guard-unknown
-  (lambda (subject missing-evidence guidance)
+(00001011 guard-unknown
+  (00001000 (subject missing-evidence guidance)
     (make-guard-finding
-      (quote unknown)
-      (quote unresolved)
+      (00000001 unknown)
+      (00000001 unresolved)
       subject
-      (quote not-observed)
-      (quote insufficient-evidence)
+      (00000001 not-observed)
+      (00000001 insufficient-evidence)
       missing-evidence
-      (quote decision-not-earned)
+      (00000001 decision-not-earned)
       guidance
-      (quote ()))))
+      (00000001 ()))))
 
 ; Oracle gives expected semantic truth; an observer gives actual truth;
 ; Guard explains the relation without replacing either authority.
 ; Oracle дає очікувану семантику, observer — фактичний стан, Guard пояснює
 ; їхнє співвідношення, не підміняючи жодне джерело.
-(def guard-compare
-  (lambda (subject expected observed evidence)
-    (cond
+(00001011 guard-compare
+  (00001000 (subject expected observed evidence)
+    (00000111
       ((equal? expected observed)
        (make-guard-finding
-         (quote allow) (quote confirmed) subject observed expected
-         (quote ()) (quote invariant-preserved) (quote no-action) evidence))
+         (00000001 allow) (00000001 confirmed) subject observed expected
+         (00000001 ()) (00000001 invariant-preserved) (00000001 no-action) evidence))
       (t
        (make-guard-finding
-         (quote warn) (quote confirmed) subject observed expected
-         (list (quote expected) expected (quote observed) observed)
-         (quote contract-drift)
-         (quote reconcile-observation-with-contract)
+         (00000001 warn) (00000001 confirmed) subject observed expected
+         (list (00000001 expected) expected (00000001 observed) observed)
+         (00000001 contract-drift)
+         (00000001 reconcile-observation-with-contract)
          evidence)))))
 
 ; Synchronization is a guarded transaction: first establish a commit freeze,
@@ -111,50 +111,50 @@
 ; Синхронізація — guarded transaction: спершу freeze комітів, потім sync,
 ; потім запис observed drift і лише після цього відкриття вікна. Це policy,
 ; а не прихований Git lock.
-(def guard-sync-window
-  (lambda (commit-state sync-state drift-state evidence)
-    (cond
-      ((not (eq commit-state (quote frozen)))
+(00001011 guard-sync-window
+  (00001000 (commit-state sync-state drift-state evidence)
+    (00000111
+      ((not? (00000011 commit-state (00000001 frozen)))
        (make-guard-finding
-         (quote reject) (quote confirmed) (quote ecosystem-sync)
-         commit-state (quote commits-frozen-before-sync)
-         (list (quote expected) (quote frozen) (quote observed) commit-state)
-         (quote concurrent-commits-can-create-unrecorded-drift)
-         (quote freeze-commits-before-synchronization)
+         (00000001 reject) (00000001 confirmed) (00000001 ecosystem-sync)
+         commit-state (00000001 commits-frozen-before-sync)
+         (list (00000001 expected) (00000001 frozen) (00000001 observed) commit-state)
+         (00000001 concurrent-commits-can-create-unrecorded-drift)
+         (00000001 freeze-commits-before-synchronization)
          evidence))
-      ((not (eq sync-state (quote completed)))
+      ((not? (00000011 sync-state (00000001 completed)))
        (make-guard-finding
-         (quote warn) (quote unresolved) (quote ecosystem-sync)
-         sync-state (quote synchronization-completed)
-         (list (quote expected) (quote completed) (quote observed) sync-state)
-         (quote drift-cannot-yet-be-classified)
-         (quote complete-sync-and-preserve-logs)
+         (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
+         sync-state (00000001 synchronization-completed)
+         (list (00000001 expected) (00000001 completed) (00000001 observed) sync-state)
+         (00000001 drift-cannot-yet-be-classified)
+         (00000001 complete-sync-and-preserve-logs)
          evidence))
-      ((not (eq drift-state (quote recorded)))
+      ((not? (00000011 drift-state (00000001 recorded)))
        (make-guard-finding
-         (quote warn) (quote unresolved) (quote ecosystem-sync)
-         drift-state (quote drift-recorded)
-         (list (quote expected) (quote recorded) (quote observed) drift-state)
-         (quote synchronization-result-has-no-drift-record)
-         (quote record-drift-before-unfreezing-commits)
+         (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
+         drift-state (00000001 drift-recorded)
+         (list (00000001 expected) (00000001 recorded) (00000001 observed) drift-state)
+         (00000001 synchronization-result-has-no-drift-record)
+         (00000001 record-drift-before-unfreezing-commits)
          evidence))
       (t
        (make-guard-finding
-         (quote allow) (quote confirmed) (quote ecosystem-sync)
+         (00000001 allow) (00000001 confirmed) (00000001 ecosystem-sync)
          (list commit-state sync-state drift-state)
-         (quote freeze-sync-record-unfreeze)
-         (quote ())
-         (quote synchronization-boundary-observed)
-         (quote reopen-commit-window)
+         (00000001 freeze-sync-record-unfreeze)
+         (00000001 ())
+         (00000001 synchronization-boundary-observed)
+         (00000001 reopen-commit-window)
          evidence)))))
 
 ; Reference records are ordinary data. The evolving ecosystem directory lives
 ; in knowledge/guard-reference.lisp; these accessors remain generic.
 ; Довідкові записи — звичайні дані. Змінний каталог екосистеми лежить у
 ; knowledge/guard-reference.lisp, а ці функції лишаються загальними.
-(def guard-reference-field
-  (lambda (field reference)
-    (let ((entry (assoc field (cdr reference))))
-      (cond
-        ((atom entry) (quote ()))
+(00001011 guard-reference-field
+  (00001000 (field reference)
+    (let ((entry (assoc field (00000110 reference))))
+      (00000111
+        ((00000010 entry) (00000001 ()))
         (t (second entry))))))
