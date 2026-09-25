@@ -145,7 +145,15 @@ pub(crate) fn dispatch_capability(
     dispatch_capability_from(registry(), name, arguments, environment, span)
 }
 
-/// Mechanical fallback for one exact SENS function after built-in mechanisms declined it.
+/// Mechanical lookup/execution seam for one already-registered exact SENS function.
+///
+/// #1406: this function is deliberately NOT called by ordinary evaluator dispatch.
+/// Registration is availability only. #1006 may consume this seam later, but only
+/// downstream of an explicit SENS-owned raw-invoke mechanism admission.
+#[expect(
+    dead_code,
+    reason = "#1406 keeps the registry mechanism dormant until #1006 supplies an admitted caller"
+)]
 pub(crate) fn dispatch_sens_capability(
     sens: Sens8,
     arguments: &[Value],
