@@ -144,3 +144,7 @@
 (review "crates/my-lisp/src/lib.rs" "f898bce28b2fec3210c71fb2e230ea3041c18f4f9f499618abf09b01c66f8b68" issue-1414 explicit-core3-profile-loader-mechanism)
 (review "crates/my-lisp/src/lib.rs" "1dbe976a8758f8ba5671804251e92f700e465dc8ca1ccfa95f940cecc5c6a5dc" issue-1417 canonical-core4-fasl-loader-mechanism)
 (review "crates/my-lisp-cli/src/main.rs" "d00f8460376ff7acc112db472e3ae3e1ff6791cd89e82cd10969b1055210ccef" issue-1417 cli-bootstrap-consumes-canonical-loader)
+
+; #1006 stacked adapter: mechanism/availability only; admission remains SENS-owned.
+(review "crates/my-lisp-cli/src/island_invoke.rs" "3e46055bd9624cac96c4bd5f64ac26375238b1d11830f0f3e01623fa2de001ce" issue-1006 exact-sens-raw-island-availability)
+(review "crates/my-lisp-cli/src/main.rs" "e356297258fdbe7024d534ab9a8df9ee7d964b004a352c93c712e81ac759d34c" issue-1006 install-raw-island-availability-only)
