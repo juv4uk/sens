@@ -359,10 +359,14 @@ pub fn is_reserved_surface_name(name: &str) -> bool {
     eval::canon::is_reserved_surface(name)
 }
 
-/// Mechanical source/UI routing query: does this surface resolve to this exact
-/// eight-bit function SID?
+/// Mechanical source/UI routing query: does this surface resolve to this exact SENS?
+pub fn surface_has_sens(name: &str, sens: Sens8) -> bool {
+    eval::canon::surface_has_sens(name, sens)
+}
+
+/// Legacy compatibility projection. New code should use `surface_has_sens`.
 pub fn surface_has_sid(name: &str, sid: Sid8) -> bool {
-    eval::canon::surface_has_sid(name, sid)
+    surface_has_sens(name, sid)
 }
 
 /// True for any admitted surface whose Lisp-owned evaluator dispatch class is Define.
