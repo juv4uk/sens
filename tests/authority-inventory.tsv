@@ -195,3 +195,6 @@ crates/my-lisp/tests/core3_profile_runtime_1414.rs	core3_loader_selects_core3_on
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	lexical_child_shares_selected_core3_signal	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	later_explicit_core4_load_replaces_core3_signal_without_implicit_fallback	observer	selected-core3-profile-mechanism	contracts/core-profile-contract.lisp	migrated
 crates/my-lisp-cli/src/main.rs	cli_core_bootstrap_selects_core4_through_the_canonical_loader	observer	cli-selected-core4-bootstrap	#1272 + #1417	migrated
+
+crates/my-lisp/src/eval/profile_mechanisms_generated.rs	profile_mechanism_route	mechanism	generated Core×SENS route projection	lib/function-table-mechanisms.lisp profile-routes	migrated
+crates/my-lisp/tests/profile_mechanism_projection_1422.rs	core3_profile_admission_is_required_before_registered_host_execution	observer	profile-scoped mechanism admission	lib/function-table-mechanisms.lisp + generated projection	migrated
