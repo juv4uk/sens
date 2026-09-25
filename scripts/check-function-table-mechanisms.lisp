@@ -1,6 +1,7 @@
 ; #1046 — fail-closed validation for transitional mechanism metadata.
 ; Semantic identity authority is ONLY lib/surface/semantic-registry.lisp.
-; This checker proves mechanism metadata cannot invent a SID beside that table.
+; This checker proves mechanism metadata cannot invent a function beside that table.
+; #1332/#1403: empty-list-ground is not a function mechanism.
 
 (def registry
   (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
@@ -62,7 +63,6 @@
 (def admitted-mechanism?
   (lambda (mechanism)
     (cond
-      ((eq mechanism (quote empty-list-ground)) (identity-relation same) (quote yes))
       ((eq mechanism (quote quote-form)) (identity-relation same) (quote yes))
       ((eq mechanism (quote atom-primitive)) (identity-relation same) (quote yes))
       ((eq mechanism (quote eq-primitive)) (identity-relation same) (quote yes))
