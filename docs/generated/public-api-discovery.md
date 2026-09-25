@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 41
-- top-level функцій: 874
+- top-level функцій: 875
 - top-level макросів: 34
-- усього визначень: 908
+- усього визначень: 909
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -282,6 +282,7 @@
 | `lib/knowledge.lisp` | macro | `load-knowledge` | unreviewed |
 | `lib/knowledge.lisp` | function | `reason-in` | unreviewed |
 | `lib/knowledge.lisp` | function | `forward-in` | unreviewed |
+| `lib/knowledge.lisp` | function | `check-conflict?` | unreviewed |
 | `lib/knowledge.lisp` | function | `check-conflict` | unreviewed |
 | `lib/knowledge.lisp` | macro | `tell-knowledge` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-proper-list?` | unreviewed |

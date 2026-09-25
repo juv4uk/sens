@@ -208,16 +208,18 @@
 ;; agreement): conflict detection guards against *adding* contradictory
 ;; information, not against *removing* it — taking a clause back out can
 ;; never itself contradict anything already known.
-(def check-conflict
-  (lambda (module-name rules)
-    (cond
+(00001011 check-conflict?
+  (00001000 (module-name rules)
+    (00000111
       ((module-known? module-name)
-       (let ((head (car (car rules))))
-         (let ((proofs (reason-in module-name (list (quote not) head))))
-           (cond
-             ((atom? proofs) (quote ()))
+       (let ((head (00000101 (00000101 rules))))
+         (let ((proofs (reason-in module-name (opposite-knowledge-head head))))
+           (00000111
+             ((00000010 proofs) (00000001 ()))
              (t t)))))
-      (t (quote ())))))
+      (t (00000001 ())))))
+
+(00001011 check-conflict check-conflict?)
 
 ;; tell-knowledge adds new clauses to a module, creating it if it doesn't
 ;; exist yet — same conflict check as before, but on success it now pushes
