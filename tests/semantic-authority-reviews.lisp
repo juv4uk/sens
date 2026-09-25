@@ -144,3 +144,10 @@
 (review "crates/my-lisp/src/lib.rs" "f898bce28b2fec3210c71fb2e230ea3041c18f4f9f499618abf09b01c66f8b68" issue-1414 explicit-core3-profile-loader-mechanism)
 (review "crates/my-lisp/src/lib.rs" "1dbe976a8758f8ba5671804251e92f700e465dc8ca1ccfa95f940cecc5c6a5dc" issue-1417 canonical-core4-fasl-loader-mechanism)
 (review "crates/my-lisp-cli/src/main.rs" "d00f8460376ff7acc112db472e3ae3e1ff6791cd89e82cd10969b1055210ccef" issue-1417 cli-bootstrap-consumes-canonical-loader)
+
+; #1422 profile-scoped mechanism admission: SENS-owned source -> generated mechanical projection.
+(review "crates/my-lisp/src/eval/canon.rs" "29d51c242f1af4b5c18d381835ddf7f20fe3ede11ab30c29bc32923b2a541d88" issue-1422 profile-mechanism-gated-host-dispatch)
+(review "crates/my-lisp/src/eval/capabilities.rs" "60db3e26da086df6a710488fd537296280f2615683c18f9e65ba78bd20157896" issue-1422 registered-host-availability-mechanism)
+(review "crates/my-lisp/src/eval/mod.rs" "a180ec865c130bc4aec9ef8112132c0af7bb8536ce49ba84255ceaf08c32cad0" issue-1422 generated-profile-route-module)
+(review "crates/my-lisp/src/eval/profile_mechanisms_generated.rs" "da10628219203e4744e0ed1105bb3a88ac1f21128ce1c4982ee52d4148321822" issue-1422 generated-profile-mechanism-projection)
+(review "crates/my-lisp/tests/profile_mechanism_projection_1422.rs" "9459fb922b3aa2fdc2471b33cdbeb6bebcce811f1d219376767650e953f3f046" issue-1422 profile-mechanism-admission-observer)
