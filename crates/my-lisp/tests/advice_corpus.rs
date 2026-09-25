@@ -78,7 +78,7 @@ fn explicit_conflict_is_rejected_and_cannot_replace_the_existing_fact() {
     let source = r#"
         (advise ethics (quote ((mortal socrates))))
         (let* ((decision
-                 (advise ethics (quote ((not? (mortal socrates))))))
+                 (advise ethics (quote ((not (mortal socrates))))))
                (outcome
                  (reason-in-observe (quote ethics) (quote (mortal socrates)))))
           (list (car decision) (result-status outcome)))
