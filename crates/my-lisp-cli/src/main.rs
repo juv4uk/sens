@@ -5,6 +5,7 @@ use std::io::Read;
 use std::process;
 use std::rc::Rc;
 mod lsp_entry;
+mod island_invoke;
 mod islands;
 mod repl;
 mod swarm;
@@ -66,6 +67,9 @@ fn main() {
     // capability layer (filesystem, process execution, TCP). The semantic
     // core itself ships none.
     my_lisp_host::install();
+    // Availability only. SENS-owned profile admission decides whether
+    // exact function 10101000 may consult this mechanism.
+    island_invoke::install();
     let args: Vec<String> = env::args().collect();
     let allowed = allowed_processes(&args);
     let sexpr_protocol = args.iter().any(|a| a == "--protocol=sexpr");
