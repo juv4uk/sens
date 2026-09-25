@@ -25,6 +25,9 @@
 (def metadata-rows
   (cdr (find-section (quote rows) metadata)))
 
+(def profile-rows
+  (cdr (find-section (quote profile-rows) metadata)))
+
 (def registry-has-sid?
   (lambda (sid rows)
     (cond
@@ -104,5 +107,76 @@
                   (quote unsupported-mechanism) sid mechanism))
            (t (validate-rows (cdr rows)))))))))
 
-(def verdict (validate-rows metadata-rows))
+(def profile-has-route?
+  (lambda (profile sens rows)
+    (cond
+      ((atom rows) (structural-kind empty-list) (quote no))
+      ((atom rows) (structural-kind pair)
+       (let ((row (car rows)))
+         (cond
+           ((eq profile (car row)) (identity-relation same)
+            (cond
+              ((eq sens (second row)) (identity-relation same) (quote yes))
+              ((eq sens (second row)) (identity-relation distinct)
+               (profile-has-route? profile sens (cdr rows)))))
+           ((eq profile (car row)) (identity-relation distinct)
+            (profile-has-route? profile sens (cdr rows)))))))))
+
+(def admitted-profile?
+  (lambda (profile)
+    (cond
+      ((eq profile (quote core3)) (identity-relation same) (quote yes))
+      (t (quote no)))))
+
+(def admitted-profile-mechanism?
+  (lambda (mechanism)
+    (cond
+      ((eq mechanism (quote registered-host-mechanism))
+       (identity-relation same)
+       (quote yes))
+      (t (quote no)))))
+
+(def validate-profile-rows
+  (lambda (rows)
+    (cond
+      ((atom rows) (structural-kind empty-list)
+       (quote (function-table-profile-mechanisms-ok)))
+      ((atom rows) (structural-kind pair)
+       (let* ((row (car rows))
+              (profile (car row))
+              (sens (second row))
+              (mechanism (third row)))
+         (cond
+           ((eq (admitted-profile? profile) (quote no))
+            (identity-relation same)
+            (list (quote function-table-mechanisms-violation)
+                  (quote unsupported-profile) profile sens))
+           ((eq (registry-has-sid? sens registry-rows) (quote no))
+            (identity-relation same)
+            (list (quote function-table-mechanisms-violation)
+                  (quote sens-not-in-function-table) sens))
+           ((eq (profile-has-route? profile sens (cdr rows)) (quote yes))
+            (identity-relation same)
+            (list (quote function-table-mechanisms-violation)
+                  (quote duplicate-profile-route) profile sens))
+           ((eq (admitted-profile-mechanism? mechanism) (quote no))
+            (identity-relation same)
+            (list (quote function-table-mechanisms-violation)
+                  (quote unsupported-profile-mechanism) profile sens mechanism))
+           (t (validate-profile-rows (cdr rows)))))))))
+
+(def ordinary-verdict (validate-rows metadata-rows))
+(def profile-verdict (validate-profile-rows profile-rows))
+
+(def verdict
+  (cond
+    ((equal? ordinary-verdict (quote (function-table-mechanisms-ok)))
+     (structural-relation same)
+     (cond
+       ((equal? profile-verdict (quote (function-table-profile-mechanisms-ok)))
+        (structural-relation same)
+        (quote (function-table-mechanisms-ok)))
+       ((quote profile-failure) profile-failure profile-verdict)))
+    ((quote ordinary-failure) ordinary-failure ordinary-verdict)))
+
 (print verdict)
