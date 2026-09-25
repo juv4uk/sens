@@ -98,7 +98,7 @@
   (lambda (rows)
     (cond
       ((atom rows) (structural-kind empty-list) (quote (semantic-authority-ok)))
-      ((atom rows) (structural-kind pair)
+      (t
        (let* ((row (car rows))
               (path (second row))
               (transport-digest (third row)))

@@ -1,8 +1,8 @@
 ; My-Lisp tasks info script
 ; Демонстрація зчитування задач
 
-; Read tasks.my and extract task count info
-; Прочитати tasks.my та витягнути статистику задач
+; Read tasks.lisp and extract task count info
+; Прочитати tasks.lisp та витягнути статистику задач
 
 ; The my-lisp CLI reads the file and evaluates the last expression
 ; my-lisp CLI читає файл і оцінює останній вираз
