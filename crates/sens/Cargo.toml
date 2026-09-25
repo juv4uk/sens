@@ -1,0 +1,12 @@
+[package]
+name = "sens"
+version = "0.41.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Canonical sens language core · Канонічне ядро мови СЕНС · Kanonischer sens-Sprachkern"
+
+[dependencies]
+my-lisp = { path = "../my-lisp" }
+
+[dev-dependencies]
+my-lisp-host = { path = "../my-lisp-host" }

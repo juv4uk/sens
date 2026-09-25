@@ -49,8 +49,8 @@ fn семантичні_ідентифікатори_складаються_ті
 
     assert_eq!(
         seen.len(),
-        170,
-        "canonical semantic registry має містити Canon 0 + 169 identities"
+        256,
+        "canonical semantic registry має містити Canon 0 + 255 identities"
     );
 }
 

@@ -716,7 +716,7 @@ fn encoder_source_contains_no_process_or_assembler_escape_hatch() {
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
     let lower = source.to_ascii_lowercase();
 
-    for forbidden in ["process-run", "nasm", "as ", "objcopy", "keystone", "iced-x86"] {
+    for forbidden in ["process-run", "nasm", " as ", "objcopy", "keystone", "iced-x86"] {
         assert!(
             !lower.contains(forbidden),
             "proof encoder must construct bytes in Lisp, not escape through {forbidden}"

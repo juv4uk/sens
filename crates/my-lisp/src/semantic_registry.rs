@@ -131,12 +131,12 @@ mod tests {
 
     #[test]
     fn generated_registry_is_one_contiguous_byte_axis() {
-        assert_eq!(SEMANTIC_ROWS.len(), 170);
+        assert_eq!(SEMANTIC_ROWS.len(), 256);
         for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
             assert_eq!(usize::from(row.semantic_id), expected);
         }
         assert_eq!(SEMANTIC_ROWS.first().map(|row| row.semantic_id), Some(0));
-        assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(169));
+        assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(255));
     }
 
     #[test]
@@ -175,7 +175,7 @@ mod tests {
     }
 
     #[test]
-    fn surfaces_with_namespace_match_present_names_and_keep_namespace() {
+    fn surfaces_with_namespace_align_with_present_names_and_keep_namespace() {
         let with_namespace = admitted_surfaces_with_namespace_for_semantic_id(crate::sid!(00000001));
         let names_only = admitted_surfaces_for_semantic_id(crate::sid!(00000001));
         assert_eq!(with_namespace.len(), names_only.len());

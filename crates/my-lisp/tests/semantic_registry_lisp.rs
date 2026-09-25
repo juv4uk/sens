@@ -24,7 +24,7 @@ fn semantic_registry_is_read_and_queried_by_lisp_itself() {
 
     assert_eq!(
         result,
-        r#"(170 "00000001" quote "00000001" "10101000" "00000101" "11111111" () "10101000" (structural-relation same))"#
+        r#"(256 "00000001" quote "00000001" "10101000" "00000101" "11111111" (11111111 (en ()) (ук ()) (укр ()) (sa ()) (sym ())) "10101000" (structural-relation same))"#
     );
 }
 
@@ -47,7 +47,7 @@ fn lisp_registry_api_accepts_headerless_canonical_rows() {
     .value
     .to_string();
 
-    assert_eq!(result, "170");
+    assert_eq!(result, "256");
 }
 
 #[test]
@@ -143,7 +143,7 @@ fn full_binary_registry_handoff_is_lisp_owned_and_digest_pinned() {
         "Lisp handoff digest must identify the exact canonical source bytes"
     );
     assert!(
-        rendered.contains("(row-count 170)"),
+        rendered.contains("(row-count 256)"),
         "handoff must report every current canonical semantic row"
     );
     assert!(
@@ -155,7 +155,7 @@ fn full_binary_registry_handoff_is_lisp_owned_and_digest_pinned() {
         "handoff must preserve the invoke row as Binary identity data"
     );
     assert!(
-        rendered.contains("(10101001 (en binary)"),
+        rendered.contains("(11111111 (en ())"),
         "handoff must preserve the current canonical registry tail as Binary identity data"
     );
 }

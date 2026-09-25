@@ -125,3 +125,6 @@
 (review "crates/my-lisp/src/lib.rs" "340674a9c5bd7cbd6ef5b6716955bfb28e9ddd3da6ce42fd0486110954ae4370" issue-1344 sens-vocabulary-foundation-export)
 (review "crates/my-lisp/tests/sens_foundation.rs" "3fbba9fff5cd2e04581fa45e31d1141ebcb15804650f56e70aaf24e7525e8d35" issue-1344 sens-foundation-observer)
 (review "crates/my-lisp/src/presentation.rs" "7f1815c6adeea63e2246f1d5a9fe9eb7f58660ac6c399f440f1139a68762b68b" issue-1327 sid8-diagnostic-observer-alignment)
+; #1368 Sens 256 identities alignment in observer tests.
+(review "crates/my-lisp/tests/rivnopravnist_mov.rs" "d20b06306ff4089fd2e5174304bc2464d5b6b883d0ad4eab995dde8deed10a8e" issue-1368 sens-256-identities-observer)
+(review "crates/my-lisp/tests/semantic_registry_lisp.rs" "0c6df2ec3c679d2cb9bb55b54e47231757dc7b5285c313f8c8f1c0d459f17569" issue-1368 sens-256-identities-observer)
