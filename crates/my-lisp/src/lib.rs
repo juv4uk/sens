@@ -144,6 +144,11 @@ pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 /// The current Core4 my-lisp bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
+/// Parse-output cache for the exact embedded Core4 source. This is only a
+/// bootstrap optimization: the source hash is verified before use, and stale
+/// or invalid bytes fall back to parsing CORE_LIBRARY_SOURCE.
+const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
+
 /// Generated runtime projection of admitted surface spellings to opaque Sid8
 /// identities. semantic-registry.lisp remains the only spelling authority.
 pub const META_SEMANTIC_REGISTRY_SOURCE: &str =
@@ -293,9 +298,26 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
         .environment
         .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
-    let result = eval_program(CORE_LIBRARY_SOURCE, session)?;
+
+    let result = match fasl_decode_program(CORE_LIBRARY_FASL) {
+        Some((expressions, source_hash))
+            if source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) =>
+        {
+            eval_parsed_expressions(&expressions, session)?
+        }
+        _ => eval_program(CORE_LIBRARY_SOURCE, session)?,
+    };
+
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
+}
+
+/// Read-only diagnostic for embedders that want to report a stale Core4 FASL
+/// cache. This does not select a profile or alter bootstrap behavior.
+pub fn core_library_fasl_is_current() -> bool {
+    fasl_decode_program(CORE_LIBRARY_FASL)
+        .map(|(_, source_hash)| source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()))
+        .unwrap_or(false)
 }
 
 /// Activate the frozen Core2/Contract-6 compatibility profile.
