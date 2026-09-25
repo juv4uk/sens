@@ -111,3 +111,4 @@
 (authority "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" observer)
 (authority "crates/my-lisp/tests/core3_profile_runtime_1414.rs" observer)
 (authority "crates/my-lisp-cli/src/main.rs" mechanism)
+(authority "crates/my-lisp/tests/postcore_peer_staging_1417.rs" observer)
