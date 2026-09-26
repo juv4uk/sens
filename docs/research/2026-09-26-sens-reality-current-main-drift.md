@@ -1,7 +1,7 @@
 # SENS-REALITY-2 — current-main drift audit, slice 1
 
 **Задача:** #1433  
-**Зріз:** `main@2970587f17a611d1f19c76b1579f44e0c832c0ae`  
+**Зріз:** `main@0f5d324dbe4682a68329e28f113127a82c8a6366`  
 **Дата:** 2026-09-26  
 **Метод цього slice:** читання current source/projections/CI + точні структурні підрахунки. Старі часові виміри не перевикористовуються як current proof.
 
@@ -58,7 +58,7 @@
 
 ## 4. Current structural counters
 
-Сирі значення з цього SHA винесено поруч у `docs/research/data/1433-current-main-2970587f.tsv`.
+Сирі значення з цього SHA винесено поруч у `docs/research/data/1433-current-main-0f5d324d.tsv`.
 
 | Метрика | Current |
 | --- | ---: |
