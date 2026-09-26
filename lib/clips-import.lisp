@@ -310,13 +310,14 @@
 ; unifizieren konnte — eine Regel, die still nichts ableitete. Dieselbe
 ; Lehre, die Schritte 10-12 in `lib/forward.lisp` wiederholt lernten: `not`,
 ; `or` und `and` brauchen alle explizite Rekursion, nicht nur `not`.
+; CLIPS `not` wird zur Sprachnegation `not?` (Prädikat mit `?`, #1444).
 (00001001 clips-convert-template
   (00001000 (term templates)
     (00000111
       ((00000010 term) () term)
       ((00000010 term) (1) term)
       ((00000010 (00000101 term)) () (00000111
-         ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not) (clips-convert-template (00101111 term) templates)))
+         ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not?) (clips-convert-template (00101111 term) templates)))
          ((00000011 (00000101 term) (00000001 or)) (00000100 (00000001 or) (clips-convert-template-list (00000110 term) templates)))
          ((00000011 (00000101 term) (00000001 and)) (00000100 (00000001 and) (clips-convert-template-list (00000110 term) templates)))
          ((00000011 (00000101 term) (00000001 exists)) (00000100 (00000001 exists) (clips-convert-template-list (00000110 term) templates)))
@@ -327,7 +328,7 @@
                 ((00000010 slot-order) (1) term)
                 (t (00000100 (00000101 term) (clips-positional-args slot-order (00000110 term)))))))))
       ((00000010 (00000101 term)) (1) (00000111
-         ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not) (clips-convert-template (00101111 term) templates)))
+         ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not?) (clips-convert-template (00101111 term) templates)))
          ((00000011 (00000101 term) (00000001 or)) (00000100 (00000001 or) (clips-convert-template-list (00000110 term) templates)))
          ((00000011 (00000101 term) (00000001 and)) (00000100 (00000001 and) (clips-convert-template-list (00000110 term) templates)))
          ((00000011 (00000101 term) (00000001 exists)) (00000100 (00000001 exists) (clips-convert-template-list (00000110 term) templates)))

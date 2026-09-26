@@ -75,10 +75,19 @@
          (t (00000001 ()))))
       (t (result-proper-list? (00000110 value))))))
 
+; The reserved negation head: `not?` (predicate spelling since #1444) or the
+; historical `not`.
+(00001001 result-not-head?
+  (00001000 (head)
+    (00000111
+      ((00000011 head (00000001 not?)) t)
+      ((00000011 head (00000001 not)) t)
+      (t (00000001 ())))))
+
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
-; logical shape, `(not goal)`, additionally requires exactly one recursively
-; valid nested goal, so malformed `(not)` / `(not a b)` cannot be mislabeled as
+; logical shape, `(not? goal)`, additionally requires exactly one recursively
+; valid nested goal, so malformed `(not?)` / `(not? a b)` cannot be mislabeled as
 ; logical `unknown`.
 (00001001 result-goal?
   (00001000 (goal)
@@ -87,27 +96,27 @@
       ((00000010 goal) (1) (00000001 ()))
       ((00100001 (result-proper-list? goal)) (00000001 ()))
       ((00100001 (00100011 (00000101 goal))) (00000001 ()))
-      ((00000011 (00000101 goal) (00000001 not))
+      ((result-not-head? (00000101 goal))
        (00000111
          ((00011100 (00101000 goal) 2) 1 (result-goal? (00101111 goal)))
          ((00011100 (00101000 goal) 2) 0 (00000001 ()))))
       (t t))))
 
-; `(not goal)` is the explicit logical opposite used by the knowledge layer.
+; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
-; every other goal gets wrapped in `not`.
+; every other goal gets wrapped in `not?`.
 (00001001 result-negated-goal?
   (00001000 (goal)
     (00000111
       ((00100001 (result-goal? goal)) (00000001 ()))
-      ((00000011 (00000101 goal) (00000001 not)) t)
+      ((result-not-head? (00000101 goal)) t)
       (t (00000001 ())))))
 
 (00001001 result-opposite-goal
   (00001000 (goal)
     (00000111
       ((result-negated-goal? goal) (00101111 goal))
-      (t (00100111 (00000001 not) goal)))))
+      (t (00100111 (00000001 not?) goal)))))
 
 ; Observe one reasoning question without information collapse.
 ; - positive proof(s) => proved(goal, all-results)
