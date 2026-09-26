@@ -11,169 +11,169 @@
 ; `(value "...")` / `(error "Kind")` envelope, but it must not invent the
 ; expected answer.
 
-(def witness-field
-  (lambda (key witness)
-    (let ((entry (assoc key witness)))
-      (cond
-        ((atom? entry) () (quote ()))
-        ((atom? entry) (1) (quote ()))
-        (t (cdr entry))))))
+(00001001 witness-field
+  (00001000 (key witness)
+    (10011100 ((entry (00101101 key witness)))
+      (00000111
+        ((00000010 entry) () (00000001 ()))
+        ((00000010 entry) (1) (00000001 ()))
+        (t (00000110 entry))))))
 
-(def witness-malformed-result
-  (lambda (reason actual)
-    (list (quote witness-result)
-          (list (quote status) (quote malformed))
-          (list (quote reason) reason)
-          (list (quote actual) actual))))
+(00001001 witness-malformed-result
+  (00001000 (reason actual)
+    (00100111 (00000001 witness-result)
+          (00100111 (00000001 status) (00000001 malformed))
+          (00100111 (00000001 reason) reason)
+          (00100111 (00000001 actual) actual))))
 
-(def witness-result-record
-  (lambda (status expected actual)
-    (list (quote witness-result)
-          (list (quote status) status)
-          (list (quote expected) expected)
-          (list (quote actual) actual))))
+(00001001 witness-result-record
+  (00001000 (status expected actual)
+    (00100111 (00000001 witness-result)
+          (00100111 (00000001 status) status)
+          (00100111 (00000001 expected) expected)
+          (00100111 (00000001 actual) actual))))
 
 ; #218 supersession layer.
 ; The old corpus remains historical evidence that atom/eq once returned T/NIL.
 ; Current authority maps only those ratified historical contracts to the new
 ; structural result data. No unrelated predicate is rewritten here.
-(def witness-superseded-outcome
-  (lambda (witness expected-entry)
-    (cond
-      ((atom? expected-entry) () (quote ()))
-      ((atom? expected-entry) (0)
-       (let ((expr (witness-field (quote expr) witness)))
-         (cond
-           ((equal? expr "(00000010 (quote radio))")
-            (list (quote value) "(1)"))
-           ((equal? expr "(00000010 (quote ()))")
-            (list (quote value) "()"))
-           ((equal? expr "(00000010 (quote (radio antenna)))")
-            (list (quote value) "(0)"))
-           ((string-prefix? "(00000011 " expr)
-            (cond
-              ((equal? (cdr expected-entry) "t")
-               (list (quote value) "(1)"))
-              ((equal? (cdr expected-entry) "()")
-               (list (quote value) "(0)"))
-              (t (quote ()))))
-           (t (quote ()))))))))
+(00001001 witness-superseded-outcome
+  (00001000 (witness expected-entry)
+    (00000111
+      ((00000010 expected-entry) () (00000001 ()))
+      ((00000010 expected-entry) (0)
+       (10011100 ((expr (witness-field (00000001 expr) witness)))
+         (00000111
+           ((00100010 expr "(00000010 (quote radio))")
+            (00100111 (00000001 value) "(1)"))
+           ((00100010 expr "(00000010 (quote ()))")
+            (00100111 (00000001 value) "()"))
+           ((00100010 expr "(00000010 (quote (radio antenna)))")
+            (00100111 (00000001 value) "(0)"))
+           ((00111101 "(00000011 " expr)
+            (00000111
+              ((00100010 (00000110 expected-entry) "t")
+               (00100111 (00000001 value) "(1)"))
+              ((00100010 (00000110 expected-entry) "()")
+               (00100111 (00000001 value) "(0)"))
+              (t (00000001 ()))))
+           (t (00000001 ()))))))))
 
 ; Convert one authoritative conformance row into the current expected-outcome
 ; envelope. A non-empty supersession record wins over the historical expected
 ; field; otherwise the row is interpreted exactly as committed.
-(def witness-expected-outcome
-  (lambda (witness)
-    (let ((expected-entry (assoc (quote expected) witness))
-          (error-entry (assoc (quote error) witness)))
-      (let ((superseded (witness-superseded-outcome witness expected-entry)))
-        (cond
-          ((atom? superseded) (0) superseded)
-          ((and expected-entry error-entry)
-           (list (quote malformed) (quote expected-and-error)))
-          ((and (00100001 (10110001 (00000010 expected-entry))) (00100001 (10110001 (00000010 error-entry))))
-           (list (quote malformed) (quote missing-outcome)))
+(00001001 witness-expected-outcome
+  (00001000 (witness)
+    (10011100 ((expected-entry (00101101 (00000001 expected) witness))
+          (error-entry (00101101 (00000001 error) witness)))
+      (10011100 ((superseded (witness-superseded-outcome witness expected-entry)))
+        (00000111
+          ((00000010 superseded) (0) superseded)
+          ((10011010 expected-entry error-entry)
+           (00100111 (00000001 malformed) (00000001 expected-and-error)))
+          ((10011010 (00100001 (10110001 (00000010 expected-entry))) (00100001 (10110001 (00000010 error-entry))))
+           (00100111 (00000001 malformed) (00000001 missing-outcome)))
           (expected-entry
-           (list (quote value) (cdr expected-entry)))
+           (00100111 (00000001 value) (00000110 expected-entry)))
           (t
-           (list (quote error) (cdr error-entry))))))))
+           (00100111 (00000001 error) (00000110 error-entry))))))))
 
 ; The normative comparator. Backends provide ACTUAL only. Expected authority is
 ; read/derived above in Lisp.
-(def witness-verdict
-  (lambda (witness actual)
-    (let ((expected (witness-expected-outcome witness)))
-      (cond
-        ((eq? (car expected) (quote malformed))
-         (witness-malformed-result (second expected) actual))
-        ((equal? expected actual)
-         (witness-result-record (quote pass) expected actual))
+(00001001 witness-verdict
+  (00001000 (witness actual)
+    (10011100 ((expected (witness-expected-outcome witness)))
+      (00000111
+        ((00000011 (00000101 expected) (00000001 malformed))
+         (witness-malformed-result (00101111 expected) actual))
+        ((00100010 expected actual)
+         (witness-result-record (00000001 pass) expected actual))
         (t
-         (witness-result-record (quote fail) expected actual))))))
+         (witness-result-record (00000001 fail) expected actual))))))
 
 ; #218/#220 transition: host observers consume an explicit status datum instead
 ; of asking Lisp for a universal truth value.
-(def witness-status
-  (lambda (result)
-    (second (second result))))
+(00001001 witness-status
+  (00001000 (result)
+    (00101111 (00101111 result))))
 
 ; Migration-only adapter for older host observers not yet converted to
 ; `witness-status`. It dispatches on the explicit status datum; it does NOT
 ; coerce an arbitrary Lisp value to truth. New/modified observers must use
 ; `witness-status` directly. Remove this with the last old observer under #220.
-(def witness-pass?
-  (lambda (result)
-    (cond
+(00001001 witness-pass?
+  (00001000 (result)
+    (00000111
       ((witness-status result) pass t)
-      ((witness-status result) fail (quote ()))
-      ((witness-status result) malformed (quote ()))
-      (t (quote ())))))
+      ((witness-status result) fail (00000001 ()))
+      ((witness-status result) malformed (00000001 ()))
+      (t (00000001 ())))))
 
 ; Meta-eval errors are Lisp data, not host exceptions. Normalize only the named
 ; correspondence already established by the meta-evaluator evidence.
-(def witness-meta-error-kind
-  (lambda (kind)
-    (cond
-      ((eq? kind (quote unbound-symbol)) "UnknownSymbol")
-      ((eq? kind (quote not-callable)) "Type")
-      ((eq? kind (quote arity)) "Arity")
-      ((eq? kind (quote invalid-form)) "InvalidForm")
+(00001001 witness-meta-error-kind
+  (00001000 (kind)
+    (00000111
+      ((00000011 kind (00000001 unbound-symbol)) "UnknownSymbol")
+      ((00000011 kind (00000001 not-callable)) "Type")
+      ((00000011 kind (00000001 arity)) "Arity")
+      ((00000011 kind (00000001 invalid-form)) "InvalidForm")
       (t "UnsupportedMetaError"))))
 
-(def witness-meta-error?
-  (lambda (value)
-    (cond
-      ((atom? value) () (quote ()))
-      ((atom? value) (1) (quote ()))
-      ((atom? (car value)) () (eq? (car value) (quote error)))
-      ((atom? (car value)) (1) (eq? (car value) (quote error)))
-      (t (quote ())))))
+(00001001 witness-meta-error?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) () (00000001 ()))
+      ((00000010 value) (1) (00000001 ()))
+      ((00000010 (00000101 value)) () (00000011 (00000101 value) (00000001 error)))
+      ((00000010 (00000101 value)) (1) (00000011 (00000101 value) (00000001 error)))
+      (t (00000001 ())))))
 
-(def witness-meta-outcome
-  (lambda (value)
-    (cond
+(00001001 witness-meta-outcome
+  (00001000 (value)
+    (00000111
       ((witness-meta-error? value)
-       (list (quote error) (witness-meta-error-kind (second value))))
+       (00100111 (00000001 error) (witness-meta-error-kind (00101111 value))))
       (t
-       (list (quote value) (write-to-string value))))))
+       (00100111 (00000001 value) (01001100 value))))))
 
 ; Registry-driven peer-surface witness. The semantic ID is a selection input;
 ; surface→ID truth comes only from my-semantic-surface-registry.
-(def witness-peer-surface-count
-  (lambda (semantic-id entries)
-    (cond
-      ((atom? entries) () 0)
-      ((atom? entries) (1) 0)
-      ((equal? (second (car entries)) semantic-id)
-       (+ 1 (witness-peer-surface-count semantic-id (cdr entries))))
+(00001001 witness-peer-surface-count
+  (00001000 (semantic-id entries)
+    (00000111
+      ((00000010 entries) () 0)
+      ((00000010 entries) (1) 0)
+      ((00100010 (00101111 (00000101 entries)) semantic-id)
+       (00001100 1 (witness-peer-surface-count semantic-id (00000110 entries))))
       (t
-       (witness-peer-surface-count semantic-id (cdr entries))))))
+       (witness-peer-surface-count semantic-id (00000110 entries))))))
 
-(def witness-peer-surfaces-consistent?
-  (lambda (semantic-id entries)
-    (cond
-      ((atom? entries) () t)
-      ((atom? entries) (1) t)
-      ((equal? (second (car entries)) semantic-id)
-       (cond
-         ((equal? (my-semantic-id-for-surface (car (car entries))) semantic-id)
-          (witness-peer-surfaces-consistent? semantic-id (cdr entries)))
-         (t (quote ()))))
+(00001001 witness-peer-surfaces-consistent?
+  (00001000 (semantic-id entries)
+    (00000111
+      ((00000010 entries) () t)
+      ((00000010 entries) (1) t)
+      ((00100010 (00101111 (00000101 entries)) semantic-id)
+       (00000111
+         ((00100010 (my-semantic-id-for-surface (00000101 (00000101 entries))) semantic-id)
+          (witness-peer-surfaces-consistent? semantic-id (00000110 entries)))
+         (t (00000001 ()))))
       (t
-       (witness-peer-surfaces-consistent? semantic-id (cdr entries))))))
+       (witness-peer-surfaces-consistent? semantic-id (00000110 entries))))))
 
-(def witness-peer-surface-verdict
-  (lambda (semantic-id)
-    (let ((count (witness-peer-surface-count semantic-id my-semantic-surface-registry)))
-      (cond
-        ((and (> count 1)
+(00001001 witness-peer-surface-verdict
+  (00001000 (semantic-id)
+    (10011100 ((count (witness-peer-surface-count semantic-id my-semantic-surface-registry)))
+      (00000111
+        ((10011010 (00011011 count 1)
               (witness-peer-surfaces-consistent? semantic-id my-semantic-surface-registry))
-         (list (quote witness-result)
-               (list (quote status) (quote pass))
-               (list (quote semantic-id) semantic-id)
-               (list (quote surface-count) count)))
+         (00100111 (00000001 witness-result)
+               (00100111 (00000001 status) (00000001 pass))
+               (00100111 (00000001 semantic-id) semantic-id)
+               (00100111 (00000001 surface-count) count)))
         (t
-         (list (quote witness-result)
-               (list (quote status) (quote fail))
-               (list (quote semantic-id) semantic-id)
-               (list (quote surface-count) count)))))))
+         (00100111 (00000001 witness-result)
+               (00100111 (00000001 status) (00000001 fail))
+               (00100111 (00000001 semantic-id) semantic-id)
+               (00100111 (00000001 surface-count) count)))))))

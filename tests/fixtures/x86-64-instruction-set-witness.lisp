@@ -7,8 +7,8 @@
 (load "lib/machine/encoding/x86-64.lisp")
 (load "lib/machine/admission/x86-64.lisp")
 
-(def x86-instruction-witness-tests
-  (quote
+(00001001 x86-instruction-witness-tests
+  (00000001
     (((encode lea-basic)
       (x86-encode-lea-r64-mem-disp8 (quote rax) (quote rbx) 10)
       (72 141 67 10))
@@ -704,34 +704,34 @@
         0)
       1))))
 
-(def x86-instruction-eval-row
-  (lambda (row)
-    (let ((name (car row))
-          (expr (second row))
-          (expected (third row)))
-      (let ((actual (eval expr)))
-        (cond
-          ((equal? actual expected) (1)
-           (quote pass))
+(00001001 x86-instruction-eval-row
+  (00001000 (row)
+    (10011100 ((name (00000101 row))
+          (expr (00101111 row))
+          (expected (00110000 row)))
+      (10011100 ((actual (01001101 expr)))
+        (00000111
+          ((00100010 actual expected) (1)
+           (00000001 pass))
           (t
-           (list (quote fail) name expected actual)))))))
+           (00100111 (00000001 fail) name expected actual)))))))
 
-(def x86-instruction-run-all
-  (lambda (rows)
-    (cond
-      ((atom? rows) () (quote (x86-64-instruction-set-witness (status pass))))
-      ((atom? rows) (1) (quote (x86-64-instruction-set-witness (status pass))))
+(00001001 x86-instruction-run-all
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) () (00000001 (x86-64-instruction-set-witness (status pass))))
+      ((00000010 rows) (1) (00000001 (x86-64-instruction-set-witness (status pass))))
       (t
-       (let ((result (x86-instruction-eval-row (car rows))))
-         (cond
-           ((equal? result (quote pass))
-            (x86-instruction-run-all (cdr rows)))
+       (10011100 ((result (x86-instruction-eval-row (00000101 rows))))
+         (00000111
+           ((00100010 result (00000001 pass))
+            (x86-instruction-run-all (00000110 rows)))
            (t
-            (list
-              (quote x86-64-instruction-set-witness)
-              (quote (status fail))
-              (list (quote check) (second result))
-              (list (quote expected) (third result))
-              (list (quote actual) (fourth result))))))))))
+            (00100111
+              (00000001 x86-64-instruction-set-witness)
+              (00000001 (status fail))
+              (00100111 (00000001 check) (00101111 result))
+              (00100111 (00000001 expected) (00110000 result))
+              (00100111 (00000001 actual) (00110001 result))))))))))
 
 (x86-instruction-run-all x86-instruction-witness-tests)

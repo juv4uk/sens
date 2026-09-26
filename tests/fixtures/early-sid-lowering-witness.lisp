@@ -5,94 +5,94 @@
 ;
 ; Backend boundary data is only: exact SID, arguments, portable contract.
 
-(def early-sid-lowering-backend-request?
-  (lambda (request)
-    (cond
-      ((atom? request)
+(00001001 early-sid-lowering-backend-request?
+  (00001000 (request)
+    (00000111
+      ((00000010 request)
        ()
-       (quote no))
-      ((atom? request)
+       (00000001 no))
+      ((00000010 request)
        (0)
-       (let ((first-field (car request)))
-         (cond
-           ((atom? first-field)
+       (10011100 ((first-field (00000101 request)))
+         (00000111
+           ((00000010 first-field)
             (0)
-            (cond
-              ((equal? (car first-field) (quote sid))
+            (00000111
+              ((00100010 (00000101 first-field) (00000001 sid))
                (1)
-               (quote yes))
-              ((equal? (car first-field) (quote sid))
+               (00000001 yes))
+              ((00100010 (00000101 first-field) (00000001 sid))
                (0)
-               (quote no))))
-           ((atom? first-field)
+               (00000001 no))))
+           ((00000010 first-field)
             (1)
-            (quote no))
-           ((atom? first-field)
+            (00000001 no))
+           ((00000010 first-field)
             ()
-            (quote no))))))))
+            (00000001 no))))))))
 
-(def early-sid-lower
-  (lambda (registry surface arguments contract)
-    (let ((sid (semantic-registry-id-in registry surface)))
-      (cond
-        ((atom? sid)
+(00001001 early-sid-lower
+  (00001000 (registry surface arguments contract)
+    (10011100 ((sid (semantic-registry-id-in registry surface)))
+      (00000111
+        ((00000010 sid)
          ()
-         (quote rejected))
-        ((atom? sid)
+         (00000001 rejected))
+        ((00000010 sid)
          (1)
-         (list
-           (cons (quote sid) sid)
-           (cons (quote arguments) arguments)
-           (cons (quote contract) contract)))))))
+         (00100111
+           (00000100 (00000001 sid) sid)
+           (00000100 (00000001 arguments) arguments)
+           (00000100 (00000001 contract) contract)))))))
 
-(def early-sid-lowering-peer-check
-  (lambda (registry surface-a surface-b surface-c surface-d)
-    (let ((a (semantic-registry-id-in registry surface-a))
+(00001001 early-sid-lowering-peer-check
+  (00001000 (registry surface-a surface-b surface-c surface-d)
+    (10011100 ((a (semantic-registry-id-in registry surface-a))
           (b (semantic-registry-id-in registry surface-b))
           (c (semantic-registry-id-in registry surface-c))
           (d (semantic-registry-id-in registry surface-d)))
-      (cond
-        ((equal? a b)
+      (00000111
+        ((00100010 a b)
          (1)
-         (cond
-           ((equal? b c)
+         (00000111
+           ((00100010 b c)
             (1)
-            (cond
-              ((equal? c d)
+            (00000111
+              ((00100010 c d)
                (1)
-               (list (quote same) a))
-              ((equal? c d)
+               (00100111 (00000001 same) a))
+              ((00100010 c d)
                (0)
-               (quote distinct))))
-           ((equal? b c)
+               (00000001 distinct))))
+           ((00100010 b c)
             (0)
-            (quote distinct))))
-        ((equal? a b)
+            (00000001 distinct))))
+        ((00100010 a b)
          (0)
-         (quote distinct))))))
+         (00000001 distinct))))))
 
-(def early-sid-lowering-witness
-  (lambda (registry-source)
-    (let ((registry (semantic-registry-read-source registry-source)))
-      (let ((atom-en (semantic-registry-id-in registry (quote atom?)))
-            (atom-uk (semantic-registry-id-in registry (quote атом?)))
-            (atom-ukr (semantic-registry-id-in registry (quote атом?)))
-            (atom-sa (semantic-registry-id-in registry (quote aṇu)))
-            (atom-sym (semantic-registry-id-in registry (quote .?))))
-        (list
+(00001001 early-sid-lowering-witness
+  (00001000 (registry-source)
+    (10011100 ((registry (semantic-registry-read-source registry-source)))
+      (10011100 ((atom-en (semantic-registry-id-in registry (00000001 atom?)))
+            (atom-uk (semantic-registry-id-in registry (00000001 атом?)))
+            (atom-ukr (semantic-registry-id-in registry (00000001 атом?)))
+            (atom-sa (semantic-registry-id-in registry (00000001 aṇu)))
+            (atom-sym (semantic-registry-id-in registry (00000001 .?))))
+        (00100111
           (early-sid-lowering-peer-check
             registry
-            (quote atom?) (quote атом?) (quote aṇu) (quote .?))
+            (00000001 atom?) (00000001 атом?) (00000001 aṇu) (00000001 .?))
           (early-sid-lowering-backend-request?
             (early-sid-lower
               registry
-              (quote atom?)
-              (quote (x))
-              (quote (portable-result-domain structural-relation))))
+              (00000001 atom?)
+              (00000001 (x))
+              (00000001 (portable-result-domain structural-relation))))
           (early-sid-lowering-backend-request?
-            (quote (surface atom?)))
-          (equal? atom-en atom-uk)
-          (equal? atom-en atom-ukr)
-          (equal? atom-en atom-sa)
-          (equal? atom-en atom-sym)
-          (semantic-registry-id-in registry (quote not-admitted-by-language)))))))
+            (00000001 (surface atom?)))
+          (00100010 atom-en atom-uk)
+          (00100010 atom-en atom-ukr)
+          (00100010 atom-en atom-sa)
+          (00100010 atom-en atom-sym)
+          (semantic-registry-id-in registry (00000001 not-admitted-by-language)))))))

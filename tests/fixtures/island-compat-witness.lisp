@@ -3,108 +3,108 @@
 ; The host may transport contracts/island-compat-contract.lisp as bytes and
 ; bind it to island-compat-document. Every semantic expectation remains here.
 
-(def island-compat-schema
-  (lambda () (car island-compat-document)))
+(00001001 island-compat-schema
+  (00001000 () (00000101 island-compat-document)))
 
-(def island-compat-entries
-  (lambda () (cdr island-compat-document)))
+(00001001 island-compat-entries
+  (00001000 () (00000110 island-compat-document)))
 
-(def island-compat-field
-  (lambda (entry field)
-    (let ((found (assoc field entry)))
-      (cond
-        ((atom? found) () (quote ()))
-        ((atom? found) (1) (quote ()))
-        (t (cdr found))))))
+(00001001 island-compat-field
+  (00001000 (entry field)
+    (10011100 ((found (00101101 field entry)))
+      (00000111
+        ((00000010 found) () (00000001 ()))
+        ((00000010 found) (1) (00000001 ()))
+        (t (00000110 found))))))
 
-(def island-compat-find
-  (lambda (identity entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      ((equal? (island-compat-field (car entries) (quote identity)) identity)
-       (car entries))
-      (t (island-compat-find identity (cdr entries))))))
+(00001001 island-compat-find
+  (00001000 (identity entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      ((00100010 (island-compat-field (00000101 entries) (00000001 identity)) identity)
+       (00000101 entries))
+      (t (island-compat-find identity (00000110 entries))))))
 
-(def island-compat-entry
-  (lambda (identity)
+(00001001 island-compat-entry
+  (00001000 (identity)
     (island-compat-find identity (island-compat-entries))))
 
-(def island-compat-check
-  (lambda (identity field expected)
-    (let ((entry (island-compat-entry identity)))
-      (cond
-        ((atom? entry) () (list (quote missing-entry) identity))
-        ((atom? entry) (1) (list (quote missing-entry) identity))
-        ((equal? (island-compat-field entry field) expected) (quote ()))
-        (t (list (quote mismatch) identity field expected
+(00001001 island-compat-check
+  (00001000 (identity field expected)
+    (10011100 ((entry (island-compat-entry identity)))
+      (00000111
+        ((00000010 entry) () (00100111 (00000001 missing-entry) identity))
+        ((00000010 entry) (1) (00100111 (00000001 missing-entry) identity))
+        ((00100010 (island-compat-field entry field) expected) (00000001 ()))
+        (t (00100111 (00000001 mismatch) identity field expected
                  (island-compat-field entry field)))))))
 
-(def island-compat-first-failure
-  (lambda (checks)
-    (cond
-      ((atom? checks) () (quote ()))
-      ((atom? checks) (1) (quote ()))
-      ((atom? (car checks)) () (island-compat-first-failure (cdr checks)))
-      ((atom? (car checks)) (1) (island-compat-first-failure (cdr checks)))
-      (t (car checks)))))
+(00001001 island-compat-first-failure
+  (00001000 (checks)
+    (00000111
+      ((00000010 checks) () (00000001 ()))
+      ((00000010 checks) (1) (00000001 ()))
+      ((00000010 (00000101 checks)) () (island-compat-first-failure (00000110 checks)))
+      ((00000010 (00000101 checks)) (1) (island-compat-first-failure (00000110 checks)))
+      (t (00000101 checks)))))
 
-(def island-compat-witness
-  (lambda ()
-    (let ((failure
+(00001001 island-compat-witness
+  (00001000 ()
+    (10011100 ((failure
             (island-compat-first-failure
-              (list
+              (00100111
                 (island-compat-check
-                  (quote semantic-id) (quote owner) (quote my-lisp))
+                  (00000001 semantic-id) (00000001 owner) (00000001 my-lisp))
                 (island-compat-check
-                  (quote semantic-id) (quote representation) (quote opaque-u8))
+                  (00000001 semantic-id) (00000001 representation) (00000001 opaque-u8))
                 (island-compat-check
-                  (quote semantic-id) (quote kernel-interpretation) (quote forbidden))
+                  (00000001 semantic-id) (00000001 kernel-interpretation) (00000001 forbidden))
                 (island-compat-check
-                  (quote execution-witness) (quote cardinality) (quote zero-or-more))
+                  (00000001 execution-witness) (00000001 cardinality) (00000001 zero-or-more))
                 (island-compat-check
-                  (quote execution-witness) (quote multiple-kernels-per-sid) (quote allowed))
+                  (00000001 execution-witness) (00000001 multiple-kernels-per-sid) (00000001 allowed))
                 (island-compat-check
-                  (quote island-call) (quote producer-required) (quote yes))
+                  (00000001 island-call) (00000001 producer-required) (00000001 yes))
                 (island-compat-check
-                  (quote island-call) (quote provenance-preserved) (quote yes))
+                  (00000001 island-call) (00000001 provenance-preserved) (00000001 yes))
                 (island-compat-check
-                  (quote island-call) (quote universal-result-coercion) (quote forbidden))
+                  (00000001 island-call) (00000001 universal-result-coercion) (00000001 forbidden))
                 (island-compat-check
-                  (quote zero-results) (quote result-count) 0)
+                  (00000001 zero-results) (00000001 result-count) 0)
                 (island-compat-check
-                  (quote zero-results) (quote literal-empty-list-alias) (quote forbidden))
+                  (00000001 zero-results) (00000001 literal-empty-list-alias) (00000001 forbidden))
                 (island-compat-check
-                  (quote one-result) (quote result-count) 1)
+                  (00000001 one-result) (00000001 result-count) 1)
                 (island-compat-check
-                  (quote many-results) (quote result-count) (quote many))
+                  (00000001 many-results) (00000001 result-count) (00000001 many))
                 (island-compat-check
-                  (quote many-results) (quote multiplicity-preserved) (quote yes))
+                  (00000001 many-results) (00000001 multiplicity-preserved) (00000001 yes))
                 (island-compat-check
-                  (quote bridge) (quote missing-bridge) (quote legal))
+                  (00000001 bridge) (00000001 missing-bridge) (00000001 legal))
                 (island-compat-check
-                  (quote bridge) (quote semantic-equivalence-assumed) (quote no))
+                  (00000001 bridge) (00000001 semantic-equivalence-assumed) (00000001 no))
                 (island-compat-check
-                  (quote missing-kernel) (quote legal) (quote yes))
+                  (00000001 missing-kernel) (00000001 legal) (00000001 yes))
                 (island-compat-check
-                  (quote missing-kernel) (quote changes-sid-meaning) (quote no))
+                  (00000001 missing-kernel) (00000001 changes-sid-meaning) (00000001 no))
                 (island-compat-check
-                  (quote missing-kernel) (quote changes-registry-numbering) (quote no))))))
-      (cond
-        ((eq? (island-compat-schema) (quote island-compat-contract/1))
-         (cond
-           ((atom? failure) () (list (quote island-compat-witness)
-                  (list (quote status) (quote pass))
-                  (list (quote detail) (quote semantic-owner-island-mechanism))))
-           ((atom? failure) (1) (list (quote island-compat-witness)
-                  (list (quote status) (quote pass))
-                  (list (quote detail) (quote semantic-owner-island-mechanism))))
+                  (00000001 missing-kernel) (00000001 changes-registry-numbering) (00000001 no))))))
+      (00000111
+        ((00000011 (island-compat-schema) (00000001 island-compat-contract/1))
+         (00000111
+           ((00000010 failure) () (00100111 (00000001 island-compat-witness)
+                  (00100111 (00000001 status) (00000001 pass))
+                  (00100111 (00000001 detail) (00000001 semantic-owner-island-mechanism))))
+           ((00000010 failure) (1) (00100111 (00000001 island-compat-witness)
+                  (00100111 (00000001 status) (00000001 pass))
+                  (00100111 (00000001 detail) (00000001 semantic-owner-island-mechanism))))
            (t
-            (list (quote island-compat-witness)
-                  (list (quote status) (quote fail))
-                  (list (quote detail) failure)))))
+            (00100111 (00000001 island-compat-witness)
+                  (00100111 (00000001 status) (00000001 fail))
+                  (00100111 (00000001 detail) failure)))))
         (t
-         (list (quote island-compat-witness)
-               (list (quote status) (quote fail))
-               (list (quote detail)
-                     (list (quote schema) (island-compat-schema)))))))))
+         (00100111 (00000001 island-compat-witness)
+               (00100111 (00000001 status) (00000001 fail))
+               (00100111 (00000001 detail)
+                     (00100111 (00000001 schema) (island-compat-schema)))))))))

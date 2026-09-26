@@ -8,22 +8,22 @@
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 (load "lib/machine/dispatch/native-first.lisp")
 
-(def native-first-totality-check
-  (lambda (expression)
-    (cond
-      ((equal?
+(00001001 native-first-totality-check
+  (00001000 (expression)
+    (00000111
+      ((00100010
          (native-first-plan expression)
-         (list (quote evaluator-fallback) expression))
+         (00100111 (00000001 evaluator-fallback) expression))
        (1)
-       (quote pass))
-      ((equal?
+       (00000001 pass))
+      ((00100010
          (native-first-plan expression)
-         (list (quote evaluator-fallback) expression))
+         (00100111 (00000001 evaluator-fallback) expression))
        (0)
-       (quote fail)))))
+       (00000001 fail)))))
 
-(list
+(00100111
   (native-first-totality-check
-    (quote ((lambda (x) (+ x 1)) 41)))
+    (00000001 ((lambda (x) (+ x 1)) 41)))
   (native-first-totality-check
-    (quote (car ((lambda (x) x) 1)))))
+    (00000001 (car ((lambda (x) x) 1)))))

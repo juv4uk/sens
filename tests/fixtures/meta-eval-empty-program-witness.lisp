@@ -4,26 +4,26 @@
 
 (load "lib/meta-eval.lisp")
 
-(def meta-eval-empty-program-check
-  (lambda ()
-    (let ((env (list (cons (quote sentinel) 42))))
-      (let ((loaded (my-eval-program (quote ()) env)))
-        (cond
-          ((equal? (car loaded) env) (1)
-           (cond
-             ((equal? (cdr loaded) (quote ())) (1)
-              (quote (meta-eval-empty-program-witness (status pass))))
-             ((equal? (cdr loaded) (quote ())) (0)
-              (list
-                (quote meta-eval-empty-program-witness)
-                (quote (status fail))
-                (quote (law empty-result))
-                (list (quote actual) (cdr loaded))))))
-          ((equal? (car loaded) env) (0)
-           (list
-             (quote meta-eval-empty-program-witness)
-             (quote (status fail))
-             (quote (law environment-preserved))
-             (list (quote actual) (car loaded)))))))))
+(00001001 meta-eval-empty-program-check
+  (00001000 ()
+    (10011100 ((env (00100111 (00000100 (00000001 sentinel) 42))))
+      (10011100 ((loaded (my-eval-program (00000001 ()) env)))
+        (00000111
+          ((00100010 (00000101 loaded) env) (1)
+           (00000111
+             ((00100010 (00000110 loaded) (00000001 ())) (1)
+              (00000001 (meta-eval-empty-program-witness (status pass))))
+             ((00100010 (00000110 loaded) (00000001 ())) (0)
+              (00100111
+                (00000001 meta-eval-empty-program-witness)
+                (00000001 (status fail))
+                (00000001 (law empty-result))
+                (00100111 (00000001 actual) (00000110 loaded))))))
+          ((00100010 (00000101 loaded) env) (0)
+           (00100111
+             (00000001 meta-eval-empty-program-witness)
+             (00000001 (status fail))
+             (00000001 (law environment-preserved))
+             (00100111 (00000001 actual) (00000101 loaded)))))))))
 
 (meta-eval-empty-program-check)

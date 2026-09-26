@@ -19,484 +19,484 @@
 ; promotion fail closed without giving Rust or a second hand-written table any
 ; authority.
 
-(def postcore-authority-form
-  (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
+(00001001 postcore-authority-form
+  (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
 
-(def postcore-authority-rows postcore-authority-form)
+(00001001 postcore-authority-rows postcore-authority-form)
 
-(def postcore-member-status
-  (lambda (needle items)
-    (cond
-      ((atom? items) ()
-       (quote absent))
-      ((atom? items) (0)
-       (cond
-         ((eq? needle (car items)) (1)
-          (quote present))
-         ((eq? needle (car items)) (0)
-          (postcore-member-status needle (cdr items))))))))
+(00001001 postcore-member-status
+  (00001000 (needle items)
+    (00000111
+      ((00000010 items) ()
+       (00000001 absent))
+      ((00000010 items) (0)
+       (00000111
+         ((00000011 needle (00000101 items)) (1)
+          (00000001 present))
+         ((00000011 needle (00000101 items)) (0)
+          (postcore-member-status needle (00000110 items))))))))
 
-(def postcore-find-authority-row
-  (lambda (semantic-id rows)
-    (cond
-      ((atom? rows) ()
-       (quote ()))
-      ((atom? rows) (0)
-       (let ((row (car rows)))
-         (cond
-           ((= semantic-id (car row)) 1
+(00001001 postcore-find-authority-row
+  (00001000 (semantic-id rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 ()))
+      ((00000010 rows) (0)
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00011100 semantic-id (00000101 row)) 1
             row)
-           ((= semantic-id (car row)) 0
-            (postcore-find-authority-row semantic-id (cdr rows)))))))))
+           ((00011100 semantic-id (00000101 row)) 0
+            (postcore-find-authority-row semantic-id (00000110 rows)))))))))
 
-(def postcore-surfaces-with-status-onto
-  (lambda (status surfaces acc)
-    (cond
-      ((atom? surfaces) ()
-       (reverse acc))
-      ((atom? surfaces) (0)
-       (let* ((surface (car surfaces))
-              (word (second surface))
-              (surface-status (third surface)))
-         (cond
-           ((eq? surface-status status) (1)
-            (cond
-              ((eq? word (quote —)) (1)
+(00001001 postcore-surfaces-with-status-onto
+  (00001000 (status surfaces acc)
+    (00000111
+      ((00000010 surfaces) ()
+       (00101010 acc))
+      ((00000010 surfaces) (0)
+       (10011101 ((surface (00000101 surfaces))
+              (word (00101111 surface))
+              (surface-status (00110000 surface)))
+         (00000111
+           ((00000011 surface-status status) (1)
+            (00000111
+              ((00000011 word (00000001 —)) (1)
                (postcore-surfaces-with-status-onto
                  status
-                 (cdr surfaces)
+                 (00000110 surfaces)
                  acc))
-              ((eq? word (quote —)) (0)
-               (cond
-                 ((eq? (postcore-member-status word acc) (quote present))
+              ((00000011 word (00000001 —)) (0)
+               (00000111
+                 ((00000011 (postcore-member-status word acc) (00000001 present))
                   (1)
                   (postcore-surfaces-with-status-onto
                     status
-                    (cdr surfaces)
+                    (00000110 surfaces)
                     acc))
-                 ((eq? (postcore-member-status word acc) (quote absent))
+                 ((00000011 (postcore-member-status word acc) (00000001 absent))
                   (1)
                   (postcore-surfaces-with-status-onto
                     status
-                    (cdr surfaces)
-                    (cons word acc)))))))
-           ((eq? surface-status status) (0)
-            (postcore-surfaces-with-status-onto status (cdr surfaces) acc))))))))
+                    (00000110 surfaces)
+                    (00000100 word acc)))))))
+           ((00000011 surface-status status) (0)
+            (postcore-surfaces-with-status-onto status (00000110 surfaces) acc))))))))
 
-(def postcore-surfaces-with-status
-  (lambda (status registry-row)
-    (cond
-      ((atom? registry-row) ()
-       (quote ()))
-      ((atom? registry-row) (0)
-       (postcore-surfaces-with-status-onto status (cdr registry-row) (quote ()))))))
+(00001001 postcore-surfaces-with-status
+  (00001000 (status registry-row)
+    (00000111
+      ((00000010 registry-row) ()
+       (00000001 ()))
+      ((00000010 registry-row) (0)
+       (postcore-surfaces-with-status-onto status (00000110 registry-row) (00000001 ()))))))
 
-(def postcore-materialization-declarations-onto
-  (lambda (forms acc)
-    (cond
-      ((atom? forms) ()
-       (reverse acc))
-      ((atom? forms) (0)
-       (let ((form (car forms)))
-         (cond
-           ((atom? form) (0)
-            (cond
-              ((eq? (car form) (quote my-postcore-materialize-stable-peers))
+(00001001 postcore-materialization-declarations-onto
+  (00001000 (forms acc)
+    (00000111
+      ((00000010 forms) ()
+       (00101010 acc))
+      ((00000010 forms) (0)
+       (10011100 ((form (00000101 forms)))
+         (00000111
+           ((00000010 form) (0)
+            (00000111
+              ((00000011 (00000101 form) (00000001 my-postcore-materialize-stable-peers))
                (1)
                (postcore-materialization-declarations-onto
-                 (cdr forms)
-                 (cons (list (second form) (third form)) acc)))
-              ((eq? (car form) (quote my-postcore-materialize-stable-peers))
+                 (00000110 forms)
+                 (00000100 (00100111 (00101111 form) (00110000 form)) acc)))
+              ((00000011 (00000101 form) (00000001 my-postcore-materialize-stable-peers))
                (0)
                (postcore-materialization-declarations-onto
-                 (cdr forms)
+                 (00000110 forms)
                  acc))))
-           ((atom? form) (1)
-            (postcore-materialization-declarations-onto (cdr forms) acc))
-           ((atom? form) ()
-            (postcore-materialization-declarations-onto (cdr forms) acc))))))))
+           ((00000010 form) (1)
+            (postcore-materialization-declarations-onto (00000110 forms) acc))
+           ((00000010 form) ()
+            (postcore-materialization-declarations-onto (00000110 forms) acc))))))))
 
-(def postcore-materialization-declarations
-  (lambda (path)
+(00001001 postcore-materialization-declarations
+  (00001000 (path)
     (postcore-materialization-declarations-onto
-      (read-all (read-file path))
-      (quote ()))))
+      (01001011 (10100110 path))
+      (00000001 ()))))
 
-(def postcore-declarations
-  (append
+(00001001 postcore-declarations
+  (00101001
     (postcore-materialization-declarations "lib/time.lisp")
-    (append
+    (00101001
       (postcore-materialization-declarations "lib/process.lisp")
-      (append
+      (00101001
         (postcore-materialization-declarations "lib/tcp.lisp")
         (postcore-materialization-declarations "lib/fs.lisp")))))
 
-(def postcore-declarations-match-authority
-  (lambda (declarations)
-    (cond
-      ((atom? declarations) ()
-       (quote registry-consistent))
-      ((atom? declarations) (0)
-       (let* ((declaration (car declarations))
-              (semantic-id (car declaration))
-              (source (second declaration))
+(00001001 postcore-declarations-match-authority
+  (00001000 (declarations)
+    (00000111
+      ((00000010 declarations) ()
+       (00000001 registry-consistent))
+      ((00000010 declarations) (0)
+       (10011101 ((declaration (00000101 declarations))
+              (semantic-id (00000101 declaration))
+              (source (00101111 declaration))
               (row
                 (postcore-find-authority-row
                   semantic-id
                   postcore-authority-rows))
               (stable-peers
-                (postcore-surfaces-with-status (quote stable) row)))
-         (cond
-           ((atom? row) ()
-            (quote registry-drift))
-           ((atom? row) (0)
-            (cond
-              ((eq? (postcore-member-status source stable-peers) (quote present))
+                (postcore-surfaces-with-status (00000001 stable) row)))
+         (00000111
+           ((00000010 row) ()
+            (00000001 registry-drift))
+           ((00000010 row) (0)
+            (00000111
+              ((00000011 (postcore-member-status source stable-peers) (00000001 present))
                (1)
-               (postcore-declarations-match-authority (cdr declarations)))
-              ((eq? (postcore-member-status source stable-peers) (quote absent))
+               (postcore-declarations-match-authority (00000110 declarations)))
+              ((00000011 (postcore-member-status source stable-peers) (00000001 absent))
                (1)
-               (quote registry-drift))))))))))
+               (00000001 registry-drift))))))))))
 
-(def postcore-expected-peer-groups-onto
-  (lambda (declarations acc)
-    (cond
-      ((atom? declarations) ()
-       (reverse acc))
-      ((atom? declarations) (0)
-       (let* ((declaration (car declarations))
-              (semantic-id (car declaration))
+(00001001 postcore-expected-peer-groups-onto
+  (00001000 (declarations acc)
+    (00000111
+      ((00000010 declarations) ()
+       (00101010 acc))
+      ((00000010 declarations) (0)
+       (10011101 ((declaration (00000101 declarations))
+              (semantic-id (00000101 declaration))
               (row
                 (postcore-find-authority-row
                   semantic-id
                   postcore-authority-rows))
               (stable-peers
-                (postcore-surfaces-with-status (quote stable) row)))
-         (cond
-           ((> (length stable-peers) 1) 1
+                (postcore-surfaces-with-status (00000001 stable) row)))
+         (00000111
+           ((00011011 (00101000 stable-peers) 1) 1
             (postcore-expected-peer-groups-onto
-              (cdr declarations)
-              (cons (cons semantic-id stable-peers) acc)))
-           ((> (length stable-peers) 1) 0
+              (00000110 declarations)
+              (00000100 (00000100 semantic-id stable-peers) acc)))
+           ((00011011 (00101000 stable-peers) 1) 0
             (postcore-expected-peer-groups-onto
-              (cdr declarations)
+              (00000110 declarations)
               acc))))))))
 
-(def postcore-expected-peer-groups
-  (postcore-expected-peer-groups-onto postcore-declarations (quote ())))
+(00001001 postcore-expected-peer-groups
+  (postcore-expected-peer-groups-onto postcore-declarations (00000001 ())))
 
-(def postcore-find-group
-  (lambda (semantic-id groups)
-    (cond
-      ((atom? groups) ()
-       (quote ()))
-      ((atom? groups) (0)
-       (let ((group (car groups)))
-         (cond
-           ((= semantic-id (car group)) 1
+(00001001 postcore-find-group
+  (00001000 (semantic-id groups)
+    (00000111
+      ((00000010 groups) ()
+       (00000001 ()))
+      ((00000010 groups) (0)
+       (10011100 ((group (00000101 groups)))
+         (00000111
+           ((00011100 semantic-id (00000101 group)) 1
             group)
-           ((= semantic-id (car group)) 0
-            (postcore-find-group semantic-id (cdr groups)))))))))
+           ((00011100 semantic-id (00000101 group)) 0
+            (postcore-find-group semantic-id (00000110 groups)))))))))
 
-(def postcore-peer-members-match
-  (lambda (expected actual)
-    (cond
-      ((atom? expected) ()
-       (quote registry-consistent))
-      ((atom? expected) (0)
-       (cond
-         ((eq? (postcore-member-status (car expected) actual) (quote present))
+(00001001 postcore-peer-members-match
+  (00001000 (expected actual)
+    (00000111
+      ((00000010 expected) ()
+       (00000001 registry-consistent))
+      ((00000010 expected) (0)
+       (00000111
+         ((00000011 (postcore-member-status (00000101 expected) actual) (00000001 present))
           (1)
-          (postcore-peer-members-match (cdr expected) actual))
-         ((eq? (postcore-member-status (car expected) actual) (quote absent))
+          (postcore-peer-members-match (00000110 expected) actual))
+         ((00000011 (postcore-member-status (00000101 expected) actual) (00000001 absent))
           (1)
-          (quote registry-drift)))))))
+          (00000001 registry-drift)))))))
 
-(def postcore-peer-sets-match
-  (lambda (expected actual)
-    (cond
-      ((= (length expected) (length actual)) 0
-       (quote registry-drift))
-      ((= (length expected) (length actual)) 1
+(00001001 postcore-peer-sets-match
+  (00001000 (expected actual)
+    (00000111
+      ((00011100 (00101000 expected) (00101000 actual)) 0
+       (00000001 registry-drift))
+      ((00011100 (00101000 expected) (00101000 actual)) 1
        (postcore-peer-members-match expected actual)))))
 
-(def postcore-projection-groups-match
-  (lambda (expected actual)
-    (cond
-      ((atom? expected) ()
-       (quote registry-consistent))
-      ((atom? expected) (0)
-       (let* ((expected-group (car expected))
-              (semantic-id (car expected-group))
+(00001001 postcore-projection-groups-match
+  (00001000 (expected actual)
+    (00000111
+      ((00000010 expected) ()
+       (00000001 registry-consistent))
+      ((00000010 expected) (0)
+       (10011101 ((expected-group (00000101 expected))
+              (semantic-id (00000101 expected-group))
               (actual-group (postcore-find-group semantic-id actual)))
-         (cond
-           ((atom? actual-group) ()
-            (quote registry-drift))
-           ((atom? actual-group) (0)
-            (cond
-              ((eq?
+         (00000111
+           ((00000010 actual-group) ()
+            (00000001 registry-drift))
+           ((00000010 actual-group) (0)
+            (00000111
+              ((00000011
                  (postcore-peer-sets-match
-                   (cdr expected-group)
-                   (cdr actual-group))
-                 (quote registry-consistent))
+                   (00000110 expected-group)
+                   (00000110 actual-group))
+                 (00000001 registry-consistent))
                (1)
-               (postcore-projection-groups-match (cdr expected) actual))
-              ((eq?
+               (postcore-projection-groups-match (00000110 expected) actual))
+              ((00000011
                  (postcore-peer-sets-match
-                   (cdr expected-group)
-                   (cdr actual-group))
-                 (quote registry-drift))
+                   (00000110 expected-group)
+                   (00000110 actual-group))
+                 (00000001 registry-drift))
                (1)
-               (quote registry-drift))))))))))
+               (00000001 registry-drift))))))))))
 
-(def postcore-projection-matches-authority
-  (lambda (expected actual)
-    (cond
-      ((= (length expected) (length actual)) 0
-       (quote registry-drift))
-      ((= (length expected) (length actual)) 1
+(00001001 postcore-projection-matches-authority
+  (00001000 (expected actual)
+    (00000111
+      ((00011100 (00101000 expected) (00101000 actual)) 0
+       (00000001 registry-drift))
+      ((00011100 (00101000 expected) (00101000 actual)) 1
        (postcore-projection-groups-match expected actual)))))
 
-(def postcore-surfaces-unbound
-  (lambda (surfaces)
-    (cond
-      ((atom? surfaces) ()
-       (quote surfaces-unbound))
-      ((atom? surfaces) (0)
-       (cond
-         ((eq?
-            (my-postcore-binding-status (car surfaces) (env))
-            (quote absent))
+(00001001 postcore-surfaces-unbound
+  (00001000 (surfaces)
+    (00000111
+      ((00000010 surfaces) ()
+       (00000001 surfaces-unbound))
+      ((00000010 surfaces) (0)
+       (00000111
+         ((00000011
+            (my-postcore-binding-status (00000101 surfaces) (01001110))
+            (00000001 absent))
           (1)
-          (postcore-surfaces-unbound (cdr surfaces)))
-         ((eq?
-            (my-postcore-binding-status (car surfaces) (env))
-            (quote present))
+          (postcore-surfaces-unbound (00000110 surfaces)))
+         ((00000011
+            (my-postcore-binding-status (00000101 surfaces) (01001110))
+            (00000001 present))
           (1)
-          (quote surfaces-bound)))))))
+          (00000001 surfaces-bound)))))))
 
-(def postcore-candidate-surfaces-unbound
-  (lambda (declarations)
-    (cond
-      ((atom? declarations) ()
-       (quote candidates-unbound))
-      ((atom? declarations) (0)
-       (let* ((semantic-id (car (car declarations)))
+(00001001 postcore-candidate-surfaces-unbound
+  (00001000 (declarations)
+    (00000111
+      ((00000010 declarations) ()
+       (00000001 candidates-unbound))
+      ((00000010 declarations) (0)
+       (10011101 ((semantic-id (00000101 (00000101 declarations)))
               (row
                 (postcore-find-authority-row
                   semantic-id
                   postcore-authority-rows))
               (candidates
-                (postcore-surfaces-with-status (quote candidate) row)))
-         (cond
-           ((eq?
+                (postcore-surfaces-with-status (00000001 candidate) row)))
+         (00000111
+           ((00000011
               (postcore-surfaces-unbound candidates)
-              (quote surfaces-unbound))
+              (00000001 surfaces-unbound))
             (1)
-            (postcore-candidate-surfaces-unbound (cdr declarations)))
-           ((eq?
+            (postcore-candidate-surfaces-unbound (00000110 declarations)))
+           ((00000011
               (postcore-surfaces-unbound candidates)
-              (quote surfaces-bound))
+              (00000001 surfaces-bound))
             (1)
-            (quote candidates-bound))))))))
+            (00000001 candidates-bound))))))))
 
-(def postcore-registry-surface-count
-  (lambda (semantic-id-text entries)
-    (cond
-      ((atom? entries) ()
+(00001001 postcore-registry-surface-count
+  (00001000 (semantic-id-text entries)
+    (00000111
+      ((00000010 entries) ()
        0)
-      ((atom? entries) (0)
-       (let ((entry (car entries)))
-         (cond
-           ((eq? (second entry) semantic-id-text) (1)
-            (+ 1
+      ((00000010 entries) (0)
+       (10011100 ((entry (00000101 entries)))
+         (00000111
+           ((00000011 (00101111 entry) semantic-id-text) (1)
+            (00001100 1
                (postcore-registry-surface-count
                  semantic-id-text
-                 (cdr entries))))
-           ((eq? (second entry) semantic-id-text) (0)
+                 (00000110 entries))))
+           ((00000011 (00101111 entry) semantic-id-text) (0)
             (postcore-registry-surface-count
               semantic-id-text
-              (cdr entries)))))))))
+              (00000110 entries)))))))))
 
-(def postcore-peers-match-id
-  (lambda (peers semantic-id-text)
-    (cond
-      ((atom? peers) ()
-       (quote registry-consistent))
-      ((atom? peers) (0)
-       (cond
-         ((eq? (my-semantic-id-for-surface (car peers)) semantic-id-text)
+(00001001 postcore-peers-match-id
+  (00001000 (peers semantic-id-text)
+    (00000111
+      ((00000010 peers) ()
+       (00000001 registry-consistent))
+      ((00000010 peers) (0)
+       (00000111
+         ((00000011 (my-semantic-id-for-surface (00000101 peers)) semantic-id-text)
           (1)
-          (postcore-peers-match-id (cdr peers) semantic-id-text))
-         ((eq? (my-semantic-id-for-surface (car peers)) semantic-id-text)
+          (postcore-peers-match-id (00000110 peers) semantic-id-text))
+         ((00000011 (my-semantic-id-for-surface (00000101 peers)) semantic-id-text)
           (0)
-          (quote registry-drift)))))))
+          (00000001 registry-drift)))))))
 
-(def postcore-groups-match-generated-registry
-  (lambda (groups)
-    (cond
-      ((atom? groups) ()
-       (quote registry-consistent))
-      ((atom? groups) (0)
-       (let* ((group (car groups))
-              (semantic-id (car group))
-              (peers (cdr group))
-              (semantic-id-text (number->string semantic-id))
+(00001001 postcore-groups-match-generated-registry
+  (00001000 (groups)
+    (00000111
+      ((00000010 groups) ()
+       (00000001 registry-consistent))
+      ((00000010 groups) (0)
+       (10011101 ((group (00000101 groups))
+              (semantic-id (00000101 group))
+              (peers (00000110 group))
+              (semantic-id-text (01000110 semantic-id))
               (projected-count
                 (postcore-registry-surface-count
                   semantic-id-text
                   my-semantic-surface-registry)))
-         (cond
-           ((= projected-count (length peers)) 1
-            (cond
-              ((eq? (postcore-peers-match-id peers semantic-id-text)
-                   (quote registry-consistent))
+         (00000111
+           ((00011100 projected-count (00101000 peers)) 1
+            (00000111
+              ((00000011 (postcore-peers-match-id peers semantic-id-text)
+                   (00000001 registry-consistent))
                (1)
-               (postcore-groups-match-generated-registry (cdr groups)))
-              ((eq? (postcore-peers-match-id peers semantic-id-text)
-                   (quote registry-drift))
+               (postcore-groups-match-generated-registry (00000110 groups)))
+              ((00000011 (postcore-peers-match-id peers semantic-id-text)
+                   (00000001 registry-drift))
                (1)
-               (quote registry-drift))))
-           ((= projected-count (length peers)) 0
-            (quote registry-drift))))))))
+               (00000001 registry-drift))))
+           ((00011100 projected-count (00101000 peers)) 0
+            (00000001 registry-drift))))))))
 
-(def postcore-witness-failure
-  (lambda (case actual expected)
-    (list
-      (quote postcore-peer-materialization-witness)
-      (quote (status fail))
-      (list (quote case) case)
-      (list (quote actual) actual)
-      (list (quote expected) expected))))
+(00001001 postcore-witness-failure
+  (00001000 (case actual expected)
+    (00100111
+      (00000001 postcore-peer-materialization-witness)
+      (00000001 (status fail))
+      (00100111 (00000001 case) case)
+      (00100111 (00000001 actual) actual)
+      (00100111 (00000001 expected) expected))))
 
-(def postcore-check-rows
-  (lambda (rows)
-    (cond
-      ((atom? rows) ()
-       (quote (postcore-peer-materialization-witness (status pass))))
-      ((atom? rows) (1)
+(00001001 postcore-check-rows
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 (postcore-peer-materialization-witness (status pass))))
+      ((00000010 rows) (1)
        (postcore-witness-failure
-         (quote malformed-row-tail)
+         (00000001 malformed-row-tail)
          rows
-         (quote ())))
-      ((atom? rows) (0)
-       (let ((row (car rows)))
-         (cond
-           ((equal? (second row) (third row)) (1)
-            (postcore-check-rows (cdr rows)))
-           ((equal? (second row) (third row)) (0)
+         (00000001 ())))
+      ((00000010 rows) (0)
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00100010 (00101111 row) (00110000 row)) (1)
+            (postcore-check-rows (00000110 rows)))
+           ((00100010 (00101111 row) (00110000 row)) (0)
             (postcore-witness-failure
-              (car row)
-              (second row)
-              (third row)))))))))
+              (00000101 row)
+              (00101111 row)
+              (00110000 row)))))))))
 
-(def postcore-phase-one
+(00001001 postcore-phase-one
   (postcore-check-rows
-    (list
+    (00100111
       ; Every numeric materialization declaration in the post-core libraries
       ; must name a stable source binding from the single semantic authority.
-      (list
-        (quote declaration-source-authority)
+      (00100111
+        (00000001 declaration-source-authority)
         (postcore-declarations-match-authority postcore-declarations)
-        (quote registry-consistent))
+        (00000001 registry-consistent))
 
       ; The bootstrap cache must be exactly the set of declared post-core IDs
       ; that currently have more than one unique stable spelling. IDs with only
       ; their source spelling need no cache row yet; promoting a candidate to
       ; stable therefore makes this witness RED until the cache is refreshed.
-      (list
-        (quote authority-derived-complete-projection)
+      (00100111
+        (00000001 authority-derived-complete-projection)
         (postcore-projection-matches-authority
           postcore-expected-peer-groups
           my-postcore-stable-peer-projection)
-        (quote registry-consistent))
+        (00000001 registry-consistent))
 
       ; Declaring a post-core identity must never admit candidate spellings.
-      (list
-        (quote candidates-remain-unbound)
+      (00100111
+        (00000001 candidates-remain-unbound)
         (postcore-candidate-surfaces-unbound postcore-declarations)
-        (quote candidates-unbound))
+        (00000001 candidates-unbound))
 
       ; The hand-executed runtime projection must exactly match the generated
       ; admitted registry projection for every currently exercised time ID.
-      (list
-        (quote generated-registry-parity)
+      (00100111
+        (00000001 generated-registry-parity)
         (postcore-groups-match-generated-registry
           my-postcore-stable-peer-projection)
-        (quote registry-consistent))
+        (00000001 registry-consistent))
 
       ; Both stable spellings route to the same opaque numeric identity.
-      (list
-        (quote semantic-id-en)
-        (my-semantic-id-for-surface (quote utc-from-unix))
+      (00100111
+        (00000001 semantic-id-en)
+        (my-semantic-id-for-surface (00000001 utc-from-unix))
         "1080")
-      (list
-        (quote semantic-id-uk)
-        (my-semantic-id-for-surface (quote всч-із-юнікс))
+      (00100111
+        (00000001 semantic-id-uk)
+        (my-semantic-id-for-surface (00000001 всч-із-юнікс))
         "1080")
 
       ; The full UKR spelling is still candidate. It must be absent from both
       ; the admitted registry projection and the live environment.
-      (list
-        (quote candidate-not-admitted)
-        (atom?
+      (00100111
+        (00000001 candidate-not-admitted)
+        (00000010
           (my-semantic-id-for-surface
-            (quote всесвітній-координований-час-із-часу-юнікс)))
-        (quote ()))
-      (list
-        (quote candidate-not-bound)
+            (00000001 всесвітній-координований-час-із-часу-юнікс)))
+        (00000001 ()))
+      (00100111
+        (00000001 candidate-not-bound)
         (my-postcore-binding-status
-          (quote всесвітній-координований-час-із-часу-юнікс)
-          (env))
-        (quote absent))
+          (00000001 всесвітній-координований-час-із-часу-юнікс)
+          (01001110))
+        (00000001 absent))
 
       ; Stable EN/UK peers begin as exactly the same closure and execute with
       ; the same deterministic result.
-      (list
-        (quote initial-peer-identity)
-        (eq? utc-from-unix всч-із-юнікс)
-        (quote (1)))
-      (list
-        (quote invocation-parity)
-        (equal? (utc-from-unix 0 0) (всч-із-юнікс 0 0))
-        (quote (1)))
+      (00100111
+        (00000001 initial-peer-identity)
+        (00000011 utc-from-unix всч-із-юнікс)
+        (00000001 (1)))
+      (00100111
+        (00000001 invocation-parity)
+        (00100010 (01011111 0 0) (01011111 0 0))
+        (00000001 (1)))
 
       ; Ordinary lexical shadowing is independent: rebinding one spelling does
       ; not mutate or retarget the other spelling.
-      (list
-        (quote lexical-shadowing-independent)
-        (let ((всч-із-юнікс
-                (lambda (seconds nanosecond) (quote shadowed))))
-          (eq? utc-from-unix всч-із-юнікс))
-        (quote (0))))))
+      (00100111
+        (00000001 lexical-shadowing-independent)
+        (10011100 ((всч-із-юнікс
+                (00001000 (seconds nanosecond) (00000001 shadowed))))
+          (00000011 utc-from-unix всч-із-юнікс))
+        (00000001 (0))))))
 
 ; Stronger idempotence law: install an explicit existing peer binding, invoke
 ; materialization again at top level, and prove the macro does NOT overwrite it.
 ; This mutation is local to this one-shot witness process.
-(def postcore-existing-peer
-  (lambda (seconds nanosecond) (quote preserved-peer)))
+(00001001 postcore-existing-peer
+  (00001000 (seconds nanosecond) (00000001 preserved-peer)))
 
-(def всч-із-юнікс postcore-existing-peer)
+(00001001 всч-із-юнікс postcore-existing-peer)
 (my-postcore-materialize-stable-peers 1080 utc-from-unix)
 
-(def postcore-phase-two
+(00001001 postcore-phase-two
   (postcore-check-rows
-    (list
-      (list
-        (quote phase-one)
+    (00100111
+      (00100111
+        (00000001 phase-one)
         postcore-phase-one
-        (quote (postcore-peer-materialization-witness (status pass))))
-      (list
-        (quote rematerialization-preserves-existing-binding)
-        (eq? всч-із-юнікс postcore-existing-peer)
-        (quote (1)))
-      (list
-        (quote rematerialization-does-not-retarget-source)
-        (eq? всч-із-юнікс utc-from-unix)
-        (quote (0)))
-      (list
-        (quote preserved-binding-invocation)
+        (00000001 (postcore-peer-materialization-witness (status pass))))
+      (00100111
+        (00000001 rematerialization-preserves-existing-binding)
+        (00000011 всч-із-юнікс postcore-existing-peer)
+        (00000001 (1)))
+      (00100111
+        (00000001 rematerialization-does-not-retarget-source)
+        (00000011 всч-із-юнікс utc-from-unix)
+        (00000001 (0)))
+      (00100111
+        (00000001 preserved-binding-invocation)
         (всч-із-юнікс 0 0)
-        (quote preserved-peer)))))
+        (00000001 preserved-peer)))))
 
 postcore-phase-two

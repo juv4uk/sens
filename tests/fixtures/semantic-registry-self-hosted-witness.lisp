@@ -3,9 +3,9 @@
 ; separate: 11111111 must round-trip as Binary even though it is not currently
 ; an admitted semantic-registry row.
 
-(def semantic-registry-self-hosted-witness
-  (lambda (source)
-    (let* ((registry (semantic-registry-read-source source))
+(00001001 semantic-registry-self-hosted-witness
+  (00001000 (source)
+    (10011101 ((registry (semantic-registry-read-source source))
            (rows (semantic-registry-rows registry))
            (quote-row (semantic-registry-row-in registry 00000001))
            (quote-id (semantic-registry-id-in registry 'quote))
@@ -13,32 +13,32 @@
            (leading-zero-row (semantic-registry-row-in registry 00000101))
            (max-roundtrip (semantic-registry-round-trip 11111111))
            (invoke-roundtrip (semantic-registry-round-trip 10101000)))
-      (list
-        (length rows)
-        (write-to-string (semantic-registry-row-id quote-row))
+      (00100111
+        (00101000 rows)
+        (01001100 (semantic-registry-row-id quote-row))
         (semantic-registry-surface-name 'en quote-row)
-        (write-to-string quote-id)
-        (write-to-string invoke-id)
-        (write-to-string (semantic-registry-row-id leading-zero-row))
-        (write-to-string max-roundtrip)
+        (01001100 quote-id)
+        (01001100 invoke-id)
+        (01001100 (semantic-registry-row-id leading-zero-row))
+        (01001100 max-roundtrip)
         (semantic-registry-row-in registry 11111111)
-        (write-to-string invoke-roundtrip)
-        (equal? invoke-roundtrip (semantic-registry-row-id (semantic-registry-row-in registry 10101000)))))))
+        (01001100 invoke-roundtrip)
+        (00100010 invoke-roundtrip (semantic-registry-row-id (semantic-registry-row-in registry 10101000)))))))
 
 ; Machine-readable handoff for downstream consumers.
 ; Git commit pinning is provenance and stays outside language semantics.
 ; The digest is content identity of the exact canonical source bytes. The full
 ; parsed canonical rows are handed off directly, so Binary SID values are
 ; preserved without building a second identity projection or recursive shadow table.
-(def semantic-registry-handoff-witness
-  (lambda (source)
-    (let* ((registry (semantic-registry-read-source source))
+(00001001 semantic-registry-handoff-witness
+  (00001000 (source)
+    (10011101 ((registry (semantic-registry-read-source source))
            (rows (semantic-registry-rows registry)))
-      (list
-        (quote semantic-registry-handoff/1)
-        (list (quote authority) semantic-registry-source-path)
-        (list (quote revision-policy) (quote pin-git-commit-containing-authority))
-        (list (quote source-digest) (sha256-hex source))
-        (list (quote binary-width) 8)
-        (list (quote row-count) (length rows))
-        (cons (quote canonical-rows) rows)))))
+      (00100111
+        (00000001 semantic-registry-handoff/1)
+        (00100111 (00000001 authority) semantic-registry-source-path)
+        (00100111 (00000001 revision-policy) (00000001 pin-git-commit-containing-authority))
+        (00100111 (00000001 source-digest) (10100001 source))
+        (00100111 (00000001 binary-width) 8)
+        (00100111 (00000001 row-count) (00101000 rows))
+        (00000100 (00000001 canonical-rows) rows)))))

@@ -7,12 +7,12 @@
 ; Результат фіксує видимість старого кореня, явний not-found, збережений nil,
 ; дедуплікацію вмісту та логічні ревізії як спостереження.
 
-(let ((empty (fs-empty)))
-  (let ((first-write (fs-write empty "notes/today" (quote (hello world)))))
-    (let ((old (car first-write))
-          (second-write (fs-write (car first-write) "notes/empty" (quote ()))))
-      (let ((new (car second-write)))
-        (list
+(10011100 ((empty (fs-empty)))
+  (10011100 ((first-write (fs-write empty "notes/today" (00000001 (hello world)))))
+    (10011100 ((old (00000101 first-write))
+          (second-write (fs-write (00000101 first-write) "notes/empty" (00000001 ()))))
+      (10011100 ((new (00000101 second-write)))
+        (00100111
           (fs-read old "notes/today")
           (fs-read old "notes/empty")
           (fs-read new "notes/empty")
