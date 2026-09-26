@@ -50,7 +50,13 @@ fn all_migrated_string_mechanisms_keep_their_surface_behavior() {
         eval("(string-rest \"λisp\")"),
         Value::String(Rc::from("isp")),
     );
-    assert_eq!(eval("(string<? \"a\" \"b\")"), Value::Symbol(Rc::from("t")));
+    // string<? визначено мовою в lib/core.lisp (власник, 2026-09-26).
+    let mut core = Session::default();
+    sens::load_core_library(&mut core).expect("core library should load");
+    assert_eq!(
+        eval_program("(string<? \"a\" \"b\")", &mut core).unwrap().value,
+        Value::Symbol(Rc::from("t"))
+    );
 }
 
 #[test]

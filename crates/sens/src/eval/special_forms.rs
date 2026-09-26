@@ -22,6 +22,6 @@ pub(super) use io::{
     write_to_string_values,
 };
 pub(super) use strings::{
-    evaluate_string_slice, string_append_values, string_first_values, string_less_than_values,
+    evaluate_string_slice, string_append_values, string_first_values,
     string_predicate_values, string_rest_values, string_to_symbol_values, symbol_to_string_values,
 };

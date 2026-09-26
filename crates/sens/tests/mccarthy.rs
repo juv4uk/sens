@@ -1421,28 +1421,40 @@ fn string_append_wrong_arity_is_an_arity_error() {
 
 // --- string<? (PLAN.md item 15 — the one primitive its persistent-map
 // design needed) --------------------------------------------------------
+// Власник, 2026-09-26: string<? визначено мовою в lib/core.lisp поверх
+// примітивів string-first/string-rest/string->codepoint — тести з ядром.
+
+fn core_session() -> Session {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("core library should load");
+    session
+}
+
+fn eval_core(source: &str) -> Value {
+    eval_program(source, &mut core_session()).unwrap().value
+}
 
 #[test]
 fn string_less_than_orders_strings_lexicographically() {
-    assert_eq!(eval(r#"(string<? "a" "b")"#), Value::truth(true));
-    assert_eq!(eval(r#"(string<? "b" "a")"#), Value::truth(false));
-    assert_eq!(eval(r#"(string<? "a" "a")"#), Value::truth(false));
+    assert_eq!(eval_core(r#"(string<? "a" "b")"#), Value::truth(true));
+    assert_eq!(eval_core(r#"(string<? "b" "a")"#), Value::truth(false));
+    assert_eq!(eval_core(r#"(string<? "a" "a")"#), Value::truth(false));
 }
 
 #[test]
 fn string_less_than_rejects_non_string_arguments() {
-    let left = eval_program(r#"(string<? 1 "a")"#, &mut Session::default())
+    let left = eval_program(r#"(string<? 1 "a")"#, &mut core_session())
         .expect_err("a non-string left argument must fail named, not panic");
     assert_eq!(left.kind, ErrorKind::Type);
 
-    let right = eval_program(r#"(string<? "a" 1)"#, &mut Session::default())
+    let right = eval_program(r#"(string<? "a" 1)"#, &mut core_session())
         .expect_err("a non-string right argument must fail named, not panic");
     assert_eq!(right.kind, ErrorKind::Type);
 }
 
 #[test]
 fn string_less_than_wrong_arity_is_an_arity_error() {
-    let error = eval_program(r#"(string<? "only-one")"#, &mut Session::default())
+    let error = eval_program(r#"(string<? "only-one")"#, &mut core_session())
         .expect_err("string<? with one argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Arity);
 }
