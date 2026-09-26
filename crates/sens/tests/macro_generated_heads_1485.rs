@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use sens::{eval_program, load_core_library, Session};
+
 const INVENTORY: &str = include_str!("../../../tests/data/macro-generated-heads-1485.tsv");
 const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
 const CORE: &str = include_str!("../../../lib/core.lisp");
@@ -197,5 +199,22 @@ fn code_template_operators_never_reintroduce_surface_heads() {
     assert!(
         offenders.is_empty(),
         "#1485 RED: code-producing templates still quote human surface heads: {offenders:#?}"
+    );
+}
+
+
+#[test]
+fn ordinary_admitted_binary_symbol_remains_user_data() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("canonical core bootstrap must load");
+
+    let value = eval_program("(binary 8)", &mut session)
+        .expect("binary descriptor must remain ordinary language data")
+        .value
+        .to_string();
+
+    assert_eq!(
+        value, "(binary 8)",
+        "#1485 negative control: admitted surface-looking data must not be promoted to exact SENS"
     );
 }
