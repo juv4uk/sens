@@ -446,7 +446,7 @@ source	examples/ukrainian-greeting.lisp	14
 source	experiments/atomspace-pattern-audit-791.lisp	7
 source	experiments/blackboard-pattern-audit-790.lisp	8
 source	experiments/core4-eq-answer-1258.lisp	5
-source	experiments/core4-eq-result-law-witness.lisp	139
+source	experiments/core4-eq-result-law-witness.lisp	140
 source	experiments/core4-mechanical-answer-grade.lisp	49
 source	experiments/core4-predicate-answer-carrier-matrix.lisp	76
 source	experiments/function-genealogy.lisp	231
@@ -454,7 +454,7 @@ source	experiments/graal-interop-pattern-audit-788.lisp	7
 source	experiments/kif-bridge-audit-792.lisp	4
 source	experiments/metacall-pattern-audit-789.lisp	7
 source	experiments/poplog-pattern-audit-787.lisp	8
-source	experiments/probabilistic-decision-jev-like.lisp	242
+source	experiments/probabilistic-decision-jev-like.lisp	243
 source	knowledge/astronomy.lisp	1
 source	knowledge/canon-authority-inventory.lisp	30
 source	knowledge/family.lisp	1
@@ -482,7 +482,7 @@ source	lib/core4.lisp	177
 source	lib/epistemic.lisp	454
 source	lib/forward.lisp	645
 source	lib/fs.lisp	15
-source	lib/generated/meta-semantic-registry.lisp	620
+source	lib/generated/meta-semantic-registry.lisp	623
 source	lib/guard.lisp	148
 source	lib/island-lowering.lisp	53
 source	lib/knowledge.lisp	944
@@ -553,7 +553,7 @@ source	scripts/check-core3-profile-contract.lisp	49
 source	scripts/check-core4-predicate-answer-boundary.lisp	61
 source	scripts/check-core4-predicate-answer-scale.lisp	68
 source	scripts/check-core4-predicate-output-boundary.lisp	49
-source	scripts/check-core4-predicate-record-inventory.lisp	133
+source	scripts/check-core4-predicate-record-inventory.lisp	134
 source	scripts/check-function-table-mechanisms.lisp	155
 source	scripts/check-island-math-evidence.lisp	271
 source	scripts/check-kernel-abi-transport-boundary.lisp	141
@@ -570,7 +570,7 @@ source	scripts/generate-uk-surface-audit.lisp	236
 source	scripts/machine-authority-guard.lisp	211
 source	scripts/oracle-batch.lisp	73
 source	scripts/program-symbol-table.lisp	164
-source	scripts/release.lisp	80
+source	scripts/release.lisp	81
 source	scripts/semantic-authority-guard-enforce.lisp	20
 source	scripts/semantic-authority-guard.lisp	128
 source	scripts/symbol-table.lisp	60
