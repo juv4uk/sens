@@ -442,12 +442,24 @@ fn same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend() {
         checked_values > 0,
         "meta witness slice must contain value witnesses"
     );
-    for required_head in ["quote", "atom", "eq", "car", "cdr", "cons", "cond"] {
-        let prefix = format!("({required_head}");
+    // A class counts by its SENS code or, for rows not yet migrated, its name.
+    for (required_head, code) in [
+        ("quote", "00000001"),
+        ("atom", "00000010"),
+        ("eq", "00000011"),
+        ("car", "00000101"),
+        ("cdr", "00000110"),
+        ("cons", "00000100"),
+        ("cond", "00000111"),
+    ] {
+        let by_code = format!("({code}");
+        let by_name = format!("({required_head} ");
         assert!(
-            rows.iter()
-                .any(|row| row.expr.trim_start().starts_with(&prefix)),
-            "meta witness slice lost McCarthy-7/Canon-0 class `{required_head}`"
+            rows.iter().any(|row| {
+                let expr = row.expr.trim_start();
+                expr.starts_with(&by_code) || expr.starts_with(&by_name)
+            }),
+            "meta witness slice lost McCarthy-7/Canon-0 class `{required_head}` ({code})"
         );
     }
     assert!(

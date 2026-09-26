@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 40
-- top-level функцій: 889
+- top-level функцій: 891
 - top-level макросів: 34
-- усього визначень: 923
+- усього визначень: 925
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -299,6 +299,7 @@
 | `lib/knowledge.lisp` | function | `knowledge-proper-list?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-terms-valid?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-term-valid?` | unreviewed |
+| `lib/knowledge.lisp` | function | `knowledge-not-head?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-goal-valid?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-goals-valid?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-clause-valid?` | unreviewed |
@@ -687,6 +688,7 @@
 | `lib/result-status.lisp` | function | `result-status` | unreviewed |
 | `lib/result-status.lisp` | function | `result-payload` | unreviewed |
 | `lib/result-status.lisp` | function | `result-proper-list?` | unreviewed |
+| `lib/result-status.lisp` | function | `result-not-head?` | unreviewed |
 | `lib/result-status.lisp` | function | `result-goal?` | unreviewed |
 | `lib/result-status.lisp` | function | `result-negated-goal?` | unreviewed |
 | `lib/result-status.lisp` | function | `result-opposite-goal` | unreviewed |
