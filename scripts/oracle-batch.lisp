@@ -22,71 +22,71 @@
 ; resource bound before the oracle ever saw the request. The only local
 ; step needed is quoting expr-str as a WSM string literal for embedding
 ; in the request text.
-(def make-request
-  (lambda (expr-str)
-    (let ((quoted-source (write-to-string expr-str)))
-      (string-append
-        (string-append
-          (string-append "(request (op oracle-eval) (id \"batch\") (source " quoted-source)
+(00001001 make-request
+  (00001000 (expr-str)
+    (10011100 ((quoted-source (01001100 expr-str)))
+      (00111010
+        (00111010
+          (00111010 "(request (op oracle-eval) (id \"batch\") (source " quoted-source)
           ") (contract-version (3 0)))")
         "\n"))))
 
-(def oracle-eval
-  (lambda (expr-str)
-    (let ((request (make-request expr-str)))
-      (let ((socket (tcp-connect "100.113.68.50" 9999)))
-        (let ((sent (tcp-write socket request)))
-          (let ((response (tcp-read socket)))
-            (let ((closed (tcp-close socket)))
-              (read response))))))))
+(00001001 oracle-eval
+  (00001000 (expr-str)
+    (10011100 ((request (make-request expr-str)))
+      (10011100 ((socket (tcp-connect "100.113.68.50" 9999)))
+        (10011100 ((sent (10100100 socket request)))
+          (10011100 ((response (10100011 socket)))
+            (10011100 ((closed (tcp-close socket)))
+              (01001010 response))))))))
 
-(def emit-result
-  (lambda (id result)
-    (print (list (quote oracle-result)
-                 (cons (quote id) id)
-                 (cons (quote result) result)))))
+(00001001 emit-result
+  (00001000 (id result)
+    (01001000 (00100111 (00000001 oracle-result)
+                 (00000100 (00000001 id) id)
+                 (00000100 (00000001 result) result)))))
 
-(def fixtures-only
-  (lambda (entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
+(00001001 fixtures-only
+  (00001000 (entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
       ; inventory.lisp's own last top-level form is a bare () -- the CLI's
       ; auto-printed final script return value, captured by the shell
       ; redirect that originally generated the file, not a real record.
       ; (car (car entries)) on that entry would car an atom and error, so
       ; skip any non-Pair top-level form defensively instead of assuming
       ; every entry is shaped like a tagged record.
-      ((atom? (car entries)) () (fixtures-only (cdr entries)))
-      ((atom? (car entries)) (1) (fixtures-only (cdr entries)))
-      (t (cond
-           ((eq? (car (car entries)) (quote fixture))
-            (cons (car entries) (fixtures-only (cdr entries))))
-           (t (fixtures-only (cdr entries))))))))
+      ((00000010 (00000101 entries)) () (fixtures-only (00000110 entries)))
+      ((00000010 (00000101 entries)) (1) (fixtures-only (00000110 entries)))
+      (t (00000111
+           ((00000011 (00000101 (00000101 entries)) (00000001 fixture))
+            (00000100 (00000101 entries) (fixtures-only (00000110 entries))))
+           (t (fixtures-only (00000110 entries))))))))
 
 ; Walk inventory.lisp's (fixture ...) records and conformance.lisp's raw
 ; ((expr . ...) ...) records in lockstep -- same position, same fixture.
-(def process-pair
-  (lambda (inventory-remaining conformance-remaining)
-    (cond
-      ((atom? inventory-remaining) () (quote ()))
-      ((atom? inventory-remaining) (1) (quote ()))
-      ((atom? conformance-remaining) () (quote ()))
-      ((atom? conformance-remaining) (1) (quote ()))
+(00001001 process-pair
+  (00001000 (inventory-remaining conformance-remaining)
+    (00000111
+      ((00000010 inventory-remaining) () (00000001 ()))
+      ((00000010 inventory-remaining) (1) (00000001 ()))
+      ((00000010 conformance-remaining) () (00000001 ()))
+      ((00000010 conformance-remaining) (1) (00000001 ()))
       (t
-       (let* ((inventory-fixture (car inventory-remaining))
-              (id (cdr (assoc (quote id) (cdr inventory-fixture))))
-              (conformance-fixture (car conformance-remaining))
-              (expr-str (cdr (assoc (quote expr) conformance-fixture)))
+       (10011101 ((inventory-fixture (00000101 inventory-remaining))
+              (id (00000110 (00101101 (00000001 id) (00000110 inventory-fixture))))
+              (conformance-fixture (00000101 conformance-remaining))
+              (expr-str (00000110 (00101101 (00000001 expr) conformance-fixture)))
               (result (oracle-eval expr-str))
               (emitted (emit-result id result)))
-         (process-pair (cdr inventory-remaining) (cdr conformance-remaining)))))))
+         (process-pair (00000110 inventory-remaining) (00000110 conformance-remaining)))))))
 
-(print (cons (quote about) "oracle-results.lisp — oracle-eval results for every tests/fixtures/inventory.lisp fixture, via the canonical TCP Oracle :9999, keyed by stable F-ID."))
-(print (cons (quote generated) "Run: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
+(01001000 (00000100 (00000001 about) "oracle-results.lisp — oracle-eval results for every tests/fixtures/inventory.lisp fixture, via the canonical TCP Oracle :9999, keyed by stable F-ID."))
+(01001000 (00000100 (00000001 generated) "Run: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
 
 (process-pair
-  (fixtures-only (read-all (read-file "tests/fixtures/inventory.lisp")))
-  (read-all (read-file "tests/fixtures/conformance.lisp")))
+  (fixtures-only (01001011 (10100110 "tests/fixtures/inventory.lisp")))
+  (01001011 (10100110 "tests/fixtures/conformance.lisp")))
 
-(quote ())
+(00000001 ())

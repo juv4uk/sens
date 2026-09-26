@@ -2,191 +2,191 @@
 ; Host tooling may mechanically inspect files, but the admitted direction and
 ; forbidden reverse authority are owned here.
 
-(def second (lambda (x) (car (cdr x))))
-(def third (lambda (x) (car (cdr (cdr x)))))
-(def fourth (lambda (x) (car (cdr (cdr (cdr x))))))
+(00001001 second (00001000 (x) (00000101 (00000110 x))))
+(00001001 third (00001000 (x) (00000101 (00000110 (00000110 x)))))
+(00001001 fourth (00001000 (x) (00000101 (00000110 (00000110 (00000110 x))))))
 
-(def kab-contract
-  (car
-    (read-all
-      (read-file "contracts/kernel-abi-transport-boundary.lisp"))))
+(00001001 kab-contract
+  (00000101
+    (01001011
+      (10100110 "contracts/kernel-abi-transport-boundary.lisp"))))
 
-(def kab-rows (cdr kab-contract))
+(00001001 kab-rows (00000110 kab-contract))
 
-(def kab-find
-  (lambda (name rows)
-    (cond
-      ((atom? rows)
+(00001001 kab-find
+  (00001000 (name rows)
+    (00000111
+      ((00000010 rows)
        ()
-       (quote ()))
-      ((atom? rows)
+       (00000001 ()))
+      ((00000010 rows)
        (0)
-       (cond
-         ((eq? (car (car rows)) name)
+       (00000111
+         ((00000011 (00000101 (00000101 rows)) name)
           (1)
-          (car rows))
-         ((eq? (car (car rows)) name)
+          (00000101 rows))
+         ((00000011 (00000101 (00000101 rows)) name)
           (0)
-          (kab-find name (cdr rows))))))))
+          (kab-find name (00000110 rows))))))))
 
-(def kab-find-kernel
-  (lambda (kernel-name rows)
-    (cond
-      ((atom? rows)
+(00001001 kab-find-kernel
+  (00001000 (kernel-name rows)
+    (00000111
+      ((00000010 rows)
        ()
-       (quote ()))
-      ((atom? rows)
+       (00000001 ()))
+      ((00000010 rows)
        (0)
-       (let ((row (car rows)))
-         (cond
-           ((eq? (car row) (quote kernel))
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00000011 (00000101 row) (00000001 kernel))
             (1)
-            (cond
-              ((eq? (second row) kernel-name)
+            (00000111
+              ((00000011 (second row) kernel-name)
                (1)
                row)
-              ((eq? (second row) kernel-name)
+              ((00000011 (second row) kernel-name)
                (0)
-               (kab-find-kernel kernel-name (cdr rows)))))
-           ((eq? (car row) (quote kernel))
+               (kab-find-kernel kernel-name (00000110 rows)))))
+           ((00000011 (00000101 row) (00000001 kernel))
             (0)
-            (kab-find-kernel kernel-name (cdr rows)))))))))
+            (kab-find-kernel kernel-name (00000110 rows)))))))))
 
-(def kab-row-check
-  (lambda (name expected)
-    (let ((actual (kab-find name kab-rows)))
-      (cond
-        ((equal? actual expected)
+(00001001 kab-row-check
+  (00001000 (name expected)
+    (10011100 ((actual (kab-find name kab-rows)))
+      (00000111
+        ((00100010 actual expected)
          (1)
-         (quote ()))
-        ((equal? actual expected)
+         (00000001 ()))
+        ((00100010 actual expected)
          (0)
-         (list (quote policy-mismatch) name expected actual))))))
+         (00100111 (00000001 policy-mismatch) name expected actual))))))
 
-(def kab-kernel-row-check
-  (lambda (kernel-name expected)
-    (let ((actual (kab-find-kernel kernel-name kab-rows)))
-      (cond
-        ((equal? actual expected)
+(00001001 kab-kernel-row-check
+  (00001000 (kernel-name expected)
+    (10011100 ((actual (kab-find-kernel kernel-name kab-rows)))
+      (00000111
+        ((00100010 actual expected)
          (1)
-         (quote ()))
-        ((equal? actual expected)
+         (00000001 ()))
+        ((00100010 actual expected)
          (0)
-         (list (quote kernel-row-mismatch) kernel-name expected actual))))))
+         (00100111 (00000001 kernel-row-mismatch) kernel-name expected actual))))))
 
-(def kab-first-failure
-  (lambda (checks)
-    (cond
-      ((atom? checks)
+(00001001 kab-first-failure
+  (00001000 (checks)
+    (00000111
+      ((00000010 checks)
        ()
-       (quote ()))
-      ((atom? (car checks))
+       (00000001 ()))
+      ((00000010 (00000101 checks))
        ()
-       (kab-first-failure (cdr checks)))
-      ((atom? (car checks))
+       (kab-first-failure (00000110 checks)))
+      ((00000010 (00000101 checks))
        (0)
-       (car checks))
-      ((atom? (car checks))
+       (00000101 checks))
+      ((00000010 (00000101 checks))
        (1)
-       (car checks)))))
+       (00000101 checks)))))
 
-(def kab-verdict
-  (lambda ()
-    (let ((failure
+(00001001 kab-verdict
+  (00001000 ()
+    (10011100 ((failure
             (kab-first-failure
-              (list
+              (00100111
                 (kab-row-check
-                  (quote owner)
-                  (quote (owner my-lisp)))
+                  (00000001 owner)
+                  (00000001 (owner my-lisp)))
                 (kab-row-check
-                  (quote language-identity-type)
-                  (quote (language-identity-type Sens8)))
+                  (00000001 language-identity-type)
+                  (00000001 (language-identity-type Sens8)))
                 (kab-row-check
-                  (quote shared-abi-type)
-                  (quote (shared-abi-type WsmKernelRequest)))
+                  (00000001 shared-abi-type)
+                  (00000001 (shared-abi-type WsmKernelRequest)))
                 (kab-row-check
-                  (quote shared-abi-field)
-                  (quote (shared-abi-field semantic_id)))
+                  (00000001 shared-abi-field)
+                  (00000001 (shared-abi-field semantic_id)))
                 (kab-row-check
-                  (quote shared-abi-storage)
-                  (quote (shared-abi-storage opaque-u8)))
+                  (00000001 shared-abi-storage)
+                  (00000001 (shared-abi-storage opaque-u8)))
                 (kab-row-check
-                  (quote kernel-wrapper-type)
-                  (quote (kernel-wrapper-type SemanticId)))
+                  (00000001 kernel-wrapper-type)
+                  (00000001 (kernel-wrapper-type SemanticId)))
                 (kab-row-check
-                  (quote kernel-wrapper-role)
-                  (quote (kernel-wrapper-role transport-coordinate-only)))
+                  (00000001 kernel-wrapper-role)
+                  (00000001 (kernel-wrapper-role transport-coordinate-only)))
                 (kab-row-check
-                  (quote wrapper-language-type-equivalence)
-                  (quote (wrapper-language-type-equivalence forbidden)))
+                  (00000001 wrapper-language-type-equivalence)
+                  (00000001 (wrapper-language-type-equivalence forbidden)))
                 (kab-row-check
-                  (quote kernel-to-language-authority)
-                  (quote (kernel-to-language-authority forbidden)))
+                  (00000001 kernel-to-language-authority)
+                  (00000001 (kernel-to-language-authority forbidden)))
                 (kab-row-check
-                  (quote kernel-may-query-semantic-registry)
-                  (quote (kernel-may-query-semantic-registry forbidden)))
+                  (00000001 kernel-may-query-semantic-registry)
+                  (00000001 (kernel-may-query-semantic-registry forbidden)))
                 (kab-row-check
-                  (quote kernel-may-import-language-sid-type)
-                  (quote (kernel-may-import-language-sid-type forbidden)))
+                  (00000001 kernel-may-import-language-sid-type)
+                  (00000001 (kernel-may-import-language-sid-type forbidden)))
                 (kab-row-check
-                  (quote kernel-may-mint-semantic-identity)
-                  (quote (kernel-may-mint-semantic-identity forbidden)))
+                  (00000001 kernel-may-mint-semantic-identity)
+                  (00000001 (kernel-may-mint-semantic-identity forbidden)))
                 (kab-row-check
-                  (quote reverse-direction)
-                  (quote
+                  (00000001 reverse-direction)
+                  (00000001
                     (reverse-direction
                       kernel-transport-to-language-meaning
                       forbidden)))
                 (kab-row-check
-                  (quote native-result-role)
-                  (quote (native-result-role observation-only)))
+                  (00000001 native-result-role)
+                  (00000001 (native-result-role observation-only)))
                 (kab-row-check
-                  (quote shared-abi-source)
-                  (quote
+                  (00000001 shared-abi-source)
+                  (00000001
                     (shared-abi-source
                       "crates/wsm-kernel-c-abi/src/lib.rs"
                       "crates/wsm-kernel-c-abi/Cargo.toml")))
                 (kab-kernel-row-check
-                  (quote common-lisp)
-                  (quote
+                  (00000001 common-lisp)
+                  (00000001
                     (kernel common-lisp
                       "crates/wsm-common-lisp-kernel/src/lib.rs"
                       "crates/wsm-common-lisp-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (quote prolog)
-                  (quote
+                  (00000001 prolog)
+                  (00000001
                     (kernel prolog
                       "crates/wsm-prolog-kernel/src/lib.rs"
                       "crates/wsm-prolog-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (quote clips)
-                  (quote
+                  (00000001 clips)
+                  (00000001
                     (kernel clips
                       "crates/wsm-clips-kernel/src/lib.rs"
                       "crates/wsm-clips-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (quote datalog)
-                  (quote
+                  (00000001 datalog)
+                  (00000001
                     (kernel datalog
                       "crates/wsm-datalog-kernel/src/lib.rs"
                       "crates/wsm-datalog-kernel/Cargo.toml")))))))
-      (cond
-        ((atom? failure)
+      (00000111
+        ((00000010 failure)
          ()
-         (quote
+         (00000001
            (kernel-abi-transport-boundary-ok
              (kernels 4)
              (language-type Sens8)
              (abi-wrapper SemanticId))))
-        ((atom? failure)
+        ((00000010 failure)
          (0)
-         (list
-           (quote kernel-abi-transport-boundary-violation)
+         (00100111
+           (00000001 kernel-abi-transport-boundary-violation)
            failure))
-        ((atom? failure)
+        ((00000010 failure)
          (1)
-         (list
-           (quote kernel-abi-transport-boundary-violation)
+         (00100111
+           (00000001 kernel-abi-transport-boundary-violation)
            failure))))))
 
 (kab-verdict)

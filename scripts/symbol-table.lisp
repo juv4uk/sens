@@ -30,20 +30,20 @@
 ; is this file's own tooling's job, not this script's — the format here is
 ; deliberately plain data, not pre-formatted assembly.
 
-(def collect-symbols-onto
-  (lambda (expr acc)
-    (cond
-      ((symbol? expr) (cond ((member? expr acc) acc) (t (cons expr acc))))
-      ((atom? expr) () acc)
-      ((atom? expr) (1) acc)
-      (t (collect-symbols-onto (cdr expr) (collect-symbols-onto (car expr) acc))))))
+(00001001 collect-symbols-onto
+  (00001000 (expr acc)
+    (00000111
+      ((00100011 expr) (00000111 ((00101100 expr acc) acc) (t (00000100 expr acc))))
+      ((00000010 expr) () acc)
+      ((00000010 expr) (1) acc)
+      (t (collect-symbols-onto (00000110 expr) (collect-symbols-onto (00000101 expr) acc))))))
 
-(def collect-all-symbols
-  (lambda (forms acc)
-    (cond
-      ((atom? forms) () acc)
-      ((atom? forms) (1) acc)
-      (t (collect-all-symbols (cdr forms) (collect-symbols-onto (car forms) acc))))))
+(00001001 collect-all-symbols
+  (00001000 (forms acc)
+    (00000111
+      ((00000010 forms) () acc)
+      ((00000010 forms) (1) acc)
+      (t (collect-all-symbols (00000110 forms) (collect-symbols-onto (00000101 forms) acc))))))
 
 ; Tail-recursive on purpose, not the more obvious `(cons (car sorted)
 ; (insert-sorted sym (cdr sorted)))`: that shape's real Rust-stack depth
@@ -58,42 +58,42 @@
 ; елементах під час написання цього файлу — той самий клас багу, від
 ; якого захищає власна -onto-конвенція проєкту. Розбиває список на
 ; before/after навколо точки вставки замість вкладеного cons.
-(def insert-sorted-onto
-  (lambda (sym before after)
-    (cond
-      ((atom? after) () (reverse-onto before (list sym)))
-      ((atom? after) (1) (reverse-onto before (list sym)))
-      ((string<? (symbol->string sym) (symbol->string (car after)))
-       (reverse-onto before (cons sym after)))
-      (t (insert-sorted-onto sym (cons (car after) before) (cdr after))))))
+(00001001 insert-sorted-onto
+  (00001000 (sym before after)
+    (00000111
+      ((00000010 after) () (reverse-onto before (00100111 sym)))
+      ((00000010 after) (1) (reverse-onto before (00100111 sym)))
+      ((00100101 (01000010 sym) (01000010 (00000101 after)))
+       (reverse-onto before (00000100 sym after)))
+      (t (insert-sorted-onto sym (00000100 (00000101 after) before) (00000110 after))))))
 
-(def insert-sorted
-  (lambda (sym sorted)
-    (insert-sorted-onto sym (quote ()) sorted)))
+(00001001 insert-sorted
+  (00001000 (sym sorted)
+    (insert-sorted-onto sym (00000001 ()) sorted)))
 
-(def sort-symbols-onto
-  (lambda (remaining sorted)
-    (cond
-      ((atom? remaining) () sorted)
-      ((atom? remaining) (1) sorted)
-      (t (sort-symbols-onto (cdr remaining) (insert-sorted (car remaining) sorted))))))
+(00001001 sort-symbols-onto
+  (00001000 (remaining sorted)
+    (00000111
+      ((00000010 remaining) () sorted)
+      ((00000010 remaining) (1) sorted)
+      (t (sort-symbols-onto (00000110 remaining) (insert-sorted (00000101 remaining) sorted))))))
 
-(def sort-symbols
-  (lambda (symbols)
-    (sort-symbols-onto symbols (quote ()))))
+(00001001 sort-symbols
+  (00001000 (symbols)
+    (sort-symbols-onto symbols (00000001 ()))))
 
-(def print-table-onto
-  (lambda (symbols id)
-    (cond
-      ((atom? symbols) () (quote ()))
-      ((atom? symbols) (1) (quote ()))
-      (t ((lambda ()
-            (print (cons (symbol->string (car symbols)) id))
-            (print-table-onto (cdr symbols) (+ id 1))))))))
+(00001001 print-table-onto
+  (00001000 (symbols id)
+    (00000111
+      ((00000010 symbols) () (00000001 ()))
+      ((00000010 symbols) (1) (00000001 ()))
+      (t ((00001000 ()
+            (01001000 (00000100 (01000010 (00000101 symbols)) id))
+            (print-table-onto (00000110 symbols) (00001100 id 1))))))))
 
-(def core-forms (read-all (read-file "lib/core4.lisp")))
-(def all-symbols (collect-all-symbols core-forms (quote ())))
-(def sorted-symbols (sort-symbols all-symbols))
+(00001001 core-forms (01001011 (10100110 "lib/core4.lisp")))
+(00001001 all-symbols (collect-all-symbols core-forms (00000001 ())))
+(00001001 sorted-symbols (sort-symbols all-symbols))
 
 (print-table-onto sorted-symbols 0)
-(quote ())
+(00000001 ())

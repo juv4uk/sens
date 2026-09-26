@@ -1,20 +1,20 @@
-(def verdicts
-  (read-all (read-file "tests/semantic-authority-verdict.lisp")))
+(00001001 verdicts
+  (01001011 (10100110 "tests/semantic-authority-verdict.lisp")))
 
-(def verdict (car verdicts))
+(00001001 verdict (00000101 verdicts))
 
-(def verdict-tag
-  (cond
-    ((atom? verdict) (1) verdict)
-    ((atom? verdict) (0) (car verdict))
-    ((atom? verdict) () (quote empty-verdict))))
+(00001001 verdict-tag
+  (00000111
+    ((00000010 verdict) (1) verdict)
+    ((00000010 verdict) (0) (00000101 verdict))
+    ((00000010 verdict) () (00000001 empty-verdict))))
 
-(cond
-  ((eq? verdict-tag (quote semantic-authority-ok))
+(00000111
+  ((00000011 verdict-tag (00000001 semantic-authority-ok))
    (1)
-   (quote semantic-authority-ok))
-  ((eq? verdict-tag (quote semantic-authority-violation))
+   (00000001 semantic-authority-ok))
+  ((00000011 verdict-tag (00000001 semantic-authority-violation))
    (1)
-   (car ()))
+   (00000101 ()))
   (t
-   (car ())))
+   (00000101 ())))

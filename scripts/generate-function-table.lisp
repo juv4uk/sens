@@ -34,85 +34,85 @@
 ; Registry surfaces are fixed two-element rows: (namespace spelling-or-()).
 ; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
-(def registry-form (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
-(def registry-rows registry-form)
+(00001001 registry-form (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
+(00001001 registry-rows registry-form)
 ; Every exact 8-bit row is a SENS function identity, including 00000000.
 ; Empty human surfaces or an absent machine mechanism stay empty; projection
 ; completeness must never invent meaning and must never alias 00000000 to ().
-(def entries registry-rows)
+(00001001 entries registry-rows)
 
 ; Processor realization projection. Its rows never create an identity: they
 ; may only annotate IDs that already exist in `entries` above.
-(def machine-profile-form
-  (car (read-all (read-file "lib/machine/intel-core-i5-6400.lisp"))))
+(00001001 machine-profile-form
+  (00000101 (01001011 (10100110 "lib/machine/intel-core-i5-6400.lisp"))))
 
-(def find-section
-  (lambda (name sections)
-    (cond
-      ((atom? sections) () (quote ()))
-      ((atom? sections) (1) (quote ()))
-      ((eq? (car (car sections)) name) (car sections))
-      (t (find-section name (cdr sections))))))
+(00001001 find-section
+  (00001000 (name sections)
+    (00000111
+      ((00000010 sections) () (00000001 ()))
+      ((00000010 sections) (1) (00000001 ()))
+      ((00000011 (00000101 (00000101 sections)) name) (00000101 sections))
+      (t (find-section name (00000110 sections))))))
 
-(def machine-rows
-  (cdr (find-section (quote rows) (cdr machine-profile-form))))
+(00001001 machine-rows
+  (00000110 (find-section (00000001 rows) (00000110 machine-profile-form))))
 
-(def find-machine-row
-  (lambda (sid rows)
-    (cond
-      ((atom? rows) () (quote ()))
-      ((atom? rows) (1) (quote ()))
-      ((equal? (car (car rows)) sid) (car rows))
-      (t (find-machine-row sid (cdr rows))))))
+(00001001 find-machine-row
+  (00001000 (sid rows)
+    (00000111
+      ((00000010 rows) () (00000001 ()))
+      ((00000010 rows) (1) (00000001 ()))
+      ((00100010 (00000101 (00000101 rows)) sid) (00000101 rows))
+      (t (find-machine-row sid (00000110 rows))))))
 
-(def machine-path
-  (lambda (sid)
-    (let ((row (find-machine-row (sid-bits sid) machine-rows)))
-      (cond
-        ((atom? row) () "()")
-        ((atom? row) (1) "()")
-        (t (third row))))))
+(00001001 machine-path
+  (00001000 (sid)
+    (10011100 ((row (find-machine-row (sid-bits sid) machine-rows)))
+      (00000111
+        ((00000010 row) () "()")
+        ((00000010 row) (1) "()")
+        (t (00110000 row))))))
 
 ; Historical (McCarthy 1960 / Lisp 1.5) realization projection. Its rows
 ; never create an identity: they may only annotate IDs that already exist
 ; in `entries` above. Reverse-authority is forbidden by the contract file
 ; itself -- a historical name never mints a new my-lisp SID.
-(def historical-profile-form
-  (car (read-all (read-file "contracts/core1-historical-sid-map.lisp"))))
+(00001001 historical-profile-form
+  (00000101 (01001011 (10100110 "contracts/core1-historical-sid-map.lisp"))))
 
-(def historical-rows
-  (cdr (find-section (quote rows) (cdr historical-profile-form))))
+(00001001 historical-rows
+  (00000110 (find-section (00000001 rows) (00000110 historical-profile-form))))
 
-(def find-historical-row
-  (lambda (sid rows)
-    (cond
-      ((atom? rows) () (quote ()))
-      ((atom? rows) (1) (quote ()))
-      ((equal? (sid-bits (second (car rows))) sid) (car rows))
-      (t (find-historical-row sid (cdr rows))))))
+(00001001 find-historical-row
+  (00001000 (sid rows)
+    (00000111
+      ((00000010 rows) () (00000001 ()))
+      ((00000010 rows) (1) (00000001 ()))
+      ((00100010 (sid-bits (00101111 (00000101 rows))) sid) (00000101 rows))
+      (t (find-historical-row sid (00000110 rows))))))
 
-(def mccarthy-label
-  (lambda (sid)
-    (let ((row (find-historical-row (sid-bits sid) historical-rows)))
-      (cond
-        ((atom? row) () "()")
-        ((atom? row) (1) "()")
-        (t (str+ (write-to-string (fourth row)) " (" (write-to-string (fifth row)) ")"))))))
+(00001001 mccarthy-label
+  (00001000 (sid)
+    (10011100 ((row (find-historical-row (sid-bits sid) historical-rows)))
+      (00000111
+        ((00000010 row) () "()")
+        ((00000010 row) (1) "()")
+        (t (str+ (01001100 (00110001 row)) " (" (01001100 (00110010 row)) ")"))))))
 
 ; A surface word is usually a symbol (write-to-string strips the
 ; Lisp-level Symbol wrapping down to bare text); the reconstructed
 ; apostrophe case above is already a plain string. For prose contexts
 ; (the human .md table) the bare apostrophe is fine either way.
-(def surface-word-text
-  (lambda (word)
-    (cond
-      ((equal? word (quote ())) "()")
+(00001001 surface-word-text
+  (00001000 (word)
+    (00000111
+      ((00100010 word (00000001 ())) "()")
       ((string-membership-helper word)
        (class-membership string member)
        word)
       ((string-membership-helper word)
        (class-membership string nonmember)
-       (write-to-string word)))))
+       (01001100 word)))))
 
 ; For the machine-readable .lisp output specifically, a bare apostrophe
 ; word must NOT be re-embedded unquoted: a future reader of this
@@ -121,97 +121,97 @@
 ; already does exactly the right thing per Value type -- a String gets
 ; quoted/escaped (read-back-safe), a Symbol stays bare -- so this is
 ; just write-to-string directly, named for what it's used for here.
-(def surface-word-wsm-text write-to-string)
+(00001001 surface-word-wsm-text write-to-string)
 
 ; --- string-append is exactly binary; this repo's scripts routinely need
 ; more pieces joined than that, so a small variadic wrapper over reduce.
-(def str+
-  (lambda args (reduce (lambda (acc s) (string-append acc s)) "" args)))
+(00001001 str+
+  (00001000 args (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
 ; SID already arrives from the registry as an exact 8-bit string. This generator
 ; must preserve it verbatim; formatting identity is owned by the registry.
 
 ; --- surfaces are fixed (lang word) slots; word is spelling or () ---
-(def find-surface
-  (lambda (lang surfaces)
-    (cond
-      ((atom? surfaces) () (quote ()))
-      ((atom? surfaces) (1) (quote ()))
-      ((eq? (car (car surfaces)) lang) (car surfaces))
-      (t (find-surface lang (cdr surfaces))))))
+(00001001 find-surface
+  (00001000 (lang surfaces)
+    (00000111
+      ((00000010 surfaces) () (00000001 ()))
+      ((00000010 surfaces) (1) (00000001 ()))
+      ((00000011 (00000101 (00000101 surfaces)) lang) (00000101 surfaces))
+      (t (find-surface lang (00000110 surfaces))))))
 
-(def surface-word
-  (lambda (surface-entry)
-    (cond
-      ((atom? surface-entry) () (quote ()))
-      ((atom? surface-entry) (1) (quote ()))
-      (t (car (cdr surface-entry))))))
+(00001001 surface-word
+  (00001000 (surface-entry)
+    (00000111
+      ((00000010 surface-entry) () (00000001 ()))
+      ((00000010 surface-entry) (1) (00000001 ()))
+      (t (00000101 (00000110 surface-entry))))))
 
-(def get-surface
-  (lambda (lang surfaces)
+(00001001 get-surface
+  (00001000 (lang surfaces)
     (surface-word (find-surface lang surfaces))))
 
-(def surface-usable?
-  (lambda (word)
-    (not? (equal? word (quote ())))))
+(00001001 surface-usable?
+  (00001000 (word)
+    (00100001 (00100010 word (00000001 ())))))
 
 ; --- formal identity stub: first present name among en/ук/sa, else bare id ---
 ; SID is already a first-class exact eight-bit identity. Its canonical printer
 ; preserves the exact spelling including leading zeroes; do not reinterpret it
 ; as arithmetic data merely to reconstruct the same source identity.
-(def sid-bits
-  (lambda (sid)
-    (write-to-string sid)))
+(00001001 sid-bits
+  (00001000 (sid)
+    (01001100 sid)))
 
-(def formal-stub
-  (lambda (sid surfaces)
-    (let* ((en (get-surface (quote en) surfaces))
-           (ук (get-surface (quote ук) surfaces))
-           (sa (get-surface (quote sa) surfaces)))
-      (cond
+(00001001 formal-stub
+  (00001000 (sid surfaces)
+    (10011101 ((en (get-surface (00000001 en) surfaces))
+           (ук (get-surface (00000001 ук) surfaces))
+           (sa (get-surface (00000001 sa) surfaces)))
+      (00000111
         ((surface-usable? en)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text en)))
         ((surface-usable? ук)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text ук)))
         ((surface-usable? sa)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text sa)))
-        (t (string-append "identity:" (sid-bits sid)))))))
+        (t (00111010 "identity:" (sid-bits sid)))))))
 
 ; #1469 invariant: this generated review projection is total over the exact
 ; SENS function space. This validates projection shape only; it assigns no
 ; surface, law, or callable mechanism to an otherwise empty registry row.
-(def validate-complete-function-space
-  (lambda (rows)
-    (cond
-      ((equal? (length rows) 256)
+(00001001 validate-complete-function-space
+  (00001000 (rows)
+    (00000111
+      ((00100010 (00101000 rows) 256)
        (1)
-       (cond
-         ((equal? (sid-bits (car (car rows))) "00000000")
+       (00000111
+         ((00100010 (sid-bits (00000101 (00000101 rows))) "00000000")
           (1)
-          (cond
-            ((equal? (sid-bits (car (car (reverse rows)))) "11111111")
+          (00000111
+            ((00100010 (sid-bits (00000101 (00000101 (00101010 rows)))) "11111111")
              (1)
              t)
             (t
-             (second
-               (list
-                 (print "function-table invariant failed: last row must be 11111111")
-                 (car (quote ())))))))
+             (00101111
+               (00100111
+                 (01001000 "function-table invariant failed: last row must be 11111111")
+                 (00000101 (00000001 ())))))))
          (t
-          (second
-            (list
-              (print "function-table invariant failed: first row must be 00000000")
-              (car (quote ())))))))
+          (00101111
+            (00100111
+              (01001000 "function-table invariant failed: first row must be 00000000")
+              (00000101 (00000001 ())))))))
       (t
-       (second
-         (list
-           (print
+       (00101111
+         (00100111
+           (01001000
              (str+
                "function-table invariant failed: expected 256 rows, got "
-               (number->string (length rows))))
-           (car (quote ()))))))))
+               (01000110 (00101000 rows))))
+           (00000101 (00000001 ()))))))))
 
-(def function-space-valid (validate-complete-function-space entries))
+(00001001 function-space-valid (validate-complete-function-space entries))
 
 ; --- string-join with newline, since core.lisp has none yet. Accumulator-
 ; based (not "car + recurse-in-argument-position"), matching core.lisp's own
@@ -219,26 +219,26 @@
 ; is not tail-recursive (the recursive call sits inside str+'s argument
 ; list, not in tail position) and overflows the host stack well before
 ; this registry's complete row set.
-(def join-newline-onto
-  (lambda (strings acc)
-    (cond
-      ((atom? strings) () acc)
-      ((atom? strings) (1) acc)
-      ((eq? acc "") (join-newline-onto (cdr strings) (car strings)))
-      (t (join-newline-onto (cdr strings) (str+ acc "
-" (car strings)))))))
+(00001001 join-newline-onto
+  (00001000 (strings acc)
+    (00000111
+      ((00000010 strings) () acc)
+      ((00000010 strings) (1) acc)
+      ((00000011 acc "") (join-newline-onto (00000110 strings) (00000101 strings)))
+      (t (join-newline-onto (00000110 strings) (str+ acc "
+" (00000101 strings)))))))
 
-(def join-newline (lambda (strings) (join-newline-onto strings "")))
+(00001001 join-newline (00001000 (strings) (join-newline-onto strings "")))
 
-(def render-wsm-row
-  (lambda (entry)
-    (let* ((sid (car entry))
-           (surfaces (cdr entry))
-           (ук (get-surface (quote ук) surfaces))
-           (укр (get-surface (quote укр) surfaces))
-           (en (get-surface (quote en) surfaces))
-           (sa (get-surface (quote sa) surfaces))
-           (sym (get-surface (quote sym) surfaces))
+(00001001 render-wsm-row
+  (00001000 (entry)
+    (10011101 ((sid (00000101 entry))
+           (surfaces (00000110 entry))
+           (ук (get-surface (00000001 ук) surfaces))
+           (укр (get-surface (00000001 укр) surfaces))
+           (en (get-surface (00000001 en) surfaces))
+           (sa (get-surface (00000001 sa) surfaces))
+           (sym (get-surface (00000001 sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
         "  (\"" (sid-bits sid) "\" " formal
@@ -249,15 +249,15 @@
         " (sym " (surface-word-wsm-text sym) ")"
         " my-lisp)"))))
 
-(def render-md-row
-  (lambda (entry)
-    (let* ((sid (car entry))
-           (surfaces (cdr entry))
-           (ук (get-surface (quote ук) surfaces))
-           (укр (get-surface (quote укр) surfaces))
-           (en (get-surface (quote en) surfaces))
-           (sa (get-surface (quote sa) surfaces))
-           (sym (get-surface (quote sym) surfaces)))
+(00001001 render-md-row
+  (00001000 (entry)
+    (10011101 ((sid (00000101 entry))
+           (surfaces (00000110 entry))
+           (ук (get-surface (00000001 ук) surfaces))
+           (укр (get-surface (00000001 укр) surfaces))
+           (en (get-surface (00000001 en) surfaces))
+           (sa (get-surface (00000001 sa) surfaces))
+           (sym (get-surface (00000001 sym) surfaces)))
       (str+
         "| `" (sid-bits sid) "` | " (surface-word-text ук)
         " | " (surface-word-text укр)
@@ -267,8 +267,8 @@
         " | " (machine-path sid)
         " | " (mccarthy-label sid) " |"))))
 
-(def wsm-header
-  (list
+(00001001 wsm-header
+  (00100111
     "; GENERATED — DO NOT EDIT BY HAND"
     "; Authority: lib/surface/semantic-registry.lisp"
     "; Generator: scripts/generate-function-table.lisp (ECO-CANON-1 / my-lisp#75)"
@@ -279,13 +279,13 @@
     ""
     "(ft/2"))
 
-(def wsm-body (join-newline (append wsm-header (map render-wsm-row entries))))
-(def wsm-output (string-append wsm-body "
+(00001001 wsm-body (join-newline (00101001 wsm-header (00110111 render-wsm-row entries))))
+(00001001 wsm-output (00111010 wsm-body "
 )
 "))
 
-(def md-header
-  (list
+(00001001 md-header
+  (00100111
     "# Function table (generated projection)"
     ""
     "**Authority:** `lib/surface/semantic-registry.lisp` — projection only, not a second source of truth."
@@ -299,56 +299,56 @@
     "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake | McCarthy 1960 / Lisp 1.5 (Core1) |"
     "|----|----|-----|---------|----------|--------|------------------------------|-----------------------------------|"))
 
-(def md-body (join-newline (append md-header (map render-md-row entries))))
-(def md-output (string-append md-body "
+(00001001 md-body (join-newline (00101001 md-header (00110111 render-md-row entries))))
+(00001001 md-output (00111010 md-body "
 "))
 
-(def wsm-output-path "lib/generated/function-table.lisp")
-(def md-output-path "docs/generated/function-table.md")
+(00001001 wsm-output-path "lib/generated/function-table.lisp")
+(00001001 md-output-path "docs/generated/function-table.md")
 
-(def write-projections
-  (lambda ()
-    (second
-      (list
-        (write-file wsm-output-path wsm-output)
-        (write-file md-output-path md-output)
-        (print
+(00001001 write-projections
+  (00001000 ()
+    (00101111
+      (00100111
+        (10100111 wsm-output-path wsm-output)
+        (10100111 md-output-path md-output)
+        (01001000
           (str+
             "function-table: "
-            (number->string (length entries))
+            (01000110 (00101000 entries))
             " exact SENS rows written"))))))
 
-(def check-projections
-  (lambda ()
-    (let ((current-wsm (read-file wsm-output-path))
-          (current-md (read-file md-output-path)))
-      (cond
-        ((equal? current-wsm wsm-output)
+(00001001 check-projections
+  (00001000 ()
+    (10011100 ((current-wsm (10100110 wsm-output-path))
+          (current-md (10100110 md-output-path)))
+      (00000111
+        ((00100010 current-wsm wsm-output)
          (1)
-         (cond
-           ((equal? current-md md-output)
+         (00000111
+           ((00100010 current-md md-output)
             (1)
-            (print
+            (01001000
               (str+
                 "function-table: "
-                (number->string (length entries))
+                (01000110 (00101000 entries))
                 " exact SENS rows current")))
            (t
-            (second
-              (list
-                (print "function-table markdown projection is stale")
-                (car (quote ())))))))
+            (00101111
+              (00100111
+                (01001000 "function-table markdown projection is stale")
+                (00000101 (00000001 ())))))))
         (t
-         (second
-           (list
-             (print "function-table Lisp projection is stale")
-             (car (quote ())))))))))
+         (00101111
+           (00100111
+             (01001000 "function-table Lisp projection is stale")
+             (00000101 (00000001 ())))))))))
 
-(cond
-  ((atom? *argv*)
+(00000111
+  ((00000010 *argv*)
    ()
    (write-projections))
-  ((equal? (car *argv*) "--check")
+  ((00100010 (00000101 *argv*) "--check")
    (1)
    (check-projections))
   (t
