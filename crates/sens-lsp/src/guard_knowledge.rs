@@ -323,7 +323,7 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
             ExprKind::List(items) => items,
             _ => continue,
         };
-        if !as_symbol(&head[0]).is_some_and(sens::is_define_surface_name) {
+        if !is_define_head(&head[0]) {
             continue;
         }
         let ExprKind::Symbol(name) = &head[1].kind else {
@@ -332,7 +332,9 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
         let Some(lambda) = head.get(2).and_then(as_list) else {
             continue;
         };
-        if !as_symbol(&lambda[0]).is_some_and(sens::is_lambda_surface_name) {
+        if !(head_is_sid(&lambda[0], sens::sens!(00001000))
+            || as_symbol(&lambda[0]).is_some_and(sens::is_lambda_surface_name))
+        {
             continue;
         }
         let Some(params) = lambda.get(1).and_then(as_list) else {
