@@ -63,19 +63,19 @@
   (00001000 (key rows)
     (00000111
       ((00000010 rows) ())
-      ((equal? key (00000101 (00000101 rows))) (00000101 rows))
+      ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
       (t (machine-capability-find-row key (00000110 rows))))))
 
 (00001001 machine-capabilities-for-sid
   (00001000 (sid)
-    (let ((row (machine-capability-find-row sid machine-capability-axis-v1)))
+    (10011100 ((row (machine-capability-find-row sid machine-capability-axis-v1)))
       (00000111
         ((00000010 row) ())
         (t (00000101 (00000110 row)))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
-    (let ((row (machine-capability-find-row target machine-target-witness-status-v1)))
+    (10011100 ((row (machine-capability-find-row target machine-target-witness-status-v1)))
       (00000111
         ((00000010 row) (00000001 absent))
         (t (00000101 (00000110 row)))))))

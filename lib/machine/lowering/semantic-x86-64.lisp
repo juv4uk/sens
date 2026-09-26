@@ -88,11 +88,11 @@
 ; routine does not violate the host ABI by clobbering a callee-saved register.
 (00001001 x86-lower-add-u64-forms
   (00001000 (left right)
-    (list
-      (list (00000001 mov-r64-imm64) (00000001 rax) left)
-      (list (00000001 mov-r64-imm64) (00000001 rcx) right)
-      (list (00000001 add-r64-r64) (00000001 rax) (00000001 rcx))
-      (list (00000001 ret)))))
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+      (00100111 (00000001 add-r64-r64) (00000001 rax) (00000001 rcx))
+      (00100111 (00000001 ret)))))
 
 ; #196 bounded conditional-growth witness for existing EQ + COND semantics.
 ; This routine does not define equality or conditional evaluation. It chooses
@@ -105,15 +105,15 @@
 ; closed admission remains the sole path to bytes.
 (00001001 x86-lower-eq-cond-u64-forms
   (00001000 (left right then-value else-value)
-    (list
-      (list (00000001 mov-r64-imm64) (00000001 rax) left)
-      (list (00000001 mov-r64-imm64) (00000001 rcx) right)
-      (list (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
-      (list (00000001 jnz-rel8) 11)
-      (list (00000001 mov-r64-imm64) (00000001 rax) then-value)
-      (list (00000001 ret))
-      (list (00000001 mov-r64-imm64) (00000001 rax) else-value)
-      (list (00000001 ret)))))
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+      (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
+      (00100111 (00000001 jnz-rel8) 11)
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) then-value)
+      (00100111 (00000001 ret))
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) else-value)
+      (00100111 (00000001 ret)))))
 
 ; #196 conditional+structural composition helper. Each branch constructs one
 ; bounded pair in the same native-call arena and returns its CAR. The caller
@@ -122,25 +122,25 @@
 ; witness. RAX remains the guest ABI result register.
 (00001001 x86-lower-bounded-car-cons-u64-arm-forms
   (00001000 (left right left-register right-register)
-    (list
-      (list (00000001 mov-r64-imm64) left-register left)
-      (list
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) left-register left)
+      (00100111
         (00000001 mov-mem-disp8-r64)
         (00000001 rdi)
         x86-pair-car-offset
         left-register)
-      (list (00000001 mov-r64-imm64) right-register right)
-      (list
+      (00100111 (00000001 mov-r64-imm64) right-register right)
+      (00100111
         (00000001 mov-mem-disp8-r64)
         (00000001 rdi)
         x86-pair-cdr-offset
         right-register)
-      (list
+      (00100111
         (00000001 mov-r64-mem-disp8)
         (00000001 rax)
         (00000001 rdi)
         x86-pair-car-offset)
-      (list (00000001 ret)))))
+      (00100111 (00000001 ret)))))
 
 ; Third bounded #196 slice: compose runtime COND/EQ choice with structural
 ; CAR(CONS ...) branch bodies. This remains deliberately finite: JNZ +33 skips
@@ -149,13 +149,13 @@
 ; general recursive expression lowering is claimed here.
 (00001001 x86-lower-eq-cond-car-cons-u64-forms
   (00001000 (left right then-car then-cdr else-car else-cdr)
-    (append
-      (list
-        (list (00000001 mov-r64-imm64) (00000001 rax) left)
-        (list (00000001 mov-r64-imm64) (00000001 rcx) right)
-        (list (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
-        (list (00000001 jnz-rel8) 33))
-      (append
+    (00101001
+      (00100111
+        (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+        (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+        (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
+        (00100111 (00000001 jnz-rel8) 33))
+      (00101001
         (x86-lower-bounded-car-cons-u64-arm-forms
           then-car then-cdr (00000001 r8) (00000001 r9))
         (x86-lower-bounded-car-cons-u64-arm-forms
@@ -172,15 +172,15 @@
 ; escape=forbidden for this proof slice.
 (00001001 x86-lower-bounded-pair-store-u64-forms
   (00001000 (left right)
-    (list
-      (list (00000001 mov-r64-imm64) (00000001 rax) left)
-      (list
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+      (00100111
         (00000001 mov-mem-disp8-r64)
         (00000001 rdi)
         x86-pair-car-offset
         (00000001 rax))
-      (list (00000001 mov-r64-imm64) (00000001 rax) right)
-      (list
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) right)
+      (00100111
         (00000001 mov-mem-disp8-r64)
         (00000001 rdi)
         x86-pair-cdr-offset
@@ -193,27 +193,27 @@
 
 (00001001 x86-lower-cons-car-u64-forms
   (00001000 (left right)
-    (append
+    (00101001
       (x86-lower-bounded-pair-store-u64-forms left right)
-      (list
-        (list
+      (00100111
+        (00100111
           (00000001 mov-r64-mem-disp8)
           (00000001 rax)
           (00000001 rdi)
           x86-pair-car-offset)
-        (list (00000001 ret))))))
+        (00100111 (00000001 ret))))))
 
 (00001001 x86-lower-cons-cdr-u64-forms
   (00001000 (left right)
-    (append
+    (00101001
       (x86-lower-bounded-pair-store-u64-forms left right)
-      (list
-        (list
+      (00100111
+        (00100111
           (00000001 mov-r64-mem-disp8)
           (00000001 rax)
           (00000001 rdi)
           x86-pair-cdr-offset)
-        (list (00000001 ret))))))
+        (00100111 (00000001 ret))))))
 
 ; Bounded semantic entry for the Vertical Day CAR witness.
 ; Canonical CAR/CDR own pair validity and therefore fail with the language's
