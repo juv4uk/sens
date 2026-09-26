@@ -26,14 +26,14 @@ jobs:
       - name: Measure base on this runner
         run: |
           git checkout --detach "$BASE_SHA"
-          cargo build -p sens-cli --bin my-lisp
+          cargo build -p sens-cli --bin sens
           echo '--- BASE ---'
           /usr/bin/time -f 'base_wall_seconds=%e' \
             ./target/debug/sens /tmp/benchmark-semantic-registry-read.lisp
       - name: Measure candidate on this runner
         run: |
           git checkout --detach "$HEAD_SHA"
-          cargo build -p sens-cli --bin my-lisp
+          cargo build -p sens-cli --bin sens
           echo '--- CANDIDATE ---'
           /usr/bin/time -f 'candidate_wall_seconds=%e' \
             ./target/debug/sens /tmp/benchmark-semantic-registry-read.lisp

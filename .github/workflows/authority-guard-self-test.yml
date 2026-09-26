@@ -38,7 +38,7 @@ jobs:
           shared-key: authority-guard-self-test
 
       - name: Build sens transport
-        run: cargo build -p sens-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin sens
 
       - name: Forbidden semantic fixture is diagnosed and rejected
         shell: bash

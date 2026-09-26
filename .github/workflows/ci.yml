@@ -94,7 +94,7 @@ jobs:
         run: |
           set -euo pipefail
           cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
-          cargo build -p sens-cli --bin my-lisp
+          cargo build -p sens-cli --bin sens
           : > tests/changed-host-tests.lisp
           while IFS=$'\t' read -r additions deletions path; do
             case "$path" in
@@ -178,7 +178,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo build -p sens-cli --bin my-lisp
+          cargo build -p sens-cli --bin sens
 
           # #150: the admitted authority graph is one-way.
           ./target/debug/sens scripts/machine-authority-guard.lisp
@@ -328,7 +328,7 @@ jobs:
         with:
           shared-key: island-math-adversarial
       - name: Build Lisp checker runtime
-        run: cargo build -p sens-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin sens
       - name: Canon-subordinate island math adversarial matrix
         shell: bash
         run: |
@@ -388,7 +388,7 @@ jobs:
           shared-key: main-fast-critical
       - name: Generated authority projections
         run: |
-          cargo build -p sens-cli --bin my-lisp
+          cargo build -p sens-cli --bin sens
           ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           cargo run -p xtask -- import-xed-evidence --check
@@ -397,7 +397,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo build -p sens-cli --bin my-lisp
+          cargo build -p sens-cli --bin sens
           ./target/debug/sens scripts/machine-authority-guard.lisp
 
           representation_status="$(./target/debug/sens tests/fixtures/machine-representation-independence-witness.lisp)"

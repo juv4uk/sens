@@ -22,7 +22,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build CLI
-        run: cargo build -p sens-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin sens
       - name: Execute lowering witness
         shell: bash
         run: |

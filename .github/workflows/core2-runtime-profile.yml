@@ -41,7 +41,7 @@ jobs:
 
       - name: Core2 Lisp-owned contract witness
         run: |
-          cargo build -p sens-cli --bin my-lisp
+          cargo build -p sens-cli --bin sens
           got="$(./target/debug/sens scripts/check-core2-profile-contract.lisp)"
           printf '%s\n' "$got"
           test "$got" = "(core2-profile-contract-ok)"
