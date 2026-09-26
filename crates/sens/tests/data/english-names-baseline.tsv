@@ -2373,7 +2373,7 @@ rust-lisp	crates/sens/tests/mccarthy.rs	cond	3
 rust-lisp	crates/sens/tests/mccarthy.rs	cons	15
 rust-lisp	crates/sens/tests/mccarthy.rs	def	9
 rust-lisp	crates/sens/tests/mccarthy.rs	defmacro	1
-rust-lisp	crates/sens/tests/mccarthy.rs	eq?	3
+rust-lisp	crates/sens/tests/mccarthy.rs	eq?	5
 rust-lisp	crates/sens/tests/mccarthy.rs	eval	4
 rust-lisp	crates/sens/tests/mccarthy.rs	filter	1
 rust-lisp	crates/sens/tests/mccarthy.rs	lambda	20
