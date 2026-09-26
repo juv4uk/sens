@@ -10,7 +10,7 @@
 //! `write-file-bytes`, `process-run-raw`, `tcp-connect`, ...) are the
 //! entire `sens-host` crate's surface, dispatched by
 //! `eval/capabilities.rs`'s `BTreeMap<String, HostFn>` on the literal
-//! spelling of the calling symbol — never through `Sid8`.
+//! spelling of the calling symbol — never through `Sens8`.
 //!
 //! Part 2: `lib/meta-eval.lisp`'s metacircular evaluator has the exact
 //! same shape, written in Lisp instead of Rust. Its Canon-identity
@@ -93,19 +93,19 @@ fn every_installed_sens_host_capability_has_zero_sid_registry_entries() {
         assert!(
             looks_like_sid_alias.is_ok(),
             "{name} at least parses as an ordinary symbol, confirming it carries \
-             no Sid8 lexical form of its own"
+             no Sens8 lexical form of its own"
         );
     }
 
     // Direct, load-bearing claim: none of these names resolve through the
-    // Sid8-keyed semantic registry at all — only through the separate
+    // Sens8-keyed semantic registry at all — only through the separate
     // name-keyed capability registry checked in `installed_capabilities`.
     let installed = installed_capabilities();
     for name in host_capabilities {
         assert!(
             installed.contains(&name.to_string()),
             "{name} must be reachable only via the name-keyed capability \
-             registry, not via any Sid8 route"
+             registry, not via any Sens8 route"
         );
     }
 }

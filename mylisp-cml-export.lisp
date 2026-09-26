@@ -1,10 +1,10 @@
 (cml-export/1
   (contract (major 6) (minor 0))
-  (digest "757726a29d06b1b8")
+  (digest "515f4ca9ddd69177")
   (forms
     (\"00000001\" (surfaces (en "quote") (sa "svarūpa") (sym "'") (ук "як-є") (укр "як-є")) (role syntax) (callable nil))
-    (\"00000010\" (surfaces (en "atom") (sa "aṇu") (sym ".?") (ук "атом?") (укр "атом?")) (role primitive) (callable t))
-    (\"00000011\" (surfaces (en "eq") (sa "abheda") (sym "=?") (ук "тотожне?") (укр "тотожне?")) (role primitive) (callable t))
+    (\"00000010\" (surfaces (en "atom?") (sa "aṇu") (sym ".?") (ук "атом?") (укр "атом?")) (role primitive) (callable t))
+    (\"00000011\" (surfaces (en "eq?") (sa "abheda") (sym "=?") (ук "тотожне?") (укр "тотожне?")) (role primitive) (callable t))
     (\"00000100\" (surfaces (en "cons") (sa "saṃyuj") (sym ":") (ук "сполучити") (укр "сполучити")) (role primitive) (callable t))
     (\"00000101\" (surfaces (en "car") (sa "ādi") (sym ":п") (ук "перше") (укр "перше")) (role primitive) (callable t))
     (\"00000110\" (surfaces (en "cdr") (sa "śeṣa") (sym ":р") (ук "решта") (укр "решта")) (role primitive) (callable t))
@@ -12,4 +12,4 @@
     (\"00001000\" (surfaces (en "lambda") (ук "функція") (укр "функція")) (role syntax) (callable nil))
     (\"00001001\" (surfaces (en "define") (ук "визначити") (укр "визначити")) (role syntax) (callable nil))
     (\"00001010\" (surfaces (en "defmacro") (ук "визначити-макрос") (укр "визначити-макрос")) (role syntax) (callable nil))
-    (\"00001101\" (surfaces (sa "viyoga") (sym "-") (ук "відняти") (укр "відняти")) (role library) (callable t))))
+    (\"00001101\" (surfaces (en "difference") (sa "viyoga") (sym "-") (ук "відняти") (укр "відняти")) (role library) (callable t))))

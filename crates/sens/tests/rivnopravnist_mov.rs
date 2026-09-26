@@ -122,7 +122,7 @@ fn додавання_відділяє_людські_мови_від_спіль
     };
 
     assert_eq!(surface("ук"), Some("додати"));
-    assert_eq!(surface("en"), None);
+    assert_eq!(surface("en"), Some("plus"));
     assert_eq!(surface("sa"), Some("yoga"));
     assert_eq!(surface("sym"), Some("+"));
 
@@ -130,9 +130,11 @@ fn додавання_відділяє_людські_мови_від_спіль
     let українське = eval_program("додати", &mut сесія).unwrap().value;
     let символічне = eval_program("+", &mut сесія).unwrap().value;
     let санскритське = eval_program("yoga", &mut сесія).unwrap().value;
+    let англійське = eval_program("plus", &mut сесія).unwrap().value;
 
     перевірити_той_самий_builtin(&українське, &символічне);
     перевірити_той_самий_builtin(&символічне, &санскритське);
+    перевірити_той_самий_builtin(&символічне, &англійське);
 
     for вираз in ["(додати 20 22)", "(+ 20 22)", "(yoga 20 22)"] {
         assert_eq!(

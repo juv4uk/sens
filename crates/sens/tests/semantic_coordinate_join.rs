@@ -3,9 +3,9 @@ use std::fs;
 use std::path::PathBuf;
 
 use sens::semantic_registry_export::semantic_id_for_admitted_surface;
-use sens::{eval_program, load_core_library, parse, Expr, ExprKind, Session, Sid8};
+use sens::{eval_program, load_core_library, parse, Expr, ExprKind, Session, Sens8};
 
-const CAR_SID: Sid8 = sens::sid!(00000101);
+const CAR_SID: Sens8 = sens::sens!(00000101);
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -31,7 +31,7 @@ fn load_coordinate_session() -> Session {
     session
 }
 
-fn kernel_names_for_sid(source: &str, wanted_sid: Sid8) -> HashSet<String> {
+fn kernel_names_for_sid(source: &str, wanted_sid: Sens8) -> HashSet<String> {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let map_items = match &exprs[0].kind {
         ExprKind::List(items) => items,
@@ -49,7 +49,7 @@ fn kernel_names_for_sid(source: &str, wanted_sid: Sid8) -> HashSet<String> {
             continue;
         }
 
-        let mut sid: Option<Sid8> = None;
+        let mut sid: Option<Sens8> = None;
         let mut witnesses: Vec<Expr> = Vec::new();
 
         for field in &fields[1..] {
@@ -59,7 +59,7 @@ fn kernel_names_for_sid(source: &str, wanted_sid: Sid8) -> HashSet<String> {
                 {
                     sid = Some(match &value.kind {
                         ExprKind::Sid(sid) => *sid,
-                        other => panic!("kernel witness SID must be exact bare Sid8, got {other:?}"),
+                        other => panic!("kernel witness SID must be exact bare Sens8, got {other:?}"),
                     });
                 }
                 ExprKind::List(items)
@@ -104,7 +104,7 @@ fn kernel_names_for_sid(source: &str, wanted_sid: Sid8) -> HashSet<String> {
 }
 
 
-fn kernel_statuses_for_sid(source: &str, wanted_sid: Sid8) -> Vec<(String, String)> {
+fn kernel_statuses_for_sid(source: &str, wanted_sid: Sens8) -> Vec<(String, String)> {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let ExprKind::List(items) = &exprs[0].kind else {
         panic!("kernel witness map must be a list");
@@ -130,7 +130,7 @@ fn kernel_statuses_for_sid(source: &str, wanted_sid: Sid8) -> Vec<(String, Strin
                 {
                     sid = Some(match &value.kind {
                         ExprKind::Sid(sid) => *sid,
-                        other => panic!("kernel witness SID must be exact bare Sid8, got {other:?}"),
+                        other => panic!("kernel witness SID must be exact bare Sens8, got {other:?}"),
                     });
                 }
                 ExprKind::List(w)
@@ -187,7 +187,7 @@ fn kernel_statuses_for_sid(source: &str, wanted_sid: Sid8) -> Vec<(String, Strin
     Vec::new()
 }
 
-fn math_coordinate_value(session: &mut Session, sid: Sid8) -> String {
+fn math_coordinate_value(session: &mut Session, sid: Sens8) -> String {
     eval_program(
         &format!("(semantic-coordinate-law-for-sid {sid})"),
         session,
@@ -197,7 +197,7 @@ fn math_coordinate_value(session: &mut Session, sid: Sid8) -> String {
     .to_string()
 }
 
-fn machine_coordinate_value(session: &mut Session, sid: Sid8) -> String {
+fn machine_coordinate_value(session: &mut Session, sid: Sens8) -> String {
     eval_program(
         &format!("(machine-capabilities-for-sid {sid})"),
         session,
@@ -223,7 +223,7 @@ fn kernel_car_block(source: &str) -> &str {
 
 #[test]
 fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
-    assert_eq!(semantic_id_for_admitted_surface("car"), Some(sens::sid!(00000101)));
+    assert_eq!(semantic_id_for_admitted_surface("car"), Some(sens::sens!(00000101)));
 
     let mut session = load_coordinate_session();
 
@@ -269,15 +269,15 @@ fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
 
 #[test]
 fn add_sid_preserves_math_and_machine_evidence_with_explicit_kernel_gap() {
-    assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sid!(00001100)));
+    assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sens!(00001100)));
 
     let mut session = load_coordinate_session();
-    let math = math_coordinate_value(&mut session, sens::sid!(00001100));
-    let machine = machine_coordinate_value(&mut session, sens::sid!(00001100));
+    let math = math_coordinate_value(&mut session, sens::sens!(00001100));
+    let machine = machine_coordinate_value(&mut session, sens::sens!(00001100));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
-    let kernels = kernel_statuses_for_sid(&kernel_source, sens::sid!(00001100));
+    let kernels = kernel_statuses_for_sid(&kernel_source, sens::sens!(00001100));
 
     assert!(math.contains("exact-rational-sum"));
     assert_eq!(machine, "((integer-add bounded-u64))");
@@ -288,15 +288,15 @@ fn add_sid_preserves_math_and_machine_evidence_with_explicit_kernel_gap() {
 
 #[test]
 fn eq_sid_joins_relation_sens_and_compare_capability() {
-    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sid!(00000011)));
+    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sens!(00000011)));
 
     let mut session = load_coordinate_session();
-    let math = math_coordinate_value(&mut session, sens::sid!(00000011));
-    let machine = machine_coordinate_value(&mut session, sens::sid!(00000011));
+    let math = math_coordinate_value(&mut session, sens::sens!(00000011));
+    let machine = machine_coordinate_value(&mut session, sens::sens!(00000011));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
-    let kernels = kernel_statuses_for_sid(&kernel_source, sens::sid!(00000011));
+    let kernels = kernel_statuses_for_sid(&kernel_source, sens::sens!(00000011));
 
     assert!(math.contains("same-atom-identity"));
     assert_eq!(machine, "((identity-compare bounded-u64))");
@@ -305,15 +305,15 @@ fn eq_sid_joins_relation_sens_and_compare_capability() {
 
 #[test]
 fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
-    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sid!(00000100)));
+    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sens!(00000100)));
 
     let mut session = load_coordinate_session();
-    let math = math_coordinate_value(&mut session, sens::sid!(00000100));
-    let machine = machine_coordinate_value(&mut session, sens::sid!(00000100));
+    let math = math_coordinate_value(&mut session, sens::sens!(00000100));
+    let machine = machine_coordinate_value(&mut session, sens::sens!(00000100));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
-    let kernels = kernel_statuses_for_sid(&kernel_source, sens::sid!(00000100));
+    let kernels = kernel_statuses_for_sid(&kernel_source, sens::sens!(00000100));
 
     assert!(math.contains("car-cons-left-inverse"));
     assert_eq!(
@@ -327,15 +327,15 @@ fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
 
 #[test]
 fn cond_sid_keeps_negative_math_evidence_and_absent_external_kernels_visible() {
-    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sid!(00000111)));
+    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sens!(00000111)));
 
     let mut session = load_coordinate_session();
-    let math = math_coordinate_value(&mut session, sens::sid!(00000111));
-    let machine = machine_coordinate_value(&mut session, sens::sid!(00000111));
+    let math = math_coordinate_value(&mut session, sens::sens!(00000111));
+    let machine = machine_coordinate_value(&mut session, sens::sens!(00000111));
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
-    let kernels = kernel_statuses_for_sid(&kernel_source, sens::sid!(00000111));
+    let kernels = kernel_statuses_for_sid(&kernel_source, sens::sens!(00000111));
 
     assert!(math.contains("non-mathematical-in-this-slice"));
     assert!(math.contains("no-mathematical-law-claimed"));

@@ -5,7 +5,7 @@
 //! 1. пам'ять: `Sens8` — рівно 1 байт; зведений виклик тримає функцію в 1 байті;
 //! 2. парсер: 8 біт у голові списку — функція; 7 і 9 біт — ні;
 //! 3. реєстр і таблицю функцій: кожен код — рівно 8 цифр 0/1, без повторів;
-//! 4. увесь Rust-код проєкту: кожен `sid!(...)`/`sens!(...)` і кожен
+//! 4. увесь Rust-код проєкту: кожен `sens!(...)`/`sens!(...)` і кожен
 //!    `semantic_id: 0b...` — рівно 8 біт;
 //! 5. увесь Lisp-код проєкту: жодна голова виклику не записана двійковим
 //!    кодом довжиною 6–7 чи 9–16 біт.
@@ -135,11 +135,11 @@ fn every_rust_sens_literal_in_project_is_exactly_eight_bits() {
         let Ok(text) = fs::read_to_string(&path) else { continue };
         for (line_no, line) in text.lines().enumerate() {
             let code = line.split("//").next().unwrap_or("");
-            for marker in ["sid!(", "sens!("] {
+            for marker in ["sens!(", "sens!("] {
                 let mut pieces = code.split(marker);
                 let mut before = pieces.next().unwrap_or("");
                 for piece in pieces {
-                    // Макрос усередині рядкового літерала ("sid!(") — не виклик.
+                    // Макрос усередині рядкового літерала ("sens!(") — не виклик.
                     let quoted = before.ends_with('"');
                     before = piece;
                     if quoted {

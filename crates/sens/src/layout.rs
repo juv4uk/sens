@@ -118,14 +118,14 @@ mod tests {
 
     #[test]
     fn sid_nanbox_payload_is_only_the_packed_sid8_transport() {
-        let NanBox(bits) = NanBox::from_value(&Value::Sid(crate::sid!(00000101)));
+        let NanBox(bits) = NanBox::from_value(&Value::Sid(crate::sens!(00000101)));
         assert_eq!((bits >> 28) & 0xF, TAG_PRIMITIVE);
         assert_eq!(bits & 0x0FFF_FFFF, 5);
     }
 
     #[test]
     fn sid_and_vector_use_distinct_nanbox_tags() {
-        let NanBox(sid_bits) = NanBox::from_value(&Value::Sid(crate::sid!(00000101)));
+        let NanBox(sid_bits) = NanBox::from_value(&Value::Sid(crate::sens!(00000101)));
         let NanBox(vector_bits) = NanBox::from_value(&Value::vector([Value::Number(
             1.0,
             Exactness::Exact,

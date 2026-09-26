@@ -159,7 +159,7 @@ fn collect_arity_diagnostics(
             // Same bug class as the symbol-occurrence data-preservation check: routing
             // must be by exact SID, never by one human surface.
             let head_is_data_preserving_sid = head_name
-                .is_some_and(|name| sens::surface_has_sid(name, sens::sid!(00000001)));
+                .is_some_and(|name| sens::surface_has_sid(name, sens::sens!(00000001)));
             for (index, element) in elements.iter().enumerate() {
                 collect_arity_diagnostics(
                     element,
@@ -208,9 +208,9 @@ fn walk_symbols(expr: &Expr, in_quote: bool, out: &mut Vec<SymbolOccurrence>) {
             let head_is_data_preserving_sid = items
                 .first()
                 .map(|h| match &h.kind {
-                    ExprKind::Sid(sid) => *sid == sens::sid!(00000001),
+                    ExprKind::Sid(sid) => *sid == sens::sens!(00000001),
                     ExprKind::Symbol(surface) => {
-                        sens::surface_has_sid(surface, sens::sid!(00000001))
+                        sens::surface_has_sid(surface, sens::sens!(00000001))
                     }
                     _ => false,
                 })

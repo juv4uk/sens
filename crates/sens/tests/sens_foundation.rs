@@ -2,25 +2,32 @@
 //!
 //! Validates that `Sens8` and the `sens!` macro provide the canonical
 //! eight-bit function sense representation with zero friction, completely
-//! compatible with existing `Sid8` mechanisms while establishing the
+//! compatible with existing `Sens8` mechanisms while establishing the
 //! ontological vocabulary for #1325.
 
-use ::sens::{sens, sid, Sens, Sens8, Sid8};
+use ::sens::{sens, Sens, Sens8};
 
 #[test]
 fn sens_macro_produces_identical_bit_representation_as_sid() {
     let s_eq = sens!(00000011);
-    let old_eq = sid!(00000011);
+    let old_eq = sens!(00000011);
     assert_eq!(s_eq, old_eq);
     assert_eq!(s_eq.to_string(), "00000011");
 }
 
 #[test]
-fn sens8_and_sid8_are_type_compatible() {
+fn sens8_and_sens_are_type_compatible() {
     let s: Sens8 = sens!(00000001);
     let s_alias: Sens = s;
-    let old: Sid8 = s_alias;
-    assert_eq!(s, old);
+    let back: Sens8 = s_alias;
+    assert_eq!(s, back);
+}
+
+#[test]
+#[allow(deprecated)]
+fn deprecated_sid8_alias_is_still_the_same_box_for_cml() {
+    let legacy: ::sens::Sid8 = ::sens::sid!(00000001);
+    assert_eq!(legacy, sens!(00000001));
 }
 
 #[test]

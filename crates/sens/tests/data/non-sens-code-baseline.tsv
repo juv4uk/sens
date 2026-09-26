@@ -482,7 +482,7 @@ source	lib/core4.lisp	177
 source	lib/epistemic.lisp	454
 source	lib/forward.lisp	645
 source	lib/fs.lisp	15
-source	lib/generated/meta-semantic-registry.lisp	623
+source	lib/generated/meta-semantic-registry.lisp	639
 source	lib/guard.lisp	148
 source	lib/island-lowering.lisp	53
 source	lib/knowledge.lisp	944

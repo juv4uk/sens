@@ -337,11 +337,14 @@ mod tests {
     }
 
     #[test]
-    fn plus_is_shared_symbol_not_english() {
+    fn plus_is_one_code_with_english_word_and_shared_symbol() {
+        // Власник, 2026-09-26: математичні функції мають англійські назви
+        // (Lisp 1.5 PLUS); символ `+` лишається спільним — це той самий код.
         let entries = registry_entries().expect("numeric registry");
         let entry = find_entry(&entries, "+").expect("+ identity");
         assert_eq!(entry.identity, "00001100");
-        assert_eq!(surface_name(entry, "en").and_then(|item| item.name.as_deref()), None);
+        assert_eq!(find_entry(&entries, "plus").map(|e| e.identity.as_str()), Some("00001100"));
+        assert_eq!(surface_name(entry, "en").and_then(|item| item.name.as_deref()), Some("plus"));
         assert_eq!(surface_name(entry, "ук").and_then(|item| item.name.as_deref()), Some("додати"));
         assert_eq!(surface_name(entry, "sa").and_then(|item| item.name.as_deref()), Some("yoga"));
         assert_eq!(surface_name(entry, "sym").and_then(|item| item.name.as_deref()), Some("+"));
@@ -355,7 +358,7 @@ mod tests {
 
         let plus = render_name("ук", "+").expect("render +");
         assert!(plus.starts_with("identity: 00001100\n"));
-        assert!(plus.contains("EN: ()"));
+        assert!(plus.contains("EN: plus"));
         assert!(plus.contains("SYM: +"));
     }
 

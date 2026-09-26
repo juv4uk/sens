@@ -23,7 +23,7 @@ use crate::eval::necessary_forms::{self, NecessaryFormIdentity};
 use crate::semantic_registry;
 use crate::syntax::{Exactness, Expr, ExprKind, Span};
 use crate::value::Rational;
-use crate::Sid8;
+use crate::Sens8;
 
 /// `def` is a compatibility-only spelling for the same Define meaning as
 /// `define`/`визначити` (SID 00001001), under its own byte SID 00001011 in
@@ -48,7 +48,7 @@ pub enum Provenance {
     NecessaryForm(NecessaryFormIdentity),
     /// A function selected by its exact eight-bit identity.
     /// No word/enum label is retained as a second identity.
-    FunctionSid(Sid8),
+    FunctionSid(Sens8),
     /// A binding this lowering pass has no registry entry for — an
     /// ordinary user-defined function/variable. This is NOT a failure:
     /// most real programs are built from bindings the registry has no
@@ -132,7 +132,7 @@ pub struct CondClause {
 pub enum LiteralValue {
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sid8),
+    Sid(Sens8),
     EmptyList,
     String(String),
     Symbol(String),
@@ -162,7 +162,7 @@ fn symbol_text(expr: &Expr) -> Option<&str> {
     }
 }
 
-fn sid_of_head(expr: &Expr) -> Option<Sid8> {
+fn sid_of_head(expr: &Expr) -> Option<Sens8> {
     match &expr.kind {
         ExprKind::Sid(sid) => Some(*sid),
         _ => None,
@@ -245,7 +245,7 @@ fn lower_list(items: &[Expr], span: Span) -> Result<IrNode, LoweringError> {
     });
 
     if let Some(sid) = head_sid {
-        if sid == crate::sid!(00000001) {
+        if sid == crate::sens!(00000001) {
             let [_, datum] = items else {
                 return Err(LoweringError::MalformedForm {
                     detail: format!(
@@ -260,16 +260,16 @@ fn lower_list(items: &[Expr], span: Span) -> Result<IrNode, LoweringError> {
                 span,
             });
         }
-        if sid == crate::sid!(00000111) {
+        if sid == crate::sens!(00000111) {
             return lower_cond(items, span);
         }
-        if sid == crate::sid!(00001000) {
+        if sid == crate::sens!(00001000) {
             return lower_lambda(items, span);
         }
-        if sid == crate::sid!(00001001) || sid == crate::sid!(00001011) {
+        if sid == crate::sens!(00001001) || sid == crate::sens!(00001011) {
             return lower_define(items, span);
         }
-        if sid == crate::sid!(00001010) {
+        if sid == crate::sens!(00001010) {
             return lower_defmacro(items, span);
         }
         return lower_ordinary_application(head, &items[1..], span);
@@ -442,7 +442,7 @@ mod tests {
         let IrNode::VariableRef { provenance, .. } = *callee else {
             panic!("expected VariableRef callee");
         };
-        assert_eq!(provenance, Provenance::FunctionSid(crate::sid!(00000101)));
+        assert_eq!(provenance, Provenance::FunctionSid(crate::sens!(00000101)));
     }
 
     #[test]
@@ -477,7 +477,7 @@ mod tests {
         };
         assert_eq!(
             provenance,
-            Provenance::FunctionSid(crate::sid!(00001100))
+            Provenance::FunctionSid(crate::sens!(00001100))
         );
     }
 

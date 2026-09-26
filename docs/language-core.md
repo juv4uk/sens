@@ -20,9 +20,9 @@ another identity.
 
 ## Reader
 
-Exactly eight bare 0/1 source characters are read directly into Sid8.
+Exactly eight bare 0/1 source characters are read directly into Sens8.
 
-    00001100  -> Sid8 00001100
+    00001100  -> Sens8 00001100
     12        -> ordinary exact decimal number
     101       -> ordinary exact decimal number
 
@@ -44,20 +44,20 @@ They are not functions and do not own meaning.
 
     surface/UI input
           ↓ mechanical lookup
-    Sid8
+    Sens8
 
 The forbidden model is:
 
     name -> meaning -> SID
     SID  -> named semantic identity
 
-Runtime and compiler logic must operate on Sid8 after source/UI routing.
+Runtime and compiler logic must operate on Sens8 after source/UI routing.
 
 ## Core profiles
 
 Core1, Core2, Core3 and Core4 are profiles of laws over the same function IDs:
 
-    Sid8
+    Sens8
       ↓
     selected Core profile
       ↓
@@ -73,14 +73,14 @@ A Core profile never mints a new identity and never renames a SID.
 
 Rust, C, Common Lisp, Prolog, Datalog, CLIPS, GraalVM, WASM, FPGA and other
 substrates may provide mechanisms. A mechanism receives an already-selected
-Sid8 and cannot redefine what that SID is.
+Sens8 and cannot redefine what that SID is.
 
 Native operator names, opcodes and helper enums are mechanism-local metadata,
 not my-lisp function identities.
 
 ## Compiler / IR rule
 
-Compiler IR provenance may carry Sid8 and mechanism/profile facts. It must not
+Compiler IR provenance may carry Sens8 and mechanism/profile facts. It must not
 introduce a second named function ontology such as a canonical-identity enum or
 a necessary-form identity enum.
 
