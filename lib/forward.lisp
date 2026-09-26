@@ -57,24 +57,24 @@
 ; erzeugende Fakt, typischerweise mit denselben Variablen, damit
 ; `fire-rule` einsetzen kann, woran `pattern` sie gebunden hat.
 
-(def *working-memory* (quote ()))
+(00001001 *working-memory* (00000001 ()))
 
-(defmacro assert-fact! (fact)
-  (list (quote def) (quote *working-memory*) (list (quote cons) fact (quote *working-memory*))))
+(00001010 assert-fact! (fact)
+  (00100111 (00000001 def) (00000001 *working-memory*) (00100111 (00000001 cons) fact (00000001 *working-memory*))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in
 ; — the new fact this rule application would produce. On failure, returns
 ; `'no-match` rather than `'()` — an empty list would be ambiguous with a
 ; template that legitimately evaluates to `()`.
-(def fire-rule
-  (lambda (rule fact)
-    (let ((pattern (car rule))
-          (template (second rule)))
-      (let ((subst (unify pattern fact (quote ()))))
-        (cond
-          ((failed-subst? subst) (quote no-match))
-          (t (apply-subst template subst)))))))
+(00001001 fire-rule
+  (00001000 (rule fact)
+    (10011100 ((pattern (00000101 rule))
+          (template (00101111 rule)))
+      (10011100 ((subst (10000111 pattern fact (00000001 ()))))
+        (00000111
+          ((failed-subst? subst) (00000001 no-match))
+          (t (10001010 template subst)))))))
 
 ; Step 2: apply one rule to every fact in a list, collecting the new facts
 ; it produces. Still just one rule (not the whole rule set) and still no
@@ -104,25 +104,25 @@
 ; it's whatever `template` was — which may itself be a compound list (e.g.
 ; `(has-mass earth)`) — and `eq` errors on non-atom arguments instead of
 ; just correctly answering "not the no-match atom".
-(def fire-rule-on-facts
-  (lambda (rule facts)
-    (cond
-      ((atom? facts) () (quote ()))
-      ((atom? facts) (1) (quote ()))
-      (t (let ((result (fire-rule rule (car facts))))
-           (cond
-             ((atom? result) () (cond
-                ((eq? result (quote no-match)) (fire-rule-on-facts rule (cdr facts)))
-                (t (cons result (fire-rule-on-facts rule (cdr facts))))))
-             ((atom? result) (1) (cond
-                ((eq? result (quote no-match)) (fire-rule-on-facts rule (cdr facts)))
-                (t (cons result (fire-rule-on-facts rule (cdr facts))))))
-             (t (cons result (fire-rule-on-facts rule (cdr facts))))))))))
+(00001001 fire-rule-on-facts
+  (00001000 (rule facts)
+    (00000111
+      ((00000010 facts) () (00000001 ()))
+      ((00000010 facts) (1) (00000001 ()))
+      (t (10011100 ((result (fire-rule rule (00000101 facts))))
+           (00000111
+             ((00000010 result) () (00000111
+                ((00000011 result (00000001 no-match)) (fire-rule-on-facts rule (00000110 facts)))
+                (t (00000100 result (fire-rule-on-facts rule (00000110 facts))))))
+             ((00000010 result) (1) (00000111
+                ((00000011 result (00000001 no-match)) (fire-rule-on-facts rule (00000110 facts)))
+                (t (00000100 result (fire-rule-on-facts rule (00000110 facts))))))
+             (t (00000100 result (fire-rule-on-facts rule (00000110 facts))))))))))
 
 ; Convenience wrapper reading the current global working memory rather than
 ; requiring the caller to pass it explicitly.
-(def fire-rule-on-working-memory
-  (lambda (rule)
+(00001001 fire-rule-on-working-memory
+  (00001000 (rule)
     (fire-rule-on-facts rule *working-memory*)))
 
 ; Step 3: apply every rule in a rule set to a fact list (still a single
@@ -143,16 +143,16 @@
 ; selbst mit anderen Regeln abgeglichen). Auf `append` aufgebaut, dieselbe
 ; Fan-out-Form, die `prove-goal` in lib/reason.lisp nutzt, um jede Regel gegen
 ; ein Ziel zu versuchen.
-(def fire-rules-on-facts
-  (lambda (rules facts)
-    (cond
-      ((atom? rules) () (quote ()))
-      ((atom? rules) (1) (quote ()))
-      (t (append (fire-rule-on-facts (car rules) facts)
-                  (fire-rules-on-facts (cdr rules) facts))))))
+(00001001 fire-rules-on-facts
+  (00001000 (rules facts)
+    (00000111
+      ((00000010 rules) () (00000001 ()))
+      ((00000010 rules) (1) (00000001 ()))
+      (t (00101001 (fire-rule-on-facts (00000101 rules) facts)
+                  (fire-rules-on-facts (00000110 rules) facts))))))
 
-(def fire-rules-on-working-memory
-  (lambda (rules)
+(00001001 fire-rules-on-working-memory
+  (00001000 (rules)
     (fire-rules-on-facts rules *working-memory*)))
 
 ; Step 4: `run` — the fixpoint loop. Repeatedly fires the whole rule set
@@ -195,23 +195,23 @@
 ; aktualisieren. Um das Ergebnis zurückzusynchronisieren, ruf `assert-facts!`
 ; selbst auf oberster Ebene auf: `(assert-facts! (run rules *working-memory*))`.
 
-(def append-new
-  (lambda (facts wm)
-    (cond
-      ((atom? facts) () wm)
-      ((atom? facts) (1) wm)
-      ((member? (car facts) wm) (append-new (cdr facts) wm))
-      (t (append-new (cdr facts) (cons (car facts) wm))))))
+(00001001 append-new
+  (00001000 (facts wm)
+    (00000111
+      ((00000010 facts) () wm)
+      ((00000010 facts) (1) wm)
+      ((00101100 (00000101 facts) wm) (append-new (00000110 facts) wm))
+      (t (append-new (00000110 facts) (00000100 (00000101 facts) wm))))))
 
-(def run
-  (lambda (rules facts)
-    (let ((merged (append-new (fire-rules-on-facts rules facts) facts)))
-      (cond
-        ((= (length merged) (length facts)) 1 facts)
+(00001001 run
+  (00001000 (rules facts)
+    (10011100 ((merged (append-new (fire-rules-on-facts rules facts) facts)))
+      (00000111
+        ((00011100 (00101000 merged) (00101000 facts)) 1 facts)
         (t (run rules merged))))))
 
-(defmacro assert-facts! (facts)
-  (list (quote def) (quote *working-memory*) (list (quote append-new) facts (quote *working-memory*))))
+(00001010 assert-facts! (facts)
+  (00100111 (00000001 def) (00000001 *working-memory*) (00100111 (00000001 append-new) facts (00000001 *working-memory*))))
 
 ; Step 5a: plain `retract-fact` — removes one matching fact (compared via
 ; `equal?`, same as everywhere else facts are compared) from a fact list.
@@ -243,16 +243,16 @@
 ; Unterstützungsmenge (`(fakt . unterstützende-fakten)`), damit das
 ; Entfernen einer Unterstützung kaskadieren kann; das ist Schritt 5b, ein
 ; separat abgestimmter Schritt, hier nicht unterstellt.
-(def retract-fact
-  (lambda (fact facts)
-    (cond
-      ((atom? facts) () (quote ()))
-      ((atom? facts) (1) (quote ()))
-      ((equal? fact (car facts)) (cdr facts))
-      (t (cons (car facts) (retract-fact fact (cdr facts)))))))
+(00001001 retract-fact
+  (00001000 (fact facts)
+    (00000111
+      ((00000010 facts) () (00000001 ()))
+      ((00000010 facts) (1) (00000001 ()))
+      ((00100010 fact (00000101 facts)) (00000110 facts))
+      (t (00000100 (00000101 facts) (retract-fact fact (00000110 facts)))))))
 
-(defmacro retract-fact! (fact)
-  (list (quote def) (quote *working-memory*) (list (quote retract-fact) fact (quote *working-memory*))))
+(00001010 retract-fact! (fact)
+  (00100111 (00000001 def) (00000001 *working-memory*) (00100111 (00000001 retract-fact) fact (00000001 *working-memory*))))
 
 ; Step 5b: a real (if minimal) truth maintenance system. A *justified fact*
 ; is `(fact . supports)`: `supports` is the list of facts a rule consumed to
@@ -313,120 +313,120 @@
 ; sie zu ersetzen: `*justified-memory*` ist eine von `*working-memory*`
 ; getrennte globale Variable, sodass bestehende Aufrufer von
 ; `run`/`assert-fact!`/`retract-fact!` unberührt bleiben.
-(def make-justified
-  (lambda (fact supports)
-    (cons fact supports)))
+(00001001 make-justified
+  (00001000 (fact supports)
+    (00000100 fact supports)))
 
-(def fact-of (lambda (entry) (car entry)))
-(def supports-of (lambda (entry) (cdr entry)))
-(def axiom (lambda (fact) (make-justified fact (quote ()))))
+(00001001 fact-of (00001000 (entry) (00000101 entry)))
+(00001001 supports-of (00001000 (entry) (00000110 entry)))
+(00001001 axiom (00001000 (fact) (make-justified fact (00000001 ()))))
 
-(def map-fact-of
-  (lambda (entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      (t (cons (fact-of (car entries)) (map-fact-of (cdr entries)))))))
+(00001001 map-fact-of
+  (00001000 (entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      (t (00000100 (fact-of (00000101 entries)) (map-fact-of (00000110 entries)))))))
 
 ; Same `fire-rule` as Step 1, but wraps a successful result with the
 ; single supporting fact that produced it.
-(def fire-rule-tms
-  (lambda (rule fact)
-    (let ((result (fire-rule rule fact)))
-      (cond
-        ((atom? result) () (cond
-           ((eq? result (quote no-match)) (quote no-match))
-           (t (make-justified result (list fact)))))
-        ((atom? result) (1) (cond
-           ((eq? result (quote no-match)) (quote no-match))
-           (t (make-justified result (list fact)))))
-        (t (make-justified result (list fact)))))))
+(00001001 fire-rule-tms
+  (00001000 (rule fact)
+    (10011100 ((result (fire-rule rule fact)))
+      (00000111
+        ((00000010 result) () (00000111
+           ((00000011 result (00000001 no-match)) (00000001 no-match))
+           (t (make-justified result (00100111 fact)))))
+        ((00000010 result) (1) (00000111
+           ((00000011 result (00000001 no-match)) (00000001 no-match))
+           (t (make-justified result (00100111 fact)))))
+        (t (make-justified result (00100111 fact)))))))
 
-(def fire-rule-on-facts-tms
-  (lambda (rule facts)
-    (cond
-      ((atom? facts) () (quote ()))
-      ((atom? facts) (1) (quote ()))
-      (t (let ((result (fire-rule-tms rule (car facts))))
-           (cond
-             ((atom? result) () (fire-rule-on-facts-tms rule (cdr facts)))
-             ((atom? result) (1) (fire-rule-on-facts-tms rule (cdr facts)))
-             (t (cons result (fire-rule-on-facts-tms rule (cdr facts))))))))))
+(00001001 fire-rule-on-facts-tms
+  (00001000 (rule facts)
+    (00000111
+      ((00000010 facts) () (00000001 ()))
+      ((00000010 facts) (1) (00000001 ()))
+      (t (10011100 ((result (fire-rule-tms rule (00000101 facts))))
+           (00000111
+             ((00000010 result) () (fire-rule-on-facts-tms rule (00000110 facts)))
+             ((00000010 result) (1) (fire-rule-on-facts-tms rule (00000110 facts)))
+             (t (00000100 result (fire-rule-on-facts-tms rule (00000110 facts))))))))))
 
-(def fire-rules-on-facts-tms
-  (lambda (rules facts)
-    (cond
-      ((atom? rules) () (quote ()))
-      ((atom? rules) (1) (quote ()))
-      (t (append (fire-rule-on-facts-tms (car rules) facts)
-                  (fire-rules-on-facts-tms (cdr rules) facts))))))
+(00001001 fire-rules-on-facts-tms
+  (00001000 (rules facts)
+    (00000111
+      ((00000010 rules) () (00000001 ()))
+      ((00000010 rules) (1) (00000001 ()))
+      (t (00101001 (fire-rule-on-facts-tms (00000101 rules) facts)
+                  (fire-rules-on-facts-tms (00000110 rules) facts))))))
 
-(def justified-member?
-  (lambda (fact entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      ((equal? fact (fact-of (car entries))) t)
-      (t (justified-member? fact (cdr entries))))))
+(00001001 justified-member?
+  (00001000 (fact entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      ((00100010 fact (fact-of (00000101 entries))) t)
+      (t (justified-member? fact (00000110 entries))))))
 
-(def add-new-justified
-  (lambda (new-entries entries)
-    (cond
-      ((atom? new-entries) () entries)
-      ((atom? new-entries) (1) entries)
-      ((justified-member? (fact-of (car new-entries)) entries)
-       (add-new-justified (cdr new-entries) entries))
-      (t (add-new-justified (cdr new-entries) (cons (car new-entries) entries))))))
+(00001001 add-new-justified
+  (00001000 (new-entries entries)
+    (00000111
+      ((00000010 new-entries) () entries)
+      ((00000010 new-entries) (1) entries)
+      ((justified-member? (fact-of (00000101 new-entries)) entries)
+       (add-new-justified (00000110 new-entries) entries))
+      (t (add-new-justified (00000110 new-entries) (00000100 (00000101 new-entries) entries))))))
 
 ; The fixpoint loop over justified facts, mirroring `run` from Step 4.
-(def run-tms
-  (lambda (rules entries)
-    (let ((new-entries (fire-rules-on-facts-tms rules (map-fact-of entries))))
-      (let ((merged (add-new-justified new-entries entries)))
-        (cond
-          ((= (length merged) (length entries)) 1 entries)
+(00001001 run-tms
+  (00001000 (rules entries)
+    (10011100 ((new-entries (fire-rules-on-facts-tms rules (map-fact-of entries))))
+      (10011100 ((merged (add-new-justified new-entries entries)))
+        (00000111
+          ((00011100 (00101000 merged) (00101000 entries)) 1 entries)
           (t (run-tms rules merged)))))))
 
-(def *justified-memory* (quote ()))
+(00001001 *justified-memory* (00000001 ()))
 
-(defmacro assert-fact-tms! (fact)
-  (list (quote def) (quote *justified-memory*) (list (quote add-new-justified) (list (quote list) (list (quote axiom) fact)) (quote *justified-memory*))))
+(00001010 assert-fact-tms! (fact)
+  (00100111 (00000001 def) (00000001 *justified-memory*) (00100111 (00000001 add-new-justified) (00100111 (00000001 list) (00100111 (00000001 axiom) fact)) (00000001 *justified-memory*))))
 
-(defmacro run-tms! (rules)
-  (list (quote def) (quote *justified-memory*) (list (quote run-tms) rules (quote *justified-memory*))))
+(00001010 run-tms! (rules)
+  (00100111 (00000001 def) (00000001 *justified-memory*) (00100111 (00000001 run-tms) rules (00000001 *justified-memory*))))
 
-(def remove-justified
-  (lambda (fact entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      ((equal? fact (fact-of (car entries))) (remove-justified fact (cdr entries)))
-      (t (cons (car entries) (remove-justified fact (cdr entries)))))))
+(00001001 remove-justified
+  (00001000 (fact entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      ((00100010 fact (fact-of (00000101 entries))) (remove-justified fact (00000110 entries)))
+      (t (00000100 (00000101 entries) (remove-justified fact (00000110 entries)))))))
 
-(def dependents-of
-  (lambda (fact entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      ((member? fact (supports-of (car entries)))
-       (cons (fact-of (car entries)) (dependents-of fact (cdr entries))))
-      (t (dependents-of fact (cdr entries))))))
+(00001001 dependents-of
+  (00001000 (fact entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      ((00101100 fact (supports-of (00000101 entries)))
+       (00000100 (fact-of (00000101 entries)) (dependents-of fact (00000110 entries))))
+      (t (dependents-of fact (00000110 entries))))))
 
 ; Retracts `fact`, then recursively retracts everything that named it in
 ; their support set — the cascade truth maintenance is for.
-(def retract-fact-tms
-  (lambda (fact entries)
+(00001001 retract-fact-tms
+  (00001000 (fact entries)
     (retract-facts-tms (dependents-of fact entries) (remove-justified fact entries))))
 
-(def retract-facts-tms
-  (lambda (facts entries)
-    (cond
-      ((atom? facts) () entries)
-      ((atom? facts) (1) entries)
-      (t (retract-facts-tms (cdr facts) (retract-fact-tms (car facts) entries))))))
+(00001001 retract-facts-tms
+  (00001000 (facts entries)
+    (00000111
+      ((00000010 facts) () entries)
+      ((00000010 facts) (1) entries)
+      (t (retract-facts-tms (00000110 facts) (retract-fact-tms (00000101 facts) entries))))))
 
-(defmacro retract-fact-tms! (fact)
-  (list (quote def) (quote *justified-memory*) (list (quote retract-fact-tms) fact (quote *justified-memory*))))
+(00001010 retract-fact-tms! (fact)
+  (00100111 (00000001 def) (00000001 *justified-memory*) (00100111 (00000001 retract-fact-tms) fact (00000001 *justified-memory*))))
 
 ; Step 5c: multiple justifications per fact — the limitation Step 5b
 ; documented and deliberately left open. An entry is now `(fact
@@ -476,97 +476,97 @@
 ; Separate globale Variable (`*jtms-memory*`) sowohl von `*working-memory*`
 ; (Schritt 1-5a) als auch von `*justified-memory*` (Schritt 5b, eine
 ; Begründung) — keine frühere Schicht wird berührt oder ersetzt.
-(def justifications-of (lambda (entry) (cdr entry)))
+(00001001 justifications-of (00001000 (entry) (00000110 entry)))
 
-(def fire-rule-jtms
-  (lambda (rule fact)
-    (let ((result (fire-rule rule fact)))
-      (cond
-        ((atom? result) () (cond
-           ((eq? result (quote no-match)) (quote no-match))
-           (t (list result (list fact)))))
-        ((atom? result) (1) (cond
-           ((eq? result (quote no-match)) (quote no-match))
-           (t (list result (list fact)))))
-        (t (list result (list fact)))))))
+(00001001 fire-rule-jtms
+  (00001000 (rule fact)
+    (10011100 ((result (fire-rule rule fact)))
+      (00000111
+        ((00000010 result) () (00000111
+           ((00000011 result (00000001 no-match)) (00000001 no-match))
+           (t (00100111 result (00100111 fact)))))
+        ((00000010 result) (1) (00000111
+           ((00000011 result (00000001 no-match)) (00000001 no-match))
+           (t (00100111 result (00100111 fact)))))
+        (t (00100111 result (00100111 fact)))))))
 
-(def fire-rule-on-facts-jtms
-  (lambda (rule facts)
-    (cond
-      ((atom? facts) () (quote ()))
-      ((atom? facts) (1) (quote ()))
-      (t (let ((result (fire-rule-jtms rule (car facts))))
-           (cond
-             ((atom? result) () (fire-rule-on-facts-jtms rule (cdr facts)))
-             ((atom? result) (1) (fire-rule-on-facts-jtms rule (cdr facts)))
-             (t (cons result (fire-rule-on-facts-jtms rule (cdr facts))))))))))
+(00001001 fire-rule-on-facts-jtms
+  (00001000 (rule facts)
+    (00000111
+      ((00000010 facts) () (00000001 ()))
+      ((00000010 facts) (1) (00000001 ()))
+      (t (10011100 ((result (fire-rule-jtms rule (00000101 facts))))
+           (00000111
+             ((00000010 result) () (fire-rule-on-facts-jtms rule (00000110 facts)))
+             ((00000010 result) (1) (fire-rule-on-facts-jtms rule (00000110 facts)))
+             (t (00000100 result (fire-rule-on-facts-jtms rule (00000110 facts))))))))))
 
-(def fire-rules-on-facts-jtms
-  (lambda (rules facts)
-    (cond
-      ((atom? rules) () (quote ()))
-      ((atom? rules) (1) (quote ()))
-      (t (append (fire-rule-on-facts-jtms (car rules) facts)
-                  (fire-rules-on-facts-jtms (cdr rules) facts))))))
+(00001001 fire-rules-on-facts-jtms
+  (00001000 (rules facts)
+    (00000111
+      ((00000010 rules) () (00000001 ()))
+      ((00000010 rules) (1) (00000001 ()))
+      (t (00101001 (fire-rule-on-facts-jtms (00000101 rules) facts)
+                  (fire-rules-on-facts-jtms (00000110 rules) facts))))))
 
-(def find-entry
-  (lambda (fact entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      ((equal? fact (fact-of (car entries))) (car entries))
-      (t (find-entry fact (cdr entries))))))
+(00001001 find-entry
+  (00001000 (fact entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      ((00100010 fact (fact-of (00000101 entries))) (00000101 entries))
+      (t (find-entry fact (00000110 entries))))))
 
-(def remove-entry-jtms
-  (lambda (fact entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      ((equal? fact (fact-of (car entries))) (remove-entry-jtms fact (cdr entries)))
-      (t (cons (car entries) (remove-entry-jtms fact (cdr entries)))))))
+(00001001 remove-entry-jtms
+  (00001000 (fact entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      ((00100010 fact (fact-of (00000101 entries))) (remove-entry-jtms fact (00000110 entries)))
+      (t (00000100 (00000101 entries) (remove-entry-jtms fact (00000110 entries)))))))
 
 ; Folds one new `(fact justification)` pair into `entries`: a brand-new
 ; fact gets a fresh entry; a fact already present gets `justification`
 ; added to its list only if not already there (so re-deriving the same way
 ; twice is a no-op, needed for `run-jtms`'s fixpoint check to terminate).
-(def add-justification
-  (lambda (fact justification entries)
-    (let ((existing (find-entry fact entries)))
-      (cond
-        ((atom? existing) () (cons (list fact justification) entries))
-        ((atom? existing) (1) (cons (list fact justification) entries))
-        ((member? justification (justifications-of existing)) entries)
-        (t (cons (cons fact (cons justification (justifications-of existing)))
+(00001001 add-justification
+  (00001000 (fact justification entries)
+    (10011100 ((existing (find-entry fact entries)))
+      (00000111
+        ((00000010 existing) () (00000100 (00100111 fact justification) entries))
+        ((00000010 existing) (1) (00000100 (00100111 fact justification) entries))
+        ((00101100 justification (justifications-of existing)) entries)
+        (t (00000100 (00000100 fact (00000100 justification (justifications-of existing)))
                  (remove-entry-jtms fact entries)))))))
 
-(def add-new-entries-jtms
-  (lambda (new-entries entries)
-    (cond
-      ((atom? new-entries) () entries)
-      ((atom? new-entries) (1) entries)
+(00001001 add-new-entries-jtms
+  (00001000 (new-entries entries)
+    (00000111
+      ((00000010 new-entries) () entries)
+      ((00000010 new-entries) (1) entries)
       (t (add-new-entries-jtms
-           (cdr new-entries)
-           (add-justification (fact-of (car new-entries)) (second (car new-entries)) entries))))))
+           (00000110 new-entries)
+           (add-justification (fact-of (00000101 new-entries)) (00101111 (00000101 new-entries)) entries))))))
 
 ; The fixpoint loop. Compares the merged result to the input with `equal?`
 ; rather than a length/count check (Step 4's `run` compares lengths) —
 ; `add-justification` can grow an *existing* entry's justification list
 ; without changing the entry count, so counting entries alone would miss
 ; real progress and stop too early.
-(def run-jtms
-  (lambda (rules entries)
-    (let ((merged (add-new-entries-jtms (fire-rules-on-facts-jtms rules (map-fact-of entries)) entries)))
-      (cond
-        ((equal? merged entries) entries)
+(00001001 run-jtms
+  (00001000 (rules entries)
+    (10011100 ((merged (add-new-entries-jtms (fire-rules-on-facts-jtms rules (map-fact-of entries)) entries)))
+      (00000111
+        ((00100010 merged entries) entries)
         (t (run-jtms rules merged))))))
 
-(def *jtms-memory* (quote ()))
+(00001001 *jtms-memory* (00000001 ()))
 
-(defmacro assert-fact-jtms! (fact)
-  (list (quote def) (quote *jtms-memory*) (list (quote add-justification) fact (list (quote quote) (quote ())) (quote *jtms-memory*))))
+(00001010 assert-fact-jtms! (fact)
+  (00100111 (00000001 def) (00000001 *jtms-memory*) (00100111 (00000001 add-justification) fact (00100111 (00000001 quote) (00000001 ())) (00000001 *jtms-memory*))))
 
-(defmacro run-jtms! (rules)
-  (list (quote def) (quote *jtms-memory*) (list (quote run-jtms) rules (quote *jtms-memory*))))
+(00001010 run-jtms! (rules)
+  (00100111 (00000001 def) (00000001 *jtms-memory*) (00100111 (00000001 run-jtms) rules (00000001 *jtms-memory*))))
 
 ; Step 14: JTMS grows a multi-condition twin, the same way Step 6 grew
 ; `fire-rule-multi`/`run-multi` alongside the Step 1-5 single-condition
@@ -643,141 +643,141 @@
 ; gültig für die `(pattern template)`-Regelform aus Schritt 1-5.
 ; `run-jtms-multi!` ist der JTMS-Einstiegspunkt für das gemeinsame Format
 ; `(head cond1 cond2 ...)`.
-(def jtms-state-subst (lambda (state) (car state)))
-(def jtms-state-used (lambda (state) (cdr state)))
-(def jtms-make-state (lambda (subst used) (cons subst used)))
+(00001001 jtms-state-subst (00001000 (state) (00000101 state)))
+(00001001 jtms-state-used (00001000 (state) (00000110 state)))
+(00001001 jtms-make-state (00001000 (subst used) (00000100 subst used)))
 
-(def match-plain-condition-jtms
-  (lambda (condition facts state)
-    (cond
-      ((atom? facts) () (quote ()))
-      ((atom? facts) (1) (quote ()))
-      (t (let ((s (unify condition (car facts) (jtms-state-subst state))))
-           (cond
-             ((failed-subst? s) (match-plain-condition-jtms condition (cdr facts) state))
-             (t (cons (jtms-make-state s (cons (car facts) (jtms-state-used state)))
-                       (match-plain-condition-jtms condition (cdr facts) state)))))))))
+(00001001 match-plain-condition-jtms
+  (00001000 (condition facts state)
+    (00000111
+      ((00000010 facts) () (00000001 ()))
+      ((00000010 facts) (1) (00000001 ()))
+      (t (10011100 ((s (10000111 condition (00000101 facts) (jtms-state-subst state))))
+           (00000111
+             ((failed-subst? s) (match-plain-condition-jtms condition (00000110 facts) state))
+             (t (00000100 (jtms-make-state s (00000100 (00000101 facts) (jtms-state-used state)))
+                       (match-plain-condition-jtms condition (00000110 facts) state)))))))))
 
-(def match-or-condition-jtms
-  (lambda (alternatives facts state)
-    (cond
-      ((atom? alternatives) () (quote ()))
-      ((atom? alternatives) (1) (quote ()))
-      (t (append (match-one-condition-jtms (car alternatives) facts state)
-                  (match-or-condition-jtms (cdr alternatives) facts state))))))
+(00001001 match-or-condition-jtms
+  (00001000 (alternatives facts state)
+    (00000111
+      ((00000010 alternatives) () (00000001 ()))
+      ((00000010 alternatives) (1) (00000001 ()))
+      (t (00101001 (match-one-condition-jtms (00000101 alternatives) facts state)
+                  (match-or-condition-jtms (00000110 alternatives) facts state))))))
 
-(def match-one-condition-jtms
-  (lambda (condition facts state)
-    (cond
+(00001001 match-one-condition-jtms
+  (00001000 (condition facts state)
+    (00000111
       ((condition-is-not? condition)
-       (cond
-         ((atom? (match-condition-against-facts (second condition) facts (jtms-state-subst state))) () (list state))
-         ((atom? (match-condition-against-facts (second condition) facts (jtms-state-subst state))) (1) (list state))
-         (t (quote ()))))
-      ((condition-is-or? condition) (match-or-condition-jtms (cdr condition) facts state))
-      ((condition-is-and? condition) (match-conditions-jtms (cdr condition) facts state))
+       (00000111
+         ((00000010 (match-condition-against-facts (00101111 condition) facts (jtms-state-subst state))) () (00100111 state))
+         ((00000010 (match-condition-against-facts (00101111 condition) facts (jtms-state-subst state))) (1) (00100111 state))
+         (t (00000001 ()))))
+      ((condition-is-or? condition) (match-or-condition-jtms (00000110 condition) facts state))
+      ((condition-is-and? condition) (match-conditions-jtms (00000110 condition) facts state))
       ((condition-is-test? condition)
-       (cond
-         ((eval (apply-subst (second condition) (jtms-state-subst state))) (list state))
-         (t (quote ()))))
+       (00000111
+         ((01001101 (10001010 (00101111 condition) (jtms-state-subst state))) (00100111 state))
+         (t (00000001 ()))))
       (t (match-plain-condition-jtms condition facts state)))))
 
-(def match-conditions-jtms
-  (lambda (conditions facts state)
+(00001001 match-conditions-jtms
+  (00001000 (conditions facts state)
     (thread-conjunction conditions state
-      (lambda (condition s) (match-one-condition-jtms condition facts s)))))
+      (00001000 (condition s) (match-one-condition-jtms condition facts s)))))
 
-(def map-apply-head-jtms
-  (lambda (head states)
-    (cond
-      ((atom? states) () (quote ()))
-      ((atom? states) (1) (quote ()))
-      (t (cons (list (apply-subst head (jtms-state-subst (car states))) (jtms-state-used (car states)))
-                (map-apply-head-jtms head (cdr states)))))))
+(00001001 map-apply-head-jtms
+  (00001000 (head states)
+    (00000111
+      ((00000010 states) () (00000001 ()))
+      ((00000010 states) (1) (00000001 ()))
+      (t (00000100 (00100111 (10001010 head (jtms-state-subst (00000101 states))) (jtms-state-used (00000101 states)))
+                (map-apply-head-jtms head (00000110 states)))))))
 
-(def fire-rule-jtms-multi
-  (lambda (rule facts)
-    (map-apply-head-jtms (car rule) (match-conditions-jtms (cdr rule) facts (jtms-make-state (quote ()) (quote ()))))))
+(00001001 fire-rule-jtms-multi
+  (00001000 (rule facts)
+    (map-apply-head-jtms (00000101 rule) (match-conditions-jtms (00000110 rule) facts (jtms-make-state (00000001 ()) (00000001 ()))))))
 
-(def fire-rules-jtms-multi
-  (lambda (rules facts)
-    (cond
-      ((atom? rules) () (quote ()))
-      ((atom? rules) (1) (quote ()))
-      (t (append (fire-rule-jtms-multi (car rules) facts)
-                  (fire-rules-jtms-multi (cdr rules) facts))))))
+(00001001 fire-rules-jtms-multi
+  (00001000 (rules facts)
+    (00000111
+      ((00000010 rules) () (00000001 ()))
+      ((00000010 rules) (1) (00000001 ()))
+      (t (00101001 (fire-rule-jtms-multi (00000101 rules) facts)
+                  (fire-rules-jtms-multi (00000110 rules) facts))))))
 
-(def run-jtms-multi
-  (lambda (rules entries)
-    (let ((merged (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries)))
-      (cond
-        ((equal? merged entries) entries)
+(00001001 run-jtms-multi
+  (00001000 (rules entries)
+    (10011100 ((merged (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries)))
+      (00000111
+        ((00100010 merged entries) entries)
         (t (run-jtms-multi rules merged))))))
 
-(defmacro run-jtms-multi! (rules)
-  (list (quote def) (quote *jtms-memory*) (list (quote run-jtms-multi) rules (quote *jtms-memory*))))
+(00001010 run-jtms-multi! (rules)
+  (00100111 (00000001 def) (00000001 *jtms-memory*) (00100111 (00000001 run-jtms-multi) rules (00000001 *jtms-memory*))))
 
-(def prune-justifications
-  (lambda (fact justifications)
-    (cond
-      ((atom? justifications) () (quote ()))
-      ((atom? justifications) (1) (quote ()))
-      ((member? fact (car justifications)) (prune-justifications fact (cdr justifications)))
-      (t (cons (car justifications) (prune-justifications fact (cdr justifications)))))))
+(00001001 prune-justifications
+  (00001000 (fact justifications)
+    (00000111
+      ((00000010 justifications) () (00000001 ()))
+      ((00000010 justifications) (1) (00000001 ()))
+      ((00101100 fact (00000101 justifications)) (prune-justifications fact (00000110 justifications)))
+      (t (00000100 (00000101 justifications) (prune-justifications fact (00000110 justifications)))))))
 
-(def prune-entry
-  (lambda (fact entry)
-    (cons (fact-of entry) (prune-justifications fact (justifications-of entry)))))
+(00001001 prune-entry
+  (00001000 (fact entry)
+    (00000100 (fact-of entry) (prune-justifications fact (justifications-of entry)))))
 
-(def prune-all-entries
-  (lambda (fact entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      (t (cons (prune-entry fact (car entries)) (prune-all-entries fact (cdr entries)))))))
+(00001001 prune-all-entries
+  (00001000 (fact entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      (t (00000100 (prune-entry fact (00000101 entries)) (prune-all-entries fact (00000110 entries)))))))
 
-(def unsupported-facts
-  (lambda (entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      ((atom? (justifications-of (car entries))) () (cons (fact-of (car entries)) (unsupported-facts (cdr entries))))
-      ((atom? (justifications-of (car entries))) (1) (cons (fact-of (car entries)) (unsupported-facts (cdr entries))))
-      (t (unsupported-facts (cdr entries))))))
+(00001001 unsupported-facts
+  (00001000 (entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      ((00000010 (justifications-of (00000101 entries))) () (00000100 (fact-of (00000101 entries)) (unsupported-facts (00000110 entries))))
+      ((00000010 (justifications-of (00000101 entries))) (1) (00000100 (fact-of (00000101 entries)) (unsupported-facts (00000110 entries))))
+      (t (unsupported-facts (00000110 entries))))))
 
-(def drop-unsupported
-  (lambda (entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      ((atom? (justifications-of (car entries))) () (drop-unsupported (cdr entries)))
-      ((atom? (justifications-of (car entries))) (1) (drop-unsupported (cdr entries)))
-      (t (cons (car entries) (drop-unsupported (cdr entries)))))))
+(00001001 drop-unsupported
+  (00001000 (entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      ((00000010 (justifications-of (00000101 entries))) () (drop-unsupported (00000110 entries)))
+      ((00000010 (justifications-of (00000101 entries))) (1) (drop-unsupported (00000110 entries)))
+      (t (00000100 (00000101 entries) (drop-unsupported (00000110 entries)))))))
 
 ; Removes `fact`'s own entry outright, then prunes every justification-set
 ; elsewhere that named it. Any entry left with zero justification-sets has
 ; lost all support and cascade-retracts in turn — recursively, the same way
 ; Step 5b's single-justification cascade works, just checking "any
 ; justification left" instead of "any support left".
-(def retract-fact-jtms
-  (lambda (fact entries)
-    (let ((pruned (prune-all-entries fact (remove-entry-jtms fact entries))))
-      (let ((newly-unsupported (unsupported-facts pruned))
+(00001001 retract-fact-jtms
+  (00001000 (fact entries)
+    (10011100 ((pruned (prune-all-entries fact (remove-entry-jtms fact entries))))
+      (10011100 ((newly-unsupported (unsupported-facts pruned))
             (remaining (drop-unsupported pruned)))
-        (cond
-          ((atom? newly-unsupported) () remaining)
-          ((atom? newly-unsupported) (1) remaining)
+        (00000111
+          ((00000010 newly-unsupported) () remaining)
+          ((00000010 newly-unsupported) (1) remaining)
           (t (retract-facts-jtms newly-unsupported remaining)))))))
 
-(def retract-facts-jtms
-  (lambda (facts entries)
-    (cond
-      ((atom? facts) () entries)
-      ((atom? facts) (1) entries)
-      (t (retract-facts-jtms (cdr facts) (retract-fact-jtms (car facts) entries))))))
+(00001001 retract-facts-jtms
+  (00001000 (facts entries)
+    (00000111
+      ((00000010 facts) () entries)
+      ((00000010 facts) (1) entries)
+      (t (retract-facts-jtms (00000110 facts) (retract-fact-jtms (00000101 facts) entries))))))
 
-(defmacro retract-fact-jtms! (fact)
-  (list (quote def) (quote *jtms-memory*) (list (quote retract-fact-jtms) fact (quote *jtms-memory*))))
+(00001010 retract-fact-jtms! (fact)
+  (00100111 (00000001 def) (00000001 *jtms-memory*) (00100111 (00000001 retract-fact-jtms) fact (00000001 *jtms-memory*))))
 
 ; Step 6: a shared rule language with `lib/reason.lisp`. Steps 1-5c used a
 ; forward-only `(pattern template)` shape, matched against exactly one
@@ -855,15 +855,15 @@
 ; ersetzt weder die 2-Element-Regel-Schicht aus Schritt 1-5a noch bindet
 ; sie sich in die Truth-Maintenance-Schichten aus Schritt 5b/5c ein — die
 ; bleiben genau, wie sie waren.
-(def match-condition-against-facts
-  (lambda (condition facts subst)
-    (cond
-      ((atom? facts) () (quote ()))
-      ((atom? facts) (1) (quote ()))
-      (t (let ((s (unify condition (car facts) subst)))
-           (cond
-             ((failed-subst? s) (match-condition-against-facts condition (cdr facts) subst))
-             (t (cons s (match-condition-against-facts condition (cdr facts) subst)))))))))
+(00001001 match-condition-against-facts
+  (00001000 (condition facts subst)
+    (00000111
+      ((00000010 facts) () (00000001 ()))
+      ((00000010 facts) (1) (00000001 ()))
+      (t (10011100 ((s (10000111 condition (00000101 facts) subst)))
+           (00000111
+             ((failed-subst? s) (match-condition-against-facts condition (00000110 facts) subst))
+             (t (00000100 s (match-condition-against-facts condition (00000110 facts) subst)))))))))
 
 ; Step 7: negation as failure — `(not (pattern))` conditions. This is the
 ; capability `lib/clips-import.lisp`'s Step 5 flagged as missing and worked
@@ -892,21 +892,21 @@
 ; Muster *nicht* gegen die aktuellen Fakten (mit der aktuellen
 ; Substitution) abgeglichen werden kann — keine neuen Bindungen, `subst`
 ; läuft unverändert durch.
-(def condition-is-not?
-  (lambda (condition)
-    (cond
-      ((atom? condition) () (quote ()))
-      ((atom? condition) (1) (quote ()))
-      ((atom? (car condition)) () (eq? (car condition) (quote not)))
-      ((atom? (car condition)) (1) (eq? (car condition) (quote not)))
-      (t (quote ())))))
+(00001001 condition-is-not?
+  (00001000 (condition)
+    (00000111
+      ((00000010 condition) () (00000001 ()))
+      ((00000010 condition) (1) (00000001 ()))
+      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 not)))
+      ((00000010 (00000101 condition)) (1) (00000011 (00000101 condition) (00000001 not)))
+      (t (00000001 ())))))
 
-(def match-negated-condition
-  (lambda (inner-pattern facts subst)
-    (cond
-      ((atom? (match-condition-against-facts inner-pattern facts subst)) () (list subst))
-      ((atom? (match-condition-against-facts inner-pattern facts subst)) (1) (list subst))
-      (t (quote ())))))
+(00001001 match-negated-condition
+  (00001000 (inner-pattern facts subst)
+    (00000111
+      ((00000010 (match-condition-against-facts inner-pattern facts subst)) () (00100111 subst))
+      ((00000010 (match-condition-against-facts inner-pattern facts subst)) (1) (00100111 subst))
+      (t (00000001 ())))))
 
 ; Step 10: `(or (pattern1) (pattern2) ...)` conditions — verified missing
 ; before fixing (not guessed), the same way Step 7's `not` gap was found:
@@ -941,22 +941,22 @@
 ; (Rekursion über `match-one-condition`, sodass eine Alternative selbst
 ; ein `not` oder verschachteltes `or` sein kann), gesammelt werden alle
 ; Substitutionen, die irgendeine davon liefert.
-(def condition-is-or?
-  (lambda (condition)
-    (cond
-      ((atom? condition) () (quote ()))
-      ((atom? condition) (1) (quote ()))
-      ((atom? (car condition)) () (eq? (car condition) (quote or)))
-      ((atom? (car condition)) (1) (eq? (car condition) (quote or)))
-      (t (quote ())))))
+(00001001 condition-is-or?
+  (00001000 (condition)
+    (00000111
+      ((00000010 condition) () (00000001 ()))
+      ((00000010 condition) (1) (00000001 ()))
+      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 or)))
+      ((00000010 (00000101 condition)) (1) (00000011 (00000101 condition) (00000001 or)))
+      (t (00000001 ())))))
 
-(def match-or-condition
-  (lambda (alternatives facts subst)
-    (cond
-      ((atom? alternatives) () (quote ()))
-      ((atom? alternatives) (1) (quote ()))
-      (t (append (match-one-condition (car alternatives) facts subst)
-                  (match-or-condition (cdr alternatives) facts subst))))))
+(00001001 match-or-condition
+  (00001000 (alternatives facts subst)
+    (00000111
+      ((00000010 alternatives) () (00000001 ()))
+      ((00000010 alternatives) (1) (00000001 ()))
+      (t (00101001 (match-one-condition (00000101 alternatives) facts subst)
+                  (match-or-condition (00000110 alternatives) facts subst))))))
 
 ; Step 11: `(and (pattern1) (pattern2) ...)` conditions — the same bug
 ; class again, found the same way: `(or (and (cat ?x) (small ?x)) (dog
@@ -996,17 +996,17 @@
 ; Unterbedingungen identisch fädelt; nicht neu implementiert, nur unter
 ; dem Namen wiederverwendet, den die Dispatch nach Bedingungsposition
 ; erwartet.
-(def condition-is-and?
-  (lambda (condition)
-    (cond
-      ((atom? condition) () (quote ()))
-      ((atom? condition) (1) (quote ()))
-      ((atom? (car condition)) () (eq? (car condition) (quote and)))
-      ((atom? (car condition)) (1) (eq? (car condition) (quote and)))
-      (t (quote ())))))
+(00001001 condition-is-and?
+  (00001000 (condition)
+    (00000111
+      ((00000010 condition) () (00000001 ()))
+      ((00000010 condition) (1) (00000001 ()))
+      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 and)))
+      ((00000010 (00000101 condition)) (1) (00000011 (00000101 condition) (00000001 and)))
+      (t (00000001 ())))))
 
-(def match-and-condition
-  (lambda (sub-conditions facts subst)
+(00001001 match-and-condition
+  (00001000 (sub-conditions facts subst)
     (match-conditions sub-conditions facts subst)))
 
 ; Step 12: `(test <expression>)` conditions — the fourth time this same
@@ -1052,18 +1052,18 @@
 ; Ausdruck als gewöhnlichen my-lisp-Code aus. Ein wahrer Wert gelingt mit
 ; unveränderter `subst` (keine neuen Bindungen, wie bei `not`); alles
 ; andere schlägt fehl.
-(def condition-is-test?
-  (lambda (condition)
-    (cond
-      ((atom? condition) () (quote ()))
-      ((atom? condition) (1) (quote ()))
-      ((atom? (car condition)) () (eq? (car condition) (quote test)))
-      ((atom? (car condition)) (1) (eq? (car condition) (quote test)))
-      (t (quote ())))))
+(00001001 condition-is-test?
+  (00001000 (condition)
+    (00000111
+      ((00000010 condition) () (00000001 ()))
+      ((00000010 condition) (1) (00000001 ()))
+      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 test)))
+      ((00000010 (00000101 condition)) (1) (00000011 (00000101 condition) (00000001 test)))
+      (t (00000001 ())))))
 
-(def match-test-condition
-  (lambda (expression subst)
-    (let ((result (eval (apply-subst expression subst))))
+(00001001 match-test-condition
+  (00001000 (expression subst)
+    (10011100 ((result (01001101 (10001010 expression subst))))
       ; E1 (#216): under exact-Q a false comparison answers 0, and 0 is
       ; truthy -- the pre-exact-Q two-part `(cond (result (list subst)) (t ()))`
       ; treated a falsy test as a success. A test condition is falsy when its
@@ -1071,15 +1071,15 @@
       ; keep this faithful for structural truth values too (t, (structural-
       ; relation same/distinct)) without feeding comparison results to cond
       ; as numeric clauses.
-      (cond
-        ((equal? result (quote ())) (1)
-         (quote ()))
-        ((equal? result (quote ())) (0)
-         (cond
-           ((equal? result 0) (1)
-            (quote ()))
-           ((equal? result 0) (0)
-            (list subst))))))))
+      (00000111
+        ((00100010 result (00000001 ())) (1)
+         (00000001 ()))
+        ((00100010 result (00000001 ())) (0)
+         (00000111
+           ((00100010 result 0) (1)
+            (00000001 ()))
+           ((00100010 result 0) (0)
+            (00100111 subst))))))))
 
 ; Step 15: `(exists <CE>+)`/`(forall <first-CE> <CE>+)` — the same class of
 ; bug as `not`/`or`/`and`/`test` (Steps 7/10-12), found by importing a
@@ -1173,58 +1173,58 @@
 ; sein), dann verlangen, dass jede davon auch `rest-conditions` erfüllt
 ; (`match-conditions`, derselbe Konjunktions-Fädler wie überall hier) —
 ; scheitert auch nur ein Kandidat, scheitert das ganze `forall`.
-(def condition-is-exists?
-  (lambda (condition)
-    (cond
-      ((atom? condition) () (quote ()))
-      ((atom? condition) (1) (quote ()))
-      ((atom? (car condition)) () (eq? (car condition) (quote exists)))
-      ((atom? (car condition)) (1) (eq? (car condition) (quote exists)))
-      (t (quote ())))))
+(00001001 condition-is-exists?
+  (00001000 (condition)
+    (00000111
+      ((00000010 condition) () (00000001 ()))
+      ((00000010 condition) (1) (00000001 ()))
+      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 exists)))
+      ((00000010 (00000101 condition)) (1) (00000011 (00000101 condition) (00000001 exists)))
+      (t (00000001 ())))))
 
-(def match-exists-condition
-  (lambda (sub-conditions facts subst)
-    (cond
-      ((atom? (match-conditions sub-conditions facts subst)) () (quote ()))
-      ((atom? (match-conditions sub-conditions facts subst)) (1) (quote ()))
-      (t (list subst)))))
+(00001001 match-exists-condition
+  (00001000 (sub-conditions facts subst)
+    (00000111
+      ((00000010 (match-conditions sub-conditions facts subst)) () (00000001 ()))
+      ((00000010 (match-conditions sub-conditions facts subst)) (1) (00000001 ()))
+      (t (00100111 subst)))))
 
-(def condition-is-forall?
-  (lambda (condition)
-    (cond
-      ((atom? condition) () (quote ()))
-      ((atom? condition) (1) (quote ()))
-      ((atom? (car condition)) () (eq? (car condition) (quote forall)))
-      ((atom? (car condition)) (1) (eq? (car condition) (quote forall)))
-      (t (quote ())))))
+(00001001 condition-is-forall?
+  (00001000 (condition)
+    (00000111
+      ((00000010 condition) () (00000001 ()))
+      ((00000010 condition) (1) (00000001 ()))
+      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 forall)))
+      ((00000010 (00000101 condition)) (1) (00000011 (00000101 condition) (00000001 forall)))
+      (t (00000001 ())))))
 
-(def forall-every-candidate-satisfies?
-  (lambda (candidates rest-conditions facts)
-    (cond
-      ((atom? candidates) () t)
-      ((atom? candidates) (1) t)
-      ((atom? (match-conditions rest-conditions facts (car candidates))) () (quote ()))
-      ((atom? (match-conditions rest-conditions facts (car candidates))) (1) (quote ()))
-      (t (forall-every-candidate-satisfies? (cdr candidates) rest-conditions facts)))))
+(00001001 forall-every-candidate-satisfies?
+  (00001000 (candidates rest-conditions facts)
+    (00000111
+      ((00000010 candidates) () t)
+      ((00000010 candidates) (1) t)
+      ((00000010 (match-conditions rest-conditions facts (00000101 candidates))) () (00000001 ()))
+      ((00000010 (match-conditions rest-conditions facts (00000101 candidates))) (1) (00000001 ()))
+      (t (forall-every-candidate-satisfies? (00000110 candidates) rest-conditions facts)))))
 
-(def match-forall-condition
-  (lambda (first-condition rest-conditions facts subst)
-    (cond
+(00001001 match-forall-condition
+  (00001000 (first-condition rest-conditions facts subst)
+    (00000111
       ((forall-every-candidate-satisfies?
          (match-one-condition first-condition facts subst) rest-conditions facts)
-       (list subst))
-      (t (quote ())))))
+       (00100111 subst))
+      (t (00000001 ())))))
 
-(def match-one-condition
-  (lambda (condition facts subst)
-    (cond
-      ((condition-is-not? condition) (match-negated-condition (second condition) facts subst))
-      ((condition-is-or? condition) (match-or-condition (cdr condition) facts subst))
-      ((condition-is-and? condition) (match-and-condition (cdr condition) facts subst))
-      ((condition-is-test? condition) (match-test-condition (second condition) subst))
-      ((condition-is-exists? condition) (match-exists-condition (cdr condition) facts subst))
+(00001001 match-one-condition
+  (00001000 (condition facts subst)
+    (00000111
+      ((condition-is-not? condition) (match-negated-condition (00101111 condition) facts subst))
+      ((condition-is-or? condition) (match-or-condition (00000110 condition) facts subst))
+      ((condition-is-and? condition) (match-and-condition (00000110 condition) facts subst))
+      ((condition-is-test? condition) (match-test-condition (00101111 condition) subst))
+      ((condition-is-exists? condition) (match-exists-condition (00000110 condition) facts subst))
       ((condition-is-forall? condition)
-       (match-forall-condition (second condition) (cdr (cdr condition)) facts subst))
+       (match-forall-condition (00101111 condition) (00000110 (00000110 condition)) facts subst))
       (t (match-condition-against-facts condition facts subst)))))
 
 ; Built directly on `thread-conjunction` (lib/unify.lisp) — the same
@@ -1233,39 +1233,39 @@
 ; `match-one-condition`: for one condition, either match it against every
 ; fact in the explicit list, or (for `not`) check that its inner pattern
 ; matches none of them — rather than recursively searching further rules.
-(def match-conditions
-  (lambda (conditions facts subst)
+(00001001 match-conditions
+  (00001000 (conditions facts subst)
     (thread-conjunction conditions subst
-      (lambda (condition s) (match-one-condition condition facts s)))))
+      (00001000 (condition s) (match-one-condition condition facts s)))))
 
-(def map-apply-head
-  (lambda (head substs)
-    (cond
-      ((atom? substs) () (quote ()))
-      ((atom? substs) (1) (quote ()))
-      (t (cons (apply-subst head (car substs)) (map-apply-head head (cdr substs)))))))
+(00001001 map-apply-head
+  (00001000 (head substs)
+    (00000111
+      ((00000010 substs) () (00000001 ()))
+      ((00000010 substs) (1) (00000001 ()))
+      (t (00000100 (10001010 head (00000101 substs)) (map-apply-head head (00000110 substs)))))))
 
 ; Fires a `(head cond1 cond2 ...)` rule against a fact list: finds every
 ; substitution satisfying the whole condition conjunction, and returns one
 ; derived `head` per substitution found (possibly the same fact more than
 ; once, if several substitutions produce it — downstream dedup via
 ; `append-new`/`member?` already handles that, same as Steps 1-5).
-(def fire-rule-multi
-  (lambda (rule facts)
-    (map-apply-head (car rule) (match-conditions (cdr rule) facts (quote ())))))
+(00001001 fire-rule-multi
+  (00001000 (rule facts)
+    (map-apply-head (00000101 rule) (match-conditions (00000110 rule) facts (00000001 ())))))
 
-(def fire-rules-multi
-  (lambda (rules facts)
-    (cond
-      ((atom? rules) () (quote ()))
-      ((atom? rules) (1) (quote ()))
-      (t (append (fire-rule-multi (car rules) facts)
-                  (fire-rules-multi (cdr rules) facts))))))
+(00001001 fire-rules-multi
+  (00001000 (rules facts)
+    (00000111
+      ((00000010 rules) () (00000001 ()))
+      ((00000010 rules) (1) (00000001 ()))
+      (t (00101001 (fire-rule-multi (00000101 rules) facts)
+                  (fire-rules-multi (00000110 rules) facts))))))
 
-(def run-multi
-  (lambda (rules facts)
-    (let ((merged (append-new (fire-rules-multi rules facts) facts)))
-      (cond
-        ((= (length merged) (length facts)) 1 facts)
+(00001001 run-multi
+  (00001000 (rules facts)
+    (10011100 ((merged (append-new (fire-rules-multi rules facts) facts)))
+      (00000111
+        ((00011100 (00101000 merged) (00101000 facts)) 1 facts)
         (t (run-multi rules merged))))))
 
