@@ -4,11 +4,11 @@
 ; Using let to bind variables
 ; Використання let для прив'язки змінних
 
-(let ((total 457)
+(10011100 ((total 457)
       (completed 232))
   ; Compute remaining tasks
   ; Обчислити залишені задачі
-  (- total completed))
+  (00001101 total completed))
 
 ; The CLI prints: 225
 ; CLI друкує: 225
