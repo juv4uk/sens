@@ -236,7 +236,8 @@ jobs:
 
       - name: Validate workflow YAML syntax
         if: steps.changes.outputs.workflow == 'true'
-        run: ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
+        # Власний runner: ruby з закріпленого Guix-каналу, не з образу ubuntu.
+        run: guix time-machine -C channels.scm -- shell ruby -- ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
 
       - name: Exercise future main fast critical gate
         if: steps.changes.outputs.workflow == 'true'
