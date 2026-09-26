@@ -468,12 +468,14 @@
     (cond
       ((atom? remaining) () (let ((global (advice-negative-head-conflict all-rules all-rules)))
          (cond
-           ((atom? global) (quote ()))
+           ((atom? global) () (quote ()))
+           ((atom? global) (1) (quote ()))
            (t (list (car clauses) (car global) (third global))))))
       ((atom? remaining) (1) (let ((global (advice-negative-head-conflict all-rules all-rules)))
          (cond
-           ((atom? global) (quote ()))
-           (t (list (car clauses) (car global) (third global))))))(car clauses) (car global) (third global))))))
+           ((atom? global) () (quote ()))
+           ((atom? global) (1) (quote ()))
+           (t (list (car clauses) (car global) (third global))))))
       (t
        (let ((opposite (opposite-knowledge-head (car (car remaining)))))
          (let ((proofs (reason opposite all-rules)))

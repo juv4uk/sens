@@ -920,8 +920,12 @@
          ((my-lambda-name? (car expr))
           (let ((problem (my-lambda-list-error (second expr))))
             (cond
-              ((atom? problem)
-               (my-result-ok
+              ((atom? problem) () (my-result-ok
+                 (my-make-closure
+                   (second expr)
+                   (cdr (cdr expr))
+                   env)))
+              ((atom? problem) (1) (my-result-ok
                  (my-make-closure
                    (second expr)
                    (cdr (cdr expr))
@@ -939,17 +943,16 @@
          ((my-lambda-name? (car expr))
           (let ((problem (my-lambda-list-error (second expr))))
             (cond
-              ((atom? problem)
-               (my-result-ok
+              ((atom? problem) () (my-result-ok
                  (my-make-closure
                    (second expr)
                    (cdr (cdr expr))
                    env)))
-              (t
-               (my-result-fail
-                 (my-lambda-invalid-form problem))))))
-         (t
-          (my-eval-application-result expr env))))
+              ((atom? problem) (1) (my-result-ok
+                 (my-make-closure
+                   (second expr)
+                   (cdr (cdr expr))
+                   env)))
               (t
                (my-result-fail
                  (my-lambda-invalid-form problem))))))
@@ -1271,7 +1274,8 @@
                      (let ((block-result
                              (my-eval-lambda-block block program-env)))
                        (cond
-                         ((atom? rest) block-result)
+                         ((atom? rest) () block-result)
+                         ((atom? rest) (1) block-result)
                          (t
                           (my-eval-program
                             rest
@@ -1280,11 +1284,11 @@
                      (let ((block-result
                              (my-eval-lambda-block block program-env)))
                        (cond
-                         ((atom? rest) block-result)
+                         ((atom? rest) () block-result)
+                         ((atom? rest) (1) block-result)
                          (t
                           (my-eval-program
                             rest
-                            (car block-result)))))))   rest
                             (car block-result)))))))
                   (t
                    (cons

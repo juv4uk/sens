@@ -323,7 +323,8 @@
          ((eq? (car term) (quote forall)) (cons (quote forall) (clips-convert-template-list (cdr term) templates)))
          (t (let ((slot-order (clips-template-slot-order (clips-strip-module-prefix (car term)) templates)))
               (cond
-                ((atom? slot-order) term)
+                ((atom? slot-order) () term)
+                ((atom? slot-order) (1) term)
                 (t (cons (car term) (clips-positional-args slot-order (cdr term)))))))))
       ((atom? (car term)) (1) (cond
          ((eq? (car term) (quote not)) (list (quote not) (clips-convert-template (second term) templates)))
@@ -333,8 +334,9 @@
          ((eq? (car term) (quote forall)) (cons (quote forall) (clips-convert-template-list (cdr term) templates)))
          (t (let ((slot-order (clips-template-slot-order (clips-strip-module-prefix (car term)) templates)))
               (cond
-                ((atom? slot-order) term)
-                (t (cons (car term) (clips-positional-args slot-order (cdr term)))))))))ips-positional-args slot-order (cdr term)))))))))
+                ((atom? slot-order) () term)
+                ((atom? slot-order) (1) term)
+                (t (cons (car term) (clips-positional-args slot-order (cdr term)))))))))
       (t term))))
 
 (def clips-convert-template-list
