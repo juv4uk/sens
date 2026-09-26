@@ -264,8 +264,18 @@ fn dispatch_call(
         Value::Sid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
             if !canon::has_primitive(*sid) {
-                if let Some(Value::Macro(closure)) = &environment.code_slot(*sid) {
-                    return closures::apply_macro(closure.clone(), arguments, environment, span);
+                match &environment.code_slot(*sid) {
+                    Some(Value::Macro(closure)) => {
+                        return closures::apply_macro(closure.clone(), arguments, environment, span);
+                    }
+                    // A language-defined function reached through its code
+                    // takes the same path as a call by name: arguments and
+                    // body run through `closures::apply`, whose tail call
+                    // keeps deep recursion (meta-eval) off the Rust stack.
+                    Some(closure @ Value::Closure(_)) => {
+                        return closures::apply(closure.clone(), arguments, environment, span);
+                    }
+                    _ => {}
                 }
             }
             let mut values = Vec::with_capacity(arguments.len());

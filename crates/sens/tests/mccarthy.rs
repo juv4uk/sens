@@ -566,12 +566,12 @@ fn print_escapes_embedded_quotes_and_backslashes_so_read_can_reconstruct_the_str
 fn princ_outputs_a_string_raw_without_quotes_or_escapes() {
     let mut session = Session::default();
     let result = eval_program(r#"(princ "(eq? \"radio\" \"radio\")")"#, &mut session).unwrap();
-    assert_eq!(result.output, vec![r#"(eq "radio" "radio")"#.to_string()]);
+    assert_eq!(result.output, vec![r#"(eq? "radio" "radio")"#.to_string()]);
     // princ still returns the string value itself, just like print does —
     // composes the same way, only the transcript text differs.
     assert_eq!(
         result.value,
-        Value::String(r#"(eq "radio" "radio")"#.into())
+        Value::String(r#"(eq? "radio" "radio")"#.into())
     );
 }
 
