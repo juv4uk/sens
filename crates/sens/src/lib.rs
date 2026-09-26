@@ -39,24 +39,24 @@ pub mod semantic_registry_export {
 
     /// Mechanical input accepted by the external projection boundary.
     ///
-    /// Runtime/source semantics use `Sid8`. The `u8` implementation exists
+    /// Runtime/source semantics use `Sens8`. The `u8` implementation exists
     /// only so the pre-#1098 CML export can remain byte-for-byte unchanged in
     /// this first vertical slice; it must not be used as a SID constructor.
     #[doc(hidden)]
     pub trait ProjectionSidInput {
         #[doc(hidden)]
-        fn into_projection_sid(self) -> super::Sid8;
+        fn into_projection_sid(self) -> super::Sens8;
     }
 
-    impl ProjectionSidInput for super::Sid8 {
-        fn into_projection_sid(self) -> super::Sid8 {
+    impl ProjectionSidInput for super::Sens8 {
+        fn into_projection_sid(self) -> super::Sens8 {
             self
         }
     }
 
     impl ProjectionSidInput for u8 {
-        fn into_projection_sid(self) -> super::Sid8 {
-            super::Sid8::from_packed_byte(self)
+        fn into_projection_sid(self) -> super::Sens8 {
+            super::Sens8::from_packed_byte(self)
         }
     }
 
@@ -75,20 +75,20 @@ pub mod semantic_registry_export {
 
     /// Повертає opaque semantic ID для stable або compatibility-only surface.
     /// Значення операції лишається у мовному контракті, не в цій проєкції.
-    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sid8> {
+    pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sens8> {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
     /// Legacy packed-byte export for external projection consumers.
     ///
-    /// Runtime/source semantics use opaque `Sid8`; this function deliberately
+    /// Runtime/source semantics use opaque `Sens8`; this function deliberately
     /// preserves the pre-#1098 projection ABI so untouched observers do not
     /// become semantic participants merely because the runtime identity type
     /// changed.
     pub fn admitted_semantic_ids() -> Vec<u8> {
         super::semantic_registry::admitted_semantic_ids()
             .into_iter()
-            .map(super::Sid8::packed_byte)
+            .map(super::Sens8::packed_byte)
             .collect()
     }
 
@@ -103,6 +103,7 @@ mod value;
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
+#[allow(deprecated)]
 pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
 
@@ -145,7 +146,7 @@ pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 /// The current Core4 sens bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
-/// Generated runtime projection of admitted surface spellings to opaque Sid8
+/// Generated runtime projection of admitted surface spellings to opaque Sens8
 /// identities. semantic-registry.lisp remains the only spelling authority.
 pub const META_SEMANTIC_REGISTRY_SOURCE: &str =
     include_str!("../../../lib/generated/meta-semantic-registry.lisp");
@@ -235,7 +236,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
 /// owns source/UI routing independently of the lexical environment.
 fn bind_missing_stable_surface_peers(environment: &Environment) {
     let snapshot = environment.snapshot();
-    // HashMap, not BTreeMap: Sid8 is deliberately not Ord (identity
+    // HashMap, not BTreeMap: Sens8 is deliberately not Ord (identity
     // comparison/hashing only, no ordering -- see sid.rs's own header).
     // Iteration order here is irrelevant; this is a lookup table.
     let mut values_by_semantic_id = std::collections::HashMap::new();
@@ -250,7 +251,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     }
 
     // The semantic registry is the only surface/SID authority. If a stable
-    // identity has no implementation binding yet, expose the Sid8 identity
+    // identity has no implementation binding yet, expose the Sens8 identity
     // itself so the admitted surface remains discoverable without inventing a
     // second table or pretending the implementation exists.
     for semantic_id in semantic_registry::admitted_semantic_ids() {
@@ -388,7 +389,7 @@ pub fn is_reserved_surface_name(name: &str) -> bool {
 
 /// Mechanical source/UI routing query: does this surface resolve to this exact
 /// eight-bit function SID?
-pub fn surface_has_sid(name: &str, sid: Sid8) -> bool {
+pub fn surface_has_sid(name: &str, sid: Sens8) -> bool {
     eval::canon::surface_has_sid(name, sid)
 }
 

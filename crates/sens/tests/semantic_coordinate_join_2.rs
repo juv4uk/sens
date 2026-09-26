@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use sens::semantic_registry_export::semantic_id_for_admitted_surface;
-use sens::{eval_program, load_core_library, parse, Expr, ExprKind, Session, Sid8};
+use sens::{eval_program, load_core_library, parse, Expr, ExprKind, Session, Sens8};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -62,7 +62,7 @@ fn load_axis_session() -> Session {
 
 fn kernel_statuses_for_sid(
     source: &str,
-    wanted_sid: Sid8,
+    wanted_sid: Sens8,
 ) -> Option<BTreeMap<String, String>> {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let ExprKind::List(items) = &exprs[0].kind else {
@@ -93,7 +93,7 @@ fn kernel_statuses_for_sid(
                 {
                     sid = match &value.kind {
                         ExprKind::Sid(sid) => Some(*sid),
-                        other => panic!("kernel witness SID must be exact bare Sid8, got {other:?}"),
+                        other => panic!("kernel witness SID must be exact bare Sens8, got {other:?}"),
                     };
                 }
                 ExprKind::List(items)
@@ -156,7 +156,7 @@ fn kernel_statuses_for_sid(
     None
 }
 
-fn math_coordinate(session: &mut Session, sid: Sid8) -> String {
+fn math_coordinate(session: &mut Session, sid: Sens8) -> String {
     eval_program(
         &format!("(semantic-coordinate-law-for-sid {sid})"),
         session,
@@ -166,7 +166,7 @@ fn math_coordinate(session: &mut Session, sid: Sid8) -> String {
     .to_string()
 }
 
-fn machine_coordinate(session: &mut Session, sid: Sid8) -> String {
+fn machine_coordinate(session: &mut Session, sid: Sens8) -> String {
     eval_program(
         &format!("(machine-capabilities-for-sid {sid})"),
         session,
@@ -178,10 +178,10 @@ fn machine_coordinate(session: &mut Session, sid: Sid8) -> String {
 
 #[test]
 fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
-    assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sid!(00001100)));
-    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sid!(00000011)));
-    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sid!(00000100)));
-    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sid!(00000111)));
+    assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sens!(00001100)));
+    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sens!(00000011)));
+    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sens!(00000100)));
+    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sens!(00000111)));
 
     let kernel_path = matrix_source_path("kernel-axis-source");
     let kernel_source = read(&kernel_path);
@@ -189,54 +189,54 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
 
     // + : mathematical law + physical capability exist, but #735 has no
     // semantic kernel witness row yet. Absence is evidence, not an error.
-    let add_math = math_coordinate(&mut session, sens::sid!(00001100));
+    let add_math = math_coordinate(&mut session, sens::sens!(00001100));
     assert!(add_math.contains("exact-rational-sum"));
     assert_eq!(
-        machine_coordinate(&mut session, sens::sid!(00001100)),
+        machine_coordinate(&mut session, sens::sens!(00001100)),
         "((integer-add bounded-u64))"
     );
-    assert_eq!(kernel_statuses_for_sid(&kernel_source, sens::sid!(00001100)), None);
+    assert_eq!(kernel_statuses_for_sid(&kernel_source, sens::sens!(00001100)), None);
 
     // EQ : identity-relation law, sens execution witness, bounded compare.
-    let eq_math = math_coordinate(&mut session, sens::sid!(00000011));
+    let eq_math = math_coordinate(&mut session, sens::sens!(00000011));
     assert!(eq_math.contains("same-atom-identity"));
     let eq_kernels =
-        kernel_statuses_for_sid(&kernel_source, sens::sid!(00000011)).expect("EQ kernel row");
+        kernel_statuses_for_sid(&kernel_source, sens::sens!(00000011)).expect("EQ kernel row");
     assert_eq!(eq_kernels.len(), 1);
     assert_eq!(eq_kernels.get("my-lisp").map(String::as_str), Some("live"));
     assert_eq!(
-        machine_coordinate(&mut session, sens::sid!(00000011)),
+        machine_coordinate(&mut session, sens::sens!(00000011)),
         "((identity-compare bounded-u64))"
     );
 
     // CONS : equational pair law + two execution witnesses + two field stores.
-    let cons_math = math_coordinate(&mut session, sens::sid!(00000100));
+    let cons_math = math_coordinate(&mut session, sens::sens!(00000100));
     assert!(cons_math.contains("car-cons-left-inverse"));
     let cons_kernels =
-        kernel_statuses_for_sid(&kernel_source, sens::sid!(00000100)).expect("CONS kernel row");
+        kernel_statuses_for_sid(&kernel_source, sens::sens!(00000100)).expect("CONS kernel row");
     assert_eq!(cons_kernels.get("my-lisp").map(String::as_str), Some("live"));
     assert_eq!(
         cons_kernels.get("common-lisp").map(String::as_str),
         Some("integration-gated")
     );
     assert_eq!(
-        machine_coordinate(&mut session, sens::sid!(00000100)),
+        machine_coordinate(&mut session, sens::sens!(00000100)),
         "((pair-field-store head bounded-u64) (pair-field-store tail bounded-u64))"
     );
 
     // COND : the math axis explicitly refuses to invent a mathematical law;
     // kernel map records live sens and explicit absent foreign witnesses;
     // machine axis records only the bounded conditional branch capability.
-    let cond_math = math_coordinate(&mut session, sens::sid!(00000111));
+    let cond_math = math_coordinate(&mut session, sens::sens!(00000111));
     assert!(cond_math.contains("non-mathematical-in-this-slice"));
     assert!(cond_math.contains("no-mathematical-law-claimed"));
     let cond_kernels =
-        kernel_statuses_for_sid(&kernel_source, sens::sid!(00000111)).expect("COND kernel row");
+        kernel_statuses_for_sid(&kernel_source, sens::sens!(00000111)).expect("COND kernel row");
     assert_eq!(cond_kernels.get("my-lisp").map(String::as_str), Some("live"));
     assert_eq!(cond_kernels.get("prolog").map(String::as_str), Some("absent"));
     assert_eq!(cond_kernels.get("clips").map(String::as_str), Some("absent"));
     assert_eq!(
-        machine_coordinate(&mut session, sens::sid!(00000111)),
+        machine_coordinate(&mut session, sens::sens!(00000111)),
         "((conditional-branch bounded-u64))"
     );
 }

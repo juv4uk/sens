@@ -1,16 +1,16 @@
-//! Legacy semantic identity compatibility layer.
+//! Застарілі назви коробки Sens8 — лише для зовнішніх споживачів (juv4uk/cml).
 //!
-//! #1344 / #1386: `Sid8` is a backward-compatible alias for [`Sens8`].
-//! The canonical term and primary implementation live in [`crate::sens`].
+//! Власник, 2026-09-26: єдина назва 1-байтової коробки функцій — `Sens8`
+//! (макрос `sens!`). Код `sens` старих назв не використовує; `Sid8` і `sid!`
+//! лишаються позначеними `#[deprecated]`, доки `cml` не перейде на `Sens8`.
 
-pub use crate::sens::Sens8;
+use crate::sens::Sens8;
 
-#[allow(deprecated)]
-pub use Sens8 as Sid8;
+#[deprecated(note = "назва коробки — Sens8 (sens!); Sid8 лишено лише для cml")]
+pub type Sid8 = Sens8;
 
-/// Legacy constructor macro for eight-bit function identity.
-///
-/// Forwards directly to [`sens!`].
+/// Застарілий конструктор; використовуйте [`sens!`].
+#[deprecated(note = "використовуйте sens!")]
 #[macro_export]
 macro_rules! sid {
     ($($token:tt)*) => {

@@ -100,7 +100,7 @@
                   (quote (owner my-lisp)))
                 (kab-row-check
                   (quote language-identity-type)
-                  (quote (language-identity-type Sid8)))
+                  (quote (language-identity-type Sens8)))
                 (kab-row-check
                   (quote shared-abi-type)
                   (quote (shared-abi-type WsmKernelRequest)))
@@ -176,7 +176,7 @@
          (quote
            (kernel-abi-transport-boundary-ok
              (kernels 4)
-             (language-type Sid8)
+             (language-type Sens8)
              (abi-wrapper SemanticId))))
         ((atom? failure)
          (structural-kind pair)

@@ -10,7 +10,7 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry, Environment, Sid8, Value};
+use crate::{semantic_registry, Environment, Sens8, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -49,7 +49,7 @@ pub struct LanguageItem {
     pub name: String,
     /// Exact eight-bit semantic identity when governed by the surface registry.
     /// Runtime-only host capabilities may legitimately have no registry identity yet.
-    pub semantic_id: Option<Sid8>,
+    pub semantic_id: Option<Sens8>,
     pub signature: &'static str,
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
@@ -64,7 +64,7 @@ enum SurfacePolicy {
 
 #[derive(Clone, Copy)]
 struct SemanticToolingMetadata {
-    semantic_id: Sid8,
+    semantic_id: Sens8,
     signature: &'static str,
     documentation: &'static str,
     kind: LanguageItemKind,
@@ -72,11 +72,11 @@ struct SemanticToolingMetadata {
     surface_policy: SurfacePolicy,
 }
 
-// Tooling meaning is keyed only by opaque exact Sid8 identity.
+// Tooling meaning is keyed only by opaque exact Sens8 identity.
 // Human spellings are projected from semantic-registry.lisp at discovery time.
 const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
     SemanticToolingMetadata {
-        semantic_id: crate::sid!(00000001),
+        semantic_id: crate::sens!(00000001),
         signature: "(quote value)",
         documentation: "Return value unevaluated",
         kind: LanguageItemKind::SyntaxForm,
@@ -84,7 +84,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: crate::sid!(00000111),
+        semantic_id: crate::sens!(00000111),
         signature: "(cond (test result) ...)",
         documentation: "Evaluate the first matching clause",
         kind: LanguageItemKind::SyntaxForm,
@@ -92,7 +92,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: crate::sid!(00001000),
+        semantic_id: crate::sens!(00001000),
         signature: "(lambda (params) body ...)",
         documentation: "Create an anonymous function",
         kind: LanguageItemKind::SyntaxForm,
@@ -100,7 +100,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: crate::sid!(00001001),
+        semantic_id: crate::sens!(00001001),
         signature: "(define name value)",
         documentation: "Bind name in the current scope",
         kind: LanguageItemKind::SyntaxForm,
@@ -108,7 +108,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Stable,
     },
     SemanticToolingMetadata {
-        semantic_id: crate::sid!(00001010),
+        semantic_id: crate::sens!(00001010),
         signature: "(defmacro name (params) body ...)",
         documentation: "Bind a language-owned macro",
         kind: LanguageItemKind::Macro,
@@ -116,7 +116,7 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
         surface_policy: SurfacePolicy::Admitted,
     },
     SemanticToolingMetadata {
-        semantic_id: crate::sid!(00001011),
+        semantic_id: crate::sens!(00001011),
         signature: "(def name value)",
         documentation: "Compatibility-only binding form",
         kind: LanguageItemKind::SyntaxForm,
@@ -126,8 +126,8 @@ const SEMANTIC_TOOLING: &[SemanticToolingMetadata] = &[
 ];
 
 fn semantic_language_items_with(
-    stable_surfaces: impl Fn(Sid8) -> Vec<&'static str>,
-    admitted_surfaces: impl Fn(Sid8) -> Vec<&'static str>,
+    stable_surfaces: impl Fn(Sens8) -> Vec<&'static str>,
+    admitted_surfaces: impl Fn(Sens8) -> Vec<&'static str>,
 ) -> Vec<LanguageItem> {
     let mut items = Vec::new();
     for metadata in SEMANTIC_TOOLING {
@@ -415,14 +415,14 @@ pub fn language_items() -> Vec<LanguageItem> {
 /// таблицю функцій): метадані для інструментів — за історичним символьним
 /// написанням, для кожного стабільного імені коду.
 fn sens_primitive_language_items() -> Vec<LanguageItem> {
-    const PRIMITIVES: [(crate::Sid8, &str); 7] = [
-        (crate::sid!(00001100), "+"),
-        (crate::sid!(00001101), "-"),
-        (crate::sid!(00001110), "*"),
-        (crate::sid!(00001111), "/"),
-        (crate::sid!(00011010), "<"),
-        (crate::sid!(00011011), ">"),
-        (crate::sid!(00011100), "="),
+    const PRIMITIVES: [(crate::Sens8, &str); 7] = [
+        (crate::sens!(00001100), "+"),
+        (crate::sens!(00001101), "-"),
+        (crate::sens!(00001110), "*"),
+        (crate::sens!(00001111), "/"),
+        (crate::sens!(00011010), "<"),
+        (crate::sens!(00011011), ">"),
+        (crate::sens!(00011100), "="),
     ];
     let mut items = Vec::new();
     for (sid, diagnostic) in PRIMITIVES {
@@ -509,14 +509,14 @@ mod tests {
         let discover = |sid8_surface: &'static str| {
             semantic_language_items_with(
                 |semantic_id| {
-                    if semantic_id == crate::sid!(00001000) {
+                    if semantic_id == crate::sens!(00001000) {
                         vec![sid8_surface]
                     } else {
                         vec![]
                     }
                 },
                 |semantic_id| {
-                    if semantic_id == crate::sid!(00001000) {
+                    if semantic_id == crate::sens!(00001000) {
                         vec![sid8_surface]
                     } else {
                         vec![]
@@ -527,11 +527,11 @@ mod tests {
         let before = discover("comet");
         let after = discover("meteor");
         assert!(before.iter().any(|item| {
-            item.name == "comet" && item.semantic_id == Some(crate::sid!(00001000))
+            item.name == "comet" && item.semantic_id == Some(crate::sens!(00001000))
         }));
         assert!(!before.iter().any(|item| item.name == "meteor"));
         assert!(after.iter().any(|item| {
-            item.name == "meteor" && item.semantic_id == Some(crate::sid!(00001000))
+            item.name == "meteor" && item.semantic_id == Some(crate::sens!(00001000))
         }));
         assert!(!after.iter().any(|item| item.name == "comet"));
     }
@@ -555,8 +555,8 @@ mod tests {
             assert_eq!(left.kind, LanguageItemKind::SyntaxForm);
             assert_eq!(right.kind, LanguageItemKind::SyntaxForm);
         }
-        assert_eq!(find("lambda").semantic_id, Some(crate::sid!(00001000)));
-        assert_eq!(find("define").semantic_id, Some(crate::sid!(00001001)));
+        assert_eq!(find("lambda").semantic_id, Some(crate::sens!(00001000)));
+        assert_eq!(find("define").semantic_id, Some(crate::sens!(00001001)));
     }
 
     #[test]
@@ -567,7 +567,7 @@ mod tests {
                 .iter()
                 .find(|item| item.name == name)
                 .unwrap_or_else(|| panic!("missing macro tooling item {name}"));
-            assert_eq!(item.semantic_id, Some(crate::sid!(00001010)));
+            assert_eq!(item.semantic_id, Some(crate::sens!(00001010)));
             assert_eq!(item.kind, LanguageItemKind::Macro);
         }
 
@@ -587,14 +587,14 @@ mod tests {
             .iter()
             .find(|item| item.name == "def")
             .expect("def tooling item");
-        assert_eq!(def.semantic_id, Some(crate::sid!(00001011)));
+        assert_eq!(def.semantic_id, Some(crate::sens!(00001011)));
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
         assert_eq!(
-            semantic_registry::stable_surfaces_for_semantic_id(crate::sid!(00001011)),
+            semantic_registry::stable_surfaces_for_semantic_id(crate::sens!(00001011)),
             vec!["def"]
         );
         assert_eq!(
-            semantic_registry::admitted_surfaces_for_semantic_id(crate::sid!(00001011)),
+            semantic_registry::admitted_surfaces_for_semantic_id(crate::sens!(00001011)),
             vec!["def"]
         );
     }

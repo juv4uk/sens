@@ -4,7 +4,7 @@ use std::rc::Rc;
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
 
-fn add_semantic_id() -> sens::Sid8 {
+fn add_semantic_id() -> sens::Sens8 {
     semantic_registry_export::semantic_id_for_admitted_surface("додати")
         .expect("canonical add surface must be admitted by the registry projection")
 }

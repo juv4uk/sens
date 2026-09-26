@@ -424,7 +424,7 @@ source	contracts/answer-contract.lisp	12
 source	contracts/control-dispatch-contract.lisp	1
 source	contracts/core-profile-contract.lisp	8
 source	contracts/core-special-form-profile-policy.lisp	1
-source	contracts/core1-bootstrap-contract.lisp	12
+source	contracts/core1-bootstrap-contract.lisp	13
 source	contracts/core1-generation-manifest.lisp	1
 source	contracts/core1-s2-compiler-admission.lisp	3
 source	contracts/core1-s3-compiler-prelude.lisp	1
@@ -449,7 +449,7 @@ source	experiments/core4-eq-answer-1258.lisp	5
 source	experiments/core4-eq-result-law-witness.lisp	140
 source	experiments/core4-mechanical-answer-grade.lisp	49
 source	experiments/core4-predicate-answer-carrier-matrix.lisp	76
-source	experiments/function-genealogy.lisp	231
+source	experiments/function-genealogy.lisp	232
 source	experiments/graal-interop-pattern-audit-788.lisp	7
 source	experiments/kif-bridge-audit-792.lisp	4
 source	experiments/metacall-pattern-audit-789.lisp	7
@@ -480,9 +480,9 @@ source	lib/core2.lisp	25
 source	lib/core3.lisp	14
 source	lib/core4.lisp	177
 source	lib/epistemic.lisp	454
-source	lib/forward.lisp	645
+source	lib/forward.lisp	647
 source	lib/fs.lisp	15
-source	lib/generated/meta-semantic-registry.lisp	623
+source	lib/generated/meta-semantic-registry.lisp	654
 source	lib/guard.lisp	148
 source	lib/island-lowering.lisp	53
 source	lib/knowledge.lisp	944

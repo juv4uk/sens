@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sid8};
+use crate::{Environment, Exactness, Expr, Sens8};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -468,7 +468,7 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sid8),
+    Sid(Sens8),
     String(Rc<str>),
     Symbol(Rc<str>),
     Pair(Rc<Value>, Rc<Value>),
@@ -608,7 +608,7 @@ impl Value {
     }
 
     /// Legacy alias for [`Self::as_sens8`].
-    pub fn as_sid8(&self) -> Option<crate::Sid8> {
+    pub fn as_sid8(&self) -> Option<crate::Sens8> {
         self.as_sens8()
     }
 

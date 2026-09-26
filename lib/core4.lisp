@@ -1034,3 +1034,68 @@
        (my-postcore-build-definitions
          source
          (my-postcore-missing-peers source (00000110 group) (env)))))))
+
+; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
+(00001001 divmod
+  (00001000 (dividend divisor)
+    (list (quotient dividend divisor) (mod dividend divisor))))
+
+; McCarthy 1960, §3d: null, subst, sublis, maplist, apply — закон Core4, коди СЕНС.
+(00001001 null?
+  (00001000 (x)
+    (00000111
+      ((00000010 x) (structural-kind empty-list) t)
+      ((00000010 x) (structural-kind pair) (00000001 ()))
+      ((00000010 x) (structural-kind atom) (00000001 ())))))
+
+(00001001 subst
+  (00001000 (x y z)
+    (00000111
+      ((00000010 z) (structural-kind pair)
+       (00000100 (subst x y (00000101 z)) (subst x y (00000110 z))))
+      ((00000010 z) (structural-kind empty-list)
+       (00000111
+         ((00000011 z y) (identity-relation same) x)
+         ((00000011 z y) (identity-relation distinct) z)))
+      ((00000010 z) (structural-kind atom)
+       (00000111
+         ((00000011 z y) (identity-relation same) x)
+         ((00000011 z y) (identity-relation distinct) z))))))
+
+(00001001 sublis-pair
+  (00001000 (x z)
+    (00000111
+      ((00000010 x) (structural-kind empty-list) z)
+      ((00000010 x) (structural-kind pair)
+       (00000111
+         ((00000011 (00000101 (00000101 x)) z) (identity-relation same)
+          (00000101 (00000110 (00000101 x))))
+         ((00000011 (00000101 (00000101 x)) z) (identity-relation distinct)
+          (sublis-pair (00000110 x) z)))))))
+
+(00001001 sublis
+  (00001000 (x y)
+    (00000111
+      ((00000010 y) (structural-kind pair)
+       (00000100 (sublis x (00000101 y)) (sublis x (00000110 y))))
+      ((00000010 y) (structural-kind empty-list) (sublis-pair x y))
+      ((00000010 y) (structural-kind atom) (sublis-pair x y)))))
+
+(00001001 maplist
+  (00001000 (x f)
+    (00000111
+      ((00000010 x) (structural-kind empty-list) (00000001 ()))
+      ((00000010 x) (structural-kind pair)
+       (00000100 (f x) (maplist (00000110 x) f))))))
+
+(00001001 apply-quote-args
+  (00001000 (m)
+    (00000111
+      ((00000010 m) (structural-kind empty-list) (00000001 ()))
+      ((00000010 m) (structural-kind pair)
+       (00000100 (00000100 (00000001 00000001) (00000100 (00000101 m) (00000001 ())))
+                 (apply-quote-args (00000110 m)))))))
+
+(00001001 apply
+  (00001000 (f args)
+    (eval (00000100 f (apply-quote-args args)))))

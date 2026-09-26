@@ -404,17 +404,17 @@ fn translate_call(items: &[Expr]) -> Result<String, Unsupported> {
         .map(translate_expr)
         .collect::<Result<Vec<_>, _>>()?;
 
-    if semantic_id == sens::sid!(00001100) {
+    if semantic_id == sens::sens!(00001100) {
         Ok(format!("Total[{{{}}}]", translated.join(", ")))
-    } else if semantic_id == sens::sid!(00001101) {
+    } else if semantic_id == sens::sens!(00001101) {
         match translated.as_slice() {
             [] => Err(Unsupported::new("external-oracle/arity")),
             [only] => Ok(format!("Minus[{only}]")),
             _ => Ok(format!("Fold[Subtract, {{{}}}]", translated.join(", "))),
         }
-    } else if semantic_id == sens::sid!(00001110) {
+    } else if semantic_id == sens::sens!(00001110) {
         Ok(format!("Times[{}]", translated.join(", ")))
-    } else if semantic_id == sens::sid!(00001111) {
+    } else if semantic_id == sens::sens!(00001111) {
         match translated.as_slice() {
             [] => Err(Unsupported::new("external-oracle/arity")),
             [only] => Ok(format!("Divide[1, {only}]")),
@@ -476,10 +476,10 @@ mod tests {
     #[test]
     fn all_admitted_arithmetic_surfaces_project_by_semantic_identity() {
         let cases = [
-            (sens::sid!(00001100), "Total[{8, 2}]"),
-            (sens::sid!(00001101), "Fold[Subtract, {8, 2}]"),
-            (sens::sid!(00001110), "Times[8, 2]"),
-            (sens::sid!(00001111), "Fold[Divide, {8, 2}]"),
+            (sens::sens!(00001100), "Total[{8, 2}]"),
+            (sens::sens!(00001101), "Fold[Subtract, {8, 2}]"),
+            (sens::sens!(00001110), "Times[8, 2]"),
+            (sens::sens!(00001111), "Fold[Divide, {8, 2}]"),
         ];
 
         for (semantic_id, expected) in cases {

@@ -62,7 +62,7 @@ fn not_is_a_clean_bit_flip_between_the_two_admitted_answers() {
 #[test]
 fn sid_identity_plays_no_role_in_the_answer() {
     // eq? is pure Lisp composition over the existing `eq` builtin; it mints
-    // no SID and its answer is plain data (a string), not a callable Sid8.
+    // no SID and its answer is plain data (a string), not a callable Sens8.
     assert_eq!(eval("(eq? 1 1)"), "\"1\"");
     assert_eq!(eval("(eq? 1 1)"), eval("(eq? 2 2)"));
 }

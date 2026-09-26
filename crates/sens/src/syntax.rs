@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sid8;
+use crate::Sens8;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -49,7 +49,7 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
-    Sid(Sid8),
+    Sid(Sens8),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -70,19 +70,19 @@ pub enum ExprKind {
     /// (nur innerhalb von `quote`, oder wo ein Aufrufer es über `read` als
     /// Daten liest).
     Pair(Rc<Expr>, Rc<Expr>),
-    /// Виклик функції СЕНС: функція займає рівно 1 байт (`Sid8`), без
+    /// Виклик функції СЕНС: функція займає рівно 1 байт (`Sens8`), без
     /// тексту імені. Створюється лише `eval::lower` після розбору — з голови
     /// `(00000010 x)` або з написання, яке неможливо перевизначити
     /// (`atom`, `атом?`, `aṇu` ...), тож усі написання однієї функції
     /// дають один і той самий вузол. Парсер цей варіант не породжує.
-    /// SENS call: the function slot is exactly one byte (`Sid8`), no name
+    /// SENS call: the function slot is exactly one byte (`Sens8`), no name
     /// text. Produced only by `eval::lower` after parsing.
-    Call(Sid8, Rc<[Expr]>),
+    Call(Sens8, Rc<[Expr]>),
 }
 
 // Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
 // збірка має впасти, а не мовчки розійтися з таблицею функцій.
-const _: () = assert!(std::mem::size_of::<Sid8>() == 1);
+const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
 
 /// Shared nesting cap for every recursive structure walk over reader
 /// output: the parser itself, `quote`d-data conversion (`quoted`) and
@@ -207,7 +207,7 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sid8::from_packed_byte(value))
+                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
