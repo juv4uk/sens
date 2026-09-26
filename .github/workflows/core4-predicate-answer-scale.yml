@@ -38,7 +38,7 @@ permissions:
 jobs:
   predicate-answer-scale:
     name: Lisp-owned Core4 predicate answer scale
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5

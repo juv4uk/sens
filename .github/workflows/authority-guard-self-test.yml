@@ -28,7 +28,7 @@ on:
 jobs:
   self-test:
     name: forbidden fails, mechanism passes
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5

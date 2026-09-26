@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     env:
       UPSTREAM_REPO: juv4uk/sens
       UPSTREAM_BRANCH: main

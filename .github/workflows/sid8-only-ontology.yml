@@ -15,7 +15,7 @@ on:
 
 jobs:
   sid8-only:
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v5
       - name: Enforce one function ontology

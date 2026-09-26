@@ -12,7 +12,7 @@ on:
 
 jobs:
   datalog-kernel:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v5
 

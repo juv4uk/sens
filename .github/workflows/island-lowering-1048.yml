@@ -15,7 +15,7 @@ permissions:
 jobs:
   lowering:
     name: Lisp-owned arguments-only island lowering
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5

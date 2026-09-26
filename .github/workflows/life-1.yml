@@ -31,7 +31,7 @@ on:
 jobs:
   life-1:
     name: does LIFE-1 still live?
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
@@ -40,10 +40,9 @@ jobs:
         with:
           shared-key: life-1-real-spine
 
-      - name: Install the first-slice external runtime
+      - name: First-slice external runtime (Guix profile)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y swi-prolog-nox
+          # Self-hosted Guix runner: the runtime comes from the shared Guix profile.
           swipl --version
 
       - name: Prove the canonical real LIFE-1 spine
