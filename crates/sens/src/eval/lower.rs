@@ -16,18 +16,18 @@
 use super::{canon, necessary_forms};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
-use crate::Sid8;
+use crate::Sens8;
 use std::rc::Rc;
 
-const QUOTE: Sid8 = crate::sid!(00000001);
-const COND: Sid8 = crate::sid!(00000111);
+const QUOTE: Sens8 = crate::sens!(00000001);
+const COND: Sens8 = crate::sens!(00000111);
 
 /// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
     expressions.iter().map(|expression| lower(expression, 0)).collect()
 }
 
-fn head_sid(head: &Expr) -> Option<Sid8> {
+fn head_sid(head: &Expr) -> Option<Sens8> {
     match &head.kind {
         ExprKind::Sid(sid) => Some(*sid),
         ExprKind::Symbol(name) => immutable_surface_sid(name),
@@ -36,7 +36,7 @@ fn head_sid(head: &Expr) -> Option<Sid8> {
 }
 
 /// Написання, значення якого неможливо змінити жодним біндингом.
-fn immutable_surface_sid(name: &str) -> Option<Sid8> {
+fn immutable_surface_sid(name: &str) -> Option<Sens8> {
     if let Some(sid) = canon::routed_sid_for_surface(name) {
         return Some(sid);
     }

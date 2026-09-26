@@ -1,12 +1,12 @@
-; #1117 — language Sid8 vs kernel ABI coordinate boundary.
+; #1117 — language Sens8 vs kernel ABI coordinate boundary.
 ;
 ; The language owns exact SID identity. External kernels may preserve one
 ; transport byte as an observation/ABI coordinate, but that wrapper is not
-; the language's Sid8 type and may not become a reverse semantic authority.
+; the language's Sens8 type and may not become a reverse semantic authority.
 
 (kernel-abi-transport-boundary/1
   (owner my-lisp)
-  (language-identity-type Sid8)
+  (language-identity-type Sens8)
   (shared-abi-type WsmKernelRequest)
   (shared-abi-field semantic_id)
   (shared-abi-storage opaque-u8)

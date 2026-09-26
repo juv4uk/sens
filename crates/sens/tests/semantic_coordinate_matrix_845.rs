@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-use sens::{parse, Expr, ExprKind, Sid8};
+use sens::{parse, Expr, ExprKind, Sens8};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -40,7 +40,7 @@ fn field_string<'a>(fields: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
-fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sid8>) {
+fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sens8>) {
     let source = read("contracts/semantic-coordinate-matrix-845.lisp");
     let forms = parse(&source).expect("#845 matrix v2 must parse");
     assert_eq!(forms.len(), 1);
@@ -89,7 +89,7 @@ fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sid8>) {
                     .iter()
                     .map(|expr| match &expr.kind {
                         ExprKind::Sid(sid) => *sid,
-                        other => panic!("scope SID must be exact bare Sid8, got {other:?}"),
+                        other => panic!("scope SID must be exact bare Sens8, got {other:?}"),
                     })
                     .collect::<Vec<_>>(),
             )
@@ -99,11 +99,11 @@ fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sid8>) {
     (identity, math, kernel, machine, scope)
 }
 
-fn source_has_bare_sid(source: &str, sid: Sid8) -> bool {
+fn source_has_bare_sid(source: &str, sid: Sens8) -> bool {
     source.contains(&format!("({sid}"))
 }
 
-fn kernel_map_has_sid(source: &str, wanted_sid: Sid8) -> bool {
+fn kernel_map_has_sid(source: &str, wanted_sid: Sens8) -> bool {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let ExprKind::List(items) = &exprs[0].kind else {
         panic!("kernel witness map must be a list");
@@ -168,12 +168,12 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
 
     // Kernel evidence is intentionally asymmetric: + currently has no
     // sid-witness row, while eq/cons/car/cond do.
-    assert!(!kernel_map_has_sid(&kernel, sens::sid!(00001100)));
+    assert!(!kernel_map_has_sid(&kernel, sens::sens!(00001100)));
     for sid in [
-        sens::sid!(00000011),
-        sens::sid!(00000100),
-        sens::sid!(00000101),
-        sens::sid!(00000111),
+        sens::sens!(00000011),
+        sens::sens!(00000100),
+        sens::sens!(00000101),
+        sens::sens!(00000111),
     ] {
         assert!(kernel_map_has_sid(&kernel, sid), "kernel axis missing {sid}");
     }
@@ -188,7 +188,7 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
     let (identity_path, math_path, kernel_path, machine_path, _) =
         matrix_sources_and_scope();
 
-    const LAMBDA_SID: Sid8 = sens::sid!(00001000);
+    const LAMBDA_SID: Sens8 = sens::sens!(00001000);
 
     let identity = read(&identity_path);
     let math = read(&math_path);

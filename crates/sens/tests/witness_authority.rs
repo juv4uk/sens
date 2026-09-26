@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use sens::{
     eval_program, load_core_library, load_meta_evaluator_library, parse, Expr, ExprKind, Session,
-    Sid8,
+    Sens8,
 };
 
 #[derive(Clone)]
@@ -37,7 +37,7 @@ fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
-fn alist_sid(entries: &[Expr], key: &str) -> Option<Sid8> {
+fn alist_sid(entries: &[Expr], key: &str) -> Option<Sens8> {
     entries.iter().find_map(|entry| {
         let ExprKind::Pair(k, v) = &entry.kind else {
             return None;
@@ -50,7 +50,7 @@ fn alist_sid(entries: &[Expr], key: &str) -> Option<Sid8> {
         }
         match &v.kind {
             ExprKind::Sid(sid) => Some(*sid),
-            other => panic!("{key} must be exact bare Sid8, got {other:?}"),
+            other => panic!("{key} must be exact bare Sens8, got {other:?}"),
         }
     })
 }
@@ -168,7 +168,7 @@ fn structure_core_rows() -> Vec<WitnessRow> {
                 return None;
             }
             alist_sid(entries, "semantic-id")
-                .expect("every structure-core row must carry exact bare Sid8 identity");
+                .expect("every structure-core row must carry exact bare Sens8 identity");
             Some(WitnessRow {
                 source: source[form.span.start..form.span.end].to_string(),
                 expr: alist_str(entries, "expr")?.to_string(),
@@ -742,7 +742,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
             ExprKind::Symbol(s) if &**s == "sid-witness"
         ));
 
-        let mut sid: Option<Sid8> = None;
+        let mut sid: Option<Sens8> = None;
         let mut witnesses: Vec<Expr> = Vec::new();
         for field in &fields[1..] {
             match &field.kind {
@@ -751,7 +751,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                 {
                     sid = Some(match &value.kind {
                         ExprKind::Sid(sid) => *sid,
-                        other => panic!("semantic sid must be exact bare Sid8, got {other:?}"),
+                        other => panic!("semantic sid must be exact bare Sens8, got {other:?}"),
                     });
                 }
                 ExprKind::List(items)
@@ -780,7 +780,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
 
             let mut kernel: Option<String> = None;
             let mut status: Option<String> = None;
-            let mut probe_id: Option<Sid8> = None;
+            let mut probe_id: Option<Sens8> = None;
             let mut evidence_class: Option<String> = None;
             let mut evidence: Option<String> = None;
 
@@ -805,7 +805,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                             probe_id = Some(match &value.kind {
                                 ExprKind::Sid(sid) => *sid,
                                 other => panic!(
-                                    "semantic witness probe-id must be exact bare Sid8, got {other:?}"
+                                    "semantic witness probe-id must be exact bare Sens8, got {other:?}"
                                 ),
                             });
                         }

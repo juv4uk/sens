@@ -395,7 +395,7 @@ pub(crate) fn install(environment: &Environment) {
 
     // ADR-007/008 runtime peer slices: each identity below allocates one
     // callable value, then binds every ratified stable spelling projected from
-    // the Sid8 semantic registry projection. Human spellings are not duplicated here.
+    // the Sens8 semantic registry projection. Human spellings are not duplicated here.
     // The builtin diagnostic token remains the historical symbolic spelling
     // for Contract 2.1 display compatibility; it is NOT semantic identity.
     define!(environment, "env", |args: &[Value], env: &Environment, span: Span| {

@@ -23,12 +23,12 @@ fn session() -> Session {
 
 #[test]
 fn current_semantic_ids_project_to_target_neutral_capabilities() {
-    assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sid!(00001100)));
-    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sid!(00000011)));
-    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sid!(00000111)));
-    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sid!(00000100)));
-    assert_eq!(semantic_id_for_admitted_surface("car"), Some(sens::sid!(00000101)));
-    assert_eq!(semantic_id_for_admitted_surface("cdr"), Some(sens::sid!(00000110)));
+    assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sens!(00001100)));
+    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sens!(00000011)));
+    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sens!(00000111)));
+    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sens!(00000100)));
+    assert_eq!(semantic_id_for_admitted_surface("car"), Some(sens::sens!(00000101)));
+    assert_eq!(semantic_id_for_admitted_surface("cdr"), Some(sens::sens!(00000110)));
 
     let mut s = session();
     let add = eval_program(

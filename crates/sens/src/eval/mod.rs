@@ -26,7 +26,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sid8, Span, Value};
+use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -218,7 +218,7 @@ fn evaluate_list(
 /// функція — лише 1 байт `head_sid`.
 fn dispatch_call(
     head_name: Option<&str>,
-    head_sid: Option<Sid8>,
+    head_sid: Option<Sens8>,
     head_expr: Option<&Expr>,
     arguments: &[Expr],
     environment: &Environment,
@@ -231,7 +231,7 @@ fn dispatch_call(
         .and_then(necessary_forms::identity_for_symbol)
         .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
-    if routed_head_sid == Some(crate::sid!(00000001)) {
+    if routed_head_sid == Some(crate::sens!(00000001)) {
         special_forms::exact_arity("00000001", arguments, 1, span)?;
         let value = special_forms::quoted(&arguments[0])?;
         return Ok(EvalStep::Value(value));
@@ -242,7 +242,7 @@ fn dispatch_call(
     if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Define) {
         return special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value);
     }
-    if routed_head_sid == Some(crate::sid!(00000111)) {
+    if routed_head_sid == Some(crate::sens!(00000111)) {
         return special_forms::evaluate_cond(arguments, environment, span);
     }
 
@@ -286,7 +286,7 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_sid(expression: &Expr) -> Option<Sid8> {
+fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
     let ExprKind::Sid(sid) = expression.kind else {
         return None;
     };

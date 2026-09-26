@@ -1034,3 +1034,8 @@
        (my-postcore-build-definitions
          source
          (my-postcore-missing-peers source (00000110 group) (env)))))))
+
+; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
+(00001001 divmod
+  (00001000 (dividend divisor)
+    (list (quotient dividend divisor) (mod dividend divisor))))

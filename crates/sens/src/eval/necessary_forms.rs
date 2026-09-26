@@ -5,7 +5,7 @@
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry;
-use crate::Sid8;
+use crate::Sens8;
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -17,7 +17,7 @@ pub(crate) enum NecessaryFormIdentity {
     Lambda,
 }
 
-pub(crate) fn identity_for_semantic_id(semantic_id: Sid8) -> Option<NecessaryFormIdentity> {
+pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFormIdentity> {
     generated::NECESSARY_FORM_DISPATCH
         .iter()
         .find(|row| row.semantic_id == semantic_id.packed_byte())
@@ -139,7 +139,7 @@ mod tests {
 
     #[test]
     fn unrelated_registry_rows_do_not_gain_necessary_form_meaning() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(crate::sid!(00001100)));
+        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(crate::sens!(00001100)));
         assert_eq!(identity_for_symbol("+"), None);
     }
 }

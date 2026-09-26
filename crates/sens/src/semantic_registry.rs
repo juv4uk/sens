@@ -8,11 +8,11 @@
 //
 //! Generated rows may carry a packed byte as substrate representation of an
 //! already understood Lisp Binary identity. This wrapper converts that byte to
-//! opaque Sid8 immediately; runtime registry APIs never expose decimal IDs.
+//! opaque Sens8 immediately; runtime registry APIs never expose decimal IDs.
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::Sid8;
+use crate::Sens8;
 
 mod generated {
     include!("semantic_registry_generated.rs");
@@ -20,7 +20,7 @@ mod generated {
 
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
-pub(crate) type SemanticId = Sid8;
+pub(crate) type SemanticId = Sens8;
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
 }
@@ -32,7 +32,7 @@ fn live_rows() -> &'static [SemanticRow] {
 pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
     live_rows()
         .iter()
-        .map(|row| Sid8::from_packed_byte(row.semantic_id))
+        .map(|row| Sens8::from_packed_byte(row.semantic_id))
         .collect()
 }
 
@@ -58,7 +58,7 @@ fn surface_index() -> &'static HashMap<&'static str, SemanticId> {
         let mut index = HashMap::new();
         for row in live_rows() {
             for surface in row.surfaces {
-                insert_surface_mapping(&mut index, surface.name, Sid8::from_packed_byte(row.semantic_id));
+                insert_surface_mapping(&mut index, surface.name, Sens8::from_packed_byte(row.semantic_id));
             }
         }
         index
@@ -157,10 +157,10 @@ mod tests {
 
     #[test]
     fn public_reverse_projection_preserves_identity() {
-        for surface in admitted_surfaces_for_semantic_id(crate::sid!(00001111)) {
+        for surface in admitted_surfaces_for_semantic_id(crate::sens!(00001111)) {
             assert_eq!(
                 crate::semantic_registry_export::semantic_id_for_admitted_surface(surface),
-                Some(crate::sid!(00001111))
+                Some(crate::sens!(00001111))
             );
         }
         assert_eq!(
@@ -171,13 +171,13 @@ mod tests {
 
     #[test]
     fn unrelated_rows_are_projected_without_assigning_evaluator_meaning() {
-        assert_eq!(semantic_id_for_surface("+"), Some(crate::sid!(00001100)));
+        assert_eq!(semantic_id_for_surface("+"), Some(crate::sens!(00001100)));
     }
 
     #[test]
     fn surfaces_with_namespace_align_with_present_names_and_keep_namespace() {
-        let with_namespace = admitted_surfaces_with_namespace_for_semantic_id(crate::sid!(00000001));
-        let names_only = admitted_surfaces_for_semantic_id(crate::sid!(00000001));
+        let with_namespace = admitted_surfaces_with_namespace_for_semantic_id(crate::sens!(00000001));
+        let names_only = admitted_surfaces_for_semantic_id(crate::sens!(00000001));
         assert_eq!(with_namespace.len(), names_only.len());
         assert!(with_namespace.contains(&("en", "quote")));
         assert!(with_namespace.contains(&("ук", "як-є")));

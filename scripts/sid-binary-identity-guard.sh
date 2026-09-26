@@ -40,7 +40,7 @@ report_forbidden \
   "${files[@]}"
 
 report_forbidden \
-  'semantic SID constant uses Rust 0b numeric literal instead of sid!(........)' \
+  'semantic SID constant uses Rust 0b numeric literal instead of sens!(........)' \
   'SEMANTIC_ID[^=]*=[[:space:]]*0b[01_]+' \
   "${files[@]}"
 
