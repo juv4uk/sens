@@ -18,6 +18,39 @@ for file in "${files[@]}"; do
   [[ -f "$file" ]] || { echo "SID8-ONLY guard: missing $file" >&2; exit 1; }
 done
 
+# #1361: current-authority prose may mention historical/debt names as such,
+# but must not present stale pre-SENS paths or pre-Contract-9 ontology as current.
+current_docs=(
+  CURRENT.md
+  docs/semantic-authority-map.md
+  docs/semantic-authority-map.uk.md
+)
+for file in "${current_docs[@]}"; do
+  [[ -f "$file" ]] || { echo "SID8-ONLY guard: missing current authority doc $file" >&2; exit 1; }
+done
+
+stale_current_patterns=(
+  'crates/my-lisp'
+  'Contract 7\.0'
+  'reference implementation = crates/my-lisp'
+  'Назва проєкту/репозиторію — \*\*\`my-lisp\`\*\*'
+)
+for pattern in "${stale_current_patterns[@]}"; do
+  if grep -Ein -- "$pattern" "${current_docs[@]}"; then
+    echo "SID8-ONLY violation: stale current-authority SENS documentation: $pattern" >&2
+    exit 1
+  fi
+done
+
+grep -Fq 'complete function-identity space is exactly the 256 eight-bit SENS values' docs/semantic-authority-map.md || {
+  echo 'SID8-ONLY violation: current authority map no longer states the 256-function SENS identity law' >&2
+  exit 1
+}
+grep -Fq 'Повний простір функцій — рівно `00000000..11111111`' docs/semantic-authority-map.uk.md || {
+  echo 'SID8-ONLY violation: Ukrainian authority map no longer states the 256-function SENS identity law' >&2
+  exit 1
+}
+
 forbidden=(
   'SID[ -]text'
   'SID[ -]literal'
