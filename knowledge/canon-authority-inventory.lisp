@@ -1,4 +1,10 @@
 ; #1060 CANON-AUTHORITY-INVENTORY-1
+; #1347 policy note (2026-09-24): this 2026-09-20 inventory is historical audit data.
+; Any row classifying Rust/host local semantics as forbidden duplicate authority
+; does NOT impose a current prohibition. Rust/backend local semantics may grow
+; freely. Only a reverse edge that makes host implementation semantics the
+; source of Lisp language authority is forbidden by the asymmetric firewall.
+;
 ; Data-only audit. This file is NOT a semantic contract and cannot mint a SID,
 ; define a Lisp law, or admit an execution mechanism.
 ;

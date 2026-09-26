@@ -30,3 +30,7 @@ lib/machine/xed/vendor/** -text -diff
 *.всм linguist-language=Common-Lisp linguist-detectable=true -linguist-vendored -linguist-generated -linguist-documentation
 *.мій linguist-language=Common-Lisp linguist-detectable=true -linguist-vendored -linguist-generated -linguist-documentation
 *.лісп linguist-language=Common-Lisp linguist-detectable=true -linguist-vendored -linguist-generated -linguist-documentation
+# Supported SENS aliases (owner 2026-09-25): .sens/.сенс are accepted,
+# .lisp stays canonical. Same classification, not a language-identity claim.
+*.sens linguist-language=Common-Lisp linguist-detectable=true -linguist-vendored -linguist-generated -linguist-documentation
+*.сенс linguist-language=Common-Lisp linguist-detectable=true -linguist-vendored -linguist-generated -linguist-documentation

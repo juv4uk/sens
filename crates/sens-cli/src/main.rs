@@ -266,7 +266,7 @@ fn main() {
         if arg == "--help" || arg == "-h" {
             println!("Usage: sens [file]");
             println!("If no file is provided, starts the REPL.");
-            println!("Canonical source extension: .lisp (per sens#81 -- extension != semantics); .wsm/.my remain supported legacy aliases; .всм/.мій/.лісп are equal-standing Ukrainian spellings of the same aliases");
+            println!("Canonical source extension: .lisp (per sens#81 -- extension != semantics); .wsm/.my remain supported legacy aliases; .всм/.мій/.лісп are equal-standing Ukrainian spellings of the same aliases; .sens/.сенс are supported SENS aliases (not canonical)");
             println!("\nOptions:");
             println!("  lsp                          Run the Language Server (LSP over stdio)");
             println!("  install [--profile four-kernel]  Automatically bootstrap the execution-island runtimes for the current host");
