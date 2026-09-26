@@ -146,6 +146,11 @@ pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 /// The current Core4 sens bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
+/// Parse-output cache for the exact embedded Core4 source. This is only a
+/// bootstrap optimization: the source hash is verified before use, and stale
+/// or invalid bytes fall back to parsing CORE_LIBRARY_SOURCE.
+const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
+
 /// Generated runtime projection of admitted surface spellings to opaque Sens8
 /// identities. semantic-registry.lisp remains the only spelling authority.
 pub const META_SEMANTIC_REGISTRY_SOURCE: &str =
@@ -250,16 +255,22 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         }
     }
 
-    // The semantic registry is the only surface/SID authority. If a stable
-    // identity has no implementation binding yet, expose the Sens8 identity
-    // itself so the admitted surface remains discoverable without inventing a
-    // second table or pretending the implementation exists.
+    // The semantic registry remains the surface/SENS authority even when no
+    // lexical implementation binding exists: evaluator fallback can still
+    // resolve an admitted surface to the exact SENS function. Therefore this
+    // bootstrap helper must NOT pre-bind a lexical SENS placeholder. Doing so
+    // would block post-core Lisp libraries from materializing their stable
+    // peers after the real closure is defined.
+    //
+    // Only copy peers when this bootstrap environment already contains a real
+    // value for the same exact SENS function. Existing bindings remain
+    // untouched so ordinary lexical shadowing stays independent.
     for semantic_id in semantic_registry::admitted_semantic_ids() {
         let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
 
         // Canonical special forms and evaluator-owned necessary forms are
         // routed by their dedicated syntax mechanisms, not as first-class
-        // SID values.
+        // lexical values.
         if peers.iter().any(|peer| {
             eval::canon::routed_sid_for_surface(peer).is_some()
                 || eval::necessary_forms::identity_for_symbol(peer).is_some()
@@ -267,10 +278,9 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
             continue;
         }
 
-        let value = values_by_semantic_id
-            .get(&semantic_id)
-            .cloned()
-            .unwrap_or(Value::Sid(semantic_id));
+        let Some(value) = values_by_semantic_id.get(&semantic_id).cloned() else {
+            continue;
+        };
 
         for peer in peers {
             if environment.get(peer).is_none() {
@@ -295,9 +305,26 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
         .environment
         .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
-    let result = eval_program(CORE_LIBRARY_SOURCE, session)?;
+
+    let result = match fasl_decode_program(CORE_LIBRARY_FASL) {
+        Some((expressions, source_hash))
+            if source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) =>
+        {
+            eval_parsed_expressions(&expressions, session)?
+        }
+        _ => eval_program(CORE_LIBRARY_SOURCE, session)?,
+    };
+
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
+}
+
+/// Read-only diagnostic for embedders that want to report a stale Core4 FASL
+/// cache. This does not select a profile or alter bootstrap behavior.
+pub fn core_library_fasl_is_current() -> bool {
+    fasl_decode_program(CORE_LIBRARY_FASL)
+        .map(|(_, source_hash)| source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()))
+        .unwrap_or(false)
 }
 
 /// Activate the frozen Core2/Contract-6 compatibility profile.
@@ -350,7 +377,9 @@ pub fn load_meta_evaluator_library(
 /// preserves the closed language core while giving embedders one canonical
 /// time-layer loader instead of ad-hoc `include_str!` calls.
 pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    eval_program(TIME_LIBRARY_SOURCE, session)
+    let result = eval_program(TIME_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load the shared byte/text adapters used by process and TCP boundaries.
@@ -361,14 +390,18 @@ pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
     eval_program(PROCESS_LIBRARY_SOURCE, session)?;
-    eval_program(TCP_LIBRARY_SOURCE, session)
+    let result = eval_program(TCP_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load language-owned TCP text semantics explicitly when an embedder does
 /// not otherwise need the process adapter.
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    eval_program(TCP_LIBRARY_SOURCE, session)
+    let result = eval_program(TCP_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load language-owned file text semantics: public `read-file`/`write-file`
@@ -377,7 +410,9 @@ pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageErr
 /// introduced for this migration.
 pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    eval_program(FS_LIBRARY_SOURCE, session)
+    let result = eval_program(FS_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Public mechanical routing hook for tooling and embedders.
