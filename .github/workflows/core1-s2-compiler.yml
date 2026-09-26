@@ -19,27 +19,41 @@ jobs:
       - name: Checkout sens Core1
         uses: actions/checkout@v5
 
+      - name: Verify local Core1 S2 inputs before private checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f lib/core1.lisp
+          test -f contracts/core1-s2-compiler-admission.lisp
+          git diff --check
+
       - name: Checkout typed-SID8 S0
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
           ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
           ref: 6031f92652066825a245c806c0773e9e524257bd
           path: .core1-s2/mccarthy-eval
 
       - name: Checkout pinned S2 compiler source
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/checkout@v5
         with:
           repository: juv4uk/wsm-my-lisp
           ssh-key: ${{ secrets.WSM_MY_LISP_SSH_KEY }}
+          persist-credentials: false
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           path: .core1-s2/wsm-sens
 
       - name: Build typed-SID8 S0
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         working-directory: .core1-s2/mccarthy-eval
         run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
 
       - name: Build zero-copy Core1 S2 probes
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -88,6 +102,7 @@ jobs:
           sha256sum lib/core1.lisp
 
       - name: Require zero-copy compiler execution parity
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -uo pipefail
@@ -144,3 +159,9 @@ jobs:
           done
 
           exit "$failures"
+
+      - name: Fail closed when private Core1 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "::error::Private Core1 dependencies are intentionally unavailable to fork/untrusted pull requests."
+          exit 1

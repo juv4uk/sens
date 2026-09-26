@@ -7,6 +7,9 @@ on:
       - ".github/workflows/core1-sid8-bootstrap-self-carry.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   core1-sid8-self-carry:
     runs-on: [self-hosted, guix]
@@ -24,18 +27,22 @@ jobs:
           ! grep -E '\(CONS[[:space:]]+\(CONS[[:space:]]+[01]{8}' lib/core1-sid8-bootstrap-overlay.lisp
 
       - name: Checkout reader-corrected SID8 S0
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
           ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
           ref: 6031f92652066825a245c806c0773e9e524257bd
           path: mccarthy-eval
           fetch-depth: 1
 
       - name: Build historical S0
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         run: gcc -no-pie -O0 -s -o mccarthy-eval/mccarthy-kernel mccarthy-eval/mccarthy-kernel.s
 
       - name: Execute direct Core1 SID8 self-carry witness
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -73,3 +80,9 @@ jobs:
           (cd mccarthy-eval && ./mccarthy-kernel "$fixture") | tail -n 10 > actual.txt
           diff -u "$expected" actual.txt
           cat actual.txt
+
+      - name: Fail closed when private Core1 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "::error::Private Core1 checkout is intentionally unavailable to fork/untrusted pull requests."
+          exit 1
