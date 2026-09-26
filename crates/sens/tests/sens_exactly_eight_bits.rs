@@ -126,6 +126,41 @@ fn registry_and_function_table_codes_are_exactly_eight_bits_and_unique() {
     }
 
     assert!(problems.is_empty(), "коди функцій не рівно 8 біт:\n{}", problems.join("\n"));
+
+    assert_eq!(
+        seen.len(),
+        256,
+        "generated Rust registry must expose the complete 256-function SENS space"
+    );
+    assert_eq!(
+        table_seen.len(),
+        256,
+        "generated function table must contain exactly 256 SENS rows"
+    );
+    assert_eq!(
+        table_seen, seen,
+        "function-table projection must contain exactly the same SENS identities as the registry"
+    );
+    assert_eq!(
+        table_seen.first().map(String::as_str),
+        Some("00000000"),
+        "the first exact SENS identity must never be dropped"
+    );
+    assert_eq!(
+        table_seen.last().map(String::as_str),
+        Some("11111111"),
+        "the complete exact SENS range must end at 11111111"
+    );
+
+    let zero_row = text
+        .lines()
+        .find(|line| line.trim_start().starts_with("(\\\"00000000\\\" "))
+        .expect("generated function table must project exact SENS 00000000");
+    assert!(
+        zero_row.contains("identity:00000000")
+            && !zero_row.contains("identity:00000000/surface:"),
+        "00000000 is an exact function identity with no invented human surface: {zero_row}"
+    );
 }
 
 #[test]
