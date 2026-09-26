@@ -108,8 +108,9 @@ fn authoritative_inputs_are_explicit_and_projection_stays_draft() {
     let constitution = fs::read_to_string(root.join("my-lisp-constitution.lisp"))
         .expect("checked-in constitution should be readable");
 
+    // Written in SENS codes: 00001001 define, 01001011 read-all, 10100110 read-file.
     let fixture_binding =
-        "(def fixtures (read-all (read-file \"tests/fixtures/conformance.lisp\")))";
+        "(00001001 fixtures (01001011 (10100110 \"tests/fixtures/conformance.lisp\")))";
     assert_eq!(
         script.matches(fixture_binding).count(),
         1,
