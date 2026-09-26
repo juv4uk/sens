@@ -1,0 +1,9 @@
+[package]
+name = "sens-host"
+version = "0.41.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Host capability layer for sens: filesystem, processes, TCP"
+
+[dependencies]
+sens = { path = "../sens" }

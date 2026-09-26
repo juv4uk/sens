@@ -3,14 +3,14 @@ name: Host ABI regression
 on:
   pull_request:
     paths:
-      - "crates/my-lisp-host/src/native_exec.rs"
-      - "crates/my-lisp-host/tests/native_guest_abi.rs"
+      - "crates/sens-host/src/native_exec.rs"
+      - "crates/sens-host/tests/native_guest_abi.rs"
       - ".github/workflows/host-abi.yml"
   push:
     branches: [main]
     paths:
-      - "crates/my-lisp-host/src/native_exec.rs"
-      - "crates/my-lisp-host/tests/native_guest_abi.rs"
+      - "crates/sens-host/src/native_exec.rs"
+      - "crates/sens-host/tests/native_guest_abi.rs"
       - ".github/workflows/host-abi.yml"
   workflow_dispatch:
 
@@ -31,8 +31,8 @@ jobs:
         with:
           shared-key: host-abi-${{ matrix.os }}
       - name: Guest ABI isolation witness
-        run: cargo test -p my-lisp-host --test native_guest_abi -- --nocapture
+        run: cargo test -p sens-host --test native_guest_abi -- --nocapture
       - name: Existing native execution witnesses
-        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+        run: cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
       - name: Clippy host crate
-        run: cargo clippy -p my-lisp-host --all-targets -- -D warnings
+        run: cargo clippy -p sens-host --all-targets -- -D warnings

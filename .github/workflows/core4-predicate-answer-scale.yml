@@ -44,13 +44,13 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Build semantic oracle
-        run: cargo build -p my-lisp-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin sens
 
       - name: Verify predicate answer scale
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp scripts/check-core4-predicate-answer-scale.lisp)"
+          verdict="$(./target/debug/sens scripts/check-core4-predicate-answer-scale.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-predicate-answer-scale-ok)"
 
@@ -58,7 +58,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp scripts/check-core4-predicate-answer-boundary.lisp)"
+          verdict="$(./target/debug/sens scripts/check-core4-predicate-answer-boundary.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-predicate-answer-boundary-ok)"
 
@@ -66,7 +66,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp experiments/core4-mechanical-answer-grade.lisp)"
+          verdict="$(./target/debug/sens experiments/core4-mechanical-answer-grade.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-mechanical-answer-grade-ok)"
 
@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp experiments/core4-predicate-answer-carrier-matrix.lisp)"
+          verdict="$(./target/debug/sens experiments/core4-predicate-answer-carrier-matrix.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-answer-carrier-matrix-ok)"
 
@@ -82,7 +82,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp experiments/core4-eq-result-law-witness.lisp)"
+          verdict="$(./target/debug/sens experiments/core4-eq-result-law-witness.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-eq-result-law-ok)"
 
@@ -90,7 +90,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp scripts/check-core4-predicate-output-boundary.lisp)"
+          verdict="$(./target/debug/sens scripts/check-core4-predicate-output-boundary.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-predicate-output-boundary-ok)"
 
@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp scripts/check-core4-predicate-record-inventory.lisp)"
+          verdict="$(./target/debug/sens scripts/check-core4-predicate-record-inventory.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core4-predicate-record-inventory-ok)"
 

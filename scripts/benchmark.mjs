@@ -14,7 +14,7 @@ function run(command, args) {
 }
 
 const outputs = [
-  run('cargo', ['run', '--quiet', '--release', '--manifest-path', 'crates/my-lisp/Cargo.toml', '--example', 'benchmark']),
+  run('cargo', ['run', '--quiet', '--release', '--manifest-path', 'crates/sens/Cargo.toml', '--example', 'benchmark']),
 ];
 const rows = outputs.flatMap(output => output.split(/\r?\n/))
   .filter(line => line.startsWith('BENCH_RESULT\t'))
@@ -23,6 +23,6 @@ const rows = outputs.flatMap(output => output.split(/\r?\n/))
     return { engine, name, nanoseconds: Number(nanoseconds) };
   });
 
-console.log('my-lisp benchmark · benchmark my-lisp · my-lisp-Benchmark');
+console.log('sens benchmark · benchmark sens · sens-Benchmark');
 console.log(`iterations · ітерації · Iterationen: ${environment.MY_LISP_BENCH_ITERATIONS}`);
 console.table(rows.map(row => ({ engine: row.engine, case: row.name, 'µs/op': (row.nanoseconds / 1000).toFixed(2) })));

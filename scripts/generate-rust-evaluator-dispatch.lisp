@@ -4,11 +4,11 @@
 ; Rust receives only a mechanical execution projection.
 ;
 ; Usage:
-;   cargo run -p my-lisp-cli -- scripts/generate-rust-evaluator-dispatch.lisp
-;   cargo run -p my-lisp-cli -- scripts/generate-rust-evaluator-dispatch.lisp --check
+;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp
+;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp --check
 
 (def source-path "lib/evaluator-dispatch.lisp")
-(def output-path "crates/my-lisp/src/eval/necessary_forms_generated.rs")
+(def output-path "crates/sens/src/eval/necessary_forms_generated.rs")
 
 (def str+
   (lambda args

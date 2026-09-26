@@ -26,8 +26,8 @@ jobs:
           shared-key: full-nightly-workspace
       - name: Check generated authority projections
         run: |
-          cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/generate-meta-semantic-registry.lisp --check
-          cargo run --quiet -p my-lisp-cli --bin my-lisp -- scripts/generate-rust-semantic-registry.lisp --check
+          cargo run --quiet -p sens-cli --bin my-lisp -- scripts/generate-meta-semantic-registry.lisp --check
+          cargo run --quiet -p sens-cli --bin my-lisp -- scripts/generate-rust-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
       - name: Full workspace tests
         run: cargo test --workspace
@@ -36,7 +36,7 @@ jobs:
       - name: Governance and policy checks
         run: cargo run -p xtask -- verify
       - name: Ukrainian full-word source profile
-        run: ./target/debug/my-lisp scripts/перевірити-український-профіль.lisp
+        run: ./target/debug/sens scripts/перевірити-український-профіль.lisp
       - name: Ukrainian direct-peer topology
         shell: bash
         run: |
@@ -106,7 +106,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: full-nightly-advice
-      - run: cargo test --profile ci-meta -p my-lisp --test meta_eval_advice_taker advice_taker_native_and_meta_preserve_expected_outcome_classes -- --ignored --nocapture
+      - run: cargo test --profile ci-meta -p sens --test meta_eval_advice_taker advice_taker_native_and_meta_preserve_expected_outcome_classes -- --ignored --nocapture
 
   android-build:
     name: Android cross-build (aarch64 + armv7)
@@ -133,7 +133,7 @@ jobs:
           CC_aarch64_linux_android: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang
           AR_aarch64_linux_android: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
         run: |
-          cargo build --release --target aarch64-linux-android -p my-lisp-cli
+          cargo build --release --target aarch64-linux-android -p sens-cli
           file target/aarch64-linux-android/release/my-lisp
       - name: Build armv7-linux-androideabi
         env:
@@ -142,11 +142,11 @@ jobs:
           CC_armv7_linux_androideabi: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi28-clang
           AR_armv7_linux_androideabi: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
         run: |
-          cargo build --release --target armv7-linux-androideabi -p my-lisp-cli
+          cargo build --release --target armv7-linux-androideabi -p sens-cli
           file target/armv7-linux-androideabi/release/my-lisp
       - uses: actions/upload-artifact@v4
         with:
-          name: my-lisp-android-nightly
+          name: sens-android-nightly
           path: |
             target/aarch64-linux-android/release/my-lisp
             target/armv7-linux-androideabi/release/my-lisp
@@ -169,11 +169,11 @@ jobs:
         with:
           version: 'v0.15.0'
       - name: Build WASM bindings
-        run: wasm-pack build crates/my-lisp-wasm --target web --out-dir ../../public/wasm
+        run: wasm-pack build crates/sens-wasm --target web --out-dir ../../public/wasm
       - name: Bundle standalone HTML
         run: |
-          node scripts/make-portable-web.mjs public/my-lisp-cli-web.html my-lisp-cli-web.html
-          test -s my-lisp-cli-web.html
+          node scripts/make-portable-web.mjs public/sens-cli-web.html sens-cli-web.html
+          test -s sens-cli-web.html
 
   wasm-browser:
     name: WASM browser tests (Chrome + Firefox)
@@ -188,6 +188,6 @@ jobs:
           targets: wasm32-unknown-unknown
       - uses: jetli/wasm-pack-action@v0.4.0
       - name: Headless Chrome
-        run: wasm-pack test --headless --chrome crates/my-lisp-wasm
+        run: wasm-pack test --headless --chrome crates/sens-wasm
       - name: Headless Firefox
-        run: wasm-pack test --headless --firefox crates/my-lisp-wasm
+        run: wasm-pack test --headless --firefox crates/sens-wasm

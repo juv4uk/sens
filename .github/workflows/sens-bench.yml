@@ -30,21 +30,24 @@ jobs:
         run: |
           mkdir -p /tmp/bench
           cp benchmarks/sens-surface/run.py benchmarks/sens-surface/ci_bench.sh \
-             benchmarks/sens-surface/ci_compare.py crates/my-lisp/examples/ci_bench.rs /tmp/bench/
+             benchmarks/sens-surface/ci_compare.py crates/sens/examples/ci_bench.rs /tmp/bench/
           python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small
       - name: Measure base on this runner
         run: |
           git checkout --detach "$BASE_SHA"
-          cp /tmp/bench/ci_bench.rs crates/my-lisp/examples/ci_bench.rs
-          cargo build --release -p my-lisp --example ci_bench
+          # Назва каталогу крейта різна на базі й на гілці — визначаємо з дерева.
+          CRATE_DIR="$(ls -d crates/my-lisp 2>/dev/null || ls -d crates/sens)"
+          CRATE_PKG="$(basename "$CRATE_DIR")"
+          cp /tmp/bench/ci_bench.rs "$CRATE_DIR/examples/ci_bench.rs"
+          cargo build --release -p "$CRATE_PKG" --example ci_bench
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/base.tsv
-          git checkout -- . && git clean -fdq crates/my-lisp/examples
+          git checkout -- . && git clean -fdq "$CRATE_DIR/examples"
       - name: Measure change on this runner
         run: |
           git checkout --detach "$HEAD_SHA"
           # Гілка може бути старшою за сам харнес — міряємо тим самим файлом.
-          cp /tmp/bench/ci_bench.rs crates/my-lisp/examples/ci_bench.rs
-          cargo build --release -p my-lisp --example ci_bench
+          cp /tmp/bench/ci_bench.rs crates/sens/examples/ci_bench.rs
+          cargo build --release -p sens --example ci_bench
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/head.tsv
       - name: Compare base -> change
         run: python3 /tmp/bench/ci_compare.py /tmp/bench/base.tsv /tmp/bench/head.tsv --fail-above 3.0

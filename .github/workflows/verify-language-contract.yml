@@ -1,4 +1,4 @@
-name: Verify pinned my-lisp language contract
+name: Verify pinned sens language contract
 
 on:
   workflow_call:
@@ -21,7 +21,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     env:
-      UPSTREAM_REPO: juv4uk/my-lisp
+      UPSTREAM_REPO: juv4uk/sens
       UPSTREAM_PATH: language-contract.lisp
       TARGET_PATH: ${{ inputs.contract_path }}
       LOCK_PATH: ${{ inputs.lock_path }}

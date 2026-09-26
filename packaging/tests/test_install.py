@@ -10,7 +10,7 @@ import unittest
 
 
 INSTALLER = Path(__file__).resolve().parents[1] / "install.sh"
-VERSION = tomllib.loads((INSTALLER.parents[1] / "crates/my-lisp-cli/Cargo.toml").read_text())["package"]["version"]
+VERSION = tomllib.loads((INSTALLER.parents[1] / "crates/sens-cli/Cargo.toml").read_text())["package"]["version"]
 
 
 class InstallerTests(unittest.TestCase):
@@ -34,7 +34,7 @@ class InstallerTests(unittest.TestCase):
         self.env = dict(os.environ, HOME=str(self.home), PATH=str(self.bin),
                         TEST_LOG=str(self.log), TEST_OS="Linux", TEST_ARCH="x86_64")
         # PATH не містить справжніх мережевих або пакетних менеджерів.
-        for name in ("bash", "mkdir", "mktemp", "chmod", "mv", "rm", "cp", "env"):
+        for name in ("bash", "mkdir", "mktemp", "chmod", "mv", "rm", "cp", "ln", "env"):
             (self.bin / name).symlink_to(shutil.which(name))
         self.stub("uname", 'if [ "$1" = -s ]; then echo "$TEST_OS"; else echo "$TEST_ARCH"; fi')
         self.stub("id", "echo 0")
@@ -42,7 +42,7 @@ class InstallerTests(unittest.TestCase):
             self.stub(name, f'echo "{name} $*" >> "$TEST_LOG"')
         self.payload = self.root / "payload"
         self.payload.write_text('#!/bin/bash\necho "new $*" >> "$TEST_LOG"\n'
-                                f'if [ "$1" = --version ]; then echo "my-lisp {VERSION}"; fi\n')
+                                f'if [ "$1" = --version ]; then echo "sens {VERSION}"; fi\n')
         self.env["TEST_PAYLOAD"] = str(self.payload)
         self.stub("curl", '''echo "curl $*" >> "$TEST_LOG"
 while [ "$#" -gt 0 ]; do
@@ -72,7 +72,7 @@ cp "$TEST_PAYLOAD" "$destination"
             with self.subTest(system=system, arch=arch):
                 self.env.update(TEST_OS=system, TEST_ARCH=arch)
                 self.log.write_text("")
-                self.stub("my-lisp", 'echo "old $*" >> "$TEST_LOG"')
+                self.stub("sens", 'echo "old $*" >> "$TEST_LOG"')
                 result = self.run_installer()
                 self.assertEqual(result.returncode, 0, result.stderr)
                 calls = self.log.read_text()
@@ -80,16 +80,16 @@ cp "$TEST_PAYLOAD" "$destination"
                 self.assertIn(f"/releases/download/l{VERSION}/", calls)
                 self.assertIn("new install --profile four-kernel", calls)
                 self.assertNotIn("old ", calls)
-                self.assertEqual((self.local_bin / "my-lisp").read_bytes(), self.payload.read_bytes())
+                self.assertEqual((self.local_bin / "sens").read_bytes(), self.payload.read_bytes())
 
     def test_failed_download_preserves_old_binary(self):
-        target = self.local_bin / "my-lisp"
+        target = self.local_bin / "sens"
         target.write_text("previous binary")
         self.env["TEST_DOWNLOAD_FAIL"] = "1"
         result = self.run_installer()
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(target.read_text(), "previous binary")
-        self.assertEqual(list(self.local_bin.glob(".my-lisp.*")), [])
+        self.assertEqual(list(self.local_bin.glob(".sens.*")), [])
         self.assertNotIn("new install", self.log.read_text())
 
     def test_unsupported_architecture_has_no_install_side_effects(self):
@@ -106,13 +106,13 @@ cp "$TEST_PAYLOAD" "$destination"
         for payload in ("", "#!/bin/bash\nexit 1\n",
                         "#!/nonexistent/installer-test-interpreter\n"):
             with self.subTest(payload=payload):
-                target = self.local_bin / "my-lisp"
+                target = self.local_bin / "sens"
                 target.write_text("previous binary")
                 self.payload.write_text(payload)
                 result = self.run_installer()
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(target.read_text(), "previous binary")
-                self.assertEqual(list(self.local_bin.glob(".my-lisp.*")), [])
+                self.assertEqual(list(self.local_bin.glob(".sens.*")), [])
 
 
 if __name__ == "__main__":

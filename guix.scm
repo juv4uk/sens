@@ -42,5 +42,5 @@
      ("cargo" ,rust "cargo")))
   (synopsis "WSM & Swarm Node")
   (description "WSM compiler and Swarm node.")
-  (home-page "https://github.com/juv4uk/my-lisp")
+  (home-page "https://github.com/juv4uk/sens")
   (license license:expat))

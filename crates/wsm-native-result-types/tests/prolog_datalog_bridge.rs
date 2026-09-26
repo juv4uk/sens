@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use my_lisp::{eval_program, load_core_library, parse, Expr, ExprKind, Session};
+use sens::{eval_program, load_core_library, parse, Expr, ExprKind, Session};
 use wsm_datalog_kernel::{Atom, Database, Evaluator, Program, Rule, Term, Value};
 use wsm_native_result_types::{
     FourKernelObservation, ProducerSlot, ProvenanceEdge, ProvenanceEdgeType,

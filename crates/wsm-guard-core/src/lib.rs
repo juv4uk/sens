@@ -2,7 +2,7 @@
 //! Rust loads the executable WSM policy and validates the returned value's
 //! outer protocol shape. Meaning and policy remain in lib/guard.wsm.
 
-use my_lisp::{eval_program, Session, Value};
+use sens::{eval_program, Session, Value};
 
 pub const CORE: &str = include_str!("../../../lib/core.lisp");
 pub const GUARD: &str = include_str!("../../../lib/guard.lisp");

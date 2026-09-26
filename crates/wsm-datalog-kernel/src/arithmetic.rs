@@ -1,7 +1,7 @@
 //! Datalog-owned integer arithmetic execution.
 //!
 //! This module is execution machinery only. Semantic meaning and any external
-//! semantic identity remain owned by my-lisp.
+//! semantic identity remain owned by sens.
 //!
 //! The first bounded mechanism set is deliberately small.
 //! Semantic operation identity is always the exact 8-bit SID carried by the

@@ -10,7 +10,7 @@ on:
       - "crates/wsm-native-result-types/**"
       - "crates/wsm-prolog-kernel/**"
       - "crates/wsm-datalog-kernel/**"
-      - "crates/my-lisp/**"
+      - "crates/sens/**"
       - "Cargo.toml"
       - "Cargo.lock"
   push:
@@ -23,7 +23,7 @@ on:
       - "crates/wsm-native-result-types/**"
       - "crates/wsm-prolog-kernel/**"
       - "crates/wsm-datalog-kernel/**"
-      - "crates/my-lisp/**"
+      - "crates/sens/**"
       - "Cargo.toml"
       - "Cargo.lock"
   workflow_dispatch:

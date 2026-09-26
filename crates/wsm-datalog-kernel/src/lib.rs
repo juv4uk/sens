@@ -483,7 +483,7 @@ impl Evaluator {
 // Semantic-neutral C ABI adapter
 // -----------------------------------------------------------------------------
 //
-// The semantic ID below is opaque provenance owned by my-lisp. This crate does
+// The semantic ID below is opaque provenance owned by sens. This crate does
 // not map IDs to Datalog relations or rules. The payload is a Datalog-native
 // relation query (currently a UTF-8 relation name), and the bytes returned are
 // a Datalog-owned textual projection of that relation after fixpoint.

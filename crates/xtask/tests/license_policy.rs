@@ -2,15 +2,15 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 const WORKSPACE_MANIFESTS: [&str; 20] = [
-    "crates/my-lisp/Cargo.toml",
-    "crates/my-lisp-cli/Cargo.toml",
-    "crates/my-lisp-embed/Cargo.toml",
-    "crates/my-lisp-literate/Cargo.toml",
-    "crates/my-lisp-wasm/Cargo.toml",
+    "crates/sens/Cargo.toml",
+    "crates/sens-cli/Cargo.toml",
+    "crates/sens-embed/Cargo.toml",
+    "crates/sens-literate/Cargo.toml",
+    "crates/sens-wasm/Cargo.toml",
     "crates/swarm-node/Cargo.toml",
-    "crates/my-lisp-host/Cargo.toml",
-    "crates/my-lisp-semantic/Cargo.toml",
-    "crates/my-lisp-lsp/Cargo.toml",
+    "crates/sens-host/Cargo.toml",
+    "crates/sens-semantic/Cargo.toml",
+    "crates/sens-lsp/Cargo.toml",
     "crates/wsm-guard-core/Cargo.toml",
     "crates/wsm-guard-slice/Cargo.toml",
     "crates/wsm-guard-facts/Cargo.toml",
@@ -95,25 +95,25 @@ fn superseded_truthiness_assertions_are_explicitly_classified_before_test_transi
 
     require_authority_row(
         &contents,
-        "crates/my-lisp/tests/mccarthy.rs",
+        "crates/sens/tests/mccarthy.rs",
         "comparisons_chain_and_promote_exact_inexact_like_arithmetic",
         "legacy-semantic",
     );
     require_authority_row(
         &contents,
-        "crates/my-lisp/tests/forward.rs",
+        "crates/sens/tests/forward.rs",
         "match_test_condition_succeeds_when_the_expression_is_truthy",
         "legacy-semantic",
     );
     require_authority_row(
         &contents,
-        "crates/my-lisp/tests/ukrainian_api_docs.rs",
+        "crates/sens/tests/ukrainian_api_docs.rs",
         "istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen",
         "legacy-semantic",
     );
     require_authority_row(
         &contents,
-        "crates/my-lisp/tests/mccarthy.rs",
+        "crates/sens/tests/mccarthy.rs",
         "bare_large_integer_literals_remain_exact",
         "mixed",
     );

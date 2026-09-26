@@ -5,4 +5,4 @@ edition = "2024"
 license-file = "../../LICENSE"
 
 [dependencies]
-my-lisp = { path = "../my-lisp" }
+sens = { path = "../sens" }

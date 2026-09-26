@@ -1,0 +1,15 @@
+[package]
+name = "sens-lsp"
+version = "0.41.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Language Server Protocol adapter for sens · LSP-adapter dlia sens"
+
+[[bin]]
+name = "sens-lsp"
+path = "src/main.rs"
+
+[dependencies]
+# The only dependency: the canonical sens core. The parser, Expr spans
+# and LanguageError are reused unchanged — the LSP never re-parses .my.
+sens = { path = "../sens" }

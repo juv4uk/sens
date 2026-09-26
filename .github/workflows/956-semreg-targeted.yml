@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "lib/surface/semantic-registry-api.lisp"
-      - "crates/my-lisp/tests/semantic_registry_lisp.rs"
+      - "crates/sens/tests/semantic_registry_lisp.rs"
       - "tests/fixtures/semantic-registry-self-hosted-witness.lisp"
       - "scripts/generate-rust-semantic-registry.lisp"
       - ".github/workflows/956-semreg-targeted.yml"
@@ -17,4 +17,4 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Run Lisp-owned semantic registry witness
-        run: cargo test -p my-lisp --test semantic_registry_lisp -- --nocapture
+        run: cargo test -p sens --test semantic_registry_lisp -- --nocapture

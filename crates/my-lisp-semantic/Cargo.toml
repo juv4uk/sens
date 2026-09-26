@@ -1,9 +1,0 @@
-[package]
-name = "my-lisp-semantic"
-version = "0.41.0"
-edition = "2021"
-license-file = "../../LICENSE"
-description = "EXPERIMENTAL Sanskrit/Paninian semantic layer for my-lisp (not wired into the evaluator)"
-
-[dependencies]
-my-lisp = { path = "../my-lisp" }

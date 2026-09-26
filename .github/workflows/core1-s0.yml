@@ -21,7 +21,7 @@ jobs:
     name: mccarthy-eval S0 executes Core1
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout my-lisp Core1 source
+      - name: Checkout sens Core1 source
         uses: actions/checkout@v5
 
       - name: Checkout pinned typed-SID8 S0 seed
@@ -34,9 +34,9 @@ jobs:
       - name: Checkout pinned Lisp-authored compiler seed
         uses: actions/checkout@v5
         with:
-          repository: juv4uk/wsm-my-lisp
+          repository: juv4uk/wsm-sens
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
-          path: .core1-s0/wsm-my-lisp
+          path: .core1-s0/wsm-sens
 
       - name: Build pinned typed-SID8 seed
         working-directory: .core1-s0/mccarthy-eval
@@ -47,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           seed_sha="$(git -C .core1-s0/mccarthy-eval rev-parse HEAD)"
-          compiler_sha="$(git -C .core1-s0/wsm-my-lisp rev-parse HEAD)"
+          compiler_sha="$(git -C .core1-s0/wsm-sens rev-parse HEAD)"
           test "$seed_sha" = "79f2f38f2a8da22a5bbcb39312da5f726ab2471f"
           test "$compiler_sha" = "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947"
           printf 'S0 seed commit: %s\n' "$seed_sha"
@@ -59,7 +59,7 @@ jobs:
           printf 'S1 core1.lisp SHA-256: '
           sha256sum lib/core1.lisp | cut -d' ' -f1
           printf 'S2 compiler.lisp SHA-256: '
-          sha256sum .core1-s0/wsm-my-lisp/lib/compiler.lisp | cut -d' ' -f1
+          sha256sum .core1-s0/wsm-sens/lib/compiler.lisp | cut -d' ' -f1
 
       - name: Verify generation manifest against measured bytes
         shell: bash
@@ -69,7 +69,7 @@ jobs:
           s0_source="$(sha256sum .core1-s0/mccarthy-eval/mccarthy-kernel.s | cut -d' ' -f1)"
           s0_binary="$(sha256sum .core1-s0/mccarthy-eval/mccarthy-kernel | cut -d' ' -f1)"
           s1_source="$(sha256sum lib/core1.lisp | cut -d' ' -f1)"
-          s2_source="$(sha256sum .core1-s0/wsm-my-lisp/lib/compiler.lisp | cut -d' ' -f1)"
+          s2_source="$(sha256sum .core1-s0/wsm-sens/lib/compiler.lisp | cut -d' ' -f1)"
 
           grep -F "(commit . \"79f2f38f2a8da22a5bbcb39312da5f726ab2471f\")" "$manifest"
           grep -F "(source-sha256 . \"$s0_source\")" "$manifest"
@@ -106,7 +106,7 @@ jobs:
           {
             printf '%s\n' '(C1-EVAL-PROGRAM-THEN'
             printf '%s\n' '  (QUOTE ('
-            sed '/^[[:space:]]*;/d' .core1-s0/wsm-my-lisp/lib/compiler.lisp
+            sed '/^[[:space:]]*;/d' .core1-s0/wsm-sens/lib/compiler.lisp
             printf '%s\n' '  ))'
             printf '%s\n' '  (QUOTE (compiler-form (quote FOO))))'
           } > .core1-s0/compiler-smoke.lisp
