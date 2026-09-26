@@ -5,7 +5,7 @@
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
 use crate::environment::CondClauseMode;
-use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
+use crate::{semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 
 use std::rc::Rc;
 
@@ -82,6 +82,17 @@ pub(crate) fn evaluate_definition(
     // Spilnyi leksychnyi freim robyt rekursyvne vyznachennia vydymym zamykanniu pislia zv’yazuvannia.
     // Der gemeinsame lexikalische Frame macht rekursive Definitionen nach der Bindung für ihre Closure sichtbar.
     environment.define(name.clone(), value.clone());
+
+    // If this language definition names a function-table identity, attach the
+    // resulting closure directly to that exact SENS slot. This is a one-way
+    // definition-time projection (surface -> SENS); invocation never converts
+    // SENS back to a surface name.
+    if matches!(value, Value::Closure(_)) {
+        if let Some(sens) = semantic_registry::semantic_id_for_surface(name) {
+            environment.define_sens(sens, value.clone());
+        }
+    }
+
     Ok(value)
 }
 
