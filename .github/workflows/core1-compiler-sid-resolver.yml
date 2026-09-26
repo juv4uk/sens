@@ -38,18 +38,22 @@ jobs:
           test "$actual" = "(core1-compiler-sid-resolver-check pass)"
 
       - name: Checkout typed-SID8 historical S0
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
           ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
           ref: 6031f92652066825a245c806c0773e9e524257bd
           path: .core1-resolver/mccarthy-eval
 
       - name: Build typed-SID8 historical S0
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         working-directory: .core1-resolver/mccarthy-eval
         run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
 
       - name: Execute compiler resolver on S0/Core1
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -94,3 +98,9 @@ jobs:
 
       - name: Diff hygiene
         run: git diff --check
+
+      - name: Fail closed when private Core1 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "::error::Private Core1 checkout is intentionally unavailable to fork/untrusted pull requests."
+          exit 1
