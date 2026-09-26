@@ -58,9 +58,9 @@
 ; unendlicher Strukturen und erhält die Stabilität der Engine bei komplexer
 ; logischer Inferenz.
 
-(def logic-var
-  (lambda (name)
-    (list (quote var) name)))
+(00001011 logic-var
+  (00001000 (name)
+    (list (00000001 var) name)))
 
 ; Guards the `eq` with `(atom (car term))` first: `term` reaching the final
 ; branch is already known non-atom, but its `car` can itself be a compound
@@ -78,42 +78,42 @@
 ; Unifikation verschachtelter Strukturen in Teile wie `((var x) bob)`,
 ; dessen `car` `(var x)` ist — eine Liste, kein Symbol) — `eq` würde dabei
 ; einen Fehler werfen statt einfach korrekt "keine Variable" zu antworten.
-(def var?
-  (lambda (term)
-    (cond
-      ((atom? term) (quote ()))
-      ((atom? (car term)) (eq? (car term) (quote var)))
-      (t (quote ())))))
+(00001011 var?
+  (00001000 (term)
+    (00000111
+      ((00000010 term) (00000001 ()))
+      ((00000010 (00000101 term)) (00000011 (00000101 term) (00000001 var)))
+      (t (00000001 ())))))
 
 ; subst is an alist of (name . term) pairs, keyed by the variable's
 ; name — never by the `(var name)` pair itself. We use `equal?` instead
 ; of `eq` because names can be structures like `(x . 3)` from renaming.
-(def lookup-subst
-  (lambda (variable subst)
-    (cond
-      ((atom? subst) variable)
-      ((equal? (car (car subst)) (second variable)) (cdr (car subst)))
-      (t (lookup-subst variable (cdr subst))))))
+(00001011 lookup-subst
+  (00001000 (variable subst)
+    (00000111
+      ((00000010 subst) variable)
+      ((equal? (00000101 (00000101 subst)) (second variable)) (00000110 (00000101 subst)))
+      (t (lookup-subst variable (00000110 subst))))))
 
-(def extend-subst
-  (lambda (variable term subst)
-    (cons (cons (second variable) term) subst)))
+(00001011 extend-subst
+  (00001000 (variable term subst)
+    (00000100 (00000100 (second variable) term) subst)))
 
 ; One-level dereference: if `term` is a bound variable, follow exactly one
 ; binding; anything else (including a still-unbound variable, or a
 ; compound term) is returned as-is. `unify` and `apply-subst` each do their
 ; own recursion into compound terms, so `walk` doesn't need to go deeper.
-(def walk
-  (lambda (term subst)
-    (cond
+(00001011 walk
+  (00001000 (term subst)
+    (00000111
       ((var? term) (walk-resolved term (lookup-subst term subst) subst))
       (t term))))
 
-(def walk-resolved
-  (lambda (term resolved subst)
-    (cond
+(00001011 walk-resolved
+  (00001000 (term resolved subst)
+    (00000111
       ((var? resolved)
-       (cond
+       (00000111
          ((equal? (second resolved) (second term)) term)
          (t (walk resolved subst))))
       (t resolved))))
@@ -128,60 +128,62 @@
 ; es eine nichtleere Alist — eine Liste, kein Atom — daher würde
 ; `(eq subst 'fail)` selbst einen Fehler werfen statt einfach korrekt
 ; "nein, es ist nicht das fail-Atom" zu antworten.
-(def unify
-  (lambda (a b subst)
-    (cond
-      ((failed-subst? subst) (quote fail))
+(00001011 unify
+  (00001000 (a b subst)
+    (00000111
+      ((failed-subst? subst) (00000001 fail))
       (t (unify-walked (walk a subst) (walk b subst) subst)))))
 
-(def failed-subst?
-  (lambda (subst)
-    (cond
-      ((atom? subst) (eq? subst (quote fail)))
-      (t (quote ())))))
+(00001011 failed-subst?
+  (00001000 (subst)
+    (00000111
+      ((00000010 subst) (00000011 subst (00000001 fail)))
+      (t (00000001 ())))))
 
-(def unify-walked
-  (lambda (a b subst)
-    (cond
+(00001011 unify-walked
+  (00001000 (a b subst)
+    (00000111
       ((var? a) (unify-var a b subst))
       ((var? b) (unify-var b a subst))
-      ((atom? a) (cond ((atom? b) (cond ((eq? a b) subst) (t (quote fail)))) (t (quote fail))))
-      ((atom? b) (quote fail))
-      (t (unify (cdr a) (cdr b) (unify (car a) (car b) subst))))))
+      ((00000010 a) (00000111 ((00000010 b) (00000111 ((00000011 a b) subst) (t (00000001 fail)))) (t (00000001 fail))))
+      ((00000010 b) (00000001 fail))
+      (t (unify (00000110 a) (00000110 b) (unify (00000101 a) (00000101 b) subst))))))
 
-(def occurs-check
-  (lambda (variable term subst)
+(00001011 occurs-check?
+  (00001000 (variable term subst)
     (let ((resolved (walk term subst)))
-      (cond
+      (00000111
         ((var? resolved) (equal? (second variable) (second resolved)))
-        ((atom? resolved) (quote ()))
-        (t (cond
-             ((occurs-check? variable (car resolved) subst) t)
-             (t (occurs-check? variable (cdr resolved) subst))))))))
+        ((00000010 resolved) (00000001 ()))
+        (t (00000111
+             ((occurs-check? variable (00000101 resolved) subst) t)
+             (t (occurs-check? variable (00000110 resolved) subst))))))))
 
-(def unify-var
-  (lambda (variable term subst)
-    (cond
+(00001011 occurs-check occurs-check?)
+
+(00001011 unify-var
+  (00001000 (variable term subst)
+    (00000111
       ((var? term)
-       (cond
+       (00000111
          ((equal? (second variable) (second term)) subst)
          (t (extend-subst variable term subst))))
-      ((occurs-check? variable term subst) (quote fail))
+      ((occurs-check? variable term subst) (00000001 fail))
       (t (extend-subst variable term subst)))))
 
 ; Fully resolves every variable in `term` (recursively, through chained
 ; bindings and into nested lists) against `subst` — what you call once
 ; unification succeeds, to read out a readable answer instead of raw
 ; `(var ...)` markers and substitution internals.
-(def apply-subst
-  (lambda (term subst)
+(00001011 apply-subst
+  (00001000 (term subst)
     (apply-subst-walked (walk term subst) subst)))
 
-(def apply-subst-walked
-  (lambda (term subst)
-    (cond
-      ((atom? term) term)
-      (t (cons (apply-subst (car term) subst) (apply-subst (cdr term) subst))))))
+(00001011 apply-subst-walked
+  (00001000 (term subst)
+    (00000111
+      ((00000010 term) term)
+      (t (00000100 (apply-subst (00000101 term) subst) (apply-subst (00000110 term) subst))))))
 
 ; The shared kernel behind proving/matching a *conjunction* of conditions:
 ; process one condition at a time, threading a `state` value (usually a
@@ -234,15 +236,15 @@
 ; der Teil, den sie teilen; `try-one` ist das Einzige, das sich
 ; unterscheidet, als gewöhnliches Funktionsargument übergeben statt als
 ; duplizierte Konjunktions-Durchlauflogik in jeder Datei.
-(def thread-conjunction
-  (lambda (conditions state try-one)
-    (cond
-      ((atom? conditions) (list state))
-      (t (thread-conjunction-branches (cdr conditions) try-one (try-one (car conditions) state))))))
+(00001011 thread-conjunction
+  (00001000 (conditions state try-one)
+    (00000111
+      ((00000010 conditions) (list state))
+      (t (thread-conjunction-branches (00000110 conditions) try-one (try-one (00000101 conditions) state))))))
 
-(def thread-conjunction-branches
-  (lambda (remaining try-one states)
-    (cond
-      ((atom? states) (quote ()))
-      (t (append (thread-conjunction remaining (car states) try-one)
-                  (thread-conjunction-branches remaining try-one (cdr states)))))))
+(00001011 thread-conjunction-branches
+  (00001000 (remaining try-one states)
+    (00000111
+      ((00000010 states) (00000001 ()))
+      (t (append (thread-conjunction remaining (00000101 states) try-one)
+                 (thread-conjunction-branches remaining try-one (00000110 states)))))))

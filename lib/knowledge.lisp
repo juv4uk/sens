@@ -208,16 +208,18 @@
 ;; agreement): conflict detection guards against *adding* contradictory
 ;; information, not against *removing* it — taking a clause back out can
 ;; never itself contradict anything already known.
-(def check-conflict
-  (lambda (module-name rules)
-    (cond
+(00001011 check-conflict?
+  (00001000 (module-name rules)
+    (00000111
       ((module-known? module-name)
-       (let ((head (car (car rules))))
-         (let ((proofs (reason-in module-name (list (quote not) head))))
-           (cond
-             ((atom? proofs) (quote ()))
+       (let ((head (00000101 (00000101 rules))))
+         (let ((proofs (reason-in module-name (opposite-knowledge-head head))))
+           (00000111
+             ((00000010 proofs) (00000001 ()))
              (t t)))))
-      (t (quote ())))))
+      (t (00000001 ())))))
+
+(00001011 check-conflict check-conflict?)
 
 ;; tell-knowledge adds new clauses to a module, creating it if it doesn't
 ;; exist yet — same conflict check as before, but on success it now pushes
@@ -260,64 +262,68 @@
 ;; Wissen getrennt. Jedes Ergebnis sind strukturierte Daten: `(accepted ...)`,
 ;; `(rejected ...)` oder `(conflict ...)`.
 
-(def knowledge-proper-list?
-  (lambda (value)
-    (cond
-      ((atom? value)
-       (cond ((eq? value (quote ())) t) (t (quote ()))))
-      (t (knowledge-proper-list? (cdr value))))))
+(00001011 knowledge-proper-list?
+  (00001000 (value)
+    (00000111
+      ((00000010 value)
+       (00000111 ((00000011 value (00000001 ())) t) (t (00000001 ()))))
+      (t (knowledge-proper-list? (00000110 value))))))
 
-(def knowledge-terms-valid?
-  (lambda (terms)
-    (cond
-      ((atom? terms)
-       (cond ((eq? terms (quote ())) t) (t (quote ()))))
-      ((knowledge-term-valid? (car terms))
-       (knowledge-terms-valid? (cdr terms)))
-      (t (quote ())))))
+(00001011 knowledge-terms-valid?
+  (00001000 (terms)
+    (00000111
+      ((00000010 terms)
+       (00000111 ((00000011 terms (00000001 ())) t) (t (00000001 ()))))
+      ((knowledge-term-valid? (00000101 terms))
+       (knowledge-terms-valid? (00000110 terms)))
+      (t (00000001 ())))))
 
-(def knowledge-term-valid?
-  (lambda (term)
-    (cond
-      ((atom? term) t)
-      ((atom? (car term))
-       (cond
-((eq? (car term) (quote var))
-           (cond
-             ((= (length term) 2) 1 (symbol? (second term)))
-             ((= (length term) 2) 0 (quote ()))))
+(00001011 knowledge-term-valid?
+  (00001000 (term)
+    (00000111
+      ((00000010 term) t)
+      ((00000010 (00000101 term))
+       (00000111
+         ((00000011 (00000101 term) (00000001 var))
+          (00000111
+            ((= (length term) 2) 1 (symbol? (second term)))
+            ((= (length term) 2) 0 (00000001 ()))))
          ((knowledge-proper-list? term) (knowledge-terms-valid? term))
-         (t (quote ()))))
-      (t (quote ())))))
+         (t (00000001 ()))))
+      (t (00000001 ())))))
 
-(def knowledge-goal-valid?
-  (lambda (goal)
-    (cond
-      ((atom? goal) (quote ()))
-      ((eq? (knowledge-proper-list? goal) (quote ())) (quote ()))
-      ((eq? (symbol? (car goal)) (quote ())) (quote ()))
-      ((eq? (car goal) (quote not))
-       (cond
+(00001011 knowledge-goal-valid?
+  (00001000 (goal)
+    (00000111
+      ((00000010 goal) (00000001 ()))
+      ((00000011 (knowledge-proper-list? goal) (00000001 ())) (00000001 ()))
+      ((00000011 (symbol? (00000101 goal)) (00000001 ())) (00000001 ()))
+      ((00000011 (00000101 goal) (00000001 not))
+       (00000111
          ((= (length goal) 2) 1 (knowledge-goal-valid? (second goal)))
-         ((= (length goal) 2) 0 (quote ()))))
-      (t (knowledge-terms-valid? (cdr goal))))))
+         ((= (length goal) 2) 0 (00000001 ()))))
+      ((00000011 (00000101 goal) (00000001 not?))
+       (00000111
+         ((= (length goal) 2) 1 (knowledge-goal-valid? (second goal)))
+         ((= (length goal) 2) 0 (00000001 ()))))
+      (t (knowledge-terms-valid? (00000110 goal))))))
 
-(def knowledge-goals-valid?
-  (lambda (goals)
-    (cond
-      ((atom? goals)
-       (cond ((eq? goals (quote ())) t) (t (quote ()))))
-      ((knowledge-goal-valid? (car goals))
-       (knowledge-goals-valid? (cdr goals)))
-      (t (quote ())))))
+(00001011 knowledge-goals-valid?
+  (00001000 (goals)
+    (00000111
+      ((00000010 goals)
+       (00000111 ((00000011 goals (00000001 ())) t) (t (00000001 ()))))
+      ((knowledge-goal-valid? (00000101 goals))
+       (knowledge-goals-valid? (00000110 goals)))
+      (t (00000001 ())))))
 
-(def knowledge-clause-valid?
-  (lambda (clause)
-    (cond
-      ((atom? clause) (quote ()))
-      ((eq? (knowledge-proper-list? clause) (quote ())) (quote ()))
-      ((eq? (knowledge-goal-valid? (car clause)) (quote ())) (quote ()))
-      (t (knowledge-goals-valid? (cdr clause))))))
+(00001011 knowledge-clause-valid?
+  (00001000 (clause)
+    (00000111
+      ((00000010 clause) (00000001 ()))
+      ((00000011 (knowledge-proper-list? clause) (00000001 ())) (00000001 ()))
+      ((00000011 (knowledge-goal-valid? (00000101 clause)) (00000001 ())) (00000001 ()))
+      (t (knowledge-goals-valid? (00000110 clause))))))
 
 ;; Explicit opposites operate on heads, not whole clauses: a rule and a fact
 ;; may derive the same head, and either is sufficient evidence.
@@ -325,37 +331,45 @@
 ;; факт можуть вивести ту саму голову, і кожного достатньо як доказу.
 ;; Explizite Gegensätze arbeiten mit Köpfen statt ganzen Clauses: Regel und
 ;; Fakt können denselben Kopf ableiten; jeder ist als Beleg ausreichend.
-(def opposite-knowledge-head
-  (lambda (head)
-    (cond
-      ((eq? (car head) (quote not)) (second head))
-      (t (list (quote not) head)))))
+(00001011 opposite-knowledge-head
+  (00001000 (head)
+    (00000111
+      ((00000011 (00000101 head) (00000001 not)) (second head))
+      ((00000011 (00000101 head) (00000001 not?)) (second head))
+      (t (list (00000001 not) head)))))
 
-(def advice-conflict-proof
-  (lambda (module-name clause)
-    (cond
+(00001011 advice-conflict-proof
+  (00001000 (module-name clause)
+    (00000111
       ((module-known? module-name)
-       (reason-in module-name (opposite-knowledge-head (car clause))))
-      (t (quote ())))))
+       (let ((proofs (reason-in module-name (opposite-knowledge-head (00000101 clause)))))
+         (00000111
+           ((00000010 proofs)
+            (00000111
+              ((00000011 (00000101 (00000101 clause)) (00000001 not)) (00000001 ()))
+              ((00000011 (00000101 (00000101 clause)) (00000001 not?)) (00000001 ()))
+              (t (reason-in module-name (list (00000001 not?) (00000101 clause))))))
+           (t proofs))))
+      (t (00000001 ())))))
 
-(def advice-decision
-  (lambda (module-name clause)
-    (cond
-      ((eq? (symbol? module-name) (quote ()))
-       (list (quote rejected) (list (quote reason) (quote invalid-module)) (list (quote input) clause)))
-      ((eq? (knowledge-clause-valid? clause) (quote ()))
-       (list (quote rejected) (list (quote reason) (quote invalid-clause)) (list (quote input) clause)))
+(00001011 advice-decision
+  (00001000 (module-name clause)
+    (00000111
+      ((00000011 (symbol? module-name) (00000001 ()))
+       (list (00000001 rejected) (list (00000001 reason) (00000001 invalid-module)) (list (00000001 input) clause)))
+      ((00000011 (knowledge-clause-valid? clause) (00000001 ()))
+       (list (00000001 rejected) (list (00000001 reason) (00000001 invalid-clause)) (list (00000001 input) clause)))
       (t
-       (let ((opposite (opposite-knowledge-head (car clause)))
+       (let ((opposite (opposite-knowledge-head (00000101 clause)))
              (proofs (advice-conflict-proof module-name clause)))
-         (cond
-           ((atom? proofs)
-            (list (quote accepted) (list (quote module) module-name) (list (quote knowledge) clause)))
+         (00000111
+           ((00000010 proofs)
+            (list (00000001 accepted) (list (00000001 module) module-name) (list (00000001 knowledge) clause)))
            (t
-            (list (quote conflict)
-                  (list (quote new) clause)
-                  (list (quote existing) opposite)
-                  (list (quote proof) (car proofs))))))))))
+            (list (00000001 conflict)
+                  (list (00000001 new) clause)
+                  (list (00000001 existing) opposite)
+                  (list (00000001 proof) (00000101 proofs))))))))))
 
 ;; The accepted branch evaluates `def` in the caller's frame, then returns
 ;; the structured decision. A helper lambda would write into a disposable
