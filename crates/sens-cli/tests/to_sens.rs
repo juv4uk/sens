@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_program, load_core_library, load_macro_library, Session, CORE_LIBRARY_SOURCE};
 use std::process::Command;
 
 fn tool() -> Command {
@@ -120,4 +120,55 @@ fn check_is_clean_after_all_currently_convertible_heads_are_migrated() {
     assert!(check.status.success());
     let stdout = String::from_utf8_lossy(&check.stdout);
     assert!(stdout.contains("convertible=0"), "{stdout}");
+}
+
+
+#[test]
+fn rewritten_current_core_library_preserves_representative_behavior() {
+    let path = temp_file("core-library", CORE_LIBRARY_SOURCE);
+
+    let apply = tool().arg(&path).output().expect("run core migration");
+    assert!(
+        apply.status.success(),
+        "{}",
+        String::from_utf8_lossy(&apply.stderr)
+    );
+    let rewritten = std::fs::read_to_string(&path).expect("read rewritten core");
+    let _ = std::fs::remove_file(&path);
+
+    assert_ne!(rewritten, CORE_LIBRARY_SOURCE, "M0 must actually migrate current core call heads");
+    assert!(
+        rewritten.contains("(00100111 "),
+        "current core rewrite should contain exact SENS list calls"
+    );
+    assert!(
+        rewritten.contains("(10011100 "),
+        "current core rewrite should contain exact SENS let calls"
+    );
+
+    let mut baseline = Session::default();
+    load_core_library(&mut baseline).expect("baseline core loads");
+
+    let mut migrated = Session::default();
+    load_macro_library(&mut migrated).expect("macro bootstrap loads");
+    eval_program(&rewritten, &mut migrated).expect("rewritten core loads");
+
+    for source in [
+        "(list 1 2 3)",
+        "(member? 2 (quote (1 2 3)))",
+        "(append (quote (1 2)) (quote (3 4)))",
+        "(quotient 17 5)",
+        "(let* ((x 3) (y (+ x 4))) y)",
+        "(and (member? 2 (quote (1 2 3))) (or () 9))",
+    ] {
+        let expected = eval_program(source, &mut baseline)
+            .unwrap_or_else(|error| panic!("baseline {source}: {error:?}"))
+            .value
+            .to_string();
+        let actual = eval_program(source, &mut migrated)
+            .unwrap_or_else(|error| panic!("migrated {source}: {error:?}"))
+            .value
+            .to_string();
+        assert_eq!(actual, expected, "{source}");
+    }
 }
