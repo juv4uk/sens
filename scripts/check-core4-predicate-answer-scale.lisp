@@ -15,8 +15,19 @@
 (def pas-yes (fourth pas-sections))
 (def pas-algebra (fifth pas-sections))
 
+(def pas-terminology (nth 5 pas-sections))
+
 (def pas-no-levels (pas-field pas-no (quote levels)))
 (def pas-yes-levels (pas-field pas-yes (quote levels)))
+(def pas-terms (pas-field pas-terminology (quote terms)))
+
+; Рядок рівня: (бітовий-запис ступінь санскрит) -> (ступінь санскрит).
+(def pas-grade-and-sanskrit
+  (lambda (level) (cdr level)))
+
+; Рядок термінів: (ступінь санскрит uk en) -> (ступінь санскрит).
+(def pas-term-grade-and-sanskrit
+  (lambda (term) (list (car term) (second term))))
 
 (def pas-observed
   (list
@@ -37,7 +48,16 @@
     (pas-field pas-algebra (quote weakening-law))
     (pas-field pas-algebra (quote boundary-law))
     (pas-field pas-algebra (quote eighth-bit-law))
-    (pas-field pas-algebra (quote function-convergence-law))))
+    (pas-field pas-algebra (quote function-convergence-law))
+    (pas-field pas-boundary (quote meaning-uk))
+    (pas-field pas-boundary (quote meaning-en))
+    (pas-field pas-terminology (quote languages))
+    pas-terms
+    (equal? (map pas-term-grade-and-sanskrit pas-terms)
+            (map pas-grade-and-sanskrit pas-no-levels))
+    (equal? (map pas-term-grade-and-sanskrit pas-terms)
+            (map pas-grade-and-sanskrit pas-yes-levels))
+    (pas-field pas-terminology (quote boundary-term))))
 
 (def pas-expected
   (list
@@ -72,7 +92,21 @@
     (quote append-same-bit)
     (quote seven-directed-grades-converge-to-empty-list)
     (quote belongs-to-sens-function-space)
-    (quote distinct-functions-same-empty-result)))
+    (quote distinct-functions-same-empty-result)
+    "невідомо"
+    "unknown"
+    (quote (sanskrit uk en))
+    (quote
+      ((1 dṛḍha-niścaya "тверда певність" "firm certainty")
+       (2 niścaya       "певність"        "certainty")
+       (3 nirṇaya       "висновок"        "determination")
+       (4 saṃbhāvanā    "правдоподібність" "plausibility")
+       (5 saṃśaya       "сумнів"          "doubt")
+       (6 aniścaya      "непевність"      "uncertainty")
+       (7 ajñāta-sīmā   "межа невідомого" "edge of the unknown")))
+    (quote (structural-relation same))
+    (quote (structural-relation same))
+    (quote (ajñāta "невідомо" "unknown"))))
 
 (cond
   ((equal? pas-observed pas-expected)
