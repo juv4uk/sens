@@ -37,6 +37,30 @@ Rust-witness спостерігає стадію A через чинне runtime
 Жоден Core loader не викликається. До і після двостадійного виконання
 `selected_core_profile() == None`.
 
+## Adversarial surface-bindings контроль
+
+Окремий тест через exact-функції `00000001`, `00000101` і `00001000`
+отримує їхні admitted peer-surfaces лише для **налаштування ворожого середовища**
+і переприв'язує кожне таке ім'я в root environment до sentinel
+`surface-poison`.
+
+Після цього той самий двостадійний exact-source без жодного surface spelling:
+
+```text
+((00001000 (f) f) 00000101)
+(((00001000 (f) f) 00000101) (00000001 (alpha beta)))
+```
+
+усе одно переносить `00000101` як exact function і повертає `alpha`.
+
+Це сильніше за просту перевірку «в source немає слів»: навіть runtime bindings
+людських peer-surfaces, що відповідають трьом задіяним exact-функціям, навмисно
+робляться неправильними, а exact-path їх не читає.
+
+Registry projection у цьому тесті використовується лише test harness-ом, щоб
+знайти bindings для отруєння. Він не бере участі в перенесенні або виконанні
+самого exact source.
+
 ## Fail-closed контроль
 
 Той самий carrier переносить `11111111` без зміни:
@@ -83,7 +107,9 @@ test API не дає production-neutral способу фізично прибр
 bindings або compiled registry table.
 
 Тому цей перший slice доводить, що двостадійний exact-path **не потребує
-завантаження surface source/library і не робить function-name round-trip**.
+завантаження surface source/library, не робить function-name round-trip і
+залишається працездатним, коли peer surface bindings задіяних функцій навмисно
+отруєні**.
 Він не стверджує, що compiled projection фізично був відсутній у процесі.
 Сильніший witness із фізично вилученими surface tables потребував би окремого
 bounded test hook або substrate witness; такий hook не можна непомітно
