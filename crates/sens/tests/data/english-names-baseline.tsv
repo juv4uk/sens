@@ -1721,6 +1721,7 @@ lisp-дані	tests/fixtures/machine-replaceability-witness.lisp	cond	1
 lisp-дані	tests/fixtures/machine-replaceability-witness.lisp	cons	1
 lisp-дані	tests/fixtures/machine-replaceability-witness.lisp	eq?	2
 lisp-дані	tests/fixtures/mathematical-result-taxonomy-witness.lisp	identity	1
+lisp-дані	tests/fixtures/mechanism-selector-1047-witness.lisp	atom?	1
 lisp-дані	tests/fixtures/meta-semantic-registry-witness.lisp	def	1
 lisp-дані	tests/fixtures/meta-semantic-registry-witness.lisp	define	1
 lisp-дані	tests/fixtures/meta-semantic-registry-witness.lisp	lambda	1
@@ -2006,9 +2007,6 @@ rust-lisp	crates/sens-cli/tests/cli.rs	eval	6
 rust-lisp	crates/sens-cli/tests/cli.rs	identity	1
 rust-lisp	crates/sens-cli/tests/cli.rs	quote	2
 rust-lisp	crates/sens-cli/tests/cli.rs	read	1
-rust-lisp	crates/sens-cli/tests/constitution_projection.rs	def	1
-rust-lisp	crates/sens-cli/tests/constitution_projection.rs	read-all	1
-rust-lisp	crates/sens-cli/tests/constitution_projection.rs	read-file	1
 rust-lisp	crates/sens-cli/tests/lsp_subcommand.rs	def	2
 rust-lisp	crates/sens-cli/tests/process_semantics.rs	process-run	2
 rust-lisp	crates/sens-cli/tests/process_semantics.rs	quote	2
