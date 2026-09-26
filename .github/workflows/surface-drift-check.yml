@@ -34,7 +34,7 @@ on:
 
 jobs:
   drift-check:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v4
 

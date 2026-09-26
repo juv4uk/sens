@@ -19,7 +19,7 @@ on:
 jobs:
   contract:
     name: Lisp-owned four-core authority
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5

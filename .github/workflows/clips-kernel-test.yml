@@ -20,7 +20,7 @@ on:
 
 jobs:
   default-build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -30,6 +30,7 @@ jobs:
         run: cargo check -p wsm-clips-kernel --features native-clips
 
   native-clips-642:
+    if: vars.HOSTED_RUNNERS == 'true'
     runs-on: ubuntu-latest
     container: fedora:45
     steps:

@@ -361,6 +361,7 @@ jobs:
 
   windows-native-exec-witness:
     name: Windows native-exec ABI witness
+    if: vars.HOSTED_RUNNERS == 'true'
     runs-on: windows-latest
     timeout-minutes: 15
     steps:

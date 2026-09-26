@@ -314,14 +314,14 @@
       ((00111101 marker s) t i)
       (t t (pos-of (01000000 s) marker (00001100 i 1))))))
 
-(10011100 ((first (pos-of uk-surface "(define середовище env)" 0)))
+(10011100 ((first (pos-of uk-surface "(00001001 середовище env)" 0)))
   (00000111
-    ((00011010 first 0) 1 (fail "uk.lisp: немає (define середовище env)"))
+    ((00011010 first 0) 1 (fail "uk.lisp: немає (00001001 середовище env)"))
     (t t
      (00000111
-       ((00111110 "(define середовище env)"
+       ((00111110 "(00001001 середовище env)"
                           (01000001 uk-surface (00001100 first 1) 1000000000)) t
-        (fail "uk.lisp: (define середовище env) більше одного разу"))
+        (fail "uk.lisp: (00001001 середовище env) більше одного разу"))
        (t t t)))))
 (pass "seredovyshche-ne-maie-povtornoho-surface-binding")
 
@@ -333,9 +333,9 @@
        (10011100 ((en (01000010 (00101111 (00000101 renames))))
              (old (01000010 (00110000 (00000101 renames)))))
          (00000111
-           ((00111110 (str+ "(define " old " " en ")") uk-surface) t
+           ((00111110 (str+ "(00001001 " old " " en ")") uk-surface) t
             (check-aliases (00000110 renames)))
-           (t t (fail (str+ "missing alias (define " old " " en ")")))))))))
+           (t t (fail (str+ "missing alias (00001001 " old " " en ")")))))))))
 (check-aliases audit-renames)
 (pass "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
 
