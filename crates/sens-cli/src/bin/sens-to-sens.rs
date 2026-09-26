@@ -214,7 +214,7 @@ fn walk_expr(
     bound: &mut HashSet<String>,
     host_capabilities: &HashSet<String>,
     analysis: &mut Analysis,
-    top_level: bool,
+    _top_level: bool,
 ) {
     let ExprKind::List(items) = &expression.kind else {
         return;
@@ -265,10 +265,12 @@ fn walk_expr(
                 if arguments.is_empty() {
                     return;
                 }
-                if !top_level {
-                    if let ExprKind::Symbol(name) = &arguments[0].kind {
-                        bound.insert(name.to_string());
-                    }
+                if let ExprKind::Symbol(name) = &arguments[0].kind {
+                    // Generic source migration must preserve lexical/surface
+                    // shadowing. #1468 pins exact code slots to the first
+                    // language definition, so a later top-level surface
+                    // redefinition must NOT be rewritten to that old slot.
+                    bound.insert(name.to_string());
                 }
                 walk_sequence(
                     &arguments[1..],
@@ -541,11 +543,11 @@ mod tests {
     }
 
     #[test]
-    fn local_define_shadows_but_top_level_language_definition_can_use_exact_identity() {
+    fn top_level_and_local_definitions_shadow_registry_surfaces() {
         let source =
-            "(define list (lambda args args)) (list 1 2) (lambda () (define list (lambda args 7)) (list 1 2))";
+            "(define list (lambda args (quote shadowed))) (list 1 2) (lambda () (define list (lambda args 7)) (list 1 2))";
         let expected =
-            "(00001001 list (00001000 args args)) (00100111 1 2) (00001000 () (00001001 list (00001000 args 7)) (list 1 2))";
+            "(00001001 list (00001000 args (00000001 shadowed))) (list 1 2) (00001000 () (00001001 list (00001000 args 7)) (list 1 2))";
         assert_eq!(rewrite(source), expected);
     }
 
