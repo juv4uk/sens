@@ -17,12 +17,14 @@ use sens::{eval_program, load_core_library, parse, Session};
 const HEADER: &str = include_str!("../../wsm-kernel-c-abi/include/wsm_kernel.h");
 const CONTRACT: &str = include_str!("../../../contracts/kernel-neutral-abi-contract.lisp");
 
-/// The nine codes `contracts/kernel-neutral-abi-contract.lisp` is allowed to
-/// call. PRIMITIVE_TABLE in crates/sens/src/eval/canon.rs admits ten
-/// mechanisms; the tenth, 00000000, is the empty code and is not a call.
+/// The codes `contracts/kernel-neutral-abi-contract.lisp` is allowed to call.
+/// PRIMITIVE_TABLE in crates/sens/src/eval/canon.rs admits ten mechanisms; the
+/// tenth, 00000000, is the empty code and is not a call. Definitions use
+/// 00001001 (define); 00001011 (def) is the historical syntax-only form and is
+/// deliberately absent, per the owner rule in issue #1438.
 const ADMITTED_CALL_CODES: [&str; 9] = [
     "00000001", "00000010", "00000011", "00000100", "00000101", "00000110", "00000111", "00001000",
-    "00001011",
+    "00001001",
 ];
 
 struct Header {
@@ -238,8 +240,17 @@ fn the_contract_judges_its_own_claims_clean() {
 #[test]
 fn the_contract_calls_only_admitted_codes() {
     parse(CONTRACT).expect("the ABI contract must remain valid SENS source");
+    // Comments name codes in prose, so they must not be scanned as call heads.
+    let code: String = CONTRACT
+        .lines()
+        .map(|line| match line.find(';') {
+            Some(at) => &line[..at],
+            None => line,
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
     let mut heads = BTreeSet::new();
-    let bytes: Vec<char> = CONTRACT.chars().collect();
+    let bytes: Vec<char> = code.chars().collect();
     for (index, ch) in bytes.iter().enumerate() {
         if *ch != '(' {
             continue;
@@ -261,6 +272,10 @@ fn the_contract_calls_only_admitted_codes() {
     assert!(
         !heads.is_empty(),
         "the contract should still call something; an empty scan means the scan is broken"
+    );
+    assert!(
+        !heads.contains("00001011"),
+        "the historical def form must not reappear in new contract code"
     );
 }
 

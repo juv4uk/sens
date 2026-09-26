@@ -1,8 +1,11 @@
 ;; kernel-neutral-abi-contract/1 — the function table, written as SENS code.
 ;;
 ;; Every registry call head in this file is the eight-bit code, never the name.
+;; Definitions use 00001001 define. 00001011 def is the historical syntax-only
+;; form, and this contract does not use it: see the owner rule in issue #1438,
+;; "def (00001011) не використовувати; визначення — 00001001".
 ;; The legend, and the only codes this file is allowed to call:
-;;   00001011 def      00001000 lambda   00000111 cond      00000001 quote
+;;   00001001 define   00001000 lambda   00000111 cond      00000001 quote
 ;;   00000010 atom?    00000011 eq?      00000100 cons     00000101 car
 ;;   00000110 cdr
 ;; That is not a stylistic choice. PRIMITIVE_TABLE in
@@ -76,19 +79,19 @@
 ;; 1. The codes, exactly as the table declares them.
 ;; ==================================================================
 
-(00001011 kernel-abi-version 2)
-(00001011 kernel-no 0)
-(00001011 kernel-yes 1)
-(00001011 kernel-kind-common-lisp 1)
-(00001011 kernel-kind-prolog 2)
-(00001011 kernel-kind-clips 3)
-(00001011 kernel-kind-datalog 4)
-(00001011 kernel-kind-unassigned 0)
-(00001011 kernel-status-ok 0)
-(00001011 kernel-status-invalid-argument 1)
-(00001011 kernel-status-not-running 2)
-(00001011 kernel-status-buffer-too-small 3)
-(00001011 kernel-status-kernel-failure 4)
+(00001001 kernel-abi-version 2)
+(00001001 kernel-no 0)
+(00001001 kernel-yes 1)
+(00001001 kernel-kind-common-lisp 1)
+(00001001 kernel-kind-prolog 2)
+(00001001 kernel-kind-clips 3)
+(00001001 kernel-kind-datalog 4)
+(00001001 kernel-kind-unassigned 0)
+(00001001 kernel-status-ok 0)
+(00001001 kernel-status-invalid-argument 1)
+(00001001 kernel-status-not-running 2)
+(00001001 kernel-status-buffer-too-small 3)
+(00001001 kernel-status-kernel-failure 4)
 
 ;; The C table has no bool, so predicates cross as integers: 0 = no, 1 = yes,
 ;; the same convention WsmStatus already uses for OK = 0.
@@ -97,10 +100,10 @@
 ;; 2. The function table itself, in table order.
 ;; ==================================================================
 
-(00001011 kernel-slot-order (00000001 (start exchange snapshot stop)))
-(00001011 kernel-slot-count 4)
+(00001001 kernel-slot-order (00000001 (start exchange snapshot stop)))
+(00001001 kernel-slot-count 4)
 
-(00001011
+(00001001
   kernel-slot-start
   (00000001
     ((arguments 1)
@@ -111,7 +114,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-slot-exchange
   (00000001
     ((arguments 4)
@@ -123,7 +126,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-slot-snapshot
   (00000001
     ((arguments 3)
@@ -135,7 +138,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-slot-stop
   (00000001
     ((arguments 1)
@@ -147,15 +150,15 @@
 )
 
 ;; The three values the table carries beside the slots.
-(00001011 kernel-table-scalars (00000001 (abi_version kernel context)))
-(00001011 kernel-table-scalar-count 3)
+(00001001 kernel-table-scalars (00000001 (abi_version kernel context)))
+(00001001 kernel-table-scalar-count 3)
 
 ;; ==================================================================
 ;; 3. The claims this ABI-level contract makes, and the ones it refuses.
 ;;    A claim is (NAME VALUE). Absent evidence is 0 and stays 0.
 ;; ==================================================================
 
-(00001011
+(00001001
   kernel-boolean-clauses
   (00000001
     ((one-abi-per-kernel-for-every-row 0)
@@ -181,10 +184,10 @@
   )
 )
 
-(00001011 kernel-claim-is-abi-level-only kernel-yes)
-(00001011 kernel-claim-covers-semantic-equivalence kernel-no)
-(00001011 kernel-claim-covers-dialect-compatibility kernel-no)
-(00001011 kernel-claim-covers-result-value-equality kernel-no)
+(00001001 kernel-claim-is-abi-level-only kernel-yes)
+(00001001 kernel-claim-covers-semantic-equivalence kernel-no)
+(00001001 kernel-claim-covers-dialect-compatibility kernel-no)
+(00001001 kernel-claim-covers-result-value-equality kernel-no)
 
 ;; ==================================================================
 ;; 4. The shapes the rest of the contract needs.
@@ -193,11 +196,11 @@
 ;; ==================================================================
 
 ;; An alist cell, the shape a C table row has: (KEY . VALUE).
-(00001011 kernel-cell (00001000 (key value) (00000100 key value)))
+(00001001 kernel-cell (00001000 (key value) (00000100 key value)))
 
 ;; eq? refuses anything that is not an atom, so the structural-kind check
 ;; above the eq? clause is what keeps a list away from it.
-(00001011
+(00001001
   kernel-portable-boolean?
   (00001000
     (value)
@@ -221,7 +224,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-fact-scan
   (00001000
     (scan key)
@@ -236,13 +239,13 @@
   )
 )
 
-(00001011 kernel-fact (00001000 (facts key) (kernel-fact-scan facts key)))
+(00001001 kernel-fact (00001000 (facts key) (kernel-fact-scan facts key)))
 
 ;; This file never uses a dotted parameter list: in this SENS a dotted tail
 ;; binds to the last argument rather than to the remaining ones, so
 ;; (first . rest) is not a usable variadic form. Everything below is
 ;; arity-explicit.
-(00001011
+(00001001
   kernel-join
   (00001000
     (left right)
@@ -259,7 +262,7 @@
 
 ;; A record becomes a group of one; () stays (), so a group never carries an
 ;; empty element that a reader would have to skip.
-(00001011
+(00001001
   kernel-one
   (00001000
     (result)
@@ -273,7 +276,7 @@
 ;; The first record in a group, or () when the group passed. The group here
 ;; comes from kernel-join, so every element is a record; the empty-list test
 ;; is on the group, not on the element.
-(00001011
+(00001001
   kernel-first-failure
   (00001000
     (checks)
@@ -297,7 +300,7 @@
 ;; and a three-element clause ((NAME 0 1)) all fail that shape and are
 ;; reported as an odd clause tail. A clause of the right shape whose value
 ;; is not 0 or 1 is a non-portable boolean, not a shape error.
-(00001011
+(00001001
   kernel-clause-record
   (00001000
     (clauses)
@@ -340,7 +343,7 @@
 
 ;; Every offending clause, not just the first: a contract that hides the
 ;; second bad clause behind the first is not a contract.
-(00001011
+(00001001
   kernel-clause-failures
   (00001000
     (clauses)
@@ -359,7 +362,7 @@
 ;; The contract's own boolean clauses, judged against the rule that will
 ;; judge the header's. A contract that cannot survive its own checker is
 ;; not a contract.
-(00001011
+(00001001
   kernel-static-clause-failures
   (00001000 () (kernel-clause-failures kernel-boolean-clauses))
 )
@@ -370,7 +373,7 @@
 ;;    declares, and a fact nobody supplied is a failure, never a pass.
 ;; ==================================================================
 
-(00001011
+(00001001
   kernel-code-value
   (00001000
     (key)
@@ -420,7 +423,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-abr-codes
   (00000001
     (abi-version
@@ -437,7 +440,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-check-one-code
   (00001000
     (facts key)
@@ -475,7 +478,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-code-failures
   (00001000
     (facts keys)
@@ -494,7 +497,7 @@
 ;; The four rows of the table. A row is compatible by construction; it is
 ;; compatible by evidence only once a real run has crossed the table. This
 ;; contract starts at 0 and stays there until a witness run says otherwise.
-(00001011
+(00001001
   kernel-unwitnessed-rows
   (00000001 ((common-lisp 0) (prolog 0) (clips 0) (datalog 0)))
 )
@@ -507,7 +510,7 @@
 ;; An absent slot count is absence, not a disagreement: the two are reported
 ;; separately, because a header that never spoke must not look like a header
 ;; that spoke wrongly.
-(00001011
+(00001001
   kernel-slot-count-failure
   (00001000
     (facts)
@@ -548,12 +551,12 @@
   )
 )
 
-(00001011
+(00001001
   kernel-slot-count-failures
   (00001000 (facts) (kernel-one (kernel-slot-count-failure facts)))
 )
 
-(00001011
+(00001001
   kernel-compatibility-detail
   (00001000
     (rows)
@@ -573,7 +576,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-fail-report
   (00001000
     (detail)
@@ -593,7 +596,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-pass-report
   (00001000
     (detail)
@@ -613,7 +616,7 @@
   )
 )
 
-(00001011
+(00001001
   kernel-neutral-abi-report
   (00001000
     (facts)
