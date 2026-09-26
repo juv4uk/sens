@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 41
-- top-level функцій: 875
+- top-level функцій: 889
 - top-level макросів: 34
-- усього визначень: 909
+- усього визначень: 923
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -148,6 +148,20 @@
 | `lib/core4.lisp` | function | `my-postcore-missing-peers` | unreviewed |
 | `lib/core4.lisp` | function | `my-postcore-build-definitions` | unreviewed |
 | `lib/core4.lisp` | macro | `my-postcore-materialize-stable-peers` | unreviewed |
+| `lib/core4.lisp` | function | `divmod` | unreviewed |
+| `lib/core4.lisp` | function | `null?` | unreviewed |
+| `lib/core4.lisp` | function | `subst` | unreviewed |
+| `lib/core4.lisp` | function | `sublis-pair` | unreviewed |
+| `lib/core4.lisp` | function | `sublis` | unreviewed |
+| `lib/core4.lisp` | function | `maplist` | unreviewed |
+| `lib/core4.lisp` | function | `apply-quote-args` | unreviewed |
+| `lib/core4.lisp` | function | `apply` | unreviewed |
+| `lib/core4.lisp` | function | `answer-not` | unreviewed |
+| `lib/core4.lisp` | function | `answer-and` | unreviewed |
+| `lib/core4.lisp` | function | `answer-or` | unreviewed |
+| `lib/core4.lisp` | function | `answer-weaken` | unreviewed |
+| `lib/core4.lisp` | function | `answer-atom` | unreviewed |
+| `lib/core4.lisp` | function | `answer-eq` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-observation` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-claim` | unreviewed |
 | `lib/epistemic.lisp` | function | `make-evidence` | unreviewed |

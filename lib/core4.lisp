@@ -1118,3 +1118,93 @@
 (00001001 apply
   (00001000 (f args)
     (eval (00000100 f (apply-quote-args args)))))
+
+; #1391: логіка відповідей Core4 — закон contracts/core4-predicate-answer-scale.lisp /3.
+; Відповідь — список двійкових бітів: (1)…(1 1 1 1 1 1 1) «так»,
+; (0)…(0 0 0 0 0 0 0) «ні», () «невідомо». Лінія істинності:
+;   0 < 00 < … < 0000000 < () < 1111111 < … < 11 < 1
+; Виконуваний свідок законів — experiments/core4-logic15-algebra.lisp.
+
+; NOT: інвертувати кожен біт, ширина та сама; () лишається ().
+(00001001 answer-not
+  (00001000 (a)
+    (00000111
+      ((00000010 a) (structural-kind empty-list) (00000001 ()))
+      ((00000010 a) (structural-kind pair)
+       (00000100
+         (00000111
+           ((00000011 (00000101 a) 0) (identity-relation same) 1)
+           ((00000011 (00000101 a) 0) (identity-relation distinct) 0))
+         (10110001 (00000110 a)))))))
+
+; AND: мінімум на лінії. «Ні» перемагає; з двох «ні» — коротше (сильніше);
+; з двох «так» — довше (слабше); () поглинає «так».
+; Для двох відповідей одного напряму крок іде по обох списках разом.
+(00001001 answer-and
+  (00001000 (a b)
+    (00000111
+      ((00000010 a) (structural-kind empty-list)
+       (00000111
+         ((00000010 b) (structural-kind empty-list) (00000001 ()))
+         ((00000010 b) (structural-kind pair)
+          (00000111
+            ((00000011 (00000101 b) 0) (identity-relation same) b)
+            ((00000011 (00000101 b) 0) (identity-relation distinct) (00000001 ()))))))
+      ((00000010 a) (structural-kind pair)
+       (00000111
+         ((00000010 b) (structural-kind empty-list)
+          (00000111
+            ((00000011 (00000101 a) 0) (identity-relation same) a)
+            ((00000011 (00000101 a) 0) (identity-relation distinct) (00000001 ()))))
+         ((00000010 b) (structural-kind pair)
+          (00000111
+            ((00000011 (00000101 a) (00000101 b)) (identity-relation distinct)
+             (00000111
+               ((00000011 (00000101 a) 0) (identity-relation same) a)
+               ((00000011 (00000101 a) 0) (identity-relation distinct) b)))
+            ((00000011 (00000101 a) (00000101 b)) (identity-relation same)
+             (00000111
+               ((00000010 (00000110 a)) (structural-kind empty-list)
+                (00000111
+                  ((00000011 (00000101 a) 0) (identity-relation same) a)
+                  ((00000011 (00000101 a) 0) (identity-relation distinct) b)))
+               ((00000010 (00000110 b)) (structural-kind empty-list)
+                (00000111
+                  ((00000011 (00000101 b) 0) (identity-relation same) b)
+                  ((00000011 (00000101 b) 0) (identity-relation distinct) a)))
+               ((00000010 (00000110 b)) (structural-kind pair)
+                (00000100 (00000101 a)
+                          (10110010 (00000110 a) (00000110 b)))))))))))))
+
+; OR: максимум на лінії = NOT(AND(NOT a, NOT b)).
+(00001001 answer-or
+  (00001000 (a b)
+    (10110001 (10110010 (10110001 a) (10110001 b)))))
+
+; Послаблення: дописати той самий біт; восьмий біт належить 256 функціям,
+; тож із семи бітів шкала сходиться в ().
+(00001001 answer-weaken
+  (00001000 (a)
+    (00000111
+      ((00000010 a) (structural-kind empty-list) (00000001 ()))
+      ((00000010 a) (structural-kind pair)
+       (00000111
+         ((00000011 (00101000 a) 7) (identity-relation same) (00000001 ()))
+         ((00000011 (00101000 a) 7) (identity-relation distinct)
+          (00000100 (00000101 a) a)))))))
+
+; atom? відповіддю шкали: атом (1), пара (0), () — невідомо, бо () стоїть
+; вище розрізнення атом/пара.
+(00001001 answer-atom
+  (00001000 (x)
+    (00000111
+      ((00000010 x) (structural-kind atom) (00000001 (1)))
+      ((00000010 x) (structural-kind pair) (00000001 (0)))
+      ((00000010 x) (structural-kind empty-list) (00000001 ())))))
+
+; eq? відповіддю шкали: same (1), distinct (0). Область та сама, що в eq?: атоми.
+(00001001 answer-eq
+  (00001000 (a b)
+    (00000111
+      ((00000011 a b) (identity-relation same) (00000001 (1)))
+      ((00000011 a b) (identity-relation distinct) (00000001 (0))))))

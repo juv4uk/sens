@@ -116,9 +116,17 @@
   ; Проєкції предикатів Core4 на шкалу. () стоїть вище розрізнення атом/пара,
   ; тому atom? на () відповідає () — «невідомо» (ajñāta).
   ((predicate-projection . core4)
-   (atom? . ((atom (1)) (pair (0)) (empty-list ())))
-   (eq? . ((same (1)) (distinct (0))))
-   (runtime-status . not-yet-installed)
+   (atom? . (((structural-kind atom) (1)) ((structural-kind pair) (0)) ((structural-kind empty-list) ())))
+   (eq? . (((identity-relation same) (1)) ((identity-relation distinct) (0))))
+   (runtime-status . answer-functions-installed)
+   (answer-functions .
+     ((10110001 answer-not)
+      (10110010 answer-and)
+      (10110011 answer-or)
+      (10110100 answer-weaken)
+      (10110101 answer-atom)
+      (10110110 answer-eq)))
+   (record-predicates . unchanged-callers-migrate-by-file)
    (core1-core3-answer-domain . grade-1-only)
    (core1 . historical-unchanged-overlay-only)
    (core2 . frozen-compatibility)))
