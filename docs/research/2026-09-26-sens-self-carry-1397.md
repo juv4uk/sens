@@ -1,96 +1,100 @@
-# SENS self-carry experiment #1397 — exact function across two stages
+# Експеримент self-carry СЕНС #1397 — exact-функція через дві стадії
 
-Date: 2026-09-26  
-Branch: `research/1397-exact-sens-self-carry`  
-Parent research: #1397 / #1383
+Дата: 2026-09-26  
+Гілка: `research/1397-exact-sens-self-carry`  
+Батьківське дослідження: #1397 / #1383
 
-## Question
+## Питання
 
-Can a SENS function cross one language stage and become the executable head of the
-next stage **without** a round trip through a human name, string, quoted symbol,
-decimal/hex representation, or backend semantic enum?
+Чи може функція СЕНС пройти через одну мовну стадію і стати виконуваною
+головою наступної **без** round-trip через людське ім'я, рядок, quoted-symbol,
+десяткове/шістнадцяткове представлення або backend semantic enum?
 
-The bounded experiment uses `00000101` because it already has an admitted callable
-mechanism in the root runtime. The carrier is an exact lambda written as
-`00001000`, not a named helper.
+У bounded-експерименті використано `00000101`, бо ця функція вже має admitted
+callable mechanism у root runtime. Переносник — exact `00001000`, а не
+іменований helper.
 
-## Executable path
+## Виконуваний шлях
 
 ```text
 00000101
    ↓
-((00001000 (f) f) 00000101)        stage A
+((00001000 (f) f) 00000101)        стадія A
    ↓
 exact runtime value 00000101
    ↓
 (((00001000 (f) f) 00000101)
-  (00000001 (alpha beta)))          stage B
+  (00000001 (alpha beta)))          стадія B
    ↓
 alpha
 ```
 
-The Rust witness inspects stage A as the current runtime representation
-`Value::Sid(Sens8)` and requires its payload to equal `sens!(00000101)`.
-That Rust variant name is implementation vocabulary only; the experiment does not
-introduce a second language identity above the eight bits.
+Rust-witness спостерігає стадію A через чинне runtime-представлення
+`Value::Sid(Sens8)` і вимагає, щоб payload дорівнював `sens!(00000101)`.
+Назва цього Rust-variant є лише vocabulary реалізації; експеримент не вводить
+другої мовної identity поверх восьми бітів.
 
-No Core loader is called. The session stays at
-`selected_core_profile() == None` before and after the two-stage execution.
+Жоден Core loader не викликається. До і після двостадійного виконання
+`selected_core_profile() == None`.
 
-## Fail-closed control
+## Fail-closed контроль
 
-The same carrier transports `11111111` unchanged:
+Той самий carrier переносить `11111111` без зміни:
 
 ```text
-11111111 → stage A → exact 11111111 → stage B call
+11111111 → стадія A → exact 11111111 → виклик стадії B
 ```
 
-Stage B fails with the existing named error:
+Стадія B завершується вже наявною іменованою помилкою:
 
 ```text
 SENS function has no admitted callable mechanism: 11111111
 ```
 
-So failure occurs because the exact function has no admitted callable mechanism,
-not because its identity was lost or reconstructed incorrectly.
+Отже, помилка виникає тому, що exact-функція не має admitted callable
+mechanism, а не тому, що її identity загубилась або була неправильно
+реконструйована.
 
-A seven-bit lookalike `1111111` is the negative control. The canonical parser
-reads it as the exact decimal number `1111111`, the identical carrier closure
-returns that number, and stage B fails with `expression is not callable`.
-It never reaches SENS mechanism admission. This separates function-space membership
-from transport success.
+Негативний контроль — семибітний lookalike `1111111`. Канонічний parser
+читає його як exact-десяткове число `1111111`; те саме замикання переносить
+це число, а стадія B завершується `expression is not callable`. У SENS
+mechanism admission це значення не потрапляє. Так ми відділяємо належність
+до восьмибітного простору функцій від самого факту успішного перенесення.
 
-## What this proves
+## Що саме доведено
 
-- an exact SENS function can be a first-class value;
-- stage A returns the same exact function representation it received;
-- stage B can directly use that returned value as an executable head;
-- the witness source performs no function-name → SENS conversion;
-- no string, quoted-symbol, decimal, hexadecimal, or semantic-enum identity carrier is used;
-- an unsupported exact function stays exact and fails closed at mechanism admission;
-- an exact-looking token outside the eight-bit function space follows a different,
+- exact-функція СЕНС може бути first-class value;
+- стадія A повертає те саме exact-представлення функції, яке отримала;
+- стадія B безпосередньо використовує повернуте значення як виконувану голову;
+- source witness не виконує перетворення function-name → SENS;
+- для identity не використовується string, quoted-symbol, decimal, hex або
+  semantic enum;
+- unsupported exact-функція лишається exact і fail-closed на admission
+  механізму;
+- схожий токен поза восьмибітним function space проходить інший,
   ordinary-value failure path;
-- the experiment needs no Core profile selection and changes no production semantics.
+- експеримент не потребує вибору Core profile і не змінює production semantics.
 
-## Explicit limit
+## Чесна межа доказу
 
-`Session::default()` installs the normal root builtin environment, whose implementation
-is compiled together with the generated registry projection. The current public test API
-does not expose a production-neutral way to physically remove every root surface binding
-or compiled registry table.
+`Session::default()` встановлює звичайне root builtin environment, реалізація
+якого скомпільована разом із generated registry projection. Поточний public
+test API не дає production-neutral способу фізично прибрати всі root surface
+bindings або compiled registry table.
 
-Therefore this first slice proves **no surface source/library lookup is required by the
-two-stage exact path**; it does not claim that the compiled runtime projection was
-physically absent from the process. A stronger “surface tables physically removed”
-fixture would require a separate bounded test hook or substrate witness and must not be
-smuggled into this research PR as a production runtime change.
+Тому цей перший slice доводить, що двостадійний exact-path **не потребує
+завантаження surface source/library і не робить function-name round-trip**.
+Він не стверджує, що compiled projection фізично був відсутній у процесі.
+Сильніший witness із фізично вилученими surface tables потребував би окремого
+bounded test hook або substrate witness; такий hook не можна непомітно
+протягувати в цей research PR як production runtime change.
 
-## Non-goals
+## Не є метою
 
-- no resurrection of deprecated `Sid8` as language ontology;
-- no named primitive table;
-- no `CanonicalIdentity` / `NecessaryFormIdentity`;
-- no historical Core1 semantics rewrite;
-- no automatic production migration from this result.
+- повертати deprecated `Sid8` як мовну онтологію;
+- створювати named primitive table;
+- повертати `CanonicalIdentity` / `NecessaryFormIdentity`;
+- переписувати історичну семантику Core1;
+- автоматично переносити результат цього research у production.
 
-This is evidence for #1383 only.
+Це лише evidence для #1383.
