@@ -11,16 +11,16 @@
   (lambda (name rows)
     (cond
       ((atom? rows)
-       (structural-kind empty-list)
+       ()
        (quote ()))
       ((atom? rows)
-       (structural-kind pair)
+       (0)
        (cond
          ((eq? (car (car rows)) name)
-          (identity-relation same)
+          (1)
           (car rows))
          ((eq? (car (car rows)) name)
-          (identity-relation distinct)
+          (0)
           (csp-find name (cdr rows))))))))
 
 (def csp-row-check
@@ -28,26 +28,26 @@
     (let ((actual (csp-find name csp-rows)))
       (cond
         ((equal? actual expected)
-         (structural-relation same)
+         (1)
          (quote ()))
         ((equal? actual expected)
-         (structural-relation distinct)
+         (0)
          (list (quote mismatch) name expected actual))))))
 
 (def csp-first-failure
   (lambda (checks)
     (cond
       ((atom? checks)
-       (structural-kind empty-list)
+       ()
        (quote ()))
       ((atom? (car checks))
-       (structural-kind empty-list)
+       ()
        (csp-first-failure (cdr checks)))
       ((atom? (car checks))
-       (structural-kind pair)
+       (0)
        (car checks))
       ((atom? (car checks))
-       (structural-kind atom)
+       (1)
        (car checks)))))
 
 (def csp-verdict
@@ -111,15 +111,15 @@
                       state active-mechanical-hook)))))))
       (cond
         ((atom? failure)
-         (structural-kind empty-list)
+         ()
          (quote (core-special-form-profile-policy-ok)))
         ((atom? failure)
-         (structural-kind pair)
+         (0)
          (list
            (quote core-special-form-profile-policy-violation)
            failure))
         ((atom? failure)
-         (structural-kind atom)
+         (1)
          (list
            (quote core-special-form-profile-policy-violation)
            failure))))))

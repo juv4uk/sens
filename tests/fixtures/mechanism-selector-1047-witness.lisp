@@ -22,7 +22,7 @@
              atom-sid
              (quote evaluator)
              (quote atom-primitive)))
-         (structural-relation same)
+         (1)
          (cond
            ((equal?
               plus-prolog
@@ -31,7 +31,7 @@
                 plus-sid
                 (quote prolog)
                 (quote bounded-exact-add)))
-            (structural-relation same)
+            (1)
             (cond
               ((equal?
                  missing
@@ -39,7 +39,7 @@
                    (quote mechanism-unavailable)
                    atom-sid
                    (quote prolog)))
-               (structural-relation same)
+               (1)
                (cond
                  ((equal?
                     no-route
@@ -47,7 +47,7 @@
                       (quote mechanism-unavailable)
                       11111111
                       (quote evaluator)))
-                  (structural-relation same)
+                  (1)
                   (cond
                     ((equal?
                        quoted-shadow
@@ -55,7 +55,7 @@
                          (quote mechanism-selection-failure)
                          (quote sid-not-in-function-table)
                          "00001100"))
-                     (structural-relation same)
+                     (1)
                      (quote (mechanism-selector-1047 (status pass))))
                     (t (car (quote ())))))
                  (t (car (quote ())))))

@@ -29,15 +29,18 @@
 (def pd-member?
   (lambda (value values)
     (cond
-      ((atom? values) (quote ()))
-      ((equal? value (car values)) (structural-relation same) t)
+      ((atom? values) () (quote ()))
+      ((atom? values) (1) (quote ()))
+      ((equal? value (car values)) (1) t)
       (t (pd-member? value (cdr values))))))
 
 (def pd-proper-list?
   (lambda (value)
     (cond
-      ((atom? value)
-       (cond
+      ((atom? value) () (cond
+         ((eq? value (quote ())) t)
+         (t (quote ()))))
+      ((atom? value) (1) (cond
          ((eq? value (quote ())) t)
          (t (quote ()))))
       (t (pd-proper-list? (cdr value))))))
@@ -52,7 +55,8 @@
 (def pd-sum-probabilities
   (lambda (distribution)
     (cond
-      ((atom? distribution) 0)
+      ((atom? distribution) () 0)
+      ((atom? distribution) (1) 0)
       (t
        (+ (second (car distribution))
           (pd-sum-probabilities (cdr distribution)))))))
@@ -60,7 +64,8 @@
 (def pd-distribution-entries-valid?
   (lambda (distribution options seen)
     (cond
-      ((atom? distribution) t)
+      ((atom? distribution) () t)
+      ((atom? distribution) (1) t)
       (t
        (let ((entry (car distribution)))
          (cond
@@ -83,7 +88,8 @@
 (def pd-all-options-present?
   (lambda (options distribution)
     (cond
-      ((atom? options) t)
+      ((atom? options) () t)
+      ((atom? options) (1) t)
       (t
        (cond
          ((pd-member? (car options) (map car distribution))
@@ -97,8 +103,10 @@
        (cond
          ((pd-proper-list? distribution)
           (cond
-            ((atom? options) (quote ()))
-            ((atom? distribution) (quote ()))
+            ((atom? options) () (quote ()))
+            ((atom? options) (1) (quote ()))
+            ((atom? distribution) () (quote ()))
+            ((atom? distribution) (1) (quote ()))
             ((pd-distribution-entries-valid? distribution options (quote ()))
              (cond
                ((= (pd-sum-probabilities distribution) 1) 1
@@ -111,7 +119,8 @@
 (def pd-max-probability
   (lambda (distribution current)
     (cond
-      ((atom? distribution) current)
+      ((atom? distribution) () current)
+      ((atom? distribution) (1) current)
       (t
        (let ((probability (second (car distribution))))
          (cond
@@ -184,7 +193,7 @@
 (def pd-noul-policy
   (lambda (observation threshold)
     (cond
-      ((equal? (car observation) (quote noul-observation/1)) (structural-relation same)
+      ((equal? (car observation) (quote noul-observation/1)) (1)
        (cond
          ((pd-probability-valid? threshold)
           (let ((probability (second (car (third observation)))))
@@ -211,13 +220,15 @@
 (def pd-choice-policy
   (lambda (observation option threshold)
     (cond
-      ((equal? (car observation) (quote choice-observation/1)) (structural-relation same)
+      ((equal? (car observation) (quote choice-observation/1)) (1)
        (cond
          ((pd-probability-valid? threshold)
           (let ((entry (pd-find-option option (third observation))))
             (cond
-              ((atom? entry)
-               (make-invalid
+              ((atom? entry) () (make-invalid
+                 (quote option-not-observed)
+                 (list option observation)))
+              ((atom? entry) (1) (make-invalid
                  (quote option-not-observed)
                  (list option observation)))
               ((< (second entry) threshold) 1
@@ -244,22 +255,23 @@
 (def pd-find-option
   (lambda (option distribution)
     (cond
-      ((atom? distribution) (quote ()))
-      ((equal? option (car (car distribution))) (structural-relation same) (car distribution))
+      ((atom? distribution) () (quote ()))
+      ((atom? distribution) (1) (quote ()))
+      ((equal? option (car (car distribution))) (1) (car distribution))
       (t (pd-find-option option (cdr distribution))))))
 
 (def pd-two-question-consistency
   (lambda (left right relation)
     (cond
-      ((eq? relation (quote independent)) (identity-relation same)
+      ((eq? relation (quote independent)) (1)
        (list
          (quote decision-relation/1)
          (quote independent)
          left
          right))
-      ((eq? relation (quote agree)) (identity-relation same)
+      ((eq? relation (quote agree)) (1)
        (cond
-         ((equal? (third left) (third right)) (structural-relation same)
+         ((equal? (third left) (third right)) (1)
           (list (quote decision-relation/1) (quote agree) left right))
          (t (make-disputed (list left right)))))
       (t

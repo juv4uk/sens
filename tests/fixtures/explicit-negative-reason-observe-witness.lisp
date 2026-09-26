@@ -17,9 +17,9 @@
            (actual (reason-observe goal (quote ())))
            (expected (quote ())))
       (cond
-        ((equal? actual expected) (structural-relation same)
+        ((equal? actual expected) (1)
          (quote (explicit-negative-reason-observe-witness (status pass))))
-        ((equal? actual expected) (structural-relation distinct)
+        ((equal? actual expected) (0)
          (list
            (quote explicit-negative-reason-observe-witness)
            (quote (status fail))

@@ -9,26 +9,26 @@
   (lambda (request)
     (cond
       ((atom? request)
-       (structural-kind empty-list)
+       ()
        (quote no))
       ((atom? request)
-       (structural-kind pair)
+       (0)
        (let ((first-field (car request)))
          (cond
            ((atom? first-field)
-            (structural-kind pair)
+            (0)
             (cond
               ((equal? (car first-field) (quote sid))
-               (structural-relation same)
+               (1)
                (quote yes))
               ((equal? (car first-field) (quote sid))
-               (structural-relation distinct)
+               (0)
                (quote no))))
            ((atom? first-field)
-            (structural-kind atom)
+            (1)
             (quote no))
            ((atom? first-field)
-            (structural-kind empty-list)
+            ()
             (quote no))))))))
 
 (def early-sid-lower
@@ -36,10 +36,10 @@
     (let ((sid (semantic-registry-id-in registry surface)))
       (cond
         ((atom? sid)
-         (structural-kind empty-list)
+         ()
          (quote rejected))
         ((atom? sid)
-         (structural-kind atom)
+         (1)
          (list
            (cons (quote sid) sid)
            (cons (quote arguments) arguments)
@@ -53,22 +53,22 @@
           (d (semantic-registry-id-in registry surface-d)))
       (cond
         ((equal? a b)
-         (structural-relation same)
+         (1)
          (cond
            ((equal? b c)
-            (structural-relation same)
+            (1)
             (cond
               ((equal? c d)
-               (structural-relation same)
+               (1)
                (list (quote same) a))
               ((equal? c d)
-               (structural-relation distinct)
+               (0)
                (quote distinct))))
            ((equal? b c)
-            (structural-relation distinct)
+            (0)
             (quote distinct))))
         ((equal? a b)
-         (structural-relation distinct)
+         (0)
          (quote distinct))))))
 
 (def early-sid-lowering-witness

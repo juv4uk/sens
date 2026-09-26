@@ -21,13 +21,13 @@
     (let ((l (write-to-string left))
           (r (write-to-string right)))
       (cond
-        ((eq? executor (quote common-lisp)) (identity-relation same)
+        ((eq? executor (quote common-lisp)) (1)
          (island-lowering-append4 "" l " " r))
-        ((eq? executor (quote prolog)) (identity-relation same)
+        ((eq? executor (quote prolog)) (1)
          (island-lowering-append4 "" l " " r))
-        ((eq? executor (quote datalog)) (identity-relation same)
+        ((eq? executor (quote datalog)) (1)
          (island-lowering-append4 "" l " " r))
-        ((eq? executor (quote clips)) (identity-relation same)
+        ((eq? executor (quote clips)) (1)
          (island-lowering-append4 "" l " " r))
         ((quote island-lowering-fallback) island-lowering-fallback
          (quote ()))))))
@@ -36,23 +36,23 @@
   (lambda (sid executor left right)
     (let ((selection (mechanism-select sid executor)))
       (cond
-        ((atom? selection) (structural-kind pair)
+        ((atom? selection) (0)
          (cond
            ((eq? (car selection) (quote mechanism-selected))
-            (identity-relation same)
+            (1)
             (let ((mechanism (fourth selection)))
               (cond
                 ((eq? mechanism (quote bounded-exact-add))
-                 (identity-relation same)
+                 (1)
                  (let ((payload
                          (island-lowering-add-payload executor left right)))
                    (cond
-                     ((atom? payload) (structural-kind empty-list)
+                     ((atom? payload) ()
                       (list
                         (quote island-lowering-failure)
                         (quote unsupported-executor)
                         sid executor mechanism))
-                     ((atom? payload) (structural-kind atom)
+                     ((atom? payload) (1)
                       (list
                         (quote island-lowering-result)
                         sid executor mechanism payload)))))

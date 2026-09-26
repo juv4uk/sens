@@ -711,7 +711,7 @@
           (expected (third row)))
       (let ((actual (eval expr)))
         (cond
-          ((equal? actual expected) (structural-relation same)
+          ((equal? actual expected) (1)
            (quote pass))
           (t
            (list (quote fail) name expected actual)))))))
@@ -719,7 +719,8 @@
 (def x86-instruction-run-all
   (lambda (rows)
     (cond
-      ((atom? rows) (quote (x86-64-instruction-set-witness (status pass))))
+      ((atom? rows) () (quote (x86-64-instruction-set-witness (status pass))))
+      ((atom? rows) (1) (quote (x86-64-instruction-set-witness (status pass))))
       (t
        (let ((result (x86-instruction-eval-row (car rows))))
          (cond

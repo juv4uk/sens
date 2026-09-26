@@ -46,22 +46,22 @@
 (def machine-register-width-check
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list)
+      ((atom? rows) ()
        (quote (machine-register-width-witness (status pass))))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) (1)
        (list
          (quote machine-register-width-witness)
          (quote (status fail))
          (list (quote malformed-tail) rows)))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let* ((row (car rows))
               (name (car row))
               (actual (second row))
               (expected (third row)))
          (cond
-           ((equal? actual expected) (structural-relation same)
+           ((equal? actual expected) (1)
             (machine-register-width-check (cdr rows)))
-           ((equal? actual expected) (structural-relation distinct)
+           ((equal? actual expected) (0)
             (list
               (quote machine-register-width-witness)
               (quote (status fail))

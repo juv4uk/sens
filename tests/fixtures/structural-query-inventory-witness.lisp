@@ -12,14 +12,16 @@
   (lambda (key row)
     (let ((entry (assoc key row)))
       (cond
-        ((atom? entry) (quote ()))
+        ((atom? entry) () (quote ()))
+        ((atom? entry) (1) (quote ()))
         (t (cdr entry))))))
 
 (def sqi-find-tag
   (lambda (tag entries)
     (cond
-      ((atom? entries) (quote ()))
-      ((and (not? (atom? (car entries)))
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
+      ((and (10110001 (00000010 (car entries)))
             (eq? (car (car entries)) tag))
        (car entries))
       (t (sqi-find-tag tag (cdr entries))))))
@@ -29,7 +31,8 @@
     (let ((entry (sqi-find-tag (quote public-predicates)
                                (cdr public-surface-inventory-document))))
       (cond
-        ((atom? entry) (quote ()))
+        ((atom? entry) () (quote ()))
+        ((atom? entry) (1) (quote ()))
         (t (car (cdr entry)))))))
 
 (def sqi-rows
@@ -39,7 +42,8 @@
 (def sqi-count-surface
   (lambda (surface rows)
     (cond
-      ((atom? rows) 0)
+      ((atom? rows) () 0)
+      ((atom? rows) (1) 0)
       ((eq? (sqi-field (quote surface) (car rows)) surface)
        (+ 1 (sqi-count-surface surface (cdr rows))))
       (t
@@ -48,21 +52,22 @@
 (def sqi-required-row?
   (lambda (row)
     (and
-      (not? (atom? (assoc (quote identity) row)))
-      (not? (atom? (assoc (quote surface) row)))
-      (not? (atom? (assoc (quote producer) row)))
-      (not? (atom? (assoc (quote current-result) row)))
-      (not? (atom? (assoc (quote question-domain) row)))
-      (not? (atom? (assoc (quote mathematical-binary?) row)))
-      (not? (atom? (assoc (quote owner) row)))
-      (not? (atom? (assoc (quote consumer-class) row)))
-      (not? (atom? (assoc (quote compatibility-impact) row)))
-      (not? (atom? (assoc (quote migration) row))))))
+      (10110001 (00000010 (assoc (quote identity) row)))
+      (10110001 (00000010 (assoc (quote surface) row)))
+      (10110001 (00000010 (assoc (quote producer) row)))
+      (10110001 (00000010 (assoc (quote current-result) row)))
+      (10110001 (00000010 (assoc (quote question-domain) row)))
+      (10110001 (00000010 (assoc (quote mathematical-binary?) row)))
+      (10110001 (00000010 (assoc (quote owner) row)))
+      (10110001 (00000010 (assoc (quote consumer-class) row)))
+      (10110001 (00000010 (assoc (quote compatibility-impact) row)))
+      (10110001 (00000010 (assoc (quote migration) row))))))
 
 (def sqi-all-public-covered-once?
   (lambda (predicates rows)
     (cond
-      ((atom? predicates) t)
+      ((atom? predicates) () t)
+      ((atom? predicates) (1) t)
       ((eq? (sqi-count-surface (car predicates) rows) 1)
        (sqi-all-public-covered-once? (cdr predicates) rows))
       (t (quote ())))))
@@ -70,7 +75,8 @@
 (def sqi-no-extra-surfaces?
   (lambda (rows predicates)
     (cond
-      ((atom? rows) t)
+      ((atom? rows) () t)
+      ((atom? rows) (1) t)
       ((and (sqi-required-row? (car rows))
             (member? (sqi-field (quote surface) (car rows)) predicates))
        (sqi-no-extra-surfaces? (cdr rows) predicates))
@@ -79,7 +85,8 @@
 (def sqi-math-delegation-valid?
   (lambda (rows)
     (cond
-      ((atom? rows) t)
+      ((atom? rows) () t)
+      ((atom? rows) (1) t)
       (t
        (let ((row (car rows)))
          (cond

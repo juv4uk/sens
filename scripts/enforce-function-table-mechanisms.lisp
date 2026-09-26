@@ -7,7 +7,7 @@
 
 (cond
   ((equal? verdict (quote (function-table-mechanisms-ok)))
-   (structural-relation same)
+   (1)
    (quote function-table-mechanisms-ok))
   (t
    (car (quote ()))))

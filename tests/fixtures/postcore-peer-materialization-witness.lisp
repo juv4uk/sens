@@ -27,21 +27,21 @@
 (def postcore-member-status
   (lambda (needle items)
     (cond
-      ((atom? items) (structural-kind empty-list)
+      ((atom? items) ()
        (quote absent))
-      ((atom? items) (structural-kind pair)
+      ((atom? items) (0)
        (cond
-         ((eq? needle (car items)) (identity-relation same)
+         ((eq? needle (car items)) (1)
           (quote present))
-         ((eq? needle (car items)) (identity-relation distinct)
+         ((eq? needle (car items)) (0)
           (postcore-member-status needle (cdr items))))))))
 
 (def postcore-find-authority-row
   (lambda (semantic-id rows)
     (cond
-      ((atom? rows) (structural-kind empty-list)
+      ((atom? rows) ()
        (quote ()))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let ((row (car rows)))
          (cond
            ((= semantic-id (car row)) 1
@@ -52,68 +52,68 @@
 (def postcore-surfaces-with-status-onto
   (lambda (status surfaces acc)
     (cond
-      ((atom? surfaces) (structural-kind empty-list)
+      ((atom? surfaces) ()
        (reverse acc))
-      ((atom? surfaces) (structural-kind pair)
+      ((atom? surfaces) (0)
        (let* ((surface (car surfaces))
               (word (second surface))
               (surface-status (third surface)))
          (cond
-           ((eq? surface-status status) (identity-relation same)
+           ((eq? surface-status status) (1)
             (cond
-              ((eq? word (quote —)) (identity-relation same)
+              ((eq? word (quote —)) (1)
                (postcore-surfaces-with-status-onto
                  status
                  (cdr surfaces)
                  acc))
-              ((eq? word (quote —)) (identity-relation distinct)
+              ((eq? word (quote —)) (0)
                (cond
                  ((eq? (postcore-member-status word acc) (quote present))
-                  (identity-relation same)
+                  (1)
                   (postcore-surfaces-with-status-onto
                     status
                     (cdr surfaces)
                     acc))
                  ((eq? (postcore-member-status word acc) (quote absent))
-                  (identity-relation same)
+                  (1)
                   (postcore-surfaces-with-status-onto
                     status
                     (cdr surfaces)
                     (cons word acc)))))))
-           ((eq? surface-status status) (identity-relation distinct)
+           ((eq? surface-status status) (0)
             (postcore-surfaces-with-status-onto status (cdr surfaces) acc))))))))
 
 (def postcore-surfaces-with-status
   (lambda (status registry-row)
     (cond
-      ((atom? registry-row) (structural-kind empty-list)
+      ((atom? registry-row) ()
        (quote ()))
-      ((atom? registry-row) (structural-kind pair)
+      ((atom? registry-row) (0)
        (postcore-surfaces-with-status-onto status (cdr registry-row) (quote ()))))))
 
 (def postcore-materialization-declarations-onto
   (lambda (forms acc)
     (cond
-      ((atom? forms) (structural-kind empty-list)
+      ((atom? forms) ()
        (reverse acc))
-      ((atom? forms) (structural-kind pair)
+      ((atom? forms) (0)
        (let ((form (car forms)))
          (cond
-           ((atom? form) (structural-kind pair)
+           ((atom? form) (0)
             (cond
               ((eq? (car form) (quote my-postcore-materialize-stable-peers))
-               (identity-relation same)
+               (1)
                (postcore-materialization-declarations-onto
                  (cdr forms)
                  (cons (list (second form) (third form)) acc)))
               ((eq? (car form) (quote my-postcore-materialize-stable-peers))
-               (identity-relation distinct)
+               (0)
                (postcore-materialization-declarations-onto
                  (cdr forms)
                  acc))))
-           ((atom? form) (structural-kind atom)
+           ((atom? form) (1)
             (postcore-materialization-declarations-onto (cdr forms) acc))
-           ((atom? form) (structural-kind empty-list)
+           ((atom? form) ()
             (postcore-materialization-declarations-onto (cdr forms) acc))))))))
 
 (def postcore-materialization-declarations
@@ -134,9 +134,9 @@
 (def postcore-declarations-match-authority
   (lambda (declarations)
     (cond
-      ((atom? declarations) (structural-kind empty-list)
+      ((atom? declarations) ()
        (quote registry-consistent))
-      ((atom? declarations) (structural-kind pair)
+      ((atom? declarations) (0)
        (let* ((declaration (car declarations))
               (semantic-id (car declaration))
               (source (second declaration))
@@ -147,23 +147,23 @@
               (stable-peers
                 (postcore-surfaces-with-status (quote stable) row)))
          (cond
-           ((atom? row) (structural-kind empty-list)
+           ((atom? row) ()
             (quote registry-drift))
-           ((atom? row) (structural-kind pair)
+           ((atom? row) (0)
             (cond
               ((eq? (postcore-member-status source stable-peers) (quote present))
-               (identity-relation same)
+               (1)
                (postcore-declarations-match-authority (cdr declarations)))
               ((eq? (postcore-member-status source stable-peers) (quote absent))
-               (identity-relation same)
+               (1)
                (quote registry-drift))))))))))
 
 (def postcore-expected-peer-groups-onto
   (lambda (declarations acc)
     (cond
-      ((atom? declarations) (structural-kind empty-list)
+      ((atom? declarations) ()
        (reverse acc))
-      ((atom? declarations) (structural-kind pair)
+      ((atom? declarations) (0)
        (let* ((declaration (car declarations))
               (semantic-id (car declaration))
               (row
@@ -188,9 +188,9 @@
 (def postcore-find-group
   (lambda (semantic-id groups)
     (cond
-      ((atom? groups) (structural-kind empty-list)
+      ((atom? groups) ()
        (quote ()))
-      ((atom? groups) (structural-kind pair)
+      ((atom? groups) (0)
        (let ((group (car groups)))
          (cond
            ((= semantic-id (car group)) 1
@@ -201,15 +201,15 @@
 (def postcore-peer-members-match
   (lambda (expected actual)
     (cond
-      ((atom? expected) (structural-kind empty-list)
+      ((atom? expected) ()
        (quote registry-consistent))
-      ((atom? expected) (structural-kind pair)
+      ((atom? expected) (0)
        (cond
          ((eq? (postcore-member-status (car expected) actual) (quote present))
-          (identity-relation same)
+          (1)
           (postcore-peer-members-match (cdr expected) actual))
          ((eq? (postcore-member-status (car expected) actual) (quote absent))
-          (identity-relation same)
+          (1)
           (quote registry-drift)))))))
 
 (def postcore-peer-sets-match
@@ -223,30 +223,30 @@
 (def postcore-projection-groups-match
   (lambda (expected actual)
     (cond
-      ((atom? expected) (structural-kind empty-list)
+      ((atom? expected) ()
        (quote registry-consistent))
-      ((atom? expected) (structural-kind pair)
+      ((atom? expected) (0)
        (let* ((expected-group (car expected))
               (semantic-id (car expected-group))
               (actual-group (postcore-find-group semantic-id actual)))
          (cond
-           ((atom? actual-group) (structural-kind empty-list)
+           ((atom? actual-group) ()
             (quote registry-drift))
-           ((atom? actual-group) (structural-kind pair)
+           ((atom? actual-group) (0)
             (cond
               ((eq?
                  (postcore-peer-sets-match
                    (cdr expected-group)
                    (cdr actual-group))
                  (quote registry-consistent))
-               (identity-relation same)
+               (1)
                (postcore-projection-groups-match (cdr expected) actual))
               ((eq?
                  (postcore-peer-sets-match
                    (cdr expected-group)
                    (cdr actual-group))
                  (quote registry-drift))
-               (identity-relation same)
+               (1)
                (quote registry-drift))))))))))
 
 (def postcore-projection-matches-authority
@@ -260,27 +260,27 @@
 (def postcore-surfaces-unbound
   (lambda (surfaces)
     (cond
-      ((atom? surfaces) (structural-kind empty-list)
+      ((atom? surfaces) ()
        (quote surfaces-unbound))
-      ((atom? surfaces) (structural-kind pair)
+      ((atom? surfaces) (0)
        (cond
          ((eq?
             (my-postcore-binding-status (car surfaces) (env))
             (quote absent))
-          (identity-relation same)
+          (1)
           (postcore-surfaces-unbound (cdr surfaces)))
          ((eq?
             (my-postcore-binding-status (car surfaces) (env))
             (quote present))
-          (identity-relation same)
+          (1)
           (quote surfaces-bound)))))))
 
 (def postcore-candidate-surfaces-unbound
   (lambda (declarations)
     (cond
-      ((atom? declarations) (structural-kind empty-list)
+      ((atom? declarations) ()
        (quote candidates-unbound))
-      ((atom? declarations) (structural-kind pair)
+      ((atom? declarations) (0)
        (let* ((semantic-id (car (car declarations)))
               (row
                 (postcore-find-authority-row
@@ -292,28 +292,28 @@
            ((eq?
               (postcore-surfaces-unbound candidates)
               (quote surfaces-unbound))
-            (identity-relation same)
+            (1)
             (postcore-candidate-surfaces-unbound (cdr declarations)))
            ((eq?
               (postcore-surfaces-unbound candidates)
               (quote surfaces-bound))
-            (identity-relation same)
+            (1)
             (quote candidates-bound))))))))
 
 (def postcore-registry-surface-count
   (lambda (semantic-id-text entries)
     (cond
-      ((atom? entries) (structural-kind empty-list)
+      ((atom? entries) ()
        0)
-      ((atom? entries) (structural-kind pair)
+      ((atom? entries) (0)
        (let ((entry (car entries)))
          (cond
-           ((eq? (second entry) semantic-id-text) (identity-relation same)
+           ((eq? (second entry) semantic-id-text) (1)
             (+ 1
                (postcore-registry-surface-count
                  semantic-id-text
                  (cdr entries))))
-           ((eq? (second entry) semantic-id-text) (identity-relation distinct)
+           ((eq? (second entry) semantic-id-text) (0)
             (postcore-registry-surface-count
               semantic-id-text
               (cdr entries)))))))))
@@ -321,23 +321,23 @@
 (def postcore-peers-match-id
   (lambda (peers semantic-id-text)
     (cond
-      ((atom? peers) (structural-kind empty-list)
+      ((atom? peers) ()
        (quote registry-consistent))
-      ((atom? peers) (structural-kind pair)
+      ((atom? peers) (0)
        (cond
          ((eq? (my-semantic-id-for-surface (car peers)) semantic-id-text)
-          (identity-relation same)
+          (1)
           (postcore-peers-match-id (cdr peers) semantic-id-text))
          ((eq? (my-semantic-id-for-surface (car peers)) semantic-id-text)
-          (identity-relation distinct)
+          (0)
           (quote registry-drift)))))))
 
 (def postcore-groups-match-generated-registry
   (lambda (groups)
     (cond
-      ((atom? groups) (structural-kind empty-list)
+      ((atom? groups) ()
        (quote registry-consistent))
-      ((atom? groups) (structural-kind pair)
+      ((atom? groups) (0)
        (let* ((group (car groups))
               (semantic-id (car group))
               (peers (cdr group))
@@ -351,11 +351,11 @@
             (cond
               ((eq? (postcore-peers-match-id peers semantic-id-text)
                    (quote registry-consistent))
-               (identity-relation same)
+               (1)
                (postcore-groups-match-generated-registry (cdr groups)))
               ((eq? (postcore-peers-match-id peers semantic-id-text)
                    (quote registry-drift))
-               (identity-relation same)
+               (1)
                (quote registry-drift))))
            ((= projected-count (length peers)) 0
             (quote registry-drift))))))))
@@ -372,19 +372,19 @@
 (def postcore-check-rows
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list)
+      ((atom? rows) ()
        (quote (postcore-peer-materialization-witness (status pass))))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) (1)
        (postcore-witness-failure
          (quote malformed-row-tail)
          rows
          (quote ())))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let ((row (car rows)))
          (cond
-           ((equal? (second row) (third row)) (structural-relation same)
+           ((equal? (second row) (third row)) (1)
             (postcore-check-rows (cdr rows)))
-           ((equal? (second row) (third row)) (structural-relation distinct)
+           ((equal? (second row) (third row)) (0)
             (postcore-witness-failure
               (car row)
               (second row)
@@ -442,7 +442,7 @@
         (atom?
           (my-semantic-id-for-surface
             (quote всесвітній-координований-час-із-часу-юнікс)))
-        (quote (structural-kind empty-list)))
+        (quote ()))
       (list
         (quote candidate-not-bound)
         (my-postcore-binding-status
@@ -455,11 +455,11 @@
       (list
         (quote initial-peer-identity)
         (eq? utc-from-unix всч-із-юнікс)
-        (quote (identity-relation same)))
+        (quote (1)))
       (list
         (quote invocation-parity)
         (equal? (utc-from-unix 0 0) (всч-із-юнікс 0 0))
-        (quote (structural-relation same)))
+        (quote (1)))
 
       ; Ordinary lexical shadowing is independent: rebinding one spelling does
       ; not mutate or retarget the other spelling.
@@ -468,7 +468,7 @@
         (let ((всч-із-юнікс
                 (lambda (seconds nanosecond) (quote shadowed))))
           (eq? utc-from-unix всч-із-юнікс))
-        (quote (identity-relation distinct))))))
+        (quote (0))))))
 
 ; Stronger idempotence law: install an explicit existing peer binding, invoke
 ; materialization again at top level, and prove the macro does NOT overwrite it.
@@ -489,11 +489,11 @@
       (list
         (quote rematerialization-preserves-existing-binding)
         (eq? всч-із-юнікс postcore-existing-peer)
-        (quote (identity-relation same)))
+        (quote (1)))
       (list
         (quote rematerialization-does-not-retarget-source)
         (eq? всч-із-юнікс utc-from-unix)
-        (quote (identity-relation distinct)))
+        (quote (0)))
       (list
         (quote preserved-binding-invocation)
         (всч-із-юнікс 0 0)

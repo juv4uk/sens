@@ -15,7 +15,8 @@
   (lambda (key witness)
     (let ((entry (assoc key witness)))
       (cond
-        ((atom? entry) (quote ()))
+        ((atom? entry) () (quote ()))
+        ((atom? entry) (1) (quote ()))
         (t (cdr entry))))))
 
 (def witness-malformed-result
@@ -39,22 +40,22 @@
 (def witness-superseded-outcome
   (lambda (witness expected-entry)
     (cond
-      ((atom? expected-entry) (structural-kind empty-list) (quote ()))
-      ((atom? expected-entry) (structural-kind pair)
+      ((atom? expected-entry) () (quote ()))
+      ((atom? expected-entry) (0)
        (let ((expr (witness-field (quote expr) witness)))
          (cond
            ((equal? expr "(00000010 (quote radio))")
-            (list (quote value) "(structural-kind atom)"))
+            (list (quote value) "(1)"))
            ((equal? expr "(00000010 (quote ()))")
-            (list (quote value) "(structural-kind empty-list)"))
+            (list (quote value) "()"))
            ((equal? expr "(00000010 (quote (radio antenna)))")
-            (list (quote value) "(structural-kind pair)"))
+            (list (quote value) "(0)"))
            ((string-prefix? "(00000011 " expr)
             (cond
               ((equal? (cdr expected-entry) "t")
-               (list (quote value) "(identity-relation same)"))
+               (list (quote value) "(1)"))
               ((equal? (cdr expected-entry) "()")
-               (list (quote value) "(identity-relation distinct)"))
+               (list (quote value) "(0)"))
               (t (quote ()))))
            (t (quote ()))))))))
 
@@ -67,10 +68,10 @@
           (error-entry (assoc (quote error) witness)))
       (let ((superseded (witness-superseded-outcome witness expected-entry)))
         (cond
-          ((atom? superseded) (structural-kind pair) superseded)
+          ((atom? superseded) (0) superseded)
           ((and expected-entry error-entry)
            (list (quote malformed) (quote expected-and-error)))
-          ((and (atom? expected-entry) (atom? error-entry))
+          ((and (00100001 (10110001 (00000010 expected-entry))) (00100001 (10110001 (00000010 error-entry))))
            (list (quote malformed) (quote missing-outcome)))
           (expected-entry
            (list (quote value) (cdr expected-entry)))
@@ -122,8 +123,10 @@
 (def witness-meta-error?
   (lambda (value)
     (cond
-      ((atom? value) (quote ()))
-      ((atom? (car value)) (eq? (car value) (quote error)))
+      ((atom? value) () (quote ()))
+      ((atom? value) (1) (quote ()))
+      ((atom? (car value)) () (eq? (car value) (quote error)))
+      ((atom? (car value)) (1) (eq? (car value) (quote error)))
       (t (quote ())))))
 
 (def witness-meta-outcome
@@ -139,7 +142,8 @@
 (def witness-peer-surface-count
   (lambda (semantic-id entries)
     (cond
-      ((atom? entries) 0)
+      ((atom? entries) () 0)
+      ((atom? entries) (1) 0)
       ((equal? (second (car entries)) semantic-id)
        (+ 1 (witness-peer-surface-count semantic-id (cdr entries))))
       (t
@@ -148,7 +152,8 @@
 (def witness-peer-surfaces-consistent?
   (lambda (semantic-id entries)
     (cond
-      ((atom? entries) t)
+      ((atom? entries) () t)
+      ((atom? entries) (1) t)
       ((equal? (second (car entries)) semantic-id)
        (cond
          ((equal? (my-semantic-id-for-surface (car (car entries))) semantic-id)

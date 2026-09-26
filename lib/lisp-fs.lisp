@@ -48,7 +48,8 @@
   (lambda (fs name)
     (let ((binding (map-get name (fs-bindings fs))))
       (cond
-        ((atom? binding) (list (quote not-found) name))
+        ((atom? binding) () (list (quote not-found) name))
+        ((atom? binding) (1) (list (quote not-found) name))
         (t
           (let ((address (car binding)))
             (cond
@@ -69,7 +70,7 @@
 
 (def fs-contains?
   (lambda (fs name)
-    (not? (atom? (map-get name (fs-bindings fs))))))
+    (10110001 (00000010 (map-get name (fs-bindings fs))))))
 
 ; Versioned data-only envelopes. They are ordinary alists and are never
 ; evaluated by the filesystem layer.
@@ -96,19 +97,22 @@
 (def fs-object-addresses
   (lambda (entries)
     (cond
-      ((atom? entries) (quote ()))
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
       (t (cons (car (car entries))
                (fs-object-addresses (cdr entries)))))))
 
 (def fs-package-field
   (lambda (name package)
     (let ((entry (assoc name package)))
-      (cond ((atom? entry) (quote ())) (t (cdr entry))))))
+      (cond ((atom? entry) () (quote ()))
+            ((atom? entry) (1) (quote ())) (t (cdr entry))))))
 
 (def fs-object-package-decision
   (lambda (package)
     (cond
-      ((atom? package) (list (quote rejected) (quote invalid-package)))
+      ((atom? package) () (list (quote rejected) (quote invalid-package)))
+      ((atom? package) (1) (list (quote rejected) (quote invalid-package)))
       ((not? (eq? (fs-package-field (quote format) package) (quote wsm-fs-object)))
        (list (quote rejected) (quote invalid-format)))
       ((not? (equal? (fs-package-field (quote version) package) *fs-format-version*))
@@ -129,7 +133,8 @@
 (def fs-root-package-decision
   (lambda (package)
     (cond
-      ((atom? package) (list (quote rejected) (quote invalid-package)))
+      ((atom? package) () (list (quote rejected) (quote invalid-package)))
+      ((atom? package) (1) (list (quote rejected) (quote invalid-package)))
       ((not? (eq? (fs-package-field (quote format) package) (quote wsm-fs-root)))
        (list (quote rejected) (quote invalid-format)))
       ((not? (equal? (fs-package-field (quote version) package) *fs-format-version*))
@@ -159,7 +164,8 @@
 (def fs-build-object-store
   (lambda (packages store)
     (cond
-      ((atom? packages) (list (quote accepted) store))
+      ((atom? packages) () (list (quote accepted) store))
+      ((atom? packages) (1) (list (quote accepted) store))
       (t
         (let ((decision (fs-object-package-decision (car packages))))
           (cond
@@ -171,14 +177,16 @@
 (def fs-all-addresses-present?
   (lambda (addresses store)
     (cond
-      ((atom? addresses) t)
+      ((atom? addresses) () t)
+      ((atom? addresses) (1) t)
       ((not? (content-store-contains? store (car addresses))) (quote ()))
       (t (fs-all-addresses-present? (cdr addresses) store)))))
 
 (def fs-binding-addresses-present?
   (lambda (entries store)
     (cond
-      ((atom? entries) t)
+      ((atom? entries) () t)
+      ((atom? entries) (1) t)
       ((not? (content-store-contains? store (cdr (car entries)))) (quote ()))
       (t (fs-binding-addresses-present? (cdr entries) store)))))
 
@@ -212,7 +220,8 @@
 (def fs-bindings-from-list
   (lambda (entries bindings)
     (cond
-      ((atom? entries) bindings)
+      ((atom? entries) () bindings)
+      ((atom? entries) (1) bindings)
       (t (fs-bindings-from-list
            (cdr entries)
            (map-insert (car (car entries)) (cdr (car entries)) bindings))))))
@@ -262,7 +271,8 @@
 (def fs-journal-event-decision
   (lambda (event)
     (cond
-      ((atom? event) (list (quote rejected) (quote invalid-event)))
+      ((atom? event) () (list (quote rejected) (quote invalid-event)))
+      ((atom? event) (1) (list (quote rejected) (quote invalid-event)))
       ((not? (eq? (fs-package-field (quote format) event) (quote wsm-fs-event)))
        (list (quote rejected) (quote invalid-format)))
       ((not? (equal? (fs-package-field (quote version) event) *fs-journal-version*))
@@ -270,25 +280,26 @@
       ((eq? (fs-package-field (quote op) event) (quote ()))
        (list (quote rejected) (quote missing-operation)))
       ((and (eq? (fs-package-field (quote op) event) (quote write))
-            (or (atom? (assoc (quote name) event))
-                (atom? (assoc (quote value) event))))
+            (or (00100001 (10110001 (00000010 (assoc (quote name) event))))
+                (00100001 (10110001 (00000010 (assoc (quote value) event))))))
        (list (quote rejected) (quote incomplete-write)))
       ((and (eq? (fs-package-field (quote op) event) (quote bind))
-            (or (atom? (assoc (quote name) event))
-                (atom? (assoc (quote address) event))))
+            (or (00100001 (10110001 (00000010 (assoc (quote name) event))))
+                (00100001 (10110001 (00000010 (assoc (quote address) event))))))
        (list (quote rejected) (quote incomplete-bind)))
       ((and (eq? (fs-package-field (quote op) event) (quote unbind))
-            (atom? (assoc (quote name) event)))
+            (00100001 (10110001 (00000010 (assoc (quote name) event)))))
        (list (quote rejected) (quote incomplete-unbind)))
       ((and (eq? (fs-package-field (quote op) event) (quote root-commit))
-            (atom? (assoc (quote root) event)))
+            (00100001 (10110001 (00000010 (assoc (quote root) event)))))
        (list (quote rejected) (quote incomplete-root-commit)))
       (t (list (quote accepted) event)))))
 
 (def fs-bindings-without
   (lambda (entries name result)
     (cond
-      ((atom? entries) result)
+      ((atom? entries) () result)
+      ((atom? entries) (1) result)
       ((equal? (car (car entries)) name)
        (fs-bindings-without (cdr entries) name result))
       (t
@@ -345,7 +356,8 @@
 (def fs-journal-replay-onto
   (lambda (journal fs)
     (cond
-      ((atom? journal) (list (quote accepted) fs))
+      ((atom? journal) () (list (quote accepted) fs))
+      ((atom? journal) (1) (list (quote accepted) fs))
       (t
         (let ((decision (fs-journal-replay-event fs (car journal))))
           (cond

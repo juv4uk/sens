@@ -20,10 +20,10 @@
         (00000001
           ((00000111
              ((00000010 args)
-              (structural-kind empty-list)
+              ()
               (make-macro))
              ((00000010 (00000110 args))
-              (structural-kind empty-list)
+              ()
               (make-macro))
              (t
               t

@@ -62,7 +62,8 @@
 (00001001 machine-capability-find-row
   (00001000 (key rows)
     (00000111
-      ((00000010 rows) ())
+      ((00000010 rows) () ())
+      ((00000010 rows) (1) ())
       ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
       (t (machine-capability-find-row key (00000110 rows))))))
 
@@ -70,12 +71,14 @@
   (00001000 (sid)
     (10011100 ((row (machine-capability-find-row sid machine-capability-axis-v1)))
       (00000111
-        ((00000010 row) ())
+        ((00000010 row) () ())
+        ((00000010 row) (1) ())
         (t (00000101 (00000110 row)))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
     (10011100 ((row (machine-capability-find-row target machine-target-witness-status-v1)))
       (00000111
-        ((00000010 row) (00000001 absent))
+        ((00000010 row) () (00000001 absent))
+        ((00000010 row) (1) (00000001 absent))
         (t (00000101 (00000110 row)))))))

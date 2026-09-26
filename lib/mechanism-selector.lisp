@@ -15,12 +15,12 @@
 (def mechanism-selector-find-section
   (lambda (name sections)
     (cond
-      ((atom? sections) (structural-kind empty-list) (quote ()))
-      ((atom? sections) (structural-kind pair)
+      ((atom? sections) () (quote ()))
+      ((atom? sections) (0)
        (cond
-         ((eq? (car (car sections)) name) (identity-relation same)
+         ((eq? (car (car sections)) name) (1)
           (car sections))
-         ((eq? (car (car sections)) name) (identity-relation distinct)
+         ((eq? (car (car sections)) name) (0)
           (mechanism-selector-find-section name (cdr sections))))))))
 
 (def mechanism-selector-routes
@@ -31,26 +31,26 @@
 (def mechanism-selector-registry-has-sid?
   (lambda (sid rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (quote no))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) () (quote no))
+      ((atom? rows) (0)
        (cond
-         ((eq? sid (car (car rows))) (identity-relation same) (quote yes))
-         ((eq? sid (car (car rows))) (identity-relation distinct)
+         ((eq? sid (car (car rows))) (1) (quote yes))
+         ((eq? sid (car (car rows))) (0)
           (mechanism-selector-registry-has-sid? sid (cdr rows))))))))
 
 (def mechanism-selector-find-route
   (lambda (sid executor rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (quote ()))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) () (quote ()))
+      ((atom? rows) (0)
        (let ((row (car rows)))
          (cond
-           ((eq? sid (car row)) (identity-relation same)
+           ((eq? sid (car row)) (1)
             (cond
-              ((eq? executor (second row)) (identity-relation same) row)
-              ((eq? executor (second row)) (identity-relation distinct)
+              ((eq? executor (second row)) (1) row)
+              ((eq? executor (second row)) (0)
                (mechanism-selector-find-route sid executor (cdr rows)))))
-           ((eq? sid (car row)) (identity-relation distinct)
+           ((eq? sid (car row)) (0)
             (mechanism-selector-find-route sid executor (cdr rows)))))))))
 
 (def mechanism-select
@@ -60,7 +60,7 @@
          (mechanism-selector-registry-has-sid?
            sid mechanism-selector-registry-rows)
          (quote no))
-       (identity-relation same)
+       (1)
        (list
          (quote mechanism-selection-failure)
          (quote sid-not-in-function-table)
@@ -70,9 +70,9 @@
                (mechanism-selector-find-route
                  sid executor mechanism-selector-routes)))
          (cond
-           ((atom? route) (structural-kind empty-list)
+           ((atom? route) ()
             (list (quote mechanism-unavailable) sid executor))
-           ((atom? route) (structural-kind pair)
+           ((atom? route) (0)
             (list
               (quote mechanism-selected)
               sid

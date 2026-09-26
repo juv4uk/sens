@@ -31,14 +31,14 @@
    (dispatch . explicit-result-equality))
 
   ((result-domain . structural-kind)
-   (admitted-results . ((structural-kind empty-list)
-                        (structural-kind pair)
-                        (structural-kind atom)))
+   (admitted-results . (()
+                        (0)
+                        (1)))
    (dispatch . explicit-result-equality))
 
   ((result-domain . identity-relation)
-   (admitted-results . ((identity-relation same)
-                        (identity-relation distinct)))
+   (admitted-results . ((1)
+                        (0)))
    (dispatch . explicit-result-equality))
 
   ((compatibility . historical-two-part-cond)

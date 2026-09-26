@@ -42,12 +42,12 @@
   (lambda (bytes)
     (cond
       ((atom? bytes)
-       (structural-kind empty-list)
+       ()
        (cond
-         ((eq? bytes (quote ())) (identity-relation same) 1)
-         ((eq? bytes (quote ())) (identity-relation distinct) 0)))
+         ((eq? bytes (quote ())) (1) 1)
+         ((eq? bytes (quote ())) (0) 0)))
       ((atom? bytes)
-       (structural-kind pair)
+       (0)
        (cond
          ((utf8-byte? (car bytes)) 1
           (utf8-all-bytes? (cdr bytes)))
@@ -90,10 +90,10 @@
   (lambda (bytes out)
     (cond
       ((atom? bytes)
-       (structural-kind empty-list)
+       ()
        (list (quote decoded) (reverse out)))
       ((atom? bytes)
-       (structural-kind pair)
+       (0)
        (let* ((b1 (car bytes))
               (r1 (cdr bytes)))
          (cond
@@ -106,10 +106,10 @@
               ((utf8-in-range? b1 194 223) 1
                (cond
                  ((atom? r1)
-                  (structural-kind empty-list)
+                  ()
                   (list (quote rejected) (quote invalid-utf8)))
                  ((atom? r1)
-                  (structural-kind pair)
+                  (0)
                   (let ((b2 (car r1)))
                     (cond
                       ((utf8-continuation-byte? b2) 1
@@ -126,17 +126,17 @@
                  ((utf8-in-range? b1 224 239) 1
                   (cond
                     ((atom? r1)
-                     (structural-kind empty-list)
+                     ()
                      (list (quote rejected) (quote invalid-utf8)))
                     ((atom? r1)
-                     (structural-kind pair)
+                     (0)
                      (let ((r2 (cdr r1)))
                        (cond
                          ((atom? r2)
-                          (structural-kind empty-list)
+                          ()
                           (list (quote rejected) (quote invalid-utf8)))
                          ((atom? r2)
-                          (structural-kind pair)
+                          (0)
                           (let* ((b2 (car r1))
                                  (b3 (car r2)))
                             (cond
@@ -161,24 +161,24 @@
                     ((utf8-in-range? b1 240 244) 1
                      (cond
                        ((atom? r1)
-                        (structural-kind empty-list)
+                        ()
                         (list (quote rejected) (quote invalid-utf8)))
                        ((atom? r1)
-                        (structural-kind pair)
+                        (0)
                         (let ((r2 (cdr r1)))
                           (cond
                             ((atom? r2)
-                             (structural-kind empty-list)
+                             ()
                              (list (quote rejected) (quote invalid-utf8)))
                             ((atom? r2)
-                             (structural-kind pair)
+                             (0)
                              (let ((r3 (cdr r2)))
                                (cond
                                  ((atom? r3)
-                                  (structural-kind empty-list)
+                                  ()
                                   (list (quote rejected) (quote invalid-utf8)))
                                  ((atom? r3)
-                                  (structural-kind pair)
+                                  (0)
                                   (let* ((b2 (car r1))
                                          (b3 (car r2))
                                          (b4 (car r3)))
@@ -223,10 +223,10 @@
   (lambda (scalars out)
     (cond
       ((atom? scalars)
-       (structural-kind empty-list)
+       ()
        out)
       ((atom? scalars)
-       (structural-kind pair)
+       (0)
        (unicode-scalars->string-onto
          (cdr scalars)
          (string-append out (codepoint->string (car scalars))))))))
@@ -240,21 +240,21 @@
     (let ((decoded (utf8-decode bytes)))
       (cond
         ((eq? (car decoded) (quote decoded))
-         (identity-relation same)
+         (1)
          (list (quote decoded)
                (unicode-scalars->string (car (cdr decoded)))))
         ((eq? (car decoded) (quote decoded))
-         (identity-relation distinct)
+         (0)
          decoded)))))
 
 (def utf8-encode-string-onto
   (lambda (text out)
     (cond
       ((string-empty? text)
-       (identity-relation same)
+       (1)
        (reverse out))
       ((string-empty? text)
-       (identity-relation distinct)
+       (0)
        (let* ((character (string-first text))
               (rest (string-rest text))
               (scalar (string->codepoint character)))

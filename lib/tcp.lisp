@@ -23,10 +23,10 @@
     (let ((decoded (utf8-decode-string bytes)))
       (cond
         ((eq? (car decoded) (quote decoded))
-         (identity-relation same)
+         (1)
          (second decoded))
         ((eq? (car decoded) (quote decoded))
-         (identity-relation distinct)
+         (0)
          decoded)))))
 
 (def tcp-read

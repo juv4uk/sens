@@ -24,8 +24,10 @@
 (def science-proper-list?
   (lambda (x)
     (cond
-      ((atom? x)
-       (cond
+      ((atom? x) () (cond
+         ((eq? x (quote ())) t)
+         (t (quote ()))))
+      ((atom? x) (1) (cond
          ((eq? x (quote ())) t)
          (t (quote ()))))
       (t (science-proper-list? (cdr x))))))
@@ -45,13 +47,15 @@
 (def dimension?
   (lambda (x)
     (cond
-      ((atom? x) (quote ()))
+      ((atom? x) () (quote ()))
+      ((atom? x) (1) (quote ()))
       ((eq? (science-proper-list? x) (quote ())) (quote ()))
       ((eq? (= (length x) 3) (quote ())) (quote ()))
       ((eq? (car x) *dimension-schema*)
        (cond
          ((eq? (symbol? (second x)) (quote ())) (quote ()))
-         ((atom? (third x)) t)
+         ((atom? (third x)) () t)
+         ((atom? (third x)) (1) t)
          (t (quote ()))))
       (t (quote ())))))
 
@@ -64,8 +68,10 @@
 (def science-dimensions-valid?
   (lambda (dimensions)
     (cond
-      ((atom? dimensions)
-       (cond
+      ((atom? dimensions) () (cond
+         ((eq? dimensions (quote ())) t)
+         (t (quote ()))))
+      ((atom? dimensions) (1) (cond
          ((eq? dimensions (quote ())) t)
          (t (quote ()))))
       ((dimension? (car dimensions))
@@ -79,7 +85,8 @@
 (def unit?
   (lambda (x)
     (cond
-      ((atom? x) (quote ()))
+      ((atom? x) () (quote ()))
+      ((atom? x) (1) (quote ()))
       ((eq? (science-proper-list? x) (quote ())) (quote ()))
       ((eq? (car x) *unit-schema*)
        (science-dimensions-valid? (cdr x)))
@@ -95,7 +102,8 @@
 (def quantity?
   (lambda (x)
     (cond
-      ((atom? x) (quote ()))
+      ((atom? x) () (quote ()))
+      ((atom? x) (1) (quote ()))
       ((eq? (science-proper-list? x) (quote ())) (quote ()))
       ((eq? (= (length x) 3) (quote ())) (quote ()))
       ((eq? (car x) *quantity-schema*)
@@ -114,8 +122,10 @@
 (def science-add-dimension
   (lambda (dimension dimensions)
     (cond
-      ((atom? dimensions)
-       (cond
+      ((atom? dimensions) () (cond
+         ((= (dimension-exponent dimension) 0) 1 (quote ()))
+         (t (list dimension))))
+      ((atom? dimensions) (1) (cond
          ((= (dimension-exponent dimension) 0) 1 (quote ()))
          (t (list dimension))))
       ((eq? (dimension-base dimension)
@@ -137,7 +147,8 @@
 (def science-merge-dimensions
   (lambda (from into)
     (cond
-      ((atom? from) into)
+      ((atom? from) () into)
+      ((atom? from) (1) into)
       (t
        (science-merge-dimensions
          (cdr from)
@@ -146,7 +157,8 @@
 (def science-negate-dimensions
   (lambda (dimensions)
     (cond
-      ((atom? dimensions) (quote ()))
+      ((atom? dimensions) () (quote ()))
+      ((atom? dimensions) (1) (quote ()))
       (t
        (cons
          (make-dimension
@@ -187,13 +199,15 @@
 (def science-source?
   (lambda (x)
     (cond
-      ((atom? x) (quote ()))
+      ((atom? x) () (quote ()))
+      ((atom? x) (1) (quote ()))
       ((eq? (science-proper-list? x) (quote ())) (quote ()))
       ((eq? (= (length x) 3) (quote ())) (quote ()))
       ((eq? (car x) *science-source-schema*)
        (cond
          ((eq? (symbol? (second x)) (quote ())) (quote ()))
-         ((atom? (third x)) t)
+         ((atom? (third x)) () t)
+         ((atom? (third x)) (1) t)
          (t (quote ()))))
       (t (quote ())))))
 
@@ -228,7 +242,8 @@
 (def scientific-constant?
   (lambda (x)
     (cond
-      ((atom? x) (quote ()))
+      ((atom? x) () (quote ()))
+      ((atom? x) (1) (quote ()))
       ((eq? (science-proper-list? x) (quote ())) (quote ()))
       ((= (length x) 7) 0 (quote ()))
       ((eq? (car x) *scientific-constant-schema*)

@@ -77,17 +77,17 @@
                  (reason-index-linear recursive-rules)
                  0))))
       (cond
-        (parity-relation (structural-relation same)
+        (parity-relation (1)
           (cond
-            (snapshot-relation (structural-relation same)
+            (snapshot-relation (1)
               (cond
-                (prepared-later-empty (structural-relation same)
+                (prepared-later-empty (1)
                   (cond
-                    (rebuilt-later-count (structural-relation same)
+                    (rebuilt-later-count (1)
                       (cond
-                        (recursive-relation (structural-relation same)
+                        (recursive-relation (1)
                           (cond
-                            (negation-relation (structural-relation same)
+                            (negation-relation (1)
                               (quote
                                 (reason-index-authority-witness
                                   (status pass)
@@ -95,32 +95,32 @@
                                     indexed-linear-parity
                                     immutable-prepared-snapshot
                                     recursion-negation-parity))))
-                            (negation-relation (structural-relation distinct)
+                            (negation-relation (0)
                               (quote
                                 (reason-index-authority-witness
                                   (status fail)
                                   (law recursion-negation-parity))))))
-                        (recursive-relation (structural-relation distinct)
+                        (recursive-relation (0)
                           (quote
                             (reason-index-authority-witness
                               (status fail)
                               (law recursion-parity))))))
-                    (rebuilt-later-count (structural-relation distinct)
+                    (rebuilt-later-count (0)
                       (quote
                         (reason-index-authority-witness
                           (status fail)
                           (law rebuilt-snapshot-sees-new-rule))))))
-                (prepared-later-empty (structural-relation distinct)
+                (prepared-later-empty (0)
                   (quote
                     (reason-index-authority-witness
                       (status fail)
                       (law prepared-snapshot-is-immutable))))))
-            (snapshot-relation (structural-relation distinct)
+            (snapshot-relation (0)
               (quote
                 (reason-index-authority-witness
                   (status fail)
                   (law prepared-snapshot-preserves-old-result))))))
-        (parity-relation (structural-relation distinct)
+        (parity-relation (0)
           (quote
             (reason-index-authority-witness
               (status fail)

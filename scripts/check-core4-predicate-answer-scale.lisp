@@ -88,6 +88,11 @@
     (equal? (list (answer-atom (quote x)) (answer-atom (quote (a))) (answer-atom (quote ())))
             (map second (pas-field pas-predicates (quote atom?))))
     (equal? (list (answer-eq (quote a) (quote a)) (answer-eq (quote a) (quote b)))
+            (map second (pas-field pas-predicates (quote eq?))))
+    ; Самі примітиви мови відповідають тією ж шкалою.
+    (equal? (list (00000010 (quote x)) (00000010 (quote (a))) (00000010 (quote ())))
+            (map second (pas-field pas-predicates (quote atom?))))
+    (equal? (list (00000011 (quote a) (quote a)) (00000011 (quote a) (quote b)))
             (map second (pas-field pas-predicates (quote eq?))))))
 
 (def pas-expected
@@ -135,8 +140,8 @@
        (5 saṃśaya       "сумнів"          "doubt")
        (6 aniścaya      "непевність"      "uncertainty")
        (7 ajñāta-sīmā   "межа невідомого" "edge of the unknown")))
-    (quote (structural-relation same))
-    (quote (structural-relation same))
+    (quote (1))
+    (quote (1))
     (quote (ajñāta "невідомо" "unknown"))
     "0 < 00 < 000 < 0000 < 00000 < 000000 < 0000000 < () < 1111111 < 111111 < 11111 < 1111 < 111 < 11 < 1"
     (quote meet-on-truth-order)
@@ -160,9 +165,9 @@
        (number-carrier . forbidden)))
     (quote
       ((predicate-projection . core4)
-       (atom? . (((structural-kind atom) (1)) ((structural-kind pair) (0)) ((structural-kind empty-list) ())))
-       (eq? . (((identity-relation same) (1)) ((identity-relation distinct) (0))))
-       (runtime-status . answer-functions-installed)
+       (atom? . ((on-atom (1)) (on-pair (0)) (on-empty-list ())))
+       (eq? . ((on-same-atoms (1)) (on-distinct-atoms (0))))
+       (runtime-status . installed)
        (answer-functions .
          ((10110001 answer-not)
           (10110010 answer-and)
@@ -170,18 +175,21 @@
           (10110100 answer-weaken)
           (10110101 answer-atom)
           (10110110 answer-eq)))
-       (record-predicates . unchanged-callers-migrate-by-file)
+       (record-predicates . retired-2026-09-26)
+       (cond-two-part-clause . selects-only-yes)
        (core1-core3-answer-domain . grade-1-only)
        (core1 . historical-unchanged-overlay-only)
        (core2 . frozen-compatibility)))
     8
-    (quote (structural-relation same))
-    (quote (structural-relation same))
-    (quote (structural-relation same))))
+    (quote (1))
+    (quote (1))
+    (quote (1))
+    (quote (1))
+    (quote (1))))
 
 (cond
   ((equal? pas-observed pas-expected)
-   (structural-relation same)
+   (1)
    (quote (core4-predicate-answer-scale-ok)))
   ((= 1 1) 1
    (list (quote core4-predicate-answer-scale-mismatch)

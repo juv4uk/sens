@@ -54,7 +54,7 @@
 
 (cond
   ((equal? pab-observed pab-expected)
-   (structural-relation same)
+   (1)
    (quote (core4-predicate-answer-boundary-ok)))
   ((= 1 1) 1
    (list (quote core4-predicate-answer-boundary-mismatch)

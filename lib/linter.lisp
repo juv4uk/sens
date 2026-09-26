@@ -12,14 +12,16 @@
 (def lint-size
   (lambda (ast)
     (cond
-      ((atom? ast) 1)
+      ((atom? ast) () 1)
+      ((atom? ast) (1) 1)
       (t (+ 1 (+ (lint-size (car ast)) (lint-size (cdr ast))))))))
 
 ; 2. Nesting: Maximum depth of pairs
 (def lint-nesting
   (lambda (ast)
     (cond
-      ((atom? ast) 0)
+      ((atom? ast) () 0)
+      ((atom? ast) (1) 0)
       (t (lint-max2 (+ 1 (lint-nesting (car ast)))
               (lint-nesting (cdr ast)))))))
 
@@ -27,7 +29,8 @@
 (def lint-complexity
   (lambda (ast)
     (cond
-      ((atom? ast) 0)
+      ((atom? ast) () 0)
+      ((atom? ast) (1) 0)
       ((equal? (car ast) (quote cond))
        (reduce (lambda (acc clause) (+ acc (lint-complexity clause)))
                (length (cdr ast))
@@ -41,7 +44,8 @@
 (def lint-effects
   (lambda (ast)
     (cond
-      ((atom? ast) (quote ()))
+      ((atom? ast) () (quote ()))
+      ((atom? ast) (1) (quote ()))
       ((symbol? (car ast))
        (cond
          ((member? (symbol->string (car ast)) effectful-primitives)
@@ -55,11 +59,13 @@
 (def collect-free-vars-let*
   (lambda (ast bound-vars)
     (cond
-      ((atom? (cdr ast))
-       (append (collect-free-vars (car ast) bound-vars)
+      ((atom? (cdr ast)) () (append (collect-free-vars (car ast) bound-vars)
                (collect-free-vars (cdr ast) bound-vars)))
-      ((atom? (cdr (cdr ast)))
-       (append (collect-free-vars (car ast) bound-vars)
+      ((atom? (cdr ast)) (1) (append (collect-free-vars (car ast) bound-vars)
+               (collect-free-vars (cdr ast) bound-vars)))
+      ((atom? (cdr (cdr ast))) () (append (collect-free-vars (car ast) bound-vars)
+               (collect-free-vars (cdr ast) bound-vars)))
+      ((atom? (cdr (cdr ast))) (1) (append (collect-free-vars (car ast) bound-vars)
                (collect-free-vars (cdr ast) bound-vars)))
       (t
        (let ((bindings (car (cdr ast)))
@@ -79,11 +85,13 @@
 (def collect-free-vars-letrec
   (lambda (ast bound-vars)
     (cond
-      ((atom? (cdr ast))
-       (append (collect-free-vars (car ast) bound-vars)
+      ((atom? (cdr ast)) () (append (collect-free-vars (car ast) bound-vars)
                (collect-free-vars (cdr ast) bound-vars)))
-      ((atom? (cdr (cdr ast)))
-       (append (collect-free-vars (car ast) bound-vars)
+      ((atom? (cdr ast)) (1) (append (collect-free-vars (car ast) bound-vars)
+               (collect-free-vars (cdr ast) bound-vars)))
+      ((atom? (cdr (cdr ast))) () (append (collect-free-vars (car ast) bound-vars)
+               (collect-free-vars (cdr ast) bound-vars)))
+      ((atom? (cdr (cdr ast))) (1) (append (collect-free-vars (car ast) bound-vars)
                (collect-free-vars (cdr ast) bound-vars)))
       (t
        (let ((bindings (car (cdr ast)))
@@ -101,8 +109,7 @@
 (def collect-free-vars
   (lambda (ast bound-vars)
     (cond
-      ((atom? ast)
-       (cond
+      ((00100001 (10110001 (atom? ast))) t (cond
          ((symbol? ast)
           (cond
             ((member? (symbol->string ast) bound-vars) (quote ()))
@@ -126,11 +133,7 @@
            (collect-free-vars body (append param-names bound-vars)))))
       ((equal? (car ast) (quote let))
        (cond
-         ((atom? (cdr ast))
-          ; Structural cdr-walks can legitimately expose a tail shaped as
-          ; (let), for example while visiting quoted AST-construction data.
-          ; That tail is not a let form and has no binding slots to destructure.
-          (append (collect-free-vars (car ast) bound-vars)
+         ((00100001 (10110001 (atom? (cdr ast)))) t (append (collect-free-vars (car ast) bound-vars)
                   (collect-free-vars (cdr ast) bound-vars)))
          ((symbol? (car (cdr ast)))
           ; Named let

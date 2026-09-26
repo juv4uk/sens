@@ -13,7 +13,9 @@
 ; /3 (2026-09-26, рішення власника в #1391): затверджено NOT/AND/OR/COND,
 ; носій відповіді — список двійкових бітів, проєкції atom?/eq? для Core4.
 ; Виконуваний свідок законів — experiments/core4-logic15-algebra.lisp.
-; Runtime цей контракт ще не перемикає: atom?/eq? переходять окремим PR.
+; Того ж дня (рішення власника) runtime перемкнено: atom?, eq?, equal? і cond
+; відповідають бітами; старі записи structural-kind / identity-relation /
+; structural-relation виведено з мови.
 
 (core4-predicate-answer-scale/3
 
@@ -116,9 +118,9 @@
   ; Проєкції предикатів Core4 на шкалу. () стоїть вище розрізнення атом/пара,
   ; тому atom? на () відповідає () — «невідомо» (ajñāta).
   ((predicate-projection . core4)
-   (atom? . (((structural-kind atom) (1)) ((structural-kind pair) (0)) ((structural-kind empty-list) ())))
-   (eq? . (((identity-relation same) (1)) ((identity-relation distinct) (0))))
-   (runtime-status . answer-functions-installed)
+   (atom? . ((on-atom (1)) (on-pair (0)) (on-empty-list ())))
+   (eq? . ((on-same-atoms (1)) (on-distinct-atoms (0))))
+   (runtime-status . installed)
    (answer-functions .
      ((10110001 answer-not)
       (10110010 answer-and)
@@ -126,7 +128,8 @@
       (10110100 answer-weaken)
       (10110101 answer-atom)
       (10110110 answer-eq)))
-   (record-predicates . unchanged-callers-migrate-by-file)
+   (record-predicates . retired-2026-09-26)
+   (cond-two-part-clause . selects-only-yes)
    (core1-core3-answer-domain . grade-1-only)
    (core1 . historical-unchanged-overlay-only)
    (core2 . frozen-compatibility)))

@@ -156,5 +156,6 @@
   (00001000 (field reference)
     (let ((entry (assoc field (00000110 reference))))
       (00000111
-        ((00000010 entry) (00000001 ()))
+        ((00000010 entry) () (00000001 ()))
+        ((00000010 entry) (1) (00000001 ()))
         (t (second entry))))))

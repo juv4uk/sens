@@ -43,7 +43,7 @@
 
 (cond
   ((equal? pob-observed pob-expected)
-   (structural-relation same)
+   (1)
    (quote (core4-predicate-output-boundary-ok)))
   ((= 1 1) 1
    (list (quote core4-predicate-output-boundary-mismatch)

@@ -48,17 +48,17 @@
     (list (quote binary-descriptor) (list (quote binary) 2))
     (list (quote symbol-written) "00")
     (list (quote symbol-read) 0)
-    (list (quote symbol-roundtrip) (quote (structural-relation distinct)))
+    (list (quote symbol-roundtrip) (quote (0)))
     (list (quote string-written) "\"00\"")
     (list (quote string-read) "00")
-    (list (quote string-roundtrip) (quote (structural-relation same)))
+    (list (quote string-roundtrip) (quote (1)))
     (list (quote sid-written) "00000011")
     (list (quote sid-read) 00000011)
-    (list (quote sid-roundtrip) (quote (structural-relation same)))))
+    (list (quote sid-roundtrip) (quote (1)))))
 
 (cond
   ((equal? cam-observed cam-expected)
-   (structural-relation same)
+   (1)
    (quote (core4-answer-carrier-matrix-ok)))
   ((= 1 1) 1
    (list (quote core4-answer-carrier-matrix-mismatch)

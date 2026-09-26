@@ -7,10 +7,10 @@
   (lambda ()
     (cond
       ((eq? process-run запустити-процес)
-       (identity-relation same)
+       (1)
        (quote (process-load-witness (status pass))))
       ((eq? process-run запустити-процес)
-       (identity-relation distinct)
+       (0)
        (quote (process-load-witness (status fail)))))))
 
 (process-load-witness)

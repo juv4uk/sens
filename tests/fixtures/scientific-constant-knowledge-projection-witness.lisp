@@ -37,21 +37,21 @@
       (cond
         ((equal?
            observation
-           (quote (7 t (structural-relation same))))
-         (structural-relation same)
+           (quote (7 t (1))))
+         (1)
          (quote
            (scientific-constant-knowledge-projection-witness
              (status pass))))
         ((equal?
            observation
-           (quote (7 t (structural-relation same))))
-         (structural-relation distinct)
+           (quote (7 t (1))))
+         (0)
          (list
            (quote scientific-constant-knowledge-projection-witness)
            (quote (status fail))
            (list (quote actual) observation)
            (quote
              (expected
-               (7 t (structural-relation same))))))))))
+               (7 t (1))))))))))
 
 (scientific-constant-knowledge-projection-witness)

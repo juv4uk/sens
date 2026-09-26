@@ -12,8 +12,8 @@
 (def release-require
   (lambda (label actual expected)
     (cond
-      ((equal? actual expected) (structural-relation same) actual)
-      ((equal? actual expected) (structural-relation distinct)
+      ((equal? actual expected) (1) actual)
+      ((equal? actual expected) (0)
        ((lambda ()
           (print label)
           (print actual)
@@ -26,10 +26,10 @@
          (release-require program (car result) 0)
          (second result))))))
 
-(release-require "Потрібна одна версія: 0.41.0" (atom? *argv*)
-                 (quote (structural-kind pair)))
-(release-require "Потрібен рівно один аргумент" (atom? (cdr *argv*))
-                 (quote (structural-kind empty-list)))
+(release-require "Потрібна одна версія: 0.41.0" (00100001 (10110001 (00000010 *argv*)))
+                 (quote (0)))
+(release-require "Потрібен рівно один аргумент" (00100001 (10110001 (00000010 (cdr *argv*))))
+                 (quote ()))
 (def release-version (car *argv*))
 (def release-tag (string-append "l" release-version))
 (def release-tag-ref (string-append "refs/tags/" release-tag))
@@ -49,8 +49,8 @@
 (def release-fasl-diff-status
   (car (process-run "git" (quote ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
 (cond
-  ((eq? release-fasl-diff-status 0) (identity-relation same) (quote ()))
-  ((eq? release-fasl-diff-status 1) (identity-relation same)
+  ((eq? release-fasl-diff-status 0) (1) (quote ()))
+  ((eq? release-fasl-diff-status 1) (1)
    ((lambda ()
       (release-run "git" (quote ("add" "lib/core4.lisp.fasl")))
       (release-run "git" (quote ("commit" "-m" "chore(fasl): regenerate Core4 snapshot")))
@@ -68,8 +68,8 @@
 (def release-check-manifests
   (lambda (paths)
     (cond
-      ((atom? paths) (structural-kind empty-list) (quote ()))
-      ((atom? paths) (structural-kind pair)
+      ((atom? paths) () (quote ()))
+      ((atom? paths) (0)
        ((lambda ()
           (release-require (car paths)
             (string-contains?

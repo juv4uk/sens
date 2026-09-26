@@ -15,20 +15,20 @@
   (lambda (entry field)
     (let ((found (assoc field entry)))
       (cond
-        ((atom? found) (structural-kind empty-list) (quote ()))
-        ((atom? found) (structural-kind pair) (cdr found))))))
+        ((atom? found) () (quote ()))
+        ((atom? found) (0) (cdr found))))))
 
 (def life-1-find
   (lambda (identity entries)
     (cond
-      ((atom? entries) (structural-kind empty-list) (quote ()))
-      ((atom? entries) (structural-kind pair)
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (0)
        (cond
          ((eq? (life-1-field (car entries) (quote identity)) identity)
-          (identity-relation same)
+          (1)
           (car entries))
          ((eq? (life-1-field (car entries) (quote identity)) identity)
-          (identity-relation distinct)
+          (0)
           (life-1-find identity (cdr entries))))))))
 
 (def life-1-entry
@@ -39,15 +39,15 @@
   (lambda (identity field expected)
     (let ((entry (life-1-entry identity)))
       (cond
-        ((atom? entry) (structural-kind empty-list)
+        ((atom? entry) ()
          (list (quote missing-entry) identity))
-        ((atom? entry) (structural-kind pair)
+        ((atom? entry) (0)
          (cond
            ((eq? (life-1-field entry field) expected)
-            (identity-relation same)
+            (1)
             (quote ()))
            ((eq? (life-1-field entry field) expected)
-            (identity-relation distinct)
+            (0)
             (list (quote mismatch)
                   identity
                   field
@@ -57,12 +57,12 @@
 (def life-1-first-failure
   (lambda (checks)
     (cond
-      ((atom? checks) (structural-kind empty-list) (quote ()))
-      ((atom? checks) (structural-kind pair)
+      ((atom? checks) () (quote ()))
+      ((atom? checks) (0)
        (cond
-         ((atom? (car checks)) (structural-kind empty-list)
+         ((atom? (car checks)) ()
           (life-1-first-failure (cdr checks)))
-         ((atom? (car checks)) (structural-kind pair)
+         ((atom? (car checks)) (0)
           (car checks)))))))
 
 (def life-1-contract-witness
@@ -111,19 +111,19 @@
                               (quote required))))))
       (cond
         ((eq? (life-1-schema) (quote life-1-contract/1))
-         (identity-relation same)
+         (1)
          (cond
-           ((atom? failure) (structural-kind empty-list)
+           ((atom? failure) ()
             (list (quote life-1-contract-witness)
                   (list (quote status) (quote pass))
                   (list (quote detail)
                         (quote provenance-not-truth))))
-           ((atom? failure) (structural-kind pair)
+           ((atom? failure) (0)
             (list (quote life-1-contract-witness)
                   (list (quote status) (quote fail))
                   (list (quote detail) failure)))))
         ((eq? (life-1-schema) (quote life-1-contract/1))
-         (identity-relation distinct)
+         (0)
          (list (quote life-1-contract-witness)
                (list (quote status) (quote fail))
                (list (quote detail)

@@ -40,19 +40,19 @@
 (def registry-check-rows
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list)
+      ((atom? rows) ()
        (quote (meta-semantic-registry-witness (status pass))))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) (1)
        (registry-witness-failure
          (quote malformed-row-tail)
          rows
          (quote ())))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let ((row (car rows)))
          (cond
-           ((equal? (second row) (third row)) (structural-relation same)
+           ((equal? (second row) (third row)) (1)
             (registry-check-rows (cdr rows)))
-           ((equal? (second row) (third row)) (structural-relation distinct)
+           ((equal? (second row) (third row)) (0)
             (registry-witness-failure
               (car row)
               (second row)
@@ -88,35 +88,35 @@
             00010000)
       (list (quote unmapped-surface-fails-closed)
             (atom? (my-semantic-id-for-surface (quote unmapped-surface)))
-            (quote (structural-kind empty-list)))
+            (quote ()))
 
       ; Canon ATOM peer surfaces: native evaluator.
       (list (quote atom-native-en)
             (registry-native-value "(00000010 (quote x))")
-            (quote (structural-kind atom)))
+            (quote (1)))
       (list (quote atom-native-uk)
             (registry-native-value "(атом? (як-є x))")
-            (quote (structural-kind atom)))
+            (quote (1)))
       (list (quote atom-native-sa)
             (registry-native-value "(aṇu (svarūpa x))")
-            (quote (structural-kind atom)))
+            (quote (1)))
       (list (quote atom-native-symbolic)
             (registry-native-value "(.? (quote x))")
-            (quote (structural-kind atom)))
+            (quote (1)))
 
       ; The same peer surfaces through the metacircular evaluator.
       (list (quote atom-meta-en)
             (registry-meta-value "(00000010 (quote x))")
-            (quote (structural-kind atom)))
+            (quote (1)))
       (list (quote atom-meta-uk)
             (registry-meta-value "(атом? (як-є x))")
-            (quote (structural-kind atom)))
+            (quote (1)))
       (list (quote atom-meta-sa)
             (registry-meta-value "(aṇu (svarūpa x))")
-            (quote (structural-kind atom)))
+            (quote (1)))
       (list (quote atom-meta-symbolic)
             (registry-meta-value "(.? (quote x))")
-            (quote (structural-kind atom)))
+            (quote (1)))
 
       ; Necessary-form routing: native evaluator.
       (list (quote lambda-native-en)

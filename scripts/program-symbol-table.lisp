@@ -21,9 +21,11 @@
 
 (def split-lines (lambda (s) (cond ((= (pos-of s "\n" 0) -1) 1 (cons s (quote ()))) ((= (pos-of s "\n" 0) -1) 0 (cons (string-slice s 0 (pos-of s "\n" 0)) (split-lines (slice-from s (+ 1 (pos-of s "\n" 0)))))))))
 
-(def reverse-acc (lambda (lst acc) (cond ((atom? lst) acc) (t (reverse-acc (cdr lst) (cons (car lst) acc))))))
+(def reverse-acc (lambda (lst acc) (cond ((atom? lst) () acc)
+                                         ((atom? lst) (1) acc) (t (reverse-acc (cdr lst) (cons (car lst) acc))))))
 
-(def count-lst (lambda (lst) (cond ((atom? lst) 0) (t (+ 1 (count-lst (cdr lst)))))))
+(def count-lst (lambda (lst) (cond ((atom? lst) () 0)
+                                   ((atom? lst) (1) 0) (t (+ 1 (count-lst (cdr lst)))))))
 
 (def asm-id (lambda (line) (cond ((has line "LOADSYM") (word-digits (slice-from line (+ 2 (pos-of line ", " 0))) 0)) (t ""))))
 
@@ -33,7 +35,8 @@
 
 (def process-asm-line (lambda (line acc) (keep-pair (asm-id line) (asm-name line) acc)))
 
-(def process-lines-asm (lambda (lines acc) (cond ((atom? lines) acc) (t (process-lines-asm (cdr lines) (process-asm-line (car lines) acc))))))
+(def process-lines-asm (lambda (lines acc) (cond ((atom? lines) () acc)
+                                                 ((atom? lines) (1) acc) (t (process-lines-asm (cdr lines) (process-asm-line (car lines) acc))))))
 
 (def inc-name (lambda (line) (word-nonspace (slice-from line 12) 0)))
 
@@ -49,17 +52,21 @@
 
 (def process-define-line (lambda (line acc) (keep-pair (inc-id line) (inc-name line) acc)))
 
-(def process-lines-inc (lambda (lines acc) (cond ((atom? lines) acc) (t (process-lines-inc (cdr lines) (process-define-line (car lines) acc))))))
+(def process-lines-inc (lambda (lines acc) (cond ((atom? lines) () acc)
+                                                 ((atom? lines) (1) acc) (t (process-lines-inc (cdr lines) (process-define-line (car lines) acc))))))
 
 (def str-eq? (lambda (a b) (cond ((string-prefix? a b) (string-prefix? b a)) (t nil-marker))))
 
-(def id-in-base? (lambda (id base) (cond ((atom? base) nil-marker) ((str-eq? id (car (car base))) t-marker) (t (id-in-base? id (cdr base))))))
+(def id-in-base? (lambda (id base) (cond ((atom? base) () nil-marker)
+                                         ((atom? base) (1) nil-marker) ((str-eq? id (car (car base))) t-marker) (t (id-in-base? id (cdr base))))))
 
 (def merge-pair (lambda (pair base) (cond ((id-in-base? (car pair) base) base) (t (cons pair base)))))
 
-(def merge-all (lambda (pairs base) (cond ((atom? pairs) base) (t (merge-all (cdr pairs) (merge-pair (car pairs) base))))))
+(def merge-all (lambda (pairs base) (cond ((atom? pairs) () base)
+                                          ((atom? pairs) (1) base) (t (merge-all (cdr pairs) (merge-pair (car pairs) base))))))
 
-(def emit-all (lambda (lst) (cond ((atom? lst) (quote ())) (t (cons (print (string-append (string-append (car (car lst)) " ") (cdr (car lst))))) (emit-all (cdr lst))))))
+(def emit-all (lambda (lst) (cond ((atom? lst) () (quote ()))
+                                  ((atom? lst) (1) (quote ())) (t (cons (print (string-append (string-append (car (car lst)) " ") (cdr (car lst))))) (emit-all (cdr lst))))))
 
 (def main (lambda (asm-path inc-path) (let ((asm-pairs (reverse-acc (process-lines-asm (split-lines (read-file asm-path)) (quote ())) (quote ())))) (let ((inc-pairs (reverse-acc (process-lines-inc (split-lines (read-file inc-path)) (quote ())) (quote ())))) (let ((merged (merge-all inc-pairs asm-pairs))) (cons (count-lst merged) (emit-all merged)))))))
 

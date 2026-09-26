@@ -28,10 +28,10 @@
     (let ((decoded (read-file-utf8-raw path)))
       (cond
         ((eq? (car decoded) (quote decoded))
-         (identity-relation same)
+         (1)
          (second decoded))
         ((eq? (car decoded) (quote decoded))
-         (identity-relation distinct)
+         (0)
          decoded)))))
 
 ; Historical `write-file` returns the text it was given after a successful

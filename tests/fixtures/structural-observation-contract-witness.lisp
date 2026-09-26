@@ -10,13 +10,15 @@
   (lambda (entry field)
     (let ((found (assoc field entry)))
       (cond
-        ((atom? found) (quote ()))
+        ((atom? found) () (quote ()))
+        ((atom? found) (1) (quote ()))
         (t (cdr found))))))
 
 (def so-find
   (lambda (identity entries)
     (cond
-      ((atom? entries) (quote ()))
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
       ((equal? (so-field (car entries) (quote identity)) identity)
        (car entries))
       (t (so-find identity (cdr entries))))))
@@ -28,7 +30,8 @@
 (def so-case-find
   (lambda (case-name cases)
     (cond
-      ((atom? cases) (quote ()))
+      ((atom? cases) () (quote ()))
+      ((atom? cases) (1) (quote ()))
       ((equal? (so-field (car cases) (quote when)) case-name)
        (car cases))
       (t (so-case-find case-name (cdr cases))))))
@@ -37,7 +40,8 @@
   (lambda (identity field expected)
     (let ((entry (so-entry identity)))
       (cond
-        ((atom? entry) (list (quote missing-entry) identity))
+        ((atom? entry) () (list (quote missing-entry) identity))
+        ((atom? entry) (1) (list (quote missing-entry) identity))
         ((equal? (so-field entry field) expected) (quote ()))
         (t (list (quote mismatch) identity field expected
                  (so-field entry field)))))))
@@ -46,14 +50,14 @@
   (lambda (identity case-name expected-result)
     (let ((entry (so-entry identity)))
       (cond
-        ((atom? entry)
-         (list (quote missing-entry) identity))
+        ((atom? entry) () (list (quote missing-entry) identity))
+        ((atom? entry) (1) (list (quote missing-entry) identity))
         (t
          (let ((case-entry
                  (so-case-find case-name (so-field entry (quote cases)))))
            (cond
-             ((atom? case-entry)
-              (list (quote missing-case) identity case-name))
+             ((atom? case-entry) () (list (quote missing-case) identity case-name))
+             ((atom? case-entry) (1) (list (quote missing-case) identity case-name))
              ((equal? (so-field case-entry (quote result)) expected-result)
               (quote ()))
              (t
@@ -67,8 +71,10 @@
 (def so-first-failure
   (lambda (checks)
     (cond
-      ((atom? checks) (quote ()))
-      ((atom? (car checks)) (so-first-failure (cdr checks)))
+      ((atom? checks) () (quote ()))
+      ((atom? checks) (1) (quote ()))
+      ((atom? (car checks)) () (so-first-failure (cdr checks)))
+      ((atom? (car checks)) (1) (so-first-failure (cdr checks)))
       (t (car checks)))))
 
 (def structural-observation-contract-witness
@@ -80,15 +86,15 @@
                 (so-expect-case
                   "0002"
                   (quote canon-zero)
-                  (quote (structural-kind empty-list)))
+                  (quote ()))
                 (so-expect-case
                   "0002"
                   (quote pair)
-                  (quote (structural-kind pair)))
+                  (quote (0)))
                 (so-expect-case
                   "0002"
                   (quote non-pair-nonempty)
-                  (quote (structural-kind atom)))
+                  (quote (1)))
                 (so-expect "0002" (quote generic-truth-coercion) (quote forbidden))
                 (so-expect "0002" (quote control-dispatch) (quote explicit-result-equality))
                 (so-expect "0003" (quote input-domain) (quote (atom? atom)))
@@ -96,11 +102,11 @@
                 (so-expect-case
                   "0003"
                   (quote same-atom)
-                  (quote (identity-relation same)))
+                  (quote (1)))
                 (so-expect-case
                   "0003"
                   (quote distinct-atoms)
-                  (quote (identity-relation distinct)))
+                  (quote (0)))
                 (so-expect "0003" (quote outside-domain) (quote type-error))
                 (so-expect "0003" (quote generic-truth-coercion) (quote forbidden))
                 (so-expect "0003" (quote control-dispatch) (quote explicit-result-equality))
@@ -173,8 +179,10 @@
          (list (quote structural-observation-contract-witness)
                (list (quote status) (quote fail))
                (list (quote detail) (quote schema))))
-        ((atom? failure)
-         (list (quote structural-observation-contract-witness)
+        ((atom? failure) () (list (quote structural-observation-contract-witness)
+               (list (quote status) (quote pass))
+               (list (quote detail) (quote explicit-domain-results))))
+        ((atom? failure) (1) (list (quote structural-observation-contract-witness)
                (list (quote status) (quote pass))
                (list (quote detail) (quote explicit-domain-results))))
         (t

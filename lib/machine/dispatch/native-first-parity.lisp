@@ -42,23 +42,23 @@
                (00100111 (00000001 value) expected))))
       (00000111
         ((00100010 evaluator-value expected)
-         (structural-relation same)
+         (1)
          (00000111
            ((00100010 native-outcome expected-native-outcome)
-            (structural-relation same)
+            (1)
             (native-first-parity-pass
               name
               effect-class
               error-class))
            ((00100010 native-outcome expected-native-outcome)
-            (structural-relation distinct)
+            (0)
             (native-first-parity-fail
               name
               (00000001 native-or-route-mismatch)
               expected-native-outcome
               native-outcome))))
         ((00100010 evaluator-value expected)
-         (structural-relation distinct)
+         (0)
          (native-first-parity-fail
            name
            (00000001 evaluator-evidence-mismatch)
@@ -68,15 +68,15 @@
 (00001001 native-first-parity-run
   (00001000 (rows)
     (00000111
-      ((00000010 rows) (structural-kind empty-list) (00000001 ()))
-      ((00000010 rows) (structural-kind atom)
+      ((00000010 rows) () (00000001 ()))
+      ((00000010 rows) (1)
        (00100111
          (native-first-parity-fail
            (00000001 malformed-corpus)
            (00000001 malformed-tail)
            (00000001 ())
            rows)))
-      ((00000010 rows) (structural-kind pair)
+      ((00000010 rows) (0)
        (00000100
          (native-first-parity-case (00000101 rows))
          (native-first-parity-run (00000110 rows)))))))
@@ -84,13 +84,13 @@
 (00001001 native-first-parity-verdict-pass?
   (00001000 (verdict)
     (00000111
-      ((00000010 verdict) (structural-kind pair)
+      ((00000010 verdict) (0)
        (00000111
          ((00100010 (00110000 verdict) (00000001 pass))
-          (structural-relation same)
+          (1)
           t)
          ((00100010 (00110000 verdict) (00000001 pass))
-          (structural-relation distinct)
+          (0)
           (00000001 ()))))
       ((00000001 native-first-parity-verdict-fallback)
        native-first-parity-verdict-fallback
@@ -99,13 +99,13 @@
 (00001001 native-first-parity-all-pass?
   (00001000 (verdicts)
     (00000111
-      ((00000010 verdicts) (structural-kind empty-list) t)
-      ((00000010 verdicts) (structural-kind atom) (00000001 ()))
-      ((00000010 verdicts) (structural-kind pair)
+      ((00000010 verdicts) () t)
+      ((00000010 verdicts) (1) (00000001 ()))
+      ((00000010 verdicts) (0)
        (00000111
          ((00100010 (native-first-parity-verdict-pass? (00000101 verdicts)) t)
-          (structural-relation same)
+          (1)
           (native-first-parity-all-pass? (00000110 verdicts)))
          ((00100010 (native-first-parity-verdict-pass? (00000101 verdicts)) t)
-          (structural-relation distinct)
+          (0)
           (00000001 ())))))))

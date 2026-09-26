@@ -88,13 +88,13 @@
   (lambda (words)
     (cond
       ((eq? (car words) (quote a))
-       (identity-relation same)
+       (1)
        (cdr words))
       ((eq? (car words) (quote an))
-       (identity-relation same)
+       (1)
        (cdr words))
       ((eq? (car words) (quote an))
-       (identity-relation distinct)
+       (0)
        words))))
 
 (def understand-is
@@ -118,13 +118,13 @@
   (lambda (words)
     (cond
       ((eq? (car words) (quote all))
-       (identity-relation same)
+       (1)
        (understand-universal words))
       ((eq? (second words) (quote is))
-       (identity-relation same)
+       (1)
        (understand-is words))
       ((eq? (second words) (quote is))
-       (identity-relation distinct)
+       (0)
        (understand-relation words)))))
 
 ; `understand-query` is the goal-shaped complement of `understand`: it turns
@@ -163,11 +163,11 @@
   (lambda (words)
     (cond
       ((eq? (car words) (quote is))
-       (identity-relation same)
+       (1)
        (understand-query-is words))
       ((eq? (car words) (quote does))
-       (identity-relation same)
+       (1)
        (understand-query-relation words))
       ((eq? (car words) (quote does))
-       (identity-relation distinct)
+       (0)
        (quote ())))))

@@ -25,40 +25,46 @@
 (def my-fc-env-lookup
   (lambda (name env)
     (cond
-      ((atom? env) name)
+      ((atom? env) () name)
+      ((atom? env) (1) name)
       ((eq? (car (car env)) name) (cdr (car env)))
       (t (my-fc-env-lookup name (cdr env))))))
 
 (def my-fc-primitive?
   (lambda (value)
     (cond
-      ((atom? value) (quote ()))
+      ((atom? value) () (quote ()))
+      ((atom? value) (1) (quote ()))
       (t (eq? (car value) (quote primitive))))))
 
 (def my-fc-closure?
   (lambda (value)
     (cond
-      ((atom? value) (quote ()))
+      ((atom? value) () (quote ()))
+      ((atom? value) (1) (quote ()))
       (t (eq? (car value) (quote closure))))))
 
 (def my-fc-bind-params
   (lambda (params args env)
     (cond
-      ((atom? params) env)
+      ((atom? params) () env)
+      ((atom? params) (1) env)
       (t (cons (cons (car params) (car args))
                (my-fc-bind-params (cdr params) (cdr args) env))))))
 
 (def my-fc-eval-list
   (lambda (exprs env)
     (cond
-      ((atom? exprs) (quote ()))
+      ((atom? exprs) () (quote ()))
+      ((atom? exprs) (1) (quote ()))
       (t (cons (my-fc-eval (car exprs) env)
                (my-fc-eval-list (cdr exprs) env))))))
 
 (def my-fc-eval-body
   (lambda (body env)
     (cond
-      ((atom? (cdr body)) (my-fc-eval (car body) env))
+      ((atom? (cdr body)) () (my-fc-eval (car body) env))
+      ((atom? (cdr body)) (1) (my-fc-eval (car body) env))
       (t ((lambda ()
             (my-fc-eval (car body) env)
             (my-fc-eval-body (cdr body) env)))))))
@@ -66,7 +72,8 @@
 (def my-fc-eval-cond
   (lambda (clauses env)
     (cond
-      ((atom? clauses) (quote ()))
+      ((atom? clauses) () (quote ()))
+      ((atom? clauses) (1) (quote ()))
       ((my-fc-eval (car (car clauses)) env)
        (my-fc-eval (second (car clauses)) env))
       (t (my-fc-eval-cond (cdr clauses) env)))))
@@ -74,7 +81,8 @@
 (def my-fc-compare-chain
   (lambda (op args)
     (cond
-      ((atom? (cdr args)) t)
+      ((atom? (cdr args)) () t)
+      ((atom? (cdr args)) (1) t)
       ((cond
          ((eq? op (quote <)) (< (car args) (second args)))
          ((eq? op (quote =)) (= (car args) (second args)))
@@ -116,9 +124,21 @@
 (def my-fc-eval
   (lambda (expr env)
     (cond
-      ((atom? expr) (my-fc-env-lookup expr env))
-      ((atom? (car expr))
-       (cond
+      ((atom? expr) () (my-fc-env-lookup expr env))
+      ((atom? expr) (1) (my-fc-env-lookup expr env))
+      ((atom? (car expr)) () (cond
+         ; Syntax-only forms remain syntax. They are intentionally not values.
+         ((eq? (car expr) (quote quote)) (second expr))
+         ((eq? (car expr) (quote cond)) (my-fc-eval-cond (cdr expr) env))
+         ((eq? (car expr) (quote lambda))
+          (list (quote closure) (second expr) (cdr (cdr expr)) env))
+         ; Every ordinary head is resolved through the environment first.
+         ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow
+         ; the root primitive binding without the evaluator special-casing its name.
+         (t (my-fc-apply
+              (my-fc-eval (car expr) env)
+              (my-fc-eval-list (cdr expr) env)))))
+      ((atom? (car expr)) (1) (cond
          ; Syntax-only forms remain syntax. They are intentionally not values.
          ((eq? (car expr) (quote quote)) (second expr))
          ((eq? (car expr) (quote cond)) (my-fc-eval-cond (cdr expr) env))

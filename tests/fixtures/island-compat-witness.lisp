@@ -13,13 +13,15 @@
   (lambda (entry field)
     (let ((found (assoc field entry)))
       (cond
-        ((atom? found) (quote ()))
+        ((atom? found) () (quote ()))
+        ((atom? found) (1) (quote ()))
         (t (cdr found))))))
 
 (def island-compat-find
   (lambda (identity entries)
     (cond
-      ((atom? entries) (quote ()))
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
       ((equal? (island-compat-field (car entries) (quote identity)) identity)
        (car entries))
       (t (island-compat-find identity (cdr entries))))))
@@ -32,7 +34,8 @@
   (lambda (identity field expected)
     (let ((entry (island-compat-entry identity)))
       (cond
-        ((atom? entry) (list (quote missing-entry) identity))
+        ((atom? entry) () (list (quote missing-entry) identity))
+        ((atom? entry) (1) (list (quote missing-entry) identity))
         ((equal? (island-compat-field entry field) expected) (quote ()))
         (t (list (quote mismatch) identity field expected
                  (island-compat-field entry field)))))))
@@ -40,8 +43,10 @@
 (def island-compat-first-failure
   (lambda (checks)
     (cond
-      ((atom? checks) (quote ()))
-      ((atom? (car checks)) (island-compat-first-failure (cdr checks)))
+      ((atom? checks) () (quote ()))
+      ((atom? checks) (1) (quote ()))
+      ((atom? (car checks)) () (island-compat-first-failure (cdr checks)))
+      ((atom? (car checks)) (1) (island-compat-first-failure (cdr checks)))
       (t (car checks)))))
 
 (def island-compat-witness
@@ -88,8 +93,10 @@
       (cond
         ((eq? (island-compat-schema) (quote island-compat-contract/1))
          (cond
-           ((atom? failure)
-            (list (quote island-compat-witness)
+           ((atom? failure) () (list (quote island-compat-witness)
+                  (list (quote status) (quote pass))
+                  (list (quote detail) (quote semantic-owner-island-mechanism))))
+           ((atom? failure) (1) (list (quote island-compat-witness)
                   (list (quote status) (quote pass))
                   (list (quote detail) (quote semantic-owner-island-mechanism))))
            (t

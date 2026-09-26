@@ -121,8 +121,10 @@
 (def clips-deftemplate-form?
   (lambda (form)
     (cond
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (eq? (car form) (quote deftemplate)))
+      ((atom? form) () (quote ()))
+      ((atom? form) (1) (quote ()))
+      ((atom? (car form)) () (eq? (car form) (quote deftemplate)))
+      ((atom? (car form)) (1) (eq? (car form) (quote deftemplate)))
       (t (quote ())))))
 
 ; Real CLIPS files namespace their deftemplate/deffacts names with a
@@ -191,7 +193,8 @@
 (def clips-slot-names
   (lambda (slot-forms)
     (cond
-      ((atom? slot-forms) (quote ()))
+      ((atom? slot-forms) () (quote ()))
+      ((atom? slot-forms) (1) (quote ()))
       (t (cons (clips-slot-name (car slot-forms)) (clips-slot-names (cdr slot-forms)))))))
 
 (def clips-deftemplate-slots
@@ -201,7 +204,8 @@
 (def clips-templates-from-forms
   (lambda (forms)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       ((clips-deftemplate-form? (car forms))
        (cons (cons (clips-deftemplate-name (car forms)) (clips-deftemplate-slots (car forms)))
              (clips-templates-from-forms (cdr forms))))
@@ -211,7 +215,8 @@
   (lambda (name templates)
     (let ((entry (assoc name templates)))
       (cond
-        ((atom? entry) (quote ()))
+        ((atom? entry) () (quote ()))
+        ((atom? entry) (1) (quote ()))
         (t (cdr entry))))))
 
 ; A CLIPS condition can name a multislot with no value at all, e.g.
@@ -243,7 +248,8 @@
 (def clips-slot-value-of
   (lambda (slot-form)
     (cond
-      ((atom? (cdr slot-form)) (quote ()))
+      ((atom? (cdr slot-form)) () (quote ()))
+      ((atom? (cdr slot-form)) (1) (quote ()))
       (t (second slot-form)))))
 
 ; Guards with `(atom (car slot-forms))` before comparing: a well-formed
@@ -256,15 +262,18 @@
 (def clips-lookup-slot-value
   (lambda (slot-name slot-forms)
     (cond
-      ((atom? slot-forms) (quote ()))
-      ((atom? (car slot-forms)) (clips-lookup-slot-value slot-name (cdr slot-forms)))
+      ((atom? slot-forms) () (quote ()))
+      ((atom? slot-forms) (1) (quote ()))
+      ((atom? (car slot-forms)) () (clips-lookup-slot-value slot-name (cdr slot-forms)))
+      ((atom? (car slot-forms)) (1) (clips-lookup-slot-value slot-name (cdr slot-forms)))
       ((equal? slot-name (car (car slot-forms))) (clips-slot-value-of (car slot-forms)))
       (t (clips-lookup-slot-value slot-name (cdr slot-forms))))))
 
 (def clips-positional-args
   (lambda (slot-order slot-forms)
     (cond
-      ((atom? slot-order) (quote ()))
+      ((atom? slot-order) () (quote ()))
+      ((atom? slot-order) (1) (quote ()))
       (t (cons (clips-lookup-slot-value (car slot-order) slot-forms)
                 (clips-positional-args (cdr slot-order) slot-forms))))))
 
@@ -304,9 +313,9 @@
 (def clips-convert-template
   (lambda (term templates)
     (cond
-      ((atom? term) term)
-      ((atom? (car term))
-       (cond
+      ((atom? term) () term)
+      ((atom? term) (1) term)
+      ((atom? (car term)) () (cond
          ((eq? (car term) (quote not)) (list (quote not) (clips-convert-template (second term) templates)))
          ((eq? (car term) (quote or)) (cons (quote or) (clips-convert-template-list (cdr term) templates)))
          ((eq? (car term) (quote and)) (cons (quote and) (clips-convert-template-list (cdr term) templates)))
@@ -314,14 +323,27 @@
          ((eq? (car term) (quote forall)) (cons (quote forall) (clips-convert-template-list (cdr term) templates)))
          (t (let ((slot-order (clips-template-slot-order (clips-strip-module-prefix (car term)) templates)))
               (cond
-                ((atom? slot-order) term)
+                ((atom? slot-order) () term)
+                ((atom? slot-order) (1) term)
+                (t (cons (car term) (clips-positional-args slot-order (cdr term)))))))))
+      ((atom? (car term)) (1) (cond
+         ((eq? (car term) (quote not)) (list (quote not) (clips-convert-template (second term) templates)))
+         ((eq? (car term) (quote or)) (cons (quote or) (clips-convert-template-list (cdr term) templates)))
+         ((eq? (car term) (quote and)) (cons (quote and) (clips-convert-template-list (cdr term) templates)))
+         ((eq? (car term) (quote exists)) (cons (quote exists) (clips-convert-template-list (cdr term) templates)))
+         ((eq? (car term) (quote forall)) (cons (quote forall) (clips-convert-template-list (cdr term) templates)))
+         (t (let ((slot-order (clips-template-slot-order (clips-strip-module-prefix (car term)) templates)))
+              (cond
+                ((atom? slot-order) () term)
+                ((atom? slot-order) (1) term)
                 (t (cons (car term) (clips-positional-args slot-order (cdr term)))))))))
       (t term))))
 
 (def clips-convert-template-list
   (lambda (terms templates)
     (cond
-      ((atom? terms) (quote ()))
+      ((atom? terms) () (quote ()))
+      ((atom? terms) (1) (quote ()))
       (t (cons (clips-convert-template (car terms) templates)
                 (clips-convert-template-list (cdr terms) templates))))))
 
@@ -349,7 +371,8 @@
 (def clips-facts->clauses-onto
   (lambda (facts templates acc)
     (cond
-      ((atom? facts) (reverse acc))
+      ((atom? facts) () (reverse acc))
+      ((atom? facts) (1) (reverse acc))
       (t (clips-facts->clauses-onto
            (cdr facts) templates
            (cons (clips-fact-clause (clips-convert-template (car facts) templates)) acc))))))
@@ -420,8 +443,10 @@
 (def clips-var?
   (lambda (term)
     (cond
-      ((atom? term)
-       (cond
+      ((atom? term) () (cond
+         ((symbol? term) (clips-symbol-starts-with-? term))
+         (t (quote ()))))
+      ((atom? term) (1) (cond
          ((symbol? term) (clips-symbol-starts-with-? term))
          (t (quote ()))))
       (t (quote ())))))
@@ -440,7 +465,8 @@
   (lambda (term)
     (cond
       ((clips-var? term) (clips-var-term term))
-      ((atom? term) term)
+      ((atom? term) () term)
+      ((atom? term) (1) term)
       (t (cons (clips-convert-vars (car term)) (clips-convert-vars (cdr term)))))))
 
 ; Splits a defrule's body at `=>` into (conditions . conclusion-forms).
@@ -450,9 +476,13 @@
 (def clips-split-at-arrow
   (lambda (body)
     (cond
-      ((atom? body) (list (quote ()) (quote ())))
-      ((atom? (car body))
-       (cond
+      ((atom? body) () (list (quote ()) (quote ())))
+      ((atom? body) (1) (list (quote ()) (quote ())))
+      ((atom? (car body)) () (cond
+         ((eq? (car body) (quote =>)) (list (quote ()) (cdr body)))
+         (t (let ((rest (clips-split-at-arrow (cdr body))))
+              (list (cons (car body) (car rest)) (second rest))))))
+      ((atom? (car body)) (1) (cond
          ((eq? (car body) (quote =>)) (list (quote ()) (cdr body)))
          (t (let ((rest (clips-split-at-arrow (cdr body))))
               (list (cons (car body) (car rest)) (second rest))))))
@@ -498,8 +528,10 @@
 (def clips-assert-form?
   (lambda (form)
     (cond
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (eq? (car form) (quote assert)))
+      ((atom? form) () (quote ()))
+      ((atom? form) (1) (quote ()))
+      ((atom? (car form)) () (eq? (car form) (quote assert)))
+      ((atom? (car form)) (1) (eq? (car form) (quote assert)))
       (t (quote ())))))
 
 ; Step 9: `printout` alongside `assert` no longer disqualifies a whole
@@ -564,21 +596,25 @@
 (def clips-printout-form?
   (lambda (form)
     (cond
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (eq? (car form) (quote printout)))
+      ((atom? form) () (quote ()))
+      ((atom? form) (1) (quote ()))
+      ((atom? (car form)) () (eq? (car form) (quote printout)))
+      ((atom? (car form)) (1) (eq? (car form) (quote printout)))
       (t (quote ())))))
 
 (def clips-drop-printouts
   (lambda (forms)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       ((clips-printout-form? (car forms)) (clips-drop-printouts (cdr forms)))
       (t (cons (car forms) (clips-drop-printouts (cdr forms)))))))
 
 (def clips-all-asserts?
   (lambda (forms)
     (cond
-      ((atom? forms) t)
+      ((atom? forms) () t)
+      ((atom? forms) (1) t)
       ((clips-assert-form? (car forms)) (clips-all-asserts? (cdr forms)))
       (t (quote ())))))
 
@@ -624,13 +660,15 @@
 (def clips-assert-conclusions
   (lambda (forms)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       (t (append (cdr (car forms)) (clips-assert-conclusions (cdr forms)))))))
 
 (def clips-clauses-for-conclusions
   (lambda (conclusions conditions)
     (cond
-      ((atom? conclusions) (quote ()))
+      ((atom? conclusions) () (quote ()))
+      ((atom? conclusions) (1) (quote ()))
       (t (cons (cons (clips-convert-vars (car conclusions)) conditions)
                 (clips-clauses-for-conclusions (cdr conclusions) conditions))))))
 
@@ -732,14 +770,17 @@
   (lambda (form)
     (cond
       ((string? form) t)
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (eq? (car form) (quote declare)))
+      ((atom? form) () (quote ()))
+      ((atom? form) (1) (quote ()))
+      ((atom? (car form)) () (eq? (car form) (quote declare)))
+      ((atom? (car form)) (1) (eq? (car form) (quote declare)))
       (t (quote ())))))
 
 (def clips-strip-rule-preamble
   (lambda (body)
     (cond
-      ((atom? body) body)
+      ((atom? body) () body)
+      ((atom? body) (1) body)
       ((clips-rule-preamble-form? (car body)) (clips-strip-rule-preamble (cdr body)))
       (t body))))
 
@@ -829,13 +870,15 @@
 (def clips-cons-each-onto
   (lambda (items acc)
     (cond
-      ((atom? items) acc)
+      ((atom? items) () acc)
+      ((atom? items) (1) acc)
       (t (clips-cons-each-onto (cdr items) (cons (car items) acc))))))
 
 (def clips-import-forms-onto
   (lambda (forms templates acc)
     (cond
-      ((atom? forms) (reverse acc))
+      ((atom? forms) () (reverse acc))
+      ((atom? forms) (1) (reverse acc))
       (t (clips-import-forms-onto
            (cdr forms) templates
            (clips-cons-each-onto (clips-form->clauses (car forms) templates) acc))))))

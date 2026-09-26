@@ -26,11 +26,11 @@ const MEMBER_NAMED: &str = r#"
 (def member-named?
   (lambda (item lst)
     (cond
-      ((atom? lst) (structural-kind empty-list) (quote ()))
-      ((atom? lst) (structural-kind pair)
+      ((atom? lst) () (quote ()))
+      ((atom? lst) (0)
        (cond
-         ((eq? item (car lst)) (identity-relation same) t)
-         ((eq? item (car lst)) (identity-relation distinct)
+         ((eq? item (car lst)) (1) t)
+         ((eq? item (car lst)) (0)
           (member-named? item (cdr lst))))))))
 "#;
 
@@ -40,11 +40,11 @@ const MEMBER_SID: &str = r#"
 (def member-sid?
   (lambda (item lst)
     (cond
-      ((atom? lst) (structural-kind empty-list) (quote ()))
-      ((atom? lst) (structural-kind pair)
+      ((atom? lst) () (quote ()))
+      ((atom? lst) (0)
        (cond
-         ((00000011 item (car lst)) (identity-relation same) t)
-         ((00000011 item (car lst)) (identity-relation distinct)
+         ((00000011 item (car lst)) (1) t)
+         ((00000011 item (car lst)) (0)
           (member-sid? item (cdr lst))))))))
 "#;
 

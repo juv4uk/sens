@@ -23,7 +23,7 @@
                  (quote common-lisp)
                  (quote bounded-exact-add)
                  "2 3"))
-         (structural-relation same)
+         (1)
          (cond
            ((equal?
               pl
@@ -32,7 +32,7 @@
                     (quote prolog)
                     (quote bounded-exact-add)
                     "2 3"))
-            (structural-relation same)
+            (1)
             (cond
               ((equal?
                  dl
@@ -41,7 +41,7 @@
                        (quote datalog)
                        (quote bounded-exact-add)
                        "2 3"))
-               (structural-relation same)
+               (1)
                (cond
                  ((equal?
                     clips-result
@@ -50,7 +50,7 @@
                           (quote clips)
                           (quote bounded-exact-add)
                           "2 3"))
-                  (structural-relation same)
+                  (1)
                   (quote (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))))
                  ((quote witness-clips-fail) witness-clips-fail
                   (car (quote ())))))

@@ -968,7 +968,8 @@
 (00001011 guard-script-find
   (00001000 (name tools)
     (00000111
-      ((00000010 tools) (00000001 ()))
+      ((00000010 tools) () (00000001 ()))
+      ((00000010 tools) (1) (00000001 ()))
       ((00000011 (guard-reference-field (00000001 name) (00000101 tools)) name) (00000101 tools))
       (t (guard-script-find name (00000110 tools))))))
 
@@ -976,8 +977,12 @@
   (00001000 (name)
     (let ((tool (guard-script-find name *guard-script-directory*)))
       (00000111
-        ((00000010 tool)
-         (list
+        ((00000010 tool) () (list
+           (00000001 tool-missing)
+           (list (00000001 name) name)
+           (list (00000001 decision) (00000001 unknown))
+           (list (00000001 unknown-routes) (guard-unknown-routes))))
+        ((00000010 tool) (1) (list
            (00000001 tool-missing)
            (list (00000001 name) name)
            (list (00000001 decision) (00000001 unknown))
@@ -987,7 +992,8 @@
 (00001011 guard-scripts
   (00001000 (tools)
     (00000111
-      ((00000010 tools) (00000001 ()))
+      ((00000010 tools) () (00000001 ()))
+      ((00000010 tools) (1) (00000001 ()))
       (t (00000100 (guard-reference-field (00000001 name) (00000101 tools))
                (guard-scripts (00000110 tools)))))))
 
@@ -1009,9 +1015,9 @@
         ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
         ; them apart. Only the empty list means "missing"; any other atom is
         ; a real found status and must be returned as-is.
-        ((00000010 status) (structural-kind empty-list) (00000001 unresolved))
-        ((00000010 status) (structural-kind atom) status)
-        ((00000010 status) (structural-kind pair) status)))))
+        ((00000010 status) () (00000001 unresolved))
+        ((00000010 status) (1) status)
+        ((00000010 status) (0) status)))))
 
 (00001011 guard-evidence-status-strength
   (00001000 (status)
@@ -1025,7 +1031,8 @@
 (00001011 guard-reference-stronger
   (00001000 (best candidate)
     (00000111
-      ((00000010 best) candidate)
+      ((00000010 best) () candidate)
+      ((00000010 best) (1) candidate)
       (t
        (let ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
              (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
@@ -1036,7 +1043,8 @@
 (00001011 guard-reference-all
   (00001000 (topic references)
     (00000111
-      ((00000010 references) (00000001 ()))
+      ((00000010 references) () (00000001 ()))
+      ((00000010 references) (1) (00000001 ()))
       ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
        (00000100 (00000101 references) (guard-reference-all topic (00000110 references))))
       (t (guard-reference-all topic (00000110 references))))))
@@ -1044,7 +1052,8 @@
 (00001011 guard-reference-find-strongest
   (00001000 (topic references best)
     (00000111
-      ((00000010 references) best)
+      ((00000010 references) () best)
+      ((00000010 references) (1) best)
       ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
        (guard-reference-find-strongest
          topic (00000110 references)
@@ -1059,8 +1068,15 @@
   (lambda (topic)
     (let ((reference (guard-reference-find topic *guard-reference-directory*)))
       (cond
-        ((atom? reference)
-         (list
+        ((atom? reference) () (list
+           (quote reference-missing)
+           (list (quote schema) (quote guard-reference/1))
+           (list (quote topic) topic)
+           (list (quote decision) (quote unknown))
+           (list (quote evidence-status) (quote unresolved))
+           (list (quote guidance) (quote choose-unknown-route))
+           (list (quote unknown-routes) (guard-unknown-routes))))
+        ((atom? reference) (1) (list
            (quote reference-missing)
            (list (quote schema) (quote guard-reference/1))
            (list (quote topic) topic)
@@ -1089,7 +1105,8 @@
 (def guard-topics
   (lambda (references)
     (cond
-      ((atom? references) (quote ()))
+      ((atom? references) () (quote ()))
+      ((atom? references) (1) (quote ()))
       (t
        (cons
          (guard-reference-field (quote topic) (car references))
@@ -1110,10 +1127,26 @@
     (let* ((tool (guard-script-find name *guard-script-directory*))
            (reference (guard-reference-find name *guard-reference-directory*)))
       (cond
-        ((atom? tool)
-         (cond
-           ((atom? reference)
-            (list (quote not-found)
+        ((atom? tool) () (cond
+           ((atom? reference) () (list (quote not-found)
+                  (list (quote query) name)
+                  (list (quote decision) (quote unknown))
+                  (list (quote unknown-routes) (guard-unknown-routes))))
+           ((atom? reference) (1) (list (quote not-found)
+                  (list (quote query) name)
+                  (list (quote decision) (quote unknown))
+                  (list (quote unknown-routes) (guard-unknown-routes))))
+           (t
+            (list (quote result)
+                  (list (quote type) (quote reference-topic))
+                  (list (quote source) (quote knowledge/guard-reference.lisp))
+                  (list (quote entry) reference)))))
+        ((atom? tool) (1) (cond
+           ((atom? reference) () (list (quote not-found)
+                  (list (quote query) name)
+                  (list (quote decision) (quote unknown))
+                  (list (quote unknown-routes) (guard-unknown-routes))))
+           ((atom? reference) (1) (list (quote not-found)
                   (list (quote query) name)
                   (list (quote decision) (quote unknown))
                   (list (quote unknown-routes) (guard-unknown-routes))))
@@ -1124,8 +1157,11 @@
                   (list (quote entry) reference)))))
         (t
          (cond
-           ((atom? reference)
-            (list (quote result)
+           ((atom? reference) () (list (quote result)
+                  (list (quote type) (quote tool))
+                  (list (quote source) (quote guard-script-directory))
+                  (list (quote entry) tool)))
+           ((atom? reference) (1) (list (quote result)
                   (list (quote type) (quote tool))
                   (list (quote source) (quote guard-script-directory))
                   (list (quote entry) tool)))

@@ -72,7 +72,7 @@ fn lisp_fs_deduplicates_equal_objects_but_keeps_explicit_missing_status() {
                     (fs-read (car b) "missing")))))
             "#
         ),
-        "(1 t (not-found \"missing\"))"
+        "(1 (1) (not-found \"missing\"))"
     );
 }
 
@@ -458,7 +458,7 @@ fn different_content_occupies_different_addresses() {
                         store (knowledge-content-address mars)))))
             "#
         ),
-        "(2 t t)"
+        "(2 (1) (1))"
     );
 }
 

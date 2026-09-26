@@ -73,8 +73,10 @@
 (def narrate-derivation
   (lambda (derivations)
     (cond
-      ((atom? derivations) (quote ()))
-      ((atom? (cdr derivations)) (narrate-provenance (car derivations)))
+      ((atom? derivations) () (quote ()))
+      ((atom? derivations) (1) (quote ()))
+      ((atom? (cdr derivations)) () (narrate-provenance (car derivations)))
+      ((atom? (cdr derivations)) (1) (narrate-provenance (car derivations)))
       (t (append (narrate-provenance (car derivations))
                   (cons (quote and) (narrate-derivation (cdr derivations))))))))
 
@@ -106,7 +108,8 @@
   (lambda (goal proof)
     (let ((derivations (provenance-derived-from (provenance proof))))
       (cond
-        ((atom? derivations) (narrate-fact goal))
+        ((atom? derivations) () (narrate-fact goal))
+        ((atom? derivations) (1) (narrate-fact goal))
         (t (append (narrate-fact goal)
                    (cons (quote because) (narrate-derivation derivations))))))))
 
@@ -124,8 +127,8 @@
     (let ((statement (second outcome))
           (results (third outcome)))
       (cond
-        ((atom? results)
-         (list (quote proved) statement (quote without-proof-result)))
+        ((atom? results) () (list (quote proved) statement (quote without-proof-result)))
+        ((atom? results) (1) (list (quote proved) statement (quote without-proof-result)))
         (t
          (append
            (list (quote proved))
@@ -146,13 +149,13 @@
 (def narrate-outcome
   (lambda (outcome)
     (cond
-      ((atom? outcome)
-       (narrate-invalid-outcome-shape outcome))
+      ((atom? outcome) () (narrate-invalid-outcome-shape outcome))
+      ((atom? outcome) (1) (narrate-invalid-outcome-shape outcome))
       ((not? (result-proper-list? outcome))
        (narrate-invalid-outcome-shape outcome))
-      ((atom? (car outcome)) (structural-kind pair)
+      ((atom? (car outcome)) (0)
        (list (quote invalid) (quote outcome-tag) (car outcome)))
-      ((atom? (car outcome)) (structural-kind empty-list)
+      ((atom? (car outcome)) ()
        (list (quote invalid) (quote outcome-tag) (car outcome)))
       ((symbol? (car outcome)) (class-membership symbol nonmember)
        (list (quote invalid) (quote outcome-tag) (car outcome)))

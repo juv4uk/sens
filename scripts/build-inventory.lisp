@@ -17,7 +17,8 @@
 (def assoc
   (lambda (key alist)
     (cond
-      ((atom? alist) ())
+      ((atom? alist) () ())
+      ((atom? alist) (1) ())
       (t (cond
            ((eq? (caar alist) key) (car alist))
            (t (assoc key (cdr alist))))))))
@@ -25,7 +26,8 @@
 (def assoc-str
   (lambda (key alist)
     (cond
-      ((atom? alist) ())
+      ((atom? alist) () ())
+      ((atom? alist) (1) ())
       (t (cond
            ((eq? (caar alist) key) (cdr (car alist)))
            (t (assoc-str key (cdr alist))))))))
@@ -33,14 +35,16 @@
 (def alist-keys
   (lambda (alist)
     (cond
-      ((atom? alist) ())
+      ((atom? alist) () ())
+      ((atom? alist) (1) ())
       (t (cons (caar alist) (alist-keys (cdr alist)))))))
 
 ;; Unique list (preserve order of first appearance)
 (def uniq
   (lambda (lst)
     (cond
-      ((atom? lst) ())
+      ((atom? lst) () ())
+      ((atom? lst) (1) ())
       (t (cond
            ((member? (car lst) (cdr lst)) (uniq (cdr lst)))
            (t (cons (car lst) (uniq (cdr lst)))))))))
@@ -58,26 +62,54 @@
 (def walk-observed
   (lambda (v)
     (cond
-      ((atom? v) ())
+      ((atom? v) () ())
+      ((atom? v) (1) ())
       (t
        (let ((head (car v)))
          (cond
-           ((atom? head)
-            (cond
+           ((atom? head) () (cond
               ((eq? head (quote quote))
                (list (quote quote)))
               ((eq? head (quote lambda))
                (cons (quote lambda)
-                     (cond ((atom? (cddr v)) ())
+                     (cond ((atom? (cddr v)) () ())
+                           ((atom? (cddr v)) (1) ())
                            (t (walk-observed (car (cddr v)))))))
               ((eq? head (quote def))
                (cons (quote def)
-                     (cond ((atom? (cddr v)) ())
+                     (cond ((atom? (cddr v)) () ())
+                           ((atom? (cddr v)) (1) ())
                            (t (walk-observed (car (cddr v)))))))
               ((eq? head (quote defmacro))
                (cons (quote defmacro)
-                     (cond ((atom? (cddr v)) ())
-                           ((atom? (cdr (cddr v))) ())
+                     (cond ((atom? (cddr v)) () ())
+                           ((atom? (cddr v)) (1) ())
+                           ((atom? (cdr (cddr v))) () ())
+                           ((atom? (cdr (cddr v))) (1) ())
+                           (t (walk-observed (car (cdr (cddr v))))))))
+              ((eq? head (quote cond))
+               (cons (quote cond) (walk-cond-clauses (cdr v))))
+              (t
+               (cons (quote application) (walk-list v)))))
+           ((atom? head) (1) (cond
+              ((eq? head (quote quote))
+               (list (quote quote)))
+              ((eq? head (quote lambda))
+               (cons (quote lambda)
+                     (cond ((atom? (cddr v)) () ())
+                           ((atom? (cddr v)) (1) ())
+                           (t (walk-observed (car (cddr v)))))))
+              ((eq? head (quote def))
+               (cons (quote def)
+                     (cond ((atom? (cddr v)) () ())
+                           ((atom? (cddr v)) (1) ())
+                           (t (walk-observed (car (cddr v)))))))
+              ((eq? head (quote defmacro))
+               (cons (quote defmacro)
+                     (cond ((atom? (cddr v)) () ())
+                           ((atom? (cddr v)) (1) ())
+                           ((atom? (cdr (cddr v))) () ())
+                           ((atom? (cdr (cddr v))) (1) ())
                            (t (walk-observed (car (cdr (cddr v))))))))
               ((eq? head (quote cond))
                (cons (quote cond) (walk-cond-clauses (cdr v))))
@@ -89,16 +121,19 @@
 (def walk-cond-clauses
   (lambda (clauses)
     (cond
-      ((atom? clauses) ())
+      ((atom? clauses) () ())
+      ((atom? clauses) (1) ())
       (t (append (walk-observed (caar clauses))
-                 (append (cond ((atom? (cdr (car clauses))) ())
+                 (append (cond ((atom? (cdr (car clauses))) () ())
+                               ((atom? (cdr (car clauses))) (1) ())
                                (t (walk-observed (cadr (car clauses)))))
                          (walk-cond-clauses (cdr clauses))))))))
 
 (def walk-list
   (lambda (lst)
     (cond
-      ((atom? lst) ())
+      ((atom? lst) () ())
+      ((atom? lst) (1) ())
       (t (append (walk-observed (car lst))
                  (walk-list (cdr lst)))))))
 
@@ -113,7 +148,8 @@
       (t
        (let ((forms (read-all expr-str)))
          (cond
-           ((atom? forms) ())
+           ((atom? forms) () ())
+           ((atom? forms) (1) ())
            (t (uniq (walk-observed (car forms))))))))))
 
 ;; Build identity record and compute ID
@@ -162,7 +198,8 @@
 (def emit-all
   (lambda (remaining)
     (cond
-      ((atom? remaining) (quote ()))
+      ((atom? remaining) () (quote ()))
+      ((atom? remaining) (1) (quote ()))
       (t
        (let ((printed (emit-fixture (car remaining))))
          (emit-all (cdr remaining)))))))

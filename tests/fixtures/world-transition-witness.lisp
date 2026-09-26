@@ -20,20 +20,20 @@
               ; 1. Parent structural relation
               (wt-verify-law (quote parent-relation)
                              (equal? w0 (world-parent w1))
-                             (quote (structural-relation same)))
+                             (quote (1)))
               ; 2. Content address self-identity (atoms compare via eq)
               (wt-verify-law (quote address-identity-same)
                              (eq? addr1 addr1)
-                             (quote (identity-relation same)))
+                             (quote (1)))
               ; 3. Distinct world histories produce distinct content address identity
               (wt-verify-law (quote address-identity-distinct)
                              (eq? addr1 addr2)
-                             (quote (identity-relation distinct)))
+                             (quote (0)))
               ; 4. World at depth recovery
               (wt-verify-law (quote depth-recovery)
                              (equal? w0 (world-at-depth w2 0))
-                             (quote (structural-relation same)))
+                             (quote (1)))
               ; 5. Universal truth forbidden: structural equality does not equal atom t
               (wt-verify-law (quote universal-t-forbidden)
-                             (equal? (equal? w0 w0) (quote (structural-relation same)))
-                             (quote (structural-relation same))))))))))
+                             (equal? (equal? w0 w0) (quote (1)))
+                             (quote (1))))))))))

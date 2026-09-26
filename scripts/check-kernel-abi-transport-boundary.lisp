@@ -17,39 +17,39 @@
   (lambda (name rows)
     (cond
       ((atom? rows)
-       (structural-kind empty-list)
+       ()
        (quote ()))
       ((atom? rows)
-       (structural-kind pair)
+       (0)
        (cond
          ((eq? (car (car rows)) name)
-          (identity-relation same)
+          (1)
           (car rows))
          ((eq? (car (car rows)) name)
-          (identity-relation distinct)
+          (0)
           (kab-find name (cdr rows))))))))
 
 (def kab-find-kernel
   (lambda (kernel-name rows)
     (cond
       ((atom? rows)
-       (structural-kind empty-list)
+       ()
        (quote ()))
       ((atom? rows)
-       (structural-kind pair)
+       (0)
        (let ((row (car rows)))
          (cond
            ((eq? (car row) (quote kernel))
-            (identity-relation same)
+            (1)
             (cond
               ((eq? (second row) kernel-name)
-               (identity-relation same)
+               (1)
                row)
               ((eq? (second row) kernel-name)
-               (identity-relation distinct)
+               (0)
                (kab-find-kernel kernel-name (cdr rows)))))
            ((eq? (car row) (quote kernel))
-            (identity-relation distinct)
+            (0)
             (kab-find-kernel kernel-name (cdr rows)))))))))
 
 (def kab-row-check
@@ -57,10 +57,10 @@
     (let ((actual (kab-find name kab-rows)))
       (cond
         ((equal? actual expected)
-         (structural-relation same)
+         (1)
          (quote ()))
         ((equal? actual expected)
-         (structural-relation distinct)
+         (0)
          (list (quote policy-mismatch) name expected actual))))))
 
 (def kab-kernel-row-check
@@ -68,26 +68,26 @@
     (let ((actual (kab-find-kernel kernel-name kab-rows)))
       (cond
         ((equal? actual expected)
-         (structural-relation same)
+         (1)
          (quote ()))
         ((equal? actual expected)
-         (structural-relation distinct)
+         (0)
          (list (quote kernel-row-mismatch) kernel-name expected actual))))))
 
 (def kab-first-failure
   (lambda (checks)
     (cond
       ((atom? checks)
-       (structural-kind empty-list)
+       ()
        (quote ()))
       ((atom? (car checks))
-       (structural-kind empty-list)
+       ()
        (kab-first-failure (cdr checks)))
       ((atom? (car checks))
-       (structural-kind pair)
+       (0)
        (car checks))
       ((atom? (car checks))
-       (structural-kind atom)
+       (1)
        (car checks)))))
 
 (def kab-verdict
@@ -172,19 +172,19 @@
                       "crates/wsm-datalog-kernel/Cargo.toml")))))))
       (cond
         ((atom? failure)
-         (structural-kind empty-list)
+         ()
          (quote
            (kernel-abi-transport-boundary-ok
              (kernels 4)
              (language-type Sens8)
              (abi-wrapper SemanticId))))
         ((atom? failure)
-         (structural-kind pair)
+         (0)
          (list
            (quote kernel-abi-transport-boundary-violation)
            failure))
         ((atom? failure)
-         (structural-kind atom)
+         (1)
          (list
            (quote kernel-abi-transport-boundary-violation)
            failure))))))

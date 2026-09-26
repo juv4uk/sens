@@ -69,7 +69,7 @@ fn canonical_ukrainian_syntax_and_batch_one_aliases_preserve_results() {
     //   текст-порожній? -> explicit identity-relation observation
     assert_eq!(
         aliases.value.to_string(),
-        "(5 1 t (identity-relation same) 7)"
+        "(5 1 t (1) 7)"
     );
 }
 

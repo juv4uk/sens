@@ -5,16 +5,16 @@
 
 (def verdict-tag
   (cond
-    ((atom? verdict) (structural-kind atom) verdict)
-    ((atom? verdict) (structural-kind pair) (car verdict))
-    ((atom? verdict) (structural-kind empty-list) (quote empty-verdict))))
+    ((atom? verdict) (1) verdict)
+    ((atom? verdict) (0) (car verdict))
+    ((atom? verdict) () (quote empty-verdict))))
 
 (cond
   ((eq? verdict-tag (quote semantic-authority-ok))
-   (identity-relation same)
+   (1)
    (quote semantic-authority-ok))
   ((eq? verdict-tag (quote semantic-authority-violation))
-   (identity-relation same)
+   (1)
    (car ()))
   (t
    (car ())))

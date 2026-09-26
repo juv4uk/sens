@@ -5,13 +5,15 @@
   (lambda (entry field)
     (let ((found (assoc field entry)))
       (cond
-        ((atom? found) (quote ()))
+        ((atom? found) () (quote ()))
+        ((atom? found) (1) (quote ()))
         (t (cdr found))))))
 
 (def q-find
   (lambda (identity entries)
     (cond
-      ((atom? entries) (quote ()))
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
       ((equal? (q-field (car entries) (quote identity)) identity)
        (car entries))
       (t (q-find identity (cdr entries))))))
@@ -31,7 +33,8 @@
 (def q-outcome-find
   (lambda (meaning outcomes)
     (cond
-      ((atom? outcomes) (quote ()))
+      ((atom? outcomes) () (quote ()))
+      ((atom? outcomes) (1) (quote ()))
       ((equal? (q-field (car outcomes) (quote meaning)) meaning)
        (car outcomes))
       (t (q-outcome-find meaning (cdr outcomes))))))
@@ -39,7 +42,8 @@
 (def q-expect
   (lambda (entry field expected)
     (cond
-      ((atom? entry) (list (quote missing-entry) field expected))
+      ((atom? entry) () (list (quote missing-entry) field expected))
+      ((atom? entry) (1) (list (quote missing-entry) field expected))
       ((equal? (q-field entry field) expected) (quote ()))
       (t (list (quote mismatch) field expected (q-field entry field))))))
 
@@ -47,7 +51,8 @@
   (lambda (identity field expected)
     (let ((entry (q-entry identity)))
       (cond
-        ((atom? entry) (list (quote missing-operation) identity))
+        ((atom? entry) () (list (quote missing-operation) identity))
+        ((atom? entry) (1) (list (quote missing-operation) identity))
         ((equal? (q-field entry field) expected) (quote ()))
         (t (list (quote operation-mismatch)
                  identity field expected (q-field entry field)))))))
@@ -59,7 +64,8 @@
               meaning
               (q-field (q-domain-entry) (quote outcomes)))))
       (cond
-        ((atom? outcome) (list (quote missing-outcome) meaning))
+        ((atom? outcome) () (list (quote missing-outcome) meaning))
+        ((atom? outcome) (1) (list (quote missing-outcome) meaning))
         ((not? (equal? (q-field outcome (quote numerator)) numerator))
          (list (quote outcome-numerator) meaning numerator
                (q-field outcome (quote numerator))))
@@ -74,8 +80,10 @@
 (def q-first-failure
   (lambda (checks)
     (cond
-      ((atom? checks) (quote ()))
-      ((atom? (car checks)) (q-first-failure (cdr checks)))
+      ((atom? checks) () (quote ()))
+      ((atom? checks) (1) (quote ()))
+      ((atom? (car checks)) () (q-first-failure (cdr checks)))
+      ((atom? (car checks)) (1) (q-first-failure (cdr checks)))
       (t (car checks)))))
 
 (def exact-q-binary-contract-witness
@@ -116,8 +124,10 @@
          (list (quote exact-q-binary-contract-witness)
                (list (quote status) (quote fail))
                (list (quote detail) (quote schema))))
-        ((atom? failure)
-         (list (quote exact-q-binary-contract-witness)
+        ((atom? failure) () (list (quote exact-q-binary-contract-witness)
+               (list (quote status) (quote pass))
+               (list (quote detail) (quote exact-q-only))))
+        ((atom? failure) (1) (list (quote exact-q-binary-contract-witness)
                (list (quote status) (quote pass))
                (list (quote detail) (quote exact-q-only))))
         (t

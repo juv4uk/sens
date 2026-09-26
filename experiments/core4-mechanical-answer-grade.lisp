@@ -71,7 +71,7 @@
 
 (cond
   ((equal? ag-observed ag-expected)
-   (structural-relation same)
+   (1)
    (quote (core4-mechanical-answer-grade-ok)))
   ((= 1 1) 1
    (list (quote core4-mechanical-answer-grade-mismatch)

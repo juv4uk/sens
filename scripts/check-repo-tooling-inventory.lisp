@@ -21,107 +21,107 @@
 (def repo-tooling-field-from
   (lambda (name fields)
     (cond
-      ((atom? fields) (structural-kind empty-list) (quote missing))
-      ((atom? fields) (structural-kind atom) (quote missing))
-      ((atom? fields) (structural-kind pair)
+      ((atom? fields) () (quote missing))
+      ((atom? fields) (1) (quote missing))
+      ((atom? fields) (0)
        (let ((field (car fields)))
          (cond
-           ((atom? field) (structural-kind empty-list)
+           ((atom? field) ()
             (repo-tooling-field-from name (cdr fields)))
-           ((atom? field) (structural-kind atom)
+           ((atom? field) (1)
             (repo-tooling-field-from name (cdr fields)))
-           ((atom? field) (structural-kind pair)
+           ((atom? field) (0)
             (cond
-              ((eq? (car field) name) (identity-relation same) (second field))
-              ((eq? (car field) name) (identity-relation distinct)
+              ((eq? (car field) name) (1) (second field))
+              ((eq? (car field) name) (0)
                (repo-tooling-field-from name (cdr fields)))))))))))
 
 (def repo-tooling-field
   (lambda (name row)
     (cond
-      ((atom? row) (structural-kind empty-list) (quote missing))
-      ((atom? row) (structural-kind atom) (quote missing))
-      ((atom? row) (structural-kind pair)
+      ((atom? row) () (quote missing))
+      ((atom? row) (1) (quote missing))
+      ((atom? row) (0)
        (repo-tooling-field-from name (cdr row))))))
 
 (def repo-tooling-verdict-ok-state
   (lambda (verdict)
     (cond
       ((equal? verdict (list (quote repo-tooling-ok)))
-       (structural-relation same)
+       (1)
        (quote yes))
       ((equal? verdict (list (quote repo-tooling-ok)))
-       (structural-relation distinct)
+       (0)
        (quote no)))))
 
 (def repo-tooling-field-presence
   (lambda (value)
     (cond
-      ((atom? value) (structural-kind empty-list) (quote present))
-      ((atom? value) (structural-kind atom)
+      ((atom? value) () (quote present))
+      ((atom? value) (1)
        (cond
-         ((eq? value (quote missing)) (identity-relation same) (quote missing))
-         ((eq? value (quote missing)) (identity-relation distinct) (quote present))))
-      ((atom? value) (structural-kind pair) (quote present)))))
+         ((eq? value (quote missing)) (1) (quote missing))
+         ((eq? value (quote missing)) (0) (quote present))))
+      ((atom? value) (0) (quote present)))))
 
 (def repo-tooling-required-fields-verdict
   (lambda (required row)
     (cond
-      ((atom? required) (structural-kind empty-list) (list (quote repo-tooling-ok)))
-      ((atom? required) (structural-kind atom)
+      ((atom? required) () (list (quote repo-tooling-ok)))
+      ((atom? required) (1)
        (repo-tooling-violation (quote malformed-required-field-list) required))
-      ((atom? required) (structural-kind pair)
+      ((atom? required) (0)
        (cond
          ((eq? (repo-tooling-field-presence
                 (repo-tooling-field (car required) row))
               (quote missing))
-          (identity-relation same)
+          (1)
           (repo-tooling-violation (quote missing-field) (car required)))
          ((eq? (repo-tooling-field-presence
                 (repo-tooling-field (car required) row))
               (quote missing))
-          (identity-relation distinct)
+          (0)
           (repo-tooling-required-fields-verdict (cdr required) row)))))))
 
 (def repo-tooling-row-required-verdict
   (lambda (row)
     (cond
-      ((atom? row) (structural-kind empty-list)
+      ((atom? row) ()
        (repo-tooling-violation (quote malformed-row) row))
-      ((atom? row) (structural-kind atom)
+      ((atom? row) (1)
        (repo-tooling-violation (quote malformed-row) row))
-      ((atom? row) (structural-kind pair)
+      ((atom? row) (0)
        (cond
-         ((eq? (car row) (quote tool)) (identity-relation same)
+         ((eq? (car row) (quote tool)) (1)
           (repo-tooling-required-fields-verdict repo-tooling-required-fields row))
-         ((eq? (car row) (quote tool)) (identity-relation distinct)
+         ((eq? (car row) (quote tool)) (0)
           (repo-tooling-violation (quote malformed-row-kind) (car row))))))))
 
 (def repo-tooling-required-verdict
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (list (quote repo-tooling-ok)))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) () (list (quote repo-tooling-ok)))
+      ((atom? rows) (1)
        (repo-tooling-violation (quote malformed-inventory-list) rows))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let ((row-verdict (repo-tooling-row-required-verdict (car rows))))
          (cond
            ((eq? (repo-tooling-verdict-ok-state row-verdict) (quote yes))
-            (identity-relation same)
+            (1)
             (repo-tooling-required-verdict (cdr rows)))
            ((eq? (repo-tooling-verdict-ok-state row-verdict) (quote no))
-            (identity-relation same)
+            (1)
             row-verdict)))))))
 
 (def repo-tooling-symbol-admission
   (lambda (value admitted)
     (cond
-      ((atom? admitted) (structural-kind empty-list) (quote rejected))
-      ((atom? admitted) (structural-kind atom) (quote malformed-admitted-set))
-      ((atom? admitted) (structural-kind pair)
+      ((atom? admitted) () (quote rejected))
+      ((atom? admitted) (1) (quote malformed-admitted-set))
+      ((atom? admitted) (0)
        (cond
-         ((eq? value (car admitted)) (identity-relation same) (quote admitted))
-         ((eq? value (car admitted)) (identity-relation distinct)
+         ((eq? value (car admitted)) (1) (quote admitted))
+         ((eq? value (car admitted)) (0)
           (repo-tooling-symbol-admission value (cdr admitted))))))))
 
 (def repo-tooling-row-enum-verdict
@@ -131,49 +131,49 @@
            (lifecycle (repo-tooling-field (quote lifecycle) row))
            (kind-state (repo-tooling-symbol-admission kind repo-tooling-kinds)))
       (cond
-        ((eq? kind-state (quote admitted)) (identity-relation same)
+        ((eq? kind-state (quote admitted)) (1)
          (let ((language-state
                  (repo-tooling-symbol-admission language repo-tooling-languages)))
            (cond
-             ((eq? language-state (quote admitted)) (identity-relation same)
+             ((eq? language-state (quote admitted)) (1)
               (let ((lifecycle-state
                       (repo-tooling-symbol-admission lifecycle repo-tooling-lifecycles)))
                 (cond
-                  ((eq? lifecycle-state (quote admitted)) (identity-relation same)
+                  ((eq? lifecycle-state (quote admitted)) (1)
                    (list (quote repo-tooling-ok)))
-                  ((eq? lifecycle-state (quote rejected)) (identity-relation same)
+                  ((eq? lifecycle-state (quote rejected)) (1)
                    (repo-tooling-violation (quote invalid-lifecycle) lifecycle))
                   ((eq? lifecycle-state (quote malformed-admitted-set))
-                   (identity-relation same)
+                   (1)
                    (repo-tooling-violation
                      (quote malformed-lifecycle-vocabulary)
                      lifecycle)))))
-             ((eq? language-state (quote rejected)) (identity-relation same)
+             ((eq? language-state (quote rejected)) (1)
               (repo-tooling-violation (quote invalid-language) language))
              ((eq? language-state (quote malformed-admitted-set))
-              (identity-relation same)
+              (1)
               (repo-tooling-violation
                 (quote malformed-language-vocabulary)
                 language)))))
-        ((eq? kind-state (quote rejected)) (identity-relation same)
+        ((eq? kind-state (quote rejected)) (1)
          (repo-tooling-violation (quote invalid-kind) kind))
-        ((eq? kind-state (quote malformed-admitted-set)) (identity-relation same)
+        ((eq? kind-state (quote malformed-admitted-set)) (1)
          (repo-tooling-violation (quote malformed-kind-vocabulary) kind))))))
 
 (def repo-tooling-enum-verdict
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (list (quote repo-tooling-ok)))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) () (list (quote repo-tooling-ok)))
+      ((atom? rows) (1)
        (repo-tooling-violation (quote malformed-inventory-list) rows))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let ((row-verdict (repo-tooling-row-enum-verdict (car rows))))
          (cond
            ((eq? (repo-tooling-verdict-ok-state row-verdict) (quote yes))
-            (identity-relation same)
+            (1)
             (repo-tooling-enum-verdict (cdr rows)))
            ((eq? (repo-tooling-verdict-ok-state row-verdict) (quote no))
-            (identity-relation same)
+            (1)
             row-verdict)))))))
 
 (def repo-tooling-python-migration-required-state
@@ -181,43 +181,43 @@
     (let ((language (repo-tooling-field (quote language) row))
           (lifecycle (repo-tooling-field (quote lifecycle) row)))
       (cond
-        ((eq? language (quote python)) (identity-relation same)
+        ((eq? language (quote python)) (1)
          (cond
-           ((eq? lifecycle (quote active)) (identity-relation same) (quote required))
-           ((eq? lifecycle (quote active)) (identity-relation distinct)
+           ((eq? lifecycle (quote active)) (1) (quote required))
+           ((eq? lifecycle (quote active)) (0)
             (cond
               ((eq? lifecycle (quote transitional))
-               (identity-relation same)
+               (1)
                (quote required))
               ((eq? lifecycle (quote transitional))
-               (identity-relation distinct)
+               (0)
                (quote not-required))))))
-        ((eq? language (quote python)) (identity-relation distinct)
+        ((eq? language (quote python)) (0)
          (quote not-required))))))
 
 (def repo-tooling-migration-owner-state
   (lambda (owner)
     (cond
-      ((atom? owner) (structural-kind empty-list) (quote missing))
-      ((atom? owner) (structural-kind atom)
+      ((atom? owner) () (quote missing))
+      ((atom? owner) (1)
        (cond
-         ((eq? owner (quote missing)) (identity-relation same) (quote missing))
-         ((eq? owner (quote missing)) (identity-relation distinct) (quote present))))
-      ((atom? owner) (structural-kind pair) (quote present)))))
+         ((eq? owner (quote missing)) (1) (quote missing))
+         ((eq? owner (quote missing)) (0) (quote present))))
+      ((atom? owner) (0) (quote present)))))
 
 (def repo-tooling-row-python-migration-verdict
   (lambda (row)
     (let ((required-state (repo-tooling-python-migration-required-state row)))
       (cond
-        ((eq? required-state (quote not-required)) (identity-relation same)
+        ((eq? required-state (quote not-required)) (1)
          (list (quote repo-tooling-ok)))
-        ((eq? required-state (quote required)) (identity-relation same)
+        ((eq? required-state (quote required)) (1)
          (let* ((owner (repo-tooling-field (quote migration-issue) row))
                 (owner-state (repo-tooling-migration-owner-state owner)))
            (cond
-             ((eq? owner-state (quote present)) (identity-relation same)
+             ((eq? owner-state (quote present)) (1)
               (list (quote repo-tooling-ok)))
-             ((eq? owner-state (quote missing)) (identity-relation same)
+             ((eq? owner-state (quote missing)) (1)
               (repo-tooling-violation
                 (quote python-migration-unowned)
                 (repo-tooling-field (quote path) row))))))))))
@@ -225,98 +225,98 @@
 (def repo-tooling-python-migration-verdict
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (list (quote repo-tooling-ok)))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) () (list (quote repo-tooling-ok)))
+      ((atom? rows) (1)
        (repo-tooling-violation (quote malformed-inventory-list) rows))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let ((row-verdict (repo-tooling-row-python-migration-verdict (car rows))))
          (cond
            ((eq? (repo-tooling-verdict-ok-state row-verdict) (quote yes))
-            (identity-relation same)
+            (1)
             (repo-tooling-python-migration-verdict (cdr rows)))
            ((eq? (repo-tooling-verdict-ok-state row-verdict) (quote no))
-            (identity-relation same)
+            (1)
             row-verdict)))))))
 
 (def repo-tooling-find-row-by-path
   (lambda (path rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (quote ()))
-      ((atom? rows) (structural-kind atom) (quote ()))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) () (quote ()))
+      ((atom? rows) (1) (quote ()))
+      ((atom? rows) (0)
        (let ((row (car rows)))
          (cond
            ((equal? path (repo-tooling-field (quote path) row))
-            (structural-relation same)
+            (1)
             row)
            ((equal? path (repo-tooling-field (quote path) row))
-            (structural-relation distinct)
+            (0)
             (repo-tooling-find-row-by-path path (cdr rows)))))))))
 
 (def repo-tooling-duplicate-path-verdict
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (list (quote repo-tooling-ok)))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) () (list (quote repo-tooling-ok)))
+      ((atom? rows) (1)
        (repo-tooling-violation (quote malformed-inventory-list) rows))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let* ((row (car rows))
               (path (repo-tooling-field (quote path) row))
               (found (repo-tooling-find-row-by-path path (cdr rows))))
          (cond
-           ((atom? found) (structural-kind empty-list)
+           ((atom? found) ()
             (repo-tooling-duplicate-path-verdict (cdr rows)))
-           ((atom? found) (structural-kind atom)
+           ((atom? found) (1)
             (repo-tooling-violation (quote malformed-row) path))
-           ((atom? found) (structural-kind pair)
+           ((atom? found) (0)
             (repo-tooling-violation (quote duplicate-path) path))))))))
 
 (def repo-tooling-observed-path-state
   (lambda (path observed)
     (cond
-      ((atom? observed) (structural-kind empty-list) (quote absent))
-      ((atom? observed) (structural-kind atom) (quote malformed))
-      ((atom? observed) (structural-kind pair)
+      ((atom? observed) () (quote absent))
+      ((atom? observed) (1) (quote malformed))
+      ((atom? observed) (0)
        (let ((observed-path (string-append "scripts/" (car observed))))
          (cond
-           ((equal? path observed-path) (structural-relation same) (quote present))
-           ((equal? path observed-path) (structural-relation distinct)
+           ((equal? path observed-path) (1) (quote present))
+           ((equal? path observed-path) (0)
             (repo-tooling-observed-path-state path (cdr observed)))))))))
 
 (def repo-tooling-stale-path-verdict
   (lambda (rows observed)
     (cond
-      ((atom? rows) (structural-kind empty-list) (list (quote repo-tooling-ok)))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) () (list (quote repo-tooling-ok)))
+      ((atom? rows) (1)
        (repo-tooling-violation (quote malformed-inventory-list) rows))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let* ((row (car rows))
               (path (repo-tooling-field (quote path) row))
               (state (repo-tooling-observed-path-state path observed)))
          (cond
-           ((eq? state (quote present)) (identity-relation same)
+           ((eq? state (quote present)) (1)
             (repo-tooling-stale-path-verdict (cdr rows) observed))
-           ((eq? state (quote absent)) (identity-relation same)
+           ((eq? state (quote absent)) (1)
             (repo-tooling-violation (quote stale-path) path))
-           ((eq? state (quote malformed)) (identity-relation same)
+           ((eq? state (quote malformed)) (1)
             (repo-tooling-violation (quote malformed-observed-list) observed))))))))
 
 (def repo-tooling-observed-coverage-verdict
   (lambda (rows observed)
     (cond
-      ((atom? observed) (structural-kind empty-list) (list (quote repo-tooling-ok)))
-      ((atom? observed) (structural-kind atom)
+      ((atom? observed) () (list (quote repo-tooling-ok)))
+      ((atom? observed) (1)
        (repo-tooling-violation (quote malformed-observed-list) observed))
-      ((atom? observed) (structural-kind pair)
+      ((atom? observed) (0)
        (let* ((name (car observed))
               (path (string-append "scripts/" name))
               (found (repo-tooling-find-row-by-path path rows)))
          (cond
-           ((atom? found) (structural-kind empty-list)
+           ((atom? found) ()
             (repo-tooling-violation (quote unregistered-tool) path))
-           ((atom? found) (structural-kind atom)
+           ((atom? found) (1)
             (repo-tooling-violation (quote malformed-row) path))
-           ((atom? found) (structural-kind pair)
+           ((atom? found) (0)
             (repo-tooling-observed-coverage-verdict rows (cdr observed)))))))))
 
 (def repo-tooling-verdict-after-required
@@ -324,31 +324,31 @@
     (let ((enum-verdict (repo-tooling-enum-verdict rows)))
       (cond
         ((eq? (repo-tooling-verdict-ok-state enum-verdict) (quote yes))
-         (identity-relation same)
+         (1)
          (let ((migration-verdict (repo-tooling-python-migration-verdict rows)))
            (cond
              ((eq? (repo-tooling-verdict-ok-state migration-verdict) (quote yes))
-              (identity-relation same)
+              (1)
               (let ((duplicate-verdict (repo-tooling-duplicate-path-verdict rows)))
                 (cond
                   ((eq? (repo-tooling-verdict-ok-state duplicate-verdict) (quote yes))
-                   (identity-relation same)
+                   (1)
                    (let ((stale-verdict (repo-tooling-stale-path-verdict rows observed)))
                      (cond
                        ((eq? (repo-tooling-verdict-ok-state stale-verdict) (quote yes))
-                        (identity-relation same)
+                        (1)
                         (repo-tooling-observed-coverage-verdict rows observed))
                        ((eq? (repo-tooling-verdict-ok-state stale-verdict) (quote no))
-                        (identity-relation same)
+                        (1)
                         stale-verdict))))
                   ((eq? (repo-tooling-verdict-ok-state duplicate-verdict) (quote no))
-                   (identity-relation same)
+                   (1)
                    duplicate-verdict))))
              ((eq? (repo-tooling-verdict-ok-state migration-verdict) (quote no))
-              (identity-relation same)
+              (1)
               migration-verdict))))
         ((eq? (repo-tooling-verdict-ok-state enum-verdict) (quote no))
-         (identity-relation same)
+         (1)
          enum-verdict)))))
 
 (def repo-tooling-verdict
@@ -356,10 +356,10 @@
     (let ((required-verdict (repo-tooling-required-verdict rows)))
       (cond
         ((eq? (repo-tooling-verdict-ok-state required-verdict) (quote yes))
-         (identity-relation same)
+         (1)
          (repo-tooling-verdict-after-required rows observed))
         ((eq? (repo-tooling-verdict-ok-state required-verdict) (quote no))
-         (identity-relation same)
+         (1)
          required-verdict)))))
 
 ; ----- pure negative witnesses -----
@@ -464,9 +464,9 @@
 (def repo-tooling-assert-verdict
   (lambda (actual expected)
     (cond
-      ((equal? actual expected) (structural-relation same)
+      ((equal? actual expected) (1)
        (list (quote repo-tooling-selftest-ok)))
-      ((equal? actual expected) (structural-relation distinct)
+      ((equal? actual expected) (0)
        (let ((shown
                (print
                  (list
@@ -516,33 +516,33 @@
 (def repo-tooling-tool-rows
   (lambda (forms)
     (cond
-      ((atom? forms) (structural-kind empty-list) (quote ()))
-      ((atom? forms) (structural-kind atom) (quote ()))
-      ((atom? forms) (structural-kind pair)
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
+      ((atom? forms) (0)
        (let ((form (car forms)))
          (cond
-           ((atom? form) (structural-kind empty-list)
+           ((atom? form) ()
             (repo-tooling-tool-rows (cdr forms)))
-           ((atom? form) (structural-kind atom)
+           ((atom? form) (1)
             (repo-tooling-tool-rows (cdr forms)))
-           ((atom? form) (structural-kind pair)
+           ((atom? form) (0)
             (cond
-              ((eq? (car form) (quote tool)) (identity-relation same)
+              ((eq? (car form) (quote tool)) (1)
                (cons form (repo-tooling-tool-rows (cdr forms))))
-              ((eq? (car form) (quote tool)) (identity-relation distinct)
+              ((eq? (car form) (quote tool)) (0)
                (repo-tooling-tool-rows (cdr forms)))))))))))
 
 (def repo-tooling-observed-scripts
   (lambda (entries)
     (cond
-      ((atom? entries) (structural-kind empty-list) (quote ()))
-      ((atom? entries) (structural-kind atom) (quote ()))
-      ((atom? entries) (structural-kind pair)
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
+      ((atom? entries) (0)
        (let ((name (car entries)))
          (cond
-           ((equal? name "tests") (structural-relation same)
+           ((equal? name "tests") (1)
             (repo-tooling-observed-scripts (cdr entries)))
-           ((equal? name "tests") (structural-relation distinct)
+           ((equal? name "tests") (0)
             (cons name (repo-tooling-observed-scripts (cdr entries))))))))))
 
 (def repo-tooling-live-forms

@@ -41,7 +41,7 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(accepted knowledge-accepted (structural-relation same) (structural-relation same))"
+        "(accepted knowledge-accepted (1) (1))"
     );
 }
 
@@ -84,7 +84,7 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(ambiguous translator-ambiguous 1 (structural-relation same) ())"
+        "(ambiguous translator-ambiguous 1 (1) ())"
     );
 }
 
@@ -107,7 +107,7 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected invalid-candidate 1 (structural-relation same) ())"
+        "(rejected invalid-candidate 1 (1) ())"
     );
 }
 
@@ -130,7 +130,7 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected translator-rejected 1 (structural-relation same) ())"
+        "(rejected translator-rejected 1 (1) ())"
     );
 }
 
@@ -152,7 +152,7 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected knowledge-conflict (structural-relation same) ())"
+        "(rejected knowledge-conflict (1) ())"
     );
 }
 
@@ -173,7 +173,7 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
           (result-status
             (reason-in-observe (quote corpus) (translation-payload proposal))))
     "#;
-    assert_eq!(eval_translation(source), "(accepted query () (structural-relation same) blocked)");
+    assert_eq!(eval_translation(source), "(accepted query () (1) blocked)");
 }
 
 #[test]

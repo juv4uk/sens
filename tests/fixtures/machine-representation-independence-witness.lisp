@@ -31,17 +31,17 @@
       ((equal?
          machine-representation-primary
          machine-representation-semantic-reference)
-       (structural-relation same)
+       (1)
        (cond
          ((equal?
             machine-representation-alternate
             machine-representation-semantic-reference)
-          (structural-relation same)
+          (1)
           (quote (machine-representation-independence-witness (status pass))))
          ((equal?
             machine-representation-alternate
             machine-representation-semantic-reference)
-          (structural-relation distinct)
+          (0)
           (list
             (quote machine-representation-independence-witness)
             (quote (status fail))
@@ -51,7 +51,7 @@
       ((equal?
          machine-representation-primary
          machine-representation-semantic-reference)
-       (structural-relation distinct)
+       (0)
        (list
          (quote machine-representation-independence-witness)
          (quote (status fail))

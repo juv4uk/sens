@@ -59,7 +59,7 @@
   (lambda ()
     (за-умовою
       ((тотожне? canon-empty-list (quote ()))
-       (identity-relation same)
+       (1)
        (canon-law-satisfied (quote empty-list)))
       ((quote canon-fallback) canon-fallback
        (canon-law-violated (quote empty-list))))))
@@ -68,7 +68,7 @@
   (lambda (x y)
     (за-умовою
       ((атом? (сполучити x y))
-       (structural-kind pair)
+       (0)
        (canon-law-satisfied (quote atom-cons)))
       ((quote canon-fallback) canon-fallback
        (canon-law-violated (quote atom-cons))))))
@@ -77,7 +77,7 @@
   (lambda (x y)
     (за-умовою
       ((тотожне? (перше (сполучити x y)) x)
-       (identity-relation same)
+       (1)
        (canon-law-satisfied (quote car-cons)))
       ((quote canon-fallback) canon-fallback
        (canon-law-violated (quote car-cons))))))
@@ -86,7 +86,7 @@
   (lambda (x y)
     (за-умовою
       ((тотожне? (решта (сполучити x y)) y)
-       (identity-relation same)
+       (1)
        (canon-law-satisfied (quote cdr-cons)))
       ((quote canon-fallback) canon-fallback
        (canon-law-violated (quote cdr-cons))))))
@@ -94,15 +94,15 @@
 (def canon-law-eq-reflexive-atom
   (lambda (x)
     (за-умовою
-      ((атом? x) (structural-kind atom)
+      ((атом? x) (1)
        (за-умовою
-         ((тотожне? x x) (identity-relation same)
+         ((тотожне? x x) (1)
           (canon-law-satisfied (quote eq-reflexive-atom)))
          ((quote canon-fallback) canon-fallback
           (canon-law-violated (quote eq-reflexive-atom)))))
-      ((атом? x) (structural-kind empty-list)
+      ((атом? x) ()
        (за-умовою
-         ((тотожне? x x) (identity-relation same)
+         ((тотожне? x x) (1)
           (canon-law-satisfied (quote eq-reflexive-atom)))
          ((quote canon-fallback) canon-fallback
           (canon-law-violated (quote eq-reflexive-atom)))))
@@ -116,7 +116,7 @@
       ((тотожне?
          (решта (сполучити (quote кіт) 42))
          42)
-       (identity-relation same)
+       (1)
        (canon-law-satisfied (quote cdr-dotted)))
       ((quote canon-fallback) canon-fallback
        (canon-law-violated (quote cdr-dotted))))))
@@ -127,13 +127,13 @@
   (lambda ()
     (за-умовою
       ((тотожне? (перше (решта (як-є (1 2 3)))) 2)
-       (identity-relation same)
+       (1)
        (за-умовою
          ((тотожне? (перше (решта (решта (як-є (1 2 3))))) 3)
-          (identity-relation same)
+          (1)
           (за-умовою
             ((атом? (решта (решта (решта (як-є (1 2 3))))))
-             (structural-kind empty-list)
+             ()
              (canon-law-satisfied (quote cdr-proper)))
             ((quote canon-fallback) canon-fallback
              (canon-law-violated (quote cdr-proper)))))
@@ -147,10 +147,10 @@
   (lambda ()
     (за-умовою
       ((тотожне? (перше (решта (як-є (1 2 . 3)))) 2)
-       (identity-relation same)
+       (1)
        (за-умовою
          ((тотожне? (решта (решта (як-є (1 2 . 3)))) 3)
-          (identity-relation same)
+          (1)
           (canon-law-satisfied (quote cdr-improper)))
          ((quote canon-fallback) canon-fallback
           (canon-law-violated (quote cdr-improper)))))
@@ -165,7 +165,7 @@
     (за-умовою
       ((тотожне? (як-є never-defined-canon-symbol)
                   (quote never-defined-canon-symbol))
-       (identity-relation same)
+       (1)
        (canon-law-satisfied (quote quote-suppresses-evaluation)))
       ((quote canon-fallback) canon-fallback
        (canon-law-violated (quote quote-suppresses-evaluation))))))
@@ -178,7 +178,7 @@
            ((quote selected) selected (як-є selected))
            ((never-defined-canon-predicate) impossible (як-є forbidden)))
          (quote selected))
-       (identity-relation same)
+       (1)
        (canon-law-satisfied (quote cond-first-match-short-circuit)))
       ((quote canon-fallback) canon-fallback
        (canon-law-violated (quote cond-first-match-short-circuit))))))
@@ -191,13 +191,13 @@
     (за-умовою
       ((тотожне?
          (?:
-           ((.? 'атом) (structural-kind atom)
+           ((.? 'атом) (1)
             (?:
               ((=? (:п (: 'ліве 'праве)) 'ліве)
-               (identity-relation same)
+               (1)
                (:р (: 'ліве 'праве))))))
          (quote праве))
-       (identity-relation same)
+       (1)
        (canon-law-satisfied (quote symbolic-surface)))
       ((quote canon-fallback) canon-fallback
        (canon-law-violated (quote symbolic-surface))))))
@@ -207,7 +207,7 @@
 (def canon-conformance-from
   (lambda (results)
     (за-умовою
-      ((атом? results) (structural-kind empty-list)
+      ((атом? results) ()
        (canon-conformance-result (quote satisfied)))
       ((canon-law-status (перше results)) satisfied
        (canon-conformance-from (решта results)))

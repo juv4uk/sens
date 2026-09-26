@@ -81,8 +81,10 @@
 (00001011 var?
   (00001000 (term)
     (00000111
-      ((00000010 term) (00000001 ()))
-      ((00000010 (00000101 term)) (00000011 (00000101 term) (00000001 var)))
+      ((00000010 term) () (00000001 ()))
+      ((00000010 term) (1) (00000001 ()))
+      ((00000010 (00000101 term)) () (00000011 (00000101 term) (00000001 var)))
+      ((00000010 (00000101 term)) (1) (00000011 (00000101 term) (00000001 var)))
       (t (00000001 ())))))
 
 ; subst is an alist of (name . term) pairs, keyed by the variable's
@@ -91,7 +93,8 @@
 (00001011 lookup-subst
   (00001000 (variable subst)
     (00000111
-      ((00000010 subst) variable)
+      ((00000010 subst) () variable)
+      ((00000010 subst) (1) variable)
       ((equal? (00000101 (00000101 subst)) (second variable)) (00000110 (00000101 subst)))
       (t (lookup-subst variable (00000110 subst))))))
 
@@ -137,7 +140,8 @@
 (00001011 failed-subst?
   (00001000 (subst)
     (00000111
-      ((00000010 subst) (00000011 subst (00000001 fail)))
+      ((00000010 subst) () (00000011 subst (00000001 fail)))
+      ((00000010 subst) (1) (00000011 subst (00000001 fail)))
       (t (00000001 ())))))
 
 (00001011 unify-walked
@@ -145,8 +149,12 @@
     (00000111
       ((var? a) (unify-var a b subst))
       ((var? b) (unify-var b a subst))
-      ((00000010 a) (00000111 ((00000010 b) (00000111 ((00000011 a b) subst) (t (00000001 fail)))) (t (00000001 fail))))
-      ((00000010 b) (00000001 fail))
+      ((00000010 a) () (00000111 ((00000010 b) () (00000111 ((00000011 a b) subst) (t (00000001 fail))))
+                                 ((00000010 b) (1) (00000111 ((00000011 a b) subst) (t (00000001 fail)))) (t (00000001 fail))))
+      ((00000010 a) (1) (00000111 ((00000010 b) () (00000111 ((00000011 a b) subst) (t (00000001 fail))))
+                                  ((00000010 b) (1) (00000111 ((00000011 a b) subst) (t (00000001 fail)))) (t (00000001 fail))))
+      ((00000010 b) () (00000001 fail))
+      ((00000010 b) (1) (00000001 fail))
       (t (unify (00000110 a) (00000110 b) (unify (00000101 a) (00000101 b) subst))))))
 
 (00001011 occurs-check?
@@ -154,7 +162,8 @@
     (let ((resolved (walk term subst)))
       (00000111
         ((var? resolved) (equal? (second variable) (second resolved)))
-        ((00000010 resolved) (00000001 ()))
+        ((00000010 resolved) () (00000001 ()))
+        ((00000010 resolved) (1) (00000001 ()))
         (t (00000111
              ((occurs-check? variable (00000101 resolved) subst) t)
              (t (occurs-check? variable (00000110 resolved) subst))))))))
@@ -182,7 +191,8 @@
 (00001011 apply-subst-walked
   (00001000 (term subst)
     (00000111
-      ((00000010 term) term)
+      ((00000010 term) () term)
+      ((00000010 term) (1) term)
       (t (00000100 (apply-subst (00000101 term) subst) (apply-subst (00000110 term) subst))))))
 
 ; The shared kernel behind proving/matching a *conjunction* of conditions:
@@ -239,12 +249,14 @@
 (00001011 thread-conjunction
   (00001000 (conditions state try-one)
     (00000111
-      ((00000010 conditions) (list state))
+      ((00000010 conditions) () (list state))
+      ((00000010 conditions) (1) (list state))
       (t (thread-conjunction-branches (00000110 conditions) try-one (try-one (00000101 conditions) state))))))
 
 (00001011 thread-conjunction-branches
   (00001000 (remaining try-one states)
     (00000111
-      ((00000010 states) (00000001 ()))
+      ((00000010 states) () (00000001 ()))
+      ((00000010 states) (1) (00000001 ()))
       (t (append (thread-conjunction remaining (00000101 states) try-one)
                  (thread-conjunction-branches remaining try-one (00000110 states)))))))

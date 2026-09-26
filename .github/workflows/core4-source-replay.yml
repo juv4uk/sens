@@ -40,9 +40,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -F '(identity-relation same)' lib/core4.lisp
-          grep -F '(structural-kind atom)' lib/core4.lisp
-          grep -F '(structural-relation same)' lib/core4.lisp
+          grep -F '(1)' lib/core4.lisp
+          grep -F '(1)' lib/core4.lisp
+          grep -F '(1)' lib/core4.lisp
 
       - name: Diff hygiene
         run: git diff --check

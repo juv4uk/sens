@@ -11,7 +11,7 @@
 (def native-first-witness-check
   (lambda (actual expected)
     (cond
-      ((equal? actual expected) (structural-relation same) (quote pass))
+      ((equal? actual expected) (1) (quote pass))
       ((quote native-first-witness-fallback)
        native-first-witness-fallback
        (list (quote fail) actual expected)))))

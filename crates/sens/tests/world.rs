@@ -55,7 +55,7 @@ fn each_world_keeps_its_immediate_parent() {
                 (equal? before (world-parent after))))
             "#
         ),
-        "(structural-relation same)"
+        "(1)"
     );
 }
 
@@ -94,7 +94,7 @@ fn defmodule_compatibility_wrapper_uses_the_world_transition() {
                    (equal? *knowledge-journal* expected)))))
             "#
         ),
-        "(structural-relation same)"
+        "(1)"
     );
 }
 
@@ -143,7 +143,7 @@ fn tell_knowledge_compatibility_wrapper_uses_the_world_transition() {
             (equal? *knowledge-journal* expected-journal)
             "#
         ),
-        "(structural-relation same)"
+        "(1)"
     );
 }
 
@@ -159,7 +159,7 @@ fn conflicting_tell_knowledge_keeps_the_legacy_journal_unchanged() {
                     (equal? before *knowledge-journal*)))
             "#
         ),
-        "(Conflict-detected (structural-relation same))"
+        "(Conflict-detected (1))"
     );
 }
 
@@ -181,7 +181,7 @@ fn retract_knowledge_compatibility_wrapper_uses_the_world_transition() {
                   (reason-in (quote space) (quote (planet earth))))
             "#
         ),
-        "((structural-relation same) ())"
+        "((1) ())"
     );
 }
 
@@ -210,7 +210,7 @@ fn advise_compatibility_wrapper_preserves_journal_on_conflict() {
             (list (car decision) (equal? before *knowledge-journal*))
             "#
         ),
-        "(conflict (structural-relation same))"
+        "(conflict (1))"
     );
 }
 
@@ -260,7 +260,7 @@ fn advise_all_compatibility_wrapper_rolls_back_invalid_batch() {
             (list (car decision) (equal? before *knowledge-journal*))
             "#
         ),
-        "(rejected (structural-relation same))"
+        "(rejected (1))"
     );
 }
 
@@ -313,7 +313,7 @@ fn package_import_compatibility_wrapper_preserves_journal_on_rejection() {
             (list (car decision) (equal? before *knowledge-journal*))
             "#
         ),
-        "(rejected (structural-relation same))"
+        "(rejected (1))"
     );
 }
 
@@ -331,7 +331,7 @@ fn package_import_compatibility_wrapper_preserves_journal_on_conflict() {
             (list (car decision) (equal? before *knowledge-journal*))
             "#
         ),
-        "(conflict (structural-relation same))"
+        "(conflict (1))"
     );
 }
 
@@ -397,10 +397,12 @@ fn backward_reasoning_reads_the_selected_world_snapshot() {
               (let ((w1 (world-tell w0 (quote family) (quote ((parent tom bob))))))
                 (let ((w2 (world-retract w1 (quote family) (quote ((parent tom bob))))))
                   (list (cond
-                          ((atom? (reason-in-world w1 (quote family) (quote (parent tom bob)))) (quote no))
+                          ((atom? (reason-in-world w1 (quote family) (quote (parent tom bob)))) () (quote no))
+                          ((atom? (reason-in-world w1 (quote family) (quote (parent tom bob)))) (1) (quote no))
                           (t (quote yes)))
                         (cond
-                          ((atom? (reason-in-world w2 (quote family) (quote (parent tom bob)))) (quote no))
+                          ((atom? (reason-in-world w2 (quote family) (quote (parent tom bob)))) () (quote no))
+                          ((atom? (reason-in-world w2 (quote family) (quote (parent tom bob)))) (1) (quote no))
                           (t (quote yes)))))))
             "#
         ),
@@ -417,16 +419,20 @@ fn backward_reasoning_keeps_independent_branches_isolated() {
               (let ((cats (world-tell root (quote zoo) (quote ((likes alice cats)))))
                     (dogs (world-tell root (quote zoo) (quote ((likes alice dogs))))))
                 (list (cond
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice cats)))) (quote no))
+                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice cats)))) () (quote no))
+                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice cats)))) (1) (quote no))
                         (t (quote yes)))
                       (cond
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) (quote no))
+                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) () (quote no))
+                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) (1) (quote no))
                         (t (quote yes)))
                       (cond
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) (quote no))
+                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) () (quote no))
+                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) (1) (quote no))
                         (t (quote yes)))
                       (cond
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) (quote no))
+                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) () (quote no))
+                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) (1) (quote no))
                         (t (quote yes))))))
             "#
         ),
@@ -475,7 +481,8 @@ fn advise_world_accepts_into_a_new_queryable_world() {
                   (list (car (car result))
                         (world-clauses before (quote astronomy))
                         (cond
-                          ((atom? (reason-in-world after (quote astronomy) (quote (planet venus)))) (quote no))
+                          ((atom? (reason-in-world after (quote astronomy) (quote (planet venus)))) () (quote no))
+                          ((atom? (reason-in-world after (quote astronomy) (quote (planet venus)))) (1) (quote no))
                           (t (quote yes)))))))
             "#
         ),
@@ -496,7 +503,7 @@ fn advise_world_rejection_returns_the_unchanged_world() {
                       (world-module-known? (second result) (quote astronomy)))))
             "#
         ),
-        "(rejected (structural-relation same) ())"
+        "(rejected (1) ())"
     );
 }
 
@@ -515,7 +522,7 @@ fn advise_world_conflict_preserves_the_existing_snapshot() {
                       (world-clauses (second result) (quote astronomy)))))
             "#
         ),
-        "(conflict (structural-relation same) (((not? (planet pluto)))))"
+        "(conflict (1) (((not? (planet pluto)))))"
     );
 }
 
@@ -554,12 +561,14 @@ fn advise_all_world_accepts_one_atomic_dependent_batch() {
                         (world-clauses before (quote astronomy))
                         (cond
                           ((atom? (reason-in-world after (quote astronomy)
-                                                 (quote (has-mass earth)))) (quote no))
+                                                 (quote (has-mass earth)))) () (quote no))
+                          ((atom? (reason-in-world after (quote astronomy)
+                                                 (quote (has-mass earth)))) (1) (quote no))
                           (t (quote yes)))
                         (equal? before (world-parent after))))))
             "#
         ),
-        "(accepted () yes (structural-relation same))"
+        "(accepted () yes (1))"
     );
 }
 
@@ -578,7 +587,7 @@ fn advise_all_world_rejects_the_whole_malformed_batch() {
                       (world-module-known? (second result) (quote astronomy)))))
             "#
         ),
-        "(rejected (structural-relation same) ())"
+        "(rejected (1) ())"
     );
 }
 
@@ -595,7 +604,7 @@ fn advise_all_world_rejects_an_empty_batch_without_a_new_world() {
                       (equal? before (second result)))))
             "#
         ),
-        "(rejected invalid-batch (structural-relation same))"
+        "(rejected invalid-batch (1))"
     );
 }
 
@@ -616,7 +625,7 @@ fn advise_all_world_detects_internal_conflict_without_partial_writes() {
                       (world-module-known? (second result) (quote astronomy)))))
             "#
         ),
-        "(conflict (structural-relation same) ())"
+        "(conflict (1) ())"
     );
 }
 
@@ -673,11 +682,13 @@ fn world_package_import_atomically_creates_a_queryable_child() {
                           (equal? before (world-parent after))
                           (cond
                             ((atom? (reason-in-world after (quote astronomy)
-                                                   (quote (has-mass earth)))) (quote no))
+                                                   (quote (has-mass earth)))) () (quote no))
+                            ((atom? (reason-in-world after (quote astronomy)
+                                                   (quote (has-mass earth)))) (1) (quote no))
                             (t (quote yes))))))))
             "#
         ),
-        "(accepted (structural-relation same) yes)"
+        "(accepted (1) yes)"
     );
 }
 
@@ -700,7 +711,7 @@ fn world_package_import_rejects_unsupported_versions_without_transition() {
                   (equal? before (second result)))
             "#
         ),
-        "(rejected unsupported-version (structural-relation same))"
+        "(rejected unsupported-version (1))"
     );
 }
 
@@ -723,7 +734,7 @@ fn world_package_import_conflict_preserves_the_target_snapshot() {
                         (world-clauses (second result) (quote astronomy))))))
             "#
         ),
-        "(conflict (structural-relation same) (((not? (planet pluto)))))"
+        "(conflict (1) (((not? (planet pluto)))))"
     );
 }
 
@@ -780,7 +791,7 @@ fn world_at_depth_recovers_an_exact_historical_snapshot() {
                         (equal? w2 (world-at-depth w2 2))))))
             "#
         ),
-        "((structural-relation same) (structural-relation same) (structural-relation same))"
+        "((1) (1) (1))"
     );
 }
 
@@ -838,7 +849,7 @@ fn world_common_ancestor_finds_the_branch_point() {
                   (equal? base (world-common-ancestor left right)))))
             "#
         ),
-        "(structural-relation same)"
+        "(1)"
     );
 }
 
@@ -856,7 +867,7 @@ fn world_common_ancestor_aligns_unequal_branch_depths() {
                     (equal? base (world-common-ancestor left2 right))))))
             "#
         ),
-        "(structural-relation same)"
+        "(1)"
     );
 }
 
@@ -908,7 +919,7 @@ fn equal_knowledge_has_the_same_canonical_content_address() {
                 (knowledge-content-address (quote ((planet earth)))))
             "#
         ),
-        "(identity-relation same)"
+        "(1)"
     );
 }
 
@@ -922,7 +933,7 @@ fn different_knowledge_has_a_different_content_address() {
                 (knowledge-content-address (quote ((planet mars)))))
             "#
         ),
-        "(identity-relation distinct)"
+        "(0)"
     );
 }
 
@@ -938,7 +949,7 @@ fn knowledge_content_addresses_round_trip_to_the_same_structure() {
                       (read (knowledge-content-address knowledge))))
             "#
         ),
-        "(structural-relation same)"
+        "(1)"
     );
 }
 
@@ -959,7 +970,7 @@ fn independently_reconstructed_worlds_have_the_same_content_address() {
                     (world-content-address copy))))
             "#
         ),
-        "(identity-relation same)"
+        "(1)"
     );
 }
 
@@ -983,7 +994,7 @@ fn equal_current_clauses_do_not_erase_distinct_world_histories() {
                               (world-content-address retold)))))))
             "#
         ),
-        "((structural-relation same) (identity-relation distinct))"
+        "((1) (0))"
     );
 }
 
