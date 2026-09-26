@@ -1,4 +1,4 @@
-use sens::{eval_parsed_expressions, parse, Environment, Expr, Session, Value};
+use sens::{eval_parsed_expressions, parse, Environment, Session, Value};
 use std::env;
 use std::fs;
 use std::io::Read;
@@ -57,6 +57,11 @@ fn extract_repl_surface(args: Vec<String>) -> Result<(Vec<String>, repl::ReplSur
     }
     Ok((output, surface))
 }
+
+fn bootstrap_core4(session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
+    sens::load_core_library(session)
+}
+
 fn main() {
     // The CLI is a trusted local Lisp-machine surface: install the OS
     // capability layer (filesystem, process execution, TCP). The semantic
@@ -108,64 +113,17 @@ fn main() {
         environment: Environment::root(),
     };
 
-    // Establish the one narrow host mechanism needed to construct macros,
-    // then evaluate the language-owned macro layer. This is explicit now:
-    // the evaluator no longer has a `make-macro` head-name escape hatch.
-    if let Err(e) = sens::load_macro_library(&mut session) {
-        eprintln!(
-            "Error loading bootstrap macro.lisp: {}",
-            e.render(sens::MACRO_LIBRARY_SOURCE)
-        );
-        process::exit(1);
-    }
-
-    // Load standard library — FASL snapshot first (parse-output cache,
-    // OPT-CORE-MY-AST-SNAPSHOT), text parse as the always-available fallback.
-    // Invalidation: the snapshot embeds sha256(lib/core4.lisp); any drift
-    // between the compiled-in bytes and the compiled-in source flips us to
-    // the parse path, never to a wrong program.
+    // Канонічний Core4 bootstrap і FASL fallback належать одному loader-у:
+    // CLI не повинен виконувати Core4 в обхід loader-owned selected profile.
     const CORE_SRC: &str = sens::CORE_LIBRARY_SOURCE;
-    const CORE_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
-    let fasl_hash_ok = sens::fasl_decode_program(CORE_FASL)
-        .map(|(_, hash)| hash == sens::sha256_source(CORE_SRC.as_bytes()))
-        .unwrap_or(false);
-    if !fasl_hash_ok {
+    if !sens::core_library_fasl_is_current() {
         eprintln!(
             "warning: lib/core4.lisp.fasl is stale (source changed); run gen-fasl to regenerate"
         );
     }
-    let core_expressions: Option<Vec<Expr>> = if fasl_hash_ok {
-        sens::fasl_decode_program(CORE_FASL).map(|(expressions, _)| expressions)
-    } else {
-        None
-    };
-    // MYLISP-CLI-BOOTSTRAP-ERROR-VISIBILITY (Manus AI review P1): this used
-    // to be `let _ = eval_parsed_expressions(...)`, silently discarding the
-    // result on both the FASL and text-parse paths. Low risk today (CORE_SRC
-    // is a static include_str! of the real, tested lib/core.lisp), but a
-    // future broken snapshot would silently degrade every session's startup
-    // -- every def in core.lisp simply wouldn't exist, with no error printed,
-    // failing far from the actual cause. Same fail-fast style the --lint
-    // path already uses for lib/linter.lisp's own bootstrap below.
-    match core_expressions {
-        Some(core_ast) => {
-            if let Err(e) = eval_parsed_expressions(&core_ast, &mut session) {
-                eprintln!("Error loading bootstrap core.lisp: {}", e.render(CORE_SRC));
-                process::exit(1);
-            }
-        }
-        None => match parse(CORE_SRC) {
-            Ok(core_ast) => {
-                if let Err(e) = eval_parsed_expressions(&core_ast, &mut session) {
-                    eprintln!("Error loading bootstrap core.lisp: {}", e.render(CORE_SRC));
-                    process::exit(1);
-                }
-            }
-            Err(e) => {
-                eprintln!("Failed to parse bootstrap core.lisp: {}", e.render(CORE_SRC));
-                process::exit(1);
-            }
-        },
+    if let Err(e) = bootstrap_core4(&mut session) {
+        eprintln!("Error loading bootstrap Core4: {}", e.render(CORE_SRC));
+        process::exit(1);
     }
 
     // Time is a language-owned semantic layer, not part of the closed core.
@@ -505,5 +463,26 @@ fn main() {
     } else {
         // REPL mode
         repl::run_repl(session, repl_surface);
+    }
+}
+
+
+#[cfg(test)]
+mod core_profile_bootstrap_tests {
+    use super::*;
+
+    #[test]
+    fn cli_core_bootstrap_selects_core4_through_the_canonical_loader() {
+        let mut session = Session {
+            environment: Environment::root(),
+        };
+        assert_eq!(session.environment.selected_core_profile(), None);
+
+        bootstrap_core4(&mut session).expect("CLI Core4 bootstrap must succeed");
+
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(sens::CoreProfile::Core4)
+        );
     }
 }
