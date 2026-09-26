@@ -39,12 +39,12 @@
 ; Migration-only two-part clauses preserve historical atom/eq branching while
 ; library source is moved to canonical three-part dispatch. These rows are NOT
 ; semantic authority for new control; they only bound the temporary adapter.
-((expr . "(cond ((atom (quote ())) (quote legacy-atom)) (t (quote wrong)))")
+((expr . "(cond ((00000010 (quote ())) (quote legacy-atom)) (t (quote wrong)))")
  (expected . "legacy-atom")
  (active . t)
  (compatibility . t))
 
-((expr . "(cond ((atom (quote (radio))) (quote wrong)) (t (quote legacy-pair)))")
+((expr . "(cond ((00000010 (quote (radio))) (quote wrong)) (t (quote legacy-pair)))")
  (expected . "legacy-pair")
  (active . t)
  (compatibility . t))

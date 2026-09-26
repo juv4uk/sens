@@ -142,3 +142,7 @@
 (review "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" "729d3a741df2b4f2fd7cb278b09107e449c6b19eaf58241a5e5b25bdd58cf248" issue-1406 sens-host-registration-admission-observer)
 (review "crates/my-lisp/src/eval/capabilities.rs" "263e6fcfeb94974a8a6d102df296ee25d6fa23888015cd73b6d3654d14062347" issue-1406 dormant-host-registry-mechanism)
 (review "crates/my-lisp/src/lib.rs" "f898bce28b2fec3210c71fb2e230ea3041c18f4f9f499618abf09b01c66f8b68" issue-1414 explicit-core3-profile-loader-mechanism)
+
+; #1432 English predicates with question mark: align test assertions.
+(review "crates/my-lisp/src/eval/mod.rs" "8d0352de416852cf928520f4f16b8d11c6882c7f16aae74107ede48db19f35a6" issue-1432 english-predicate-question-mark-test)
+(review "crates/my-lisp/src/presentation.rs" "ebb12056da482bf59ee37645eda8ca60c22cf9f0a7819f115952262bcb55e53e" issue-1432 english-predicate-question-mark-test)

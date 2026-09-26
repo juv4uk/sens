@@ -43,11 +43,11 @@
       ((atom? expected-entry) (structural-kind pair)
        (let ((expr (witness-field (quote expr) witness)))
          (cond
-           ((equal? expr "(atom (quote radio))")
+           ((equal? expr "(00000010 (quote radio))")
             (list (quote value) "(structural-kind atom)"))
-           ((equal? expr "(atom (quote ()))")
+           ((equal? expr "(00000010 (quote ()))")
             (list (quote value) "(structural-kind empty-list)"))
-           ((equal? expr "(atom (quote (radio antenna)))")
+           ((equal? expr "(00000010 (quote (radio antenna)))")
             (list (quote value) "(structural-kind pair)"))
            ((string-prefix? "(eq " expr)
             (cond

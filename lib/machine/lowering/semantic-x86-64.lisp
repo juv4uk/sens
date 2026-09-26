@@ -7,8 +7,8 @@
 ; belongs to the closed Lisp-owned admission layer and is deliberately not
 ; re-exported from semantic lowering as a compatibility convenience.
 
-(def x86-semantic-lowering-profile
-  (quote
+(00001001 x86-semantic-lowering-profile
+  (00000001
     (("00000010" sequence "tag-test: TEST/AND/CMP")
      ("00000011" direct "CMP/SETE")
      ("00000100" runtime "allocate+STORE-pair")
@@ -86,13 +86,13 @@
 ;
 ; RAX carries the result per SysV x86-64. RCX is caller-saved, so the proof
 ; routine does not violate the host ABI by clobbering a callee-saved register.
-(def x86-lower-add-u64-forms
-  (lambda (left right)
+(00001001 x86-lower-add-u64-forms
+  (00001000 (left right)
     (list
-      (list (quote mov-r64-imm64) (quote rax) left)
-      (list (quote mov-r64-imm64) (quote rcx) right)
-      (list (quote add-r64-r64) (quote rax) (quote rcx))
-      (list (quote ret)))))
+      (list (00000001 mov-r64-imm64) (00000001 rax) left)
+      (list (00000001 mov-r64-imm64) (00000001 rcx) right)
+      (list (00000001 add-r64-r64) (00000001 rax) (00000001 rcx))
+      (list (00000001 ret)))))
 
 ; #196 bounded conditional-growth witness for existing EQ + COND semantics.
 ; This routine does not define equality or conditional evaluation. It chooses
@@ -103,63 +103,63 @@
 ; landing at the ELSE arm. This is deliberately not a general label resolver,
 ; branch assembler, or compiler policy. It returns structured forms only;
 ; closed admission remains the sole path to bytes.
-(def x86-lower-eq-cond-u64-forms
-  (lambda (left right then-value else-value)
+(00001001 x86-lower-eq-cond-u64-forms
+  (00001000 (left right then-value else-value)
     (list
-      (list (quote mov-r64-imm64) (quote rax) left)
-      (list (quote mov-r64-imm64) (quote rcx) right)
-      (list (quote cmp-r64-r64) (quote rax) (quote rcx))
-      (list (quote jnz-rel8) 11)
-      (list (quote mov-r64-imm64) (quote rax) then-value)
-      (list (quote ret))
-      (list (quote mov-r64-imm64) (quote rax) else-value)
-      (list (quote ret)))))
+      (list (00000001 mov-r64-imm64) (00000001 rax) left)
+      (list (00000001 mov-r64-imm64) (00000001 rcx) right)
+      (list (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
+      (list (00000001 jnz-rel8) 11)
+      (list (00000001 mov-r64-imm64) (00000001 rax) then-value)
+      (list (00000001 ret))
+      (list (00000001 mov-r64-imm64) (00000001 rax) else-value)
+      (list (00000001 ret)))))
 
 ; #196 conditional+structural composition helper. Each branch constructs one
 ; bounded pair in the same native-call arena and returns its CAR. The caller
 ; selects distinct caller-saved extended GPRs so #207's widened MOV imm64
 ; admission is exercised by semantic composition rather than by an ISA-only
 ; witness. RAX remains the guest ABI result register.
-(def x86-lower-bounded-car-cons-u64-arm-forms
-  (lambda (left right left-register right-register)
+(00001001 x86-lower-bounded-car-cons-u64-arm-forms
+  (00001000 (left right left-register right-register)
     (list
-      (list (quote mov-r64-imm64) left-register left)
+      (list (00000001 mov-r64-imm64) left-register left)
       (list
-        (quote mov-mem-disp8-r64)
-        (quote rdi)
+        (00000001 mov-mem-disp8-r64)
+        (00000001 rdi)
         x86-pair-car-offset
         left-register)
-      (list (quote mov-r64-imm64) right-register right)
+      (list (00000001 mov-r64-imm64) right-register right)
       (list
-        (quote mov-mem-disp8-r64)
-        (quote rdi)
+        (00000001 mov-mem-disp8-r64)
+        (00000001 rdi)
         x86-pair-cdr-offset
         right-register)
       (list
-        (quote mov-r64-mem-disp8)
-        (quote rax)
-        (quote rdi)
+        (00000001 mov-r64-mem-disp8)
+        (00000001 rax)
+        (00000001 rdi)
         x86-pair-car-offset)
-      (list (quote ret)))))
+      (list (00000001 ret)))))
 
 ; Third bounded #196 slice: compose runtime COND/EQ choice with structural
 ; CAR(CONS ...) branch bodies. This remains deliberately finite: JNZ +33 skips
 ; exactly one six-form CAR(CONS) arm (10+4+10+4+4+1 bytes with base RDI), and
 ; each arm returns directly. No label resolver, register allocator, GC, or
 ; general recursive expression lowering is claimed here.
-(def x86-lower-eq-cond-car-cons-u64-forms
-  (lambda (left right then-car then-cdr else-car else-cdr)
+(00001001 x86-lower-eq-cond-car-cons-u64-forms
+  (00001000 (left right then-car then-cdr else-car else-cdr)
     (append
       (list
-        (list (quote mov-r64-imm64) (quote rax) left)
-        (list (quote mov-r64-imm64) (quote rcx) right)
-        (list (quote cmp-r64-r64) (quote rax) (quote rcx))
-        (list (quote jnz-rel8) 33))
+        (list (00000001 mov-r64-imm64) (00000001 rax) left)
+        (list (00000001 mov-r64-imm64) (00000001 rcx) right)
+        (list (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
+        (list (00000001 jnz-rel8) 33))
       (append
         (x86-lower-bounded-car-cons-u64-arm-forms
-          then-car then-cdr (quote r8) (quote r9))
+          then-car then-cdr (00000001 r8) (00000001 r9))
         (x86-lower-bounded-car-cons-u64-arm-forms
-          else-car else-cdr (quote r10) (quote r11))))))
+          else-car else-cdr (00000001 r10) (00000001 r11))))))
 
 ; Bounded structural witness for semantic identities 00000100/00000101/00000110.
 ; The host contributes only a raw writable arena pointer in RDI. Lisp owns
@@ -170,50 +170,50 @@
 ; This is deliberately not a claim that arbitrary first-class pair values may
 ; already escape native code: pair-x86-64.lisp fixes lifetime=native-call and
 ; escape=forbidden for this proof slice.
-(def x86-lower-bounded-pair-store-u64-forms
-  (lambda (left right)
+(00001001 x86-lower-bounded-pair-store-u64-forms
+  (00001000 (left right)
     (list
-      (list (quote mov-r64-imm64) (quote rax) left)
+      (list (00000001 mov-r64-imm64) (00000001 rax) left)
       (list
-        (quote mov-mem-disp8-r64)
-        (quote rdi)
+        (00000001 mov-mem-disp8-r64)
+        (00000001 rdi)
         x86-pair-car-offset
-        (quote rax))
-      (list (quote mov-r64-imm64) (quote rax) right)
+        (00000001 rax))
+      (list (00000001 mov-r64-imm64) (00000001 rax) right)
       (list
-        (quote mov-mem-disp8-r64)
-        (quote rdi)
+        (00000001 mov-mem-disp8-r64)
+        (00000001 rdi)
         x86-pair-cdr-offset
-        (quote rax)))))
+        (00000001 rax)))))
 
 ; Historical internal name retained only as a form-level alias so existing
 ; Lisp callers do not regain a byte-level bypass.
-(def x86-lower-bounded-pair-store-u64-instructions
+(00001001 x86-lower-bounded-pair-store-u64-instructions
   x86-lower-bounded-pair-store-u64-forms)
 
-(def x86-lower-cons-car-u64-forms
-  (lambda (left right)
+(00001001 x86-lower-cons-car-u64-forms
+  (00001000 (left right)
     (append
       (x86-lower-bounded-pair-store-u64-forms left right)
       (list
         (list
-          (quote mov-r64-mem-disp8)
-          (quote rax)
-          (quote rdi)
+          (00000001 mov-r64-mem-disp8)
+          (00000001 rax)
+          (00000001 rdi)
           x86-pair-car-offset)
-        (list (quote ret))))))
+        (list (00000001 ret))))))
 
-(def x86-lower-cons-cdr-u64-forms
-  (lambda (left right)
+(00001001 x86-lower-cons-cdr-u64-forms
+  (00001000 (left right)
     (append
       (x86-lower-bounded-pair-store-u64-forms left right)
       (list
         (list
-          (quote mov-r64-mem-disp8)
-          (quote rax)
-          (quote rdi)
+          (00000001 mov-r64-mem-disp8)
+          (00000001 rax)
+          (00000001 rdi)
           x86-pair-cdr-offset)
-        (list (quote ret))))))
+        (list (00000001 ret))))))
 
 ; Bounded semantic entry for the Vertical Day CAR witness.
 ; Canonical CAR/CDR own pair validity and therefore fail with the language's
@@ -221,10 +221,10 @@
 ; language-owned gate succeeds do the extracted u64 fields become structured
 ; machine forms, pass closed admission, and enter the semantics-blind host.
 ; No pair predicate or tag rule is duplicated in this machine layer.
-(def x86-call-semantic-car-u64
-  (lambda (pair-value)
+(00001001 x86-call-semantic-car-u64
+  (00001000 (pair-value)
     (x86-call-admitted-u64
       (x86-lower-cons-car-u64-forms
-        (car pair-value)
-        (cdr pair-value))
+        (00000101 pair-value)
+        (00000110 pair-value))
       x86-pair-cell-bytes)))

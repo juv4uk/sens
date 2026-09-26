@@ -12,9 +12,9 @@
 ; contract, kept in the same record on purpose (2026-08-09) — my-lisp
 ; can tell them apart by name without two physically separate files.
 ((expr . "(quote radio)") (expected . "radio") (tier . 1) (axioms . (G3)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
-((expr . "(atom (quote radio))") (expected . "(structural-kind atom)") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
-((expr . "(atom (quote ()))") (expected . "(structural-kind empty-list)") (tier . 1) (axioms . (G2)) (role . "constitutive") (meta-eval . t))
-((expr . "(atom (quote (radio antenna)))") (expected . "(structural-kind pair)") (tier . 1) (axioms . (G2)) (role . "constitutive") (meta-eval . t))
+((expr . "(00000010 (quote radio))") (expected . "(structural-kind atom)") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
+((expr . "(00000010 (quote ()))") (expected . "(structural-kind empty-list)") (tier . 1) (axioms . (G2)) (role . "constitutive") (meta-eval . t))
+((expr . "(00000010 (quote (radio antenna)))") (expected . "(structural-kind pair)") (tier . 1) (axioms . (G2)) (role . "constitutive") (meta-eval . t))
 ((expr . "(eq (quote radio) (quote radio))") (expected . "(identity-relation same)") (tier . 1) (axioms . (G1)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
 ((expr . "(eq (quote radio) (quote antenna))") (expected . "(identity-relation distinct)") (tier . 1) (axioms . (G1)) (role . "constitutive") (meta-eval . t))
 ((expr . "(car (quote (radio antenna)))") (expected . "radio") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))

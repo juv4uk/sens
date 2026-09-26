@@ -4,26 +4,26 @@
 ; Target-specific atoms create the forms; admission decides whether a target
 ; accepts them; the encoder materializes bytes only after admission.
 
-(def machine-block
-  (lambda (forms)
+(00001001 machine-block
+  (00001000 (forms)
     forms))
 
-(def machine-block-empty
-  (lambda ()
-    (quote ())))
+(00001001 machine-block-empty
+  (00001000 ()
+    (00000001 ())))
 
-(def machine-block-one
-  (lambda (form)
+(00001001 machine-block-one
+  (00001000 (form)
     (list form)))
 
-(def machine-block-append
-  (lambda (block form)
+(00001001 machine-block-append
+  (00001000 (block form)
     (append block (list form))))
 
-(def machine-block-concat
-  (lambda (left right)
+(00001001 machine-block-concat
+  (00001000 (left right)
     (append left right)))
 
-(def machine-block-forms
-  (lambda (block)
+(00001001 machine-block-forms
+  (00001000 (block)
     block))

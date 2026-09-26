@@ -15,103 +15,103 @@
 ;   lib/machine/admission/x86-64.lisp
 ;   lib/machine/dispatch/native-first.lisp
 
-(def native-first-execution-completed
-  (lambda (route value)
+(00001001 native-first-execution-completed
+  (00001000 (route value)
     (list
-      (quote execution-route)
+      (00000001 execution-route)
       route
-      (quote (status completed))
-      (list (quote value) value))))
+      (00000001 (status completed))
+      (list (00000001 value) value))))
 
-(def native-first-execution-rejected
-  (lambda (route detail)
+(00001001 native-first-execution-rejected
+  (00001000 (route detail)
     (list
-      (quote execution-route)
+      (00000001 execution-route)
       route
-      (quote (status rejected))
-      (list (quote detail) detail))))
+      (00000001 (status rejected))
+      (list (00000001 detail) detail))))
 
-(def native-first-plan-tag-state
-  (lambda (plan tag)
-    (cond
-      ((atom? plan) (structural-kind pair)
-       (cond
-         ((eq? (car plan) tag) (identity-relation same) (quote same))
-         ((eq? (car plan) tag) (identity-relation distinct) (quote distinct))))
-      ((quote native-first-plan-tag-state-fallback)
+(00001001 native-first-plan-tag-state
+  (00001000 (plan tag)
+    (00000111
+      ((00000010 plan) (structural-kind pair)
+       (00000111
+         ((00000011 (00000101 plan) tag) (identity-relation same) (00000001 same))
+         ((00000011 (00000101 plan) tag) (identity-relation distinct) (00000001 distinct))))
+      ((00000001 native-first-plan-tag-state-fallback)
        native-first-plan-tag-state-fallback
-       (quote distinct)))))
+       (00000001 distinct)))))
 
-(def native-first-execute-native-plan
-  (lambda (plan)
+(00001001 native-first-execute-native-plan
+  (00001000 (plan)
     (let ((result
             (x86-call-admitted-u64
               (second plan)
               (third plan))))
-      (cond
+      (00000111
         ((equal? (x86-machine-rejected? result) t)
          (structural-relation same)
-         (native-first-execution-rejected (quote native) result))
+         (native-first-execution-rejected (00000001 native) result))
         ((equal? (x86-machine-rejected? result) t)
          (structural-relation distinct)
-         (native-first-execution-completed (quote native) result))))))
+         (native-first-execution-completed (00000001 native) result))))))
 
-(def native-first-execute-plan
-  (lambda (plan)
+(00001001 native-first-execute-plan
+  (00001000 (plan)
     (let ((native-state
-            (native-first-plan-tag-state plan (quote native-plan))))
-      (cond
-        ((eq? native-state (quote same)) (identity-relation same)
-         (cond
+            (native-first-plan-tag-state plan (00000001 native-plan))))
+      (00000111
+        ((00000011 native-state (00000001 same)) (identity-relation same)
+         (00000111
            ((equal? (length plan) 3) (structural-relation same)
             (native-first-execute-native-plan plan))
            ((equal? (length plan) 3) (structural-relation distinct)
             (native-first-execution-rejected
-              (quote native)
-              (list (quote malformed-native-plan) plan)))))
-        ((eq? native-state (quote distinct)) (identity-relation same)
+              (00000001 native)
+              (list (00000001 malformed-native-plan) plan)))))
+        ((00000011 native-state (00000001 distinct)) (identity-relation same)
          (let ((fallback-state
                  (native-first-plan-tag-state
                    plan
-                   (quote evaluator-fallback))))
-           (cond
-             ((eq? fallback-state (quote same)) (identity-relation same)
-              (cond
+                   (00000001 evaluator-fallback))))
+           (00000111
+             ((00000011 fallback-state (00000001 same)) (identity-relation same)
+              (00000111
                 ((equal? (length plan) 2) (structural-relation same)
                  (native-first-execution-completed
-                   (quote evaluator)
+                   (00000001 evaluator)
                    (eval (second plan))))
                 ((equal? (length plan) 2) (structural-relation distinct)
                  (native-first-execution-rejected
-                   (quote evaluator)
-                   (list (quote malformed-evaluator-fallback) plan)))))
-             ((eq? fallback-state (quote distinct)) (identity-relation same)
+                   (00000001 evaluator)
+                   (list (00000001 malformed-evaluator-fallback) plan)))))
+             ((00000011 fallback-state (00000001 distinct)) (identity-relation same)
               (native-first-execution-rejected
-                (quote invalid-plan)
-                (list (quote unknown-native-first-plan) plan))))))))))
+                (00000001 invalid-plan)
+                (list (00000001 unknown-native-first-plan) plan))))))))))
 
-(def native-first-execute-expression
-  (lambda (expression)
+(00001001 native-first-execute-expression
+  (00001000 (expression)
     (native-first-execute-plan
       (native-first-plan expression))))
 
-(def native-first-execute-source-forms
-  (lambda (forms)
-    (cond
-      ((atom? forms) (structural-kind empty-list) (quote ()))
-      ((atom? forms) (structural-kind atom)
+(00001001 native-first-execute-source-forms
+  (00001000 (forms)
+    (00000111
+      ((00000010 forms) (structural-kind empty-list) (00000001 ()))
+      ((00000010 forms) (structural-kind atom)
        (list
          (native-first-execution-rejected
-           (quote evaluator)
-           (list (quote malformed-source-form-tail) forms))))
-      ((atom? forms) (structural-kind pair)
-       (cons
-         (native-first-execute-expression (car forms))
-         (native-first-execute-source-forms (cdr forms)))))))
+           (00000001 evaluator)
+           (list (00000001 malformed-source-form-tail) forms))))
+      ((00000010 forms) (structural-kind pair)
+       (00000100
+         (native-first-execute-expression (00000101 forms))
+         (native-first-execute-source-forms (00000110 forms)))))))
 
-(def native-first-execute-source
-  (lambda (source)
+(00001001 native-first-execute-source
+  (00001000 (source)
     (list
-      (quote source-execution)
+      (00000001 source-execution)
       (native-first-execute-source-forms
         (read-all source)))))

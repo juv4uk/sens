@@ -92,7 +92,7 @@
 
       ; Canon ATOM peer surfaces: native evaluator.
       (list (quote atom-native-en)
-            (registry-native-value "(atom (quote x))")
+            (registry-native-value "(00000010 (quote x))")
             (quote (structural-kind atom)))
       (list (quote atom-native-uk)
             (registry-native-value "(атом? (як-є x))")
@@ -106,7 +106,7 @@
 
       ; The same peer surfaces through the metacircular evaluator.
       (list (quote atom-meta-en)
-            (registry-meta-value "(atom (quote x))")
+            (registry-meta-value "(00000010 (quote x))")
             (quote (structural-kind atom)))
       (list (quote atom-meta-uk)
             (registry-meta-value "(атом? (як-є x))")
