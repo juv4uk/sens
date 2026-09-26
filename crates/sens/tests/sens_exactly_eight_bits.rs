@@ -138,7 +138,7 @@ fn registry_and_function_table_codes_are_exactly_eight_bits_and_unique() {
         "generated function table must contain exactly 256 SENS rows"
     );
     assert_eq!(
-        table_seen, seen,
+        &table_seen, &seen,
         "function-table projection must contain exactly the same SENS identities as the registry"
     );
     assert_eq!(
@@ -154,7 +154,7 @@ fn registry_and_function_table_codes_are_exactly_eight_bits_and_unique() {
 
     let zero_row = text
         .lines()
-        .find(|line| line.trim_start().starts_with("(\\\"00000000\\\" "))
+        .find(|line| line.trim_start().starts_with("(\"00000000\" "))
         .expect("generated function table must project exact SENS 00000000");
     assert!(
         zero_row.contains("identity:00000000")
