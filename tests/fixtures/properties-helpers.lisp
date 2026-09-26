@@ -1,37 +1,37 @@
-(def build-map
-  (lambda (keys map)
-    (cond
-      ((atom? keys) () map)
-      ((atom? keys) (1) map)
-      (t (build-map (cdr keys) (map-insert (car keys) (car keys) map))))))
+(00001001 build-map
+  (00001000 (keys map)
+    (00000111
+      ((00000010 keys) () map)
+      ((00000010 keys) (1) map)
+      (t (build-map (00000110 keys) (01101110 (00000101 keys) (00000101 keys) map))))))
 
-(def map-keys-sorted?
-  (lambda (l)
-    (cond
-      ((atom? l) () t)
-      ((atom? l) (1) t)
-      ((atom? (cdr l)) () t)
-      ((atom? (cdr l)) (1) t)
-      ((string<? (car (car (cdr l))) (car (car l))) (quote ()))
-      (t (map-keys-sorted? (cdr l))))))
+(00001001 map-keys-sorted?
+  (00001000 (l)
+    (00000111
+      ((00000010 l) () t)
+      ((00000010 l) (1) t)
+      ((00000010 (00000110 l)) () t)
+      ((00000010 (00000110 l)) (1) t)
+      ((00100101 (00000101 (00000101 (00000110 l))) (00000101 (00000101 l))) (00000001 ()))
+      (t (map-keys-sorted? (00000110 l))))))
 
-(def fib
-  (lambda (n)
-    (cond
-      ((< n 2) 1 n)
-      ((< n 2) 0 (+ (fib (+ n -1)) (fib (+ n -2)))))))
+(00001001 fib
+  (00001000 (n)
+    (00000111
+      ((00011010 n 2) 1 n)
+      ((00011010 n 2) 0 (00001100 (fib (00001100 n -1)) (fib (00001100 n -2)))))))
 
-(def build-world
-  (lambda (events w)
-    (cond
-      ((atom? events) () w)
-      ((atom? events) (1) w)
-      (t (build-world (cdr events) (world-tell w "mod" (car events)))))))
+(00001001 build-world
+  (00001000 (events w)
+    (00000111
+      ((00000010 events) () w)
+      ((00000010 events) (1) w)
+      (t (build-world (00000110 events) (world-tell w "mod" (00000101 events)))))))
 
-(def tell-all-events
-  (lambda (events)
-    (cond
-      ((atom? events) () t)
-      ((atom? events) (1) t)
-      (t (let ((_ (defmodule "mod" (list (car events)))))
-           (tell-all-events (cdr events)))))))
+(00001001 tell-all-events
+  (00001000 (events)
+    (00000111
+      ((00000010 events) () t)
+      ((00000010 events) (1) t)
+      (t (10011100 ((_ (defmodule "mod" (00100111 (00000101 events)))))
+           (tell-all-events (00000110 events)))))))

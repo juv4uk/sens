@@ -6,20 +6,20 @@
 ; separate explicit facility; this witness does not reinterpret SID bits as a
 ; decimal value.
 
-(def bare-sid-sum (00001100 2 3))
-(def surface-sum (+ 2 3))
+(00001001 bare-sid-sum (00001100 2 3))
+(00001001 surface-sum (00001100 2 3))
 
-(cond
-  ((= bare-sid-sum surface-sum) 1
-   (cond
-     ((equal? (write-to-string 00000000) "00000000")
+(00000111
+  ((00011100 bare-sid-sum surface-sum) 1
+   (00000111
+     ((00100010 (01001100 00000000) "00000000")
       (1)
-      (quote (bare-sid-literal-witness (status pass))))
+      (00000001 (bare-sid-literal-witness (status pass))))
      (t t
-      (quote (bare-sid-literal-witness
+      (00000001 (bare-sid-literal-witness
                (status fail)
                (reason sid-zero-print-roundtrip))))))
   (t t
-   (quote (bare-sid-literal-witness
+   (00000001 (bare-sid-literal-witness
             (status fail)
             (reason sid-call-surface-parity)))))

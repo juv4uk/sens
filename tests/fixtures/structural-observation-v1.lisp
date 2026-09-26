@@ -106,12 +106,12 @@
 
 
 ; #218 regression: equal? must distinguish equal atomic values from distinct atoms.
-(def equal-atomic-structural-witness
-  (lambda ()
-    (cond
-      ((equal? (quote radio) (quote radio)) (1)
-       (quote (equal-atomic-structural-witness (status pass))))
-      ((equal? (quote radio) (quote antenna)) (0)
-       (quote (equal-atomic-structural-witness (status pass)))))))
+(00001001 equal-atomic-structural-witness
+  (00001000 ()
+    (00000111
+      ((00100010 (00000001 radio) (00000001 radio)) (1)
+       (00000001 (equal-atomic-structural-witness (status pass))))
+      ((00100010 (00000001 radio) (00000001 antenna)) (0)
+       (00000001 (equal-atomic-structural-witness (status pass)))))))
 
 (equal-atomic-structural-witness)
