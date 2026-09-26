@@ -3,7 +3,8 @@
 
 This is a discovery tool, not semantic authority.  It observes canonical
 ``lib/**/*.lisp`` source and reports top-level DEFINE/``def`` / ``defmacro``
-forms. DEFINE's byte-SID spellings come from the Lisp-owned evaluator dispatch.
+forms. DEFINE's byte-SID spellings come from the Lisp-owned function table
+(`(form define)` rows of lib/surface/function-signatures.lisp).
 Visibility (public/internal/compatibility) is a separate governance decision.
 Surface spellings remain owned exclusively by ``lib/surface/semantic-registry.lisp``.
 Machine/ISA exclusion is read from the Lisp-owned machine authority contract;
@@ -23,13 +24,14 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 LIB_ROOT = REPO_ROOT / "lib"
 REPORT = REPO_ROOT / "docs" / "generated" / "public-api-discovery.md"
 MACHINE_AUTHORITY = LIB_ROOT / "machine" / "authority-boundary.lisp"
-EVALUATOR_DISPATCH = LIB_ROOT / "evaluator-dispatch.lisp"
+FUNCTION_SIGNATURES = LIB_ROOT / "surface" / "function-signatures.lisp"
 CORE_PROFILE_AUTHORITY = REPO_ROOT / "contracts" / "core-profile-contract.lisp"
 STATIC_EXCLUDED_TOP_LEVEL_DIRS = {"generated", "surface"}
 PUBLIC_API_EXCLUDED_ROOT = re.compile(
     r"^\s*\(public-api-excluded-root\s+lib/([^/\s()]+)\)\s*$"
 )
-DEFINE_DISPATCH_ROW = re.compile(r"^\s*\(([01]{8})\s+define-form\)\s*$")
+DEFINE_SIGNATURE_ROW = re.compile(r"^\s*\(([01]{8})\s+\(kind syntax\)\s+\(form define\)")
+DEFMACRO_SIGNATURE_ROW = re.compile(r"^\s*\(([01]{8})\s+\(kind macro\).*\(sig \"\(defmacro ")
 PUBLIC_API_EXCLUDED_SOURCE = re.compile(
     r'^\s*\(public-api-excluded-source\s+\.\s+"([^"]+)"\)+\s*$'
 )
@@ -102,14 +104,26 @@ def _atom(text: str, index: int) -> tuple[str | None, int]:
 
 
 def define_operators() -> set[str]:
-    """Read DEFINE's byte spellings from Lisp-owned evaluator dispatch."""
+    """Read DEFINE's byte spellings from the Lisp-owned function table."""
     operators = {
         match.group(1)
-        for line in EVALUATOR_DISPATCH.read_text(encoding="utf-8").splitlines()
-        if (match := DEFINE_DISPATCH_ROW.match(line)) is not None
+        for line in FUNCTION_SIGNATURES.read_text(encoding="utf-8").splitlines()
+        if (match := DEFINE_SIGNATURE_ROW.match(line)) is not None
     }
     if not operators:
-        raise ValueError(f"{EVALUATOR_DISPATCH.relative_to(REPO_ROOT)} has no define-form rows")
+        raise ValueError(f"{FUNCTION_SIGNATURES.relative_to(REPO_ROOT)} has no (form define) rows")
+    return operators
+
+
+def defmacro_operators() -> set[str]:
+    """Read DEFMACRO's byte spelling from the Lisp-owned function table."""
+    operators = {
+        match.group(1)
+        for line in FUNCTION_SIGNATURES.read_text(encoding="utf-8").splitlines()
+        if (match := DEFMACRO_SIGNATURE_ROW.match(line)) is not None
+    }
+    if not operators:
+        raise ValueError(f"{FUNCTION_SIGNATURES.relative_to(REPO_ROOT)} has no defmacro row")
     return operators
 
 
@@ -117,6 +131,7 @@ def scan_source(source: str, source_name: str) -> list[Definition]:
     masked = _mask_strings_and_comments(source)
     definitions: list[Definition] = []
     function_operators = {"def"} | define_operators()
+    macro_operators = {"defmacro"} | defmacro_operators()
     depth = 0
     line = 1
     index = 0
@@ -131,14 +146,14 @@ def scan_source(source: str, source_name: str) -> list[Definition]:
         if char == "(":
             if depth == 0:
                 operator, after_operator = _atom(masked, index + 1)
-                if operator in function_operators | {"defmacro"}:
+                if operator in function_operators | macro_operators:
                     name, _after_name = _atom(masked, after_operator)
                     if name is not None:
                         definitions.append(
                             Definition(
                                 source=source_name,
                                 line=line,
-                                kind="macro" if operator == "defmacro" else "function",
+                                kind="macro" if operator in macro_operators else "function",
                                 name=name,
                             )
                         )
