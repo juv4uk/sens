@@ -14,7 +14,7 @@ permissions:
 jobs:
   sid-to-historical-mechanism:
     name: SID authority maps one-way to 1960s mechanisms
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - name: Checkout sens authority
         uses: actions/checkout@v5

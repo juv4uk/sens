@@ -11,7 +11,7 @@ on:
 
 jobs:
   bench:
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     timeout-minutes: 30
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -24,11 +24,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: sens-bench
-      - name: Install valgrind
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq valgrind
+      - name: Valgrind from the Guix channel pin
+        # Власний runner: без sudo/apt — valgrind з того самого закріпленого Guix-каналу.
+        run: |
+          VG="$(guix time-machine -C channels.scm -- build valgrind | grep -v -- '-debug$' | tail -1)"
+          echo "$VG/bin" >> "$GITHUB_PATH"
+          "$VG/bin/valgrind" --version
       - name: Preserve harness from the change
         run: |
-          mkdir -p /tmp/bench
+          rm -rf /tmp/bench && mkdir -p /tmp/bench
           cp benchmarks/sens-surface/run.py benchmarks/sens-surface/ci_bench.sh \
              benchmarks/sens-surface/ci_compare.py crates/sens/examples/ci_bench.rs /tmp/bench/
           python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small

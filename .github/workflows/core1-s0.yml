@@ -19,7 +19,7 @@ permissions:
 jobs:
   mccarthy-seed:
     name: mccarthy-eval S0 executes Core1
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - name: Checkout sens Core1 source
         uses: actions/checkout@v5

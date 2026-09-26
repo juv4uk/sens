@@ -9,7 +9,7 @@ on:
 
 jobs:
   core1-sid8-self-carry:
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - name: Checkout sens
         uses: actions/checkout@v5

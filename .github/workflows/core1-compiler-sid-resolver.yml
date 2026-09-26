@@ -18,7 +18,7 @@ permissions:
 jobs:
   core1-sid8-resolver:
     name: Core1 compiler resolver delegates to admitted SID8
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v5
 
