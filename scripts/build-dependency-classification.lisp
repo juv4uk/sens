@@ -52,8 +52,8 @@
 ; ---------------------------------------------------------------------
 
 ; crates/my-lisp/src/eval/mod.rs evaluate_list's own match arms
-(def core-special-forms
-  (quote (quote lambda def defmacro cond print princ write-to-string read
+(00001001 core-special-forms
+  (00000001 (quote lambda def defmacro cond print princ write-to-string read
           eval string-append string<? read-all string? symbol->string
           string->symbol string-first string-rest sha256-hex json-parse)))
 
@@ -62,8 +62,8 @@
 ; timezone-detect intentionally do not appear here: they are defined by
 ; lib/time.lisp. The retained host-facing time operations expose observations
 ; only: mono-ns, unix-time-now, ntp-query-raw, timezone-declarations-raw.
-(def core-builtins
-  (quote (* + - / < = > abs atom car cdr cons env eq f32 f32-buffer i32
+(00001001 core-builtins
+  (00000001 (* + - / < = > abs atom car cdr cons env eq f32 f32-buffer i32
           i32-buffer make-vector max max-list min min-list mono-ns
           ntp-query-raw numeric-buffer-length numeric-buffer-map
           numeric-buffer-ref numeric-buffer-type numeric-buffer? string-slice
@@ -71,15 +71,15 @@
           vector-set!)))
 
 ; crates/my-lisp-host/src/lib.rs register_capability calls
-(def host-capabilities
-  (quote (load process-run read-dir read-file read-file-bytes tcp-accept
+(00001001 host-capabilities
+  (00000001 (load process-run read-dir read-file read-file-bytes tcp-accept
           tcp-close tcp-connect tcp-listen tcp-read tcp-write write-file
           write-file-bytes)))
 
 ; the string/reader-flavored subset of the two tables above, called out
 ; as its own bucket per the task description ("strings/reader")
-(def strings-reader-subset
-  (quote (write-to-string read read-all string-append string<? string?
+(00001001 strings-reader-subset
+  (00000001 (write-to-string read read-all string-append string<? string?
           symbol->string string->symbol string-first string-rest
           string-slice string-contains? string-empty? string-length
           string-prefix? digit->string number->string number->string-onto)))
@@ -88,37 +88,37 @@
 ; Generated tables: read the real library sources, don't hand-copy them
 ; ---------------------------------------------------------------------
 
-(def top-level-def-names
-  (lambda (forms)
-    (cond
-      ((atom? forms) (quote ()))
-      (t (let* ((form (car forms))
-                (rest (top-level-def-names (cdr forms))))
-           (cond
-             ((atom? form) rest)
-             ((eq? (car form) (quote def)) (cons (car (cdr form)) rest))
-             ((eq? (car form) (quote defmacro)) (cons (car (cdr form)) rest))
+(00001001 top-level-def-names
+  (00001000 (forms)
+    (00000111
+      ((00000010 forms) (00000001 ()))
+      (t (let* ((form (00000101 forms))
+                (rest (top-level-def-names (00000110 forms))))
+           (00000111
+             ((00000010 form) rest)
+             ((00000011 (00000101 form) (00000001 def)) (00000100 (00000101 (00000110 form)) rest))
+             ((00000011 (00000101 form) (00000001 defmacro)) (00000100 (00000101 (00000110 form)) rest))
              (t rest)))))))
 
-(def symbol-names-from-file
-  (lambda (path)
+(00001001 symbol-names-from-file
+  (00001000 (path)
     (top-level-def-names (read-all (read-file path)))))
 
-(def core-my-symbols
+(00001001 core-my-symbols
   (symbol-names-from-file "lib/core.lisp"))
 
 ; every file under lib/ except core.lisp (and its .fasl cache), paired with
 ; the symbol names it defines -- an alist of (filename . (symbols...))
-(def other-lib-tables
-  (lambda ()
+(00001001 other-lib-tables
+  (00001000 ()
     (let* ((entries (read-dir "lib"))
            (relevant (filter
-                       (lambda (name)
-                         (and (string-prefix? ".lisp" (string-slice name (- (string-length name) 3) (string-length name)))
+                       (00001000 (name)
+                         (and (string-prefix? ".lisp" (string-slice name (00001101 (string-length name) 3) (string-length name)))
                               (not? (equal? name "core.lisp"))))
                        entries)))
-      (map (lambda (name)
-             (cons name (symbol-names-from-file (string-append "lib/" name))))
+      (map (00001000 (name)
+             (00000100 name (symbol-names-from-file (string-append "lib/" name))))
            relevant))))
 
 ; ---------------------------------------------------------------------
@@ -136,80 +136,80 @@
 ; needs to not crash while walking them, so every destructuring step
 ; below that assumes a minimum shape uses these instead of raw car/cdr,
 ; degrading a missing piece to () rather than erroring.
-(def safe-car
-  (lambda (lst) (cond ((atom? lst) (quote ())) (t (car lst)))))
-(def safe-cdr
-  (lambda (lst) (cond ((atom? lst) (quote ())) (t (cdr lst)))))
+(00001001 safe-car
+  (00001000 (lst) (00000111 ((00000010 lst) (00000001 ())) (t (00000101 lst)))))
+(00001001 safe-cdr
+  (00001000 (lst) (00000111 ((00000010 lst) (00000001 ())) (t (00000110 lst)))))
 
-(def collect-symbols-leaf
-  (lambda (form)
-    (cond
+(00001001 collect-symbols-leaf
+  (00001000 (form)
+    (00000111
       ((symbol? form) (list form))
-      ((atom? form) (quote ()))
-      (t (append (collect-symbols-leaf (car form)) (collect-symbols-leaf (cdr form)))))))
+      ((00000010 form) (00000001 ()))
+      (t (append (collect-symbols-leaf (00000101 form)) (collect-symbols-leaf (00000110 form)))))))
 
-(def collect-heads-each
-  (lambda (forms bound)
-    (cond
-      ((atom? forms) (quote ()))
-      (t (append (collect-heads (car forms) bound)
-                 (collect-heads-each (cdr forms) bound))))))
+(00001001 collect-heads-each
+  (00001000 (forms bound)
+    (00000111
+      ((00000010 forms) (00000001 ()))
+      (t (append (collect-heads (00000101 forms) bound)
+                 (collect-heads-each (00000110 forms) bound))))))
 
-(def collect-heads-cond-clauses
-  (lambda (clauses bound)
-    (cond
-      ((atom? clauses) (quote ()))
-      (t (let* ((clause (car clauses))
+(00001001 collect-heads-cond-clauses
+  (00001000 (clauses bound)
+    (00000111
+      ((00000010 clauses) (00000001 ()))
+      (t (let* ((clause (00000101 clauses))
                 (test-form (safe-car clause))
                 (body-form (safe-car (safe-cdr clause)))
                 (test-deps (collect-heads test-form bound))
                 (body-deps (collect-heads body-form bound))
-                (rest-deps (collect-heads-cond-clauses (cdr clauses) bound)))
+                (rest-deps (collect-heads-cond-clauses (00000110 clauses) bound)))
            (append test-deps (append body-deps rest-deps)))))))
 
-(def collect-heads-let*-seq
-  (lambda (bindings body bound)
-    (cond
-      ((atom? bindings) (collect-heads body bound))
-      (t (let* ((binding (car bindings))
+(00001001 collect-heads-let*-seq
+  (00001000 (bindings body bound)
+    (00000111
+      ((00000010 bindings) (collect-heads body bound))
+      (t (let* ((binding (00000101 bindings))
                 (name (safe-car binding))
                 (value-form (safe-car (safe-cdr binding)))
                 (value-deps (collect-heads value-form bound))
-                (new-bound (cons name bound))
-                (rest-deps (collect-heads-let*-seq (cdr bindings) body new-bound)))
+                (new-bound (00000100 name bound))
+                (rest-deps (collect-heads-let*-seq (00000110 bindings) body new-bound)))
            (append value-deps rest-deps))))))
 
-(def collect-heads
-  (lambda (form bound)
-    (cond
-      ((atom? form) (quote ()))
-      (t (let ((head (car form)))
-           (cond
-             ((and (symbol? head) (eq? head (quote quote)))
-              (quote ()))
-             ((and (symbol? head) (eq? head (quote lambda)))
+(00001001 collect-heads
+  (00001000 (form bound)
+    (00000111
+      ((00000010 form) (00000001 ()))
+      (t (let ((head (00000101 form)))
+           (00000111
+             ((and (symbol? head) (00000011 head (00000001 quote)))
+              (00000001 ()))
+             ((and (symbol? head) (00000011 head (00000001 lambda)))
               (let* ((params (safe-car (safe-cdr form)))
                      (body (safe-cdr (safe-cdr form)))
                      (param-names (collect-symbols-leaf params))
                      (new-bound (append param-names bound)))
-                (cons (quote %uses-lambda) (collect-heads-each body new-bound))))
-             ((and (symbol? head) (eq? head (quote let)))
+                (00000100 (00000001 %uses-lambda) (collect-heads-each body new-bound))))
+             ((and (symbol? head) (00000011 head (00000001 let)))
               (let* ((bindings (safe-car (safe-cdr form)))
                      (body (safe-car (safe-cdr (safe-cdr form))))
-                     (names (map (lambda (b) (safe-car b)) bindings))
-                     (value-forms (map (lambda (b) (safe-car (safe-cdr b))) bindings))
+                     (names (map (00001000 (b) (safe-car b)) bindings))
+                     (value-forms (map (00001000 (b) (safe-car (safe-cdr b))) bindings))
                      (value-deps (collect-heads-each value-forms bound))
                      (new-bound (append names bound))
                      (body-deps (collect-heads body new-bound)))
-                (cons (quote %uses-lambda)
-                      (cons (quote %uses-let-family) (append value-deps body-deps)))))
-             ((and (symbol? head) (eq? head (quote let*)))
+                (00000100 (00000001 %uses-lambda)
+                      (00000100 (00000001 %uses-let-family) (append value-deps body-deps)))))
+             ((and (symbol? head) (00000011 head (00000001 let*)))
               (let* ((bindings (safe-car (safe-cdr form)))
                      (body (safe-car (safe-cdr (safe-cdr form)))))
-                (cons (quote %uses-lambda)
-                      (cons (quote %uses-let-family)
+                (00000100 (00000001 %uses-lambda)
+                      (00000100 (00000001 %uses-let-family)
                             (collect-heads-let*-seq bindings body bound)))))
-             ((and (symbol? head) (eq? head (quote def)))
+             ((and (symbol? head) (00000011 head (00000001 def)))
               (let* ((name (safe-car (safe-cdr form)))
                      (value-form (safe-car (safe-cdr (safe-cdr form))))
                      ; def's own name is visible inside its own value-expr:
@@ -219,29 +219,29 @@
                      ; at call time even though f isn't bound yet when the
                      ; closure is created (crates/my-lisp/src/eval/special_forms/core.rs
                      ; evaluate_definition's own comment documents this).
-                     (new-bound (cons name bound)))
+                     (new-bound (00000100 name bound)))
                 (collect-heads value-form new-bound)))
-             ((and (symbol? head) (eq? head (quote defmacro)))
+             ((and (symbol? head) (00000011 head (00000001 defmacro)))
               (let* ((params (safe-car (safe-cdr (safe-cdr form))))
                      (body (safe-cdr (safe-cdr (safe-cdr form))))
                      (param-names (collect-symbols-leaf params))
                      (new-bound (append param-names bound)))
-                (cons (quote %uses-lambda) (collect-heads-each body new-bound))))
-             ((and (symbol? head) (eq? head (quote cond)))
-              (collect-heads-cond-clauses (cdr form) bound))
+                (00000100 (00000001 %uses-lambda) (collect-heads-each body new-bound))))
+             ((and (symbol? head) (00000011 head (00000001 cond)))
+              (collect-heads-cond-clauses (00000110 form) bound))
              (t
-              (let* ((head-dep (cond
-                                  ((not? (symbol? head)) (quote ()))
-                                  ((member? head bound) (quote ()))
+              (let* ((head-dep (00000111
+                                  ((not? (symbol? head)) (00000001 ()))
+                                  ((member? head bound) (00000001 ()))
                                   (t (list head))))
-                     (head-recurse (cond ((atom? head) (quote ())) (t (collect-heads head bound))))
-                     (args-deps (collect-heads-each (cdr form) bound)))
+                     (head-recurse (00000111 ((00000010 head) (00000001 ())) (t (collect-heads head bound))))
+                     (args-deps (collect-heads-each (00000110 form) bound)))
                 (append head-dep (append head-recurse args-deps))))))))))
 
-(def collect-deps-one
-  (lambda (form bound)
-    (cond
-      ((symbol? form) (cond ((member? form bound) (quote ())) (t (list form))))
+(00001001 collect-deps-one
+  (00001000 (form bound)
+    (00000111
+      ((symbol? form) (00000111 ((member? form bound) (00000001 ())) (t (list form))))
       (t (collect-heads form bound)))))
 
 ; a fixture's expr text can hold MORE than one top-level form (e.g.
@@ -250,62 +250,62 @@
 ; a top-level def/defmacro extends the bound-set for the forms that
 ; follow it in the SAME fixture, matching how they'd actually be
 ; evaluated in one shared environment.
-(def collect-deps-top-seq
-  (lambda (forms bound)
-    (cond
-      ((atom? forms) (quote ()))
-      (t (let* ((form (car forms))
+(00001001 collect-deps-top-seq
+  (00001000 (forms bound)
+    (00000111
+      ((00000010 forms) (00000001 ()))
+      (t (let* ((form (00000101 forms))
                 (deps (collect-deps-one form bound))
-                (new-bound (cond
-                             ((atom? form) bound)
-                             ((and (symbol? (car form)) (eq? (car form) (quote def)))
-                              (cons (car (cdr form)) bound))
-                             ((and (symbol? (car form)) (eq? (car form) (quote defmacro)))
-                              (cons (car (cdr form)) bound))
+                (new-bound (00000111
+                             ((00000010 form) bound)
+                             ((and (symbol? (00000101 form)) (00000011 (00000101 form) (00000001 def)))
+                              (00000100 (00000101 (00000110 form)) bound))
+                             ((and (symbol? (00000101 form)) (00000011 (00000101 form) (00000001 defmacro)))
+                              (00000100 (00000101 (00000110 form)) bound))
                              (t bound))))
-           (append deps (collect-deps-top-seq (cdr forms) new-bound)))))))
+           (append deps (collect-deps-top-seq (00000110 forms) new-bound)))))))
 
-(def collect-deps-top
-  (lambda (forms)
-    (collect-deps-top-seq forms (quote ()))))
+(00001001 collect-deps-top
+  (00001000 (forms)
+    (collect-deps-top-seq forms (00000001 ()))))
 
 ; ---------------------------------------------------------------------
 ; Classification of one fixture's collected raw head-symbol list against
 ; the known tables.
 ; ---------------------------------------------------------------------
 
-(def is-marker?
-  (lambda (s)
-    (or (eq? s (quote %uses-lambda)) (eq? s (quote %uses-let-family)))))
+(00001001 is-marker?
+  (00001000 (s)
+    (or (00000011 s (00000001 %uses-lambda)) (00000011 s (00000001 %uses-let-family)))))
 
-(def unique-onto
-  (lambda (items acc)
-    (cond
-      ((atom? items) acc)
-      ((member? (car items) acc) (unique-onto (cdr items) acc))
-      (t (unique-onto (cdr items) (cons (car items) acc))))))
+(00001001 unique-onto
+  (00001000 (items acc)
+    (00000111
+      ((00000010 items) acc)
+      ((member? (00000101 items) acc) (unique-onto (00000110 items) acc))
+      (t (unique-onto (00000110 items) (00000100 (00000101 items) acc))))))
 
-(def uniq (lambda (items) (unique-onto items (quote ()))))
+(00001001 uniq (00001000 (items) (unique-onto items (00000001 ()))))
 
-(def owning-library
-  (lambda (sym tables)
-    (cond
-      ((atom? tables) (quote ()))
-      ((member? sym (cdr (car tables))) (car (car tables)))
-      (t (owning-library sym (cdr tables))))))
+(00001001 owning-library
+  (00001000 (sym tables)
+    (00000111
+      ((00000010 tables) (00000001 ()))
+      ((member? sym (00000110 (00000101 tables))) (00000101 (00000101 tables)))
+      (t (owning-library sym (00000110 tables))))))
 
 ; classify one real (non-marker) symbol; returns (bucket-tag . library-or-())
-(def classify-symbol
-  (lambda (sym other-tables)
-    (cond
-      ((member? sym core-special-forms) (cons (quote core) (quote ())))
-      ((member? sym core-builtins) (cons (quote core) (quote ())))
-      ((member? sym host-capabilities) (cons (quote reasoning-world-or-host) sym))
-      ((member? sym core-my-symbols) (cons (quote macro-expanded-core) (quote ())))
+(00001001 classify-symbol
+  (00001000 (sym other-tables)
+    (00000111
+      ((member? sym core-special-forms) (00000100 (00000001 core) (00000001 ())))
+      ((member? sym core-builtins) (00000100 (00000001 core) (00000001 ())))
+      ((member? sym host-capabilities) (00000100 (00000001 reasoning-world-or-host) sym))
+      ((member? sym core-my-symbols) (00000100 (00000001 macro-expanded-core) (00000001 ())))
       (t (let ((lib (owning-library sym other-tables)))
-           (cond
-             ((equal? lib (quote ())) (cons (quote unknown) (quote ())))
-             (t (cons (quote reasoning-world-or-host) lib))))))))
+           (00000111
+             ((equal? lib (00000001 ())) (00000100 (00000001 unknown) (00000001 ())))
+             (t (00000100 (00000001 reasoning-world-or-host) lib))))))))
 
 ; my-lisp has no try/catch: a fixture whose own point is that its source
 ; text exceeds the reader's decimal-literal exponent resource bound
@@ -323,92 +323,92 @@
 ; risk of hand-rolling number classification outside the real reader. If
 ; a future fixture adds a different oversized-exponent literal, this
 ; check needs re-verification against the live corpus, not silent trust.
-(def known-unreadable-oversized-exponent?
-  (lambda (expr-str)
+(00001001 known-unreadable-oversized-exponent?
+  (00001000 (expr-str)
     (or (string-contains? "e100001" expr-str)
         (string-contains? "e-100001" expr-str))))
 
-(def classify-fixture
-  (lambda (id expr-str axioms-list other-tables)
-    (cond
+(00001001 classify-fixture
+  (00001000 (id expr-str axioms-list other-tables)
+    (00000111
       ((known-unreadable-oversized-exponent? expr-str)
-       (list (quote dependency-classification)
-             (cons (quote id) id)
-             (cons (quote buckets) (quote (core)))
-             (cons (quote unknown-symbols) (quote ()))
-             (cons (quote world-host-libraries) (quote ()))
-             (cons (quote axiom-tagged-s1) (member? (quote S1) axioms-list))
-             (cons (quote note) "source text exceeds the reader's own decimal-literal exponent resource bound; not locally re-parsed, classified as core (the reader itself) by inspection")))
+       (list (00000001 dependency-classification)
+             (00000100 (00000001 id) id)
+             (00000100 (00000001 buckets) (00000001 (core)))
+             (00000100 (00000001 unknown-symbols) (00000001 ()))
+             (00000100 (00000001 world-host-libraries) (00000001 ()))
+             (00000100 (00000001 axiom-tagged-s1) (member? (00000001 S1) axioms-list))
+             (00000100 (00000001 note) "source text exceeds the reader's own decimal-literal exponent resource bound; not locally re-parsed, classified as core (the reader itself) by inspection")))
       (t (classify-readable-fixture id expr-str axioms-list other-tables)))))
 
-(def classify-readable-fixture
-  (lambda (id expr-str axioms-list other-tables)
+(00001001 classify-readable-fixture
+  (00001000 (id expr-str axioms-list other-tables)
     (let* ((parsed-forms (read-all expr-str))
            (raw (collect-deps-top parsed-forms))
            (markers (filter is-marker? raw))
-           (real-syms (uniq (filter (lambda (s) (not? (is-marker? s))) raw)))
-           (classified (map (lambda (s) (cons s (classify-symbol s other-tables))) real-syms))
-           (bucket-of (lambda (tag) (map (lambda (c) (car c)) (filter (lambda (c) (eq? (car (cdr c)) tag)) classified))))
-           (unknowns (bucket-of (quote unknown)))
-           (uses-core (or (member? (quote core) (map (lambda (c) (car (cdr c))) classified))
-                          (atom? real-syms)))
-           (uses-macro-core (member? (quote macro-expanded-core) (map (lambda (c) (car (cdr c))) classified)))
-           (uses-world-host (member? (quote reasoning-world-or-host) (map (lambda (c) (car (cdr c))) classified)))
-           (uses-lambda (member? (quote %uses-lambda) markers))
-           (uses-let-family (member? (quote %uses-let-family) markers))
-           (uses-strings-reader (filter (lambda (s) (member? s strings-reader-subset)) real-syms))
-           (world-host-libraries (uniq (filter (lambda (x) (not? (equal? x (quote ()))))
-                                                (map (lambda (c) (cdr (cdr c))) classified))))
-           (buckets (filter (lambda (x) (not? (equal? x (quote ()))))
+           (real-syms (uniq (filter (00001000 (s) (not? (is-marker? s))) raw)))
+           (classified (map (00001000 (s) (00000100 s (classify-symbol s other-tables))) real-syms))
+           (bucket-of (00001000 (tag) (map (00001000 (c) (00000101 c)) (filter (00001000 (c) (00000011 (00000101 (00000110 c)) tag)) classified))))
+           (unknowns (bucket-of (00000001 unknown)))
+           (uses-core (or (member? (00000001 core) (map (00001000 (c) (00000101 (00000110 c))) classified))
+                          (00000010 real-syms)))
+           (uses-macro-core (member? (00000001 macro-expanded-core) (map (00001000 (c) (00000101 (00000110 c))) classified)))
+           (uses-world-host (member? (00000001 reasoning-world-or-host) (map (00001000 (c) (00000101 (00000110 c))) classified)))
+           (uses-lambda (member? (00000001 %uses-lambda) markers))
+           (uses-let-family (member? (00000001 %uses-let-family) markers))
+           (uses-strings-reader (filter (00001000 (s) (member? s strings-reader-subset)) real-syms))
+           (world-host-libraries (uniq (filter (00001000 (x) (not? (equal? x (00000001 ()))))
+                                                (map (00001000 (c) (00000110 (00000110 c))) classified))))
+           (buckets (filter (00001000 (x) (not? (equal? x (00000001 ()))))
                       (list
-                        (cond (uses-core (quote core)) (t (quote ())))
-                        (cond ((or uses-lambda uses-let-family) (quote closure-application)) (t (quote ())))
-                        (cond ((member? (quote S1) axioms-list) (quote exact-numbers)) (t (quote ())))
-                        (cond ((not? (atom? uses-strings-reader)) (quote strings-reader)) (t (quote ())))
-                        (cond ((or uses-macro-core uses-let-family) (quote macro-expanded-core)) (t (quote ())))
-                        (cond (uses-world-host (quote reasoning-world-or-host)) (t (quote ())))))))
-      (list (quote dependency-classification)
-            (cons (quote id) id)
-            (cons (quote buckets) buckets)
-            (cons (quote unknown-symbols) unknowns)
-            (cons (quote world-host-libraries) world-host-libraries)
-            (cons (quote axiom-tagged-s1) (member? (quote S1) axioms-list))))))
+                        (00000111 (uses-core (00000001 core)) (t (00000001 ())))
+                        (00000111 ((or uses-lambda uses-let-family) (00000001 closure-application)) (t (00000001 ())))
+                        (00000111 ((member? (00000001 S1) axioms-list) (00000001 exact-numbers)) (t (00000001 ())))
+                        (00000111 ((not? (00000010 uses-strings-reader)) (00000001 strings-reader)) (t (00000001 ())))
+                        (00000111 ((or uses-macro-core uses-let-family) (00000001 macro-expanded-core)) (t (00000001 ())))
+                        (00000111 (uses-world-host (00000001 reasoning-world-or-host)) (t (00000001 ())))))))
+      (list (00000001 dependency-classification)
+            (00000100 (00000001 id) id)
+            (00000100 (00000001 buckets) buckets)
+            (00000100 (00000001 unknown-symbols) unknowns)
+            (00000100 (00000001 world-host-libraries) world-host-libraries)
+            (00000100 (00000001 axiom-tagged-s1) (member? (00000001 S1) axioms-list))))))
 
 ; ---------------------------------------------------------------------
 ; Fixture pairing (same technique as scripts/oracle-batch.lisp)
 ; ---------------------------------------------------------------------
 
-(def fixtures-only
-  (lambda (entries)
-    (cond
-      ((atom? entries) (quote ()))
-      ((atom? (car entries)) (fixtures-only (cdr entries)))
-      (t (cond
-           ((eq? (car (car entries)) (quote fixture))
-            (cons (car entries) (fixtures-only (cdr entries))))
-           (t (fixtures-only (cdr entries))))))))
+(00001001 fixtures-only
+  (00001000 (entries)
+    (00000111
+      ((00000010 entries) (00000001 ()))
+      ((00000010 (00000101 entries)) (fixtures-only (00000110 entries)))
+      (t (00000111
+           ((00000011 (00000101 (00000101 entries)) (00000001 fixture))
+            (00000100 (00000101 entries) (fixtures-only (00000110 entries))))
+           (t (fixtures-only (00000110 entries))))))))
 
-(def process-pair
-  (lambda (inventory-remaining conformance-remaining other-tables)
-    (cond
-      ((atom? inventory-remaining) (quote ()))
-      ((atom? conformance-remaining) (quote ()))
-      (t (let* ((invf (car inventory-remaining))
-                (id (cdr (assoc (quote id) (cdr invf))))
-                (conff (car conformance-remaining))
-                (expr-str (cdr (assoc (quote expr) conff)))
-                (axioms-entry (assoc (quote axioms) conff))
-                (axioms-list (cond ((atom? axioms-entry) (quote ())) (t (cdr axioms-entry))))
+(00001001 process-pair
+  (00001000 (inventory-remaining conformance-remaining other-tables)
+    (00000111
+      ((00000010 inventory-remaining) (00000001 ()))
+      ((00000010 conformance-remaining) (00000001 ()))
+      (t (let* ((invf (00000101 inventory-remaining))
+                (id (00000110 (assoc (00000001 id) (00000110 invf))))
+                (conff (00000101 conformance-remaining))
+                (expr-str (00000110 (assoc (00000001 expr) conff)))
+                (axioms-entry (assoc (00000001 axioms) conff))
+                (axioms-list (00000111 ((00000010 axioms-entry) (00000001 ())) (t (00000110 axioms-entry))))
                 (record (classify-fixture id expr-str axioms-list other-tables))
                 (emitted (print record)))
-           (process-pair (cdr inventory-remaining) (cdr conformance-remaining) other-tables))))))
+           (process-pair (00000110 inventory-remaining) (00000110 conformance-remaining) other-tables))))))
 
-(print (cons (quote about) "dependency-classification.lisp — WSM-CONSTITUTION-DEPENDENCY-CLASSIFICATION: every tests/fixtures/inventory.lisp fixture, classified by executable dependency (core / closure-application / exact-numbers / strings-reader / macro-expanded-core / reasoning-world-or-host), generated from the live source tables, not hand-copied."))
-(print (cons (quote generated) "Run: my-lisp scripts/build-dependency-classification.lisp > tests/fixtures/dependency-classification.lisp"))
+(print (00000100 (00000001 about) "dependency-classification.lisp — WSM-CONSTITUTION-DEPENDENCY-CLASSIFICATION: every tests/fixtures/inventory.lisp fixture, classified by executable dependency (core / closure-application / exact-numbers / strings-reader / macro-expanded-core / reasoning-world-or-host), generated from the live source tables, not hand-copied."))
+(print (00000100 (00000001 generated) "Run: my-lisp scripts/build-dependency-classification.lisp > tests/fixtures/dependency-classification.lisp"))
 
 (process-pair
   (fixtures-only (read-all (read-file "tests/fixtures/inventory.lisp")))
   (read-all (read-file "tests/fixtures/conformance.lisp"))
   (other-lib-tables))
 
-(quote ())
+(00000001 ())
