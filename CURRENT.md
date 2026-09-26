@@ -1,35 +1,51 @@
 # CURRENT — where the truth actually lives
 
-Українською: це єдина точка входу для "що зараз чинне". Якщо будь-який інший документ (включно з архівом, застарілими планами чи старими рев'ю) суперечить джерелам нижче — **джерела нижче перемагають беззастережно**. Ніхто не має права цитувати `docs/archive/**` як специфікацію.
+Українською: це єдина точка входу для «що зараз чинне». Якщо будь-який інший документ, включно з архівом, застарілим планом чи старим рев'ю, суперечить джерелам нижче — **чинні джерела нижче перемагають**. `docs/archive/**` зберігає історію, але не є специфікацією.
 
-This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosystem/issues/5): **one active truth, many preserved histories**. Read this first. On any conflict between this file's authority order and anything else — a design doc, a dated report, a plan, an archived file — this order wins unconditionally.
+This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosystem/issues/5): **one active truth, many preserved histories**. Read this first. Historical material may explain how SENS arrived here, but it cannot override current contract and executable evidence.
 
 ## Authority order (highest wins)
 
-1. **Machine-readable contracts and Canon** — these are executable, not prose:
-   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — the numeric semantic-ID registry; the single source of truth for which spellings (en/uk/sa/sym) mean which semantic identity.
-   - `crates/my-lisp/src/eval/canon.rs` / `necessary_forms.rs` — Canon 0+7 and DEFINE/LAMBDA evaluator meaning, keyed only by numeric semantic ID.
-   - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) — the implementation-independent behavioral contract (the "oracle corpus"); `my-lisp-constitution.lisp` and `tests/fixtures/inventory.lisp` are GENERATED projections over it, never hand-edited.
-   - `language-contract.lisp` (this repo), and the sibling repos' own `isa-contract.lisp` (`fpga-lisp`) / `compatibility.lisp` (`cml`) for cross-repo compatibility.
-2. **Active ADRs and ratified design decisions** — see [`docs/adr/`](docs/adr) (if present) and any doc explicitly marked ratified/accepted, not proposed.
-3. **Active plans** — the plan actually being executed right now:
-   - [`docs/POLYGLOT-SEMANTIC-ORCHESTRATOR-IMPLEMENTATION-PLAN.md`](docs/POLYGLOT-SEMANTIC-ORCHESTRATOR-IMPLEMENTATION-PLAN.md) — polyglot foreign-runtime work (Python, C ABI).
-   - [`docs/FFI-FOREIGN-C-ABI-DESIGN-2026-09-12.md`](docs/FFI-FOREIGN-C-ABI-DESIGN-2026-09-12.md) — native C ABI track, explicitly separate from the Python track above.
-   - [`docs/COMPILER-AUTHORITY-BOUNDARY.md`](docs/COMPILER-AUTHORITY-BOUNDARY.md), [`docs/COMPILER-ORACLE-CORPUS.md`](docs/COMPILER-ORACLE-CORPUS.md), [`docs/COMPILER-IR-V0.md`](docs/COMPILER-IR-V0.md) — compiler roadmap.
-   - [`tasks.lisp`](tasks.lisp) — the live, machine-readable task DAG; `(done . nil)` entries are the actual open backlog, `(status . superseded)` entries are explicitly retired (kept for audit trail, never executed).
-4. **Standing doctrine** — [`docs/agent-doctrine.md`](docs/agent-doctrine.md), this repo's own [`AGENTS.md`](AGENTS.md), and [`PLAN.md`](PLAN.md) (the active Advice Taker roadmap) / [`STATUS.md`](STATUS.md) (current milestone snapshot) / [`ecosystem-status.md`](ecosystem-status.md) (cross-repo current-state snapshot — the log of *how* things got decided lives in `cml`'s own copy, this one is the derived, current-only view).
-5. **Tests and evidence** — `cargo test --workspace`, `--oracle-check`, and CI (`.github/workflows/ci.yml`) prove the current state actually holds; a claim without a passing test or a cited commit is a hypothesis, not a fact (doctrine rule 2, rule 10).
+1. **Machine-readable language authority**
+   - [`language-contract.lisp`](language-contract.lisp) — current ratified observable language contract.
+   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — source/UI routing metadata from admitted human spellings to exact eight-bit SENS functions. A spelling is not a function identity and does not own meaning.
+   - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
+   - SENS has exactly 256 functions: `00000000..11111111`. The concrete empty list `()` is a structural value outside that function space.
+2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
+3. **Reference implementation and substrates**
+   - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
+   - Independent substrates such as C, WASM, FPGA, GraalVM, Common Lisp, Prolog, Datalog, and CLIPS may execute or observe admitted behavior without becoming semantic authority.
+4. **Active plans and standing doctrine** — [`AGENTS.md`](AGENTS.md), [`docs/agent-doctrine.md`](docs/agent-doctrine.md), [`PLAN.md`](PLAN.md), [`STATUS.md`](STATUS.md), [`ecosystem-status.md`](ecosystem-status.md), and the currently active scoped plans they reference.
+5. **Tests and evidence** — `cargo test --workspace`, `--oracle-check`, focused witnesses, and CI prove what the implementation currently satisfies. A claim without executable or source evidence is a hypothesis, not a fact.
+
+## Current identity rule
+
+The language is **sens / СЕНС**.
+
+```text
+00000000
+...
+11111111
+```
+
+Those exact eight-bit forms are the 256 SENS functions. There is no parallel named-function identity layer. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings are source/UI routes only.
+
+`()` is not function `00000000`, function `11111111`, or any other member of the 256-function space. It is a separate structural value.
+
+Historical McCarthy names remain useful when discussing the 1960 evaluator, Core1, migration evidence, or provenance. They are not the current ontology of SENS.
 
 ## What is explicitly NOT authoritative
 
-- **`docs/archive/**`** — see [`docs/archive/README.md`](docs/archive/README.md). Superseded designs, completed plans, research spikes, and dated historical reviews/audits/reactions. Non-normative by construction; never cite as a reason for an implementation decision.
-- Any dated report, PoC writeup, or "here's what I found" investigation doc not listed above — read it for context if it helps, but if it disagrees with the contracts/Canon/registry/active plan/tests, it is the document that's wrong, not the code.
-- A peer agent's claim, a swarm `notify`/`emit` message, or a cross-session report of "X is fixed" — verify against the actual evidence (commit, test, CI run) before treating it as true (doctrine rule 9).
+- **`docs/archive/**`** — preserved superseded designs, completed plans, research spikes, historical audits, and reactions.
+- Any dated report or PoC not explicitly promoted into the current authority chain.
+- A host implementation detail merely because it is implemented in Rust, C, Java, Common Lisp, Prolog, Datalog, CLIPS, or another executor.
+- A peer agent's report that something is fixed without a verifiable commit/test/CI witness.
+- A human surface spelling as a substitute for the exact eight-bit SENS function it routes to.
 
 ## For a new agent starting cold
 
-1. Read `AGENTS.md` and `docs/agent-doctrine.md` (the fourteen rules).
-2. Read `tasks.lisp` for the current open backlog and its dependency structure.
-3. Read `lib/surface/semantic-registry.lisp` before assuming any spelling (English or otherwise) has special authority — it does not.
-4. Run `cargo test --workspace` and `cargo clippy --workspace --all-targets -- -D warnings` before trusting that "the docs say it works" — doctrine rule 13.
-5. If a design question seems already answered by an old document, check whether a newer active plan superseded it before acting on it.
+1. Read `AGENTS.md` and `docs/agent-doctrine.md`.
+2. Read `language-contract.lisp` and this file before trusting older design prose.
+3. Read `lib/surface/semantic-registry.lisp` only as routing metadata; do not infer function meaning from a spelling.
+4. Inspect `crates/sens` for the current Rust reference mechanism and the relevant executable witnesses for the behavior being changed.
+5. Run the focused tests for your slice and then the applicable repository gates before claiming the change works.

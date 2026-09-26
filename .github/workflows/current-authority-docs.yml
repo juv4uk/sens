@@ -1,0 +1,34 @@
+name: Current authority docs
+
+on:
+  pull_request:
+    paths:
+      - README.md
+      - CURRENT.md
+      - docs/semantic-authority-map.md
+      - docs/semantic-authority-map.uk.md
+      - scripts/check-current-authority-docs.sh
+      - .github/workflows/current-authority-docs.yml
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - CURRENT.md
+      - docs/semantic-authority-map.md
+      - docs/semantic-authority-map.uk.md
+      - scripts/check-current-authority-docs.sh
+      - .github/workflows/current-authority-docs.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current-authority-docs:
+    runs-on: [self-hosted, guix]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify current authority entry-points
+        shell: bash
+        run: bash scripts/check-current-authority-docs.sh
