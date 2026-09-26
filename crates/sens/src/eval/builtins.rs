@@ -26,20 +26,15 @@ use crate::eval::arithmetic::{
 };
 use crate::eval::special_forms::json::json_parse_values;
 use crate::eval::special_forms::{
-    codepoint_to_string_values, eval_values,
+    codepoint_to_string_values,
     princ_values, print_values, read_all_values, read_values, sha256_hex_values,
-    string_append_values, string_first_values, string_less_than_values, string_predicate_values,
+    string_append_values, string_first_values, string_predicate_values,
     string_rest_values, string_to_codepoint_values, string_to_symbol_values,
     symbol_to_string_values, write_to_string_values,
 };
 use crate::{Exactness, NumericBuffer, Rational, Span, Value};
 
-type Native =
-    std::rc::Rc<dyn Fn(&[Value], &Environment, Span) -> Result<Value, crate::LanguageError>>;
 
-fn builtin(name: &'static str, func: Native) -> Value {
-    Value::Builtin(std::rc::Rc::new(crate::value::Builtin { name, func }))
-}
 
 
 fn ntp_query_raw_value(
@@ -122,11 +117,10 @@ fn ntp_query_raw_value(
 }
 
 pub(crate) fn install(environment: &Environment) {
-    macro_rules! define {
-        ($env:expr, $name:expr, $f:expr) => {
-            $env.define($name, builtin($name, std::rc::Rc::new($f)));
-        };
-    }
+    // Власник, 2026-09-26: вбудовані функції більше не прив'язуються за
+    // англійською назвою — вони примітиви за кодом СЕНС у PRIMITIVE_TABLE
+    // (див. prim_* нижче і eval/canon.rs). Назви дає лише таблиця функцій.
+    let _ = environment;
 
 
     // abs/min-list/max-list/min/max migrated to lib/core.my (owner
@@ -138,7 +132,67 @@ pub(crate) fn install(environment: &Environment) {
     // docs/BUILTIN-IDENTITY-MIGRATION-MAP-2026-09-11.md for the wider
     // migration this is the first vertical slice of.
 
-    define!(environment, "make-vector", |args: &[Value], _env: &Environment, span: Span| {
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // ADR-007/008 runtime peer slices: each identity below allocates one
+    // callable value, then binds every ratified stable spelling projected from
+    // the Sens8 semantic registry projection. Human spellings are not duplicated here.
+    // The builtin diagnostic token remains the historical symbolic spelling
+    // for Contract 2.1 display compatibility; it is NOT semantic identity.
+    
+}
+
+fn exact_args(
+    name: &'static str,
+    args: &[Value],
+    expected: usize,
+    span: Span,
+) -> Result<(), crate::LanguageError> {
+    if args.len() != expected {
+        return Err(crate::LanguageError::new(
+            crate::ErrorKind::Arity,
+            format!("{name} expects exactly {expected} argument(s)"),
+            span,
+        ));
+    }
+    Ok(())
+}
+
+// Примітиви мови за кодом СЕНС (власник, 2026-09-26: Rust знає лише коди).
+/// make-vector
+pub(super) fn prim_01010000(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("make-vector", args, 1, span)?;
         match &args[0] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 =>
@@ -146,18 +200,23 @@ pub(crate) fn install(environment: &Environment) {
             _ => Err(crate::LanguageError::new(crate::ErrorKind::Type,
                 "make-vector expects an exact non-negative integer · make-vector ochikuie tochnyi nenulevyi tsilyi · make-vector erwartet eine exakte nichtnegative ganze Zahl", span)),
         }
-    });
-    define!(environment, "vector", |args: &[Value], _env: &Environment, _span: Span| {
-        Ok(Value::vector(args.iter().cloned()))
-    });
+    }
 
-    define!(environment, "mono-ns", |args: &[Value], _env: &Environment, span: Span| {
+/// vector
+pub(super) fn prim_01001111(args: &[Value], _env: &Environment, _span: Span) -> Result<Value, crate::LanguageError> {
+        Ok(Value::vector(args.iter().cloned()))
+    }
+
+/// mono-ns
+pub(super) fn prim_01011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("mono-ns", args, 0, span)?;
         static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
         let elapsed = START.get_or_init(std::time::Instant::now).elapsed();
         Ok(exact_value(Rational::integer(elapsed.as_nanos() as i64)))
-    });
-    define!(environment, "unix-time-now", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// unix-time-now
+pub(super) fn prim_01011011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("unix-time-now", args, 0, span)?;
         let duration = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)
             .map_err(|_| crate::LanguageError::new(crate::ErrorKind::Type,
@@ -171,8 +230,10 @@ pub(crate) fn install(environment: &Environment) {
             exact_value(Rational::integer(seconds)),
             exact_value(Rational::integer(duration.subsec_nanos() as i64)),
         ]))
-    });
-    define!(environment, "ntp-query-raw", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// ntp-query-raw
+pub(super) fn prim_01011100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("ntp-query-raw", args, 2, span)?;
         let host = match &args[0] {
             Value::String(value) => value.as_ref(),
@@ -185,8 +246,10 @@ pub(crate) fn install(environment: &Environment) {
                 "ntp-query-raw expects exact timeout milliseconds", span)),
         };
         ntp_query_raw_value(host, timeout, span)
-    });
-    define!(environment, "timezone-declarations-raw", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// timezone-declarations-raw
+pub(super) fn prim_01011101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("timezone-declarations-raw", args, 0, span)?;
         let tz_value = std::env::var("TZ").ok().filter(|value| !value.is_empty())
             .map(|value| Value::String(std::rc::Rc::from(value))).unwrap_or(Value::Nil);
@@ -196,16 +259,19 @@ pub(crate) fn install(environment: &Environment) {
         Ok(Value::list([
             Value::Symbol(std::rc::Rc::from("timezone-declarations")), tz_value, etc_timezone_value,
         ]))
-    });
+    }
 
-    define!(environment, "vector-length", |args: &[Value], _env: &Environment, span: Span| {
+/// vector-length
+pub(super) fn prim_01010001(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("vector-length", args, 1, span)?;
         match &args[0] {
             Value::Vector(vec) => Ok(Value::Number(vec.borrow().len() as f64, Exactness::Exact)),
             _ => Err(crate::LanguageError::new(crate::ErrorKind::Type, "vector-length expects a vector", span)),
         }
-    });
-    define!(environment, "vector-ref", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// vector-ref
+pub(super) fn prim_01010010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("vector-ref", args, 2, span)?;
         let index = match &args[1] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 && *f <= usize::MAX as f64 => *f as usize,
@@ -219,8 +285,10 @@ pub(crate) fn install(environment: &Environment) {
             }),
             _ => Err(crate::LanguageError::new(crate::ErrorKind::Type, "vector-ref expects a vector", span)),
         }
-    });
-    define!(environment, "vector-set!", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// vector-set!
+pub(super) fn prim_01010011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("vector-set!", args, 3, span)?;
         let index = match &args[1] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 && *f <= usize::MAX as f64 => *f as usize,
@@ -240,9 +308,10 @@ pub(crate) fn install(environment: &Environment) {
             }
             _ => Err(crate::LanguageError::new(crate::ErrorKind::Type, "vector-set! expects a vector", span)),
         }
-    });
+    }
 
-    define!(environment, "i32-buffer", |args: &[Value], _env: &Environment, span: Span| {
+/// i32-buffer
+pub(super) fn prim_01010100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         let mut values = Vec::with_capacity(args.len());
         for value in args {
             let integer = match value {
@@ -260,8 +329,10 @@ pub(crate) fn install(environment: &Environment) {
             })?);
         }
         Ok(Value::NumericBuffer(NumericBuffer::I32(values.into())))
-    });
-    define!(environment, "f32-buffer", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// f32-buffer
+pub(super) fn prim_01010101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         let mut values = Vec::with_capacity(args.len());
         for value in args {
             let number = match value {
@@ -278,35 +349,96 @@ pub(crate) fn install(environment: &Environment) {
             values.push(narrowed);
         }
         Ok(Value::NumericBuffer(NumericBuffer::F32(values.into())))
-    });
+    }
 
-    define!(environment, "string-slice", |args: &[Value], _env: &Environment, span: Span| {
+/// string-slice
+pub(super) fn prim_01000001(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         super::special_forms::evaluate_string_slice(args, span)
-    });
-    define!(environment, "string-append", |args: &[Value], _env: &Environment, span: Span| string_append_values(args, span));
-    define!(environment, "string<?", |args: &[Value], _env: &Environment, span: Span| string_less_than_values(args, span));
-    define!(environment, "string?", |args: &[Value], _env: &Environment, span: Span| string_predicate_values(args, span));
-    define!(environment, "symbol->string", |args: &[Value], _env: &Environment, span: Span| symbol_to_string_values(args, span));
-    define!(environment, "string->symbol", |args: &[Value], _env: &Environment, span: Span| string_to_symbol_values(args, span));
-    define!(environment, "string-first", |args: &[Value], _env: &Environment, span: Span| string_first_values(args, span));
-    define!(environment, "string-rest", |args: &[Value], _env: &Environment, span: Span| string_rest_values(args, span));
-    define!(environment, "codepoint->string", |args: &[Value], _env: &Environment, span: Span| codepoint_to_string_values(args, span));
-    define!(environment, "string->codepoint", |args: &[Value], _env: &Environment, span: Span| string_to_codepoint_values(args, span));
-    define!(environment, "sha256-hex", |args: &[Value], _env: &Environment, span: Span| sha256_hex_values(args, span));
-    define!(environment, "json-parse", |args: &[Value], _env: &Environment, span: Span| json_parse_values(args, span));
+    }
 
-    define!(environment, "print", |args: &[Value], env: &Environment, span: Span| print_values(args, env, span));
-    define!(environment, "princ", |args: &[Value], env: &Environment, span: Span| princ_values(args, env, span));
-    define!(environment, "write-to-string", |args: &[Value], env: &Environment, span: Span| write_to_string_values(args, env, span));
-    define!(environment, "read", |args: &[Value], env: &Environment, span: Span| read_values(args, env, span));
-    define!(environment, "read-all", |args: &[Value], env: &Environment, span: Span| read_all_values(args, env, span));
-    define!(environment, "eval", |args: &[Value], env: &Environment, span: Span| eval_values(args, env, span));
+/// string-append
+pub(super) fn prim_00111010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        string_append_values(args, span)
+    }
 
-    define!(environment, "numeric-buffer?", |args: &[Value], _env: &Environment, span: Span| {
+/// string?
+pub(super) fn prim_00100100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        string_predicate_values(args, span)
+    }
+
+/// symbol->string
+pub(super) fn prim_01000010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        symbol_to_string_values(args, span)
+    }
+
+/// string->symbol
+pub(super) fn prim_01000011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        string_to_symbol_values(args, span)
+    }
+
+/// string-first
+pub(super) fn prim_00111111(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        string_first_values(args, span)
+    }
+
+/// string-rest
+pub(super) fn prim_01000000(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        string_rest_values(args, span)
+    }
+
+/// codepoint->string
+pub(super) fn prim_01000100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        codepoint_to_string_values(args, span)
+    }
+
+/// string->codepoint
+pub(super) fn prim_01000101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        string_to_codepoint_values(args, span)
+    }
+
+/// sha256-hex
+pub(super) fn prim_10100001(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        sha256_hex_values(args, span)
+    }
+
+/// json-parse
+pub(super) fn prim_10100000(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        json_parse_values(args, span)
+    }
+
+/// print
+pub(super) fn prim_01001000(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        print_values(args, env, span)
+    }
+
+/// princ
+pub(super) fn prim_01001001(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        princ_values(args, env, span)
+    }
+
+/// write-to-string
+pub(super) fn prim_01001100(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        write_to_string_values(args, env, span)
+    }
+
+/// read
+pub(super) fn prim_01001010(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        read_values(args, env, span)
+    }
+
+/// read-all
+pub(super) fn prim_01001011(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+        read_all_values(args, env, span)
+    }
+
+/// numeric-buffer?
+pub(super) fn prim_00100110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("numeric-buffer?", args, 1, span)?;
         Ok(if matches!(args[0], Value::NumericBuffer(_)) { Value::truth(true) } else { Value::Nil })
-    });
-    define!(environment, "numeric-buffer-type", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// numeric-buffer-type
+pub(super) fn prim_01010110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("numeric-buffer-type", args, 1, span)?;
         let name = match &args[0] {
             Value::NumericBuffer(NumericBuffer::I32(_)) => "i32",
@@ -315,8 +447,10 @@ pub(crate) fn install(environment: &Environment) {
                 "numeric-buffer-type expects a numeric buffer", span)),
         };
         Ok(Value::Symbol(name.into()))
-    });
-    define!(environment, "numeric-buffer-length", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// numeric-buffer-length
+pub(super) fn prim_01010111(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("numeric-buffer-length", args, 1, span)?;
         let length = match &args[0] {
             Value::NumericBuffer(NumericBuffer::I32(values)) => values.len(),
@@ -325,8 +459,10 @@ pub(crate) fn install(environment: &Environment) {
                 "numeric-buffer-length expects a numeric buffer", span)),
         };
         Ok(Value::Number(length as f64, Exactness::Exact))
-    });
-    define!(environment, "numeric-buffer-ref", |args: &[Value], _env: &Environment, span: Span| {
+    }
+
+/// numeric-buffer-ref
+pub(super) fn prim_01011000(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("numeric-buffer-ref", args, 2, span)?;
         let index = match args[1] {
             Value::Number(number, Exactness::Exact)
@@ -343,8 +479,10 @@ pub(crate) fn install(environment: &Environment) {
                 "numeric-buffer-ref expects a numeric buffer", span)),
         }.ok_or_else(|| crate::LanguageError::new(crate::ErrorKind::InvalidForm,
             "numeric-buffer-ref index is out of bounds", span))
-    });
-    define!(environment, "numeric-buffer-map", |args: &[Value], env: &Environment, span: Span| {
+    }
+
+/// numeric-buffer-map
+pub(super) fn prim_01011001(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("numeric-buffer-map", args, 2, span)?;
         match &args[1] {
             Value::NumericBuffer(NumericBuffer::I32(input)) => {
@@ -391,14 +529,10 @@ pub(crate) fn install(environment: &Environment) {
             _ => Err(crate::LanguageError::new(crate::ErrorKind::Type,
                 "numeric-buffer-map expects a numeric buffer", span)),
         }
-    });
+    }
 
-    // ADR-007/008 runtime peer slices: each identity below allocates one
-    // callable value, then binds every ratified stable spelling projected from
-    // the Sens8 semantic registry projection. Human spellings are not duplicated here.
-    // The builtin diagnostic token remains the historical symbolic spelling
-    // for Contract 2.1 display compatibility; it is NOT semantic identity.
-    define!(environment, "env", |args: &[Value], env: &Environment, span: Span| {
+/// env
+pub(super) fn prim_01001110(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args("env", args, 0, span)?;
         let mut items = Vec::new();
         for (name, value) in env.snapshot() {
@@ -409,21 +543,4 @@ pub(crate) fn install(environment: &Environment) {
             list = Value::Pair(std::rc::Rc::new(item), std::rc::Rc::new(list));
         }
         Ok(list)
-    });
-}
-
-fn exact_args(
-    name: &'static str,
-    args: &[Value],
-    expected: usize,
-    span: Span,
-) -> Result<(), crate::LanguageError> {
-    if args.len() != expected {
-        return Err(crate::LanguageError::new(
-            crate::ErrorKind::Arity,
-            format!("{name} expects exactly {expected} argument(s)"),
-            span,
-        ));
     }
-    Ok(())
-}

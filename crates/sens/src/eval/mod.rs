@@ -262,6 +262,12 @@ fn dispatch_call(
     };
     match &function {
         Value::Sid(sid) => {
+            // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
+            if !canon::has_primitive(*sid) {
+                if let Some(Value::Macro(closure)) = &environment.code_slot(*sid) {
+                    return closures::apply_macro(closure.clone(), arguments, environment, span);
+                }
+            }
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
                 values.push(evaluate(argument, environment)?);

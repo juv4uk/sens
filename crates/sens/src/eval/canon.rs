@@ -4,7 +4,7 @@
 //! mechanism shape for an already-selected SID, but it must never invent a
 //! second named function identity.
 
-use super::{arithmetic, special_forms};
+use super::{arithmetic, builtins, closures, special_forms};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -116,6 +116,39 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     table[crate::sens!(00011011).packed_byte() as usize] = Some(prim_00011011);
     table[crate::sens!(00011100).packed_byte() as usize] = Some(prim_00011100);
     table[crate::sens!(01001101).packed_byte() as usize] = Some(prim_01001101);
+    table[crate::sens!(01010000).packed_byte() as usize] = Some(builtins::prim_01010000); // make-vector
+    table[crate::sens!(01001111).packed_byte() as usize] = Some(builtins::prim_01001111); // vector
+    table[crate::sens!(01011010).packed_byte() as usize] = Some(builtins::prim_01011010); // mono-ns
+    table[crate::sens!(01011011).packed_byte() as usize] = Some(builtins::prim_01011011); // unix-time-now
+    table[crate::sens!(01011100).packed_byte() as usize] = Some(builtins::prim_01011100); // ntp-query-raw
+    table[crate::sens!(01011101).packed_byte() as usize] = Some(builtins::prim_01011101); // timezone-declarations-raw
+    table[crate::sens!(01010001).packed_byte() as usize] = Some(builtins::prim_01010001); // vector-length
+    table[crate::sens!(01010010).packed_byte() as usize] = Some(builtins::prim_01010010); // vector-ref
+    table[crate::sens!(01010011).packed_byte() as usize] = Some(builtins::prim_01010011); // vector-set!
+    table[crate::sens!(01010100).packed_byte() as usize] = Some(builtins::prim_01010100); // i32-buffer
+    table[crate::sens!(01010101).packed_byte() as usize] = Some(builtins::prim_01010101); // f32-buffer
+    table[crate::sens!(01000001).packed_byte() as usize] = Some(builtins::prim_01000001); // string-slice
+    table[crate::sens!(00111010).packed_byte() as usize] = Some(builtins::prim_00111010); // string-append
+    table[crate::sens!(00100100).packed_byte() as usize] = Some(builtins::prim_00100100); // string?
+    table[crate::sens!(01000010).packed_byte() as usize] = Some(builtins::prim_01000010); // symbol->string
+    table[crate::sens!(01000011).packed_byte() as usize] = Some(builtins::prim_01000011); // string->symbol
+    table[crate::sens!(00111111).packed_byte() as usize] = Some(builtins::prim_00111111); // string-first
+    table[crate::sens!(01000000).packed_byte() as usize] = Some(builtins::prim_01000000); // string-rest
+    table[crate::sens!(01000100).packed_byte() as usize] = Some(builtins::prim_01000100); // codepoint->string
+    table[crate::sens!(01000101).packed_byte() as usize] = Some(builtins::prim_01000101); // string->codepoint
+    table[crate::sens!(10100001).packed_byte() as usize] = Some(builtins::prim_10100001); // sha256-hex
+    table[crate::sens!(10100000).packed_byte() as usize] = Some(builtins::prim_10100000); // json-parse
+    table[crate::sens!(01001000).packed_byte() as usize] = Some(builtins::prim_01001000); // print
+    table[crate::sens!(01001001).packed_byte() as usize] = Some(builtins::prim_01001001); // princ
+    table[crate::sens!(01001100).packed_byte() as usize] = Some(builtins::prim_01001100); // write-to-string
+    table[crate::sens!(01001010).packed_byte() as usize] = Some(builtins::prim_01001010); // read
+    table[crate::sens!(01001011).packed_byte() as usize] = Some(builtins::prim_01001011); // read-all
+    table[crate::sens!(00100110).packed_byte() as usize] = Some(builtins::prim_00100110); // numeric-buffer?
+    table[crate::sens!(01010110).packed_byte() as usize] = Some(builtins::prim_01010110); // numeric-buffer-type
+    table[crate::sens!(01010111).packed_byte() as usize] = Some(builtins::prim_01010111); // numeric-buffer-length
+    table[crate::sens!(01011000).packed_byte() as usize] = Some(builtins::prim_01011000); // numeric-buffer-ref
+    table[crate::sens!(01011001).packed_byte() as usize] = Some(builtins::prim_01011001); // numeric-buffer-map
+    table[crate::sens!(01001110).packed_byte() as usize] = Some(builtins::prim_01001110); // env
     table
 };
 
@@ -228,18 +261,45 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let Some(primitive) = PRIMITIVE_TABLE
+    // #1455: примітив Rust → визначення мовою, прив'язане до коду → помилка.
+    if let Some(primitive) = PRIMITIVE_TABLE
         .get(sid.packed_byte() as usize)
         .and_then(|function| *function)
-    else {
-        return Err(LanguageError::new(
+    {
+        return primitive(args, environment, span);
+    }
+    match &environment.code_slot(sid) {
+        Some(Value::Closure(closure)) => closures::apply_values(closure.clone(), args, span),
+        Some(Value::Builtin(builtin)) => (builtin.func)(args, environment, span),
+        _ => Err(LanguageError::new(
             ErrorKind::Type,
             format!("SENS function has no admitted callable mechanism: {sid}"),
             span,
-        ));
-    };
+        )),
+    }
+}
 
-    primitive(args, environment, span)
+/// #1455: чи має код примітив Rust.
+pub(crate) fn has_primitive(sid: Sens8) -> bool {
+    PRIMITIVE_TABLE
+        .get(sid.packed_byte() as usize)
+        .is_some_and(|function| function.is_some())
+}
+
+/// #1455: визначення (функція або макрос) верхнього рівня з назвою з таблиці функцій, чий код не
+/// має примітиву й не є особливою формою, стає механізмом цього коду. Лише
+/// перше визначення; затінення назви пізніше слот не змінює.
+pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &Environment) {
+    if !environment.is_root() || !matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
+        return;
+    }
+    let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
+        return;
+    };
+    if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
+        return;
+    }
+    environment.bind_code_slot_once(sid, value.clone());
 }
 
 pub(crate) fn value_for_sid(sid: Sens8) -> Option<Value> {

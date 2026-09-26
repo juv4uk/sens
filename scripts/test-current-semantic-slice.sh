@@ -5,7 +5,7 @@ set -euo pipefail
 # expectations through host observers. It deliberately does not run legacy
 # host-authored Canon truth assertions; deep/current-contract lanes retain
 # broader mechanism and integration evidence.
-cargo test -p my-lisp \
+cargo test -p sens \
   --test witness_authority \
   --test structural_query_inventory \
   --test structural_observation_contract \

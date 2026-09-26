@@ -526,6 +526,25 @@
       ((string-empty? s) (identity-relation same) 0)
       (t t (00001100 1 (string-length (string-rest s)))))))
 
+; string<? — лексикографічний порядок за кодовими точками, як `<` для &str
+; у Rust (UTF-8 зберігає порядок кодових точок). Переведено з Rust у мову
+; (власник, 2026-09-26): рядок розбирають лише примітиви string-first
+; (00111111), string-rest (01000000) і string->codepoint (01000101). Не-рядок
+; дає природну помилку Type від string-first; неправильна кількість
+; аргументів — Arity від прив'язки лямбди.
+(00001001 string<?
+  (00001000 (a b)
+    (00000111
+      ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
+      ((string-empty? b) (identity-relation same)
+       (second (list (00111010 a "") (00000001 ()))))
+      ((string-empty? a) (identity-relation same)
+       (second (list (00111010 b "") t)))
+      ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) 1 t)
+      ((00000011 (00111111 a) (00111111 b)) (identity-relation same)
+       (string<? (01000000 a) (01000000 b)))
+      (t t (00000001 ())))))
+
 (00001001 string-prefix?
   (00001000 (prefix s)
     (00000111

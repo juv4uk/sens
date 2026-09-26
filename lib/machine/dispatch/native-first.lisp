@@ -11,28 +11,28 @@
 
 (00001001 native-first-fallback
   (00001000 (expression)
-    (list (00000001 evaluator-fallback) expression)))
+    (00100111 (00000001 evaluator-fallback) expression)))
 
 (00001001 native-first-native-plan
   (00001000 (forms arena-bytes)
-    (list (00000001 native-plan) forms arena-bytes)))
+    (00100111 (00000001 native-plan) forms arena-bytes)))
 
 (00001001 native-first-plan-car-cons-u64
   (00001000 (expression cons-expression)
-    (let ((cons-arguments (00000110 cons-expression)))
+    (10011100 ((cons-arguments (00000110 cons-expression)))
       (00000111
         ((00000010 cons-arguments) (structural-kind pair)
-         (let ((rest-after-left (00000110 cons-arguments)))
+         (10011100 ((rest-after-left (00000110 cons-arguments)))
            (00000111
              ((00000010 rest-after-left) (structural-kind pair)
-              (let ((rest-after-right (00000110 rest-after-left)))
+              (10011100 ((rest-after-right (00000110 rest-after-left)))
                 (00000111
                   ((00000010 rest-after-right) (structural-kind empty-list)
-                   (let ((typed-left (x86-as-u64-imm (00000101 cons-arguments))))
+                   (10011100 ((typed-left (x86-as-u64-imm (00000101 cons-arguments))))
                      (00000111
                        ((00000011 (00000101 typed-left) (00000001 u64-imm))
                         (identity-relation same)
-                        (let ((typed-right (x86-as-u64-imm (00000101 rest-after-left))))
+                        (10011100 ((typed-right (x86-as-u64-imm (00000101 rest-after-left))))
                           (00000111
                             ((00000011 (00000101 typed-right) (00000001 u64-imm))
                              (identity-relation same)
@@ -61,7 +61,7 @@
   (00001000 (expression argument)
     (00000111
       ((00000010 argument) (structural-kind pair)
-       (let ((head (00000101 argument)))
+       (10011100 ((head (00000101 argument)))
          (00000111
            ((00000010 head) (structural-kind empty-list)
             (native-first-fallback expression))
@@ -79,7 +79,7 @@
 
 (00001001 native-first-plan-car
   (00001000 (expression)
-    (let ((arguments (00000110 expression)))
+    (10011100 ((arguments (00000110 expression)))
       (00000111
         ((00000010 arguments) (structural-kind pair)
          (00000111
@@ -96,7 +96,7 @@
   (00001000 (expression)
     (00000111
       ((00000010 expression) (structural-kind pair)
-       (let ((head (00000101 expression)))
+       (10011100 ((head (00000101 expression)))
          (00000111
            ((00000010 head) (structural-kind empty-list)
             (native-first-fallback expression))

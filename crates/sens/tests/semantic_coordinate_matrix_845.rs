@@ -103,6 +103,61 @@ fn source_has_bare_sid(source: &str, sid: Sens8) -> bool {
     source.contains(&format!("({sid}"))
 }
 
+fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
+    let exprs = parse(source).expect("machine capability axis must parse");
+
+    exprs.iter().any(|expr| {
+        let ExprKind::List(definition) = &expr.kind else {
+            return false;
+        };
+        let Some(Expr {
+            kind: ExprKind::Sid(define_sid),
+            ..
+        }) = definition.first()
+        else {
+            return false;
+        };
+        if *define_sid != sens::sens!(00001001) {
+            return false;
+        }
+        if !matches!(
+            definition.get(1).map(|expr| &expr.kind),
+            Some(ExprKind::Symbol(name)) if &**name == "machine-capability-axis-v1"
+        ) {
+            return false;
+        }
+
+        let Some(quoted) = definition.get(2) else {
+            return false;
+        };
+        let ExprKind::List(quote_form) = &quoted.kind else {
+            return false;
+        };
+        if !matches!(
+            quote_form.first().map(|expr| &expr.kind),
+            Some(ExprKind::Sid(sid)) if *sid == sens::sens!(00000001)
+        ) {
+            return false;
+        }
+        let Some(rows) = quote_form.get(1) else {
+            return false;
+        };
+        let ExprKind::List(rows) = &rows.kind else {
+            return false;
+        };
+
+        rows.iter().any(|row| {
+            let ExprKind::List(fields) = &row.kind else {
+                return false;
+            };
+            matches!(
+                fields.first().map(|expr| &expr.kind),
+                Some(ExprKind::Sid(sid)) if *sid == wanted_sid
+            )
+        })
+    })
+}
+
 fn kernel_map_has_sid(source: &str, wanted_sid: Sens8) -> bool {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let ExprKind::List(items) = &exprs[0].kind else {
@@ -198,7 +253,7 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
     assert!(identity.contains(&format!("({LAMBDA_SID} ")));
     assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
     assert!(!source_has_bare_sid(&math, LAMBDA_SID));
-    assert!(!source_has_bare_sid(&machine, LAMBDA_SID));
+    assert!(!machine_axis_has_row(&machine, LAMBDA_SID));
 }
 
 #[test]

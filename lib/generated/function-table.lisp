@@ -7,6 +7,7 @@
 ; authority = my-lisp (semantic)
 
 (ft/2
+  ("00000000" identity:00000000 (ук ()) (укр ()) (en ()) (sa ()) (sym ()) my-lisp)
   ("00000001" identity:00000001/surface:quote (ук як-є) (укр як-є) (en quote) (sa svarūpa) (sym "'") my-lisp)
   ("00000010" identity:00000010/surface:atom? (ук атом?) (укр атом?) (en atom?) (sa aṇu) (sym .?) my-lisp)
   ("00000011" identity:00000011/surface:eq? (ук тотожне?) (укр тотожне?) (en eq?) (sa abheda) (sym =?) my-lisp)

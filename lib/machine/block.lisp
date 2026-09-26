@@ -14,15 +14,15 @@
 
 (00001001 machine-block-one
   (00001000 (form)
-    (list form)))
+    (00100111 form)))
 
 (00001001 machine-block-append
   (00001000 (block form)
-    (append block (list form))))
+    (00101001 block (00100111 form))))
 
 (00001001 machine-block-concat
   (00001000 (left right)
-    (append left right)))
+    (00101001 left right)))
 
 (00001001 machine-block-forms
   (00001000 (block)

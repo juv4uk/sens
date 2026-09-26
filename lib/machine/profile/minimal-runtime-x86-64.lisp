@@ -89,14 +89,14 @@
     (00000111
       ((00000010 forms) seen)
       (t
-       (let ((family (00000101 (00000101 forms))))
+       (10011100 ((family (00000101 (00000101 forms))))
          (00000111
            ((x86-minimal-family-member? family seen)
             (x86-minimal-unique-form-families (00000110 forms) seen))
            (t
             (x86-minimal-unique-form-families
               (00000110 forms)
-              (append seen (list family))))))))))
+              (00101001 seen (00100111 family))))))))))
 
 (00001001 x86-minimal-row-second
   (00001000 (row)
@@ -144,16 +144,16 @@
 
 (00001001 x86-minimal-structural-car-profile
   (00001000 (left right)
-    (list
-      (list (00000001 witness) (00000001 bounded-car-cons-u64))
-      (list (00000001 forms) (x86-minimal-structural-car-forms left right))
-      (list
+    (00100111
+      (00100111 (00000001 witness) (00000001 bounded-car-cons-u64))
+      (00100111 (00000001 forms) (x86-minimal-structural-car-forms left right))
+      (00100111
         (00000001 observed-families)
         (x86-minimal-structural-car-observed-families left right))
-      (list (00000001 dependencies) x86-minimal-structural-car-dependencies)
-      (list (00000001 arena-lifetime) (00000001 native-call))
-      (list (00000001 escape) (00000001 forbidden))
-      (list (00000001 claim) (00000001 bounded-structural-lower-bound)))))
+      (00100111 (00000001 dependencies) x86-minimal-structural-car-dependencies)
+      (00100111 (00000001 arena-lifetime) (00000001 native-call))
+      (00100111 (00000001 escape) (00000001 forbidden))
+      (00100111 (00000001 claim) (00000001 bounded-structural-lower-bound)))))
 
 (00001001 x86-minimal-eq-cond-forms
   (00001000 (left right then-value else-value)
@@ -175,17 +175,17 @@
 
 (00001001 x86-minimal-eq-cond-profile
   (00001000 (left right then-value else-value)
-    (list
-      (list (00000001 witness) (00000001 bounded-eq-cond-u64))
-      (list
+    (00100111
+      (00100111 (00000001 witness) (00000001 bounded-eq-cond-u64))
+      (00100111
         (00000001 forms)
         (x86-minimal-eq-cond-forms left right then-value else-value))
-      (list
+      (00100111
         (00000001 observed-families)
         (x86-minimal-eq-cond-observed-families
           left right then-value else-value))
-      (list (00000001 dependencies) x86-minimal-eq-cond-dependencies)
-      (list (00000001 claim) (00000001 bounded-conditional-growth-lower-bound)))))
+      (00100111 (00000001 dependencies) x86-minimal-eq-cond-dependencies)
+      (00100111 (00000001 claim) (00000001 bounded-conditional-growth-lower-bound)))))
 
 (00001001 x86-minimal-eq-cond-car-cons-forms
   (00001000 (left right then-car then-cdr else-car else-cdr)
@@ -209,19 +209,19 @@
 
 (00001001 x86-minimal-eq-cond-car-cons-profile
   (00001000 (left right then-car then-cdr else-car else-cdr)
-    (list
-      (list (00000001 witness) (00000001 bounded-eq-cond-car-cons-u64))
-      (list
+    (00100111
+      (00100111 (00000001 witness) (00000001 bounded-eq-cond-car-cons-u64))
+      (00100111
         (00000001 forms)
         (x86-minimal-eq-cond-car-cons-forms
           left right then-car then-cdr else-car else-cdr))
-      (list
+      (00100111
         (00000001 observed-families)
         (x86-minimal-eq-cond-car-cons-observed-families
           left right then-car then-cdr else-car else-cdr))
-      (list (00000001 dependencies) x86-minimal-eq-cond-car-cons-dependencies)
-      (list (00000001 arena-lifetime) (00000001 native-call))
-      (list (00000001 escape) (00000001 forbidden))
-      (list
+      (00100111 (00000001 dependencies) x86-minimal-eq-cond-car-cons-dependencies)
+      (00100111 (00000001 arena-lifetime) (00000001 native-call))
+      (00100111 (00000001 escape) (00000001 forbidden))
+      (00100111
         (00000001 claim)
         (00000001 bounded-conditional-structural-composition-lower-bound)))))

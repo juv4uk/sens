@@ -16,9 +16,9 @@
   (microarchitecture skylake)
   (profile-class client)
   (source lib/machine/cpu/intel-core-i5-6400.lisp)
-  (provenance intel-ark)
-  (provenance intel-sdm)
-  (provenance (intel-xed datafiles/skl/skl-chips.txt))
+  (10000100 intel-ark)
+  (10000100 intel-sdm)
+  (10000100 (intel-xed datafiles/skl/skl-chips.txt))
   (admission-policy fail-closed)
 
   ; Architectural baseline, admitted directly from supported-extension facts.

@@ -74,7 +74,7 @@
 (def early-sid-lowering-witness
   (lambda (registry-source)
     (let ((registry (semantic-registry-read-source registry-source)))
-      (let ((atom-en (semantic-registry-id-in registry (quote atom)))
+      (let ((atom-en (semantic-registry-id-in registry (quote atom?)))
             (atom-uk (semantic-registry-id-in registry (quote атом?)))
             (atom-ukr (semantic-registry-id-in registry (quote атом?)))
             (atom-sa (semantic-registry-id-in registry (quote aṇu)))
@@ -82,11 +82,11 @@
         (list
           (early-sid-lowering-peer-check
             registry
-            (quote atom) (quote атом?) (quote aṇu) (quote .?))
+            (quote atom?) (quote атом?) (quote aṇu) (quote .?))
           (early-sid-lowering-backend-request?
             (early-sid-lower
               registry
-              (quote atom)
+              (quote atom?)
               (quote (x))
               (quote (portable-result-domain structural-relation))))
           (early-sid-lowering-backend-request?
