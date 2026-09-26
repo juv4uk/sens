@@ -8,8 +8,8 @@
 ; завершення. Це навігаційне знання, а не копія контрактів. Шляхи відносні до
 ; репозиторію, якщо не починаються з ../.
 
-(def *guard-reference-directory*
-  (quote
+(00001001 *guard-reference-directory*
+  (00000001
     ((reference
        (topic language-policy)
        (summary "Українська — первинна мова в усіх авторських репозиторіях власника; кодові коментарі — українською кирилицею в UTF-8; англійська й німецька — допоміжні. CORE-RULE tier (CRITICAL, ALL_AGENTS) з 2026-09-08: знання політики саме по собі не гарантує дотримання — перевіряти мову свідомо до першого речення нової прози, не покладатися на звичку (реальний зрив і виправлення задокументовані в ecosystem/memory/CORE-RULE-ukrainian-first.md). Ecosystem-wide audit 2026-09-08 знайшов борг у 12 з 19 перевірених репозиторіїв (ecosystem/memory/LANGUAGE-DEBT-REGISTRY-2026-09-08.md); за прямою настановою власника кожен із них тепер має задачу BILINGUAL-DOCUMENTATION-AUDIT (priority 9.0) у своєму tasks.lisp, з конкретним context, не generic-описом -- claim-able через звичайний swarm цикл, не масове автоматичне виправлення. СТРУКТУРНА ЗАГОРОЖА (2026-09-08, після другого зриву цього самого правила в тій самій сесії): scripts/check-bilingual-docs тепер підключений -- pre-commit hook (git config core.hooksPath githooks, живо перевірено -- блокує реальний англомовний коміт) і CI (.github/workflows/bilingual-docs-check.yml), не лише перевірка присутності кирилиці, а порядок/обсяг української прози відносно секції English. Пілот на ecosystem+my-lisp; не покриває код-коментарі -- відомий, названий пробіл")
@@ -821,8 +821,8 @@
 ; the command. `risk` and `verify` tell an agent what must be checked afterward.
 ; Добірка часто вживаних інструментів. Запис є навігацією, а не дозволом на
 ; запуск. Поля `risk` і `verify` пояснюють потрібний доказ після команди.
-(def *guard-script-directory*
-  (quote
+(00001001 *guard-script-directory*
+  (00000001
     ((tool
        (name oracle-check)
        (summary "Безпечна перевірка синтаксису WSM без виконання · Parse-only WSM preflight without evaluation")
@@ -975,18 +975,18 @@
 
 (00001011 guard-script
   (00001000 (name)
-    (let ((tool (guard-script-find name *guard-script-directory*)))
+    (10011100 ((tool (guard-script-find name *guard-script-directory*)))
       (00000111
-        ((00000010 tool) () (list
+        ((00000010 tool) () (00100111
            (00000001 tool-missing)
-           (list (00000001 name) name)
-           (list (00000001 decision) (00000001 unknown))
-           (list (00000001 unknown-routes) (guard-unknown-routes))))
-        ((00000010 tool) (1) (list
+           (00100111 (00000001 name) name)
+           (00100111 (00000001 decision) (00000001 unknown))
+           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+        ((00000010 tool) (1) (00100111
            (00000001 tool-missing)
-           (list (00000001 name) name)
-           (list (00000001 decision) (00000001 unknown))
-           (list (00000001 unknown-routes) (guard-unknown-routes))))
+           (00100111 (00000001 name) name)
+           (00100111 (00000001 decision) (00000001 unknown))
+           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
         (t tool)))))
 
 (00001011 guard-scripts
@@ -1009,7 +1009,7 @@
 ; entry is deleted.
 (00001011 guard-reference-evidence-status
   (00001000 (reference)
-    (let ((status (guard-reference-field (00000001 evidence-status) reference)))
+    (10011100 ((status (guard-reference-field (00000001 evidence-status) reference)))
       (00000111
         ; A missing field and a found bare-symbol value (e.g. `confirmed`)
         ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
@@ -1034,11 +1034,11 @@
       ((00000010 best) () candidate)
       ((00000010 best) (1) candidate)
       (t
-       (let ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
+       (10011100 ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
              (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
          (00000111
-           ((> candidate-strength best-strength) 1 candidate)
-           ((> candidate-strength best-strength) 0 best)))))))
+           ((00011011 candidate-strength best-strength) 1 candidate)
+           ((00011011 candidate-strength best-strength) 0 best)))))))
 
 (00001011 guard-reference-all
   (00001000 (topic references)
@@ -1064,53 +1064,53 @@
   (00001000 (topic references)
     (guard-reference-find-strongest topic references (00000001 ()))))
 
-(def guard-reference
-  (lambda (topic)
-    (let ((reference (guard-reference-find topic *guard-reference-directory*)))
-      (cond
-        ((atom? reference) () (list
-           (quote reference-missing)
-           (list (quote schema) (quote guard-reference/1))
-           (list (quote topic) topic)
-           (list (quote decision) (quote unknown))
-           (list (quote evidence-status) (quote unresolved))
-           (list (quote guidance) (quote choose-unknown-route))
-           (list (quote unknown-routes) (guard-unknown-routes))))
-        ((atom? reference) (1) (list
-           (quote reference-missing)
-           (list (quote schema) (quote guard-reference/1))
-           (list (quote topic) topic)
-           (list (quote decision) (quote unknown))
-           (list (quote evidence-status) (quote unresolved))
-           (list (quote guidance) (quote choose-unknown-route))
-           (list (quote unknown-routes) (guard-unknown-routes))))
+(00001001 guard-reference
+  (00001000 (topic)
+    (10011100 ((reference (guard-reference-find topic *guard-reference-directory*)))
+      (00000111
+        ((00000010 reference) () (00100111
+           (00000001 reference-missing)
+           (00100111 (00000001 schema) (00000001 guard-reference/1))
+           (00100111 (00000001 topic) topic)
+           (00100111 (00000001 decision) (00000001 unknown))
+           (00100111 (00000001 evidence-status) (00000001 unresolved))
+           (00100111 (00000001 guidance) (00000001 choose-unknown-route))
+           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+        ((00000010 reference) (1) (00100111
+           (00000001 reference-missing)
+           (00100111 (00000001 schema) (00000001 guard-reference/1))
+           (00100111 (00000001 topic) topic)
+           (00100111 (00000001 decision) (00000001 unknown))
+           (00100111 (00000001 evidence-status) (00000001 unresolved))
+           (00100111 (00000001 guidance) (00000001 choose-unknown-route))
+           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
         (t reference)))))
 
-(def guard-explain
-  (lambda (topic)
-    (guard-reference-field (quote summary) (guard-reference topic))))
+(00001001 guard-explain
+  (00001000 (topic)
+    (guard-reference-field (00000001 summary) (guard-reference topic))))
 
-(def guard-how-to
-  (lambda (topic)
-    (guard-reference-field (quote how-to) (guard-reference topic))))
+(00001001 guard-how-to
+  (00001000 (topic)
+    (guard-reference-field (00000001 how-to) (guard-reference topic))))
 
-(def guard-authority
-  (lambda (topic)
-    (guard-reference-field (quote authority) (guard-reference topic))))
+(00001001 guard-authority
+  (00001000 (topic)
+    (guard-reference-field (00000001 authority) (guard-reference topic))))
 
-(def guard-verify
-  (lambda (topic)
-    (guard-reference-field (quote verify) (guard-reference topic))))
+(00001001 guard-verify
+  (00001000 (topic)
+    (guard-reference-field (00000001 verify) (guard-reference topic))))
 
-(def guard-topics
-  (lambda (references)
-    (cond
-      ((atom? references) () (quote ()))
-      ((atom? references) (1) (quote ()))
+(00001001 guard-topics
+  (00001000 (references)
+    (00000111
+      ((00000010 references) () (00000001 ()))
+      ((00000010 references) (1) (00000001 ()))
       (t
-       (cons
-         (guard-reference-field (quote topic) (car references))
-         (guard-topics (cdr references)))))))
+       (00000100
+         (guard-reference-field (00000001 topic) (00000101 references))
+         (guard-topics (00000110 references)))))))
 
 ; One canonical entry point for a cold agent: "ask Guard" without needing
 ; to know whether the answer lives in the tool directory or the reference
@@ -1122,51 +1122,51 @@
 ; довідковій директорії. Ніколи мовчки не надає перевагу одному з них --
 ; ім'я, знайдене в обох, повертається позначеним `ambiguous` з обома
 ; повними записами, і вибір лишається за викликачем.
-(def guard-ask
-  (lambda (name)
-    (let* ((tool (guard-script-find name *guard-script-directory*))
+(00001001 guard-ask
+  (00001000 (name)
+    (10011101 ((tool (guard-script-find name *guard-script-directory*))
            (reference (guard-reference-find name *guard-reference-directory*)))
-      (cond
-        ((atom? tool) () (cond
-           ((atom? reference) () (list (quote not-found)
-                  (list (quote query) name)
-                  (list (quote decision) (quote unknown))
-                  (list (quote unknown-routes) (guard-unknown-routes))))
-           ((atom? reference) (1) (list (quote not-found)
-                  (list (quote query) name)
-                  (list (quote decision) (quote unknown))
-                  (list (quote unknown-routes) (guard-unknown-routes))))
+      (00000111
+        ((00000010 tool) () (00000111
+           ((00000010 reference) () (00100111 (00000001 not-found)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 decision) (00000001 unknown))
+                  (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+           ((00000010 reference) (1) (00100111 (00000001 not-found)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 decision) (00000001 unknown))
+                  (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
            (t
-            (list (quote result)
-                  (list (quote type) (quote reference-topic))
-                  (list (quote source) (quote knowledge/guard-reference.lisp))
-                  (list (quote entry) reference)))))
-        ((atom? tool) (1) (cond
-           ((atom? reference) () (list (quote not-found)
-                  (list (quote query) name)
-                  (list (quote decision) (quote unknown))
-                  (list (quote unknown-routes) (guard-unknown-routes))))
-           ((atom? reference) (1) (list (quote not-found)
-                  (list (quote query) name)
-                  (list (quote decision) (quote unknown))
-                  (list (quote unknown-routes) (guard-unknown-routes))))
+            (00100111 (00000001 result)
+                  (00100111 (00000001 type) (00000001 reference-topic))
+                  (00100111 (00000001 source) (00000001 knowledge/guard-reference.lisp))
+                  (00100111 (00000001 entry) reference)))))
+        ((00000010 tool) (1) (00000111
+           ((00000010 reference) () (00100111 (00000001 not-found)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 decision) (00000001 unknown))
+                  (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+           ((00000010 reference) (1) (00100111 (00000001 not-found)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 decision) (00000001 unknown))
+                  (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
            (t
-            (list (quote result)
-                  (list (quote type) (quote reference-topic))
-                  (list (quote source) (quote knowledge/guard-reference.lisp))
-                  (list (quote entry) reference)))))
+            (00100111 (00000001 result)
+                  (00100111 (00000001 type) (00000001 reference-topic))
+                  (00100111 (00000001 source) (00000001 knowledge/guard-reference.lisp))
+                  (00100111 (00000001 entry) reference)))))
         (t
-         (cond
-           ((atom? reference) () (list (quote result)
-                  (list (quote type) (quote tool))
-                  (list (quote source) (quote guard-script-directory))
-                  (list (quote entry) tool)))
-           ((atom? reference) (1) (list (quote result)
-                  (list (quote type) (quote tool))
-                  (list (quote source) (quote guard-script-directory))
-                  (list (quote entry) tool)))
+         (00000111
+           ((00000010 reference) () (00100111 (00000001 result)
+                  (00100111 (00000001 type) (00000001 tool))
+                  (00100111 (00000001 source) (00000001 guard-script-directory))
+                  (00100111 (00000001 entry) tool)))
+           ((00000010 reference) (1) (00100111 (00000001 result)
+                  (00100111 (00000001 type) (00000001 tool))
+                  (00100111 (00000001 source) (00000001 guard-script-directory))
+                  (00100111 (00000001 entry) tool)))
            (t
-            (list (quote ambiguous)
-                  (list (quote query) name)
-                  (list (quote tool) tool)
-                  (list (quote reference-topic) reference)))))))))
+            (00100111 (00000001 ambiguous)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 tool) tool)
+                  (00100111 (00000001 reference-topic) reference)))))))))
