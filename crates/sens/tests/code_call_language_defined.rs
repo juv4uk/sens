@@ -97,3 +97,16 @@ fn a_local_definition_of_a_table_name_does_not_retarget_the_code() {
         eval(&mut session, "(member? 2 (00000001 (1 2 3)))")
     );
 }
+
+#[test]
+fn defmacro_itself_is_callable_by_its_code() {
+    let mut session = core_session();
+    // defmacro = 00001010: визначення макроса кодом, виклик — назвою й кодом.
+    // (00001010 quoted (x) ...) розгортається в (quote x).
+    eval(
+        &mut session,
+        "(00001010 quoted (x) (00000100 (00000001 00000001) (00000100 x (00000001 ()))))",
+    );
+    assert_eq!(eval(&mut session, "(quoted (a b))"), "(a b)");
+}
+
