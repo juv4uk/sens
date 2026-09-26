@@ -13,8 +13,13 @@ fn timezone_detect_public_binding_is_language_owned_over_raw_declarations() {
             .expect("timezone-detect must remain admitted by sr/2");
     assert_eq!(
         session.environment.get("timezone-detect"),
-        Some(Value::Sid(timezone_sid)),
-        "core exposes semantic identity without installing timezone policy"
+        None,
+        "Core4 must not install a lexical SENS placeholder before the time layer"
+    );
+    assert_eq!(
+        semantic_registry_export::semantic_id_for_admitted_surface("timezone-detect"),
+        Some(timezone_sid),
+        "surface admission still resolves to the exact SENS identity"
     );
     let error = eval_program("(timezone-detect)", &mut session)
         .expect_err("unadmitted SID must fail closed before time library loads");
