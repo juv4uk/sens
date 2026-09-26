@@ -1462,6 +1462,7 @@ lisp-дані	knowledge/guard-reference.lisp	reason	1
 lisp-дані	knowledge/guard-runtime-policy.lisp	read	1
 lisp-дані	knowledge/swarm-no-live-callers-audit.lisp	eval	1
 lisp-дані	lib/clips-import.lisp	and	4
+lisp-дані	lib/clips-import.lisp	not?	2
 lisp-дані	lib/clips-import.lisp	or	4
 lisp-дані	lib/core.lisp	and	1
 lisp-дані	lib/core.lisp	binary	1
@@ -1528,6 +1529,7 @@ lisp-дані	lib/forward.lisp	and	2
 lisp-дані	lib/forward.lisp	cons	1
 lisp-дані	lib/forward.lisp	def	10
 lisp-дані	lib/forward.lisp	list	1
+lisp-дані	lib/forward.lisp	not?	2
 lisp-дані	lib/forward.lisp	or	2
 lisp-дані	lib/forward.lisp	quote	1
 lisp-дані	lib/guard.lisp	difference	1
@@ -1539,7 +1541,7 @@ lisp-дані	lib/knowledge.lisp	def	9
 lisp-дані	lib/knowledge.lisp	equal?	3
 lisp-дані	lib/knowledge.lisp	let	1
 lisp-дані	lib/knowledge.lisp	list	15
-lisp-дані	lib/knowledge.lisp	not?	6
+lisp-дані	lib/knowledge.lisp	not?	7
 lisp-дані	lib/knowledge.lisp	quote	25
 lisp-дані	lib/knowledge.lisp	read	3
 lisp-дані	lib/knowledge.lisp	read-file	1
@@ -1584,6 +1586,7 @@ lisp-дані	lib/meta-eval.lisp	quote	2
 lisp-дані	lib/meta-eval.lisp	string->symbol	3
 lisp-дані	lib/meta-eval.lisp	write-to-string	3
 lisp-дані	lib/narrate.lisp	and	1
+lisp-дані	lib/result-status.lisp	not?	2
 lisp-дані	lib/si.lisp	second	6
 lisp-дані	lib/surface/semantic-registry-experiment.lisp	quote	1
 lisp-дані	lib/surface/uk-inventory.lisp	atom?	1
@@ -2006,7 +2009,7 @@ rust-lisp	crates/sens-cli/tests/to_sens.rs	quotient	1
 rust-lisp	crates/sens-embed/src/lib.rs	car	1
 rust-lisp	crates/sens-host/tests/capabilities.rs	car	3
 rust-lisp	crates/sens-host/tests/capabilities.rs	cdr	1
-rust-lisp	crates/sens-host/tests/capabilities.rs	cond	2
+rust-lisp	crates/sens-host/tests/capabilities.rs	cond	1
 rust-lisp	crates/sens-host/tests/capabilities.rs	cons	1
 rust-lisp	crates/sens-host/tests/capabilities.rs	def	4
 rust-lisp	crates/sens-host/tests/capabilities.rs	defmacro	1
@@ -2811,7 +2814,6 @@ rust-lisp-дані	crates/sens-lsp/src/guard_knowledge.rs	provenance	2
 rust-lisp-дані	crates/sens-lsp/tests/e2e.rs	car	1
 rust-lisp-дані	crates/sens/src/eval/mod.rs	cond	1
 rust-lisp-дані	crates/sens/tests/advice_corpus.rs	not?	1
-rust-lisp-дані	crates/sens/tests/clips_import.rs	not?	1
 rust-lisp-дані	crates/sens/tests/clips_import.rs	or	1
 rust-lisp-дані	crates/sens/tests/content_store_authority.rs	lambda	2
 rust-lisp-дані	crates/sens/tests/def_ownership.rs	define	2

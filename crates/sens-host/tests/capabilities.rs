@@ -460,9 +460,13 @@ fn cond_rejects_a_clause_that_is_not_a_list() {
 
 #[test]
 fn cond_rejects_a_clause_with_the_wrong_number_of_parts() {
-    let error = eval_program("(cond (t 1 2))", &mut Session::default())
-        .expect_err("a cond clause with three parts must fail named, not panic");
-    assert_eq!(error.kind, ErrorKind::InvalidForm);
+    // Since #1495 a clause is canonical `(query expected-result expression)`
+    // or migration-only `(test expression)`; one part or four are malformed.
+    for source in ["(00000111 (t))", "(00000111 (t t 1 2))"] {
+        let error = eval_program(source, &mut Session::default())
+            .expect_err("a malformed cond clause must fail named, not panic");
+        assert_eq!(error.kind, ErrorKind::InvalidForm, "{source}");
+    }
 }
 
 #[test]
