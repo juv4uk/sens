@@ -544,3 +544,93 @@ pub(super) fn prim_01001110(args: &[Value], env: &Environment, span: Span) -> Re
         }
         Ok(list)
     }
+
+// --- Рядкові примітиви за кодом (власник, 2026-09-26: «швидкі рядкові функції
+// в ядрі»). Раніше — визначення мовою через string-first/string-rest, які
+// щоразу копіюють решту рядка (квадратично на довгому тексті). Поведінка,
+// включно з відповідями й помилками на не-рядках, повторює мовні версії.
+
+fn string_rest_or_error(value: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+    string_rest_values(std::slice::from_ref(value), span)
+}
+
+fn string_first_or_error(value: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+    string_first_values(std::slice::from_ref(value), span)
+}
+
+/// string-empty? — це `eq?` з порожнім рядком (та сама відповідь, що й раніше).
+fn string_empty_answer(value: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+    super::special_forms::eq_values(value.clone(), Value::String(std::rc::Rc::from("")), span)
+}
+
+fn is_empty_string(value: &Value) -> bool {
+    matches!(value, Value::String(text) if text.is_empty())
+}
+
+/// string-empty?
+pub(super) fn prim_00111100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+    exact_args("string-empty?", args, 1, span)?;
+    string_empty_answer(&args[0], span)
+}
+
+/// string-length — кількість символів (кодових точок).
+pub(super) fn prim_00111011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+    exact_args("string-length", args, 1, span)?;
+    match &args[0] {
+        Value::String(text) => Ok(exact_value(Rational::integer(text.chars().count() as i64))),
+        other => {
+            // Мовна версія: string-empty? → (0), далі string-rest → помилка Type.
+            string_empty_answer(other, span)?;
+            string_rest_or_error(other, span)?;
+            unreachable!("string-rest accepts only strings")
+        }
+    }
+}
+
+fn string_prefix_answer(prefix: &Value, text: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+    match (prefix, text) {
+        (Value::String(p), Value::String(t)) => Ok(Value::truth(t.starts_with(p.as_ref()))),
+        _ => {
+            // Той самий порядок кроків, що в мовній версії.
+            if is_empty_string(prefix) {
+                return Ok(Value::truth(true));
+            }
+            string_empty_answer(prefix, span)?;
+            if is_empty_string(text) {
+                return Ok(Value::Nil);
+            }
+            string_empty_answer(text, span)?;
+            string_first_or_error(prefix, span)?;
+            string_first_or_error(text, span)?;
+            unreachable!("string-first accepts only strings")
+        }
+    }
+}
+
+/// string-prefix? prefix s
+pub(super) fn prim_00111101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+    exact_args("string-prefix?", args, 2, span)?;
+    string_prefix_answer(&args[0], &args[1], span)
+}
+
+/// string-contains? needle s
+pub(super) fn prim_00111110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+    exact_args("string-contains?", args, 2, span)?;
+    match (&args[0], &args[1]) {
+        (Value::String(needle), Value::String(text)) => {
+            Ok(Value::truth(text.contains(needle.as_ref())))
+        }
+        (needle, text) => {
+            // Мовна версія: спершу string-prefix?, потім string-empty?, потім string-rest.
+            if string_prefix_answer(needle, text, span)? == Value::truth(true) {
+                return Ok(Value::truth(true));
+            }
+            if is_empty_string(text) {
+                return Ok(Value::Nil);
+            }
+            string_empty_answer(text, span)?;
+            string_rest_or_error(text, span)?;
+            unreachable!("string-rest accepts only strings")
+        }
+    }
+}

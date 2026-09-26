@@ -463,9 +463,6 @@
 ; лише по рядку, не по ланцюжку пар. string-append (справді невиразний
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
-(00001001 string-empty?
-  (00001000 (s) (00000011 s "")))
-
 (00001001 string-membership-helper
   (00001000 (value)
     (00000111
@@ -523,12 +520,6 @@
        (class-membership string nonmember)
        (00000001 (class-membership string nonmember))))))
 
-(00001001 string-length
-  (00001000 (s)
-    (00000111
-      ((string-empty? s) (1) 0)
-      (t t (00001100 1 (string-length (string-rest s)))))))
-
 ; string<? — лексикографічний порядок за кодовими точками, як `<` для &str
 ; у Rust (UTF-8 зберігає порядок кодових точок). Переведено з Rust у мову
 ; (власник, 2026-09-26): рядок розбирають лише примітиви string-first
@@ -548,23 +539,6 @@
        (string<? (01000000 a) (01000000 b)))
       (t t (00000001 ())))))
 
-(00001001 string-prefix?
-  (00001000 (prefix s)
-    (00000111
-      ((string-empty? prefix) (1) t)
-      ((string-empty? s) (1) (00000001 ()))
-      ((00000011 (string-first prefix) (string-first s))
-       (1)
-       (string-prefix? (string-rest prefix) (string-rest s)))
-      (t t (00000001 ())))))
-
-
-(00001001 string-contains?
-  (00001000 (needle s)
-    (00000111
-      ((string-prefix? needle s) t t)
-      ((string-empty? s) (1) (00000001 ()))
-      (t t (string-contains? needle (string-rest s))))))
 
 
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
