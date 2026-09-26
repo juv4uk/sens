@@ -17,7 +17,6 @@ mod checks;
 mod contract_workflow_paths;
 pub mod encoder_coverage;
 pub mod external_oracle;
-mod gen_functions_md;
 pub mod xed_import;
 
 use std::process::ExitCode;
@@ -26,13 +25,6 @@ fn main() -> ExitCode {
     let mut args = std::env::args().skip(1);
     match args.next().as_deref() {
         Some("verify") => run_verify(),
-        Some("gen-functions-md") => match gen_functions_md::run() {
-            Ok(()) => ExitCode::SUCCESS,
-            Err(error) => {
-                eprintln!("gen-functions-md failed: {error}");
-                ExitCode::FAILURE
-            }
-        },
         Some("external-oracle") => run_external_oracle(args),
         Some("import-xed-evidence") => run_import_xed_evidence(args),
         Some("generate-encoder-coverage") => run_generate_encoder_coverage(args),
@@ -50,7 +42,7 @@ fn main() -> ExitCode {
 
 fn print_usage() {
     eprintln!(
-        "usage: cargo xtask <verify|gen-functions-md|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
+        "usage: cargo xtask <verify|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
     );
 }
 
