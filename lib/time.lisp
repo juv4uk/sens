@@ -6,55 +6,55 @@
 ; but lives in Lisp so we can prove that calendar semantics do not belong to
 ; the host. Scope is non-negative Unix days; utc-now already rejects times
 ; before the Unix epoch.
-(def civil-from-days
-  (lambda (days)
-    (let* ((z (+ days 719468))
-           (era (quotient z 146097))
-           (doe (- z (* era 146097)))
-           (yoe (quotient (- (+ doe (quotient doe 36524))
-                              (+ (quotient doe 1460) (quotient doe 146096)))
+(00001001 civil-from-days
+  (00001000 (days)
+    (10011101 ((z (00001100 days 719468))
+           (era (00010100 z 146097))
+           (doe (00001101 z (00001110 era 146097)))
+           (yoe (00010100 (00001101 (00001100 doe (00010100 doe 36524))
+                              (00001100 (00010100 doe 1460) (00010100 doe 146096)))
                            365))
-           (y (+ yoe (* era 400)))
-           (doy (- doe (+ (* 365 yoe)
-                           (- (quotient yoe 4) (quotient yoe 100)))))
-           (mp (quotient (+ (* 5 doy) 2) 153))
-           (day (+ (- doy (quotient (+ (* 153 mp) 2) 5)) 1))
-           (month (+ mp (cond ((< mp 10) 1 3) ((< mp 10) 0 -9))))
-           (year (+ y (cond ((<= month 2) 1 1) ((<= month 2) 0 0)))))
-      (list year month day))))
+           (y (00001100 yoe (00001110 era 400)))
+           (doy (00001101 doe (00001100 (00001110 365 yoe)
+                           (00001101 (00010100 yoe 4) (00010100 yoe 100)))))
+           (mp (00010100 (00001100 (00001110 5 doy) 2) 153))
+           (day (00001100 (00001101 doy (00010100 (00001100 (00001110 153 mp) 2) 5)) 1))
+           (month (00001100 mp (00000111 ((00011010 mp 10) 1 3) ((00011010 mp 10) 0 -9))))
+           (year (00001100 y (00000111 ((00011101 month 2) 1 1) ((00011101 month 2) 0 0)))))
+      (00100111 year month day))))
 
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
 ; data. The host owns clock observation; this function owns deterministic
 ; calendar semantics.
-(def utc-from-unix
-  (lambda (seconds nanosecond)
-    (let* ((days (quotient seconds 86400))
-           (day-seconds (mod seconds 86400))
+(00001001 utc-from-unix
+  (00001000 (seconds nanosecond)
+    (10011101 ((days (00010100 seconds 86400))
+           (day-seconds (00010011 seconds 86400))
            (civil (civil-from-days days))
-           (hour (quotient day-seconds 3600))
-           (minute (quotient (mod day-seconds 3600) 60))
-           (second-of-minute (mod day-seconds 60)))
-      (list (quote utc)
-            (car civil)
-            (second civil)
-            (third civil)
+           (hour (00010100 day-seconds 3600))
+           (minute (00010100 (00010011 day-seconds 3600) 60))
+           (second-of-minute (00010011 day-seconds 60)))
+      (00100111 (00000001 utc)
+            (00000101 civil)
+            (00101111 civil)
+            (00110000 civil)
             hour minute second-of-minute nanosecond))))
 
 ; Minimal wall-clock host capability contract:
 ;   (unix-time-now) -> (unix-time seconds nanosecond)
 ; The host observes only the Unix clock. Calendar meaning stays here in Lisp.
-(def unix-time-observation->utc
-  (lambda (observation)
-    (cond
-      ((eq? (car observation) (quote unix-time))
-       (utc-from-unix (second observation) (third observation)))
-      (t (list (quote rejected) (quote invalid-unix-time-observation))))))
+(00001001 unix-time-observation->utc
+  (00001000 (observation)
+    (00000111
+      ((00000011 (00000101 observation) (00000001 unix-time))
+       (utc-from-unix (00101111 observation) (00110000 observation)))
+      (t (00100111 (00000001 rejected) (00000001 invalid-unix-time-observation))))))
 
 ; Public UTC clock meaning is language-owned. The only host fact needed here is
 ; the raw Unix observation above.
-(def utc-now
-  (lambda ()
-    (unix-time-observation->utc (unix-time-now))))
+(00001001 utc-now
+  (00001000 ()
+    (unix-time-observation->utc (01011011))))
 
 ; Interpret protocol fields from one complete NTP response. Packet I/O and
 ; extracting fixed-width fields are host mechanisms; deciding whether those
@@ -70,168 +70,168 @@
 ; operand, falsy or not, to t). E1 (#216): validity is decided by explicit
 ; three-part gates whose queries answer 1/0 and are consumed by expected
 ; 1/0 slots; canonical cond accepts no bare t/() clause query.
-(def internet-time-mode-valid?
-  (lambda (mode)
-    (cond
-      ((= mode 4) 1 1)
-      ((= mode 4) 0
-       (cond
-         ((= mode 5) 1 1)
-         ((= mode 5) 0 0))))))
+(00001001 internet-time-mode-valid?
+  (00001000 (mode)
+    (00000111
+      ((00011100 mode 4) 1 1)
+      ((00011100 mode 4) 0
+       (00000111
+         ((00011100 mode 5) 1 1)
+         ((00011100 mode 5) 0 0))))))
 
-(def internet-time-stratum-valid?
-  (lambda (stratum)
-    (cond
-      ((= stratum 0) 1 0)
-      ((= stratum 0) 0
-       (cond
-         ((> stratum 15) 1 0)
-         ((> stratum 15) 0 1))))))
+(00001001 internet-time-stratum-valid?
+  (00001000 (stratum)
+    (00000111
+      ((00011100 stratum 0) 1 0)
+      ((00011100 stratum 0) 0
+       (00000111
+         ((00011011 stratum 15) 1 0)
+         ((00011011 stratum 15) 0 1))))))
 
-(def internet-time-fields->observation
-  (lambda (host mode stratum ntp-seconds fraction)
-    (cond
+(00001001 internet-time-fields->observation
+  (00001000 (host mode stratum ntp-seconds fraction)
+    (00000111
       ((internet-time-mode-valid? mode) 1
-        (cond
+        (00000111
           ((internet-time-stratum-valid? stratum) 1
-            (cond
-              ((< ntp-seconds 2208988800) 1
-               (list (quote rejected) (quote invalid-epoch)))
-              ((< ntp-seconds 2208988800) 0
-               (list (quote accepted)
+            (00000111
+              ((00011010 ntp-seconds 2208988800) 1
+               (00100111 (00000001 rejected) (00000001 invalid-epoch)))
+              ((00011010 ntp-seconds 2208988800) 0
+               (00100111 (00000001 accepted)
                      host
-                     (- ntp-seconds 2208988800)
-                     (quotient (* fraction 1000000000) 4294967296)))))
+                     (00001101 ntp-seconds 2208988800)
+                     (00010100 (00001110 fraction 1000000000) 4294967296)))))
           ((internet-time-stratum-valid? stratum) 0
-            (list (quote rejected) (quote invalid-response)))))
+            (00100111 (00000001 rejected) (00000001 invalid-response)))))
       ((internet-time-mode-valid? mode) 0
-        (list (quote rejected) (quote invalid-response))))))
+        (00100111 (00000001 rejected) (00000001 invalid-response))))))
 
 ; Adapter for the raw host boundary. The host returns either:
 ;   (ntp-fields host mode stratum ntp-seconds fraction)
 ; or a transport-level rejection such as (rejected receive-failed).
 ; Lisp owns every protocol interpretation after that raw observation boundary.
-(def internet-time-raw->observation
-  (lambda (raw)
-    (cond
-      ((eq? (car raw) (quote ntp-fields))
+(00001001 internet-time-raw->observation
+  (00001000 (raw)
+    (00000111
+      ((00000011 (00000101 raw) (00000001 ntp-fields))
        (internet-time-fields->observation
-         (second raw)
-         (third raw)
-         (car (cdr (cdr (cdr raw))))
-         (car (cdr (cdr (cdr (cdr raw)))))
-         (car (cdr (cdr (cdr (cdr (cdr raw))))))))
+         (00101111 raw)
+         (00110000 raw)
+         (00000101 (00000110 (00000110 (00000110 raw))))
+         (00000101 (00000110 (00000110 (00000110 (00000110 raw)))))
+         (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 raw))))))))
       (t raw))))
 
 ; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
 ; query mechanism under the deliberately mechanical name `ntp-query-raw`.
-(def internet-time-sync
-  (lambda (host timeout-ms)
+(00001001 internet-time-sync
+  (00001000 (host timeout-ms)
     (internet-time-raw->observation
-      (ntp-query-raw host timeout-ms))))
+      (01011100 host timeout-ms))))
 
 ; Turning an accepted timestamp into calendar meaning is also language policy.
-(def internet-time-observation->utc
-  (lambda (observation)
-    (cond
-      ((eq? (car observation) (quote accepted))
-       (list (quote accepted)
-             (second observation)
+(00001001 internet-time-observation->utc
+  (00001000 (observation)
+    (00000111
+      ((00000011 (00000101 observation) (00000001 accepted))
+       (00100111 (00000001 accepted)
+             (00101111 observation)
              (utc-from-unix
-               (third observation)
-               (car (cdr (cdr (cdr observation)))))))
+               (00110000 observation)
+               (00000101 (00000110 (00000110 (00000110 observation)))))))
       (t observation))))
 
 ; Nanoseconds are the one monotonic host observation. Milliseconds are only a
 ; coarser language-level view, so derive them instead of requiring a second
 ; host clock primitive. For the non-negative monotonic counter, quotient gives
 ; whole elapsed milliseconds (floor toward zero == floor here).
-(def milliseconds-from-nanoseconds
-  (lambda (nanoseconds)
-    (quotient nanoseconds 1000000)))
+(00001001 milliseconds-from-nanoseconds
+  (00001000 (nanoseconds)
+    (00010100 nanoseconds 1000000)))
 
-(def mono-ms
-  (lambda ()
-    (milliseconds-from-nanoseconds (mono-ns))))
+(00001001 mono-ms
+  (00001000 ()
+    (milliseconds-from-nanoseconds (01011010))))
 
 ; Monotonic counters are host observations; deadline arithmetic is language
 ; semantics. Keep a pure pair of helpers so scheduler logic can be tested
 ; without sleeping, then expose convenience wrappers over the host counter.
-(def deadline-from
-  (lambda (now-ns delta-ns)
-    (+ now-ns delta-ns)))
+(00001001 deadline-from
+  (00001000 (now-ns delta-ns)
+    (00001100 now-ns delta-ns)))
 
-(def deadline-reached-at?
-  (lambda (now-ns deadline-ns)
-    (>= now-ns deadline-ns)))
+(00001001 deadline-reached-at?
+  (00001000 (now-ns deadline-ns)
+    (00011110 now-ns deadline-ns)))
 
-(def deadline-after-ns
-  (lambda (delta-ns)
-    (deadline-from (mono-ns) delta-ns)))
+(00001001 deadline-after-ns
+  (00001000 (delta-ns)
+    (deadline-from (01011010) delta-ns)))
 
-(def deadline-reached?
-  (lambda (deadline-ns)
-    (deadline-reached-at? (mono-ns) deadline-ns)))
+(00001001 deadline-reached?
+  (00001000 (deadline-ns)
+    (deadline-reached-at? (01011010) deadline-ns)))
 
-(def elapsed-ns
-  (lambda (started-ns)
-    (- (mono-ns) started-ns)))
+(00001001 elapsed-ns
+  (00001000 (started-ns)
+    (00001101 (01011010) started-ns)))
 
 ; Interpret raw host timezone declarations without performing host I/O here.
 ; The host contract is:
 ;   (timezone-declarations tz-value etc-timezone-value)
 ; where each value is either a non-empty string or (). Lisp owns source
 ; precedence and the public detected/unknown result shape.
-(def timezone-declarations->observation
-  (lambda (tz-value etc-timezone-value)
-    (cond
+(00001001 timezone-declarations->observation
+  (00001000 (tz-value etc-timezone-value)
+    (00000111
       ((nonempty-string-membership-helper tz-value)
        (class-membership string nonempty-member)
-       (list (quote detected) tz-value (quote TZ)))
+       (00100111 (00000001 detected) tz-value (00000001 TZ)))
       ((nonempty-string-membership-helper etc-timezone-value)
        (class-membership string nonempty-member)
-       (list (quote detected) etc-timezone-value (quote etc-timezone)))
+       (00100111 (00000001 detected) etc-timezone-value (00000001 etc-timezone)))
       (t
-       (list (quote unknown) (quote host-declaration-unavailable))))))
+       (00100111 (00000001 unknown) (00000001 host-declaration-unavailable))))))
 
 ; Adapt the mechanism-only host observation to public timezone meaning.
-(def timezone-raw->observation
-  (lambda (raw)
-    (cond
-      ((eq? (car raw) (quote timezone-declarations))
+(00001001 timezone-raw->observation
+  (00001000 (raw)
+    (00000111
+      ((00000011 (00000101 raw) (00000001 timezone-declarations))
        (timezone-declarations->observation
-         (second raw)
-         (third raw)))
+         (00101111 raw)
+         (00110000 raw)))
       (t
-       (list (quote rejected) (quote invalid-timezone-observation))))))
+       (00100111 (00000001 rejected) (00000001 invalid-timezone-observation))))))
 
-(def timezone-detect
-  (lambda ()
+(00001001 timezone-detect
+  (00001000 ()
     (timezone-raw->observation
-      (timezone-declarations-raw))))
+      (01011101))))
 
-(def timezone-config
-  (lambda (name offset-seconds)
-    (cond
+(00001001 timezone-config
+  (00001000 (name offset-seconds)
+    (00000111
       ((string-membership-helper name)
        (class-membership string nonmember)
-       (list (quote rejected) (quote invalid-name)))
-      ((< offset-seconds -86400) 1
-       (list (quote rejected) (quote invalid-offset)))
-      ((< offset-seconds -86400) 0
-       (cond
-         ((> offset-seconds 86400) 1
-          (list (quote rejected) (quote invalid-offset)))
-         ((> offset-seconds 86400) 0
-          (list (quote accepted) (list (quote timezone) name offset-seconds))))))))
+       (00100111 (00000001 rejected) (00000001 invalid-name)))
+      ((00011010 offset-seconds -86400) 1
+       (00100111 (00000001 rejected) (00000001 invalid-offset)))
+      ((00011010 offset-seconds -86400) 0
+       (00000111
+         ((00011011 offset-seconds 86400) 1
+          (00100111 (00000001 rejected) (00000001 invalid-offset)))
+         ((00011011 offset-seconds 86400) 0
+          (00100111 (00000001 accepted) (00100111 (00000001 timezone) name offset-seconds))))))))
 
-(def timezone-name
-  (lambda (config)
-    (second config)))
+(00001001 timezone-name
+  (00001000 (config)
+    (00101111 config)))
 
-(def timezone-offset-seconds
-  (lambda (config)
-    (third config)))
+(00001001 timezone-offset-seconds
+  (00001000 (config)
+    (00110000 config)))
 
 ; Registry-driven peer materialization for the stable public time identities.
 ; The numeric IDs are authority; this file does not name or implement any

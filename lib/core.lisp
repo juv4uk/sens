@@ -10,7 +10,7 @@
 ; top-level source is read; decimal integers remain ordinary decimal values.
 (00001001 binary
   (00001000 (width)
-    (list (00000001 binary) width)))
+    (00100111 (00000001 binary) width)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -42,7 +42,7 @@
 ; логічного "і"/"або"). Перевірено живцем: коротке замикання (другий
 ; аргумент дійсно не обчислюється), варіативність на 3+ аргументах,
 ; передача самого значення, не лише t/() (напр. (and t 42) -> 42).
-(defmacro and rest
+(00001010 and rest
   (00000111
     ((00000010 rest) () t)
     ((00000010 rest) (1) t)
@@ -61,7 +61,7 @@
                                    (00000001 ())))
                        (00000001 ())))))))
 
-(defmacro or rest
+(00001010 or rest
   (00000111
     ((00000010 rest) () (00000001 ()))
     ((00000010 rest) (1) (00000001 ()))
@@ -91,7 +91,7 @@
 ; a real caller needs it, don't build it speculatively now).
 (00001001 gensym
   (00001000 (prefix)
-    (string->symbol (string-append prefix (write-to-string (mono-ns))))))
+    (01000011 (00111010 prefix (01001100 (01011010))))))
 
 (00001001 pair
   (00001000 (left right)
@@ -234,7 +234,7 @@
       ((00000010 values) () (reverse acc))
       ((00000010 values) (1) (reverse acc))
       (t t
-       (let ((decision (predicate (00000101 values))))
+       (10011100 ((decision (predicate (00000101 values))))
          (00000111
            ((truthy? decision) t
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
@@ -286,7 +286,7 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
-(defmacro let (bindings body)
+(00001010 let (bindings body)
   (00000100 (list (00000001 00001000) (map (00001000 (binding) (00000101 binding)) bindings) body)
         (map (00001000 (binding) (second binding)) bindings)))
 
@@ -429,7 +429,7 @@
          ((equal? key (00000101 (00000101 alist))) (0)
           (assoc key (00000110 alist))))))))
 
-(defmacro let* (bindings body)
+(00001010 let* (bindings body)
   (00000111
     ((00000010 bindings) () body)
     ((00000010 bindings) (0)
@@ -470,12 +470,12 @@
        (00000001 (class-membership string nonmember)))
       ((00000010 value) (1)
        (00000111
-         ((00000011 (string-first (write-to-string value))
-              (string-first (write-to-string "")))
+         ((00000011 (00111111 (01001100 value))
+              (00111111 (01001100 "")))
           (1)
           (00000001 (class-membership string member)))
-         ((00000011 (string-first (write-to-string value))
-              (string-first (write-to-string "")))
+         ((00000011 (00111111 (01001100 value))
+              (00111111 (01001100 "")))
           (0)
           (00000001 (class-membership string nonmember)))))
       ((00000010 value) (0)
@@ -484,23 +484,23 @@
 (00001001 string-order-helper
   (00001000 (left right)
     (00000111
-      ((string-empty? left) (1)
+      ((00111100 left) (1)
        (00000111
-         ((string-empty? right) (1)
+         ((00111100 right) (1)
           (00000001 (text-order same)))
-         ((string-empty? right) (0)
+         ((00111100 right) (0)
           (00000001 (text-order before)))))
-      ((string-empty? left) (0)
+      ((00111100 left) (0)
        (00000001 (text-order after)))
-      ((00000011 (string-first left) (string-first right))
+      ((00000011 (00111111 left) (00111111 right))
        (1)
-       (string-order-helper (string-rest left) (string-rest right)))
-      ((< (string->codepoint (string-first left))
-          (string->codepoint (string-first right)))
+       (string-order-helper (01000000 left) (01000000 right)))
+      ((00011010 (01000101 (00111111 left))
+          (01000101 (00111111 right)))
        1
        (00000001 (text-order before)))
-      ((< (string->codepoint (string-first left))
-          (string->codepoint (string-first right)))
+      ((00011010 (01000101 (00111111 left))
+          (01000101 (00111111 right)))
        0
        (00000001 (text-order after))))))
 
@@ -510,10 +510,10 @@
       ((string-membership-helper value)
        (class-membership string member)
        (00000111
-         ((string-empty? value)
+         ((00111100 value)
           (0)
           (00000001 (class-membership string nonempty-member)))
-         ((string-empty? value)
+         ((00111100 value)
           (1)
           (00000001 (class-membership string member)))))
       ((string-membership-helper value)
@@ -530,9 +530,9 @@
   (00001000 (a b)
     (00000111
       ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
-      ((string-empty? b) (1)
+      ((00111100 b) (1)
        (second (list (00111010 a "") (00000001 ()))))
-      ((string-empty? a) (1)
+      ((00111100 a) (1)
        (second (list (00111010 b "") t)))
       ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) 1 t)
       ((00000011 (00111111 a) (00111111 b)) (1)
@@ -556,7 +556,7 @@
       ((00000010 value) () (00000001 ()))
       ((00000010 value) (1)
        (00000111
-         ((00000011 value (string->symbol (write-to-string value)))
+         ((00000011 value (01000011 (01001100 value)))
           (1) t)
          (t t (00000001 ()))))
       ((00000010 value) (0) (00000001 ())))))
@@ -619,8 +619,8 @@
 (00001001 largest-chunk
   (00001000 (a b chunk mult)
     (00000111
-      ((< a (00001100 chunk chunk)) 1 (00000100 chunk mult))
-      ((< a (00001100 chunk chunk)) 0
+      ((00011010 a (00001100 chunk chunk)) 1 (00000100 chunk mult))
+      ((00011010 a (00001100 chunk chunk)) 0
        (largest-chunk a b (00001100 chunk chunk) (00001100 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
@@ -646,8 +646,8 @@
       ((00000011 b 0) (1) (00001111 a b))
       ((00000011 b 0) (0)
        (00000111
-         ((< a b) 1 0)
-         ((< a b) 0
+         ((00011010 a b) 1 0)
+         ((00011010 a b) 0
           (let ((chunk+mult (largest-chunk a b b 1)))
             (00001100 (00000110 chunk+mult)
                (quotient (00001101 a (00000101 chunk+mult)) b)))))))))
@@ -665,21 +665,21 @@
   (00001000 (current remaining)
     (00000111
       ((00000010 remaining) () 1)
-      ((< current (00000101 remaining)) 1
+      ((00011010 current (00000101 remaining)) 1
        (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((= current (00000101 remaining)) 1
+      ((00011100 current (00000101 remaining)) 1
        (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((= current (00000101 remaining)) 0 0))))
+      ((00011100 current (00000101 remaining)) 0 0))))
 
 (00001001 nonincreasing-from?
   (00001000 (current remaining)
     (00000111
       ((00000010 remaining) () 1)
-      ((> current (00000101 remaining)) 1
+      ((00011011 current (00000101 remaining)) 1
        (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((= current (00000101 remaining)) 1
+      ((00011100 current (00000101 remaining)) 1
        (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((= current (00000101 remaining)) 0 0))))
+      ((00011100 current (00000101 remaining)) 0 0))))
 
 (00001001 <=
   (00001000 (first . remaining)
@@ -722,7 +722,7 @@
       ((00000011 n 0) (0)
        (number->string-onto
          (quotient n 10)
-         (string-append (digit->string (mod n 10)) acc))))))
+         (00111010 (digit->string (mod n 10)) acc))))))
 
 (00001001 number->string
   (00001000 (n)
@@ -735,7 +735,7 @@
     ; its misleading error surfaced as an apparent memory corruption.
     ; Delegation, not re-implementation: write-to-string is already the
     ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
-    (write-to-string n)))
+    (01001100 n)))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
 ; without deep nesting (PLAN.md item / clean-code policy).
@@ -750,7 +750,7 @@
 ;
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
-(defmacro -> forms
+(00001010 -> forms
   (00000111
     ((00000010 forms) () (00000001 ()))
     ((00000010 forms) (0)
@@ -771,7 +771,7 @@
             ((00000010 rest) (0)
              (00000100 (00000001 ->) (00000100 step rest))))))))))
 
-(defmacro ->> forms
+(00001010 ->> forms
   (00000111
     ((00000010 forms) () (00000001 ()))
     ((00000010 forms) (0)
@@ -807,34 +807,34 @@
 (00001001 sqrt-iter
   (00001000 (guess x n)
     (00000111
-      ((= n 0) 1 guess)
-      ((= n 0) 0
+      ((00011100 n 0) 1 guess)
+      ((00011100 n 0) 0
        (sqrt-iter (00001111 (00001100 guess (00001111 x guess)) 2) x (00001101 n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
 (00001001 isqrt
   (00001000 (n)
     (00000111
-      ((< n 2) 1 n)
-      ((< n 2) 0
+      ((00011010 n 2) 1 n)
+      ((00011010 n 2) 0
        (isqrt-step n (quotient n 2))))))
 
 (00001001 isqrt-step
   (00001000 (n g)
     (let ((next (quotient (00001100 g (quotient n g)) 2)))
       (00000111
-        ((< next g) 1 (isqrt-step n next))
-        ((< next g) 0 g)))))
+        ((00011010 next g) 1 (isqrt-step n next))
+        ((00011010 next g) 0 g)))))
 
 (00001001 sqrt
   (00001000 (x)
     (00000111
-      ((< x 0) 1 (00000001 ()))
-      ((= x 0) 1 0)
-      ((= x (quotient x 1)) 1
+      ((00011010 x 0) 1 (00000001 ()))
+      ((00011100 x 0) 1 0)
+      ((00011100 x (quotient x 1)) 1
        (let ((r (isqrt x)))
          (00000111
-           ((= (00001110 r r) x) t r)
+           ((00011100 (00001110 r r) x) t r)
            (t t (sqrt-iter (00001111 x 2) x 8)))))
       (t t (sqrt-iter (00001111 x 2.0) x 5)))))
 
@@ -864,8 +864,8 @@
 (00001001 abs
   (00001000 (x)
     (00000111
-      ((< x 0) 1 (00001101 0 x))
-      ((< x 0) 0 x))))
+      ((00011010 x 0) 1 (00001101 0 x))
+      ((00011010 x 0) 0 x))))
 
 ; Required first parameter (dotted lambda-list, same pattern as
 ; `<=`/`>=` above) keeps zero arguments an Arity error via the
@@ -874,11 +874,11 @@
 ; without this Lisp definition needing to raise a custom error itself.
 (00001001 min
   (00001000 (first . rest)
-    (min-list (00000100 first rest))))
+    (00010111 (00000100 first rest))))
 
 (00001001 max
   (00001000 (first . rest)
-    (max-list (00000100 first rest))))
+    (00011000 (00000100 first rest))))
 
 ; Two real bugs found live via oracle testing before this landed, not
 ; assumed from reading the removed Rust source:
@@ -903,8 +903,8 @@
             (00000101 items))
            ((equal? rest-min (00000001 ())) (0)
             (00000111
-              ((< (00000101 items) rest-min) 1 (00000101 items))
-              ((< (00000101 items) rest-min) 0 rest-min)))))))))
+              ((00011010 (00000101 items) rest-min) 1 (00000101 items))
+              ((00011010 (00000101 items) rest-min) 0 rest-min)))))))))
 
 (00001001 max-list
   (00001000 (items)
@@ -917,8 +917,8 @@
             (00000101 items))
            ((equal? rest-max (00000001 ())) (0)
             (00000111
-              ((> (00000101 items) rest-max) 1 (00000101 items))
-              ((> (00000101 items) rest-max) 0 rest-max)))))))))
+              ((00011011 (00000101 items) rest-max) 1 (00000101 items))
+              ((00011011 (00000101 items) rest-max) 0 rest-max)))))))))
 
 ; #469 — post-core stable peer materialization.
 ;
@@ -975,9 +975,9 @@
       ((00000010 bindings) (0)
        (let ((binding (00000101 bindings)))
          (00000111
-           ((00000011 (symbol->string surface) (00000101 binding)) (1)
+           ((00000011 (01000010 surface) (00000101 binding)) (1)
             (00000001 present))
-           ((00000011 (symbol->string surface) (00000101 binding)) (0)
+           ((00000011 (01000010 surface) (00000101 binding)) (0)
             (my-postcore-binding-status surface (00000110 bindings)))))))))
 
 (00001001 my-postcore-missing-peers
@@ -1016,7 +1016,7 @@
              (00000101 peers)
              (my-postcore-build-definitions source (00000110 peers)))))))
 
-(defmacro my-postcore-materialize-stable-peers args
+(00001010 my-postcore-materialize-stable-peers args
   (let* ((semantic-id (00000101 args))
          (source (second args))
          (group
@@ -1029,7 +1029,7 @@
       ((00000010 group) (0)
        (my-postcore-build-definitions
          source
-         (my-postcore-missing-peers source (00000110 group) (env)))))))
+         (my-postcore-missing-peers source (00000110 group) (01001110)))))))
 
 ; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
 (00001001 divmod
@@ -1094,7 +1094,7 @@
 
 (00001001 apply
   (00001000 (f args)
-    (eval (00000100 f (apply-quote-args args)))))
+    (01001101 (00000100 f (apply-quote-args args)))))
 
 ; #1391: логіка відповідей Core4 — закон contracts/core4-predicate-answer-scale.lisp /3.
 ; Відповідь — список двійкових бітів: (1)…(1 1 1 1 1 1 1) «так»,

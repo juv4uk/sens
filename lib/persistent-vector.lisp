@@ -48,61 +48,61 @@
 ; vector. Each tree node is a 5-element list: (index value height left
 ; right) -- the identical shape lib/persistent-map.lisp's node uses.
 
-(def vec-empty (cons 0 (quote ())))
-(def vec-count (lambda (v) (car v)))
-(def vec-tree (lambda (v) (cdr v)))
+(00001001 vec-empty (00000100 0 (00000001 ())))
+(00001001 vec-count (00001000 (v) (00000101 v)))
+(00001001 vec-tree (00001000 (v) (00000110 v)))
 
-(def vnode-index (lambda (n) (car n)))
-(def vnode-value (lambda (n) (second n)))
-(def vnode-height (lambda (n) (third n)))
-(def vnode-left fourth)
-(def vnode-right fifth)
+(00001001 vnode-index (00001000 (n) (00000101 n)))
+(00001001 vnode-value (00001000 (n) (00101111 n)))
+(00001001 vnode-height (00001000 (n) (00110000 n)))
+(00001001 vnode-left fourth)
+(00001001 vnode-right fifth)
 
-(def vheight-of
-  (lambda (n) (cond ((atom? n) () 0)
-                    ((atom? n) (1) 0) (t (vnode-height n)))))
+(00001001 vheight-of
+  (00001000 (n) (00000111 ((00000010 n) () 0)
+                    ((00000010 n) (1) 0) (t (vnode-height n)))))
 
-(def vmax2
-  (lambda (a b)
-    (cond
-      ((< a b) 1 b)
-      ((< a b) 0 a))))
+(00001001 vmax2
+  (00001000 (a b)
+    (00000111
+      ((00011010 a b) 1 b)
+      ((00011010 a b) 0 a))))
 
-(def vmake-balanced-node
-  (lambda (index value left right)
-    (list index value (+ 1 (vmax2 (vheight-of left) (vheight-of right))) left right)))
+(00001001 vmake-balanced-node
+  (00001000 (index value left right)
+    (00100111 index value (00001100 1 (vmax2 (vheight-of left) (vheight-of right))) left right)))
 
-(def vbalance-factor
-  (lambda (n) (- (vheight-of (vnode-left n)) (vheight-of (vnode-right n)))))
+(00001001 vbalance-factor
+  (00001000 (n) (00001101 (vheight-of (vnode-left n)) (vheight-of (vnode-right n)))))
 
-(def vrotate-left
-  (lambda (n)
-    (let ((r (vnode-right n)))
+(00001001 vrotate-left
+  (00001000 (n)
+    (10011100 ((r (vnode-right n)))
       (vmake-balanced-node (vnode-index r) (vnode-value r)
         (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-left n) (vnode-left r))
         (vnode-right r)))))
 
-(def vrotate-right
-  (lambda (n)
-    (let ((l (vnode-left n)))
+(00001001 vrotate-right
+  (00001000 (n)
+    (10011100 ((l (vnode-left n)))
       (vmake-balanced-node (vnode-index l) (vnode-value l)
         (vnode-left l)
         (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-right l) (vnode-right n))))))
 
-(def vbalance
-  (lambda (n)
-    (cond
-      ((atom? n) () n)
-      ((atom? n) (1) n)
-      ((> (vbalance-factor n) 1) 1
-       (cond
-         ((< (vbalance-factor (vnode-left n)) 0) 1
+(00001001 vbalance
+  (00001000 (n)
+    (00000111
+      ((00000010 n) () n)
+      ((00000010 n) (1) n)
+      ((00011011 (vbalance-factor n) 1) 1
+       (00000111
+         ((00011010 (vbalance-factor (vnode-left n)) 0) 1
           (vrotate-right (vmake-balanced-node (vnode-index n) (vnode-value n)
                            (vrotate-left (vnode-left n)) (vnode-right n))))
          (t (vrotate-right n))))
-      ((< (vbalance-factor n) -1) 1
-       (cond
-         ((> (vbalance-factor (vnode-right n)) 0) 1
+      ((00011010 (vbalance-factor n) -1) 1
+       (00000111
+         ((00011011 (vbalance-factor (vnode-right n)) 0) 1
           (vrotate-left (vmake-balanced-node (vnode-index n) (vnode-value n)
                           (vnode-left n) (vrotate-right (vnode-right n)))))
 
@@ -111,14 +111,14 @@
 
 ; Returns a new tree with `index`/`value` inserted (or `value` replacing
 ; an existing entry at `index`) -- the original tree is untouched.
-(def vtree-insert
-  (lambda (index value tree)
-    (cond
-      ((atom? tree) () (vmake-balanced-node index value (quote ()) (quote ())))
-      ((atom? tree) (1) (vmake-balanced-node index value (quote ()) (quote ())))
-      ((eq? index (vnode-index tree))
+(00001001 vtree-insert
+  (00001000 (index value tree)
+    (00000111
+      ((00000010 tree) () (vmake-balanced-node index value (00000001 ()) (00000001 ())))
+      ((00000010 tree) (1) (vmake-balanced-node index value (00000001 ()) (00000001 ())))
+      ((00000011 index (vnode-index tree))
        (vmake-balanced-node index value (vnode-left tree) (vnode-right tree)))
-      ((< index (vnode-index tree)) 1
+      ((00011010 index (vnode-index tree)) 1
        (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
                    (vtree-insert index value (vnode-left tree))
                    (vnode-right tree))))
@@ -129,13 +129,13 @@
 
 ; O(log n): the AVL tree is height-balanced, so this recursion depth
 ; (and therefore the work done) never exceeds ~1.44*log2(count).
-(def vtree-get
-  (lambda (index tree)
-    (cond
-      ((atom? tree) () (quote ()))
-      ((atom? tree) (1) (quote ()))
-      ((eq? index (vnode-index tree)) (list (vnode-value tree)))
-      ((< index (vnode-index tree)) 1 (vtree-get index (vnode-left tree)))
+(00001001 vtree-get
+  (00001000 (index tree)
+    (00000111
+      ((00000010 tree) () (00000001 ()))
+      ((00000010 tree) (1) (00000001 ()))
+      ((00000011 index (vnode-index tree)) (00100111 (vnode-value tree)))
+      ((00011010 index (vnode-index tree)) 1 (vtree-get index (vnode-left tree)))
       (t (vtree-get index (vnode-right tree))))))
 
 ; `vec-nth` returns the classic "maybe" shape ('() or (value)), the same
@@ -145,32 +145,32 @@
 ; Mixing the two conventions silently would be exactly the kind of
 ; accidental-vs-intentional confusion this session already spent a long
 ; conversation on with macro hygiene -- named differently on purpose.
-(def vec-nth
-  (lambda (index v) (vtree-get index (vec-tree v))))
+(00001001 vec-nth
+  (00001000 (index v) (vtree-get index (vec-tree v))))
 
 ; O(log n): appends `value` at the current end (index = current count),
 ; then increments count. The new count/tree pair shares every subtree
 ; the insert path didn't touch with the original vector.
-(def vec-conj
-  (lambda (value v)
-    (cons (+ 1 (vec-count v))
+(00001001 vec-conj
+  (00001000 (value v)
+    (00000100 (00001100 1 (vec-count v))
           (vtree-insert (vec-count v) value (vec-tree v)))))
 
 ; In-order traversal over an index-keyed BST comes back in index order
 ; for free, the same free side effect lib/persistent-map.lisp's map->list
 ; already relies on. Top-level helper, not a nested letrec -- my-lisp
 ; has no letrec; `def` at top level is how a helper refers to itself.
-(def vtree->list
-  (lambda (tree)
-    (cond
-      ((atom? tree) () (quote ()))
-      ((atom? tree) (1) (quote ()))
-      (t (append (vtree->list (vnode-left tree))
-                 (cons (vnode-value tree)
+(00001001 vtree->list
+  (00001000 (tree)
+    (00000111
+      ((00000010 tree) () (00000001 ()))
+      ((00000010 tree) (1) (00000001 ()))
+      (t (00101001 (vtree->list (vnode-left tree))
+                 (00000100 (vnode-value tree)
                        (vtree->list (vnode-right tree))))))))
 
-(def vec->list
-  (lambda (v) (vtree->list (vec-tree v))))
+(00001001 vec->list
+  (00001000 (v) (vtree->list (vec-tree v))))
 
 ; Builds a persistent vector from an ordinary list, in list order --
 ; the on-ramp for adopting existing O(n)-vector code without hand-writing
@@ -180,12 +180,12 @@
 ; would conj the LAST element first (its own recursive call bottoms out
 ; before any conj runs), reversing the list into the vector -- caught
 ; before this file was ever tested, not after.
-(def vec-from-list-onto
-  (lambda (lst acc)
-    (cond
-      ((atom? lst) () acc)
-      ((atom? lst) (1) acc)
-      (t (vec-from-list-onto (cdr lst) (vec-conj (car lst) acc))))))
+(00001001 vec-from-list-onto
+  (00001000 (lst acc)
+    (00000111
+      ((00000010 lst) () acc)
+      ((00000010 lst) (1) acc)
+      (t (vec-from-list-onto (00000110 lst) (vec-conj (00000101 lst) acc))))))
 
-(def vec-from-list
-  (lambda (lst) (vec-from-list-onto lst vec-empty)))
+(00001001 vec-from-list
+  (00001000 (lst) (vec-from-list-onto lst vec-empty)))

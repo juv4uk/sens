@@ -5,50 +5,50 @@
 ; exit observation, and byte capture. This layer owns UTF-8 interpretation.
 ; Load `lib/utf8.lisp` before this file.
 
-(def process-raw-exit-code
-  (lambda (raw)
-    (second raw)))
+(00001001 process-raw-exit-code
+  (00001000 (raw)
+    (00101111 raw)))
 
-(def process-raw-stdout-bytes
-  (lambda (raw)
-    (third raw)))
+(00001001 process-raw-stdout-bytes
+  (00001000 (raw)
+    (00110000 raw)))
 
-(def process-raw-stderr-bytes
-  (lambda (raw)
-    (car (cdr (cdr (cdr raw))))))
+(00001001 process-raw-stderr-bytes
+  (00001000 (raw)
+    (00000101 (00000110 (00000110 (00000110 raw))))))
 
-(def process-result->text
-  (lambda (raw)
-    (cond
-      ((eq? (car raw) (quote process-result))
+(00001001 process-result->text
+  (00001000 (raw)
+    (00000111
+      ((00000011 (00000101 raw) (00000001 process-result))
        (0)
-       (list (quote rejected) (quote invalid-process-result)))
-      ((eq? (car raw) (quote process-result))
+       (00100111 (00000001 rejected) (00000001 invalid-process-result)))
+      ((00000011 (00000101 raw) (00000001 process-result))
        (1)
-       (let* ((stdout-result
+       (10011101 ((stdout-result
                 (utf8-decode-string (process-raw-stdout-bytes raw)))
               (stderr-result
                 (utf8-decode-string (process-raw-stderr-bytes raw))))
-         (cond
-           ((eq? (car stdout-result) (quote decoded))
+         (00000111
+           ((00000011 (00000101 stdout-result) (00000001 decoded))
             (0)
-            (list (quote rejected) (quote stdout-invalid-utf8)))
-           ((eq? (car stdout-result) (quote decoded))
+            (00100111 (00000001 rejected) (00000001 stdout-invalid-utf8)))
+           ((00000011 (00000101 stdout-result) (00000001 decoded))
             (1)
-            (cond
-              ((eq? (car stderr-result) (quote decoded))
+            (00000111
+              ((00000011 (00000101 stderr-result) (00000001 decoded))
                (0)
-               (list (quote rejected) (quote stderr-invalid-utf8)))
-              ((eq? (car stderr-result) (quote decoded))
+               (00100111 (00000001 rejected) (00000001 stderr-invalid-utf8)))
+              ((00000011 (00000101 stderr-result) (00000001 decoded))
                (1)
-               (list
-                 (quote decoded-process)
+               (00100111
+                 (00000001 decoded-process)
                  (process-raw-exit-code raw)
-                 (second stdout-result)
-                 (second stderr-result)))))))))))
+                 (00101111 stdout-result)
+                 (00101111 stderr-result)))))))))))
 
-(def process-run-text
-  (lambda (program args)
+(00001001 process-run-text
+  (00001000 (program args)
     (process-result->text (process-run-raw program args))))
 
 ; Public compatibility surface. Rust no longer registers a semantic
@@ -59,23 +59,23 @@
 ; terminates without a numeric exit code keeps the historical public `-1`
 ; convention here in Lisp. Invalid UTF-8 is no longer silently lossy: it
 ; returns the explicit rejection value produced above.
-(def process-public-exit-code
-  (lambda (code)
-    (cond
-      ((eq? code (quote ())) (1) -1)
-      ((eq? code (quote ())) (0) code))))
+(00001001 process-public-exit-code
+  (00001000 (code)
+    (00000111
+      ((00000011 code (00000001 ())) (1) -1)
+      ((00000011 code (00000001 ())) (0) code))))
 
-(def process-run
-  (lambda (program args)
-    (let ((result (process-run-text program args)))
-      (cond
-        ((eq? (car result) (quote decoded-process))
+(00001001 process-run
+  (00001000 (program args)
+    (10011100 ((result (process-run-text program args)))
+      (00000111
+        ((00000011 (00000101 result) (00000001 decoded-process))
          (1)
-         (list
-           (process-public-exit-code (second result))
-           (third result)
-           (car (cdr (cdr (cdr result))))))
-        ((eq? (car result) (quote decoded-process))
+         (00100111
+           (process-public-exit-code (00101111 result))
+           (00110000 result)
+           (00000101 (00000110 (00000110 (00000110 result))))))
+        ((00000011 (00000101 result) (00000001 decoded-process))
          (0)
          result)))))
 
@@ -83,7 +83,7 @@
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
 ; whether this post-core closure currently has any additional stable peers.
 ; Candidate spellings remain unavailable until explicitly ratified stable.
-(quote (postcore-materialization-debug skipped))
+(00000001 (postcore-materialization-debug skipped))
 
 ; #771: materialize the registry-authoritative Ukrainian peer after process-run exists.
 (my-postcore-materialize-stable-peers 162 process-run)
