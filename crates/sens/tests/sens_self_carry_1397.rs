@@ -1,4 +1,8 @@
-use sens::{eval_program, parse, ErrorKind, Exactness, ExprKind, Session, Value};
+use sens::{
+    eval_program, parse,
+    semantic_registry_export::admitted_surfaces_for_semantic_id,
+    ErrorKind, Exactness, ExprKind, Sens8, Session, Value,
+};
 
 fn eval_value(session: &mut Session, source: &str) -> Value {
     eval_program(source, session)
@@ -35,6 +39,42 @@ fn exact_function_carries_itself_across_two_language_stages() {
         None,
         "виконання перенесеної exact-функції не повинно неявно вибирати Core"
     );
+}
+
+fn poison_surfaces_for(session: &mut Session, function: Sens8) -> usize {
+    let surfaces = admitted_surfaces_for_semantic_id(function);
+    for surface in &surfaces {
+        session
+            .environment
+            .define(surface.name, Value::Symbol("surface-poison".into()));
+    }
+    surfaces.len()
+}
+
+#[test]
+fn exact_path_ignores_poisoned_surface_bindings() {
+    let mut session = Session::default();
+
+    // Це adversarial setup, а не transport: exact-функціями знаходимо лише
+    // їхні людські peer-surfaces і робимо ці bindings явно непридатними.
+    let poisoned = [
+        sens::sens!(00000001),
+        sens::sens!(00000101),
+        sens::sens!(00001000),
+    ]
+    .into_iter()
+    .map(|function| poison_surfaces_for(&mut session, function))
+    .sum::<usize>();
+    assert!(poisoned > 0, "adversarial setup має реально отруїти surface bindings");
+
+    let carried = eval_value(&mut session, "((00001000 (f) f) 00000101)");
+    assert_eq!(carried, Value::Sid(sens::sens!(00000101)));
+
+    let result = eval_value(
+        &mut session,
+        "(((00001000 (f) f) 00000101) (00000001 (alpha beta)))",
+    );
+    assert_eq!(result, Value::Symbol("alpha".into()));
 }
 
 #[test]
