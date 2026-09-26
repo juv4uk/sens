@@ -8,7 +8,6 @@ const CORE4: &str = include_str!("../../../lib/core4.lisp");
 #[derive(Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
 struct Row {
     path: String,
-    line: usize,
     surface: String,
     exact_sens: String,
     class: String,
@@ -23,10 +22,9 @@ fn inventory_rows() -> Vec<Row> {
             assert_eq!(parts.len(), 4, "bad #1485 inventory row: {line}");
             Row {
                 path: parts[0].to_string(),
-                line: parts[1].parse().expect("line must be decimal"),
-                surface: parts[2].to_string(),
-                exact_sens: parts[3].to_string(),
-                class: parts[4].to_string(),
+                surface: parts[1].to_string(),
+                exact_sens: parts[2].to_string(),
+                class: parts[3].to_string(),
             }
         })
         .collect()
@@ -43,6 +41,7 @@ fn admitted_surface_bits() -> BTreeMap<String, String> {
         if bits.len() != 8 || !bits.bytes().all(|b| b == b'0' || b == b'1') {
             continue;
         }
+
         for namespace in ["en", "ук", "укр", "sa", "sym"] {
             let needle = format!("({namespace} ");
             let Some(start) = trimmed.find(&needle) else {
@@ -70,6 +69,7 @@ fn quoted_admitted_single_atoms(path: &str, source: &str) -> BTreeSet<Row> {
     let mut out = BTreeSet::new();
     let needle = "(00000001 ";
     let mut offset = 0;
+
     while let Some(relative) = source[offset..].find(needle) {
         let start = offset + relative;
         let value_start = start + needle.len();
@@ -78,16 +78,15 @@ fn quoted_admitted_single_atoms(path: &str, source: &str) -> BTreeSet<Row> {
         };
         let value_end = value_start + relative_end;
         let value = source[value_start..value_end].trim();
+
         if !value.is_empty()
             && !value.contains(char::is_whitespace)
             && !value.contains('(')
             && !value.bytes().all(|b| b == b'0' || b == b'1')
         {
             if let Some(bits) = admitted.get(value) {
-                let line = source[..start].bytes().filter(|b| *b == b'\n').count() + 1;
                 out.insert(Row {
                     path: path.to_string(),
-                    line,
                     surface: value.to_string(),
                     exact_sens: bits.clone(),
                     class: String::new(),
@@ -114,6 +113,7 @@ fn inventory_covers_every_quoted_admitted_single_atom_in_core_and_core4() {
             row
         })
         .collect();
+
     assert_eq!(
         discovered_rows_without_class(),
         inventoried,
@@ -124,15 +124,26 @@ fn inventory_covers_every_quoted_admitted_single_atom_in_core_and_core4() {
 #[test]
 fn inventory_has_only_explicit_data_or_code_template_classes() {
     let rows = inventory_rows();
-    assert_eq!(rows.len(), 16, "current audit is exactly eight rows per core profile");
+    assert_eq!(
+        rows.len(),
+        16,
+        "current audit is exactly eight rows per core profile"
+    );
+
     for row in &rows {
         assert!(
-            matches!(row.class.as_str(), "ordinary-data" | "code-template-operator"),
+            matches!(
+                row.class.as_str(),
+                "ordinary-data" | "code-template-operator"
+            ),
             "unclassified #1485 row: {row:?}"
         );
     }
 
-    let ordinary: Vec<_> = rows.iter().filter(|row| row.class == "ordinary-data").collect();
+    let ordinary: Vec<_> = rows
+        .iter()
+        .filter(|row| row.class == "ordinary-data")
+        .collect();
     assert_eq!(ordinary.len(), 2);
     assert!(ordinary.iter().all(|row| row.surface == "binary"));
     assert!(ordinary.iter().all(|row| row.exact_sens == "10101001"));
