@@ -50,18 +50,26 @@ fn meta_program(program: &str) -> String {
 
 #[test]
 fn native_and_meta_reject_canon_lambda_binders() {
-    for name in ["car", "перше", "ādi", "atom", "атом?", "aṇu"] {
+    // Surface names of table functions and a SENS code itself (00000010,
+    // atom?) — none may become a lambda parameter.
+    for name in ["car", "перше", "ādi", "00000010", "атом?", "aṇu"] {
         let source = format!("(lambda ({name}) {name})");
 
         let mut native = Session::default();
-        let error = eval_program(&source, &mut native)
-            .expect_err("native evaluator must reject a Canon parameter");
-        assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
+        // `match`, not `expect_err`: printing an accepted closure with Debug
+        // walks its self-referencing environment and overflows the stack,
+        // which hid this failure as an aborted test binary.
+        match eval_program(&source, &mut native) {
+            Ok(_) => panic!("native evaluator must reject a Canon parameter: {source}"),
+            Err(error) => assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}"),
+        }
 
+        let is_code = name.len() == 8 && name.bytes().all(|b| b == b'0' || b == b'1');
+        let reason = if is_code { "non-symbol-parameter" } else { "canonical-parameter" };
         let meta = meta_eval(&source);
         assert!(
-            meta.contains("error invalid-form") && meta.contains("canonical-parameter"),
-            "meta-eval must reject {name}, got: {meta}"
+            meta.contains("error invalid-form") && meta.contains(reason),
+            "meta-eval must reject {name} ({reason}), got: {meta}"
         );
     }
 }
