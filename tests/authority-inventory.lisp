@@ -110,3 +110,7 @@
 (authority "crates/my-lisp/tests/core_profile_runtime_1272.rs" observer)
 (authority "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" observer)
 (authority "crates/my-lisp/tests/core3_profile_runtime_1414.rs" observer)
+(authority "crates/sens-cli/src/main.rs" mechanism)
+(authority "crates/sens/tests/postcore_peer_staging_1417.rs" observer)
+(authority "crates/sens/tests/clock.rs" observer)
+(authority "crates/sens/tests/timezone_ownership.rs" observer)
