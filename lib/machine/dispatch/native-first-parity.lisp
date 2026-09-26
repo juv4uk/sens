@@ -7,57 +7,57 @@
 
 (00001001 native-first-parity-pass
   (00001000 (name effect-class error-class)
-    (list
+    (00100111
       (00000001 native-parity-case)
       name
       (00000001 pass)
-      (list (00000001 effect) effect-class)
-      (list (00000001 error) error-class))))
+      (00100111 (00000001 effect) effect-class)
+      (00100111 (00000001 error) error-class))))
 
 (00001001 native-first-parity-fail
   (00001000 (name kind expected actual)
-    (list
+    (00100111
       (00000001 native-parity-case)
       name
       (00000001 fail)
-      (list (00000001 kind) kind)
-      (list (00000001 expected) expected)
-      (list (00000001 actual) actual))))
+      (00100111 (00000001 kind) kind)
+      (00100111 (00000001 expected) expected)
+      (00100111 (00000001 actual) actual))))
 
 (00001001 native-first-parity-case
   (00001000 (row)
-    (let* ((name (00000101 row))
-           (expression (second row))
-           (expected (third row))
-           (effect-class (fourth row))
-           (error-class (fifth row))
-           (evaluator-value (eval expression))
+    (10011101 ((name (00000101 row))
+           (expression (00101111 row))
+           (expected (00110000 row))
+           (effect-class (00110001 row))
+           (error-class (00110010 row))
+           (evaluator-value (01001101 expression))
            (native-outcome
              (native-first-execute-expression expression))
            (expected-native-outcome
-             (list
+             (00100111
                (00000001 execution-route)
                (00000001 native)
                (00000001 (status completed))
-               (list (00000001 value) expected))))
+               (00100111 (00000001 value) expected))))
       (00000111
-        ((equal? evaluator-value expected)
+        ((00100010 evaluator-value expected)
          (structural-relation same)
          (00000111
-           ((equal? native-outcome expected-native-outcome)
+           ((00100010 native-outcome expected-native-outcome)
             (structural-relation same)
             (native-first-parity-pass
               name
               effect-class
               error-class))
-           ((equal? native-outcome expected-native-outcome)
+           ((00100010 native-outcome expected-native-outcome)
             (structural-relation distinct)
             (native-first-parity-fail
               name
               (00000001 native-or-route-mismatch)
               expected-native-outcome
               native-outcome))))
-        ((equal? evaluator-value expected)
+        ((00100010 evaluator-value expected)
          (structural-relation distinct)
          (native-first-parity-fail
            name
@@ -70,7 +70,7 @@
     (00000111
       ((00000010 rows) (structural-kind empty-list) (00000001 ()))
       ((00000010 rows) (structural-kind atom)
-       (list
+       (00100111
          (native-first-parity-fail
            (00000001 malformed-corpus)
            (00000001 malformed-tail)
@@ -86,10 +86,10 @@
     (00000111
       ((00000010 verdict) (structural-kind pair)
        (00000111
-         ((equal? (third verdict) (00000001 pass))
+         ((00100010 (00110000 verdict) (00000001 pass))
           (structural-relation same)
           t)
-         ((equal? (third verdict) (00000001 pass))
+         ((00100010 (00110000 verdict) (00000001 pass))
           (structural-relation distinct)
           (00000001 ()))))
       ((00000001 native-first-parity-verdict-fallback)
@@ -103,9 +103,9 @@
       ((00000010 verdicts) (structural-kind atom) (00000001 ()))
       ((00000010 verdicts) (structural-kind pair)
        (00000111
-         ((equal? (native-first-parity-verdict-pass? (00000101 verdicts)) t)
+         ((00100010 (native-first-parity-verdict-pass? (00000101 verdicts)) t)
           (structural-relation same)
           (native-first-parity-all-pass? (00000110 verdicts)))
-         ((equal? (native-first-parity-verdict-pass? (00000101 verdicts)) t)
+         ((00100010 (native-first-parity-verdict-pass? (00000101 verdicts)) t)
           (structural-relation distinct)
           (00000001 ())))))))

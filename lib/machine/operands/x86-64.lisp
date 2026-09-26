@@ -8,7 +8,7 @@
 
 (00001001 x86-machine-operand-rejection
   (00001000 (expected actual)
-    (list (00000001 rejected) (00000001 machine-operand) expected actual)))
+    (00100111 (00000001 rejected) (00000001 machine-operand) expected actual)))
 
 (00001001 x86-machine-rejected?
   (00001000 (value)
@@ -20,8 +20,8 @@
 (00001001 x86-gpr8-name?
   (00001000 (name)
     (00000111
-      ((symbol? name)
-       (member?
+      ((00100011 name)
+       (00101100
          name
          (00000001
            (al cl dl bl spl bpl sil dil
@@ -31,10 +31,10 @@
 (00001001 x86-gpr64-name?
   (00001000 (name)
     (00000111
-      ((symbol? name)
-       (and
-         (not? (00000011 (x86-reg-code name) (00000001 ())))
-         (not? (x86-gpr8-name? name))))
+      ((00100011 name)
+       (10011010
+         (00100001 (00000011 (x86-reg-code name) (00000001 ())))
+         (00100001 (x86-gpr8-name? name))))
       (t (00000001 ())))))
 
 (00001001 x86-gpr8?
@@ -44,15 +44,15 @@
       ((00000011 (00000101 operand) (00000001 gpr8))
        (00000111
          ((00000010 (00000110 operand)) (00000001 ()))
-         ((equal? (00000110 (00000110 operand)) (00000001 ()))
-          (x86-gpr8-name? (second operand)))
+         ((00100010 (00000110 (00000110 operand)) (00000001 ()))
+          (x86-gpr8-name? (00101111 operand)))
          (t (00000001 ()))))
       (t (00000001 ())))))
 
 (00001001 x86-gpr8
   (00001000 (name)
     (00000111
-      ((x86-gpr8-name? name) (list (00000001 gpr8) name))
+      ((x86-gpr8-name? name) (00100111 (00000001 gpr8) name))
       (t (x86-machine-operand-rejection (00000001 gpr8) name)))))
 
 (00001001 x86-as-gpr8
@@ -64,7 +64,7 @@
 
 (00001001 x86-gpr8-value
   (00001000 (operand)
-    (second operand)))
+    (00101111 operand)))
 
 (00001001 x86-gpr64?
   (00001000 (operand)
@@ -73,15 +73,15 @@
       ((00000011 (00000101 operand) (00000001 gpr64))
        (00000111
          ((00000010 (00000110 operand)) (00000001 ()))
-         ((equal? (00000110 (00000110 operand)) (00000001 ()))
-          (x86-gpr64-name? (second operand)))
+         ((00100010 (00000110 (00000110 operand)) (00000001 ()))
+          (x86-gpr64-name? (00101111 operand)))
          (t (00000001 ()))))
       (t (00000001 ())))))
 
 (00001001 x86-gpr64
   (00001000 (name)
     (00000111
-      ((x86-gpr64-name? name) (list (00000001 gpr64) name))
+      ((x86-gpr64-name? name) (00100111 (00000001 gpr64) name))
       (t (x86-machine-operand-rejection (00000001 gpr64) name)))))
 
 (00001001 x86-as-gpr64
@@ -93,7 +93,7 @@
 
 (00001001 x86-gpr64-value
   (00001000 (operand)
-    (second operand)))
+    (00101111 operand)))
 
 ; A gpr32 operand is a 32-bit view of the same physical general-purpose
 ; register named by its canonical 64-bit base name. The encoder already owns
@@ -111,15 +111,15 @@
       ((00000011 (00000101 operand) (00000001 gpr32))
        (00000111
          ((00000010 (00000110 operand)) (00000001 ()))
-         ((equal? (00000110 (00000110 operand)) (00000001 ()))
-          (x86-gpr32-name? (second operand)))
+         ((00100010 (00000110 (00000110 operand)) (00000001 ()))
+          (x86-gpr32-name? (00101111 operand)))
          (t (00000001 ()))))
       (t (00000001 ())))))
 
 (00001001 x86-gpr32
   (00001000 (name)
     (00000111
-      ((x86-gpr32-name? name) (list (00000001 gpr32) name))
+      ((x86-gpr32-name? name) (00100111 (00000001 gpr32) name))
       (t (x86-machine-operand-rejection (00000001 gpr32) name)))))
 
 (00001001 x86-as-gpr32
@@ -131,7 +131,7 @@
 
 (00001001 x86-gpr32-value
   (00001000 (operand)
-    (second operand)))
+    (00101111 operand)))
 
 ; XMM is a separate register class even though encoding uses the same 4-bit
 ; ModR/M namespace width. Validity is projected from x86-xmm-reg-code so this
@@ -139,12 +139,12 @@
 (00001001 x86-xmm-name?
   (00001000 (name)
     (00000111
-      ((symbol? name)
+      ((00100011 name)
        (00000111
-         ((equal? (x86-xmm-reg-code name) (00000001 ()))
+         ((00100010 (x86-xmm-reg-code name) (00000001 ()))
           (structural-relation same)
           (00000001 ()))
-         ((equal? (x86-xmm-reg-code name) (00000001 ()))
+         ((00100010 (x86-xmm-reg-code name) (00000001 ()))
           (structural-relation distinct)
           t)))
       (t (00000001 ())))))
@@ -156,15 +156,15 @@
       ((00000011 (00000101 operand) (00000001 xmm))
        (00000111
          ((00000010 (00000110 operand)) (00000001 ()))
-         ((equal? (00000110 (00000110 operand)) (00000001 ()))
-          (x86-xmm-name? (second operand)))
+         ((00100010 (00000110 (00000110 operand)) (00000001 ()))
+          (x86-xmm-name? (00101111 operand)))
          (t (00000001 ()))))
       (t (00000001 ())))))
 
 (00001001 x86-xmm
   (00001000 (name)
     (00000111
-      ((x86-xmm-name? name) (list (00000001 xmm) name))
+      ((x86-xmm-name? name) (00100111 (00000001 xmm) name))
       (t (x86-machine-operand-rejection (00000001 xmm) name)))))
 
 (00001001 x86-as-xmm
@@ -176,7 +176,7 @@
 
 (00001001 x86-xmm-value
   (00001000 (operand)
-    (second operand)))
+    (00101111 operand)))
 
 ; Exact integer recognition stays in Lisp and does not require a new host
 ; `number?`/`integer?` primitive. Canonical serialization is already a language
@@ -186,13 +186,13 @@
 ; cannot impersonate a number.
 (00001001 x86-decimal-digit?
   (00001000 (character)
-    (member? character
+    (00101100 character
              (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
 (00001001 x86-decimal-digits?
   (00001000 (text)
     (00000111
-      ((string-empty? text) t)
+      ((00111100 text) t)
       ((x86-decimal-digit? (string-first text))
        (x86-decimal-digits? (string-rest text)))
       (t (00000001 ())))))
@@ -200,15 +200,15 @@
 (00001001 x86-exact-integer?
   (00001000 (value)
     (00000111
-      ((not? (00000010 value)) (00000001 ()))
-      ((symbol? value) (00000001 ()))
+      ((00100001 (00000010 value)) (00000001 ()))
+      ((00100011 value) (00000001 ()))
       (t
-       (let ((text (write-to-string value)))
+       (10011100 ((text (write-to-string value)))
          (00000111
-           ((string-empty? text) (00000001 ()))
+           ((00111100 text) (00000001 ()))
            ((00000011 (string-first text) "-")
             (00000111
-              ((string-empty? (string-rest text)) (00000001 ()))
+              ((00111100 (string-rest text)) (00000001 ()))
               (t (x86-decimal-digits? (string-rest text)))))
            (t (x86-decimal-digits? text))))))))
 
@@ -219,11 +219,11 @@
     ; u64-imm/disp8 slots. E1 (#216): explicit expected-result domains,
     ; reduced to a t/() structural predicate so it is safe as a cond query.
     (00000111
-      ((>= value lower) 1
+      ((00011110 value lower) 1
         (00000111
-          ((<= value upper) 1 t)
-          ((<= value upper) 0 (00000001 ()))))
-      ((>= value lower) 0 (00000001 ())))))
+          ((00011101 value upper) 1 t)
+          ((00011101 value upper) 0 (00000001 ()))))
+      ((00011110 value lower) 0 (00000001 ())))))
 
 (00001001 x86-u64-imm?
   (00001000 (operand)
@@ -232,8 +232,8 @@
       ((00000011 (00000101 operand) (00000001 u64-imm))
        (00000111
          ((00000010 (00000110 operand)) (00000001 ()))
-         ((equal? (00000110 (00000110 operand)) (00000001 ()))
-          (let ((value (second operand)))
+         ((00100010 (00000110 (00000110 operand)) (00000001 ()))
+          (10011100 ((value (00101111 operand)))
             (00000111
               ((x86-exact-integer? value)
                (x86-operand-in-inclusive-range? value 0 18446744073709551615))
@@ -247,7 +247,7 @@
       ((x86-exact-integer? value)
        (00000111
          ((x86-operand-in-inclusive-range? value 0 18446744073709551615)
-          (list (00000001 u64-imm) value))
+          (00100111 (00000001 u64-imm) value))
          (t (x86-machine-operand-rejection (00000001 u64-imm) value))))
       (t (x86-machine-operand-rejection (00000001 u64-imm) value)))))
 
@@ -260,7 +260,7 @@
 
 (00001001 x86-u64-imm-value
   (00001000 (operand)
-    (second operand)))
+    (00101111 operand)))
 
 (00001001 x86-disp8?
   (00001000 (operand)
@@ -269,8 +269,8 @@
       ((00000011 (00000101 operand) (00000001 disp8))
        (00000111
          ((00000010 (00000110 operand)) (00000001 ()))
-         ((equal? (00000110 (00000110 operand)) (00000001 ()))
-          (let ((value (second operand)))
+         ((00100010 (00000110 (00000110 operand)) (00000001 ()))
+          (10011100 ((value (00101111 operand)))
             (00000111
               ((x86-exact-integer? value)
                (x86-operand-in-inclusive-range? value -128 127))
@@ -284,7 +284,7 @@
       ((x86-exact-integer? value)
        (00000111
          ((x86-operand-in-inclusive-range? value -128 127)
-          (list (00000001 disp8) value))
+          (00100111 (00000001 disp8) value))
          (t (x86-machine-operand-rejection (00000001 disp8) value))))
       (t (x86-machine-operand-rejection (00000001 disp8) value)))))
 
@@ -297,7 +297,7 @@
 
 (00001001 x86-disp8-value
   (00001000 (operand)
-    (second operand)))
+    (00101111 operand)))
 
 (00001001 x86-mem64-disp8?
   (00001000 (operand)
@@ -307,23 +307,23 @@
        (00000111
          ((00000010 (00000110 operand)) (00000001 ()))
          ((00000010 (00000110 (00000110 operand))) (00000001 ()))
-         ((equal? (00000110 (00000110 (00000110 operand))) (00000001 ()))
-          (and (x86-gpr64? (second operand))
-               (x86-disp8? (third operand))))
+         ((00100010 (00000110 (00000110 (00000110 operand))) (00000001 ()))
+          (10011010 (x86-gpr64? (00101111 operand))
+               (x86-disp8? (00110000 operand))))
          (t (00000001 ()))))
       (t (00000001 ())))))
 
 (00001001 x86-mem64-disp8
   (00001000 (base displacement)
-    (let ((typed-base (x86-as-gpr64 base)))
+    (10011100 ((typed-base (x86-as-gpr64 base)))
       (00000111
         ((x86-machine-rejected? typed-base) typed-base)
         (t
-         (let ((typed-displacement (x86-as-disp8 displacement)))
+         (10011100 ((typed-displacement (x86-as-disp8 displacement)))
            (00000111
              ((x86-machine-rejected? typed-displacement) typed-displacement)
              (t
-              (list (00000001 mem64-disp8)
+              (00100111 (00000001 mem64-disp8)
                     typed-base
                     typed-displacement)))))))))
 
@@ -336,8 +336,8 @@
 
 (00001001 x86-mem64-disp8-base
   (00001000 (operand)
-    (x86-gpr64-value (second operand))))
+    (x86-gpr64-value (00101111 operand))))
 
 (00001001 x86-mem64-disp8-displacement
   (00001000 (operand)
-    (x86-disp8-value (third operand))))
+    (x86-disp8-value (00110000 operand))))

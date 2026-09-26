@@ -12,43 +12,43 @@
 
 (00001001 x86-mov-r64-imm64
   (00001000 (register immediate)
-    (let ((typed-register (x86-as-gpr64 register)))
+    (10011100 ((typed-register (x86-as-gpr64 register)))
       (00000111
         ((x86-machine-rejected? typed-register) typed-register)
         (t
-         (let ((typed-immediate (x86-as-u64-imm immediate)))
+         (10011100 ((typed-immediate (x86-as-u64-imm immediate)))
            (00000111
              ((x86-machine-rejected? typed-immediate) typed-immediate)
              (t
-              (list (00000001 mov-r64-imm64)
+              (00100111 (00000001 mov-r64-imm64)
                     (x86-gpr64-value typed-register)
                     (x86-u64-imm-value typed-immediate))))))))))
 
 (00001001 x86-add-r64-r64
   (00001000 (destination source)
-    (let ((typed-destination (x86-as-gpr64 destination)))
+    (10011100 ((typed-destination (x86-as-gpr64 destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-source (x86-as-gpr64 source)))
+         (10011100 ((typed-source (x86-as-gpr64 source)))
            (00000111
              ((x86-machine-rejected? typed-source) typed-source)
              (t
-              (list (00000001 add-r64-r64)
+              (00100111 (00000001 add-r64-r64)
                     (x86-gpr64-value typed-destination)
                     (x86-gpr64-value typed-source))))))))))
 
 (00001001 x86-binary-gpr64-form
   (00001000 (mnemonic destination source)
-    (let ((typed-destination (x86-as-gpr64 destination)))
+    (10011100 ((typed-destination (x86-as-gpr64 destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-source (x86-as-gpr64 source)))
+         (10011100 ((typed-source (x86-as-gpr64 source)))
            (00000111
              ((x86-machine-rejected? typed-source) typed-source)
              (t
-              (list mnemonic
+              (00100111 mnemonic
                     (x86-gpr64-value typed-destination)
                     (x86-gpr64-value typed-source))))))))))
 
@@ -77,21 +77,21 @@
 ; conditional-transfer family demanded by the bounded EQ+COND witness.
 (00001001 x86-jnz-rel8
   (00001000 (displacement)
-    (let ((typed-displacement (x86-as-disp8 displacement)))
+    (10011100 ((typed-displacement (x86-as-disp8 displacement)))
       (00000111
         ((x86-machine-rejected? typed-displacement) typed-displacement)
         (t
-         (list
+         (00100111
            (00000001 jnz-rel8)
            (x86-disp8-value typed-displacement)))))))
 
 (00001001 x86-unary-gpr64-form
   (00001000 (mnemonic register)
-    (let ((typed-register (x86-as-gpr64 register)))
+    (10011100 ((typed-register (x86-as-gpr64 register)))
       (00000111
         ((x86-machine-rejected? typed-register) typed-register)
         (t
-         (list mnemonic (x86-gpr64-value typed-register)))))))
+         (00100111 mnemonic (x86-gpr64-value typed-register)))))))
 
 (00001001 x86-push-r64
   (00001000 (register)
@@ -111,30 +111,30 @@
 
 (00001001 x86-mov-mem64-r64
   (00001000 (memory source)
-    (let ((typed-memory (x86-as-mem64-disp8 memory)))
+    (10011100 ((typed-memory (x86-as-mem64-disp8 memory)))
       (00000111
         ((x86-machine-rejected? typed-memory) typed-memory)
         (t
-         (let ((typed-source (x86-as-gpr64 source)))
+         (10011100 ((typed-source (x86-as-gpr64 source)))
            (00000111
              ((x86-machine-rejected? typed-source) typed-source)
              (t
-              (list (00000001 mov-mem-disp8-r64)
+              (00100111 (00000001 mov-mem-disp8-r64)
                     (x86-mem64-disp8-base typed-memory)
                     (x86-mem64-disp8-displacement typed-memory)
                     (x86-gpr64-value typed-source))))))))))
 
 (00001001 x86-mov-r64-mem64
   (00001000 (destination memory)
-    (let ((typed-destination (x86-as-gpr64 destination)))
+    (10011100 ((typed-destination (x86-as-gpr64 destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-memory (x86-as-mem64-disp8 memory)))
+         (10011100 ((typed-memory (x86-as-mem64-disp8 memory)))
            (00000111
              ((x86-machine-rejected? typed-memory) typed-memory)
              (t
-              (list (00000001 mov-r64-mem-disp8)
+              (00100111 (00000001 mov-r64-mem-disp8)
                     (x86-gpr64-value typed-destination)
                     (x86-mem64-disp8-base typed-memory)
                     (x86-mem64-disp8-displacement typed-memory))))))))))
@@ -144,14 +144,14 @@
 ; #176-native forms.
 (00001001 x86-mov-mem-disp8-r64
   (00001000 (base displacement source)
-    (let ((memory (x86-mem64-disp8 base displacement)))
+    (10011100 ((memory (x86-mem64-disp8 base displacement)))
       (00000111
         ((x86-machine-rejected? memory) memory)
         (t (x86-mov-mem64-r64 memory source))))))
 
 (00001001 x86-mov-r64-mem-disp8
   (00001000 (destination base displacement)
-    (let ((memory (x86-mem64-disp8 base displacement)))
+    (10011100 ((memory (x86-mem64-disp8 base displacement)))
       (00000111
         ((x86-machine-rejected? memory) memory)
         (t (x86-mov-r64-mem64 destination memory))))))
@@ -199,37 +199,37 @@
 
 (00001001 x86-unary-gpr8-form
   (00001000 (mnemonic register)
-    (let ((typed-register (x86-as-gpr8 register)))
+    (10011100 ((typed-register (x86-as-gpr8 register)))
       (00000111
         ((x86-machine-rejected? typed-register) typed-register)
         (t
-         (list mnemonic (x86-gpr8-value typed-register)))))))
+         (00100111 mnemonic (x86-gpr8-value typed-register)))))))
 
 (00001001 x86-gpr64-gpr8-form
   (00001000 (mnemonic destination source)
-    (let ((typed-destination (x86-as-gpr64 destination)))
+    (10011100 ((typed-destination (x86-as-gpr64 destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-source (x86-as-gpr8 source)))
+         (10011100 ((typed-source (x86-as-gpr8 source)))
            (00000111
              ((x86-machine-rejected? typed-source) typed-source)
              (t
-              (list mnemonic
+              (00100111 mnemonic
                     (x86-gpr64-value typed-destination)
                     (x86-gpr8-value typed-source))))))))))
 
 (00001001 x86-gpr64-gpr32-form
   (00001000 (mnemonic destination source)
-    (let ((typed-destination (x86-as-gpr64 destination)))
+    (10011100 ((typed-destination (x86-as-gpr64 destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-source (x86-as-gpr32 source)))
+         (10011100 ((typed-source (x86-as-gpr32 source)))
            (00000111
              ((x86-machine-rejected? typed-source) typed-source)
              (t
-              (list mnemonic
+              (00100111 mnemonic
                     (x86-gpr64-value typed-destination)
                     (x86-gpr32-value typed-source))))))))))
 
@@ -522,22 +522,22 @@
 
 (00001001 x86-lea-r64-mem64
   (00001000 (destination memory)
-    (let ((typed-destination (x86-as-gpr64 destination)))
+    (10011100 ((typed-destination (x86-as-gpr64 destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-memory (x86-as-mem64-disp8 memory)))
+         (10011100 ((typed-memory (x86-as-mem64-disp8 memory)))
            (00000111
              ((x86-machine-rejected? typed-memory) typed-memory)
              (t
-              (list (00000001 lea-r64-mem-disp8)
+              (00100111 (00000001 lea-r64-mem-disp8)
                     (x86-gpr64-value typed-destination)
                     (x86-mem64-disp8-base typed-memory)
                     (x86-mem64-disp8-displacement typed-memory))))))))))
 
 (00001001 x86-lea-r64-mem-disp8
   (00001000 (destination base displacement)
-    (let ((memory (x86-mem64-disp8 base displacement)))
+    (10011100 ((memory (x86-mem64-disp8 base displacement)))
       (00000111
         ((x86-machine-rejected? memory) memory)
         (t (x86-lea-r64-mem64 destination memory))))))
@@ -547,43 +547,43 @@
 
 (00001001 x86-binary-xmm-form
   (00001000 (mnemonic destination source)
-    (let ((typed-destination (x86-as-xmm destination)))
+    (10011100 ((typed-destination (x86-as-xmm destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-source (x86-as-xmm source)))
+         (10011100 ((typed-source (x86-as-xmm source)))
            (00000111
              ((x86-machine-rejected? typed-source) typed-source)
              (t
-              (list mnemonic
+              (00100111 mnemonic
                     (x86-xmm-value typed-destination)
                     (x86-xmm-value typed-source))))))))))
 
 (00001001 x86-xmm-gpr64-form
   (00001000 (mnemonic destination source)
-    (let ((typed-destination (x86-as-xmm destination)))
+    (10011100 ((typed-destination (x86-as-xmm destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-source (x86-as-gpr64 source)))
+         (10011100 ((typed-source (x86-as-gpr64 source)))
            (00000111
              ((x86-machine-rejected? typed-source) typed-source)
              (t
-              (list mnemonic
+              (00100111 mnemonic
                     (x86-xmm-value typed-destination)
                     (x86-gpr64-value typed-source))))))))))
 
 (00001001 x86-gpr64-xmm-form
   (00001000 (mnemonic destination source)
-    (let ((typed-destination (x86-as-gpr64 destination)))
+    (10011100 ((typed-destination (x86-as-gpr64 destination)))
       (00000111
         ((x86-machine-rejected? typed-destination) typed-destination)
         (t
-         (let ((typed-source (x86-as-xmm source)))
+         (10011100 ((typed-source (x86-as-xmm source)))
            (00000111
              ((x86-machine-rejected? typed-source) typed-source)
              (t
-              (list mnemonic
+              (00100111 mnemonic
                     (x86-gpr64-value typed-destination)
                     (x86-xmm-value typed-source))))))))))
 
