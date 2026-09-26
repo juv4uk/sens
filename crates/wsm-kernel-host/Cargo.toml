@@ -8,4 +8,4 @@ description = "Mechanical lifecycle and opaque-byte transport substrate for auto
 [dependencies]
 
 [dev-dependencies]
-my-lisp = { path = "../my-lisp" }
+sens = { path = "../sens" }

@@ -57,7 +57,7 @@ pub type WsmStopFn = unsafe extern "C" fn(context: *mut c_void) -> WsmStatus;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct WsmKernelRequest {
-    /// Opaque 8-bit semantic primitive identity owned by my-lisp.
+    /// Opaque 8-bit semantic primitive identity owned by sens.
     pub semantic_id: u8,
     pub payload: WsmByteSpan,
 }

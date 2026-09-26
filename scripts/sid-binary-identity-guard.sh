@@ -6,18 +6,18 @@ set -euo pipefail
 # projection boundaries; they must not reappear as normative SID constructors.
 
 files=(
-  crates/my-lisp/src/eval/canon.rs
-  crates/my-lisp/src/eval/necessary_forms.rs
-  crates/my-lisp/src/eval/mod.rs
-  crates/my-lisp/src/eval/closures.rs
-  crates/my-lisp/src/ir.rs
-  crates/my-lisp/src/language_items.rs
-  crates/my-lisp/src/lib.rs
-  crates/my-lisp/src/parser.rs
-  crates/my-lisp/src/presentation.rs
-  crates/my-lisp/src/semantic_registry.rs
-  crates/my-lisp/src/syntax.rs
-  crates/my-lisp/src/value.rs
+  crates/sens/src/eval/canon.rs
+  crates/sens/src/eval/necessary_forms.rs
+  crates/sens/src/eval/mod.rs
+  crates/sens/src/eval/closures.rs
+  crates/sens/src/ir.rs
+  crates/sens/src/language_items.rs
+  crates/sens/src/lib.rs
+  crates/sens/src/parser.rs
+  crates/sens/src/presentation.rs
+  crates/sens/src/semantic_registry.rs
+  crates/sens/src/syntax.rs
+  crates/sens/src/value.rs
 )
 
 fail=0
@@ -49,7 +49,7 @@ report_forbidden \
   '(Value|ExprKind)::Sid\((0b[01_]+|[0-9]+|"[^"]*")\)' \
   "${files[@]}"
 
-direct_sid8="$(grep -REn '(Sid8|Sens8)\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/my-lisp/src \
+direct_sid8="$(grep -REn '(Sid8|Sens8)\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/sens/src \
   --exclude=sid.rs --exclude=sens.rs || true)"
 if [[ -n "$direct_sid8" ]]; then
   printf 'SID-BINARY-IDENTITY violation: direct Sid8/Sens8 constructor outside sid.rs/sens.rs\n%s\n' \

@@ -303,7 +303,7 @@ mod tests {
     fn real_fact_policy_covers_git_clean_and_dirty() {
         let fact = Fact {
             source: "git".into(),
-            subject: "my-lisp".into(),
+            subject: "sens".into(),
             state: "((head abcdef123) (branch main) (dirty clean))".into(),
             error: None,
         };
@@ -313,7 +313,7 @@ mod tests {
 
         let dirty = Fact {
             source: "git".into(),
-            subject: "my-lisp".into(),
+            subject: "sens".into(),
             state: "((head abcdef123) (branch main) (dirty dirty))".into(),
             error: None,
         };
@@ -327,7 +327,7 @@ mod tests {
             FACT_POLICY,
             &Fact {
                 source: "systemd".into(),
-                subject: "my-lisp-oracle".into(),
+                subject: "sens-oracle".into(),
                 state: "((active active))".into(),
                 error: None,
             },
@@ -387,8 +387,8 @@ mod tests {
         // A real git-tracked directory that exists in ANY checkout, not
         // just this one machine -- CARGO_MANIFEST_DIR is wherever this
         // crate was actually built from, which is always inside the
-        // my-lisp repo `git -C` needs. The previous hardcoded
-        // /home/agents/GitHub/my-lisp only existed on the machine that
+        // sens repo `git -C` needs. The previous hardcoded
+        // /home/agents/GitHub/sens only existed on the machine that
         // wrote it, so this test had been silently failing in CI (a
         // different checkout path) since the commit that added it --
         // confirmed via `gh run list` history, not assumed.

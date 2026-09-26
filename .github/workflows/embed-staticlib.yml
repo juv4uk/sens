@@ -3,12 +3,12 @@ name: Canonical embed staticlib
 on:
   pull_request:
     paths:
-      - "crates/my-lisp-embed/**"
+      - "crates/sens-embed/**"
       - ".github/workflows/embed-staticlib.yml"
   push:
     branches: [main]
     paths:
-      - "crates/my-lisp-embed/**"
+      - "crates/sens-embed/**"
       - ".github/workflows/embed-staticlib.yml"
   workflow_dispatch:
 
@@ -23,20 +23,20 @@ jobs:
       - name: Require canonical staticlib artifact contract
         shell: pwsh
         run: |
-          $manifest = Get-Content crates/my-lisp-embed/Cargo.toml -Raw
+          $manifest = Get-Content crates/sens-embed/Cargo.toml -Raw
           if ($manifest -notmatch 'crate-type\s*=\s*\["cdylib",\s*"staticlib",\s*"rlib"\]') {
-            throw 'my-lisp-embed does not yet emit staticlib alongside cdylib/rlib'
+            throw 'sens-embed does not yet emit staticlib alongside cdylib/rlib'
           }
 
       - name: Preserve canonical embed tests
-        run: cargo test --release -p my-lisp-embed
+        run: cargo test --release -p sens-embed
 
       - name: Build canonical embed artifacts and capture Cargo metadata
         shell: pwsh
         run: |
-          $lines = & cargo build --release -p my-lisp-embed --message-format=json-render-diagnostics
+          $lines = & cargo build --release -p sens-embed --message-format=json-render-diagnostics
           if ($LASTEXITCODE -ne 0) {
-            throw 'cargo build failed for my-lisp-embed'
+            throw 'cargo build failed for sens-embed'
           }
 
           $artifacts = @()
@@ -47,12 +47,12 @@ jobs:
             catch {
               continue
             }
-            if ($row.reason -eq 'compiler-artifact' -and $row.target.name -eq 'my_lisp_embed') {
+            if ($row.reason -eq 'compiler-artifact' -and $row.target.name -eq 'sens_embed') {
               $artifacts += $row
             }
           }
           if ($artifacts.Count -eq 0) {
-            throw 'Cargo emitted no compiler-artifact row for my_lisp_embed'
+            throw 'Cargo emitted no compiler-artifact row for sens_embed'
           }
 
           $filenames = @($artifacts | ForEach-Object { $_.filenames } | Sort-Object -Unique)
@@ -79,7 +79,7 @@ jobs:
         env:
           CARGO_TERM_COLOR: never
         run: |
-          $nativeOutput = @(& cargo rustc --release -p my-lisp-embed --lib -- --print native-static-libs 2>&1 | ForEach-Object { "$_" })
+          $nativeOutput = @(& cargo rustc --release -p sens-embed --lib -- --print native-static-libs 2>&1 | ForEach-Object { "$_" })
           $nativeOutput | ForEach-Object { Write-Output $_ }
           if ($LASTEXITCODE -ne 0) {
             throw 'rustc failed while reporting native-static-libs'
@@ -87,7 +87,7 @@ jobs:
 
           $matches = @($nativeOutput | Where-Object { $_ -match 'native-static-libs:\s*(.+)$' })
           if ($matches.Count -eq 0) {
-            throw 'rustc did not report native-static-libs for my-lisp-embed'
+            throw 'rustc did not report native-static-libs for sens-embed'
           }
           $match = [regex]::Match($matches[-1], 'native-static-libs:\s*(.+)$')
           $libs = @($match.Groups[1].Value.Trim() -split '\s+' | Where-Object { $_ })
@@ -100,7 +100,7 @@ jobs:
       - name: Configure native static C consumer
         shell: pwsh
         run: |
-          cmake -S crates/my-lisp-embed/tests/static-consumer -B target/static-consumer `
+          cmake -S crates/sens-embed/tests/static-consumer -B target/static-consumer `
             "-DMY_LISP_EMBED_STATIC=$env:MY_LISP_EMBED_STATIC" `
             "-DMY_LISP_NATIVE_LIBS=$env:MY_LISP_NATIVE_LIBS"
           if ($LASTEXITCODE -ne 0) { throw 'static consumer configure failed' }
@@ -114,5 +114,5 @@ jobs:
       - name: Run native static C consumer
         shell: pwsh
         run: |
-          & .\target\static-consumer\Release\my-lisp-embed-static-consumer.exe
+          & .\target\static-consumer\Release\sens-embed-static-consumer.exe
           if ($LASTEXITCODE -ne 0) { throw "static consumer exited $LASTEXITCODE" }

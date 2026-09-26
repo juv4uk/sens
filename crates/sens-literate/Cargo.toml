@@ -1,0 +1,10 @@
+[package]
+name = "sens-literate"
+version = "0.41.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Literate markdown extraction wrapper for the sens engine"
+
+[dependencies]
+sens = { path = "../sens" }
+pulldown-cmark = "0.12"

@@ -6,7 +6,7 @@
 //! extracts a bounded set of fields (instruction class, XED extension tag,
 //! category, ISA-set grouping, a coarse form count, and one representative
 //! operand descriptor), maps the XED extension tag onto an already-admitted
-//! my-lisp extension name, and emits deterministic Lisp data with a stable
+//! sens extension name, and emits deterministic Lisp data with a stable
 //! digest. It never invents a public semantic ID, never touches the
 //! semantic registry, and fails closed on anything it cannot parse
 //! confidently rather than guessing.
@@ -16,7 +16,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-/// XED extension tag -> already-admitted my-lisp extension name. Every
+/// XED extension tag -> already-admitted sens extension name. Every
 /// value here must already exist as an `(admitted-extension ...)` fact in
 /// lib/machine/cpu/intel-core-i5-6400-inventory.lisp; this table renames
 /// nothing new into existence, it only aligns two pre-existing vocabularies.

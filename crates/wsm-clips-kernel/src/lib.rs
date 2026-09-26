@@ -2,11 +2,11 @@
 //!
 //! This crate owns only mechanical access to the external CLIPS C runtime.
 //! It does not reimplement CLIPS semantics and does not assign meaning to
-//! my-lisp semantic IDs.
+//! sens semantic IDs.
 //!
 //! The default build is runtime-independent. With the `native-clips` feature
 //! enabled, CLIPS is loaded dynamically at runtime rather than linked into the
-//! my-lisp binary. Set `WSM_CLIPS_LIBRARY` to an exact shared-library path,
+//! sens binary. Set `WSM_CLIPS_LIBRARY` to an exact shared-library path,
 //! or let the platform loader try a conventional CLIPS library name.
 
 use std::ffi::c_void;
@@ -395,7 +395,7 @@ mod native {
         pub bytes: Vec<u8>,
     }
 
-    const EVAL_ROUTER_LOGICAL_NAME: &[u8] = b"my-lisp-eval-capture";
+    const EVAL_ROUTER_LOGICAL_NAME: &[u8] = b"sens-eval-capture";
 
     pub unsafe extern "C" fn eval_router_query(
         _environment: *mut Environment,
@@ -429,7 +429,7 @@ mod native {
         #[cfg(windows)]
         {
             if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
-                roots.push(PathBuf::from(local_app_data).join("my-lisp").join("islands").join("clips"));
+                roots.push(PathBuf::from(local_app_data).join("sens").join("islands").join("clips"));
             }
             if let Ok(executable) = std::env::current_exe() {
                 if let Some(parent) = executable.parent() {
@@ -441,13 +441,13 @@ mod native {
         #[cfg(not(windows))]
         {
             if let Some(data_home) = std::env::var_os("XDG_DATA_HOME") {
-                roots.push(PathBuf::from(data_home).join("my-lisp").join("islands").join("clips"));
+                roots.push(PathBuf::from(data_home).join("sens").join("islands").join("clips"));
             } else if let Some(home) = std::env::var_os("HOME") {
                 roots.push(
                     PathBuf::from(home)
                         .join(".local")
                         .join("share")
-                        .join("my-lisp")
+                        .join("sens")
                         .join("islands")
                         .join("clips"),
                 );
@@ -571,11 +571,11 @@ impl ClipsEnvironment {
     ///
     /// Rust never decodes a CLIPS value or reconstructs its semantics.
     pub fn eval_bytes(&self, expression: &str) -> Result<Vec<u8>, ClipsKernelError> {
-        let request = format!("(printout my-lisp-eval-capture {expression})");
+        let request = format!("(printout sens-eval-capture {expression})");
         let request =
             std::ffi::CString::new(request).map_err(|_| ClipsKernelError::NulInput)?;
         let router_name =
-            std::ffi::CString::new("my-lisp-eval-capture").expect("static router name");
+            std::ffi::CString::new("sens-eval-capture").expect("static router name");
         let mut capture = native::RouterCapture { bytes: Vec::new() };
 
         let installed = unsafe {
@@ -663,7 +663,7 @@ impl Drop for ClipsFact {
     }
 }
 
-/// Opaque my-lisp semantic identity. The CLIPS adapter preserves this byte as
+/// Opaque sens semantic identity. The CLIPS adapter preserves this byte as
 /// provenance and never maps it to CLIPS constructs, facts, rules or agenda
 /// operations.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# packaging/install.sh — Canonical installer for my-lisp and all execution islands
+# packaging/install.sh — Canonical installer for sens and all execution islands
 # Автоматично визначає пакетний менеджер і встановлює всі залежності островів.
 set -euo pipefail
 
-echo "==> my-lisp: встановлення інтерпретатора та всіх островів виконання..."
+echo "==> sens: встановлення інтерпретатора та всіх островів виконання..."
 
 OS="$(uname -s)"
 ARCH="$(uname -m)"
@@ -15,11 +15,11 @@ fi
 
 # Перевіряємо платформу до створення каталогів або встановлення пакетів.
 if [ "$OS" = "Linux" ] && [ "$ARCH" = "x86_64" ]; then
-    ASSET_NAME="my-lisp-cli_0.41.0_linux_amd64"
+    ASSET_NAME="sens-cli_0.41.0_linux_amd64"
 elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ]; then
-    ASSET_NAME="my-lisp-cli_0.41.0_macos_arm64"
+    ASSET_NAME="sens-cli_0.41.0_macos_arm64"
 elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "x86_64" ]; then
-    ASSET_NAME="my-lisp-cli_0.41.0_macos_x64"
+    ASSET_NAME="sens-cli_0.41.0_macos_x64"
 else
     echo "Помилка: непідтримувана платформа: $OS $ARCH" >&2
     exit 1
@@ -193,16 +193,17 @@ echo "==> Перевірка/збірка CLIPS 6.4.2..."
 ensure_clips
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Завантаження my-lisp
+# Завантаження sens
 # ──────────────────────────────────────────────────────────────────────────────
 
-MY_LISP_TARGET="${INSTALL_DIR}/my-lisp"
+SENS_TARGET="${INSTALL_DIR}/sens"
+LEGACY_TARGET="${INSTALL_DIR}/my-lisp"
 
 # Оновлюємо саме користувацьку копію, незалежно від старих CLI у PATH.
 # Тимчасовий файл поруч із ціллю дозволяє замінити її одним rename.
-echo "==> Завантаження my-lisp (${ASSET_NAME})..."
-DOWNLOAD_URL="https://github.com/juv4uk/my-lisp/releases/download/l0.41.0/${ASSET_NAME}"
-CLI_TEMP="$(mktemp "${INSTALL_DIR}/.my-lisp.XXXXXX")"
+echo "==> Завантаження sens (${ASSET_NAME})..."
+DOWNLOAD_URL="https://github.com/juv4uk/sens/releases/download/l0.41.0/${ASSET_NAME}"
+CLI_TEMP="$(mktemp "${INSTALL_DIR}/.sens.XXXXXX")"
 trap 'rm -f "$CLI_TEMP"' EXIT
 curl -fL --silent --show-error --connect-timeout 15 --max-time 120 \
     "$DOWNLOAD_URL" -o "$CLI_TEMP"
@@ -210,15 +211,18 @@ test -s "$CLI_TEMP"
 chmod 755 "$CLI_TEMP"
 # Не замінюємо попередній файл, якщо новий CLI навіть не запускається.
 CLI_VERSION="$("$CLI_TEMP" --version)"
-mv -f "$CLI_TEMP" "$MY_LISP_TARGET"
+mv -f "$CLI_TEMP" "$SENS_TARGET"
 trap - EXIT
+# Старе ім'я my-lisp лишається доступним як symlink — зовнішній контракт
+# для наявних викликів не ламається.
+ln -sfn sens "$LEGACY_TARGET"
 export PATH="${INSTALL_DIR}:${PATH}"
 
-EXE="$MY_LISP_TARGET"
-echo "==> my-lisp готовий до роботи: ${CLI_VERSION}"
+EXE="$SENS_TARGET"
+echo "==> sens готовий до роботи: ${CLI_VERSION} (сумісний alias: my-lisp)"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Встановлення решти островів через my-lisp install
+# Встановлення решти островів через sens install
 # (Datalog — embedded; SBCL та SWI-Prolog вже встановлені вище)
 # ──────────────────────────────────────────────────────────────────────────────
 

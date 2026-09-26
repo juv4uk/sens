@@ -1749,7 +1749,7 @@ fn p2p_presence_work_visibility_help_request_offer_and_reconnect() {
     // typed `work-state`).
     let announce = request(
         port_a,
-        "(emit (type work-state) (payload ((node agent-a) (repo my-lisp) (task macro-semantics) (current-action \"auditing eq/macro value roundtrip\") (status working))))",
+        "(emit (type work-state) (payload ((node agent-a) (repo sens) (task macro-semantics) (current-action \"auditing eq/macro value roundtrip\") (status working))))",
     );
     assert!(announce.starts_with("(ok"), "A's work-state announce should succeed: {announce}");
 
@@ -1835,7 +1835,7 @@ fn compaction_preserves_work_state_and_help_requests() {
 
     request(
         port,
-        "(emit (type work-state) (payload ((node compact-node) (repo my-lisp) (task macro-semantics) (status working))))",
+        "(emit (type work-state) (payload ((node compact-node) (repo sens) (task macro-semantics) (status working))))",
     );
     request(
         port,

@@ -18,4 +18,4 @@ wsm-datalog-kernel = { path = "../wsm-datalog-kernel" }
 wsm-kernel-c-abi = { path = "../wsm-kernel-c-abi" }
 
 [dev-dependencies]
-my-lisp = { path = "../my-lisp" }
+sens = { path = "../sens" }

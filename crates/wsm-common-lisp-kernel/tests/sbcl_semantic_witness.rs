@@ -17,7 +17,7 @@ fn integration_enabled() -> bool {
 }
 
 #[test]
-fn common_lisp_car_witness_preserves_my_lisp_semantic_id() {
+fn common_lisp_car_witness_preserves_sens_semantic_id() {
     if !integration_enabled() { return; }
     let kernel = CommonLispKernel::default();
     let request = CommonLispRequest::new(CAR_ID, "(car '(left right))");
@@ -28,7 +28,7 @@ fn common_lisp_car_witness_preserves_my_lisp_semantic_id() {
 }
 
 #[test]
-fn common_lisp_cdr_witness_preserves_my_lisp_semantic_id() {
+fn common_lisp_cdr_witness_preserves_sens_semantic_id() {
     if !integration_enabled() { return; }
     let kernel = CommonLispKernel::default();
     let request = CommonLispRequest::new(CDR_ID, "(cdr '(left right))");
@@ -44,7 +44,7 @@ fn common_lisp_cons_then_car_reproduces_the_car_cons_law_slice() {
     let kernel = CommonLispKernel::default();
 
     // The form exercises CL:CONS and CL:CAR while the externally observed
-    // semantic identity is CAR. my-lisp still owns the car(cons(x,y)) = x law.
+    // semantic identity is CAR. sens still owns the car(cons(x,y)) = x law.
     let request =
         CommonLispRequest::new(CAR_ID, "(car (cons 'left 'right))");
     let result = kernel.evaluate(&request).expect("SBCL must execute witness");

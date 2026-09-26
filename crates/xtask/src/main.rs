@@ -3,13 +3,13 @@
 //!
 //! Hosts documentation/governance/policy checks that were previously
 //! implemented as `cargo test` tests but do not exercise executable
-//! my-lisp behavior (markdown grepping, external script shell-outs,
+//! sens behavior (markdown grepping, external script shell-outs,
 //! contract-metadata text matching). `cargo test` should verify
 //! executable behavior only; this tool verifies everything else.
 //!
 //! Розміщує перевірки документації/врядування/політик, які раніше були
 //! реалізовані як тести `cargo test`, але не перевіряють виконувану
-//! поведінку my-lisp (grep по markdown, виклики зовнішніх скриптів,
+//! поведінку sens (grep по markdown, виклики зовнішніх скриптів,
 //! звірка тексту метаданих контрактів). `cargo test` має перевіряти лише
 //! виконувану поведінку; цей інструмент перевіряє все інше.
 

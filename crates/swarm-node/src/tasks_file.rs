@@ -1,5 +1,5 @@
 //! Reads the ecosystem's durable `tasks.lisp` format (the same dotted-alist
-//! convention `my-lisp`'s `:9999` `sync-tasks`/`sync-milestone` ops read) so
+//! convention `sens`'s `:9999` `sync-tasks`/`sync-milestone` ops read) so
 //! `swarm-node` can absorb the same durable plan files as part of the M0.5
 //! migration off `:9999` for coordination traffic.
 
@@ -177,7 +177,7 @@ mod tests {
     fn recognizes_done_with_evidence_not_just_bare_t() {
         // (done . (t . "who/when/what happened")) is the predominant shape
         // real completed tasks use across this ecosystem's tasks.lisp files
-        // (5 of them in my-lisp's own file alone as of 2026-09-01) -- only
+        // (5 of them in sens's own file alone as of 2026-09-01) -- only
         // the older bare (done . t) had ever been tested here.
         let text = r#"
 ((kind . tasks-my)

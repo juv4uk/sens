@@ -3,10 +3,10 @@ name: Core2 runtime profile
 on:
   pull_request:
     paths:
-      - "crates/my-lisp/src/environment.rs"
-      - "crates/my-lisp/src/eval/special_forms/core.rs"
-      - "crates/my-lisp/src/lib.rs"
-      - "crates/my-lisp/tests/core2_runtime_profile.rs"
+      - "crates/sens/src/environment.rs"
+      - "crates/sens/src/eval/special_forms/core.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/core2_runtime_profile.rs"
       - "lib/core2.lisp"
       - "contracts/core2-profile-contract.lisp"
       - "contracts/core-profile-contract.lisp"
@@ -29,20 +29,20 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Core2 runtime witness
-        run: cargo test -p my-lisp --test core2_runtime_profile
+        run: cargo test -p sens --test core2_runtime_profile
       - name: Core2 authority digest evidence
         shell: bash
         run: |
-          sha256sum crates/my-lisp/src/environment.rs
-          sha256sum crates/my-lisp/src/eval/special_forms/core.rs
-          sha256sum crates/my-lisp/src/lib.rs
-          sha256sum crates/my-lisp/tests/core2_runtime_profile.rs
+          sha256sum crates/sens/src/environment.rs
+          sha256sum crates/sens/src/eval/special_forms/core.rs
+          sha256sum crates/sens/src/lib.rs
+          sha256sum crates/sens/tests/core2_runtime_profile.rs
           grep 'core2-' tests/semantic-authority-reviews.lisp
 
       - name: Core2 Lisp-owned contract witness
         run: |
-          cargo build -p my-lisp-cli --bin my-lisp
-          got="$(./target/debug/my-lisp scripts/check-core2-profile-contract.lisp)"
+          cargo build -p sens-cli --bin my-lisp
+          got="$(./target/debug/sens scripts/check-core2-profile-contract.lisp)"
           printf '%s\n' "$got"
           test "$got" = "(core2-profile-contract-ok)"
       - name: Diff hygiene

@@ -1,7 +1,7 @@
 //! Exact arithmetic AST projection for WSM-5's independent external oracle.
 //!
 //! This layer does not interpret arithmetic by spelling and does not evaluate
-//! my-lisp. It parses one source expression, resolves the operator through the
+//! sens. It parses one source expression, resolves the operator through the
 //! authoritative semantic registry, and projects the exact AST shape into a
 //! Wolfram Language expression. Unsupported input fails closed with stable
 //! codes instead of being approximated.
@@ -18,8 +18,8 @@
 //! versioned `external-oracle/1` request s-expression ready for an external
 //! Wolfram Language host.
 
-use my_lisp::semantic_registry_export::semantic_id_for_admitted_surface;
-use my_lisp::{Exactness, Expr, ExprKind};
+use sens::semantic_registry_export::semantic_id_for_admitted_surface;
+use sens::{Exactness, Expr, ExprKind};
 
 // ── Public corpus types ───────────────────────────────────────────────────────
 
@@ -352,7 +352,7 @@ impl Unsupported {
 
 fn translate_source(source: &str) -> Result<String, Unsupported> {
     let expressions =
-        my_lisp::parse(source).map_err(|_| Unsupported::new("external-oracle/parse"))?;
+        sens::parse(source).map_err(|_| Unsupported::new("external-oracle/parse"))?;
     if expressions.len() != 1 {
         return Err(Unsupported::new("external-oracle/top-level-arity"));
     }
@@ -404,17 +404,17 @@ fn translate_call(items: &[Expr]) -> Result<String, Unsupported> {
         .map(translate_expr)
         .collect::<Result<Vec<_>, _>>()?;
 
-    if semantic_id == my_lisp::sid!(00001100) {
+    if semantic_id == sens::sid!(00001100) {
         Ok(format!("Total[{{{}}}]", translated.join(", ")))
-    } else if semantic_id == my_lisp::sid!(00001101) {
+    } else if semantic_id == sens::sid!(00001101) {
         match translated.as_slice() {
             [] => Err(Unsupported::new("external-oracle/arity")),
             [only] => Ok(format!("Minus[{only}]")),
             _ => Ok(format!("Fold[Subtract, {{{}}}]", translated.join(", "))),
         }
-    } else if semantic_id == my_lisp::sid!(00001110) {
+    } else if semantic_id == sens::sid!(00001110) {
         Ok(format!("Times[{}]", translated.join(", ")))
-    } else if semantic_id == my_lisp::sid!(00001111) {
+    } else if semantic_id == sens::sid!(00001111) {
         match translated.as_slice() {
             [] => Err(Unsupported::new("external-oracle/arity")),
             [only] => Ok(format!("Divide[1, {only}]")),
@@ -433,8 +433,8 @@ mod tests {
         export_fixture, load_corpus, render_request, translate_expr, translate_source,
         verify_response, ExportOutcome, VerifyOutcome,
     };
-    use my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id;
-    use my_lisp::{Exactness, Expr, ExprKind, NumericBuffer, Span};
+    use sens::semantic_registry_export::admitted_surfaces_for_semantic_id;
+    use sens::{Exactness, Expr, ExprKind, NumericBuffer, Span};
     use std::rc::Rc;
 
     // ── AST translation (regression tests) ───────────────────────────────────
@@ -476,10 +476,10 @@ mod tests {
     #[test]
     fn all_admitted_arithmetic_surfaces_project_by_semantic_identity() {
         let cases = [
-            (my_lisp::sid!(00001100), "Total[{8, 2}]"),
-            (my_lisp::sid!(00001101), "Fold[Subtract, {8, 2}]"),
-            (my_lisp::sid!(00001110), "Times[8, 2]"),
-            (my_lisp::sid!(00001111), "Fold[Divide, {8, 2}]"),
+            (sens::sid!(00001100), "Total[{8, 2}]"),
+            (sens::sid!(00001101), "Fold[Subtract, {8, 2}]"),
+            (sens::sid!(00001110), "Times[8, 2]"),
+            (sens::sid!(00001111), "Fold[Divide, {8, 2}]"),
         ];
 
         for (semantic_id, expected) in cases {

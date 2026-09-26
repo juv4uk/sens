@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - lib/utf8.lisp
-      - crates/my-lisp/tests/utf8.rs
+      - crates/sens/tests/utf8.rs
       - .github/workflows/issue-1352-utf8-binary-add.yml
 
 jobs:
@@ -15,6 +15,6 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: UTF-8 semantic regression
-        run: cargo test -p my-lisp --test utf8 -- --nocapture
+        run: cargo test -p sens --test utf8 -- --nocapture
       - name: UTF-8 stack regression
-        run: cargo test -p my-lisp --test utf8_stack -- --nocapture
+        run: cargo test -p sens --test utf8_stack -- --nocapture

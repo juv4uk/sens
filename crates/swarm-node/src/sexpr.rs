@@ -1,5 +1,5 @@
 //! Minimal sexpr reader/writer for the `swarm/1` wire protocol.
-//! Deliberately separate from `my-lisp`'s own reader: this dialect never
+//! Deliberately separate from `sens`'s own reader: this dialect never
 //! needs numbers-as-values, macros, or evaluation — just atoms, strings,
 //! and nested lists, line-framed exactly like the existing `:9999` protocol.
 

@@ -1,9 +1,0 @@
-[package]
-name = "my-lisp-host"
-version = "0.41.0"
-edition = "2021"
-license-file = "../../LICENSE"
-description = "Host capability layer for my-lisp: filesystem, processes, TCP"
-
-[dependencies]
-my-lisp = { path = "../my-lisp" }

@@ -3,12 +3,12 @@ name: Surface Drift Check
 on:
   push:
     paths:
-      - 'lib/core.lisp'   # canonical (my-lisp#81); legacy: lib/core.my
+      - 'lib/core.lisp'   # canonical (sens#81); legacy: lib/core.my
       - 'lib/surface/**'
-      - 'crates/my-lisp/src/eval/builtins.rs'
-      - 'crates/my-lisp/src/language_items.rs'
-      - 'crates/my-lisp-cli/src/repl.rs'
-      - 'crates/my-lisp-cli/src/repl/surface_catalog.rs'
+      - 'crates/sens/src/eval/builtins.rs'
+      - 'crates/sens/src/language_items.rs'
+      - 'crates/sens-cli/src/repl.rs'
+      - 'crates/sens-cli/src/repl/surface_catalog.rs'
       - 'scripts/check_surface_coverage.py'
       - 'scripts/check_trilingual_surface.py'
       - 'scripts/check_semantic_registry.py'
@@ -18,12 +18,12 @@ on:
       - 'docs/adr/ADR-008-NUMERIC-SURFACE-AUTHORITY.md'
   pull_request:
     paths:
-      - 'lib/core.lisp'   # canonical (my-lisp#81); legacy: lib/core.my
+      - 'lib/core.lisp'   # canonical (sens#81); legacy: lib/core.my
       - 'lib/surface/**'
-      - 'crates/my-lisp/src/eval/builtins.rs'
-      - 'crates/my-lisp/src/language_items.rs'
-      - 'crates/my-lisp-cli/src/repl.rs'
-      - 'crates/my-lisp-cli/src/repl/surface_catalog.rs'
+      - 'crates/sens/src/eval/builtins.rs'
+      - 'crates/sens/src/language_items.rs'
+      - 'crates/sens-cli/src/repl.rs'
+      - 'crates/sens-cli/src/repl/surface_catalog.rs'
       - 'scripts/check_surface_coverage.py'
       - 'scripts/check_trilingual_surface.py'
       - 'scripts/check_semantic_registry.py'

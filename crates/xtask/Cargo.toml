@@ -11,6 +11,6 @@ name = "xtask"
 path = "src/main.rs"
 
 [dependencies]
-my-lisp = { path = "../my-lisp" }
+sens = { path = "../sens" }
 
 [dev-dependencies]

@@ -34,13 +34,13 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Build semantic oracle
-        run: cargo build -p my-lisp-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin my-lisp
 
       - name: Verify Core3 route selection
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp scripts/check-core3-profile-contract.lisp)"
+          verdict="$(./target/debug/sens scripts/check-core3-profile-contract.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core3-profile-contract-ok (routes 4) (canon-round-trip pending-992) (clips-result available))"
 

@@ -33,12 +33,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build semantic oracle
-        run: cargo build -p my-lisp-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin my-lisp
       - name: Execute special-form profile policy witness
         shell: bash
         run: |
           set -euo pipefail
-          verdict="$(./target/debug/my-lisp scripts/check-core-special-form-profile-policy.lisp)"
+          verdict="$(./target/debug/sens scripts/check-core-special-form-profile-policy.lisp)"
           printf '%s\n' "$verdict"
           test "$verdict" = "(core-special-form-profile-policy-ok)"
       - name: Diff hygiene

@@ -3,8 +3,8 @@ name: #857 semantic coordinate join witness
 on:
   pull_request:
     paths:
-      - "crates/my-lisp/tests/semantic_coordinate_join.rs"
-      - "crates/my-lisp/tests/semantic_coordinate_join_2.rs"
+      - "crates/sens/tests/semantic_coordinate_join.rs"
+      - "crates/sens/tests/semantic_coordinate_join_2.rs"
       - "contracts/semantic-coordinate-matrix-845.lisp"
       - "contracts/sid-kernel-witness-735.lisp"
       - "tests/fixtures/semantic-coordinate-law-axis-v1.lisp"
@@ -20,5 +20,5 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Prove bounded SIDs join three orthogonal evidence axes
         run: |
-          cargo test -p my-lisp --test semantic_coordinate_join -- --nocapture
-          cargo test -p my-lisp --test semantic_coordinate_join_2 -- --nocapture
+          cargo test -p sens --test semantic_coordinate_join -- --nocapture
+          cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
