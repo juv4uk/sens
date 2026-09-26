@@ -54,8 +54,8 @@ fn a_local_definition_does_not_bind_the_code() {
 #[test]
 fn a_code_without_mechanism_fails_closed() {
     let mut session = core_session();
-    // 10110001 — порожній рядок таблиці функцій.
-    let error = eval_program("(10110001 1)", &mut session).expect_err("empty code must fail");
+    // 11111110 — порожній рядок таблиці функцій (10110001 з #1391 уже зайнятий).
+    let error = eval_program("(11111110 1)", &mut session).expect_err("empty code must fail");
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(error.message.contains("no admitted callable mechanism"));
 }

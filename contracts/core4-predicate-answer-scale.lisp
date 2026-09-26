@@ -116,8 +116,8 @@
   ; Проєкції предикатів Core4 на шкалу. () стоїть вище розрізнення атом/пара,
   ; тому atom? на () відповідає () — «невідомо» (ajñāta).
   ((predicate-projection . core4)
-   (atom? . ((atom (1)) (pair (0)) (empty-list ())))
-   (eq? . ((same (1)) (distinct (0))))
+   (atom? . (((structural-kind atom) (1)) ((structural-kind pair) (0)) ((structural-kind empty-list) ())))
+   (eq? . (((identity-relation same) (1)) ((identity-relation distinct) (0))))
    (runtime-status . answer-functions-installed)
    (answer-functions .
      ((10110001 answer-not)

@@ -83,7 +83,12 @@
     pas-predicates
     (length pas-sections)
     (equal? (map pas-registry-row (pas-field pas-predicates (quote answer-functions)))
-            (pas-field pas-predicates (quote answer-functions)))))
+            (pas-field pas-predicates (quote answer-functions)))
+    ; Runtime відповідає рівно так, як записано в проєкціях контракту.
+    (equal? (list (answer-atom (quote x)) (answer-atom (quote (a))) (answer-atom (quote ())))
+            (map second (pas-field pas-predicates (quote atom?))))
+    (equal? (list (answer-eq (quote a) (quote a)) (answer-eq (quote a) (quote b)))
+            (map second (pas-field pas-predicates (quote eq?))))))
 
 (def pas-expected
   (list
@@ -155,8 +160,8 @@
        (number-carrier . forbidden)))
     (quote
       ((predicate-projection . core4)
-       (atom? . ((atom (1)) (pair (0)) (empty-list ())))
-       (eq? . ((same (1)) (distinct (0))))
+       (atom? . (((structural-kind atom) (1)) ((structural-kind pair) (0)) ((structural-kind empty-list) ())))
+       (eq? . (((identity-relation same) (1)) ((identity-relation distinct) (0))))
        (runtime-status . answer-functions-installed)
        (answer-functions .
          ((10110001 answer-not)
@@ -170,6 +175,8 @@
        (core1 . historical-unchanged-overlay-only)
        (core2 . frozen-compatibility)))
     8
+    (quote (structural-relation same))
+    (quote (structural-relation same))
     (quote (structural-relation same))))
 
 (cond

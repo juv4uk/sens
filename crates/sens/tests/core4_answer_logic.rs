@@ -107,3 +107,23 @@ fn ukrainian_names_reach_the_same_functions() {
     );
     assert_eq!(eval(&mut session, "(відповідь-атом (00000001 ()))"), "()");
 }
+
+#[test]
+fn sens_codes_call_the_answer_functions() {
+    let mut session = session();
+    assert_eq!(eval(&mut session, "(10110001 (00000001 (0 0)))"), "(1 1)");
+    assert_eq!(
+        eval(&mut session, "(10110010 (00000001 (1 1)) (00000001 (0)))"),
+        "(0)"
+    );
+    assert_eq!(
+        eval(&mut session, "(10110011 (00000001 ()) (00000001 (1 1 1)))"),
+        "(1 1 1)"
+    );
+    assert_eq!(eval(&mut session, "(10110100 (00000001 (1)))"), "(1 1)");
+    assert_eq!(eval(&mut session, "(10110101 (00000001 ()))"), "()");
+    assert_eq!(
+        eval(&mut session, "(10110110 (00000001 a) (00000001 b))"),
+        "(0)"
+    );
+}
