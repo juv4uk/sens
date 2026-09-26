@@ -110,10 +110,19 @@ fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
         let ExprKind::List(definition) = &expr.kind else {
             return false;
         };
+        let Some(Expr {
+            kind: ExprKind::Sid(define_sid),
+            ..
+        }) = definition.first()
+        else {
+            return false;
+        };
+        if *define_sid != sens::sens!(00001001) {
+            return false;
+        }
         if !matches!(
-            definition.as_slice(),
-            [Expr { kind: ExprKind::Sid(sid), .. }, Expr { kind: ExprKind::Symbol(name), .. }, ..]
-                if *sid == sens::sens!(00001001) && &**name == "machine-capability-axis-v1"
+            definition.get(1).map(|expr| &expr.kind),
+            Some(ExprKind::Symbol(name)) if &**name == "machine-capability-axis-v1"
         ) {
             return false;
         }
