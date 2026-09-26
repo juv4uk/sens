@@ -81,6 +81,7 @@ pub(crate) fn evaluate_definition(
     // The shared lexical frame makes recursive definitions visible to their closure after binding.
     // Spilnyi leksychnyi freim robyt rekursyvne vyznachennia vydymym zamykanniu pislia zv’yazuvannia.
     // Der gemeinsame lexikalische Frame macht rekursive Definitionen nach der Bindung für ihre Closure sichtbar.
+    canon::bind_language_definition(name, &value, environment);
     environment.define(name.clone(), value.clone());
     Ok(value)
 }
