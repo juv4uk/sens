@@ -49,7 +49,7 @@
             (list (quote value) "(structural-kind empty-list)"))
            ((equal? expr "(00000010 (quote (radio antenna)))")
             (list (quote value) "(structural-kind pair)"))
-           ((string-prefix? "(eq " expr)
+           ((string-prefix? "(00000011 " expr)
             (cond
               ((equal? (cdr expected-entry) "t")
                (list (quote value) "(identity-relation same)"))

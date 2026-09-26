@@ -23,19 +23,19 @@
  (identity . "0002")
  (case . pair))
 
-((expr . "(eq (quote radio) (quote radio))")
+((expr . "(00000011 (quote radio) (quote radio))")
  (expected . "(identity-relation same)")
  (active . t)
  (identity . "0003")
  (case . same-atom))
 
-((expr . "(eq (quote radio) (quote antenna))")
+((expr . "(00000011 (quote radio) (quote antenna))")
  (expected . "(identity-relation distinct)")
  (active . t)
  (identity . "0003")
  (case . distinct-atoms))
 
-((expr . "(eq (quote (radio)) (quote (radio)))")
+((expr . "(00000011 (quote (radio)) (quote (radio)))")
  (error . "Type")
  (active . t)
  (identity . "0003")
@@ -44,37 +44,37 @@
 ; Vector values are atoms at the PRIM_EQ boundary (only Pair is outside the
 ; atom domain). Their recursive Value equality therefore belongs to the same
 ; Lisp-owned identity-relation contract, not to Rust-authored t/() assertions.
-((expr . "(eq (vector 1 2 3) (vector 1 2 3))")
+((expr . "(00000011 (vector 1 2 3) (vector 1 2 3))")
  (expected . "(identity-relation same)")
  (active . t)
  (identity . "0003")
  (case . vector-same-structure))
 
-((expr . "(def v (vector 1 2)) (eq v v)")
+((expr . "(def v (vector 1 2)) (00000011 v v)")
  (expected . "(identity-relation same)")
  (active . t)
  (identity . "0003")
  (case . vector-same-object))
 
-((expr . "(eq (vector 1 2) (vector 1 9))")
+((expr . "(00000011 (vector 1 2) (vector 1 9))")
  (expected . "(identity-relation distinct)")
  (active . t)
  (identity . "0003")
  (case . vector-distinct-element))
 
-((expr . "(eq (vector 1 2) (vector 1))")
+((expr . "(00000011 (vector 1 2) (vector 1))")
  (expected . "(identity-relation distinct)")
  (active . t)
  (identity . "0003")
  (case . vector-distinct-length))
 
-((expr . "(eq (vector) (vector))")
+((expr . "(00000011 (vector) (vector))")
  (expected . "(identity-relation same)")
  (active . t)
  (identity . "0003")
  (case . empty-vectors-same))
 
-((expr . "(eq (vector (list 1 2)) (vector (list 1 2)))")
+((expr . "(00000011 (vector (list 1 2)) (vector (list 1 2)))")
  (expected . "(identity-relation same)")
  (active . t)
  (identity . "0003")
@@ -83,13 +83,13 @@
 ; Typed numeric buffers are also atoms at the PRIM_EQ boundary. Their
 ; representation-specific equality is mechanism, but the meaning of the
 ; observation is still the Lisp-owned identity-relation algebra.
-((expr . "(eq (i32-buffer 1 2) (i32-buffer 1 2))")
+((expr . "(00000011 (i32-buffer 1 2) (i32-buffer 1 2))")
  (expected . "(identity-relation same)")
  (active . t)
  (identity . "0003")
  (case . numeric-buffer-i32-same-values))
 
-((expr . "(eq (i32-buffer 1) (f32-buffer 1))")
+((expr . "(00000011 (i32-buffer 1) (f32-buffer 1))")
  (expected . "(identity-relation distinct)")
  (active . t)
  (identity . "0003")
@@ -98,7 +98,7 @@
 ; F32 buffer equality is bitwise at the mechanism boundary. Signed zeroes have
 ; different binary32 encodings, so EQ reports the ordinary explicit distinct
 ; identity relation rather than a truth sentinel.
-((expr . "(eq #f32(-0.0) #f32(0.0))")
+((expr . "(00000011 #f32(-0.0) #f32(0.0))")
  (expected . "(identity-relation distinct)")
  (active . t)
  (identity . "0003")

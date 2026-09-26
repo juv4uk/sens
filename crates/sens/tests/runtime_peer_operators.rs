@@ -52,6 +52,9 @@ fn assert_same_builtin(left: &Value, right: &Value) {
             Rc::ptr_eq(left, right),
             "peer spellings must point to one builtin allocation"
         ),
+        // Після кроку «Rust лише примітиви» всі написання ведуть до одного
+        // SENS-коду — спільна ідентичність тепер сам 1-байтовий код.
+        (Value::Sid(left), Value::Sid(right)) => assert_eq!(left, right),
         other => panic!("expected builtin peer values, got {other:?}"),
     }
 }
