@@ -123,13 +123,16 @@ fn cargo_workspace_has_no_my_lisp_package_prefix() -> Result<(), String> {
                 in_package = line == "[package]";
                 continue;
             }
-            if !in_package || !line.starts_with("name") {
+            if !in_package {
                 continue;
             }
 
-            let Some((_, raw_value)) = line.split_once('=') else {
+            let Some((raw_key, raw_value)) = line.split_once('=') else {
                 continue;
             };
+            if raw_key.trim() != "name" {
+                continue;
+            }
             let package_name = raw_value.trim().trim_matches('"');
             if package_name.starts_with("my-lisp") {
                 stale_packages.push(format!(
