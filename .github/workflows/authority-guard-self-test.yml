@@ -14,7 +14,7 @@ on:
       - "tests/fixtures/authority-guard/**"
       - "lib/life-1-scheduler.lisp"
       - "tests/fixtures/life-1-scheduler-witness.lisp"
-      - "crates/my-lisp/tests/life_1_scheduler.rs"
+      - "crates/sens/tests/life_1_scheduler.rs"
   push:
     branches: [main]
     paths:
@@ -37,8 +37,8 @@ jobs:
         with:
           shared-key: authority-guard-self-test
 
-      - name: Build my-lisp transport
-        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Build sens transport
+        run: cargo build -p sens-cli --bin sens
 
       - name: Host semantic fixture is accepted
         shell: bash
@@ -48,10 +48,10 @@ jobs:
             '(change "tests/fixtures/authority-guard/forbidden-semantic.rs" modified)' \
             > tests/changed-host-tests.lisp
 
-          ./target/debug/my-lisp scripts/authority-guard.lisp > tests/authority-verdict.lisp
+          ./target/debug/sens scripts/authority-guard.lisp > tests/authority-verdict.lisp
           cat tests/authority-verdict.lisp
           grep -q 'authority-ok' tests/authority-verdict.lisp
-          ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
+          ./target/debug/sens scripts/authority-guard-enforce.lisp
 
       - name: Host mechanism fixture is accepted
         shell: bash
@@ -61,16 +61,16 @@ jobs:
             '(change "tests/fixtures/authority-guard/allowed-mechanism.rs" modified)' \
             > tests/changed-host-tests.lisp
 
-          ./target/debug/my-lisp scripts/authority-guard.lisp > tests/authority-verdict.lisp
+          ./target/debug/sens scripts/authority-guard.lisp > tests/authority-verdict.lisp
           cat tests/authority-verdict.lisp
           grep -q 'authority-ok' tests/authority-verdict.lisp
-          ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
+          ./target/debug/sens scripts/authority-guard-enforce.lisp
 
       - name: Asymmetric semantic firewall fixtures
         shell: bash
         run: |
           set -euo pipefail
-          bash scripts/test-semantic-authority-guard.sh ./target/debug/my-lisp
+          bash scripts/test-semantic-authority-guard.sh ./target/debug/sens
 
       - name: Focused LIFE-1 scheduler witness
-        run: cargo test -p my-lisp --test life_1_scheduler
+        run: cargo test -p sens --test life_1_scheduler

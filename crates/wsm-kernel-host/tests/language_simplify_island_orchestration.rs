@@ -1,10 +1,10 @@
 //! Integration witness for Issue #746 [P0][LANGUAGE-SIMPLIFY-1].
 //!
-//! This witness deliberately uses the real `my-lisp` evaluator for every Lisp
+//! This witness deliberately uses the real `sens` evaluator for every Lisp
 //! operation. Rust owns only mock island drivers plus the mechanical router.
 //! There is no shadow parser, Value model, closure model, or evaluator here.
 
-use my_lisp::{eval_program, load_core_library, Session};
+use sens::{eval_program, load_core_library, Session};
 use wsm_kernel_host::{KernelDriver, KernelHostError, KernelId, KernelRouter};
 
 struct MockDatalogIsland {
@@ -102,27 +102,27 @@ fn escape_lisp_string(value: &str) -> String {
 }
 
 #[test]
-fn real_my_lisp_composes_local_evaluation_with_two_autonomous_island_calls() {
+fn real_sens_composes_local_evaluation_with_two_autonomous_island_calls() {
     let mut router = KernelRouter::new();
     router.register(Box::new(MockDatalogIsland::new()));
     router.register(Box::new(MockPrologIsland::new()));
 
     let mut session = Session::default();
-    load_core_library(&mut session).expect("real my-lisp core library");
+    load_core_library(&mut session).expect("real sens core library");
 
     let local = eval_program(
         "(cons \"query-target\" \"person(alice)\")",
         &mut session,
     )
-    .expect("real my-lisp local evaluation")
+    .expect("real sens local evaluation")
     .value
     .to_string();
 
     let datalog = router
-        .exchange("datalog", b"person(alice)", b"my-lisp-orchestrator")
+        .exchange("datalog", b"person(alice)", b"sens-orchestrator")
         .expect("mechanical Datalog island exchange");
     let prolog = router
-        .exchange("prolog", b"person(alice)", b"my-lisp-orchestrator")
+        .exchange("prolog", b"person(alice)", b"sens-orchestrator")
         .expect("mechanical Prolog island exchange");
 
     let datalog = String::from_utf8(datalog).expect("mock Datalog output is UTF-8");
@@ -138,7 +138,7 @@ fn real_my_lisp_composes_local_evaluation_with_two_autonomous_island_calls() {
     );
 
     let final_value = eval_program(&composition, &mut session)
-        .expect("real my-lisp composes island observations")
+        .expect("real sens composes island observations")
         .value
         .to_string();
 

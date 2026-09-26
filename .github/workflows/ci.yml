@@ -43,14 +43,14 @@ jobs:
             case "$path" in Cargo.toml|Cargo.lock|.cargo/*) workspace=true ;; esac
             case "$path" in .github/workflows/*) workflow=true ;; esac
             case "$path" in *.rs|Cargo.toml|Cargo.lock|crates/*/Cargo.toml) rust=true ;; esac
-            case "$path" in lib/surface/*|lib/generated/meta-semantic-registry.lisp|docs/ukrainian-api.md|docs/generated/public-api-discovery.md|scripts/public_api_inventory.py|scripts/generate-meta-semantic-registry.lisp|scripts/generate-ukrainian-api.py|scripts/перевірити-український-профіль.lisp|machine-lowering-boundary.lisp|repo.lisp|crates/my-lisp/tests/macro_derivation.rs|crates/my-lisp/tests/ukrainian_api_docs.rs|crates/my-lisp/tests/uk_surface_equivalence.rs|crates/my-lisp/tests/public_api_inventory_contract.rs|crates/my-lisp/tests/machine_lowering_boundary.rs) surface=true ;; esac
-            case "$path" in crates/my-lisp/src/*|crates/my-lisp/tests/*|lib/*.lisp|lib/*/*.lisp) case "$path" in lib/surface/*|lib/generated/*) ;; *) core=true ;; esac ;; esac
-            case "$path" in crates/my-lisp/src/value.rs|crates/my-lisp/src/eval/*|crates/my-lisp/src/semantic_registry.rs|crates/my-lisp/src/semantic_registry_generated.rs|lib/evaluator-dispatch.lisp|scripts/generate-rust-evaluator-dispatch.lisp|scripts/generate-rust-semantic-registry.lisp|crates/my-lisp/tests/witness_authority.rs|crates/my-lisp/tests/structural_query_inventory.rs|lib/canon.lisp|lib/core.lisp|lib/core4.lisp|lib/meta-eval.lisp|lib/process.lisp|contracts/*.lisp|tests/fixtures/conformance.lisp|tests/fixtures/*-witness.lisp|my-lisp-constitution.lisp) semantic=true ;; esac
+            case "$path" in lib/surface/*|lib/generated/meta-semantic-registry.lisp|docs/ukrainian-api.md|docs/generated/public-api-discovery.md|scripts/public_api_inventory.py|scripts/generate-meta-semantic-registry.lisp|scripts/generate-ukrainian-api.py|scripts/перевірити-український-профіль.lisp|machine-lowering-boundary.lisp|repo.lisp|crates/sens/tests/macro_derivation.rs|crates/sens/tests/ukrainian_api_docs.rs|crates/sens/tests/uk_surface_equivalence.rs|crates/sens/tests/public_api_inventory_contract.rs|crates/sens/tests/machine_lowering_boundary.rs) surface=true ;; esac
+            case "$path" in crates/sens/src/*|crates/sens/tests/*|lib/*.lisp|lib/*/*.lisp) case "$path" in lib/surface/*|lib/generated/*) ;; *) core=true ;; esac ;; esac
+            case "$path" in crates/sens/src/value.rs|crates/sens/src/eval/*|crates/sens/src/semantic_registry.rs|crates/sens/src/semantic_registry_generated.rs|lib/evaluator-dispatch.lisp|scripts/generate-rust-evaluator-dispatch.lisp|scripts/generate-rust-semantic-registry.lisp|crates/sens/tests/witness_authority.rs|crates/sens/tests/structural_query_inventory.rs|lib/canon.lisp|lib/core.lisp|lib/core4.lisp|lib/meta-eval.lisp|lib/process.lisp|contracts/*.lisp|tests/fixtures/conformance.lisp|tests/fixtures/*-witness.lisp|my-lisp-constitution.lisp) semantic=true ;; esac
             if bash scripts/is-current-semantic-fixture.sh "$path"; then semantic=true; fi
-            case "$path" in crates/my-lisp-host/src/*|crates/my-lisp-host/tests/*) host=true ;; esac
-            case "$path" in crates/my-lisp-cli/src/*|crates/my-lisp-cli/tests/*) cli=true ;; esac
+            case "$path" in crates/sens-host/src/*|crates/sens-host/tests/*) host=true ;; esac
+            case "$path" in crates/sens-cli/src/*|crates/sens-cli/tests/*) cli=true ;; esac
             case "$path" in crates/xtask/src/*|crates/xtask/tests/*) xtask=true ;; esac
-            case "$path" in lib/meta-eval.lisp|lib/reason.lisp|lib/forward.lisp|lib/knowledge.lisp|crates/my-lisp/tests/meta_eval_*|crates/my-lisp/tests/reason_*|crates/my-lisp/tests/reasoning_*) meta=true ;; esac
+            case "$path" in lib/meta-eval.lisp|lib/reason.lisp|lib/forward.lisp|lib/knowledge.lisp|crates/sens/tests/meta_eval_*|crates/sens/tests/reason_*|crates/sens/tests/reasoning_*) meta=true ;; esac
           done < /tmp/changed.txt
           { echo "surface=$surface"; echo "core=$core"; echo "semantic=$semantic"; echo "host=$host"; echo "cli=$cli"; echo "xtask=$xtask"; echo "meta=$meta"; echo "rust=$rust"; echo "workspace=$workspace"; echo "workflow=$workflow"; } | tee -a "$GITHUB_OUTPUT"
 
@@ -87,14 +87,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test -p my-lisp --test postcore_build_definitions_debug -- --nocapture
+          cargo test -p sens --test postcore_build_definitions_debug -- --nocapture
 
       - name: Host semantics freedom compatibility witness
         shell: bash
         run: |
           set -euo pipefail
-          cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
-          cargo build -p my-lisp-cli --bin my-lisp
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo build -p sens-cli --bin sens
           : > tests/changed-host-tests.lisp
           while IFS=$'\t' read -r additions deletions path; do
             case "$path" in
@@ -108,9 +108,9 @@ jobs:
                 ;;
             esac
           done < /tmp/changed-numstat.txt
-          ./target/debug/my-lisp scripts/authority-guard.lisp > tests/authority-verdict.lisp
+          ./target/debug/sens scripts/authority-guard.lisp > tests/authority-verdict.lisp
           cat tests/authority-verdict.lisp
-          ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
+          ./target/debug/sens scripts/authority-guard-enforce.lisp
 
       - name: Asymmetric semantic firewall (host -> Lisp)
         shell: bash
@@ -133,9 +133,9 @@ jobs:
             digest="$(sha256sum "$path" | awk '{print $1}')"
             printf '(changed "%s" "%s")\n' "$path" "$digest" >> tests/semantic-authority-changes.lisp
           done < /tmp/changed.txt
-          ./target/debug/my-lisp scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
+          ./target/debug/sens scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
           cat tests/semantic-authority-verdict.lisp
-          ./target/debug/my-lisp scripts/semantic-authority-guard-enforce.lisp
+          ./target/debug/sens scripts/semantic-authority-guard-enforce.lisp
 
       - name: Upload regenerated core FASL for #771
         uses: actions/upload-artifact@v4
@@ -156,36 +156,36 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./target/debug/my-lisp scripts/check-repo-tooling-inventory.lisp
+          ./target/debug/sens scripts/check-repo-tooling-inventory.lisp
 
       - name: Canon function-table mechanism provenance
         shell: bash
         run: |
           set -euo pipefail
-          ./target/debug/my-lisp scripts/check-function-table-mechanisms.lisp > tests/function-table-mechanisms-verdict.lisp
+          ./target/debug/sens scripts/check-function-table-mechanisms.lisp > tests/function-table-mechanisms-verdict.lisp
           cat tests/function-table-mechanisms-verdict.lisp
-          ./target/debug/my-lisp scripts/enforce-function-table-mechanisms.lisp
+          ./target/debug/sens scripts/enforce-function-table-mechanisms.lisp
 
       - name: Canon-subordinate island math evidence
         shell: bash
         run: |
           set -euo pipefail
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > tests/island-math-evidence-verdict.lisp
+          ./target/debug/sens scripts/check-island-math-evidence.lisp > tests/island-math-evidence-verdict.lisp
           cat tests/island-math-evidence-verdict.lisp
-          ./target/debug/my-lisp scripts/enforce-island-math-evidence.lisp
+          ./target/debug/sens scripts/enforce-island-math-evidence.lisp
 
       - name: Lisp-owned machine non-interference guard
         shell: bash
         run: |
           set -euo pipefail
-          cargo build -p my-lisp-cli --bin my-lisp
+          cargo build -p sens-cli --bin sens
 
           # #150: the admitted authority graph is one-way.
-          ./target/debug/my-lisp scripts/machine-authority-guard.lisp
+          ./target/debug/sens scripts/machine-authority-guard.lisp
 
           cp tests/machine-authority-edges.lisp /tmp/machine-authority-edges.lisp
           cp tests/fixtures/machine-authority/reverse-edge.lisp tests/machine-authority-edges.lisp
-          if ./target/debug/my-lisp scripts/machine-authority-guard.lisp > /tmp/machine-reverse-edge.log 2>&1; then
+          if ./target/debug/sens scripts/machine-authority-guard.lisp > /tmp/machine-reverse-edge.log 2>&1; then
             echo "ERROR: #150 reverse machine->semantic authority edge was accepted"
             exit 1
           fi
@@ -196,7 +196,7 @@ jobs:
           # or the only semantic answer key.
           cp lib/machine/capability-provenance.lisp /tmp/machine-capability-provenance.lisp
           cp tests/fixtures/machine-authority/hybrid-capability.lisp lib/machine/capability-provenance.lisp
-          if ./target/debug/my-lisp scripts/machine-authority-guard.lisp > /tmp/machine-hybrid.log 2>&1; then
+          if ./target/debug/sens scripts/machine-authority-guard.lisp > /tmp/machine-hybrid.log 2>&1; then
             echo "ERROR: #211 machine/native semantic answer key was accepted"
             exit 1
           fi
@@ -204,7 +204,7 @@ jobs:
           cp /tmp/machine-capability-provenance.lisp lib/machine/capability-provenance.lisp
 
           # Same Lisp addition, two admitted register realizations.
-          representation_status="$(./target/debug/my-lisp tests/fixtures/machine-representation-independence-witness.lisp)"
+          representation_status="$(./target/debug/sens tests/fixtures/machine-representation-independence-witness.lisp)"
           if [[ "$representation_status" != "(machine-representation-independence-witness (status pass))" ]]; then
             printf 'machine representation-independence witness failed: %s\n' "$representation_status" >&2
             exit 1
@@ -213,14 +213,14 @@ jobs:
           # Meaning must remain executable when the whole target-specific
           # machine layer is physically absent from the checkout.
           restore_machine_layer() {
-            if [[ -d /tmp/my-lisp-machine-211 ]]; then
-              mv /tmp/my-lisp-machine-211 lib/machine
+            if [[ -d /tmp/sens-machine-211 ]]; then
+              mv /tmp/sens-machine-211 lib/machine
             fi
           }
           trap restore_machine_layer EXIT
-          rm -rf /tmp/my-lisp-machine-211
-          mv lib/machine /tmp/my-lisp-machine-211
-          replaceability_status="$(./target/debug/my-lisp tests/fixtures/machine-replaceability-witness.lisp)"
+          rm -rf /tmp/sens-machine-211
+          mv lib/machine /tmp/sens-machine-211
+          replaceability_status="$(./target/debug/sens tests/fixtures/machine-replaceability-witness.lisp)"
           restore_machine_layer
           trap - EXIT
           if [[ "$replaceability_status" != "(machine-replaceability-witness (status pass))" ]]; then
@@ -241,18 +241,18 @@ jobs:
       - name: Exercise future main fast critical gate
         if: steps.changes.outputs.workflow == 'true'
         run: |
-          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
+          ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           bash scripts/test-current-semantic-slice.sh
-          cargo test -p my-lisp --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
-          cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
-          cargo test -p my-lisp-cli --test cli
+          cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
+          cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
+          cargo test -p sens-cli --test cli
           cargo test -p xtask --test license_policy
           cargo run -p xtask -- verify
 
       - name: Exercise future main fast clippy
         if: steps.changes.outputs.workflow == 'true'
-        run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+        run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
 
       - name: Workspace dependency-graph fallback
         if: steps.changes.outputs.workspace == 'true'
@@ -263,9 +263,9 @@ jobs:
       - name: Check generated semantic registry
         if: (steps.changes.outputs.surface == 'true' || steps.changes.outputs.semantic == 'true') && steps.changes.outputs.workspace != 'true'
         run: |
-          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
-          ./target/debug/my-lisp scripts/generate-rust-semantic-registry.lisp --check
-          ./target/debug/my-lisp scripts/generate-rust-evaluator-dispatch.lisp --check
+          ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
+          ./target/debug/sens scripts/generate-rust-semantic-registry.lisp --check
+          ./target/debug/sens scripts/generate-rust-evaluator-dispatch.lisp --check
 
       - name: Check public API discovery projection
         if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
@@ -277,9 +277,9 @@ jobs:
         run: |
           set -euo pipefail
           tests=(macro_derivation ukrainian_api_docs uk_surface_equivalence public_api_inventory_contract machine_noninterference_contract)
-          if [[ -f crates/my-lisp/tests/machine_lowering_boundary.rs ]]; then tests+=(machine_lowering_boundary); fi
+          if [[ -f crates/sens/tests/machine_lowering_boundary.rs ]]; then tests+=(machine_lowering_boundary); fi
           args=(); for test_name in "${tests[@]}"; do args+=(--test "$test_name"); done
-          cargo test -p my-lisp "${args[@]}"
+          cargo test -p sens "${args[@]}"
 
       - name: Current Lisp-owned semantic slice
         if: steps.changes.outputs.semantic == 'true' && steps.changes.outputs.workspace != 'true'
@@ -287,15 +287,15 @@ jobs:
 
       - name: Core language package tests
         if: steps.changes.outputs.core == 'true' && steps.changes.outputs.surface != 'true' && steps.changes.outputs.semantic != 'true' && steps.changes.outputs.workspace != 'true'
-        run: cargo test -p my-lisp
+        run: cargo test -p sens
 
       - name: Native host vertical witness
         if: steps.changes.outputs.host == 'true' && steps.changes.outputs.workspace != 'true'
-        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+        run: cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
 
       - name: CLI black-box tests
         if: (steps.changes.outputs.cli == 'true' || steps.changes.outputs.surface == 'true') && steps.changes.outputs.workspace != 'true'
-        run: cargo test -p my-lisp-cli --test cli
+        run: cargo test -p sens-cli --test cli
 
       - name: xtask policy tests
         if: (steps.changes.outputs.xtask == 'true' || steps.changes.outputs.surface == 'true') && steps.changes.outputs.workspace != 'true'
@@ -310,11 +310,11 @@ jobs:
 
       - name: Focused Advice Taker witness
         if: steps.changes.outputs.meta == 'true' && steps.changes.outputs.workspace != 'true'
-        run: cargo test --profile ci-meta -p my-lisp --test meta_eval_advice_taker advice_taker_native_and_meta_preserve_expected_outcome_classes -- --ignored --nocapture
+        run: cargo test --profile ci-meta -p sens --test meta_eval_advice_taker advice_taker_native_and_meta_preserve_expected_outcome_classes -- --ignored --nocapture
 
       - name: Clippy changed Rust surfaces
         if: steps.changes.outputs.rust == 'true' && steps.changes.outputs.workspace != 'true'
-        run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+        run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
 
   island-math-adversarial:
     name: island math adversarial matrix
@@ -328,7 +328,7 @@ jobs:
         with:
           shared-key: island-math-adversarial
       - name: Build Lisp checker runtime
-        run: cargo build -p my-lisp-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin sens
       - name: Canon-subordinate island math adversarial matrix
         shell: bash
         run: |
@@ -338,19 +338,19 @@ jobs:
           trap restore_evidence EXIT
 
           cp tests/fixtures/island-math-evidence/unadmitted-route.lisp lib/island-math-evidence.lisp
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-unadmitted.lisp
+          ./target/debug/sens scripts/check-island-math-evidence.lisp > /tmp/island-math-unadmitted.lisp
           grep -q 'executor-route-not-admitted-by-canon-projection' /tmp/island-math-unadmitted.lisp
 
           cp tests/fixtures/island-math-evidence/unsupported-executor.lisp lib/island-math-evidence.lisp
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-executor.lisp
+          ./target/debug/sens scripts/check-island-math-evidence.lisp > /tmp/island-math-executor.lisp
           grep -q 'unsupported-executor' /tmp/island-math-executor.lisp
 
           cp tests/fixtures/island-math-evidence/duplicate-route.lisp lib/island-math-evidence.lisp
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-duplicate.lisp
+          ./target/debug/sens scripts/check-island-math-evidence.lisp > /tmp/island-math-duplicate.lisp
           grep -q 'duplicate-executor-evidence' /tmp/island-math-duplicate.lisp
 
           cp tests/fixtures/island-math-evidence/semantic-field-leak.lisp lib/island-math-evidence.lisp
-          ./target/debug/my-lisp scripts/check-island-math-evidence.lisp > /tmp/island-math-semantic-leak.lisp
+          ./target/debug/sens scripts/check-island-math-evidence.lisp > /tmp/island-math-semantic-leak.lisp
           grep -q 'semantic-field-forbidden' /tmp/island-math-semantic-leak.lisp
 
           restore_evidence
@@ -369,11 +369,11 @@ jobs:
         with:
           shared-key: windows-native-exec-witness
       - name: Windows guest-ABI witness (sysv64 vs win64)
-        run: cargo test -p my-lisp-host --test windows_native_exec_abi
+        run: cargo test -p sens-host --test windows_native_exec_abi
       - name: Native CPU vertical witnesses on Windows
-        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
-      - name: Clippy my-lisp-host on Windows
-        run: cargo clippy -p my-lisp-host --all-targets -- -D warnings
+        run: cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
+      - name: Clippy sens-host on Windows
+        run: cargo clippy -p sens-host --all-targets -- -D warnings
 
   main-fast-critical:
     name: main fast critical gate
@@ -388,8 +388,8 @@ jobs:
           shared-key: main-fast-critical
       - name: Generated authority projections
         run: |
-          cargo build -p my-lisp-cli --bin my-lisp
-          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
+          cargo build -p sens-cli --bin sens
+          ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           cargo run -p xtask -- import-xed-evidence --check
           cargo run -p xtask -- generate-encoder-coverage --check
@@ -397,24 +397,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo build -p my-lisp-cli --bin my-lisp
-          ./target/debug/my-lisp scripts/machine-authority-guard.lisp
+          cargo build -p sens-cli --bin sens
+          ./target/debug/sens scripts/machine-authority-guard.lisp
 
-          representation_status="$(./target/debug/my-lisp tests/fixtures/machine-representation-independence-witness.lisp)"
+          representation_status="$(./target/debug/sens tests/fixtures/machine-representation-independence-witness.lisp)"
           if [[ "$representation_status" != "(machine-representation-independence-witness (status pass))" ]]; then
             printf 'machine representation-independence witness failed: %s\n' "$representation_status" >&2
             exit 1
           fi
 
           restore_machine_layer() {
-            if [[ -d /tmp/my-lisp-machine-211 ]]; then
-              mv /tmp/my-lisp-machine-211 lib/machine
+            if [[ -d /tmp/sens-machine-211 ]]; then
+              mv /tmp/sens-machine-211 lib/machine
             fi
           }
           trap restore_machine_layer EXIT
-          rm -rf /tmp/my-lisp-machine-211
-          mv lib/machine /tmp/my-lisp-machine-211
-          replaceability_status="$(./target/debug/my-lisp tests/fixtures/machine-replaceability-witness.lisp)"
+          rm -rf /tmp/sens-machine-211
+          mv lib/machine /tmp/sens-machine-211
+          replaceability_status="$(./target/debug/sens tests/fixtures/machine-replaceability-witness.lisp)"
           restore_machine_layer
           trap - EXIT
           if [[ "$replaceability_status" != "(machine-replaceability-witness (status pass))" ]]; then
@@ -424,11 +424,11 @@ jobs:
       - name: Current Lisp-owned semantic witnesses
         run: bash scripts/test-current-semantic-slice.sh
       - name: Critical machine and surface witnesses
-        run: cargo test -p my-lisp --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
+        run: cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
       - name: Native CPU vertical witnesses
-        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+        run: cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
       - name: CLI smoke
-        run: cargo test -p my-lisp-cli --test cli
+        run: cargo test -p sens-cli --test cli
       - name: Governance and policy checks
         run: |
           cargo test -p xtask --test license_policy
@@ -447,4 +447,4 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: main-fast-clippy
-      - run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+      - run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings

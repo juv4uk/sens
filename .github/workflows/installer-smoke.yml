@@ -5,14 +5,14 @@ on:
     paths:
       - 'packaging/install.sh'
       - 'packaging/tests/**'
-      - 'crates/my-lisp-cli/Cargo.toml'
+      - 'crates/sens-cli/Cargo.toml'
       - '.github/workflows/installer-smoke.yml'
   push:
     branches: [main]
     paths:
       - 'packaging/install.sh'
       - 'packaging/tests/**'
-      - 'crates/my-lisp-cli/Cargo.toml'
+      - 'crates/sens-cli/Cargo.toml'
       - '.github/workflows/installer-smoke.yml'
   workflow_dispatch:
 

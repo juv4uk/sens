@@ -111,7 +111,7 @@ fn run_python(script: &str, args: &[&str], label: &str) -> Result<(), String> {
     }
 }
 
-// --- ported from crates/my-lisp/tests/meta_eval_evidence_matrix.rs ---
+// --- ported from crates/sens/tests/meta_eval_evidence_matrix.rs ---
 
 fn meta_eval_evidence_matrix() -> Result<(), String> {
     let script = concat!(
@@ -133,7 +133,7 @@ fn meta_eval_human_evidence_projection() -> Result<(), String> {
     )
 }
 
-// --- ported from crates/my-lisp/tests/semantic_ownership.rs ---
+// --- ported from crates/sens/tests/semantic_ownership.rs ---
 
 fn semantic_ownership_map_in_sync() -> Result<(), String> {
     let script = concat!(
@@ -143,7 +143,7 @@ fn semantic_ownership_map_in_sync() -> Result<(), String> {
     run_python(script, &["--check"], "semantic ownership checker")
 }
 
-// --- ported from crates/my-lisp/tests/documentation_contract.rs ---
+// --- ported from crates/sens/tests/documentation_contract.rs ---
 
 fn public_docs_share_current_project_identity_and_extension() -> Result<(), String> {
     let readme = include_str!("../../../README.md");
@@ -176,7 +176,7 @@ fn public_docs_share_current_project_identity_and_extension() -> Result<(), Stri
         if !states_lisp_canonical || !states_others_legacy_aliases {
             return Err(format!(
                 "{doc_name}: public architecture prose must state `.lisp` as the canonical \
-                 extension and `.wsm`/`.my` as legacy aliases (per my-lisp#81)"
+                 extension and `.wsm`/`.my` as legacy aliases (per sens#81)"
             ));
         }
     }
@@ -215,7 +215,7 @@ fn public_docs_point_to_semantic_authority() -> Result<(), String> {
 fn host_semantic_surface_documentation_tracks_time_ownership() -> Result<(), String> {
     let hss = include_str!("../../../docs/host-semantic-surface.md");
     let time = include_str!("../../../lib/time.lisp");
-    let builtins = include_str!("../../my-lisp/src/eval/builtins.rs");
+    let builtins = include_str!("../../sens/src/eval/builtins.rs");
 
     let mut problems = Vec::new();
     if !hss.contains("mono-ns") {
@@ -260,7 +260,7 @@ fn agent_onboarding_records_removed_coordination_surface() -> Result<(), String>
 
     let mut problems = Vec::new();
     for needle in [
-        "my-lisp :9999",
+        "sens :9999",
         "swarm-node :910x",
         "Стара coordination surface на `:9999` фізично видалена",
         "мають повертати `unknown op`",
@@ -291,7 +291,7 @@ fn agent_onboarding_records_removed_coordination_surface() -> Result<(), String>
     }
 }
 
-// --- ported from crates/my-lisp/tests/swarm_deprecation.rs ---
+// --- ported from crates/sens/tests/swarm_deprecation.rs ---
 
 fn current_agent_authority_records_removed_legacy_coordination() -> Result<(), String> {
     let agent_guide = include_str!("../../../AGENTS.md");
@@ -301,7 +301,7 @@ fn current_agent_authority_records_removed_legacy_coordination() -> Result<(), S
         "`swarm-node`",
         "Стара coordination surface на `:9999` фізично видалена",
         "мають повертати `unknown op`",
-        "my-lisp :9999",
+        "sens :9999",
         "swarm-node :910x",
     ] {
         if !agent_guide.contains(needle) {
@@ -319,7 +319,7 @@ fn human_migration_doc_keeps_semantic_and_coordination_planes_separate() -> Resu
     let mesh_doc = include_str!("../../../docs/swarm-mesh-v2.md");
     let mut problems = Vec::new();
     for needle in [
-        "my-lisp :9999",
+        "sens :9999",
         "swarm-node :910x",
         "no longer the\ncoordination path going forward",
         "semantic oracle",
@@ -335,7 +335,7 @@ fn human_migration_doc_keeps_semantic_and_coordination_planes_separate() -> Resu
     }
 }
 
-// --- ported from crates/my-lisp/tests/meta_eval_error_detail_boundary.rs ---
+// --- ported from crates/sens/tests/meta_eval_error_detail_boundary.rs ---
 
 fn s2_explicitly_contracts_category_not_error_wording() -> Result<(), String> {
     let axioms = include_str!("../../../docs/language-core-axioms.md");
@@ -343,7 +343,7 @@ fn s2_explicitly_contracts_category_not_error_wording() -> Result<(), String> {
         return Err("S2 must state the error-detail boundary explicitly".to_string());
     }
 
-    let error_source = include_str!("../../my-lisp/src/error.rs");
+    let error_source = include_str!("../../sens/src/error.rs");
     if !error_source.contains("non-contractual: `kind` is what S2 ratifies") {
         return Err(
             "the reference error type must keep the contractual axis explicit".to_string(),
@@ -352,7 +352,7 @@ fn s2_explicitly_contracts_category_not_error_wording() -> Result<(), String> {
     Ok(())
 }
 
-// --- ported from crates/my-lisp/tests/ukrainian_api_docs.rs ---
+// --- ported from crates/sens/tests/ukrainian_api_docs.rs ---
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -362,11 +362,11 @@ const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const NAME_AUDIT: &str = include_str!("../../../lib/surface/uk-name-audit.lisp");
 
 fn stable_pairs() -> BTreeSet<(String, String)> {
-    my_lisp::semantic_registry_export::admitted_semantic_ids()
+    sens::semantic_registry_export::admitted_semantic_ids()
         .into_iter()
         .filter_map(|semantic_id| {
-            let identity = my_lisp::semantic_registry_export::semantic_id_bits(semantic_id);
-            my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
+            let identity = sens::semantic_registry_export::semantic_id_bits(semantic_id);
+            sens::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
                 .into_iter()
                 .find(|surface| surface.namespace == "ук")
                 .map(|surface| (identity, surface.name.to_string()))
@@ -578,8 +578,8 @@ fn stari_nazvy_smystovoho_audytu_lyshaiutsia_aliasamy_sumisnosti() -> Result<(),
     Ok(())
 }
 
-// --- ported from crates/my-lisp/tests/uk_surface_equivalence.rs and
-// crates/my-lisp/tests/ukrainska_programa_pryimannya.rs: keyboard/text-policy
+// --- ported from crates/sens/tests/uk_surface_equivalence.rs and
+// crates/sens/tests/ukrainska_programa_pryimannya.rs: keyboard/text-policy
 // lints, not semantic mutation tests (TEST-ARCHITECTURE-1 step 4). ---
 
 const UK_ACCEPTANCE: &str = include_str!("../../../lib/surface/uk-acceptance.lisp");
@@ -587,9 +587,9 @@ const RIVNOPRAVNIST_UK: &str = include_str!("../../../tests/fixtures/rivnopravni
 
 fn en_uk_names_needing_uk_layout_check() -> Vec<String> {
     let mut names = Vec::new();
-    for semantic_id in my_lisp::semantic_registry_export::admitted_semantic_ids() {
+    for semantic_id in sens::semantic_registry_export::admitted_semantic_ids() {
         let surfaces =
-            my_lisp::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id);
+            sens::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id);
         if let Some(uk) = surfaces
             .iter()
             .find(|surface| surface.namespace == "ук")

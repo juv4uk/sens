@@ -21,22 +21,22 @@ jobs:
         run: |
           python3 - <<'PY'
           import os, pathlib, tomllib
-          package = tomllib.loads(pathlib.Path("crates/my-lisp-cli/Cargo.toml").read_text())["package"]
+          package = tomllib.loads(pathlib.Path("crates/sens-cli/Cargo.toml").read_text())["package"]
           assert os.environ["RELEASE_TAG"] == "l" + package["version"], "tag/package version mismatch"
           PY
           python3 -m unittest discover -s packaging/tests -v
       - name: Узгодженість версій усіх релізних crates
-        run: cargo test --locked -p my-lisp-lsp --test release_parity
+        run: cargo test --locked -p sens-lsp --test release_parity
       - name: translation boundary regression
-        run: cargo test -p my-lisp --test translation_boundary
+        run: cargo test -p sens --test translation_boundary
       - name: Ukrainian/Sanskrit surface regression
-        run: cargo test -p my-lisp --test uk_sa_surface
+        run: cargo test -p sens --test uk_sa_surface
       - name: island installer CLI
-        run: cargo test -p my-lisp-cli --test islands_cli
+        run: cargo test -p sens-cli --test islands_cli
       - name: release asset contract
-        run: cargo test -p my-lisp-cli --test islands_release_asset
+        run: cargo test -p sens-cli --test islands_release_asset
       - name: focused release clippy
-        run: cargo clippy -p my-lisp -p my-lisp-cli --all-targets -- -D warnings
+        run: cargo clippy -p sens -p sens-cli --all-targets -- -D warnings
 
 
   create-release:
@@ -135,7 +135,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-cli:
-    name: my-lisp-cli · ${{ matrix.os }}
+    name: sens-cli · ${{ matrix.os }}
     needs: create-release
     runs-on: ${{ matrix.os }}
     strategy:
@@ -144,19 +144,19 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: my-lisp
+            artifact_name: sens
             asset_suffix: linux_amd64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: my-lisp.exe
+            artifact_name: sens.exe
             asset_suffix: windows_x64
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact_name: my-lisp
+            artifact_name: sens
             asset_suffix: macos_x64
           - os: macos-latest
             target: aarch64-apple-darwin
-            artifact_name: my-lisp
+            artifact_name: sens
             asset_suffix: macos_arm64
 
     steps:
@@ -170,7 +170,7 @@ jobs:
           shared-key: cli-${{ matrix.target }}
 
       - name: Build
-        run: cargo build --release -p my-lisp-cli --target ${{ matrix.target }}
+        run: cargo build --release -p sens-cli --target ${{ matrix.target }}
 
       - name: Rename binary
         shell: bash
@@ -178,9 +178,9 @@ jobs:
           VERSION=${GITHUB_REF_NAME#l}
           SRC="target/${{ matrix.target }}/release/${{ matrix.artifact_name }}"
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            DST="my-lisp-cli_${VERSION}_${{ matrix.asset_suffix }}.exe"
+            DST="sens-cli_${VERSION}_${{ matrix.asset_suffix }}.exe"
           else
-            DST="my-lisp-cli_${VERSION}_${{ matrix.asset_suffix }}"
+            DST="sens-cli_${VERSION}_${{ matrix.asset_suffix }}"
           fi
           mv "$SRC" "$DST"
           echo "ASSET_PATH=$DST" >> "$GITHUB_ENV"
@@ -195,7 +195,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-msi:
-    name: my-lisp-cli · Windows MSI installer
+    name: sens-cli · Windows MSI installer
     needs: create-release
     runs-on: windows-latest
     steps:
@@ -209,7 +209,7 @@ jobs:
           shared-key: cli-x86_64-pc-windows-msvc
 
       - name: Build
-        run: cargo build --release -p my-lisp-cli --target x86_64-pc-windows-msvc
+        run: cargo build --release -p sens-cli --target x86_64-pc-windows-msvc
 
       - name: Install WiX
         shell: pwsh
@@ -227,14 +227,14 @@ jobs:
             -arch x64 `
             -D "ProductVersion=$VERSION" `
             -D "BinDir=target\x86_64-pc-windows-msvc\release" `
-            -out "my-lisp-cli_${VERSION}_windows_x64.msi" `
-            packaging/windows/my-lisp.wxs
-          if (-not (Test-Path "my-lisp-cli_${VERSION}_windows_x64.msi")) { throw 'MSI was not produced.' }
+            -out "sens-cli_${VERSION}_windows_x64.msi" `
+            packaging/windows/sens.wxs
+          if (-not (Test-Path "sens-cli_${VERSION}_windows_x64.msi")) { throw 'MSI was not produced.' }
 
       - name: Upload
         uses: softprops/action-gh-release@v1
         with:
-          files: my-lisp-cli_*_windows_x64.msi
+          files: sens-cli_*_windows_x64.msi
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
         env:
@@ -258,17 +258,17 @@ jobs:
           version: 'v0.15.0'
 
       - name: Build the WASM bindings
-        run: wasm-pack build crates/my-lisp-wasm --target web --out-dir ../../public/wasm
+        run: wasm-pack build crates/sens-wasm --target web --out-dir ../../public/wasm
 
       - name: Bundle the standalone HTML
         run: |
-          node scripts/make-portable-web.mjs public/my-lisp-cli-web.html my-lisp-cli-web.html
-          test -s my-lisp-cli-web.html
+          node scripts/make-portable-web.mjs public/sens-cli-web.html sens-cli-web.html
+          test -s sens-cli-web.html
 
       - name: Upload
         uses: softprops/action-gh-release@v1
         with:
-          files: my-lisp-cli-web.html
+          files: sens-cli-web.html
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
         env:

@@ -34,22 +34,22 @@ jobs:
           shared-key: release-preflight
 
       - name: Версійна паритетність релізних crates
-        run: cargo test --locked -p my-lisp-lsp --test release_parity
+        run: cargo test --locked -p sens-lsp --test release_parity
 
       - name: Ізольовані перевірки інсталятора
         run: python3 -m unittest discover -s packaging/tests -p test_install.py -v
 
       - name: translation boundary regression
-        run: cargo test --locked -p my-lisp --test translation_boundary
+        run: cargo test --locked -p sens --test translation_boundary
 
       - name: Ukrainian/Sanskrit surface regression
-        run: cargo test --locked -p my-lisp --test uk_sa_surface
+        run: cargo test --locked -p sens --test uk_sa_surface
 
       - name: island installer CLI
-        run: cargo test --locked -p my-lisp-cli --test islands_cli
+        run: cargo test --locked -p sens-cli --test islands_cli
 
       - name: release asset contract
-        run: cargo test --locked -p my-lisp-cli --test islands_release_asset
+        run: cargo test --locked -p sens-cli --test islands_release_asset
 
       - name: focused release clippy
-        run: cargo clippy -p my-lisp -p my-lisp-cli --all-targets -- -D warnings
+        run: cargo clippy -p sens -p sens-cli --all-targets -- -D warnings

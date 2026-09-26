@@ -9,8 +9,8 @@ files=(
   language-contract.lisp
   docs/language-core.md
   README.md
-  crates/my-lisp/src/sid.rs
-  crates/my-lisp/src/parser.rs
+  crates/sens/src/sid.rs
+  crates/sens/src/parser.rs
   lib/macro.lisp
 )
 
@@ -46,7 +46,7 @@ for pattern in "${forbidden[@]}"; do
 done
 
 # Reader sugar must materialize the eight-bit head directly.
-grep -Fq 'ExprKind::Sid(crate::sid!(00000001))' crates/my-lisp/src/parser.rs || {
+grep -Fq 'ExprKind::Sid(crate::sid!(00000001))' crates/sens/src/parser.rs || {
   echo 'SID8-ONLY violation: apostrophe reader no longer emits SID 00000001 directly' >&2
   failed=1
 }

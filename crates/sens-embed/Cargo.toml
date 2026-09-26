@@ -1,0 +1,12 @@
+[package]
+name = "sens-embed"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "Canonical stateful sens C ABI embedding boundary"
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+sens = { path = "../sens" }

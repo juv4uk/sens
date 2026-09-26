@@ -1,0 +1,25 @@
+[package]
+name = "sens-wasm"
+version = "0.41.0"
+edition = "2021"
+license-file = "../../LICENSE"
+description = "WebAssembly bindings for the sens engine · WASM-прив'язки до рушія sens · WebAssembly-Bindungen für die sens-Engine"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+sens = { path = "../sens" }
+sens-literate = { path = "../sens-literate" }
+sens-lsp = { path = "../sens-lsp" }
+wasm-bindgen = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+
+# Release profile (opt-level = "z", lto = true) is defined at the workspace root.
+# Профіль release визначено в корені workspace.
+# Release-Profil ist im Workspace-Root definiert.

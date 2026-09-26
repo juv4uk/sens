@@ -1,7 +1,7 @@
 ; scripts/build-constitution.lisp — regenerate my-lisp-constitution.lisp from
-; its real sources of truth, written in my-lisp itself (2026-08-09,
+; its real sources of truth, written in sens itself (2026-08-09,
 ; replacing the old Python version now that both real blockers are gone:
-; tests/fixtures/conformance.lisp is native my-lisp data, readable via
+; tests/fixtures/conformance.lisp is native sens data, readable via
 ; read-file/read-all with no JSON parser needed, and `print` now escapes
 ; strings correctly, so a plain (print value) call is enough to emit
 ; correct, re-readable .lisp output — no string-append needed either.
@@ -13,10 +13,10 @@
 ; file; edit tests/fixtures/conformance.lisp (or this script's own
 ; PRINCIPLES/AXIOMS text below), then rerun this script:
 ;
-;   cargo run -p my-lisp-cli -- scripts/build-constitution.lisp > my-lisp-constitution.lisp
+;   cargo run -p sens-cli -- scripts/build-constitution.lisp > my-lisp-constitution.lisp
 ;
 ; The CLI always echoes the final expression's value after the print
-; transcript (see crates/my-lisp-cli/tests/cli.rs) — this script ends with
+; transcript (see crates/sens-cli/tests/cli.rs) — this script ends with
 ; a bare '() for exactly that reason, so the echoed extra line is a
 ; harmless "()" a reader can skip, not a duplicated fixture.
 
@@ -26,7 +26,7 @@
 
 (print (cons (quote status) "draft — not yet ratified; will become read-only once ratified"))
 
-(print (cons (quote generated) "This file is GENERATED — do not hand-edit it. It is a projection over tests/fixtures/conformance.lisp (facts and tags in one record) plus this script's own principle/axiom text. Edit tests/fixtures/conformance.lisp or scripts/build-constitution.lisp, then run: cargo run -p my-lisp-cli -- scripts/build-constitution.lisp > my-lisp-constitution.lisp . Written as my-lisp data, not JSON: readable directly via (read-all (read-file \"my-lisp-constitution.lisp\")), no foreign parser needed — the same reason conformance.lisp itself moved off JSON."))
+(print (cons (quote generated) "This file is GENERATED — do not hand-edit it. It is a projection over tests/fixtures/conformance.lisp (facts and tags in one record) plus this script's own principle/axiom text. Edit tests/fixtures/conformance.lisp or scripts/build-constitution.lisp, then run: cargo run -p sens-cli -- scripts/build-constitution.lisp > my-lisp-constitution.lisp . Written as sens data, not JSON: readable directly via (read-all (read-file \"my-lisp-constitution.lisp\")), no foreign parser needed — the same reason conformance.lisp itself moved off JSON."))
 
 (print (cons (quote self-contained) "principles and axioms below are the canonical one-line statements from docs/language-core-axioms.md, kept here so this file can be read and understood on its own; docs/language-core-axioms.md remains the single source of the full prose rationale, examples, and open questions — not duplicated here, to avoid two sources of truth for the same wording drifting apart"))
 
@@ -38,7 +38,7 @@
 (print (list (quote principle) 1 "Write about possibilities, not limitations." "Писати про можливості, не про обмеження."))
 (print (list (quote principle) 2 "Be Lisp in the full sense of the word — homoiconicity and a minimal, closed core that grows the rest of the language from inside itself, not the surface syntax of any one historical dialect." "Бути Lisp-ом у повному розумінні цього слова — гомоіконність і мінімальне, замкнене ядро, що вирощує решту мови зсередини себе, не поверхневий синтаксис якогось одного історичного діалекту."))
 (print (list (quote principle) 3 "Build the reasoning machine — McCarthy's documented 1958 Advice Taker goal, extended by the author's own hybrid neural/symbolic vision (private/lisp-to-knowledge.md)." "Реалізувати розумну машину — задокументована ціль МакКарті 1958 року (Advice Taker), продовжена власним гібридним нейро-символьним баченням автора (private/lisp-to-knowledge.md)."))
-(print (list (quote principle) 4 "Cross-platform-ness, or more simply: universality — the falsifiability test for G6/G7; my-lisp commits to real, physically different substrates (Rust, fpga-lisp), not just one implementation asserting conformance." "Кросплатформеність, або простіше — універсальність — тест на фальсифіковність для G6/G7; my-lisp зобов'язується перед реально різними фізичними субстратами (Rust, fpga-lisp), не лише однією реалізацією, що заявляє конформність."))
+(print (list (quote principle) 4 "Cross-platform-ness, or more simply: universality — the falsifiability test for G6/G7; sens commits to real, physically different substrates (Rust, fpga-lisp), not just one implementation asserting conformance." "Кросплатформеність, або простіше — універсальність — тест на фальсифіковність для G6/G7; sens зобов'язується перед реально різними фізичними субстратами (Rust, fpga-lisp), не лише однією реалізацією, що заявляє конформність."))
 (print (list (quote principle) 5 "Maximum awareness of today's technology, applied to symbolic AI — classical symbolic AI is not a museum piece; modern tooling and modern LLMs (as the fuzzy natural-language interface, not a competitor to the precise symbolic core) are part of building it." "Максимальна обізнаність у сьогоднішніх технологіях, застосована до символьного ШІ — класичний символьний AI не музейний експонат; сучасні інструменти й сучасні LLM (як нечіткий інтерфейс природної мови, не конкурент точному символьному ядру) — частина його побудови."))
 
 (print (list (quote axiom) (quote G1) (quote generative) "A value's meaning can be fully defined by observable behavior." "Значення value може бути повністю визначене спостережуваною поведінкою."))
@@ -55,7 +55,7 @@
 
 (print (list (quote tier) 1 "CORE SEMANTICS — every conforming implementation must have this"))
 (print (list (quote tier) 2 "LANGUAGE CONTRACT — every conforming implementation must have this"))
-(print (list (quote tier) 3 "ECOSYSTEM CONFORMANCE — an implementation can be my-lisp without this loaded yet; tests a library, not the language itself"))
+(print (list (quote tier) 3 "ECOSYSTEM CONFORMANCE — an implementation can be sens without this loaded yet; tests a library, not the language itself"))
 
 (def print-fixture
   (lambda (fixture)

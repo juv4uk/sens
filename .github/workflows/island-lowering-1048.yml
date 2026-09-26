@@ -22,12 +22,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build CLI
-        run: cargo build -p my-lisp-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin sens
       - name: Execute lowering witness
         shell: bash
         run: |
           set -euo pipefail
-          got="$(./target/debug/my-lisp tests/fixtures/island-lowering-1048-witness.lisp)"
+          got="$(./target/debug/sens tests/fixtures/island-lowering-1048-witness.lisp)"
           printf '%s\n' "$got"
           test "$got" = "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))"
       - name: Diff hygiene

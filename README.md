@@ -10,7 +10,7 @@
 
 *Lisp був початковим синтаксичним носієм і прототипом. СЕНС є сутнісним онтологічним ядром: 256 чистих функцій `00000000..11111111` без рядкових імен у рантаймі, із симетричними людськими проєкціями (укр / en / sa / sym).*
 
-<p><a href="https://github.com/juv4uk/sens/releases/latest/download/my-lisp-cli-web.html"><strong>▶ Спробувати sens у вебі</strong></a></p>
+<p><a href="https://github.com/juv4uk/sens/releases/latest/download/sens-cli-web.html"><strong>▶ Спробувати sens у вебі</strong></a></p>
 <sub>Один автономний portable-файл <code>.html</code> · без встановлення · працює локально у браузері</sub>
 
 [![CI](https://github.com/juv4uk/sens/actions/workflows/ci.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/ci.yml)
@@ -27,7 +27,7 @@
 
 `sens` (СЕНС) — фундаментальна онтологічна мова обчислення з точно визначеним 8-бітним простором функцій, точною арифметикою, виконуваними законами та архіпелагом незалежних execution kernels.
 
-Історично проєкт розвивався під робочою назвою `my-lisp`, де Lisp слугував початковим синтаксичним носієм і середовищем прототипування. У ході еволюції відбувся якісний онтологічний зсув: синтаксичний носій поступився місцем сутнісному ядру. Мова більше не залежить від текстових назв функцій чи конкретного діалекту — вона складається з 256 точних 8-бітних функцій-сенсів (`00000000..11111111`), над якими люди взаємодіють через симетричні мовні проєкції (українську, англійську, санскрит, символьну).
+Історично проєкт розвивався під робочою назвою `sens`, де Lisp слугував початковим синтаксичним носієм і середовищем прототипування. У ході еволюції відбувся якісний онтологічний зсув: синтаксичний носій поступився місцем сутнісному ядру. Мова більше не залежить від текстових назв функцій чи конкретного діалекту — вона складається з 256 точних 8-бітних функцій-сенсів (`00000000..11111111`), над якими люди взаємодіють через симетричні мовні проєкції (українську, англійську, санскрит, символьну).
 
 Головний архітектурний принцип:
 
@@ -372,11 +372,11 @@ Lisp/sens-визначена інтерпретація / політика / п�
 Різні реалізації потрібні не для того, щоб копіювати одну архітектуру, а щоб **ламати приховані припущення одна одної**.
 
 - [`crates/sens`](crates/sens) — канонічний Rust crate мови sens (Sens, Sens8, sens! macro);
-- [`crates/my-lisp`](crates/my-lisp) — референсний Rust runtime (перехідний сумісний шар);
-- [`crates/my-lisp-cli`](crates/my-lisp-cli) — CLI, REPL і semantic oracle (sens-oracle);
-- [`crates/my-lisp-wasm`](crates/my-lisp-wasm) — WebAssembly;
-- [`crates/my-lisp-lsp`](crates/my-lisp-lsp) — LSP;
-- [`crates/my-lisp-host`](crates/my-lisp-host) — явна межа OS capabilities;
+- [`crates/sens`](crates/sens) — референсний Rust runtime (перехідний сумісний шар);
+- [`crates/sens-cli`](crates/sens-cli) — CLI, REPL і semantic oracle (sens-oracle);
+- [`crates/sens-wasm`](crates/sens-wasm) — WebAssembly;
+- [`crates/sens-lsp`](crates/sens-lsp) — LSP;
+- [`crates/sens-host`](crates/sens-host) — явна межа OS capabilities;
 - [`c-runtime/`](c-runtime/) — C + x86_64 substrate;
 - [`racket/`](racket/) — `#lang sens` для Racket/DrRacket;
 - [`juv4uk/cml`](https://github.com/juv4uk/cml) — AOT / heterogeneous compiler напрям;
@@ -391,11 +391,11 @@ Lisp/sens-визначена інтерпретація / політика / п�
 Потрібні Rust toolchain і залежності workspace. У репозиторії також є Guix manifest для відтворюваного середовища.
 
 ```bash
-# REPL (через sens або my-lisp-cli)
-cargo run -p sens --example repl # або: cargo run -p my-lisp-cli
+# REPL (через sens або sens-cli)
+cargo run -p sens --example repl # або: cargo run -p sens-cli
 
 # виконати файл
-cargo run -p my-lisp-cli -- path/to/file.lisp
+cargo run -p sens-cli -- path/to/file.lisp
 
 # повний workspace
 cargo test --workspace
@@ -403,7 +403,7 @@ cargo build --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Канонічне розширення вихідного коду — **`.lisp`** (згідно з [my-lisp#81](https://github.com/juv4uk/sens/issues/81)). **`.wsm`** і **`.my`** лишаються повністю підтримуваними legacy aliases.
+Канонічне розширення вихідного коду — **`.lisp`** (згідно з [sens#81](https://github.com/juv4uk/sens/issues/81)). **`.wsm`** і **`.my`** лишаються повністю підтримуваними legacy aliases.
 
 ---
 

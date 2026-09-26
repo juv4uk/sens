@@ -2,7 +2,7 @@
 //!
 //! This crate deliberately has no universal result enum and performs no
 //! cross-kernel reconstruction. Each field is owned by the kernel that
-//! produced it. The artifact only keeps the four domains adjacent so my-lisp
+//! produced it. The artifact only keeps the four domains adjacent so sens
 //! can observe/relate them later without replacing their native shapes.
 
 use wsm_clips_kernel::ClipsExecutionResult;

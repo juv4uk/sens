@@ -1,6 +1,6 @@
 //! Independent Common Lisp execution kernel.
 //!
-//! my-lisp owns semantic identities and laws. This crate owns only process
+//! sens owns semantic identities and laws. This crate owns only process
 //! execution against a real Common Lisp implementation and preserves the
 //! caller-provided 8-bit semantic identity as opaque provenance.
 //!
@@ -17,7 +17,7 @@ use wsm_kernel_c_abi::{
     WSM_KERNEL_ABI_VERSION,
 };
 
-/// Opaque my-lisp experimental semantic identity.
+/// Opaque sens experimental semantic identity.
 ///
 /// This crate deliberately does not attach meaning to the byte.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

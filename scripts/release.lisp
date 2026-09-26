@@ -1,4 +1,4 @@
-; Випуск підготовленого snapshot: my-lisp scripts/release.lisp 0.41.0
+; Випуск підготовленого snapshot: sens scripts/release.lisp 0.41.0
 ; Версії семи Cargo.toml, Cargo.lock та packaging/install.sh оновлюються в PR.
 ; Скрипт перевіряє чистий checkout, відповідність origin/main, версії та
 ; зелений CI цього SHA. Не комітить файли й не пересуває наявні теги.
@@ -44,7 +44,7 @@
   (release-run "git" (quote ("log" "-1" "--pretty=format:%H" "HEAD")))
   (release-run "git" (quote ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
 (release-run "cargo"
-  (quote ("run" "--release" "--locked" "-p" "my-lisp-cli" "--bin" "gen-fasl"
+  (quote ("run" "--release" "--locked" "-p" "sens-cli" "--bin" "gen-fasl"
           "--" "lib/core4.lisp" "lib/core4.lisp.fasl")))
 (def release-fasl-diff-status
   (car (process-run "git" (quote ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
@@ -78,10 +78,10 @@
           (release-check-manifests (cdr paths))))))))
 
 (release-check-manifests
-  (quote ("crates/my-lisp/Cargo.toml" "crates/my-lisp-cli/Cargo.toml"
-          "crates/my-lisp-literate/Cargo.toml" "crates/my-lisp-wasm/Cargo.toml"
-          "crates/my-lisp-lsp/Cargo.toml" "crates/my-lisp-host/Cargo.toml"
-          "crates/my-lisp-semantic/Cargo.toml")))
+  (quote ("crates/sens/Cargo.toml" "crates/sens-cli/Cargo.toml"
+          "crates/sens-literate/Cargo.toml" "crates/sens-wasm/Cargo.toml"
+          "crates/sens-lsp/Cargo.toml" "crates/sens-host/Cargo.toml"
+          "crates/sens-semantic/Cargo.toml")))
 ; pretty=format дає SHA без кінцевого newline.
 (release-require "Потрібен успішний CI для точного HEAD на main"
   (release-run "timeout"

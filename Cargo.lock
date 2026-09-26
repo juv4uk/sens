@@ -207,75 +207,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "my-lisp"
-version = "0.41.0"
-dependencies = [
- "my-lisp-host",
-]
-
-[[package]]
-name = "my-lisp-cli"
-version = "0.41.0"
-dependencies = [
- "my-lisp",
- "my-lisp-host",
- "my-lisp-lsp",
- "rustyline",
- "serde",
- "serde_json",
- "wsm-guard-core",
-]
-
-[[package]]
-name = "my-lisp-embed"
-version = "0.1.0"
-dependencies = [
- "my-lisp",
-]
-
-[[package]]
-name = "my-lisp-host"
-version = "0.41.0"
-dependencies = [
- "my-lisp",
-]
-
-[[package]]
-name = "my-lisp-literate"
-version = "0.41.0"
-dependencies = [
- "my-lisp",
- "pulldown-cmark",
-]
-
-[[package]]
-name = "my-lisp-lsp"
-version = "0.41.0"
-dependencies = [
- "my-lisp",
-]
-
-[[package]]
-name = "my-lisp-semantic"
-version = "0.41.0"
-dependencies = [
- "my-lisp",
-]
-
-[[package]]
-name = "my-lisp-wasm"
-version = "0.41.0"
-dependencies = [
- "my-lisp",
- "my-lisp-literate",
- "my-lisp-lsp",
- "serde",
- "serde-wasm-bindgen",
- "wasm-bindgen",
- "wasm-bindgen-test",
-]
-
-[[package]]
 name = "nibble_vec"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -428,6 +359,75 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "sens"
+version = "0.41.0"
+dependencies = [
+ "sens-host",
+]
+
+[[package]]
+name = "sens-cli"
+version = "0.41.0"
+dependencies = [
+ "rustyline",
+ "sens",
+ "sens-host",
+ "sens-lsp",
+ "serde",
+ "serde_json",
+ "wsm-guard-core",
+]
+
+[[package]]
+name = "sens-embed"
+version = "0.1.0"
+dependencies = [
+ "sens",
+]
+
+[[package]]
+name = "sens-host"
+version = "0.41.0"
+dependencies = [
+ "sens",
+]
+
+[[package]]
+name = "sens-literate"
+version = "0.41.0"
+dependencies = [
+ "pulldown-cmark",
+ "sens",
+]
+
+[[package]]
+name = "sens-lsp"
+version = "0.41.0"
+dependencies = [
+ "sens",
+]
+
+[[package]]
+name = "sens-semantic"
+version = "0.41.0"
+dependencies = [
+ "sens",
+]
+
+[[package]]
+name = "sens-wasm"
+version = "0.41.0"
+dependencies = [
+ "sens",
+ "sens-literate",
+ "sens-lsp",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
+ "wasm-bindgen-test",
 ]
 
 [[package]]
@@ -784,7 +784,7 @@ dependencies = [
 name = "wsm-guard-core"
 version = "0.1.0"
 dependencies = [
- "my-lisp",
+ "sens",
 ]
 
 [[package]]
@@ -809,14 +809,14 @@ version = "0.1.0"
 name = "wsm-kernel-host"
 version = "0.1.0"
 dependencies = [
- "my-lisp",
+ "sens",
 ]
 
 [[package]]
 name = "wsm-native-result-types"
 version = "0.1.0"
 dependencies = [
- "my-lisp",
+ "sens",
  "wsm-clips-kernel",
  "wsm-common-lisp-kernel",
  "wsm-datalog-kernel",
@@ -836,7 +836,7 @@ dependencies = [
 name = "xtask"
 version = "0.1.0"
 dependencies = [
- "my-lisp",
+ "sens",
 ]
 
 [[package]]

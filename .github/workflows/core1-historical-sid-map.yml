@@ -16,7 +16,7 @@ jobs:
     name: SID authority maps one-way to 1960s mechanisms
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout my-lisp authority
+      - name: Checkout sens authority
         uses: actions/checkout@v5
 
       - name: Checkout pinned historical mechanism repository
@@ -88,9 +88,9 @@ jobs:
 
           for name in label apply appq evcon evlis function funarg; do
             if grep -F -q "(en $name)" "$registry"; then
-              echo "historical support mechanism unexpectedly has a my-lisp EN identity: $name" >&2
+              echo "historical support mechanism unexpectedly has a sens EN identity: $name" >&2
               exit 1
             fi
           done
 
-          echo "historical support remains mechanism-only; SID authority stays in my-lisp"
+          echo "historical support remains mechanism-only; SID authority stays in sens"

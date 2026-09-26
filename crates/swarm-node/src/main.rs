@@ -1,6 +1,6 @@
 //! swarm-node — see docs/swarm-mesh-v2.md.
 //!
-//! A separate binary from `my-lisp`'s `:9999` semantic oracle: this is the
+//! A separate binary from `sens`'s `:9999` semantic oracle: this is the
 //! *coordination plane*, not the *semantic plane*. M0.1: persistent event
 //! journal, node-id + epoch, peer handshake, sequence numbers, anti-entropy
 //! sync, deterministic derived state from replayed events. M0.2: quorum
@@ -975,7 +975,7 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
                         ]),
                         Sexp::list(vec![
                             Sexp::atom("swarm-id"),
-                            Sexp::atom("my-lisp-ecosystem"),
+                            Sexp::atom("sens-ecosystem"),
                         ]),
                         Sexp::list(vec![Sexp::atom("protocol"), Sexp::atom("swarm/1")]),
                         Sexp::list(vec![

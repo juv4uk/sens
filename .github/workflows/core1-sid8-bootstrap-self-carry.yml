@@ -11,7 +11,7 @@ jobs:
   core1-sid8-self-carry:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout my-lisp
+      - name: Checkout sens
         uses: actions/checkout@v5
 
       - name: Guard historical Core1 source is untouched

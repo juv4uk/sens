@@ -16,7 +16,7 @@ jobs:
     name: Core1 executes pinned Lisp compiler seed
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout my-lisp Core1
+      - name: Checkout sens Core1
         uses: actions/checkout@v5
 
       - name: Checkout typed-SID8 S0
@@ -33,7 +33,7 @@ jobs:
           repository: juv4uk/wsm-my-lisp
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           ssh-key: ${{ secrets.WSM_MY_LISP_DEPLOY_KEY }}
-          path: .core1-s2/wsm-my-lisp
+          path: .core1-s2/wsm-sens
 
       - name: Build typed-SID8 S0
         working-directory: .core1-s2/mccarthy-eval
@@ -53,7 +53,7 @@ jobs:
           (C1-EVAL-PROGRAM-THEN
             (QUOTE (
           LISP
-              sed '/^[[:space:]]*;/d' .core1-s2/wsm-my-lisp/lib/compiler.lisp
+              sed '/^[[:space:]]*;/d' .core1-s2/wsm-sens/lib/compiler.lisp
               cat <<'LISP'
             ))
           LISP
@@ -84,7 +84,7 @@ jobs:
           build_core1_probe sid-direct-identity '(C1-PRIMITIVE-IDENTITY 00000100)'
           build_core1_probe sid-unsupported-call '(C1-EVAL (QUOTE (11111111 (QUOTE A))) NIL NIL)'
 
-          sha256sum .core1-s2/wsm-my-lisp/lib/compiler.lisp
+          sha256sum .core1-s2/wsm-sens/lib/compiler.lisp
           sha256sum lib/core1.lisp
 
       - name: Require zero-copy compiler execution parity
