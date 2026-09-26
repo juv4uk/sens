@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
           ref: 1ae9745b66a1439c1929b0d9038c680567118a58
           path: .core1-historical/mccarthy-eval
 
