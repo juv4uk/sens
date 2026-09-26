@@ -250,6 +250,7 @@ jobs:
           cargo test -p sens-cli --test cli
           cargo test -p xtask --test license_policy
           cargo run -p xtask -- verify
+          cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
 
       - name: Exercise future main fast clippy
         if: steps.changes.outputs.workflow == 'true'
@@ -308,6 +309,7 @@ jobs:
           cargo test -p xtask --test encoder_coverage_cli
           cargo test -p xtask --test license_policy
           cargo run -p xtask -- verify
+          cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
           cargo run -p xtask -- import-xed-evidence --check
           cargo run -p xtask -- generate-encoder-coverage --check
 
@@ -436,6 +438,7 @@ jobs:
         run: |
           cargo test -p xtask --test license_policy
           cargo run -p xtask -- verify
+          cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
 
   main-fast-clippy:
     name: main fast clippy
