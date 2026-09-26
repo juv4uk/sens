@@ -9,7 +9,7 @@
    (law-source . "lib/core1.lisp")
    (law-source-git-blob . "00b54cfab977b03be8ecaeea9c4734941325fa29")
    (identity-source . "contracts/core1-historical-sid-map.lisp")
-   (identity-source-git-blob . "9edb8c2e658e0e0dd6f6972536f29bf8bcad432a")
+   (identity-source-git-blob . "4a537bff20d10b721e817d5bddd5a17c62cefdd3")
    (semantic-authority . my-lisp)
    (compiler-mechanism . cml))
 
