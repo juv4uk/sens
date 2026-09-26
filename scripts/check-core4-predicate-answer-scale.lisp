@@ -19,6 +19,16 @@
 (def pas-carrier (nth 6 pas-sections))
 (def pas-predicates (nth 7 pas-sections))
 
+; Таблиця функцій: рядок (код (en ім'я) (ук …) …).
+(def pas-registry
+  (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
+
+; (код ім'я) з контракту -> (код ім'я-з-таблиці-функцій).
+(def pas-registry-row
+  (lambda (entry)
+    (list (car entry)
+          (second (assoc (quote en) (cdr (assoc (car entry) pas-registry)))))))
+
 (def pas-no-levels (pas-field pas-no (quote levels)))
 (def pas-yes-levels (pas-field pas-yes (quote levels)))
 (def pas-terms (pas-field pas-terminology (quote terms)))
@@ -71,7 +81,9 @@
     (pas-field pas-algebra (quote and-or-cond-law))
     pas-carrier
     pas-predicates
-    (length pas-sections)))
+    (length pas-sections)
+    (equal? (map pas-registry-row (pas-field pas-predicates (quote answer-functions)))
+            (pas-field pas-predicates (quote answer-functions)))))
 
 (def pas-expected
   (list
@@ -145,11 +157,20 @@
       ((predicate-projection . core4)
        (atom? . ((atom (1)) (pair (0)) (empty-list ())))
        (eq? . ((same (1)) (distinct (0))))
-       (runtime-status . not-yet-installed)
+       (runtime-status . answer-functions-installed)
+       (answer-functions .
+         ((10110001 answer-not)
+          (10110010 answer-and)
+          (10110011 answer-or)
+          (10110100 answer-weaken)
+          (10110101 answer-atom)
+          (10110110 answer-eq)))
+       (record-predicates . unchanged-callers-migrate-by-file)
        (core1-core3-answer-domain . grade-1-only)
        (core1 . historical-unchanged-overlay-only)
        (core2 . frozen-compatibility)))
-    8))
+    8
+    (quote (structural-relation same))))
 
 (cond
   ((equal? pas-observed pas-expected)
