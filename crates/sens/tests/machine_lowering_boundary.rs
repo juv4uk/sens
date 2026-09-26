@@ -40,11 +40,11 @@ fn vertical_machine_boundary_separates_semantics_isa_optimization_and_host() {
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
 
     for required in [
-        "(semantic-authority sens)",
+        "(semantic-authority my-lisp)",
         "(isa-authority hardware-specification)",
         "(isa-source intel-xed/intel-sdm)",
-        "(isa-representation sens)",
-        "(instruction-encoding sens)",
+        "(isa-representation my-lisp)",
+        "(instruction-encoding my-lisp)",
         "(optimization-authority cml)",
         "(semantic-id-from-isa forbidden)",
         "(raw-execution-mechanism host)",

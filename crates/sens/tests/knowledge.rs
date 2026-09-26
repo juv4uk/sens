@@ -484,7 +484,7 @@ fn advise_all_detects_a_conflict_activated_across_existing_and_new_knowledge() {
 fn knowledge_package_constructor_has_the_versioned_interchange_shape() {
     assert_eq!(
         eval_knowledge("(make-knowledge-package (quote astronomy) (quote (((planet earth)))))"),
-        "((format . sens-knowledge) (version 0 1) (module . astronomy) (clauses ((planet earth))))"
+        "((format . my-lisp-knowledge) (version 0 1) (module . astronomy) (clauses ((planet earth))))"
     );
 }
 
@@ -492,7 +492,7 @@ fn knowledge_package_constructor_has_the_versioned_interchange_shape() {
 fn import_knowledge_package_atomically_installs_valid_data() {
     let source = r#"
         (def package
-          (quote ((format . sens-knowledge)
+          (quote ((format . my-lisp-knowledge)
             (version 0 1)
             (module . astronomy)
             (clauses . (((planet earth))
@@ -507,7 +507,7 @@ fn import_knowledge_package_atomically_installs_valid_data() {
 fn import_knowledge_package_rejects_an_unsupported_version_without_writing() {
     let source = r#"
         (def package
-          (quote ((format . sens-knowledge)
+          (quote ((format . my-lisp-knowledge)
             (version 1 0)
             (module . astronomy)
             (clauses . (((planet earth)))))))
@@ -523,13 +523,13 @@ fn import_knowledge_package_rejects_an_unsupported_version_without_writing() {
 #[test]
 fn import_knowledge_package_rejects_a_malformed_envelope_without_writing() {
     let source = r#"
-        (def package (quote ((format . sens-knowledge) broken-entry)))
+        (def package (quote ((format . my-lisp-knowledge) broken-entry)))
         (list (knowledge-package-decision package)
               (reason-in (quote astronomy) (quote (planet earth))))
     "#;
     assert_eq!(
         eval_knowledge(source),
-        "((rejected (reason invalid-package) (input ((format . sens-knowledge) broken-entry))) Module-not-found)"
+        "((rejected (reason invalid-package) (input ((format . my-lisp-knowledge) broken-entry))) Module-not-found)"
     );
 }
 
@@ -545,7 +545,7 @@ fn import_knowledge_file_reads_the_data_only_example() {
 
 #[test]
 fn write_knowledge_package_round_trips_through_file_import() {
-    let path = std::env::temp_dir().join("sens-knowledge-package.lisp");
+    let path = std::env::temp_dir().join("my-lisp-knowledge-package.lisp");
     let path_str = path.to_str().unwrap().replace('\\', "/");
     let source = format!(
         r#"

@@ -300,7 +300,7 @@ fn eq_sid_joins_relation_sens_and_compare_capability() {
 
     assert!(math.contains("same-atom-identity"));
     assert_eq!(machine, "((identity-compare bounded-u64))");
-    assert_eq!(kernels, vec![("sens".into(), "live".into())]);
+    assert_eq!(kernels, vec![("my-lisp".into(), "live".into())]);
 }
 
 #[test]
@@ -320,7 +320,7 @@ fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
         machine,
         "((pair-field-store head bounded-u64) (pair-field-store tail bounded-u64))"
     );
-    assert!(kernels.contains(&("sens".into(), "live".into())));
+    assert!(kernels.contains(&("my-lisp".into(), "live".into())));
     assert!(kernels.contains(&("common-lisp".into(), "integration-gated".into())));
     assert_eq!(kernels.len(), 2);
 }
@@ -340,7 +340,7 @@ fn cond_sid_keeps_negative_math_evidence_and_absent_external_kernels_visible() {
     assert!(math.contains("non-mathematical-in-this-slice"));
     assert!(math.contains("no-mathematical-law-claimed"));
     assert_eq!(machine, "((conditional-branch bounded-u64))");
-    assert!(kernels.contains(&("sens".into(), "live".into())));
+    assert!(kernels.contains(&("my-lisp".into(), "live".into())));
     assert!(kernels.contains(&("prolog".into(), "absent".into())));
     assert!(kernels.contains(&("clips".into(), "absent".into())));
     assert_eq!(kernels.len(), 3);

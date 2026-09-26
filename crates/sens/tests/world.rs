@@ -305,7 +305,7 @@ fn package_import_compatibility_wrapper_preserves_journal_on_rejection() {
             r#"
             (def before *knowledge-journal*)
             (def package
-              (quote ((format . sens-knowledge)
+              (quote ((format . my-lisp-knowledge)
                 (version 99 0)
                 (module . space)
                 (clauses . (((planet earth)))))))
@@ -691,7 +691,7 @@ fn world_package_import_rejects_unsupported_versions_without_transition() {
             (def result
               (import-knowledge-package-world
                 before
-                (quote ((format . sens-knowledge)
+                (quote ((format . my-lisp-knowledge)
                   (version 1 0)
                   (module . astronomy)
                   (clauses . (((planet earth))))))))

@@ -120,7 +120,7 @@ fn send_knowledge_package_transmits_one_canonical_expression_then_eof() {
     eval_program(&source, &mut session).unwrap();
     assert_eq!(
         server.join().unwrap(),
-        "((format . sens-knowledge) (version 0 1) (module . exchange) (clauses ((planet earth)) ((has-mass (var x)) (planet (var x)))))"
+        "((format . my-lisp-knowledge) (version 0 1) (module . exchange) (clauses ((planet earth)) ((has-mass (var x)) (planet (var x)))))"
     );
 }
 
@@ -144,7 +144,7 @@ fn receive_knowledge_package_drains_chunks_and_atomically_imports() {
             .value
             .to_string()
     });
-    let payload = b"((format . sens-knowledge) (version 0 1) (module . exchange) (clauses . (((planet earth)) ((has-mass (var x)) (planet (var x))))))";
+    let payload = b"((format . my-lisp-knowledge) (version 0 1) (module . exchange) (clauses . (((planet earth)) ((has-mass (var x)) (planet (var x))))))";
     let mut stream = loop {
         match TcpStream::connect(("127.0.0.1", port)) {
             Ok(stream) => break stream,
