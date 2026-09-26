@@ -7,10 +7,11 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable contracts and Canon** — these are executable, not prose:
-   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — the numeric semantic-ID registry; the single source of truth for which spellings (en/uk/sa/sym) mean which semantic identity.
-   - `crates/my-lisp/src/eval/canon.rs` / `necessary_forms.rs` — Canon 0+7 and DEFINE/LAMBDA evaluator meaning, keyed only by numeric semantic ID.
+   - [`language-contract.lisp`](language-contract.lisp) — Contract 9.0: the complete function-identity space is exactly the 256 eight-bit SENS values `00000000..11111111`; human spellings are never identities.
+   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — source/UI routing metadata from optional spellings (`en`/`uk`/`ukr`/`sa`/`sym`) to an already-existing exact `Sens8`; it does not own function meaning.
+   - `crates/sens/src/eval/canon.rs` / `crates/sens/src/eval/necessary_forms.rs` — current executor-local routing/mechanism code. It is implementation evidence only; open cleanup #1328 tracks remaining named mechanism identities.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) — the implementation-independent behavioral contract (the "oracle corpus"); `my-lisp-constitution.lisp` and `tests/fixtures/inventory.lisp` are GENERATED projections over it, never hand-edited.
-   - `language-contract.lisp` (this repo), and the sibling repos' own `isa-contract.lisp` (`fpga-lisp`) / `compatibility.lisp` (`cml`) for cross-repo compatibility.
+   - sibling repos' own `isa-contract.lisp` (`fpga-lisp`) / `compatibility.lisp` (`cml`) for cross-repo compatibility.
 2. **Active ADRs and ratified design decisions** — see [`docs/adr/`](docs/adr) (if present) and any doc explicitly marked ratified/accepted, not proposed.
 3. **Active plans** — the plan actually being executed right now:
    - [`docs/POLYGLOT-SEMANTIC-ORCHESTRATOR-IMPLEMENTATION-PLAN.md`](docs/POLYGLOT-SEMANTIC-ORCHESTRATOR-IMPLEMENTATION-PLAN.md) — polyglot foreign-runtime work (Python, C ABI).
@@ -30,6 +31,6 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 
 1. Read `AGENTS.md` and `docs/agent-doctrine.md` (the fourteen rules).
 2. Read `tasks.lisp` for the current open backlog and its dependency structure.
-3. Read `lib/surface/semantic-registry.lisp` before assuming any spelling (English or otherwise) has special authority — it does not.
+3. Read `language-contract.lisp` first, then `lib/surface/semantic-registry.lisp`; the registry may route a spelling to exact `Sens8`, but the spelling never becomes function identity or meaning.
 4. Run `cargo test --workspace` and `cargo clippy --workspace --all-targets -- -D warnings` before trusting that "the docs say it works" — doctrine rule 13.
 5. If a design question seems already answered by an old document, check whether a newer active plan superseded it before acting on it.
