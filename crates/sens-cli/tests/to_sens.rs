@@ -166,6 +166,10 @@ fn rewritten_current_core_library_preserves_representative_behavior() {
         rewritten.contains("(10011100 "),
         "current core rewrite should contain exact SENS let calls"
     );
+    assert!(
+        rewritten.contains("(00001010 and "),
+        "current core rewrite should define macros through exact SENS defmacro"
+    );
 
     let mut baseline = Session::default();
     load_core_library(&mut baseline).expect("baseline core loads");
