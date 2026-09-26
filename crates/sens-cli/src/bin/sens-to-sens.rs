@@ -4,31 +4,31 @@ use std::env;
 use std::fs;
 use std::process;
 
-const QUOTE: u8 = 0b0000_0001;
-const ATOM: u8 = 0b0000_0010;
-const EQ: u8 = 0b0000_0011;
-const CONS: u8 = 0b0000_0100;
-const CAR: u8 = 0b0000_0101;
-const CDR: u8 = 0b0000_0110;
-const COND: u8 = 0b0000_0111;
-const LAMBDA: u8 = 0b0000_1000;
-const DEFINE: u8 = 0b0000_1001;
-const DEFMACRO: u8 = 0b0000_1010;
-const DEF_COMPAT: u8 = 0b0000_1011;
-const ADD: u8 = 0b0000_1100;
-const SUB: u8 = 0b0000_1101;
-const MUL: u8 = 0b0000_1110;
-const DIV: u8 = 0b0000_1111;
-const LT: u8 = 0b0001_1010;
-const GT: u8 = 0b0001_1011;
-const NUM_EQ: u8 = 0b0001_1100;
-const EVAL: u8 = 0b0100_1101;
-const AND: u8 = 0b1001_1010;
-const OR: u8 = 0b1001_1011;
-const LET: u8 = 0b1001_1100;
-const LET_STAR: u8 = 0b1001_1101;
-const THREAD_FIRST: u8 = 0b1001_1110;
-const THREAD_LAST: u8 = 0b1001_1111;
+const QUOTE: Sens8 = sens::sens!(00000001);
+const ATOM: Sens8 = sens::sens!(00000010);
+const EQ: Sens8 = sens::sens!(00000011);
+const CONS: Sens8 = sens::sens!(00000100);
+const CAR: Sens8 = sens::sens!(00000101);
+const CDR: Sens8 = sens::sens!(00000110);
+const COND: Sens8 = sens::sens!(00000111);
+const LAMBDA: Sens8 = sens::sens!(00001000);
+const DEFINE: Sens8 = sens::sens!(00001001);
+const DEFMACRO: Sens8 = sens::sens!(00001010);
+const DEF_COMPAT: Sens8 = sens::sens!(00001011);
+const ADD: Sens8 = sens::sens!(00001100);
+const SUB: Sens8 = sens::sens!(00001101);
+const MUL: Sens8 = sens::sens!(00001110);
+const DIV: Sens8 = sens::sens!(00001111);
+const LT: Sens8 = sens::sens!(00011010);
+const GT: Sens8 = sens::sens!(00011011);
+const NUM_EQ: Sens8 = sens::sens!(00011100);
+const EVAL: Sens8 = sens::sens!(01001101);
+const AND: Sens8 = sens::sens!(10011010);
+const OR: Sens8 = sens::sens!(10011011);
+const LET: Sens8 = sens::sens!(10011100);
+const LET_STAR: Sens8 = sens::sens!(10011101);
+const THREAD_FIRST: Sens8 = sens::sens!(10011110);
+const THREAD_LAST: Sens8 = sens::sens!(10011111);
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Edit {
@@ -59,24 +59,34 @@ enum HeadKind {
 }
 
 fn head_kind(sens: Sens8) -> HeadKind {
-    match sens.packed_byte() {
-        QUOTE => HeadKind::Quote,
-        COND => HeadKind::Cond,
-        LAMBDA => HeadKind::Lambda,
-        DEFINE | DEF_COMPAT => HeadKind::Define,
-        DEFMACRO => HeadKind::Defmacro,
-        LET => HeadKind::Let,
-        LET_STAR => HeadKind::LetStar,
-        AND | OR | THREAD_FIRST | THREAD_LAST => HeadKind::RawMacro,
-        ATOM | EQ | CONS | CAR | CDR | LT | GT | NUM_EQ | EVAL => HeadKind::Primitive,
-        ADD | SUB | MUL | DIV => HeadKind::Arithmetic,
-        _ => HeadKind::Other,
+    if sens == QUOTE {
+        HeadKind::Quote
+    } else if sens == COND {
+        HeadKind::Cond
+    } else if sens == LAMBDA {
+        HeadKind::Lambda
+    } else if sens == DEFINE || sens == DEF_COMPAT {
+        HeadKind::Define
+    } else if sens == DEFMACRO {
+        HeadKind::Defmacro
+    } else if sens == LET {
+        HeadKind::Let
+    } else if sens == LET_STAR {
+        HeadKind::LetStar
+    } else if [AND, OR, THREAD_FIRST, THREAD_LAST].contains(&sens) {
+        HeadKind::RawMacro
+    } else if [ATOM, EQ, CONS, CAR, CDR, LT, GT, NUM_EQ, EVAL].contains(&sens) {
+        HeadKind::Primitive
+    } else if [ADD, SUB, MUL, DIV].contains(&sens) {
+        HeadKind::Arithmetic
+    } else {
+        HeadKind::Other
     }
 }
 
 fn target_sens(sens: Sens8) -> Sens8 {
-    if sens.packed_byte() == DEF_COMPAT {
-        Sens8::from_packed_byte(DEFINE)
+    if sens == DEF_COMPAT {
+        DEFINE
     } else {
         sens
     }
@@ -100,7 +110,7 @@ fn push_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysis) {
     analysis.edits.push(Edit {
         start: head.span.start,
         end: head.span.end,
-        replacement: format!("{:08b}", target_sens(sens).packed_byte()),
+        replacement: target_sens(sens).to_string(),
     });
 }
 
@@ -327,7 +337,8 @@ fn main() {
             check = true;
         } else if argument == "-h" || argument == "--help" {
             println!("Usage: sens-to-sens [--check] <file>...");
-            println!("Rewrites only parser-proven call heads that currently have a safe SENS mechanism.");
+            println!("Rewrites parser-proven registry call heads with a current exact-SENS mechanism.");
+            println!("Language-defined functions are supported; raw macro heads remain gated until #1460.");
             println!("--check reports candidates without writing and exits 1 when changes are available.");
             return;
         } else if argument.starts_with('-') {
