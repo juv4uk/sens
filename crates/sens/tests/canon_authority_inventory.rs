@@ -132,7 +132,6 @@ fn every_known_active_sid_mapping_hotspot_has_an_inventory_classification() {
         "lib/surface/function-signatures.lisp",
         "crates/sens/src/eval/necessary_forms_generated.rs",
         "crates/sens/src/eval/necessary_forms.rs",
-        "crates/sens/src/ir.rs",
         "crates/sens/src/language_items.rs",
         "crates/sens-cli/src/bin/cml-export.rs",
         "mylisp-cml-export.lisp",

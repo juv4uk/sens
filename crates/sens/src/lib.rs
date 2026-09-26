@@ -13,11 +13,6 @@ mod bignum;
 mod environment;
 mod error;
 pub(crate) mod eval;
-/// Compiler IR v0 (GitHub issue #68) — provenance-bearing lowering data.
-/// See docs/COMPILER-IR-V0.md. Not part of the public API yet (no
-/// execution backend exists); kept `pub(crate)` until a consumer needs it
-/// exposed, per rule 7 (minimize change surface).
-pub(crate) mod ir;
 mod language_items;
 mod parser;
 mod presentation;
