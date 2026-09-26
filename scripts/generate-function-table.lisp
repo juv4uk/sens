@@ -36,9 +36,10 @@
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
 (def registry-form (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
 (def registry-rows registry-form)
-; SID 00000000 is Canon 0 / (), a semantic ground value rather than a function.
-; The function table projects only callable/form identities, so skip that first row.
-(def entries (cdr registry-rows))
+; Every exact 8-bit row is a SENS function identity, including 00000000.
+; Empty human surfaces or an absent machine mechanism stay empty; projection
+; completeness must never invent meaning and must never alias 00000000 to ().
+(def entries registry-rows)
 
 ; Processor realization projection. Its rows never create an identity: they
 ; may only annotate IDs that already exist in `entries` above.
