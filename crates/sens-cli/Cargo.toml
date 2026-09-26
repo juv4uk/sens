@@ -32,6 +32,10 @@ path = "src/bin/wsm-fs-record-consumer.rs"
 name = "cml-export"
 path = "src/bin/cml-export.rs"
 
+[[bin]]
+name = "sens-to-sens"
+path = "src/bin/sens-to-sens.rs"
+
 [dependencies]
 sens = { path = "../sens" }
 sens-host = { path = "../sens-host" }
