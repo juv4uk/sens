@@ -18,7 +18,7 @@ permissions:
 jobs:
   core1-sid8-resolver:
     name: Core1 compiler resolver delegates to admitted SID8
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v5
 
@@ -41,6 +41,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
           ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
           path: .core1-resolver/mccarthy-eval
 

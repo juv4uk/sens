@@ -19,7 +19,7 @@ permissions:
 jobs:
   mccarthy-seed:
     name: mccarthy-eval S0 executes Core1
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - name: Checkout sens Core1 source
         uses: actions/checkout@v5
@@ -28,13 +28,15 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
           ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
           path: .core1-s0/mccarthy-eval
 
       - name: Checkout pinned Lisp-authored compiler seed
         uses: actions/checkout@v5
         with:
-          repository: juv4uk/wsm-sens
+          repository: juv4uk/wsm-my-lisp
+          ssh-key: ${{ secrets.WSM_MY_LISP_SSH_KEY }}
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           path: .core1-s0/wsm-sens
 

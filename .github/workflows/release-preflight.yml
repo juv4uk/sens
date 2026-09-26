@@ -22,7 +22,7 @@ jobs:
     # не PR-гейту випуску: релізний скрипт тепер вимагає саме зелений CI на
     # злитому SHA, а не локальний повний прогон.
     name: focused release preflight
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5

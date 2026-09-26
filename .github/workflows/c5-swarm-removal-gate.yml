@@ -22,7 +22,7 @@ on:
 
 jobs:
   c5-removal-evidence:
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
