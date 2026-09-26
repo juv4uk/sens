@@ -6,7 +6,7 @@
 ; but the coverage/classification verdict stays in Lisp.
 ;
 ; The witness deliberately derives the predicate surface set from
-; lib/surface/uk-inventory.lisp instead of copying the 17 names here.
+; lib/surface/uk-inventory.lisp instead of copying the 18 names here.
 
 (00001001 sqi-field
   (00001000 (key row)
@@ -102,8 +102,8 @@
     (10011100 ((predicates (sqi-public-predicates))
           (rows (sqi-rows)))
       (00000111
-        ((10011010 (00000011 (00101000 predicates) 17)
-              (00000011 (00101000 rows) 17)
+        ((10011010 (00000011 (00101000 predicates) 18)
+              (00000011 (00101000 rows) 18)
               (sqi-all-public-covered-once? predicates rows)
               (sqi-no-extra-surfaces? rows predicates)
               (sqi-math-delegation-valid? rows))

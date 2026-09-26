@@ -30,11 +30,12 @@
      ; had gone stale relative to the actual implementation until
      ; corrected.
      (core-library
-       (abs identity binary list not? and or gensym pair second third fourth cadddr fifth
+       (abs identity binary list not? not and or gensym pair second third fourth cadddr fifth
         caar cadr cddr length reverse append map filter reduce let equal? max
-        max-list member? min min-list assoc let* nth string-empty? string-length
-        string-prefix? string-contains? symbol? quotient mod <= >= number->string
-        -> ->> isqrt sqrt))))
+        max-list member? min min-list assoc let* nth string<? symbol? quotient mod
+        divmod <= >= number->string -> ->> isqrt sqrt
+        null? subst sublis maplist apply
+        answer-atom answer-eq answer-not answer-and answer-or answer-weaken))))
   ; Ukrainian words carry the readable surface. Mathematical marks remain
   ; optional compact notation over the same existing operations.
   (symbolic-sugar (+ - * / < = > <= >=))
@@ -45,10 +46,11 @@
         nondecreasing-from? nonincreasing-from? digit->string
         number->string-onto sqrt-iter isqrt-step truthy?
         string-membership-helper string-order-helper nonempty-string-membership-helper
+        sublis-pair apply-quote-args
         my-postcore-stable-peer-projection my-postcore-peer-group
         my-postcore-binding-status my-postcore-missing-peers
         my-postcore-build-definitions my-postcore-materialize-stable-peers))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
   (public-predicates
     (atom? eq? < = > numeric-buffer? string<? string? not? equal? member?
-     string-empty? string-prefix? string-contains? symbol? <= >=)))
+     string-empty? string-prefix? string-contains? symbol? null? <= >=)))
