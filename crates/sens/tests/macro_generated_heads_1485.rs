@@ -36,15 +36,15 @@ fn inventory_rows() -> Vec<Row> {
         .collect()
 }
 
-fn sens_for_admitted_surface(surface: &str) -> Option<String> {
-    semantic_id_for_admitted_surface(surface).map(|sens| sens.to_string())
+fn sens_for_admitted_surface(surface: &str) -> Option<sens::Sens8> {
+    semantic_id_for_admitted_surface(surface)
 }
 
 fn is_quote_head(expr: &Expr) -> bool {
     match &expr.kind {
-        ExprKind::Sid(sens) => sens.to_string() == "00000001",
+        ExprKind::Sid(sens) => *sens == sens::sens!(00000001),
         ExprKind::Symbol(surface) => {
-            sens_for_admitted_surface(surface.as_ref()).as_deref() == Some("00000001")
+            sens_for_admitted_surface(surface.as_ref()) == Some(sens::sens!(00000001))
         }
         _ => false,
     }
@@ -63,7 +63,7 @@ fn collect_quoted_admitted_single_atoms(
                         out.insert(Row {
                             path: path.to_string(),
                             surface: surface.to_string(),
-                            exact_sens,
+                            exact_sens: exact_sens.to_string(),
                             class: String::new(),
                         });
                     }
@@ -204,8 +204,8 @@ fn code_template_operator_rows_name_the_exact_registry_function() {
         .filter(|row| row.class == "code-template-operator")
     {
         assert_eq!(
-            sens_for_admitted_surface(&row.surface).as_deref(),
-            Some(row.exact_sens.as_str()),
+            sens_for_admitted_surface(&row.surface).map(|sens| sens.to_string()),
+            Some(row.exact_sens.clone()),
             "inventory exact SENS must be derived from the current registry: {row:?}"
         );
     }
