@@ -4,15 +4,15 @@
 ; core.lisp's recursive string-length here: on a registry-sized String that is
 ; a separate non-tail recursion benchmark and can overflow the host stack.
 
-(def started (mono-ns))
-(def registry-text (read-file "lib/surface/semantic-registry.lisp"))
-(def after-read (mono-ns))
-(def registry-form (car (read-all registry-text)))
-(def after-parse (mono-ns))
+(00001001 started (01011010))
+(00001001 registry-text (10100110 "lib/surface/semantic-registry.lisp"))
+(00001001 after-read (01011010))
+(00001001 registry-form (00000101 (01001011 registry-text)))
+(00001001 after-parse (01011010))
 
-(print
-  (list (quote eco-lisp-script-perf/read-semantic-registry)
-        (list (quote read-file-ns) (- after-read started))
-        (list (quote read-all-ns) (- after-parse after-read))
-        (list (quote total-ns) (- after-parse started))
-        (list (quote root) (car registry-form))))
+(01001000
+  (00100111 (00000001 eco-lisp-script-perf/read-semantic-registry)
+        (00100111 (00000001 read-file-ns) (00001101 after-read started))
+        (00100111 (00000001 read-all-ns) (00001101 after-parse after-read))
+        (00100111 (00000001 total-ns) (00001101 after-parse started))
+        (00100111 (00000001 root) (00000101 registry-form))))

@@ -1,88 +1,88 @@
 ; #1180 — Lisp-owned checker for the Core1 compiler SID8 resolver.
 
-(def c1r-resolver-form
-  (car (read-all (read-file "lib/core1-compiler-sid-resolver.lisp"))))
+(00001001 c1r-resolver-form
+  (00000101 (01001011 (10100110 "lib/core1-compiler-sid-resolver.lisp"))))
 
-(def c1r-expected-resolver-form
-  (quote
+(00001001 c1r-expected-resolver-form
+  (00000001
     (DEFINE C1-COMPILER-SID-FOR-SURFACE
       (LAMBDA (NAME)
         (C1-PRIMITIVE-IDENTITY NAME)))))
 
-(def c1r-find-section
-  (lambda (name sections)
-    (cond
-      ((atom? sections) () (quote ()))
-      ((atom? sections) (0)
-       (cond
-         ((eq? (car (car sections)) name) (1)
-          (car sections))
-         ((eq? (car (car sections)) name) (0)
-          (c1r-find-section name (cdr sections))))))))
+(00001001 c1r-find-section
+  (00001000 (name sections)
+    (00000111
+      ((00000010 sections) () (00000001 ()))
+      ((00000010 sections) (0)
+       (00000111
+         ((00000011 (00000101 (00000101 sections)) name) (1)
+          (00000101 sections))
+         ((00000011 (00000101 (00000101 sections)) name) (0)
+          (c1r-find-section name (00000110 sections))))))))
 
-(def c1r-authority
-  (car (read-all (read-file "contracts/core1-historical-sid-map.lisp"))))
+(00001001 c1r-authority
+  (00000101 (01001011 (10100110 "contracts/core1-historical-sid-map.lisp"))))
 
-(def c1r-authority-rows
-  (cdr (c1r-find-section (quote rows) (cdr c1r-authority))))
+(00001001 c1r-authority-rows
+  (00000110 (c1r-find-section (00000001 rows) (00000110 c1r-authority))))
 
-(def c1r-seventh
-  (lambda (row)
-    (car (cdr (cdr (cdr (cdr (cdr (cdr row)))))))))
+(00001001 c1r-seventh
+  (00001000 (row)
+    (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 (00000110 row)))))))))
 
-(def c1r-row-status
-  (lambda (surface sid rows)
-    (cond
-      ((atom? rows) () (quote missing))
-      ((atom? rows) (0)
-       (let ((row (car rows)))
-         (cond
-           ((equal? (second row) sid) (1)
-            (cond
-              ((equal? (fourth row) surface) (1)
+(00001001 c1r-row-status
+  (00001000 (surface sid rows)
+    (00000111
+      ((00000010 rows) () (00000001 missing))
+      ((00000010 rows) (0)
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00100010 (00101111 row) sid) (1)
+            (00000111
+              ((00100010 (00110001 row) surface) (1)
                (c1r-seventh row))
-              ((equal? (fourth row) surface) (0)
-               (c1r-row-status surface sid (cdr rows)))))
-           ((equal? (second row) sid) (0)
-            (c1r-row-status surface sid (cdr rows)))))))))
+              ((00100010 (00110001 row) surface) (0)
+               (c1r-row-status surface sid (00000110 rows)))))
+           ((00100010 (00101111 row) sid) (0)
+            (c1r-row-status surface sid (00000110 rows)))))))))
 
-(def c1r-check-required
-  (lambda (pairs)
-    (cond
-      ((atom? pairs) () (quote ()))
-      ((atom? pairs) (0)
-       (let* ((pair (car pairs))
-              (surface (car pair))
-              (sid (second pair))
+(00001001 c1r-check-required
+  (00001000 (pairs)
+    (00000111
+      ((00000010 pairs) () (00000001 ()))
+      ((00000010 pairs) (0)
+       (10011101 ((pair (00000101 pairs))
+              (surface (00000101 pair))
+              (sid (00101111 pair))
               (status (c1r-row-status surface sid c1r-authority-rows)))
-         (cond
-           ((eq? status (quote admitted)) (1)
-            (c1r-check-required (cdr pairs)))
-           ((quote c1r-required-fail) c1r-required-fail
-            (list (quote required-row-not-admitted) surface sid status))))))))
+         (00000111
+           ((00000011 status (00000001 admitted)) (1)
+            (c1r-check-required (00000110 pairs)))
+           ((00000001 c1r-required-fail) c1r-required-fail
+            (00100111 (00000001 required-row-not-admitted) surface sid status))))))))
 
-(def c1r-first-failure
-  (lambda (checks)
-    (cond
-      ((atom? checks) () (quote ()))
-      ((atom? (car checks)) ()
-       (c1r-first-failure (cdr checks)))
-      ((quote c1r-failure) c1r-failure (car checks)))))
+(00001001 c1r-first-failure
+  (00001000 (checks)
+    (00000111
+      ((00000010 checks) () (00000001 ()))
+      ((00000010 (00000101 checks)) ()
+       (c1r-first-failure (00000110 checks)))
+      ((00000001 c1r-failure) c1r-failure (00000101 checks)))))
 
-(def c1r-verdict
-  (lambda ()
-    (let ((failure
+(00001001 c1r-verdict
+  (00001000 ()
+    (10011100 ((failure
             (c1r-first-failure
-              (list
-                (cond
-                  ((equal? c1r-resolver-form c1r-expected-resolver-form)
+              (00100111
+                (00000111
+                  ((00100010 c1r-resolver-form c1r-expected-resolver-form)
                    (1)
-                   (quote ()))
-                  ((quote c1r-shape-fail) c1r-shape-fail
-                   (list (quote resolver-must-delegate-without-table)
+                   (00000001 ()))
+                  ((00000001 c1r-shape-fail) c1r-shape-fail
+                   (00100111 (00000001 resolver-must-delegate-without-table)
                          c1r-resolver-form)))
                 (c1r-check-required
-                  (quote
+                  (00000001
                     ((ATOM 00000010)
                      (EQ 00000011)
                      (CONS 00000100)
@@ -90,30 +90,30 @@
                      (CDR 00000110)
                      (NOT 00100001)
                      (LIST 00100111))))
-                (cond
-                  ((eq?
+                (00000111
+                  ((00000011
                      (c1r-row-status
-                       (quote PLUS) 00001100 c1r-authority-rows)
-                     (quote available-not-admitted))
+                       (00000001 PLUS) 00001100 c1r-authority-rows)
+                     (00000001 available-not-admitted))
                    (1)
-                   (quote ()))
-                  ((quote c1r-plus-fail) c1r-plus-fail
-                   (quote (plus-must-remain-not-admitted))))
-                (cond
-                  ((eq?
+                   (00000001 ()))
+                  ((00000001 c1r-plus-fail) c1r-plus-fail
+                   (00000001 (plus-must-remain-not-admitted))))
+                (00000111
+                  ((00000011
                      (c1r-row-status
-                       (quote DIFFERENCE) 00001101 c1r-authority-rows)
-                     (quote available-not-admitted))
+                       (00000001 DIFFERENCE) 00001101 c1r-authority-rows)
+                     (00000001 available-not-admitted))
                    (1)
-                   (quote ()))
-                  ((quote c1r-minus-fail) c1r-minus-fail
-                   (quote (minus-must-remain-not-admitted))))))))
-      (cond
-        ((atom? failure) ()
-         (quote (core1-compiler-sid-resolver-check pass)))
-        ((quote c1r-contract-fail) c1r-contract-fail
-         (list (quote core1-compiler-sid-resolver-check)
-               (quote fail)
+                   (00000001 ()))
+                  ((00000001 c1r-minus-fail) c1r-minus-fail
+                   (00000001 (minus-must-remain-not-admitted))))))))
+      (00000111
+        ((00000010 failure) ()
+         (00000001 (core1-compiler-sid-resolver-check pass)))
+        ((00000001 c1r-contract-fail) c1r-contract-fail
+         (00100111 (00000001 core1-compiler-sid-resolver-check)
+               (00000001 fail)
                failure))))))
 
 (c1r-verdict)
