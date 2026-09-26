@@ -23,8 +23,12 @@ const LT: u8 = 0b0001_1010;
 const GT: u8 = 0b0001_1011;
 const NUM_EQ: u8 = 0b0001_1100;
 const EVAL: u8 = 0b0100_1101;
+const AND: u8 = 0b1001_1010;
+const OR: u8 = 0b1001_1011;
 const LET: u8 = 0b1001_1100;
 const LET_STAR: u8 = 0b1001_1101;
+const THREAD_FIRST: u8 = 0b1001_1110;
+const THREAD_LAST: u8 = 0b1001_1111;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Edit {
@@ -48,6 +52,7 @@ enum HeadKind {
     Defmacro,
     Let,
     LetStar,
+    RawMacro,
     Primitive,
     Arithmetic,
     Other,
@@ -62,6 +67,7 @@ fn head_kind(sens: Sens8) -> HeadKind {
         DEFMACRO => HeadKind::Defmacro,
         LET => HeadKind::Let,
         LET_STAR => HeadKind::LetStar,
+        AND | OR | THREAD_FIRST | THREAD_LAST => HeadKind::RawMacro,
         ATOM | EQ | CONS | CAR | CDR | LT | GT | NUM_EQ | EVAL => HeadKind::Primitive,
         ADD | SUB | MUL | DIV => HeadKind::Arithmetic,
         _ => HeadKind::Other,
@@ -208,8 +214,8 @@ fn walk_expr(
                 | HeadKind::Lambda
                 | HeadKind::Define
                 | HeadKind::Primitive => true,
-                HeadKind::Arithmetic => true,
-                HeadKind::Defmacro | HeadKind::Let | HeadKind::LetStar | HeadKind::Other => false,
+                HeadKind::Arithmetic | HeadKind::Other => true,
+                HeadKind::Defmacro | HeadKind::Let | HeadKind::LetStar | HeadKind::RawMacro => false,
             };
 
         if replace {
@@ -261,6 +267,10 @@ fn walk_expr(
                 walk_cond_clauses(arguments, bound, analysis);
                 return;
             }
+            // Registry-owned macros receive raw syntax. Until their exact-code
+            // migration has a dedicated structural witness, do not recurse into
+            // those raw forms merely because the macro's surface has a SENS ID.
+            HeadKind::RawMacro => return,
             _ => {}
         }
     } else {
@@ -444,6 +454,19 @@ mod tests {
         let expected =
             "(00001001 + (00001000 (a b) a)) (+ 1 2) (00001100 1 2)";
         assert_eq!(rewrite(source), expected);
+    }
+
+    #[test]
+    fn unshadowed_language_defined_registry_calls_rewrite_after_1455() {
+        let source = "(list 1 2) (member? 2 (quote (1 2 3))) (quotient 17 5) (append (quote (1)) (quote (2)))";
+        let expected = "(00100111 1 2) (00101100 2 (00000001 (1 2 3))) (00010100 17 5) (00101001 (00000001 (1)) (00000001 (2)))";
+        assert_eq!(rewrite(source), expected);
+    }
+
+    #[test]
+    fn raw_macro_heads_remain_gated_without_rewriting_their_argument_syntax() {
+        let source = "(and (+ 1 2) (member? 2 (quote (1 2)))) (or (car x) y) (-> x (car))";
+        assert_eq!(rewrite(source), source);
     }
 
     #[test]
