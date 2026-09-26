@@ -14,7 +14,7 @@
 
 ; Canon 0 has no lexical alias as part of Canon itself. This ordinary witness
 ; is intentionally outside the reserved set and is used only by the laws below.
-(def canon-empty-list (quote ()))
+(00001001 canon-empty-list (00000001 ()))
 
 ; QUOTE and COND are evaluation-control forms, not ordinary first-class values.
 ; Callable Canon primitives are first-class immutable operation handles.
@@ -27,217 +27,217 @@
 ; A law does not return universal TRUE/FALSE. It returns explicit Lisp data.
 ; Закон не повертає універсальні TRUE/FALSE, а явний Lisp-запис.
 
-(def canon-law-result
-  (lambda (law status)
-    (сполучити
-      (quote canon-law-result)
-      (сполучити law (сполучити status (quote ()))))))
+(00001001 canon-law-result
+  (00001000 (law status)
+    (00000100
+      (00000001 canon-law-result)
+      (00000100 law (00000100 status (00000001 ()))))))
 
-(def canon-law-satisfied
-  (lambda (law)
-    (canon-law-result law (quote satisfied))))
+(00001001 canon-law-satisfied
+  (00001000 (law)
+    (canon-law-result law (00000001 satisfied))))
 
-(def canon-law-violated
-  (lambda (law)
-    (canon-law-result law (quote violated))))
+(00001001 canon-law-violated
+  (00001000 (law)
+    (canon-law-result law (00000001 violated))))
 
-(def canon-law-status
-  (lambda (result)
-    (перше (решта (решта result)))))
+(00001001 canon-law-status
+  (00001000 (result)
+    (00000101 (00000110 (00000110 result)))))
 
-(def canon-conformance-result
-  (lambda (status)
-    (сполучити
-      (quote canon-conformance)
-      (сполучити status (quote ())))))
+(00001001 canon-conformance-result
+  (00001000 (status)
+    (00000100
+      (00000001 canon-conformance)
+      (00000100 status (00000001 ())))))
 
 ; --- Constitutive laws ----------------------------------------------------
 ; Every branch below uses canonical #217 explicit-result dispatch. `()` is
 ; structural data / Canon 0 and is never consumed as FALSE.
 
-(def canon-law-empty-list
-  (lambda ()
-    (за-умовою
-      ((тотожне? canon-empty-list (quote ()))
+(00001001 canon-law-empty-list
+  (00001000 ()
+    (00000111
+      ((00000011 canon-empty-list (00000001 ()))
        (1)
-       (canon-law-satisfied (quote empty-list)))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote empty-list))))))
+       (canon-law-satisfied (00000001 empty-list)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 empty-list))))))
 
-(def canon-law-atom-cons
-  (lambda (x y)
-    (за-умовою
-      ((атом? (сполучити x y))
+(00001001 canon-law-atom-cons
+  (00001000 (x y)
+    (00000111
+      ((00000010 (00000100 x y))
        (0)
-       (canon-law-satisfied (quote atom-cons)))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote atom-cons))))))
+       (canon-law-satisfied (00000001 atom-cons)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 atom-cons))))))
 
-(def canon-law-car-cons
-  (lambda (x y)
-    (за-умовою
-      ((тотожне? (перше (сполучити x y)) x)
+(00001001 canon-law-car-cons
+  (00001000 (x y)
+    (00000111
+      ((00000011 (00000101 (00000100 x y)) x)
        (1)
-       (canon-law-satisfied (quote car-cons)))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote car-cons))))))
+       (canon-law-satisfied (00000001 car-cons)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 car-cons))))))
 
-(def canon-law-cdr-cons
-  (lambda (x y)
-    (за-умовою
-      ((тотожне? (решта (сполучити x y)) y)
+(00001001 canon-law-cdr-cons
+  (00001000 (x y)
+    (00000111
+      ((00000011 (00000110 (00000100 x y)) y)
        (1)
-       (canon-law-satisfied (quote cdr-cons)))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote cdr-cons))))))
+       (canon-law-satisfied (00000001 cdr-cons)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 cdr-cons))))))
 
-(def canon-law-eq-reflexive-atom
-  (lambda (x)
-    (за-умовою
-      ((атом? x) (1)
-       (за-умовою
-         ((тотожне? x x) (1)
-          (canon-law-satisfied (quote eq-reflexive-atom)))
-         ((quote canon-fallback) canon-fallback
-          (canon-law-violated (quote eq-reflexive-atom)))))
-      ((атом? x) ()
-       (за-умовою
-         ((тотожне? x x) (1)
-          (canon-law-satisfied (quote eq-reflexive-atom)))
-         ((quote canon-fallback) canon-fallback
-          (canon-law-violated (quote eq-reflexive-atom)))))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote eq-reflexive-atom))))))
+(00001001 canon-law-eq-reflexive-atom
+  (00001000 (x)
+    (00000111
+      ((00000010 x) (1)
+       (00000111
+         ((00000011 x x) (1)
+          (canon-law-satisfied (00000001 eq-reflexive-atom)))
+         ((00000001 canon-fallback) canon-fallback
+          (canon-law-violated (00000001 eq-reflexive-atom)))))
+      ((00000010 x) ()
+       (00000111
+         ((00000011 x x) (1)
+          (canon-law-satisfied (00000001 eq-reflexive-atom)))
+         ((00000001 canon-fallback) canon-fallback
+          (canon-law-violated (00000001 eq-reflexive-atom)))))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 eq-reflexive-atom))))))
 
 ; `решта` must be a pair projection, not a human-language "second element".
-(def canon-law-cdr-dotted
-  (lambda ()
-    (за-умовою
-      ((тотожне?
-         (решта (сполучити (quote кіт) 42))
+(00001001 canon-law-cdr-dotted
+  (00001000 ()
+    (00000111
+      ((00000011
+         (00000110 (00000100 (00000001 кіт) 42))
          42)
        (1)
-       (canon-law-satisfied (quote cdr-dotted)))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote cdr-dotted))))))
+       (canon-law-satisfied (00000001 cdr-dotted)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 cdr-dotted))))))
 
 ; EQ is atom-only. The proper-list witness therefore checks projected atom
 ; values and recognizes final `()` through its structural-kind result.
-(def canon-law-cdr-proper
-  (lambda ()
-    (за-умовою
-      ((тотожне? (перше (решта (як-є (1 2 3)))) 2)
+(00001001 canon-law-cdr-proper
+  (00001000 ()
+    (00000111
+      ((00000011 (00000101 (00000110 (00000001 (1 2 3)))) 2)
        (1)
-       (за-умовою
-         ((тотожне? (перше (решта (решта (як-є (1 2 3))))) 3)
+       (00000111
+         ((00000011 (00000101 (00000110 (00000110 (00000001 (1 2 3))))) 3)
           (1)
-          (за-умовою
-            ((атом? (решта (решта (решта (як-є (1 2 3))))))
+          (00000111
+            ((00000010 (00000110 (00000110 (00000110 (00000001 (1 2 3))))))
              ()
-             (canon-law-satisfied (quote cdr-proper)))
-            ((quote canon-fallback) canon-fallback
-             (canon-law-violated (quote cdr-proper)))))
-         ((quote canon-fallback) canon-fallback
-          (canon-law-violated (quote cdr-proper)))))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote cdr-proper))))))
+             (canon-law-satisfied (00000001 cdr-proper)))
+            ((00000001 canon-fallback) canon-fallback
+             (canon-law-violated (00000001 cdr-proper)))))
+         ((00000001 canon-fallback) canon-fallback
+          (canon-law-violated (00000001 cdr-proper)))))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 cdr-proper))))))
 
 ; EQ is atom-only, so the improper tail is checked through atom projections.
-(def canon-law-cdr-improper
-  (lambda ()
-    (за-умовою
-      ((тотожне? (перше (решта (як-є (1 2 . 3)))) 2)
+(00001001 canon-law-cdr-improper
+  (00001000 ()
+    (00000111
+      ((00000011 (00000101 (00000110 (00000001 (1 2 . 3)))) 2)
        (1)
-       (за-умовою
-         ((тотожне? (решта (решта (як-є (1 2 . 3)))) 3)
+       (00000111
+         ((00000011 (00000110 (00000110 (00000001 (1 2 . 3)))) 3)
           (1)
-          (canon-law-satisfied (quote cdr-improper)))
-         ((quote canon-fallback) canon-fallback
-          (canon-law-violated (quote cdr-improper)))))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote cdr-improper))))))
+          (canon-law-satisfied (00000001 cdr-improper)))
+         ((00000001 canon-fallback) canon-fallback
+          (canon-law-violated (00000001 cdr-improper)))))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 cdr-improper))))))
 
 ; Evaluation-control laws: quoted/unselected unknown symbols must never be
 ; evaluated. If a host eagerly evaluates them, execution errors before a law
 ; record can be produced.
-(def canon-law-quote-suppresses-evaluation
-  (lambda ()
-    (за-умовою
-      ((тотожне? (як-є never-defined-canon-symbol)
-                  (quote never-defined-canon-symbol))
+(00001001 canon-law-quote-suppresses-evaluation
+  (00001000 ()
+    (00000111
+      ((00000011 (00000001 never-defined-canon-symbol)
+                  (00000001 never-defined-canon-symbol))
        (1)
-       (canon-law-satisfied (quote quote-suppresses-evaluation)))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote quote-suppresses-evaluation))))))
+       (canon-law-satisfied (00000001 quote-suppresses-evaluation)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 quote-suppresses-evaluation))))))
 
-(def canon-law-cond-first-match-short-circuit
-  (lambda ()
-    (за-умовою
-      ((тотожне?
-         (за-умовою
-           ((quote selected) selected (як-є selected))
-           ((never-defined-canon-predicate) impossible (як-є forbidden)))
-         (quote selected))
+(00001001 canon-law-cond-first-match-short-circuit
+  (00001000 ()
+    (00000111
+      ((00000011
+         (00000111
+           ((00000001 selected) selected (00000001 selected))
+           ((never-defined-canon-predicate) impossible (00000001 forbidden)))
+         (00000001 selected))
        (1)
-       (canon-law-satisfied (quote cond-first-match-short-circuit)))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote cond-first-match-short-circuit))))))
+       (canon-law-satisfied (00000001 cond-first-match-short-circuit)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 cond-first-match-short-circuit))))))
 
 ; The compact Ukrainian-keyboard surface denotes the same seven operations.
 ; This vertical witness exercises quote, atom, eq, cons, car, cdr, and cond
 ; without relying on historical T/NIL truthiness.
-(def canon-law-symbolic-surface
-  (lambda ()
-    (за-умовою
-      ((тотожне?
-         (?:
-           ((.? 'атом) (1)
-            (?:
-              ((=? (:п (: 'ліве 'праве)) 'ліве)
+(00001001 canon-law-symbolic-surface
+  (00001000 ()
+    (00000111
+      ((00000011
+         (00000111
+           ((00000010 'атом) (1)
+            (00000111
+              ((00000011 (00000101 (00000100 'ліве 'праве)) 'ліве)
                (1)
-               (:р (: 'ліве 'праве))))))
-         (quote праве))
+               (00000110 (00000100 'ліве 'праве))))))
+         (00000001 праве))
        (1)
-       (canon-law-satisfied (quote symbolic-surface)))
-      ((quote canon-fallback) canon-fallback
-       (canon-law-violated (quote symbolic-surface))))))
+       (canon-law-satisfied (00000001 symbolic-surface)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-law-violated (00000001 symbolic-surface))))))
 
 ; Aggregate explicit law records recursively. The empty list terminates the
 ; result list structurally; it does not mean FALSE.
-(def canon-conformance-from
-  (lambda (results)
-    (за-умовою
-      ((атом? results) ()
-       (canon-conformance-result (quote satisfied)))
-      ((canon-law-status (перше results)) satisfied
-       (canon-conformance-from (решта results)))
-      ((quote canon-fallback) canon-fallback
-       (canon-conformance-result (quote violated))))))
+(00001001 canon-conformance-from
+  (00001000 (results)
+    (00000111
+      ((00000010 results) ()
+       (canon-conformance-result (00000001 satisfied)))
+      ((canon-law-status (00000101 results)) satisfied
+       (canon-conformance-from (00000110 results)))
+      ((00000001 canon-fallback) canon-fallback
+       (canon-conformance-result (00000001 violated))))))
 
 ; One language-level explicit conformance record used by runtime observers.
-(def canon-conforms?
-  (lambda ()
+(00001001 canon-conforms?
+  (00001000 ()
     (canon-conformance-from
-      (сполучити
+      (00000100
         (canon-law-empty-list)
-        (сполучити
-          (canon-law-atom-cons (quote x) (quote y))
-          (сполучити
-            (canon-law-car-cons (quote x) (quote y))
-            (сполучити
-              (canon-law-cdr-cons (quote x) (quote y))
-              (сполучити
-                (canon-law-eq-reflexive-atom (quote x))
-                (сполучити
+        (00000100
+          (canon-law-atom-cons (00000001 x) (00000001 y))
+          (00000100
+            (canon-law-car-cons (00000001 x) (00000001 y))
+            (00000100
+              (canon-law-cdr-cons (00000001 x) (00000001 y))
+              (00000100
+                (canon-law-eq-reflexive-atom (00000001 x))
+                (00000100
                   (canon-law-cdr-dotted)
-                  (сполучити
+                  (00000100
                     (canon-law-cdr-proper)
-                    (сполучити
+                    (00000100
                       (canon-law-cdr-improper)
-                      (сполучити
+                      (00000100
                         (canon-law-quote-suppresses-evaluation)
-                        (сполучити
+                        (00000100
                           (canon-law-cond-first-match-short-circuit)
-                          (сполучити
+                          (00000100
                             (canon-law-symbolic-surface)
-                            (quote ())))))))))))))))
+                            (00000001 ())))))))))))))))

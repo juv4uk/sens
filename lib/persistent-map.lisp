@@ -46,11 +46,11 @@
 ; через `symbol->string`, ту саму конверсію, яку `describe` та інші вже
 ; вимагають в lib/knowledge.lisp.
 
-(def map-empty (quote ()))
+(00001001 map-empty (00000001 ()))
 
-(def node-key (lambda (n) (car n)))
-(def node-value (lambda (n) (second n)))
-(def node-height (lambda (n) (third n)))
+(00001001 node-key (00001000 (n) (00000101 n)))
+(00001001 node-value (00001000 (n) (00101111 n)))
+(00001001 node-height (00001000 (n) (00110000 n)))
 ; node-left/node-right kept as semantic names (readability inside the
 ; AVL balance/rotate logic below) but aliased to fourth/fifth (same
 ; closure objects, core.lisp, 2026-08-10) rather than re-spelling the
@@ -60,18 +60,18 @@
 ; логіці балансування/ротації AVL нижче), але як псевдоніми fourth/
 ; fifth (ті самі об'єкти-closure з core.lisp), не переписані вручну —
 ; вони обчислювали точно те саме, що вже роблять fourth/fifth.
-(def node-left fourth)
-(def node-right fifth)
+(00001001 node-left fourth)
+(00001001 node-right fifth)
 
-(def height-of
-  (lambda (n) (cond ((atom? n) () 0)
-                    ((atom? n) (1) 0) (t (node-height n)))))
+(00001001 height-of
+  (00001000 (n) (00000111 ((00000010 n) () 0)
+                    ((00000010 n) (1) 0) (t (node-height n)))))
 
-(def max2
-  (lambda (a b)
-    (cond
-      ((< a b) 1 b)
-      ((< a b) 0 a))))
+(00001001 max2
+  (00001000 (a b)
+    (00000111
+      ((00011010 a b) 1 b)
+      ((00011010 a b) 0 a))))
 
 ; Rebuilds a node with a recomputed height from its (possibly new)
 ; children — every insert/rotation goes through this, never hand-tracks
@@ -79,23 +79,23 @@
 ; Перебудовує вузол із перерахованою висотою з його (можливо нових)
 ; дітей — кожна вставка/ротація йде через це, ніколи не рахує висоту
 ; вручну.
-(def make-balanced-node
-  (lambda (key value left right)
-    (list key value (+ 1 (max2 (height-of left) (height-of right))) left right)))
+(00001001 make-balanced-node
+  (00001000 (key value left right)
+    (00100111 key value (00001100 1 (max2 (height-of left) (height-of right))) left right)))
 
-(def balance-factor
-  (lambda (n) (- (height-of (node-left n)) (height-of (node-right n)))))
+(00001001 balance-factor
+  (00001000 (n) (00001101 (height-of (node-left n)) (height-of (node-right n)))))
 
-(def rotate-left
-  (lambda (n)
-    (let ((r (node-right n)))
+(00001001 rotate-left
+  (00001000 (n)
+    (10011100 ((r (node-right n)))
       (make-balanced-node (node-key r) (node-value r)
         (make-balanced-node (node-key n) (node-value n) (node-left n) (node-left r))
         (node-right r)))))
 
-(def rotate-right
-  (lambda (n)
-    (let ((l (node-left n)))
+(00001001 rotate-right
+  (00001000 (n)
+    (10011100 ((l (node-left n)))
       (make-balanced-node (node-key l) (node-value l)
         (node-left l)
         (make-balanced-node (node-key n) (node-value n) (node-right l) (node-right n))))))
@@ -106,20 +106,20 @@
 ; Стандартна AVL-ребалансировка: щонайбільше одна проста чи подвійна
 ; ротація відновлює |balance-factor| <= 1 після однієї вставки,
 ; перевіряється на зворотному шляху рекурсії в map-insert нижче.
-(def balance
-  (lambda (n)
-    (cond
-      ((atom? n) () n)
-      ((atom? n) (1) n)
-      ((> (balance-factor n) 1) 1
-       (cond
-         ((< (balance-factor (node-left n)) 0) 1
+(00001001 balance
+  (00001000 (n)
+    (00000111
+      ((00000010 n) () n)
+      ((00000010 n) (1) n)
+      ((00011011 (balance-factor n) 1) 1
+       (00000111
+         ((00011010 (balance-factor (node-left n)) 0) 1
           (rotate-right (make-balanced-node (node-key n) (node-value n)
                           (rotate-left (node-left n)) (node-right n))))
          (t (rotate-right n))))
-      ((< (balance-factor n) -1) 1
-       (cond
-         ((> (balance-factor (node-right n)) 0) 1
+      ((00011010 (balance-factor n) -1) 1
+       (00000111
+         ((00011011 (balance-factor (node-right n)) 0) 1
           (rotate-left (make-balanced-node (node-key n) (node-value n)
                          (node-left n) (rotate-right (node-right n)))))
          (t (rotate-left n))))
@@ -131,14 +131,14 @@
 ; Повертає нове дерево зі вставленим `key`/`value` (або із заміненим
 ; значенням на наявному `key`) — оригінальне дерево не чіпається, кожне
 ; піддерево поза шляхом до `key` ділиться, не копіюється.
-(def map-insert
-  (lambda (key value tree)
-    (cond
-      ((atom? tree) () (make-balanced-node key value (quote ()) (quote ())))
-      ((atom? tree) (1) (make-balanced-node key value (quote ()) (quote ())))
-      ((eq? key (node-key tree))
+(00001001 map-insert
+  (00001000 (key value tree)
+    (00000111
+      ((00000010 tree) () (make-balanced-node key value (00000001 ()) (00000001 ())))
+      ((00000010 tree) (1) (make-balanced-node key value (00000001 ()) (00000001 ())))
+      ((00000011 key (node-key tree))
        (make-balanced-node key value (node-left tree) (node-right tree)))
-      ((string<? key (node-key tree))
+      ((00100101 key (node-key tree))
        (balance (make-balanced-node (node-key tree) (node-value tree)
                   (map-insert key value (node-left tree))
                   (node-right tree))))
@@ -156,27 +156,27 @@
 ; що й списки доведень у lib/reason.lisp), обрана саме тому, щоб законно
 ; збережене значення '() за якимось ключем ніколи не сплутати з
 ; "не знайдено".
-(def map-get
-  (lambda (key tree)
-    (cond
-      ((atom? tree) () (quote ()))
-      ((atom? tree) (1) (quote ()))
-      ((eq? key (node-key tree)) (list (node-value tree)))
-      ((string<? key (node-key tree)) (map-get key (node-left tree)))
+(00001001 map-get
+  (00001000 (key tree)
+    (00000111
+      ((00000010 tree) () (00000001 ()))
+      ((00000010 tree) (1) (00000001 ()))
+      ((00000011 key (node-key tree)) (00100111 (node-value tree)))
+      ((00100101 key (node-key tree)) (map-get key (node-left tree)))
       (t (map-get key (node-right tree))))))
 
-(def map-contains?
-  (lambda (key tree) (10110001 (00000010 (map-get key tree)))))
+(00001001 map-contains?
+  (00001000 (key tree) (10110001 (00000010 (map-get key tree)))))
 
 ; In-order traversal — the keys come back sorted, a free side effect of
 ; the tree being a BST, not something map->list computes separately.
 ; Обхід in-order — ключі повертаються відсортованими, побічний ефект
 ; того, що дерево — BST, а не щось, що map->list рахує окремо.
-(def map->list
-  (lambda (tree)
-    (cond
-      ((atom? tree) () (quote ()))
-      ((atom? tree) (1) (quote ()))
-      (t (append (map->list (node-left tree))
-                 (cons (cons (node-key tree) (node-value tree))
+(00001001 map->list
+  (00001000 (tree)
+    (00000111
+      ((00000010 tree) () (00000001 ()))
+      ((00000010 tree) (1) (00000001 ()))
+      (t (00101001 (map->list (node-left tree))
+                 (00000100 (00000100 (node-key tree) (node-value tree))
                        (map->list (node-right tree))))))))

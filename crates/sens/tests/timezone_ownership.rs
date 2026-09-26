@@ -25,10 +25,12 @@ fn timezone_detect_public_binding_is_language_owned_over_raw_declarations() {
         .expect_err("unadmitted SID must fail closed before time library loads");
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(session.environment.get("timezone-detect-raw").is_none());
-    assert!(matches!(
-        session.environment.get("timezone-declarations-raw"),
-        Some(Value::Builtin(_))
-    ));
+    // Після #1477 — примітив за кодом СЕНС, не прив'язка Value::Builtin.
+    assert_eq!(
+        sens::semantic_registry_export::semantic_id_for_admitted_surface("timezone-declarations-raw")
+            .and_then(sens::semantic_registry_export::function_role),
+        Some("primitive")
+    );
 
     load_time_library(&mut session).unwrap();
 
@@ -37,8 +39,10 @@ fn timezone_detect_public_binding_is_language_owned_over_raw_declarations() {
         Some(Value::Closure(_))
     ));
     assert!(session.environment.get("timezone-detect-raw").is_none());
-    assert!(matches!(
-        session.environment.get("timezone-declarations-raw"),
-        Some(Value::Builtin(_))
-    ));
+    // Після #1477 — примітив за кодом СЕНС, не прив'язка Value::Builtin.
+    assert_eq!(
+        sens::semantic_registry_export::semantic_id_for_admitted_surface("timezone-declarations-raw")
+            .and_then(sens::semantic_registry_export::function_role),
+        Some("primitive")
+    );
 }

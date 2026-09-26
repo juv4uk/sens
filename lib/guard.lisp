@@ -48,24 +48,24 @@
 (00001011 make-guard-finding
   (00001000 (decision evidence-status subject state contract difference impact guidance evidence)
     (00000111
-      ((not? (guard-decision? decision))
-       (list (00000001 invalid-guard-decision) decision))
-      ((not? (guard-evidence-status? evidence-status))
-       (list (00000001 invalid-evidence-status) evidence-status))
+      ((00100001 (guard-decision? decision))
+       (00100111 (00000001 invalid-guard-decision) decision))
+      ((00100001 (guard-evidence-status? evidence-status))
+       (00100111 (00000001 invalid-evidence-status) evidence-status))
       (t
-       (list
+       (00100111
          (00000001 guard-finding)
-         (list (00000001 schema) (00000001 guard/1))
-         (list (00000001 decision) decision)
-         (list (00000001 evidence-status) evidence-status)
-         (list (00000001 subject) subject)
-         (list (00000001 state) state)
-         (list (00000001 contract) contract)
-         (list (00000001 difference) difference)
-         (list (00000001 impact) impact)
-         (list (00000001 guidance) guidance)
-         (list (00000001 evidence) evidence)
-         (list
+         (00100111 (00000001 schema) (00000001 guard/1))
+         (00100111 (00000001 decision) decision)
+         (00100111 (00000001 evidence-status) evidence-status)
+         (00100111 (00000001 subject) subject)
+         (00100111 (00000001 state) state)
+         (00100111 (00000001 contract) contract)
+         (00100111 (00000001 difference) difference)
+         (00100111 (00000001 impact) impact)
+         (00100111 (00000001 guidance) guidance)
+         (00100111 (00000001 evidence) evidence)
+         (00100111
            (00000001 unknown-routes)
            (00000111
              ((00000011 decision (00000001 unknown)) (guard-unknown-routes))
@@ -93,14 +93,14 @@
 (00001011 guard-compare
   (00001000 (subject expected observed evidence)
     (00000111
-      ((equal? expected observed)
+      ((00100010 expected observed)
        (make-guard-finding
          (00000001 allow) (00000001 confirmed) subject observed expected
          (00000001 ()) (00000001 invariant-preserved) (00000001 no-action) evidence))
       (t
        (make-guard-finding
          (00000001 warn) (00000001 confirmed) subject observed expected
-         (list (00000001 expected) expected (00000001 observed) observed)
+         (00100111 (00000001 expected) expected (00000001 observed) observed)
          (00000001 contract-drift)
          (00000001 reconcile-observation-with-contract)
          evidence)))))
@@ -114,34 +114,34 @@
 (00001011 guard-sync-window
   (00001000 (commit-state sync-state drift-state evidence)
     (00000111
-      ((not? (00000011 commit-state (00000001 frozen)))
+      ((00100001 (00000011 commit-state (00000001 frozen)))
        (make-guard-finding
          (00000001 reject) (00000001 confirmed) (00000001 ecosystem-sync)
          commit-state (00000001 commits-frozen-before-sync)
-         (list (00000001 expected) (00000001 frozen) (00000001 observed) commit-state)
+         (00100111 (00000001 expected) (00000001 frozen) (00000001 observed) commit-state)
          (00000001 concurrent-commits-can-create-unrecorded-drift)
          (00000001 freeze-commits-before-synchronization)
          evidence))
-      ((not? (00000011 sync-state (00000001 completed)))
+      ((00100001 (00000011 sync-state (00000001 completed)))
        (make-guard-finding
          (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
          sync-state (00000001 synchronization-completed)
-         (list (00000001 expected) (00000001 completed) (00000001 observed) sync-state)
+         (00100111 (00000001 expected) (00000001 completed) (00000001 observed) sync-state)
          (00000001 drift-cannot-yet-be-classified)
          (00000001 complete-sync-and-preserve-logs)
          evidence))
-      ((not? (00000011 drift-state (00000001 recorded)))
+      ((00100001 (00000011 drift-state (00000001 recorded)))
        (make-guard-finding
          (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
          drift-state (00000001 drift-recorded)
-         (list (00000001 expected) (00000001 recorded) (00000001 observed) drift-state)
+         (00100111 (00000001 expected) (00000001 recorded) (00000001 observed) drift-state)
          (00000001 synchronization-result-has-no-drift-record)
          (00000001 record-drift-before-unfreezing-commits)
          evidence))
       (t
        (make-guard-finding
          (00000001 allow) (00000001 confirmed) (00000001 ecosystem-sync)
-         (list commit-state sync-state drift-state)
+         (00100111 commit-state sync-state drift-state)
          (00000001 freeze-sync-record-unfreeze)
          (00000001 ())
          (00000001 synchronization-boundary-observed)
@@ -154,8 +154,8 @@
 ; knowledge/guard-reference.lisp, а ці функції лишаються загальними.
 (00001011 guard-reference-field
   (00001000 (field reference)
-    (let ((entry (assoc field (00000110 reference))))
+    (10011100 ((entry (00101101 field (00000110 reference))))
       (00000111
         ((00000010 entry) () (00000001 ()))
         ((00000010 entry) (1) (00000001 ()))
-        (t (second entry))))))
+        (t (00101111 entry))))))

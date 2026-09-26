@@ -60,7 +60,7 @@
 
 (00001011 logic-var
   (00001000 (name)
-    (list (00000001 var) name)))
+    (00100111 (00000001 var) name)))
 
 ; Guards the `eq` with `(atom (car term))` first: `term` reaching the final
 ; branch is already known non-atom, but its `car` can itself be a compound
@@ -95,12 +95,12 @@
     (00000111
       ((00000010 subst) () variable)
       ((00000010 subst) (1) variable)
-      ((equal? (00000101 (00000101 subst)) (second variable)) (00000110 (00000101 subst)))
+      ((00100010 (00000101 (00000101 subst)) (00101111 variable)) (00000110 (00000101 subst)))
       (t (lookup-subst variable (00000110 subst))))))
 
 (00001011 extend-subst
   (00001000 (variable term subst)
-    (00000100 (00000100 (second variable) term) subst)))
+    (00000100 (00000100 (00101111 variable) term) subst)))
 
 ; One-level dereference: if `term` is a bound variable, follow exactly one
 ; binding; anything else (including a still-unbound variable, or a
@@ -117,7 +117,7 @@
     (00000111
       ((var? resolved)
        (00000111
-         ((equal? (second resolved) (second term)) term)
+         ((00100010 (00101111 resolved) (00101111 term)) term)
          (t (walk resolved subst))))
       (t resolved))))
 
@@ -159,9 +159,9 @@
 
 (00001011 occurs-check?
   (00001000 (variable term subst)
-    (let ((resolved (walk term subst)))
+    (10011100 ((resolved (walk term subst)))
       (00000111
-        ((var? resolved) (equal? (second variable) (second resolved)))
+        ((var? resolved) (00100010 (00101111 variable) (00101111 resolved)))
         ((00000010 resolved) () (00000001 ()))
         ((00000010 resolved) (1) (00000001 ()))
         (t (00000111
@@ -175,7 +175,7 @@
     (00000111
       ((var? term)
        (00000111
-         ((equal? (second variable) (second term)) subst)
+         ((00100010 (00101111 variable) (00101111 term)) subst)
          (t (extend-subst variable term subst))))
       ((occurs-check? variable term subst) (00000001 fail))
       (t (extend-subst variable term subst)))))
@@ -249,8 +249,8 @@
 (00001011 thread-conjunction
   (00001000 (conditions state try-one)
     (00000111
-      ((00000010 conditions) () (list state))
-      ((00000010 conditions) (1) (list state))
+      ((00000010 conditions) () (00100111 state))
+      ((00000010 conditions) (1) (00100111 state))
       (t (thread-conjunction-branches (00000110 conditions) try-one (try-one (00000101 conditions) state))))))
 
 (00001011 thread-conjunction-branches
@@ -258,5 +258,5 @@
     (00000111
       ((00000010 states) () (00000001 ()))
       ((00000010 states) (1) (00000001 ()))
-      (t (append (thread-conjunction remaining (00000101 states) try-one)
+      (t (00101001 (thread-conjunction remaining (00000101 states) try-one)
                  (thread-conjunction-branches remaining try-one (00000110 states)))))))

@@ -15,27 +15,27 @@
 ;; werden als `(world-history journal metadata)` ohne rekursive Elternkopien
 ;; gespeichert.
 
-(def empty-content-store
-  (lambda () map-empty))
+(00001001 empty-content-store
+  (00001000 () map-empty))
 
-(def content-store-put
-  (lambda (store value)
-    (map-insert (knowledge-content-address value) value store)))
+(00001001 content-store-put
+  (00001000 (store value)
+    (01101110 (knowledge-content-address value) value store)))
 
-(def content-store-get
-  (lambda (store address)
-    (map-get address store)))
+(00001001 content-store-get
+  (00001000 (store address)
+    (01101101 address store)))
 
-(def content-store-contains?
-  (lambda (store address)
-    (map-contains? address store)))
+(00001001 content-store-contains?
+  (00001000 (store address)
+    (01101111 address store)))
 
-(def content-store-put-world
-  (lambda (store world)
-    (map-insert (world-content-address world)
+(00001001 content-store-put-world
+  (00001000 (store world)
+    (01101110 (world-content-address world)
                 (world-address-content world)
                 store)))
 
-(def content-store-size
-  (lambda (store)
-    (length (map->list store))))
+(00001001 content-store-size
+  (00001000 (store)
+    (00101000 (01110000 store))))
