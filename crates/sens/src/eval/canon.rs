@@ -4,7 +4,7 @@
 //! mechanism shape for an already-selected SID, but it must never invent a
 //! second named function identity.
 
-use super::{arithmetic, special_forms};
+use super::{arithmetic, closures, special_forms};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -228,18 +228,29 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let Some(primitive) = PRIMITIVE_TABLE
+    if let Some(primitive) = PRIMITIVE_TABLE
         .get(sid.packed_byte() as usize)
         .and_then(|function| *function)
-    else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            format!("SENS function has no admitted callable mechanism: {sid}"),
-            span,
-        ));
-    };
+    {
+        return primitive(args, environment, span);
+    }
 
-    primitive(args, environment, span)
+    if let Some(value) = environment.get_sens(sid) {
+        return match value {
+            Value::Closure(closure) => closures::apply_values(closure, args, span),
+            _ => Err(LanguageError::new(
+                ErrorKind::Type,
+                format!("SENS function slot is not callable: {sid}"),
+                span,
+            )),
+        };
+    }
+
+    Err(LanguageError::new(
+        ErrorKind::Type,
+        format!("SENS function has no admitted callable mechanism: {sid}"),
+        span,
+    ))
 }
 
 pub(crate) fn value_for_sid(sid: Sens8) -> Option<Value> {
