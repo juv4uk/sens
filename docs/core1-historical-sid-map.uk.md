@@ -9,6 +9,12 @@
 Статус: **source-confirmed** (прочитано напряму з контракту й CI-скрипту,
 не виконувалось у цій сесії).
 
+## Джерело семантики
+
+Семантика мови береться з перших лиспів Маккартні (1960) і Lisp 1.5 (1962);
+наша єдина поверхнева відмінність — англійські предикати мають `?`
+(рішення власника, #1443). `among` зі статті 1960 — це наш `member?`.
+
 ## Напрямок відповідності — лише в один бік
 
 ```
@@ -38,8 +44,8 @@
 |---|---|---|---|---|---|
 | `00000000` | `empty-list` | `NIL` | mccarthy-1960 | direct | admitted |
 | `00000001` | `quote` | `QUOTE` | mccarthy-1960 | direct | admitted |
-| `00000010` | `atom` | `ATOM` | mccarthy-1960 | direct | admitted |
-| `00000011` | `eq` | `EQ` | mccarthy-1960 | direct | admitted |
+| `00000010` | `atom?` | `ATOM` | mccarthy-1960 | direct | admitted |
+| `00000011` | `eq?` | `EQ` | mccarthy-1960 | direct | admitted |
 | `00000100` | `cons` | `CONS` | mccarthy-1960 | direct | admitted |
 | `00000101` | `car` | `CAR` | mccarthy-1960 | direct | admitted |
 | `00000110` | `cdr` | `CDR` | mccarthy-1960 | direct | admitted |
@@ -48,6 +54,11 @@
 | `00001001` | `define` | `DEFINE` | lisp-i-1960 | surface-adapter | admitted |
 | `00001011` | `def` | `DEFINE` | lisp-i-1960 | surface-adapter | admitted |
 | `10101010` | `label` | `LABEL` | mccarthy-1960 | direct | admitted |
+| `10101011` | `null?` | `NULL` | mccarthy-1960 | direct | available-not-admitted |
+| `10101100` | `subst` | `SUBST` | mccarthy-1960 | direct | available-not-admitted |
+| `10101101` | `sublis` | `SUBLIS` | mccarthy-1960 | direct | available-not-admitted |
+| `10101110` | `maplist` | `MAPLIST` | mccarthy-1960 | direct | available-not-admitted |
+| `10101111` | `apply` | `apply` | mccarthy-1960 | direct | available-not-admitted |
 | `00001100` | `+` | `PLUS` | lisp15-1962 | direct | available-not-admitted |
 | `00001101` | `-` | `DIFFERENCE` | lisp15-1962 | surface-adapter | available-not-admitted |
 | `00001110` | `*` | `TIMES` | lisp15-1962 | direct | available-not-admitted |
@@ -57,7 +68,7 @@
 | `00010100` | `quotient` | `QUOTIENT` | lisp15-1962 | direct | available-not-admitted |
 | `00011010` | `<` | `LESSP` | lisp15-1962 | direct | available-not-admitted |
 | `00011011` | `>` | `GREATERP` | lisp15-1962 | direct | available-not-admitted |
-| `00100001` | `not` | `NOT` | lisp15-1962 | direct | admitted |
+| `00100001` | `not?` | `NOT` | lisp15-1962 | direct | admitted |
 | `00100010` | `equal?` | `EQUAL` | lisp15-1962 | direct | available-not-admitted |
 | `00100111` | `list` | `LIST` | lisp15-1962 | direct | admitted |
 | `00101000` | `length` | `LENGTH` | lisp15-1962 | direct | available-not-admitted |
@@ -83,7 +94,6 @@ SID у my-lisp — вони лишаються суто механізмом е�
 
 | механізм | джерело | роль |
 |---|---|---|
-| `apply` | mccarthy-1960 | внутрішня підтримка евалюатора |
 | `appq` | mccarthy-1960 | внутрішня підтримка евалюатора |
 | `evcon` | mccarthy-1960 | внутрішня підтримка евалюатора |
 | `evlis` | mccarthy-1960 | внутрішня підтримка евалюатора |

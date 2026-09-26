@@ -87,7 +87,7 @@ jobs:
           registry=lib/surface/semantic-registry.lisp
 
           # label отримав SID 10101010 (рішення власника 2026-09-26) — у рядках контракту, не тут.
-          for name in apply appq evcon evlis function funarg; do
+          for name in appq evcon evlis function funarg; do
             if grep -F -q "(en $name)" "$registry"; then
               echo "historical support mechanism unexpectedly has a sens EN identity: $name" >&2
               exit 1
