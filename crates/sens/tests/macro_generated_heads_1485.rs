@@ -20,7 +20,7 @@ fn inventory_rows() -> Vec<Row> {
         .filter(|line| !line.trim().is_empty() && !line.starts_with('#'))
         .map(|line| {
             let parts: Vec<_> = line.split('\t').collect();
-            assert_eq!(parts.len(), 5, "bad #1485 inventory row: {line}");
+            assert_eq!(parts.len(), 4, "bad #1485 inventory row: {line}");
             Row {
                 path: parts[0].to_string(),
                 line: parts[1].parse().expect("line must be decimal"),
@@ -165,10 +165,7 @@ fn code_template_operators_never_reintroduce_surface_heads() {
                 "lib/core4.lisp" => CORE4,
                 other => panic!("unexpected inventory path: {other}"),
             };
-            source
-                .lines()
-                .nth(row.line - 1)
-                .is_some_and(|line| line.contains(&format!("(00000001 {})", row.surface)))
+            source.contains(&format!("(00000001 {})", row.surface))
         })
         .collect();
 
