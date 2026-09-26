@@ -45,7 +45,7 @@ fn version_flag_prints_the_crate_version() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert_eq!(
         stdout.trim(),
-        format!("my-lisp {}", env!("CARGO_PKG_VERSION"))
+        format!("sens {}", env!("CARGO_PKG_VERSION"))
     );
 }
 
@@ -79,7 +79,7 @@ fn short_version_flags_match_the_long_form() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         assert_eq!(
             stdout.trim(),
-            format!("my-lisp {}", env!("CARGO_PKG_VERSION"))
+            format!("sens {}", env!("CARGO_PKG_VERSION"))
         );
     }
 }
@@ -89,7 +89,7 @@ fn help_flag_prints_usage() {
     let output = legacy_bin().arg("--help").output().expect("binary should run");
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("Usage: my-lisp [file]"));
+    assert!(stdout.contains("Usage: sens [file]"));
     assert!(stdout.contains(".wsm"));
     assert!(stdout.contains(".my"));
     assert!(stdout.contains(".lisp"));
@@ -308,12 +308,12 @@ fn running_a_missing_file_reports_a_read_error() {
 #[test]
 fn repl_history_persists_across_separate_sessions() {
     // Isolate HOME/USERPROFILE per test run so this doesn't read or write the
-    // real user's ~/.my-lisp-history, and so parallel test runs don't collide.
+    // real user's ~/.sens-history, and so parallel test runs don't collide.
     // Izoliuiemo HOME/USERPROFILE dlia kozhnoho zapusku testu, shchob ne chytaty y ne
-    // pysaty v realnyi ~/.my-lisp-history korystuvacha, i shchob paralelni
+    // pysaty v realnyi ~/.sens-history korystuvacha, i shchob paralelni
     // zapusky testiv ne konfliktuvaly.
     // Isoliert HOME/USERPROFILE pro Testlauf, damit weder das echte
-    // ~/.my-lisp-history des Nutzers gelesen/geschrieben wird noch parallele
+    // ~/.sens-history des Nutzers gelesen/geschrieben wird noch parallele
     // Testläufe kollidieren.
     let dir = std::env::temp_dir().join(format!("my-lisp-cli-test-history-{}", std::process::id()));
     std::fs::create_dir_all(&dir).expect("should create temp home dir");
@@ -341,7 +341,7 @@ fn repl_history_persists_across_separate_sessions() {
     run("(+ 1 2)\n");
     run("(+ 3 4)\n");
 
-    let history = std::fs::read_to_string(dir.join(".my-lisp-history"))
+    let history = std::fs::read_to_string(dir.join(".sens-history"))
         .expect("second session should find history left by the first");
     let _ = std::fs::remove_dir_all(&dir);
 
