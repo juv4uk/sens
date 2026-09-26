@@ -150,6 +150,20 @@ fn inventory_has_only_explicit_data_or_code_template_classes() {
 }
 
 #[test]
+fn ordinary_data_is_not_promoted_to_exact_sens() {
+    for (path, source) in [("lib/core.lisp", CORE), ("lib/core4.lisp", CORE4)] {
+        assert!(
+            source.contains("(00000001 binary)"),
+            "{path}: the admitted-looking symbol binary is ordinary quoted data and must remain data"
+        );
+        assert!(
+            !source.contains("(00000001 10101001)"),
+            "{path}: #1485 must not blanket-rewrite ordinary quoted data to exact SENS"
+        );
+    }
+}
+
+#[test]
 fn code_template_operator_rows_name_the_exact_registry_function() {
     let admitted = admitted_surface_bits();
     for row in inventory_rows()
