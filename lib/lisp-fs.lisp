@@ -14,146 +14,146 @@
 ; новий snapshot і адресу, попередній не змінюється. Відсутнє ім'я дає
 ; (not-found name), а не голий nil.
 
-(def fs-objects car)
-(def fs-bindings second)
-(def fs-revision third)
+(00001001 fs-objects car)
+(00001001 fs-bindings second)
+(00001001 fs-revision third)
 
-(def fs-empty
-  (lambda ()
-    (list (empty-content-store) map-empty 0)))
+(00001001 fs-empty
+  (00001000 ()
+    (00100111 (empty-content-store) map-empty 0)))
 
-(def fs-root-address
-  (lambda (fs)
+(00001001 fs-root-address
+  (00001000 (fs)
     (knowledge-content-address
-      (list (quote wsm-fs-root)
+      (00100111 (00000001 wsm-fs-root)
             (fs-bindings fs)))))
 
 ; fs-write returns (new-fs content-address). The caller chooses whether to
 ; retain the old root, enabling immutable branching and rollback.
 ; fs-write повертає (new-fs content-address); викликач сам вирішує, чи
 ; зберігати старий корінь, тому branching і rollback лишаються можливими.
-(def fs-write
-  (lambda (fs name value)
-    (let ((address (knowledge-content-address value)))
-      (list
-        (list
+(00001001 fs-write
+  (00001000 (fs name value)
+    (10011100 ((address (knowledge-content-address value)))
+      (00100111
+        (00100111
           (content-store-put (fs-objects fs) value)
-          (map-insert name address (fs-bindings fs))
-          (+ 1 (fs-revision fs)))
+          (01101110 name address (fs-bindings fs))
+          (00001100 1 (fs-revision fs)))
         address))))
 
 ; fs-read returns (found value address) or (not-found name).
 ; fs-read повертає (found value address) або (not-found name).
-(def fs-read
-  (lambda (fs name)
-    (let ((binding (map-get name (fs-bindings fs))))
-      (cond
-        ((atom? binding) () (list (quote not-found) name))
-        ((atom? binding) (1) (list (quote not-found) name))
+(00001001 fs-read
+  (00001000 (fs name)
+    (10011100 ((binding (01101101 name (fs-bindings fs))))
+      (00000111
+        ((00000010 binding) () (00100111 (00000001 not-found) name))
+        ((00000010 binding) (1) (00100111 (00000001 not-found) name))
         (t
-          (let ((address (car binding)))
-            (cond
-              ((not? (content-store-contains? (fs-objects fs) address))
-               (list (quote not-found) name))
+          (10011100 ((address (00000101 binding)))
+            (00000111
+              ((00100001 (content-store-contains? (fs-objects fs) address))
+               (00100111 (00000001 not-found) name))
               (t
                 ; map-get is a maybe-list, so unwrap exactly once. This
                 ; preserves a legitimately stored nil value.
                 ; map-get повертає maybe-список, тому знімаємо рівно одну
                 ; оболонку й не втрачаємо законно збережений nil.
-                (list (quote found)
-                      (car (content-store-get (fs-objects fs) address))
+                (00100111 (00000001 found)
+                      (00000101 (content-store-get (fs-objects fs) address))
                       address)))))))))
 
-(def fs-list
-  (lambda (fs)
-    (map->list (fs-bindings fs))))
+(00001001 fs-list
+  (00001000 (fs)
+    (01110000 (fs-bindings fs))))
 
-(def fs-contains?
-  (lambda (fs name)
-    (10110001 (00000010 (map-get name (fs-bindings fs))))))
+(00001001 fs-contains?
+  (00001000 (fs name)
+    (10110001 (00000010 (01101101 name (fs-bindings fs))))))
 
 ; Versioned data-only envelopes. They are ordinary alists and are never
 ; evaluated by the filesystem layer.
 ; Версіоновані data-only оболонки є звичайними alist і ніколи не виконуються.
-(def *fs-format-version* (quote (0 1)))
+(00001001 *fs-format-version* (00000001 (0 1)))
 
-(def fs-object-package
-  (lambda (value)
-    (list
-      (cons (quote format) (quote wsm-fs-object))
-      (cons (quote version) *fs-format-version*)
-      (cons (quote address) (knowledge-content-address value))
-      (cons (quote value) value))))
+(00001001 fs-object-package
+  (00001000 (value)
+    (00100111
+      (00000100 (00000001 format) (00000001 wsm-fs-object))
+      (00000100 (00000001 version) *fs-format-version*)
+      (00000100 (00000001 address) (knowledge-content-address value))
+      (00000100 (00000001 value) value))))
 
-(def fs-root-package
-  (lambda (fs)
-    (list
-      (cons (quote format) (quote wsm-fs-root))
-      (cons (quote version) *fs-format-version*)
-      (cons (quote revision) (fs-revision fs))
-      (cons (quote bindings) (map->list (fs-bindings fs)))
-      (cons (quote objects) (fs-object-addresses (map->list (fs-objects fs)))))))
+(00001001 fs-root-package
+  (00001000 (fs)
+    (00100111
+      (00000100 (00000001 format) (00000001 wsm-fs-root))
+      (00000100 (00000001 version) *fs-format-version*)
+      (00000100 (00000001 revision) (fs-revision fs))
+      (00000100 (00000001 bindings) (01110000 (fs-bindings fs)))
+      (00000100 (00000001 objects) (fs-object-addresses (01110000 (fs-objects fs)))))))
 
-(def fs-object-addresses
-  (lambda (entries)
-    (cond
-      ((atom? entries) () (quote ()))
-      ((atom? entries) (1) (quote ()))
-      (t (cons (car (car entries))
-               (fs-object-addresses (cdr entries)))))))
+(00001001 fs-object-addresses
+  (00001000 (entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (1) (00000001 ()))
+      (t (00000100 (00000101 (00000101 entries))
+               (fs-object-addresses (00000110 entries)))))))
 
-(def fs-package-field
-  (lambda (name package)
-    (let ((entry (assoc name package)))
-      (cond ((atom? entry) () (quote ()))
-            ((atom? entry) (1) (quote ())) (t (cdr entry))))))
+(00001001 fs-package-field
+  (00001000 (name package)
+    (10011100 ((entry (00101101 name package)))
+      (00000111 ((00000010 entry) () (00000001 ()))
+            ((00000010 entry) (1) (00000001 ())) (t (00000110 entry))))))
 
-(def fs-object-package-decision
-  (lambda (package)
-    (cond
-      ((atom? package) () (list (quote rejected) (quote invalid-package)))
-      ((atom? package) (1) (list (quote rejected) (quote invalid-package)))
-      ((not? (eq? (fs-package-field (quote format) package) (quote wsm-fs-object)))
-       (list (quote rejected) (quote invalid-format)))
-      ((not? (equal? (fs-package-field (quote version) package) *fs-format-version*))
-       (list (quote rejected) (quote unsupported-version)))
-      ((not? (equal? (fs-package-field (quote address) package)
-                    (knowledge-content-address (fs-package-field (quote value) package))))
-       (list (quote rejected) (quote address-mismatch)))
-      (t (list (quote accepted) (fs-package-field (quote value) package))))))
+(00001001 fs-object-package-decision
+  (00001000 (package)
+    (00000111
+      ((00000010 package) () (00100111 (00000001 rejected) (00000001 invalid-package)))
+      ((00000010 package) (1) (00100111 (00000001 rejected) (00000001 invalid-package)))
+      ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-object)))
+       (00100111 (00000001 rejected) (00000001 invalid-format)))
+      ((00100001 (00100010 (fs-package-field (00000001 version) package) *fs-format-version*))
+       (00100111 (00000001 rejected) (00000001 unsupported-version)))
+      ((00100001 (00100010 (fs-package-field (00000001 address) package)
+                    (knowledge-content-address (fs-package-field (00000001 value) package))))
+       (00100111 (00000001 rejected) (00000001 address-mismatch)))
+      (t (00100111 (00000001 accepted) (fs-package-field (00000001 value) package))))))
 
-(def fs-serialize-object
-  (lambda (value)
-    (write-to-string (fs-object-package value))))
+(00001001 fs-serialize-object
+  (00001000 (value)
+    (01001100 (fs-object-package value))))
 
-(def fs-deserialize-object
-  (lambda (text)
-    (fs-object-package-decision (read text))))
+(00001001 fs-deserialize-object
+  (00001000 (text)
+    (fs-object-package-decision (01001010 text))))
 
-(def fs-root-package-decision
-  (lambda (package)
-    (cond
-      ((atom? package) () (list (quote rejected) (quote invalid-package)))
-      ((atom? package) (1) (list (quote rejected) (quote invalid-package)))
-      ((not? (eq? (fs-package-field (quote format) package) (quote wsm-fs-root)))
-       (list (quote rejected) (quote invalid-format)))
-      ((not? (equal? (fs-package-field (quote version) package) *fs-format-version*))
-       (list (quote rejected) (quote unsupported-version)))
-      ((eq? (fs-package-field (quote revision) package) (quote ()))
-       (list (quote rejected) (quote invalid-revision)))
-      ((not? (knowledge-proper-list? (fs-package-field (quote bindings) package)))
-       (list (quote rejected) (quote invalid-bindings)))
-      ((not? (knowledge-proper-list? (fs-package-field (quote objects) package)))
-       (list (quote rejected) (quote invalid-objects)))
-      (t (list (quote accepted) package)))))
+(00001001 fs-root-package-decision
+  (00001000 (package)
+    (00000111
+      ((00000010 package) () (00100111 (00000001 rejected) (00000001 invalid-package)))
+      ((00000010 package) (1) (00100111 (00000001 rejected) (00000001 invalid-package)))
+      ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-root)))
+       (00100111 (00000001 rejected) (00000001 invalid-format)))
+      ((00100001 (00100010 (fs-package-field (00000001 version) package) *fs-format-version*))
+       (00100111 (00000001 rejected) (00000001 unsupported-version)))
+      ((00000011 (fs-package-field (00000001 revision) package) (00000001 ()))
+       (00100111 (00000001 rejected) (00000001 invalid-revision)))
+      ((00100001 (knowledge-proper-list? (fs-package-field (00000001 bindings) package)))
+       (00100111 (00000001 rejected) (00000001 invalid-bindings)))
+      ((00100001 (knowledge-proper-list? (fs-package-field (00000001 objects) package)))
+       (00100111 (00000001 rejected) (00000001 invalid-objects)))
+      (t (00100111 (00000001 accepted) package)))))
 
-(def fs-serialize-root
-  (lambda (fs)
-    (write-to-string (fs-root-package fs))))
+(00001001 fs-serialize-root
+  (00001000 (fs)
+    (01001100 (fs-root-package fs))))
 
-(def fs-deserialize-root
-  (lambda (text)
-    (fs-root-package-decision (read text))))
+(00001001 fs-deserialize-root
+  (00001000 (text)
+    (fs-root-package-decision (01001010 text))))
 
 ; Rebuild an in-memory snapshot from data-only envelopes. No envelope is
 ; evaluated. Missing referenced objects are rejected before a snapshot is
@@ -161,70 +161,70 @@
 ; Відновлює snapshot із data-only оболонок. Жодна оболонка не виконується.
 ; Відсутні object-и відхиляються до повернення snapshot, тому реконструкція
 ; атомарна з погляду викликачa.
-(def fs-build-object-store
-  (lambda (packages store)
-    (cond
-      ((atom? packages) () (list (quote accepted) store))
-      ((atom? packages) (1) (list (quote accepted) store))
+(00001001 fs-build-object-store
+  (00001000 (packages store)
+    (00000111
+      ((00000010 packages) () (00100111 (00000001 accepted) store))
+      ((00000010 packages) (1) (00100111 (00000001 accepted) store))
       (t
-        (let ((decision (fs-object-package-decision (car packages))))
-          (cond
-            ((not? (eq? (car decision) (quote accepted))) decision)
+        (10011100 ((decision (fs-object-package-decision (00000101 packages))))
+          (00000111
+            ((00100001 (00000011 (00000101 decision) (00000001 accepted))) decision)
             (t (fs-build-object-store
-                 (cdr packages)
-                 (content-store-put store (second decision))))))))))
+                 (00000110 packages)
+                 (content-store-put store (00101111 decision))))))))))
 
-(def fs-all-addresses-present?
-  (lambda (addresses store)
-    (cond
-      ((atom? addresses) () t)
-      ((atom? addresses) (1) t)
-      ((not? (content-store-contains? store (car addresses))) (quote ()))
-      (t (fs-all-addresses-present? (cdr addresses) store)))))
+(00001001 fs-all-addresses-present?
+  (00001000 (addresses store)
+    (00000111
+      ((00000010 addresses) () t)
+      ((00000010 addresses) (1) t)
+      ((00100001 (content-store-contains? store (00000101 addresses))) (00000001 ()))
+      (t (fs-all-addresses-present? (00000110 addresses) store)))))
 
-(def fs-binding-addresses-present?
-  (lambda (entries store)
-    (cond
-      ((atom? entries) () t)
-      ((atom? entries) (1) t)
-      ((not? (content-store-contains? store (cdr (car entries)))) (quote ()))
-      (t (fs-binding-addresses-present? (cdr entries) store)))))
+(00001001 fs-binding-addresses-present?
+  (00001000 (entries store)
+    (00000111
+      ((00000010 entries) () t)
+      ((00000010 entries) (1) t)
+      ((00100001 (content-store-contains? store (00000110 (00000101 entries)))) (00000001 ()))
+      (t (fs-binding-addresses-present? (00000110 entries) store)))))
 
-(def fs-reconstruct-root
-  (lambda (root-package object-packages)
-    (let ((root-decision (fs-root-package-decision root-package)))
-      (cond
-        ((not? (eq? (car root-decision) (quote accepted))) root-decision)
+(00001001 fs-reconstruct-root
+  (00001000 (root-package object-packages)
+    (10011100 ((root-decision (fs-root-package-decision root-package)))
+      (00000111
+        ((00100001 (00000011 (00000101 root-decision) (00000001 accepted))) root-decision)
         (t
-          (let ((objects-decision
+          (10011100 ((objects-decision
                   (fs-build-object-store object-packages (empty-content-store))))
-            (cond
-              ((not? (eq? (car objects-decision) (quote accepted))) objects-decision)
-              ((not? (fs-all-addresses-present?
-                      (fs-package-field (quote objects) root-package)
-                      (second objects-decision)))
-               (list (quote rejected) (quote missing-object)))
-              ((not? (fs-binding-addresses-present?
-                      (fs-package-field (quote bindings) root-package)
-                      (second objects-decision)))
-               (list (quote rejected) (quote missing-object)))
+            (00000111
+              ((00100001 (00000011 (00000101 objects-decision) (00000001 accepted))) objects-decision)
+              ((00100001 (fs-all-addresses-present?
+                      (fs-package-field (00000001 objects) root-package)
+                      (00101111 objects-decision)))
+               (00100111 (00000001 rejected) (00000001 missing-object)))
+              ((00100001 (fs-binding-addresses-present?
+                      (fs-package-field (00000001 bindings) root-package)
+                      (00101111 objects-decision)))
+               (00100111 (00000001 rejected) (00000001 missing-object)))
               (t
-                (list
-                  (quote accepted)
-                  (list
-                    (second objects-decision)
-                    (let ((bindings (fs-package-field (quote bindings) root-package)))
+                (00100111
+                  (00000001 accepted)
+                  (00100111
+                    (00101111 objects-decision)
+                    (10011100 ((bindings (fs-package-field (00000001 bindings) root-package)))
                       (fs-bindings-from-list bindings map-empty))
-                    (fs-package-field (quote revision) root-package)))))))))))
+                    (fs-package-field (00000001 revision) root-package)))))))))))
 
-(def fs-bindings-from-list
-  (lambda (entries bindings)
-    (cond
-      ((atom? entries) () bindings)
-      ((atom? entries) (1) bindings)
+(00001001 fs-bindings-from-list
+  (00001000 (entries bindings)
+    (00000111
+      ((00000010 entries) () bindings)
+      ((00000010 entries) (1) bindings)
       (t (fs-bindings-from-list
-           (cdr entries)
-           (map-insert (car (car entries)) (cdr (car entries)) bindings))))))
+           (00000110 entries)
+           (01101110 (00000101 (00000101 entries)) (00000110 (00000101 entries)) bindings))))))
 
 ; F3 journal records are data-only append-only events.  Replay starts from
 ; fs-empty and returns either (accepted fs) or (rejected reason); unknown or
@@ -232,179 +232,179 @@
 ; Журнал F3 — це лише data-only події append-only. Replay починається з
 ; fs-empty і повертає (accepted fs) або (rejected reason); невідомі чи
 ; пошкоджені події не стають частковим станом.
-(def *fs-journal-version* (quote (0 1)))
+(00001001 *fs-journal-version* (00000001 (0 1)))
 
-(def fs-journal-event
-  (lambda (op fields)
-    (cons
-      (cons (quote format) (quote wsm-fs-event))
-      (cons
-        (cons (quote version) *fs-journal-version*)
-        (cons (cons (quote op) op) fields)))))
+(00001001 fs-journal-event
+  (00001000 (op fields)
+    (00000100
+      (00000100 (00000001 format) (00000001 wsm-fs-event))
+      (00000100
+        (00000100 (00000001 version) *fs-journal-version*)
+        (00000100 (00000100 (00000001 op) op) fields)))))
 
-(def fs-journal-write-event
-  (lambda (name value)
+(00001001 fs-journal-write-event
+  (00001000 (name value)
     (fs-journal-event
-      (quote write)
-      (list (cons (quote name) name) (cons (quote value) value)))))
+      (00000001 write)
+      (00100111 (00000100 (00000001 name) name) (00000100 (00000001 value) value)))))
 
-(def fs-journal-bind-event
-  (lambda (name address)
+(00001001 fs-journal-bind-event
+  (00001000 (name address)
     (fs-journal-event
-      (quote bind)
-      (list (cons (quote name) name) (cons (quote address) address)))))
+      (00000001 bind)
+      (00100111 (00000100 (00000001 name) name) (00000100 (00000001 address) address)))))
 
-(def fs-journal-unbind-event
-  (lambda (name)
-    (fs-journal-event (quote unbind) (list (cons (quote name) name)))))
+(00001001 fs-journal-unbind-event
+  (00001000 (name)
+    (fs-journal-event (00000001 unbind) (00100111 (00000100 (00000001 name) name)))))
 
-(def fs-journal-root-commit-event
-  (lambda (root-package)
+(00001001 fs-journal-root-commit-event
+  (00001000 (root-package)
     (fs-journal-event
-      (quote root-commit)
-      (list (cons (quote root) root-package)))))
+      (00000001 root-commit)
+      (00100111 (00000100 (00000001 root) root-package)))))
 
-(def fs-journal-append
-  (lambda (journal event)
-    (append journal (list event))))
+(00001001 fs-journal-append
+  (00001000 (journal event)
+    (00101001 journal (00100111 event))))
 
-(def fs-journal-event-decision
-  (lambda (event)
-    (cond
-      ((atom? event) () (list (quote rejected) (quote invalid-event)))
-      ((atom? event) (1) (list (quote rejected) (quote invalid-event)))
-      ((not? (eq? (fs-package-field (quote format) event) (quote wsm-fs-event)))
-       (list (quote rejected) (quote invalid-format)))
-      ((not? (equal? (fs-package-field (quote version) event) *fs-journal-version*))
-       (list (quote rejected) (quote unsupported-version)))
-      ((eq? (fs-package-field (quote op) event) (quote ()))
-       (list (quote rejected) (quote missing-operation)))
-      ((and (eq? (fs-package-field (quote op) event) (quote write))
-            (or (00100001 (10110001 (00000010 (assoc (quote name) event))))
-                (00100001 (10110001 (00000010 (assoc (quote value) event))))))
-       (list (quote rejected) (quote incomplete-write)))
-      ((and (eq? (fs-package-field (quote op) event) (quote bind))
-            (or (00100001 (10110001 (00000010 (assoc (quote name) event))))
-                (00100001 (10110001 (00000010 (assoc (quote address) event))))))
-       (list (quote rejected) (quote incomplete-bind)))
-      ((and (eq? (fs-package-field (quote op) event) (quote unbind))
-            (00100001 (10110001 (00000010 (assoc (quote name) event)))))
-       (list (quote rejected) (quote incomplete-unbind)))
-      ((and (eq? (fs-package-field (quote op) event) (quote root-commit))
-            (00100001 (10110001 (00000010 (assoc (quote root) event)))))
-       (list (quote rejected) (quote incomplete-root-commit)))
-      (t (list (quote accepted) event)))))
+(00001001 fs-journal-event-decision
+  (00001000 (event)
+    (00000111
+      ((00000010 event) () (00100111 (00000001 rejected) (00000001 invalid-event)))
+      ((00000010 event) (1) (00100111 (00000001 rejected) (00000001 invalid-event)))
+      ((00100001 (00000011 (fs-package-field (00000001 format) event) (00000001 wsm-fs-event)))
+       (00100111 (00000001 rejected) (00000001 invalid-format)))
+      ((00100001 (00100010 (fs-package-field (00000001 version) event) *fs-journal-version*))
+       (00100111 (00000001 rejected) (00000001 unsupported-version)))
+      ((00000011 (fs-package-field (00000001 op) event) (00000001 ()))
+       (00100111 (00000001 rejected) (00000001 missing-operation)))
+      ((10011010 (00000011 (fs-package-field (00000001 op) event) (00000001 write))
+            (10011011 (00100001 (10110001 (00000010 (00101101 (00000001 name) event))))
+                (00100001 (10110001 (00000010 (00101101 (00000001 value) event))))))
+       (00100111 (00000001 rejected) (00000001 incomplete-write)))
+      ((10011010 (00000011 (fs-package-field (00000001 op) event) (00000001 bind))
+            (10011011 (00100001 (10110001 (00000010 (00101101 (00000001 name) event))))
+                (00100001 (10110001 (00000010 (00101101 (00000001 address) event))))))
+       (00100111 (00000001 rejected) (00000001 incomplete-bind)))
+      ((10011010 (00000011 (fs-package-field (00000001 op) event) (00000001 unbind))
+            (00100001 (10110001 (00000010 (00101101 (00000001 name) event)))))
+       (00100111 (00000001 rejected) (00000001 incomplete-unbind)))
+      ((10011010 (00000011 (fs-package-field (00000001 op) event) (00000001 root-commit))
+            (00100001 (10110001 (00000010 (00101101 (00000001 root) event)))))
+       (00100111 (00000001 rejected) (00000001 incomplete-root-commit)))
+      (t (00100111 (00000001 accepted) event)))))
 
-(def fs-bindings-without
-  (lambda (entries name result)
-    (cond
-      ((atom? entries) () result)
-      ((atom? entries) (1) result)
-      ((equal? (car (car entries)) name)
-       (fs-bindings-without (cdr entries) name result))
+(00001001 fs-bindings-without
+  (00001000 (entries name result)
+    (00000111
+      ((00000010 entries) () result)
+      ((00000010 entries) (1) result)
+      ((00100010 (00000101 (00000101 entries)) name)
+       (fs-bindings-without (00000110 entries) name result))
       (t
         (fs-bindings-without
-          (cdr entries)
+          (00000110 entries)
           name
-          (map-insert (car (car entries)) (cdr (car entries)) result))))))
+          (01101110 (00000101 (00000101 entries)) (00000110 (00000101 entries)) result))))))
 
-(def fs-unbind
-  (lambda (fs name)
-    (list
+(00001001 fs-unbind
+  (00001000 (fs name)
+    (00100111
       (fs-objects fs)
-      (fs-bindings-without (map->list (fs-bindings fs)) name map-empty)
-      (+ 1 (fs-revision fs)))))
+      (fs-bindings-without (01110000 (fs-bindings fs)) name map-empty)
+      (00001100 1 (fs-revision fs)))))
 
-(def fs-journal-replay-event
-  (lambda (fs event)
-    (let ((decision (fs-journal-event-decision event)))
-      (cond
-        ((not? (eq? (car decision) (quote accepted))) decision)
+(00001001 fs-journal-replay-event
+  (00001000 (fs event)
+    (10011100 ((decision (fs-journal-event-decision event)))
+      (00000111
+        ((00100001 (00000011 (00000101 decision) (00000001 accepted))) decision)
         (t
-          (let ((op (fs-package-field (quote op) event)))
-            (cond
-              ((eq? op (quote write))
-               (let ((written (fs-write fs
-                                        (fs-package-field (quote name) event)
-                                        (fs-package-field (quote value) event))))
-                 (list (quote accepted) (car written))))
-              ((eq? op (quote bind))
-               (let ((address (fs-package-field (quote address) event)))
-                 (cond
-                   ((not? (content-store-contains? (fs-objects fs) address))
-                    (list (quote rejected) (quote missing-object)))
+          (10011100 ((op (fs-package-field (00000001 op) event)))
+            (00000111
+              ((00000011 op (00000001 write))
+               (10011100 ((written (fs-write fs
+                                        (fs-package-field (00000001 name) event)
+                                        (fs-package-field (00000001 value) event))))
+                 (00100111 (00000001 accepted) (00000101 written))))
+              ((00000011 op (00000001 bind))
+               (10011100 ((address (fs-package-field (00000001 address) event)))
+                 (00000111
+                   ((00100001 (content-store-contains? (fs-objects fs) address))
+                    (00100111 (00000001 rejected) (00000001 missing-object)))
                    (t
-                     (list
-                       (quote accepted)
-                       (list
+                     (00100111
+                       (00000001 accepted)
+                       (00100111
                          (fs-objects fs)
-                         (map-insert (fs-package-field (quote name) event)
+                         (01101110 (fs-package-field (00000001 name) event)
                                      address
                                      (fs-bindings fs))
-                         (+ 1 (fs-revision fs))))))))
-              ((eq? op (quote unbind))
-               (list (quote accepted)
-                     (fs-unbind fs (fs-package-field (quote name) event))))
-              ((eq? op (quote root-commit))
-               (cond
-                 ((equal? (fs-root-package fs)
-                          (fs-package-field (quote root) event))
-                  (list (quote accepted) fs))
-                 (t (list (quote rejected) (quote root-mismatch)))))
-              (t (list (quote rejected) (quote unknown-event))))))))))
+                         (00001100 1 (fs-revision fs))))))))
+              ((00000011 op (00000001 unbind))
+               (00100111 (00000001 accepted)
+                     (fs-unbind fs (fs-package-field (00000001 name) event))))
+              ((00000011 op (00000001 root-commit))
+               (00000111
+                 ((00100010 (fs-root-package fs)
+                          (fs-package-field (00000001 root) event))
+                  (00100111 (00000001 accepted) fs))
+                 (t (00100111 (00000001 rejected) (00000001 root-mismatch)))))
+              (t (00100111 (00000001 rejected) (00000001 unknown-event))))))))))
 
-(def fs-journal-replay-onto
-  (lambda (journal fs)
-    (cond
-      ((atom? journal) () (list (quote accepted) fs))
-      ((atom? journal) (1) (list (quote accepted) fs))
+(00001001 fs-journal-replay-onto
+  (00001000 (journal fs)
+    (00000111
+      ((00000010 journal) () (00100111 (00000001 accepted) fs))
+      ((00000010 journal) (1) (00100111 (00000001 accepted) fs))
       (t
-        (let ((decision (fs-journal-replay-event fs (car journal))))
-          (cond
-            ((not? (eq? (car decision) (quote accepted))) decision)
-            (t (fs-journal-replay-onto (cdr journal) (second decision)))))))))
+        (10011100 ((decision (fs-journal-replay-event fs (00000101 journal))))
+          (00000111
+            ((00100001 (00000011 (00000101 decision) (00000001 accepted))) decision)
+            (t (fs-journal-replay-onto (00000110 journal) (00101111 decision)))))))))
 
-(def fs-journal-replay
-  (lambda (journal)
+(00001001 fs-journal-replay
+  (00001000 (journal)
     (fs-journal-replay-onto journal (fs-empty))))
 
-(def fs-serialize-journal
-  (lambda (journal)
-    (write-to-string journal)))
+(00001001 fs-serialize-journal
+  (00001000 (journal)
+    (01001100 journal)))
 
-(def fs-deserialize-journal
-  (lambda (text)
-    (fs-journal-replay (read text))))
+(00001001 fs-deserialize-journal
+  (00001000 (text)
+    (fs-journal-replay (01001010 text))))
 
 ; F4 commit boundary model. Objects and journal may be written first, but a
 ; snapshot becomes visible only when the root-pointer stage completes.
 ; Модель межі commit F4. Objects і journal можна записати раніше, але
 ; snapshot стає видимим лише після завершення root-pointer.
-(def fs-commit-stage?
-  (lambda (stage)
-    (cond
-      ((eq? stage (quote objects)) t)
-      ((eq? stage (quote journal)) t)
-      ((eq? stage (quote root-pointer)) t)
-      (t (quote ())))))
+(00001001 fs-commit-stage?
+  (00001000 (stage)
+    (00000111
+      ((00000011 stage (00000001 objects)) t)
+      ((00000011 stage (00000001 journal)) t)
+      ((00000011 stage (00000001 root-pointer)) t)
+      (t (00000001 ())))))
 
-(def fs-recover-commit
-  (lambda (old-fs new-fs completed-stage)
-    (cond
-      ((not? (fs-commit-stage? completed-stage))
-       (list (quote rejected) (quote unknown-commit-stage)))
-      ((eq? completed-stage (quote root-pointer))
-       (list (quote recovered) new-fs))
-      (t (list (quote recovered) old-fs)))))
+(00001001 fs-recover-commit
+  (00001000 (old-fs new-fs completed-stage)
+    (00000111
+      ((00100001 (fs-commit-stage? completed-stage))
+       (00100111 (00000001 rejected) (00000001 unknown-commit-stage)))
+      ((00000011 completed-stage (00000001 root-pointer))
+       (00100111 (00000001 recovered) new-fs))
+      (t (00100111 (00000001 recovered) old-fs)))))
 
-(def fs-recover-root-package
-  (lambda (old-package candidate-package completed-stage)
-    (cond
-      ((not? (eq? completed-stage (quote root-pointer)))
-       (list (quote recovered) old-package))
+(00001001 fs-recover-root-package
+  (00001000 (old-package candidate-package completed-stage)
+    (00000111
+      ((00100001 (00000011 completed-stage (00000001 root-pointer)))
+       (00100111 (00000001 recovered) old-package))
       (t
-        (let ((decision (fs-root-package-decision candidate-package)))
-          (cond
-            ((eq? (car decision) (quote accepted))
-             (list (quote recovered) candidate-package))
-            (t (list (quote recovered) old-package (quote rejected-candidate)))))))))
+        (10011100 ((decision (fs-root-package-decision candidate-package)))
+          (00000111
+            ((00000011 (00000101 decision) (00000001 accepted))
+             (00100111 (00000001 recovered) candidate-package))
+            (t (00100111 (00000001 recovered) old-package (00000001 rejected-candidate)))))))))

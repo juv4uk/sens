@@ -15,203 +15,203 @@
 ; top-level lambda-definition groups; later non-group top-level bindings are
 ; not claimed visible through an earlier captured environment.
 
-(def my-group-closure?
-  (lambda (value)
-    (cond
-      ((atom? value) () (quote ()))
-      ((atom? value) (1) (quote ()))
-      (t (eq? (car value) (quote recursive-group-closure))))))
+(00001001 my-group-closure?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) () (00000001 ()))
+      ((00000010 value) (1) (00000001 ()))
+      (t (00000011 (00000101 value) (00000001 recursive-group-closure))))))
 
-(def my-sixth
-  (lambda (values)
-    (car (cdr (cdr (cdr (cdr (cdr values))))))))
+(00001001 my-sixth
+  (00001000 (values)
+    (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 values))))))))
 
-(def my-lambda-def-form?
-  (lambda (form)
-    (cond
-      ((atom? form) () (quote ()))
-      ((atom? form) (1) (quote ()))
-      ((eq? (car form) (quote def))
-       (my-lambda-form? (third form)))
-      (t (quote ())))))
+(00001001 my-lambda-def-form?
+  (00001000 (form)
+    (00000111
+      ((00000010 form) () (00000001 ()))
+      ((00000010 form) (1) (00000001 ()))
+      ((00000011 (00000101 form) (00000001 def))
+       (my-lambda-form? (00110000 form)))
+      (t (00000001 ())))))
 
-(def my-take-lambda-def-group
-  (lambda (forms)
-    (cond
-      ((atom? forms) () (quote ()))
-      ((atom? forms) (1) (quote ()))
-      ((my-lambda-def-form? (car forms))
-       (cons (car forms)
-             (my-take-lambda-def-group (cdr forms))))
-      (t (quote ())))))
+(00001001 my-take-lambda-def-group
+  (00001000 (forms)
+    (00000111
+      ((00000010 forms) () (00000001 ()))
+      ((00000010 forms) (1) (00000001 ()))
+      ((my-lambda-def-form? (00000101 forms))
+       (00000100 (00000101 forms)
+             (my-take-lambda-def-group (00000110 forms))))
+      (t (00000001 ())))))
 
-(def my-drop-lambda-def-group
-  (lambda (forms)
-    (cond
-      ((atom? forms) () (quote ()))
-      ((atom? forms) (1) (quote ()))
-      ((my-lambda-def-form? (car forms))
-       (my-drop-lambda-def-group (cdr forms)))
+(00001001 my-drop-lambda-def-group
+  (00001000 (forms)
+    (00000111
+      ((00000010 forms) () (00000001 ()))
+      ((00000010 forms) (1) (00000001 ()))
+      ((my-lambda-def-form? (00000101 forms))
+       (my-drop-lambda-def-group (00000110 forms)))
       (t forms))))
 
-(def my-group-closure-from-def
-  (lambda (form group captured-env)
-    (let ((lambda-form (third form)))
-      (list (quote recursive-group-closure)
-            (second form)
-            (second lambda-form)
-            (cdr (cdr lambda-form))
+(00001001 my-group-closure-from-def
+  (00001000 (form group captured-env)
+    (10011100 ((lambda-form (00110000 form)))
+      (00100111 (00000001 recursive-group-closure)
+            (00101111 form)
+            (00101111 lambda-form)
+            (00000110 (00000110 lambda-form))
             group
             captured-env))))
 
 ; Build onto the captured environment so later definitions in the same group
 ; appear earlier in the alist, matching same-frame overwrite order.
-(def my-build-group-env-onto
-  (lambda (forms group captured-env out)
-    (cond
-      ((atom? forms) () out)
-      ((atom? forms) (1) out)
+(00001001 my-build-group-env-onto
+  (00001000 (forms group captured-env out)
+    (00000111
+      ((00000010 forms) () out)
+      ((00000010 forms) (1) out)
       (t
-       (let ((form (car forms)))
+       (10011100 ((form (00000101 forms)))
          (my-build-group-env-onto
-           (cdr forms)
+           (00000110 forms)
            group
            captured-env
-           (cons
-             (cons (second form)
+           (00000100
+             (00000100 (00101111 form)
                    (my-group-closure-from-def form group captured-env))
              out)))))))
 
-(def my-build-group-env
-  (lambda (group captured-env)
+(00001001 my-build-group-env
+  (00001000 (group captured-env)
     (my-build-group-env-onto group group captured-env captured-env)))
 
-(def my-apply-group-closure
-  (lambda (fn args)
-    (let ((group-env
+(00001001 my-apply-group-closure
+  (00001000 (fn args)
+    (10011100 ((group-env
             (my-build-group-env (my-fifth fn) (my-sixth fn))))
       (my-eval-body
         (my-fourth fn)
         (bind-params
-          (third fn)
+          (00110000 fn)
           args
           group-env)))))
 
 ; Apply wrapper used only by this experiment. Ordinary values delegate to the
 ; already-proven main my-apply path.
-(def my-group-apply
-  (lambda (fn args)
-    (cond
+(00001001 my-group-apply
+  (00001000 (fn args)
+    (00000111
       ((my-group-closure? fn) (my-apply-group-closure fn args))
       (t (my-apply fn args)))))
 
 ; Evaluator wrapper mirrors my-eval, changing only the apply hook so nested
 ; calls between members of a recursive group can invoke group closures.
-(def my-group-eval-list
-  (lambda (exprs env)
-    (cond
-      ((atom? exprs) () (quote ()))
-      ((atom? exprs) (1) (quote ()))
-      (t (cons (my-group-eval (car exprs) env)
-               (my-group-eval-list (cdr exprs) env))))))
+(00001001 my-group-eval-list
+  (00001000 (exprs env)
+    (00000111
+      ((00000010 exprs) () (00000001 ()))
+      ((00000010 exprs) (1) (00000001 ()))
+      (t (00000100 (my-group-eval (00000101 exprs) env)
+               (my-group-eval-list (00000110 exprs) env))))))
 
-(def my-group-eval-body
-  (lambda (body env)
-    (cond
-      ((atom? (cdr body)) () (my-group-eval (car body) env))
-      ((atom? (cdr body)) (1) (my-group-eval (car body) env))
-      (t ((lambda ()
-            (my-group-eval (car body) env)
-            (my-group-eval-body (cdr body) env)))))))
+(00001001 my-group-eval-body
+  (00001000 (body env)
+    (00000111
+      ((00000010 (00000110 body)) () (my-group-eval (00000101 body) env))
+      ((00000010 (00000110 body)) (1) (my-group-eval (00000101 body) env))
+      (t ((00001000 ()
+            (my-group-eval (00000101 body) env)
+            (my-group-eval-body (00000110 body) env)))))))
 
-(def my-group-eval-cond
-  (lambda (clauses env)
-    (cond
-      ((atom? clauses) () (quote ()))
-      ((atom? clauses) (1) (quote ()))
-      ((my-group-eval (car (car clauses)) env)
-       (my-group-eval (second (car clauses)) env))
-      (t (my-group-eval-cond (cdr clauses) env)))))
+(00001001 my-group-eval-cond
+  (00001000 (clauses env)
+    (00000111
+      ((00000010 clauses) () (00000001 ()))
+      ((00000010 clauses) (1) (00000001 ()))
+      ((my-group-eval (00000101 (00000101 clauses)) env)
+       (my-group-eval (00101111 (00000101 clauses)) env))
+      (t (my-group-eval-cond (00000110 clauses) env)))))
 
-(def my-group-apply-owned
-  (lambda (fn args)
-    (cond
+(00001001 my-group-apply-owned
+  (00001000 (fn args)
+    (00000111
       ((my-group-closure? fn)
-       (let ((group-env
+       (10011100 ((group-env
                (my-build-group-env (my-fifth fn) (my-sixth fn))))
          (my-group-eval-body
            (my-fourth fn)
-           (bind-params (third fn) args group-env))))
+           (bind-params (00110000 fn) args group-env))))
       (t (my-apply fn args)))))
 
-(def my-group-eval
-  (lambda (expr env)
-    (cond
-      ((atom? expr) () (env-lookup expr env))
-      ((atom? expr) (1) (env-lookup expr env))
-      ((atom? (car expr)) () (cond
-         ((eq? (car expr) (quote quote)) (second expr))
-         ((eq? (car expr) (quote cond))
-          (my-group-eval-cond (cdr expr) env))
-         ((eq? (car expr) (quote lambda))
-          (list (quote closure) (second expr) (cdr (cdr expr)) env))
+(00001001 my-group-eval
+  (00001000 (expr env)
+    (00000111
+      ((00000010 expr) () (env-lookup expr env))
+      ((00000010 expr) (1) (env-lookup expr env))
+      ((00000010 (00000101 expr)) () (00000111
+         ((00000011 (00000101 expr) (00000001 quote)) (00101111 expr))
+         ((00000011 (00000101 expr) (00000001 cond))
+          (my-group-eval-cond (00000110 expr) env))
+         ((00000011 (00000101 expr) (00000001 lambda))
+          (00100111 (00000001 closure) (00101111 expr) (00000110 (00000110 expr)) env))
          (t
-          (let ((fn (my-group-eval (car expr) env)))
-            (cond
+          (10011100 ((fn (my-group-eval (00000101 expr) env)))
+            (00000111
               ((my-macro? fn)
-               (my-group-eval (my-apply fn (cdr expr)) env))
+               (my-group-eval (my-apply fn (00000110 expr)) env))
               (t
                (my-group-apply-owned
                  fn
-                 (my-group-eval-list (cdr expr) env))))))))
-      ((atom? (car expr)) (1) (cond
-         ((eq? (car expr) (quote quote)) (second expr))
-         ((eq? (car expr) (quote cond))
-          (my-group-eval-cond (cdr expr) env))
-         ((eq? (car expr) (quote lambda))
-          (list (quote closure) (second expr) (cdr (cdr expr)) env))
+                 (my-group-eval-list (00000110 expr) env))))))))
+      ((00000010 (00000101 expr)) (1) (00000111
+         ((00000011 (00000101 expr) (00000001 quote)) (00101111 expr))
+         ((00000011 (00000101 expr) (00000001 cond))
+          (my-group-eval-cond (00000110 expr) env))
+         ((00000011 (00000101 expr) (00000001 lambda))
+          (00100111 (00000001 closure) (00101111 expr) (00000110 (00000110 expr)) env))
          (t
-          (let ((fn (my-group-eval (car expr) env)))
-            (cond
+          (10011100 ((fn (my-group-eval (00000101 expr) env)))
+            (00000111
               ((my-macro? fn)
-               (my-group-eval (my-apply fn (cdr expr)) env))
+               (my-group-eval (my-apply fn (00000110 expr)) env))
               (t
                (my-group-apply-owned
                  fn
-                 (my-group-eval-list (cdr expr) env))))))))
+                 (my-group-eval-list (00000110 expr) env))))))))
       (t
        (my-group-apply-owned
-         (my-group-eval (car expr) env)
-         (my-group-eval-list (cdr expr) env))))))
+         (my-group-eval (00000101 expr) env)
+         (my-group-eval-list (00000110 expr) env))))))
 
-(def my-group-eval-top-form
-  (lambda (form env)
-    (cond
-      ((atom? form) () (cons env (my-group-eval form env)))
-      ((atom? form) (1) (cons env (my-group-eval form env)))
-      ((eq? (car form) (quote def))
-       (let ((value (my-group-eval (third form) env)))
-         (cons (cons (cons (second form) value) env) value)))
-      ((eq? (car form) (quote defmacro))
+(00001001 my-group-eval-top-form
+  (00001000 (form env)
+    (00000111
+      ((00000010 form) () (00000100 env (my-group-eval form env)))
+      ((00000010 form) (1) (00000100 env (my-group-eval form env)))
+      ((00000011 (00000101 form) (00000001 def))
+       (10011100 ((value (my-group-eval (00110000 form) env)))
+         (00000100 (00000100 (00000100 (00101111 form) value) env) value)))
+      ((00000011 (00000101 form) (00000001 defmacro))
        (my-eval-top-form form env))
-      (t (cons env (my-group-eval form env))))))
+      (t (00000100 env (my-group-eval form env))))))
 
-(def my-eval-program-with-groups
-  (lambda (forms env)
-    (cond
-      ((my-lambda-def-form? (car forms))
-       (let ((group (my-take-lambda-def-group forms)))
-         (let ((rest (my-drop-lambda-def-group forms)))
-           (let ((group-env (my-build-group-env group env)))
-             (cond
-               ((atom? rest) () (cons group-env (cdr (car group-env))))
-               ((atom? rest) (1) (cons group-env (cdr (car group-env))))
+(00001001 my-eval-program-with-groups
+  (00001000 (forms env)
+    (00000111
+      ((my-lambda-def-form? (00000101 forms))
+       (10011100 ((group (my-take-lambda-def-group forms)))
+         (10011100 ((rest (my-drop-lambda-def-group forms)))
+           (10011100 ((group-env (my-build-group-env group env)))
+             (00000111
+               ((00000010 rest) () (00000100 group-env (00000110 (00000101 group-env))))
+               ((00000010 rest) (1) (00000100 group-env (00000110 (00000101 group-env))))
                (t (my-eval-program-with-groups rest group-env)))))))
       (t
-       (let ((result (my-group-eval-top-form (car forms) env)))
-         (cond
-           ((atom? (cdr forms)) () result)
-           ((atom? (cdr forms)) (1) result)
+       (10011100 ((result (my-group-eval-top-form (00000101 forms) env)))
+         (00000111
+           ((00000010 (00000110 forms)) () result)
+           ((00000010 (00000110 forms)) (1) result)
            (t (my-eval-program-with-groups
-                (cdr forms)
-                (car result)))))))))
+                (00000110 forms)
+                (00000101 result)))))))))
