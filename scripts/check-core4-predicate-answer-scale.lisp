@@ -16,6 +16,8 @@
 (def pas-algebra (fifth pas-sections))
 
 (def pas-terminology (nth 5 pas-sections))
+(def pas-carrier (nth 6 pas-sections))
+(def pas-predicates (nth 7 pas-sections))
 
 (def pas-no-levels (pas-field pas-no (quote levels)))
 (def pas-yes-levels (pas-field pas-yes (quote levels)))
@@ -57,11 +59,23 @@
             (map pas-grade-and-sanskrit pas-no-levels))
     (equal? (map pas-term-grade-and-sanskrit pas-terms)
             (map pas-grade-and-sanskrit pas-yes-levels))
-    (pas-field pas-terminology (quote boundary-term))))
+    (pas-field pas-terminology (quote boundary-term))
+    (pas-field pas-algebra (quote truth-order))
+    (pas-field pas-algebra (quote and-law))
+    (pas-field pas-algebra (quote or-law))
+    (pas-field pas-algebra (quote de-morgan-law))
+    (pas-field pas-algebra (quote not-order-law))
+    (pas-field pas-algebra (quote cond-law))
+    (pas-field pas-algebra (quote excluded-middle-law))
+    (pas-field pas-algebra (quote kleene-k3-slice))
+    (pas-field pas-algebra (quote and-or-cond-law))
+    pas-carrier
+    pas-predicates
+    (length pas-sections)))
 
 (def pas-expected
   (list
-    (quote core4-predicate-answer-scale/2)
+    (quote core4-predicate-answer-scale/3)
     15
     "0^n | 1^n | (), n=1..7"
     (quote separate-00000000-through-11111111)
@@ -106,7 +120,36 @@
        (7 ajñāta-sīmā   "межа невідомого" "edge of the unknown")))
     (quote (structural-relation same))
     (quote (structural-relation same))
-    (quote (ajñāta "невідомо" "unknown"))))
+    (quote (ajñāta "невідомо" "unknown"))
+    "0 < 00 < 000 < 0000 < 00000 < 000000 < 0000000 < () < 1111111 < 111111 < 11111 < 1111 < 111 < 11 < 1"
+    (quote meet-on-truth-order)
+    (quote join-on-truth-order)
+    (quote or-is-not-of-and-of-nots)
+    (quote order-reversing-involution)
+    (quote exact-structural-match-of-answer)
+    (quote grade-1-only)
+    (quote ((0) () (1)))
+    (quote ratified-2026-09-26)
+    (quote
+      ((carrier . bit-list)
+       (bits . (0 1))
+       (yes-examples . ((1) (1 1) (1 1 1 1 1 1 1)))
+       (no-examples . ((0) (0 0) (0 0 0 0 0 0 0)))
+       (unknown . ())
+       (max-width . 7)
+       (spelling . notation-only)
+       (short-bit-symbol-carrier . forbidden)
+       (string-carrier . superseded-by-bit-list)
+       (number-carrier . forbidden)))
+    (quote
+      ((predicate-projection . core4)
+       (atom? . ((atom (1)) (pair (0)) (empty-list ())))
+       (eq? . ((same (1)) (distinct (0))))
+       (runtime-status . not-yet-installed)
+       (core1-core3-answer-domain . grade-1-only)
+       (core1 . historical-unchanged-overlay-only)
+       (core2 . frozen-compatibility)))
+    8))
 
 (cond
   ((equal? pas-observed pas-expected)
