@@ -19,15 +19,26 @@ jobs:
       - name: Checkout sens authority
         uses: actions/checkout@v5
 
+      - name: Verify local Core1 historical inputs before private checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f contracts/core1-historical-sid-map.lisp
+          test -f lib/surface/semantic-registry.lisp
+          git diff --check
+
       - name: Checkout pinned historical mechanism repository
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
           ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
           ref: 1ae9745b66a1439c1929b0d9038c680567118a58
           path: .core1-historical/mccarthy-eval
 
       - name: Verify one-way SID mapping
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -95,3 +106,9 @@ jobs:
           done
 
           echo "historical support remains mechanism-only; SID authority stays in sens"
+
+      - name: Fail closed when private Core1 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "::error::Private Core1 historical evidence is intentionally unavailable to fork/untrusted pull requests."
+          exit 1

@@ -24,27 +24,42 @@ jobs:
       - name: Checkout sens Core1 source
         uses: actions/checkout@v5
 
+      - name: Verify local Core1 inputs before private checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f lib/core1.lisp
+          test -f contracts/core1-bootstrap-contract.lisp
+          test -f contracts/core1-s3-compiler-prelude.lisp
+          git diff --check
+
       - name: Checkout pinned typed-SID8 S0 seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
           ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
           ref: 6031f92652066825a245c806c0773e9e524257bd
           path: .core1-s0/mccarthy-eval
 
       - name: Checkout pinned Lisp-authored compiler seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/checkout@v5
         with:
           repository: juv4uk/wsm-my-lisp
           ssh-key: ${{ secrets.WSM_MY_LISP_SSH_KEY }}
+          persist-credentials: false
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           path: .core1-s0/wsm-sens
 
       - name: Build pinned typed-SID8 seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         working-directory: .core1-s0/mccarthy-eval
         run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
 
       - name: Record S0/S1 provenance
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -64,6 +79,7 @@ jobs:
           sha256sum .core1-s0/wsm-sens/lib/compiler.lisp | cut -d' ' -f1
 
       - name: Verify generation manifest against measured bytes
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -81,6 +97,7 @@ jobs:
           grep -F "(source-sha256 . \"$s2_source\")" "$manifest"
 
       - name: Execute exact Core1 S1 source on S0
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -101,6 +118,7 @@ jobs:
           test "$actual" = "$expected"
 
       - name: Load pinned compiler source through Core1
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -124,6 +142,7 @@ jobs:
           test "$actual" = '(var FOO)'
 
       - name: Execute Core1 S3 compiler prelude through S0/Core1
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -165,3 +184,9 @@ jobs:
 
           printf '%s\n' "$actual"
           test "$actual" = '(T NIL)'
+
+      - name: Fail closed when private Core1 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "::error::Private Core1 dependencies are intentionally unavailable to fork/untrusted pull requests."
+          exit 1
