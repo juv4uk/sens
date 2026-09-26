@@ -66,6 +66,11 @@ fn exact_path_ignores_poisoned_surface_bindings() {
     .map(|function| poison_surfaces_for(&mut session, function))
     .sum::<usize>();
     assert!(poisoned > 0, "adversarial setup має реально отруїти surface bindings");
+    assert_eq!(
+        session.environment.get("car"),
+        Some(Value::Symbol("surface-poison".into())),
+        "контроль має довести, що peer surface 00000101 справді отруєний"
+    );
 
     let carried = eval_value(&mut session, "((00001000 (f) f) 00000101)");
     assert_eq!(carried, Value::Sid(sens::sens!(00000101)));
