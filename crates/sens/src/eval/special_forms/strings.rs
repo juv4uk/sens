@@ -122,28 +122,6 @@ pub(crate) fn string_append_values(
     Ok(Value::String(Rc::from(format!("{left}{right}").as_str())))
 }
 
-pub(crate) fn string_less_than_values(
-    arguments: &[Value],
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_value_arity("string<?", arguments, 2, span)?;
-    let Value::String(left) = &arguments[0] else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "string<? expects two strings · string<? ochikuie dva riadky · string<? erwartet zwei Zeichenketten",
-            span,
-        ));
-    };
-    let Value::String(right) = &arguments[1] else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "string<? expects two strings · string<? ochikuie dva riadky · string<? erwartet zwei Zeichenketten",
-            span,
-        ));
-    };
-    Ok(Value::truth(left.as_ref() < right.as_ref()))
-}
-
 pub(crate) fn string_predicate_values(
     arguments: &[Value],
     span: Span,

@@ -129,7 +129,6 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     table[crate::sens!(01010101).packed_byte() as usize] = Some(builtins::prim_01010101); // f32-buffer
     table[crate::sens!(01000001).packed_byte() as usize] = Some(builtins::prim_01000001); // string-slice
     table[crate::sens!(00111010).packed_byte() as usize] = Some(builtins::prim_00111010); // string-append
-    table[crate::sens!(00100101).packed_byte() as usize] = Some(builtins::prim_00100101); // string<?
     table[crate::sens!(00100100).packed_byte() as usize] = Some(builtins::prim_00100100); // string?
     table[crate::sens!(01000010).packed_byte() as usize] = Some(builtins::prim_01000010); // symbol->string
     table[crate::sens!(01000011).packed_byte() as usize] = Some(builtins::prim_01000011); // string->symbol

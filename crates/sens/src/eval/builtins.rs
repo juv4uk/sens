@@ -28,7 +28,7 @@ use crate::eval::special_forms::json::json_parse_values;
 use crate::eval::special_forms::{
     codepoint_to_string_values,
     princ_values, print_values, read_all_values, read_values, sha256_hex_values,
-    string_append_values, string_first_values, string_less_than_values, string_predicate_values,
+    string_append_values, string_first_values, string_predicate_values,
     string_rest_values, string_to_codepoint_values, string_to_symbol_values,
     symbol_to_string_values, write_to_string_values,
 };
@@ -359,11 +359,6 @@ pub(super) fn prim_01000001(args: &[Value], _env: &Environment, span: Span) -> R
 /// string-append
 pub(super) fn prim_00111010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         string_append_values(args, span)
-    }
-
-/// string<?
-pub(super) fn prim_00100101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        string_less_than_values(args, span)
     }
 
 /// string?
