@@ -11,7 +11,7 @@
 
   ((generation . s1)
    (role . lisp-owned-bootstrap)
-   (repository . juv4uk/my-lisp)
+   (repository . juv4uk/sens)
    (path . "lib/core1.lisp")
    (source-sha256 . "d58d0161e2c0ba6e91f760f8e8b4baa304a307ca7362d299c7e402ab67d4c9ba")
    (executed-by . s0)
