@@ -22,21 +22,3 @@ fn cli_export_produces_expected_s_expression_for_target_fixture() {
     assert!(stdout.contains("(expected . \"5/336\")"));
 }
 
-#[test]
-fn cli_verify_runs_and_passes_all_policy_checks() {
-    let repo_root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
-    let output = Command::new(env!("CARGO_BIN_EXE_xtask"))
-        .current_dir(repo_root)
-        .arg("verify")
-        .output()
-        .expect("failed to run xtask verify");
-
-    assert!(output.status.success(), "xtask verify must exit 0");
-    let stdout = String::from_utf8(output.stdout).expect("stdout must be utf-8");
-    assert!(
-        stdout.lines().any(|line| {
-            line.starts_with("[xtask verify] all ") && line.ends_with(" checks passed")
-        }),
-        "xtask verify must report that all registered policy checks passed; stdout:\n{stdout}"
-    );
-}

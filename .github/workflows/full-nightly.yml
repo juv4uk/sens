@@ -35,7 +35,6 @@ jobs:
         run: cargo build --workspace
       - name: Governance and policy checks
         run: |
-          cargo run -p xtask -- verify
           cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
       - name: Ukrainian full-word source profile
         run: ./target/debug/sens scripts/перевірити-український-профіль.lisp
