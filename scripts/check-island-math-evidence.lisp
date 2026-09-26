@@ -14,7 +14,7 @@
 
 (def registry-rows registry)
 
-(def evidence-sid-text
+(def evidence-sid-bits
   (lambda (sid)
     (cond
       ((string? sid) sid)
@@ -54,12 +54,12 @@
       ((atom? rows) (0)
        (let ((row (car rows)))
          (cond
-           ((equal? (evidence-sid-text sid) (evidence-sid-text (car row))) (1)
+           ((equal? (evidence-sid-bits sid) (evidence-sid-bits (car row))) (1)
             (cond
               ((eq? executor (second row)) (1) (quote yes))
               ((eq? executor (second row)) (0)
                (mechanism-has-route? sid executor (cdr rows)))))
-           ((equal? (evidence-sid-text sid) (evidence-sid-text (car row))) (0)
+           ((equal? (evidence-sid-bits sid) (evidence-sid-bits (car row))) (0)
             (mechanism-has-route? sid executor (cdr rows)))))))))
 
 (def evidence-has-route?

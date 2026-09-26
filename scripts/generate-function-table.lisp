@@ -67,7 +67,7 @@
 
 (def machine-path
   (lambda (sid)
-    (let ((row (find-machine-row (sid-text sid) machine-rows)))
+    (let ((row (find-machine-row (sid-bits sid) machine-rows)))
       (cond
         ((atom? row) () "()")
         ((atom? row) (1) "()")
@@ -88,12 +88,12 @@
     (cond
       ((atom? rows) () (quote ()))
       ((atom? rows) (1) (quote ()))
-      ((equal? (sid-text (second (car rows))) sid) (car rows))
+      ((equal? (sid-bits (second (car rows))) sid) (car rows))
       (t (find-historical-row sid (cdr rows))))))
 
 (def mccarthy-label
   (lambda (sid)
-    (let ((row (find-historical-row (sid-text sid) historical-rows)))
+    (let ((row (find-historical-row (sid-bits sid) historical-rows)))
       (cond
         ((atom? row) () "()")
         ((atom? row) (1) "()")
@@ -159,7 +159,7 @@
 ; SID is already a first-class exact eight-bit identity. Its canonical printer
 ; preserves the exact spelling including leading zeroes; do not reinterpret it
 ; as arithmetic data merely to reconstruct the same source identity.
-(def sid-text
+(def sid-bits
   (lambda (sid)
     (write-to-string sid)))
 
@@ -170,12 +170,12 @@
            (sa (get-surface (quote sa) surfaces)))
       (cond
         ((surface-usable? en)
-         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text en)))
+         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text en)))
         ((surface-usable? ук)
-         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text ук)))
+         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text ук)))
         ((surface-usable? sa)
-         (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text sa)))
-        (t (string-append "identity:" (sid-text sid)))))))
+         (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text sa)))
+        (t (string-append "identity:" (sid-bits sid)))))))
 
 ; #1469 invariant: this generated review projection is total over the exact
 ; SENS function space. This validates projection shape only; it assigns no
@@ -186,10 +186,10 @@
       ((equal? (length rows) 256)
        (1)
        (cond
-         ((equal? (sid-text (car (car rows))) "00000000")
+         ((equal? (sid-bits (car (car rows))) "00000000")
           (1)
           (cond
-            ((equal? (sid-text (car (car (reverse rows)))) "11111111")
+            ((equal? (sid-bits (car (car (reverse rows)))) "11111111")
              (1)
              t)
             (t
@@ -241,7 +241,7 @@
            (sym (get-surface (quote sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
-        "  (\"" (sid-text sid) "\" " formal
+        "  (\"" (sid-bits sid) "\" " formal
         " (ук " (surface-word-wsm-text ук) ")"
         " (укр " (surface-word-wsm-text укр) ")"
         " (en " (surface-word-wsm-text en) ")"
@@ -259,7 +259,7 @@
            (sa (get-surface (quote sa) surfaces))
            (sym (get-surface (quote sym) surfaces)))
       (str+
-        "| `" (sid-text sid) "` | " (surface-word-text ук)
+        "| `" (sid-bits sid) "` | " (surface-word-text ук)
         " | " (surface-word-text укр)
         " | " (surface-word-text en)
         " | " (surface-word-text sa)

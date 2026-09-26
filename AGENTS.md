@@ -197,7 +197,7 @@ Read the neighbor's own contract/evidence directly (`fpga-lisp/isa-contract.lisp
 
 ## Host capability boundary
 
-`crates/my-lisp` owns language/runtime policy data but installs no OS capabilities. `my-lisp-host` owns filesystem/process/TCP mechanisms and enforcement.
+`crates/sens` owns language/runtime policy data but installs no OS capabilities. `sens-host` owns filesystem/process/TCP mechanisms and enforcement.
 
 Per-session restricted embeddings can configure:
 

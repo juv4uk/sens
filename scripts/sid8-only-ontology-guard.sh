@@ -18,6 +18,20 @@ for file in "${files[@]}"; do
   [[ -f "$file" ]] || { echo "SID8-ONLY guard: missing $file" >&2; exit 1; }
 done
 
+# #1355: інструменти можуть відображати вісім бітів, але не повинні
+# навчати другої ідентичності «SID-as-text» через назви допоміжних функцій.
+tooling_identity_files=(
+  scripts/generate-function-table.lisp
+  scripts/check-island-math-evidence.lisp
+)
+for file in "${tooling_identity_files[@]}"; do
+  [[ -f "$file" ]] || { echo "SID8-ONLY guard: missing tooling identity file $file" >&2; exit 1; }
+done
+if grep -Fn -e 'sid-text' -e 'evidence-sid-text' "${tooling_identity_files[@]}"; then
+  echo 'SID8-ONLY violation: stale SID-as-text tooling helper name' >&2
+  exit 1
+fi
+
 forbidden=(
   'SID[ -]text'
   'SID[ -]literal'
