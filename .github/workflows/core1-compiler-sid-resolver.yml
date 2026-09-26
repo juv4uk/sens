@@ -34,8 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           actual="$(./target/debug/sens scripts/check-core1-compiler-sid-resolver.lisp)"
-          printf '%s
-' "$actual"
+          printf '%s\n' "$actual"
           test "$actual" = "(core1-compiler-sid-resolver-check pass)"
 
       - name: Checkout typed-SID8 historical S0
@@ -94,8 +93,7 @@ jobs:
             ./mccarthy-kernel ../resolver-witness.lisp | tail -n 11
           )"
 
-          printf '%s
-' "$actual"
+          printf '%s\n' "$actual"
           test "$actual" = "$expected"
 
       - name: Diff hygiene
