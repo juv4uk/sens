@@ -176,7 +176,7 @@
   ("10100111" identity:10100111/surface:write-file (ук записати-файл) (укр записати-файл) (en write-file) (sa ()) (sym ()) my-lisp)
   ("10101000" identity:10101000/surface:invoke (ук викликати) (укр викликати) (en invoke) (sa ()) (sym ()) my-lisp)
   ("10101001" identity:10101001/surface:binary (ук двійковий) (укр двійковий) (en binary) (sa ()) (sym ()) my-lisp)
-  ("10101010" identity:10101010 (ук ()) (укр ()) (en ()) (sa ()) (sym ()) my-lisp)
+  ("10101010" identity:10101010/surface:label (ук мітка) (укр мітка) (en label) (sa ()) (sym ()) my-lisp)
   ("10101011" identity:10101011 (ук ()) (укр ()) (en ()) (sa ()) (sym ()) my-lisp)
   ("10101100" identity:10101100 (ук ()) (укр ()) (en ()) (sa ()) (sym ()) my-lisp)
   ("10101101" identity:10101101 (ук ()) (укр ()) (en ()) (sa ()) (sym ()) my-lisp)

@@ -1,0 +1,19 @@
+name: self-hosted smoke
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/self-hosted-smoke.yml
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: [self-hosted, guix]
+    timeout-minutes: 5
+    steps:
+      - name: машина runner-а
+        run: |
+          uname -a
+          nproc
+          grep -m1 'model name' /proc/cpuinfo
+          command -v guix && guix --version | head -1

@@ -22,7 +22,7 @@ concurrency:
 jobs:
   deep-meta-advice-taker:
     name: full Advice Taker through debug meta-evaluator
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
@@ -35,7 +35,7 @@ jobs:
 
   b5-advice-diagnostic:
     name: Advice Taker B5 100/500/1000 diagnostic
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
@@ -49,7 +49,7 @@ jobs:
   extended-b5:
     name: optional 5k/10k Advice Taker falsification profiles
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.extended_b5 }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5

@@ -14,7 +14,7 @@ jobs:
   pr-focused:
     name: focused PR verification
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
@@ -236,7 +236,8 @@ jobs:
 
       - name: Validate workflow YAML syntax
         if: steps.changes.outputs.workflow == 'true'
-        run: ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
+        # Власний runner: ruby з закріпленого Guix-каналу, не з образу ubuntu.
+        run: guix time-machine -C channels.scm -- shell ruby -- ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
 
       - name: Exercise future main fast critical gate
         if: steps.changes.outputs.workflow == 'true'
@@ -319,7 +320,7 @@ jobs:
   island-math-adversarial:
     name: island math adversarial matrix
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
@@ -378,7 +379,7 @@ jobs:
   main-fast-critical:
     name: main fast critical gate
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
@@ -437,7 +438,7 @@ jobs:
   main-fast-clippy:
     name: main fast clippy
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5

@@ -9,7 +9,7 @@ on:
 
 jobs:
   core1-sid8-self-carry:
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, guix]
     steps:
       - name: Checkout sens
         uses: actions/checkout@v5
@@ -18,7 +18,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object lib/core1.lisp)" = "c134b01bb37e45e0b9f29c098d7791538565b8e7"
+          test "$(git hash-object lib/core1.lisp)" = "00b54cfab977b03be8ecaeea9c4734941325fa29"
           ! grep -E '"[01]{8}"' lib/core1-sid8-bootstrap-overlay.lisp
           ! grep -E '\(QUOTE[[:space:]]+[01]{8}\)' lib/core1-sid8-bootstrap-overlay.lisp
           ! grep -E '\(CONS[[:space:]]+\(CONS[[:space:]]+[01]{8}' lib/core1-sid8-bootstrap-overlay.lisp
@@ -27,8 +27,8 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: juv4uk/mccarthy-eval
-          ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
-          ssh-key: ${{ secrets.MCCARTHY_EVAL_DEPLOY_KEY }}
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          ref: 6031f92652066825a245c806c0773e9e524257bd
           path: mccarthy-eval
           fetch-depth: 1
 
