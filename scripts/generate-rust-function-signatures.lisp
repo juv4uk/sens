@@ -21,27 +21,27 @@
 (def has-field?
   (lambda (key row)
     (cond
-      ((atom? (assoc key (cdr row))) (structural-kind empty-list) (quote ()))
-      ((atom? (assoc key (cdr row))) (structural-kind pair) t))))
+      ((atom? (assoc key (cdr row))) () (quote ()))
+      ((atom? (assoc key (cdr row))) (0) t))))
 
 (def render-kind
   (lambda (kind)
     (cond
-      ((equal? kind (quote builtin)) (structural-relation same) "LanguageItemKind::Builtin")
-      ((equal? kind (quote syntax)) (structural-relation same) "LanguageItemKind::SyntaxForm")
-      ((equal? kind (quote macro)) (structural-relation same) "LanguageItemKind::Macro")
+      ((equal? kind (quote builtin)) (1) "LanguageItemKind::Builtin")
+      ((equal? kind (quote syntax)) (1) "LanguageItemKind::SyntaxForm")
+      ((equal? kind (quote macro)) (1) "LanguageItemKind::Macro")
       ((quote unknown-kind) unknown-kind (car (quote ()))))))
 
 (def render-arity
   (lambda (arity)
     (cond
-      ((atom? arity) (structural-kind atom)
+      ((atom? arity) (1)
        (str+ "Arity::Exact(" (number->string arity) ")"))
-      ((atom? arity) (structural-kind pair)
+      ((atom? arity) (0)
        (cond
-         ((equal? (car arity) (quote at-least)) (structural-relation same)
+         ((equal? (car arity) (quote at-least)) (1)
           (str+ "Arity::AtLeast(" (number->string (second arity)) ")"))
-         ((equal? (car arity) (quote between)) (structural-relation same)
+         ((equal? (car arity) (quote between)) (1)
           (str+ "Arity::Between { min: " (number->string (second arity))
                 ", max: " (number->string (third arity)) " }"))
          ((quote unknown-arity) unknown-arity (car (quote ()))))))))
@@ -49,8 +49,8 @@
 (def render-admitted
   (lambda (row)
     (cond
-      ((equal? (field (quote surfaces) row) (quote admitted)) (structural-relation same) "true")
-      ((equal? (field (quote surfaces) row) (quote admitted)) (structural-relation distinct) "false"))))
+      ((equal? (field (quote surfaces) row) (quote admitted)) (1) "true")
+      ((equal? (field (quote surfaces) row) (quote admitted)) (0) "false"))))
 
 (def render-row
   (lambda (row)
@@ -67,8 +67,8 @@
 (def render-rows
   (lambda (remaining)
     (cond
-      ((atom? remaining) (structural-kind empty-list) "")
-      ((atom? remaining) (structural-kind pair)
+      ((atom? remaining) () "")
+      ((atom? remaining) (0)
        (str+ (render-row (car remaining)) (render-rows (cdr remaining)))))))
 
 (def header
@@ -93,19 +93,19 @@
 
 (cond
   ((atom? *argv*)
-   (structural-kind empty-list)
+   ()
    (second
      (list
        (write-file output-path generated)
        (print "Rust function signatures projection written"))))
   ((equal? (car *argv*) "--check")
-   (structural-relation same)
+   (1)
    (cond
      ((equal? (read-file output-path) generated)
-      (structural-relation same)
+      (1)
       (print "Rust function signatures projection is current"))
      ((equal? (read-file output-path) generated)
-      (structural-relation distinct)
+      (0)
       (second
         (list
           (print "Rust function signatures projection is stale")
