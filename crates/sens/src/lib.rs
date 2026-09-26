@@ -222,6 +222,11 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
     for name in admitted {
         session.environment.define(name, result.value.clone());
     }
+    // #1460: сам `defmacro` теж прив'язаний до свого коду СЕНС (00001010),
+    // тож `(00001010 назва параметри тіло)` працює так само, як назва.
+    session
+        .environment
+        .bind_code_slot_once(defmacro_semantic_id, result.value.clone());
 
     Ok(result)
 }
