@@ -1,6 +1,6 @@
 (cml-export/1
   (contract (major 6) (minor 0))
-  (digest "515f4ca9ddd69177")
+  (digest "58b45536232e32c5")
   (forms
     (\"00000001\" (surfaces (en "quote") (sa "svarūpa") (sym "'") (ук "як-є") (укр "як-є")) (role syntax) (callable nil))
     (\"00000010\" (surfaces (en "atom?") (sa "aṇu") (sym ".?") (ук "атом?") (укр "атом?")) (role primitive) (callable t))
@@ -12,4 +12,4 @@
     (\"00001000\" (surfaces (en "lambda") (ук "функція") (укр "функція")) (role syntax) (callable nil))
     (\"00001001\" (surfaces (en "define") (ук "визначити") (укр "визначити")) (role syntax) (callable nil))
     (\"00001010\" (surfaces (en "defmacro") (ук "визначити-макрос") (укр "визначити-макрос")) (role syntax) (callable nil))
-    (\"00001101\" (surfaces (en "difference") (sa "viyoga") (sym "-") (ук "відняти") (укр "відняти")) (role library) (callable t))))
+    (\"00001101\" (surfaces (en "difference") (sa "viyoga") (sym "-") (ук "відняти") (укр "відняти")) (role primitive) (callable t))))

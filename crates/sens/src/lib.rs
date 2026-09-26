@@ -87,6 +87,21 @@ pub mod semantic_registry_export {
             .collect()
     }
 
+    /// Роль функції таблиці за кодом — з таблиці функцій, не з рукописного
+    /// списку: `syntax` (особлива форма або макрос), `primitive` (примітив
+    /// за кодом), `library` (визначена мовою). `None` — коду нема в таблиці
+    /// метаданих (lib/surface/function-signatures.lisp).
+    pub fn function_role(semantic_id: impl ProjectionSidInput) -> Option<&'static str> {
+        let sid = semantic_id.into_projection_sid();
+        match super::language_items::signature_kind(sid)? {
+            super::LanguageItemKind::SyntaxForm | super::LanguageItemKind::Macro => Some("syntax"),
+            super::LanguageItemKind::Builtin if super::eval::canon::has_primitive(sid) => {
+                Some("primitive")
+            }
+            super::LanguageItemKind::Builtin => Some("library"),
+        }
+    }
+
     /// Canonical 8-bit textual serialization for provenance/export.
     pub fn semantic_id_bits(semantic_id: impl ProjectionSidInput) -> String {
         super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())

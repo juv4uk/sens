@@ -7,7 +7,9 @@
 //! repository or code — per docs/agent-doctrine.md rule 4, a neighboring
 //! repo is an external authority, not a file this repo edits.
 
-use sens::semantic_registry_export::{admitted_surfaces_for_semantic_id, semantic_id_bits, SurfaceRow};
+use sens::semantic_registry_export::{
+    admitted_surfaces_for_semantic_id, function_role, semantic_id_bits, SurfaceRow,
+};
 
 /// Slice 1 (2026-09-10, unchanged): exactly the semantic IDs
 /// `tests/fixtures/conformance.my`'s fixture #69 (named def + recursion,
@@ -21,36 +23,10 @@ use sens::semantic_registry_export::{admitted_surfaces_for_semantic_id, semantic
 /// defmacro (SID 00001010), so a consumer's own "which surfaces are Canon-reserved"
 /// table can be derived entirely from this file instead of staying a
 /// second hand-typed list that silently drifts if the registry changes.
-const EXPORTED_FORMS: &[(u8, Role, bool)] = &[
-    (1, Role::Syntax, false),    // quote
-    (2, Role::Primitive, true),  // atom
-    (3, Role::Primitive, true),  // eq
-    (4, Role::Primitive, true),  // cons
-    (5, Role::Primitive, true),  // car
-    (6, Role::Primitive, true),  // cdr
-    (7, Role::Syntax, false),    // cond
-    (8, Role::Syntax, false),    // lambda
-    (9, Role::Syntax, false),    // define
-    (10, Role::Syntax, false),    // defmacro
-    (13, Role::Library, true),    // subtraction
-];
-
-#[derive(Clone, Copy)]
-enum Role {
-    Syntax,
-    Primitive,
-    Library,
-}
-
-impl Role {
-    fn as_str(self) -> &'static str {
-        match self {
-            Role::Syntax => "syntax",
-            Role::Primitive => "primitive",
-            Role::Library => "library",
-        }
-    }
-}
+/// Обсяг експорту — які коди потрібні cml (slice 1 + slice 2). Роль і
+/// викликність більше не вписуються тут вручну: їх дає таблиця функцій
+/// (`function_role`, lib/surface/function-signatures.lisp).
+const EXPORTED_CODES: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13];
 
 /// FNV-1a (64-bit) — not cryptographic, a drift-detection digest between
 /// trusted collaborators. See the design doc for why this is deliberate,
@@ -87,13 +63,15 @@ fn render_surfaces(surfaces: &[SurfaceRow]) -> String {
 
 fn render_forms_block() -> String {
     let mut lines = Vec::new();
-    for &(id, role, callable) in EXPORTED_FORMS {
+    for &id in EXPORTED_CODES {
         let surfaces = admitted_surfaces_for_semantic_id(id);
         let id_bits = semantic_id_bits(id);
+        let role = function_role(id).expect("exported code must have function-table metadata");
+        let callable = role != "syntax";
         lines.push(format!(
             "    (\\\"{id_bits}\\\" (surfaces {}) (role {}) (callable {}))",
             render_surfaces(&surfaces),
-            role.as_str(),
+            role,
             if callable { "t" } else { "nil" }
         ));
     }
