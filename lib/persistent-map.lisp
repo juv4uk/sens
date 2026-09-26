@@ -166,7 +166,7 @@
       (t (map-get key (node-right tree))))))
 
 (def map-contains?
-  (lambda (key tree) (not? (atom? (map-get key tree)))))
+  (lambda (key tree) (10110001 (00000010 (map-get key tree)))))
 
 ; In-order traversal — the keys come back sorted, a free side effect of
 ; the tree being a BST, not something map->list computes separately.

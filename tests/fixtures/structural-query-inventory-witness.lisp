@@ -21,7 +21,7 @@
     (cond
       ((atom? entries) () (quote ()))
       ((atom? entries) (1) (quote ()))
-      ((and (not? (atom? (car entries)))
+      ((and (10110001 (00000010 (car entries)))
             (eq? (car (car entries)) tag))
        (car entries))
       (t (sqi-find-tag tag (cdr entries))))))
@@ -52,16 +52,16 @@
 (def sqi-required-row?
   (lambda (row)
     (and
-      (not? (atom? (assoc (quote identity) row)))
-      (not? (atom? (assoc (quote surface) row)))
-      (not? (atom? (assoc (quote producer) row)))
-      (not? (atom? (assoc (quote current-result) row)))
-      (not? (atom? (assoc (quote question-domain) row)))
-      (not? (atom? (assoc (quote mathematical-binary?) row)))
-      (not? (atom? (assoc (quote owner) row)))
-      (not? (atom? (assoc (quote consumer-class) row)))
-      (not? (atom? (assoc (quote compatibility-impact) row)))
-      (not? (atom? (assoc (quote migration) row))))))
+      (10110001 (00000010 (assoc (quote identity) row)))
+      (10110001 (00000010 (assoc (quote surface) row)))
+      (10110001 (00000010 (assoc (quote producer) row)))
+      (10110001 (00000010 (assoc (quote current-result) row)))
+      (10110001 (00000010 (assoc (quote question-domain) row)))
+      (10110001 (00000010 (assoc (quote mathematical-binary?) row)))
+      (10110001 (00000010 (assoc (quote owner) row)))
+      (10110001 (00000010 (assoc (quote consumer-class) row)))
+      (10110001 (00000010 (assoc (quote compatibility-impact) row)))
+      (10110001 (00000010 (assoc (quote migration) row))))))
 
 (def sqi-all-public-covered-once?
   (lambda (predicates rows)

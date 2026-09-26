@@ -120,7 +120,7 @@
       ((atom? (car (cddr value))) () (quote ()))
       ((atom? (car (cddr value))) (1) (quote ()))
       ((not? (eq? (car (car (cddr value))) (quote statement))) (quote ()))
-      ((not? (atom? (cdr (cddr value)))) (quote ()))
+      ((10110001 (00000010 (cdr (cddr value)))) (quote ()))
       (t t))))
 
 ; claim? — also validates `review` strictly against its finite enum
@@ -151,7 +151,7 @@
       ((atom? (car (cdr (cddr value)))) (1) (quote ()))
       ((not? (eq? (car (car (cdr (cddr value)))) (quote review))) (quote ()))
       ((not? (member? (cadr (car (cdr (cddr value)))) (quote (proposed reviewed rejected)))) (quote ()))
-      ((not? (atom? (cdr (cdr (cddr value))))) (quote ()))
+      ((10110001 (00000010 (cdr (cdr (cddr value))))) (quote ()))
       (t t))))
 
 ; evidence? — same reasoning as claim? for the finite outcome enum
@@ -183,7 +183,7 @@
       ((atom? (car (cdr (cdr (cddr value))))) () (quote ()))
       ((atom? (car (cdr (cdr (cddr value))))) (1) (quote ()))
       ((not? (eq? (car (car (cdr (cdr (cddr value))))) (quote source-ref))) (quote ()))
-      ((not? (atom? (cdr (cdr (cdr (cddr value)))))) (quote ()))
+      ((10110001 (00000010 (cdr (cdr (cdr (cddr value)))))) (quote ()))
       (t t))))
 
 (def intent?
@@ -212,7 +212,7 @@
       ((atom? (car (cdr (cdr (cddr value))))) () (quote ()))
       ((atom? (car (cdr (cdr (cddr value))))) (1) (quote ()))
       ((not? (eq? (car (car (cdr (cdr (cddr value))))) (quote produces))) (quote ()))
-      ((not? (atom? (cdr (cdr (cdr (cddr value)))))) (quote ()))
+      ((10110001 (00000010 (cdr (cdr (cdr (cddr value)))))) (quote ()))
       (t t))))
 
 ; --- Accessors ------------------------------------------------------------

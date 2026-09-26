@@ -70,7 +70,7 @@
 
 (def fs-contains?
   (lambda (fs name)
-    (not? (atom? (map-get name (fs-bindings fs))))))
+    (10110001 (00000010 (map-get name (fs-bindings fs))))))
 
 ; Versioned data-only envelopes. They are ordinary alists and are never
 ; evaluated by the filesystem layer.
@@ -280,18 +280,18 @@
       ((eq? (fs-package-field (quote op) event) (quote ()))
        (list (quote rejected) (quote missing-operation)))
       ((and (eq? (fs-package-field (quote op) event) (quote write))
-            (or (atom? (assoc (quote name) event))
-                (atom? (assoc (quote value) event))))
+            (or (00100001 (10110001 (00000010 (assoc (quote name) event))))
+                (00100001 (10110001 (00000010 (assoc (quote value) event))))))
        (list (quote rejected) (quote incomplete-write)))
       ((and (eq? (fs-package-field (quote op) event) (quote bind))
-            (or (atom? (assoc (quote name) event))
-                (atom? (assoc (quote address) event))))
+            (or (00100001 (10110001 (00000010 (assoc (quote name) event))))
+                (00100001 (10110001 (00000010 (assoc (quote address) event))))))
        (list (quote rejected) (quote incomplete-bind)))
       ((and (eq? (fs-package-field (quote op) event) (quote unbind))
-            (atom? (assoc (quote name) event)))
+            (00100001 (10110001 (00000010 (assoc (quote name) event)))))
        (list (quote rejected) (quote incomplete-unbind)))
       ((and (eq? (fs-package-field (quote op) event) (quote root-commit))
-            (atom? (assoc (quote root) event)))
+            (00100001 (10110001 (00000010 (assoc (quote root) event)))))
        (list (quote rejected) (quote incomplete-root-commit)))
       (t (list (quote accepted) event)))))
 

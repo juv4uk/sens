@@ -145,15 +145,15 @@
                   index
                   0)))
          (cond
-           ((and (not? (atom? positive-results))
-                 (not? (atom? opposite-results)))
+           ((and (10110001 (00000010 positive-results))
+                 (10110001 (00000010 opposite-results)))
             (make-disputed
               (list
                 (make-proved goal positive-results)
                 (make-proved opposite opposite-results))))
-           ((not? (atom? positive-results))
+           ((10110001 (00000010 positive-results))
             (make-proved goal positive-results))
-           ((not? (atom? opposite-results))
+           ((10110001 (00000010 opposite-results))
             (make-proved opposite opposite-results))
            (t (quote ()))))))))
 

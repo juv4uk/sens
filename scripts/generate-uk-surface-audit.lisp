@@ -54,7 +54,7 @@
     (cond
       ((atom? sections) () (quote ()))
       ((atom? sections) (1) (quote ()))
-      ((and (not? (atom? (car sections))) (eq? (car (car sections)) name))
+      ((and (10110001 (00000010 (car sections))) (eq? (car (car sections)) name))
        (car sections))
       (t (find-section name (cdr sections))))))
 

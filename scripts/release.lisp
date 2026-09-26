@@ -26,9 +26,9 @@
          (release-require program (car result) 0)
          (second result))))))
 
-(release-require "Потрібна одна версія: 0.41.0" (atom? *argv*)
+(release-require "Потрібна одна версія: 0.41.0" (00100001 (10110001 (00000010 *argv*)))
                  (quote (0)))
-(release-require "Потрібен рівно один аргумент" (atom? (cdr *argv*))
+(release-require "Потрібен рівно один аргумент" (00100001 (10110001 (00000010 (cdr *argv*))))
                  (quote ()))
 (def release-version (car *argv*))
 (def release-tag (string-append "l" release-version))

@@ -71,7 +71,7 @@
           ((atom? superseded) (0) superseded)
           ((and expected-entry error-entry)
            (list (quote malformed) (quote expected-and-error)))
-          ((and (atom? expected-entry) (atom? error-entry))
+          ((and (00100001 (10110001 (00000010 expected-entry))) (00100001 (10110001 (00000010 error-entry))))
            (list (quote malformed) (quote missing-outcome)))
           (expected-entry
            (list (quote value) (cdr expected-entry)))

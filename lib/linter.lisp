@@ -109,14 +109,7 @@
 (def collect-free-vars
   (lambda (ast bound-vars)
     (cond
-      ((atom? ast) () (cond
-         ((symbol? ast)
-          (cond
-            ((member? (symbol->string ast) bound-vars) (quote ()))
-            ((member? (symbol->string ast) (quote ("t" "def" "defmacro" "lambda" "let" "let*" "letrec" "cond" "quote" "list" "car" "cdr" "cons" "eq" "atom" "+" "-" "*" "/" "<" ">" "=" "<=" ">=" "print" "read" "eval"))) (quote ()))
-            (t (list ast))))
-         (t (quote ()))))
-      ((atom? ast) (1) (cond
+      ((00100001 (10110001 (atom? ast))) t (cond
          ((symbol? ast)
           (cond
             ((member? (symbol->string ast) bound-vars) (quote ()))
@@ -140,9 +133,7 @@
            (collect-free-vars body (append param-names bound-vars)))))
       ((equal? (car ast) (quote let))
        (cond
-         ((atom? (cdr ast)) () (append (collect-free-vars (car ast) bound-vars)
-                  (collect-free-vars (cdr ast) bound-vars)))
-         ((atom? (cdr ast)) (1) (append (collect-free-vars (car ast) bound-vars)
+         ((00100001 (10110001 (atom? (cdr ast)))) t (append (collect-free-vars (car ast) bound-vars)
                   (collect-free-vars (cdr ast) bound-vars)))
          ((symbol? (car (cdr ast)))
           ; Named let
