@@ -1,7 +1,8 @@
 //! Immutable routing for evaluator mechanisms necessary beyond Canon 0 + McCarthy7.
 //!
 //! Stable human/symbolic spellings are resolved by the shared semantic registry.
-//! Lisp owns the SID-to-operation mapping in `lib/evaluator-dispatch.lisp`.
+//! Lisp owns the SID-to-operation mapping in the `(form ...)` field of
+//! `lib/surface/function-signatures.lisp`.
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry;
