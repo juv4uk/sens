@@ -15,208 +15,208 @@
 ; A dimension is a named Lisp term rather than an anonymous pair so the same
 ; finite data can pass through Advice Taker's existing knowledge grammar.
 
-(def *dimension-schema* (quote dimension/1))
-(def *unit-schema* (quote unit/1))
-(def *quantity-schema* (quote quantity/1))
-(def *science-source-schema* (quote science-source/1))
-(def *scientific-constant-schema* (quote scientific-constant/1))
+(00001001 *dimension-schema* (00000001 dimension/1))
+(00001001 *unit-schema* (00000001 unit/1))
+(00001001 *quantity-schema* (00000001 quantity/1))
+(00001001 *science-source-schema* (00000001 science-source/1))
+(00001001 *scientific-constant-schema* (00000001 scientific-constant/1))
 
-(def science-proper-list?
-  (lambda (x)
-    (cond
-      ((atom? x)
-       (cond
-         ((eq? x (quote ())) t)
-         (t (quote ()))))
-      (t (science-proper-list? (cdr x))))))
+(00001001 science-proper-list?
+  (00001000 (x)
+    (00000111
+      ((00000010 x)
+       (00000111
+         ((00000011 x (00000001 ())) t)
+         (t (00000001 ()))))
+      (t (science-proper-list? (00000110 x))))))
 
-(def science-sixth
-  (lambda (values)
-    (car (cdr (cdr (cdr (cdr (cdr values))))))))
+(00001001 science-sixth
+  (00001000 (values)
+    (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 values))))))))
 
-(def science-seventh
-  (lambda (values)
-    (car (cdr (cdr (cdr (cdr (cdr (cdr values)))))))))
+(00001001 science-seventh
+  (00001000 (values)
+    (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 (00000110 values)))))))))
 
-(def make-dimension
-  (lambda (base exponent)
-    (list *dimension-schema* base exponent)))
+(00001001 make-dimension
+  (00001000 (base exponent)
+    (00100111 *dimension-schema* base exponent)))
 
-(def dimension?
-  (lambda (x)
-    (cond
-      ((atom? x) (quote ()))
-      ((eq? (science-proper-list? x) (quote ())) (quote ()))
-      ((eq? (= (length x) 3) (quote ())) (quote ()))
-      ((eq? (car x) *dimension-schema*)
-       (cond
-         ((eq? (symbol? (second x)) (quote ())) (quote ()))
-         ((atom? (third x)) t)
-         (t (quote ()))))
-      (t (quote ())))))
+(00001001 dimension?
+  (00001000 (x)
+    (00000111
+      ((00000010 x) (00000001 ()))
+      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
+      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
+      ((00000011 (00000101 x) *dimension-schema*)
+       (00000111
+         ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
+         ((00000010 (00110000 x)) t)
+         (t (00000001 ()))))
+      (t (00000001 ())))))
 
-(def dimension-base
-  (lambda (dimension) (second dimension)))
+(00001001 dimension-base
+  (00001000 (dimension) (00101111 dimension)))
 
-(def dimension-exponent
-  (lambda (dimension) (third dimension)))
+(00001001 dimension-exponent
+  (00001000 (dimension) (00110000 dimension)))
 
-(def science-dimensions-valid?
-  (lambda (dimensions)
-    (cond
-      ((atom? dimensions)
-       (cond
-         ((eq? dimensions (quote ())) t)
-         (t (quote ()))))
-      ((dimension? (car dimensions))
-       (science-dimensions-valid? (cdr dimensions)))
-      (t (quote ())))))
+(00001001 science-dimensions-valid?
+  (00001000 (dimensions)
+    (00000111
+      ((00000010 dimensions)
+       (00000111
+         ((00000011 dimensions (00000001 ())) t)
+         (t (00000001 ()))))
+      ((dimension? (00000101 dimensions))
+       (science-dimensions-valid? (00000110 dimensions)))
+      (t (00000001 ())))))
 
-(def make-unit
-  (lambda (dimensions)
-    (cons *unit-schema* dimensions)))
+(00001001 make-unit
+  (00001000 (dimensions)
+    (00000100 *unit-schema* dimensions)))
 
-(def unit?
-  (lambda (x)
-    (cond
-      ((atom? x) (quote ()))
-      ((eq? (science-proper-list? x) (quote ())) (quote ()))
-      ((eq? (car x) *unit-schema*)
-       (science-dimensions-valid? (cdr x)))
-      (t (quote ())))))
+(00001001 unit?
+  (00001000 (x)
+    (00000111
+      ((00000010 x) (00000001 ()))
+      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
+      ((00000011 (00000101 x) *unit-schema*)
+       (science-dimensions-valid? (00000110 x)))
+      (t (00000001 ())))))
 
-(def unit-dimensions
-  (lambda (unit) (cdr unit)))
+(00001001 unit-dimensions
+  (00001000 (unit) (00000110 unit)))
 
-(def make-quantity
-  (lambda (value unit)
-    (list *quantity-schema* value unit)))
+(00001001 make-quantity
+  (00001000 (value unit)
+    (00100111 *quantity-schema* value unit)))
 
-(def quantity?
-  (lambda (x)
-    (cond
-      ((atom? x) (quote ()))
-      ((eq? (science-proper-list? x) (quote ())) (quote ()))
-      ((eq? (= (length x) 3) (quote ())) (quote ()))
-      ((eq? (car x) *quantity-schema*)
-       (unit? (third x)))
-      (t (quote ())))))
+(00001001 quantity?
+  (00001000 (x)
+    (00000111
+      ((00000010 x) (00000001 ()))
+      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
+      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
+      ((00000011 (00000101 x) *quantity-schema*)
+       (unit? (00110000 x)))
+      (t (00000001 ())))))
 
-(def quantity-value
-  (lambda (quantity) (second quantity)))
+(00001001 quantity-value
+  (00001000 (quantity) (00101111 quantity)))
 
-(def quantity-unit
-  (lambda (quantity) (third quantity)))
+(00001001 quantity-unit
+  (00001000 (quantity) (00110000 quantity)))
 
 ; Мінімальна точна алгебра одиниць. Вона не вводить нових примітивів:
 ; показники вимірностей додаються/віднімаються звичайною точною арифметикою
 ; my-lisp, а нульовий показник видаляє вимірність з результату.
-(def science-add-dimension
-  (lambda (dimension dimensions)
-    (cond
-      ((atom? dimensions)
-       (cond
-         ((= (dimension-exponent dimension) 0) 1 (quote ()))
-         (t (list dimension))))
-      ((eq? (dimension-base dimension)
-           (dimension-base (car dimensions)))
-       (let ((sum
-               (+ (dimension-exponent dimension)
-                  (dimension-exponent (car dimensions)))))
-         (cond
-           ((= sum 0) 1 (cdr dimensions))
+(00001001 science-add-dimension
+  (00001000 (dimension dimensions)
+    (00000111
+      ((00000010 dimensions)
+       (00000111
+         ((00011100 (dimension-exponent dimension) 0) 1 (00000001 ()))
+         (t (00100111 dimension))))
+      ((00000011 (dimension-base dimension)
+           (dimension-base (00000101 dimensions)))
+       (10011100 ((sum
+               (00001100 (dimension-exponent dimension)
+                  (dimension-exponent (00000101 dimensions)))))
+         (00000111
+           ((00011100 sum 0) 1 (00000110 dimensions))
            (t
-            (cons
+            (00000100
               (make-dimension (dimension-base dimension) sum)
-              (cdr dimensions))))))
+              (00000110 dimensions))))))
       (t
-       (cons
-         (car dimensions)
-         (science-add-dimension dimension (cdr dimensions)))))))
+       (00000100
+         (00000101 dimensions)
+         (science-add-dimension dimension (00000110 dimensions)))))))
 
-(def science-merge-dimensions
-  (lambda (from into)
-    (cond
-      ((atom? from) into)
+(00001001 science-merge-dimensions
+  (00001000 (from into)
+    (00000111
+      ((00000010 from) into)
       (t
        (science-merge-dimensions
-         (cdr from)
-         (science-add-dimension (car from) into))))))
+         (00000110 from)
+         (science-add-dimension (00000101 from) into))))))
 
-(def science-negate-dimensions
-  (lambda (dimensions)
-    (cond
-      ((atom? dimensions) (quote ()))
+(00001001 science-negate-dimensions
+  (00001000 (dimensions)
+    (00000111
+      ((00000010 dimensions) (00000001 ()))
       (t
-       (cons
+       (00000100
          (make-dimension
-           (dimension-base (car dimensions))
-           (- 0 (dimension-exponent (car dimensions))))
-         (science-negate-dimensions (cdr dimensions)))))))
+           (dimension-base (00000101 dimensions))
+           (00001101 0 (dimension-exponent (00000101 dimensions))))
+         (science-negate-dimensions (00000110 dimensions)))))))
 
-(def unit-product
-  (lambda (left right)
+(00001001 unit-product
+  (00001000 (left right)
     (make-unit
       (science-merge-dimensions
         (unit-dimensions right)
         (unit-dimensions left)))))
 
-(def unit-quotient
-  (lambda (left right)
+(00001001 unit-quotient
+  (00001000 (left right)
     (make-unit
       (science-merge-dimensions
         (science-negate-dimensions (unit-dimensions right))
         (unit-dimensions left)))))
 
-(def quantity-product
-  (lambda (left right)
+(00001001 quantity-product
+  (00001000 (left right)
     (make-quantity
-      (* (quantity-value left) (quantity-value right))
+      (00001110 (quantity-value left) (quantity-value right))
       (unit-product (quantity-unit left) (quantity-unit right)))))
 
-(def quantity-quotient
-  (lambda (left right)
+(00001001 quantity-quotient
+  (00001000 (left right)
     (make-quantity
-      (/ (quantity-value left) (quantity-value right))
+      (00001111 (quantity-value left) (quantity-value right))
       (unit-quotient (quantity-unit left) (quantity-unit right)))))
 
-(def make-science-source
-  (lambda (authority edition)
-    (list *science-source-schema* authority edition)))
+(00001001 make-science-source
+  (00001000 (authority edition)
+    (00100111 *science-source-schema* authority edition)))
 
-(def science-source?
-  (lambda (x)
-    (cond
-      ((atom? x) (quote ()))
-      ((eq? (science-proper-list? x) (quote ())) (quote ()))
-      ((eq? (= (length x) 3) (quote ())) (quote ()))
-      ((eq? (car x) *science-source-schema*)
-       (cond
-         ((eq? (symbol? (second x)) (quote ())) (quote ()))
-         ((atom? (third x)) t)
-         (t (quote ()))))
-      (t (quote ())))))
+(00001001 science-source?
+  (00001000 (x)
+    (00000111
+      ((00000010 x) (00000001 ()))
+      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
+      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
+      ((00000011 (00000101 x) *science-source-schema*)
+       (00000111
+         ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
+         ((00000010 (00110000 x)) t)
+         (t (00000001 ()))))
+      (t (00000001 ())))))
 
-(def scientific-constant-status-valid?
-  (lambda (status)
-    (cond
-      ((eq? status (quote exact-by-definition)) t)
-      ((eq? status (quote exact-derived)) t)
-      ((eq? status (quote measured)) t)
-      (t (quote ())))))
+(00001001 scientific-constant-status-valid?
+  (00001000 (status)
+    (00000111
+      ((00000011 status (00000001 exact-by-definition)) t)
+      ((00000011 status (00000001 exact-derived)) t)
+      ((00000011 status (00000001 measured)) t)
+      (t (00000001 ())))))
 
-(def scientific-constant-kind-valid?
-  (lambda (kind)
-    (cond
-      ((eq? kind (quote physical-defining)) t)
-      ((eq? kind (quote physical-derived)) t)
-      ((eq? kind (quote physical-measured)) t)
-      ((eq? kind (quote mathematical)) t)
-      (t (quote ())))))
+(00001001 scientific-constant-kind-valid?
+  (00001000 (kind)
+    (00000111
+      ((00000011 kind (00000001 physical-defining)) t)
+      ((00000011 kind (00000001 physical-derived)) t)
+      ((00000011 kind (00000001 physical-measured)) t)
+      ((00000011 kind (00000001 mathematical)) t)
+      (t (00000001 ())))))
 
-(def make-scientific-constant
-  (lambda (name quantity status kind system source)
-    (list
+(00001001 make-scientific-constant
+  (00001000 (name quantity status kind system source)
+    (00100111
       *scientific-constant-schema*
       name
       quantity
@@ -225,81 +225,81 @@
       system
       source)))
 
-(def scientific-constant?
-  (lambda (x)
-    (cond
-      ((atom? x) (quote ()))
-      ((eq? (science-proper-list? x) (quote ())) (quote ()))
-      ((= (length x) 7) 0 (quote ()))
-      ((eq? (car x) *scientific-constant-schema*)
-       (cond
-         ((eq? (symbol? (second x)) (quote ())) (quote ()))
-         ((eq? (quantity? (third x)) (quote ())) (quote ()))
-         ((eq? (scientific-constant-status-valid? (fourth x)) (quote ())) (quote ()))
-         ((eq? (scientific-constant-kind-valid? (fifth x)) (quote ())) (quote ()))
-         ((eq? (symbol? (science-sixth x)) (quote ())) (quote ()))
-         ((eq? (science-source? (science-seventh x)) (quote ())) (quote ()))
+(00001001 scientific-constant?
+  (00001000 (x)
+    (00000111
+      ((00000010 x) (00000001 ()))
+      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
+      ((00011100 (00101000 x) 7) 0 (00000001 ()))
+      ((00000011 (00000101 x) *scientific-constant-schema*)
+       (00000111
+         ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
+         ((00000011 (quantity? (00110000 x)) (00000001 ())) (00000001 ()))
+         ((00000011 (scientific-constant-status-valid? (00110001 x)) (00000001 ())) (00000001 ()))
+         ((00000011 (scientific-constant-kind-valid? (00110010 x)) (00000001 ())) (00000001 ()))
+         ((00000011 (00100011 (science-sixth x)) (00000001 ())) (00000001 ()))
+         ((00000011 (science-source? (science-seventh x)) (00000001 ())) (00000001 ()))
          (t t)))
-      (t (quote ())))))
+      (t (00000001 ())))))
 
-(def scientific-constant-name
-  (lambda (constant) (second constant)))
+(00001001 scientific-constant-name
+  (00001000 (constant) (00101111 constant)))
 
-(def scientific-constant-quantity
-  (lambda (constant) (third constant)))
+(00001001 scientific-constant-quantity
+  (00001000 (constant) (00110000 constant)))
 
-(def scientific-constant-value
-  (lambda (constant)
+(00001001 scientific-constant-value
+  (00001000 (constant)
     (quantity-value (scientific-constant-quantity constant))))
 
-(def scientific-constant-unit
-  (lambda (constant)
+(00001001 scientific-constant-unit
+  (00001000 (constant)
     (quantity-unit (scientific-constant-quantity constant))))
 
-(def scientific-constant-status
-  (lambda (constant) (fourth constant)))
+(00001001 scientific-constant-status
+  (00001000 (constant) (00110001 constant)))
 
-(def scientific-constant-kind
-  (lambda (constant) (fifth constant)))
+(00001001 scientific-constant-kind
+  (00001000 (constant) (00110010 constant)))
 
-(def scientific-constant-system
-  (lambda (constant) (science-sixth constant)))
+(00001001 scientific-constant-system
+  (00001000 (constant) (science-sixth constant)))
 
-(def scientific-constant-source
-  (lambda (constant) (science-seventh constant)))
+(00001001 scientific-constant-source
+  (00001000 (constant) (science-seventh constant)))
 
 ; Pure projection into the existing knowledge clause format. It does not write
 ; *knowledge-journal*: callers must still pass the returned batch through the
 ; explicit advise-all admission boundary. A malformed constant projects to ().
-(def scientific-constant->clauses
-  (lambda (constant)
-    (cond
-      ((eq? (scientific-constant? constant) (quote ())) (quote ()))
+(00001001 scientific-constant->clauses
+  (00001000 (constant)
+    (00000111
+      ((00000011 (scientific-constant? constant) (00000001 ())) (00000001 ()))
       (t
-       (let ((name (scientific-constant-name constant)))
-         (list
-           (list (list (quote scientific-constant) name))
-           (list
-             (list (quote constant-value)
+       (10011100 ((name (scientific-constant-name constant)))
+         (00100111
+           (00100111 (00100111 (00000001 scientific-constant) name))
+           (00100111
+             (00100111 (00000001 constant-value)
                    name
                    (scientific-constant-value constant)))
-           (list
-             (list (quote constant-unit)
+           (00100111
+             (00100111 (00000001 constant-unit)
                    name
                    (scientific-constant-unit constant)))
-           (list
-             (list (quote constant-status)
+           (00100111
+             (00100111 (00000001 constant-status)
                    name
                    (scientific-constant-status constant)))
-           (list
-             (list (quote constant-kind)
+           (00100111
+             (00100111 (00000001 constant-kind)
                    name
                    (scientific-constant-kind constant)))
-           (list
-             (list (quote constant-system)
+           (00100111
+             (00100111 (00000001 constant-system)
                    name
                    (scientific-constant-system constant)))
-           (list
-             (list (quote constant-source)
+           (00100111
+             (00100111 (00000001 constant-source)
                    name
                    (scientific-constant-source constant)))))))))

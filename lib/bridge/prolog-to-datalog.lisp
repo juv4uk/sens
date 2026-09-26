@@ -18,44 +18,44 @@
 ;
 ; Failure is named data, never ()/false.
 
-(def prolog-values-to-datalog-facts
-  (lambda (role values)
-    (cond
-      ((atom? values) (structural-kind empty-list) (quote ()))
-      ((atom? values) (structural-kind pair)
-       (cons (list role (car values))
-             (prolog-values-to-datalog-facts role (cdr values)))))))
+(00001001 prolog-values-to-datalog-facts
+  (00001000 (role values)
+    (00000111
+      ((00000010 values) (structural-kind empty-list) (00000001 ()))
+      ((00000010 values) (structural-kind pair)
+       (00000100 (00100111 role (00000101 values))
+             (prolog-values-to-datalog-facts role (00000110 values)))))))
 
-(def prolog-substitutions-to-datalog-facts
-  (lambda (observation)
-    (let ((source-ref-row (assoc (quote source-ref) (cdr observation)))
-          (variable-row (assoc (quote variable) (cdr observation)))
-          (values-row (assoc (quote values) (cdr observation))))
-      (cond
-        ((atom? source-ref-row) (structural-kind empty-list)
-         (list (quote projection-failure) (quote missing-source-ref)))
-        ((atom? source-ref-row) (structural-kind atom)
-         (list (quote projection-failure) (quote malformed-source-ref)))
-        ((atom? source-ref-row) (structural-kind pair)
-         (cond
-           ((atom? variable-row) (structural-kind empty-list)
-            (list (quote projection-failure) (quote missing-variable-role)))
-           ((atom? variable-row) (structural-kind atom)
-            (list (quote projection-failure) (quote malformed-variable-role)))
-           ((atom? variable-row) (structural-kind pair)
-            (cond
-              ((atom? values-row) (structural-kind empty-list)
-               (list (quote projection-failure) (quote missing-values)))
-              ((atom? values-row) (structural-kind atom)
-               (list (quote projection-failure) (quote malformed-values)))
-              ((atom? values-row) (structural-kind pair)
-               (list
-                 (quote projection-result)
-                 (list (quote projection)
-                       (quote prolog-substitutions-to-datalog-facts))
-                 (list (quote source-ref)
-                       (car (cdr source-ref-row)))
-                 (list (quote facts)
+(00001001 prolog-substitutions-to-datalog-facts
+  (00001000 (observation)
+    (10011100 ((source-ref-row (00101101 (00000001 source-ref) (00000110 observation)))
+          (variable-row (00101101 (00000001 variable) (00000110 observation)))
+          (values-row (00101101 (00000001 values) (00000110 observation))))
+      (00000111
+        ((00000010 source-ref-row) (structural-kind empty-list)
+         (00100111 (00000001 projection-failure) (00000001 missing-source-ref)))
+        ((00000010 source-ref-row) (structural-kind atom)
+         (00100111 (00000001 projection-failure) (00000001 malformed-source-ref)))
+        ((00000010 source-ref-row) (structural-kind pair)
+         (00000111
+           ((00000010 variable-row) (structural-kind empty-list)
+            (00100111 (00000001 projection-failure) (00000001 missing-variable-role)))
+           ((00000010 variable-row) (structural-kind atom)
+            (00100111 (00000001 projection-failure) (00000001 malformed-variable-role)))
+           ((00000010 variable-row) (structural-kind pair)
+            (00000111
+              ((00000010 values-row) (structural-kind empty-list)
+               (00100111 (00000001 projection-failure) (00000001 missing-values)))
+              ((00000010 values-row) (structural-kind atom)
+               (00100111 (00000001 projection-failure) (00000001 malformed-values)))
+              ((00000010 values-row) (structural-kind pair)
+               (00100111
+                 (00000001 projection-result)
+                 (00100111 (00000001 projection)
+                       (00000001 prolog-substitutions-to-datalog-facts))
+                 (00100111 (00000001 source-ref)
+                       (00000101 (00000110 source-ref-row)))
+                 (00100111 (00000001 facts)
                        (prolog-values-to-datalog-facts
-                         (car (cdr variable-row))
-                         (cdr values-row)))))))))))))
+                         (00000101 (00000110 variable-row))
+                         (00000110 values-row)))))))))))))

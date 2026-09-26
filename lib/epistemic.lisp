@@ -31,29 +31,29 @@
 
 ; --- Constructors (Spec §6 exact arg order) ---------------------------
 
-(def make-observation
-  (lambda (source statement)
-    (list (quote observation) (list (quote source) source) (list (quote statement) statement))))
+(00001001 make-observation
+  (00001000 (source statement)
+    (00100111 (00000001 observation) (00100111 (00000001 source) source) (00100111 (00000001 statement) statement))))
 
-(def make-claim
-  (lambda (statement source review)
-    (list (quote claim) (list (quote statement) statement) (list (quote source) source) (list (quote review) review))))
+(00001001 make-claim
+  (00001000 (statement source review)
+    (00100111 (00000001 claim) (00100111 (00000001 statement) statement) (00100111 (00000001 source) source) (00100111 (00000001 review) review))))
 
-(def make-evidence
-  (lambda (claim-ref method outcome source-ref)
-    (list (quote evidence)
-          (list (quote claim-ref) claim-ref)
-          (list (quote method) method)
-          (list (quote outcome) outcome)
-          (list (quote source-ref) source-ref))))
+(00001001 make-evidence
+  (00001000 (claim-ref method outcome source-ref)
+    (00100111 (00000001 evidence)
+          (00100111 (00000001 claim-ref) claim-ref)
+          (00100111 (00000001 method) method)
+          (00100111 (00000001 outcome) outcome)
+          (00100111 (00000001 source-ref) source-ref))))
 
-(def make-intent
-  (lambda (goal requirements stop-condition produces)
-    (list (quote intent)
-          (list (quote goal) goal)
-          (list (quote requires) requirements)
-          (list (quote stop-on) stop-condition)
-          (list (quote produces) produces))))
+(00001001 make-intent
+  (00001000 (goal requirements stop-condition produces)
+    (00100111 (00000001 intent)
+          (00100111 (00000001 goal) goal)
+          (00100111 (00000001 requires) requirements)
+          (00100111 (00000001 stop-on) stop-condition)
+          (00100111 (00000001 produces) produces))))
 
 ; --- Shape predicates ---------------------------------------------------
 ; All return t for valid, () for malformed — no new error/exception type,
@@ -64,16 +64,16 @@
 ; must be one of the four v0 variants, payload must be a nonempty proper
 ; list. It does not, and must not, judge whether a digest is
 ; cryptographically real, a proof belongs to a World, or a test exists.
-(def source-ref?
-  (lambda (value)
-    (cond
-      ((atom? value) (quote ()))
-      ((atom? (cdr value)) (quote ()))
-      ((eq? (car value) (quote digest)) t)
-      ((eq? (car value) (quote proof)) t)
-      ((eq? (car value) (quote test)) t)
-      ((eq? (car value) (quote observation)) t)
-      (t (quote ())))))
+(00001001 source-ref?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (00000001 ()))
+      ((00000010 (00000110 value)) (00000001 ()))
+      ((00000011 (00000101 value) (00000001 digest)) t)
+      ((00000011 (00000101 value) (00000001 proof)) t)
+      ((00000011 (00000101 value) (00000001 test)) t)
+      ((00000011 (00000101 value) (00000001 observation)) t)
+      (t (00000001 ())))))
 
 ; claim-ref shape check — no claim-ref? predicate is spec-mandated (and
 ; none is added as a public export), but supporting-evidence below needs
@@ -81,13 +81,13 @@
 ; semantically weak" philosophy as source-ref?: car must be the symbol
 ; claim-ref, cdr nonempty. Architect-decision extension of the
 ; documented philosophy, not a literal spec requirement.
-(def epistemic--claim-ref?
-  (lambda (value)
-    (cond
-      ((atom? value) (quote ()))
-      ((atom? (cdr value)) (quote ()))
-      ((eq? (car value) (quote claim-ref)) t)
-      (t (quote ())))))
+(00001001 epistemic--claim-ref?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (00000001 ()))
+      ((00000010 (00000110 value)) (00000001 ()))
+      ((00000011 (00000101 value) (00000001 claim-ref)) t)
+      (t (00000001 ())))))
 
 ; observation? must NOT be tag-only: the `observation` tag is reused both
 ; for the full top-level record here and as one of source-ref's four
@@ -100,18 +100,18 @@
 ; shown or disallowed in the docs, not this phase's problem to solve):
 ; if an observation-variant source-ref's payload were itself a full
 ; nested Observation record, this becomes structurally undecidable.
-(def observation?
-  (lambda (value)
-    (cond
-      ((atom? value) (quote ()))
-      ((not? (eq? (car value) (quote observation))) (quote ()))
-      ((atom? (cdr value)) (quote ()))
-      ((atom? (cadr value)) (quote ()))
-      ((not? (eq? (car (cadr value)) (quote source))) (quote ()))
-      ((atom? (cddr value)) (quote ()))
-      ((atom? (car (cddr value))) (quote ()))
-      ((not? (eq? (car (car (cddr value))) (quote statement))) (quote ()))
-      ((not? (atom? (cdr (cddr value)))) (quote ()))
+(00001001 observation?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (00000001 ()))
+      ((00100001 (00000011 (00000101 value) (00000001 observation))) (00000001 ()))
+      ((00000010 (00000110 value)) (00000001 ()))
+      ((00000010 (00110100 value)) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00110100 value)) (00000001 source))) (00000001 ()))
+      ((00000010 (00110101 value)) (00000001 ()))
+      ((00000010 (00000101 (00110101 value))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 statement))) (00000001 ()))
+      ((00100001 (00000010 (00000110 (00110101 value)))) (00000001 ()))
       (t t))))
 
 ; claim? — also validates `review` strictly against its finite enum
@@ -120,65 +120,65 @@
 ; a fully decidable finite set, not an open-ended claim about the world
 ; (real-file digest, proof membership, test existence), so there is no
 ; reason to leave it unchecked. Architect decision, not silently assumed.
-(def claim?
-  (lambda (value)
-    (cond
-      ((atom? value) (quote ()))
-      ((not? (eq? (car value) (quote claim))) (quote ()))
-      ((atom? (cdr value)) (quote ()))
-      ((atom? (cadr value)) (quote ()))
-      ((not? (eq? (car (cadr value)) (quote statement))) (quote ()))
-      ((atom? (cddr value)) (quote ()))
-      ((atom? (car (cddr value))) (quote ()))
-      ((not? (eq? (car (car (cddr value))) (quote source))) (quote ()))
-      ((atom? (cdr (cddr value))) (quote ()))
-      ((atom? (car (cdr (cddr value)))) (quote ()))
-      ((not? (eq? (car (car (cdr (cddr value)))) (quote review))) (quote ()))
-      ((not? (member? (cadr (car (cdr (cddr value)))) (quote (proposed reviewed rejected)))) (quote ()))
-      ((not? (atom? (cdr (cdr (cddr value))))) (quote ()))
+(00001001 claim?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (00000001 ()))
+      ((00100001 (00000011 (00000101 value) (00000001 claim))) (00000001 ()))
+      ((00000010 (00000110 value)) (00000001 ()))
+      ((00000010 (00110100 value)) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00110100 value)) (00000001 statement))) (00000001 ()))
+      ((00000010 (00110101 value)) (00000001 ()))
+      ((00000010 (00000101 (00110101 value))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 source))) (00000001 ()))
+      ((00000010 (00000110 (00110101 value))) (00000001 ()))
+      ((00000010 (00000101 (00000110 (00110101 value)))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00000110 (00110101 value)))) (00000001 review))) (00000001 ()))
+      ((00100001 (00101100 (00110100 (00000101 (00000110 (00110101 value)))) (00000001 (proposed reviewed rejected)))) (00000001 ()))
+      ((00100001 (00000010 (00000110 (00000110 (00110101 value))))) (00000001 ()))
       (t t))))
 
 ; evidence? — same reasoning as claim? for the finite outcome enum
 ; {supports, contradicts, inconclusive}.
-(def evidence?
-  (lambda (value)
-    (cond
-      ((atom? value) (quote ()))
-      ((not? (eq? (car value) (quote evidence))) (quote ()))
-      ((atom? (cdr value)) (quote ()))
-      ((atom? (cadr value)) (quote ()))
-      ((not? (eq? (car (cadr value)) (quote claim-ref))) (quote ()))
-      ((atom? (cddr value)) (quote ()))
-      ((atom? (car (cddr value))) (quote ()))
-      ((not? (eq? (car (car (cddr value))) (quote method))) (quote ()))
-      ((atom? (cdr (cddr value))) (quote ()))
-      ((atom? (car (cdr (cddr value)))) (quote ()))
-      ((not? (eq? (car (car (cdr (cddr value)))) (quote outcome))) (quote ()))
-      ((not? (member? (cadr (car (cdr (cddr value)))) (quote (supports contradicts inconclusive)))) (quote ()))
-      ((atom? (cdr (cdr (cddr value)))) (quote ()))
-      ((atom? (car (cdr (cdr (cddr value))))) (quote ()))
-      ((not? (eq? (car (car (cdr (cdr (cddr value))))) (quote source-ref))) (quote ()))
-      ((not? (atom? (cdr (cdr (cdr (cddr value)))))) (quote ()))
+(00001001 evidence?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (00000001 ()))
+      ((00100001 (00000011 (00000101 value) (00000001 evidence))) (00000001 ()))
+      ((00000010 (00000110 value)) (00000001 ()))
+      ((00000010 (00110100 value)) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00110100 value)) (00000001 claim-ref))) (00000001 ()))
+      ((00000010 (00110101 value)) (00000001 ()))
+      ((00000010 (00000101 (00110101 value))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 method))) (00000001 ()))
+      ((00000010 (00000110 (00110101 value))) (00000001 ()))
+      ((00000010 (00000101 (00000110 (00110101 value)))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00000110 (00110101 value)))) (00000001 outcome))) (00000001 ()))
+      ((00100001 (00101100 (00110100 (00000101 (00000110 (00110101 value)))) (00000001 (supports contradicts inconclusive)))) (00000001 ()))
+      ((00000010 (00000110 (00000110 (00110101 value)))) (00000001 ()))
+      ((00000010 (00000101 (00000110 (00000110 (00110101 value))))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00000110 (00000110 (00110101 value))))) (00000001 source-ref))) (00000001 ()))
+      ((00100001 (00000010 (00000110 (00000110 (00000110 (00110101 value)))))) (00000001 ()))
       (t t))))
 
-(def intent?
-  (lambda (value)
-    (cond
-      ((atom? value) (quote ()))
-      ((not? (eq? (car value) (quote intent))) (quote ()))
-      ((atom? (cdr value)) (quote ()))
-      ((atom? (cadr value)) (quote ()))
-      ((not? (eq? (car (cadr value)) (quote goal))) (quote ()))
-      ((atom? (cddr value)) (quote ()))
-      ((atom? (car (cddr value))) (quote ()))
-      ((not? (eq? (car (car (cddr value))) (quote requires))) (quote ()))
-      ((atom? (cdr (cddr value))) (quote ()))
-      ((atom? (car (cdr (cddr value)))) (quote ()))
-      ((not? (eq? (car (car (cdr (cddr value)))) (quote stop-on))) (quote ()))
-      ((atom? (cdr (cdr (cddr value)))) (quote ()))
-      ((atom? (car (cdr (cdr (cddr value))))) (quote ()))
-      ((not? (eq? (car (car (cdr (cdr (cddr value))))) (quote produces))) (quote ()))
-      ((not? (atom? (cdr (cdr (cdr (cddr value)))))) (quote ()))
+(00001001 intent?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (00000001 ()))
+      ((00100001 (00000011 (00000101 value) (00000001 intent))) (00000001 ()))
+      ((00000010 (00000110 value)) (00000001 ()))
+      ((00000010 (00110100 value)) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00110100 value)) (00000001 goal))) (00000001 ()))
+      ((00000010 (00110101 value)) (00000001 ()))
+      ((00000010 (00000101 (00110101 value))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 requires))) (00000001 ()))
+      ((00000010 (00000110 (00110101 value))) (00000001 ()))
+      ((00000010 (00000101 (00000110 (00110101 value)))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00000110 (00110101 value)))) (00000001 stop-on))) (00000001 ()))
+      ((00000010 (00000110 (00000110 (00110101 value)))) (00000001 ()))
+      ((00000010 (00000101 (00000110 (00000110 (00110101 value))))) (00000001 ()))
+      ((00100001 (00000011 (00000101 (00000101 (00000110 (00000110 (00110101 value))))) (00000001 produces))) (00000001 ()))
+      ((00100001 (00000010 (00000110 (00000110 (00000110 (00110101 value)))))) (00000001 ()))
       (t t))))
 
 ; --- Accessors ------------------------------------------------------------
@@ -188,24 +188,24 @@
 ; (cadr (assoc 'field (cdr record))), not (cdr (assoc ...)).
 
 ; Spec-literal (Spec §6 names these explicitly):
-(def claim-statement (lambda (claim) (cadr (assoc (quote statement) (cdr claim)))))
-(def claim-review (lambda (claim) (cadr (assoc (quote review) (cdr claim)))))
-(def evidence-outcome (lambda (evidence) (cadr (assoc (quote outcome) (cdr evidence)))))
-(def evidence-source-ref (lambda (evidence) (cadr (assoc (quote source-ref) (cdr evidence)))))
-(def intent-goal (lambda (intent) (cadr (assoc (quote goal) (cdr intent)))))
+(00001001 claim-statement (00001000 (claim) (00110100 (00101101 (00000001 statement) (00000110 claim)))))
+(00001001 claim-review (00001000 (claim) (00110100 (00101101 (00000001 review) (00000110 claim)))))
+(00001001 evidence-outcome (00001000 (evidence) (00110100 (00101101 (00000001 outcome) (00000110 evidence)))))
+(00001001 evidence-source-ref (00001000 (evidence) (00110100 (00101101 (00000001 source-ref) (00000110 evidence)))))
+(00001001 intent-goal (00001000 (intent) (00110100 (00101101 (00000001 goal) (00000110 intent)))))
 
 ; Architect-completed by symmetry — the spec names accessors for claim's
 ; statement/review, evidence's outcome/source-ref, and intent's goal, but
 ; not for observation's fields, evidence's claim-ref/method, or intent's
 ; requires/stop-on/produces. Added here for API completeness, not
 ; spec-literal:
-(def observation-source (lambda (observation) (cadr (assoc (quote source) (cdr observation)))))
-(def observation-statement (lambda (observation) (cadr (assoc (quote statement) (cdr observation)))))
-(def evidence-claim-ref (lambda (evidence) (cadr (assoc (quote claim-ref) (cdr evidence)))))
-(def evidence-method (lambda (evidence) (cadr (assoc (quote method) (cdr evidence)))))
-(def intent-requires (lambda (intent) (cadr (assoc (quote requires) (cdr intent)))))
-(def intent-stop-on (lambda (intent) (cadr (assoc (quote stop-on) (cdr intent)))))
-(def intent-produces (lambda (intent) (cadr (assoc (quote produces) (cdr intent)))))
+(00001001 observation-source (00001000 (observation) (00110100 (00101101 (00000001 source) (00000110 observation)))))
+(00001001 observation-statement (00001000 (observation) (00110100 (00101101 (00000001 statement) (00000110 observation)))))
+(00001001 evidence-claim-ref (00001000 (evidence) (00110100 (00101101 (00000001 claim-ref) (00000110 evidence)))))
+(00001001 evidence-method (00001000 (evidence) (00110100 (00101101 (00000001 method) (00000110 evidence)))))
+(00001001 intent-requires (00001000 (intent) (00110100 (00101101 (00000001 requires) (00000110 intent)))))
+(00001001 intent-stop-on (00001000 (intent) (00110100 (00101101 (00000001 stop-on) (00000110 intent)))))
+(00001001 intent-produces (00001000 (intent) (00110100 (00101101 (00000001 produces) (00000110 intent)))))
 
 ; --- Narrow relations -------------------------------------------------
 
@@ -230,24 +230,24 @@
 ; exactly like the old evidence-supports? did; callers who want the
 ; evidence itself, not just the fact of its existence, now have it for
 ; free instead of re-deriving it.
-(def supporting-evidence
-  (lambda (evidence claim-ref)
-    (cond
-      ((not? (evidence? evidence)) (quote ()))
-      ((not? (epistemic--claim-ref? claim-ref)) (quote ()))
-      ((not? (eq? (evidence-outcome evidence) (quote supports))) (quote ()))
-      ((not? (equal? (evidence-claim-ref evidence) claim-ref)) (quote ()))
+(00001001 supporting-evidence
+  (00001000 (evidence claim-ref)
+    (00000111
+      ((00100001 (10010000 evidence)) (00000001 ()))
+      ((00100001 (epistemic--claim-ref? claim-ref)) (00000001 ()))
+      ((00100001 (00000011 (10010010 evidence) (00000001 supports))) (00000001 ()))
+      ((00100001 (00100010 (evidence-claim-ref evidence) claim-ref)) (00000001 ()))
       (t evidence))))
 
 ; local helper for intent-capabilities-satisfied? — no every?/all? helper
 ; exists in lib/core.lisp (confirmed directly, not assumed), so this small
 ; recursive walk lives here instead of being added to core.lisp.
-(def epistemic--all-required-present?
-  (lambda (requirements effective-capabilities)
-    (cond
-      ((atom? requirements) t)
-      ((not? (member? (car requirements) effective-capabilities)) (quote ()))
-      (t (epistemic--all-required-present? (cdr requirements) effective-capabilities)))))
+(00001001 epistemic--all-required-present?
+  (00001000 (requirements effective-capabilities)
+    (00000111
+      ((00000010 requirements) t)
+      ((00100001 (00101100 (00000101 requirements) effective-capabilities)) (00000001 ()))
+      (t (epistemic--all-required-present? (00000110 requirements) effective-capabilities)))))
 
 ; intent-capabilities-satisfied? checks ONLY the requires-subset
 ; membership relation: every symbol in the intent's `requires` list must
@@ -264,8 +264,8 @@
 ; `effective-capabilities` is taken here as a plain list of capability
 ; symbols (matching the `requires` shape) to check membership against —
 ; the same plain-list convention `requires` itself uses.
-(def intent-capabilities-satisfied?
-  (lambda (intent effective-capabilities)
-    (cond
-      ((not? (intent? intent)) (quote ()))
+(00001001 intent-capabilities-satisfied?
+  (00001000 (intent effective-capabilities)
+    (00000111
+      ((00100001 (10010101 intent)) (00000001 ()))
       (t (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))
