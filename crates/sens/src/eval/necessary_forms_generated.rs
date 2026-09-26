@@ -1,5 +1,5 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Authority: lib/evaluator-dispatch.lisp
+// Authority: lib/surface/function-signatures.lisp
 // Generator: scripts/generate-rust-evaluator-dispatch.lisp
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

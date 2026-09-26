@@ -1,31 +1,52 @@
 ; Lisp-owned generator for the evaluator necessary-form dispatch projection.
 ;
-; Authority: lib/evaluator-dispatch.lisp
+; Authority: lib/surface/function-signatures.lisp (поле (form ...) рядка таблиці)
 ; Rust receives only a mechanical execution projection.
 ;
 ; Usage:
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp --check
 
-(def source-path "lib/evaluator-dispatch.lisp")
+(def source-path "lib/surface/function-signatures.lisp")
 (def output-path "crates/sens/src/eval/necessary_forms_generated.rs")
 
 (def str+
   (lambda args
     (reduce (lambda (acc s) (string-append acc s)) "" args)))
 
-(def dispatch-form
+;; Особливі форми — рядки таблиці з полем (form lambda|define).
+(def all-rows
   (car (read-all (read-file source-path))))
 
-(def rows dispatch-form)
+(def row-form
+  (lambda (row)
+    (second (assoc (quote form) (cdr row)))))
+
+(def form-rows
+  (lambda (remaining)
+    (cond
+      ((atom? remaining)
+       ()
+       (quote ()))
+      ((atom? remaining)
+       (0)
+       (cond
+         ((atom? (assoc (quote form) (cdr (car remaining))))
+          ()
+          (form-rows (cdr remaining)))
+         ((atom? (assoc (quote form) (cdr (car remaining))))
+          (0)
+          (cons (car remaining) (form-rows (cdr remaining)))))))))
+
+(def rows (form-rows all-rows))
 
 (def rust-mechanism
   (lambda (name)
     (cond
-      ((equal? name (quote lambda-form))
+      ((equal? name (quote lambda))
        (1)
        "NecessaryFormMechanism::Lambda")
-      ((equal? name (quote define-form))
+      ((equal? name (quote define))
        (1)
        "NecessaryFormMechanism::Define")
       ((quote no-known-mechanism)
@@ -34,7 +55,7 @@
 
 (def render-row
   (lambda (row)
-    (let ((mechanism (rust-mechanism (second row))))
+    (let ((mechanism (rust-mechanism (row-form row))))
       (cond
         ((atom? mechanism)
          ()
@@ -62,7 +83,7 @@
 (def header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
-    "// Authority: lib/evaluator-dispatch.lisp\n"
+    "// Authority: lib/surface/function-signatures.lisp\n"
     "// Generator: scripts/generate-rust-evaluator-dispatch.lisp\n\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
     "pub(super) enum NecessaryFormMechanism {\n"
