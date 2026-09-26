@@ -5,73 +5,73 @@
 ;   sens scripts/generate-rust-function-signatures.lisp
 ;   sens scripts/generate-rust-function-signatures.lisp --check
 
-(def source-path "lib/surface/function-signatures.lisp")
-(def output-path "crates/sens/src/function_signatures_generated.rs")
+(00001001 source-path "lib/surface/function-signatures.lisp")
+(00001001 output-path "crates/sens/src/function_signatures_generated.rs")
 
-(def str+
-  (lambda args
-    (reduce (lambda (acc s) (string-append acc s)) "" args)))
+(00001001 str+
+  (00001000 args
+    (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
-(def rows (car (read-all (read-file source-path))))
+(00001001 rows (00000101 (01001011 (10100110 source-path))))
 
-(def field
-  (lambda (key row)
-    (second (assoc key (cdr row)))))
+(00001001 field
+  (00001000 (key row)
+    (00101111 (00101101 key (00000110 row)))))
 
-(def has-field?
-  (lambda (key row)
-    (cond
-      ((atom? (assoc key (cdr row))) () (quote ()))
-      ((atom? (assoc key (cdr row))) (0) t))))
+(00001001 has-field?
+  (00001000 (key row)
+    (00000111
+      ((00000010 (00101101 key (00000110 row))) () (00000001 ()))
+      ((00000010 (00101101 key (00000110 row))) (0) t))))
 
-(def render-kind
-  (lambda (kind)
-    (cond
-      ((equal? kind (quote builtin)) (1) "LanguageItemKind::Builtin")
-      ((equal? kind (quote syntax)) (1) "LanguageItemKind::SyntaxForm")
-      ((equal? kind (quote macro)) (1) "LanguageItemKind::Macro")
-      ((quote unknown-kind) unknown-kind (car (quote ()))))))
+(00001001 render-kind
+  (00001000 (kind)
+    (00000111
+      ((00100010 kind (00000001 builtin)) (1) "LanguageItemKind::Builtin")
+      ((00100010 kind (00000001 syntax)) (1) "LanguageItemKind::SyntaxForm")
+      ((00100010 kind (00000001 macro)) (1) "LanguageItemKind::Macro")
+      ((00000001 unknown-kind) unknown-kind (00000101 (00000001 ()))))))
 
-(def render-arity
-  (lambda (arity)
-    (cond
-      ((atom? arity) (1)
-       (str+ "Arity::Exact(" (number->string arity) ")"))
-      ((atom? arity) (0)
-       (cond
-         ((equal? (car arity) (quote at-least)) (1)
-          (str+ "Arity::AtLeast(" (number->string (second arity)) ")"))
-         ((equal? (car arity) (quote between)) (1)
-          (str+ "Arity::Between { min: " (number->string (second arity))
-                ", max: " (number->string (third arity)) " }"))
-         ((quote unknown-arity) unknown-arity (car (quote ()))))))))
+(00001001 render-arity
+  (00001000 (arity)
+    (00000111
+      ((00000010 arity) (1)
+       (str+ "Arity::Exact(" (01000110 arity) ")"))
+      ((00000010 arity) (0)
+       (00000111
+         ((00100010 (00000101 arity) (00000001 at-least)) (1)
+          (str+ "Arity::AtLeast(" (01000110 (00101111 arity)) ")"))
+         ((00100010 (00000101 arity) (00000001 between)) (1)
+          (str+ "Arity::Between { min: " (01000110 (00101111 arity))
+                ", max: " (01000110 (00110000 arity)) " }"))
+         ((00000001 unknown-arity) unknown-arity (00000101 (00000001 ()))))))))
 
-(def render-admitted
-  (lambda (row)
-    (cond
-      ((equal? (field (quote surfaces) row) (quote admitted)) (1) "true")
-      ((equal? (field (quote surfaces) row) (quote admitted)) (0) "false"))))
+(00001001 render-admitted
+  (00001000 (row)
+    (00000111
+      ((00100010 (field (00000001 surfaces) row) (00000001 admitted)) (1) "true")
+      ((00100010 (field (00000001 surfaces) row) (00000001 admitted)) (0) "false"))))
 
-(def render-row
-  (lambda (row)
+(00001001 render-row
+  (00001000 (row)
     (str+
       "    FunctionSignature { semantic_id: 0b"
-      (write-to-string (car row))
-      ", kind: " (render-kind (field (quote kind) row))
-      ", arity: " (render-arity (field (quote arity) row))
+      (01001100 (00000101 row))
+      ", kind: " (render-kind (field (00000001 kind) row))
+      ", arity: " (render-arity (field (00000001 arity) row))
       ", admitted_surfaces: " (render-admitted row)
-      ", signature: " (write-to-string (field (quote sig) row))
-      ", documentation: " (write-to-string (field (quote doc) row))
+      ", signature: " (01001100 (field (00000001 sig) row))
+      ", documentation: " (01001100 (field (00000001 doc) row))
       " },\n")))
 
-(def render-rows
-  (lambda (remaining)
-    (cond
-      ((atom? remaining) () "")
-      ((atom? remaining) (0)
-       (str+ (render-row (car remaining)) (render-rows (cdr remaining)))))))
+(00001001 render-rows
+  (00001000 (remaining)
+    (00000111
+      ((00000010 remaining) () "")
+      ((00000010 remaining) (0)
+       (str+ (render-row (00000101 remaining)) (render-rows (00000110 remaining)))))))
 
-(def header
+(00001001 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/surface/function-signatures.lisp\n"
@@ -88,31 +88,31 @@
     "}\n\n"
     "pub(crate) const FUNCTION_SIGNATURES: &[FunctionSignature] = &[\n"))
 
-(def generated
+(00001001 generated
   (str+ header (render-rows rows) "];\n"))
 
-(cond
-  ((atom? *argv*)
+(00000111
+  ((00000010 *argv*)
    ()
-   (second
-     (list
-       (write-file output-path generated)
-       (print "Rust function signatures projection written"))))
-  ((equal? (car *argv*) "--check")
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "Rust function signatures projection written"))))
+  ((00100010 (00000101 *argv*) "--check")
    (1)
-   (cond
-     ((equal? (read-file output-path) generated)
+   (00000111
+     ((00100010 (10100110 output-path) generated)
       (1)
-      (print "Rust function signatures projection is current"))
-     ((equal? (read-file output-path) generated)
+      (01001000 "Rust function signatures projection is current"))
+     ((00100010 (10100110 output-path) generated)
       (0)
-      (second
-        (list
-          (print "Rust function signatures projection is stale")
-          (car (quote ())))))))
-  ((quote write-projection)
+      (00101111
+        (00100111
+          (01001000 "Rust function signatures projection is stale")
+          (00000101 (00000001 ())))))))
+  ((00000001 write-projection)
    write-projection
-   (second
-     (list
-       (write-file output-path generated)
-       (print "Rust function signatures projection written")))))
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "Rust function signatures projection written")))))

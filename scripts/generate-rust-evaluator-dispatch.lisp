@@ -7,80 +7,80 @@
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp --check
 
-(def source-path "lib/surface/function-signatures.lisp")
-(def output-path "crates/sens/src/eval/necessary_forms_generated.rs")
+(00001001 source-path "lib/surface/function-signatures.lisp")
+(00001001 output-path "crates/sens/src/eval/necessary_forms_generated.rs")
 
-(def str+
-  (lambda args
-    (reduce (lambda (acc s) (string-append acc s)) "" args)))
+(00001001 str+
+  (00001000 args
+    (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
 ;; Особливі форми — рядки таблиці з полем (form lambda|define).
-(def all-rows
-  (car (read-all (read-file source-path))))
+(00001001 all-rows
+  (00000101 (01001011 (10100110 source-path))))
 
-(def row-form
-  (lambda (row)
-    (second (assoc (quote form) (cdr row)))))
+(00001001 row-form
+  (00001000 (row)
+    (00101111 (00101101 (00000001 form) (00000110 row)))))
 
-(def form-rows
-  (lambda (remaining)
-    (cond
-      ((atom? remaining)
+(00001001 form-rows
+  (00001000 (remaining)
+    (00000111
+      ((00000010 remaining)
        ()
-       (quote ()))
-      ((atom? remaining)
+       (00000001 ()))
+      ((00000010 remaining)
        (0)
-       (cond
-         ((atom? (assoc (quote form) (cdr (car remaining))))
+       (00000111
+         ((00000010 (00101101 (00000001 form) (00000110 (00000101 remaining))))
           ()
-          (form-rows (cdr remaining)))
-         ((atom? (assoc (quote form) (cdr (car remaining))))
+          (form-rows (00000110 remaining)))
+         ((00000010 (00101101 (00000001 form) (00000110 (00000101 remaining))))
           (0)
-          (cons (car remaining) (form-rows (cdr remaining)))))))))
+          (00000100 (00000101 remaining) (form-rows (00000110 remaining)))))))))
 
-(def rows (form-rows all-rows))
+(00001001 rows (form-rows all-rows))
 
-(def rust-mechanism
-  (lambda (name)
-    (cond
-      ((equal? name (quote lambda))
+(00001001 rust-mechanism
+  (00001000 (name)
+    (00000111
+      ((00100010 name (00000001 lambda))
        (1)
        "NecessaryFormMechanism::Lambda")
-      ((equal? name (quote define))
+      ((00100010 name (00000001 define))
        (1)
        "NecessaryFormMechanism::Define")
-      ((quote no-known-mechanism)
+      ((00000001 no-known-mechanism)
        no-known-mechanism
-       (car (quote ()))))))
+       (00000101 (00000001 ()))))))
 
-(def render-row
-  (lambda (row)
-    (let ((mechanism (rust-mechanism (row-form row))))
-      (cond
-        ((atom? mechanism)
+(00001001 render-row
+  (00001000 (row)
+    (10011100 ((mechanism (rust-mechanism (row-form row))))
+      (00000111
+        ((00000010 mechanism)
          ()
-         (car (quote ())))
-        ((atom? mechanism)
+         (00000101 (00000001 ())))
+        ((00000010 mechanism)
          (1)
          (str+
            "    NecessaryFormDispatchRow { semantic_id: 0b"
-           (write-to-string (car row))
+           (01001100 (00000101 row))
            ", mechanism: "
            mechanism
            " },\n"))))))
 
-(def render-rows
-  (lambda (remaining)
-    (cond
-      ((atom? remaining)
+(00001001 render-rows
+  (00001000 (remaining)
+    (00000111
+      ((00000010 remaining)
        ()
        "")
-      ((atom? remaining)
+      ((00000010 remaining)
        (0)
-       (str+ (render-row (car remaining))
-             (render-rows (cdr remaining)))))))
+       (str+ (render-row (00000101 remaining))
+             (render-rows (00000110 remaining)))))))
 
-(def header
+(00001001 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/surface/function-signatures.lisp\n"
@@ -97,32 +97,32 @@
     "}\n\n"
     "pub(super) const NECESSARY_FORM_DISPATCH: &[NecessaryFormDispatchRow] = &[\n"))
 
-(def generated
+(00001001 generated
   (str+ header (render-rows rows) "];\n"))
 
-(cond
-  ((atom? *argv*)
+(00000111
+  ((00000010 *argv*)
    ()
-   (second
-     (list
-       (write-file output-path generated)
-       (print "Rust evaluator dispatch projection written"))))
-  ((equal? (car *argv*) "--check")
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "Rust evaluator dispatch projection written"))))
+  ((00100010 (00000101 *argv*) "--check")
    (1)
-   (let ((current (read-file output-path)))
-     (cond
-       ((equal? current generated)
+   (10011100 ((current (10100110 output-path)))
+     (00000111
+       ((00100010 current generated)
         (1)
-        (print "Rust evaluator dispatch projection is current"))
-       ((equal? current generated)
+        (01001000 "Rust evaluator dispatch projection is current"))
+       ((00100010 current generated)
         (0)
-        (second
-          (list
-            (print "Rust evaluator dispatch projection is stale")
-            (car (quote ()))))))))
-  ((quote write-projection)
+        (00101111
+          (00100111
+            (01001000 "Rust evaluator dispatch projection is stale")
+            (00000101 (00000001 ()))))))))
+  ((00000001 write-projection)
    write-projection
-   (second
-     (list
-       (write-file output-path generated)
-       (print "Rust evaluator dispatch projection written")))))
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "Rust evaluator dispatch projection written")))))

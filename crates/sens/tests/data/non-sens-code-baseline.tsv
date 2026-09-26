@@ -435,10 +435,7 @@ source	scripts/enforce-island-math-evidence.lisp	11
 source	scripts/fixtures-for-tier.lisp	28
 source	scripts/gen-functions.lisp	21
 source	scripts/generate-function-table.lisp	241
-source	scripts/generate-functions-md.lisp	124
 source	scripts/generate-meta-semantic-registry.lisp	96
-source	scripts/generate-rust-evaluator-dispatch.lisp	92
-source	scripts/generate-rust-function-signatures.lisp	112
 source	scripts/generate-rust-semantic-registry.lisp	73
 source	scripts/generate-uk-surface-audit.lisp	254
 source	scripts/machine-authority-guard.lisp	211
@@ -448,7 +445,6 @@ source	scripts/release.lisp	79
 source	scripts/semantic-authority-guard-enforce.lisp	20
 source	scripts/semantic-authority-guard.lisp	60
 source	scripts/symbol-table.lisp	67
-source	scripts/verify-repo.lisp	356
 source	scripts/перевірити-український-профіль.lisp	239
 source	task-demo.lisp	9
 source	task-stats.lisp	2

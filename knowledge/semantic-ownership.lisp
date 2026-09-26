@@ -22,7 +22,7 @@
 
 (ownership list-constructor - lisp-owned stdlib confirmed no "Варіадичний list-конструктор виведений із lambda/rest семантики самої мови" "lib/core4.lisp" "crates/sens/tests/mccarthy.rs" host-mechanism efdd9252fd4ca4af4503b219ab3ae79130ef0e64)
 (ownership gensym - lisp-owned stdlib confirmed no "Політика свіжого символу складена в Lisp зі string-операцій і monotonic observation" "lib/core4.lisp" "tests/fixtures/conformance.lisp;crates/sens/tests/mccarthy.rs" - -)
-(ownership meta-evaluator - lisp-owned self-hosting confirmed no "Lisp-owned metacircular evaluator witness; усі 34 required parity rows підтверджені machine evidence matrix" "lib/meta-eval.lisp;knowledge/meta-eval-evidence.lisp" "crates/xtask/src/checks.rs;crates/sens/tests/witness_authority.rs;tests/fixtures/meta-semantic-registry-witness.lisp;crates/sens/tests/meta_eval_error_kind_parity.rs;crates/sens/tests/meta_eval_error_detail_boundary.rs" - -)
+(ownership meta-evaluator - lisp-owned self-hosting confirmed no "Lisp-owned metacircular evaluator witness; усі 34 required parity rows підтверджені machine evidence matrix" "lib/meta-eval.lisp;knowledge/meta-eval-evidence.lisp" "scripts/verify-repo.lisp;crates/sens/tests/witness_authority.rs;tests/fixtures/meta-semantic-registry-witness.lisp;crates/sens/tests/meta_eval_error_kind_parity.rs;crates/sens/tests/meta_eval_error_detail_boundary.rs" - -)
 
 (ownership unification - lisp-owned reasoning confirmed no "Уніфікація логічних змінних з occurs-check" "lib/unify.lisp" "tests/fixtures/conformance.lisp" - -)
 (ownership backward-reasoning - lisp-owned reasoning confirmed no "Backward-chaining пошук доказу й побудова provenance" "lib/reason.lisp" "crates/sens/tests/reason_stack.rs;crates/sens/tests/reason_index.rs" - -)
