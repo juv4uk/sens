@@ -103,7 +103,7 @@ BUILD = """\
 """
 LEN = """\
 ({def} len ({lambda} (xs n)
-  ({cond} (({atom} xs) n)
+  ({cond} (({atom} xs) () n)
         (t (len ({cdr} xs) ({+} n 1))))))
 """
 TREE = """\
@@ -143,7 +143,7 @@ WORKLOADS = {
         "params": {"N": 1000, "R": 120}, "small": {"N": 200, "R": 10},
         "setup": BUILD + LEN + """\
 ({def} rev ({lambda} (xs acc)
-  ({cond} (({atom} xs) acc)
+  ({cond} (({atom} xs) () acc)
         (t (rev ({cdr} xs) ({cons} ({car} xs) acc))))))
 ({def} work ({lambda} (r total)
   ({cond} (({eq} r 0) total)
@@ -157,7 +157,7 @@ WORKLOADS = {
         "params": {"N": 100, "R": 5000}, "small": {"N": 100, "R": 50},
         "setup": BUILD + """\
 ({def} mem ({lambda} (x xs)
-  ({cond} (({atom} xs) 0)
+  ({cond} (({atom} xs) () 0)
         (({eq} x ({car} xs)) 1)
         (t (mem x ({cdr} xs))))))
 ({def} xs (build {N} ({quote} ())))
@@ -212,7 +212,7 @@ WORKLOADS = {
   ({cond} (({eq} n 0) acc)
         (t (mkal ({-} n 1) ({cons} ({cons} n ({+} n n)) acc))))))
 ({def} look ({lambda} (k al)
-  ({cond} (({atom} al) 0)
+  ({cond} (({atom} al) () 0)
         (({eq} k ({car} ({car} al))) ({cdr} ({car} al)))
         (t (look k ({cdr} al))))))
 ({def} sumall ({lambda} (k al acc)
@@ -227,10 +227,10 @@ WORKLOADS = {
         "params": {"N": 1000, "R": 60}, "small": {"N": 200, "R": 5},
         "setup": BUILD + """\
 ({def} mymap ({lambda} (f xs)
-  ({cond} (({atom} xs) xs)
+  ({cond} (({atom} xs) () xs)
         (t ({cons} (f ({car} xs)) (mymap f ({cdr} xs)))))))
 ({def} myfold ({lambda} (f acc xs)
-  ({cond} (({atom} xs) acc)
+  ({cond} (({atom} xs) () acc)
         (t (myfold f (f acc ({car} xs)) ({cdr} xs))))))
 ({def} work ({lambda} (r total)
   ({cond} (({eq} r 0) total)
