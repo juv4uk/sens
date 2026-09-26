@@ -249,7 +249,6 @@ jobs:
           cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
           cargo test -p sens-cli --test cli
           cargo test -p xtask --test license_policy
-          cargo run -p xtask -- verify
           cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
 
       - name: Exercise future main fast clippy
@@ -308,7 +307,6 @@ jobs:
           cargo test -p xtask --test xed_import_cli
           cargo test -p xtask --test encoder_coverage_cli
           cargo test -p xtask --test license_policy
-          cargo run -p xtask -- verify
           cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
           cargo run -p xtask -- import-xed-evidence --check
           cargo run -p xtask -- generate-encoder-coverage --check
@@ -437,7 +435,6 @@ jobs:
       - name: Governance and policy checks
         run: |
           cargo test -p xtask --test license_policy
-          cargo run -p xtask -- verify
           cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
 
   main-fast-clippy:

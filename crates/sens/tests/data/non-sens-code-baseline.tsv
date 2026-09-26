@@ -448,7 +448,7 @@ source	scripts/release.lisp	79
 source	scripts/semantic-authority-guard-enforce.lisp	20
 source	scripts/semantic-authority-guard.lisp	60
 source	scripts/symbol-table.lisp	67
-source	scripts/verify-repo.lisp	110
+source	scripts/verify-repo.lisp	356
 source	scripts/перевірити-український-профіль.lisp	239
 source	task-demo.lisp	9
 source	task-stats.lisp	2
