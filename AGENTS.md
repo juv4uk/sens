@@ -140,7 +140,7 @@ English auxiliary note: before searching blindly or inventing a workflow, load `
 
 ```text
 semantic plane                         coordination plane
-my-lisp :9999                          swarm-node :910x
+sens :9999                             swarm-node :910x
 -------------------------------        -------------------------------
 eval / parse / diagnose                join / list-members
 contract-version                       claim-task / release-task

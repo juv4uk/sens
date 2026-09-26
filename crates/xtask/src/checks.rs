@@ -1,7 +1,7 @@
-//! Documentation/governance/policy checks relocated out of `cargo test`.
-//! Перевірки документації/врядування/політик, перенесені з `cargo test`.
+//! Перевірки української документації й розкладки (ще не перенесені в мову).
+//! Решта перевірок verify — scripts/verify-repo.lisp.
 
-use std::{fs, path::PathBuf, process::Command};
+
 
 pub struct Check {
     pub name: &'static str,
@@ -10,50 +10,6 @@ pub struct Check {
 
 pub fn all() -> Vec<Check> {
     vec![
-        Check {
-            name: "meta-eval-evidence-matrix",
-            run: meta_eval_evidence_matrix,
-        },
-        Check {
-            name: "meta-eval-human-evidence-projection",
-            run: meta_eval_human_evidence_projection,
-        },
-        Check {
-            name: "semantic-ownership-map-in-sync",
-            run: semantic_ownership_map_in_sync,
-        },
-        Check {
-            name: "public-docs-share-current-project-identity-and-extension",
-            run: public_docs_share_current_project_identity_and_extension,
-        },
-        Check {
-            name: "cargo-workspace-has-no-my-lisp-package-prefix",
-            run: cargo_workspace_has_no_my_lisp_package_prefix,
-        },
-        Check {
-            name: "public-docs-point-to-semantic-authority",
-            run: public_docs_point_to_semantic_authority,
-        },
-        Check {
-            name: "host-semantic-surface-documentation-tracks-time-ownership",
-            run: host_semantic_surface_documentation_tracks_time_ownership,
-        },
-        Check {
-            name: "agent-onboarding-records-removed-coordination-surface",
-            run: agent_onboarding_records_removed_coordination_surface,
-        },
-        Check {
-            name: "current-agent-authority-records-removed-legacy-coordination",
-            run: current_agent_authority_records_removed_legacy_coordination,
-        },
-        Check {
-            name: "human-migration-doc-keeps-semantic-and-coordination-planes-separate",
-            run: human_migration_doc_keeps_semantic_and_coordination_planes_separate,
-        },
-        Check {
-            name: "s2-explicitly-contracts-category-not-error-wording",
-            run: s2_explicitly_contracts_category_not_error_wording,
-        },
         Check {
             name: "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku",
             run: vsi_stable_ukrainski_nazvy_maiut_numeric_zapys_u_dovidnyku,
@@ -97,324 +53,27 @@ pub fn all() -> Vec<Check> {
     ]
 }
 
-fn cargo_workspace_has_no_my_lisp_package_prefix() -> Result<(), String> {
-    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let crates_dir = repo_root.join("crates");
-    let entries = fs::read_dir(&crates_dir)
-        .map_err(|error| format!("cannot read {}: {error}", crates_dir.display()))?;
 
-    let mut stale_packages = Vec::new();
-
-    for entry in entries {
-        let entry = entry.map_err(|error| format!("cannot read crates entry: {error}"))?;
-        let manifest = entry.path().join("Cargo.toml");
-        if !manifest.is_file() {
-            continue;
-        }
-
-        let source = fs::read_to_string(&manifest)
-            .map_err(|error| format!("cannot read {}: {error}", manifest.display()))?;
-
-        let mut in_package = false;
-        for raw_line in source.lines() {
-            let line = raw_line.trim();
-
-            if line.starts_with('[') {
-                in_package = line == "[package]";
-                continue;
-            }
-            if !in_package {
-                continue;
-            }
-
-            let Some((raw_key, raw_value)) = line.split_once('=') else {
-                continue;
-            };
-            if raw_key.trim() != "name" {
-                continue;
-            }
-            let package_name = raw_value.trim().trim_matches('"');
-            if package_name.starts_with("my-lisp") {
-                stale_packages.push(format!(
-                    "{} -> {package_name}",
-                    manifest
-                        .strip_prefix(&repo_root)
-                        .unwrap_or(&manifest)
-                        .display()
-                ));
-            }
-            break;
-        }
-    }
-
-    if stale_packages.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "Cargo package prefix regression: current packages must use sens*, not my-lisp*: {}",
-            stale_packages.join(", ")
-        ))
-    }
-}
-
-fn run_python(script: &str, args: &[&str], label: &str) -> Result<(), String> {
-    let output = Command::new("python3")
-        .arg(script)
-        .args(args)
-        .output()
-        .map_err(|error| format!("python3 must run {label}: {error}"))?;
-
-    if output.status.success() {
-        Ok(())
-    } else {
-        Err(format!(
-            "{label} failed\nstdout:\n{}\nstderr:\n{}",
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr)
-        ))
-    }
-}
 
 // --- ported from crates/sens/tests/meta_eval_evidence_matrix.rs ---
 
-fn meta_eval_evidence_matrix() -> Result<(), String> {
-    let script = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../scripts/check-meta-eval-evidence.py"
-    );
-    run_python(script, &[], "meta-eval evidence checker")
-}
 
-fn meta_eval_human_evidence_projection() -> Result<(), String> {
-    let script = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../scripts/generate-meta-eval-evidence.py"
-    );
-    run_python(
-        script,
-        &["--check"],
-        "meta-eval human evidence projection check",
-    )
-}
 
 // --- ported from crates/sens/tests/semantic_ownership.rs ---
 
-fn semantic_ownership_map_in_sync() -> Result<(), String> {
-    let script = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../scripts/semantic-ownership.py"
-    );
-    run_python(script, &["--check"], "semantic ownership checker")
-}
 
 // --- ported from crates/sens/tests/documentation_contract.rs ---
 
-fn public_docs_share_current_project_identity_and_extension() -> Result<(), String> {
-    let readme = include_str!("../../../README.md");
-    let core = include_str!("../../../docs/language-core.md");
 
-    for (doc_name, doc) in [("README.md", readme), ("docs/language-core.md", core)] {
-        if !(doc.contains("reference implementation") || doc.contains("референсна реалізація")) {
-            return Err(format!(
-                "{doc_name}: public architecture prose must describe Rust as a reference implementation"
-            ));
-        }
-        if doc.contains("canonical Rust implementation")
-            || doc.contains("канонічна реалізація на Rust")
-            || doc.contains("kanonische Rust-Implementierung")
-        {
-            return Err(format!(
-                "{doc_name}: implementation wording must not imply that Rust itself owns semantics"
-            ));
-        }
-        // Not just "all three extension tokens are mentioned somewhere" (that
-        // passed while README and language-core.md contradicted each other
-        // on which extension is canonical) — the doc must actually state
-        // `.lisp` as canonical and the other two as legacy aliases.
-        let states_lisp_canonical = doc.contains("канонічне розширення вихідного коду — **`.lisp`**")
-            || doc.contains("Канонічне розширення вихідного коду — **`.lisp`**")
-            || doc.contains("canonical source extension is **`.lisp`**")
-            || doc.contains("current canonical source extension is **`.lisp`**");
-        let states_others_legacy_aliases = (doc.contains("`.wsm`") && doc.contains("`.my`"))
-            && (doc.contains("legacy alias") || doc.contains("legacy aliases"));
-        if !states_lisp_canonical || !states_others_legacy_aliases {
-            return Err(format!(
-                "{doc_name}: public architecture prose must state `.lisp` as the canonical \
-                 extension and `.wsm`/`.my` as legacy aliases (per sens#81)"
-            ));
-        }
-    }
-    Ok(())
-}
 
-fn public_docs_point_to_semantic_authority() -> Result<(), String> {
-    let readme = include_str!("../../../README.md");
-    let core = include_str!("../../../docs/language-core.md");
-    let authority = include_str!("../../../docs/semantic-authority-map.md");
-    let authority_lower = authority.to_lowercase();
 
-    let mut problems = Vec::new();
-    if !readme.contains("docs/semantic-authority-map.md") {
-        problems.push("README.md must link docs/semantic-authority-map.md");
-    }
-    if !core.contains("semantic-authority-map.md") {
-        problems.push("docs/language-core.md must link semantic-authority-map.md");
-    }
-    if !authority.contains("language-contract.lisp") {
-        problems.push("docs/semantic-authority-map.md must reference language-contract.lisp");
-    }
-    if !authority_lower.contains("ratified adr") {
-        problems.push("docs/semantic-authority-map.md must mention ratified ADRs");
-    }
-    if !authority_lower.contains("executable conformance") {
-        problems.push("docs/semantic-authority-map.md must mention executable conformance");
-    }
-    if problems.is_empty() {
-        Ok(())
-    } else {
-        Err(problems.join("; "))
-    }
-}
-
-fn host_semantic_surface_documentation_tracks_time_ownership() -> Result<(), String> {
-    let hss = include_str!("../../../docs/host-semantic-surface.md");
-    let time = include_str!("../../../lib/time.lisp");
-    let builtins = include_str!("../../sens/src/eval/builtins.rs");
-
-    let mut problems = Vec::new();
-    if !hss.contains("mono-ns") {
-        problems.push("host-semantic-surface.md missing mono-ns".to_string());
-    }
-    if !hss.contains("unix-time-now") {
-        problems.push("host-semantic-surface.md missing unix-time-now".to_string());
-    }
-    if !hss.contains("`utc-now` | `lib/time.lisp` | derived public clock meaning | HOST REMOVED")
-        && !hss.contains("`utc-now` | `lib/time.my` | derived public clock meaning | HOST REMOVED")
-    {
-        problems.push("host-semantic-surface.md missing utc-now HOST REMOVED row".to_string());
-    }
-    if !time.contains("(def mono-ms") {
-        problems.push("lib/time.my missing (def mono-ms".to_string());
-    }
-    if !time.contains("(def utc-now") {
-        problems.push("lib/time.my missing (def utc-now".to_string());
-    }
-    if builtins.contains("fn civil_from_days")
-        || builtins.contains("fn utc_now_value")
-        || builtins.contains("\"utc-now\",")
-    {
-        problems.push(
-            "Rust must not regain Gregorian utc-now semantics after the completed migration"
-                .to_string(),
-        );
-    }
-    if !builtins.contains("\"unix-time-now\",") {
-        problems.push("builtins.rs missing \"unix-time-now\",".to_string());
-    }
-    if problems.is_empty() {
-        Ok(())
-    } else {
-        Err(problems.join("; "))
-    }
-}
-
-fn agent_onboarding_records_removed_coordination_surface() -> Result<(), String> {
-    let agents = include_str!("../../../AGENTS.md");
-    let deprecation = include_str!("../../../knowledge/swarm-legacy-deprecation.lisp");
-
-    let mut problems = Vec::new();
-    for needle in [
-        "sens :9999",
-        "swarm-node :910x",
-        "Стара coordination surface на `:9999` фізично видалена",
-        "мають повертати `unknown op`",
-        "knowledge/swarm-legacy-deprecation.lisp",
-    ] {
-        if !agents.contains(needle) {
-            problems.push(format!("AGENTS.md missing: {needle}"));
-        }
-    }
-    if agents.contains("This is a\n  first-class pattern, not a fallback") {
-        problems
-            .push("legacy :9999 mailbox instructions must not return as current onboarding".to_string());
-    }
-    for needle in [
-        "(status . deprecated)",
-        "(physical-status . removed)",
-        "(runtime-rejection . confirmed)",
-        "(coordination-authority . swarm-node)",
-    ] {
-        if !deprecation.contains(needle) {
-            problems.push(format!("swarm-legacy-deprecation.wsm missing: {needle}"));
-        }
-    }
-    if problems.is_empty() {
-        Ok(())
-    } else {
-        Err(problems.join("; "))
-    }
-}
 
 // --- ported from crates/sens/tests/swarm_deprecation.rs ---
 
-fn current_agent_authority_records_removed_legacy_coordination() -> Result<(), String> {
-    let agent_guide = include_str!("../../../AGENTS.md");
-    let mut problems = Vec::new();
-    for needle in [
-        "Current coordination authority:",
-        "`swarm-node`",
-        "Стара coordination surface на `:9999` фізично видалена",
-        "мають повертати `unknown op`",
-        "sens :9999",
-        "swarm-node :910x",
-    ] {
-        if !agent_guide.contains(needle) {
-            problems.push(format!("AGENTS.md missing: {needle}"));
-        }
-    }
-    if problems.is_empty() {
-        Ok(())
-    } else {
-        Err(problems.join("; "))
-    }
-}
 
-fn human_migration_doc_keeps_semantic_and_coordination_planes_separate() -> Result<(), String> {
-    let mesh_doc = include_str!("../../../docs/swarm-mesh-v2.md");
-    let mut problems = Vec::new();
-    for needle in [
-        "sens :9999",
-        "swarm-node :910x",
-        "no longer the\ncoordination path going forward",
-        "semantic oracle",
-    ] {
-        if !mesh_doc.contains(needle) {
-            problems.push(format!("docs/swarm-mesh-v2.md missing: {needle}"));
-        }
-    }
-    if problems.is_empty() {
-        Ok(())
-    } else {
-        Err(problems.join("; "))
-    }
-}
 
 // --- ported from crates/sens/tests/meta_eval_error_detail_boundary.rs ---
 
-fn s2_explicitly_contracts_category_not_error_wording() -> Result<(), String> {
-    let axioms = include_str!("../../../docs/language-core-axioms.md");
-    if !axioms.contains("The wording may differ; the *category* is the contract.") {
-        return Err("S2 must state the error-detail boundary explicitly".to_string());
-    }
-
-    let error_source = include_str!("../../sens/src/error.rs");
-    if !error_source.contains("non-contractual: `kind` is what S2 ratifies") {
-        return Err(
-            "the reference error type must keep the contractual axis explicit".to_string(),
-        );
-    }
-    Ok(())
-}
 
 // --- ported from crates/sens/tests/ukrainian_api_docs.rs ---
 

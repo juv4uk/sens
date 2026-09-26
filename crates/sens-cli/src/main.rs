@@ -483,6 +483,11 @@ fn main() {
                         println!("{}", result.value);
                     }
                     Err(e) => {
+                        // Вивід, накопичений до помилки (наприклад, «FAIL: ...» від
+                        // скрипта перевірок), не губиться: друкуємо його перед помилкою.
+                        for out in session.environment.output_take_new() {
+                            println!("{}", out);
+                        }
                         eprintln!("Error: {}", e.render(&source));
                         process::exit(1);
                     }
