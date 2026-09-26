@@ -99,8 +99,15 @@ fn resolve_head<'a>(
     match &head.kind {
         ExprKind::Sid(sens) => Some((None, *sens)),
         ExprKind::Symbol(name) if !bound.contains(name.as_ref()) => {
-            semantic_registry_export::semantic_id_for_admitted_surface(name)
-                .map(|sens| (Some(name.as_ref()), sens))
+            // Host capabilities dispatch by literal name before ordinary
+            // function evaluation. A future accidental name collision with
+            // the SENS registry must therefore remain a named capability.
+            if sens::capability_installed(name) {
+                None
+            } else {
+                semantic_registry_export::semantic_id_for_admitted_surface(name)
+                    .map(|sens| (Some(name.as_ref()), sens))
+            }
         }
         _ => None,
     }
@@ -295,6 +302,11 @@ fn walk_expr(
 }
 
 fn analyze(source: &str) -> Result<Analysis, String> {
+    // Mirror the native CLI host boundary so capability-vs-language routing is
+    // decided against the same installed name registry as real execution.
+    // install() is idempotent: registering an existing name replaces the same
+    // handler without changing language semantics.
+    sens_host::install();
     let expressions = parse(source).map_err(|error| error.render(source))?;
     let mut analysis = Analysis::default();
     let mut bound = HashSet::new();
@@ -465,6 +477,22 @@ mod tests {
         let expected =
             "(00001001 + (00001000 (a b) a)) (+ 1 2) (00001100 1 2)";
         assert_eq!(rewrite(source), expected);
+    }
+
+    fn dummy_capability(
+        _arguments: &[Expr],
+        _environment: &sens::Environment,
+        _span: sens::Span,
+    ) -> Result<sens::Value, sens::LanguageError> {
+        Ok(sens::Value::Nil)
+    }
+
+    #[test]
+    fn host_capability_name_wins_over_registry_collision() {
+        sens::register_capability("describe", dummy_capability);
+        let rewritten = rewrite("(describe x)");
+        sens::unregister_capability("describe");
+        assert_eq!(rewritten, "(describe x)");
     }
 
     #[test]
