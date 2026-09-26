@@ -1,7 +1,7 @@
 //! Documentation/governance/policy checks relocated out of `cargo test`.
 //! Перевірки документації/врядування/політик, перенесені з `cargo test`.
 
-use std::process::Command;
+use std::{fs, path::PathBuf, process::Command};
 
 pub struct Check {
     pub name: &'static str,
@@ -25,6 +25,10 @@ pub fn all() -> Vec<Check> {
         Check {
             name: "public-docs-share-current-project-identity-and-extension",
             run: public_docs_share_current_project_identity_and_extension,
+        },
+        Check {
+            name: "cargo-workspace-has-no-my-lisp-package-prefix",
+            run: cargo_workspace_has_no_my_lisp_package_prefix,
         },
         Check {
             name: "public-docs-point-to-semantic-authority",
@@ -91,6 +95,66 @@ pub fn all() -> Vec<Check> {
             run: ukrainska_prohrama_pryinnyattia_ne_potrebuie_latynskoi_rozkladky,
         },
     ]
+}
+
+fn cargo_workspace_has_no_my_lisp_package_prefix() -> Result<(), String> {
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let crates_dir = repo_root.join("crates");
+    let entries = fs::read_dir(&crates_dir)
+        .map_err(|error| format!("cannot read {}: {error}", crates_dir.display()))?;
+
+    let mut stale_packages = Vec::new();
+
+    for entry in entries {
+        let entry = entry.map_err(|error| format!("cannot read crates entry: {error}"))?;
+        let manifest = entry.path().join("Cargo.toml");
+        if !manifest.is_file() {
+            continue;
+        }
+
+        let source = fs::read_to_string(&manifest)
+            .map_err(|error| format!("cannot read {}: {error}", manifest.display()))?;
+
+        let mut in_package = false;
+        for raw_line in source.lines() {
+            let line = raw_line.trim();
+
+            if line.starts_with('[') {
+                in_package = line == "[package]";
+                continue;
+            }
+            if !in_package {
+                continue;
+            }
+
+            let Some((raw_key, raw_value)) = line.split_once('=') else {
+                continue;
+            };
+            if raw_key.trim() != "name" {
+                continue;
+            }
+            let package_name = raw_value.trim().trim_matches('"');
+            if package_name.starts_with("my-lisp") {
+                stale_packages.push(format!(
+                    "{} -> {package_name}",
+                    manifest
+                        .strip_prefix(&repo_root)
+                        .unwrap_or(&manifest)
+                        .display()
+                ));
+            }
+            break;
+        }
+    }
+
+    if stale_packages.is_empty() {
+        Ok(())
+    } else {
+        Err(format!(
+            "Cargo package prefix regression: current packages must use sens*, not my-lisp*: {}",
+            stale_packages.join(", ")
+        ))
+    }
 }
 
 fn run_python(script: &str, args: &[&str], label: &str) -> Result<(), String> {
