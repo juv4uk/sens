@@ -36,6 +36,7 @@
   ((boundary . ())
    (sanskrit . ajñāta)
    (meaning-uk . "невідомо")
+   (meaning-en . "unknown")
    (direction . none)
    (sens-function . none)
    (convergence-functions . (00000000 11111111))
@@ -58,4 +59,19 @@
    (boundary-law . seven-directed-grades-converge-to-empty-list)
    (eighth-bit-law . belongs-to-sens-function-space)
    (function-convergence-law . distinct-functions-same-empty-result)
-   (and-or-cond-law . deliberately-unratified)))
+   (and-or-cond-law . deliberately-unratified))
+
+  ; Таблиця термінів: один санскритський термін на ступінь, спільний для
+  ; напрямків «так» (1^n) і «ні» (0^n). Українська — первинна, англійська —
+  ; допоміжна. Це назви ступенів, а не ймовірності: probability-model лишається forbidden.
+  ((terminology . per-grade)
+   (languages . (sanskrit uk en))
+   (terms .
+     ((1 dṛḍha-niścaya "тверда певність" "firm certainty")
+      (2 niścaya       "певність"        "certainty")
+      (3 nirṇaya       "висновок"        "determination")
+      (4 saṃbhāvanā    "правдоподібність" "plausibility")
+      (5 saṃśaya       "сумнів"          "doubt")
+      (6 aniścaya      "непевність"      "uncertainty")
+      (7 ajñāta-sīmā   "межа невідомого" "edge of the unknown")))
+   (boundary-term . (ajñāta "невідомо" "unknown"))))
