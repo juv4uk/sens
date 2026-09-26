@@ -407,6 +407,37 @@ pub fn language_items() -> Vec<LanguageItem> {
         .collect::<Vec<_>>();
 
     items.extend(semantic_language_items());
+    items.extend(sens_primitive_language_items());
+    items
+}
+
+/// SENS-примітиви без прив'язки за іменем (імена ведуть до коду через
+/// таблицю функцій): метадані для інструментів — за історичним символьним
+/// написанням, для кожного стабільного імені коду.
+fn sens_primitive_language_items() -> Vec<LanguageItem> {
+    const PRIMITIVES: [(crate::Sid8, &str); 7] = [
+        (crate::sid!(00001100), "+"),
+        (crate::sid!(00001101), "-"),
+        (crate::sid!(00001110), "*"),
+        (crate::sid!(00001111), "/"),
+        (crate::sid!(00011010), "<"),
+        (crate::sid!(00011011), ">"),
+        (crate::sid!(00011100), "="),
+    ];
+    let mut items = Vec::new();
+    for (sid, diagnostic) in PRIMITIVES {
+        let (signature, documentation, arity) = builtin_metadata(diagnostic);
+        for name in semantic_registry::stable_surfaces_for_semantic_id(sid) {
+            items.push(LanguageItem {
+                semantic_id: Some(sid),
+                name: name.to_string(),
+                signature,
+                documentation,
+                kind: LanguageItemKind::Builtin,
+                arity,
+            });
+        }
+    }
     items
 }
 

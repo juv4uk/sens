@@ -112,6 +112,9 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     table[crate::sid!(00001101).packed_byte() as usize] = Some(prim_00001101);
     table[crate::sid!(00001110).packed_byte() as usize] = Some(prim_00001110);
     table[crate::sid!(00001111).packed_byte() as usize] = Some(prim_00001111);
+    table[crate::sid!(00011010).packed_byte() as usize] = Some(prim_00011010);
+    table[crate::sid!(00011011).packed_byte() as usize] = Some(prim_00011011);
+    table[crate::sid!(00011100).packed_byte() as usize] = Some(prim_00011100);
     table[crate::sid!(01001101).packed_byte() as usize] = Some(prim_01001101);
     table
 };
@@ -166,7 +169,7 @@ fn prim_00001100(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00001100", args, 2, span)?;
+    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
     arithmetic::arithmetic_on_values("+", args, env, span)
 }
 
@@ -175,7 +178,7 @@ fn prim_00001101(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00001101", args, 2, span)?;
+    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
     arithmetic::arithmetic_on_values("-", args, env, span)
 }
 
@@ -184,7 +187,7 @@ fn prim_00001110(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00001110", args, 2, span)?;
+    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
     arithmetic::arithmetic_on_values("*", args, env, span)
 }
 
@@ -193,8 +196,20 @@ fn prim_00001111(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00001111", args, 2, span)?;
+    // Довільна арність: (/ 5 6 8 7) -> 5/336 (conformance.lisp).
     arithmetic::division_on_values(args, args.len(), env, span)
+}
+
+fn prim_00011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    arithmetic::comparison_on_values("<", args, span)
+}
+
+fn prim_00011011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    arithmetic::comparison_on_values(">", args, span)
+}
+
+fn prim_00011100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
+    arithmetic::comparison_on_values("=", args, span)
 }
 
 fn prim_01001101(

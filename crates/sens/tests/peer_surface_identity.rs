@@ -23,6 +23,9 @@ fn assert_same_builtin_handle(left: &Value, right: &Value) {
         // Language-level identity is specified by the registry/Lisp contract,
         // not by Rc allocation identity.
         (Value::Builtin(left), Value::Builtin(right)) => assert!(Rc::ptr_eq(left, right)),
+        // Після кроку «Rust лише примітиви» всі написання ведуть до одного
+        // SENS-коду — спільна ідентичність тепер сам 1-байтовий код.
+        (Value::Sid(left), Value::Sid(right)) => assert_eq!(left, right),
         other => panic!("expected two builtin values, got {other:?}"),
     }
 }

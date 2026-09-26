@@ -49,12 +49,12 @@
  (active . t)
  (compatibility . t))
 
-((expr . "(cond ((eq (quote radio) (quote radio)) (quote legacy-same)) (t (quote wrong)))")
+((expr . "(cond ((00000011 (quote radio) (quote radio)) (quote legacy-same)) (t (quote wrong)))")
  (expected . "legacy-same")
  (active . t)
  (compatibility . t))
 
-((expr . "(cond ((eq (quote radio) (quote antenna)) (quote wrong)) (t (quote legacy-distinct)))")
+((expr . "(cond ((00000011 (quote radio) (quote antenna)) (quote wrong)) (t (quote legacy-distinct)))")
  (expected . "legacy-distinct")
  (active . t)
  (compatibility . t))

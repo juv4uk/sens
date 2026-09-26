@@ -22,17 +22,17 @@
 
 use crate::environment::Environment;
 use crate::eval::arithmetic::{
-    arithmetic_on_values, comparison_on_values, division_on_values, exact_value,
+    exact_value,
 };
 use crate::eval::special_forms::json::json_parse_values;
 use crate::eval::special_forms::{
-    car_value, cdr_value, codepoint_to_string_values, cons_values, eq_values, eval_values,
+    codepoint_to_string_values, eval_values,
     princ_values, print_values, read_all_values, read_values, sha256_hex_values,
     string_append_values, string_first_values, string_less_than_values, string_predicate_values,
     string_rest_values, string_to_codepoint_values, string_to_symbol_values,
     symbol_to_string_values, write_to_string_values,
 };
-use crate::{semantic_registry, Exactness, NumericBuffer, Rational, Sid8, Span, Value};
+use crate::{Exactness, NumericBuffer, Rational, Span, Value};
 
 type Native =
     std::rc::Rc<dyn Fn(&[Value], &Environment, Span) -> Result<Value, crate::LanguageError>>;
@@ -41,22 +41,6 @@ fn builtin(name: &'static str, func: Native) -> Value {
     Value::Builtin(std::rc::Rc::new(crate::value::Builtin { name, func }))
 }
 
-fn define_peer_builtin(
-    environment: &Environment,
-    diagnostic_name: &'static str,
-    semantic_id: Sid8,
-    func: Native,
-) {
-    let names = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
-    assert!(
-        !names.is_empty(),
-        "peer builtin semantic identity must have at least one stable surface: {semantic_id}"
-    );
-    let value = builtin(diagnostic_name, func);
-    for name in names {
-        environment.define(name, value.clone());
-    }
-}
 
 fn ntp_query_raw_value(
     host: &str,
@@ -144,22 +128,6 @@ pub(crate) fn install(environment: &Environment) {
         };
     }
 
-    define!(environment, "car", |args: &[Value], _env: &Environment, span: Span| {
-        exact_args("car", args, 1, span)?;
-        car_value(&args[0], span)
-    });
-    define!(environment, "cdr", |args: &[Value], _env: &Environment, span: Span| {
-        exact_args("cdr", args, 1, span)?;
-        cdr_value(&args[0], span)
-    });
-    define!(environment, "cons", |args: &[Value], env: &Environment, span: Span| {
-        exact_args("cons", args, 2, span)?;
-        cons_values(args[0].clone(), args[1].clone(), env, span)
-    });
-    define!(environment, "eq", |args: &[Value], _env: &Environment, span: Span| {
-        exact_args("eq", args, 2, span)?;
-        eq_values(args[0].clone(), args[1].clone(), span)
-    });
 
     // abs/min-list/max-list/min/max migrated to lib/core.my (owner
     // directive 2026-09-11: "Lisp owns meaning, Rust owns only
@@ -430,38 +398,6 @@ pub(crate) fn install(environment: &Environment) {
     // the Sid8 semantic registry projection. Human spellings are not duplicated here.
     // The builtin diagnostic token remains the historical symbolic spelling
     // for Contract 2.1 display compatibility; it is NOT semantic identity.
-    define_peer_builtin(
-        environment,
-        "+",
-        crate::sid!(00001100),
-        std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
-            arithmetic_on_values("+", args, env, span)
-        }),
-    );
-    define_peer_builtin(
-        environment,
-        "-",
-        crate::sid!(00001101),
-        std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
-            arithmetic_on_values("-", args, env, span)
-        }),
-    );
-    define_peer_builtin(
-        environment,
-        "*",
-        crate::sid!(00001110),
-        std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
-            arithmetic_on_values("*", args, env, span)
-        }),
-    );
-    define_peer_builtin(
-        environment,
-        "/",
-        crate::sid!(00001111),
-        std::rc::Rc::new(|args: &[Value], env: &Environment, span: Span| {
-            division_on_values(args, args.len(), env, span)
-        }),
-    );
     define!(environment, "env", |args: &[Value], env: &Environment, span: Span| {
         exact_args("env", args, 0, span)?;
         let mut items = Vec::new();
@@ -474,30 +410,6 @@ pub(crate) fn install(environment: &Environment) {
         }
         Ok(list)
     });
-    define_peer_builtin(
-        environment,
-        "<",
-        crate::sid!(00011010),
-        std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
-            comparison_on_values("<", args, span)
-        }),
-    );
-    define_peer_builtin(
-        environment,
-        ">",
-        crate::sid!(00011011),
-        std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
-            comparison_on_values(">", args, span)
-        }),
-    );
-    define_peer_builtin(
-        environment,
-        "=",
-        crate::sid!(00011100),
-        std::rc::Rc::new(|args: &[Value], _env: &Environment, span: Span| {
-            comparison_on_values("=", args, span)
-        }),
-    );
 }
 
 fn exact_args(
