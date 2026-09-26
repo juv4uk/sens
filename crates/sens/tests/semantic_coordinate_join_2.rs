@@ -179,7 +179,7 @@ fn machine_coordinate(session: &mut Session, sid: Sens8) -> String {
 #[test]
 fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sens!(00001100)));
-    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sens!(00000011)));
+    assert_eq!(semantic_id_for_admitted_surface("eq?"), Some(sens::sens!(00000011)));
     assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sens!(00000100)));
     assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sens!(00000111)));
 

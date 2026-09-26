@@ -321,7 +321,7 @@ source	contracts/life-1-contract.lisp	7
 source	contracts/life-2-pattern-catalog.lisp	5
 source	contracts/mathematical-result-taxonomy.lisp	8
 source	contracts/structural-observation-contract.lisp	7
-source	contracts/structural-query-inventory.lisp	17
+source	contracts/structural-query-inventory.lisp	18
 source	contracts/world-transition-contract.lisp	2
 source	evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp	1
 source	experiments/atomspace-pattern-audit-791.lisp	7

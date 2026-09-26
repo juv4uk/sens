@@ -288,7 +288,7 @@ fn add_sid_preserves_math_and_machine_evidence_with_explicit_kernel_gap() {
 
 #[test]
 fn eq_sid_joins_relation_sens_and_compare_capability() {
-    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sens!(00000011)));
+    assert_eq!(semantic_id_for_admitted_surface("eq?"), Some(sens::sens!(00000011)));
 
     let mut session = load_coordinate_session();
     let math = math_coordinate_value(&mut session, sens::sens!(00000011));
