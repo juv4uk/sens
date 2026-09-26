@@ -11,7 +11,7 @@
 ;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp --check
 
 (def source-path "lib/surface/semantic-registry.lisp")
-(def output-path "crates/my-lisp/src/semantic_registry_generated.rs")
+(def output-path "crates/sens/src/semantic_registry_generated.rs")
 
 (def str+
   (lambda args

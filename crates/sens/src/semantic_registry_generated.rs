@@ -188,7 +188,7 @@ pub(super) const SEMANTIC_ROWS: &[SemanticRow] = &[
     SemanticRow { semantic_id: 0b10100111, surfaces: &[SemanticSurface { namespace: "en", name: "write-file" }, SemanticSurface { namespace: "ук", name: "записати-файл" }, SemanticSurface { namespace: "укр", name: "записати-файл" }, ] },
     SemanticRow { semantic_id: 0b10101000, surfaces: &[SemanticSurface { namespace: "en", name: "invoke" }, SemanticSurface { namespace: "ук", name: "викликати" }, SemanticSurface { namespace: "укр", name: "викликати" }, ] },
     SemanticRow { semantic_id: 0b10101001, surfaces: &[SemanticSurface { namespace: "en", name: "binary" }, SemanticSurface { namespace: "ук", name: "двійковий" }, SemanticSurface { namespace: "укр", name: "двійковий" }, ] },
-    SemanticRow { semantic_id: 0b10101010, surfaces: &[] },
+    SemanticRow { semantic_id: 0b10101010, surfaces: &[SemanticSurface { namespace: "en", name: "label" }, SemanticSurface { namespace: "ук", name: "мітка" }, SemanticSurface { namespace: "укр", name: "мітка" }, ] },
     SemanticRow { semantic_id: 0b10101011, surfaces: &[] },
     SemanticRow { semantic_id: 0b10101100, surfaces: &[] },
     SemanticRow { semantic_id: 0b10101101, surfaces: &[] },

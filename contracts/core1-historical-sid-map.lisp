@@ -48,6 +48,10 @@
     (row 00001000 lambda LAMBDA mccarthy-1960 closure-adapter admitted)
     (row 00001001 define DEFINE lisp-i-1960 surface-adapter admitted)
     (row 00001011 def DEFINE lisp-i-1960 surface-adapter admitted)
+    ; 10101010 label: рішення власника 2026-09-26 — LABEL отримав SID
+    ; (раніше — механізм без SID). Ядро mccarthy-eval 6031f926 диспетчеризує
+    ; LABEL за кодом 10101010; Core1 (lib/core1.lisp) записаний цим кодом.
+    (row 10101010 label LABEL mccarthy-1960 direct admitted)
 
     (row 00001100 + PLUS lisp15-1962 direct available-not-admitted)
     (row 00001101 - DIFFERENCE lisp15-1962 surface-adapter available-not-admitted)
@@ -75,7 +79,6 @@
     (row 10011011 or OR lisp15-1962 direct available-not-admitted))
 
   (historical-support-without-my-lisp-sid
-    (mechanism LABEL mccarthy-1960 named-recursion)
     (mechanism apply mccarthy-1960 evaluator-support)
     (mechanism appq mccarthy-1960 evaluator-support)
     (mechanism evcon mccarthy-1960 evaluator-support)

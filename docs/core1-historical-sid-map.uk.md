@@ -47,6 +47,7 @@
 | `00001000` | `lambda` | `LAMBDA` | mccarthy-1960 | closure-adapter | admitted |
 | `00001001` | `define` | `DEFINE` | lisp-i-1960 | surface-adapter | admitted |
 | `00001011` | `def` | `DEFINE` | lisp-i-1960 | surface-adapter | admitted |
+| `10101010` | `label` | `LABEL` | mccarthy-1960 | direct | admitted |
 | `00001100` | `+` | `PLUS` | lisp15-1962 | direct | available-not-admitted |
 | `00001101` | `-` | `DIFFERENCE` | lisp15-1962 | surface-adapter | available-not-admitted |
 | `00001110` | `*` | `TIMES` | lisp15-1962 | direct | available-not-admitted |
@@ -71,13 +72,17 @@
 
 ## Історичні механізми без нашого SID
 
+`LABEL` раніше був у цьому списку. 2026-09-26 власник вирішив дати йому
+SID `10101010` (іменована рекурсія Маккартні 1960): ядро `mccarthy-eval`
+`6031f926` розпізнає LABEL за цим кодом, а Core1 записаний ним. Тепер це
+рядок таблиці вище, `direct` / `admitted`.
+
 Ці механізми існують у `mccarthy-eval`, але **свідомо не отримали** свого
 SID у my-lisp — вони лишаються суто механізмом евалюатора, не публічною
 ідентичністю мови:
 
 | механізм | джерело | роль |
 |---|---|---|
-| `LABEL` | mccarthy-1960 | іменована рекурсія |
 | `apply` | mccarthy-1960 | внутрішня підтримка евалюатора |
 | `appq` | mccarthy-1960 | внутрішня підтримка евалюатора |
 | `evcon` | mccarthy-1960 | внутрішня підтримка евалюатора |

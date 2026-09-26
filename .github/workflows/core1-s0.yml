@@ -29,7 +29,7 @@ jobs:
         with:
           repository: juv4uk/mccarthy-eval
           ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
-          ref: 79f2f38f2a8da22a5bbcb39312da5f726ab2471f
+          ref: 6031f92652066825a245c806c0773e9e524257bd
           path: .core1-s0/mccarthy-eval
 
       - name: Checkout pinned Lisp-authored compiler seed
@@ -50,7 +50,7 @@ jobs:
           set -euo pipefail
           seed_sha="$(git -C .core1-s0/mccarthy-eval rev-parse HEAD)"
           compiler_sha="$(git -C .core1-s0/wsm-sens rev-parse HEAD)"
-          test "$seed_sha" = "79f2f38f2a8da22a5bbcb39312da5f726ab2471f"
+          test "$seed_sha" = "6031f92652066825a245c806c0773e9e524257bd"
           test "$compiler_sha" = "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947"
           printf 'S0 seed commit: %s\n' "$seed_sha"
           printf 'S2 compiler seed commit: %s\n' "$compiler_sha"
@@ -73,7 +73,7 @@ jobs:
           s1_source="$(sha256sum lib/core1.lisp | cut -d' ' -f1)"
           s2_source="$(sha256sum .core1-s0/wsm-sens/lib/compiler.lisp | cut -d' ' -f1)"
 
-          grep -F "(commit . \"79f2f38f2a8da22a5bbcb39312da5f726ab2471f\")" "$manifest"
+          grep -F "(commit . \"6031f92652066825a245c806c0773e9e524257bd\")" "$manifest"
           grep -F "(source-sha256 . \"$s0_source\")" "$manifest"
           grep -F "(binary-sha256 . \"$s0_binary\")" "$manifest"
           grep -F "(source-sha256 . \"$s1_source\")" "$manifest"
