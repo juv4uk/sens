@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{Sens8, Value};
 use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -26,6 +26,9 @@ pub struct Environment(
 #[derive(Debug)]
 struct Frame {
     values: HashMap<Rc<str>, Value>,
+    /// Language-defined callable mechanisms keyed by exact SENS identity.
+    /// Surface bindings remain a separate lexical projection.
+    sens_values: HashMap<Sens8, Value>,
     parent: Option<Environment>,
 }
 
@@ -72,6 +75,7 @@ impl Environment {
         let environment = Self(
             Rc::new(RefCell::new(Frame {
                 values: HashMap::new(),
+                sens_values: HashMap::new(),
                 parent: None,
             })),
             Rc::new(RefCell::new(Transcript {
@@ -217,6 +221,7 @@ impl Environment {
         Self(
             Rc::new(RefCell::new(Frame {
                 values: HashMap::new(),
+                sens_values: HashMap::new(),
                 parent: Some(self.clone()),
             })),
             self.1.clone(),
@@ -285,6 +290,28 @@ impl Environment {
 
     pub fn define(&self, name: impl Into<Rc<str>>, value: Value) {
         self.0.borrow_mut().values.insert(name.into(), value);
+    }
+
+    /// Bind one language-defined implementation directly to its exact SENS
+    /// identity. This is mechanism storage only: identity still comes from the
+    /// Lisp-owned semantic registry, and ordinary surface shadowing cannot
+    /// retarget this slot.
+    pub(crate) fn define_sens(&self, sens: Sens8, value: Value) {
+        self.0.borrow_mut().sens_values.insert(sens, value);
+    }
+
+    /// Resolve a language-defined implementation by exact SENS identity,
+    /// following the same lexical frame chain as ordinary definitions without
+    /// converting the identity back through any surface spelling.
+    pub(crate) fn get_sens(&self, sens: Sens8) -> Option<Value> {
+        let mut current = Some(self.clone());
+        while let Some(env) = current {
+            if let Some(value) = env.0.borrow().sens_values.get(&sens) {
+                return Some(value.clone());
+            }
+            current = env.0.borrow().parent.clone();
+        }
+        None
     }
 
     pub fn get(&self, name: &str) -> Option<Value> {
