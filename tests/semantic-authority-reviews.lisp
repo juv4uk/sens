@@ -146,3 +146,10 @@
 ; #1432 English predicates with question mark: align test assertions.
 (review "crates/my-lisp/src/eval/mod.rs" "8d0352de416852cf928520f4f16b8d11c6882c7f16aae74107ede48db19f35a6" issue-1432 english-predicate-question-mark-test)
 (review "crates/my-lisp/src/presentation.rs" "ebb12056da482bf59ee37645eda8ca60c22cf9f0a7819f115952262bcb55e53e" issue-1432 english-predicate-question-mark-test)
+
+; #1417 fresh replay after crate rename and current main reconciliation.
+(review "crates/sens/src/lib.rs" "b2e7249c3ae2aedab82d3ccd545fe98199890aaa9353f884727de81055320fe8" issue-1417 canonical-core4-fasl-loader-mechanism)
+(review "crates/sens-cli/src/main.rs" "5edb978317cad12f54495c8454d11fff4f02d50c3769f9ba10f69f6d8c9448f5" issue-1417 cli-bootstrap-consumes-canonical-loader)
+(review "crates/sens/tests/clock.rs" "7983b07ea92ffbcb2444d7ff401ad0b92c07e882300d33a64b2a7aee947882f1" issue-1417 nonlexical-time-identity-observer)
+(review "crates/sens/tests/timezone_ownership.rs" "409be4447cdd06d524bc99c5f7b21297bc1ec2fa94004bd8d5324812cb340dc4" issue-1417 nonlexical-timezone-identity-observer)
+(review "crates/sens/tests/postcore_peer_staging_1417.rs" "1175ffce5152a456054b6e36c4c8bc0f16dcd5fe034a0938cb090b804dee4821" issue-1417 postcore-peer-staging-observer)
