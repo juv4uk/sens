@@ -170,6 +170,42 @@
          (str+ "identity:" (sid-text sid) "/surface:" (surface-word-text sa)))
         (t (string-append "identity:" (sid-text sid)))))))
 
+; #1469 invariant: this generated review projection is total over the exact
+; SENS function space. This validates projection shape only; it assigns no
+; surface, law, or callable mechanism to an otherwise empty registry row.
+(def validate-complete-function-space
+  (lambda (rows)
+    (cond
+      ((equal? (length rows) 256)
+       (structural-relation same)
+       (cond
+         ((equal? (sid-text (car (car rows))) "00000000")
+          (structural-relation same)
+          (cond
+            ((equal? (sid-text (car (car (reverse rows)))) "11111111")
+             (structural-relation same)
+             t)
+            (t
+             (second
+               (list
+                 (print "function-table invariant failed: last row must be 11111111")
+                 (car (quote ())))))))
+         (t
+          (second
+            (list
+              (print "function-table invariant failed: first row must be 00000000")
+              (car (quote ())))))))
+      (t
+       (second
+         (list
+           (print
+             (str+
+               "function-table invariant failed: expected 256 rows, got "
+               (number->string (length rows))))
+           (car (quote ()))))))))
+
+(def function-space-valid (validate-complete-function-space entries))
+
 ; --- string-join with newline, since core.lisp has none yet. Accumulator-
 ; based (not "car + recurse-in-argument-position"), matching core.lisp's own
 ; map-onto/reverse-onto/length-onto pattern -- a naive recursive version
@@ -259,7 +295,53 @@
 (def md-output (string-append md-body "
 "))
 
-(write-file "lib/generated/function-table.lisp" wsm-output)
-(write-file "docs/generated/function-table.md" md-output)
+(def wsm-output-path "lib/generated/function-table.lisp")
+(def md-output-path "docs/generated/function-table.md")
 
-(print (str+ "function-table: " (number->string (length entries)) " identities written"))
+(def write-projections
+  (lambda ()
+    (second
+      (list
+        (write-file wsm-output-path wsm-output)
+        (write-file md-output-path md-output)
+        (print
+          (str+
+            "function-table: "
+            (number->string (length entries))
+            " exact SENS rows written"))))))
+
+(def check-projections
+  (lambda ()
+    (let ((current-wsm (read-file wsm-output-path))
+          (current-md (read-file md-output-path)))
+      (cond
+        ((equal? current-wsm wsm-output)
+         (structural-relation same)
+         (cond
+           ((equal? current-md md-output)
+            (structural-relation same)
+            (print
+              (str+
+                "function-table: "
+                (number->string (length entries))
+                " exact SENS rows current")))
+           (t
+            (second
+              (list
+                (print "function-table markdown projection is stale")
+                (car (quote ())))))))
+        (t
+         (second
+           (list
+             (print "function-table Lisp projection is stale")
+             (car (quote ())))))))))
+
+(cond
+  ((atom? *argv*)
+   (structural-kind empty-list)
+   (write-projections))
+  ((equal? (car *argv*) "--check")
+   (structural-relation same)
+   (check-projections))
+  (t
+   (write-projections)))
