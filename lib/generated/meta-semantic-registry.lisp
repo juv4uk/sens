@@ -3,8 +3,8 @@
 ; Generator: scripts/generate-meta-semantic-registry.lisp
 ; Registry surfaces; empty and reader-only apostrophe surfaces omitted.
 
-(def my-semantic-surface-registry
-  (quote (
+(00001001 my-semantic-surface-registry
+  (00000001 (
     (quote 00000001) ; en
     (як-є 00000001) ; ук
     (як-є 00000001) ; укр
@@ -674,9 +674,9 @@
     (відповідь-тотожне 10110110) ; укр
   )))
 
-(def my-semantic-id-for-surface
-  (lambda (name)
-    (let ((entry (assoc name my-semantic-surface-registry)))
-      (cond
-        ((atom? entry) () (quote ()))
-        ((atom? entry) (0) (second entry))))))
+(00001001 my-semantic-id-for-surface
+  (00001000 (name)
+    (10011100 ((entry (00101101 name my-semantic-surface-registry)))
+      (00000111
+        ((00000010 entry) () (00000001 ()))
+        ((00000010 entry) (0) (00101111 entry))))))

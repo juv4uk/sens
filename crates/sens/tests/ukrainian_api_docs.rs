@@ -28,13 +28,18 @@ fn documented_kind(name: &str) -> Option<String> {
 
 #[test]
 fn stari_nazvy_dvokh_predykativ_lyshaiutsia_aliasamy_symisnosti() {
+    // Визначення пишеться кодом СЕНС 00001001 (або старим іменем define).
     for binding in [
-        "(define конфлікт? check-conflict)",
-        "(define перевірити-конфлікт check-conflict)",
-        "(define змінна-зустрічається? occurs-check)",
-        "(define перевірити-зустрічання occurs-check)",
+        "конфлікт? check-conflict)",
+        "перевірити-конфлікт check-conflict)",
+        "змінна-зустрічається? occurs-check)",
+        "перевірити-зустрічання occurs-check)",
     ] {
-        assert!(UK_SURFACE.contains(binding), "відсутній compatibility alias: {binding}");
+        assert!(
+            UK_SURFACE.contains(&format!("(00001001 {binding}"))
+                || UK_SURFACE.contains(&format!("(define {binding}")),
+            "відсутній compatibility alias: {binding}"
+        );
     }
 }
 

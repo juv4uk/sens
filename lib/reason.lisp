@@ -284,7 +284,7 @@
           (proofs (00101111 state))
           (index (reason-ensure-index all-rules)))
       (map-goal-results
-        (prove-goal
+        (10000000
           goal
           (reason-index-candidates goal index)
           subst
@@ -350,7 +350,7 @@
 ; provided separately by lib/result-status.lisp / reason-observe.
 (00001011 reason-explain
   (00001000 (goal rules)
-    (10011100 ((results (reason goal rules)))
+    (10011100 ((results (10000101 goal rules)))
       (00000111
         ((00000010 results) () (10011101 ((_1 (01001000 (00000001 Cannot)))
                 (_2 (01001000 (00000001 prove:)))
@@ -360,7 +360,7 @@
                 (_2 (01001000 (00000001 prove:)))
                 (_3 (01001000 goal)))
            (00000001 ())))
-        (t (explain-proof (00101111 (00000101 results))))))))
+        (t (10000010 (00101111 (00000101 results))))))))
 
 (00001011 add-usage
   (00001000 (entry alist)
@@ -415,7 +415,7 @@
        (00100111
          (00000001 statement)
          (00101111 node)
-         (00100111 (00000001 source) (source-of node))
+         (00100111 (00000001 source) (10000011 node))
          (00100111 (00000001 rule) (00110000 node))
          (00100111
            (00000001 derived-from)
@@ -433,5 +433,5 @@
       ((00000010 nodes) (1) (00000001 ()))
       (t
        (00000100
-         (provenance (00000101 nodes))
+         (10000100 (00000101 nodes))
          (provenance-list (00000110 nodes)))))))

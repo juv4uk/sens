@@ -213,8 +213,8 @@
   (00001000 (text)
     (00000111
       ((00111100 text) t)
-      ((x86-admission-decimal-digit? (string-first text))
-       (x86-admission-decimal-digits? (string-rest text)))
+      ((x86-admission-decimal-digit? (00111111 text))
+       (x86-admission-decimal-digits? (01000000 text)))
       (t (00000001 ())))))
 
 (00001001 x86-admission-exact-integer?
@@ -223,13 +223,13 @@
       ((00100011 value) (00000001 ()))
       ((10110001 (00000010 value)) (00000001 ()))
       (t
-       (10011100 ((text (write-to-string value)))
+       (10011100 ((text (01001100 value)))
          (00000111
            ((00111100 text) (00000001 ()))
-           ((00000011 (string-first text) "-")
+           ((00000011 (00111111 text) "-")
             (00000111
-              ((00111100 (string-rest text)) (00000001 ()))
-              (t (x86-admission-decimal-digits? (string-rest text)))))
+              ((00111100 (01000000 text)) (00000001 ()))
+              (t (x86-admission-decimal-digits? (01000000 text)))))
            (t (x86-admission-decimal-digits? text))))))))
 
 (00001001 x86-admission-within-inclusive-integer-range?

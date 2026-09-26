@@ -114,4 +114,4 @@
     (00100111
       (00000001 source-execution)
       (native-first-execute-source-forms
-        (read-all source)))))
+        (01001011 source)))))

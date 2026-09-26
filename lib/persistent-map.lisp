@@ -140,12 +140,12 @@
        (make-balanced-node key value (node-left tree) (node-right tree)))
       ((00100101 key (node-key tree))
        (balance (make-balanced-node (node-key tree) (node-value tree)
-                  (map-insert key value (node-left tree))
+                  (01101110 key value (node-left tree))
                   (node-right tree))))
       (t
        (balance (make-balanced-node (node-key tree) (node-value tree)
                   (node-left tree)
-                  (map-insert key value (node-right tree))))))))
+                  (01101110 key value (node-right tree))))))))
 
 ; Returns '() if `key` is absent, or a one-element list `(value)` if
 ; present — the classic "maybe" shape (same idiom lib/reason.lisp's proof
@@ -162,11 +162,11 @@
       ((00000010 tree) () (00000001 ()))
       ((00000010 tree) (1) (00000001 ()))
       ((00000011 key (node-key tree)) (00100111 (node-value tree)))
-      ((00100101 key (node-key tree)) (map-get key (node-left tree)))
-      (t (map-get key (node-right tree))))))
+      ((00100101 key (node-key tree)) (01101101 key (node-left tree)))
+      (t (01101101 key (node-right tree))))))
 
 (00001001 map-contains?
-  (00001000 (key tree) (10110001 (00000010 (map-get key tree)))))
+  (00001000 (key tree) (10110001 (00000010 (01101101 key tree)))))
 
 ; In-order traversal — the keys come back sorted, a free side effect of
 ; the tree being a BST, not something map->list computes separately.
@@ -177,6 +177,6 @@
     (00000111
       ((00000010 tree) () (00000001 ()))
       ((00000010 tree) (1) (00000001 ()))
-      (t (00101001 (map->list (node-left tree))
+      (t (00101001 (01110000 (node-left tree))
                  (00000100 (00000100 (node-key tree) (node-value tree))
-                       (map->list (node-right tree))))))))
+                       (01110000 (node-right tree))))))))

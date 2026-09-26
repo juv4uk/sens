@@ -160,7 +160,7 @@
 (00001001 reason-in
   (00001000 (module-name goal)
     (00000111
-      ((module-known? module-name) (10000101 goal (module-clauses-now module-name)))
+      ((01111110 module-name) (10000101 goal (01111111 module-name)))
       (t (00000001 Module-not-found)))))
 
 ;; --- forward-chaining integration (lib/forward.lisp) ----------------------
@@ -202,7 +202,7 @@
 (00001001 forward-in
   (00001000 (module-name)
     (00000111
-      ((module-known? module-name) (run-multi (module-clauses-now module-name) (00000001 ())))
+      ((01111110 module-name) (run-multi (01111111 module-name) (00000001 ())))
       (t (00000001 Module-not-found)))))
 
 ;; check-conflict checks if the negation of the first rule's head is
@@ -213,9 +213,9 @@
 (00001011 check-conflict?
   (00001000 (module-name rules)
     (00000111
-      ((module-known? module-name)
+      ((01111110 module-name)
        (10011100 ((head (00000101 (00000101 rules))))
-         (10011100 ((proofs (reason-in module-name (opposite-knowledge-head head))))
+         (10011100 ((proofs (01111100 module-name (opposite-knowledge-head head))))
            (00000111
              ((00000010 proofs) () (00000001 ()))
              ((00000010 proofs) (1) (00000001 ()))
@@ -353,17 +353,17 @@
 (00001011 advice-conflict-proof
   (00001000 (module-name clause)
     (00000111
-      ((module-known? module-name)
-       (10011100 ((proofs (reason-in module-name (opposite-knowledge-head (00000101 clause)))))
+      ((01111110 module-name)
+       (10011100 ((proofs (01111100 module-name (opposite-knowledge-head (00000101 clause)))))
          (00000111
            ((00000010 proofs) () (00000111
               ((00000011 (00000101 (00000101 clause)) (00000001 not)) (00000001 ()))
               ((00000011 (00000101 (00000101 clause)) (00000001 not?)) (00000001 ()))
-              (t (reason-in module-name (00100111 (00000001 not?) (00000101 clause))))))
+              (t (01111100 module-name (00100111 (00000001 not?) (00000101 clause))))))
            ((00000010 proofs) (1) (00000111
               ((00000011 (00000101 (00000101 clause)) (00000001 not)) (00000001 ()))
               ((00000011 (00000101 (00000101 clause)) (00000001 not?)) (00000001 ()))
-              (t (reason-in module-name (00100111 (00000001 not?) (00000101 clause))))))
+              (t (01111100 module-name (00100111 (00000001 not?) (00000101 clause))))))
            (t proofs))))
       (t (00000001 ())))))
 
@@ -497,8 +497,8 @@
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-clause)) (00100111 (00000001 input) clauses)))
       (t
        (10011100 ((existing (00000111
-                         ((module-known? module-name)
-                          (module-clauses-now module-name))
+                         ((01111110 module-name)
+                          (01111111 module-name))
                          (t (00000001 ())))))
          (10011100 ((conflict (advice-batch-conflict clauses clauses
                                                 (00101001 clauses existing))))
@@ -791,11 +791,11 @@
       ((00000010 lst) (1) (00000001 ()))
       ((00000010 (00000101 lst)) () (00000111
          ((00000011 (00000101 lst) item) t)
-         (t (contains-atom? item (00000110 lst)))))
+         (t (01111010 item (00000110 lst)))))
       ((00000010 (00000101 lst)) (1) (00000111
          ((00000011 (00000101 lst) item) t)
-         (t (contains-atom? item (00000110 lst)))))
-      (t (contains-atom? item (00000110 lst))))))
+         (t (01111010 item (00000110 lst)))))
+      (t (01111010 item (00000110 lst))))))
 
 ;; is-fact? answers the knowledge-domain question explicitly. The structural
 ;; shape of the clause body is mechanism: an empty body means a fact, while a
@@ -822,22 +822,22 @@
        (10011100 ((clause (00000101 clauses)))
          (10011100 ((head (00000101 clause)))
            (00000111
-             ((is-fact? clause) (clause-kind rule)
-              (collect-facts-about item (00000110 clauses)))
-             ((is-fact? clause) (clause-kind fact)
-              (10011100 ((contains (contains-atom? item head)))
+             ((01110111 clause) (clause-kind rule)
+              (01111001 item (00000110 clauses)))
+             ((01110111 clause) (clause-kind fact)
+              (10011100 ((contains (01111010 item head)))
                 (00000111
                   ((00000011 contains (00000001 ())) (1)
-                   (collect-facts-about item (00000110 clauses)))
+                   (01111001 item (00000110 clauses)))
                   ((00000011 contains (00000001 ())) (0)
-                   (00000100 head (collect-facts-about item (00000110 clauses))))))))))))))
+                   (00000100 head (01111001 item (00000110 clauses))))))))))))))
 
 ;; describe returns every known fact about `item` within `module-name`,
 ;; or `Module-not-found` for consistency with `reason-in`.
 (00001001 describe
   (00001000 (item module-name)
     (00000111
-      ((module-known? module-name) (collect-facts-about item (module-clauses-now module-name)))
+      ((01111110 module-name) (01111001 item (01111111 module-name)))
       (t (00000001 Module-not-found)))))
 
 ;; --- usage tracking (which knowledge is actually alive) ----------------
