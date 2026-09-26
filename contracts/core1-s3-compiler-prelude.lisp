@@ -27,7 +27,11 @@
    (historical-two-part-cond . admitted)
    (core4-result-records . forbidden)
    (cml-hidden-not-primitive . forbidden)
+   ; "fallback" тут означає заборонений Sens8 -> surface -> evaluator lookup.
+   ; Прямий language-defined Sens8 slot (#1455; формулювання з #1458) є
+   ; механізмом того самого коду, а не запасним шляхом через ім'я.
    (semantic-evaluator-fallback . forbidden)
+   (language-defined-sens-slot-dispatch . required)
    (additional-helper-without-concrete-red . forbidden)
    (prelude-provenance-required . yes))
 

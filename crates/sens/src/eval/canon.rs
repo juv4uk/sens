@@ -4,7 +4,7 @@
 //! mechanism shape for an already-selected SID, but it must never invent a
 //! second named function identity.
 
-use super::{arithmetic, special_forms};
+use super::{arithmetic, closures, special_forms};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -228,18 +228,45 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let Some(primitive) = PRIMITIVE_TABLE
+    // #1455: примітив Rust → визначення мовою, прив'язане до коду → помилка.
+    if let Some(primitive) = PRIMITIVE_TABLE
         .get(sid.packed_byte() as usize)
         .and_then(|function| *function)
-    else {
-        return Err(LanguageError::new(
+    {
+        return primitive(args, environment, span);
+    }
+    match &environment.code_slot(sid) {
+        Some(Value::Closure(closure)) => closures::apply_values(closure.clone(), args, span),
+        Some(Value::Builtin(builtin)) => (builtin.func)(args, environment, span),
+        _ => Err(LanguageError::new(
             ErrorKind::Type,
             format!("SENS function has no admitted callable mechanism: {sid}"),
             span,
-        ));
-    };
+        )),
+    }
+}
 
-    primitive(args, environment, span)
+/// #1455: чи має код примітив Rust.
+pub(crate) fn has_primitive(sid: Sens8) -> bool {
+    PRIMITIVE_TABLE
+        .get(sid.packed_byte() as usize)
+        .is_some_and(|function| function.is_some())
+}
+
+/// #1455: визначення (функція або макрос) верхнього рівня з назвою з таблиці функцій, чий код не
+/// має примітиву й не є особливою формою, стає механізмом цього коду. Лише
+/// перше визначення; затінення назви пізніше слот не змінює.
+pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &Environment) {
+    if !environment.is_root() || !matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
+        return;
+    }
+    let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
+        return;
+    };
+    if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
+        return;
+    }
+    environment.bind_code_slot_once(sid, value.clone());
 }
 
 pub(crate) fn value_for_sid(sid: Sens8) -> Option<Value> {

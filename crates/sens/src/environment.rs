@@ -65,6 +65,10 @@ struct Limits {
     /// (host-or-bind-address, first-port, last-port), inclusive.
     tcp_connect_allowlist: Option<Vec<(String, u16, u16)>>,
     tcp_listen_allowlist: Option<Vec<(String, u16, u16)>>,
+    /// #1455: визначення мовою для кодів СЕНС без примітиву Rust. Слот коду
+    /// заповнює перше визначення верхнього рівня з назвою з таблиці функцій;
+    /// пізніше затінення назви слот не змінює.
+    code_slots: HashMap<u8, Value>,
 }
 
 impl Environment {
@@ -209,6 +213,26 @@ impl Environment {
             Some(programs) => programs.iter().any(|allowed| allowed == program),
             None => true,
         }
+    }
+
+    /// Чи це кадр верхнього рівня сесії (без lexical parent).
+    pub(crate) fn is_root(&self) -> bool {
+        self.0.borrow().parent.is_none()
+    }
+
+    /// #1455: визначення мовою, прив'язане до коду СЕНС.
+    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
+        self.2.borrow().code_slots.get(&sid.packed_byte()).cloned()
+    }
+
+    /// Прив'язує визначення до коду, лише якщо слот ще порожній.
+    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
+        let mut limits = self.2.borrow_mut();
+        if limits.code_slots.contains_key(&sid.packed_byte()) {
+            return false;
+        }
+        limits.code_slots.insert(sid.packed_byte(), value);
+        true
     }
 
     /// A child frame is the future lexical boundary captured by a closure. It
