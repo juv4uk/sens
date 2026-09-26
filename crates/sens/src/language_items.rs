@@ -87,6 +87,14 @@ fn semantic_language_items_with(
     items
 }
 
+/// Вид функції таблиці за кодом (з lib/surface/function-signatures.lisp).
+pub(crate) fn signature_kind(semantic_id: Sens8) -> Option<LanguageItemKind> {
+    generated::FUNCTION_SIGNATURES
+        .iter()
+        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .map(|row| row.kind)
+}
+
 pub fn language_items() -> Vec<LanguageItem> {
     semantic_language_items_with(
         semantic_registry::stable_surfaces_for_semantic_id,
