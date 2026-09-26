@@ -183,7 +183,7 @@ fn loads_a_real_verbatim_slice_of_lib_core_my_and_runs_it_through_my_eval() {
         eval_meta_program(core_slice, "(third (quote (a b c)))"),
         "c"
     );
-    assert_eq!(eval_meta_program(core_slice, "(not? (quote ()))"), "t");
+    assert_eq!(eval_meta_program(core_slice, "(not (quote ()))"), "t");
     assert_eq!(
         eval_meta_program(core_slice, "(identity (quote radio))"),
         "radio"
