@@ -297,14 +297,17 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// This is the canonical bootstrap order for embedders that start from a bare
 /// `Environment::root()`: the root itself stays smaller, while the bootstrap
 /// explicitly gains `make-macro` before evaluating `lib/macro.lisp`.
-pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+fn load_core_library_with_fasl(
+    session: &mut Session,
+    core_fasl: &[u8],
+) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core4);
     session
         .environment
         .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
 
-    let result = match fasl_decode_program(CORE_LIBRARY_FASL) {
+    let result = match fasl_decode_program(core_fasl) {
         Some((expressions, source_hash))
             if source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) =>
         {
@@ -315,6 +318,10 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
+}
+
+pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    load_core_library_with_fasl(session, CORE_LIBRARY_FASL)
 }
 
 /// Read-only diagnostic for embedders that want to report a stale Core4 FASL
@@ -480,4 +487,47 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
     let start = start.min(chars.len());
     let end = end.min(chars.len()).max(start);
     chars[start..end].iter().collect()
+}
+
+
+#[cfg(test)]
+mod core4_bootstrap_cache_tests {
+    use super::*;
+
+    fn result_of(session: &mut Session, source: &str) -> String {
+        eval_program(source, session)
+            .unwrap_or_else(|error| panic!("{source}: {error:?}"))
+            .value
+            .to_string()
+    }
+
+    #[test]
+    fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
+        let expressions = parse(CORE_LIBRARY_SOURCE).expect("current Core4 parses");
+        let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
+        let fasl = fasl_encode(&expressions, &hash);
+        let mut session = Session::default();
+
+        load_core_library_with_fasl(&mut session, &fasl).expect("valid FASL Core4 bootstrap");
+
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(CoreProfile::Core4)
+        );
+        assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
+    }
+
+    #[test]
+    fn stale_or_invalid_fasl_falls_back_to_text_and_still_selects_core4() {
+        let mut session = Session::default();
+
+        load_core_library_with_fasl(&mut session, b"not-a-current-fasl")
+            .expect("text fallback Core4 bootstrap");
+
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(CoreProfile::Core4)
+        );
+        assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
+    }
 }
