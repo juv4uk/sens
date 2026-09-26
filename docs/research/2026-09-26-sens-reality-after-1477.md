@@ -1,7 +1,7 @@
 # SENS-REALITY-2 — current-main reality audit after #1477
 
 **Issue:** #1433  
-**Snapshot:** `main@f97543734a58584cf6ff81d45d41b38b076a756b`  
+**Snapshot:** `main@bd271c92d74fdf7a0064b054a2696a92a1ca8e77`  
 **Date:** 2026-09-26  
 **Scope:** evidence/research only. No runtime changes.
 
@@ -72,13 +72,11 @@ The runtime ratchet has **208** non-SENS surface rows:
 
 Interpretation matters: 208 is a count of admitted surface rows, not 208 distinct functions.
 
-### 3.3 Exact macro reachability is still incomplete
+### 3.3 Exact macro reachability blocker is fixed
 
-Merged #1468 added language-defined exact-code slots for closures/macros and pre-argument macro dispatch, but current `load_macro_library()` binds the bootstrap `defmacro` result only to admitted human surface names.
+Merged #1468 added language-defined exact-code slots and pre-argument macro dispatch. Merged #1487 then bound the bootstrap `defmacro` Macro to its already-resolved exact slot `00001010`.
 
-Therefore exact `00001010` still lacks the required bootstrap macro slot. #1460 was reopened after merge.
-
-Required witnesses still include exact `or` and `let*` evaluation-order parity.
+#1460 is now closed. Current black-box M0 evidence also exercises exact `or` and `let*` parity. The remaining macro-related migration risk is different: language macros can still construct quoted **surface** operator heads at expansion time; that is tracked separately by #1485.
 
 ### 3.4 Tail-call AST clone remains
 
@@ -124,7 +122,7 @@ The architecture is no longer honestly described by the strongest 25 September c
 The remaining performance/reality work is narrower and more measurable:
 
 - remove the remaining source-name debt safely;
-- finish exact macro reachability (#1460);
+- finish the parser-aware source migration gate (M0 #1446/#1482) and macro-generated-head cleanup (#1485);
 - measure allocation/clone/bootstrap costs on current code;
 - prove how much of the machine/SIMD path is executable rather than descriptive;
 - use fresh benchmark artifacts rather than carrying old ratios across major runtime rewrites.
