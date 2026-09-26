@@ -2616,7 +2616,7 @@ rust-lisp	crates/sens/tests/result_status.rs	second	2
 rust-lisp	crates/sens/tests/result_status.rs	third	1
 rust-lisp	crates/sens/tests/runtime_peer_operators.rs	define	12
 rust-lisp	crates/sens/tests/scientific_constants.rs	car	1
-rust-lisp	crates/sens/tests/scientific_constants.rs	def	13
+rust-lisp	crates/sens/tests/scientific_constants.rs	def	3
 rust-lisp	crates/sens/tests/scientific_constants.rs	lambda	1
 rust-lisp	crates/sens/tests/scientific_constants.rs	list	7
 rust-lisp	crates/sens/tests/scientific_constants.rs	map	1

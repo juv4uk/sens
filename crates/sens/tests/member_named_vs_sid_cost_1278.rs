@@ -19,6 +19,14 @@
 //! this test — landing the SID-form variant is a separate, explicit
 //! decision (readability cost per #997/#1254).
 
+//!
+//! Update after #1468/#1477: `equal?` is still Lisp-defined, but its code
+//! `00100010` now reaches that definition through the language code slot
+//! (the core's first top-level definition binds it), so `(00100010 a b)`
+//! works. And names no longer have their own Rust builtins: a name call is
+//! lowered to the same code, so the named/SID cost gap is gone — the
+//! timing comparison is kept as an ignored observational benchmark.
+
 use sens::{eval_program, load_core_library, Session};
 use std::time::Instant;
 
@@ -56,18 +64,26 @@ fn bench(def_source: &str, call_expr: &str, session: &mut Session) -> u128 {
 }
 
 #[test]
-fn equal_has_an_admitted_sid_but_no_native_callable_mechanism() {
-    // The finding that shaped this file: equal? (SID 00100010) cannot be
-    // invoked as a bare SID at all, unlike eq/atom/cons/car/cdr/+/-.
+fn equal_code_reaches_the_language_defined_function() {
+    // Originally: equal? (SID 00100010) could not be invoked as a bare SID.
+    // Since #1468 the core's definition binds the code slot, so the code
+    // and the name reach the same Lisp function.
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library should load");
-    let bare_sid_call = eval_program("(00100010 5 5)", &mut session);
-    assert!(
-        bare_sid_call.is_err(),
-        "equal? is Lisp-defined (built on atom/eq), not a native \
-         canon::invoke_semantic_ref mechanism — this must keep failing \
-         unless #1278/#997 deliberately wires a native fast path for it"
-    );
+    let by_code = eval_program("(00100010 (00000001 (1 (2))) (00000001 (1 (2))))", &mut session)
+        .expect("equal? code reaches the language definition")
+        .value
+        .to_string();
+    let by_name = eval_program("(equal? (00000001 (1 (2))) (00000001 (1 (2))))", &mut session)
+        .expect("equal? name still works")
+        .value
+        .to_string();
+    assert_eq!(by_code, by_name);
+    let differ = eval_program("(00100010 (00000001 (1)) (00000001 (2)))", &mut session)
+        .expect("equal? code answers a mismatch")
+        .value
+        .to_string();
+    assert_ne!(by_code, differ, "equal and unequal lists must answer differently");
 }
 
 #[test]
@@ -98,7 +114,8 @@ fn named_eq_call_and_bare_sid_call_agree_on_every_answer() {
 }
 
 #[test]
-fn repeated_lookups_through_a_real_shaped_member_cost_more_by_name_than_by_sid() {
+#[ignore = "observational benchmark: since #1477 a name is lowered to the same code, so there is no gap to assert; timing on a shared machine is noise"]
+fn repeated_lookups_through_a_real_shaped_member_named_vs_sid_cost() {
     // A realistic workload: repeated membership checks against the same
     // list, the shape any real caller of member?/pd-member? actually
     // produces (not one isolated call, which would be noise-dominated).
@@ -142,16 +159,5 @@ fn repeated_lookups_through_a_real_shaped_member_cost_more_by_name_than_by_sid()
     let ratio = named_ns as f64 / sid_ns as f64;
     eprintln!(
         "member? via named eq: {named_ns} ns; via bare SID 00000011: {sid_ns} ns; ratio {ratio:.3}"
-    );
-
-    // Regression guard, not a tight performance contract: if this ever
-    // flips (named becomes cheaper, or the two converge to noise), that
-    // is itself news worth re-reading #1277/#1278 over, so fail loud
-    // rather than silently accept a changed shape.
-    assert!(
-        ratio > 1.0,
-        "expected the named-call form to cost measurably more than the \
-         bare-SID form over {ITERATIONS} repeated lookups, per #1277's \
-         benchmark methodology; got ratio {ratio:.3} (named={named_ns}ns, sid={sid_ns}ns)"
     );
 }

@@ -165,31 +165,39 @@ fn malformed_constant_cannot_project_into_knowledge() {
     assert_eq!(eval_science(source), "()");
 }
 
+/// `si` defines `rest` (`"name value)"`) — by SENS code 00001001 or the old
+/// `def` name.
+fn si_defines(si: &str, rest: &str) -> bool {
+    ["(00001001 ", "(def "]
+        .iter()
+        .any(|head| si.contains(&format!("{head}{rest}")))
+}
+
 #[test]
 fn si_source_does_not_reintroduce_a_second_literal_authority_for_numeric_views() {
     let si = include_str!("../../../lib/si.lisp");
 
     for forbidden in [
-        "(def si:cesium-frequency 9192631770)",
-        "(def si:speed-of-light 299792458)",
-        "(def si:avogadro-constant 602214076000000000000000)",
-        "(def si:luminous-efficacy 683)",
+        "si:cesium-frequency 9192631770)",
+        "si:speed-of-light 299792458)",
+        "si:avogadro-constant 602214076000000000000000)",
+        "si:luminous-efficacy 683)",
     ] {
         assert!(
-            !si.contains(forbidden),
+            !si_defines(si, forbidden),
             "numeric view must be derived from its scientific-constant record: {forbidden}"
         );
     }
 
     for derived in [
-        "(def si:cesium-frequency (si:constant-value si:defining-cesium-frequency))",
-        "(def si:speed-of-light (si:constant-value si:defining-speed-of-light))",
-        "(def si:planck-constant (si:constant-value si:defining-planck-constant))",
-        "(def si:elementary-charge (si:constant-value si:defining-elementary-charge))",
-        "(def si:boltzmann-constant (si:constant-value si:defining-boltzmann-constant))",
-        "(def si:avogadro-constant (si:constant-value si:defining-avogadro-constant))",
-        "(def si:luminous-efficacy (si:constant-value si:defining-luminous-efficacy))",
+        "si:cesium-frequency (si:constant-value si:defining-cesium-frequency))",
+        "si:speed-of-light (si:constant-value si:defining-speed-of-light))",
+        "si:planck-constant (si:constant-value si:defining-planck-constant))",
+        "si:elementary-charge (si:constant-value si:defining-elementary-charge))",
+        "si:boltzmann-constant (si:constant-value si:defining-boltzmann-constant))",
+        "si:avogadro-constant (si:constant-value si:defining-avogadro-constant))",
+        "si:luminous-efficacy (si:constant-value si:defining-luminous-efficacy))",
     ] {
-        assert!(si.contains(derived), "missing derived SI numeric view: {derived}");
+        assert!(si_defines(si, derived), "missing derived SI numeric view: {derived}");
     }
 }
