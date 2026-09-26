@@ -5,77 +5,77 @@
 ; Usage: sens scripts/verify-repo.lisp
 ; Друкує кожну перевірку; за першої ж проблеми — помилка й ненульовий вихід.
 
-(def str+
-  (lambda args
-    (reduce (lambda (acc s) (string-append acc s)) "" args)))
+(00001001 str+
+  (00001000 args
+    (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
-(def fail
-  (lambda (message)
-    (second (list (print (str+ "FAIL: " message)) (car (quote ()))))))
+(00001001 fail
+  (00001000 (message)
+    (00101111 (00100111 (01001000 (str+ "FAIL: " message)) (00000101 (00000001 ()))))))
 
-(def pass
-  (lambda (name)
-    (print (str+ "ok: " name))))
+(00001001 pass
+  (00001000 (name)
+    (01001000 (str+ "ok: " name))))
 
-(def contains? (lambda (text needle) (string-contains? needle text)))
+(00001001 contains? (00001000 (text needle) (00111110 needle text)))
 
 ; Кожна голка з needles має бути в тексті; повертає перелік відсутніх.
-(def missing-needles
-  (lambda (text needles)
-    (cond
-      ((atom? needles) () (quote ()))
-      ((atom? needles) (0)
-       (cond
-         ((contains? text (car needles)) t (missing-needles text (cdr needles)))
-         (t t (cons (car needles) (missing-needles text (cdr needles)))))))))
+(00001001 missing-needles
+  (00001000 (text needles)
+    (00000111
+      ((00000010 needles) () (00000001 ()))
+      ((00000010 needles) (0)
+       (00000111
+         ((contains? text (00000101 needles)) t (missing-needles text (00000110 needles)))
+         (t t (00000100 (00000101 needles) (missing-needles text (00000110 needles)))))))))
 
-(def require-needles
-  (lambda (name path needles)
-    (let ((missing (missing-needles (read-file path) needles)))
-      (cond
-        ((atom? missing) () (pass name))
-        ((atom? missing) (0) (fail (str+ name ": " path " missing " (write-to-string missing))))))))
+(00001001 require-needles
+  (00001000 (name path needles)
+    (10011100 ((missing (missing-needles (10100110 path) needles)))
+      (00000111
+        ((00000010 missing) () (pass name))
+        ((00000010 missing) (0) (fail (str+ name ": " path " missing " (01001100 missing))))))))
 
-(def forbid-needle
-  (lambda (name path needle)
-    (cond
-      ((contains? (read-file path) needle) t
-       (fail (str+ name ": " path " must not contain " (write-to-string needle))))
+(00001001 forbid-needle
+  (00001000 (name path needle)
+    (00000111
+      ((contains? (10100110 path) needle) t
+       (fail (str+ name ": " path " must not contain " (01001100 needle))))
       (t t t))))
 
-(def any-needle?
-  (lambda (text needles)
-    (cond
-      ((atom? needles) () (quote ()))
-      ((atom? needles) (0)
-       (cond
-         ((contains? text (car needles)) t t)
-         (t t (any-needle? text (cdr needles))))))))
+(00001001 any-needle?
+  (00001000 (text needles)
+    (00000111
+      ((00000010 needles) () (00000001 ()))
+      ((00000010 needles) (0)
+       (00000111
+         ((contains? text (00000101 needles)) t t)
+         (t t (any-needle? text (00000110 needles))))))))
 
 ; --- public-docs-share-current-project-identity-and-extension ---
-(def check-doc-identity
-  (lambda (path)
-    (let ((doc (read-file path)))
-      (cond
-        ((any-needle? doc (quote ("reference implementation" "референсна реалізація")))
+(00001001 check-doc-identity
+  (00001000 (path)
+    (10011100 ((doc (10100110 path)))
+      (00000111
+        ((any-needle? doc (00000001 ("reference implementation" "референсна реалізація")))
          t
-         (cond
-           ((any-needle? doc (quote ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
+         (00000111
+           ((any-needle? doc (00000001 ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
             t
             (fail (str+ path ": implementation wording must not imply that Rust itself owns semantics")))
            (t t
-            (cond
-              ((any-needle? doc (quote ("канонічне розширення вихідного коду — **`.lisp`**"
+            (00000111
+              ((any-needle? doc (00000001 ("канонічне розширення вихідного коду — **`.lisp`**"
                                         "Канонічне розширення вихідного коду — **`.lisp`**"
                                         "canonical source extension is **`.lisp`**"
                                         "current canonical source extension is **`.lisp`**")))
                t
-               (cond
-                 ((any-needle? doc (quote ("legacy alias" "legacy aliases")))
+               (00000111
+                 ((any-needle? doc (00000001 ("legacy alias" "legacy aliases")))
                   t
-                  (cond
+                  (00000111
                     ((contains? doc "`.wsm`") t
-                     (cond
+                     (00000111
                        ((contains? doc "`.my`") t t)
                        (t t (fail (str+ path ": must name `.my` as a legacy alias")))))
                     (t t (fail (str+ path ": must name `.wsm` as a legacy alias")))))
@@ -90,35 +90,35 @@
 ; --- cargo-workspace-has-no-my-lisp-package-prefix ---
 ; Назва пакета (рядок одразу після `[package]`) з префіксом my-lisp — регресія.
 ; Бінарники з назвою my-lisp (сумісні псевдоніми CLI) — не пакет, їх не чіпаємо.
-(def check-manifests
-  (lambda (entries)
-    (cond
-      ((atom? entries) () t)
-      ((atom? entries) (0)
-       (let ((manifest (str+ "crates/" (car entries) "/Cargo.toml")))
-         (let ((text (read-file manifest)))
-           (cond
+(00001001 check-manifests
+  (00001000 (entries)
+    (00000111
+      ((00000010 entries) () t)
+      ((00000010 entries) (0)
+       (10011100 ((manifest (str+ "crates/" (00000101 entries) "/Cargo.toml")))
+         (10011100 ((text (10100110 manifest)))
+           (00000111
              ((contains? text "[package]\nname = \"my-lisp") t
               (fail (str+ "cargo package prefix regression: " manifest " uses my-lisp*")))
-             (t t (check-manifests (cdr entries))))))))))
+             (t t (check-manifests (00000110 entries))))))))))
 
 (check-manifests (read-dir "crates"))
 (pass "cargo-workspace-has-no-my-lisp-package-prefix")
 
 ; --- public-docs-point-to-semantic-authority ---
 (require-needles "public-docs-point-to-semantic-authority" "README.md"
-  (quote ("docs/semantic-authority-map.md")))
+  (00000001 ("docs/semantic-authority-map.md")))
 (require-needles "public-docs-point-to-semantic-authority" "docs/language-core.md"
-  (quote ("semantic-authority-map.md")))
+  (00000001 ("semantic-authority-map.md")))
 (require-needles "public-docs-point-to-semantic-authority" "docs/semantic-authority-map.md"
-  (quote ("language-contract.lisp")))
+  (00000001 ("language-contract.lisp")))
 ; Rust шукав без урахування регістру; у документі — «Ratified ADRs» і
 ; «executable conformance» / «Executable conformance».
-(cond
-  ((any-needle? (read-file "docs/semantic-authority-map.md") (quote ("Ratified ADR" "ratified ADR"))) t t)
+(00000111
+  ((any-needle? (10100110 "docs/semantic-authority-map.md") (00000001 ("Ratified ADR" "ratified ADR"))) t t)
   (t t (fail "docs/semantic-authority-map.md must mention ratified ADRs")))
-(cond
-  ((any-needle? (read-file "docs/semantic-authority-map.md") (quote ("Executable conformance" "executable conformance"))) t t)
+(00000111
+  ((any-needle? (10100110 "docs/semantic-authority-map.md") (00000001 ("Executable conformance" "executable conformance"))) t t)
   (t t (fail "docs/semantic-authority-map.md must mention executable conformance")))
 (pass "public-docs-point-to-semantic-authority")
 
@@ -127,20 +127,20 @@
 ; примітиви за кодом, тож джерело — таблиця функцій і її метадані.
 (require-needles "host-semantic-surface-documentation-tracks-time-ownership"
   "docs/host-semantic-surface.md"
-  (quote ("mono-ns" "unix-time-now"
+  (00000001 ("mono-ns" "unix-time-now"
           "`utc-now` | `lib/time.lisp` | derived public clock meaning | HOST REMOVED")))
 (require-needles "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/time.lisp"
-  (quote ("mono-ms" "utc-now")))
+  (00000001 ("mono-ms" "utc-now")))
 (require-needles "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/surface/function-signatures.lisp"
-  (quote ("(01011011 (kind builtin)")))
+  (00000001 ("(01011011 (kind builtin)")))
 (forbid-needle "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/surface/function-signatures.lisp" "(utc-now)")
 
 ; --- agent-onboarding / current-agent-authority / human-migration-doc ---
 (require-needles "agent-onboarding-records-removed-coordination-surface" "AGENTS.md"
-  (quote ("sens :9999" "swarm-node :910x"
+  (00000001 ("sens :9999" "swarm-node :910x"
           "Стара coordination surface на `:9999` фізично видалена"
           "мають повертати `unknown op`"
           "knowledge/swarm-legacy-deprecation.lisp"
@@ -149,120 +149,120 @@
   "This is a\n  first-class pattern, not a fallback")
 (require-needles "agent-onboarding-records-removed-coordination-surface"
   "knowledge/swarm-legacy-deprecation.lisp"
-  (quote ("(status . deprecated)" "(physical-status . removed)"
+  (00000001 ("(status . deprecated)" "(physical-status . removed)"
           "(runtime-rejection . confirmed)" "(coordination-authority . swarm-node)")))
 (require-needles "human-migration-doc-keeps-semantic-and-coordination-planes-separate"
   "docs/swarm-mesh-v2.md"
-  (quote ("sens :9999" "swarm-node :910x"
+  (00000001 ("sens :9999" "swarm-node :910x"
           "no longer the\ncoordination path going forward" "semantic oracle")))
 
 ; --- s2-explicitly-contracts-category-not-error-wording ---
 (require-needles "s2-explicitly-contracts-category-not-error-wording"
   "docs/language-core-axioms.md"
-  (quote ("The wording may differ; the *category* is the contract.")))
+  (00000001 ("The wording may differ; the *category* is the contract.")))
 (require-needles "s2-explicitly-contracts-category-not-error-wording"
   "crates/sens/src/error.rs"
-  (quote ("non-contractual: `kind` is what S2 ratifies")))
+  (00000001 ("non-contractual: `kind` is what S2 ratifies")))
 
 ; --- Python-перевірки (поки викликаються; перенесення самих скриптів — окремо) ---
-(def run-python
-  (lambda (name script args)
-    (let ((result (process-run "python3" (cons script args))))
-      (cond
-        ((equal? (car result) 0) (1) (pass name))
-        ((equal? (car result) 0) (0)
-         (fail (str+ name " failed\n" (second result) (third result))))))))
+(00001001 run-python
+  (00001000 (name script args)
+    (10011100 ((result (10100010 "python3" (00000100 script args))))
+      (00000111
+        ((00100010 (00000101 result) 0) (1) (pass name))
+        ((00100010 (00000101 result) 0) (0)
+         (fail (str+ name " failed\n" (00101111 result) (00110000 result))))))))
 
-(run-python "meta-eval-evidence-matrix" "scripts/check-meta-eval-evidence.py" (quote ()))
-(run-python "meta-eval-human-evidence-projection" "scripts/generate-meta-eval-evidence.py" (quote ("--check")))
-(run-python "semantic-ownership-map-in-sync" "scripts/semantic-ownership.py" (quote ("--check")))
+(run-python "meta-eval-evidence-matrix" "scripts/check-meta-eval-evidence.py" (00000001 ()))
+(run-python "meta-eval-human-evidence-projection" "scripts/generate-meta-eval-evidence.py" (00000001 ("--check")))
+(run-python "semantic-ownership-map-in-sync" "scripts/semantic-ownership.py" (00000001 ("--check")))
 
 ;; ===== Українська документація й розкладка (з xtask verify) =====
 
-(def field (lambda (key form) (second (assoc key (cdr form)))))
+(00001001 field (00001000 (key form) (00101111 (00101101 key (00000110 form)))))
 
-(def count-items
-  (lambda (items)
-    (cond
-      ((atom? items) () 0)
-      ((atom? items) (0) (+ 1 (count-items (cdr items)))))))
+(00001001 count-items
+  (00001000 (items)
+    (00000111
+      ((00000010 items) () 0)
+      ((00000010 items) (0) (00001100 1 (count-items (00000110 items)))))))
 
-(def last-char
-  (lambda (text)
-    (string-slice text (- (string-length text) 1) (string-length text))))
+(00001001 last-char
+  (00001000 (text)
+    (01000001 text (00001101 (00111011 text) 1) (00111011 text))))
 
 ; Стабільні українські назви з таблиці функцій: ((бітовий-код . назва) ...).
-(def registry-rows (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
+(00001001 registry-rows (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
 
-(def stable-uk-pairs
-  (lambda (rows)
-    (cond
-      ((atom? rows) () (quote ()))
-      ((atom? rows) (0)
-       (let ((name (field (quote ук) (car rows))))
-         (cond
-           ((atom? name) (1)
-            (cons (cons (write-to-string (car (car rows))) (symbol->string name))
-                  (stable-uk-pairs (cdr rows))))
-           (t t (stable-uk-pairs (cdr rows)))))))))
+(00001001 stable-uk-pairs
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) () (00000001 ()))
+      ((00000010 rows) (0)
+       (10011100 ((name (field (00000001 ук) (00000101 rows))))
+         (00000111
+           ((00000010 name) (1)
+            (00000100 (00000100 (01001100 (00000101 (00000101 rows))) (01000010 name))
+                  (stable-uk-pairs (00000110 rows))))
+           (t t (stable-uk-pairs (00000110 rows)))))))))
 
-(def stable-uk (stable-uk-pairs registry-rows))
+(00001001 stable-uk (stable-uk-pairs registry-rows))
 
 ; Документаційний індекс: (doc категорія "КОД" вид "сигнатура" "опис").
-(def uk-docs (cdr (assoc (quote docs) (cdr (car (read-all (read-file "lib/surface/uk-docs.lisp")))))))
-(def doc-id (lambda (doc) (third doc)))
-(def doc-kind (lambda (doc) (fourth doc)))
-(def api-md (read-file "docs/ukrainian-api.md"))
+(00001001 uk-docs (00000110 (00101101 (00000001 docs) (00000110 (00000101 (01001011 (10100110 "lib/surface/uk-docs.lisp")))))))
+(00001001 doc-id (00001000 (doc) (00110000 doc)))
+(00001001 doc-kind (00001000 (doc) (00110001 doc)))
+(00001001 api-md (10100110 "docs/ukrainian-api.md"))
 
-(def uk-name-for
-  (lambda (id)
-    (let ((pair (assoc id stable-uk)))
-      (cond
-        ((atom? pair) (0) (cdr pair))
+(00001001 uk-name-for
+  (00001000 (id)
+    (10011100 ((found (00101101 id stable-uk)))
+      (00000111
+        ((00000010 found) (0) (00000110 found))
         (t t (fail (str+ "документаційний ID " id " не має stable UK projection у registry")))))))
 
-(def all-bits?
-  (lambda (text)
-    (cond
-      ((string-empty? text) (1) t)
-      ((string-contains? (string-first text) "01") t (all-bits? (string-rest text)))
-      (t t (quote ())))))
+(00001001 all-bits?
+  (00001000 (text)
+    (00000111
+      ((00111100 text) (1) t)
+      ((00111110 (00111111 text) "01") t (all-bits? (01000000 text)))
+      (t t (00000001 ())))))
 
-(def check-docs
-  (lambda (docs predicates mutations)
-    (cond
-      ((atom? docs) ()
-       (cond
-         ((< 10 predicates) 1
-          (cond
-            ((< 0 mutations) 1 t)
+(00001001 check-docs
+  (00001000 (docs predicates mutations)
+    (00000111
+      ((00000010 docs) ()
+       (00000111
+         ((00011010 10 predicates) 1
+          (00000111
+            ((00011010 0 mutations) 1 t)
             (t t (fail "публічний каталог мутацій схлопнувся"))))
          (t t (fail "публічний каталог предикатів схлопнувся"))))
-      ((atom? docs) (0)
-       (let ((id (doc-id (car docs))) (kind (doc-kind (car docs))))
-         (cond
-           ((equal? (string-length id) 8) (0)
+      ((00000010 docs) (0)
+       (10011100 ((id (doc-id (00000101 docs))) (kind (doc-kind (00000101 docs))))
+         (00000111
+           ((00100010 (00111011 id) 8) (0)
             (fail (str+ "документаційний join key має бути 8-бітним SID: " id)))
            ((all-bits? id) () (fail (str+ "документаційний join key має бути 8-бітним SID: " id)))
            (t t
-            (let ((uk (uk-name-for id)))
-              (let ((question (equal? (last-char uk) "?"))
-                    (bang (equal? (last-char uk) "!"))
-                    (predicate (equal? kind (quote predicate)))
-                    (mutation (equal? kind (quote mutation))))
-                (cond
-                  ((equal? question predicate) (0)
+            (10011100 ((uk (uk-name-for id)))
+              (10011100 ((question (00100010 (last-char uk) "?"))
+                    (bang (00100010 (last-char uk) "!"))
+                    (predicate (00100010 kind (00000001 predicate)))
+                    (mutation (00100010 kind (00000001 mutation))))
+                (00000111
+                  ((00100010 question predicate) (0)
                    (fail (str+ "українська назва " uk ": знак ? і predicate мусять збігатися")))
-                  ((equal? bang mutation) (0)
+                  ((00100010 bang mutation) (0)
                    (fail (str+ uk ": ! зарезервований для мутації")))
                   (mutation (1)
-                   (cond
-                     ((equal? uk "встановити-елемент-вектора!") (1)
-                      (check-docs (cdr docs) predicates (+ mutations 1)))
+                   (00000111
+                     ((00100010 uk "встановити-елемент-вектора!") (1)
+                      (check-docs (00000110 docs) predicates (00001100 mutations 1)))
                      (t t (fail (str+ "несподівана мутація: " uk)))))
                   (predicate (1)
-                   (check-docs (cdr docs) (+ predicates 1) mutations))
-                  (t t (check-docs (cdr docs) predicates mutations))))))))))))
+                   (check-docs (00000110 docs) (00001100 predicates 1) mutations))
+                  (t t (check-docs (00000110 docs) predicates mutations))))))))))))
 
 (check-docs uk-docs 0 0)
 (pass "dokumentatsiinyi-kliuch-ie-tilky-numeric")
@@ -270,132 +270,132 @@
 (pass "znak-oklyku-tochno-vidpovidaie-mutatsii")
 
 ; Усі ID документації є в таблиці; усі задокументовані назви — у Markdown.
-(def check-md-rows
-  (lambda (pairs)
-    (cond
-      ((atom? pairs) () t)
-      ((atom? pairs) (0)
-       (let ((id (car (car pairs))) (uk (cdr (car pairs))))
-         (cond
-           ((atom? (assoc id (map (lambda (doc) (cons (doc-id doc) t)) uk-docs))) ()
-            (check-md-rows (cdr pairs)))
-           ((string-contains? (str+ "| `" uk "` |") api-md) t (check-md-rows (cdr pairs)))
+(00001001 check-md-rows
+  (00001000 (pairs)
+    (00000111
+      ((00000010 pairs) () t)
+      ((00000010 pairs) (0)
+       (10011100 ((id (00000101 (00000101 pairs))) (uk (00000110 (00000101 pairs))))
+         (00000111
+           ((00000010 (00101101 id (00110111 (00001000 (doc) (00000100 (doc-id doc) t)) uk-docs))) ()
+            (check-md-rows (00000110 pairs)))
+           ((00111110 (str+ "| `" uk "` |") api-md) t (check-md-rows (00000110 pairs)))
            (t t (fail (str+ "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
 
-(cond
-  ((< 50 (count-items stable-uk)) 1 (check-md-rows stable-uk))
+(00000111
+  ((00011010 50 (count-items stable-uk)) 1 (check-md-rows stable-uk))
   (t t (fail "замало stable UK-назв у таблиці")))
 (pass "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku")
 
 ; Смисловий аудит назв: підсумок збігається з даними.
-(def audit (car (read-all (read-file "lib/surface/uk-name-audit.lisp"))))
-(def audit-renames (cdr (assoc (quote renames) (cdr audit))))
-(def reviewed (field (quote stable-reviewed) audit))
-(def renamed (field (quote renamed) audit))
-(def retained (field (quote retained) audit))
-(cond
-  ((equal? reviewed (+ renamed retained)) (1)
-   (cond
-     ((equal? renamed (count-items audit-renames)) (1)
-      (cond
-        ((equal? reviewed (count-items uk-docs)) (1) t)
+(00001001 audit (00000101 (01001011 (10100110 "lib/surface/uk-name-audit.lisp"))))
+(00001001 audit-renames (00000110 (00101101 (00000001 renames) (00000110 audit))))
+(00001001 reviewed (field (00000001 stable-reviewed) audit))
+(00001001 renamed (field (00000001 renamed) audit))
+(00001001 retained (field (00000001 retained) audit))
+(00000111
+  ((00100010 reviewed (00001100 renamed retained)) (1)
+   (00000111
+     ((00100010 renamed (count-items audit-renames)) (1)
+      (00000111
+        ((00100010 reviewed (count-items uk-docs)) (1) t)
         (t t (fail "смисловий аудит мусить покривати рівно documented UK-покриття"))))
      (t t (fail "(renamed N) розійшовся з фактичною кількістю (rename ...)"))))
   (t t (fail "stable-reviewed мусить дорівнювати renamed+retained")))
 (pass "smyslovyi-audyt-summary-zbihaietsia-z-faktychnymy-danymy")
 
-(def uk-surface (read-file "lib/surface/uk.lisp"))
+(00001001 uk-surface (10100110 "lib/surface/uk.lisp"))
 
 ; Позиція першого входження marker у s від i; -1 якщо нема.
-(def pos-of
-  (lambda (s marker i)
-    (cond
-      ((string-empty? s) (1) -1)
-      ((string-prefix? marker s) t i)
-      (t t (pos-of (string-rest s) marker (+ i 1))))))
+(00001001 pos-of
+  (00001000 (s marker i)
+    (00000111
+      ((00111100 s) (1) -1)
+      ((00111101 marker s) t i)
+      (t t (pos-of (01000000 s) marker (00001100 i 1))))))
 
-(let ((first (pos-of uk-surface "(define середовище env)" 0)))
-  (cond
-    ((< first 0) 1 (fail "uk.lisp: немає (define середовище env)"))
+(10011100 ((first (pos-of uk-surface "(define середовище env)" 0)))
+  (00000111
+    ((00011010 first 0) 1 (fail "uk.lisp: немає (define середовище env)"))
     (t t
-     (cond
-       ((string-contains? "(define середовище env)"
-                          (string-slice uk-surface (+ first 1) 1000000000)) t
+     (00000111
+       ((00111110 "(define середовище env)"
+                          (01000001 uk-surface (00001100 first 1) 1000000000)) t
         (fail "uk.lisp: (define середовище env) більше одного разу"))
        (t t t)))))
 (pass "seredovyshche-ne-maie-povtornoho-surface-binding")
 
-(def check-aliases
-  (lambda (renames)
-    (cond
-      ((atom? renames) () t)
-      ((atom? renames) (0)
-       (let ((en (symbol->string (second (car renames))))
-             (old (symbol->string (third (car renames)))))
-         (cond
-           ((string-contains? (str+ "(define " old " " en ")") uk-surface) t
-            (check-aliases (cdr renames)))
+(00001001 check-aliases
+  (00001000 (renames)
+    (00000111
+      ((00000010 renames) () t)
+      ((00000010 renames) (0)
+       (10011100 ((en (01000010 (00101111 (00000101 renames))))
+             (old (01000010 (00110000 (00000101 renames)))))
+         (00000111
+           ((00111110 (str+ "(define " old " " en ")") uk-surface) t
+            (check-aliases (00000110 renames)))
            (t t (fail (str+ "missing alias (define " old " " en ")")))))))))
 (check-aliases audit-renames)
 (pass "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
 
 ; Розкладка: українські назви набираються без латиниці.
-(def uk-layout
+(00001001 uk-layout
   "абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ0123456789-?!'*")
 
-(def typeable?
-  (lambda (text)
-    (cond
-      ((string-empty? text) (1) t)
-      ((string-contains? (string-first text) uk-layout) t (typeable? (string-rest text)))
-      (t t (quote ())))))
+(00001001 typeable?
+  (00001000 (text)
+    (00000111
+      ((00111100 text) (1) t)
+      ((00111110 (00111111 text) uk-layout) t (typeable? (01000000 text)))
+      (t t (00000001 ())))))
 
-(def check-typeable
-  (lambda (pairs)
-    (cond
-      ((atom? pairs) () t)
-      ((atom? pairs) (0)
-       (cond
-         ((typeable? (cdr (car pairs))) t (check-typeable (cdr pairs)))
-         (t t (fail (str+ "Ukrainian name needs another keyboard layout: " (cdr (car pairs))))))))))
+(00001001 check-typeable
+  (00001000 (pairs)
+    (00000111
+      ((00000010 pairs) () t)
+      ((00000010 pairs) (0)
+       (00000111
+         ((typeable? (00000110 (00000101 pairs))) t (check-typeable (00000110 pairs)))
+         (t t (fail (str+ "Ukrainian name needs another keyboard layout: " (00000110 (00000101 pairs))))))))))
 (check-typeable stable-uk)
 (pass "every-stable-ukrainian-name-is-typeable-on-the-ukrainian-layout")
 
-(def latin-letter?
-  (lambda (char)
-    (let ((code (string->codepoint char)))
-      (cond
-        ((< code 65) 1 (quote ()))
-        ((< code 91) 1 t)
-        ((< code 97) 1 (quote ()))
-        ((< code 123) 1 t)
-        (t t (quote ()))))))
+(00001001 latin-letter?
+  (00001000 (char)
+    (10011100 ((code (01000101 char)))
+      (00000111
+        ((00011010 code 65) 1 (00000001 ()))
+        ((00011010 code 91) 1 t)
+        ((00011010 code 97) 1 (00000001 ()))
+        ((00011010 code 123) 1 t)
+        (t t (00000001 ()))))))
 
 ; Латинські літери у виконуваному коді: поза рядками й коментарями.
-(def latin-in-code
-  (lambda (text in-string in-comment found)
-    (cond
-      ((string-empty? text) (1) found)
+(00001001 latin-in-code
+  (00001000 (text in-string in-comment found)
+    (00000111
+      ((00111100 text) (1) found)
       (t t
-       (let ((c (string-first text)) (rest (string-rest text)))
-         (cond
-           ((equal? in-comment t) (1)
-            (latin-in-code rest () (cond ((equal? c "\n") (1) ()) (t t t)) found))
-           ((equal? in-string t) (1)
-            (cond
-              ((equal? c "\\") (1) (latin-in-code (string-rest rest) t () found))
-              ((equal? c "\"") (1) (latin-in-code rest () () found))
+       (10011100 ((c (00111111 text)) (rest (01000000 text)))
+         (00000111
+           ((00100010 in-comment t) (1)
+            (latin-in-code rest () (00000111 ((00100010 c "\n") (1) ()) (t t t)) found))
+           ((00100010 in-string t) (1)
+            (00000111
+              ((00100010 c "\\") (1) (latin-in-code (01000000 rest) t () found))
+              ((00100010 c "\"") (1) (latin-in-code rest () () found))
               (t t (latin-in-code rest t () found))))
-           ((equal? c ";") (1) (latin-in-code rest () t found))
-           ((equal? c "\"") (1) (latin-in-code rest t () found))
-           ((latin-letter? c) t (latin-in-code rest () () (string-append found c)))
+           ((00100010 c ";") (1) (latin-in-code rest () t found))
+           ((00100010 c "\"") (1) (latin-in-code rest t () found))
+           ((latin-letter? c) t (latin-in-code rest () () (00111010 found c)))
            (t t (latin-in-code rest () () found))))))))
 
-(def require-no-latin
-  (lambda (name path)
-    (let ((found (latin-in-code (read-file path) () () "")))
-      (cond
-        ((string-empty? found) (1) (pass name))
+(00001001 require-no-latin
+  (00001000 (name path)
+    (10011100 ((found (latin-in-code (10100110 path) () () "")))
+      (00000111
+        ((00111100 found) (1) (pass name))
         (t t (fail (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
 
 (require-no-latin "ukrainian-acceptance-program-code-never-requires-latin-layout"
@@ -404,20 +404,20 @@
   "tests/fixtures/rivnopravnist-uk.lisp")
 
 ;; ===== Workflow контракту мови — канонічні шляхи .lisp (з xtask) =====
-(def check-contract-workflow
-  (lambda (path)
-    (let ((text (read-file path)))
-      (cond
-        ((string-contains? "language-contract.my" text) t
+(00001001 check-contract-workflow
+  (00001000 (path)
+    (10011100 ((text (10100110 path)))
+      (00000111
+        ((00111110 "language-contract.my" text) t
          (fail (str+ path " still contains removed path language-contract.my")))
-        ((string-contains? "contracts/my-lisp/lock.my" text) t
+        ((00111110 "contracts/my-lisp/lock.my" text) t
          (fail (str+ path " still contains removed path contracts/my-lisp/lock.my")))
         (t t
          (require-needles "contract-workflows-use-canonical-lisp-paths" path
-           (quote ("default: contracts/my-lisp/language-contract.lisp"
+           (00000001 ("default: contracts/my-lisp/language-contract.lisp"
                    "default: contracts/my-lisp/lock.lisp"
                    "UPSTREAM_PATH: language-contract.lisp"))))))))
 (check-contract-workflow ".github/workflows/sync-language-contract.yml")
 (check-contract-workflow ".github/workflows/verify-language-contract.yml")
 
-(print "verify-repo: all checks passed")
+(01001000 "verify-repo: all checks passed")
