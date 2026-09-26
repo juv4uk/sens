@@ -10,6 +10,18 @@ fn time_session() -> Session {
     session
 }
 
+/// A raw host observation is a Rust primitive on its SENS code (#1477), not a
+/// name bound in the environment.
+fn assert_raw_host_primitive(surface: &str) {
+    let sid = semantic_registry_export::semantic_id_for_admitted_surface(surface)
+        .unwrap_or_else(|| panic!("{surface} must stay admitted"));
+    assert_eq!(
+        semantic_registry_export::function_role(sid),
+        Some("primitive"),
+        "{surface} is a raw host primitive on its code"
+    );
+}
+
 #[test]
 fn utc_now_returns_utc_calendar_with_nanosecond_field() {
     let mut session = time_session();
@@ -107,10 +119,7 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
     let error = eval_program("(utc-now)", &mut session)
         .expect_err("unadmitted SID must fail closed before time library loads");
     assert_eq!(error.kind, ErrorKind::Type);
-    assert!(matches!(
-        session.environment.get("unix-time-now"),
-        Some(Value::Builtin(_))
-    ));
+    assert_raw_host_primitive("unix-time-now");
 
     load_time_library(&mut session).unwrap();
 
@@ -118,10 +127,7 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
         session.environment.get("utc-now"),
         Some(Value::Closure(_))
     ));
-    assert!(matches!(
-        session.environment.get("unix-time-now"),
-        Some(Value::Builtin(_))
-    ));
+    assert_raw_host_primitive("unix-time-now");
 
     let value = eval_program("(utc-now)", &mut session)
         .unwrap()
@@ -248,10 +254,7 @@ fn internet_time_sync_is_language_owned_after_time_library_loads() {
     )
     .expect_err("unadmitted SID must fail closed before time library loads");
     assert_eq!(error.kind, ErrorKind::Type);
-    assert!(matches!(
-        session.environment.get("ntp-query-raw"),
-        Some(Value::Builtin(_))
-    ));
+    assert_raw_host_primitive("ntp-query-raw");
 
     load_time_library(&mut session).unwrap();
 
@@ -259,10 +262,7 @@ fn internet_time_sync_is_language_owned_after_time_library_loads() {
         session.environment.get("internet-time-sync"),
         Some(Value::Closure(_))
     ));
-    assert!(matches!(
-        session.environment.get("ntp-query-raw"),
-        Some(Value::Builtin(_))
-    ));
+    assert_raw_host_primitive("ntp-query-raw");
 }
 
 #[test]
@@ -333,10 +333,7 @@ fn mono_ms_binding_is_owned_by_lisp_after_time_library_loads() {
         session.environment.get("mono-ms"),
         Some(Value::Closure(_))
     ));
-    assert!(matches!(
-        session.environment.get("mono-ns"),
-        Some(Value::Builtin(_))
-    ));
+    assert_raw_host_primitive("mono-ns");
 }
 
 #[test]
