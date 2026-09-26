@@ -2,4 +2,4 @@
 ; як Common Lisp для клікабельного фільтра мови (на відміну від .lisp/.lisp
 ; з linguist-language override, який працює лише для статистики байтів,
 ; не для пошукового індексу — підтверджено 2026-09-08 через gh api).
-(print "language-detection probe")
+(01001000 "language-detection probe")

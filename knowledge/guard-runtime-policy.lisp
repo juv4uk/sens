@@ -6,25 +6,25 @@
 ; Політика навмисно мала: Rust подає нормалізовані факти, а WSM визначає
 ; класифікацію й може змінювати її без перекомпіляції.
 
-(def guard-evaluate
-  (lambda (kind subject evidence)
-    (cond
-      ((eq? evidence (quote missing))
-       (guard-unknown subject (quote runtime-evidence) (quote ask-agent)))
-      ((eq? kind (quote read))
+(00001001 guard-evaluate
+  (00001000 (kind subject evidence)
+    (00000111
+      ((00000011 evidence (00000001 missing))
+       (guard-unknown subject (00000001 runtime-evidence) (00000001 ask-agent)))
+      ((00000011 kind (00000001 read))
        (make-guard-finding
-         (quote allow) (quote confirmed) subject kind (quote read-only)
-         (quote ()) (quote no-state-change) (quote continue) (list evidence)))
-      ((eq? kind (quote write))
+         (00000001 allow) (00000001 confirmed) subject kind (00000001 read-only)
+         (00000001 ()) (00000001 no-state-change) (00000001 continue) (00100111 evidence)))
+      ((00000011 kind (00000001 write))
        (make-guard-finding
-         (quote warn) (quote partial) subject kind (quote review-write-scope)
-         (quote mutation-requested) (quote state-may-change)
-         (quote verify-authority-and-target) (list evidence)))
-      ((eq? kind (quote destructive))
+         (00000001 warn) (00000001 partial) subject kind (00000001 review-write-scope)
+         (00000001 mutation-requested) (00000001 state-may-change)
+         (00000001 verify-authority-and-target) (00100111 evidence)))
+      ((00000011 kind (00000001 destructive))
        (make-guard-finding
-         (quote reject) (quote confirmed) subject kind
-         (quote explicit-owner-authority-required)
-         (quote authority-not-present) (quote irreversible-impact)
-         (quote ask-owner) (list evidence)))
-      (t (guard-unknown subject (quote unclassified-event-kind)
-           (quote choose-unknown-route))))))
+         (00000001 reject) (00000001 confirmed) subject kind
+         (00000001 explicit-owner-authority-required)
+         (00000001 authority-not-present) (00000001 irreversible-impact)
+         (00000001 ask-owner) (00100111 evidence)))
+      (t (guard-unknown subject (00000001 unclassified-event-kind)
+           (00000001 choose-unknown-route))))))

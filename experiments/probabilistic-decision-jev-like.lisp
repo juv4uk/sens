@@ -14,294 +14,294 @@
 ; literal tag. Every other clause below uses the two-part migration-compatible
 ; form instead, which `evaluate_cond` resolves via generic/structural truthiness.
 
-(def pd-question-choice
-  (lambda (name options)
-    (list (quote choice-question/1) name options)))
+(00001001 pd-question-choice
+  (00001000 (name options)
+    (00100111 (00000001 choice-question/1) name options)))
 
-(def pd-question-noul
-  (lambda (name)
-    (list (quote noul-question/1) name)))
+(00001001 pd-question-noul
+  (00001000 (name)
+    (00100111 (00000001 noul-question/1) name)))
 
-(def pd-question-score
-  (lambda (name levels)
-    (list (quote score-question/1) name levels)))
+(00001001 pd-question-score
+  (00001000 (name levels)
+    (00100111 (00000001 score-question/1) name levels)))
 
-(def pd-member?
-  (lambda (value values)
-    (cond
-      ((atom? values) () (quote ()))
-      ((atom? values) (1) (quote ()))
-      ((equal? value (car values)) (1) t)
-      (t (pd-member? value (cdr values))))))
+(00001001 pd-member?
+  (00001000 (value values)
+    (00000111
+      ((00000010 values) () (00000001 ()))
+      ((00000010 values) (1) (00000001 ()))
+      ((00100010 value (00000101 values)) (1) t)
+      (t (pd-member? value (00000110 values))))))
 
-(def pd-proper-list?
-  (lambda (value)
-    (cond
-      ((atom? value) () (cond
-         ((eq? value (quote ())) t)
-         (t (quote ()))))
-      ((atom? value) (1) (cond
-         ((eq? value (quote ())) t)
-         (t (quote ()))))
-      (t (pd-proper-list? (cdr value))))))
+(00001001 pd-proper-list?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) () (00000111
+         ((00000011 value (00000001 ())) t)
+         (t (00000001 ()))))
+      ((00000010 value) (1) (00000111
+         ((00000011 value (00000001 ())) t)
+         (t (00000001 ()))))
+      (t (pd-proper-list? (00000110 value))))))
 
-(def pd-probability-valid?
-  (lambda (probability)
-    (cond
-      ((< probability 0) 1 (quote ()))
-      ((< 1 probability) 1 (quote ()))
+(00001001 pd-probability-valid?
+  (00001000 (probability)
+    (00000111
+      ((00011010 probability 0) 1 (00000001 ()))
+      ((00011010 1 probability) 1 (00000001 ()))
       (t t))))
 
-(def pd-sum-probabilities
-  (lambda (distribution)
-    (cond
-      ((atom? distribution) () 0)
-      ((atom? distribution) (1) 0)
+(00001001 pd-sum-probabilities
+  (00001000 (distribution)
+    (00000111
+      ((00000010 distribution) () 0)
+      ((00000010 distribution) (1) 0)
       (t
-       (+ (second (car distribution))
-          (pd-sum-probabilities (cdr distribution)))))))
+       (00001100 (00101111 (00000101 distribution))
+          (pd-sum-probabilities (00000110 distribution)))))))
 
-(def pd-distribution-entries-valid?
-  (lambda (distribution options seen)
-    (cond
-      ((atom? distribution) () t)
-      ((atom? distribution) (1) t)
+(00001001 pd-distribution-entries-valid?
+  (00001000 (distribution options seen)
+    (00000111
+      ((00000010 distribution) () t)
+      ((00000010 distribution) (1) t)
       (t
-       (let ((entry (car distribution)))
-         (cond
-           ((= (length entry) 2) 1
-            (let ((label (car entry))
-                  (probability (second entry)))
-              (cond
+       (10011100 ((entry (00000101 distribution)))
+         (00000111
+           ((00011100 (00101000 entry) 2) 1
+            (10011100 ((label (00000101 entry))
+                  (probability (00101111 entry)))
+              (00000111
                 ((pd-member? label options)
-                 (cond
-                   ((pd-member? label seen) (quote ()))
+                 (00000111
+                   ((pd-member? label seen) (00000001 ()))
                    ((pd-probability-valid? probability)
                     (pd-distribution-entries-valid?
-                      (cdr distribution)
+                      (00000110 distribution)
                       options
-                      (cons label seen)))
-                   (t (quote ()))))
-                (t (quote ())))))
-           (t (quote ()))))))))
+                      (00000100 label seen)))
+                   (t (00000001 ()))))
+                (t (00000001 ())))))
+           (t (00000001 ()))))))))
 
-(def pd-all-options-present?
-  (lambda (options distribution)
-    (cond
-      ((atom? options) () t)
-      ((atom? options) (1) t)
+(00001001 pd-all-options-present?
+  (00001000 (options distribution)
+    (00000111
+      ((00000010 options) () t)
+      ((00000010 options) (1) t)
       (t
-       (cond
-         ((pd-member? (car options) (map car distribution))
-          (pd-all-options-present? (cdr options) distribution))
-         (t (quote ())))))))
+       (00000111
+         ((pd-member? (00000101 options) (00110111 car distribution))
+          (pd-all-options-present? (00000110 options) distribution))
+         (t (00000001 ())))))))
 
-(def pd-distribution-valid?
-  (lambda (options distribution)
-    (cond
+(00001001 pd-distribution-valid?
+  (00001000 (options distribution)
+    (00000111
       ((pd-proper-list? options)
-       (cond
+       (00000111
          ((pd-proper-list? distribution)
-          (cond
-            ((atom? options) () (quote ()))
-            ((atom? options) (1) (quote ()))
-            ((atom? distribution) () (quote ()))
-            ((atom? distribution) (1) (quote ()))
-            ((pd-distribution-entries-valid? distribution options (quote ()))
-             (cond
-               ((= (pd-sum-probabilities distribution) 1) 1
+          (00000111
+            ((00000010 options) () (00000001 ()))
+            ((00000010 options) (1) (00000001 ()))
+            ((00000010 distribution) () (00000001 ()))
+            ((00000010 distribution) (1) (00000001 ()))
+            ((pd-distribution-entries-valid? distribution options (00000001 ()))
+             (00000111
+               ((00011100 (pd-sum-probabilities distribution) 1) 1
                 (pd-all-options-present? options distribution))
-               (t (quote ()))))
-            (t (quote ()))))
-         (t (quote ()))))
-      (t (quote ())))))
+               (t (00000001 ()))))
+            (t (00000001 ()))))
+         (t (00000001 ()))))
+      (t (00000001 ())))))
 
-(def pd-max-probability
-  (lambda (distribution current)
-    (cond
-      ((atom? distribution) () current)
-      ((atom? distribution) (1) current)
+(00001001 pd-max-probability
+  (00001000 (distribution current)
+    (00000111
+      ((00000010 distribution) () current)
+      ((00000010 distribution) (1) current)
       (t
-       (let ((probability (second (car distribution))))
-         (cond
-           ((< current probability) 1
-            (pd-max-probability (cdr distribution) probability))
+       (10011100 ((probability (00101111 (00000101 distribution))))
+         (00000111
+           ((00011010 current probability) 1
+            (pd-max-probability (00000110 distribution) probability))
            (t
-            (pd-max-probability (cdr distribution) current))))))))
+            (pd-max-probability (00000110 distribution) current))))))))
 
-(def pd-confidence
-  (lambda (distribution)
+(00001001 pd-confidence
+  (00001000 (distribution)
     (pd-max-probability distribution 0)))
 
-(def pd-choice-observe
-  (lambda (question distribution source)
-    (cond
-      ((pd-distribution-valid? (third question) distribution)
-       (list
-         (quote choice-observation/1)
+(00001001 pd-choice-observe
+  (00001000 (question distribution source)
+    (00000111
+      ((pd-distribution-valid? (00110000 question) distribution)
+       (00100111
+         (00000001 choice-observation/1)
          question
          distribution
          (pd-confidence distribution)
          source))
       (t
        (make-invalid
-         (quote malformed-choice-distribution)
-         (list question distribution))))))
+         (00000001 malformed-choice-distribution)
+         (00100111 question distribution))))))
 
-(def pd-noul-observe
-  (lambda (question yes-probability source)
-    (cond
+(00001001 pd-noul-observe
+  (00001000 (question yes-probability source)
+    (00000111
       ((pd-probability-valid? yes-probability)
-       (let ((distribution
-               (list
-                 (list (quote yes) yes-probability)
-                 (list (quote no) (- 1 yes-probability)))))
-         (list
-           (quote noul-observation/1)
+       (10011100 ((distribution
+               (00100111
+                 (00100111 (00000001 yes) yes-probability)
+                 (00100111 (00000001 no) (00001101 1 yes-probability)))))
+         (00100111
+           (00000001 noul-observation/1)
            question
            distribution
            (pd-confidence distribution)
            source)))
       (t
        (make-invalid
-         (quote malformed-noul-probability)
-         (list question yes-probability))))))
+         (00000001 malformed-noul-probability)
+         (00100111 question yes-probability))))))
 
-(def pd-score-observe
-  (lambda (question distribution source)
-    (cond
-      ((pd-distribution-valid? (third question) distribution)
-       (list
-         (quote score-observation/1)
+(00001001 pd-score-observe
+  (00001000 (question distribution source)
+    (00000111
+      ((pd-distribution-valid? (00110000 question) distribution)
+       (00100111
+         (00000001 score-observation/1)
          question
          distribution
          (pd-confidence distribution)
          source))
       (t
        (make-invalid
-         (quote malformed-score-distribution)
-         (list question distribution))))))
+         (00000001 malformed-score-distribution)
+         (00100111 question distribution))))))
 
-(def pd-observation-confidence
-  (lambda (observation)
-    (fourth observation)))
+(00001001 pd-observation-confidence
+  (00001000 (observation)
+    (00110001 observation)))
 
-(def pd-observation-provenance
-  (lambda (observation)
-    (fifth observation)))
+(00001001 pd-observation-provenance
+  (00001000 (observation)
+    (00110010 observation)))
 
-(def pd-noul-policy
-  (lambda (observation threshold)
-    (cond
-      ((equal? (car observation) (quote noul-observation/1)) (1)
-       (cond
+(00001001 pd-noul-policy
+  (00001000 (observation threshold)
+    (00000111
+      ((00100010 (00000101 observation) (00000001 noul-observation/1)) (1)
+       (00000111
          ((pd-probability-valid? threshold)
-          (let ((probability (second (car (third observation)))))
-            (cond
-              ((< probability threshold) 1
-               (list (quote decision/1)
-                     (quote defer)
+          (10011100 ((probability (00101111 (00000101 (00110000 observation)))))
+            (00000111
+              ((00011010 probability threshold) 1
+               (00100111 (00000001 decision/1)
+                     (00000001 defer)
                      observation
-                     (list (quote threshold) threshold)))
+                     (00100111 (00000001 threshold) threshold)))
               (t
-               (list (quote decision/1)
-                     (quote accept)
+               (00100111 (00000001 decision/1)
+                     (00000001 accept)
                      observation
-                     (list (quote threshold) threshold))))))
+                     (00100111 (00000001 threshold) threshold))))))
          (t
           (make-invalid
-            (quote malformed-policy-threshold)
+            (00000001 malformed-policy-threshold)
             threshold))))
       (t
        (make-invalid
-         (quote unsupported-decision-observation)
+         (00000001 unsupported-decision-observation)
          observation)))))
 
-(def pd-choice-policy
-  (lambda (observation option threshold)
-    (cond
-      ((equal? (car observation) (quote choice-observation/1)) (1)
-       (cond
+(00001001 pd-choice-policy
+  (00001000 (observation option threshold)
+    (00000111
+      ((00100010 (00000101 observation) (00000001 choice-observation/1)) (1)
+       (00000111
          ((pd-probability-valid? threshold)
-          (let ((entry (pd-find-option option (third observation))))
-            (cond
-              ((atom? entry) () (make-invalid
-                 (quote option-not-observed)
-                 (list option observation)))
-              ((atom? entry) (1) (make-invalid
-                 (quote option-not-observed)
-                 (list option observation)))
-              ((< (second entry) threshold) 1
-               (list (quote decision/1)
-                     (quote defer)
+          (10011100 ((entry (pd-find-option option (00110000 observation))))
+            (00000111
+              ((00000010 entry) () (make-invalid
+                 (00000001 option-not-observed)
+                 (00100111 option observation)))
+              ((00000010 entry) (1) (make-invalid
+                 (00000001 option-not-observed)
+                 (00100111 option observation)))
+              ((00011010 (00101111 entry) threshold) 1
+               (00100111 (00000001 decision/1)
+                     (00000001 defer)
                      observation
-                     (list (quote option) option)
-                     (list (quote threshold) threshold)))
+                     (00100111 (00000001 option) option)
+                     (00100111 (00000001 threshold) threshold)))
               (t
-               (list (quote decision/1)
-                     (quote accept)
+               (00100111 (00000001 decision/1)
+                     (00000001 accept)
                      observation
-                     (list (quote option) option)
-                     (list (quote threshold) threshold))))))
+                     (00100111 (00000001 option) option)
+                     (00100111 (00000001 threshold) threshold))))))
          (t
           (make-invalid
-            (quote malformed-policy-threshold)
+            (00000001 malformed-policy-threshold)
             threshold))))
       (t
        (make-invalid
-         (quote unsupported-decision-observation)
+         (00000001 unsupported-decision-observation)
          observation)))))
 
-(def pd-find-option
-  (lambda (option distribution)
-    (cond
-      ((atom? distribution) () (quote ()))
-      ((atom? distribution) (1) (quote ()))
-      ((equal? option (car (car distribution))) (1) (car distribution))
-      (t (pd-find-option option (cdr distribution))))))
+(00001001 pd-find-option
+  (00001000 (option distribution)
+    (00000111
+      ((00000010 distribution) () (00000001 ()))
+      ((00000010 distribution) (1) (00000001 ()))
+      ((00100010 option (00000101 (00000101 distribution))) (1) (00000101 distribution))
+      (t (pd-find-option option (00000110 distribution))))))
 
-(def pd-two-question-consistency
-  (lambda (left right relation)
-    (cond
-      ((eq? relation (quote independent)) (1)
-       (list
-         (quote decision-relation/1)
-         (quote independent)
+(00001001 pd-two-question-consistency
+  (00001000 (left right relation)
+    (00000111
+      ((00000011 relation (00000001 independent)) (1)
+       (00100111
+         (00000001 decision-relation/1)
+         (00000001 independent)
          left
          right))
-      ((eq? relation (quote agree)) (1)
-       (cond
-         ((equal? (third left) (third right)) (1)
-          (list (quote decision-relation/1) (quote agree) left right))
-         (t (make-disputed (list left right)))))
+      ((00000011 relation (00000001 agree)) (1)
+       (00000111
+         ((00100010 (00110000 left) (00110000 right)) (1)
+          (00100111 (00000001 decision-relation/1) (00000001 agree) left right))
+         (t (make-disputed (00100111 left right)))))
       (t
        (make-invalid
-         (quote unsupported-question-relation)
-         (list relation left right))))))
+         (00000001 unsupported-question-relation)
+         (00100111 relation left right))))))
 
-(def pd-synthetic-witness
-  (lambda (state choice-question noul-question score-question)
-    (list
-      (quote probabilistic-witness/1)
+(00001001 pd-synthetic-witness
+  (00001000 (state choice-question noul-question score-question)
+    (00100111
+      (00000001 probabilistic-witness/1)
       state
       (pd-choice-observe
         choice-question
-        (quote ((billing 3/4) (technical 1/4)))
-        (list (quote source)
-              (quote synthetic-witness)
-              (quote state)
+        (00000001 ((billing 3/4) (technical 1/4)))
+        (00100111 (00000001 source)
+              (00000001 synthetic-witness)
+              (00000001 state)
               state))
       (pd-noul-observe
         noul-question
         2/3
-        (list (quote source)
-              (quote synthetic-witness)
-              (quote state)
+        (00100111 (00000001 source)
+              (00000001 synthetic-witness)
+              (00000001 state)
               state))
       (pd-score-observe
         score-question
-        (quote ((low 1/4) (medium 1/2) (high 1/4)))
-        (list (quote source)
-              (quote synthetic-witness)
-              (quote state)
+        (00000001 ((low 1/4) (medium 1/2) (high 1/4)))
+        (00100111 (00000001 source)
+              (00000001 synthetic-witness)
+              (00000001 state)
               state)))))
