@@ -7,7 +7,7 @@
 
 (00001001 mechanism-selector-1047-witness
   (00001000 ()
-    (10011101 ((atom-sid (semantic-registry-id (00000001 atom)))
+    (10011101 ((atom-sid (semantic-registry-id (00000001 atom?)))
            (plus-sid (semantic-registry-id (00000001 +)))
            (selected (mechanism-select atom-sid (00000001 evaluator)))
            (plus-prolog (mechanism-select plus-sid (00000001 prolog)))
