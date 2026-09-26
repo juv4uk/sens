@@ -77,15 +77,15 @@ fn no_live_callers_audit_records_physical_removal() {
         "the historical removal gate must remain recorded as open"
     );
     assert!(
-        value.contains("(sens-production-operational . confirmed)"),
+        value.contains("(my-lisp-production-operational . confirmed)"),
         "{value}"
     );
     assert!(
-        NO_LIVE_CALLERS_AUDIT.contains("(sens-production-operational-callers . ())"),
+        NO_LIVE_CALLERS_AUDIT.contains("(my-lisp-production-operational-callers . ())"),
         "production caller inventory must remain empty"
     );
     assert!(
-        NO_LIVE_CALLERS_AUDIT.contains("(sens-compatibility-callers . ())"),
+        NO_LIVE_CALLERS_AUDIT.contains("(my-lisp-compatibility-callers . ())"),
         "compatibility callers must be gone with the physical surface"
     );
     assert!(NO_LIVE_CALLERS_AUDIT.contains("(blockers . ())"));

@@ -76,7 +76,7 @@
      (reference
        (topic semantic-oracle)
        (summary "Expected semantic truth from the reference implementation | Очікувана семантична істина від еталонної реалізації")
-       (authority (language-contract.lisp crates/my-lisp-cli/src/swarm.rs docs/guard-oracle-node-plan.md))
+       (authority (language-contract.lisp crates/sens-cli/src/swarm.rs docs/guard-oracle-node-plan.md))
        (how-to (oracle-check oracle-eval oracle-help contract-version))
        (verify (oracle-result/1 source-digest contract-revision))
        (lifecycle current-contract)
@@ -185,7 +185,7 @@
      (reference
        (topic oracle-usage)
        (summary "Choose the narrowest Oracle operation: parse-only check, evaluation, diagnosis, or contract inspection | Обрати найвужчу операцію Oracle: parse-only check, evaluation, diagnosis, contract inspection")
-       (authority (crates/my-lisp-cli/src/main.rs crates/my-lisp-cli/src/swarm.rs docs/guard-oracle-node-plan.md))
+       (authority (crates/sens-cli/src/main.rs crates/sens-cli/src/swarm.rs docs/guard-oracle-node-plan.md))
        (how-to (oracle-check-for-syntax oracle-eval-for-semantics diagnose-for-errors contract-version-for-revision))
        (verify (operation-recorded parse-vs-eval-distinguished structured-result))
        (lifecycle current-contract)
@@ -257,7 +257,7 @@
      (reference
        (topic wsm-lisp-filesystem)
        (summary "Experimental immutable content-addressed filesystem model for the WSM Lisp machine | Експериментальна immutable content-addressed FS модель для WSM Lisp machine")
-       (authority (lib/lisp-fs.lisp lib/content-store.lisp tests/fixtures/lisp-fs-conformance.lisp crates/my-lisp/tests/content_store.rs))
+       (authority (lib/lisp-fs.lisp lib/content-store.lisp tests/fixtures/lisp-fs-conformance.lisp crates/sens/tests/content_store.rs))
        (how-to (fs-empty fs-write fs-read fs-list fs-contains? retain-old-root))
        (verify (fs-conformance-fixture immutable-root old-value not-found stored-nil logical-revision ci-run))
        (lifecycle proposal)
@@ -265,8 +265,8 @@
        (unknown-route ask-agent))
      (reference
        (topic reference-learning)
-       (summary "Знайдена корисна відповідь одразу дописується як (reference ...) у *guard-reference-directory* з explicit evidence-status -- жодного окремого gatekeeper-кроку, жодної черги pending-review для самого куратованого файлу. Якщо для тієї самої теми вже існує запис і нова відповідь має сильнішу доказовість (тести/бенчмарки/пряма перевірка -- вищий evidence-status: confirmed > partial > unresolved > broken), старий запис НЕ видаляється й не відхиляється -- guard-reference-find/guard-reference повертають найсильніший за evidence-status, а guard-reference-all показує всі, включно з пониженими. Owner's own words: 'якщо хтось додає в довідник і зразу поступає в основний, якщо хтось знайшов сильніше рішення то старий просто понижується в рейтингу... якщо реальність каже що нова сильніша то ок... тобто доказовість, тести, аргументи, бенчмарки'. Окремий, нижчого тертя механізм лишається для попереднього фіксування: guard-reference propose --inbox (crates/my-lisp-cli/src/bin/guard-reference.rs, PR my-lisp#1299) дописує provenance-запис у knowledge/guard-reference-inbox.mylog, коли автор ще не готовий написати повний reference entry з authority/how-to/verify -- це доповнення, не заміна прямого запису | A found useful answer is written directly as a (reference ...) entry into *guard-reference-directory* with an explicit evidence-status -- no separate gatekeeper step, no pending-review queue for the curated file itself. If a topic already has an entry and a new answer has stronger evidence (tests/benchmarks/direct verification -- a higher evidence-status: confirmed > partial > unresolved > broken), the older entry is neither deleted nor rejected -- guard-reference-find/guard-reference return the strongest by evidence-status, and guard-reference-all shows every entry including outranked ones. A separate, lower-friction capture mechanism remains for provisional notes not yet written as a full entry: guard-reference propose --inbox appends a provenance-bearing record to the inbox log -- this is additive, not a replacement for writing directly")
-       (authority (crates/my-lisp-cli/src/bin/guard-reference.rs ../ecosystem/knowledge/guard-reference-inbox.lisplog ../ecosystem/docs/guard/GUARD-REFERENCE-DIRECTORY.md))
+       (summary "Знайдена корисна відповідь одразу дописується як (reference ...) у *guard-reference-directory* з explicit evidence-status -- жодного окремого gatekeeper-кроку, жодної черги pending-review для самого куратованого файлу. Якщо для тієї самої теми вже існує запис і нова відповідь має сильнішу доказовість (тести/бенчмарки/пряма перевірка -- вищий evidence-status: confirmed > partial > unresolved > broken), старий запис НЕ видаляється й не відхиляється -- guard-reference-find/guard-reference повертають найсильніший за evidence-status, а guard-reference-all показує всі, включно з пониженими. Owner's own words: 'якщо хтось додає в довідник і зразу поступає в основний, якщо хтось знайшов сильніше рішення то старий просто понижується в рейтингу... якщо реальність каже що нова сильніша то ок... тобто доказовість, тести, аргументи, бенчмарки'. Окремий, нижчого тертя механізм лишається для попереднього фіксування: guard-reference propose --inbox (crates/sens-cli/src/bin/guard-reference.rs, PR my-lisp#1299) дописує provenance-запис у knowledge/guard-reference-inbox.mylog, коли автор ще не готовий написати повний reference entry з authority/how-to/verify -- це доповнення, не заміна прямого запису | A found useful answer is written directly as a (reference ...) entry into *guard-reference-directory* with an explicit evidence-status -- no separate gatekeeper step, no pending-review queue for the curated file itself. If a topic already has an entry and a new answer has stronger evidence (tests/benchmarks/direct verification -- a higher evidence-status: confirmed > partial > unresolved > broken), the older entry is neither deleted nor rejected -- guard-reference-find/guard-reference return the strongest by evidence-status, and guard-reference-all shows every entry including outranked ones. A separate, lower-friction capture mechanism remains for provisional notes not yet written as a full entry: guard-reference propose --inbox appends a provenance-bearing record to the inbox log -- this is additive, not a replacement for writing directly")
+       (authority (crates/sens-cli/src/bin/guard-reference.rs ../ecosystem/knowledge/guard-reference-inbox.lisplog ../ecosystem/docs/guard/GUARD-REFERENCE-DIRECTORY.md))
        (how-to (search-directory-and-guard-reference-all-for-existing-entries state-evidence-status-honestly-confirmed-only-with-real-tests-or-benchmarks write-reference-directly-into-guard-reference-directory never-delete-or-edit-a-superseded-entry-just-let-evidence-status-outrank-it use-propose-inbox-only-for-provisional-notes-not-yet-full-entries))
        (verify (guard-reference-returns-highest-evidence-status-for-a-topic guard-reference-all-still-lists-outranked-entries evidence-status-defaults-to-unresolved-never-to-confirmed))
        (evidence-status confirmed)
@@ -303,7 +303,7 @@
       (reference
         (topic capabilities)
         (summary "Authoritative capability map: Tier 1 (7 core primitives + bootstrap kernel), Tier 2 (arithmetic/exact-rational/IO/network/process), Tier 3 (symbolic-reasoning), explicit decided-against/still-open | Авторитетна мапа можливостей: Tier 1 (7 core primitives + bootstrap kernel), Tier 2 (арифметика/IO/мережа/процеси), Tier 3 (symbolic-reasoning), явні decided-against/still-open")
-        (authority (docs/capabilities.md crates/my-lisp/src/eval/mod.rs lib/core.lisp))
+        (authority (docs/capabilities.md crates/sens/src/eval/mod.rs lib/core.lisp))
         (how-to (read-capabilities verify-tier1 verify-tier2 verify-tier3))
         (verify (conformance-tier-map.md language-core-axioms.md eval/mod.rs))
         (lifecycle current-contract)
@@ -312,7 +312,7 @@
       (reference
         (topic lsp-server)
         (summary "LSP M0: thin adapter over canonical core, stdio Content-Length framing, initialize/didOpen/didChange/publishDiagnostics/documentSymbol/hover/definition/lifecycle | LSP M0: тонкий адаптер над canonical core, stdio Content-Length, initialize/didOpen/didChange/publishDiagnostics/documentSymbol/hover/definition/lifecycle")
-        (authority (docs/lsp-m0.md crates/my-lisp-lsp/src/analysis.rs crates/my-lisp-lsp/src/transport.rs crates/my-lisp-lsp/src/server.rs))
+        (authority (docs/lsp-m0.md crates/sens-lsp/src/analysis.rs crates/sens-lsp/src/transport.rs crates/sens-lsp/src/server.rs))
         (how-to (cargo build --workspace lsp-subcommand standalone-binary))
         (verify (e2e t01..t09 stdio release_parity publishDiagnostics-from-LanguageError))
         (lifecycle current-contract)
@@ -393,7 +393,7 @@
       (reference
         (topic ci-committed-bin-closure)
         (summary "Declared binary target must have committed source; after push find GH Actions run for exact SHA, wait completion, inspect failure logs | Оголошений binary target має committed source; після push знайти GH Actions run для exact SHA, зачекати completion, переглянути failure logs")
-        (authority (crates/my-lisp-cli/Cargo.toml .github/workflows/ci.yml))
+        (authority (crates/sens-cli/Cargo.toml .github/workflows/ci.yml))
         (how-to (cargo build --bin NAME git push find-gh-run wait inspect-logs))
         (verify (source-committed gh-run-matched logs-inspected))
         (lifecycle current-contract)
@@ -474,7 +474,7 @@
       (reference
          (topic wsm-file-paren-safety)
          (summary "Hand-editing a .lisp/.lisp file blind risks a silent unbalanced-paren or malformed-dotted-pair break that only surfaces later when something finally runs the canonical reader against it -- edit through an LSP-connected session instead, which reports the exact same class of error live, on every keystroke, via the identical canonical parser. | Ручне редагування .lisp/.lisp-файлу наосліп ризикує мовчазним розбалансуванням дужок або malformed dotted-pair, який виявиться лише пізніше, коли щось нарешті прожене канонічний ридер. Редагуй через сесію, підключену до LSP -- вона показує той самий клас помилки живо, на кожному натисканні клавіші, тим самим канонічним парсером.")
-         (authority (crates/my-lisp-lsp/src/server.rs crates/my-lisp-lsp/src/analysis.rs))
+         (authority (crates/sens-lsp/src/server.rs crates/sens-lsp/src/analysis.rs))
          (how-to (connect-my-lisp-lsp edit-through-lsp-session watch-live-diagnostics-on-didChange))
          (verify (my-lisp-lsp-analyze-calls-my-lisp-parse-directly publishDiagnostics-on-textDocument/didChange))
          (lifecycle current-contract)
@@ -537,7 +537,7 @@
       (reference
         (topic automated-bulk-edit-paren-safety)
         (summary "Automated scripts modifying .lisp/.lisp files must run my-lisp --oracle-check before committing to prevent silent syntax breakage across repos | Автоматизовані скрипти, що змінюють .lisp/.lisp, мусять виконувати my-lisp --oracle-check перед комітом для уникнення мовчазної поломки синтаксису")
-        (authority (../ecosystem/AGENTS.md crates/my-lisp-cli/src/main.rs))
+        (authority (../ecosystem/AGENTS.md crates/sens-cli/src/main.rs))
         (how-to (run-oracle-check-after-bulk-edit restore-from-git-if-broken test-all-touched-repos-before-commit))
         (verify (oracle-check-exit-0 valid-outcome-confirmed no-unclosed-list))
         (lifecycle current-contract)
@@ -609,7 +609,7 @@
       (reference
         (topic oracle-error-classification-vs-status)
         (summary "Since commit ddd538c (2026-09-04) every error_response()-derived failure carries an additive non-contractual (classification unresolved|limit|fault) field next to the unchanged (status error)/(kind ...); UnknownSymbol -> unresolved (a reference with no binding yet, per the same reasoning OutOfMemory/NumericOverflow already used for 'limit'), everything else stays fault; (status error) is intentionally kept literal for every category because S2 (docs/language-core-axioms.md) requires every failure be a named observable outcome and ecosystem/scripts/conformance-check.py:159 asserts status=='error' directly -- changing it would be a protocol-contract change, not a patch. Stage 1 of a two-stage design; Stage 2 (replacing flat status with a value|unresolved|fault|limit outcome sum type) is NOT done and needs a contract-version bump (2.x->3.0 precedent in S2). The REPL's echo-fallback for a lone top-level UnknownSymbol keeps its own narrow explicit check, deliberately NOT keyed off classification | Від commit ddd538c (2026-09-04) кожна error_response()-похідна відмова несе додаткове неконтрактне поле (classification unresolved|limit|fault) поруч із незмінним (status error)/(kind ...); UnknownSymbol -> unresolved (посилання без біндингу, за тією самою логікою, якою OutOfMemory/NumericOverflow вже користувалися для 'limit'), решта лишається fault; (status error) навмисно збережено буквально для кожної категорії, бо S2 (docs/language-core-axioms.md) вимагає кожну відмову як названий спостережуваний результат, а ecosystem/scripts/conformance-check.py:159 прямо асертить status=='error' -- зміна статусу була б контрактною зміною протоколу, а не патчем. Стадія 1 дворівневого дизайну; Стадія 2 (заміна плаского status на sum type value|unresolved|fault|limit) НЕ зроблена і потребує bump версії контракту (прецедент 2.x->3.0 у S2). REPL echo-fallback для самотнього top-level UnknownSymbol зберігає власну вузьку явну перевірку, свідомо НЕ прив'язану до classification")
-        (authority (../my-lisp/crates/my-lisp/src/error.rs ../my-lisp/crates/my-lisp-cli/src/repl.rs ../my-lisp/docs/language-core-axioms.md ../ecosystem/scripts/conformance-check.py))
+        (authority (../my-lisp/crates/sens/src/error.rs ../my-lisp/crates/sens-cli/src/repl.rs ../my-lisp/docs/language-core-axioms.md ../ecosystem/scripts/conformance-check.py))
         (how-to (classify-failure-oracle stage-1-only status-stays-error))
         (verify (classification-additive stage-2-not-done conformance-check-pass))
         (lifecycle current-contract)
@@ -799,7 +799,7 @@
       (reference
         (topic all-project-code-is-written-in-sens)
         (summary "Постійний закон власника: увесь наш код пишеться СЕНС-кодами (рівно 8 двійкових біт на функцію), і новий код не на СЕНС заборонено. Функція СЕНС має окрему коробку рівно 1 байт (Sens8; ExprKind::Call(Sens8, args)); ім'я (en/ук/укр/sa/sym) ніколи не має пріоритету над СЕНС і не може бути перевизначене вище за функцію СЕНС. Кожен англійський предикат закінчується на `?`, повернення старих написань заборонено. Стан на 2026-09-25 (#1413): 25 790 викликів іменем проти 2 262 кодом СЕНС у коді мови; 326 імен реєстру виконуються не як СЕНС (146 Rust-функцій за іменем, 161 Lisp-замикання, 19 макросів). Храповик non_sens_code_inventory забороняє збільшення; суворі тести sens_priority_over_names і english_predicates_question_mark червоні, доки код не переписано. | Standing owner law: all our code is written in SENS codes (exactly eight binary bits per function) and new non-SENS code is forbidden. A SENS function has its own exactly-one-byte box; a name never has priority over SENS and can never be rebound above it. Every English predicate ends with `?`; reverting to old spellings is forbidden.")
-        (authority (crates/my-lisp/tests/sens_exactly_eight_bits.rs crates/my-lisp/tests/non_sens_code_inventory.rs crates/my-lisp/tests/sens_priority_over_names.rs crates/my-lisp/tests/english_predicates_question_mark.rs crates/my-lisp/tests/data/non-sens-code-baseline.tsv crates/my-lisp/src/eval/lower.rs crates/my-lisp/src/syntax.rs))
+        (authority (crates/sens/tests/sens_exactly_eight_bits.rs crates/sens/tests/non_sens_code_inventory.rs crates/sens/tests/sens_priority_over_names.rs crates/sens/tests/english_predicates_question_mark.rs crates/sens/tests/data/non-sens-code-baseline.tsv crates/sens/src/eval/lower.rs crates/sens/src/syntax.rs))
         (how-to (write-every-call-head-as-eight-bit-sens-code never-add-a-name-based-call-to-a-sens-function never-bind-or-rebind-a-registry-name english-predicates-end-with-question-mark run-non-sens-code-inventory-before-commit never-raise-the-baseline-to-hide-new-non-sens-code))
         (verify (sens-exactly-eight-bits-green non-sens-code-never-grows-green sens-priority-over-names-trend-to-zero english-predicates-question-mark-green-after-migration))
         (evidence-status confirmed)
@@ -809,7 +809,7 @@
       (reference
         (topic canon-sid-archeology)
         (summary "Canon 0+7 (quote/atom/eq/cons/car/cdr/cond) НЕ був задуманий одразу як SID-простір -- SID прийшов пізніше як виправлення власної регресії, не як первісний дизайн. Хронологія за прямим git show/log: 05.08.2026 (коміт 516b5954, день народження crate my-lisp) -- усі 7 примітивів + lambda були одним хардкодженим англомовним рядковим match в evaluate_list, без Canon і без SID; до 24.08 -- регресія: atom/eq/car/cdr/cons перенесені у звичайні мутабельні Environment-біндинги ((def atom 42) реально стирав примітив); 05-06.09 (ADR-004, docs/research/canon-resolution-semantics.md, написаний за 6 годин до самого canon.rs) -- ця регресія названа Model B (Pure Environment Mutability) і відкинута на користь Model C (незмінний Canon + fallback), народжується canon.rs ще з рядковими трійками en/uk/sa, без SID; 19-21.09 (issue #1098) -- рядкові трійки замінені на Sid8; 24.09 (issue #1292, PR #1293) -- SID стає структурним первинним ключем (identity_for_semantic_id індексує масив CANON напряму байтом SID замість лінійного .find(), CanonEntry.semantic_id -- перше поле). Окрема знахідка: Canon не оперує SID однорідно для всіх 7 -- atom/eq/cons/car/cdr викликаються напряму по байту SID через PRIMITIVE_TABLE (CanonicalIdentity в цьому шляху не консультується), а quote/cond навмисно виведені з-під SID-диспетчеризації через порядок обчислення (quote не повинен обчислювати аргумент, cond мусить мати коротке замикання), не через незмінність -- усі 7 однаково immutable через ensure_bindable. | Canon 0+7 was NOT designed as a SID space from the start -- SID arrived later as a fix for a self-inflicted regression, not an original design choice. Timeline verified directly against git show/log: 2026-08-05 (crate birth) all 7 primitives + lambda were one hardcoded English-only string match with no Canon and no SID; before 2026-08-24 a regression moved atom/eq/car/cdr/cons into ordinary mutable Environment bindings; 2026-09-05/06 (ADR-004) named that regression Model B and chose Model C instead, birthing canon.rs with string triples, still no SID; 2026-09-19/21 (#1098) replaced string triples with Sid8; 2026-09-24 (#1292/PR#1293) made SID the structural primary key. Canon does not operate on SID uniformly: quote/cond are deliberately excluded from SID-value dispatch for evaluation-order reasons, not immutability -- all 7 are equally immutable.")
-        (authority (crates/my-lisp/src/eval/canon.rs crates/my-lisp/src/eval/mod.rs crates/my-lisp/src/eval/special_forms/core.rs lib/canon.lisp docs/research/canon-resolution-semantics.md docs/adr/ADR-004-CLOSED-MCCARTHY7-CORE.md ../ecosystem/docs/research/MY-LISP-CANON-SID-ARCHEOLOGY-2026-09-24.uk.md))
+        (authority (crates/sens/src/eval/canon.rs crates/sens/src/eval/mod.rs crates/sens/src/eval/special_forms/core.rs lib/canon.lisp docs/research/canon-resolution-semantics.md docs/adr/ADR-004-CLOSED-MCCARTHY7-CORE.md ../ecosystem/docs/research/MY-LISP-CANON-SID-ARCHEOLOGY-2026-09-24.uk.md))
         (how-to (read-canon-rs-for-current-sid-dispatch read-ecosystem-archeology-doc-for-full-timeline never-assume-sid-was-the-original-design check-invoke-semantic-ref-vs-canonical-identity-before-claiming-uniform-sid-operation distinguish-immutability-ensure-bindable-from-value-dispatch-eligibility))
         (verify (eval-canon-9-unit-tests-ok canon-adversarial-and-70-more-tests-ok-post-1293 identity-for-semantic-id-now-array-indexed))
         (evidence-status confirmed)
