@@ -172,3 +172,41 @@ fn rewritten_current_core_library_preserves_representative_behavior() {
         assert_eq!(actual, expected, "{source}");
     }
 }
+
+
+#[test]
+fn top_level_surface_redefinition_has_identical_result_after_migration() {
+    let source =
+        "(define list (lambda args (quote shadowed)))\n(list 1 2)\n";
+    let path = temp_file("top-level-shadow", source);
+
+    let mut baseline = Session::default();
+    load_core_library(&mut baseline).expect("baseline core loads");
+    let expected = eval_program(source, &mut baseline)
+        .expect("baseline surface shadow program")
+        .value
+        .to_string();
+    assert_eq!(expected, "shadowed");
+
+    let apply = tool().arg(&path).output().expect("run apply");
+    assert!(
+        apply.status.success(),
+        "{}",
+        String::from_utf8_lossy(&apply.stderr)
+    );
+    let rewritten = std::fs::read_to_string(&path).expect("read rewritten");
+    let _ = std::fs::remove_file(&path);
+
+    assert_eq!(
+        rewritten,
+        "(00001001 list (00001000 args (00000001 shadowed)))\n(list 1 2)\n"
+    );
+
+    let mut migrated = Session::default();
+    load_core_library(&mut migrated).expect("migrated baseline core loads");
+    let actual = eval_program(&rewritten, &mut migrated)
+        .expect("migrated surface shadow program")
+        .value
+        .to_string();
+    assert_eq!(actual, expected);
+}
