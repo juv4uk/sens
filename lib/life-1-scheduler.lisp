@@ -18,161 +18,161 @@
 ;
 ; Quiescence is liveness/control data, never truth.
 
-(def life-scheduler-field
-  (lambda (entry field)
-    (cond
-      ((atom? entry) () (quote ()))
-      ((atom? entry) (0)
-       (let ((rows (cdr entry)))
-         (cond
-           ((atom? rows) () (quote ()))
-           ((atom? rows) (0)
-            (let ((row (car rows)))
-              (cond
-                ((atom? row) ()
+(00001001 life-scheduler-field
+  (00001000 (entry field)
+    (00000111
+      ((00000010 entry) () (00000001 ()))
+      ((00000010 entry) (0)
+       (10011100 ((rows (00000110 entry)))
+         (00000111
+           ((00000010 rows) () (00000001 ()))
+           ((00000010 rows) (0)
+            (10011100 ((row (00000101 rows)))
+              (00000111
+                ((00000010 row) ()
                  (life-scheduler-field
-                   (cons (car entry) (cdr rows))
+                   (00000100 (00000101 entry) (00000110 rows))
                    field))
-                ((atom? row) (1)
+                ((00000010 row) (1)
                  (life-scheduler-field
-                   (cons (car entry) (cdr rows))
+                   (00000100 (00000101 entry) (00000110 rows))
                    field))
-                ((atom? row) (0)
-                 (cond
-                   ((equal? field (car row)) (1)
-                    (car (cdr row)))
-                   ((equal? field (car row)) (0)
+                ((00000010 row) (0)
+                 (00000111
+                   ((00100010 field (00000101 row)) (1)
+                    (00000101 (00000110 row)))
+                   ((00100010 field (00000101 row)) (0)
                     (life-scheduler-field
-                      (cons (car entry) (cdr rows))
+                      (00000100 (00000101 entry) (00000110 rows))
                       field)))))))))))))
 
-(def life-scheduler-invocation-key
-  (lambda (invocation)
-    (list
-      (life-scheduler-field invocation (quote producer))
-      (life-scheduler-field invocation (quote trigger))
-      (life-scheduler-field invocation (quote provenance-ref))
-      (life-scheduler-field invocation (quote semantic-id)))))
+(00001001 life-scheduler-invocation-key
+  (00001000 (invocation)
+    (00100111
+      (life-scheduler-field invocation (00000001 producer))
+      (life-scheduler-field invocation (00000001 trigger))
+      (life-scheduler-field invocation (00000001 provenance-ref))
+      (life-scheduler-field invocation (00000001 semantic-id)))))
 
-(def life-scheduler-key-present?
-  (lambda (key keys)
-    (cond
-      ((atom? keys) () (quote absent))
-      ((atom? keys) (0)
-       (cond
-         ((equal? key (car keys)) (1) (quote present))
-         ((equal? key (car keys)) (0)
-          (life-scheduler-key-present? key (cdr keys))))))))
+(00001001 life-scheduler-key-present?
+  (00001000 (key keys)
+    (00000111
+      ((00000010 keys) () (00000001 absent))
+      ((00000010 keys) (0)
+       (00000111
+         ((00100010 key (00000101 keys)) (1) (00000001 present))
+         ((00100010 key (00000101 keys)) (0)
+          (life-scheduler-key-present? key (00000110 keys))))))))
 
-(def life-scheduler-dedup-pending
-  (lambda (pending seen-keys)
-    (cond
-      ((atom? pending) () (quote ()))
-      ((atom? pending) (0)
-       (let* ((invocation (car pending))
+(00001001 life-scheduler-dedup-pending
+  (00001000 (pending seen-keys)
+    (00000111
+      ((00000010 pending) () (00000001 ()))
+      ((00000010 pending) (0)
+       (10011101 ((invocation (00000101 pending))
               (key (life-scheduler-invocation-key invocation)))
-         (cond
-           ((eq? (life-scheduler-key-present? key seen-keys) (quote present))
+         (00000111
+           ((00000011 (life-scheduler-key-present? key seen-keys) (00000001 present))
             (1)
-            (life-scheduler-dedup-pending (cdr pending) seen-keys))
-           ((eq? (life-scheduler-key-present? key seen-keys) (quote absent))
+            (life-scheduler-dedup-pending (00000110 pending) seen-keys))
+           ((00000011 (life-scheduler-key-present? key seen-keys) (00000001 absent))
             (1)
-            (cons invocation
+            (00000100 invocation
                   (life-scheduler-dedup-pending
-                    (cdr pending)
-                    (cons key seen-keys))))))))))
+                    (00000110 pending)
+                    (00000100 key seen-keys))))))))))
 
-(def life-scheduler-pending
-  (lambda (pending)
-    (life-scheduler-dedup-pending pending (quote ()))))
+(00001001 life-scheduler-pending
+  (00001000 (pending)
+    (life-scheduler-dedup-pending pending (00000001 ()))))
 
-(def life-scheduler-projection-match?
-  (lambda (expected projections)
-    (cond
-      ((atom? projections) () (quote absent))
-      ((atom? projections) (0)
-       (let ((projection (car projections)))
-         (cond
-           ((equal? expected projection)
+(00001001 life-scheduler-projection-match?
+  (00001000 (expected projections)
+    (00000111
+      ((00000010 projections) () (00000001 absent))
+      ((00000010 projections) (0)
+       (10011100 ((projection (00000101 projections)))
+         (00000111
+           ((00100010 expected projection)
             (1)
-            (quote present))
-           ((equal? expected projection)
+            (00000001 present))
+           ((00100010 expected projection)
             (0)
-            (life-scheduler-projection-match? expected (cdr projections)))))))))
+            (life-scheduler-projection-match? expected (00000110 projections)))))))))
 
-(def life-scheduler-projection-ready?
-  (lambda (invocation projections)
-    (let* ((trigger (life-scheduler-field invocation (quote trigger)))
-           (provenance (life-scheduler-field invocation (quote provenance-ref))))
-      (cond
-        ((atom? trigger) ()
-         (quote absent))
-        ((atom? trigger) (1)
-         (quote absent))
-        ((atom? trigger) (0)
-         (let ((tail (cdr trigger)))
-           (cond
-             ((atom? tail) ()
-              (quote absent))
-             ((atom? tail) (1)
-              (quote absent))
-             ((atom? tail) (0)
+(00001001 life-scheduler-projection-ready?
+  (00001000 (invocation projections)
+    (10011101 ((trigger (life-scheduler-field invocation (00000001 trigger)))
+           (provenance (life-scheduler-field invocation (00000001 provenance-ref))))
+      (00000111
+        ((00000010 trigger) ()
+         (00000001 absent))
+        ((00000010 trigger) (1)
+         (00000001 absent))
+        ((00000010 trigger) (0)
+         (10011100 ((tail (00000110 trigger)))
+           (00000111
+             ((00000010 tail) ()
+              (00000001 absent))
+             ((00000010 tail) (1)
+              (00000001 absent))
+             ((00000010 tail) (0)
               (life-scheduler-projection-match?
-                (list
-                  (quote projection-ready)
-                  (car tail)
+                (00100111
+                  (00000001 projection-ready)
+                  (00000101 tail)
                   provenance)
                 projections)))))))))
 
-(def life-scheduler-select-ready
-  (lambda (pending projections)
-    (cond
-      ((atom? pending) ()
-       (quote (scheduler-selection none)))
-      ((atom? pending) (0)
-       (let ((invocation (car pending)))
-         (cond
-           ((eq? (life-scheduler-projection-ready? invocation projections)
-                (quote present))
+(00001001 life-scheduler-select-ready
+  (00001000 (pending projections)
+    (00000111
+      ((00000010 pending) ()
+       (00000001 (scheduler-selection none)))
+      ((00000010 pending) (0)
+       (10011100 ((invocation (00000101 pending)))
+         (00000111
+           ((00000011 (life-scheduler-projection-ready? invocation projections)
+                (00000001 present))
             (1)
-            (list
-              (quote scheduler-selection)
-              (quote ready)
+            (00100111
+              (00000001 scheduler-selection)
+              (00000001 ready)
               invocation
-              (cdr pending)))
-           ((eq? (life-scheduler-projection-ready? invocation projections)
-                (quote absent))
+              (00000110 pending)))
+           ((00000011 (life-scheduler-projection-ready? invocation projections)
+                (00000001 absent))
             (1)
-            (life-scheduler-select-ready (cdr pending) projections))))))))
+            (life-scheduler-select-ready (00000110 pending) projections))))))))
 
-(def life-scheduler-quiescence-state
-  (lambda (projections lifecycle-state)
-    (cond
-      ((atom? projections) ()
-       (cond
-         ((eq? lifecycle-state (quote no-transition-required))
+(00001001 life-scheduler-quiescence-state
+  (00001000 (projections lifecycle-state)
+    (00000111
+      ((00000010 projections) ()
+       (00000111
+         ((00000011 lifecycle-state (00000001 no-transition-required))
           (1)
-          (quote (quiescence-state quiescent)))
-         ((eq? lifecycle-state (quote no-transition-required))
+          (00000001 (quiescence-state quiescent)))
+         ((00000011 lifecycle-state (00000001 no-transition-required))
           (0)
-          (quote (quiescence-state active)))))
-      ((atom? projections) (0)
-       (quote (quiescence-state active))))))
+          (00000001 (quiescence-state active)))))
+      ((00000010 projections) (0)
+       (00000001 (quiescence-state active))))))
 
-(def life-scheduler-quiescence
-  (lambda (pending projections lifecycle-state)
-    (cond
-      ((atom? pending) ()
+(00001001 life-scheduler-quiescence
+  (00001000 (pending projections lifecycle-state)
+    (00000111
+      ((00000010 pending) ()
        (life-scheduler-quiescence-state projections lifecycle-state))
-      ((atom? pending) (0)
-       (quote (quiescence-state active))))))
-(def life-scheduler-state
-  (lambda (pending projections lifecycle-state)
-    (list
-      (quote scheduler-state)
-      (list (quote pending) (life-scheduler-pending pending))
-      (list (quote projections) projections)
-      (list (quote lifecycle) lifecycle-state)
+      ((00000010 pending) (0)
+       (00000001 (quiescence-state active))))))
+(00001001 life-scheduler-state
+  (00001000 (pending projections lifecycle-state)
+    (00100111
+      (00000001 scheduler-state)
+      (00100111 (00000001 pending) (life-scheduler-pending pending))
+      (00100111 (00000001 projections) projections)
+      (00100111 (00000001 lifecycle) lifecycle-state)
       (life-scheduler-quiescence
         (life-scheduler-pending pending)
         projections
