@@ -15,17 +15,17 @@
   (lambda (left right substitution)
     (let ((raw (unify left right substitution)))
       (cond
-        ((atom? raw) (structural-kind atom)
+        ((atom? raw) (1)
          (cond
-           ((eq? raw (quote fail)) (identity-relation same)
+           ((eq? raw (quote fail)) (1)
             (list
               (quote unification-failure)
               left
               right
               substitution))
-           ((eq? raw (quote fail)) (identity-relation distinct)
+           ((eq? raw (quote fail)) (0)
             (list (quote unified) raw))))
-        ((atom? raw) (structural-kind empty-list)
+        ((atom? raw) ()
          (list (quote unified) raw))
-        ((atom? raw) (structural-kind pair)
+        ((atom? raw) (0)
          (list (quote unified) raw))))))

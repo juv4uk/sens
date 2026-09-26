@@ -30,11 +30,11 @@
                (world-clauses direct (quote zoo))
                (world-clauses retold (quote zoo)))))
       (cond
-        (root-relation (structural-relation same)
+        (root-relation (1)
           (cond
-            (object-relation (structural-relation same)
+            (object-relation (1)
               (cond
-                (projection-relation (structural-relation same)
+                (projection-relation (1)
                   (quote
                     (content-store-authority-witness
                       (status pass)
@@ -42,17 +42,17 @@
                         root-image-deterministic
                         object-image-deterministic
                         equal-current-projection))))
-                (projection-relation (structural-relation distinct)
+                (projection-relation (0)
                   (quote
                     (content-store-authority-witness
                       (status fail)
                       (law equal-current-projection))))))
-            (object-relation (structural-relation distinct)
+            (object-relation (0)
               (quote
                 (content-store-authority-witness
                   (status fail)
                   (law object-image-deterministic))))))
-        (root-relation (structural-relation distinct)
+        (root-relation (0)
           (quote
             (content-store-authority-witness
               (status fail)

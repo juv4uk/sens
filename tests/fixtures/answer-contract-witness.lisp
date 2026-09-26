@@ -16,13 +16,15 @@
   (lambda (entry field)
     (let ((found (assoc field entry)))
       (cond
-        ((atom? found) (quote ()))
+        ((atom? found) () (quote ()))
+        ((atom? found) (1) (quote ()))
         (t (cdr found))))))
 
 (def answer-contract-find
   (lambda (identity entries)
     (cond
-      ((atom? entries) (quote ()))
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
       ((equal?
          (answer-contract-field (car entries) (quote identity))
          identity)
@@ -44,8 +46,8 @@
   (lambda (identity field expected)
     (let ((entry (answer-contract-entry identity)))
       (cond
-        ((atom? entry)
-         (list (quote missing-entry) identity field expected))
+        ((atom? entry) () (list (quote missing-entry) identity field expected))
+        ((atom? entry) (1) (list (quote missing-entry) identity field expected))
         ((equal? (answer-contract-field entry field) expected)
          (quote ()))
         (t
@@ -69,15 +71,17 @@
 (def answer-contract-witness-expect-missing
   (lambda (identity)
     (cond
-      ((atom? (answer-contract-entry identity)) (quote ()))
+      ((atom? (answer-contract-entry identity)) () (quote ()))
+      ((atom? (answer-contract-entry identity)) (1) (quote ()))
       (t (list (quote unexpected-entry) identity)))))
 
 (def answer-contract-witness-first-failure
   (lambda (checks)
     (cond
-      ((atom? checks) (quote ()))
-      ((atom? (car checks))
-       (answer-contract-witness-first-failure (cdr checks)))
+      ((atom? checks) () (quote ()))
+      ((atom? checks) (1) (quote ()))
+      ((atom? (car checks)) () (answer-contract-witness-first-failure (cdr checks)))
+      ((atom? (car checks)) (1) (answer-contract-witness-first-failure (cdr checks)))
       (t (car checks)))))
 
 (def answer-contract-witness
@@ -132,9 +136,9 @@
                 (answer-contract-witness-expect
                   00000010
                   (quote result-values)
-                  (quote ((structural-kind empty-list)
-                          (structural-kind pair)
-                          (structural-kind atom))))
+                  (quote (()
+                          (0)
+                          (1))))
                 (answer-contract-witness-expect
                   00000010
                   (quote no-answer)
@@ -154,8 +158,8 @@
                 (answer-contract-witness-expect
                   00000011
                   (quote result-values)
-                  (quote ((identity-relation same)
-                          (identity-relation distinct))))
+                  (quote ((1)
+                          (0))))
                 (answer-contract-witness-expect
                   00000011
                   (quote outside-domain)
@@ -237,8 +241,10 @@
       (cond
         ((eq? (answer-contract-schema) (quote answer-contract/1))
          (cond
-           ((atom? failure)
-            (answer-contract-witness-record
+           ((atom? failure) () (answer-contract-witness-record
+              (quote pass)
+              (quote canon-zero-unspecialized-accumulator)))
+           ((atom? failure) (1) (answer-contract-witness-record
               (quote pass)
               (quote canon-zero-unspecialized-accumulator)))
            (t

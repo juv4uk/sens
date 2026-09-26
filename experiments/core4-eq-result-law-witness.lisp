@@ -12,14 +12,14 @@
 (def eqr-field-from
   (lambda (name fields)
     (cond
-      ((atom? fields) (structural-kind empty-list) (quote missing))
-      ((atom? fields) (structural-kind pair)
+      ((atom? fields) () (quote missing))
+      ((atom? fields) (0)
        (let ((field (car fields)))
          (cond
-           ((atom? field) (structural-kind pair)
+           ((atom? field) (0)
             (cond
-              ((eq? (car field) name) (identity-relation same) (cdr field))
-              ((eq? (car field) name) (identity-relation distinct)
+              ((eq? (car field) name) (1) (cdr field))
+              ((eq? (car field) name) (0)
                (eqr-field-from name (cdr fields)))))
            ((quote eqr-next) eqr-next
             (eqr-field-from name (cdr fields)))))))))
@@ -31,7 +31,7 @@
 (def eqr-check
   (lambda (label actual expected)
     (cond
-      ((equal? actual expected) (structural-relation same) (quote ()))
+      ((equal? actual expected) (1) (quote ()))
       ((quote eqr-fail) eqr-fail
        (list (quote core4-eq-result-law-mismatch)
              label expected actual)))))
@@ -39,8 +39,8 @@
 (def eqr-first-failure
   (lambda (checks)
     (cond
-      ((atom? checks) (structural-kind empty-list) (quote ()))
-      ((atom? (car checks)) (structural-kind empty-list)
+      ((atom? checks) () (quote ()))
+      ((atom? (car checks)) ()
        (eqr-first-failure (cdr checks)))
       ((quote eqr-failure) eqr-failure (car checks)))))
 
@@ -91,7 +91,7 @@
                            (quote unresolved-1257))
                 (eqr-check (quote same-observation)
                            (eqr-field eqr-same (quote observation))
-                           (quote (identity-relation same)))
+                           (quote (1)))
                 (eqr-check (quote same-direction)
                            (eqr-field eqr-same (quote direction))
                            (quote yes))
@@ -103,7 +103,7 @@
                            0)
                 (eqr-check (quote distinct-observation)
                            (eqr-field eqr-distinct (quote observation))
-                           (quote (identity-relation distinct)))
+                           (quote (0)))
                 (eqr-check (quote distinct-direction)
                            (eqr-field eqr-distinct (quote direction))
                            (quote no))
@@ -129,7 +129,7 @@
                            (eqr-field eqr-integration (quote integration))
                            (quote pending-selected-core))))))
       (cond
-        ((atom? failure) (structural-kind empty-list)
+        ((atom? failure) ()
          (quote (core4-eq-result-law-ok)))
         ((quote eqr-failure-result) eqr-failure-result failure)))))
 

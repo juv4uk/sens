@@ -49,7 +49,8 @@
 (def my-result-fail?
   (lambda (result)
     (cond
-      ((atom? result) (quote ()))
+      ((atom? result) () (quote ()))
+      ((atom? result) (1) (quote ()))
       (t (eq? (car result) my-result-fail-token)))))
 
 (def my-result-value
@@ -176,13 +177,15 @@
 (def my-shared-frame-binding?
   (lambda (binding)
     (cond
-      ((atom? binding) (quote ()))
+      ((atom? binding) () (quote ()))
+      ((atom? binding) (1) (quote ()))
       (t (eq? (car binding) 0)))))
 
 (def my-frame-bound?
   (lambda (name frame)
     (cond
-      ((atom? frame) (quote ()))
+      ((atom? frame) () (quote ()))
+      ((atom? frame) (1) (quote ()))
       ((eq? (car (car frame)) name) t)
       (t (my-frame-bound? name (cdr frame))))))
 
@@ -195,14 +198,16 @@
 (def my-env-has-shared-frame?
   (lambda (env)
     (cond
-      ((atom? env) (quote ()))
+      ((atom? env) () (quote ()))
+      ((atom? env) (1) (quote ()))
       ((my-shared-frame-binding? (car env)) t)
       (t (my-env-has-shared-frame? (cdr env))))))
 
 (def my-shared-frame-value
   (lambda (env)
     (cond
-      ((atom? env) (quote ()))
+      ((atom? env) () (quote ()))
+      ((atom? env) (1) (quote ()))
       ((my-shared-frame-binding? (car env)) (cdr (car env)))
       (t (my-shared-frame-value (cdr env))))))
 
@@ -215,7 +220,8 @@
 (def my-replace-shared-frame
   (lambda (env frame)
     (cond
-      ((atom? env) env)
+      ((atom? env) () env)
+      ((atom? env) (1) env)
       ((my-shared-frame-binding? (car env))
        (cons (cons 0 frame) (cdr env)))
       (t
@@ -240,7 +246,8 @@
 (def my-env-define
   (lambda (name value env)
     (cond
-      ((atom? env) (cons (cons name value) env))
+      ((atom? env) () (cons (cons name value) env))
+      ((atom? env) (1) (cons (cons name value) env))
       ((my-shared-frame-binding? (car env))
        (cons
          (cons 0
@@ -259,7 +266,8 @@
       (cond
         ((my-canon-callable-identity? identity) (my-primitive identity))
         ((my-canon-name? name) (my-canon-binding-error name))
-        ((atom? env) (my-default-binding name))
+        ((atom? env) () (my-default-binding name))
+        ((atom? env) (1) (my-default-binding name))
         ((my-shared-frame-binding? (car env))
          (cond
            ((my-frame-bound? name (cdr (car env)))
@@ -272,7 +280,8 @@
   (lambda (name env)
     (cond
       ((my-canon-name? name) t)
-      ((atom? env) (quote ()))
+      ((atom? env) () (quote ()))
+      ((atom? env) (1) (quote ()))
       ((my-shared-frame-binding? (car env))
        (cond
          ((my-frame-bound? name (cdr (car env))) t)
@@ -283,7 +292,8 @@
 (def my-primitive?
   (lambda (value)
     (cond
-      ((atom? value) (quote ()))
+      ((atom? value) () (quote ()))
+      ((atom? value) (1) (quote ()))
       (t (eq? (car value) (quote primitive))))))
 
 ; UnknownSymbol belongs to name resolution, not application. A symbol produced
@@ -307,13 +317,15 @@
 (def my-macro?
   (lambda (value)
     (cond
-      ((atom? value) (quote ()))
+      ((atom? value) () (quote ()))
+      ((atom? value) (1) (quote ()))
       (t (eq? (car value) (quote macro))))))
 
 (def my-closure?
   (lambda (value)
     (cond
-      ((atom? value) (quote ()))
+      ((atom? value) () (quote ()))
+      ((atom? value) (1) (quote ()))
       (t (eq? (car value) (quote closure))))))
 
 ; A recursive closure is finite Lisp data. It does not require a cyclic host
@@ -325,7 +337,8 @@
 (def my-recursive-closure?
   (lambda (value)
     (cond
-      ((atom? value) (quote ()))
+      ((atom? value) () (quote ()))
+      ((atom? value) (1) (quote ()))
       (t (eq? (car value) (quote recursive-closure))))))
 
 ; A mutually-recursive group is also finite Lisp data. Every member stores the
@@ -337,20 +350,24 @@
 (def my-group-closure?
   (lambda (value)
     (cond
-      ((atom? value) (quote ()))
+      ((atom? value) () (quote ()))
+      ((atom? value) (1) (quote ()))
       (t (eq? (car value) (quote recursive-group-closure))))))
 
 (def my-lambda-form?
   (lambda (form)
     (cond
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (my-lambda-name? (car form)))
+      ((atom? form) () (quote ()))
+      ((atom? form) (1) (quote ()))
+      ((atom? (car form)) () (my-lambda-name? (car form)))
+      ((atom? (car form)) (1) (my-lambda-name? (car form)))
       (t (quote ())))))
 
 (def my-lambda-def-form?
   (lambda (form)
     (cond
-      ((atom? form) (quote ()))
+      ((atom? form) () (quote ()))
+      ((atom? form) (1) (quote ()))
       ((my-definition-name? (car form))
        (cond
          ((my-canon-name? (second form)) (quote ()))
@@ -386,7 +403,8 @@
 (def my-compare-chain
   (lambda (operator values)
     (cond
-      ((atom? (cdr values)) t)
+      ((atom? (cdr values)) () t)
+      ((atom? (cdr values)) (1) t)
       ((eq? (my-compare-two operator (car values) (second values)) 1)
        (my-compare-chain operator (cdr values)))
       (t (quote ())))))
@@ -421,14 +439,17 @@
 (def my-fixed-param-count
   (lambda (params)
     (cond
-      ((atom? params) 0)
+      ((atom? params) () 0)
+      ((atom? params) (1) 0)
       (t (+ 1 (my-fixed-param-count (cdr params)))))))
 
 (def my-rest-param?
   (lambda (params)
     (cond
-      ((atom? params)
-       (cond
+      ((atom? params) () (cond
+         ((eq? params (quote ())) (quote ()))
+         (t t)))
+      ((atom? params) (1) (cond
          ((eq? params (quote ())) (quote ()))
          (t t)))
       (t (my-rest-param? (cdr params))))))
@@ -468,15 +489,25 @@
 (def my-symbol-member?
   (lambda (name names)
     (cond
-      ((atom? names) (quote ()))
+      ((atom? names) () (quote ()))
+      ((atom? names) (1) (quote ()))
       ((eq? name (car names)) t)
       (t (my-symbol-member? name (cdr names))))))
 
 (def my-lambda-list-error-pairs
   (lambda (params seen)
     (cond
-      ((atom? params)
-       (cond
+      ((atom? params) () (cond
+         ((eq? params (quote ())) (quote ()))
+         ((symbol? params)
+          (cond
+            ((my-canon-name? params)
+             (list (quote canonical-parameter) params))
+            ((my-symbol-member? params seen)
+             (list (quote duplicate-parameter) params))
+            (t (quote ()))))
+         (t (list (quote invalid-rest) params))))
+      ((atom? params) (1) (cond
          ((eq? params (quote ())) (quote ()))
          ((symbol? params)
           (cond
@@ -501,8 +532,15 @@
 (def my-lambda-list-error
   (lambda (params)
     (cond
-      ((atom? params)
-       (cond
+      ((atom? params) () (cond
+         ((eq? params (quote ())) (quote ()))
+         ((symbol? params)
+          (cond
+            ((my-canon-name? params)
+             (list (quote canonical-parameter) params))
+            (t (quote ()))))
+         (t (list (quote invalid-parameters) params))))
+      ((atom? params) (1) (cond
          ((eq? params (quote ())) (quote ()))
          ((symbol? params)
           (cond
@@ -522,7 +560,8 @@
   (lambda (params body env)
     (let ((problem (my-lambda-list-error params)))
       (cond
-        ((atom? problem) (list (quote closure) params body env))
+        ((atom? problem) () (list (quote closure) params body env))
+        ((atom? problem) (1) (list (quote closure) params body env))
         (t (my-lambda-invalid-form problem))))))
 
 ; Return the first malformed lambda-list in a top-level recursive group.
@@ -531,12 +570,14 @@
 (def my-lambda-def-group-error
   (lambda (forms)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       (t
        (let ((problem
                (my-lambda-list-error (second (third (car forms))))))
          (cond
-           ((atom? problem) (my-lambda-def-group-error (cdr forms)))
+           ((atom? problem) () (my-lambda-def-group-error (cdr forms)))
+           ((atom? problem) (1) (my-lambda-def-group-error (cdr forms)))
            (t problem)))))))
 
 ; Parameter binding owns only the successful path. Arity and Canon-name
@@ -544,8 +585,10 @@
 (def bind-params
   (lambda (params args env)
     (cond
-      ((atom? params)
-       (cond
+      ((atom? params) () (cond
+         ((eq? params (quote ())) env)
+         (t (cons (cons params args) env))))
+      ((atom? params) (1) (cond
          ((eq? params (quote ())) env)
          (t (cons (cons params args) env))))
       (t (cons (cons (car params) (car args))
@@ -554,7 +597,8 @@
 (def my-eval-list-result
   (lambda (exprs env)
     (cond
-      ((atom? exprs) (my-result-ok (quote ())))
+      ((atom? exprs) () (my-result-ok (quote ())))
+      ((atom? exprs) (1) (my-result-ok (quote ())))
       (t
        (let ((head-result (my-eval-result (car exprs) env)))
          (cond
@@ -576,7 +620,8 @@
 (def my-eval-body-result
   (lambda (body env)
     (cond
-      ((atom? (cdr body)) (my-eval-result (car body) env))
+      ((atom? (cdr body)) () (my-eval-result (car body) env))
+      ((atom? (cdr body)) (1) (my-eval-result (car body) env))
       (t
        (let ((first-result (my-eval-result (car body) env)))
          (cond
@@ -590,18 +635,23 @@
 (def my-cond-has-migration-clause?
   (lambda (clauses)
     (cond
-      ((atom? clauses) (quote ()))
-      ((atom? (car clauses))
-       (my-cond-has-migration-clause? (cdr clauses)))
-      ((eq? (length (car clauses)) 2) (identity-relation same) t)
-      ((eq? (length (car clauses)) 2) (identity-relation distinct)
+      ((atom? clauses) () (quote ()))
+      ((atom? clauses) (1) (quote ()))
+      ((atom? (car clauses)) () (my-cond-has-migration-clause? (cdr clauses)))
+      ((atom? (car clauses)) (1) (my-cond-has-migration-clause? (cdr clauses)))
+      ((eq? (length (car clauses)) 2) (1) t)
+      ((eq? (length (car clauses)) 2) (0)
        (my-cond-has-migration-clause? (cdr clauses))))))
 
 (def my-eval-cond-result-mode
   (lambda (clauses env migration-compatibility?)
     (cond
-      ((atom? clauses)
-       (cond
+      ((atom? clauses) () (cond
+         (migration-compatibility? (my-result-ok (quote ())))
+         (t
+          (my-result-fail
+            (my-error (quote unsatisfied-conditional) (quote cond))))))
+      ((atom? clauses) (1) (cond
          (migration-compatibility? (my-result-ok (quote ())))
          (t
           (my-result-fail
@@ -612,21 +662,21 @@
            ; #217 canonical path: evaluate only the query. The expected result
            ; is already Lisp data in the interpreted program and must never be
            ; executed as code. Match it structurally, then evaluate the branch.
-           ((eq? (length clause) 3) (identity-relation same)
+           ((eq? (length clause) 3) (1)
             (let ((test-result (my-eval-result (car clause) env)))
               (cond
                 ((my-result-fail? test-result) test-result)
                 ((equal? (my-result-value test-result) (second clause))
-                 (structural-relation same)
+                 (1)
                  (my-eval-result (third clause) env))
                 ((equal? (my-result-value test-result) (second clause))
-                 (structural-relation distinct)
+                 (0)
                  (my-eval-cond-result-mode
                    (cdr clauses) env migration-compatibility?)))))
            ; Historical two-part clauses remain migration-only, mirroring the
            ; native evaluator until their callers are moved to explicit result
            ; matching. This path intentionally retains old truthiness.
-           ((eq? (length clause) 2) (identity-relation same)
+           ((eq? (length clause) 2) (1)
             (let ((test-result (my-eval-result (car clause) env)))
               (cond
                 ((my-result-fail? test-result) test-result)
@@ -653,7 +703,8 @@
 (def my-take-lambda-def-group
   (lambda (forms)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       ((my-lambda-def-form? (car forms))
        (cons (car forms)
              (my-take-lambda-def-group (cdr forms))))
@@ -662,7 +713,8 @@
 (def my-drop-lambda-def-group
   (lambda (forms)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       ((my-lambda-def-form? (car forms))
        (my-drop-lambda-def-group (cdr forms)))
       (t forms))))
@@ -682,7 +734,8 @@
 (def my-build-group-env-onto
   (lambda (forms group captured-env out)
     (cond
-      ((atom? forms) out)
+      ((atom? forms) () out)
+      ((atom? forms) (1) out)
       (t
        (let ((form (car forms)))
          (my-build-group-env-onto
@@ -704,7 +757,8 @@
 (def my-install-group-env-onto
   (lambda (forms group captured-env out)
     (cond
-      ((atom? forms) out)
+      ((atom? forms) () out)
+      ((atom? forms) (1) out)
       (t
        (let ((form (car forms)))
          (my-install-group-env-onto
@@ -729,8 +783,8 @@
 (def my-apply-result
   (lambda (fn args caller-env)
     (cond
-      ((atom? fn)
-       (my-result-fail (my-error (quote not-callable) fn)))
+      ((atom? fn) () (my-result-fail (my-error (quote not-callable) fn)))
+      ((atom? fn) (1) (my-result-fail (my-error (quote not-callable) fn)))
       ((my-primitive? fn)
        (my-result-ok (my-apply-primitive (second fn) args)))
       ((my-closure? fn)
@@ -801,7 +855,8 @@
   (lambda (fn args . caller-env-rest)
     (let ((caller-env
             (cond
-              ((atom? caller-env-rest) (quote ()))
+              ((atom? caller-env-rest) () (quote ()))
+              ((atom? caller-env-rest) (1) (quote ()))
               (t (car caller-env-rest)))))
       (my-result-value (my-apply-result fn args caller-env)))))
 
@@ -845,15 +900,19 @@
 (def my-eval-result
   (lambda (expr env)
     (cond
-      ((atom? expr)
-       (cond
+      ((atom? expr) () (cond
          ((my-unresolved-name? expr env)
           (my-result-fail
             (my-error (quote unbound-symbol) expr)))
          (t
           (my-result-ok (env-lookup expr env)))))
-      ((atom? (car expr))
-       (cond
+      ((atom? expr) (1) (cond
+         ((my-unresolved-name? expr env)
+          (my-result-fail
+            (my-error (quote unbound-symbol) expr)))
+         (t
+          (my-result-ok (env-lookup expr env)))))
+      ((atom? (car expr)) () (cond
          ((my-canon-quote-name? (car expr))
           (my-result-ok (second expr)))
          ((my-canon-cond-name? (car expr))
@@ -867,6 +926,30 @@
                    (second expr)
                    (cdr (cdr expr))
                    env)))
+              (t
+               (my-result-fail
+                 (my-lambda-invalid-form problem))))))
+         (t
+          (my-eval-application-result expr env))))
+      ((atom? (car expr)) (1) (cond
+         ((my-canon-quote-name? (car expr))
+          (my-result-ok (second expr)))
+         ((my-canon-cond-name? (car expr))
+          (my-eval-cond-result (cdr expr) env))
+         ((my-lambda-name? (car expr))
+          (let ((problem (my-lambda-list-error (second expr))))
+            (cond
+              ((atom? problem)
+               (my-result-ok
+                 (my-make-closure
+                   (second expr)
+                   (cdr (cdr expr))
+                   env)))
+              (t
+               (my-result-fail
+                 (my-lambda-invalid-form problem))))))
+         (t
+          (my-eval-application-result expr env))))
               (t
                (my-result-fail
                  (my-lambda-invalid-form problem))))))
@@ -888,7 +971,8 @@
 (def my-eval-top-form
   (lambda (form env)
     (cond
-      ((atom? form) (cons env (my-eval form env)))
+      ((atom? form) () (cons env (my-eval form env)))
+      ((atom? form) (1) (cons env (my-eval form env)))
       ((my-definition-name? (car form))
        (cond
          ((my-canon-name? (second form))
@@ -899,8 +983,16 @@
               ((my-lambda-form? value-form)
                (let ((problem (my-lambda-list-error (second value-form))))
                  (cond
-                   ((atom? problem)
-                    (let ((value
+                   ((atom? problem) () (let ((value
+                            (list (quote recursive-closure)
+                                  (second form)
+                                  (second value-form)
+                                  (cdr (cdr value-form))
+                                  env)))
+                      (cons
+                        (my-env-define (second form) value env)
+                        value)))
+                   ((atom? problem) (1) (let ((value
                             (list (quote recursive-closure)
                                   (second form)
                                   (second value-form)
@@ -936,8 +1028,11 @@
 (def my-params-bind-name?
   (lambda (name params)
     (cond
-      ((atom? params)
-       (cond
+      ((atom? params) () (cond
+         ((eq? params (quote ())) (quote ()))
+         ((eq? params name) t)
+         (t (quote ()))))
+      ((atom? params) (1) (cond
          ((eq? params (quote ())) (quote ()))
          ((eq? params name) t)
          (t (quote ()))))
@@ -947,19 +1042,30 @@
 (def my-forms-reference-name?
   (lambda (forms name)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       ((my-form-references-name? (car forms) name) t)
       (t (my-forms-reference-name? (cdr forms) name)))))
 
 (def my-form-references-name?
   (lambda (form name)
     (cond
-      ((atom? form)
-       (cond
+      ((atom? form) () (cond
          ((symbol? form) (eq? form name))
          (t (quote ()))))
-      ((atom? (car form))
-       (cond
+      ((atom? form) (1) (cond
+         ((symbol? form) (eq? form name))
+         (t (quote ()))))
+      ((atom? (car form)) () (cond
+         ; Quoted data is not a lexical dependency.
+         ((my-canon-quote-name? (car form)) (quote ()))
+         ; A nested lambda can shadow a candidate top-level name.
+         ((my-lambda-name? (car form))
+          (cond
+            ((my-params-bind-name? name (second form)) (quote ()))
+            (t (my-forms-reference-name? (cdr (cdr form)) name))))
+         (t (my-forms-reference-name? form name))))
+      ((atom? (car form)) (1) (cond
          ; Quoted data is not a lexical dependency.
          ((my-canon-quote-name? (car form)) (quote ()))
          ; A nested lambda can shadow a candidate top-level name.
@@ -980,14 +1086,16 @@
 (def my-lambda-def-names
   (lambda (forms)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       (t (cons (second (car forms))
                (my-lambda-def-names (cdr forms)))))))
 
 (def my-def-dependencies
   (lambda (form candidates)
     (cond
-      ((atom? candidates) (quote ()))
+      ((atom? candidates) () (quote ()))
+      ((atom? candidates) (1) (quote ()))
       ((my-lambda-def-references-name? form (car candidates))
        (cons (car candidates)
              (my-def-dependencies form (cdr candidates))))
@@ -996,7 +1104,8 @@
 (def my-build-dependency-graph-with-names
   (lambda (forms names)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       (t
        (cons
          (list
@@ -1012,14 +1121,16 @@
 (def my-graph-dependencies
   (lambda (name graph)
     (cond
-      ((atom? graph) (quote ()))
+      ((atom? graph) () (quote ()))
+      ((atom? graph) (1) (quote ()))
       ((eq? name (car (car graph))) (second (car graph)))
       (t (my-graph-dependencies name (cdr graph))))))
 
 (def my-graph-dependencies-reach?
   (lambda (dependencies target graph visited)
     (cond
-      ((atom? dependencies) (quote ()))
+      ((atom? dependencies) () (quote ()))
+      ((atom? dependencies) (1) (quote ()))
       ((eq? (car dependencies) target) t)
       ((my-symbol-member? (car dependencies) visited)
        (my-graph-dependencies-reach?
@@ -1048,7 +1159,8 @@
 (def my-scc-names
   (lambda (name candidates graph)
     (cond
-      ((atom? candidates) (quote ()))
+      ((atom? candidates) () (quote ()))
+      ((atom? candidates) (1) (quote ()))
       ((eq? name (car candidates))
        (cons (car candidates)
              (my-scc-names name (cdr candidates) graph)))
@@ -1063,7 +1175,8 @@
 (def my-select-defs-by-names
   (lambda (forms names)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       ((my-symbol-member? (second (car forms)) names)
        (cons (car forms)
              (my-select-defs-by-names (cdr forms) names)))
@@ -1072,7 +1185,8 @@
 (def my-remove-defs-by-names
   (lambda (forms names)
     (cond
-      ((atom? forms) (quote ()))
+      ((atom? forms) () (quote ()))
+      ((atom? forms) (1) (quote ()))
       ((my-symbol-member? (second (car forms)) names)
        (my-remove-defs-by-names (cdr forms) names))
       (t
@@ -1082,14 +1196,15 @@
 (def my-last-lambda-def-name
   (lambda (forms)
     (cond
-      ((atom? (cdr forms)) (second (car forms)))
+      ((atom? (cdr forms)) () (second (car forms)))
+      ((atom? (cdr forms)) (1) (second (car forms)))
       (t (my-last-lambda-def-name (cdr forms))))))
 
 (def my-eval-lambda-components
   (lambda (forms graph env final-name)
     (cond
-      ((atom? forms)
-       (cons env (env-lookup final-name env)))
+      ((atom? forms) () (cons env (env-lookup final-name env)))
+      ((atom? forms) (1) (cons env (env-lookup final-name env)))
       (t
        (let ((name (second (car forms))))
          (let ((component-names
@@ -1101,8 +1216,13 @@
              ; A singleton stays on the ordinary top-level path. That path
              ; already gives self-recursive definitions a finite
              ; recursive-closure without falsely inventing a group.
-             ((atom? (cdr component-names))
-              (let ((result (my-eval-top-form (car forms) env)))
+             ((atom? (cdr component-names)) () (let ((result (my-eval-top-form (car forms) env)))
+                (my-eval-lambda-components
+                  (cdr forms)
+                  graph
+                  (car result)
+                  final-name)))
+             ((atom? (cdr component-names)) (1) (let ((result (my-eval-top-form (car forms) env)))
                 (my-eval-lambda-components
                   (cdr forms)
                   graph
@@ -1138,7 +1258,8 @@
 (def my-eval-program
   (lambda (forms env)
     (cond
-      ((atom? forms) (cons env (quote ())))
+      ((atom? forms) () (cons env (quote ())))
+      ((atom? forms) (1) (cons env (quote ())))
       (t
        (let ((program-env (my-ensure-shared-frame env)))
          (cond
@@ -1146,8 +1267,7 @@
             (let ((block (my-take-lambda-def-group forms)))
               (let ((problem (my-lambda-def-group-error block)))
                 (cond
-                  ((atom? problem)
-                   (let ((rest (my-drop-lambda-def-group forms)))
+                  ((atom? problem) () (let ((rest (my-drop-lambda-def-group forms)))
                      (let ((block-result
                              (my-eval-lambda-block block program-env)))
                        (cond
@@ -1156,6 +1276,16 @@
                           (my-eval-program
                             rest
                             (car block-result)))))))
+                  ((atom? problem) (1) (let ((rest (my-drop-lambda-def-group forms)))
+                     (let ((block-result
+                             (my-eval-lambda-block block program-env)))
+                       (cond
+                         ((atom? rest) block-result)
+                         (t
+                          (my-eval-program
+                            rest
+                            (car block-result)))))))   rest
+                            (car block-result)))))))
                   (t
                    (cons
                      program-env
@@ -1163,7 +1293,8 @@
            (t
             (let ((result (my-eval-top-form (car forms) program-env)))
               (cond
-                ((atom? (cdr forms)) result)
+                ((atom? (cdr forms)) () result)
+                ((atom? (cdr forms)) (1) result)
                 (t
                  (my-eval-program
                    (cdr forms)

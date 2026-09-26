@@ -9,17 +9,17 @@
     (let ((env (list (cons (quote sentinel) 42))))
       (let ((loaded (my-eval-program (quote ()) env)))
         (cond
-          ((equal? (car loaded) env) (structural-relation same)
+          ((equal? (car loaded) env) (1)
            (cond
-             ((equal? (cdr loaded) (quote ())) (structural-relation same)
+             ((equal? (cdr loaded) (quote ())) (1)
               (quote (meta-eval-empty-program-witness (status pass))))
-             ((equal? (cdr loaded) (quote ())) (structural-relation distinct)
+             ((equal? (cdr loaded) (quote ())) (0)
               (list
                 (quote meta-eval-empty-program-witness)
                 (quote (status fail))
                 (quote (law empty-result))
                 (list (quote actual) (cdr loaded))))))
-          ((equal? (car loaded) env) (structural-relation distinct)
+          ((equal? (car loaded) env) (0)
            (list
              (quote meta-eval-empty-program-witness)
              (quote (status fail))

@@ -352,7 +352,7 @@ mod single_pass_eval_tests {
     fn binary_sids_keep_quote_and_cond_as_syntax() {
         let source = r#"
             (00000111
-              ((00000010 (00000001 atom)) (structural-kind atom) (00000001 selected))
+              ((00000010 (00000001 atom)) (1) (00000001 selected))
               (t t (00000001 missed)))
         "#;
         let mut session = Session::default();

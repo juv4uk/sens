@@ -39,7 +39,8 @@
 (def result-tagged?
   (lambda (result)
     (cond
-      ((atom? result) (quote ()))
+      ((atom? result) () (quote ()))
+      ((atom? result) (1) (quote ()))
       ((eq? (car result) (quote proved)) t)
       ((eq? (car result) (quote unknown)) t)
       ((eq? (car result) (quote partial)) t)
@@ -66,8 +67,10 @@
 (def result-proper-list?
   (lambda (value)
     (cond
-      ((atom? value)
-       (cond
+      ((atom? value) () (cond
+         ((eq? value (quote ())) t)
+         (t (quote ()))))
+      ((atom? value) (1) (cond
          ((eq? value (quote ())) t)
          (t (quote ()))))
       (t (result-proper-list? (cdr value))))))
@@ -80,7 +83,8 @@
 (def result-goal?
   (lambda (goal)
     (cond
-      ((atom? goal) (quote ()))
+      ((atom? goal) () (quote ()))
+      ((atom? goal) (1) (quote ()))
       ((not? (result-proper-list? goal)) (quote ()))
       ((not? (symbol? (car goal))) (quote ()))
       ((eq? (car goal) (quote not))

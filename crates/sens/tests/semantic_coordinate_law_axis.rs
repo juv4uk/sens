@@ -92,7 +92,7 @@ fn eq_relation_law_stays_separate_from_exact_q_binary_policy() {
         .expect("identity relation witness")
         .value
         .to_string();
-    assert_eq!(value, "(identity-relation same)");
+    assert_eq!(value, "(1)");
 
     let row = eval_program(
         r#"(semantic-coordinate-law-for-sid 00000011)"#,

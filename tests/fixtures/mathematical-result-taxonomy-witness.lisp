@@ -6,13 +6,15 @@
   (lambda (entry field)
     (let ((found (assoc field entry)))
       (cond
-        ((atom? found) (quote ()))
+        ((atom? found) () (quote ()))
+        ((atom? found) (1) (quote ()))
         (t (cdr found))))))
 
 (def mrt-find
   (lambda (identity entries)
     (cond
-      ((atom? entries) (quote ()))
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
       ((equal? (mrt-field (car entries) (quote identity)) identity)
        (car entries))
       (t (mrt-find identity (cdr entries))))))
@@ -25,7 +27,8 @@
   (lambda (identity field expected)
     (let ((entry (mrt-entry identity)))
       (cond
-        ((atom? entry) (list (quote missing-entry) identity))
+        ((atom? entry) () (list (quote missing-entry) identity))
+        ((atom? entry) (1) (list (quote missing-entry) identity))
         ((equal? (mrt-field entry field) expected) (quote ()))
         (t
          (list
@@ -38,8 +41,10 @@
 (def mrt-first-failure
   (lambda (checks)
     (cond
-      ((atom? checks) (quote ()))
-      ((atom? (car checks)) (mrt-first-failure (cdr checks)))
+      ((atom? checks) () (quote ()))
+      ((atom? checks) (1) (quote ()))
+      ((atom? (car checks)) () (mrt-first-failure (cdr checks)))
+      ((atom? (car checks)) (1) (mrt-first-failure (cdr checks)))
       (t (car checks)))))
 
 (def mathematical-result-taxonomy-witness
@@ -113,8 +118,10 @@
          (list (quote mathematical-result-taxonomy-witness)
                (list (quote status) (quote fail))
                (list (quote detail) (quote schema))))
-        ((atom? failure)
-         (list (quote mathematical-result-taxonomy-witness)
+        ((atom? failure) () (list (quote mathematical-result-taxonomy-witness)
+               (list (quote status) (quote pass))
+               (list (quote detail) (quote standard-math-classification))))
+        ((atom? failure) (1) (list (quote mathematical-result-taxonomy-witness)
                (list (quote status) (quote pass))
                (list (quote detail) (quote standard-math-classification))))
         (t

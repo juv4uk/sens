@@ -23,7 +23,7 @@
            (h (vnode-height (vec-tree v)))
            (balanced? (< h 15)))
       (cond
-        ((eq? balanced? 1) (identity-relation same)
+        ((eq? balanced? 1) (1)
          (quote (persistent-vector-balance-witness (status pass))))
         (t
          (list

@@ -7,7 +7,7 @@
 
 (cond
   ((equal? verdict (quote (island-math-evidence-ok)))
-   (structural-relation same)
+   (1)
    (quote island-math-evidence-ok))
   (t
    (car (quote ()))))

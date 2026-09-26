@@ -14,12 +14,12 @@
       ((equal?
          (native-first-plan expression)
          (list (quote evaluator-fallback) expression))
-       (structural-relation same)
+       (1)
        (quote pass))
       ((equal?
          (native-first-plan expression)
          (list (quote evaluator-fallback) expression))
-       (structural-relation distinct)
+       (0)
        (quote fail)))))
 
 (list

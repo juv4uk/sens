@@ -88,9 +88,9 @@
 (def genealogy-check
   (lambda (identity observed expected)
     (cond
-      ((equal? observed expected) (structural-relation same)
+      ((equal? observed expected) (1)
        (list identity (quote reproduced)))
-      ((equal? observed expected) (structural-relation distinct)
+      ((equal? observed expected) (0)
        (list identity (quote diverged))))))
 
 (def function-genealogy-witness
@@ -117,18 +117,18 @@
 (def genealogy-direct-targets
   (lambda (graph source)
     (cond
-      ((atom? graph) (structural-kind empty-list)
+      ((atom? graph) ()
        (quote ()))
-      ((atom? graph) (structural-kind pair)
+      ((atom? graph) (0)
        (let ((edge (car graph)))
          (cond
-           ((eq? (car edge) source) (identity-relation same)
+           ((eq? (car edge) source) (1)
             (cons
               (third edge)
               (genealogy-direct-targets (cdr graph) source)))
-           ((eq? (car edge) source) (identity-relation distinct)
+           ((eq? (car edge) source) (0)
             (genealogy-direct-targets (cdr graph) source)))))
-      ((atom? graph) (structural-kind atom)
+      ((atom? graph) (1)
        (quote ())))))
 
 (def function-genealogy-observation
@@ -169,14 +169,14 @@
 (def sample-equivalent-two-unary?
   (lambda (f g sample-a sample-b)
     (cond
-      ((observation-same? (f sample-a) (g sample-a)) (structural-relation same)
+      ((observation-same? (f sample-a) (g sample-a)) (1)
        (cond
-         ((observation-same? (f sample-b) (g sample-b)) (structural-relation same)
-          (quote (structural-relation same)))
-         ((observation-same? (f sample-b) (g sample-b)) (structural-relation distinct)
-          (quote (structural-relation distinct)))))
-      ((observation-same? (f sample-a) (g sample-a)) (structural-relation distinct)
-       (quote (structural-relation distinct))))))
+         ((observation-same? (f sample-b) (g sample-b)) (1)
+          (quote (1)))
+         ((observation-same? (f sample-b) (g sample-b)) (0)
+          (quote (0)))))
+      ((observation-same? (f sample-a) (g sample-a)) (0)
+       (quote (0))))))
 
 ; Distinct registry identities:
 ;   second  = 00101111
@@ -279,18 +279,18 @@
 (def genealogy-sources-for
   (lambda (graph target)
     (cond
-      ((atom? graph) (structural-kind empty-list)
+      ((atom? graph) ()
        (quote ()))
-      ((atom? graph) (structural-kind pair)
+      ((atom? graph) (0)
        (let ((edge (car graph)))
          (cond
-           ((eq? (third edge) target) (identity-relation same)
+           ((eq? (third edge) target) (1)
             (cons
               (car edge)
               (genealogy-sources-for (cdr graph) target)))
-           ((eq? (third edge) target) (identity-relation distinct)
+           ((eq? (third edge) target) (0)
             (genealogy-sources-for (cdr graph) target)))))
-      ((atom? graph) (structural-kind atom)
+      ((atom? graph) (1)
        (quote ())))))
 
 (def unification-genealogy-witness

@@ -15,10 +15,10 @@
   (lambda (actual expected)
     (cond
       ((equal? actual expected)
-       (structural-relation same)
+       (1)
        (quote pass))
       ((equal? actual expected)
-       (structural-relation distinct)
+       (0)
        (list (quote fail) actual expected)))))
 
 (def native-first-execution-witness

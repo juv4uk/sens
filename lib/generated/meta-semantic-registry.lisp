@@ -678,5 +678,5 @@
   (lambda (name)
     (let ((entry (assoc name my-semantic-surface-registry)))
       (cond
-        ((atom? entry) (structural-kind empty-list) (quote ()))
-        ((atom? entry) (structural-kind pair) (second entry))))))
+        ((atom? entry) () (quote ()))
+        ((atom? entry) (0) (second entry))))))

@@ -16,8 +16,8 @@
 ; visible to the Lisp process, but do not classify host semantics.
 (cond
   ((atom? changed-host-tests)
-   (structural-kind empty-list)
+   ()
    (quote (authority-ok)))
   ((atom? changed-host-tests)
-   (structural-kind pair)
+   (0)
    (quote (authority-ok))))

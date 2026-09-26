@@ -19,18 +19,18 @@
 (def cp-field-from
   (lambda (name fields)
     (cond
-      ((atom? fields) (structural-kind empty-list) (quote missing))
-      ((atom? fields) (structural-kind pair)
+      ((atom? fields) () (quote missing))
+      ((atom? fields) (0)
        (let ((field (car fields)))
          (cond
-           ((atom? field) (structural-kind pair)
+           ((atom? field) (0)
             (cond
-              ((eq? (car field) name) (identity-relation same) (cdr field))
-              ((eq? (car field) name) (identity-relation distinct)
+              ((eq? (car field) name) (1) (cdr field))
+              ((eq? (car field) name) (0)
                (cp-field-from name (cdr fields)))))
-           ((atom? field) (structural-kind atom)
+           ((atom? field) (1)
             (cp-field-from name (cdr fields)))
-           ((atom? field) (structural-kind empty-list)
+           ((atom? field) ()
             (cp-field-from name (cdr fields)))))))))
 
 (def cp-field
@@ -40,29 +40,29 @@
 (def cp-find-section
   (lambda (wanted sections)
     (cond
-      ((atom? sections) (structural-kind empty-list) (quote ()))
-      ((atom? sections) (structural-kind pair)
+      ((atom? sections) () (quote ()))
+      ((atom? sections) (0)
        (let ((section (car sections)))
          (cond
            ((eq? (cp-field section (quote identity)) wanted)
-            (identity-relation same)
+            (1)
             section)
            ((eq? (cp-field section (quote identity)) wanted)
-            (identity-relation distinct)
+            (0)
             (cp-find-section wanted (cdr sections)))))))))
 
 (def cp-check
   (lambda (section-name field-name expected)
     (let ((section (cp-find-section section-name cp-sections)))
       (cond
-        ((atom? section) (structural-kind empty-list)
+        ((atom? section) ()
          (list (quote missing-section) section-name))
-        ((atom? section) (structural-kind pair)
+        ((atom? section) (0)
          (let ((actual (cp-field section field-name)))
            (cond
-             ((equal? actual expected) (structural-relation same)
+             ((equal? actual expected) (1)
               (quote ()))
-             ((equal? actual expected) (structural-relation distinct)
+             ((equal? actual expected) (0)
               (list (quote mismatch)
                     section-name
                     field-name
@@ -72,22 +72,22 @@
 (def cp-first-failure
   (lambda (checks)
     (cond
-      ((atom? checks) (structural-kind empty-list) (quote ()))
-      ((atom? checks) (structural-kind pair)
+      ((atom? checks) () (quote ()))
+      ((atom? checks) (0)
        (let ((check (car checks)))
          (cond
-           ((atom? check) (structural-kind empty-list)
+           ((atom? check) ()
             (cp-first-failure (cdr checks)))
-           ((atom? check) (structural-kind pair)
+           ((atom? check) (0)
             check)
-           ((atom? check) (structural-kind atom)
+           ((atom? check) (1)
             (list (quote malformed-check) check))))))))
 
 (def cp-contract-verdict
   (lambda ()
     (cond
       ((eq? cp-schema (quote core-profile-contract/2))
-       (identity-relation same)
+       (1)
        (let ((failure
                (cp-first-failure
                  (list
@@ -176,12 +176,12 @@
                      (quote copy-current-core-four-times)
                      (quote forbidden))))))
          (cond
-           ((atom? failure) (structural-kind empty-list)
+           ((atom? failure) ()
             (list (quote core-profile-contract-ok)))
-           ((atom? failure) (structural-kind pair)
+           ((atom? failure) (0)
             (list (quote core-profile-contract-violation) failure)))))
       ((eq? cp-schema (quote core-profile-contract/2))
-       (identity-relation distinct)
+       (0)
        (list
          (quote core-profile-contract-violation)
          (list (quote schema) (quote core-profile-contract/2) cp-schema))))))

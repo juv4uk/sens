@@ -49,7 +49,8 @@
 (def find-section
   (lambda (name sections)
     (cond
-      ((atom? sections) (quote ()))
+      ((atom? sections) () (quote ()))
+      ((atom? sections) (1) (quote ()))
       ((eq? (car (car sections)) name) (car sections))
       (t (find-section name (cdr sections))))))
 
@@ -59,7 +60,8 @@
 (def find-machine-row
   (lambda (sid rows)
     (cond
-      ((atom? rows) (quote ()))
+      ((atom? rows) () (quote ()))
+      ((atom? rows) (1) (quote ()))
       ((equal? (car (car rows)) sid) (car rows))
       (t (find-machine-row sid (cdr rows))))))
 
@@ -67,7 +69,8 @@
   (lambda (sid)
     (let ((row (find-machine-row (sid-text sid) machine-rows)))
       (cond
-        ((atom? row) "()")
+        ((atom? row) () "()")
+        ((atom? row) (1) "()")
         (t (third row))))))
 
 ; Historical (McCarthy 1960 / Lisp 1.5) realization projection. Its rows
@@ -83,7 +86,8 @@
 (def find-historical-row
   (lambda (sid rows)
     (cond
-      ((atom? rows) (quote ()))
+      ((atom? rows) () (quote ()))
+      ((atom? rows) (1) (quote ()))
       ((equal? (sid-text (second (car rows))) sid) (car rows))
       (t (find-historical-row sid (cdr rows))))))
 
@@ -91,7 +95,8 @@
   (lambda (sid)
     (let ((row (find-historical-row (sid-text sid) historical-rows)))
       (cond
-        ((atom? row) "()")
+        ((atom? row) () "()")
+        ((atom? row) (1) "()")
         (t (str+ (write-to-string (fourth row)) " (" (write-to-string (fifth row)) ")"))))))
 
 ; A surface word is usually a symbol (write-to-string strips the
@@ -130,14 +135,16 @@
 (def find-surface
   (lambda (lang surfaces)
     (cond
-      ((atom? surfaces) (quote ()))
+      ((atom? surfaces) () (quote ()))
+      ((atom? surfaces) (1) (quote ()))
       ((eq? (car (car surfaces)) lang) (car surfaces))
       (t (find-surface lang (cdr surfaces))))))
 
 (def surface-word
   (lambda (surface-entry)
     (cond
-      ((atom? surface-entry) (quote ()))
+      ((atom? surface-entry) () (quote ()))
+      ((atom? surface-entry) (1) (quote ()))
       (t (car (cdr surface-entry))))))
 
 (def get-surface
@@ -177,13 +184,13 @@
   (lambda (rows)
     (cond
       ((equal? (length rows) 256)
-       (structural-relation same)
+       (1)
        (cond
          ((equal? (sid-text (car (car rows))) "00000000")
-          (structural-relation same)
+          (1)
           (cond
             ((equal? (sid-text (car (car (reverse rows)))) "11111111")
-             (structural-relation same)
+             (1)
              t)
             (t
              (second
@@ -215,7 +222,8 @@
 (def join-newline-onto
   (lambda (strings acc)
     (cond
-      ((atom? strings) acc)
+      ((atom? strings) () acc)
+      ((atom? strings) (1) acc)
       ((eq? acc "") (join-newline-onto (cdr strings) (car strings)))
       (t (join-newline-onto (cdr strings) (str+ acc "
 " (car strings)))))))
@@ -316,10 +324,10 @@
           (current-md (read-file md-output-path)))
       (cond
         ((equal? current-wsm wsm-output)
-         (structural-relation same)
+         (1)
          (cond
            ((equal? current-md md-output)
-            (structural-relation same)
+            (1)
             (print
               (str+
                 "function-table: "
@@ -338,10 +346,10 @@
 
 (cond
   ((atom? *argv*)
-   (structural-kind empty-list)
+   ()
    (write-projections))
   ((equal? (car *argv*) "--check")
-   (structural-relation same)
+   (1)
    (check-projections))
   (t
    (write-projections)))

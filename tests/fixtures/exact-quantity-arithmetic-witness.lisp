@@ -43,7 +43,7 @@
                   (dimension/1 kilogram 1)
                   (dimension/1 metre 2)
                   (dimension/1 second -2)))))
-          (quote (structural-relation same)))
+          (quote (1)))
         (list
           (quote speed-times-second-distance-shape)
           (equal?
@@ -52,7 +52,7 @@
               (quantity/1
                 299792458
                 (unit/1 (dimension/1 metre 1)))))
-          (quote (structural-relation same)))
+          (quote (1)))
         (list
           (quote recovered-speed-shape)
           (equal?
@@ -63,11 +63,11 @@
                 (unit/1
                   (dimension/1 metre 1)
                   (dimension/1 second -1)))))
-          (quote (structural-relation same)))
+          (quote (1)))
         (list
           (quote quotient-inverse)
           (equal? recovered speed)
-          (quote (structural-relation same)))
+          (quote (1)))
         (list
           (quote si-numeric-views-match-authoritative-records)
           (list
@@ -124,20 +124,20 @@
 (def exact-quantity-arithmetic-check
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list)
+      ((atom? rows) ()
        (quote (exact-quantity-arithmetic-witness (status pass))))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) (1)
        (list
          (quote exact-quantity-arithmetic-witness)
          (list (quote status) (quote fail))
          (list (quote case) (quote malformed-row-tail))
          (list (quote actual) rows)))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let ((row (car rows)))
          (cond
-           ((equal? (second row) (third row)) (structural-relation same)
+           ((equal? (second row) (third row)) (1)
             (exact-quantity-arithmetic-check (cdr rows)))
-           ((equal? (second row) (third row)) (structural-relation distinct)
+           ((equal? (second row) (third row)) (0)
             (list
               (quote exact-quantity-arithmetic-witness)
               (list (quote status) (quote fail))

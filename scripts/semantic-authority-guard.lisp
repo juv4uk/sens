@@ -14,13 +14,13 @@
 (def exact-text?
   (lambda (left right)
     (cond
-      ((equal? left right) (structural-relation same) t)
+      ((equal? left right) (1) t)
       (t t ()))))
 
 (def contains-any?
   (lambda (source needles)
     (cond
-      ((atom? needles) (structural-kind empty-list) ())
+      ((atom? needles) () ())
       ((string-contains? (car needles) source) t)
       (t (contains-any? source (cdr needles))))))
 
@@ -81,7 +81,7 @@
 (def scan
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (quote (semantic-authority-ok)))
+      ((atom? rows) () (quote (semantic-authority-ok)))
       (t
        (let* ((row (car rows))
               (path (second row)))

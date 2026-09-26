@@ -1,11 +1,11 @@
 ; #217 — canonical explicit-result dispatch witnesses.
 ; Each three-part clause is (query expected-datum expression).
 
-((expr . "(cond ((quote (structural-kind pair)) (structural-kind pair) (quote hit)))")
+((expr . "(cond ((quote (0)) (0) (quote hit)))")
  (expected . "hit")
  (active . t))
 
-((expr . "(cond ((quote (structural-kind atom)) (structural-kind pair) (quote miss)) ((quote (structural-kind atom)) (structural-kind atom) (quote hit)))")
+((expr . "(cond ((quote (1)) (0) (quote miss)) ((quote (1)) (1) (quote hit)))")
  (expected . "hit")
  (active . t))
 

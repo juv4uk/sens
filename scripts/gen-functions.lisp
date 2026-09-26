@@ -13,7 +13,8 @@
 (def emit
   (lambda (lst)
     (cond
-      ((atom? lst) (quote ()))
+      ((atom? lst) () (quote ()))
+      ((atom? lst) (1) (quote ()))
       (t (cons
            (emit-pair (car lst))
            (emit (cdr lst)))))))

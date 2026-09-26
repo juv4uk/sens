@@ -9,10 +9,10 @@
   (lambda (value)
     (cond
       ((atom? value)
-       (structural-kind atom)
+       (1)
        (cond
          ((equal? value (quote ()))
-          (structural-relation same)
+          (1)
           (quote yes))
          ((quote always)
           (quote always)
@@ -26,7 +26,7 @@
     (let ((found (assoc name record)))
       (cond
         ((equal? found (quote ()))
-         (structural-relation same)
+         (1)
          (quote ()))
         ((quote always)
          (quote always)
@@ -37,7 +37,7 @@
     (let ((found (assoc name record)))
       (cond
         ((equal? found (quote ()))
-         (structural-relation same)
+         (1)
          (quote no))
         ((quote always)
          (quote always)
@@ -51,7 +51,7 @@
         ((equal?
            (yo-field (quote capability) action)
            (quote shell))
-         (structural-relation same)
+         (1)
          (quote no))
         ((yo-has-field? (quote command) parameters)
          (quote yes)

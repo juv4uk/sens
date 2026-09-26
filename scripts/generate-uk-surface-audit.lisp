@@ -34,7 +34,8 @@
 (def join-newline-onto
   (lambda (strings acc)
     (cond
-      ((atom? strings) acc)
+      ((atom? strings) () acc)
+      ((atom? strings) (1) acc)
       ((eq? acc "") (join-newline-onto (cdr strings) (car strings)))
       (t (join-newline-onto (cdr strings) (str+ acc "\n" (car strings)))))))
 (def join-newline (lambda (strings) (join-newline-onto strings "")))
@@ -51,7 +52,8 @@
 (def find-section
   (lambda (name sections)
     (cond
-      ((atom? sections) (quote ()))
+      ((atom? sections) () (quote ()))
+      ((atom? sections) (1) (quote ()))
       ((and (not? (atom? (car sections))) (eq? (car (car sections)) name))
        (car sections))
       (t (find-section name (cdr sections))))))
@@ -59,13 +61,15 @@
 (def candidate-section (find-section (quote назви) (cdr profile-form)))
 (def candidate-rows
   (cond
-    ((atom? candidate-section) (quote ()))
+    ((atom? candidate-section) () (quote ()))
+    ((atom? candidate-section) (1) (quote ()))
     (t (cdr candidate-section))))
 
 (def find-candidate-row
   (lambda (sid rows)
     (cond
-      ((atom? rows) (quote ()))
+      ((atom? rows) () (quote ()))
+      ((atom? rows) (1) (quote ()))
       ((equal? (car (car rows)) sid) (car rows))
       (t (find-candidate-row sid (cdr rows))))))
 
@@ -85,18 +89,21 @@
     (cond
       ((eq? (surface-status uk) (quote compatibility-only)) (quote compatibility-only))
       ((missing-surface? uk) (quote needs-research))
-      ((atom? candidate) (quote needs-research))
+      ((atom? candidate) () (quote needs-research))
+      ((atom? candidate) (1) (quote needs-research))
       ((eq? (second candidate) (third candidate)) (quote full))
       (t (quote needs-research)))))
 
 (def candidate-full-word
   (lambda (candidate)
-    (cond ((atom? candidate) (quote —))
+    (cond ((atom? candidate) () (quote —))
+          ((atom? candidate) (1) (quote —))
           (t (third candidate)))))
 
 (def candidate-evidence-status
   (lambda (candidate)
-    (cond ((atom? candidate) (quote no-staging-evidence))
+    (cond ((atom? candidate) () (quote no-staging-evidence))
+          ((atom? candidate) (1) (quote no-staging-evidence))
           (t (fourth candidate)))))
 
 ; `candidate-compact-uk` belongs to #86/#89. #85 must expose the empty slot,
@@ -106,7 +113,8 @@
 (def ambiguity-status
   (lambda (candidate)
     (cond
-      ((atom? candidate) (quote needs-research))
+      ((atom? candidate) () (quote needs-research))
+      ((atom? candidate) (1) (quote needs-research))
       (t (quote not-yet-assessed)))))
 
 (def render-row
@@ -146,7 +154,8 @@
 (def count-class
   (lambda (wanted rows acc)
     (cond
-      ((atom? rows) acc)
+      ((atom? rows) () acc)
+      ((atom? rows) (1) acc)
       (t
        (let* ((sid (car (car rows)))
               (uk (third (car rows)))
@@ -159,10 +168,12 @@
 (def count-candidates
   (lambda (rows acc)
     (cond
-      ((atom? rows) acc)
+      ((atom? rows) () acc)
+      ((atom? rows) (1) acc)
       (t
        (count-candidates (cdr rows)
-         (cond ((atom? (find-candidate-row (car (car rows)) candidate-rows)) acc)
+         (cond ((atom? (find-candidate-row (car (car rows)) candidate-rows)) () acc)
+               ((atom? (find-candidate-row (car (car rows)) candidate-rows)) (1) acc)
                (t (+ acc 1))))))))
 
 (def total (length ft-rows))

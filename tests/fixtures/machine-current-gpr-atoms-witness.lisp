@@ -145,18 +145,18 @@
 (def machine-current-gpr-check-rows
   (lambda (rows)
     (cond
-      ((atom? rows) (structural-kind empty-list) (quote pass))
-      ((atom? rows) (structural-kind atom)
+      ((atom? rows) () (quote pass))
+      ((atom? rows) (1)
        (list (quote fail) (quote malformed-row-tail) rows))
-      ((atom? rows) (structural-kind pair)
+      ((atom? rows) (0)
        (let* ((row (car rows))
               (name (car row))
               (actual (second row))
               (expected (third row)))
          (cond
-           ((equal? actual expected) (structural-relation same)
+           ((equal? actual expected) (1)
             (machine-current-gpr-check-rows (cdr rows)))
-           ((equal? actual expected) (structural-relation distinct)
+           ((equal? actual expected) (0)
             (list (quote fail) name expected actual))))))))
 
 (def machine-native
@@ -339,18 +339,18 @@
             (machine-current-gpr-check-rows
               (machine-current-gpr-atom-rows))))
       (cond
-        ((eq? form-state (quote pass)) (identity-relation same)
+        ((eq? form-state (quote pass)) (1)
          (let ((native-state
                  (machine-current-gpr-check-rows
                    (machine-current-gpr-native-rows))))
            (cond
-             ((eq? native-state (quote pass)) (identity-relation same)
+             ((eq? native-state (quote pass)) (1)
               (quote (machine-current-gpr-atoms-witness (status pass))))
-             ((eq? native-state (quote pass)) (identity-relation distinct)
+             ((eq? native-state (quote pass)) (0)
               (list (quote machine-current-gpr-atoms-witness)
                     (quote (status fail))
                     (list (quote native) native-state))))))
-        ((eq? form-state (quote pass)) (identity-relation distinct)
+        ((eq? form-state (quote pass)) (0)
          (list (quote machine-current-gpr-atoms-witness)
                (quote (status fail))
                (list (quote forms) form-state)))))))

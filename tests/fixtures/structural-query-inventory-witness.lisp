@@ -12,13 +12,15 @@
   (lambda (key row)
     (let ((entry (assoc key row)))
       (cond
-        ((atom? entry) (quote ()))
+        ((atom? entry) () (quote ()))
+        ((atom? entry) (1) (quote ()))
         (t (cdr entry))))))
 
 (def sqi-find-tag
   (lambda (tag entries)
     (cond
-      ((atom? entries) (quote ()))
+      ((atom? entries) () (quote ()))
+      ((atom? entries) (1) (quote ()))
       ((and (not? (atom? (car entries)))
             (eq? (car (car entries)) tag))
        (car entries))
@@ -29,7 +31,8 @@
     (let ((entry (sqi-find-tag (quote public-predicates)
                                (cdr public-surface-inventory-document))))
       (cond
-        ((atom? entry) (quote ()))
+        ((atom? entry) () (quote ()))
+        ((atom? entry) (1) (quote ()))
         (t (car (cdr entry)))))))
 
 (def sqi-rows
@@ -39,7 +42,8 @@
 (def sqi-count-surface
   (lambda (surface rows)
     (cond
-      ((atom? rows) 0)
+      ((atom? rows) () 0)
+      ((atom? rows) (1) 0)
       ((eq? (sqi-field (quote surface) (car rows)) surface)
        (+ 1 (sqi-count-surface surface (cdr rows))))
       (t
@@ -62,7 +66,8 @@
 (def sqi-all-public-covered-once?
   (lambda (predicates rows)
     (cond
-      ((atom? predicates) t)
+      ((atom? predicates) () t)
+      ((atom? predicates) (1) t)
       ((eq? (sqi-count-surface (car predicates) rows) 1)
        (sqi-all-public-covered-once? (cdr predicates) rows))
       (t (quote ())))))
@@ -70,7 +75,8 @@
 (def sqi-no-extra-surfaces?
   (lambda (rows predicates)
     (cond
-      ((atom? rows) t)
+      ((atom? rows) () t)
+      ((atom? rows) (1) t)
       ((and (sqi-required-row? (car rows))
             (member? (sqi-field (quote surface) (car rows)) predicates))
        (sqi-no-extra-surfaces? (cdr rows) predicates))
@@ -79,7 +85,8 @@
 (def sqi-math-delegation-valid?
   (lambda (rows)
     (cond
-      ((atom? rows) t)
+      ((atom? rows) () t)
+      ((atom? rows) (1) t)
       (t
        (let ((row (car rows)))
          (cond

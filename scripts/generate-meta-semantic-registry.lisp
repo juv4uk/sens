@@ -21,7 +21,8 @@
 (def surface-included?
   (lambda (surface)
     (cond
-      ((atom? surface) ())
+      ((atom? surface) () ())
+      ((atom? surface) (1) ())
       ((equal? (surface-word surface) (quote ())) ())
       ((equal? (surface-word surface) "'") ())
       (t t))))
@@ -29,7 +30,8 @@
 (def collect-surfaces
   (lambda (sid surfaces rows)
     (cond
-      ((atom? surfaces) rows)
+      ((atom? surfaces) () rows)
+      ((atom? surfaces) (1) rows)
       (t
        (let ((surface (car surfaces)))
          (cond
@@ -49,7 +51,8 @@
 (def collect-entries
   (lambda (entries rows)
     (cond
-      ((atom? entries) rows)
+      ((atom? entries) () rows)
+      ((atom? entries) (1) rows)
       (t
        (let ((entry (car entries)))
          (collect-entries
@@ -98,8 +101,8 @@
       "  (lambda (name)\n"
       "    (let ((entry (assoc name my-semantic-surface-registry)))\n"
       "      (cond\n"
-      "        ((atom? entry) (structural-kind empty-list) (quote ()))\n"
-      "        ((atom? entry) (structural-kind pair) (second entry))))))\n")))
+      "        ((atom? entry) () (quote ()))\n"
+      "        ((atom? entry) (0) (second entry))))))\n")))
 
 (def registry-form
   (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
@@ -116,32 +119,32 @@
 
 (cond
   ((atom? *argv*)
-   (structural-kind empty-list)
+   ()
    (second
      (list
        (write-file output-path generated)
        (print "meta semantic registry projection written"))))
   ((atom? *argv*)
-   (structural-kind atom)
+   (1)
    (second
      (list
        (write-file output-path generated)
        (print "meta semantic registry projection written"))))
   ((equal? (car *argv*) "--check")
-   (structural-relation same)
+   (1)
    (let ((current (read-file output-path)))
      (cond
        ((equal? current generated)
-        (structural-relation same)
+        (1)
         (print "meta semantic registry projection is current"))
        ((equal? current generated)
-        (structural-relation distinct)
+        (0)
         (second
           (list
             (print "meta semantic registry projection is stale")
             (car (quote ()))))))))
   ((equal? (car *argv*) "--check")
-   (structural-relation distinct)
+   (0)
    (second
      (list
        (write-file output-path generated)

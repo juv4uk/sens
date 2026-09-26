@@ -154,11 +154,11 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
 
 fn prim_00000010(
     args: &[Value],
-    _env: &Environment,
+    env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_args("00000010", args, 1, span)?;
-    Ok(special_forms::atom_value(&args[0]))
+    Ok(special_forms::atom_value(&args[0], env))
 }
 
 fn prim_00000011(

@@ -21,9 +21,12 @@
 (00001011 reason-index?
   (00001000 (value)
     (00000111
-      ((00000010 value) (00000001 ()))
-      ((00000010 (00000101 value))
-       (00000111
+      ((00000010 value) () (00000001 ()))
+      ((00000010 value) (1) (00000001 ()))
+      ((00000010 (00000101 value)) () (00000111
+         ((00000011 (00000101 value) *reason-index-schema*) t)
+         (t (00000001 ()))))
+      ((00000010 (00000101 value)) (1) (00000111
          ((00000011 (00000101 value) *reason-index-schema*) t)
          (t (00000001 ()))))
       (t (00000001 ())))))
@@ -38,10 +41,13 @@
 (00001011 reason-term-predicate
   (00001000 (term)
     (00000111
-      ((00000010 term) (00000001 ()))
+      ((00000010 term) () (00000001 ()))
+      ((00000010 term) (1) (00000001 ()))
       ((var? term) (00000001 ()))
-      ((00000010 (00000101 term))
-       (00000111
+      ((00000010 (00000101 term)) () (00000111
+         ((symbol? (00000101 term)) (00000101 term))
+         (t (00000001 ()))))
+      ((00000010 (00000101 term)) (1) (00000111
          ((symbol? (00000101 term)) (00000101 term))
          (t (00000001 ()))))
       (t (00000001 ())))))
@@ -49,7 +55,8 @@
 (00001011 reason-rule-predicate
   (00001000 (rule)
     (00000111
-      ((00000010 rule) (00000001 ()))
+      ((00000010 rule) () (00000001 ()))
+      ((00000010 rule) (1) (00000001 ()))
       (t (reason-term-predicate (00000101 rule))))))
 
 ; Buckets are accumulated with each bucket's rules reversed. Predicate count
@@ -58,7 +65,8 @@
 (00001011 reason-index-add-reversed
   (00001000 (predicate rule buckets)
     (00000111
-      ((00000010 buckets) (list (list predicate rule)))
+      ((00000010 buckets) () (list (list predicate rule)))
+      ((00000010 buckets) (1) (list (list predicate rule)))
       ((00000011 predicate (00000101 (00000101 buckets)))
        (00000100
          (00000100 predicate (00000100 rule (00000110 (00000101 buckets))))
@@ -71,7 +79,8 @@
 (00001011 reason-index-normalize-buckets
   (00001000 (buckets)
     (00000111
-      ((00000010 buckets) (00000001 ()))
+      ((00000010 buckets) () (00000001 ()))
+      ((00000010 buckets) (1) (00000001 ()))
       (t
        (00000100
          (00000100 (00000101 (00000101 buckets)) (reverse (00000110 (00000101 buckets))))
@@ -80,8 +89,12 @@
 (00001011 reason-index-build-scan
   (00001000 (remaining original buckets predicate-count)
     (00000111
-      ((00000010 remaining)
-       (list
+      ((00000010 remaining) () (list
+         *reason-index-schema*
+         (00000001 indexed)
+         original
+         (reason-index-normalize-buckets buckets)))
+      ((00000010 remaining) (1) (list
          *reason-index-schema*
          (00000001 indexed)
          original
@@ -95,8 +108,17 @@
            (t
             (let ((entry (assoc predicate buckets)))
               (00000111
-                ((00000010 entry)
-                 (00000111
+                ((00000010 entry) () (00000111
+                   ((< predicate-count *reason-index-max-predicates*) 1
+                    (reason-index-build-scan
+                      (00000110 remaining)
+                      original
+                      (reason-index-add-reversed
+                        predicate (00000101 remaining) buckets)
+                      (00001100 predicate-count 1)))
+                   ((< predicate-count *reason-index-max-predicates*) 0
+                    (reason-index-linear original))))
+                ((00000010 entry) (1) (00000111
                    ((< predicate-count *reason-index-max-predicates*) 1
                     (reason-index-build-scan
                       (00000110 remaining)
@@ -140,7 +162,8 @@
              (t
               (let ((entry (assoc predicate (reason-index-buckets index))))
                 (00000111
-                  ((00000010 entry) (00000001 ()))
+                  ((00000010 entry) () (00000001 ()))
+                  ((00000010 entry) (1) (00000001 ()))
                   (t (00000110 entry))))))))))))
 
 ; Public `reason` accepts either the historical rule list or an already-built
@@ -164,7 +187,8 @@
 (00001011 prove-goal-accumulate
   (00001000 (results acc)
     (00000111
-      ((00000010 results) acc)
+      ((00000010 results) () acc)
+      ((00000010 results) (1) acc)
       (t (prove-goal-accumulate
            (00000110 results)
            (00000100 (00000101 results) acc))))))
@@ -185,7 +209,8 @@
 (00001011 prove-goal-scan
   (00001000 (goal rules subst all-rules depth acc)
     (00000111
-      ((00000010 rules) (reverse acc))
+      ((00000010 rules) () (reverse acc))
+      ((00000010 rules) (1) (reverse acc))
       (t
        (let ((rule-results
                (prove-rule goal (00000101 rules) subst all-rules depth)))
@@ -201,7 +226,8 @@
 (00001011 rename-vars
   (00001000 (term depth)
     (00000111
-      ((00000010 term) term)
+      ((00000010 term) () term)
+      ((00000010 term) (1) term)
       ((var? term) (list (00000001 var) (00000100 (second term) depth)))
       (t (00000100 (rename-vars (00000101 term) depth)
                    (rename-vars (00000110 term) depth))))))
@@ -209,7 +235,8 @@
 (00001011 map-proofs
   (00001000 (f lst)
     (00000111
-      ((00000010 lst) (00000001 ()))
+      ((00000010 lst) () (00000001 ()))
+      ((00000010 lst) (1) (00000001 ()))
       (t (00000100 (f (00000101 lst)) (map-proofs f (00000110 lst)))))))
 
 ; Try one rule, then wrap every successful body result in its proof node.
@@ -268,7 +295,8 @@
 (00001011 map-goal-results
   (00001000 (results proofs)
     (00000111
-      ((00000010 results) (00000001 ()))
+      ((00000010 results) () (00000001 ()))
+      ((00000010 results) (1) (00000001 ()))
       (t
        (00000100
          (list
@@ -302,7 +330,8 @@
 (00001011 explain-proof-list
   (00001000 (nodes level)
     (00000111
-      ((00000010 nodes) (00000001 ()))
+      ((00000010 nodes) () (00000001 ()))
+      ((00000010 nodes) (1) (00000001 ()))
       (t
        (let* ((_1 (print-indent level))
               (_2 (print (00000001 |-)))
@@ -323,8 +352,11 @@
   (00001000 (goal rules)
     (let ((results (reason goal rules)))
       (00000111
-        ((00000010 results)
-         (let* ((_1 (print (00000001 Cannot)))
+        ((00000010 results) () (let* ((_1 (print (00000001 Cannot)))
+                (_2 (print (00000001 prove:)))
+                (_3 (print goal)))
+           (00000001 ())))
+        ((00000010 results) (1) (let* ((_1 (print (00000001 Cannot)))
                 (_2 (print (00000001 prove:)))
                 (_3 (print goal)))
            (00000001 ())))
@@ -333,7 +365,8 @@
 (00001011 add-usage
   (00001000 (entry alist)
     (00000111
-      ((00000010 alist) (list entry))
+      ((00000010 alist) () (list entry))
+      ((00000010 alist) (1) (list entry))
       ((equal? (00000101 (00000101 alist)) (00000101 entry))
        (00000100
          (00000100
@@ -345,7 +378,8 @@
 (00001011 merge-usage
   (00001000 (a b)
     (00000111
-      ((00000010 a) b)
+      ((00000010 a) () b)
+      ((00000010 a) (1) b)
       (t (merge-usage (00000110 a) (add-usage (00000101 a) b))))))
 
 (00001011 count-usage
@@ -360,7 +394,8 @@
 (00001011 count-usage-list
   (00001000 (nodes)
     (00000111
-      ((00000010 nodes) (00000001 ()))
+      ((00000010 nodes) () (00000001 ()))
+      ((00000010 nodes) (1) (00000001 ()))
       (t
        (merge-usage
          (count-usage (00000101 nodes))
@@ -369,7 +404,8 @@
 (00001011 source-of
   (00001000 (node)
     (00000111
-      ((00000010 (cadddr node)) (00000001 fact))
+      ((00000010 (cadddr node)) () (00000001 fact))
+      ((00000010 (cadddr node)) (1) (00000001 fact))
       (t (00000001 rule)))))
 
 (00001011 provenance
@@ -393,7 +429,8 @@
 (00001011 provenance-list
   (00001000 (nodes)
     (00000111
-      ((00000010 nodes) (00000001 ()))
+      ((00000010 nodes) () (00000001 ()))
+      ((00000010 nodes) (1) (00000001 ()))
       (t
        (00000100
          (provenance (00000101 nodes))

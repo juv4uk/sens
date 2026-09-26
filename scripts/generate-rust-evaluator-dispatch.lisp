@@ -23,10 +23,10 @@
   (lambda (name)
     (cond
       ((equal? name (quote lambda-form))
-       (structural-relation same)
+       (1)
        "NecessaryFormMechanism::Lambda")
       ((equal? name (quote define-form))
-       (structural-relation same)
+       (1)
        "NecessaryFormMechanism::Define")
       ((quote no-known-mechanism)
        no-known-mechanism
@@ -37,10 +37,10 @@
     (let ((mechanism (rust-mechanism (second row))))
       (cond
         ((atom? mechanism)
-         (structural-kind empty-list)
+         ()
          (car (quote ())))
         ((atom? mechanism)
-         (structural-kind atom)
+         (1)
          (str+
            "    NecessaryFormDispatchRow { semantic_id: 0b"
            (write-to-string (car row))
@@ -52,10 +52,10 @@
   (lambda (remaining)
     (cond
       ((atom? remaining)
-       (structural-kind empty-list)
+       ()
        "")
       ((atom? remaining)
-       (structural-kind pair)
+       (0)
        (str+ (render-row (car remaining))
              (render-rows (cdr remaining)))))))
 
@@ -81,20 +81,20 @@
 
 (cond
   ((atom? *argv*)
-   (structural-kind empty-list)
+   ()
    (second
      (list
        (write-file output-path generated)
        (print "Rust evaluator dispatch projection written"))))
   ((equal? (car *argv*) "--check")
-   (structural-relation same)
+   (1)
    (let ((current (read-file output-path)))
      (cond
        ((equal? current generated)
-        (structural-relation same)
+        (1)
         (print "Rust evaluator dispatch projection is current"))
        ((equal? current generated)
-        (structural-relation distinct)
+        (0)
         (second
           (list
             (print "Rust evaluator dispatch projection is stale")

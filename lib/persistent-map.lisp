@@ -64,7 +64,8 @@
 (def node-right fifth)
 
 (def height-of
-  (lambda (n) (cond ((atom? n) 0) (t (node-height n)))))
+  (lambda (n) (cond ((atom? n) () 0)
+                    ((atom? n) (1) 0) (t (node-height n)))))
 
 (def max2
   (lambda (a b)
@@ -108,7 +109,8 @@
 (def balance
   (lambda (n)
     (cond
-      ((atom? n) n)
+      ((atom? n) () n)
+      ((atom? n) (1) n)
       ((> (balance-factor n) 1) 1
        (cond
          ((< (balance-factor (node-left n)) 0) 1
@@ -132,7 +134,8 @@
 (def map-insert
   (lambda (key value tree)
     (cond
-      ((atom? tree) (make-balanced-node key value (quote ()) (quote ())))
+      ((atom? tree) () (make-balanced-node key value (quote ()) (quote ())))
+      ((atom? tree) (1) (make-balanced-node key value (quote ()) (quote ())))
       ((eq? key (node-key tree))
        (make-balanced-node key value (node-left tree) (node-right tree)))
       ((string<? key (node-key tree))
@@ -156,7 +159,8 @@
 (def map-get
   (lambda (key tree)
     (cond
-      ((atom? tree) (quote ()))
+      ((atom? tree) () (quote ()))
+      ((atom? tree) (1) (quote ()))
       ((eq? key (node-key tree)) (list (node-value tree)))
       ((string<? key (node-key tree)) (map-get key (node-left tree)))
       (t (map-get key (node-right tree))))))
@@ -171,7 +175,8 @@
 (def map->list
   (lambda (tree)
     (cond
-      ((atom? tree) (quote ()))
+      ((atom? tree) () (quote ()))
+      ((atom? tree) (1) (quote ()))
       (t (append (map->list (node-left tree))
                  (cons (cons (node-key tree) (node-value tree))
                        (map->list (node-right tree))))))))

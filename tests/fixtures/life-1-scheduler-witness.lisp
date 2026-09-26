@@ -58,12 +58,12 @@
                     different-bridge-contract
                     observation-42))))))
       (cond
-        ((atom? selection) (structural-kind empty-list)
+        ((atom? selection) ()
          (list
            (quote life-1-scheduler-witness)
            (list (quote status) (quote fail))
            (list (quote detail) (quote missing-selection))))
-        ((atom? selection) (structural-kind pair)
+        ((atom? selection) (0)
          (let* ((ready (car (cdr selection)))
                 (remaining (car (cdr (cdr (cdr selection)))))
                 (dedup-ok (equal? remaining (list second)))
@@ -83,10 +83,10 @@
                 (list ready dedup-ok quiescence-ok adversarial-ok)
                 (quote
                   (ready
-                    (structural-relation same)
-                    (structural-relation same)
-                    (structural-relation same))))
-              (structural-relation same)
+                    (1)
+                    (1)
+                    (1))))
+              (1)
               (list
                 (quote life-1-scheduler-witness)
                 (list (quote status) (quote pass))
@@ -94,14 +94,14 @@
                       (quote deduplicated-activation-and-quiescence))))
              ((equal? (list wrong-provenance wrong-bridge)
                       (quote (absent absent)))
-              (structural-relation same)
+              (1)
               (list
                 (quote life-1-scheduler-witness)
                 (list (quote status) (quote fail))
                 (list (quote detail) (quote scheduler-invariant-mismatch))))
              ((equal? (list wrong-provenance wrong-bridge)
                       (quote (absent absent)))
-              (structural-relation distinct)
+              (0)
               (list
                 (quote life-1-scheduler-witness)
                 (list (quote status) (quote fail))

@@ -77,10 +77,10 @@ fn historical_core1_eq_is_completely_unchanged() {
         .unwrap()
         .value
         .to_string();
-    assert_eq!(result, "(identity-relation same)");
+    assert_eq!(result, "(1)");
     let result = eval_program("(eq? (quote a) (quote b))", &mut session)
         .unwrap()
         .value
         .to_string();
-    assert_eq!(result, "(identity-relation distinct)");
+    assert_eq!(result, "(0)");
 }

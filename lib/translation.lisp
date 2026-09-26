@@ -74,7 +74,8 @@
 (def translation-envelope-valid?
   (lambda (proposal)
     (cond
-      ((atom? proposal) (quote ()))
+      ((atom? proposal) () (quote ()))
+      ((atom? proposal) (1) (quote ()))
       ((eq? (knowledge-proper-list? proposal) (quote ())) (quote ()))
       ((eq? (= (length proposal) 5) (quote ())) (quote ()))
       ((eq? (symbol? (car proposal)) (quote ())) (quote ()))
@@ -93,7 +94,8 @@
 (def translation-batch-valid?
   (lambda (payload)
     (cond
-      ((atom? payload) (quote ()))
+      ((atom? payload) () (quote ()))
+      ((atom? payload) (1) (quote ()))
       ((eq? (knowledge-proper-list? payload) (quote ())) (quote ()))
       (t (knowledge-clauses-valid? payload)))))
 
@@ -108,10 +110,12 @@
 (def translation-alternatives-valid?
   (lambda (kind alternatives)
     (cond
-      ((atom? alternatives) (quote ()))
+      ((atom? alternatives) () (quote ()))
+      ((atom? alternatives) (1) (quote ()))
       ((translation-candidate-payload-valid? kind (car alternatives))
        (cond
-         ((atom? (cdr alternatives)) t)
+         ((atom? (cdr alternatives)) () t)
+         ((atom? (cdr alternatives)) (1) t)
          (t (translation-alternatives-valid? kind (cdr alternatives)))))
       (t (quote ())))))
 
@@ -120,9 +124,11 @@
 (def translation-ambiguity-valid?
   (lambda (kind payload)
     (cond
-      ((atom? payload) (quote ()))
+      ((atom? payload) () (quote ()))
+      ((atom? payload) (1) (quote ()))
       ((eq? (knowledge-proper-list? payload) (quote ())) (quote ()))
-      ((atom? (cdr payload)) (quote ()))
+      ((atom? (cdr payload)) () (quote ()))
+      ((atom? (cdr payload)) (1) (quote ()))
       (t (translation-alternatives-valid? kind payload)))))
 
 (def make-translation-review
@@ -153,7 +159,8 @@
 (def translation-review-valid?
   (lambda (review)
     (cond
-      ((atom? review) (quote ()))
+      ((atom? review) () (quote ()))
+      ((atom? review) (1) (quote ()))
       ((eq? (knowledge-proper-list? review) (quote ())) (quote ()))
       ((eq? (= (length review) 5) (quote ())) (quote ()))
       ((eq? (symbol? (car review)) (quote ())) (quote ()))
@@ -169,8 +176,9 @@
 (def translation-review-advice-decision
   (lambda (proposal decision)
     (cond
-      ((atom? decision)
-       (make-translation-review
+      ((atom? decision) () (make-translation-review
+         (quote rejected) (quote malformed-advice-decision) proposal decision))
+      ((atom? decision) (1) (make-translation-review
          (quote rejected) (quote malformed-advice-decision) proposal decision))
       ((eq? (symbol? (car decision)) (quote ()))
        (make-translation-review

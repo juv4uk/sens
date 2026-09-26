@@ -13,7 +13,7 @@
   ((= bare-sid-sum surface-sum) 1
    (cond
      ((equal? (write-to-string 00000000) "00000000")
-      (structural-relation same)
+      (1)
       (quote (bare-sid-literal-witness (status pass))))
      (t t
       (quote (bare-sid-literal-witness

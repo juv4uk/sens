@@ -42,13 +42,13 @@
   (lambda ()
     (cond
       ((equal? (native-first-parity-all-pass? native-first-parity-verdicts) t)
-       (structural-relation same)
+       (1)
        (list
          (quote native-first-parity-witness)
          (quote (status pass))
          (list (quote cases) (length native-first-parity-corpus))))
       ((equal? (native-first-parity-all-pass? native-first-parity-verdicts) t)
-       (structural-relation distinct)
+       (0)
        (list
          (quote native-first-parity-witness)
          (quote (status fail))

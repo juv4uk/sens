@@ -38,10 +38,10 @@
     (let ((name (second entry)))
       (cond
         ((equal? name (quote ()))
-         (structural-relation same)
+         (1)
          "")
         ((equal? name (quote ()))
-         (structural-relation distinct)
+         (0)
          (str+
            "SemanticSurface { namespace: "
            (rust-string (car entry))
@@ -53,10 +53,10 @@
   (lambda (surfaces)
     (cond
       ((atom? surfaces)
-       (structural-kind empty-list)
+       ()
        "")
       ((atom? surfaces)
-       (structural-kind pair)
+       (0)
        (str+
          (render-surface (car surfaces))
          (render-surfaces (cdr surfaces)))))))
@@ -74,10 +74,10 @@
   (lambda (remaining)
     (cond
       ((atom? remaining)
-       (structural-kind empty-list)
+       ()
        "")
       ((atom? remaining)
-       (structural-kind pair)
+       (0)
        (str+
          (render-row (car remaining))
          (render-rows (cdr remaining)))))))
@@ -110,20 +110,20 @@
 
 (cond
   ((atom? *argv*)
-   (structural-kind empty-list)
+   ()
    (second
      (list
        (write-file output-path generated)
        (print "Rust semantic registry projection written"))))
   ((equal? (car *argv*) "--check")
-   (structural-relation same)
+   (1)
    (let ((current (read-file output-path)))
      (cond
        ((equal? current generated)
-        (structural-relation same)
+        (1)
         (print "Rust semantic registry projection is current"))
        ((equal? current generated)
-        (structural-relation distinct)
+        (0)
         (second
           (list
             (print "Rust semantic registry projection is stale")

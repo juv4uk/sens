@@ -21,7 +21,7 @@
                ((ancestor bob)
                 (ancestor dave)
                 (ancestor carol))))))
-       (structural-relation same)
+       (1)
        (quote (prolog-datalog-bridge-witness (status pass))))
       ((equal?
          (prolog-substitutions-to-datalog-facts
@@ -30,7 +30,7 @@
                (variable ancestor)
                (values bob))))
          (quote (projection-failure missing-source-ref)))
-       (structural-relation same)
+       (1)
        (quote (prolog-datalog-bridge-witness (status pass)))))))
 
 (prolog-datalog-bridge-witness)
