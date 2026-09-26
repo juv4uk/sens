@@ -3,78 +3,78 @@
 ; This file never decides what a SID means. It only selects among executor
 ; routes already admitted by transitional #1046 mechanism metadata.
 
-(def mechanism-selector-registry
-  (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
+(00001001 mechanism-selector-registry
+  (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
 
-(def mechanism-selector-metadata
-  (car (read-all (read-file "lib/function-table-mechanisms.lisp"))))
+(00001001 mechanism-selector-metadata
+  (00000101 (01001011 (10100110 "lib/function-table-mechanisms.lisp"))))
 
-(def mechanism-selector-registry-rows
+(00001001 mechanism-selector-registry-rows
   mechanism-selector-registry)
 
-(def mechanism-selector-find-section
-  (lambda (name sections)
-    (cond
-      ((atom? sections) () (quote ()))
-      ((atom? sections) (0)
-       (cond
-         ((eq? (car (car sections)) name) (1)
-          (car sections))
-         ((eq? (car (car sections)) name) (0)
-          (mechanism-selector-find-section name (cdr sections))))))))
+(00001001 mechanism-selector-find-section
+  (00001000 (name sections)
+    (00000111
+      ((00000010 sections) () (00000001 ()))
+      ((00000010 sections) (0)
+       (00000111
+         ((00000011 (00000101 (00000101 sections)) name) (1)
+          (00000101 sections))
+         ((00000011 (00000101 (00000101 sections)) name) (0)
+          (mechanism-selector-find-section name (00000110 sections))))))))
 
-(def mechanism-selector-routes
-  (cdr (mechanism-selector-find-section
-         (quote rows)
+(00001001 mechanism-selector-routes
+  (00000110 (mechanism-selector-find-section
+         (00000001 rows)
          mechanism-selector-metadata)))
 
-(def mechanism-selector-registry-has-sid?
-  (lambda (sid rows)
-    (cond
-      ((atom? rows) () (quote no))
-      ((atom? rows) (0)
-       (cond
-         ((eq? sid (car (car rows))) (1) (quote yes))
-         ((eq? sid (car (car rows))) (0)
-          (mechanism-selector-registry-has-sid? sid (cdr rows))))))))
+(00001001 mechanism-selector-registry-has-sid?
+  (00001000 (sid rows)
+    (00000111
+      ((00000010 rows) () (00000001 no))
+      ((00000010 rows) (0)
+       (00000111
+         ((00000011 sid (00000101 (00000101 rows))) (1) (00000001 yes))
+         ((00000011 sid (00000101 (00000101 rows))) (0)
+          (mechanism-selector-registry-has-sid? sid (00000110 rows))))))))
 
-(def mechanism-selector-find-route
-  (lambda (sid executor rows)
-    (cond
-      ((atom? rows) () (quote ()))
-      ((atom? rows) (0)
-       (let ((row (car rows)))
-         (cond
-           ((eq? sid (car row)) (1)
-            (cond
-              ((eq? executor (second row)) (1) row)
-              ((eq? executor (second row)) (0)
-               (mechanism-selector-find-route sid executor (cdr rows)))))
-           ((eq? sid (car row)) (0)
-            (mechanism-selector-find-route sid executor (cdr rows)))))))))
+(00001001 mechanism-selector-find-route
+  (00001000 (sid executor rows)
+    (00000111
+      ((00000010 rows) () (00000001 ()))
+      ((00000010 rows) (0)
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00000011 sid (00000101 row)) (1)
+            (00000111
+              ((00000011 executor (00101111 row)) (1) row)
+              ((00000011 executor (00101111 row)) (0)
+               (mechanism-selector-find-route sid executor (00000110 rows)))))
+           ((00000011 sid (00000101 row)) (0)
+            (mechanism-selector-find-route sid executor (00000110 rows)))))))))
 
-(def mechanism-select
-  (lambda (sid executor)
-    (cond
-      ((eq?
+(00001001 mechanism-select
+  (00001000 (sid executor)
+    (00000111
+      ((00000011
          (mechanism-selector-registry-has-sid?
            sid mechanism-selector-registry-rows)
-         (quote no))
+         (00000001 no))
        (1)
-       (list
-         (quote mechanism-selection-failure)
-         (quote sid-not-in-function-table)
+       (00100111
+         (00000001 mechanism-selection-failure)
+         (00000001 sid-not-in-function-table)
          sid))
       (t
-       (let ((route
+       (10011100 ((route
                (mechanism-selector-find-route
                  sid executor mechanism-selector-routes)))
-         (cond
-           ((atom? route) ()
-            (list (quote mechanism-unavailable) sid executor))
-           ((atom? route) (0)
-            (list
-              (quote mechanism-selected)
+         (00000111
+           ((00000010 route) ()
+            (00100111 (00000001 mechanism-unavailable) sid executor))
+           ((00000010 route) (0)
+            (00100111
+              (00000001 mechanism-selected)
               sid
               executor
-              (third route)))))))))
+              (00110000 route)))))))))
