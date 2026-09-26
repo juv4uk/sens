@@ -1,0 +1,17 @@
+# path	line	surface	exact_sens	class
+lib/core.lisp	13	binary	10101001	ordinary-data
+lib/core.lisp	55	and	10011010	code-template-operator
+lib/core.lisp	73	or	10011011	code-template-operator
+lib/core.lisp	437	let	10011100	code-template-operator
+lib/core.lisp	439	let*	10011101	code-template-operator
+lib/core.lisp	795	->	10011110	code-template-operator
+lib/core.lisp	816	->>	10011111	code-template-operator
+lib/core.lisp	1038	define	00001001	code-template-operator
+lib/core4.lisp	13	binary	10101001	ordinary-data
+lib/core4.lisp	55	and	10011010	code-template-operator
+lib/core4.lisp	73	or	10011011	code-template-operator
+lib/core4.lisp	437	let	10011100	code-template-operator
+lib/core4.lisp	439	let*	10011101	code-template-operator
+lib/core4.lisp	795	->	10011110	code-template-operator
+lib/core4.lisp	816	->>	10011111	code-template-operator
+lib/core4.lisp	1038	define	00001001	code-template-operator
