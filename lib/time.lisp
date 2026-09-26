@@ -47,14 +47,14 @@
   (00001000 (observation)
     (00000111
       ((00000011 (00000101 observation) (00000001 unix-time))
-       (utc-from-unix (00101111 observation) (00110000 observation)))
+       (01011111 (00101111 observation) (00110000 observation)))
       (t (00100111 (00000001 rejected) (00000001 invalid-unix-time-observation))))))
 
 ; Public UTC clock meaning is language-owned. The only host fact needed here is
 ; the raw Unix observation above.
 (00001001 utc-now
   (00001000 ()
-    (unix-time-observation->utc (01011011))))
+    (01100000 (01011011))))
 
 ; Interpret protocol fields from one complete NTP response. Packet I/O and
 ; extracting fixed-width fields are host mechanisms; deciding whether those
@@ -137,7 +137,7 @@
       ((00000011 (00000101 observation) (00000001 accepted))
        (00100111 (00000001 accepted)
              (00101111 observation)
-             (utc-from-unix
+             (01011111
                (00110000 observation)
                (00000101 (00000110 (00000110 (00000110 observation)))))))
       (t observation))))
@@ -152,7 +152,7 @@
 
 (00001001 mono-ms
   (00001000 ()
-    (milliseconds-from-nanoseconds (01011010))))
+    (01100001 (01011010))))
 
 ; Monotonic counters are host observations; deadline arithmetic is language
 ; semantics. Keep a pure pair of helpers so scheduler logic can be tested
@@ -167,11 +167,11 @@
 
 (00001001 deadline-after-ns
   (00001000 (delta-ns)
-    (deadline-from (01011010) delta-ns)))
+    (01101001 (01011010) delta-ns)))
 
 (00001001 deadline-reached?
   (00001000 (deadline-ns)
-    (deadline-reached-at? (01011010) deadline-ns)))
+    (01100111 (01011010) deadline-ns)))
 
 (00001001 elapsed-ns
   (00001000 (started-ns)

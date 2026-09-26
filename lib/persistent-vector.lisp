@@ -153,8 +153,8 @@
 ; the insert path didn't touch with the original vector.
 (00001001 vec-conj
   (00001000 (value v)
-    (00000100 (00001100 1 (vec-count v))
-          (vtree-insert (vec-count v) value (vec-tree v)))))
+    (00000100 (00001100 1 (01110011 v))
+          (vtree-insert (01110011 v) value (vec-tree v)))))
 
 ; In-order traversal over an index-keyed BST comes back in index order
 ; for free, the same free side effect lib/persistent-map.lisp's map->list
@@ -185,7 +185,7 @@
     (00000111
       ((00000010 lst) () acc)
       ((00000010 lst) (1) acc)
-      (t (vec-from-list-onto (00000110 lst) (vec-conj (00000101 lst) acc))))))
+      (t (vec-from-list-onto (00000110 lst) (01110010 (00000101 lst) acc))))))
 
 (00001001 vec-from-list
   (00001000 (lst) (vec-from-list-onto lst vec-empty)))

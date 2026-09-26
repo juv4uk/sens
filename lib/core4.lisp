@@ -214,12 +214,12 @@
 ; Rust-Stack-sicheres append.
 (00001001 append
   (00001000 (left right)
-    (reverse-onto (reverse left) right)))
+    (reverse-onto (00101010 left) right)))
 
 (00001001 map-onto
   (00001000 (f values acc)
     (00000111
-      ((00000010 values) () (reverse acc))
+      ((00000010 values) () (00101010 acc))
       ((00000010 values) (1) (00000001 ()))
       ((00000010 values) (0)
        (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
@@ -231,8 +231,8 @@
 (00001001 filter-onto
   (00001000 (predicate values acc)
     (00000111
-      ((00000010 values) () (reverse acc))
-      ((00000010 values) (1) (reverse acc))
+      ((00000010 values) () (00101010 acc))
+      ((00000010 values) (1) (00101010 acc))
       (t t
        (10011100 ((decision (predicate (00000101 values))))
          (00000111
@@ -250,7 +250,7 @@
     (00000111
       ((00000010 values) () acc)
       ((00000010 values) (0)
-       (reduce f (f acc (00000101 values)) (00000110 values))))))
+       (00111001 f (f acc (00000101 values)) (00000110 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -287,8 +287,8 @@
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
 (00001010 let (bindings body)
-  (00000100 (list (00000001 00001000) (map (00001000 (binding) (00000101 binding)) bindings) body)
-        (map (00001000 (binding) (second binding)) bindings)))
+  (00000100 (00100111 (00000001 00001000) (00110111 (00001000 (binding) (00000101 binding)) bindings) body)
+        (00110111 (00001000 (binding) (00101111 binding)) bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -356,9 +356,9 @@
           (00000001 (0)))
          ((00000010 b) (0)
           (00000111
-            ((equal? (00000101 a) (00000101 b)) (1)
-             (equal? (00000110 a) (00000110 b)))
-            ((equal? (00000101 a) (00000101 b)) (0)
+            ((00100010 (00000101 a) (00000101 b)) (1)
+             (00100010 (00000110 a) (00000110 b)))
+            ((00100010 (00000101 a) (00000101 b)) (0)
              (00000001 (0))))))))))
 
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
@@ -373,9 +373,9 @@
          ((00000011 value 0) (0) t)))
       ((00000010 value) (0)
        (00000111
-         ((equal? value (00000001 (0))) (1) (00000001 ()))
-         ((equal? value (00000001 (0))) (1) (00000001 ()))
-         ((equal? value (00000001 (0))) (1) (00000001 ()))
+         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+         ((00100010 value (00000001 (0))) (1) (00000001 ()))
          (t t t))))))
 
 (00001001 not?
@@ -407,7 +407,7 @@
     (00000111
       ((00000011 i 0) (1) (00000101 lst))
       ((00000011 i 0) (0)
-       (nth (00001101 i 1) (00000110 lst))))))
+       (00101011 (00001101 i 1) (00000110 lst))))))
 
 (00001001 member?
   (00001000 (item lst)
@@ -415,9 +415,9 @@
       ((00000010 lst) () (00000001 ()))
       ((00000010 lst) (0)
        (00000111
-         ((equal? item (00000101 lst)) (1) t)
-         ((equal? item (00000101 lst)) (0)
-          (member? item (00000110 lst))))))))
+         ((00100010 item (00000101 lst)) (1) t)
+         ((00100010 item (00000101 lst)) (0)
+          (00101100 item (00000110 lst))))))))
 
 (00001001 assoc
   (00001000 (key alist)
@@ -425,9 +425,9 @@
       ((00000010 alist) () (00000001 ()))
       ((00000010 alist) (0)
        (00000111
-         ((equal? key (00000101 (00000101 alist))) (1) (00000101 alist))
-         ((equal? key (00000101 (00000101 alist))) (0)
-          (assoc key (00000110 alist))))))))
+         ((00100010 key (00000101 (00000101 alist))) (1) (00000101 alist))
+         ((00100010 key (00000101 (00000101 alist))) (0)
+          (00101101 key (00000110 alist))))))))
 
 (00001010 let* (bindings body)
   (00000111
@@ -531,12 +531,12 @@
     (00000111
       ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
       ((00111100 b) (1)
-       (second (list (00111010 a "") (00000001 ()))))
+       (00101111 (00100111 (00111010 a "") (00000001 ()))))
       ((00111100 a) (1)
-       (second (list (00111010 b "") t)))
+       (00101111 (00100111 (00111010 b "") t)))
       ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) 1 t)
       ((00000011 (00111111 a) (00111111 b)) (1)
-       (string<? (01000000 a) (01000000 b)))
+       (00100101 (01000000 a) (01000000 b)))
       (t t (00000001 ())))))
 
 
@@ -621,7 +621,7 @@
     (00000111
       ((00011010 a (00001100 chunk chunk)) 1 (00000100 chunk mult))
       ((00011010 a (00001100 chunk chunk)) 0
-       (largest-chunk a b (00001100 chunk chunk) (00001100 mult mult))))))
+       (00011001 a b (00001100 chunk chunk) (00001100 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -648,13 +648,13 @@
        (00000111
          ((00011010 a b) 1 0)
          ((00011010 a b) 0
-          (let ((chunk+mult (largest-chunk a b b 1)))
+          (let ((chunk+mult (00011001 a b b 1)))
             (00001100 (00000110 chunk+mult)
-               (quotient (00001101 a (00000101 chunk+mult)) b)))))))))
+               (00010100 (00001101 a (00000101 chunk+mult)) b)))))))))
 
 (00001001 mod
   (00001000 (a b)
-    (00001101 a (00001110 b (quotient a b)))))
+    (00001101 a (00001110 b (00010100 a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
@@ -666,9 +666,9 @@
     (00000111
       ((00000010 remaining) () 1)
       ((00011010 current (00000101 remaining)) 1
-       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
+       (00011111 (00000101 remaining) (00000110 remaining)))
       ((00011100 current (00000101 remaining)) 1
-       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
+       (00011111 (00000101 remaining) (00000110 remaining)))
       ((00011100 current (00000101 remaining)) 0 0))))
 
 (00001001 nonincreasing-from?
@@ -676,18 +676,18 @@
     (00000111
       ((00000010 remaining) () 1)
       ((00011011 current (00000101 remaining)) 1
-       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
+       (00100000 (00000101 remaining) (00000110 remaining)))
       ((00011100 current (00000101 remaining)) 1
-       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
+       (00100000 (00000101 remaining) (00000110 remaining)))
       ((00011100 current (00000101 remaining)) 0 0))))
 
 (00001001 <=
   (00001000 (first . remaining)
-    (nondecreasing-from? first remaining)))
+    (00011111 first remaining)))
 
 (00001001 >=
   (00001000 (first . remaining)
-    (nonincreasing-from? first remaining)))
+    (00100000 first remaining)))
 
 ; number->string (G5 test: already expressible via existing means?) —
 ; yes, now that quotient/mod exist. Surfaced from the fpga-lisp
@@ -713,7 +713,7 @@
   ; variant — removal is a separate mirrored-surface decision, not a
   ; silent one.
   (00001000 (d)
-    (nth d (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+    (00101011 d (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
 (00001001 number->string-onto
   (00001000 (n acc)
@@ -721,8 +721,8 @@
       ((00000011 n 0) (1) acc)
       ((00000011 n 0) (0)
        (number->string-onto
-         (quotient n 10)
-         (00111010 (digit->string (mod n 10)) acc))))))
+         (00010100 n 10)
+         (00111010 (01000111 (00010011 n 10)) acc))))))
 
 (00001001 number->string
   (00001000 (n)
@@ -762,8 +762,8 @@
                (rest (00000110 (00000110 forms)))
                (step
                  (00000111
-                   ((00000010 next) () (list next x))
-                   ((00000010 next) (1) (list next x))
+                   ((00000010 next) () (00100111 next x))
+                   ((00000010 next) (1) (00100111 next x))
                    ((00000010 next) (0)
                     (00000100 (00000101 next) (00000100 x (00000110 next)))))))
           (00000111
@@ -783,10 +783,10 @@
                (rest (00000110 (00000110 forms)))
                (step
                  (00000111
-                   ((00000010 next) () (list next x))
-                   ((00000010 next) (1) (list next x))
+                   ((00000010 next) () (00100111 next x))
+                   ((00000010 next) (1) (00100111 next x))
                    ((00000010 next) (0)
-                    (append next (list x))))))
+                    (00101001 next (00100111 x))))))
           (00000111
             ((00000010 rest) () step)
             ((00000010 rest) (0)
@@ -817,11 +817,11 @@
     (00000111
       ((00011010 n 2) 1 n)
       ((00011010 n 2) 0
-       (isqrt-step n (quotient n 2))))))
+       (isqrt-step n (00010100 n 2))))))
 
 (00001001 isqrt-step
   (00001000 (n g)
-    (let ((next (quotient (00001100 g (quotient n g)) 2)))
+    (let ((next (00010100 (00001100 g (00010100 n g)) 2)))
       (00000111
         ((00011010 next g) 1 (isqrt-step n next))
         ((00011010 next g) 0 g)))))
@@ -831,8 +831,8 @@
     (00000111
       ((00011010 x 0) 1 (00000001 ()))
       ((00011100 x 0) 1 0)
-      ((00011100 x (quotient x 1)) 1
-       (let ((r (isqrt x)))
+      ((00011100 x (00010100 x 1)) 1
+       (let ((r (00010110 x)))
          (00000111
            ((00011100 (00001110 r r) x) t r)
            (t t (sqrt-iter (00001111 x 2) x 8)))))
@@ -897,11 +897,11 @@
     (00000111
       ((00000010 items) () (00000001 ()))
       ((00000010 items) (0)
-       (let ((rest-min (min-list (00000110 items))))
+       (let ((rest-min (00010111 (00000110 items))))
          (00000111
-           ((equal? rest-min (00000001 ())) (1)
+           ((00100010 rest-min (00000001 ())) (1)
             (00000101 items))
-           ((equal? rest-min (00000001 ())) (0)
+           ((00100010 rest-min (00000001 ())) (0)
             (00000111
               ((00011010 (00000101 items) rest-min) 1 (00000101 items))
               ((00011010 (00000101 items) rest-min) 0 rest-min)))))))))
@@ -911,11 +911,11 @@
     (00000111
       ((00000010 items) () (00000001 ()))
       ((00000010 items) (0)
-       (let ((rest-max (max-list (00000110 items))))
+       (let ((rest-max (00011000 (00000110 items))))
          (00000111
-           ((equal? rest-max (00000001 ())) (1)
+           ((00100010 rest-max (00000001 ())) (1)
             (00000101 items))
-           ((equal? rest-max (00000001 ())) (0)
+           ((00100010 rest-max (00000001 ())) (0)
             (00000111
               ((00011011 (00000101 items) rest-max) 1 (00000101 items))
               ((00011011 (00000101 items) rest-max) 0 rest-max)))))))))
@@ -1012,13 +1012,13 @@
       ((00000010 peers) ()
        source)
       ((00000010 peers) (0)
-       (list (00000001 define)
+       (00100111 (00000001 define)
              (00000101 peers)
              (my-postcore-build-definitions source (00000110 peers)))))))
 
 (00001010 my-postcore-materialize-stable-peers args
   (let* ((semantic-id (00000101 args))
-         (source (second args))
+         (source (00101111 args))
          (group
            (my-postcore-peer-group
              semantic-id
@@ -1034,7 +1034,7 @@
 ; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
 (00001001 divmod
   (00001000 (dividend divisor)
-    (list (quotient dividend divisor) (mod dividend divisor))))
+    (00100111 (00010100 dividend divisor) (00010011 dividend divisor))))
 
 ; McCarthy 1960, §3d: null, subst, sublis, maplist, apply — закон Core4, коди СЕНС.
 (00001001 null?
@@ -1048,7 +1048,7 @@
   (00001000 (x y z)
     (00000111
       ((00000010 z) (0)
-       (00000100 (subst x y (00000101 z)) (subst x y (00000110 z))))
+       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z))))
       ((00000010 z) ()
        (00000111
          ((00000011 z y) (1) x)
@@ -1073,7 +1073,7 @@
   (00001000 (x y)
     (00000111
       ((00000010 y) (0)
-       (00000100 (sublis x (00000101 y)) (sublis x (00000110 y))))
+       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y))))
       ((00000010 y) () (sublis-pair x y))
       ((00000010 y) (1) (sublis-pair x y)))))
 
@@ -1082,7 +1082,7 @@
     (00000111
       ((00000010 x) () (00000001 ()))
       ((00000010 x) (0)
-       (00000100 (f x) (maplist (00000110 x) f))))))
+       (00000100 (f x) (10101110 (00000110 x) f))))))
 
 (00001001 apply-quote-args
   (00001000 (m)

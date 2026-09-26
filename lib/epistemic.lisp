@@ -267,9 +267,9 @@
 (00001001 supporting-evidence
   (00001000 (evidence claim-ref)
     (00000111
-      ((00100001 (evidence? evidence)) (00000001 ()))
+      ((00100001 (10010000 evidence)) (00000001 ()))
       ((00100001 (epistemic--claim-ref? claim-ref)) (00000001 ()))
-      ((00100001 (00000011 (evidence-outcome evidence) (00000001 supports))) (00000001 ()))
+      ((00100001 (00000011 (10010010 evidence) (00000001 supports))) (00000001 ()))
       ((00100001 (00100010 (evidence-claim-ref evidence) claim-ref)) (00000001 ()))
       (t evidence))))
 
@@ -302,5 +302,5 @@
 (00001001 intent-capabilities-satisfied?
   (00001000 (intent effective-capabilities)
     (00000111
-      ((00100001 (intent? intent)) (00000001 ()))
+      ((00100001 (10010101 intent)) (00000001 ()))
       (t (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))

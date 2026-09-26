@@ -10,156 +10,156 @@
 ; Runtime implementations may project the Binary identity to an internal byte,
 ; but the meaning and lookup rules below belong to Lisp.
 
-(def semantic-registry-source-path
+(00001001 semantic-registry-source-path
   "lib/surface/semantic-registry.lisp")
 
-(def semantic-registry-read-source
-  (lambda (source)
-    (car
-      (read-all source))))
+(00001001 semantic-registry-read-source
+  (00001000 (source)
+    (00000101
+      (01001011 source))))
 
-(def semantic-registry-read
-  (lambda ()
+(00001001 semantic-registry-read
+  (00001000 ()
     (semantic-registry-read-source
-      (read-file semantic-registry-source-path))))
+      (10100110 semantic-registry-source-path))))
 
-(def semantic-registry-rows
-  (lambda (registry)
+(00001001 semantic-registry-rows
+  (00001000 (registry)
     registry))
 
-(def semantic-registry-namespaces
-  (lambda ()
-    (quote (en ук укр sa sym))))
+(00001001 semantic-registry-namespaces
+  (00001000 ()
+    (00000001 (en ук укр sa sym))))
 
-(def semantic-registry-row-namespaces
-  (lambda (surfaces)
-    (cond
-      ((atom? surfaces) ()
-       (quote ()))
-      ((atom? surfaces) (0)
-       (cons
-         (car (car surfaces))
+(00001001 semantic-registry-row-namespaces
+  (00001000 (surfaces)
+    (00000111
+      ((00000010 surfaces) ()
+       (00000001 ()))
+      ((00000010 surfaces) (0)
+       (00000100
+         (00000101 (00000101 surfaces))
          (semantic-registry-row-namespaces
-           (cdr surfaces)))))))
+           (00000110 surfaces)))))))
 
-(def semantic-registry-row-namespaces-from-row
-  (lambda (row)
+(00001001 semantic-registry-row-namespaces-from-row
+  (00001000 (row)
     (semantic-registry-row-namespaces
       (semantic-registry-row-surfaces row))))
 
-(def semantic-registry-row-id
-  (lambda (row)
-    (car row)))
+(00001001 semantic-registry-row-id
+  (00001000 (row)
+    (00000101 row)))
 
-(def semantic-registry-row-surfaces
-  (lambda (row)
-    (cdr row)))
+(00001001 semantic-registry-row-surfaces
+  (00001000 (row)
+    (00000110 row)))
 
-(def semantic-registry-find-surface
-  (lambda (namespace surfaces)
-    (cond
-      ((atom? surfaces) ()
-       (quote ()))
-      ((atom? surfaces) (0)
-       (cond
-         ((eq? namespace (car (car surfaces))) (1)
-          (car surfaces))
-         ((eq? namespace (car (car surfaces))) (0)
-          (semantic-registry-find-surface namespace (cdr surfaces))))))))
+(00001001 semantic-registry-find-surface
+  (00001000 (namespace surfaces)
+    (00000111
+      ((00000010 surfaces) ()
+       (00000001 ()))
+      ((00000010 surfaces) (0)
+       (00000111
+         ((00000011 namespace (00000101 (00000101 surfaces))) (1)
+          (00000101 surfaces))
+         ((00000011 namespace (00000101 (00000101 surfaces))) (0)
+          (semantic-registry-find-surface namespace (00000110 surfaces))))))))
 
-(def semantic-registry-surface-name
-  (lambda (namespace row)
-    (let ((entry
+(00001001 semantic-registry-surface-name
+  (00001000 (namespace row)
+    (10011100 ((entry
             (semantic-registry-find-surface
               namespace
               (semantic-registry-row-surfaces row))))
-      (cond
-        ((atom? entry) ()
-         (quote ()))
-        ((atom? entry) (0)
-         (second entry))))))
+      (00000111
+        ((00000010 entry) ()
+         (00000001 ()))
+        ((00000010 entry) (0)
+         (00101111 entry))))))
 
-(def semantic-registry-find-row
-  (lambda (identity rows)
-    (cond
-      ((atom? rows) ()
-       (quote ()))
-      ((atom? rows) (0)
-       (cond
-         ((equal? identity (semantic-registry-row-id (car rows)))
+(00001001 semantic-registry-find-row
+  (00001000 (identity rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 ()))
+      ((00000010 rows) (0)
+       (00000111
+         ((00100010 identity (semantic-registry-row-id (00000101 rows)))
           (1)
-          (car rows))
-         ((equal? identity (semantic-registry-row-id (car rows)))
+          (00000101 rows))
+         ((00100010 identity (semantic-registry-row-id (00000101 rows)))
           (0)
-          (semantic-registry-find-row identity (cdr rows))))))))
+          (semantic-registry-find-row identity (00000110 rows))))))))
 
-(def semantic-registry-find-id-in-namespaces
-  (lambda (name row namespaces)
-    (cond
-      ((atom? namespaces) ()
-       (quote ()))
-      ((atom? namespaces) (0)
-       (let ((candidate
+(00001001 semantic-registry-find-id-in-namespaces
+  (00001000 (name row namespaces)
+    (00000111
+      ((00000010 namespaces) ()
+       (00000001 ()))
+      ((00000010 namespaces) (0)
+       (10011100 ((candidate
                (semantic-registry-surface-name
-                 (car namespaces)
+                 (00000101 namespaces)
                  row)))
-         (cond
-           ((equal? name candidate) (1)
+         (00000111
+           ((00100010 name candidate) (1)
             (semantic-registry-row-id row))
-           ((equal? name candidate) (0)
+           ((00100010 name candidate) (0)
             (semantic-registry-find-id-in-namespaces
               name
               row
-              (cdr namespaces)))))))))
+              (00000110 namespaces)))))))))
 
-(def semantic-registry-id-for-surface
-  (lambda (name rows)
-    (cond
-      ((atom? rows) ()
-       (quote ()))
-      ((atom? rows) (0)
-       (let ((identity
+(00001001 semantic-registry-id-for-surface
+  (00001000 (name rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 ()))
+      ((00000010 rows) (0)
+       (10011100 ((identity
                (semantic-registry-find-id-in-namespaces
                  name
-                 (car rows)
-                 (quote (en ук укр sa sym)))))
-         (cond
-           ((atom? identity) ()
-            (semantic-registry-id-for-surface name (cdr rows)))
-           ((atom? identity) (1)
+                 (00000101 rows)
+                 (00000001 (en ук укр sa sym)))))
+         (00000111
+           ((00000010 identity) ()
+            (semantic-registry-id-for-surface name (00000110 rows)))
+           ((00000010 identity) (1)
             identity)
-           ((atom? identity) (0)
-            (semantic-registry-id-for-surface name (cdr rows)))))))))
+           ((00000010 identity) (0)
+            (semantic-registry-id-for-surface name (00000110 rows)))))))))
 
-(def semantic-registry-round-trip
-  (lambda (identity)
-    (let* ((printed (write-to-string identity))
+(00001001 semantic-registry-round-trip
+  (00001000 (identity)
+    (10011101 ((printed (01001100 identity))
            (forms
-             (read-all printed)))
-      (car forms))))
+             (01001011 printed)))
+      (00000101 forms))))
 
 ; Query already-read registry data without re-entering host I/O.
-(def semantic-registry-row-in
-  (lambda (registry identity)
+(00001001 semantic-registry-row-in
+  (00001000 (registry identity)
     (semantic-registry-find-row
       identity
       (semantic-registry-rows registry))))
 
-(def semantic-registry-id-in
-  (lambda (registry surface)
+(00001001 semantic-registry-id-in
+  (00001000 (registry surface)
     (semantic-registry-id-for-surface
       surface
       (semantic-registry-rows registry))))
 
 ; Convenience wrappers for ordinary runtime use.
-(def semantic-registry-row
-  (lambda (identity)
+(00001001 semantic-registry-row
+  (00001000 (identity)
     (semantic-registry-row-in
       (semantic-registry-read)
       identity)))
 
-(def semantic-registry-id
-  (lambda (surface)
+(00001001 semantic-registry-id
+  (00001000 (surface)
     (semantic-registry-id-in
       (semantic-registry-read)
       surface)))

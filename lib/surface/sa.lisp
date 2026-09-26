@@ -32,19 +32,19 @@
 ; are ratified stable peers installed directly by the runtime together with
 ; Ukrainian and symbolic spellings. None is defined through another surface.
 ; rūpa = absolute value (candidate — polysemous)
-(define rūpa abs)
+(00001001 rūpa abs)
 ; alpatara = least (alpa + -tara comparative)
-(define alpatara min)
+(00001001 alpatara min)
 ; brhattara = greatest (bṛhat + -tara comparative)
-(define brhattara max)
+(00001001 brhattara max)
 ; avasiṣṭa = remainder (ava-śiṣ; ≠ śeṣa CDR)
-(define avasiṣṭa mod)
+(00001001 avasiṣṭa mod)
 ; bhāga = quotient (result of division)
-(define bhāga quotient)
+(00001001 bhāga quotient)
 ; mūla = square root
-(define mūla sqrt)
+(00001001 mūla sqrt)
 ; sakalamūla = integer square root
-(define sakalamūla isqrt)
+(00001001 sakalamūla isqrt)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Comparisons (status: candidate)
@@ -53,223 +53,223 @@
 ; ADR-007/008 / 1014–1016: hīna?, adhika? and sama? are ratified
 ; stable peers installed directly by the runtime with UK and symbolic names.
 ; na-adhika = not-greater (compound)
-(define na-adhika? <=)
+(00001001 na-adhika? <=)
 ; na-hīna = not-lesser (compound)
-(define na-hīna? >=)
+(00001001 na-hīna? >=)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Predicates (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; na = not (universal negation)
-(define na not)
+(00001001 na not)
 ; tulya = structurally equal (≠ abheda eq, sama =)
-(define tulya? equal?)
+(00001001 tulya? equal?)
 ; nāman = symbol/name (Pāṇini 1.1.62)
-(define nāman? symbol?)
+(00001001 nāman? symbol?)
 ; śabda = string/text
-(define śabda? string?)
-(define śabda-hīna? string<?)
+(00001001 śabda? string?)
+(00001001 śabda-hīna? string<?)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Lists (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; śreṇī = ordered sequence
-(define śreṇī list)
+(00001001 śreṇī list)
 ; pramāṇa = measure/quantity
-(define pramāṇa length)
+(00001001 pramāṇa length)
 ; saṅkalana = collection (≠ saṃyuj CONS)
-(define saṅkalana append)
+(00001001 saṅkalana append)
 ; viloma = reverse order
-(define viloma reverse)
+(00001001 viloma reverse)
 ; kramāṅka = ordinal number (candidate)
-(define kramāṅka nth)
+(00001001 kramāṅka nth)
 ; sambaddha = included/bound (candidate)
-(define sambaddha? member?)
+(00001001 sambaddha? member?)
 ; saṃbandha = relation/connection
-(define saṃbandha assoc)
+(00001001 saṃbandha assoc)
 ; dvandva = pair (Pāṇini 2.2.29-34)
-(define dvandva pair)
+(00001001 dvandva pair)
 ; ordinals — safe: return element, not sublist
-(define dvitīya second)
-(define tṛtīya third)
-(define caturtha fourth)
-(define pañcama fifth)
+(00001001 dvitīya second)
+(00001001 tṛtīya third)
+(00001001 caturtha fourth)
+(00001001 pañcama fifth)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Higher-order (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; āvartana = repeated application (candidate — no direct traditional source)
-(define āvartana map)
+(00001001 āvartana map)
 ; kalpana = selection/postulation (Mīmāṃsā)
-(define kalpana filter)
+(00001001 kalpana filter)
 ; saṅgraha = comprehension/collection
-(define saṅgraha reduce)
+(00001001 saṅgraha reduce)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Strings (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; śabdasaṃyoga = joining of words (≠ saṃyuj CONS)
-(define śabdasaṃyoga string-append)
-(define śabdapramāṇa string-length)
+(00001001 śabdasaṃyoga string-append)
+(00001001 śabdapramāṇa string-length)
 ; śūnya = empty/void
-(define śūnya? string-empty?)
+(00001001 śūnya? string-empty?)
 ; pūrva = preceding (≠ ādi CAR)
-(define pūrva? string-prefix?)
-(define śabdasambaddha? string-contains?)
+(00001001 pūrva? string-prefix?)
+(00001001 śabdasambaddha? string-contains?)
 ; prathamavarṇa = first letter (≠ ādi CAR)
-(define prathamavarṇa string-first)
+(00001001 prathamavarṇa string-first)
 ; śeṣavarṇa = rest of letters (≠ śeṣa CDR)
-(define śeṣavarṇa string-rest)
+(00001001 śeṣavarṇa string-rest)
 ; cheda = cut/slice
-(define cheda string-slice)
+(00001001 cheda string-slice)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Other (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; svabhāva = own nature/identity (≠ svarūpa QUOTE)
-(define svabhāva identity)
+(00001001 svabhāva identity)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — I/O (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; mudraṇa = impression/printing
-(define mudraṇa print)
+(00001001 mudraṇa print)
 ; darśana = showing/display
-(define darśana princ)
+(00001001 darśana princ)
 ; pāṭhana = reading
-(define pāṭhana read)
-(define pāṭhana-sarva read-all)
+(00001001 pāṭhana read)
+(00001001 pāṭhana-sarva read-all)
 ; likhana = writing
-(define likhana write-to-string)
+(00001001 likhana write-to-string)
 ; vicāraṇa = deliberation/evaluation
-(define vicāraṇa eval)
+(00001001 vicāraṇa eval)
 ; āśraya = substrate/environment
-(define āśraya env)
+(00001001 āśraya env)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Vectors (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; samūha = collection/aggregate
-(define samūha vector)
-(define samūha-nirmāṇa make-vector)
-(define samūha-pramāṇa vector-length)
-(define samūha-āvartana vector-ref)
+(00001001 samūha vector)
+(00001001 samūha-nirmāṇa make-vector)
+(00001001 samūha-pramāṇa vector-length)
+(00001001 samūha-āvartana vector-ref)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Conversions (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-(define nāman-śabda symbol->string)
-(define śabda-nāman string->symbol)
-(define varṇa-śabda codepoint->string)
-(define śabda-varṇa string->codepoint)
+(00001001 nāman-śabda symbol->string)
+(00001001 śabda-nāman string->symbol)
+(00001001 varṇa-śabda codepoint->string)
+(00001001 śabda-varṇa string->codepoint)
 ; saṅkhyā-śabda = number-to-word
-(define saṅkhyā-śabda number->string)
+(00001001 saṅkhyā-śabda number->string)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Time (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; kāla = time
-(define kāla-adya utc-now)
-(define kāla-unix unix-time-now)
-(define kāla-mono mono-ns)
-(define kāla-mono-ms mono-ms)
-(define kāla-millisecondāni milliseconds-from-nanoseconds)
+(00001001 kāla-adya utc-now)
+(00001001 kāla-unix unix-time-now)
+(00001001 kāla-mono mono-ns)
+(00001001 kāla-mono-ms mono-ms)
+(00001001 kāla-millisecondāni milliseconds-from-nanoseconds)
 ; deśa-kāla = timezone
-(define deśa-kāla-nāma timezone-name)
-(define deśa-kāla-jñāna timezone-detect)
-(define deśa-kāla-śeṣa timezone-offset-seconds)
+(00001001 deśa-kāla-nāma timezone-name)
+(00001001 deśa-kāla-jñāna timezone-detect)
+(00001001 deśa-kāla-śeṣa timezone-offset-seconds)
 ;avadhi = deadline
-(define avadhi-gatā? deadline-reached?)
-(define avadhi-gatā-kadā? deadline-reached-at?)
-(define avadhi-nirmāṇa deadline-from)
-(define avadhi-anantara-ns deadline-after-ns)
-(define atīta-ns elapsed-ns)
+(00001001 avadhi-gatā? deadline-reached?)
+(00001001 avadhi-gatā-kadā? deadline-reached-at?)
+(00001001 avadhi-nirmāṇa deadline-from)
+(00001001 avadhi-anantara-ns deadline-after-ns)
+(00001001 atīta-ns elapsed-ns)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Persistent map (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; kośa = repository/map
-(define kośa-śūnya map-empty)
-(define kośa-grahaṇa map-get)
-(define kośa-niveśana map-insert)
-(define kośa-sambaddha? map-contains?)
-(define kośa-śreṇī map->list)
+(00001001 kośa-śūnya map-empty)
+(00001001 kośa-grahaṇa map-get)
+(00001001 kośa-niveśana map-insert)
+(00001001 kośa-sambaddha? map-contains?)
+(00001001 kośa-śreṇī map->list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Persistent vector (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-(define samūha-śūnya vec-empty)
-(define samūha-yukti vec-conj)
-(define samūha-gaṇana vec-count)
-(define samūha-kramāṅka vec-nth)
-(define samūha-śreṇī vec->list)
-(define śreṇī-samūha vec-from-list)
+(00001001 samūha-śūnya vec-empty)
+(00001001 samūha-yukti vec-conj)
+(00001001 samūha-gaṇana vec-count)
+(00001001 samūha-kramāṅka vec-nth)
+(00001001 samūha-śreṇī vec->list)
+(00001001 śreṇī-samūha vec-from-list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Knowledge/Reasoning (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; jñāna = knowledge
-(define jñāna-satya? is-fact?)
-(define varṇana describe)
-(define jñāna-saṅgraha collect-facts-about)
-(define aṇu-sambaddha? contains-atom?)
+(00001001 jñāna-satya? is-fact?)
+(00001001 varṇana describe)
+(00001001 jñāna-saṅgraha collect-facts-about)
+(00001001 aṇu-sambaddha? contains-atom?)
 ; abhimukha = forward
-(define abhimukha-anumāna forward-in)
+(00001001 abhimukha-anumāna forward-in)
 ; anumāna = inference
-(define anumāna reason-in)
-(define virodha-parīkṣā check-conflict)
+(00001001 anumāna reason-in)
+(00001001 virodha-parīkṣā check-conflict)
 ; pramāṇa-siddhi = proof
-(define siddhi-sādhana prove-goal)
-(define siddhi-sādhana-sarva prove-goals)
-(define siddhi-vyākhyā explain-proof)
-(define siddhi-mūla source-of)
-(define utpatti provenance)
-(define tarka reason)
-(define tarka-vyākhyā reason-explain)
+(00001001 siddhi-sādhana prove-goal)
+(00001001 siddhi-sādhana-sarva prove-goals)
+(00001001 siddhi-vyākhyā explain-proof)
+(00001001 siddhi-mūla source-of)
+(00001001 utpatti provenance)
+(00001001 tarka reason)
+(00001001 tarka-vyākhyā reason-explain)
 
 ; Unification
-(define ekīkaraṇa unify)
-(define tarka-cihna logic-var)
-(define cihna? var?)
-(define pratyāroha apply-subst)
-(define vicāraṇa-gamana walk)
-(define parivṛtti-parīkṣā occurs-check)
+(00001001 ekīkaraṇa unify)
+(00001001 tarka-cihna logic-var)
+(00001001 cihna? var?)
+(00001001 pratyāroha apply-subst)
+(00001001 vicāraṇa-gamana walk)
+(00001001 parivṛtti-parīkṣā occurs-check)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Epistemic (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; pratyaya = claim/conviction
-(define pratyaya? claim?)
-(define pratyaya-vākya claim-statement)
-(define pratyaya-parīkṣā claim-review)
+(00001001 pratyaya? claim?)
+(00001001 pratyaya-vākya claim-statement)
+(00001001 pratyaya-parīkṣā claim-review)
 ; pramāṇa = evidence
-(define pramāṇa? evidence?)
-(define pramāṇa-vidhi evidence-method)
-(define pramāṇa-phala evidence-outcome)
+(00001001 pramāṇa? evidence?)
+(00001001 pramāṇa-vidhi evidence-method)
+(00001001 pramāṇa-phala evidence-outcome)
 ; pratyakṣa = observation
-(define pratyakṣa? observation?)
-(define pratyakṣa-vākya observation-statement)
+(00001001 pratyakṣa? observation?)
+(00001001 pratyakṣa-vākya observation-statement)
 ; saṅkalpa = intent
-(define saṅkalpa? intent?)
-(define saṅkalpa-lakṣya intent-goal)
-(define sahāya-pramāṇa supporting-evidence)
+(00001001 saṅkalpa? intent?)
+(00001001 saṅkalpa-lakṣya intent-goal)
+(00001001 sahāya-pramāṇa supporting-evidence)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Missing SA fill (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; nāman-nirmāṇa = name generation
-(define nāman-nirmāṇa gensym)
+(00001001 nāman-nirmāṇa gensym)

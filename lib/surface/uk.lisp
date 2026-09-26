@@ -41,8 +41,8 @@
 ; Українські імена тих самих канонічних значень істини й хиби.
 ; Це не нові логічні об'єкти: істина є тим самим символом t, а хиба — тим
 ; самим Canon 0 `()`. Шар подання показує t як `істина` лише в українському REPL.
-(define істина t)
-(define хиба (quote ()))
+(00001001 істина t)
+(00001001 хиба (00000001 ()))
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Arithmetic (status: stable)
@@ -52,15 +52,15 @@
 ; ADR-007/008 / 0104, 1001–1003: `додати`, `відняти`, `помножити`,
 ; `поділити`, їхні Sanskrit peers і symbolic notation встановлюються runtime
 ; напряму на ті самі callable values. Жодна людська поверхня не є мостом.
-(define модуль abs)
-(define найменше min)
-(define найбільше max)
-(define остача mod)
-(define частка quotient)
-(define корінь sqrt)
-(define цілий-корінь isqrt)
-(define найменше-у-списку min-list)
-(define найбільше-у-списку max-list)
+(00001001 модуль abs)
+(00001001 найменше min)
+(00001001 найбільше max)
+(00001001 остача mod)
+(00001001 частка quotient)
+(00001001 корінь sqrt)
+(00001001 цілий-корінь isqrt)
+(00001001 найменше-у-списку min-list)
+(00001001 найбільше-у-списку max-list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Comparisons (status: stable)
@@ -69,47 +69,47 @@
 
 ; ADR-007/008 / 1014–1016: `менше?`, `більше?`, `рівне?`, їхні
 ; Sanskrit peers і symbolic notation є прямими runtime bindings.
-(define не-більше? <=)
-(define не-менше? >=)
+(00001001 не-більше? <=)
+(00001001 не-менше? >=)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Predicates (status: stable)
 ;; Предикати
 ;; ═══════════════════════════════════════════════════════════════
 
-(define хибне? not)
-(define однакові? equal?)
-(define символ? symbol?)
-(define текст? string?)
-(define текст-передує? string<?)
-(define числовий-буфер? numeric-buffer?)
+(00001001 хибне? not)
+(00001001 однакові? equal?)
+(00001001 символ? symbol?)
+(00001001 текст? string?)
+(00001001 текст-передує? string<?)
+(00001001 числовий-буфер? numeric-buffer?)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Lists (status: stable)
 ;; Списки
 ;; ═══════════════════════════════════════════════════════════════
 
-(define список list)
-(define довжина length)
-(define приєднати append)
-(define зворот reverse)
-(define елемент-списку-за-індексом nth)
-(define значення-у-списку? member?)
-(define знайти-за-ключем assoc)
-(define пара pair)
-(define друге second)
-(define третє third)
-(define четверте fourth)
-(define п'яте fifth)
+(00001001 список list)
+(00001001 довжина length)
+(00001001 приєднати append)
+(00001001 зворот reverse)
+(00001001 елемент-списку-за-індексом nth)
+(00001001 значення-у-списку? member?)
+(00001001 знайти-за-ключем assoc)
+(00001001 пара pair)
+(00001001 друге second)
+(00001001 третє third)
+(00001001 четверте fourth)
+(00001001 п'яте fifth)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Higher-order functions (status: stable)
 ;; Функції вищого порядку
 ;; ═══════════════════════════════════════════════════════════════
 
-(define відобразити map)
-(define відсіяти filter)
-(define згорнути reduce)
+(00001001 відобразити map)
+(00001001 відсіяти filter)
+(00001001 згорнути reduce)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Strings (status: stable)
@@ -126,54 +126,54 @@
 ; 1050: `string-slice` / `відрізати` встановлюються як registry-driven direct peers.
 ; 1051: `symbol->string` / `символ-у-текст` встановлюються як registry-driven direct peers.
 ; 1052: `string->symbol` / `текст-у-символ` встановлюються як registry-driven direct peers.
-(define текст-у-кодову-точку string->codepoint)
-(define кодова-точка-у-текст codepoint->string)
-(define число-у-текст number->string)
+(00001001 текст-у-кодову-точку string->codepoint)
+(00001001 кодова-точка-у-текст codepoint->string)
+(00001001 число-у-текст number->string)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — I/O (status: stable)
 ;; Ввід/вивід
 ;; ═══════════════════════════════════════════════════════════════
 
-(define друкувати print)
-(define показати princ)
-(define прочитати read)
-(define прочитати-усе read-all)
-(define значення-у-текст write-to-string)
-(define обчислити eval)
-(define середовище env)
+(00001001 друкувати print)
+(00001001 показати princ)
+(00001001 прочитати read)
+(00001001 прочитати-усе read-all)
+(00001001 значення-у-текст write-to-string)
+(00001001 обчислити eval)
+(00001001 середовище env)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Vectors (status: stable)
 ;; Вектори
 ;; ═══════════════════════════════════════════════════════════════
 
-(define вектор vector)
-(define створити-вектор make-vector)
-(define довжина-вектора vector-length)
-(define елемент-вектора vector-ref)
+(00001001 вектор vector)
+(00001001 створити-вектор make-vector)
+(00001001 довжина-вектора vector-length)
+(00001001 елемент-вектора vector-ref)
 
 ; vector-set! є мутацією — тому знак ! зберігається і в українській назві.
-(define встановити-елемент-вектора! vector-set!)
+(00001001 встановити-елемент-вектора! vector-set!)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Time (status: stable)
 ;; Час
 ;; ═══════════════════════════════════════════════════════════════
 
-(define монотонний-нс mono-ns)
-(define поточний-юнікс-час unix-time-now)
+(00001001 монотонний-нс mono-ns)
+(00001001 поточний-юнікс-час unix-time-now)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Other (status: stable)
 ;; Інше
 ;; ═══════════════════════════════════════════════════════════════
 
-(define без-змін identity)
-(define та and)
-(define або or)
-(define нехай let)
-(define нехай* let*)
+(00001001 без-змін identity)
+(00001001 та and)
+(00001001 або or)
+(00001001 нехай let)
+(00001001 нехай* let*)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Persistent map (status: stable)
@@ -181,11 +181,11 @@
 ;; User-facing API only; AVL internals (node-*, rotate-*, balance-*) excluded.
 ;; ═══════════════════════════════════════════════════════════════
 
-(define порожня-карта map-empty)
-(define отримати-з-карти map-get)
-(define вставити-в-карту map-insert)
-(define ключ-у-карті? map-contains?)
-(define карта-у-список map->list)
+(00001001 порожня-карта map-empty)
+(00001001 отримати-з-карти map-get)
+(00001001 вставити-в-карту map-insert)
+(00001001 ключ-у-карті? map-contains?)
+(00001001 карта-у-список map->list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Persistent vector (status: stable)
@@ -193,32 +193,32 @@
 ;; User-facing API only; RRB-tree internals (vnode-*, vrotate-*, vbalance-*) excluded.
 ;; ═══════════════════════════════════════════════════════════════
 
-(define порожній-вектор vec-empty)
-(define додати-до-вектора vec-conj)
-(define розмір-вектора vec-count)
-(define елемент-вектора-за-індексом vec-nth)
-(define вектор-у-список vec->list)
-(define вектор-із-списку vec-from-list)
+(00001001 порожній-вектор vec-empty)
+(00001001 додати-до-вектора vec-conj)
+(00001001 розмір-вектора vec-count)
+(00001001 елемент-вектора-за-індексом vec-nth)
+(00001001 вектор-у-список vec->list)
+(00001001 вектор-із-списку vec-from-list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Time library (status: stable)
 ;; Бібліотека часу
 ;; ═══════════════════════════════════════════════════════════════
 
-(define поточний-всч utc-now)
-(define всч-із-юнікс utc-from-unix)
-(define юнікс-спостереження-у-всч unix-time-observation->utc)
-(define мілісекунди-із-наносекунд milliseconds-from-nanoseconds)
-(define монотонний-мс mono-ms)
-(define назва-часового-поясу timezone-name)
-(define визначити-часовий-пояс timezone-detect)
-(define зміщення-часового-поясу-в-секундах timezone-offset-seconds)
-(define дедлайн-досягнуто? deadline-reached?)
-(define дедлайн-досягнуто-на-момент? deadline-reached-at?)
-(define минуло-нс elapsed-ns)
-(define дедлайн-від deadline-from)
-(define дедлайн-через-нс deadline-after-ns)
-(define запитати-інтернет-час internet-time-sync)
+(00001001 поточний-всч utc-now)
+(00001001 всч-із-юнікс utc-from-unix)
+(00001001 юнікс-спостереження-у-всч unix-time-observation->utc)
+(00001001 мілісекунди-із-наносекунд milliseconds-from-nanoseconds)
+(00001001 монотонний-мс mono-ms)
+(00001001 назва-часового-поясу timezone-name)
+(00001001 визначити-часовий-пояс timezone-detect)
+(00001001 зміщення-часового-поясу-в-секундах timezone-offset-seconds)
+(00001001 дедлайн-досягнуто? deadline-reached?)
+(00001001 дедлайн-досягнуто-на-момент? deadline-reached-at?)
+(00001001 минуло-нс elapsed-ns)
+(00001001 дедлайн-від deadline-from)
+(00001001 дедлайн-через-нс deadline-after-ns)
+(00001001 запитати-інтернет-час internet-time-sync)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Knowledge/Reasoning (status: stable)
@@ -226,61 +226,61 @@
 ;; User-facing API only; indexing internals excluded.
 ;; ═══════════════════════════════════════════════════════════════
 
-(define факт? is-fact?)
-(define описати describe)
-(define зібрати-факти-про collect-facts-about)
-(define атом-у-списку? contains-atom?)
-(define пряме-виведення forward-in)
-(define логічний-висновок reason-in)
+(00001001 факт? is-fact?)
+(00001001 описати describe)
+(00001001 зібрати-факти-про collect-facts-about)
+(00001001 атом-у-списку? contains-atom?)
+(00001001 пряме-виведення forward-in)
+(00001001 логічний-висновок reason-in)
 ; Публічний предикат читається як питання; стара дієслівна назва лишається
 ; compatibility alias, щоб наявні українські програми не ламалися.
-(define конфлікт? check-conflict)
-(define перевірити-конфлікт check-conflict)
-(define модуль-відомий? module-known?)
-(define поточні-клаузи-модуля module-clauses-now)
+(00001001 конфлікт? check-conflict)
+(00001001 перевірити-конфлікт check-conflict)
+(00001001 модуль-відомий? module-known?)
+(00001001 поточні-клаузи-модуля module-clauses-now)
 
 ; Reasoning engine
-(define довести-мету prove-goal)
-(define довести-мети prove-goals)
-(define пояснити-доведення explain-proof)
-(define джерело-доведення source-of)
-(define походження provenance)
-(define міркування reason)
-(define пояснити-міркування reason-explain)
+(00001001 довести-мету prove-goal)
+(00001001 довести-мети prove-goals)
+(00001001 пояснити-доведення explain-proof)
+(00001001 джерело-доведення source-of)
+(00001001 походження provenance)
+(00001001 міркування reason)
+(00001001 пояснити-міркування reason-explain)
 
 ; Unification
-(define уніфікувати unify)
-(define логічна-змінна logic-var)
-(define змінна? var?)
-(define підставити apply-subst)
-(define розіменувати walk)
+(00001001 уніфікувати unify)
+(00001001 логічна-змінна logic-var)
+(00001001 змінна? var?)
+(00001001 підставити apply-subst)
+(00001001 розіменувати walk)
 ; Occurs-check є питанням t/(), тому preferred-назва має ?. Стара назва
 ; збережена як compatibility alias.
-(define змінна-зустрічається? occurs-check)
-(define перевірити-зустрічання occurs-check)
+(00001001 змінна-зустрічається? occurs-check)
+(00001001 перевірити-зустрічання occurs-check)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Epistemic (status: stable)
 ;; Епістемічні структури
 ;; ═══════════════════════════════════════════════════════════════
 
-(define твердження? claim?)
-(define зміст-твердження claim-statement)
-(define стан-розгляду-твердження claim-review)
-(define доказ? evidence?)
-(define метод-доказу evidence-method)
-(define результат-доказу evidence-outcome)
-(define спостереження? observation?)
-(define зміст-спостереження observation-statement)
-(define намір? intent?)
-(define мета-наміру intent-goal)
-(define підтримувальний-доказ supporting-evidence)
+(00001001 твердження? claim?)
+(00001001 зміст-твердження claim-statement)
+(00001001 стан-розгляду-твердження claim-review)
+(00001001 доказ? evidence?)
+(00001001 метод-доказу evidence-method)
+(00001001 результат-доказу evidence-outcome)
+(00001001 спостереження? observation?)
+(00001001 зміст-спостереження observation-statement)
+(00001001 намір? intent?)
+(00001001 мета-наміру intent-goal)
+(00001001 підтримувальний-доказ supporting-evidence)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Missing UK fill (status: stable)
 ;; ═══════════════════════════════════════════════════════════════
 
-(define генерувати-символ gensym)
+(00001001 генерувати-символ gensym)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Сумісність назв після смислового аудиту 2026-09-08
@@ -288,49 +288,49 @@
 ;; лишаються alias-ами тієї самої семантичної тотожності.
 ;; ═══════════════════════════════════════════════════════════════
 
-(define текст-менше? string<?)
-(define за-номером nth)
-(define перший-знак string-first)
-(define решта-знаків string-rest)
-(define встановити-вектор! vector-set!)
-(define монотонний-час mono-ns)
-(define юнікс-із-спостереження unix-time-observation->utc)
-(define часовий-пояс-назва timezone-name)
-(define часовий-пояс-виявити timezone-detect)
-(define часовий-пояс-зміщення timezone-offset-seconds)
-(define дедлайн-досягнуто-о? deadline-reached-at?)
-(define дедлайн-з deadline-from)
-(define інтернет-час-синхронізація internet-time-sync)
-(define карта-порожня map-empty)
-(define карта-отримати map-get)
-(define карта-вставити map-insert)
-(define вектор-порожній vec-empty)
-(define вектор-додати vec-conj)
-(define вектор-розмір vec-count)
-(define вектор-за-номером vec-nth)
-(define вперед-висновок forward-in)
-(define модуль-умови-зараз module-clauses-now)
-(define обґрунтувати-доведення explain-proof)
-(define міркування-пояснити reason-explain)
-(define відшукати walk)
-(define твердження-текст claim-statement)
-(define твердження-відгук claim-review)
-(define доказ-метод evidence-method)
-(define доказ-результат evidence-outcome)
-(define спостереження-текст observation-statement)
-(define намір-мета intent-goal)
-(define підтримуючий-доказ supporting-evidence)
+(00001001 текст-менше? string<?)
+(00001001 за-номером nth)
+(00001001 перший-знак string-first)
+(00001001 решта-знаків string-rest)
+(00001001 встановити-вектор! vector-set!)
+(00001001 монотонний-час mono-ns)
+(00001001 юнікс-із-спостереження unix-time-observation->utc)
+(00001001 часовий-пояс-назва timezone-name)
+(00001001 часовий-пояс-виявити timezone-detect)
+(00001001 часовий-пояс-зміщення timezone-offset-seconds)
+(00001001 дедлайн-досягнуто-о? deadline-reached-at?)
+(00001001 дедлайн-з deadline-from)
+(00001001 інтернет-час-синхронізація internet-time-sync)
+(00001001 карта-порожня map-empty)
+(00001001 карта-отримати map-get)
+(00001001 карта-вставити map-insert)
+(00001001 вектор-порожній vec-empty)
+(00001001 вектор-додати vec-conj)
+(00001001 вектор-розмір vec-count)
+(00001001 вектор-за-номером vec-nth)
+(00001001 вперед-висновок forward-in)
+(00001001 модуль-умови-зараз module-clauses-now)
+(00001001 обґрунтувати-доведення explain-proof)
+(00001001 міркування-пояснити reason-explain)
+(00001001 відшукати walk)
+(00001001 твердження-текст claim-statement)
+(00001001 твердження-відгук claim-review)
+(00001001 доказ-метод evidence-method)
+(00001001 доказ-результат evidence-outcome)
+(00001001 спостереження-текст observation-statement)
+(00001001 намір-мета intent-goal)
+(00001001 підтримуючий-доказ supporting-evidence)
 
-(define містить? member?)
-(define текст-починається? string-prefix?)
-(define містить-текст? string-contains?)
-(define код-у-текст codepoint->string)
-(define текст-у-код string->codepoint)
-(define у-текст write-to-string)
-(define юнікс-час-зараз unix-time-now)
-(define дедлайн-після-нс deadline-after-ns)
-(define карта-містить? map-contains?)
-(define містить-атом? contains-atom?)
+(00001001 містить? member?)
+(00001001 текст-починається? string-prefix?)
+(00001001 містить-текст? string-contains?)
+(00001001 код-у-текст codepoint->string)
+(00001001 текст-у-код string->codepoint)
+(00001001 у-текст write-to-string)
+(00001001 юнікс-час-зараз unix-time-now)
+(00001001 дедлайн-після-нс deadline-after-ns)
+(00001001 карта-містить? map-contains?)
+(00001001 містить-атом? contains-atom?)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — SA missing fill (Sanskrit surface for previously missing)

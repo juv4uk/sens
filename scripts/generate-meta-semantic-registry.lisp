@@ -93,16 +93,16 @@
       "; Source authority: lib/surface/semantic-registry.lisp\n"
       "; Generator: scripts/generate-meta-semantic-registry.lisp\n"
       "; Registry surfaces; empty and reader-only apostrophe surfaces omitted.\n\n"
-      "(def my-semantic-surface-registry\n"
-      "  (quote (\n"
+      "(00001001 my-semantic-surface-registry\n"
+      "  (00000001 (\n"
       (join-rows (00101010 rows))
       "  )))\n\n"
-      "(def my-semantic-id-for-surface\n"
-      "  (lambda (name)\n"
-      "    (let ((entry (assoc name my-semantic-surface-registry)))\n"
-      "      (cond\n"
-      "        ((atom? entry) () (quote ()))\n"
-      "        ((atom? entry) (0) (second entry))))))\n")))
+      "(00001001 my-semantic-id-for-surface\n"
+      "  (00001000 (name)\n"
+      "    (10011100 ((entry (00101101 name my-semantic-surface-registry)))\n"
+      "      (00000111\n"
+      "        ((00000010 entry) () (00000001 ()))\n"
+      "        ((00000010 entry) (0) (00101111 entry))))))\n")))
 
 (00001001 registry-form
   (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))

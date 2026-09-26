@@ -15,6 +15,8 @@ struct Edit {
 
 #[derive(Default, Debug)]
 struct Analysis {
+    /// `--language`: this file defines the language's own table functions.
+    language: bool,
     edits: Vec<Edit>,
     named_calls: usize,
     blocked_host_capabilities: usize,
@@ -213,7 +215,7 @@ fn walk_expr(
     bound: &mut HashSet<String>,
     host_capabilities: &HashSet<String>,
     analysis: &mut Analysis,
-    _top_level: bool,
+    top_level: bool,
 ) {
     let ExprKind::List(items) = &expression.kind else {
         return;
@@ -262,7 +264,11 @@ fn walk_expr(
                     // shadowing. #1468 pins exact code slots to the first
                     // language definition, so a later top-level surface
                     // redefinition must NOT be rewritten to that old slot.
-                    bound.insert(name.to_string());
+                    // With `--language` the file *is* that first definition:
+                    // its calls reach the same function through the code.
+                    if !(analysis.language && top_level && is_language_definition(name)) {
+                        bound.insert(name.to_string());
+                    }
                 }
                 walk_sequence(
                     &arguments[1..],
@@ -344,12 +350,33 @@ fn walk_expr(
     }
 }
 
+/// A table function the language itself defines in Lisp: a code with no
+/// Rust primitive and no special form. Its first top-level definition binds
+/// the code slot (#1468), so code and name reach the same function.
+fn is_language_definition(name: &str) -> bool {
+    semantic_registry_export::semantic_id_for_admitted_surface(name)
+        .is_some_and(|sens| {
+            !matches!(
+                semantic_registry_export::function_role(sens),
+                Some("primitive") | Some("syntax")
+            )
+        })
+}
+
 fn analyze(
     source: &str,
     host_capabilities: &HashSet<String>,
 ) -> Result<Analysis, String> {
+    analyze_with(source, host_capabilities, false)
+}
+
+fn analyze_with(
+    source: &str,
+    host_capabilities: &HashSet<String>,
+    language: bool,
+) -> Result<Analysis, String> {
     let expressions = parse(source).map_err(|error| error.render(source))?;
-    let mut analysis = Analysis::default();
+    let mut analysis = Analysis { language, ..Analysis::default() };
     let mut bound = HashSet::new();
     walk_sequence(
         &expressions,
@@ -384,20 +411,25 @@ fn apply_edits(source: &str, edits: &[Edit]) -> Result<String, String> {
 }
 
 fn usage() {
-    eprintln!("Usage: sens-to-sens [--check] <file>...");
+    eprintln!("Usage: sens-to-sens [--check] [--language] <file>...");
 }
 
 fn main() {
     let mut check = false;
+    let mut language = false;
     let mut files = Vec::new();
 
     for argument in env::args().skip(1) {
         if argument == "--check" {
             check = true;
+        } else if argument == "--language" {
+            language = true;
         } else if argument == "-h" || argument == "--help" {
-            println!("Usage: sens-to-sens [--check] <file>...");
+            println!("Usage: sens-to-sens [--check] [--language] <file>...");
             println!("Parser-aware repository migration from admitted surfaces to exact SENS functions.");
             println!("--check reports candidates without writing and exits 1 when changes are available.");
+            println!("--language: the files are the language's own first definitions of table");
+            println!("  functions (code slots, #1468); calls to them become codes too.");
             return;
         } else if argument.starts_with('-') {
             eprintln!("sens-to-sens: unknown option: {argument}");
@@ -427,7 +459,7 @@ fn main() {
             }
         };
 
-        let analysis = match analyze(&source, &host_capabilities) {
+        let analysis = match analyze_with(&source, &host_capabilities, language) {
             Ok(analysis) => analysis,
             Err(error) => {
                 eprintln!("sens-to-sens: {filename}: {error}");
@@ -544,6 +576,31 @@ mod tests {
         let expected =
             "(00001001 list (00001000 args (00000001 shadowed))) (list 1 2) (00001000 () (00001001 list (00001000 args 7)) (list 1 2))";
         assert_eq!(rewrite(source), expected);
+    }
+
+    fn rewrite_language(source: &str) -> String {
+        let analysis = analyze_with(source, &HashSet::new(), true).expect("source analyzes");
+        apply_edits(source, &analysis.edits).expect("edits apply")
+    }
+
+    #[test]
+    fn language_definition_of_library_function_does_not_shadow_its_code() {
+        // `reverse` has no primitive: the language's first definition binds
+        // code slot 00101010 (#1468), so calls to it become the code.
+        assert_eq!(
+            rewrite_language("(define reverse (lambda (xs) (reverse xs))) (reverse (list 1))"),
+            "(00001001 reverse (00001000 (xs) (00101010 xs))) (00101010 (00100111 1))"
+        );
+        // A primitive surface still shadows: redefining it is not the language's function.
+        assert_eq!(
+            rewrite_language("(define car (lambda (x) x)) (car 1)"),
+            "(00001001 car (00001000 (x) x)) (car 1)"
+        );
+        // Local definitions always shadow.
+        assert_eq!(
+            rewrite_language("(lambda () (define reverse (lambda (x) x)) (reverse 1))"),
+            "(00001000 () (00001001 reverse (00001000 (x) x)) (reverse 1))"
+        );
     }
 
     #[test]
