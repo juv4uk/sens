@@ -14,7 +14,7 @@ Regenerate: `cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function
 | `00000001` | як-є | як-є | quote | svarūpa | ' | () | QUOTE (mccarthy-1960) |
 | `00000010` | атом? | атом? | atom? | aṇu | .? | tag-test: TEST/AND/CMP | ATOM (mccarthy-1960) |
 | `00000011` | тотожне? | тотожне? | eq? | abheda | =? | CMP/SETE | EQ (mccarthy-1960) |
-| `00000100` | сполучити | сполучити | cons | saṃyuj | : | allocate+STORE-pair | CONS (mccarthy-1960) |
+| `00000100` | сполучити | сполучити | cons | saṃyuj | () | allocate+STORE-pair | CONS (mccarthy-1960) |
 | `00000101` | перше | перше | car | ādi | :п | LOAD-pair-head | CAR (mccarthy-1960) |
 | `00000110` | решта | решта | cdr | śeṣa | :р | LOAD-pair-tail | CDR (mccarthy-1960) |
 | `00000111` | за-умовою | за-умовою | cond | anukrama | ?: | TEST/CMP+Jcc | COND (mccarthy-1960) |
@@ -186,7 +186,7 @@ Regenerate: `cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function
 | `10101101` | підставити-пари | підставити-пари | sublis | () | () | () | SUBLIS (mccarthy-1960) |
 | `10101110` | відобразити-залишки | відобразити-залишки | maplist | () | () | () | MAPLIST (mccarthy-1960) |
 | `10101111` | застосувати | застосувати | apply | () | () | () | apply (mccarthy-1960) |
-| `10110000` | поділити-з-остачею | поділити-з-остачею | divmod | () | () | () | () |
+| `10110000` | поділити-з-остачею | поділити-з-остачею | divmod | () | : | () | () |
 | `10110001` | відповідь-не | відповідь-не | answer-not | () | () | () | () |
 | `10110010` | відповідь-і | відповідь-і | answer-and | () | () | () | () |
 | `10110011` | відповідь-або | відповідь-або | answer-or | () | () | () | () |
