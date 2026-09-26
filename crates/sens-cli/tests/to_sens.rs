@@ -72,3 +72,43 @@ fn arithmetic_shadowing_is_not_rewritten() {
         "(00001000 (+) (+ 1 2))\n(00001100 1 2 3)\n(00011010 1 2 3)\n"
     );
 }
+
+
+#[test]
+fn language_defined_registry_calls_keep_runtime_result_after_migration() {
+    let source = "(list (quotient 17 5) (member? 2 (quote (1 2 3))) (append (quote (a)) (quote (b))))\n";
+    let path = temp_file("language-defined-parity", source);
+
+    let mut named_session = sens::Session::default();
+    sens::load_core_library(&mut named_session).expect("named core bootstrap");
+    let named = sens::eval_program(source, &mut named_session)
+        .expect("named program must execute")
+        .value
+        .to_string();
+
+    let apply = tool().arg(&path).output().expect("run migration");
+    assert!(
+        apply.status.success(),
+        "{}",
+        String::from_utf8_lossy(&apply.stderr)
+    );
+
+    let migrated_source = std::fs::read_to_string(&path).expect("read migrated source");
+    let _ = std::fs::remove_file(&path);
+    assert!(
+        migrated_source.contains("(00100111 ")
+            && migrated_source.contains("(00010100 ")
+            && migrated_source.contains("(00101100 ")
+            && migrated_source.contains("(00101001 "),
+        "expected exact SENS heads, got: {migrated_source}"
+    );
+
+    let mut migrated_session = sens::Session::default();
+    sens::load_core_library(&mut migrated_session).expect("migrated core bootstrap");
+    let migrated = sens::eval_program(&migrated_source, &mut migrated_session)
+        .expect("migrated program must execute")
+        .value
+        .to_string();
+
+    assert_eq!(migrated, named);
+}
