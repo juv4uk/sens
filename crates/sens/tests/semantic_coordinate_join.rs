@@ -253,7 +253,7 @@ fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
     let kernel_source = fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
         .expect("kernel witness contract");
     let kernels = kernel_names_for_sid(&kernel_source, CAR_SID);
-    assert!(kernels.contains("sens"));
+    assert!(kernels.contains("my-lisp"));
     assert!(kernels.contains("common-lisp"));
     assert!(!kernels.contains("prolog"));
     assert!(!kernels.contains("datalog"));

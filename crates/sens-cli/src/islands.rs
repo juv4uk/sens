@@ -291,7 +291,7 @@ fn load_manifest_str(source: &str, origin: &str) -> Result<Manifest, String> {
     let manifest: Manifest = serde_json::from_str(source)
         .map_err(|error| format!("invalid manifest {origin}: {error}"))?;
 
-    if manifest.protocol != "sens-islands-manifest/1" {
+    if manifest.protocol != "my-lisp-islands-manifest/1" {
         return Err(format!("unsupported manifest protocol: {}", manifest.protocol));
     }
 
@@ -457,7 +457,7 @@ fn load_manifest(args: &[String]) -> Result<Manifest, String> {
     }
 
     let temporary = std::env::temp_dir().join(format!(
-        "sens-islands-manifest-{}-{}.json",
+        "my-lisp-islands-manifest-{}-{}.json",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
