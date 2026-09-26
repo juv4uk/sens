@@ -1,9 +1,13 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
-use sens::{eval_program, load_core_library, Session};
+use sens::{
+    eval_program, load_core_library, parse,
+    semantic_registry_export::semantic_id_for_admitted_surface,
+    syntax::{Expr, ExprKind},
+    Session,
+};
 
 const INVENTORY: &str = include_str!("../../../tests/data/macro-generated-heads-1485.tsv");
-const REGISTRY: &str = include_str!("../../../lib/surface/semantic-registry.lisp");
 const CORE: &str = include_str!("../../../lib/core.lisp");
 const CORE4: &str = include_str!("../../../lib/core4.lisp");
 
@@ -32,71 +36,65 @@ fn inventory_rows() -> Vec<Row> {
         .collect()
 }
 
-fn admitted_surface_bits() -> BTreeMap<String, String> {
-    let mut out = BTreeMap::new();
-    for line in REGISTRY.lines() {
-        let trimmed = line.trim_start();
-        if !trimmed.starts_with('(') || trimmed.len() < 10 {
-            continue;
-        }
-        let bits = &trimmed[1..9];
-        if bits.len() != 8 || !bits.bytes().all(|b| b == b'0' || b == b'1') {
-            continue;
-        }
+fn sens_for_admitted_surface(surface: &str) -> Option<String> {
+    semantic_id_for_admitted_surface(surface).map(|sens| sens.to_string())
+}
 
-        for namespace in ["en", "ук", "укр", "sa", "sym"] {
-            let needle = format!("({namespace} ");
-            let Some(start) = trimmed.find(&needle) else {
-                continue;
-            };
-            let rest = &trimmed[start + needle.len()..];
-            let Some(end) = rest.find(')') else {
-                continue;
-            };
-            let value = rest[..end].trim();
-            if !value.is_empty()
-                && value != "()"
-                && !value.contains(char::is_whitespace)
-                && !value.contains('(')
-            {
-                out.insert(value.to_string(), bits.to_string());
+fn is_quote_head(expr: &Expr) -> bool {
+    match &expr.kind {
+        ExprKind::Sid(sens) => sens.to_string() == "00000001",
+        ExprKind::Symbol(surface) => {
+            sens_for_admitted_surface(surface.as_ref()).as_deref() == Some("00000001")
+        }
+        _ => false,
+    }
+}
+
+fn collect_quoted_admitted_single_atoms(
+    path: &str,
+    expr: &Expr,
+    out: &mut BTreeSet<Row>,
+) {
+    match &expr.kind {
+        ExprKind::List(items) => {
+            if items.len() == 2 && is_quote_head(&items[0]) {
+                if let ExprKind::Symbol(surface) = &items[1].kind {
+                    if let Some(exact_sens) = sens_for_admitted_surface(surface.as_ref()) {
+                        out.insert(Row {
+                            path: path.to_string(),
+                            surface: surface.to_string(),
+                            exact_sens,
+                            class: String::new(),
+                        });
+                    }
+                }
+
+                // The quote payload is data. Do not reinterpret nested lists inside it
+                // as executable quote forms.
+                return;
+            }
+
+            for item in items.iter() {
+                collect_quoted_admitted_single_atoms(path, item, out);
             }
         }
+        ExprKind::Pair(head, tail) => {
+            collect_quoted_admitted_single_atoms(path, head, out);
+            collect_quoted_admitted_single_atoms(path, tail, out);
+        }
+        _ => {}
     }
-    out
 }
 
 fn quoted_admitted_single_atoms(path: &str, source: &str) -> BTreeSet<Row> {
-    let admitted = admitted_surface_bits();
+    let expressions =
+        parse(source).unwrap_or_else(|error| panic!("{path}: canonical parser failed: {error:?}"));
     let mut out = BTreeSet::new();
-    let needle = "(00000001 ";
-    let mut offset = 0;
 
-    while let Some(relative) = source[offset..].find(needle) {
-        let start = offset + relative;
-        let value_start = start + needle.len();
-        let Some(relative_end) = source[value_start..].find(')') else {
-            break;
-        };
-        let value_end = value_start + relative_end;
-        let value = source[value_start..value_end].trim();
-
-        if !value.is_empty()
-            && !value.contains(char::is_whitespace)
-            && !value.contains('(')
-            && !value.bytes().all(|b| b == b'0' || b == b'1')
-        {
-            if let Some(bits) = admitted.get(value) {
-                out.insert(Row {
-                    path: path.to_string(),
-                    surface: value.to_string(),
-                    exact_sens: bits.clone(),
-                    class: String::new(),
-                });
-            }
-        }
-        offset = value_end + 1;
+    for expr in &expressions {
+        collect_quoted_admitted_single_atoms(path, expr, &mut out);
     }
+
     out
 }
 
@@ -104,6 +102,40 @@ fn discovered_rows_without_class() -> BTreeSet<Row> {
     let mut rows = quoted_admitted_single_atoms("lib/core.lisp", CORE);
     rows.extend(quoted_admitted_single_atoms("lib/core4.lisp", CORE4));
     rows
+}
+
+#[test]
+fn discovery_is_structural_and_recognizes_quote_surface_aliases() {
+    let rows = quoted_admitted_single_atoms(
+        "synthetic",
+        r#"
+          ; (00000001 or)
+          "(00000001 let)"
+          (quote and)
+          (00000001 binary)
+          (00000001 (quote let*))
+        "#,
+    );
+
+    let expected = BTreeSet::from([
+        Row {
+            path: "synthetic".to_string(),
+            surface: "and".to_string(),
+            exact_sens: "10011010".to_string(),
+            class: String::new(),
+        },
+        Row {
+            path: "synthetic".to_string(),
+            surface: "binary".to_string(),
+            exact_sens: "10101001".to_string(),
+            class: String::new(),
+        },
+    ]);
+
+    assert_eq!(
+        rows, expected,
+        "canonical parsing must ignore comments/strings, admit quote surfaces, and stop at quoted data"
+    );
 }
 
 #[test]
@@ -167,14 +199,13 @@ fn ordinary_data_is_not_promoted_to_exact_sens() {
 
 #[test]
 fn code_template_operator_rows_name_the_exact_registry_function() {
-    let admitted = admitted_surface_bits();
     for row in inventory_rows()
         .into_iter()
         .filter(|row| row.class == "code-template-operator")
     {
         assert_eq!(
-            admitted.get(&row.surface),
-            Some(&row.exact_sens),
+            sens_for_admitted_surface(&row.surface).as_deref(),
+            Some(row.exact_sens.as_str()),
             "inventory exact SENS must be derived from the current registry: {row:?}"
         );
     }
@@ -183,16 +214,14 @@ fn code_template_operator_rows_name_the_exact_registry_function() {
 #[test]
 #[ignore = "RED witness for #1485: unignore when production macro/code templates emit exact SENS"]
 fn code_template_operators_never_reintroduce_surface_heads() {
+    let discovered = discovered_rows_without_class();
     let offenders: Vec<_> = inventory_rows()
         .into_iter()
         .filter(|row| row.class == "code-template-operator")
         .filter(|row| {
-            let source = match row.path.as_str() {
-                "lib/core.lisp" => CORE,
-                "lib/core4.lisp" => CORE4,
-                other => panic!("unexpected inventory path: {other}"),
-            };
-            source.contains(&format!("(00000001 {})", row.surface))
+            let mut structural = row.clone();
+            structural.class.clear();
+            discovered.contains(&structural)
         })
         .collect();
 
