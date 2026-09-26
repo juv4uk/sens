@@ -335,6 +335,7 @@ impl Drop for Environment {
             Environment(
                 Rc::new(RefCell::new(Frame {
                     values: HashMap::new(),
+                    sens_values: HashMap::new(),
                     parent: None,
                 })),
                 Rc::new(RefCell::new(Transcript {
