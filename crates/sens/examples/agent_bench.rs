@@ -2,25 +2,30 @@
 //! програм байтами й кожну одразу виконує в одній довгоживучій сесії.
 //!
 //! Файл повідомлень — записи `u32 LE довжина + байти`. Форма `sens` — двійковий
-//! fasl (функція = 1 байт); форма `en` — англійський текст, який розбирається.
+//! fasl (функція = 1 байт); `wire` — компактний формат обміну (SENS wire);
+//! форма `en` — англійський текст, який розбирається.
 //!
-//!   agent_bench encode IN_TEXT_RECORDS OUT_FASL_RECORDS
+//!   agent_bench encode FORMAT IN_TEXT_RECORDS OUT_RECORDS   (FORMAT = fasl | wire)
 //!   agent_bench run FORM RECORDS MODE [EXPECTED]
-//!     FORM = sens | en
+//!     FORM = sens | wire | en
 //!     MODE = base   — лише прочитати файл і створити сесію (база, яку віднімають);
 //!            decode — прочитати + декодувати/розібрати кожне повідомлення;
 //!            full   — прочитати + декодувати + виконати кожне повідомлення.
 //!     EXPECTED — файл відповідей по рядку на повідомлення; з ним `full`
 //!                звіряє кожну відповідь (неправильна — код 3).
 
-use sens::{eval_lowered_expressions, fasl_decode_program, fasl_encode_program, parse, Expr, Session};
+use sens::{
+    eval_lowered_expressions, fasl_decode_program, fasl_encode_program, parse, wire_decode_program,
+    wire_encode_program, Expr, Session,
+};
 use std::{env, fs, process::ExitCode};
 
 fn records(bytes: &[u8]) -> Vec<&[u8]> {
     let mut out = Vec::new();
     let mut at = 0;
     while at < bytes.len() {
-        let len = u32::from_le_bytes(bytes[at..at + 4].try_into().expect("довжина запису")) as usize;
+        let len =
+            u32::from_le_bytes(bytes[at..at + 4].try_into().expect("довжина запису")) as usize;
         out.push(&bytes[at + 4..at + 4 + len]);
         at += 4 + len;
     }
@@ -30,6 +35,8 @@ fn records(bytes: &[u8]) -> Vec<&[u8]> {
 fn load(form: &str, message: &[u8]) -> Vec<Expr> {
     if form == "sens" {
         fasl_decode_program(message).expect("fasl decodes").0
+    } else if form == "wire" {
+        wire_decode_program(message).expect("wire decodes")
     } else {
         parse(std::str::from_utf8(message).expect("utf-8 text")).expect("text parses")
     }
@@ -38,15 +45,20 @@ fn load(form: &str, message: &[u8]) -> Vec<Expr> {
 fn main() -> ExitCode {
     let args: Vec<String> = env::args().collect();
     if args[1] == "encode" {
-        let input = fs::read(&args[2]).expect("text records");
+        let wire = args[2] == "wire";
+        let input = fs::read(&args[3]).expect("text records");
         let mut out = Vec::new();
         for message in records(&input) {
             let program = parse(std::str::from_utf8(message).expect("utf-8")).expect("parses");
-            let fasl = fasl_encode_program(&program, &[0u8; 32]);
-            out.extend_from_slice(&(fasl.len() as u32).to_le_bytes());
-            out.extend_from_slice(&fasl);
+            let encoded = if wire {
+                wire_encode_program(&program)
+            } else {
+                fasl_encode_program(&program, &[0u8; 32])
+            };
+            out.extend_from_slice(&(encoded.len() as u32).to_le_bytes());
+            out.extend_from_slice(&encoded);
         }
-        fs::write(&args[3], out).expect("fasl records written");
+        fs::write(&args[4], out).expect("records written");
         return ExitCode::SUCCESS;
     }
 
@@ -66,9 +78,13 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
-    let expected: Option<Vec<String>> = args
-        .get(5)
-        .map(|file| fs::read_to_string(file).expect("expected").lines().map(str::to_owned).collect());
+    let expected: Option<Vec<String>> = args.get(5).map(|file| {
+        fs::read_to_string(file)
+            .expect("expected")
+            .lines()
+            .map(str::to_owned)
+            .collect()
+    });
     for (index, message) in messages.iter().enumerate() {
         let program = load(form, message);
         match eval_lowered_expressions(&program, &mut session) {
