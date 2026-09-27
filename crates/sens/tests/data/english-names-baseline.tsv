@@ -1418,10 +1418,6 @@ lisp	scripts/check-kernel-abi-transport-boundary.lisp	fourth	1
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	second	3
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	third	1
 lisp	scripts/generate-function-table.lisp	write-to-string	1
-lisp	scripts/generate-uk-surface-audit.lisp	fifth	2
-lisp	scripts/generate-uk-surface-audit.lisp	fourth	3
-lisp	scripts/generate-uk-surface-audit.lisp	second	3
-lisp	scripts/generate-uk-surface-audit.lisp	third	6
 lisp	scripts/machine-authority-guard.lisp	second	4
 lisp	scripts/machine-authority-guard.lisp	third	3
 lisp	scripts/program-symbol-table.lisp	pair	3

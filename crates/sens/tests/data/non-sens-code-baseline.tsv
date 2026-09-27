@@ -372,7 +372,6 @@ source	scripts/check-core4-predicate-answer-scale.lisp	2
 source	scripts/check-core4-predicate-record-inventory.lisp	1
 source	scripts/check-island-math-evidence.lisp	1
 source	scripts/check-kernel-abi-transport-boundary.lisp	2
-source	scripts/generate-uk-surface-audit.lisp	10
 source	scripts/machine-authority-guard.lisp	5
 source	scripts/program-symbol-table.lisp	1
 source	scripts/release.lisp	1

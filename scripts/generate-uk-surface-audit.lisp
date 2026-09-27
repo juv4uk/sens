@@ -22,10 +22,6 @@
 (00001001 str+
   (00001000 args (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
-(00001001 second (00001000 (xs) (00000101 (00000110 xs))))
-(00001001 third (00001000 (xs) (00000101 (00000110 (00000110 xs)))))
-(00001001 fourth (00001000 (xs) (00000101 (00000110 (00000110 (00000110 xs))))))
-(00001001 fifth (00001000 (xs) (00000101 (00000110 (00000110 (00000110 (00000110 xs)))))))
 (00001001 sixth (00001000 (xs) (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 xs))))))))
 (00001001 seventh (00001000 (xs) (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 (00000110 xs)))))))))
 (00001001 eighth (00001000 (xs) (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 (00000110 (00000110 xs))))))))))
@@ -40,11 +36,43 @@
       (t (join-newline-onto (00000110 strings) (str+ acc "\n" (00000101 strings)))))))
 (00001001 join-newline (00001000 (strings) (join-newline-onto strings "")))
 
-; Function-table rows have the generated schema:
-; (sid-bitstring formal (uk word status) (full-uk word status) (en word status)
-;     (sa word status) (sym word status) primary-status authority)
+; Function-table rows have the generated schema ft/2:
+; (sid-bitstring formal (ук word) (укр word) (en word) (sa word) (sym word) authority)
+; A surface is present or missing; ft/2 carries no per-surface status. The
+; per-identity status (current, candidate, compatibility-only) comes from the
+; Ukrainian staging profile below.
 (00001001 ft-form (00000101 (01001011 (10100110 "lib/generated/function-table.lisp"))))
-(00001001 ft-rows (00000110 ft-form))
+
+; The 256-row table also lists every unused code with only () surfaces.
+(00001001 surface-empty?
+  (00001000 (surface)
+    (00000111
+      ((00000011 (00101111 surface) (00000001 ())) t)
+      (t (00000001 ())))))
+
+(00001001 named-row?
+  (00001000 (row)
+    (00000111
+      ((surface-empty? (00110000 row))
+       (00000111
+         ((surface-empty? (00110001 row))
+          (00000111
+            ((surface-empty? (00110010 row))
+             (00000111
+               ((surface-empty? (sixth row)) (00100001 (surface-empty? (seventh row))))
+               (t t)))
+            (t t)))
+         (t t)))
+      (t t))))
+
+(00001001 named-rows
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) () (00000001 ()))
+      ((named-row? (00000101 rows)) (00000100 (00000101 rows) (named-rows (00000110 rows))))
+      (t (named-rows (00000110 rows))))))
+
+(00001001 ft-rows (named-rows (00000110 ft-form)))
 
 (00001001 profile-form
   (00000101 (01001011 (10100110 "lib/surface/український-профіль-джерела.lisp"))))
@@ -73,8 +101,16 @@
       ((00100010 (00000101 (00000101 rows)) sid) (00000101 rows))
       (t (find-candidate-row sid (00000110 rows))))))
 
-(00001001 surface-word (00001000 (surface) (second surface)))
-(00001001 surface-status (00001000 (surface) (third surface)))
+(00001001 surface-word
+  (00001000 (surface)
+    (00000111
+      ((00000011 (00101111 surface) (00000001 ())) (00000001 —))
+      (t (00101111 surface)))))
+(00001001 surface-status
+  (00001000 (surface)
+    (00000111
+      ((00000011 (00101111 surface) (00000001 ())) (00000001 missing))
+      (t (00000001 stable)))))
 
 (00001001 missing-surface?
   (00001000 (surface)
@@ -87,24 +123,25 @@
 (00001001 audit-class
   (00001000 (uk candidate)
     (00000111
-      ((00000011 (surface-status uk) (00000001 compatibility-only)) (00000001 compatibility-only))
+      ((00000011 (candidate-evidence-status candidate) (00000001 кандидат-сумісності))
+       (00000001 compatibility-only))
       ((missing-surface? uk) (00000001 needs-research))
       ((00000010 candidate) () (00000001 needs-research))
       ((00000010 candidate) (1) (00000001 needs-research))
-      ((00000011 (second candidate) (third candidate)) (00000001 full))
+      ((00000011 (00101111 candidate) (00110000 candidate)) (00000001 full))
       (t (00000001 needs-research)))))
 
 (00001001 candidate-full-word
   (00001000 (candidate)
     (00000111 ((00000010 candidate) () (00000001 —))
           ((00000010 candidate) (1) (00000001 —))
-          (t (third candidate)))))
+          (t (00110000 candidate)))))
 
 (00001001 candidate-evidence-status
   (00001000 (candidate)
     (00000111 ((00000010 candidate) () (00000001 no-staging-evidence))
           ((00000010 candidate) (1) (00000001 no-staging-evidence))
-          (t (fourth candidate)))))
+          (t (00110001 candidate)))))
 
 ; `candidate-compact-uk` belongs to #86/#89. #85 must expose the empty slot,
 ; not invent abbreviations while performing an inventory.
@@ -117,16 +154,26 @@
       ((00000010 candidate) (1) (00000001 needs-research))
       (t (00000001 not-yet-assessed)))))
 
+; Per-identity status from the staging profile: чинна -> stable,
+; кандидат-сумісності -> compatibility-only, any other candidate -> candidate.
+(00001001 profile-primary-status
+  (00001000 (candidate)
+    (00000111
+      ((00000010 candidate) () (00000001 missing))
+      ((00000011 (00110001 candidate) (00000001 чинна)) (00000001 stable))
+      ((00000011 (00110001 candidate) (00000001 кандидат-сумісності)) (00000001 compatibility-only))
+      (t (00000001 candidate)))))
+
 (00001001 render-row
   (00001000 (row)
     (10011101 ((sid (00000101 row))
-           (uk (third row))
-           (full-authority (fourth row))
-           (en (fifth row))
+           (uk (00110000 row))
+           (full-authority (00110001 row))
+           (en (00110010 row))
            (sa (sixth row))
            (sym (seventh row))
-           (primary (eighth row))
            (candidate (find-candidate-row sid candidate-rows))
+           (primary (profile-primary-status candidate))
            (class (audit-class uk candidate))
            (candidate-full (candidate-full-word candidate))
            (candidate-status (candidate-evidence-status candidate))
@@ -158,7 +205,7 @@
       ((00000010 rows) (1) acc)
       (t
        (10011101 ((sid (00000101 (00000101 rows)))
-              (uk (third (00000101 rows)))
+              (uk (00110000 (00000101 rows)))
               (candidate (find-candidate-row sid candidate-rows))
               (class (audit-class uk candidate)))
          (count-class wanted (00000110 rows)
