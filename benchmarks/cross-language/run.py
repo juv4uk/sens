@@ -260,17 +260,15 @@ def command_set(
             "full": [str(sens_bench), str(workdir), name, "sens", "full"],
         },
         "cpython": {
-            "load": [
+            "load": [python, str(CPYTHON_DRIVER), str(py_file), "load"],
+            "ready": [python, str(CPYTHON_DRIVER), str(py_file), "ready"],
+            "repeat": [
                 python,
-                "-c",
-                (
-                    "from pathlib import Path;"
-                    f"p=Path({str(py_file)!r});"
-                    "compile(p.read_text(encoding='utf-8'),str(p),'exec')"
-                ),
+                str(CPYTHON_DRIVER),
+                str(py_file),
+                "repeat",
+                str(inner_reps),
             ],
-            "ready": [python, str(CPYTHON_DRIVER), str(py_file), "0"],
-            "repeat": [python, str(CPYTHON_DRIVER), str(py_file), str(inner_reps)],
             "full": [python, str(py_file)],
         },
     }
@@ -591,7 +589,7 @@ def main() -> int:
         "## Межі інтерпретації",
         "",
         "- SENS load — декодування заздалегідь створеного FASL; encode не міряється.",
-        "- CPython load — читання source + compile(...), без виконання модулю.",
+        "- CPython load — matched driver: читання source + compile(...), без виконання модулю.",
         f"- Steady execution — (repeat({args.inner_reps}) - ready) / {args.inner_reps}; "
         "ready і repeat проходять matched load/setup path.",
         "- CPython repeat має мінімальний Python loop у driver; SENS repeat має "
