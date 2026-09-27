@@ -13,7 +13,7 @@
    (role . lisp-owned-bootstrap)
    (repository . juv4uk/sens)
    (path . "lib/core1.lisp")
-   (source-sha256 . "d58d0161e2c0ba6e91f760f8e8b4baa304a307ca7362d299c7e402ab67d4c9ba")
+   (source-sha256 . "fa858aed41abd51957ebdc696eb332d799bb750faf7bb7074c18286c573254a4")
    (executed-by . s0)
    (mechanism . historical-function-funarg-plus-zero-copy-lisp-owned-dispatch)
    (witnesses .
@@ -21,6 +21,7 @@
       (core1-lambda-representation . "T")
       (closure-capture . "(A . B)")
       (self-recursive-definition . "C")
+      (self-source-load . "(00000100 Y T)")
       (unsupported-modern-identity .
         ((sid . 01001111)
          (surface . VECTOR)
