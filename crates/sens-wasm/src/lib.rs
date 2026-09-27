@@ -366,9 +366,11 @@ mod tests {
             let mut guard = slot.borrow_mut();
             let session = &mut guard.as_mut().unwrap().session;
             let uk = eval_program("(атом? 'мама)", session).expect("uk alias");
-            assert_eq!(uk.value.to_string(), "t");
+            assert_eq!(uk.value.to_string(), "(1)");
+            // `хибне?` (not?) answers t/(); t is presented in Ukrainian.
+            let truth = eval_program("(хибне? '())", session).expect("uk predicate");
             assert_eq!(
-                render_value_for_presentation(&uk.value, WebSurface::Ukrainian.presentation()),
+                render_value_for_presentation(&truth.value, WebSurface::Ukrainian.presentation()),
                 "істина"
             );
             eval_program("(define крок 2)", session).expect("redefine user value");
@@ -395,7 +397,7 @@ mod tests {
             let session = &mut guard.as_mut().unwrap().session;
             let full = eval_program("(порожній-текст? \"\")", session)
                 .expect("full Ukrainian spelling");
-            assert_eq!(full.value.to_string(), "t");
+            assert_eq!(full.value.to_string(), "(1)");
         });
     }
 

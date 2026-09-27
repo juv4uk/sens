@@ -13,6 +13,14 @@ fn sens(cwd: &Path) -> Command {
     command
 }
 
+/// A quoted SENS code `"00001100"` as a number; rows are keyed by code.
+fn sens_code(token: &str) -> Option<u32> {
+    let code = token.trim_matches('"').trim_end_matches(')');
+    (code.len() == 8 && code.bytes().all(|b| b == b'0' || b == b'1'))
+        .then(|| u32::from_str_radix(code, 2).ok())
+        .flatten()
+}
+
 fn numeric_row_id_list(source: &str) -> Vec<u32> {
     source
         .lines()
@@ -20,13 +28,25 @@ fn numeric_row_id_list(source: &str) -> Vec<u32> {
             let line = line.trim_start();
             let rest = line.strip_prefix('(')?;
             let token = rest.split_whitespace().next()?;
-            token.parse::<u32>().ok()
+            token.starts_with('"').then(|| sens_code(token)).flatten()
         })
         .collect()
 }
 
 fn numeric_row_ids(source: &str) -> BTreeSet<u32> {
     numeric_row_id_list(source).into_iter().collect()
+}
+
+/// Function-table identities that carry at least one surface; the 256-row
+/// table also lists every unused code with only `()` surfaces.
+fn named_function_table_ids(source: &str) -> Vec<u32> {
+    source
+        .lines()
+        .filter(|line| {
+            !line.contains("(ук ()) (укр ()) (en ()) (sa ()) (sym ())")
+        })
+        .flat_map(|line| numeric_row_id_list(line))
+        .collect()
 }
 
 #[derive(Debug)]
@@ -42,9 +62,15 @@ fn ukr_candidate_rows(source: &str) -> Vec<UkrCandidateRow> {
             let line = line.trim_start();
             let rest = line.strip_prefix('(')?;
             let token = rest.split_whitespace().next()?;
-            let id = token.parse::<u32>().ok()?;
+            if !token.starts_with('"') {
+                return None;
+            }
+            let id = sens_code(token)?;
 
+            // ("code" "current UK surface, or —" "full UK" status)
             let mut quoted = line.split('"');
+            quoted.next()?;
+            quoted.next()?; // code
             quoted.next()?;
             quoted.next()?; // current UK surface, or —
             quoted.next()?;
@@ -65,12 +91,12 @@ fn ukr_aliases(source: &str) -> BTreeMap<u32, u32> {
         let mut fields = rest.trim_end_matches(')').split_whitespace();
         let from = fields
             .next()
-            .and_then(|field| field.parse::<u32>().ok())
-            .expect("ukr alias source must be a numeric semantic ID");
+            .and_then(sens_code)
+            .expect("ukr alias source must be a SENS code");
         let to = fields
             .next()
-            .and_then(|field| field.parse::<u32>().ok())
-            .expect("ukr alias target must be a numeric semantic ID");
+            .and_then(sens_code)
+            .expect("ukr alias target must be a SENS code");
         assert!(
             fields.next().is_none(),
             "ukr alias rows must have exactly source and target IDs"
@@ -108,9 +134,9 @@ fn ukrainian_staging_profile_covers_every_function_table_identity() {
     let profile = fs::read_to_string(root.join("lib/surface/український-профіль-джерела.lisp"))
         .expect("Ukrainian staging profile must be readable");
 
-    let expected_rows = numeric_row_id_list(&function_table);
+    let expected_rows = named_function_table_ids(&function_table);
     let actual_rows = numeric_row_id_list(&profile);
-    let expected = numeric_row_ids(&function_table);
+    let expected: BTreeSet<u32> = expected_rows.iter().copied().collect();
     let actual = numeric_row_ids(&profile);
 
     assert_eq!(
@@ -125,13 +151,13 @@ fn ukrainian_staging_profile_covers_every_function_table_identity() {
     );
     assert_eq!(
         expected_rows.len(),
-        167,
+        182,
         "function table inventory changed; review UK coverage gate"
     );
     assert_eq!(
         actual_rows.len(),
-        167,
-        "Ukrainian staging row count must stay exactly aligned with the 167-row function table"
+        182,
+        "Ukrainian staging row count must stay exactly aligned with the 182 named identities of the function table"
     );
     assert_eq!(
         actual, expected,
@@ -148,7 +174,7 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
     let rows = ukr_candidate_rows(&profile);
     assert_eq!(
         rows.len(),
-        167,
+        182,
         "coherence audit must inspect every Ukrainian staging candidate"
     );
 

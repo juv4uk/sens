@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, load_macro_library, Session, CORE_LIBRARY_SOURCE};
+use sens::{eval_program, load_core_library, Session, CORE_LIBRARY_SOURCE};
 use std::process::Command;
 
 fn tool() -> Command {
@@ -104,8 +104,9 @@ fn exact_defmacro_rewrite_preserves_unevaluated_argument_semantics() {
 
 #[test]
 fn defmacro_target_shadowing_preserves_surface_dispatch_after_migration() {
+    // The macro returns data: its expansion is (quote shadowed).
     let source =
-        "(defmacro list (x) (quote shadowed))\n(list (never-defined-function))\n";
+        "(defmacro list (x) (quote (quote shadowed)))\n(list (never-defined-function))\n";
     let path = temp_file("defmacro-shadow", source);
 
     let original = eval_core(source);
@@ -122,7 +123,7 @@ fn defmacro_target_shadowing_preserves_surface_dispatch_after_migration() {
 
     assert_eq!(
         rewritten,
-        "(00001010 list (x) (00000001 shadowed))\n(list (never-defined-function))\n"
+        "(00001010 list (x) (00000001 (quote shadowed)))\n(list (never-defined-function))\n"
     );
     assert_eq!(eval_core(&rewritten), original);
 }
@@ -145,56 +146,29 @@ fn check_is_clean_after_all_currently_convertible_heads_are_migrated() {
 
 
 #[test]
-fn rewritten_current_core_library_preserves_representative_behavior() {
+fn current_core_library_is_already_fully_migrated() {
+    // M1 (#1447) and the --language pass (#1520) moved every call head of the
+    // core library to SENS codes; the tool finds nothing left in either mode.
     let path = temp_file("core-library", CORE_LIBRARY_SOURCE);
-
-    let apply = tool().arg(&path).output().expect("run core migration");
-    assert!(
-        apply.status.success(),
-        "{}",
-        String::from_utf8_lossy(&apply.stderr)
-    );
-    let rewritten = std::fs::read_to_string(&path).expect("read rewritten core");
+    for args in [vec!["--check"], vec!["--check", "--language"]] {
+        let check = tool()
+            .args(&args)
+            .arg(&path)
+            .output()
+            .expect("run core check");
+        let stdout = String::from_utf8_lossy(&check.stdout);
+        assert!(check.status.success(), "{args:?}: {stdout}");
+        assert!(stdout.contains("convertible=0"), "{args:?}: {stdout}");
+    }
     let _ = std::fs::remove_file(&path);
 
-    assert_ne!(rewritten, CORE_LIBRARY_SOURCE, "M0 must actually migrate current core call heads");
-    assert!(
-        rewritten.contains("(00100111 "),
-        "current core rewrite should contain exact SENS list calls"
-    );
-    assert!(
-        rewritten.contains("(10011100 "),
-        "current core rewrite should contain exact SENS let calls"
-    );
-    assert!(
-        rewritten.contains("(00001010 and "),
-        "current core rewrite should define macros through exact SENS defmacro"
-    );
-
-    let mut baseline = Session::default();
-    load_core_library(&mut baseline).expect("baseline core loads");
-
-    let mut migrated = Session::default();
-    load_macro_library(&mut migrated).expect("macro bootstrap loads");
-    eval_program(&rewritten, &mut migrated).expect("rewritten core loads");
-
-    for source in [
-        "(list 1 2 3)",
-        "(member? 2 (quote (1 2 3)))",
-        "(append (quote (1 2)) (quote (3 4)))",
-        "(quotient 17 5)",
-        "(let* ((x 3) (y (+ x 4))) y)",
-        "(and (member? 2 (quote (1 2 3))) (or () 9))",
+    for (source, expected) in [
+        ("(list 1 2 3)", "(1 2 3)"),
+        ("(append (quote (1 2)) (quote (3 4)))", "(1 2 3 4)"),
+        ("(quotient 17 5)", "3"),
+        ("(let* ((x 3) (y (+ x 4))) y)", "7"),
     ] {
-        let expected = eval_program(source, &mut baseline)
-            .unwrap_or_else(|error| panic!("baseline {source}: {error:?}"))
-            .value
-            .to_string();
-        let actual = eval_program(source, &mut migrated)
-            .unwrap_or_else(|error| panic!("migrated {source}: {error:?}"))
-            .value
-            .to_string();
-        assert_eq!(actual, expected, "{source}");
+        assert_eq!(eval_core(source), expected, "{source}");
     }
 }
 

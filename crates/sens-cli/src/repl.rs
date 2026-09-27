@@ -48,7 +48,7 @@ impl ReplSurface {
         match value.trim().to_lowercase().as_str() {
             "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
-            "ук" | "українська" => Some(Self::Ukrainian),
+            "ук" | "uk" | "українська" => Some(Self::Ukrainian),
             "укр" | "ukr" | "українська-повна" => Some(Self::UkrainianFull),
             "sa" | "sanskrit" | "санскрит" => Some(Self::Sanskrit),
             _ => None,
@@ -373,8 +373,9 @@ mod tests {
         assert!(state.session.environment.get("атом?").is_none());
 
         state.switch_surface(ReplSurface::Ukrainian).expect("uk");
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "t");
-        let truth = eval_program("(атом? 'мама)", &mut state.session)
+        assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
+        // `хибне?` (not?) answers t/(); t is presented in Ukrainian.
+        let truth = eval_program("(хибне? '())", &mut state.session)
             .expect("immutable Ukrainian Canon predicate")
             .value;
         assert_eq!(
@@ -384,16 +385,19 @@ mod tests {
         // Contract 6.0: canonical spelling is resolver-owned, never a mutable
         // surface-frame alias. Derived Ukrainian vocabulary remains a binding.
         assert!(state.session.environment.get("атом?").is_none());
-        assert!(state.session.environment.get("додати").is_some());
+        // `додати` is now a table surface (plus, 00001100) resolved through
+        // its code; `вектор-додати` is derived vocabulary bound by uk.lisp.
+        assert!(state.session.environment.get("додати").is_none());
+        assert!(state.session.environment.get("вектор-додати").is_some());
         assert_eq!(value(&mut state, "істина"), "t");
         assert_eq!(value(&mut state, "хиба"), "()");
 
         state.switch_surface(ReplSurface::Core).expect("core");
         assert!(state.session.environment.get("атом?").is_none());
-        assert_eq!(value(&mut state, "(atom? 'мама)"), "t");
+        assert_eq!(value(&mut state, "(atom? 'мама)"), "(1)");
         // Canon is not a UI layer: registered spellings still denote Canon
         // even when no human surface frame is loaded.
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "t");
+        assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
     }
 
     #[test]
@@ -441,17 +445,18 @@ mod tests {
     fn one_name_help_resolves_across_en_uk_sa() {
         for requested in ["map", "відобразити", "āvartana"] {
             let help = render_surface_name(ReplSurface::Ukrainian, requested).expect("name help");
-            assert!(help.contains("identity: 0101"));
-            assert!(help.contains("EN: map [stable]"));
-            assert!(help.contains("UK: відобразити [stable]"));
-            assert!(help.contains("SA: āvartana [candidate]"));
+            // One SENS code, every surface; ft/2 carries no per-surface status.
+            assert!(help.contains("identity: 00110111"));
+            assert!(help.contains("EN: map"));
+            assert!(help.contains("UK: відобразити"));
+            assert!(help.contains("SA: āvartana"));
         }
     }
 
     #[test]
     fn trilingual_status_is_measured_not_claimed() {
         let status = render_surface_status().expect("surface status");
-        assert!(status.contains("trilingual stable: 29/146"));
+        assert!(status.contains("trilingual present: 124/255"));
         assert!(status.contains("release parity: OPEN"));
     }
 
@@ -460,10 +465,10 @@ mod tests {
         let mut state = core_state();
         state.switch_surface(ReplSurface::Ukrainian).expect("uk");
         let snapshot = state.session.environment.snapshot();
-        // Historical bootstrap spelling may still be visible in raw env;
-        // Ukrainian Canon spelling is never introduced as a mutable alias.
-        assert!(snapshot.iter().any(|(name, _)| name.as_ref() == "atom"));
+        // Since #1477 no function name is bound in the raw environment: the
+        // call resolves through the SENS code, in any surface.
+        assert!(!snapshot.iter().any(|(name, _)| name.as_ref() == "atom?"));
         assert!(!snapshot.iter().any(|(name, _)| name.as_ref() == "атом?"));
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "t");
+        assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
     }
 }

@@ -1750,6 +1750,7 @@ rust	crates/sens-cli/src/bin/guard-reference-schema-check.rs	provenance	1
 rust	crates/sens-cli/src/bin/guard-reference.rs	list	1
 rust	crates/sens-cli/src/bin/sens-to-sens.rs	car	1
 rust	crates/sens-cli/src/islands.rs	env	3
+rust	crates/sens-cli/src/repl.rs	atom?	1
 rust	crates/sens-cli/src/repl.rs	map	1
 rust	crates/sens-cli/src/repl/surface_catalog.rs	cond	1
 rust	crates/sens-cli/src/repl/surface_catalog.rs	map	2
@@ -2011,7 +2012,7 @@ rust-lisp	crates/sens-cli/tests/lsp_subcommand.rs	def	2
 rust-lisp	crates/sens-cli/tests/process_semantics.rs	process-run	2
 rust-lisp	crates/sens-cli/tests/process_semantics.rs	quote	2
 rust-lisp	crates/sens-cli/tests/semantic_oracle_preservation.rs	eval	3
-rust-lisp	crates/sens-cli/tests/to_sens.rs	and	3
+rust-lisp	crates/sens-cli/tests/to_sens.rs	and	1
 rust-lisp	crates/sens-cli/tests/to_sens.rs	append	1
 rust-lisp	crates/sens-cli/tests/to_sens.rs	define	2
 rust-lisp	crates/sens-cli/tests/to_sens.rs	defmacro	2
@@ -2019,9 +2020,9 @@ rust-lisp	crates/sens-cli/tests/to_sens.rs	lambda	2
 rust-lisp	crates/sens-cli/tests/to_sens.rs	length	1
 rust-lisp	crates/sens-cli/tests/to_sens.rs	let*	2
 rust-lisp	crates/sens-cli/tests/to_sens.rs	list	10
-rust-lisp	crates/sens-cli/tests/to_sens.rs	member?	3
-rust-lisp	crates/sens-cli/tests/to_sens.rs	or	2
-rust-lisp	crates/sens-cli/tests/to_sens.rs	quote	7
+rust-lisp	crates/sens-cli/tests/to_sens.rs	member?	1
+rust-lisp	crates/sens-cli/tests/to_sens.rs	or	1
+rust-lisp	crates/sens-cli/tests/to_sens.rs	quote	5
 rust-lisp	crates/sens-cli/tests/to_sens.rs	quotient	1
 rust-lisp	crates/sens-embed/src/lib.rs	car	1
 rust-lisp	crates/sens-host/tests/capabilities.rs	car	3
@@ -2426,7 +2427,6 @@ rust-lisp	crates/sens/tests/meta_eval.rs	eq?	2
 rust-lisp	crates/sens/tests/meta_eval.rs	identity	2
 rust-lisp	crates/sens/tests/meta_eval.rs	lambda	15
 rust-lisp	crates/sens/tests/meta_eval.rs	let	1
-rust-lisp	crates/sens/tests/meta_eval.rs	not?	1
 rust-lisp	crates/sens/tests/meta_eval.rs	pair	1
 rust-lisp	crates/sens/tests/meta_eval.rs	quote	31
 rust-lisp	crates/sens/tests/meta_eval.rs	read	2
@@ -2642,7 +2642,6 @@ rust-lisp	crates/sens/tests/scientific_constants.rs	list	7
 rust-lisp	crates/sens/tests/scientific_constants.rs	map	1
 rust-lisp	crates/sens/tests/scientific_constants.rs	quote	13
 rust-lisp	crates/sens/tests/scientific_constants.rs	second	1
-rust-lisp	crates/sens/tests/semantic_authority_guard_1049.rs	car	1
 rust-lisp	crates/sens/tests/semantic_coordinate_law_axis.rs	car	2
 rust-lisp	crates/sens/tests/semantic_coordinate_law_axis.rs	cons	2
 rust-lisp	crates/sens/tests/semantic_coordinate_law_axis.rs	eq?	1
@@ -2826,6 +2825,7 @@ rust-lisp	tests/fixtures/authority-guard/forbidden-semantic.rs	quote	1
 rust-lisp-дані	crates/sens-cli/src/bin/guard-reference-schema-check.rs	provenance	1
 rust-lisp-дані	crates/sens-cli/src/bin/sens-to-sens.rs	car	2
 rust-lisp-дані	crates/sens-cli/src/bin/sens-to-sens.rs	list	2
+rust-lisp-дані	crates/sens-cli/tests/to_sens.rs	quote	2
 rust-lisp-дані	crates/sens-host/tests/tcp.rs	not?	1
 rust-lisp-дані	crates/sens-lsp/src/guard_knowledge.rs	provenance	2
 rust-lisp-дані	crates/sens-lsp/tests/e2e.rs	car	1

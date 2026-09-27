@@ -70,9 +70,9 @@
 
 `add-usage`, `count-usage`, `count-usage-list`, `explain-proof`, `explain-proof-list`, `explain-proof-node`, `map-goal-results`, `map-proofs`, `merge-usage`, `print-indent`, `prove-goal`, `prove-goal-state`, `prove-goals`, `prove-rule`, `provenance`, `provenance-list`, `reason`, `reason-explain`, `rename-vars`, `source-of`
 
-### result-status.lisp (15)
+### result-status.lisp (16)
 
-`make-proved`, `make-unknown`, `make-partial`, `make-blocked`, `make-disputed`, `make-invalid`, `result-tagged?`, `result-status`, `result-payload`, `result-proper-list?`, `result-goal?`, `result-negated-goal?`, `result-opposite-goal`, `reason-observe`, `reason-in-observe`
+`make-proved`, `make-unknown`, `make-partial`, `make-blocked`, `make-disputed`, `make-invalid`, `result-tagged?`, `result-status`, `result-payload`, `result-proper-list?`, `result-not-head?`, `result-goal?`, `result-negated-goal?`, `result-opposite-goal`, `reason-observe`, `reason-in-observe`
 
 ### si.lisp (29)
 
