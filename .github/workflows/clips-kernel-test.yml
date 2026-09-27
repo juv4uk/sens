@@ -30,20 +30,19 @@ jobs:
         run: cargo check -p wsm-clips-kernel --features native-clips
 
   native-clips-642:
-    if: vars.HOSTED_RUNNERS == 'true'
-    runs-on: ubuntu-latest
-    container: fedora:45
+    # CLIPS 6.4.2 comes from the shared Guix profile of the self-hosted runner
+    # (packaging/guix/clips.scm installed into it), not from a container.
+    runs-on: [self-hosted, guix]
+    env:
+      WSM_CLIPS_LIBRARY: /var/guix/profiles/shared/guix-profile/lib/libclips.so
     steps:
-      - name: Install Git, Rust and CLIPS 6.4.2
-        run: dnf install -y git rust cargo clippy clips-devel gcc
-      - uses: actions/checkout@v4
-      - name: Show native CLIPS package version
-        run: rpm -q clips-devel clips-libs
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Show native CLIPS library
+        run: ls -l "$WSM_CLIPS_LIBRARY" && readlink -f "$WSM_CLIPS_LIBRARY"
       - name: Run real CLIPS agenda and retract witnesses
-        env:
-          WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
         run: cargo test -p wsm-clips-kernel --features native-clips --test c_abi_semantic_witness -- --nocapture
       - name: Clippy CLIPS adapter
-        env:
-          WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
         run: cargo clippy -p wsm-clips-kernel --all-targets --features native-clips -- -D warnings
