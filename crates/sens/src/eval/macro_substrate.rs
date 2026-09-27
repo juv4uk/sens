@@ -29,7 +29,11 @@ fn make_macro_values(
     }
 
     match &arguments[0] {
-        Value::Closure(closure) => Ok(Value::Macro(closure.clone())),
+        Value::Closure(closure) => {
+            // Новий макрос: розв'язані раніше тіла могли бачити цю назву як виклик.
+            super::closures::bump_resolution_epoch();
+            Ok(Value::Macro(closure.clone()))
+        }
         _ => Err(LanguageError::new(
             ErrorKind::Type,
             "make-macro expects a closure · make-macro ochikuie zamykannia · make-macro erwartet eine Closure",

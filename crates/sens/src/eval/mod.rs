@@ -191,6 +191,18 @@ pub(crate) fn evaluate_step(
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
+        // Розв'язувач гарантує, що слот існує; ім'я — лише запасний шлях.
+        ExprKind::Local { depth, index, name } => environment
+            .get_local(*depth, *index)
+            .or_else(|| environment.get(name))
+            .map(EvalStep::Value)
+            .ok_or_else(|| {
+                LanguageError::new(
+                    ErrorKind::UnknownSymbol,
+                    format!("unknown symbol · nevidomyi symvol · unbekanntes Symbol: {name}"),
+                    expression.span,
+                )
+            }),
         ExprKind::Pair(_, _) => Err(LanguageError::new(
             ErrorKind::InvalidForm,
             "a dotted pair is not executable code · dotted-para ne ye vykonuvanym kodom · ein Dotted Pair ist kein ausführbarer Code",

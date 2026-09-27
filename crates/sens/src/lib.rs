@@ -136,6 +136,9 @@ pub use presentation::{
 pub use syntax::fasl::{
     decode_program as fasl_decode_program, encode_program as fasl_encode_program,
 };
+pub use syntax::wire::{
+    decode_program as wire_decode_program, encode_program as wire_encode_program,
+};
 
 /// Language-owned macro constructor. Its only host-side bootstrap dependency
 /// is the narrow first-class `make-macro` binding that materializes
