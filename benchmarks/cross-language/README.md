@@ -15,8 +15,9 @@
 5. Фази не змішуються:
    - startup — порожній процес/сесія;
    - load — прочитати й декодувати/скомпілювати програму без виконання;
-   - full — load + виконання;
-   - execution у звіті = full - load.
+   - ready — той самий load + setup/module initialization, без benchmark-call;
+   - repeat N — той самий ready path + N benchmark-calls;
+   - steady execution у звіті = (repeat N - ready) / N.
 6. Основне відтворюване мірило — кількість інструкцій Cachegrind.
    Wall/user time і RSS додаються окремо; вони не повинні підміняти
    instruction-count через шум self-hosted runner.
@@ -43,4 +44,9 @@
       --sens-bench target/release/examples/ci_bench \
       --check-only
 
-Результат містить instructions.tsv, environment.json і report.md.
+Результат містить instructions.tsv, runtime.tsv, environment.json і report.md.
+
+Steady execution навмисно не рахується як `full - load`: на коротких
+програмах це різниця двох великих process-level чисел і вона може потонути
+в шумі. Matched `ready` / `repeat N` ампліфікує саме виконання call,
+залишаючи однаковий load/setup шлях по обидва боки віднімання.
