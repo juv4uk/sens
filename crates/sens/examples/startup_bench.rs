@@ -1,5 +1,5 @@
-//! Вартість старту: MODE = session | read | decode | parse | macro | core.
-//! read — прочитати двійкове ядро з диска; decode — прочитати й декодувати;
+//! Вартість старту: MODE = session | bytes | decode | parse | macro | core.
+//! bytes — прочитати двійкове ядро з диска; decode — прочитати й декодувати;
 //! parse — розібрати текстове ядро; macro — сесія + бібліотека макросів;
 //! core — повний старт load_core_library.
 use sens::{fasl_decode_program, load_core_library, load_macro_library, parse, Session, CORE_LIBRARY_SOURCE};
@@ -11,7 +11,7 @@ fn main() -> ExitCode {
     let mut session = Session::default();
     match mode {
         "session" => {}
-        "read" => { std::hint::black_box(fs::read(fasl_path.unwrap()).unwrap()); }
+        "bytes" => { std::hint::black_box(fs::read(fasl_path.unwrap()).unwrap()); }
         "decode" => {
             let bytes = fs::read(fasl_path.unwrap()).unwrap();
             std::hint::black_box(fasl_decode_program(&bytes).expect("fasl decodes"));
