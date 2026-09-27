@@ -411,6 +411,13 @@ pub struct Closure {
     pub(crate) rest: Option<Rc<str>>,
     pub(crate) body: Rc<[Expr]>,
     pub(crate) environment: Environment,
+    /// Імена слотів кадру виклику: параметри, потім rest.
+    pub(crate) slot_names: Rc<[Rc<str>]>,
+    /// Тіло не може додати нове ім'я в кадр виклику (див. `Frame::pure`).
+    pub(crate) pure: bool,
+    /// Тіло з параметрами за номером слота і епоха розв'язання, для якої воно
+    /// дійсне; нова епоха (новий макрос чи можливість хоста) — назад до `body`.
+    pub(crate) resolved: Option<(Rc<[Expr]>, u64)>,
 }
 
 pub type BuiltinFunction =

@@ -66,6 +66,7 @@ pub fn register_capability(name: &str, handler: HostFn) {
         .write()
         .expect("capability registry poisoned")
         .insert(name.to_string(), handler);
+    super::closures::bump_resolution_epoch();
 }
 
 /// Remove one previously installed capability.
@@ -82,6 +83,7 @@ pub fn register_sens_capability(sens: Sens8, handler: SensHostFn) {
         .write()
         .expect("SENS capability registry poisoned")
         .insert(sens, handler);
+    super::closures::bump_resolution_epoch();
 }
 
 /// Detach a host mechanism without changing the function itself.
