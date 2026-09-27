@@ -34,27 +34,24 @@ jobs:
         run: cargo test -p wsm-native-result-types --no-default-features --lib
 
   four-real-kernels:
-    if: vars.HOSTED_RUNNERS == 'true'
-    runs-on: ubuntu-latest
-    container: fedora:45
+    # SBCL, SWI-Prolog and CLIPS 6.4.2 come from the shared Guix profile of the
+    # self-hosted runner (CLIPS via packaging/guix/clips.scm).
+    runs-on: [self-hosted, guix]
+    env:
+      WSM_CLIPS_LIBRARY: /var/guix/profiles/shared/guix-profile/lib/libclips.so
     steps:
-      - name: Install Rust and four external runtime dependencies
-        run: dnf install -y git rust cargo clippy gcc clips-devel sbcl swi-prolog
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - name: Show producer runtime versions
         run: |
           sbcl --version
           swipl --version
-          rpm -q clips-devel clips-libs
+          readlink -f "$WSM_CLIPS_LIBRARY"
       - name: Preserve four real producer-native domains side by side
-        env:
-          WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
         run: cargo test -p wsm-native-result-types --features native-clips --test four_real_kernels -- --nocapture
       - name: LIFE-1 Prolog to Datalog bridge stays alive
-        env:
-          WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
         run: cargo test -p wsm-native-result-types --features native-clips --test prolog_datalog_bridge -- --nocapture
       - name: Clippy result-domain artifact
-        env:
-          WSM_CLIPS_LIBRARY: /usr/lib64/libclips.so
         run: cargo clippy -p wsm-native-result-types --all-targets --features native-clips -- -D warnings
