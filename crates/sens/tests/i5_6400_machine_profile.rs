@@ -83,7 +83,8 @@ fn generated_function_table_has_i5_6400_column_without_replacing_semantic_author
         "human function table must expose the requested processor column"
     );
     assert!(
-        markdown.contains("| `00001100` | додати | додати | () | yoga | + | ADD / ADDSD |"),
+        // English surface is the historical `plus` since #1444.
+        markdown.contains("| `00001100` | додати | додати | plus | yoga | + | ADD / ADDSD |"),
         "byte SID 00001100 must show the i5-6400 ADD fast path"
     );
     assert!(

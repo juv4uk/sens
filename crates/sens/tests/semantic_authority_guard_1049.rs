@@ -35,6 +35,7 @@ fn semantic_authority_guard_is_lisp_owned() {
     assert!(runner.contains("allowed-lisp-host-evidence.lisp allowed"));
 
     assert!(enforcer.contains("semantic-authority-violation"));
-    assert!(enforcer.contains("(car ())"));
+    // Fail closed by taking car (00000101) of the empty list.
+    assert!(enforcer.contains("(00000101 ())"));
     assert!(!root.join("scripts/semantic_authority_guard.py").exists());
 }
