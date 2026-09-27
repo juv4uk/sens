@@ -1,0 +1,417 @@
+#!/usr/bin/env python3
+"""#1546: однаковий корпус SENS ↔ CPython на одному runner.
+
+Це benchmark реалізацій, не рейтинг абстрактних мов. SENS-програми
+генеруються з уже наявних шаблонів benchmarks/sens-surface/run.py;
+CPython-адаптер реалізує ті самі алгоритми й параметри.
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import importlib.util
+import json
+import math
+import os
+import platform
+import re
+import statistics
+import subprocess
+import sys
+import tempfile
+from collections import defaultdict
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+SENS_SURFACE_RUN = ROOT / "benchmarks" / "sens-surface" / "run.py"
+CASES = ("fib", "loop", "ackermann", "closures", "evenodd")
+
+# Параметри спільні й достатньо малі для CPython-рекурсії під Cachegrind.
+# Алгоритм не замінюється ітеративним лише заради Python.
+PARAMS = {
+    "fib": {"N": 16},
+    "loop": {"N": 700},
+    "ackermann": {"N": 3},
+    "closures": {"N": 700},
+    "evenodd": {"N": 700},
+}
+
+
+def load_sens_surface_module():
+    spec = importlib.util.spec_from_file_location("sens_surface_bench", SENS_SURFACE_RUN)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"не вдалося завантажити {SENS_SURFACE_RUN}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def python_source(name: str, params: dict[str, int]) -> str:
+    n = params["N"]
+    limit = max(10_000, n * 4 + 100)
+
+    if name == "fib":
+        return f"""import sys
+sys.setrecursionlimit({limit})
+
+def fib(n):
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+    return fib(n - 1) + fib(n - 2)
+
+print(fib({n}))
+"""
+
+    if name == "loop":
+        return f"""import sys
+sys.setrecursionlimit({limit})
+
+def loop(n, acc):
+    if n == 0:
+        return acc
+    return loop(n - 1, acc + 2)
+
+print(loop({n}, 0))
+"""
+
+    if name == "ackermann":
+        return f"""import sys
+sys.setrecursionlimit({limit})
+
+def ack(m, n):
+    if m == 0:
+        return n + 1
+    if n == 0:
+        return ack(m - 1, 1)
+    return ack(m - 1, ack(m, n - 1))
+
+print(ack(3, {n}))
+"""
+
+    if name == "closures":
+        return f"""import sys
+sys.setrecursionlimit({limit})
+
+def make_adder(k):
+    def add(x):
+        return x + k
+    return add
+
+add3 = make_adder(3)
+
+def loop(n, acc):
+    if n == 0:
+        return acc
+    return loop(n - 1, add3(acc))
+
+print(loop({n}, 0))
+"""
+
+    if name == "evenodd":
+        return f"""import sys
+sys.setrecursionlimit({limit})
+
+def is_even(n):
+    if n == 0:
+        return 1
+    return is_odd(n - 1)
+
+def is_odd(n):
+    if n == 0:
+        return 0
+    return is_even(n - 1)
+
+print(is_even({n}))
+"""
+
+    raise KeyError(name)
+
+
+def run_checked(
+    cmd: list[str],
+    *,
+    expected: str | None = None,
+) -> subprocess.CompletedProcess[str]:
+    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"команда впала ({proc.returncode}): {' '.join(cmd)}\n"
+            f"stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
+        )
+    if expected is not None:
+        got_lines = [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+        got = got_lines[-1] if got_lines else ""
+        if got != expected:
+            raise RuntimeError(
+                f"неправильна відповідь: {' '.join(cmd)}: "
+                f"expected={expected!r}, got={got!r}"
+            )
+    return proc
+
+
+def instruction_count(cmd: list[str]) -> int:
+    proc = subprocess.run(
+        [
+            "valgrind",
+            "--tool=cachegrind",
+            "--cache-sim=no",
+            "--cachegrind-out-file=/dev/null",
+            *cmd,
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"valgrind-команда впала ({proc.returncode}): {' '.join(cmd)}\n"
+            f"{proc.stderr}"
+        )
+    match = re.search(r"I\s+refs:\s*([\d,]+)", proc.stderr)
+    if match is None:
+        raise RuntimeError(f"Cachegrind не повернув I refs:\n{proc.stderr}")
+    return int(match.group(1).replace(",", ""))
+
+
+def git_fact(*args: str) -> str:
+    try:
+        return subprocess.run(
+            ["git", *args],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except Exception as exc:  # noqa: BLE001 — це лише факт середовища.
+        return f"unknown ({exc})"
+
+
+def command_set(
+    sens_bench: Path,
+    python: str,
+    workdir: Path,
+    name: str,
+) -> dict[str, dict[str, list[str]]]:
+    py_file = workdir / f"{name}.py"
+    return {
+        "sens": {
+            "load": [str(sens_bench), str(workdir), name, "sens", "load"],
+            "full": [str(sens_bench), str(workdir), name, "sens", "full"],
+        },
+        "cpython": {
+            "load": [
+                python,
+                "-c",
+                (
+                    "from pathlib import Path;"
+                    f"p=Path({str(py_file)!r});"
+                    "compile(p.read_text(encoding='utf-8'),str(p),'exec')"
+                ),
+            ],
+            "full": [python, str(py_file)],
+        },
+    }
+
+
+def median(rows, key):
+    return statistics.median(rows[key])
+
+
+def geomean(values):
+    return math.exp(sum(math.log(value) for value in values) / len(values))
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--sens-bench", required=True, type=Path)
+    parser.add_argument("--python", default=sys.executable)
+    parser.add_argument("--reps", type=int, default=3)
+    parser.add_argument("--only", default=",".join(CASES))
+    parser.add_argument("--check-only", action="store_true")
+    parser.add_argument("--out")
+    args = parser.parse_args()
+
+    selected = tuple(name for name in args.only.split(",") if name)
+    unknown = sorted(set(selected) - set(CASES))
+    if unknown:
+        parser.error(f"невідомі workload: {', '.join(unknown)}")
+    if args.reps < 1:
+        parser.error("--reps має бути >= 1")
+
+    sens_surface = load_sens_surface_module()
+    workdir = Path(tempfile.mkdtemp(prefix="sens-cross-bench-"))
+
+    expected_by_name: dict[str, str] = {}
+    for name in selected:
+        workload = sens_surface.WORKLOADS[name]
+        params = PARAMS[name]
+        expected = workload["expected"](params)
+        expected_by_name[name] = expected
+
+        (workdir / f"{name}-sens.setup.lisp").write_text(
+            sens_surface.render(workload["setup"], "sens", params),
+            encoding="utf-8",
+        )
+        (workdir / f"{name}-sens.call.lisp").write_text(
+            sens_surface.render(workload["call"], "sens", params) + "\n",
+            encoding="utf-8",
+        )
+        (workdir / f"{name}.expected").write_text(expected + "\n", encoding="utf-8")
+        (workdir / f"{name}.py").write_text(
+            python_source(name, params),
+            encoding="utf-8",
+        )
+
+        # SENS FASL створюється до заміру; encode ніколи не входить у число.
+        run_checked(
+            [str(args.sens_bench), str(workdir), name, "sens", "encode"]
+        )
+
+    # Правильність — до будь-якого виміру.
+    for name in selected:
+        commands = command_set(args.sens_bench, args.python, workdir, name)
+        run_checked(commands["sens"]["full"])
+        run_checked(commands["cpython"]["full"], expected=expected_by_name[name])
+        print(f"[check] {name}: SENS=OK CPython=OK expected={expected_by_name[name]}")
+
+    if args.check_only:
+        return 0
+
+    startup_commands = {
+        "sens": [str(args.sens_bench), str(workdir), "empty", "-"],
+        "cpython": [args.python, "-c", "pass"],
+    }
+
+    rows: list[tuple[str, str, str, int, int]] = []
+    for rep in range(1, args.reps + 1):
+        for implementation, cmd in startup_commands.items():
+            rows.append(
+                (implementation, "empty", "startup", rep, instruction_count(cmd))
+            )
+        for name in selected:
+            commands = command_set(args.sens_bench, args.python, workdir, name)
+            for implementation in ("sens", "cpython"):
+                for mode in ("load", "full"):
+                    count = instruction_count(commands[implementation][mode])
+                    rows.append((implementation, name, mode, rep, count))
+        print(f"[measure] repetition {rep}/{args.reps}")
+
+    grouped = defaultdict(list)
+    for implementation, name, mode, _rep, count in rows:
+        grouped[(implementation, name, mode)].append(count)
+
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d-%H%M%SZ")
+    out = Path(args.out) if args.out else (
+        ROOT / "benchmarks" / "cross-language" / "results"
+        / f"{stamp}-{git_fact('rev-parse', '--short=8', 'HEAD')}"
+    )
+    out.mkdir(parents=True, exist_ok=True)
+
+    with (out / "instructions.tsv").open("w", encoding="utf-8") as handle:
+        handle.write("implementation\tworkload\tmode\trep\tinstructions\n")
+        for row in rows:
+            handle.write("\t".join(map(str, row)) + "\n")
+
+    version_proc = run_checked([args.python, "--version"])
+    python_version = (version_proc.stdout or version_proc.stderr).strip()
+    environment = {
+        "date_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "git_sha": git_fact("rev-parse", "HEAD"),
+        "python": python_version,
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "cpu_count": os.cpu_count(),
+        "sens_bench": str(args.sens_bench.resolve()),
+        "reps": args.reps,
+        "cases": list(selected),
+        "params": {name: PARAMS[name] for name in selected},
+        "metric": "valgrind cachegrind I refs",
+    }
+    (out / "environment.json").write_text(
+        json.dumps(environment, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    def startup(implementation: str) -> float:
+        return median(grouped, (implementation, "empty", "startup"))
+
+    def load_net(implementation: str, name: str) -> float:
+        return median(grouped, (implementation, name, "load")) - startup(implementation)
+
+    def execution_net(implementation: str, name: str) -> float:
+        # Full і load включають той самий startup шлях; різниця ізолює
+        # виконання настільки, наскільки це дозволяє конкретна реалізація.
+        return (
+            median(grouped, (implementation, name, "full"))
+            - median(grouped, (implementation, name, "load"))
+        )
+
+    lines = [
+        "# SENS ↔ CPython: benchmark реалізацій",
+        "",
+        "Мірило: Valgrind Cachegrind I refs, медіана повторів. "
+        "Це не рейтинг абстрактних мов.",
+        "",
+        "## Startup",
+        "",
+        "| реалізація | інструкції |",
+        "|---|---:|",
+        f"| SENS | {startup('sens'):,.0f} |",
+        f"| CPython | {startup('cpython'):,.0f} |",
+        "",
+        "## Execution = full - load",
+        "",
+        "| workload | SENS | CPython | CPython / SENS |",
+        "|---|---:|---:|---:|",
+    ]
+
+    ratios = []
+    for name in selected:
+        sens = execution_net("sens", name)
+        cpython = execution_net("cpython", name)
+        ratio = cpython / sens
+        ratios.append(ratio)
+        lines.append(f"| {name} | {sens:,.0f} | {cpython:,.0f} | ×{ratio:.3f} |")
+
+    lines += [
+        "",
+        "Геометричне середнє нижче — лише компактний опис цього конкретного "
+        "корпусу, не рейтинг мов.",
+        f"Корпусне CPython/SENS: **×{geomean(ratios):.3f}**.",
+        "",
+        "## Load - startup",
+        "",
+        "| workload | SENS FASL decode | CPython source compile | CPython / SENS |",
+        "|---|---:|---:|---:|",
+    ]
+    for name in selected:
+        sens = load_net("sens", name)
+        cpython = load_net("cpython", name)
+        lines.append(f"| {name} | {sens:,.0f} | {cpython:,.0f} | ×{cpython / sens:.3f} |")
+
+    lines += [
+        "",
+        "## Межі інтерпретації",
+        "",
+        "- SENS load — декодування заздалегідь створеного FASL; encode не міряється.",
+        "- CPython load — читання source + compile(...), без виконання модулю.",
+        "- Execution — різниця instruction count full - load; це operational "
+        "наближення, а не твердження про однаковий внутрішній pipeline.",
+        "- Усі відповіді перевірені до вимірювання.",
+        "",
+    ]
+
+    report = "\n".join(lines)
+    (out / "report.md").write_text(report, encoding="utf-8")
+    print()
+    print(report)
+    print(f"\nРезультати: {out}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
