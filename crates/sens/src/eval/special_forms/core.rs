@@ -70,7 +70,7 @@ pub(crate) fn evaluate_definition(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("def", arguments, 2, span)?;
+    exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
     let ExprKind::Symbol(name) = &arguments[0].kind else {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
@@ -163,6 +163,28 @@ pub(crate) fn evaluate_cond(
 
 pub fn exact_arity(
     operator: &str,
+    arguments: &[Expr],
+    expected: usize,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if arguments.len() == expected {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!(
+            "{operator}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            arguments.len()
+        ),
+        span,
+    ))
+}
+
+/// Arity check for a SENS form inside the core: the form is named by its
+/// 8-bit code, never by a surface spelling. `exact_arity` stays for host
+/// capabilities, which are not SENS identities.
+pub fn exact_sens_arity(
+    operator: crate::Sens8,
     arguments: &[Expr],
     expected: usize,
     span: Span,
