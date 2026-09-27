@@ -108,16 +108,22 @@ fn registry_and_function_table_codes_are_exactly_eight_bits_and_unique() {
     }
     assert!(!seen.is_empty(), "реєстр не прочитано");
 
-    // Згенерована Lisp-таблиця функцій: рядки ("xxxxxxxx" ...).
+    // Згенерована Lisp-таблиця функцій: рядки (xxxxxxxx ...) — голі 8 біт, не текст.
     let table = root.join("lib/generated/function-table.lisp");
     let text = fs::read_to_string(&table).unwrap();
     let mut table_seen = std::collections::BTreeSet::new();
     for (line_no, line) in text.lines().enumerate() {
-        let Some(rest) = line.trim_start().strip_prefix("(\"") else { continue };
-        let code: String = rest.chars().take_while(|c| *c != '"').collect();
-        if !code.chars().all(|c| c == '0' || c == '1') {
+        let Some(rest) = line.trim_start().strip_prefix('(') else { continue };
+        let code: String = rest.chars().take_while(|c| !c.is_whitespace() && *c != ')').collect();
+        if code.is_empty() || !code.chars().all(|c| c == '0' || c == '1') {
             continue;
         }
+        assert!(
+            !line.contains(&format!("\"{code}\"")),
+            "{}:{}: SENS у лапках — текстовий сурогат, не ідентичність",
+            rel(&table),
+            line_no + 1
+        );
         if !is_bits(&code, 8) {
             problems.push(format!("{}:{}: {} біт: {code}", rel(&table), line_no + 1, code.len()));
         } else if !table_seen.insert(code.clone()) {
@@ -154,7 +160,7 @@ fn registry_and_function_table_codes_are_exactly_eight_bits_and_unique() {
 
     let zero_row = text
         .lines()
-        .find(|line| line.trim_start().starts_with("(\"00000000\" "))
+        .find(|line| line.trim_start().starts_with("(00000000 "))
         .expect("generated function table must project exact SENS 00000000");
     assert!(
         zero_row.contains("identity:00000000")
