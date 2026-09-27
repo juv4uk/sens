@@ -78,6 +78,11 @@ pub enum ExprKind {
     /// SENS call: the function slot is exactly one byte (`Sens8`), no name
     /// text. Produced only by `eval::lower` after parsing.
     Call(Sens8, Rc<[Expr]>),
+    /// Параметр замикання за номером: слот `index` кадру виклику на `depth`
+    /// кадрів вище. Створює лише розв'язувач тіла `lambda` (`eval::closures`);
+    /// парсер його не породжує, у fasl він записується як ім'я `name`.
+    /// A closure parameter by slot, produced only by the lambda-body resolver.
+    Local { depth: u32, index: u32, name: Rc<str> },
 }
 
 // Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
@@ -153,7 +158,7 @@ pub(crate) mod fasl {
                 out.push(TAG_STRING);
                 put_str(out, value);
             }
-            ExprKind::Symbol(symbol) => {
+            ExprKind::Symbol(symbol) | ExprKind::Local { name: symbol, .. } => {
                 out.push(TAG_SYMBOL);
                 put_str(out, symbol);
             }
