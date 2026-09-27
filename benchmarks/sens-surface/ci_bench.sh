@@ -8,7 +8,7 @@
 #   sh ci_bench.sh CI_BENCH_BINARY WORKLOAD_DIR OUT.tsv [FORMS] [REPS]
 #
 # WORKLOAD_DIR — вихід `run.py --emit DIR --small`. FORMS — через пробіл
-# (за замовчуванням "en sens"; для закріпленої старої бази — "legacy-en").
+# (за замовчуванням "en sens").
 # Форма `sens` спершу кодується в двійковий вигляд (fasl, функція = 1 байт)
 # самим бінарником — цей крок не міряється.
 # Режими: load — лише завантажити програму; full — завантажити й виконати.
