@@ -312,52 +312,49 @@ impl Environment {
     }
 
     pub fn get(&self, name: &str) -> Option<Value> {
-        let mut current = Some(self.clone());
-        while let Some(env) = current {
-            if let Some(value) = env.0.borrow().values.get(name) {
-                return Some(value.clone());
-            }
-            current = env.0.borrow().parent.clone();
+        // Walk the frames themselves: cloning an `Environment` per step would
+        // run its `Drop` for every step of every lookup.
+        let mut frame = Rc::clone(&self.0);
+        loop {
+            let parent = {
+                let current = frame.borrow();
+                if let Some(value) = current.values.get(name) {
+                    return Some(value.clone());
+                }
+                current.parent.as_ref().map(|parent| Rc::clone(&parent.0))
+            };
+            frame = parent?;
         }
-        None
     }
 }
 
 impl Drop for Environment {
     fn drop(&mut self) {
-        // Swap this Environment's real content out for a cheap, parentless
-        // sentinel, then walk the extracted parent chain iteratively.
-        let taken = std::mem::replace(
-            self,
-            Environment(
-                Rc::new(RefCell::new(Frame {
-                    values: HashMap::new(),
-                    parent: None,
-                })),
-                Rc::new(RefCell::new(Transcript {
-                    lines: Vec::new(),
-                    taken: 0,
-                })),
-                Rc::new(RefCell::new(Limits::default())),
-            ),
-        );
-
-        let mut worklist = vec![taken];
-        while let Some(env) = worklist.pop() {
-            let env = std::mem::ManuallyDrop::new(env);
-            // SAFETY: `env` is ManuallyDrop, so each field is read exactly once.
-            let frame_rc = unsafe { std::ptr::read(&env.0) };
-            let transcript_rc = unsafe { std::ptr::read(&env.1) };
-            let limits_rc = unsafe { std::ptr::read(&env.2) };
-            drop(transcript_rc);
-            drop(limits_rc);
-
-            if let Ok(cell) = Rc::try_unwrap(frame_rc) {
-                let mut frame = cell.into_inner();
-                if let Some(parent) = frame.parent.take() {
-                    worklist.push(parent);
-                }
-            }
+        // Only the last owner of a frame frees it. Its parent chain is then
+        // released iteratively: each frame that dies gives up its parent
+        // before it drops, so no drop recurses through the chain (a deep
+        // recursion would overflow the stack). Dropping a shared handle only
+        // decrements a reference count and allocates nothing.
+        if Rc::strong_count(&self.0) != 1 {
+            return;
+        }
+        let Ok(mut frame) = self.0.try_borrow_mut() else {
+            return;
+        };
+        let mut next = frame.parent.take();
+        drop(frame);
+        while let Some(environment) = next {
+            next = if Rc::strong_count(&environment.0) == 1 {
+                environment
+                    .0
+                    .try_borrow_mut()
+                    .ok()
+                    .and_then(|mut parent_frame| parent_frame.parent.take())
+            } else {
+                None
+            };
+            // `environment` now has no parent, so its own drop is shallow.
+            drop(environment);
         }
     }
 }
