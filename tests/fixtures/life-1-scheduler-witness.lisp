@@ -13,7 +13,7 @@
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-42)
                  (priority ordinary)
-                 (semantic-id "00001100"))))
+                 (semantic-id 00001100))))
            (first-duplicate
              (00000001
                (pending-invocation
@@ -21,7 +21,7 @@
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-42)
                  (priority ordinary)
-                 (semantic-id "00001100"))))
+                 (semantic-id 00001100))))
            (second
              (00000001
                (pending-invocation
@@ -29,7 +29,7 @@
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-99)
                  (priority ordinary)
-                 (semantic-id "00001100"))))
+                 (semantic-id 00001100))))
            (pending
              (life-scheduler-pending
                (00100111 first first-duplicate second)))
