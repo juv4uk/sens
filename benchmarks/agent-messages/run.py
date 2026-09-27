@@ -7,6 +7,7 @@
 
 Форми:
   sens-fasl  — SENS, двійковий fasl, функція = 1 байт;
+  sens-wire  — SENS, компактний формат обміну (без хешу, малі цілі — 1 байт);
   sens-en    — той самий SENS англійським текстом (розбір тексту);
   py-src     — CPython, текст: compile + exec;
   py-marshal — CPython, заздалегідь скомпільований байткод: marshal.loads + exec;
@@ -37,7 +38,7 @@ SENS = {"quote": "00000001", "eq": "00000011", "car": "00000101", "cdr": "000001
         "+": "00001100", "-": "00001101", "*": "00001110"}
 EN = {"quote": "quote", "eq": "eq?", "car": "car", "cdr": "cdr", "cond": "cond",
       "lambda": "lambda", "def": "def", "+": "+", "-": "-", "*": "*"}
-FORMS = ["sens-fasl", "sens-en", "py-src", "py-marshal", "py-json"]
+FORMS = ["sens-fasl", "sens-wire", "sens-en", "py-src", "py-marshal", "py-json"]
 
 
 # --- генерація повідомлень: AST -> Lisp / Python / JSON --------------------
@@ -159,7 +160,8 @@ def write_records(path, payloads):
 
 def command(form, bench, files, mode):
     if form.startswith("sens"):
-        return [str(bench), "run", form.split("-")[1] if form == "sens-en" else "sens",
+        engine = {"sens-fasl": "sens", "sens-wire": "wire", "sens-en": "en"}[form]
+        return [str(bench), "run", engine,
                 str(files[form]), mode]
     return [sys.executable, str(HERE / "py_agent.py"), form.split("-")[1], str(files[form]), mode]
 
@@ -196,8 +198,9 @@ def main():
                   [marshal.dumps(compile(python(m), "<message>", "exec")) for m in messages])
     write_records(files["py-json"],
                   [json.dumps(json_ast(m), separators=(",", ":")).encode() for m in messages])
-    subprocess.run([str(args.agent_bench), "encode", str(out / "messages-sens-text.bin"),
-                    str(files["sens-fasl"])], check=True)
+    for form, fmt in (("sens-fasl", "fasl"), ("sens-wire", "wire")):
+        subprocess.run([str(args.agent_bench), "encode", fmt, str(out / "messages-sens-text.bin"),
+                        str(files[form])], check=True)
 
     # Спершу правильність: кожна відповідь кожної форми звіряється з CPython.
     for form in FORMS:
