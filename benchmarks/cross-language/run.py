@@ -292,8 +292,14 @@ def main() -> int:
     parser.add_argument(
         "--inner-reps",
         type=int,
-        default=10,
-        help="скільки разів повторити вже завантажений call для steady execution",
+        default=3,
+        help="скільки call-ів ампліфікувати під Cachegrind",
+    )
+    parser.add_argument(
+        "--native-inner-reps",
+        type=int,
+        default=100,
+        help="скільки call-ів ампліфікувати для native wall/CPU виміру",
     )
     parser.add_argument("--only", default=",".join(CASES))
     parser.add_argument("--check-only", action="store_true")
@@ -308,6 +314,8 @@ def main() -> int:
         parser.error("--reps має бути >= 1")
     if args.inner_reps < 1:
         parser.error("--inner-reps має бути >= 1")
+    if args.native_inner_reps < 1:
+        parser.error("--native-inner-reps має бути >= 1")
 
     sens_surface = load_sens_surface_module()
     workdir = Path(tempfile.mkdtemp(prefix="sens-cross-bench-"))
@@ -374,13 +382,18 @@ def main() -> int:
                 )
             )
         for name in selected:
-            commands = command_set(args.sens_bench, args.python, workdir, name, args.inner_reps)
+            instruction_commands = command_set(
+                args.sens_bench, args.python, workdir, name, args.inner_reps
+            )
+            native_commands = command_set(
+                args.sens_bench, args.python, workdir, name, args.native_inner_reps
+            )
             for implementation in ("sens", "cpython"):
                 for mode in ("load", "ready", "repeat", "full"):
-                    cmd = commands[implementation][mode]
-                    count = instruction_count(cmd)
+                    count = instruction_count(instruction_commands[implementation][mode])
                     rows.append((implementation, name, mode, rep, count))
-                    metrics = runtime_metrics(cmd)
+                    native_cmd = native_commands[implementation][mode]
+                    metrics = runtime_metrics(native_cmd)
                     runtime_rows.append(
                         (
                             implementation,
@@ -437,6 +450,7 @@ def main() -> int:
         "sens_bench": str(args.sens_bench.resolve()),
         "reps": args.reps,
         "inner_reps": args.inner_reps,
+        "native_inner_reps": args.native_inner_reps,
         "cases": list(selected),
         "params": {name: PARAMS[name] for name in selected},
         "metrics": [
@@ -557,11 +571,11 @@ def main() -> int:
         sens_wall = (
             median(runtime_grouped, ("sens", name, "repeat", "wall_s"))
             - median(runtime_grouped, ("sens", name, "ready", "wall_s"))
-        ) / args.inner_reps
+        ) / args.native_inner_reps
         cpython_wall = (
             median(runtime_grouped, ("cpython", name, "repeat", "wall_s"))
             - median(runtime_grouped, ("cpython", name, "ready", "wall_s"))
-        ) / args.inner_reps
+        ) / args.native_inner_reps
         sens_rss = median(runtime_grouped, ("sens", name, "repeat", "maxrss_kb"))
         cpython_rss = median(runtime_grouped, ("cpython", name, "repeat", "maxrss_kb"))
         lines.append(
@@ -571,8 +585,8 @@ def main() -> int:
 
     lines += [
         "",
-        "Wall/RSS міряються окремим нативним запуском без Valgrind; "
-        "тому вони не містять overhead Cachegrind.",
+        f"Wall/RSS міряються окремим нативним repeat({args.native_inner_reps}) "
+        "без Valgrind; тому вони не містять overhead Cachegrind.",
         "",
         "## Межі інтерпретації",
         "",
@@ -582,6 +596,8 @@ def main() -> int:
         "ready і repeat проходять matched load/setup path.",
         "- CPython repeat має мінімальний Python loop у driver; SENS repeat має "
         "мінімальний Rust loop. Це явно лишається частиною measurement harness.",
+        f"- Cachegrind використовує repeat({args.inner_reps}); native wall/CPU — "
+        f"repeat({args.native_inner_reps}), щоб process noise не домінував короткі workload.",
         "- Усі відповіді перевірені до вимірювання.",
         "",
     ]
