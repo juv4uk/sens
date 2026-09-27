@@ -20,6 +20,7 @@ import statistics
 import subprocess
 import sys
 import tempfile
+import time
 from collections import defaultdict
 from pathlib import Path
 
@@ -177,6 +178,36 @@ def instruction_count(cmd: list[str]) -> int:
     return int(match.group(1).replace(",", ""))
 
 
+def runtime_metrics(cmd: list[str]) -> dict[str, float | int]:
+    started = time.perf_counter()
+    proc = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    _pid, status, usage = os.wait4(proc.pid, 0)
+    wall = time.perf_counter() - started
+    stdout = proc.stdout.read() if proc.stdout is not None else ""
+    stderr = proc.stderr.read() if proc.stderr is not None else ""
+    if proc.stdout is not None:
+        proc.stdout.close()
+    if proc.stderr is not None:
+        proc.stderr.close()
+    exit_code = os.waitstatus_to_exitcode(status)
+    if exit_code != 0:
+        raise RuntimeError(
+            f"native-команда впала ({exit_code}): {' '.join(cmd)}\n"
+            f"stdout:\n{stdout}\nstderr:\n{stderr}"
+        )
+    return {
+        "wall_s": wall,
+        "user_s": usage.ru_utime,
+        "sys_s": usage.ru_stime,
+        "maxrss_kb": usage.ru_maxrss,
+    }
+
+
 def git_fact(*args: str) -> str:
     try:
         return subprocess.run(
@@ -287,22 +318,57 @@ def main() -> int:
     }
 
     rows: list[tuple[str, str, str, int, int]] = []
+    runtime_rows: list[tuple[str, str, str, int, float, float, float, int]] = []
     for rep in range(1, args.reps + 1):
         for implementation, cmd in startup_commands.items():
             rows.append(
                 (implementation, "empty", "startup", rep, instruction_count(cmd))
             )
+            metrics = runtime_metrics(cmd)
+            runtime_rows.append(
+                (
+                    implementation,
+                    "empty",
+                    "startup",
+                    rep,
+                    float(metrics["wall_s"]),
+                    float(metrics["user_s"]),
+                    float(metrics["sys_s"]),
+                    int(metrics["maxrss_kb"]),
+                )
+            )
         for name in selected:
             commands = command_set(args.sens_bench, args.python, workdir, name)
             for implementation in ("sens", "cpython"):
                 for mode in ("load", "full"):
-                    count = instruction_count(commands[implementation][mode])
+                    cmd = commands[implementation][mode]
+                    count = instruction_count(cmd)
                     rows.append((implementation, name, mode, rep, count))
+                    metrics = runtime_metrics(cmd)
+                    runtime_rows.append(
+                        (
+                            implementation,
+                            name,
+                            mode,
+                            rep,
+                            float(metrics["wall_s"]),
+                            float(metrics["user_s"]),
+                            float(metrics["sys_s"]),
+                            int(metrics["maxrss_kb"]),
+                        )
+                    )
         print(f"[measure] repetition {rep}/{args.reps}")
 
     grouped = defaultdict(list)
     for implementation, name, mode, _rep, count in rows:
         grouped[(implementation, name, mode)].append(count)
+
+    runtime_grouped = defaultdict(list)
+    for implementation, name, mode, _rep, wall, user, sys_time, rss in runtime_rows:
+        runtime_grouped[(implementation, name, mode, "wall_s")].append(wall)
+        runtime_grouped[(implementation, name, mode, "user_s")].append(user)
+        runtime_grouped[(implementation, name, mode, "sys_s")].append(sys_time)
+        runtime_grouped[(implementation, name, mode, "maxrss_kb")].append(rss)
 
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d-%H%M%SZ")
     out = Path(args.out) if args.out else (
@@ -314,6 +380,13 @@ def main() -> int:
     with (out / "instructions.tsv").open("w", encoding="utf-8") as handle:
         handle.write("implementation\tworkload\tmode\trep\tinstructions\n")
         for row in rows:
+            handle.write("\t".join(map(str, row)) + "\n")
+
+    with (out / "runtime.tsv").open("w", encoding="utf-8") as handle:
+        handle.write(
+            "implementation\tworkload\tmode\trep\twall_s\tuser_s\tsys_s\tmaxrss_kb\n"
+        )
+        for row in runtime_rows:
             handle.write("\t".join(map(str, row)) + "\n")
 
     version_proc = run_checked([args.python, "--version"])
@@ -329,7 +402,11 @@ def main() -> int:
         "reps": args.reps,
         "cases": list(selected),
         "params": {name: PARAMS[name] for name in selected},
-        "metric": "valgrind cachegrind I refs",
+        "metrics": [
+            "valgrind cachegrind I refs",
+            "native wall/user/sys time",
+            "native maxrss_kb",
+        ],
     }
     (out / "environment.json").write_text(
         json.dumps(environment, ensure_ascii=False, indent=2) + "\n",
@@ -394,6 +471,32 @@ def main() -> int:
         lines.append(f"| {name} | {sens:,.0f} | {cpython:,.0f} | ×{cpython / sens:.3f} |")
 
     lines += [
+        "",
+        "## Operational wall time і RSS (спостереження, не CI-контракт)",
+        "",
+        "| workload | SENS exec wall, s | CPython exec wall, s | CPython / SENS | SENS full RSS, KiB | CPython full RSS, KiB |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for name in selected:
+        sens_wall = (
+            median(runtime_grouped, ("sens", name, "full", "wall_s"))
+            - median(runtime_grouped, ("sens", name, "load", "wall_s"))
+        )
+        cpython_wall = (
+            median(runtime_grouped, ("cpython", name, "full", "wall_s"))
+            - median(runtime_grouped, ("cpython", name, "load", "wall_s"))
+        )
+        sens_rss = median(runtime_grouped, ("sens", name, "full", "maxrss_kb"))
+        cpython_rss = median(runtime_grouped, ("cpython", name, "full", "maxrss_kb"))
+        lines.append(
+            f"| {name} | {sens_wall:.6f} | {cpython_wall:.6f} | "
+            f"×{cpython_wall / sens_wall:.3f} | {sens_rss:,.0f} | {cpython_rss:,.0f} |"
+        )
+
+    lines += [
+        "",
+        "Wall/RSS міряються окремим нативним запуском без Valgrind; "
+        "тому вони не містять overhead Cachegrind.",
         "",
         "## Межі інтерпретації",
         "",
