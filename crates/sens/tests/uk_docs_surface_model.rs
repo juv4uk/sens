@@ -52,7 +52,8 @@ fn documented_ids() -> Vec<String> {
             let mut fields = rest.split_whitespace();
             fields.next()?;
             let id = fields.next()?;
-            let bits = id.strip_prefix('"')?.strip_suffix('"')?;
+            // A bare 8-bit SENS token; a quoted "00001100" is text, not SENS.
+            let bits = id;
             (bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')))
                 .then(|| bits.to_string())
         })

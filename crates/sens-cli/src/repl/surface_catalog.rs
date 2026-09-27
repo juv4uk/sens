@@ -140,10 +140,12 @@ fn expr_string(expr: &Expr) -> Option<&str> {
     }
 }
 
-fn expr_byte_sid(expr: &Expr) -> Option<&str> {
-    let bits = expr_string(expr)?;
-    (bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')))
-        .then_some(bits)
+/// A SENS identity in the docs index is a bare 8-bit token, never text.
+fn expr_byte_sid(expr: &Expr) -> Option<String> {
+    match &expr.kind {
+        ExprKind::Sid(sid) => Some(sid.to_string()),
+        _ => None,
+    }
 }
 
 fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
@@ -176,8 +178,7 @@ fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
                     .ok_or_else(|| "uk-docs.wsm: category має бути символом".to_string())?
                     .to_string(),
                 identity: expr_byte_sid(&fields[2])
-                    .ok_or_else(|| "uk-docs.wsm: byte SID має бути 8-бітним рядком".to_string())?
-                    .to_string(),
+                    .ok_or_else(|| "uk-docs.wsm: byte SID має бути голими 8 бітами".to_string())?,
                 kind: expr_symbol(&fields[3])
                     .ok_or_else(|| "uk-docs.wsm: kind має бути символом".to_string())?
                     .to_string(),
