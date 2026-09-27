@@ -67,7 +67,7 @@
 
 (00001001 machine-path
   (00001000 (sid)
-    (10011100 ((row (find-machine-row (sid-bits sid) machine-rows)))
+    (10011100 ((row (find-machine-row sid machine-rows)))
       (00000111
         ((00000010 row) () "()")
         ((00000010 row) (1) "()")
