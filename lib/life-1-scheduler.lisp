@@ -9,7 +9,7 @@
 ;     (trigger (projection-ready prolog-substitutions-to-datalog-facts))
 ;     (provenance-ref observation-42)
 ;     (priority ordinary)
-;     (semantic-id "00001100"))
+;     (semantic-id 00001100))
 ;
 ; Projection availability shape:
 ;   (projection-ready
