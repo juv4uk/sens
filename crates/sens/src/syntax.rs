@@ -405,33 +405,96 @@ pub(crate) mod wire {
         }
     }
 
-    fn decode_list(bytes: &[u8], pos: &mut usize, count: usize, depth: u32) -> Option<ExprKind> {
-        // Кожен елемент займає щонайменше 1 байт — більший лічильник брехливий.
-        if count > bytes.len().saturating_sub(*pos) {
-            return None;
+    fn expr(kind: ExprKind) -> Expr {
+        Expr {
+            kind,
+            span: crate::Span { start: 0, end: 0 },
         }
-        let mut items = Vec::with_capacity(count);
-        for _ in 0..count {
-            items.push(decode_expr(bytes, pos, depth + 1)?);
-        }
-        Some(ExprKind::List(items.into()))
     }
 
-    fn decode_expr(bytes: &[u8], pos: &mut usize, depth: u32) -> Option<Expr> {
-        if depth > MAX_STRUCTURE_DEPTH {
+    /// Незавершений контейнер на явному стеку декодера.
+    enum Open {
+        List { remaining: usize, items: Vec<Expr> },
+        Pair { head: Option<Expr> },
+    }
+
+    /// Один вираз без рекурсії: вхід недовірений, тож глибина вкладеності не
+    /// повинна залежати від розміру стеку потоку (debug-збірка, малий стек).
+    /// Глибину все одно обмежено `MAX_STRUCTURE_DEPTH` — решта інтерпретатора
+    /// обходить дерево рекурсивно.
+    fn decode_expr(bytes: &[u8], pos: &mut usize) -> Option<Expr> {
+        let mut stack: Vec<Open> = Vec::new();
+        loop {
+            let mut done = match decode_step(bytes, pos)? {
+                Step::Value(kind) => expr(kind),
+                Step::Open(open) => {
+                    if stack.len() as u32 >= MAX_STRUCTURE_DEPTH {
+                        return None;
+                    }
+                    match open {
+                        Open::List { remaining: 0, .. } => expr(ExprKind::List(Rc::from([]))),
+                        open => {
+                            stack.push(open);
+                            continue;
+                        }
+                    }
+                }
+            };
+            // Готове значення піднімається вгору, закриваючи заповнені контейнери.
+            loop {
+                match stack.last_mut() {
+                    None => return Some(done),
+                    Some(Open::List { remaining, items }) => {
+                        items.push(done);
+                        *remaining -= 1;
+                        if *remaining > 0 {
+                            break;
+                        }
+                        let Some(Open::List { items, .. }) = stack.pop() else { unreachable!() };
+                        done = expr(ExprKind::List(items.into()));
+                    }
+                    Some(Open::Pair { head }) => {
+                        if head.is_none() {
+                            *head = Some(done);
+                            break;
+                        }
+                        let Some(Open::Pair { head: Some(head) }) = stack.pop() else { unreachable!() };
+                        done = expr(ExprKind::Pair(Rc::new(head), Rc::new(done)));
+                    }
+                }
+            }
+        }
+    }
+
+    enum Step {
+        Value(ExprKind),
+        Open(Open),
+    }
+
+    fn open_list(bytes: &[u8], pos: usize, count: usize) -> Option<Step> {
+        // Кожен елемент займає щонайменше 1 байт — більший лічильник брехливий.
+        if count > bytes.len().saturating_sub(pos) {
             return None;
         }
+        Some(Step::Open(Open::List {
+            remaining: count,
+            items: Vec::with_capacity(count),
+        }))
+    }
+
+    fn decode_step(bytes: &[u8], pos: &mut usize) -> Option<Step> {
         let tag = *bytes.get(*pos)?;
         *pos += 1;
         let kind = match tag {
             0..SMALL_INT_END => ExprKind::Number(f64::from(tag), Exactness::Exact),
             SHORT_LIST..SHORT_LIST_END => {
-                decode_list(bytes, pos, usize::from(tag - SHORT_LIST), depth)?
+                return open_list(bytes, *pos, usize::from(tag - SHORT_LIST));
             }
             TAG_LIST => {
                 let count = usize::try_from(get_varint(bytes, pos)?).ok()?;
-                decode_list(bytes, pos, count, depth)?
+                return open_list(bytes, *pos, count);
             }
+            TAG_PAIR => return Some(Step::Open(Open::Pair { head: None })),
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
@@ -459,17 +522,9 @@ pub(crate) mod wire {
             TAG_RATIONAL => ExprKind::Rational(Rational::read_fasl(bytes, pos)?),
             TAG_STRING => ExprKind::String(get_text(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_text(bytes, pos)?.into()),
-            TAG_PAIR => {
-                let head = decode_expr(bytes, pos, depth + 1)?;
-                let tail = decode_expr(bytes, pos, depth + 1)?;
-                ExprKind::Pair(Rc::new(head), Rc::new(tail))
-            }
             _ => return None,
         };
-        Some(Expr {
-            kind,
-            span: crate::Span { start: 0, end: 0 },
-        })
+        Some(Step::Value(kind))
     }
 
     /// Магія `SW\x01` + varint кількість виразів + вирази.
@@ -493,7 +548,7 @@ pub(crate) mod wire {
         }
         let mut out = Vec::with_capacity(count);
         for _ in 0..count {
-            out.push(decode_expr(bytes, &mut pos, 0)?);
+            out.push(decode_expr(bytes, &mut pos)?);
         }
         (pos == bytes.len()).then_some(out)
     }
@@ -548,6 +603,12 @@ mod wire_tests {
         deep.extend(std::iter::repeat_n(0x41u8, 100_000));
         deep.push(0x00);
         assert!(decode_program(&deep).is_none());
+        // Дозволена глибина декодується без рекурсії й без аварії.
+        let mut nested = b"SW\x01\x01".to_vec();
+        nested.extend(std::iter::repeat_n(0x41u8, 700));
+        nested.push(0x07);
+        let decoded = decode_program(&nested).expect("700 levels are within the limit");
+        assert_eq!(encode_program(&decoded), nested);
         let expressions = parse(SAMPLE).expect("sample parses");
         let encoded = encode_program(&expressions);
         for cut in 0..encoded.len() {
