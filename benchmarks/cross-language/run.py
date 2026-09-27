@@ -27,6 +27,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SENS_SURFACE_RUN = ROOT / "benchmarks" / "sens-surface" / "run.py"
+CPYTHON_DRIVER = ROOT / "benchmarks" / "cross-language" / "cpython_driver.py"
 CASES = ("fib", "loop", "ackermann", "closures", "evenodd")
 
 # Параметри спільні й достатньо малі для CPython-рекурсії під Cachegrind.
@@ -64,7 +65,11 @@ def fib(n):
         return 1
     return fib(n - 1) + fib(n - 2)
 
-print(fib({n}))
+def bench():
+    return fib({n})
+
+if __name__ == "__main__":
+    print(bench())
 """
 
     if name == "loop":
@@ -76,7 +81,11 @@ def loop(n, acc):
         return acc
     return loop(n - 1, acc + 2)
 
-print(loop({n}, 0))
+def bench():
+    return loop({n}, 0)
+
+if __name__ == "__main__":
+    print(bench())
 """
 
     if name == "ackermann":
@@ -90,7 +99,11 @@ def ack(m, n):
         return ack(m - 1, 1)
     return ack(m - 1, ack(m, n - 1))
 
-print(ack(3, {n}))
+def bench():
+    return ack(3, {n})
+
+if __name__ == "__main__":
+    print(bench())
 """
 
     if name == "closures":
@@ -109,7 +122,11 @@ def loop(n, acc):
         return acc
     return loop(n - 1, add3(acc))
 
-print(loop({n}, 0))
+def bench():
+    return loop({n}, 0)
+
+if __name__ == "__main__":
+    print(bench())
 """
 
     if name == "evenodd":
@@ -126,7 +143,11 @@ def is_odd(n):
         return 0
     return is_even(n - 1)
 
-print(is_even({n}))
+def bench():
+    return is_even({n})
+
+if __name__ == "__main__":
+    print(bench())
 """
 
     raise KeyError(name)
@@ -226,11 +247,16 @@ def command_set(
     python: str,
     workdir: Path,
     name: str,
+    inner_reps: int,
 ) -> dict[str, dict[str, list[str]]]:
     py_file = workdir / f"{name}.py"
     return {
         "sens": {
             "load": [str(sens_bench), str(workdir), name, "sens", "load"],
+            "ready": [str(sens_bench), str(workdir), name, "sens", "ready"],
+            "repeat": [
+                str(sens_bench), str(workdir), name, "sens", "repeat", str(inner_reps)
+            ],
             "full": [str(sens_bench), str(workdir), name, "sens", "full"],
         },
         "cpython": {
@@ -243,6 +269,8 @@ def command_set(
                     "compile(p.read_text(encoding='utf-8'),str(p),'exec')"
                 ),
             ],
+            "ready": [python, str(CPYTHON_DRIVER), str(py_file), "0"],
+            "repeat": [python, str(CPYTHON_DRIVER), str(py_file), str(inner_reps)],
             "full": [python, str(py_file)],
         },
     }
@@ -261,6 +289,12 @@ def main() -> int:
     parser.add_argument("--sens-bench", required=True, type=Path)
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--reps", type=int, default=3)
+    parser.add_argument(
+        "--inner-reps",
+        type=int,
+        default=10,
+        help="скільки разів повторити вже завантажений call для steady execution",
+    )
     parser.add_argument("--only", default=",".join(CASES))
     parser.add_argument("--check-only", action="store_true")
     parser.add_argument("--out")
@@ -272,6 +306,8 @@ def main() -> int:
         parser.error(f"невідомі workload: {', '.join(unknown)}")
     if args.reps < 1:
         parser.error("--reps має бути >= 1")
+    if args.inner_reps < 1:
+        parser.error("--inner-reps має бути >= 1")
 
     sens_surface = load_sens_surface_module()
     workdir = Path(tempfile.mkdtemp(prefix="sens-cross-bench-"))
@@ -304,7 +340,7 @@ def main() -> int:
 
     # Правильність — до будь-якого виміру.
     for name in selected:
-        commands = command_set(args.sens_bench, args.python, workdir, name)
+        commands = command_set(args.sens_bench, args.python, workdir, name, args.inner_reps)
         run_checked(commands["sens"]["full"])
         run_checked(commands["cpython"]["full"], expected=expected_by_name[name])
         print(f"[check] {name}: SENS=OK CPython=OK expected={expected_by_name[name]}")
@@ -338,9 +374,9 @@ def main() -> int:
                 )
             )
         for name in selected:
-            commands = command_set(args.sens_bench, args.python, workdir, name)
+            commands = command_set(args.sens_bench, args.python, workdir, name, args.inner_reps)
             for implementation in ("sens", "cpython"):
-                for mode in ("load", "full"):
+                for mode in ("load", "ready", "repeat"):
                     cmd = commands[implementation][mode]
                     count = instruction_count(cmd)
                     rows.append((implementation, name, mode, rep, count))
@@ -400,6 +436,7 @@ def main() -> int:
         "cpu_count": os.cpu_count(),
         "sens_bench": str(args.sens_bench.resolve()),
         "reps": args.reps,
+        "inner_reps": args.inner_reps,
         "cases": list(selected),
         "params": {name: PARAMS[name] for name in selected},
         "metrics": [
@@ -419,13 +456,23 @@ def main() -> int:
     def load_net(implementation: str, name: str) -> float:
         return median(grouped, (implementation, name, "load")) - startup(implementation)
 
-    def execution_net(implementation: str, name: str) -> float:
-        # Full і load включають той самий startup шлях; різниця ізолює
-        # виконання настільки, наскільки це дозволяє конкретна реалізація.
+    def setup_net(implementation: str, name: str) -> float:
         return (
-            median(grouped, (implementation, name, "full"))
+            median(grouped, (implementation, name, "ready"))
             - median(grouped, (implementation, name, "load"))
         )
+
+    def execution_net(implementation: str, name: str) -> float:
+        delta = (
+            median(grouped, (implementation, name, "repeat"))
+            - median(grouped, (implementation, name, "ready"))
+        )
+        if delta <= 0:
+            raise RuntimeError(
+                f"{implementation}/{name}: repeat-ready={delta} <= 0; "
+                "збільш --inner-reps, не маскуй шум"
+            )
+        return delta / args.inner_reps
 
     lines = [
         "# SENS ↔ CPython: benchmark реалізацій",
@@ -440,7 +487,7 @@ def main() -> int:
         f"| SENS | {startup('sens'):,.0f} |",
         f"| CPython | {startup('cpython'):,.0f} |",
         "",
-        "## Execution = full - load",
+        f"## Steady execution = (repeat({args.inner_reps}) - ready) / {args.inner_reps}",
         "",
         "| workload | SENS | CPython | CPython / SENS |",
         "|---|---:|---:|---:|",
@@ -468,26 +515,40 @@ def main() -> int:
     for name in selected:
         sens = load_net("sens", name)
         cpython = load_net("cpython", name)
-        lines.append(f"| {name} | {sens:,.0f} | {cpython:,.0f} | ×{cpython / sens:.3f} |")
+        ratio = cpython / sens if sens > 0 else float("nan")
+        lines.append(f"| {name} | {sens:,.0f} | {cpython:,.0f} | ×{ratio:.3f} |")
+
+    lines += [
+        "",
+        "## Setup = ready - load",
+        "",
+        "| workload | SENS setup | CPython module setup | CPython / SENS |",
+        "|---|---:|---:|---:|",
+    ]
+    for name in selected:
+        sens = setup_net("sens", name)
+        cpython = setup_net("cpython", name)
+        ratio = cpython / sens if sens > 0 else float("nan")
+        lines.append(f"| {name} | {sens:,.0f} | {cpython:,.0f} | ×{ratio:.3f} |")
 
     lines += [
         "",
         "## Operational wall time і RSS (спостереження, не CI-контракт)",
         "",
-        "| workload | SENS exec wall, s | CPython exec wall, s | CPython / SENS | SENS full RSS, KiB | CPython full RSS, KiB |",
+        "| workload | SENS exec wall/call, s | CPython exec wall/call, s | CPython / SENS | SENS repeat RSS, KiB | CPython repeat RSS, KiB |",
         "|---|---:|---:|---:|---:|---:|",
     ]
     for name in selected:
         sens_wall = (
-            median(runtime_grouped, ("sens", name, "full", "wall_s"))
-            - median(runtime_grouped, ("sens", name, "load", "wall_s"))
-        )
+            median(runtime_grouped, ("sens", name, "repeat", "wall_s"))
+            - median(runtime_grouped, ("sens", name, "ready", "wall_s"))
+        ) / args.inner_reps
         cpython_wall = (
-            median(runtime_grouped, ("cpython", name, "full", "wall_s"))
-            - median(runtime_grouped, ("cpython", name, "load", "wall_s"))
-        )
-        sens_rss = median(runtime_grouped, ("sens", name, "full", "maxrss_kb"))
-        cpython_rss = median(runtime_grouped, ("cpython", name, "full", "maxrss_kb"))
+            median(runtime_grouped, ("cpython", name, "repeat", "wall_s"))
+            - median(runtime_grouped, ("cpython", name, "ready", "wall_s"))
+        ) / args.inner_reps
+        sens_rss = median(runtime_grouped, ("sens", name, "repeat", "maxrss_kb"))
+        cpython_rss = median(runtime_grouped, ("cpython", name, "repeat", "maxrss_kb"))
         lines.append(
             f"| {name} | {sens_wall:.6f} | {cpython_wall:.6f} | "
             f"×{cpython_wall / sens_wall:.3f} | {sens_rss:,.0f} | {cpython_rss:,.0f} |"
@@ -502,8 +563,10 @@ def main() -> int:
         "",
         "- SENS load — декодування заздалегідь створеного FASL; encode не міряється.",
         "- CPython load — читання source + compile(...), без виконання модулю.",
-        "- Execution — різниця instruction count full - load; це operational "
-        "наближення, а не твердження про однаковий внутрішній pipeline.",
+        f"- Steady execution — (repeat({args.inner_reps}) - ready) / {args.inner_reps}; "
+        "ready і repeat проходять matched load/setup path.",
+        "- CPython repeat має мінімальний Python loop у driver; SENS repeat має "
+        "мінімальний Rust loop. Це явно лишається частиною measurement harness.",
         "- Усі відповіді перевірені до вимірювання.",
         "",
     ]
