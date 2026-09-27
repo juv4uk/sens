@@ -241,7 +241,7 @@
            (sym (get-surface (00000001 sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
-        "  (\"" (sid-bits sid) "\" " formal
+        "  (" (sid-bits sid) " " formal
         " (ук " (surface-word-wsm-text ук) ")"
         " (укр " (surface-word-wsm-text укр) ")"
         " (en " (surface-word-wsm-text en) ")"

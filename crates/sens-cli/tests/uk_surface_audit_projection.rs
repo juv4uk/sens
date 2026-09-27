@@ -13,9 +13,13 @@ fn sens(cwd: &Path) -> Command {
     command
 }
 
-/// A quoted SENS code `"00001100"` as a number; rows are keyed by code.
+/// A bare SENS token `00001100` as a number; rows are keyed by code. A quoted
+/// `"00001100"` is text describing a code, not the code, and is rejected.
 fn sens_code(token: &str) -> Option<u32> {
-    let code = token.trim_matches('"').trim_end_matches(')');
+    if token.starts_with('"') {
+        return None;
+    }
+    let code = token.trim_end_matches(')');
     (code.len() == 8 && code.bytes().all(|b| b == b'0' || b == b'1'))
         .then(|| u32::from_str_radix(code, 2).ok())
         .flatten()
@@ -28,7 +32,7 @@ fn numeric_row_id_list(source: &str) -> Vec<u32> {
             let line = line.trim_start();
             let rest = line.strip_prefix('(')?;
             let token = rest.split_whitespace().next()?;
-            token.starts_with('"').then(|| sens_code(token)).flatten()
+            sens_code(token)
         })
         .collect()
 }
@@ -62,16 +66,11 @@ fn ukr_candidate_rows(source: &str) -> Vec<UkrCandidateRow> {
             let line = line.trim_start();
             let rest = line.strip_prefix('(')?;
             let token = rest.split_whitespace().next()?;
-            if !token.starts_with('"') {
-                return None;
-            }
             let id = sens_code(token)?;
 
-            // ("code" "current UK surface, or —" "full UK" status)
+            // (code "current UK surface, or —" "full UK" status)
             let mut quoted = line.split('"');
-            quoted.next()?;
-            quoted.next()?; // code
-            quoted.next()?;
+            quoted.next()?; // (code
             quoted.next()?; // current UK surface, or —
             quoted.next()?;
             let ukr = quoted.next()?.to_string();
