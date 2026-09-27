@@ -14,7 +14,7 @@ on:
 jobs:
   bench:
     runs-on: [self-hosted, guix]
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       # Англійський Lisp до реєстру й таблиці функцій (перед 16620d83).
       LEGACY_SHA: b4f75d2f3de1eff3a5784b60d9bb57978e0accb0
@@ -38,7 +38,8 @@ jobs:
         run: |
           rm -rf /tmp/bench && mkdir -p /tmp/bench
           cp benchmarks/sens-surface/run.py benchmarks/sens-surface/ci_bench.sh \
-             benchmarks/sens-surface/ci_compare.py crates/sens/examples/ci_bench.rs /tmp/bench/
+             benchmarks/sens-surface/ci_compare.py benchmarks/sens-surface/ci_bench_legacy.rs \
+             crates/sens/examples/ci_bench.rs /tmp/bench/
           python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small \
             --forms en,sens,legacy-en
       - name: Measure old English Lisp (LEGACY_SHA, before the function table)
@@ -48,7 +49,7 @@ jobs:
         run: |
           git checkout --detach "$LEGACY_SHA"
           mkdir -p crates/my-lisp/examples
-          sed 's/^use sens::/use my_lisp::/' /tmp/bench/ci_bench.rs > crates/my-lisp/examples/ci_bench.rs
+          cp /tmp/bench/ci_bench_legacy.rs crates/my-lisp/examples/ci_bench.rs
           cargo build --release -p my-lisp --example ci_bench
           sh /tmp/bench/ci_bench.sh "$CARGO_TARGET_DIR/release/examples/ci_bench" \
             /tmp/bench/workloads /tmp/bench/legacy.tsv legacy-en

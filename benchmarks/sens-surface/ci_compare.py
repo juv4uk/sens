@@ -3,35 +3,41 @@
 
 Мірило — кількість інструкцій процесора під valgrind: на відміну від часу,
 вона відтворювана на спільній машині. Швидкість = 1 / інструкції, тож
-«швидкість ×1.20» означає, що програма виконує в 1.20 раза менше інструкцій.
+«×1.20» означає, що програма виконує в 1.20 раза менше інструкцій.
+
+SENS — 8-бітна функція, не текст: форма `sens` виконується з двійкового
+вигляду (fasl, функція = 1 байт). Англійська форма — з тексту, своєї людської
+поверхні.
 
 Три сторони:
   old-English  — англійський Lisp до таблиці функцій (b4f75d2f, 2026-09-08),
                  форма `legacy-en`; його швидкість — точка відліку ×1.00;
-  new-English  — ця зміна, англійські імена (форма `en`);
-  new-SENS     — ця зміна, коди СЕНС (форма `sens`).
+  new-English  — ця зміна, англійські імена (`en`);
+  new-SENS     — ця зміна, коди СЕНС у двійковому вигляді (`sens`).
 
-new-English і new-SENS — той самий бінарник і ті самі програми (токен у
-токен), тож SENS проти EN — контрольований експеримент. Проти old-English —
-історичний шлях мови: між комітами змінювалося й інше.
+new-English і new-SENS — той самий бінарник і ті самі програми. Проти
+old-English — історичний шлях мови: між комітами змінювалося й інше.
 
-Прогрес коміту — швидкість цієї зміни проти попереднього коміту; уповільнення
-понад поріг — код 1. Сирі інструкції — у згорнутому блоці звіту.
+Кожен вимір — медіана REPS повторів; розкид — у згорнутому блоці.
+Уповільнення виконання між комітами понад поріг — код 1.
 
   python3 ci_compare.py BASE.tsv HEAD.tsv [--legacy LEGACY.tsv] [--fail-above 3.0]
 """
 import math
 import os
+import statistics
 import sys
+from collections import defaultdict
 
 
 def load(path):
-    rows = {}
+    """(workload, form, mode) -> список інструкцій по повторах."""
+    rows = defaultdict(list)
     with open(path, encoding="utf-8") as fh:
         next(fh)
         for line in fh:
-            name, form, count = line.rstrip("\n").split("\t")
-            rows[(name, form)] = int(count)
+            name, form, mode, _rep, count = line.rstrip("\n").split("\t")
+            rows[(name, form, mode)].append(int(count))
     return rows
 
 
@@ -39,6 +45,16 @@ def option(name, default=None):
     if name in sys.argv:
         return sys.argv[sys.argv.index(name) + 1]
     return default
+
+
+def median(rows, key):
+    return statistics.median(rows[key])
+
+
+def spread(rows, key):
+    values = rows[key]
+    mid = statistics.median(values)
+    return (max(values) - min(values)) / mid * 100 if mid else 0.0
 
 
 def speedup(now, was):
@@ -59,53 +75,71 @@ def main():
     legacy_path = option("--legacy")
     legacy = load(legacy_path) if legacy_path else {}
     threshold = float(option("--fail-above", "3.0"))
-    base_empty, head_empty = base[("empty", "-")], head[("empty", "-")]
-    legacy_empty = legacy.get(("empty", "-"))
-    names = sorted({name for name, form in head if name != "empty"})
+    empty = ("empty", "-", "full")
+    head_empty, base_empty = median(head, empty), median(base, empty)
+    legacy_empty = median(legacy, empty) if legacy else None
+    names = sorted({name for name, form, mode in head if name != "empty"})
 
-    def net(rows, empty, name, form):
-        return rows[(name, form)] - empty
+    def net(rows, empty_cost, name, form, mode="full"):
+        return median(rows, (name, form, mode)) - empty_cost
 
     lines = [
         "## Швидкість мови",
         "",
-        "Мірило — інструкції процесора (valgrind), відтворювані на спільній машині. "
+        "Мірило — інструкції процесора (valgrind), медіана 3 повторів. "
         "**«+» / ×більше 1 — швидше, «−» / ×менше 1 — повільніше.** "
-        "Вартість порожньої сесії віднято.",
+        "SENS виконується з двійкового вигляду (функція = 1 байт), англійська — з тексту. "
+        "Вартість створення сесії віднято.",
         "",
     ]
 
-    have_legacy = legacy_empty is not None
-    if have_legacy:
+    if legacy:
         lines += [
-            "### Шлях мови від англійського Lisp (`b4f75d2f`, 2026-09-08 = ×1.00)",
+            "### Виконання: шлях мови від англійського Lisp (`b4f75d2f`, 2026-09-08 = ×1.00)",
             "",
-            "SENS проти англійської — той самий бінарник, ті самі програми: чистий внесок коду замість імені.",
+            "SENS проти англійської — той самий бінарник, ті самі програми.",
             "",
             "| навантаження | англійський Lisp зараз | SENS зараз | SENS проти англійської зараз |",
             "|---|---:|---:|---:|",
         ]
-        en_hist, sens_hist, sens_vs_en = [], [], []
+        cols = ([], [], [])
         for name in names:
             old = net(legacy, legacy_empty, name, "legacy-en")
             en = net(head, head_empty, name, "en")
             sens = net(head, head_empty, name, "sens")
-            a, b, c = speedup(en, old), speedup(sens, old), speedup(sens, en)
-            en_hist.append(a)
-            sens_hist.append(b)
-            sens_vs_en.append(c)
-            lines.append(f"| {name} | ×{a:.3f} ({pct(a)}) | ×{b:.3f} ({pct(b)}) | ×{c:.3f} ({pct(c)}) |")
-        ge, gs, gc = geomean(en_hist), geomean(sens_hist), geomean(sens_vs_en)
-        lines += [
-            f"| **геометричне середнє** | **×{ge:.3f} ({pct(ge)})** | **×{gs:.3f} ({pct(gs)})** "
-            f"| **×{gc:.3f} ({pct(gc)})** |",
-            "",
-        ]
-    else:
-        lines += ["Стара англійська база не виміряна.", ""]
+            factors = (speedup(en, old), speedup(sens, old), speedup(sens, en))
+            for col, factor in zip(cols, factors):
+                col.append(factor)
+            lines.append("| " + name + " | " + " | ".join(f"×{f:.3f} ({pct(f)})" for f in factors) + " |")
+        means = [geomean(col) for col in cols]
+        lines += ["| **геометричне середнє** | "
+                  + " | ".join(f"**×{g:.3f} ({pct(g)})**" for g in means) + " |", ""]
 
     lines += [
-        f"### Прогрес цього коміту (проти попереднього; уповільнення гірше ніж −{threshold:.1f}% — червоне)",
+        "### Завантаження програми: SENS (двійковий вигляд, функція = 1 байт) проти тексту",
+        "",
+        "| навантаження | англійська (текст) зараз | SENS (двійковий) зараз | SENS швидше за англійську |"
+        + (" SENS швидше за англійський Lisp 8.09 |" if legacy else ""),
+        "|---|---:|---:|---:|" + ("---:|" if legacy else ""),
+    ]
+    load_sens, load_legacy = [], []
+    for name in names:
+        en = net(head, head_empty, name, "en", "load")
+        sens = net(head, head_empty, name, "sens", "load")
+        load_sens.append(speedup(sens, en))
+        row = f"| {name} | {en:,.0f} | {sens:,.0f} | ×{speedup(sens, en):.2f} |"
+        if legacy:
+            old = net(legacy, legacy_empty, name, "legacy-en", "load")
+            load_legacy.append(speedup(sens, old))
+            row += f" ×{speedup(sens, old):.2f} |"
+        lines.append(row)
+    g = geomean(load_sens)
+    lines += ["", f"Геометричне середнє: SENS завантажується в **×{g:.2f}** швидше за англійський текст"
+              + (f", в **×{geomean(load_legacy):.2f}** швидше за англійський Lisp 8.09" if legacy else "")
+              + ". Завантаження — мала частка часу виконання цих програм.", ""]
+
+    lines += [
+        f"### Прогрес цього коміту — виконання (проти попереднього; уповільнення гірше ніж −{threshold:.1f}% — червоне)",
         "",
         "| навантаження | SENS | англійський Lisp |",
         "|---|---:|---:|",
@@ -114,7 +148,7 @@ def main():
     for name in names:
         cells = [name]
         for form in ("sens", "en"):
-            if (name, form) not in base:
+            if (name, form, "full") not in base:
                 cells.append("нове")
                 continue
             factor = speedup(net(head, head_empty, name, form), net(base, base_empty, name, form))
@@ -132,23 +166,24 @@ def main():
               f"**Повільніше:** {', '.join(regressions) or 'немає'}", ""]
 
     lines += [
-        "<details><summary>Сирі інструкції</summary>",
+        "<details><summary>Сирі інструкції (медіана, розкид повторів)</summary>",
         "",
-        "Порожня сесія: "
-        + (f"old {legacy_empty:,}, " if have_legacy else "")
-        + f"попередній коміт {base_empty:,}, зараз {head_empty:,}.",
+        "Створення сесії: "
+        + (f"old {legacy_empty:,.0f}, " if legacy else "")
+        + f"попередній коміт {base_empty:,.0f}, зараз {head_empty:,.0f}.",
         "",
-        "| навантаження | old EN сирі | old EN чисті | EN сирі | EN чисті | SENS сирі | SENS чисті |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "| навантаження | режим | англійський Lisp 8.09 | англійська зараз | SENS зараз |",
+        "|---|---|---:|---:|---:|",
     ]
     for name in names:
-        old_raw = legacy.get((name, "legacy-en"))
-        old_cells = (f"{old_raw:,} | {old_raw - legacy_empty:,}" if old_raw is not None
-                     else "— | —")
-        en_raw, sens_raw = head[(name, "en")], head[(name, "sens")]
-        lines.append(
-            f"| {name} | {old_cells} | {en_raw:,} | {en_raw - head_empty:,} | "
-            f"{sens_raw:,} | {sens_raw - head_empty:,} |")
+        for mode in ("load", "full"):
+            def cell(rows, form):
+                key = (name, form, mode)
+                if key not in rows:
+                    return "—"
+                return f"{median(rows, key):,.0f} (±{spread(rows, key):.2f}%)"
+            lines.append(f"| {name} | {mode} | {cell(legacy, 'legacy-en')} | "
+                         f"{cell(head, 'en')} | {cell(head, 'sens')} |")
     lines += ["", "</details>"]
 
     report = "\n".join(lines) + "\n"
