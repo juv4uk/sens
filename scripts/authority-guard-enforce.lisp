@@ -3,16 +3,16 @@
 ; its complete verdict.  This second Lisp process reads that verdict and owns
 ; the non-zero failure for forbidden authority changes.
 
-(def verdicts (read-all (read-file "tests/authority-verdict.lisp")))
-(def verdict (car verdicts))
-(def verdict-tag (car verdict))
+(00001001 verdicts (01001011 (10100110 "tests/authority-verdict.lisp")))
+(00001001 verdict (00000101 verdicts))
+(00001001 verdict-tag (00000101 verdict))
 
-(cond
-  ((eq? verdict-tag (quote authority-ok)) (identity-relation same)
-   (quote authority-ok))
-  ((eq? verdict-tag (quote authority-ok)) (identity-relation distinct)
-   (cond
-     ((eq? verdict-tag (quote semantic-authority-violation)) (identity-relation same)
-      (car ()))
-     ((eq? verdict-tag (quote semantic-authority-violation)) (identity-relation distinct)
-      (car ())))))
+(00000111
+  ((00000011 verdict-tag (00000001 authority-ok)) (1)
+   (00000001 authority-ok))
+  ((00000011 verdict-tag (00000001 authority-ok)) (0)
+   (00000111
+     ((00000011 verdict-tag (00000001 semantic-authority-violation)) (1)
+      (00000101 ()))
+     ((00000011 verdict-tag (00000001 semantic-authority-violation)) (0)
+      (00000101 ())))))

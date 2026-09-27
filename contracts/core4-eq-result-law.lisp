@@ -35,14 +35,14 @@
    (core1-core2-core3-impact . none))
 
   ((case . same)
-   (observation . (identity-relation same))
+   (observation . (1))
    (direction . yes)
    (open-steps . 0)
    (contradiction . 0)
    (expected-strength . strongest-directed-answer))
 
   ((case . distinct)
-   (observation . (identity-relation distinct))
+   (observation . (0))
    (direction . no)
    (open-steps . 0)
    (contradiction . 0)

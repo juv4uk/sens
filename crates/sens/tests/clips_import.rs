@@ -189,7 +189,7 @@ fn clips_defrule_with_a_not_condition_imports_and_runs_correctly() {
     let source = r#"
         (def imported (clips-import (quote (
             (deffacts init (animal tweety) (animal pingu) (penguin pingu))
-            (defrule bird-rule (animal ?x) (not? (penguin ?x)) => (assert (bird ?x)))
+            (defrule bird-rule (animal ?x) (not (penguin ?x)) => (assert (bird ?x)))
         ))))
         (defmodule zoo imported)
         (forward-in (quote zoo))

@@ -10,79 +10,79 @@
 ;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp
 ;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp --check
 
-(def source-path "lib/surface/semantic-registry.lisp")
-(def output-path "crates/sens/src/semantic_registry_generated.rs")
+(00001001 source-path "lib/surface/semantic-registry.lisp")
+(00001001 output-path "crates/sens/src/semantic_registry_generated.rs")
 
-(def str+
-  (lambda args
-    (reduce (lambda (acc s) (string-append acc s)) "" args)))
+(00001001 str+
+  (00001000 args
+    (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
-(def registry-form
-  (car (read-all (read-file source-path))))
+(00001001 registry-form
+  (00000101 (01001011 (10100110 source-path))))
 
-(def rows registry-form)
+(00001001 rows registry-form)
 
-(def rust-string
-  (lambda (value)
-    (cond
+(00001001 rust-string
+  (00001000 (value)
+    (00000111
       ((string-membership-helper value)
        (class-membership string member)
-       (write-to-string value))
+       (01001100 value))
       ((string-membership-helper value)
        (class-membership string nonmember)
-       (write-to-string (symbol->string value))))))
+       (01001100 (01000010 value))))))
 
 
-(def render-surface
-  (lambda (entry)
-    (let ((name (second entry)))
-      (cond
-        ((equal? name (quote ()))
-         (structural-relation same)
+(00001001 render-surface
+  (00001000 (entry)
+    (10011100 ((name (00101111 entry)))
+      (00000111
+        ((00100010 name (00000001 ()))
+         (1)
          "")
-        ((equal? name (quote ()))
-         (structural-relation distinct)
+        ((00100010 name (00000001 ()))
+         (0)
          (str+
            "SemanticSurface { namespace: "
-           (rust-string (car entry))
+           (rust-string (00000101 entry))
            ", name: "
            (rust-string name)
            " }, "))))))
 
-(def render-surfaces
-  (lambda (surfaces)
-    (cond
-      ((atom? surfaces)
-       (structural-kind empty-list)
+(00001001 render-surfaces
+  (00001000 (surfaces)
+    (00000111
+      ((00000010 surfaces)
+       ()
        "")
-      ((atom? surfaces)
-       (structural-kind pair)
+      ((00000010 surfaces)
+       (0)
        (str+
-         (render-surface (car surfaces))
-         (render-surfaces (cdr surfaces)))))))
+         (render-surface (00000101 surfaces))
+         (render-surfaces (00000110 surfaces)))))))
 
-(def render-row
-  (lambda (row)
+(00001001 render-row
+  (00001000 (row)
     (str+
       "    SemanticRow { semantic_id: 0b"
-      (write-to-string (car row))
+      (01001100 (00000101 row))
       ", surfaces: &["
-      (render-surfaces (cdr row))
+      (render-surfaces (00000110 row))
       "] },\n")))
 
-(def render-rows
-  (lambda (remaining)
-    (cond
-      ((atom? remaining)
-       (structural-kind empty-list)
+(00001001 render-rows
+  (00001000 (remaining)
+    (00000111
+      ((00000010 remaining)
+       ()
        "")
-      ((atom? remaining)
-       (structural-kind pair)
+      ((00000010 remaining)
+       (0)
        (str+
-         (render-row (car remaining))
-         (render-rows (cdr remaining)))))))
+         (render-row (00000101 remaining))
+         (render-rows (00000110 remaining)))))))
 
-(def header
+(00001001 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/surface/semantic-registry.lisp\n"
@@ -105,32 +105,32 @@
     "\n"
     "pub(super) const SEMANTIC_ROWS: &[SemanticRow] = &[\n"))
 
-(def generated
+(00001001 generated
   (str+ header (render-rows rows) "];\n"))
 
-(cond
-  ((atom? *argv*)
-   (structural-kind empty-list)
-   (second
-     (list
-       (write-file output-path generated)
-       (print "Rust semantic registry projection written"))))
-  ((equal? (car *argv*) "--check")
-   (structural-relation same)
-   (let ((current (read-file output-path)))
-     (cond
-       ((equal? current generated)
-        (structural-relation same)
-        (print "Rust semantic registry projection is current"))
-       ((equal? current generated)
-        (structural-relation distinct)
-        (second
-          (list
-            (print "Rust semantic registry projection is stale")
-            (car (quote ()))))))))
-  ((quote write-projection)
+(00000111
+  ((00000010 *argv*)
+   ()
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "Rust semantic registry projection written"))))
+  ((00100010 (00000101 *argv*) "--check")
+   (1)
+   (10011100 ((current (10100110 output-path)))
+     (00000111
+       ((00100010 current generated)
+        (1)
+        (01001000 "Rust semantic registry projection is current"))
+       ((00100010 current generated)
+        (0)
+        (00101111
+          (00100111
+            (01001000 "Rust semantic registry projection is stale")
+            (00000101 (00000001 ()))))))))
+  ((00000001 write-projection)
    write-projection
-   (second
-     (list
-       (write-file output-path generated)
-       (print "Rust semantic registry projection written")))))
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "Rust semantic registry projection written")))))

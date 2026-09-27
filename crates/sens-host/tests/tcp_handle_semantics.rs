@@ -31,7 +31,7 @@ fn listener_handles_expose_only_class_and_identity() {
 
     assert_eq!(
         value.to_string(),
-        "(t () <tcp-listener> <tcp-listener>)",
+        "((1) (0) <tcp-listener> <tcp-listener>)",
         "listener observables are pointer identity plus resource class, not std::net details"
     );
 }
@@ -57,7 +57,7 @@ fn connection_handle_keeps_identity_and_display_across_close() {
         .expect("connection identity remains meaningful after lifecycle operation")
         .value;
 
-    assert_eq!(value.to_string(), "(t <tcp-connection>)");
+    assert_eq!(value.to_string(), "((1) <tcp-connection>)");
     server.join().expect("server thread should finish");
 }
 

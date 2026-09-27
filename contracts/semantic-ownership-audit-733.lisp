@@ -103,12 +103,12 @@
    (rationale . "Defines outcome vocabulary: ok, err, pass, fail, halt, pending."))
 
   ((key . evaluator-dispatch-contract)
-   (path . "lib/evaluator-dispatch.lisp")
+   (path . "lib/surface/function-signatures.lisp")
    (category . semantic-authority)
    (question-answer . what-language-means)
    (semantic-role . evaluator-operation-classification)
    (future-action . retain-in-core)
-   (target-destination . "lib/evaluator-dispatch.lisp")
+   (target-destination . "lib/surface/function-signatures.lisp")
    (rationale . "Owns the language-level mapping from semantic identities to evaluator operation classes; host runtimes may project this data to mechanisms but must not recreate the mapping."))
 
   ; --------------------------------------------------------------------------

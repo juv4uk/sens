@@ -22,11 +22,11 @@
    (result-form . structural-kind)
    (cases .
      (((when . canon-zero)
-       (result . (structural-kind empty-list)))
+       (result . ()))
       ((when . pair)
-       (result . (structural-kind pair)))
+       (result . (0)))
       ((when . non-pair-nonempty)
-       (result . (structural-kind atom)))))
+       (result . (1)))))
    (generic-truth-coercion . forbidden)
    (control-dispatch . explicit-result-equality))
 
@@ -37,9 +37,9 @@
    (result-form . identity-relation)
    (cases .
      (((when . same-atom)
-       (result . (identity-relation same)))
+       (result . (1)))
       ((when . distinct-atoms)
-       (result . (identity-relation distinct)))))
+       (result . (0)))))
    (outside-domain . type-error)
    (generic-truth-coercion . forbidden)
    (control-dispatch . explicit-result-equality))

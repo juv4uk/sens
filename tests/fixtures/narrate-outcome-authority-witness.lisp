@@ -16,54 +16,54 @@
 (load "lib/result-status.lisp")
 (load "lib/narrate.lisp")
 
-(def narrate-outcome-authority-rows
-  (lambda ()
-    (list
-      (list
-        (quote explicit-unknown-presentation)
+(00001001 narrate-outcome-authority-rows
+  (00001000 ()
+    (00100111
+      (00100111
+        (00000001 explicit-unknown-presentation)
         (narrate-outcome
-          (make-unknown (quote (parent bob alice))))
-        (quote
+          (make-unknown (00000001 (parent bob alice))))
+        (00000001
           (unknown because no-proof-found-for (parent bob alice))))
-      (list
-        (quote non-symbol-tag-is-invalid)
-        (narrate-outcome (quote (42 payload)))
-        (quote (invalid outcome-tag 42)))
-      (list
-        (quote pair-tag-is-invalid)
-        (narrate-outcome (quote ((bad-tag) payload)))
-        (quote (invalid outcome-tag (bad-tag))))
-      (list
-        (quote empty-list-tag-is-invalid)
-        (narrate-outcome (quote (() payload)))
-        (quote (invalid outcome-tag ()))))))
+      (00100111
+        (00000001 non-symbol-tag-is-invalid)
+        (narrate-outcome (00000001 (42 payload)))
+        (00000001 (invalid outcome-tag 42)))
+      (00100111
+        (00000001 pair-tag-is-invalid)
+        (narrate-outcome (00000001 ((bad-tag) payload)))
+        (00000001 (invalid outcome-tag (bad-tag))))
+      (00100111
+        (00000001 empty-list-tag-is-invalid)
+        (narrate-outcome (00000001 (() payload)))
+        (00000001 (invalid outcome-tag ()))))))
 
-(def narrate-outcome-authority-check-rows
-  (lambda (rows)
-    (cond
-      ((atom? rows) (structural-kind empty-list)
-       (quote (narrate-outcome-authority-witness (status pass))))
-      ((atom? rows) (structural-kind atom)
-       (list
-         (quote narrate-outcome-authority-witness)
-         (quote (status fail))
-         (quote (law malformed-row-tail))
-         (list (quote actual) rows)))
-      ((atom? rows) (structural-kind pair)
-       (let ((row (car rows)))
-         (cond
-           ((equal? (second row) (third row)) (structural-relation same)
-            (narrate-outcome-authority-check-rows (cdr rows)))
-           ((equal? (second row) (third row)) (structural-relation distinct)
-            (list
-              (quote narrate-outcome-authority-witness)
-              (quote (status fail))
-              (list (quote law) (car row))
-              (list (quote expected) (third row))
-              (list (quote actual) (second row))))))))))
+(00001001 narrate-outcome-authority-check-rows
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 (narrate-outcome-authority-witness (status pass))))
+      ((00000010 rows) (1)
+       (00100111
+         (00000001 narrate-outcome-authority-witness)
+         (00000001 (status fail))
+         (00000001 (law malformed-row-tail))
+         (00100111 (00000001 actual) rows)))
+      ((00000010 rows) (0)
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00100010 (00101111 row) (00110000 row)) (1)
+            (narrate-outcome-authority-check-rows (00000110 rows)))
+           ((00100010 (00101111 row) (00110000 row)) (0)
+            (00100111
+              (00000001 narrate-outcome-authority-witness)
+              (00000001 (status fail))
+              (00100111 (00000001 law) (00000101 row))
+              (00100111 (00000001 expected) (00110000 row))
+              (00100111 (00000001 actual) (00101111 row))))))))))
 
-(def narrate-outcome-authority-check
-  (lambda ()
+(00001001 narrate-outcome-authority-check
+  (00001000 ()
     (narrate-outcome-authority-check-rows
       (narrate-outcome-authority-rows))))
 

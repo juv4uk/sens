@@ -18,40 +18,40 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
-(def scientific-constant-knowledge-projection-observation
-  (lambda ()
-    (let* ((before *knowledge-journal*)
+(00001001 scientific-constant-knowledge-projection-observation
+  (00001000 ()
+    (10011101 ((before *knowledge-journal*)
            (clauses
              (scientific-constant->clauses
                si:defining-speed-of-light))
-           (count (length clauses))
+           (count (00101000 clauses))
            (admitted (knowledge-clauses-valid? clauses))
            (journal-relation
-             (equal? before *knowledge-journal*)))
-      (list count admitted journal-relation))))
+             (00100010 before *knowledge-journal*)))
+      (00100111 count admitted journal-relation))))
 
-(def scientific-constant-knowledge-projection-witness
-  (lambda ()
-    (let ((observation
+(00001001 scientific-constant-knowledge-projection-witness
+  (00001000 ()
+    (10011100 ((observation
             (scientific-constant-knowledge-projection-observation)))
-      (cond
-        ((equal?
+      (00000111
+        ((00100010
            observation
-           (quote (7 t (structural-relation same))))
-         (structural-relation same)
-         (quote
+           (00000001 (7 t (1))))
+         (1)
+         (00000001
            (scientific-constant-knowledge-projection-witness
              (status pass))))
-        ((equal?
+        ((00100010
            observation
-           (quote (7 t (structural-relation same))))
-         (structural-relation distinct)
-         (list
-           (quote scientific-constant-knowledge-projection-witness)
-           (quote (status fail))
-           (list (quote actual) observation)
-           (quote
+           (00000001 (7 t (1))))
+         (0)
+         (00100111
+           (00000001 scientific-constant-knowledge-projection-witness)
+           (00000001 (status fail))
+           (00100111 (00000001 actual) observation)
+           (00000001
              (expected
-               (7 t (structural-relation same))))))))))
+               (7 t (1))))))))))
 
 (scientific-constant-knowledge-projection-witness)

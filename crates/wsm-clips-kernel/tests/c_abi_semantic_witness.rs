@@ -1,5 +1,9 @@
+//! Every witness here drives the real CLIPS 6.4 runtime, so the file builds
+//! only with the `native-clips` feature, where CI provides libclips
+//! (.github/workflows/clips-kernel-test.yml, native-clips-642).
+#![cfg(feature = "native-clips")]
+
 use wsm_clips_kernel::{ClipsAbiAdapter, SemanticId};
-#[cfg(feature = "native-clips")]
 use wsm_clips_kernel::ClipsKernel;
 use wsm_kernel_c_abi::{
     WsmByteSpan, WsmKernelKind, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
@@ -62,7 +66,6 @@ fn exchange(adapter: &ClipsAbiAdapter, command: &[u8]) -> (WsmStatus, Vec<u8>) {
 }
 
 #[test]
-#[cfg(feature = "native-clips")]
 fn direct_native_clips_642_smoke() {
     let kernel = ClipsKernel::discover().expect("load external CLIPS 6.4 runtime");
     let environment = kernel

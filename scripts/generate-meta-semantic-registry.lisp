@@ -10,139 +10,142 @@
 ; a string and is omitted because the reader consumes it as quote syntax.
 ; Every other admitted symbol is projected in registry order.
 
-(def surface-word
-  (lambda (surface)
-    (car (cdr surface))))
+(00001001 surface-word
+  (00001000 (surface)
+    (00000101 (00000110 surface))))
 
-(def surface-namespace
-  (lambda (surface)
-    (car surface)))
+(00001001 surface-namespace
+  (00001000 (surface)
+    (00000101 surface)))
 
-(def surface-included?
-  (lambda (surface)
-    (cond
-      ((atom? surface) ())
-      ((equal? (surface-word surface) (quote ())) ())
-      ((equal? (surface-word surface) "'") ())
+(00001001 surface-included?
+  (00001000 (surface)
+    (00000111
+      ((00000010 surface) () ())
+      ((00000010 surface) (1) ())
+      ((00100010 (surface-word surface) (00000001 ())) ())
+      ((00100010 (surface-word surface) "'") ())
       (t t))))
 
-(def collect-surfaces
-  (lambda (sid surfaces rows)
-    (cond
-      ((atom? surfaces) rows)
+(00001001 collect-surfaces
+  (00001000 (sid surfaces rows)
+    (00000111
+      ((00000010 surfaces) () rows)
+      ((00000010 surfaces) (1) rows)
       (t
-       (let ((surface (car surfaces)))
-         (cond
+       (10011100 ((surface (00000101 surfaces)))
+         (00000111
            ((surface-included? surface)
             (collect-surfaces
               sid
-              (cdr surfaces)
-              (cons
-                (list
+              (00000110 surfaces)
+              (00000100
+                (00100111
                   (surface-word surface)
                   sid
                   (surface-namespace surface))
                 rows)))
            (t
-            (collect-surfaces sid (cdr surfaces) rows))))))))
+            (collect-surfaces sid (00000110 surfaces) rows))))))))
 
-(def collect-entries
-  (lambda (entries rows)
-    (cond
-      ((atom? entries) rows)
+(00001001 collect-entries
+  (00001000 (entries rows)
+    (00000111
+      ((00000010 entries) () rows)
+      ((00000010 entries) (1) rows)
       (t
-       (let ((entry (car entries)))
+       (10011100 ((entry (00000101 entries)))
          (collect-entries
-           (cdr entries)
-           (collect-surfaces (car entry) (cdr entry) rows)))))))
+           (00000110 entries)
+           (collect-surfaces (00000101 entry) (00000110 entry) rows)))))))
 
-(def str+
-  (lambda args
-    (reduce
-      (lambda (acc part)
-        (string-append acc part))
+(00001001 str+
+  (00001000 args
+    (00111001
+      (00001000 (acc part)
+        (00111010 acc part))
       ""
       args)))
 
-(def render-row
-  (lambda (row)
+(00001001 render-row
+  (00001000 (row)
     (str+
       "    ("
-      (write-to-string (car row))
+      (01001100 (00000101 row))
       " "
-      (write-to-string (second row))
+      (01001100 (00101111 row))
       ") ; "
-      (write-to-string (third row))
+      (01001100 (00110000 row))
       "\n")))
 
-(def join-rows
-  (lambda (rows)
-    (reduce
-      (lambda (acc row)
-        (string-append acc (render-row row)))
+(00001001 join-rows
+  (00001000 (rows)
+    (00111001
+      (00001000 (acc row)
+        (00111010 acc (render-row row)))
       ""
       rows)))
 
-(def render-projection
-  (lambda (rows)
+(00001001 render-projection
+  (00001000 (rows)
     (str+
       "; GENERATED FILE — DO NOT EDIT.\n"
       "; Source authority: lib/surface/semantic-registry.lisp\n"
       "; Generator: scripts/generate-meta-semantic-registry.lisp\n"
       "; Registry surfaces; empty and reader-only apostrophe surfaces omitted.\n\n"
-      "(def my-semantic-surface-registry\n"
-      "  (quote (\n"
-      (join-rows (reverse rows))
+      "(00001001 my-semantic-surface-registry\n"
+      "  (00000001 (\n"
+      (join-rows (00101010 rows))
       "  )))\n\n"
-      "(def my-semantic-id-for-surface\n"
-      "  (lambda (name)\n"
-      "    (let ((entry (assoc name my-semantic-surface-registry)))\n"
-      "      (cond\n"
-      "        ((atom? entry) (structural-kind empty-list) (quote ()))\n"
-      "        ((atom? entry) (structural-kind pair) (second entry))))))\n")))
+      "(00001001 my-semantic-id-for-surface\n"
+      "  (00001000 (name)\n"
+      "    (10011100 ((entry (00101101 name my-semantic-surface-registry)))\n"
+      "      (00000111\n"
+      "        ((00000010 entry) () (00000001 ()))\n"
+      "        ((00000010 entry) (0) (00101111 entry))))))\n")))
 
-(def registry-form
-  (car (read-all (read-file "lib/surface/semantic-registry.lisp"))))
+(00001001 registry-form
+  (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
 
-(def projection-rows
+(00001001 projection-rows
   (collect-entries
     registry-form
-    (quote ())))
+    (00000001 ())))
 
-(def generated
+(00001001 generated
   (render-projection projection-rows))
 
-(def output-path "lib/generated/meta-semantic-registry.lisp")
+(00001001 output-path "lib/generated/meta-semantic-registry.lisp")
 
-(cond
-  ((atom? *argv*)
-   (structural-kind empty-list)
-   (second
-     (list
-       (write-file output-path generated)
-       (print "meta semantic registry projection written"))))
-  ((atom? *argv*)
-   (structural-kind atom)
-   (second
-     (list
-       (write-file output-path generated)
-       (print "meta semantic registry projection written"))))
-  ((equal? (car *argv*) "--check")
-   (structural-relation same)
-   (let ((current (read-file output-path)))
-     (cond
-       ((equal? current generated)
-        (structural-relation same)
-        (print "meta semantic registry projection is current"))
-       ((equal? current generated)
-        (structural-relation distinct)
-        (second
-          (list
-            (print "meta semantic registry projection is stale")
-            (car (quote ()))))))))
-  ((equal? (car *argv*) "--check")
-   (structural-relation distinct)
-   (second
-     (list
-       (write-file output-path generated)
-       (print "meta semantic registry projection written")))))
+(00000111
+  ((00000010 *argv*)
+   ()
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "meta semantic registry projection written"))))
+  ((00000010 *argv*)
+   (1)
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "meta semantic registry projection written"))))
+  ((00100010 (00000101 *argv*) "--check")
+   (1)
+   (10011100 ((current (10100110 output-path)))
+     (00000111
+       ((00100010 current generated)
+        (1)
+        (01001000 "meta semantic registry projection is current"))
+       ((00100010 current generated)
+        (0)
+        (00101111
+          (00100111
+            (01001000 "meta semantic registry projection is stale")
+            (00000101 (00000001 ()))))))))
+  ((00100010 (00000101 *argv*) "--check")
+   (0)
+   (00101111
+     (00100111
+       (10100111 output-path generated)
+       (01001000 "meta semantic registry projection written")))))

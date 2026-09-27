@@ -52,7 +52,7 @@ fn canon_zero_is_stated_by_the_language_as_the_empty_list_itself() {
 fn ukrainian_keyboard_symbols_execute_the_same_canon() {
     let mut session = session_with_language_canon();
     let result = eval_program(
-        "(?: ((=? (:п (: 'кіт 'пес)) 'кіт) (:р (: 'кіт 'пес))))",
+        "(?: ((=? (:п (00000100 'кіт 'пес)) 'кіт) (:р (00000100 'кіт 'пес))))",
         &mut session,
     )
     .expect("symbolic Canon surface should execute without changing identity");

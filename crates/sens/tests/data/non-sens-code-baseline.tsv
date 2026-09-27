@@ -137,22 +137,6 @@ runtime	00111001	en	reduce	Lisp-замикання	1
 runtime	00111001	sa	saṅgraha	Lisp-замикання	1
 runtime	00111001	ук	згорнути	Lisp-замикання	1
 runtime	00111001	укр	згорнути	Lisp-замикання	1
-runtime	00111011	en	string-length	Lisp-замикання	1
-runtime	00111011	sa	śabdapramāṇa	Lisp-замикання	1
-runtime	00111011	ук	довжина-тексту	Lisp-замикання	1
-runtime	00111011	укр	довжина-тексту	Lisp-замикання	1
-runtime	00111100	en	string-empty?	Lisp-замикання	1
-runtime	00111100	sa	śūnya?	Lisp-замикання	1
-runtime	00111100	ук	текст-порожній?	Lisp-замикання	1
-runtime	00111100	укр	порожній-текст?	Lisp-замикання	1
-runtime	00111101	en	string-prefix?	Lisp-замикання	1
-runtime	00111101	sa	pūrva?	Lisp-замикання	1
-runtime	00111101	ук	префікс-тексту?	Lisp-замикання	1
-runtime	00111101	укр	текст-починається-з?	Lisp-замикання	1
-runtime	00111110	en	string-contains?	Lisp-замикання	1
-runtime	00111110	sa	śabdasambaddha?	Lisp-замикання	1
-runtime	00111110	ук	фрагмент-у-тексті?	Lisp-замикання	1
-runtime	00111110	укр	фрагмент-у-тексті?	Lisp-замикання	1
 runtime	01000110	en	number->string	Lisp-замикання	1
 runtime	01000110	sa	saṅkhyā-śabda	Lisp-замикання	1
 runtime	01000110	ук	число-у-текст	Lisp-замикання	1
@@ -206,13 +190,30 @@ runtime	10101111	en	apply	Lisp-замикання	1
 runtime	10101111	ук	застосувати	Lisp-замикання	1
 runtime	10101111	укр	застосувати	Lisp-замикання	1
 runtime	10110000	en	divmod	Lisp-замикання	1
+runtime	10110000	sym	:	Lisp-замикання	1
 runtime	10110000	ук	поділити-з-остачею	Lisp-замикання	1
 runtime	10110000	укр	поділити-з-остачею	Lisp-замикання	1
-source	benchmarks/arithmetic.lisp	5
-source	benchmarks/closures.lisp	8
-source	benchmarks/lists.lisp	9
-source	benchmarks/parser.lisp	10
-source	benchmarks/recursion.lisp	9
+runtime	10110001	en	answer-not	Lisp-замикання	1
+runtime	10110001	ук	відповідь-не	Lisp-замикання	1
+runtime	10110001	укр	відповідь-не	Lisp-замикання	1
+runtime	10110010	en	answer-and	Lisp-замикання	1
+runtime	10110010	ук	відповідь-і	Lisp-замикання	1
+runtime	10110010	укр	відповідь-і	Lisp-замикання	1
+runtime	10110011	en	answer-or	Lisp-замикання	1
+runtime	10110011	ук	відповідь-або	Lisp-замикання	1
+runtime	10110011	укр	відповідь-або	Lisp-замикання	1
+runtime	10110100	en	answer-weaken	Lisp-замикання	1
+runtime	10110100	ук	відповідь-послабити	Lisp-замикання	1
+runtime	10110100	укр	відповідь-послабити	Lisp-замикання	1
+runtime	10110101	en	answer-atom	Lisp-замикання	1
+runtime	10110101	ук	відповідь-атом	Lisp-замикання	1
+runtime	10110101	укр	відповідь-атом	Lisp-замикання	1
+runtime	10110110	en	answer-eq	Lisp-замикання	1
+runtime	10110110	ук	відповідь-тотожне	Lisp-замикання	1
+runtime	10110110	укр	відповідь-тотожне	Lisp-замикання	1
+source	benchmarks/lists.lisp	2
+source	benchmarks/parser.lisp	5
+source	benchmarks/recursion.lisp	2
 source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-en.lisp	10
 source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-sens.lisp	1
 source	benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-uk.lisp	11
@@ -312,7 +313,7 @@ source	contracts/core1-s2-compiler-admission.lisp	3
 source	contracts/core1-s3-compiler-prelude.lisp	1
 source	contracts/core2-profile-contract.lisp	7
 source	contracts/core3-profile-contract.lisp	6
-source	contracts/core4-predicate-answer-scale.lisp	4
+source	contracts/core4-predicate-answer-scale.lisp	3
 source	contracts/datalog-math-capability-1001.lisp	2
 source	contracts/exact-q-binary-contract.lisp	5
 source	contracts/island-compat-contract.lisp	8
@@ -320,183 +321,84 @@ source	contracts/life-1-contract.lisp	7
 source	contracts/life-2-pattern-catalog.lisp	5
 source	contracts/mathematical-result-taxonomy.lisp	8
 source	contracts/structural-observation-contract.lisp	7
-source	contracts/structural-query-inventory.lisp	17
+source	contracts/structural-query-inventory.lisp	18
 source	contracts/world-transition-contract.lisp	2
-source	demo-tasks.lisp	4
 source	evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp	1
-source	examples/ukrainian-greeting.lisp	14
 source	experiments/atomspace-pattern-audit-791.lisp	7
 source	experiments/blackboard-pattern-audit-790.lisp	8
-source	experiments/core4-eq-answer-1258.lisp	5
-source	experiments/core4-eq-result-law-witness.lisp	140
-source	experiments/core4-mechanical-answer-grade.lisp	49
-source	experiments/core4-predicate-answer-carrier-matrix.lisp	76
-source	experiments/function-genealogy.lisp	232
+source	experiments/core4-eq-answer-1258.lisp	2
+source	experiments/core4-eq-result-law-witness.lisp	1
+source	experiments/function-genealogy.lisp	2
 source	experiments/graal-interop-pattern-audit-788.lisp	7
 source	experiments/kif-bridge-audit-792.lisp	4
 source	experiments/metacall-pattern-audit-789.lisp	7
 source	experiments/poplog-pattern-audit-787.lisp	8
-source	experiments/probabilistic-decision-jev-like.lisp	243
-source	knowledge/astronomy.lisp	1
-source	knowledge/canon-authority-inventory.lisp	30
-source	knowledge/family.lisp	1
-source	knowledge/guard-fact-policy.lisp	115
-source	knowledge/guard-reference.lisp	214
-source	knowledge/guard-runtime-policy.lisp	36
-source	knowledge/language-detection-probe.lisp	1
-source	knowledge/language-policy.lisp	2
-source	knowledge/physics.lisp	1
+source	experiments/probabilistic-decision-jev-like.lisp	1
+source	knowledge/canon-authority-inventory.lisp	29
+source	knowledge/guard-fact-policy.lisp	3
+source	knowledge/guard-reference.lisp	111
 source	knowledge/sanskrit-cyrillic-audit.lisp	1
 source	knowledge/sanskrit-cyrillic-keyboard.lisp	1
 source	knowledge/sanskrit-cyrillic-phoneme-map.lisp	10
 source	knowledge/semantic-lineage-core-v1.lisp	18
-source	knowledge/swarm-legacy-deprecation.lisp	2
-source	knowledge/swarm-no-live-callers-audit.lisp	3
-source	lib/bridge/prolog-to-datalog.lisp	66
-source	lib/canon.lisp	197
-source	lib/clips-import.lisp	358
-source	lib/content-store.lisp	18
-source	lib/core.lisp	172
-source	lib/core4.lisp	172
-source	lib/epistemic.lisp	454
-source	lib/forward.lisp	647
-source	lib/fs.lisp	15
-source	lib/generated/meta-semantic-registry.lisp	654
-source	lib/guard.lisp	28
-source	lib/island-lowering.lisp	53
-source	lib/knowledge.lisp	828
-source	lib/life-1-scheduler.lisp	157
-source	lib/linter.lisp	337
-source	lib/lisp-fs.lisp	501
-source	lib/machine/admission/x86-64.lisp	6
+source	knowledge/swarm-no-live-callers-audit.lisp	1
+source	lib/core.lisp	11
+source	lib/core4.lisp	11
+source	lib/forward.lisp	2
+source	lib/generated/meta-semantic-registry.lisp	661
+source	lib/life-1-scheduler.lisp	1
 source	lib/machine/dispatch/native-first-coverage.lisp	16
-source	lib/machine/dispatch/native-first-execute.lisp	1
 source	lib/machine/encoding/coverage.lisp	1175
 source	lib/machine/layout/pair-x86-64.lisp	2
-source	lib/machine/operands/x86-64.lisp	6
-source	lib/mechanism-selector.lisp	79
-source	lib/meta-eval-first-class.lisp	218
-source	lib/meta-eval-mutual.lisp	171
-source	lib/meta-eval.lisp	1019
-source	lib/narrate.lisp	166
-source	lib/persistent-map.lisp	80
-source	lib/persistent-vector.lisp	94
-source	lib/process.lisp	76
-source	lib/quantity.lisp	313
-source	lib/reason.lisp	85
-source	lib/result-status.lisp	139
-source	lib/si-derived.lisp	18
-source	lib/si.lisp	42
+source	lib/meta-eval.lisp	7
+source	lib/reason.lisp	1
+source	lib/result-status.lisp	2
 source	lib/surface/peer-identity-acceptance.lisp	20
-source	lib/surface/sa.lisp	110
-source	lib/surface/semantic-registry-api.lisp	112
+source	lib/surface/semantic-registry-api.lisp	4
 source	lib/surface/uk-acceptance.lisp	109
 source	lib/surface/uk-inventory.lisp	8
 source	lib/surface/uk-sa-coverage.lisp	21
-source	lib/surface/uk.lisp	160
 source	lib/surface/ukr-acceptance.lisp	6
-source	lib/surface/ukr.lisp	1
-source	lib/tcp.lisp	24
-source	lib/time.lisp	225
-source	lib/translation.lisp	302
-source	lib/understand.lisp	82
-source	lib/unify-observe.lisp	21
-source	lib/unify.lisp	35
-source	lib/utf8.lisp	262
-source	lib/world.lisp	521
-source	lib/yantra.lisp	417
+source	lib/unify.lisp	1
 source	memory-layout-contract.lisp	1
 source	prototype/lisp_core_phonetics/prototype_phonetics.lisp	6
 source	racket/boot/core.lisp	345
 source	racket/examples/constitution.lisp	31
-source	scripts/authority-guard-enforce.lisp	20
-source	scripts/authority-guard.lisp	8
-source	scripts/benchmark-semantic-registry-read.lisp	26
-source	scripts/build-constitution.lisp	117
-source	scripts/build-dependency-classification.lisp	462
-source	scripts/build-inventory.lisp	196
-source	scripts/check-core-profile-contract.lisp	222
-source	scripts/check-core-special-form-profile-policy.lisp	78
-source	scripts/check-core1-compiler-sid-resolver.lisp	118
-source	scripts/check-core2-profile-contract.lisp	124
-source	scripts/check-core3-profile-contract.lisp	49
-source	scripts/check-core4-predicate-answer-boundary.lisp	61
-source	scripts/check-core4-predicate-answer-scale.lisp	122
-source	scripts/check-core4-predicate-output-boundary.lisp	49
-source	scripts/check-core4-predicate-record-inventory.lisp	134
-source	scripts/check-function-table-mechanisms.lisp	152
-source	scripts/check-island-math-evidence.lisp	271
-source	scripts/check-kernel-abi-transport-boundary.lisp	141
-source	scripts/check-repo-tooling-inventory.lisp	497
-source	scripts/enforce-function-table-mechanisms.lisp	11
-source	scripts/enforce-island-math-evidence.lisp	11
-source	scripts/fixtures-for-tier.lisp	25
-source	scripts/gen-functions.lisp	19
-source	scripts/generate-function-table.lisp	228
-source	scripts/generate-meta-semantic-registry.lisp	93
-source	scripts/generate-rust-evaluator-dispatch.lisp	66
-source	scripts/generate-rust-semantic-registry.lisp	73
-source	scripts/generate-uk-surface-audit.lisp	236
-source	scripts/machine-authority-guard.lisp	211
-source	scripts/oracle-batch.lisp	73
-source	scripts/program-symbol-table.lisp	164
-source	scripts/release.lisp	81
-source	scripts/semantic-authority-guard-enforce.lisp	20
-source	scripts/semantic-authority-guard.lisp	60
-source	scripts/symbol-table.lisp	60
-source	scripts/перевірити-український-профіль.lisp	239
-source	task-demo.lisp	9
-source	task-stats.lisp	2
-source	tasks-info.lisp	2
-source	tasks-summary.lisp	2
-source	tasks-summary2.lisp	2
-source	tests/fixtures/answer-contract-witness.lisp	169
-source	tests/fixtures/bare-sid-literal-v1.lisp	13
+source	scripts/build-dependency-classification.lisp	3
+source	scripts/build-inventory.lisp	2
+source	scripts/check-core-special-form-profile-policy.lisp	1
+source	scripts/check-core1-compiler-sid-resolver.lisp	1
+source	scripts/check-core4-predicate-answer-scale.lisp	2
+source	scripts/check-core4-predicate-record-inventory.lisp	1
+source	scripts/check-island-math-evidence.lisp	1
+source	scripts/check-kernel-abi-transport-boundary.lisp	2
+source	scripts/machine-authority-guard.lisp	5
+source	scripts/program-symbol-table.lisp	1
+source	scripts/release.lisp	1
+source	scripts/перевірити-український-профіль.lisp	26
+source	tests/fixtures/answer-contract-witness.lisp	5
+source	tests/fixtures/bare-sid-literal-v1.lisp	2
 source	tests/fixtures/conformance-transition-witness.lisp	3
-source	tests/fixtures/content-store-authority-witness.lisp	26
-source	tests/fixtures/decimal-comma-authority-witness.lisp	65
-source	tests/fixtures/early-sid-lowering-witness.lisp	77
-source	tests/fixtures/exact-q-binary-contract-witness.lisp	153
+source	tests/fixtures/content-store-authority-witness.lisp	1
+source	tests/fixtures/exact-q-binary-contract-witness.lisp	3
 source	tests/fixtures/exact-q-binary-v1.lisp	12
-source	tests/fixtures/exact-quantity-arithmetic-witness.lisp	90
-source	tests/fixtures/explicit-negative-reason-observe-witness.lisp	19
-source	tests/fixtures/island-compat-witness.lisp	134
-source	tests/fixtures/island-lowering-1048-witness.lisp	45
-source	tests/fixtures/life-1-contract-witness.lisp	137
-source	tests/fixtures/life-1-scheduler-witness.lisp	73
-source	tests/fixtures/lisp-fs-conformance.lisp	10
-source	tests/fixtures/machine-current-gpr-atoms-witness.lisp	432
-source	tests/fixtures/machine-register-width-witness.lisp	77
-source	tests/fixtures/machine-replaceability-witness.lisp	40
-source	tests/fixtures/machine-representation-independence-witness.lisp	34
-source	tests/fixtures/mathematical-result-taxonomy-witness.lisp	125
-source	tests/fixtures/mechanism-selector-1047-witness.lisp	48
-source	tests/fixtures/meta-eval-empty-program-witness.lisp	36
-source	tests/fixtures/meta-semantic-registry-witness.lisp	122
-source	tests/fixtures/narrate-outcome-authority-witness.lisp	56
-source	tests/fixtures/native-first-coverage-ledger-witness.lisp	241
-source	tests/fixtures/native-first-dispatch-witness.lisp	38
-source	tests/fixtures/native-first-execution-witness.lisp	23
-source	tests/fixtures/native-first-parity-witness.lisp	27
-source	tests/fixtures/native-first-totality-witness.lisp	18
+source	tests/fixtures/explicit-negative-reason-observe-witness.lisp	1
+source	tests/fixtures/island-compat-witness.lisp	3
+source	tests/fixtures/life-1-contract-witness.lisp	3
+source	tests/fixtures/life-1-scheduler-witness.lisp	1
+source	tests/fixtures/machine-replaceability-witness.lisp	6
+source	tests/fixtures/mathematical-result-taxonomy-witness.lisp	3
+source	tests/fixtures/meta-eval-empty-program-witness.lisp	1
+source	tests/fixtures/native-first-coverage-ledger-witness.lisp	1
+source	tests/fixtures/native-first-dispatch-witness.lisp	16
+source	tests/fixtures/native-first-execution-witness.lisp	3
+source	tests/fixtures/native-first-parity-witness.lisp	8
+source	tests/fixtures/native-first-totality-witness.lisp	4
 source	tests/fixtures/oracle-results.lisp	227
-source	tests/fixtures/persistent-vector-balance-witness.lisp	23
-source	tests/fixtures/postcore-peer-materialization-witness.lisp	408
-source	tests/fixtures/process-load-witness.lisp	7
-source	tests/fixtures/prolog-datalog-bridge-witness.lisp	11
-source	tests/fixtures/properties-helpers.lisp	44
-source	tests/fixtures/reason-index-authority-witness.lisp	52
-source	tests/fixtures/rivnopravnist-uk.lisp	8
-source	tests/fixtures/scientific-constant-knowledge-projection-witness.lisp	21
-source	tests/fixtures/semantic-coordinate-law-axis-v1.lisp	13
-source	tests/fixtures/semantic-coordinate-matrix-845.lisp	3
-source	tests/fixtures/semantic-registry-self-hosted-witness.lisp	32
-source	tests/fixtures/structural-observation-contract-witness.lisp	186
-source	tests/fixtures/structural-observation-v1.lisp	26
-source	tests/fixtures/structural-query-inventory-witness.lisp	155
-source	tests/fixtures/translation-symbol-boundary-witness.lisp	63
-source	tests/fixtures/witness-runner.lisp	186
-source	tests/fixtures/world-transition-witness.lisp	38
-source	tests/fixtures/x86-64-instruction-set-witness.lisp	211
-source	tests/fixtures/yantraos-bridge-witness.lisp	192
+source	tests/fixtures/postcore-peer-materialization-witness.lisp	2
+source	tests/fixtures/reason-index-authority-witness.lisp	1
+source	tests/fixtures/structural-observation-contract-witness.lisp	5
+source	tests/fixtures/structural-observation-v1.lisp	15
+source	tests/fixtures/witness-runner.lisp	1
+source	tests/fixtures/x86-64-instruction-set-witness.lisp	173
 source	tests/fixtures/приклад.lisp	1

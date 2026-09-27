@@ -10,7 +10,7 @@
 ; top-level source is read; decimal integers remain ordinary decimal values.
 (00001001 binary
   (00001000 (width)
-    (list (00000001 binary) width)))
+    (00100111 (00000001 binary) width)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -42,10 +42,12 @@
 ; логічного "і"/"або"). Перевірено живцем: коротке замикання (другий
 ; аргумент дійсно не обчислюється), варіативність на 3+ аргументах,
 ; передача самого значення, не лише t/() (напр. (and t 42) -> 42).
-(defmacro and rest
+(00001010 and rest
   (00000111
-    ((00000010 rest) t)
-    ((00000010 (00000110 rest)) (00000101 rest))
+    ((00000010 rest) () t)
+    ((00000010 rest) (1) t)
+    ((00000010 (00000110 rest)) () (00000101 rest))
+    ((00000010 (00000110 rest)) (1) (00000101 rest))
     (t
      ; Build the short-circuit cond AST from the primitive tree substrate.
      ; AND remains Lisp-owned; generic macro frontends need no private LIST
@@ -59,10 +61,12 @@
                                    (00000001 ())))
                        (00000001 ())))))))
 
-(defmacro or rest
+(00001010 or rest
   (00000111
-    ((00000010 rest) (00000001 ()))
-    ((00000010 (00000110 rest)) (00000101 rest))
+    ((00000010 rest) () (00000001 ()))
+    ((00000010 rest) (1) (00000001 ()))
+    ((00000010 (00000110 rest)) () (00000101 rest))
+    ((00000010 (00000110 rest)) (1) (00000101 rest))
     (t
      ; Same primitive constructor discipline as AND above: preserve lazy
      ; short-circuit expansion without importing LIST into compiler authority.
@@ -87,7 +91,7 @@
 ; a real caller needs it, don't build it speculatively now).
 (00001001 gensym
   (00001000 (prefix)
-    (string->symbol (string-append prefix (write-to-string (mono-ns))))))
+    (01000011 (00111010 prefix (01001100 (01011010))))))
 
 (00001001 pair
   (00001000 (left right)
@@ -174,8 +178,8 @@
 (00001001 length-onto
   (00001000 (values acc)
     (00000111
-      ((00000010 values) (structural-kind empty-list) acc)
-      ((00000010 values) (structural-kind pair)
+      ((00000010 values) () acc)
+      ((00000010 values) (0)
        (length-onto (00000110 values) (00001100 acc 1))))))
 
 
@@ -186,8 +190,8 @@
 (00001001 reverse-onto
   (00001000 (values acc)
     (00000111
-      ((00000010 values) (structural-kind empty-list) acc)
-      ((00000010 values) (structural-kind pair)
+      ((00000010 values) () acc)
+      ((00000010 values) (0)
        (reverse-onto (00000110 values) (00000100 (00000101 values) acc))))))
 
 (00001001 reverse
@@ -210,14 +214,14 @@
 ; Rust-Stack-sicheres append.
 (00001001 append
   (00001000 (left right)
-    (reverse-onto (reverse left) right)))
+    (reverse-onto (00101010 left) right)))
 
 (00001001 map-onto
   (00001000 (f values acc)
     (00000111
-      ((00000010 values) (structural-kind empty-list) (reverse acc))
-      ((00000010 values) (structural-kind atom) (00000001 ()))
-      ((00000010 values) (structural-kind pair)
+      ((00000010 values) () (00101010 acc))
+      ((00000010 values) (1) (00000001 ()))
+      ((00000010 values) (0)
        (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
 
 (00001001 map
@@ -227,10 +231,10 @@
 (00001001 filter-onto
   (00001000 (predicate values acc)
     (00000111
-      ((00000010 values) (structural-kind empty-list) (reverse acc))
-      ((00000010 values) (structural-kind atom) (reverse acc))
+      ((00000010 values) () (00101010 acc))
+      ((00000010 values) (1) (00101010 acc))
       (t t
-       (let ((decision (predicate (00000101 values))))
+       (10011100 ((decision (predicate (00000101 values))))
          (00000111
            ((truthy? decision) t
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
@@ -244,9 +248,9 @@
 (00001001 reduce
   (00001000 (f acc values)
     (00000111
-      ((00000010 values) (structural-kind empty-list) acc)
-      ((00000010 values) (structural-kind pair)
-       (reduce f (f acc (00000101 values)) (00000110 values))))))
+      ((00000010 values) () acc)
+      ((00000010 values) (0)
+       (00111001 f (f acc (00000101 values)) (00000110 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -282,9 +286,9 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
-(defmacro let (bindings body)
-  (00000100 (list (00000001 00001000) (map (00001000 (binding) (00000101 binding)) bindings) body)
-        (map (00001000 (binding) (second binding)) bindings)))
+(00001010 let (bindings body)
+  (00000100 (00100111 (00000001 00001000) (00110111 (00001000 (binding) (00000101 binding)) bindings) body)
+        (00110111 (00001000 (binding) (00101111 binding)) bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -317,62 +321,61 @@
 ; `eq` is deliberately atom-only per McCarthy's original primitive (see
 ; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
 ; structurally. `equal?` is the structural/deep-equality counterpart, built
-; on top of `eq` and `atom` rather than replacing them. Its answer belongs
-; to the structural domain: `(structural-relation same|distinct)`, never a
-; universal truth sentinel. Canonical three-part `cond` consumes the domain
-; results explicitly; the historical two-part bridge exists only for callers
-; not yet migrated.
+; on top of `eq` and `atom` rather than replacing them. Its answer is the
+; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
+; Canonical three-part `cond` consumes the answer explicitly; a two-part
+; clause selects only on a «yes» answer.
 (00001001 equal?
   (00001000 (a b)
     (00000111
-      ((00000010 a) (structural-kind empty-list)
+      ((00000010 a) ()
        (00000111
-         ((00000010 b) (structural-kind empty-list)
-          (00000001 (structural-relation same)))
-         ((00000010 b) (structural-kind atom)
-          (00000001 (structural-relation distinct)))
-         ((00000010 b) (structural-kind pair)
-          (00000001 (structural-relation distinct)))))
-      ((00000010 a) (structural-kind atom)
+         ((00000010 b) ()
+          (00000001 (1)))
+         ((00000010 b) (1)
+          (00000001 (0)))
+         ((00000010 b) (0)
+          (00000001 (0)))))
+      ((00000010 a) (1)
        (00000111
-         ((00000010 b) (structural-kind empty-list)
-          (00000001 (structural-relation distinct)))
-         ((00000010 b) (structural-kind atom)
+         ((00000010 b) ()
+          (00000001 (0)))
+         ((00000010 b) (1)
           (00000111
-            ((00000011 a b) (identity-relation same)
-             (00000001 (structural-relation same)))
-            ((00000011 a b) (identity-relation distinct)
-             (00000001 (structural-relation distinct)))))
-         ((00000010 b) (structural-kind pair)
-          (00000001 (structural-relation distinct)))))
-      ((00000010 a) (structural-kind pair)
+            ((00000011 a b) (1)
+             (00000001 (1)))
+            ((00000011 a b) (0)
+             (00000001 (0)))))
+         ((00000010 b) (0)
+          (00000001 (0)))))
+      ((00000010 a) (0)
        (00000111
-         ((00000010 b) (structural-kind empty-list)
-          (00000001 (structural-relation distinct)))
-         ((00000010 b) (structural-kind atom)
-          (00000001 (structural-relation distinct)))
-         ((00000010 b) (structural-kind pair)
+         ((00000010 b) ()
+          (00000001 (0)))
+         ((00000010 b) (1)
+          (00000001 (0)))
+         ((00000010 b) (0)
           (00000111
-            ((equal? (00000101 a) (00000101 b)) (structural-relation same)
-             (equal? (00000110 a) (00000110 b)))
-            ((equal? (00000101 a) (00000101 b)) (structural-relation distinct)
-             (00000001 (structural-relation distinct))))))))))
+            ((00100010 (00000101 a) (00000101 b)) (1)
+             (00100010 (00000110 a) (00000110 b)))
+            ((00100010 (00000101 a) (00000101 b)) (0)
+             (00000001 (0))))))))))
 
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
 (00001001 truthy?
   (00001000 (value)
     (00000111
-      ((00000010 value) (structural-kind empty-list) (00000001 ()))
-      ((00000010 value) (structural-kind atom)
+      ((00000010 value) () (00000001 ()))
+      ((00000010 value) (1)
        (00000111
-         ((00000011 value 0) (identity-relation same) (00000001 ()))
-         ((00000011 value 0) (identity-relation distinct) t)))
-      ((00000010 value) (structural-kind pair)
+         ((00000011 value 0) (1) (00000001 ()))
+         ((00000011 value 0) (0) t)))
+      ((00000010 value) (0)
        (00000111
-         ((equal? value (00000001 (structural-kind pair))) (structural-relation same) (00000001 ()))
-         ((equal? value (00000001 (identity-relation distinct))) (structural-relation same) (00000001 ()))
-         ((equal? value (00000001 (structural-relation distinct))) (structural-relation same) (00000001 ()))
+         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+         ((00100010 value (00000001 (0))) (1) (00000001 ()))
          (t t t))))))
 
 (00001001 not?
@@ -402,34 +405,34 @@
 (00001001 nth
   (00001000 (i lst)
     (00000111
-      ((00000011 i 0) (identity-relation same) (00000101 lst))
-      ((00000011 i 0) (identity-relation distinct)
-       (nth (00001101 i 1) (00000110 lst))))))
+      ((00000011 i 0) (1) (00000101 lst))
+      ((00000011 i 0) (0)
+       (00101011 (00001101 i 1) (00000110 lst))))))
 
 (00001001 member?
   (00001000 (item lst)
     (00000111
-      ((00000010 lst) (structural-kind empty-list) (00000001 ()))
-      ((00000010 lst) (structural-kind pair)
+      ((00000010 lst) () (00000001 ()))
+      ((00000010 lst) (0)
        (00000111
-         ((equal? item (00000101 lst)) (structural-relation same) t)
-         ((equal? item (00000101 lst)) (structural-relation distinct)
-          (member? item (00000110 lst))))))))
+         ((00100010 item (00000101 lst)) (1) t)
+         ((00100010 item (00000101 lst)) (0)
+          (00101100 item (00000110 lst))))))))
 
 (00001001 assoc
   (00001000 (key alist)
     (00000111
-      ((00000010 alist) (structural-kind empty-list) (00000001 ()))
-      ((00000010 alist) (structural-kind pair)
+      ((00000010 alist) () (00000001 ()))
+      ((00000010 alist) (0)
        (00000111
-         ((equal? key (00000101 (00000101 alist))) (structural-relation same) (00000101 alist))
-         ((equal? key (00000101 (00000101 alist))) (structural-relation distinct)
-          (assoc key (00000110 alist))))))))
+         ((00100010 key (00000101 (00000101 alist))) (1) (00000101 alist))
+         ((00100010 key (00000101 (00000101 alist))) (0)
+          (00101101 key (00000110 alist))))))))
 
-(defmacro let* (bindings body)
+(00001010 let* (bindings body)
   (00000111
-    ((00000010 bindings) (structural-kind empty-list) body)
-    ((00000010 bindings) (structural-kind pair)
+    ((00000010 bindings) () body)
+    ((00000010 bindings) (0)
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
@@ -460,47 +463,44 @@
 ; лише по рядку, не по ланцюжку пар. string-append (справді невиразний
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
-(00001001 string-empty?
-  (00001000 (s) (00000011 s "")))
-
 (00001001 string-membership-helper
   (00001000 (value)
     (00000111
-      ((00000010 value) (structural-kind empty-list)
+      ((00000010 value) ()
        (00000001 (class-membership string nonmember)))
-      ((00000010 value) (structural-kind atom)
+      ((00000010 value) (1)
        (00000111
-         ((00000011 (string-first (write-to-string value))
-              (string-first (write-to-string "")))
-          (identity-relation same)
+         ((00000011 (00111111 (01001100 value))
+              (00111111 (01001100 "")))
+          (1)
           (00000001 (class-membership string member)))
-         ((00000011 (string-first (write-to-string value))
-              (string-first (write-to-string "")))
-          (identity-relation distinct)
+         ((00000011 (00111111 (01001100 value))
+              (00111111 (01001100 "")))
+          (0)
           (00000001 (class-membership string nonmember)))))
-      ((00000010 value) (structural-kind pair)
+      ((00000010 value) (0)
        (00000001 (class-membership string nonmember))))))
 
 (00001001 string-order-helper
   (00001000 (left right)
     (00000111
-      ((string-empty? left) (identity-relation same)
+      ((00111100 left) (1)
        (00000111
-         ((string-empty? right) (identity-relation same)
+         ((00111100 right) (1)
           (00000001 (text-order same)))
-         ((string-empty? right) (identity-relation distinct)
+         ((00111100 right) (0)
           (00000001 (text-order before)))))
-      ((string-empty? left) (identity-relation distinct)
+      ((00111100 left) (0)
        (00000001 (text-order after)))
-      ((00000011 (string-first left) (string-first right))
-       (identity-relation same)
-       (string-order-helper (string-rest left) (string-rest right)))
-      ((< (string->codepoint (string-first left))
-          (string->codepoint (string-first right)))
+      ((00000011 (00111111 left) (00111111 right))
+       (1)
+       (string-order-helper (01000000 left) (01000000 right)))
+      ((00011010 (01000101 (00111111 left))
+          (01000101 (00111111 right)))
        1
        (00000001 (text-order before)))
-      ((< (string->codepoint (string-first left))
-          (string->codepoint (string-first right)))
+      ((00011010 (01000101 (00111111 left))
+          (01000101 (00111111 right)))
        0
        (00000001 (text-order after))))))
 
@@ -510,21 +510,15 @@
       ((string-membership-helper value)
        (class-membership string member)
        (00000111
-         ((string-empty? value)
-          (identity-relation distinct)
+         ((00111100 value)
+          (0)
           (00000001 (class-membership string nonempty-member)))
-         ((string-empty? value)
-          (identity-relation same)
+         ((00111100 value)
+          (1)
           (00000001 (class-membership string member)))))
       ((string-membership-helper value)
        (class-membership string nonmember)
        (00000001 (class-membership string nonmember))))))
-
-(00001001 string-length
-  (00001000 (s)
-    (00000111
-      ((string-empty? s) (identity-relation same) 0)
-      (t t (00001100 1 (string-length (string-rest s)))))))
 
 ; string<? — лексикографічний порядок за кодовими точками, як `<` для &str
 ; у Rust (UTF-8 зберігає порядок кодових точок). Переведено з Rust у мову
@@ -536,32 +530,15 @@
   (00001000 (a b)
     (00000111
       ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
-      ((string-empty? b) (identity-relation same)
-       (second (list (00111010 a "") (00000001 ()))))
-      ((string-empty? a) (identity-relation same)
-       (second (list (00111010 b "") t)))
+      ((00111100 b) (1)
+       (00101111 (00100111 (00111010 a "") (00000001 ()))))
+      ((00111100 a) (1)
+       (00101111 (00100111 (00111010 b "") t)))
       ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) 1 t)
-      ((00000011 (00111111 a) (00111111 b)) (identity-relation same)
-       (string<? (01000000 a) (01000000 b)))
+      ((00000011 (00111111 a) (00111111 b)) (1)
+       (00100101 (01000000 a) (01000000 b)))
       (t t (00000001 ())))))
 
-(00001001 string-prefix?
-  (00001000 (prefix s)
-    (00000111
-      ((string-empty? prefix) (identity-relation same) t)
-      ((string-empty? s) (identity-relation same) (00000001 ()))
-      ((00000011 (string-first prefix) (string-first s))
-       (identity-relation same)
-       (string-prefix? (string-rest prefix) (string-rest s)))
-      (t t (00000001 ())))))
-
-
-(00001001 string-contains?
-  (00001000 (needle s)
-    (00000111
-      ((string-prefix? needle s) t t)
-      ((string-empty? s) (identity-relation same) (00000001 ()))
-      (t t (string-contains? needle (string-rest s))))))
 
 
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
@@ -576,13 +553,13 @@
 (00001001 symbol?
   (00001000 (value)
     (00000111
-      ((00000010 value) (structural-kind empty-list) (00000001 ()))
-      ((00000010 value) (structural-kind atom)
+      ((00000010 value) () (00000001 ()))
+      ((00000010 value) (1)
        (00000111
-         ((00000011 value (string->symbol (write-to-string value)))
-          (identity-relation same) t)
+         ((00000011 value (01000011 (01001100 value)))
+          (1) t)
          (t t (00000001 ()))))
-      ((00000010 value) (structural-kind pair) (00000001 ())))))
+      ((00000010 value) (0) (00000001 ())))))
 
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
@@ -642,9 +619,9 @@
 (00001001 largest-chunk
   (00001000 (a b chunk mult)
     (00000111
-      ((< a (00001100 chunk chunk)) 1 (00000100 chunk mult))
-      ((< a (00001100 chunk chunk)) 0
-       (largest-chunk a b (00001100 chunk chunk) (00001100 mult mult))))))
+      ((00011010 a (00001100 chunk chunk)) 1 (00000100 chunk mult))
+      ((00011010 a (00001100 chunk chunk)) 0
+       (00011001 a b (00001100 chunk chunk) (00001100 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -666,18 +643,18 @@
 (00001001 quotient
   (00001000 (a b)
     (00000111
-      ((00000011 b 0) (identity-relation same) (00001111 a b))
-      ((00000011 b 0) (identity-relation distinct)
+      ((00000011 b 0) (1) (00001111 a b))
+      ((00000011 b 0) (0)
        (00000111
-         ((< a b) 1 0)
-         ((< a b) 0
-          (let ((chunk+mult (largest-chunk a b b 1)))
+         ((00011010 a b) 1 0)
+         ((00011010 a b) 0
+          (let ((chunk+mult (00011001 a b b 1)))
             (00001100 (00000110 chunk+mult)
-               (quotient (00001101 a (00000101 chunk+mult)) b)))))))))
+               (00010100 (00001101 a (00000101 chunk+mult)) b)))))))))
 
 (00001001 mod
   (00001000 (a b)
-    (00001101 a (00001110 b (quotient a b)))))
+    (00001101 a (00001110 b (00010100 a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
@@ -687,30 +664,30 @@
 (00001001 nondecreasing-from?
   (00001000 (current remaining)
     (00000111
-      ((00000010 remaining) (structural-kind empty-list) 1)
-      ((< current (00000101 remaining)) 1
-       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((= current (00000101 remaining)) 1
-       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((= current (00000101 remaining)) 0 0))))
+      ((00000010 remaining) () 1)
+      ((00011010 current (00000101 remaining)) 1
+       (00011111 (00000101 remaining) (00000110 remaining)))
+      ((00011100 current (00000101 remaining)) 1
+       (00011111 (00000101 remaining) (00000110 remaining)))
+      ((00011100 current (00000101 remaining)) 0 0))))
 
 (00001001 nonincreasing-from?
   (00001000 (current remaining)
     (00000111
-      ((00000010 remaining) (structural-kind empty-list) 1)
-      ((> current (00000101 remaining)) 1
-       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((= current (00000101 remaining)) 1
-       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((= current (00000101 remaining)) 0 0))))
+      ((00000010 remaining) () 1)
+      ((00011011 current (00000101 remaining)) 1
+       (00100000 (00000101 remaining) (00000110 remaining)))
+      ((00011100 current (00000101 remaining)) 1
+       (00100000 (00000101 remaining) (00000110 remaining)))
+      ((00011100 current (00000101 remaining)) 0 0))))
 
 (00001001 <=
   (00001000 (first . remaining)
-    (nondecreasing-from? first remaining)))
+    (00011111 first remaining)))
 
 (00001001 >=
   (00001000 (first . remaining)
-    (nonincreasing-from? first remaining)))
+    (00100000 first remaining)))
 
 ; number->string (G5 test: already expressible via existing means?) —
 ; yes, now that quotient/mod exist. Surfaced from the fpga-lisp
@@ -736,16 +713,16 @@
   ; variant — removal is a separate mirrored-surface decision, not a
   ; silent one.
   (00001000 (d)
-    (nth d (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+    (00101011 d (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
 (00001001 number->string-onto
   (00001000 (n acc)
     (00000111
-      ((00000011 n 0) (identity-relation same) acc)
-      ((00000011 n 0) (identity-relation distinct)
+      ((00000011 n 0) (1) acc)
+      ((00000011 n 0) (0)
        (number->string-onto
-         (quotient n 10)
-         (string-append (digit->string (mod n 10)) acc))))))
+         (00010100 n 10)
+         (00111010 (01000111 (00010011 n 10)) acc))))))
 
 (00001001 number->string
   (00001000 (n)
@@ -758,7 +735,7 @@
     ; its misleading error surfaced as an apparent memory corruption.
     ; Delegation, not re-implementation: write-to-string is already the
     ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
-    (write-to-string n)))
+    (01001100 n)))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
 ; without deep nesting (PLAN.md item / clean-code policy).
@@ -773,46 +750,46 @@
 ;
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
-(defmacro -> forms
+(00001010 -> forms
   (00000111
-    ((00000010 forms) (structural-kind empty-list) (00000001 ()))
-    ((00000010 forms) (structural-kind pair)
+    ((00000010 forms) () (00000001 ()))
+    ((00000010 forms) (0)
      (00000111
-       ((00000010 (00000110 forms)) (structural-kind empty-list) (00000101 forms))
-       ((00000010 (00000110 forms)) (structural-kind pair)
+       ((00000010 (00000110 forms)) () (00000101 forms))
+       ((00000010 (00000110 forms)) (0)
         (let* ((x (00000101 forms))
                (next (00000101 (00000110 forms)))
                (rest (00000110 (00000110 forms)))
                (step
                  (00000111
-                   ((00000010 next) (structural-kind empty-list) (list next x))
-                   ((00000010 next) (structural-kind atom) (list next x))
-                   ((00000010 next) (structural-kind pair)
+                   ((00000010 next) () (00100111 next x))
+                   ((00000010 next) (1) (00100111 next x))
+                   ((00000010 next) (0)
                     (00000100 (00000101 next) (00000100 x (00000110 next)))))))
           (00000111
-            ((00000010 rest) (structural-kind empty-list) step)
-            ((00000010 rest) (structural-kind pair)
+            ((00000010 rest) () step)
+            ((00000010 rest) (0)
              (00000100 (00000001 ->) (00000100 step rest))))))))))
 
-(defmacro ->> forms
+(00001010 ->> forms
   (00000111
-    ((00000010 forms) (structural-kind empty-list) (00000001 ()))
-    ((00000010 forms) (structural-kind pair)
+    ((00000010 forms) () (00000001 ()))
+    ((00000010 forms) (0)
      (00000111
-       ((00000010 (00000110 forms)) (structural-kind empty-list) (00000101 forms))
-       ((00000010 (00000110 forms)) (structural-kind pair)
+       ((00000010 (00000110 forms)) () (00000101 forms))
+       ((00000010 (00000110 forms)) (0)
         (let* ((x (00000101 forms))
                (next (00000101 (00000110 forms)))
                (rest (00000110 (00000110 forms)))
                (step
                  (00000111
-                   ((00000010 next) (structural-kind empty-list) (list next x))
-                   ((00000010 next) (structural-kind atom) (list next x))
-                   ((00000010 next) (structural-kind pair)
-                    (append next (list x))))))
+                   ((00000010 next) () (00100111 next x))
+                   ((00000010 next) (1) (00100111 next x))
+                   ((00000010 next) (0)
+                    (00101001 next (00100111 x))))))
           (00000111
-            ((00000010 rest) (structural-kind empty-list) step)
-            ((00000010 rest) (structural-kind pair)
+            ((00000010 rest) () step)
+            ((00000010 rest) (0)
              (00000100 (00000001 ->>) (00000100 step rest))))))))))
 
 ;; ── Numeric library additions (M0, 2026-08-22) ─────────────────────
@@ -830,34 +807,34 @@
 (00001001 sqrt-iter
   (00001000 (guess x n)
     (00000111
-      ((= n 0) 1 guess)
-      ((= n 0) 0
+      ((00011100 n 0) 1 guess)
+      ((00011100 n 0) 0
        (sqrt-iter (00001111 (00001100 guess (00001111 x guess)) 2) x (00001101 n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
 (00001001 isqrt
   (00001000 (n)
     (00000111
-      ((< n 2) 1 n)
-      ((< n 2) 0
-       (isqrt-step n (quotient n 2))))))
+      ((00011010 n 2) 1 n)
+      ((00011010 n 2) 0
+       (isqrt-step n (00010100 n 2))))))
 
 (00001001 isqrt-step
   (00001000 (n g)
-    (let ((next (quotient (00001100 g (quotient n g)) 2)))
+    (let ((next (00010100 (00001100 g (00010100 n g)) 2)))
       (00000111
-        ((< next g) 1 (isqrt-step n next))
-        ((< next g) 0 g)))))
+        ((00011010 next g) 1 (isqrt-step n next))
+        ((00011010 next g) 0 g)))))
 
 (00001001 sqrt
   (00001000 (x)
     (00000111
-      ((< x 0) 1 (00000001 ()))
-      ((= x 0) 1 0)
-      ((= x (quotient x 1)) 1
-       (let ((r (isqrt x)))
+      ((00011010 x 0) 1 (00000001 ()))
+      ((00011100 x 0) 1 0)
+      ((00011100 x (00010100 x 1)) 1
+       (let ((r (00010110 x)))
          (00000111
-           ((= (00001110 r r) x) t r)
+           ((00011100 (00001110 r r) x) t r)
            (t t (sqrt-iter (00001111 x 2) x 8)))))
       (t t (sqrt-iter (00001111 x 2.0) x 5)))))
 
@@ -887,8 +864,8 @@
 (00001001 abs
   (00001000 (x)
     (00000111
-      ((< x 0) 1 (00001101 0 x))
-      ((< x 0) 0 x))))
+      ((00011010 x 0) 1 (00001101 0 x))
+      ((00011010 x 0) 0 x))))
 
 ; Required first parameter (dotted lambda-list, same pattern as
 ; `<=`/`>=` above) keeps zero arguments an Arity error via the
@@ -897,11 +874,11 @@
 ; without this Lisp definition needing to raise a custom error itself.
 (00001001 min
   (00001000 (first . rest)
-    (min-list (00000100 first rest))))
+    (00010111 (00000100 first rest))))
 
 (00001001 max
   (00001000 (first . rest)
-    (max-list (00000100 first rest))))
+    (00011000 (00000100 first rest))))
 
 ; Two real bugs found live via oracle testing before this landed, not
 ; assumed from reading the removed Rust source:
@@ -918,30 +895,30 @@
 (00001001 min-list
   (00001000 (items)
     (00000111
-      ((00000010 items) (structural-kind empty-list) (00000001 ()))
-      ((00000010 items) (structural-kind pair)
-       (let ((rest-min (min-list (00000110 items))))
+      ((00000010 items) () (00000001 ()))
+      ((00000010 items) (0)
+       (let ((rest-min (00010111 (00000110 items))))
          (00000111
-           ((equal? rest-min (00000001 ())) (structural-relation same)
+           ((00100010 rest-min (00000001 ())) (1)
             (00000101 items))
-           ((equal? rest-min (00000001 ())) (structural-relation distinct)
+           ((00100010 rest-min (00000001 ())) (0)
             (00000111
-              ((< (00000101 items) rest-min) 1 (00000101 items))
-              ((< (00000101 items) rest-min) 0 rest-min)))))))))
+              ((00011010 (00000101 items) rest-min) 1 (00000101 items))
+              ((00011010 (00000101 items) rest-min) 0 rest-min)))))))))
 
 (00001001 max-list
   (00001000 (items)
     (00000111
-      ((00000010 items) (structural-kind empty-list) (00000001 ()))
-      ((00000010 items) (structural-kind pair)
-       (let ((rest-max (max-list (00000110 items))))
+      ((00000010 items) () (00000001 ()))
+      ((00000010 items) (0)
+       (let ((rest-max (00011000 (00000110 items))))
          (00000111
-           ((equal? rest-max (00000001 ())) (structural-relation same)
+           ((00100010 rest-max (00000001 ())) (1)
             (00000101 items))
-           ((equal? rest-max (00000001 ())) (structural-relation distinct)
+           ((00100010 rest-max (00000001 ())) (0)
             (00000111
-              ((> (00000101 items) rest-max) 1 (00000101 items))
-              ((> (00000101 items) rest-max) 0 rest-max)))))))))
+              ((00011011 (00000101 items) rest-max) 1 (00000101 items))
+              ((00011011 (00000101 items) rest-max) 0 rest-max)))))))))
 
 ; #469 — post-core stable peer materialization.
 ;
@@ -980,46 +957,46 @@
 (00001001 my-postcore-peer-group
   (00001000 (semantic-id groups)
     (00000111
-      ((00000010 groups) (structural-kind empty-list)
+      ((00000010 groups) ()
        (00000001 ()))
-      ((00000010 groups) (structural-kind pair)
+      ((00000010 groups) (0)
        (let ((group (00000101 groups)))
          (00000111
-           ((00000011 semantic-id (00000101 group)) (identity-relation same)
+           ((00000011 semantic-id (00000101 group)) (1)
             group)
-           ((00000011 semantic-id (00000101 group)) (identity-relation distinct)
+           ((00000011 semantic-id (00000101 group)) (0)
             (my-postcore-peer-group semantic-id (00000110 groups)))))))))
 
 (00001001 my-postcore-binding-status
   (00001000 (surface bindings)
     (00000111
-      ((00000010 bindings) (structural-kind empty-list)
+      ((00000010 bindings) ()
        (00000001 absent))
-      ((00000010 bindings) (structural-kind pair)
+      ((00000010 bindings) (0)
        (let ((binding (00000101 bindings)))
          (00000111
-           ((00000011 (symbol->string surface) (00000101 binding)) (identity-relation same)
+           ((00000011 (01000010 surface) (00000101 binding)) (1)
             (00000001 present))
-           ((00000011 (symbol->string surface) (00000101 binding)) (identity-relation distinct)
+           ((00000011 (01000010 surface) (00000101 binding)) (0)
             (my-postcore-binding-status surface (00000110 bindings)))))))))
 
 (00001001 my-postcore-missing-peers
   (00001000 (source peers bindings)
     (00000111
-      ((00000010 peers) (structural-kind empty-list)
+      ((00000010 peers) ()
        (00000001 ()))
-      ((00000010 peers) (structural-kind pair)
+      ((00000010 peers) (0)
        (let ((peer (00000101 peers)))
          (00000111
-           ((00000011 source peer) (identity-relation same)
+           ((00000011 source peer) (1)
             (my-postcore-missing-peers source (00000110 peers) bindings))
-           ((00000011 source peer) (identity-relation distinct)
+           ((00000011 source peer) (0)
             (00000111
               ((00000011 (my-postcore-binding-status peer bindings) (00000001 present))
-               (identity-relation same)
+               (1)
                (my-postcore-missing-peers source (00000110 peers) bindings))
               ((00000011 (my-postcore-binding-status peer bindings) (00000001 absent))
-               (identity-relation same)
+               (1)
                (00000100 peer
                      (my-postcore-missing-peers
                        source
@@ -1032,92 +1009,92 @@
 (00001001 my-postcore-build-definitions
   (00001000 (source peers)
     (00000111
-      ((00000010 peers) (structural-kind empty-list)
+      ((00000010 peers) ()
        source)
-      ((00000010 peers) (structural-kind pair)
-       (list (00000001 define)
+      ((00000010 peers) (0)
+       (00100111 (00000001 define)
              (00000101 peers)
              (my-postcore-build-definitions source (00000110 peers)))))))
 
-(defmacro my-postcore-materialize-stable-peers args
+(00001010 my-postcore-materialize-stable-peers args
   (let* ((semantic-id (00000101 args))
-         (source (second args))
+         (source (00101111 args))
          (group
            (my-postcore-peer-group
              semantic-id
              my-postcore-stable-peer-projection)))
     (00000111
-      ((00000010 group) (structural-kind empty-list)
+      ((00000010 group) ()
        source)
-      ((00000010 group) (structural-kind pair)
+      ((00000010 group) (0)
        (my-postcore-build-definitions
          source
-         (my-postcore-missing-peers source (00000110 group) (env)))))))
+         (my-postcore-missing-peers source (00000110 group) (01001110)))))))
 
 ; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
 (00001001 divmod
   (00001000 (dividend divisor)
-    (list (quotient dividend divisor) (mod dividend divisor))))
+    (00100111 (00010100 dividend divisor) (00010011 dividend divisor))))
 
 ; McCarthy 1960, §3d: null, subst, sublis, maplist, apply — закон Core4, коди СЕНС.
 (00001001 null?
   (00001000 (x)
     (00000111
-      ((00000010 x) (structural-kind empty-list) t)
-      ((00000010 x) (structural-kind pair) (00000001 ()))
-      ((00000010 x) (structural-kind atom) (00000001 ())))))
+      ((00000010 x) () t)
+      ((00000010 x) (0) (00000001 ()))
+      ((00000010 x) (1) (00000001 ())))))
 
 (00001001 subst
   (00001000 (x y z)
     (00000111
-      ((00000010 z) (structural-kind pair)
-       (00000100 (subst x y (00000101 z)) (subst x y (00000110 z))))
-      ((00000010 z) (structural-kind empty-list)
+      ((00000010 z) (0)
+       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z))))
+      ((00000010 z) ()
        (00000111
-         ((00000011 z y) (identity-relation same) x)
-         ((00000011 z y) (identity-relation distinct) z)))
-      ((00000010 z) (structural-kind atom)
+         ((00000011 z y) (1) x)
+         ((00000011 z y) (0) z)))
+      ((00000010 z) (1)
        (00000111
-         ((00000011 z y) (identity-relation same) x)
-         ((00000011 z y) (identity-relation distinct) z))))))
+         ((00000011 z y) (1) x)
+         ((00000011 z y) (0) z))))))
 
 (00001001 sublis-pair
   (00001000 (x z)
     (00000111
-      ((00000010 x) (structural-kind empty-list) z)
-      ((00000010 x) (structural-kind pair)
+      ((00000010 x) () z)
+      ((00000010 x) (0)
        (00000111
-         ((00000011 (00000101 (00000101 x)) z) (identity-relation same)
+         ((00000011 (00000101 (00000101 x)) z) (1)
           (00000101 (00000110 (00000101 x))))
-         ((00000011 (00000101 (00000101 x)) z) (identity-relation distinct)
+         ((00000011 (00000101 (00000101 x)) z) (0)
           (sublis-pair (00000110 x) z)))))))
 
 (00001001 sublis
   (00001000 (x y)
     (00000111
-      ((00000010 y) (structural-kind pair)
-       (00000100 (sublis x (00000101 y)) (sublis x (00000110 y))))
-      ((00000010 y) (structural-kind empty-list) (sublis-pair x y))
-      ((00000010 y) (structural-kind atom) (sublis-pair x y)))))
+      ((00000010 y) (0)
+       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y))))
+      ((00000010 y) () (sublis-pair x y))
+      ((00000010 y) (1) (sublis-pair x y)))))
 
 (00001001 maplist
   (00001000 (x f)
     (00000111
-      ((00000010 x) (structural-kind empty-list) (00000001 ()))
-      ((00000010 x) (structural-kind pair)
-       (00000100 (f x) (maplist (00000110 x) f))))))
+      ((00000010 x) () (00000001 ()))
+      ((00000010 x) (0)
+       (00000100 (f x) (10101110 (00000110 x) f))))))
 
 (00001001 apply-quote-args
   (00001000 (m)
     (00000111
-      ((00000010 m) (structural-kind empty-list) (00000001 ()))
-      ((00000010 m) (structural-kind pair)
+      ((00000010 m) () (00000001 ()))
+      ((00000010 m) (0)
        (00000100 (00000100 (00000001 00000001) (00000100 (00000101 m) (00000001 ())))
                  (apply-quote-args (00000110 m)))))))
 
 (00001001 apply
   (00001000 (f args)
-    (eval (00000100 f (apply-quote-args args)))))
+    (01001101 (00000100 f (apply-quote-args args)))))
 
 ; #1391: логіка відповідей Core4 — закон contracts/core4-predicate-answer-scale.lisp /3.
 ; Відповідь — список двійкових бітів: (1)…(1 1 1 1 1 1 1) «так»,
@@ -1129,12 +1106,12 @@
 (00001001 answer-not
   (00001000 (a)
     (00000111
-      ((00000010 a) (structural-kind empty-list) (00000001 ()))
-      ((00000010 a) (structural-kind pair)
+      ((00000010 a) () (00000001 ()))
+      ((00000010 a) (0)
        (00000100
          (00000111
-           ((00000011 (00000101 a) 0) (identity-relation same) 1)
-           ((00000011 (00000101 a) 0) (identity-relation distinct) 0))
+           ((00000011 (00000101 a) 0) (1) 1)
+           ((00000011 (00000101 a) 0) (0) 0))
          (10110001 (00000110 a)))))))
 
 ; AND: мінімум на лінії. «Ні» перемагає; з двох «ні» — коротше (сильніше);
@@ -1143,36 +1120,36 @@
 (00001001 answer-and
   (00001000 (a b)
     (00000111
-      ((00000010 a) (structural-kind empty-list)
+      ((00000010 a) ()
        (00000111
-         ((00000010 b) (structural-kind empty-list) (00000001 ()))
-         ((00000010 b) (structural-kind pair)
+         ((00000010 b) () (00000001 ()))
+         ((00000010 b) (0)
           (00000111
-            ((00000011 (00000101 b) 0) (identity-relation same) b)
-            ((00000011 (00000101 b) 0) (identity-relation distinct) (00000001 ()))))))
-      ((00000010 a) (structural-kind pair)
+            ((00000011 (00000101 b) 0) (1) b)
+            ((00000011 (00000101 b) 0) (0) (00000001 ()))))))
+      ((00000010 a) (0)
        (00000111
-         ((00000010 b) (structural-kind empty-list)
+         ((00000010 b) ()
           (00000111
-            ((00000011 (00000101 a) 0) (identity-relation same) a)
-            ((00000011 (00000101 a) 0) (identity-relation distinct) (00000001 ()))))
-         ((00000010 b) (structural-kind pair)
+            ((00000011 (00000101 a) 0) (1) a)
+            ((00000011 (00000101 a) 0) (0) (00000001 ()))))
+         ((00000010 b) (0)
           (00000111
-            ((00000011 (00000101 a) (00000101 b)) (identity-relation distinct)
+            ((00000011 (00000101 a) (00000101 b)) (0)
              (00000111
-               ((00000011 (00000101 a) 0) (identity-relation same) a)
-               ((00000011 (00000101 a) 0) (identity-relation distinct) b)))
-            ((00000011 (00000101 a) (00000101 b)) (identity-relation same)
+               ((00000011 (00000101 a) 0) (1) a)
+               ((00000011 (00000101 a) 0) (0) b)))
+            ((00000011 (00000101 a) (00000101 b)) (1)
              (00000111
-               ((00000010 (00000110 a)) (structural-kind empty-list)
+               ((00000010 (00000110 a)) ()
                 (00000111
-                  ((00000011 (00000101 a) 0) (identity-relation same) a)
-                  ((00000011 (00000101 a) 0) (identity-relation distinct) b)))
-               ((00000010 (00000110 b)) (structural-kind empty-list)
+                  ((00000011 (00000101 a) 0) (1) a)
+                  ((00000011 (00000101 a) 0) (0) b)))
+               ((00000010 (00000110 b)) ()
                 (00000111
-                  ((00000011 (00000101 b) 0) (identity-relation same) b)
-                  ((00000011 (00000101 b) 0) (identity-relation distinct) a)))
-               ((00000010 (00000110 b)) (structural-kind pair)
+                  ((00000011 (00000101 b) 0) (1) b)
+                  ((00000011 (00000101 b) 0) (0) a)))
+               ((00000010 (00000110 b)) (0)
                 (00000100 (00000101 a)
                           (10110010 (00000110 a) (00000110 b)))))))))))))
 
@@ -1186,11 +1163,11 @@
 (00001001 answer-weaken
   (00001000 (a)
     (00000111
-      ((00000010 a) (structural-kind empty-list) (00000001 ()))
-      ((00000010 a) (structural-kind pair)
+      ((00000010 a) () (00000001 ()))
+      ((00000010 a) (0)
        (00000111
-         ((00000011 (00101000 a) 7) (identity-relation same) (00000001 ()))
-         ((00000011 (00101000 a) 7) (identity-relation distinct)
+         ((00000011 (00101000 a) 7) (1) (00000001 ()))
+         ((00000011 (00101000 a) 7) (0)
           (00000100 (00000101 a) a)))))))
 
 ; atom? відповіддю шкали: атом (1), пара (0), () — невідомо, бо () стоїть
@@ -1198,13 +1175,13 @@
 (00001001 answer-atom
   (00001000 (x)
     (00000111
-      ((00000010 x) (structural-kind atom) (00000001 (1)))
-      ((00000010 x) (structural-kind pair) (00000001 (0)))
-      ((00000010 x) (structural-kind empty-list) (00000001 ())))))
+      ((00000010 x) (1) (00000001 (1)))
+      ((00000010 x) (0) (00000001 (0)))
+      ((00000010 x) () (00000001 ())))))
 
 ; eq? відповіддю шкали: same (1), distinct (0). Область та сама, що в eq?: атоми.
 (00001001 answer-eq
   (00001000 (a b)
     (00000111
-      ((00000011 a b) (identity-relation same) (00000001 (1)))
-      ((00000011 a b) (identity-relation distinct) (00000001 (0))))))
+      ((00000011 a b) (1) (00000001 (1)))
+      ((00000011 a b) (0) (00000001 (0))))))

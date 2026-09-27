@@ -4,37 +4,37 @@
 ; a Prolog projection becoming ready activates a Datalog pending invocation.
 ; No kernel is called here; invocation routing remains a later mechanism step.
 
-(def life-1-scheduler-witness
-  (lambda ()
-    (let* ((first
-             (quote
+(00001001 life-1-scheduler-witness
+  (00001000 ()
+    (10011101 ((first
+             (00000001
                (pending-invocation
                  (producer datalog)
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-42)
                  (priority ordinary)
-                 (semantic-id "00001100"))))
+                 (semantic-id 00001100))))
            (first-duplicate
-             (quote
+             (00000001
                (pending-invocation
                  (producer datalog)
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-42)
                  (priority ordinary)
-                 (semantic-id "00001100"))))
+                 (semantic-id 00001100))))
            (second
-             (quote
+             (00000001
                (pending-invocation
                  (producer datalog)
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-99)
                  (priority ordinary)
-                 (semantic-id "00001100"))))
+                 (semantic-id 00001100))))
            (pending
              (life-scheduler-pending
-               (list first first-duplicate second)))
+               (00100111 first first-duplicate second)))
            (projections
-             (quote
+             (00000001
                ((projection-ready
                   prolog-substitutions-to-datalog-facts
                   observation-42)
@@ -46,65 +46,65 @@
            (wrong-provenance
              (life-scheduler-projection-ready?
                first
-               (quote
+               (00000001
                  ((projection-ready
                     prolog-substitutions-to-datalog-facts
                     observation-99)))))
            (wrong-bridge
              (life-scheduler-projection-ready?
                first
-               (quote
+               (00000001
                  ((projection-ready
                     different-bridge-contract
                     observation-42))))))
-      (cond
-        ((atom? selection) (structural-kind empty-list)
-         (list
-           (quote life-1-scheduler-witness)
-           (list (quote status) (quote fail))
-           (list (quote detail) (quote missing-selection))))
-        ((atom? selection) (structural-kind pair)
-         (let* ((ready (car (cdr selection)))
-                (remaining (car (cdr (cdr (cdr selection)))))
-                (dedup-ok (equal? remaining (list second)))
+      (00000111
+        ((00000010 selection) ()
+         (00100111
+           (00000001 life-1-scheduler-witness)
+           (00100111 (00000001 status) (00000001 fail))
+           (00100111 (00000001 detail) (00000001 missing-selection))))
+        ((00000010 selection) (0)
+         (10011101 ((ready (00000101 (00000110 selection)))
+                (remaining (00000101 (00000110 (00000110 (00000110 selection)))))
+                (dedup-ok (00100010 remaining (00100111 second)))
                 (quiescence-ok
-                  (equal?
+                  (00100010
                     (life-scheduler-quiescence
-                      (quote ())
-                      (quote ())
-                      (quote no-transition-required))
-                    (quote (quiescence-state quiescent))))
+                      (00000001 ())
+                      (00000001 ())
+                      (00000001 no-transition-required))
+                    (00000001 (quiescence-state quiescent))))
                 (adversarial-ok
-                  (equal?
-                    (list wrong-provenance wrong-bridge)
-                    (quote (absent absent)))))
-           (cond
-             ((equal?
-                (list ready dedup-ok quiescence-ok adversarial-ok)
-                (quote
+                  (00100010
+                    (00100111 wrong-provenance wrong-bridge)
+                    (00000001 (absent absent)))))
+           (00000111
+             ((00100010
+                (00100111 ready dedup-ok quiescence-ok adversarial-ok)
+                (00000001
                   (ready
-                    (structural-relation same)
-                    (structural-relation same)
-                    (structural-relation same))))
-              (structural-relation same)
-              (list
-                (quote life-1-scheduler-witness)
-                (list (quote status) (quote pass))
-                (list (quote detail)
-                      (quote deduplicated-activation-and-quiescence))))
-             ((equal? (list wrong-provenance wrong-bridge)
-                      (quote (absent absent)))
-              (structural-relation same)
-              (list
-                (quote life-1-scheduler-witness)
-                (list (quote status) (quote fail))
-                (list (quote detail) (quote scheduler-invariant-mismatch))))
-             ((equal? (list wrong-provenance wrong-bridge)
-                      (quote (absent absent)))
-              (structural-relation distinct)
-              (list
-                (quote life-1-scheduler-witness)
-                (list (quote status) (quote fail))
-                (list (quote detail) (quote adversarial-readiness-mismatch)))))))))))
+                    (1)
+                    (1)
+                    (1))))
+              (1)
+              (00100111
+                (00000001 life-1-scheduler-witness)
+                (00100111 (00000001 status) (00000001 pass))
+                (00100111 (00000001 detail)
+                      (00000001 deduplicated-activation-and-quiescence))))
+             ((00100010 (00100111 wrong-provenance wrong-bridge)
+                      (00000001 (absent absent)))
+              (1)
+              (00100111
+                (00000001 life-1-scheduler-witness)
+                (00100111 (00000001 status) (00000001 fail))
+                (00100111 (00000001 detail) (00000001 scheduler-invariant-mismatch))))
+             ((00100010 (00100111 wrong-provenance wrong-bridge)
+                      (00000001 (absent absent)))
+              (0)
+              (00100111
+                (00000001 life-1-scheduler-witness)
+                (00100111 (00000001 status) (00000001 fail))
+                (00100111 (00000001 detail) (00000001 adversarial-readiness-mismatch)))))))))))
 
 (life-1-scheduler-witness)

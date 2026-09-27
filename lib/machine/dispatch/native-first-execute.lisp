@@ -34,10 +34,10 @@
 (00001001 native-first-plan-tag-state
   (00001000 (plan tag)
     (00000111
-      ((00000010 plan) (structural-kind pair)
+      ((00000010 plan) (0)
        (00000111
-         ((00000011 (00000101 plan) tag) (identity-relation same) (00000001 same))
-         ((00000011 (00000101 plan) tag) (identity-relation distinct) (00000001 distinct))))
+         ((00000011 (00000101 plan) tag) (1) (00000001 same))
+         ((00000011 (00000101 plan) tag) (0) (00000001 distinct))))
       ((00000001 native-first-plan-tag-state-fallback)
        native-first-plan-tag-state-fallback
        (00000001 distinct)))))
@@ -50,10 +50,10 @@
               (00110000 plan))))
       (00000111
         ((00100010 (x86-machine-rejected? result) t)
-         (structural-relation same)
+         (1)
          (native-first-execution-rejected (00000001 native) result))
         ((00100010 (x86-machine-rejected? result) t)
-         (structural-relation distinct)
+         (0)
          (native-first-execution-completed (00000001 native) result))))))
 
 (00001001 native-first-execute-plan
@@ -61,31 +61,31 @@
     (10011100 ((native-state
             (native-first-plan-tag-state plan (00000001 native-plan))))
       (00000111
-        ((00000011 native-state (00000001 same)) (identity-relation same)
+        ((00000011 native-state (00000001 same)) (1)
          (00000111
-           ((00100010 (00101000 plan) 3) (structural-relation same)
+           ((00100010 (00101000 plan) 3) (1)
             (native-first-execute-native-plan plan))
-           ((00100010 (00101000 plan) 3) (structural-relation distinct)
+           ((00100010 (00101000 plan) 3) (0)
             (native-first-execution-rejected
               (00000001 native)
               (00100111 (00000001 malformed-native-plan) plan)))))
-        ((00000011 native-state (00000001 distinct)) (identity-relation same)
+        ((00000011 native-state (00000001 distinct)) (1)
          (10011100 ((fallback-state
                  (native-first-plan-tag-state
                    plan
                    (00000001 evaluator-fallback))))
            (00000111
-             ((00000011 fallback-state (00000001 same)) (identity-relation same)
+             ((00000011 fallback-state (00000001 same)) (1)
               (00000111
-                ((00100010 (00101000 plan) 2) (structural-relation same)
+                ((00100010 (00101000 plan) 2) (1)
                  (native-first-execution-completed
                    (00000001 evaluator)
                    (01001101 (00101111 plan))))
-                ((00100010 (00101000 plan) 2) (structural-relation distinct)
+                ((00100010 (00101000 plan) 2) (0)
                  (native-first-execution-rejected
                    (00000001 evaluator)
                    (00100111 (00000001 malformed-evaluator-fallback) plan)))))
-             ((00000011 fallback-state (00000001 distinct)) (identity-relation same)
+             ((00000011 fallback-state (00000001 distinct)) (1)
               (native-first-execution-rejected
                 (00000001 invalid-plan)
                 (00100111 (00000001 unknown-native-first-plan) plan))))))))))
@@ -98,13 +98,13 @@
 (00001001 native-first-execute-source-forms
   (00001000 (forms)
     (00000111
-      ((00000010 forms) (structural-kind empty-list) (00000001 ()))
-      ((00000010 forms) (structural-kind atom)
+      ((00000010 forms) () (00000001 ()))
+      ((00000010 forms) (1)
        (00100111
          (native-first-execution-rejected
            (00000001 evaluator)
            (00100111 (00000001 malformed-source-form-tail) forms))))
-      ((00000010 forms) (structural-kind pair)
+      ((00000010 forms) (0)
        (00000100
          (native-first-execute-expression (00000101 forms))
          (native-first-execute-source-forms (00000110 forms)))))))
@@ -114,4 +114,4 @@
     (00100111
       (00000001 source-execution)
       (native-first-execute-source-forms
-        (read-all source)))))
+        (01001011 source)))))

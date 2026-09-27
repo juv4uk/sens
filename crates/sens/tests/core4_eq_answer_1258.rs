@@ -4,17 +4,18 @@
 //! stays completely unchanged. Only the admitted level-1 answers are
 //! exercised here — no weaker level (11/00/...) is assigned without a
 //! separate law, per #1258's own scope.
+//!
+//! Since #1495 the slice is part of the language: `eq?` is the primitive
+//! 00000011 itself and answers `(1)`/`(0)`. The experiment
+//! `experiments/core4-eq-answer-1258.lisp` redefined `eq?` in Lisp, which
+//! the immutable function table now rejects; these witnesses therefore check
+//! the adopted language `eq?` directly.
 
 use sens::{eval_program, load_core_library, Session};
 
 fn eq_answer_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library should load");
-    eval_program(
-        include_str!("../../../experiments/core4-eq-answer-1258.lisp"),
-        &mut session,
-    )
-    .expect("eq? definition should load");
     session
 }
 
@@ -28,25 +29,19 @@ fn eval(source: &str) -> String {
 
 #[test]
 fn same_atom_answers_one() {
-    assert_eq!(eval("(eq? (quote route) (quote route))"), "\"1\"");
-    assert_eq!(eval("(eq? 5 5)"), "\"1\"");
+    assert_eq!(eval("(eq? (quote route) (quote route))"), "(1)");
+    assert_eq!(eval("(eq? 5 5)"), "(1)");
 }
 
 #[test]
 fn distinct_atom_answers_zero() {
-    assert_eq!(eval("(eq? (quote route) (quote billing))"), "\"0\"");
-    assert_eq!(eval("(eq? 5 6)"), "\"0\"");
+    assert_eq!(eval("(eq? (quote route) (quote billing))"), "(0)");
+    assert_eq!(eval("(eq? 5 6)"), "(0)");
 }
 
 #[test]
 fn outside_domain_is_a_named_error_not_zero() {
-    let mut session = Session::default();
-    load_core_library(&mut session).unwrap();
-    eval_program(
-        include_str!("../../../experiments/core4-eq-answer-1258.lisp"),
-        &mut session,
-    )
-    .unwrap();
+    let mut session = eq_answer_session();
     let result = eval_program("(eq? (quote (1 2)) (quote (1 2)))", &mut session);
     assert!(
         result.is_err(),
@@ -61,9 +56,8 @@ fn not_is_a_clean_bit_flip_between_the_two_admitted_answers() {
 
 #[test]
 fn sid_identity_plays_no_role_in_the_answer() {
-    // eq? is pure Lisp composition over the existing `eq` builtin; it mints
-    // no SID and its answer is plain data (a string), not a callable Sens8.
-    assert_eq!(eval("(eq? 1 1)"), "\"1\"");
+    // The answer is plain data `(1)`, not a callable Sens8.
+    assert_eq!(eval("(eq? 1 1)"), "(1)");
     assert_eq!(eval("(eq? 1 1)"), eval("(eq? 2 2)"));
 }
 
@@ -77,10 +71,10 @@ fn historical_core1_eq_is_completely_unchanged() {
         .unwrap()
         .value
         .to_string();
-    assert_eq!(result, "(identity-relation same)");
+    assert_eq!(result, "(1)");
     let result = eval_program("(eq? (quote a) (quote b))", &mut session)
         .unwrap()
         .value
         .to_string();
-    assert_eq!(result, "(identity-relation distinct)");
+    assert_eq!(result, "(0)");
 }

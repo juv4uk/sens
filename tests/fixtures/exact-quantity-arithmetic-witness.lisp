@@ -12,9 +12,9 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
-(def exact-quantity-arithmetic-rows
-  (lambda ()
-    (let* ((planck
+(00001001 exact-quantity-arithmetic-rows
+  (00001000 ()
+    (10011101 ((planck
              (scientific-constant-quantity si:defining-planck-constant))
            (cesium
              (scientific-constant-quantity si:defining-cesium-frequency))
@@ -24,72 +24,72 @@
              (make-quantity
                1
                (make-unit
-                 (list (make-dimension (quote second) 1)))))
+                 (00100111 (make-dimension (00000001 second) 1)))))
            (speed
              (scientific-constant-quantity si:defining-speed-of-light))
            (distance
              (quantity-product speed one-second))
            (recovered
              (quantity-quotient distance one-second)))
-      (list
-        (list
-          (quote planck-cesium-energy-shape)
-          (equal?
+      (00100111
+        (00100111
+          (00000001 planck-cesium-energy-shape)
+          (00100010
             energy
-            (quote
+            (00000001
               (quantity/1
                 121822045942277331/20000000000000000000000000000000000000000
                 (unit/1
                   (dimension/1 kilogram 1)
                   (dimension/1 metre 2)
                   (dimension/1 second -2)))))
-          (quote (structural-relation same)))
-        (list
-          (quote speed-times-second-distance-shape)
-          (equal?
+          (00000001 (1)))
+        (00100111
+          (00000001 speed-times-second-distance-shape)
+          (00100010
             distance
-            (quote
+            (00000001
               (quantity/1
                 299792458
                 (unit/1 (dimension/1 metre 1)))))
-          (quote (structural-relation same)))
-        (list
-          (quote recovered-speed-shape)
-          (equal?
+          (00000001 (1)))
+        (00100111
+          (00000001 recovered-speed-shape)
+          (00100010
             recovered
-            (quote
+            (00000001
               (quantity/1
                 299792458
                 (unit/1
                   (dimension/1 metre 1)
                   (dimension/1 second -1)))))
-          (quote (structural-relation same)))
-        (list
-          (quote quotient-inverse)
-          (equal? recovered speed)
-          (quote (structural-relation same)))
-        (list
-          (quote si-numeric-views-match-authoritative-records)
-          (list
-            (= si:cesium-frequency
+          (00000001 (1)))
+        (00100111
+          (00000001 quotient-inverse)
+          (00100010 recovered speed)
+          (00000001 (1)))
+        (00100111
+          (00000001 si-numeric-views-match-authoritative-records)
+          (00100111
+            (00011100 si:cesium-frequency
                (scientific-constant-value si:defining-cesium-frequency))
-            (= si:speed-of-light
+            (00011100 si:speed-of-light
                (scientific-constant-value si:defining-speed-of-light))
-            (= si:planck-constant
+            (00011100 si:planck-constant
                (scientific-constant-value si:defining-planck-constant))
-            (= si:elementary-charge
+            (00011100 si:elementary-charge
                (scientific-constant-value si:defining-elementary-charge))
-            (= si:boltzmann-constant
+            (00011100 si:boltzmann-constant
                (scientific-constant-value si:defining-boltzmann-constant))
-            (= si:avogadro-constant
+            (00011100 si:avogadro-constant
                (scientific-constant-value si:defining-avogadro-constant))
-            (= si:luminous-efficacy
+            (00011100 si:luminous-efficacy
                (scientific-constant-value si:defining-luminous-efficacy)))
-          (quote (1 1 1 1 1 1 1)))
-        (list
-          (quote speed-constant-knowledge-projection)
+          (00000001 (1 1 1 1 1 1 1)))
+        (00100111
+          (00000001 speed-constant-knowledge-projection)
           (scientific-constant->clauses si:defining-speed-of-light)
-          (quote
+          (00000001
             (((scientific-constant si:speed-of-light))
              ((constant-value si:speed-of-light 299792458))
              ((constant-unit
@@ -103,15 +103,15 @@
              ((constant-source
                 si:speed-of-light
                 (science-source/1 bipm-si-brochure-9 2019))))))
-        (list
-          (quote malformed-short-constant-does-not-project)
+        (00100111
+          (00000001 malformed-short-constant-does-not-project)
           (scientific-constant->clauses
-            (quote (scientific-constant/1 broken)))
-          (quote ()))
-        (list
-          (quote invalid-string-name-does-not-project)
+            (00000001 (scientific-constant/1 broken)))
+          (00000001 ()))
+        (00100111
+          (00000001 invalid-string-name-does-not-project)
           (scientific-constant->clauses
-            (quote
+            (00000001
               (scientific-constant/1 "not-a-symbol"
                 (quantity/1 299792458
                   (unit/1
@@ -119,34 +119,34 @@
                     (dimension/1 second -1)))
                 exact-by-definition physical-defining si
                 (science-source/1 bipm-si-brochure-9 2019))))
-          (quote ()))))))
+          (00000001 ()))))))
 
-(def exact-quantity-arithmetic-check
-  (lambda (rows)
-    (cond
-      ((atom? rows) (structural-kind empty-list)
-       (quote (exact-quantity-arithmetic-witness (status pass))))
-      ((atom? rows) (structural-kind atom)
-       (list
-         (quote exact-quantity-arithmetic-witness)
-         (list (quote status) (quote fail))
-         (list (quote case) (quote malformed-row-tail))
-         (list (quote actual) rows)))
-      ((atom? rows) (structural-kind pair)
-       (let ((row (car rows)))
-         (cond
-           ((equal? (second row) (third row)) (structural-relation same)
-            (exact-quantity-arithmetic-check (cdr rows)))
-           ((equal? (second row) (third row)) (structural-relation distinct)
-            (list
-              (quote exact-quantity-arithmetic-witness)
-              (list (quote status) (quote fail))
-              (list (quote case) (car row))
-              (list (quote actual) (second row))
-              (list (quote expected) (third row))))))))))
+(00001001 exact-quantity-arithmetic-check
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 (exact-quantity-arithmetic-witness (status pass))))
+      ((00000010 rows) (1)
+       (00100111
+         (00000001 exact-quantity-arithmetic-witness)
+         (00100111 (00000001 status) (00000001 fail))
+         (00100111 (00000001 case) (00000001 malformed-row-tail))
+         (00100111 (00000001 actual) rows)))
+      ((00000010 rows) (0)
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00100010 (00101111 row) (00110000 row)) (1)
+            (exact-quantity-arithmetic-check (00000110 rows)))
+           ((00100010 (00101111 row) (00110000 row)) (0)
+            (00100111
+              (00000001 exact-quantity-arithmetic-witness)
+              (00100111 (00000001 status) (00000001 fail))
+              (00100111 (00000001 case) (00000101 row))
+              (00100111 (00000001 actual) (00101111 row))
+              (00100111 (00000001 expected) (00110000 row))))))))))
 
-(def exact-quantity-arithmetic-witness
-  (lambda ()
+(00001001 exact-quantity-arithmetic-witness
+  (00001000 ()
     (exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))))
 
 (exact-quantity-arithmetic-witness)

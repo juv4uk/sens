@@ -6,54 +6,54 @@
 ; the language whether the two deterministic images are structurally the same
 ; and whether two Worlds with equal current clauses have the same projection.
 
-(def content-store-authority-witness
-  (lambda ()
-    (let* ((value (quote (lambda (x) x)))
+(00001001 content-store-authority-witness
+  (00001000 ()
+    (10011101 ((value (00000001 (lambda (x) x)))
            (written (fs-write (fs-empty) "code" value))
-           (fs (car written))
+           (fs (00000101 written))
            (root-a (fs-serialize-root fs))
            (root-b (fs-serialize-root fs))
            (object-a (fs-serialize-object value))
            (object-b (fs-serialize-object value))
-           (root-relation (equal? root-a root-b))
-           (object-relation (equal? object-a object-b))
+           (root-relation (00100010 root-a root-b))
+           (object-relation (00100010 object-a object-b))
            (direct
-             (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))
+             (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat)))))
            (retold
              (world-tell
                (world-retract
-                 (world-tell (empty-world) (quote zoo) (quote ((has-fur cat))))
-                 (quote zoo) (quote ((has-fur cat))))
-               (quote zoo) (quote ((has-fur cat)))))
+                 (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat))))
+                 (00000001 zoo) (00000001 ((has-fur cat))))
+               (00000001 zoo) (00000001 ((has-fur cat)))))
            (projection-relation
-             (equal?
-               (world-clauses direct (quote zoo))
-               (world-clauses retold (quote zoo)))))
-      (cond
-        (root-relation (structural-relation same)
-          (cond
-            (object-relation (structural-relation same)
-              (cond
-                (projection-relation (structural-relation same)
-                  (quote
+             (00100010
+               (world-clauses direct (00000001 zoo))
+               (world-clauses retold (00000001 zoo)))))
+      (00000111
+        (root-relation (1)
+          (00000111
+            (object-relation (1)
+              (00000111
+                (projection-relation (1)
+                  (00000001
                     (content-store-authority-witness
                       (status pass)
                       (laws
                         root-image-deterministic
                         object-image-deterministic
                         equal-current-projection))))
-                (projection-relation (structural-relation distinct)
-                  (quote
+                (projection-relation (0)
+                  (00000001
                     (content-store-authority-witness
                       (status fail)
                       (law equal-current-projection))))))
-            (object-relation (structural-relation distinct)
-              (quote
+            (object-relation (0)
+              (00000001
                 (content-store-authority-witness
                   (status fail)
                   (law object-image-deterministic))))))
-        (root-relation (structural-relation distinct)
-          (quote
+        (root-relation (0)
+          (00000001
             (content-store-authority-witness
               (status fail)
               (law root-image-deterministic))))))))

@@ -11,21 +11,21 @@
 ;   (unify-observe 'radio 'antenna '())
 ;     => (unification-failure radio antenna ())
 
-(def unify-observe
-  (lambda (left right substitution)
-    (let ((raw (unify left right substitution)))
-      (cond
-        ((atom? raw) (structural-kind atom)
-         (cond
-           ((eq? raw (quote fail)) (identity-relation same)
-            (list
-              (quote unification-failure)
+(00001001 unify-observe
+  (00001000 (left right substitution)
+    (10011100 ((raw (10000111 left right substitution)))
+      (00000111
+        ((00000010 raw) (1)
+         (00000111
+           ((00000011 raw (00000001 fail)) (1)
+            (00100111
+              (00000001 unification-failure)
               left
               right
               substitution))
-           ((eq? raw (quote fail)) (identity-relation distinct)
-            (list (quote unified) raw))))
-        ((atom? raw) (structural-kind empty-list)
-         (list (quote unified) raw))
-        ((atom? raw) (structural-kind pair)
-         (list (quote unified) raw))))))
+           ((00000011 raw (00000001 fail)) (0)
+            (00100111 (00000001 unified) raw))))
+        ((00000010 raw) ()
+         (00100111 (00000001 unified) raw))
+        ((00000010 raw) (0)
+         (00100111 (00000001 unified) raw))))))

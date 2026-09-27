@@ -4,139 +4,159 @@
 ; primitive names live in the metacircular environment as values, so ordinary lexical
 ; shadowing works for the evaluator written in Lisp too.
 
-(def my-fc-primitive
-  (lambda (name)
-    (list (quote primitive) name)))
+(00001001 my-fc-primitive
+  (00001000 (name)
+    (00100111 (00000001 primitive) name)))
 
-(def my-fc-root-env
-  (list
-    (cons (quote atom) (my-fc-primitive (quote atom)))
-    (cons (quote eq)   (my-fc-primitive (quote eq)))
-    (cons (quote car)  (my-fc-primitive (quote car)))
-    (cons (quote cdr)  (my-fc-primitive (quote cdr)))
-    (cons (quote cons) (my-fc-primitive (quote cons)))
-    (cons (quote +)    (my-fc-primitive (quote +)))
-    (cons (quote -)    (my-fc-primitive (quote -)))
-    (cons (quote *)    (my-fc-primitive (quote *)))
-    (cons (quote <)    (my-fc-primitive (quote <)))
-    (cons (quote =)    (my-fc-primitive (quote =)))
-    (cons (quote >)    (my-fc-primitive (quote >)))))
+(00001001 my-fc-root-env
+  (00100111
+    (00000100 (00000001 atom) (my-fc-primitive (00000001 atom)))
+    (00000100 (00000001 eq)   (my-fc-primitive (00000001 eq)))
+    (00000100 (00000001 car)  (my-fc-primitive (00000001 car)))
+    (00000100 (00000001 cdr)  (my-fc-primitive (00000001 cdr)))
+    (00000100 (00000001 cons) (my-fc-primitive (00000001 cons)))
+    (00000100 (00000001 +)    (my-fc-primitive (00000001 +)))
+    (00000100 (00000001 -)    (my-fc-primitive (00000001 -)))
+    (00000100 (00000001 *)    (my-fc-primitive (00000001 *)))
+    (00000100 (00000001 <)    (my-fc-primitive (00000001 <)))
+    (00000100 (00000001 =)    (my-fc-primitive (00000001 =)))
+    (00000100 (00000001 >)    (my-fc-primitive (00000001 >)))))
 
-(def my-fc-env-lookup
-  (lambda (name env)
-    (cond
-      ((atom? env) name)
-      ((eq? (car (car env)) name) (cdr (car env)))
-      (t (my-fc-env-lookup name (cdr env))))))
+(00001001 my-fc-env-lookup
+  (00001000 (name env)
+    (00000111
+      ((00000010 env) () name)
+      ((00000010 env) (1) name)
+      ((00000011 (00000101 (00000101 env)) name) (00000110 (00000101 env)))
+      (t (my-fc-env-lookup name (00000110 env))))))
 
-(def my-fc-primitive?
-  (lambda (value)
-    (cond
-      ((atom? value) (quote ()))
-      (t (eq? (car value) (quote primitive))))))
+(00001001 my-fc-primitive?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) () (00000001 ()))
+      ((00000010 value) (1) (00000001 ()))
+      (t (00000011 (00000101 value) (00000001 primitive))))))
 
-(def my-fc-closure?
-  (lambda (value)
-    (cond
-      ((atom? value) (quote ()))
-      (t (eq? (car value) (quote closure))))))
+(00001001 my-fc-closure?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) () (00000001 ()))
+      ((00000010 value) (1) (00000001 ()))
+      (t (00000011 (00000101 value) (00000001 closure))))))
 
-(def my-fc-bind-params
-  (lambda (params args env)
-    (cond
-      ((atom? params) env)
-      (t (cons (cons (car params) (car args))
-               (my-fc-bind-params (cdr params) (cdr args) env))))))
+(00001001 my-fc-bind-params
+  (00001000 (params args env)
+    (00000111
+      ((00000010 params) () env)
+      ((00000010 params) (1) env)
+      (t (00000100 (00000100 (00000101 params) (00000101 args))
+               (my-fc-bind-params (00000110 params) (00000110 args) env))))))
 
-(def my-fc-eval-list
-  (lambda (exprs env)
-    (cond
-      ((atom? exprs) (quote ()))
-      (t (cons (my-fc-eval (car exprs) env)
-               (my-fc-eval-list (cdr exprs) env))))))
+(00001001 my-fc-eval-list
+  (00001000 (exprs env)
+    (00000111
+      ((00000010 exprs) () (00000001 ()))
+      ((00000010 exprs) (1) (00000001 ()))
+      (t (00000100 (my-fc-eval (00000101 exprs) env)
+               (my-fc-eval-list (00000110 exprs) env))))))
 
-(def my-fc-eval-body
-  (lambda (body env)
-    (cond
-      ((atom? (cdr body)) (my-fc-eval (car body) env))
-      (t ((lambda ()
-            (my-fc-eval (car body) env)
-            (my-fc-eval-body (cdr body) env)))))))
+(00001001 my-fc-eval-body
+  (00001000 (body env)
+    (00000111
+      ((00000010 (00000110 body)) () (my-fc-eval (00000101 body) env))
+      ((00000010 (00000110 body)) (1) (my-fc-eval (00000101 body) env))
+      (t ((00001000 ()
+            (my-fc-eval (00000101 body) env)
+            (my-fc-eval-body (00000110 body) env)))))))
 
-(def my-fc-eval-cond
-  (lambda (clauses env)
-    (cond
-      ((atom? clauses) (quote ()))
-      ((my-fc-eval (car (car clauses)) env)
-       (my-fc-eval (second (car clauses)) env))
-      (t (my-fc-eval-cond (cdr clauses) env)))))
+(00001001 my-fc-eval-cond
+  (00001000 (clauses env)
+    (00000111
+      ((00000010 clauses) () (00000001 ()))
+      ((00000010 clauses) (1) (00000001 ()))
+      ((my-fc-eval (00000101 (00000101 clauses)) env)
+       (my-fc-eval (00101111 (00000101 clauses)) env))
+      (t (my-fc-eval-cond (00000110 clauses) env)))))
 
-(def my-fc-compare-chain
-  (lambda (op args)
-    (cond
-      ((atom? (cdr args)) t)
-      ((cond
-         ((eq? op (quote <)) (< (car args) (second args)))
-         ((eq? op (quote =)) (= (car args) (second args)))
-         ((eq? op (quote >)) (> (car args) (second args)))
-         (t (quote ())))
-       (my-fc-compare-chain op (cdr args)))
-      (t (quote ())))))
+(00001001 my-fc-compare-chain
+  (00001000 (op args)
+    (00000111
+      ((00000010 (00000110 args)) () t)
+      ((00000010 (00000110 args)) (1) t)
+      ((00000111
+         ((00000011 op (00000001 <)) (00011010 (00000101 args) (00101111 args)))
+         ((00000011 op (00000001 =)) (00011100 (00000101 args) (00101111 args)))
+         ((00000011 op (00000001 >)) (00011011 (00000101 args) (00101111 args)))
+         (t (00000001 ())))
+       (my-fc-compare-chain op (00000110 args)))
+      (t (00000001 ())))))
 
-(def my-fc-apply-primitive
-  (lambda (name args)
-    (cond
-      ((eq? name (quote atom)) (atom? (car args)))
-      ((eq? name (quote eq)) (eq? (car args) (second args)))
-      ((eq? name (quote car)) (car (car args)))
-      ((eq? name (quote cdr)) (cdr (car args)))
-      ((eq? name (quote cons)) (cons (car args) (second args)))
-      ((eq? name (quote +)) (+ (car args) (second args)))
-      ((eq? name (quote -)) (- (car args) (second args)))
-      ((eq? name (quote *)) (* (car args) (second args)))
-      ((eq? name (quote <)) (my-fc-compare-chain (quote <) args))
-      ((eq? name (quote =)) (my-fc-compare-chain (quote =) args))
-      ((eq? name (quote >)) (my-fc-compare-chain (quote >) args))
-      (t (list (quote unknown-primitive) name)))))
+(00001001 my-fc-apply-primitive
+  (00001000 (name args)
+    (00000111
+      ((00000011 name (00000001 atom)) (00000010 (00000101 args)))
+      ((00000011 name (00000001 eq)) (00000011 (00000101 args) (00101111 args)))
+      ((00000011 name (00000001 car)) (00000101 (00000101 args)))
+      ((00000011 name (00000001 cdr)) (00000110 (00000101 args)))
+      ((00000011 name (00000001 cons)) (00000100 (00000101 args) (00101111 args)))
+      ((00000011 name (00000001 +)) (00001100 (00000101 args) (00101111 args)))
+      ((00000011 name (00000001 -)) (00001101 (00000101 args) (00101111 args)))
+      ((00000011 name (00000001 *)) (00001110 (00000101 args) (00101111 args)))
+      ((00000011 name (00000001 <)) (my-fc-compare-chain (00000001 <) args))
+      ((00000011 name (00000001 =)) (my-fc-compare-chain (00000001 =) args))
+      ((00000011 name (00000001 >)) (my-fc-compare-chain (00000001 >) args))
+      (t (00100111 (00000001 unknown-primitive) name)))))
 
-(def my-fc-apply
-  (lambda (fn args)
-    (cond
+(00001001 my-fc-apply
+  (00001000 (fn args)
+    (00000111
       ((my-fc-primitive? fn)
-       (my-fc-apply-primitive (second fn) args))
+       (my-fc-apply-primitive (00101111 fn) args))
       ((my-fc-closure? fn)
        (my-fc-eval-body
-         (third fn)
+         (00110000 fn)
          (my-fc-bind-params
-           (second fn)
+           (00101111 fn)
            args
-           (car (cdr (cdr (cdr fn)))))))
-      (t (list (quote not-callable) fn)))))
+           (00000101 (00000110 (00000110 (00000110 fn)))))))
+      (t (00100111 (00000001 not-callable) fn)))))
 
-(def my-fc-eval
-  (lambda (expr env)
-    (cond
-      ((atom? expr) (my-fc-env-lookup expr env))
-      ((atom? (car expr))
-       (cond
+(00001001 my-fc-eval
+  (00001000 (expr env)
+    (00000111
+      ((00000010 expr) () (my-fc-env-lookup expr env))
+      ((00000010 expr) (1) (my-fc-env-lookup expr env))
+      ((00000010 (00000101 expr)) () (00000111
          ; Syntax-only forms remain syntax. They are intentionally not values.
-         ((eq? (car expr) (quote quote)) (second expr))
-         ((eq? (car expr) (quote cond)) (my-fc-eval-cond (cdr expr) env))
-         ((eq? (car expr) (quote lambda))
-          (list (quote closure) (second expr) (cdr (cdr expr)) env))
+         ((00000011 (00000101 expr) (00000001 quote)) (00101111 expr))
+         ((00000011 (00000101 expr) (00000001 cond)) (my-fc-eval-cond (00000110 expr) env))
+         ((00000011 (00000101 expr) (00000001 lambda))
+          (00100111 (00000001 closure) (00101111 expr) (00000110 (00000110 expr)) env))
          ; Every ordinary head is resolved through the environment first.
          ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow
          ; the root primitive binding without the evaluator special-casing its name.
          (t (my-fc-apply
-              (my-fc-eval (car expr) env)
-              (my-fc-eval-list (cdr expr) env)))))
+              (my-fc-eval (00000101 expr) env)
+              (my-fc-eval-list (00000110 expr) env)))))
+      ((00000010 (00000101 expr)) (1) (00000111
+         ; Syntax-only forms remain syntax. They are intentionally not values.
+         ((00000011 (00000101 expr) (00000001 quote)) (00101111 expr))
+         ((00000011 (00000101 expr) (00000001 cond)) (my-fc-eval-cond (00000110 expr) env))
+         ((00000011 (00000101 expr) (00000001 lambda))
+          (00100111 (00000001 closure) (00101111 expr) (00000110 (00000110 expr)) env))
+         ; Every ordinary head is resolved through the environment first.
+         ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow
+         ; the root primitive binding without the evaluator special-casing its name.
+         (t (my-fc-apply
+              (my-fc-eval (00000101 expr) env)
+              (my-fc-eval-list (00000110 expr) env)))))
       (t (my-fc-apply
-           (my-fc-eval (car expr) env)
-           (my-fc-eval-list (cdr expr) env))))))
+           (my-fc-eval (00000101 expr) env)
+           (my-fc-eval-list (00000110 expr) env))))))
 
 ; Public experimental entry point.  The root primitive environment is explicit
 ; Lisp data, so a future host/runtime only has to preserve the primitive mechanism
 ; identities; lexical resolution itself is owned here.
-(def my-eval-first-class
-  (lambda (expr)
+(00001001 my-eval-first-class
+  (00001000 (expr)
     (my-fc-eval expr my-fc-root-env)))

@@ -3,10 +3,10 @@
 > Згенеровано `scripts/public_api_inventory.py`. Цей звіт знаходить
 > top-level визначення, але **не** оголошує їх публічним API.
 
-- проскановано бібліотечних файлів: 41
-- top-level функцій: 889
+- проскановано бібліотечних файлів: 40
+- top-level функцій: 891
 - top-level макросів: 34
-- усього визначень: 923
+- усього визначень: 925
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -113,13 +113,10 @@
 | `lib/core4.lisp` | function | `member?` | unreviewed |
 | `lib/core4.lisp` | function | `assoc` | unreviewed |
 | `lib/core4.lisp` | macro | `let*` | unreviewed |
-| `lib/core4.lisp` | function | `string-empty?` | unreviewed |
 | `lib/core4.lisp` | function | `string-membership-helper` | unreviewed |
 | `lib/core4.lisp` | function | `string-order-helper` | unreviewed |
 | `lib/core4.lisp` | function | `nonempty-string-membership-helper` | unreviewed |
-| `lib/core4.lisp` | function | `string-length` | unreviewed |
-| `lib/core4.lisp` | function | `string-prefix?` | unreviewed |
-| `lib/core4.lisp` | function | `string-contains?` | unreviewed |
+| `lib/core4.lisp` | function | `string<?` | unreviewed |
 | `lib/core4.lisp` | function | `symbol?` | unreviewed |
 | `lib/core4.lisp` | function | `largest-chunk` | unreviewed |
 | `lib/core4.lisp` | function | `quotient` | unreviewed |
@@ -302,6 +299,7 @@
 | `lib/knowledge.lisp` | function | `knowledge-proper-list?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-terms-valid?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-term-valid?` | unreviewed |
+| `lib/knowledge.lisp` | function | `knowledge-not-head?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-goal-valid?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-goals-valid?` | unreviewed |
 | `lib/knowledge.lisp` | function | `knowledge-clause-valid?` | unreviewed |
@@ -347,6 +345,9 @@
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-quiescence-state` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-quiescence` | unreviewed |
 | `lib/life-1-scheduler.lisp` | function | `life-scheduler-state` | unreviewed |
+| `lib/linter.lisp` | function | `lint-form-head` | unreviewed |
+| `lib/linter.lisp` | function | `lint-short-head` | unreviewed |
+| `lib/linter.lisp` | function | `lint-head` | unreviewed |
 | `lib/linter.lisp` | function | `lint-max2` | unreviewed |
 | `lib/linter.lisp` | function | `lint-size` | unreviewed |
 | `lib/linter.lisp` | function | `lint-nesting` | unreviewed |
@@ -687,6 +688,7 @@
 | `lib/result-status.lisp` | function | `result-status` | unreviewed |
 | `lib/result-status.lisp` | function | `result-payload` | unreviewed |
 | `lib/result-status.lisp` | function | `result-proper-list?` | unreviewed |
+| `lib/result-status.lisp` | function | `result-not-head?` | unreviewed |
 | `lib/result-status.lisp` | function | `result-goal?` | unreviewed |
 | `lib/result-status.lisp` | function | `result-negated-goal?` | unreviewed |
 | `lib/result-status.lisp` | function | `result-opposite-goal` | unreviewed |

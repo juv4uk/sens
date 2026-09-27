@@ -9,54 +9,54 @@
 (load "lib/machine/admission/x86-64.lisp")
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 
-(def machine-representation-semantic-reference (+ 2 3))
+(00001001 machine-representation-semantic-reference (00001100 2 3))
 
-(def machine-representation-primary
+(00001001 machine-representation-primary
   (x86-call-admitted-u64
     (x86-lower-add-u64-forms 2 3)
     0))
 
-(def machine-representation-alternate
+(00001001 machine-representation-alternate
   (x86-call-admitted-u64
-    (quote
+    (00000001
       ((mov-r64-imm64 rax 2)
        (mov-r64-imm64 r8 3)
        (add-r64-r64 rax r8)
        (ret)))
     0))
 
-(def machine-representation-witness
-  (lambda ()
-    (cond
-      ((equal?
+(00001001 machine-representation-witness
+  (00001000 ()
+    (00000111
+      ((00100010
          machine-representation-primary
          machine-representation-semantic-reference)
-       (structural-relation same)
-       (cond
-         ((equal?
+       (1)
+       (00000111
+         ((00100010
             machine-representation-alternate
             machine-representation-semantic-reference)
-          (structural-relation same)
-          (quote (machine-representation-independence-witness (status pass))))
-         ((equal?
+          (1)
+          (00000001 (machine-representation-independence-witness (status pass))))
+         ((00100010
             machine-representation-alternate
             machine-representation-semantic-reference)
-          (structural-relation distinct)
-          (list
-            (quote machine-representation-independence-witness)
-            (quote (status fail))
-            (list (quote case) (quote alternate-register))
-            (list (quote semantic) machine-representation-semantic-reference)
-            (list (quote actual) machine-representation-alternate)))))
-      ((equal?
+          (0)
+          (00100111
+            (00000001 machine-representation-independence-witness)
+            (00000001 (status fail))
+            (00100111 (00000001 case) (00000001 alternate-register))
+            (00100111 (00000001 semantic) machine-representation-semantic-reference)
+            (00100111 (00000001 actual) machine-representation-alternate)))))
+      ((00100010
          machine-representation-primary
          machine-representation-semantic-reference)
-       (structural-relation distinct)
-       (list
-         (quote machine-representation-independence-witness)
-         (quote (status fail))
-         (list (quote case) (quote canonical-register))
-         (list (quote semantic) machine-representation-semantic-reference)
-         (list (quote actual) machine-representation-primary))))))
+       (0)
+       (00100111
+         (00000001 machine-representation-independence-witness)
+         (00000001 (status fail))
+         (00100111 (00000001 case) (00000001 canonical-register))
+         (00100111 (00000001 semantic) machine-representation-semantic-reference)
+         (00100111 (00000001 actual) machine-representation-primary))))))
 
 (machine-representation-witness)

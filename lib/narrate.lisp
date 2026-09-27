@@ -57,33 +57,35 @@
 ; zeigen, wenn der Kopf genau dieses Regel zum Zeitpunkt der Ableitung
 ; nicht vollständig konkretisiert war; dies ist dokumentiert, nicht
 ; verborgen.
-(def narrate-fact
-  (lambda (fact)
-    (cond
-      ((= (length fact) 2) 1 (list (second fact) (quote is) (quote a) (car fact)))
-      ((= (length fact) 3) 1 (list (second fact) (car fact) (third fact)))
+(00001001 narrate-fact
+  (00001000 (fact)
+    (00000111
+      ((00011100 (00101000 fact) 2) 1 (00100111 (00101111 fact) (00000001 is) (00000001 a) (00000101 fact)))
+      ((00011100 (00101000 fact) 3) 1 (00100111 (00101111 fact) (00000101 fact) (00110000 fact)))
       (t fact))))
 
 
-(def provenance-goal (lambda (prov) (second prov)))
-(def provenance-source (lambda (prov) (second (third prov))))
-(def provenance-rule (lambda (prov) (second (cadddr prov))))
-(def provenance-derived-from (lambda (prov) (second (fifth prov))))
+(00001001 provenance-goal (00001000 (prov) (00101111 prov)))
+(00001001 provenance-source (00001000 (prov) (00101111 (00110000 prov))))
+(00001001 provenance-rule (00001000 (prov) (00101111 (00110110 prov))))
+(00001001 provenance-derived-from (00001000 (prov) (00101111 (00110010 prov))))
 
-(def narrate-derivation
-  (lambda (derivations)
-    (cond
-      ((atom? derivations) (quote ()))
-      ((atom? (cdr derivations)) (narrate-provenance (car derivations)))
-      (t (append (narrate-provenance (car derivations))
-                  (cons (quote and) (narrate-derivation (cdr derivations))))))))
+(00001001 narrate-derivation
+  (00001000 (derivations)
+    (00000111
+      ((00000010 derivations) () (00000001 ()))
+      ((00000010 derivations) (1) (00000001 ()))
+      ((00000010 (00000110 derivations)) () (narrate-provenance (00000101 derivations)))
+      ((00000010 (00000110 derivations)) (1) (narrate-provenance (00000101 derivations)))
+      (t (00101001 (narrate-provenance (00000101 derivations))
+                  (00000100 (00000001 and) (narrate-derivation (00000110 derivations))))))))
 
-(def narrate-provenance
-  (lambda (prov)
-    (cond
-      ((eq? (provenance-source prov) (quote fact)) (narrate-fact (provenance-rule prov)))
-      (t (append (narrate-fact (provenance-rule prov))
-                  (cons (quote because) (narrate-derivation (provenance-derived-from prov))))))))
+(00001001 narrate-provenance
+  (00001000 (prov)
+    (00000111
+      ((00000011 (provenance-source prov) (00000001 fact)) (narrate-fact (provenance-rule prov)))
+      (t (00101001 (narrate-fact (provenance-rule prov))
+                  (00000100 (00000001 because) (narrate-derivation (provenance-derived-from prov))))))))
 
 ; `narrate-answer` grounds the conclusion with the caller's actual query while
 ; retaining the proof's real premises. A renamed rule head can contain
@@ -102,13 +104,14 @@
 ; umbenannter Regelkopf kann interne `(var (name . depth))`-Platzhalter
 ; enthalten; die erfolgreiche konkrete Anfrage ist die ehrliche Antwort für
 ; den Benutzer, die Beweiskinder bleiben die ehrliche Begründung dafür.
-(def narrate-answer
-  (lambda (goal proof)
-    (let ((derivations (provenance-derived-from (provenance proof))))
-      (cond
-        ((atom? derivations) (narrate-fact goal))
-        (t (append (narrate-fact goal)
-                   (cons (quote because) (narrate-derivation derivations))))))))
+(00001001 narrate-answer
+  (00001000 (goal proof)
+    (10011100 ((derivations (provenance-derived-from (10000100 proof))))
+      (00000111
+        ((00000010 derivations) () (narrate-fact goal))
+        ((00000010 derivations) (1) (narrate-fact goal))
+        (t (00101001 (narrate-fact goal)
+                   (00000100 (00000001 because) (narrate-derivation derivations))))))))
 
 ; ----------------------------------------------------------------------
 ; Structured reasoning-outcome presentation (B2)
@@ -119,92 +122,92 @@
 ; `blocked`, and `invalid` can never collapse back into one "cannot prove"
 ; sentence.
 
-(def narrate-proved-outcome
-  (lambda (outcome)
-    (let ((statement (second outcome))
-          (results (third outcome)))
-      (cond
-        ((atom? results)
-         (list (quote proved) statement (quote without-proof-result)))
+(00001001 narrate-proved-outcome
+  (00001000 (outcome)
+    (10011100 ((statement (00101111 outcome))
+          (results (00110000 outcome)))
+      (00000111
+        ((00000010 results) () (00100111 (00000001 proved) statement (00000001 without-proof-result)))
+        ((00000010 results) (1) (00100111 (00000001 proved) statement (00000001 without-proof-result)))
         (t
-         (append
-           (list (quote proved))
-           (narrate-answer statement (second (car results)))))))))
+         (00101001
+           (00100111 (00000001 proved))
+           (narrate-answer statement (00101111 (00000101 results)))))))))
 
-(def narrate-invalid-outcome-shape
-  (lambda (outcome)
-    (list (quote invalid) (quote outcome-shape) outcome)))
+(00001001 narrate-invalid-outcome-shape
+  (00001000 (outcome)
+    (00100111 (00000001 invalid) (00000001 outcome-shape) outcome)))
 
-(def narrate-outcome-arity?
-  (lambda (outcome expected)
-    (cond
-      ((not? (result-proper-list? outcome)) (quote ()))
-      ((= (length outcome) expected) 1 t)
+(00001001 narrate-outcome-arity?
+  (00001000 (outcome expected)
+    (00000111
+      ((00100001 (result-proper-list? outcome)) (00000001 ()))
+      ((00011100 (00101000 outcome) expected) 1 t)
 
-      (t (quote ())))))
+      (t (00000001 ())))))
 
-(def narrate-outcome
-  (lambda (outcome)
-    (cond
-      ((atom? outcome)
+(00001001 narrate-outcome
+  (00001000 (outcome)
+    (00000111
+      ((00000010 outcome) () (narrate-invalid-outcome-shape outcome))
+      ((00000010 outcome) (1) (narrate-invalid-outcome-shape outcome))
+      ((00100001 (result-proper-list? outcome))
        (narrate-invalid-outcome-shape outcome))
-      ((not? (result-proper-list? outcome))
-       (narrate-invalid-outcome-shape outcome))
-      ((atom? (car outcome)) (structural-kind pair)
-       (list (quote invalid) (quote outcome-tag) (car outcome)))
-      ((atom? (car outcome)) (structural-kind empty-list)
-       (list (quote invalid) (quote outcome-tag) (car outcome)))
-      ((symbol? (car outcome)) (class-membership symbol nonmember)
-       (list (quote invalid) (quote outcome-tag) (car outcome)))
-      ((eq? (car outcome) (quote proved))
-       (cond
+      ((00000010 (00000101 outcome)) (0)
+       (00100111 (00000001 invalid) (00000001 outcome-tag) (00000101 outcome)))
+      ((00000010 (00000101 outcome)) ()
+       (00100111 (00000001 invalid) (00000001 outcome-tag) (00000101 outcome)))
+      ((00100011 (00000101 outcome)) (class-membership symbol nonmember)
+       (00100111 (00000001 invalid) (00000001 outcome-tag) (00000101 outcome)))
+      ((00000011 (00000101 outcome) (00000001 proved))
+       (00000111
          ((narrate-outcome-arity? outcome 3) (narrate-proved-outcome outcome))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq? (car outcome) (quote unknown))
-       (cond
+      ((00000011 (00000101 outcome) (00000001 unknown))
+       (00000111
          ((narrate-outcome-arity? outcome 2)
-          (list
-            (quote unknown)
-            (quote because)
-            (quote no-proof-found-for)
-            (second outcome)))
+          (00100111
+            (00000001 unknown)
+            (00000001 because)
+            (00000001 no-proof-found-for)
+            (00101111 outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq? (car outcome) (quote partial))
-       (cond
+      ((00000011 (00000101 outcome) (00000001 partial))
+       (00000111
          ((narrate-outcome-arity? outcome 3)
-          (list
-            (quote partial)
-            (quote value)
-            (second outcome)
-            (quote bound)
-            (third outcome)))
+          (00100111
+            (00000001 partial)
+            (00000001 value)
+            (00101111 outcome)
+            (00000001 bound)
+            (00110000 outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq? (car outcome) (quote blocked))
-       (cond
+      ((00000011 (00000101 outcome) (00000001 blocked))
+       (00000111
          ((narrate-outcome-arity? outcome 2)
-          (list
-            (quote blocked)
-            (quote because)
-            (second outcome)))
+          (00100111
+            (00000001 blocked)
+            (00000001 because)
+            (00101111 outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq? (car outcome) (quote disputed))
-       (cond
+      ((00000011 (00000101 outcome) (00000001 disputed))
+       (00000111
          ((narrate-outcome-arity? outcome 2)
-          (list
-            (quote disputed)
-            (quote because)
-            (quote both-sides-have-evidence)
-            (second outcome)))
+          (00100111
+            (00000001 disputed)
+            (00000001 because)
+            (00000001 both-sides-have-evidence)
+            (00101111 outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
-      ((eq? (car outcome) (quote invalid))
-       (cond
+      ((00000011 (00000101 outcome) (00000001 invalid))
+       (00000111
          ((narrate-outcome-arity? outcome 3)
-          (list
-            (quote invalid)
-            (quote because)
-            (second outcome)
-            (quote payload)
-            (third outcome)))
+          (00100111
+            (00000001 invalid)
+            (00000001 because)
+            (00101111 outcome)
+            (00000001 payload)
+            (00110000 outcome)))
          (t (narrate-invalid-outcome-shape outcome))))
       (t
-       (list (quote invalid) (quote outcome-tag) (car outcome))))))
+       (00100111 (00000001 invalid) (00000001 outcome-tag) (00000101 outcome))))))

@@ -8,57 +8,57 @@
 (load "lib/mechanism-selector.lisp")
 (load "lib/island-lowering.lisp")
 
-(def island-lowering-1048-witness
-  (lambda ()
-    (let* ((plus-sid (semantic-registry-id (quote +)))
-           (cl (island-lower-binary plus-sid (quote common-lisp) 2 3))
-           (pl (island-lower-binary plus-sid (quote prolog) 2 3))
-           (clips-result (island-lower-binary plus-sid (quote clips) 2 3))
-           (dl (island-lower-binary plus-sid (quote datalog) 2 3)))
-      (cond
-        ((equal?
+(00001001 island-lowering-1048-witness
+  (00001000 ()
+    (10011101 ((plus-sid (semantic-registry-id (00000001 +)))
+           (cl (island-lower-binary plus-sid (00000001 common-lisp) 2 3))
+           (pl (island-lower-binary plus-sid (00000001 prolog) 2 3))
+           (clips-result (island-lower-binary plus-sid (00000001 clips) 2 3))
+           (dl (island-lower-binary plus-sid (00000001 datalog) 2 3)))
+      (00000111
+        ((00100010
            cl
-           (list (quote island-lowering-result)
+           (00100111 (00000001 island-lowering-result)
                  plus-sid
-                 (quote common-lisp)
-                 (quote bounded-exact-add)
+                 (00000001 common-lisp)
+                 (00000001 bounded-exact-add)
                  "2 3"))
-         (structural-relation same)
-         (cond
-           ((equal?
+         (1)
+         (00000111
+           ((00100010
               pl
-              (list (quote island-lowering-result)
+              (00100111 (00000001 island-lowering-result)
                     plus-sid
-                    (quote prolog)
-                    (quote bounded-exact-add)
+                    (00000001 prolog)
+                    (00000001 bounded-exact-add)
                     "2 3"))
-            (structural-relation same)
-            (cond
-              ((equal?
+            (1)
+            (00000111
+              ((00100010
                  dl
-                 (list (quote island-lowering-result)
+                 (00100111 (00000001 island-lowering-result)
                        plus-sid
-                       (quote datalog)
-                       (quote bounded-exact-add)
+                       (00000001 datalog)
+                       (00000001 bounded-exact-add)
                        "2 3"))
-               (structural-relation same)
-               (cond
-                 ((equal?
+               (1)
+               (00000111
+                 ((00100010
                     clips-result
-                    (list (quote island-lowering-result)
+                    (00100111 (00000001 island-lowering-result)
                           plus-sid
-                          (quote clips)
-                          (quote bounded-exact-add)
+                          (00000001 clips)
+                          (00000001 bounded-exact-add)
                           "2 3"))
-                  (structural-relation same)
-                  (quote (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))))
-                 ((quote witness-clips-fail) witness-clips-fail
-                  (car (quote ())))))
-              ((quote witness-datalog-fail) witness-datalog-fail
-               (car (quote ())))))
-           ((quote witness-prolog-fail) witness-prolog-fail
-            (car (quote ())))))
-        ((quote witness-cl-fail) witness-cl-fail
-         (car (quote ())))))))
+                  (1)
+                  (00000001 (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))))
+                 ((00000001 witness-clips-fail) witness-clips-fail
+                  (00000101 (00000001 ())))))
+              ((00000001 witness-datalog-fail) witness-datalog-fail
+               (00000101 (00000001 ())))))
+           ((00000001 witness-prolog-fail) witness-prolog-fail
+            (00000101 (00000001 ())))))
+        ((00000001 witness-cl-fail) witness-cl-fail
+         (00000101 (00000001 ())))))))
 
 (island-lowering-1048-witness)

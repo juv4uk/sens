@@ -3,124 +3,124 @@
 ; It validates classification shape only. Function identity is always bare
 ; exact 8 bits; no surface/name field is admitted as identity.
 
-(def pri-form
-  (car (read-all (read-file "knowledge/core4-predicate-record-inventory.lisp"))))
-(def pri-schema (car pri-form))
-(def pri-sections (cdr pri-form))
-(def pri-header (car pri-sections))
-(def pri-rows (cdr pri-sections))
+(00001001 pri-form
+  (00000101 (01001011 (10100110 "knowledge/core4-predicate-record-inventory.lisp"))))
+(00001001 pri-schema (00000101 pri-form))
+(00001001 pri-sections (00000110 pri-form))
+(00001001 pri-header (00000101 pri-sections))
+(00001001 pri-rows (00000110 pri-sections))
 
-(def pri-field-from
-  (lambda (name fields)
-    (cond
-      ((atom? fields) (structural-kind empty-list) (quote missing))
-      ((atom? fields) (structural-kind pair)
-       (let ((field (car fields)))
-         (cond
-           ((atom? field) (structural-kind pair)
-            (cond
-              ((eq? (car field) name) (identity-relation same) (cdr field))
-              ((eq? (car field) name) (identity-relation distinct)
-               (pri-field-from name (cdr fields)))))
-           ((quote pri-next) pri-next
-            (pri-field-from name (cdr fields)))))))))
+(00001001 pri-field-from
+  (00001000 (name fields)
+    (00000111
+      ((00000010 fields) () (00000001 missing))
+      ((00000010 fields) (0)
+       (10011100 ((field (00000101 fields)))
+         (00000111
+           ((00000010 field) (0)
+            (00000111
+              ((00000011 (00000101 field) name) (1) (00000110 field))
+              ((00000011 (00000101 field) name) (0)
+               (pri-field-from name (00000110 fields)))))
+           ((00000001 pri-next) pri-next
+            (pri-field-from name (00000110 fields)))))))))
 
-(def pri-field
-  (lambda (section name)
+(00001001 pri-field
+  (00001000 (section name)
     (pri-field-from name section)))
 
-(def pri-row-by-function
-  (lambda (function rows)
-    (cond
-      ((atom? rows) (structural-kind empty-list) (quote missing))
-      ((atom? rows) (structural-kind pair)
-       (cond
-         ((equal? (pri-field (car rows) (quote function)) function)
-          (structural-relation same)
-          (car rows))
-         ((quote pri-next-row) pri-next-row
-          (pri-row-by-function function (cdr rows))))))))
+(00001001 pri-row-by-function
+  (00001000 (function rows)
+    (00000111
+      ((00000010 rows) () (00000001 missing))
+      ((00000010 rows) (0)
+       (00000111
+         ((00100010 (pri-field (00000101 rows) (00000001 function)) function)
+          (1)
+          (00000101 rows))
+         ((00000001 pri-next-row) pri-next-row
+          (pri-row-by-function function (00000110 rows))))))))
 
-(def pri-check
-  (lambda (label actual expected)
-    (cond
-      ((equal? actual expected) (structural-relation same) (quote ()))
-      ((quote pri-fail) pri-fail
-       (list (quote predicate-record-inventory-mismatch)
+(00001001 pri-check
+  (00001000 (label actual expected)
+    (00000111
+      ((00100010 actual expected) (1) (00000001 ()))
+      ((00000001 pri-fail) pri-fail
+       (00100111 (00000001 predicate-record-inventory-mismatch)
              label expected actual)))))
 
-(def pri-first-failure
-  (lambda (checks)
-    (cond
-      ((atom? checks) (structural-kind empty-list) (quote ()))
-      ((atom? (car checks)) (structural-kind empty-list)
-       (pri-first-failure (cdr checks)))
-      ((quote pri-failure) pri-failure (car checks)))))
+(00001001 pri-first-failure
+  (00001000 (checks)
+    (00000111
+      ((00000010 checks) () (00000001 ()))
+      ((00000010 (00000101 checks)) ()
+       (pri-first-failure (00000110 checks)))
+      ((00000001 pri-failure) pri-failure (00000101 checks)))))
 
-(def pri-00000010 (pri-row-by-function (quote 00000010) pri-rows))
-(def pri-00000011 (pri-row-by-function (quote 00000011) pri-rows))
-(def pri-00100010 (pri-row-by-function (quote 00100010) pri-rows))
-(def pri-00100011 (pri-row-by-function (quote 00100011) pri-rows))
-(def pri-00100100 (pri-row-by-function (quote 00100100) pri-rows))
-(def pri-00100110 (pri-row-by-function (quote 00100110) pri-rows))
-(def pri-00000111 (pri-row-by-function (quote 00000111) pri-rows))
+(00001001 pri-00000010 (pri-row-by-function (00000001 00000010) pri-rows))
+(00001001 pri-00000011 (pri-row-by-function (00000001 00000011) pri-rows))
+(00001001 pri-00100010 (pri-row-by-function (00000001 00100010) pri-rows))
+(00001001 pri-00100011 (pri-row-by-function (00000001 00100011) pri-rows))
+(00001001 pri-00100100 (pri-row-by-function (00000001 00100100) pri-rows))
+(00001001 pri-00100110 (pri-row-by-function (00000001 00100110) pri-rows))
+(00001001 pri-00000111 (pri-row-by-function (00000001 00000111) pri-rows))
 
-(def pri-verdict
-  (lambda ()
-    (let ((failure
+(00001001 pri-verdict
+  (00001000 ()
+    (10011100 ((failure
             (pri-first-failure
-              (list
-                (pri-check (quote schema)
+              (00100111
+                (pri-check (00000001 schema)
                            pri-schema
-                           (quote core4-predicate-record-inventory/2))
-                (pri-check (quote profile)
-                           (pri-field pri-header (quote profile))
-                           (quote core4))
-                (pri-check (quote identity)
-                           (pri-field pri-header (quote function-identity))
-                           (quote exact-8-bits-only))
-                (pri-check (quote named-ontology)
-                           (pri-field pri-header (quote named-function-ontology))
-                           (quote forbidden))
-                (pri-check (quote no-surface-key-00000010)
-                           (pri-field pri-00000010 (quote surface))
-                           (quote missing))
-                (pri-check (quote role-00000010)
-                           (pri-field pri-00000010 (quote current-role))
-                           (quote classifier-observer))
-                (pri-check (quote target-00000010)
-                           (pri-field pri-00000010 (quote target-role))
-                           (quote classifier-observer))
-                (pri-check (quote role-00000011)
-                           (pri-field pri-00000011 (quote current-role))
-                           (quote classifier-observer))
-                (pri-check (quote target-00000011)
-                           (pri-field pri-00000011 (quote target-role))
-                           (quote predicate-question))
-                (pri-check (quote law-00000011)
-                           (pri-field pri-00000011 (quote core4-result-law))
-                           (quote ratified-1284))
-                (pri-check (quote role-00100010)
-                           (pri-field pri-00100010 (quote current-role))
-                           (quote predicate-question))
-                (pri-check (quote role-00100011)
-                           (pri-field pri-00100011 (quote current-role))
-                           (quote predicate-question))
-                (pri-check (quote role-00100100)
-                           (pri-field pri-00100100 (quote current-role))
-                           (quote predicate-question))
-                (pri-check (quote role-00100110)
-                           (pri-field pri-00100110 (quote current-role))
-                           (quote predicate-question))
-                (pri-check (quote role-00000111)
-                           (pri-field pri-00000111 (quote current-role))
-                           (quote control-consumer))
-                (pri-check (quote compatibility-00000111)
-                           (pri-field pri-00000111 (quote compatibility-role))
-                           (quote compatibility-only))))))
-      (cond
-        ((atom? failure) (structural-kind empty-list)
-         (quote (core4-predicate-record-inventory-ok)))
-        ((quote pri-contract-failure) pri-contract-failure failure)))))
+                           (00000001 core4-predicate-record-inventory/2))
+                (pri-check (00000001 profile)
+                           (pri-field pri-header (00000001 profile))
+                           (00000001 core4))
+                (pri-check (00000001 identity)
+                           (pri-field pri-header (00000001 function-identity))
+                           (00000001 exact-8-bits-only))
+                (pri-check (00000001 named-ontology)
+                           (pri-field pri-header (00000001 named-function-ontology))
+                           (00000001 forbidden))
+                (pri-check (00000001 no-surface-key-00000010)
+                           (pri-field pri-00000010 (00000001 surface))
+                           (00000001 missing))
+                (pri-check (00000001 role-00000010)
+                           (pri-field pri-00000010 (00000001 current-role))
+                           (00000001 classifier-observer))
+                (pri-check (00000001 target-00000010)
+                           (pri-field pri-00000010 (00000001 target-role))
+                           (00000001 classifier-observer))
+                (pri-check (00000001 role-00000011)
+                           (pri-field pri-00000011 (00000001 current-role))
+                           (00000001 classifier-observer))
+                (pri-check (00000001 target-00000011)
+                           (pri-field pri-00000011 (00000001 target-role))
+                           (00000001 predicate-question))
+                (pri-check (00000001 law-00000011)
+                           (pri-field pri-00000011 (00000001 core4-result-law))
+                           (00000001 ratified-1284))
+                (pri-check (00000001 role-00100010)
+                           (pri-field pri-00100010 (00000001 current-role))
+                           (00000001 predicate-question))
+                (pri-check (00000001 role-00100011)
+                           (pri-field pri-00100011 (00000001 current-role))
+                           (00000001 predicate-question))
+                (pri-check (00000001 role-00100100)
+                           (pri-field pri-00100100 (00000001 current-role))
+                           (00000001 predicate-question))
+                (pri-check (00000001 role-00100110)
+                           (pri-field pri-00100110 (00000001 current-role))
+                           (00000001 predicate-question))
+                (pri-check (00000001 role-00000111)
+                           (pri-field pri-00000111 (00000001 current-role))
+                           (00000001 control-consumer))
+                (pri-check (00000001 compatibility-00000111)
+                           (pri-field pri-00000111 (00000001 compatibility-role))
+                           (00000001 compatibility-only))))))
+      (00000111
+        ((00000010 failure) ()
+         (00000001 (core4-predicate-record-inventory-ok)))
+        ((00000001 pri-contract-failure) pri-contract-failure failure)))))
 
 (pri-verdict)

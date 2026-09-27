@@ -25,10 +25,10 @@ START = "## Повний довідник"
 END = "## Межа довідника"
 
 DOC_RE = re.compile(
-    r'^\s*\(doc\s+(\S+)\s+"([01]{8})"\s+(\S+)\s+"((?:\\.|[^"\\])*)"\s+"((?:\\.|[^"\\])*)"\)\s*$'
+    r'^\s*\(doc\s+(\S+)\s+([01]{8})\s+(\S+)\s+"((?:\\.|[^"\\])*)"\s+"((?:\\.|[^"\\])*)"\)\s*$'
 )
 SURFACE_RE = re.compile(r"\((ук|укр|en|sym)\s+(\(\)|[^\s)]+)\)")
-ROW_RE = re.compile(r'^\s*\("([01]{8})"\s')
+ROW_RE = re.compile(r'^\s*\(([01]{8})\s')
 
 CATEGORY_TITLES = OrderedDict(
     [

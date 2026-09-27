@@ -4,62 +4,64 @@
 
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
-use crate::environment::CondClauseMode;
+use crate::environment::{CondClauseMode, CoreProfile};
 use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 
 use std::rc::Rc;
 
-fn semantic_record(kind: &str, state: &str) -> Value {
-    Value::list([
-        Value::Symbol(Rc::from(kind)),
-        Value::Symbol(Rc::from(state)),
-    ])
+/// Відповідь 15-станної шкали Core4 (#1391): список двійкових бітів.
+/// `(1)` — «так» ступеня 1, `(0)` — «ні» ступеня 1, `()` — невідомо.
+fn answer(bit: Option<u8>) -> Value {
+    match bit {
+        Some(bit) => Value::list([Value::Number(f64::from(bit), crate::Exactness::Exact)]),
+        None => Value::Nil,
+    }
 }
 
-pub(crate) fn atom_value(value: &Value) -> Value {
-    let state = match value {
-        Value::Nil => "empty-list",
-        Value::Pair(_, _) => "pair",
-        _ => "atom",
-    };
-    semantic_record("structural-kind", state)
+/// atom? відповіддю шкали (contracts/core4-predicate-answer-scale.lisp /3):
+/// атом `(1)`, пара `(0)`. `()` стоїть вище розрізнення атом/пара, тож у Core4
+/// (і Core3, що стоїть на ньому) відповідь `()`. Core1–2 мають лише ступінь 1,
+/// тож там `()` — атом, як у Маккарті 1960: `(1)`.
+pub(crate) fn atom_value(value: &Value, environment: &Environment) -> Value {
+    match value {
+        Value::Pair(_, _) => answer(Some(0)),
+        Value::Nil => match environment.selected_core_profile() {
+            Some(CoreProfile::Core1 | CoreProfile::Core2) => answer(Some(1)),
+            _ => answer(None),
+        },
+        _ => answer(Some(1)),
+    }
 }
 
-fn two_symbol_record(value: &Value) -> Option<(&str, &str)> {
-    let Value::Pair(kind, tail) = value else {
-        return None;
-    };
-    let Value::Symbol(kind) = kind.as_ref() else {
-        return None;
-    };
-    let Value::Pair(state, end) = tail.as_ref() else {
-        return None;
-    };
-    let Value::Symbol(state) = state.as_ref() else {
-        return None;
-    };
-    if !matches!(end.as_ref(), Value::Nil) {
+/// Напрям відповіді шкали: `Some(true)` для 1^n, `Some(false)` для 0^n
+/// (n = 1..7); `None`, якщо значення не є відповіддю зі стрілкою.
+fn answer_direction(value: &Value) -> Option<bool> {
+    let mut bits = Vec::new();
+    let mut cursor = value;
+    while let Value::Pair(head, tail) = cursor {
+        match head.as_ref() {
+            Value::Number(number, crate::Exactness::Exact) if *number == 0.0 || *number == 1.0 => {
+                bits.push(*number == 1.0)
+            }
+            _ => return None,
+        }
+        cursor = tail.as_ref();
+    }
+    if !matches!(cursor, Value::Nil) || bits.is_empty() || bits.len() > 7 {
         return None;
     }
-    Some((kind.as_ref(), state.as_ref()))
+    let first = bits[0];
+    bits.iter().all(|bit| *bit == first).then_some(first)
 }
 
-/// Temporary bridge for historical two-part `cond` only.
-///
-/// Canonical three-part #217 dispatch never calls this function. The mapping
-/// preserves the old branching behavior of the migrated #218 structural
-/// observations and #216 exact-Q decisions while their callers move to
-/// explicit domain-result matching. Once two-part `cond` is retired, this
-/// adapter disappears with it.
+/// Двочастинна клауза `cond` `(перевірка вираз)` за новою логікою (#1391):
+/// клауза обирається лише відповіддю «так» (1^n). «Ні» (0^n) і невідомо `()`
+/// її не обирають. Значення, що не є відповіддю шкали, лишаються за
+/// історичною істинністю (лише () і false хибні).
 fn migration_only_cond_truthy(value: &Value) -> bool {
-    match two_symbol_record(value) {
-        Some(("structural-kind", "empty-list" | "atom")) => true,
-        Some(("structural-kind", "pair")) => false,
-        Some(("identity-relation", "same")) => true,
-        Some(("identity-relation", "distinct")) => false,
-        Some(("structural-relation", "same")) => true,
-        Some(("structural-relation", "distinct")) => false,
-        _ => value.is_truthy(),
+    match answer_direction(value) {
+        Some(direction) => direction,
+        None => value.is_truthy(),
     }
 }
 
@@ -68,7 +70,7 @@ pub(crate) fn evaluate_definition(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("def", arguments, 2, span)?;
+    exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
     let ExprKind::Symbol(name) = &arguments[0].kind else {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
@@ -178,6 +180,28 @@ pub fn exact_arity(
     ))
 }
 
+/// Arity check for a SENS form inside the core: the form is named by its
+/// 8-bit code, never by a surface spelling. `exact_arity` stays for host
+/// capabilities, which are not SENS identities.
+pub fn exact_sens_arity(
+    operator: crate::Sens8,
+    arguments: &[Expr],
+    expected: usize,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if arguments.len() == expected {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!(
+            "{operator}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            arguments.len()
+        ),
+        span,
+    ))
+}
+
 pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
     fn go(expression: &Expr, depth: u32) -> Result<Value, LanguageError> {
         if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
@@ -268,8 +292,5 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
             span,
         ));
     }
-    Ok(semantic_record(
-        "identity-relation",
-        if left == right { "same" } else { "distinct" },
-    ))
+    Ok(answer(Some(u8::from(left == right))))
 }

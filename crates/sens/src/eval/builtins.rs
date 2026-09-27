@@ -175,7 +175,7 @@ pub(crate) fn install(environment: &Environment) {
 }
 
 fn exact_args(
-    name: &'static str,
+    name: crate::Sens8,
     args: &[Value],
     expected: usize,
     span: Span,
@@ -193,7 +193,7 @@ fn exact_args(
 // Примітиви мови за кодом СЕНС (власник, 2026-09-26: Rust знає лише коди).
 /// make-vector
 pub(super) fn prim_01010000(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("make-vector", args, 1, span)?;
+        exact_args(crate::sens!(01010000), args, 1, span)?;
         match &args[0] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 =>
                 Ok(Value::vector(std::iter::repeat_n(Value::Nil, *f as usize))),
@@ -209,7 +209,7 @@ pub(super) fn prim_01001111(args: &[Value], _env: &Environment, _span: Span) -> 
 
 /// mono-ns
 pub(super) fn prim_01011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("mono-ns", args, 0, span)?;
+        exact_args(crate::sens!(01011010), args, 0, span)?;
         static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
         let elapsed = START.get_or_init(std::time::Instant::now).elapsed();
         Ok(exact_value(Rational::integer(elapsed.as_nanos() as i64)))
@@ -217,7 +217,7 @@ pub(super) fn prim_01011010(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// unix-time-now
 pub(super) fn prim_01011011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("unix-time-now", args, 0, span)?;
+        exact_args(crate::sens!(01011011), args, 0, span)?;
         let duration = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)
             .map_err(|_| crate::LanguageError::new(crate::ErrorKind::Type,
                 "unix-time-now is unavailable before the Unix epoch", span))?;
@@ -234,7 +234,7 @@ pub(super) fn prim_01011011(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// ntp-query-raw
 pub(super) fn prim_01011100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("ntp-query-raw", args, 2, span)?;
+        exact_args(crate::sens!(01011100), args, 2, span)?;
         let host = match &args[0] {
             Value::String(value) => value.as_ref(),
             _ => return Err(crate::LanguageError::new(crate::ErrorKind::Type,
@@ -250,7 +250,7 @@ pub(super) fn prim_01011100(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// timezone-declarations-raw
 pub(super) fn prim_01011101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("timezone-declarations-raw", args, 0, span)?;
+        exact_args(crate::sens!(01011101), args, 0, span)?;
         let tz_value = std::env::var("TZ").ok().filter(|value| !value.is_empty())
             .map(|value| Value::String(std::rc::Rc::from(value))).unwrap_or(Value::Nil);
         let etc_timezone_value = std::fs::read_to_string("/etc/timezone").ok()
@@ -263,7 +263,7 @@ pub(super) fn prim_01011101(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// vector-length
 pub(super) fn prim_01010001(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("vector-length", args, 1, span)?;
+        exact_args(crate::sens!(01010001), args, 1, span)?;
         match &args[0] {
             Value::Vector(vec) => Ok(Value::Number(vec.borrow().len() as f64, Exactness::Exact)),
             _ => Err(crate::LanguageError::new(crate::ErrorKind::Type, "vector-length expects a vector", span)),
@@ -272,7 +272,7 @@ pub(super) fn prim_01010001(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// vector-ref
 pub(super) fn prim_01010010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("vector-ref", args, 2, span)?;
+        exact_args(crate::sens!(01010010), args, 2, span)?;
         let index = match &args[1] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 && *f <= usize::MAX as f64 => *f as usize,
             _ => return Err(crate::LanguageError::new(crate::ErrorKind::Type,
@@ -289,7 +289,7 @@ pub(super) fn prim_01010010(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// vector-set!
 pub(super) fn prim_01010011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("vector-set!", args, 3, span)?;
+        exact_args(crate::sens!(01010011), args, 3, span)?;
         let index = match &args[1] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 && *f <= usize::MAX as f64 => *f as usize,
             _ => return Err(crate::LanguageError::new(crate::ErrorKind::Type,
@@ -433,13 +433,13 @@ pub(super) fn prim_01001011(args: &[Value], env: &Environment, span: Span) -> Re
 
 /// numeric-buffer?
 pub(super) fn prim_00100110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("numeric-buffer?", args, 1, span)?;
+        exact_args(crate::sens!(00100110), args, 1, span)?;
         Ok(if matches!(args[0], Value::NumericBuffer(_)) { Value::truth(true) } else { Value::Nil })
     }
 
 /// numeric-buffer-type
 pub(super) fn prim_01010110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("numeric-buffer-type", args, 1, span)?;
+        exact_args(crate::sens!(01010110), args, 1, span)?;
         let name = match &args[0] {
             Value::NumericBuffer(NumericBuffer::I32(_)) => "i32",
             Value::NumericBuffer(NumericBuffer::F32(_)) => "f32",
@@ -451,7 +451,7 @@ pub(super) fn prim_01010110(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// numeric-buffer-length
 pub(super) fn prim_01010111(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("numeric-buffer-length", args, 1, span)?;
+        exact_args(crate::sens!(01010111), args, 1, span)?;
         let length = match &args[0] {
             Value::NumericBuffer(NumericBuffer::I32(values)) => values.len(),
             Value::NumericBuffer(NumericBuffer::F32(values)) => values.len(),
@@ -463,7 +463,7 @@ pub(super) fn prim_01010111(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// numeric-buffer-ref
 pub(super) fn prim_01011000(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("numeric-buffer-ref", args, 2, span)?;
+        exact_args(crate::sens!(01011000), args, 2, span)?;
         let index = match args[1] {
             Value::Number(number, Exactness::Exact)
                 if number >= 0.0 && number.fract() == 0.0 && number <= usize::MAX as f64 => number as usize,
@@ -483,7 +483,7 @@ pub(super) fn prim_01011000(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// numeric-buffer-map
 pub(super) fn prim_01011001(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("numeric-buffer-map", args, 2, span)?;
+        exact_args(crate::sens!(01011001), args, 2, span)?;
         match &args[1] {
             Value::NumericBuffer(NumericBuffer::I32(input)) => {
                 let mut output = Vec::with_capacity(input.len());
@@ -533,7 +533,7 @@ pub(super) fn prim_01011001(args: &[Value], env: &Environment, span: Span) -> Re
 
 /// env
 pub(super) fn prim_01001110(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args("env", args, 0, span)?;
+        exact_args(crate::sens!(01001110), args, 0, span)?;
         let mut items = Vec::new();
         for (name, value) in env.snapshot() {
             items.push(Value::Pair(std::rc::Rc::new(Value::String(name)), std::rc::Rc::new(value)));
@@ -544,3 +544,93 @@ pub(super) fn prim_01001110(args: &[Value], env: &Environment, span: Span) -> Re
         }
         Ok(list)
     }
+
+// --- Рядкові примітиви за кодом (власник, 2026-09-26: «швидкі рядкові функції
+// в ядрі»). Раніше — визначення мовою через string-first/string-rest, які
+// щоразу копіюють решту рядка (квадратично на довгому тексті). Поведінка,
+// включно з відповідями й помилками на не-рядках, повторює мовні версії.
+
+fn string_rest_or_error(value: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+    string_rest_values(std::slice::from_ref(value), span)
+}
+
+fn string_first_or_error(value: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+    string_first_values(std::slice::from_ref(value), span)
+}
+
+/// string-empty? — це `eq?` з порожнім рядком (та сама відповідь, що й раніше).
+fn string_empty_answer(value: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+    super::special_forms::eq_values(value.clone(), Value::String(std::rc::Rc::from("")), span)
+}
+
+fn is_empty_string(value: &Value) -> bool {
+    matches!(value, Value::String(text) if text.is_empty())
+}
+
+/// string-empty?
+pub(super) fn prim_00111100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+    exact_args(crate::sens!(00111100), args, 1, span)?;
+    string_empty_answer(&args[0], span)
+}
+
+/// string-length — кількість символів (кодових точок).
+pub(super) fn prim_00111011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+    exact_args(crate::sens!(00111011), args, 1, span)?;
+    match &args[0] {
+        Value::String(text) => Ok(exact_value(Rational::integer(text.chars().count() as i64))),
+        other => {
+            // Мовна версія: string-empty? → (0), далі string-rest → помилка Type.
+            string_empty_answer(other, span)?;
+            string_rest_or_error(other, span)?;
+            unreachable!("string-rest accepts only strings")
+        }
+    }
+}
+
+fn string_prefix_answer(prefix: &Value, text: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+    match (prefix, text) {
+        (Value::String(p), Value::String(t)) => Ok(Value::truth(t.starts_with(p.as_ref()))),
+        _ => {
+            // Той самий порядок кроків, що в мовній версії.
+            if is_empty_string(prefix) {
+                return Ok(Value::truth(true));
+            }
+            string_empty_answer(prefix, span)?;
+            if is_empty_string(text) {
+                return Ok(Value::Nil);
+            }
+            string_empty_answer(text, span)?;
+            string_first_or_error(prefix, span)?;
+            string_first_or_error(text, span)?;
+            unreachable!("string-first accepts only strings")
+        }
+    }
+}
+
+/// string-prefix? prefix s
+pub(super) fn prim_00111101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+    exact_args(crate::sens!(00111101), args, 2, span)?;
+    string_prefix_answer(&args[0], &args[1], span)
+}
+
+/// string-contains? needle s
+pub(super) fn prim_00111110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+    exact_args(crate::sens!(00111110), args, 2, span)?;
+    match (&args[0], &args[1]) {
+        (Value::String(needle), Value::String(text)) => {
+            Ok(Value::truth(text.contains(needle.as_ref())))
+        }
+        (needle, text) => {
+            // Мовна версія: спершу string-prefix?, потім string-empty?, потім string-rest.
+            if string_prefix_answer(needle, text, span)? == Value::truth(true) {
+                return Ok(Value::truth(true));
+            }
+            if is_empty_string(text) {
+                return Ok(Value::Nil);
+            }
+            string_empty_answer(text, span)?;
+            string_rest_or_error(text, span)?;
+            unreachable!("string-rest accepts only strings")
+        }
+    }
+}

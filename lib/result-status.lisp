@@ -12,98 +12,111 @@
 ;   (disputed evidence)
 ;   (invalid reason payload)
 
-(def make-proved
-  (lambda (statement results)
-    (list (quote proved) statement results)))
+(00001001 make-proved
+  (00001000 (statement results)
+    (00100111 (00000001 proved) statement results)))
 
-(def make-unknown
-  (lambda (subject)
-    (list (quote unknown) subject)))
+(00001001 make-unknown
+  (00001000 (subject)
+    (00100111 (00000001 unknown) subject)))
 
-(def make-partial
-  (lambda (value bound)
-    (list (quote partial) value bound)))
+(00001001 make-partial
+  (00001000 (value bound)
+    (00100111 (00000001 partial) value bound)))
 
-(def make-blocked
-  (lambda (reason)
-    (list (quote blocked) reason)))
+(00001001 make-blocked
+  (00001000 (reason)
+    (00100111 (00000001 blocked) reason)))
 
-(def make-disputed
-  (lambda (evidence)
-    (list (quote disputed) evidence)))
+(00001001 make-disputed
+  (00001000 (evidence)
+    (00100111 (00000001 disputed) evidence)))
 
-(def make-invalid
-  (lambda (reason payload)
-    (list (quote invalid) reason payload)))
+(00001001 make-invalid
+  (00001000 (reason payload)
+    (00100111 (00000001 invalid) reason payload)))
 
-(def result-tagged?
-  (lambda (result)
-    (cond
-      ((atom? result) (quote ()))
-      ((eq? (car result) (quote proved)) t)
-      ((eq? (car result) (quote unknown)) t)
-      ((eq? (car result) (quote partial)) t)
-      ((eq? (car result) (quote blocked)) t)
-      ((eq? (car result) (quote disputed)) t)
-      ((eq? (car result) (quote invalid)) t)
-      (t (quote ())))))
+(00001001 result-tagged?
+  (00001000 (result)
+    (00000111
+      ((00000010 result) () (00000001 ()))
+      ((00000010 result) (1) (00000001 ()))
+      ((00000011 (00000101 result) (00000001 proved)) t)
+      ((00000011 (00000101 result) (00000001 unknown)) t)
+      ((00000011 (00000101 result) (00000001 partial)) t)
+      ((00000011 (00000101 result) (00000001 blocked)) t)
+      ((00000011 (00000101 result) (00000001 disputed)) t)
+      ((00000011 (00000101 result) (00000001 invalid)) t)
+      (t (00000001 ())))))
 
-(def result-status
-  (lambda (result)
-    (cond
-      ((result-tagged? result) (car result))
-      (t (quote ())))))
+(00001001 result-status
+  (00001000 (result)
+    (00000111
+      ((result-tagged? result) (00000101 result))
+      (t (00000001 ())))))
 
-(def result-payload
-  (lambda (result)
-    (cond
-      ((result-tagged? result) (cdr result))
-      (t (quote ())))))
+(00001001 result-payload
+  (00001000 (result)
+    (00000111
+      ((result-tagged? result) (00000110 result))
+      (t (00000001 ())))))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
 ; passed to it merely to ask whether that pair is `()`.
-(def result-proper-list?
-  (lambda (value)
-    (cond
-      ((atom? value)
-       (cond
-         ((eq? value (quote ())) t)
-         (t (quote ()))))
-      (t (result-proper-list? (cdr value))))))
+(00001001 result-proper-list?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) () (00000111
+         ((00000011 value (00000001 ())) t)
+         (t (00000001 ()))))
+      ((00000010 value) (1) (00000111
+         ((00000011 value (00000001 ())) t)
+         (t (00000001 ()))))
+      (t (result-proper-list? (00000110 value))))))
+
+; The reserved negation head: `not?` (predicate spelling since #1444) or the
+; historical `not`.
+(00001001 result-not-head?
+  (00001000 (head)
+    (00000111
+      ((00000011 head (00000001 not?)) t)
+      ((00000011 head (00000001 not)) t)
+      (t (00000001 ())))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
-; logical shape, `(not goal)`, additionally requires exactly one recursively
-; valid nested goal, so malformed `(not)` / `(not a b)` cannot be mislabeled as
+; logical shape, `(not? goal)`, additionally requires exactly one recursively
+; valid nested goal, so malformed `(not?)` / `(not? a b)` cannot be mislabeled as
 ; logical `unknown`.
-(def result-goal?
-  (lambda (goal)
-    (cond
-      ((atom? goal) (quote ()))
-      ((not? (result-proper-list? goal)) (quote ()))
-      ((not? (symbol? (car goal))) (quote ()))
-      ((eq? (car goal) (quote not))
-       (cond
-         ((= (length goal) 2) 1 (result-goal? (second goal)))
-         ((= (length goal) 2) 0 (quote ()))))
+(00001001 result-goal?
+  (00001000 (goal)
+    (00000111
+      ((00000010 goal) () (00000001 ()))
+      ((00000010 goal) (1) (00000001 ()))
+      ((00100001 (result-proper-list? goal)) (00000001 ()))
+      ((00100001 (00100011 (00000101 goal))) (00000001 ()))
+      ((result-not-head? (00000101 goal))
+       (00000111
+         ((00011100 (00101000 goal) 2) 1 (result-goal? (00101111 goal)))
+         ((00011100 (00101000 goal) 2) 0 (00000001 ()))))
       (t t))))
 
-; `(not goal)` is the explicit logical opposite used by the knowledge layer.
+; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
-; every other goal gets wrapped in `not`.
-(def result-negated-goal?
-  (lambda (goal)
-    (cond
-      ((not? (result-goal? goal)) (quote ()))
-      ((eq? (car goal) (quote not)) t)
-      (t (quote ())))))
+; every other goal gets wrapped in `not?`.
+(00001001 result-negated-goal?
+  (00001000 (goal)
+    (00000111
+      ((00100001 (result-goal? goal)) (00000001 ()))
+      ((result-not-head? (00000101 goal)) t)
+      (t (00000001 ())))))
 
-(def result-opposite-goal
-  (lambda (goal)
-    (cond
-      ((result-negated-goal? goal) (second goal))
-      (t (list (quote not) goal)))))
+(00001001 result-opposite-goal
+  (00001000 (goal)
+    (00000111
+      ((result-negated-goal? goal) (00101111 goal))
+      (t (00100111 (00000001 not?) goal)))))
 
 ; Observe one reasoning question without information collapse.
 ; - positive proof(s) => proved(goal, all-results)
@@ -118,55 +131,55 @@
 ; repeated-query callers may retain the prepared index themselves. There is no
 ; hidden cache or invalidation policy: a retained index continues to represent
 ; the exact rules captured when it was built.
-(def reason-observe
-  (lambda (goal rules-or-index)
-    (cond
-      ((not? (result-goal? goal))
-       (make-invalid (quote invalid-goal) goal))
+(00001001 reason-observe
+  (00001000 (goal rules-or-index)
+    (00000111
+      ((00100001 (result-goal? goal))
+       (make-invalid (00000001 invalid-goal) goal))
       (t
-       (let* ((opposite (result-opposite-goal goal))
+       (10011101 ((opposite (result-opposite-goal goal))
               (index (reason-ensure-index rules-or-index))
               (positive-results
-                (prove-goal
+                (10000000
                   goal
                   (reason-index-candidates goal index)
-                  (quote ())
+                  (00000001 ())
                   index
                   0))
               (opposite-results
-                (prove-goal
+                (10000000
                   opposite
                   (reason-index-candidates opposite index)
-                  (quote ())
+                  (00000001 ())
                   index
                   0)))
-         (cond
-           ((and (not? (atom? positive-results))
-                 (not? (atom? opposite-results)))
+         (00000111
+           ((10011010 (10110001 (00000010 positive-results))
+                 (10110001 (00000010 opposite-results)))
             (make-disputed
-              (list
+              (00100111
                 (make-proved goal positive-results)
                 (make-proved opposite opposite-results))))
-           ((not? (atom? positive-results))
+           ((10110001 (00000010 positive-results))
             (make-proved goal positive-results))
-           ((not? (atom? opposite-results))
+           ((10110001 (00000010 opposite-results))
             (make-proved opposite opposite-results))
-           (t (quote ()))))))))
+           (t (00000001 ()))))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
 ; `invalid` observation even when the named module does not exist. If a
 ; well-formed module name is absent after scanning the concrete append-only
 ; knowledge journal, that absence is already established: reasoning is blocked
 ; by a known missing precondition rather than epistemically `unknown`.
-(def reason-in-observe
-  (lambda (module-name goal)
-    (cond
-      ((not? (symbol? module-name))
-       (make-invalid (quote invalid-module) module-name))
-      ((not? (result-goal? goal))
-       (make-invalid (quote invalid-goal) goal))
-      ((module-known? module-name)
-       (reason-observe goal (module-clauses-now module-name)))
+(00001001 reason-in-observe
+  (00001000 (module-name goal)
+    (00000111
+      ((00100001 (00100011 module-name))
+       (make-invalid (00000001 invalid-module) module-name))
+      ((00100001 (result-goal? goal))
+       (make-invalid (00000001 invalid-goal) goal))
+      ((01111110 module-name)
+       (reason-observe goal (01111111 module-name)))
       (t
        (make-blocked
-         (list (quote module-not-found) module-name))))))
+         (00100111 (00000001 module-not-found) module-name))))))

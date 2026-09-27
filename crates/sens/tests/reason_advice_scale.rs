@@ -231,7 +231,7 @@ fn profile_repeated_queries(distractors: usize) {
         );
         assert_eq!(
             eval_session(&mut session, &parity),
-            "(structural-relation same)",
+            "(1)",
             "prepared public path changed outcome/proof structure for {goal}"
         );
     }

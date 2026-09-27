@@ -24,7 +24,7 @@ fn semantic_registry_is_read_and_queried_by_lisp_itself() {
 
     assert_eq!(
         result,
-        r#"(256 "00000001" quote "00000001" "10101000" "00000101" "11111111" (11111111 (en ()) (ук ()) (укр ()) (sa ()) (sym ())) "10101000" (structural-relation same))"#
+        r#"(256 "00000001" quote "00000001" "10101000" "00000101" "11111111" (11111111 (en ()) (ук ()) (укр ()) (sa ()) (sym ())) "10101000" (1))"#
     );
 }
 
@@ -71,7 +71,7 @@ fn decimal_values_do_not_mint_semantic_identity() {
 
     assert_eq!(
         result,
-        "(structural-relation distinct)",
+        "(0)",
         "decimal 12 must remain ordinary numeric data, not mint Binary SID 00001100"
     );
 }

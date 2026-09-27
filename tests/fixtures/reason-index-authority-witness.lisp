@@ -11,44 +11,44 @@
 (load "lib/unify.lisp")
 (load "lib/reason.lisp")
 
-(def reason-index-authority-witness
-  (lambda ()
-    (let* ((parity-rules
-             (quote
+(00001001 reason-index-authority-witness
+  (00001000 ()
+    (10011101 ((parity-rules
+             (00000001
                (((seed a))
                 ((noise one))
                 ((path (var x) left) (seed (var x)))
                 ((noise two))
                 ((path (var x) right) (seed (var x)))
                 ((reachable (var x)) (path (var x) (var side))))))
-           (indexed (reason (quote (reachable a)) parity-rules))
+           (indexed (10000101 (00000001 (reachable a)) parity-rules))
            (linear
-             (prove-goal
-               (quote (reachable a))
+             (10000000
+               (00000001 (reachable a))
                parity-rules
-               (quote ())
+               (00000001 ())
                (reason-index-linear parity-rules)
                0))
-           (parity-relation (equal? indexed linear))
+           (parity-relation (00100010 indexed linear))
 
            (old-rules
-             (quote
+             (00000001
                (((seed a))
                 ((reachable (var x)) (seed (var x))))))
            (prepared (reason-make-index old-rules))
            (newer-rules
-             (append old-rules (quote (((later yes))))))
+             (00101001 old-rules (00000001 (((later yes))))))
            (snapshot-relation
-             (equal?
-               (reason (quote (reachable a)) old-rules)
-               (reason (quote (reachable a)) prepared)))
+             (00100010
+               (10000101 (00000001 (reachable a)) old-rules)
+               (10000101 (00000001 (reachable a)) prepared)))
            (prepared-later-empty
-             (equal? (reason (quote (later yes)) prepared) (quote ())))
+             (00100010 (10000101 (00000001 (later yes)) prepared) (00000001 ())))
            (rebuilt-later-count
-             (equal? (length (reason (quote (later yes)) newer-rules)) 1))
+             (00100010 (00101000 (10000101 (00000001 (later yes)) newer-rules)) 1))
 
            (recursive-rules
-             (quote
+             (00000001
                (((parent alice bob))
                 ((parent bob carol))
                 ((ancestor (var x) (var y)) (parent (var x) (var y)))
@@ -57,71 +57,71 @@
                   (ancestor (var z) (var y)))
                 ((safe (var x)) (not? (blocked (var x))))
                 ((noise irrelevant)))))
-           (goal (quote (ancestor alice carol)))
-           (recursive-indexed (reason goal recursive-rules))
+           (goal (00000001 (ancestor alice carol)))
+           (recursive-indexed (10000101 goal recursive-rules))
            (recursive-linear
-             (prove-goal
+             (10000000
                goal
                recursive-rules
-               (quote ())
+               (00000001 ())
                (reason-index-linear recursive-rules)
                0))
-           (recursive-relation (equal? recursive-indexed recursive-linear))
+           (recursive-relation (00100010 recursive-indexed recursive-linear))
            (negation-relation
-             (equal?
-               (reason (quote (safe alice)) recursive-rules)
-               (prove-goal
-                 (quote (safe alice))
+             (00100010
+               (10000101 (00000001 (safe alice)) recursive-rules)
+               (10000000
+                 (00000001 (safe alice))
                  recursive-rules
-                 (quote ())
+                 (00000001 ())
                  (reason-index-linear recursive-rules)
                  0))))
-      (cond
-        (parity-relation (structural-relation same)
-          (cond
-            (snapshot-relation (structural-relation same)
-              (cond
-                (prepared-later-empty (structural-relation same)
-                  (cond
-                    (rebuilt-later-count (structural-relation same)
-                      (cond
-                        (recursive-relation (structural-relation same)
-                          (cond
-                            (negation-relation (structural-relation same)
-                              (quote
+      (00000111
+        (parity-relation (1)
+          (00000111
+            (snapshot-relation (1)
+              (00000111
+                (prepared-later-empty (1)
+                  (00000111
+                    (rebuilt-later-count (1)
+                      (00000111
+                        (recursive-relation (1)
+                          (00000111
+                            (negation-relation (1)
+                              (00000001
                                 (reason-index-authority-witness
                                   (status pass)
                                   (laws
                                     indexed-linear-parity
                                     immutable-prepared-snapshot
                                     recursion-negation-parity))))
-                            (negation-relation (structural-relation distinct)
-                              (quote
+                            (negation-relation (0)
+                              (00000001
                                 (reason-index-authority-witness
                                   (status fail)
                                   (law recursion-negation-parity))))))
-                        (recursive-relation (structural-relation distinct)
-                          (quote
+                        (recursive-relation (0)
+                          (00000001
                             (reason-index-authority-witness
                               (status fail)
                               (law recursion-parity))))))
-                    (rebuilt-later-count (structural-relation distinct)
-                      (quote
+                    (rebuilt-later-count (0)
+                      (00000001
                         (reason-index-authority-witness
                           (status fail)
                           (law rebuilt-snapshot-sees-new-rule))))))
-                (prepared-later-empty (structural-relation distinct)
-                  (quote
+                (prepared-later-empty (0)
+                  (00000001
                     (reason-index-authority-witness
                       (status fail)
                       (law prepared-snapshot-is-immutable))))))
-            (snapshot-relation (structural-relation distinct)
-              (quote
+            (snapshot-relation (0)
+              (00000001
                 (reason-index-authority-witness
                   (status fail)
                   (law prepared-snapshot-preserves-old-result))))))
-        (parity-relation (structural-relation distinct)
-          (quote
+        (parity-relation (0)
+          (00000001
             (reason-index-authority-witness
               (status fail)
               (law indexed-linear-parity))))))))

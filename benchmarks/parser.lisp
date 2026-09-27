@@ -1,7 +1,7 @@
 ; Parser benchmark · Benchmark парсера · Parser-Benchmark
-(def identity (lambda (value) value))
-(identity (quote (alpha beta gamma delta epsilon)))
-(identity (quote (radio antenna signal power frequency)))
-(identity (quote (one (two three) (four (five six)))))
+(00001001 identity (00001000 (value) value))
+(identity (00000001 (alpha beta gamma delta epsilon)))
+(identity (00000001 (radio antenna signal power frequency)))
+(identity (00000001 (one (two three) (four (five six)))))
 (identity "UTF-8 · Українська · Deutsch")
 (identity 5/336)

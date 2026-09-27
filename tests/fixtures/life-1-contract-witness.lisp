@@ -5,127 +5,127 @@
 ; This witness uses Canon 6 explicit-result COND clauses. Canon 0 is data and
 ; list termination; it is never consumed as generic FALSE.
 
-(def life-1-schema
-  (lambda () (car life-1-document)))
+(00001001 life-1-schema
+  (00001000 () (00000101 life-1-document)))
 
-(def life-1-entries
-  (lambda () (cdr life-1-document)))
+(00001001 life-1-entries
+  (00001000 () (00000110 life-1-document)))
 
-(def life-1-field
-  (lambda (entry field)
-    (let ((found (assoc field entry)))
-      (cond
-        ((atom? found) (structural-kind empty-list) (quote ()))
-        ((atom? found) (structural-kind pair) (cdr found))))))
+(00001001 life-1-field
+  (00001000 (entry field)
+    (10011100 ((found (00101101 field entry)))
+      (00000111
+        ((00000010 found) () (00000001 ()))
+        ((00000010 found) (0) (00000110 found))))))
 
-(def life-1-find
-  (lambda (identity entries)
-    (cond
-      ((atom? entries) (structural-kind empty-list) (quote ()))
-      ((atom? entries) (structural-kind pair)
-       (cond
-         ((eq? (life-1-field (car entries) (quote identity)) identity)
-          (identity-relation same)
-          (car entries))
-         ((eq? (life-1-field (car entries) (quote identity)) identity)
-          (identity-relation distinct)
-          (life-1-find identity (cdr entries))))))))
+(00001001 life-1-find
+  (00001000 (identity entries)
+    (00000111
+      ((00000010 entries) () (00000001 ()))
+      ((00000010 entries) (0)
+       (00000111
+         ((00000011 (life-1-field (00000101 entries) (00000001 identity)) identity)
+          (1)
+          (00000101 entries))
+         ((00000011 (life-1-field (00000101 entries) (00000001 identity)) identity)
+          (0)
+          (life-1-find identity (00000110 entries))))))))
 
-(def life-1-entry
-  (lambda (identity)
+(00001001 life-1-entry
+  (00001000 (identity)
     (life-1-find identity (life-1-entries))))
 
-(def life-1-check
-  (lambda (identity field expected)
-    (let ((entry (life-1-entry identity)))
-      (cond
-        ((atom? entry) (structural-kind empty-list)
-         (list (quote missing-entry) identity))
-        ((atom? entry) (structural-kind pair)
-         (cond
-           ((eq? (life-1-field entry field) expected)
-            (identity-relation same)
-            (quote ()))
-           ((eq? (life-1-field entry field) expected)
-            (identity-relation distinct)
-            (list (quote mismatch)
+(00001001 life-1-check
+  (00001000 (identity field expected)
+    (10011100 ((entry (life-1-entry identity)))
+      (00000111
+        ((00000010 entry) ()
+         (00100111 (00000001 missing-entry) identity))
+        ((00000010 entry) (0)
+         (00000111
+           ((00000011 (life-1-field entry field) expected)
+            (1)
+            (00000001 ()))
+           ((00000011 (life-1-field entry field) expected)
+            (0)
+            (00100111 (00000001 mismatch)
                   identity
                   field
                   expected
                   (life-1-field entry field)))))))))
 
-(def life-1-first-failure
-  (lambda (checks)
-    (cond
-      ((atom? checks) (structural-kind empty-list) (quote ()))
-      ((atom? checks) (structural-kind pair)
-       (cond
-         ((atom? (car checks)) (structural-kind empty-list)
-          (life-1-first-failure (cdr checks)))
-         ((atom? (car checks)) (structural-kind pair)
-          (car checks)))))))
+(00001001 life-1-first-failure
+  (00001000 (checks)
+    (00000111
+      ((00000010 checks) () (00000001 ()))
+      ((00000010 checks) (0)
+       (00000111
+         ((00000010 (00000101 checks)) ()
+          (life-1-first-failure (00000110 checks)))
+         ((00000010 (00000101 checks)) (0)
+          (00000101 checks)))))))
 
-(def life-1-contract-witness
-  (lambda ()
-    (let ((failure
+(00001001 life-1-contract-witness
+  (00001000 ()
+    (10011100 ((failure
             (life-1-first-failure
-              (list
-                (life-1-check (quote life-trace)
-                              (quote owner)
-                              (quote my-lisp))
-                (life-1-check (quote life-trace)
-                              (quote truth-value)
-                              (quote forbidden))
-                (life-1-check (quote source-observation)
-                              (quote native-domain-preserved)
-                              (quote yes))
-                (life-1-check (quote source-observation)
-                              (quote universal-result-normalization)
-                              (quote forbidden))
-                (life-1-check (quote projection)
-                              (quote explicit)
-                              (quote yes))
-                (life-1-check (quote projection)
-                              (quote partial)
-                              (quote yes))
-                (life-1-check (quote projection)
-                              (quote semantic-equivalence-assumed)
-                              (quote no))
-                (life-1-check (quote target-invocation)
-                              (quote kernel-reinterpretation)
-                              (quote forbidden))
-                (life-1-check (quote missing-source-kernel)
-                              (quote changes-semantic-id-meaning)
-                              (quote no))
-                (life-1-check (quote first-vertical-slice)
-                              (quote source)
-                              (quote prolog))
-                (life-1-check (quote first-vertical-slice)
-                              (quote target)
-                              (quote datalog))
-                (life-1-check (quote first-vertical-slice)
-                              (quote shared-result-type)
-                              (quote forbidden))
-                (life-1-check (quote liveness)
-                              (quote fresh-checkout)
-                              (quote required))))))
-      (cond
-        ((eq? (life-1-schema) (quote life-1-contract/1))
-         (identity-relation same)
-         (cond
-           ((atom? failure) (structural-kind empty-list)
-            (list (quote life-1-contract-witness)
-                  (list (quote status) (quote pass))
-                  (list (quote detail)
-                        (quote provenance-not-truth))))
-           ((atom? failure) (structural-kind pair)
-            (list (quote life-1-contract-witness)
-                  (list (quote status) (quote fail))
-                  (list (quote detail) failure)))))
-        ((eq? (life-1-schema) (quote life-1-contract/1))
-         (identity-relation distinct)
-         (list (quote life-1-contract-witness)
-               (list (quote status) (quote fail))
-               (list (quote detail)
-                     (list (quote schema)
+              (00100111
+                (life-1-check (00000001 life-trace)
+                              (00000001 owner)
+                              (00000001 my-lisp))
+                (life-1-check (00000001 life-trace)
+                              (00000001 truth-value)
+                              (00000001 forbidden))
+                (life-1-check (00000001 source-observation)
+                              (00000001 native-domain-preserved)
+                              (00000001 yes))
+                (life-1-check (00000001 source-observation)
+                              (00000001 universal-result-normalization)
+                              (00000001 forbidden))
+                (life-1-check (00000001 projection)
+                              (00000001 explicit)
+                              (00000001 yes))
+                (life-1-check (00000001 projection)
+                              (00000001 partial)
+                              (00000001 yes))
+                (life-1-check (00000001 projection)
+                              (00000001 semantic-equivalence-assumed)
+                              (00000001 no))
+                (life-1-check (00000001 target-invocation)
+                              (00000001 kernel-reinterpretation)
+                              (00000001 forbidden))
+                (life-1-check (00000001 missing-source-kernel)
+                              (00000001 changes-semantic-id-meaning)
+                              (00000001 no))
+                (life-1-check (00000001 first-vertical-slice)
+                              (00000001 source)
+                              (00000001 prolog))
+                (life-1-check (00000001 first-vertical-slice)
+                              (00000001 target)
+                              (00000001 datalog))
+                (life-1-check (00000001 first-vertical-slice)
+                              (00000001 shared-result-type)
+                              (00000001 forbidden))
+                (life-1-check (00000001 liveness)
+                              (00000001 fresh-checkout)
+                              (00000001 required))))))
+      (00000111
+        ((00000011 (life-1-schema) (00000001 life-1-contract/1))
+         (1)
+         (00000111
+           ((00000010 failure) ()
+            (00100111 (00000001 life-1-contract-witness)
+                  (00100111 (00000001 status) (00000001 pass))
+                  (00100111 (00000001 detail)
+                        (00000001 provenance-not-truth))))
+           ((00000010 failure) (0)
+            (00100111 (00000001 life-1-contract-witness)
+                  (00100111 (00000001 status) (00000001 fail))
+                  (00100111 (00000001 detail) failure)))))
+        ((00000011 (life-1-schema) (00000001 life-1-contract/1))
+         (0)
+         (00100111 (00000001 life-1-contract-witness)
+               (00100111 (00000001 status) (00000001 fail))
+               (00100111 (00000001 detail)
+                     (00100111 (00000001 schema)
                            (life-1-schema)))))))))

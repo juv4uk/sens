@@ -232,7 +232,7 @@ fn dispatch_call(
         .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
     if routed_head_sid == Some(crate::sens!(00000001)) {
-        special_forms::exact_arity("00000001", arguments, 1, span)?;
+        special_forms::exact_sens_arity(crate::sens!(00000001), arguments, 1, span)?;
         let value = special_forms::quoted(&arguments[0])?;
         return Ok(EvalStep::Value(value));
     }
@@ -264,8 +264,18 @@ fn dispatch_call(
         Value::Sid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
             if !canon::has_primitive(*sid) {
-                if let Some(Value::Macro(closure)) = &environment.code_slot(*sid) {
-                    return closures::apply_macro(closure.clone(), arguments, environment, span);
+                match &environment.code_slot(*sid) {
+                    Some(Value::Macro(closure)) => {
+                        return closures::apply_macro(closure.clone(), arguments, environment, span);
+                    }
+                    // A language-defined function reached through its code
+                    // takes the same path as a call by name: arguments and
+                    // body run through `closures::apply`, whose tail call
+                    // keeps deep recursion (meta-eval) off the Rust stack.
+                    Some(closure @ Value::Closure(_)) => {
+                        return closures::apply(closure.clone(), arguments, environment, span);
+                    }
+                    _ => {}
                 }
             }
             let mut values = Vec::with_capacity(arguments.len());
@@ -352,7 +362,7 @@ mod single_pass_eval_tests {
     fn binary_sids_keep_quote_and_cond_as_syntax() {
         let source = r#"
             (00000111
-              ((00000010 (00000001 atom)) (structural-kind atom) (00000001 selected))
+              ((00000010 (00000001 atom)) (1) (00000001 selected))
               (t t (00000001 missed)))
         "#;
         let mut session = Session::default();
@@ -423,8 +433,11 @@ mod single_pass_eval_tests {
     fn ukrainian_canonical_surface_executes_the_core() {
         let source = r#"
             (за-умовою
-              ((атом? (як-є кіт))
-               (перше
+              ((атом? (як-є кіт)) () (перше
+                 (сполучити
+                   (як-є груша)
+                   (сполучити (як-є слива) ()))))
+              ((атом? (як-є кіт)) (1) (перше
                  (сполучити
                    (як-є груша)
                    (сполучити (як-є слива) ()))))

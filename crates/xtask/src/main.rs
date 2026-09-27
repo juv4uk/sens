@@ -1,23 +1,12 @@
-//! xtask — project verification/policy tool.
-//! xtask — інструмент верифікації/політик проєкту.
+//! xtask — генератори машинних доказів (external oracle, Intel XED,
+//! покриття кодувальника). Перевірки документації й політик (колишній
+//! `cargo xtask verify`) перенесено в мову: `scripts/verify-repo.lisp`.
 //!
-//! Hosts documentation/governance/policy checks that were previously
-//! implemented as `cargo test` tests but do not exercise executable
-//! sens behavior (markdown grepping, external script shell-outs,
-//! contract-metadata text matching). `cargo test` should verify
-//! executable behavior only; this tool verifies everything else.
-//!
-//! Розміщує перевірки документації/врядування/політик, які раніше були
-//! реалізовані як тести `cargo test`, але не перевіряють виконувану
-//! поведінку sens (grep по markdown, виклики зовнішніх скриптів,
-//! звірка тексту метаданих контрактів). `cargo test` має перевіряти лише
-//! виконувану поведінку; цей інструмент перевіряє все інше.
+//! xtask — machine-evidence generators only; repository policy checks
+//! (formerly `cargo xtask verify`) now live in `scripts/verify-repo.lisp`.
 
-mod checks;
-mod contract_workflow_paths;
 pub mod encoder_coverage;
 pub mod external_oracle;
-mod gen_functions_md;
 pub mod xed_import;
 
 use std::process::ExitCode;
@@ -25,14 +14,6 @@ use std::process::ExitCode;
 fn main() -> ExitCode {
     let mut args = std::env::args().skip(1);
     match args.next().as_deref() {
-        Some("verify") => run_verify(),
-        Some("gen-functions-md") => match gen_functions_md::run() {
-            Ok(()) => ExitCode::SUCCESS,
-            Err(error) => {
-                eprintln!("gen-functions-md failed: {error}");
-                ExitCode::FAILURE
-            }
-        },
         Some("external-oracle") => run_external_oracle(args),
         Some("import-xed-evidence") => run_import_xed_evidence(args),
         Some("generate-encoder-coverage") => run_generate_encoder_coverage(args),
@@ -50,7 +31,7 @@ fn main() -> ExitCode {
 
 fn print_usage() {
     eprintln!(
-        "usage: cargo xtask <verify|gen-functions-md|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
+        "usage: cargo xtask <external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
     );
 }
 
@@ -148,40 +129,6 @@ fn run_import_xed_evidence(args: impl Iterator<Item = String>) -> ExitCode {
     })
 }
 
-fn run_verify() -> ExitCode {
-    let mut all_checks = checks::all();
-    all_checks.push(checks::Check {
-        name: "contract-workflows-use-canonical-lisp-paths",
-        run: contract_workflow_paths::verify,
-    });
-    let mut failures = Vec::new();
-
-    for check in &all_checks {
-        print!("[xtask verify] {} ... ", check.name);
-        match (check.run)() {
-            Ok(()) => println!("ok"),
-            Err(message) => {
-                println!("FAILED");
-                failures.push((check.name, message));
-            }
-        }
-    }
-
-    if failures.is_empty() {
-        println!("[xtask verify] all {} checks passed", all_checks.len());
-        ExitCode::SUCCESS
-    } else {
-        eprintln!(
-            "\n[xtask verify] {} of {} checks failed:\n",
-            failures.len(),
-            all_checks.len()
-        );
-        for (name, message) in &failures {
-            eprintln!("  - {name}:\n{message}\n");
-        }
-        ExitCode::FAILURE
-    }
-}
 
 /// Handle `cargo xtask external-oracle <subcommand> [args]`
 ///

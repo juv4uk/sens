@@ -12,70 +12,70 @@
 (load "lib/result-status.lisp")
 (load "lib/translation.lisp")
 
-(def translation-symbol-boundary-rows
-  (lambda ()
-    (let* ((symbol-refusal
-             (quote
+(00001001 translation-symbol-boundary-rows
+  (00001000 ()
+    (10011101 ((symbol-refusal
+             (00000001
                (translation/1 rejected clause
                  "Colorless green ideas sleep furiously."
                  unsupported-translation)))
            (non-symbol-refusal
-             (quote
+             (00000001
                (translation/1 rejected clause
                  "Colorless green ideas sleep furiously."
                  42)))
            (invalid-module-review
              (translation-review 42 symbol-refusal))
            (symbol-refusal-review
-             (translation-review (quote corpus) symbol-refusal))
+             (translation-review (00000001 corpus) symbol-refusal))
            (non-symbol-refusal-review
-             (translation-review (quote corpus) non-symbol-refusal)))
-      (list
-        (list
-          (quote non-symbol-module-is-invalid)
-          (list
+             (translation-review (00000001 corpus) non-symbol-refusal)))
+      (00100111
+        (00100111
+          (00000001 non-symbol-module-is-invalid)
+          (00100111
             (translation-review-status invalid-module-review)
             (translation-review-code invalid-module-review))
-          (quote (rejected invalid-module)))
-        (list
-          (quote symbolic-refusal-is-recordable)
-          (list
+          (00000001 (rejected invalid-module)))
+        (00100111
+          (00000001 symbolic-refusal-is-recordable)
+          (00100111
             (translation-review-status symbol-refusal-review)
             (translation-review-code symbol-refusal-review))
-          (quote (rejected translator-rejected)))
-        (list
-          (quote non-symbol-refusal-is-invalid)
-          (list
+          (00000001 (rejected translator-rejected)))
+        (00100111
+          (00000001 non-symbol-refusal-is-invalid)
+          (00100111
             (translation-review-status non-symbol-refusal-review)
             (translation-review-code non-symbol-refusal-review))
-          (quote (rejected invalid-rejection)))))))
+          (00000001 (rejected invalid-rejection)))))))
 
-(def translation-symbol-boundary-check
-  (lambda (rows)
-    (cond
-      ((atom? rows) (structural-kind empty-list)
-       (quote (translation-symbol-boundary-witness (status pass))))
-      ((atom? rows) (structural-kind atom)
-       (list
-         (quote translation-symbol-boundary-witness)
-         (list (quote status) (quote fail))
-         (list (quote case) (quote malformed-row-tail))
-         (list (quote actual) rows)))
-      ((atom? rows) (structural-kind pair)
-       (let ((row (car rows)))
-         (cond
-           ((equal? (second row) (third row)) (structural-relation same)
-            (translation-symbol-boundary-check (cdr rows)))
-           ((equal? (second row) (third row)) (structural-relation distinct)
-            (list
-              (quote translation-symbol-boundary-witness)
-              (list (quote status) (quote fail))
-              (list (quote case) (car row))
-              (list (quote actual) (second row))
-              (list (quote expected) (third row))))))))))
+(00001001 translation-symbol-boundary-check
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 (translation-symbol-boundary-witness (status pass))))
+      ((00000010 rows) (1)
+       (00100111
+         (00000001 translation-symbol-boundary-witness)
+         (00100111 (00000001 status) (00000001 fail))
+         (00100111 (00000001 case) (00000001 malformed-row-tail))
+         (00100111 (00000001 actual) rows)))
+      ((00000010 rows) (0)
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00100010 (00101111 row) (00110000 row)) (1)
+            (translation-symbol-boundary-check (00000110 rows)))
+           ((00100010 (00101111 row) (00110000 row)) (0)
+            (00100111
+              (00000001 translation-symbol-boundary-witness)
+              (00100111 (00000001 status) (00000001 fail))
+              (00100111 (00000001 case) (00000101 row))
+              (00100111 (00000001 actual) (00101111 row))
+              (00100111 (00000001 expected) (00110000 row))))))))))
 
-(def translation-symbol-boundary-witness
-  (lambda ()
+(00001001 translation-symbol-boundary-witness
+  (00001000 ()
     (translation-symbol-boundary-check
       (translation-symbol-boundary-rows))))
 

@@ -99,6 +99,38 @@ fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sens8>) {
     (identity, math, kernel, machine, scope)
 }
 
+/// The law axis has a row keyed by `wanted_sid` inside the quoted data of
+/// `semantic-coordinate-law-axis-v1`. A structural check: since the fixture
+/// is written in SENS codes, its own `(00001000 ...)` lambdas must not count
+/// as a lambda row.
+fn law_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
+    let exprs = parse(source).expect("law axis must parse");
+    exprs.iter().any(|expr| {
+        let ExprKind::List(definition) = &expr.kind else {
+            return false;
+        };
+        let named = matches!(
+            definition.get(1).map(|e| &e.kind),
+            Some(ExprKind::Symbol(name)) if name.as_ref() == "semantic-coordinate-law-axis-v1"
+        );
+        if !named {
+            return false;
+        }
+        let Some(ExprKind::List(quoted)) = definition.get(2).map(|e| &e.kind) else {
+            return false;
+        };
+        let Some(ExprKind::List(rows)) = quoted.get(1).map(|e| &e.kind) else {
+            return false;
+        };
+        rows.iter().any(|row| match &row.kind {
+            ExprKind::List(items) => {
+                matches!(items.first().map(|e| &e.kind), Some(ExprKind::Sid(sid)) if *sid == wanted_sid)
+            }
+            _ => false,
+        })
+    })
+}
+
 fn source_has_bare_sid(source: &str, sid: Sens8) -> bool {
     source.contains(&format!("({sid}"))
 }
@@ -205,14 +237,14 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
         );
 
         // Presence is derived, never copied into the matrix contract.
-        let _math_present = source_has_bare_sid(&math, *sid);
+        let _math_present = law_axis_has_row(&math, *sid);
         let _machine_present = source_has_bare_sid(&machine, *sid);
     }
 
     // Current bounded slice has math + machine coordinates for all five SIDs.
     for sid in &scope {
         assert!(
-            source_has_bare_sid(&math, *sid),
+            law_axis_has_row(&math, *sid),
             "math axis missing scoped SID {sid}"
         );
         assert!(
@@ -252,7 +284,7 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
 
     assert!(identity.contains(&format!("({LAMBDA_SID} ")));
     assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
-    assert!(!source_has_bare_sid(&math, LAMBDA_SID));
+    assert!(!law_axis_has_row(&math, LAMBDA_SID));
     assert!(!machine_axis_has_row(&machine, LAMBDA_SID));
 }
 

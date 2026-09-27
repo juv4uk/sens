@@ -9,15 +9,15 @@
 ; The active semantic boundary is now scripts/semantic-authority-guard.lisp:
 ; only host/backend -> Lisp language-authority leakage is forbidden.
 
-(def changed-host-tests
-  (read-all (read-file "tests/changed-host-tests.lisp")))
+(00001001 changed-host-tests
+  (01001011 (10100110 "tests/changed-host-tests.lisp")))
 
 ; Consume the transported facts so malformed/unreadable transport still stays
 ; visible to the Lisp process, but do not classify host semantics.
-(cond
-  ((atom? changed-host-tests)
-   (structural-kind empty-list)
-   (quote (authority-ok)))
-  ((atom? changed-host-tests)
-   (structural-kind pair)
-   (quote (authority-ok))))
+(00000111
+  ((00000010 changed-host-tests)
+   ()
+   (00000001 (authority-ok)))
+  ((00000010 changed-host-tests)
+   (0)
+   (00000001 (authority-ok))))

@@ -11,20 +11,20 @@
 (load "lib/reason.lisp")
 (load "lib/result-status.lisp")
 
-(def explicit-negative-reason-observe-check
-  (lambda ()
-    (let* ((goal (quote (not? (planet earth))))
-           (actual (reason-observe goal (quote ())))
-           (expected (quote ())))
-      (cond
-        ((equal? actual expected) (structural-relation same)
-         (quote (explicit-negative-reason-observe-witness (status pass))))
-        ((equal? actual expected) (structural-relation distinct)
-         (list
-           (quote explicit-negative-reason-observe-witness)
-           (quote (status fail))
-           (quote (law explicit-negative-valid-no-evidence-canon-zero))
-           (list (quote expected) expected)
-           (list (quote actual) actual)))))))
+(00001001 explicit-negative-reason-observe-check
+  (00001000 ()
+    (10011101 ((goal (00000001 (not? (planet earth))))
+           (actual (reason-observe goal (00000001 ())))
+           (expected (00000001 ())))
+      (00000111
+        ((00100010 actual expected) (1)
+         (00000001 (explicit-negative-reason-observe-witness (status pass))))
+        ((00100010 actual expected) (0)
+         (00100111
+           (00000001 explicit-negative-reason-observe-witness)
+           (00000001 (status fail))
+           (00000001 (law explicit-negative-valid-no-evidence-canon-zero))
+           (00100111 (00000001 expected) expected)
+           (00100111 (00000001 actual) actual)))))))
 
 (explicit-negative-reason-observe-check)

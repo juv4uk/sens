@@ -1,13 +1,13 @@
 ; #990 — fail-closed enforcement of the Lisp-owned island-math evidence verdict.
 
-(def verdicts
-  (read-all (read-file "tests/island-math-evidence-verdict.lisp")))
+(00001001 verdicts
+  (01001011 (10100110 "tests/island-math-evidence-verdict.lisp")))
 
-(def verdict (car verdicts))
+(00001001 verdict (00000101 verdicts))
 
-(cond
-  ((equal? verdict (quote (island-math-evidence-ok)))
-   (structural-relation same)
-   (quote island-math-evidence-ok))
+(00000111
+  ((00100010 verdict (00000001 (island-math-evidence-ok)))
+   (1)
+   (00000001 island-math-evidence-ok))
   (t
-   (car (quote ()))))
+   (00000101 (00000001 ()))))

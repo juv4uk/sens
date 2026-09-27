@@ -63,6 +63,9 @@ fn inventory_is_structured_complete_data_not_a_second_semantic_table() {
         "executor-local-mechanism-detail",
         "compatibility-historical-fixture",
         "forbidden-duplicate-semantic-authority",
+        // Метадані за кодом (вид, механізм особливої форми, арність,
+        // сигнатура) — мовою, поруч із таблицею; не влада над ідентичністю.
+        "function-table-metadata",
     ]
     .into_iter()
     .collect();
@@ -126,10 +129,9 @@ fn every_known_active_sid_mapping_hotspot_has_an_inventory_classification() {
         "crates/sens/src/semantic_registry_generated.rs",
         "crates/sens/src/semantic_registry.rs",
         "crates/sens/src/eval/canon.rs",
-        "lib/evaluator-dispatch.lisp",
+        "lib/surface/function-signatures.lisp",
         "crates/sens/src/eval/necessary_forms_generated.rs",
         "crates/sens/src/eval/necessary_forms.rs",
-        "crates/sens/src/ir.rs",
         "crates/sens/src/language_items.rs",
         "crates/sens-cli/src/bin/cml-export.rs",
         "mylisp-cml-export.lisp",

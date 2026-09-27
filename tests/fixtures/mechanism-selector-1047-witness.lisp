@@ -5,62 +5,62 @@
 (load "lib/surface/semantic-registry-api.lisp")
 (load "lib/mechanism-selector.lisp")
 
-(def mechanism-selector-1047-witness
-  (lambda ()
-    (let* ((atom-sid (semantic-registry-id (quote atom)))
-           (plus-sid (semantic-registry-id (quote +)))
-           (selected (mechanism-select atom-sid (quote evaluator)))
-           (plus-prolog (mechanism-select plus-sid (quote prolog)))
-           (missing (mechanism-select atom-sid (quote prolog)))
-           (no-route (mechanism-select 11111111 (quote evaluator)))
-           (quoted-shadow (mechanism-select "00001100" (quote prolog))))
-      (cond
-        ((equal?
+(00001001 mechanism-selector-1047-witness
+  (00001000 ()
+    (10011101 ((atom-sid (semantic-registry-id (00000001 atom?)))
+           (plus-sid (semantic-registry-id (00000001 +)))
+           (selected (mechanism-select atom-sid (00000001 evaluator)))
+           (plus-prolog (mechanism-select plus-sid (00000001 prolog)))
+           (missing (mechanism-select atom-sid (00000001 prolog)))
+           (no-route (mechanism-select 11111111 (00000001 evaluator)))
+           (quoted-shadow (mechanism-select "00001100" (00000001 prolog))))
+      (00000111
+        ((00100010
            selected
-           (list
-             (quote mechanism-selected)
+           (00100111
+             (00000001 mechanism-selected)
              atom-sid
-             (quote evaluator)
-             (quote atom-primitive)))
-         (structural-relation same)
-         (cond
-           ((equal?
+             (00000001 evaluator)
+             (00000001 atom-primitive)))
+         (1)
+         (00000111
+           ((00100010
               plus-prolog
-              (list
-                (quote mechanism-selected)
+              (00100111
+                (00000001 mechanism-selected)
                 plus-sid
-                (quote prolog)
-                (quote bounded-exact-add)))
-            (structural-relation same)
-            (cond
-              ((equal?
+                (00000001 prolog)
+                (00000001 bounded-exact-add)))
+            (1)
+            (00000111
+              ((00100010
                  missing
-                 (list
-                   (quote mechanism-unavailable)
+                 (00100111
+                   (00000001 mechanism-unavailable)
                    atom-sid
-                   (quote prolog)))
-               (structural-relation same)
-               (cond
-                 ((equal?
+                   (00000001 prolog)))
+               (1)
+               (00000111
+                 ((00100010
                     no-route
-                    (list
-                      (quote mechanism-unavailable)
+                    (00100111
+                      (00000001 mechanism-unavailable)
                       11111111
-                      (quote evaluator)))
-                  (structural-relation same)
-                  (cond
-                    ((equal?
+                      (00000001 evaluator)))
+                  (1)
+                  (00000111
+                    ((00100010
                        quoted-shadow
-                       (list
-                         (quote mechanism-selection-failure)
-                         (quote sid-not-in-function-table)
+                       (00100111
+                         (00000001 mechanism-selection-failure)
+                         (00000001 sid-not-in-function-table)
                          "00001100"))
-                     (structural-relation same)
-                     (quote (mechanism-selector-1047 (status pass))))
-                    (t (car (quote ())))))
-                 (t (car (quote ())))))
-              (t (car (quote ())))))
-           (t (car (quote ())))))
-        (t (car (quote ())))))))
+                     (1)
+                     (00000001 (mechanism-selector-1047 (status pass))))
+                    (t (00000101 (00000001 ())))))
+                 (t (00000101 (00000001 ())))))
+              (t (00000101 (00000001 ())))))
+           (t (00000101 (00000001 ())))))
+        (t (00000101 (00000001 ())))))))
 
 (mechanism-selector-1047-witness)

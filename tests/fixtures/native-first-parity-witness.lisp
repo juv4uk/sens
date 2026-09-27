@@ -12,8 +12,8 @@
 (load "lib/machine/dispatch/native-first-execute.lisp")
 (load "lib/machine/dispatch/native-first-parity.lisp")
 
-(def native-first-parity-corpus
-  (quote
+(00001001 native-first-parity-corpus
+  (00000001
     ((car-cons-u64-zero
        (car (cons 0 1))
        0
@@ -35,23 +35,23 @@
        pure
        not-applicable))))
 
-(def native-first-parity-verdicts
+(00001001 native-first-parity-verdicts
   (native-first-parity-run native-first-parity-corpus))
 
-(def native-first-parity-witness
-  (lambda ()
-    (cond
-      ((equal? (native-first-parity-all-pass? native-first-parity-verdicts) t)
-       (structural-relation same)
-       (list
-         (quote native-first-parity-witness)
-         (quote (status pass))
-         (list (quote cases) (length native-first-parity-corpus))))
-      ((equal? (native-first-parity-all-pass? native-first-parity-verdicts) t)
-       (structural-relation distinct)
-       (list
-         (quote native-first-parity-witness)
-         (quote (status fail))
-         (list (quote verdicts) native-first-parity-verdicts))))))
+(00001001 native-first-parity-witness
+  (00001000 ()
+    (00000111
+      ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
+       (1)
+       (00100111
+         (00000001 native-first-parity-witness)
+         (00000001 (status pass))
+         (00100111 (00000001 cases) (00101000 native-first-parity-corpus))))
+      ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
+       (0)
+       (00100111
+         (00000001 native-first-parity-witness)
+         (00000001 (status fail))
+         (00100111 (00000001 verdicts) native-first-parity-verdicts))))))
 
 (native-first-parity-witness)

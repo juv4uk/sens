@@ -1,8 +1,10 @@
-name: Language benchmark (instructions, base vs change)
+name: Language benchmark (English Lisp vs SENS, instructions)
 
-# #1433: швидкий детермінований бенчмарк — кількість інструкцій процесора
-# (valgrind) для 11 програм × 2 форми (англійська / SENS), база і зміна
-# міряються на одній машині. Регрес понад поріг — червоний крок.
+# #1433: швидкий відтворюваний бенчмарк — кількість інструкцій процесора
+# (valgrind) для 11 програм на одному коміті: англійський Lisp (текст, імена)
+# проти SENS (двійковий вигляд, функція = 1 байт), той самий бінарник.
+# Страховка: попередній коміт проти зміни; уповільнення понад поріг —
+# червоний крок.
 
 on:
   pull_request:
@@ -44,7 +46,8 @@ jobs:
           rm -rf /tmp/bench && mkdir -p /tmp/bench
           cp benchmarks/sens-surface/run.py benchmarks/sens-surface/ci_bench.sh \
              benchmarks/sens-surface/ci_compare.py crates/sens/examples/ci_bench.rs /tmp/bench/
-          python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small
+          python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small \
+            --forms en,sens
       - name: Measure base on this runner
         run: |
           git checkout --detach "$BASE_SHA"
@@ -62,7 +65,7 @@ jobs:
           cp /tmp/bench/ci_bench.rs crates/sens/examples/ci_bench.rs
           cargo build --release -p sens --example ci_bench
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/head.tsv
-      - name: Compare base -> change
+      - name: Compare English Lisp -> SENS, and base -> change
         run: python3 /tmp/bench/ci_compare.py /tmp/bench/base.tsv /tmp/bench/head.tsv --fail-above 3.0
       - uses: actions/upload-artifact@v4
         if: always()

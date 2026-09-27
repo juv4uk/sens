@@ -6,44 +6,44 @@
 
 (load "lib/core.lisp")
 
-(def machine-replaceability-rows
-  (quote
+(00001001 machine-replaceability-rows
+  (00000001
     ((add
        (+ 2 3)
        5)
      (eq-cond
        (cond
-         ((eq? 2 2) (identity-relation same) 111)
-         ((eq? 2 2) (identity-relation distinct) 222))
+         ((eq? 2 2) (1) 111)
+         ((eq? 2 2) (0) 222))
        111)
      (car-cons
        (car (cons 2 3))
        2))))
 
-(def machine-replaceability-run
-  (lambda (rows)
-    (cond
-      ((atom? rows) (structural-kind empty-list)
-       (quote (machine-replaceability-witness (status pass))))
-      ((atom? rows) (structural-kind atom)
-       (list
-         (quote machine-replaceability-witness)
-         (quote (status fail))
-         (list (quote case) (quote malformed-row-tail))))
-      ((atom? rows) (structural-kind pair)
-       (let* ((row (car rows))
-              (name (car row))
-              (actual (eval (second row)))
-              (expected (third row)))
-         (cond
-           ((equal? actual expected) (structural-relation same)
-            (machine-replaceability-run (cdr rows)))
-           ((equal? actual expected) (structural-relation distinct)
-            (list
-              (quote machine-replaceability-witness)
-              (quote (status fail))
-              (list (quote case) name)
-              (list (quote expected) expected)
-              (list (quote actual) actual)))))))))
+(00001001 machine-replaceability-run
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 (machine-replaceability-witness (status pass))))
+      ((00000010 rows) (1)
+       (00100111
+         (00000001 machine-replaceability-witness)
+         (00000001 (status fail))
+         (00100111 (00000001 case) (00000001 malformed-row-tail))))
+      ((00000010 rows) (0)
+       (10011101 ((row (00000101 rows))
+              (name (00000101 row))
+              (actual (01001101 (00101111 row)))
+              (expected (00110000 row)))
+         (00000111
+           ((00100010 actual expected) (1)
+            (machine-replaceability-run (00000110 rows)))
+           ((00100010 actual expected) (0)
+            (00100111
+              (00000001 machine-replaceability-witness)
+              (00000001 (status fail))
+              (00100111 (00000001 case) name)
+              (00100111 (00000001 expected) expected)
+              (00100111 (00000001 actual) actual)))))))))
 
 (machine-replaceability-run machine-replaceability-rows)

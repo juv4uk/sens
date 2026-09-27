@@ -23,7 +23,10 @@ fn legacy_host_authority_guard_is_non_restrictive() {
 
     assert!(guard.contains("#1347 supersedes the old deny policy"));
     assert!(guard.contains("Host/runtime/compiler/backend code and tests may contain local semantics."));
-    assert!(guard.contains("(quote (authority-ok))"));
+    // The guard is written in SENS codes: 00000001 is quote.
+    assert!(
+        guard.contains("(00000001 (authority-ok))") || guard.contains("(quote (authority-ok))")
+    );
 
     assert!(!guard.contains("allowed-authority?"));
     assert!(!guard.contains("semantic-authority-violation"));

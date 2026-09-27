@@ -1,13 +1,13 @@
 ; #1046 — fail-closed enforcement of the Lisp-owned mechanism verdict.
 
-(def verdicts
-  (read-all (read-file "tests/function-table-mechanisms-verdict.lisp")))
+(00001001 verdicts
+  (01001011 (10100110 "tests/function-table-mechanisms-verdict.lisp")))
 
-(def verdict (car verdicts))
+(00001001 verdict (00000101 verdicts))
 
-(cond
-  ((equal? verdict (quote (function-table-mechanisms-ok)))
-   (structural-relation same)
-   (quote function-table-mechanisms-ok))
+(00000111
+  ((00100010 verdict (00000001 (function-table-mechanisms-ok)))
+   (1)
+   (00000001 function-table-mechanisms-ok))
   (t
-   (car (quote ()))))
+   (00000101 (00000001 ()))))

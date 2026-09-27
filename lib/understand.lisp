@@ -84,47 +84,47 @@
 ;   (is X a Y)   / (is X an Y) / (is X Y)  -> Anfrage: (Y X)
 ;   (does X V Y)                           -> Anfrage: (V X Y)
 
-(def strip-article
-  (lambda (words)
-    (cond
-      ((eq? (car words) (quote a))
-       (identity-relation same)
-       (cdr words))
-      ((eq? (car words) (quote an))
-       (identity-relation same)
-       (cdr words))
-      ((eq? (car words) (quote an))
-       (identity-relation distinct)
+(00001001 strip-article
+  (00001000 (words)
+    (00000111
+      ((00000011 (00000101 words) (00000001 a))
+       (1)
+       (00000110 words))
+      ((00000011 (00000101 words) (00000001 an))
+       (1)
+       (00000110 words))
+      ((00000011 (00000101 words) (00000001 an))
+       (0)
        words))))
 
-(def understand-is
-  (lambda (words)
-    (let ((subject (car words))
-          (after-is (strip-article (cddr words))))
-      (list (list (car after-is) subject)))))
+(00001001 understand-is
+  (00001000 (words)
+    (10011100 ((subject (00000101 words))
+          (after-is (strip-article (00110101 words))))
+      (00100111 (00100111 (00000101 after-is) subject)))))
 
-(def understand-relation
-  (lambda (words)
-    (list (list (second words) (car words) (third words)))))
+(00001001 understand-relation
+  (00001000 (words)
+    (00100111 (00100111 (00101111 words) (00000101 words) (00110000 words)))))
 
-(def understand-universal
-  (lambda (words)
-    (let ((subject-class (second words))
-          (property (cadddr words)))
-      (list (list (quote has) (list (quote var) (quote w)) property)
-            (list subject-class (list (quote var) (quote w)))))))
+(00001001 understand-universal
+  (00001000 (words)
+    (10011100 ((subject-class (00101111 words))
+          (property (00110110 words)))
+      (00100111 (00100111 (00000001 has) (00100111 (00000001 var) (00000001 w)) property)
+            (00100111 subject-class (00100111 (00000001 var) (00000001 w)))))))
 
-(def understand
-  (lambda (words)
-    (cond
-      ((eq? (car words) (quote all))
-       (identity-relation same)
+(00001001 understand
+  (00001000 (words)
+    (00000111
+      ((00000011 (00000101 words) (00000001 all))
+       (1)
        (understand-universal words))
-      ((eq? (second words) (quote is))
-       (identity-relation same)
+      ((00000011 (00101111 words) (00000001 is))
+       (1)
        (understand-is words))
-      ((eq? (second words) (quote is))
-       (identity-relation distinct)
+      ((00000011 (00101111 words) (00000001 is))
+       (0)
        (understand-relation words)))))
 
 ; `understand-query` is the goal-shaped complement of `understand`: it turns
@@ -149,25 +149,25 @@
 ; in die Wissensbasis aufgenommen werden, liefert dies genau ein Ziel — das,
 ; wonach man *fragt*. Kontrolliert, strukturell, deterministisch: keine
 ; Morphologie, kein Netz, kein LLM.
-(def understand-query-is
-  (lambda (words)
-    (let ((subject (second words))
-          (after (cddr words)))
-      (list (car (strip-article after)) subject))))
+(00001001 understand-query-is
+  (00001000 (words)
+    (10011100 ((subject (00101111 words))
+          (after (00110101 words)))
+      (00100111 (00000101 (strip-article after)) subject))))
 
-(def understand-query-relation
-  (lambda (words)
-    (list (third words) (second words) (fourth words))))
+(00001001 understand-query-relation
+  (00001000 (words)
+    (00100111 (00110000 words) (00101111 words) (00110001 words))))
 
-(def understand-query
-  (lambda (words)
-    (cond
-      ((eq? (car words) (quote is))
-       (identity-relation same)
+(00001001 understand-query
+  (00001000 (words)
+    (00000111
+      ((00000011 (00000101 words) (00000001 is))
+       (1)
        (understand-query-is words))
-      ((eq? (car words) (quote does))
-       (identity-relation same)
+      ((00000011 (00000101 words) (00000001 does))
+       (1)
        (understand-query-relation words))
-      ((eq? (car words) (quote does))
-       (identity-relation distinct)
-       (quote ())))))
+      ((00000011 (00000101 words) (00000001 does))
+       (0)
+       (00000001 ())))))

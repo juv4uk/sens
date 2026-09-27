@@ -19,7 +19,7 @@
 
 (structural-query-inventory/1
   ((identity . "0002")
-   (surface . atom)
+   (surface . atom?)
    (producer . rust-canon-value-truth)
    (current-result . classic-lisp-t-or-empty)
    (question-domain . value-shape)
@@ -30,7 +30,7 @@
    (migration . explicit-structural-result-pending-218))
 
   ((identity . "0003")
-   (surface . eq)
+   (surface . eq?)
    (producer . rust-canon-eq-value-truth)
    (current-result . classic-lisp-t-or-empty)
    (question-domain . atomic-identity)
@@ -107,7 +107,7 @@
    (migration . explicit-value-kind-result-pending-218))
 
   ((identity . "1021")
-   (surface . not)
+   (surface . not?)
    (producer . lisp-core-generic-truthiness-negation)
    (current-result . classic-lisp-t-or-empty)
    (question-domain . generic-control-negation)
@@ -171,6 +171,17 @@
    (consumer-class . text-guard-and-legacy-control)
    (compatibility-impact . medium-library)
    (migration . explicit-text-relation-result-pending-218))
+
+  ((identity . "10101011")
+   (surface . null?)
+   (producer . lisp-core-atom-derived)
+   (current-result . classic-lisp-t-or-empty)
+   (question-domain . list-emptiness)
+   (mathematical-binary? . no)
+   (owner . structural-observation-218)
+   (consumer-class . list-guard-and-legacy-control)
+   (compatibility-impact . medium-library)
+   (migration . explicit-list-observation-result-pending-218))
 
   ((identity . "1023")
    (surface . symbol?)

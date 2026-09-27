@@ -13,11 +13,6 @@ mod bignum;
 mod environment;
 mod error;
 pub(crate) mod eval;
-/// Compiler IR v0 (GitHub issue #68) — provenance-bearing lowering data.
-/// See docs/COMPILER-IR-V0.md. Not part of the public API yet (no
-/// execution backend exists); kept `pub(crate)` until a consumer needs it
-/// exposed, per rule 7 (minimize change surface).
-pub(crate) mod ir;
 mod language_items;
 mod parser;
 mod presentation;
@@ -92,6 +87,21 @@ pub mod semantic_registry_export {
             .collect()
     }
 
+    /// Роль функції таблиці за кодом — з таблиці функцій, не з рукописного
+    /// списку: `syntax` (особлива форма або макрос), `primitive` (примітив
+    /// за кодом), `library` (визначена мовою). `None` — коду нема в таблиці
+    /// метаданих (lib/surface/function-signatures.lisp).
+    pub fn function_role(semantic_id: impl ProjectionSidInput) -> Option<&'static str> {
+        let sid = semantic_id.into_projection_sid();
+        match super::language_items::signature_kind(sid)? {
+            super::LanguageItemKind::SyntaxForm | super::LanguageItemKind::Macro => Some("syntax"),
+            super::LanguageItemKind::Builtin if super::eval::canon::has_primitive(sid) => {
+                Some("primitive")
+            }
+            super::LanguageItemKind::Builtin => Some("library"),
+        }
+    }
+
     /// Canonical 8-bit textual serialization for provenance/export.
     pub fn semantic_id_bits(semantic_id: impl ProjectionSidInput) -> String {
         super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())
@@ -145,6 +155,11 @@ pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 
 /// The current Core4 sens bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
+
+/// Parse-output кеш для точного вбудованого Core4 source. Це лише bootstrap-
+/// оптимізація: hash source перевіряється перед використанням, а stale/invalid
+/// bytes переходять на parsing CORE_LIBRARY_SOURCE.
+const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 
 /// Generated runtime projection of admitted surface spellings to opaque Sens8
 /// identities. semantic-registry.lisp remains the only spelling authority.
@@ -255,16 +270,15 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         }
     }
 
-    // The semantic registry is the only surface/SID authority. If a stable
-    // identity has no implementation binding yet, expose the Sens8 identity
-    // itself so the admitted surface remains discoverable without inventing a
-    // second table or pretending the implementation exists.
+    // Реєстр лишається єдиною владою surface/SENS навіть без lexical binding:
+    // evaluator може знайти точну функцію без placeholder у середовищі.
+    // Stable peer копіюємо лише тоді, коли реальне значення вже існує; інакше
+    // Value::Sid зайняв би ім'я і заблокував пізніший Lisp-owned closure.
     for semantic_id in semantic_registry::admitted_semantic_ids() {
         let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
 
-        // Canonical special forms and evaluator-owned necessary forms are
-        // routed by their dedicated syntax mechanisms, not as first-class
-        // SID values.
+        // Special/necessary forms мають власний routing і тут не стають
+        // першокласними lexical values.
         if peers.iter().any(|peer| {
             eval::canon::routed_sid_for_surface(peer).is_some()
                 || eval::necessary_forms::identity_for_symbol(peer).is_some()
@@ -272,10 +286,9 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
             continue;
         }
 
-        let value = values_by_semantic_id
-            .get(&semantic_id)
-            .cloned()
-            .unwrap_or(Value::Sid(semantic_id));
+        let Some(value) = values_by_semantic_id.get(&semantic_id).cloned() else {
+            continue;
+        };
 
         for peer in peers {
             if environment.get(peer).is_none() {
@@ -294,15 +307,39 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// This is the canonical bootstrap order for embedders that start from a bare
 /// `Environment::root()`: the root itself stays smaller, while the bootstrap
 /// explicitly gains `make-macro` before evaluating `lib/macro.lisp`.
-pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+fn load_core_library_with_fasl(
+    session: &mut Session,
+    core_fasl: &[u8],
+) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core4);
     session
         .environment
         .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
-    let result = eval_program(CORE_LIBRARY_SOURCE, session)?;
+
+    let result = match fasl_decode_program(core_fasl) {
+        Some((expressions, source_hash))
+            if source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) =>
+        {
+            eval_parsed_expressions(&expressions, session)?
+        }
+        _ => eval_program(CORE_LIBRARY_SOURCE, session)?,
+    };
+
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
+}
+
+pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    load_core_library_with_fasl(session, CORE_LIBRARY_FASL)
+}
+
+/// Read-only діагностика для embedder-а: чи відповідає Core4 FASL точному
+/// вбудованому source. Не вибирає profile і не змінює bootstrap.
+pub fn core_library_fasl_is_current() -> bool {
+    fasl_decode_program(CORE_LIBRARY_FASL)
+        .map(|(_, source_hash)| source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()))
+        .unwrap_or(false)
 }
 
 /// Activate the frozen Core2/Contract-6 compatibility profile.
@@ -355,7 +392,9 @@ pub fn load_meta_evaluator_library(
 /// preserves the closed language core while giving embedders one canonical
 /// time-layer loader instead of ad-hoc `include_str!` calls.
 pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    eval_program(TIME_LIBRARY_SOURCE, session)
+    let result = eval_program(TIME_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load the shared byte/text adapters used by process and TCP boundaries.
@@ -366,14 +405,18 @@ pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
     eval_program(PROCESS_LIBRARY_SOURCE, session)?;
-    eval_program(TCP_LIBRARY_SOURCE, session)
+    let result = eval_program(TCP_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load language-owned TCP text semantics explicitly when an embedder does
 /// not otherwise need the process adapter.
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    eval_program(TCP_LIBRARY_SOURCE, session)
+    let result = eval_program(TCP_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Load language-owned file text semantics: public `read-file`/`write-file`
@@ -382,7 +425,9 @@ pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageErr
 /// introduced for this migration.
 pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    eval_program(FS_LIBRARY_SOURCE, session)
+    let result = eval_program(FS_LIBRARY_SOURCE, session)?;
+    bind_missing_stable_surface_peers(&session.environment);
+    Ok(result)
 }
 
 /// Public mechanical routing hook for tooling and embedders.
@@ -452,4 +497,47 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
     let start = start.min(chars.len());
     let end = end.min(chars.len()).max(start);
     chars[start..end].iter().collect()
+}
+
+
+#[cfg(test)]
+mod core4_bootstrap_cache_tests {
+    use super::*;
+
+    fn result_of(session: &mut Session, source: &str) -> String {
+        eval_program(source, session)
+            .unwrap_or_else(|error| panic!("{source}: {error:?}"))
+            .value
+            .to_string()
+    }
+
+    #[test]
+    fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
+        let expressions = parse(CORE_LIBRARY_SOURCE).expect("current Core4 parses");
+        let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
+        let fasl = fasl_encode(&expressions, &hash);
+        let mut session = Session::default();
+
+        load_core_library_with_fasl(&mut session, &fasl).expect("valid FASL Core4 bootstrap");
+
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(CoreProfile::Core4)
+        );
+        assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
+    }
+
+    #[test]
+    fn stale_or_invalid_fasl_falls_back_to_text_and_still_selects_core4() {
+        let mut session = Session::default();
+
+        load_core_library_with_fasl(&mut session, b"not-a-current-fasl")
+            .expect("text fallback Core4 bootstrap");
+
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(CoreProfile::Core4)
+        );
+        assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
+    }
 }

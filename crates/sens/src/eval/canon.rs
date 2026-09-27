@@ -81,7 +81,7 @@ pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), Language
 }
 
 fn exact_args(
-    sid: &'static str,
+    sid: crate::Sens8,
     args: &[Value],
     expected: usize,
     span: Span,
@@ -116,6 +116,10 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     table[crate::sens!(00011011).packed_byte() as usize] = Some(prim_00011011);
     table[crate::sens!(00011100).packed_byte() as usize] = Some(prim_00011100);
     table[crate::sens!(01001101).packed_byte() as usize] = Some(prim_01001101);
+    table[crate::sens!(00111011).packed_byte() as usize] = Some(builtins::prim_00111011); // string-length
+    table[crate::sens!(00111100).packed_byte() as usize] = Some(builtins::prim_00111100); // string-empty?
+    table[crate::sens!(00111101).packed_byte() as usize] = Some(builtins::prim_00111101); // string-prefix?
+    table[crate::sens!(00111110).packed_byte() as usize] = Some(builtins::prim_00111110); // string-contains?
     table[crate::sens!(01010000).packed_byte() as usize] = Some(builtins::prim_01010000); // make-vector
     table[crate::sens!(01001111).packed_byte() as usize] = Some(builtins::prim_01001111); // vector
     table[crate::sens!(01011010).packed_byte() as usize] = Some(builtins::prim_01011010); // mono-ns
@@ -154,11 +158,11 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
 
 fn prim_00000010(
     args: &[Value],
-    _env: &Environment,
+    env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000010", args, 1, span)?;
-    Ok(special_forms::atom_value(&args[0]))
+    exact_args(crate::sens!(00000010), args, 1, span)?;
+    Ok(special_forms::atom_value(&args[0], env))
 }
 
 fn prim_00000011(
@@ -166,7 +170,7 @@ fn prim_00000011(
     _env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000011", args, 2, span)?;
+    exact_args(crate::sens!(00000011), args, 2, span)?;
     special_forms::eq_values(args[0].clone(), args[1].clone(), span)
 }
 
@@ -175,7 +179,7 @@ fn prim_00000100(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000100", args, 2, span)?;
+    exact_args(crate::sens!(00000100), args, 2, span)?;
     special_forms::cons_values(args[0].clone(), args[1].clone(), env, span)
 }
 
@@ -184,7 +188,7 @@ fn prim_00000101(
     _env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000101", args, 1, span)?;
+    exact_args(crate::sens!(00000101), args, 1, span)?;
     special_forms::car_value(&args[0], span)
 }
 
@@ -193,7 +197,7 @@ fn prim_00000110(
     _env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000110", args, 1, span)?;
+    exact_args(crate::sens!(00000110), args, 1, span)?;
     special_forms::cdr_value(&args[0], span)
 }
 
@@ -250,7 +254,7 @@ fn prim_01001101(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("01001101", args, 1, span)?;
+    exact_args(crate::sens!(01001101), args, 1, span)?;
     special_forms::eval_values(args, env, span)
 }
 

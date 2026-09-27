@@ -22,7 +22,7 @@ permissions:
 jobs:
   core2-runtime:
     name: Native Contract-6 profile selection
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5

@@ -1,9 +1,13 @@
+/// Визначення — форма з головою def, define або кодом СЕНС 00001001/00001011
+/// (так само рахує scripts/generate-functions-md.lisp).
 fn defined_names(source: &str) -> Vec<&str> {
     source
         .lines()
         .filter_map(|line| {
             let trimmed = line.trim_start();
-            let rest = trimmed.strip_prefix("(def ")?;
+            let rest = ["(def ", "(define ", "(00001001 ", "(00001011 "]
+                .iter()
+                .find_map(|head| trimmed.strip_prefix(head))?;
             rest.split_whitespace().next()
         })
         .collect()

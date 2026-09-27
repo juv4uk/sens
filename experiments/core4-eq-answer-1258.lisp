@@ -12,8 +12,8 @@
 ; SID identity plays no role in this answer: `eq?` is pure Lisp composition
 ; over the existing `eq` builtin, never a new semantic identity of its own.
 
-(def eq?
-  (lambda (a b)
-    (cond
-      ((eq? a b) (identity-relation same) "1")
-      ((eq? a b) (identity-relation distinct) "0"))))
+(00001001 eq?
+  (00001000 (a b)
+    (00000111
+      ((eq? a b) (1) "1")
+      ((eq? a b) (0) "0"))))

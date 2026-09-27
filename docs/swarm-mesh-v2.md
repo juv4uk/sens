@@ -21,7 +21,7 @@ converged on this being the top remaining friction.
 ```
 semantic plane (unchanged)          coordination plane (new)
 ─────────────────────────           ──────────────────────────
-my-lisp :9999                       swarm-node :910x (one per agent)
+sens :9999                          swarm-node :910x (one per agent)
 sexpr eval, TCP REPL                journal, claims, presence, events
 must stay small & stable            P2P mesh, no single point of failure
 ```

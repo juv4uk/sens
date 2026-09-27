@@ -23,22 +23,22 @@
 ; Historical `read-file` returns the decoded text directly. Invalid UTF-8 is
 ; no longer a raw Rust IO error: it returns the same explicit rejection value
 ; `utf8-decode-string` already produces for process/TCP bytes.
-(def read-file
-  (lambda (path)
-    (let ((decoded (read-file-utf8-raw path)))
-      (cond
-        ((eq? (car decoded) (quote decoded))
-         (identity-relation same)
-         (second decoded))
-        ((eq? (car decoded) (quote decoded))
-         (identity-relation distinct)
+(00001001 read-file
+  (00001000 (path)
+    (10011100 ((decoded (read-file-utf8-raw path)))
+      (00000111
+        ((00000011 (00000101 decoded) (00000001 decoded))
+         (1)
+         (00101111 decoded))
+        ((00000011 (00000101 decoded) (00000001 decoded))
+         (0)
          decoded)))))
 
 ; Historical `write-file` returns the text it was given after a successful
 ; write; encoding policy belongs to Lisp, the host only persists bytes.
-(def write-file
-  (lambda (path text)
-    (second (list (write-file-bytes path (utf8-encode-string text)) text))))
+(00001001 write-file
+  (00001000 (path text)
+    (00101111 (00100111 (write-file-bytes path (utf8-encode-string text)) text))))
  
 ; #469: post-core public identities declare only numeric IDs plus the source
 ; binding they just defined. No human-language alias is encoded in this file.

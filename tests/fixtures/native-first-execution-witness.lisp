@@ -11,24 +11,24 @@
 (load "lib/machine/dispatch/native-first.lisp")
 (load "lib/machine/dispatch/native-first-execute.lisp")
 
-(def native-first-execution-witness-check
-  (lambda (actual expected)
-    (cond
-      ((equal? actual expected)
-       (structural-relation same)
-       (quote pass))
-      ((equal? actual expected)
-       (structural-relation distinct)
-       (list (quote fail) actual expected)))))
+(00001001 native-first-execution-witness-check
+  (00001000 (actual expected)
+    (00000111
+      ((00100010 actual expected)
+       (1)
+       (00000001 pass))
+      ((00100010 actual expected)
+       (0)
+       (00100111 (00000001 fail) actual expected)))))
 
-(def native-first-execution-witness
-  (lambda ()
-    (list
+(00001001 native-first-execution-witness
+  (00001000 ()
+    (00100111
       ; Supported bounded structural slice really reaches the CPU.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (quote (car (cons 2 3))))
-        (quote
+          (00000001 (car (cons 2 3))))
+        (00000001
           (execution-route native
             (status completed)
             (value 2))))
@@ -36,8 +36,8 @@
       ; Unsupported ordinary Lisp is not an error: it stays evaluator-owned.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (quote (+ 2 3)))
-        (quote
+          (00000001 (+ 2 3)))
+        (00000001
           (execution-route evaluator
             (status completed)
             (value 5))))
@@ -47,7 +47,7 @@
         (native-first-execute-source
           "(+ 1 2)
 (car (cons 7 9))")
-        (quote
+        (00000001
           (source-execution
             ((execution-route evaluator
                (status completed)
@@ -60,11 +60,11 @@
       ; The bridge must NOT hide this bug by evaluating (+ 40 2) instead.
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (quote
+          (00000001
             (native-plan
               ((definitely-not-an-admitted-machine-form))
               0)))
-        (quote
+        (00000001
           (execution-route native
             (status rejected)
             (detail
@@ -75,8 +75,8 @@
       ; Malformed native plans also fail closed on the native route.
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (quote (native-plan ((ret)))))
-        (quote
+          (00000001 (native-plan ((ret)))))
+        (00000001
           (execution-route native
             (status rejected)
             (detail

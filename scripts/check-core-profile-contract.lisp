@@ -9,181 +9,181 @@
 ; Порушення:
 ;   (core-profile-contract-violation ...)
 
-(def cp-contract-forms
-  (read-all (read-file "contracts/core-profile-contract.lisp")))
+(00001001 cp-contract-forms
+  (01001011 (10100110 "contracts/core-profile-contract.lisp")))
 
-(def cp-contract (car cp-contract-forms))
-(def cp-schema (car cp-contract))
-(def cp-sections (cdr cp-contract))
+(00001001 cp-contract (00000101 cp-contract-forms))
+(00001001 cp-schema (00000101 cp-contract))
+(00001001 cp-sections (00000110 cp-contract))
 
-(def cp-field-from
-  (lambda (name fields)
-    (cond
-      ((atom? fields) (structural-kind empty-list) (quote missing))
-      ((atom? fields) (structural-kind pair)
-       (let ((field (car fields)))
-         (cond
-           ((atom? field) (structural-kind pair)
-            (cond
-              ((eq? (car field) name) (identity-relation same) (cdr field))
-              ((eq? (car field) name) (identity-relation distinct)
-               (cp-field-from name (cdr fields)))))
-           ((atom? field) (structural-kind atom)
-            (cp-field-from name (cdr fields)))
-           ((atom? field) (structural-kind empty-list)
-            (cp-field-from name (cdr fields)))))))))
+(00001001 cp-field-from
+  (00001000 (name fields)
+    (00000111
+      ((00000010 fields) () (00000001 missing))
+      ((00000010 fields) (0)
+       (10011100 ((field (00000101 fields)))
+         (00000111
+           ((00000010 field) (0)
+            (00000111
+              ((00000011 (00000101 field) name) (1) (00000110 field))
+              ((00000011 (00000101 field) name) (0)
+               (cp-field-from name (00000110 fields)))))
+           ((00000010 field) (1)
+            (cp-field-from name (00000110 fields)))
+           ((00000010 field) ()
+            (cp-field-from name (00000110 fields)))))))))
 
-(def cp-field
-  (lambda (section name)
+(00001001 cp-field
+  (00001000 (section name)
     (cp-field-from name section)))
 
-(def cp-find-section
-  (lambda (wanted sections)
-    (cond
-      ((atom? sections) (structural-kind empty-list) (quote ()))
-      ((atom? sections) (structural-kind pair)
-       (let ((section (car sections)))
-         (cond
-           ((eq? (cp-field section (quote identity)) wanted)
-            (identity-relation same)
+(00001001 cp-find-section
+  (00001000 (wanted sections)
+    (00000111
+      ((00000010 sections) () (00000001 ()))
+      ((00000010 sections) (0)
+       (10011100 ((section (00000101 sections)))
+         (00000111
+           ((00000011 (cp-field section (00000001 identity)) wanted)
+            (1)
             section)
-           ((eq? (cp-field section (quote identity)) wanted)
-            (identity-relation distinct)
-            (cp-find-section wanted (cdr sections)))))))))
+           ((00000011 (cp-field section (00000001 identity)) wanted)
+            (0)
+            (cp-find-section wanted (00000110 sections)))))))))
 
-(def cp-check
-  (lambda (section-name field-name expected)
-    (let ((section (cp-find-section section-name cp-sections)))
-      (cond
-        ((atom? section) (structural-kind empty-list)
-         (list (quote missing-section) section-name))
-        ((atom? section) (structural-kind pair)
-         (let ((actual (cp-field section field-name)))
-           (cond
-             ((equal? actual expected) (structural-relation same)
-              (quote ()))
-             ((equal? actual expected) (structural-relation distinct)
-              (list (quote mismatch)
+(00001001 cp-check
+  (00001000 (section-name field-name expected)
+    (10011100 ((section (cp-find-section section-name cp-sections)))
+      (00000111
+        ((00000010 section) ()
+         (00100111 (00000001 missing-section) section-name))
+        ((00000010 section) (0)
+         (10011100 ((actual (cp-field section field-name)))
+           (00000111
+             ((00100010 actual expected) (1)
+              (00000001 ()))
+             ((00100010 actual expected) (0)
+              (00100111 (00000001 mismatch)
                     section-name
                     field-name
                     expected
                     actual)))))))))
 
-(def cp-first-failure
-  (lambda (checks)
-    (cond
-      ((atom? checks) (structural-kind empty-list) (quote ()))
-      ((atom? checks) (structural-kind pair)
-       (let ((check (car checks)))
-         (cond
-           ((atom? check) (structural-kind empty-list)
-            (cp-first-failure (cdr checks)))
-           ((atom? check) (structural-kind pair)
+(00001001 cp-first-failure
+  (00001000 (checks)
+    (00000111
+      ((00000010 checks) () (00000001 ()))
+      ((00000010 checks) (0)
+       (10011100 ((check (00000101 checks)))
+         (00000111
+           ((00000010 check) ()
+            (cp-first-failure (00000110 checks)))
+           ((00000010 check) (0)
             check)
-           ((atom? check) (structural-kind atom)
-            (list (quote malformed-check) check))))))))
+           ((00000010 check) (1)
+            (00100111 (00000001 malformed-check) check))))))))
 
-(def cp-contract-verdict
-  (lambda ()
-    (cond
-      ((eq? cp-schema (quote core-profile-contract/2))
-       (identity-relation same)
-       (let ((failure
+(00001001 cp-contract-verdict
+  (00001000 ()
+    (00000111
+      ((00000011 cp-schema (00000001 core-profile-contract/2))
+       (1)
+       (10011100 ((failure
                (cp-first-failure
-                 (list
-                   (cp-check (quote authority) (quote owner) (quote my-lisp))
-                   (cp-check (quote authority) (quote sid-identity) (quote shared))
-                   (cp-check (quote authority) (quote canon-identity) (quote shared))
-                   (cp-check (quote authority) (quote semantic-registry) (quote shared))
-                   (cp-check (quote authority) (quote profile-law-selection) (quote required))
-                   (cp-check (quote authority) (quote profile-may-mint-sid) (quote forbidden))
-                   (cp-check (quote authority) (quote profile-may-renumber-sid) (quote forbidden))
-                   (cp-check (quote authority) (quote backend-may-own-sid-meaning) (quote forbidden))
-                   (cp-check (quote authority) (quote single-law-for-all-profiles) (quote forbidden))
+                 (00100111
+                   (cp-check (00000001 authority) (00000001 owner) (00000001 my-lisp))
+                   (cp-check (00000001 authority) (00000001 sid-identity) (00000001 shared))
+                   (cp-check (00000001 authority) (00000001 canon-identity) (00000001 shared))
+                   (cp-check (00000001 authority) (00000001 semantic-registry) (00000001 shared))
+                   (cp-check (00000001 authority) (00000001 profile-law-selection) (00000001 required))
+                   (cp-check (00000001 authority) (00000001 profile-may-mint-sid) (00000001 forbidden))
+                   (cp-check (00000001 authority) (00000001 profile-may-renumber-sid) (00000001 forbidden))
+                   (cp-check (00000001 authority) (00000001 backend-may-own-sid-meaning) (00000001 forbidden))
+                   (cp-check (00000001 authority) (00000001 single-law-for-all-profiles) (00000001 forbidden))
 
-                   (cp-check (quote core1) (quote profile-number) 1)
-                   (cp-check (quote core1) (quote role) (quote bootstrap-historical-root))
-                   (cp-check (quote core1) (quote execution-source) "lib/core1.lisp")
-                   (cp-check (quote core1) (quote status) (quote admitted))
+                   (cp-check (00000001 core1) (00000001 profile-number) 1)
+                   (cp-check (00000001 core1) (00000001 role) (00000001 bootstrap-historical-root))
+                   (cp-check (00000001 core1) (00000001 execution-source) "lib/core1.lisp")
+                   (cp-check (00000001 core1) (00000001 status) (00000001 admitted))
 
-                   (cp-check (quote core2) (quote profile-number) 2)
-                   (cp-check (quote core2) (quote role) (quote frozen-legacy-compatibility))
-                   (cp-check (quote core2) (quote historical-contract) (quote (6 0)))
-                   (cp-check (quote core2) (quote status) (quote admitted))
+                   (cp-check (00000001 core2) (00000001 profile-number) 2)
+                   (cp-check (00000001 core2) (00000001 role) (00000001 frozen-legacy-compatibility))
+                   (cp-check (00000001 core2) (00000001 historical-contract) (00000001 (6 0)))
+                   (cp-check (00000001 core2) (00000001 status) (00000001 admitted))
 
-                   (cp-check (quote core3) (quote profile-number) 3)
-                   (cp-check (quote core3) (quote role) (quote experimental-kernel-laboratory))
-                   (cp-check (quote core3) (quote status) (quote partial-native-observation-admitted-canon-operation-pending))
-                   (cp-check (quote core3) (quote law-source) "contracts/core3-profile-contract.lisp")
-                   (cp-check (quote core3) (quote execution-source) "lib/core3.lisp")
-                   (cp-check (quote core3) (quote historical-contract) (quote (7 0)))
-                   (cp-check (quote core3) (quote selector-owner) (quote my-lisp))
-                   (cp-check (quote core3) (quote lowering-owner) (quote my-lisp))
-                   (cp-check (quote core3) (quote native-observation-is-language-law) (quote no))
+                   (cp-check (00000001 core3) (00000001 profile-number) 3)
+                   (cp-check (00000001 core3) (00000001 role) (00000001 experimental-kernel-laboratory))
+                   (cp-check (00000001 core3) (00000001 status) (00000001 partial-native-observation-admitted-canon-operation-pending))
+                   (cp-check (00000001 core3) (00000001 law-source) "contracts/core3-profile-contract.lisp")
+                   (cp-check (00000001 core3) (00000001 execution-source) "lib/core3.lisp")
+                   (cp-check (00000001 core3) (00000001 historical-contract) (00000001 (7 0)))
+                   (cp-check (00000001 core3) (00000001 selector-owner) (00000001 my-lisp))
+                   (cp-check (00000001 core3) (00000001 lowering-owner) (00000001 my-lisp))
+                   (cp-check (00000001 core3) (00000001 native-observation-is-language-law) (00000001 no))
 
-                   (cp-check (quote core4) (quote profile-number) 4)
-                   (cp-check (quote core4) (quote role) (quote current-creative-language))
-                   (cp-check (quote core4) (quote historical-contract) (quote (8 0)))
-                   (cp-check (quote core4) (quote execution-source) "lib/core4.lisp")
-                   (cp-check (quote core4) (quote fasl-source) "lib/core4.lisp.fasl")
-                   (cp-check (quote core4) (quote compatibility-donor) "lib/core.lisp")
-                   (cp-check (quote core4) (quote status) (quote admitted))
-
-                   (cp-check
-                     (quote profile-selection)
-                     (quote same-sid-across-profiles)
-                     (quote required))
-                   (cp-check
-                     (quote profile-selection)
-                     (quote same-sid-may-select-profile-specific-law)
-                     (quote yes))
-                   (cp-check
-                     (quote profile-selection)
-                     (quote same-sid-may-select-profile-specific-result-domain)
-                     (quote yes))
-                   (cp-check
-                     (quote profile-selection)
-                     (quote profile-selection-precedes-mechanism-selection)
-                     (quote yes))
-                   (cp-check
-                     (quote profile-selection)
-                     (quote mechanism-selection-may-ratify-language-law)
-                     (quote no))
-                   (cp-check
-                     (quote profile-selection)
-                     (quote implicit-fallback-to-another-profile)
-                     (quote forbidden))
+                   (cp-check (00000001 core4) (00000001 profile-number) 4)
+                   (cp-check (00000001 core4) (00000001 role) (00000001 current-creative-language))
+                   (cp-check (00000001 core4) (00000001 historical-contract) (00000001 (8 0)))
+                   (cp-check (00000001 core4) (00000001 execution-source) "lib/core4.lisp")
+                   (cp-check (00000001 core4) (00000001 fasl-source) "lib/core4.lisp.fasl")
+                   (cp-check (00000001 core4) (00000001 compatibility-donor) "lib/core.lisp")
+                   (cp-check (00000001 core4) (00000001 status) (00000001 admitted))
 
                    (cp-check
-                     (quote migration-state)
-                     (quote core2-source)
-                     (quote admitted))
+                     (00000001 profile-selection)
+                     (00000001 same-sid-across-profiles)
+                     (00000001 required))
                    (cp-check
-                     (quote migration-state)
-                     (quote core4-source)
-                     (quote admitted))
-                   (cp-check (quote migration-state) (quote core3-source) (quote partial))
+                     (00000001 profile-selection)
+                     (00000001 same-sid-may-select-profile-specific-law)
+                     (00000001 yes))
                    (cp-check
-                     (quote migration-state)
-                     (quote current-lib-core-role)
-                     (quote core4-compatibility-donor))
+                     (00000001 profile-selection)
+                     (00000001 same-sid-may-select-profile-specific-result-domain)
+                     (00000001 yes))
                    (cp-check
-                     (quote migration-state)
-                     (quote current-lib-core-is-core1)
-                     (quote no))
+                     (00000001 profile-selection)
+                     (00000001 profile-selection-precedes-mechanism-selection)
+                     (00000001 yes))
                    (cp-check
-                     (quote migration-state)
-                     (quote copy-current-core-four-times)
-                     (quote forbidden))))))
-         (cond
-           ((atom? failure) (structural-kind empty-list)
-            (list (quote core-profile-contract-ok)))
-           ((atom? failure) (structural-kind pair)
-            (list (quote core-profile-contract-violation) failure)))))
-      ((eq? cp-schema (quote core-profile-contract/2))
-       (identity-relation distinct)
-       (list
-         (quote core-profile-contract-violation)
-         (list (quote schema) (quote core-profile-contract/2) cp-schema))))))
+                     (00000001 profile-selection)
+                     (00000001 mechanism-selection-may-ratify-language-law)
+                     (00000001 no))
+                   (cp-check
+                     (00000001 profile-selection)
+                     (00000001 implicit-fallback-to-another-profile)
+                     (00000001 forbidden))
+
+                   (cp-check
+                     (00000001 migration-state)
+                     (00000001 core2-source)
+                     (00000001 admitted))
+                   (cp-check
+                     (00000001 migration-state)
+                     (00000001 core4-source)
+                     (00000001 admitted))
+                   (cp-check (00000001 migration-state) (00000001 core3-source) (00000001 partial))
+                   (cp-check
+                     (00000001 migration-state)
+                     (00000001 current-lib-core-role)
+                     (00000001 core4-compatibility-donor))
+                   (cp-check
+                     (00000001 migration-state)
+                     (00000001 current-lib-core-is-core1)
+                     (00000001 no))
+                   (cp-check
+                     (00000001 migration-state)
+                     (00000001 copy-current-core-four-times)
+                     (00000001 forbidden))))))
+         (00000111
+           ((00000010 failure) ()
+            (00100111 (00000001 core-profile-contract-ok)))
+           ((00000010 failure) (0)
+            (00100111 (00000001 core-profile-contract-violation) failure)))))
+      ((00000011 cp-schema (00000001 core-profile-contract/2))
+       (0)
+       (00100111
+         (00000001 core-profile-contract-violation)
+         (00100111 (00000001 schema) (00000001 core-profile-contract/2) cp-schema))))))
 
 (cp-contract-verdict)

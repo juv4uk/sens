@@ -45,7 +45,7 @@ jobs:
             case "$path" in *.rs|Cargo.toml|Cargo.lock|crates/*/Cargo.toml) rust=true ;; esac
             case "$path" in lib/surface/*|lib/generated/meta-semantic-registry.lisp|docs/ukrainian-api.md|docs/generated/public-api-discovery.md|scripts/public_api_inventory.py|scripts/generate-meta-semantic-registry.lisp|scripts/generate-ukrainian-api.py|scripts/перевірити-український-профіль.lisp|machine-lowering-boundary.lisp|repo.lisp|crates/sens/tests/macro_derivation.rs|crates/sens/tests/ukrainian_api_docs.rs|crates/sens/tests/uk_surface_equivalence.rs|crates/sens/tests/public_api_inventory_contract.rs|crates/sens/tests/machine_lowering_boundary.rs) surface=true ;; esac
             case "$path" in crates/sens/src/*|crates/sens/tests/*|lib/*.lisp|lib/*/*.lisp) case "$path" in lib/surface/*|lib/generated/*) ;; *) core=true ;; esac ;; esac
-            case "$path" in crates/sens/src/value.rs|crates/sens/src/eval/*|crates/sens/src/semantic_registry.rs|crates/sens/src/semantic_registry_generated.rs|lib/evaluator-dispatch.lisp|scripts/generate-rust-evaluator-dispatch.lisp|scripts/generate-rust-semantic-registry.lisp|crates/sens/tests/witness_authority.rs|crates/sens/tests/structural_query_inventory.rs|lib/canon.lisp|lib/core.lisp|lib/core4.lisp|lib/meta-eval.lisp|lib/process.lisp|contracts/*.lisp|tests/fixtures/conformance.lisp|tests/fixtures/*-witness.lisp|my-lisp-constitution.lisp) semantic=true ;; esac
+            case "$path" in crates/sens/src/value.rs|crates/sens/src/eval/*|crates/sens/src/semantic_registry.rs|crates/sens/src/semantic_registry_generated.rs|lib/surface/function-signatures.lisp|scripts/generate-rust-evaluator-dispatch.lisp|scripts/generate-rust-semantic-registry.lisp|crates/sens/tests/witness_authority.rs|crates/sens/tests/structural_query_inventory.rs|lib/canon.lisp|lib/core.lisp|lib/core4.lisp|lib/meta-eval.lisp|lib/process.lisp|contracts/*.lisp|tests/fixtures/conformance.lisp|tests/fixtures/*-witness.lisp|my-lisp-constitution.lisp) semantic=true ;; esac
             if bash scripts/is-current-semantic-fixture.sh "$path"; then semantic=true; fi
             case "$path" in crates/sens-host/src/*|crates/sens-host/tests/*) host=true ;; esac
             case "$path" in crates/sens-cli/src/*|crates/sens-cli/tests/*) cli=true ;; esac
@@ -249,7 +249,7 @@ jobs:
           cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
           cargo test -p sens-cli --test cli
           cargo test -p xtask --test license_policy
-          cargo run -p xtask -- verify
+          cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
 
       - name: Exercise future main fast clippy
         if: steps.changes.outputs.workflow == 'true'
@@ -267,6 +267,8 @@ jobs:
           ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           ./target/debug/sens scripts/generate-rust-semantic-registry.lisp --check
           ./target/debug/sens scripts/generate-rust-evaluator-dispatch.lisp --check
+          ./target/debug/sens scripts/generate-rust-function-signatures.lisp --check
+          ./target/debug/sens scripts/generate-functions-md.lisp --check
 
       - name: Check public API discovery projection
         if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
@@ -305,7 +307,7 @@ jobs:
           cargo test -p xtask --test xed_import_cli
           cargo test -p xtask --test encoder_coverage_cli
           cargo test -p xtask --test license_policy
-          cargo run -p xtask -- verify
+          cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
           cargo run -p xtask -- import-xed-evidence --check
           cargo run -p xtask -- generate-encoder-coverage --check
 
@@ -359,6 +361,7 @@ jobs:
 
   windows-native-exec-witness:
     name: Windows native-exec ABI witness
+    if: vars.HOSTED_RUNNERS == 'true'
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
@@ -433,7 +436,7 @@ jobs:
       - name: Governance and policy checks
         run: |
           cargo test -p xtask --test license_policy
-          cargo run -p xtask -- verify
+          cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
 
   main-fast-clippy:
     name: main fast clippy

@@ -19,10 +19,11 @@
 ; on its own, updated here as soon as the underlying gaps closed instead
 ; of leaving the workaround comment stale.
 
-(def target-tier
-  (cond
-    ((atom? *argv*) (missing-tier-argument))
-    (t (read (car *argv*)))))
+(00001001 target-tier
+  (00000111
+    ((00000010 *argv*) () (missing-tier-argument))
+    ((00000010 *argv*) (1) (missing-tier-argument))
+    (t (01001010 (00000101 *argv*)))))
 
 ; `missing-tier-argument` is deliberately unbound — calling it is a real
 ; named ErrorKind::UnknownSymbol (S2), not an invented ad-hoc error
@@ -33,19 +34,20 @@
 ; помилки, та сама конвенція, яку вже використовує scripts/release.lisp
 ; для власного випадку відсутнього аргументу.
 
-(def fixture-tier
-  (lambda (fixture)
-    (cdr (assoc (quote tier) fixture))))
+(00001001 fixture-tier
+  (00001000 (fixture)
+    (00000110 (00101101 (00000001 tier) fixture))))
 
-(def print-matching
-  (lambda (remaining)
-    (cond
-      ((atom? remaining) (quote ()))
-      (t ((lambda ()
-            (cond
-              ((eq? (fixture-tier (car remaining)) target-tier)
-               (print (car remaining)))
-              (t (quote ())))
-            (print-matching (cdr remaining))))))))
+(00001001 print-matching
+  (00001000 (remaining)
+    (00000111
+      ((00000010 remaining) () (00000001 ()))
+      ((00000010 remaining) (1) (00000001 ()))
+      (t ((00001000 ()
+            (00000111
+              ((00000011 (fixture-tier (00000101 remaining)) target-tier)
+               (01001000 (00000101 remaining)))
+              (t (00000001 ())))
+            (print-matching (00000110 remaining))))))))
 
-(print-matching (read-all (read-file "tests/fixtures/conformance.lisp")))
+(print-matching (01001011 (10100110 "tests/fixtures/conformance.lisp")))

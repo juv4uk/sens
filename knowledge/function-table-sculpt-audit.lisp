@@ -10,7 +10,7 @@
   (registry-count 170)
   (rows
     (row
-      (sid "00000000")
+      (sid 00000000)
       (name "empty-list")
       (definition-locus "crates/my-lisp/src/eval/canon.rs")
       (class ground-value)
@@ -24,7 +24,7 @@
       (evidence "#419;crates/my-lisp/src/eval/canon.rs")
       (notes "Ground identity, not a callable primitive."))
     (row
-      (sid "00000001")
+      (sid 00000001)
       (name "quote")
       (definition-locus "crates/my-lisp/src/eval/canon.rs")
       (class evaluation-control-anchor)
@@ -38,7 +38,7 @@
       (evidence "#419;crates/my-lisp/src/eval/canon.rs")
       (notes "Controls evaluation; ordinary eager-function replacement is not equivalent. Strict reduction remains evidence-governed."))
     (row
-      (sid "00000010")
+      (sid 00000010)
       (name "atom")
       (definition-locus "crates/my-lisp/src/eval/canon.rs")
       (class backend-core-candidate)
@@ -52,7 +52,7 @@
       (evidence "#419;crates/my-lisp/src/eval/canon.rs")
       (notes "Current backend anchor only; #419 governs irreducibility claims. Backend presence alone is not proof."))
     (row
-      (sid "00000011")
+      (sid 00000011)
       (name "eq")
       (definition-locus "crates/my-lisp/src/eval/canon.rs")
       (class backend-core-candidate)
@@ -66,7 +66,7 @@
       (evidence "#419;crates/my-lisp/src/eval/canon.rs")
       (notes "Current backend anchor only; #419 governs irreducibility claims. Backend presence alone is not proof."))
     (row
-      (sid "00000100")
+      (sid 00000100)
       (name "cons")
       (definition-locus "crates/my-lisp/src/eval/canon.rs")
       (class backend-core-candidate)
@@ -80,7 +80,7 @@
       (evidence "#419;crates/my-lisp/src/eval/canon.rs")
       (notes "Current backend anchor only; #419 governs irreducibility claims. Backend presence alone is not proof."))
     (row
-      (sid "00000101")
+      (sid 00000101)
       (name "car")
       (definition-locus "crates/my-lisp/src/eval/canon.rs")
       (class backend-core-candidate)
@@ -94,7 +94,7 @@
       (evidence "#419;crates/my-lisp/src/eval/canon.rs")
       (notes "Current backend anchor only; #419 governs irreducibility claims. Backend presence alone is not proof."))
     (row
-      (sid "00000110")
+      (sid 00000110)
       (name "cdr")
       (definition-locus "crates/my-lisp/src/eval/canon.rs")
       (class backend-core-candidate)
@@ -108,7 +108,7 @@
       (evidence "#419;crates/my-lisp/src/eval/canon.rs")
       (notes "Current backend anchor only; #419 governs irreducibility claims. Backend presence alone is not proof."))
     (row
-      (sid "00000111")
+      (sid 00000111)
       (name "cond")
       (definition-locus "crates/my-lisp/src/eval/canon.rs")
       (class evaluation-control-anchor)
@@ -122,7 +122,7 @@
       (evidence "#419;crates/my-lisp/src/eval/canon.rs")
       (notes "Controls evaluation; ordinary eager-function replacement is not equivalent. Strict reduction remains evidence-governed."))
     (row
-      (sid "00001000")
+      (sid 00001000)
       (name "lambda")
       (definition-locus "crates/my-lisp/src/eval/necessary_forms.rs;crates/my-lisp/src/eval/mod.rs")
       (class evaluation-control-anchor)
@@ -136,7 +136,7 @@
       (evidence "crates/my-lisp/src/eval/necessary_forms.rs;crates/my-lisp/src/eval/mod.rs")
       (notes "Needs focused evidence before primitive or reclaim claim."))
     (row
-      (sid "00001001")
+      (sid 00001001)
       (name "define")
       (definition-locus "crates/my-lisp/src/eval/necessary_forms.rs;crates/my-lisp/src/eval/mod.rs")
       (class evaluation-control-anchor)
@@ -150,7 +150,7 @@
       (evidence "crates/my-lisp/src/eval/necessary_forms.rs;crates/my-lisp/src/eval/mod.rs")
       (notes "Needs focused evidence before primitive or reclaim claim."))
     (row
-      (sid "00001010")
+      (sid 00001010)
       (name "defmacro")
       (definition-locus "lib/macro.lisp;crates/my-lisp/src/eval/macro_substrate.rs")
       (class evaluation-control-anchor)
@@ -164,7 +164,7 @@
       (evidence "knowledge/semantic-ownership.lisp;lib/macro.lisp;crates/my-lisp/src/eval/macro_substrate.rs")
       (notes "Public semantics are Lisp-owned over a narrow macro substrate; not mere textual alias."))
     (row
-      (sid "00001011")
+      (sid 00001011)
       (name "def")
       (definition-locus "crates/my-lisp/src/eval/necessary_forms.rs;crates/my-lisp/src/eval/mod.rs")
       (class compatibility-only)
@@ -178,7 +178,7 @@
       (evidence "knowledge/meta-eval-evidence.lisp;crates/my-lisp/src/eval/necessary_forms.rs")
       (notes "Compatibility form for define; strongest immediate reclaim candidate after compatibility impact check."))
     (row
-      (sid "00001100")
+      (sid 00001100)
       (name "+")
       (definition-locus "crates/my-lisp/src/eval/canon.rs;crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -192,7 +192,7 @@
       (evidence "crates/my-lisp/src/eval/canon.rs;crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend arithmetic/comparison mechanism today; permanence is not inferred from implementation."))
     (row
-      (sid "00001101")
+      (sid 00001101)
       (name "-")
       (definition-locus "crates/my-lisp/src/eval/canon.rs;crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -206,7 +206,7 @@
       (evidence "crates/my-lisp/src/eval/canon.rs;crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend arithmetic/comparison mechanism today; permanence is not inferred from implementation."))
     (row
-      (sid "00001110")
+      (sid 00001110)
       (name "*")
       (definition-locus "crates/my-lisp/src/eval/canon.rs;crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -220,7 +220,7 @@
       (evidence "crates/my-lisp/src/eval/canon.rs;crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend arithmetic/comparison mechanism today; permanence is not inferred from implementation."))
     (row
-      (sid "00001111")
+      (sid 00001111)
       (name "/")
       (definition-locus "crates/my-lisp/src/eval/canon.rs;crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -234,7 +234,7 @@
       (evidence "crates/my-lisp/src/eval/canon.rs;crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend arithmetic/comparison mechanism today; permanence is not inferred from implementation."))
     (row
-      (sid "00010000")
+      (sid 00010000)
       (name "abs")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -248,7 +248,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00010001")
+      (sid 00010001)
       (name "min")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -262,7 +262,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00010010")
+      (sid 00010010)
       (name "max")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -276,7 +276,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00010011")
+      (sid 00010011)
       (name "mod")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -290,7 +290,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00010100")
+      (sid 00010100)
       (name "quotient")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -304,7 +304,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00010101")
+      (sid 00010101)
       (name "sqrt")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -318,7 +318,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00010110")
+      (sid 00010110)
       (name "isqrt")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -332,7 +332,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00010111")
+      (sid 00010111)
       (name "min-list")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -346,7 +346,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00011000")
+      (sid 00011000)
       (name "max-list")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -360,7 +360,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00011001")
+      (sid 00011001)
       (name "largest-chunk")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -374,7 +374,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00011010")
+      (sid 00011010)
       (name "<")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -388,7 +388,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend arithmetic/comparison mechanism today; permanence is not inferred from implementation."))
     (row
-      (sid "00011011")
+      (sid 00011011)
       (name ">")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -402,7 +402,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend arithmetic/comparison mechanism today; permanence is not inferred from implementation."))
     (row
-      (sid "00011100")
+      (sid 00011100)
       (name "=")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -416,7 +416,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend arithmetic/comparison mechanism today; permanence is not inferred from implementation."))
     (row
-      (sid "00011101")
+      (sid 00011101)
       (name "<=")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -430,7 +430,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00011110")
+      (sid 00011110)
       (name ">=")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -444,7 +444,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00011111")
+      (sid 00011111)
       (name "nondecreasing-from?")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -458,7 +458,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00100000")
+      (sid 00100000)
       (name "nonincreasing-from?")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -472,7 +472,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00100001")
+      (sid 00100001)
       (name "not")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -486,7 +486,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00100010")
+      (sid 00100010)
       (name "equal?")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -500,7 +500,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00100011")
+      (sid 00100011)
       (name "symbol?")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -514,7 +514,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00100100")
+      (sid 00100100)
       (name "string?")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -528,7 +528,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "00100101")
+      (sid 00100101)
       (name "string<?")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -542,7 +542,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "00100110")
+      (sid 00100110)
       (name "numeric-buffer?")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -556,7 +556,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "00100111")
+      (sid 00100111)
       (name "list")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -570,7 +570,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00101000")
+      (sid 00101000)
       (name "length")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -584,7 +584,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00101001")
+      (sid 00101001)
       (name "append")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -598,7 +598,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00101010")
+      (sid 00101010)
       (name "reverse")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -612,7 +612,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00101011")
+      (sid 00101011)
       (name "nth")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -626,7 +626,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00101100")
+      (sid 00101100)
       (name "member?")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -640,7 +640,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00101101")
+      (sid 00101101)
       (name "assoc")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -654,7 +654,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00101110")
+      (sid 00101110)
       (name "pair")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -668,7 +668,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00101111")
+      (sid 00101111)
       (name "second")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -682,7 +682,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00110000")
+      (sid 00110000)
       (name "third")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -696,7 +696,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00110001")
+      (sid 00110001)
       (name "fourth")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -710,7 +710,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00110010")
+      (sid 00110010)
       (name "fifth")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -724,7 +724,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00110011")
+      (sid 00110011)
       (name "caar")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -738,7 +738,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00110100")
+      (sid 00110100)
       (name "cadr")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -752,7 +752,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00110101")
+      (sid 00110101)
       (name "cddr")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -766,7 +766,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00110110")
+      (sid 00110110)
       (name "cadddr")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -780,7 +780,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00110111")
+      (sid 00110111)
       (name "map")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -794,7 +794,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00111000")
+      (sid 00111000)
       (name "filter")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -808,7 +808,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00111001")
+      (sid 00111001)
       (name "reduce")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -822,7 +822,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00111010")
+      (sid 00111010)
       (name "string-append")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -836,7 +836,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "00111011")
+      (sid 00111011)
       (name "string-length")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -850,7 +850,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00111100")
+      (sid 00111100)
       (name "string-empty?")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -864,7 +864,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00111101")
+      (sid 00111101)
       (name "string-prefix?")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -878,7 +878,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00111110")
+      (sid 00111110)
       (name "string-contains?")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -892,7 +892,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "00111111")
+      (sid 00111111)
       (name "string-first")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -906,7 +906,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01000000")
+      (sid 01000000)
       (name "string-rest")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -920,7 +920,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01000001")
+      (sid 01000001)
       (name "string-slice")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -934,7 +934,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01000010")
+      (sid 01000010)
       (name "symbol->string")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -948,7 +948,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01000011")
+      (sid 01000011)
       (name "string->symbol")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -962,7 +962,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01000100")
+      (sid 01000100)
       (name "codepoint->string")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -976,7 +976,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01000101")
+      (sid 01000101)
       (name "string->codepoint")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -990,7 +990,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01000110")
+      (sid 01000110)
       (name "number->string")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -1004,7 +1004,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01000111")
+      (sid 01000111)
       (name "digit->string")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -1018,7 +1018,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01001000")
+      (sid 01001000)
       (name "print")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1032,7 +1032,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01001001")
+      (sid 01001001)
       (name "princ")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1046,7 +1046,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01001010")
+      (sid 01001010)
       (name "read")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1060,7 +1060,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01001011")
+      (sid 01001011)
       (name "read-all")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1074,7 +1074,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01001100")
+      (sid 01001100)
       (name "write-to-string")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1088,7 +1088,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01001101")
+      (sid 01001101)
       (name "eval")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1102,7 +1102,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01001110")
+      (sid 01001110)
       (name "env")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1116,7 +1116,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01001111")
+      (sid 01001111)
       (name "vector")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1130,7 +1130,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01010000")
+      (sid 01010000)
       (name "make-vector")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1144,7 +1144,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01010001")
+      (sid 01010001)
       (name "vector-length")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1158,7 +1158,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01010010")
+      (sid 01010010)
       (name "vector-ref")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1172,7 +1172,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01010011")
+      (sid 01010011)
       (name "vector-set!")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1186,7 +1186,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01010100")
+      (sid 01010100)
       (name "i32-buffer")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1200,7 +1200,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01010101")
+      (sid 01010101)
       (name "f32-buffer")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1214,7 +1214,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01010110")
+      (sid 01010110)
       (name "numeric-buffer-type")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1228,7 +1228,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01010111")
+      (sid 01010111)
       (name "numeric-buffer-length")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1242,7 +1242,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01011000")
+      (sid 01011000)
       (name "numeric-buffer-ref")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1256,7 +1256,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01011001")
+      (sid 01011001)
       (name "numeric-buffer-map")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -1270,7 +1270,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Direct backend mechanism today; replace only after a lower honest mechanism plus parity witness exists."))
     (row
-      (sid "01011010")
+      (sid 01011010)
       (name "mono-ns")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class host-observation-anchor)
@@ -1284,7 +1284,7 @@
       (evidence "knowledge/semantic-ownership.lisp;crates/my-lisp/src/eval/builtins.rs")
       (notes "Physical observation cannot be manufactured by syntax sugar; interpretation above it should stay Lisp-owned."))
     (row
-      (sid "01011011")
+      (sid 01011011)
       (name "unix-time-now")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class host-observation-anchor)
@@ -1298,7 +1298,7 @@
       (evidence "knowledge/semantic-ownership.lisp;crates/my-lisp/src/eval/builtins.rs")
       (notes "Physical observation cannot be manufactured by syntax sugar; interpretation above it should stay Lisp-owned."))
     (row
-      (sid "01011100")
+      (sid 01011100)
       (name "ntp-query-raw")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class host-observation-anchor)
@@ -1312,7 +1312,7 @@
       (evidence "knowledge/semantic-ownership.lisp;crates/my-lisp/src/eval/builtins.rs")
       (notes "Physical observation cannot be manufactured by syntax sugar; interpretation above it should stay Lisp-owned."))
     (row
-      (sid "01011101")
+      (sid 01011101)
       (name "timezone-declarations-raw")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class host-observation-anchor)
@@ -1326,7 +1326,7 @@
       (evidence "knowledge/semantic-ownership.lisp;crates/my-lisp/src/eval/builtins.rs")
       (notes "Physical observation cannot be manufactured by syntax sugar; interpretation above it should stay Lisp-owned."))
     (row
-      (sid "01011110")
+      (sid 01011110)
       (name "utc-now")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1340,7 +1340,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01011111")
+      (sid 01011111)
       (name "utc-from-unix")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1354,7 +1354,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01100000")
+      (sid 01100000)
       (name "unix-time-observation->utc")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1368,7 +1368,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01100001")
+      (sid 01100001)
       (name "milliseconds-from-nanoseconds")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1382,7 +1382,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01100010")
+      (sid 01100010)
       (name "mono-ms")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1396,7 +1396,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01100011")
+      (sid 01100011)
       (name "timezone-name")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1410,7 +1410,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01100100")
+      (sid 01100100)
       (name "timezone-detect")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1424,7 +1424,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01100101")
+      (sid 01100101)
       (name "timezone-offset-seconds")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1438,7 +1438,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01100110")
+      (sid 01100110)
       (name "deadline-reached?")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1452,7 +1452,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01100111")
+      (sid 01100111)
       (name "deadline-reached-at?")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1466,7 +1466,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01101000")
+      (sid 01101000)
       (name "elapsed-ns")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1480,7 +1480,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01101001")
+      (sid 01101001)
       (name "deadline-from")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1494,7 +1494,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01101010")
+      (sid 01101010)
       (name "deadline-after-ns")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1508,7 +1508,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01101011")
+      (sid 01101011)
       (name "internet-time-sync")
       (definition-locus "lib/time.lisp")
       (class lisp-derived-function)
@@ -1522,7 +1522,7 @@
       (evidence "lib/time.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "01101100")
+      (sid 01101100)
       (name "map-empty")
       (definition-locus "lib/persistent-map.lisp")
       (class library-identity)
@@ -1536,7 +1536,7 @@
       (evidence "lib/persistent-map.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01101101")
+      (sid 01101101)
       (name "map-get")
       (definition-locus "lib/persistent-map.lisp")
       (class library-identity)
@@ -1550,7 +1550,7 @@
       (evidence "lib/persistent-map.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01101110")
+      (sid 01101110)
       (name "map-insert")
       (definition-locus "lib/persistent-map.lisp")
       (class library-identity)
@@ -1564,7 +1564,7 @@
       (evidence "lib/persistent-map.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01101111")
+      (sid 01101111)
       (name "map-contains?")
       (definition-locus "lib/persistent-map.lisp")
       (class library-identity)
@@ -1578,7 +1578,7 @@
       (evidence "lib/persistent-map.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01110000")
+      (sid 01110000)
       (name "map->list")
       (definition-locus "lib/persistent-map.lisp")
       (class library-identity)
@@ -1592,7 +1592,7 @@
       (evidence "lib/persistent-map.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01110001")
+      (sid 01110001)
       (name "vec-empty")
       (definition-locus "lib/persistent-vector.lisp")
       (class library-identity)
@@ -1606,7 +1606,7 @@
       (evidence "lib/persistent-vector.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01110010")
+      (sid 01110010)
       (name "vec-conj")
       (definition-locus "lib/persistent-vector.lisp")
       (class library-identity)
@@ -1620,7 +1620,7 @@
       (evidence "lib/persistent-vector.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01110011")
+      (sid 01110011)
       (name "vec-count")
       (definition-locus "lib/persistent-vector.lisp")
       (class library-identity)
@@ -1634,7 +1634,7 @@
       (evidence "lib/persistent-vector.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01110100")
+      (sid 01110100)
       (name "vec-nth")
       (definition-locus "lib/persistent-vector.lisp")
       (class library-identity)
@@ -1648,7 +1648,7 @@
       (evidence "lib/persistent-vector.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01110101")
+      (sid 01110101)
       (name "vec->list")
       (definition-locus "lib/persistent-vector.lisp")
       (class library-identity)
@@ -1662,7 +1662,7 @@
       (evidence "lib/persistent-vector.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01110110")
+      (sid 01110110)
       (name "vec-from-list")
       (definition-locus "lib/persistent-vector.lisp")
       (class library-identity)
@@ -1676,7 +1676,7 @@
       (evidence "lib/persistent-vector.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01110111")
+      (sid 01110111)
       (name "is-fact?")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1690,7 +1690,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01111000")
+      (sid 01111000)
       (name "describe")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1704,7 +1704,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01111001")
+      (sid 01111001)
       (name "collect-facts-about")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1718,7 +1718,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01111010")
+      (sid 01111010)
       (name "contains-atom?")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1732,7 +1732,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01111011")
+      (sid 01111011)
       (name "forward-in")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1746,7 +1746,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01111100")
+      (sid 01111100)
       (name "reason-in")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1760,7 +1760,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01111101")
+      (sid 01111101)
       (name "check-conflict")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1774,7 +1774,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01111110")
+      (sid 01111110)
       (name "module-known?")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1788,7 +1788,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "01111111")
+      (sid 01111111)
       (name "module-clauses-now")
       (definition-locus "lib/knowledge.lisp")
       (class library-identity)
@@ -1802,7 +1802,7 @@
       (evidence "lib/knowledge.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10000000")
+      (sid 10000000)
       (name "prove-goal")
       (definition-locus "lib/reason.lisp")
       (class library-identity)
@@ -1816,7 +1816,7 @@
       (evidence "lib/reason.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10000001")
+      (sid 10000001)
       (name "prove-goals")
       (definition-locus "lib/reason.lisp")
       (class library-identity)
@@ -1830,7 +1830,7 @@
       (evidence "lib/reason.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10000010")
+      (sid 10000010)
       (name "explain-proof")
       (definition-locus "lib/reason.lisp")
       (class library-identity)
@@ -1844,7 +1844,7 @@
       (evidence "lib/reason.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10000011")
+      (sid 10000011)
       (name "source-of")
       (definition-locus "lib/reason.lisp")
       (class library-identity)
@@ -1858,7 +1858,7 @@
       (evidence "lib/reason.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10000100")
+      (sid 10000100)
       (name "provenance")
       (definition-locus "lib/reason.lisp")
       (class library-identity)
@@ -1872,7 +1872,7 @@
       (evidence "lib/reason.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10000101")
+      (sid 10000101)
       (name "reason")
       (definition-locus "lib/reason.lisp")
       (class library-identity)
@@ -1886,7 +1886,7 @@
       (evidence "lib/reason.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10000110")
+      (sid 10000110)
       (name "reason-explain")
       (definition-locus "lib/reason.lisp")
       (class library-identity)
@@ -1900,7 +1900,7 @@
       (evidence "lib/reason.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10000111")
+      (sid 10000111)
       (name "unify")
       (definition-locus "lib/unify.lisp")
       (class library-identity)
@@ -1914,7 +1914,7 @@
       (evidence "lib/unify.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10001000")
+      (sid 10001000)
       (name "logic-var")
       (definition-locus "lib/unify.lisp")
       (class library-identity)
@@ -1928,7 +1928,7 @@
       (evidence "lib/unify.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10001001")
+      (sid 10001001)
       (name "var?")
       (definition-locus "lib/unify.lisp")
       (class library-identity)
@@ -1942,7 +1942,7 @@
       (evidence "lib/unify.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10001010")
+      (sid 10001010)
       (name "apply-subst")
       (definition-locus "lib/unify.lisp")
       (class library-identity)
@@ -1956,7 +1956,7 @@
       (evidence "lib/unify.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10001011")
+      (sid 10001011)
       (name "walk")
       (definition-locus "lib/unify.lisp")
       (class library-identity)
@@ -1970,7 +1970,7 @@
       (evidence "lib/unify.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10001100")
+      (sid 10001100)
       (name "occurs-check")
       (definition-locus "lib/unify.lisp")
       (class library-identity)
@@ -1984,7 +1984,7 @@
       (evidence "lib/unify.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10001101")
+      (sid 10001101)
       (name "claim?")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -1998,7 +1998,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10001110")
+      (sid 10001110)
       (name "claim-statement")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2012,7 +2012,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10001111")
+      (sid 10001111)
       (name "claim-review")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2026,7 +2026,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10010000")
+      (sid 10010000)
       (name "evidence?")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2040,7 +2040,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10010001")
+      (sid 10010001)
       (name "evidence-method")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2054,7 +2054,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10010010")
+      (sid 10010010)
       (name "evidence-outcome")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2068,7 +2068,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10010011")
+      (sid 10010011)
       (name "observation?")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2082,7 +2082,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10010100")
+      (sid 10010100)
       (name "observation-statement")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2096,7 +2096,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10010101")
+      (sid 10010101)
       (name "intent?")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2110,7 +2110,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10010110")
+      (sid 10010110)
       (name "intent-goal")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2124,7 +2124,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10010111")
+      (sid 10010111)
       (name "supporting-evidence")
       (definition-locus "lib/epistemic.lisp")
       (class library-identity)
@@ -2138,7 +2138,7 @@
       (evidence "lib/epistemic.lisp")
       (notes "Library semantic identity with Lisp implementation; SID retention is API-budget policy, not backend necessity."))
     (row
-      (sid "10011000")
+      (sid 10011000)
       (name "identity")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -2152,7 +2152,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "10011001")
+      (sid 10011001)
       (name "gensym")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)
@@ -2166,7 +2166,7 @@
       (evidence "lib/core.lisp")
       (notes "Already executable as Lisp definition; cannot be called primitive merely because it owns a SID."))
     (row
-      (sid "10011010")
+      (sid 10011010)
       (name "and")
       (definition-locus "lib/core.lisp")
       (class syntax-sugar)
@@ -2180,7 +2180,7 @@
       (evidence "lib/core.lisp")
       (notes "Current macro expansion provides behavior from lower identities; strong primitive/SID necessity review candidate."))
     (row
-      (sid "10011011")
+      (sid 10011011)
       (name "or")
       (definition-locus "lib/core.lisp")
       (class syntax-sugar)
@@ -2194,7 +2194,7 @@
       (evidence "lib/core.lisp")
       (notes "Current macro expansion provides behavior from lower identities; strong primitive/SID necessity review candidate."))
     (row
-      (sid "10011100")
+      (sid 10011100)
       (name "let")
       (definition-locus "lib/core.lisp")
       (class syntax-sugar)
@@ -2208,7 +2208,7 @@
       (evidence "lib/core.lisp")
       (notes "Current macro expansion provides behavior from lower identities; strong primitive/SID necessity review candidate."))
     (row
-      (sid "10011101")
+      (sid 10011101)
       (name "let*")
       (definition-locus "lib/core.lisp")
       (class syntax-sugar)
@@ -2222,7 +2222,7 @@
       (evidence "lib/core.lisp")
       (notes "Current macro expansion provides behavior from lower identities; strong primitive/SID necessity review candidate."))
     (row
-      (sid "10011110")
+      (sid 10011110)
       (name "->")
       (definition-locus "lib/core.lisp")
       (class syntax-sugar)
@@ -2236,7 +2236,7 @@
       (evidence "lib/core.lisp")
       (notes "Current macro expansion provides behavior from lower identities; strong primitive/SID necessity review candidate."))
     (row
-      (sid "10011111")
+      (sid 10011111)
       (name "->>")
       (definition-locus "lib/core.lisp")
       (class syntax-sugar)
@@ -2250,7 +2250,7 @@
       (evidence "lib/core.lisp")
       (notes "Current macro expansion provides behavior from lower identities; strong primitive/SID necessity review candidate."))
     (row
-      (sid "10100000")
+      (sid 10100000)
       (name "json-parse")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -2264,7 +2264,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Backend JSON parser today. Derivability must be re-audited because current language now has codepoint/string bridges."))
     (row
-      (sid "10100001")
+      (sid 10100001)
       (name "sha256-hex")
       (definition-locus "crates/my-lisp/src/eval/builtins.rs")
       (class backend-value-mechanism)
@@ -2278,7 +2278,7 @@
       (evidence "crates/my-lisp/src/eval/builtins.rs")
       (notes "Digest computation is backend-provided today; no claim of eternal primitiveness."))
     (row
-      (sid "10100010")
+      (sid 10100010)
       (name "process-run")
       (definition-locus "lib/process.lisp;crates/my-lisp-host/src/process_raw.rs")
       (class host-wrapper-lisp-owned)
@@ -2292,7 +2292,7 @@
       (evidence "knowledge/semantic-ownership.lisp;lib/process.lisp;crates/my-lisp-host/src/process_raw.rs")
       (notes "Public meaning is Lisp-owned; only the raw physical capability is host-owned."))
     (row
-      (sid "10100011")
+      (sid 10100011)
       (name "tcp-read")
       (definition-locus "lib/tcp.lisp;crates/my-lisp-host/src/lib.rs")
       (class host-wrapper-lisp-owned)
@@ -2306,7 +2306,7 @@
       (evidence "knowledge/semantic-ownership.lisp;lib/tcp.lisp;crates/my-lisp-host/src/lib.rs")
       (notes "Public meaning is Lisp-owned; only the raw physical capability is host-owned."))
     (row
-      (sid "10100100")
+      (sid 10100100)
       (name "tcp-write")
       (definition-locus "lib/tcp.lisp;crates/my-lisp-host/src/lib.rs")
       (class host-wrapper-lisp-owned)
@@ -2320,7 +2320,7 @@
       (evidence "knowledge/semantic-ownership.lisp;lib/tcp.lisp;crates/my-lisp-host/src/lib.rs")
       (notes "Public meaning is Lisp-owned; only the raw physical capability is host-owned."))
     (row
-      (sid "10100101")
+      (sid 10100101)
       (name "tcp-listen")
       (definition-locus "lib/tcp.lisp;crates/my-lisp-host/src/lib.rs")
       (class host-wrapper-lisp-owned)
@@ -2334,7 +2334,7 @@
       (evidence "knowledge/semantic-ownership.lisp;lib/tcp.lisp;crates/my-lisp-host/src/lib.rs")
       (notes "Public meaning is Lisp-owned; only the raw physical capability is host-owned."))
     (row
-      (sid "10100110")
+      (sid 10100110)
       (name "read-file")
       (definition-locus "lib/fs.lisp;crates/my-lisp-host/src/lib.rs")
       (class host-wrapper-lisp-owned)
@@ -2348,7 +2348,7 @@
       (evidence "knowledge/semantic-ownership.lisp;lib/fs.lisp;crates/my-lisp-host/src/lib.rs")
       (notes "Public meaning is Lisp-owned; only the raw physical capability is host-owned."))
     (row
-      (sid "10100111")
+      (sid 10100111)
       (name "write-file")
       (definition-locus "lib/fs.lisp;crates/my-lisp-host/src/lib.rs")
       (class host-wrapper-lisp-owned)
@@ -2362,7 +2362,7 @@
       (evidence "knowledge/semantic-ownership.lisp;lib/fs.lisp;crates/my-lisp-host/src/lib.rs")
       (notes "Public meaning is Lisp-owned; only the raw physical capability is host-owned."))
     (row
-      (sid "10101000")
+      (sid 10101000)
       (name "invoke")
       (definition-locus "crates/wsm-kernel-host/src/lib.rs;crates/wsm-native-result-types/tests/four_real_kernels.rs")
       (class backend-core-candidate)
@@ -2376,7 +2376,7 @@
       (evidence "#747;docs/architecture/PRIMITIVE-ADMISSION-AUDIT-747.md;crates/wsm-native-result-types/tests/four_real_kernels.rs")
       (notes "Cross-kernel invocation identity has a four-real-kernel witness; payload/result semantics remain kernel-private."))
     (row
-      (sid "10101001")
+      (sid 10101001)
       (name "binary")
       (definition-locus "lib/core.lisp")
       (class lisp-derived-function)

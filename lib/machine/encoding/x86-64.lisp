@@ -1139,7 +1139,8 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (00000111
-      ((00000010 instructions) (00000001 ()))
+      ((00000010 instructions) () (00000001 ()))
+      ((00000010 instructions) (1) (00000001 ()))
       (t
         (00101001
           (00000101 instructions)

@@ -60,7 +60,7 @@
 
 (00001011 logic-var
   (00001000 (name)
-    (list (00000001 var) name)))
+    (00100111 (00000001 var) name)))
 
 ; Guards the `eq` with `(atom (car term))` first: `term` reaching the final
 ; branch is already known non-atom, but its `car` can itself be a compound
@@ -81,8 +81,10 @@
 (00001011 var?
   (00001000 (term)
     (00000111
-      ((00000010 term) (00000001 ()))
-      ((00000010 (00000101 term)) (00000011 (00000101 term) (00000001 var)))
+      ((00000010 term) () (00000001 ()))
+      ((00000010 term) (1) (00000001 ()))
+      ((00000010 (00000101 term)) () (00000011 (00000101 term) (00000001 var)))
+      ((00000010 (00000101 term)) (1) (00000011 (00000101 term) (00000001 var)))
       (t (00000001 ())))))
 
 ; subst is an alist of (name . term) pairs, keyed by the variable's
@@ -91,13 +93,14 @@
 (00001011 lookup-subst
   (00001000 (variable subst)
     (00000111
-      ((00000010 subst) variable)
-      ((equal? (00000101 (00000101 subst)) (second variable)) (00000110 (00000101 subst)))
+      ((00000010 subst) () variable)
+      ((00000010 subst) (1) variable)
+      ((00100010 (00000101 (00000101 subst)) (00101111 variable)) (00000110 (00000101 subst)))
       (t (lookup-subst variable (00000110 subst))))))
 
 (00001011 extend-subst
   (00001000 (variable term subst)
-    (00000100 (00000100 (second variable) term) subst)))
+    (00000100 (00000100 (00101111 variable) term) subst)))
 
 ; One-level dereference: if `term` is a bound variable, follow exactly one
 ; binding; anything else (including a still-unbound variable, or a
@@ -106,16 +109,16 @@
 (00001011 walk
   (00001000 (term subst)
     (00000111
-      ((var? term) (walk-resolved term (lookup-subst term subst) subst))
+      ((10001001 term) (walk-resolved term (lookup-subst term subst) subst))
       (t term))))
 
 (00001011 walk-resolved
   (00001000 (term resolved subst)
     (00000111
-      ((var? resolved)
+      ((10001001 resolved)
        (00000111
-         ((equal? (second resolved) (second term)) term)
-         (t (walk resolved subst))))
+         ((00100010 (00101111 resolved) (00101111 term)) term)
+         (t (10001011 resolved subst))))
       (t resolved))))
 
 ; Same guard shape as `var?`: once `subst` gains bindings it's a non-empty
@@ -132,43 +135,49 @@
   (00001000 (a b subst)
     (00000111
       ((failed-subst? subst) (00000001 fail))
-      (t (unify-walked (walk a subst) (walk b subst) subst)))))
+      (t (unify-walked (10001011 a subst) (10001011 b subst) subst)))))
 
 (00001011 failed-subst?
   (00001000 (subst)
     (00000111
-      ((00000010 subst) (00000011 subst (00000001 fail)))
+      ((00000010 subst) () (00000011 subst (00000001 fail)))
+      ((00000010 subst) (1) (00000011 subst (00000001 fail)))
       (t (00000001 ())))))
 
 (00001011 unify-walked
   (00001000 (a b subst)
     (00000111
-      ((var? a) (unify-var a b subst))
-      ((var? b) (unify-var b a subst))
-      ((00000010 a) (00000111 ((00000010 b) (00000111 ((00000011 a b) subst) (t (00000001 fail)))) (t (00000001 fail))))
-      ((00000010 b) (00000001 fail))
-      (t (unify (00000110 a) (00000110 b) (unify (00000101 a) (00000101 b) subst))))))
+      ((10001001 a) (unify-var a b subst))
+      ((10001001 b) (unify-var b a subst))
+      ((00000010 a) () (00000111 ((00000010 b) () (00000111 ((00000011 a b) subst) (t (00000001 fail))))
+                                 ((00000010 b) (1) (00000111 ((00000011 a b) subst) (t (00000001 fail)))) (t (00000001 fail))))
+      ((00000010 a) (1) (00000111 ((00000010 b) () (00000111 ((00000011 a b) subst) (t (00000001 fail))))
+                                  ((00000010 b) (1) (00000111 ((00000011 a b) subst) (t (00000001 fail)))) (t (00000001 fail))))
+      ((00000010 b) () (00000001 fail))
+      ((00000010 b) (1) (00000001 fail))
+      (t (10000111 (00000110 a) (00000110 b) (10000111 (00000101 a) (00000101 b) subst))))))
 
 (00001011 occurs-check?
   (00001000 (variable term subst)
-    (let ((resolved (walk term subst)))
+    (10011100 ((resolved (10001011 term subst)))
       (00000111
-        ((var? resolved) (equal? (second variable) (second resolved)))
-        ((00000010 resolved) (00000001 ()))
+        ((10001001 resolved) (00100010 (00101111 variable) (00101111 resolved)))
+        ((00000010 resolved) () (00000001 ()))
+        ((00000010 resolved) (1) (00000001 ()))
         (t (00000111
-             ((occurs-check? variable (00000101 resolved) subst) t)
-             (t (occurs-check? variable (00000110 resolved) subst))))))))
+             ((10001100 variable (00000101 resolved) subst) t)
+             (t (10001100 variable (00000110 resolved) subst))))))))
 
 (00001011 occurs-check occurs-check?)
 
 (00001011 unify-var
   (00001000 (variable term subst)
     (00000111
-      ((var? term)
+      ((10001001 term)
        (00000111
-         ((equal? (second variable) (second term)) subst)
+         ((00100010 (00101111 variable) (00101111 term)) subst)
          (t (extend-subst variable term subst))))
-      ((occurs-check? variable term subst) (00000001 fail))
+      ((10001100 variable term subst) (00000001 fail))
       (t (extend-subst variable term subst)))))
 
 ; Fully resolves every variable in `term` (recursively, through chained
@@ -177,13 +186,14 @@
 ; `(var ...)` markers and substitution internals.
 (00001011 apply-subst
   (00001000 (term subst)
-    (apply-subst-walked (walk term subst) subst)))
+    (apply-subst-walked (10001011 term subst) subst)))
 
 (00001011 apply-subst-walked
   (00001000 (term subst)
     (00000111
-      ((00000010 term) term)
-      (t (00000100 (apply-subst (00000101 term) subst) (apply-subst (00000110 term) subst))))))
+      ((00000010 term) () term)
+      ((00000010 term) (1) term)
+      (t (00000100 (10001010 (00000101 term) subst) (10001010 (00000110 term) subst))))))
 
 ; The shared kernel behind proving/matching a *conjunction* of conditions:
 ; process one condition at a time, threading a `state` value (usually a
@@ -239,12 +249,14 @@
 (00001011 thread-conjunction
   (00001000 (conditions state try-one)
     (00000111
-      ((00000010 conditions) (list state))
+      ((00000010 conditions) () (00100111 state))
+      ((00000010 conditions) (1) (00100111 state))
       (t (thread-conjunction-branches (00000110 conditions) try-one (try-one (00000101 conditions) state))))))
 
 (00001011 thread-conjunction-branches
   (00001000 (remaining try-one states)
     (00000111
-      ((00000010 states) (00000001 ()))
-      (t (append (thread-conjunction remaining (00000101 states) try-one)
+      ((00000010 states) () (00000001 ()))
+      ((00000010 states) (1) (00000001 ()))
+      (t (00101001 (thread-conjunction remaining (00000101 states) try-one)
                  (thread-conjunction-branches remaining try-one (00000110 states)))))))

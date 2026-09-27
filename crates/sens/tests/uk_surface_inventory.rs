@@ -36,7 +36,8 @@ fn core_definition_names() -> BTreeSet<String> {
             };
 
             let is_definition = match &head.kind {
-                ExprKind::Sid(sid) => sid.to_string() == "00001001",
+                // 00001001 define, 00001010 defmacro.
+                ExprKind::Sid(sid) => matches!(sid.to_string().as_str(), "00001001" | "00001010"),
                 ExprKind::Symbol(symbol) => matches!(symbol.as_ref(), "def" | "defmacro"),
                 _ => false,
             };

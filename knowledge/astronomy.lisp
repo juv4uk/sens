@@ -1,5 +1,5 @@
 ;; knowledge/astronomy.lisp
-(defmodule astronomy (quote (
+(defmodule astronomy (00000001 (
   ;; Facts
   ((planet earth))
   ((planet mars))

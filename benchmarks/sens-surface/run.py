@@ -27,6 +27,7 @@
 """
 
 import argparse
+import re
 import datetime as dt
 import json
 import os
@@ -42,19 +43,19 @@ from pathlib import Path
 # Поверхні: токен шаблону -> написання в кожній формі.
 # SENS-коди звірені з docs/generated/function-table.md.
 SURFACES = {
-    "def":    {"en": "def",    "sens": "00001011", "uk": "визначити", "wrap": "def"},
-    "lambda": {"en": "lambda", "sens": "00001000", "uk": "функція",   "wrap": "lambda"},
-    "cond":   {"en": "cond",   "sens": "00000111", "uk": "за-умовою", "wrap": "cond"},
-    "quote":  {"en": "quote",  "sens": "00000001", "uk": "як-є",      "wrap": "quote"},
-    "eq":     {"en": "eq?",     "sens": "00000011", "uk": "тотожне?",  "wrap": "my-eq"},
-    "atom":   {"en": "atom?",   "sens": "00000010", "uk": "атом?",     "wrap": "my-atom"},
-    "cons":   {"en": "cons",   "sens": "00000100", "uk": "сполучити", "wrap": "my-cons"},
-    "car":    {"en": "car",    "sens": "00000101", "uk": "перше",     "wrap": "my-car"},
-    "cdr":    {"en": "cdr",    "sens": "00000110", "uk": "решта",     "wrap": "my-cdr"},
-    "+":      {"en": "+",      "sens": "00001100", "uk": "додати",    "wrap": "my-add"},
-    "-":      {"en": "-",      "sens": "00001101", "uk": "відняти",   "wrap": "my-sub"},
+    "def":    {"en": "def",    "sens": "00001011", "uk": "визначити", "wrap": "def", "legacy-en": "def"},
+    "lambda": {"en": "lambda", "sens": "00001000", "uk": "функція",   "wrap": "lambda", "legacy-en": "lambda"},
+    "cond":   {"en": "cond",   "sens": "00000111", "uk": "за-умовою", "wrap": "cond", "legacy-en": "cond"},
+    "quote":  {"en": "quote",  "sens": "00000001", "uk": "як-є",      "wrap": "quote", "legacy-en": "quote"},
+    "eq":     {"en": "eq?",     "sens": "00000011", "uk": "тотожне?",  "wrap": "my-eq", "legacy-en": "eq"},
+    "atom":   {"en": "atom?",   "sens": "00000010", "uk": "атом?",     "wrap": "my-atom", "legacy-en": "atom"},
+    "cons":   {"en": "cons",   "sens": "00000100", "uk": "сполучити", "wrap": "my-cons", "legacy-en": "cons"},
+    "car":    {"en": "car",    "sens": "00000101", "uk": "перше",     "wrap": "my-car", "legacy-en": "car"},
+    "cdr":    {"en": "cdr",    "sens": "00000110", "uk": "решта",     "wrap": "my-cdr", "legacy-en": "cdr"},
+    "+":      {"en": "+",      "sens": "00001100", "uk": "додати",    "wrap": "my-add", "legacy-en": "+"},
+    "-":      {"en": "-",      "sens": "00001101", "uk": "відняти",   "wrap": "my-sub", "legacy-en": "-"},
 }
-ALL_FORMS = ["en", "sens", "uk", "wrap"]
+ALL_FORMS = ["en", "sens", "uk", "wrap", "legacy-en"]
 FORMS = ["en", "sens"]  # за замовчуванням: англійський Lisp проти SENS
 
 WRAP_PRELUDE = """\
@@ -103,7 +104,7 @@ BUILD = """\
 """
 LEN = """\
 ({def} len ({lambda} (xs n)
-  ({cond} (({atom} xs) n)
+  ({cond} (({atom} xs) () n)
         (t (len ({cdr} xs) ({+} n 1))))))
 """
 TREE = """\
@@ -143,7 +144,7 @@ WORKLOADS = {
         "params": {"N": 1000, "R": 120}, "small": {"N": 200, "R": 10},
         "setup": BUILD + LEN + """\
 ({def} rev ({lambda} (xs acc)
-  ({cond} (({atom} xs) acc)
+  ({cond} (({atom} xs) () acc)
         (t (rev ({cdr} xs) ({cons} ({car} xs) acc))))))
 ({def} work ({lambda} (r total)
   ({cond} (({eq} r 0) total)
@@ -157,7 +158,7 @@ WORKLOADS = {
         "params": {"N": 100, "R": 5000}, "small": {"N": 100, "R": 50},
         "setup": BUILD + """\
 ({def} mem ({lambda} (x xs)
-  ({cond} (({atom} xs) 0)
+  ({cond} (({atom} xs) () 0)
         (({eq} x ({car} xs)) 1)
         (t (mem x ({cdr} xs))))))
 ({def} xs (build {N} ({quote} ())))
@@ -212,7 +213,7 @@ WORKLOADS = {
   ({cond} (({eq} n 0) acc)
         (t (mkal ({-} n 1) ({cons} ({cons} n ({+} n n)) acc))))))
 ({def} look ({lambda} (k al)
-  ({cond} (({atom} al) 0)
+  ({cond} (({atom} al) () 0)
         (({eq} k ({car} ({car} al))) ({cdr} ({car} al)))
         (t (look k ({cdr} al))))))
 ({def} sumall ({lambda} (k al acc)
@@ -227,10 +228,10 @@ WORKLOADS = {
         "params": {"N": 1000, "R": 60}, "small": {"N": 200, "R": 5},
         "setup": BUILD + """\
 ({def} mymap ({lambda} (f xs)
-  ({cond} (({atom} xs) xs)
+  ({cond} (({atom} xs) () xs)
         (t ({cons} (f ({car} xs)) (mymap f ({cdr} xs)))))))
 ({def} myfold ({lambda} (f acc xs)
-  ({cond} (({atom} xs) acc)
+  ({cond} (({atom} xs) () acc)
         (t (myfold f (f acc ({car} xs)) ({cdr} xs))))))
 ({def} work ({lambda} (r total)
   ({cond} (({eq} r 0) total)
@@ -285,6 +286,10 @@ def render(template, form, params):
         out = out.replace("{" + token + "}", SURFACES[token][form])
     if "{" in out:
         raise ValueError(f"незамінений токен у формі {form}: {out}")
+    if form == "legacy-en":
+        # Англійський Lisp до таблиці функцій (b4f75d2f, 2026-09-08): `atom` на
+        # () давав t, тож кінець списку — двочастинна клауза ((atom xs) base).
+        out = re.sub(r"\(\(atom (\S+)\) \(\) ", r"((atom \1) ", out)
     if form == "wrap":
         out = WRAP_PRELUDE + out
     return out

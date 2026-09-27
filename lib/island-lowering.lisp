@@ -12,60 +12,60 @@
 ; only as exact SID8 + arguments; the adapter builds private native syntax after
 ; SID selection and never accepts operator text across this boundary.
 
-(def island-lowering-append4
-  (lambda (a b c d)
-    (string-append a (string-append b (string-append c d)))))
+(00001001 island-lowering-append4
+  (00001000 (a b c d)
+    (00111010 a (00111010 b (00111010 c d)))))
 
-(def island-lowering-add-payload
-  (lambda (executor left right)
-    (let ((l (write-to-string left))
-          (r (write-to-string right)))
-      (cond
-        ((eq? executor (quote common-lisp)) (identity-relation same)
+(00001001 island-lowering-add-payload
+  (00001000 (executor left right)
+    (10011100 ((l (01001100 left))
+          (r (01001100 right)))
+      (00000111
+        ((00000011 executor (00000001 common-lisp)) (1)
          (island-lowering-append4 "" l " " r))
-        ((eq? executor (quote prolog)) (identity-relation same)
+        ((00000011 executor (00000001 prolog)) (1)
          (island-lowering-append4 "" l " " r))
-        ((eq? executor (quote datalog)) (identity-relation same)
+        ((00000011 executor (00000001 datalog)) (1)
          (island-lowering-append4 "" l " " r))
-        ((eq? executor (quote clips)) (identity-relation same)
+        ((00000011 executor (00000001 clips)) (1)
          (island-lowering-append4 "" l " " r))
-        ((quote island-lowering-fallback) island-lowering-fallback
-         (quote ()))))))
+        ((00000001 island-lowering-fallback) island-lowering-fallback
+         (00000001 ()))))))
 
-(def island-lower-binary
-  (lambda (sid executor left right)
-    (let ((selection (mechanism-select sid executor)))
-      (cond
-        ((atom? selection) (structural-kind pair)
-         (cond
-           ((eq? (car selection) (quote mechanism-selected))
-            (identity-relation same)
-            (let ((mechanism (fourth selection)))
-              (cond
-                ((eq? mechanism (quote bounded-exact-add))
-                 (identity-relation same)
-                 (let ((payload
+(00001001 island-lower-binary
+  (00001000 (sid executor left right)
+    (10011100 ((selection (mechanism-select sid executor)))
+      (00000111
+        ((00000010 selection) (0)
+         (00000111
+           ((00000011 (00000101 selection) (00000001 mechanism-selected))
+            (1)
+            (10011100 ((mechanism (00110001 selection)))
+              (00000111
+                ((00000011 mechanism (00000001 bounded-exact-add))
+                 (1)
+                 (10011100 ((payload
                          (island-lowering-add-payload executor left right)))
-                   (cond
-                     ((atom? payload) (structural-kind empty-list)
-                      (list
-                        (quote island-lowering-failure)
-                        (quote unsupported-executor)
+                   (00000111
+                     ((00000010 payload) ()
+                      (00100111
+                        (00000001 island-lowering-failure)
+                        (00000001 unsupported-executor)
                         sid executor mechanism))
-                     ((atom? payload) (structural-kind atom)
-                      (list
-                        (quote island-lowering-result)
+                     ((00000010 payload) (1)
+                      (00100111
+                        (00000001 island-lowering-result)
                         sid executor mechanism payload)))))
-                ((quote island-lowering-other-mechanism) island-lowering-other-mechanism
-                 (list
-                   (quote island-lowering-failure)
-                   (quote unsupported-selected-mechanism)
+                ((00000001 island-lowering-other-mechanism) island-lowering-other-mechanism
+                 (00100111
+                   (00000001 island-lowering-failure)
+                   (00000001 unsupported-selected-mechanism)
                    sid executor mechanism)))))
-           ((quote island-lowering-selection-not-selected)
+           ((00000001 island-lowering-selection-not-selected)
             island-lowering-selection-not-selected
             selection)))
-        ((quote island-lowering-malformed) island-lowering-malformed
-         (list
-           (quote island-lowering-failure)
-           (quote malformed-selection)
+        ((00000001 island-lowering-malformed) island-lowering-malformed
+         (00100111
+           (00000001 island-lowering-failure)
+           (00000001 malformed-selection)
            sid executor))))))

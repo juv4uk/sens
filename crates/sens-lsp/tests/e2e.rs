@@ -656,7 +656,12 @@ fn t17_g3_guard_function_hover_from_live_lib_guard_wsm() {
     let r = replies[2].as_str();
     assert!(r.contains("**guard function**"), "{r}");
     // The canonical source must be the live def, structurally provable.
-    assert!(r.contains("(def guard-unknown"), "{r}");
+    assert!(
+        ["(00001001 guard-unknown", "(00001011 guard-unknown", "(def guard-unknown"]
+            .iter()
+            .any(|form| r.contains(form)),
+        "{r}"
+    );
     assert!(r.contains("lib/guard.lisp"), "{r}");
 }
 

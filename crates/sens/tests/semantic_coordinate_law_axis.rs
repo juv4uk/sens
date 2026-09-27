@@ -26,7 +26,7 @@ fn session() -> Session {
 #[test]
 fn coordinate_rows_use_current_semantic_ids_without_minting_new_identity() {
     assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sens!(00001100)));
-    assert_eq!(semantic_id_for_admitted_surface("eq"), Some(sens::sens!(00000011)));
+    assert_eq!(semantic_id_for_admitted_surface("eq?"), Some(sens::sens!(00000011)));
     assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sens!(00000100)));
     assert_eq!(semantic_id_for_admitted_surface("car"), Some(sens::sens!(00000101)));
     assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sens!(00000111)));
@@ -92,7 +92,7 @@ fn eq_relation_law_stays_separate_from_exact_q_binary_policy() {
         .expect("identity relation witness")
         .value
         .to_string();
-    assert_eq!(value, "(identity-relation same)");
+    assert_eq!(value, "(1)");
 
     let row = eval_program(
         r#"(semantic-coordinate-law-for-sid 00000011)"#,

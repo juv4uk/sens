@@ -5,179 +5,179 @@
 ; the execution owner, and the returned execution observation remains data.
 ; No raw shell command is admitted to the envelope.
 
-(def yo-proper-list?
-  (lambda (value)
-    (cond
-      ((atom? value)
-       (structural-kind atom)
-       (cond
-         ((equal? value (quote ()))
-          (structural-relation same)
-          (quote yes))
-         ((quote always)
-          (quote always)
-          (quote invalid))))
-      ((quote always)
-       (quote always)
-       (yo-proper-list? (cdr value))))))
+(00001001 yo-proper-list?
+  (00001000 (value)
+    (00000111
+      ((00000010 value)
+       (1)
+       (00000111
+         ((00100010 value (00000001 ()))
+          (1)
+          (00000001 yes))
+         ((00000001 always)
+          (00000001 always)
+          (00000001 invalid))))
+      ((00000001 always)
+       (00000001 always)
+       (yo-proper-list? (00000110 value))))))
 
-(def yo-field
-  (lambda (name record)
-    (let ((found (assoc name record)))
-      (cond
-        ((equal? found (quote ()))
-         (structural-relation same)
-         (quote ()))
-        ((quote always)
-         (quote always)
-         (cdr found))))))
+(00001001 yo-field
+  (00001000 (name record)
+    (10011100 ((found (00101101 name record)))
+      (00000111
+        ((00100010 found (00000001 ()))
+         (1)
+         (00000001 ()))
+        ((00000001 always)
+         (00000001 always)
+         (00000110 found))))))
 
-(def yo-has-field?
-  (lambda (name record)
-    (let ((found (assoc name record)))
-      (cond
-        ((equal? found (quote ()))
-         (structural-relation same)
-         (quote no))
-        ((quote always)
-         (quote always)
-         (quote yes))))))
+(00001001 yo-has-field?
+  (00001000 (name record)
+    (10011100 ((found (00101101 name record)))
+      (00000111
+        ((00100010 found (00000001 ()))
+         (1)
+         (00000001 no))
+        ((00000001 always)
+         (00000001 always)
+         (00000001 yes))))))
 
-(def yo-no-raw-shell?
-  (lambda (envelope)
-    (let ((action (yo-field (quote action) envelope))
-          (parameters (yo-field (quote parameters) envelope)))
-      (cond
-        ((equal?
-           (yo-field (quote capability) action)
-           (quote shell))
-         (structural-relation same)
-         (quote no))
-        ((yo-has-field? (quote command) parameters)
-         (quote yes)
-         (quote no))
-        ((quote always)
-         (quote always)
-         (quote yes))))))
+(00001001 yo-no-raw-shell?
+  (00001000 (envelope)
+    (10011100 ((action (yo-field (00000001 action) envelope))
+          (parameters (yo-field (00000001 parameters) envelope)))
+      (00000111
+        ((00100010
+           (yo-field (00000001 capability) action)
+           (00000001 shell))
+         (1)
+         (00000001 no))
+        ((yo-has-field? (00000001 command) parameters)
+         (00000001 yes)
+         (00000001 no))
+        ((00000001 always)
+         (00000001 always)
+         (00000001 yes))))))
 
-(def yo-action-envelope
-  (lambda (goal capability operation target parameters verification provenance approval)
-    (list
-      (cons (quote protocol) (quote (yantraos-bridge 1)))
-      (cons (quote intent)
-            (list
-              (cons (quote goal) goal)
-              (cons (quote requires) (quote ()))
-              (cons (quote stop-on) (quote (verified)))
-              (cons (quote produces) (quote (execution-observation)))))
-      (cons (quote action)
-            (list
-              (cons (quote capability) capability)
-              (cons (quote operation) operation)
-              (cons (quote target) target)))
-      (cons (quote parameters) parameters)
-      (cons (quote verification) verification)
-      (cons (quote provenance) provenance)
-      (cons (quote approval) approval))))
+(00001001 yo-action-envelope
+  (00001000 (goal capability operation target parameters verification provenance approval)
+    (00100111
+      (00000100 (00000001 protocol) (00000001 (yantraos-bridge 1)))
+      (00000100 (00000001 intent)
+            (00100111
+              (00000100 (00000001 goal) goal)
+              (00000100 (00000001 requires) (00000001 ()))
+              (00000100 (00000001 stop-on) (00000001 (verified)))
+              (00000100 (00000001 produces) (00000001 (execution-observation)))))
+      (00000100 (00000001 action)
+            (00100111
+              (00000100 (00000001 capability) capability)
+              (00000100 (00000001 operation) operation)
+              (00000100 (00000001 target) target)))
+      (00000100 (00000001 parameters) parameters)
+      (00000100 (00000001 verification) verification)
+      (00000100 (00000001 provenance) provenance)
+      (00000100 (00000001 approval) approval))))
 
-(def yo-action-envelope?
-  (lambda (value)
-    (cond
+(00001001 yo-action-envelope?
+  (00001000 (value)
+    (00000111
       ((yo-proper-list? value)
-       (quote yes)
-       (cond
-         ((yo-has-field? (quote protocol) value)
-          (quote yes)
-          (cond
-            ((yo-has-field? (quote intent) value)
-             (quote yes)
-             (cond
-               ((yo-has-field? (quote action) value)
-                (quote yes)
-                (cond
-                  ((yo-has-field? (quote parameters) value)
-                   (quote yes)
-                   (cond
-                     ((yo-has-field? (quote verification) value)
-                      (quote yes)
-                      (cond
-                        ((yo-has-field? (quote provenance) value)
-                         (quote yes)
-                         (cond
-                           ((yo-has-field? (quote approval) value)
-                            (quote yes)
+       (00000001 yes)
+       (00000111
+         ((yo-has-field? (00000001 protocol) value)
+          (00000001 yes)
+          (00000111
+            ((yo-has-field? (00000001 intent) value)
+             (00000001 yes)
+             (00000111
+               ((yo-has-field? (00000001 action) value)
+                (00000001 yes)
+                (00000111
+                  ((yo-has-field? (00000001 parameters) value)
+                   (00000001 yes)
+                   (00000111
+                     ((yo-has-field? (00000001 verification) value)
+                      (00000001 yes)
+                      (00000111
+                        ((yo-has-field? (00000001 provenance) value)
+                         (00000001 yes)
+                         (00000111
+                           ((yo-has-field? (00000001 approval) value)
+                            (00000001 yes)
                             (yo-no-raw-shell? value))
-                           ((quote always)
-                            (quote always)
-                            (quote no))))
-                        ((quote always)
-                         (quote always)
-                         (quote no))))
-                     ((quote always)
-                      (quote always)
-                      (quote no))))
-                  ((quote always)
-                   (quote always)
-                   (quote no))))
-               ((quote always)
-                (quote always)
-                (quote no))))
-            ((quote always)
-             (quote always)
-             (quote no))))
-         ((quote always)
-          (quote always)
-          (quote no))))
-      ((quote always)
-       (quote always)
-       (quote no)))))
+                           ((00000001 always)
+                            (00000001 always)
+                            (00000001 no))))
+                        ((00000001 always)
+                         (00000001 always)
+                         (00000001 no))))
+                     ((00000001 always)
+                      (00000001 always)
+                      (00000001 no))))
+                  ((00000001 always)
+                   (00000001 always)
+                   (00000001 no))))
+               ((00000001 always)
+                (00000001 always)
+                (00000001 no))))
+            ((00000001 always)
+             (00000001 always)
+             (00000001 no))))
+         ((00000001 always)
+          (00000001 always)
+          (00000001 no))))
+      ((00000001 always)
+       (00000001 always)
+       (00000001 no)))))
 
-(def yo-execution-observation
-  (lambda (result route evidence audit-ref provenance)
-    (list
-      (cons (quote protocol) (quote (yantraos-bridge 1)))
-      (cons (quote result) result)
-      (cons (quote route) route)
-      (cons (quote evidence) evidence)
-      (cons (quote audit-ref) audit-ref)
-      (cons (quote provenance) provenance))))
+(00001001 yo-execution-observation
+  (00001000 (result route evidence audit-ref provenance)
+    (00100111
+      (00000100 (00000001 protocol) (00000001 (yantraos-bridge 1)))
+      (00000100 (00000001 result) result)
+      (00000100 (00000001 route) route)
+      (00000100 (00000001 evidence) evidence)
+      (00000100 (00000001 audit-ref) audit-ref)
+      (00000100 (00000001 provenance) provenance))))
 
-(def yo-execution-observation?
-  (lambda (value)
-    (cond
+(00001001 yo-execution-observation?
+  (00001000 (value)
+    (00000111
       ((yo-proper-list? value)
-       (quote yes)
-       (cond
-         ((yo-has-field? (quote protocol) value)
-          (quote yes)
-          (cond
-            ((yo-has-field? (quote result) value)
-             (quote yes)
-             (cond
-               ((yo-has-field? (quote route) value)
-                (quote yes)
-                (cond
-                  ((yo-has-field? (quote evidence) value)
-                   (quote yes)
-                   (cond
-                     ((yo-has-field? (quote audit-ref) value)
-                      (quote yes)
-                      (yo-has-field? (quote provenance) value))
-                     ((quote always)
-                      (quote always)
-                      (quote no))))
-                  ((quote always)
-                   (quote always)
-                   (quote no))))
-               ((quote always)
-                (quote always)
-                (quote no))))
-            ((quote always)
-             (quote always)
-             (quote no))))
-         ((quote always)
-          (quote always)
-          (quote no))))
-      ((quote always)
-       (quote always)
-       (quote no)))))
+       (00000001 yes)
+       (00000111
+         ((yo-has-field? (00000001 protocol) value)
+          (00000001 yes)
+          (00000111
+            ((yo-has-field? (00000001 result) value)
+             (00000001 yes)
+             (00000111
+               ((yo-has-field? (00000001 route) value)
+                (00000001 yes)
+                (00000111
+                  ((yo-has-field? (00000001 evidence) value)
+                   (00000001 yes)
+                   (00000111
+                     ((yo-has-field? (00000001 audit-ref) value)
+                      (00000001 yes)
+                      (yo-has-field? (00000001 provenance) value))
+                     ((00000001 always)
+                      (00000001 always)
+                      (00000001 no))))
+                  ((00000001 always)
+                   (00000001 always)
+                   (00000001 no))))
+               ((00000001 always)
+                (00000001 always)
+                (00000001 no))))
+            ((00000001 always)
+             (00000001 always)
+             (00000001 no))))
+         ((00000001 always)
+          (00000001 always)
+          (00000001 no))))
+      ((00000001 always)
+       (00000001 always)
+       (00000001 no)))))

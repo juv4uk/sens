@@ -118,12 +118,14 @@
 ; Konvertierung dann einfach nachschlägt — kein `def`-basierter globaler
 ; Zustand nötig. Ein Term, dessen Kopf kein bekannter Template-Name ist,
 ; bleibt unverändert.
-(def clips-deftemplate-form?
-  (lambda (form)
-    (cond
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (eq? (car form) (quote deftemplate)))
-      (t (quote ())))))
+(00001001 clips-deftemplate-form?
+  (00001000 (form)
+    (00000111
+      ((00000010 form) () (00000001 ()))
+      ((00000010 form) (1) (00000001 ()))
+      ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 deftemplate)))
+      ((00000010 (00000101 form)) (1) (00000011 (00000101 form) (00000001 deftemplate)))
+      (t (00000001 ())))))
 
 ; Real CLIPS files namespace their deftemplate/deffacts names with a
 ; `defmodule` prefix, e.g. `QUESTIONS::question`. `wine-external.clp`
@@ -153,66 +155,69 @@
 ; zu kürzen (oder den ganzen Namen, falls kein `::` vorkommt) lässt nackte
 ; und qualifizierte Namen einander finden, ohne `defmodule` wirklich
 ; abzubilden.
-(def clips-string-empty? (lambda (s) (eq? s "")))
+(00001001 clips-string-empty? (00001000 (s) (00000011 s "")))
 
-(def clips-string-starts-with-double-colon?
-  (lambda (s)
-    (cond
-      ((clips-string-empty? s) (quote ()))
-      ((clips-string-empty? (string-rest s)) (quote ()))
-      ((eq? (string-first s) ":") (eq? (string-first (string-rest s)) ":"))
-      (t (quote ())))))
+(00001001 clips-string-starts-with-double-colon?
+  (00001000 (s)
+    (00000111
+      ((clips-string-empty? s) (00000001 ()))
+      ((clips-string-empty? (01000000 s)) (00000001 ()))
+      ((00000011 (00111111 s) ":") (00000011 (00111111 (01000000 s)) ":"))
+      (t (00000001 ())))))
 
-(def clips-string-after-last-double-colon
-  (lambda (s)
-    (cond
-      ((clips-string-empty? s) (quote ()))
+(00001001 clips-string-after-last-double-colon
+  (00001000 (s)
+    (00000111
+      ((clips-string-empty? s) (00000001 ()))
       ((clips-string-starts-with-double-colon? s)
-       (let ((after (clips-string-after-last-double-colon (string-rest (string-rest s)))))
-         (cond
-           ((eq? after (quote ())) (string-rest (string-rest s)))
+       (10011100 ((after (clips-string-after-last-double-colon (01000000 (01000000 s)))))
+         (00000111
+           ((00000011 after (00000001 ())) (01000000 (01000000 s)))
            (t after))))
-      (t (clips-string-after-last-double-colon (string-rest s))))))
+      (t (clips-string-after-last-double-colon (01000000 s))))))
 
-(def clips-strip-module-prefix
-  (lambda (sym)
-    (cond
-      ((symbol? sym)
-       (let ((after (clips-string-after-last-double-colon (symbol->string sym))))
-         (cond
-           ((eq? after (quote ())) sym)
-           (t (string->symbol after)))))
+(00001001 clips-strip-module-prefix
+  (00001000 (sym)
+    (00000111
+      ((00100011 sym)
+       (10011100 ((after (clips-string-after-last-double-colon (01000010 sym))))
+         (00000111
+           ((00000011 after (00000001 ())) sym)
+           (t (01000011 after)))))
       (t sym))))
 
-(def clips-deftemplate-name (lambda (form) (clips-strip-module-prefix (second form))))
+(00001001 clips-deftemplate-name (00001000 (form) (clips-strip-module-prefix (00101111 form))))
 
-(def clips-slot-name (lambda (slot-form) (second slot-form)))
+(00001001 clips-slot-name (00001000 (slot-form) (00101111 slot-form)))
 
-(def clips-slot-names
-  (lambda (slot-forms)
-    (cond
-      ((atom? slot-forms) (quote ()))
-      (t (cons (clips-slot-name (car slot-forms)) (clips-slot-names (cdr slot-forms)))))))
+(00001001 clips-slot-names
+  (00001000 (slot-forms)
+    (00000111
+      ((00000010 slot-forms) () (00000001 ()))
+      ((00000010 slot-forms) (1) (00000001 ()))
+      (t (00000100 (clips-slot-name (00000101 slot-forms)) (clips-slot-names (00000110 slot-forms)))))))
 
-(def clips-deftemplate-slots
-  (lambda (form)
-    (clips-slot-names (cddr form))))
+(00001001 clips-deftemplate-slots
+  (00001000 (form)
+    (clips-slot-names (00110101 form))))
 
-(def clips-templates-from-forms
-  (lambda (forms)
-    (cond
-      ((atom? forms) (quote ()))
-      ((clips-deftemplate-form? (car forms))
-       (cons (cons (clips-deftemplate-name (car forms)) (clips-deftemplate-slots (car forms)))
-             (clips-templates-from-forms (cdr forms))))
-      (t (clips-templates-from-forms (cdr forms))))))
+(00001001 clips-templates-from-forms
+  (00001000 (forms)
+    (00000111
+      ((00000010 forms) () (00000001 ()))
+      ((00000010 forms) (1) (00000001 ()))
+      ((clips-deftemplate-form? (00000101 forms))
+       (00000100 (00000100 (clips-deftemplate-name (00000101 forms)) (clips-deftemplate-slots (00000101 forms)))
+             (clips-templates-from-forms (00000110 forms))))
+      (t (clips-templates-from-forms (00000110 forms))))))
 
-(def clips-template-slot-order
-  (lambda (name templates)
-    (let ((entry (assoc name templates)))
-      (cond
-        ((atom? entry) (quote ()))
-        (t (cdr entry))))))
+(00001001 clips-template-slot-order
+  (00001000 (name templates)
+    (10011100 ((entry (00101101 name templates)))
+      (00000111
+        ((00000010 entry) () (00000001 ()))
+        ((00000010 entry) (1) (00000001 ()))
+        (t (00000110 entry))))))
 
 ; A CLIPS condition can name a multislot with no value at all, e.g.
 ; `(precursors)` in wine-external.clp's `ask-a-question` rule — CLIPS reads
@@ -240,11 +245,12 @@
 ; derselben "überspringen statt abstürzen"-Politik wie die eigene
 ; atom-Prüfung von clips-lookup-slot-value weiter unten, statt `second`
 ; auf einer Liste ohne cdr abstürzen zu lassen.
-(def clips-slot-value-of
-  (lambda (slot-form)
-    (cond
-      ((atom? (cdr slot-form)) (quote ()))
-      (t (second slot-form)))))
+(00001001 clips-slot-value-of
+  (00001000 (slot-form)
+    (00000111
+      ((00000010 (00000110 slot-form)) () (00000001 ()))
+      ((00000010 (00000110 slot-form)) (1) (00000001 ()))
+      (t (00101111 slot-form)))))
 
 ; Guards with `(atom (car slot-forms))` before comparing: a well-formed
 ; slot entry is `(slotname value)`, a compound list, but a positional fact
@@ -253,20 +259,23 @@
 ; and slot-based) would hand this bare atoms instead. Degrading to "no
 ; value found" here keeps the same "skip, don't crash" policy the rest of
 ; this file follows, rather than letting `car` error on a non-pair.
-(def clips-lookup-slot-value
-  (lambda (slot-name slot-forms)
-    (cond
-      ((atom? slot-forms) (quote ()))
-      ((atom? (car slot-forms)) (clips-lookup-slot-value slot-name (cdr slot-forms)))
-      ((equal? slot-name (car (car slot-forms))) (clips-slot-value-of (car slot-forms)))
-      (t (clips-lookup-slot-value slot-name (cdr slot-forms))))))
+(00001001 clips-lookup-slot-value
+  (00001000 (slot-name slot-forms)
+    (00000111
+      ((00000010 slot-forms) () (00000001 ()))
+      ((00000010 slot-forms) (1) (00000001 ()))
+      ((00000010 (00000101 slot-forms)) () (clips-lookup-slot-value slot-name (00000110 slot-forms)))
+      ((00000010 (00000101 slot-forms)) (1) (clips-lookup-slot-value slot-name (00000110 slot-forms)))
+      ((00100010 slot-name (00000101 (00000101 slot-forms))) (clips-slot-value-of (00000101 slot-forms)))
+      (t (clips-lookup-slot-value slot-name (00000110 slot-forms))))))
 
-(def clips-positional-args
-  (lambda (slot-order slot-forms)
-    (cond
-      ((atom? slot-order) (quote ()))
-      (t (cons (clips-lookup-slot-value (car slot-order) slot-forms)
-                (clips-positional-args (cdr slot-order) slot-forms))))))
+(00001001 clips-positional-args
+  (00001000 (slot-order slot-forms)
+    (00000111
+      ((00000010 slot-order) () (00000001 ()))
+      ((00000010 slot-order) (1) (00000001 ()))
+      (t (00000100 (clips-lookup-slot-value (00000101 slot-order) slot-forms)
+                (clips-positional-args (00000110 slot-order) slot-forms))))))
 
 ; Step 13 (fold-in fix, verified before writing — same discipline as
 ; lib/forward.lisp's Steps 10-12): originally recursed through a `not`
@@ -301,32 +310,46 @@
 ; unifizieren konnte — eine Regel, die still nichts ableitete. Dieselbe
 ; Lehre, die Schritte 10-12 in `lib/forward.lisp` wiederholt lernten: `not`,
 ; `or` und `and` brauchen alle explizite Rekursion, nicht nur `not`.
-(def clips-convert-template
-  (lambda (term templates)
-    (cond
-      ((atom? term) term)
-      ((atom? (car term))
-       (cond
-         ((eq? (car term) (quote not)) (list (quote not) (clips-convert-template (second term) templates)))
-         ((eq? (car term) (quote or)) (cons (quote or) (clips-convert-template-list (cdr term) templates)))
-         ((eq? (car term) (quote and)) (cons (quote and) (clips-convert-template-list (cdr term) templates)))
-         ((eq? (car term) (quote exists)) (cons (quote exists) (clips-convert-template-list (cdr term) templates)))
-         ((eq? (car term) (quote forall)) (cons (quote forall) (clips-convert-template-list (cdr term) templates)))
-         (t (let ((slot-order (clips-template-slot-order (clips-strip-module-prefix (car term)) templates)))
-              (cond
-                ((atom? slot-order) term)
-                (t (cons (car term) (clips-positional-args slot-order (cdr term)))))))))
+; CLIPS `not` wird zur Sprachnegation `not?` (Prädikat mit `?`, #1444).
+(00001001 clips-convert-template
+  (00001000 (term templates)
+    (00000111
+      ((00000010 term) () term)
+      ((00000010 term) (1) term)
+      ((00000010 (00000101 term)) () (00000111
+         ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not?) (clips-convert-template (00101111 term) templates)))
+         ((00000011 (00000101 term) (00000001 or)) (00000100 (00000001 or) (clips-convert-template-list (00000110 term) templates)))
+         ((00000011 (00000101 term) (00000001 and)) (00000100 (00000001 and) (clips-convert-template-list (00000110 term) templates)))
+         ((00000011 (00000101 term) (00000001 exists)) (00000100 (00000001 exists) (clips-convert-template-list (00000110 term) templates)))
+         ((00000011 (00000101 term) (00000001 forall)) (00000100 (00000001 forall) (clips-convert-template-list (00000110 term) templates)))
+         (t (10011100 ((slot-order (clips-template-slot-order (clips-strip-module-prefix (00000101 term)) templates)))
+              (00000111
+                ((00000010 slot-order) () term)
+                ((00000010 slot-order) (1) term)
+                (t (00000100 (00000101 term) (clips-positional-args slot-order (00000110 term)))))))))
+      ((00000010 (00000101 term)) (1) (00000111
+         ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not?) (clips-convert-template (00101111 term) templates)))
+         ((00000011 (00000101 term) (00000001 or)) (00000100 (00000001 or) (clips-convert-template-list (00000110 term) templates)))
+         ((00000011 (00000101 term) (00000001 and)) (00000100 (00000001 and) (clips-convert-template-list (00000110 term) templates)))
+         ((00000011 (00000101 term) (00000001 exists)) (00000100 (00000001 exists) (clips-convert-template-list (00000110 term) templates)))
+         ((00000011 (00000101 term) (00000001 forall)) (00000100 (00000001 forall) (clips-convert-template-list (00000110 term) templates)))
+         (t (10011100 ((slot-order (clips-template-slot-order (clips-strip-module-prefix (00000101 term)) templates)))
+              (00000111
+                ((00000010 slot-order) () term)
+                ((00000010 slot-order) (1) term)
+                (t (00000100 (00000101 term) (clips-positional-args slot-order (00000110 term)))))))))
       (t term))))
 
-(def clips-convert-template-list
-  (lambda (terms templates)
-    (cond
-      ((atom? terms) (quote ()))
-      (t (cons (clips-convert-template (car terms) templates)
-                (clips-convert-template-list (cdr terms) templates))))))
+(00001001 clips-convert-template-list
+  (00001000 (terms templates)
+    (00000111
+      ((00000010 terms) () (00000001 ()))
+      ((00000010 terms) (1) (00000001 ()))
+      (t (00000100 (clips-convert-template (00000101 terms) templates)
+                (clips-convert-template-list (00000110 terms) templates))))))
 
-(def clips-fact-clause
-  (lambda (fact) (list fact)))
+(00001001 clips-fact-clause
+  (00001000 (fact) (00100111 fact)))
 
 ; `(cons ... (clips-facts->clauses ...))` is not a tail call — for a real
 ; CLIPS file with a big `deffacts` block (`animal-external.clp`'s own
@@ -346,23 +369,24 @@
 ; um einen Frame pro Fakt und lief über. Akkumulator `-onto` + `reverse`,
 ; dieselbe stack-sichere Form, die `lib/core.lisp`s eigene `map`/`filter`
 ; verwenden, hält jeden rekursiven Aufruf hier in Tail-Position.
-(def clips-facts->clauses-onto
-  (lambda (facts templates acc)
-    (cond
-      ((atom? facts) (reverse acc))
+(00001001 clips-facts->clauses-onto
+  (00001000 (facts templates acc)
+    (00000111
+      ((00000010 facts) () (00101010 acc))
+      ((00000010 facts) (1) (00101010 acc))
       (t (clips-facts->clauses-onto
-           (cdr facts) templates
-           (cons (clips-fact-clause (clips-convert-template (car facts) templates)) acc))))))
+           (00000110 facts) templates
+           (00000100 (clips-fact-clause (clips-convert-template (00000101 facts) templates)) acc))))))
 
-(def clips-facts->clauses
-  (lambda (facts templates)
-    (clips-facts->clauses-onto facts templates (quote ()))))
+(00001001 clips-facts->clauses
+  (00001000 (facts templates)
+    (clips-facts->clauses-onto facts templates (00000001 ()))))
 
 ; `(cddr form)` drops `deffacts` and the deffacts block's own name,
 ; leaving just the fact list.
-(def clips-deffacts->clauses
-  (lambda (form templates)
-    (clips-facts->clauses (cddr form) templates)))
+(00001001 clips-deffacts->clauses
+  (00001000 (form templates)
+    (clips-facts->clauses (00110101 form) templates)))
 
 ; --- Step 2: defrule, with CLIPS's `?x` variable syntax ------------------
 ; CLIPS variables are ordinary symbols to my-lisp's reader (`?x` parses as
@@ -417,47 +441,54 @@
 ; argument can just as easily be a number, e.g. `(temperature 98)`), and
 ; `symbol->string` (called by `clips-symbol-starts-with-?`) errors on
 ; anything that isn't actually a symbol.
-(def clips-var?
-  (lambda (term)
-    (cond
-      ((atom? term)
-       (cond
-         ((symbol? term) (clips-symbol-starts-with-? term))
-         (t (quote ()))))
-      (t (quote ())))))
+(00001001 clips-var?
+  (00001000 (term)
+    (00000111
+      ((00000010 term) () (00000111
+         ((00100011 term) (clips-symbol-starts-with-? term))
+         (t (00000001 ()))))
+      ((00000010 term) (1) (00000111
+         ((00100011 term) (clips-symbol-starts-with-? term))
+         (t (00000001 ()))))
+      (t (00000001 ())))))
 
-(def clips-symbol-starts-with-?
-  (lambda (symbol)
-    (equal? (string-first (symbol->string symbol)) (string-first "?_"))))
+(00001001 clips-symbol-starts-with-?
+  (00001000 (symbol)
+    (00100010 (00111111 (01000010 symbol)) (00111111 "?_"))))
 
-(def clips-var-term
-  (lambda (symbol)
-    (list (quote var) (string->symbol (string-rest (symbol->string symbol))))))
+(00001001 clips-var-term
+  (00001000 (symbol)
+    (00100111 (00000001 var) (01000011 (01000000 (01000010 symbol))))))
 
 ; Walks an arbitrary CLIPS term, replacing every `?x`-shaped symbol with
 ; `(var x)` and leaving everything else untouched.
-(def clips-convert-vars
-  (lambda (term)
-    (cond
+(00001001 clips-convert-vars
+  (00001000 (term)
+    (00000111
       ((clips-var? term) (clips-var-term term))
-      ((atom? term) term)
-      (t (cons (clips-convert-vars (car term)) (clips-convert-vars (cdr term)))))))
+      ((00000010 term) () term)
+      ((00000010 term) (1) term)
+      (t (00000100 (clips-convert-vars (00000101 term)) (clips-convert-vars (00000110 term)))))))
 
 ; Splits a defrule's body at `=>` into (conditions . conclusion-forms).
 ; Guards the `=>`-check with `(atom (car body))` first: a condition like
 ; `(planet ?x)` is itself a compound list, and `eq` errors on non-atom
 ; arguments instead of just correctly answering "not the `=>` marker".
-(def clips-split-at-arrow
-  (lambda (body)
-    (cond
-      ((atom? body) (list (quote ()) (quote ())))
-      ((atom? (car body))
-       (cond
-         ((eq? (car body) (quote =>)) (list (quote ()) (cdr body)))
-         (t (let ((rest (clips-split-at-arrow (cdr body))))
-              (list (cons (car body) (car rest)) (second rest))))))
-      (t (let ((rest (clips-split-at-arrow (cdr body))))
-           (list (cons (car body) (car rest)) (second rest)))))))
+(00001001 clips-split-at-arrow
+  (00001000 (body)
+    (00000111
+      ((00000010 body) () (00100111 (00000001 ()) (00000001 ())))
+      ((00000010 body) (1) (00100111 (00000001 ()) (00000001 ())))
+      ((00000010 (00000101 body)) () (00000111
+         ((00000011 (00000101 body) (00000001 =>)) (00100111 (00000001 ()) (00000110 body)))
+         (t (10011100 ((rest (clips-split-at-arrow (00000110 body))))
+              (00100111 (00000100 (00000101 body) (00000101 rest)) (00101111 rest))))))
+      ((00000010 (00000101 body)) (1) (00000111
+         ((00000011 (00000101 body) (00000001 =>)) (00100111 (00000001 ()) (00000110 body)))
+         (t (10011100 ((rest (clips-split-at-arrow (00000110 body))))
+              (00100111 (00000100 (00000101 body) (00000101 rest)) (00101111 rest))))))
+      (t (10011100 ((rest (clips-split-at-arrow (00000110 body))))
+           (00100111 (00000100 (00000101 body) (00000101 rest)) (00101111 rest)))))))
 
 ; Step 3: any number of `(assert (...))` forms after `=>`, not just one.
 ; my-lisp's rule format only ever has one head per clause, so N assertions
@@ -495,12 +526,14 @@
 ; dieses Projekt nicht modelliert — dieselbe "überspringen statt
 ; fehlschlagen"-Politik wie bei einer nicht unterstützten Form der obersten
 ; Ebene.
-(def clips-assert-form?
-  (lambda (form)
-    (cond
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (eq? (car form) (quote assert)))
-      (t (quote ())))))
+(00001001 clips-assert-form?
+  (00001000 (form)
+    (00000111
+      ((00000010 form) () (00000001 ()))
+      ((00000010 form) (1) (00000001 ()))
+      ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 assert)))
+      ((00000010 (00000101 form)) (1) (00000011 (00000101 form) (00000001 assert)))
+      (t (00000001 ())))))
 
 ; Step 9: `printout` alongside `assert` no longer disqualifies a whole
 ; rule. Verified before writing this (not guessed): a rule shaped
@@ -561,26 +594,30 @@
 ; über `equal?` verglichen, nicht über Identität adressiert) — eine Regel
 ; mit einem von beiden importiert weiterhin als keine Clauses, statt eine
 ; Semantik zu erraten, die nicht treu dargestellt werden kann.
-(def clips-printout-form?
-  (lambda (form)
-    (cond
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (eq? (car form) (quote printout)))
-      (t (quote ())))))
+(00001001 clips-printout-form?
+  (00001000 (form)
+    (00000111
+      ((00000010 form) () (00000001 ()))
+      ((00000010 form) (1) (00000001 ()))
+      ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 printout)))
+      ((00000010 (00000101 form)) (1) (00000011 (00000101 form) (00000001 printout)))
+      (t (00000001 ())))))
 
-(def clips-drop-printouts
-  (lambda (forms)
-    (cond
-      ((atom? forms) (quote ()))
-      ((clips-printout-form? (car forms)) (clips-drop-printouts (cdr forms)))
-      (t (cons (car forms) (clips-drop-printouts (cdr forms)))))))
+(00001001 clips-drop-printouts
+  (00001000 (forms)
+    (00000111
+      ((00000010 forms) () (00000001 ()))
+      ((00000010 forms) (1) (00000001 ()))
+      ((clips-printout-form? (00000101 forms)) (clips-drop-printouts (00000110 forms)))
+      (t (00000100 (00000101 forms) (clips-drop-printouts (00000110 forms)))))))
 
-(def clips-all-asserts?
-  (lambda (forms)
-    (cond
-      ((atom? forms) t)
-      ((clips-assert-form? (car forms)) (clips-all-asserts? (cdr forms)))
-      (t (quote ())))))
+(00001001 clips-all-asserts?
+  (00001000 (forms)
+    (00000111
+      ((00000010 forms) () t)
+      ((00000010 forms) (1) t)
+      ((clips-assert-form? (00000101 forms)) (clips-all-asserts? (00000110 forms)))
+      (t (00000001 ())))))
 
 ; Step 15: real CLIPS `assert` accepts *multiple* facts in one call —
 ; `(assert (number 0) (number 1) (number 2) ...)`, not just one. Verified
@@ -621,18 +658,20 @@
 ; liest *jedes* Fakt-Argument, über alle `assert`-Formen der RHS
 ; `append`-t (eine Regel kann weiterhin mehrere `assert`-Aufrufe haben,
 ; jeder selbst mehrfaktig).
-(def clips-assert-conclusions
-  (lambda (forms)
-    (cond
-      ((atom? forms) (quote ()))
-      (t (append (cdr (car forms)) (clips-assert-conclusions (cdr forms)))))))
+(00001001 clips-assert-conclusions
+  (00001000 (forms)
+    (00000111
+      ((00000010 forms) () (00000001 ()))
+      ((00000010 forms) (1) (00000001 ()))
+      (t (00101001 (00000110 (00000101 forms)) (clips-assert-conclusions (00000110 forms)))))))
 
-(def clips-clauses-for-conclusions
-  (lambda (conclusions conditions)
-    (cond
-      ((atom? conclusions) (quote ()))
-      (t (cons (cons (clips-convert-vars (car conclusions)) conditions)
-                (clips-clauses-for-conclusions (cdr conclusions) conditions))))))
+(00001001 clips-clauses-for-conclusions
+  (00001000 (conclusions conditions)
+    (00000111
+      ((00000010 conclusions) () (00000001 ()))
+      ((00000010 conclusions) (1) (00000001 ()))
+      (t (00000100 (00000100 (clips-convert-vars (00000101 conclusions)) conditions)
+                (clips-clauses-for-conclusions (00000110 conclusions) conditions))))))
 
 ; Step 5 (superseded — history kept, not silently erased): originally
 ; detected CLIPS's `(not (pattern))` conditions and skipped the whole rule,
@@ -728,19 +767,22 @@
 ; ändert es nie das Endergebnis, welche Regel "zuerst dran ist" — das
 ; Verwerfen von `declare` verliert Information, die CLIPS nutzen würde, um
 ; zu ordnen, *wann* etwas feuert, nie *ob*.
-(def clips-rule-preamble-form?
-  (lambda (form)
-    (cond
-      ((string? form) t)
-      ((atom? form) (quote ()))
-      ((atom? (car form)) (eq? (car form) (quote declare)))
-      (t (quote ())))))
+(00001001 clips-rule-preamble-form?
+  (00001000 (form)
+    (00000111
+      ((00100100 form) t)
+      ((00000010 form) () (00000001 ()))
+      ((00000010 form) (1) (00000001 ()))
+      ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 declare)))
+      ((00000010 (00000101 form)) (1) (00000011 (00000101 form) (00000001 declare)))
+      (t (00000001 ())))))
 
-(def clips-strip-rule-preamble
-  (lambda (body)
-    (cond
-      ((atom? body) body)
-      ((clips-rule-preamble-form? (car body)) (clips-strip-rule-preamble (cdr body)))
+(00001001 clips-strip-rule-preamble
+  (00001000 (body)
+    (00000111
+      ((00000010 body) () body)
+      ((00000010 body) (1) body)
+      ((clips-rule-preamble-form? (00000101 body)) (clips-strip-rule-preamble (00000110 body)))
       (t body))))
 
 ; Step 19's `exists`/`forall` guard — skip a whole rule rather than
@@ -770,29 +812,29 @@
 ; für `not`/`or`/`and` gab), sodass ein Template-Fakt, verschachtelt in
 ; einer von beiden, jetzt auch seine benannten Slots in positionale Form
 ; umgewandelt bekommt.
-(def clips-defrule->clauses
-  (lambda (form templates)
-    (let ((split (clips-split-at-arrow (clips-strip-rule-preamble (cddr form)))))
-      (let ((conditions (clips-convert-vars (clips-convert-template-list (car split) templates)))
-            (relevant (clips-drop-printouts (second split))))
-        (cond
+(00001001 clips-defrule->clauses
+  (00001000 (form templates)
+    (10011100 ((split (clips-split-at-arrow (clips-strip-rule-preamble (00110101 form)))))
+      (10011100 ((conditions (clips-convert-vars (clips-convert-template-list (00000101 split) templates)))
+            (relevant (clips-drop-printouts (00101111 split))))
+        (00000111
           ((clips-all-asserts? relevant)
            (clips-clauses-for-conclusions
              (clips-convert-template-list (clips-assert-conclusions relevant) templates)
              conditions))
-          (t (quote ())))))))
+          (t (00000001 ())))))))
 
 ; Dispatches on one top-level CLIPS form's leading symbol. Unknown or
 ; not-yet-supported forms produce no clauses rather than erroring — a
 ; partial import of a mixed file still returns whatever it *could*
 ; translate. `deftemplate` itself produces no clauses (it only feeds the
 ; `templates` lookup `clips-import` builds once, up front).
-(def clips-form->clauses
-  (lambda (form templates)
-    (cond
-      ((eq? (car form) (quote deffacts)) (clips-deffacts->clauses form templates))
-      ((eq? (car form) (quote defrule)) (clips-defrule->clauses form templates))
-      (t (quote ())))))
+(00001001 clips-form->clauses
+  (00001000 (form templates)
+    (00000111
+      ((00000011 (00000101 form) (00000001 deffacts)) (clips-deffacts->clauses form templates))
+      ((00000011 (00000101 form) (00000001 defrule)) (clips-defrule->clauses form templates))
+      (t (00000001 ())))))
 
 ; Same non-tail-call problem as `clips-facts->clauses` above, one level up:
 ; `(append (clips-form->clauses ...) (clips-import-forms ...))` nests one
@@ -826,26 +868,28 @@
 ; `clips-cons-each-onto` glättet die Clause-Liste einer Form tail-rekursiv
 ; auf den laufenden Akkumulator, sodass weder die Schleife über die Formen
 ; noch die über die Clauses einer Form den nativen Stack wachsen lässt.
-(def clips-cons-each-onto
-  (lambda (items acc)
-    (cond
-      ((atom? items) acc)
-      (t (clips-cons-each-onto (cdr items) (cons (car items) acc))))))
+(00001001 clips-cons-each-onto
+  (00001000 (items acc)
+    (00000111
+      ((00000010 items) () acc)
+      ((00000010 items) (1) acc)
+      (t (clips-cons-each-onto (00000110 items) (00000100 (00000101 items) acc))))))
 
-(def clips-import-forms-onto
-  (lambda (forms templates acc)
-    (cond
-      ((atom? forms) (reverse acc))
+(00001001 clips-import-forms-onto
+  (00001000 (forms templates acc)
+    (00000111
+      ((00000010 forms) () (00101010 acc))
+      ((00000010 forms) (1) (00101010 acc))
       (t (clips-import-forms-onto
-           (cdr forms) templates
-           (clips-cons-each-onto (clips-form->clauses (car forms) templates) acc))))))
+           (00000110 forms) templates
+           (clips-cons-each-onto (clips-form->clauses (00000101 forms) templates) acc))))))
 
-(def clips-import-forms
-  (lambda (forms templates)
-    (clips-import-forms-onto forms templates (quote ()))))
+(00001001 clips-import-forms
+  (00001000 (forms templates)
+    (clips-import-forms-onto forms templates (00000001 ()))))
 
-(def clips-import
-  (lambda (forms)
+(00001001 clips-import
+  (00001000 (forms)
     (clips-import-forms forms (clips-templates-from-forms forms))))
 
 ; Step 4: read a real CLIPS source file off disk and import it — the tool
@@ -868,6 +912,6 @@
 ; (ebenfalls neu) parst ihn in jede Form der obersten Ebene als Daten — das
 ; Mehrform-Gegenstück zu `read`; `clips-import` erledigt den Rest genau so
 ; wie für ein vom Aufrufer bereitgestelltes Quote-Literal.
-(def clips-import-file
-  (lambda (path)
-    (clips-import (read-all (read-file path)))))
+(00001001 clips-import-file
+  (00001000 (path)
+    (clips-import (01001011 (10100110 path)))))

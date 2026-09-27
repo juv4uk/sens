@@ -1668,6 +1668,12 @@ fn failed_delivery_is_redelivered_after_peer_reconnects() {
     // The old connection dies (peer "went away") -- the only way redelivery
     // is triggered is a genuinely fresh reconnect registering the same id.
     drop(silent);
+    // Wait until the node has noticed the close: a peer-hello for an id that
+    // still has a live connection is rejected as a possible duplicate
+    // identity, so reconnecting too early raced that guard.
+    eventually(port_a, "(presence)", Duration::from_secs(5), |r| {
+        !r.contains("zzz-retry-peer")
+    });
 
     // Reconnect as the SAME node id, but this time a cooperative peer that
     // acks what it receives. `register_peer` must drain the queue and

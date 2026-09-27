@@ -167,6 +167,23 @@ fn as_symbol(expr: &Expr) -> Option<&str> {
     }
 }
 
+/// True when `expr` is the SENS code `sid` or a surface routing to it.
+fn head_is_sid(expr: &Expr, sid: sens::Sens8) -> bool {
+    match &expr.kind {
+        ExprKind::Sid(code) => *code == sid,
+        ExprKind::Symbol(surface) => sens::surface_has_sid(surface, sid),
+        _ => false,
+    }
+}
+
+/// True when `expr` is a definition head: SENS code 00001001/00001011 or a
+/// surface routing to either.
+fn is_define_head(expr: &Expr) -> bool {
+    head_is_sid(expr, sens::sens!(00001001))
+        || head_is_sid(expr, sens::sens!(00001011))
+        || as_symbol(expr).is_some_and(sens::is_define_surface_name)
+}
+
 fn as_list(expr: &Expr) -> Option<&[Expr]> {
     match &expr.kind {
         ExprKind::List(items) => Some(items),
@@ -187,7 +204,8 @@ fn read_fields<'a>(
 
 /// Parse knowledge/guard-reference.wsm into topic entries.
 ///
-/// Structure: `(def *guard-reference-directory* (quote ((reference ...) ...)))`
+/// Structure: `(00001001 *guard-reference-directory* (00000001 ((reference ...) ...)))`
+/// (surface names `def`/`quote` are accepted too).
 /// where each `(reference ...)` is a series of `(field value)` pairs.
 fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
     let mut out = HashMap::new();
@@ -199,7 +217,7 @@ fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
             Some(list) => list,
             None => continue,
         };
-        if !as_symbol(&list[0]).is_some_and(sens::is_define_surface_name) {
+        if !is_define_head(&list[0]) {
             continue;
         }
         if as_symbol(&list[1]) != Some("*guard-reference-directory*") {
@@ -210,7 +228,7 @@ fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
         let Some(value_list) = as_list(value) else {
             continue;
         };
-        if as_symbol(&value_list[0]) != Some("quote") {
+        if !head_is_sid(&value_list[0], sens::sens!(00000001)) {
             continue;
         }
         let Some(data) = value_list.get(1).and_then(as_list) else {
@@ -305,7 +323,7 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
             ExprKind::List(items) => items,
             _ => continue,
         };
-        if !as_symbol(&head[0]).is_some_and(sens::is_define_surface_name) {
+        if !is_define_head(&head[0]) {
             continue;
         }
         let ExprKind::Symbol(name) = &head[1].kind else {
@@ -314,7 +332,9 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
         let Some(lambda) = head.get(2).and_then(as_list) else {
             continue;
         };
-        if !as_symbol(&lambda[0]).is_some_and(sens::is_lambda_surface_name) {
+        if !(head_is_sid(&lambda[0], sens::sens!(00001000))
+            || as_symbol(&lambda[0]).is_some_and(sens::is_lambda_surface_name))
+        {
             continue;
         }
         let Some(params) = lambda.get(1).and_then(as_list) else {

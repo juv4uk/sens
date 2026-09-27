@@ -1,11 +1,11 @@
 ; #217 — canonical explicit-result dispatch witnesses.
 ; Each three-part clause is (query expected-datum expression).
 
-((expr . "(cond ((quote (structural-kind pair)) (structural-kind pair) (quote hit)))")
+((expr . "(cond ((quote (0)) (0) (quote hit)))")
  (expected . "hit")
  (active . t))
 
-((expr . "(cond ((quote (structural-kind atom)) (structural-kind pair) (quote miss)) ((quote (structural-kind atom)) (structural-kind atom) (quote hit)))")
+((expr . "(cond ((quote (1)) (0) (quote miss)) ((quote (1)) (1) (quote hit)))")
  (expected . "hit")
  (active . t))
 
@@ -36,11 +36,11 @@
  (active . t)
  (since-contract . (8 0)))
 
-; Migration-only two-part clauses preserve historical atom/eq branching while
-; library source is moved to canonical three-part dispatch. These rows are NOT
-; semantic authority for new control; they only bound the temporary adapter.
-((expr . "(cond ((00000010 (quote ())) (quote legacy-atom)) (t (quote wrong)))")
- (expected . "legacy-atom")
+; Two-part clauses under the Core4 15-state logic (#1391, 2026-09-26): a
+; clause is selected only by a «yes» answer 1^n. atom? on () answers () —
+; unknown — so it no longer selects (formerly the legacy-atom row).
+((expr . "(cond ((00000010 (quote ())) (quote wrong)) (t (quote unknown-does-not-select)))")
+ (expected . "unknown-does-not-select")
  (active . t)
  (compatibility . t))
 
