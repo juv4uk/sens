@@ -17,6 +17,8 @@
 //!   ci_bench DIR NAME FORM [MODE]
 //!     MODE = full (за замовчуванням) — завантажити й виконати, звірити відповідь;
 //!            load — лише завантажити програму (розбір тексту або декодування fasl);
+//!            ready — завантажити + виконати setup, але не call;
+//!            repeat N — завантажити + setup один раз + виконати call N разів;
 //!            encode — `sens`: закодувати текст у DIR/NAME-sens.{setup,call}.fasl.
 //!   ci_bench DIR empty -     — лише створення сесії.
 //!
@@ -72,6 +74,28 @@ fn main() -> ExitCode {
     if let Err(error) = eval_lowered_expressions(&setup, &mut session) {
         eprintln!("{name}/{form}: setup failed: {error}");
         return ExitCode::from(2);
+    }
+    if mode == "ready" {
+        return ExitCode::SUCCESS;
+    }
+    if mode == "repeat" {
+        let repetitions = args
+            .get(5)
+            .and_then(|value| value.parse::<usize>().ok())
+            .filter(|count| *count > 0)
+            .expect("repeat mode requires positive N");
+        for _ in 0..repetitions {
+            match eval_lowered_expressions(&call, &mut session) {
+                Ok(result) => {
+                    std::hint::black_box(result.value);
+                }
+                Err(error) => {
+                    eprintln!("{name}/{form}: repeated call failed: {error}");
+                    return ExitCode::from(4);
+                }
+            }
+        }
+        return ExitCode::SUCCESS;
     }
     match eval_lowered_expressions(&call, &mut session) {
         Ok(result) if result.value.to_string() == expected => ExitCode::SUCCESS,
