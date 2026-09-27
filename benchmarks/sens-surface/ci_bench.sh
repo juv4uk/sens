@@ -5,13 +5,17 @@
 # навантаження × форми (en / sens). На відміну від часу, інструкції не
 # залежать від шуму спільної CI-машини — регрес у 1% видно чесно.
 #
-#   sh ci_bench.sh CI_BENCH_BINARY WORKLOAD_DIR OUT.tsv
+#   sh ci_bench.sh CI_BENCH_BINARY WORKLOAD_DIR OUT.tsv [FORMS]
+#
+# FORMS — форми через пробіл (за замовчуванням "en sens"); для закріпленої
+# старої англійської бази — "legacy-en".
 #
 # WORKLOAD_DIR — вихід `run.py --emit DIR --small`.
 set -eu
 BIN=$1
 DIR=$2
 OUT=$3
+FORMS=${4:-en sens}
 
 measure() {
   valgrind --tool=cachegrind --cache-sim=no --cachegrind-out-file=/dev/null \
@@ -23,7 +27,7 @@ printf 'workload\tform\tinstructions\n' > "$OUT"
 printf 'empty\t-\t%s\n' "$(measure empty -)" >> "$OUT"
 for expected in "$DIR"/*.expected; do
   name=$(basename "$expected" .expected)
-  for form in en sens; do
+  for form in $FORMS; do
     # Спершу правильність: неправильна відповідь — збій, не число.
     "$BIN" "$DIR" "$name" "$form"
     printf '%s\t%s\t%s\n' "$name" "$form" "$(measure "$name" "$form")" >> "$OUT"

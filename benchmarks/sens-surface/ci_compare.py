@@ -1,12 +1,26 @@
 #!/usr/bin/env python3
-"""#1433: порівняння «було / стало» двох прогонів ci_bench.sh.
+"""#1433: бенчмарк мови — три сторони, інструкції процесора (valgrind).
 
-Пише markdown-таблицю (у $GITHUB_STEP_SUMMARY, якщо задано) і повертає
-код 1, якщо будь-яке навантаження стало дорожчим більше ніж на поріг.
-Інструкції рахуються без вартості порожньої сесії (рядок `empty`).
+  old-English  — англійський Lisp до таблиці функцій (b4f75d2f, 2026-09-08),
+                 форма `legacy-en`;
+  new-English  — ця зміна, англійські імена (форма `en`);
+  new-SENS     — ця зміна, коди СЕНС (форма `sens`).
 
-  python3 ci_compare.py BASE.tsv HEAD.tsv [--fail-above 3.0]
+Головний контрольований експеримент — new-English проти new-SENS: той самий
+бінарник, ті самі програми (токен у токен після заміни імені на код), різниця
+лише в записі функціональної ідентичності. old-English проти new-SENS —
+окреме історичне end-to-end порівняння: між цими комітами змінювалося й
+інше, тож це не причинний доказ переваги SENS.
+
+Для кожного навантаження — сирі інструкції, вартість порожньої сесії, чисті
+інструкції, абсолютна й відсоткова різниця; потім геометричне середнє.
+
+Страховка від регресу: SENS і англійська форма бази (попередній коміт)
+проти зміни; регрес понад поріг — код 1.
+
+  python3 ci_compare.py BASE.tsv HEAD.tsv [--legacy LEGACY.tsv] [--fail-above 3.0]
 """
+import math
 import os
 import sys
 
@@ -21,38 +35,96 @@ def load(path):
     return rows
 
 
+def option(name, default=None):
+    if name in sys.argv:
+        return sys.argv[sys.argv.index(name) + 1]
+    return default
+
+
+def pct(now, was):
+    return (now - was) / was * 100 if was else 0.0
+
+
+def geomean(ratios):
+    return math.exp(sum(math.log(r) for r in ratios) / len(ratios)) if ratios else float("nan")
+
+
 def main():
     base, head = load(sys.argv[1]), load(sys.argv[2])
-    threshold = 3.0
-    if "--fail-above" in sys.argv:
-        threshold = float(sys.argv[sys.argv.index("--fail-above") + 1])
+    legacy_path = option("--legacy")
+    legacy = load(legacy_path) if legacy_path else {}
+    threshold = float(option("--fail-above", "3.0"))
     base_empty, head_empty = base[("empty", "-")], head[("empty", "-")]
+    legacy_empty = legacy.get(("empty", "-"))
+    names = sorted({name for name, form in head if name != "empty"})
 
     lines = [
-        "## Бенчмарк мови: інструкції процесора (valgrind), було → стало",
+        "## Бенчмарк мови: інструкції процесора (valgrind), три сторони",
         "",
-        f"Поріг регресу: +{threshold:.1f}%. Вартість порожньої сесії віднято "
-        f"(було {base_empty:,}, стало {head_empty:,}).",
+        "- **old-English** — англійський Lisp до таблиці функцій (`b4f75d2f`, 2026-09-08);",
+        "- **new-English**, **new-SENS** — ця зміна, той самий бінарник; програми однакові "
+        "токен у токен, відрізняється лише запис ідентичності функції (ім'я чи 8-бітний код).",
         "",
-        "| навантаження | форма | було | стало | Δ | en/sens стало |",
-        "|---|---|---:|---:|---:|---:|",
+        "Порожня сесія (віднімається): "
+        + (f"old {legacy_empty:,}, " if legacy_empty is not None else "")
+        + f"new {head_empty:,}.",
+        "",
+        "### Контрольований експеримент: new-English → new-SENS",
+        "",
+        "| навантаження | EN сирі | SENS сирі | EN чисті | SENS чисті | Δ абс | Δ % |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    controlled = []
+    for name in names:
+        en_raw, sens_raw = head[(name, "en")], head[(name, "sens")]
+        en_net, sens_net = en_raw - head_empty, sens_raw - head_empty
+        controlled.append(sens_net / en_net)
+        lines.append(
+            f"| {name} | {en_raw:,} | {sens_raw:,} | {en_net:,} | {sens_net:,} | "
+            f"{sens_net - en_net:+,} | {pct(sens_net, en_net):+.2f}% |")
+    g = geomean(controlled)
+    lines += ["", f"Геометричне середнє SENS/EN: **{g:.4f}** ({(g - 1) * 100:+.2f}%).", ""]
+
+    if legacy_empty is not None:
+        lines += [
+            "### Історичне end-to-end: old-English (b4f75d2f) → new-English / new-SENS",
+            "",
+            "Не причинний доказ: між комітами змінювалися й ядро, і логіка (`cond`/`atom?`/`eq?`).",
+            "",
+            "| навантаження | old сирі | old чисті | new-EN чисті | Δ % | new-SENS чисті | Δ абс | Δ % |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|",
+        ]
+        hist_en, hist_sens = [], []
+        for name in names:
+            if (name, "legacy-en") not in legacy:
+                continue
+            old_raw = legacy[(name, "legacy-en")]
+            old_net = old_raw - legacy_empty
+            en_net = head[(name, "en")] - head_empty
+            sens_net = head[(name, "sens")] - head_empty
+            hist_en.append(en_net / old_net)
+            hist_sens.append(sens_net / old_net)
+            lines.append(
+                f"| {name} | {old_raw:,} | {old_net:,} | {en_net:,} | {pct(en_net, old_net):+.1f}% | "
+                f"{sens_net:,} | {sens_net - old_net:+,} | {pct(sens_net, old_net):+.1f}% |")
+        ge, gs = geomean(hist_en), geomean(hist_sens)
+        lines += ["", f"Геометричне середнє: new-EN/old **{ge:.4f}** ({(ge - 1) * 100:+.1f}%), "
+                  f"new-SENS/old **{gs:.4f}** ({(gs - 1) * 100:+.1f}%).", ""]
+
+    lines += [
+        f"### Страховка: попередній коміт → ця зміна (поріг +{threshold:.1f}%)",
+        "",
+        "| навантаження | Δ SENS | Δ EN |",
+        "|---|---:|---:|",
     ]
     regressions, improvements = [], []
-    names = sorted({name for name, form in head if name != "empty"})
     for name in names:
-        for form in ("en", "sens"):
-            if (name, form) not in head:
+        cells = [name]
+        for form in ("sens", "en"):
+            if (name, form) not in base:
+                cells.append("нове")
                 continue
-            now = head[(name, form)] - head_empty
-            was = base.get((name, form))
-            ratio = ""
-            if form == "en" and (name, "sens") in head:
-                ratio = f"{now / (head[(name, 'sens')] - head_empty):.3f}"
-            if was is None:
-                lines.append(f"| {name} | {form} | нове | {now:,} | — | {ratio} |")
-                continue
-            was -= base_empty
-            delta = (now - was) / was * 100 if was else 0.0
+            delta = pct(head[(name, form)] - head_empty, base[(name, form)] - base_empty)
             mark = ""
             if delta > threshold:
                 mark = " 🔴"
@@ -60,10 +132,10 @@ def main():
             elif delta < -threshold:
                 mark = " 🟢"
                 improvements.append(f"{name}/{form} {delta:+.2f}%")
-            lines.append(
-                f"| {name} | {form} | {was:,} | {now:,} | {delta:+.2f}%{mark} | {ratio} |")
-    lines += ["", f"**Прогрес:** {', '.join(improvements) or 'немає'}",
-              f"**Регрес:** {', '.join(regressions) or 'немає'}"]
+            cells.append(f"{delta:+.2f}%{mark}")
+        lines.append("| " + " | ".join(cells) + " |")
+    lines += ["", f"**Прогрес між комітами:** {', '.join(improvements) or 'немає'}",
+              f"**Регрес між комітами:** {', '.join(regressions) or 'немає'}"]
     report = "\n".join(lines) + "\n"
     print(report)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")

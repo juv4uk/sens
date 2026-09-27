@@ -1,8 +1,10 @@
-name: Language benchmark (instructions, base vs change)
+name: Language benchmark (old English Lisp vs SENS, instructions)
 
 # #1433: швидкий детермінований бенчмарк — кількість інструкцій процесора
-# (valgrind) для 11 програм × 2 форми (англійська / SENS), база і зміна
-# міряються на одній машині. Регрес понад поріг — червоний крок.
+# (valgrind) для 11 програм. Головне порівняння: закріплений англійський Lisp
+# до таблиці функцій (LEGACY_SHA, 2026-09-08) проти SENS цієї зміни — так видно
+# справжній прогрес мови. Страховка: база (попередній коміт) проти зміни;
+# регрес понад поріг — червоний крок.
 
 on:
   pull_request:
@@ -14,6 +16,8 @@ jobs:
     runs-on: [self-hosted, guix]
     timeout-minutes: 30
     env:
+      # Англійський Lisp до реєстру й таблиці функцій (перед 16620d83).
+      LEGACY_SHA: b4f75d2f3de1eff3a5784b60d9bb57978e0accb0
       BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
@@ -35,7 +39,20 @@ jobs:
           rm -rf /tmp/bench && mkdir -p /tmp/bench
           cp benchmarks/sens-surface/run.py benchmarks/sens-surface/ci_bench.sh \
              benchmarks/sens-surface/ci_compare.py crates/sens/examples/ci_bench.rs /tmp/bench/
-          python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small
+          python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small \
+            --forms en,sens,legacy-en
+      - name: Measure old English Lisp (LEGACY_SHA, before the function table)
+        env:
+          # Закріплений коміт не змінюється: збірка живе в кеші ранера.
+          CARGO_TARGET_DIR: ${{ runner.tool_cache }}/sens-bench-legacy-target
+        run: |
+          git checkout --detach "$LEGACY_SHA"
+          mkdir -p crates/my-lisp/examples
+          sed 's/^use sens::/use my_lisp::/' /tmp/bench/ci_bench.rs > crates/my-lisp/examples/ci_bench.rs
+          cargo build --release -p my-lisp --example ci_bench
+          sh /tmp/bench/ci_bench.sh "$CARGO_TARGET_DIR/release/examples/ci_bench" \
+            /tmp/bench/workloads /tmp/bench/legacy.tsv legacy-en
+          git checkout -- . && git clean -fdq crates/my-lisp/examples
       - name: Measure base on this runner
         run: |
           git checkout --detach "$BASE_SHA"
@@ -53,8 +70,10 @@ jobs:
           cp /tmp/bench/ci_bench.rs crates/sens/examples/ci_bench.rs
           cargo build --release -p sens --example ci_bench
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/head.tsv
-      - name: Compare base -> change
-        run: python3 /tmp/bench/ci_compare.py /tmp/bench/base.tsv /tmp/bench/head.tsv --fail-above 3.0
+      - name: Compare old English -> SENS, and base -> change
+        run: |
+          python3 /tmp/bench/ci_compare.py /tmp/bench/base.tsv /tmp/bench/head.tsv \
+            --legacy /tmp/bench/legacy.tsv --fail-above 3.0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
