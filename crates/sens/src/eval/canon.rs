@@ -81,7 +81,7 @@ pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), Language
 }
 
 fn exact_args(
-    sid: &'static str,
+    sid: crate::Sens8,
     args: &[Value],
     expected: usize,
     span: Span,
@@ -161,7 +161,7 @@ fn prim_00000010(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000010", args, 1, span)?;
+    exact_args(crate::sens!(00000010), args, 1, span)?;
     Ok(special_forms::atom_value(&args[0], env))
 }
 
@@ -170,7 +170,7 @@ fn prim_00000011(
     _env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000011", args, 2, span)?;
+    exact_args(crate::sens!(00000011), args, 2, span)?;
     special_forms::eq_values(args[0].clone(), args[1].clone(), span)
 }
 
@@ -179,7 +179,7 @@ fn prim_00000100(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000100", args, 2, span)?;
+    exact_args(crate::sens!(00000100), args, 2, span)?;
     special_forms::cons_values(args[0].clone(), args[1].clone(), env, span)
 }
 
@@ -188,7 +188,7 @@ fn prim_00000101(
     _env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000101", args, 1, span)?;
+    exact_args(crate::sens!(00000101), args, 1, span)?;
     special_forms::car_value(&args[0], span)
 }
 
@@ -197,7 +197,7 @@ fn prim_00000110(
     _env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("00000110", args, 1, span)?;
+    exact_args(crate::sens!(00000110), args, 1, span)?;
     special_forms::cdr_value(&args[0], span)
 }
 
@@ -254,7 +254,7 @@ fn prim_01001101(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args("01001101", args, 1, span)?;
+    exact_args(crate::sens!(01001101), args, 1, span)?;
     special_forms::eval_values(args, env, span)
 }
 
