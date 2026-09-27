@@ -13,7 +13,8 @@
 інше, тож це не причинний доказ переваги SENS.
 
 Для кожного навантаження — сирі інструкції, вартість порожньої сесії, чисті
-інструкції, абсолютна й відсоткова різниця; потім геометричне середнє.
+інструкції, заощаджені інструкції й виграш у відсотках; потім геометричне
+середнє. Знак: «+» — менше інструкцій (краще), «−» — більше (гірше).
 
 Страховка від регресу: SENS і англійська форма бази (попередній коміт)
 проти зміни; регрес понад поріг — код 1.
@@ -41,8 +42,9 @@ def option(name, default=None):
     return default
 
 
-def pct(now, was):
-    return (now - was) / was * 100 if was else 0.0
+def gain(now, was):
+    """Виграш у відсотках: «+» — менше інструкцій (краще), «−» — більше (гірше)."""
+    return (was - now) / was * 100 if was else 0.0
 
 
 def geomean(ratios):
@@ -65,13 +67,15 @@ def main():
         "- **new-English**, **new-SENS** — ця зміна, той самий бінарник; програми однакові "
         "токен у токен, відрізняється лише запис ідентичності функції (ім'я чи 8-бітний код).",
         "",
+        "Знак: **«+» — менше інструкцій (краще), «−» — більше (гірше)**.",
+        "",
         "Порожня сесія (віднімається): "
         + (f"old {legacy_empty:,}, " if legacy_empty is not None else "")
         + f"new {head_empty:,}.",
         "",
         "### Контрольований експеримент: new-English → new-SENS",
         "",
-        "| навантаження | EN сирі | SENS сирі | EN чисті | SENS чисті | Δ абс | Δ % |",
+        "| навантаження | EN сирі | SENS сирі | EN чисті | SENS чисті | заощаджено інструкцій | виграш SENS |",
         "|---|---:|---:|---:|---:|---:|---:|",
     ]
     controlled = []
@@ -81,9 +85,9 @@ def main():
         controlled.append(sens_net / en_net)
         lines.append(
             f"| {name} | {en_raw:,} | {sens_raw:,} | {en_net:,} | {sens_net:,} | "
-            f"{sens_net - en_net:+,} | {pct(sens_net, en_net):+.2f}% |")
+            f"{en_net - sens_net:+,} | {gain(sens_net, en_net):+.2f}% |")
     g = geomean(controlled)
-    lines += ["", f"Геометричне середнє SENS/EN: **{g:.4f}** ({(g - 1) * 100:+.2f}%).", ""]
+    lines += ["", f"Геометричне середнє: SENS/EN **{g:.4f}**, виграш SENS **{(1 - g) * 100:+.2f}%**.", ""]
 
     if legacy_empty is not None:
         lines += [
@@ -91,7 +95,7 @@ def main():
             "",
             "Не причинний доказ: між комітами змінювалися й ядро, і логіка (`cond`/`atom?`/`eq?`).",
             "",
-            "| навантаження | old сирі | old чисті | new-EN чисті | Δ % | new-SENS чисті | Δ абс | Δ % |",
+            "| навантаження | old сирі | old чисті | new-EN чисті | виграш EN | new-SENS чисті | заощаджено | виграш SENS |",
             "|---|---:|---:|---:|---:|---:|---:|---:|",
         ]
         hist_en, hist_sens = [], []
@@ -105,16 +109,16 @@ def main():
             hist_en.append(en_net / old_net)
             hist_sens.append(sens_net / old_net)
             lines.append(
-                f"| {name} | {old_raw:,} | {old_net:,} | {en_net:,} | {pct(en_net, old_net):+.1f}% | "
-                f"{sens_net:,} | {sens_net - old_net:+,} | {pct(sens_net, old_net):+.1f}% |")
+                f"| {name} | {old_raw:,} | {old_net:,} | {en_net:,} | {gain(en_net, old_net):+.1f}% | "
+                f"{sens_net:,} | {old_net - sens_net:+,} | {gain(sens_net, old_net):+.1f}% |")
         ge, gs = geomean(hist_en), geomean(hist_sens)
-        lines += ["", f"Геометричне середнє: new-EN/old **{ge:.4f}** ({(ge - 1) * 100:+.1f}%), "
-                  f"new-SENS/old **{gs:.4f}** ({(gs - 1) * 100:+.1f}%).", ""]
+        lines += ["", f"Геометричне середнє відносно old: new-EN **{(1 - ge) * 100:+.1f}%**, "
+                  f"new-SENS **{(1 - gs) * 100:+.1f}%**.", ""]
 
     lines += [
-        f"### Страховка: попередній коміт → ця зміна (поріг +{threshold:.1f}%)",
+        f"### Страховка: попередній коміт → ця зміна (регрес — гірше ніж −{threshold:.1f}%)",
         "",
-        "| навантаження | Δ SENS | Δ EN |",
+        "| навантаження | зміна SENS | зміна EN |",
         "|---|---:|---:|",
     ]
     regressions, improvements = [], []
@@ -124,12 +128,12 @@ def main():
             if (name, form) not in base:
                 cells.append("нове")
                 continue
-            delta = pct(head[(name, form)] - head_empty, base[(name, form)] - base_empty)
+            delta = gain(head[(name, form)] - head_empty, base[(name, form)] - base_empty)
             mark = ""
-            if delta > threshold:
+            if delta < -threshold:
                 mark = " 🔴"
                 regressions.append(f"{name}/{form} {delta:+.2f}%")
-            elif delta < -threshold:
+            elif delta > threshold:
                 mark = " 🟢"
                 improvements.append(f"{name}/{form} {delta:+.2f}%")
             cells.append(f"{delta:+.2f}%{mark}")
