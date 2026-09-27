@@ -384,7 +384,9 @@ pub(crate) mod wire {
                 out.push(sid.packed_byte());
             }
             ExprKind::String(value) => put_text(out, TAG_STRING, value),
-            ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
+            ExprKind::Symbol(symbol) | ExprKind::Local { name: symbol, .. } => {
+                put_text(out, TAG_SYMBOL, symbol);
+            }
             ExprKind::List(items) => {
                 put_list_header(out, items.len());
                 for item in items.iter() {
@@ -561,8 +563,8 @@ pub(crate) mod wire {
 
 #[cfg(test)]
 mod wire_tests {
-    use super::fasl;
     use super::wire::{decode_program, encode_program};
+    use super::{fasl, Expr, ExprKind};
     use crate::parser::parse;
 
     const SAMPLE: &str = r#"
@@ -574,6 +576,25 @@ mod wire_tests {
 (00000001 (a b . c))
 (00000001 (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17))
 "#;
+
+    #[test]
+    fn wire_local_serializes_as_original_symbol() {
+        let expression = Expr {
+            kind: ExprKind::Local {
+                depth: 2,
+                index: 3,
+                name: "slot-name".into(),
+            },
+            span: crate::Span { start: 0, end: 9 },
+        };
+
+        let encoded = encode_program(&[expression]);
+        let decoded = decode_program(&encoded).expect("wire decodes local as source data");
+        assert!(matches!(
+            &decoded[0].kind,
+            ExprKind::Symbol(name) if &**name == "slot-name"
+        ));
+    }
 
     #[test]
     fn wire_round_trip_is_byte_identical() {
