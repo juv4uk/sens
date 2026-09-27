@@ -376,7 +376,7 @@ def main() -> int:
         for name in selected:
             commands = command_set(args.sens_bench, args.python, workdir, name, args.inner_reps)
             for implementation in ("sens", "cpython"):
-                for mode in ("load", "ready", "repeat"):
+                for mode in ("load", "ready", "repeat", "full"):
                     cmd = commands[implementation][mode]
                     count = instruction_count(cmd)
                     rows.append((implementation, name, mode, rep, count))
@@ -486,6 +486,21 @@ def main() -> int:
         "|---|---:|",
         f"| SENS | {startup('sens'):,.0f} |",
         f"| CPython | {startup('cpython'):,.0f} |",
+        f"| **CPython / SENS** | **×{startup('cpython') / startup('sens'):.3f}** |",
+        "",
+        "## Cold one-shot = process + load/setup + one call",
+        "",
+        "| workload | SENS full | CPython full | CPython / SENS |",
+        "|---|---:|---:|---:|",
+    ]
+    for name in selected:
+        sens_full = median(grouped, ("sens", name, "full"))
+        cpython_full = median(grouped, ("cpython", name, "full"))
+        lines.append(
+            f"| {name} | {sens_full:,.0f} | {cpython_full:,.0f} | "
+            f"×{cpython_full / sens_full:.3f} |"
+        )
+    lines += [
         "",
         f"## Steady execution = (repeat({args.inner_reps}) - ready) / {args.inner_reps}",
         "",
