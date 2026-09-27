@@ -49,7 +49,7 @@ fn named_function_table_ids(source: &str) -> Vec<u32> {
         .filter(|line| {
             !line.contains("(ук ()) (укр ()) (en ()) (sa ()) (sym ())")
         })
-        .flat_map(|line| numeric_row_id_list(line))
+        .flat_map(numeric_row_id_list)
         .collect()
 }
 
