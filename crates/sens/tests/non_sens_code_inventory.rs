@@ -434,6 +434,17 @@ fn active_sens_coverage_report_1673() {
         );
     }
 
+    for (file, (named, sens)) in inventory
+        .iter()
+        .filter(|(file, (named, _))| is_active_lib_source(file) && *named > 0)
+    {
+        let total = named + sens;
+        let basis_points = if total == 0 { 10_000 } else { sens * 10_000 / total };
+        eprintln!(
+            "SENS_COVERAGE_FILE\tactive-lib\t{file}\t{named}\t{sens}\t{basis_points}"
+        );
+    }
+
     assert!(
         active_lib.total() > 0 && runtime.total() > 0,
         "active SENS coverage views must contain admitted call-heads"
