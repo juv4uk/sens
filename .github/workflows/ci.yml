@@ -258,6 +258,10 @@ jobs:
         if: steps.changes.outputs.workflow == 'true'
         run: ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
 
+      - name: Check generated function signatures projection
+        if: steps.changes.outputs.semantic == 'true' && steps.changes.outputs.workspace != 'true'
+        run: ./target/debug/sens scripts/generate-rust-function-signatures.lisp --check
+
       - name: Exercise future main fast critical gate
         if: steps.changes.outputs.workflow == 'true'
         run: |
