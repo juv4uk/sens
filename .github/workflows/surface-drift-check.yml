@@ -53,5 +53,5 @@ jobs:
           echo "Surface drift check complete."
           echo "Meaning comes first; human-language surfaces are peers."
           echo "Shared punctuation belongs to sym, not to a human language."
-          echo "semantic-registry.wsm is the sole numeric surface authority."
-          echo "uk-sa-coverage.wsm is historical audit only."
+          echo "semantic-registry.lisp is the sole numeric surface authority."
+          echo "uk-sa-coverage.lisp is historical audit only."
