@@ -1,0 +1,37 @@
+name: M8 meta-eval env collision
+
+on:
+  pull_request:
+    paths:
+      - "lib/meta-eval.lisp"
+      - "crates/sens/tests/data/english-names-baseline.tsv"
+      - ".github/workflows/m8-meta-eval-env.yml"
+  workflow_dispatch:
+
+jobs:
+  meta-eval-env:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: m8-meta-eval-env
+
+      - name: Backend meta-eval SID gap witnesses
+        run: cargo test -p sens --test backend_not_on_sid_gap
+
+      - name: Meta-eval witness corpus
+        run: cargo test -p sens --test witness_authority same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend -- --nocapture
+
+      - name: Meta-eval structure rows
+        run: cargo test -p sens --test witness_authority structure_core_stays_stable_across_native_and_meta_eval -- --nocapture
+
+      - name: Exact env binder residue
+        run: |
+          if grep -nE '(^|[[:space:]()])env([[:space:]()]|$)' lib/meta-eval.lisp | grep -v '^[^:]*:[[:space:]]*;'; then
+            echo "standalone executable env binder residue remains" >&2
+            exit 1
+          fi
+          ! grep -F $'lisp\tlib/meta-eval.lisp\tenv\t' crates/sens/tests/data/english-names-baseline.tsv
