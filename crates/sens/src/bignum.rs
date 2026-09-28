@@ -886,4 +886,27 @@ mod tests {
             Ordering::Less
         );
     }
+    #[test]
+    fn binary_wire_helpers_are_canonical_and_arbitrary_precision() {
+        for (input, expected) in [
+            ("0", "0"),
+            ("0000", "0"),
+            ("101010", "101010"),
+            ("-00101", "-101"),
+        ] {
+            assert_eq!(
+                BigInt::from_binary_str(input).unwrap().to_binary_string(),
+                expected
+            );
+        }
+
+        let huge = format!("1{}", "0".repeat(192));
+        assert_eq!(
+            BigInt::from_binary_str(&huge).unwrap().to_binary_string(),
+            huge
+        );
+        assert!(BigInt::from_binary_str("").is_err());
+        assert!(BigInt::from_binary_str("102").is_err());
+    }
+
 }
