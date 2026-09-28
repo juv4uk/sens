@@ -44,19 +44,21 @@ def tracked_lisp_files() -> list[Path]:
     ]
 
 
-def source_tokens(text: str) -> Iterable[str]:
-    """Yield Lisp tokens while ignoring semicolon comments and strings."""
+def source_token_locations(text: str) -> Iterable[tuple[str, int]]:
+    """Yield (token, one-based line) while ignoring comments and strings."""
     token: list[str] = []
+    token_line = 1
+    line = 1
     in_string = False
     escaped = False
     index = 0
 
-    def flush() -> Iterable[str]:
+    def flush() -> Iterable[tuple[str, int]]:
         nonlocal token
         if token:
             value = "".join(token)
             token = []
-            return (value,)
+            return ((value, token_line),)
         return ()
 
     while index < len(text):
@@ -69,6 +71,8 @@ def source_tokens(text: str) -> Iterable[str]:
                 escaped = True
             elif ch == '"':
                 in_string = False
+            if ch == "\n":
+                line += 1
             index += 1
             continue
 
@@ -83,16 +87,26 @@ def source_tokens(text: str) -> Iterable[str]:
             newline = text.find("\n", index)
             if newline < 0:
                 break
+            line += 1
             index = newline + 1
             continue
 
         if ch.isspace() or ch in "()":
             yield from flush()
+            if ch == "\n":
+                line += 1
         else:
+            if not token:
+                token_line = line
             token.append(ch)
         index += 1
 
     yield from flush()
+
+
+def source_tokens(text: str) -> Iterable[str]:
+    for token, _line in source_token_locations(text):
+        yield token
 
 
 def bucket(path: Path) -> str:
@@ -173,6 +187,21 @@ def inventory(files: Iterable[Path]) -> dict:
             for name, counts in sorted(bucket_counts.items())
         },
     }
+
+
+def list_category(files: Iterable[Path], category: str, bucket_name: str | None) -> int:
+    count = 0
+    for path in files:
+        if bucket_name is not None and bucket(path) != bucket_name:
+            continue
+        rel = path.relative_to(REPO_ROOT).as_posix()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for token, line in source_token_locations(text):
+            if classify(token) == category:
+                print(f"{rel}:{line}:{token}")
+                count += 1
+    print(f"TOTAL {category} bucket={bucket_name or 'all'} count={count}")
+    return 0
 
 
 def print_summary(data: dict) -> None:
@@ -284,12 +313,26 @@ def main() -> int:
         metavar="PATH",
         help="fail if migration-sensitive counts exceed the recorded ceilings",
     )
+    parser.add_argument(
+        "--list-category",
+        metavar="CATEGORY",
+        help="print every matching path:line:token occurrence",
+    )
+    parser.add_argument(
+        "--bucket",
+        metavar="BUCKET",
+        help="optional path bucket filter for --list-category",
+    )
     args = parser.parse_args()
 
     if args.self_test:
         return self_test()
 
-    data = inventory(tracked_lisp_files())
+    files = tracked_lisp_files()
+    if args.list_category:
+        return list_category(files, args.list_category, args.bucket)
+
+    data = inventory(files)
     if args.check_baseline:
         result = check_baseline(data, args.check_baseline)
         if result != 0:
