@@ -68,7 +68,7 @@
 ; nāman = symbol/name (Pāṇini 1.1.62)
 (00001001 nāman? symbol?)
 ; śabda = string/text
-(00001001 śabda? string?)
+; śabda? is a registry-driven direct primitive peer (SID 00100100)
 (00001001 śabda-hīna? string<?)
 
 ;; ═══════════════════════════════════════════════════════════════
@@ -113,19 +113,19 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; śabdasaṃyoga = joining of words (≠ saṃyuj CONS)
-(00001001 śabdasaṃyoga string-append)
-(00001001 śabdapramāṇa string-length)
+; śabdasaṃyoga is a registry-driven direct primitive peer (SID 00111010)
+; śabdapramāṇa is a registry-driven direct primitive peer (SID 00111011)
 ; śūnya = empty/void
-(00001001 śūnya? string-empty?)
+; śūnya? is a registry-driven direct primitive peer (SID 00111100)
 ; pūrva = preceding (≠ ādi CAR)
-(00001001 pūrva? string-prefix?)
-(00001001 śabdasambaddha? string-contains?)
+; pūrva? is a registry-driven direct primitive peer (SID 00111101)
+; śabdasambaddha? is a registry-driven direct primitive peer (SID 00111110)
 ; prathamavarṇa = first letter (≠ ādi CAR)
-(00001001 prathamavarṇa string-first)
+; prathamavarṇa is a registry-driven direct primitive peer (SID 00111111)
 ; śeṣavarṇa = rest of letters (≠ śeṣa CDR)
-(00001001 śeṣavarṇa string-rest)
+; śeṣavarṇa is a registry-driven direct primitive peer (SID 01000000)
 ; cheda = cut/slice
-(00001001 cheda string-slice)
+; cheda is a registry-driven direct primitive peer (SID 01000001)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Other (status: candidate)
@@ -139,37 +139,37 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; mudraṇa = impression/printing
-(00001001 mudraṇa print)
+; mudraṇa is a registry-driven direct primitive peer (SID 01001000)
 ; darśana = showing/display
-(00001001 darśana princ)
+; darśana is a registry-driven direct primitive peer (SID 01001001)
 ; pāṭhana = reading
-(00001001 pāṭhana read)
-(00001001 pāṭhana-sarva read-all)
+; pāṭhana is a registry-driven direct primitive peer (SID 01001010)
+; pāṭhana-sarva is a registry-driven direct primitive peer (SID 01001011)
 ; likhana = writing
-(00001001 likhana write-to-string)
+; likhana is a registry-driven direct primitive peer (SID 01001100)
 ; vicāraṇa = deliberation/evaluation
-(00001001 vicāraṇa eval)
+; vicāraṇa is a registry-driven direct primitive peer (SID 01001101)
 ; āśraya = substrate/environment
-(00001001 āśraya env)
+; āśraya is a registry-driven direct primitive peer (SID 01001110)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Vectors (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; samūha = collection/aggregate
-(00001001 samūha vector)
-(00001001 samūha-nirmāṇa make-vector)
-(00001001 samūha-pramāṇa vector-length)
-(00001001 samūha-āvartana vector-ref)
+; samūha is a registry-driven direct primitive peer (SID 01001111)
+; samūha-nirmāṇa is a registry-driven direct primitive peer (SID 01010000)
+; samūha-pramāṇa is a registry-driven direct primitive peer (SID 01010001)
+; samūha-āvartana is a registry-driven direct primitive peer (SID 01010010)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Conversions (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-(00001001 nāman-śabda symbol->string)
-(00001001 śabda-nāman string->symbol)
-(00001001 varṇa-śabda codepoint->string)
-(00001001 śabda-varṇa string->codepoint)
+; nāman-śabda is a registry-driven direct primitive peer (SID 01000010)
+; śabda-nāman is a registry-driven direct primitive peer (SID 01000011)
+; varṇa-śabda is a registry-driven direct primitive peer (SID 01000100)
+; śabda-varṇa is a registry-driven direct primitive peer (SID 01000101)
 ; saṅkhyā-śabda = number-to-word
 (00001001 saṅkhyā-śabda number->string)
 
@@ -179,8 +179,8 @@
 
 ; kāla = time
 (00001001 kāla-adya utc-now)
-(00001001 kāla-unix unix-time-now)
-(00001001 kāla-mono mono-ns)
+; kāla-unix is a registry-driven direct primitive peer (SID 01011011)
+; kāla-mono is a registry-driven direct primitive peer (SID 01011010)
 (00001001 kāla-mono-ms mono-ms)
 (00001001 kāla-millisecondāni milliseconds-from-nanoseconds)
 ; deśa-kāla = timezone

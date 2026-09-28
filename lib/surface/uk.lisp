@@ -80,9 +80,9 @@
 (00001001 хибне? not)
 (00001001 однакові? equal?)
 (00001001 символ? symbol?)
-(00001001 текст? string?)
+; текст? is a registry-driven direct primitive peer (SID 00100100)
 (00001001 текст-передує? string<?)
-(00001001 числовий-буфер? numeric-buffer?)
+; числовий-буфер? is a registry-driven direct primitive peer (SID 00100110)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Lists (status: stable)
@@ -126,8 +126,8 @@
 ; 1050: `string-slice` / `відрізати` встановлюються як registry-driven direct peers.
 ; 1051: `symbol->string` / `символ-у-текст` встановлюються як registry-driven direct peers.
 ; 1052: `string->symbol` / `текст-у-символ` встановлюються як registry-driven direct peers.
-(00001001 текст-у-кодову-точку string->codepoint)
-(00001001 кодова-точка-у-текст codepoint->string)
+; текст-у-кодову-точку is a registry-driven direct primitive peer (SID 01000101)
+; кодова-точка-у-текст is a registry-driven direct primitive peer (SID 01000100)
 (00001001 число-у-текст number->string)
 
 ;; ═══════════════════════════════════════════════════════════════
@@ -135,34 +135,34 @@
 ;; Ввід/вивід
 ;; ═══════════════════════════════════════════════════════════════
 
-(00001001 друкувати print)
-(00001001 показати princ)
-(00001001 прочитати read)
-(00001001 прочитати-усе read-all)
-(00001001 значення-у-текст write-to-string)
-(00001001 обчислити eval)
-(00001001 середовище env)
+; друкувати is a registry-driven direct primitive peer (SID 01001000)
+; показати is a registry-driven direct primitive peer (SID 01001001)
+; прочитати is a registry-driven direct primitive peer (SID 01001010)
+; прочитати-усе is a registry-driven direct primitive peer (SID 01001011)
+; значення-у-текст is a registry-driven direct primitive peer (SID 01001100)
+; обчислити is a registry-driven direct primitive peer (SID 01001101)
+; середовище is a registry-driven direct primitive peer (SID 01001110)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Vectors (status: stable)
 ;; Вектори
 ;; ═══════════════════════════════════════════════════════════════
 
-(00001001 вектор vector)
-(00001001 створити-вектор make-vector)
-(00001001 довжина-вектора vector-length)
-(00001001 елемент-вектора vector-ref)
+; вектор is a registry-driven direct primitive peer (SID 01001111)
+; створити-вектор is a registry-driven direct primitive peer (SID 01010000)
+; довжина-вектора is a registry-driven direct primitive peer (SID 01010001)
+; елемент-вектора is a registry-driven direct primitive peer (SID 01010010)
 
 ; vector-set! є мутацією — тому знак ! зберігається і в українській назві.
-(00001001 встановити-елемент-вектора! vector-set!)
+; встановити-елемент-вектора! is a registry-driven direct primitive peer (SID 01010011)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Time (status: stable)
 ;; Час
 ;; ═══════════════════════════════════════════════════════════════
 
-(00001001 монотонний-нс mono-ns)
-(00001001 поточний-юнікс-час unix-time-now)
+; монотонний-нс is a registry-driven direct primitive peer (SID 01011010)
+; поточний-юнікс-час is a registry-driven direct primitive peer (SID 01011011)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Other (status: stable)
