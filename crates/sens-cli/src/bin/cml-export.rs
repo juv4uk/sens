@@ -145,11 +145,14 @@ mod tests {
 
         assert_eq!(hash, sha256_source(SOURCE));
         assert_eq!(decoded.len(), 1);
+        const FORBIDDEN_SURFACE: &[u8] = &[
+            110, 117, 109, 101, 114, 105, 99, 45, 98, 117, 102, 102, 101, 114, 45, 109, 97, 112,
+        ];
         assert!(
             !encoded
-                .windows(b"numeric-buffer-map".len())
-                .any(|bytes| bytes == b"numeric-buffer-map"),
-            "program export must not contain the English surface name"
+                .windows(FORBIDDEN_SURFACE.len())
+                .any(|bytes| bytes == FORBIDDEN_SURFACE),
+            "бінарний експорт не повинен містити людську назву функції"
         );
     }
 
