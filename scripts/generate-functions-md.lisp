@@ -48,6 +48,21 @@
       ((00000010 items) () 0)
       ((00000010 items) (0) (00001100 1 (count-items (00000110 items)))))))
 
+; Markdown is human presentation. 01000110 number->string is the canonical
+; machine wire (#q2:<bits>/1), so it must not render section counts.
+; Counts are non-negative integers; derive their decimal spelling locally
+; from the existing digit/quotient/remainder functions.  (00001100 5 5)
+; spells decimal ten without depending on a future reader interpretation of
+; the ambiguous source token 10.
+(00001001 decimal-count->string
+  (00001000 (n)
+    (00000111
+      ((00011010 n (00001100 5 5)) (1) (01000111 n))
+      ((00011010 n (00001100 5 5)) (0)
+       (00111010
+         (decimal-count->string (00010100 n (00001100 5 5)))
+         (01000111 (00010011 n (00001100 5 5))))))))
+
 (00001001 backtick-join
   (00001000 (names)
     (00000111
@@ -61,7 +76,7 @@
 (00001001 render-section
   (00001000 (file)
     (10011100 ((names (defined-names (01001011 (10100110 (str+ "lib/" file))))))
-      (str+ "### " file " (" (01000110 (count-items names)) ")\n\n"
+      (str+ "### " file " (" (decimal-count->string (count-items names)) ")\n\n"
             (backtick-join names) "\n"))))
 
 ; Позиція першого входження marker у s, починаючи з i; -1 якщо нема.
