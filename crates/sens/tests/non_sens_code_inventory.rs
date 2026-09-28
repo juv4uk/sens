@@ -245,3 +245,123 @@ fn every_registry_name_executes_as_sens() {
         .collect();
     assert!(offenders.is_empty(), "імен поза СЕНС: {}\n{}", offenders.len(), offenders.join("\n"));
 }
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Coverage {
+    files: usize,
+    named: usize,
+    sens: usize,
+}
+
+impl Coverage {
+    fn total(self) -> usize {
+        self.named + self.sens
+    }
+
+    fn basis_points(self) -> usize {
+        let total = self.total();
+        if total == 0 {
+            10_000
+        } else {
+            self.sens * 10_000 / total
+        }
+    }
+}
+
+fn coverage_for<F>(inventory: &BTreeMap<String, (usize, usize)>, include: F) -> Coverage
+where
+    F: Fn(&str) -> bool,
+{
+    inventory
+        .iter()
+        .filter(|(file, _)| include(file))
+        .fold(
+            Coverage {
+                files: 0,
+                named: 0,
+                sens: 0,
+            },
+            |mut acc, (_, (named, sens))| {
+                acc.files += 1;
+                acc.named += named;
+                acc.sens += sens;
+                acc
+            },
+        )
+}
+
+/// Live language library source. Explicit exclusions are projection/evidence
+/// artifacts, not runtime/library code. Keep this list narrow and reviewable:
+/// adding an exclusion raises the reported percentage and therefore requires
+/// explicit review rather than a broad path heuristic.
+fn is_active_lib_source(file: &str) -> bool {
+    if !file.starts_with("lib/") || !file.ends_with(".lisp") {
+        return false;
+    }
+    if file.starts_with("lib/generated/") {
+        return false;
+    }
+    !matches!(
+        file,
+        "lib/machine/encoding/coverage.lisp"
+            | "lib/machine/dispatch/native-first-coverage.lisp"
+            | "lib/surface/uk-acceptance.lisp"
+            | "lib/surface/ukr-acceptance.lisp"
+            | "lib/surface/uk-sa-coverage.lisp"
+            | "lib/surface/peer-identity-acceptance.lisp"
+            | "lib/surface/uk-inventory.lisp"
+    )
+}
+
+/// Exact Lisp sources embedded by the core crate as current runtime/library
+/// inputs. This deliberately excludes generated registry projections: they are
+/// runtime inputs, but are generated evidence rather than authored language
+/// source and would dominate this human-authored migration metric.
+fn is_runtime_embedded_source(file: &str) -> bool {
+    matches!(
+        file,
+        "lib/macro.lisp"
+            | "lib/core1.lisp"
+            | "lib/core2.lisp"
+            | "lib/core3.lisp"
+            | "lib/core4.lisp"
+            | "lib/meta-eval.lisp"
+            | "lib/time.lisp"
+            | "lib/utf8.lisp"
+            | "lib/process.lisp"
+            | "lib/tcp.lisp"
+            | "lib/fs.lisp"
+    )
+}
+
+#[test]
+fn active_sens_coverage_report_1673() {
+    let inventory = source_inventory();
+    let repository = coverage_for(&inventory, |_| true);
+    let active_lib = coverage_for(&inventory, is_active_lib_source);
+    let runtime = coverage_for(&inventory, is_runtime_embedded_source);
+
+    eprintln!(
+        "SENS_COVERAGE\tview\tfiles\tnamed\tsens\ttotal\tbasis_points"
+    );
+    for (view, coverage) in [
+        ("repository-source", repository),
+        ("active-lib", active_lib),
+        ("runtime-embedded", runtime),
+    ] {
+        eprintln!(
+            "SENS_COVERAGE\t{view}\t{}\t{}\t{}\t{}\t{}",
+            coverage.files,
+            coverage.named,
+            coverage.sens,
+            coverage.total(),
+            coverage.basis_points()
+        );
+    }
+
+    assert!(
+        active_lib.total() > 0 && runtime.total() > 0,
+        "active SENS coverage views must contain admitted call-heads"
+    );
+}
