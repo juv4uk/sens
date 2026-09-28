@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+GUIX="${GUIX:-}"
+if [[ -z "$GUIX" ]]; then
+  GUIX="$(command -v guix 2>/dev/null || true)"
+  [[ -n "$GUIX" ]] || GUIX=/usr/local/guix-bin/guix
+fi
+
+bash -n "$ROOT/guix/run"
+grep -Fq '(name "sens")' "$ROOT/guix.scm"
+if grep -Fq 'target/release/swarm-node' "$ROOT/packaging/systemd/swarm-node@.service"; then
+  echo "systemd template не повинен запускати repo-built swarm-node" >&2
+  exit 1
+fi
+
+"$ROOT/guix/run" --dry-run all
+"$GUIX" time-machine -C "$ROOT/channels.scm" -- build --dry-run -f "$ROOT/guix.scm"
+printf '%s\n' 'guix substrate: GREEN'

@@ -1,12 +1,12 @@
 [Unit]
-Description=WSM swarm-node %i
+Description=SENS swarm-node %i
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
 EnvironmentFile=%h/.config/swarm-node/%i.env
-ExecStart=/bin/bash -c 'exec %h/GitHub/my-lisp/target/release/swarm-node --port ${SWARM_PORT} --node-id %i --project ${SWARM_PROJECT} --data-dir ${SWARM_DATA_DIR} --bind ${SWARM_BIND} --connect ${SWARM_BOOTSTRAP} --auto-sync ${SWARM_TASKS_FILE} ${SWARM_EXTRA_ARGS}'
+ExecStart=/bin/bash -c 'test -x "$GUIX_PROFILE/bin/swarm-node" && . "$GUIX_PROFILE/etc/profile" && exec "$GUIX_PROFILE/bin/swarm-node" --port "$SWARM_PORT" --node-id %i --project "$SWARM_PROJECT" --data-dir "$SWARM_DATA_DIR" --bind "$SWARM_BIND" --connect "$SWARM_BOOTSTRAP" --auto-sync "$SWARM_TASKS_FILE" $SWARM_EXTRA_ARGS'
 Restart=on-failure
 RestartSec=3
 

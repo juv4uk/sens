@@ -1,8 +1,11 @@
-;; guix shell -m manifest.scm
-;; Toolchain for my-lisp: Rust core/CLI/WASM, plus TLS certs for cargo.
+;; Базове dev-середовище SENS. Evidence-grade запуск: ./guix/run dev -- <команда>
+;; gcc-toolchain оголошений явно, щоб --pure не успадковував linker з host PATH.
 (specifications->manifest
  (quote ("rust"
-   "rust:cargo"
-   "nss-certs"
-   "git"
-   "racket")))
+         "rust:cargo"
+         "gcc-toolchain"
+         "bash"
+         "coreutils"
+         "nss-certs"
+         "git"
+         "racket")))
