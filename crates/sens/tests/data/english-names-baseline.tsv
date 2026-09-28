@@ -1413,7 +1413,6 @@ lisp	scripts/build-inventory.lisp	identity	2
 lisp	scripts/check-core1-compiler-sid-resolver.lisp	pair	3
 lisp	scripts/check-core4-predicate-answer-scale.lisp	second	4
 lisp	scripts/check-core4-predicate-record-inventory.lisp	label	2
-lisp	scripts/check-island-math-evidence.lisp	provenance	2
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	fourth	1
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	second	3
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	third	1
