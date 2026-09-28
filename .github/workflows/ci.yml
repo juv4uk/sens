@@ -60,6 +60,8 @@ jobs:
           set -euo pipefail
           python3 scripts/numeric_source_inventory.py --self-test
           python3 scripts/numeric_source_inventory.py
+          python3 scripts/numeric_source_inventory.py \
+            --check-baseline tests/data/numeric-source-inventory-baseline.json
           python3 scripts/numeric_source_inventory.py --json > /tmp/numeric-source-inventory.json
 
       - name: Semantic fixture path classifier self-test
