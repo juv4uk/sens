@@ -192,7 +192,7 @@ def inventory(files: Iterable[Path]) -> dict:
 def list_category(files: Iterable[Path], category: str, bucket_name: str | None) -> int:
     count = 0
     for path in files:
-        if bucket_name is not None && bucket(path) != bucket_name:
+        if bucket_name is not None and bucket(path) != bucket_name:
             continue
         rel = path.relative_to(REPO_ROOT).as_posix()
         text = path.read_text(encoding="utf-8", errors="replace")
