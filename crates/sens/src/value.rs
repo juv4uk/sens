@@ -149,6 +149,34 @@ impl Rational {
         Self::from_big(numerator, denominator)
     }
 
+    /// Parse an explicit binary integer projection into the same exact
+    /// Rational domain used by ordinary exact integers. The source prefix
+    /// itself is handled by the reader; this function accepts only the
+    /// signed bit payload. It never constructs or aliases a SENS function.
+    pub fn from_binary_integer_literal(text: &str) -> Option<Self> {
+        let (negative, digits) = match text.strip_prefix('-') {
+            Some(rest) => (true, rest),
+            None => (false, text.strip_prefix('+').unwrap_or(text)),
+        };
+        if digits.is_empty() || !digits.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+            return None;
+        }
+
+        let two = BigInt::from_i64(2);
+        let one = BigInt::from_i64(1);
+        let mut value = BigInt::zero();
+        for bit in digits.bytes() {
+            value = value.mul(&two);
+            if bit == b'1' {
+                value = value.add(&one);
+            }
+        }
+        if negative {
+            value = value.neg();
+        }
+        Self::from_big(value, BigInt::from_i64(1))
+    }
+
     /// Parses a decimal literal (like `0.5`, `3.14`, `1e-3`) directly into an exact
     /// arbitrary-precision `Rational`, preserving the full mathematical value
     /// without relying on intermediate floating-point approximations.
