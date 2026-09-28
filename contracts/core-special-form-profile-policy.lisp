@@ -9,7 +9,7 @@
 ;   (core-special-form-profile-policy/1 ROW ...)
 
 (core-special-form-profile-policy/1
-  (owner my-lisp)
+  (owner sens)
   (cond-sid 00000111)
   (identity shared-across-profiles)
   (selection-order profile-before-special-form-mechanism)
@@ -51,5 +51,5 @@
   (global-two-part-bridge retirement-required)
   (host-profile-law-table forbidden)
   (runtime-profile-selector
-    owner my-lisp
+    owner sens
     state active-mechanical-hook))
