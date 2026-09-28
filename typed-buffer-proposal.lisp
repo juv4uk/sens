@@ -25,4 +25,4 @@
                 (backend-selection-changes-result . forbidden)
                 (vendor-api-in-source-semantics . forbidden)))
  (implementation . crates/my-lisp)
- (authority . "language-contract.my 2.2 and tests/fixtures/conformance.my"))
+ (authority . "language-contract.lisp 2.2 and tests/fixtures/conformance.lisp"))
