@@ -1,0 +1,17 @@
+name: Numeric numeral migration evidence
+
+on:
+  pull_request:
+    paths:
+      - "scripts/numeric_source_inventory.py"
+      - ".github/workflows/numeric-inventory-evidence.yml"
+
+jobs:
+  silent-change-cohort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Self-test inventory
+        run: python3 scripts/numeric_source_inventory.py --self-test
+      - name: List binary-shaped multi-bit numerals
+        run: python3 scripts/numeric_source_inventory.py --list-category binary-shaped-multibit-number
