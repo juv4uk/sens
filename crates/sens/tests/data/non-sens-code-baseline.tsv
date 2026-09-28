@@ -362,7 +362,7 @@ source	lib/surface/ukr-acceptance.lisp	6
 source	lib/unify.lisp	1
 source	memory-layout-contract.lisp	1
 source	prototype/lisp_core_phonetics/prototype_phonetics.lisp	6
-source	racket/boot/core.lisp	345
+source	racket/boot/core.lisp	44
 source	racket/examples/constitution.lisp	31
 source	scripts/build-dependency-classification.lisp	3
 source	scripts/build-inventory.lisp	2
