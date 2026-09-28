@@ -409,7 +409,7 @@ impl BigInt {
             return "0".to_string();
         }
         let width = self.bit_length();
-        let mut out = String::with_capacity(width + usize::from(self.negative));
+        let mut out = String::with_capacity(width + self.negative as usize);
         if self.negative {
             out.push('-');
         }
