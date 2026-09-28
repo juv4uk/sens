@@ -22,6 +22,42 @@ guix time-machine -C channels.scm -- shell -m manifest.scm \
 `--check-only` — лише перевірка правильності всіх форм; `--cpu N` —
 прив'язати до ядра; `--samples`/`--warmup` — кількість раундів.
 
+## Post-M8 three-way (#1665)
+
+Після M8 старе порівняння «EN ім'я проти SENS коду» не можна переносити
+на поточний runtime: admitted human surface уже має зводитися до exact SENS
+call. Окремий runner `post_m8_three_way.sh` порівнює на **одному current-main
+бінарнику** три форми того самого workload:
+
+1. `en-text` — англійська людська поверхня, text parse;
+2. `sens-text` — exact 8-bit reader spelling, text parse;
+3. `sens-fasl` — exact SENS binary FASL, one-byte function transport.
+
+Вимірюються три різні питання, які не можна змішувати:
+
+- load/parse/decode: `load - empty`;
+- steady call execution: `(repeat(N) - ready) / N`;
+- one-call end-to-end: `full - empty`.
+
+Правильність усіх трьох форм перевіряється **до** Cachegrind. Runner записує
+raw TSV, SHA/Guix/CPU/Valgrind provenance, Markdown report і JSON summary.
+Немає автоматичного «переможця» чи performance threshold.
+
+Відтворення:
+
+```bash
+guix time-machine -C channels.scm -- shell -m manifest.scm \
+  -m benchmarks/sens-surface/manifest.scm -- \
+  sh -c '
+    cargo build --release -p sens --example ci_bench &&
+    sh benchmarks/sens-surface/post_m8_three_way.sh \
+      target/release/examples/ci_bench
+  '
+```
+
+За замовчуванням evidence пишеться в
+`benchmarks/sens-surface/results/YYYYMMDD-post-m8/`.
+
 ## Методика
 
 - **Спершу правильність:** кожна програма в кожному раунді звіряється з
@@ -127,3 +163,20 @@ load average 1.9–5.6 (паралельно працювали інші аге�
 проти `sens` в окремих раундах опускались нижче 1.0. Це один локальний
 прогін на спільній машині — найнижча сходинка доказу, не CI і не
 незалежне відтворення.
+## Numeric buffer map: bare SENS/FASL (#1567)
+
+`numeric_buffer_map.py` — окремий workload для `01011001`.
+Він не прикидається англійською чи українською поверхнею, бо ця функція не
+admitted на цих поверхнях: програма містить лише exact SENS-коди й `#i32`
+дані, кодується у FASL до вимірювання, мапить `x → x + 1`, а потім читає
+останній елемент. Очікувана відповідь `1` перевіряється до Cachegrind,
+водночас мапування проходить весь буфер.
+
+```bash
+python3 benchmarks/sens-surface/numeric_buffer_map.py \
+  --sens-bench target/release/examples/ci_bench \
+  --size 100000 --measure --reps 3 --out /tmp/sens-numeric-100k
+```
+
+Підтримувані розміри: 1k, 100k і 1M. Артефакт містить FASL, exact SHA,
+hash бінарника, середовище та сирі instruction rows.

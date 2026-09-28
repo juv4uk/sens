@@ -44,7 +44,8 @@ jobs:
         run: |
           rm -rf /tmp/bench && mkdir -p /tmp/bench
           cp benchmarks/sens-surface/run.py benchmarks/sens-surface/ci_bench.sh \
-             benchmarks/sens-surface/ci_compare.py crates/sens/examples/ci_bench.rs /tmp/bench/
+             benchmarks/sens-surface/ci_compare.py benchmarks/sens-surface/numeric_buffer_map.py \
+             crates/sens/examples/ci_bench.rs /tmp/bench/
           python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small \
             --forms en,sens
       - name: Measure base on this runner
@@ -64,6 +65,15 @@ jobs:
           cp /tmp/bench/ci_bench.rs crates/sens/examples/ci_bench.rs
           cargo build --release -p sens --example ci_bench
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/head.tsv
+      - name: "Numeric buffer map: exact SENS FASL correctness and instructions"
+        run: |
+          mkdir -p /tmp/bench/numeric-buffer-map
+          for size in 1000 100000 1000000; do
+            python3 /tmp/bench/numeric_buffer_map.py \
+              --sens-bench target/release/examples/ci_bench \
+              --size "$size" --measure --reps 3 \
+              --out "/tmp/bench/numeric-buffer-map/$size"
+          done
       - name: Compare English Lisp -> SENS, and base -> change
         run: python3 /tmp/bench/ci_compare.py /tmp/bench/base.tsv /tmp/bench/head.tsv --fail-above 3.0
       - name: Upload benchmark evidence
@@ -72,5 +82,7 @@ jobs:
         continue-on-error: true
         with:
           name: sens-bench-instructions
-          path: /tmp/bench/*.tsv
+          path: |
+            /tmp/bench/*.tsv
+            /tmp/bench/numeric-buffer-map/
           retention-days: 1
