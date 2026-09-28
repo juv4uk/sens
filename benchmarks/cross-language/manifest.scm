@@ -3,6 +3,7 @@
 (specifications->manifest
  (quote ("python"
          "lua@5.4"
+         "racket"
          "valgrind"
          "util-linux"
          "coreutils")))
