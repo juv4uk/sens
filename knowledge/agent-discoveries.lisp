@@ -3,19 +3,16 @@
 ;; Призначення: спільна дошка відкриттів рою — щоб жоден агент
 ;; не тримав finding лише в PR-коментарі чи локальній пам'яті.
 ;;
-;; Протокол (також doctrine rule 18):
-;; 1. Знайшов несподіване (RED після M8, колізія surface, layout cost,
-;;    bench gap, island admission) → запис сюди або коментар у issue
-;;    «Agent discovery board» з посиланням на evidence/PR/SHA.
-;; 2. Формат запису: (discovery (date ...) (agent ...) (kind ...) (claim ...)
-;;    (evidence ...) (status confirmed|partial|hypothesis) (action ...))
+;; Протокол (doctrine rule 18):
+;; 1. Знайшов несподіване → запис сюди або коментар у issue #1599.
+;; 2. Формат: kind / claim / evidence / status / action
 ;; 3. Не дублювати semantic authority — лише координаційні факти.
-;; 4. Перед CLAIM нової задачі: прочитай цей файл + open comments на #1590/#1598.
+;; 4. Перед CLAIM: прочитай цей файл + open comments на #1590/#1599.
 
 (agent-discoveries
   (schema . 1)
   (updated . "2026-09-28")
-  (board-issue . 1598)
+  (board-issue . 1599)
   (related . (1590 1413))
 
   (hot-facts
@@ -50,7 +47,7 @@
     (m8-fallout-scan . "grep local bindings that collide with admitted surfaces"))
 
   (how-to-share
-    . "Додай (discovery ...) у цей файл у PR, АБО коментар на issue #1598:
+    . "Додай (discovery ...) у цей файл у PR, АБО коментар на issue #1599:
        ### discovery
        - kind: m8-fallout | bench | island | transport | other
        - claim: одне речення
