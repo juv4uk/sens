@@ -116,8 +116,8 @@ fn uk_le_ge_comparisons_work() {
     );
 }
 
-// ── Aliases absent from semantic-registry.wsm (за-номером/містить? are
-//    plain `(define ... )` aliases in uk.my, not registry-tracked rows),
+// ── Aliases absent from semantic-registry.lisp (за-номером/містить? are
+//    plain `(define ... )` aliases in uk.lisp, not registry-tracked rows),
 //    so no registry-driven sweep sees them. ──
 
 #[test]

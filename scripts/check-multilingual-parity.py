@@ -101,7 +101,7 @@ Die EN/UK/DE-Dokumentation lebt in lib/*.lisp und im Repo-README; die drei
 Sprachen in Schritt zu halten, schützt genau dieser Gate.
 
 Usage:
-    python3 scripts/check-multilingual-parity.py [--root /home/agents/GitHub/my-lisp]
+    python3 scripts/check-multilingual-parity.py [--root /home/agents/GitHub/sens]
     python3 scripts/check-multilingual-parity.py --generated-tables docs/FUNCTIONS.md
 
 Exit code: 0 if no drift, 1 if any gate-level finding (missing section,

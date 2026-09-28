@@ -5,7 +5,7 @@ use sens::{
 
 /// Looks up `key` in a sens alist `((k1 . v1) (k2 . v2) ...)`, already
 /// parsed as `Expr`s (data, not evaluated) — used by the two
-/// `tests/fixtures/conformance.my`-consuming tests below, which read the
+/// `tests/fixtures/conformance.lisp`-consuming tests below, which read the
 /// fixture file as reader-level data rather than executing it.
 fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     entries.iter().find_map(|entry| {
@@ -653,7 +653,7 @@ fn non_strict_comparisons_are_sens_functions_not_rust_builtins() {
     );
 }
 
-/// tests/fixtures/conformance.my is the implementation-independent contract
+/// tests/fixtures/conformance.lisp is the implementation-independent contract
 /// (see CLAUDE.md): any future sens implementation — C, HDL, whatever —
 /// should reproduce these results once it gets the seven primitives and
 /// lambda/def/defmacro right, since everything above that (lib/core.my
@@ -664,7 +664,7 @@ fn non_strict_comparisons_are_sens_functions_not_rust_builtins() {
 /// not `serde_json`; the fixture file no longer needs a foreign format to
 /// stay implementation-independent, it needs sens's own reader, which
 /// every conforming implementation already has by definition.
-/// tests/fixtures/conformance.my — nezalezhnyi vid realizatsii kontrakt
+/// tests/fixtures/conformance.lisp — nezalezhnyi vid realizatsii kontrakt
 /// (dyv. CLAUDE.md): bud-yaka maibutnia realizatsiia sens — C, HDL, shcho
 /// zavhodno — maie vidtvoriuvaty tsi rezultaty, shchoino pravylno realizuie sim
 /// prymityviv i lambda/def/defmacro, bo vse, shcho nad nymy (vkliuchno z
@@ -679,7 +679,7 @@ fn non_strict_comparisons_are_sens_functions_not_rust_builtins() {
 #[test]
 fn conformance_tests_from_my() {
     let forms = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
-        .expect("conformance.my should parse as valid sens source");
+        .expect("conformance.lisp should parse as valid sens source");
 
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session)
@@ -697,7 +697,7 @@ fn conformance_tests_from_my() {
 
     for form in &forms {
         let ExprKind::List(entries) = &form.kind else {
-            panic!("each top-level form in conformance.my should be an alist: {form:?}");
+            panic!("each top-level form in conformance.lisp should be an alist: {form:?}");
         };
         let expr = alist_str(entries, "expr").expect("fixture needs an \"expr\" string");
 
@@ -740,11 +740,11 @@ fn conformance_tests_from_my() {
 #[test]
 fn conformance_fixture_exprs_parse_as_single_form() {
     let forms = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
-        .expect("conformance.my should parse as valid sens source");
+        .expect("conformance.lisp should parse as valid sens source");
 
     for form in &forms {
         let ExprKind::List(entries) = &form.kind else {
-            panic!("each top-level form in conformance.my should be an alist: {form:?}");
+            panic!("each top-level form in conformance.lisp should be an alist: {form:?}");
         };
         let expr = alist_str(entries, "expr").expect("fixture needs an \"expr\" string");
         let expected_error = alist_str(entries, "error");
@@ -798,7 +798,7 @@ fn conformance_fixture_exprs_parse_as_single_form() {
 #[test]
 fn macro_conformance_tests_from_my() {
     let forms = parse(include_str!("../../../tests/fixtures/macro-conformance.lisp"))
-        .expect("macro-conformance.my should parse as valid sens source");
+        .expect("macro-conformance.lisp should parse as valid sens source");
 
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session)
@@ -806,7 +806,7 @@ fn macro_conformance_tests_from_my() {
 
     for form in &forms {
         let ExprKind::List(entries) = &form.kind else {
-            panic!("each top-level form in macro-conformance.my should be an alist: {form:?}");
+            panic!("each top-level form in macro-conformance.lisp should be an alist: {form:?}");
         };
         let expr = alist_str(entries, "expr").expect("fixture needs an \"expr\" string");
 
@@ -1170,22 +1170,22 @@ fn a_dotted_pair_used_directly_as_code_is_an_invalid_form() {
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }
 
-/// `my-lisp-constitution.my` is a *generated projection* over
-/// `tests/fixtures/conformance.my` (`scripts/build-constitution.my`
+/// `my-lisp-constitution.lisp` is a *generated projection* over
+/// `tests/fixtures/conformance.lisp` (`scripts/build-constitution.lisp`
 /// regenerates it) — the same one-source-plus-projection shape
 /// `lib/knowledge.my`'s `*knowledge-journal*` uses for runtime state,
 /// applied here to documentation instead. This test is the CI-enforced
-/// half of that pattern: if someone appends a fixture to `conformance.my`
+/// half of that pattern: if someone appends a fixture to `conformance.lisp`
 /// and forgets to rerun the generator, the two files silently drift — this
 /// test turns that into a loud, immediate failure instead. Both files are
 /// sens data now (2026-08-09, moved off JSON), so this test parses them
 /// the same way `conformance_tests_from_my` does above, not via serde_json.
-/// `my-lisp-constitution.my` — tse *zhenerovana proektsiia* nad
-/// `tests/fixtures/conformance.my` (perehenerovuie `scripts/build-constitution.my`)
+/// `my-lisp-constitution.lisp` — tse *zhenerovana proektsiia* nad
+/// `tests/fixtures/conformance.lisp` (perehenerovuie `scripts/build-constitution.lisp`)
 /// — ta sama forma "odne dzherelo + proektsiia", yaku `*knowledge-journal*`
 /// z `lib/knowledge.my` vykorystovuie dlia rantaim-stanu, zastosovana tut do
 /// dokumentatsii. Tsei test — prymusova CI-polovyna toho paternu: yakshcho khtos
-/// dodast fiksturu v `conformance.my` i zabude pereheneruvaty, tsi dva
+/// dodast fiksturu v `conformance.lisp` i zabude pereheneruvaty, tsi dva
 /// faily movchky roziidutsia — tsei test peretvoriuie tse na nehainyi, huchnyi
 /// proval. Obydva faily teper sens-dani (2026-08-09, pereneseno z JSON),
 /// tozh tsei test parsyt yikh tak samo, yak `conformance_tests_from_my` vyshche,
@@ -1193,17 +1193,17 @@ fn a_dotted_pair_used_directly_as_code_is_an_invalid_form() {
 #[test]
 fn constitution_my_stays_in_sync_with_conformance_my() {
     let conformance = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
-        .expect("conformance.my should parse as valid sens source");
+        .expect("conformance.lisp should parse as valid sens source");
 
     let constitution_forms = parse(include_str!("../../../my-lisp-constitution.lisp"))
-        .expect("my-lisp-constitution.my should parse as valid sens source");
+        .expect("my-lisp-constitution.lisp should parse as valid sens source");
     let fixtures: Vec<&[Expr]> = constitution_forms
         .iter()
         .filter_map(|form| {
             let ExprKind::List(items) = &form.kind else {
                 return None;
             };
-            // `(print (cons (quote fixture) fixture))` in build-constitution.my
+            // `(print (cons (quote fixture) fixture))` in build-constitution.lisp
             // prints as `(fixture (expr . ...) (expected . ...) ...)` — the
             // fixture alist's own entries spliced in as `cons`'s tail, not
             // wrapped in a nested list, since `fixture` here is already a
@@ -1222,20 +1222,20 @@ fn constitution_my_stays_in_sync_with_conformance_my() {
     assert_eq!(
         conformance.len(),
         fixtures.len(),
-        "my-lisp-constitution.my has a different fixture count than conformance.my — \
-         run `cargo run -p sens-cli -- scripts/build-constitution.my > my-lisp-constitution.my` to regenerate it"
+        "my-lisp-constitution.lisp has a different fixture count than conformance.lisp — \
+         run `cargo run -p sens-cli -- scripts/build-constitution.lisp > my-lisp-constitution.lisp` to regenerate it"
     );
 
     for (i, (fact_form, tagged_entries)) in conformance.iter().zip(fixtures.iter()).enumerate() {
         let ExprKind::List(fact_entries) = &fact_form.kind else {
-            panic!("conformance.my fixture #{} should be an alist", i + 1);
+            panic!("conformance.lisp fixture #{} should be an alist", i + 1);
         };
         for key in ["expr", "expected", "error"] {
             assert_eq!(
                 alist_str(fact_entries, key),
                 alist_str(tagged_entries, key),
-                "fixture #{} field \"{key}\" drifted between conformance.my and \
-                 my-lisp-constitution.my — regenerate it",
+                "fixture #{} field \"{key}\" drifted between conformance.lisp and \
+                 my-lisp-constitution.lisp — regenerate it",
                 i + 1
             );
         }
@@ -1288,7 +1288,7 @@ fn symbolic_reasoning_layer_stays_loaded_and_tested() {
     );
 
     let forms = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
-        .expect("conformance.my should parse as valid sens source");
+        .expect("conformance.lisp should parse as valid sens source");
     let tier3_count = forms
         .iter()
         .filter(|form| {
@@ -1313,7 +1313,7 @@ fn symbolic_reasoning_layer_stays_loaded_and_tested() {
 /// heap (S3's own example, "4096 cons cells on an FPGA") without needing
 /// real hardware to verify the claim "bounded implementations fail named,
 /// never silently redefine `cons`'s meaning." The default session (every
-/// `conformance.my` fixture) stays unbounded — this is opt-in, not a new
+/// `conformance.lisp` fixture) stays unbounded — this is opt-in, not a new
 /// default limit on the reference implementation.
 /// S3 nazvav `OutOfMemory` u vlasnomu teksti do toho, yak katehoriia
 /// isnuvala v kodi (znaideno pid chas audytu aksiom pered ratyfikatsiieiu,
@@ -1322,7 +1322,7 @@ fn symbolic_reasoning_layer_stays_loaded_and_tested() {
 /// "4096 cons-komirok na FPGA") bez potreby v realnomu zalizi, shchob
 /// pereviryty tverdzhennia "obmezheni realizatsii provaliuiutsia nazvano,
 /// nikoly ne pereoznachaiut sens `cons` movchky". Typova sesiia (kozhna
-/// fikstura `conformance.my`) lyshaietsia neobmezhenoiu — tse optsiino, ne nova
+/// fikstura `conformance.lisp`) lyshaietsia neobmezhenoiu — tse optsiino, ne nova
 /// typova mezha dlia etalonnoi realizatsii.
 #[test]
 fn cons_respects_an_opt_in_resource_limit_and_fails_named_not_silently() {
