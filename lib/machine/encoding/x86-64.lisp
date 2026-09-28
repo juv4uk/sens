@@ -1113,7 +1113,7 @@
     (10011100 ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-reg-code src)))
       (00100111 102 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
-            15 110 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
+            15 #d110 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
 
 ; MOVQ r64, xmm: opcode 0x66 REX.W 0x0F 0x7E /r
 (00001001 x86-encode-movq-r64-xmm
