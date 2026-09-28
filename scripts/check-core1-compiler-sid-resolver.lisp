@@ -51,9 +51,9 @@
     (00000111
       ((00000010 pairs) () (00000001 ()))
       ((00000010 pairs) (0)
-       (10011101 ((pair (00000101 pairs))
-              (surface (00000101 pair))
-              (sid (00101111 pair))
+       (10011101 ((pair-ref (00000101 pairs))
+              (surface (00000101 pair-ref))
+              (sid (00101111 pair-ref))
               (status (c1r-row-status surface sid c1r-authority-rows)))
          (00000111
            ((00000011 status (00000001 admitted)) (1)

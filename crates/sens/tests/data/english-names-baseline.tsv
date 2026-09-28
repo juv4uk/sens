@@ -1410,7 +1410,6 @@ lisp	racket/examples/constitution.lisp	eq?	4
 lisp	racket/examples/constitution.lisp	quote	18
 lisp	scripts/build-inventory.lisp	assoc	2
 lisp	scripts/build-inventory.lisp	identity	2
-lisp	scripts/check-core1-compiler-sid-resolver.lisp	pair	3
 lisp	scripts/check-core4-predicate-answer-scale.lisp	second	4
 lisp	scripts/check-core4-predicate-record-inventory.lisp	label	2
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	fourth	1
