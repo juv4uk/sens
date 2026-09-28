@@ -1,7 +1,7 @@
 ; yantraos-bridge-contract.lisp — v1 data-only boundary between
-; my-lisp semantic authority and yantraOS execution.
+; SENS semantic authority and yantraOS execution.
 ;
-; my-lisp owns intent/meaning/policy/provenance.
+; SENS owns intent/meaning/policy/provenance.
 ; yantraOS owns host routing, confirmation, sandboxing, execution and audit.
 ; Neither side may reinterpret the other's authority.
 ;

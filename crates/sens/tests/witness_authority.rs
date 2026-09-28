@@ -1,5 +1,5 @@
 //! WITNESS-CORPUS-1 (#113): the corpus owns expected truth; Rust only
-//! transports actual outcomes and asks Lisp-owned witness logic for a verdict.
+//! transports actual outcomes and asks SENS-owned witness logic for a verdict.
 
 use std::fs;
 use std::path::PathBuf;
@@ -868,7 +868,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
         }
     }
 
-    assert!(semantic_kernels.contains("my-lisp"));
+    assert!(semantic_kernels.contains("sens"));
     assert!(semantic_kernels.contains("common-lisp"));
     assert!(live_count > 0);
     assert!(seen_sids.len() >= 4);

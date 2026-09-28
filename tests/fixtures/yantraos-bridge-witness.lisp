@@ -1,7 +1,7 @@
 ; #1145 executable witness for the yantraOS bridge contract.
 ;
 ; The witness proves the intended composition without network access:
-; my-lisp constructs a typed action envelope, yantraOS is represented as
+; SENS constructs a typed action envelope, yantraOS is represented as
 ; the execution owner, and the returned execution observation remains data.
 ; No raw shell command is admitted to the envelope.
 
