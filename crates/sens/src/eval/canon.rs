@@ -4,7 +4,7 @@
 //! mechanism shape for an already-selected SID, but it must never invent a
 //! second named function identity.
 
-use super::{arithmetic, builtins, closures, special_forms};
+use super::{arithmetic, builtins, closures, necessary_forms, special_forms};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -57,17 +57,28 @@ pub(crate) fn surface_has_sid(surface: &str, sid: Sens8) -> bool {
     semantic_registry::semantic_id_for_surface(surface) == Some(sid)
 }
 
+/// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
+/// M8 (#1590): після lower admitted surface → SENS, біндинг `+` не змінює Call.
 pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageError> {
-    let Some(sid) = routed_sid_for_surface(surface) else {
-        return Ok(());
-    };
-    Err(LanguageError::new(
+    if let Some(sid) = routed_sid_for_surface(surface) {
+        return Err(immutable_surface_error(surface, sid, span));
+    }
+    if let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(surface) {
+        if has_primitive(sid) || necessary_forms::identity_for_semantic_id(sid).is_some() {
+            return Err(immutable_surface_error(surface, sid, span));
+        }
+    }
+    Ok(())
+}
+
+fn immutable_surface_error(surface: &str, sid: Sens8, span: Span) -> LanguageError {
+    LanguageError::new(
         ErrorKind::InvalidForm,
         format!(
             "surface routes to immutable function SID · surface маршрутизується до незмінного function SID · Surface verweist auf unveränderliche Funktions-SID: {surface} -> {sid}"
         ),
         span,
-    ))
+    )
 }
 
 pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), LanguageError> {
@@ -390,5 +401,12 @@ mod tests {
     fn special_form_routes_do_not_materialize_callable_values() {
         assert_eq!(value_for_sid(crate::sens!(00000001)), None);
         assert_eq!(value_for_sid(crate::sens!(00000111)), None);
+    }
+
+    #[test]
+    fn plus_surface_is_not_bindable_after_m8() {
+        let span = Span { start: 0, end: 1 };
+        assert!(ensure_bindable("+", span).is_err());
+        assert!(ensure_bindable("-", span).is_err());
     }
 }
