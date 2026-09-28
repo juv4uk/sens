@@ -496,8 +496,8 @@ lisp	lib/core.lisp	identity	1
 lisp	lib/core.lisp	isqrt	1
 lisp	lib/core.lisp	largest-chunk	1
 lisp	lib/core.lisp	length	1
-lisp	lib/core.lisp	let	9
-lisp	lib/core.lisp	let*	4
+lisp	lib/core.lisp	let	1
+lisp	lib/core.lisp	let*	1
 lisp	lib/core.lisp	list	1
 lisp	lib/core.lisp	map	1
 lisp	lib/core.lisp	maplist	1
@@ -552,8 +552,8 @@ lisp	lib/core4.lisp	identity	1
 lisp	lib/core4.lisp	isqrt	1
 lisp	lib/core4.lisp	largest-chunk	1
 lisp	lib/core4.lisp	length	1
-lisp	lib/core4.lisp	let	9
-lisp	lib/core4.lisp	let*	4
+lisp	lib/core4.lisp	let	1
+lisp	lib/core4.lisp	let*	1
 lisp	lib/core4.lisp	list	1
 lisp	lib/core4.lisp	map	1
 lisp	lib/core4.lisp	maplist	1
