@@ -103,7 +103,7 @@
 (00001001 life-scheduler-projection-ready?
   (00001000 (invocation projections)
     (10011101 ((trigger (life-scheduler-field invocation (00000001 trigger)))
-           (provenance (life-scheduler-field invocation (00000001 provenance-ref))))
+           (provenance-ref-value (life-scheduler-field invocation (00000001 provenance-ref))))
       (00000111
         ((00000010 trigger) ()
          (00000001 absent))
@@ -121,7 +121,7 @@
                 (00100111
                   (00000001 projection-ready)
                   (00000101 tail)
-                  provenance)
+                  provenance-ref-value)
                 projections)))))))))
 
 (00001001 life-scheduler-select-ready
