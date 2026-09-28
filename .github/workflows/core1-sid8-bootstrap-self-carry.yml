@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   core1-sid8-self-carry:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout sens
         uses: actions/checkout@v5
