@@ -23,14 +23,23 @@ from collections import defaultdict
 
 
 def load(path):
-    """(workload, form, mode) -> список інструкцій по повторах."""
+    """(workload, form, mode) -> список інструкцій по повторах; params —
+    розмір навантаження на кожне ім'я (#1587). Стара п'ятиколонкова схема
+    (без params) приймається: параметр стає "-", а не мовчазною втратою."""
     rows = defaultdict(list)
+    params = {}
     with open(path, encoding="utf-8") as fh:
         next(fh)
         for line in fh:
-            name, form, mode, _rep, count = line.rstrip("\n").split("\t")
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) == 6:
+                name, param, form, mode, _rep, count = parts
+            else:
+                name, form, mode, _rep, count = parts
+                param = "-"
             rows[(name, form, mode)].append(int(count))
-    return rows
+            params.setdefault(name, param)
+    return rows, params
 
 
 def option(name, default=None):
@@ -54,7 +63,8 @@ def geomean(ratios):
 
 
 def main():
-    base, head = load(sys.argv[1]), load(sys.argv[2])
+    (base, base_params), (head, head_params) = load(sys.argv[1]), load(sys.argv[2])
+    params = {**base_params, **head_params}
     threshold = float(option("--fail-above", "3.0"))
     empty = ("empty", "-", "full")
     head_empty, base_empty = median(head, empty), median(base, empty)
@@ -70,12 +80,15 @@ def main():
         "функція = 1 байт. Інструкції процесора (valgrind), медіана 3 повторів, "
         "вартість створення сесії віднято. **×більше 1 — SENS швидший.**",
         "",
+        "#1587: кожен рядок несе свій розмір (params). Порівняння «×N швидше» —",
+        "лише в межах одного розміру; крос-розмірних висновків цей звіт не робить.",
+        "",
     ]
     for mode, title in (("full", "Виконання програми"), ("load", "Завантаження програми")):
         lines += [
             f"### {title}",
             "",
-            "| навантаження | англійська | SENS | SENS швидший |",
+            "| навантаження · розмір | англійська | SENS | SENS швидший |",
             "|---|---:|---:|---:|",
         ]
         ratios = []
@@ -83,19 +96,19 @@ def main():
             en = net(head, head_empty, name, "en", mode)
             sens = net(head, head_empty, name, "sens", mode)
             ratios.append(en / sens)
-            lines.append(f"| {name} | {en:,.0f} | {sens:,.0f} | ×{en / sens:.3f} |")
+            lines.append(f"| {name} · {params.get(name, '-')} | {en:,.0f} | {sens:,.0f} | ×{en / sens:.3f} |")
         g = geomean(ratios)
-        lines += [f"| **геометричне середнє** | | | **×{g:.3f}** |", ""]
+        lines += [f"| **геометричне середнє** (усереднено по навантаженнях, не по розмірах) | | | **×{g:.3f}** |", ""]
 
     lines += [
         f"### Прогрес цього коміту — виконання (проти попереднього; уповільнення гірше ніж −{threshold:.1f}% — червоне)",
         "",
-        "| навантаження | SENS | англійська |",
+        "| навантаження · розмір | SENS | англійська |",
         "|---|---:|---:|",
     ]
     regressions, improvements = [], []
     for name in names:
-        cells = [name]
+        cells = [f"{name} · {params.get(name, '-')}"]
         for form in ("sens", "en"):
             if (name, form, "full") not in base:
                 cells.append("нове")
@@ -120,7 +133,7 @@ def main():
         "",
         f"Створення сесії: попередній коміт {base_empty:,.0f}, зараз {head_empty:,.0f}.",
         "",
-        "| навантаження | режим | англійська | SENS |",
+        "| навантаження · розмір | режим | англійська | SENS |",
         "|---|---|---:|---:|",
     ]
     for name in names:
@@ -129,7 +142,7 @@ def main():
             for form in ("en", "sens"):
                 key = (name, form, mode)
                 cells.append(f"{median(head, key):,.0f} (±{spread(head, key):.2f}%)")
-            lines.append(f"| {name} | {mode} | {cells[0]} | {cells[1]} |")
+            lines.append(f"| {name} · {params.get(name, '-')} | {mode} | {cells[0]} | {cells[1]} |")
     lines += ["", "</details>"]
 
     report = "\n".join(lines) + "\n"

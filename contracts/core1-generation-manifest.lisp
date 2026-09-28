@@ -5,7 +5,12 @@
    (commit . "6031f92652066825a245c806c0773e9e524257bd")
    (source-path . "mccarthy-kernel.s")
    (source-sha256 . "20bdd714a4072cd45ce782bb0b4597a1ff3e96b35624ff86188fb7bb3f455cdd")
-   (binary-sha256 . "30f903e15ab0b0b7007b1005ceca449497bda312389863f0990390c8beeb9ef7")
+   (build-system . guix-time-machine)
+   (guix-channel-commit . "5375f33fd48ffc3b39ecc1c5993e299258a043d8")
+   (build-package . "gcc-toolchain")
+   (build-command . "gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s")
+   (artifact-scope . x86_64-linux-pinned-guix-closure)
+   (binary-sha256 . "3283cec94edb4211f2aaa4fee5d52c4f9b6add72b1d1db36c142788bf548cfa0")
    (semantic-authority . no)
    (status . witnessed))
 
@@ -13,7 +18,7 @@
    (role . lisp-owned-bootstrap)
    (repository . juv4uk/sens)
    (path . "lib/core1.lisp")
-   (source-sha256 . "d58d0161e2c0ba6e91f760f8e8b4baa304a307ca7362d299c7e402ab67d4c9ba")
+   (source-sha256 . "fa858aed41abd51957ebdc696eb332d799bb750faf7bb7074c18286c573254a4")
    (executed-by . s0)
    (mechanism . historical-function-funarg-plus-zero-copy-lisp-owned-dispatch)
    (witnesses .
@@ -21,6 +26,7 @@
       (core1-lambda-representation . "T")
       (closure-capture . "(A . B)")
       (self-recursive-definition . "C")
+      (self-source-load . "(00000100 Y T)")
       (unsupported-modern-identity .
         ((sid . 01001111)
          (surface . VECTOR)

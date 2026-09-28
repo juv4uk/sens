@@ -298,11 +298,33 @@ def render(template, form, params):
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# #1586: іменований контекст навантаження машини. Правило зафіксовано явно,
+# щоб споживач замірів (поріг вибору CPU/карта, #1568) не виводив поріг із
+# замірів під робочим навантаженням без позначки: CPU-база з «хворої»
+# машини — це налаштований на хвору машину поріг.
+LOAD_CONTEXT_RULE = "idle: load1 < 0.25*nproc; high: інакше; unknown: nproc недоступний"
+
+
+def load_context(load1, nproc):
+    """Класифікує контекст навантаження за #1586. Названий стан, не мовчазне
+    припущення: 'unknown' краще за фальшиве 'idle'."""
+    if nproc is None or nproc <= 0:
+        return "unknown"
+    return "idle" if load1 < 0.25 * nproc else "high"
+
+
+def params_str(params):
+    """#1587: канонічний рядок розміру навантаження для кожного рядка звіту."""
+    return ",".join(f"{k}={v}" for k, v in sorted(params.items()))
+
+
 def run_once(sens, path, cpu):
     cmd = [sens, str(path)]
     if cpu is not None:
         cmd = ["taskset", "-c", str(cpu)] + cmd
     load1 = os.getloadavg()[0]
+    ctx = load_context(load1, os.cpu_count())
     started = time.perf_counter()
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _, status, rusage = os.wait4(proc.pid, 0)
@@ -318,6 +340,7 @@ def run_once(sens, path, cpu):
         "maxrss_kb": rusage.ru_maxrss,
         "exit": os.waitstatus_to_exitcode(status),
         "load1": load1,
+        "load_context": ctx,
         "stdout": stdout,
         "stderr": stderr,
     }
@@ -392,15 +415,21 @@ def main():
     if args.emit:
         emit = Path(args.emit)
         emit.mkdir(parents=True, exist_ok=True)
+        # #1587: params.tsv — розмір кожного навантаження є частиною
+        # випуску; споживачі (ci_bench.sh, майбутній GPU-3 #1567) не мають
+        # права виводити рядок без розміру.
+        param_rows = []
         for name in names:
             wl = WORKLOADS[name]
             params = wl["small"] if args.small else wl["params"]
+            param_rows.append(f"{name}\t{params_str(params)}")
             for form in FORMS:
                 (emit / f"{name}-{form}.setup.lisp").write_text(
                     render(wl["setup"], form, params), encoding="utf-8")
                 (emit / f"{name}-{form}.call.lisp").write_text(
                     render(wl["call"], form, params) + "\n", encoding="utf-8")
             (emit / f"{name}.expected").write_text(wl["expected"](params) + "\n")
+        (emit / "params.tsv").write_text("\n".join(param_rows) + "\n", encoding="utf-8")
         print(f"записано в {emit}")
         return
 
@@ -447,8 +476,8 @@ def main():
         order = FORMS[rnd % len(FORMS):] + FORMS[:rnd % len(FORMS)]
         r = run_once(args.sens, empty, args.cpu)
         runs.append({"round": rnd, "warmup": warm, "workload": "empty",
-                     "form": "-", **{k: v for k, v in r.items()
-                                     if k not in ("stdout", "stderr")}})
+                     "params": "-", "form": "-", **{k: v for k, v in r.items()
+                                             if k not in ("stdout", "stderr")}})
         for name in names:
             for form in order:
                 r = run_once(args.sens, programs[(name, form)], args.cpu)
@@ -457,6 +486,7 @@ def main():
                     print(f"ПОМИЛКА в раунді {rnd}: {name}/{form}", r["stderr"][:300])
                     sys.exit(3)
                 runs.append({"round": rnd, "warmup": warm, "workload": name,
+                             "params": params_str(WORKLOADS[name]["active"]),
                              "form": form, **{k: v for k, v in r.items()
                                               if k not in ("stdout", "stderr")}})
         print(f"[round {rnd + 1}/{total_rounds}{' warmup' if warm else ''}] "
@@ -508,6 +538,10 @@ def main():
     facts["cpu_pin"] = args.cpu
     facts["load1_range"] = [min(r["load1"] for r in measured),
                             max(r["load1"] for r in measured)]
+    # #1586: названий контекст замірів; правило вище, у LOAD_CONTEXT_RULE.
+    facts["load_context"] = load_context(
+        statistics.median(r["load1"] for r in measured), os.cpu_count())
+    facts["load_context_rule"] = LOAD_CONTEXT_RULE
 
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     out = Path(args.out) if args.out else (
@@ -516,8 +550,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     (out / "env.json").write_text(json.dumps(facts, ensure_ascii=False, indent=2))
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2))
-    cols = ["round", "warmup", "workload", "form", "wall_s", "user_s", "sys_s",
-            "maxrss_kb", "exit", "load1"]
+    cols = ["round", "warmup", "workload", "params", "form", "wall_s", "user_s", "sys_s",
+            "maxrss_kb", "exit", "load1", "load_context"]
     with open(out / "runs.tsv", "w", encoding="utf-8") as fh:
         fh.write("\t".join(cols) + "\n")
         for r in runs:
@@ -532,7 +566,9 @@ def main():
     print(f"sha={facts['git_sha'][:8]} rustc={facts['rustc']} guix={facts['guix_environment']}")
     print(f"старт (порожня програма): медіана {startup_med:.3f}s "
           f"[{min(startup):.3f}–{max(startup):.3f}]; load1 {facts['load1_range']}")
-    print(f"{'навантаження':10s} {'форма':5s} {'wall мед.':>9s} {'обчисл.':>8s} "
+    print(f"контекст навантаження: {facts['load_context']} "
+          f"(правило: {facts['load_context_rule']})")
+    print(f"{'навантаження':10s} {'параметри':18s} {'форма':5s} {'wall мед.':>9s} {'обчисл.':>8s} "
           f"{'min–max':>15s} {'/sens (мед. [min–max])':>24s}")
     for name in names:
         s = summary["workloads"][name]
@@ -540,7 +576,7 @@ def main():
             f = s["forms"][form]
             r = s["ratio_vs_sens"][form]
             rs = f"{r['median']:.3f} [{r['min']:.3f}–{r['max']:.3f}]" if r else "n/a"
-            print(f"{name:10s} {form:5s} {f['wall_median']:9.3f} {f['compute_median']:8.3f} "
+            print(f"{name:10s} {params_str(s['params']):18s} {form:5s} {f['wall_median']:9.3f} {f['compute_median']:8.3f} "
                   f"{f['wall_min']:7.3f}–{f['wall_max']:<7.3f} {rs:>24s}")
 
 

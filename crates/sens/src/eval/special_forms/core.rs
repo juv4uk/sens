@@ -217,7 +217,9 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             ExprKind::Sid(sid) => Value::Sid(*sid),
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
-            ExprKind::Symbol(symbol) => Value::Symbol(symbol.clone()),
+            ExprKind::Symbol(symbol) | ExprKind::Local { name: symbol, .. } => {
+                Value::Symbol(symbol.clone())
+            }
             ExprKind::List(items) => {
                 let mut out = Vec::with_capacity(items.len());
                 for item in items.iter() {

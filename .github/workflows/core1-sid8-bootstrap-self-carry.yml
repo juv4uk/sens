@@ -3,7 +3,11 @@ name: Core1 SID8 bootstrap self-carry
 on:
   pull_request:
     paths:
+      - "lib/core1.lisp"
       - "lib/core1-sid8-bootstrap-overlay.lisp"
+      - "contracts/core1-generation-manifest.lisp"
+      - "contracts/core1-s3-compiler-prelude.lisp"
+      - "scripts/check-core1-self-load.sh"
       - ".github/workflows/core1-sid8-bootstrap-self-carry.yml"
   workflow_dispatch:
 
@@ -17,11 +21,11 @@ jobs:
       - name: Checkout sens
         uses: actions/checkout@v5
 
-      - name: Guard historical Core1 source is untouched
+      - name: Guard pinned Core1 self-load source
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object lib/core1.lisp)" = "00b54cfab977b03be8ecaeea9c4734941325fa29"
+          test "$(git hash-object lib/core1.lisp)" = "a2f184373428bc516a0b03491dfabfb3255d07ef"
           ! grep -E '"[01]{8}"' lib/core1-sid8-bootstrap-overlay.lisp
           ! grep -E '\(QUOTE[[:space:]]+[01]{8}\)' lib/core1-sid8-bootstrap-overlay.lisp
           ! grep -E '\(CONS[[:space:]]+\(CONS[[:space:]]+[01]{8}' lib/core1-sid8-bootstrap-overlay.lisp
@@ -40,6 +44,12 @@ jobs:
       - name: Build historical S0
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         run: gcc -no-pie -O0 -s -o mccarthy-eval/mccarthy-kernel mccarthy-eval/mccarthy-kernel.s
+
+      - name: Execute Core1 source through Core1 itself
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        env:
+          MCCARTHY_KERNEL: ${{ github.workspace }}/mccarthy-eval/mccarthy-kernel
+        run: scripts/check-core1-self-load.sh
 
       - name: Execute direct Core1 SID8 self-carry witness
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}

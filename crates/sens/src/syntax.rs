@@ -78,6 +78,11 @@ pub enum ExprKind {
     /// SENS call: the function slot is exactly one byte (`Sens8`), no name
     /// text. Produced only by `eval::lower` after parsing.
     Call(Sens8, Rc<[Expr]>),
+    /// Параметр замикання за номером: слот `index` кадру виклику на `depth`
+    /// кадрів вище. Створює лише розв'язувач тіла `lambda` (`eval::closures`);
+    /// парсер його не породжує, у fasl він записується як ім'я `name`.
+    /// A closure parameter by slot, produced only by the lambda-body resolver.
+    Local { depth: u32, index: u32, name: Rc<str> },
 }
 
 // Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
@@ -99,8 +104,9 @@ pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 /// callers fall back to text parsing (never a wrong program).
 pub(crate) mod fasl {
     use super::{Exactness, Expr, ExprKind};
-    use crate::value::Rational;
+    use crate::value::{NumericBuffer, Rational};
     use std::rc::Rc;
+    use std::sync::Arc;
 
     pub const FASL_FORMAT_VERSION: u32 = 3;
 
@@ -111,6 +117,10 @@ pub(crate) mod fasl {
     const TAG_LIST: u8 = 5;
     const TAG_PAIR: u8 = 6;
     const TAG_BINARY: u8 = 7;
+    // Адитивні v3 tags: старі snapshots лишаються байт-в-байт незмінними,
+    // а старий decoder fail-closed відхилить новий tag як невідомий.
+    const TAG_I32_BUFFER: u8 = 8;
+    const TAG_F32_BUFFER: u8 = 9;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -153,7 +163,7 @@ pub(crate) mod fasl {
                 out.push(TAG_STRING);
                 put_str(out, value);
             }
-            ExprKind::Symbol(symbol) => {
+            ExprKind::Symbol(symbol) | ExprKind::Local { name: symbol, .. } => {
                 out.push(TAG_SYMBOL);
                 put_str(out, symbol);
             }
@@ -179,11 +189,19 @@ pub(crate) mod fasl {
                     encode_expr(argument, out);
                 }
             }
-            // Runtime-constructed buffers are not source syntax; a program
-            // containing one cannot come from lib/*.my text, so snapshots
-            // refuse them and callers fall back to parsing.
-            ExprKind::NumericBuffer(_) => {
-                unreachable!("NumericBuffer is runtime-only, never parsed")
+            ExprKind::NumericBuffer(NumericBuffer::I32(values)) => {
+                out.push(TAG_I32_BUFFER);
+                put_u32(out, values.len() as u32);
+                for value in values.iter() {
+                    out.extend_from_slice(&value.to_le_bytes());
+                }
+            }
+            ExprKind::NumericBuffer(NumericBuffer::F32(values)) => {
+                out.push(TAG_F32_BUFFER);
+                put_u32(out, values.len() as u32);
+                for value in values.iter() {
+                    out.extend_from_slice(&value.to_bits().to_le_bytes());
+                }
             }
         }
     }
@@ -223,6 +241,33 @@ pub(crate) mod fasl {
                 let head = decode_expr(bytes, pos)?;
                 let tail = decode_expr(bytes, pos)?;
                 ExprKind::Pair(Rc::new(head), Rc::new(tail))
+            }
+            TAG_I32_BUFFER => {
+                let count = get_u32(bytes, pos)? as usize;
+                let byte_len = count.checked_mul(std::mem::size_of::<i32>())?;
+                let raw = bytes.get(*pos..pos.checked_add(byte_len)?)?;
+                *pos += byte_len;
+                let mut values = Vec::with_capacity(count.min(1 << 22));
+                for chunk in raw.chunks_exact(4) {
+                    values.push(i32::from_le_bytes(chunk.try_into().ok()?));
+                }
+                ExprKind::NumericBuffer(NumericBuffer::I32(Arc::from(values)))
+            }
+            TAG_F32_BUFFER => {
+                let count = get_u32(bytes, pos)? as usize;
+                let byte_len = count.checked_mul(std::mem::size_of::<u32>())?;
+                let raw = bytes.get(*pos..pos.checked_add(byte_len)?)?;
+                *pos += byte_len;
+                let mut values = Vec::with_capacity(count.min(1 << 22));
+                for chunk in raw.chunks_exact(4) {
+                    let bits = u32::from_le_bytes(chunk.try_into().ok()?);
+                    let value = f32::from_bits(bits);
+                    if !value.is_finite() {
+                        return None;
+                    }
+                    values.push(value);
+                }
+                ExprKind::NumericBuffer(NumericBuffer::F32(Arc::from(values)))
             }
             _ => return None,
         };
@@ -276,6 +321,368 @@ pub(crate) mod fasl {
     }
 }
 
+/// Компактний формат програм для обміну між агентами (SENS wire).
+///
+/// На відміну від fasl (кеш розбору ядра з хешем джерела), тут немає хешу й
+/// фіксованих u32: малі цілі — 1 байт, список до 15 елементів — 1 байт
+/// заголовка, довжини — varint, функція СЕНС — тег + 1 байт. Вхід вважається
+/// недовіреним: глибина й розміри обмежені, будь-яка невідповідність — None.
+pub(crate) mod wire {
+    use super::{Exactness, Expr, ExprKind, MAX_STRUCTURE_DEPTH};
+    use crate::value::Rational;
+    use std::rc::Rc;
+
+    const MAGIC: &[u8; 3] = b"SW\x01";
+    const SMALL_INT_END: u8 = 0x40; // 0x00..0x3F — ціле 0..63
+    const SHORT_LIST: u8 = 0x40; // 0x40..0x4F — список із 0..15 елементів
+    const SHORT_LIST_END: u8 = 0x50;
+    const TAG_LIST: u8 = 0x50;
+    const TAG_BINARY: u8 = 0x51;
+    const TAG_INTEGER: u8 = 0x52;
+    const TAG_NUMBER: u8 = 0x53;
+    const TAG_RATIONAL: u8 = 0x54;
+    const TAG_STRING: u8 = 0x55;
+    const TAG_SYMBOL: u8 = 0x56;
+    const TAG_PAIR: u8 = 0x57;
+    /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
+    const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
+
+    fn put_varint(out: &mut Vec<u8>, mut value: u64) {
+        while value >= 0x80 {
+            out.push((value as u8) | 0x80);
+            value >>= 7;
+        }
+        out.push(value as u8);
+    }
+
+    fn get_varint(bytes: &[u8], pos: &mut usize) -> Option<u64> {
+        let mut value = 0u64;
+        for shift in (0..64).step_by(7) {
+            let byte = *bytes.get(*pos)?;
+            *pos += 1;
+            value |= u64::from(byte & 0x7F) << shift;
+            if byte < 0x80 {
+                return Some(value);
+            }
+        }
+        None
+    }
+
+    fn put_text(out: &mut Vec<u8>, tag: u8, text: &str) {
+        out.push(tag);
+        put_varint(out, text.len() as u64);
+        out.extend_from_slice(text.as_bytes());
+    }
+
+    fn get_text<'a>(bytes: &'a [u8], pos: &mut usize) -> Option<&'a str> {
+        let len = usize::try_from(get_varint(bytes, pos)?).ok()?;
+        let slice = bytes.get(*pos..pos.checked_add(len)?)?;
+        *pos += len;
+        std::str::from_utf8(slice).ok()
+    }
+
+    fn put_list_header(out: &mut Vec<u8>, count: usize) {
+        if count < usize::from(SHORT_LIST_END - SHORT_LIST) {
+            out.push(SHORT_LIST + count as u8);
+        } else {
+            out.push(TAG_LIST);
+            put_varint(out, count as u64);
+        }
+    }
+
+    /// Точне ціле, яке f64 зберігає без втрат (включно зі знаком нуля).
+    fn exact_integer(value: f64, exactness: &Exactness) -> Option<i64> {
+        if !matches!(exactness, Exactness::Exact) || value.abs() >= EXACT_INTEGER_LIMIT {
+            return None;
+        }
+        let integer = value as i64;
+        ((integer as f64).to_bits() == value.to_bits()).then_some(integer)
+    }
+
+    fn encode_expr(expr: &Expr, out: &mut Vec<u8>) {
+        match &expr.kind {
+            ExprKind::Number(value, exactness) => match exact_integer(*value, exactness) {
+                Some(integer) if (0..i64::from(SMALL_INT_END)).contains(&integer) => {
+                    out.push(integer as u8);
+                }
+                Some(integer) => {
+                    out.push(TAG_INTEGER);
+                    put_varint(out, ((integer << 1) ^ (integer >> 63)) as u64);
+                }
+                None => {
+                    out.push(TAG_NUMBER);
+                    out.extend_from_slice(&value.to_le_bytes());
+                    out.push(matches!(exactness, Exactness::Inexact) as u8);
+                }
+            },
+            ExprKind::Rational(rational) => {
+                out.push(TAG_RATIONAL);
+                rational.write_fasl(out);
+            }
+            ExprKind::Sid(sid) => {
+                out.push(TAG_BINARY);
+                out.push(sid.packed_byte());
+            }
+            ExprKind::String(value) => put_text(out, TAG_STRING, value),
+            ExprKind::Symbol(symbol) | ExprKind::Local { name: symbol, .. } => {
+                put_text(out, TAG_SYMBOL, symbol);
+            }
+            ExprKind::List(items) => {
+                put_list_header(out, items.len());
+                for item in items.iter() {
+                    encode_expr(item, out);
+                }
+            }
+            ExprKind::Pair(head, tail) => {
+                out.push(TAG_PAIR);
+                encode_expr(head, out);
+                encode_expr(tail, out);
+            }
+            ExprKind::Call(sid, arguments) => {
+                put_list_header(out, arguments.len() + 1);
+                out.push(TAG_BINARY);
+                out.push(sid.packed_byte());
+                for argument in arguments.iter() {
+                    encode_expr(argument, out);
+                }
+            }
+            ExprKind::NumericBuffer(_) => {
+                unreachable!("NumericBuffer is runtime-only, never parsed")
+            }
+        }
+    }
+
+    fn expr(kind: ExprKind) -> Expr {
+        Expr {
+            kind,
+            span: crate::Span { start: 0, end: 0 },
+        }
+    }
+
+    /// Незавершений контейнер на явному стеку декодера.
+    enum Open {
+        List { remaining: usize, items: Vec<Expr> },
+        Pair { head: Option<Expr> },
+    }
+
+    /// Один вираз без рекурсії: вхід недовірений, тож глибина вкладеності не
+    /// повинна залежати від розміру стеку потоку (debug-збірка, малий стек).
+    /// Глибину все одно обмежено `MAX_STRUCTURE_DEPTH` — решта інтерпретатора
+    /// обходить дерево рекурсивно.
+    fn decode_expr(bytes: &[u8], pos: &mut usize) -> Option<Expr> {
+        let mut stack: Vec<Open> = Vec::new();
+        loop {
+            let mut done = match decode_step(bytes, pos)? {
+                Step::Value(kind) => expr(kind),
+                Step::Open(open) => {
+                    if stack.len() as u32 >= MAX_STRUCTURE_DEPTH {
+                        return None;
+                    }
+                    match open {
+                        Open::List { remaining: 0, .. } => expr(ExprKind::List(Rc::from([]))),
+                        open => {
+                            stack.push(open);
+                            continue;
+                        }
+                    }
+                }
+            };
+            // Готове значення піднімається вгору, закриваючи заповнені контейнери.
+            loop {
+                match stack.last_mut() {
+                    None => return Some(done),
+                    Some(Open::List { remaining, items }) => {
+                        items.push(done);
+                        *remaining -= 1;
+                        if *remaining > 0 {
+                            break;
+                        }
+                        let Some(Open::List { items, .. }) = stack.pop() else { unreachable!() };
+                        done = expr(ExprKind::List(items.into()));
+                    }
+                    Some(Open::Pair { head }) => {
+                        if head.is_none() {
+                            *head = Some(done);
+                            break;
+                        }
+                        let Some(Open::Pair { head: Some(head) }) = stack.pop() else { unreachable!() };
+                        done = expr(ExprKind::Pair(Rc::new(head), Rc::new(done)));
+                    }
+                }
+            }
+        }
+    }
+
+    enum Step {
+        Value(ExprKind),
+        Open(Open),
+    }
+
+    fn open_list(bytes: &[u8], pos: usize, count: usize) -> Option<Step> {
+        // Кожен елемент займає щонайменше 1 байт — більший лічильник брехливий.
+        if count > bytes.len().saturating_sub(pos) {
+            return None;
+        }
+        Some(Step::Open(Open::List {
+            remaining: count,
+            items: Vec::with_capacity(count),
+        }))
+    }
+
+    fn decode_step(bytes: &[u8], pos: &mut usize) -> Option<Step> {
+        let tag = *bytes.get(*pos)?;
+        *pos += 1;
+        let kind = match tag {
+            0..SMALL_INT_END => ExprKind::Number(f64::from(tag), Exactness::Exact),
+            SHORT_LIST..SHORT_LIST_END => {
+                return open_list(bytes, *pos, usize::from(tag - SHORT_LIST));
+            }
+            TAG_LIST => {
+                let count = usize::try_from(get_varint(bytes, pos)?).ok()?;
+                return open_list(bytes, *pos, count);
+            }
+            TAG_PAIR => return Some(Step::Open(Open::Pair { head: None })),
+            TAG_BINARY => {
+                let value = *bytes.get(*pos)?;
+                *pos += 1;
+                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+            }
+            TAG_INTEGER => {
+                let zigzag = get_varint(bytes, pos)?;
+                let integer = ((zigzag >> 1) as i64) ^ -((zigzag & 1) as i64);
+                if integer.unsigned_abs() as f64 >= EXACT_INTEGER_LIMIT {
+                    return None;
+                }
+                ExprKind::Number(integer as f64, Exactness::Exact)
+            }
+            TAG_NUMBER => {
+                let bits = bytes.get(*pos..*pos + 8)?;
+                *pos += 8;
+                let exact = match bytes.get(*pos)? {
+                    0 => Exactness::Exact,
+                    1 => Exactness::Inexact,
+                    _ => return None,
+                };
+                *pos += 1;
+                ExprKind::Number(f64::from_le_bytes(bits.try_into().ok()?), exact)
+            }
+            TAG_RATIONAL => ExprKind::Rational(Rational::read_fasl(bytes, pos)?),
+            TAG_STRING => ExprKind::String(get_text(bytes, pos)?.into()),
+            TAG_SYMBOL => ExprKind::Symbol(get_text(bytes, pos)?.into()),
+            _ => return None,
+        };
+        Some(Step::Value(kind))
+    }
+
+    /// Магія `SW\x01` + varint кількість виразів + вирази.
+    pub fn encode_program(expressions: &[Expr]) -> Vec<u8> {
+        let mut out = MAGIC.to_vec();
+        put_varint(&mut out, expressions.len() as u64);
+        for expr in expressions {
+            encode_expr(expr, &mut out);
+        }
+        out
+    }
+
+    pub fn decode_program(bytes: &[u8]) -> Option<Vec<Expr>> {
+        if bytes.get(0..3)? != MAGIC {
+            return None;
+        }
+        let mut pos = 3;
+        let count = usize::try_from(get_varint(bytes, &mut pos)?).ok()?;
+        if count > bytes.len() - pos {
+            return None;
+        }
+        let mut out = Vec::with_capacity(count);
+        for _ in 0..count {
+            out.push(decode_expr(bytes, &mut pos)?);
+        }
+        (pos == bytes.len()).then_some(out)
+    }
+}
+
+#[cfg(test)]
+mod wire_tests {
+    use super::wire::{decode_program, encode_program};
+    use super::{fasl, Expr, ExprKind};
+    use crate::parser::parse;
+
+    const SAMPLE: &str = r#"
+(00001011 f (00001000 (n) (00000111 ((00000011 n 0) 0) (t (00001100 n (f (00001101 n 1)))))))
+(f 12)
+(00000101 (00000110 (00000001 (64 85 24 38 36 75 1000000 -7 -0.0 0.25 9007199254740991))))
+(00001111 1 3)
+"рядок з кирилицею"
+(00000001 (a b . c))
+(00000001 (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17))
+"#;
+
+    #[test]
+    fn wire_local_serializes_as_original_symbol() {
+        let expression = Expr {
+            kind: ExprKind::Local {
+                depth: 2,
+                index: 3,
+                name: "slot-name".into(),
+            },
+            span: crate::Span { start: 0, end: 9 },
+        };
+
+        let encoded = encode_program(&[expression]);
+        let decoded = decode_program(&encoded).expect("wire decodes local as source data");
+        assert!(matches!(
+            &decoded[0].kind,
+            ExprKind::Symbol(name) if &**name == "slot-name"
+        ));
+    }
+
+    #[test]
+    fn wire_round_trip_is_byte_identical() {
+        let expressions = parse(SAMPLE).expect("sample parses");
+        let encoded = encode_program(&expressions);
+        let decoded = decode_program(&encoded).expect("wire decodes");
+        assert_eq!(encode_program(&decoded), encoded);
+        // Той самий вміст, що й через fasl — отже програма та сама.
+        let hash = [0u8; 32];
+        assert_eq!(fasl::encode_program(&decoded, &hash), fasl::encode_program(&expressions, &hash));
+    }
+
+    #[test]
+    fn wire_is_smaller_than_fasl_and_text() {
+        let source = "(00000101 (00000110 (00000110 (00000110 (00000001 (64 85 24 38 36 75))))))";
+        let expressions = parse(source).expect("parses");
+        let wire = encode_program(&expressions);
+        let fasl = fasl::encode_program(&expressions, &[0u8; 32]);
+        assert!(wire.len() < source.len(), "wire {} >= text {}", wire.len(), source.len());
+        assert!(wire.len() * 4 < fasl.len(), "wire {} vs fasl {}", wire.len(), fasl.len());
+    }
+
+    #[test]
+    fn wire_rejects_untrusted_garbage_without_panicking() {
+        assert!(decode_program(b"").is_none());
+        assert!(decode_program(b"not wire").is_none());
+        // Брехливий лічильник, обрізаний varint, зайвий хвіст, надглибока вкладеність.
+        assert!(decode_program(b"SW\x01\x01\x50\xff\xff\xff\xff\x0f").is_none());
+        assert!(decode_program(b"SW\x01\x01\x52\xff").is_none());
+        assert!(decode_program(b"SW\x01\x01\x05\x00").is_none());
+        let mut deep = b"SW\x01\x01".to_vec();
+        deep.extend(std::iter::repeat_n(0x41u8, 100_000));
+        deep.push(0x00);
+        assert!(decode_program(&deep).is_none());
+        // Дозволена глибина декодується без рекурсії й без аварії.
+        let mut nested = b"SW\x01\x01".to_vec();
+        nested.extend(std::iter::repeat_n(0x41u8, 700));
+        nested.push(0x07);
+        let decoded = decode_program(&nested).expect("700 levels are within the limit");
+        assert_eq!(encode_program(&decoded), nested);
+        let expressions = parse(SAMPLE).expect("sample parses");
+        let encoded = encode_program(&expressions);
+        for cut in 0..encoded.len() {
+            assert!(decode_program(&encoded[..cut]).is_none(), "prefix {cut} decoded");
+        }
+    }
+}
+
 #[cfg(test)]
 mod fasl_tests {
     use super::fasl::{decode_program, encode_program};
@@ -308,6 +715,75 @@ mod fasl_tests {
         // byte-identical to the original encoding.
         let re_encoded = encode_program(&decoded, &source_hash);
         assert_eq!(re_encoded, encoded);
+    }
+
+    #[test]
+    fn fasl_transports_exact_sens_numeric_buffer_map_without_surface_names() {
+        const SOURCE: &str =
+            "(01011001 (00001000 (x) (00001100 x 1)) #i32(1 2 3))";
+        let source_hash = sha256_source(SOURCE.as_bytes());
+        let expressions = parse(SOURCE).expect("exact SENS numeric-buffer-map parses");
+        let encoded = encode_program(&expressions, &source_hash);
+
+        // FASL TAG_BINARY = 7; наступний байт є самою функцією СЕНС.
+        assert!(
+            encoded.windows(2).any(|bytes| bytes == [7, 0b01011001]),
+            "numeric-buffer-map must travel as one exact SENS byte"
+        );
+        const FORBIDDEN_SURFACES: &[&[u8]] = &[
+            &[110, 117, 109, 101, 114, 105, 99, 45, 98, 117, 102, 102, 101, 114, 45, 109, 97, 112],
+            &[108, 97, 109, 98, 100, 97],
+            &[105, 51, 50, 45, 98, 117, 102, 102, 101, 114],
+        ];
+        for forbidden in FORBIDDEN_SURFACES {
+            assert!(
+                !encoded.windows(forbidden.len()).any(|bytes| bytes == *forbidden),
+                "людська назва просочилася в бінарний транспорт: {:?}",
+                forbidden
+            );
+        }
+
+        let (decoded, decoded_hash) =
+            decode_program(&encoded).expect("typed-buffer FASL must decode");
+        assert_eq!(decoded_hash, source_hash);
+        assert_eq!(encode_program(&decoded, &source_hash), encoded);
+
+        let ExprKind::List(outer) = &decoded[0].kind else {
+            panic!("numeric-buffer-map program must stay a list");
+        };
+        assert!(matches!(
+            &outer[0].kind,
+            ExprKind::Sid(sid) if *sid == crate::sens!(01011001)
+        ));
+        let ExprKind::NumericBuffer(crate::NumericBuffer::I32(values)) = &outer[2].kind else {
+            panic!("third argument must stay an i32 buffer");
+        };
+        assert_eq!(&**values, &[1, 2, 3]);
+    }
+
+    #[test]
+    fn fasl_preserves_f32_buffer_bits_including_negative_zero() {
+        const SOURCE: &str = "#f32(-0.0 0.1 3.0)";
+        let source_hash = sha256_source(SOURCE.as_bytes());
+        let expressions = parse(SOURCE).expect("f32 buffer parses");
+        let encoded = encode_program(&expressions, &source_hash);
+        let (decoded, _) = decode_program(&encoded).expect("f32 buffer FASL decodes");
+
+        let ExprKind::NumericBuffer(crate::NumericBuffer::F32(values)) = &decoded[0].kind else {
+            panic!("decoded expression must remain an f32 buffer");
+        };
+        assert_eq!(values[0].to_bits(), (-0.0f32).to_bits());
+        assert_eq!(values[1].to_bits(), (0.1f32).to_bits());
+        assert_eq!(values[2].to_bits(), 3.0f32.to_bits());
+        assert_eq!(encode_program(&decoded, &source_hash), encoded);
+
+        let mut tampered = encoded.clone();
+        let start = tampered.len() - std::mem::size_of::<u32>();
+        tampered[start..].copy_from_slice(&f32::INFINITY.to_bits().to_le_bytes());
+        assert!(
+            decode_program(&tampered).is_none(),
+            "non-finite f32 payload must fail closed"
+        );
     }
 
     #[test]

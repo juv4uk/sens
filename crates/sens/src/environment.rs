@@ -25,8 +25,32 @@ pub struct Environment(
 
 #[derive(Debug)]
 struct Frame {
+    /// Кадр виклику замикання: параметри лежать у масиві `slots` за номером,
+    /// імена — у `slot_names` (той самий порядок), тож пошук за іменем теж
+    /// їх бачить. `None` — звичайний кадр без слотів (корінь, `child`).
+    slot_names: Option<Rc<[Rc<str>]>>,
+    slots: Vec<Value>,
+    /// Тіло цього виклику не може додати нове ім'я в кадр (без `def`, `eval`,
+    /// макросів і можливостей хоста) — розв'язувач може дивитися крізь нього.
+    pure: bool,
     values: HashMap<Rc<str>, Value>,
     parent: Option<Environment>,
+}
+
+impl Frame {
+    fn empty(parent: Option<Environment>) -> Self {
+        Frame {
+            slot_names: None,
+            slots: Vec::new(),
+            pure: false,
+            values: HashMap::new(),
+            parent,
+        }
+    }
+
+    fn slot_index(&self, name: &str) -> Option<usize> {
+        self.slot_names.as_ref()?.iter().position(|slot| **slot == *name)
+    }
 }
 
 /// Opt-in resource/capability limits for one session, shared across every
@@ -74,10 +98,7 @@ struct Limits {
 impl Environment {
     pub fn root() -> Self {
         let environment = Self(
-            Rc::new(RefCell::new(Frame {
-                values: HashMap::new(),
-                parent: None,
-            })),
+            Rc::new(RefCell::new(Frame::empty(None))),
             Rc::new(RefCell::new(Transcript {
                 lines: Vec::new(),
                 taken: 0,
@@ -239,13 +260,54 @@ impl Environment {
     /// shares transcript and all session policy/limits with its parent.
     pub fn child(&self) -> Self {
         Self(
-            Rc::new(RefCell::new(Frame {
-                values: HashMap::new(),
-                parent: Some(self.clone()),
-            })),
+            Rc::new(RefCell::new(Frame::empty(Some(self.clone())))),
             self.1.clone(),
             self.2.clone(),
         )
+    }
+
+    /// Кадр виклику замикання: значення параметрів за номером слота.
+    pub(crate) fn child_with_slots(&self, names: Rc<[Rc<str>]>, slots: Vec<Value>, pure: bool) -> Self {
+        let mut frame = Frame::empty(Some(self.clone()));
+        frame.slot_names = Some(names);
+        frame.slots = slots;
+        frame.pure = pure;
+        Self(Rc::new(RefCell::new(frame)), self.1.clone(), self.2.clone())
+    }
+
+    /// Значення `Local(depth, index)`: слот `index` кадру на `depth` кроків вище.
+    pub(crate) fn get_local(&self, depth: u32, index: u32) -> Option<Value> {
+        let mut frame = Rc::clone(&self.0);
+        for _ in 0..depth {
+            let parent = frame.borrow().parent.as_ref().map(|parent| Rc::clone(&parent.0))?;
+            frame = parent;
+        }
+        let current = frame.borrow();
+        current.slots.get(index as usize).cloned()
+    }
+
+    /// Імена параметрів кадрів, крізь які розв'язувач може бачити: від цього
+    /// кадру вгору, доки кадри мають слоти; нечистий кадр — останній (його
+    /// тіло може визначити нове ім'я, що затінить глибші).
+    pub(crate) fn lexical_slot_scopes(&self) -> Vec<Rc<[Rc<str>]>> {
+        let mut scopes = Vec::new();
+        let mut frame = Rc::clone(&self.0);
+        loop {
+            let parent = {
+                let current = frame.borrow();
+                let Some(names) = &current.slot_names else { break };
+                scopes.push(Rc::clone(names));
+                if !current.pure {
+                    break;
+                }
+                current.parent.as_ref().map(|parent| Rc::clone(&parent.0))
+            };
+            match parent {
+                Some(parent) => frame = parent,
+                None => break,
+            }
+        }
+        scopes
     }
 
     /// Перепід'єднує лише безпосереднього lexical parent цього frame.
@@ -296,7 +358,8 @@ impl Environment {
         let mut out: Vec<(Rc<str>, Value)> = Vec::new();
         for frame in frames.iter().rev() {
             let f = frame.borrow();
-            for (name, value) in f.values.iter() {
+            let slots = f.slot_names.iter().flat_map(|names| names.iter().zip(f.slots.iter()));
+            for (name, value) in slots.chain(f.values.iter()) {
                 match out.iter_mut().find(|(n, _)| n == name) {
                     Some(slot) => slot.1 = value.clone(),
                     None => out.push((name.clone(), value.clone())),
@@ -308,56 +371,63 @@ impl Environment {
     }
 
     pub fn define(&self, name: impl Into<Rc<str>>, value: Value) {
-        self.0.borrow_mut().values.insert(name.into(), value);
+        let name = name.into();
+        let mut frame = self.0.borrow_mut();
+        match frame.slot_index(&name) {
+            Some(index) => frame.slots[index] = value,
+            None => {
+                frame.values.insert(name, value);
+            }
+        }
     }
 
     pub fn get(&self, name: &str) -> Option<Value> {
-        let mut current = Some(self.clone());
-        while let Some(env) = current {
-            if let Some(value) = env.0.borrow().values.get(name) {
-                return Some(value.clone());
-            }
-            current = env.0.borrow().parent.clone();
+        // Walk the frames themselves: cloning an `Environment` per step would
+        // run its `Drop` for every step of every lookup.
+        let mut frame = Rc::clone(&self.0);
+        loop {
+            let parent = {
+                let current = frame.borrow();
+                if let Some(index) = current.slot_index(name) {
+                    return Some(current.slots[index].clone());
+                }
+                if let Some(value) = current.values.get(name) {
+                    return Some(value.clone());
+                }
+                current.parent.as_ref().map(|parent| Rc::clone(&parent.0))
+            };
+            frame = parent?;
         }
-        None
     }
 }
 
 impl Drop for Environment {
     fn drop(&mut self) {
-        // Swap this Environment's real content out for a cheap, parentless
-        // sentinel, then walk the extracted parent chain iteratively.
-        let taken = std::mem::replace(
-            self,
-            Environment(
-                Rc::new(RefCell::new(Frame {
-                    values: HashMap::new(),
-                    parent: None,
-                })),
-                Rc::new(RefCell::new(Transcript {
-                    lines: Vec::new(),
-                    taken: 0,
-                })),
-                Rc::new(RefCell::new(Limits::default())),
-            ),
-        );
-
-        let mut worklist = vec![taken];
-        while let Some(env) = worklist.pop() {
-            let env = std::mem::ManuallyDrop::new(env);
-            // SAFETY: `env` is ManuallyDrop, so each field is read exactly once.
-            let frame_rc = unsafe { std::ptr::read(&env.0) };
-            let transcript_rc = unsafe { std::ptr::read(&env.1) };
-            let limits_rc = unsafe { std::ptr::read(&env.2) };
-            drop(transcript_rc);
-            drop(limits_rc);
-
-            if let Ok(cell) = Rc::try_unwrap(frame_rc) {
-                let mut frame = cell.into_inner();
-                if let Some(parent) = frame.parent.take() {
-                    worklist.push(parent);
-                }
-            }
+        // Only the last owner of a frame frees it. Its parent chain is then
+        // released iteratively: each frame that dies gives up its parent
+        // before it drops, so no drop recurses through the chain (a deep
+        // recursion would overflow the stack). Dropping a shared handle only
+        // decrements a reference count and allocates nothing.
+        if Rc::strong_count(&self.0) != 1 {
+            return;
+        }
+        let Ok(mut frame) = self.0.try_borrow_mut() else {
+            return;
+        };
+        let mut next = frame.parent.take();
+        drop(frame);
+        while let Some(environment) = next {
+            next = if Rc::strong_count(&environment.0) == 1 {
+                environment
+                    .0
+                    .try_borrow_mut()
+                    .ok()
+                    .and_then(|mut parent_frame| parent_frame.parent.take())
+            } else {
+                None
+            };
+            // `environment` now has no parent, so its own drop is shallow.
+            drop(environment);
         }
     }
 }

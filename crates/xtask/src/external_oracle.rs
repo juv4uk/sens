@@ -8,8 +8,8 @@
 //!
 //! ## Corpus loading
 //!
-//! `load_corpus()` reads `tests/fixtures/conformance.my` and
-//! `tests/fixtures/inventory.my` positionally (same as `scripts/oracle-batch.wsm`):
+//! `load_corpus()` reads `tests/fixtures/conformance.lisp` and
+//! `tests/fixtures/inventory.lisp` positionally (same as `scripts/oracle-batch.lisp`):
 //! both files must have the same fixture count; they are walked in lockstep.
 //!
 //! ## Export
@@ -26,9 +26,9 @@ use sens::{Exactness, Expr, ExprKind};
 /// One fixture as read from the corpus pair.
 #[derive(Debug, Clone)]
 pub struct CorpusFixture {
-    /// Stable F-… identifier from `inventory.my`.
+    /// Stable F-… identifier from `inventory.lisp`.
     pub id: String,
-    /// Source expression text from `conformance.my`.
+    /// Source expression text from `conformance.lisp`.
     pub source: String,
     /// Expected output string, or `None` when the fixture expects an error.
     pub expected: Option<String>,
@@ -36,7 +36,7 @@ pub struct CorpusFixture {
     pub is_s1: bool,
 }
 
-/// Load and pair conformance.my + inventory.my.
+/// Load and pair conformance.lisp + inventory.lisp.
 ///
 /// Both files are read from `repo_root/tests/fixtures/`.  Returns an error
 /// string if the files cannot be read, are malformed, or have different counts.
@@ -385,6 +385,7 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
         ExprKind::List(items) => translate_call(items),
         // Парсер не породжує зведених викликів; сюди надходить лише parse().
         ExprKind::Call(_, _) => Err(Unsupported::new("external-oracle/lowered-call")),
+        ExprKind::Local { .. } => Err(Unsupported::new("external-oracle/slot-local")),
     }
 }
 

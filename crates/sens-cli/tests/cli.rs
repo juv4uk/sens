@@ -19,7 +19,7 @@ use std::process::Command;
 /// Every test here spawns the compiled binary with the sens repo root as
 /// its working directory, matching how the legacy `my-lisp` binary is actually invoked in
 /// practice (and specifically required by `--oracle-help`, which reads
-/// `knowledge/guard-reference.wsm` relative to the caller's cwd so new
+/// `knowledge/guard-reference.lisp` relative to the caller's cwd so new
 /// reference entries take effect without a rebuild).
 fn legacy_bin() -> Command {
     let repo_root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
