@@ -1,57 +1,61 @@
 ;; knowledge/agent-discoveries.lisp
 ;; Статус: coordination authority (не semantic contract мови).
-;; Призначення: спільна дошка відкриттів рою — щоб жоден агент
-;; не тримав finding лише в PR-коментарі чи локальній пам'яті.
 ;;
-;; Протокол (doctrine rule 18):
-;; 1. Знайшов несподіване → запис сюди або коментар у issue #1599.
-;; 2. Формат: kind / claim / evidence / status / action
-;; 3. Не дублювати semantic authority — лише координаційні факти.
-;; 4. Перед CLAIM: прочитай цей файл + open comments на #1590/#1599.
+;; === КАНОН (без двозначності) ===
+;; ЗАГАЛЬНА дошка відкриттів рою: issue #1599 + цей файл + doctrine rule 18.
+;; ВУЗЬКИЙ журнал GPU/witness (sens⇄cml): issue #1598 (дзеркало cml#370).
+;;
+;; Правило маршрутизації:
+;; - M8, surface, transport, islands, будь-що загальне → #1599 (обов'язково)
+;; - критичний шлях GPU/witness E1–E3 / f32 / cml bridge → #1598 І #1599
+;;   (крос-репо: також cml#370)
+;; Не створювати третій журнал. Не дублювати semantic authority.
 
 (agent-discoveries
-  (schema . 1)
+  (schema . 2)
   (updated . "2026-09-28")
   (board-issue . 1599)
+  (gpu-witness-journal . 1598)
   (related . (1590 1413))
+
+  (routing
+    (general . 1599)
+    (gpu-witness-critical-path . (1598 1599))
+    (machine-readable . "knowledge/agent-discoveries.lisp")
+    (doctrine . "docs/agent-doctrine.md rule 18"))
 
   (hot-facts
     (m8-admitted-surface-to-call
       . ((status . confirmed)
-         (main-sha-hint . "37f31edd")
          (claim . "admitted registry surfaces lower to Call(SID); ensure_bindable blocks binding them")
-         (evidence . ("PR #1593" "crates/sens/src/eval/lower.rs" "crates/sens/src/eval/canon.rs"))
-         (action . "do not reintroduce runtime name lookup for + - * / admitted names")))
+         (evidence . ("PR #1593"))
+         (action . "do not reintroduce runtime name lookup for admitted surfaces")))
 
     (m8-local-binding-shadow
       . ((status . confirmed)
-         (claim . "local Lisp binding matching admitted surface name fails: surface routes to immutable function SID")
-         (example . "provenance -> 10000100 in life-1-scheduler")
+         (claim . "local binding matching admitted surface → immutable SID error")
+         (example . "provenance -> 10000100")
          (evidence . ("PR #1596"))
          (action . "rename local to …-ref / …-value; never weaken ensure_bindable")))
 
     (binary-transport-ci
       . ((status . confirmed)
-         (claim . "CI form=sens encodes via fasl; function identity = 1 byte")
-         (evidence . ("evidence/sens-binary-transport-2026-09-28.md" "benchmarks/sens-surface/ci_bench.sh"))
-         (pending . "post-M8 three-way valgrind remeasure on hardware")))
+         (claim . "CI form=sens = fasl 1-byte identity")
+         (evidence . ("PR #1595"))
+         (pending . "post-M8 valgrind three-way on hardware")))
 
     (sens-primary-axioms
       . ((status . confirmed)
-         (claim . "identity / meaning / execution separated; backends are witnesses")
-         (evidence . ("knowledge/sens-primary.lisp" "docs/agent-doctrine.md rule 17")))))
+         (claim . "identity / meaning / execution separated")
+         (evidence . ("knowledge/sens-primary.lisp" "rule 17")))))
 
   (pending-slots
     (post-m8-three-way-bench . needs-valgrind-machine)
     (island-stack-replay . (1418 1425 1426))
-    (m8-fallout-scan . "grep local bindings that collide with admitted surfaces"))
+    (m8-fallout-scan . "local bindings vs admitted surfaces"))
 
   (how-to-share
-    . "Додай (discovery ...) у цей файл у PR, АБО коментар на issue #1599:
-       ### discovery
-       - kind: m8-fallout | bench | island | transport | other
-       - claim: одне речення
-       - evidence: PR/SHA/path
-       - status: confirmed|partial|hypothesis
-       - action: що робити іншим агентам"))
+    . "Загальне → коментар #1599 або PR у цей файл.
+       GPU/witness critical path → #1598 + #1599 (+ cml#370).
+       Формат: kind / claim / evidence / status / action"))
 )
