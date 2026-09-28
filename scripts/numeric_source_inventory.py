@@ -279,6 +279,55 @@ def check_baseline(data: dict, baseline_path: Path) -> int:
     return 0
 
 
+def check_active_routes(files: Iterable[Path], routes_path: Path) -> int:
+    routes = json.loads(routes_path.read_text(encoding="utf-8"))
+    allowed_routes = {
+        "preserve-numeric-value",
+        "typed-machine-notation",
+        "regenerate-from-authority",
+    }
+
+    live: Counter[tuple[str, str]] = Counter()
+    for path in files:
+        if bucket(path) != "active-lib":
+            continue
+        rel = path.relative_to(REPO_ROOT).as_posix()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for token, _line in source_token_locations(text):
+            if classify(token) == "binary-shaped-multibit-number":
+                live[(rel, token)] += 1
+
+    declared: Counter[tuple[str, str]] = Counter()
+    failures: list[str] = []
+    for row in routes.get("rows", []):
+        path = row.get("path")
+        token = row.get("token")
+        route = row.get("route")
+        if route not in allowed_routes:
+            failures.append(f"invalid route {route!r} for {path}:{token}")
+        if not isinstance(path, str) or not isinstance(token, str):
+            failures.append(f"malformed route row: {row!r}")
+            continue
+        declared[(path, token)] += 1
+
+    if live != declared:
+        for key in sorted(set(live) | set(declared)):
+            if live[key] != declared[key]:
+                failures.append(
+                    f"coverage {key[0]} token={key[1]}: "
+                    f"live={live[key]} declared={declared[key]}"
+                )
+
+    if failures:
+        print("ACTIVE-LIB NUMERAL ROUTE COVERAGE FAILED", file=sys.stderr)
+        for failure in failures:
+            print(f"  - {failure}", file=sys.stderr)
+        return 1
+
+    print(f"active-lib numeral routes: PASS ({sum(live.values())} occurrences)")
+    return 0
+
+
 def self_test() -> int:
     sample = r"""
 ; 42 101 00001100 ignored in comment
@@ -323,6 +372,12 @@ def main() -> int:
         metavar="BUCKET",
         help="optional path bucket filter for --list-category",
     )
+    parser.add_argument(
+        "--check-active-routes",
+        type=Path,
+        metavar="PATH",
+        help="verify that active-lib binary-shaped numerals are fully routed",
+    )
     args = parser.parse_args()
 
     if args.self_test:
@@ -331,6 +386,8 @@ def main() -> int:
     files = tracked_lisp_files()
     if args.list_category:
         return list_category(files, args.list_category, args.bucket)
+    if args.check_active_routes:
+        return check_active_routes(files, args.check_active_routes)
 
     data = inventory(files)
     if args.check_baseline:
