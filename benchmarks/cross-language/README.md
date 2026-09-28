@@ -64,3 +64,16 @@ Cachegrind I refs = 0.021, тобто поточний SENS evaluator викон
 
 Цей witness збережений як історична точка до environment optimization #1558.
 Він не повинен підміняти повторний вимір після злиття #1558.
+
+
+## Standard binary-trees scaffold (#1549)
+
+The CLBG binary-trees workload has a pinned provenance note and an N=10
+correctness oracle in this directory:
+
+    python3 benchmarks/cross-language/binary_trees_reference.py --check-fixture
+
+This is correctness infrastructure only. The SENS measured adapter is added
+after canonical 2-part COND (#1663) lands, then it must reuse the same
+cross-language phases and machine-readable result schema. No upstream timing
+number is imported as our evidence.
