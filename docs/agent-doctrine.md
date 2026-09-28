@@ -4,7 +4,9 @@ Status: proposed 2026-08-18 (owner strategy session), written by
 `my-lisp-1`, broadcast to all sibling swarm agents for adoption/critique.
 Amended by explicit owner decision 2026-09-13: every task now requires a
 live Current Technology Preflight before claim/design/implementation.
-Applies to `my-lisp`, `cml`, `fpga-lisp`, `my-idea`, `my-lisp-panini`,
+Amended 2026-09-28 (#1590): SENS-primary design discipline — identity,
+meaning, and execution stay separate; backends are witnesses only.
+Applies to `my-lisp`/`sens`, `cml`, `fpga-lisp`, `my-idea`, `my-lisp-panini`,
 `shiva-sutras`, and any future sibling. Each repo's own `AGENTS.md` stays
 authoritative for repo-specific detail; this file is the cross-cutting
 constitution none of them should contradict.
@@ -155,6 +157,10 @@ premise three repos downstream with no traceable evidence chain.
     the owner explicitly waives the scan.
 
 16. **Асиметричний semantic firewall (#1347): Rust може рости, Lisp не копіює Rust як істину.** Попередні правила про `library before primitive`, зменшення Rust або винесення поведінки в Lisp **не є вимогою міграції** і не можуть блокувати локальну Rust/runtime/compiler semantics. Rust може мати власні таблиці SID→meaning, enums, dispatch, fallback, optimization metadata й експериментальні закони. Самодостатність my-lisp означає інше: коли мовний закон існує в Lisp, він має бути сформульований і перевірений незалежно від структури поточного Rust implementation. Заборонений лише зворотний напрямок — `Rust/host/backend semantics -> Lisp language authority`. Не перенось Rust type names, match arms, tables або fallback rules у Lisp лише для того, щоб "забрати семантику з Rust"; це саме і є contamination, від якого ми захищаємо мову.
+
+17. **SENS-primary (#1590): ідентичність → значення → виконання.** Machine-readable: `knowledge/sens-primary.lisp`. Функціональний простір — рівно 256 SENS (`00000000..11111111`), кожен рівно 8 біт. SENS не є текстом, string, quoted literal, десятковим числом чи англійським ім'ям. Історичні назви (CAR, CDR, CONS, EQ, ATOM, COND, PLUS, …) — лише surface, не semantic authority. Backend (Rust, C, Common Lisp, Prolog, Datalog, CLIPS, FPGA, WASM) — свідок виконання, не джерело значення. Не створюй «зручний тимчасовий» текстовий сурогат SENS у ядрі, якщо можна зберегти один байт. Не вводь паралельної канонічної identity поруч із SENS. Перед зміною питай: *«Як би це виглядало, якби SENS був первинним з 1958, а англійські імена з'явилися лише як surface?»* — а не *«Як прикрутити SENS до звичного Lisp?»*. При конфлікті історична Lisp-традиція vs однозначність SENS — перемагає SENS; compatibility будується зверху.
+
+   **English auxiliary:** Design as if SENS were primary from the start. Identity (8-bit SENS), meaning (language law), and execution (witness backend) stay separate. Historical English names are surfaces only. Prefer one-byte transport over text surrogates in the core. No second canonical identity layer.
 
 
 ## Rule 0 for coordination specifically

@@ -4,11 +4,10 @@
 //! одним і тим самим вузлом `ExprKind::Call(00000010, [x])`: функція
 //! займає 1 байт, а виконання більше не шукає ім'я на кожному виклику.
 //!
-//! Зводяться лише написання, які неможливо перевизначити (`ensure_bindable`
-//! для Canon-маршрутів; необхідні форми `lambda`/`def`/`define`, що
-//! розпізнаються до будь-якого оточення), тож зведення не змінює значення
-//! жодної програми. Імена, які користувач може перевизначити (`+`, `-`, ...),
-//! лишаються списками — див. #1413.
+//! M8 (#1590): зводяться **усі** admitted surface з реєстру, не лише Canon
+//! і necessary forms. Написання (`+`, `-`, `додати`, …) — маршрутизація до
+//! фіксованого SENS, не окрема identity, яку можна перевизначити й тим
+//! самим змусити runtime шукати ім'я на кожному виклику (#1413).
 //!
 //! Дані лишаються даними: аргумент `quote`, клаузи `cond` (самі клаузи — не
 //! виклики), параметри `lambda` та ім'я в `def`/`define`.
@@ -35,13 +34,14 @@ fn head_sid(head: &Expr) -> Option<Sens8> {
     }
 }
 
-/// Написання, значення якого неможливо змінити жодним біндингом.
+/// Написання, що маршрутизується до фіксованого SENS (не окрема identity).
 fn immutable_surface_sid(name: &str) -> Option<Sens8> {
     if let Some(sid) = canon::routed_sid_for_surface(name) {
         return Some(sid);
     }
-    let sid = semantic_registry::admitted_semantic_id_for_surface(name)?;
-    necessary_forms::identity_for_semantic_id(sid).map(|_| sid)
+    // M8: будь-яка admitted surface → SENS. Необхідні форми лишаються
+    // підмножиною; раніше лише вони зводились, тож `+`/`-` шукались у runtime.
+    semantic_registry::admitted_semantic_id_for_surface(name)
 }
 
 fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
@@ -96,5 +96,48 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
     Expr {
         kind,
         span: expression.span,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::parser;
+
+    fn lower_one(source: &str) -> Expr {
+        let program = parser::parse(source).expect("parse");
+        let lowered = lower_program(&program);
+        assert_eq!(lowered.len(), 1);
+        lowered.into_iter().next().expect("one form")
+    }
+
+    #[test]
+    fn plus_surface_lowers_to_sens_call() {
+        let expr = lower_one("(+ 1 2)");
+        match expr.kind {
+            ExprKind::Call(sid, args) => {
+                assert_eq!(sid, crate::sens!(00001100));
+                assert_eq!(args.len(), 2);
+            }
+            other => panic("expected Call, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn minus_surface_lowers_to_sens_call() {
+        let expr = lower_one("(- 5 3)");
+        match expr.kind {
+            ExprKind::Call(sid, _) => assert_eq!(sid, crate::sens!(00001101)),
+            other => panic!("expected Call, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn user_symbol_is_not_lowered() {
+        let expr = lower_one("(my-fn 1)");
+        match expr.kind {
+            ExprKind::List(_) => {}
+            other => panic!("user head must stay List, got {other:?}"),
+        }
     }
 }

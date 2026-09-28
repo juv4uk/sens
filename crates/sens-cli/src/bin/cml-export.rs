@@ -10,6 +10,8 @@
 use sens::semantic_registry_export::{
     admitted_surfaces_for_semantic_id, function_role, semantic_id_bits, SurfaceRow,
 };
+use sens::{fasl_encode, parse, sha256_source};
+use std::{fs, process};
 
 /// Slice 1 (2026-09-10, unchanged): exactly the semantic IDs
 /// `tests/fixtures/conformance.lisp`'s fixture #69 (named def + recursion,
@@ -87,8 +89,38 @@ fn render_export() -> String {
     )
 }
 
+/// Binary program transport for CML. Unlike the default semantic-metadata
+/// export, this path preserves exact parsed SENS identities and typed buffers;
+/// it never resolves function identities back to human surface names.
+fn program_fasl(source: &[u8]) -> Result<Vec<u8>, String> {
+    let text = std::str::from_utf8(source).map_err(|error| format!("UTF-8: {error}"))?;
+    let expressions = parse(text).map_err(|error| format!("parse: {error}"))?;
+    Ok(fasl_encode(&expressions, &sha256_source(source)))
+}
+
 fn main() {
-    print!("{}", render_export());
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    match args.as_slice() {
+        [] => print!("{}", render_export()),
+        [mode, source, output] if mode == "--program-fasl" => {
+            let source_bytes = fs::read(source).unwrap_or_else(|error| {
+                eprintln!("cml-export: cannot read {source}: {error}");
+                process::exit(1);
+            });
+            let encoded = program_fasl(&source_bytes).unwrap_or_else(|error| {
+                eprintln!("cml-export: {source}: {error}");
+                process::exit(1);
+            });
+            fs::write(output, encoded).unwrap_or_else(|error| {
+                eprintln!("cml-export: cannot write {output}: {error}");
+                process::exit(1);
+            });
+        }
+        _ => {
+            eprintln!("usage: cml-export [--program-fasl <source.lisp> <output.fasl>]");
+            process::exit(2);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -101,6 +133,27 @@ mod tests {
     #[test]
     fn repeated_export_is_byte_identical() {
         assert_eq!(render_export(), render_export());
+    }
+
+    #[test]
+    fn program_fasl_mode_exports_exact_sens_numeric_buffer_map() {
+        const SOURCE: &[u8] =
+            b"(01011001 (00001000 (x) (00001100 x 1)) #i32(1 2 3))";
+        let encoded = program_fasl(SOURCE).expect("program FASL export");
+        let (decoded, hash) =
+            sens::fasl_decode_program(&encoded).expect("program FASL must decode");
+
+        assert_eq!(hash, sha256_source(SOURCE));
+        assert_eq!(decoded.len(), 1);
+        const FORBIDDEN_SURFACE: &[u8] = &[
+            110, 117, 109, 101, 114, 105, 99, 45, 98, 117, 102, 102, 101, 114, 45, 109, 97, 112,
+        ];
+        assert!(
+            !encoded
+                .windows(FORBIDDEN_SURFACE.len())
+                .any(|bytes| bytes == FORBIDDEN_SURFACE),
+            "бінарний експорт не повинен містити людську назву функції"
+        );
     }
 
     /// The committed `mylisp-cml-export.wsm` at the repo root must be
