@@ -245,3 +245,208 @@ fn every_registry_name_executes_as_sens() {
         .collect();
     assert!(offenders.is_empty(), "імен поза СЕНС: {}\n{}", offenders.len(), offenders.join("\n"));
 }
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Coverage {
+    files: usize,
+    named: usize,
+    sens: usize,
+}
+
+impl Coverage {
+    fn total(self) -> usize {
+        self.named + self.sens
+    }
+
+    fn basis_points(self) -> usize {
+        let total = self.total();
+        if total == 0 {
+            10_000
+        } else {
+            self.sens * 10_000 / total
+        }
+    }
+}
+
+fn coverage_for<F>(inventory: &BTreeMap<String, (usize, usize)>, include: F) -> Coverage
+where
+    F: Fn(&str) -> bool,
+{
+    inventory
+        .iter()
+        .filter(|(file, _)| include(file))
+        .fold(
+            Coverage {
+                files: 0,
+                named: 0,
+                sens: 0,
+            },
+            |mut acc, (_, (named, sens))| {
+                acc.files += 1;
+                acc.named += named;
+                acc.sens += sens;
+                acc
+            },
+        )
+}
+
+/// Live language library source. Explicit exclusions are projection/evidence
+/// artifacts, not runtime/library code. Keep this list narrow and reviewable:
+/// adding an exclusion raises the reported percentage and therefore requires
+/// explicit review rather than a broad path heuristic.
+fn is_active_lib_source(file: &str) -> bool {
+    if !file.starts_with("lib/") || !file.ends_with(".lisp") {
+        return false;
+    }
+    if file.starts_with("lib/generated/") {
+        return false;
+    }
+    !matches!(
+        file,
+        "lib/machine/encoding/coverage.lisp"
+            | "lib/machine/dispatch/native-first-coverage.lisp"
+            | "lib/surface/uk-acceptance.lisp"
+            | "lib/surface/ukr-acceptance.lisp"
+            | "lib/surface/uk-sa-coverage.lisp"
+            | "lib/surface/peer-identity-acceptance.lisp"
+            | "lib/surface/uk-inventory.lisp"
+    )
+}
+
+/// Exact authored Lisp sources embedded by the core crate as current
+/// runtime/library inputs (`include_str!` constants in crates/sens/src/lib.rs).
+/// Core1 is intentionally not in this view because it is not an embedded
+/// runtime source there. This deliberately excludes generated registry
+/// projections: they are
+/// runtime inputs, but are generated evidence rather than authored language
+/// source and would dominate this human-authored migration metric.
+fn is_runtime_embedded_source(file: &str) -> bool {
+    matches!(
+        file,
+        "lib/macro.lisp"
+            | "lib/core2.lisp"
+            | "lib/core3.lisp"
+            | "lib/core4.lisp"
+            | "lib/meta-eval.lisp"
+            | "lib/time.lisp"
+            | "lib/utf8.lisp"
+            | "lib/process.lisp"
+            | "lib/tcp.lisp"
+            | "lib/fs.lisp"
+    )
+}
+
+
+fn active_coverage_baseline_path() -> PathBuf {
+    repo_root().join("crates/sens/tests/data/active-sens-coverage-baseline.tsv")
+}
+
+fn read_active_coverage_baseline() -> BTreeMap<String, (usize, usize)> {
+    let text = fs::read_to_string(active_coverage_baseline_path())
+        .expect("active SENS coverage baseline must exist");
+    text.lines()
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .map(|line| {
+            let columns: Vec<&str> = line.split('\t').collect();
+            assert_eq!(
+                columns.len(),
+                6,
+                "active coverage baseline row must have 6 TSV columns: {line}"
+            );
+            let view = columns[0].to_owned();
+            let named_max = columns[2]
+                .parse::<usize>()
+                .expect("named_max must be an integer");
+            let basis_points_min = columns[5]
+                .parse::<usize>()
+                .expect("basis_points_min must be an integer");
+            (view, (named_max, basis_points_min))
+        })
+        .collect()
+}
+
+#[test]
+fn active_sens_coverage_never_regresses_1673() {
+    let inventory = source_inventory();
+    let current = BTreeMap::from([
+        ("repository-source".to_owned(), coverage_for(&inventory, |_| true)),
+        ("active-lib".to_owned(), coverage_for(&inventory, is_active_lib_source)),
+        (
+            "runtime-embedded".to_owned(),
+            coverage_for(&inventory, is_runtime_embedded_source),
+        ),
+    ]);
+    let baseline = read_active_coverage_baseline();
+
+    assert_eq!(
+        current.keys().collect::<Vec<_>>(),
+        baseline.keys().collect::<Vec<_>>(),
+        "coverage views changed: update classification and baseline explicitly"
+    );
+
+    let mut regressions = Vec::new();
+    for (view, coverage) in current {
+        let (named_max, basis_points_min) = baseline[&view];
+        if coverage.named > named_max {
+            regressions.push(format!(
+                "{view}: named call-heads grew {named_max} -> {}",
+                coverage.named
+            ));
+        }
+        if coverage.basis_points() < basis_points_min {
+            regressions.push(format!(
+                "{view}: SENS coverage fell {basis_points_min} -> {} basis points",
+                coverage.basis_points()
+            ));
+        }
+    }
+
+    assert!(
+        regressions.is_empty(),
+        "active SENS coverage regressed:\n{}",
+        regressions.join("\n")
+    );
+}
+
+#[test]
+fn active_sens_coverage_report_1673() {
+    let inventory = source_inventory();
+    let repository = coverage_for(&inventory, |_| true);
+    let active_lib = coverage_for(&inventory, is_active_lib_source);
+    let runtime = coverage_for(&inventory, is_runtime_embedded_source);
+
+    eprintln!(
+        "SENS_COVERAGE\tview\tfiles\tnamed\tsens\ttotal\tbasis_points"
+    );
+    for (view, coverage) in [
+        ("repository-source", repository),
+        ("active-lib", active_lib),
+        ("runtime-embedded", runtime),
+    ] {
+        eprintln!(
+            "SENS_COVERAGE\t{view}\t{}\t{}\t{}\t{}\t{}",
+            coverage.files,
+            coverage.named,
+            coverage.sens,
+            coverage.total(),
+            coverage.basis_points()
+        );
+    }
+
+    for (file, (named, sens)) in inventory
+        .iter()
+        .filter(|(file, (named, _))| is_active_lib_source(file) && *named > 0)
+    {
+        let total = named + sens;
+        let basis_points = if total == 0 { 10_000 } else { sens * 10_000 / total };
+        eprintln!(
+            "SENS_COVERAGE_FILE\tactive-lib\t{file}\t{named}\t{sens}\t{basis_points}"
+        );
+    }
+
+    assert!(
+        active_lib.total() > 0 && runtime.total() > 0,
+        "active SENS coverage views must contain admitted call-heads"
+    );
+}
