@@ -14,7 +14,7 @@ use sens::{fasl_encode, parse, sha256_source};
 use std::{fs, process};
 
 /// Slice 1 (2026-09-10, unchanged): exactly the semantic IDs
-/// `tests/fixtures/conformance.my`'s fixture #69 (named def + recursion,
+/// `tests/fixtures/conformance.lisp`'s fixture #69 (named def + recursion,
 /// `count-down`) exercises.
 ///
 /// Slice 2 (2026-09-11, per cml's own real need, not speculative --
@@ -48,7 +48,7 @@ fn fnv1a_hex(bytes: &[u8]) -> String {
 /// parse when it is the last token before a closing paren -- verified
 /// directly with the real reader (`--oracle-check`): `(a ')` errors
 /// with `unexpected-closing-parenthesis`, even though the identical
-/// character parses fine inside `lib/surface/semantic-registry.wsm`
+/// character parses fine inside `lib/surface/semantic-registry.lisp`
 /// itself, where it is always followed by more content (` stable)`)
 /// before any closing paren. Quote-sugar's removal (contract 2.0) left
 /// a bare `'` still requiring a following token in the reader. Rather

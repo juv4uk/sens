@@ -287,7 +287,7 @@ impl Server {
             return response(&incoming.id, Some(result), None);
         }
         // Guard knowledge from the live canonical WSM files (G3): a guard
-        // function shows its defining form from lib/guard.wsm; a guard
+        // function shows its defining form from lib/guard.lisp; a guard
         // topic shows its reference-bureau entry. The source of truth is
         // the workspace files themselves, never a Rust copy.
         if let Some(function) = self.guard.function(&symbol) {

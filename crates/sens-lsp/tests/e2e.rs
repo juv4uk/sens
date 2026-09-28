@@ -577,15 +577,14 @@ fn t15_arity_diagnostics_are_conservative_and_shadow_aware() {
     );
 }
 
-/// ECO-DECISION-2026-08-27-MYLISP-WSM-RENAME: `.wsm` is now the canonical
-/// extension, `.my`/`.lisp` stay supported. Workspace scanning (M1) must
-/// pick up `.wsm` files exactly like `.my` ones — same cross-file
-/// definition flow as t10, just with the new extension on both files.
+/// `.lisp` is the canonical source extension. Workspace scanning (M1) must
+/// pick up canonical `.lisp` files; `.my` and `.wsm` remain supported legacy
+/// aliases and are covered by compatibility-oriented extension tests.
 #[test]
-fn t16_workspace_scan_recognizes_wsm_extension() {
+fn t16_workspace_scan_recognizes_lisp_extension() {
     static SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let seq = SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let dir: PathBuf = std::env::temp_dir().join(format!("lsp-wsm-{}-{seq}", std::process::id()));
+    let dir: PathBuf = std::env::temp_dir().join(format!("lsp-lisp-{}-{seq}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).unwrap();
     fs::write(dir.join("a.lisp"), "(def foo (lambda (x) (* x x)))\n").unwrap();
@@ -613,7 +612,7 @@ fn t16_workspace_scan_recognizes_wsm_extension() {
     let r = replies[0].as_str();
     assert!(
         r.contains("/a.lisp"),
-        "cross-file definition must point into a.wsm: {r}"
+        "cross-file definition must point into a.lisp: {r}"
     );
 }
 
@@ -623,7 +622,7 @@ fn t16_workspace_scan_recognizes_wsm_extension() {
 
 /// The sens repo root (parent of crates/sens-lsp), used as the LSP
 /// workspace root so initialize loads guard knowledge from the REAL
-/// lib/guard.wsm and knowledge/guard-reference.wsm.
+/// lib/guard.lisp and knowledge/guard-reference.lisp.
 fn sens_repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("..")
 }
@@ -640,7 +639,7 @@ fn init_with_root(root: &Path) -> String {
 }
 
 /// Hover over a guard function name in ordinary source must surface its
-/// canonical defining form from lib/guard.wsm — the live file, not a
+/// canonical defining form from lib/guard.lisp — the live file, not a
 /// Rust copy.
 #[test]
 fn t17_g3_guard_function_hover_from_live_lib_guard_wsm() {
@@ -691,8 +690,8 @@ fn t18_g3_guard_function_wrong_arity_is_diagnosed() {
 /// 47KB canonical file), so this stays explicit rather than slowing every
 /// `cargo test`. Run: `cargo test --release -p sens-lsp -- --ignored`
 #[test]
-#[ignore = "guard-reference.wsm topic parse is slow; run explicitly in release"]
-fn t19_g3_guard_topic_hover_from_live_reference_wsm() {
+#[ignore = "guard-reference.lisp topic parse is slow; run explicitly in release"]
+fn t19_g3_guard_topic_hover_from_live_reference_lisp() {
     let uri = "file:///g3tp.lisp";
     let doc = "(guard)\n"; // `guard` as a bare symbol form, not a call
     let mut server = Server::new();

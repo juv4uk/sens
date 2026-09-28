@@ -1,6 +1,6 @@
 //! Shared Rust adapter for the Lisp-owned Guard schema.
 //! Rust loads the executable WSM policy and validates the returned value's
-//! outer protocol shape. Meaning and policy remain in lib/guard.wsm.
+//! outer protocol shape. Meaning and policy remain in lib/guard.lisp.
 
 use sens::{eval_program, Session, Value};
 

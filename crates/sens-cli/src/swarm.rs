@@ -417,7 +417,7 @@ pub(crate) fn oracle_check(source: &str, contract_version: &Value) -> (Value, bo
 /// embed in `wsm-guard-core` (same library every Guard consumer uses), but
 /// its reference directory is read fresh from disk on every call, exactly
 /// like the LSP's `guard_knowledge.rs` already does — adding or editing a
-/// topic in `knowledge/guard-reference.wsm` takes effect immediately, no
+/// topic in `knowledge/guard-reference.lisp` takes effect immediately, no
 /// rebuild. `None` lists the curated frequently-used tool names. A named
 /// query goes through `guard-ask`, which searches the tool directory and
 /// the reference-topic directory together and tags the result `type
@@ -428,7 +428,7 @@ pub(crate) fn oracle_check(source: &str, contract_version: &Value) -> (Value, bo
 pub(crate) fn oracle_help(session: &mut Session, topic: Option<&str>) -> Result<Value, String> {
     let reference = std::fs::read_to_string("knowledge/guard-reference.lisp").map_err(|error| {
         format!(
-            "cannot read knowledge/guard-reference.wsm (run from the sens repo root): {error}"
+            "cannot read knowledge/guard-reference.lisp (run from the sens repo root): {error}"
         )
     })?;
     for (name, source) in [
