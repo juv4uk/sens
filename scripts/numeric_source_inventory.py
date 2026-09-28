@@ -184,14 +184,8 @@ def print_summary(data: dict) -> None:
             f"{category}: tokens={item['tokens']} files={item['files']}"
         )
     print()
-    migration_sensitive = (
-        "binary-shaped-multibit-number",
-        "decimal-integer-needs-migration",
-        "decimal-fraction-or-exponent-needs-policy",
-        "rational-literal",
-    )
     print("migration-sensitive categories:")
-    for category in migration_sensitive:
+    for category in MIGRATION_SENSITIVE:
         item = data["categories"].get(category, {"tokens": 0, "files": 0})
         print(f"  {category}: tokens={item['tokens']} files={item['files']}")
 
@@ -200,9 +194,60 @@ def print_summary(data: dict) -> None:
     for bucket_name, counts in data["buckets"].items():
         rendered = " ".join(
             f"{category}={counts.get(category, 0)}"
-            for category in migration_sensitive
+            for category in MIGRATION_SENSITIVE
         )
         print(f"  {bucket_name}: {rendered}")
+
+
+MIGRATION_SENSITIVE = (
+    "binary-shaped-multibit-number",
+    "decimal-integer-needs-migration",
+    "decimal-fraction-or-exponent-needs-policy",
+    "rational-literal",
+)
+
+
+def check_baseline(data: dict, baseline_path: Path) -> int:
+    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    failures: list[str] = []
+
+    for category in MIGRATION_SENSITIVE:
+        current = data["categories"].get(category, {}).get("tokens", 0)
+        ceiling = baseline["categories"].get(category, 0)
+        if current > ceiling:
+            failures.append(
+                f"category {category}: current={current} exceeds ceiling={ceiling}"
+            )
+
+    all_buckets = set(data["buckets"]) | set(baseline.get("buckets", {}))
+    for bucket_name in sorted(all_buckets):
+        current_counts = data["buckets"].get(bucket_name, {})
+        ceiling_counts = baseline.get("buckets", {}).get(bucket_name, {})
+        for category in MIGRATION_SENSITIVE:
+            current = current_counts.get(category, 0)
+            ceiling = ceiling_counts.get(category, 0)
+            if current > ceiling:
+                failures.append(
+                    f"bucket {bucket_name}/{category}: "
+                    f"current={current} exceeds ceiling={ceiling}"
+                )
+
+    if failures:
+        print("NUMERIC SOURCE INVENTORY DRIFT DETECTED", file=sys.stderr)
+        for failure in failures:
+            print(f"  - {failure}", file=sys.stderr)
+        print(
+            "Migration-sensitive numeric source debt may decrease, but must not grow.",
+            file=sys.stderr,
+        )
+        return 1
+
+    print("numeric source inventory baseline: PASS")
+    for category in MIGRATION_SENSITIVE:
+        current = data["categories"].get(category, {}).get("tokens", 0)
+        ceiling = baseline["categories"].get(category, 0)
+        print(f"  {category}: {current}/{ceiling}")
+    return 0
 
 
 def self_test() -> int:
@@ -233,12 +278,22 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", action="store_true", help="emit JSON")
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument(
+        "--check-baseline",
+        type=Path,
+        metavar="PATH",
+        help="fail if migration-sensitive counts exceed the recorded ceilings",
+    )
     args = parser.parse_args()
 
     if args.self_test:
         return self_test()
 
     data = inventory(tracked_lisp_files())
+    if args.check_baseline:
+        result = check_baseline(data, args.check_baseline)
+        if result != 0:
+            return result
     if args.json:
         json.dump(data, sys.stdout, ensure_ascii=False, indent=2, sort_keys=True)
         print()
