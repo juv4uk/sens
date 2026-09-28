@@ -102,13 +102,13 @@ fn every_binder_shape_rejects_canon_names() {
 }
 
 #[test]
-fn ordinary_noncanon_values_remain_shadowable() {
+fn ordinary_nonregistry_values_remain_lexical() {
     assert_eq!(
-        eval("(def + (lambda (x y) (як-є локально))) (+ 1 2)"),
+        eval("(def local-add (lambda (x y) (як-є локально))) (local-add 1 2)"),
         "локально"
     );
     assert_eq!(
-        eval("(def map (lambda args (svarūpa sthānika))) (map 1 2)"),
+        eval("(def local-map (lambda args (svarūpa sthānika))) (local-map 1 2)"),
         "sthānika"
     );
 }
