@@ -22,7 +22,7 @@ concurrency:
 jobs:
   bench:
     if: ${{ github.event_name != 'pull_request' || github.event.action != 'closed' }}
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -35,12 +35,11 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: sens-bench
-      - name: Valgrind from the Guix channel pin
-        # Власний runner: без sudo/apt — valgrind з того самого закріпленого Guix-каналу.
+      - name: Install Valgrind on GitHub-hosted runner
         run: |
-          VG="$(guix time-machine -C channels.scm -- build valgrind | grep -v -- '-debug$' | tail -1)"
-          echo "$VG/bin" >> "$GITHUB_PATH"
-          "$VG/bin/valgrind" --version
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
       - name: Preserve harness from the change
         run: |
           rm -rf /tmp/bench && mkdir -p /tmp/bench
