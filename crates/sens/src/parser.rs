@@ -342,6 +342,23 @@ impl Parser<'_> {
         }
         let token = &self.source[start..self.cursor];
 
+        if let Some(wire) = token.strip_prefix("#q2:") {
+            let Some((numerator, denominator)) = wire.split_once('/') else {
+                return Err(self.error("invalid #q2 exact-rational wire", start, self.cursor));
+            };
+            let Some(rational) = crate::value::Rational::from_binary_wire_parts(numerator, denominator) else {
+                return Err(self.error("invalid #q2 exact-rational wire", start, self.cursor));
+            };
+            let kind = match rational.as_precise_i64() {
+                Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
+                None => ExprKind::Rational(rational),
+            };
+            return Ok(Expr {
+                kind,
+                span: Span { start, end: self.cursor },
+            });
+        }
+
         // The complete 8-bit space is reserved for function identities.
         // This is a direct SID read, not numeric conversion:
         // `00001100` is function SID 00001100; decimal `12` remains a number.
