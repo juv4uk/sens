@@ -3,27 +3,14 @@
   "issue": 1631,
   "source_evidence": "tests/data/numeral-silent-change-cohort.json",
   "authority": "migration-review-not-language-semantics",
-  "count": 8,
+  "count": 6,
   "route_counts": {
-    "preserve-numeric-value": 2,
+    "preserve-numeric-value": 0,
     "typed-machine-notation": 5,
     "regenerate-from-authority": 1
   },
   "invariant": "classification selects a migration route; it does not change numeric meaning or source grammar",
   "rows": [
-    {
-      "path": "lib/machine/encoding/x86-64.lisp",
-      "line": 1116,
-      "token": "110",
-      "bucket": "active-lib",
-      "current_decimal_value": "110",
-      "future_binary_value": "6",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "machine-byte-value",
-      "rationale": "encoder byte/opcode numeric value; preserve current byte value (line comment pins opcode semantics)"
-    },
     {
       "path": "lib/machine/isa/sse.lisp",
       "line": 28,
@@ -83,19 +70,6 @@
       "route": "typed-machine-notation",
       "owner_issue": 1636,
       "rationale": "opcode/prefix notation domain; lexical Symbol-vs-Number must not depend on digit composition or global numeric radix"
-    },
-    {
-      "path": "lib/machine/lowering/semantic-x86-64.lisp",
-      "line": 112,
-      "token": "11",
-      "bucket": "active-lib",
-      "current_decimal_value": "11",
-      "future_binary_value": "3",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "branch-displacement",
-      "rationale": "relative branch displacement numeric value; preserve current displacement"
     },
     {
       "path": "lib/machine/xed/generated/machine-evidence.lisp",
