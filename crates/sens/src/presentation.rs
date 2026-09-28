@@ -306,7 +306,7 @@ pub fn render_error_for_presentation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{eval_program, parse, Session, Span};
+    use crate::{eval_program, parse, Rational, Session, Span};
 
     #[test]
     fn ukrainian_value_presentation_changes_only_the_human_view() {
