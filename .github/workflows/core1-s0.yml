@@ -53,6 +53,12 @@ jobs:
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           path: .core1-s0/wsm-sens
 
+      - name: Install Guix for pinned closure
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix
+          guix --version
+
       - name: Build pinned typed-SID8 seed in pinned Guix closure
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         working-directory: .core1-s0/mccarthy-eval
