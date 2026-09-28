@@ -342,6 +342,36 @@ impl Parser<'_> {
         }
         let token = &self.source[start..self.cursor];
 
+        if let Some(payload) = explicit_radix_payload(token, "#d") {
+            let Some(rational) = crate::value::Rational::from_literal(payload, "1") else {
+                return Err(self.error("invalid #d exact-integer projection", start, self.cursor));
+            };
+            let kind = match rational.as_precise_i64() {
+                Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
+                None => ExprKind::Rational(rational),
+            };
+            return Ok(Expr {
+                kind,
+                span: Span { start, end: self.cursor },
+            });
+        }
+
+        if let Some(payload) = explicit_radix_payload(token, "#b") {
+            let Some(rational) =
+                crate::value::Rational::from_binary_wire_parts(payload, "1")
+            else {
+                return Err(self.error("invalid #b exact-integer projection", start, self.cursor));
+            };
+            let kind = match rational.as_precise_i64() {
+                Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
+                None => ExprKind::Rational(rational),
+            };
+            return Ok(Expr {
+                kind,
+                span: Span { start, end: self.cursor },
+            });
+        }
+
         if let Some(wire) = token.strip_prefix("#q2:") {
             let Some((numerator, denominator)) = wire.split_once('/') else {
                 return Err(self.error("invalid #q2 exact-rational wire", start, self.cursor));
@@ -479,6 +509,15 @@ impl Parser<'_> {
     }
 }
 
+fn explicit_radix_payload<'a>(token: &'a str, prefix: &str) -> Option<&'a str> {
+    let payload = token.strip_prefix(prefix)?;
+    let starts_explicitly = payload.is_empty()
+        || payload.starts_with('+')
+        || payload.starts_with('-')
+        || payload.chars().next().is_some_and(|ch| ch.is_ascii_digit());
+    starts_explicitly.then_some(payload)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -487,6 +526,59 @@ mod tests {
         let expressions = parse(source).expect("parsing should succeed");
         assert_eq!(expressions.len(), 1, "expected exactly one top-level form");
         expressions.into_iter().next().unwrap()
+    }
+
+    #[test]
+    fn explicit_radix_integer_projections_share_the_exact_numeric_domain() {
+        assert!(matches!(
+            parse_one("#d10").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 10.0
+        ));
+        assert!(matches!(
+            parse_one("#b1010").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 10.0
+        ));
+        assert!(matches!(
+            parse_one("#b00001100").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 12.0
+        ));
+        assert!(matches!(
+            parse_one("00001100").kind,
+            ExprKind::Sid(sid) if sid == crate::sens!(00001100)
+        ));
+        assert!(matches!(
+            parse_one("#b-1010").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == -10.0
+        ));
+        assert!(matches!(
+            parse_one("#d-10").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == -10.0
+        ));
+    }
+
+    #[test]
+    fn binary_projection_is_arbitrary_precision() {
+        let ExprKind::Rational(value) =
+            parse_one("#b100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").kind
+        else {
+            panic!("2^128 must use the arbitrary-precision exact path");
+        };
+        assert_eq!(
+            value.to_string(),
+            "340282366920938463463374607431768211456"
+        );
+    }
+
+    #[test]
+    fn malformed_explicit_radix_projection_fails_closed_without_stealing_hash_symbols() {
+        for source in ["#b102", "#b-", "#d12x", "#d+"] {
+            let error = parse(source).expect_err("malformed explicit radix projection must fail");
+            assert_eq!(error.kind, ErrorKind::Parse, "source: {source}");
+        }
+        assert!(matches!(
+            parse_one("#debug").kind,
+            ExprKind::Symbol(symbol) if &*symbol == "#debug"
+        ));
     }
 
     #[test]
