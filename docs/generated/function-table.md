@@ -6,7 +6,7 @@
 
 **Historical projection:** `contracts/core1-historical-sid-map.lisp` — one-way SID → McCarthy 1960 / Lisp 1.5 mechanism comparison, pinned against `juv4uk/mccarthy-eval`; it never mints a new identity and does not create language meaning.
 
-Regenerate: `cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-function-table.lisp`
+Regenerate: `cargo run -p sens-cli --bin my-lisp -- scripts/generate-function-table.lisp`
 
 | ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake | McCarthy 1960 / Lisp 1.5 (Core1) |
 |----|----|-----|---------|----------|--------|------------------------------|-----------------------------------|
