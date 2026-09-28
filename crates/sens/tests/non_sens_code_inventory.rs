@@ -314,15 +314,17 @@ fn is_active_lib_source(file: &str) -> bool {
     )
 }
 
-/// Exact Lisp sources embedded by the core crate as current runtime/library
-/// inputs. This deliberately excludes generated registry projections: they are
+/// Exact authored Lisp sources embedded by the core crate as current
+/// runtime/library inputs (`include_str!` constants in crates/sens/src/lib.rs).
+/// Core1 is intentionally not in this view because it is not an embedded
+/// runtime source there. This deliberately excludes generated registry
+/// projections: they are
 /// runtime inputs, but are generated evidence rather than authored language
 /// source and would dominate this human-authored migration metric.
 fn is_runtime_embedded_source(file: &str) -> bool {
     matches!(
         file,
         "lib/macro.lisp"
-            | "lib/core1.lisp"
             | "lib/core2.lisp"
             | "lib/core3.lisp"
             | "lib/core4.lisp"
