@@ -80,18 +80,18 @@
          (00101111 entry))))))
 
 (00001001 semantic-registry-find-row
-  (00001000 (identity rows)
+  (00001000 (sens-ref rows)
     (00000111
       ((00000010 rows) ()
        (00000001 ()))
       ((00000010 rows) (0)
        (00000111
-         ((00100010 identity (semantic-registry-row-id (00000101 rows)))
+         ((00100010 sens-ref (semantic-registry-row-id (00000101 rows)))
           (1)
           (00000101 rows))
-         ((00100010 identity (semantic-registry-row-id (00000101 rows)))
+         ((00100010 sens-ref (semantic-registry-row-id (00000101 rows)))
           (0)
-          (semantic-registry-find-row identity (00000110 rows))))))))
+          (semantic-registry-find-row sens-ref (00000110 rows))))))))
 
 (00001001 semantic-registry-find-id-in-namespaces
   (00001000 (name row namespaces)
@@ -124,25 +124,25 @@
                  (00000101 rows)
                  (00000001 (en ук укр sa sym)))))
          (00000111
-           ((00000010 identity) ()
+           ((00000010 sens-ref) ()
             (semantic-registry-id-for-surface name (00000110 rows)))
-           ((00000010 identity) (1)
+           ((00000010 sens-ref) (1)
             identity)
-           ((00000010 identity) (0)
+           ((00000010 sens-ref) (0)
             (semantic-registry-id-for-surface name (00000110 rows)))))))))
 
 (00001001 semantic-registry-round-trip
-  (00001000 (identity)
-    (10011101 ((printed (01001100 identity))
+  (00001000 (sens-ref)
+    (10011101 ((printed (01001100 sens-ref))
            (forms
              (01001011 printed)))
       (00000101 forms))))
 
 ; Query already-read registry data without re-entering host I/O.
 (00001001 semantic-registry-row-in
-  (00001000 (registry identity)
+  (00001000 (registry sens-ref)
     (semantic-registry-find-row
-      identity
+      sens-ref
       (semantic-registry-rows registry))))
 
 (00001001 semantic-registry-id-in
@@ -153,10 +153,10 @@
 
 ; Convenience wrappers for ordinary runtime use.
 (00001001 semantic-registry-row
-  (00001000 (identity)
+  (00001000 (sens-ref)
     (semantic-registry-row-in
       (semantic-registry-read)
-      identity)))
+      sens-ref)))
 
 (00001001 semantic-registry-id
   (00001000 (surface)
