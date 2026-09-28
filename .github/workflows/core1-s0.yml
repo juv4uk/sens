@@ -53,10 +53,13 @@ jobs:
           ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
           path: .core1-s0/wsm-sens
 
-      - name: Build pinned typed-SID8 seed
+      - name: Build pinned typed-SID8 seed in pinned Guix closure
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         working-directory: .core1-s0/mccarthy-eval
-        run: gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+        run: |
+          set -euo pipefail
+          guix time-machine -C ../../channels.scm -- shell gcc-toolchain -- \
+            gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
 
       - name: Record S0/S1 provenance
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -91,6 +94,10 @@ jobs:
 
           grep -F "(commit . \"6031f92652066825a245c806c0773e9e524257bd\")" "$manifest"
           grep -F "(source-sha256 . \"$s0_source\")" "$manifest"
+          grep -F '(build-system . guix-time-machine)' "$manifest"
+          grep -F '(guix-channel-commit . "5375f33fd48ffc3b39ecc1c5993e299258a043d8")' "$manifest"
+          grep -F '(build-package . "gcc-toolchain")' "$manifest"
+          grep -F '(artifact-scope . x86_64-linux-pinned-guix-closure)' "$manifest"
           grep -F "(binary-sha256 . \"$s0_binary\")" "$manifest"
           grep -F "(source-sha256 . \"$s1_source\")" "$manifest"
           grep -F "(commit . \"a6bd9747196f2d676ab6883cbb4b84c7fcfc6947\")" "$manifest"

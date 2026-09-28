@@ -3,9 +3,9 @@
 //! Rust strings.
 //!
 //! Guard knowledge lives in two authoritative files under the workspace
-//! root: `knowledge/guard-reference.wsm` (the reference bureau: each topic
+//! root: `knowledge/guard-reference.lisp` (the reference bureau: each topic
 //! points at authority, the canonical how-to and the verification evidence)
-//! and `lib/guard.wsm` (the shared guard-finding functions). This module
+//! and `lib/guard.lisp` (the shared guard-finding functions). This module
 //! reads both at runtime, parses them with the SAME canonical reader the
 //! evaluator uses (`sens::parse`), and walks the parsed AST. No string
 //! copy of any summary/authority/how-to/verify text exists here — if the
@@ -34,7 +34,7 @@ pub struct GuardReference {
     pub unknown_route: String,
 }
 
-/// One function defined in lib/guard.wsm, with its lambda arity and the
+/// One function defined in lib/guard.lisp, with its lambda arity and the
 /// spans needed to render the canonical defining form on hover.
 #[derive(Clone, Debug)]
 pub struct GuardFunction {
@@ -46,9 +46,9 @@ pub struct GuardFunction {
 
 /// A loaded guard-knowledge snapshot. Default = empty (nothing found).
 ///
-/// Load is deliberately split: the function map comes from `lib/guard.wsm`
+/// Load is deliberately split: the function map comes from `lib/guard.lisp`
 /// and is cheap (~ms, so arity diagnostics publish it eagerly), while the
-/// reference directory (`knowledge/guard-reference.wsm`) is only parsed on
+/// reference directory (`knowledge/guard-reference.lisp`) is only parsed on
 /// first need via `ensure_topics` — the canonical parser takes ~3.4s
 /// (release) on that 47KB file today, so a session that never hovers a
 /// guard topic must never pay for it.
@@ -60,14 +60,14 @@ pub struct GuardKnowledge {
     pub reference_file_uri: Option<String>,
     /// Where the knowledge was loaded from (for source rendering).
     pub guard_file_uri: Option<String>,
-    /// Full text of lib/guard.wsm as loaded (for span→text rendering).
+    /// Full text of lib/guard.lisp as loaded (for span→text rendering).
     pub guard_file_text: Option<String>,
     reference_path: PathBuf,
     reference_loaded: bool,
 }
 
 impl GuardKnowledge {
-    /// Cheap snapshot used at `initialize`: only `lib/guard.wsm` is read
+    /// Cheap snapshot used at `initialize`: only `lib/guard.lisp` is read
     /// and parsed. Missing files produce an empty snapshot — this is
     /// graceful, not a failure (a workspace that is not the sens repo
     /// simply gets no guard knowledge).
@@ -121,7 +121,7 @@ impl GuardKnowledge {
     }
 
     /// The canonical source text of a guard function's defining form, if
-    /// the snapshot holds lib/guard.wsm.
+    /// the snapshot holds lib/guard.lisp.
     pub fn source_of(&self, function: &GuardFunction) -> Option<String> {
         let text = self.guard_file_text.as_ref()?;
         Some(crate::analysis::span_text(text, function.form_span).to_string())
@@ -202,7 +202,7 @@ fn read_fields<'a>(
     })
 }
 
-/// Parse knowledge/guard-reference.wsm into topic entries.
+/// Parse knowledge/guard-reference.lisp into topic entries.
 ///
 /// Structure: `(00001001 *guard-reference-directory* (00000001 ((reference ...) ...)))`
 /// (surface names `def`/`quote` are accepted too).
@@ -307,7 +307,7 @@ impl GuardReference {
     }
 }
 
-/// Parse lib/guard.wsm into function definitions with lambda arities.
+/// Parse lib/guard.lisp into function definitions with lambda arities.
 ///
 /// A top-level `(def name (lambda (params) body ...))` contributes name →
 /// (name_span, form_span, arity = params.len()). Non-lambda defs (data) and
@@ -427,7 +427,7 @@ mod tests {
 
     #[test]
     fn load_functions_from_real_repo_sees_live_guard_functions() {
-        // Real evidence: the actual repo's lib/guard.wsm must yield the
+        // Real evidence: the actual repo's lib/guard.lisp must yield the
         // guard functions. This is the cheap half (milliseconds).
         let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("..").join("..");
@@ -444,7 +444,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "parses knowledge/guard-reference.wsm (~47KB): ~3.4s in release, ~65s in debug. Run explicitly for live evidence."]
+    #[ignore = "parses knowledge/guard-reference.lisp (~47KB): ~3.4s in release, ~65s in debug. Run explicitly for live evidence."]
     fn live_reference_topics_parse() {
         // The guard topic and the swarm-coordination topic must be present
         // in the live canonical directory. Slower than a normal unit test,
@@ -461,7 +461,7 @@ mod tests {
 
     #[test]
     fn load_functions_is_cheap_for_non_sens_root() {
-        // A root without lib/guard.wsm yields an empty snapshot quickly —
+        // A root without lib/guard.lisp yields an empty snapshot quickly —
         // the LSP must behave exactly as before for other workspaces.
         let root = std::env::temp_dir();
         let knowledge = GuardKnowledge::load_functions(&root);

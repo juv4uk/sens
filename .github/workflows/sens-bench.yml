@@ -8,11 +8,20 @@ name: Language benchmark (English Lisp vs SENS, instructions)
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   push:
     branches: [main]
 
+# #106: a newer head — or the PR being closed/merged — retires benchmark
+# evidence for an older head of that same PR. Main pushes are deliberately
+# non-cancellable: each main benchmark remains evidence for its exact commit.
+concurrency:
+  group: sens-bench-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   bench:
+    if: ${{ github.event_name != 'pull_request' || github.event.action != 'closed' }}
     runs-on: [self-hosted, guix]
     timeout-minutes: 30
     env:
@@ -58,8 +67,11 @@ jobs:
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/head.tsv
       - name: Compare English Lisp -> SENS, and base -> change
         run: python3 /tmp/bench/ci_compare.py /tmp/bench/base.tsv /tmp/bench/head.tsv --fail-above 3.0
-      - uses: actions/upload-artifact@v4
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: sens-bench-instructions
           path: /tmp/bench/*.tsv
+          retention-days: 1

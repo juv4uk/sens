@@ -1,7 +1,7 @@
 #lang racket
 ;;;
 ;;; racket/tests/conformance.rkt — runs the Racket port against
-;;; tests/fixtures/conformance.my, the same implementation-independent
+;;; tests/fixtures/conformance.lisp, the same implementation-independent
 ;;; contract the Rust and C backends are checked against.
 ;;;
 ;;; Found and confirmed two real semantic bugs this way (2026-08-18,
@@ -24,7 +24,7 @@
 (require "../interpreter.rkt")
 (require "../reader-lib.rkt")
 
-(define-runtime-path fixtures-path (build-path 'up 'up "tests" "fixtures" "conformance.my"))
+(define-runtime-path fixtures-path (build-path 'up 'up "tests" "fixtures" "conformance.lisp"))
 
 ;; Fixtures needing lib/unify.my, lib/reason.my, lib/understand.my,
 ;; lib/narrate.my, lib/persistent_map.my, or lib/strings-extra.my —
@@ -113,5 +113,5 @@
       (check-true raised?
                   (format "~a expected ~a, Racket returned a value"
                           expr expected-kind))))
-  (printf "conformance.my: checked ~a value fixtures and ~a error fixtures\n"
+  (printf "conformance.lisp: checked ~a value fixtures and ~a error fixtures\n"
           checked error-checked))

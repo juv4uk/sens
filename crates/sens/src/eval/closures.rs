@@ -2,9 +2,13 @@
 //! Pobudova `lambda` ta zastosuvannia zamykan/makrosiv do arhumentiv.
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
-use super::{canon, evaluate, special_forms::quoted, EvalStep};
-use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
-use std::{collections::HashSet, rc::Rc};
+use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
+use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
+use std::{
+    collections::HashSet,
+    rc::Rc,
+    sync::atomic::{AtomicU64, Ordering},
+};
 
 /// Parses a lambda-list, which comes in three shapes shared across the Lisp
 /// family (not one dialect's `&rest` keyword): `(a b)` — exactly two fixed
@@ -152,12 +156,273 @@ pub(super) fn create_lambda(
         ));
     }
     let (parameters, rest) = parse_lambda_list(&arguments[0])?;
+    let slot_names: Rc<[Rc<str>]> = parameters.iter().chain(rest.iter()).cloned().collect();
+    let body: Rc<[Expr]> = arguments[1..].into();
+    let pure = body.iter().all(|expression| is_pure(expression, &slot_names, environment));
+    let resolved = resolve_body(&body, &slot_names, pure, environment);
     Ok(Value::Closure(Rc::new(Closure {
         parameters,
         rest,
-        body: arguments[1..].into(),
+        body,
         environment: environment.clone(),
+        slot_names,
+        pure,
+        resolved,
     })))
+}
+
+// --- параметри за номером слота ---------------------------------------------
+//
+// Розв'язувач замінює посилання на параметр замикання вузлом
+// `ExprKind::Local { depth, index }` там, де обчислення цього імені гарантовано
+// знайшло б саме цей слот. Семантика не змінюється: кадр виклику зберігає й
+// імена параметрів, тож `eval`, знімки оточення й нерозв'язані посилання
+// працюють за іменем, як раніше.
+//
+// Посилання не розв'язуються в даних (`quote`, очікуваний результат `cond`),
+// в аргументах макросів і можливостей хоста (вони бачать синтаксис), у
+// вкладених `lambda` (їх розв'яже власне створення), у голові виклику (вона
+// лишається іменем для диспетчера). Крізь кадр, тіло якого може додати нове
+// ім'я (`def`, `eval`, макрос, можливість хоста, вбудована функція), глибше не
+// дивимося. Новий макрос чи можливість хоста піднімає епоху — розв'язані
+// раніше тіла відкидаються на користь оригінальних.
+
+static RESOLUTION_EPOCH: AtomicU64 = AtomicU64::new(0);
+
+/// Новий макрос або можливість хоста можуть змінити, які форми бачать синтаксис.
+pub(crate) fn bump_resolution_epoch() {
+    RESOLUTION_EPOCH.fetch_add(1, Ordering::Relaxed);
+}
+
+fn resolution_epoch() -> u64 {
+    RESOLUTION_EPOCH.load(Ordering::Relaxed)
+}
+
+/// Тіло для виконання: розв'язане, якщо його епоха ще чинна.
+fn body_for_call(closure: &Closure) -> &Rc<[Expr]> {
+    match &closure.resolved {
+        Some((body, epoch)) if *epoch == resolution_epoch() => body,
+        _ => &closure.body,
+    }
+}
+
+/// Кадр виклику з уже обчисленими значеннями параметрів.
+fn call_frame(closure: &Closure, slots: Vec<Value>) -> Environment {
+    closure
+        .environment
+        .child_with_slots(closure.slot_names.clone(), slots, closure.pure)
+}
+
+/// Як диспетчер виклику бачить голову форми.
+enum Head {
+    Quote,
+    Lambda,
+    Define,
+    Cond,
+    /// Макрос, можливість хоста, вбудована функція чи `eval`: аргументи — не
+    /// звичайні обчислювані вирази або виклик може додати ім'я в кадр.
+    Opaque,
+    /// Звичайний виклик: аргументи обчислюються як вирази.
+    Call,
+}
+
+const EVAL: Sens8 = crate::sens!(01001101);
+
+fn sid_head(sid: Sens8, environment: &Environment) -> Head {
+    if sid == EVAL {
+        return Head::Opaque;
+    }
+    match necessary_forms::identity_for_semantic_id(sid) {
+        Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
+        Some(necessary_forms::NecessaryFormIdentity::Define) => return Head::Define,
+        _ => {}
+    }
+    if canon::route_kind_for_sid(sid).is_some() {
+        if sid == crate::sens!(00000001) {
+            return Head::Quote;
+        }
+        if sid == crate::sens!(00000111) {
+            return Head::Cond;
+        }
+    }
+    if !canon::has_primitive(sid) && matches!(environment.code_slot(sid), Some(Value::Macro(_))) {
+        return Head::Opaque;
+    }
+    Head::Call
+}
+
+fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Head {
+    match &head.kind {
+        ExprKind::Sid(sid) => sid_head(*sid, environment),
+        ExprKind::Symbol(name) => {
+            if let Some(sid) = canon::routed_sid_for_surface(name) {
+                return sid_head(sid, environment);
+            }
+            match necessary_forms::identity_for_symbol(name) {
+                Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
+                Some(necessary_forms::NecessaryFormIdentity::Define) => return Head::Define,
+                _ => {}
+            }
+            if capabilities::capability_installed(name) {
+                return Head::Opaque;
+            }
+            if own.iter().any(|parameter| **parameter == **name) {
+                return Head::Call;
+            }
+            match environment.get(name) {
+                Some(Value::Macro(_) | Value::Builtin(_)) => Head::Opaque,
+                Some(Value::Sid(sid)) => sid_head(sid, environment),
+                _ => Head::Call,
+            }
+        }
+        _ => Head::Call,
+    }
+}
+
+/// Чи тіло не може додати нове ім'я в кадр виклику.
+fn is_pure(expression: &Expr, own: &[Rc<str>], environment: &Environment) -> bool {
+    let (head, arguments): (Head, &[Expr]) = match &expression.kind {
+        ExprKind::List(items) if !items.is_empty() => {
+            (classify_head(&items[0], own, environment), &items[..])
+        }
+        ExprKind::Call(sid, arguments) => (sid_head(*sid, environment), &arguments[..]),
+        _ => return true,
+    };
+    match head {
+        Head::Quote | Head::Lambda => true,
+        Head::Define | Head::Opaque => false,
+        Head::Cond | Head::Call => arguments.iter().all(|part| match &part.kind {
+            ExprKind::List(clause) if matches!(head, Head::Cond) => {
+                clause.iter().all(|item| is_pure(item, own, environment))
+            }
+            _ => is_pure(part, own, environment),
+        }),
+    }
+}
+
+fn resolve_body(
+    body: &Rc<[Expr]>,
+    own: &Rc<[Rc<str>]>,
+    pure: bool,
+    environment: &Environment,
+) -> Option<(Rc<[Expr]>, u64)> {
+    let epoch = resolution_epoch();
+    let mut scopes = vec![own.clone()];
+    if pure {
+        scopes.extend(environment.lexical_slot_scopes());
+    }
+    let mut changed = false;
+    let resolved: Rc<[Expr]> = body
+        .iter()
+        .map(|expression| resolve(expression, &scopes, environment, &mut changed))
+        .collect();
+    changed.then_some((resolved, epoch))
+}
+
+fn local_for(name: &Rc<str>, scopes: &[Rc<[Rc<str>]>]) -> Option<ExprKind> {
+    if canon::routed_sid_for_surface(name).is_some()
+        || necessary_forms::identity_for_symbol(name).is_some()
+    {
+        return None;
+    }
+    scopes.iter().enumerate().find_map(|(depth, names)| {
+        names.iter().position(|slot| **slot == **name).map(|index| ExprKind::Local {
+            depth: depth as u32,
+            index: index as u32,
+            name: name.clone(),
+        })
+    })
+}
+
+fn resolve(
+    expression: &Expr,
+    scopes: &[Rc<[Rc<str>]>],
+    environment: &Environment,
+    changed: &mut bool,
+) -> Expr {
+    let resolve_all = |items: &[Expr], changed: &mut bool| -> Rc<[Expr]> {
+        items.iter().map(|item| resolve(item, scopes, environment, changed)).collect()
+    };
+    let kind = match &expression.kind {
+        ExprKind::Symbol(name) => match local_for(name, scopes) {
+            Some(local) => {
+                *changed = true;
+                local
+            }
+            None => return expression.clone(),
+        },
+        ExprKind::List(items) if !items.is_empty() => {
+            match classify_head(&items[0], &scopes[0], environment) {
+                Head::Quote | Head::Lambda | Head::Define | Head::Opaque => return expression.clone(),
+                Head::Cond => {
+                    let mut out = Vec::with_capacity(items.len());
+                    out.push(items[0].clone());
+                    for clause in &items[1..] {
+                        out.push(resolve_cond_clause(clause, scopes, environment, changed));
+                    }
+                    ExprKind::List(out.into())
+                }
+                Head::Call => {
+                    // Голова лишається як є: диспетчер вирішує за нею.
+                    let head = match &items[0].kind {
+                        ExprKind::Symbol(_) | ExprKind::Sid(_) => items[0].clone(),
+                        _ => resolve(&items[0], scopes, environment, changed),
+                    };
+                    let mut out = Vec::with_capacity(items.len());
+                    out.push(head);
+                    out.extend(items[1..].iter().map(|item| resolve(item, scopes, environment, changed)));
+                    ExprKind::List(out.into())
+                }
+            }
+        }
+        ExprKind::Call(sid, arguments) => match sid_head(*sid, environment) {
+            Head::Call => ExprKind::Call(*sid, resolve_all(arguments, changed)),
+            Head::Cond => ExprKind::Call(
+                *sid,
+                arguments
+                    .iter()
+                    .map(|clause| resolve_cond_clause(clause, scopes, environment, changed))
+                    .collect(),
+            ),
+            _ => return expression.clone(),
+        },
+        _ => return expression.clone(),
+    };
+    Expr {
+        kind,
+        span: expression.span,
+    }
+}
+
+/// Клауза `cond`: `(запит очікуване вираз)` — очікуване є даними;
+/// `(перевірка вираз)` — обидва вирази. Інша форма лишається як є.
+fn resolve_cond_clause(
+    clause: &Expr,
+    scopes: &[Rc<[Rc<str>]>],
+    environment: &Environment,
+    changed: &mut bool,
+) -> Expr {
+    let ExprKind::List(parts) = &clause.kind else {
+        return clause.clone();
+    };
+    let parts: Rc<[Expr]> = match parts.len() {
+        3 => [
+            resolve(&parts[0], scopes, environment, changed),
+            parts[1].clone(),
+            resolve(&parts[2], scopes, environment, changed),
+        ]
+        .into(),
+        2 => [
+            resolve(&parts[0], scopes, environment, changed),
+            resolve(&parts[1], scopes, environment, changed),
+        ]
+        .into(),
+        _ => return clause.clone(),
+    };
+    Expr {
+        kind: ExprKind::List(parts),
+        span: clause.span,
+    }
 }
 
 /// Shared by `apply`/`apply_macro`: exact arity when there's no rest
@@ -219,19 +484,19 @@ pub(super) fn apply(
             // Arguments belong to the caller; parameters belong to the captured lexical frame.
             // Arhumenty nalezhat vyklyku, a parametry — zakhoplenomu leksychnomu freimu.
             // Argumente gehören zum Aufrufer, Parameter zum erfassten lexikalischen Frame.
-            let local_environment = closure.environment.child();
-            for (parameter, argument) in closure.parameters.iter().zip(arguments.iter()) {
-                let value = evaluate(argument, calling_environment)?;
-                local_environment.define(parameter.clone(), value);
+            let mut slots = Vec::with_capacity(closure.slot_names.len());
+            for argument in &arguments[..closure.parameters.len()] {
+                slots.push(evaluate(argument, calling_environment)?);
             }
-            if let Some(rest_name) = &closure.rest {
+            if closure.rest.is_some() {
                 let mut rest_values = Vec::with_capacity(arguments.len() - closure.parameters.len());
                 for argument in &arguments[closure.parameters.len()..] {
                     rest_values.push(evaluate(argument, calling_environment)?);
                 }
-                local_environment.define(rest_name.clone(), Value::list(rest_values));
+                slots.push(Value::list(rest_values));
             }
-            let last = last_body_expression(&closure.body, &local_environment, span)?;
+            let local_environment = call_frame(closure, slots);
+            let last = last_body_expression(body_for_call(closure), &local_environment, span)?;
             // Tail positions become data for the evaluator loop instead of recursive Rust calls.
             // Khvostovi pozytsii staiut danymy dlia tsyklu evaluator, a ne rekursyvnymy vyklykamy Rust.
             // Tail-Positionen werden zu Daten für den Evaluator-Schleife statt zu rekursiven Rust-Aufrufen.
@@ -263,18 +528,13 @@ pub(super) fn apply_values(
         arguments.len(),
         span,
     )?;
-    let local_environment = closure.environment.child();
-    for (parameter, value) in closure.parameters.iter().zip(arguments.iter()) {
-        local_environment.define(parameter.clone(), value.clone());
+    let mut slots: Vec<Value> = arguments[..closure.parameters.len()].to_vec();
+    if closure.rest.is_some() {
+        slots.push(Value::list(arguments[closure.parameters.len()..].iter().cloned()));
     }
-    if let Some(rest_name) = &closure.rest {
-        local_environment.define(
-            rest_name.clone(),
-            Value::list(arguments[closure.parameters.len()..].iter().cloned()),
-        );
-    }
+    let local_environment = call_frame(&closure, slots);
     let mut result = Value::Nil;
-    for expression in closure.body.iter() {
+    for expression in body_for_call(&closure).iter() {
         result = evaluate(expression, &local_environment)?;
     }
     Ok(result)
@@ -324,20 +584,20 @@ pub(super) fn apply_macro(
         span,
     )?;
 
-    let local_environment = closure.environment.child();
-    for (parameter, argument) in closure.parameters.iter().zip(arguments.iter()) {
-        let value = quoted(argument)?; // Do NOT evaluate arguments
-        local_environment.define(parameter.clone(), value);
+    let mut slots = Vec::with_capacity(closure.slot_names.len());
+    for argument in &arguments[..closure.parameters.len()] {
+        slots.push(quoted(argument)?); // Do NOT evaluate arguments
     }
-    if let Some(rest_name) = &closure.rest {
+    if closure.rest.is_some() {
         let mut rest_values: Vec<Value> = Vec::with_capacity(arguments.len());
         for argument in &arguments[closure.parameters.len()..] {
             rest_values.push(quoted(argument)?); // Do NOT evaluate arguments
         }
-        local_environment.define(rest_name.clone(), Value::list(rest_values));
+        slots.push(Value::list(rest_values));
     }
+    let local_environment = call_frame(&closure, slots);
 
-    let last = last_body_expression(&closure.body, &local_environment, span)?;
+    let last = last_body_expression(body_for_call(&closure), &local_environment, span)?;
 
     let expanded_value = evaluate(last, &local_environment)?;
     let expanded_expr = value_to_expr(expanded_value, span)?;
