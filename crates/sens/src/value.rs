@@ -380,6 +380,21 @@ impl Rational {
     pub fn is_negative(&self) -> bool {
         self.numerator.is_negative()
     }
+
+    /// Build an exact rational from explicit base-2 canonical wire parts.
+    /// The tagged wire grammar selects this path; bare source numerals never do.
+    pub(crate) fn from_binary_wire_parts(numerator: &str, denominator: &str) -> Option<Self> {
+        let numerator = BigInt::from_binary_str(numerator).ok()?;
+        let denominator = BigInt::from_binary_str(denominator).ok()?;
+        Self::from_big(numerator, denominator)
+    }
+
+    /// Reader-safe canonical wire token. The #q2: tag keeps numeric values
+    /// outside the exact eight-bit SENS function-token space even when the
+    /// magnitude itself happens to have eight bits.
+    pub(crate) fn to_binary_wire_token(&self) -> String {
+        format!("#q2:{}/{}", self.numerator.to_binary_string(), self.denominator.to_binary_string())
+    }
 }
 
 impl fmt::Display for Rational {
@@ -704,6 +719,12 @@ impl Value {
     pub fn to_princ_string(&self) -> String {
         render(self, false)
     }
+
+    /// Deterministic machine wire representation used by write-to-string.
+    /// Human presentation deliberately remains on the existing rational view.
+    pub fn to_canonical_wire_string(&self) -> String {
+        render_canonical_wire(self)
+    }
 }
 
 /// Shared by `Display` (`quote_strings: true`, escaped — `prin1`/`write`
@@ -791,6 +812,44 @@ fn render(value: &Value, quote_strings: bool) -> String {
         Value::Macro(_) => "<macro>".to_string(),
         Value::TcpConnection(_) => "<tcp-connection>".to_string(),
         Value::TcpListener(_) => "<tcp-listener>".to_string(),
+    }
+}
+
+fn render_canonical_wire(value: &Value) -> String {
+    match value {
+        Value::Number(number, Exactness::Exact) if number.is_finite() && number.fract() == 0.0 => {
+            Rational::integer(*number as i64).to_binary_wire_token()
+        }
+        Value::Rational(number) => number.to_binary_wire_token(),
+        Value::Pair(_, _) => render_pair_canonical_wire(value),
+        Value::Vector(values) => {
+            let items = values.borrow().iter().map(render_canonical_wire).collect::<Vec<_>>();
+            format!("#({})", items.join(" "))
+        }
+        _ => render(value, true),
+    }
+}
+
+fn render_pair_canonical_wire(value: &Value) -> String {
+    let mut out = String::from("(");
+    let mut current = value;
+    let mut first = true;
+    loop {
+        match current {
+            Value::Pair(head, tail) => {
+                if !first { out.push(' '); }
+                out.push_str(&render_canonical_wire(head));
+                current = tail;
+                first = false;
+            }
+            Value::Nil => { out.push(')'); return out; }
+            tail => {
+                out.push_str(" . ");
+                out.push_str(&render_canonical_wire(tail));
+                out.push(')');
+                return out;
+            }
+        }
     }
 }
 
