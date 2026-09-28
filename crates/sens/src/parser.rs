@@ -342,6 +342,52 @@ impl Parser<'_> {
         }
         let token = &self.source[start..self.cursor];
 
+        // Explicit radix projections enter the ordinary exact numeric domain.
+        // They are source projections only: in particular #b........ is never
+        // a SENS function, while the same eight bits without #b remain one.
+        if let Some(payload) = token.strip_prefix("#d") {
+            let rational = crate::value::Rational::from_literal(payload, "1").ok_or_else(|| {
+                self.error(
+                    "invalid explicit decimal integer literal",
+                    start,
+                    self.cursor,
+                )
+            })?;
+            let kind = match rational.as_precise_i64() {
+                Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
+                None => ExprKind::Rational(rational),
+            };
+            return Ok(Expr {
+                kind,
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
+            });
+        }
+
+        if let Some(payload) = token.strip_prefix("#b") {
+            let rational =
+                crate::value::Rational::from_binary_integer_literal(payload).ok_or_else(|| {
+                    self.error(
+                        "invalid explicit binary integer literal",
+                        start,
+                        self.cursor,
+                    )
+                })?;
+            let kind = match rational.as_precise_i64() {
+                Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
+                None => ExprKind::Rational(rational),
+            };
+            return Ok(Expr {
+                kind,
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
+            });
+        }
+
         // The complete 8-bit space is reserved for function identities.
         // This is a direct SID read, not numeric conversion:
         // `00001100` is function SID 00001100; decimal `12` remains a number.
@@ -485,6 +531,66 @@ mod tests {
             &expressions[1].kind,
             ExprKind::Number(value, Exactness::Exact) if *value == 102.0
         ));
+    }
+
+    #[test]
+    fn explicit_radix_integer_projections_share_the_exact_numeric_domain() {
+        assert!(matches!(
+            parse_one("#d10").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 10.0
+        ));
+        assert!(matches!(
+            parse_one("#b1010").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 10.0
+        ));
+        assert!(matches!(
+            parse_one("#d-10").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == -10.0
+        ));
+        assert!(matches!(
+            parse_one("#b-1010").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == -10.0
+        ));
+    }
+
+    #[test]
+    fn explicit_binary_eight_bits_are_numeric_not_a_sens_function() {
+        assert!(matches!(
+            parse_one("#b00001100").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 12.0
+        ));
+        assert!(matches!(
+            parse_one("00001100").kind,
+            ExprKind::Sid(sid) if sid == crate::sens!(00001100)
+        ));
+    }
+
+    #[test]
+    fn explicit_radix_integer_projections_are_arbitrary_precision() {
+        let ExprKind::Rational(binary) =
+            parse_one("#b100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").kind
+        else {
+            panic!("2^128 must use arbitrary-precision exact storage");
+        };
+        assert_eq!(
+            binary.to_string(),
+            "340282366920938463463374607431768211456"
+        );
+
+        let ExprKind::Rational(decimal) =
+            parse_one("#d123456789012345678901234567890").kind
+        else {
+            panic!("large explicit decimal integer must stay exact");
+        };
+        assert_eq!(decimal.to_string(), "123456789012345678901234567890");
+    }
+
+    #[test]
+    fn malformed_explicit_radix_integer_projections_fail_closed() {
+        for source in ["#b", "#b102", "#b1/10", "#d", "#d1x", "#d1.5"] {
+            let error = parse(source).expect_err("reserved radix projection must fail closed");
+            assert_eq!(error.kind, ErrorKind::Parse, "{source}");
+        }
     }
 
     #[test]
