@@ -78,8 +78,14 @@ impl Sens8 {
         Self(byte)
     }
 
-    /// Mechanical boundary for serialization/dispatch only.
-    pub(crate) const fn packed_byte(self) -> u8 {
+    /// One-way mechanical boundary for serialization/dispatch only.
+    ///
+    /// This exposes the already-typed function sense as its exact eight
+    /// transport bits. The byte is not source syntax, a numeric alias, or
+    /// semantic authority. Construction from an arbitrary byte remains
+    /// crate-private so external consumers cannot create a second identity
+    /// path around the exact-binary reader/macro boundary.
+    pub const fn packed_byte(self) -> u8 {
         self.0
     }
 }
