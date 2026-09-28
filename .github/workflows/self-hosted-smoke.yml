@@ -1,4 +1,4 @@
-name: self-hosted smoke
+name: GitHub-hosted smoke
 
 on:
   pull_request:
@@ -8,12 +8,12 @@ on:
 
 jobs:
   smoke:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: машина runner-а
+      - name: GitHub-hosted runner evidence
         run: |
           uname -a
           nproc
           grep -m1 'model name' /proc/cpuinfo
-          command -v guix && guix --version | head -1
+          printf 'runner=%s os=%s arch=%s\n' "$RUNNER_NAME" "$RUNNER_OS" "$RUNNER_ARCH"
