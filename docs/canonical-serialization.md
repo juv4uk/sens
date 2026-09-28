@@ -1,5 +1,21 @@
 # Canonical serialization · Канонічна серіалізація · Kanonische Serialisierung
 
+## Українська
+
+`write-to-string` визначає незалежний від реалізації machine data wire format СЕНС і навмисно відділений від людського представлення. Для кожного значення із серіалізованого домену `read(write-to-string(value))` структурно `equal?` до `value`, а рівні значення дають побайтово однаковий wire-текст. Виконуване джерело істини — Tier-2 блок “Canonical serialization law” у [`tests/fixtures/conformance.lisp`](../tests/fixtures/conformance.lisp), а не Rust `Display`.
+
+Домен: `()`/`t`, читабельні символи, рядки, пари (proper і dotted lists), точні цілі та скорочені раціональні числа, скінченні неточні числа. Замикання, макроси, TCP handles та інші живі capabilities навмисно поза ним: діагностичні форми на кшталт `<lambda>` не є даними й не мають зберігатися чи передаватися.
+
+- `()` і `t` представляють false/nil та true; символ використовує свій читабельний token.
+- Рядок береться в лапки. Quote, backslash, newline і tab екрануються як `\"`, `\\`, `\n` і `\t`; інші Unicode scalar values лишаються буквальними.
+- Proper list має дужки й один ASCII-пробіл між елементами: `(a b c)`. Неправильний хвіст має по одному пробілу навколо крапки: `(a b . c)`.
+- Точні цілі та rational у machine wire мають теговану двійкову форму `#q2:<signed-numerator-bits>/<positive-denominator-bits>`. Дріб скорочений, нуль канонічно `0`, величини не мають початкових нулів. Приклади: 42 → `#q2:101010/1`, 1/2 → `#q2:1/10`, -5/4 → `#q2:-101/100`. Тег відділяє numeric wire від голих 8-бітних функцій СЕНС. Людське представлення лишається `42`, `1/2`, `-5/4`.
+- Скінченне неточне число використовує найкоротшу сумісну з reader десяткову форму, що зберігає представлене значення. Ціле неточне значення зберігає одну дробову цифру (`3.0`), тому exactness не стирається.
+
+Саме цей текст — не Rust layout і не digest-алгоритм — є semantic identity. `knowledge-content-address` та `world-content-address` використовують його напряму. Software- чи FPGA-adapter може хешувати UTF-8 bytes для передачі, але спочатку має збігтися канонічний текст.
+
+---
+
 ## English
 
 `write-to-string` defines SENS's implementation-independent machine data wire format. It is deliberately distinct from human presentation. For every value in the serializable domain, `read(write-to-string(value))` is structurally `equal?` to `value`, and equal values produce byte-for-byte equal wire text. The executable authority is the Tier-2 “Canonical serialization law” block in [`tests/fixtures/conformance.lisp`](../tests/fixtures/conformance.lisp), not Rust's `Display` implementation.
@@ -14,19 +30,7 @@ The domain is `()`/`t`, readable symbols, strings, pairs (proper and dotted list
 
 This text—not a Rust layout or digest algorithm—is semantic identity. `knowledge-content-address` and `world-content-address` use it directly. Software or FPGA adapters may hash its UTF-8 bytes for transport, but canonical text must match before hashing.
 
-## Українська
-
-`write-to-string` визначає незалежний від реалізації machine data wire format СЕНС і навмисно відділений від людського представлення. Для кожного значення із серіалізованого домену `read(write-to-string(value))` структурно `equal?` до `value`, а рівні значення дають побайтово однаковий wire-текст. Виконуване джерело істини — Tier-2 блок “Canonical serialization law” у [`tests/fixtures/conformance.lisp`](../tests/fixtures/conformance.lisp), а не Rust `Display`.
-
-Домен: `()`/`t`, читабельні символи, рядки, пари (proper і dotted lists), точні цілі та скорочені раціональні числа, скінченні неточні числа. Замикання, макроси, TCP handles та інші живі capabilities навмисно поза ним: діагностичні форми на кшталт `<lambda>` не є даними й не мають зберігатися чи передаватися.
-
-- `()` і `t` представляють false/nil та true; символ використовує свій читабельний token.
-- Рядок береться в лапки. Quote, backslash, newline і tab екрануються як `\"`, `\\`, `\n` і `\t`; інші Unicode scalar values лишаються буквальними.
-- Proper list має дужки й один ASCII-пробіл між елементами: `(a b c)`. Неправильний хвіст має по одному пробілу навколо крапки: `(a b . c)`.
-- Точні цілі та rational у machine wire мають теговану двійкову форму `#q2:<signed-numerator-bits>/<positive-denominator-bits>`. Дріб скорочений, нуль канонічно `0`, величини не мають початкових нулів. Приклади: 42 → `#q2:101010/1`, 1/2 → `#q2:1/10`, -5/4 → `#q2:-101/100`. Тег відділяє numeric wire від голих 8-бітних функцій СЕНС. Людське представлення лишається `42`, `1/2`, `-5/4`.
-- Скінченне неточне число використовує найкоротшу сумісну з reader десяткову форму, що зберігає представлене значення. Ціле неточне значення зберігає одну дробову цифру (`3.0`), тому exactness не стирається.
-
-Саме цей текст — не Rust layout і не digest-алгоритм — є semantic identity. `knowledge-content-address` та `world-content-address` використовують його напряму. Software- чи FPGA-adapter може хешувати UTF-8 bytes для передачі, але спочатку має збігтися канонічний текст.
+---
 
 ## Deutsch
 
