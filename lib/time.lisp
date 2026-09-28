@@ -16,10 +16,10 @@
                            365))
            (y (00001100 yoe (00001110 era 400)))
            (doy (00001101 doe (00001100 (00001110 365 yoe)
-                           (00001101 (00010100 yoe 4) (00010100 yoe 100)))))
+                           (00001101 (00010100 yoe 4) (00010100 yoe #d100)))))
            (mp (00010100 (00001100 (00001110 5 doy) 2) 153))
            (day (00001100 (00001101 doy (00010100 (00001100 (00001110 153 mp) 2) 5)) 1))
-           (month (00001100 mp (00000111 ((00011010 mp 10) 1 3) ((00011010 mp 10) 0 -9))))
+           (month (00001100 mp (00000111 ((00011010 mp #d10) 1 3) ((00011010 mp #d10) 0 -9))))
            (year (00001100 y (00000111 ((00011101 month 2) 1 1) ((00011101 month 2) 0 0)))))
       (00100111 year month day))))
 
@@ -101,7 +101,7 @@
                (00100111 (00000001 accepted)
                      host
                      (00001101 ntp-seconds 2208988800)
-                     (00010100 (00001110 fraction 1000000000) 4294967296)))))
+                     (00010100 (00001110 fraction #d1000000000) 4294967296)))))
           ((internet-time-stratum-valid? stratum) 0
             (00100111 (00000001 rejected) (00000001 invalid-response)))))
       ((internet-time-mode-valid? mode) 0
@@ -148,7 +148,7 @@
 ; whole elapsed milliseconds (floor toward zero == floor here).
 (00001001 milliseconds-from-nanoseconds
   (00001000 (nanoseconds)
-    (00010100 nanoseconds 1000000)))
+    (00010100 nanoseconds #d1000000)))
 
 (00001001 mono-ms
   (00001000 ()
