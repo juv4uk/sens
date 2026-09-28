@@ -65,7 +65,7 @@ jobs:
           cp /tmp/bench/ci_bench.rs crates/sens/examples/ci_bench.rs
           cargo build --release -p sens --example ci_bench
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/head.tsv
-      - name: Numeric buffer map: exact SENS FASL correctness and instructions
+      - name: "Numeric buffer map: exact SENS FASL correctness and instructions"
         run: |
           mkdir -p /tmp/bench/numeric-buffer-map
           for size in 1000 100000 1000000; do
