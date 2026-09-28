@@ -22,7 +22,7 @@
                  (provenance-ref observation-42)
                  (priority ordinary)
                  (semantic-id 00001100))))
-           (second
+           (second-ref
              (00000001
                (pending-invocation
                  (producer datalog)
@@ -32,7 +32,7 @@
                  (semantic-id 00001100))))
            (pending
              (life-scheduler-pending
-               (00100111 first first-duplicate second)))
+               (00100111 first first-duplicate second-ref)))
            (projections
              (00000001
                ((projection-ready
@@ -66,7 +66,7 @@
         ((00000010 selection) (0)
          (10011101 ((ready (00000101 (00000110 selection)))
                 (remaining (00000101 (00000110 (00000110 (00000110 selection)))))
-                (dedup-ok (00100010 remaining (00100111 second)))
+                (dedup-ok (00100010 remaining (00100111 second-ref)))
                 (quiescence-ok
                   (00100010
                     (life-scheduler-quiescence

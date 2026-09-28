@@ -1444,7 +1444,6 @@ lisp	tests/fixtures/inventory.lisp	numeric-buffer-map	3
 lisp	tests/fixtures/inventory.lisp	quote	87
 lisp	tests/fixtures/island-compat-witness.lisp	identity	10
 lisp	tests/fixtures/life-1-contract-witness.lisp	identity	10
-lisp	tests/fixtures/life-1-scheduler-witness.lisp	second	3
 lisp	tests/fixtures/mathematical-result-taxonomy-witness.lisp	identity	10
 lisp	tests/fixtures/meta-eval-empty-program-witness.lisp	env	4
 lisp	tests/fixtures/native-first-coverage-ledger-witness.lisp	reason	2
