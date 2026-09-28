@@ -1,4 +1,4 @@
-; #1131 — executable my-lisp witness for contracts/core-profile-contract.lisp.
+; #1131 — executable SENS witness for contracts/core-profile-contract.lisp.
 ;
 ; Цей файл не визначає профільні закони. Він читає authority-документ як
 ; Lisp-дані та перевіряє лише критичні інваріанти four-core boundary.
@@ -91,7 +91,7 @@
        (10011100 ((failure
                (cp-first-failure
                  (00100111
-                   (cp-check (00000001 authority) (00000001 owner) (00000001 my-lisp))
+                   (cp-check (00000001 authority) (00000001 owner) (00000001 sens))
                    (cp-check (00000001 authority) (00000001 sid-identity) (00000001 shared))
                    (cp-check (00000001 authority) (00000001 canon-identity) (00000001 shared))
                    (cp-check (00000001 authority) (00000001 semantic-registry) (00000001 shared))
@@ -117,8 +117,8 @@
                    (cp-check (00000001 core3) (00000001 law-source) "contracts/core3-profile-contract.lisp")
                    (cp-check (00000001 core3) (00000001 execution-source) "lib/core3.lisp")
                    (cp-check (00000001 core3) (00000001 historical-contract) (00000001 (7 0)))
-                   (cp-check (00000001 core3) (00000001 selector-owner) (00000001 my-lisp))
-                   (cp-check (00000001 core3) (00000001 lowering-owner) (00000001 my-lisp))
+                   (cp-check (00000001 core3) (00000001 selector-owner) (00000001 sens))
+                   (cp-check (00000001 core3) (00000001 lowering-owner) (00000001 sens))
                    (cp-check (00000001 core3) (00000001 native-observation-is-language-law) (00000001 no))
 
                    (cp-check (00000001 core4) (00000001 profile-number) 4)
