@@ -5,7 +5,12 @@
    (commit . "6031f92652066825a245c806c0773e9e524257bd")
    (source-path . "mccarthy-kernel.s")
    (source-sha256 . "20bdd714a4072cd45ce782bb0b4597a1ff3e96b35624ff86188fb7bb3f455cdd")
-   (binary-sha256 . "243bb38ccab14fb023f1d74e3be4a7672a0a7ef5d8ff90f8a7e8016666acb8cc")
+   (build-system . guix-time-machine)
+   (guix-channel-commit . "5375f33fd48ffc3b39ecc1c5993e299258a043d8")
+   (build-package . "gcc-toolchain")
+   (build-command . "gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s")
+   (artifact-scope . x86_64-linux-pinned-guix-closure)
+   (binary-sha256 . "3283cec94edb4211f2aaa4fee5d52c4f9b6add72b1d1db36c142788bf548cfa0")
    (semantic-authority . no)
    (status . witnessed))
 
