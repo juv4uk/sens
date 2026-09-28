@@ -119,7 +119,7 @@ mod tests {
                 assert_eq!(sid, crate::sens!(00001100));
                 assert_eq!(args.len(), 2);
             }
-            other => panic("expected Call, got {other:?}"),
+            other => panic!("expected Call, got {other:?}"),
         }
     }
 
