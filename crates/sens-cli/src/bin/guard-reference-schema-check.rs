@@ -1,6 +1,6 @@
 //! Guard Reference Schema Quality Gate / Гарантна перевірка якості схеми довідника.
 //!
-//! Fail-closed validation of guard-reference.wsm:
+//! Fail-closed validation of guard-reference.lisp:
 //! - Duplicate topics
 //! - Missing authority files
 //! - Empty authority/verify

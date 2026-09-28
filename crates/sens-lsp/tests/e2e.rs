@@ -623,7 +623,7 @@ fn t16_workspace_scan_recognizes_wsm_extension() {
 
 /// The sens repo root (parent of crates/sens-lsp), used as the LSP
 /// workspace root so initialize loads guard knowledge from the REAL
-/// lib/guard.wsm and knowledge/guard-reference.wsm.
+/// lib/guard.wsm and knowledge/guard-reference.lisp.
 fn sens_repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("..")
 }
@@ -691,7 +691,7 @@ fn t18_g3_guard_function_wrong_arity_is_diagnosed() {
 /// 47KB canonical file), so this stays explicit rather than slowing every
 /// `cargo test`. Run: `cargo test --release -p sens-lsp -- --ignored`
 #[test]
-#[ignore = "guard-reference.wsm topic parse is slow; run explicitly in release"]
+#[ignore = "guard-reference.lisp topic parse is slow; run explicitly in release"]
 fn t19_g3_guard_topic_hover_from_live_reference_wsm() {
     let uri = "file:///g3tp.lisp";
     let doc = "(guard)\n"; // `guard` as a bare symbol form, not a call
