@@ -1,0 +1,24 @@
+name: Final preserve-value migration witness
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/encoding/x86-64.lisp"
+      - "lib/machine/lowering/semantic-x86-64.lisp"
+      - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - ".github/workflows/final-preserve-1635.yml"
+
+jobs:
+  preserve-values:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: final-preserve-1635
+      - name: MOVQ byte stays decimal 110
+        run: cargo test -p sens --test x86_64_lisp_encoder movq_xmm_r64_keeps_opcode_byte_0x6e_as_decimal_110 -- --exact
+      - name: Semantic branch displacement stays decimal 11
+        run: cargo test -p sens --test machine_minimal_profile bounded_cond_profile_is_projected_from_lisp_runtime_decision_need -- --exact
