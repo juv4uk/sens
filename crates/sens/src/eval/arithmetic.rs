@@ -92,13 +92,13 @@ fn arithmetic_overflow(span: Span) -> LanguageError {
 
 /// Enforces an *opt-in* numeric resource limit (`Environment::with_numeric_bit_limit`)
 /// — a no-op when this session never configured one, which is every
-/// `conformance.my` fixture and the Rust reference implementation by
+/// `conformance.lisp` fixture and the Rust reference implementation by
 /// default (see S1's own open note on arbitrary precision). Checked after
 /// computing an exact result, never used to fall back to an inexact
 /// approximation — that would violate S1, not satisfy it.
 /// Zastosovuie *optsiinu* chyslovu mezhu resursu (`Environment::with_numeric_bit_limit`)
 /// — nichoho ne robyt, yakshcho tsia sesiia yii ne nalashtuvala, shcho ye typovym dlia
-/// kozhnoi fikstury `conformance.my` y Rust-realizatsii (dyv. vlasnu
+/// kozhnoi fikstury `conformance.lisp` y Rust-realizatsii (dyv. vlasnu
 /// vidkrytu prymitku S1 pro dovilnu tochnist). Pereviriaietsia pislia
 /// obchyslennia tochnoho rezultatu, nikoly ne vykorystovuietsia, shchob
 /// vidkotytys do netochnoho nablyzhennia — tse porushylo b S1, ne

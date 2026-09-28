@@ -96,7 +96,7 @@ pub fn arity_diagnostics(source: &str) -> Result<Vec<ArityDiagnostic>, LanguageE
 
 /// Same as [`arity_diagnostics`], with additional known heads folded into
 /// the same canonical shape (e.g. live guard functions from
-/// `lib/guard.wsm`). Canonical `language_items()` win on name collision —
+/// `lib/guard.lisp`). Canonical `language_items()` win on name collision —
 /// guard files are lower authority than the language itself.
 pub fn arity_diagnostics_with_items(
     source: &str,

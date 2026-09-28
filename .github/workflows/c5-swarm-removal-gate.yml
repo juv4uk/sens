@@ -5,7 +5,7 @@ on:
     paths:
       - "AGENTS.md"
       - "docs/swarm-*.md"
-      - "knowledge/swarm-*.wsm"
+      - "knowledge/swarm-*.lisp"
       - "crates/sens-cli/src/swarm.rs"
       - "crates/sens-cli/tests/**"
       - "crates/sens/tests/swarm_*.rs"
@@ -14,7 +14,7 @@ on:
     paths:
       - "AGENTS.md"
       - "docs/swarm-*.md"
-      - "knowledge/swarm-*.wsm"
+      - "knowledge/swarm-*.lisp"
       - "crates/sens-cli/src/swarm.rs"
       - "crates/sens-cli/tests/**"
       - "crates/sens/tests/swarm_*.rs"
