@@ -1,22 +1,22 @@
 ; ecosystem-status.my — machine-readable current-state snapshot for the
 ; four-repository ecosystem (my-lisp, fpga-lisp, cml, my-idea).
 ;
-; Data only, same convention as language-contract.my/isa-contract.my/
-; compatibility.my — one flat alist, read via (read-file ...) or (read
+; Data only, same convention as language-contract.lisp/isa-contract.lisp/
+; compatibility.lisp — one flat alist, read via (read-file ...) or (read
 ; (read-file "ecosystem-status.my")), never loaded as executable source.
 ; docs/ecosystem-sync.md's prose narrates the same facts for humans;
 ; this file is the version another session's my-lisp code could actually
 ; consume (e.g. a future my-idea "System Observatory" panel) without
 ; scraping Markdown.
 ;
-; Not the contract itself — language-contract.my/isa-contract.my/
-; compatibility.my remain authoritative; this file is a snapshot,
+; Not the contract itself — language-contract.lisp/isa-contract.lisp/
+; compatibility.lisp remain authoritative; this file is a snapshot,
 ; refreshed by hand after each cross-session sync, per
 ; docs/ecosystem-sync.md's four-point status request.
 ;
 ; ecosystem-status.my — машинно-читаний знімок поточного стану
 ; чотирьох-репозиторної екосистеми. Дані, не код; та сама конвенція, що
-; й у language-contract.my/isa-contract.my/compatibility.my.
+; й у language-contract.lisp/isa-contract.lisp/compatibility.lisp.
 
 ((kind . ecosystem-status)
  (as-of . "2026-08-12")
