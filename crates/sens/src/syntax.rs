@@ -104,8 +104,9 @@ pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 /// callers fall back to text parsing (never a wrong program).
 pub(crate) mod fasl {
     use super::{Exactness, Expr, ExprKind};
-    use crate::value::Rational;
+    use crate::value::{NumericBuffer, Rational};
     use std::rc::Rc;
+    use std::sync::Arc;
 
     pub const FASL_FORMAT_VERSION: u32 = 3;
 
@@ -116,6 +117,10 @@ pub(crate) mod fasl {
     const TAG_LIST: u8 = 5;
     const TAG_PAIR: u8 = 6;
     const TAG_BINARY: u8 = 7;
+    // Адитивні v3 tags: старі snapshots лишаються байт-в-байт незмінними,
+    // а старий decoder fail-closed відхилить новий tag як невідомий.
+    const TAG_I32_BUFFER: u8 = 8;
+    const TAG_F32_BUFFER: u8 = 9;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -184,11 +189,19 @@ pub(crate) mod fasl {
                     encode_expr(argument, out);
                 }
             }
-            // Runtime-constructed buffers are not source syntax; a program
-            // containing one cannot come from lib/*.my text, so snapshots
-            // refuse them and callers fall back to parsing.
-            ExprKind::NumericBuffer(_) => {
-                unreachable!("NumericBuffer is runtime-only, never parsed")
+            ExprKind::NumericBuffer(NumericBuffer::I32(values)) => {
+                out.push(TAG_I32_BUFFER);
+                put_u32(out, values.len() as u32);
+                for value in values.iter() {
+                    out.extend_from_slice(&value.to_le_bytes());
+                }
+            }
+            ExprKind::NumericBuffer(NumericBuffer::F32(values)) => {
+                out.push(TAG_F32_BUFFER);
+                put_u32(out, values.len() as u32);
+                for value in values.iter() {
+                    out.extend_from_slice(&value.to_bits().to_le_bytes());
+                }
             }
         }
     }
@@ -228,6 +241,33 @@ pub(crate) mod fasl {
                 let head = decode_expr(bytes, pos)?;
                 let tail = decode_expr(bytes, pos)?;
                 ExprKind::Pair(Rc::new(head), Rc::new(tail))
+            }
+            TAG_I32_BUFFER => {
+                let count = get_u32(bytes, pos)? as usize;
+                let byte_len = count.checked_mul(std::mem::size_of::<i32>())?;
+                let raw = bytes.get(*pos..pos.checked_add(byte_len)?)?;
+                *pos += byte_len;
+                let mut values = Vec::with_capacity(count.min(1 << 22));
+                for chunk in raw.chunks_exact(4) {
+                    values.push(i32::from_le_bytes(chunk.try_into().ok()?));
+                }
+                ExprKind::NumericBuffer(NumericBuffer::I32(Arc::from(values)))
+            }
+            TAG_F32_BUFFER => {
+                let count = get_u32(bytes, pos)? as usize;
+                let byte_len = count.checked_mul(std::mem::size_of::<u32>())?;
+                let raw = bytes.get(*pos..pos.checked_add(byte_len)?)?;
+                *pos += byte_len;
+                let mut values = Vec::with_capacity(count.min(1 << 22));
+                for chunk in raw.chunks_exact(4) {
+                    let bits = u32::from_le_bytes(chunk.try_into().ok()?);
+                    let value = f32::from_bits(bits);
+                    if !value.is_finite() {
+                        return None;
+                    }
+                    values.push(value);
+                }
+                ExprKind::NumericBuffer(NumericBuffer::F32(Arc::from(values)))
             }
             _ => return None,
         };
@@ -675,6 +715,70 @@ mod fasl_tests {
         // byte-identical to the original encoding.
         let re_encoded = encode_program(&decoded, &source_hash);
         assert_eq!(re_encoded, encoded);
+    }
+
+    #[test]
+    fn fasl_transports_exact_sens_numeric_buffer_map_without_surface_names() {
+        const SOURCE: &str =
+            "(01011001 (00001000 (x) (00001100 x 1)) #i32(1 2 3))";
+        let source_hash = sha256_source(SOURCE.as_bytes());
+        let expressions = parse(SOURCE).expect("exact SENS numeric-buffer-map parses");
+        let encoded = encode_program(&expressions, &source_hash);
+
+        // FASL TAG_BINARY = 7; наступний байт є самою функцією СЕНС.
+        assert!(
+            encoded.windows(2).any(|bytes| bytes == [7, 0b01011001]),
+            "numeric-buffer-map must travel as one exact SENS byte"
+        );
+        for forbidden in [b"numeric-buffer-map".as_slice(), b"lambda", b"i32-buffer"] {
+            assert!(
+                !encoded.windows(forbidden.len()).any(|bytes| bytes == forbidden),
+                "human surface leaked into binary transport: {:?}",
+                String::from_utf8_lossy(forbidden)
+            );
+        }
+
+        let (decoded, decoded_hash) =
+            decode_program(&encoded).expect("typed-buffer FASL must decode");
+        assert_eq!(decoded_hash, source_hash);
+        assert_eq!(encode_program(&decoded, &source_hash), encoded);
+
+        let ExprKind::List(outer) = &decoded[0].kind else {
+            panic!("numeric-buffer-map program must stay a list");
+        };
+        assert!(matches!(
+            &outer[0].kind,
+            ExprKind::Sid(sid) if *sid == crate::sens!(01011001)
+        ));
+        let ExprKind::NumericBuffer(crate::NumericBuffer::I32(values)) = &outer[2].kind else {
+            panic!("third argument must stay an i32 buffer");
+        };
+        assert_eq!(&**values, &[1, 2, 3]);
+    }
+
+    #[test]
+    fn fasl_preserves_f32_buffer_bits_including_negative_zero() {
+        const SOURCE: &str = "#f32(-0.0 0.1 3.0)";
+        let source_hash = sha256_source(SOURCE.as_bytes());
+        let expressions = parse(SOURCE).expect("f32 buffer parses");
+        let encoded = encode_program(&expressions, &source_hash);
+        let (decoded, _) = decode_program(&encoded).expect("f32 buffer FASL decodes");
+
+        let ExprKind::NumericBuffer(crate::NumericBuffer::F32(values)) = &decoded[0].kind else {
+            panic!("decoded expression must remain an f32 buffer");
+        };
+        assert_eq!(values[0].to_bits(), (-0.0f32).to_bits());
+        assert_eq!(values[1].to_bits(), (0.1f32).to_bits());
+        assert_eq!(values[2].to_bits(), 3.0f32.to_bits());
+        assert_eq!(encode_program(&decoded, &source_hash), encoded);
+
+        let mut tampered = encoded.clone();
+        let start = tampered.len() - std::mem::size_of::<u32>();
+        tampered[start..].copy_from_slice(&f32::INFINITY.to_bits().to_le_bytes());
+        assert!(
+            decode_program(&tampered).is_none(),
+            "non-finite f32 payload must fail closed"
+        );
     }
 
     #[test]
