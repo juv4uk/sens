@@ -30,7 +30,7 @@
 
 (core1-historical-sid-map/1
   (authority
-    (semantic-owner . my-lisp)
+    (semantic-owner . sens)
     (historical-mechanism-repository . juv4uk/mccarthy-eval)
     (historical-mechanism-pin . "1ae9745b66a1439c1929b0d9038c680567118a58")
     (reverse-authority . forbidden)

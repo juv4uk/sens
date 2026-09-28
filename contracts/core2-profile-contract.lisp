@@ -1,6 +1,6 @@
 ; #1133 — authoritative Core2 legacy compatibility profile.
 ;
-; Core2 freezes the last pre-structural/result-domain my-lisp behavior under
+; Core2 freezes the last pre-structural/result-domain SENS behavior under
 ; Language Contract 6.0. This is a compatibility profile, not a rollback of
 ; current Core4 semantics.
 ;
@@ -16,7 +16,7 @@
 
 (core2-profile-contract/1
   ((identity . authority)
-   (owner . my-lisp)
+   (owner . sens)
    (profile . core2)
    (sid-identity-source . "lib/surface/semantic-registry.lisp")
    (sid-may-be-reminted . no)
