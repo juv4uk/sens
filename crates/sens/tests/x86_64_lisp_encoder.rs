@@ -40,6 +40,27 @@ fn register_ordinals_10_and_11_preserve_decimal_values() {
 }
 
 #[test]
+fn parity_condition_wrappers_preserve_decimal_codes_10_and_11() {
+    let mut session = encoder_session();
+    for (wrapper, generic) in [
+        ("(x86-encode-jp-rel8 0)", "(x86-encode-jcc-rel8 #d10 0)"),
+        ("(x86-encode-jnp-rel8 0)", "(x86-encode-jcc-rel8 #d11 0)"),
+        ("(x86-encode-jp-rel32 0)", "(x86-encode-jcc-rel32 #d10 0)"),
+        ("(x86-encode-jnp-rel32 0)", "(x86-encode-jcc-rel32 #d11 0)"),
+        ("(x86-encode-setp-r8 (quote al))", "(x86-encode-setcc-r8 #d10 (quote al))"),
+        ("(x86-encode-setnp-r8 (quote al))", "(x86-encode-setcc-r8 #d11 (quote al))"),
+        ("(x86-encode-cmovp-r64-r64 (quote rax) (quote rbx))", "(x86-encode-cmovcc-r64-r64 #d10 (quote rax) (quote rbx))"),
+        ("(x86-encode-cmovnp-r64-r64 (quote rax) (quote rbx))", "(x86-encode-cmovcc-r64-r64 #d11 (quote rax) (quote rbx))"),
+    ] {
+        assert_eq!(
+            eval_bytes(wrapper, &mut session),
+            eval_bytes(generic, &mut session),
+            "condition wrapper must preserve its explicit decimal condition code: {wrapper}",
+        );
+    }
+}
+
+#[test]
 fn lisp_encodes_ret_to_exact_machine_byte() {
     let mut session = encoder_session();
     assert_eq!(eval_bytes("(x86-encode-ret)", &mut session), "(195)");
