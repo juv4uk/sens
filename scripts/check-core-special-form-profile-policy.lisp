@@ -57,7 +57,7 @@
               (00100111
                 (csp-row-check
                   (00000001 owner)
-                  (00000001 (owner my-lisp)))
+                  (00000001 (owner sens)))
                 (csp-row-check
                   (00000001 cond-sid)
                   (00000001 (cond-sid 00000111)))
@@ -107,7 +107,7 @@
                   (00000001 runtime-profile-selector)
                   (00000001
                     (runtime-profile-selector
-                      owner my-lisp
+                      owner sens
                       state active-mechanical-hook)))))))
       (00000111
         ((00000010 failure)
