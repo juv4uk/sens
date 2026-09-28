@@ -33,7 +33,16 @@ jobs:
           sudo apt-get install -y guix
           guix --version
 
-      - name: Correctness and measurements in pinned Guix environment
+      - name: Correctness in pinned Guix environment
+        run: |
+          guix time-machine -C channels.scm -- shell \
+            -m manifest.scm \
+            -m benchmarks/cross-language/manifest.scm -- \
+            python3 benchmarks/cross-language/run.py \
+              --sens-bench target/release/examples/ci_bench \
+              --check-only
+
+      - name: Measurements in pinned Guix environment
         run: |
           rm -rf /tmp/sens-cross-language
           guix time-machine -C channels.scm -- shell \
