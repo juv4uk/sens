@@ -184,15 +184,25 @@ def print_summary(data: dict) -> None:
             f"{category}: tokens={item['tokens']} files={item['files']}"
         )
     print()
-    print("migration-sensitive categories:")
-    for category in (
+    migration_sensitive = (
         "binary-shaped-multibit-number",
         "decimal-integer-needs-migration",
         "decimal-fraction-or-exponent-needs-policy",
         "rational-literal",
-    ):
+    )
+    print("migration-sensitive categories:")
+    for category in migration_sensitive:
         item = data["categories"].get(category, {"tokens": 0, "files": 0})
         print(f"  {category}: tokens={item['tokens']} files={item['files']}")
+
+    print()
+    print("migration-sensitive tokens by bucket:")
+    for bucket_name, counts in data["buckets"].items():
+        rendered = " ".join(
+            f"{category}={counts.get(category, 0)}"
+            for category in migration_sensitive
+        )
+        print(f"  {bucket_name}: {rendered}")
 
 
 def self_test() -> int:
