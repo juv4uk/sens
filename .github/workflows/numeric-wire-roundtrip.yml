@@ -30,8 +30,11 @@ jobs:
       - name: Tagged exact numeric wire
         run: cargo test -p sens --test numeric_wire
 
-      - name: Composite serialization fallout
-        run: cargo test -p sens --test vectors --test io_first_class
+      - name: Vector serialization fallout
+        run: cargo test -p sens --test vectors write_to_string_round_trip_uses_hash_paren_syntax
+
+      - name: First-class writer still works
+        run: cargo test -p sens --test io_first_class write_to_string_read_and_eval_are_first_class_values
 
       - name: BigInt binary wire unit
         run: cargo test -p sens binary_wire_helpers_are_canonical_and_arbitrary_precision
