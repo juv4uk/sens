@@ -3,9 +3,9 @@
   "issue": 1631,
   "source_evidence": "tests/data/numeral-silent-change-cohort.json",
   "authority": "migration-review-not-language-semantics",
-  "count": 31,
+  "count": 26,
   "route_counts": {
-    "preserve-numeric-value": 25,
+    "preserve-numeric-value": 20,
     "typed-machine-notation": 5,
     "regenerate-from-authority": 1
   },
@@ -342,71 +342,6 @@
       "route": "regenerate-from-authority",
       "owner_issue": 1632,
       "rationale": "generated machine evidence; update generator/source authority, never hand-edit generated observation"
-    },
-    {
-      "path": "lib/time.lisp",
-      "line": 19,
-      "token": "100",
-      "bucket": "active-lib",
-      "current_decimal_value": "100",
-      "future_binary_value": "4",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "domain-math-constant",
-      "rationale": "calendar/time arithmetic scale or threshold; preserve exact current mathematical value"
-    },
-    {
-      "path": "lib/time.lisp",
-      "line": 22,
-      "token": "10",
-      "bucket": "active-lib",
-      "current_decimal_value": "10",
-      "future_binary_value": "2",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "domain-math-constant",
-      "rationale": "calendar/time arithmetic scale or threshold; preserve exact current mathematical value"
-    },
-    {
-      "path": "lib/time.lisp",
-      "line": 22,
-      "token": "10",
-      "bucket": "active-lib",
-      "current_decimal_value": "10",
-      "future_binary_value": "2",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "domain-math-constant",
-      "rationale": "calendar/time arithmetic scale or threshold; preserve exact current mathematical value"
-    },
-    {
-      "path": "lib/time.lisp",
-      "line": 104,
-      "token": "1000000000",
-      "bucket": "active-lib",
-      "current_decimal_value": "1000000000",
-      "future_binary_value": "512",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "domain-math-constant",
-      "rationale": "calendar/time arithmetic scale or threshold; preserve exact current mathematical value"
-    },
-    {
-      "path": "lib/time.lisp",
-      "line": 151,
-      "token": "1000000",
-      "bucket": "active-lib",
-      "current_decimal_value": "1000000",
-      "future_binary_value": "64",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "domain-math-constant",
-      "rationale": "calendar/time arithmetic scale or threshold; preserve exact current mathematical value"
     }
   ]
 }
