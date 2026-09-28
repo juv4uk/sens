@@ -1,0 +1,40 @@
+name: Numeric wire round-trip
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/bignum.rs"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/eval/special_forms/io.rs"
+      - "crates/sens/tests/numeric_wire.rs"
+      - "crates/sens/tests/vectors.rs"
+      - "tests/fixtures/conformance.lisp"
+      - "my-lisp-constitution.lisp"
+      - "docs/canonical-serialization.md"
+      - "docs/exact-number-representation.md"
+      - ".github/workflows/numeric-wire-roundtrip.yml"
+  workflow_dispatch:
+
+jobs:
+  exact-numeric-wire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: numeric-wire-roundtrip
+
+      - name: Tagged exact numeric wire
+        run: cargo test -p sens --test numeric_wire
+
+      - name: Composite serialization fallout
+        run: cargo test -p sens --test vectors --test io_first_class
+
+      - name: BigInt binary wire unit
+        run: cargo test -p sens binary_wire_helpers_are_canonical_and_arbitrary_precision
+
+      - name: Constitution projection stays generated
+        run: cargo test -p sens-cli --test constitution_projection generator_reproduces_checked_in_constitution_byte_for_byte
