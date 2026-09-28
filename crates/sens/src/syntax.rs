@@ -248,8 +248,8 @@ pub(crate) mod fasl {
                 let raw = bytes.get(*pos..pos.checked_add(byte_len)?)?;
                 *pos += byte_len;
                 let mut values = Vec::with_capacity(count.min(1 << 22));
-                for chunk in raw.chunks_exact(4) {
-                    values.push(i32::from_le_bytes(chunk.try_into().ok()?));
+                for chunk in raw.as_chunks::<4>().0 {
+                    values.push(i32::from_le_bytes(*chunk));
                 }
                 ExprKind::NumericBuffer(NumericBuffer::I32(Arc::from(values)))
             }
@@ -259,8 +259,8 @@ pub(crate) mod fasl {
                 let raw = bytes.get(*pos..pos.checked_add(byte_len)?)?;
                 *pos += byte_len;
                 let mut values = Vec::with_capacity(count.min(1 << 22));
-                for chunk in raw.chunks_exact(4) {
-                    let bits = u32::from_le_bytes(chunk.try_into().ok()?);
+                for chunk in raw.as_chunks::<4>().0 {
+                    let bits = u32::from_le_bytes(*chunk);
                     let value = f32::from_bits(bits);
                     if !value.is_finite() {
                         return None;
