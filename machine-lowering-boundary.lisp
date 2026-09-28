@@ -1,7 +1,7 @@
 ; Machine-readable authority boundary between language meaning and physical target facts.
 ; This file deliberately contains no target mnemonic, register, opcode, or ISA name.
-; my-lisp owns language meaning and semantic IDs. Hardware specifications own ISA
-; facts. my-lisp may represent and encode those facts. CML remains an optimizer,
+; SENS owns language meaning and semantic IDs. Hardware specifications own ISA
+; facts. SENS may represent and encode those facts. CML remains an optimizer,
 ; while the host owns only raw executable-memory / invocation mechanisms.
 ;
 ; Machine authority is admitted by properties, not by a historical file path or
@@ -9,11 +9,11 @@
 
 (machine-lowering-boundary
   (schema machine-lowering-boundary/2)
-  (semantic-authority my-lisp)
+  (semantic-authority sens)
   (isa-authority hardware-specification)
   (isa-source intel-xed/intel-sdm)
-  (isa-representation my-lisp)
-  (instruction-encoding my-lisp)
+  (isa-representation sens)
+  (instruction-encoding sens)
   (optimization-authority cml)
   (portable-monotonic-observation 1075)
   (semantic-id-allocation explicit-language-contract-only)
@@ -24,7 +24,7 @@
   ; Admission belongs to a closed witnessed subset, not to asm-x86.lisp,
   ; x86-64.lisp, or any other implementation carrier by name.
   (machine-authority-basis admitted-subset-properties)
-  (admitted-subset-owner my-lisp)
+  (admitted-subset-owner sens)
   (admitted-subset-closed required)
   (admitted-subset-machine-readable required)
   (admitted-subset-witnessed required)
