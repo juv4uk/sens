@@ -6,7 +6,7 @@
 
 (semantic-registry-handoff-contract/1
   (authority "lib/surface/semantic-registry.lisp")
-  (authority-owner my-lisp)
+  (authority-owner sens)
   (identity-domain bare-sid-8)
   (revision-pin git-commit-containing-authority)
   (content-digest sha256-utf8-source)
