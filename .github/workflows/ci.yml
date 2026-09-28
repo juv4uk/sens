@@ -54,6 +54,16 @@ jobs:
           done < /tmp/changed.txt
           { echo "surface=$surface"; echo "core=$core"; echo "semantic=$semantic"; echo "host=$host"; echo "cli=$cli"; echo "xtask=$xtask"; echo "meta=$meta"; echo "rust=$rust"; echo "workspace=$workspace"; echo "workflow=$workflow"; } | tee -a "$GITHUB_OUTPUT"
 
+      - name: Numeric source inventory observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/numeric_source_inventory.py --self-test
+          python3 scripts/numeric_source_inventory.py
+          python3 scripts/numeric_source_inventory.py \
+            --check-baseline tests/data/numeric-source-inventory-baseline.json
+          python3 scripts/numeric_source_inventory.py --json > /tmp/numeric-source-inventory.json
+
       - name: Semantic fixture path classifier self-test
         run: bash scripts/test-ci-semantic-path-classifier.sh
 
