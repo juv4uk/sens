@@ -528,11 +528,11 @@ mod single_pass_eval_tests {
     }
 
     #[test]
-    fn noncanonical_builtins_remain_lexically_shadowable() {
-        let source = "(def + (lambda (a b) (quote shadowed))) (+ 1 2)";
+    fn ordinary_nonregistry_bindings_remain_lexical() {
+        let source = "(def local-add (lambda (a b) (quote shadowed))) (local-add 1 2)";
         let mut session = Session::default();
         let result = eval_program(source, &mut session)
-            .expect("non-Canon builtins remain ordinary lexical values");
+            .expect("ordinary non-registry bindings remain lexical values");
         assert_eq!(result.value.to_string(), "shadowed");
     }
 
