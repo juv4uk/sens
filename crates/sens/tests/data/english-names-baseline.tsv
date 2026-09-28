@@ -614,7 +614,6 @@ lisp	lib/lisp-fs.lisp	third	1
 lisp	lib/machine/encoding/coverage.lisp	reason	1175
 lisp	lib/meta-eval-first-class.lisp	env	35
 lisp	lib/meta-eval-mutual.lisp	env	40
-lisp	lib/meta-eval.lisp	identity	12
 lisp	lib/persistent-map.lisp	fifth	1
 lisp	lib/persistent-map.lisp	fourth	1
 lisp	lib/persistent-map.lisp	map->list	1
