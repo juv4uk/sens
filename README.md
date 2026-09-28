@@ -10,6 +10,8 @@
 
 *Lisp був початковим синтаксичним носієм і прототипом. СЕНС є сутнісним онтологічним ядром: 256 чистих функцій `00000000..11111111` без рядкових імен у рантаймі, із симетричними людськими проєкціями (укр / en / sa / sym).*
 
+> **Стан переходу:** M8 ще в польоті — частина active Lisp/tooling paths досі очищається від admitted surfaces як локальної/runtime identity. Ціль незмінна: executable identity = exact SENS8; перевірна фінішна лінія — [#1606](https://github.com/juv4uk/sens/issues/1606).
+
 <p><a href="https://github.com/juv4uk/sens/releases/latest/download/sens-cli-web.html"><strong>▶ Спробувати sens у вебі</strong></a></p>
 <sub>Один автономний portable-файл <code>.html</code> · без встановлення · працює локально у браузері</sub>
 
