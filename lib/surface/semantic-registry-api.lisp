@@ -118,7 +118,7 @@
       ((00000010 rows) ()
        (00000001 ()))
       ((00000010 rows) (0)
-       (10011100 ((identity
+       (10011100 ((sens-ref
                (semantic-registry-find-id-in-namespaces
                  name
                  (00000101 rows)
@@ -127,7 +127,7 @@
            ((00000010 sens-ref) ()
             (semantic-registry-id-for-surface name (00000110 rows)))
            ((00000010 sens-ref) (1)
-            identity)
+            sens-ref)
            ((00000010 sens-ref) (0)
             (semantic-registry-id-for-surface name (00000110 rows)))))))))
 
