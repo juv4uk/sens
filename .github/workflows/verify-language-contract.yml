@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   verify:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     env:
       UPSTREAM_REPO: juv4uk/sens
       UPSTREAM_PATH: language-contract.lisp

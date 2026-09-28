@@ -11,16 +11,17 @@ on:
 
 jobs:
   swi-prolog-kernel:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: SWI-Prolog core (Guix profile)
+      - name: Install SWI-Prolog runtime
         run: |
-          # Self-hosted Guix runner: the runtime comes from the shared Guix profile.
+          sudo apt-get update
+          sudo apt-get install -y swi-prolog-nox
           swipl --version
 
       - name: Test independent Prolog kernel

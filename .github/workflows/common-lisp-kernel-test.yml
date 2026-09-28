@@ -11,16 +11,17 @@ on:
 
 jobs:
   common-lisp-kernel:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: SBCL (Guix profile)
+      - name: Install SBCL runtime
         run: |
-          # Self-hosted Guix runner: the runtime comes from the shared Guix profile.
+          sudo apt-get update
+          sudo apt-get install -y sbcl
           sbcl --version
 
       - name: Test process adapter and real semantic witnesses

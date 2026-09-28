@@ -11,7 +11,7 @@ on:
 
 jobs:
   cpython:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
@@ -22,6 +22,12 @@ jobs:
 
       - name: Build SENS benchmark binary
         run: cargo build --release -p sens --example ci_bench
+
+      - name: Install Guix on GitHub-hosted runner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix
+          guix --version
 
       - name: Correctness and measurements in pinned Guix environment
         run: |

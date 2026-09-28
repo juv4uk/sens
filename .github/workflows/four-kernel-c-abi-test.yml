@@ -11,7 +11,7 @@ on:
 
 jobs:
   c-abi:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 

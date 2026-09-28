@@ -9,7 +9,7 @@ on:
 
 jobs:
   semantic-coordinate:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
