@@ -577,15 +577,14 @@ fn t15_arity_diagnostics_are_conservative_and_shadow_aware() {
     );
 }
 
-/// ECO-DECISION-2026-08-27-MYLISP-WSM-RENAME: `.wsm` is now the canonical
-/// extension, `.my`/`.lisp` stay supported. Workspace scanning (M1) must
-/// pick up `.wsm` files exactly like `.my` ones — same cross-file
-/// definition flow as t10, just with the new extension on both files.
+/// `.lisp` is the canonical source extension. Workspace scanning (M1) must
+/// pick up canonical `.lisp` files; `.my` and `.wsm` remain supported legacy
+/// aliases and are covered by compatibility-oriented extension tests.
 #[test]
-fn t16_workspace_scan_recognizes_wsm_extension() {
+fn t16_workspace_scan_recognizes_lisp_extension() {
     static SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let seq = SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let dir: PathBuf = std::env::temp_dir().join(format!("lsp-wsm-{}-{seq}", std::process::id()));
+    let dir: PathBuf = std::env::temp_dir().join(format!("lsp-lisp-{}-{seq}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).unwrap();
     fs::write(dir.join("a.lisp"), "(def foo (lambda (x) (* x x)))\n").unwrap();
@@ -613,7 +612,7 @@ fn t16_workspace_scan_recognizes_wsm_extension() {
     let r = replies[0].as_str();
     assert!(
         r.contains("/a.lisp"),
-        "cross-file definition must point into a.wsm: {r}"
+        "cross-file definition must point into a.lisp: {r}"
     );
 }
 
