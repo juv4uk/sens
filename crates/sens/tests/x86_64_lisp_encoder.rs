@@ -61,6 +61,23 @@ fn parity_condition_wrappers_preserve_decimal_codes_10_and_11() {
 }
 
 #[test]
+fn movq_xmm_r64_keeps_opcode_byte_0x6e_as_decimal_110() {
+    let mut session = encoder_session();
+    let rendered = eval_bytes(
+        "(x86-encode-movq-xmm-r64 (quote xmm0) (quote rax))",
+        &mut session,
+    );
+    let bytes = rendered
+        .trim_start_matches('(')
+        .trim_end_matches(')')
+        .split_whitespace()
+        .map(|token| token.parse::<u8>().expect("MOVQ byte must stay in u8 range"))
+        .collect::<Vec<_>>();
+    assert_eq!(bytes, vec![102, 72, 15, 110, 192]);
+    assert_eq!(bytes[3], 110, "0x6E opcode must not become binary 110 = decimal 6");
+}
+
+#[test]
 fn lisp_encodes_ret_to_exact_machine_byte() {
     let mut session = encoder_session();
     assert_eq!(eval_bytes("(x86-encode-ret)", &mut session), "(195)");
