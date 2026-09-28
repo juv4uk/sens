@@ -7,7 +7,7 @@
 
 (early-sid-lowering-contract/1
   ((resolution
-     (owner my-lisp)
+     (owner sens)
      (source canonical-semantic-registry)
      (input surface-name)
      (output exact-eight-bit-sid)
