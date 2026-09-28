@@ -39,7 +39,7 @@ pub(crate) fn write_to_string_values(
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_values("write-to-string", arguments, 1, span)?;
-    Ok(Value::String(Rc::from(arguments[0].to_string())))
+    Ok(Value::String(Rc::from(arguments[0].to_canonical_wire_string())))
 }
 
 pub(crate) fn read_values(
