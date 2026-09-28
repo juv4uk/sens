@@ -48,20 +48,21 @@
       ((00000010 items) () 0)
       ((00000010 items) (0) (00001100 1 (count-items (00000110 items)))))))
 
-; Markdown is human presentation. 01000110 number->string is the canonical
-; machine wire (#q2:<bits>/1), so it must not render section counts.
-; Counts are non-negative integers; derive their decimal spelling locally
-; from the existing digit/quotient/remainder functions.  (00001100 5 5)
-; spells decimal ten without depending on a future reader interpretation of
-; the ambiguous source token 10.
+; Markdown is human presentation. number->string owns canonical machine
+; numeric wire, so it must not render human section counts.  Build decimal
+; radix ten only from base-neutral single-bit numeric source; this generator
+; must not create new numeric-reader migration debt.
+(00001001 functions-md-decimal-radix
+  (00001100 1 1 1 1 1 1 1 1 1 1))
+
 (00001001 decimal-count->string
   (00001000 (n)
     (00000111
-      ((00011010 n (00001100 5 5)) (1) (01000111 n))
-      ((00011010 n (00001100 5 5)) (0)
+      ((00011010 n functions-md-decimal-radix) (1) (01000111 n))
+      ((00011010 n functions-md-decimal-radix) (0)
        (00111010
-         (decimal-count->string (00010100 n (00001100 5 5)))
-         (01000111 (00010011 n (00001100 5 5))))))))
+         (decimal-count->string (00010100 n functions-md-decimal-radix))
+         (01000111 (00010011 n functions-md-decimal-radix)))))))
 
 (00001001 backtick-join
   (00001000 (names)
