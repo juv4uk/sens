@@ -12,6 +12,11 @@
 # Форма `sens` спершу кодується в двійковий вигляд (fasl, функція = 1 байт)
 # самим бінарником — цей крок не міряється.
 # Режими: load — лише завантажити програму; full — завантажити й виконати.
+#
+# #1587: у кожному рядку — розмір навантаження (колонка params із params.tsv,
+# який пише run.py --emit). Рядок без розміру не виводиться.
+# #1586: середовище замірів (load-контекст) фіксується окремим файлом
+# оточення; сам цей TSV — лише інструкції.
 set -eu
 BIN=$1
 DIR=$2
@@ -19,16 +24,26 @@ OUT=$3
 FORMS=${4:-en sens}
 REPS=${5:-3}
 
+# Розмір навантаження з params.tsv; відсутній файл/рядок — "-", не збій.
+paramsof() {
+  if [ -f "$DIR/params.tsv" ]; then
+    awk -F'\t' -v n="$1" '$1 == n { print $2; found = 1; exit }
+      END { if (!found) print "-" }' "$DIR/params.tsv"
+  else
+    echo -
+  fi
+}
+
 measure() {
   valgrind --tool=cachegrind --cache-sim=no --cachegrind-out-file=/dev/null \
     "$BIN" "$DIR" "$@" 2>&1 >/dev/null |
     sed -n 's/.*I *refs: *//p' | tr -d ','
 }
 
-printf 'workload\tform\tmode\trep\tinstructions\n' > "$OUT"
+printf 'workload\tparams\tform\tmode\trep\tinstructions\n' > "$OUT"
 rep=1
 while [ "$rep" -le "$REPS" ]; do
-  printf 'empty\t-\tfull\t%s\t%s\n' "$rep" "$(measure empty -)" >> "$OUT"
+  printf 'empty\t-\t-\tfull\t%s\t%s\n' "$rep" "$(measure empty -)" >> "$OUT"
   rep=$((rep + 1))
 done
 for expected in "$DIR"/*.expected; do
@@ -42,7 +57,7 @@ for expected in "$DIR"/*.expected; do
     for mode in load full; do
       rep=1
       while [ "$rep" -le "$REPS" ]; do
-        printf '%s\t%s\t%s\t%s\t%s\n' "$name" "$form" "$mode" "$rep" \
+        printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$name" "$(paramsof "$name")" "$form" "$mode" "$rep" \
           "$(measure "$name" "$form" "$mode")" >> "$OUT"
         rep=$((rep + 1))
       done

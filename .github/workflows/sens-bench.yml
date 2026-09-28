@@ -67,8 +67,11 @@ jobs:
           sh /tmp/bench/ci_bench.sh target/release/examples/ci_bench /tmp/bench/workloads /tmp/bench/head.tsv
       - name: Compare English Lisp -> SENS, and base -> change
         run: python3 /tmp/bench/ci_compare.py /tmp/bench/base.tsv /tmp/bench/head.tsv --fail-above 3.0
-      - uses: actions/upload-artifact@v4
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: sens-bench-instructions
           path: /tmp/bench/*.tsv
+          retention-days: 1
