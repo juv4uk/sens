@@ -197,27 +197,27 @@
 ; a B5 reason-index/1. We normalize it once here; recursive body goals then
 ; reuse the same finite index instead of rebuilding it at every depth.
 (00001011 prove-goal
-  (00001000 (goal rules subst all-rules depth)
+  (00001000 (goal rules bindings all-rules depth)
     (prove-goal-scan
       goal
       rules
-      subst
+      bindings
       (reason-ensure-index all-rules)
       depth
       (00000001 ()))))
 
 (00001011 prove-goal-scan
-  (00001000 (goal rules subst all-rules depth acc)
+  (00001000 (goal rules bindings all-rules depth acc)
     (00000111
       ((00000010 rules) () (00101010 acc))
       ((00000010 rules) (1) (00101010 acc))
       (t
        (10011100 ((rule-results
-               (prove-rule goal (00000101 rules) subst all-rules depth)))
+               (prove-rule goal (00000101 rules) bindings all-rules depth)))
          (prove-goal-scan
            goal
            (00000110 rules)
-           subst
+           bindings
            all-rules
            depth
            (prove-goal-accumulate rule-results acc)))))))
@@ -241,9 +241,9 @@
 
 ; Try one rule, then wrap every successful body result in its proof node.
 (00001011 prove-rule
-  (00001000 (goal rule subst all-rules depth)
+  (00001000 (goal rule bindings all-rules depth)
     (10011100 ((renamed-rule (rename-vars rule depth)))
-      (10011100 ((new-subst (10000111 goal (00000101 renamed-rule) subst)))
+      (10011100 ((new-subst (10000111 goal (00000101 renamed-rule) bindings)))
         (00000111
           ((failed-subst? new-subst) (00000001 ()))
           (t
@@ -267,10 +267,10 @@
 ; Prove a conjunction while threading `(subst proofs)` through the shared
 ; conjunction walker from lib/unify.lisp.
 (00001011 prove-goals
-  (00001000 (goals subst all-rules depth)
+  (00001000 (goals bindings all-rules depth)
     (thread-conjunction
       goals
-      (00100111 subst (00000001 ()))
+      (00100111 bindings (00000001 ()))
       (00001000 (goal state)
         (prove-goal-state goal state all-rules depth)))))
 
@@ -280,14 +280,14 @@
 ; still prove `(not P)` through an actual rule/fact whose head is `(not P)`.
 (00001011 prove-goal-state
   (00001000 (goal state all-rules depth)
-    (10011100 ((subst (00000101 state))
+    (10011100 ((bindings (00000101 state))
           (proofs (00101111 state))
           (index (reason-ensure-index all-rules)))
       (map-goal-results
         (10000000
           goal
           (reason-index-candidates goal index)
-          subst
+          bindings
           index
           depth)
         proofs))))
