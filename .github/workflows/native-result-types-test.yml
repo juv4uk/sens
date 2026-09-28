@@ -26,7 +26,7 @@ on:
 
 jobs:
   default-artifact:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -34,16 +34,22 @@ jobs:
         run: cargo test -p wsm-native-result-types --no-default-features --lib
 
   four-real-kernels:
-    # SBCL, SWI-Prolog and CLIPS 6.4.2 come from the shared Guix profile of the
-    # self-hosted runner (CLIPS via packaging/guix/clips.scm).
-    runs-on: [self-hosted, guix]
-    env:
-      WSM_CLIPS_LIBRARY: /var/guix/profiles/shared/guix-profile/lib/libclips.so
+    # Keep the real producer runtimes explicit on GitHub-hosted CI.
+    # CLIPS remains the repository-defined 6.4.2 Guix witness.
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+      - name: Install producer runtimes and build pinned CLIPS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix sbcl swi-prolog-nox
+          CLIPS_OUT="$(guix time-machine -C channels.scm -- build -f packaging/guix/clips.scm | tail -1)"
+          test -f "$CLIPS_OUT/lib/libclips.so"
+          echo "WSM_CLIPS_LIBRARY=$CLIPS_OUT/lib/libclips.so" >> "$GITHUB_ENV"
+
       - name: Show producer runtime versions
         run: |
           sbcl --version

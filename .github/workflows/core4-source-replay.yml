@@ -20,7 +20,7 @@ permissions:
 jobs:
   replay:
     name: Current core donor replays exactly as Core4
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 

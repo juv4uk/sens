@@ -22,7 +22,7 @@ permissions:
 jobs:
   core2:
     name: Contract 6 frozen compatibility profile
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
