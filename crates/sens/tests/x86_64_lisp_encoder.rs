@@ -25,6 +25,21 @@ fn eval_bytes(source: &str, session: &mut Session) -> String {
 }
 
 #[test]
+fn register_ordinals_10_and_11_preserve_decimal_values() {
+    let mut session = encoder_session();
+    for (form, expected) in [
+        ("(x86-reg-code (quote r10))", "10"),
+        ("(x86-reg-code (quote r10b))", "10"),
+        ("(x86-reg-code (quote r11))", "11"),
+        ("(x86-reg-code (quote r11b))", "11"),
+        ("(x86-xmm-reg-code (quote xmm10))", "10"),
+        ("(x86-xmm-reg-code (quote xmm11))", "11"),
+    ] {
+        assert_eq!(eval_bytes(form, &mut session), expected, "form: {form}");
+    }
+}
+
+#[test]
 fn lisp_encodes_ret_to_exact_machine_byte() {
     let mut session = encoder_session();
     assert_eq!(eval_bytes("(x86-encode-ret)", &mut session), "(195)");
