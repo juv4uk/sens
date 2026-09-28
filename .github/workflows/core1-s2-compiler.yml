@@ -14,7 +14,7 @@ permissions:
 jobs:
   core1-s2:
     name: Core1 executes pinned Lisp compiler seed
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout sens Core1
         uses: actions/checkout@v5
