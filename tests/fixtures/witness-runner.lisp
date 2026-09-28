@@ -137,6 +137,19 @@
       (t
        (00100111 (00000001 value) (01001100 value))))))
 
+; Witness transport adapter after #1623/#1648: machine write-to-string is now
+; the tagged #q2 canonical wire, while conformance expected values remain on
+; the guarded human projection. Error classification stays Lisp-owned; the
+; host supplies only the already-guarded presentation text for successful
+; values, exactly as the native witness transport has always done.
+(00001001 witness-meta-outcome-presented
+  (00001000 (value presented-text)
+    (00000111
+      ((witness-meta-error? value)
+       (00100111 (00000001 error) (witness-meta-error-kind (00101111 value))))
+      (t
+       (00100111 (00000001 value) presented-text)))))
+
 ; Registry-driven peer-surface witness. The semantic ID is a selection input;
 ; surface→ID truth comes only from my-semantic-surface-registry.
 (00001001 witness-peer-surface-count
