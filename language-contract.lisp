@@ -33,6 +33,8 @@
        . "At expression start, apostrophe is reader sugar whose produced list head is SID 00000001 directly. It must not create an intermediate named function identity. Inside an identifier, apostrophe remains an ordinary Unicode character.")
       (reader-eight-bits
        . "Exactly eight bare 0/1 source characters are read directly into Sid8. The reader does not reinterpret them as decimal or binary numeric data and does not wrap them in String/Symbol.")
+      (reader-explicit-integer-radix
+       . "#d<signed-decimal-digits> and #b<signed-binary-digits> are explicit source projections into the same exact integer numeric domain. They do not create a new runtime numeric kind. #b followed by exactly eight bits is numeric data and never function identity; the same exact eight bits without #b remain Sid8. Malformed #d/#b projections fail closed as Parse. This law covers exact integers only; fractions and scientific notation are outside this projection rule.")
       (reader-decimal-separator
        . "Dot and comma are equivalent decimal separators only for otherwise valid finite decimal/base-10 scientific numeric input. Non-numeric tokens retain their ordinary data behavior; this rule never affects Sid8.")
       (error-classification
