@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if [[ -z "${GUIX:-}" ]]; then
+  if command -v guix >/dev/null 2>&1; then
+    GUIX=guix
+  elif [[ -x /usr/local/guix-bin/guix ]]; then
+    GUIX=/usr/local/guix-bin/guix
+  else
+    echo "guix не знайдено; задайте GUIX=/шлях/до/guix" >&2
+    exit 127
+  fi
+fi
+
+usage() {
+  cat <<'EOF'
+Використання: ./guix/run [опції] <роль> -- <команда> [аргументи]
+
+Ролі: dev, bench, native, islands, fpga, all.
+Опції: --container, --network, --dry-run, --gc-root PATH, --local-skylake.
+
+`--local-skylake` — лише локальний performance mode для Intel Core i5-6400.
+Він не призначений для portable/evidence build.
+
+Приклад:
+  ./guix/run bench -- python3 benchmarks/sens-surface/run.py --help
+EOF
+}
+container=0
+network=0
+dry_run=0
+local_skylake=0
+gc_root=""
+
+while [[ ${1:-} == --* ]]; do
+  case "$1" in
+    --container) container=1; shift ;;
+    --network) network=1; shift ;;
+    --dry-run) dry_run=1; shift ;;
+    --local-skylake) local_skylake=1; shift ;;
+    --gc-root)
+      [[ $# -ge 2 ]] || { usage >&2; exit 2; }
+      gc_root="$2"; shift 2 ;;
+    --help) usage; exit 0 ;;
+    *) echo "невідома опція: $1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+role="${1:-}"
+[[ -n "$role" ]] || { usage >&2; exit 2; }
+shift
+[[ ${1:-} == -- ]] && shift
+[[ $# -gt 0 || $dry_run -eq 1 ]] || { usage >&2; exit 2; }
+
+if [[ $network -eq 1 && $container -ne 1 ]]; then
+  echo "--network має сенс лише разом із --container" >&2
+  exit 2
+fi
+
+if [[ $local_skylake -eq 1 ]]; then
+  profile="$ROOT/lib/machine/cpu/intel-core-i5-6400.lisp"
+  inventory="$ROOT/lib/machine/cpu/intel-core-i5-6400-inventory.lisp"
+  grep -Fq "(microarchitecture skylake)" "$profile"
+  grep -Fq "(admission-policy fail-closed)" "$inventory"
+  grep -Fq "Intel(R) Core(TM) i5-6400" /proc/cpuinfo || {
+    echo "--local-skylake дозволений лише на задокументованому i5-6400" >&2
+    exit 2
+  }
+  cpu_flags=" $(grep -m1 "^flags" /proc/cpuinfo | cut -d: -f2-) "
+  for flag in avx avx2 fma bmi1 bmi2 popcnt aes adx clflushopt xsave; do
+    [[ "$cpu_flags" == *" $flag "* ]] || {
+      echo "CPU/WSL не надає потрібний Skylake flag: $flag" >&2
+      exit 2
+    }
+  done
+fi
+
+manifests=(-m "$ROOT/manifest.scm")
+case "$role" in
+  dev) ;;
+  bench) manifests+=(-m "$ROOT/benchmarks/sens-surface/manifest.scm") ;;
+  native) manifests+=(-m "$ROOT/guix/manifests/native.scm") ;;
+  islands)
+    manifests+=(-m "$ROOT/guix/manifests/islands.scm")
+    manifests+=(-f "$ROOT/packaging/guix/clips.scm")
+    ;;
+  fpga) manifests+=(-m "$ROOT/guix/manifests/fpga.scm") ;;
+  all)
+    manifests+=(-m "$ROOT/benchmarks/sens-surface/manifest.scm")
+    manifests+=(-m "$ROOT/guix/manifests/native.scm")
+    manifests+=(-m "$ROOT/guix/manifests/islands.scm")
+    manifests+=(-f "$ROOT/packaging/guix/clips.scm")
+    manifests+=(-m "$ROOT/guix/manifests/fpga.scm")
+    ;;
+  *) echo "невідома роль: $role" >&2; usage >&2; exit 2 ;;
+esac
+
+shell_args=(shell --pure)
+[[ $dry_run -eq 1 ]] && shell_args+=(--dry-run)
+[[ -n "$gc_root" ]] && shell_args+=(--root="$gc_root")
+if [[ $local_skylake -eq 1 ]]; then
+  shell_args+=(-E "RUSTFLAGS=-C target-cpu=skylake")
+  shell_args+=(-E "CFLAGS=-O2 -march=skylake -mtune=skylake")
+  shell_args+=(-E "CXXFLAGS=-O2 -march=skylake -mtune=skylake")
+fi
+
+if [[ $container -eq 1 ]]; then
+  shell_args+=(--container --no-cwd "--share=$ROOT=/workspace" --cwd=/workspace)
+  [[ $network -eq 1 ]] && shell_args+=(--network)
+fi
+cmd=("$GUIX" time-machine -C "$ROOT/channels.scm" --)
+cmd+=("${shell_args[@]}")
+cmd+=("${manifests[@]}")
+
+if [[ $dry_run -eq 1 && $# -eq 0 ]]; then
+  exec "${cmd[@]}"
+fi
+
+cmd+=(-- "$@")
+exec "${cmd[@]}"
