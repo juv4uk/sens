@@ -69,6 +69,9 @@ jobs:
       - name: Active SENS coverage report + ratchet
         run: cargo test -p sens --test non_sens_code_inventory active_sens_coverage -- --nocapture
 
+      - name: Exact let/let* code parity
+        run: cargo test -p sens --test let_code_parity_1678 -- --nocapture
+
       - name: Binary-trees N=10 reference fixture
         run: python3 benchmarks/cross-language/binary_trees_reference.py --check-fixture
 
