@@ -81,13 +81,17 @@ fn stable_surfaces_from_index(
     surfaces
 }
 
+fn semantic_row_for_id(rows: &[SemanticRow], semantic_id: SemanticId) -> Option<&SemanticRow> {
+    let byte = semantic_id.packed_byte();
+    let row = rows.get(usize::from(byte))?;
+    (row.semantic_id == byte).then_some(row)
+}
+
 fn admitted_surfaces_from_rows(
     rows: &[SemanticRow],
     semantic_id: SemanticId,
 ) -> Vec<&'static str> {
-    let mut surfaces = rows
-        .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+    let mut surfaces = semantic_row_for_id(rows, semantic_id)
         .into_iter()
         .flat_map(|row| row.surfaces.iter().map(|surface| surface.name))
         .collect::<Vec<_>>();
@@ -114,9 +118,7 @@ pub(crate) fn admitted_surfaces_for_semantic_id(
 pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
     semantic_id: SemanticId,
 ) -> Vec<(&'static str, &'static str)> {
-    let mut surfaces = live_rows()
-        .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+    let mut surfaces = semantic_row_for_id(live_rows(), semantic_id)
         .into_iter()
         .flat_map(|row| row.surfaces.iter().map(|s| (s.namespace, s.name)))
         .collect::<Vec<_>>();
@@ -137,6 +139,22 @@ mod tests {
         }
         assert_eq!(SEMANTIC_ROWS.first().map(|row| row.semantic_id), Some(0));
         assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(255));
+    }
+
+    #[test]
+    fn exact_id_projection_uses_the_contiguous_byte_axis() {
+        for byte in 0..=u8::MAX {
+            let sid = Sens8::from_packed_byte(byte);
+            let row = semantic_row_for_id(live_rows(), sid).expect("generated row for every byte");
+            assert_eq!(row.semantic_id, byte);
+        }
+    }
+
+    #[test]
+    fn direct_projection_fails_closed_when_rows_are_not_byte_aligned() {
+        let shifted = &SEMANTIC_ROWS[1..];
+        assert!(semantic_row_for_id(shifted, Sens8::from_packed_byte(0)).is_none());
+        assert!(semantic_row_for_id(shifted, Sens8::from_packed_byte(1)).is_none());
     }
 
     #[test]
