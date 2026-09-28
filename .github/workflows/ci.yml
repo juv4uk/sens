@@ -62,6 +62,8 @@ jobs:
           python3 scripts/numeric_source_inventory.py
           python3 scripts/numeric_source_inventory.py \
             --check-baseline tests/data/numeric-source-inventory-baseline.json
+          python3 scripts/numeric_source_inventory.py \
+            --list-category binary-shaped-multibit-number
           python3 scripts/numeric_source_inventory.py --json > /tmp/numeric-source-inventory.json
 
       - name: Semantic fixture path classifier self-test
