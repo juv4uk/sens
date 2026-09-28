@@ -156,6 +156,15 @@ contract-version                       claim-task / release-task
 
 `my-lisp --tcp=9999 --protocol=sexpr` лишається **лише semantic oracle**. Не змішуйте його з coordination plane `swarm-node :910x`.
 
+## Журнал відкриттів (канон, без двозначності)
+
+| Куди | Коли |
+|------|------|
+| **#1599** + `knowledge/agent-discoveries.lisp` | **усі** відкриття рою (M8, surface, transport, islands, …). Doctrine rule 18. |
+| **#1598** (+ cml#370) | **додатково**, якщо відкриття на критичному шляху GPU/witness (E1–E3, f32, cml bridge) |
+
+Не створювати третій журнал. Формат: `kind` / `claim` / `evidence` / `status` / `action`. Журнал не є семантичною владою.
+
 ## Role
 
 Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lisp`, `cml`, `my-idea`). Defines what a my-lisp program means; every other repository must match this, not the reverse.
