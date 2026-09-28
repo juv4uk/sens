@@ -1,5 +1,4 @@
 ; #219 — first reasoning-honesty witness.
-; CI probe: exercise the Lisp-owned semantic slice while validating binder alpha-renaming.
 ; Absence of a proof for P is not evidence for (not P).
 ;
 ; Historical negation-as-failure proves (safe ocean) from the rule below merely
