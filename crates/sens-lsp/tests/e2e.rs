@@ -623,7 +623,7 @@ fn t16_workspace_scan_recognizes_wsm_extension() {
 
 /// The sens repo root (parent of crates/sens-lsp), used as the LSP
 /// workspace root so initialize loads guard knowledge from the REAL
-/// lib/guard.wsm and knowledge/guard-reference.wsm.
+/// lib/guard.lisp and knowledge/guard-reference.lisp.
 fn sens_repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("..")
 }
@@ -640,7 +640,7 @@ fn init_with_root(root: &Path) -> String {
 }
 
 /// Hover over a guard function name in ordinary source must surface its
-/// canonical defining form from lib/guard.wsm — the live file, not a
+/// canonical defining form from lib/guard.lisp — the live file, not a
 /// Rust copy.
 #[test]
 fn t17_g3_guard_function_hover_from_live_lib_guard_wsm() {
@@ -691,8 +691,8 @@ fn t18_g3_guard_function_wrong_arity_is_diagnosed() {
 /// 47KB canonical file), so this stays explicit rather than slowing every
 /// `cargo test`. Run: `cargo test --release -p sens-lsp -- --ignored`
 #[test]
-#[ignore = "guard-reference.wsm topic parse is slow; run explicitly in release"]
-fn t19_g3_guard_topic_hover_from_live_reference_wsm() {
+#[ignore = "guard-reference.lisp topic parse is slow; run explicitly in release"]
+fn t19_g3_guard_topic_hover_from_live_reference_lisp() {
     let uri = "file:///g3tp.lisp";
     let doc = "(guard)\n"; // `guard` as a bare symbol form, not a call
     let mut server = Server::new();
