@@ -707,7 +707,7 @@
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
 (00001001 digit->string
-  ; Superseded by number->string's canonical delegation to write-to-string
+  ; Superseded by number->string's machine-wire delegation to write-to-string
   ; (FIX-NUMBER-TO-STRING-RATIONAL). Retained because racket/boot/core.lisp
   ; mirrors this file and fpga-lisp's assembler.lisp carries its own local
   ; variant — removal is a separate mirrored-surface decision, not a
@@ -726,15 +726,12 @@
 
 (00001001 number->string
   (00001000 (n)
-    ; Canonical serialization for every number (FIX-NUMBER-TO-STRING-
-    ; RATIONAL, docs/BUG-number-to-string-rational.md): integers render
-    ; as themselves, non-integer rationals render REDUCED exactly —
-    ; "1/3", never a decimal approximation, per the same G6 law that
-    ; makes 10/20 serialize as "1/2". The previous quotient/mod descent
-    ; crashed on fractional digit indices ((nth 1/3 <digit-table>)) and
-    ; its misleading error surfaced as an apparent memory corruption.
-    ; Delegation, not re-implementation: write-to-string is already the
-    ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
+    ; Canonical MACHINE serialization for every number (#1623,
+    ; FIX-NUMBER-TO-STRING-RATIONAL): delegates to write-to-string, so exact
+    ; numeric values use the reader-safe tagged binary wire. Human rational
+    ; presentation is deliberately separate and remains 42 / 1/2 / 5/4.
+    ; The historical quotient/mod descent crashed on fractional digit indices;
+    ; delegation keeps one machine-wire authority instead of reimplementing it.
     (01001100 n)))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
