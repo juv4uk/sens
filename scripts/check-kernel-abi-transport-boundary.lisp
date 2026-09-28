@@ -97,7 +97,7 @@
               (00100111
                 (kab-row-check
                   (00000001 owner)
-                  (00000001 (owner my-lisp)))
+                  (00000001 (owner sens)))
                 (kab-row-check
                   (00000001 language-identity-type)
                   (00000001 (language-identity-type Sens8)))
