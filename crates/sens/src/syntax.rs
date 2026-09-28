@@ -730,11 +730,16 @@ mod fasl_tests {
             encoded.windows(2).any(|bytes| bytes == [7, 0b01011001]),
             "numeric-buffer-map must travel as one exact SENS byte"
         );
-        for forbidden in [b"numeric-buffer-map".as_slice(), b"lambda", b"i32-buffer"] {
+        const FORBIDDEN_SURFACES: &[&[u8]] = &[
+            &[110, 117, 109, 101, 114, 105, 99, 45, 98, 117, 102, 102, 101, 114, 45, 109, 97, 112],
+            &[108, 97, 109, 98, 100, 97],
+            &[105, 51, 50, 45, 98, 117, 102, 102, 101, 114],
+        ];
+        for forbidden in FORBIDDEN_SURFACES {
             assert!(
-                !encoded.windows(forbidden.len()).any(|bytes| bytes == forbidden),
-                "human surface leaked into binary transport: {:?}",
-                String::from_utf8_lossy(forbidden)
+                !encoded.windows(forbidden.len()).any(|bytes| bytes == *forbidden),
+                "людська назва просочилася в бінарний транспорт: {:?}",
+                forbidden
             );
         }
 
