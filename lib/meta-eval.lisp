@@ -118,13 +118,13 @@
       (t (00000001 ())))))
 
 (00001001 my-canon-callable-identity?
-  (00001000 (identity)
+  (00001000 (identity-ref)
     (00000111
-      ((00000011 identity (00000001 atom)) t)
-      ((00000011 identity (00000001 eq)) t)
-      ((00000011 identity (00000001 cons)) t)
-      ((00000011 identity (00000001 car)) t)
-      ((00000011 identity (00000001 cdr)) t)
+      ((00000011 identity-ref (00000001 atom)) t)
+      ((00000011 identity-ref (00000001 eq)) t)
+      ((00000011 identity-ref (00000001 cons)) t)
+      ((00000011 identity-ref (00000001 car)) t)
+      ((00000011 identity-ref (00000001 cdr)) t)
       (t (00000001 ())))))
 
 (00001001 my-canon-quote-name?
@@ -145,9 +145,9 @@
 ; ordinary non-Canon primitives continue through this default environment layer.
 (00001001 my-default-binding
   (00001000 (name)
-    (10011100 ((identity (my-canon-identity name)))
+    (10011100 ((identity-ref (my-canon-identity name)))
       (00000111
-        ((my-canon-callable-identity? identity) (my-primitive identity))
+        ((my-canon-callable-identity? identity-ref) (my-primitive identity-ref))
         ((my-canon-name? name) (my-canon-binding-error name))
         ((00000011 name (00000001 +))    (my-primitive (00000001 +)))
         ((00000011 name (00000001 -))    (my-primitive (00000001 -)))
@@ -262,9 +262,9 @@
 ; environment contains the same text. Non-Canon names retain ordinary lookup.
 (00001001 env-lookup
   (00001000 (name env-ref)
-    (10011100 ((identity (my-canon-identity name)))
+    (10011100 ((identity-ref (my-canon-identity name)))
       (00000111
-        ((my-canon-callable-identity? identity) (my-primitive identity))
+        ((my-canon-callable-identity? identity-ref) (my-primitive identity-ref))
         ((my-canon-name? name) (my-canon-binding-error name))
         ((00000010 env-ref) () (my-default-binding name))
         ((00000010 env-ref) (1) (my-default-binding name))
