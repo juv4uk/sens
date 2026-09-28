@@ -2,5 +2,5 @@
 ; Мовне джерело СЕНС не може брати семантичну істину з Rust.
 
 (language-contract
-  (semantic-authority-source "crates/my-lisp/src/eval/canon.rs")
+  (semantic-authority-source "crates/sens/src/eval/canon.rs")
   (law function-meaning comes-from-host))

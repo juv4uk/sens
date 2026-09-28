@@ -203,7 +203,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     let eq_kernels =
         kernel_statuses_for_sid(&kernel_source, sens::sens!(00000011)).expect("EQ kernel row");
     assert_eq!(eq_kernels.len(), 1);
-    assert_eq!(eq_kernels.get("my-lisp").map(String::as_str), Some("live"));
+    assert_eq!(eq_kernels.get("sens").map(String::as_str), Some("live"));
     assert_eq!(
         machine_coordinate(&mut session, sens::sens!(00000011)),
         "((identity-compare bounded-u64))"
@@ -214,7 +214,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert!(cons_math.contains("car-cons-left-inverse"));
     let cons_kernels =
         kernel_statuses_for_sid(&kernel_source, sens::sens!(00000100)).expect("CONS kernel row");
-    assert_eq!(cons_kernels.get("my-lisp").map(String::as_str), Some("live"));
+    assert_eq!(cons_kernels.get("sens").map(String::as_str), Some("live"));
     assert_eq!(
         cons_kernels.get("common-lisp").map(String::as_str),
         Some("integration-gated")
@@ -232,7 +232,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert!(cond_math.contains("no-mathematical-law-claimed"));
     let cond_kernels =
         kernel_statuses_for_sid(&kernel_source, sens::sens!(00000111)).expect("COND kernel row");
-    assert_eq!(cond_kernels.get("my-lisp").map(String::as_str), Some("live"));
+    assert_eq!(cond_kernels.get("sens").map(String::as_str), Some("live"));
     assert_eq!(cond_kernels.get("prolog").map(String::as_str), Some("absent"));
     assert_eq!(cond_kernels.get("clips").map(String::as_str), Some("absent"));
     assert_eq!(

@@ -1,6 +1,6 @@
 ; #749 — Lisp-owned language-facing island compatibility contract.
 ;
-; This document defines what my-lisp promises at the border with autonomous
+; This document defines what SENS promises at the border with autonomous
 ; execution islands. It does NOT define Common Lisp, Prolog, CLIPS or Datalog
 ; semantics and does not invent a universal result ontology.
 ;
@@ -17,7 +17,7 @@
 
 (island-compat-contract/1
   ((identity . semantic-id)
-   (owner . my-lisp)
+   (owner . sens)
    (representation . opaque-u8)
    (meaning-source . semantic-registry-and-laws)
    (kernel-interpretation . forbidden)

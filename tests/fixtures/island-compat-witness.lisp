@@ -55,7 +55,7 @@
             (island-compat-first-failure
               (00100111
                 (island-compat-check
-                  (00000001 semantic-id) (00000001 owner) (00000001 my-lisp))
+                  (00000001 semantic-id) (00000001 owner) (00000001 sens))
                 (island-compat-check
                   (00000001 semantic-id) (00000001 representation) (00000001 opaque-u8))
                 (island-compat-check

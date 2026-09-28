@@ -11,7 +11,7 @@
 
 (life-1-contract/1
   ((identity . life-trace)
-   (owner . my-lisp)
+   (owner . sens)
    (kind . provenance-observation)
    (truth-value . forbidden)
    (producer-required . yes)
@@ -25,7 +25,7 @@
    (universal-result-normalization . forbidden))
 
   ((identity . projection)
-   (owner . my-lisp)
+   (owner . sens)
    (explicit . yes)
    (partial . yes)
    (source-native-result-preserved . yes)
@@ -34,7 +34,7 @@
   ((identity . target-invocation)
    (input-origin-recorded . yes)
    (target-native-domain-preserved . yes)
-   (semantic-id-meaning-source . my-lisp-registry-and-laws)
+   (semantic-id-meaning-source . sens-registry-and-laws)
    (kernel-reinterpretation . forbidden))
 
   ((identity . missing-source-kernel)

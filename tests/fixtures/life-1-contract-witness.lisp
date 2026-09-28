@@ -72,7 +72,7 @@
               (00100111
                 (life-1-check (00000001 life-trace)
                               (00000001 owner)
-                              (00000001 my-lisp))
+                              (00000001 sens))
                 (life-1-check (00000001 life-trace)
                               (00000001 truth-value)
                               (00000001 forbidden))
