@@ -3,66 +3,14 @@
   "issue": 1631,
   "source_evidence": "tests/data/numeral-silent-change-cohort.json",
   "authority": "migration-review-not-language-semantics",
-  "count": 35,
+  "count": 31,
   "route_counts": {
-    "preserve-numeric-value": 29,
+    "preserve-numeric-value": 25,
     "typed-machine-notation": 5,
     "regenerate-from-authority": 1
   },
   "invariant": "classification selects a migration route; it does not change numeric meaning or source grammar",
   "rows": [
-    {
-      "path": "lib/core.lisp",
-      "line": 724,
-      "token": "10",
-      "bucket": "active-lib",
-      "current_decimal_value": "10",
-      "future_binary_value": "2",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "decimal-radix-algorithm-constant",
-      "rationale": "base-ten divisor/remainder used by number->string; preserve numeric value ten, independent of future source spelling"
-    },
-    {
-      "path": "lib/core.lisp",
-      "line": 725,
-      "token": "10",
-      "bucket": "active-lib",
-      "current_decimal_value": "10",
-      "future_binary_value": "2",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "decimal-radix-algorithm-constant",
-      "rationale": "base-ten divisor/remainder used by number->string; preserve numeric value ten, independent of future source spelling"
-    },
-    {
-      "path": "lib/core4.lisp",
-      "line": 724,
-      "token": "10",
-      "bucket": "active-lib",
-      "current_decimal_value": "10",
-      "future_binary_value": "2",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "decimal-radix-algorithm-constant",
-      "rationale": "base-ten divisor/remainder used by number->string; preserve numeric value ten, independent of future source spelling"
-    },
-    {
-      "path": "lib/core4.lisp",
-      "line": 725,
-      "token": "10",
-      "bucket": "active-lib",
-      "current_decimal_value": "10",
-      "future_binary_value": "2",
-      "silent_value_change": true,
-      "route": "preserve-numeric-value",
-      "owner_issue": 1635,
-      "role": "decimal-radix-algorithm-constant",
-      "rationale": "base-ten divisor/remainder used by number->string; preserve numeric value ten, independent of future source spelling"
-    },
     {
       "path": "lib/machine/encoding/x86-64.lisp",
       "line": 24,
