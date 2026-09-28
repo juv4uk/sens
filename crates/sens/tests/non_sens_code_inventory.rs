@@ -337,6 +337,78 @@ fn is_runtime_embedded_source(file: &str) -> bool {
     )
 }
 
+
+fn active_coverage_baseline_path() -> PathBuf {
+    repo_root().join("crates/sens/tests/data/active-sens-coverage-baseline.tsv")
+}
+
+fn read_active_coverage_baseline() -> BTreeMap<String, (usize, usize)> {
+    let text = fs::read_to_string(active_coverage_baseline_path())
+        .expect("active SENS coverage baseline must exist");
+    text.lines()
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .map(|line| {
+            let columns: Vec<&str> = line.split('\t').collect();
+            assert_eq!(
+                columns.len(),
+                6,
+                "active coverage baseline row must have 6 TSV columns: {line}"
+            );
+            let view = columns[0].to_owned();
+            let named_max = columns[2]
+                .parse::<usize>()
+                .expect("named_max must be an integer");
+            let basis_points_min = columns[5]
+                .parse::<usize>()
+                .expect("basis_points_min must be an integer");
+            (view, (named_max, basis_points_min))
+        })
+        .collect()
+}
+
+#[test]
+fn active_sens_coverage_never_regresses_1673() {
+    let inventory = source_inventory();
+    let current = BTreeMap::from([
+        ("repository-source".to_owned(), coverage_for(&inventory, |_| true)),
+        ("active-lib".to_owned(), coverage_for(&inventory, is_active_lib_source)),
+        (
+            "runtime-embedded".to_owned(),
+            coverage_for(&inventory, is_runtime_embedded_source),
+        ),
+    ]);
+    let baseline = read_active_coverage_baseline();
+
+    assert_eq!(
+        current.keys().collect::<Vec<_>>(),
+        baseline.keys().collect::<Vec<_>>(),
+        "coverage views changed: update classification and baseline explicitly"
+    );
+
+    let mut regressions = Vec::new();
+    for (view, coverage) in current {
+        let (named_max, basis_points_min) = baseline[&view];
+        if coverage.named > named_max {
+            regressions.push(format!(
+                "{view}: named call-heads grew {named_max} -> {}",
+                coverage.named
+            ));
+        }
+        if coverage.basis_points() < basis_points_min {
+            regressions.push(format!(
+                "{view}: SENS coverage fell {basis_points_min} -> {} basis points",
+                coverage.basis_points()
+            ));
+        }
+    }
+
+    assert!(
+        regressions.is_empty(),
+        "active SENS coverage regressed:\n{}",
+        regressions.join("\n")
+    );
+}
+
 #[test]
 fn active_sens_coverage_report_1673() {
     let inventory = source_inventory();
