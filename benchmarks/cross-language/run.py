@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""#1546/#1547: однаковий корпус SENS ↔ CPython ↔ Lua 5.4 на одному runner.
+"""#1546/#1547/#1548: SENS ↔ CPython ↔ Lua 5.4 ↔ Racket CS.
 
 Це benchmark реалізацій, не рейтинг абстрактних мов. SENS-програми
 генеруються з уже наявних шаблонів benchmarks/sens-surface/run.py;
-CPython і Lua 5.4 реалізують ті самі алгоритми й параметри.
+зовнішні adapters реалізують ті самі алгоритми й параметри.
 """
 
 from __future__ import annotations
@@ -24,11 +24,14 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
+import racket_adapter
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SENS_SURFACE_RUN = ROOT / "benchmarks" / "sens-surface" / "run.py"
 CPYTHON_DRIVER = ROOT / "benchmarks" / "cross-language" / "cpython_driver.py"
 LUA_DRIVER = ROOT / "benchmarks" / "cross-language" / "lua_driver.lua"
+RACKET_DRIVER = ROOT / "benchmarks" / "cross-language" / "racket_driver.rkt"
 CASES = ("fib", "loop", "ackermann", "closures", "evenodd")
 
 # Параметри спільні й достатньо малі для CPython-рекурсії під Cachegrind.
@@ -337,12 +340,14 @@ def command_set(
     sens_bench: Path,
     python: str,
     lua: str,
+    racket: str,
     workdir: Path,
     name: str,
     inner_reps: int,
 ) -> dict[str, dict[str, list[str]]]:
     py_file = workdir / f"{name}.py"
     lua_file = workdir / f"{name}.lua"
+    racket_file = workdir / f"{name}.rkt"
     return {
         "sens": {
             "load": [str(sens_bench), str(workdir), name, "sens", "load"],
@@ -376,6 +381,18 @@ def command_set(
             ],
             "full": [lua, str(LUA_DRIVER), str(lua_file), "full"],
         },
+        "racket": {
+            "load": [racket, str(RACKET_DRIVER), str(racket_file), "load"],
+            "ready": [racket, str(RACKET_DRIVER), str(racket_file), "ready"],
+            "repeat": [
+                racket,
+                str(RACKET_DRIVER),
+                str(racket_file),
+                "repeat",
+                str(inner_reps),
+            ],
+            "full": [racket, str(RACKET_DRIVER), str(racket_file), "full"],
+        },
     }
 
 
@@ -392,6 +409,7 @@ def main() -> int:
     parser.add_argument("--sens-bench", required=True, type=Path)
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--lua", default="lua", help="Lua 5.4 executable")
+    parser.add_argument("--racket", default="racket", help="Racket CS executable")
     parser.add_argument("--reps", type=int, default=3)
     parser.add_argument(
         "--inner-reps",
@@ -428,6 +446,13 @@ def main() -> int:
             f"#1547 requires Lua 5.4, got {lua_version!r} from {args.lua!r}"
         )
 
+    racket_version_proc = run_checked([args.racket, "--version"])
+    racket_version = (racket_version_proc.stdout or racket_version_proc.stderr).strip()
+    if "[cs]" not in racket_version.lower():
+        raise RuntimeError(
+            f"#1548 requires Racket CS, got {racket_version!r} from {args.racket!r}"
+        )
+
     sens_surface = load_sens_surface_module()
     workdir = Path(tempfile.mkdtemp(prefix="sens-cross-bench-"))
 
@@ -455,6 +480,10 @@ def main() -> int:
             lua_source(name, params),
             encoding="utf-8",
         )
+        (workdir / f"{name}.rkt").write_text(
+            racket_adapter.source(name, params),
+            encoding="utf-8",
+        )
 
         # SENS FASL створюється до заміру; encode ніколи не входить у число.
         run_checked(
@@ -464,13 +493,20 @@ def main() -> int:
     # Правильність — до будь-якого виміру.
     for name in selected:
         commands = command_set(
-            args.sens_bench, args.python, args.lua, workdir, name, args.inner_reps
+            args.sens_bench,
+            args.python,
+            args.lua,
+            args.racket,
+            workdir,
+            name,
+            args.inner_reps,
         )
         run_checked(commands["sens"]["full"])
         run_checked(commands["cpython"]["full"], expected=expected_by_name[name])
         run_checked(commands["lua"]["full"], expected=expected_by_name[name])
+        run_checked(commands["racket"]["full"], expected=expected_by_name[name])
         print(
-            f"[check] {name}: SENS=OK CPython=OK Lua=OK "
+            f"[check] {name}: SENS=OK CPython=OK Lua=OK RacketCS=OK "
             f"expected={expected_by_name[name]}"
         )
 
@@ -481,6 +517,7 @@ def main() -> int:
         "sens": [str(args.sens_bench), str(workdir), "empty", "-"],
         "cpython": [args.python, "-c", "pass"],
         "lua": [args.lua, "-e", ""],
+        "racket": [args.racket, "-e", "(void)"],
     }
 
     rows: list[tuple[str, str, str, int, int]] = []
@@ -505,12 +542,24 @@ def main() -> int:
             )
         for name in selected:
             instruction_commands = command_set(
-                args.sens_bench, args.python, args.lua, workdir, name, args.inner_reps
+                args.sens_bench,
+                args.python,
+                args.lua,
+                args.racket,
+                workdir,
+                name,
+                args.inner_reps,
             )
             native_commands = command_set(
-                args.sens_bench, args.python, args.lua, workdir, name, args.native_inner_reps
+                args.sens_bench,
+                args.python,
+                args.lua,
+                args.racket,
+                workdir,
+                name,
+                args.native_inner_reps,
             )
-            for implementation in ("sens", "cpython", "lua"):
+            for implementation in ("sens", "cpython", "lua", "racket"):
                 for mode in ("load", "ready", "repeat", "full"):
                     count = instruction_count(instruction_commands[implementation][mode])
                     rows.append((implementation, name, mode, rep, count))
@@ -567,6 +616,7 @@ def main() -> int:
         "git_sha": git_fact("rev-parse", "HEAD"),
         "python": python_version,
         "lua": lua_version,
+        "racket": racket_version,
         "platform": platform.platform(),
         "machine": platform.machine(),
         "cpu_count": os.cpu_count(),
@@ -611,11 +661,16 @@ def main() -> int:
             )
         return delta / args.inner_reps
 
-    implementations = ("sens", "cpython", "lua")
-    labels = {"sens": "SENS", "cpython": "CPython", "lua": "Lua 5.4"}
+    implementations = ("sens", "cpython", "lua", "racket")
+    labels = {
+        "sens": "SENS",
+        "cpython": "CPython",
+        "lua": "Lua 5.4",
+        "racket": "Racket CS",
+    }
 
     lines = [
-        "# SENS ↔ CPython ↔ Lua 5.4: benchmark реалізацій",
+        "# SENS ↔ CPython ↔ Lua 5.4 ↔ Racket CS: benchmark реалізацій",
         "",
         "Мірило: Valgrind Cachegrind I refs, медіана повторів. "
         "Це не рейтинг абстрактних мов.",
@@ -636,39 +691,45 @@ def main() -> int:
         "",
         "## Cold one-shot = process + load/setup + one call",
         "",
-        "| workload | SENS full | CPython full | Lua 5.4 full | CPython/SENS | Lua/SENS |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| workload | SENS full | CPython full | Lua 5.4 full | Racket CS full | CPython/SENS | Lua/SENS | Racket/SENS |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for name in selected:
         sens_full = median(grouped, ("sens", name, "full"))
         cpython_full = median(grouped, ("cpython", name, "full"))
         lua_full = median(grouped, ("lua", name, "full"))
+        racket_full = median(grouped, ("racket", name, "full"))
         lines.append(
             f"| {name} | {sens_full:,.0f} | {cpython_full:,.0f} | {lua_full:,.0f} | "
-            f"×{cpython_full / sens_full:.3f} | ×{lua_full / sens_full:.3f} |"
+            f"{racket_full:,.0f} | ×{cpython_full / sens_full:.3f} | "
+            f"×{lua_full / sens_full:.3f} | ×{racket_full / sens_full:.3f} |"
         )
 
     lines += [
         "",
         f"## Steady execution = (repeat({args.inner_reps}) - ready) / {args.inner_reps}",
         "",
-        "| workload | SENS | CPython | Lua 5.4 | CPython/SENS | Lua/SENS |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| workload | SENS | CPython | Lua 5.4 | Racket CS | CPython/SENS | Lua/SENS | Racket/SENS |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
 
     cpython_ratios = []
     lua_ratios = []
+    racket_ratios = []
     for name in selected:
         sens = execution_net("sens", name)
         cpython = execution_net("cpython", name)
         lua = execution_net("lua", name)
+        racket = execution_net("racket", name)
         cpython_ratio = cpython / sens
         lua_ratio = lua / sens
+        racket_ratio = racket / sens
         cpython_ratios.append(cpython_ratio)
         lua_ratios.append(lua_ratio)
+        racket_ratios.append(racket_ratio)
         lines.append(
-            f"| {name} | {sens:,.0f} | {cpython:,.0f} | {lua:,.0f} | "
-            f"×{cpython_ratio:.3f} | ×{lua_ratio:.3f} |"
+            f"| {name} | {sens:,.0f} | {cpython:,.0f} | {lua:,.0f} | {racket:,.0f} | "
+            f"×{cpython_ratio:.3f} | ×{lua_ratio:.3f} | ×{racket_ratio:.3f} |"
         )
 
     lines += [
@@ -677,45 +738,49 @@ def main() -> int:
         "корпусу, не рейтинг мов.",
         f"Корпусне CPython/SENS: **×{geomean(cpython_ratios):.3f}**.",
         f"Корпусне Lua/SENS: **×{geomean(lua_ratios):.3f}**.",
+        f"Корпусне Racket/SENS: **×{geomean(racket_ratios):.3f}**.",
         "",
         "## Load - startup",
         "",
-        "| workload | SENS FASL decode | CPython source compile | Lua source compile | CPython/SENS | Lua/SENS |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| workload | SENS FASL decode | CPython source compile | Lua source compile | Racket source compile | CPython/SENS | Lua/SENS | Racket/SENS |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for name in selected:
         sens = load_net("sens", name)
         cpython = load_net("cpython", name)
         lua = load_net("lua", name)
+        racket = load_net("racket", name)
         lines.append(
-            f"| {name} | {sens:,.0f} | {cpython:,.0f} | {lua:,.0f} | "
-            f"×{cpython / sens:.3f} | ×{lua / sens:.3f} |"
+            f"| {name} | {sens:,.0f} | {cpython:,.0f} | {lua:,.0f} | {racket:,.0f} | "
+            f"×{cpython / sens:.3f} | ×{lua / sens:.3f} | ×{racket / sens:.3f} |"
         )
 
     lines += [
         "",
         "## Setup = ready - load",
         "",
-        "| workload | SENS setup | CPython module setup | Lua chunk setup | CPython/SENS | Lua/SENS |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| workload | SENS setup | CPython module setup | Lua chunk setup | Racket module setup | CPython/SENS | Lua/SENS | Racket/SENS |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for name in selected:
         sens = setup_net("sens", name)
         cpython = setup_net("cpython", name)
         lua = setup_net("lua", name)
+        racket = setup_net("racket", name)
         cpython_ratio = cpython / sens if sens > 0 else float("nan")
         lua_ratio = lua / sens if sens > 0 else float("nan")
+        racket_ratio = racket / sens if sens > 0 else float("nan")
         lines.append(
-            f"| {name} | {sens:,.0f} | {cpython:,.0f} | {lua:,.0f} | "
-            f"×{cpython_ratio:.3f} | ×{lua_ratio:.3f} |"
+            f"| {name} | {sens:,.0f} | {cpython:,.0f} | {lua:,.0f} | {racket:,.0f} | "
+            f"×{cpython_ratio:.3f} | ×{lua_ratio:.3f} | ×{racket_ratio:.3f} |"
         )
 
     lines += [
         "",
         "## Operational wall time і RSS (спостереження, не CI-контракт)",
         "",
-        "| workload | SENS wall/call | CPython wall/call | Lua wall/call | CPython/SENS | Lua/SENS | SENS RSS | CPython RSS | Lua RSS |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| workload | SENS wall/call | CPython wall/call | Lua wall/call | Racket wall/call | CPython/SENS | Lua/SENS | Racket/SENS | SENS RSS | CPython RSS | Lua RSS | Racket RSS |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for name in selected:
         wall = {}
@@ -730,8 +795,9 @@ def main() -> int:
             )
         lines.append(
             f"| {name} | {wall['sens']:.6f} | {wall['cpython']:.6f} | {wall['lua']:.6f} | "
-            f"×{wall['cpython'] / wall['sens']:.3f} | ×{wall['lua'] / wall['sens']:.3f} | "
-            f"{rss['sens']:,.0f} | {rss['cpython']:,.0f} | {rss['lua']:,.0f} |"
+            f"{wall['racket']:.6f} | ×{wall['cpython'] / wall['sens']:.3f} | "
+            f"×{wall['lua'] / wall['sens']:.3f} | ×{wall['racket'] / wall['sens']:.3f} | "
+            f"{rss['sens']:,.0f} | {rss['cpython']:,.0f} | {rss['lua']:,.0f} | {rss['racket']:,.0f} |"
         )
 
     lines += [
@@ -744,13 +810,14 @@ def main() -> int:
         "- SENS load — декодування заздалегідь створеного FASL; encode не міряється.",
         "- CPython load — matched driver: читання source + compile(...), без виконання модулю.",
         "- Lua load — matched Lua 5.4 driver: loadfile(source), без виконання chunk.",
+        "- Racket load — matched Racket CS driver: read-syntax + compile(module), без instantiation.",
         f"- Steady execution — (repeat({args.inner_reps}) - ready) / {args.inner_reps}; "
         "ready і repeat проходять matched load/setup path у кожній реалізації.",
-        "- CPython і Lua repeat мають мінімальний loop у своїх driver; SENS repeat має "
+        "- CPython, Lua і Racket repeat мають мінімальний loop у своїх driver; SENS repeat має "
         "мінімальний Rust loop. Це явно лишається частиною measurement harness.",
         f"- Cachegrind використовує repeat({args.inner_reps}); native wall/CPU — "
         f"repeat({args.native_inner_reps}), щоб process noise не домінував короткі workload.",
-        "- Усі відповіді трьох реалізацій перевірені до вимірювання.",
+        "- Усі відповіді чотирьох реалізацій перевірені до вимірювання.",
         "",
     ]
 
