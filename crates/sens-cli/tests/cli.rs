@@ -663,3 +663,8 @@ fn sexpr_protocol_connections_do_not_share_state() {
         "a def on one connection leaked into another: {second_response}"
     );
 }
+
+// #1675: run the canonical active-lib migration completion gate in the
+// focused CI target (`cargo test -p sens-cli --test cli`).
+#[path = "active_lib_sens_completion.rs"]
+mod active_lib_sens_completion;
