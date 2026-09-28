@@ -26,7 +26,7 @@
 
 (core-profile-contract/2
   ((identity . authority)
-   (owner . my-lisp)
+   (owner . sens)
    (sid-identity . shared)
    (canon-identity . shared)
    (semantic-registry . shared)
@@ -74,8 +74,8 @@
    (historical-contract . (7 0))
    (historical-contract-pin . "fae8d8f8ea6713d94db1f1fd7e8df4398279317e")
    (mechanism-families . (common-lisp prolog clips datalog))
-   (selector-owner . my-lisp)
-   (lowering-owner . my-lisp)
+   (selector-owner . sens)
+   (lowering-owner . sens)
    (native-observation-preserved . yes)
    (native-observation-is-language-law . no)
    (experiment-may-propose-core4-law . evidence-required)

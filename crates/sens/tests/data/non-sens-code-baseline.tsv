@@ -381,7 +381,6 @@ source	tests/fixtures/exact-q-binary-v1.lisp	12
 source	tests/fixtures/explicit-negative-reason-observe-witness.lisp	1
 source	tests/fixtures/island-compat-witness.lisp	3
 source	tests/fixtures/life-1-contract-witness.lisp	3
-source	tests/fixtures/life-1-scheduler-witness.lisp	1
 source	tests/fixtures/machine-replaceability-witness.lisp	6
 source	tests/fixtures/mathematical-result-taxonomy-witness.lisp	3
 source	tests/fixtures/meta-eval-empty-program-witness.lisp	1

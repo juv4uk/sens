@@ -379,6 +379,48 @@ impl BigInt {
         }
     }
 
+    /// Parses an explicit base-2 integer used by the canonical numeric wire.
+    /// This is not the ordinary source-number reader: the caller must already
+    /// have selected the tagged wire grammar.
+    pub(crate) fn from_binary_str(text: &str) -> Result<Self, ()> {
+        let (negative, digits) = match text.strip_prefix('-') {
+            Some(rest) => (true, rest),
+            None => (false, text.strip_prefix('+').unwrap_or(text)),
+        };
+        if digits.is_empty() || !digits.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+            return Err(());
+        }
+
+        let one = Magnitude::from_u64(1);
+        let mut magnitude = Magnitude::ZERO;
+        for byte in digits.bytes() {
+            magnitude.shl_assign(1);
+            if byte == b'1' {
+                magnitude = magnitude.add(&one);
+            }
+        }
+        Ok(Self::normalized(negative, magnitude))
+    }
+
+    /// Canonical base-2 spelling for the tagged numeric wire. Magnitude uses
+    /// no leading zeros; zero is always exactly "0".
+    pub(crate) fn to_binary_string(&self) -> String {
+        if self.is_zero() {
+            return "0".to_string();
+        }
+        let width = self.bit_length();
+        let mut out = String::with_capacity(width + self.negative as usize);
+        if self.negative {
+            out.push('-');
+        }
+        for bit in (0..width).rev() {
+            let limb = self.magnitude.0[bit / 32];
+            let value = (limb >> (bit % 32)) & 1;
+            out.push(if value == 0 { '0' } else { '1' });
+        }
+        out
+    }
+
     pub fn is_zero(&self) -> bool {
         self.magnitude.is_zero()
     }
@@ -844,4 +886,27 @@ mod tests {
             Ordering::Less
         );
     }
+    #[test]
+    fn binary_wire_helpers_are_canonical_and_arbitrary_precision() {
+        for (input, expected) in [
+            ("0", "0"),
+            ("0000", "0"),
+            ("101010", "101010"),
+            ("-00101", "-101"),
+        ] {
+            assert_eq!(
+                BigInt::from_binary_str(input).unwrap().to_binary_string(),
+                expected
+            );
+        }
+
+        let huge = format!("1{}", "0".repeat(192));
+        assert_eq!(
+            BigInt::from_binary_str(&huge).unwrap().to_binary_string(),
+            huge
+        );
+        assert!(BigInt::from_binary_str("").is_err());
+        assert!(BigInt::from_binary_str("102").is_err());
+    }
+
 }

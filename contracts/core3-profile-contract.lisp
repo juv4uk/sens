@@ -17,7 +17,7 @@
 
 (core3-profile-contract/1
   ((identity . authority)
-   (owner . my-lisp)
+   (owner . sens)
    (profile . core3)
    (sid-identity-source . "lib/surface/semantic-registry.lisp")
    (profile-may-mint-sid . forbidden)
@@ -37,8 +37,8 @@
   ((identity . mechanism-architecture)
    (selector-source . "lib/mechanism-selector.lisp")
    (lowering-source . "lib/island-lowering.lisp")
-   (selector-owner . my-lisp)
-   (lowering-owner . my-lisp)
+   (selector-owner . sens)
+   (lowering-owner . sens)
    (transport-semantics . blind)
    (executors . (common-lisp prolog clips datalog))
    (unknown-sid . fail-closed)

@@ -71,6 +71,6 @@ fn type_errors_fail_named() {
 fn write_to_string_round_trip_uses_hash_paren_syntax() {
     assert_eq!(
         eval_source("(write-to-string (vector 1 (list 2) \"a\"))"),
-        "\"#(1 (2) \\\"a\\\")\""
+        "\"#(#q2:1/1 (#q2:10/1) \\\"a\\\")\""
     );
 }

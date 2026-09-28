@@ -1,18 +1,18 @@
 ; #1132 — Core1 bootstrap contract.
 ;
-; Core1 is the minimal Lisp-on-Lisp bootstrap profile. my-lisp owns this
+; Core1 is the minimal Lisp-on-Lisp bootstrap profile. SENS owns this
 ; contract; mccarthy-eval is only the Stage-0 execution seed.
 ;
 ; Important boundary:
 ; historical S0 spellings/mechanisms are NOT automatically aliases for current
-; my-lisp SID laws. They are a bootstrap substrate used to execute lib/core1.lisp.
+; SENS identity laws. They are a bootstrap substrate used to execute lib/core1.lisp.
 ; Any bridge to a current semantic identity requires an explicit witness.
 ;
 ; This file is data, not executable semantics.
 
 (core1-bootstrap-contract/1
   ((identity . authority)
-   (owner . my-lisp)
+   (owner . sens)
    (profile . core1)
    (semantic-authority-transfer . forbidden)
    (seed-may-mint-sid . forbidden)
@@ -57,7 +57,7 @@
    (lisp15-mechanisms-consumed . (FUNCTION FUNARG))
    (closure-provenance . lisp15-appendix-b)
    (closure-representation . (FUNARG fn captured-environment))
-   (semantic-authority . my-lisp)
+   (semantic-authority . sens)
    (mechanism-provenance . mccarthy-eval))
 
   ((identity . s1-source)

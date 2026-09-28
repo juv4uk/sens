@@ -5,7 +5,7 @@
 ; the language's Sens8 type and may not become a reverse semantic authority.
 
 (kernel-abi-transport-boundary/1
-  (owner my-lisp)
+  (owner sens)
   (language-identity-type Sens8)
   (shared-abi-type WsmKernelRequest)
   (shared-abi-field semantic_id)

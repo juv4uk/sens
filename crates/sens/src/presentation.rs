@@ -326,6 +326,31 @@ mod tests {
     }
 
     #[test]
+    fn exact_rationals_keep_the_existing_human_representation() {
+        let cases = [
+            (Value::Rational(Rational::new(42, 1).unwrap()), "42"),
+            (Value::Rational(Rational::new(1, 2).unwrap()), "1/2"),
+            (Value::Rational(Rational::new(5, 4).unwrap()), "5/4"),
+            (Value::Rational(Rational::new(5, 336).unwrap()), "5/336"),
+        ];
+        let human_languages = [
+            PresentationLanguage::Ukrainian,
+            PresentationLanguage::English,
+            PresentationLanguage::Sanskrit,
+        ];
+
+        for (value, expected) in cases {
+            for language in human_languages {
+                assert_eq!(
+                    render_value_for_presentation(&value, language),
+                    expected,
+                    "binary-first numeric work must not change human exact-rational presentation"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn ukrainian_presentation_uses_decimal_comma_for_inexact_numbers() {
         let value = Value::Number(12.5, Exactness::Inexact);
         assert_eq!(

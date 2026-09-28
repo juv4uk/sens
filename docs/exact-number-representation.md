@@ -109,12 +109,16 @@ Magnitude comparisons `<`, `=`, `>` порівнюють усі exact inputs я�
 
 `eq` лишається відношенням equality/identity, визначеним `Value::PartialEq`, і не є заміною numeric magnitude `=`. Не можна зливати ці дві операції лише для спрощення представлення.
 
-### Друк і read-back
+### Людський друк і machine read-back
 
-- compact exact Number друкується як ціле;
-- integer Rational друкує numerator без `/1`;
-- fractional Rational друкується як `numerator/denominator`;
-- integral inexact Number друкується з decimal marker, наприклад `3.0`, щоб read-back не маскував його як exact.
+Людське представлення не є machine wire:
+
+- compact exact Number для людини друкується як ціле;
+- integer Rational для людини друкує numerator без `/1`;
+- fractional Rational для людини друкується як `numerator/denominator`;
+- цей human-facing exact-rational view зберігається незалежно від внутрішньої binary-first граматики.
+
+Canonical `write-to-string` для exact integer/rational використовує окремий reader-safe тегований binary wire `#q2:<signed-numerator-bits>/<positive-denominator-bits>`. Тому machine round-trip не залежить від human decimal/rational spelling і не може зіткнутися з голими 8-бітними функціями СЕНС.
 
 Boundary corpus доводить, що велике exact integer проходить `write-to-string -> read -> eval` без втрати magnitude.
 
