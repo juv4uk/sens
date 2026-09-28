@@ -12,6 +12,34 @@
   (00001000 args
     (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
+; Rust arity fields are machine projection, not human number presentation.
+; number->string deliberately returns the canonical #q2:<bits>/1 wire.
+; Arity metadata is non-negative integer data, so consume its binary numerator
+; and emit an equivalent Rust binary integer literal.
+(00001001 wire-integer-bits-onto
+  (00001000 (remaining acc)
+    (00000111
+      ((00100010 (00111111 remaining) "/") (1) acc)
+      ((00100010 (00111111 remaining) "/") (0)
+       (wire-integer-bits-onto
+         (01000000 remaining)
+         (00111010 acc (00111111 remaining)))))))
+
+(00001001 render-rust-nat
+  (00001000 (n)
+    (10011100 ((wire (01000110 n)))
+      (00000111
+        ((00111101 "#q2:" wire)
+         (1)
+         (str+
+           "0b"
+           (wire-integer-bits-onto
+             (01000000 (01000000 (01000000 (01000000 wire))))
+             "")))
+        ((00111101 "#q2:" wire)
+         (0)
+         (00000101 (00000001 ())))))))
+
 (00001001 rows (00000101 (01001011 (10100110 source-path))))
 
 (00001001 field
@@ -36,14 +64,14 @@
   (00001000 (arity)
     (00000111
       ((00000010 arity) (1)
-       (str+ "Arity::Exact(" (01000110 arity) ")"))
+       (str+ "Arity::Exact(" (render-rust-nat arity) ")"))
       ((00000010 arity) (0)
        (00000111
          ((00100010 (00000101 arity) (00000001 at-least)) (1)
-          (str+ "Arity::AtLeast(" (01000110 (00101111 arity)) ")"))
+          (str+ "Arity::AtLeast(" (render-rust-nat (00101111 arity)) ")"))
          ((00100010 (00000101 arity) (00000001 between)) (1)
-          (str+ "Arity::Between { min: " (01000110 (00101111 arity))
-                ", max: " (01000110 (00110000 arity)) " }"))
+          (str+ "Arity::Between { min: " (render-rust-nat (00101111 arity))
+                ", max: " (render-rust-nat (00110000 arity)) " }"))
          ((00000001 unknown-arity) unknown-arity (00000101 (00000001 ()))))))))
 
 (00001001 render-admitted
