@@ -1,7 +1,7 @@
 ; repo.my — Swarm Contract v0.1 scope declaration for my-lisp.
 ; See docs/swarm-mesh-v2.md for the full spec. Format confirmed by
-; example against fpga-lisp/repo.my, shiva-sutras/repo.my and
-; tauricode/repo.my (MYLISP-SWARM-CONTRACT-01).
+; example against fpga-lisp/repo.lisp, shiva-sutras/repo.lisp and
+; tauricode/repo.lisp (MYLISP-SWARM-CONTRACT-01).
 ;
 ; A declaration of scope, not an authorization grant — authorities/
 ; non-authorities state what this repo is and is not the source of
