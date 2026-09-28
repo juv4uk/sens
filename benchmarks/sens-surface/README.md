@@ -22,6 +22,42 @@ guix time-machine -C channels.scm -- shell -m manifest.scm \
 `--check-only` — лише перевірка правильності всіх форм; `--cpu N` —
 прив'язати до ядра; `--samples`/`--warmup` — кількість раундів.
 
+## Post-M8 three-way (#1665)
+
+Після M8 старе порівняння «EN ім'я проти SENS коду» не можна переносити
+на поточний runtime: admitted human surface уже має зводитися до exact SENS
+call. Окремий runner `post_m8_three_way.sh` порівнює на **одному current-main
+бінарнику** три форми того самого workload:
+
+1. `en-text` — англійська людська поверхня, text parse;
+2. `sens-text` — exact 8-bit reader spelling, text parse;
+3. `sens-fasl` — exact SENS binary FASL, one-byte function transport.
+
+Вимірюються три різні питання, які не можна змішувати:
+
+- load/parse/decode: `load - empty`;
+- steady call execution: `(repeat(N) - ready) / N`;
+- one-call end-to-end: `full - empty`.
+
+Правильність усіх трьох форм перевіряється **до** Cachegrind. Runner записує
+raw TSV, SHA/Guix/CPU/Valgrind provenance, Markdown report і JSON summary.
+Немає автоматичного «переможця» чи performance threshold.
+
+Відтворення:
+
+```bash
+guix time-machine -C channels.scm -- shell -m manifest.scm \
+  -m benchmarks/sens-surface/manifest.scm -- \
+  sh -c '
+    cargo build --release -p sens --example ci_bench &&
+    sh benchmarks/sens-surface/post_m8_three_way.sh \
+      target/release/examples/ci_bench
+  '
+```
+
+За замовчуванням evidence пишеться в
+`benchmarks/sens-surface/results/YYYYMMDD-post-m8/`.
+
 ## Методика
 
 - **Спершу правильність:** кожна програма в кожному раунді звіряється з
