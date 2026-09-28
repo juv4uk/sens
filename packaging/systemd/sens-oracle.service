@@ -3,8 +3,8 @@ Description=sens semantic oracle :9999 (formerly my-lisp)
 After=network.target
 
 [Service]
-WorkingDirectory=/home/agents/GitHub/my-lisp
-ExecStart=/home/agents/GitHub/my-lisp/target/release/sens --tcp=9999 --protocol=sexpr
+WorkingDirectory=/home/agents/GitHub/sens
+ExecStart=/home/agents/GitHub/sens/target/release/sens --tcp=9999 --protocol=sexpr
 Restart=always
 RestartSec=3
 
