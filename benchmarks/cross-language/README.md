@@ -1,9 +1,9 @@
 # Міжмовні бенчмарки SENS
 
 Цей каталог вимірює **конкретні реалізації**, а не абстрактні "мови".
-Перший зовнішній орієнтир — CPython (#1546); Lua 5.4 (#1547) використовує
-той самий корпус і той самий machine-readable формат. Racket CS (#1548)
-і standard binary-trees (#1549) лишаються окремими slices.
+Перший зовнішній орієнтир — CPython (#1546); Lua 5.4 (#1547) і Racket CS
+(#1548) використовують той самий корпус та machine-readable формат.
+Standard binary-trees (#1549) лишається окремим workload slice.
 
 ## Правила чесності
 
@@ -85,6 +85,27 @@ Cachegrind I refs = 0.021, тобто поточний SENS evaluator викон
 Цей witness збережений як історична точка до environment optimization #1558.
 Він не повинен підміняти повторний вимір після злиття #1558.
 
+
+
+## Racket CS (#1548)
+
+Racket отримує ті самі `fib, loop, ackermann, closures, evenodd`, ті самі
+параметри й expected answers. Harness fail-fast перевіряє, що
+`racket --version` повідомляє CS runtime (`[cs]`).
+
+Matched driver `racket_driver.rkt` розділяє фази так:
+
+- `load` — `read-syntax` + `compile` module, без instantiation;
+- `ready` — compiled module declaration + `dynamic-require ... #f`, без `bench`;
+- `repeat N` — той самий ready path + N викликів exported `bench`;
+- `full` — ready + один `bench` із друком відповіді.
+
+Raw TSV schema не змінюється: `racket` — ще одне значення колонки
+`implementation`. Report додає Racket CS поруч із SENS/CPython/Lua.
+
+Racket source adapter не залежить від SENS COND syntax. Публікувати нові
+SENS-comparative performance claims усе одно можна лише після #1668,
+коли SENS benchmark corpus буде replay-нутий на canonical 2-part COND.
 
 ## Standard binary-trees scaffold (#1549)
 
