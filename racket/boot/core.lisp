@@ -2,14 +2,14 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(def identity (lambda (value) value))
+(00001001 identity (00001000 (value) value))
 
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
-(def binary
-  (lambda (width)
-    (list (quote binary) width)))
+(00001001 binary
+  (00001000 (width)
+    (00100111 (00000001 binary) width)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -27,29 +27,29 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(def list (lambda args args))
+(00001001 list (00001000 args args))
 
-(def not
-  (lambda (value)
-    (cond
-      (value (quote ()))
+(00001001 not
+  (00001000 (value)
+    (00000111
+      (value (00000001 ()))
       (t t))))
 
-(def pair
-  (lambda (left right)
-    (cons left (cons right (quote ())))))
+(00001001 pair
+  (00001000 (left right)
+    (00000100 left (00000100 right (00000001 ())))))
 
-(def second
-  (lambda (values)
-    (car (cdr values))))
+(00001001 second
+  (00001000 (values)
+    (00000101 (00000110 values))))
 
-(def third
-  (lambda (values)
-    (car (cdr (cdr values)))))
+(00001001 third
+  (00001000 (values)
+    (00000101 (00000110 (00000110 values)))))
 
-(def fourth
-  (lambda (values)
-    (car (cdr (cdr (cdr values))))))
+(00001001 fourth
+  (00001000 (values)
+    (00000101 (00000110 (00000110 (00000110 values))))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -61,7 +61,7 @@
 ; не друге визначення), бо реальні виклики вже пишуть саме так
 ; (lib/reason.my мав власний локальний (def cadddr ...) до цього,
 ; посимвольно ідентичний тілу fourth).
-(def cadddr fourth)
+(00001001 cadddr fourth)
 
 ; fifth — same single-parameter primitive-chain pattern as second/third/
 ; fourth, one step deeper. Found duplicated in two places at once:
@@ -73,21 +73,21 @@
 ; у двох місцях: власний локальний (def fifth ...) у lib/narrate.my,
 ; посимвольно ідентичний, і node-right у lib/persistent-map.my — та
 ; сама операція, виписана вручну замість названа.
-(def fifth
-  (lambda (values)
-    (car (cdr (cdr (cdr (cdr values)))))))
+(00001001 fifth
+  (00001000 (values)
+    (00000101 (00000110 (00000110 (00000110 (00000110 values)))))))
 
-(def caar
-  (lambda (values)
-    (car (car values))))
+(00001001 caar
+  (00001000 (values)
+    (00000101 (00000101 values))))
 
-(def cadr
-  (lambda (values)
-    (car (cdr values))))
+(00001001 cadr
+  (00001000 (values)
+    (00000101 (00000110 values))))
 
-(def cddr
-  (lambda (values)
-    (cdr (cdr values))))
+(00001001 cddr
+  (00001000 (values)
+    (00000110 (00000110 values))))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
@@ -117,25 +117,25 @@
 ; umgekehrter Reihenfolge und rufen daher am Ende einmal `reverse` auf, um
 ; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
 ; einfach seinen Akkumulator zurück.
-(def length-onto
-  (lambda (values acc)
-    (cond
-      ((atom? values) acc)
-      (t (length-onto (cdr values) (+ acc 1))))))
+(00001001 length-onto
+  (00001000 (values acc)
+    (00000111
+      ((00000010 values) acc)
+      (t (length-onto (00000110 values) (00001100 acc 1))))))
 
-(def length
-  (lambda (values)
+(00001001 length
+  (00001000 (values)
     (length-onto values 0)))
 
-(def reverse-onto
-  (lambda (values acc)
-    (cond
-      ((atom? values) acc)
-      (t (reverse-onto (cdr values) (cons (car values) acc))))))
+(00001001 reverse-onto
+  (00001000 (values acc)
+    (00000111
+      ((00000010 values) acc)
+      (t (reverse-onto (00000110 values) (00000100 (00000101 values) acc))))))
 
-(def reverse
-  (lambda (values)
-    (reverse-onto values (quote ()))))
+(00001001 reverse
+  (00001000 (values)
+    (reverse-onto values (00000001 ()))))
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
@@ -151,36 +151,36 @@
 ; korrekter Reihenfolge wieder auf — zwei endrekursive Durchläufe statt
 ; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
 ; Rust-Stack-sicheres append.
-(def append
-  (lambda (left right)
+(00001001 append
+  (00001000 (left right)
     (reverse-onto (reverse left) right)))
 
-(def map-onto
-  (lambda (f values acc)
-    (cond
-      ((atom? values) (reverse acc))
-      (t (map-onto f (cdr values) (cons (f (car values)) acc))))))
+(00001001 map-onto
+  (00001000 (f values acc)
+    (00000111
+      ((00000010 values) (reverse acc))
+      (t (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
 
-(def map
-  (lambda (f values)
-    (map-onto f values (quote ()))))
+(00001001 map
+  (00001000 (f values)
+    (map-onto f values (00000001 ()))))
 
-(def filter-onto
-  (lambda (predicate values acc)
-    (cond
-      ((atom? values) (reverse acc))
-      ((predicate (car values)) (filter-onto predicate (cdr values) (cons (car values) acc)))
-      (t (filter-onto predicate (cdr values) acc)))))
+(00001001 filter-onto
+  (00001000 (predicate values acc)
+    (00000111
+      ((00000010 values) (reverse acc))
+      ((predicate (00000101 values)) (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
+      (t (filter-onto predicate (00000110 values) acc)))))
 
-(def filter
-  (lambda (predicate values)
-    (filter-onto predicate values (quote ()))))
+(00001001 filter
+  (00001000 (predicate values)
+    (filter-onto predicate values (00000001 ()))))
 
-(def reduce
-  (lambda (f acc values)
-    (cond
-      ((atom? values) acc)
-      (t (reduce f (f acc (car values)) (cdr values))))))
+(00001001 reduce
+  (00001000 (f acc values)
+    (00000111
+      ((00000010 values) acc)
+      (t (reduce f (f acc (00000101 values)) (00000110 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -216,9 +216,9 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
-(defmacro let (bindings body)
-  (cons (list (quote lambda) (map (lambda (binding) (car binding)) bindings) body)
-        (map (lambda (binding) (second binding)) bindings)))
+(00001010 let (bindings body)
+  (00000100 (list (00000001 lambda) (map (00001000 (binding) (00000101 binding)) bindings) body)
+        (map (00001000 (binding) (second binding)) bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -277,14 +277,14 @@
 ; ein Nicht-Atom untergeschoben werden kann, wie es `var?` und `unify` in
 ; lib/unify.my anfangs passieren konnte (der dabei gefangene Bug steht im
 ; Header-Kommentar dieser Datei).
-(def equal?
-  (lambda (a b)
-    (cond
-      ((atom? a) (cond ((atom? b) (eq? a b)) (t (quote ()))))
-      ((atom? b) (quote ()))
-      (t (cond
-           ((equal? (car a) (car b)) (equal? (cdr a) (cdr b)))
-           (t (quote ())))))))
+(00001001 equal?
+  (00001000 (a b)
+    (00000111
+      ((00000010 a) (00000111 ((00000010 b) (00000011 a b)) (t (00000001 ()))))
+      ((00000010 b) (00000001 ()))
+      (t (00000111
+           ((equal? (00000101 a) (00000101 b)) (equal? (00000110 a) (00000110 b)))
+           (t (00000001 ())))))))
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
@@ -302,40 +302,40 @@
 ; спекулятивна прогалина. Узагальнений assoc тут також збігається з
 ; формою, яку lib/meta-eval.my's власний env-lookup уже вручну пише для
 ; свого специфічного випадку asoc-списку (symbol . value).
-(def nth
-  (lambda (i lst)
-    (cond
-      ((eq? i 0) (car lst))
-      (t (nth (- i 1) (cdr lst))))))
+(00001001 nth
+  (00001000 (i lst)
+    (00000111
+      ((00000011 i 0) (00000101 lst))
+      (t (nth (00001101 i 1) (00000110 lst))))))
 
-(def member?
-  (lambda (item lst)
-    (cond
-      ((atom? lst) (quote ()))
-      ((equal? item (car lst)) t)
-      (t (member? item (cdr lst))))))
+(00001001 member?
+  (00001000 (item lst)
+    (00000111
+      ((00000010 lst) (00000001 ()))
+      ((equal? item (00000101 lst)) t)
+      (t (member? item (00000110 lst))))))
 
-(def assoc
-  (lambda (key alist)
-    (cond
-      ((atom? alist) (quote ()))
-      ((equal? key (car (car alist))) (car alist))
-      (t (assoc key (cdr alist))))))
+(00001001 assoc
+  (00001000 (key alist)
+    (00000111
+      ((00000010 alist) (00000001 ()))
+      ((equal? key (00000101 (00000101 alist))) (00000101 alist))
+      (t (assoc key (00000110 alist))))))
 
-(defmacro let* (bindings body)
-  (cond
-    ((atom? bindings) body)
+(00001010 let* (bindings body)
+  (00000111
+    ((00000010 bindings) body)
     (t
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
      ; helper as host/compiler semantic authority.
-     (cons (quote let)
-           (cons (cons (car bindings) (quote ()))
-                 (cons (cons (quote let*)
-                             (cons (cdr bindings)
-                                   (cons body (quote ()))))
-                       (quote ())))))))
+     (00000100 (00000001 let)
+           (00000100 (00000100 (00000101 bindings) (00000001 ()))
+                 (00000100 (00000100 (00000001 let*)
+                             (00000100 (00000110 bindings)
+                                   (00000100 body (00000001 ()))))
+                       (00000001 ())))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
@@ -356,30 +356,30 @@
 ; лише по рядку, не по ланцюжку пар. string-append (справді невиразний
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
-(def string-empty?
-  (lambda (s) (eq? s "")))
+(00001001 string-empty?
+  (00001000 (s) (00000011 s "")))
 
-(def string-length
-  (lambda (s)
-    (cond
+(00001001 string-length
+  (00001000 (s)
+    (00000111
       ((string-empty? s) 0)
-      (t (+ 1 (string-length (string-rest s)))))))
+      (t (00001100 1 (string-length (01000000 s)))))))
 
-(def string-prefix?
-  (lambda (prefix s)
-    (cond
+(00001001 string-prefix?
+  (00001000 (prefix s)
+    (00000111
       ((string-empty? prefix) t)
-      ((string-empty? s) (quote ()))
-      ((eq? (string-first prefix) (string-first s))
-       (string-prefix? (string-rest prefix) (string-rest s)))
-      (t (quote ())))))
+      ((string-empty? s) (00000001 ()))
+      ((00000011 (00111111 prefix) (00111111 s))
+       (string-prefix? (01000000 prefix) (01000000 s)))
+      (t (00000001 ())))))
 
-(def string-contains?
-  (lambda (needle s)
-    (cond
+(00001001 string-contains?
+  (00001000 (needle s)
+    (00000111
       ((string-prefix? needle s) t)
-      ((string-empty? s) (quote ()))
-      (t (string-contains? needle (string-rest s))))))
+      ((string-empty? s) (00000001 ()))
+      (t (string-contains? needle (01000000 s))))))
 
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
 ; expressible without exceptions: among atoms, exactly a Symbol is identical
@@ -390,14 +390,14 @@
 ; відновленому з його канонічного тексту. `atom` не допускає пари до `eq`.
 ; `symbol?` wurde aus Rust verschoben: Unter Atomen ist nur ein Symbol mit dem
 ; aus seinem kanonischen Text rekonstruierten Symbol identisch; `atom` schützt `eq`.
-(def symbol?
-  (lambda (value)
-    (cond
-      ((atom? value)
-       (cond
-         ((eq? value (string->symbol (write-to-string value))) t)
-         (t (quote ()))))
-      (t (quote ())))))
+(00001001 symbol?
+  (00001000 (value)
+    (00000111
+      ((00000010 value)
+       (00000111
+         ((00000011 value (01000011 (01001100 value))) t)
+         (t (00000001 ()))))
+      (t (00000001 ())))))
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
 ; Unlike bitwise operations (AND/OR/XOR/shift — no primitive exposes a
@@ -453,11 +453,11 @@
 ; відняти, повторити) — стандартний трюк бінарного довгого ділення,
 ; глибина рекурсії O(log(a/b)) як у `largest-chunk`, так і в самому
 ; `quotient`, перевірено на 13-розрядному діленому без проблем.
-(def largest-chunk
-  (lambda (a b chunk mult)
-    (cond
-      ((< a (+ chunk chunk)) (cons chunk mult))
-      (t (largest-chunk a b (+ chunk chunk) (+ mult mult))))))
+(00001001 largest-chunk
+  (00001000 (a b chunk mult)
+    (00000111
+      ((00011010 a (00001100 chunk chunk)) (00000100 chunk mult))
+      (t (largest-chunk a b (00001100 chunk chunk) (00001100 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -476,17 +476,17 @@
 ; нуль (`ErrorKind::InvalidForm`) — маршрутизація через нього тут
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
-(def quotient
-  (lambda (a b)
-    (cond
-      ((eq? b 0) (/ a b))
-      ((< a b) 0)
+(00001001 quotient
+  (00001000 (a b)
+    (00000111
+      ((00000011 b 0) (00001111 a b))
+      ((00011010 a b) 0)
       (t (let ((chunk+mult (largest-chunk a b b 1)))
-           (+ (cdr chunk+mult) (quotient (- a (car chunk+mult)) b)))))))
+           (00001100 (00000110 chunk+mult) (quotient (00001101 a (00000101 chunk+mult)) b)))))))
 
-(def mod
-  (lambda (a b)
-    (- a (* b (quotient a b)))))
+(00001001 mod
+  (00001000 (a b)
+    (00001101 a (00001110 b (quotient a b)))))
 
 ; `<=` and `>=` need no Rust dispatch: the strict comparisons plus equality
 ; already preserve exact/inexact numeric semantics, while ordinary recursion
@@ -498,32 +498,32 @@
 ; `<=` und `>=` brauchen keinen Rust-Dispatch: strikte Vergleiche und Gleichheit
 ; reichen, gewöhnliche Rekursion liefert die Verkettung. Der Pflichtparameter
 ; erhält den Arity-Fehler bei null Argumenten; ein Argument ist trivial geordnet.
-(def nondecreasing-from?
-  (lambda (current remaining)
-    (cond
-      ((atom? remaining) t)
-      ((< current (car remaining))
-       (nondecreasing-from? (car remaining) (cdr remaining)))
-      ((= current (car remaining))
-       (nondecreasing-from? (car remaining) (cdr remaining)))
-      (t (quote ())))))
+(00001001 nondecreasing-from?
+  (00001000 (current remaining)
+    (00000111
+      ((00000010 remaining) t)
+      ((00011010 current (00000101 remaining))
+       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((00011100 current (00000101 remaining))
+       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
+      (t (00000001 ())))))
 
-(def nonincreasing-from?
-  (lambda (current remaining)
-    (cond
-      ((atom? remaining) t)
-      ((> current (car remaining))
-       (nonincreasing-from? (car remaining) (cdr remaining)))
-      ((= current (car remaining))
-       (nonincreasing-from? (car remaining) (cdr remaining)))
-      (t (quote ())))))
+(00001001 nonincreasing-from?
+  (00001000 (current remaining)
+    (00000111
+      ((00000010 remaining) t)
+      ((00011011 current (00000101 remaining))
+       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((00011100 current (00000101 remaining))
+       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
+      (t (00000001 ())))))
 
-(def <=
-  (lambda (first . remaining)
+(00001001 <=
+  (00001000 (first . remaining)
     (nondecreasing-from? first remaining)))
 
-(def >=
-  (lambda (first . remaining)
+(00001001 >=
+  (00001000 (first . remaining)
     (nonincreasing-from? first remaining)))
 
 ; number->string (G5 test: already expressible via existing means?) —
@@ -543,20 +543,20 @@
 ; quotient/mod, та сама -onto-форма акумулятора, що й length-onto/
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
-(def digit->string
-  (lambda (d)
-    (nth d (quote ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+(00001001 digit->string
+  (00001000 (d)
+    (nth d (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
-(def number->string-onto
-  (lambda (n acc)
-    (cond
-      ((eq? n 0) acc)
-      (t (number->string-onto (quotient n 10) (string-append (digit->string (mod n 10)) acc))))))
+(00001001 number->string-onto
+  (00001000 (n acc)
+    (00000111
+      ((00000011 n 0) acc)
+      (t (number->string-onto (quotient n 10) (00111010 (digit->string (mod n 10)) acc))))))
 
-(def number->string
-  (lambda (n)
-    (cond
-      ((eq? n 0) "0")
+(00001001 number->string
+  (00001000 (n)
+    (00000111
+      ((00000011 n 0) "0")
       (t (number->string-onto n "")))))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
@@ -572,28 +572,28 @@
 ;
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
-(defmacro -> forms
-  (cond
-    ((atom? forms) (quote ()))
-    ((atom? (cdr forms)) (car forms))
-    (t (let* ((x (car forms))
-              (next (car (cdr forms)))
-              (rest (cdr (cdr forms)))
-              (step (cond ((atom? next) (list next x))
-                          (t (cons (car next) (cons x (cdr next)))))))
-         (cond
-           ((atom? rest) step)
-           (t (cons (quote ->) (cons step rest))))))))
+(00001010 -> forms
+  (00000111
+    ((00000010 forms) (00000001 ()))
+    ((00000010 (00000110 forms)) (00000101 forms))
+    (t (let* ((x (00000101 forms))
+              (next (00000101 (00000110 forms)))
+              (rest (00000110 (00000110 forms)))
+              (step (00000111 ((00000010 next) (list next x))
+                          (t (00000100 (00000101 next) (00000100 x (00000110 next)))))))
+         (00000111
+           ((00000010 rest) step)
+           (t (00000100 (00000001 ->) (00000100 step rest))))))))
 
-(defmacro ->> forms
-  (cond
-    ((atom? forms) (quote ()))
-    ((atom? (cdr forms)) (car forms))
-    (t (let* ((x (car forms))
-              (next (car (cdr forms)))
-              (rest (cdr (cdr forms)))
-              (step (cond ((atom? next) (list next x))
+(00001010 ->> forms
+  (00000111
+    ((00000010 forms) (00000001 ()))
+    ((00000010 (00000110 forms)) (00000101 forms))
+    (t (let* ((x (00000101 forms))
+              (next (00000101 (00000110 forms)))
+              (rest (00000110 (00000110 forms)))
+              (step (00000111 ((00000010 next) (list next x))
                           (t (append next (list x))))))
-         (cond
-           ((atom? rest) step)
-           (t (cons (quote ->>) (cons step rest))))))))
+         (00000111
+           ((00000010 rest) step)
+           (t (00000100 (00000001 ->>) (00000100 step rest))))))))
