@@ -11,9 +11,9 @@
 ; bring-up — friction here is friction there too.
 ;
 ; Usage:
-;   cargo run -p my-lisp-cli -- scripts/fixtures-for-tier.lisp 1
+;   cargo run -p sens-cli -- scripts/fixtures-for-tier.lisp 1
 ; *argv* (added 2026-08-09 for scripts/release.lisp, general-purpose in
-; my-lisp-cli since then) carries the tier as a string; assoc (added
+; sens-cli since then) carries the tier as a string; assoc (added
 ; 2026-08-10, lib/core.lisp) replaced this file's own hand-rolled
 ; assoc-my — both were dead weight this script no longer needs to carry
 ; on its own, updated here as soon as the underlying gaps closed instead

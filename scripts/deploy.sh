@@ -4,7 +4,7 @@ set -e
 SERVER="root@100.113.68.50"
 # Build locally
 echo "Building release binary locally via Guix..."
-guix shell -m manifest.scm -- cargo build --release -p my-lisp-cli
+guix shell -m manifest.scm -- cargo build --release -p sens-cli
 
 # The semantic Oracle is a release-only service.  Fail closed if the build
 # produced no release artifact; never fall back to target/debug/my-lisp.

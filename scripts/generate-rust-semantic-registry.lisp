@@ -7,8 +7,8 @@
 ; source text at runtime.
 ;
 ; Usage:
-;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp
-;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp --check
+;   cargo run -p sens-cli -- scripts/generate-rust-semantic-registry.lisp
+;   cargo run -p sens-cli -- scripts/generate-rust-semantic-registry.lisp --check
 
 (00001001 source-path "lib/surface/semantic-registry.lisp")
 (00001001 output-path "crates/sens/src/semantic_registry_generated.rs")

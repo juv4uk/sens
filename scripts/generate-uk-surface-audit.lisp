@@ -17,7 +17,7 @@
 ;   lib/generated/uk-surface-audit.lisp
 ;
 ; Usage from repo root:
-;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-uk-surface-audit.lisp
+;   cargo run -p sens-cli --bin my-lisp -- scripts/generate-uk-surface-audit.lisp
 
 (00001001 str+
   (00001000 args (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))

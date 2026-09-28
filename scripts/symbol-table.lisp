@@ -24,7 +24,7 @@
 ; Numbers, strings, and structural nil/pairs are excluded via `symbol?`.
 ;
 ; Usage:
-;   cargo run -p my-lisp-cli -- scripts/symbol-table.lisp > symbol-table.txt
+;   cargo run -p sens-cli -- scripts/symbol-table.lisp > symbol-table.txt
 ; Output: one `(name . id)` pair per line, e.g. `("second" . 47)`, sorted by
 ; name, ids starting at 0. Convert to `.define` lines in fpga/asm/constants.inc
 ; is this file's own tooling's job, not this script's — the format here is

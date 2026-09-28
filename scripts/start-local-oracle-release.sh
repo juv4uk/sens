@@ -32,7 +32,7 @@ if ! command -v "$cargo_bin" >/dev/null 2>&1; then
 fi
 
 echo "Building release Oracle into $cache_root ..."
-CARGO_TARGET_DIR="$cache_root" "$cargo_bin" build --release -p my-lisp-cli --manifest-path "$project_root/Cargo.toml"
+CARGO_TARGET_DIR="$cache_root" "$cargo_bin" build --release -p sens-cli --manifest-path "$project_root/Cargo.toml"
 test -x "$binary" || {
   echo "ERROR: release binary missing: $binary" >&2
   exit 1

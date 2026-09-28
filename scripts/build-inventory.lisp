@@ -4,7 +4,7 @@
 ; one every conforming implementation has. The inventory is a *projection*,
 ; not a second source of truth — edit conformance.lisp, then rerun:
 ;
-;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp
+;   cargo run -p sens-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp
 ;
 ; Each inventory entry preserves the authoritative fields from conformance.lisp
 ; and adds stable content-addressed IDs plus mechanically observed forms.
@@ -205,7 +205,7 @@
          (emit-all (00000110 remaining)))))))
 
 ;; Header
-(01001000 (00000100 (00000001 about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
+(01001000 (00000100 (00000001 about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p sens-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
 (01001000 (00000100 (00000001 generated) "This file is GENERATED — do not hand-edit. It is a projection over tests/fixtures/conformance.lisp plus this script's canonical logic."))
 (01001000 (00000100 (00000001 source) "tests/fixtures/conformance.lisp"))
 
