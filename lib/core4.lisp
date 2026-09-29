@@ -426,11 +426,22 @@
 (00001001 assoc
   (00001000 (key alist)
     (00000111
-      ((00000010 alist) () (00000001 ()))
-      ((00000010 alist) (0)
+      ; ATOM is true for both structural () and malformed non-list atoms.
+      ; Distinguish the legitimate empty-alist base case with EQ; every other
+      ; atom deliberately reaches CAR and therefore fails Type instead of
+      ; being silently reclassified as an empty association list.
+      ((00000010 alist)
        (00000111
-         ((00100010 key (00000101 (00000101 alist))) (1) (00000101 alist))
-         ((00100010 key (00000101 (00000101 alist))) (0)
+         ((00000011 alist (00000001 ()))
+          (00000001 ()))
+         ((00000010 (00000001 ()))
+          (00000101 alist))))
+      ; Pair case: deep key equality is itself an exact PredicateBit.
+      ((00000010 (00000001 ()))
+       (00000111
+         ((00100010 key (00000101 (00000101 alist)))
+          (00000101 alist))
+         ((00000010 (00000001 ()))
           (00101101 key (00000110 alist))))))))
 
 (00001010 let* (bindings body)
