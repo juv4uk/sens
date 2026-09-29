@@ -191,15 +191,17 @@ pub(crate) fn evaluate_step(
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
-        // Розв'язувач гарантує, що слот існує; ім'я — лише запасний шлях.
-        ExprKind::Local { depth, index, name } => environment
+        // Виконання залежить лише від числових координат (#1697): слот або є,
+        // або названа помилка — пошуку за іменем більше немає.
+        ExprKind::Local { depth, index } => environment
             .get_local(*depth, *index)
-            .or_else(|| environment.get(name))
             .map(EvalStep::Value)
             .ok_or_else(|| {
                 LanguageError::new(
                     ErrorKind::UnknownSymbol,
-                    format!("unknown symbol · nevidomyi symvol · unbekanntes Symbol: {name}"),
+                    format!(
+                        "lexical slot {depth}.{index} is not bound in this frame · leksychnyi slot {depth}.{index} ne zv'iazanyi u tsomu freimi · lexikalischer Slot {depth}.{index} ist in diesem Frame nicht gebunden"
+                    ),
                     expression.span,
                 )
             }),
