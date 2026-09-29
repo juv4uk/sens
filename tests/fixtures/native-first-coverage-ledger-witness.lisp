@@ -134,7 +134,7 @@
             (native-first-coverage-field
               (00000001 representative)
               row))
-          (reason
+          (reason-ref
             (native-first-coverage-field
               (00000001 reason)
               row))
@@ -144,7 +144,7 @@
               row)))
       (native-first-coverage-all-pass-state
         (00100111
-          (native-first-coverage-present-state reason)
+          (native-first-coverage-present-state reason-ref)
           (native-first-coverage-check
             evidence
             (00000001 native-first-dispatch-witness))
