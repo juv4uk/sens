@@ -10,28 +10,28 @@
 (binary-only-language-contract/1
   (owner sens)
   (status ratified-target)
-  (governing-issue 1706)
+  (governing-issue "1706")
 
   (canonical-alphabet (0 1))
   (nonbinary-semantic-authority forbidden)
 
   (widths
-    (predicate-result 1)
-    (default-lexical-control 2)
-    (text-code 7)
-    (function-identity 8)
+    (predicate-result one-bit)
+    (default-lexical-control two-bit)
+    (text-code seven-bit)
+    (function-identity eight-bit)
     (number variable-binary))
 
   (control2
-    (00 space)
-    (01 close-structure)
-    (10 open-structure)
-    (11 typed-payload-escape))
+    ("00" space)
+    ("01" close-structure)
+    ("10" open-structure)
+    ("11" typed-payload-escape))
 
   (human-structure-projection
-    (left-parenthesis -> 10)
-    (right-parenthesis -> 01)
-    (space -> 00)
+    (left-parenthesis -> "10")
+    (right-parenthesis -> "01")
+    (space -> "00")
     (projection-role human-reader-only))
 
   (canonical-domains
