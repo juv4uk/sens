@@ -41,6 +41,10 @@ impl NanBox {
     pub fn from_value(value: &Value) -> Self {
         match value {
             Value::Nil => NanBox(MASK_QNAN | (TAG_NIL << 28)),
+            // The 4-bit tag space is full, so predicate results use distinct
+            // payloads under the legacy logic tag. They never alias Nil/Bool.
+            Value::PredicateBit(false) => NanBox(MASK_QNAN | (TAG_TRUE << 28) | 1),
+            Value::PredicateBit(true) => NanBox(MASK_QNAN | (TAG_TRUE << 28) | 2),
             Value::Bool(true) => NanBox(MASK_QNAN | (TAG_TRUE << 28)),
             Value::Bool(false) => NanBox(MASK_QNAN | (TAG_NIL << 28)), // false is nil in fpga-lisp
             Value::Number(f, Exactness::Inexact) => NanBox(f.to_bits()),
