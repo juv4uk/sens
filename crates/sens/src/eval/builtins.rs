@@ -116,64 +116,6 @@ fn ntp_query_raw_value(
     ]))
 }
 
-pub(crate) fn install(environment: &Environment) {
-    // Власник, 2026-09-26: вбудовані функції більше не прив'язуються за
-    // англійською назвою — вони примітиви за кодом СЕНС у PRIMITIVE_TABLE
-    // (див. prim_* нижче і eval/canon.rs). Назви дає лише таблиця функцій.
-    let _ = environment;
-
-
-    // abs/min-list/max-list/min/max migrated to lib/core.my (owner
-    // directive 2026-09-11: "Lisp owns meaning, Rust owns only
-    // irreducible mechanism" -- none of the five touch OS/host
-    // capability). See lib/core.lisp's own comment at the definitions for
-    // the real bugs (eq-on-non-atom, atom-vs-equal? sentinel confusion)
-    // found and fixed during migration, and
-    // docs/BUILTIN-IDENTITY-MIGRATION-MAP-2026-09-11.md for the wider
-    // migration this is the first vertical slice of.
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    // ADR-007/008 runtime peer slices: each identity below allocates one
-    // callable value, then binds every ratified stable spelling projected from
-    // the Sens8 semantic registry projection. Human spellings are not duplicated here.
-    // The builtin diagnostic token remains the historical symbolic spelling
-    // for Contract 2.1 display compatibility; it is NOT semantic identity.
-    
-}
-
 fn exact_args(
     name: crate::Sens8,
     args: &[Value],
