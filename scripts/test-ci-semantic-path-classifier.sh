@@ -22,6 +22,11 @@ positive_paths=(
   tests/fixtures/structural-observation-v1.lisp
   tests/fixtures/structure-core-v1.lisp
   tests/fixtures/unification-outcome-v1.lisp
+  tests/fixtures/semantic/atom-1bit-v1.lisp
+  tests/fixtures/semantic/cond-2part-v1.lisp
+  tests/fixtures/semantic/core-universal-v1.lisp
+  tests/fixtures/semantic/eq-1bit-v1.lisp
+  tests/fixtures/semantic/predicate-1bit-v1.lisp
 )
 
 for path in "${positive_paths[@]}"; do
@@ -32,6 +37,8 @@ for path in "${positive_paths[@]}"; do
 done
 
 negative_paths=(
+  # The witness protocol is code the Rust observer drives, not a law fixture.
+  tests/fixtures/semantic/runner.lisp
   tests/fixtures/translation-corpus-v1.lisp
   tests/fixtures/oracle-results.lisp
   tests/fixtures/inventory.lisp
