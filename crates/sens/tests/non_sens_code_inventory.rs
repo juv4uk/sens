@@ -261,11 +261,7 @@ impl Coverage {
 
     fn basis_points(self) -> usize {
         let total = self.total();
-        if total == 0 {
-            10_000
-        } else {
-            self.sens * 10_000 / total
-        }
+        (self.sens * 10_000).checked_div(total).unwrap_or(10_000)
     }
 }
 
@@ -439,7 +435,7 @@ fn active_sens_coverage_report_1673() {
         .filter(|(file, (named, _))| is_active_lib_source(file) && *named > 0)
     {
         let total = named + sens;
-        let basis_points = if total == 0 { 10_000 } else { sens * 10_000 / total };
+        let basis_points = (sens * 10_000).checked_div(total).unwrap_or(10_000);
         eprintln!(
             "SENS_COVERAGE_FILE\tactive-lib\t{file}\t{named}\t{sens}\t{basis_points}"
         );
