@@ -53,7 +53,7 @@ Rust лишається важливим механічним substrate/referenc
 
 Нова дисципліна проста: `sens` має вміти **висловити, адресувати, передати, прийняти й композиційно використати** результат, але не зобов'язаний повторно реалізовувати всередині себе найкращий алгоритм кожного острова.
 
-Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **9.0**.
+Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **10.0**.
 
 
 ### Одна мова, різні субстрати
@@ -435,7 +435,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · auxiliary
 
-`sens` (СЕНС) reserves exactly 256 language functions: `00000000..11111111` (`Sens8`). These exact 8-bit binary forms are the ontological core functions of the language, with zero string names at runtime. Lisp served as the initial syntactic carrier and prototyping substrate; SENS has emerged as the essential ontological computing language. Core profiles may assign different laws to the same 256 functions; human names (Ukrainian, English, Sanskrit, symbols) are purely non-authoritative routing and UI projections.
+`sens` (СЕНС) reserves exactly 256 language functions: `00000000..11111111` (`Sens8`). These exact 8-bit binary forms are the ontological core functions of the language, with zero string names at runtime. Lisp served as the initial syntactic carrier and prototyping substrate; SENS has emerged as the essential ontological computing language. Core profiles may differ outside the shared foundation, but `00000010` ATOM, `00000011` EQ and `00000111` COND have one common PredicateBit/2-part control law across Core1–4; human names (Ukrainian, English, Sanskrit, symbols) are purely non-authoritative routing and UI projections.
 
 Ukrainian is the project's primary human language. English and German are auxiliary. The Rust runtime is the reference implementation, not semantic authority; start with [`language-contract.lisp`](language-contract.lisp) and [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
 
@@ -443,7 +443,7 @@ The central research question is now: **how simple can the language remain while
 
 ## Deutsch · ergänzend
 
-`sens` (СЕНС) reserviert genau 256 Sprachfunktionen: `00000000..11111111` (`Sens8`). Diese exakten 8-Bit-Binärformen bilden den ontologischen Kern der Sprache ohne String-Namen zur Laufzeit. Lisp diente als ursprünglicher syntaktischer Träger und Prototyp; SENS ist als eigentliche essentielle Sprache hervorgegangen. Core-Profile können denselben 256 Funktionen unterschiedliche Gesetze zuweisen; menschliche Namen (Ukrainisch, Englisch, Sanskrit, Symbole) sind reine nicht-autoritative Projektionen für Routing und UI.
+`sens` (СЕНС) reserviert genau 256 Sprachfunktionen: `00000000..11111111` (`Sens8`). Diese exakten 8-Bit-Binärformen bilden den ontologischen Kern der Sprache ohne String-Namen zur Laufzeit. Lisp diente als ursprünglicher syntaktischer Träger und Prototyp; SENS ist als eigentliche essentielle Sprache hervorgegangen. Core-Profile dürfen sich außerhalb des gemeinsamen Fundaments unterscheiden, aber `00000010` ATOM, `00000011` EQ und `00000111` COND haben in Core1–4 dasselbe PredicateBit-/zweiteilige Kontrollgesetz; menschliche Namen (Ukrainisch, Englisch, Sanskrit, Symbole) sind reine nicht-autoritative Projektionen für Routing und UI.
 
 Ukrainisch ist die primäre menschliche Sprache des Projekts; Englisch und Deutsch sind Hilfssprachen. Rust ist die Referenzimplementierung, aber nicht die semantische Autorität. Maßgeblich sind [`language-contract.lisp`](language-contract.lisp), ratifizierte Entscheidungen und ausführbare Konformitätsbelege.
 
