@@ -338,7 +338,7 @@ fn active_coverage_baseline_path() -> PathBuf {
     repo_root().join("crates/sens/tests/data/active-sens-coverage-baseline.tsv")
 }
 
-fn read_active_coverage_baseline() -> BTreeMap<String, (usize, usize)> {
+fn read_active_coverage_baseline() -> BTreeMap<String, usize> {
     let text = fs::read_to_string(active_coverage_baseline_path())
         .expect("active SENS coverage baseline must exist");
     text.lines()
@@ -354,10 +354,7 @@ fn read_active_coverage_baseline() -> BTreeMap<String, (usize, usize)> {
             let named_max = columns[2]
                 .parse::<usize>()
                 .expect("named_max must be an integer");
-            let basis_points_min = columns[5]
-                .parse::<usize>()
-                .expect("basis_points_min must be an integer");
-            (view, (named_max, basis_points_min))
+            (view, named_max)
         })
         .collect()
 }
@@ -382,18 +379,16 @@ fn active_sens_coverage_never_regresses_1673() {
     );
 
     let mut regressions = Vec::new();
+    // The hard ratchet is absolute admitted-name residue. A percentage floor
+    // adds no independent protection against new named authority, but it does
+    // punish deletion of exact-SENS calls because the denominator shrinks.
+    // Keep basis points as evidence in the report below; gate only named growth.
     for (view, coverage) in current {
-        let (named_max, basis_points_min) = baseline[&view];
+        let named_max = baseline[&view];
         if coverage.named > named_max {
             regressions.push(format!(
                 "{view}: named call-heads grew {named_max} -> {}",
                 coverage.named
-            ));
-        }
-        if coverage.basis_points() < basis_points_min {
-            regressions.push(format!(
-                "{view}: SENS coverage fell {basis_points_min} -> {} basis points",
-                coverage.basis_points()
             ));
         }
     }
