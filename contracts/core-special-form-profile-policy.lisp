@@ -1,55 +1,33 @@
-; #1133/#1131 — Lisp-owned special-form profile policy.
+; #1711/#1663 — current shared COND policy.
 ;
-; One shared COND SID keeps one semantic identity across all Core profiles.
-; The selected Core chooses the admitted law/result domain BEFORE mechanism
-; execution. This file is authority data; a host may transport the selected
-; profile but must not invent or reinterpret the law recorded here.
-;
-; Flat rows keep the policy easy to audit and executable from ordinary Lisp:
-;   (core-special-form-profile-policy/1 ROW ...)
+; The selected Core may choose mechanisms outside the shared foundation, but
+; Function8 00000111 has one control law across Core1-Core4.
 
-(core-special-form-profile-policy/1
+(core-special-form-profile-policy/2
   (owner sens)
-  (cond-sid 00000111)
+  (cond-function 00000111)
   (identity shared-across-profiles)
-  (selection-order profile-before-special-form-mechanism)
+  (law shared-across-profiles)
 
-  ; Core1 remains on its separately pinned historical evaluator mechanism.
-  (core1
-    clause-family historical-mccarthy
-    law-source contracts/core1-bootstrap-contract.lisp
-    activation historical-mechanism)
+  (clause-family two-part)
+  (clause-shape (test expression))
+  (predicate-result exact-one-bit)
+  (select-on exact-one)
+  (skip-on exact-zero)
+  (exhaustion-result ())
+  (empty-is-predicate-answer no)
 
-  ; Contract 6 compatibility: legacy truthiness and NIL exhaustion.
-  (core2
-    clause-family two-part
-    selection-rule historical-truthiness
-    exhaustion-result ()
-    contract (6 0)
-    law-source contracts/core2-profile-contract.lisp
-    activation runtime-profile-hook-required)
+  (core1 same-foundation-law)
+  (core2 same-foundation-law)
+  (core3 same-foundation-law)
+  (core4 same-foundation-law)
 
-  ; Contract 7 predates the Contract-8 explicit-result COND revolution.
-  (core3
-    clause-family two-part
-    selection-rule historical-truthiness
-    exhaustion-result ()
-    contract (7 0)
-    law-source contracts/core3-profile-contract.lisp
-    activation experimental-profile)
+  (three-part-cond forbidden)
+  (expected-result-field forbidden)
+  (historical-truthiness forbidden)
+  (graded-answer-match forbidden)
+  (unsatisfied-conditional-as-exhaustion forbidden)
 
-  ; Contract 8: explicit domain-result matching and named exhaustion failure.
-  (core4
-    clause-family three-part
-    selection-rule explicit-result-match
-    exhaustion-result UnsatisfiedConditional
-    contract (8 0)
-    law-source language-contract.lisp
-    activation current)
-
-  (implicit-profile-selection forbidden)
-  (global-two-part-bridge retirement-required)
+  (profile-selector role-mechanism-only)
   (host-profile-law-table forbidden)
-  (runtime-profile-selector
-    owner sens
-    state active-mechanical-hook))
+  (semantic-witness issue-1709))
