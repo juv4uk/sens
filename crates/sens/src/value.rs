@@ -817,15 +817,20 @@ fn render(value: &Value, quote_strings: bool) -> String {
 
 fn render_canonical_wire(value: &Value) -> String {
     match value {
+        // CANONICAL BINARY DOMAINS (explicit, no fallback)
+        Value::Nil => "()".to_string(),                              // structural empty list
+        Value::Sid(sid) => sid.to_string(),                          // binary SID token
         Value::Number(number, Exactness::Exact) if number.is_finite() && number.fract() == 0.0 => {
-            Rational::integer(*number as i64).to_binary_wire_token()
+            Rational::integer(*number as i64).to_binary_wire_token() // exact integer
         }
-        Value::Rational(number) => number.to_binary_wire_token(),
-        Value::Pair(_, _) => render_pair_canonical_wire(value),
-        Value::Vector(values) => {
+        Value::Rational(number) => number.to_binary_wire_token(),   // exact rational
+        Value::Pair(_, _) => render_pair_canonical_wire(value),     // proper/improper list
+        Value::Vector(values) => {                                  // vector (recursive)
             let items = values.borrow().iter().map(render_canonical_wire).collect::<Vec<_>>();
             format!("#({})", items.join(" "))
         }
+        // NON-CANONICAL / TRANSITION / HOST DOMAINS — explicit fallback with classification
+        // These do NOT have canonical binary wire identity; fallback to presentation renderer.
         _ => render(value, true),
     }
 }
