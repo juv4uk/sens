@@ -186,4 +186,3 @@
          (answer-contract-witness-record
            (00000001 fail)
            (00100111 (00000001 schema) (answer-contract-schema))))))))
-
