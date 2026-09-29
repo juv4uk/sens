@@ -1449,8 +1449,6 @@ lisp	tests/fixtures/postcore-peer-materialization-witness.lisp	utc-from-unix	4
 lisp	tests/fixtures/process-load-witness.lisp	process-run	2
 lisp	tests/fixtures/properties-helpers.lisp	map	4
 lisp	tests/fixtures/structural-observation-contract-witness.lisp	identity	17
-lisp	tests/fixtures/structural-observation-v1.lisp	identity	15
-lisp	tests/fixtures/structural-observation-v1.lisp	pair	1
 lisp	tests/fixtures/witness-runner.lisp	reason	2
 lisp	tests/fixtures/yantraos-bridge-witness.lisp	provenance	4
 lisp-дані	contracts/core1-s2-compiler-admission.lisp	cond	1

@@ -1,117 +1,15 @@
-//! #218 observer for the Lisp-owned PRIM_ATOM / PRIM_EQ result contract.
-//! Rust transports contract bytes and runtime actuals only.
+//! #218 observer for remaining Lisp-owned structural result contracts.
+//! ATOM/EQ one-bit laws are witnessed separately under #1709.
 
 use std::fs;
 use std::path::PathBuf;
 
-use sens::{eval_program, load_core_library, parse, Expr, ExprKind, Session};
-
-#[derive(Clone)]
-struct Row {
-    source: String,
-    expr: String,
-    expected: Option<String>,
-    error: Option<String>,
-    active: bool,
-}
+use sens::{eval_program, load_core_library, parse, Session};
 
 fn repo_file(relative: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../..")
         .join(relative)
-}
-
-fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
-    entries.iter().find_map(|entry| {
-        let ExprKind::Pair(k, v) = &entry.kind else {
-            return None;
-        };
-        let ExprKind::Symbol(name) = &k.kind else {
-            return None;
-        };
-        if &**name != key {
-            return None;
-        }
-        match &v.kind {
-            ExprKind::String(value) => Some(value.as_ref()),
-            _ => None,
-        }
-    })
-}
-
-fn alist_symbol<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
-    entries.iter().find_map(|entry| {
-        let ExprKind::Pair(k, v) = &entry.kind else {
-            return None;
-        };
-        let ExprKind::Symbol(name) = &k.kind else {
-            return None;
-        };
-        if &**name != key {
-            return None;
-        }
-        match &v.kind {
-            ExprKind::Symbol(value) => Some(value.as_ref()),
-            _ => None,
-        }
-    })
-}
-
-fn alist_true(entries: &[Expr], key: &str) -> bool {
-    alist_symbol(entries, key) == Some("t")
-}
-
-fn rows() -> Vec<Row> {
-    let source = include_str!("../../../tests/fixtures/structural-observation-v1.lisp");
-    parse(source)
-        .expect("structural-observation-v1.lisp must parse")
-        .into_iter()
-        .filter_map(|form| {
-            let ExprKind::List(entries) = &form.kind else {
-                return None;
-            };
-            Some(Row {
-                source: source[form.span.start..form.span.end].to_string(),
-                expr: alist_str(entries, "expr")?.to_string(),
-                expected: alist_str(entries, "expected").map(str::to_string),
-                error: alist_str(entries, "error").map(str::to_string),
-                active: alist_true(entries, "active"),
-            })
-        })
-        .collect()
-}
-
-fn escape_lisp_string(value: &str) -> String {
-    value.replace('\\', "\\\\").replace('"', "\\\"")
-}
-
-fn load_witness_runner(session: &mut Session) {
-    let source = fs::read_to_string(repo_file("tests/fixtures/witness-runner.lisp"))
-        .expect("Lisp-owned witness runner");
-    eval_program(&source, session).expect("witness-runner.lisp must load");
-}
-
-fn actual(row: &Row, session: &mut Session) -> String {
-    match eval_program(&row.expr, session) {
-        Ok(result) => format!("(value \"{}\")", escape_lisp_string(&result.value.to_string())),
-        Err(error) => format!("(error \"{:?}\")", error.kind),
-    }
-}
-
-fn assert_lisp_verdict(session: &mut Session, row: &Row, actual: &str) {
-    let program = format!(
-        "(witness-status (witness-verdict (quote {}) (quote {})))",
-        row.source, actual
-    );
-    let status = eval_program(&program, session)
-        .unwrap_or_else(|error| panic!("Lisp verdict failed for {}: {error}", row.expr))
-        .value
-        .to_string();
-    assert_eq!(
-        status, "pass",
-        "Lisp-owned #218 witness rejected runtime actual for {} (expected={:?}, error={:?}, actual={actual})",
-        row.expr, row.expected, row.error
-    );
 }
 
 fn transport_contract(session: &mut Session) {
@@ -146,31 +44,4 @@ fn lisp_owned_structural_observation_contract_is_self_consistent() {
         verdict.starts_with("(structural-observation-contract-witness (status pass)"),
         "Lisp-owned structural observation contract rejected itself: {verdict}"
     );
-}
-
-#[test]
-fn all_structural_result_targets_are_active_after_explicit_control_lands() {
-    let rows = rows();
-    assert!(
-        rows.iter().all(|row| row.active),
-        "#217 landed explicit result dispatch; no #218 structural-result row may remain blocked"
-    );
-    assert!(
-        rows.iter().any(|row| row.error.as_deref() == Some("Type")),
-        "the atom-only eq jurisdiction must retain its Type boundary"
-    );
-}
-
-#[test]
-fn active_runtime_rows_match_lisp_owned_structural_observation_results() {
-    let rows: Vec<_> = rows().into_iter().filter(|row| row.active).collect();
-
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library");
-    load_witness_runner(&mut session);
-
-    for row in &rows {
-        let runtime_actual = actual(row, &mut session);
-        assert_lisp_verdict(&mut session, row, &runtime_actual);
-    }
 }

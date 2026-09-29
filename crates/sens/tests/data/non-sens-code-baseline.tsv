@@ -396,7 +396,6 @@ source	tests/fixtures/oracle-results.lisp	227
 source	tests/fixtures/postcore-peer-materialization-witness.lisp	2
 source	tests/fixtures/reason-index-authority-witness.lisp	1
 source	tests/fixtures/structural-observation-contract-witness.lisp	5
-source	tests/fixtures/structural-observation-v1.lisp	15
 source	tests/fixtures/witness-runner.lisp	1
 source	tests/fixtures/x86-64-instruction-set-witness.lisp	173
 source	tests/fixtures/приклад.lisp	1

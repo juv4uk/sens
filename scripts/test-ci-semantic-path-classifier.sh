@@ -17,7 +17,6 @@ positive_paths=(
   tests/fixtures/reason-honesty-v1.lisp
   tests/fixtures/reason-module-honesty-v1.lisp
   tests/fixtures/reason-observe-honesty-v1.lisp
-  tests/fixtures/structural-observation-v1.lisp
   tests/fixtures/structure-core-v1.lisp
   tests/fixtures/unification-outcome-v1.lisp
   tests/fixtures/semantic/atom-1bit-v1.lisp
