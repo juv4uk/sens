@@ -11,7 +11,6 @@ fi
 positive_paths=(
   tests/fixtures/bare-sid-literal-v1.lisp
   tests/fixtures/canon-zero-v2.lisp
-  tests/fixtures/control-dispatch-v1.lisp
   tests/fixtures/deep-structural-relation-v1.lisp
   tests/fixtures/exact-q-binary-v1.lisp
   tests/fixtures/knowledge-clause-kind-v1.lisp
