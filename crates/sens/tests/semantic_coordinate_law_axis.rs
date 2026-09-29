@@ -26,14 +26,12 @@ fn session() -> Session {
 #[test]
 fn coordinate_rows_use_current_semantic_ids_without_minting_new_identity() {
     assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sens!(00001100)));
-    assert_eq!(semantic_id_for_admitted_surface("eq?"), Some(sens::sens!(00000011)));
     assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sens!(00000100)));
     assert_eq!(semantic_id_for_admitted_surface("car"), Some(sens::sens!(00000101)));
     assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sens!(00000111)));
 
     for label in [
         "exact-rational-arithmetic",
-        "identity-relation",
         "pair-construction",
         "pair-elimination",
         "no-mathematical-law-claimed",
@@ -83,27 +81,6 @@ fn pair_equation_is_executable_and_independent_of_machine_representation() {
     assert!(row.contains("car-cons-left-inverse"));
     assert!(!row.contains("x86"));
     assert!(!row.contains("mov-"));
-}
-
-#[test]
-fn eq_relation_law_stays_separate_from_exact_q_binary_policy() {
-    let mut s = session();
-    let value = eval_program("(eq? (quote radio) (quote radio))", &mut s)
-        .expect("identity relation witness")
-        .value
-        .to_string();
-    assert_eq!(value, "(1)");
-
-    let row = eval_program(
-        r#"(semantic-coordinate-law-for-sid 00000011)"#,
-        &mut s,
-    )
-    .expect("EQ law row")
-    .value
-    .to_string();
-    assert!(row.contains("identity-relation"));
-    assert!(!row.contains("0/1"));
-    assert!(!row.contains("1/1"));
 }
 
 #[test]

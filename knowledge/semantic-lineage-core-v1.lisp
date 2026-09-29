@@ -43,7 +43,7 @@
       (historical-reference "McCarthy atom/structure distinction")
       (my-lisp-rationale "Retains an explicit structural distinction while current predicate/classifier representation is being re-separated under #218.")
       (observable-law "Atomic values and pair-shaped values are distinguishable by a language-owned observation.")
-      (current-witness "tests/fixtures/structural-observation-v1.lisp;contracts/structural-observation-contract.lisp")
+      (current-witness "tests/fixtures/semantic/atom-1bit-v1.lisp;tests/fixtures/semantic/eq-1bit-v1.lisp")
       (deliberate-differences "Current #218 treats predicate questions and richer structural classifiers as distinct concepts; final predicate answer representation is not yet frozen.")
       (substrate-assumptions none)
       (portability-risk medium)

@@ -1,4 +1,4 @@
-; #218 — Lisp-owned verifier for contracts/structural-observation-contract.lisp.
+; #218 — Lisp-owned verifier for remaining structural-observation rows.
 ; The host transports the contract document into `structural-observation-document`.
 ;
 ; Case tables are verified one case at a time. This avoids asking the historical
@@ -82,35 +82,6 @@
     (10011100 ((failure
             (so-first-failure
               (00100111
-                (so-expect "0002" (00000001 result-form) (00000001 structural-kind))
-                (so-expect-case
-                  "0002"
-                  (00000001 canon-zero)
-                  (00000001 ()))
-                (so-expect-case
-                  "0002"
-                  (00000001 pair)
-                  (00000001 (0)))
-                (so-expect-case
-                  "0002"
-                  (00000001 non-pair-nonempty)
-                  (00000001 (1)))
-                (so-expect "0002" (00000001 generic-truth-coercion) (00000001 forbidden))
-                (so-expect "0002" (00000001 control-dispatch) (00000001 explicit-result-equality))
-                (so-expect "0003" (00000001 input-domain) (00000001 (atom? atom)))
-                (so-expect "0003" (00000001 result-form) (00000001 identity-relation))
-                (so-expect-case
-                  "0003"
-                  (00000001 same-atom)
-                  (00000001 (1)))
-                (so-expect-case
-                  "0003"
-                  (00000001 distinct-atoms)
-                  (00000001 (0)))
-                (so-expect "0003" (00000001 outside-domain) (00000001 type-error))
-                (so-expect "0003" (00000001 generic-truth-coercion) (00000001 forbidden))
-                (so-expect "0003" (00000001 control-dispatch) (00000001 explicit-result-equality))
-
                 ; #369: symbol? is a runtime class observation, not universal
                 ; truth. Demand the explicit Lisp-owned result algebra first;
                 ; this commit is intentionally RED until the contract is ratified.
