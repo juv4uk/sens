@@ -1,0 +1,10 @@
+path	classification	action	note
+crates/sens/tests/core4_eq_answer_1258.rs	historical-semantic-debt	delete-obsolete	Superseded Core4-only EQ and graded-answer semantics; new law belongs to Lisp #1709/#1705.
+crates/sens/tests/core2_runtime_profile.rs	semantic-law	delete-obsolete	Encoded historical T/NIL, truthiness and profile-specific COND semantics superseded by #1703.
+crates/sens/tests/semantic_coordinate_law_axis.rs	mixed	split	Keep surface-to-Function8 non-minting boundary only; Lisp owns EQ/COND/arithmetic law.
+crates/sens/tests/core_profile_runtime_1272.rs	mechanism	keep-rust	Carries only selected-Core signal/propagation and does not define language truth semantics.
+.github/workflows/core2-runtime-profile.yml	mechanism	split	Active workflow now runs only selected-Core carrier mechanics.
+.github/workflows/core2-profile-contract.yml	historical-semantic-debt	manual-archive	Historical Contract-6/T-NIL semantics no longer block pull requests or main.
+crates/sens/tests/sens_self_carry_1397.rs	mixed	split	Use explicit #b numeric projection; do not freeze legacy decimal-default seven-bit token parsing.
+crates/sens/tests/uk_surface.rs	mixed	split	Remove old mixed result-domain semantic assertion; retain surface plumbing.
+crates/sens/tests/mccarthy.rs	mixed	follow-up	Large legacy suite mixes mechanism/parser/arithmetic/old truth/language law; split after Lisp witness lane #1709 is executable.
