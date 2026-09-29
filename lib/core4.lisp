@@ -344,13 +344,11 @@
 ; Makro-Expansionsmechanismus, den `unless` und `let` bereits nutzen —
 ; `let*`, das `let*` aufruft, ist gewöhnliche Rekursion, kein Sonderfall,
 ; von dem der Evaluator wissen müsste.
-; `eq` is deliberately atom-only per McCarthy's original primitive (see
-; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
-; structurally. `equal?` is the structural/deep-equality counterpart, built
-; on top of `eq` and `atom` rather than replacing them. Its answer is the
-; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
-; Canonical three-part `cond` consumes the answer explicitly; a two-part
-; clause selects only on a «yes» answer.
+; `eq` is deliberately atom-only per McCarthy's original primitive.
+; `equal?` is the structural/deep-equality predicate built on top of EQ,
+; ATOM, CAR and CDR. Contract 10 gives it the shared predicate result domain:
+; exact PredicateBit 1 for equal, 0 for different. No list-wrapped answer
+; scale and no three-part COND remain in this law.
 (00001001 equal?
   (00001000 (a b)
     (00000111
@@ -375,7 +373,7 @@
             ((00100010 (00000101 a) (00000101 b))
              (00100010 (00000110 a) (00000110 b)))
             ((00000010 (00000001 ()))
-             (00000010 (00000001 (00000000))))))))))))
+             (00000010 (00000001 (00000000)))))))))))
 
 ; NOT is a predicate combinator, not a generic truthiness converter.
 ; Its input must already be an exact PredicateBit; strict COND rejects every
