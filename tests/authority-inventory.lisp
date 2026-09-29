@@ -22,8 +22,6 @@
 (authority "crates/my-lisp/tests/mccarthy.rs" semantic-authority)
 (authority "crates/my-lisp/tests/ukrainian_api_docs.rs" semantic-authority)
 (authority "crates/my-lisp/tests/rivnopravnist_mov.rs" observer)
-(authority "tests/fixtures/authority-guard/forbidden-semantic.rs" semantic-authority)
-(authority "tests/fixtures/authority-guard/allowed-mechanism.rs" mechanism)
 (authority "crates/my-lisp/tests/skylake_inventory_contract.rs" observer)
 (authority "crates/xtask/tests/xed_import_cli.rs" observer)
 (authority "crates/xtask/tests/external_oracle_cli.rs" observer)
