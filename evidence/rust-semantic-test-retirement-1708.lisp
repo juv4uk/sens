@@ -43,5 +43,26 @@
     (action manual-archive)
     (reason "Historical Contract-6/T-NIL semantics no longer block pull requests or main; preserved only as manual archive evidence."))
 
+  (row
+    (path "crates/sens/tests/sens_self_carry_1397.rs")
+    (classification mixed)
+    (action split)
+    (kept function-number-boundary)
+    (removed decimal-default-seven-bit-assumption)
+    (reason "Use explicit #b numeric projection so the witness cannot freeze the future bare-binary reader."))
+
+  (row
+    (path "crates/sens/tests/uk_surface.rs")
+    (classification mixed)
+    (action split)
+    (removed old-mixed-result-domain-assertion)
+    (reason "Surface plumbing remains; old predicate/result-domain semantic expectations move to Lisp authority."))
+
+  (row
+    (path "crates/sens/tests/mccarthy.rs")
+    (classification mixed)
+    (action follow-up)
+    (reason "Large legacy file mixes mechanism, parser, arithmetic, old truth and language semantic assertions; split only after Lisp witness lane #1709 is executable."))
+
   (next
-    "inventory remaining crates/sens/tests and cfg(test) modules; move or delete semantic assertions before binary-only cutover."))
+    "continue with mccarthy.rs and other mixed Rust semantic suites after #1709 can receive active language expectations."))
