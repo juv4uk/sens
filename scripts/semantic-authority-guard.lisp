@@ -84,8 +84,13 @@
       ((00000010 rows) () (00000001 (semantic-authority-ok)))
       (t
        (10011101 ((row (00000101 rows))
+              (kind (00000101 row))
               (path (00101111 row)))
          (00000111
+           ; Deletion shrinks the authority surface. The path no longer has
+           ; source bytes to inspect, so accept the deletion and continue.
+           ((00000011 kind (00000001 deleted))
+            (scan (00000110 rows)))
            ; Crucial asymmetry: do not even inspect host implementation text.
            ((00100001 (language-authority-source? path))
             (scan (00000110 rows)))

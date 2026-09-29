@@ -151,6 +151,10 @@ jobs:
                 continue
                 ;;
             esac
+            if [[ ! -e "$path" ]]; then
+              printf '(deleted "%s")\n' "$path" >> tests/semantic-authority-changes.lisp
+              continue
+            fi
             digest="$(sha256sum "$path" | awk '{print $1}')"
             printf '(changed "%s" "%s")\n' "$path" "$digest" >> tests/semantic-authority-changes.lisp
           done < /tmp/changed.txt

@@ -52,3 +52,17 @@ run_case tests/fixtures/semantic-authority-guard/forbidden-lisp-host-authority.Ñ
 
 # Rust may be cited as observation/evidence without becoming language authority.
 run_case tests/fixtures/semantic-authority-guard/allowed-lisp-host-evidence.lisp allowed
+
+run_deleted_case() {
+  probe="tests/semantic-authority-guard-probe.lisp"
+  cp tests/fixtures/semantic-authority-guard/forbidden-lisp-host-authority.lisp "$probe"
+  rm -f "$probe"
+  printf '(deleted "%s")\n' "$probe" > tests/semantic-authority-changes.lisp
+  "$my_lisp" scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
+  cat tests/semantic-authority-verdict.lisp
+  "$my_lisp" scripts/semantic-authority-guard-enforce.lisp
+  grep -q "semantic-authority-ok" tests/semantic-authority-verdict.lisp
+}
+
+# Deleting a protected Lisp authority file is a valid reduction of authority.
+run_deleted_case
