@@ -371,6 +371,26 @@ fn load_evaluates_every_form_in_a_file_and_returns_the_last_value() {
 }
 
 #[test]
+fn load_uses_the_same_surface_lowering_as_eval_program() {
+    let path = std::env::temp_dir().join("sens-load-lowering-parity.lisp");
+    let path_str = path.to_str().unwrap().replace('\\', "/");
+    std::fs::write(&path, "(plus 20 22)").unwrap();
+
+    let direct = eval_program("(plus 20 22)", &mut capability_session())
+        .expect("direct program should lower the human function surface");
+    let loaded = eval_program(
+        &format!(r#"(load "{path_str}")"#),
+        &mut capability_session(),
+    )
+    .expect("load should use the same lowering path as eval_program");
+
+    assert_eq!(loaded.value, direct.value);
+    assert_eq!(loaded.value, Value::Number(42.0, Exactness::Exact));
+
+    std::fs::remove_file(&path).ok();
+}
+
+#[test]
 fn load_definitions_are_visible_in_the_calling_environment() {
     let path = std::env::temp_dir().join("sens-load-definitions.lisp");
     let path_str = path.to_str().unwrap().replace('\\', "/");

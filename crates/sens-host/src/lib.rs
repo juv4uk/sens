@@ -615,11 +615,10 @@ fn evaluate_load(
         error
     })?;
 
-    let mut last_value = Value::Nil;
-    for expr in expressions {
-        last_value = sens::eval_expr(&expr, environment)?;
-    }
-    Ok(last_value)
+    let mut session = sens::Session {
+        environment: environment.clone(),
+    };
+    sens::eval_parsed_expressions(&expressions, &mut session).map(|result| result.value)
 }
 
 pub fn install() {
