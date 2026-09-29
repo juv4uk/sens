@@ -241,14 +241,16 @@
 (00001001 filter-onto
   (00001000 (predicate values acc)
     (00000111
-      ((00000010 values) () (00101010 acc))
-      ((00000010 values) (1) (00101010 acc))
-      (t t
+      ((00000010 values)
+       (00101010 acc))
+      ((00000010 (00000001 ()))
        (10011100 ((decision (predicate (00000101 values))))
          (00000111
-           ((truthy? decision) t
-            (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           ((truthy? decision) ()
+           (decision
+            (filter-onto predicate
+              (00000110 values)
+              (00000100 (00000101 values) acc)))
+           ((00000010 (00000001 ()))
             (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
@@ -371,28 +373,17 @@
             ((00100010 (00000101 a) (00000101 b)) (0)
              (00000001 (0))))))))))
 
-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
-; retain their own result domains, so predicate consumers normalize them here.
-(00001001 truthy?
-  (00001000 (value)
-    (00000111
-      ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1)
-       (00000111
-         ((00000011 value 0) (1) (00000001 ()))
-         ((00000011 value 0) (0) t)))
-      ((00000010 value) (0)
-       (00000111
-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
-         (t t t))))))
-
+; NOT is a predicate combinator, not a generic truthiness converter.
+; Its input must already be an exact PredicateBit; strict COND rejects every
+; other domain. Constant YES/NO are produced by ATOM because PredicateBit has
+; no source literal.
 (00001001 not?
   (00001000 (value)
     (00000111
-      ((truthy? value) t (00000001 ()))
-      ((truthy? value) () t))))
+      (value
+       (00000010 (00000001 (00000000))))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 ()))))))
 
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
