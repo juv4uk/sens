@@ -8,6 +8,20 @@
 ; Number is the binary-first numeric domain, kept orthogonal to Function.
 ; Text is a sequence of exact UPC-7 codes and never a runtime dispatch key.
 ;
+; Active width constitution:
+;   predicate answer = exact 1 bit: 0 NO, 1 YES
+;   default lexical/control cell = exact 2 bits
+;   text code = exact 7 bits (UPC-7)
+;   function identity = exact 8 bits
+;
+; Default 2-bit cells:
+;   00 = real canonical SPACE/separator
+;   01 = close structure
+;   10 = open structure
+;   11 = typed-payload escape
+;
+; The canonical language does not target a whitespace-free continuous bitstream.
+;
 ; Parentheses define structure/composition; they do not create a fourth payload
 ; domain. Symbol/name/container-layout/host-tag are not canonical language
 ; ontologies. Human names and decimal notation are frontend projections only.
@@ -17,10 +31,18 @@
 ; contains Symbol/decimal-reader/runtime representation debt.
 
 ((major . #d10) (minor . 0)
- (note . "RATIFIED TARGET by owner 2026-09-29 under #1694. Canonical sens (СЕНС) has parenthesized structure plus exactly three payload domains: Function, Number, Text. Function is exact eight-bit 00000000..11111111; Number is binary-first and orthogonal to Function; Text is a stream of exact seven-bit UPC-7 codes whose human layout may be switched without changing identity. Unicode/UTF-8 is host/UI boundary only. Symbol/name/container-layout/host-tag are not fourth language ontologies. Human names and decimal notation are projections that must lower before canonical execution. Merge of Contract 10.0 requires executable conformance for #1694.")
+ (note . "RATIFIED TARGET by owner 2026-09-29 under #1694/#1702. Canonical sens (СЕНС) has exactly three payload domains: Function, Number, Text, plus two-bit lexical/structural control. Default cells are 00 SPACE, 01 close, 10 open, 11 typed-payload escape. Predicate answers are exactly one bit: 0 NO, 1 YES. Function is exact eight-bit 00000000..11111111; Text is exact seven-bit UPC-7; Number is binary-first and explicitly framed. The language keeps real canonical separators and does not target a whitespace-free continuous bitstream.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
-   . ((three-payload-ontology
+   . ((bit-width-constitution
+       . "Active widths are role-specific: predicate result is exactly one bit (0 NO, 1 YES); the default lexical/control layer is exactly two bits; Text uses exact seven-bit UPC-7 codes; Function uses exact eight-bit identities. Number is binary and explicitly framed. The former 1..7-bit predicate gradation is inactive.")
+      (default-two-bit-language
+       . "The canonical reader defaults to two-bit cells: 00 is a real SPACE/separator, 01 closes structure, 10 opens structure, and 11 escapes to a typed payload. Separators are part of the canonical representation where grammar requires them and are not optional padding.")
+      (no-continuous-stream-goal
+       . "Canonical sens does not optimize away all separators to form a whitespace-free continuous bitstream. Number/Text framing exists only to delimit their own payloads safely; it does not remove the real 00 SPACE cells from canonical syntax.")
+      (predicate-one-bit
+       . "Predicate results are exactly one bit: 1 means YES and 0 means NO. No 00/11/etc. strength or width gradation is active. The one-bit result is consumed in predicate-result context and is not a free-standing default two-bit lexical token.")
+      (three-payload-ontology
        . "Outside parenthesized structure, canonical sens has exactly three payload domains: Function, Number, and Text. No Symbol, identifier, predicate-answer wrapper, container layout, host tag, enum label, opcode, or backend-native object may become a fourth fundamental language payload domain.")
       (parentheses-are-structure
        . "Opening and closing parentheses express structure/composition only. List, pair, vector, map, record, buffer, or other container shapes may be structural or mechanism representations, but their representation does not mint a new atomic language ontology. The empty () remains structural emptiness outside the 256 function slots.")
@@ -35,7 +57,7 @@
       (derived-layout-non-ontology
        . "Numeric buffers, vectors, maps, records, island observations, machine bytes, and optimized layouts are either structures composed from the three payload domains or mechanism representations with parity witnesses. Optimization never creates a fourth semantic value domain.")
       (predicate-answer-projection
-       . "Predicate YES/NO laws may remain language semantics, but their representation must project into Number or structure built from Function/Number/Text. A standalone PredicateAnswer or truth wrapper is not a fourth fundamental payload domain.")
+       . "Predicate semantics are strictly binary in the active language: exact one-bit 1 YES or 0 NO. A standalone multi-width PredicateAnswer domain and the historical 1..7-bit gradation are inactive and must not affect reader, evaluator, FASL, wire, or COND.")
       (sid8-function-space
        . "The complete function-identity space is exactly 00000000..11111111. All 256 slots are reserved exclusively for functions. A function identity is the eight bits themselves; it is not text, a string, a symbol, a literal, a decimal number, a human name, an enum label, an opcode, or a backend identifier.")
       (single-function-ontology
@@ -47,7 +69,7 @@
       (kernel-archipelago
        . "Execution kernels may own native mechanisms and observations. They consume an already-selected Sid8 plus arguments/context and may return native observations. Kernel operator names, opcodes and native types never acquire sens function identity by themselves.")
       (sid-00000111-control
-       . "For the current Core4 law of SID 00000111, clauses have exactly three fields: (query expected-result expression), are checked left-to-right, evaluate only the first matching expression, and fail with UnsatisfiedConditional on exhaustion. Older Core profiles may retain their separately pinned law for the same SID.")
+       . "Target law for SID 00000111 is the canonical two-part COND clause (test expression) across Core1-Core4. A test activates its expression only on exact one-bit YES=1; NO=0 skips the clause. Historical three-part expected-result clauses and graded predicate answers are migration debt, not target semantics.")
       (reader-apostrophe
        . "At expression start, apostrophe may exist as human/compatibility reader sugar whose produced list head is Function 00000001 directly. It must disappear before canonical execution and may not create an intermediate Symbol or named function identity.")
       (reader-eight-bits
