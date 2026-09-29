@@ -77,22 +77,6 @@ pub fn eval_program(source: &str, session: &mut Session) -> Result<EvalResult, L
     eval_parsed_expressions(&expressions, session)
 }
 
-pub fn eval_program_incremental(
-    source: &str,
-    session: &mut Session,
-) -> Result<EvalResult, LanguageError> {
-    session.environment.output_take_new();
-    let expressions = parse(source)?;
-    let mut value = Value::Nil;
-    for expression in &expressions {
-        value = evaluate(expression, &session.environment)?;
-    }
-    Ok(EvalResult {
-        value,
-        output: session.environment.output_take_new(),
-    })
-}
-
 pub(crate) enum EvalStep {
     Value(Value),
     TailCall {
