@@ -400,6 +400,26 @@ fn active_sens_coverage_never_regresses_1673() {
     );
 }
 
+
+/// #1707: host Bool is not language predicate authority.
+///
+/// This is intentionally a zero-debt invariant, not a migration baseline.
+/// JSON/adapters may still carry host booleans privately, but the shared
+/// predicate/control foundation must never consume or produce `Value::Bool`.
+#[test]
+fn predicate_foundation_never_uses_host_bool_1707() {
+    let core = fs::read_to_string(
+        repo_root().join("crates/sens/src/eval/special_forms/core.rs"),
+    )
+    .expect("read predicate/control foundation");
+
+    assert_eq!(
+        core.matches("Value::Bool").count(),
+        0,
+        "binary-only regression: predicate/control foundation must not use host Value::Bool"
+    );
+}
+
 #[test]
 fn active_sens_coverage_report_1673() {
     let inventory = source_inventory();
