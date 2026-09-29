@@ -76,7 +76,7 @@ semantic contract + executable laws
 
 Особливо це стосується bootstrap: `lib/macro.lisp` і поточний профіль `lib/core4.lisp` є Lisp/sens-owned behavior. `lib/core.lisp` лишається bounded compatibility donor/entry point під час міграції чотирьох Core. Інший субстрат або Rust-host може мати власну локальну семантику, таблиці, lowering, dispatch і fallback. Межа асиметрична: ця implementation semantics не має ставати джерелом мовної істини для СЕНС або замінювати 8-бітну функцію СЕНС словесною чи іншою language identity.
 
-Для Core4 функція SID `00000111` має тричленний закон `(query expected-result expression)`: спостережений результат порівнюється з явним expected datum, а вичерпання дає `UnsatisfiedConditional`. Інші Core можуть мати інший ратифікований закон для того самого SID. Contract 9.0 не створює для цього жодної словесної identity.
+Функція `00000111` (`COND`) має спільний для Core1–4 двочленний закон `(test expression)`: тест повертає рівно PredicateBit `1` або `0`; `1` вибирає гілку, `0` переходить до наступної, а вичерпання повертає структурне `()`.
 
 ---
 
