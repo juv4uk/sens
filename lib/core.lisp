@@ -971,51 +971,51 @@
 (00001001 my-postcore-peer-group
   (00001000 (semantic-id groups)
     (00000111
-      ((00000010 groups) ()
+      ((00000010 groups)
        (00000001 ()))
-      ((00000010 groups) (0)
+      ((00000010 (00000001 ()))
        (10011100 ((group (00000101 groups)))
          (00000111
-           ((00000011 semantic-id (00000101 group)) (1)
+           ((00000011 semantic-id (00000101 group))
             group)
-           ((00000011 semantic-id (00000101 group)) (0)
+           ((00000010 (00000001 ()))
             (my-postcore-peer-group semantic-id (00000110 groups)))))))))
 
 (00001001 my-postcore-binding-status
   (00001000 (surface bindings)
     (00000111
-      ((00000010 bindings) ()
+      ((00000010 bindings)
        (00000001 absent))
-      ((00000010 bindings) (0)
+      ((00000010 (00000001 ()))
        (10011100 ((binding (00000101 bindings)))
          (00000111
-           ((00000011 (01000010 surface) (00000101 binding)) (1)
+           ((00000011 (01000010 surface) (00000101 binding))
             (00000001 present))
-           ((00000011 (01000010 surface) (00000101 binding)) (0)
+           ((00000010 (00000001 ()))
             (my-postcore-binding-status surface (00000110 bindings)))))))))
 
 (00001001 my-postcore-missing-peers
   (00001000 (source peers bindings)
     (00000111
-      ((00000010 peers) ()
+      ((00000010 peers)
        (00000001 ()))
-      ((00000010 peers) (0)
+      ((00000010 (00000001 ()))
        (10011100 ((peer (00000101 peers)))
          (00000111
-           ((00000011 source peer) (1)
+           ((00000011 source peer)
             (my-postcore-missing-peers source (00000110 peers) bindings))
-           ((00000011 source peer) (0)
+           ((00000010 (00000001 ()))
             (00000111
-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 present))
-               (1)
+              ((00000011
+                 (my-postcore-binding-status peer bindings)
+                 (00000001 present))
                (my-postcore-missing-peers source (00000110 peers) bindings))
-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 absent))
-               (1)
+              ((00000010 (00000001 ()))
                (00000100 peer
-                     (my-postcore-missing-peers
-                       source
-                       (00000110 peers)
-                       bindings)))))))))))
+                 (my-postcore-missing-peers
+                   source
+                   (00000110 peers)
+                   bindings)))))))))))
 
 ; Build one expression whose nested DEFINE forms all execute in the caller's
 ; environment. This is why materialization is a macro rather than a function:
@@ -1023,9 +1023,9 @@
 (00001001 my-postcore-build-definitions
   (00001000 (source peers)
     (00000111
-      ((00000010 peers) ()
+      ((00000010 peers)
        source)
-      ((00000010 peers) (0)
+      ((00000010 (00000001 ()))
        (00100111 (00000001 define)
              (00000101 peers)
              (my-postcore-build-definitions source (00000110 peers)))))))
@@ -1038,9 +1038,9 @@
              semantic-id
              my-postcore-stable-peer-projection)))
     (00000111
-      ((00000010 group) ()
+      ((00000010 group)
        source)
-      ((00000010 group) (0)
+      ((00000010 (00000001 ()))
        (my-postcore-build-definitions
          source
          (my-postcore-missing-peers source (00000110 group) (01001110)))))))
