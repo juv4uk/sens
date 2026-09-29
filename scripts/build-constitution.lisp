@@ -64,11 +64,11 @@
 (00001001 print-fixtures
   (00001000 (remaining)
     (00000111
-      ((00000010 remaining) () (00000001 ()))
-      ((00000010 remaining) (1) (00000001 ()))
-      (t ((00001000 ()
-            (print-fixture (00000101 remaining))
-            (print-fixtures (00000110 remaining))))))))
+      ((00000010 remaining) (00000001 ()))
+      ((00000010 (00000001 ()))
+       ((00001000 ()
+          (print-fixture (00000101 remaining))
+          (print-fixtures (00000110 remaining))))))))
 
 (print-fixtures fixtures)
 
