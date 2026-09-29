@@ -20,29 +20,29 @@ contracts/primitive-budget-audit-734.lisp	37	encodes	-	не-більше?
 contracts/primitive-budget-audit-734.lisp	38	encodes	-	не-менше?
 contracts/sid-kernel-witness-735.lisp	38	blocked	latin	Canon 0 — первинний ground object. Жоден island поки не вико
 contracts/sid-kernel-witness-735.lisp	48	blocked	latin	quote: my-lisp evaluator є live witness; CL gated через WSM_
-contracts/sid-kernel-witness-735.lisp	57	blocked	latin	atom: Prolog/CLIPS мають native atom-check, але ABI witness 
+contracts/sid-kernel-witness-735.lisp	57	blocked	latin	atom: Prolog/CLIPS мають native atom-check, але ABI witness
 contracts/sid-kernel-witness-735.lisp	80	blocked	latin	car: CL witness live коли задано WSM_COMMON_LISP_INTEGRATION
-contracts/sid-kernel-witness-735.lisp	97	blocked	latin	cond: Prolog/CLIPS мають native branching, але ABI probe ще 
+contracts/sid-kernel-witness-735.lisp	97	blocked	latin	cond: Prolog/CLIPS мають native branching, але ABI probe ще
 contracts/sid-kernel-witness-735.lisp	107	blocked	latin	lambda: CL має native lambda; witness gated через integratio
 contracts/sid-kernel-witness-735.lisp	114	blocked	latin	def: my-lisp-owned binding form. Island-відповідник не відоб
 contracts/sid-kernel-witness-735.lisp	123	blocked	latin	let: CL має native let. Prolog не має прямого відповідника.
 contracts/sid-kernel-witness-735.lisp	133	blocked	latin	defmacro: CL має defmacro, але CL ABI witness ще його не вик
 docs/research/1394-sens-basis-graph.lisp	22	blocked	cyrillic-uppercase	Ідея допускається лише якщо не суперечить current executable
 docs/research/1394-sens-basis-graph.lisp	127	blocked	latin	підтримує schema/evidence classes; після #1403/#1406 додає п
-docs/research/1394-sens-basis-graph.lisp	129	blocked	latin	незалежно перевіряє main@33bfb53: runtime () vs 00000000 та 
+docs/research/1394-sens-basis-graph.lisp	129	blocked	latin	незалежно перевіряє main@33bfb53: runtime () vs 00000000 та
 docs/research/1394-sens-basis-graph.lisp	131	blocked	latin	шукає circularity, semantic ordering, host oracle leaks і пі
-examples/ukrainian-greeting.lisp	4	blocked	cyrillic-uppercase	Привіт, 
+examples/ukrainian-greeting.lisp	4	blocked	cyrillic-uppercase	Привіт,
 examples/ukrainian-greeting.lisp	8	encodes	-	друже
-examples/ukrainian-greeting.lisp	9	blocked	cyrillic-uppercase	Перший гість — 
-examples/ukrainian-greeting.lisp	10	blocked	cyrillic-uppercase	Це атом? 
+examples/ukrainian-greeting.lisp	9	blocked	cyrillic-uppercase	Перший гість —
+examples/ukrainian-greeting.lisp	10	blocked	cyrillic-uppercase	Це атом?
 knowledge/guard-reference.lisp	15	blocked	cyrillic-uppercase	Українська — первинна мова в усіх авторських репозиторіях вл
 knowledge/guard-reference.lisp	24	blocked	cyrillic-uppercase	Фраза власника «всі мої репо» означає всі авторські репозито
 knowledge/guard-reference.lisp	33	blocked	cyrillic-uppercase	Український публічний API: stable-імена, довідник, предикати
 knowledge/guard-reference.lisp	42	blocked	latin	Lisp-owned навігація по інвентарю repo tooling; registry збе
 knowledge/guard-reference.lisp	51	blocked	latin	Meaning of WSM programs and conformance obligations | Значен
-knowledge/guard-reference.lisp	268	blocked	cyrillic-uppercase	Знайдена корисна відповідь одразу дописується як (reference 
-knowledge/guard-reference.lisp	274	blocked	latin	owner direction 2026-09-24, this exact session: 'гваурд мав 
-knowledge/guard-reference.lisp	791	blocked	cyrillic-uppercase	Постійний інваріант: будь-яке обмеження дизайну, синтаксису 
+knowledge/guard-reference.lisp	268	blocked	cyrillic-uppercase	Знайдена корисна відповідь одразу дописується як (reference
+knowledge/guard-reference.lisp	274	blocked	latin	owner direction 2026-09-24, this exact session: 'гваурд мав
+knowledge/guard-reference.lisp	791	blocked	cyrillic-uppercase	Постійний інваріант: будь-яке обмеження дизайну, синтаксису
 knowledge/guard-reference.lisp	797	blocked	latin	owner direction 2026-09-24: обмеження мають перевірятися док
 knowledge/guard-reference.lisp	801	blocked	cyrillic-uppercase	Постійний закон власника: увесь наш код пишеться СЕНС-кодами
 knowledge/guard-reference.lisp	807	blocked	latin	owner direction 2026-09-25: коробка для наших функцій має ма
@@ -62,11 +62,11 @@ knowledge/guard-reference.lisp	905	blocked	cyrillic-uppercase	Знайти ли�
 knowledge/guard-reference.lisp	912	blocked	cyrillic-uppercase	Прогнати незалежного TCP witness мовного контракту · Run the
 knowledge/guard-reference.lisp	919	blocked	cyrillic-uppercase	Відчути пульс і щільність роботи репозиторію через історію g
 knowledge/guard-reference.lisp	926	blocked	cyrillic-uppercase	Виміряти затримку рецензування та вік кандидатів у черзі Gua
-knowledge/guard-reference.lisp	933	blocked	cyrillic-uppercase	Відчути пульс спілкування рою, свіжість присутності агентів 
+knowledge/guard-reference.lisp	933	blocked	cyrillic-uppercase	Відчути пульс спілкування рою, свіжість присутності агентів
 knowledge/guard-reference.lisp	940	blocked	cyrillic-uppercase	Виміряти реальний життєвий цикл і час визрівання задач рою т
 knowledge/guard-reference.lisp	947	blocked	cyrillic-uppercase	Механічний контроль свіжості пам'яті екосистеми та відставан
 knowledge/guard-reference.lisp	954	blocked	cyrillic-uppercase	Швидка лексична перевірка валідності записів схеми довідника
-knowledge/guard-reference.lisp	961	blocked	cyrillic-uppercase	Лінтер нормативних і семантичних дефектів для дослідницьких 
+knowledge/guard-reference.lisp	961	blocked	cyrillic-uppercase	Лінтер нормативних і семантичних дефектів для дослідницьких
 knowledge/meta-eval-evidence.lisp	8	blocked	latin	немає в аудитованому scope
 knowledge/meta-eval-evidence.lisp	8	encodes	-	немає
 knowledge/meta-eval-evidence.lisp	9	blocked	latin	немає для lambda binder і top-level def
@@ -482,7 +482,7 @@ knowledge/semantic-ownership.lisp	17	blocked	latin	COND: канонічна shor
 knowledge/semantic-ownership.lisp	19	blocked	latin	LAMBDA: evaluator-controlled побудова closure
 knowledge/semantic-ownership.lisp	21	blocked	cyrillic-uppercase	Поведінка визначення макросів виведена у lib/macro.lisp пове
 knowledge/semantic-ownership.lisp	23	blocked	cyrillic-uppercase	Варіадичний list-конструктор виведений із lambda/rest семант
-knowledge/semantic-ownership.lisp	24	blocked	cyrillic-uppercase	Політика свіжого символу складена в Lisp зі string-операцій 
+knowledge/semantic-ownership.lisp	24	blocked	cyrillic-uppercase	Політика свіжого символу складена в Lisp зі string-операцій
 knowledge/semantic-ownership.lisp	25	blocked	latin	Lisp-owned metacircular evaluator witness; усі 34 required p
 knowledge/semantic-ownership.lisp	27	blocked	cyrillic-uppercase	Уніфікація логічних змінних з occurs-check
 knowledge/semantic-ownership.lisp	28	blocked	latin	Backward-chaining пошук доказу й побудова provenance
@@ -498,7 +498,7 @@ knowledge/semantic-ownership.lisp	39	blocked	cyrillic-uppercase	Публічне
 knowledge/semantic-ownership.lisp	41	blocked	latin	Monotonic nanosecond observation без calendar policy
 knowledge/semantic-ownership.lisp	42	blocked	latin	OS process execution і захоплення raw bytes
 knowledge/semantic-ownership.lisp	43	blocked	latin	Per-session filesystem read/write scope і host canonicalizat
-knowledge/semantic-ownership.lisp	44	blocked	latin	Per-session process allowlist, який Lisp-код не може видати 
+knowledge/semantic-ownership.lisp	44	blocked	latin	Per-session process allowlist, який Lisp-код не може видати
 knowledge/semantic-ownership.lisp	45	blocked	latin	Per-session connect/listen allowlists, перевірені до OS-опер
 knowledge/semantic-ownership.lisp	48	blocked	latin	Rust projection/index mechanism читає numeric surface author
 knowledge/semantic-ownership.lisp	49	blocked	latin	Tooling metadata ключується semantic identity, а spelling от
@@ -506,7 +506,7 @@ knowledge/semantic-ownership.lisp	52	blocked	latin	Rust special form list вид
 knowledge/semantic-ownership.lisp	53	blocked	latin	Rust defmacro evaluator fallback видалено; поведінкою володі
 knowledge/semantic-ownership.lisp	54	blocked	latin	LAMBDA/DEFINE stable surface routing перенесено з Rust spell
 knowledge/semantic-ownership.lisp	55	blocked	latin	Canon stable surface routing перенесено у shared numeric sem
-knowledge/semantic-ownership.lisp	56	blocked	latin	Arithmetic/comparison peer names перенесено з Rust arrays у 
+knowledge/semantic-ownership.lisp	56	blocked	latin	Arithmetic/comparison peer names перенесено з Rust arrays у
 knowledge/semantic-ownership.lisp	57	blocked	punctuation-or-other	00001010 stable і compatibility peer names перенесено з load
 knowledge/semantic-ownership.lisp	58	blocked	latin	Tooling syntax discovery перенесено з human spelling keys на
 knowledge/semantic-ownership.lisp	59	blocked	latin	OS-touching filesystem/process/TCP операції перенесено з my-
@@ -693,7 +693,7 @@ lib/generated/uk-surface-audit.lisp	188	encodes	-	відповідь-або
 lib/generated/uk-surface-audit.lisp	189	encodes	-	відповідь-послабити
 lib/generated/uk-surface-audit.lisp	190	encodes	-	відповідь-атом
 lib/generated/uk-surface-audit.lisp	191	encodes	-	відповідь-тотожне
-lib/surface/uk-acceptance.lisp	82	blocked	cyrillic-uppercase	Привіт, 
+lib/surface/uk-acceptance.lisp	82	blocked	cyrillic-uppercase	Привіт,
 lib/surface/uk-acceptance.lisp	115	encodes	-	світе
 lib/surface/uk-acceptance.lisp	115	blocked	cyrillic-uppercase	Привіт, світе
 lib/surface/uk-acceptance.lisp	117	encodes	-	тест
@@ -823,7 +823,7 @@ lib/surface/uk-docs.lisp	73	blocked	cyrillic-uppercase	Повертає Unicode 
 lib/surface/uk-docs.lisp	74	encodes	-	(число-у-текст число)
 lib/surface/uk-docs.lisp	74	blocked	cyrillic-uppercase	Повертає канонічне текстове представлення числа.
 lib/surface/uk-docs.lisp	75	encodes	-	(друкувати значення)
-lib/surface/uk-docs.lisp	75	blocked	cyrillic-uppercase	Додає друковане представлення значення до виходу й повертає 
+lib/surface/uk-docs.lisp	75	blocked	cyrillic-uppercase	Додає друковане представлення значення до виходу й повертає
 lib/surface/uk-docs.lisp	76	encodes	-	(показати значення)
 lib/surface/uk-docs.lisp	76	blocked	cyrillic-uppercase	Виводить значення; текст показує без лапок та escape-послідо
 lib/surface/uk-docs.lisp	77	encodes	-	(прочитати текст)
@@ -965,7 +965,7 @@ lib/surface/uk-docs.lisp	144	blocked	cyrillic-uppercase	Питає, чи зна�
 lib/surface/uk-docs.lisp	145	encodes	-	(мета-наміру намір)
 lib/surface/uk-docs.lisp	145	blocked	cyrillic-uppercase	Повертає ціль із запису наміру.
 lib/surface/uk-docs.lisp	146	blocked	latin	(підтримувальний-доказ claim-ref evidence-list)
-lib/surface/uk-docs.lisp	146	blocked	cyrillic-uppercase	Повертає відповідний evidence-запис або (); це не предикат, 
+lib/surface/uk-docs.lisp	146	blocked	cyrillic-uppercase	Повертає відповідний evidence-запис або (); це не предикат,
 lib/surface/uk-docs.lisp	147	encodes	-	(без-змін значення)
 lib/surface/uk-docs.lisp	147	blocked	cyrillic-uppercase	Повертає аргумент без змін.
 lib/surface/uk-docs.lisp	148	encodes	-	(генерувати-символ префікс)
@@ -993,7 +993,7 @@ lib/surface/uk-name-audit.lisp	23	blocked	punctuation-or-other	«Від» при
 lib/surface/uk-name-audit.lisp	24	blocked	cyrillic-uppercase	Функція робить один NTP-запит і повертає спостереження; сист
 lib/surface/uk-name-audit.lisp	25	blocked	cyrillic-uppercase	Природний порядок прикметника й іменника для значення.
 lib/surface/uk-name-audit.lisp	26	blocked	cyrillic-uppercase	Природний дієслівний порядок і явний напрям доступу.
-lib/surface/uk-name-audit.lisp	27	blocked	cyrillic-uppercase	Природний дієслівний порядок; відсутність ! зберігає ознаку 
+lib/surface/uk-name-audit.lisp	27	blocked	cyrillic-uppercase	Природний дієслівний порядок; відсутність ! зберігає ознаку
 lib/surface/uk-name-audit.lisp	28	blocked	cyrillic-uppercase	Природний порядок прикметника й іменника для значення.
 lib/surface/uk-name-audit.lisp	29	blocked	cyrillic-uppercase	Природний дієслівний порядок; операція повертає новий вектор
 lib/surface/uk-name-audit.lisp	30	blocked	cyrillic-uppercase	Природна іменна конструкція.
@@ -1004,12 +1004,12 @@ lib/surface/uk-name-audit.lisp	34	blocked	latin	Explain означає пояс�
 lib/surface/uk-name-audit.lisp	35	blocked	cyrillic-uppercase	Природний український порядок дієслова й об'єкта.
 lib/surface/uk-name-audit.lisp	36	blocked	cyrillic-uppercase	Уніфікаційний walk виконує dereference логічної змінної, а н
 lib/surface/uk-name-audit.lisp	37	blocked	latin	Statement може бути структурованими Lisp-даними, не лише тек
-lib/surface/uk-name-audit.lisp	38	blocked	cyrillic-uppercase	Поле review є скінченним станом proposed/reviewed/rejected, 
+lib/surface/uk-name-audit.lisp	38	blocked	cyrillic-uppercase	Поле review є скінченним станом proposed/reviewed/rejected,
 lib/surface/uk-name-audit.lisp	39	blocked	cyrillic-uppercase	Природна українська родова конструкція.
 lib/surface/uk-name-audit.lisp	40	blocked	cyrillic-uppercase	Природна українська родова конструкція.
 lib/surface/uk-name-audit.lisp	41	blocked	latin	Statement спостереження може бути структурованими даними, не
 lib/surface/uk-name-audit.lisp	42	blocked	cyrillic-uppercase	Природна українська родова конструкція.
-lib/surface/uk-name-audit.lisp	43	blocked	cyrillic-uppercase	Нормативніша прикметникова форма без калькованого активного 
+lib/surface/uk-name-audit.lisp	43	blocked	cyrillic-uppercase	Нормативніша прикметникова форма без калькованого активного
 lib/surface/uk-name-audit.lisp	44	blocked	cyrillic-uppercase	У виклику прямо видно відношення: значення належить списку.
 lib/surface/uk-name-audit.lisp	45	blocked	cyrillic-uppercase	Аргументи мають порядок префікс, текст; назва читається як п
 lib/surface/uk-name-audit.lisp	46	blocked	cyrillic-uppercase	Аргументи мають порядок фрагмент, текст; назва більше не при
@@ -1032,41 +1032,41 @@ my-lisp-constitution.lisp	9	blocked	cyrillic-uppercase	Бути Lisp-ом у п�
 my-lisp-constitution.lisp	10	blocked	cyrillic-uppercase	Реалізувати розумну машину — задокументована ціль МакКарті 1
 my-lisp-constitution.lisp	11	blocked	cyrillic-uppercase	Кросплатформеність, або простіше — універсальність — тест на
 my-lisp-constitution.lisp	12	blocked	cyrillic-uppercase	Максимальна обізнаність у сьогоднішніх технологіях, застосов
-my-lisp-constitution.lisp	13	blocked	cyrillic-uppercase	Значення value може бути повністю визначене спостережуваною 
-my-lisp-constitution.lisp	14	blocked	cyrillic-uppercase	Кожне значення можна побудувати лише з двох речей: атомів і 
+my-lisp-constitution.lisp	13	blocked	cyrillic-uppercase	Значення value може бути повністю визначене спостережуваною
+my-lisp-constitution.lisp	14	blocked	cyrillic-uppercase	Кожне значення можна побудувати лише з двох речей: атомів і
 my-lisp-constitution.lisp	15	blocked	cyrillic-uppercase	Структуру програми можна оглядати, трансформувати й будувати
 my-lisp-constitution.lisp	16	blocked	cyrillic-uppercase	Мінімальне ядро може вирощувати всю мову всередині себе.
 my-lisp-constitution.lisp	17	blocked	cyrillic-uppercase	Усе, що виразне мовою, може жити над межею реалізації.
 my-lisp-constitution.lisp	18	blocked	cyrillic-uppercase	Конформність можна визначити суто спостережуваною поведінкою
 my-lisp-constitution.lisp	19	blocked	cyrillic-uppercase	Той самий вираз може означати те саме всюди.
-my-lisp-constitution.lisp	20	blocked	cyrillic-uppercase	Відсутність будь-якого елемента й відсутність істини можуть 
+my-lisp-constitution.lisp	20	blocked	cyrillic-uppercase	Відсутність будь-якого елемента й відсутність істини можуть
 my-lisp-constitution.lisp	21	blocked	cyrillic-uppercase	Ніколи мовчки не перетворювати точне значення на наближення.
 my-lisp-constitution.lisp	22	blocked	cyrillic-uppercase	Ніколи не провалюватись мовчки — кожен провал є названим, сп
 my-lisp-constitution.lisp	23	blocked	cyrillic-uppercase	Ніколи не дозволяти обмеженню ресурсу мовчки переозначити се
 my-lisp-constitution.lisp	159	blocked	latin	(string-slice \"привіт\" 1 3)
 my-lisp-constitution.lisp	159	encodes	-	\"ри\"
-mylisp-cml-export.lisp	5	encodes	-	) (ук 
-mylisp-cml-export.lisp	5	encodes	-	) (укр 
-mylisp-cml-export.lisp	6	encodes	-	) (ук 
-mylisp-cml-export.lisp	6	encodes	-	) (укр 
-mylisp-cml-export.lisp	7	encodes	-	) (ук 
-mylisp-cml-export.lisp	7	encodes	-	) (укр 
-mylisp-cml-export.lisp	8	encodes	-	) (ук 
-mylisp-cml-export.lisp	8	encodes	-	) (укр 
-mylisp-cml-export.lisp	9	encodes	-	) (ук 
-mylisp-cml-export.lisp	9	encodes	-	) (укр 
-mylisp-cml-export.lisp	10	encodes	-	) (ук 
-mylisp-cml-export.lisp	10	encodes	-	) (укр 
-mylisp-cml-export.lisp	11	encodes	-	) (ук 
-mylisp-cml-export.lisp	11	encodes	-	) (укр 
-mylisp-cml-export.lisp	12	encodes	-	) (ук 
-mylisp-cml-export.lisp	12	encodes	-	) (укр 
-mylisp-cml-export.lisp	13	encodes	-	) (ук 
-mylisp-cml-export.lisp	13	encodes	-	) (укр 
-mylisp-cml-export.lisp	14	encodes	-	) (ук 
-mylisp-cml-export.lisp	14	encodes	-	) (укр 
-mylisp-cml-export.lisp	15	encodes	-	) (ук 
-mylisp-cml-export.lisp	15	encodes	-	) (укр 
+mylisp-cml-export.lisp	5	encodes	-	) (ук
+mylisp-cml-export.lisp	5	encodes	-	) (укр
+mylisp-cml-export.lisp	6	encodes	-	) (ук
+mylisp-cml-export.lisp	6	encodes	-	) (укр
+mylisp-cml-export.lisp	7	encodes	-	) (ук
+mylisp-cml-export.lisp	7	encodes	-	) (укр
+mylisp-cml-export.lisp	8	encodes	-	) (ук
+mylisp-cml-export.lisp	8	encodes	-	) (укр
+mylisp-cml-export.lisp	9	encodes	-	) (ук
+mylisp-cml-export.lisp	9	encodes	-	) (укр
+mylisp-cml-export.lisp	10	encodes	-	) (ук
+mylisp-cml-export.lisp	10	encodes	-	) (укр
+mylisp-cml-export.lisp	11	encodes	-	) (ук
+mylisp-cml-export.lisp	11	encodes	-	) (укр
+mylisp-cml-export.lisp	12	encodes	-	) (ук
+mylisp-cml-export.lisp	12	encodes	-	) (укр
+mylisp-cml-export.lisp	13	encodes	-	) (ук
+mylisp-cml-export.lisp	13	encodes	-	) (укр
+mylisp-cml-export.lisp	14	encodes	-	) (ук
+mylisp-cml-export.lisp	14	encodes	-	) (укр
+mylisp-cml-export.lisp	15	encodes	-	) (ук
+mylisp-cml-export.lisp	15	encodes	-	) (укр
 prototype/lisp_core_phonetics/prototype_phonetics.lisp	62	encodes	-	т'
 prototype/lisp_core_phonetics/prototype_phonetics.lisp	62	encodes	-	д'
 prototype/lisp_core_phonetics/prototype_phonetics.lisp	62	encodes	-	н'
@@ -1079,14 +1079,14 @@ scripts/build-constitution.lisp	39	blocked	cyrillic-uppercase	Бути Lisp-ом
 scripts/build-constitution.lisp	40	blocked	cyrillic-uppercase	Реалізувати розумну машину — задокументована ціль МакКарті 1
 scripts/build-constitution.lisp	41	blocked	cyrillic-uppercase	Кросплатформеність, або простіше — універсальність — тест на
 scripts/build-constitution.lisp	42	blocked	cyrillic-uppercase	Максимальна обізнаність у сьогоднішніх технологіях, застосов
-scripts/build-constitution.lisp	44	blocked	cyrillic-uppercase	Значення value може бути повністю визначене спостережуваною 
-scripts/build-constitution.lisp	45	blocked	cyrillic-uppercase	Кожне значення можна побудувати лише з двох речей: атомів і 
+scripts/build-constitution.lisp	44	blocked	cyrillic-uppercase	Значення value може бути повністю визначене спостережуваною
+scripts/build-constitution.lisp	45	blocked	cyrillic-uppercase	Кожне значення можна побудувати лише з двох речей: атомів і
 scripts/build-constitution.lisp	46	blocked	cyrillic-uppercase	Структуру програми можна оглядати, трансформувати й будувати
 scripts/build-constitution.lisp	47	blocked	cyrillic-uppercase	Мінімальне ядро може вирощувати всю мову всередині себе.
 scripts/build-constitution.lisp	48	blocked	cyrillic-uppercase	Усе, що виразне мовою, може жити над межею реалізації.
 scripts/build-constitution.lisp	49	blocked	cyrillic-uppercase	Конформність можна визначити суто спостережуваною поведінкою
 scripts/build-constitution.lisp	50	blocked	cyrillic-uppercase	Той самий вираз може означати те саме всюди.
-scripts/build-constitution.lisp	51	blocked	cyrillic-uppercase	Відсутність будь-якого елемента й відсутність істини можуть 
+scripts/build-constitution.lisp	51	blocked	cyrillic-uppercase	Відсутність будь-якого елемента й відсутність істини можуть
 scripts/build-constitution.lisp	52	blocked	cyrillic-uppercase	Ніколи мовчки не перетворювати точне значення на наближення.
 scripts/build-constitution.lisp	53	blocked	cyrillic-uppercase	Ніколи не провалюватись мовчки — кожен провал є названим, сп
 scripts/build-constitution.lisp	54	blocked	cyrillic-uppercase	Ніколи не дозволяти обмеженню ресурсу мовчки переозначити се
@@ -1099,8 +1099,8 @@ scripts/check-core4-predicate-answer-scale.lisp	140	encodes	-	сумнів
 scripts/check-core4-predicate-answer-scale.lisp	141	encodes	-	непевність
 scripts/check-core4-predicate-answer-scale.lisp	142	encodes	-	межа невідомого
 scripts/check-core4-predicate-answer-scale.lisp	145	encodes	-	невідомо
-scripts/generate-function-table.lisp	245	encodes	-	 (ук 
-scripts/generate-function-table.lisp	246	encodes	-	 (укр 
+scripts/generate-function-table.lisp	245	encodes	-	 (ук
+scripts/generate-function-table.lisp	246	encodes	-	 (укр
 scripts/generate-function-table.lisp	275	blocked	latin	; Schema ft/2: (sid-bitstring formal ук укр en sa sym author
 scripts/generate-function-table.lisp	276	blocked	latin	; ук = current Ukrainian; укр = full Ukrainian peer surface
 scripts/generate-function-table.lisp	277	blocked	latin	; Display order for humans: ук → укр → English → Sanskrit
@@ -1118,7 +1118,7 @@ scripts/release.lisp	86	blocked	cyrillic-uppercase	Потрібен успішн
 scripts/release.lisp	94	blocked	latin	origin/main змінився; підготуй новий snapshot
 scripts/release.lisp	96	blocked	cyrillic-uppercase	Релізний тег уже існує
 scripts/release.lisp	98	blocked	latin	Checkout змінився під час перевірок
-scripts/release.lisp	102	blocked	cyrillic-uppercase	Тег опубліковано; очікуй завершення workflow Release: 
+scripts/release.lisp	102	blocked	cyrillic-uppercase	Тег опубліковано; очікуй завершення workflow Release:
 scripts/semantic-authority-guard.lisp	37	blocked	latin	tests/semantic-authority-guard-probe.сенс
 scripts/verify-repo.lisp	60	encodes	-	референсна реалізація
 scripts/verify-repo.lisp	63	blocked	latin	канонічна реалізація на Rust
@@ -1126,18 +1126,18 @@ scripts/verify-repo.lisp	68	blocked	punctuation-or-other	канонічне ро
 scripts/verify-repo.lisp	69	blocked	cyrillic-uppercase	Канонічне розширення вихідного коду — **`.lisp`**
 scripts/verify-repo.lisp	144	blocked	cyrillic-uppercase	Стара coordination surface на `:9999` фізично видалена
 scripts/verify-repo.lisp	145	blocked	latin	мають повертати `unknown op`
-scripts/verify-repo.lisp	224	blocked	latin	документаційний ID 
+scripts/verify-repo.lisp	224	blocked	latin	документаційний ID
 scripts/verify-repo.lisp	224	blocked	latin	 не має stable UK projection у registry
 scripts/verify-repo.lisp	241	encodes	-	публічний каталог мутацій схлопнувся
 scripts/verify-repo.lisp	242	encodes	-	публічний каталог предикатів схлопнувся
-scripts/verify-repo.lisp	247	blocked	latin	документаційний join key має бути 8-бітним SID: 
-scripts/verify-repo.lisp	248	blocked	latin	документаційний join key має бути 8-бітним SID: 
-scripts/verify-repo.lisp	257	encodes	-	українська назва 
+scripts/verify-repo.lisp	247	blocked	latin	документаційний join key має бути 8-бітним SID:
+scripts/verify-repo.lisp	248	blocked	latin	документаційний join key має бути 8-бітним SID:
+scripts/verify-repo.lisp	257	encodes	-	українська назва
 scripts/verify-repo.lisp	257	blocked	latin	: знак ? і predicate мусять збігатися
 scripts/verify-repo.lisp	259	encodes	-	: ! зарезервований для мутації
 scripts/verify-repo.lisp	262	encodes	-	встановити-елемент-вектора!
-scripts/verify-repo.lisp	264	encodes	-	несподівана мутація: 
-scripts/verify-repo.lisp	285	blocked	latin	публічне українське ім'я відсутнє у Markdown-довіднику: 
+scripts/verify-repo.lisp	264	encodes	-	несподівана мутація:
+scripts/verify-repo.lisp	285	blocked	latin	публічне українське ім'я відсутнє у Markdown-довіднику:
 scripts/verify-repo.lisp	289	blocked	latin	замало stable UK-назв у таблиці
 scripts/verify-repo.lisp	304	blocked	latin	смисловий аудит мусить покривати рівно documented UK-покритт
 scripts/verify-repo.lisp	305	blocked	latin	(renamed N) розійшовся з фактичною кількістю (rename ...)
@@ -1145,7 +1145,7 @@ scripts/verify-repo.lisp	306	blocked	latin	stable-reviewed мусить дорі
 scripts/verify-repo.lisp	320	blocked	punctuation-or-other	(00001001 середовище env)
 scripts/verify-repo.lisp	321	blocked	latin	uk.lisp: (00001001 середовище env) мусить бути лише в реєстр
 scripts/verify-repo.lisp	341	blocked	cyrillic-uppercase	абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦ
-scripts/verify-repo.lisp	396	encodes	-	: латинські літери у виконуваному коді 
+scripts/verify-repo.lisp	396	encodes	-	: латинські літери у виконуваному коді
 tasks.lisp	488	blocked	cyrillic-uppercase	Пряма мрія власника (2026-09-10, дослівно): 'для мене дуже в
 tasks.lisp	489	blocked	cyrillic-uppercase	Перевірено цієї сесії: lib/core.my вже має обов'язкову білін
 tasks.lisp	506	blocked	latin	Enforce the DOCUMENTATION LANGUAGE / МОВА ДОКУМЕНТАЦІЇ polic
@@ -1156,7 +1156,7 @@ tasks.lisp	1215	blocked	cyrillic-uppercase	Пряма настанова вла�
 tasks.lisp	1222	blocked	cyrillic-uppercase	Стиснути та впорядкувати тестову архітектуру my-lisp за прин
 tasks.lisp	1223	blocked	cyrillic-uppercase	Власник 2026-09-12 надав детальний критичний аналіз: cyrilli
 tasks.lisp	1224	blocked	cyrillic-uppercase	Виконано у явно узгодженому порядку, кожен крок окремим комі
-tasks.lisp	1225	blocked	cyrillic-uppercase	Зміна самого evaluator/runtime-семантики; зміна CI workflow 
+tasks.lisp	1225	blocked	cyrillic-uppercase	Зміна самого evaluator/runtime-семантики; зміна CI workflow
 tasks.lisp	1226	blocked	cyrillic-uppercase	Список тестів з класифікацією (крок 1) як окремий документ а
 tasks/pending-replay-2026-09-14-research-vertical.lisp	21	blocked	cyrillic-uppercase	Чиста машина або VM, одна canonical README/entrypoint процед
 tasks/pending-replay-2026-09-14-research-vertical.lisp	22	blocked	cyrillic-uppercase	Незалежний clean run без усних підказок проходить semantic w
@@ -1239,11 +1239,11 @@ tests/fixtures/semantic/atom-1bit-v1.lisp	49	blocked	cyrillic-uppercase	Сигн
 tests/fixtures/semantic/cond-2part-v1.lisp	26	blocked	latin	COND: test 1 вибирає клаузу
 tests/fixtures/semantic/cond-2part-v1.lisp	29	blocked	cyrillic-uppercase	Точний біт 1 select -> значення виразу 7.
 tests/fixtures/semantic/cond-2part-v1.lisp	35	blocked	latin	COND: test 0 пропускає, вичерпання дає структурне ()
-tests/fixtures/semantic/cond-2part-v1.lisp	38	blocked	cyrillic-uppercase	Точний біт 0 skip -> (), де () — вичерпання, а не відповідь 
+tests/fixtures/semantic/cond-2part-v1.lisp	38	blocked	cyrillic-uppercase	Точний біт 0 skip -> (), де () — вичерпання, а не відповідь
 tests/fixtures/semantic/cond-2part-v1.lisp	44	blocked	latin	COND: skip 0 продовжує до наступної клаузи з 1
 tests/fixtures/semantic/cond-2part-v1.lisp	47	blocked	punctuation-or-other	0 пропускається, наступний 1 вибирає 9 — не перший ненулльов
 tests/fixtures/semantic/cond-2part-v1.lisp	60	blocked	latin	COND: тричастинна клауза не допускається читачем
-tests/fixtures/semantic/cond-2part-v1.lisp	63	blocked	cyrillic-uppercase	Неактивний: main ще приймає 3-частинну форму. Порожній cond 
+tests/fixtures/semantic/cond-2part-v1.lisp	63	blocked	cyrillic-uppercase	Неактивний: main ще приймає 3-частинну форму. Порожній cond
 tests/fixtures/semantic/core-universal-v1.lisp	18	blocked	latin	universal: equal? 1 1 -> 1 біт
 tests/fixtures/semantic/core-universal-v1.lisp	21	blocked	cyrillic-uppercase	Однакова відповідь у кожному профілі.
 tests/fixtures/semantic/core-universal-v1.lisp	27	blocked	latin	universal: equal? 1 2 -> 1 біт
@@ -1263,7 +1263,7 @@ tests/fixtures/semantic/eq-1bit-v1.lisp	21	blocked	cyrillic-uppercase	Тот с�
 tests/fixtures/semantic/eq-1bit-v1.lisp	27	blocked	latin	EQ різних атомів — NO
 tests/fixtures/semantic/eq-1bit-v1.lisp	30	blocked	cyrillic-uppercase	Різні admitted atoms -> 1 біт NO, не помилка.
 tests/fixtures/semantic/eq-1bit-v1.lisp	36	blocked	latin	EQ пари — іменована помилка, не біт
-tests/fixtures/semantic/eq-1bit-v1.lisp	39	blocked	cyrillic-uppercase	Пара поза admitted-діапазоном EQ: іменована помилка, а не 0 
+tests/fixtures/semantic/eq-1bit-v1.lisp	39	blocked	cyrillic-uppercase	Пара поза admitted-діапазоном EQ: іменована помилка, а не 0
 tests/fixtures/semantic/eq-1bit-v1.lisp	45	blocked	latin	eq? того самого атома — YES
 tests/fixtures/semantic/eq-1bit-v1.lisp	48	blocked	cyrillic-uppercase	Сигнатурний предикат EQP ділиться ту саму відповідь 1 біт.
 tests/fixtures/semantic/eq-1bit-v1.lisp	54	blocked	latin	eq? різних атомів — NO
