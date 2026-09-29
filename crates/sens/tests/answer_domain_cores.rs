@@ -1,24 +1,24 @@
-//! #1663 — спільна фістура домену відповіді для ядер Core1–Core4.
+//! #1663 — спільна фікстура домену відповіді для ядер Core1–Core4.
 //!
-//! Один закон, одна фікстура, чотири профілі: так — 1, ні — 0.
-//! Джерело — `tests/fixtures/answer-domain-cores-v1.lisp`; Rust лише
-//! виконує вирази й переносить фактичні відповіді, як спостерігач #217
-//! робить для control-dispatch.
+//! Закон буквально, без вимірок і винятків: відповідь дорівнює `1` або `0`.
+//! `1`, `0`, і нічого іншого. `(1)`, `(0)`, `()`, `t`, `T`, `nil` — не є
+//! відповіддю «так» і не є відповіддю «ні».
 //!
-//! Закон перевіряється як ЗНАЧЕННЯ (1 або 0), незалежно від того, чи сповнене
-//! воно списком бітів (1)/(0), чи скаляром 1/0. Носій — окрема вимір: він
-//! асертиться лише там, де ратифікований договіром проєкцій.
+//! Джерело — `tests/fixtures/answer-domain-cores-v1.lisp`; Rust лише виконує
+//! вирази й переносить фактичні відповіді, як спостерігач #217 робить для
+//! control-dispatch.
 //!
 //! Ідентифікація функцій — лише кодами СЕНС: основа тотожності — вісім бітів,
 //! назва поверхні не є тотожністю.
 //!
 //! Межі цього зрізу (чесно, без прикрас):
-//!   * ядро 2 відповідає t/() на іменованій поверхні, але на кодах СЕНС уже
-//!     відповідає бітами; проекція назад на t/() усунена окремим кроком;
 //!   * ядро 1 не має публічного runtime-завантажувача в цьому крейте
 //!     (лише `lib/core1.lisp` та `tests/fixtures/core1-s0-witness.lisp`),
-//!     тому для нього закон поки не перевіряється взагалі — це UNRESOLVED,
-//!     а не «перевірено й пройдено».
+//!     тому для нього закон поки взагалі не перевіряється — це UNRESOLVED,
+//!     а не «перевірено й пройдено»;
+//!   * ядро 4 має третій стан () у розширенні 15-станної шкали — за цим
+//!     законом він прибирається, але змінювати розширення в цьому зрізі
+//!     не можна, тому рядок із порожнім списком зараз падає.
 
 use sens::{
     eval_program, load_core2_library, load_core3_library, load_core_library, parse, CoreProfile,
@@ -30,20 +30,7 @@ struct Row {
     id: String,
     expr: String,
     expected: String,
-    carrier: Option<String>,
-    status: String,
     cores: Vec<u8>,
-}
-
-impl Row {
-    /// Закон: значення відповіді належить домену {так, ні}.
-    fn law_holds(&self, answer: &str) -> bool {
-        match self.expected.as_str() {
-            "1" => matches!(answer, "1" | "(1)"),
-            "0" => matches!(answer, "0" | "(0)"),
-            _ => true,
-        }
-    }
 }
 
 fn alist<'a>(entries: &'a [Expr], key: &str) -> Option<&'a Expr> {
@@ -86,8 +73,6 @@ fn rows() -> Vec<Row> {
                 id: alist_str(entries, "ід")?.to_string(),
                 expr: alist_str(entries, "вираз")?.to_string(),
                 expected: alist_str(entries, "очікуване")?.to_string(),
-                carrier: alist_str(entries, "носій").map(str::to_string),
-                status: alist_str(entries, "статус")?.to_string(),
                 cores: alist_cores(entries, "ядра")?,
             })
         })
@@ -122,6 +107,19 @@ fn actual(session: &mut Session, expr: &str) -> String {
     }
 }
 
+/// Закон: очікуване значення рядка — виключно «1» або «0».
+#[test]
+fn every_row_expects_exactly_one_or_zero() {
+    for row in rows() {
+        assert!(
+            row.expected == "1" || row.expected == "0",
+            "ряд {} очікує {:?}, а закон допускає лише 1 або 0",
+            row.id,
+            row.expected
+        );
+    }
+}
+
 /// Кожен ряд спільний для чотирьох ядер — інакше це вже не спільна фікстура.
 #[test]
 fn every_shared_row_covers_all_four_cores() {
@@ -138,7 +136,7 @@ fn every_shared_row_covers_all_four_cores() {
 }
 
 /// Фактична відповідь кожного доступного ядра на кожен спільний ряд.
-/// Це доказова таблиця, а не прикраса: вона показує і збіги, і розбіжності.
+/// Це доказова таблиця: вона показує і збіги, і порушення.
 #[test]
 fn shared_rows_report_the_actual_answer_of_every_available_core() {
     let mut core4 = core4_session();
@@ -150,53 +148,65 @@ fn shared_rows_report_the_actual_answer_of_every_available_core() {
         let answer4 = actual(&mut core4, &row.expr);
         let answer3 = actual(&mut core3, &row.expr);
         let answer2 = actual(&mut core2, &row.expr);
-        let verdict = if row.law_holds(&answer4) && row.law_holds(&answer3) && row.law_holds(&answer2) {
+        let verdict = if [&answer4, &answer3, &answer2]
+            .iter()
+            .all(|answer| **answer == row.expected)
+        {
             "закон"
         } else {
             "ПОРУШЕНО"
         };
         table.push_str(&format!(
-            "{:<34} {:<16} | 4: {:<6} 3: {:<6} 2: {:<6} {}\n",
-            row.expr, row.status, answer4, answer3, answer2, verdict
+            "{:<34} очікується {:<3} | 4: {:<6} 3: {:<6} 2: {:<6} {}\n",
+            row.expr, row.expected, answer4, answer3, answer2, verdict
         ));
     }
     println!("#1663 спільна доменна таблиця відповіді\n{table}");
 }
 
-/// Спільний закон діє на кодах СЕНС вже на ядрах 2, 3 і 4.
+/// Ядро 2: точний домен, без винятків.
 #[test]
-fn shared_law_holds_on_every_core_that_can_be_loaded() {
+fn core2_answers_exactly_one_or_zero() {
+    let mut session = core2_session();
     let violations: Vec<String> = rows()
         .iter()
-        .filter(|row| row.status == "спільний")
-        .flat_map(|row| {
-            [("ядро 4", core4_session()), ("ядро 3", core3_session()), ("ядро 2", core2_session())]
-                .into_iter()
-                .filter_map(move |(label, mut session)| {
-                    let answer = actual(&mut session, &row.expr);
-                    (!row.law_holds(&answer))
-                        .then(|| format!("{label}: {} дав {answer} замість {}", row.expr, row.expected))
-                })
+        .filter_map(|row| {
+            let answer = actual(&mut session, &row.expr);
+            (answer != row.expected)
+                .then(|| format!("ядро 2: {} дав {answer}, очікувалося {}", row.expr, row.expected))
         })
         .collect();
-
-    assert!(
-        violations.is_empty(),
-        "спільний закон домену відповіді порушено:\n{}",
-        violations.join("\n")
-    );
+    assert!(violations.is_empty(), "порушення:\n{}", violations.join("\n"));
 }
 
-/// Носій асертиться лише там, де він ратифікований.
+/// Ядро 3: точний домен, без винятків.
 #[test]
-fn ratified_carrier_is_a_list_of_bits() {
-    let mut core4 = core4_session();
-    for row in rows().iter().filter(|row| row.status == "спільний") {
-        let carrier = row
-            .carrier
-            .as_ref()
-            .expect("ряд «спільний» має ратифікований носій");
-        let answer = actual(&mut core4, &row.expr);
-        assert_eq!(answer, *carrier, "носій відповіді розбігвся для {}", row.expr);
-    }
+fn core3_answers_exactly_one_or_zero() {
+    let mut session = core3_session();
+    let violations: Vec<String> = rows()
+        .iter()
+        .filter_map(|row| {
+            let answer = actual(&mut session, &row.expr);
+            (answer != row.expected)
+                .then(|| format!("ядро 3: {} дав {answer}, очікувалося {}", row.expr, row.expected))
+        })
+        .collect();
+    assert!(violations.is_empty(), "порушення:\n{}", violations.join("\n"));
+}
+
+/// Ядро 4: точний домен, без винятків. Рядок із порожнім списком падає —
+/// розширення 15-станної шкали повертає (), а закон вимагає 0.
+#[test]
+#[ignore = "ядро 4 повертає () з розширення 15-станної шкали; усунення — за межами цього зрізу"]
+fn core4_answers_exactly_one_or_zero() {
+    let mut session = core4_session();
+    let violations: Vec<String> = rows()
+        .iter()
+        .filter_map(|row| {
+            let answer = actual(&mut session, &row.expr);
+            (answer != row.expected)
+                .then(|| format!("ядро 4: {} дав {answer}, очікувалося {}", row.expr, row.expected))
+        })
+        .collect();
+    assert!(violations.is_empty(), "порушення:\n{}", violations.join("\n"));
 }

@@ -27,9 +27,11 @@
 ; acquire authority to guess a specialization.
 ;
 ; /2 adds the shared yes/no answer law for cores 1–4 (see the /2 entry below
-; and tests/fixtures/answer-domain-cores-v1.lisp). It narrows the answer value
-; domain; it does not touch the 15-state extension, which keeps () as its
-; third state. () remains canon-zero and remains never FALSE.
+; and tests/fixtures/answer-domain-cores-v1.lisp): an answer is exactly 1
+; (yes) or exactly 0 (no). Lists of bits, (), t, T and nil are not answers.
+; This narrows the answer value domain. It does not rewrite the 15-state
+; extension, which is ratified separately and keeps () as its third state;
+; () additionally remains canon-zero and remains never FALSE.
 
 (answer-contract/2
   ((identity . canon-zero)
@@ -159,31 +161,30 @@
    (generic-value-coercion . forbidden))
 
   ; /2 (2026-09-29, рішення власника в #1663): спільний закон домену
-  ; відповіді «так»/«ні» для ядер 1–4. Одна фістура, один закон, чотири
-  ; профілі. Виконуваний свідок — tests/fixtures/answer-domain-cores-v1.lisp
-  ; зі спостерігачем crates/sens/tests/answer_domain_cores.rs.
+  ; відповіді для ядер 1–4. Одна фікстура, один закон, чотири профілі.
+  ; Виконуваний свідок — tests/fixtures/answer-domain-cores-v1.lisp зі
+  ; спостерігачем crates/sens/tests/answer_domain_cores.rs.
   ;
-  ; Закон діє на ЗНАЧЕННІ відповіді, а не на їхньому сповненні: носій — окрема
-  ; вимір, ратифікована для проєкцій 00000010 і 00000011 як список двійкових
-  ; бітів (див. core4-predicate-answer-scale/3). Тому скаляр 1/0 і список
-  ; (1)/(0) — один закон із двома носіями, а не два різні закони.
+  ; Закон буквально, без вимірок і винятків: відповідь дорівнює 1 або 0.
+  ; 1 — так, 0 — ні. (1), (0), (), t, T, nil, false не є відповіддю
+  ; «так» і не є відповіддю «ні». Список бітів — це не носій відповіді,
+  ; це інша річ; якщо ядро повертає (1), воно не відповіло на запитання
+  ; «так чи ні», а відповіло чимось іншим.
   ;
-  ; Межа закону: () не є відповіддю «так» і не є відповіддю «ні». Це
-  ; несуспеціалізований акумулятор (canon-zero) і, у профілі 4, третій стан
-  ; розширення 0^n | 1^n | (). Розширення не перевизначає спільний закон і
-  ; не змінюється ним.
+  ; Наслідок для розширення: () з 15-станної шкали профілю 4 — не
+  ; відповідь «ні», а третій стан поза спільним законом. Закон прибирає
+  ; його з домену відповіді, але не переписує саме розширення, бо те
+  ; ратифіковано окремим договором (core4-predicate-answer-scale/3).
   ;
   ; Ідентифікація функцій — лише кодами СЕНС. Назва поверхні не є тотожністю.
-  ((binary-answer-law . yes-one-no-zero)
+  ((binary-answer-law . exact-domain-one-zero)
    (scope . (1 2 3 4))
    (yes . 1)
    (no . 0)
-   (allowed-value-domain . (1 0))
-   (forbidden-answer-values . (t T nil nil () false unknown-sentinel))
-   (carrier-ratified . (00000010 00000011))
-   (carrier-form . list-of-binary-bits)
-   (extension-state . ())
-   (extension-owns . (0^n 1^n ()))
+   (domain . exact)
+   (allowed-answer-values . (1 0))
+   (forbidden-answer-values . ((1) (0) () t T nil false unknown-sentinel))
+   (third-state-is-answer . no)
    (extension-scope . core4)
    (extension-mutated-by-this-law . no)
    (identifier-spelling . sens-code-only)
