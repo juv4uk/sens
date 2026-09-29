@@ -626,7 +626,7 @@ pub(super) fn prim_00111110(args: &[Value], _env: &Environment, span: Span) -> R
                 return Ok(Value::predicate_bit(true));
             }
             if is_empty_string(text) {
-                return Ok(Value::Nil);
+                return Ok(Value::predicate_bit(false));
             }
             string_empty_answer(text, span)?;
             string_rest_or_error(text, span)?;
