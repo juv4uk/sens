@@ -241,16 +241,25 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
         let _machine_present = source_has_bare_sid(&machine, *sid);
     }
 
-    // Current bounded slice has math + machine coordinates for all five SIDs.
+    // Machine coordinates remain present for the whole bounded slice.
     for sid in &scope {
-        assert!(
-            law_axis_has_row(&math, *sid),
-            "math axis missing scoped SID {sid}"
-        );
         assert!(
             source_has_bare_sid(&machine, *sid),
             "machine axis missing scoped SID {sid}"
         );
+    }
+
+    // EQ remains a scoped semantic identity, but its retired relation-law row
+    // is intentionally absent. Missing axis evidence must stay explicit rather
+    // than recreating identity-relation authority.
+    assert!(!law_axis_has_row(&math, sens::sens!(00000011)));
+    for sid in [
+        sens::sens!(00001100),
+        sens::sens!(00000100),
+        sens::sens!(00000101),
+        sens::sens!(00000111),
+    ] {
+        assert!(law_axis_has_row(&math, sid), "math axis missing {sid}");
     }
 
     // Kernel evidence is intentionally asymmetric: + currently has no
