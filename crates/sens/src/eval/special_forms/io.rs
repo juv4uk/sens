@@ -55,7 +55,9 @@ pub(crate) fn write_to_string_values(
             span,
         ));
     }
-    Ok(Value::String(Rc::from(arguments[0].to_canonical_wire_string())))
+    Ok(Value::String(Rc::from(
+        arguments[0].to_canonical_wire_string(),
+    )))
 }
 
 pub(crate) fn read_values(
@@ -177,7 +179,6 @@ fn exact_values(
     }
     Ok(())
 }
-
 
 #[cfg(test)]
 mod tests {
