@@ -2229,7 +2229,6 @@ rust-lisp	crates/sens/tests/content_store_authority.rs	car	1
 rust-lisp	crates/sens/tests/content_store_authority.rs	let	3
 rust-lisp	crates/sens/tests/content_store_authority.rs	let*	1
 rust-lisp	crates/sens/tests/content_store_authority.rs	quote	10
-rust-lisp	crates/sens/tests/control_dispatch_contract.rs	quote	2
 rust-lisp	crates/sens/tests/deep_structural_relation_contract.rs	quote	2
 rust-lisp	crates/sens/tests/def_ownership.rs	cons	6
 rust-lisp	crates/sens/tests/def_ownership.rs	def	1
