@@ -1,17 +1,14 @@
 # Root lifecycle inventory (GitHub issue juv4uk/my-lisp#23)
 
-First-pass classification of every non-directory root artifact, per
-issue #23's own required fields. **Classification only — nothing is
-moved or deleted in this pass**, per the issue's own gate ("do not
-move files in the same first audit commit unless the move is
-independently proven safe and trivial") and the owner's own standing
-instruction this session to not delete anything.
+Перший прохід класифікує кожен файл у корені репозиторію за полями
+задачі #23. **Це лише класифікація: у цьому проході нічого не
+переміщується й не видаляється**, доки безпечність такого кроку не
+доведена окремо.
 
-Method: `git grep` for each filename across `.rs`/`.lisp`/`.lisp`/`.md`/
-`.sh`/`.yml` sources (not a plain filesystem grep, which times out on
-this tree's `target/` build output) — absence of a hit is recorded as
-`unknown`, per the issue's own rule ("absence of a grep hit alone is
-not proof of irrelevance").
+Метод: `git grep` за кожним ім'ям у `.rs`/`.lisp`/`.md`/`.sh`/`.yml`.
+Відсутність збігу означає `unknown`, а не автоматичну непотрібність.
+This inventory is classification-first: absence of a textual consumer is
+evidence to investigate, never permission to delete an artifact.
 
 ## Semantic authority / contract
 
