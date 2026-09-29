@@ -315,9 +315,6 @@ fn load_core_library_with_fasl(
     core_fasl: &[u8],
 ) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core4);
-    session
-        .environment
-        .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
 
     let result = match fasl_decode_program(core_fasl) {
@@ -345,17 +342,12 @@ pub fn core_library_fasl_is_current() -> bool {
         .unwrap_or(false)
 }
 
-/// Activate the frozen Core2/Contract-6 compatibility profile.
+/// Activate the Core2 compatibility/study profile.
 ///
-/// This loader deliberately does not install the current Core4 macro layer:
-/// Core2 is a historical compatibility profile, not Core4 plus legacy answers.
-/// The environment mode is shared by lexical children, so lazy COND behavior
-/// remains stable across closures without exposing a shadowable Lisp binding.
+/// Profile selection is mechanical only. ATOM/EQ/COND semantics are the same
+/// shared one-bit/two-part foundation as every other Core.
 pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core2);
-    session
-        .environment
-        .set_cond_clause_mode(environment::CondClauseMode::Core2LegacyTwoPart);
     let result = eval_program(CORE2_LIBRARY_SOURCE, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
