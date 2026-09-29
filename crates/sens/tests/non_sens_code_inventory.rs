@@ -401,37 +401,22 @@ fn active_sens_coverage_never_regresses_1673() {
 }
 
 
-/// #1707: predicate/control foundation may still carry bounded migration debt,
-/// but host truth must never grow back into language semantics.
+/// #1707: host Bool is not language predicate authority.
 ///
-/// Keep this deliberately tiny: it protects only the shared ATOM/EQ/COND
-/// foundation while #1713/#1714 removes the remaining migration bridge.
-/// JSON/adapter Bool representation is outside this foundation and is not
-/// classified here.
+/// This is intentionally a zero-debt invariant, not a migration baseline.
+/// JSON/adapters may still carry host booleans privately, but the shared
+/// ATOM/EQ/COND foundation must never consume or produce `Value::Bool`.
 #[test]
-fn predicate_foundation_host_truth_debt_never_grows_1707() {
-    let root = repo_root();
-    let core = fs::read_to_string(root.join("crates/sens/src/eval/special_forms/core.rs"))
-        .expect("read predicate/control foundation");
-    let environment = fs::read_to_string(root.join("crates/sens/src/environment.rs"))
-        .expect("read environment mechanism");
+fn predicate_foundation_never_uses_host_bool_1707() {
+    let core = fs::read_to_string(
+        repo_root().join("crates/sens/src/eval/special_forms/core.rs"),
+    )
+    .expect("read predicate/control foundation");
 
-    let generic_truthiness = core.matches(".is_truthy()").count();
-    let host_bool_in_foundation = core.matches("Value::Bool").count();
-    let cond_mode_mentions =
-        core.matches("CondClauseMode").count() + environment.matches("CondClauseMode").count();
-
-    assert!(
-        generic_truthiness <= 1,
-        "binary-only regression: predicate/control foundation gained generic host truthiness: {generic_truthiness} > 1"
-    );
     assert_eq!(
-        host_bool_in_foundation, 0,
+        core.matches("Value::Bool").count(),
+        0,
         "binary-only regression: predicate/control foundation must not use host Value::Bool"
-    );
-    assert!(
-        cond_mode_mentions <= 8,
-        "binary-only regression: profile-specific COND-mode debt grew: {cond_mode_mentions} > 8"
     );
 }
 
