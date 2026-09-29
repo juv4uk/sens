@@ -1,5 +1,5 @@
 use sens::{
-    eval_program, load_core_library, register_capability, Environment, ErrorKind, Exactness, Expr,
+    eval_program, load_core_library, register_capability, Environment, ErrorKind, Exactness,
     LanguageError, Session, Span, Value,
 };
 use std::fs;
@@ -21,7 +21,7 @@ fn load_lisp_file(path: &str, session: &mut Session) {
 }
 
 fn spy_executor(
-    _arguments: &[Expr],
+    _arguments: &[Value],
     _environment: &Environment,
     _span: Span,
 ) -> Result<Value, LanguageError> {
@@ -46,10 +46,7 @@ fn semantic_car_entry_preserves_canonical_type_before_host() {
 
     for (reference_source, machine_source) in [
         ("(car 5)", "(x86-call-semantic-car-u64 5)"),
-        (
-            "(car (quote ()))",
-            "(x86-call-semantic-car-u64 (quote ()))",
-        ),
+        ("(car (quote ()))", "(x86-call-semantic-car-u64 (quote ()))"),
     ] {
         let reference_error = eval_program(reference_source, &mut session)
             .expect_err("reference CAR must reject a non-pair");
@@ -74,11 +71,8 @@ fn semantic_car_entry_preserves_canonical_type_before_host() {
     }
 
     EXECUTOR_CALLS.store(0, Ordering::SeqCst);
-    let valid = eval_program(
-        "(x86-call-semantic-car-u64 (cons 2 3))",
-        &mut session,
-    )
-    .expect("valid bounded pair must proceed through the admitted machine gateway");
+    let valid = eval_program("(x86-call-semantic-car-u64 (cons 2 3))", &mut session)
+        .expect("valid bounded pair must proceed through the admitted machine gateway");
     assert_eq!(
         valid.value.to_string(),
         "4242",

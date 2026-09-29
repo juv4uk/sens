@@ -1,8 +1,11 @@
-#![cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
+#![cfg(all(
+    any(target_os = "linux", target_os = "windows"),
+    target_arch = "x86_64"
+))]
 
 use sens::{
-    eval_program, load_core_library, register_capability, Environment, Exactness, Expr,
-    LanguageError, Session, Span, Value,
+    eval_program, load_core_library, register_capability, Environment, Exactness, LanguageError,
+    Session, Span, Value,
 };
 use sens_host::install;
 use std::fs;
@@ -40,7 +43,7 @@ fn load_lisp_file(path: &str, session: &mut Session) {
 }
 
 fn spy_executor(
-    _arguments: &[Expr],
+    _arguments: &[Value],
     _environment: &Environment,
     _span: Span,
 ) -> Result<Value, LanguageError> {
@@ -60,11 +63,8 @@ fn unadmitted_ud2_form_is_rejected_before_host_executor() {
     register_capability("native-call-u64-raw", spy_executor);
     let _restore = RestoreHostCapabilities;
 
-    let result = eval_program(
-        "(x86-call-admitted-u64 (quote ((ud2))) 0)",
-        &mut session,
-    )
-    .expect("unadmitted machine form must be a Lisp-level named rejection");
+    let result = eval_program("(x86-call-admitted-u64 (quote ((ud2))) 0)", &mut session)
+        .expect("unadmitted machine form must be a Lisp-level named rejection");
 
     assert_eq!(
         result.value.to_string(),
@@ -116,7 +116,8 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     let _serial = test_lock();
     install();
     let mut session = Session::default();
-    load_core_library(&mut session).expect("core must bootstrap before structured machine lowering");
+    load_core_library(&mut session)
+        .expect("core must bootstrap before structured machine lowering");
     load_lisp_file("lib/machine/layout/pair-x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
@@ -155,8 +156,9 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     assert_eq!(native_car.value, interpreter_car.value);
     assert_eq!(native_cdr.value, interpreter_cdr.value);
 
-    let lowering_source = fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
-        .expect("semantic lowerer source must be readable");
+    let lowering_source =
+        fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
+            .expect("semantic lowerer source must be readable");
     for forbidden in [
         "(def x86-lower-add-u64\n",
         "(def x86-lower-cons-car-u64\n",
@@ -187,7 +189,10 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
         "(lifetime native-call)",
         "(escape forbidden)",
     ] {
-        assert!(source.contains(required), "pair layout authority missing {required}");
+        assert!(
+            source.contains(required),
+            "pair layout authority missing {required}"
+        );
     }
 
     assert!(
@@ -197,7 +202,8 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before layout authority");
-    eval_program(&source, &mut session).expect("pair layout authority must evaluate as ordinary sens");
+    eval_program(&source, &mut session)
+        .expect("pair layout authority must evaluate as ordinary sens");
 
     for (name, expected) in [
         ("x86-pair-cell-bytes", "16"),
@@ -242,7 +248,9 @@ fn semantics_blind_raw_executor_accepts_optional_arena_bytes() {
         "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-add-u64-forms 2 3)) 16)",
         &mut session,
     )
-    .expect("raw host mechanism must receive only bytes materialized from admitted structured forms");
+    .expect(
+        "raw host mechanism must receive only bytes materialized from admitted structured forms",
+    );
 
     assert_eq!(result.value.to_string(), "5");
 }
@@ -341,9 +349,8 @@ fn native_execution_mechanism_is_not_a_language_semantic_identity() {
 #[test]
 fn rust_native_executor_may_grow_local_semantics_and_still_exposes_real_memory_mechanism() {
     let _serial = test_lock();
-    let mut source =
-        fs::read_to_string(repo_root().join("crates/sens-host/src/native_exec.rs"))
-            .expect("native execution mechanism source must be readable");
+    let mut source = fs::read_to_string(repo_root().join("crates/sens-host/src/native_exec.rs"))
+        .expect("native execution mechanism source must be readable");
     source.push_str(
         &fs::read_to_string(repo_root().join("crates/sens-host/src/platform.rs"))
             .expect("host memory-adapter source must be readable"),
@@ -419,7 +426,11 @@ fn jcc_actually_branches_on_real_hardware_for_equal_and_ordering_conditions() {
 
     // JLE/JNLE: signed less-or-equal.
     assert_eq!(run("jle", 5, 5), "5", "JLE must branch when equal");
-    assert_eq!(run("jnle", 6, 5), "6", "JNLE must branch when strictly greater");
+    assert_eq!(
+        run("jnle", 6, 5),
+        "6",
+        "JNLE must branch when strictly greater"
+    );
     assert_eq!(run("jnle", 5, 5), "999", "JNLE must not branch when equal");
 }
 

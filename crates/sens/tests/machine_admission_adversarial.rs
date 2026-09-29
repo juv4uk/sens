@@ -1,6 +1,6 @@
 use sens::{
-    eval_program, load_core_library, register_capability, Environment, Exactness, Expr,
-    LanguageError, Session, Span, Value,
+    eval_program, load_core_library, register_capability, Environment, Exactness, LanguageError,
+    Session, Span, Value,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -21,7 +21,7 @@ fn load_lisp_file(path: &str, session: &mut Session) {
 }
 
 fn spy_executor(
-    _arguments: &[Expr],
+    _arguments: &[Value],
     _environment: &Environment,
     _span: Span,
 ) -> Result<Value, LanguageError> {

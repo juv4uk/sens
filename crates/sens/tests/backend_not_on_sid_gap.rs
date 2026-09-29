@@ -48,12 +48,12 @@
 //! executable, named location instead of only living in issue prose.
 
 use sens::{
-    capability_installed, eval_program, installed_capabilities, load_core_library, register_capability,
-    Environment, LanguageError, Session, Value,
+    capability_installed, eval_program, installed_capabilities, load_core_library,
+    register_capability, Environment, LanguageError, Session, Value,
 };
 
 fn dummy_capability(
-    _arguments: &[sens::Expr],
+    _arguments: &[Value],
     _environment: &Environment,
     _span: sens::Span,
 ) -> Result<Value, LanguageError> {
@@ -86,10 +86,7 @@ fn every_installed_sens_host_capability_has_zero_sid_registry_entries() {
         // they carry no semantic identity at all — dispatch happens purely on
         // this literal string, one BTreeMap lookup before SID routing is ever
         // consulted (crates/sens/src/eval/mod.rs's dispatch order).
-        let looks_like_sid_alias = eval_program(
-            &format!("(quote {name})"),
-            &mut session,
-        );
+        let looks_like_sid_alias = eval_program(&format!("(quote {name})"), &mut session);
         assert!(
             looks_like_sid_alias.is_ok(),
             "{name} at least parses as an ordinary symbol, confirming it carries \
@@ -164,11 +161,8 @@ fn meta_eval_resolves_canon_identity_primitives_through_any_admitted_surface_nam
     // primitives go through my-semantic-id-for-surface first, so both
     // spellings must resolve identically inside the metacircular evaluator.
     let mut session = Session::default();
-    eval_program(
-        include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("core.lisp should load");
+    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("core.lisp should load");
     sens::load_meta_evaluator_library(&mut session).expect("meta-evaluator should load");
 
     let english = eval_via_meta("(atom? 5)", &mut session).expect("english spelling resolves");
@@ -210,13 +204,9 @@ fn meta_eval_ordinary_primitive_dispatch_is_hardcoded_to_one_spelling_not_sid() 
     // textual, not SID-routed, exactly like the host-capability registry
     // above, just written in Lisp instead of Rust.
     let mut meta_session = Session::default();
-    eval_program(
-        include_str!("../../../lib/core.lisp"),
-        &mut meta_session,
-    )
-    .expect("core.lisp should load");
-    sens::load_meta_evaluator_library(&mut meta_session)
-        .expect("meta-evaluator should load");
+    eval_program(include_str!("../../../lib/core.lisp"), &mut meta_session)
+        .expect("core.lisp should load");
+    sens::load_meta_evaluator_library(&mut meta_session).expect("meta-evaluator should load");
 
     let meta_english = eval_via_meta("((lambda (a b) (+ a b)) 2 3)", &mut meta_session)
         .expect("meta-eval resolves the hardcoded English spelling");

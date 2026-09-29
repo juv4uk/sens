@@ -245,10 +245,12 @@ fn dispatch_call(
     }
 
     if let Some(name) = head_name {
-        if let Some(result) =
-            capabilities::dispatch_capability(name, arguments, environment, span)
-        {
-            return result;
+        if let Some(handler) = capabilities::capability_handler(name, span)? {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, environment)?);
+            }
+            return handler(&values, environment, span).map(EvalStep::Value);
         }
     }
     let function = match head_sid {
