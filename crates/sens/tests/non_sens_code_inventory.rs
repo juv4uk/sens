@@ -74,6 +74,16 @@ fn rel(path: &Path) -> String {
     path.strip_prefix(repo_root()).unwrap_or(path).display().to_string()
 }
 
+/// Lisp-shaped artifacts that are data/evidence, not executable language source.
+/// Keep this exact and fail-closed: future research artifacts must be classified separately.
+fn is_non_executable_lisp_artifact(file: &str) -> bool {
+    matches!(
+        file,
+        "docs/research/1556-sens-runtime-lookup-inventory.lisp"
+            | "knowledge/sens-primary.lisp"
+    )
+}
+
 /// Голови викликів: токен одразу після `(`. Коментарі й рядки пропускаються.
 fn call_heads(text: &str) -> Vec<String> {
     let mut out = Vec::new();
@@ -122,6 +132,10 @@ fn source_inventory() -> BTreeMap<String, (usize, usize)> {
     let names: BTreeSet<String> = registry().into_iter().map(|(_, _, name)| name).collect();
     let mut out = BTreeMap::new();
     for path in language_files() {
+        let file = rel(&path);
+        if is_non_executable_lisp_artifact(&file) {
+            continue;
+        }
         let Ok(text) = fs::read_to_string(&path) else { continue };
         let (mut named, mut sens) = (0, 0);
         for head in call_heads(&text) {
@@ -132,7 +146,7 @@ fn source_inventory() -> BTreeMap<String, (usize, usize)> {
             }
         }
         if named + sens > 0 {
-            out.insert(rel(&path), (named, sens));
+            out.insert(file, (named, sens));
         }
     }
     out
