@@ -5,4 +5,3 @@
 ; semantic-registry.lisp. Цей thin layer materializes the full spelling that
 ; differs from the compact uk surface where a runtime binding is required.
 
-(00001001 порожній-текст? string-empty?)
