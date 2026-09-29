@@ -31,5 +31,17 @@
     (action keep-rust)
     (reason "Carries only selected-Core signal/propagation and does not define language truth semantics."))
 
+  (row
+    (path ".github/workflows/core2-runtime-profile.yml")
+    (classification mechanism)
+    (action split)
+    (reason "Active workflow now runs only selected-Core carrier mechanics; old Core2 semantic assertions removed."))
+
+  (row
+    (path ".github/workflows/core2-profile-contract.yml")
+    (classification historical-semantic-debt)
+    (action manual-archive)
+    (reason "Historical Contract-6/T-NIL semantics no longer block pull requests or main; preserved only as manual archive evidence."))
+
   (next
     "inventory remaining crates/sens/tests and cfg(test) modules; move or delete semantic assertions before binary-only cutover."))
