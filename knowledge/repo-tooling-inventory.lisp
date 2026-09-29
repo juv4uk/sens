@@ -79,4 +79,3 @@
 
 (tool (path "scripts/check-core4-predicate-record-inventory.lisp") (kind check) (language lisp) (role core4-predicate-record-inventory-witness) (lifecycle active) (callers (".github/workflows/core4-predicate-answer-scale.yml")) (authority-source "knowledge/core4-predicate-record-inventory.lisp") (migration-issue 1259) (replacement ()) (removal-condition issue-1259-superseded-by-ratified-successor))
 (tool (path "scripts/migrate-english-predicates-question-mark.py") (kind migration) (language python) (role english-predicates-question-mark-migration) (lifecycle transitional) (callers unknown) (authority-source "lib/surface/semantic-registry.lisp") (migration-issue 1413) (replacement ()) (removal-condition migration-issue-complete-and-callers-switched))
-
