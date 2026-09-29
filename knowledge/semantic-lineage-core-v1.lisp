@@ -118,7 +118,7 @@
       (historical-reference "McCarthy conditional control")
       (my-lisp-rationale "Core4 canonical control uses explicit result equality and separates structural/richer-domain dispatch from generic value truthiness.")
       (observable-law "Canonical Core4 conditional dispatch consumes explicitly matched query/result pairs; historical two-part behavior is profile-scoped compatibility.")
-      (current-witness "contracts/control-dispatch-v1.lisp;contracts/canon-laws-v2-contract.lisp;tests/fixtures/control-dispatch-v1.lisp")
+      (current-witness "tests/fixtures/semantic/cond-2part-v1.lisp;contracts/canon-laws-v2-contract.lisp")
       (deliberate-differences "Generic arbitrary-value truth coercion is not the canonical control authority.")
       (substrate-assumptions "profile-specific evaluator mechanics may execute the law")
       (portability-risk medium)
