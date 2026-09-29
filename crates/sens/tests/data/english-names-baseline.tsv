@@ -2229,12 +2229,6 @@ rust-lisp	crates/sens/tests/content_store_authority.rs	let	3
 rust-lisp	crates/sens/tests/content_store_authority.rs	let*	1
 rust-lisp	crates/sens/tests/content_store_authority.rs	quote	10
 rust-lisp	crates/sens/tests/control_dispatch_contract.rs	quote	2
-rust-lisp	crates/sens/tests/core4_answer_logic.rs	answer-and	1
-rust-lisp	crates/sens/tests/core4_answer_logic.rs	answer-atom	4
-rust-lisp	crates/sens/tests/core4_answer_logic.rs	answer-eq	3
-rust-lisp	crates/sens/tests/core4_answer_logic.rs	answer-not	1
-rust-lisp	crates/sens/tests/core4_answer_logic.rs	answer-or	1
-rust-lisp	crates/sens/tests/core4_answer_logic.rs	answer-weaken	3
 rust-lisp	crates/sens/tests/deep_structural_relation_contract.rs	quote	2
 rust-lisp	crates/sens/tests/def_ownership.rs	cons	6
 rust-lisp	crates/sens/tests/def_ownership.rs	def	1
