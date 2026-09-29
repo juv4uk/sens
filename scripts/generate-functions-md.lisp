@@ -48,6 +48,22 @@
       ((00000010 items) () 0)
       ((00000010 items) (0) (00001100 1 (count-items (00000110 items)))))))
 
+; Markdown is human presentation. number->string owns canonical machine
+; numeric wire, so it must not render human section counts.  Build decimal
+; radix ten only from base-neutral single-bit numeric source; this generator
+; must not create new numeric-reader migration debt.
+(00001001 functions-md-decimal-radix
+  (00001100 1 1 1 1 1 1 1 1 1 1))
+
+(00001001 decimal-count->string
+  (00001000 (n)
+    (00000111
+      ((00011010 n functions-md-decimal-radix) (1) (01000111 n))
+      ((00011010 n functions-md-decimal-radix) (0)
+       (00111010
+         (decimal-count->string (00010100 n functions-md-decimal-radix))
+         (01000111 (00010011 n functions-md-decimal-radix)))))))
+
 (00001001 backtick-join
   (00001000 (names)
     (00000111
@@ -61,7 +77,7 @@
 (00001001 render-section
   (00001000 (file)
     (10011100 ((names (defined-names (01001011 (10100110 (str+ "lib/" file))))))
-      (str+ "### " file " (" (01000110 (count-items names)) ")\n\n"
+      (str+ "### " file " (" (decimal-count->string (count-items names)) ")\n\n"
             (backtick-join names) "\n"))))
 
 ; Позиція першого входження marker у s, починаючи з i; -1 якщо нема.
