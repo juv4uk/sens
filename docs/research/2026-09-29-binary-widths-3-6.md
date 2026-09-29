@@ -75,15 +75,61 @@ Evidence поєднує:
 Поточний Control2 використовує `11`, після якого йде 2-бітний selector для Function, Number, Text або extension.
 
 Плоский 3-бітний selector дає 8 класів і простішу плоску таблицю dispatch, але додає один selector bit до кожного наявного Function/Number/Text payload.
-Повний scan бібліотеки знайшов приблизно 17 527 точних Function8 token проти приблизно 6 917 lexical refs. Самих Function token приблизно у 2.5 раза більше, ніж lexical refs.
 
-Тому Domain3 зараз не доведений як виграш у щільності. Його можлива перевага:
+Для мінімального nested Type2 extension:
+- primary payload платить 2 selector bits;
+- extended lexical payload платить 4 selector bits;
+- flat Type3 платить 3 selector bits для обох.
+
+Отже Type3 додає 1 біт кожному primary payload і економить 1 біт кожному lexical payload. По щільності він виграє лише коли `lexical_count > primary_payload_count`.
+
+Повний scan бібліотеки знайшов приблизно 17 527 точних Function8 token проти приблизно 6 917 lexical refs. Навіть якщо повністю ігнорувати Number/Text, нижня межа програшу flat Type3 становить:
+
+```text
+17 527 - 6 917 = 10 610 bits ~= 1326 bytes
+```
+
+Тому Domain3 на поточному корпусі вже **доведено не є виграшем у щільності** проти цього Type2+extension baseline. Його можлива перевага:
 - простіший decoder;
 - чіткіша ортогональність;
 - більше fail-closed reserved classes;
 - простіше майбутнє extension/proof structure.
 
-Перед призначенням його треба порівняти з Type2 + nested extension.
+Перед призначенням його треба порівняти з Type2 + nested extension за decoder/proof cost, а не за compression.
+
+## Lex4/Lex5/Lex6: точні break-even межі
+
+Початковий Lex4=`depth2|slot2` виявився неоптимальним: corpus має дуже малу lexical depth, тому симетричний split марнує короткий простір.
+
+Краща проста форма без таблиці:
+
+```text
+Lex4 = depth1 | slot3
+Lex5 = depth2 | slot3
+Lex6 = depth2 | slot4
+```
+
+Поточний corpus:
+- Lex4(1+3): 6910 direct refs, 7 escapes (6 через depth=2, 1 через slot=8);
+- Lex5(2+3): 6916 direct refs, 1 escape;
+- Lex6(2+4): 6917 direct refs, 0 escapes.
+
+Для coordinate-only порівняння спільні type/framing bits скорочуються. Нехай `C` — повна кількість coordinate bits для одного long-form escaped reference.
+
+```text
+Lex4 = 6910*4 + 7*C
+Lex5 = 6916*5 + 1*C
+Lex6 = 6917*6
+```
+
+Звідси:
+- Lex4 < Lex5, якщо `C < ~1156.7 bits`;
+- Lex4 < Lex6, якщо `C < ~1980.3 bits`;
+- Lex5 < Lex6, якщо `C < 6922 bits`.
+
+Будь-яка практична довга форма binary lexical coordinate очікувано значно менша за ці межі. Тому **raw density дуже сильно підтримує Lex4(1+3)**. Lex5 купує майже повну відсутність escape, а Lex6 — нуль current escape і найпростіший прямий шлях.
+
+Це не призначає Lex4: тепер вирішальним стає реальний branch/decoder/proof cost семи long-form випадків.
 
 ## Чотирибітний кандидат: error vocabulary
 
@@ -107,25 +153,39 @@ Evidence поєднує:
 - FPGA protocol errors=14 -> 4 біти.
 
 Сьогодні це compiler/backend facts. Компактний код може лишитися приватним або бути generated projection Lisp-owned machine contract; CML не повинен сам створювати numbering як semantic authority SENS.
+
+## WSM / layout evidence: одна семантика не вимагає однієї tag-width
+
+Незалежний аудит `wsm-my-lisp/docs/parity/machine-contract-audit.uk.md` уже фіксує реальний приклад двох представлень:
+- freestanding WSM bootstrap ABI: `TAG_MASK=7`, тобто 3-bit low tags;
+- SENS `memory-layout-contract.lisp`: 4-bit nan-boxing tag у bits 31..28.
+
+WSM-аудит класифікує цю різницю як різні **physical representation mechanisms**, а не як semantic drift. Це підтримує правило #1738: корисна 3/4-бітна ширина може лишатися mechanism-private й не потребує нового мовного domain.
+
+Водночас поточна 4-bit tag table в `memory-layout-contract.lisp` містить старі ролі `symbol`, `true`, UTF-8 `string` тощо, які конфліктують із новою binary-only ontology. Тому:
+- сам факт зручності 4-bit physical field є evidence;
+- старе призначення tag values **не** є кандидатом для механічного перенесення в canonical SENS;
+- будь-який новий 4-bit semantic domain потребує власної Lisp-owned authority, а не успадкування старих nan-boxing ordinals.
+
 ## Попередня матриця кандидатів
 
 | Ширина | Кандидат | Evidence | Поточна рекомендація |
 |---|---|---|---|
 | 3 | payload/domain discriminator | 8 класів; evaluator head families вміщаються | досліджувати далі; Type2+extension може бути щільнішим |
 | 3 | machine operand classes | кілька CML families мають рівно 8 станів | backend-private, доки не виводиться з upstream machine contract |
-| 4 | Lex4 short coordinate | 99.6097% поточного lib corpus | придатна short form із long escape |
+| 4 | Lex4 short coordinate | depth1|slot3: 99.8988% direct; 7 escapes; beats Lex5 if long form <~1156.7 bits | найсильніший raw-density кандидат; decoder cost ще виміряти |
 | 4 | Error4 | 10 поточних admitted observable error classes | сильний кандидат після Lisp authority migration |
 | 4 | FASL/tag families | поточні ExprKind/FASL мають 10 станів | mechanism-only; переоцінити після Symbol/String cleanup |
-| 5 | Lex5 short coordinate | 99.9855%; лише один observed slot-8 escape | найсильніший баланс density/coverage для lexical |
+| 5 | Lex5 short coordinate | 99.9855%; 1 escape; beats Lex6 if long form <6922 bits | майже без escape; компроміс density/simplicity |
 | 5 | CML MachineInst/IR | 31/20/18 станів | корисний machine encoding candidate, не автоматично SENS |
-| 6 | Lex6 short coordinate | 100% поточного lib corpus | найпростіший lexical candidate без current escape |
+| 6 | Lex6 short coordinate | 100% direct; 0 current escapes | найпростіший current decode, але більший raw bit cost |
 | 6 | wire small-int capacity | wire вже використовує 64-state range | лишити mechanism-private; не робити другою Number semantics |
 
 ## Відкриті питання
 
-1. Hardware/FPGA: area/timing/proof burden Type2+extension проти flat Type3.
+1. Hardware/FPGA: area/timing/proof burden Type2+extension проти flat Type3; compression уже не є аргументом за Type3 на поточному corpus.
 2. CML: чи MachineInst=31 достатньо стабільний для packing, чи це backend-evolving набір.
-3. Lexical representation: чи один рідкісний long-form escape робить Lex5 кращим за простіший Lex6.
+3. Lexical representation: виміряти branch/decoder/proof cost 7 Lex4(1+3) escapes проти 1 Lex5 escape та 0 Lex6 escapes; raw density уже сильно схиляється до Lex4.
 4. Error vocabulary: остаточний Lisp-owned набір категорій після видалення старого COND/error debt.
 5. Alignment: canonical storage має бути bit-packed, byte-packed, чи треба розділити canonical bits і transport packing.
 
