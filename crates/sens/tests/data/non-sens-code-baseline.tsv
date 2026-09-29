@@ -366,7 +366,6 @@ source	scripts/build-dependency-classification.lisp	3
 source	scripts/build-inventory.lisp	2
 source	scripts/check-core-special-form-profile-policy.lisp	1
 source	scripts/check-core1-compiler-sid-resolver.lisp	1
-source	scripts/check-core4-predicate-record-inventory.lisp	1
 source	scripts/check-island-math-evidence.lisp	1
 source	scripts/check-kernel-abi-transport-boundary.lisp	2
 source	scripts/machine-authority-guard.lisp	5
