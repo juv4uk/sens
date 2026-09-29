@@ -71,10 +71,10 @@
   (00001000 (rule fact)
     (10011100 ((pattern (00000101 rule))
           (template (00101111 rule)))
-      (10011100 ((subst (10000111 pattern fact (00000001 ()))))
+      (10011100 ((bindings (10000111 pattern fact (00000001 ()))))
         (00000111
-          ((failed-subst? subst) (00000001 no-match))
-          (t (10001010 template subst)))))))
+          ((failed-subst? bindings) (00000001 no-match))
+          (t (10001010 template bindings)))))))
 
 ; Step 2: apply one rule to every fact in a list, collecting the new facts
 ; it produces. Still just one rule (not the whole rule set) and still no
@@ -645,7 +645,7 @@
 ; `(head cond1 cond2 ...)`.
 (00001001 jtms-state-subst (00001000 (state) (00000101 state)))
 (00001001 jtms-state-used (00001000 (state) (00000110 state)))
-(00001001 jtms-make-state (00001000 (subst used) (00000100 subst used)))
+(00001001 jtms-make-state (00001000 (bindings used) (00000100 bindings used)))
 
 (00001001 match-plain-condition-jtms
   (00001000 (condition facts state)
@@ -856,14 +856,14 @@
 ; sie sich in die Truth-Maintenance-Schichten aus Schritt 5b/5c ein — die
 ; bleiben genau, wie sie waren.
 (00001001 match-condition-against-facts
-  (00001000 (condition facts subst)
+  (00001000 (condition facts bindings)
     (00000111
       ((00000010 facts) () (00000001 ()))
       ((00000010 facts) (1) (00000001 ()))
-      (t (10011100 ((s (10000111 condition (00000101 facts) subst)))
+      (t (10011100 ((s (10000111 condition (00000101 facts) bindings)))
            (00000111
-             ((failed-subst? s) (match-condition-against-facts condition (00000110 facts) subst))
-             (t (00000100 s (match-condition-against-facts condition (00000110 facts) subst)))))))))
+             ((failed-subst? s) (match-condition-against-facts condition (00000110 facts) bindings))
+             (t (00000100 s (match-condition-against-facts condition (00000110 facts) bindings)))))))))
 
 ; Step 7: negation as failure — `(not (pattern))` conditions. This is the
 ; capability `lib/clips-import.lisp`'s Step 5 flagged as missing and worked
@@ -906,10 +906,10 @@
       (t (00000001 ())))))
 
 (00001001 match-negated-condition
-  (00001000 (inner-pattern facts subst)
+  (00001000 (inner-pattern facts bindings)
     (00000111
-      ((00000010 (match-condition-against-facts inner-pattern facts subst)) () (00100111 subst))
-      ((00000010 (match-condition-against-facts inner-pattern facts subst)) (1) (00100111 subst))
+      ((00000010 (match-condition-against-facts inner-pattern facts bindings)) () (00100111 bindings))
+      ((00000010 (match-condition-against-facts inner-pattern facts bindings)) (1) (00100111 bindings))
       (t (00000001 ())))))
 
 ; Step 10: `(or (pattern1) (pattern2) ...)` conditions — verified missing
@@ -955,12 +955,12 @@
       (t (00000001 ())))))
 
 (00001001 match-or-condition
-  (00001000 (alternatives facts subst)
+  (00001000 (alternatives facts bindings)
     (00000111
       ((00000010 alternatives) () (00000001 ()))
       ((00000010 alternatives) (1) (00000001 ()))
-      (t (00101001 (match-one-condition (00000101 alternatives) facts subst)
-                  (match-or-condition (00000110 alternatives) facts subst))))))
+      (t (00101001 (match-one-condition (00000101 alternatives) facts bindings)
+                  (match-or-condition (00000110 alternatives) facts bindings))))))
 
 ; Step 11: `(and (pattern1) (pattern2) ...)` conditions — the same bug
 ; class again, found the same way: `(or (and (cat ?x) (small ?x)) (dog
@@ -1010,8 +1010,8 @@
       (t (00000001 ())))))
 
 (00001001 match-and-condition
-  (00001000 (sub-conditions facts subst)
-    (match-conditions sub-conditions facts subst)))
+  (00001000 (sub-conditions facts bindings)
+    (match-conditions sub-conditions facts bindings)))
 
 ; Step 12: `(test <expression>)` conditions — the fourth time this same
 ; bug class turned up (verified before fixing, same as `not`/`or`/`and`):
@@ -1066,8 +1066,8 @@
       (t (00000001 ())))))
 
 (00001001 match-test-condition
-  (00001000 (expression subst)
-    (10011100 ((result (01001101 (10001010 expression subst))))
+  (00001000 (expression bindings)
+    (10011100 ((result (01001101 (10001010 expression bindings))))
       ; E1 (#216): under exact-Q a false comparison answers 0, and 0 is
       ; truthy -- the pre-exact-Q two-part `(cond (result (list subst)) (t ()))`
       ; treated a falsy test as a success. A test condition is falsy when its
@@ -1083,7 +1083,7 @@
            ((00100010 result 0) (1)
             (00000001 ()))
            ((00100010 result 0) (0)
-            (00100111 subst))))))))
+            (00100111 bindings))))))))
 
 ; Step 15: `(exists <CE>+)`/`(forall <first-CE> <CE>+)` — the same class of
 ; bug as `not`/`or`/`and`/`test` (Steps 7/10-12), found by importing a
@@ -1187,11 +1187,11 @@
       (t (00000001 ())))))
 
 (00001001 match-exists-condition
-  (00001000 (sub-conditions facts subst)
+  (00001000 (sub-conditions facts bindings)
     (00000111
-      ((00000010 (match-conditions sub-conditions facts subst)) () (00000001 ()))
-      ((00000010 (match-conditions sub-conditions facts subst)) (1) (00000001 ()))
-      (t (00100111 subst)))))
+      ((00000010 (match-conditions sub-conditions facts bindings)) () (00000001 ()))
+      ((00000010 (match-conditions sub-conditions facts bindings)) (1) (00000001 ()))
+      (t (00100111 bindings)))))
 
 (00001001 condition-is-forall?
   (00001000 (condition)
@@ -1212,24 +1212,24 @@
       (t (forall-every-candidate-satisfies? (00000110 candidates) rest-conditions facts)))))
 
 (00001001 match-forall-condition
-  (00001000 (first-condition rest-conditions facts subst)
+  (00001000 (first-condition rest-conditions facts bindings)
     (00000111
       ((forall-every-candidate-satisfies?
-         (match-one-condition first-condition facts subst) rest-conditions facts)
-       (00100111 subst))
+         (match-one-condition first-condition facts bindings) rest-conditions facts)
+       (00100111 bindings))
       (t (00000001 ())))))
 
 (00001001 match-one-condition
-  (00001000 (condition facts subst)
+  (00001000 (condition facts bindings)
     (00000111
-      ((condition-is-not? condition) (match-negated-condition (00101111 condition) facts subst))
-      ((condition-is-or? condition) (match-or-condition (00000110 condition) facts subst))
-      ((condition-is-and? condition) (match-and-condition (00000110 condition) facts subst))
-      ((condition-is-test? condition) (match-test-condition (00101111 condition) subst))
-      ((condition-is-exists? condition) (match-exists-condition (00000110 condition) facts subst))
+      ((condition-is-not? condition) (match-negated-condition (00101111 condition) facts bindings))
+      ((condition-is-or? condition) (match-or-condition (00000110 condition) facts bindings))
+      ((condition-is-and? condition) (match-and-condition (00000110 condition) facts bindings))
+      ((condition-is-test? condition) (match-test-condition (00101111 condition) bindings))
+      ((condition-is-exists? condition) (match-exists-condition (00000110 condition) facts bindings))
       ((condition-is-forall? condition)
-       (match-forall-condition (00101111 condition) (00000110 (00000110 condition)) facts subst))
-      (t (match-condition-against-facts condition facts subst)))))
+       (match-forall-condition (00101111 condition) (00000110 (00000110 condition)) facts bindings))
+      (t (match-condition-against-facts condition facts bindings)))))
 
 ; Built directly on `thread-conjunction` (lib/unify.lisp) — the same
 ; conjunction-walking kernel `lib/reason.lisp`'s `prove-goals` threads a
@@ -1238,8 +1238,8 @@
 ; fact in the explicit list, or (for `not`) check that its inner pattern
 ; matches none of them — rather than recursively searching further rules.
 (00001001 match-conditions
-  (00001000 (conditions facts subst)
-    (thread-conjunction conditions subst
+  (00001000 (conditions facts bindings)
+    (thread-conjunction conditions bindings
       (00001000 (condition s) (match-one-condition condition facts s)))))
 
 (00001001 map-apply-head
