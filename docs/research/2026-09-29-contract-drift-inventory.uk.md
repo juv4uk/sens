@@ -1,3 +1,52 @@
+# Contract Authority Drift Inventory — #1774 slice A
+
+**Agent:** Vyasa (Оксі) | **Date:** 2026-09-29 | **File:** `language-contract.lisp`
+
+---
+
+## Класифікація інваріантів (Contract 9.0)
+
+| Invariant | Current Text | Classification | Rationale |
+|-----------|--------------|----------------|-----------|
+| `sid8-function-space` | 256 SIDs, no second ontology | **canonical-language** | Still valid: one function-identity space |
+| `single-function-ontology` | No second named ontology | **canonical-language** | Still valid |
+| `surface-non-authority` | Human surfaces non-authoritative | **canonical-language** | Still valid |
+| `core-profile-law` | Core1-4 may have different laws per SID | **obsolete** | Contradicts #1703: ONE foundation law Core1–4 |
+| `kernel-archipelago` | Kernels consume Sid8, no new identity | **canonical-language** | Still valid mechanism boundary |
+| **`sid-00000111-control`** | **3-field COND, UnsatisfiedConditional on exhaustion** | **obsolete** | Contradicts #1663/#1713: 2-part COND, exhaustion → structural `()` |
+| `reader-apostrophe` | Apostrophe → SID 00000001 | **canonical-language** | Still valid reader behavior |
+| `reader-eight-bits` | 8 bare bits → Sid8 | **canonical-language** | Still valid reader behavior |
+| `reader-decimal-separator` | Dot/comma decimal separators | **canonical-language** | Still valid reader behavior |
+| **`error-classification`** | **UnsatisfiedConditional for COND exhaustion** | **obsolete** | Contradicts #1663/#1713: exhaustion → structural `()` |
+| `migration-debt-00000000` | () structural, 00000000 not empty | **canonical-language** | Still valid (completed #1332) |
+
+---
+
+## Header Fields Classification
+
+| Field | Current Value | Classification | Action |
+|-------|---------------|----------------|--------|
+| `major` | 9 | **relabel** | Historical Contract 9.0 |
+| `minor` | 0 | **keep** | Version |
+| `note` | "RATIFIED by owner 2026-09-24..." | **demote** | Historical Contract 9.0, superseded |
+| `covers` | G1-8, S1-3 | **keep** | Coverage groups |
+| `invariants` | 12 entries | **relabel** | Per-clause classification |
+
+---
+
+## Рекомендовані зміни
+
+1. **Header:** `major` → 9 (historical), add `superseded-by` pointer
+2. **Note:** "RATIFIED..." → "HISTORICAL Contract 9.0 — superseded by #1703/#1663"
+3. **Relabel obsolete invariants:** `core-profile-law`, `sid-00000111-control`, `error-classification`
+4. **Add supersession pointers:** #1703 (foundation), #1663 (2-part COND), #1713 (Predicate1), #1714 (runtime)
+5. **Preserve canonical invariants** unchanged
+
+---
+
+## Запропонований оновлений `language-contract.lisp`
+
+```lisp
 ; language-contract.lisp — HISTORICAL Contract 9.0 — superseded by #1703/#1663
 ; Історичний Contract 9.0 — замінено #1703/#1663.
 ; Contract 9.0 ratified by owner 2026-09-24.
