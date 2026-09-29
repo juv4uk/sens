@@ -147,7 +147,7 @@ fn lisp_fs_object_envelope_round_trips_and_rejects_bad_metadata() {
                     (cons (quote value) (quote (hello world)))))))
             "#
         ),
-        "(\"((format . wsm-fs-object) (version 0 1) (address . \\\"(hello world)\\\") (value hello world))\" (accepted (hello world)) (rejected unsupported-version) (rejected address-mismatch))"
+        "(\"((format . wsm-fs-object) (version #q2:0/1 #q2:1/1) (address . \\\"(hello world)\\\") (value hello world))\" (accepted (hello world)) (rejected unsupported-version) (rejected address-mismatch))"
     );
 }
 
@@ -170,7 +170,7 @@ fn lisp_fs_root_envelope_round_trips_bindings_revision_and_addresses() {
                     (car (fs-root-package-decision bad))))
             "#
         ),
-        "(\"((format . wsm-fs-root) (version 0 1) (revision . 1) (bindings (\\\"notes/today\\\" . \\\"(hello world)\\\")) (objects \\\"(hello world)\\\"))\" accepted rejected)"
+        "(\"((format . wsm-fs-root) (version #q2:0/1 #q2:1/1) (revision . #q2:1/1) (bindings (\\\"notes/today\\\" . \\\"(hello world)\\\")) (objects \\\"(hello world)\\\"))\" accepted rejected)"
     );
 }
 
@@ -248,7 +248,7 @@ fn lisp_fs_journal_serialization_round_trips_into_the_same_snapshot() {
                 (fs-read (second replayed) "notes/today")))
             "#
         ),
-        "(\"(((format . wsm-fs-event) (version 0 1) (op . write) (name . \\\"notes/today\\\") (value hello world)))\" accepted (found (hello world) \"(hello world)\"))"
+        "(\"(((format . wsm-fs-event) (version #q2:0/1 #q2:1/1) (op . write) (name . \\\"notes/today\\\") (value hello world)))\" accepted (found (hello world) \"(hello world)\"))"
     );
 }
 

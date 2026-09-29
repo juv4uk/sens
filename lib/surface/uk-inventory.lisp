@@ -30,7 +30,7 @@
      ; had gone stale relative to the actual implementation until
      ; corrected.
      (core-library
-       (abs identity binary list not? not and or gensym pair second third fourth cadddr fifth
+       (abs identity binary list not? and or gensym pair second third fourth cadddr fifth
         caar cadr cddr length reverse append map filter reduce let equal? max
         max-list member? min min-list assoc let* nth string<? symbol? quotient mod
         divmod <= >= number->string -> ->> isqrt sqrt
