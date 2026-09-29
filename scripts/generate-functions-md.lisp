@@ -55,14 +55,25 @@
 (00001001 functions-md-decimal-radix
   (00001100 1 1 1 1 1 1 1 1 1 1))
 
+; Use only two-part COND with EQ.  On current main EQ yields the existing
+; answer carrier; on the PredicateBit runtime it yields the one-bit carrier.
+; That keeps this human-presentation helper valid across the active migration.
+(00001001 decimal-count->string-onto
+  (00001000 (n acc)
+    (00000111
+      ((00000011 n 0) acc)
+      ((00000011 0 0)
+       (decimal-count->string-onto
+         (00010100 n functions-md-decimal-radix)
+         (00111010
+           (01000111 (00010011 n functions-md-decimal-radix))
+           acc))))))
+
 (00001001 decimal-count->string
   (00001000 (n)
     (00000111
-      ((00011010 n functions-md-decimal-radix) (1) (01000111 n))
-      ((00011010 n functions-md-decimal-radix) (0)
-       (00111010
-         (decimal-count->string (00010100 n functions-md-decimal-radix))
-         (01000111 (00010011 n functions-md-decimal-radix)))))))
+      ((00000011 n 0) "0")
+      ((00000011 0 0) (decimal-count->string-onto n "")))))
 
 (00001001 backtick-join
   (00001000 (names)
