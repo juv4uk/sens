@@ -25,8 +25,13 @@
 ; Consumers read it as data. #228/#244's Lisp-owned witness is the executable
 ; authority consumer. Runtime/backends may preserve this contract; they do not
 ; acquire authority to guess a specialization.
+;
+; /2 adds the shared yes/no answer law for cores 1–4 (see the /2 entry below
+; and tests/fixtures/answer-domain-cores-v1.lisp). It narrows the answer value
+; domain; it does not touch the 15-state extension, which keeps () as its
+; third state. () remains canon-zero and remains never FALSE.
 
-(answer-contract/1
+(answer-contract/2
   ((identity . canon-zero)
    (domain-owner . no-answer-boundary)
    (answer-role . unspecialized-accumulator)
@@ -151,4 +156,37 @@
    (no-answer . ())
    (allowed-coercions . (domain-dispatch))
    (forbidden-coercions . (generic-value->bool host-bool truthy-collapse))
-   (generic-value-coercion . forbidden)))
+   (generic-value-coercion . forbidden))
+
+  ; /2 (2026-09-29, рішення власника в #1663): спільний закон домену
+  ; відповіді «так»/«ні» для ядер 1–4. Одна фістура, один закон, чотири
+  ; профілі. Виконуваний свідок — tests/fixtures/answer-domain-cores-v1.lisp
+  ; зі спостерігачем crates/sens/tests/answer_domain_cores.rs.
+  ;
+  ; Закон діє на ЗНАЧЕННІ відповіді, а не на їхньому сповненні: носій — окрема
+  ; вимір, ратифікована для проєкцій 00000010 і 00000011 як список двійкових
+  ; бітів (див. core4-predicate-answer-scale/3). Тому скаляр 1/0 і список
+  ; (1)/(0) — один закон із двома носіями, а не два різні закони.
+  ;
+  ; Межа закону: () не є відповіддю «так» і не є відповіддю «ні». Це
+  ; несуспеціалізований акумулятор (canon-zero) і, у профілі 4, третій стан
+  ; розширення 0^n | 1^n | (). Розширення не перевизначає спільний закон і
+  ; не змінюється ним.
+  ;
+  ; Ідентифікація функцій — лише кодами СЕНС. Назва поверхні не є тотожністю.
+  ((binary-answer-law . yes-one-no-zero)
+   (scope . (1 2 3 4))
+   (yes . 1)
+   (no . 0)
+   (allowed-value-domain . (1 0))
+   (forbidden-answer-values . (t T nil nil () false unknown-sentinel))
+   (carrier-ratified . (00000010 00000011))
+   (carrier-form . list-of-binary-bits)
+   (extension-state . ())
+   (extension-owns . (0^n 1^n ()))
+   (extension-scope . core4)
+   (extension-mutated-by-this-law . no)
+   (identifier-spelling . sens-code-only)
+   (fixture . answer-domain-cores-v1)
+   (witness . answer_domain_cores)))
+

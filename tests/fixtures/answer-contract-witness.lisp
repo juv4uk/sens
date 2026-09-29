@@ -239,7 +239,7 @@
                 ; A String that looks like an SID is still ordinary String data.
                 (answer-contract-witness-expect-missing "00000100")))))
       (00000111
-        ((00000011 (answer-contract-schema) (00000001 answer-contract/1))
+        ((00000011 (answer-contract-schema) (00000001 answer-contract/2))
          (00000111
            ((00000010 failure) () (answer-contract-witness-record
               (00000001 pass)
