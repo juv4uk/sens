@@ -112,19 +112,11 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; śabdasaṃyoga = joining of words (≠ saṃyuj CONS)
-(00001001 śabdasaṃyoga string-append)
-(00001001 śabdapramāṇa string-length)
 ; śūnya = empty/void
-(00001001 śūnya? string-empty?)
 ; pūrva = preceding (≠ ādi CAR)
-(00001001 pūrva? string-prefix?)
-(00001001 śabdasambaddha? string-contains?)
 ; prathamavarṇa = first letter (≠ ādi CAR)
-(00001001 prathamavarṇa string-first)
 ; śeṣavarṇa = rest of letters (≠ śeṣa CDR)
-(00001001 śeṣavarṇa string-rest)
 ; cheda = cut/slice
-(00001001 cheda string-slice)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Other (status: candidate)
@@ -138,37 +130,22 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; mudraṇa = impression/printing
-(00001001 mudraṇa print)
 ; darśana = showing/display
-(00001001 darśana princ)
 ; pāṭhana = reading
-(00001001 pāṭhana read)
-(00001001 pāṭhana-sarva read-all)
 ; likhana = writing
-(00001001 likhana write-to-string)
 ; vicāraṇa = deliberation/evaluation
-(00001001 vicāraṇa eval)
 ; āśraya = substrate/environment
-(00001001 āśraya env)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Vectors (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; samūha = collection/aggregate
-(00001001 samūha vector)
-(00001001 samūha-nirmāṇa make-vector)
-(00001001 samūha-pramāṇa vector-length)
-(00001001 samūha-āvartana vector-ref)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Conversions (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-(00001001 nāman-śabda symbol->string)
-(00001001 śabda-nāman string->symbol)
-(00001001 varṇa-śabda codepoint->string)
-(00001001 śabda-varṇa string->codepoint)
 ; saṅkhyā-śabda = number-to-word
 (00001001 saṅkhyā-śabda number->string)
 
@@ -178,8 +155,6 @@
 
 ; kāla = time
 (00001001 kāla-adya utc-now)
-(00001001 kāla-unix unix-time-now)
-(00001001 kāla-mono mono-ns)
 (00001001 kāla-mono-ms mono-ms)
 (00001001 kāla-millisecondāni milliseconds-from-nanoseconds)
 ; deśa-kāla = timezone
