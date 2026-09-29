@@ -1,125 +1,28 @@
-name: Core4 predicate answer scale
+name: Core4 predicate answer scale — deferred research
 
 on:
-  pull_request:
-    paths:
-      - "contracts/core4-predicate-answer-scale.lisp"
-      - "knowledge/core4-predicate-record-inventory.lisp"
-      - "contracts/core4-predicate-answer-boundary.lisp"
-      - "contracts/core4-predicate-output-boundary.lisp"
-      - "contracts/core4-eq-result-law.lisp"
-      - "scripts/check-core4-predicate-answer-scale.lisp"
-      - "scripts/check-core4-predicate-record-inventory.lisp"
-      - "scripts/check-core4-predicate-answer-boundary.lisp"
-      - "experiments/core4-logic15-algebra.lisp"
-      - "scripts/check-core4-predicate-output-boundary.lisp"
-      - "tests/fixtures/core4-predicate-output-allowed.lisp"
-      - "tests/fixtures/core4-predicate-output-forbidden.lisp"
-      - "experiments/core4-mechanical-answer-grade.lisp"
-      - "experiments/core4-eq-result-law-witness.lisp"
-      - "experiments/core4-predicate-answer-carrier-matrix.lisp"
-      - ".github/workflows/core4-predicate-answer-scale.yml"
-  push:
-    branches: [main]
-    paths:
-      - "contracts/core4-predicate-answer-scale.lisp"
-      - "contracts/core4-predicate-answer-boundary.lisp"
-      - "scripts/check-core4-predicate-answer-scale.lisp"
-      - "scripts/check-core4-predicate-answer-boundary.lisp"
-      - "experiments/core4-logic15-algebra.lisp"
-      - "experiments/core4-mechanical-answer-grade.lisp"
-      - "experiments/core4-predicate-answer-carrier-matrix.lisp"
-      - ".github/workflows/core4-predicate-answer-scale.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  predicate-answer-scale:
-    name: Lisp-owned Core4 predicate answer scale
+  historical-research:
+    name: Deferred 15-state research archive
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Build semantic oracle
-        run: cargo build -p sens-cli --bin sens
-
-      - name: Verify predicate answer scale
-        shell: bash
+      - name: Explain authority status
         run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens scripts/check-core4-predicate-answer-scale.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core4-predicate-answer-scale-ok)"
-
-      - name: Verify function-SID endpoint boundary
-        shell: bash
+          echo "15-state / graded predicate logic is deferred research under #1703/#1711."
+          echo "This workflow is manual-only and must not block pull requests or main."
+          echo "Active predicate law is exact one bit: 1 YES / 0 NO."
+      - name: Record historical artifacts
         run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens scripts/check-core4-predicate-answer-boundary.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core4-predicate-answer-boundary-ok)"
-
-      - name: Verify ratified AND/OR/NOT laws (15-state witness)
-        shell: bash
-        run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens experiments/core4-logic15-algebra.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core4-logic15-algebra-ok)"
-
-      - name: Verify mechanical answer grading experiment
-        shell: bash
-        run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens experiments/core4-mechanical-answer-grade.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core4-mechanical-answer-grade-ok)"
-
-      - name: Measure predicate-answer carrier candidates
-        shell: bash
-        run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens experiments/core4-predicate-answer-carrier-matrix.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core4-answer-carrier-matrix-ok)"
-
-      - name: Verify Core4 EQ result law
-        shell: bash
-        run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens experiments/core4-eq-result-law-witness.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core4-eq-result-law-ok)"
-
-      - name: Verify final predicate-answer output boundary
-        shell: bash
-        run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens scripts/check-core4-predicate-output-boundary.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core4-predicate-output-boundary-ok)"
-
-      - name: Verify exact-8-bit predicate/record inventory
-        shell: bash
-        run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens scripts/check-core4-predicate-record-inventory.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core4-predicate-record-inventory-ok)"
-
-      - name: Keep this slice Lisp-owned
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --name-only "${{ github.event.pull_request.base.sha || github.event.before }}" HEAD 2>/dev/null | grep -E '\.rs$'; then
-            echo "Predicate-answer authority slice must not grow Rust" >&2
-            exit 1
-          fi
-
+          sha256sum contracts/core4-predicate-answer-scale.lisp
+          sha256sum contracts/core4-predicate-output-boundary.lisp
+          sha256sum contracts/core4-eq-result-law.lisp
+          sha256sum experiments/core4-logic15-algebra.lisp
       - name: Diff hygiene
         run: git diff --check
