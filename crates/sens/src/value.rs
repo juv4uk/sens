@@ -498,6 +498,9 @@ impl std::fmt::Debug for Builtin {
 #[derive(Clone, Debug)]
 pub enum Value {
     Nil,
+    /// Exact contextual SENS predicate result. This runtime carrier is
+    /// neither Number nor host Bool and has no source literal.
+    PredicateBit(bool),
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
@@ -562,6 +565,7 @@ impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Value::Nil, Value::Nil) => true,
+            (Value::PredicateBit(left), Value::PredicateBit(right)) => left == right,
             (Value::Bool(left), Value::Bool(right)) => left == right,
             // Exactness is part of a number's identity (PLAN.md item 10, Path
             // A): (eq 3 3.0) is () because these are different values in the
@@ -686,6 +690,19 @@ impl Value {
         !matches!(self, Value::Pair(_, _))
     }
 
+    pub fn predicate_bit(holds: bool) -> Self {
+        Self::PredicateBit(holds)
+    }
+
+    pub fn as_predicate_bit(&self) -> Option<bool> {
+        match self {
+            Self::PredicateBit(bit) => Some(*bit),
+            _ => None,
+        }
+    }
+
+    /// Legacy host/boundary truthiness. Core predicate/control execution must
+    /// not call this; COND accepts PredicateBit only.
     pub fn is_truthy(&self) -> bool {
         !matches!(self, Value::Nil | Value::Bool(false))
     }
@@ -783,6 +800,8 @@ fn render(value: &Value, quote_strings: bool) -> String {
             format!("#f32({})", items.join(" "))
         }
         Value::Nil => "()".to_string(),
+        Value::PredicateBit(true) => "1".to_string(),
+        Value::PredicateBit(false) => "0".to_string(),
         Value::Bool(true) => "t".to_string(),
         Value::Bool(false) => "()".to_string(),
         Value::Number(number, Exactness::Exact) => number.to_string(),
