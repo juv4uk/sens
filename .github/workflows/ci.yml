@@ -151,6 +151,9 @@ jobs:
                 continue
                 ;;
             esac
+            # A deletion has no remaining source text that can introduce
+            # host -> language authority. Do not require a tombstone file.
+            [[ -e "$path" ]] || continue
             digest="$(sha256sum "$path" | awk '{print $1}')"
             printf '(changed "%s" "%s")\n' "$path" "$digest" >> tests/semantic-authority-changes.lisp
           done < /tmp/changed.txt
