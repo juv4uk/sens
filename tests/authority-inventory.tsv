@@ -89,11 +89,6 @@ crates/wsm-prolog-kernel/tests/c_abi_semantic_witness.rs	prolog_native_substitut
 crates/my-lisp-cli/tests/semantic_oracle_preservation.rs\tsemantic_oracle_surface_survives_coordination_removal\tobserver\tsemantic-oracle-surface\tcrates/my-lisp-cli/src/swarm.rs\tretained
 crates/my-lisp-cli/tests/legacy_coordination_rejected.rs\tsemantic_oracle_rejects_retired_coordination_operations\tobserver\tsemantic-oracle-removal\ttests/fixtures/native-first-execution-witness.lisp\tretained
 tests/fixtures/semantic-coordinate-law-axis-v1.lisp	semantic-coordinate-law-axis-v1	semantic-witness	bounded-semantic-coordinate-laws	lib/surface/semantic-registry.lisp + existing math/structural/control contracts	retained
-crates/my-lisp/tests/semantic_coordinate_law_axis.rs	coordinate_rows_use_current_semantic_ids_without_minting_new_identity	observer	semantic-coordinate-noninterference	lib/surface/semantic-registry.lisp + tests/fixtures/semantic-coordinate-law-axis-v1.lisp	retained
-crates/my-lisp/tests/semantic_coordinate_law_axis.rs	exact_rational_addition_reuses_existing_mathematical_result_contract	observer	mathematical-result-coordinate	tests/fixtures/mathematical-result-v1.lisp	retained
-crates/my-lisp/tests/semantic_coordinate_law_axis.rs	pair_equation_is_executable_and_independent_of_machine_representation	observer	equational-structure-coordinate	lib/canon.lisp + tests/fixtures/semantic-coordinate-law-axis-v1.lisp	retained
-crates/my-lisp/tests/semantic_coordinate_law_axis.rs	eq_relation_law_stays_separate_from_exact_q_binary_policy	observer	identity-relation-coordinate	contracts/structural-observation-contract.lisp + tests/fixtures/semantic-coordinate-law-axis-v1.lisp	retained
-crates/my-lisp/tests/semantic_coordinate_law_axis.rs	cond_proves_that_not_every_semantic_identity_is_a_mathematical_law	observer	negative-math-coordinate	contracts/control-dispatch-contract.lisp + tests/fixtures/semantic-coordinate-law-axis-v1.lisp	retained
 crates/my-lisp/tests/machine_capability_axis.rs	current_semantic_ids_project_to_target_neutral_capabilities	observer	machine-capability-axis	lib/surface/semantic-registry.lisp + lib/machine/capability-axis.lisp	retained
 crates/my-lisp/tests/machine_capability_axis.rs	capability_names_do_not_mint_semantic_identities	observer	machine-semantic-noninterference	lib/surface/semantic-registry.lisp + lib/machine/capability-axis.lisp	retained
 crates/my-lisp/tests/machine_capability_axis.rs	unsupported_targets_are_explicitly_unwitnessed	observer	target-witness-absence	lib/machine/capability-axis.lisp	retained
@@ -144,12 +139,6 @@ crates/my-lisp/tests/yantra.rs	yantraos_bridge_builds_typed_action_envelope	obse
 crates/my-lisp/tests/yantra.rs	yantraos_bridge_rejects_raw_shell_capability	observer	yantraos-bridge-shell-boundary	contracts/yantraos-bridge-contract.lisp + tests/fixtures/yantraos-bridge-witness.lisp	retained
 crates/my-lisp/tests/yantra.rs	yantraos_bridge_keeps_execution_observation_and_provenance	observer	yantraos-bridge-provenance	contracts/yantraos-bridge-contract.lisp + tests/fixtures/yantraos-bridge-witness.lisp	retained
 crates/my-lisp/tests/program_surface_translation.rs	translated_programs_execute_with_the_same_result_on_all_table_surfaces	observer	surface-namespace-translation-parity	lib/surface/semantic-registry.lisp + scripts/translate-program.py	retained
-crates/my-lisp/tests/core2_runtime_profile.rs	core2_uses_legacy_two_part_cond_truthiness	observer	core2-contract6-cond	contracts/core2-profile-contract.lisp + lib/core2.lisp	migrated
-crates/my-lisp/tests/core2_runtime_profile.rs	core2_two_part_cond_short_circuits	observer	core2-contract6-short-circuit	contracts/core2-profile-contract.lisp + lib/core2.lisp	migrated
-crates/my-lisp/tests/core2_runtime_profile.rs	core2_exhaustion_returns_nil	observer	core2-contract6-cond-exhaustion	contracts/core2-profile-contract.lisp + lib/core2.lisp	migrated
-crates/my-lisp/tests/core2_runtime_profile.rs	core2_rejects_core4_three_part_clause_shape	observer	core2-core4-profile-separation	contracts/core2-profile-contract.lisp + contracts/core-profile-contract.lisp	migrated
-crates/my-lisp/tests/core2_runtime_profile.rs	core2_library_projects_structural_results_back_to_t_nil	observer	core2-contract6-result-projection	lib/core2.lisp	migrated
-crates/my-lisp/tests/core2_runtime_profile.rs	loading_core4_after_core2_restores_current_cond_profile	observer	core2-core4-profile-switch-noninterference	contracts/core-profile-contract.lisp + lib/core2.lisp + lib/core4.lisp	migrated
 crates/my-lisp/tests/probabilistic_decision_jev_like.rs	choice_observation_keeps_probability_confidence_and_provenance	observer	probabilistic-decision-jev-like	experiments/probabilistic-decision-jev-like.lisp	migrated
 crates/my-lisp/tests/probabilistic_decision_jev_like.rs	invalid_choice_distribution_fails_closed_when_not_normalized	observer	probabilistic-decision-jev-like	experiments/probabilistic-decision-jev-like.lisp	migrated
 crates/my-lisp/tests/probabilistic_decision_jev_like.rs	noul_policy_is_explicit_threshold_control_not_truthiness	observer	probabilistic-decision-jev-like	experiments/probabilistic-decision-jev-like.lisp	migrated
@@ -159,12 +148,6 @@ crates/my-lisp/tests/probabilistic_decision_jev_like.rs	declared_agreement_with_
 crates/my-lisp/tests/probabilistic_decision_jev_like.rs	noul_policy_rejects_out_of_domain_threshold	observer	probabilistic-decision-jev-like	experiments/probabilistic-decision-jev-like.lisp	migrated
 crates/my-lisp/tests/probabilistic_decision_jev_like.rs	choice_policy_rejects_out_of_domain_threshold	observer	probabilistic-decision-jev-like	experiments/probabilistic-decision-jev-like.lisp	migrated
 crates/my-lisp/tests/probabilistic_decision_jev_like.rs	synthetic_witness_carries_one_state_through_three_typed_questions	observer	probabilistic-decision-jev-like	experiments/probabilistic-decision-jev-like.lisp	migrated
-crates/my-lisp/tests/core4_eq_answer_1258.rs	same_atom_answers_one	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
-crates/my-lisp/tests/core4_eq_answer_1258.rs	distinct_atom_answers_zero	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
-crates/my-lisp/tests/core4_eq_answer_1258.rs	outside_domain_is_a_named_error_not_zero	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
-crates/my-lisp/tests/core4_eq_answer_1258.rs	not_is_a_clean_bit_flip_between_the_two_admitted_answers	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
-crates/my-lisp/tests/core4_eq_answer_1258.rs	sid_identity_plays_no_role_in_the_answer	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
-crates/my-lisp/tests/core4_eq_answer_1258.rs	historical_core1_eq_is_completely_unchanged	observer	core4-predicate-answer-eq-vertical-slice	experiments/core4-eq-answer-1258.lisp	migrated
 crates/my-lisp/tests/member_named_vs_sid_cost_1278.rs	equal_has_an_admitted_sid_but_no_native_callable_mechanism	observer	named-vs-sid-real-function-cost	lib/core.lisp	migrated
 crates/my-lisp/tests/member_named_vs_sid_cost_1278.rs	named_eq_call_and_bare_sid_call_agree_on_every_answer	observer	named-vs-sid-real-function-cost	lib/core.lisp	migrated
 crates/my-lisp/tests/member_named_vs_sid_cost_1278.rs	repeated_lookups_through_a_real_shaped_member_cost_more_by_name_than_by_sid	observer	named-vs-sid-real-function-cost	lib/core.lisp	migrated
@@ -195,3 +178,4 @@ crates/my-lisp/tests/sens_host_registration_admission_1406.rs	host_registration_
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	core3_loader_selects_core3_only_after_the_profile_layer_loads	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	lexical_child_shares_selected_core3_signal	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	later_explicit_core4_load_replaces_core3_signal_without_implicit_fallback	observer	selected-core3-profile-mechanism	contracts/core-profile-contract.lisp	migrated
+crates/sens/tests/semantic_coordinate_law_axis.rs	coordinate_rows_use_current_function_ids_without_minting_new_identity	observer	function8-boundary-noninterference	lib/surface/semantic-registry.lisp	retained
