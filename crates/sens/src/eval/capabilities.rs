@@ -23,6 +23,23 @@ use std::sync::{OnceLock, RwLock};
 /// the `Environment`, exactly like every kernel primitive.
 pub type HostFn = fn(&[Expr], &Environment, Span) -> Result<Value, LanguageError>;
 
+/// Тимчасова межа міграції #1779: значення вже обчислене evaluator-ом,
+/// а Span лишається суто діагностичною метаданою механізму.
+#[derive(Clone, Debug)]
+pub struct EvaluatedArg {
+    pub value: Value,
+    pub span: Span,
+}
+
+pub type EvaluatedHostFn =
+    fn(&[EvaluatedArg], &Environment, Span) -> Result<Value, LanguageError>;
+
+#[derive(Clone, Copy)]
+enum HostHandler {
+    Raw(HostFn),
+    Evaluated(EvaluatedHostFn),
+}
+
 /// Host mechanism for one already-existing exact SENS function.
 /// The key is the eight-bit function itself; this registry owns no function meaning.
 pub type SensHostFn =
@@ -30,13 +47,13 @@ pub type SensHostFn =
 
 #[derive(Clone, Copy)]
 enum CapabilityLookup {
-    Present(HostFn),
+    Present(HostHandler),
     Absent,
     Unreadable,
 }
 
 fn lookup_capability(
-    source: &RwLock<BTreeMap<String, HostFn>>,
+    source: &RwLock<BTreeMap<String, HostHandler>>,
     name: &str,
 ) -> CapabilityLookup {
     match source.read() {
@@ -48,8 +65,8 @@ fn lookup_capability(
     }
 }
 
-fn registry() -> &'static RwLock<BTreeMap<String, HostFn>> {
-    static REGISTRY: OnceLock<RwLock<BTreeMap<String, HostFn>>> = OnceLock::new();
+fn registry() -> &'static RwLock<BTreeMap<String, HostHandler>> {
+    static REGISTRY: OnceLock<RwLock<BTreeMap<String, HostHandler>>> = OnceLock::new();
     REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
 }
 
@@ -65,7 +82,18 @@ pub fn register_capability(name: &str, handler: HostFn) {
     registry()
         .write()
         .expect("capability registry poisoned")
-        .insert(name.to_string(), handler);
+        .insert(name.to_string(), HostHandler::Raw(handler));
+    super::closures::bump_resolution_epoch();
+}
+
+/// #1779 migration seam: evaluator-owned argument evaluation, host receives
+/// only ready Values plus their original source spans. The string key remains
+/// private mechanism metadata and is not a SENS function identity.
+pub fn register_evaluated_capability(name: &str, handler: EvaluatedHostFn) {
+    registry()
+        .write()
+        .expect("capability registry poisoned")
+        .insert(name.to_string(), HostHandler::Evaluated(handler));
     super::closures::bump_resolution_epoch();
 }
 
@@ -115,15 +143,28 @@ pub fn installed_capabilities() -> Vec<String> {
 }
 
 fn dispatch_capability_from(
-    source: &RwLock<BTreeMap<String, HostFn>>,
+    source: &RwLock<BTreeMap<String, HostHandler>>,
     name: &str,
     arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Option<Result<EvalStep, LanguageError>> {
     match lookup_capability(source, name) {
-        CapabilityLookup::Present(handler) => {
+        CapabilityLookup::Present(HostHandler::Raw(handler)) => {
             Some(handler(arguments, environment, span).map(EvalStep::Value))
+        }
+        CapabilityLookup::Present(HostHandler::Evaluated(handler)) => {
+            let result = (|| {
+                let mut evaluated = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    evaluated.push(EvaluatedArg {
+                        value: super::evaluate(argument, environment)?,
+                        span: argument.span,
+                    });
+                }
+                handler(&evaluated, environment, span)
+            })();
+            Some(result.map(EvalStep::Value))
         }
         CapabilityLookup::Absent => None,
         CapabilityLookup::Unreadable => Some(Err(LanguageError::new(
@@ -189,7 +230,7 @@ mod honesty_tests {
         let lock = RwLock::new(BTreeMap::new());
         lock.write()
             .expect("fresh local registry")
-            .insert("demo".to_string(), dummy_handler as HostFn);
+            .insert("demo".to_string(), HostHandler::Raw(dummy_handler as HostFn));
 
         assert!(matches!(
             lookup_capability(&lock, "demo"),
