@@ -316,15 +316,10 @@
       ((00111101 marker s) t i)
       (t t (pos-of (01000000 s) marker (00001100 i 1))))))
 
-(10011100 ((first (pos-of uk-surface "(00001001 середовище env)" 0)))
-  (00000111
-    ((00011010 first 0) 1 (fail "uk.lisp: немає (00001001 середовище env)"))
-    (t t
-     (00000111
-       ((00111110 "(00001001 середовище env)"
-                          (01000001 uk-surface (00001100 first 1) 1000000000)) t
-        (fail "uk.lisp: (00001001 середовище env) більше одного разу"))
-       (t t t)))))
+(00000111
+  ((00011010 (pos-of uk-surface "(00001001 середовище env)" 0) 0) t
+   (fail "uk.lisp: (00001001 середовище env) мусить бути лише в реєстрі, не в поверхні"))
+  (t t t))
 (pass "seredovyshche-ne-maie-povtornoho-surface-binding")
 
 (00001001 check-aliases
