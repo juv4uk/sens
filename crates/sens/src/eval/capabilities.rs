@@ -23,16 +23,8 @@ use std::sync::{OnceLock, RwLock};
 /// the `Environment`, exactly like every kernel primitive.
 pub type HostFn = fn(&[Expr], &Environment, Span) -> Result<Value, LanguageError>;
 
-/// Тимчасова межа міграції #1779: значення вже обчислене evaluator-ом,
-/// а Span лишається суто діагностичною метаданою механізму.
-#[derive(Clone, Debug)]
-pub struct EvaluatedArg {
-    pub value: Value,
-    pub span: Span,
-}
-
-pub type EvaluatedHostFn =
-    fn(&[EvaluatedArg], &Environment, Span) -> Result<Value, LanguageError>;
+type EvaluatedHostFn =
+    fn(&[(Value, Span)], &Environment, Span) -> Result<Value, LanguageError>;
 
 #[derive(Clone, Copy)]
 enum HostHandler {
@@ -170,10 +162,7 @@ fn dispatch_capability_from(
             let result = (|| {
                 let mut evaluated = Vec::with_capacity(arguments.len());
                 for argument in arguments {
-                    evaluated.push(EvaluatedArg {
-                        value: super::evaluate(argument, environment)?,
-                        span: argument.span,
-                    });
+                    evaluated.push((super::evaluate(argument, environment)?, argument.span));
                 }
                 handler(&evaluated, environment, span)
             })();
@@ -266,7 +255,7 @@ mod honesty_tests {
     }
 
     fn evaluated_handler(
-        _arguments: &[EvaluatedArg],
+        _arguments: &[(Value, Span)],
         _environment: &Environment,
         _span: Span,
     ) -> Result<Value, LanguageError> {
