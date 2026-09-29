@@ -31,7 +31,7 @@
    (contract-pin . "fae8d8f8ea6713d94db1f1fd7e8df4398279317e")
    (primitive-admission . evidence-based-adr-005)
    (sid-budget . shared-8-bit)
-   (canonical-cond-family . historical-truthiness)
+   (historical-cond-family . contract-7-truthiness-provenance-only)
    (unsatisfied-conditional . not-yet-contract8))
 
   ((identity . mechanism-architecture)
