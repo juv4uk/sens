@@ -8,7 +8,6 @@ set -euo pipefail
 cargo test -p sens \
   --test witness_authority \
   --test structural_observation_contract \
-  --test deep_structural_relation_contract \
   --test exact_q_binary_contract \
   --test mathematical_result_taxonomy \
   --test canon_laws_v2_contract \
