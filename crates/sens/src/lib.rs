@@ -7,7 +7,6 @@
 //! installed into this core's registry at startup by whichever embedder
 //! wants them (the CLI does; WASM does not). See eval/capabilities.rs.
 
-pub mod layout;
 
 mod bignum;
 mod environment;
