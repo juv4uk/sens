@@ -53,7 +53,7 @@ if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(symbol) {
 
 ---
 
-## Підсумок класифікації
+## Класифікація підсумок
 
 | Класифікація | Шляхи | Дія |
 |---|---|---|
