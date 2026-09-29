@@ -92,7 +92,7 @@ fn alist_word<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
 
 /// A semantic id is written as the exact 8-bit literal it names, not as a
 /// string or a symbol — the head of the row IS the id.
-fn alist_id<'a>(entries: &'a [Expr], key: &str) -> Option<String> {
+fn alist_id(entries: &[Expr], key: &str) -> Option<String> {
     match &alist_field(entries, key)?.kind {
         ExprKind::String(value) => Some(value.as_ref().to_string()),
         ExprKind::Sid(sid) => Some(sid.to_string()),
