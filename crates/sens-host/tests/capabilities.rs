@@ -374,9 +374,9 @@ fn load_evaluates_every_form_in_a_file_and_returns_the_last_value() {
 fn load_uses_the_same_surface_lowering_as_eval_program() {
     let path = std::env::temp_dir().join("sens-load-lowering-parity.lisp");
     let path_str = path.to_str().unwrap().replace('\\', "/");
-    std::fs::write(&path, "(plus 20 22)").unwrap();
+    std::fs::write(&path, "(додати 20 22)").unwrap();
 
-    let direct = eval_program("(plus 20 22)", &mut capability_session())
+    let direct = eval_program("(додати 20 22)", &mut capability_session())
         .expect("direct program should lower the human function surface");
     let loaded = eval_program(
         &format!(r#"(load "{path_str}")"#),
