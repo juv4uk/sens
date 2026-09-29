@@ -6,7 +6,7 @@
 
 Практичний LISP I того ж періоду робить цю частковість спостережуваною як named failure: [*LISP I Programmer's Manual*, 1 March 1960](https://softwarepreservation.computerhistory.org/LISP/book/LISP%20I%20Programmers%20Manual.pdf) має помилку `A3 CONDITIONAL UNSATISFIED -EVCON-` для випадку, коли жодна умова не обчислилася як істинна. У ["History of Lisp" (1978)](https://www-formal.stanford.edu/jmc/history/lisp/lisp.html) Маккарті також пояснює походження conditional expressions роботою над шаховими процедурами у FORTRAN для IBM 704 у 1957–58 роках: на відміну від eager `XIF`, справжній conditional expression не обчислює непотрібну гілку.
 
-**Межа аналогії:** канонічний my-lisp `COND` — не реконструкція синтаксису Маккарті. Власне розширення my-lisp має клаузу `(query expected-result expression)` і робить вибір через явне зіставлення observed result з expected datum. Історичний корінь тут лише у двох принципах: ordered/selective evaluation та легітимність відсутності значення при вичерпанні умов. Contract 8.0 робить другий принцип явним як `UnsatisfiedConditional`, а не як тихий `()`.
+**Межа аналогії:** сучасний SENS не копіює історичну truth-модель. Після binary reset `COND` має форму `(test expression)` і приймає тільки точний PredicateBit `1/0`; вибір лишається впорядкованим і selective, а вичерпання повертає структурне `()`. Старий expected-result dispatch Contract 8.0 лишається лише в історії git.
 
 ## Українська
 
@@ -50,7 +50,7 @@ Lisp ніколи не був для Маккарті мовою загальн�
 
 ### English note
 
-McCarthy's 1960 conditional expression is ordered and partial: predicates are examined left-to-right, only the selected branch is evaluated, and exhaustion is undefined. The March 1960 LISP I manual exposes the same boundary as `A3 CONDITIONAL UNSATISFIED -EVCON-`. my-lisp's three-part expected-result matching is its own extension, not a historical claim; Contract 8.0 preserves ordered selective evaluation and makes canonical exhaustion a named `UnsatisfiedConditional` failure.
+McCarthy's 1960 conditional expression is ordered and selective; the March 1960 LISP I manual exposed exhaustion as `A3 CONDITIONAL UNSATISFIED -EVCON-`. Modern SENS keeps the ordered/selective idea but, after the binary reset, uses `(test expression)` with exact PredicateBit `1/0`; exhaustion returns structural `()`. The former three-part expected-result Contract 8.0 is historical, not current language authority.
 
 This document lays out how John McCarthy himself described Lisp's origin and evolution — mainly from his own 1978 retrospective ["History of Lisp"](https://www-formal.stanford.edu/jmc/history/lisp/lisp.html) (written for the ACM SIGPLAN History of Programming Languages conference) and his public writing over the following decades — and where this project deliberately follows or departs from that account. It's history, not a design spec; [`docs/language-core.md`](language-core.md) and [`PLAN.md`](../PLAN.md) are where this project's own decisions live.
 
