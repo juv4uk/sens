@@ -13,15 +13,15 @@
  (authority . mechanism-private)
  (lifecycle . historical-transition)
  (format . nan-boxing-64)
- 
+
  (nan-marker . ((bits . 12) (position . (63 52)) (value . #xfff)))
- 
+
  (fpga-lisp-compatibility .
   "The lower 32-bit layout mirrors the fpga-lisp VALUE WORD shape only.
    bits (31 28) = tag
    bits (27 0) = payload
    This does not make tag ordinals or FPGA instruction opcodes language semantics.")
- 
+
  (layout . ((float . "IEEE-754 64-bit double (when exponent is not all 1s)")
             (tagged . ((nan-marker . (63 52))
                        (extended-payload . (51 32))
@@ -39,7 +39,7 @@
           (closure . 8)   ; New: extended-payload + payload = 48-bit pointer to heap
           (tcp-conn . 9))) ; New: host resource handle
 
- (heap-representation . 
+ (heap-representation .
   ((string . "null-terminated UTF-8 byte array")
    (rational . "two consecutive 64-bit pointers (numerator, denominator) to BigInt blocks")
    (closure . "two consecutive 64-bit pointers (environment, compiled-code-pointer)")))
