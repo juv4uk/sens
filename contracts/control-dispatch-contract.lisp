@@ -1,48 +1,28 @@
-; #217 — Lisp-owned explicit control-dispatch contract.
+; #1810 — minimal shared COND control law.
 ;
-; Canonical control does not coerce arbitrary values to truth. A clause names
-; both the query to evaluate and the exact domain result that selects it.
+; COND does not understand arbitrary answer algebras.
+; It consumes exactly the contextual one-bit predicate result:
 ;
-; Conceptual clause shape:
-;   (query expected-result expression)
+;   1 -> select/evaluate expression
+;   0 -> continue
 ;
-; Dispatch law:
-;   actual = eval(query)
-;   actual structurally equals expected-result -> select expression
-;   otherwise -> continue
-;   no matching clause -> ()
+; A clause is exactly:
+;   (test expression)
 ;
-; This first contract ratifies shape only. Historical two-part T/NIL cond is
-; compatibility debt until migrated; it is not canonical semantic authority.
+; Exhaustion returns structural (), which is data and never predicate FALSE.
 
-(control-dispatch-contract/1
-  ((identity . "0007")
-   (domain-owner . control-consumer)
-   (canonical-clause-shape . (query expected-result expression))
-   (selection-rule . explicit-result-equality)
+(control-dispatch-contract/2
+  ((identity . 00000111)
+   (domain-owner . control)
+   (canonical-clause-shape . (test expression))
+   (test-domain . predicate-one-bit)
+   (select-on . one)
+   (skip-on . zero)
+   (no-match . structural-empty)
+   (three-part-clause . forbidden)
+   (expected-result-field . forbidden)
+   (explicit-result-equality . forbidden)
    (generic-truth-coercion . forbidden)
    (host-bool-coercion . forbidden)
    (empty-list-as-false . forbidden)
-   (arbitrary-nonempty-as-true . forbidden)
-   (no-match . ()))
-
-  ((result-domain . exact-q-decision)
-   (admitted-results . (0/1 1/1))
-   (dispatch . explicit-result-equality))
-
-  ((result-domain . structural-kind)
-   (admitted-results . (()
-                        (0)
-                        (1)))
-   (dispatch . explicit-result-equality))
-
-  ((result-domain . identity-relation)
-   (admitted-results . ((1)
-                        (0)))
-   (dispatch . explicit-result-equality))
-
-  ((compatibility . historical-two-part-cond)
-   (status . migration-only)
-   (semantic-authority . forbidden)
-   (uses-generic-truthiness . yes)
-   (retire-after . library-migration)))
+   (arbitrary-nonempty-as-true . forbidden)))
