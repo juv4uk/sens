@@ -62,3 +62,12 @@
  (semantic-id . 10110101)
  (governs . "#1704 #1709")
  (note . "Поки неактивний: main відповідає (). Це і є четвертий тип, який #1699 забороняє."))
+
+((expect . expect-value)
+ (expr . "(00001010 preservation-exact-no () (00011010 2 1)) (00100010 (00011010 2 1) (preservation-exact-no))")
+ (expected . (value (1)))
+ (active . t)
+ (name . "equal? зберігає PredicateBit через macro expansion")
+ (semantic-id . 00100010)
+ (governs . "#1699 #218")
+ (note . "Єдиний незалежний закон зі старого structural-relation wrapper: прямий і macro-expanded predicate result структурно однакові."))

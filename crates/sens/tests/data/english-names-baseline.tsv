@@ -393,7 +393,6 @@ lisp	contracts/core4-predicate-answer-scale.lisp	atom?	1
 lisp	contracts/core4-predicate-answer-scale.lisp	eq?	1
 lisp	contracts/core4-predicate-answer-scale.lisp	identity	1
 lisp	contracts/datalog-math-capability-1001.lisp	identity	2
-lisp	contracts/deep-structural-relation-contract.lisp	equal?	1
 lisp	contracts/exact-q-binary-contract.lisp	identity	5
 lisp	contracts/island-compat-contract.lisp	identity	8
 lisp	contracts/knowledge-clause-kind-contract.lisp	is-fact?	1
@@ -2228,7 +2227,6 @@ rust-lisp	crates/sens/tests/content_store_authority.rs	car	1
 rust-lisp	crates/sens/tests/content_store_authority.rs	let	3
 rust-lisp	crates/sens/tests/content_store_authority.rs	let*	1
 rust-lisp	crates/sens/tests/content_store_authority.rs	quote	10
-rust-lisp	crates/sens/tests/deep_structural_relation_contract.rs	quote	2
 rust-lisp	crates/sens/tests/def_ownership.rs	cons	6
 rust-lisp	crates/sens/tests/def_ownership.rs	def	1
 rust-lisp	crates/sens/tests/def_ownership.rs	define	1
