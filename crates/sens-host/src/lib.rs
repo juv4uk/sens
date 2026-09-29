@@ -7,7 +7,7 @@
 
 use sens::{
     eval_expr, exact_arity, register_capability, register_evaluated_capability, Environment,
-    ErrorKind, EvaluatedArg, Exactness, Expr, LanguageError, Span, Value,
+    ErrorKind, Exactness, Expr, LanguageError, Span, Value,
 };
 use std::{path::{Path, PathBuf}, rc::Rc};
 
@@ -444,7 +444,7 @@ fn evaluate_tcp_write_raw(
 }
 
 fn evaluate_tcp_close(
-    arguments: &[EvaluatedArg],
+    arguments: &[(Value, Span)],
     _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
@@ -458,12 +458,12 @@ fn evaluate_tcp_close(
             span,
         ));
     }
-    let argument = &arguments[0];
-    let Value::TcpConnection(connection) = &argument.value else {
+    let (value, argument_span) = &arguments[0];
+    let Value::TcpConnection(connection) = value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-close expects a TCP connection · tcp-close ochikuie TCP-ziednannia · tcp-close erwartet eine TCP-Verbindung",
-            argument.span,
+            *argument_span,
         ));
     };
     tcp_close(connection, span)?;
@@ -652,17 +652,14 @@ pub fn install() {
 
 #[cfg(test)]
 mod install_tests {
-    use sens::{Environment, ErrorKind, EvaluatedArg, Exactness, Span, Value};
+    use sens::{Environment, ErrorKind, Exactness, Span, Value};
 
     #[test]
     fn tcp_close_value_handler_keeps_argument_local_span() {
         let argument_span = Span { start: 13, end: 15 };
         let call_span = Span { start: 0, end: 19 };
         let error = super::evaluate_tcp_close(
-            &[EvaluatedArg {
-                value: Value::Number(42.0, Exactness::Exact),
-                span: argument_span,
-            }],
+            &[(Value::Number(42.0, Exactness::Exact), argument_span)],
             &Environment::root(),
             call_span,
         )
