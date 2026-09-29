@@ -37,7 +37,10 @@ pub type EvaluatedHostFn =
 #[derive(Clone, Copy)]
 enum HostHandler {
     Raw(HostFn),
-    Evaluated(EvaluatedHostFn),
+    Evaluated {
+        arity: usize,
+        handler: EvaluatedHostFn,
+    },
 }
 
 /// Host mechanism for one already-existing exact SENS function.
@@ -89,11 +92,11 @@ pub fn register_capability(name: &str, handler: HostFn) {
 /// #1779 migration seam: evaluator-owned argument evaluation, host receives
 /// only ready Values plus their original source spans. The string key remains
 /// private mechanism metadata and is not a SENS function identity.
-pub fn register_evaluated_capability(name: &str, handler: EvaluatedHostFn) {
+pub fn register_evaluated_capability(name: &str, arity: usize, handler: EvaluatedHostFn) {
     registry()
         .write()
         .expect("capability registry poisoned")
-        .insert(name.to_string(), HostHandler::Evaluated(handler));
+        .insert(name.to_string(), HostHandler::Evaluated { arity, handler });
     super::closures::bump_resolution_epoch();
 }
 
@@ -153,7 +156,17 @@ fn dispatch_capability_from(
         CapabilityLookup::Present(HostHandler::Raw(handler)) => {
             Some(handler(arguments, environment, span).map(EvalStep::Value))
         }
-        CapabilityLookup::Present(HostHandler::Evaluated(handler)) => {
+        CapabilityLookup::Present(HostHandler::Evaluated { arity, handler }) => {
+            if arguments.len() != arity {
+                return Some(Err(LanguageError::new(
+                    ErrorKind::Arity,
+                    format!(
+                        "{name}: expected / ochikuvalosia / erwartet {arity}; received / otrymano / erhalten {}",
+                        arguments.len()
+                    ),
+                    span,
+                )));
+            }
             let result = (|| {
                 let mut evaluated = Vec::with_capacity(arguments.len());
                 for argument in arguments {
@@ -250,6 +263,49 @@ mod honesty_tests {
             lookup_capability(&lock, "demo"),
             CapabilityLookup::Unreadable
         ));
+    }
+
+    fn evaluated_handler(
+        _arguments: &[EvaluatedArg],
+        _environment: &Environment,
+        _span: Span,
+    ) -> Result<Value, LanguageError> {
+        Ok(Value::Nil)
+    }
+
+    #[test]
+    fn evaluated_handler_checks_arity_before_evaluating_arguments() {
+        let lock = RwLock::new(BTreeMap::new());
+        lock.write()
+            .expect("fresh local registry")
+            .insert(
+                "demo".to_string(),
+                HostHandler::Evaluated {
+                    arity: 1,
+                    handler: evaluated_handler,
+                },
+            );
+
+        let program = crate::parse("(demo missing extra)").expect("probe parses");
+        let ExprKind::List(items) = &program[0].kind else {
+            panic!("probe must be a call");
+        };
+        let span = program[0].span;
+        let error = match dispatch_capability_from(
+            &lock,
+            "demo",
+            &items[1..],
+            &Environment::root(),
+            span,
+        )
+        .expect("registered evaluated handler")
+        {
+            Err(error) => error,
+            Ok(_) => panic!("wrong arity must fail before callback"),
+        };
+
+        assert_eq!(error.kind, ErrorKind::Arity);
+        assert_eq!(error.span, span);
     }
 
     fn sens_handler(
