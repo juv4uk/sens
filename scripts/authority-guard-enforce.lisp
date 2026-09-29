@@ -8,11 +8,7 @@
 (00001001 verdict-tag (00000101 verdict))
 
 (00000111
-  ((00000011 verdict-tag (00000001 authority-ok)) (1)
+  ((00000011 verdict-tag (00000001 authority-ok))
    (00000001 authority-ok))
-  ((00000011 verdict-tag (00000001 authority-ok)) (0)
-   (00000111
-     ((00000011 verdict-tag (00000001 semantic-authority-violation)) (1)
-      (00000101 ()))
-     ((00000011 verdict-tag (00000001 semantic-authority-violation)) (0)
-      (00000101 ())))))
+  ((00000010 (00000001 ()))
+   (00000101 ())))
