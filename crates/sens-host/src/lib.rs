@@ -11,6 +11,10 @@ use sens::{
 };
 use std::{path::{Path, PathBuf}, rc::Rc};
 
+pub mod pure;
+pub use pure::{parse_and_lower, eval_lowered};
+
+
 #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
 mod native_exec;
 #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
