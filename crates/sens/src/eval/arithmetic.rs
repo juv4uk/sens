@@ -419,19 +419,18 @@ pub(super) fn comparison_on_values(
         .iter()
         .any(|value| matches!(value, Numeric::Inexact(_)))
     {
-        // #216 is deliberately narrower than generic numeric comparison:
-        // this exact-Q layer has no absolute answer once any operand is
-        // inexact, so Canon 0 is returned rather than manufacturing FALSE.
-        return Ok(Value::Nil);
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "comparison predicate requires exact numeric operands",
+            span,
+        ));
     }
 
     let holds = numerics
         .windows(2)
         .all(|pair| compare(operator, pair[0].to_exact(), pair[1].to_exact()));
 
-    // #216 exact-rational decisions stay mathematical data: 1/1 for YES,
-    // 0/1 for NO. `exact_value` writes those canonically as exact 1 and 0.
-    Ok(exact_value(Rational::integer(if holds { 1 } else { 0 })))
+    Ok(Value::predicate_bit(holds))
 }
 
 #[cfg(test)]
