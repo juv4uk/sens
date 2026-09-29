@@ -44,8 +44,8 @@ Evidence поєднує:
 Спостережений slot index:
 `0=4455, 1=1903, 2=455, 3=77, 4=14, 5=10, 6=1, 7=1, 8=1`.
 
-Покриття прямої короткої форми:
-- Lex4 = depth2 | slot2: 6890/6917 = 99.6097%;
+Покриття прямої короткої форми після уточнення розподілу depth/slot:
+- Lex4 = depth1 | slot3: 6910/6917 = 99.8988%;
 - Lex5 = depth2 | slot3: 6916/6917 = 99.9855%;
 - Lex6 = depth2 | slot4: 6917/6917 = 100%.
 
@@ -70,18 +70,20 @@ Evidence поєднує:
 
 Це evidence на користь компактного transport, але не дозвіл створювати другу семантику Number.
 
-## Domain3 проти поточного Type2 baseline
+## Domain3: flat/per-element форма відкинута, block-scoped форма лишається гіпотезою
 
 Поточний Control2 використовує `11`, після якого йде 2-бітний selector для Function, Number, Text або extension.
 
-Плоский 3-бітний selector дає 8 класів і простішу плоску таблицю dispatch, але додає один selector bit до кожного наявного Function/Number/Text payload.
+### Flat / per-element Type3
+
+Плоский 3-бітний selector для кожного payload додає один selector bit до кожного наявного Function/Number/Text payload.
 
 Для мінімального nested Type2 extension:
 - primary payload платить 2 selector bits;
 - extended lexical payload платить 4 selector bits;
 - flat Type3 платить 3 selector bits для обох.
 
-Отже Type3 додає 1 біт кожному primary payload і економить 1 біт кожному lexical payload. По щільності він виграє лише коли `lexical_count > primary_payload_count`.
+Отже flat Type3 додає 1 біт кожному primary payload і економить 1 біт кожному lexical payload. По щільності він виграє лише коли `lexical_count > primary_payload_count`.
 
 Повний scan бібліотеки знайшов приблизно 17 527 точних Function8 token проти приблизно 6 917 lexical refs. Навіть якщо повністю ігнорувати Number/Text, нижня межа програшу flat Type3 становить:
 
@@ -89,13 +91,34 @@ Evidence поєднує:
 17 527 - 6 917 = 10 610 bits ~= 1326 bytes
 ```
 
-Тому Domain3 на поточному корпусі вже **доведено не є виграшем у щільності** проти цього Type2+extension baseline. Його можлива перевага:
-- простіший decoder;
-- чіткіша ортогональність;
-- більше fail-closed reserved classes;
-- простіше майбутнє extension/proof structure.
+Тому **flat/per-element Domain3 відкинутий як compression-кандидат** на поточному corpus. Для Text7 він був би ще гіршим: `Domain3 + char7` на кожен символ додає 3 біти до кожних 7 біт тексту.
 
-Перед призначенням його треба порівняти з Type2 + nested extension за decoder/proof cost, а не за compression.
+### Block-scoped Domain3
+
+Окрема, ще не спростована гіпотеза — Domain3 як **відкривач типізованої області**, а не тег кожного елемента:
+
+```text
+11 + Domain3 -> open typed region
+raw Function8 / Text7 / Number elements inside the region
+Control2 closes or changes the region
+```
+
+У такій формі один discriminator амортизується на весь блок. Це може:
+- прибрати повторні host/FASL/wire enum tags;
+- дати prefix-decodable typed region;
+- не обкладати Text7 +43% податком на кожен символ.
+
+Головний acceptance/falsifier для block-scoped форми:
+**два незалежні substrates повинні декодувати один stream однаково, не ділячись host enums або implementation code.**
+
+Block-scoped Domain3 ще нічого не заробив автоматично. Його треба порівняти з Type2 + extension за:
+- загальними bits на реальному corpus;
+- кількістю decoder states/branches;
+- fail-closed malformed-region behavior;
+- proof burden;
+- explicit region termination / nesting law.
+
+Якщо цього виграшу немає, 3 біти лишаються вільними.
 
 ## Lex4/Lex5/Lex6: точні break-even межі
 
@@ -131,18 +154,26 @@ Lex6 = 6917*6
 
 Це не призначає Lex4: тепер вирішальним стає реальний branch/decoder/proof cost семи long-form випадків.
 
-## Чотирибітний кандидат: error vocabulary
+## Error4: відкинути як canonical semantic domain за замовчуванням
 
-Поточний observable `ErrorKind` має 10 навмисно admitted категорій. Compiler-authority boundary каже, що backend може мати будь-яке приватне представлення помилки, але не може назовні створити нову категорію поза admitted vocabulary.
+Історично Rust `ErrorKind` мав 10 named categories, що технічно вміщаються у 4 біти. Але #1755/#1749 змінили саму основу питання: Rust error vocabulary більше не є semantic authority, а implementation failures не доведені як закритий мовний всесвіт.
 
-Десять станів вміщаються у 4 біти.
+Тому кардинальність старого enum — **не аргумент за Error4**.
 
-Це сильніший semantic candidate, ніж просте стискання FASL tags, але спочатку треба повернути authority:
-- #1708 переносить semantic/error-domain authority з Rust tests у Lisp-owned contracts/witnesses;
-- `UnsatisfiedConditional` належить старому three-part COND і може зникнути;
-- ordinal/order Rust enum ніколи не повинен ставати binary identity.
+Ризик fixed Error4:
+- заморозити випадковий набір implementation failures у language semantics;
+- повторити саме ту помилку authority, яку #1755 щойно стер;
+- змусити майбутні substrates або брехати через старі коди, або ламати fixed domain.
 
-Порядок дослідження: Lisp-owned error vocabulary -> остаточна кардинальність -> оцінка Error4.
+Додатковий evidence: `UnsatisfiedConditional` уже є transition debt старого three-part COND і зникає разом із новою 2-part foundation law. Отже навіть історична кардинальність нестабільна.
+
+Поточний verdict:
+- **canonical Error4 semantic domain: reject-by-default**;
+- private backend/error tags можуть мати 3/4/5/6 біт як mechanism packing;
+- 1–2 окремі framing/result distinctions можуть колись заробити коротку форму лише через незалежний Lisp-owned contract;
+- Rust enum ordinal/order ніколи не стає SENS identity.
+
+Щоб повернути Error4 як semantic candidate, потрібен новий незалежний доказ, що мова справді має закритий, стабільний, implementation-independent error algebra. Поточних доказів немає.
 
 ## CML / machine evidence
 
@@ -171,10 +202,11 @@ WSM-аудит класифікує цю різницю як різні **physic
 
 | Ширина | Кандидат | Evidence | Поточна рекомендація |
 |---|---|---|---|
-| 3 | payload/domain discriminator | 8 класів; evaluator head families вміщаються | досліджувати далі; Type2+extension може бути щільнішим |
+| 3 | flat/per-element domain discriminator | +1 selector bit на primary payload; >=10 610 bits програш ще до Number/Text | відкинути як compression-кандидат |
+| 3 | block-scoped domain opener | один Domain3 на typed region; raw payload усередині | досліджувати тільки як block/framing grammar; потрібен незалежний cross-substrate decode proof |
 | 3 | machine operand classes | кілька CML families мають рівно 8 станів | backend-private, доки не виводиться з upstream machine contract |
 | 4 | Lex4 short coordinate | depth1|slot3: 99.8988% direct; 7 escapes; beats Lex5 if long form <~1156.7 bits | найсильніший raw-density кандидат; decoder cost ще виміряти |
-| 4 | Error4 | 10 поточних admitted observable error classes | сильний кандидат після Lisp authority migration |
+| 4 | Error4 semantic domain | historical Rust enum fit 4 bits, але #1755 стер його authority | reject-by-default; лише private packing або окремо ратифіковане framing |
 | 4 | FASL/tag families | поточні ExprKind/FASL мають 10 станів | mechanism-only; переоцінити після Symbol/String cleanup |
 | 5 | Lex5 short coordinate | 99.9855%; 1 escape; beats Lex6 if long form <6922 bits | майже без escape; компроміс density/simplicity |
 | 5 | CML MachineInst/IR | 31/20/18 станів | корисний machine encoding candidate, не автоматично SENS |
@@ -183,11 +215,12 @@ WSM-аудит класифікує цю різницю як різні **physic
 
 ## Відкриті питання
 
-1. Hardware/FPGA: area/timing/proof burden Type2+extension проти flat Type3; compression уже не є аргументом за Type3 на поточному corpus.
-2. CML: чи MachineInst=31 достатньо стабільний для packing, чи це backend-evolving набір.
-3. Lexical representation: виміряти branch/decoder/proof cost 7 Lex4(1+3) escapes проти 1 Lex5 escape та 0 Lex6 escapes; raw density уже сильно схиляється до Lex4.
-4. Error vocabulary: остаточний Lisp-owned набір категорій після видалення старого COND/error debt.
+1. Block-scoped Domain3: чи один opener на typed region реально спрощує state machine/host-tag removal проти Type2+extension, і як region явно завершується/вкладається.
+2. Cross-substrate criterion: два незалежні decoder-и повинні отримувати однаковий stream semantics без спільних host enums/code.
+3. CML: чи MachineInst=31 достатньо стабільний для packing, чи це backend-evolving набір.
+4. Lexical representation: виміряти branch/decoder/proof cost 7 Lex4(1+3) escapes проти 1 Lex5 escape та 0 Lex6 escapes; raw density уже сильно схиляється до Lex4.
 5. Alignment: canonical storage має бути bit-packed, byte-packed, чи треба розділити canonical bits і transport packing.
+6. Final outcome: документоване рішення лишити 3/4/5/6 FREE є повноцінним успішним результатом, якщо жодна ширина не видаляє достатньо складності.
 
 ## Правило дослідження
 
