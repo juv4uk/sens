@@ -2,6 +2,10 @@
 ; All admitted bounded-add transports carry arguments only under exact SID8 identity.
 ; CLIPS raw operator-text Eval remains diagnostic-only; semantic addition uses
 ; the same arguments-only payload as Common Lisp, Prolog and Datalog.
+;
+; The payload numbers are the canonical machine wire (#q2:<bits>/<bits>) that
+; write-to-string owns since #1648, not decimal text: this is a mechanism
+; transport, not a human presentation (#1693, #1656).
 
 (load "lib/core4.lisp")
 (load "lib/surface/semantic-registry-api.lisp")
@@ -22,7 +26,7 @@
                  plus-sid
                  (00000001 common-lisp)
                  (00000001 bounded-exact-add)
-                 "2 3"))
+                 "#q2:10/1 #q2:11/1"))
          (1)
          (00000111
            ((00100010
@@ -31,7 +35,7 @@
                     plus-sid
                     (00000001 prolog)
                     (00000001 bounded-exact-add)
-                    "2 3"))
+                    "#q2:10/1 #q2:11/1"))
             (1)
             (00000111
               ((00100010
@@ -40,7 +44,7 @@
                        plus-sid
                        (00000001 datalog)
                        (00000001 bounded-exact-add)
-                       "2 3"))
+                       "#q2:10/1 #q2:11/1"))
                (1)
                (00000111
                  ((00100010
@@ -49,7 +53,7 @@
                           plus-sid
                           (00000001 clips)
                           (00000001 bounded-exact-add)
-                          "2 3"))
+                          "#q2:10/1 #q2:11/1"))
                   (1)
                   (00000001 (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))))
                  ((00000001 witness-clips-fail) witness-clips-fail
