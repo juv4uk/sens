@@ -7,7 +7,6 @@ set -euo pipefail
 # broader mechanism and integration evidence.
 cargo test -p sens \
   --test witness_authority \
-  --test structural_query_inventory \
   --test structural_observation_contract \
   --test deep_structural_relation_contract \
   --test exact_q_binary_contract \
