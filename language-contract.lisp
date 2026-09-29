@@ -6,7 +6,7 @@
 ;
 ; Function is the complete exact 8-bit space 00000000..11111111.
 ; Number is the binary-first numeric domain, kept orthogonal to Function.
-; Text is UTF-8 data and never a runtime dispatch key.
+; Text is a sequence of exact UPC-7 codes and never a runtime dispatch key.
 ;
 ; Parentheses define structure/composition; they do not create a fourth payload
 ; domain. Symbol/name/container-layout/host-tag are not canonical language
@@ -17,19 +17,19 @@
 ; contains Symbol/decimal-reader/runtime representation debt.
 
 ((major . #d10) (minor . 0)
- (note . "RATIFIED TARGET by owner 2026-09-29 under #1694. Canonical sens (СЕНС) has parenthesized structure plus exactly three payload domains: Function, Number, Text. Function is exact eight-bit 00000000..11111111; Number is binary-first and orthogonal to Function; Text is UTF-8 data. Symbol/name/container-layout/host-tag are not fourth language ontologies. Human names and decimal notation are projections that must lower before canonical execution. Merge of Contract 10.0 requires executable conformance for #1694.")
+ (note . "RATIFIED TARGET by owner 2026-09-29 under #1694. Canonical sens (СЕНС) has parenthesized structure plus exactly three payload domains: Function, Number, Text. Function is exact eight-bit 00000000..11111111; Number is binary-first and orthogonal to Function; Text is a stream of exact seven-bit UPC-7 codes whose human layout may be switched without changing identity. Unicode/UTF-8 is host/UI boundary only. Symbol/name/container-layout/host-tag are not fourth language ontologies. Human names and decimal notation are projections that must lower before canonical execution. Merge of Contract 10.0 requires executable conformance for #1694.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((three-payload-ontology
        . "Outside parenthesized structure, canonical sens has exactly three payload domains: Function, Number, and Text. No Symbol, identifier, predicate-answer wrapper, container layout, host tag, enum label, opcode, or backend-native object may become a fourth fundamental language payload domain.")
       (parentheses-are-structure
        . "Opening and closing parentheses express structure/composition only. List, pair, vector, map, record, buffer, or other container shapes may be structural or mechanism representations, but their representation does not mint a new atomic language ontology. The empty () remains structural emptiness outside the 256 function slots.")
-      (text-utf8-data
-       . "Text is UTF-8 data. Text bytes and human spellings never select runtime semantics after lowering. KOI8, Char8, host strings, and other encodings may exist only as boundary/mechanism representations with explicit projection to Text.")
+      (text-upc7-data
+       . "Text is a sequence of exact seven-bit UPC-7 identities 0000000..1111111 derived from the shiva-sutras UPC prototype. Human layouts/profiles map spellings to and from the same UPC-7 code stream without changing code identity. Unicode/UTF-8 may exist only at host/UI boundaries and is never a canonical Text identity.")
       (no-canonical-symbol
        . "Canonical sens has no Symbol payload category. Human function names resolve to Function before canonical execution; human local names resolve to lexical slots; textual data is Text; unknown bare words fail closed in canonical mode instead of becoming symbols.")
       (locals-are-slots-not-names
-       . "Local variable spellings are human/debug metadata only. After resolution, canonical execution addresses locals by structural numeric slot/index/depth information and does not depend on the UTF-8 spelling of a local name.")
+       . "Local variable spellings are human/debug metadata only. After resolution, canonical execution addresses locals by structural numeric slot/index/depth information and does not depend on the selected UPC-7 human layout spelling of a local name.")
       (binary-number-domain
        . "Number is a language-owned numeric domain distinct from Function even when physical bits coincide. Canonical numeric source/serialization is binary-owned; decimal exact-rational notation is a human or explicitly transitional projection and may not become a second canonical numeric semantics.")
       (derived-layout-non-ontology
