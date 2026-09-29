@@ -16,6 +16,8 @@
 ; visible to the Lisp process, but do not classify host semantics.
 (00000111
   ((00000010 changed-host-tests)
+   ()
    (00000001 (authority-ok)))
-  ((00000010 (00000001 ()))
+  ((00000010 changed-host-tests)
+   (0)
    (00000001 (authority-ok))))
