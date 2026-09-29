@@ -68,7 +68,6 @@
 ; nāman = symbol/name (Pāṇini 1.1.62)
 (00001001 nāman? symbol?)
 ; śabda = string/text
-(00001001 śabda? string?)
 (00001001 śabda-hīna? string<?)
 
 ;; ═══════════════════════════════════════════════════════════════
