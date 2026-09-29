@@ -2154,7 +2154,6 @@ rust-lisp	crates/sens/tests/advice_corpus.rs	def	2
 rust-lisp	crates/sens/tests/advice_corpus.rs	let*	3
 rust-lisp	crates/sens/tests/advice_corpus.rs	list	3
 rust-lisp	crates/sens/tests/advice_corpus.rs	quote	18
-rust-lisp	crates/sens/tests/authority_guard_contract.rs	quote	1
 rust-lisp	crates/sens/tests/backend_not_on_sid_gap.rs	atom?	1
 rust-lisp	crates/sens/tests/backend_not_on_sid_gap.rs	def	1
 rust-lisp	crates/sens/tests/backend_not_on_sid_gap.rs	lambda	2
@@ -2795,8 +2794,6 @@ rust-lisp	crates/xtask/src/external_oracle.rs	cons	1
 rust-lisp	crates/xtask/src/xed_import.rs	and	1
 rust-lisp	crates/xtask/tests/encoder_coverage_cli.rs	pair	1
 rust-lisp	crates/xtask/tests/encoder_coverage_cli.rs	times	1
-rust-lisp	tests/fixtures/authority-guard/forbidden-semantic.rs	car	1
-rust-lisp	tests/fixtures/authority-guard/forbidden-semantic.rs	quote	1
 rust-lisp-дані	crates/sens-cli/src/bin/guard-reference-schema-check.rs	provenance	1
 rust-lisp-дані	crates/sens-cli/src/bin/sens-to-sens.rs	car	2
 rust-lisp-дані	crates/sens-cli/src/bin/sens-to-sens.rs	list	2
