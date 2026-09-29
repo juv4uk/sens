@@ -62,7 +62,6 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; na = not (universal negation)
-(00001001 na not)
 ; tulya = structurally equal (≠ abheda eq, sama =)
 (00001001 tulya? equal?)
 ; nāman = symbol/name (Pāṇini 1.1.62)
