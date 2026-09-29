@@ -2259,7 +2259,6 @@ rust-lisp	crates/sens/tests/epistemic.rs	observation-statement	1
 rust-lisp	crates/sens/tests/epistemic.rs	observation?	5
 rust-lisp	crates/sens/tests/epistemic.rs	quote	107
 rust-lisp	crates/sens/tests/epistemic.rs	supporting-evidence	3
-rust-lisp	crates/sens/tests/error_kind_vocabulary_is_closed.rs	and	1
 rust-lisp	crates/sens/tests/exact_number_boundaries.rs	eval	1
 rust-lisp	crates/sens/tests/exact_number_boundaries.rs	read	1
 rust-lisp	crates/sens/tests/exact_number_boundaries.rs	write-to-string	1
