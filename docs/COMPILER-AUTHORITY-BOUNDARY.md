@@ -23,17 +23,12 @@ because they are meaning, not implementation:
    distinction (`Exactness`), and exact-rational normalization (never
    silently coerced to float — this repo's own standing rule, see
    `docs/cyberpunk-numeric-representation.md`).
-2. **Error kind, where currently contractual.** The finite `ErrorKind`
-   enum (`crates/my-lisp/src/error.rs`: `Parse`, `UnknownSymbol`,
-   `Arity`, `Type`, `InvalidForm`, `UnsatisfiedConditional`,
-   `MechanismUnavailable`, `OutOfMemory`, `NumericOverflow`,
-   `DivisionByZero` — 10 variants, deliberately admitted) is
-   the *entire* admitted vocabulary. A compiler backend may use its own
-   internal error representation, but whatever it *observably*
-   surfaces for a given program must map onto one of these categories
-   — never a new one invented by the compiler (this is exactly the
-   `NotCallable`-vs-`Type` question already resolved for cml: internal
-   naming is free, external observation must match the authority).
+2. **Observable failure distinctions, where language-owned witnesses require them.**
+   The language owns only the distinctions a Lisp contract or witness actually
+   makes observable. Rust `ErrorKind` variant names are one backend's local
+   projection, not a SENS vocabulary. A compiler may use any internal names or
+   representation, provided its observable failures satisfy the same
+   language-owned distinctions.
 3. **Error detail, only where ADR-011 already ratifies it as
    contractual.** Per `docs/adr/ADR-011-ERROR-DETAIL-CONTRACT-BOUNDARY.md`,
    message text/span are diagnostic, not contractual, unless a future
@@ -65,7 +60,7 @@ because they are meaning, not implementation:
 - Execution strategy: interpretation vs compiled-to-native vs
   hardware-synthesized (FPGA) — as long as observable behavior matches.
 - Internal error representation, naming, and control flow, as long as
-  external observation maps onto the admitted `ErrorKind` vocabulary.
+  observable failures satisfy the language-owned witnesses.
 - Performance characteristics — nothing in this boundary makes any
   speed promise or requirement (explicitly a non-goal of #66 itself).
 
@@ -145,52 +140,19 @@ selection, future auto-schedulers, and ordinary compiler optimization passes.
 - A compiler silently treating an admitted error condition
   differently than the reference implementation (e.g. returning a
   successful-looking value where native/meta both raise `Type`).
-- A compiler inventing a new externally-observable error category not
-  in the admitted `ErrorKind` set, even if internally named
-  differently (`NotCallable` as an internal name mapping to `Type` is
-  fine; `NotCallable` as a new *externally observable* kind is not).
+- A compiler inventing a new language-observable failure distinction
+  without a Lisp-owned contract or witness that admits that distinction.
 - A compiler changing which of two independently-valid evaluation
   orders a program observes, when the reference implementation's order
   is itself part of the admitted contract.
 - A performance selector or benchmark result being used as authority to
   redefine semantic identity or witness truth.
 
-## Machine-checkable gate (this issue's acceptance criterion)
+## Mechanical boundary
 
-A gate that can only check "no *known* violation exists today" is
-weaker than one that can fail when a *future* change tries to smuggle
-in a new semantic identity. The concrete, minimal gate landing with
-this doc:
+Rust still gets ordinary compile-time exhaustiveness from its own `match`es over
+`ErrorKind`. That is a backend maintenance property, not language authority.
+There is deliberately no second list of Rust variant spellings to keep in sync.
+Cross-backend semantic drift is checked by Lisp-owned conformance witnesses,
+which compare observable behavior rather than host enum names.
 
-`crates/my-lisp/tests/error_kind_vocabulary_is_closed.rs` — pins the
-exhaustive list of `ErrorKind` variant names via Rust's own exhaustive
-`match` (compile error, not a runtime check, if a variant is added or
-removed without updating the pinned list) plus a runtime assertion
-that the pinned list's `Debug` names match reality. This makes
-"introduce another error category" a change that must touch this test
-file explicitly — it cannot land silently as a side effect of
-unrelated compiler work in this or another repo that merely imports
-`ErrorKind`.
-
-This is deliberately narrow — it enforces closure of the *error-kind*
-vocabulary specifically, the piece of "admitted registry" a compiler
-backend most directly interacts with (per cml's own error-normalization
-work this session). Vocabulary closure for the other five preserved
-categories above (value identity, evaluation order, macro/closure
-behavior, proof/provenance) is enforced today by the existing
-`docs/meta-eval-evidence.md` parity matrix and its 34 confirmed rows,
-not a new mechanism — #66 does not need to duplicate that, only to
-name it explicitly as part of the same boundary, which this document
-now does.
-
-## Negative fixture (acceptance evidence)
-
-Verified directly: temporarily adding an additional `ErrorKind` variant
-(`NotCallable`) to `crates/my-lisp/src/error.rs` fails the crate build
-outright — not just this test — because an existing exhaustive `match`
-elsewhere in `error.rs` itself also has no wildcard arm. This is even
-stronger than the intended mechanism: adding an unhandled variant
-cannot land at all without deliberately updating every exhaustive
-match over `ErrorKind` in the crate, `error_kind_vocabulary_is_closed.rs`
-included. Confirmed the failure (`error[E0004]: non-exhaustive
-patterns`), then reverted; not committed.
