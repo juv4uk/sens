@@ -642,7 +642,7 @@ pub fn install() {
     register_capability("tcp-accept", evaluate_tcp_accept);
     register_capability("tcp-read-raw", evaluate_tcp_read_raw);
     register_capability("tcp-write-raw", evaluate_tcp_write_raw);
-    register_evaluated_capability("tcp-close", evaluate_tcp_close);
+    register_evaluated_capability("tcp-close", 1, evaluate_tcp_close);
     #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
     register_capability(
         "native-call-u64-raw",
