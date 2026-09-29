@@ -1,17 +1,14 @@
 # Root lifecycle inventory (GitHub issue juv4uk/my-lisp#23)
 
-First-pass classification of every non-directory root artifact, per
-issue #23's own required fields. **Classification only — nothing is
-moved or deleted in this pass**, per the issue's own gate ("do not
-move files in the same first audit commit unless the move is
-independently proven safe and trivial") and the owner's own standing
-instruction this session to not delete anything.
+Перший прохід класифікує кожен файл у корені репозиторію за полями
+задачі #23. **Це лише класифікація: у цьому проході нічого не
+переміщується й не видаляється**, доки безпечність такого кроку не
+доведена окремо.
 
-Method: `git grep` for each filename across `.rs`/`.lisp`/`.lisp`/`.md`/
-`.sh`/`.yml` sources (not a plain filesystem grep, which times out on
-this tree's `target/` build output) — absence of a hit is recorded as
-`unknown`, per the issue's own rule ("absence of a grep hit alone is
-not proof of irrelevance").
+Метод: `git grep` за кожним ім'ям у `.rs`/`.lisp`/`.md`/`.sh`/`.yml`.
+Відсутність збігу означає `unknown`, а не автоматичну непотрібність.
+This inventory is classification-first: absence of a textual consumer is
+evidence to investigate, never permission to delete an artifact.
 
 ## Semantic authority / contract
 
@@ -19,7 +16,6 @@ not proof of irrelevance").
 |---|---|---|---|---|---|
 | `language-contract.lisp` | my-lisp core | Level 1/2 contract, read by `crates/my-lisp` at build/runtime via `include_str!`-style loading and by `docs/cml-semantic-export-v1-design.md`'s producer | Owner-ratified only | active | Yes — root is this ecosystem's established convention for the contract file (`repo.lisp` siblings in cml/my-idea etc. reference it there) |
 | `my-lisp-constitution.lisp` | my-lisp core | `crates/my-lisp-cli/tests/constitution_projection.rs`, `crates/my-lisp/tests/mccarthy.rs`, `scripts/build-constitution.lisp`, `tasks.lisp`, 8+ docs | Owner-ratified only | active | Yes — same convention as `language-contract.lisp` |
-| `memory-layout-contract.lisp` | my-lisp core (GC-adjacent) | `docs/gc-holistic-map.md`, `docs/gc-m0-design.md`, `docs/gc-sakshi-analysis.md`, 3 more review docs | Owner-ratified only | active | Yes — same convention |
 
 ## Machine entrypoint / build & reproducibility metadata
 
@@ -51,6 +47,7 @@ not proof of irrelevance").
 
 | File | Owner | Consumers found | Mutability | Lifecycle | Root required? |
 |---|---|---|---|---|---|
+| `memory-layout-contract.lisp` | layout mechanism research / GC-adjacent history | GC/review docs only; 2026-09-29 re-audit found no runtime, CI, or cross-repo machine consumer beyond vendored SENS copies | mechanism/design evidence, not semantic authority | transitional mechanism design | No hard requirement found; keep in root only until #23 chooses a documented relocation |
 | `PLAN.md` | roadmap | referenced from `lib.rs` doc comments (TCP library entry, item 21) and multiple docs as the plan-of-record | living document | active | No hard requirement found, but is the established roadmap-of-record; moving needs the doc-comment cross-references in `crates/my-lisp/src/lib.rs` updated first |
 | `CLEAN_CODE_PLAN.md` | code-quality roadmap | none found via grep | manual | **unknown** — no consumer found, but per issue's own rule this is not proof of irrelevance; may be read manually by agents/owner without being grepped-for | No requirement found; candidate for relocation to `docs/`, pending confirmation it isn't referenced by convention/memory rather than by text search |
 | `typed-buffer-proposal.lisp` | research proposal | `crates/my-lisp/tests/typed_buffer_proposal.rs` — a real, live test | test-referenced | active research/proposal, not yet ratified | Path is load-bearing for its own test; do not move without updating that test |
