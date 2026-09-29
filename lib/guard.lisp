@@ -46,7 +46,7 @@
         (verify citations-and-access-date))))))
 
 (00001011 make-guard-finding
-  (00001000 (decision evidence-status subject state contract difference impact guidance evidence)
+  (00001000 (decision evidence-status subject state contract delta impact guidance evidence)
     (00000111
       ((00100001 (guard-decision? decision))
        (00100111 (00000001 invalid-guard-decision) decision))
@@ -61,7 +61,7 @@
          (00100111 (00000001 subject) subject)
          (00100111 (00000001 state) state)
          (00100111 (00000001 contract) contract)
-         (00100111 (00000001 difference) difference)
+         (00100111 (00000001 difference) delta)
          (00100111 (00000001 impact) impact)
          (00100111 (00000001 guidance) guidance)
          (00100111 (00000001 evidence) evidence)
