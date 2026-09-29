@@ -14,7 +14,7 @@
 
 (00001001 island-lowering-1048-witness
   (00001000 ()
-    (10011101 ((plus-sid (semantic-registry-id (00000001 +)))
+    (10011101 ((plus-sid 00001100)
            (cl (island-lower-binary plus-sid (00000001 common-lisp) 2 3))
            (pl (island-lower-binary plus-sid (00000001 prolog) 2 3))
            (clips-result (island-lower-binary plus-sid (00000001 clips) 2 3))
