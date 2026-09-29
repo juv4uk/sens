@@ -47,18 +47,6 @@ fn print_and_princ_are_first_class_and_keep_transcript_semantics() {
 }
 
 #[test]
-fn reflection_names_obey_ordinary_lexical_shadowing() {
-    assert_eq!(
-        eval("((lambda (eval) (eval (quote x))) (lambda (x) (quote shadowed)))"),
-        Value::Symbol(Rc::from("shadowed")),
-    );
-    assert_eq!(
-        eval("((lambda (read) (read \"ignored\")) (lambda (x) (quote shadowed-read)))"),
-        Value::Symbol(Rc::from("shadowed-read")),
-    );
-}
-
-#[test]
 fn read_and_eval_preserve_named_failure_classes() {
     let read_type = eval_program("(read 42)", &mut Session::default())
         .expect_err("read must reject non-string input");

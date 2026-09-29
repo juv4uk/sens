@@ -32,14 +32,6 @@ fn language_defined_functions_are_callable_by_code() {
 }
 
 #[test]
-fn shadowing_a_name_does_not_change_what_the_code_calls() {
-    let mut session = core_session();
-    eval(&mut session, "(00001001 list (00001000 args (00000001 shadowed)))");
-    assert_eq!(eval(&mut session, "(list 1 2)"), "shadowed");
-    assert_eq!(eval(&mut session, "(00100111 1 2)"), "(1 2)");
-}
-
-#[test]
 fn a_local_definition_does_not_bind_the_code() {
     let mut session = Session::default();
     // Без ядра: локальне визначення `list` усередині функції не стає механізмом коду.

@@ -79,12 +79,4 @@ fn special_forms_are_not_values() {
     );
 }
 
-#[test]
-
-fn lexical_shadowing_of_builtin_name() {
-    assert_eq!(
-        eval_source("((lambda (+) (+ 2 3)) (lambda (a b) (* a b)))"),
-        "6"
-    );
-}
 

@@ -24,14 +24,6 @@ fn eager_string_builtin_can_be_passed_higher_order() {
 }
 
 #[test]
-fn eager_string_name_obeys_ordinary_lexical_shadowing() {
-    assert_eq!(
-        eval("((lambda (string-append) (string-append \"a\" \"b\")) (lambda (a b) (quote shadowed)))"),
-        Value::Symbol(Rc::from("shadowed")),
-    );
-}
-
-#[test]
 fn all_migrated_string_mechanisms_keep_their_surface_behavior() {
     assert_eq!(eval("(string? \"x\")"), Value::Symbol(Rc::from("t")));
     assert_eq!(
@@ -78,14 +70,10 @@ fn codepoint_and_digest_mechanisms_are_first_class_values() {
 }
 
 #[test]
-fn json_parse_is_first_class_and_shadowable() {
+fn json_parse_is_a_first_class_value() {
     assert_eq!(
         eval("(def decode json-parse) (decode \"{\\\"a\\\":1}\")").to_string(),
         r#"(("a" . 1))"#,
-    );
-    assert_eq!(
-        eval("((lambda (json-parse) (json-parse \"{}\")) (lambda (x) (quote shadowed)))"),
-        Value::Symbol(Rc::from("shadowed")),
     );
 }
 

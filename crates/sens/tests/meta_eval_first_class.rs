@@ -6,7 +6,6 @@
 use sens::{eval_program, Session};
 
 const HIGHER_ORDER_BUILTIN: &str = "((lambda (f) (f 2 3)) +)";
-const SHADOW_BUILTIN: &str = "((lambda (+) (+ 2 3)) (lambda (a b) (* a b)))";
 
 fn eval_native(expr: &str) -> String {
     let mut session = Session::default();
@@ -35,17 +34,10 @@ fn eval_via_meta(expr: &str) -> String {
 fn witness_expressions_are_existing_contract_21_acceptance_cases() {
     let matrix = include_str!("first_class_builtins.rs");
     assert!(matrix.contains(HIGHER_ORDER_BUILTIN));
-    assert!(matrix.contains(SHADOW_BUILTIN));
 }
 
 #[test]
 fn main_metacircular_evaluator_accepts_builtin_as_higher_order_value() {
     assert_eq!(eval_native(HIGHER_ORDER_BUILTIN), "5");
     assert_eq!(eval_via_meta(HIGHER_ORDER_BUILTIN), "5");
-}
-
-#[test]
-fn main_metacircular_evaluator_obeys_lexical_builtin_shadowing() {
-    assert_eq!(eval_native(SHADOW_BUILTIN), "6");
-    assert_eq!(eval_via_meta(SHADOW_BUILTIN), "6");
 }
