@@ -63,6 +63,47 @@ fn is_table_source(rel: &str) -> bool {
         || rel == "crates/sens/tests/english_names_in_code.rs"
 }
 
+fn explicit_nonsemantic_lisp_evidence(text: &str) -> bool {
+    let header = text.lines().take(24).collect::<Vec<_>>().join("\n").to_lowercase();
+    header.contains("(role research-only)")
+        || header.contains("(semantic-authority-change none)")
+        || header.contains("inventory only")
+        || header.contains("не language-contract")
+}
+
+fn rust_test_is_semantic_authority(rel: &str) -> bool {
+    if !rel.starts_with("crates/sens/tests/") || !rel.ends_with(".rs") {
+        return false;
+    }
+    let inventory = fs::read_to_string(repo_root().join("tests/authority-inventory.tsv"))
+        .unwrap_or_default();
+    inventory.lines().any(|line| {
+        let mut fields = line.split('\t');
+        let Some(path) = fields.next() else { return false };
+        let _site = fields.next();
+        let class = fields.next().unwrap_or_default();
+        let normalized = path.replace("crates/my-lisp/", "crates/sens/");
+        normalized == rel && class == "semantic-authority"
+    })
+}
+
+fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static str {
+    if rel.starts_with("crates/sens/tests/")
+        && rel.ends_with(".rs")
+        && !rust_test_is_semantic_authority(rel)
+    {
+        return "rust-test-instrument";
+    }
+    if !rel.ends_with(".rs") && explicit_nonsemantic_lisp_evidence(text) {
+        return "lisp-evidence";
+    }
+    base_kind
+}
+
+fn ratchet_enforced_kind(kind: &str) -> bool {
+    !matches!(kind, "rust-test-instrument" | "lisp-evidence")
+}
+
 fn files() -> Vec<(PathBuf, String)> {
     fn walk(root: &Path, dir: &Path, out: &mut Vec<(PathBuf, String)>) {
         let Ok(entries) = fs::read_dir(dir) else { return };
@@ -266,11 +307,13 @@ fn places() -> Vec<Place> {
         if rel.ends_with(".rs") {
             for (line, literal) in rust_strings(&text) {
                 if names.contains(literal.as_str()) {
-                    out.push(("rust", rel.clone(), line, literal));
+                    let kind = classified_kind(&rel, &text, "rust");
+                    out.push((kind, rel.clone(), line, literal));
                 } else if literal.contains('(') {
                     for (l, token, data) in lisp_tokens(&literal, line) {
                         if names.contains(&token) {
-                            let kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
+                            let base_kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
+                            let kind = classified_kind(&rel, &text, base_kind);
                             out.push((kind, rel.clone(), l, token));
                         }
                     }
@@ -279,7 +322,8 @@ fn places() -> Vec<Place> {
         } else {
             for (line, token, data) in lisp_tokens(&text, 1) {
                 if names.contains(&token) {
-                    let kind = if data { "lisp-дані" } else { "lisp" };
+                    let base_kind = if data { "lisp-дані" } else { "lisp" };
+                    let kind = classified_kind(&rel, &text, base_kind);
                     out.push((kind, rel.clone(), line, token));
                 }
             }
@@ -291,6 +335,9 @@ fn places() -> Vec<Place> {
 fn counts(places: &[Place]) -> BTreeMap<String, usize> {
     let mut out = BTreeMap::new();
     for (kind, file, _, name) in places {
+        if !ratchet_enforced_kind(kind) {
+            continue;
+        }
         *out.entry(format!("{kind}\t{file}\t{name}")).or_insert(0) += 1;
     }
     out
@@ -397,6 +444,24 @@ fn scanners_find_names_in_lisp_and_rust() {
         ]
     );
     assert_eq!(lisp[3].0, 2);
+
+    assert_eq!(
+        classified_kind("crates/sens/tests/numeric_wire.rs", "", "rust-lisp"),
+        "rust-test-instrument"
+    );
+    assert_eq!(
+        classified_kind("crates/sens/tests/mccarthy.rs", "", "rust-lisp"),
+        "rust-lisp",
+        "explicit semantic-authority test must stay inside the executable-name ratchet"
+    );
+    assert!(explicit_nonsemantic_lisp_evidence(
+        "; Inventory only: mechanism evidence, no semantic authority\n(foo car)"
+    ));
+    assert_eq!(
+        classified_kind("lib/core1.lisp", "", "lisp-дані"),
+        "lisp-дані",
+        "production Core1 data that drives compatibility must remain enforced"
+    );
 
     let rust = rust_strings("let a = \"car\"; // \"cdr\"\nlet c = '\"'; let s = r#\"(cons 1 ())\"#;");
     let literals: Vec<&str> = rust.iter().map(|(_, s)| s.as_str()).collect();

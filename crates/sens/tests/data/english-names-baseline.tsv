@@ -1503,6 +1503,7 @@ lisp-дані	lib/core1.lisp	cons	1
 lisp-дані	lib/core1.lisp	def	1
 lisp-дані	lib/core1.lisp	define	1
 lisp-дані	lib/core1.lisp	lambda	1
+lisp-дані	lib/core1.lisp	label	1
 lisp-дані	lib/core1.lisp	list	1
 lisp-дані	lib/core1.lisp	quote	1
 lisp-дані	lib/core4.lisp	and	1
