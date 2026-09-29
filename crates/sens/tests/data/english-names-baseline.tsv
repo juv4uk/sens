@@ -427,7 +427,6 @@ lisp	contracts/yantraos-bridge-contract.lisp	provenance	2
 lisp	evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp	quote	1
 lisp	experiments/atomspace-pattern-audit-791.lisp	reason	7
 lisp	experiments/blackboard-pattern-audit-790.lisp	reason	8
-lisp	experiments/core4-eq-answer-1258.lisp	eq?	3
 lisp	experiments/core4-eq-result-law-witness.lisp	label	2
 lisp	experiments/function-genealogy.lisp	cadddr	1
 lisp	experiments/function-genealogy.lisp	cadr	1
