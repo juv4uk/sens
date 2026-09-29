@@ -287,7 +287,7 @@ mod honesty_tests {
             );
 
         let program = crate::parse("(demo missing extra)").expect("probe parses");
-        let ExprKind::List(items) = &program[0].kind else {
+        let crate::ExprKind::List(items) = &program[0].kind else {
             panic!("probe must be a call");
         };
         let span = program[0].span;
