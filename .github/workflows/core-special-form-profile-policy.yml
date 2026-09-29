@@ -1,45 +1,24 @@
-name: Core special-form profile policy
+name: Core special-form profile policy — transition archive
 
 on:
-  pull_request:
-    paths:
-      - "contracts/core-special-form-profile-policy.lisp"
-      - "contracts/core2-profile-contract.lisp"
-      - "contracts/core-profile-contract.lisp"
-      - "scripts/check-core-special-form-profile-policy.lisp"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/core-special-form-profile-policy.yml"
-  push:
-    branches: [main]
-    paths:
-      - "contracts/core-special-form-profile-policy.lisp"
-      - "contracts/core2-profile-contract.lisp"
-      - "contracts/core-profile-contract.lisp"
-      - "scripts/check-core-special-form-profile-policy.lisp"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/core-special-form-profile-policy.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  policy:
-    name: Lisp-owned COND profile policy
+  archive:
+    name: Historical COND profile policy archive
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Build semantic oracle
-        run: cargo build -p sens-cli --bin sens
-      - name: Execute special-form profile policy witness
-        shell: bash
+      - name: Record policy
+        run: sha256sum contracts/core-special-form-profile-policy.lisp
+      - name: Explain active authority
         run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens scripts/check-core-special-form-profile-policy.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core-special-form-profile-policy-ok)"
+          echo "Profile-specific COND laws are superseded by #1663/#1703."
+          echo "Active target is one two-part COND law across Core1-4."
+          echo "This workflow is manual-only until #1709 supplies the new Lisp witness lane."
       - name: Diff hygiene
         run: git diff --check
