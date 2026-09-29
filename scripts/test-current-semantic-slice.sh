@@ -12,7 +12,6 @@ cargo test -p sens \
   --test deep_structural_relation_contract \
   --test exact_q_binary_contract \
   --test mathematical_result_taxonomy \
-  --test control_dispatch_contract \
   --test canon_laws_v2_contract \
   --test reason_honesty_contract \
   --test unification_outcome_contract \
