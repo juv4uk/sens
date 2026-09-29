@@ -103,29 +103,32 @@ fn unsupported_exact_function_is_still_carried_as_the_same_function() {
 }
 
 #[test]
-fn exact_function_failure_is_distinct_from_an_exact_like_non_function_token() {
-    let parsed = parse("1111111").expect("схожий на 7-бітний токен є коректним десятковим source");
+fn exact_function_failure_is_distinct_from_explicit_binary_number() {
+    // #1708/#1706: do not pin legacy decimal-default parsing here.
+    // #b is an explicit numeric-domain projection and therefore proves the
+    // Function8/Number boundary without constraining the future bare-binary reader.
+    let parsed = parse("#b1111111").expect("explicit binary numeric projection");
     assert_eq!(parsed.len(), 1);
     assert!(matches!(
         parsed[0].kind,
-        ExprKind::Number(value, Exactness::Exact) if value == 1_111_111.0
+        ExprKind::Number(value, Exactness::Exact) if value == 127.0
     ));
 
     let mut session = Session::default();
     let error = eval_program(
-        "(((00001000 (f) f) 1111111))",
+        "(((00001000 (f) f) #b1111111))",
         &mut session,
     )
-    .expect_err("перенесене десяткове значення не повинно ставати exact-функцією СЕНС");
+    .expect_err("an explicit binary Number must not become an exact SENS function");
 
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(
         error.message.contains("expression is not callable"),
-        "неочікувана помилка невиконуваного значення: {}",
+        "unexpected non-callable Number error: {}",
         error.message
     );
     assert!(
         !error.message.contains("no admitted callable mechanism"),
-        "не-восьмибітний токен не повинен входити в admission механізму exact-функції"
+        "a Number must not enter Function8 mechanism admission"
     );
 }
