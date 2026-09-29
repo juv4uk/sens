@@ -445,8 +445,8 @@
 
 (00001010 let* (bindings body)
   (00000111
-    ((00000010 bindings) () body)
-    ((00000010 bindings) (0)
+    ((00000010 bindings) body)
+    ((00000010 (00000001 ()))
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
