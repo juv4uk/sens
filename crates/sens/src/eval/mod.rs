@@ -22,7 +22,7 @@ mod special_forms;
 pub use capabilities::{
     capability_installed, installed_capabilities, register_capability,
     register_evaluated_capability, register_sens_capability, unregister_capability,
-    unregister_sens_capability, EvaluatedArg,
+    unregister_sens_capability,
 };
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
