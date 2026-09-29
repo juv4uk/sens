@@ -6,19 +6,21 @@
 ; Core-specific predicate/control laws. It does not claim unfinished runtime
 ; migrations are already mechanically complete.
 ;
+; Version metadata uses explicit human decimal projection (#d10); it is not canonical Number identity.
+;
 ; Canonical SENS is binary-only. Function identity is exact Function8
 ; (00000000..11111111). Predicate results are an orthogonal contextual one-bit
 ; domain. Human names, Unicode text, decimal notation and host labels are
 ; boundary/mechanism projections, not canonical semantic identity.
 
-((major . 10) (minor . 0)
+((major . #d10) (minor . 0)
  (note . "Contract 10.0 candidate from owner decisions #1706/#1694/#1703/#1663/#1699. Canonical SENS is binary-only: Control2 structure, exact Function8 identities, binary exact Number, UPC-7 Text7, and contextual Predicate1. Core1/Core2/Core3/Core4 share one ATOM/EQ/COND foundation law. Three-part COND and UnsatisfiedConditional exhaustion authority from Contract 9.0 are superseded.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((binary-only-super-law
        . "Canonical SENS semantic identity is owned only by exact binary representations. Current fundamental domains are structural/control bits, exact Function8, exact binary Number, UPC-7 Text7, and contextual Predicate1. Human names, Unicode/UTF-8 spelling, decimal notation, host enum labels and backend names are boundary, debug, provenance or mechanism only.")
       (function8-space
-       . "The complete function-identity space is exactly 00000000..11111111. All 256 exact eight-bit forms are reserved exclusively for functions. Function identity is the eight bits themselves; it is not text, a string, a symbol, a literal, a decimal number, a human name, an enum label, an opcode, or a backend identifier.")
+       . "The complete function-identity space is exactly 00000000..11111111. All 256 slots are reserved exclusively for functions. Function identity is the exact eight bits themselves; it is not text, a string, a symbol, a literal, a decimal number, a human name, an enum label, an opcode, or a backend identifier.")
       (single-function-ontology
        . "There is no second named function ontology. Runtime, compiler IR, contracts, backends and tooling must not introduce named identities beside Function8. Internal mechanism metadata may describe how an already-selected Function8 executes, but may never rename or redefine the function.")
       (surface-non-authority
