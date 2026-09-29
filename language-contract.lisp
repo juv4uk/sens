@@ -8,6 +8,11 @@
 ; Number is the binary-first numeric domain, kept orthogonal to Function.
 ; Text is a sequence of exact UPC-7 codes and never a runtime dispatch key.
 ;
+; Binary-only language law:
+;   canonical SENS semantic identity/data/control is owned only by bits.
+;   Human names, decimal spellings, Unicode/UTF-8, symbols and host labels
+;   are projections/metadata outside the canonical language boundary.
+;
 ; Active width constitution:
 ;   predicate answer = exact 1 bit: 0 NO, 1 YES
 ;   default lexical/control cell = exact 2 bits
@@ -34,7 +39,13 @@
  (note . "RATIFIED TARGET by owner 2026-09-29 under #1694/#1702. Canonical sens (СЕНС) has exactly three payload domains: Function, Number, Text, plus two-bit lexical/structural control. Default cells are 00 SPACE, 01 close, 10 open, 11 typed-payload escape. Predicate answers are exactly one bit: 0 NO, 1 YES. Function is exact eight-bit 00000000..11111111; Text is exact seven-bit UPC-7; Number is binary-first and explicitly framed. The language keeps real canonical separators and does not target a whitespace-free continuous bitstream.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
-   . ((bit-width-constitution
+   . ((binary-only-language
+       . "Canonical sens is binary-only. Every canonical semantic identity, value, predicate result and lexical/control form is owned by an exact bit representation. Human names, decimal/hex spellings, Unicode/UTF-8 code points, symbols, host enum labels, booleans and textual opcodes may exist only before lowering or as debug/provenance/mechanism metadata; none may be required to recover canonical meaning.")
+      (binary-domain-orthogonality
+       . "Binary-only does not collapse domains. Width plus semantic context owns interpretation: one-bit predicate result, two-bit lexical/control cell, seven-bit UPC-7 Text code, eight-bit Function identity, and N-bit Number remain orthogonal even when their physical bit patterns overlap. No implicit coercion is permitted by bit-pattern coincidence.")
+      (human-boundary-one-way
+       . "Human/UI spellings resolve or encode exactly once into canonical bits. Canonical evaluator/compiler/FASL/wire/islands must not perform bits-to-name-to-bits, decimal-string-to-number, Unicode-to-Text identity recovery, or any equivalent semantic round trip.")
+      (bit-width-constitution
        . "Active widths are role-specific: predicate result is exactly one bit (0 NO, 1 YES); the default lexical/control layer is exactly two bits; Text uses exact seven-bit UPC-7 codes; Function uses exact eight-bit identities. Number is binary and explicitly framed. The former 1..7-bit predicate gradation is inactive.")
       (default-two-bit-language
        . "The canonical reader defaults to two-bit cells: 00 is a real SPACE/separator, 01 closes structure, 10 opens structure, and 11 escapes to a typed payload. Separators are part of the canonical representation where grammar requires them and are not optional padding.")
