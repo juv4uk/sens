@@ -73,3 +73,34 @@ fn deep_tail_recursion_through_slots_stays_off_the_stack() {
         "100000"
     );
 }
+
+// --- #1697: виконання залежить лише від числових координат -------------------
+
+#[test]
+fn quote_of_a_parameter_name_stays_a_symbol_after_names_left_the_node() {
+    assert_eq!(run("((00001000 (alpha) (00000001 alpha)) 5)"), "alpha");
+    assert_eq!(run("((00001000 (alpha) (00000001 (alpha beta))) 5)"), "(alpha beta)");
+}
+
+#[test]
+fn alpha_renaming_parameters_does_not_change_the_answer() {
+    let with = |a: &str, b: &str| {
+        run(&format!(
+            "(((00001000 ({a}) (00001000 ({b}) (00001101 (00001100 {a} {b}) 1))) 10) 20)"
+        ))
+    };
+    assert_eq!(with("x", "y"), "29");
+    assert_eq!(with("alpha", "beta"), "29");
+    assert_eq!(with("y", "x"), "29");
+    // Внутрішнє ім'я збігається із зовнішнім: затінює, координати лишаються правильними.
+    assert_eq!(run("(((00001000 (x) (00001000 (x) x)) 1) 2)"), "2");
+}
+
+#[test]
+fn a_parameter_cannot_take_an_admitted_function_code() {
+    // Код функції СЕНС не можна зв'язати як локальну змінну: розв'язувач його
+    // ніколи не перехопить, бо параметр із таким іменем відхиляється на вході.
+    let mut session = Session::default();
+    let result = eval_program("((00001000 (00000010) 00000010) 1)", &mut session);
+    assert!(result.is_err(), "a function code must not be bindable as a local");
+}

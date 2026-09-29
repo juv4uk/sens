@@ -217,8 +217,15 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             ExprKind::Sid(sid) => Value::Sid(*sid),
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
-            ExprKind::Symbol(symbol) | ExprKind::Local { name: symbol, .. } => {
-                Value::Symbol(symbol.clone())
+            ExprKind::Symbol(symbol) => Value::Symbol(symbol.clone()),
+            // Слот — координата виконання, не дані: у quote-позиції його не буває
+            // (розв'язувач її не чіпає), тож така поява — порушення інваріанта.
+            ExprKind::Local { .. } => {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    "a lexical slot has no source datum · leksychnyi slot ne maie danykh dzherela · ein lexikalischer Slot hat kein Quelldatum",
+                    expression.span,
+                ));
             }
             ExprKind::List(items) => {
                 let mut out = Vec::with_capacity(items.len());

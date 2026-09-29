@@ -78,11 +78,16 @@ pub enum ExprKind {
     /// SENS call: the function slot is exactly one byte (`Sens8`), no name
     /// text. Produced only by `eval::lower` after parsing.
     Call(Sens8, Rc<[Expr]>),
-    /// Параметр замикання за номером: слот `index` кадру виклику на `depth`
-    /// кадрів вище. Створює лише розв'язувач тіла `lambda` (`eval::closures`);
-    /// парсер його не породжує, у fasl він записується як ім'я `name`.
-    /// A closure parameter by slot, produced only by the lambda-body resolver.
-    Local { depth: u32, index: u32, name: Rc<str> },
+    /// Параметр замикання за числовими координатами: слот `index` кадру
+    /// виклику на `depth` кадрів вище. Імені тут немає навмисно (#1697,
+    /// контракт 10.0 `locals-are-slots-not-names`): виконання залежить лише від
+    /// координат; людські імена лишаються в `Closure::slot_names` як
+    /// налагоджувальні метадані. Створює лише розв'язувач тіла `lambda`
+    /// (`eval::closures`); парсер його не породжує. fasl і wire записують
+    /// саме координати.
+    /// A closure parameter by numeric lexical coordinates only; the human name
+    /// lives in the closure's debug metadata, never in the node.
+    Local { depth: u32, index: u32 },
 }
 
 // Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
@@ -121,6 +126,8 @@ pub(crate) mod fasl {
     // а старий decoder fail-closed відхилить новий tag як невідомий.
     const TAG_I32_BUFFER: u8 = 8;
     const TAG_F32_BUFFER: u8 = 9;
+    // #1697: числові координати локальної змінної; ім'я не записується.
+    const TAG_LOCAL: u8 = 10;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -163,9 +170,14 @@ pub(crate) mod fasl {
                 out.push(TAG_STRING);
                 put_str(out, value);
             }
-            ExprKind::Symbol(symbol) | ExprKind::Local { name: symbol, .. } => {
+            ExprKind::Symbol(symbol) => {
                 out.push(TAG_SYMBOL);
                 put_str(out, symbol);
+            }
+            ExprKind::Local { depth, index } => {
+                out.push(TAG_LOCAL);
+                put_u32(out, *depth);
+                put_u32(out, *index);
             }
             ExprKind::List(items) => {
                 out.push(TAG_LIST);
@@ -229,6 +241,11 @@ pub(crate) mod fasl {
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
+            TAG_LOCAL => {
+                let depth = get_u32(bytes, pos)?;
+                let index = get_u32(bytes, pos)?;
+                ExprKind::Local { depth, index }
+            }
             TAG_LIST => {
                 let count = get_u32(bytes, pos)? as usize;
                 let mut items = Vec::with_capacity(count.min(1 << 22));
@@ -344,6 +361,7 @@ pub(crate) mod wire {
     const TAG_STRING: u8 = 0x55;
     const TAG_SYMBOL: u8 = 0x56;
     const TAG_PAIR: u8 = 0x57;
+    const TAG_LOCAL: u8 = 0x58;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
 
@@ -424,8 +442,11 @@ pub(crate) mod wire {
                 out.push(sid.packed_byte());
             }
             ExprKind::String(value) => put_text(out, TAG_STRING, value),
-            ExprKind::Symbol(symbol) | ExprKind::Local { name: symbol, .. } => {
-                put_text(out, TAG_SYMBOL, symbol);
+            ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
+            ExprKind::Local { depth, index } => {
+                out.push(TAG_LOCAL);
+                put_varint(out, u64::from(*depth));
+                put_varint(out, u64::from(*index));
             }
             ExprKind::List(items) => {
                 put_list_header(out, items.len());
@@ -547,6 +568,11 @@ pub(crate) mod wire {
                 *pos += 1;
                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
             }
+            TAG_LOCAL => {
+                let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
+                let index = u32::try_from(get_varint(bytes, pos)?).ok()?;
+                ExprKind::Local { depth, index }
+            }
             TAG_INTEGER => {
                 let zigzag = get_varint(bytes, pos)?;
                 let integer = ((zigzag >> 1) as i64) ^ -((zigzag & 1) as i64);
@@ -618,22 +644,39 @@ mod wire_tests {
 "#;
 
     #[test]
-    fn wire_local_serializes_as_original_symbol() {
-        let expression = Expr {
-            kind: ExprKind::Local {
-                depth: 2,
-                index: 3,
-                name: "slot-name".into(),
-            },
+    fn wire_local_carries_numeric_coordinates_and_no_name() {
+        // #1697: канонічний wire несе координати слота, а не людське ім'я.
+        let local = |depth, index| Expr {
+            kind: ExprKind::Local { depth, index },
             span: crate::Span { start: 0, end: 9 },
         };
+        let encoded = encode_program(&[local(2, 3), local(0, 200)]);
+        // магія(3) + кількість(1) + [тег + depth + index] * 2, усе varint
+        assert_eq!(encoded.len(), 3 + 1 + (1 + 1 + 1) + (1 + 1 + 2));
+        let decoded = decode_program(&encoded).expect("wire decodes local coordinates");
+        assert_eq!(decoded[0].kind, ExprKind::Local { depth: 2, index: 3 });
+        assert_eq!(decoded[1].kind, ExprKind::Local { depth: 0, index: 200 });
+        assert_eq!(encode_program(&decoded), encoded);
+    }
 
-        let encoded = encode_program(&[expression]);
-        let decoded = decode_program(&encoded).expect("wire decodes local as source data");
-        assert!(matches!(
-            &decoded[0].kind,
-            ExprKind::Symbol(name) if &**name == "slot-name"
-        ));
+    #[test]
+    fn wire_local_rejects_coordinates_wider_than_u32() {
+        // depth = 2^32 як varint: 0x80 0x80 0x80 0x80 0x10
+        assert!(decode_program(b"SW\x01\x01\x58\x80\x80\x80\x80\x10\x00").is_none());
+    }
+
+    #[test]
+    fn fasl_local_carries_numeric_coordinates_and_no_name() {
+        let local = Expr {
+            kind: ExprKind::Local { depth: 1, index: 4 },
+            span: crate::Span { start: 0, end: 0 },
+        };
+        let hash = [7u8; 32];
+        let encoded = fasl::encode_program(&[local], &hash);
+        let (decoded, decoded_hash) = fasl::decode_program(&encoded).expect("fasl decodes local");
+        assert_eq!(decoded_hash, hash);
+        assert_eq!(decoded[0].kind, ExprKind::Local { depth: 1, index: 4 });
+        assert_eq!(fasl::encode_program(&decoded, &hash), encoded);
     }
 
     #[test]
