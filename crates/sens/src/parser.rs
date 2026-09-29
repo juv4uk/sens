@@ -1,12 +1,6 @@
 use crate::{ErrorKind, Exactness, Expr, ExprKind, LanguageError, Span};
 use std::rc::Rc;
 
-/// `true` for a token that is exactly the single character `.` — the reader
-/// marker for a dotted pair's tail, never a symbol name in ordinary use.
-fn is_dot_symbol(expr: &Expr) -> bool {
-    matches!(&expr.kind, ExprKind::Symbol(symbol) if &**symbol == ".")
-}
-
 /// Folds `items` right-to-left onto `tail`, building nested `ExprKind::Pair`
 /// nodes — `(a b . c)` becomes `Pair(a, Pair(b, c))`, the same shape `cons`
 /// builds at runtime. Every node shares the whole list's span; only the
@@ -249,13 +243,17 @@ impl Parser<'_> {
                     });
                 }
                 Some(_) => {
-                    let item = self.expression()?;
-                    if is_dot_symbol(&item) {
+                    // `.` is reader punctuation (#1696): a lone dot in list
+                    // context is recognised structurally and never becomes an
+                    // expression, so no `Symbol(".")` is ever built.
+                    if self.at_dot_marker() {
+                        let dot_start = self.cursor;
+                        self.bump();
                         if items.is_empty() {
                             return Err(self.error(
                                 "unexpected '.' with nothing before it · neochikuvana '.' bez nichoho pered neiu · unerwartetes '.' ohne vorangehenden Ausdruck",
-                                item.span.start,
-                                item.span.end,
+                                dot_start,
+                                dot_start + 1,
                             ));
                         }
                         self.skip_ignored();
@@ -281,6 +279,7 @@ impl Parser<'_> {
                         };
                     }
 
+                    let item = self.expression()?;
                     items.push(item);
                 }
                 None => {
@@ -291,6 +290,20 @@ impl Parser<'_> {
                     ))
                 }
             }
+        }
+    }
+
+    /// `true` when the next token is exactly the single character `.`, that is
+    /// `.` followed by whitespace, a parenthesis, a comment or the end of input.
+    /// Tokens such as `.5` or `..` are ordinary tokens and do not match.
+    fn at_dot_marker(&self) -> bool {
+        let rest = &self.source[self.cursor..];
+        let Some(after) = rest.strip_prefix('.') else {
+            return false;
+        };
+        match after.chars().next() {
+            None => true,
+            Some(next) => next.is_whitespace() || matches!(next, '(' | ')' | ';'),
         }
     }
 
@@ -341,6 +354,15 @@ impl Parser<'_> {
             self.bump();
         }
         let token = &self.source[start..self.cursor];
+
+        // A lone `.` outside a dotted pair is not an expression (#1696).
+        if token == "." {
+            return Err(self.error(
+                "unexpected '.' outside a dotted pair · neochikuvana '.' poza dotted-paroiu · unerwartetes '.' außerhalb eines Dotted Pair",
+                start,
+                self.cursor,
+            ));
+        }
 
         if let Some(payload) = explicit_radix_payload(token, "#d") {
             let Some(rational) = crate::value::Rational::from_literal(payload, "1") else {
@@ -670,7 +692,7 @@ mod tests {
     #[test]
     fn malformed_decimal_literals_fall_back_to_plain_symbols() {
         for literal in [
-            ".", ".e3", "1e", "1e+", "1e-", "1.2.3", "1ee3", "--0.5", "+", "-",
+            ".e3", "1e", "1e+", "1e-", "1.2.3", "1ee3", "--0.5", "+", "-",
         ] {
             assert!(
                 matches!(parse_one(literal).kind, ExprKind::Symbol(s) if &*s == literal),
@@ -864,10 +886,56 @@ mod tests {
     }
 
     #[test]
-    fn a_lone_dot_outside_a_list_is_an_ordinary_symbol() {
-        // Only special between two sub-expressions inside parentheses — a
-        // bare top-level `.` has nothing to be a separator between.
-        assert!(matches!(parse_one(".").kind, ExprKind::Symbol(s) if &*s == "."));
+    fn a_lone_dot_outside_a_dotted_pair_is_a_parse_error() {
+        // #1696: `.` is reader punctuation. Outside a list's dotted position
+        // it is neither a word nor an expression.
+        for source in [".", "'.", "(00000001 .)", "#i32(1 . 2)", "(. )"] {
+            let error = parse(source).expect_err(source);
+            assert_eq!(error.kind, ErrorKind::Parse, "source: {source}");
+        }
+    }
+
+    #[test]
+    fn a_dotted_pair_never_materializes_a_dot_symbol() {
+        fn contains_dot_symbol(expr: &Expr) -> bool {
+            match &expr.kind {
+                ExprKind::Symbol(name) => &**name == ".",
+                ExprKind::List(items) => items.iter().any(contains_dot_symbol),
+                ExprKind::Pair(head, tail) => contains_dot_symbol(head) || contains_dot_symbol(tail),
+                _ => false,
+            }
+        }
+        for source in ["(1 . 2)", "(a b . c)", "(1 .(2))", "(1 . (2 . 3))", "((1 . 2) . (3 . 4))"] {
+            for expression in parse(source).expect(source) {
+                assert!(!contains_dot_symbol(&expression), "source: {source}");
+            }
+        }
+    }
+
+    #[test]
+    fn a_dot_touching_a_parenthesis_is_still_a_dotted_pair_marker() {
+        let ExprKind::Pair(head, tail) = parse_one("(1 .(2))").kind else {
+            panic!("expected a dotted pair");
+        };
+        assert!(matches!(head.kind, ExprKind::Number(n, Exactness::Exact) if n == 1.0));
+        assert!(matches!(&tail.kind, ExprKind::List(items) if items.len() == 1));
+    }
+
+    #[test]
+    fn tokens_that_merely_start_with_a_dot_are_not_the_marker() {
+        // `.5` is a decimal; `..` and `.b` are ordinary words for now.
+        assert!(matches!(parse_one(".5").kind, ExprKind::Number(_, _) | ExprKind::Rational(_)));
+        let ExprKind::List(items) = parse_one("(a .b)").kind else {
+            panic!("expected a two-element list, not a dotted pair");
+        };
+        assert_eq!(items.len(), 2);
+        assert!(matches!(&parse_one("..").kind, ExprKind::Symbol(s) if &**s == ".."));
+    }
+
+    #[test]
+    fn a_second_dot_in_one_list_is_a_parse_error() {
+        let error = parse("(1 . 2 . 3)").unwrap_err();
+        assert_eq!(error.kind, ErrorKind::Parse);
     }
 
     #[test]

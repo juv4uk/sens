@@ -36,7 +36,9 @@
 ((expr . "12345678901234567890.12345678901234567890") (expected . "123456789012345678901234567890123456789/10000000000000000000") (tier . 2) (axioms . (S1)))
 ((expr . "1e100") (expected . "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") (tier . 2) (axioms . (S1)))
 ((expr . "1e-100") (expected . "1/10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") (tier . 2) (axioms . (S1)))
-((expr . ".") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
+; A lone `.` is reader punctuation (#1696), not a malformed number: outside a
+; dotted pair it is a Parse error, so it no longer belongs to this family.
+; Covered by parser::tests::a_lone_dot_outside_a_dotted_pair_is_a_parse_error.
 ((expr . ".e3") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
 ((expr . "1e") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))
 ((expr . "1e+") (error . "UnknownSymbol") (tier . 2) (axioms . (S2)))

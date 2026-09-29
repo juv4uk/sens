@@ -49,7 +49,6 @@
 (fixture (expr . "12345678901234567890.12345678901234567890") (expected . "123456789012345678901234567890123456789/10000000000000000000") (tier . 2) (axioms S1))
 (fixture (expr . "1e100") (expected . "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") (tier . 2) (axioms S1))
 (fixture (expr . "1e-100") (expected . "1/10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") (tier . 2) (axioms S1))
-(fixture (expr . ".") (error . "UnknownSymbol") (tier . 2) (axioms S2))
 (fixture (expr . ".e3") (error . "UnknownSymbol") (tier . 2) (axioms S2))
 (fixture (expr . "1e") (error . "UnknownSymbol") (tier . 2) (axioms S2))
 (fixture (expr . "1e+") (error . "UnknownSymbol") (tier . 2) (axioms S2))
