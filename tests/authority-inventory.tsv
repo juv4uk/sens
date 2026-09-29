@@ -173,7 +173,7 @@ crates/my-lisp/tests/ukr_acceptance.rs	ukr_acceptance_program_needs_no_latin_key
 crates/my-lisp/tests/ukr_acceptance.rs	ukr_acceptance_program_executes_through_real_runtime	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
 crates/my-lisp/tests/ukr_acceptance.rs	shadowing_ukr_peer_does_not_retarget_english_peer	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
 
-crates/my-lisp/tests/core_profile_runtime_1272.rs	selected_core_profile_signal_is_shared_mechanically	observer	selected-core-profile-mechanism	contracts/core-special-form-profile-policy.lisp	migrated
+crates/my-lisp/tests/core_profile_runtime_1272.rs	selected_core_profile_signal_is_shared_mechanically	observer	selected-core-profile-mechanism	contracts/core-profile-contract.lisp	migrated
 crates/my-lisp/tests/sens_host_registration_admission_1406.rs	host_registration_alone_must_not_make_function_without_admitted_mechanism_callable	observer	sens-host-registration-admission	#997 + #1006 + #1406	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	core3_loader_selects_core3_only_after_the_profile_layer_loads	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	lexical_child_shares_selected_core3_signal	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
