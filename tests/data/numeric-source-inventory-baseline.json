@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "measured_from": "sens PR #1630, head 2b2eecef3f6fb87cd867bbf722c4758d8c800682",
+  "measured_from": "sens PR #1709, head 71e5bae2e57fd2081025d2340f74499e4007b16f",
   "policy": "migration-sensitive counts are ceilings; decreases are progress, increases fail",
   "categories": {
     "binary-shaped-multibit-number": 132,
-    "decimal-integer-needs-migration": 4472,
+    "decimal-integer-needs-migration": 4475,
     "decimal-fraction-or-exponent-needs-policy": 154,
     "rational-literal": 35
   },
@@ -23,7 +23,7 @@
     },
     "fixtures": {
       "binary-shaped-multibit-number": 46,
-      "decimal-integer-needs-migration": 1945,
+      "decimal-integer-needs-migration": 1948,
       "decimal-fraction-or-exponent-needs-policy": 17,
       "rational-literal": 21
     },
