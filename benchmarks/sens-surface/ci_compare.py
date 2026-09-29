@@ -13,7 +13,7 @@
 Прогрес коміту — швидкість цієї зміни проти попереднього коміту для обох
 форм; уповільнення понад поріг — код 1.
 
-  python3 ci_compare.py BASE.tsv HEAD.tsv [--fail-above 3.0]
+  python3 ci_compare.py BASE.tsv HEAD.tsv [--fail-above 3.0] [--skip-base-regression]
 """
 import math
 import os
@@ -66,6 +66,7 @@ def main():
     (base, base_params), (head, head_params) = load(sys.argv[1]), load(sys.argv[2])
     params = {**base_params, **head_params}
     threshold = float(option("--fail-above", "3.0"))
+    skip_base_regression = "--skip-base-regression" in sys.argv
     empty = ("empty", "-", "full")
     head_empty, base_empty = median(head, empty), median(base, empty)
     names = sorted({name for name, form, mode in head if name != "empty"})
@@ -100,38 +101,55 @@ def main():
         g = geomean(ratios)
         lines += [f"| **геометричне середнє** (усереднено по навантаженнях, не по розмірах) | | | **×{g:.3f}** |", ""]
 
-    lines += [
-        f"### Прогрес цього коміту — виконання (проти попереднього; уповільнення гірше ніж −{threshold:.1f}% — червоне)",
-        "",
-        "| навантаження · розмір | SENS | англійська |",
-        "|---|---:|---:|",
-    ]
     regressions, improvements = [], []
-    for name in names:
-        cells = [f"{name} · {params.get(name, '-')}"]
-        for form in ("sens", "en"):
-            if (name, form, "full") not in base:
-                cells.append("нове")
-                continue
-            was = net(base, base_empty, name, form, "full")
-            now = net(head, head_empty, name, form, "full")
-            change = (was / now - 1) * 100
-            mark = ""
-            if change < -threshold:
-                mark = " 🔴"
-                regressions.append(f"{name}/{form} {change:+.2f}%")
-            elif change > threshold:
-                mark = " 🟢"
-                improvements.append(f"{name}/{form} {change:+.2f}%")
-            cells.append(f"{change:+.2f}%{mark}")
-        lines.append("| " + " | ".join(cells) + " |")
-    lines += ["", f"**Швидше:** {', '.join(improvements) or 'немає'}",
-              f"**Повільніше:** {', '.join(regressions) or 'немає'}", ""]
+    if skip_base_regression:
+        lines += [
+            "### Прогрес base → head — не оцінюється",
+            "",
+            "Контрольоване benchmark-навантаження або harness змінено в цьому PR. "
+            "Крос-комітне порівняння не виконується, бо програма вже не є тією самою. "
+            "Порівняння English ↔ SENS вище лишається чинним: обидві форми виміряні "
+            "на одному HEAD-бінарнику й з одного шаблону.",
+            "",
+        ]
+    else:
+        lines += [
+            f"### Прогрес цього коміту — виконання (проти попереднього; уповільнення гірше ніж −{threshold:.1f}% — червоне)",
+            "",
+            "| навантаження · розмір | SENS | англійська |",
+            "|---|---:|---:|",
+        ]
+        for name in names:
+            cells = [f"{name} · {params.get(name, '-')}"]
+            for form in ("sens", "en"):
+                if (name, form, "full") not in base:
+                    cells.append("нове")
+                    continue
+                was = net(base, base_empty, name, form, "full")
+                now = net(head, head_empty, name, form, "full")
+                change = (was / now - 1) * 100
+                mark = ""
+                if change < -threshold:
+                    mark = " 🔴"
+                    regressions.append(f"{name}/{form} {change:+.2f}%")
+                elif change > threshold:
+                    mark = " 🟢"
+                    improvements.append(f"{name}/{form} {change:+.2f}%")
+                cells.append(f"{change:+.2f}%{mark}")
+            lines.append("| " + " | ".join(cells) + " |")
+        lines += [
+            "",
+            f"**Швидше:** {', '.join(improvements) or 'немає'}",
+            f"**Повільніше:** {', '.join(regressions) or 'немає'}",
+            "",
+        ]
 
     lines += [
         "<details><summary>Сирі інструкції (медіана, розкид повторів)</summary>",
         "",
-        f"Створення сесії: попередній коміт {base_empty:,.0f}, зараз {head_empty:,.0f}.",
+        (f"Створення сесії: зараз {head_empty:,.0f} (base не порівнюється — workload змінено)."
+         if skip_base_regression
+         else f"Створення сесії: попередній коміт {base_empty:,.0f}, зараз {head_empty:,.0f}."),
         "",
         "| навантаження · розмір | режим | англійська | SENS |",
         "|---|---|---:|---:|",
