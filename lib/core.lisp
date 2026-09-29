@@ -384,7 +384,6 @@
       ((truthy? value) t (00000001 ()))
       ((truthy? value) () t))))
 
-(00001001 not not?)
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
