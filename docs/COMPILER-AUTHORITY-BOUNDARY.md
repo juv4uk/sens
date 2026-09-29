@@ -137,9 +137,8 @@ selection, future auto-schedulers, and ordinary compiler optimization passes.
 - A compiler-only special form, primitive, or macro that has no
   Lisp-side semantic definition (no "eighth McCarthy primitive," per
   #66's own acceptance criterion).
-- A compiler silently treating an admitted error condition
-  differently than the reference implementation (e.g. returning a
-  successful-looking value where native/meta both raise `Type`).
+- A compiler silently changing a language-owned observable failure into
+  a successful-looking value or a different failure distinction.
 - A compiler inventing a new language-observable failure distinction
   without a Lisp-owned contract or witness that admits that distinction.
 - A compiler changing which of two independently-valid evaluation
