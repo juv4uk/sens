@@ -39,6 +39,13 @@ pub(crate) fn write_to_string_values(
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_values("write-to-string", arguments, 1, span)?;
+    if matches!(arguments[0], Value::PredicateBit(_)) {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "write-to-string cannot serialize a contextual predicate bit without a canonical predicate framing",
+            span,
+        ));
+    }
     Ok(Value::String(Rc::from(arguments[0].to_canonical_wire_string())))
 }
 
@@ -160,4 +167,24 @@ fn exact_values(
         ));
     }
     Ok(())
+}
+
+
+#[cfg(test)]
+mod predicate_wire_tests {
+    use super::*;
+
+    #[test]
+    fn write_to_string_rejects_contextual_predicate_bit() {
+        let span = Span { start: 7, end: 8 };
+        let error = write_to_string_values(
+            &[Value::predicate_bit(true)],
+            &Environment::root(),
+            span,
+        )
+        .expect_err("contextual PredicateBit must not serialize as another domain");
+
+        assert_eq!(error.kind, ErrorKind::Type);
+        assert_eq!(error.span, span);
+    }
 }
