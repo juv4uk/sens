@@ -42,7 +42,7 @@ fn exact_let_star_code_matches_surface_semantics() {
     let mut exact = loaded_session();
 
     let surface_program =
-        "(let* ((x 1) (y (+ x 1)) (z (+ y 1))) (list x y z))";
+        "(let* ((x 1) (y (00001100 x 1)) (z (00001100 y 1))) (00100111 x y z))";
     let exact_program =
         "(10011101 ((x 1) (y (00001100 x 1)) (z (00001100 y 1))) (00100111 x y z))";
 

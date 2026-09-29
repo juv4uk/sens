@@ -255,6 +255,18 @@ fn rust_strings(text: &str) -> Vec<(usize, String)> {
     out
 }
 
+/// Machine-readable inventories/doctrine are Lisp-shaped data, not executable
+/// source. Keep this list narrow: adding a path here is a classification
+/// decision, not an allowlist for arbitrary English executable heads.
+fn is_explicit_lisp_data(rel: &str) -> bool {
+    matches!(
+        rel,
+        "docs/research/1556-sens-runtime-lookup-inventory.lisp"
+            | "knowledge/sens-primary.lisp"
+            | "knowledge/structure-not-ontology-inventory.lisp"
+    )
+}
+
 /// Одне місце: (вид, файл, рядок, ім'я).
 type Place = (&'static str, String, usize, String);
 
@@ -277,9 +289,10 @@ fn places() -> Vec<Place> {
                 }
             }
         } else {
+            let explicit_data = is_explicit_lisp_data(&rel);
             for (line, token, data) in lisp_tokens(&text, 1) {
                 if names.contains(&token) {
-                    let kind = if data { "lisp-дані" } else { "lisp" };
+                    let kind = if data || explicit_data { "lisp-дані" } else { "lisp" };
                     out.push((kind, rel.clone(), line, token));
                 }
             }

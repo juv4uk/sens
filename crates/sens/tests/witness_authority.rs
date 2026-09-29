@@ -322,12 +322,12 @@ fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
     )
     .expect("thread meta environment");
 
-    let meta_value = eval_program("(cdr --witness-meta-step--)", session)
+    let meta_value = eval_program("(00000110 --witness-meta-step--)", session)
         .expect("meta value transport")
         .value;
     let presented = escape_lisp_string(&meta_value.to_string());
     let program = format!(
-        "(witness-verdict (quote {}) (witness-meta-outcome-presented (cdr --witness-meta-step--) \"{}\"))",
+        "(witness-verdict (quote {}) (witness-meta-outcome-presented (00000110 --witness-meta-step--) \"{}\"))",
         row.source, presented
     );
     eval_program(&program, session)

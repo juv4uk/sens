@@ -28,12 +28,12 @@ fn eval_bytes(source: &str, session: &mut Session) -> String {
 fn register_ordinals_10_and_11_preserve_decimal_values() {
     let mut session = encoder_session();
     for (form, expected) in [
-        ("(x86-reg-code (quote r10))", "10"),
-        ("(x86-reg-code (quote r10b))", "10"),
-        ("(x86-reg-code (quote r11))", "11"),
-        ("(x86-reg-code (quote r11b))", "11"),
-        ("(x86-xmm-reg-code (quote xmm10))", "10"),
-        ("(x86-xmm-reg-code (quote xmm11))", "11"),
+        ("(x86-reg-code (00000001 r10))", "10"),
+        ("(x86-reg-code (00000001 r10b))", "10"),
+        ("(x86-reg-code (00000001 r11))", "11"),
+        ("(x86-reg-code (00000001 r11b))", "11"),
+        ("(x86-xmm-reg-code (00000001 xmm10))", "10"),
+        ("(x86-xmm-reg-code (00000001 xmm11))", "11"),
     ] {
         assert_eq!(eval_bytes(form, &mut session), expected, "form: {form}");
     }
@@ -47,10 +47,10 @@ fn parity_condition_wrappers_preserve_decimal_codes_10_and_11() {
         ("(x86-encode-jnp-rel8 0)", "(x86-encode-jcc-rel8 #d11 0)"),
         ("(x86-encode-jp-rel32 0)", "(x86-encode-jcc-rel32 #d10 0)"),
         ("(x86-encode-jnp-rel32 0)", "(x86-encode-jcc-rel32 #d11 0)"),
-        ("(x86-encode-setp-r8 (quote al))", "(x86-encode-setcc-r8 #d10 (quote al))"),
-        ("(x86-encode-setnp-r8 (quote al))", "(x86-encode-setcc-r8 #d11 (quote al))"),
-        ("(x86-encode-cmovp-r64-r64 (quote rax) (quote rbx))", "(x86-encode-cmovcc-r64-r64 #d10 (quote rax) (quote rbx))"),
-        ("(x86-encode-cmovnp-r64-r64 (quote rax) (quote rbx))", "(x86-encode-cmovcc-r64-r64 #d11 (quote rax) (quote rbx))"),
+        ("(x86-encode-setp-r8 (00000001 al))", "(x86-encode-setcc-r8 #d10 (00000001 al))"),
+        ("(x86-encode-setnp-r8 (00000001 al))", "(x86-encode-setcc-r8 #d11 (00000001 al))"),
+        ("(x86-encode-cmovp-r64-r64 (00000001 rax) (00000001 rbx))", "(x86-encode-cmovcc-r64-r64 #d10 (00000001 rax) (00000001 rbx))"),
+        ("(x86-encode-cmovnp-r64-r64 (00000001 rax) (00000001 rbx))", "(x86-encode-cmovcc-r64-r64 #d11 (00000001 rax) (00000001 rbx))"),
     ] {
         assert_eq!(
             eval_bytes(wrapper, &mut session),
@@ -64,7 +64,7 @@ fn parity_condition_wrappers_preserve_decimal_codes_10_and_11() {
 fn movq_xmm_r64_keeps_opcode_byte_0x6e_as_decimal_110() {
     let mut session = encoder_session();
     let rendered = eval_bytes(
-        "(x86-encode-movq-xmm-r64 (quote xmm0) (quote rax))",
+        "(x86-encode-movq-xmm-r64 (00000001 xmm0) (00000001 rax))",
         &mut session,
     );
     let bytes = rendered
@@ -97,7 +97,7 @@ fn lisp_encodes_add_rax_rbx_without_external_assembler() {
     let mut session = encoder_session();
     assert_eq!(
         eval_bytes(
-            "(x86-encode-add-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-add-r64-r64 (00000001 rax) (00000001 rbx))",
             &mut session
         ),
         "(72 1 216)"
@@ -139,27 +139,27 @@ fn lisp_encodes_the_alu_register_family_with_pinned_opcodes() {
     let mut session = encoder_session();
     for (form, expected, xed_pattern) in [
         (
-            "(x86-encode-or-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-or-r64-r64 (00000001 rax) (00000001 rbx))",
             "(72 9 216)",
             "PATTERN   : 0x09 MOD[0b11] MOD=3 REG[rrr] RM[nnn]",
         ),
         (
-            "(x86-encode-and-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-and-r64-r64 (00000001 rax) (00000001 rbx))",
             "(72 33 216)",
             "PATTERN   : 0x21 MOD[0b11] MOD=3 REG[rrr] RM[nnn]",
         ),
         (
-            "(x86-encode-sub-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-sub-r64-r64 (00000001 rax) (00000001 rbx))",
             "(72 41 216)",
             "PATTERN   : 0x29 MOD[0b11] MOD=3 REG[rrr] RM[nnn]",
         ),
         (
-            "(x86-encode-xor-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-xor-r64-r64 (00000001 rax) (00000001 rbx))",
             "(72 49 216)",
             "PATTERN   : 0x31 MOD[0b11] MOD=3 REG[rrr] RM[nnn]",
         ),
         (
-            "(x86-encode-cmp-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-cmp-r64-r64 (00000001 rax) (00000001 rbx))",
             "(72 57 216)",
             "PATTERN   : 0x39 MOD[0b11] MOD=3 REG[rrr] RM[nnn]",
         ),
@@ -226,7 +226,7 @@ fn lisp_encodes_push_and_pop_with_pinned_opcodes_and_independent_decode() {
 
     for (register_name, register_code) in registers {
         for (op, mnemonic) in [("push", "push"), ("pop", "pop")] {
-            let form = format!("(x86-encode-{op}-r64 (quote {register_name}))");
+            let form = format!("(x86-encode-{op}-r64 (00000001 {register_name}))");
             let rendered = eval_bytes(&form, &mut session);
             let bytes: Vec<u8> = rendered
                 .trim_start_matches('(')
@@ -306,7 +306,7 @@ fn lisp_encodes_inc_and_dec_via_group5_modrm_never_the_not64_legacy_form() {
     let mut session = encoder_session();
     for (register_name, register_code) in [("rax", 0u8), ("rcx", 1), ("r8", 8), ("r15", 15)] {
         for (op, mnemonic) in [("inc", "inc"), ("dec", "dec")] {
-            let form = format!("(x86-encode-{op}-r64 (quote {register_name}))");
+            let form = format!("(x86-encode-{op}-r64 (00000001 {register_name}))");
             let rendered = eval_bytes(&form, &mut session);
             let bytes: Vec<u8> = rendered
                 .trim_start_matches('(')
@@ -383,7 +383,7 @@ fn lisp_encodes_not_and_neg_via_group3_modrm_with_independent_decode() {
     let mut session = encoder_session();
     for (register_name, register_code) in [("rax", 0u8), ("rdx", 2), ("r9", 9), ("r14", 14)] {
         for (op, mnemonic) in [("not", "not"), ("neg", "neg")] {
-            let form = format!("(x86-encode-{op}-r64 (quote {register_name}))");
+            let form = format!("(x86-encode-{op}-r64 (00000001 {register_name}))");
             let rendered = eval_bytes(&form, &mut session);
             let bytes: Vec<u8> = rendered
                 .trim_start_matches('(')
@@ -428,7 +428,7 @@ fn lisp_encodes_test_r64_r64_matching_pinned_opcode() {
     let mut session = encoder_session();
     assert_eq!(
         eval_bytes(
-            "(x86-encode-test-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-test-r64-r64 (00000001 rax) (00000001 rbx))",
             &mut session
         ),
         "(72 133 216)",
@@ -526,10 +526,10 @@ fn lisp_encodes_mov_disp8_for_every_gpr_base_with_correct_negative_displacement(
         for base in ALL_GPRS {
             for displacement in [-128i32, -1, 0, 1, 127] {
                 let load_form = format!(
-                    "(x86-encode-mov-r64-mem-disp8 (quote {data_register}) (quote {base}) {displacement})"
+                    "(x86-encode-mov-r64-mem-disp8 (00000001 {data_register}) (00000001 {base}) {displacement})"
                 );
                 let store_form = format!(
-                    "(x86-encode-mov-mem-disp8-r64 (quote {base}) {displacement} (quote {data_register}))"
+                    "(x86-encode-mov-mem-disp8-r64 (00000001 {base}) {displacement} (00000001 {data_register}))"
                 );
 
                 for (form, expected_direction) in [(&load_form, "load"), (&store_form, "store")] {
@@ -685,7 +685,7 @@ fn lisp_encodes_mov_r64_imm64_for_every_gpr_with_independent_decode() {
 
     for register in ALL_GPRS {
         for immediate in [0u64, 1, 42, 999, 4294967296, 9007199254740991] {
-            let form = format!("(x86-encode-mov-r64-imm64 (quote {register}) {immediate})");
+            let form = format!("(x86-encode-mov-r64-imm64 (00000001 {register}) {immediate})");
             let rendered = eval_bytes(&form, &mut session);
             let bytes: Vec<u8> = rendered
                 .trim_start_matches('(')

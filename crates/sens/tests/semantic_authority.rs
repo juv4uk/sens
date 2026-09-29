@@ -254,7 +254,7 @@ fn actual_source(row: &SemanticRow, session: &mut Session) -> String {
 /// The verdict is the language's. Rust only compares the label symbol.
 fn verdict_label(row: &SemanticRow, actual: &str, session: &mut Session) -> String {
     let program = format!(
-        "(semantic-verdict-label (quote {}) (quote {}))",
+        "(semantic-verdict-label (00000001 {}) (00000001 {}))",
         row.source, actual
     );
     let result = eval_program(&program, session)
