@@ -71,8 +71,13 @@ def read_rules(path: Path) -> list[Rule]:
         )
     if not rules:
         raise ValueError(f"{path}: no rules")
-    if len({r.pattern_id for r in rules}) != len(rules):
-        raise ValueError(f"{path}: pattern_id values must be unique in first slice")
+    by_id: dict[str, str] = {}
+    for rule in rules:
+        previous = by_id.setdefault(rule.pattern_id, rule.pattern.pattern)
+        if previous != rule.pattern.pattern:
+            raise ValueError(
+                f"{path}: pattern_id {rule.pattern_id!r} has multiple regexes"
+            )
     return rules
 
 
@@ -96,41 +101,53 @@ def count(rule: Rule, source: str) -> int:
 
 def check(base: str, rules: list[Rule]) -> int:
     failures: list[str] = []
-    totals: dict[str, int] = {r.pattern_id: 0 for r in rules}
+    groups: dict[str, list[Rule]] = {}
+    row_totals: dict[Rule, int] = {r: 0 for r in rules}
+    for rule in rules:
+        groups.setdefault(rule.pattern_id, []).append(rule)
 
     for path in tracked_runtime_files():
         now = current_text(path)
         before = base_text(base, path)
 
-        for rule in rules:
-            now_count = count(rule, now)
+        for pattern_id, group in groups.items():
+            probe = group[0]
+            now_count = count(probe, now)
             if not now_count:
                 continue
 
-            if not rule.path.fullmatch(path):
+            matching = [rule for rule in group if rule.path.fullmatch(path)]
+            if not matching:
                 failures.append(
-                    f"UNCLASSIFIED {rule.pattern_id}: {path} has {now_count} match(es)"
+                    f"UNCLASSIFIED {pattern_id}: {path} has {now_count} match(es)"
+                )
+                continue
+            if len(matching) != 1:
+                failures.append(
+                    f"AMBIGUOUS {pattern_id}: {path} matches {len(matching)} classifications"
                 )
                 continue
 
-            totals[rule.pattern_id] += now_count
-            before_count = count(rule, before)
+            rule = matching[0]
+            row_totals[rule] += now_count
+            before_count = count(probe, before)
             if now_count > before_count:
                 failures.append(
-                    f"GROWTH {rule.pattern_id}: {path} {before_count} -> {now_count} "
+                    f"GROWTH {pattern_id}: {path} {before_count} -> {now_count} "
                     f"[{rule.classification}, owner={rule.owner}, target={rule.target}]"
                 )
 
             if rule.classification == "violation":
                 failures.append(
-                    f"VIOLATION {rule.pattern_id}: {path} has {now_count} match(es)"
+                    f"VIOLATION {pattern_id}: {path} has {now_count} match(es)"
                 )
 
     print("BINARY-ONLY AUTHORITY INVENTORY")
     for rule in rules:
         print(
-            f"{rule.pattern_id}\t{totals[rule.pattern_id]}\t"
-            f"{rule.classification}\t{rule.owner}\t{rule.target}"
+            f"{rule.pattern_id}\t{row_totals[rule]}\t"
+            f"{rule.classification}\t{rule.owner}\t{rule.target}\t"
+            f"path={rule.path.pattern}"
         )
 
     if failures:
