@@ -400,6 +400,41 @@ fn active_sens_coverage_never_regresses_1673() {
     );
 }
 
+
+/// #1707: predicate/control foundation may still carry bounded migration debt,
+/// but host truth must never grow back into language semantics.
+///
+/// Keep this deliberately tiny: it protects only the shared ATOM/EQ/COND
+/// foundation while #1713/#1714 removes the remaining migration bridge.
+/// JSON/adapter Bool representation is outside this foundation and is not
+/// classified here.
+#[test]
+fn predicate_foundation_host_truth_debt_never_grows_1707() {
+    let root = repo_root();
+    let core = fs::read_to_string(root.join("crates/sens/src/eval/special_forms/core.rs"))
+        .expect("read predicate/control foundation");
+    let environment = fs::read_to_string(root.join("crates/sens/src/environment.rs"))
+        .expect("read environment mechanism");
+
+    let generic_truthiness = core.matches(".is_truthy()").count();
+    let host_bool_in_foundation = core.matches("Value::Bool").count();
+    let cond_mode_mentions =
+        core.matches("CondClauseMode").count() + environment.matches("CondClauseMode").count();
+
+    assert!(
+        generic_truthiness <= 1,
+        "binary-only regression: predicate/control foundation gained generic host truthiness: {generic_truthiness} > 1"
+    );
+    assert_eq!(
+        host_bool_in_foundation, 0,
+        "binary-only regression: predicate/control foundation must not use host Value::Bool"
+    );
+    assert!(
+        cond_mode_mentions <= 8,
+        "binary-only regression: profile-specific COND-mode debt grew: {cond_mode_mentions} > 8"
+    );
+}
+
 #[test]
 fn active_sens_coverage_report_1673() {
     let inventory = source_inventory();
