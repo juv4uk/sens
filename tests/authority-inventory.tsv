@@ -5,7 +5,6 @@ crates/my-lisp/tests/witness_authority.rs	peer_surface_witness_reads_semantic_re
 crates/my-lisp/tests/witness_authority.rs	malformed_witness_fails_closed_as_lisp_data	mechanism	witness-protocol-fail-closed	tests/fixtures/witness-runner.lisp	migrated
 crates/my-lisp/tests/witness_authority.rs	answer_contract_semantics_are_owned_by_lisp_data_not_host_expectations	observer	layered-answer-contract	contracts/answer-contract.lisp + tests/fixtures/answer-contract-witness.lisp	migrated
 crates/my-lisp/tests/canon_laws_v2_contract.rs	executable_canon_speaks_layered_answer_semantics	observer	Canon0+structure+structural-observation+explicit-control	tests/fixtures/canon-laws-v2-witness.lisp + lib/canon.lisp	migrated
-crates/my-lisp/tests/authority_guard_contract.rs	legacy_host_authority_guard_is_non_restrictive	observer	host-semantics-freedom	scripts/authority-guard.lisp	retained
 crates/my-lisp/tests/authority_guard_contract.rs	active_boundary_is_the_asymmetric_host_to_lisp_firewall	observer	asymmetric-semantic-firewall	scripts/semantic-authority-guard.lisp	retained
 crates/my-lisp/tests/content_store_authority.rs	content_store_semantic_relations_are_owned_by_lisp_witness	observer	content-store-structural-relations	tests/fixtures/content-store-authority-witness.lisp	migrated
 crates/my-lisp/tests/content_store_authority.rs	content_store_mechanism_keeps_deterministic_images_and_distinct_history_entries	mechanism	content-store-images+history-cardinality	lib/lisp-fs.lisp + lib/content-store.lisp	retained
@@ -24,8 +23,6 @@ crates/my-lisp/tests/ukrainian_api_docs.rs	novi_predykatni_nazvy_i_stari_aliasy_
 crates/my-lisp/tests/canon_language_authority.rs	ukrainian_keyboard_symbols_execute_the_same_canon	observer	peer-canon-symbolic-surface	tests/fixtures/canon-laws-v2-witness.lisp + lib/canon.lisp	migrated
 crates/my-lisp/tests/canon_adversarial.rs	cond_surface_stops_at_the_first_true_clause	mixed	short-circuit/evaluation order + old t branch sentinel	#217/#229 preserve short-circuit with explicit control result	transition
 crates/my-lisp/tests/rivnopravnist_mov.rs	peer arithmetic surface evaluation assertion	semantic-authority	peer-surface-equivalence	semantic registry + Lisp witness	pending
-tests/fixtures/authority-guard/forbidden-semantic.rs	host_authored_semantic_expectation_is_forbidden	semantic-authority	guard-negative-fixture	Lisp-owned witness corpus	fixture
-tests/fixtures/authority-guard/allowed-mechanism.rs	host_mechanism_assertion_is_allowed	mechanism	guard-positive-fixture	remain host-owned	fixture
 crates/my-lisp/tests/skylake_inventory_contract.rs	i5_6400_inventory_is_explicitly_skylake_client_and_fail_closed	observer	machine-isa-admission	lib/machine/cpu/intel-core-i5-6400-inventory.lisp	migrated
 crates/my-lisp/tests/skylake_inventory_contract.rs	admitted_inventory_names_only_existing_lisp_machine_catalogues	observer	machine-isa-admission	lib/machine/cpu/intel-core-i5-6400-inventory.lisp	migrated
 crates/my-lisp/tests/skylake_inventory_contract.rs	avx_admission_keeps_os_state_gate_explicit	observer	machine-isa-admission	lib/machine/cpu/intel-core-i5-6400-inventory.lisp	migrated
