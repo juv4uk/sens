@@ -110,9 +110,6 @@ impl Environment {
         // so `t` evaluates to `Symbol("t")` -- the exact value `eq`/`atom`
         // (Value::truth) already return for true.
         environment.define("t", Value::Symbol(Rc::from("t")));
-        // contract 2.1: primitives enter the root environment as first-class
-        // builtin values -- one runtime authority, no head-only registry.
-        crate::eval::builtins::install(&environment);
         environment
     }
 

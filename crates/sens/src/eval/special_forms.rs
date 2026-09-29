@@ -1,7 +1,7 @@
 //! The McCarthy primitives (`eq`, `car`, `cdr`, `cons`, `cond`, `quote`'s helper),
 //! plus the small compatibility/bootstrap surface and host mechanisms that still
-//! require Rust. Ordinary eager operations enter the language through first-class
-//! `Value::Builtin` bindings rather than by adding names to the evaluator dispatcher.
+//! require Rust. Ordinary primitive dispatch is keyed by exact SENS identity;
+//! this module does not install name-bound root builtins.
 
 mod codepoint;
 mod core;
