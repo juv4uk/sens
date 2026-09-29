@@ -1,41 +1,24 @@
-name: Core profile contract
+name: Core profile contract — transition archive
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "contracts/core-profile-contract.lisp"
-      - "scripts/check-core-profile-contract.lisp"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/core-profile-contract.yml"
-  pull_request:
-    paths:
-      - "contracts/core-profile-contract.lisp"
-      - "scripts/check-core-profile-contract.lisp"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/core-profile-contract.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  contract:
-    name: Lisp-owned four-core authority
+  archive:
+    name: Historical four-Core contract archive
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Build semantic oracle
-        run: cargo build -p sens-cli --bin sens
-
-      - name: Verify four-core contract
-        shell: bash
+      - name: Record contract
+        run: sha256sum contracts/core-profile-contract.lisp
+      - name: Explain active authority
         run: |
-          set -euo pipefail
-          verdict="$(./target/debug/sens scripts/check-core-profile-contract.lisp)"
-          printf '%s\n' "$verdict"
-          test "$verdict" = "(core-profile-contract-ok)"
-
+          echo "Profile-specific ATOM/EQ/COND semantics are superseded by #1703."
+          echo "Current shared foundation is being proven by #1664/#1709."
+          echo "This legacy checker is not an active semantic oracle."
       - name: Diff hygiene
         run: git diff --check
