@@ -1,0 +1,23 @@
+(text7-upc7-lock/1
+  (repository "juv4uk/shiva-sutras")
+  (revision "25b629548f4d9a6d8b3c94d4a93fa15f7a1de68d")
+  (path "prototype/upc7-table.tsv")
+  (sha256 "8ce2339a4a98c2b671af4b945e3b0da1100a465dc97e54dc3e97180d541883d4")
+  (logical-width 7)
+  (assigned-cells 107)
+  (reserved-cells 21)
+  (ukrainian-extension
+    ((vowels "а е о и")
+     (affricates "ц ч дз дж")
+     (softness "ь")))
+  (ukrainian-normalization
+    (("я" "йа")
+     ("ю" "йу")
+     ("є" "йе")
+     ("ї" "йі")
+     ("щ" "шч")))
+  (authority-boundary
+    ((upstream-role "UPC-7 code assignment and human layout projection")
+     (sens-role "Text7 admission and language semantics")
+     (copy-table-into-sens no)))
+  (status admitted-upstream-source))
