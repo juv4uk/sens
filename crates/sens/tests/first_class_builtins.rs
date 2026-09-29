@@ -78,5 +78,3 @@ fn special_forms_are_not_values() {
         "special forms must not become callable values"
     );
 }
-
-
