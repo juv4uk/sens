@@ -4,24 +4,36 @@
 ;;;
 ;;; Це не мапінг my-lisp на Racket-семантику, а власний evaluator,
 ;;; який працює зі значеннями my-lisp і може завантажувати справжню
-;;; bootstrap-бібліотеку lib/core.my (та інші *.my файли).
+;;; bootstrap-бібліотеку lib/core4.lisp (та інші *.lisp файли).
 ;;;
 
 (require "reader-lib.rkt")
 (require racket/runtime-path)
 
-(define-runtime-path repo-core "../lib/core.my")
-(define-runtime-path boot-core "boot/core.my")
+(define-runtime-path repo-core "../lib/core4.lisp")
+(define-runtime-path boot-core "boot/core.lisp")
 
 ;; -----------------------------------------------------------------
 ;; Значення my-lisp
 ;; -----------------------------------------------------------------
 
-;; t — друкується як "t" і є істиною.
+;; Historical `t` may still exist as ordinary compatibility data while old
+;; library source is being removed. It is NOT predicate truth and control must
+;; never coerce it to truth.
 (struct my-true () #:transparent
   #:methods gen:custom-write
   [(define (write-proc v port mode)
      (write-string "t" port))])
+
+;; Exact contextual SENS predicate result. This is a Racket mechanism carrier,
+;; not a Number and not a free-standing source literal.
+(struct my-predicate-bit (bit) #:transparent
+  #:methods gen:custom-write
+  [(define (write-proc v port mode)
+     (write-string (if (my-predicate-bit-bit v) "1" "0") port))])
+
+(define predicate-yes (my-predicate-bit #t))
+(define predicate-no  (my-predicate-bit #f))
 
 ;; Замикання: (lambda params body...) або макро-трансформер.
 (struct my-closure (params variadic? body env) #:transparent)
@@ -67,21 +79,29 @@
     [else (error 'my-lisp "unbound identifier: ~a" name)]))
 
 ;; -----------------------------------------------------------------
-;; Помічники істини / atom / eq
+;; PredicateBit / atom / eq
 ;; -----------------------------------------------------------------
 
-(define (truthy? x)
-  (not (null? x)))
+(define (predicate-value holds?)
+  (if holds? predicate-yes predicate-no))
+
+(define (predicate-select? value who)
+  (cond
+    [(my-predicate-bit? value) (my-predicate-bit-bit value)]
+    [else
+     (error who
+            "expected exact one-bit SENS predicate result, got: ~a"
+            (my-format-string value))]))
 
 (define (atom-val x)
-  (if (pair? x) nil t))
+  (predicate-value (not (pair? x))))
 
 (define (eq-val a b)
   (when (or (pair? a) (pair? b))
     (error 'eq "eq expects two atoms"))
   (cond
     [(and (number? a) (number? b))
-     (if (and (= a b) (eq? (exact? a) (exact? b))) t nil)]
+     (predicate-value (and (= a b) (eq? (exact? a) (exact? b))))]
     ;; Closures/macros/primitives are `#:transparent` (so `print`/error
     ;; messages show their contents), which makes plain Racket `equal?`
     ;; compare them structurally — two separately-created closures with
@@ -90,11 +110,11 @@
     ;; (`(eq (lambda (x) x) (lambda (x) x))` => `()`), same as `car`/
     ;; `cdr`/`cons` never make two distinct allocations `eq` either.
     [(or (my-closure? a) (my-closure? b) (my-macro? a) (my-macro? b) (my-primitive? a) (my-primitive? b))
-     (if (eq? a b) t nil)]
-    [else (if (equal? a b) t nil)]))
+     (predicate-value (eq? a b))]
+    [else (predicate-value (equal? a b))]))
 
 (define (my-pred proc)
-  (lambda args (if (apply proc args) t nil)))
+  (lambda args (predicate-value (apply proc args))))
 
 ;; Canonical my-lisp printed form of a value — no Racket quote-sugar
 ;; (`'radio`/`'(1 2)`), matching the Rust reference's writer. Racket's
@@ -240,8 +260,10 @@
   (if (null? clauses)
       nil
       (let ([clause (car clauses)])
-        (if (truthy? (eval-loop (car clause) env))
-            (eval-sequence (cdr clause) env eval-loop)
+        (unless (and (list? clause) (= (length clause) 2))
+          (error 'cond "expected exactly (test expression)"))
+        (if (predicate-select? (eval-loop (car clause) env) 'cond)
+            (eval-loop (cadr clause) env)
             (eval-cond (cdr clauses) env eval-loop)))))
 
 (define (apply-proc proc args env eval-loop)
@@ -258,7 +280,8 @@
 (define (my-eval expr env)
   (let eval-loop ([expr expr] [env env])
     (cond
-      [(or (number? expr) (string? expr) (my-true? expr) (null? expr)) expr]
+      [(or (number? expr) (string? expr) (my-true? expr)
+           (my-predicate-bit? expr) (null? expr)) expr]
       [(symbol? expr) (env-lookup env expr)]
       [(not (pair? expr)) expr]
       [else
@@ -284,7 +307,7 @@
          [(cond)
           (eval-cond args env eval-loop)]
          [(if)
-          (if (truthy? (eval-loop (car args) env))
+          (if (predicate-select? (eval-loop (car args) env) 'if)
               (eval-loop (cadr args) env)
               (if (null? (cddr args))
                   nil
@@ -329,7 +352,7 @@
              (apply-proc proc evaled-args env eval-loop)])])])))
 
 ;; -----------------------------------------------------------------
-;; Початкове середовище з lib/core.my
+;; Початкове середовище з lib/core4.lisp
 ;; -----------------------------------------------------------------
 
 (define (make-initial-env)
@@ -337,7 +360,7 @@
   (register-primitives! e)
   (define core-path (find-core-path))
   (unless core-path
-    (error 'my-lisp "cannot find core.my; expected ../lib/core.my or boot/core.my"))
+    (error 'my-lisp "cannot find core4.lisp; expected ../lib/core4.lisp or boot/core.lisp"))
   (define forms (read-file core-path))
   (eval-sequence forms e my-eval)
   e)
@@ -356,7 +379,7 @@
  ;; environments
  make-env env-lookup env-bound? env-define! env-set!
  ;; values
- t nil my-true? my-closure? my-macro? my-primitive?
+ t nil my-true? my-predicate-bit? my-closure? my-macro? my-primitive?
  ;; module / file loading
  make-initial-env run-module read-file
  ;; needed by main.rkt for REPL echo

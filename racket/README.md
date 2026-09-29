@@ -2,7 +2,8 @@
 
 Платформенна підтримка мови **my-lisp** як повноцінного `#lang`-плагіна
 для Racket (Racket CS, версія 8+). Racket тут — **субстрат, а не
-специфікація**: вся семантика живе у власному tree-walking evaluator
+специфікація**: evaluator зобов'язаний виконувати той самий закон SENS,
+а не мати власну T/NIL/truthiness-семантику
 (`interpreter.rkt`), а поточний бібліотечний профіль — `lib/core4.lisp`, той самий
 Contract-8 source, який використовує Rust-реалізація. JIT Chez Scheme компілює сам evaluator;
 my-lisp-форми виконує `my-eval`.
@@ -28,7 +29,7 @@ racket/
 
 ## Архітектура: source is sacred
 
-`lib/core4.lisp` — авторитетне бібліотечне джерело **поточного Core4/Contract-8 профілю** для обох реалізацій. Воно не є «єдиним можливим core»: Core1/Core2/Core3 мають окремі профільні ролі під спільною SID/Canon authority. `interpreter.rkt` реалізує **машину** (evaluator, середовища, примітиви), а не бібліотечне знання: жоден алгоритм з `lib/*.lisp` не переписується у `.rkt`.
+`lib/core4.lisp` — авторитетне бібліотечне джерело поточного Core4 для обох реалізацій. Core1/Core2/Core3 мають окремі профільні ролі, але PredicateBit/ATOM/EQ/COND належать до спільного фундаменту SENS і не змінюються вибором профілю. `interpreter.rkt` реалізує **машину** (evaluator, середовища, примітиви), а не бібліотечне знання: жоден алгоритм з `lib/*.lisp` не переписується у `.rkt`.
 
 Макроси — **runtime-замикання над сирими datum** (традиційна
 unhygienic модель, як у Rust-реалізації): при виклику макроса
@@ -154,9 +155,14 @@ racket examples/constitution.lisp
 (/ 5 336)          ; ⇒ 5/336 (не наближення!)
 (/ 5.0 2)          ; ⇒ 5/2
 
-;; Значення істини
-(if t (quote yes) (quote no))    ; ⇒ yes
-(if () (quote yes) (quote no))   ; ⇒ no
+;; PredicateBit: control приймає тільки точний результат предиката
+(atom (quote x))                  ; ⇒ 1
+(atom (quote (x)))                ; ⇒ 0
+(if (atom (quote x))
+    (quote yes)
+    (quote no))                   ; ⇒ yes
+
+;; t, (), числа та інші значення не перетворюються неявно на truth
 
 ;; Класичні макроси (runtime transformers; quasiquote відсутній,
 ;; тож форми будуємо явно через list/cons)
