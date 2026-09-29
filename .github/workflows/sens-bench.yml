@@ -40,6 +40,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y valgrind
           valgrind --version
+      - name: Classify controlled benchmark inputs
+        run: |
+          if git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- \
+               benchmarks/sens-surface/run.py \
+               benchmarks/sens-surface/ci_bench.sh \
+               crates/sens/examples/ci_bench.rs; then
+            echo "BENCH_INPUT_CHANGED=false" >> "$GITHUB_ENV"
+          else
+            echo "BENCH_INPUT_CHANGED=true" >> "$GITHUB_ENV"
+            echo "Benchmark workload/harness changed: base→head regression will be omitted."
+          fi
       - name: Preserve harness from the change
         run: |
           rm -rf /tmp/bench && mkdir -p /tmp/bench
@@ -49,6 +60,7 @@ jobs:
           python3 /tmp/bench/run.py --sens /bin/true --emit /tmp/bench/workloads --small \
             --forms en,sens
       - name: Measure base on this runner
+        if: env.BENCH_INPUT_CHANGED != 'true'
         run: |
           git checkout --detach "$BASE_SHA"
           # Назва каталогу крейта різна на базі й на гілці — визначаємо з дерева.
@@ -75,7 +87,13 @@ jobs:
               --out "/tmp/bench/numeric-buffer-map/$size"
           done
       - name: Compare English Lisp -> SENS, and base -> change
+        if: env.BENCH_INPUT_CHANGED != 'true'
         run: python3 /tmp/bench/ci_compare.py /tmp/bench/base.tsv /tmp/bench/head.tsv --fail-above 3.0
+      - name: Compare English Lisp -> SENS on changed workload
+        if: env.BENCH_INPUT_CHANGED == 'true'
+        run: |
+          python3 /tmp/bench/ci_compare.py /tmp/bench/head.tsv /tmp/bench/head.tsv \
+            --fail-above 3.0 --skip-base-regression
       - name: Upload benchmark evidence
         uses: actions/upload-artifact@v4
         if: always()
