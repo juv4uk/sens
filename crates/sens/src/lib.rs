@@ -119,8 +119,9 @@ pub use sens::{Sens, Sens8};
 pub use eval::exact_arity;
 pub use eval::parse_json;
 pub use eval::{
-    capability_installed, installed_capabilities, register_capability, register_sens_capability,
-    unregister_capability, unregister_sens_capability,
+    capability_installed, installed_capabilities, register_capability,
+    register_evaluated_capability, register_sens_capability, unregister_capability,
+    unregister_sens_capability,
 };
 pub use eval::{
     eval_lowered_expressions, eval_parsed_expressions, eval_parsed_expressions_incremental,

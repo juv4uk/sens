@@ -23,6 +23,18 @@ use std::sync::{OnceLock, RwLock};
 /// the `Environment`, exactly like every kernel primitive.
 pub type HostFn = fn(&[Expr], &Environment, Span) -> Result<Value, LanguageError>;
 
+type EvaluatedHostFn =
+    fn(&[(Value, Span)], &Environment, Span) -> Result<Value, LanguageError>;
+
+#[derive(Clone, Copy)]
+enum HostHandler {
+    Raw(HostFn),
+    Evaluated {
+        arity: usize,
+        handler: EvaluatedHostFn,
+    },
+}
+
 /// Host mechanism for one already-existing exact SENS function.
 /// The key is the eight-bit function itself; this registry owns no function meaning.
 pub type SensHostFn =
@@ -30,13 +42,13 @@ pub type SensHostFn =
 
 #[derive(Clone, Copy)]
 enum CapabilityLookup {
-    Present(HostFn),
+    Present(HostHandler),
     Absent,
     Unreadable,
 }
 
 fn lookup_capability(
-    source: &RwLock<BTreeMap<String, HostFn>>,
+    source: &RwLock<BTreeMap<String, HostHandler>>,
     name: &str,
 ) -> CapabilityLookup {
     match source.read() {
@@ -48,8 +60,8 @@ fn lookup_capability(
     }
 }
 
-fn registry() -> &'static RwLock<BTreeMap<String, HostFn>> {
-    static REGISTRY: OnceLock<RwLock<BTreeMap<String, HostFn>>> = OnceLock::new();
+fn registry() -> &'static RwLock<BTreeMap<String, HostHandler>> {
+    static REGISTRY: OnceLock<RwLock<BTreeMap<String, HostHandler>>> = OnceLock::new();
     REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
 }
 
@@ -65,7 +77,18 @@ pub fn register_capability(name: &str, handler: HostFn) {
     registry()
         .write()
         .expect("capability registry poisoned")
-        .insert(name.to_string(), handler);
+        .insert(name.to_string(), HostHandler::Raw(handler));
+    super::closures::bump_resolution_epoch();
+}
+
+/// #1779 migration seam: evaluator-owned argument evaluation, host receives
+/// only ready Values plus their original source spans. The string key remains
+/// private mechanism metadata and is not a SENS function identity.
+pub fn register_evaluated_capability(name: &str, arity: usize, handler: EvaluatedHostFn) {
+    registry()
+        .write()
+        .expect("capability registry poisoned")
+        .insert(name.to_string(), HostHandler::Evaluated { arity, handler });
     super::closures::bump_resolution_epoch();
 }
 
@@ -115,15 +138,35 @@ pub fn installed_capabilities() -> Vec<String> {
 }
 
 fn dispatch_capability_from(
-    source: &RwLock<BTreeMap<String, HostFn>>,
+    source: &RwLock<BTreeMap<String, HostHandler>>,
     name: &str,
     arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Option<Result<EvalStep, LanguageError>> {
     match lookup_capability(source, name) {
-        CapabilityLookup::Present(handler) => {
+        CapabilityLookup::Present(HostHandler::Raw(handler)) => {
             Some(handler(arguments, environment, span).map(EvalStep::Value))
+        }
+        CapabilityLookup::Present(HostHandler::Evaluated { arity, handler }) => {
+            if arguments.len() != arity {
+                return Some(Err(LanguageError::new(
+                    ErrorKind::Arity,
+                    format!(
+                        "{name}: expected / ochikuvalosia / erwartet {arity}; received / otrymano / erhalten {}",
+                        arguments.len()
+                    ),
+                    span,
+                )));
+            }
+            let result = (|| {
+                let mut evaluated = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    evaluated.push((super::evaluate(argument, environment)?, argument.span));
+                }
+                handler(&evaluated, environment, span)
+            })();
+            Some(result.map(EvalStep::Value))
         }
         CapabilityLookup::Absent => None,
         CapabilityLookup::Unreadable => Some(Err(LanguageError::new(
@@ -189,7 +232,7 @@ mod honesty_tests {
         let lock = RwLock::new(BTreeMap::new());
         lock.write()
             .expect("fresh local registry")
-            .insert("demo".to_string(), dummy_handler as HostFn);
+            .insert("demo".to_string(), HostHandler::Raw(dummy_handler as HostFn));
 
         assert!(matches!(
             lookup_capability(&lock, "demo"),
@@ -209,6 +252,49 @@ mod honesty_tests {
             lookup_capability(&lock, "demo"),
             CapabilityLookup::Unreadable
         ));
+    }
+
+    fn evaluated_handler(
+        _arguments: &[(Value, Span)],
+        _environment: &Environment,
+        _span: Span,
+    ) -> Result<Value, LanguageError> {
+        Ok(Value::Nil)
+    }
+
+    #[test]
+    fn evaluated_handler_checks_arity_before_evaluating_arguments() {
+        let lock = RwLock::new(BTreeMap::new());
+        lock.write()
+            .expect("fresh local registry")
+            .insert(
+                "demo".to_string(),
+                HostHandler::Evaluated {
+                    arity: 1,
+                    handler: evaluated_handler,
+                },
+            );
+
+        let program = crate::parse("(demo missing extra)").expect("probe parses");
+        let crate::ExprKind::List(items) = &program[0].kind else {
+            panic!("probe must be a call");
+        };
+        let span = program[0].span;
+        let error = match dispatch_capability_from(
+            &lock,
+            "demo",
+            &items[1..],
+            &Environment::root(),
+            span,
+        )
+        .expect("registered evaluated handler")
+        {
+            Err(error) => error,
+            Ok(_) => panic!("wrong arity must fail before callback"),
+        };
+
+        assert_eq!(error.kind, ErrorKind::Arity);
+        assert_eq!(error.span, span);
     }
 
     fn sens_handler(

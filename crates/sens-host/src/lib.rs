@@ -6,8 +6,8 @@
 //! into per-session filesystem/TCP scopes carried by `Environment`.
 
 use sens::{
-    eval_expr, exact_arity, register_capability, Environment, ErrorKind, Exactness, Expr,
-    LanguageError, Span, Value,
+    eval_expr, exact_arity, register_capability, register_evaluated_capability, Environment,
+    ErrorKind, Exactness, Expr, LanguageError, Span, Value,
 };
 use std::{path::{Path, PathBuf}, rc::Rc};
 
@@ -444,17 +444,26 @@ fn evaluate_tcp_write_raw(
 }
 
 fn evaluate_tcp_close(
-    arguments: &[Expr],
-    environment: &Environment,
+    arguments: &[(Value, Span)],
+    _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("tcp-close", arguments, 1, span)?;
-    let connection_value = eval_expr(&arguments[0], environment)?;
-    let Value::TcpConnection(ref connection) = connection_value else {
+    if arguments.len() != 1 {
+        return Err(LanguageError::new(
+            ErrorKind::Arity,
+            format!(
+                "tcp-close: expected / ochikuvalosia / erwartet 1; received / otrymano / erhalten {}",
+                arguments.len()
+            ),
+            span,
+        ));
+    }
+    let (value, argument_span) = &arguments[0];
+    let Value::TcpConnection(connection) = value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-close expects a TCP connection · tcp-close ochikuie TCP-ziednannia · tcp-close erwartet eine TCP-Verbindung",
-            arguments[0].span,
+            *argument_span,
         ));
     };
     tcp_close(connection, span)?;
@@ -633,7 +642,7 @@ pub fn install() {
     register_capability("tcp-accept", evaluate_tcp_accept);
     register_capability("tcp-read-raw", evaluate_tcp_read_raw);
     register_capability("tcp-write-raw", evaluate_tcp_write_raw);
-    register_capability("tcp-close", evaluate_tcp_close);
+    register_evaluated_capability("tcp-close", 1, evaluate_tcp_close);
     #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
     register_capability(
         "native-call-u64-raw",
@@ -643,6 +652,23 @@ pub fn install() {
 
 #[cfg(test)]
 mod install_tests {
+    use sens::{Environment, ErrorKind, Exactness, Span, Value};
+
+    #[test]
+    fn tcp_close_value_handler_keeps_argument_local_span() {
+        let argument_span = Span { start: 13, end: 15 };
+        let call_span = Span { start: 0, end: 19 };
+        let error = super::evaluate_tcp_close(
+            &[(Value::Number(42.0, Exactness::Exact), argument_span)],
+            &Environment::root(),
+            call_span,
+        )
+        .expect_err("non-connection must fail before touching host TCP");
+
+        assert_eq!(error.kind, ErrorKind::Type);
+        assert_eq!(error.span, argument_span);
+    }
+
     #[test]
     fn install_registers_every_host_form() {
         super::install();
