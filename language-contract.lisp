@@ -58,6 +58,10 @@
        . "Numeric buffers, vectors, maps, records, island observations, machine bytes, and optimized layouts are either structures composed from the three payload domains or mechanism representations with parity witnesses. Optimization never creates a fourth semantic value domain.")
       (predicate-answer-projection
        . "Predicate semantics are strictly binary in the active language: exact one-bit 1 YES or 0 NO. A standalone multi-width PredicateAnswer domain and the historical 1..7-bit gradation are inactive and must not affect reader, evaluator, FASL, wire, or COND.")
+      (atom-one-bit-core1-4
+       . "Function 00000010 is the same atomic/non-pair predicate across Core1, Core2, Core3 and Core4: structural empty () -> 1, any admitted non-pair atomic value -> 1, pair -> 0. It does not return structural-kind. The empty structure is an ATOM-yes subject but is not itself a truth value.")
+      (eq-one-bit-core1-4
+       . "Function 00000011 is the same admitted-atom identity predicate across Core1, Core2, Core3 and Core4: same atom -> 1, distinct atoms -> 0, pair/outside-domain -> named type/domain failure. It does not return identity-relation and is not deep structural equality.")
       (sid8-function-space
        . "The complete function-identity space is exactly 00000000..11111111. All 256 slots are reserved exclusively for functions. A function identity is the eight bits themselves; it is not text, a string, a symbol, a literal, a decimal number, a human name, an enum label, an opcode, or a backend identifier.")
       (single-function-ontology
@@ -65,7 +69,7 @@
       (surface-non-authority
        . "Human-language and symbolic surfaces are optional source/UI routing metadata only. A surface may resolve mechanically to Sid8; it never creates a function, owns meaning, or becomes an identity. No name->meaning->SID or SID->named-meaning layer is authoritative.")
       (core-profile-law
-       . "Core1/Core2/Core3/Core4 are law profiles over the same Sid8 identities. Profile selection may change the admitted law/result/mechanism for a SID, but never its eight-bit identity and never the global function-ID space.")
+       . "Core1/Core2/Core3/Core4 are law profiles over the same Sid8 identities. Profiles may differ outside the shared foundation, but Function 00000010 ATOM, 00000011 EQ, and 00000111 COND have one shared predicate/control law across all four cores.")
       (kernel-archipelago
        . "Execution kernels may own native mechanisms and observations. They consume an already-selected Sid8 plus arguments/context and may return native observations. Kernel operator names, opcodes and native types never acquire sens function identity by themselves.")
       (sid-00000111-control
