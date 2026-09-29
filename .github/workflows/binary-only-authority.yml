@@ -1,0 +1,48 @@
+name: Binary-only authority ratchet
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/**"
+      - "scripts/check_binary_only_authority.py"
+      - "evidence/binary-only-authority-baseline.tsv"
+      - ".github/workflows/binary-only-authority.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/**"
+      - "scripts/check_binary_only_authority.py"
+      - "evidence/binary-only-authority-baseline.tsv"
+      - ".github/workflows/binary-only-authority.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  binary-only-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Checker self-test
+        run: python3 scripts/check_binary_only_authority.py --self-test
+
+      - name: Binary-only authority ratchet
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          elif [[ -n "${{ github.event.before }}" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
+            base="${{ github.event.before }}"
+          else
+            base="$(git rev-parse HEAD^)"
+          fi
+          python3 scripts/check_binary_only_authority.py --base "$base"
+
+      - name: Diff hygiene
+        run: git diff --check
