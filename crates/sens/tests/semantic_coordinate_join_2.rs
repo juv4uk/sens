@@ -197,9 +197,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     );
     assert_eq!(kernel_statuses_for_sid(&kernel_source, sens::sens!(00001100)), None);
 
-    // EQ : identity-relation law, sens execution witness, bounded compare.
-    let eq_math = math_coordinate(&mut session, sens::sens!(00000011));
-    assert!(eq_math.contains("same-atom-identity"));
+    // EQ : Function8 execution witness + bounded machine compare.
     let eq_kernels =
         kernel_statuses_for_sid(&kernel_source, sens::sens!(00000011)).expect("EQ kernel row");
     assert_eq!(eq_kernels.len(), 1);

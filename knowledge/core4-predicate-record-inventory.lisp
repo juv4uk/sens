@@ -28,11 +28,11 @@
    (core1-core2-core3 . out-of-scope))
 
   ((function . 00000010)
-   (authority . contracts/structural-observation-contract.lisp)
-   (current-role . classifier-observer)
-   (current-result . structural-kind)
-   (target-role . classifier-observer)
-   (migration . retain-richer-classifier-data))
+   (authority . tests/fixtures/semantic/atom-1bit-v1.lisp)
+   (current-role . predicate-question)
+   (current-result . exact-predicate-bit)
+   (target-role . predicate-question)
+   (migration . current-shared-foundation))
 
   ((function . 00000011)
    (authority . tests/fixtures/semantic/eq-1bit-v1.lisp)

@@ -14,11 +14,6 @@
        (domain exact-rational-arithmetic)
        (witness exact-rational-sum)
        (evidence tests/fixtures/mathematical-result-v1.lisp))
-     (00000011
-       (axis relation-law)
-       (domain identity-relation)
-       (witness same-atom-identity)
-       (evidence contracts/structural-observation-contract.lisp))
      (00000100
        (axis equational-structure)
        (domain pair-construction)
