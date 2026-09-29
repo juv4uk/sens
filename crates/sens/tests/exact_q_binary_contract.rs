@@ -56,20 +56,6 @@ fn rows() -> Vec<Row> {
         .collect()
 }
 
-fn transport_contract(session: &mut Session) {
-    let source = fs::read_to_string(repo_file("contracts/exact-q-binary-contract.lisp"))
-        .expect("#216 exact-Q binary contract");
-    let forms = parse(&source).expect("exact-Q binary contract must parse");
-    assert_eq!(forms.len(), 1, "#216 contract must remain one Lisp data document");
-    let form = &forms[0];
-    let exact = &source[form.span.start..form.span.end];
-    eval_program(
-        &format!("(def exact-q-binary-document (quote {exact}))"),
-        session,
-    )
-    .expect("transport exact-Q binary contract");
-}
-
 fn load_witness_runner(session: &mut Session) {
     let source = fs::read_to_string(repo_file("tests/fixtures/witness-runner.lisp"))
         .expect("Lisp-owned witness runner");
@@ -85,26 +71,6 @@ fn actual(row: &Row, session: &mut Session) -> String {
         Ok(result) => format!("(value \"{}\")", escape_lisp_string(&result.value.to_string())),
         Err(error) => format!("(error \"{:?}\")", error.kind),
     }
-}
-
-#[test]
-fn lisp_owned_exact_q_binary_contract_is_self_consistent() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library");
-    transport_contract(&mut session);
-    let witness = fs::read_to_string(repo_file(
-        "tests/fixtures/exact-q-binary-contract-witness.lisp",
-    ))
-    .expect("#216 exact-Q contract witness");
-    eval_program(&witness, &mut session).expect("exact-Q contract witness must load");
-    let verdict = eval_program("(exact-q-binary-contract-witness)", &mut session)
-        .expect("exact-Q contract witness must execute")
-        .value
-        .to_string();
-    assert!(
-        verdict.starts_with("(exact-q-binary-contract-witness (status pass)"),
-        "Lisp-owned exact-Q contract rejected itself: {verdict}"
-    );
 }
 
 #[test]

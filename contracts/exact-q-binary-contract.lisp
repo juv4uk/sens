@@ -1,54 +1,51 @@
-; exact-q-binary-contract.lisp — Lisp-owned mathematical binary domain for #216.
+; #1826 — exact-ℚ admissibility for numeric comparison predicates.
 ;
-; This is not universal truth. It is the answer algebra of one narrow domain:
-; comparisons whose required operands are all established exactly in Q.
+; Exactness answers only one question here: may this numeric predicate produce
+; an exact language answer without approximation?
 ;
-; Mathematical outcomes are the exact rationals 0/1 (NO) and 1/1 (YES).
-; The ordinary printer may canonically render denominator-1 rationals as 0/1
-; -> "0" and 1/1 -> "1"; spelling is not the semantic value.
+; If admitted, the result is the ordinary SENS PredicateBit:
+;   0 = NO
+;   1 = YES
 ;
-; Outside this domain the layer is silent: (). That means no answer from this
-; layer, never mathematical NO. Control over such results belongs to #217.
+; PredicateBit is not Number. Exact rational values 0/1 and 1/1 remain ordinary
+; Numbers and must not be used as predicate identity.
+;
+; Outside the admitted exact-ℚ domain the predicate must fail with a named
+; domain/type failure. Structural () is not a third predicate result.
 
-(exact-q-binary-contract/1
-  ((domain-owner . exact-q-decision)
+(exact-q-predicate-contract/2
+  ((domain-owner . exact-q-comparison-predicate)
    (admissibility . all-required-values-exact-rational)
-   (no-answer . ())
-   (outside-domain . no-answer)
+   (result-form . predicate-one-bit)
+   (yes . one)
+   (no . zero)
+   (outside-domain . named-domain-error)
    (approximation-policy . forbidden)
+   (number-as-predicate-result . forbidden)
    (generic-truth-coercion . forbidden)
-   (control-dispatch . delegated-to-217)
-   (outcomes .
-     (((meaning . no)
-       (numerator . 0)
-       (denominator . 1)
-       (canonical-write . "0"))
-      ((meaning . yes)
-       (numerator . 1)
-       (denominator . 1)
-       (canonical-write . "1")))))
+   (host-bool-authority . forbidden))
 
-  ((identity . "1014")
-   (surface . <)
+  ((identity . 00011010)
+   (role . lessp?)
    (relation . strictly-increasing)
    (operand-domain . exact-rational-sequence))
 
-  ((identity . "1015")
-   (surface . >)
+  ((identity . 00011011)
+   (role . greaterp?)
    (relation . strictly-decreasing)
    (operand-domain . exact-rational-sequence))
 
-  ((identity . "1016")
-   (surface . =)
+  ((identity . 00011100)
+   (role . equalp?)
    (relation . numeric-equality)
    (operand-domain . exact-rational-sequence))
 
-  ((identity . "1017")
-   (surface . <=)
+  ((identity . 00011101)
+   (role . not-greaterp?)
    (relation . nondecreasing)
    (operand-domain . exact-rational-sequence))
 
-  ((identity . "1018")
-   (surface . >=)
+  ((identity . 00011110)
+   (role . not-lessp?)
    (relation . nonincreasing)
    (operand-domain . exact-rational-sequence)))
