@@ -354,38 +354,28 @@
 (00001001 equal?
   (00001000 (a b)
     (00000111
-      ((00000010 a) ()
+      ; ATOM already returns exact PredicateBit. If both values are atoms,
+      ; EQ owns the identity decision directly.
+      ((00000010 a)
        (00000111
-         ((00000010 b) ()
-          (00000001 (1)))
-         ((00000010 b) (1)
-          (00000001 (0)))
-         ((00000010 b) (0)
-          (00000001 (0)))))
-      ((00000010 a) (1)
+         ((00000010 b)
+          (00000011 a b))
+         ; b is a pair: atom vs pair is structurally unequal.
+         ((00000010 (00000001 ()))
+          (00000010 (00000001 (00000000))))))
+      ; a is a pair. The explicit YES test below is a constant predicate
+      ; producer used only as the exhaustive second COND branch.
+      ((00000010 (00000001 ()))
        (00000111
-         ((00000010 b) ()
-          (00000001 (0)))
-         ((00000010 b) (1)
+         ((00000010 b)
+          (00000010 (00000001 (00000000))))
+         ((00000010 (00000001 ()))
           (00000111
-            ((00000011 a b) (1)
-             (00000001 (1)))
-            ((00000011 a b) (0)
-             (00000001 (0)))))
-         ((00000010 b) (0)
-          (00000001 (0)))))
-      ((00000010 a) (0)
-       (00000111
-         ((00000010 b) ()
-          (00000001 (0)))
-         ((00000010 b) (1)
-          (00000001 (0)))
-         ((00000010 b) (0)
-          (00000111
-            ((00100010 (00000101 a) (00000101 b)) (1)
+            ; Deep equality short-circuits on the heads, then compares tails.
+            ((00100010 (00000101 a) (00000101 b))
              (00100010 (00000110 a) (00000110 b)))
-            ((00100010 (00000101 a) (00000101 b)) (0)
-             (00000001 (0))))))))))
+            ((00000010 (00000001 ()))
+             (00000010 (00000001 (00000000))))))))))))
 
 ; NOT is a predicate combinator, not a generic truthiness converter.
 ; Its input must already be an exact PredicateBit; strict COND rejects every
