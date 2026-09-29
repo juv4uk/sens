@@ -43,10 +43,10 @@
    (path . "contracts/answer-contract.lisp")
    (category . semantic-authority)
    (question-answer . what-language-means)
-   (semantic-role . answer-ontology)
-   (future-action . retain-in-core)
+   (semantic-role . shared-predicate-control-boundary)
+   (future-action . retain-minimal)
    (target-destination . "contracts/answer-contract.lisp")
-   (rationale . "Layered answer protocol defining status, count, and items, strictly distinguishing 0-answers from the literal value ()."))
+   (rationale . "Minimal shared law only: structural empty, one-bit predicates, and two-part COND. Domain-specific mathematics/reasoning live in separate contracts."))
 
   ((key . island-compatibility-contract)
    (path . "contracts/island-compat-contract.lisp")
@@ -124,14 +124,7 @@
    (target-destination . "tests/fixtures/island-compat-witness.lisp")
    (rationale . "Lisp-owned witness verifying #749 island call, 0/1/N count distinguishability, and data flow laws."))
 
-  ((key . answer-contract-witness)
-   (path . "tests/fixtures/answer-contract-witness.lisp")
-   (category . semantic-witness)
-   (question-answer . what-language-means)
-   (semantic-role . answer-protocol-verifier)
-   (future-action . retain-in-core)
-   (target-destination . "tests/fixtures/answer-contract-witness.lisp")
-   (rationale . "Lisp-owned witness verifying layered answer protocol invariants without host-coded expectations."))
+
 
   ((key . compiler-conformance-corpus)
    (path . "tests/fixtures/conformance.lisp")

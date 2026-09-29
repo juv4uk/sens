@@ -193,29 +193,6 @@ fn load_witness_library(session: &mut Session) {
     eval_program(&source, session).expect("witness-runner.lisp must load");
 }
 
-fn transport_answer_contract_document(session: &mut Session) {
-    let source = fs::read_to_string(repo_file("contracts/answer-contract.lisp"))
-        .expect("#228 requires the Lisp-owned contracts/answer-contract.lisp data artifact");
-    let forms = parse(&source).expect("answer-contract.lisp must be readable Lisp data");
-    assert_eq!(
-        forms.len(),
-        1,
-        "#228 answer contract must remain one self-contained Lisp data document"
-    );
-
-    let form = &forms[0];
-    let exact_form_source = &source[form.span.start..form.span.end];
-    let transport = format!("(def answer-contract-document (quote {exact_form_source}))");
-    eval_program(&transport, session)
-        .expect("host observer must be able to transport contract bytes into Lisp data");
-}
-
-fn load_answer_contract_witness(session: &mut Session) {
-    let source = fs::read_to_string(repo_file("tests/fixtures/answer-contract-witness.lisp"))
-        .expect("#228 requires its Lisp-owned answer-contract witness");
-    eval_program(&source, session).expect("answer-contract-witness.lisp must load");
-}
-
 fn transport_island_compat_document(session: &mut Session) {
     let source = fs::read_to_string(repo_file("contracts/island-compat-contract.lisp"))
         .expect("#749 requires the Lisp-owned island compatibility contract");
@@ -516,24 +493,6 @@ fn malformed_witness_fails_closed_as_lisp_data() {
     assert!(
         verdict.starts_with("(witness-result (status malformed)"),
         "missing expected/error must fail closed: {verdict}"
-    );
-}
-
-#[test]
-fn answer_contract_semantics_are_owned_by_lisp_data_not_host_expectations() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library");
-    transport_answer_contract_document(&mut session);
-    load_answer_contract_witness(&mut session);
-
-    let verdict = eval_program("(answer-contract-witness)", &mut session)
-        .expect("Lisp-owned answer-contract witness must execute")
-        .value
-        .to_string();
-
-    assert!(
-        verdict.starts_with("(answer-contract-witness (status pass)"),
-        "Lisp-owned answer-contract witness rejected the first #228 slice: {verdict}"
     );
 }
 

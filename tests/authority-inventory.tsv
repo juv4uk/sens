@@ -3,7 +3,6 @@ crates/my-lisp/tests/witness_authority.rs	compiler_corpus_native_actuals_are_jud
 crates/my-lisp/tests/witness_authority.rs	same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend	observer	Canon0+McCarthy7;lambda	tests/fixtures/conformance.lisp + tests/fixtures/witness-runner.lisp	migrated
 crates/my-lisp/tests/witness_authority.rs	peer_surface_witness_reads_semantic_registry_instead_of_copying_surface_truth	observer	peer-surface-identity	lib/surface/semantic-registry.lisp via generated projection	migrated
 crates/my-lisp/tests/witness_authority.rs	malformed_witness_fails_closed_as_lisp_data	mechanism	witness-protocol-fail-closed	tests/fixtures/witness-runner.lisp	migrated
-crates/my-lisp/tests/witness_authority.rs	answer_contract_semantics_are_owned_by_lisp_data_not_host_expectations	observer	layered-answer-contract	contracts/answer-contract.lisp + tests/fixtures/answer-contract-witness.lisp	migrated
 crates/my-lisp/tests/canon_laws_v2_contract.rs	executable_canon_speaks_layered_answer_semantics	observer	Canon0+structure+structural-observation+explicit-control	tests/fixtures/canon-laws-v2-witness.lisp + lib/canon.lisp	migrated
 crates/my-lisp/tests/authority_guard_contract.rs	legacy_host_authority_guard_is_non_restrictive	observer	host-semantics-freedom	scripts/authority-guard.lisp	retained
 crates/my-lisp/tests/authority_guard_contract.rs	active_boundary_is_the_asymmetric_host_to_lisp_firewall	observer	asymmetric-semantic-firewall	scripts/semantic-authority-guard.lisp	retained
