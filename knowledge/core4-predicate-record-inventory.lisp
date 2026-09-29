@@ -42,11 +42,11 @@
    (migration . current-shared-foundation))
 
   ((function . 00100010)
-   (authority . contracts/deep-structural-relation-contract.lisp)
+   (authority . tests/fixtures/semantic/predicate-1bit-v1.lisp)
    (current-role . predicate-question)
-   (current-result . structural-relation)
+   (current-result . exact-predicate-bit)
    (target-role . predicate-question)
-   (migration . after-00000011-vertical))
+   (migration . current-shared-foundation))
 
   ((function . 00100011)
    (authority . contracts/structural-observation-contract.lisp)
