@@ -151,7 +151,6 @@ jobs:
                 continue
                 ;;
             esac
-            [[ -e "$path" ]] || continue
             digest="$(sha256sum "$path" | awk '{print $1}')"
             printf '(changed "%s" "%s")\n' "$path" "$digest" >> tests/semantic-authority-changes.lisp
           done < /tmp/changed.txt
