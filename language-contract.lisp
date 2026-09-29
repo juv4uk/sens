@@ -16,7 +16,7 @@
 ; Merge requires the executable gates tracked by #1694; current main still
 ; contains Symbol/decimal-reader/runtime representation debt.
 
-((major . 10) (minor . 0)
+((major . #d10) (minor . 0)
  (note . "RATIFIED TARGET by owner 2026-09-29 under #1694. Canonical sens (СЕНС) has parenthesized structure plus exactly three payload domains: Function, Number, Text. Function is exact eight-bit 00000000..11111111; Number is binary-first and orthogonal to Function; Text is UTF-8 data. Symbol/name/container-layout/host-tag are not fourth language ontologies. Human names and decimal notation are projections that must lower before canonical execution. Merge of Contract 10.0 requires executable conformance for #1694.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
