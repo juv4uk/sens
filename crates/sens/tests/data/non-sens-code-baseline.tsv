@@ -325,7 +325,6 @@ source	contracts/world-transition-contract.lisp	2
 source	evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp	1
 source	experiments/atomspace-pattern-audit-791.lisp	7
 source	experiments/blackboard-pattern-audit-790.lisp	8
-source	experiments/core4-eq-answer-1258.lisp	2
 source	experiments/core4-eq-result-law-witness.lisp	1
 source	experiments/function-genealogy.lisp	2
 source	experiments/graal-interop-pattern-audit-788.lisp	7
