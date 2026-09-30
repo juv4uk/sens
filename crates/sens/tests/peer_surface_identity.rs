@@ -71,36 +71,33 @@ fn admitted_add_surfaces_share_one_runtime_handle_before_surface_library_loads()
 }
 
 #[test]
-fn shadowing_one_admitted_add_surface_does_not_retarget_its_peers() {
+fn admitted_add_surfaces_are_immutable_function_routes() {
     let surfaces = add_surfaces();
 
-    for (_, shadowed) in &surfaces {
+    for (_, admitted) in &surfaces {
         let mut session = Session::default();
-        eval_program(
-            &format!("(define {shadowed} (lambda (a b) (quote shadowed)))"),
+        let error = eval_program(
+            &format!("(define {admitted} (lambda (a b) (quote shadowed)))"),
             &mut session,
         )
-        .expect("ordinary peer spelling remains lexically shadowable");
+        .expect_err("an admitted surface must not shadow its immutable Function8 route");
 
-        assert_eq!(
-            eval_program(&format!("({shadowed} 1 2)"), &mut session)
-                .unwrap()
-                .value
-                .to_string(),
-            "shadowed"
+        assert_eq!(error.kind, sens::ErrorKind::InvalidForm);
+        assert!(
+            error
+                .message
+                .contains("surface routes to immutable function SID"),
+            "unexpected immutability error for {admitted}: {error}"
         );
 
         for (_, peer) in &surfaces {
-            if peer == shadowed {
-                continue;
-            }
             assert_eq!(
                 eval_program(&format!("({peer} 1 2)"), &mut session)
                     .unwrap()
                     .value
                     .to_string(),
                 "3",
-                "shadowing {shadowed} retargeted peer {peer}"
+                "failed redefinition of {admitted} changed peer route {peer}"
             );
         }
     }
