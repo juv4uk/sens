@@ -4,65 +4,13 @@
 
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
-use crate::environment::{CondClauseMode, CoreProfile};
 use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 
 use std::rc::Rc;
 
-/// Відповідь 15-станної шкали Core4 (#1391): список двійкових бітів.
-/// `(1)` — «так» ступеня 1, `(0)` — «ні» ступеня 1, `()` — невідомо.
-fn answer(bit: Option<u8>) -> Value {
-    match bit {
-        Some(bit) => Value::list([Value::Number(f64::from(bit), crate::Exactness::Exact)]),
-        None => Value::Nil,
-    }
-}
-
-/// atom? відповіддю шкали (contracts/core4-predicate-answer-scale.lisp /3):
-/// атом `(1)`, пара `(0)`. `()` стоїть вище розрізнення атом/пара, тож у Core4
-/// (і Core3, що стоїть на ньому) відповідь `()`. Core1–2 мають лише ступінь 1,
-/// тож там `()` — атом, як у Маккарті 1960: `(1)`.
-pub(crate) fn atom_value(value: &Value, environment: &Environment) -> Value {
-    match value {
-        Value::Pair(_, _) => answer(Some(0)),
-        Value::Nil => match environment.selected_core_profile() {
-            Some(CoreProfile::Core1 | CoreProfile::Core2) => answer(Some(1)),
-            _ => answer(None),
-        },
-        _ => answer(Some(1)),
-    }
-}
-
-/// Напрям відповіді шкали: `Some(true)` для 1^n, `Some(false)` для 0^n
-/// (n = 1..7); `None`, якщо значення не є відповіддю зі стрілкою.
-fn answer_direction(value: &Value) -> Option<bool> {
-    let mut bits = Vec::new();
-    let mut cursor = value;
-    while let Value::Pair(head, tail) = cursor {
-        match head.as_ref() {
-            Value::Number(number, crate::Exactness::Exact) if *number == 0.0 || *number == 1.0 => {
-                bits.push(*number == 1.0)
-            }
-            _ => return None,
-        }
-        cursor = tail.as_ref();
-    }
-    if !matches!(cursor, Value::Nil) || bits.is_empty() || bits.len() > 7 {
-        return None;
-    }
-    let first = bits[0];
-    bits.iter().all(|bit| *bit == first).then_some(first)
-}
-
-/// Двочастинна клауза `cond` `(перевірка вираз)` за новою логікою (#1391):
-/// клауза обирається лише відповіддю «так» (1^n). «Ні» (0^n) і невідомо `()`
-/// її не обирають. Значення, що не є відповіддю шкали, лишаються за
-/// історичною істинністю (лише () і false хибні).
-fn migration_only_cond_truthy(value: &Value) -> bool {
-    match answer_direction(value) {
-        Some(direction) => direction,
-        None => value.is_truthy(),
-    }
+/// Exact one-bit SENS predicate answer.
+pub(crate) fn atom_value(value: &Value, _environment: &Environment) -> Value {
+    Value::predicate_bit(!matches!(value, Value::Pair(_, _)))
 }
 
 pub(crate) fn evaluate_definition(
@@ -91,74 +39,39 @@ pub(crate) fn evaluate_definition(
 pub(crate) fn evaluate_cond(
     clauses: &[Expr],
     environment: &Environment,
-    span: Span,
+    _span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    let mode = environment.cond_clause_mode();
-    let mut migration_compatibility_seen = false;
-
     for clause in clauses {
         let ExprKind::List(parts) = &clause.kind else {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
-                "cond expects list clauses · cond ochikuie spysky-umovy · cond erwartet Listenklauseln",
+                "cond expects list clauses",
                 clause.span,
             ));
         };
+        if parts.len() != 2 {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                "cond expects exactly (test expression)",
+                clause.span,
+            ));
+        }
 
-        match mode {
-            CondClauseMode::Core2LegacyTwoPart => {
-                if parts.len() != 2 {
-                    return Err(LanguageError::new(
-                        ErrorKind::InvalidForm,
-                        "Core2 cond expects historical (test expression) clauses",
-                        clause.span,
-                    ));
-                }
-                let value = evaluate(&parts[0], environment)?;
-                if migration_only_cond_truthy(&value) {
-                    return evaluate_step(&parts[1], environment);
-                }
+        let test = evaluate(&parts[0], environment)?;
+        match test.as_predicate_bit() {
+            Some(true) => return evaluate_step(&parts[1], environment),
+            Some(false) => {}
+            None => {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "cond test must return an exact one-bit predicate result",
+                    parts[0].span,
+                ))
             }
-            CondClauseMode::CurrentMigration => match parts.len() {
-                // #217 canonical path: the clause explicitly names the domain
-                // result that selects it. The expected form is data, not code.
-                // No Value -> bool conversion occurs on this path.
-                3 => {
-                    let actual = evaluate(&parts[0], environment)?;
-                    let expected = quoted(&parts[1])?;
-                    if actual == expected {
-                        return evaluate_step(&parts[2], environment);
-                    }
-                }
-                // Migration-only compatibility path for callers not yet moved
-                // to the canonical three-part form.
-                2 => {
-                    migration_compatibility_seen = true;
-                    let value = evaluate(&parts[0], environment)?;
-                    if migration_only_cond_truthy(&value) {
-                        return evaluate_step(&parts[1], environment);
-                    }
-                }
-                _ => {
-                    return Err(LanguageError::new(
-                        ErrorKind::InvalidForm,
-                        "cond expects canonical (query expected-result expression) clauses or migration-only (test expression) clauses · cond ochikuie kanonichni (zapyt ochikuvanyi-rezultat vyraz) abo tymchasovi (perevirka vyraz) · cond erwartet kanonische (Abfrage erwartetes-Ergebnis Ausdruck)- oder voruebergehende (Test Ausdruck)-Klauseln",
-                        clause.span,
-                    ));
-                }
-            },
         }
     }
 
-    if mode == CondClauseMode::Core2LegacyTwoPart || migration_compatibility_seen {
-        return Ok(EvalStep::Value(Value::Nil));
-    }
-
-    Err(LanguageError::new(
-        ErrorKind::UnsatisfiedConditional,
-        "канонічний cond: жоден query не збігся з expected-result · canonical cond: no query matched its expected result · kanonisches cond: keine Abfrage entsprach ihrem erwarteten Ergebnis",
-        span,
-    ))
+    Ok(EvalStep::Value(Value::Nil))
 }
 
 pub fn exact_arity(
@@ -301,5 +214,5 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
             span,
         ));
     }
-    Ok(answer(Some(u8::from(left == right))))
+    Ok(Value::predicate_bit(left == right))
 }
