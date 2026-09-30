@@ -35,11 +35,11 @@
 (01001000 (00000100 (00000001 principles-document) "docs/language-core-axioms.md"))
 (01001000 (00000100 (00000001 tier-map) "docs/conformance-tier-map.md"))
 
-(01001000 (00100111 (00000001 principle) 1 "Write about possibilities, not limitations." "Писати про можливості, не про обмеження."))
-(01001000 (00100111 (00000001 principle) 2 "Be Lisp in the full sense of the word — homoiconicity and a minimal, closed core that grows the rest of the language from inside itself, not the surface syntax of any one historical dialect." "Бути Lisp-ом у повному розумінні цього слова — гомоіконність і мінімальне, замкнене ядро, що вирощує решту мови зсередини себе, не поверхневий синтаксис якогось одного історичного діалекту."))
-(01001000 (00100111 (00000001 principle) 3 "Build the reasoning machine — McCarthy's documented 1958 Advice Taker goal, extended by the author's own hybrid neural/symbolic vision (private/lisp-to-knowledge.md)." "Реалізувати розумну машину — задокументована ціль МакКарті 1958 року (Advice Taker), продовжена власним гібридним нейро-символьним баченням автора (private/lisp-to-knowledge.md)."))
-(01001000 (00100111 (00000001 principle) 4 "Cross-platform-ness, or more simply: universality — the falsifiability test for G6/G7; sens commits to real, physically different substrates (Rust, fpga-lisp), not just one implementation asserting conformance." "Кросплатформеність, або простіше — універсальність — тест на фальсифіковність для G6/G7; sens зобов'язується перед реально різними фізичними субстратами (Rust, fpga-lisp), не лише однією реалізацією, що заявляє конформність."))
-(01001000 (00100111 (00000001 principle) 5 "Maximum awareness of today's technology, applied to symbolic AI — classical symbolic AI is not a museum piece; modern tooling and modern LLMs (as the fuzzy natural-language interface, not a competitor to the precise symbolic core) are part of building it." "Максимальна обізнаність у сьогоднішніх технологіях, застосована до символьного ШІ — класичний символьний AI не музейний експонат; сучасні інструменти й сучасні LLM (як нечіткий інтерфейс природної мови, не конкурент точному символьному ядру) — частина його побудови."))
+(01001000 (00100111 (00000001 principle) #b1 "Write about possibilities, not limitations." "Писати про можливості, не про обмеження."))
+(01001000 (00100111 (00000001 principle) #b10 "Be Lisp in the full sense of the word — homoiconicity and a minimal, closed core that grows the rest of the language from inside itself, not the surface syntax of any one historical dialect." "Бути Lisp-ом у повному розумінні цього слова — гомоіконність і мінімальне, замкнене ядро, що вирощує решту мови зсередини себе, не поверхневий синтаксис якогось одного історичного діалекту."))
+(01001000 (00100111 (00000001 principle) #b11 "Build the reasoning machine — McCarthy's documented 1958 Advice Taker goal, extended by the author's own hybrid neural/symbolic vision (private/lisp-to-knowledge.md)." "Реалізувати розумну машину — задокументована ціль МакКарті 1958 року (Advice Taker), продовжена власним гібридним нейро-символьним баченням автора (private/lisp-to-knowledge.md)."))
+(01001000 (00100111 (00000001 principle) #b100 "Cross-platform-ness, or more simply: universality — the falsifiability test for G6/G7; sens commits to real, physically different substrates (Rust, fpga-lisp), not just one implementation asserting conformance." "Кросплатформеність, або простіше — універсальність — тест на фальсифіковність для G6/G7; sens зобов'язується перед реально різними фізичними субстратами (Rust, fpga-lisp), не лише однією реалізацією, що заявляє конформність."))
+(01001000 (00100111 (00000001 principle) #b101 "Maximum awareness of today's technology, applied to symbolic AI — classical symbolic AI is not a museum piece; modern tooling and modern LLMs (as the fuzzy natural-language interface, not a competitor to the precise symbolic core) are part of building it." "Максимальна обізнаність у сьогоднішніх технологіях, застосована до символьного ШІ — класичний символьний AI не музейний експонат; сучасні інструменти й сучасні LLM (як нечіткий інтерфейс природної мови, не конкурент точному символьному ядру) — частина його побудови."))
 
 (01001000 (00100111 (00000001 axiom) (00000001 G1) (00000001 generative) "A value's meaning can be fully defined by observable behavior." "Значення value може бути повністю визначене спостережуваною поведінкою."))
 (01001000 (00100111 (00000001 axiom) (00000001 G2) (00000001 generative) "Every value can be built from just two things: atoms and pairs." "Кожне значення можна побудувати лише з двох речей: атомів і пар."))
@@ -53,9 +53,9 @@
 (01001000 (00100111 (00000001 axiom) (00000001 S2) (00000001 safety) "Never fail silently — every failure is a named, observable outcome." "Ніколи не провалюватись мовчки — кожен провал є названим, спостережуваним результатом."))
 (01001000 (00100111 (00000001 axiom) (00000001 S3) (00000001 safety) "Never let a resource limit silently redefine an operation's meaning." "Ніколи не дозволяти обмеженню ресурсу мовчки переозначити сенс операції."))
 
-(01001000 (00100111 (00000001 tier) 1 "CORE SEMANTICS — every conforming implementation must have this"))
-(01001000 (00100111 (00000001 tier) 2 "LANGUAGE CONTRACT — every conforming implementation must have this"))
-(01001000 (00100111 (00000001 tier) 3 "ECOSYSTEM CONFORMANCE — an implementation can be sens without this loaded yet; tests a library, not the language itself"))
+(01001000 (00100111 (00000001 tier) #b1 "CORE SEMANTICS — every conforming implementation must have this"))
+(01001000 (00100111 (00000001 tier) #b10 "LANGUAGE CONTRACT — every conforming implementation must have this"))
+(01001000 (00100111 (00000001 tier) #b11 "ECOSYSTEM CONFORMANCE — an implementation can be sens without this loaded yet; tests a library, not the language itself"))
 
 (00001001 print-fixture
   (00001000 (fixture)
@@ -65,7 +65,7 @@
   (00001000 (remaining)
     (00000111
       ((00000010 remaining) () (00000001 ()))
-      ((00000010 remaining) (1) (00000001 ()))
+      ((00000010 remaining) (#b1) (00000001 ()))
       (t ((00001000 ()
             (print-fixture (00000101 remaining))
             (print-fixtures (00000110 remaining))))))))
