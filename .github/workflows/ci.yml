@@ -192,6 +192,38 @@ jobs:
           cat tests/function-table-mechanisms-verdict.lisp
           ./target/debug/sens scripts/enforce-function-table-mechanisms.lisp
 
+      - name: Canon projection provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./target/debug/my-lisp scripts/generate-projection-provenance.lisp --check
+
+          cp lib/surface/semantic-registry.lisp /tmp/semantic-registry-1061.lisp
+          cp crates/my-lisp/src/semantic_registry_generated.rs /tmp/semantic-registry-generated-1061.rs
+          restore_provenance_inputs() {
+            cp /tmp/semantic-registry-1061.lisp lib/surface/semantic-registry.lisp
+            cp /tmp/semantic-registry-generated-1061.rs crates/my-lisp/src/semantic_registry_generated.rs
+          }
+          trap restore_provenance_inputs EXIT
+
+          sed -i '/^  (00001100 /d' lib/surface/semantic-registry.lisp
+          if ./target/debug/my-lisp scripts/generate-projection-provenance.lisp --check > /tmp/projection-provenance-missing-source.log 2>&1; then
+            echo "ERROR: #1061 accepted projection after deleting Canon SID 00001100"
+            exit 1
+          fi
+          grep -q 'source-sid-missing' /tmp/projection-provenance-missing-source.log
+
+          cp /tmp/semantic-registry-1061.lisp lib/surface/semantic-registry.lisp
+          printf '\n// #1061 adversarial hand edit\n' >> crates/my-lisp/src/semantic_registry_generated.rs
+          if ./target/debug/my-lisp scripts/generate-projection-provenance.lisp --check > /tmp/projection-provenance-hand-edit.log 2>&1; then
+            echo "ERROR: #1061 accepted hand-edited generated semantic projection"
+            exit 1
+          fi
+          grep -q 'stale-projection-provenance' /tmp/projection-provenance-hand-edit.log
+
+          restore_provenance_inputs
+          trap - EXIT
+
       - name: Canon-subordinate island math evidence
         shell: bash
         run: |
