@@ -41,6 +41,10 @@ sens = { path = "../sens" }
 sens-host = { path = "../sens-host" }
 sens-lsp = { path = "../sens-lsp" }
 wsm-guard-core = { path = "../wsm-guard-core" }
+wsm-common-lisp-kernel = { path = "../wsm-common-lisp-kernel" }
+wsm-prolog-kernel = { path = "../wsm-prolog-kernel" }
+wsm-clips-kernel = { path = "../wsm-clips-kernel", features = ["native-clips"] }
+wsm-datalog-kernel = { path = "../wsm-datalog-kernel" }
 rustyline = { version = "14.0.0", features = ["with-file-history"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
