@@ -11,6 +11,6 @@
 ; In particular, + and - remain unadmitted here until Core1 itself admits and
 ; executes them. No quoted/string SID compatibility representation is accepted.
 
-(DEFINE C1-COMPILER-SID-FOR-SURFACE
-  (LAMBDA (NAME)
+(00001001 C1-COMPILER-SID-FOR-SURFACE
+  (00001000 (NAME)
     (C1-PRIMITIVE-IDENTITY NAME)))
