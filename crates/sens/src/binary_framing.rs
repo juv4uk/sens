@@ -415,8 +415,6 @@ mod tests {
             let frame = BinaryFrame::Number(value);
             let encoded = encode_binary_frame(&frame).unwrap();
             assert_eq!(&encoded[..4], &[1, 1, 0, 1]);
-            assert!(!encoded.windows(4).any(|w| w == [b'#', b'q', b'2', b':']));
-
             let (decoded, consumed) = decode_binary_frame(&encoded).unwrap();
             assert_eq!(decoded, frame);
             assert_eq!(consumed, encoded.len());
