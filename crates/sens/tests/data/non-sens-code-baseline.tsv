@@ -326,7 +326,6 @@ source	contracts/world-transition-contract.lisp	2
 source	evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp	1
 source	experiments/atomspace-pattern-audit-791.lisp	7
 source	experiments/blackboard-pattern-audit-790.lisp	8
-source	experiments/core4-eq-answer-1258.lisp	2
 source	experiments/function-genealogy.lisp	2
 source	experiments/graal-interop-pattern-audit-788.lisp	7
 source	experiments/kif-bridge-audit-792.lisp	4
@@ -368,7 +367,6 @@ source	scripts/build-inventory.lisp	2
 source	scripts/check-core-special-form-profile-policy.lisp	1
 source	scripts/check-core1-compiler-sid-resolver.lisp	1
 source	scripts/check-core4-predicate-answer-scale.lisp	2
-source	scripts/check-core4-predicate-record-inventory.lisp	1
 source	scripts/check-island-math-evidence.lisp	1
 source	scripts/check-kernel-abi-transport-boundary.lisp	2
 source	scripts/machine-authority-guard.lisp	5
