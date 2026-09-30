@@ -5,8 +5,8 @@
 
 (00001001 c1r-expected-resolver-form
   (00000001
-    (DEFINE C1-COMPILER-SID-FOR-SURFACE
-      (LAMBDA (NAME)
+    (00001001 C1-COMPILER-SID-FOR-SURFACE
+      (00001000 (NAME)
         (C1-PRIMITIVE-IDENTITY NAME)))))
 
 (00001001 c1r-find-section
