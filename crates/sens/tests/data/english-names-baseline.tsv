@@ -2147,7 +2147,6 @@ rust-lisp	crates/sens/tests/advice_corpus.rs	def	2
 rust-lisp	crates/sens/tests/advice_corpus.rs	let*	3
 rust-lisp	crates/sens/tests/advice_corpus.rs	list	3
 rust-lisp	crates/sens/tests/advice_corpus.rs	quote	18
-rust-lisp	crates/sens/tests/authority_guard_contract.rs	quote	1
 rust-lisp	crates/sens/tests/backend_not_on_sid_gap.rs	atom?	1
 rust-lisp	crates/sens/tests/backend_not_on_sid_gap.rs	def	1
 rust-lisp	crates/sens/tests/backend_not_on_sid_gap.rs	lambda	2
