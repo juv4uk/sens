@@ -57,6 +57,11 @@ guix time-machine -C channels.scm -- shell -m manifest.scm \
 2. **Warm:** fasl ×3.8 vs py-src, ×1.3 vs py-json; **×0.26 vs py-marshal** (програємо).
 3. **Size:** wire 34 B — найменший.
 
+### P1 — wire як транспорт контракту
+
+`results/20260930/p1-wire-as-transport.md` — payload-only розклад; wire vs JSON
+(size + decode); absolute-binary гіпотеза окремо від виміру.
+
 ### Історичний baseline (i5-6400 Guix)
 
 `results/20260927/report.md` — той самий порядок висновків; абсолютні I-refs інші.
