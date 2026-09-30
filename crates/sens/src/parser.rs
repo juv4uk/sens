@@ -628,7 +628,7 @@ fn symbol_kind(token: &str) -> ExprKind {
     ExprKind::Symbol(token.into())
 }
 
-fn validate_canonical_executable_heads(
+pub(crate) fn validate_canonical_executable_heads(
     expressions: &[Expr],
 ) -> Result<(), LanguageError> {
     for expression in expressions {
