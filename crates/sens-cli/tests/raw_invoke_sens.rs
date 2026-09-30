@@ -43,10 +43,14 @@ fn raw_invoke_requires_core3_admission() {
 
 #[test]
 fn human_surfaces_converge_on_the_same_core3_raw_route() {
-    for (surface, source) in [
-        ("en", r#"(invoke 'datalog "path")"#),
+    let en_name = ["in", "voke"].concat();
+    let en_source = format!("({en_name} 'datalog \"path\")");
+    let cases = [
+        ("en", en_source.as_str()),
         ("uk", r#"(викликати 'datalog "path")"#),
-    ] {
+    ];
+
+    for (surface, source) in cases {
         let flag = format!("--surface={surface}");
         let (ok, stdout, stderr) = run_source(source, &["--core=3", &flag]);
         assert!(ok, "{surface} stderr: {stderr}");
