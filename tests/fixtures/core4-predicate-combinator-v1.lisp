@@ -34,3 +34,25 @@
     (00000010 (00000001 ()))
     (00000010 (00000001 ()))
     (00000010 (00000001 ()))))
+
+; Composition matching semantic-authority-claim?: six string predicates.
+(01001000
+  (10011011
+    (00111110 "semantic-authority-source" "plain text")
+    (00111110 "authority-source" "plain text")
+    (00111110 "source-of-truth" "plain text")
+    (00111110 "semantic-source" "plain text")
+    (00111110 "Authority:" "plain text")
+    (00111110 "generated-from-host" "generated-from-host marker")))
+
+; Composition matching host-marker?: eight string predicates.
+(01001000
+  (10011011
+    (00111110 ".rs" "plain text")
+    (00111110 "crates/" "plain text")
+    (00111110 "Rust" "plain text")
+    (00111110 "rust::" "plain text")
+    (00111110 "Value::" "plain text")
+    (00111110 "ExprKind::" "plain text")
+    (00111110 "CanonicalIdentity" "plain text")
+    (00111110 "NecessaryFormIdentity" "NecessaryFormIdentity marker")))
