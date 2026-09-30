@@ -20,29 +20,24 @@
    (false-sentinel . no))
 
   ((identity . 00000001)
-   (role . quote)
    (domain-owner . structure)
    (result-form . data))
 
   ((identity . 00000100)
-   (role . cons)
    (domain-owner . structure)
    (result-form . pair))
 
   ((identity . 00000101)
-   (role . car)
    (domain-owner . structure)
    (input-domain . pair)
    (result-form . value))
 
   ((identity . 00000110)
-   (role . cdr)
    (domain-owner . structure)
    (input-domain . pair)
    (result-form . value))
 
   ((identity . 00000010)
-   (role . atom)
    (domain-owner . predicate)
    (result-form . predicate-one-bit)
    (yes . one)
@@ -54,7 +49,6 @@
    (host-bool-authority . forbidden))
 
   ((identity . 00000011)
-   (role . eq)
    (domain-owner . predicate)
    (input-domain . (admitted-atom admitted-atom))
    (result-form . predicate-one-bit)
@@ -67,7 +61,6 @@
    (host-bool-authority . forbidden))
 
   ((identity . 00000111)
-   (role . cond)
    (domain-owner . control)
    (clause-shape . (test expression))
    (test-domain . predicate-one-bit)
