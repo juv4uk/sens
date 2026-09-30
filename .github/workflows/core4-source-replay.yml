@@ -5,12 +5,14 @@ on:
     paths:
       - "lib/core.lisp"
       - "lib/core4.lisp"
+      - "tests/fixtures/core4-predicate-combinator-v1.lisp"
       - ".github/workflows/core4-source-replay.yml"
   push:
     branches: [main]
     paths:
       - "lib/core.lisp"
       - "lib/core4.lisp"
+      - "tests/fixtures/core4-predicate-combinator-v1.lisp"
       - ".github/workflows/core4-source-replay.yml"
   workflow_dispatch:
 
@@ -43,6 +45,16 @@ jobs:
           grep -F '(1)' lib/core4.lisp
           grep -F '(1)' lib/core4.lisp
           grep -F '(1)' lib/core4.lisp
+
+      - name: Execute variadic PredicateBit combinators
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo build -p sens-cli --bin sens
+          ./target/debug/sens tests/fixtures/core4-predicate-combinator-v1.lisp > /tmp/core4-predicate-combinators.out
+          cat /tmp/core4-predicate-combinators.out
+          test "$(grep -cx '1' /tmp/core4-predicate-combinators.out)" -eq 2
 
       - name: Diff hygiene
         run: git diff --check
