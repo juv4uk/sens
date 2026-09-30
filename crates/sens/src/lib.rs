@@ -141,7 +141,7 @@ pub use eval::{
     eval_program, evaluate as eval_expr, EvalResult,
 };
 pub use eval::lower::lower_program;
-pub use parser::{parse, parse_text7_literal};
+pub use parser::{parse, parse_canonical, parse_text7_literal};
 pub use presentation::{
     present_system_message, render_error_for_presentation, render_value_for_presentation,
     PresentationLanguage,
