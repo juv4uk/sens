@@ -391,12 +391,12 @@ impl fmt::Display for BinaryFrameError {
                 write!(f, "invalid exact Number frame begins at bit {index}")
             }
             Self::UnexpectedClose { index } => {
-                write!(f, "canonical binary program closes unopened structure at bit {index}")
+                write!(f, "canonical Control2 program closes unopened structure at bit {index}")
             }
             Self::UnclosedStructure { index, depth } => {
                 write!(
                     f,
-                    "canonical binary program ends at bit {index} with {depth} unclosed structure(s)"
+                    "canonical Control2 program ends at bit {index} with {depth} unclosed structure(s)"
                 )
             }
         }
