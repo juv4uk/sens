@@ -46,7 +46,7 @@ pub(crate) enum ReplSurface {
 impl ReplSurface {
     pub(crate) fn parse(value: &str) -> Option<Self> {
         match value.trim().to_lowercase().as_str() {
-            "core" | "ядро" => Some(Self::Core),
+            "sens" | "binary" | "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
             "ук" | "uk" | "українська" => Some(Self::Ukrainian),
             "укр" | "ukr" | "українська-повна" => Some(Self::UkrainianFull),
@@ -57,7 +57,7 @@ impl ReplSurface {
 
     pub(crate) fn code(self) -> &'static str {
         match self {
-            Self::Core => "core",
+            Self::Core => "sens",
             Self::English => "en",
             Self::Ukrainian => "ук",
             Self::UkrainianFull => "укр",
@@ -67,7 +67,7 @@ impl ReplSurface {
 
     fn title(self) -> &'static str {
         match self {
-            Self::Core => "ядро",
+            Self::Core => "SENS двійкова",
             Self::English => "англійська",
             Self::Ukrainian => "українська",
             Self::UkrainianFull => "українська (повна)",
@@ -161,13 +161,14 @@ pub(crate) fn history_path() -> Option<PathBuf> {
 }
 
 fn print_surface_help() {
-    println!("Поверхні: :мова ук | укр | en | sa | core");
-    println!("Технічний alias: :surface ук | укр | en | sa | core");
+    println!("Поверхні: :мова sens | ук | укр | en | sa");
+    println!("Технічний alias: :surface sens | ук | укр | en | sa");
+    println!("Сумісний selector `core` тимчасово означає той самий binary mode `sens`.");
     println!("Каталог поточної людської поверхні: :імена / :names");
     println!("Одна semantic identity у всіх людських поверхнях: :ім'я <назва> / :name <name>");
     println!("Стан людських поверхонь: :поверхні / :surfaces");
     println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
-    println!("core — канонічний машинний шар, не четверта людська мова.");
+    println!("sens — default binary entry: executable function heads мають бути exact Function8.");
     println!("Перемикання змінює лише surface-frame; ваші define/closures лишаються живими.");
 }
 
@@ -260,7 +261,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
 
     println!("sens REPL v{} (pure Rust)", env!("CARGO_PKG_VERSION"));
     println!(
-        "Поверхня: {} ({}) · змінити: :мова ук|укр|en|sa|core · :допомога",
+        "Режим: {} ({}) · human surface лише явно: :мова ук|укр|en|sa · :допомога",
         state.surface.title(),
         state.surface.code()
     );
@@ -300,6 +301,19 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
 
                 match parse(line) {
                     Ok(ast) => {
+                        if state.surface == ReplSurface::Core {
+                            if let Err(e) = sens::require_binary_function_heads(&ast) {
+                                eprintln!(
+                                    "{}",
+                                    render_error_for_presentation(
+                                        &e,
+                                        line,
+                                        state.surface.presentation(),
+                                    )
+                                );
+                                continue;
+                            }
+                        }
                         match eval_parsed_expressions_incremental(&ast, &mut state.session) {
                             Ok(result) => {
                                 for out in result.output {
@@ -392,12 +406,17 @@ mod tests {
         assert_eq!(value(&mut state, "істина"), "t");
         assert_eq!(value(&mut state, "хиба"), "()");
 
-        state.switch_surface(ReplSurface::Core).expect("core");
+        state.switch_surface(ReplSurface::Core).expect("sens");
         assert!(state.session.environment.get("атом?").is_none());
-        assert_eq!(value(&mut state, "(atom? 'мама)"), "(1)");
-        // Canon is not a UI layer: registered spellings still denote Canon
-        // even when no human surface frame is loaded.
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
+
+        for source in ["(atom? (00000001 мама))", "(атом? (00000001 мама))"] {
+            let parsed = parse(source).expect("parse");
+            let error = sens::require_binary_function_heads(&parsed)
+                .expect_err("default sens mode rejects human function heads");
+            assert_eq!(error.kind, ErrorKind::InvalidForm);
+        }
+
+        assert_eq!(value(&mut state, "(00000010 (00000001 мама))"), "(1)");
     }
 
     #[test]
@@ -413,6 +432,22 @@ mod tests {
 
         state.switch_surface(ReplSurface::English).expect("en");
         assert_eq!(value(&mut state, "(додай-крок 5)"), "7");
+    }
+
+    #[test]
+    fn sens_is_the_binary_default_selector_and_core_is_only_an_alias() {
+        assert_eq!(ReplSurface::Core.code(), "sens");
+        assert_eq!(ReplSurface::parse("sens"), Some(ReplSurface::Core));
+        assert_eq!(ReplSurface::parse("binary"), Some(ReplSurface::Core));
+        assert_eq!(ReplSurface::parse("core"), Some(ReplSurface::Core));
+
+        for source in ["(+ 2 3)", "(додати 2 3)"] {
+            let parsed = parse(source).expect("parse");
+            sens::require_binary_function_heads(&parsed)
+                .expect_err("human function head must require explicit surface");
+        }
+        let exact = parse("(00001100 2 3)").expect("parse exact Function8");
+        sens::require_binary_function_heads(&exact).expect("exact Function8 is default SENS");
     }
 
     #[test]
