@@ -378,7 +378,11 @@ dependencies = [
  "sens-lsp",
  "serde",
  "serde_json",
+ "wsm-clips-kernel",
+ "wsm-common-lisp-kernel",
+ "wsm-datalog-kernel",
  "wsm-guard-core",
+ "wsm-prolog-kernel",
 ]
 
 [[package]]
