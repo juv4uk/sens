@@ -317,17 +317,6 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     environment.bind_code_slot_once(sid, value.clone());
 }
 
-pub(crate) fn value_for_sid(sid: Sens8) -> Option<Value> {
-    match route_kind_for_sid(sid)? {
-        SidRouteKind::ValueCall => Some(Value::Sid(sid)),
-        SidRouteKind::SpecialForm => None,
-    }
-}
-
-pub(crate) fn value_for_surface(surface: &str) -> Option<Value> {
-    routed_sid_for_surface(surface).and_then(value_for_sid)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
