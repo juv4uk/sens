@@ -149,6 +149,15 @@ fn no_project_code_calls_an_english_predicate_without_question_mark() {
 
     let mut offenders = Vec::new();
     for path in files {
+        let rel = path.strip_prefix(&root).unwrap();
+        // Pinned Core1 S2 admission data records the historical compiler's
+        // real source surfaces (including `atom`). It is provenance, not
+        // executable SENS code, so rewriting it to modern `atom?` would make
+        // the historical witness false rather than improve active code.
+        if rel == Path::new("contracts/core1-s2-compiler-admission.lisp") {
+            continue;
+        }
+
         let Ok(text) = fs::read_to_string(&path) else { continue };
         let stripped = strip_comments_and_strings(&text);
         for (line_no, line) in stripped.lines().enumerate() {
