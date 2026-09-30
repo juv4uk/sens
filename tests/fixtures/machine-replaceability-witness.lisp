@@ -4,6 +4,8 @@
 ; and explicit binary Number source. Removing a backend may remove execution
 ; capability, never the meaning of these already-ratified forms.
 
+(load "lib/core.lisp")
+
 (00001001 machine-replaceability-add
   (00001100 #b10 #b11))
 
