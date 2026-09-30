@@ -6,8 +6,8 @@
 //! into per-session filesystem/TCP scopes carried by `Environment`.
 
 use sens::{
-    register_capability, register_evaluated_capability, Environment, ErrorKind, Exactness,
-    LanguageError, Span, Value,
+    eval_expr, exact_arity, register_capability, register_evaluated_capability, Environment,
+    ErrorKind, Exactness, Expr, LanguageError, Span, Value,
 };
 use std::{path::{Path, PathBuf}, rc::Rc};
 
@@ -114,23 +114,24 @@ fn evaluate_read_dir(
 }
 
 fn evaluate_write_file_bytes(
-    arguments: &[(Value, Span)],
+    arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let (path_value, _path_span) = &arguments[0];
-    let Value::String(path) = path_value else {
+    exact_arity("write-file-bytes", arguments, 2, span)?;
+    let path_value = eval_expr(&arguments[0], environment)?;
+    let Value::String(ref path) = path_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "write-file-bytes expects a string path · write-file-bytes ochikuie riadok-shliakh · write-file-bytes erwartet einen String-Pfad",
             span,
         ));
     };
-    let (bytes_value, bytes_span) = &arguments[1];
-    let bytes = expect_byte_list(bytes_value, *bytes_span)?;
+    let bytes_value = eval_expr(&arguments[1], environment)?;
+    let bytes = expect_byte_list(&bytes_value, arguments[1].span)?;
     ensure_fs_write_allowed(environment, "write-file-bytes", path, span)?;
     write_file_bytes(path, &bytes, span)?;
-    Ok(bytes_value.clone())
+    Ok(bytes_value)
 }
 
 fn evaluate_read_file_bytes(
@@ -336,19 +337,20 @@ fn write_file_bytes(_path: &str, _bytes: &[u8], span: Span) -> Result<(), Langua
 }
 
 fn evaluate_tcp_connect(
-    arguments: &[(Value, Span)],
+    arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let (host_value, host_span) = &arguments[0];
-    let Value::String(host) = host_value else {
+    exact_arity("tcp-connect", arguments, 2, span)?;
+    let host_value = eval_expr(&arguments[0], environment)?;
+    let Value::String(ref host) = host_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-connect expects a string host · tcp-connect ochikuie riadok-khost · tcp-connect erwartet einen String-Host",
-            *host_span,
+            arguments[0].span,
         ));
     };
-    let port = expect_port(&arguments[1])?;
+    let port = expect_port(&arguments[1], environment)?;
     if !environment.is_tcp_connect_allowed(host, port) {
         return Err(denied("tcp-connect", format!("{host}:{port}"), span));
     }
@@ -357,19 +359,20 @@ fn evaluate_tcp_connect(
 }
 
 fn evaluate_tcp_listen_raw(
-    arguments: &[(Value, Span)],
+    arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let (address_value, address_span) = &arguments[0];
-    let Value::String(address) = address_value else {
+    exact_arity("tcp-listen-raw", arguments, 2, span)?;
+    let address_value = eval_expr(&arguments[0], environment)?;
+    let Value::String(ref address) = address_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-listen-raw expects a string bind address · tcp-listen-raw ochikuie riadok-adresu pryviazky · tcp-listen-raw erwartet eine String-Bind-Adresse",
-            *address_span,
+            arguments[0].span,
         ));
     };
-    let port = expect_port(&arguments[1])?;
+    let port = expect_port(&arguments[1], environment)?;
     if !environment.is_tcp_listen_allowed(address, port) {
         return Err(denied("tcp-listen-raw", format!("{address}:{port}"), span));
     }
@@ -416,22 +419,23 @@ fn evaluate_tcp_read_raw(
 }
 
 fn evaluate_tcp_write_raw(
-    arguments: &[(Value, Span)],
-    _environment: &Environment,
+    arguments: &[Expr],
+    environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let (connection_value, connection_span) = &arguments[0];
-    let Value::TcpConnection(connection) = connection_value else {
+    exact_arity("tcp-write-raw", arguments, 2, span)?;
+    let connection_value = eval_expr(&arguments[0], environment)?;
+    let Value::TcpConnection(ref connection) = connection_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-write-raw expects a TCP connection · tcp-write-raw ochikuie TCP-ziednannia · tcp-write-raw erwartet eine TCP-Verbindung",
-            *connection_span,
+            arguments[0].span,
         ));
     };
-    let (bytes_value, bytes_span) = &arguments[1];
-    let bytes = expect_tcp_byte_list(bytes_value, *bytes_span)?;
+    let bytes_value = eval_expr(&arguments[1], environment)?;
+    let bytes = expect_tcp_byte_list(&bytes_value, arguments[1].span)?;
     tcp_write_raw(connection, &bytes, span)?;
-    Ok(bytes_value.clone())
+    Ok(bytes_value)
 }
 
 fn evaluate_tcp_close(
@@ -461,23 +465,23 @@ fn evaluate_tcp_close(
     Ok(Value::Bool(true))
 }
 
-fn expect_port(argument: &(Value, Span)) -> Result<u16, LanguageError> {
-    let (value, span) = argument;
+fn expect_port(expr: &Expr, environment: &Environment) -> Result<u16, LanguageError> {
+    let value = eval_expr(expr, environment)?;
     let Value::Number(port, _) = value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "expected a port number · ochikuvavsia nomer portu · erwartete eine Portnummer",
-            *span,
+            expr.span,
         ));
     };
-    if port.fract() != 0.0 || *port < 0.0 || *port > u16::MAX as f64 {
+    if port.fract() != 0.0 || port < 0.0 || port > u16::MAX as f64 {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "port must be an integer between 0 and 65535 · port maie buty tsilym chyslom vid 0 do 65535 · Port muss eine Ganzzahl zwischen 0 und 65535 sein",
-            *span,
+            expr.span,
         ));
     }
-    Ok(*port as u16)
+    Ok(port as u16)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -624,14 +628,14 @@ pub fn install() {
     register_evaluated_capability("read-dir", 1, evaluate_read_dir);
     register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
     register_evaluated_capability("read-file-utf8-raw", 1, evaluate_read_file_utf8_raw);
-    register_evaluated_capability("write-file-bytes", 2, evaluate_write_file_bytes);
-    register_evaluated_capability("process-run-raw", 2, process_raw::evaluate_process_run_raw);
+    register_capability("write-file-bytes", evaluate_write_file_bytes);
+    register_capability("process-run-raw", process_raw::evaluate_process_run_raw);
     register_evaluated_capability("load", 1, evaluate_load);
-    register_evaluated_capability("tcp-connect", 2, evaluate_tcp_connect);
-    register_evaluated_capability("tcp-listen-raw", 2, evaluate_tcp_listen_raw);
+    register_capability("tcp-connect", evaluate_tcp_connect);
+    register_capability("tcp-listen-raw", evaluate_tcp_listen_raw);
     register_evaluated_capability("tcp-accept", 1, evaluate_tcp_accept);
     register_evaluated_capability("tcp-read-raw", 1, evaluate_tcp_read_raw);
-    register_evaluated_capability("tcp-write-raw", 2, evaluate_tcp_write_raw);
+    register_capability("tcp-write-raw", evaluate_tcp_write_raw);
     register_evaluated_capability("tcp-close", 1, evaluate_tcp_close);
     #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
     register_capability(
@@ -679,5 +683,18 @@ mod install_tests {
         ] {
             assert!(installed.iter().any(|n| n == name), "{name} not registered");
         }
+    }
+
+    #[test]
+    fn write_file_bytes_rejects_bad_path_before_evaluating_bytes() {
+        super::install();
+        let mut session = sens::Session::default();
+        let error = sens::eval_program(
+            "(write-file-bytes 42 definitely-missing-order-probe)",
+            &mut session,
+        )
+        .expect_err("argument 0 type failure must short-circuit argument 1 evaluation");
+
+        assert_eq!(error.kind, ErrorKind::Type);
     }
 }

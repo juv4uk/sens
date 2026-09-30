@@ -1,4 +1,6 @@
-use sens::{Environment, ErrorKind, Exactness, LanguageError, Span, Value};
+use sens::{
+    eval_expr, exact_arity, Environment, ErrorKind, Exactness, Expr, LanguageError, Span, Value,
+};
 use std::rc::Rc;
 
 fn bytes_to_value(bytes: &[u8]) -> Value {
@@ -76,16 +78,17 @@ fn process_run(
 /// Process selection and allowlisting remain host capability policy. Text
 /// decoding belongs to the language layer (`lib/utf8.lisp`).
 pub(super) fn evaluate_process_run_raw(
-    arguments: &[(Value, Span)],
+    arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let (program_value, program_span) = &arguments[0];
-    let Value::String(program) = program_value else {
+    exact_arity("process-run-raw", arguments, 2, span)?;
+    let program_value = eval_expr(&arguments[0], environment)?;
+    let Value::String(ref program) = program_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "process-run-raw expects a string program name · process-run-raw ochikuie riadok-imia prohramy · process-run-raw erwartet einen String-Programmnamen",
-            *program_span,
+            arguments[0].span,
         ));
     };
     if !environment.is_process_allowed(program) {
@@ -96,8 +99,8 @@ pub(super) fn evaluate_process_run_raw(
         ));
     }
 
-    let (args_value, args_span) = &arguments[1];
-    let args = expect_string_list(args_value, *args_span)?;
+    let args_value = eval_expr(&arguments[1], environment)?;
+    let args = expect_string_list(&args_value, arguments[1].span)?;
     let output = process_run(program, &args, span)?;
 
     let exit_code = output
