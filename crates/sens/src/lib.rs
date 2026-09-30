@@ -107,6 +107,7 @@ pub mod semantic_registry_export {
     }
 }
 pub mod syntax;
+mod text7;
 mod value;
 
 pub use environment::{CoreProfile, Environment, Session};
@@ -115,6 +116,7 @@ pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 #[allow(deprecated)]
 pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
+pub use text7::{Text7, Text7CellError};
 
 pub use eval::exact_arity;
 pub use eval::parse_json;
