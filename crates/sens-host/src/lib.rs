@@ -6,8 +6,8 @@
 //! into per-session filesystem/TCP scopes carried by `Environment`.
 
 use sens::{
-    eval_expr, exact_arity, register_capability, register_evaluated_capability, Environment,
-    ErrorKind, Exactness, Expr, LanguageError, Span, Value,
+    register_capability, register_evaluated_capability, Environment, ErrorKind, Exactness,
+    LanguageError, Span, Value,
 };
 use std::{path::{Path, PathBuf}, rc::Rc};
 
@@ -92,13 +92,12 @@ fn ensure_fs_write_allowed(
 }
 
 fn evaluate_read_dir(
-    arguments: &[Expr],
+    arguments: &[(Value, Span)],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("read-dir", arguments, 1, span)?;
-    let evaluated = eval_expr(&arguments[0], environment)?;
-    let Value::String(ref path) = evaluated else {
+    let (evaluated, _argument_span) = &arguments[0];
+    let Value::String(path) = evaluated else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "read-dir expects a string path · read-dir ochikuie riadok-shliakh · read-dir erwartet einen String-Pfad",
@@ -115,34 +114,32 @@ fn evaluate_read_dir(
 }
 
 fn evaluate_write_file_bytes(
-    arguments: &[Expr],
+    arguments: &[(Value, Span)],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("write-file-bytes", arguments, 2, span)?;
-    let path_value = eval_expr(&arguments[0], environment)?;
-    let Value::String(ref path) = path_value else {
+    let (path_value, _path_span) = &arguments[0];
+    let Value::String(path) = path_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "write-file-bytes expects a string path · write-file-bytes ochikuie riadok-shliakh · write-file-bytes erwartet einen String-Pfad",
             span,
         ));
     };
-    let bytes_value = eval_expr(&arguments[1], environment)?;
-    let bytes = expect_byte_list(&bytes_value, arguments[1].span)?;
+    let (bytes_value, bytes_span) = &arguments[1];
+    let bytes = expect_byte_list(bytes_value, *bytes_span)?;
     ensure_fs_write_allowed(environment, "write-file-bytes", path, span)?;
     write_file_bytes(path, &bytes, span)?;
-    Ok(bytes_value)
+    Ok(bytes_value.clone())
 }
 
 fn evaluate_read_file_bytes(
-    arguments: &[Expr],
+    arguments: &[(Value, Span)],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("read-file-bytes", arguments, 1, span)?;
-    let evaluated = eval_expr(&arguments[0], environment)?;
-    let Value::String(ref path) = evaluated else {
+    let (evaluated, _argument_span) = &arguments[0];
+    let Value::String(path) = evaluated else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "read-file-bytes expects a string path · read-file-bytes ochikuie riadok-shliakh · read-file-bytes erwartet einen String-Pfad",
@@ -168,13 +165,12 @@ fn evaluate_read_file_bytes(
 /// contract. Introduced under sens#1228: high-load byte/text processing
 /// belongs in a Rust mechanism, not in a per-byte recursive Lisp walk.
 fn evaluate_read_file_utf8_raw(
-    arguments: &[Expr],
+    arguments: &[(Value, Span)],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("read-file-utf8-raw", arguments, 1, span)?;
-    let evaluated = eval_expr(&arguments[0], environment)?;
-    let Value::String(ref path) = evaluated else {
+    let (evaluated, _argument_span) = &arguments[0];
+    let Value::String(path) = evaluated else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "read-file-utf8-raw expects a string path · read-file-utf8-raw ochikuie riadok-shliakh · read-file-utf8-raw erwartet einen String-Pfad",
@@ -340,20 +336,19 @@ fn write_file_bytes(_path: &str, _bytes: &[u8], span: Span) -> Result<(), Langua
 }
 
 fn evaluate_tcp_connect(
-    arguments: &[Expr],
+    arguments: &[(Value, Span)],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("tcp-connect", arguments, 2, span)?;
-    let host_value = eval_expr(&arguments[0], environment)?;
-    let Value::String(ref host) = host_value else {
+    let (host_value, host_span) = &arguments[0];
+    let Value::String(host) = host_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-connect expects a string host · tcp-connect ochikuie riadok-khost · tcp-connect erwartet einen String-Host",
-            arguments[0].span,
+            *host_span,
         ));
     };
-    let port = expect_port(&arguments[1], environment)?;
+    let port = expect_port(&arguments[1])?;
     if !environment.is_tcp_connect_allowed(host, port) {
         return Err(denied("tcp-connect", format!("{host}:{port}"), span));
     }
@@ -362,20 +357,19 @@ fn evaluate_tcp_connect(
 }
 
 fn evaluate_tcp_listen_raw(
-    arguments: &[Expr],
+    arguments: &[(Value, Span)],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("tcp-listen-raw", arguments, 2, span)?;
-    let address_value = eval_expr(&arguments[0], environment)?;
-    let Value::String(ref address) = address_value else {
+    let (address_value, address_span) = &arguments[0];
+    let Value::String(address) = address_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-listen-raw expects a string bind address · tcp-listen-raw ochikuie riadok-adresu pryviazky · tcp-listen-raw erwartet eine String-Bind-Adresse",
-            arguments[0].span,
+            *address_span,
         ));
     };
-    let port = expect_port(&arguments[1], environment)?;
+    let port = expect_port(&arguments[1])?;
     if !environment.is_tcp_listen_allowed(address, port) {
         return Err(denied("tcp-listen-raw", format!("{address}:{port}"), span));
     }
@@ -384,17 +378,16 @@ fn evaluate_tcp_listen_raw(
 }
 
 fn evaluate_tcp_accept(
-    arguments: &[Expr],
-    environment: &Environment,
+    arguments: &[(Value, Span)],
+    _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("tcp-accept", arguments, 1, span)?;
-    let listener_value = eval_expr(&arguments[0], environment)?;
-    let Value::TcpListener(ref listener) = listener_value else {
+    let (listener_value, listener_span) = &arguments[0];
+    let Value::TcpListener(listener) = listener_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-accept expects a TCP listener · tcp-accept ochikuie TCP-listener · tcp-accept erwartet einen TCP-Listener",
-            arguments[0].span,
+            *listener_span,
         ));
     };
     let stream = tcp_accept(listener, span)?;
@@ -402,17 +395,16 @@ fn evaluate_tcp_accept(
 }
 
 fn evaluate_tcp_read_raw(
-    arguments: &[Expr],
-    environment: &Environment,
+    arguments: &[(Value, Span)],
+    _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("tcp-read-raw", arguments, 1, span)?;
-    let connection_value = eval_expr(&arguments[0], environment)?;
-    let Value::TcpConnection(ref connection) = connection_value else {
+    let (connection_value, connection_span) = &arguments[0];
+    let Value::TcpConnection(connection) = connection_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-read-raw expects a TCP connection · tcp-read-raw ochikuie TCP-ziednannia · tcp-read-raw erwartet eine TCP-Verbindung",
-            arguments[0].span,
+            *connection_span,
         ));
     };
     let bytes = tcp_read_raw(connection, span)?;
@@ -424,23 +416,22 @@ fn evaluate_tcp_read_raw(
 }
 
 fn evaluate_tcp_write_raw(
-    arguments: &[Expr],
-    environment: &Environment,
+    arguments: &[(Value, Span)],
+    _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("tcp-write-raw", arguments, 2, span)?;
-    let connection_value = eval_expr(&arguments[0], environment)?;
-    let Value::TcpConnection(ref connection) = connection_value else {
+    let (connection_value, connection_span) = &arguments[0];
+    let Value::TcpConnection(connection) = connection_value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "tcp-write-raw expects a TCP connection · tcp-write-raw ochikuie TCP-ziednannia · tcp-write-raw erwartet eine TCP-Verbindung",
-            arguments[0].span,
+            *connection_span,
         ));
     };
-    let bytes_value = eval_expr(&arguments[1], environment)?;
-    let bytes = expect_tcp_byte_list(&bytes_value, arguments[1].span)?;
+    let (bytes_value, bytes_span) = &arguments[1];
+    let bytes = expect_tcp_byte_list(bytes_value, *bytes_span)?;
     tcp_write_raw(connection, &bytes, span)?;
-    Ok(bytes_value)
+    Ok(bytes_value.clone())
 }
 
 fn evaluate_tcp_close(
@@ -470,23 +461,23 @@ fn evaluate_tcp_close(
     Ok(Value::Bool(true))
 }
 
-fn expect_port(expr: &Expr, environment: &Environment) -> Result<u16, LanguageError> {
-    let value = eval_expr(expr, environment)?;
+fn expect_port(argument: &(Value, Span)) -> Result<u16, LanguageError> {
+    let (value, span) = argument;
     let Value::Number(port, _) = value else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "expected a port number · ochikuvavsia nomer portu · erwartete eine Portnummer",
-            expr.span,
+            *span,
         ));
     };
-    if port.fract() != 0.0 || port < 0.0 || port > u16::MAX as f64 {
+    if port.fract() != 0.0 || *port < 0.0 || *port > u16::MAX as f64 {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "port must be an integer between 0 and 65535 · port maie buty tsilym chyslom vid 0 do 65535 · Port muss eine Ganzzahl zwischen 0 und 65535 sein",
-            expr.span,
+            *span,
         ));
     }
-    Ok(port as u16)
+    Ok(*port as u16)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -598,17 +589,16 @@ fn tcp_close(
 }
 
 fn evaluate_load(
-    arguments: &[Expr],
+    arguments: &[(Value, Span)],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_arity("load", arguments, 1, span)?;
-    let evaluated = sens::eval_expr(&arguments[0], environment)?;
-    let Value::String(ref path) = evaluated else {
+    let (evaluated, argument_span) = &arguments[0];
+    let Value::String(path) = evaluated else {
         return Err(LanguageError::new(
             ErrorKind::Type,
             "load expects a string path / load ochikuie riadok-shliakh / load erwartet einen String-Pfad",
-            span,
+            *argument_span,
         ));
     };
     ensure_fs_read_allowed(environment, "load", path, span)?;
@@ -631,17 +621,17 @@ fn evaluate_load(
 }
 
 pub fn install() {
-    register_capability("read-dir", evaluate_read_dir);
-    register_capability("read-file-bytes", evaluate_read_file_bytes);
-    register_capability("read-file-utf8-raw", evaluate_read_file_utf8_raw);
-    register_capability("write-file-bytes", evaluate_write_file_bytes);
-    register_capability("process-run-raw", process_raw::evaluate_process_run_raw);
-    register_capability("load", evaluate_load);
-    register_capability("tcp-connect", evaluate_tcp_connect);
-    register_capability("tcp-listen-raw", evaluate_tcp_listen_raw);
-    register_capability("tcp-accept", evaluate_tcp_accept);
-    register_capability("tcp-read-raw", evaluate_tcp_read_raw);
-    register_capability("tcp-write-raw", evaluate_tcp_write_raw);
+    register_evaluated_capability("read-dir", 1, evaluate_read_dir);
+    register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
+    register_evaluated_capability("read-file-utf8-raw", 1, evaluate_read_file_utf8_raw);
+    register_evaluated_capability("write-file-bytes", 2, evaluate_write_file_bytes);
+    register_evaluated_capability("process-run-raw", 2, process_raw::evaluate_process_run_raw);
+    register_evaluated_capability("load", 1, evaluate_load);
+    register_evaluated_capability("tcp-connect", 2, evaluate_tcp_connect);
+    register_evaluated_capability("tcp-listen-raw", 2, evaluate_tcp_listen_raw);
+    register_evaluated_capability("tcp-accept", 1, evaluate_tcp_accept);
+    register_evaluated_capability("tcp-read-raw", 1, evaluate_tcp_read_raw);
+    register_evaluated_capability("tcp-write-raw", 2, evaluate_tcp_write_raw);
     register_evaluated_capability("tcp-close", 1, evaluate_tcp_close);
     #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
     register_capability(
