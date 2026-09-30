@@ -25,6 +25,9 @@
 (00001001 metadata-rows
   (00000110 (find-section (00000001 rows) metadata)))
 
+(00001001 profile-rows
+  (00000110 (find-section (00000001 profile-routes) metadata)))
+
 (00001001 registry-has-sid?
   (00001000 (sid rows)
     (00000111
@@ -75,6 +78,64 @@
       ((00000011 mechanism (00000001 bounded-exact-add)) (#b1) (00000001 yes))
       (t (00000001 no)))))
 
+(00001001 admitted-profile?
+  (00001000 (profile)
+    (00000111
+      ((00000011 profile (00000001 core3)) (#b1) (00000001 yes))
+      (t (00000001 no)))))
+
+(00001001 admitted-profile-mechanism?
+  (00001000 (mechanism)
+    (00000111
+      ((00000011 mechanism (00000001 registered-host-mechanism))
+       (#b1)
+       (00000001 yes))
+      (t (00000001 no)))))
+
+(00001001 profile-has-route?
+  (00001000 (profile sid rows)
+    (00000111
+      ((00000010 rows) () (00000001 no))
+      ((00000010 rows) (#b0)
+       (10011100 ((row (00000101 rows)))
+         (00000111
+           ((00000011 profile (00000101 row)) (#b1)
+            (00000111
+              ((00000011 sid (00101111 row)) (#b1) (00000001 yes))
+              ((00000011 sid (00101111 row)) (#b0)
+               (profile-has-route? profile sid (00000110 rows)))))
+           ((00000011 profile (00000101 row)) (#b0)
+            (profile-has-route? profile sid (00000110 rows)))))))))
+
+(00001001 validate-profile-rows
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) ()
+       (00000001 (function-table-mechanisms-ok)))
+      ((00000010 rows) (#b0)
+       (10011101 ((row (00000101 rows))
+              (profile (00000101 row))
+              (sid (00101111 row))
+              (mechanism (00110000 row)))
+         (00000111
+           ((00000011 (admitted-profile? profile) (00000001 no))
+            (#b1)
+            (00100111 (00000001 function-table-mechanisms-violation)
+                  (00000001 unsupported-profile) profile sid))
+           ((00000011 (registry-has-sid? sid registry-rows) (00000001 no))
+            (#b1)
+            (00100111 (00000001 function-table-mechanisms-violation)
+                  (00000001 profile-function-not-in-canon-function-table) profile sid))
+           ((00000011 (profile-has-route? profile sid (00000110 rows)) (00000001 yes))
+            (#b1)
+            (00100111 (00000001 function-table-mechanisms-violation)
+                  (00000001 duplicate-profile-route) profile sid))
+           ((00000011 (admitted-profile-mechanism? mechanism) (00000001 no))
+            (#b1)
+            (00100111 (00000001 function-table-mechanisms-violation)
+                  (00000001 unsupported-profile-mechanism) profile sid mechanism))
+           (t (validate-profile-rows (00000110 rows)))))))))
+
 (00001001 validate-rows
   (00001000 (rows)
     (00000111
@@ -104,5 +165,14 @@
                   (00000001 unsupported-mechanism) sid mechanism))
            (t (validate-rows (00000110 rows)))))))))
 
-(00001001 verdict (validate-rows metadata-rows))
+(00001001 legacy-verdict (validate-rows metadata-rows))
+(00001001 profile-verdict (validate-profile-rows profile-rows))
+
+(00001001 verdict
+  (00000111
+    ((00100010 legacy-verdict (00000001 (function-table-mechanisms-ok)))
+     (#b1)
+     profile-verdict)
+    (t legacy-verdict)))
+
 (01001000 verdict)
