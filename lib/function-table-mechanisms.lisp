@@ -12,7 +12,7 @@
   (schema function-table-mechanisms/1)
   (authority "lib/surface/semantic-registry.lisp")
   (lifecycle transitional)
-  (retirement-issue 1046)
+  (retirement-issue #b10000010110)
   (rows
     (00000001 evaluator quote-form)
     (00000010 evaluator atom-primitive)
