@@ -9,36 +9,36 @@
 (00001001 machine-replaceability-rows
   (00000001
     ((add
-       (00001100 2 3)
-       5)
+       (00001100 #b10 #b11)
+       #b101)
      (eq-cond
        (00000111
-         ((00000011 2 2) (1) 111)
-         ((00000011 2 2) (0) 222))
-       111)
+         ((00000011 #b10 #b10) (#b1) #b1101111)
+         ((00000011 #b10 #b10) (#b0) #b11011110))
+       #b1101111)
      (car-cons
-       (00000101 (00000100 2 3))
-       2))))
+       (00000101 (00000100 #b10 #b11))
+       #b10))))
 
 (00001001 machine-replaceability-run
   (00001000 (rows)
     (00000111
       ((00000010 rows) ()
        (00000001 (machine-replaceability-witness (status pass))))
-      ((00000010 rows) (1)
+      ((00000010 rows) (#b1)
        (00100111
          (00000001 machine-replaceability-witness)
          (00000001 (status fail))
          (00100111 (00000001 case) (00000001 malformed-row-tail))))
-      ((00000010 rows) (0)
+      ((00000010 rows) (#b0)
        (10011101 ((row (00000101 rows))
               (name (00000101 row))
               (actual (01001101 (00101111 row)))
               (expected (00110000 row)))
          (00000111
-           ((00100010 actual expected) (1)
+           ((00100010 actual expected) (#b1)
             (machine-replaceability-run (00000110 rows)))
-           ((00100010 actual expected) (0)
+           ((00100010 actual expected) (#b0)
             (00100111
               (00000001 machine-replaceability-witness)
               (00000001 (status fail))
