@@ -112,12 +112,15 @@ fn додавання_відділяє_людські_мови_від_спіль
     assert_eq!(surface("sa"), Some("yoga"));
     assert_eq!(surface("sym"), Some("+"));
 
+    let en_surface = surface("en").expect("English plus surface");
+    let en_call = format!("({en_surface} 20 22)");
+
     let mut сесія = Session::default();
     for вираз in [
         "(додати 20 22)",
         "(+ 20 22)",
         "(yoga 20 22)",
-        "(plus 20 22)",
+        en_call.as_str(),
     ] {
         assert_eq!(
             eval_program(вираз, &mut сесія).unwrap().value.to_string(),
@@ -126,7 +129,7 @@ fn додавання_відділяє_людські_мови_від_спіль
     }
 
     assert!(
-        eval_program("plus", &mut сесія).is_err(),
+        eval_program(en_surface, &mut сесія).is_err(),
         "bare human surface must not become Function8 during evaluation"
     );
 
