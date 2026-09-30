@@ -195,9 +195,9 @@ fn decode_text(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFrameErr
         cells.push(reader.read_fixed_u8(7)?);
     }
 
-    Ok(BinaryFrame::Text(
-        Text7::from_cells(cells).expect("seven-bit decoder cannot create an invalid Text7 cell"),
-    ))
+    Ok(BinaryFrame::Text(Text7::from_cells(cells).expect(
+        "seven-bit decoder cannot create an invalid Text7 cell",
+    )))
 }
 
 fn decode_number(
@@ -326,16 +326,28 @@ impl fmt::Display for BinaryFrameError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::NonBit { index, value } => {
-                write!(f, "canonical binary stream has non-bit value {value} at {index}")
+                write!(
+                    f,
+                    "canonical binary stream has non-bit value {value} at {index}"
+                )
             }
             Self::UnexpectedEnd { index } => {
-                write!(f, "canonical binary stream ends unexpectedly at bit {index}")
+                write!(
+                    f,
+                    "canonical binary stream ends unexpectedly at bit {index}"
+                )
             }
             Self::LengthOverflow { index } => {
-                write!(f, "canonical binary length overflows host index at bit {index}")
+                write!(
+                    f,
+                    "canonical binary length overflows host index at bit {index}"
+                )
             }
             Self::ReservedExtension { index } => {
-                write!(f, "canonical Control2 extension 11 is reserved at bit {index}")
+                write!(
+                    f,
+                    "canonical Control2 extension 11 is reserved at bit {index}"
+                )
             }
             Self::NonCanonicalNumber { index } => {
                 write!(f, "non-canonical exact Number frame begins at bit {index}")
