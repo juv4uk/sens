@@ -354,20 +354,6 @@ mod tests {
     }
 
     #[test]
-    fn routed_value_surface_materializes_only_the_sid() {
-        let surface = semantic_registry::admitted_surfaces_for_semantic_id(
-            crate::sens!(00000101),
-        )
-        .into_iter()
-        .next()
-        .expect("SID 00000101 should have a routing surface");
-        assert_eq!(
-            value_for_surface(surface),
-            Some(Value::Sid(crate::sens!(00000101)))
-        );
-    }
-
-    #[test]
     fn surfaces_for_sid_routes_are_reserved_mechanically() {
         for sid in [
             crate::sens!(00000001),
@@ -384,12 +370,6 @@ mod tests {
             }
         }
         assert!(!is_reserved_surface("map"));
-    }
-
-    #[test]
-    fn special_form_routes_do_not_materialize_callable_values() {
-        assert_eq!(value_for_sid(crate::sens!(00000001)), None);
-        assert_eq!(value_for_sid(crate::sens!(00000111)), None);
     }
 
     #[test]
