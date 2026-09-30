@@ -2,9 +2,9 @@
 ; its real sources of truth, written in sens itself (2026-08-09,
 ; replacing the old Python version now that both real blockers are gone:
 ; tests/fixtures/conformance.lisp is native sens data, readable via
-; read-file/read-all with no JSON parser needed, and `print` now escapes
-; strings correctly, so a plain (print value) call is enough to emit
-; correct, re-readable .lisp output — no string-append needed either.
+; read-file/read-all with no JSON parser needed. Static human-authored
+; constitution headers still use print; fixture projection is machine data
+; and therefore goes through canonical write-to-string, then raw princ.
 ;
 ; my-lisp-constitution.lisp is a *projection*, not a second source of truth
 ; — the same pattern lib/knowledge.lisp's *knowledge-journal* uses (one
@@ -59,16 +59,20 @@
 
 (00001001 print-fixture
   (00001000 (fixture)
-    (01001000 (00000100 (00000001 fixture) fixture))))
+    ; Machine projection: canonical reader-safe wire, then raw transcript.
+    ; The CLI adds exactly one newline per transcript record.
+    (01001001
+      (01001100
+        (00000100 (00000001 fixture) fixture)))))
 
 (00001001 print-fixtures
   (00001000 (remaining)
     (00000111
-      ((00000010 remaining) () (00000001 ()))
-      ((00000010 remaining) (1) (00000001 ()))
-      (t ((00001000 ()
-            (print-fixture (00000101 remaining))
-            (print-fixtures (00000110 remaining))))))))
+      ((00000010 remaining) (00000001 ()))
+      ((00000010 (00000001 ()))
+       ((00001000 ()
+          (print-fixture (00000101 remaining))
+          (print-fixtures (00000110 remaining))))))))
 
 (print-fixtures fixtures)
 
