@@ -2,8 +2,7 @@
 //!
 //! Data source: `lib/surface/semantic-registry.lisp`, the byte-SID surface
 //! authority (see `semantic_registry.rs` for the runtime parser this test
-//! mirrors, and `peer_surface_identity.rs` for the same pattern applied to
-//! one byte SID). This file used to read the legacy EN-shaped
+//! mirrors). This file used to read the legacy EN-shaped
 //! `lib/surface/uk-sa-coverage.wsm`, which `rivnopravnist_mov.rs` and
 //! `runtime_peer_operators.rs` already assert is no longer executable
 //! authority (TEST-ARCHITECTURE-1 step 2 migration, 2026-09-12).

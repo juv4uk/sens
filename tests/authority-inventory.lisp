@@ -44,7 +44,6 @@
 (authority "crates/my-lisp/tests/full_uk_surface.rs" observer)
 
 (authority "crates/my-lisp/tests/i5_6400_machine_profile.rs" observer)
-(authority "crates/my-lisp/tests/peer_surface_identity.rs" observer)
 (authority "crates/my-lisp/tests/semantic_ref_fail_closed.rs" mechanism)
 (authority "crates/my-lisp/tests/uk_docs_surface_model.rs" observer)
 (authority "crates/my-lisp/tests/uk_surface_equivalence.rs" observer)

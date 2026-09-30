@@ -2506,9 +2506,6 @@ rust-lisp	crates/sens/tests/numeric_buffers.rs	numeric-buffer-ref	3
 rust-lisp	crates/sens/tests/numeric_buffers.rs	numeric-buffer-type	1
 rust-lisp	crates/sens/tests/numeric_buffers.rs	quote	1
 rust-lisp	crates/sens/tests/numeric_buffers.rs	read	2
-rust-lisp	crates/sens/tests/peer_surface_identity.rs	define	2
-rust-lisp	crates/sens/tests/peer_surface_identity.rs	lambda	1
-rust-lisp	crates/sens/tests/peer_surface_identity.rs	quote	1
 rust-lisp	crates/sens/tests/persistent_map.rs	atom?	4
 rust-lisp	crates/sens/tests/persistent_map.rs	car	6
 rust-lisp	crates/sens/tests/persistent_map.rs	cdr	2
