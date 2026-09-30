@@ -58,8 +58,60 @@ fn extract_repl_surface(args: Vec<String>) -> Result<(Vec<String>, repl::ReplSur
     Ok((output, surface))
 }
 
-fn bootstrap_core4(session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
-    sens::load_core_library(session)
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum CliCore {
+    Core3,
+    Core4,
+}
+
+fn extract_cli_core(args: Vec<String>) -> Result<(Vec<String>, CliCore), String> {
+    let mut output = Vec::with_capacity(args.len());
+    let mut input = args.into_iter();
+    let Some(program) = input.next() else {
+        return Ok((output, CliCore::Core4));
+    };
+    output.push(program);
+    let mut input = input.peekable();
+    let mut core = CliCore::Core4;
+    let mut seen = false;
+
+    while let Some(arg) = input.next() {
+        let core_value = if arg == "--core" {
+            Some(
+                input
+                    .next()
+                    .ok_or_else(|| "--core requires 3|4".to_string())?,
+            )
+        } else {
+            arg.strip_prefix("--core=").map(str::to_string)
+        };
+
+        if let Some(value) = core_value {
+            if seen {
+                return Err("--core may be specified only once".to_string());
+            }
+            core = match value.as_str() {
+                "3" => CliCore::Core3,
+                "4" => CliCore::Core4,
+                _ => return Err(format!("unknown Core profile: {value}; expected 3|4")),
+            };
+            seen = true;
+        } else {
+            output.push(arg);
+        }
+    }
+
+    Ok((output, core))
+}
+
+fn bootstrap_core(
+    session: &mut Session,
+    core: CliCore,
+) -> Result<sens::EvalResult, sens::LanguageError> {
+    match core {
+        CliCore::Core3 => sens::load_core3_library(session),
+        CliCore::Core4 => sens::load_core_library(session),
+    }
 }
 
 fn main() {
@@ -74,6 +126,13 @@ fn main() {
         .into_iter()
         .filter(|arg| !arg.starts_with("--allow-process=") && arg != "--protocol=sexpr")
         .collect();
+    let (args, cli_core) = match extract_cli_core(args) {
+        Ok(parsed) => parsed,
+        Err(error) => {
+            eprintln!("sens: {error}");
+            process::exit(2);
+        }
+    };
     let (args, repl_surface) = match extract_repl_surface(args) {
         Ok(parsed) => parsed,
         Err(error) => {
@@ -121,8 +180,12 @@ fn main() {
             "warning: lib/core4.lisp.fasl is stale (source changed); run gen-fasl to regenerate"
         );
     }
-    if let Err(e) = bootstrap_core4(&mut session) {
-        eprintln!("Error loading bootstrap Core4: {}", e.render(CORE_SRC));
+    if let Err(e) = bootstrap_core(&mut session, cli_core) {
+        let label = match cli_core {
+            CliCore::Core3 => "Core3",
+            CliCore::Core4 => "Core4",
+        };
+        eprintln!("Error loading bootstrap {label}: {}", e.render(CORE_SRC));
         process::exit(1);
     }
 
@@ -232,6 +295,7 @@ fn main() {
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
             println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
+            println!("  --core=3|4                    Explicitly select Core3 laboratory or default Core4 before evaluation");
             println!(
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
             );
@@ -472,17 +536,48 @@ mod core_profile_bootstrap_tests {
     use super::*;
 
     #[test]
-    fn cli_core_bootstrap_selects_core4_through_the_canonical_loader() {
-        let mut session = Session {
+    fn cli_core_selector_defaults_to_core4_and_accepts_only_3_or_4() {
+        let (args, core) =
+            extract_cli_core(vec!["sens".to_string()]).expect("default selector");
+        assert_eq!(args, vec!["sens"]);
+        assert_eq!(core, CliCore::Core4);
+
+        let (args, core) = extract_cli_core(vec![
+            "sens".to_string(),
+            "--core=3".to_string(),
+            "program.lisp".to_string(),
+        ])
+        .expect("explicit Core3 selector");
+        assert_eq!(args, vec!["sens", "program.lisp"]);
+        assert_eq!(core, CliCore::Core3);
+
+        assert!(extract_cli_core(vec!["sens".to_string(), "--core=2".to_string()]).is_err());
+        assert!(extract_cli_core(vec![
+            "sens".to_string(),
+            "--core=3".to_string(),
+            "--core=4".to_string(),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn cli_core_bootstrap_uses_only_canonical_profile_loaders() {
+        let mut core4 = Session {
             environment: Environment::root(),
         };
-        assert_eq!(session.environment.selected_core_profile(), None);
-
-        bootstrap_core4(&mut session).expect("CLI Core4 bootstrap must succeed");
-
+        bootstrap_core(&mut core4, CliCore::Core4).expect("CLI Core4 bootstrap must succeed");
         assert_eq!(
-            session.environment.selected_core_profile(),
+            core4.environment.selected_core_profile(),
             Some(sens::CoreProfile::Core4)
+        );
+
+        let mut core3 = Session {
+            environment: Environment::root(),
+        };
+        bootstrap_core(&mut core3, CliCore::Core3).expect("CLI Core3 bootstrap must succeed");
+        assert_eq!(
+            core3.environment.selected_core_profile(),
+            Some(sens::CoreProfile::Core3)
         );
     }
 }

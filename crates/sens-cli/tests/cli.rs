@@ -96,6 +96,39 @@ fn help_flag_prints_usage() {
     assert!(stdout.contains(".sens"));
     assert!(stdout.contains(".сенс"));
     assert!(stdout.contains("--oracle-check <file|->"));
+    assert!(stdout.contains("--core=3|4"));
+}
+
+#[test]
+fn explicit_core3_flag_selects_core3_before_file_evaluation() {
+    let path = std::env::temp_dir().join("sens-cli-core3-profile-1429.lisp");
+    std::fs::write(&path, "(10101000)").expect("should write Core3 probe");
+
+    let default = sens()
+        .arg(&path)
+        .output()
+        .expect("default Core4 CLI should run");
+    let core3 = sens()
+        .args(["--core=3", path.to_str().expect("UTF-8 temp path")])
+        .output()
+        .expect("explicit Core3 CLI should run");
+    let _ = std::fs::remove_file(&path);
+
+    assert_eq!(default.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&default.stderr)
+            .contains("SENS function has no admitted callable mechanism: 10101000"),
+        "{:?}",
+        String::from_utf8_lossy(&default.stderr)
+    );
+
+    assert_eq!(core3.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&core3.stderr)
+            .contains("admitted host mechanism is unavailable for SENS function: 10101000"),
+        "{:?}",
+        String::from_utf8_lossy(&core3.stderr)
+    );
 }
 
 #[test]
