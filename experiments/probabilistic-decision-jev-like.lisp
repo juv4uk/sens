@@ -70,17 +70,17 @@
        (10011100 ((entry (00000101 distribution)))
          (00000111
            ((00011100 (00101000 entry) 2) 1
-            (10011100 ((label (00000101 entry))
+            (10011100 ((entry-key-ref (00000101 entry))
                   (probability (00101111 entry)))
               (00000111
-                ((pd-member? label options)
+                ((pd-member? entry-key-ref options)
                  (00000111
-                   ((pd-member? label seen) (00000001 ()))
+                   ((pd-member? entry-key-ref seen) (00000001 ()))
                    ((pd-probability-valid? probability)
                     (pd-distribution-entries-valid?
                       (00000110 distribution)
                       options
-                      (00000100 label seen)))
+                      (00000100 entry-key-ref seen)))
                    (t (00000001 ()))))
                 (t (00000001 ())))))
            (t (00000001 ()))))))))
