@@ -62,6 +62,11 @@ guix time-machine -C channels.scm -- shell -m manifest.scm \
 `results/20260930/p1-wire-as-transport.md` — payload-only розклад; wire vs JSON
 (size + decode); absolute-binary гіпотеза окремо від виміру.
 
+### P2 — agent-bus envelope (research)
+
+`results/20260930/p2-agent-envelope.md` — мінімальний envelope поверх `SW\\x01` +
+u32 framing; RESULT1 research; fasl/marshal не default portable bus.
+
 ### Історичний baseline (i5-6400 Guix)
 
 `results/20260927/report.md` — той самий порядок висновків; абсолютні I-refs інші.
