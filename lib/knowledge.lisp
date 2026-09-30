@@ -649,7 +649,7 @@
 
 (00001010 import-knowledge-file (path)
   (00100111 (00000001 import-knowledge-package)
-        (00100111 (00000001 read) (00100111 (00000001 read-file) path))))
+        (00100111 (00000001 01001010) (00100111 (00000001 read-file) path))))
 
 ;; Export is deliberately a plain function: unlike import it does not mutate
 ;; the knowledge journal. It validates the module and clauses, serializes the
