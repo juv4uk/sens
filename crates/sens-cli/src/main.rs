@@ -38,7 +38,7 @@ fn extract_repl_surface(args: Vec<String>) -> Result<(Vec<String>, repl::ReplSur
             Some(
                 input
                     .next()
-                    .ok_or_else(|| "--surface requires uk|en|sa|core".to_string())?,
+                    .ok_or_else(|| "--surface requires sens|uk|ukr|en|sa".to_string())?,
             )
         } else {
             arg.strip_prefix("--surface=").map(str::to_string)
@@ -237,7 +237,7 @@ fn main() {
             println!("  islands plan|install|status      Inspect, install, or observe execution islands without semantic admission");
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
-            println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
+            println!("  --surface=sens|uk|ukr|en|sa  Start binary SENS (default) or an explicit human REPL surface");
             println!(
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
             );
