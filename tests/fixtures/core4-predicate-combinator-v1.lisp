@@ -56,3 +56,18 @@
     (00111110 "ExprKind::" "plain text")
     (00111110 "CanonicalIdentity" "plain text")
     (00111110 "NecessaryFormIdentity" "NecessaryFormIdentity marker")))
+
+; Real guard shape: variadic OR is inside a closure and each predicate consumes
+; the lowered lexical local `source`.
+(00001001 predicate-local-or-probe
+  (00001000 (source)
+    (10011011
+      (00111110 "semantic-authority-source" source)
+      (00111110 "authority-source" source)
+      (00111110 "source-of-truth" source)
+      (00111110 "semantic-source" source)
+      (00111110 "Authority:" source)
+      (00111110 "generated-from-host" source))))
+
+(01001000
+  (predicate-local-or-probe "generated-from-host marker"))
