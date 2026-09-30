@@ -307,6 +307,7 @@ pub fn render_error_for_presentation(
 mod tests {
     use super::*;
     use crate::{eval_program, parse, Rational, Session, Span};
+    use std::rc::Rc;
 
     #[test]
     fn ukrainian_value_presentation_changes_only_the_human_view() {
@@ -362,14 +363,19 @@ mod tests {
 
     #[test]
     fn ukrainian_presentation_localizes_builtin_and_function_markers() {
-        let mut session = Session::default();
-        let builtin = eval_program("atom?", &mut session)
-            .expect("atom? value")
-            .value;
+        // Presentation is a value-rendering concern.  Do not obtain a builtin
+        // by evaluating a bare function surface: after lowering-only admission,
+        // Function8 is syntax in function position, not a source-level value.
+        let builtin = Value::Builtin(Rc::new(crate::value::Builtin {
+            name: "atom?",
+            func: Rc::new(|_, _, _| Ok(Value::Nil)),
+        }));
         assert_eq!(
             render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
             "#<вбудована атом?>"
         );
+
+        let mut session = Session::default();
         let closure = eval_program("(lambda (x) x)", &mut session)
             .expect("closure")
             .value;
