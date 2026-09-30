@@ -10,8 +10,8 @@
   },
   "buckets": {
     "active-lib": {
-      "binary-shaped-multibit-number": 35,
-      "decimal-integer-needs-migration": 1800,
+      "binary-shaped-multibit-number": 5,
+      "decimal-integer-needs-migration": 828,
       "decimal-fraction-or-exponent-needs-policy": 2,
       "rational-literal": 3
     },
