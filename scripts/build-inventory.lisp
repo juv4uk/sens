@@ -161,10 +161,10 @@
 ;; is actually evidence for.
 (00001001 compute-id
   (00001000 (expr axioms outcome-kind outcome-value)
-    (10011101 ((identity (00100111 (00000100 (00000001 expr) expr)
+    (10011101 ((identity-record (00100111 (00000100 (00000001 expr) expr)
                           (00000100 (00000001 axioms) axioms)
                           (00000100 outcome-kind outcome-value)))
-          (encoded (01001100 identity))
+          (encoded (01001100 identity-record))
           (hash (10100001 encoded)))
       (00111010 "F-" (01000001 hash 0 16)))))
 
