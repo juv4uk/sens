@@ -1,0 +1,18 @@
+key	value
+date_utc	2026-09-30T19:53:45Z
+git_sha	786c62b9c9aea167fc5e0dc0e5a541752953b01c
+git_dirty	yes
+binary	/tmp/sens-bench/repo/target/release/examples/ci_bench
+binary_sha256	75c6fc7e173823f0796ad8acd99325318ea723f2daf547fe03522a18be46b6b7
+valgrind	valgrind-3.22.0
+rustc	rustc 1.98.1 (48a229cea 2026-09-01)
+guix	
+channels_sha256	ff4d6643b694497f06281d3e400d7609815d9e52d276220bf8d9484df522014a
+manifest_sha256	779d26e1ba495e04347918643a61180833a2571dea73a6112d6d0daa685f3f87
+bench_manifest_sha256	d7024ec0a14effcf53d093d2c4e42e2c31e60521733cfc602fecd415c7690821
+kernel	Linux 6.12.8+ x86_64 GNU/Linux
+cpu	Intel(R) Xeon(R) Platinum 8481C CPU @ 2.70GHz
+nproc	2
+loadavg	0.43 0.12 0.04 1/107 2258
+reps	2
+repeat_n	3
