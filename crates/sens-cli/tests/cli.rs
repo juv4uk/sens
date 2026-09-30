@@ -104,6 +104,56 @@ fn sens_file_execution_is_binary_default_while_my_lisp_remains_transition_human(
         decimal.stderr
     );
 
+    let eval_binary_path = dir.join("sens-cli-eval-binary-data.lisp");
+    std::fs::write(
+        &eval_binary_path,
+        "(01001101 (00000001 (00001100 #b1 #b10)))",
+    )
+    .expect("write canonical eval fixture");
+    let eval_binary = sens()
+        .arg(&eval_binary_path)
+        .output()
+        .expect("sens should run");
+    let _ = std::fs::remove_file(&eval_binary_path);
+    assert!(eval_binary.status.success(), "{:?}", eval_binary.stderr);
+    assert_eq!(String::from_utf8_lossy(&eval_binary.stdout).trim(), "3");
+
+    let eval_human_path = dir.join("sens-cli-eval-human-head-rejected.lisp");
+    std::fs::write(
+        &eval_human_path,
+        "(01001101 (00000001 (+ #b1 #b10)))",
+    )
+    .expect("write eval bypass fixture");
+    let eval_human = sens()
+        .arg(&eval_human_path)
+        .output()
+        .expect("sens should run");
+    let _ = std::fs::remove_file(&eval_human_path);
+    assert!(!eval_human.status.success());
+    assert!(
+        String::from_utf8_lossy(&eval_human.stderr).contains("Function8"),
+        "{:?}",
+        eval_human.stderr
+    );
+
+    let read_human_path = dir.join("sens-cli-read-human-head-rejected.lisp");
+    std::fs::write(
+        &read_human_path,
+        r#"(01001101 (01001010 "(+ #b1 #b10)"))"#,
+    )
+    .expect("write read bypass fixture");
+    let read_human = sens()
+        .arg(&read_human_path)
+        .output()
+        .expect("sens should run");
+    let _ = std::fs::remove_file(&read_human_path);
+    assert!(!read_human.status.success());
+    assert!(
+        String::from_utf8_lossy(&read_human.stderr).contains("Function8"),
+        "{:?}",
+        read_human.stderr
+    );
+
     let transition_path = dir.join("my-lisp-human-transition.lisp");
     std::fs::write(&transition_path, "(+ 1 2)").expect("write transition fixture");
     let transition = legacy_bin()
