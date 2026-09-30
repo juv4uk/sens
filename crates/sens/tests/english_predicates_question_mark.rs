@@ -164,6 +164,16 @@ fn no_project_code_calls_an_english_predicate_without_question_mark() {
             for old in &olds {
                 let needle = format!("({old}");
                 for (pos, _) in line.match_indices(&needle) {
+                    // A list immediately to the right of a dotted-pair marker
+                    // is metadata/data, not executable head position:
+                    //   (primitive-operations . (atom eq cons ...))
+                    // Do not rewrite historical surface data merely to satisfy
+                    // the executable-call spelling ratchet.
+                    let previous_non_space = line[..pos].chars().rev().find(|ch| !ch.is_whitespace());
+                    if previous_non_space == Some('.') {
+                        continue;
+                    }
+
                     let next = line[pos + needle.len()..].chars().next();
                     if matches!(next, None | Some(' ' | '\t' | ')' | '(')) {
                         offenders.push(format!(
