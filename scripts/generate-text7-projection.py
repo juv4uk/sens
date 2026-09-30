@@ -147,7 +147,12 @@ def generate(upstream_root: Path) -> str:
         sys.path.pop(0)
 
     layouts = upstream.build_layouts()
-    for name, column in (("uk", "uk"), ("sa-slp1", "sa-slp1")):
+    for name, column in (
+        ("uk", "uk"),
+        ("sa-slp1", "sa-slp1"),
+        ("sa-iast", "sa-iast"),
+        ("sa-deva", "sa-deva"),
+    ):
         actual = dict(layouts[name].code_to_spelling)
         tabular = direct_from_table(table, column)
         if actual != tabular:
@@ -158,13 +163,19 @@ def generate(upstream_root: Path) -> str:
         "// Authority: pinned juv4uk/shiva-sutras UPC-7 projection.",
         "// Generator: scripts/generate-text7-projection.py",
         f'pub(crate) const UPC7_SOURCE_REVISION: &str = "{revision}";',
-        f'pub(crate) const UPC7_TABLE_SHA256: &str = "{table_hash}";',
-        f'pub(crate) const UPC7_LAYOUT_SHA256: &str = "{layout_hash}";',
+        "pub(crate) const UPC7_TABLE_SHA256: &str =",
+        f'    "{table_hash}";',
+        "pub(crate) const UPC7_LAYOUT_SHA256: &str =",
+        f'    "{layout_hash}";',
         "",
     ]
     lines.extend(render_table("uk", layouts["uk"]))
     lines.append("")
     lines.extend(render_table("sa-slp1", layouts["sa-slp1"]))
+    lines.append("")
+    lines.extend(render_table("sa-iast", layouts["sa-iast"]))
+    lines.append("")
+    lines.extend(render_table("sa-deva", layouts["sa-deva"]))
     lines.append("")
     return "\n".join(lines)
 

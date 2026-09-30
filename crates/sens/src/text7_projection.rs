@@ -8,6 +8,8 @@ use crate::text7_projection_generated as generated;
 pub enum Text7Layout {
     Uk,
     SaSlp1,
+    SaIast,
+    SaDeva,
 }
 
 /// Fail-closed boundary error. No failed human spelling becomes Text7 identity.
@@ -39,6 +41,8 @@ fn projection(layout: Text7Layout) -> (&'static [Candidate], &'static [Option<&'
     match layout {
         Text7Layout::Uk => (generated::UK_ENCODE, generated::UK_RENDER),
         Text7Layout::SaSlp1 => (generated::SA_SLP1_ENCODE, generated::SA_SLP1_RENDER),
+        Text7Layout::SaIast => (generated::SA_IAST_ENCODE, generated::SA_IAST_RENDER),
+        Text7Layout::SaDeva => (generated::SA_DEVA_ENCODE, generated::SA_DEVA_RENDER),
     }
 }
 
@@ -178,6 +182,19 @@ mod tests {
 
         assert_eq!(rendered, "k");
         assert_eq!(uk, sa);
+    }
+
+    #[test]
+    fn sanskrit_slp1_iast_and_devanagari_share_text7_identity() {
+        let slp1 = encode_text7("K", Text7Layout::SaSlp1).unwrap();
+        let iast = encode_text7("kh", Text7Layout::SaIast).unwrap();
+        let deva = encode_text7("ख", Text7Layout::SaDeva).unwrap();
+
+        assert_eq!(slp1.cells(), &[0x01]);
+        assert_eq!(slp1, iast);
+        assert_eq!(slp1, deva);
+        assert_eq!(render_text7(&slp1, Text7Layout::SaIast).unwrap(), "kh");
+        assert_eq!(render_text7(&slp1, Text7Layout::SaDeva).unwrap(), "ख");
     }
 
     #[test]
