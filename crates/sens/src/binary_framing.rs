@@ -24,7 +24,8 @@ pub enum BinaryFrameError {
     ReservedExtension { index: usize },
     NonCanonicalNumber { index: usize },
     InvalidNumber { index: usize },
-    TrailingBits { index: usize },
+    UnexpectedClose { index: usize },
+    UnclosedStructure { index: usize, depth: usize },
 }
 
 const CONTROL_SPACE: [u8; 2] = [0, 0];
@@ -118,11 +119,31 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
     Ok(out)
 }
 
-pub fn encode_binary_stream(frames: &[BinaryFrame]) -> Result<Vec<u8>, BinaryFrameError> {
+pub fn encode_binary_program(frames: &[BinaryFrame]) -> Result<Vec<u8>, BinaryFrameError> {
     let mut out = Vec::new();
+    let mut depth = 0usize;
+
     for frame in frames {
+        match frame {
+            BinaryFrame::Open => depth += 1,
+            BinaryFrame::Close => {
+                if depth == 0 {
+                    return Err(BinaryFrameError::UnexpectedClose { index: out.len() });
+                }
+                depth -= 1;
+            }
+            _ => {}
+        }
         out.extend(encode_binary_frame(frame)?);
     }
+
+    if depth != 0 {
+        return Err(BinaryFrameError::UnclosedStructure {
+            index: out.len(),
+            depth,
+        });
+    }
+
     Ok(out)
 }
 
@@ -132,17 +153,31 @@ pub fn decode_binary_frame(bits: &[u8]) -> Result<(BinaryFrame, usize), BinaryFr
     Ok((frame, reader.position()))
 }
 
-pub fn decode_binary_stream(bits: &[u8]) -> Result<Vec<BinaryFrame>, BinaryFrameError> {
+pub fn decode_binary_program(bits: &[u8]) -> Result<Vec<BinaryFrame>, BinaryFrameError> {
     let mut reader = BitReader::new(bits);
     let mut frames = Vec::new();
+    let mut depth = 0usize;
 
     while reader.position() < bits.len() {
-        frames.push(decode_frame_from(&mut reader)?);
+        let frame_start = reader.position();
+        let frame = decode_frame_from(&mut reader)?;
+        match frame {
+            BinaryFrame::Open => depth += 1,
+            BinaryFrame::Close => {
+                if depth == 0 {
+                    return Err(BinaryFrameError::UnexpectedClose { index: frame_start });
+                }
+                depth -= 1;
+            }
+            _ => {}
+        }
+        frames.push(frame);
     }
 
-    if reader.position() != bits.len() {
-        return Err(BinaryFrameError::TrailingBits {
+    if depth != 0 {
+        return Err(BinaryFrameError::UnclosedStructure {
             index: reader.position(),
+            depth,
         });
     }
 
@@ -355,8 +390,14 @@ impl fmt::Display for BinaryFrameError {
             Self::InvalidNumber { index } => {
                 write!(f, "invalid exact Number frame begins at bit {index}")
             }
-            Self::TrailingBits { index } => {
-                write!(f, "canonical binary stream has trailing bits at {index}")
+            Self::UnexpectedClose { index } => {
+                write!(f, "canonical Control2 program closes unopened structure at bit {index}")
+            }
+            Self::UnclosedStructure { index, depth } => {
+                write!(
+                    f,
+                    "canonical Control2 program ends at bit {index} with {depth} unclosed structure(s)"
+                )
             }
         }
     }
@@ -458,10 +499,32 @@ mod tests {
             BinaryFrame::Close,
         ];
 
-        let encoded = encode_binary_stream(&frames).unwrap();
+        let encoded = encode_binary_program(&frames).unwrap();
         assert_eq!(&encoded[..2], &[1, 0]);
         assert!(encoded.windows(2).any(|pair| pair == [0, 0]));
-        assert_eq!(decode_binary_stream(&encoded).unwrap(), frames);
+        assert_eq!(decode_binary_program(&encoded).unwrap(), frames);
+    }
+
+    #[test]
+    fn canonical_program_rejects_unbalanced_control2_structure() {
+        assert!(matches!(
+            encode_binary_program(&[BinaryFrame::Close]),
+            Err(BinaryFrameError::UnexpectedClose { index: 0 })
+        ));
+        assert!(matches!(
+            decode_binary_program(&[0, 1]),
+            Err(BinaryFrameError::UnexpectedClose { index: 0 })
+        ));
+
+        let open_only = encode_binary_frame(&BinaryFrame::Open).unwrap();
+        assert!(matches!(
+            decode_binary_program(&open_only),
+            Err(BinaryFrameError::UnclosedStructure { depth: 1, .. })
+        ));
+        assert!(matches!(
+            encode_binary_program(&[BinaryFrame::Open]),
+            Err(BinaryFrameError::UnclosedStructure { depth: 1, .. })
+        ));
     }
 
     #[test]
