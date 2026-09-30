@@ -1,4 +1,4 @@
-use sens::{eval_parsed_expressions, parse, EvalResult, Expr, LanguageError, Session};
+use sens::{eval_parsed_expressions, parse, parse_canonical, EvalResult, Expr, LanguageError, Session};
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 
 /// Remaps a concatenated string offset back to the original source file offset.
@@ -76,6 +76,24 @@ pub fn parse_literate(source: &str, mode: SourceMode) -> Result<Vec<Expr>, Langu
     parse(&concatenated).map_err(|e| remap_error(e, &offset_maps))
 }
 
+
+/// Canonical binary counterpart to `parse_literate`.
+///
+/// Markdown extraction is identical; only the language reader differs. This
+/// keeps one default SENS source law across file, native REPL and Web/WASM.
+pub fn parse_literate_canonical(
+    source: &str,
+    mode: SourceMode,
+) -> Result<Vec<Expr>, LanguageError> {
+    let (concatenated, offset_maps) = extract_code(source, mode == SourceMode::Literate);
+
+    if mode == SourceMode::Literate && offset_maps.is_empty() {
+        return Ok(vec![]);
+    }
+
+    parse_canonical(&concatenated).map_err(|e| remap_error(e, &offset_maps))
+}
+
 pub fn eval_literate(
     source: &str,
     mode: SourceMode,
@@ -96,6 +114,37 @@ pub fn eval_literate(
     let forms = parse(&concatenated).map_err(|e| remap_error(e, &offset_maps))?;
 
     // Canonical bootstrap order: language-owned macro layer first, then core.my.
+    sens::load_core_library(session).map_err(|e| remap_error(e, &offset_maps))?;
+
+    let result =
+        eval_parsed_expressions(&forms, session).map_err(|e| remap_error(e, &offset_maps))?;
+    Ok((result, forms))
+}
+
+
+/// Evaluate literate/pure source through the canonical binary SENS reader.
+///
+/// This is the default interactive/browser path. Human surface entrypoints use
+/// `eval_literate` explicitly instead.
+pub fn eval_literate_canonical(
+    source: &str,
+    mode: SourceMode,
+    session: &mut Session,
+) -> Result<(EvalResult, Vec<Expr>), LanguageError> {
+    let (concatenated, offset_maps) = extract_code(source, mode == SourceMode::Literate);
+
+    if mode == SourceMode::Literate && offset_maps.is_empty() {
+        return Ok((
+            EvalResult {
+                value: sens::Value::Nil,
+                output: vec!["No sens code blocks found in markdown document.".to_string()],
+            },
+            vec![],
+        ));
+    }
+
+    let forms = parse_canonical(&concatenated).map_err(|e| remap_error(e, &offset_maps))?;
+
     sens::load_core_library(session).map_err(|e| remap_error(e, &offset_maps))?;
 
     let result =
