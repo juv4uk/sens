@@ -108,6 +108,8 @@ pub mod semantic_registry_export {
 }
 pub mod syntax;
 mod text7;
+mod text7_projection;
+mod text7_projection_generated;
 mod value;
 
 pub use environment::{CoreProfile, Environment, Session};
@@ -117,6 +119,10 @@ pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
 pub use text7::{Text7, Text7CellError};
+pub use text7_projection::{
+    encode_text7, render_text7, Text7Layout, Text7ProjectionError, TEXT7_LAYOUT_SHA256,
+    TEXT7_TABLE_SHA256, TEXT7_UPSTREAM_REVISION,
+};
 
 pub use eval::exact_arity;
 pub use eval::parse_json;
