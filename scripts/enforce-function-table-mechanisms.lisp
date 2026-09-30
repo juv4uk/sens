@@ -7,7 +7,7 @@
 
 (00000111
   ((00100010 verdict (00000001 (function-table-mechanisms-ok)))
-   (1)
+   (#b1)
    (00000001 function-table-mechanisms-ok))
   (t
    (00000101 (00000001 ()))))
