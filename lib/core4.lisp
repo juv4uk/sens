@@ -621,8 +621,9 @@
 (00001001 largest-chunk
   (00001000 (a b chunk mult)
     (00000111
-      ((00011010 a (00001100 chunk chunk)) 1 (00000100 chunk mult))
-      ((00011010 a (00001100 chunk chunk)) 0
+      ((00011010 a (00001100 chunk chunk))
+       (00000100 chunk mult))
+      ((00000010 (00000001 ()))
        (00011001 a b (00001100 chunk chunk) (00001100 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
@@ -817,16 +818,19 @@
 (00001001 isqrt
   (00001000 (n)
     (00000111
-      ((00011010 n 2) 1 n)
-      ((00011010 n 2) 0
+      ((00011010 n 2)
+       n)
+      ((00000010 (00000001 ()))
        (isqrt-step n (00010100 n 2))))))
 
 (00001001 isqrt-step
   (00001000 (n g)
     (let ((next (00010100 (00001100 g (00010100 n g)) 2)))
       (00000111
-        ((00011010 next g) 1 (isqrt-step n next))
-        ((00011010 next g) 0 g)))))
+        ((00011010 next g)
+         (isqrt-step n next))
+        ((00000010 (00000001 ()))
+         g)))))
 
 (00001001 sqrt
   (00001000 (x)
@@ -866,8 +870,10 @@
 (00001001 abs
   (00001000 (x)
     (00000111
-      ((00011010 x 0) 1 (00001101 0 x))
-      ((00011010 x 0) 0 x))))
+      ((00011010 x 0)
+       (00001101 0 x))
+      ((00000010 (00000001 ()))
+       x))))
 
 ; Required first parameter (dotted lambda-list, same pattern as
 ; `<=`/`>=` above) keeps zero arguments an Arity error via the
