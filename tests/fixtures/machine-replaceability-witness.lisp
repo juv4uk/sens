@@ -9,7 +9,7 @@
 (00001001 machine-replaceability-rows
   (00000001
     ((add
-       (+ 2 3)
+       (00001100 2 3)
        5)
      (eq-cond
        (cond
