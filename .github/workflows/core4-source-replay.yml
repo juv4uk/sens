@@ -54,7 +54,7 @@ jobs:
           cargo build -p sens-cli --bin sens
           ./target/debug/sens tests/fixtures/core4-predicate-combinator-v1.lisp > /tmp/core4-predicate-combinators.out
           cat /tmp/core4-predicate-combinators.out
-          test "$(grep -cx '1' /tmp/core4-predicate-combinators.out)" -eq 11
+          test "$(grep -cx '1' /tmp/core4-predicate-combinators.out)" -eq 13
 
       - name: Diff hygiene
         run: git diff --check
