@@ -5,7 +5,7 @@
 mod surface_catalog;
 
 use sens::{
-    eval_parsed_expressions_incremental, eval_program, parse, render_error_for_presentation,
+    eval_parsed_expressions_incremental, eval_program, parse, parse_canonical, render_error_for_presentation,
     render_value_for_presentation, Environment, ErrorKind, ExprKind, PresentationLanguage, Session,
 };
 use rustyline::error::ReadlineError;
@@ -46,7 +46,7 @@ pub(crate) enum ReplSurface {
 impl ReplSurface {
     pub(crate) fn parse(value: &str) -> Option<Self> {
         match value.trim().to_lowercase().as_str() {
-            "core" | "ядро" => Some(Self::Core),
+            "sens" | "binary" | "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
             "ук" | "uk" | "українська" => Some(Self::Ukrainian),
             "укр" | "ukr" | "українська-повна" => Some(Self::UkrainianFull),
@@ -57,7 +57,7 @@ impl ReplSurface {
 
     pub(crate) fn code(self) -> &'static str {
         match self {
-            Self::Core => "core",
+            Self::Core => "sens",
             Self::English => "en",
             Self::Ukrainian => "ук",
             Self::UkrainianFull => "укр",
@@ -67,7 +67,7 @@ impl ReplSurface {
 
     fn title(self) -> &'static str {
         match self {
-            Self::Core => "ядро",
+            Self::Core => "SENS двійкова",
             Self::English => "англійська",
             Self::Ukrainian => "українська",
             Self::UkrainianFull => "українська (повна)",
@@ -82,6 +82,14 @@ impl ReplSurface {
             Self::Ukrainian | Self::UkrainianFull => PresentationLanguage::Ukrainian,
             Self::Sanskrit => PresentationLanguage::Sanskrit,
         }
+    }
+}
+
+fn parse_repl_source(surface: ReplSurface, source: &str) -> Result<Vec<sens::Expr>, sens::LanguageError> {
+    if surface == ReplSurface::Core {
+        parse_canonical(source)
+    } else {
+        parse(source)
     }
 }
 
@@ -161,13 +169,14 @@ pub(crate) fn history_path() -> Option<PathBuf> {
 }
 
 fn print_surface_help() {
-    println!("Поверхні: :мова ук | укр | en | sa | core");
-    println!("Технічний alias: :surface ук | укр | en | sa | core");
+    println!("Режими: :мова sens | ук | укр | en | sa");
+    println!("Технічний alias: :surface sens | ук | укр | en | sa");
     println!("Каталог поточної людської поверхні: :імена / :names");
     println!("Одна semantic identity у всіх людських поверхнях: :ім'я <назва> / :name <name>");
     println!("Стан людських поверхонь: :поверхні / :surfaces");
     println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
-    println!("core — канонічний машинний шар, не четверта людська мова.");
+    println!("sens — default binary reader: Function8 і Number вводяться у двійковій формі.");
+    println!("core лишається тимчасовим selector alias до sens.");
     println!("Перемикання змінює лише surface-frame; ваші define/closures лишаються живими.");
 }
 
@@ -260,7 +269,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
 
     println!("sens REPL v{} (pure Rust)", env!("CARGO_PKG_VERSION"));
     println!(
-        "Поверхня: {} ({}) · змінити: :мова ук|укр|en|sa|core · :допомога",
+        "Режим: {} ({}) · human surface лише явно: :мова ук|укр|en|sa · :допомога",
         state.surface.title(),
         state.surface.code()
     );
@@ -298,7 +307,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
                     continue;
                 }
 
-                match parse(line) {
+                match parse_repl_source(state.surface, line) {
                     Ok(ast) => {
                         match eval_parsed_expressions_incremental(&ast, &mut state.session) {
                             Ok(result) => {
@@ -392,12 +401,26 @@ mod tests {
         assert_eq!(value(&mut state, "істина"), "t");
         assert_eq!(value(&mut state, "хиба"), "()");
 
-        state.switch_surface(ReplSurface::Core).expect("core");
+        state.switch_surface(ReplSurface::Core).expect("sens");
         assert!(state.session.environment.get("атом?").is_none());
-        assert_eq!(value(&mut state, "(atom? 'мама)"), "(1)");
-        // Canon is not a UI layer: registered spellings still denote Canon
-        // even when no human surface frame is loaded.
-        assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
+
+        for source in [
+            "(atom? (00000001 мама))",
+            "(атом? (00000001 мама))",
+            "(00001100 1 #b10)",
+        ] {
+            parse_repl_source(state.surface, source)
+                .expect_err("default sens reader must reject human/decimal source");
+        }
+
+        let exact = parse_repl_source(
+            state.surface,
+            "(00000010 (00000001 мама))",
+        )
+        .expect("exact binary SENS source");
+        let result = eval_parsed_expressions_incremental(&exact, &mut state.session)
+            .expect("exact Function8 call");
+        assert_eq!(result.value.to_string(), "(1)");
     }
 
     #[test]
@@ -413,6 +436,24 @@ mod tests {
 
         state.switch_surface(ReplSurface::English).expect("en");
         assert_eq!(value(&mut state, "(додай-крок 5)"), "7");
+    }
+
+    #[test]
+    fn sens_is_default_binary_selector_and_core_is_only_an_alias() {
+        assert_eq!(ReplSurface::Core.code(), "sens");
+        assert_eq!(ReplSurface::parse("sens"), Some(ReplSurface::Core));
+        assert_eq!(ReplSurface::parse("binary"), Some(ReplSurface::Core));
+        assert_eq!(ReplSurface::parse("core"), Some(ReplSurface::Core));
+
+        parse_repl_source(ReplSurface::Core, "(00001100 #b1 #b10)")
+            .expect("binary default source");
+        parse_repl_source(ReplSurface::Core, "(+ #b1 #b10)")
+            .expect_err("human head requires explicit human surface");
+        parse_repl_source(ReplSurface::Core, "(00001100 1 #b10)")
+            .expect_err("decimal Number spelling is not default SENS");
+
+        parse_repl_source(ReplSurface::English, "(+ 1 2)")
+            .expect("explicit human surface keeps human reader");
     }
 
     #[test]
