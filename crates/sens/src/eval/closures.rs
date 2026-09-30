@@ -631,6 +631,13 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
     fn go_inner(value: &Value, span: Span, depth: u32) -> Result<Expr, LanguageError> {
         let kind = match &value {
         Value::Nil => ExprKind::List(Rc::new([])),
+        Value::PredicateBit(_) => {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                "a contextual predicate bit has no source-code literal",
+                span,
+            ));
+        }
         Value::Bool(true) => ExprKind::Symbol("t".into()),
         Value::Bool(false) => ExprKind::List(Rc::new([])),
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
