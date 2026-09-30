@@ -281,6 +281,7 @@ jobs:
           ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           ./target/debug/sens scripts/generate-rust-semantic-registry.lisp --check
           ./target/debug/sens scripts/generate-rust-evaluator-dispatch.lisp --check
+          ./target/debug/sens scripts/generate-rust-profile-mechanism-routes.lisp --check
           ./target/debug/sens scripts/generate-rust-function-signatures.lisp --check
           ./target/debug/sens scripts/generate-functions-md.lisp --check
 
