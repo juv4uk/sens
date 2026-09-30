@@ -37,8 +37,8 @@ type Candidate = (&'static str, Option<&'static [u8]>);
 
 fn projection(layout: Text7Layout) -> (&'static [Candidate], &'static [Option<&'static str>; 128]) {
     match layout {
-        Text7Layout::Uk => (generated::UK_ENCODE, &generated::UK_RENDER),
-        Text7Layout::SaSlp1 => (generated::SA_SLP1_ENCODE, &generated::SA_SLP1_RENDER),
+        Text7Layout::Uk => (generated::UK_ENCODE, generated::UK_RENDER),
+        Text7Layout::SaSlp1 => (generated::SA_SLP1_ENCODE, generated::SA_SLP1_RENDER),
     }
 }
 
