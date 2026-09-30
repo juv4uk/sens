@@ -1,12 +1,7 @@
-//! Acceptance matrix for contract 2.1 — first-class builtins.
+//! First-class function law: the value is the exact Function8.
 //!
-//! PROPOSAL: docs/PROPOSAL-FIRST-CLASS-BUILTINS.md (v2, c736d2e).
-//! These tests are the §4 acceptance matrix. They are `#[ignore]`d until
-//! the 2.1 implementation lands; each `#[ignore]` removed = one matrix
-//! row proven. The WSM-24 geometry driver (`mylisp/`) is the §8.8 final
-//! acceptance run once all rows pass un-ignored.
-//!
-//! Ігноровані до реалізації 2.1; знятий атрибут = доведений рядок матриці.
+//! Human spellings may lower at the call boundary, but passing, storing,
+//! selecting, and invoking a function as data uses its exact eight bits.
 
 use sens::{eval_program, ErrorKind, Session};
 
@@ -31,31 +26,31 @@ fn builtins_are_callable_in_head_position_unchanged() {
 #[test]
 
 fn def_f_plus_then_call_proves_first_classness() {
-    assert_eq!(eval_source("(def f +) (f 20 22)"), "42");
+    assert_eq!(eval_source("(def f 00001100) (f 20 22)"), "42");
 }
 
 #[test]
 
 fn reduce_over_builtin_add() {
-    assert_eq!(eval_source("(reduce + 0 (list 1 2 3))"), "6");
+    assert_eq!(eval_source("(reduce 00001100 0 (list 1 2 3))"), "6");
 }
 
 #[test]
 
 fn map_over_builtin_car() {
-    assert_eq!(eval_source("(map car (quote ((1 2) (3 4))))"), "(1 3)");
+    assert_eq!(eval_source("(map 00000101 (00000001 ((1 2) (3 4))))"), "(1 3)");
 }
 
 #[test]
 
 fn builtin_as_higher_order_argument() {
-    assert_eq!(eval_source("((lambda (f) (f 2 3)) +)"), "5");
+    assert_eq!(eval_source("((lambda (f) (f 2 3)) 00001100)"), "5");
 }
 
 #[test]
 
 fn select_operator_from_list() {
-    assert_eq!(eval_source("((car (list + -)) 8 2)"), "10");
+    assert_eq!(eval_source("((00000101 (list 00001100 00001101)) 8 2)"), "10");
 }
 
 #[test]
@@ -68,11 +63,12 @@ fn applying_a_non_callable_is_a_named_error() {
 #[test]
 
 fn special_forms_are_not_values() {
-    // `(def q quote)` must NOT make quote callable as a value; per
-    // contract 2.1 special forms keep their syntax-only status. The exact
-    // error kind is implementation-defined, but it MUST be an error,
-    // never silent success.
-    let outcome = eval_program("(def q quote) (q (quote x))", &mut session_with_core());
+    // The exact quote Function8 is a value, but ordinary value invocation must
+    // not erase its special evaluation rule.
+    let outcome = eval_program(
+        "(def q 00000001) (q (00000001 x))",
+        &mut session_with_core(),
+    );
     assert!(
         outcome.is_err(),
         "special forms must not become callable values"
