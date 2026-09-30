@@ -53,9 +53,10 @@ pub(crate) fn evaluate_cond(
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
                 format!(
-                    "cond expects exactly (test expression); got {} parts: {:?}",
+                    "cond expects exactly (test expression); got {} parts: {:?}; local-0.0={:?}",
                     parts.len(),
-                    clause.kind
+                    clause.kind,
+                    environment.get_local(0, 0)
                 ),
                 clause.span,
             ));
