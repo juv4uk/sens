@@ -14,7 +14,7 @@
 (00001001 exact-text?
   (00001000 (left right)
     (00000111
-      ((00100010 left right) (1) t)
+      ((00100010 left right) (#b1) t)
       (t t ()))))
 
 (00001001 contains-any?
