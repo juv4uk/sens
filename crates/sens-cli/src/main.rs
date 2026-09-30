@@ -437,6 +437,14 @@ fn main() {
         );
         session.environment.define("*argv*", argv);
 
+        // File execution through the canonical `sens` binary keeps the same
+        // binary-source policy across dynamic read/read-all/eval inside this
+        // session. Bootstrap happened before this flip and remains transition
+        // human source until its own migration lands.
+        if canonical_binary_default {
+            session.environment.set_canonical_source(true);
+        }
+
         match fs::read_to_string(filename) {
             Ok(source) => {
                 let parsed = if canonical_binary_default {
