@@ -26,26 +26,21 @@
    (host-bool-authority . forbidden))
 
   ((identity . 00011010)
-   (role . lessp?)
    (relation . strictly-increasing)
    (operand-domain . exact-rational-sequence))
 
   ((identity . 00011011)
-   (role . greaterp?)
    (relation . strictly-decreasing)
    (operand-domain . exact-rational-sequence))
 
   ((identity . 00011100)
-   (role . equalp?)
    (relation . numeric-equality)
    (operand-domain . exact-rational-sequence))
 
   ((identity . 00011101)
-   (role . not-greaterp?)
    (relation . nondecreasing)
    (operand-domain . exact-rational-sequence))
 
   ((identity . 00011110)
-   (role . not-lessp?)
    (relation . nonincreasing)
    (operand-domain . exact-rational-sequence)))
