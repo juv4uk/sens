@@ -1,6 +1,5 @@
-use sens::{eval_program, Session, Value};
+use sens::{eval_program, ErrorKind, Session, Value};
 use std::collections::HashSet;
-use std::rc::Rc;
 
 const REPL_КАТАЛОГ: &str = include_str!("../../sens-cli/src/repl/surface_catalog.rs");
 const ПЕРЕВІРКА_ПОКРИТТЯ: &str = include_str!("../../../scripts/check_surface_coverage.py");
@@ -21,19 +20,6 @@ fn registry_id_bits(
     id: impl sens::semantic_registry_export::ProjectionSidInput,
 ) -> String {
     sens::semantic_registry_export::semantic_id_bits(id)
-}
-
-fn перевірити_той_самий_builtin(ліве: &Value, праве: &Value) {
-    match (ліве, праве) {
-        (Value::Builtin(ліве), Value::Builtin(праве)) => assert!(
-            Rc::ptr_eq(ліве, праве),
-            "peer spellings повинні вказувати на один runtime builtin"
-        ),
-        // Після кроку «Rust лише примітиви» всі написання ведуть до одного
-        // SENS-коду — спільна ідентичність тепер сам 1-байтовий код.
-        (Value::Sid(left), Value::Sid(right)) => assert_eq!(left, right),
-        інше => panic!("очікувалися builtin-значення, отримано {інше:?}"),
-    }
 }
 
 #[test]
@@ -109,7 +95,7 @@ fn символічна_нотація_не_належить_людській_м
 }
 
 #[test]
-fn додавання_відділяє_людські_мови_від_спільного_символу() {
+fn додавання_відділяє_людські_мови_від_спільного_двійкового_коду() {
     let id = sens::semantic_registry_export::semantic_id_for_admitted_surface("додати")
         .expect("додати must be admitted");
     assert_eq!(registry_id_bits(id), "00001100");
@@ -127,23 +113,31 @@ fn додавання_відділяє_людські_мови_від_спіль
     assert_eq!(surface("sym"), Some("+"));
 
     let mut сесія = Session::default();
-    let українське = eval_program("додати", &mut сесія).unwrap().value;
-    let символічне = eval_program("+", &mut сесія).unwrap().value;
-    let санскритське = eval_program("yoga", &mut сесія).unwrap().value;
-    let англійське = eval_program("plus", &mut сесія).unwrap().value;
-
-    перевірити_той_самий_builtin(&українське, &символічне);
-    перевірити_той_самий_builtin(&символічне, &санскритське);
-    перевірити_той_самий_builtin(&символічне, &англійське);
-
-    for вираз in ["(додати 20 22)", "(+ 20 22)", "(yoga 20 22)"] {
+    for вираз in [
+        "(додати 20 22)",
+        "(+ 20 22)",
+        "(yoga 20 22)",
+        "(plus 20 22)",
+    ] {
         assert_eq!(
             eval_program(вираз, &mut сесія).unwrap().value.to_string(),
             "42"
         );
     }
-}
 
+    let error = eval_program("plus", &mut сесія)
+        .expect_err("bare human surface must not become Function8 during evaluation");
+    assert!(
+        matches!(error.kind, ErrorKind::InvalidForm | ErrorKind::UnknownSymbol),
+        "bare surface must fail named, got {:?}",
+        error.kind
+    );
+
+    let exact = eval_program("00001100", &mut сесія)
+        .expect("bare exact Function8 remains a binary value")
+        .value;
+    assert_eq!(exact, Value::Sid(sens::sens!(00001100)));
+}
 #[test]
 fn executable_authority_більше_не_читає_legacy_en_shaped_таблицю() {
     for (імя, джерело) in [
