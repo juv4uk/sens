@@ -68,7 +68,12 @@ pub(crate) fn read_values(
     } else {
         read_stdin_line(span)?
     };
-    let expressions = crate::parse(&source).map_err(|mut error| {
+    let expressions = if _environment.canonical_source() {
+        crate::parse_canonical(&source)
+    } else {
+        crate::parse(&source)
+    }
+    .map_err(|mut error| {
         error.span = span;
         error
     })?;
@@ -119,6 +124,9 @@ pub(crate) fn eval_values(
         return Ok(datum);
     }
     let expression = closures::value_to_expr(datum, span)?;
+    if environment.canonical_source() {
+        crate::parser::validate_canonical_executable_heads(std::slice::from_ref(&expression))?;
+    }
     evaluate(&expression, environment)
 }
 
@@ -135,7 +143,12 @@ pub(crate) fn read_all_values(
             span,
         ));
     };
-    let expressions = crate::parse(text).map_err(|mut error| {
+    let expressions = if _environment.canonical_source() {
+        crate::parse_canonical(text)
+    } else {
+        crate::parse(text)
+    }
+    .map_err(|mut error| {
         error.span = span;
         error
     })?;
