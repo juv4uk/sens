@@ -524,7 +524,7 @@ impl Parser<'_> {
                 }
                 ExprKind::Rational(r)
             } else {
-                ExprKind::Symbol(token.into())
+                symbol_kind(token)
             }
         } else if token.contains(['.', ',', 'e', 'E']) {
             let kind = match crate::value::Rational::from_decimal_literal(decimal_text) {
@@ -542,7 +542,7 @@ impl Parser<'_> {
                     }
                 }
                 Err(crate::value::DecimalLiteralError::InvalidSyntax) => {
-                    ExprKind::Symbol(token.into())
+                    symbol_kind(token)
                 }
                 Err(crate::value::DecimalLiteralError::ResourceLimitExceeded) => {
                     // S3: a syntactically valid numeric literal must never become
@@ -584,7 +584,7 @@ impl Parser<'_> {
                 None => ExprKind::Rational(r),
             }
         } else {
-            ExprKind::Symbol(token.into())
+            symbol_kind(token)
         };
         Ok(Expr {
             kind,
@@ -622,6 +622,10 @@ impl Parser<'_> {
     fn error(&self, message: &str, start: usize, end: usize) -> LanguageError {
         LanguageError::new(ErrorKind::Parse, message, Span { start, end })
     }
+}
+
+fn symbol_kind(token: &str) -> ExprKind {
+    ExprKind::Symbol(token.into())
 }
 
 fn validate_canonical_executable_heads(
