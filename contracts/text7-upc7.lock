@@ -1,8 +1,10 @@
 (text7-upc7-lock/1
   (repository "juv4uk/shiva-sutras")
-  (revision "25b629548f4d9a6d8b3c94d4a93fa15f7a1de68d")
+  (revision "721a2c2a576af1827e7a407a8e8c57038d318cc7")
   (path "prototype/upc7-table.tsv")
   (sha256 "8ce2339a4a98c2b671af4b945e3b0da1100a465dc97e54dc3e97180d541883d4")
+  (layout-path "prototype/upc7_layouts.py")
+  (layout-sha256 "25f3a82842be1104254aed59f4e84d9321b5d52e4abc324d16382c064af095d7")
   (logical-width 7)
   (assigned-cells 107)
   (reserved-cells 21)
@@ -16,6 +18,7 @@
      ("є" "йе")
      ("ї" "йі")
      ("щ" "шч")))
+  (ukrainian-case-input-projection yes)
   (authority-boundary
     ((upstream-role "UPC-7 code assignment and human layout projection")
      (sens-role "Text7 admission and language semantics")
