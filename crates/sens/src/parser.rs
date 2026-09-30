@@ -13,11 +13,31 @@ fn dotted_list(items: Vec<Expr>, tail: Expr, start: usize, end: usize) -> Expr {
     })
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ReaderPolicy {
+    HumanProjection,
+    CanonicalBinary,
+}
+
 pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
+    parse_with_policy(source, ReaderPolicy::HumanProjection)
+}
+
+pub fn parse_canonical(source: &str) -> Result<Vec<Expr>, LanguageError> {
+    let expressions = parse_with_policy(source, ReaderPolicy::CanonicalBinary)?;
+    validate_canonical_executable_heads(&expressions)?;
+    Ok(expressions)
+}
+
+fn parse_with_policy(
+    source: &str,
+    policy: ReaderPolicy,
+) -> Result<Vec<Expr>, LanguageError> {
     let mut parser = Parser {
         source,
         cursor: 0,
         depth: 0,
+        policy,
     };
     let mut expressions = Vec::new();
     parser.skip_ignored();
@@ -75,6 +95,7 @@ struct Parser<'a> {
     source: &'a str,
     cursor: usize,
     depth: u32,
+    policy: ReaderPolicy,
 }
 
 impl Parser<'_> {
@@ -407,6 +428,13 @@ impl Parser<'_> {
         }
 
         if let Some(payload) = explicit_radix_payload(token, "#d") {
+            if self.policy == ReaderPolicy::CanonicalBinary {
+                return Err(self.error(
+                    "decimal projection is human/transition-only in canonical SENS; use binary Number syntax",
+                    start,
+                    self.cursor,
+                ));
+            }
             let Some(rational) = crate::value::Rational::from_literal(payload, "1") else {
                 return Err(self.error("invalid #d exact-integer projection", start, self.cursor));
             };
@@ -487,16 +515,32 @@ impl Parser<'_> {
         // Integer literal → exact; decimal or exponential-notation literal →
         let kind = if let Some((num, den)) = token.split_once('/') {
             if let Some(r) = crate::value::Rational::from_literal(num, den) {
+                if self.policy == ReaderPolicy::CanonicalBinary {
+                    return Err(self.error(
+                        "implicit decimal rational is not canonical SENS; use #q2 binary rational syntax",
+                        start,
+                        self.cursor,
+                    ));
+                }
                 ExprKind::Rational(r)
             } else {
                 ExprKind::Symbol(token.into())
             }
         } else if token.contains(['.', ',', 'e', 'E']) {
             let kind = match crate::value::Rational::from_decimal_literal(decimal_text) {
-                Ok(r) => match r.as_precise_i64() {
-                    Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
-                    None => ExprKind::Rational(r),
-                },
+                Ok(r) => {
+                    if self.policy == ReaderPolicy::CanonicalBinary {
+                        return Err(self.error(
+                            "implicit decimal number is not canonical SENS; use binary Number syntax",
+                            start,
+                            self.cursor,
+                        ));
+                    }
+                    match r.as_precise_i64() {
+                        Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
+                        None => ExprKind::Rational(r),
+                    }
+                }
                 Err(crate::value::DecimalLiteralError::InvalidSyntax) => {
                     ExprKind::Symbol(token.into())
                 }
@@ -525,6 +569,13 @@ impl Parser<'_> {
                 },
             });
         } else if let Some(r) = crate::value::Rational::from_literal(token, "1") {
+            if self.policy == ReaderPolicy::CanonicalBinary {
+                return Err(self.error(
+                    "implicit decimal integer is not canonical SENS; use #b binary integer syntax",
+                    start,
+                    self.cursor,
+                ));
+            }
             // Preserve the compact f64-backed representation only where it is
             // mathematically exact; larger integer literals enter the same
             // arbitrary-precision Rational path as n/1 arithmetic results.
@@ -573,6 +624,51 @@ impl Parser<'_> {
     }
 }
 
+fn validate_canonical_executable_heads(
+    expressions: &[Expr],
+) -> Result<(), LanguageError> {
+    for expression in expressions {
+        validate_canonical_expression(expression)?;
+    }
+    Ok(())
+}
+
+fn validate_canonical_expression(expression: &Expr) -> Result<(), LanguageError> {
+    match &expression.kind {
+        ExprKind::List(items) => {
+            let items = items.as_ref();
+            if let Some(head) = items.first() {
+                if matches!(
+                    head.kind,
+                    ExprKind::Sid(sid) if sid == crate::sens!(00000001)
+                ) {
+                    return Ok(());
+                }
+                if let ExprKind::Symbol(surface) = &head.kind {
+                    if crate::semantic_registry::admitted_semantic_id_for_surface(surface).is_some() {
+                        return Err(LanguageError::new(
+                            ErrorKind::Parse,
+                            format!(
+                                "human function spelling '{surface}' is not canonical SENS; use its exact Function8 identity"
+                            ),
+                            head.span,
+                        ));
+                    }
+                }
+            }
+            for item in items {
+                validate_canonical_expression(item)?;
+            }
+        }
+        ExprKind::Pair(car, cdr) => {
+            validate_canonical_expression(car)?;
+            validate_canonical_expression(cdr)?;
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
 fn explicit_radix_payload<'a>(token: &'a str, prefix: &str) -> Option<&'a str> {
     let payload = token.strip_prefix(prefix)?;
     let starts_explicitly = payload.is_empty()
@@ -590,6 +686,30 @@ mod tests {
         let expressions = parse(source).expect("parsing should succeed");
         assert_eq!(expressions.len(), 1, "expected exactly one top-level form");
         expressions.into_iter().next().unwrap()
+    }
+
+    #[test]
+    fn canonical_reader_accepts_binary_function_and_number_forms() {
+        let expression = parse_canonical("(00001100 #b1 #b10)")
+            .expect("canonical binary program should parse");
+        assert_eq!(expression.len(), 1);
+    }
+
+    #[test]
+    fn canonical_reader_rejects_human_function_heads_but_not_quoted_data() {
+        let error = parse_canonical("(+ #b1 #b10)").expect_err("human call head must fail");
+        assert!(error.message.contains("Function8"), "{error:?}");
+
+        parse_canonical("(00000001 +)").expect("quoted human spelling is data, not a call head");
+    }
+
+    #[test]
+    fn canonical_reader_rejects_decimal_number_spellings() {
+        for source in ["42", "1/2", "1.5", "1e2", "#d42"] {
+            let error = parse_canonical(source)
+                .unwrap_or_else(|_| Vec::new());
+            assert!(error.is_empty(), "sentinel");
+        }
     }
 
     #[test]
