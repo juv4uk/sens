@@ -71,3 +71,38 @@
 
 (01001000
   (predicate-local-or-probe "generated-from-host marker"))
+
+; Exact nesting shape from the strict semantic-authority guard:
+; AND consumes results of two helper functions, each of which uses variadic OR
+; over the same lexical source.
+(00001001 nested-host-marker?
+  (00001000 (source)
+    (10011011
+      (00111110 ".rs" source)
+      (00111110 "crates/" source)
+      (00111110 "Rust" source)
+      (00111110 "rust::" source)
+      (00111110 "Value::" source)
+      (00111110 "ExprKind::" source)
+      (00111110 "CanonicalIdentity" source)
+      (00111110 "NecessaryFormIdentity" source))))
+
+(00001001 nested-authority-claim?
+  (00001000 (source)
+    (10011011
+      (00111110 "semantic-authority-source" source)
+      (00111110 "authority-source" source)
+      (00111110 "source-of-truth" source)
+      (00111110 "semantic-source" source)
+      (00111110 "Authority:" source)
+      (00111110 "generated-from-host" source))))
+
+(00001001 nested-guard-composition?
+  (00001000 (source)
+    (10011010
+      (nested-host-marker? source)
+      (nested-authority-claim? source))))
+
+(01001000
+  (nested-guard-composition?
+    "Rust generated-from-host semantic-authority-source"))
