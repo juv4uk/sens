@@ -80,7 +80,7 @@
 ;; variable holding the clause to remove.
 (00001010 retract-knowledge (module-name clause)
   (00100111 (00000001 def) (00000001 *knowledge-journal*)
-        (00100111 (00000001 cons)
+        (00100111 (00000001 00000100)
               (00100111 (00000001 list) (00100111 (00000001 quote) (00000001 retract)) (00100111 (00000001 quote) module-name) clause)
               (00000001 *knowledge-journal*))))
 
@@ -407,7 +407,7 @@
   (00100111 (00000001 cond)
         (00100111
           (00100111 (00000001 equal?)
-                (00100111 (00000001 car) (00100111 (00000001 advice-decision) (00100111 (00000001 quote) module-name) clause))
+                (00100111 (00000001 00000101) (00100111 (00000001 advice-decision) (00100111 (00000001 quote) module-name) clause))
                 (00100111 (00000001 quote) (00000001 accepted)))
           (00100111 (00000001 second)
                 (00100111 (00000001 list)
@@ -533,7 +533,7 @@
   (00100111 (00000001 cond)
         (00100111
           (00100111 (00000001 equal?)
-                (00100111 (00000001 car)
+                (00100111 (00000001 00000101)
                       (00100111 (00000001 advice-all-decision)
                             (00100111 (00000001 quote) module-name) clauses))
                 (00100111 (00000001 quote) (00000001 accepted)))
@@ -632,7 +632,7 @@
   (00100111 (00000001 cond)
         (00100111
           (00100111 (00000001 equal?)
-                (00100111 (00000001 car) (00100111 (00000001 knowledge-package-decision) package))
+                (00100111 (00000001 00000101) (00100111 (00000001 knowledge-package-decision) package))
                 (00100111 (00000001 quote) (00000001 accepted)))
           (00100111 (00000001 second)
                 (00100111 (00000001 list)
