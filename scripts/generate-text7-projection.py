@@ -61,7 +61,7 @@ def rust_string(text: str) -> str:
 def direct_from_table(path: Path, column: str) -> dict[int, str]:
     out: dict[int, str] = {}
     with path.open(encoding="utf-8", newline="") as handle:
-        for row in csv.DictReader(handle, delimiter="\t"):
+        for row in csv.DictReader(handle, delimiter="\t", quoting=csv.QUOTE_NONE):
             spelling = row[column]
             if spelling:
                 out[int(row["bits"], 2)] = table_spelling(spelling)
