@@ -44,7 +44,7 @@ enum WebSurface {
 impl WebSurface {
     fn parse(value: &str) -> Option<Self> {
         match value.trim().to_lowercase().as_str() {
-            "core" | "ядро" => Some(Self::Core),
+            "sens" | "binary" | "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
             "ук" | "українська" => Some(Self::Ukrainian),
             "укр" | "ukr" | "українська-повна" => Some(Self::UkrainianFull),
@@ -55,7 +55,7 @@ impl WebSurface {
 
     fn code(self) -> &'static str {
         match self {
-            Self::Core => "core",
+            Self::Core => "sens",
             Self::English => "en",
             Self::Ukrainian => "ук",
             Self::UkrainianFull => "укр",
@@ -186,6 +186,24 @@ pub fn evaluate(source: &str, mode: JsValue) -> Result<JsValue, JsValue> {
     SESSION.with(|slot| {
         let mut guard = slot.borrow_mut();
         let state = guard.as_mut().expect("session set by init_if_needed");
+
+        if state.surface == WebSurface::Core {
+            let forms = sens_literate::parse_literate(source, source_mode).map_err(|e| {
+                JsValue::from_str(&render_error_for_presentation(
+                    &e,
+                    source,
+                    state.surface.presentation(),
+                ))
+            })?;
+            sens::require_binary_function_heads(&forms).map_err(|e| {
+                JsValue::from_str(&render_error_for_presentation(
+                    &e,
+                    source,
+                    state.surface.presentation(),
+                ))
+            })?;
+        }
+
         let (result, forms) =
             sens_literate::eval_literate(source, source_mode, &mut state.session).map_err(
                 |e| {
@@ -219,7 +237,7 @@ pub fn reset_session() {
 fn set_surface_impl(name: &str) -> Result<String, String> {
     init_if_needed()?;
     let surface = WebSurface::parse(name)
-        .ok_or_else(|| format!("unknown surface: {name}; expected ук|укр|en|sa|core"))?;
+        .ok_or_else(|| format!("unknown surface: {name}; expected sens|ук|укр|en|sa"))?;
     SESSION.with(|slot| {
         let mut guard = slot.borrow_mut();
         let state = guard.as_mut().expect("session set by init_if_needed");
@@ -237,13 +255,13 @@ pub fn set_surface(name: &str) -> Result<String, JsValue> {
 #[wasm_bindgen]
 pub fn current_surface() -> String {
     if init_if_needed().is_err() {
-        return "core".to_string();
+        return "sens".to_string();
     }
     SESSION.with(|slot| {
         slot.borrow()
             .as_ref()
             .map(|state| state.surface.code().to_string())
-            .unwrap_or_else(|| "core".to_string())
+            .unwrap_or_else(|| "sens".to_string())
     })
 }
 
@@ -349,6 +367,25 @@ mod tests {
     }
 
     #[test]
+    fn web_default_surface_is_binary_sens_and_core_is_only_an_alias() {
+        reset_session();
+        init_if_needed().expect("core preload");
+        assert_eq!(current_surface(), "sens");
+        assert_eq!(set_surface_impl("core").expect("compat alias"), "sens");
+
+        for source in ["(+ 2 3)", "(додати 2 3)"] {
+            let forms = sens_literate::parse_literate(source, SourceMode::PureLisp)
+                .expect("parse human surface source");
+            sens::require_binary_function_heads(&forms)
+                .expect_err("human function head must require explicit surface");
+        }
+
+        let forms = sens_literate::parse_literate("(00001100 2 3)", SourceMode::PureLisp)
+            .expect("parse exact Function8");
+        sens::require_binary_function_heads(&forms).expect("exact Function8 is default");
+    }
+
+    #[test]
     fn web_surface_switch_is_layered_and_preserves_user_definitions() {
         reset_session();
         init_if_needed().expect("core preload");
@@ -378,7 +415,7 @@ mod tests {
             assert_eq!(closure.value.to_string(), "7");
         });
 
-        assert_eq!(set_surface_impl("core").expect("core"), "core");
+        assert_eq!(set_surface_impl("core").expect("core alias"), "sens");
         SESSION.with(|slot| {
             let guard = slot.borrow();
             let state = guard.as_ref().unwrap();
