@@ -62,11 +62,8 @@ fn bootstrap_core4(session: &mut Session) -> Result<sens::EvalResult, sens::Lang
     sens::load_core_library(session)
 }
 
-fn canonical_binary_entrypoint(argv0: &str) -> bool {
-    std::path::Path::new(argv0)
-        .file_stem()
-        .and_then(std::ffi::OsStr::to_str)
-        == Some("sens")
+fn canonical_binary_entrypoint() -> bool {
+    env!("CARGO_BIN_NAME") == "sens"
 }
 
 fn main() {
@@ -75,9 +72,7 @@ fn main() {
     // core itself ships none.
     sens_host::install();
     let args: Vec<String> = env::args().collect();
-    let canonical_binary_default = args
-        .first()
-        .is_some_and(|argv0| canonical_binary_entrypoint(argv0));
+    let canonical_binary_default = canonical_binary_entrypoint();
     let allowed = allowed_processes(&args);
     let sexpr_protocol = args.iter().any(|a| a == "--protocol=sexpr");
     let args: Vec<String> = args
