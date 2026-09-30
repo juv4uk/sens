@@ -4,7 +4,11 @@
 //! mechanism shape for an already-selected SID, but it must never invent a
 //! second named function identity.
 
-use super::{arithmetic, builtins, closures, necessary_forms, special_forms};
+use super::{
+    arithmetic, builtins, closures, necessary_forms,
+    profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
+    special_forms,
+};
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -284,14 +288,37 @@ pub(crate) fn invoke_semantic_ref(
         return primitive(args, environment, span);
     }
     match &environment.code_slot(sid) {
-        Some(Value::Closure(closure)) => closures::apply_values(closure.clone(), args, span),
-        Some(Value::Builtin(builtin)) => (builtin.func)(args, environment, span),
-        _ => Err(LanguageError::new(
-            ErrorKind::Type,
-            format!("SENS function has no admitted callable mechanism: {sid}"),
-            span,
-        )),
+        Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
+        Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
+        _ => {}
     }
+
+    if let Some(profile) = environment.selected_core_profile() {
+        if matches!(
+            profile_mechanism_route(profile, sid),
+            Some(ProfileMechanismRouteKind::RegisteredHostMechanism)
+        ) {
+            return match super::capabilities::dispatch_sens_capability(
+                sid,
+                args,
+                environment,
+                span,
+            ) {
+                Some(result) => result,
+                None => Err(LanguageError::new(
+                    ErrorKind::MechanismUnavailable,
+                    format!("admitted host mechanism is unavailable for SENS function: {sid}"),
+                    span,
+                )),
+            };
+        }
+    }
+
+    Err(LanguageError::new(
+        ErrorKind::Type,
+        format!("SENS function has no admitted callable mechanism: {sid}"),
+        span,
+    ))
 }
 
 /// #1455: чи має код примітив Rust.
