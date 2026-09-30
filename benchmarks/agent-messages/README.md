@@ -17,7 +17,7 @@ execute, in CPU instructions (Cachegrind), plus message size in bytes.*
 | форма | що це |
 |---|---|
 | `sens-fasl` | SENS, двійковий fasl (кеш розбору ядра), функція = 1 байт |
-| `sens-wire` | SENS, компактний формат обміну `SW\x01`: без хешу, малі цілі й короткі списки — 1 байт, довжини — varint |
+| `sens-wire` | SENS, компактний формат обміну `SW\\x01`: без хешу, малі цілі й короткі списки — 1 байт, довжини — varint |
 | `sens-en` | той самий SENS англійським текстом (розбір тексту) |
 | `py-src` | CPython, текст Python: `compile` + `exec` |
 | `py-marshal` | CPython, заздалегідь скомпільований байткод: `marshal.loads` + `exec` |
@@ -40,21 +40,30 @@ guix time-machine -C channels.scm -- shell -m manifest.scm \
 
 ## Результат
 
-### Повний baseline (SENS + CPython)
+### Поточний повний прогін (main `86e836be`, 2026-09-30)
 
-Див. `results/20260927/report.md` (i5-6400; Guix). Висновки:
+`results/20260930/report.md` — усі шість форм, oracle GREEN, Cachegrind.
 
-1. **Один процес на повідомлення — SENS у ~60 разів легший.** Старт SENS
-   ≈1,5 млн інструкцій, CPython ≈94 млн.
-2. **Warm session:** fasl швидший за py-src (×4) і py-json (×1,3), повільніший за
-   py-marshal (×3,7). Decode fasl≈marshal (~10k); різниця в execute.
-3. **SENS wire найменший: ~34 байти** (проти en 44, py-src 46, json 48, fasl 154).
+| форма | байт | warm разом | старт процесу |
+|-------|-----:|-----------:|--------------:|
+| sens-fasl | 154.1 | **53 438** | ~1.52M |
+| sens-wire | **34.3** | 55 848 | ~1.52M |
+| sens-en | 44.4 | 144 170 | ~1.52M |
+| py-src | 46.4 | 202 302 | ~76M |
+| py-marshal | 195.9 | **14 003** | ~76M |
+| py-json | 48.4 | 70 324 | ~76M |
 
-### Частковий remeasure 2026-09-30
+1. **Cold / tool-call:** SENS start ~1.5M vs CPython ~76M (~50× на цьому host).
+2. **Warm:** fasl ×3.8 vs py-src, ×1.3 vs py-json; **×0.26 vs py-marshal** (програємо).
+3. **Size:** wire 34 B — найменший.
 
-`results/20260930-partial/report.md` — розміри + CPython Cachegrind на іншому
-host; **без** `agent_bench` (SENS binary encode/run). Підтверджує детерміновані
-розміри text/json/marshal і порядок warm CPython: marshal ≪ json ≪ src.
+### Історичний baseline (i5-6400 Guix)
+
+`results/20260927/report.md` — той самий порядок висновків; абсолютні I-refs інші.
+
+### Частковий прогін (без agent_bench)
+
+`results/20260930-partial/report.md` — лише sizes + CPython.
 
 ## Межі
 
