@@ -873,6 +873,45 @@ mod tests {
         assert_eq!(&*value, "line\n\ttab\"quote");
     }
 
+    #[test]
+    fn explicit_text7_reader_applies_ukrainian_normalization() {
+        let ya = parse_text7_literal(r#""я""#, crate::Text7Layout::Uk).unwrap();
+        let yi_a = parse_text7_literal(r#""йа""#, crate::Text7Layout::Uk).unwrap();
+        let upper = parse_text7_literal(r#""Я""#, crate::Text7Layout::Uk).unwrap();
+
+        assert_eq!(ya, yi_a);
+        assert_eq!(ya, upper);
+    }
+
+    #[test]
+    fn explicit_text7_reader_preserves_slp1_case_distinction() {
+        let k = parse_text7_literal(r#""k""#, crate::Text7Layout::SaSlp1).unwrap();
+        let kh = parse_text7_literal(r#""K""#, crate::Text7Layout::SaSlp1).unwrap();
+
+        assert_ne!(k, kh);
+        assert_eq!(k.cells(), &[0x00]);
+        assert_eq!(kh.cells(), &[0x01]);
+    }
+
+    #[test]
+    fn explicit_text7_reader_fails_closed_on_unadmitted_spelling() {
+        let error = parse_text7_literal(r#""A""#, crate::Text7Layout::Uk)
+            .expect_err("uppercase Latin A is not Ukrainian Text7 spelling");
+
+        assert_eq!(error.kind, ErrorKind::Parse);
+        assert!(error.message.contains("Text7 admission failed"));
+        assert!(error.message.contains("no admitted Text7 spelling"));
+    }
+
+    #[test]
+    fn explicit_text7_reader_requires_one_quoted_literal() {
+        for source in ["кіт", r#""кіт" "кіт""#, ""] {
+            let error = parse_text7_literal(source, crate::Text7Layout::Uk)
+                .expect_err("non-single-string source must fail");
+            assert_eq!(error.kind, ErrorKind::Parse);
+        }
+    }
+
     /// `\r` used to silently fall through the "unrecognized escape" branch
     /// (drop the backslash, keep the literal letter) — `"\r"` parsed as the
     /// one-character string `"r"`, not carriage-return 0x0D. Found via a
