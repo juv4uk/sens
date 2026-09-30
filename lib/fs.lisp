@@ -28,10 +28,8 @@
     (10011100 ((decoded (read-file-utf8-raw path)))
       (00000111
         ((00000011 (00000101 decoded) (00000001 decoded))
-         (1)
          (00101111 decoded))
-        ((00000011 (00000101 decoded) (00000001 decoded))
-         (0)
+        ((00000010 (00000001 ()))
          decoded)))))
 
 ; Historical `write-file` returns the text it was given after a successful
