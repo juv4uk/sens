@@ -1459,26 +1459,6 @@ fn string_less_than_wrong_arity_is_an_arity_error() {
     assert_eq!(error.kind, ErrorKind::Arity);
 }
 
-// --- CORE predicates return canonical WSM t/() (Value::truth), not a
-// hidden Value::Bool -------------------------------------------------
-//
-// `<`/`=`/`>`/`string<?`/`string?` used to construct `Value::Bool`
-// directly. That is a real Rust datatype with no WSM syntax of its own —
-// it printed identically to Nil/t but was a DIFFERENT runtime
-// representation, discoverable only via `eq`. This mattered concretely:
-// `closures::value_to_expr` (used by macro expansion) maps
-// `Value::Bool(false)` to the same empty-list syntax as `Nil`, and
-// re-evaluating that empty list yields `Value::Nil` — so a macro whose
-// body computed a CORE predicate's `Bool(false)` as its own expansion
-// value silently returned `Nil` instead, while the same predicate called
-// directly stayed `Bool(false)`: the identical expression `(< 2 1)`
-// disagreed with itself depending on whether it crossed a macro
-// boundary. Migrating these five CORE producers to `Value::truth`
-// removes the hidden Bool entirely from CORE, so there is nothing left
-// for that boundary to lose. json-parse/swarm-protocol/host `Value::Bool`
-// uses are untouched — those are real external booleans (JSON's own
-// true/false/null triple, wire-protocol acks), not WSM predicate results.
-
 #[test]
 fn si_defining_constants_exact_rationals() {
     let mut session = Session::default();
