@@ -20,12 +20,25 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Verify local Core1 S2 inputs before private checkout
+        id: contract
         shell: bash
         run: |
           set -euo pipefail
           test -f lib/core1.lisp
           test -f contracts/core1-s2-compiler-admission.lisp
           git diff --check
+
+          contract=contracts/core1-s2-compiler-admission.lisp
+          head_sha="$(sed -n 's/^[[:space:]]*(repository-head . "\([0-9a-f]\{40\}\)").*/\1/p' "$contract")"
+          blob_sha="$(sed -n 's/^[[:space:]]*(blob . "\([0-9a-f]\{40\}\)").*/\1/p' "$contract")"
+
+          if [[ ! "$head_sha" =~ ^[0-9a-f]{40}$ || ! "$blob_sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::S2 admission contract must pin exactly one repository-head and one blob (40 hex each)."
+            exit 1
+          fi
+
+          echo "head=$head_sha" >> "$GITHUB_OUTPUT"
+          echo "blob=$blob_sha" >> "$GITHUB_OUTPUT"
 
       - name: Checkout typed-SID8 S0
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -44,8 +57,31 @@ jobs:
           repository: juv4uk/wsm-my-lisp
           ssh-key: ${{ secrets.WSM_MY_LISP_SSH_KEY }}
           persist-credentials: false
-          ref: a6bd9747196f2d676ab6883cbb4b84c7fcfc6947
+          ref: ${{ steps.contract.outputs.head }}
           path: .core1-s2/wsm-sens
+
+      - name: Require checked-out compiler source to match the contract pin
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          expected_head="${{ steps.contract.outputs.head }}"
+          expected_blob="${{ steps.contract.outputs.blob }}"
+          actual_head="$(git -C .core1-s2/wsm-sens rev-parse HEAD)"
+          actual_blob="$(git -C .core1-s2/wsm-sens rev-parse "HEAD:lib/compiler.lisp")"
+
+          printf 'expected_head=%s\nactual_head=%s\n' "$expected_head" "$actual_head"
+          printf 'expected_blob=%s\nactual_blob=%s\n' "$expected_blob" "$actual_blob"
+
+          if [[ "$actual_head" != "$expected_head" ]]; then
+            echo "::error::S2 admission repository-head drifted from contracts/core1-s2-compiler-admission.lisp"
+            exit 1
+          fi
+          if [[ "$actual_blob" != "$expected_blob" ]]; then
+            echo "::error::S2 admission blob drifted from contracts/core1-s2-compiler-admission.lisp"
+            exit 1
+          fi
 
       - name: Build typed-SID8 S0
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -81,6 +117,7 @@ jobs:
           build_probe form-quote '(compiler-form (quote (quote A)))'
           build_probe map-quotes '(compiler-map compiler-form (quote ((quote A) (quote B))))'
           build_probe form-cons '(compiler-form (quote (cons (quote A) (quote B))))'
+          build_probe form-cond '(compiler-form (quote (cond ((quote A) (quote B)))))'
 
           build_core1_probe() {
             local name="$1"
@@ -107,15 +144,18 @@ jobs:
         run: |
           set -uo pipefail
           failures=0
+          observed=.core1-s2/observed.txt
+          : > "$observed"
 
-          for probe in primitive-p quote-p form-atom form-quote map-quotes form-cons; do
+          for probe in primitive-p quote-p form-atom form-quote map-quotes form-cons form-cond; do
             case "$probe" in
               primitive-p) expected='T' ;;
               quote-p) expected='T' ;;
               form-atom) expected='(var A)' ;;
               form-quote) expected='(quote A)' ;;
               map-quotes) expected='((quote A) (quote B))' ;;
-              form-cons) expected='(prim cons ((quote A) (quote B)))' ;;
+              form-cons) expected='(prim 00000100 ((quote A) (quote B)))' ;;
+              form-cond) expected='(cond ((quote A) (quote B)))' ;;
             esac
 
             echo "=== $probe ==="
@@ -127,6 +167,7 @@ jobs:
             printf 'status=%s\n' "$status"
             printf 'expected=%s\n' "$expected"
             printf 'actual=%s\n' "$actual"
+            printf '%s\n' "$actual" >> "$observed"
 
             if [[ "$status" -ne 0 || "$actual" != "$expected" ]]; then
               failures=$((failures + 1))
@@ -152,11 +193,18 @@ jobs:
             printf 'status=%s\n' "$status"
             printf 'expected=%s\n' "$expected"
             printf 'actual=%s\n' "$actual"
+            printf '%s\n' "$actual" >> "$observed"
 
             if [[ "$status" -ne 0 || "$actual" != "$expected" ]]; then
               failures=$((failures + 1))
             fi
           done
+
+          if grep -q 'cond-match' "$observed"; then
+            echo "::error::Withdrawn cond-match projection observed; sens#1703 keeps Core1 COND two-part."
+            grep -n 'cond-match' "$observed" || true
+            failures=$((failures + 1))
+          fi
 
           exit "$failures"
 
