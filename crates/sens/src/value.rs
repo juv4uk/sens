@@ -389,11 +389,22 @@ impl Rational {
         Self::from_big(numerator, denominator)
     }
 
+    /// Exact reduced binary numerator/denominator parts without any textual
+    /// transport tag. Canonical binary framing consumes these values directly;
+    /// `#q2:` is only the transitional reader-safe textual projection.
+    pub(crate) fn binary_parts(&self) -> (String, String) {
+        (
+            self.numerator.to_binary_string(),
+            self.denominator.to_binary_string(),
+        )
+    }
+
     /// Reader-safe canonical wire token. The #q2: tag keeps numeric values
     /// outside the exact eight-bit SENS function-token space even when the
     /// magnitude itself happens to have eight bits.
     pub(crate) fn to_binary_wire_token(&self) -> String {
-        format!("#q2:{}/{}", self.numerator.to_binary_string(), self.denominator.to_binary_string())
+        let (numerator, denominator) = self.binary_parts();
+        format!("#q2:{numerator}/{denominator}")
     }
 }
 

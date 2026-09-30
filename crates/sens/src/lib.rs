@@ -9,6 +9,7 @@
 
 
 mod bignum;
+mod binary_framing;
 mod environment;
 mod error;
 pub(crate) mod eval;
@@ -112,6 +113,10 @@ mod text7_projection;
 mod text7_projection_generated;
 mod value;
 
+pub use binary_framing::{
+    decode_binary_frame, decode_binary_stream, encode_binary_frame, encode_binary_stream,
+    BinaryFrame, BinaryFrameError,
+};
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
