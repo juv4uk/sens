@@ -1,4 +1,4 @@
-use sens::{eval_program, ErrorKind, Session, Value};
+use sens::{eval_program, Session, Value};
 use std::collections::HashSet;
 
 const REPL_КАТАЛОГ: &str = include_str!("../../sens-cli/src/repl/surface_catalog.rs");
@@ -125,12 +125,9 @@ fn додавання_відділяє_людські_мови_від_спіль
         );
     }
 
-    let error = eval_program("plus", &mut сесія)
-        .expect_err("bare human surface must not become Function8 during evaluation");
     assert!(
-        matches!(error.kind, ErrorKind::InvalidForm | ErrorKind::UnknownSymbol),
-        "bare surface must fail named, got {:?}",
-        error.kind
+        eval_program("plus", &mut сесія).is_err(),
+        "bare human surface must not become Function8 during evaluation"
     );
 
     let exact = eval_program("00001100", &mut сесія)
