@@ -370,6 +370,19 @@ pub(crate) fn run_repl(
 mod tests {
     use super::*;
 
+    #[test]
+    fn sens_repl_policy_is_binary_default_while_human_projection_remains_explicit() {
+        parse_repl_source("(00001100 #b1 #b10)", true)
+            .expect("canonical sens REPL should accept binary source");
+
+        let binary_error = parse_repl_source("(+ 1 2)", true)
+            .expect_err("canonical sens REPL must reject human function/decimal source");
+        assert_eq!(binary_error.kind, ErrorKind::Parse);
+
+        parse_repl_source("(+ 1 2)", false)
+            .expect("my-lisp human REPL should keep transition source compatibility");
+    }
+
     fn core_state() -> ReplState {
         let mut session = Session::default();
         sens::load_core_library(&mut session).expect("core bootstrap");
