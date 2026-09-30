@@ -52,7 +52,7 @@ fn version_flag_prints_the_crate_version() {
 #[test]
 fn sens_and_my_lisp_binaries_execute_the_same_direct_8_bit_program() {
     let path = std::env::temp_dir().join("sens-cli-parity-direct-8-bit.lisp");
-    std::fs::write(&path, "(00000001 42)").expect("should write parity fixture");
+    std::fs::write(&path, "(00000001 #b101010)").expect("should write parity fixture");
 
     let legacy = legacy_bin()
         .arg(&path)
