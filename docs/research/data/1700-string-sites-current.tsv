@@ -1,0 +1,92 @@
+path	line	marker	role	rationale
+crates/sens/src/eval/builtins.rs	111	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	181	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	197	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	200	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	481	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	505	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	509	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	522	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	534	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/builtins.rs	562	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/closures.rs	640	ExprKind::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/closures.rs	640	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/mod.rs	140	ExprKind::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/mod.rs	140	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/codepoint.rs	26	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/codepoint.rs	43	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/core.rs	219	ExprKind::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/core.rs	219	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/digest.rs	21	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/digest.rs	33	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/io.rs	42	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/io.rs	59	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/io.rs	131	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/json.rs	34	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/json.rs	122	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/json.rs	162	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	43	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	53	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	108	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	115	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	122	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	130	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	139	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	154	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	169	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	170	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	191	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/eval/special_forms/strings.rs	200	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/parser.rs	57	ExprKind::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/parser.rs	359	ExprKind::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/parser.rs	870	ExprKind::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/parser.rs	924	ExprKind::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/presentation.rs	84	Value::String	human-boundary	human presentation is a projection, not Text7 identity
+crates/sens/src/presentation.rs	443	Value::String	human-boundary	human presentation is a projection, not Text7 identity
+crates/sens/src/syntax.rs	120	TAG_STRING	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	169	ExprKind::String	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	170	TAG_STRING	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	242	ExprKind::String	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	242	TAG_STRING	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	361	TAG_STRING	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	444	ExprKind::String	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	444	TAG_STRING	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	596	ExprKind::String	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/syntax.rs	596	TAG_STRING	mechanism	AST/FASL/wire String transport is migration mechanism debt
+crates/sens/src/value.rs	564	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens/src/value.rs	790	Value::String	textual-language-data	live language String producer/consumer to migrate by role
+crates/sens-cli/src/bin/wsm-fs-record-producer.rs	61	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/main.rs	430	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/repl/surface_catalog.rs	138	ExprKind::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	120	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	145	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	187	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	206	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	246	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	284	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	302	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	306	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	337	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	341	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	350	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	366	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	370	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	669	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-cli/src/swarm.rs	674	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	100	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	112	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	122	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	142	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	173	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	185	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	344	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	365	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/lib.rs	597	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/process_raw.rs	19	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-host/src/process_raw.rs	84	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-lsp/src/guard_knowledge.rs	165	ExprKind::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-lsp/src/protocol.rs	19	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-lsp/src/protocol.rs	34	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/sens-lsp/src/protocol.rs	101	Value::String	human-boundary	host/UI adapter keeps UTF-8 outside canonical Text7
+crates/xtask/src/external_oracle.rs	381	ExprKind::String	mechanism	tooling/oracle adapter observes syntax mechanically
+crates/xtask/src/external_oracle.rs	530	ExprKind::String	mechanism	tooling/oracle adapter observes syntax mechanically
