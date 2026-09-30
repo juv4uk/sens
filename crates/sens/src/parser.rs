@@ -706,9 +706,14 @@ mod tests {
     #[test]
     fn canonical_reader_rejects_decimal_number_spellings() {
         for source in ["42", "1/2", "1.5", "1e2", "#d42"] {
-            let error = parse_canonical(source)
-                .unwrap_or_else(|_| Vec::new());
-            assert!(error.is_empty(), "sentinel");
+            let error =
+                parse_canonical(source).expect_err("decimal spelling must fail in canonical mode");
+            assert_eq!(error.kind, ErrorKind::Parse, "source: {source}");
+            assert!(
+                error.message.contains("canonical SENS")
+                    || error.message.contains("human/transition-only"),
+                "source: {source}, error: {error:?}"
+            );
         }
     }
 
