@@ -5,16 +5,13 @@
 
 (00001001 verdict-tag
   (00000111
-    ((00000010 verdict) (1) verdict)
-    ((00000010 verdict) (0) (00000101 verdict))
-    ((00000010 verdict) () (00000001 empty-verdict))))
+    ((00000010 verdict)
+     verdict)
+    ((00000010 (00000001 ()))
+     (00000101 verdict))))
 
 (00000111
   ((00000011 verdict-tag (00000001 semantic-authority-ok))
-   (1)
    (00000001 semantic-authority-ok))
-  ((00000011 verdict-tag (00000001 semantic-authority-violation))
-   (1)
-   (00000101 ()))
-  (t
+  ((00000010 (00000001 ()))
    (00000101 ())))
