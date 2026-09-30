@@ -5,7 +5,7 @@
 mod surface_catalog;
 
 use sens::{
-    eval_parsed_expressions_incremental, eval_program, parse, render_error_for_presentation,
+    eval_parsed_expressions_incremental, eval_program, parse, parse_canonical, render_error_for_presentation,
     render_value_for_presentation, Environment, ErrorKind, ExprKind, PresentationLanguage, Session,
 };
 use rustyline::error::ReadlineError;
@@ -249,7 +249,22 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
     }
 }
 
-pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
+fn parse_repl_source(
+    source: &str,
+    canonical_binary_default: bool,
+) -> Result<Vec<sens::Expr>, sens::LanguageError> {
+    if canonical_binary_default {
+        parse_canonical(source)
+    } else {
+        parse(source)
+    }
+}
+
+pub(crate) fn run_repl(
+    session: Session,
+    initial_surface: ReplSurface,
+    canonical_binary_default: bool,
+) {
     let mut state = match ReplState::new(session, initial_surface) {
         Ok(state) => state,
         Err(error) => {
@@ -298,7 +313,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
                     continue;
                 }
 
-                match parse(line) {
+                match parse_repl_source(line, canonical_binary_default) {
                     Ok(ast) => {
                         match eval_parsed_expressions_incremental(&ast, &mut state.session) {
                             Ok(result) => {
@@ -353,6 +368,19 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sens_repl_policy_is_binary_default_while_human_projection_remains_explicit() {
+        parse_repl_source("(00001100 #b1 #b10)", true)
+            .expect("canonical sens REPL should accept binary source");
+
+        let binary_error = parse_repl_source("(+ 1 2)", true)
+            .expect_err("canonical sens REPL must reject human function/decimal source");
+        assert_eq!(binary_error.kind, ErrorKind::Parse);
+
+        parse_repl_source("(+ 1 2)", false)
+            .expect("my-lisp human REPL should keep transition source compatibility");
+    }
 
     fn core_state() -> ReplState {
         let mut session = Session::default();

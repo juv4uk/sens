@@ -545,7 +545,7 @@ fn main() {
         }
     } else {
         // REPL mode
-        repl::run_repl(session, repl_surface);
+        repl::run_repl(session, repl_surface, canonical_binary_default);
     }
 }
 
