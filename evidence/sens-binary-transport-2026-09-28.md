@@ -1,8 +1,8 @@
 # SENS-BINARY-TRANSPORT-ONLY
 
-**Дата:** 2026-09-28  
-**Issue:** #1590  
-**Статус:** confirmed для CI surface-bench; post-M8 remeasure — pending agent with valgrind
+**Дата:** 2026-09-28 (updated 2026-09-30)  
+**Issue:** #1590 · post-M8 measure #1665  
+**Статус:** confirmed для CI surface-bench **і** post-M8 three-way
 
 ## Що вже чинне (не гіпотеза)
 
@@ -30,23 +30,27 @@
 
 До M8: EN names лишали `+`/`-` як runtime lookup → execute gap EN vs SENS ≈ +16%.
 
-Після M8: EN admitted surfaces також → `Call(SID)`. Очікування:
+Після M8: EN admitted surfaces також → `Call(SID)`.
 
-| Порівняння | Очікування post-M8 |
-|------------|---------------------|
-| EN text vs SENS text (same binary) execute | gap ≈ 0 (обидва Call) |
-| EN text load vs SENS binary fasl load | SENS load все ще ×~3–4 (parse vs 1 byte) |
-| SENS text vs SENS binary execute | ≈ 0 (lower already SID) |
+### Post-M8 three-way (#1665) — виміряно
 
-## Pending (потрібна машина з valgrind)
+Evidence: `benchmarks/sens-surface/results/20260930-post-m8/report.md`  
+SHA measure: `786c62b9` · PR #1951 · Cachegrind · connector host
 
-1. Повторити `benchmarks/sens-surface` three-way на main ≥ `37f31edd` (M8).
-2. Записати results dir `YYYYMMDD-post-m8/`.
-3. Якщо execute EN≈SENS — закрити residual claim з #1413 як **resolved by M8**.
+| Порівняння | Результат (геом. середнє) |
+|------------|---------------------------|
+| EN text vs SENS text **steady execute** | **×1.001** (gap ≈ 0) |
+| SENS text vs SENS FASL **steady execute** | **×0.997** (gap ≈ 0) |
+| EN text **load** vs SENS FASL load | **×4.30** (parse vs 1-byte) |
+
+**#1413 residual EN-runtime-name-cost на steady execute: resolved by M8.**  
+Pre-M8 «+16% SENS vs EN execute» — історичний факт, не поточний claim.
+
+Load-path перевага binary FASL лишається реальною (~×4.3).
 
 ## Acceptance цього запису
 
 - [x] CI form=sens = fasl 1-byte path (confirmed in `ci_bench.sh`)
 - [x] Core fasl/wire = 1 byte (audit #1592)
 - [x] M8 removes EN runtime name tax for admitted surfaces
-- [ ] Post-M8 numeric remeasure (agent with hardware)
+- [x] Post-M8 numeric remeasure (#1665 · `20260930-post-m8/`)
