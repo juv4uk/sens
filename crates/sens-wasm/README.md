@@ -9,7 +9,7 @@ wasm.set_surface("uk");
 wasm.set_surface("ukr");
 wasm.set_surface("en");
 wasm.set_surface("sa");
-wasm.set_surface("core");
+wasm.set_surface("sens"); // "core" remains a compatibility selector alias
 
 wasm.current_surface();
 ```
@@ -26,6 +26,6 @@ surface
 user
 ```
 
-Автономний [`public/my-lisp-cli-web.html`](../../public/my-lisp-cli-web.html) стартує з `uk` і реалізує interaction-команди `:мова` / `:surface` поверх цього API.
+Автономний [`public/my-lisp-cli-web.html`](../../public/my-lisp-cli-web.html) стартує з binary `sens`; `uk`/`ukr`/`en`/`sa` вмикаються лише явно через `:мова` / `:surface`.
 
 Повна користувацька документація: [`docs/repl-surfaces.md`](../../docs/repl-surfaces.md).
