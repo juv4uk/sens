@@ -70,10 +70,10 @@
    (path . "contracts/exact-q-binary-contract.lisp")
    (category . semantic-authority)
    (question-answer . what-language-means)
-   (semantic-role . mathematical-truth-domain)
-   (future-action . retain-in-core)
+   (semantic-role . exact-q-predicate-admissibility)
+   (future-action . retain-minimal)
    (target-destination . "contracts/exact-q-binary-contract.lisp")
-   (rationale . "Defines 0/1 | 1/1 truth algebra for exact rational decisions, preventing collapse of structural/epistemic uncertainty into false."))
+   (rationale . "Defines which exact-rational comparison predicates may produce the ordinary one-bit SENS PredicateBit without approximation. Numeric 0/1 and 1/1 remain Number values, never predicate identity."))
 
   ((key . structural-observation-contract)
    (path . "contracts/structural-observation-contract.lisp")
