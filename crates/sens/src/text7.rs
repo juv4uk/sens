@@ -123,10 +123,7 @@ mod tests {
         assert_eq!(text.cells(), &[0, 1, 127]);
         assert_eq!(text.len(), 3);
         assert!(!text.is_empty());
-        assert_eq!(
-            format!("{text:?}"),
-            "Text7(0000000 0000001 1111111)"
-        );
+        assert_eq!(format!("{text:?}"), "Text7(0000000 0000001 1111111)");
     }
 
     #[test]
