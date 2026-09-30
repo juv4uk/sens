@@ -1,49 +1,28 @@
 ; #211 — replaceability witness.
 ; CI runs this after physically moving lib/machine out of the checkout.
-; The expected answers live here in Lisp; the shell observes only the named
-; pass envelope. Removing a backend may remove execution capability, never
-; the meaning of these already-ratified language forms.
+; The witness uses only exact Function8 language forms and explicit binary
+; Number source. No machine/backend definition participates in the answer key.
 
-(load "lib/core.lisp")
+(00001001 machine-replaceability-add
+  (00001100 #b10 #b11))
 
-(00001001 machine-replaceability-rows
-  (00000001
-    ((add
-       (00001100 2 3)
-       5)
-     (eq-cond
-       (00000111
-         ((00000011 2 2) (1) 111)
-         ((00000011 2 2) (0) 222))
-       111)
-     (car-cons
-       (00000101 (00000100 2 3))
-       2))))
+(00001001 machine-replaceability-eq-cond
+  (00000111
+    ((00000011 #b10 #b10)
+     #b1101111)))
 
-(00001001 machine-replaceability-run
-  (00001000 (rows)
-    (00000111
-      ((00000010 rows) ()
-       (00000001 (machine-replaceability-witness (status pass))))
-      ((00000010 rows) (1)
-       (00100111
-         (00000001 machine-replaceability-witness)
-         (00000001 (status fail))
-         (00100111 (00000001 case) (00000001 malformed-row-tail))))
-      ((00000010 rows) (0)
-       (10011101 ((row (00000101 rows))
-              (name (00000101 row))
-              (actual (01001101 (00101111 row)))
-              (expected (00110000 row)))
-         (00000111
-           ((00100010 actual expected) (1)
-            (machine-replaceability-run (00000110 rows)))
-           ((00100010 actual expected) (0)
-            (00100111
-              (00000001 machine-replaceability-witness)
-              (00000001 (status fail))
-              (00100111 (00000001 case) name)
-              (00100111 (00000001 expected) expected)
-              (00100111 (00000001 actual) actual)))))))))
+(00001001 machine-replaceability-car-cons
+  (00000101 (00000100 #b10 #b11)))
 
-(machine-replaceability-run machine-replaceability-rows)
+; Every assertion is a strict one-clause PredicateBit COND. If any assertion
+; is NO, COND yields (), so the shell's exact pass-envelope check fails closed.
+(00001001 machine-replaceability-verdict
+  (00000111
+    ((00000011 machine-replaceability-add #b101)
+     (00000111
+       ((00000011 machine-replaceability-eq-cond #b1101111)
+        (00000111
+          ((00000011 machine-replaceability-car-cons #b10)
+           (00000001 (machine-replaceability-witness (status pass))))))))))
+
+machine-replaceability-verdict
