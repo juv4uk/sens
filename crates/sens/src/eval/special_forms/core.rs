@@ -52,7 +52,11 @@ pub(crate) fn evaluate_cond(
         if parts.len() != 2 {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
-                "cond expects exactly (test expression)",
+                format!(
+                    "cond expects exactly (test expression); got {} parts: {:?}",
+                    parts.len(),
+                    clause.kind
+                ),
                 clause.span,
             ));
         }
