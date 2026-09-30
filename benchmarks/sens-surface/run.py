@@ -13,9 +13,10 @@
 Імена користувацьких функцій (fib, loop, ...) однакові в усіх формах —
 різниться лише поверхня примітивів.
 
-Навантаження навмисно використовують лише eq/atom/cons/car/cdr/+/-:
-на main 33bfb53a `(< 2 1)` повертає "0", який `cond` трактує як істину
-(див. звіт), тож програми з `<`/`=` зараз дають неправильні відповіді.
+Навантаження навмисно використовують лише eq/atom/cons/car/cdr/+/-.
+Після Predicate1 reset (#1703/#1663) кожна умова COND є двочастинною:
+предикат напряму повертає точний one-bit результат, без T/NIL truthiness
+і без expected-result поля.
 
 Кожен прогін спершу перевіряє відповідь; неправильна відповідь = збій
 бенчмарку, не число.
@@ -27,7 +28,6 @@
 """
 
 import argparse
-import re
 import datetime as dt
 import json
 import os
@@ -100,17 +100,17 @@ def ack_py(m, n):
 BUILD = """\
 ({def} build ({lambda} (n acc)
   ({cond} (({eq} n 0) acc)
-        (t (build ({-} n 1) ({cons} n acc))))))
+        (({eq} 0 0) (build ({-} n 1) ({cons} n acc))))))
 """
 LEN = """\
 ({def} len ({lambda} (xs n)
-  ({cond} (({atom} xs) () n)
-        (t (len ({cdr} xs) ({+} n 1))))))
+  ({cond} (({atom} xs) n)
+        (({eq} 0 0) (len ({cdr} xs) ({+} n 1))))))
 """
 TREE = """\
 ({def} mk ({lambda} (d)
   ({cond} (({eq} d 0) ({quote} leaf))
-        (t ({cons} (mk ({-} d 1)) (mk ({-} d 1)))))))
+        (({eq} 0 0) ({cons} (mk ({-} d 1)) (mk ({-} d 1)))))))
 """
 
 # Кожне навантаження: setup (визначення), call (вираз-відповідь),
@@ -123,7 +123,7 @@ WORKLOADS = {
 ({def} fib ({lambda} (n)
   ({cond} (({eq} n 0) 0)
         (({eq} n 1) 1)
-        (t ({+} (fib ({-} n 1)) (fib ({-} n 2)))))))
+        (({eq} 0 0) ({+} (fib ({-} n 1)) (fib ({-} n 2)))))))
 """,
         "call": "(fib {N})",
         "expected": lambda p: str(fib_py(p["N"])),
@@ -134,7 +134,7 @@ WORKLOADS = {
         "setup": """\
 ({def} loop ({lambda} (n acc)
   ({cond} (({eq} n 0) acc)
-        (t (loop ({-} n 1) ({+} acc 2))))))
+        (({eq} 0 0) (loop ({-} n 1) ({+} acc 2))))))
 """,
         "call": "(loop {N} 0)",
         "expected": lambda p: str(2 * p["N"]),
@@ -144,11 +144,11 @@ WORKLOADS = {
         "params": {"N": 1000, "R": 120}, "small": {"N": 200, "R": 10},
         "setup": BUILD + LEN + """\
 ({def} rev ({lambda} (xs acc)
-  ({cond} (({atom} xs) () acc)
-        (t (rev ({cdr} xs) ({cons} ({car} xs) acc))))))
+  ({cond} (({atom} xs) acc)
+        (({eq} 0 0) (rev ({cdr} xs) ({cons} ({car} xs) acc))))))
 ({def} work ({lambda} (r total)
   ({cond} (({eq} r 0) total)
-        (t (work ({-} r 1) ({+} total (len (rev (build {N} ({quote} ())) ({quote} ())) 0)))))))
+        (({eq} 0 0) (work ({-} r 1) ({+} total (len (rev (build {N} ({quote} ())) ({quote} ())) 0)))))))
 """,
         "call": "(work {R} 0)",
         "expected": lambda p: str(p["N"] * p["R"]),
@@ -158,13 +158,13 @@ WORKLOADS = {
         "params": {"N": 100, "R": 5000}, "small": {"N": 100, "R": 50},
         "setup": BUILD + """\
 ({def} mem ({lambda} (x xs)
-  ({cond} (({atom} xs) () 0)
+  ({cond} (({atom} xs) 0)
         (({eq} x ({car} xs)) 1)
-        (t (mem x ({cdr} xs))))))
+        (({eq} 0 0) (mem x ({cdr} xs))))))
 ({def} xs (build {N} ({quote} ())))
 ({def} work ({lambda} (r hits)
   ({cond} (({eq} r 0) hits)
-        (t (work ({-} r 1) ({+} hits (mem {N} xs)))))))
+        (({eq} 0 0) (work ({-} r 1) ({+} hits (mem {N} xs)))))))
 """,
         "call": "(work {R} 0)",
         "expected": lambda p: str(p["R"]),
@@ -177,7 +177,7 @@ WORKLOADS = {
 ({def} add3 (make-adder 3))
 ({def} loop ({lambda} (n acc)
   ({cond} (({eq} n 0) acc)
-        (t (loop ({-} n 1) (add3 acc))))))
+        (({eq} 0 0) (loop ({-} n 1) (add3 acc))))))
 """,
         "call": "(loop {N} 0)",
         "expected": lambda p: str(3 * p["N"]),
@@ -189,7 +189,7 @@ WORKLOADS = {
 ({def} ack ({lambda} (m n)
   ({cond} (({eq} m 0) ({+} n 1))
         (({eq} n 0) (ack ({-} m 1) 1))
-        (t (ack ({-} m 1) (ack m ({-} n 1)))))))
+        (({eq} 0 0) (ack ({-} m 1) (ack m ({-} n 1)))))))
 """,
         "call": "(ack 3 {N})",
         "expected": lambda p: str(ack_py(3, p["N"])),
@@ -200,7 +200,7 @@ WORKLOADS = {
         "setup": TREE + """\
 ({def} cnt ({lambda} (x)
   ({cond} (({atom} x) 1)
-        (t ({+} (cnt ({car} x)) (cnt ({cdr} x)))))))
+        (({eq} 0 0) ({+} (cnt ({car} x)) (cnt ({cdr} x)))))))
 """,
         "call": "(cnt (mk {N}))",
         "expected": lambda p: str(2 ** p["N"]),
@@ -211,14 +211,14 @@ WORKLOADS = {
         "setup": """\
 ({def} mkal ({lambda} (n acc)
   ({cond} (({eq} n 0) acc)
-        (t (mkal ({-} n 1) ({cons} ({cons} n ({+} n n)) acc))))))
+        (({eq} 0 0) (mkal ({-} n 1) ({cons} ({cons} n ({+} n n)) acc))))))
 ({def} look ({lambda} (k al)
-  ({cond} (({atom} al) () 0)
+  ({cond} (({atom} al) 0)
         (({eq} k ({car} ({car} al))) ({cdr} ({car} al)))
-        (t (look k ({cdr} al))))))
+        (({eq} 0 0) (look k ({cdr} al))))))
 ({def} sumall ({lambda} (k al acc)
   ({cond} (({eq} k 0) acc)
-        (t (sumall ({-} k 1) al ({+} acc (look k al)))))))
+        (({eq} 0 0) (sumall ({-} k 1) al ({+} acc (look k al)))))))
 """,
         "call": "(sumall {N} (mkal {N} ({quote} ())) 0)",
         "expected": lambda p: str(p["N"] * (p["N"] + 1)),
@@ -228,14 +228,14 @@ WORKLOADS = {
         "params": {"N": 1000, "R": 60}, "small": {"N": 200, "R": 5},
         "setup": BUILD + """\
 ({def} mymap ({lambda} (f xs)
-  ({cond} (({atom} xs) () xs)
-        (t ({cons} (f ({car} xs)) (mymap f ({cdr} xs)))))))
+  ({cond} (({atom} xs) xs)
+        (({eq} 0 0) ({cons} (f ({car} xs)) (mymap f ({cdr} xs)))))))
 ({def} myfold ({lambda} (f acc xs)
-  ({cond} (({atom} xs) () acc)
-        (t (myfold f (f acc ({car} xs)) ({cdr} xs))))))
+  ({cond} (({atom} xs) acc)
+        (({eq} 0 0) (myfold f (f acc ({car} xs)) ({cdr} xs))))))
 ({def} work ({lambda} (r total)
   ({cond} (({eq} r 0) total)
-        (t (work ({-} r 1)
+        (({eq} 0 0) (work ({-} r 1)
                  ({+} total (myfold ({lambda} (a b) ({+} a b)) 0
                                    (mymap ({lambda} (x) ({+} x x)) (build {N} ({quote} ()))))))))))
 """,
@@ -248,10 +248,10 @@ WORKLOADS = {
         "setup": """\
 ({def} is-even ({lambda} (n)
   ({cond} (({eq} n 0) 1)
-        (t (is-odd ({-} n 1))))))
+        (({eq} 0 0) (is-odd ({-} n 1))))))
 ({def} is-odd ({lambda} (n)
   ({cond} (({eq} n 0) 0)
-        (t (is-even ({-} n 1))))))
+        (({eq} 0 0) (is-even ({-} n 1))))))
 """,
         "call": "(is-even {N})",
         "expected": lambda p: "1" if p["N"] % 2 == 0 else "0",
@@ -262,7 +262,7 @@ WORKLOADS = {
         "setup": TREE + LEN + """\
 ({def} flat ({lambda} (x acc)
   ({cond} (({atom} x) ({cons} x acc))
-        (t (flat ({car} x) (flat ({cdr} x) acc))))))
+        (({eq} 0 0) (flat ({car} x) (flat ({cdr} x) acc))))))
 """,
         "call": "(len (flat (mk {N}) ({quote} ())) 0)",
         "expected": lambda p: str(2 ** p["N"]),
@@ -286,10 +286,6 @@ def render(template, form, params):
         out = out.replace("{" + token + "}", SURFACES[token][form])
     if "{" in out:
         raise ValueError(f"незамінений токен у формі {form}: {out}")
-    if form == "legacy-en":
-        # Англійський Lisp до таблиці функцій (b4f75d2f, 2026-09-08): `atom` на
-        # () давав t, тож кінець списку — двочастинна клауза ((atom xs) base).
-        out = re.sub(r"\(\(atom (\S+)\) \(\) ", r"((atom \1) ", out)
     if form == "wrap":
         out = WRAP_PRELUDE + out
     return out
