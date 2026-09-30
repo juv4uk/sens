@@ -4,7 +4,7 @@
 //! exact SENS -> selected external kernel -> opaque native payload -> native observation.
 //! Kernel names are mechanism selectors, never function identities or semantic laws.
 
-use sens::{
+use ::sens::{
     register_sens_capability, sens, Environment, ErrorKind, LanguageError, Sens8, Span, Value,
 };
 use std::fs;
