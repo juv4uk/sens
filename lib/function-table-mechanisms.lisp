@@ -29,4 +29,10 @@
     (00001100 common-lisp bounded-exact-add)
     (00001100 prolog bounded-exact-add)
     (00001100 clips bounded-exact-add)
-    (00001100 datalog bounded-exact-add)))
+    (00001100 datalog bounded-exact-add))
+  ; #1422 — profile selection precedes host mechanism lookup.
+  ; This row admits only a mechanical registered-host route for the already
+  ; existing SENS function 10101000 under Core3. It defines no kernel syntax,
+  ; surface spelling, result law, or host availability.
+  (profile-routes
+    (core3 10101000 registered-host-mechanism)))

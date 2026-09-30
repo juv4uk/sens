@@ -171,6 +171,9 @@ jobs:
           cat tests/function-table-mechanisms-verdict.lisp
           ./target/debug/sens scripts/enforce-function-table-mechanisms.lisp
 
+      - name: Profile-scoped SENS host admission
+        run: cargo test -p sens --test profile_mechanism_projection_1422 -- --nocapture
+
       - name: Canon-subordinate island math evidence
         shell: bash
         run: |
@@ -281,6 +284,7 @@ jobs:
           ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           ./target/debug/sens scripts/generate-rust-semantic-registry.lisp --check
           ./target/debug/sens scripts/generate-rust-evaluator-dispatch.lisp --check
+          ./target/debug/sens scripts/generate-rust-profile-mechanism-routes.lisp --check
           ./target/debug/sens scripts/generate-rust-function-signatures.lisp --check
           ./target/debug/sens scripts/generate-functions-md.lisp --check
 
