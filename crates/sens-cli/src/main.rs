@@ -6,6 +6,7 @@ use std::process;
 use std::rc::Rc;
 mod lsp_entry;
 mod islands;
+mod island_invoke;
 mod repl;
 mod swarm;
 mod tcp_repl;
@@ -119,6 +120,7 @@ fn main() {
     // capability layer (filesystem, process execution, TCP). The semantic
     // core itself ships none.
     sens_host::install();
+    island_invoke::install();
     let args: Vec<String> = env::args().collect();
     let allowed = allowed_processes(&args);
     let sexpr_protocol = args.iter().any(|a| a == "--protocol=sexpr");
