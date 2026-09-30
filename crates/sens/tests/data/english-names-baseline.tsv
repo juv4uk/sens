@@ -435,7 +435,6 @@ lisp	contracts/yantraos-bridge-contract.lisp	provenance	2
 lisp	evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp	quote	1
 lisp	experiments/atomspace-pattern-audit-791.lisp	reason	7
 lisp	experiments/blackboard-pattern-audit-790.lisp	reason	8
-lisp	experiments/core4-eq-answer-1258.lisp	eq?	3
 lisp	experiments/function-genealogy.lisp	cadddr	1
 lisp	experiments/function-genealogy.lisp	cadr	1
 lisp	experiments/function-genealogy.lisp	fourth	1
@@ -1407,7 +1406,6 @@ lisp	racket/examples/constitution.lisp	quote	18
 lisp	scripts/build-inventory.lisp	assoc	2
 lisp	scripts/build-inventory.lisp	identity	2
 lisp	scripts/check-core4-predicate-answer-scale.lisp	second	4
-lisp	scripts/check-core4-predicate-record-inventory.lisp	label	2
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	fourth	1
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	second	3
 lisp	scripts/check-kernel-abi-transport-boundary.lisp	third	1
@@ -1686,7 +1684,6 @@ lisp-дані	scripts/check-core4-predicate-answer-scale.lisp	answer-or	1
 lisp-дані	scripts/check-core4-predicate-answer-scale.lisp	answer-weaken	1
 lisp-дані	scripts/check-core4-predicate-answer-scale.lisp	atom?	3
 lisp-дані	scripts/check-core4-predicate-answer-scale.lisp	eq?	3
-lisp-дані	scripts/check-core4-predicate-record-inventory.lisp	identity	1
 lisp-дані	scripts/generate-functions-md.lisp	def	1
 lisp-дані	scripts/generate-functions-md.lisp	define	1
 lisp-дані	scripts/generate-rust-evaluator-dispatch.lisp	define	1
