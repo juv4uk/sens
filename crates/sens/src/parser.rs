@@ -29,6 +29,48 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
     Ok(expressions)
 }
 
+/**
+ * Read exactly one human string literal and lower it through an explicit
+ * UPC-7 layout before it crosses the canonical Text boundary.
+ *
+ * This is deliberately separate from `parse()` while legacy `String`
+ * consumers are being classified. The ordinary parser still supports those
+ * host/mechanism strings; callers that mean canonical SENS Text must opt into
+ * this route and receive only `Text7`.
+ */
+pub fn parse_text7_literal(
+    source: &str,
+    layout: crate::Text7Layout,
+) -> Result<crate::Text7, LanguageError> {
+    let expressions = parse(source)?;
+    let [expression] = expressions.as_slice() else {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "expected exactly one explicit Text7 string literal",
+            Span {
+                start: 0,
+                end: source.len(),
+            },
+        ));
+    };
+
+    let ExprKind::String(spelling) = &expression.kind else {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "expected an explicit quoted Text7 string literal",
+            expression.span,
+        ));
+    };
+
+    crate::encode_text7(spelling, layout).map_err(|error| {
+        LanguageError::new(
+            ErrorKind::Parse,
+            format!("Text7 admission failed: {error}"),
+            expression.span,
+        )
+    })
+}
+
 struct Parser<'a> {
     source: &'a str,
     cursor: usize,
