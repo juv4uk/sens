@@ -19,5 +19,5 @@
    ()
    (00000001 (authority-ok)))
   ((00000010 changed-host-tests)
-   (0)
+   (#b0)
    (00000001 (authority-ok))))
