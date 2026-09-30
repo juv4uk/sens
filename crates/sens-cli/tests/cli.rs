@@ -374,7 +374,10 @@ fn repl_echoes_a_lone_unknown_symbol_as_a_greeting_not_an_error() {
         .stdin
         .take()
         .expect("stdin should be piped")
-        .write_all("мама\nhello\nсонце\n(+ мама 1)\n(car мама)\n(quote мама)\n".as_bytes())
+        .write_all(
+            "мама\nhello\nсонце\n(00001100 мама 1)\n(00000101 мама)\n(00000001 мама)\n"
+                .as_bytes(),
+        )
         .expect("should write to stdin");
     let output = child.wait_with_output().expect("binary should run");
     let _ = std::fs::remove_dir_all(&dir);
@@ -386,10 +389,11 @@ fn repl_echoes_a_lone_unknown_symbol_as_a_greeting_not_an_error() {
     assert!(stdout.contains("echo мама"), "stdout was: {stdout:?}");
     assert!(stdout.contains("echo hello"), "stdout was: {stdout:?}");
     assert!(stdout.contains("echo сонце"), "stdout was: {stdout:?}");
-    // ...but the same unknown symbol inside a real form is still a named
-    // failure — the echo is an interaction policy, not a language change.
+    // ...but the same unknown symbol inside a real exact-Function8 form is
+    // still a named failure — echo is interaction policy, not language truth.
     assert!(stderr.contains("unknown symbol"), "stderr was: {stderr:?}");
-    // A quoted symbol evaluates fine and prints itself, no echo involved.
+    // Exact Function8 QUOTE keeps the word as data; no human function head is
+    // needed merely to prove the interaction/data distinction.
     assert!(stdout.contains("мама"), "stdout was: {stdout:?}");
 }
 
