@@ -24,7 +24,6 @@
 (review "crates/my-lisp/tests/semantic_coordinate_join.rs" "102a70d74902b90d029a96e1f0d02c81dbd4e7f7afff2298bab303f10e39beba" issue-1098 sid8-witness-migration)
 (review "crates/my-lisp/tests/semantic_coordinate_join_2.rs" "49328492430e58e516ce926d77808a111992fdd586356c517c462db7c222baeb" issue-1098 sid8-witness-migration)
 (review "crates/xtask/src/external_oracle.rs" "9ad5faa5003a3e440ffc1408f4f4e7f4d3985508c34933d0425e796bab4e7f05" issue-1098 sid8-tooling-migration)
-(review "crates/my-lisp/tests/peer_surface_identity.rs" "ac66056cda917c2104b4e62d126587a067b9acd6bacff7ad658b3ee905addc8e" issue-1098 sid8-observer-migration)
 (review "crates/my-lisp/tests/uk_surface_equivalence.rs" "a726233e46be11fdfaabcb8b84074cfcba8beb919b753334411c2b092a2c1a63" issue-1098 sid8-witness-migration)
 (review "crates/my-lisp/tests/rivnopravnist_mov.rs" "40cfe6b0dd9808a31be1f161a5da05982a1b7b15f6b3a5ac5dea063062ae5112" issue-1098 legacy-export-sid8-boundary-witness)
 
