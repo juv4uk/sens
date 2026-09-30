@@ -3,6 +3,8 @@
 Питання: чи має SENS місце там, де агенти обмінюються маленькими програмами й
 одразу їх виконують? Бенчмарк міряє саме цю нішу, а не абстрактну швидкість.
 
+**Задача absolute-binary lane:** #1845.
+
 *English layer: a stream of N small, different programs (expressions, lambda
 application, a conditional, list access, a small recursion) is received as bytes
 and executed immediately in one long-lived session. Cost per message = decode +
@@ -26,6 +28,7 @@ execute, in CPU instructions (Cachegrind), plus message size in bytes.*
 - Спершу правильність: відповідь кожної форми на кожне повідомлення звіряється з
   CPython; неправильна відповідь — збій, а не число.
 - Генератор детермінований (`--seed 1`).
+- **Не змішувати** cold-start, warm-session і size в один слоган «швидший за Python».
 
 ```sh
 cargo build --release -p sens --example agent_bench
@@ -37,28 +40,26 @@ guix time-machine -C channels.scm -- shell -m manifest.scm \
 
 ## Результат
 
-Див. `results/20260927/report.md` (main `2f2611b9` + ця гілка; i5-6400; Guix
-за `channels.scm`). Висновки нижче — з цього прогону.
+### Повний baseline (SENS + CPython)
+
+Див. `results/20260927/report.md` (i5-6400; Guix). Висновки:
 
 1. **Один процес на повідомлення — SENS у ~60 разів легший.** Старт SENS
-   ≈1,5 млн інструкцій, CPython ≈94 млн. Для агента, що запускає окремий процес
-   на кожен виклик інструмента, це вирішальне.
-2. **У довгоживучій сесії SENS fasl швидший за текст Python (×4) і за
-   JSON-інтерпретатор на Python (×1,3), але повільніший за готовий байткод
-   CPython (`marshal`) приблизно в 3,7 раза.** Декодування fasl і marshal
-   однакове (~10 тис. інструкцій); різницю дає виконання: ~48 тис. проти
-   ~5,5 тис. — дерево з іменами проти байткоду зі слотами.
-3. **fasl більший за текст (~154 байти проти ~44), а SENS wire — найменший: ~34
-   байти**, менше за англійський текст SENS (44), текст Python (46) і JSON (48),
-   у 4,5 раза менше за fasl. Декодування wire коштує стільки ж, як fasl
-   (~10,4 тис. проти ~10,0 тис. інструкцій). Місце у fasl забирав формат, а не
-   коди СЕНС: заголовок із 32-байтовим хешем, числа як f64 (10 байтів), довжини
-   як u32 (5 байтів на список). fasl лишається для кешу ядра (там хеш потрібен).
+   ≈1,5 млн інструкцій, CPython ≈94 млн.
+2. **Warm session:** fasl швидший за py-src (×4) і py-json (×1,3), повільніший за
+   py-marshal (×3,7). Decode fasl≈marshal (~10k); різниця в execute.
+3. **SENS wire найменший: ~34 байти** (проти en 44, py-src 46, json 48, fasl 154).
+
+### Частковий remeasure 2026-09-30
+
+`results/20260930-partial/report.md` — розміри + CPython Cachegrind на іншому
+host; **без** `agent_bench` (SENS binary encode/run). Підтверджує детерміновані
+розміри text/json/marshal і порядок warm CPython: marshal ≪ json ≪ src.
 
 ## Межі
 
 - Програми маленькі й прості; для важких обчислень див. `benchmarks/cross-language`.
 - `py-marshal` залежить від версії CPython (байткод непереносний між версіями),
-  а fasl SENS — ні; у цьому бенчмарку це не міряється.
+  а fasl/wire SENS — ні; у цьому бенчмарку portability не міряється окремо.
 - Бібліотека core SENS не завантажується; повідомлення користуються лише
   примітивами мови.
