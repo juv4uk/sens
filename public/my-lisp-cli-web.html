@@ -110,19 +110,19 @@
       // переобчислення всього буфера не потрібне й не бажане.
       const history = [];
       let historyIndex = -1;
-      let currentSurface = "core";
+      let currentSurface = "sens";
       const promptEl = document.getElementById("prompt");
 
       function updatePrompt() {
-        promptEl.textContent = `my-lisp[${currentSurface}]>`;
+        promptEl.textContent = `sens[${currentSurface}]>`;
       }
 
       function handleMetaCommand(line, wasmModule) {
         const parts = line.split(/\s+/);
         const command = parts[0];
         if (command === ":допомога" || command === ":help") {
-          printLine("Поверхні: :мова ук | укр | en | sa | core", "line-system");
-          printLine("Технічний alias: :surface ук | укр | en | sa | core", "line-system");
+          printLine("Режими: :мова sens | ук | укр | en | sa", "line-system");
+          printLine("Default sens приймає binary Function8/Number; core — лише compat alias.", "line-system");
           return true;
         }
         if (command !== ":мова" && command !== ":surface") return false;
@@ -153,18 +153,14 @@
           return;
         }
 
-        try {
-          currentSurface = wasmModule.set_surface("uk");
-        } catch (error) {
-          printLine("Помилка запуску української поверхні: " + String(error), "line-error");
-        }
+        currentSurface = wasmModule.current_surface();
         updatePrompt();
-        printLine("my-lisp-cli · Web — українська поверхня над тим самим семантичним ядром.", "line-system");
-        printLine("Змінити: :мова en | sa | core · допомога: :допомога · Ctrl-L очищає екран.", "line-system");
+        printLine("sens Web — default canonical binary SENS.", "line-system");
+        printLine("Людські назви лише явно: :мова ук | укр | en | sa · :допомога · Ctrl-L очищає екран.", "line-system");
         printLine("", "line-system");
 
         inputEl.disabled = false;
-        inputEl.placeholder = "(атом? 'мама)";
+        inputEl.placeholder = "(00001100 #b1 #b10)";
         inputEl.focus();
 
         inputEl.addEventListener("keydown", (event) => {
