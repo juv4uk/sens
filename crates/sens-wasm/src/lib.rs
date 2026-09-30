@@ -44,7 +44,7 @@ enum WebSurface {
 impl WebSurface {
     fn parse(value: &str) -> Option<Self> {
         match value.trim().to_lowercase().as_str() {
-            "core" | "ядро" => Some(Self::Core),
+            "sens" | "binary" | "core" | "ядро" => Some(Self::Core),
             "en" | "english" | "англійська" => Some(Self::English),
             "ук" | "українська" => Some(Self::Ukrainian),
             "укр" | "ukr" | "українська-повна" => Some(Self::UkrainianFull),
@@ -55,7 +55,7 @@ impl WebSurface {
 
     fn code(self) -> &'static str {
         match self {
-            Self::Core => "core",
+            Self::Core => "sens",
             Self::English => "en",
             Self::Ukrainian => "ук",
             Self::UkrainianFull => "укр",
@@ -186,16 +186,18 @@ pub fn evaluate(source: &str, mode: JsValue) -> Result<JsValue, JsValue> {
     SESSION.with(|slot| {
         let mut guard = slot.borrow_mut();
         let state = guard.as_mut().expect("session set by init_if_needed");
-        let (result, forms) =
-            sens_literate::eval_literate(source, source_mode, &mut state.session).map_err(
-                |e| {
-                    JsValue::from_str(&render_error_for_presentation(
-                        &e,
-                        source,
-                        state.surface.presentation(),
-                    ))
-                },
-            )?;
+        let evaluated = if state.surface == WebSurface::Core {
+            sens_literate::eval_literate_canonical(source, source_mode, &mut state.session)
+        } else {
+            sens_literate::eval_literate(source, source_mode, &mut state.session)
+        };
+        let (result, forms) = evaluated.map_err(|e| {
+            JsValue::from_str(&render_error_for_presentation(
+                &e,
+                source,
+                state.surface.presentation(),
+            ))
+        })?;
 
         let evaluation = Evaluation {
             value: render_value_for_presentation(&result.value, state.surface.presentation()),
@@ -219,7 +221,7 @@ pub fn reset_session() {
 fn set_surface_impl(name: &str) -> Result<String, String> {
     init_if_needed()?;
     let surface = WebSurface::parse(name)
-        .ok_or_else(|| format!("unknown surface: {name}; expected ук|укр|en|sa|core"))?;
+        .ok_or_else(|| format!("unknown surface: {name}; expected sens|ук|укр|en|sa"))?;
     SESSION.with(|slot| {
         let mut guard = slot.borrow_mut();
         let state = guard.as_mut().expect("session set by init_if_needed");
@@ -237,13 +239,13 @@ pub fn set_surface(name: &str) -> Result<String, JsValue> {
 #[wasm_bindgen]
 pub fn current_surface() -> String {
     if init_if_needed().is_err() {
-        return "core".to_string();
+        return "sens".to_string();
     }
     SESSION.with(|slot| {
         slot.borrow()
             .as_ref()
             .map(|state| state.surface.code().to_string())
-            .unwrap_or_else(|| "core".to_string())
+            .unwrap_or_else(|| "sens".to_string())
     })
 }
 
@@ -251,20 +253,26 @@ pub fn current_surface() -> String {
 pub fn diagnose(source: &str, mode: JsValue) -> JsValue {
     let mode_str = mode.as_string().unwrap_or_default();
     let is_literate = mode_str == "markdown";
-    let presentation = if init_if_needed().is_ok() {
+    let (presentation, canonical_reader) = if init_if_needed().is_ok() {
         SESSION.with(|slot| {
             slot.borrow()
                 .as_ref()
-                .map(|state| state.surface.presentation())
-                .unwrap_or(PresentationLanguage::Canonical)
+                .map(|state| {
+                    (
+                        state.surface.presentation(),
+                        state.surface == WebSurface::Core,
+                    )
+                })
+                .unwrap_or((PresentationLanguage::Canonical, true))
         })
     } else {
-        PresentationLanguage::Canonical
+        (PresentationLanguage::Canonical, true)
     };
-    serde_wasm_bindgen::to_value(&diagnose_impl_with_presentation(
+    serde_wasm_bindgen::to_value(&diagnose_impl_with_reader(
         source,
         is_literate,
         presentation,
+        canonical_reader,
     ))
     .unwrap_or(JsValue::NULL)
 }
@@ -274,13 +282,19 @@ pub fn diagnose(source: &str, mode: JsValue) -> JsValue {
 /// native test without the wasm-bindgen-test harness).
 #[cfg(test)]
 fn diagnose_impl(source: &str, is_literate: bool) -> Vec<Diagnostic> {
-    diagnose_impl_with_presentation(source, is_literate, PresentationLanguage::Canonical)
+    diagnose_impl_with_reader(
+        source,
+        is_literate,
+        PresentationLanguage::Canonical,
+        false,
+    )
 }
 
-fn diagnose_impl_with_presentation(
+fn diagnose_impl_with_reader(
     source: &str,
     is_literate: bool,
     presentation: PresentationLanguage,
+    canonical_reader: bool,
 ) -> Vec<Diagnostic> {
     // extract_code/remap_offset are the same functions parse_literate()
     // itself uses internally (sens-literate/src/lib.rs) -- called
@@ -295,7 +309,13 @@ fn diagnose_impl_with_presentation(
         return diagnostics;
     }
 
-    match sens::parse(&concatenated) {
+    let parsed = if canonical_reader {
+        sens::parse_canonical(&concatenated)
+    } else {
+        sens::parse(&concatenated)
+    };
+
+    match parsed {
         Err(e) => diagnostics.push(Diagnostic {
             from: sens_literate::remap_offset(e.span.start, &offset_maps),
             to: sens_literate::remap_offset(e.span.end, &offset_maps),
@@ -349,6 +369,24 @@ mod tests {
     }
 
     #[test]
+    fn web_default_is_canonical_binary_sens_and_core_is_only_alias() {
+        reset_session();
+        init_if_needed().expect("core preload");
+        assert_eq!(current_surface(), "sens");
+        assert_eq!(set_surface_impl("core").expect("compat alias"), "sens");
+
+        sens_literate::parse_literate_canonical(
+            "(00001100 #b1 #b10)",
+            SourceMode::PureLisp,
+        )
+        .expect("canonical binary program");
+        sens_literate::parse_literate_canonical("(+ #b1 #b10)", SourceMode::PureLisp)
+            .expect_err("human function head is not default SENS");
+        sens_literate::parse_literate_canonical("(00001100 1 #b10)", SourceMode::PureLisp)
+            .expect_err("decimal Number spelling is not default SENS");
+    }
+
+    #[test]
     fn web_surface_switch_is_layered_and_preserves_user_definitions() {
         reset_session();
         init_if_needed().expect("core preload");
@@ -378,7 +416,7 @@ mod tests {
             assert_eq!(closure.value.to_string(), "7");
         });
 
-        assert_eq!(set_surface_impl("core").expect("core"), "core");
+        assert_eq!(set_surface_impl("core").expect("core alias"), "sens");
         SESSION.with(|slot| {
             let guard = slot.borrow();
             let state = guard.as_ref().unwrap();
@@ -479,9 +517,14 @@ mod tests {
         init_if_needed().expect("core.lisp preload must succeed");
 
         let mode = JsValue::from_str("sens");
-        evaluate("(def foo (lambda (x) (+ x 1)))", mode.clone()).expect("def should succeed");
+        evaluate(
+            "(00001001 foo (00001000 (x) (00001100 x #b1)))",
+            mode.clone(),
+        )
+        .expect("binary default define should succeed");
         let second: Evaluation = serde_wasm_bindgen::from_value(
-            evaluate("(foo 5)", mode).expect("second call should see foo from the first"),
+            evaluate("(foo #b101)", mode)
+                .expect("second canonical call should see foo from the first"),
         )
         .expect("decode second evaluation");
         assert_eq!(second.value, "6");
