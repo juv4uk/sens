@@ -77,6 +77,9 @@ pub(crate) enum CondClauseMode {
 struct Limits {
     selected_core_profile: Option<CoreProfile>,
     cond_clause_mode: CondClauseMode,
+    /// Host/source-entry policy only. When true, dynamic read/eval routes must
+    /// preserve canonical binary source rules instead of reopening human syntax.
+    canonical_source: bool,
     cons_limit: Option<usize>,
     cons_count: usize,
     numeric_bit_limit: Option<usize>,
@@ -222,6 +225,18 @@ impl Environment {
 
     pub(crate) fn cond_clause_mode(&self) -> CondClauseMode {
         self.2.borrow().cond_clause_mode
+    }
+
+    /// Mark this session as executing canonical binary source.
+    ///
+    /// This is a host entry policy, not a SENS value or semantic domain.
+    /// Lexical children inherit it because session limits are shared.
+    pub fn set_canonical_source(&self, enabled: bool) {
+        self.2.borrow_mut().canonical_source = enabled;
+    }
+
+    pub(crate) fn canonical_source(&self) -> bool {
+        self.2.borrow().canonical_source
     }
 
     /// Native root sessions are unrestricted (`None`). An embedding can set
