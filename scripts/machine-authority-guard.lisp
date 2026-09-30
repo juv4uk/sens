@@ -5,9 +5,6 @@
 ; independent Lisp-owned semantic witness. Native/host results may realize
 ; meaning but may never become their own answer key.
 
-(00001001 second (00001000 (x) (00000101 (00000110 x))))
-(00001001 third (00001000 (x) (00000101 (00000110 (00000110 x)))))
-
 (00001001 authority-edges
   (01001011 (10100110 "tests/machine-authority-edges.lisp")))
 
@@ -39,7 +36,7 @@
            ((00000010 field) (#b0)
             (00000111
               ((00000011 (00000101 field) name) (#b1)
-               (second field))
+               (00101111 field))
               ((00000011 (00000101 field) name) (#b0)
                (machine-provenance-field-from name (00000110 fields)))))))))))
 
@@ -93,13 +90,13 @@
        (00000111
          ((00000011 (00000101 row) (00000001 authority-edge)) (#b1)
           (00000111
-            ((00000011 (second row) (00000001 semantic)) (#b1)
+            ((00000011 (00101111 row) (00000001 semantic)) (#b1)
              (00000111
-               ((00000011 (third row) (00000001 machine)) (#b1)
+               ((00000011 (00110000 row) (00000001 machine)) (#b1)
                 (00000001 allowed))
-               ((00000011 (third row) (00000001 machine)) (#b0)
+               ((00000011 (00110000 row) (00000001 machine)) (#b0)
                 (00000001 denied))))
-            ((00000011 (second row) (00000001 semantic)) (#b0)
+            ((00000011 (00101111 row) (00000001 semantic)) (#b0)
              (00000001 denied))))
          ((00000011 (00000101 row) (00000001 authority-edge)) (#b0)
           (00000001 denied)))))))
