@@ -175,3 +175,13 @@
       "language-contract.lisp"
       "Rust generated-from-host semantic-authority-source")
     (00000001 host-to-language-authority-leak)))
+
+; I/O boundary used by the real authority guard.
+(00001001 guard-probe-source
+  (10100110 "tests/fixtures/semantic-authority-guard/forbidden-lisp-host-authority.lisp"))
+
+(01001000
+  (00100100 guard-probe-source))
+
+(01001000
+  (00111110 "semantic-authority-source" guard-probe-source))
