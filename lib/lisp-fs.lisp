@@ -14,9 +14,9 @@
 ; новий snapshot і адресу, попередній не змінюється. Відсутнє ім'я дає
 ; (not-found name), а не голий nil.
 
-(00001001 fs-objects car)
-(00001001 fs-bindings second)
-(00001001 fs-revision third)
+(00001001 fs-objects 00000101)
+(00001001 fs-bindings 00101111)
+(00001001 fs-revision 00110000)
 
 (00001001 fs-empty
   (00001000 ()

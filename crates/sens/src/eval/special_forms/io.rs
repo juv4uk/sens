@@ -7,7 +7,7 @@
 //! their names.
 
 use super::core::quoted;
-use crate::eval::{closures, evaluate};
+use crate::eval::{closures, evaluate, lower};
 use crate::{Environment, ErrorKind, Expr, LanguageError, Span, Value};
 use std::rc::Rc;
 
@@ -119,7 +119,8 @@ pub(crate) fn eval_values(
         return Ok(datum);
     }
     let expression = closures::value_to_expr(datum, span)?;
-    evaluate(&expression, environment)
+    let lowered = lower::lower_program(std::slice::from_ref(&expression));
+    evaluate(&lowered[0], environment)
 }
 
 pub(crate) fn read_all_values(

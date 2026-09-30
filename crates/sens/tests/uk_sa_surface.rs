@@ -25,7 +25,7 @@
 //!   -> `runtime_peer_operators.rs::stable_operator_peers_exist_before_human_surface_libraries_load`
 //!   (same IDs 1001/1002/1003/1014/1015/1016, behaviorally checked there).
 //! - uk_addition_works, uk_and_sa_produce_same_result (додати/+/yoga, ID
-//!   0104) -> `rivnopravnist_mov.rs::додавання_відділяє_людські_мови_від_спільного_символу`.
+//!   0104) -> `rivnopravnist_mov.rs::додавання_відділяє_людські_мови_від_спільного_двійкового_коду`.
 //! - sa_arithmetic_works, sa_comparisons_work, sa_and_en_produce_same_result
 //!   -> `runtime_peer_operators.rs` CASES already behaviorally check every
 //!   one of those SA spellings (viyoga/guṇana/haraṇa/hīna?/adhika?/sama?)

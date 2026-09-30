@@ -28,7 +28,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, semantic_registry, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -140,9 +140,6 @@ pub(crate) fn evaluate_step(
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
-            if let Some(value) = canon::value_for_surface(symbol) {
-                return Ok(EvalStep::Value(value));
-            }
             if let Some(sid) = canon::routed_sid_for_surface(symbol) {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
@@ -161,9 +158,6 @@ pub(crate) fn evaluate_step(
             }
             if let Some(value) = environment.get(symbol) {
                 return Ok(EvalStep::Value(value));
-            }
-            if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(symbol) {
-                return Ok(EvalStep::Value(Value::Sid(semantic_id)));
             }
             Err(LanguageError::new(
                 ErrorKind::UnknownSymbol,

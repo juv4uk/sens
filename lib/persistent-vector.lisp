@@ -55,8 +55,8 @@
 (00001001 vnode-index (00001000 (n) (00000101 n)))
 (00001001 vnode-value (00001000 (n) (00101111 n)))
 (00001001 vnode-height (00001000 (n) (00110000 n)))
-(00001001 vnode-left fourth)
-(00001001 vnode-right fifth)
+(00001001 vnode-left 00110001)
+(00001001 vnode-right 00110010)
 
 (00001001 vheight-of
   (00001000 (n) (00000111 ((00000010 n) () 0)

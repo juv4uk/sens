@@ -10,9 +10,11 @@
 //! заздалегідь (режим `encode`, не міряється). Англійська форма (`en`)
 //! читається з тексту — це її людська поверхня.
 //!
-//! Обидві форми виконуються як є, без попереднього зведення імен до кодів
-//! (`lower_program`): англійське ім'я розв'язується під час виконання, код
-//! СЕНС — одразу функція. Так порівнюється саме ім'я проти коду.
+//! Human/English source is lowered exactly once at the frontend boundary:
+//! parse -> lower_program. The evaluator never resolves human function spelling.
+//! SENS executes from binary FASL, where Function8 is already the execution identity.
+//! The benchmark therefore compares human-boundary parse+lower against binary decode,
+//! while both execution paths run the same lowered binary identities.
 //!
 //!   ci_bench DIR NAME FORM [MODE]
 //!     MODE = full (за замовчуванням) — завантажити й виконати, звірити відповідь;
@@ -26,7 +28,10 @@
 //! `fasl_decode_program`, `Session`, `eval_lowered_expressions`), щоб той самий
 //! файл збирався й на попередньому коміті.
 
-use sens::{eval_lowered_expressions, fasl_decode_program, fasl_encode_program, parse, Expr, Session};
+use sens::{
+    eval_lowered_expressions, fasl_decode_program, fasl_encode_program, lower_program, parse, Expr,
+    Session,
+};
 use std::{env, fs, path::Path, process::ExitCode};
 
 fn main() -> ExitCode {
@@ -57,7 +62,8 @@ fn main() -> ExitCode {
                 .unwrap_or_else(|e| panic!("{name}-sens.{part}.fasl (run encode first): {e}"));
             fasl_decode_program(&bytes).expect("fasl decodes").0
         } else {
-            parse(&text(part)).expect("text parses")
+            let parsed = parse(&text(part)).expect("text parses");
+            lower_program(&parsed)
         }
     };
     let setup = load("setup");
