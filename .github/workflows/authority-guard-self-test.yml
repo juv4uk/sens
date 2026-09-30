@@ -31,6 +31,9 @@ jobs:
         with:
           shared-key: authority-guard-self-test
 
+      - name: Regenerate Core4 FASL for this stacked source
+        run: cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+
       - name: Build sens transport
         run: cargo build -p sens-cli --bin sens
 
