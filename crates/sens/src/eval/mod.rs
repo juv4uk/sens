@@ -17,6 +17,7 @@ mod closures;
 pub(crate) mod lower;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
+mod profile_mechanisms_generated;
 mod special_forms;
 
 pub use capabilities::{
