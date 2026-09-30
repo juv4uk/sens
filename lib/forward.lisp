@@ -60,7 +60,7 @@
 (00001001 *working-memory* (00000001 ()))
 
 (00001010 assert-fact! (fact)
-  (00100111 (00000001 def) (00000001 *working-memory*) (00100111 (00000001 cons) fact (00000001 *working-memory*))))
+  (00100111 (00000001 def) (00000001 *working-memory*) (00100111 (00000001 00000100) fact (00000001 *working-memory*))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in

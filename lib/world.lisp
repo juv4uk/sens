@@ -292,8 +292,8 @@
                 (00100111 (00000001 cond)
                       (00100111
                         (00100111 (00000001 equal?)
-                              (00100111 (00000001 car)
-                                    (00100111 (00000001 car) (00000001 *legacy-knowledge-transition*)))
+                              (00100111 (00000001 00000101)
+                                    (00100111 (00000001 00000101) (00000001 *legacy-knowledge-transition*)))
                               (00100111 (00000001 quote) (00000001 accepted)))
                         (00100111 (00000001 second)
                               (00100111 (00000001 list)
@@ -301,9 +301,9 @@
                                           (00100111 (00000001 world-journal)
                                                 (00100111 (00000001 second)
                                                       (00000001 *legacy-knowledge-transition*))))
-                                    (00100111 (00000001 car) (00000001 *legacy-knowledge-transition*)))))
+                                    (00100111 (00000001 00000101) (00000001 *legacy-knowledge-transition*)))))
                       (00100111 (00000001 t)
-                            (00100111 (00000001 car) (00000001 *legacy-knowledge-transition*))))))))
+                            (00100111 (00000001 00000101) (00000001 *legacy-knowledge-transition*))))))))
 
 (00001010 advise (module-name clause)
   (legacy-world-transition-expansion
