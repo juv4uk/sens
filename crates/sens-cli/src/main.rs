@@ -62,12 +62,22 @@ fn bootstrap_core4(session: &mut Session) -> Result<sens::EvalResult, sens::Lang
     sens::load_core_library(session)
 }
 
+fn canonical_binary_entrypoint(argv0: &str) -> bool {
+    std::path::Path::new(argv0)
+        .file_stem()
+        .and_then(std::ffi::OsStr::to_str)
+        == Some("sens")
+}
+
 fn main() {
     // The CLI is a trusted local Lisp-machine surface: install the OS
     // capability layer (filesystem, process execution, TCP). The semantic
     // core itself ships none.
     sens_host::install();
     let args: Vec<String> = env::args().collect();
+    let canonical_binary_default = args
+        .first()
+        .is_some_and(|argv0| canonical_binary_entrypoint(argv0));
     let allowed = allowed_processes(&args);
     let sexpr_protocol = args.iter().any(|a| a == "--protocol=sexpr");
     let args: Vec<String> = args
@@ -224,6 +234,7 @@ fn main() {
         if arg == "--help" || arg == "-h" {
             println!("Usage: sens [file]");
             println!("If no file is provided, starts the REPL.");
+            println!("File execution through the sens binary is canonical binary by default; the legacy my-lisp binary remains the explicit human/transition entrypoint.");
             println!("Canonical source extension: .lisp (per sens#81 -- extension != semantics); .wsm/.my remain supported legacy aliases; .всм/.мій/.лісп are equal-standing Ukrainian spellings of the same aliases; .sens/.сенс are supported SENS aliases (not canonical)");
             println!("\nOptions:");
             println!("  lsp                          Run the Language Server (LSP over stdio)");
@@ -432,7 +443,13 @@ fn main() {
         session.environment.define("*argv*", argv);
 
         match fs::read_to_string(filename) {
-            Ok(source) => match parse(&source) {
+            Ok(source) => {
+                let parsed = if canonical_binary_default {
+                    sens::parse_canonical(&source)
+                } else {
+                    parse(&source)
+                };
+                match parsed {
                 Ok(ast) => match eval_parsed_expressions(&ast, &mut session) {
                     Ok(result) => {
                         for out in result.output {
@@ -454,7 +471,8 @@ fn main() {
                     eprintln!("Parse error: {}", e.render(&source));
                     process::exit(1);
                 }
-            },
+                }
+            }
             Err(e) => {
                 eprintln!("Error reading file {}: {}", filename, e);
                 process::exit(1);
