@@ -31,27 +31,19 @@
       ((00100010
          machine-representation-primary
          machine-representation-semantic-reference)
-       (1)
        (00000111
          ((00100010
             machine-representation-alternate
             machine-representation-semantic-reference)
-          (1)
           (00000001 (machine-representation-independence-witness (status pass))))
-         ((00100010
-            machine-representation-alternate
-            machine-representation-semantic-reference)
-          (0)
+         ((00000010 (00000001 ()))
           (00100111
             (00000001 machine-representation-independence-witness)
             (00000001 (status fail))
             (00100111 (00000001 case) (00000001 alternate-register))
             (00100111 (00000001 semantic) machine-representation-semantic-reference)
             (00100111 (00000001 actual) machine-representation-alternate)))))
-      ((00100010
-         machine-representation-primary
-         machine-representation-semantic-reference)
-       (0)
+      ((00000010 (00000001 ()))
        (00100111
          (00000001 machine-representation-independence-witness)
          (00000001 (status fail))
