@@ -114,7 +114,7 @@ mod text7_projection_generated;
 mod value;
 
 pub use binary_framing::{
-    decode_binary_frame, decode_binary_stream, encode_binary_frame, encode_binary_stream,
+    decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
     BinaryFrame, BinaryFrameError,
 };
 pub use environment::{CoreProfile, Environment, Session};
