@@ -52,7 +52,7 @@ fn version_flag_prints_the_crate_version() {
 #[test]
 fn sens_and_my_lisp_binaries_execute_the_same_direct_8_bit_program() {
     let path = std::env::temp_dir().join("sens-cli-parity-direct-8-bit.lisp");
-    std::fs::write(&path, "(00000001 42)").expect("should write parity fixture");
+    std::fs::write(&path, "(00000001 #b101010)").expect("should write parity fixture");
 
     let legacy = legacy_bin()
         .arg(&path)
@@ -69,6 +69,100 @@ fn sens_and_my_lisp_binaries_execute_the_same_direct_8_bit_program() {
     assert_eq!(canonical.stderr, legacy.stderr);
     assert!(canonical.status.success());
     assert_eq!(String::from_utf8_lossy(&canonical.stdout).trim(), "42");
+}
+
+#[test]
+fn sens_file_execution_is_binary_default_while_my_lisp_remains_transition_human() {
+    let dir = std::env::temp_dir();
+
+    let binary_path = dir.join("sens-cli-binary-default.lisp");
+    std::fs::write(&binary_path, "(00001100 #b1 #b10)").expect("write binary fixture");
+    let binary = sens().arg(&binary_path).output().expect("sens should run");
+    let _ = std::fs::remove_file(&binary_path);
+    assert!(binary.status.success(), "{:?}", binary.stderr);
+    assert_eq!(String::from_utf8_lossy(&binary.stdout).trim(), "3");
+
+    let human_head_path = dir.join("sens-cli-human-head-rejected.lisp");
+    std::fs::write(&human_head_path, "(+ #b1 #b10)").expect("write human-head fixture");
+    let human_head = sens().arg(&human_head_path).output().expect("sens should run");
+    let _ = std::fs::remove_file(&human_head_path);
+    assert!(!human_head.status.success());
+    assert!(
+        String::from_utf8_lossy(&human_head.stderr).contains("Function8"),
+        "{:?}",
+        human_head.stderr
+    );
+
+    let decimal_path = dir.join("sens-cli-decimal-default-rejected.lisp");
+    std::fs::write(&decimal_path, "(00001100 1 #b10)").expect("write decimal fixture");
+    let decimal = sens().arg(&decimal_path).output().expect("sens should run");
+    let _ = std::fs::remove_file(&decimal_path);
+    assert!(!decimal.status.success());
+    assert!(
+        String::from_utf8_lossy(&decimal.stderr).contains("implicit decimal"),
+        "{:?}",
+        decimal.stderr
+    );
+
+    let eval_binary_path = dir.join("sens-cli-eval-binary-data.lisp");
+    std::fs::write(
+        &eval_binary_path,
+        "(01001101 (00000001 (00001100 #b1 #b10)))",
+    )
+    .expect("write canonical eval fixture");
+    let eval_binary = sens()
+        .arg(&eval_binary_path)
+        .output()
+        .expect("sens should run");
+    let _ = std::fs::remove_file(&eval_binary_path);
+    assert!(eval_binary.status.success(), "{:?}", eval_binary.stderr);
+    assert_eq!(String::from_utf8_lossy(&eval_binary.stdout).trim(), "3");
+
+    let eval_human_path = dir.join("sens-cli-eval-human-head-rejected.lisp");
+    std::fs::write(
+        &eval_human_path,
+        "(01001101 (00000001 (+ #b1 #b10)))",
+    )
+    .expect("write eval bypass fixture");
+    let eval_human = sens()
+        .arg(&eval_human_path)
+        .output()
+        .expect("sens should run");
+    let _ = std::fs::remove_file(&eval_human_path);
+    assert!(!eval_human.status.success());
+    assert!(
+        String::from_utf8_lossy(&eval_human.stderr).contains("Function8"),
+        "{:?}",
+        eval_human.stderr
+    );
+
+    let read_human_path = dir.join("sens-cli-read-human-head-rejected.lisp");
+    std::fs::write(
+        &read_human_path,
+        r#"(01001101 (01001010 "(+ #b1 #b10)"))"#,
+    )
+    .expect("write read bypass fixture");
+    let read_human = sens()
+        .arg(&read_human_path)
+        .output()
+        .expect("sens should run");
+    let _ = std::fs::remove_file(&read_human_path);
+    assert!(!read_human.status.success());
+    assert!(
+        String::from_utf8_lossy(&read_human.stderr).contains("Function8"),
+        "{:?}",
+        read_human.stderr
+    );
+
+    let transition_path = dir.join("my-lisp-human-transition.lisp");
+    std::fs::write(&transition_path, "(+ 1 2)").expect("write transition fixture");
+    let transition = legacy_bin()
+        .arg(&transition_path)
+        .output()
+        .expect("my-lisp should run");
+    let _ = std::fs::remove_file(&transition_path);
+    assert!(transition.status.success(), "{:?}", transition.stderr);
+    assert_eq!(String::from_utf8_lossy(&transition.stdout).trim(), "3");
 }
 
 #[test]
