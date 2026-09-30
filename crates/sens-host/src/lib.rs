@@ -379,7 +379,7 @@ fn evaluate_tcp_listen_raw(
 
 fn evaluate_tcp_accept(
     arguments: &[(Value, Span)],
-    environment: &Environment,
+    _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
     let (listener_value, listener_span) = &arguments[0];
@@ -396,7 +396,7 @@ fn evaluate_tcp_accept(
 
 fn evaluate_tcp_read_raw(
     arguments: &[(Value, Span)],
-    environment: &Environment,
+    _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
     let (connection_value, connection_span) = &arguments[0];
@@ -417,7 +417,7 @@ fn evaluate_tcp_read_raw(
 
 fn evaluate_tcp_write_raw(
     arguments: &[(Value, Span)],
-    environment: &Environment,
+    _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
     let (connection_value, connection_span) = &arguments[0];
