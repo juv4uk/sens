@@ -10,8 +10,8 @@
     (schema island-math-evidence/1)
   (authority "lib/surface/semantic-registry.lisp")
   (role mechanism-evidence-only)
-  (parent-issue 990)
-  (canon-convergence-issue 1046)
+  (parent-issue #b1111011110)
+  (canon-convergence-issue #b10000010110)
   (mechanism-source "lib/function-table-mechanisms.lisp")
   (ratification-state blocked-until-canon-law-domain)
   (rows
