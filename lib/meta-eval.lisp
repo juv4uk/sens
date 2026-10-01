@@ -149,16 +149,14 @@
       (00000111
         ((my-canon-callable-identity? identity-ref) (my-primitive identity-ref))
         ((my-canon-name? name) (my-canon-binding-error name))
-        ((00000011 name (00000001 +))    (my-primitive (00000001 +)))
-        ((00000011 name (00000001 -))    (my-primitive (00000001 -)))
-        ((00000011 name (00000001 *))    (my-primitive (00000001 *)))
-        ((00000011 name (00000001 <))    (my-primitive (00000001 <)))
-        ((00000011 name (00000001 =))    (my-primitive (00000001 =)))
-        ((00000011 name (00000001 >))    (my-primitive (00000001 >)))
-        ((00000011 name (00000001 write-to-string))
-         (my-primitive (00000001 write-to-string)))
-        ((00000011 name (00000001 string->symbol))
-         (my-primitive (00000001 string->symbol)))
+        ((my-semantic-id? name 00001100) (my-primitive 00001100))
+        ((my-semantic-id? name 00001101) (my-primitive 00001101))
+        ((my-semantic-id? name 00001110) (my-primitive 00001110))
+        ((my-semantic-id? name 00011010) (my-primitive 00011010))
+        ((my-semantic-id? name 00011100) (my-primitive 00011100))
+        ((my-semantic-id? name 00011011) (my-primitive 00011011))
+        ((my-semantic-id? name 01001100) (my-primitive 01001100))
+        ((my-semantic-id? name 01000011) (my-primitive 01000011))
         (t name)))))
 
 ; ADR-009 shared definition frame.
@@ -389,9 +387,9 @@
 (00001001 my-compare-two
   (00001000 (operator left right)
     (00000111
-      ((00000011 operator (00000001 <)) (00011010 left right))
-      ((00000011 operator (00000001 =)) (00011100 left right))
-      ((00000011 operator (00000001 >)) (00011011 left right))
+      ((00000011 operator 00011010) (00011010 left right))
+      ((00000011 operator 00011100) (00011100 left right))
+      ((00000011 operator 00011011) (00011011 left right))
       (t (00000001 ())))))
 
 ; Chained comparison semantics are Lisp-owned: values arrive already
@@ -419,16 +417,14 @@
       ((00000011 name (00000001 car))  (00000101 (00000101 args)))
       ((00000011 name (00000001 cdr))  (00000110 (00000101 args)))
       ((00000011 name (00000001 cons)) (00000100 (00000101 args) (00101111 args)))
-      ((00000011 name (00000001 +))    (00001100 (00000101 args) (00101111 args)))
-      ((00000011 name (00000001 -))    (00001101 (00000101 args) (00101111 args)))
-      ((00000011 name (00000001 *))    (00001110 (00000101 args) (00101111 args)))
-      ((00000011 name (00000001 <))    (my-compare-chain (00000001 <) args))
-      ((00000011 name (00000001 =))    (my-compare-chain (00000001 =) args))
-      ((00000011 name (00000001 >))    (my-compare-chain (00000001 >) args))
-      ((00000011 name (00000001 write-to-string))
-       (01001100 (00000101 args)))
-      ((00000011 name (00000001 string->symbol))
-       (01000011 (00000101 args)))
+      ((00000011 name 00001100) (00001100 (00000101 args) (00101111 args)))
+      ((00000011 name 00001101) (00001101 (00000101 args) (00101111 args)))
+      ((00000011 name 00001110) (00001110 (00000101 args) (00101111 args)))
+      ((00000011 name 00011010) (my-compare-chain 00011010 args))
+      ((00000011 name 00011100) (my-compare-chain 00011100 args))
+      ((00000011 name 00011011) (my-compare-chain 00011011 args))
+      ((00000011 name 01001100) (01001100 (00000101 args)))
+      ((00000011 name 01000011) (01000011 (00000101 args)))
       (t (00100111 (00000001 unknown-primitive) name)))))
 
 ; Lambda-list arity is derivable from Lisp list structure itself:
