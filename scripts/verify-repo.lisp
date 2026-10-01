@@ -307,6 +307,34 @@
 (pass "smyslovyi-audyt-summary-zbihaietsia-z-faktychnymy-danymy")
 
 (00001001 uk-surface (10100110 "lib/surface/uk.lisp"))
+(00001001 semantic-registry
+  (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
+(00001001 function-signatures
+  (00000101 (01001011 (10100110 "lib/surface/function-signatures.lisp"))))
+
+; EN surface -> exact SENS, derived from the single semantic registry.
+(00001001 registry-sens-for-en
+  (00001000 (name rows)
+    (00000111
+      ((00000010 rows) () ())
+      ((00100010 (field (00000001 en) (00000101 rows)) name) (1)
+       (00000101 (00000101 rows)))
+      (t t (registry-sens-for-en name (00000110 rows))))))
+
+; Only rows admitted as builtin mechanisms in function-signatures must carry
+; exact SENS as compatibility-alias values. Lisp-owned helpers remain lexical
+; aliases to their language definitions. No manual code/name table lives here.
+(00001001 exact-builtin-alias?
+  (00001000 (en)
+    (10011100 ((sens (registry-sens-for-en en semantic-registry)))
+      (00000111
+        ((00000010 sens) () ())
+        (t t
+         (10011100 ((signature (00101101 sens function-signatures)))
+           (00000111
+             ((00000010 signature) () ())
+             ((00100010 (field (00000001 kind) signature) (00000001 builtin)) (1) t)
+             (t t ())))))))))
 
 ; Позиція першого входження marker у s від i; -1 якщо нема.
 (00001001 pos-of
@@ -328,11 +356,28 @@
       ((00000010 renames) () t)
       ((00000010 renames) (0)
        (10011100 ((en (01000010 (00101111 (00000101 renames))))
-             (old (01000010 (00110000 (00000101 renames)))))
+             (old (01000010 (00110000 (00000101 renames))))
+             (sens (registry-sens-for-en
+                     (01000010 (00101111 (00000101 renames)))
+                     semantic-registry)))
          (00000111
-           ((00111110 (str+ "(00001001 " old " " en ")") uk-surface) t
-            (check-aliases (00000110 renames)))
-           (t t (fail (str+ "missing alias (00001001 " old " " en ")")))))))))
+           ((exact-builtin-alias? en) (1)
+            (00000111
+              ((00111110
+                 (str+ "(00001001 " old " " (01001100 sens) ")")
+                 uk-surface)
+               t
+               (check-aliases (00000110 renames)))
+              (t t
+               (fail
+                 (str+ "missing exact-SENS builtin alias (00001001 "
+                       old " " (01001100 sens) ")")))))
+           (t t
+            (00000111
+              ((00111110 (str+ "(00001001 " old " " en ")") uk-surface) t
+               (check-aliases (00000110 renames)))
+              (t t
+               (fail (str+ "missing language alias (00001001 " old " " en ")")))))))))))
 (check-aliases audit-renames)
 (pass "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
 
