@@ -27,7 +27,7 @@ Canonical word:
 w ∈ {0,1}+
 ```
 
-з явною межею слова.
+з явною межею слова. Чи є порожня бітова послідовність `ε` семантично допустимою, навмисно лишається unresolved у #2106.
 
 Два слова тотожні тоді й лише тоді, коли збігаються всі bits і exact width:
 
@@ -66,6 +66,12 @@ Prefix relation не зливає identity:
 Internal `00` — звичайні bits слова, не separator.
 
 Source/container/transport можуть кодувати boundaries, але framing bits/bytes не стають semantic bits.
+
+## Epsilon — відкрите semantic питання
+
+На carrier-рівні порожню послідовність можна представити й round-trip без суперечності. Це не робить її admitted SENS identity. Але й її заборона ще не виведена.
+
+Тому Foundation-0 механічно переносить `ε`, а semantic admission лишає відкритим для #2106.
 
 ## Semantic admission окремо
 
