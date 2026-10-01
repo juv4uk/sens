@@ -3,6 +3,7 @@
  * Same pair-tree and same six ratified selector operations are executed through:
  *   flat   : already-ready u8 identity -> one 256-slot row lookup
  *   prefix : already-ready exact D3/D4 word -> root + suffix generator
+ *            homogeneous D3/D4 workloads select their typed-width lane once
  *   direct : operation already specialized -> direct CAR/CDR chain
  *
  * The flat lane is intentionally favorable. It models the old 8-bit flat-slot
