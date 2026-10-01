@@ -1,0 +1,7 @@
+max_suffix_depth	selector_nodes	prefix_edges	hamming1_directed_edges	hamming_edges_not_prefix	scc_count	nontrivial_scc_count	dag_height_edges	flat_registry_rows	generator_roots	generator_actions	compression_rows_over_actions	bfs_touch_steps	seed_nodes	seed_hamming1_undirected	seed_max_undirected	seed_hamming_density
+1	6	4	4	4	6	0	1	6	2	2	3.0	4	8	12	28	0.4286
+2	14	12	20	20	14	0	2	14	2	2	7.0	12	8	12	28	0.4286
+3	30	28	68	68	30	0	3	30	2	2	15.0	28	8	12	28	0.4286
+4	62	60	196	196	62	0	4	62	2	2	31.0	60	8	12	28	0.4286
+6	254	252	1284	1284	254	0	6	254	2	2	127.0	252	8	12	28	0.4286
+8	1022	1020	7172	7172	1022	0	8	1022	2	2	511.0	1020	8	12	28	0.4286

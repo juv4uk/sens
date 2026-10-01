@@ -103,6 +103,7 @@ fn render_uk(value: &Value) -> String {
         Value::Macro(_) => "<макрос>".to_string(),
         Value::TcpConnection(_) => "<tcp-з'єднання>".to_string(),
         Value::TcpListener(_) => "<tcp-слухач>".to_string(),
+        Value::Text7(text) => format!("#<текст7 {} комірок>", text.len()),
     }
 }
 

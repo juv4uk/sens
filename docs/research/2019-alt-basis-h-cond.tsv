@@ -1,0 +1,11 @@
+candidate	result	detail
+C1_host_if	smuggle	host conditional renamed
+C2_church_boolean	out_of_scope_or_larger	needs abs/app roots
+C3_and_or_111x	falsified	#1986 PredicateBit / ()!=0
+C4_predicates_no_branch	not_equivalent	loses controlled eval
+C5_macro_eq_chains	smuggle	branching eval rule remains
+C6_exceptions_exotic	out_of_scope	not McCarthy COND
+H_COND_0_derivable	unsupported	branch authority reappears
+H_COND_1_equals_boolean	false	control ≠ lattice
+H_COND_2_capability_distinct	best_fit	PredicateBit ≠ COND
+status_lock	premise	111 remains in bīja3 premise

@@ -649,7 +649,7 @@
 
 (00001010 import-knowledge-file (path)
   (00100111 (00000001 import-knowledge-package)
-        (00100111 (00000001 read) (00100111 (00000001 read-file) path))))
+        (00100111 (00000001 01001010) (00100111 (00000001 read-file) path))))
 
 ;; Export is deliberately a plain function: unlike import it does not mutate
 ;; the knowledge journal. It validates the module and clauses, serializes the
@@ -706,7 +706,7 @@
   (00100111 (00000001 second)
         (00100111 (00000001 list)
               (00100111 (00000001 def) (00000001 *received-knowledge-package*)
-                    (00100111 (00000001 read) (00100111 (00000001 tcp-read-to-eof) connection "")))
+                    (00100111 (00000001 01001010) (00100111 (00000001 tcp-read-to-eof) connection "")))
               (00100111 (00000001 import-knowledge-package) (00000001 *received-knowledge-package*)))))
 
 ;; A newline-framed request/receipt protocol keeps the connection open long
@@ -763,7 +763,7 @@
   (00100111 (00000001 second)
         (00100111 (00000001 list)
               (00100111 (00000001 def) (00000001 *received-knowledge-package*)
-                    (00100111 (00000001 read) (00100111 (00000001 tcp-read-frame) connection "")))
+                    (00100111 (00000001 01001010) (00100111 (00000001 tcp-read-frame) connection "")))
               (00100111 (00000001 let)
                     (00100111 (00100111 (00000001 decision)
                                 (00100111 (00000001 import-knowledge-package)

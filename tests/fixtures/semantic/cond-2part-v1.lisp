@@ -57,6 +57,7 @@
 ((expect . expect-rejected)
  (expr . "(00000111 (0 7 8))")
  (expected . (rejected "(00000111 (0 7 8))"))
+ (active . ())
  (name . "COND: тричастинна клауза не допускається читачем")
  (semantic-id . 00000111)
  (governs . "#1713 #1714")

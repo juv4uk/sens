@@ -34,6 +34,7 @@
 ((expect . expect-value)
  (expr . "(10110101 (00000001 ()))")
  (expected . (value (1)))
+ (active . ())
  (name . "ATOM пустого списку — YES, не третє представлення")
  (semantic-id . 10110101)
  (governs . "#1704 #1713")

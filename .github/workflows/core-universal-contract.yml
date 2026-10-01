@@ -1,0 +1,55 @@
+name: Core universal contract
+
+# #1664. The Core1–4 shared ATOM/EQ/COND foundation is Lisp-owned law
+# (contracts/core-universal-contract.lisp) and Lisp-owned data
+# (tests/fixtures/semantic/*-v1.lisp, #1709). This lane only refuses to let
+# either drift silently: the structural checker names every missing law value
+# or malformed corpus row, and the corpus is exercised under the profiles it
+# can run under today.
+on:
+  pull_request:
+    paths:
+      - "contracts/core-universal-contract.lisp"
+      - "scripts/check-core-universal-contract.py"
+      - "tests/fixtures/semantic/*"
+      - "crates/sens/tests/semantic_authority.rs"
+      - ".github/workflows/core-universal-contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "contracts/core-universal-contract.lisp"
+      - "scripts/check-core-universal-contract.py"
+      - "tests/fixtures/semantic/*"
+      - "crates/sens/tests/semantic_authority.rs"
+      - ".github/workflows/core-universal-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core-universal-contract:
+    name: Core1–4 universal foundation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: core-universal-contract
+
+      - name: Contract states the universal law and the corpus carries it
+        run: python3 scripts/check-core-universal-contract.py
+
+      - name: Native profile agrees with the Lisp corpus
+        run: cargo test -p sens --test semantic_authority native_semantic_witnesses_agree_with_the_lisp_corpus -- --nocapture
+
+      - name: Core3 profile agrees with the Lisp corpus
+        run: cargo test -p sens --test semantic_authority core3_semantic_witnesses_agree_with_the_lisp_corpus -- --nocapture
+
+      - name: Core2 blocker stays measured, not assumed
+        run: cargo test -p sens --test semantic_authority core2_blocker_is_measured_not_assumed -- --nocapture
+
+      - name: Diff hygiene
+        run: git diff --check

@@ -24,6 +24,11 @@ impl Text7 {
     pub const LOGICAL_WIDTH: u8 = 7;
     pub const MAX_CELL: u8 = 0b0111_1111;
 
+    /// Domain tag of the canonical machine transport token. The tag keeps a
+    /// Text7 value distinct from Number (`#q2:`/`#b`), from a String spelling
+    /// and from the bare eight-bit Function8 space.
+    pub const WIRE_TAG: &'static str = "#t7:";
+
     /// Admit a sequence only when every mechanism byte is exactly one UPC-7
     /// cell. No masking or truncation is allowed: a set high bit is a named
     /// failure, never an implicit modulo-128 conversion.
@@ -35,6 +40,64 @@ impl Text7 {
             .find(|(_, byte)| **byte > Self::MAX_CELL)
         {
             return Err(Text7CellError { index, byte });
+        }
+
+        Ok(Self {
+            cells: cells.into(),
+        })
+    }
+
+    /// Canonical machine transport for one Text7 value.
+    ///
+    /// The token carries the exact UPC-7 cell stream: the domain tag followed
+    /// by two lowercase hex digits per cell. It is deliberately not a human
+    /// spelling — no Unicode, no UTF-8 and no selected layout appears in it —
+    /// and `to_canonical_wire_string` must never fall back to human `render`
+    /// for this domain.
+    pub fn to_canonical_wire_token(&self) -> String {
+        let mut token = String::with_capacity(Self::WIRE_TAG.len() + self.cells.len() * 2);
+        token.push_str(Self::WIRE_TAG);
+        for cell in self.cells.iter() {
+            token.push(char::from_digit((cell >> 4) as u32, 16).expect("nibble is a hex digit"));
+            token.push(char::from_digit((cell & 0x0F) as u32, 16).expect("nibble is a hex digit"));
+        }
+        token
+    }
+
+    /// Admit a canonical Text7 wire token back to its exact cell stream.
+    ///
+    /// Fails closed on every malformed shape: a missing tag, an odd digit
+    /// count, a non-hex (or non-lowercase) digit, or a cell with the forbidden
+    /// high bit set is a named error — never a masked, truncated or
+    /// Unicode-transcoded value.
+    pub fn from_canonical_wire_token(token: &str) -> Result<Self, Text7WireError> {
+        let payload = token
+            .strip_prefix(Self::WIRE_TAG)
+            .ok_or(Text7WireError::MissingTag)?;
+        if payload.len() % 2 != 0 {
+            return Err(Text7WireError::OddLength {
+                digits: payload.len(),
+            });
+        }
+
+        let mut cells = Vec::with_capacity(payload.len() / 2);
+        for (pair_index, pair) in payload.as_bytes().chunks(2).enumerate() {
+            let high = hex_nibble(pair[0]).ok_or(Text7WireError::NonHexDigit {
+                index: pair_index * 2,
+                byte: pair[0],
+            })?;
+            let low = hex_nibble(pair[1]).ok_or(Text7WireError::NonHexDigit {
+                index: pair_index * 2 + 1,
+                byte: pair[1],
+            })?;
+            let byte = (high << 4) | low;
+            if byte > Self::MAX_CELL {
+                return Err(Text7WireError::CellOutOfRange {
+                    index: pair_index,
+                    byte,
+                });
+            }
+            cells.push(byte);
         }
 
         Ok(Self {
@@ -84,6 +147,30 @@ impl Text7CellError {
     /// Text7 identity.
     pub fn packed_byte(self) -> u8 {
         self.byte
+    }
+}
+
+/// Failure to admit a canonical Text7 wire token. Every failure is named;
+/// nothing here silently converts a malformed token into Text identity.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Text7WireError {
+    /// The token does not carry the `#t7:` domain tag.
+    MissingTag,
+    /// The payload is not an even-length sequence of cell bytes.
+    OddLength { digits: usize },
+    /// A payload character is not a lowercase hex digit.
+    NonHexDigit { index: usize, byte: u8 },
+    /// A cell byte sets the forbidden high bit (`>= 128`).
+    CellOutOfRange { index: usize, byte: u8 },
+}
+
+/// Only canonical lowercase hex is admitted; uppercase is a named failure so
+/// one cell stream cannot gain two canonical spellings.
+fn hex_nibble(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        _ => None,
     }
 }
 
