@@ -8,7 +8,7 @@
 
 | seed | probe | eliminable as operator root? |
 |------|-------|------------------------------|
-| 000 NIL | H-NIL | **maybe** (data vs operator) |
+| 000 NIL | H-NIL | **bounded current-corpus witness for demotion**; globally still conjecture |
 | 001 QUOTE | H-QUOTE | **no** |
 | 010 ATOM | H-ATOM | **no** |
 | 011 EQ | H-EQ | **no** |
@@ -18,7 +18,7 @@
 
 ## What foundations moved
 
-1. **Only NIL** has a live demotion conjecture (operator → pure data).  
+1. **Only NIL** has a live demotion conjecture (operator → pure data), now backed by a bounded current-corpus witness: zero callable NIL heads and no current ground route through Function8 zero.  
 2. **QUOTE / ATOM / EQ / CONS / COND** are **distinct capability classes** — packaging open, existence not.  
 3. **CAR/CDR** sole positive local generator witnesses.  
 4. Packaging-probe set for bīja3 is **complete**; further H-* without new evidence is noise.
@@ -32,9 +32,10 @@
 
 ## Next honest steps (not more packaging essays)
 
-1. Corpus forms that **require** callable NIL (kill or strengthen H-NIL).  
+1. Keep the current-corpus H-NIL witness as a falsifier ratchet.  
 2. Blind WSM after freeze.  
-3. Only then #2018 status cells.
+3. Strengthen the role-vs-representative proof.  
+4. Only then #2018 status cells.
 
 ```text
 Roots earn root-hood by surviving elimination attacks —
