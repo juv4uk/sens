@@ -1,11 +1,11 @@
 # gcc: gcc (GCC) 16.1.0
 # valgrind: valgrind-3.27.0
 # cpu: Intel(R) Core(TM) i5-6400 CPU @ 2.70GHz
-# git: f08eafff0af05627f8b3b8e1cf10e14e86d5deae (harness as committed or as in the working tree)
-# parity	A	k<=12	words=16382	mismatches=0
-# parity	B	k<=12	words=16382	mismatches=0
-# parity	C	k<=12	words=16382	mismatches=0
-# parity	D	k<=12	words=16382	mismatches=0
+# git: 37bce52eec101f21296bf05bd679dde63abcc492 (harness as committed or as in the working tree)
+# parity	A	k<=16	words=262142	mismatches=0
+# parity	B	k<=16	words=262142	mismatches=0
+# parity	C	k<=16	words=262142	mismatches=0
+# parity	D	k<=16	words=262142	mismatches=0
 strategy	k	workload	calls	I_setup	I_setup_minus_B	I_calls	I_per_call	bits_per_call	gens_per_call	edges_per_call	lookups_per_call	cache_hit_rate	allocs	alloc_bytes
 A	0	repeat	20000	153747	1073	1240119	62.01	0.0	1.0	1.0	1.0		2	108
 B	0	repeat	20000	152674	0	660119	33.01	3.0	1.0	1.0	0.0		1	8

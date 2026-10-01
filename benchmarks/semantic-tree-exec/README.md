@@ -42,7 +42,7 @@ valgrind, cpu, git) is in the header of the TSV.
 | 8 | 170 | **147** | 195 | 154 | |
 | 16 | 250 | **227** | 346 | 234 | |
 
-- Preparation of A over B (I refs, once): 1.1k (k=0), 76k (k=8), **23.1M (k=16)** and 6.5 MB of rows; B needs none.
+- Preparation of A over B (I refs, once): 1.1k (k=0), 76k (k=8), **23.1M (k=16)** and about 6.5 MB of rows (A allocates about 7.6 MB in total, the 1 MB tree included); B needs none.
 - B costs 19 bits consumed and 17 tree edges per call at k=16 (random).
 - C: cache hit rate on random paths 99.99% (k=0) ... 61% (k=8) ... 0.8% (k=16); with 1024 slots it cannot hold 2^17 paths.
 
@@ -56,7 +56,7 @@ valgrind, cpu, git) is in the header of the TSV.
    in the independent harness of the panini agent (a larger table, 2^19 slots, A made of nested legacy-style definitions) C is cheaper
    than A for repeated paths and for k=8 random. With 2^19 slots here C improves on random paths (k=16: 346 -> 336 I refs, still above A 250)
    but not on repeated ones (148 vs A 142 at k=8). So the A-versus-C order is **implementation-dependent**; B cheapest is not.
-3. **The hybrid (D)** is not cheaper than B here: the flat rows for depth <= 2 cost more than interpreting them.
+3. **The hybrid (D)** is not cheaper than B here: the flat rows for depth <= 2 cost more than interpreting them. Order per call: B < D < A < C holds for k >= 4; for k <= 2 it is B < A < D < C (D = A plus a dispatch branch).
 
 ## Independent confirmation (panini agent, not reading this code; C, `gcc -O2`, valgrind 3.27)
 
@@ -67,7 +67,7 @@ overhead. Her net I refs per call, random k=16: A 225, B 134, C 236, D 139. Orde
 
 ## Limits (do not read more into it)
 
-- I refs only: no data-cache or branch-prediction effects (`--cache-sim=no`). A flat table of 6.5 MB would be worse than
+- I refs only: no data-cache or branch-prediction effects (`--cache-sim=no`). A flat table of about 6.5 MB would be worse than
   its I refs suggest; the tree itself (1 MB at k=16) is the same for all.
 - One CPU, one compiler (`-O2`), a C interpreter whose decode is trivially cheap. A route where decoding is costly
   (a text/FASL decode, a registry hash lookup instead of a direct index, a compiled path) is NOT measured: A is given a

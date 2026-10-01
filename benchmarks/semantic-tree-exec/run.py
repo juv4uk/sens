@@ -91,7 +91,7 @@ def main() -> int:
     calls = 2000 if a.quick else a.calls
     with tempfile.TemporaryDirectory() as t:
         plain, counted = build(Path(t))
-        par = parity(plain, 12)
+        par = parity(plain, 16)
         out = [*provenance(), *[f"# {p}" for p in par]]
         out.append("\t".join(["strategy", "k", "workload", "calls", "I_setup", "I_setup_minus_B", "I_calls", "I_per_call",
                               "bits_per_call", "gens_per_call", "edges_per_call", "lookups_per_call", "cache_hit_rate",
