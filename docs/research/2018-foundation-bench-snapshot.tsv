@@ -1,0 +1,14 @@
+axis	metric	value	<unit>	source
+layer0	checker_pass	1	bool	#2102 research-2018-layer0-check.py
+layer0	wall_time	~20	ms	local python3
+h_nil_corpus	files_scanned	134	count	#2019 scan
+h_nil_corpus	nil_call_head	0	count	supports H-NIL
+h_nil_corpus	quoted_nil_as_data	2	count	EQ/data only
+h_nil_corpus	empty_list_token	5745	count	data density
+h_nil_corpus	scan_ms	84.77	ms	
+graph	CAR_exclusive_depth4	30	count	#2035
+graph	hamming_density_seed3	0.4286	ratio	#2008
+graph	nontrivial_scc	0	count	#2008 Tarjan
+economy	CAR_CDR_ratio	3.0	ratio	#1973
+economy	one_off_ATOM_NULL	<=1	ratio	weak
+packaging	seeds_eliminable	NIL_maybe_only	enum	synthesis #2098
