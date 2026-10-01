@@ -119,7 +119,8 @@ def evidence(core1: str) -> dict[str, bool]:
     lambda_define = (
         "C1-LAMBDA-NAMEP" in eval_
         and "FUNCTION" in eval_
-        and "C1-DEFINE-NAMEP" in eval_program
+        and "C1-DEFINITIONP" in eval_program
+        and "C1-DEFINE-NAMEP" in definitionp
         and re.search(r"\\(00000100\\s+\\(00000100", eval_program) is not None
         and "GLOBAL" in eval_program
     )
