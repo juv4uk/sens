@@ -1,0 +1,59 @@
+name: Identity witness gate
+
+# #2133. A change to an identity-authority file must arrive with an executable
+# witness in the same change set. The rule lives in
+# scripts/check-identity-witness-gate.py and is self-tested here before it is
+# applied to the diff, so the gate itself is provable.
+on:
+  pull_request:
+    paths:
+      - "contracts/*identity*"
+      - "contracts/*.lock"
+      - "contracts/sid-*"
+      - "contracts/early-sid-lowering-contract.lisp"
+      - "contracts/core-universal-contract.lisp"
+      - "contracts/exact-q-binary-contract.lisp"
+      - "lib/surface/semantic-registry.lisp"
+      - "lib/function-table-mechanisms.lisp"
+      - "lib/mechanism-selector.lisp"
+      - "tests/**"
+      - "crates/*/tests/**"
+      - "scripts/check-identity-witness-gate.py"
+      - ".github/workflows/identity-witness-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identity-witness-gate:
+    name: Identity change carries a witness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Self-test the gate rule
+        run: python3 scripts/check-identity-witness-gate.py --self-test
+
+      - name: Identity-authority changes must carry a witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${{ github.base_ref }}"
+          if [ -z "$base" ]; then
+            base="$(git rev-parse HEAD~1 2>/dev/null || echo HEAD)"
+            git diff --name-status "$base...HEAD" > changed.txt || true
+          else
+            git fetch --no-tags --depth=1 origin "$base"
+            git diff --name-status "origin/$base...HEAD" > changed.txt
+          fi
+          echo "--- changed paths ---"
+          cat changed.txt || true
+          echo "---------------------"
+          python3 scripts/check-identity-witness-gate.py --changed changed.txt
+
+      - name: Diff hygiene
+        run: git diff --check
