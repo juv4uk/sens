@@ -222,13 +222,18 @@ def main() -> None:
                             )
                         )
 
-                    prepare_median = int(statistics.median(prepare_samples))
-                    full_median = int(statistics.median(full_samples))
-                    execute_irefs = full_median - prepare_median
-                    if execute_irefs < 0:
+                    execute_samples = [
+                        full - prepare
+                        for prepare, full in zip(prepare_samples, full_samples, strict=True)
+                    ]
+                    if min(execute_samples) < 0:
                         raise RuntimeError(
                             f"negative differential I refs: {mode=} {depth=} {pattern=}"
                         )
+
+                    prepare_median = int(statistics.median(prepare_samples))
+                    full_median = int(statistics.median(full_samples))
+                    execute_median = int(statistics.median(execute_samples))
 
                     row = {
                         "depth": depth,
@@ -238,16 +243,26 @@ def main() -> None:
                         "samples": samples,
                         "checksum": full_checksum,
                         "prepare_i_refs": prepare_median,
+                        "prepare_i_refs_min": min(prepare_samples),
+                        "prepare_i_refs_max": max(prepare_samples),
                         "full_i_refs": full_median,
-                        "execute_i_refs": execute_irefs,
-                        "i_refs_per_call": f"{execute_irefs / calls:.3f}",
+                        "full_i_refs_min": min(full_samples),
+                        "full_i_refs_max": max(full_samples),
+                        "execute_i_refs": execute_median,
+                        "execute_i_refs_min": min(execute_samples),
+                        "execute_i_refs_max": max(execute_samples),
+                        "prepare_i_refs_raw": ",".join(map(str, prepare_samples)),
+                        "full_i_refs_raw": ",".join(map(str, full_samples)),
+                        "execute_i_refs_raw": ",".join(map(str, execute_samples)),
+                        "i_refs_per_call": f"{execute_median / calls:.3f}",
                     }
                     row.update(metrics)
                     rows.append(row)
                     print(
-                        f"depth={depth:2d} {pattern:9s} {mode:6s} "
-                        f"exec-Irefs={execute_irefs:12d} "
-                        f"Irefs/call={execute_irefs / calls:9.3f}"
+                        f"depth={depth:2d} {pattern:9s} {mode:8s} "
+                        f"exec-Irefs={execute_median:12d} "
+                        f"[{min(execute_samples)},{max(execute_samples)}] "
+                        f"Irefs/call={execute_median / calls:9.3f}"
                     )
 
         keys = []
