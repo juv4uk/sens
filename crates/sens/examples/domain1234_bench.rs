@@ -58,7 +58,7 @@ fn verify_foundation_mechanics() {
         let root = Bit3::new(root_raw).unwrap();
         for suffix in [false, true] {
             let child = root.append::<4>(suffix).unwrap();
-            assert_eq!(child.parent::<3>(), Some(root));
+            assert!(child.parent::<3>() == Some(root));
             assert!(root.is_prefix_of(child));
             generated.push(child.packed_bits());
         }
