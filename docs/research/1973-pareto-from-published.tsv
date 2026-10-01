@@ -6,36 +6,17 @@ machinery	root_plus_path	generator_actions	2	count	#1973 CAR/CDR 0/1	replication
 machinery	root_plus_path	generated_descendants	6	count	#1973	replication-invariant	
 machinery	all_models	semantic_identities_eliminated	0	count	#1973	replication-invariant	path != semantic quotient
 machinery	root_plus_path	execution_rows_avoided	6	count	#1973	replication-invariant	
-exec_route	flat	i_refs_per_call_depth0	30	I-ref	#1988 PR#1991 rust i5-6400	single-harness	repeated path
-exec_route	cold_root_suffix	i_refs_per_call_depth0	26	I-ref	#1988 PR#1991	single-harness	
-exec_route	hash_cache	i_refs_per_call_depth0	131	I-ref	#1988 PR#1991	single-harness	
-exec_route	flat	i_refs_per_call_depth16	222	I-ref	#1988 PR#1991	single-harness	
-exec_route	cold_root_suffix	i_refs_per_call_depth16	218	I-ref	#1988 PR#1991	single-harness	
-exec_route	hash_cache	i_refs_per_call_depth16	323	I-ref	#1988 PR#1991	single-harness	
 exec_route	ordering	cold_beats_flat	1	bool	#1988 independent C+Rust	replication-invariant	every measured depth
 exec_route	ordering	hash_cache_beats_cold	0	bool	#1988	replication-invariant	
-exec_route	flat	prepare_grows_2_pow_k	1	bool	#1988	replication-invariant	
 locality	direct_bitwalk_depth16	i_refs_uniform	148	I-ref/call	#2009 PR#2010 smoke	single-harness	i5-6400
 locality	direct_mapped_cache_depth16	i_refs_hot1	91	I-ref/call	#2009 PR#2010 smoke	single-harness	
 locality	direct_mapped_cache_depth16	i_refs_uniform	211	I-ref/call	#2009 PR#2010 smoke	single-harness	cache loses when cold
-carrier	Sens8	eq_i_refs_width8	90.5	I-ref/op	#1989 PR#1995	single-harness	
-carrier	Inline64	eq_i_refs_width8	119.5	I-ref/op	#1989 PR#1995	single-harness	
-carrier	SmallSpill	eq_i_refs_width8	154.5	I-ref/op	#1989 PR#1995	single-harness	aligned eq algorithm
-carrier	BitBytes	eq_i_refs_width8	165.7	I-ref/op	#1989 PR#1995	single-harness	
 carrier	Inline64	supports_width65	0	bool	#1989	replication-invariant	ceiling falsifier
-carrier	BitBytes	append_64_to_65_i_refs	1767.6	I-ref/op	#1989 PR#1995	single-harness	+1 alloc 9B
-carrier	SmallSpill	append_64_to_65_i_refs	1686.0	I-ref/op	#1989 PR#1995	single-harness	+1 alloc 9B
-framing	Width3_raw	i_refs_msg_width3	139.8	I-ref/msg	#1993 smoke 1-sample	single-harness-only	provisional
-framing	gamma_raw	i_refs_msg_width3	192.8	I-ref/msg	#1993 smoke 1-sample	single-harness-only	provisional
-framing	Width3_container	i_refs_msg_width3	147.8	I-ref/msg	#1993 smoke	single-harness-only	~+8 vs raw
-framing	zero_pad_eos	correct	0	bool	#1980	replication-invariant	falsified
+carrier	Sens8	eq_i_refs_width8	90.5	I-ref/op	#1989 PR#1995	single-harness	
 graph	prefix_family	nontrivial_scc	0	count	#1961 PR#2008	replication-invariant	Tarjan
 graph	seed_width3	hamming_density	0.4286	ratio	#1961 PR#2008	replication-invariant	12/28
 graph	CAR_seed	exclusive_dependents_depth4	30	count	#2019 PR#2035 pure-graph	single-harness	not corpus #2031
-economy	CAR_CDR_family	rule_count	2	count	generator-economy bench	replication-invariant	suffix 0/1
-economy	CAR_CDR_family	descendants_generated	6	count	caar..cddr set	replication-invariant	
-economy	CAR_CDR_family	rows_avoided	6	count		replication-invariant	
-economy	one_off_ATOM_NULL	rule_count	1	count	hypothetical	replication-invariant	
-economy	one_off_ATOM_NULL	descendants_generated	1	count	hypothetical	replication-invariant	
-economy	one_off_ATOM_NULL	rows_avoided	1	count	hypothetical	replication-invariant	fails economy bar vs CAR/CDR
-production_debt	knowledge_tcp_read	quoted_read_heads_remaining	2	count	#1996 open	replication-invariant	run scripts/apply-1996-knowledge-read.sh
+economy	CAR_CDR_family	economy_ratio	3.0	ratio	#1973 generator-economy	replication-invariant	
+economy	one_off_ATOM_NULL	economy_ratio	1.0	ratio	#1973	replication-invariant	weak
+framing	zero_pad_eos	correct	0	bool	#1980	replication-invariant	falsified
+production_debt	knowledge_tcp_read	quoted_read_heads_remaining	0	count	#1996 closed via #2041	replication-invariant	01001010 on both TCP sites
