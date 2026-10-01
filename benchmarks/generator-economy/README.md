@@ -1,47 +1,83 @@
-# Generator economy microbench
+# Generator economy benchmark (#2001)
 
-**Parents:** #1973 · #1987 · #1961  
-**Not:** #1988 execution harness · #1989 carrier · production
+Parent benchmark gate: **#1987**. Generator research: #1968. Residue: #1972.
+Accounting: #1966 / #1973.
 
-## Question
+> **A semantic law earns a bit only when it explains enough to pay for itself.**
 
-Does a local generator **earn** a prefix bit on economy, or only on semantic validity?
+Benchmark-only research harness. It edits nothing in the runtime, contracts or
+function table.
 
-```text
-semantic proof  → candidate
-economy proof   → allocation pressure
-```
+## The question
 
-## Models compared (counts only)
+A local T0/T1 law (a generator) may be semantically valid and still be *worse*
+than one explicit residue row. This lane measures only the economic side.
 
-### CAR/CDR family (positive control)
+## Cost model (honest, deterministic, logical steps)
 
-```text
-roots: 101 CAR, 110 CDR
-suffix actions: 0 → inner CAR, 1 → inner CDR
-descendants measured: caar cadr cdar cddr + second/third aliases as *mechanism* share only
-```
-
-### One-off rule (stress)
+Per call, an explicit index lookup and a generator dispatch are modelled as the
+**same** cost (1 step). So the entire difference is **one-time** cost:
 
 ```text
-1 rule → 1 child → 1 explicit row avoided
+explicit  : materialise the whole family            = descendants rows
+generator : rule_size + derive only the descendants
+            the workload actually touches           = rule_size + used * depth
+            used = ceil(descendants * utilisation)
 ```
 
-Representative of ATOM→NULL style candidates that may be semantically interesting but fail compression.
+Two consequences, stated plainly:
 
-## Metric
+1. **N cancels.** In this model the decision does not depend on the number of
+   calls — both routes pay the same per-call cost. The deciding variables are
+   family size, utilisation and path depth. A crossover *in N* exists only when
+   per-call costs are asymmetric (e.g. a runtime hash cache costing more per call
+   than a table index) — that asymmetry is exactly what the pinned Cachegrind run
+   must supply.
+2. The bounded result is therefore a **utilisation threshold**:
 
 ```text
-economy_ratio = rows_avoided / max(rule_count, 1)
+generator pays  <=>  utilisation < (descendants - rule_size) / (descendants * depth)
 ```
 
-No Cachegrind here — machinery ledger only. CPU cost lives in #1988.
+## Laws compared
+
+| law | roots | descendants | semantics |
+|---|---|---|---|
+| `selector-carcdr-k10` (CAR/CDR family, depth 10) | 2 | 2046 | valid (positive control) |
+| `selector-carcdr-k4` | 2 | 30 | valid |
+| `atom-null-oneoff` | 1 | 1 | valid but a one-off |
+| `eq-equal-typed-family` | 1 | 2 | valid but tiny |
+| `cons-negative-evidence` | 1 | 0 | no claim (negative evidence) |
+| `cond-andor-falsifier` | 1 | 1 | no claim (falsifier) |
+
+## Falsifiers checked (all asserted in code)
+
+- a one-off generator admitted merely because it is elegant → **rejected**;
+- a law whose exceptions approach the original table size → threshold ≤ 0 → rejected;
+- generator dispatch costlier with no compensating benefit → no accept verdict;
+- path sharing miscounted as semantic quotient → `path_sharing_nodes` is reported
+  as a **separate** count and asserted different from `semantic_nodes`.
 
 ## Run
 
-```sh
-python3 benchmarks/generator-economy/run.py
+```bash
+python3 benchmarks/generator-economy/generator_economy.py \
+    --tsv benchmarks/generator-economy/results/<date>/economy.tsv
 ```
 
-Writes `docs/research/1973-generator-economy.tsv` when run from repo root (or stdout).
+## Output schema
+
+Raw rows follow the shared #1987 schema verbatim (33 columns, blank when not
+applicable) plus lane-specific columns appended at the end: `utilisation`,
+`rows_avoided`, `semantic_nodes`, `path_sharing_nodes`, `rule_size`,
+`special_cases`, `residue_required`, `semantics_valid`.
+
+## What this harness does NOT claim
+
+- **No instruction counts.** `i_refs`/`cpu`/`valgrind_version` are intentionally
+  blank (no gcc/valgrind in this sandbox). Join them on `case_id` from the pinned
+  environment; until then no per-call performance claim is made.
+- No wall-time winner; the result is a step-model threshold plus a reject/accept
+  verdict per law.
+- No production carrier/reader/table edit, and no semantic validity inferred from
+  the economy sweep (validity and economy stay separate gates).
