@@ -82,15 +82,6 @@ fn uk_session() -> Session {
     session
 }
 
-fn is_same_runtime_value(left: &Value, right: &Value) -> bool {
-    match (left, right) {
-        // A builtin is an operation handle. Canon EN/UK/SA spellings and
-        // ordinary aliases must retain one allocation, not merely similar code.
-        (Value::Builtin(left), Value::Builtin(right)) => Rc::ptr_eq(left, right),
-        _ => left == right,
-    }
-}
-
 #[test]
 fn every_stable_uk_surface_entry_lowers_to_its_declared_exact_sens() {
     let pairs = present_en_uk_pairs();
