@@ -25,6 +25,12 @@ jobs:
             --smoke --reps 3 --queries 256 \
             --out /tmp/independent-reconstruction/results
 
+      - name: Run reconstruction ablation smoke benchmark
+        run: |
+          python3 benchmarks/independent-reconstruction/ablation.py \
+            --smoke --queries 256 \
+            --out /tmp/reconstruction-ablation/results
+
       - name: Upload raw reconstruction evidence
         uses: actions/upload-artifact@v4
         if: always()
@@ -33,4 +39,6 @@ jobs:
           path: |
             /tmp/independent-reconstruction/results.tsv
             /tmp/independent-reconstruction/results.json
+            /tmp/reconstruction-ablation/results.tsv
+            /tmp/reconstruction-ablation/results.json
           retention-days: 7
