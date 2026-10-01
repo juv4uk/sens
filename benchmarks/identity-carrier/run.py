@@ -9,7 +9,7 @@ The inner loop is identical length; prepare substitutes a tiny checksum loop.
 """
 
 from __future__ import annotations
-import argparse, csv, os, re, statistics, subprocess, tempfile
+import argparse, csv, hashlib, os, re, statistics, subprocess, tempfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -38,7 +38,7 @@ IRE=re.compile(r"I\s*refs:\s*([0-9,]+)")
 KV=re.compile(r"([a-zA-Z_]+)=([^\s]+)")
 
 def build():
-    subprocess.run(["gcc","-O2","-std=c11","-Wall","-Wextra","-o",str(BIN),str(SRC)],check=True)
+    subprocess.run(["gcc","-O2","-std=c11","-Wall","-Wextra","-Werror","-o",str(BIN),str(SRC)],check=True)
 
 def invoke(cand,op,width,iters,mode,valgrind):
     cmd=[str(BIN),cand,op,str(width),str(iters),mode]
@@ -65,6 +65,30 @@ def cases(smoke):
                 out.append((c,op,w))
     return out
 
+def sha256(path: Path) -> str:
+    h=hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda:f.read(1<<20), b""): h.update(chunk)
+    return h.hexdigest()
+
+def provenance():
+    def out(cmd):
+        return subprocess.run(cmd,text=True,capture_output=True,check=True).stdout.strip()
+    git_sha=out(["git","rev-parse","HEAD"])
+    valgrind_version=out(["valgrind","--version"])
+    cpu=""
+    for line in Path("/proc/cpuinfo").read_text(errors="replace").splitlines():
+        if line.lower().startswith("model name"):
+            cpu=line.split(":",1)[1].strip(); break
+    channels=ROOT/"channels.scm"
+    return {
+        "git_sha":git_sha,
+        "binary_sha":sha256(BIN),
+        "guix_channels_sha":sha256(channels) if channels.exists() else "",
+        "cpu":cpu,
+        "valgrind_version":valgrind_version,
+    }
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--smoke",action="store_true")
@@ -73,6 +97,7 @@ def main():
     ap.add_argument("--out",type=Path,default=ROOT/"docs/research/1989-carrier-bench.tsv")
     args=ap.parse_args()
     build()
+    prov=provenance()
     rows=[]
     for cand,op,width in cases(args.smoke):
         # correctness/support probe without valgrind
@@ -81,7 +106,7 @@ def main():
             rows.append(dict(case_id=f"{cand}-{op}-{width}",candidate=cand,operation=op,width=width,
                              supported=0,i_refs="",allocations="",allocated_bytes="",
                              object_bytes=meta.get("object_bytes",""),payload_bytes=meta.get("payload_bytes",""),
-                             reps=args.reps,iters=args.iters))
+                             reps=args.reps,iters=args.iters,**prov))
             continue
         pre=[]; full=[]; last={}
         for _ in range(args.reps):
@@ -96,11 +121,12 @@ def main():
                          allocated_bytes_per_op=f"{int(last.get('allocated_bytes','0'))/args.iters:.3f}",
                          object_bytes=last.get("object_bytes",""),payload_bytes=last.get("payload_bytes",""),
                          spilled=last.get("spilled","0"),prepare_i_refs=med0,full_i_refs=med1,
-                         reps=args.reps,iters=args.iters))
+                         reps=args.reps,iters=args.iters,**prov))
         print(rows[-1])
     fields=["case_id","candidate","operation","width","supported","i_refs","i_refs_per_op",
             "allocations","allocated_bytes","allocations_per_op","allocated_bytes_per_op",
-            "object_bytes","payload_bytes","spilled","prepare_i_refs","full_i_refs","reps","iters"]
+            "object_bytes","payload_bytes","spilled","prepare_i_refs","full_i_refs","reps","iters",
+            "git_sha","binary_sha","guix_channels_sha","cpu","valgrind_version"]
     args.out.parent.mkdir(parents=True,exist_ok=True)
     with args.out.open("w",newline="") as f:
         w=csv.DictWriter(f,fieldnames=fields,delimiter="\t",extrasaction="ignore");w.writeheader();w.writerows(rows)
