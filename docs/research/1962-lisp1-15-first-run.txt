@@ -1,61 +1,128 @@
+Verified 2026-10-01 on WSL, detached worktree from PR #1963 @ 255f3e78.
+
+$ python3 scripts/research-domain-graph-1962.py
+
 === lisp1 ===
-candidate lower basis:
-  D3 hypothesis: {cond, label, lambda, quote}
-  mūla4:        {atom, car, cdr, cons, eq}
+bīja3 seed:
+  000  nil
+  001  quote
+  010  atom
+  011  eq
+  100  cons
+  101  car
+  110  cdr
+  111  cond
+exact prefix witnesses:
+  1010  caar     parent=101:car
+  1011  cadr     parent=101:car
+  1100  cdar     parent=110:cdr
+  1101  cddr     parent=110:cdr
+  10110 cadar    parent=1011:cadr
+  10111 caddr    parent=1011:cadr
 multi-node SCC:
   {eval_lisp1, evcon_lisp1, evlis_lisp1}
 
-model A: named dependency depth (diagnostic only)
-  caar                 depth=1 naive-domain=janya5   basis-support={car}
-  cadar                depth=1 naive-domain=janya5   basis-support={car,cdr}
-  caddr                depth=1 naive-domain=janya5   basis-support={car,cdr}
-  cadr                 depth=1 naive-domain=janya5   basis-support={car,cdr}
-  cdar                 depth=1 naive-domain=janya5   basis-support={car,cdr}
-  cddr                 depth=1 naive-domain=janya5   basis-support={cdr}
-  equal                depth=1 naive-domain=janya5   basis-support={atom,car,cdr,cond,eq}
-  list                 depth=1 naive-domain=janya5   basis-support={cons}
-  null                 depth=1 naive-domain=janya5   basis-support={atom,eq}
-  append               depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq}
-  appq_lisp1           depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq,quote}
-  assoc_lisp1          depth=2 naive-domain=janya6   basis-support={car,cdr,cond,eq}
-  pair_lisp1           depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq}
-  eval_lisp1           depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
-  evcon_lisp1          depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
-  evlis_lisp1          depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
-  apply_lisp1          depth=4 naive-domain=janya8   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+model A: named dependency depth from bīja3 (diagnostic only)
+  caar                 depth=1 seed-support={101:car}
+  cadar                depth=1 seed-support={101:car,110:cdr}
+  caddr                depth=1 seed-support={101:car,110:cdr}
+  cadr                 depth=1 seed-support={101:car,110:cdr}
+  cdar                 depth=1 seed-support={101:car,110:cdr}
+  cddr                 depth=1 seed-support={110:cdr}
+  equal                depth=1 seed-support={010:atom,011:eq,101:car,110:cdr,111:cond}
+  label                depth=1 seed-support={-}
+  lambda               depth=1 seed-support={-}
+  list                 depth=1 seed-support={000:nil,100:cons}
+  null                 depth=1 seed-support={000:nil,010:atom,011:eq}
+  append               depth=2 seed-support={000:nil,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  appq_lisp1           depth=2 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  assoc_lisp1          depth=2 seed-support={011:eq,101:car,110:cdr,111:cond}
+  pair_lisp1           depth=2 seed-support={000:nil,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  eval_lisp1           depth=3 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  evcon_lisp1          depth=3 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  evlis_lisp1          depth=3 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  apply_lisp1          depth=4 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
 
-model B: transitive basis-support flattening
-  derived nodes with basis support: 17
-  distinct basis-support sets:      10
-  warning: basis expressibility alone has no distance information
+model B: transitive seed-support flattening
+  non-seed nodes with seed support: 17
+  distinct seed-support sets:       9
+  warning: seed expressibility alone has no distance information
 
 === lisp15 ===
-candidate lower basis:
-  D3 hypothesis: {cond, label, lambda, quote}
-  mūla4:        {atom, car, cdr, cons, eq}
+bīja3 seed:
+  000  nil
+  001  quote
+  010  atom
+  011  eq
+  100  cons
+  101  car
+  110  cdr
+  111  cond
+exact prefix witnesses:
+  1010  caar     parent=101:car
+  1011  cadr     parent=101:car
+  1100  cdar     parent=110:cdr
+  1101  cddr     parent=110:cdr
+  10110 cadar    parent=1011:cadr
+  10111 caddr    parent=1011:cadr
 multi-node SCC:
   {apply_lisp15, eval_lisp15, evcon_lisp15, evlis_lisp15}
 
-model A: named dependency depth (diagnostic only)
-  caar                 depth=1 naive-domain=janya5   basis-support={car}
-  cadar                depth=1 naive-domain=janya5   basis-support={car,cdr}
-  caddr                depth=1 naive-domain=janya5   basis-support={car,cdr}
-  cadr                 depth=1 naive-domain=janya5   basis-support={car,cdr}
-  cdar                 depth=1 naive-domain=janya5   basis-support={car,cdr}
-  cddr                 depth=1 naive-domain=janya5   basis-support={cdr}
-  equal                depth=1 naive-domain=janya5   basis-support={atom,car,cdr,cond,eq}
-  list                 depth=1 naive-domain=janya5   basis-support={cons}
-  null                 depth=1 naive-domain=janya5   basis-support={atom,eq}
-  append               depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq}
-  assoc_lisp15         depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,eq}
-  pairlis_lisp15       depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq}
-  apply_lisp15         depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
-  eval_lisp15          depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
-  evcon_lisp15         depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
-  evlis_lisp15         depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
-  evalquote_lisp15     depth=4 naive-domain=janya8   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+model A: named dependency depth from bīja3 (diagnostic only)
+  caar                 depth=1 seed-support={101:car}
+  cadar                depth=1 seed-support={101:car,110:cdr}
+  caddr                depth=1 seed-support={101:car,110:cdr}
+  cadr                 depth=1 seed-support={101:car,110:cdr}
+  cdar                 depth=1 seed-support={101:car,110:cdr}
+  cddr                 depth=1 seed-support={110:cdr}
+  equal                depth=1 seed-support={010:atom,011:eq,101:car,110:cdr,111:cond}
+  label                depth=1 seed-support={-}
+  lambda               depth=1 seed-support={-}
+  list                 depth=1 seed-support={000:nil,100:cons}
+  null                 depth=1 seed-support={000:nil,010:atom,011:eq}
+  append               depth=2 seed-support={000:nil,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  assoc_lisp15         depth=2 seed-support={010:atom,011:eq,101:car,110:cdr,111:cond}
+  pairlis_lisp15       depth=2 seed-support={000:nil,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  apply_lisp15         depth=3 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  eval_lisp15          depth=3 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  evcon_lisp15         depth=3 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  evlis_lisp15         depth=3 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
+  evalquote_lisp15     depth=4 seed-support={000:nil,001:quote,010:atom,011:eq,100:cons,101:car,110:cdr,111:cond}
 
-model B: transitive basis-support flattening
-  derived nodes with basis support: 17
-  distinct basis-support sets:      8
-  warning: basis expressibility alone has no distance information
+model B: transitive seed-support flattening
+  non-seed nodes with seed support: 17
+  distinct seed-support sets:       8
+  warning: seed expressibility alone has no distance information
+
+$ python3 scripts/research-1962-prefix-tree.py
+
+seed3	old-padded8	role
+000	00000000	()
+001	00000001	QUOTE
+010	00000010	ATOM
+011	00000011	EQ
+100	00000100	CONS
+101	00000101	CAR
+110	00000110	CDR
+111	00000111	COND
+
+selector-prefix-tree
+width=3
+101	CAR	parent=-
+110	CDR	parent=-
+width=4
+1010	CAAR	parent=101
+1011	CADR	parent=101
+1100	CDAR	parent=110
+1101	CDDR	parent=110
+width=5
+10100	CAAAR	parent=1010
+10101	CAADR	parent=1010
+10110	CADAR	parent=1011
+10111	CADDR	parent=1011
+11000	CDAAR	parent=1100
+11001	CDADR	parent=1100
+11010	CDDAR	parent=1101
+11011	CDDDR	parent=1101
+
+PASS: seed3 is full; padded first-eight projection is lossless; CAR/CDR descendants form a collision-free binary prefix tree.
