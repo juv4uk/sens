@@ -27,7 +27,7 @@ Let a canonical word be:
 w ∈ {0,1}+
 ```
 
-with an explicit word boundary.
+with an explicit word boundary. Whether the empty bit sequence `ε` is semantically admissible is intentionally unresolved under #2106.
 
 Two words are identical iff every bit and the exact width match:
 
@@ -70,6 +70,12 @@ It is not silently reinterpreted as:
 Likewise, internal `00` is ordinary word data. It is not an implicit separator.
 
 Transport/source/container mechanisms may encode boundaries, but framing bits/bytes are not semantic bits.
+
+## Epsilon is an open semantic question
+
+At the carrier level, the empty sequence can be represented and round-tripped without contradiction. That does not make it an admitted SENS identity. Excluding it is also not yet derived.
+
+Therefore Foundation-0 carries `ε` mechanically while leaving its semantic admission open to #2106.
 
 ## Semantic admission is separate
 
