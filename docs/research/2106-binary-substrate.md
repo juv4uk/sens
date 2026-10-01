@@ -91,6 +91,25 @@ Therefore `epsilon forbidden` is not derived from the neutral carrier.
 
 #2077 has been weakened accordingly: epsilon can round-trip mechanically while semantic admission remains unresolved.
 
+## 5. Order is semantically observable
+
+The selector positive control gives a direct witness that an unordered bag of bits is insufficient.
+
+Using the admitted local selector interpretation `0 -> left` and `1 -> right` on a nested pair:
+
+```text
+suffix 01 -> one result
+suffix 10 -> a different result
+```
+
+The two suffixes contain the same bits with the same multiplicity. Only order differs.
+
+Likewise `0` and `00` differ under repeated projection, so multiplicity/width is observable too.
+
+Therefore the carrier requirement is stronger than 'binary labels': it must preserve ordered sequence position and exact multiplicity.
+
+This is a family-backed witness, not a claim that every future semantic family interprets order in the same way.
+
 ## Epistemic split proposed for #2018
 
 ```text
