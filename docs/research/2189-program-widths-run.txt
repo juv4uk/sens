@@ -1,0 +1,16 @@
+# research-2189 program widths (ASSUMED widths of real Lisp source: see the module docstring)
+
+whole file as ONE message:
+  file                        words payload B  runs   framing bytes   B   B2   B*   B4
+  lib/core1.lisp               2364      1324  1360                 889 1362  890  594
+  lib/core3.lisp                114        69    59                  44   60   45   17
+  lib/core4.lisp               5216      2869  2695                 1958 2697 1959 1307
+  benchmarks/lists.lisp          64        39    33                  25   34   26   10
+  benchmarks/recursion.lisp      76        49    31                  30   32   31   12
+
+each top-level form as its own message (mean framing bytes per form, and the share of forms where each is the cheapest):
+  lib/core1.lisp                34 forms   B  27.74  B2  42.06  B*  28.74  B4  19.03   B <= B2 in 100% of forms
+  lib/core3.lisp                 4 forms   B  11.75  B2   16.5  B*  12.75  B4   5.75   B <= B2 in 100% of forms
+  lib/core4.lisp                79 forms   B   26.3  B2  36.13  B*   27.3  B4  11.16   B <= B2 in 100% of forms
+  benchmarks/lists.lisp          2 forms   B   13.5  B2     18  B*   14.5  B4    6.5   B <= B2 in 100% of forms
+  benchmarks/recursion.lisp      2 forms   B   15.5  B2     17  B*   14.5  B4      7   B <= B2 in 50% of forms

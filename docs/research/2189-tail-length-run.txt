@@ -6,6 +6,7 @@
 [1] D stop bit: 27931 sequences, 0 round-trip failures (widths from the grammar for A, C, D)
 [1] B2 runs: 27931 sequences, 0 round-trip failures (widths from the grammar for A, C, D)
 [1] B* mode+shorter: 27931 sequences, 0 round-trip failures (widths from the grammar for A, C, D)
+[1] B4 alphabet: 27931 sequences, 0 round-trip failures (widths from the grammar for A, C, D)
 
 [2] A bit length: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
 [2] B count+widths: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
@@ -13,6 +14,7 @@
 [2] D stop bit: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
 [2] B2 runs: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
 [2] B* mode+shorter: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
+[2] B4 alphabet: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
 
 [3] fixture [0],[00] vs [000] (#1980: same zero-padded byte): all frames round-trip
 [3] fixture [1],[1,0] style: [1],[10] vs [110]: all frames round-trip
@@ -34,14 +36,15 @@
       D stop bit: 4092 shared frames of 8191 distinct frames
       B2 runs: 0 shared frames of 27931 distinct frames
       B* mode+shorter: 0 shared frames of 27931 distinct frames
+      B4 alphabet: 0 shared frames of 27931 distinct frames
 
-[4b] standalone-envelope width streams: framing bytes (everything except the payload bytes), B = count + 3 bits per width, B2 = run-length (1 byte per run), B* = a mode byte + the shorter of the two:
-      ( QUOTE ) = 2,3,2                       3 words   B   3   B2   4   B*   4
-      20 words of width 3 (one run)          20 words   B   9   B2   2   B*   3
-      100 words of width 3 (one run)        100 words   B  39   B2   5   B*   6
-      alternating 2,3 x 10                   20 words   B   9   B2  21   B*  10
-      alternating 2,3 x 50                  100 words   B  39   B2 101   B*  40
-      widths 1..4 cycling x 25              100 words   B  39   B2 101   B*  40
+[4b] standalone-envelope width streams: framing bytes (everything except the payload bytes), B = count + 3 bits per width, B2 = run-length (1 byte per run), B* = a mode byte + the shorter of the two, B4 = an alphabet of the used widths + ceil(log2 k) bits per width:
+      ( QUOTE ) = 2,3,2                       3 words   B   3   B2   4   B*   4   B4   3
+      20 words of width 3 (one run)          20 words   B   9   B2   2   B*   3   B4   2
+      100 words of width 3 (one run)        100 words   B  39   B2   5   B*   6   B4   2
+      alternating 2,3 x 10                   20 words   B   9   B2  21   B*  10   B4   5
+      alternating 2,3 x 50                  100 words   B  39   B2 101   B*  40   B4  15
+      widths 1..4 cycling x 25              100 words   B  39   B2 101   B*  40   B4  27
 
 [5] accounting, mean per sequence: frame | payload bits | payload bytes | tail bits | framing bytes | total bytes | utilization
       A bit length | 9.69 | 1.77 | 4.47 | 1.0 | 2.77 | 0.4372
@@ -50,3 +53,4 @@
       D stop bit | 9.69 | 1.77 | 4.43 | 0.12 | 1.89 | 0.641
       B2 runs | 9.69 | 1.77 | 4.47 | 3.22 | 4.99 | 0.2425
       B* mode+shorter | 9.69 | 1.77 | 4.47 | 3.8 | 5.57 | 0.2174
+      B4 alphabet | 9.69 | 1.77 | 4.47 | 2.82 | 4.59 | 0.2639

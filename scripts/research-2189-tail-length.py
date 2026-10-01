@@ -281,6 +281,57 @@ def dec_b2(frame: bytes, widths: Optional[Sequence[int]] = None) -> Seq:
     return split_words(bits[:total], ws)
 
 
+# --- B4: an ALPHABET of the widths actually used (a 1-byte bitmask of widths 1..8), then ceil(log2 k) bits per width
+def _bits_per_width(k: int) -> int:
+    return (k - 1).bit_length()                      # k = 1 -> 0 bits, 2 -> 1, 3..4 -> 2, 5..8 -> 3
+
+
+def enc_b4(seq: Seq) -> bytes:
+    ws = widths_of(seq)
+    alphabet = sorted(set(ws))
+    mask = sum(1 << (w - 1) for w in alphabet)
+    nb = _bits_per_width(len(alphabet))
+    head = "".join(f"{alphabet.index(w):0{nb}b}" for w in ws) if nb else ""
+    return varint(len(ws)) + bytes([mask]) + to_bytes(head) + to_bytes(payload_bits(seq))
+
+
+def dec_b4(frame: bytes, widths: Optional[Sequence[int]] = None) -> Seq:
+    count, pos = read_varint(frame, 0)
+    if pos >= len(frame):
+        raise FrameError("truncated alphabet")
+    mask = frame[pos]
+    pos += 1
+    alphabet = [w for w in range(1, 9) if mask >> (w - 1) & 1]
+    if count == 0 and mask:
+        raise FrameError("an alphabet for an empty sequence")
+    nb = _bits_per_width(len(alphabet)) if alphabet else 0
+    hbytes = (count * nb + 7) // 8
+    if pos + hbytes > len(frame):
+        raise FrameError("truncated width stream")
+    hbits = bits_of(frame[pos:pos + hbytes])
+    if set(hbits[count * nb:]) - {"0"}:
+        raise FrameError("non-zero padding in the width stream")
+    ws = []
+    for i in range(count):
+        idx = int(hbits[i * nb:(i + 1) * nb], 2) if nb else 0
+        if idx >= len(alphabet):
+            raise FrameError("width index outside the alphabet")
+        ws.append(alphabet[idx])
+    if set(ws) != set(alphabet):
+        raise FrameError("the alphabet lists a width that is never used")
+    pos += hbytes
+    total = sum(ws)
+    body = frame[pos:]
+    if len(body) != (total + 7) // 8:
+        raise FrameError("payload byte count differs from the widths")
+    bits = bits_of(body)
+    if set(bits[total:]) - {"0"}:
+        raise FrameError("non-zero tail padding")
+    if widths is not None and list(widths) != ws:
+        raise FrameError("widths differ from the grammar")
+    return split_words(bits[:total], ws)
+
+
 def enc_bstar(seq: Seq) -> bytes:
     """B*: one mode byte (0 = B, 1 = B2), then whichever of the two is shorter (a tie takes B): canonical by construction."""
     b, b2 = enc_b(seq), enc_b2(seq)
@@ -296,7 +347,7 @@ def dec_bstar(frame: bytes, widths: Optional[Sequence[int]] = None) -> Seq:
     return seq
 
 
-def shape_costs() -> List[Tuple[str, int, int, int, int]]:
+def shape_costs() -> List[Tuple[str, int, int, int, int, int]]:
     """(shape, words, B, B2, B* framing bytes) for sequences whose widths are generated, values all zero."""
     shapes = {
         "( QUOTE ) = 2,3,2": [2, 3, 2],
@@ -310,13 +361,13 @@ def shape_costs() -> List[Tuple[str, int, int, int, int]]:
     for name, ws in shapes.items():
         seq = tuple((w, 0) for w in ws)
         pb = (sum(ws) + 7) // 8
-        rows.append((name, len(ws), len(enc_b(seq)) - pb, len(enc_b2(seq)) - pb, len(enc_bstar(seq)) - pb))
+        rows.append((name, len(ws), len(enc_b(seq)) - pb, len(enc_b2(seq)) - pb, len(enc_bstar(seq)) - pb, len(enc_b4(seq)) - pb))
     return rows
 
 
 FRAMES = {"A bit length": (enc_a, dec_a), "B count+widths": (enc_b, dec_b),
           "C valid bits": (enc_c, dec_c), "D stop bit": (enc_d, dec_d),
-          "B2 runs": (enc_b2, dec_b2), "B* mode+shorter": (enc_bstar, dec_bstar)}
+          "B2 runs": (enc_b2, dec_b2), "B* mode+shorter": (enc_bstar, dec_bstar), "B4 alphabet": (enc_b4, dec_b4)}
 
 
 # ----------------------------------------------------------------- the corpus
@@ -468,9 +519,9 @@ def main(argv: Sequence[str]) -> int:
     print("\n[4] self-containment: frames shared by 2+ DIFFERENT word sequences (without the grammar's widths):")
     for name, (shared, distinct) in check_self_containment(seqs).items():
         print(f"      {name}: {shared} shared frames of {distinct} distinct frames")
-    print("\n[4b] standalone-envelope width streams: framing bytes (everything except the payload bytes), B = count + 3 bits per width, B2 = run-length (1 byte per run), B* = a mode byte + the shorter of the two:")
-    for shape, n, b_bytes, b2_bytes, bs_bytes in shape_costs():
-        print(f"      {shape:36} {n:>4} words   B {b_bytes:>3}   B2 {b2_bytes:>3}   B* {bs_bytes:>3}")
+    print("\n[4b] standalone-envelope width streams: framing bytes (everything except the payload bytes), B = count + 3 bits per width, B2 = run-length (1 byte per run), B* = a mode byte + the shorter of the two, B4 = an alphabet of the used widths + ceil(log2 k) bits per width:")
+    for shape, n, b_bytes, b2_bytes, bs_bytes, b4_bytes in shape_costs():
+        print(f"      {shape:36} {n:>4} words   B {b_bytes:>3}   B2 {b2_bytes:>3}   B* {bs_bytes:>3}   B4 {b4_bytes:>3}")
     print("\n[5] accounting, mean per sequence: frame | payload bits | payload bytes | tail bits | framing bytes | total bytes | utilization")
     for r in accounting(seqs):
         print("      " + " | ".join(str(x) for x in r))
