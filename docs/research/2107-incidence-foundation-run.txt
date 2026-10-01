@@ -1,0 +1,29 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-2107-incidence-foundation.py
+
+D / POINTS
+host node tokens are not semantic: rename changes tokens, not isomorphism class
+
+I / INCIDENCE
+underlying undirected edges: [['a','b'],['a','c']]
+out-star and in-star share identical undirected incidence: YES
+
+O / ORIENTATION
+out-star degree signature: [(0,2),(1,0),(1,0)]
+in-star degree signature:  [(0,1),(0,1),(2,0)]
+direction-preserving isomorphic: False
+result: orientation is extra structure beyond incidence
+
+L / RELATION TYPES
+consistent label renaming preserves typed structure: YES
+collapsing two relation kinds into one preserves directed edges but loses typed structure: YES
+
+FOUNDATIONAL CLASSIFICATION
+node token identity       -> mechanism/gauge under graph isomorphism
+distinguishable points    -> assumed by executable representation
+incidence                 -> extra structure over points
+orientation               -> extra structure over incidence
+relation typing/labels    -> extra structure over orientation
+
+PASS: R subset CxC is not assumption-free; it packages distinction + incidence + orientation.
