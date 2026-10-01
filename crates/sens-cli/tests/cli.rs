@@ -125,7 +125,7 @@ fn explicit_core3_flag_selects_core3_before_file_evaluation() {
     assert_eq!(core3.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&core3.stderr)
-            .contains("admitted host mechanism is unavailable for SENS function: 10101000"),
+            .contains("10101000: expected 2 arguments, received 0"),
         "{:?}",
         String::from_utf8_lossy(&core3.stderr)
     );
