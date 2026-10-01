@@ -1,0 +1,27 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-1968-cond-family.py
+
+candidate	p	q	got	expected	match
+AND	0	0	()	0	false
+AND	0	1	()	0	false
+AND	1	0	0	0	true
+AND	1	1	1	1	true
+OR	0	0	()	0	false
+OR	0	1	1	1	true
+OR	1	0	1	1	true
+OR	1	1	1	1	true
+
+bounded classification
+COND -> predicate AND : attractive partial-specialization law FALSIFIED
+COND -> predicate OR  : attractive partial-specialization law FALSIFIED
+reason: structural () is not PredicateBit(0)
+1110/1111             : remain unallocated by this experiment
+
+repair analysis
+A correct total PredicateBit connective would need an explicit way to produce
+PredicateBit(0) on the skipped/exhausted path. Under answer-contract/2, source
+cannot use structural () as that value; adding EQ/other predicate machinery
+would make the construction multi-root.
+
+PASS: falsifier preserves () != 0 and rejects the tempting allocation.
