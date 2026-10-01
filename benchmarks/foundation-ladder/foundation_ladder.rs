@@ -252,7 +252,7 @@ fn prepare(candidate: &str, g: &Graph, c: &mut Counters) -> (Prepared, usize) {
                 temporary_signatures + temporary_classes + final_bytes,
             )
         }
-        _ => panic!("unknown candidate: {candidate}"),
+        _ => panic!("unknown candidate: {}", candidate),
     }
 }
 
@@ -356,7 +356,7 @@ fn parse_arg(name: &str, default: Option<&str>) -> String {
         }
     }
     default
-        .unwrap_or_else(|| panic!("missing {name}"))
+        .unwrap_or_else(|| panic!("missing {}", name))
         .to_string()
 }
 
