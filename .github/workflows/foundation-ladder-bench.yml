@@ -1,0 +1,45 @@
+name: Foundation ladder benchmark
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/foundation-ladder/**"
+      - ".github/workflows/foundation-ladder-bench.yml"
+      - "manifest.scm"
+      - "channels.scm"
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Guix bootstrap
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix
+          guix --version
+
+      - name: Parity + logical counters + Cachegrind in pinned Guix environment
+        run: |
+          rm -rf /tmp/sens-foundation-ladder
+          guix time-machine -C channels.scm -- shell \
+            -m manifest.scm valgrind -- \
+            bash benchmarks/foundation-ladder/run.sh /tmp/sens-foundation-ladder
+
+      - name: Publish benchmark summary
+        if: always()
+        run: |
+          if test -f /tmp/sens-foundation-ladder/report.md; then
+            cat /tmp/sens-foundation-ladder/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: foundation-ladder-benchmark
+          path: /tmp/sens-foundation-ladder/
+          retention-days: 7
