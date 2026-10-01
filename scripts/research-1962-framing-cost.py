@@ -79,6 +79,30 @@ def wire_cost(width: int) -> int:
     return len(width_header(width)) + width
 
 
+CURRENT_CONTROL2 = 2
+CURRENT_FUNCTION8 = 12
+CURRENT_SPACE = 2
+
+
+def current_parenthesized_function_cost(function_count: int) -> int:
+    if function_count < 1:
+        raise ValueError("need at least one function word")
+    return (
+        CURRENT_CONTROL2
+        + function_count * CURRENT_FUNCTION8
+        + (function_count - 1) * CURRENT_SPACE
+        + CURRENT_CONTROL2
+    )
+
+
+def candidate_parenthesized_same_width_cost(width: int, function_count: int) -> int:
+    if function_count < 1:
+        raise ValueError("need at least one function word")
+    structural = 2 * wire_cost(2)
+    functions = function_count * wire_cost(width)
+    return structural + functions
+
+
 def verify_bounded() -> None:
     all_words = []
     for width in range(1, 9):
@@ -113,6 +137,25 @@ def main() -> None:
     print("tokens: ", " | ".join(example))
     print("wire:   ", encoded)
     print("decoded:", " | ".join(decode_words(encoded)))
+
+    print()
+    print("current-vs-candidate bounded call cost")
+    print("width\tone-fn-current\tone-fn-width3\ttwo-fn-current\ttwo-fn-width3")
+    for width in range(3, 9):
+        print(
+            f"{width}\t"
+            f"{current_parenthesized_function_cost(1)}\t"
+            f"{candidate_parenthesized_same_width_cost(width, 1)}\t"
+            f"{current_parenthesized_function_cost(2)}\t"
+            f"{candidate_parenthesized_same_width_cost(width, 2)}"
+        )
+
+    print()
+    print("notes")
+    print("- candidate wire omits Space frames because width metadata already preserves boundaries")
+    print("- this is valid only if separator multiplicity is not semantic; source can canonicalize one boundary")
+    print("- current donor has no semantic D2 dot: 11 is its escape, so dot needs the new layer separation")
+
     print()
     print("PASS: arbitrary 1..8-bit words round-trip; all ordered pairs of")
     print("1..4-bit words round-trip; internal 00/01/10/11 never act as delimiters.")
