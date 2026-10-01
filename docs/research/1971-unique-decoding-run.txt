@@ -1,0 +1,34 @@
+# research-1971 unique decoding (words up to 4 bits, up to 3 words per sequence)
+
+[1] A width3+escape: 27931 sequences, 0 failures (round trip + injectivity)
+[1] B gamma-only: 27931 sequences, 0 failures (round trip + injectivity)
+[2] A width3+escape: 131071 bit strings up to 16 bits, 17163 accepted, 0 accepted but not canonical (non-strict decoding)
+[2] B gamma-only: 131071 bit strings up to 16 bits, 19371 accepted, 0 accepted but not canonical (non-strict decoding)
+[3] A width3+escape end of stream over 27931 sequences:
+      plain_zero_padding_misread: 26390
+      stop_bit_misread: 0
+      length_prefix_misread: 0
+      padded_wires_shared_by_two_or_more_sequences: 386
+      e.g. padded wire 00000000 is the packing of [('0',), ('0', '0')]
+      e.g. padded wire 00010000 is the packing of [('1',), ('1', '0')]
+[3] B gamma-only end of stream over 27931 sequences:
+      plain_zero_padding_misread: 20602
+      stop_bit_misread: 0
+      length_prefix_misread: 0
+      padded_wires_shared_by_two_or_more_sequences: 0
+
+[4] full wire cost for one word of width w (bits): w, A, B
+       1   4   2
+       2   5   5
+       3   6   6
+       4   7   9
+       5   8  10
+       6   9  11
+       7  10  12
+       8  12  15
+       9  15  16
+      10  16  17
+      11  19  18
+      12  20  19
+
+[5] racanā2 words 00 01 10 11 (the dot) survive as ordinary words: True
