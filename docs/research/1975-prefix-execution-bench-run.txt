@@ -1,0 +1,27 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-1975-prefix-execution-bench.py
+
+selector execution microbenchmark (Python research mechanism only)
+calls: 200000
+hot unique words: 6
+flat precomputed words (suffix<=8): 1022
+lazy cache entries after workload: 6
+
+mode                    median-ms   ns/call   derived-entries-required
+dynamic-root+suffix     534.371     2671.9    0
+lazy-derived-cache      118.279      591.4    6
+flat-precomputed        120.632      603.2    1022
+
+semantic root mechanisms: 2
+semantic suffix actions:   2
+semantic descendant rows required by all three modes: 0
+
+Interpretation:
+- Python-specific mechanism probe only; not a production runtime verdict.
+- dynamic root+suffix pays reconstruction cost every call.
+- lazy cache derives the path once from the canonical word, then reuses it.
+- flat table precomputes 1022 paths although workload touched only 6.
+- lazy cache matched/slightly beat flat lookup in this run while retaining only
+  the six actually used derived projections.
+- cached entries are disposable projections, not semantic authority.
