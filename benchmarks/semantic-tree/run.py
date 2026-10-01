@@ -270,6 +270,9 @@ def main() -> None:
             for key in row:
                 if key not in keys:
                     keys.append(key)
+        for row in rows:
+            for key in keys:
+                row.setdefault(key, 0)
         with (out_dir / "instructions.tsv").open("w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=keys, delimiter="\t", lineterminator="\n")
             writer.writeheader()
