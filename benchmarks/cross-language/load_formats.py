@@ -282,7 +282,7 @@ def main() -> int:
         "",
     ]
     report = "\n".join(lines)
-    (args.out / "report.md").write_text(report + "\n", encoding="utf-8")
+    (args.out / "report.md").write_text(report.rstrip() + "\n", encoding="utf-8")
     print(report)
     return 0
 

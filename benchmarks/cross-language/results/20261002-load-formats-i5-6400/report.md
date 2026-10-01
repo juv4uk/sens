@@ -33,4 +33,3 @@ Interpretation boundary:
 - CPython .pyc lane = validate magic/header + marshal code object; no import-system/module setup.
 - SENS lane = decode prebuilt historical Function8 FASL; encode excluded.
 - Fresh D1-D4 comparison is blocked on #1668 and must replace, not relabel, the SENS lane.
-
