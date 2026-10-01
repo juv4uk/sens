@@ -12,9 +12,11 @@
 //! `eval/capabilities.rs`'s `BTreeMap<String, HostFn>` on the literal
 //! spelling of the calling symbol — never through `Sens8`.
 //!
-//! Part 2: `lib/meta-eval.lisp`'s metacircular evaluator has the exact
-//! same shape, written in Lisp instead of Rust. Its Canon-identity
-//! primitives (`quote`/`atom`/`eq`/`cons`/`car`/`cdr`/`cond`) correctly
+//! Part 2 was originally a second executable gap in `lib/meta-eval.lisp`.
+//! #2223 closes that bounded ordinary-primitive path by projecting admitted
+//! surfaces to exact SENS primitive values before application. The test below
+//! is now a regression ratchet for that closure. Canon-identity primitives
+//! (`quote`/`atom`/`eq`/`cons`/`car`/`cdr`/`cond`) correctly
 //! resolve through `my-semantic-id-for-surface`, so any admitted surface
 //! spelling in any language works. But `my-default-binding`'s fallback
 //! for "ordinary" primitives (`+`/`-`/`*`/`<`/`=`/`>`/`write-to-string`/
@@ -182,33 +184,23 @@ fn meta_eval_resolves_canon_identity_primitives_through_any_admitted_surface_nam
 }
 
 #[test]
-fn meta_eval_ordinary_primitive_dispatch_is_hardcoded_to_one_spelling_not_sid() {
-    // `+` is SID 00001100; `додати` is its own admitted Ukrainian surface
-    // spelling for the exact same identity (see
-    // lib/surface/semantic-registry.lisp and #1228's own read-file work
-    // this session, which read that very table). The NATIVE evaluator
-    // resolves both spellings to the same SID and gives the same answer.
+fn meta_eval_ordinary_primitive_dispatch_converges_on_exact_sens_identity() {
+    // `+` and `додати` are admitted surfaces for exact SENS 00001100.
+    // Native execution must remain spelling-invariant.
     let mut native_session = Session::default();
     let native_english = eval_program("(+ 2 3)", &mut native_session)
         .expect("native + resolves")
         .value
         .to_string();
     let native_ukrainian = eval_program("(додати 2 3)", &mut native_session)
-        .expect("native evaluator is SID-routed for + regardless of surface spelling")
+        .expect("native evaluator resolves the admitted peer surface")
         .value
         .to_string();
-    assert_eq!(
-        native_english, native_ukrainian,
-        "the native evaluator must be spelling-invariant for a SID-routed primitive"
-    );
+    assert_eq!(native_english, native_ukrainian);
 
-    // The metacircular evaluator's `my-default-binding` fallback for
-    // "ordinary" primitives is a literal `(eq name (quote +))` chain
-    // (lib/meta-eval.lisp) — hardcoded to the English spelling only, never
-    // consulting the SID that `+` and `додати` already share. This is the
-    // concrete, named confirmation that this specific backend path is
-    // textual, not SID-routed, exactly like the host-capability registry
-    // above, just written in Lisp instead of Rust.
+    // #2223 closes the old meta-eval text-only gap. Human surfaces may enter
+    // at the boundary, but my-default-binding projects them to the same exact
+    // SENS primitive value that an already-exact 00001100 carries.
     let mut meta_session = Session::default();
     eval_program(
         include_str!("../../../lib/core.lisp"),
@@ -219,19 +211,19 @@ fn meta_eval_ordinary_primitive_dispatch_is_hardcoded_to_one_spelling_not_sid() 
         .expect("meta-evaluator should load");
 
     let meta_english = eval_via_meta("((lambda (a b) (+ a b)) 2 3)", &mut meta_session)
-        .expect("meta-eval resolves the hardcoded English spelling");
-    assert_eq!(meta_english, "5");
+        .expect("meta-eval resolves admitted English surface");
+    let meta_ukrainian = eval_via_meta(
+        "((lambda (a b) (додати a b)) 2 3)",
+        &mut meta_session,
+    )
+    .expect("meta-eval resolves admitted Ukrainian peer through exact SENS");
+    let meta_exact = eval_via_meta(
+        "((lambda (a b) (00001100 a b)) 2 3)",
+        &mut meta_session,
+    )
+    .expect("meta-eval applies exact SENS 00001100 as a first-class primitive");
 
-    let meta_ukrainian = eval_via_meta("((lambda (a b) (додати a b)) 2 3)", &mut meta_session);
-    assert!(
-        meta_ukrainian.is_err()
-            || meta_ukrainian
-                .as_deref()
-                .map(|v| v.contains("unbound"))
-                .unwrap_or(false),
-        "meta-eval must fail to resolve додати even though it is the exact \
-         same SID as +, proving this dispatch path ignores SID identity \
-         entirely and depends on the literal English spelling baked into \
-         lib/meta-eval.lisp's eq-chain: got {meta_ukrainian:?}"
-    );
+    assert_eq!(meta_english, "5");
+    assert_eq!(meta_ukrainian, meta_english);
+    assert_eq!(meta_exact, meta_english);
 }

@@ -5,7 +5,7 @@
 
 use sens::{eval_program, Session};
 
-const HIGHER_ORDER_BUILTIN: &str = "((lambda (f) (f 2 3)) +)";
+const HIGHER_ORDER_BUILTIN: &str = "((lambda (f) (f 2 3)) 00001100)";
 
 fn eval_native(expr: &str) -> String {
     let mut session = Session::default();
