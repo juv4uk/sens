@@ -126,7 +126,7 @@ def rows():
                 }
                 for cand, total in variants.items():
                     out.append({
-                        "case_id": f"{law.name}/u{util}/{cand}",
+                        "case_id": f"{law.name}/u{util}/{cand}/n{calls}",
                         "candidate": cand,
                         "family": law.name,
                         "semantic_depth": str(law.max_depth),
