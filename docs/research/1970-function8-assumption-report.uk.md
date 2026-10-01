@@ -21,7 +21,7 @@
 
 Таблиця `Sens8 -> [Option<PrimitiveFn>; 256]` може лишитися хорошою backend-оптимізацією для legacy/anchor-функцій навіть тоді, коли канонічна identity стане bounded variable-width word/path.
 
-## Знайдені жорсткі блокери
+## Жорсткі блокери в SENS
 
 Перший прохід визначає прямими блокерами production variable-width identity:
 
@@ -32,8 +32,27 @@
 - `crates/sens/src/parser.rs`: binary token стає `ExprKind::Sid` лише коли `token.len() == 8`.
 - `crates/sens/src/syntax.rs`: FASL/SID-представлення зберігає один packed byte.
 - registry/ownership/numeric-inventory validators містять `^[01]{8}$` як schema authority.
+- `knowledge/guard-reference.lisp` досі описує exact-eight identity як standing owner law.
+- CI/workflow callers досі запускають кілька exact-width validators.
 
 Їх слід мігрувати лише після ратифікації дослідницької моделі; цей аудит **не** пропонує послаблювати їх зараз.
+
+## Cross-repository blocker: CML
+
+Read-only аудит `juv4uk/cml` показав, що CML не просто використовує один старий adapter. Exact-8 identity зараз проходить через саму compiler boundary:
+
+- `Expr::Sid(sens::Sid8)` в AST;
+- `Ir::Sid(sens::Sid8)` у backend-neutral IR;
+- direct-source parser розпізнає canonical callable identity лише за exact width 8;
+- `semantic.rs` трактує весь `00000000..11111111` як function space мови;
+- `build.rs` парсить registry identity в `u8`, генерує `Sid8` і форматує IDs рівно у вісім бітів;
+- `upstream_sid_bridge.rs` зводить registry-owned callables у `Sid8`;
+- CML має vendored старий SENS language contract із `sid8-function-space`;
+- `.github/workflows/sid8-issue-lifecycle-guard.yml` автоматично перевідкриває CML issue 238, якщо закрити його «permanent SID8-only constitution».
+
+Отже CML треба вважати **реальною consumer migration dependency** до того, як SENS почне віддавати компілятору нові variable-width callable identities.
+
+Але це все одно **не** означає, що кожна Sid8 backend-specialization мусить зникнути. Відомі восьмибітні anchors можуть лишитися прямими fast paths після того, як CML отримає width-neutral canonical identity carrier.
 
 ## Механізми, які можуть пережити міграцію
 
@@ -44,14 +63,15 @@
 - legacy one-byte wire/FASL Function8 frames;
 - deprecated `Sid8 = Sens8` compatibility adapter;
 - наявні 8-бітні generated registry rows;
-- benchmark parsers для історичної таблиці.
+- benchmark parsers для історичної таблиці;
+- CML backend pattern matches для наявних Sid8 anchors.
 
-Майбутній runtime цілком може мати:
+Майбутній runtime/compiler цілком може мати:
 
 ```text
 canonical variable-width identity
         |
-        +-- legacy/anchor Sens8 -> O(1) 256-slot fast path
+        +-- legacy/anchor Sens8 -> O(1) / direct backend fast path
         |
         +-- longer/path identity -> generator / sparse / derived route
 ```
@@ -65,24 +85,25 @@ canonical variable-width identity
 ```text
 1. ратифікувати width-neutral identity law
 2. замінити exact-width semantic/CI authority
-3. ввести width-neutral canonical identity representation
+3. ввести width-neutral canonical identity representation у SENS
 4. навчити reader/AST/registry schema
 5. version FASL/wire
-6. зберегти або адаптувати 256-byte fast paths там, де вони вигідні
-7. мігрувати tests/docs/bench tooling
+6. відкрити нову identity через SENS API
+7. мігрувати CML AST/IR/build-time registry bridge
+8. зберегти або адаптувати 256-byte / Sid8 fast paths там, де вони вигідні
+9. мігрувати tests/docs/bench tooling
 ```
 
-Такий порядок не дозволяє механічному рефакторингу випадково стати semantic authority.
+Такий порядок не дозволяє механічному рефакторингу випадково стати semantic authority і не дає CML через public API знову зафіксувати SENS на старому типі.
 
 ## Координація
 
-Це лише перший bounded pass. Решту аудиту можна паралелити без конфлікту файлів:
+Це все ще bounded audit. Решту можна паралелити без production-змін:
 
 - додаткові Rust Value/Environment/code-slot типи;
 - necessary forms та semantic-registry consumers;
 - FASL/wire call sites і versioning assumptions;
-- CI workflows, що запускають SID8 guards;
-- cross-repository consumers, особливо CML;
+- інші cross-repository consumers;
 - відділення archived documentation від active authority.
 
 Machine-readable рядки лежать у `docs/research/1970-function8-assumption-inventory.tsv`.
