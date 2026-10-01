@@ -6,8 +6,8 @@
 ; explicit, justified gap. There is no third, silent outcome (#176).
 
 (x86-encoder-coverage/1
-  (form-count 1175)
-  (partial-count 32)
+  (form-count #b10010010111)
+  (partial-count #b100000)
   (coverage
     (iclass "AAA")
     (extension X86-BASE)

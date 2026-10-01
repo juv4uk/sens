@@ -1,0 +1,35 @@
+id	era	kind	seed3_code	prefix_code	prefix_evidence	note
+nil	both	structure-ground	000	000	exact-seed	() / NIL ground; перший вузол повного 3-бітного зерна
+quote	both	evaluation-form	001	001	exact-seed	Історичний QUOTE; constitutive root
+atom	both	semantic	010	010	exact-seed	Історичний ATOM; constitutive root
+eq	both	semantic	011	011	exact-seed	Історичний EQ; constitutive root
+cons	both	semantic	100	100	exact-seed	Історичний CONS; constitutive root
+car	both	semantic	101	101	exact-seed	Історичний CAR; selector root
+cdr	both	semantic	110	110	exact-seed	Історичний CDR; selector root
+cond	both	evaluation-form	111	111	exact-seed	Історичний COND; constitutive root
+lambda	both	binding-form			candidate-family-001	Первинна binding form; можливий нащадок representation/evaluation family, код не призначено
+label	both	binding-form			candidate-family-001	Первинна recursive-name form; код не призначено
+caar	both	derived		1010	exact-selector	CAR∘CAR; prefix theorem
+cadr	both	derived		1011	exact-selector	CAR∘CDR; prefix theorem
+cadar	both	derived		10110	exact-selector	CAR∘CDR∘CAR; prefix theorem
+caddr	both	derived		10111	exact-selector	CAR∘CDR∘CDR; prefix theorem
+cdar	both	derived		1100	exact-selector	CDR∘CAR; prefix theorem
+cddr	both	derived		1101	exact-selector	CDR∘CDR; prefix theorem
+list	both	derived			candidate-family-100	Скорочення ланцюга CONS із NIL; construction-family candidate
+null	both	derived			unresolved-multiparent	Тест NIL через кілька root relations; не форсувати prefix-parent
+equal	both	derived			candidate-family-011	Рекурсивна структурна рівність; equality-family candidate
+append	both	derived			candidate-family-100	Рекурсивне конструювання списку через CONS; construction-family candidate
+pair_lisp1	lisp1	derived				LISP I helper pair
+assoc_lisp1	lisp1	derived				LISP I association-list lookup
+appq_lisp1	lisp1	derived				LISP I quote-each-argument helper
+eval_lisp1	lisp1	evaluator				Теоретичний eval LISP I
+apply_lisp1	lisp1	evaluator				Теоретичний apply LISP I
+evcon_lisp1	lisp1	evaluator				COND helper LISP I
+evlis_lisp1	lisp1	evaluator				Argument-list evaluator LISP I
+pairlis_lisp15	lisp15	derived				LISP 1.5 environment pairing helper
+assoc_lisp15	lisp15	derived				LISP 1.5 association-list lookup
+evalquote_lisp15	lisp15	evaluator				Universal entry point LISP 1.5
+apply_lisp15	lisp15	evaluator				Function+arguments evaluator LISP 1.5
+eval_lisp15	lisp15	evaluator				Form evaluator LISP 1.5
+evcon_lisp15	lisp15	evaluator				COND helper LISP 1.5
+evlis_lisp15	lisp15	evaluator				Argument-list evaluator LISP 1.5

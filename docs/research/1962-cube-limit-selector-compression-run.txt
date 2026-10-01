@@ -1,0 +1,33 @@
+Verified live on WSL 2026-10-01.
+
+CUBE LIMIT
+-----------
+strong semantic triangle
+()   -- ATOM : hamming=1  historical NIL is atomic
+()   -- CONS : hamming=1  NIL is proper-list ground/terminator
+ATOM -- CONS : hamming=2  ATOM(CONS(x,y)) = 0
+
+PASS: hypercubes are triangle-free; therefore Hamming-1 adjacency
+cannot represent every strong semantic relation simultaneously.
+
+SELECTOR COMPRESSION
+--------------------
+name     old8      new-path  bits  saved/use
+second   00101111  1011      4     4
+third    00110000  10111     5     3
+fourth   00110001  101111    6     2
+fifth    00110010  1011111   7     1
+caar     00110011  1010      4     4
+cadr     00110100  1011      4     4
+cddr     00110101  1101      4     4
+cadddr   00110110  101111    6     2
+
+old registered identities: 8
+unique selector semantics: 6
+duplicate identities eliminated: 2
+one use of each old spelling: 64 -> 40 identifier bits
+saving: 24 bits = 37.5%
+unique semantic dictionary footprint: 64 -> 30 bits
+semantic-path saving: 34 bits = 53.1%
+
+Separator/framing cost excluded on both sides.
