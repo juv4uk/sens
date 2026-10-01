@@ -699,6 +699,16 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
                 span,
             ))
         }
+        // Text7 is canonical data, not executable code: no source syntax
+        // re-reads it yet (reader admission is a separate slice), so a macro
+        // cannot return one as code. Named refusal, never silent bits.
+        Value::Text7(_) => {
+            return Err(LanguageError::new(
+                ErrorKind::Type,
+                "a Text7 value is not executable code · znachennia Text7 ne ye vykonavym kodom",
+                span,
+            ))
+        }
     };
         Ok(Expr { kind, span })
     }

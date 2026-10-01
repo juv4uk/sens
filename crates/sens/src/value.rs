@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sens8};
+use crate::{Environment, Exactness, Expr, Sens8, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -503,6 +503,10 @@ pub enum Value {
     Rational(Rational),
     Sid(Sens8),
     String(Rc<str>),
+    /// Canonical SENS text: an exact UPC-7 cell stream. Never a human
+    /// spelling, never Unicode/UTF-8, never a selected layout. Human layout
+    /// projection lives at the reader/boundary layer.
+    Text7(Text7),
     Symbol(Rc<str>),
     Pair(Rc<Value>, Rc<Value>),
     Closure(Rc<Closure>),
@@ -609,6 +613,8 @@ impl PartialEq for Value {
             // resursu — tse vin sam, ne znachennia zi strukturnoiu rivnistiu.
             (Value::TcpConnection(left), Value::TcpConnection(right)) => Rc::ptr_eq(left, right),
             (Value::TcpListener(left), Value::TcpListener(right)) => Rc::ptr_eq(left, right),
+            // Text identity is exact cell-stream equality.
+            (Value::Text7(left), Value::Text7(right)) => left == right,
             _ => false,
         }
     }
@@ -817,6 +823,9 @@ fn render(value: &Value, quote_strings: bool) -> String {
                 text.to_string()
             }
         }
+        // No layout is known at the Value level, so the human view shows the
+        // exact cells rather than inventing a Unicode spelling.
+        Value::Text7(text) => text.to_canonical_wire_token(),
         Value::Symbol(symbol) => symbol.to_string(),
         Value::Pair(_, _) => render_pair(value, quote_strings),
         Value::Closure(_) => "<lambda>".to_string(),
@@ -837,6 +846,9 @@ fn render_canonical_wire(value: &Value) -> String {
             let items = values.borrow().iter().map(render_canonical_wire).collect::<Vec<_>>();
             format!("#({})", items.join(" "))
         }
+        // Canonical Text transport carries the exact UPC-7 cell stream.
+        // Human rendering (Unicode/UTF-8/layout) is never accepted here.
+        Value::Text7(text) => text.to_canonical_wire_token(),
         _ => render(value, true),
     }
 }

@@ -123,7 +123,7 @@ pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 #[allow(deprecated)]
 pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
-pub use text7::{Text7, Text7CellError};
+pub use text7::{Text7, Text7CellError, Text7WireError};
 pub use text7_projection::{
     encode_text7, render_text7, Text7Layout, Text7ProjectionError, TEXT7_LAYOUT_SHA256,
     TEXT7_TABLE_SHA256, TEXT7_UPSTREAM_REVISION,
