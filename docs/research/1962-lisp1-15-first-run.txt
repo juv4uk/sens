@@ -1,0 +1,61 @@
+=== lisp1 ===
+candidate lower basis:
+  D3 hypothesis: {cond, label, lambda, quote}
+  mūla4:        {atom, car, cdr, cons, eq}
+multi-node SCC:
+  {eval_lisp1, evcon_lisp1, evlis_lisp1}
+
+model A: named dependency depth (diagnostic only)
+  caar                 depth=1 naive-domain=janya5   basis-support={car}
+  cadar                depth=1 naive-domain=janya5   basis-support={car,cdr}
+  caddr                depth=1 naive-domain=janya5   basis-support={car,cdr}
+  cadr                 depth=1 naive-domain=janya5   basis-support={car,cdr}
+  cdar                 depth=1 naive-domain=janya5   basis-support={car,cdr}
+  cddr                 depth=1 naive-domain=janya5   basis-support={cdr}
+  equal                depth=1 naive-domain=janya5   basis-support={atom,car,cdr,cond,eq}
+  list                 depth=1 naive-domain=janya5   basis-support={cons}
+  null                 depth=1 naive-domain=janya5   basis-support={atom,eq}
+  append               depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq}
+  appq_lisp1           depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq,quote}
+  assoc_lisp1          depth=2 naive-domain=janya6   basis-support={car,cdr,cond,eq}
+  pair_lisp1           depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq}
+  eval_lisp1           depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+  evcon_lisp1          depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+  evlis_lisp1          depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+  apply_lisp1          depth=4 naive-domain=janya8   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+
+model B: transitive basis-support flattening
+  derived nodes with basis support: 17
+  distinct basis-support sets:      10
+  warning: basis expressibility alone has no distance information
+
+=== lisp15 ===
+candidate lower basis:
+  D3 hypothesis: {cond, label, lambda, quote}
+  mūla4:        {atom, car, cdr, cons, eq}
+multi-node SCC:
+  {apply_lisp15, eval_lisp15, evcon_lisp15, evlis_lisp15}
+
+model A: named dependency depth (diagnostic only)
+  caar                 depth=1 naive-domain=janya5   basis-support={car}
+  cadar                depth=1 naive-domain=janya5   basis-support={car,cdr}
+  caddr                depth=1 naive-domain=janya5   basis-support={car,cdr}
+  cadr                 depth=1 naive-domain=janya5   basis-support={car,cdr}
+  cdar                 depth=1 naive-domain=janya5   basis-support={car,cdr}
+  cddr                 depth=1 naive-domain=janya5   basis-support={cdr}
+  equal                depth=1 naive-domain=janya5   basis-support={atom,car,cdr,cond,eq}
+  list                 depth=1 naive-domain=janya5   basis-support={cons}
+  null                 depth=1 naive-domain=janya5   basis-support={atom,eq}
+  append               depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq}
+  assoc_lisp15         depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,eq}
+  pairlis_lisp15       depth=2 naive-domain=janya6   basis-support={atom,car,cdr,cond,cons,eq}
+  apply_lisp15         depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+  eval_lisp15          depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+  evcon_lisp15         depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+  evlis_lisp15         depth=3 naive-domain=janya7   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+  evalquote_lisp15     depth=4 naive-domain=janya8   basis-support={atom,car,cdr,cond,cons,eq,label,lambda,quote}
+
+model B: transitive basis-support flattening
+  derived nodes with basis support: 17
+  distinct basis-support sets:      8
+  warning: basis expressibility alone has no distance information

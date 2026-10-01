@@ -1,0 +1,35 @@
+id	era	kind	candidate_domain	note
+atom	both	semantic	mūla4	Одна з п'яти elementary functions/predicates
+eq	both	semantic	mūla4	Одна з п'яти elementary functions/predicates
+car	both	semantic	mūla4	Одна з п'яти elementary functions/predicates
+cdr	both	semantic	mūla4	Одна з п'яти elementary functions/predicates
+cons	both	semantic	mūla4	Одна з п'яти elementary functions/predicates
+quote	both	evaluation-form	d3-candidate	Спеціально змінює правило обчислення аргументу/константи
+cond	both	evaluation-form	d3-candidate	Вибіркове обчислення гілки
+lambda	both	binding-form	d3-candidate	Зв'язування параметрів у представленні функції
+label	both	binding-form	d3-candidate	Самопосилання рекурсивної функції
+nil	both	structure		Порожній список/термінатор; не функціональний вузол
+caar	both	derived		Композиція CAR
+cadr	both	derived		CAR∘CDR
+cadar	both	derived		CAR∘CDR∘CAR
+caddr	both	derived		CAR∘CDR∘CDR
+cdar	both	derived		CDR∘CAR
+cddr	both	derived		CDR∘CDR
+list	both	derived		Скорочення ланцюга CONS із NIL
+null	both	derived		Предикат порожнього списку
+equal	both	derived		Рекурсивна структурна рівність
+append	both	derived		Рекурсивне зчеплення списків
+pair_lisp1	lisp1	derived		LISP I helper pair
+assoc_lisp1	lisp1	derived		LISP I association-list lookup
+appq_lisp1	lisp1	derived		LISP I quote-each-argument helper
+eval_lisp1	lisp1	evaluator		Теоретичний eval LISP I
+apply_lisp1	lisp1	evaluator		Теоретичний apply LISP I
+evcon_lisp1	lisp1	evaluator		COND helper LISP I
+evlis_lisp1	lisp1	evaluator		Argument-list evaluator LISP I
+pairlis_lisp15	lisp15	derived		LISP 1.5 environment pairing helper
+assoc_lisp15	lisp15	derived		LISP 1.5 association-list lookup (returns pair)
+evalquote_lisp15	lisp15	evaluator		Universal entry point LISP 1.5
+apply_lisp15	lisp15	evaluator		Function+arguments evaluator LISP 1.5
+eval_lisp15	lisp15	evaluator		Form evaluator LISP 1.5
+evcon_lisp15	lisp15	evaluator		COND helper LISP 1.5
+evlis_lisp15	lisp15	evaluator		Argument-list evaluator LISP 1.5
