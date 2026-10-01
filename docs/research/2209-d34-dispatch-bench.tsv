@@ -1,0 +1,25 @@
+# gcc: gcc (GCC) 16.1.0
+# valgrind: valgrind-3.27.0
+# parity	selectors=6	lanes=F,P,D	mismatches=0
+lane	workload	calls	I_per_call_net	branches_per_call_net	mispredicts_per_call_net	lookups_per_call	bits_per_call	generator_applications_per_call	prepared_bytes
+u8-flat-ready	CAR	100000	25.0	6.0	0.0	1.0	0.0	1.0	768
+d3d4-prefix-ready	CAR	100000	20.0	6.0	0.0	0.0	3.0	1.0	0
+direct-specialized	CAR	100000	3.0	1.0	0.0	0.0	0.0	1.0	0
+u8-flat-ready	CDR	100000	24.0	6.0	0.0	1.0	0.0	1.0	768
+d3d4-prefix-ready	CDR	100000	19.0	6.0	0.0	0.0	3.0	1.0	0
+direct-specialized	CDR	100000	3.0	1.0	0.0	0.0	0.0	1.0	0
+u8-flat-ready	CAAR	100000	36.0	9.0	0.0	1.0	0.0	2.0	768
+d3d4-prefix-ready	CAAR	100000	27.0	8.0	0.0	0.0	4.0	2.0	0
+direct-specialized	CAAR	100000	6.0	2.0	0.0	0.0	0.0	2.0	0
+u8-flat-ready	CADR	100000	35.0	9.0	1.0	1.0	0.0	2.0	768
+d3d4-prefix-ready	CADR	100000	27.0	8.0	0.0	0.0	4.0	2.0	0
+direct-specialized	CADR	100000	6.0	2.0	-0.0	0.0	0.0	2.0	0
+u8-flat-ready	CDAR	100000	35.0	9.0	0.0	1.0	0.0	2.0	768
+d3d4-prefix-ready	CDAR	100000	26.0	8.0	0.0	0.0	4.0	2.0	0
+direct-specialized	CDAR	100000	6.0	2.0	0.0	0.0	0.0	2.0	0
+u8-flat-ready	CDDR	100000	34.0	9.0	2.0	1.0	0.0	2.0	768
+d3d4-prefix-ready	CDDR	100000	26.0	8.0	0.0	0.0	4.0	2.0	0
+direct-specialized	CDDR	100000	7.0	2.0	-0.0	0.0	0.0	2.0	0
+u8-flat-ready	mixed	100000	31.49	8.0	1.237	1.0	0.0	1.66587	768
+d3d4-prefix-ready	mixed	100000	24.16	7.33	1.239	0.0	3.66587	1.66587	0
+direct-specialized	mixed	100000	18.5	6.5	0.859	0.0	0.0	1.66587	0
