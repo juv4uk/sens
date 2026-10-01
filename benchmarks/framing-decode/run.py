@@ -135,15 +135,31 @@ def main() -> None:
     ap.add_argument("--samples", type=int, default=3)
     ap.add_argument("--iterations", type=int, default=20000)
     ap.add_argument("--cpu", type=int, default=None)
+    ap.add_argument("--widths", default=None, help="comma-separated single-word widths")
+    ap.add_argument("--codecs", default=",".join(CODECS))
+    ap.add_argument("--wrappers", default=",".join(WRAPPERS))
+    ap.add_argument("--singles-only", action="store_true")
     ap.add_argument("--out", default=None)
     ap.add_argument("--source-sha", default=None)
     ap.add_argument("--check-only", action="store_true")
     ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args()
 
-    widths = WIDTHS if not args.smoke else (3,8,16,65)
-    program_cases = PROGRAM_CASES if not args.smoke else ("corpus",)
-    cases = tuple(f"single-{w}" for w in widths) + program_cases + ("invalid",)
+    widths = (
+        tuple(int(part) for part in args.widths.split(",") if part)
+        if args.widths
+        else (WIDTHS if not args.smoke else (3,8,16,65))
+    )
+    codecs = tuple(part for part in args.codecs.split(",") if part)
+    wrappers = tuple(part for part in args.wrappers.split(",") if part)
+    if set(codecs) - set(CODECS):
+        raise SystemExit("unknown codec")
+    if set(wrappers) - set(WRAPPERS):
+        raise SystemExit("unknown wrapper")
+    program_cases = () if args.singles_only else (PROGRAM_CASES if not args.smoke else ("corpus",))
+    cases = tuple(f"single-{w}" for w in widths) + program_cases
+    if not args.singles_only:
+        cases += ("invalid",)
 
     out_dir = Path(args.out) if args.out else ROOT / "benchmarks/framing-decode/results"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -162,8 +178,8 @@ def main() -> None:
         )
 
         rows = []
-        for codec in CODECS:
-            for wrapper in WRAPPERS:
+        for codec in codecs:
+            for wrapper in wrappers:
                 for case in cases:
                     iterations = iterations_for(case, args.iterations)
                     _, metrics = run_metrics(binary, codec, wrapper, case, iterations)
