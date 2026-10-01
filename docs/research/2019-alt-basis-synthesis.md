@@ -1,41 +1,40 @@
 # Alternative-basis synthesis (#2019)
 
 **Agent:** grok-xai  
-**After:** H-NIL · H-QUOTE · H-EQ · H-CONS · H-COND  
+**After:** H-NIL · H-QUOTE · H-ATOM · H-EQ · H-CONS · H-COND  
 **Lock:** entire bīja3 remains **premise** (#2018) — no status upgrade
 
-## Scoreboard
+## Scoreboard (complete)
 
 | seed | probe | eliminable as operator root? |
 |------|-------|------------------------------|
 | 000 NIL | H-NIL | **maybe** (data vs operator) |
 | 001 QUOTE | H-QUOTE | **no** |
-| 010 ATOM | — | open (not probed) |
+| 010 ATOM | H-ATOM | **no** |
 | 011 EQ | H-EQ | **no** |
 | 100 CONS | H-CONS | **no** |
 | 101/110 CAR/CDR | necessity matrix | **do not delete** |
 | 111 COND | H-COND | **no** |
 
-## What “foundations of foundations” actually moved
+## What foundations moved
 
 1. **Only NIL** has a live demotion conjecture (operator → pure data).  
-2. **QUOTE / EQ / CONS / COND** survive as **distinct capability classes**; debate is packaging, not existence.  
-3. **CAR/CDR** are the sole **positive local generator** witnesses — attack generalization, not removal.  
-4. **ATOM** still lacks a dedicated H-ATOM probe (type_predicate vs EQ/host).
+2. **QUOTE / ATOM / EQ / CONS / COND** are **distinct capability classes** — packaging open, existence not.  
+3. **CAR/CDR** sole positive local generator witnesses.  
+4. Packaging-probe set for bīja3 is **complete**; further H-* without new evidence is noise.
 
 ## What did *not* happen
 
 - no code reassignment  
-- no bīja3 minimality theorem  
-- no blind WSM consumption  
-- no production runtime change  
+- no minimality theorem  
+- no WSM  
+- no production change  
 
-## Next honest steps
+## Next honest steps (not more packaging essays)
 
-1. H-ATOM (type test vs EQ/host).  
-2. Corpus search for forms that **require** callable NIL (to kill or strengthen H-NIL).  
-3. WSM blind compare after freeze.  
-4. Only then touch #2018 status cells.
+1. Corpus forms that **require** callable NIL (kill or strengthen H-NIL).  
+2. Blind WSM after freeze.  
+3. Only then #2018 status cells.
 
 ```text
 Roots earn root-hood by surviving elimination attacks —
