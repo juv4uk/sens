@@ -100,7 +100,9 @@ static int32_t exec_a(const Word *w, int32_t x)
 }
 
 /* ---- C: decoded-path cache (direct mapped) ----------------------------- */
+#ifndef CACHE_SLOTS
 #define CACHE_SLOTS 1024
+#endif
 typedef struct { int valid; Word w; Row row; } Slot;
 static Slot cache[CACHE_SLOTS];
 

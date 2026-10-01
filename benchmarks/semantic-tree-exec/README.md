@@ -51,9 +51,19 @@ valgrind, cpu, git) is in the header of the TSV.
 1. **Interpreting the suffix bits (B) is the cheapest per call at every depth here.** Flat lookup (A) costs about 23-29 more
    instructions per call (index arithmetic + a row load + a second loop) AND pays preparation that grows as 2^k.
    The crossover N where A becomes cheaper than B **does not exist** at any measured depth (A is never cheaper per call).
-2. **The decoded-path cache (C) does not pay** against a one-bit-per-operation interpreter: decoding is a shift and a mask, so
-   the cache check costs more than it saves, even for a repeated path; with many distinct paths it also misses.
+2. **The decoded-path cache (C) does not beat the interpreter (B)** in either harness: decoding is a shift and a mask, so the
+   cache check costs more than it saves. Whether C beats the FLAT lookup (A) depends on how A and C are built: here C is dearer than A;
+   in the independent harness of the panini agent (a larger table, 2^19 slots, A made of nested legacy-style definitions) C is cheaper
+   than A for repeated paths and for k=8 random. With 2^19 slots here C improves on random paths (k=16: 346 -> 336 I refs, still above A 250)
+   but not on repeated ones (148 vs A 142 at k=8). So the A-versus-C order is **implementation-dependent**; B cheapest is not.
 3. **The hybrid (D)** is not cheaper than B here: the flat rows for depth <= 2 cost more than interpreting them.
+
+## Independent confirmation (panini agent, not reading this code; C, `gcc -O2`, valgrind 3.27)
+
+B is the cheapest per call at every depth, A preparation grows as 2^k (k=16/k=8 ratio 246 ≈ 2^8), and the tree steps / generator
+applications per call are IDENTICAL across all strategies (17 at k=16): the strategies differ only in lookup, cache and decode
+overhead. Her net I refs per call, random k=16: A 225, B 134, C 236, D 139. Orders differ for short suffixes only in D vs A
+(k<=2: B < A < D < C, as here) and in A vs C (see 2).
 
 ## Limits (do not read more into it)
 
