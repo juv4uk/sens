@@ -1,0 +1,35 @@
+node	era	semantic_class	root	canonical_path	path_shared_with	equivalence_evidence	generator_evidence	residue_reason	status
+nil	both	seed-root	000	000	-	-	exact-seed	-	proven
+quote	both	seed-root	001	001	-	-	exact-seed	-	proven
+atom	both	seed-root	010	010	-	-	exact-seed	-	proven
+eq	both	seed-root	011	011	-	-	exact-seed	-	proven
+cons	both	seed-root	100	100	-	-	exact-seed	-	proven
+car	both	seed-root	101	101	-	-	exact-seed	-	proven
+cdr	both	seed-root	110	110	-	-	exact-seed	-	proven
+cond	both	seed-root	111	111	-	-	exact-seed	-	proven
+lambda	both	unresolved	001	-	-	-	candidate-family-001	no proven generator and no irreducibility proof	unresolved
+label	both	unresolved	001	-	-	-	candidate-family-001	no proven generator and no irreducibility proof	unresolved
+caar	both	generated-path	101	1010	-	-	exact-selector	-	proven
+cadr	both	generated-path	101	1011	second	implementation-equal; observational=yes@proper-list; semantic=no	exact-selector	-	proven
+cadar	both	generated-path	101	10110	-	-	exact-selector	-	proven
+caddr	both	generated-path	101	10111	-	-	exact-selector	-	proven
+cdar	both	generated-path	110	1100	-	-	exact-selector	-	proven
+cddr	both	generated-path	110	1101	-	-	exact-selector	-	proven
+list	both	unresolved	100	-	-	-	candidate-family-100; bounded-negative-cons-family	CONS strong generator not proven; negative family evidence does not prove irreducibility	unresolved-not-strong-semantic
+null	both	unresolved	-	-	-	-	unresolved-multiparent	multiple typed parents; no canonical generator/irreducibility proof	unresolved
+equal	both	unresolved	011	-	-	-	candidate-family-011	no proven generator and no irreducibility proof	unresolved
+append	both	unresolved	100	-	-	-	candidate-family-100; bounded-negative-cons-family	CONS strong generator not proven; negative family evidence does not prove irreducibility	unresolved-not-strong-semantic
+pair_lisp1	lisp1	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+assoc_lisp1	lisp1	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+appq_lisp1	lisp1	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+eval_lisp1	lisp1	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+apply_lisp1	lisp1	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+evcon_lisp1	lisp1	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+evlis_lisp1	lisp1	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+pairlis_lisp15	lisp15	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+assoc_lisp15	lisp15	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+evalquote_lisp15	lisp15	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+apply_lisp15	lisp15	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+eval_lisp15	lisp15	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+evcon_lisp15	lisp15	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
+evlis_lisp15	lisp15	unresolved	-	-	-	-	-	no proven generator and no irreducibility proof	unresolved
