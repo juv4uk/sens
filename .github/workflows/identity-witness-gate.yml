@@ -42,16 +42,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base="${{ github.base_ref }}"
-          if [ -z "$base" ]; then
-            base="$(git rev-parse HEAD~1 2>/dev/null || echo HEAD)"
-            git diff --name-status "$base...HEAD" > changed.txt || true
+          # checkout used fetch-depth: 0, so the PR base commit is already local;
+          # a shallow fetch here would destroy the merge base (no merge base).
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$base" ]; then
+            git diff --name-status "$base...HEAD" > changed.txt
           else
-            git fetch --no-tags --depth=1 origin "$base"
-            git diff --name-status "origin/$base...HEAD" > changed.txt
+            git diff --name-status HEAD~1...HEAD > changed.txt \
+              || git diff --name-status HEAD > changed.txt
           fi
           echo "--- changed paths ---"
-          cat changed.txt || true
+          cat changed.txt
           echo "---------------------"
           python3 scripts/check-identity-witness-gate.py --changed changed.txt
 
