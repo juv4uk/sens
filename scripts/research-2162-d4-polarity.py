@@ -92,7 +92,7 @@ def evidence(core1: str) -> dict[str, bool]:
     apply_ = extract_top_level_form(core1, "(00001001 C1-APPLY\n")
     eval_ = extract_top_level_form(core1, "(00001001 C1-EVAL\n")
     eval_program = extract_top_level_form(core1, "(00001001 C1-EVAL-PROGRAM\n")
-    definitionp = extract_top_level_form(core1, "(00001001 C1-DEFINITIONP\\n")
+    definitionp = extract_top_level_form(core1, "(00001001 C1-DEFINITIONP\n")
 
     # LOOKUP reads existing bindings; BIND constructs fresh environment cells.
     lookup_bind = (
