@@ -1,0 +1,130 @@
+era	source	target	relation	rank_edge	evidence	note
+both	caar	car	composition	1	L1 p20/L1.5 p11	Repeated CAR
+both	cadr	car	composition	1	L1 p20-21/L1.5 p11	CAR after CDR
+both	cadr	cdr	composition	1	L1 p20-21/L1.5 p11	CAR after CDR
+both	cadar	car	composition	1	notation	Selector abbreviation
+both	caddr	car	composition	1	notation	Selector abbreviation
+both	cdar	car	composition	1	notation	Selector abbreviation
+both	cadar	cdr	composition	1	notation	Selector abbreviation
+both	caddr	cdr	composition	1	notation	Selector abbreviation
+both	cdar	cdr	composition	1	notation	Selector abbreviation
+both	cddr	cdr	composition	1	notation	Repeated CDR
+both	list	cons	composition	1	L1 p21	LIST expands to nested CONS
+both	list	nil	structure	1	L1 p21	List terminator
+both	null	atom	derivable	1	L1 p20	NULL = ATOM(x) ∧ EQ(x,NIL) in LISP I
+both	null	eq	derivable	1	L1 p20	NULL = ATOM(x) ∧ EQ(x,NIL) in LISP I
+both	null	nil	structure	1	L1 p20	Tests NIL
+both	equal	atom	derivable	1	L1 p20/L1.5 p18
+both	equal	eq	derivable	1	L1 p20/L1.5 p18
+both	equal	car	derivable	1	L1 p20/L1.5 p18
+both	equal	cdr	derivable	1	L1 p20/L1.5 p18
+both	equal	cond	derivable	1	L1 p20/L1.5 p18
+both	equal	equal	recursion	1	L1 p20/L1.5 p18
+both	append	null	derivable	1	L1 p21/L1.5 p18
+both	append	cons	derivable	1	L1 p21/L1.5 p18
+both	append	car	derivable	1	L1 p21/L1.5 p18
+both	append	cdr	derivable	1	L1 p21/L1.5 p18
+both	append	cond	derivable	1	L1 p21/L1.5 p18
+both	append	append	recursion	1	L1 p21/L1.5 p18
+lisp1	pair_lisp1	null	derivable	1	L1 p21
+lisp1	pair_lisp1	atom	derivable	1	L1 p21
+lisp1	pair_lisp1	cons	derivable	1	L1 p21
+lisp1	pair_lisp1	list	derivable	1	L1 p21
+lisp1	pair_lisp1	car	derivable	1	L1 p21
+lisp1	pair_lisp1	cdr	derivable	1	L1 p21
+lisp1	pair_lisp1	cond	derivable	1	L1 p21
+lisp1	pair_lisp1	pair_lisp1	recursion	1	L1 p21
+lisp1	assoc_lisp1	eq	derivable	1	L1 p21
+lisp1	assoc_lisp1	caar	derivable	1	L1 p21
+lisp1	assoc_lisp1	cadar	derivable	1	L1 p21
+lisp1	assoc_lisp1	cdr	derivable	1	L1 p21
+lisp1	assoc_lisp1	cond	derivable	1	L1 p21
+lisp1	assoc_lisp1	assoc_lisp1	recursion	1	L1 p21
+lisp1	appq_lisp1	null	derivable	1	L1 p24
+lisp1	appq_lisp1	cons	derivable	1	L1 p24
+lisp1	appq_lisp1	list	derivable	1	L1 p24
+lisp1	appq_lisp1	quote	derivable	1	L1 p24
+lisp1	appq_lisp1	car	derivable	1	L1 p24
+lisp1	appq_lisp1	cdr	derivable	1	L1 p24
+lisp1	appq_lisp1	cond	derivable	1	L1 p24
+lisp1	appq_lisp1	appq_lisp1	recursion	1	L1 p24
+lisp1	apply_lisp1	eval_lisp1	calls	1	L1 p24
+lisp1	apply_lisp1	cons	calls	1	L1 p24
+lisp1	apply_lisp1	appq_lisp1	calls	1	L1 p24
+lisp1	eval_lisp1	atom	calls	1	L1 p24
+lisp1	eval_lisp1	assoc_lisp1	calls	1	L1 p24
+lisp1	eval_lisp1	car	calls	1	L1 p24
+lisp1	eval_lisp1	eq	calls	1	L1 p24
+lisp1	eval_lisp1	quote	calls	1	L1 p24
+lisp1	eval_lisp1	cadr	calls	1	L1 p24
+lisp1	eval_lisp1	evcon_lisp1	calls	1	L1 p24
+lisp1	eval_lisp1	cdr	calls	1	L1 p24
+lisp1	eval_lisp1	cons	calls	1	L1 p24
+lisp1	eval_lisp1	evlis_lisp1	calls	1	L1 p24
+lisp1	eval_lisp1	caar	calls	1	L1 p24
+lisp1	eval_lisp1	label	calls	1	L1 p24
+lisp1	eval_lisp1	cadar	calls	1	L1 p24
+lisp1	eval_lisp1	lambda	calls	1	L1 p24
+lisp1	eval_lisp1	append	calls	1	L1 p24
+lisp1	eval_lisp1	pair_lisp1	calls	1	L1 p24
+lisp1	eval_lisp1	eval_lisp1	recursion	1	L1 p24
+lisp1	evcon_lisp1	eval_lisp1	calls	1	L1 p24
+lisp1	evcon_lisp1	caar	calls	1	L1 p24
+lisp1	evcon_lisp1	cadar	calls	1	L1 p24
+lisp1	evcon_lisp1	cdr	calls	1	L1 p24
+lisp1	evcon_lisp1	cond	calls	1	L1 p24
+lisp1	evcon_lisp1	evcon_lisp1	recursion	1	L1 p24
+lisp1	evlis_lisp1	null	calls	1	L1 p24
+lisp1	evlis_lisp1	cons	calls	1	L1 p24
+lisp1	evlis_lisp1	eval_lisp1	calls	1	L1 p24
+lisp1	evlis_lisp1	car	calls	1	L1 p24
+lisp1	evlis_lisp1	cdr	calls	1	L1 p24
+lisp1	evlis_lisp1	cond	calls	1	L1 p24
+lisp1	evlis_lisp1	evlis_lisp1	recursion	1	L1 p24
+lisp15	pairlis_lisp15	null	derivable	1	L1.5 p19
+lisp15	pairlis_lisp15	cons	derivable	1	L1.5 p19
+lisp15	pairlis_lisp15	car	derivable	1	L1.5 p19
+lisp15	pairlis_lisp15	cdr	derivable	1	L1.5 p19
+lisp15	pairlis_lisp15	cond	derivable	1	L1.5 p19
+lisp15	pairlis_lisp15	pairlis_lisp15	recursion	1	L1.5 p19
+lisp15	assoc_lisp15	equal	derivable	1	L1.5 p19
+lisp15	assoc_lisp15	caar	derivable	1	L1.5 p19
+lisp15	assoc_lisp15	car	derivable	1	L1.5 p19
+lisp15	assoc_lisp15	cdr	derivable	1	L1.5 p19
+lisp15	assoc_lisp15	cond	derivable	1	L1.5 p19
+lisp15	assoc_lisp15	assoc_lisp15	recursion	1	L1.5 p19
+lisp15	evalquote_lisp15	apply_lisp15	calls	1	L1.5 p20
+lisp15	apply_lisp15	atom	calls	1	L1.5 p20
+lisp15	apply_lisp15	eq	calls	1	L1.5 p20
+lisp15	apply_lisp15	car	calls	1	L1.5 p20
+lisp15	apply_lisp15	cdr	calls	1	L1.5 p20
+lisp15	apply_lisp15	cons	calls	1	L1.5 p20
+lisp15	apply_lisp15	eval_lisp15	calls	1	L1.5 p20
+lisp15	apply_lisp15	lambda	calls	1	L1.5 p20
+lisp15	apply_lisp15	pairlis_lisp15	calls	1	L1.5 p20
+lisp15	apply_lisp15	label	calls	1	L1.5 p20
+lisp15	apply_lisp15	cond	calls	1	L1.5 p20
+lisp15	apply_lisp15	apply_lisp15	recursion	1	L1.5 p20
+lisp15	eval_lisp15	atom	calls	1	L1.5 p20
+lisp15	eval_lisp15	cdr	calls	1	L1.5 p20
+lisp15	eval_lisp15	assoc_lisp15	calls	1	L1.5 p20
+lisp15	eval_lisp15	car	calls	1	L1.5 p20
+lisp15	eval_lisp15	eq	calls	1	L1.5 p20
+lisp15	eval_lisp15	quote	calls	1	L1.5 p20
+lisp15	eval_lisp15	cond	calls	1	L1.5 p20
+lisp15	eval_lisp15	evcon_lisp15	calls	1	L1.5 p20
+lisp15	eval_lisp15	apply_lisp15	calls	1	L1.5 p20
+lisp15	eval_lisp15	evlis_lisp15	calls	1	L1.5 p20
+lisp15	evcon_lisp15	eval_lisp15	calls	1	L1.5 p20
+lisp15	evcon_lisp15	caar	calls	1	L1.5 p20
+lisp15	evcon_lisp15	cadar	calls	1	L1.5 p20
+lisp15	evcon_lisp15	cdr	calls	1	L1.5 p20
+lisp15	evcon_lisp15	cond	calls	1	L1.5 p20
+lisp15	evcon_lisp15	evcon_lisp15	recursion	1	L1.5 p20
+lisp15	evlis_lisp15	null	calls	1	L1.5 p20
+lisp15	evlis_lisp15	cons	calls	1	L1.5 p20
+lisp15	evlis_lisp15	eval_lisp15	calls	1	L1.5 p20
+lisp15	evlis_lisp15	car	calls	1	L1.5 p20
+lisp15	evlis_lisp15	cdr	calls	1	L1.5 p20
+lisp15	evlis_lisp15	cond	calls	1	L1.5 p20
+lisp15	evlis_lisp15	evlis_lisp15	recursion	1	L1.5 p20

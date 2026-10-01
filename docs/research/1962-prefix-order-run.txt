@@ -1,0 +1,22 @@
+Verified live on WSL 2026-10-01.
+
+$ python3 scripts/research-1962-prefix-order.py
+
+node	direct-seed-support	best-seed-anchor(s)	score
+caar	car	car	0
+cadr	car,cdr	car,cdr	4
+cdar	car,cdr	car,cdr	4
+cddr	cdr	cdr	0
+list	cons,nil	cons,nil	6
+null	atom,eq,nil	atom,eq	6
+equal	atom,eq,car,cdr,cond	cdr,cond	18
+append	cons,car,cdr,cond	car,cdr,cond,cons	10
+
+PASS: unordered dependency support cannot distinguish CADR from CDAR;
+ordered composition path does: 1011=CAR→CDR, 1100=CDR→CAR.
+
+Interpretation:
+- global tree-distance / nearest-seed allocation is falsified;
+- unordered dependency support is insufficient;
+- numeric/prefix geometry does not itself carry semantics;
+- only a separately proven local generator may give a prefix edge semantic meaning.
