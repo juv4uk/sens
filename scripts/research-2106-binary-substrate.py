@@ -165,6 +165,38 @@ def test_boundary_vs_payload() -> None:
     assert words[2] != "00"
 
 
+def test_order_is_semantically_observable() -> None:
+    """Selector positive control proves sequence order cannot be discarded."""
+
+    def left(value):
+        return value[0]
+
+    def right(value):
+        return value[1]
+
+    actions = {"0": left, "1": right}
+
+    def run(value, suffix: str):
+        out = value
+        for bit in suffix:
+            out = actions[bit](out)
+        return out
+
+    value = (("a", "b"), ("c", "d"))
+
+    # Same multiset of bits, different ordered program.
+    assert sorted("01") == sorted("10")
+    assert run(value, "01") == "b"
+    assert run(value, "10") == "c"
+    assert run(value, "01") != run(value, "10")
+
+    # Multiplicity/width is observable too.
+    deeper = ((("x", "y"), "z"), "w")
+    assert run(deeper, "0") == (("x", "y"), "z")
+    assert run(deeper, "00") == ("x", "y")
+    assert run(deeper, "0") != run(deeper, "00")
+
+
 def test_epsilon_models() -> None:
     """Both epsilon-including and positive-word carriers satisfy common laws."""
     monoid_words = set(all_words(4, include_epsilon=True))
@@ -198,6 +230,7 @@ def main() -> None:
     racana_assignments = test_racana_label_symmetry()
     delimiter_collisions = test_raw_delimiter_impossibility()
     test_boundary_vs_payload()
+    test_order_is_semantically_observable()
     test_epsilon_models()
 
     print("FOUNDATION-1 binary substrate witness: PASS")
@@ -214,6 +247,8 @@ def main() -> None:
     )
     print("fixed unescaped in-band delimiter for arbitrary words: IMPOSSIBLE")
     print("bounded-word boundary distinct from payload substring: PASS")
+    print("ordered-bit sequence semantically observable in selector witness: PASS")
+    print("unordered bit multiset as identity carrier: INSUFFICIENT")
     print("epsilon-including carrier model: CONSISTENT")
     print("positive-word-only carrier model: CONSISTENT")
     print("epsilon semantic admission: UNRESOLVED")
