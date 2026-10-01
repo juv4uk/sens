@@ -1,0 +1,31 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-2112-constraint-foundation.py
+
+COMPLETE WORLD
+ADMITTED = Omega \ REFUTED: True
+REFUTED  = Omega \ ADMITTED: True
+
+OPEN WORLD — POSITIVE EXTENSION LOSS
+same positive projection: True
+but status models differ: True
+
+OPEN WORLD — NEGATIVE EXTENSION LOSS
+same negative projection: True
+but status models differ: True
+
+CLOSED-WORLD POLICY
+UNKNOWN -> REFUTED changes the model and is therefore an extra policy law.
+
+RENAMING
+host fact tokens differ, status structure preserved up to bijection.
+
+FOUNDATIONAL CLASSIFICATION
+positive relation extension = ADMITTED slice only
+negative/falsifier extension = REFUTED slice only
+UNKNOWN is independent information in an open world
+absence from positive relation != refutation
+absence from negative relation != admission
+closed-world assumption is additional law/policy
+
+PASS: relation extension alone is not a sufficient primitive fact model under unknown!=false.
