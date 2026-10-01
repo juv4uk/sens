@@ -1,0 +1,40 @@
+name: D5 transformer placement
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/tests/d5_transformer_placement.rs"
+      - "docs/research/2198-d5-transformer-placement*.md"
+      - ".github/workflows/d5-transformer-placement.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/tests/d5_transformer_placement.rs"
+      - "docs/research/2198-d5-transformer-placement*.md"
+      - ".github/workflows/d5-transformer-placement.yml"
+
+jobs:
+  d5-placement:
+    name: D5 transformer placement
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run transformer placement witnesses
+        run: cargo test -p sens --test d5_transformer_placement -- --nocapture
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D5 transformer placement"
+            echo
+            echo "- Closure -> transformer preserves exact Rc payload identity"
+            echo "- Non-closure input fails closed"
+            echo "- Ordinary vs staged behavior differs by call mode"
+            echo "- Candidate parent is D4 LAMBDA"
+            echo "- Research-only: 00101 is not ratified"
+          } >> "$GITHUB_STEP_SUMMARY"
