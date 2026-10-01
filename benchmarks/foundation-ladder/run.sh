@@ -140,7 +140,7 @@ for candidate in "${candidates[@]}"; do
   emit_row "cg-s${size}-prepare-${candidate}" "$candidate" "$size" \
     "prepare" 1 "$prep_irefs" "$prep_line" "prep"
 
-  for reps in 1 2 4 5 10 100 1000 10000; do
+  for reps in 1 2 3 4 5 10 100 1000 10000; do
     full_record="$(cachegrind_run "$candidate" full "$size" "$reps" "cg-${candidate}-full-${reps}")"
     full_irefs="${full_record%%$'\t'*}"
     full_line="${full_record#*$'\t'}"
