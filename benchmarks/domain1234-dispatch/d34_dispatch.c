@@ -94,30 +94,34 @@ static int32_t exec_flat(const Call *call, int32_t value) {
     return value;
 }
 
-static int32_t exec_prefix(const Call *call, int32_t value) {
+static int32_t exec_prefix_d3(const Call *call, int32_t value) {
     CNT(dispatches, 1);
-    CNT(bits, call->width);
+    CNT(bits, 3);
     CNT(root_selections, 1);
+    if (call->bits == 0b101) return step(value, 0);
+    if (call->bits == 0b110) return step(value, 1);
+    fprintf(stderr, "bad D3 selector word\n");
+    exit(3);
+}
 
-    if (call->width == 3) {
-        if (call->bits == 0b101) return step(value, 0);
-        if (call->bits == 0b110) return step(value, 1);
-        fprintf(stderr, "bad D3 selector word\n");
+static int32_t exec_prefix_d4(const Call *call, int32_t value) {
+    CNT(dispatches, 1);
+    CNT(bits, 4);
+    CNT(root_selections, 1);
+    const uint8_t root = call->bits >> 1;
+    const uint8_t suffix = call->bits & 1;
+    if (root != 0b101 && root != 0b110) {
+        fprintf(stderr, "bad D4 selector root\n");
         exit(3);
     }
+    CNT(gens, 1);
+    value = step(value, suffix);
+    return step(value, root == 0b110);
+}
 
-    if (call->width == 4) {
-        const uint8_t root = call->bits >> 1;
-        const uint8_t suffix = call->bits & 1;
-        if (root != 0b101 && root != 0b110) {
-            fprintf(stderr, "bad D4 selector root\n");
-            exit(3);
-        }
-        CNT(gens, 1);
-        value = step(value, suffix);
-        return step(value, root == 0b110);
-    }
-
+static int32_t exec_prefix(const Call *call, int32_t value) {
+    if (call->width == 3) return exec_prefix_d3(call, value);
+    if (call->width == 4) return exec_prefix_d4(call, value);
     fprintf(stderr, "unsupported selector width\n");
     exit(3);
 }
@@ -211,11 +215,31 @@ int main(int argc, char **argv) {
             for (long i = 0; i < calls; i++)
                 checksum += exec_flat(&prepared[i], 0);
         } else if (strategy == STRAT_PREFIX) {
-            for (long i = 0; i < calls; i++)
-                checksum += exec_prefix(&prepared[i], 0);
+            if (strcmp(workload, "repeat-d3") == 0 || strcmp(workload, "random-d3") == 0) {
+                for (long i = 0; i < calls; i++)
+                    checksum += exec_prefix_d3(&prepared[i], 0);
+            } else if (strcmp(workload, "repeat-d4") == 0 || strcmp(workload, "random-d4") == 0) {
+                for (long i = 0; i < calls; i++)
+                    checksum += exec_prefix_d4(&prepared[i], 0);
+            } else {
+                for (long i = 0; i < calls; i++)
+                    checksum += exec_prefix(&prepared[i], 0);
+            }
         } else {
-            for (long i = 0; i < calls; i++)
-                checksum += exec_direct(&prepared[i], 0);
+            if (strcmp(workload, "repeat-d3") == 0) {
+                for (long i = 0; i < calls; i++) {
+                    CNT(dispatches, 1);
+                    checksum += step(0, 0);
+                }
+            } else if (strcmp(workload, "repeat-d4") == 0) {
+                for (long i = 0; i < calls; i++) {
+                    CNT(dispatches, 1);
+                    checksum += step(step(0, 1), 0);
+                }
+            } else {
+                for (long i = 0; i < calls; i++)
+                    checksum += exec_direct(&prepared[i], 0);
+            }
         }
     }
 
