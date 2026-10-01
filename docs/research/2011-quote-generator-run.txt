@@ -1,0 +1,27 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-2011-quote-generator.py
+
+QUOTE depth candidate
+case	form	eval-result
+depth1	(QUOTE x)	x
+depth2	(QUOTE (QUOTE x))	(QUOTE x)
+depth3	(QUOTE (QUOTE (QUOTE x)))	(QUOTE (QUOTE x))
+
+payload-class candidate
+class	payload	eval-result
+atom	x	x
+list	(x y)	(x y)
+
+reader-sugar candidate
+explicit and apostrophe-desugared form: (QUOTE x)
+
+BOUNDED CLASSIFICATION
+quote-depth local generator: NOT PROVEN / candidate falsified at strong-local level
+  reason: deeper quote syntax changes returned data shape and requires construction
+payload atom/list children: typed domain split only, not a new local action
+  reason: QUOTE performs the same operand-preserving law on both payload classes
+reader apostrophe: surface projection only, no semantic child
+QUOTE immediate children remain unallocated by these candidates.
+
+PASS: QUOTE suppression is separated from construction of quoted syntax/data.

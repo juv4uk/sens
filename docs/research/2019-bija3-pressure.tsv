@@ -1,0 +1,17 @@
+era	seed	seed3_code	dependent_nodes	exclusive_nodes	co_seed_count	graph_has_outgoing_seed_path	dependents	exclusive	co_seeds
+lisp1	nil	000	8	0	7	0	append,apply_lisp1,appq_lisp1,eval_lisp1,evlis_lisp1,list,null,pair_lisp1		atom,car,cdr,cond,cons,eq,quote
+lisp1	quote	001	3	0	7	0	apply_lisp1,appq_lisp1,eval_lisp1		atom,car,cdr,cond,cons,eq,nil
+lisp1	atom	010	8	0	7	0	append,apply_lisp1,appq_lisp1,equal,eval_lisp1,evlis_lisp1,null,pair_lisp1		car,cdr,cond,cons,eq,nil,quote
+lisp1	eq	011	9	0	7	0	append,apply_lisp1,appq_lisp1,assoc_lisp1,equal,eval_lisp1,evlis_lisp1,null,pair_lisp1		atom,car,cdr,cond,cons,nil,quote
+lisp1	cons	100	7	0	7	0	append,apply_lisp1,appq_lisp1,eval_lisp1,evlis_lisp1,list,pair_lisp1		atom,car,cdr,cond,eq,nil,quote
+lisp1	car	101	14	1	7	0	append,apply_lisp1,appq_lisp1,assoc_lisp1,caar,cadar,caddr,cadr,cdar,equal,eval_lisp1,evcon_lisp1,evlis_lisp1,pair_lisp1	caar	atom,cdr,cond,cons,eq,nil,quote
+lisp1	cdr	110	14	1	7	0	append,apply_lisp1,appq_lisp1,assoc_lisp1,cadar,caddr,cadr,cdar,cddr,equal,eval_lisp1,evcon_lisp1,evlis_lisp1,pair_lisp1	cddr	atom,car,cond,cons,eq,nil,quote
+lisp1	cond	111	9	0	7	0	append,apply_lisp1,appq_lisp1,assoc_lisp1,equal,eval_lisp1,evcon_lisp1,evlis_lisp1,pair_lisp1		atom,car,cdr,cons,eq,nil,quote
+lisp15	nil	000	8	0	7	0	append,apply_lisp15,eval_lisp15,evalquote_lisp15,evlis_lisp15,list,null,pairlis_lisp15		atom,car,cdr,cond,cons,eq,quote
+lisp15	quote	001	3	0	7	0	apply_lisp15,eval_lisp15,evalquote_lisp15		atom,car,cdr,cond,cons,eq,nil
+lisp15	atom	010	9	0	7	0	append,apply_lisp15,assoc_lisp15,equal,eval_lisp15,evalquote_lisp15,evlis_lisp15,null,pairlis_lisp15		car,cdr,cond,cons,eq,nil,quote
+lisp15	eq	011	9	0	7	0	append,apply_lisp15,assoc_lisp15,equal,eval_lisp15,evalquote_lisp15,evlis_lisp15,null,pairlis_lisp15		atom,car,cdr,cond,cons,nil,quote
+lisp15	cons	100	7	0	7	0	append,apply_lisp15,eval_lisp15,evalquote_lisp15,evlis_lisp15,list,pairlis_lisp15		atom,car,cdr,cond,eq,nil,quote
+lisp15	car	101	14	1	7	0	append,apply_lisp15,assoc_lisp15,caar,cadar,caddr,cadr,cdar,equal,eval_lisp15,evalquote_lisp15,evcon_lisp15,evlis_lisp15,pairlis_lisp15	caar	atom,cdr,cond,cons,eq,nil,quote
+lisp15	cdr	110	14	1	7	0	append,apply_lisp15,assoc_lisp15,cadar,caddr,cadr,cdar,cddr,equal,eval_lisp15,evalquote_lisp15,evcon_lisp15,evlis_lisp15,pairlis_lisp15	cddr	atom,car,cond,cons,eq,nil,quote
+lisp15	cond	111	9	0	7	0	append,apply_lisp15,assoc_lisp15,equal,eval_lisp15,evalquote_lisp15,evcon_lisp15,evlis_lisp15,pairlis_lisp15		atom,car,cdr,cons,eq,nil,quote
