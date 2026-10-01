@@ -1,0 +1,46 @@
+name: D5 transformer boundary research
+
+on:
+  pull_request:
+    paths:
+      - "lib/macro.lisp"
+      - "crates/sens/src/eval/macro_substrate.rs"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/closures.rs"
+      - "crates/sens/tests/macro_derivation.rs"
+      - "scripts/research-2181-d5-transformer-boundary.py"
+      - "docs/research/2181-d5-transformer-boundary*.md"
+      - ".github/workflows/d5-transformer-boundary.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "lib/macro.lisp"
+      - "crates/sens/src/eval/macro_substrate.rs"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/closures.rs"
+      - "crates/sens/tests/macro_derivation.rs"
+      - "scripts/research-2181-d5-transformer-boundary.py"
+      - "docs/research/2181-d5-transformer-boundary*.md"
+      - ".github/workflows/d5-transformer-boundary.yml"
+
+jobs:
+  d5-transformer-boundary:
+    name: D5 transformer boundary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run current macro substrate decomposition witness
+        run: python3 scripts/research-2181-d5-transformer-boundary.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D5 transformer boundary"
+            echo
+            echo "- Existing D4 mechanisms: DEFINE/LAMBDA/form construction/EVAL"
+            echo "- Host locus 1: Closure -> Macro materialization"
+            echo "- Host locus 2: raw-form invocation mode"
+            echo "- Candidate compression: one staged transformer capability at 00101"
+            echo "- Research-only: 00101 is not ratified."
+          } >> "$GITHUB_STEP_SUMMARY"
