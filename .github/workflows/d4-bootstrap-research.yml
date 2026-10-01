@@ -1,0 +1,45 @@
+name: D4 bootstrap placement research
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1.lisp"
+      - "scripts/research-2159-d4-pair-grammar.py"
+      - "scripts/research-2162-d4-polarity.py"
+      - "docs/research/2159-d4-pair-grammar*.md"
+      - "docs/research/2162-d4-polarity*.md"
+      - ".github/workflows/d4-bootstrap-research.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "lib/core1.lisp"
+      - "scripts/research-2159-d4-pair-grammar.py"
+      - "scripts/research-2162-d4-polarity.py"
+      - "docs/research/2159-d4-pair-grammar*.md"
+      - "docs/research/2162-d4-polarity*.md"
+      - ".github/workflows/d4-bootstrap-research.yml"
+
+jobs:
+  d4-research:
+    name: D4 pair grammar + polarity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run D4 pair-grammar placement witness
+        run: python3 scripts/research-2159-d4-pair-grammar.py
+
+      - name: Run D4 Core1 polarity witness
+        run: python3 scripts/research-2162-d4-polarity.py
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D4 bootstrap research"
+            echo
+            echo "- #2159 pair-grammar witness: 69,120 constrained placements"
+            echo "- #2162 polarity witness: 16 within-pair orientations"
+            echo "- Research-only: these checks do not ratify production D4 identities."
+          } >> "$GITHUB_STEP_SUMMARY"
