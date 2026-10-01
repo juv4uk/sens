@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(__file__).with_name("bench.rs")
 DEFAULT_DEPTHS = (0, 1, 2, 4, 8, 16)
 DEFAULT_PATTERNS = ("repeated", "random")
-DEFAULT_MODES = ("flat", "cold", "cached", "hybrid")
+DEFAULT_MODES = ("flat", "cold", "compiled", "cached", "hybrid")
 IREF_RE = re.compile(r"I\s+refs:\s+([0-9,]+)")
 
 
