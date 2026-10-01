@@ -170,7 +170,7 @@ mod tests {
     fn unsupported_widths_fail_closed() {
         assert!(Bits::<0>::new(0).is_none());
         assert!(Bits::<9>::new(0).is_none());
-        assert!(Bits::<usize::MAX>::new(0).is_none());
+        assert!(Bits::<{ usize::MAX }>::new(0).is_none());
     }
 
     #[test]
