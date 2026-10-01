@@ -1,0 +1,10 @@
+candidate	result	detail
+C1_car_cdr_only	incomplete	cannot create new pairs
+C2_host_malloc_fields	smuggle	host CONS renamed
+C3_quote_literals_only	not_equivalent	no computed pairs
+C4_macro_sugar	smuggle	primitive allocation remains
+C5_linear_exotic	out_of_scope	not McCarthy basis
+C6_fuse_into_quote	not_equivalent	loses computed cons
+H_CONS_0_derivable	unsupported	introduction ≠ elimination
+H_CONS_2_dual_capability	best_fit	closed pair calculus needs both
+status_lock	premise	100 remains in bīja3 premise
