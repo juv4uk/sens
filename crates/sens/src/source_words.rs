@@ -55,6 +55,55 @@ impl BinarySourceWord {
             Self::W8(word) => word.packed_bits(),
         }
     }
+
+    /// Lift an exact one-bit source word into the typed D1 carrier.
+    ///
+    /// This assigns no bit orientation: NO/YES remains language-owned.
+    pub const fn d1(self) -> Option<crate::PredicateBit> {
+        match self {
+            Self::W1(word) => Some(crate::PredicateBit::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact two-bit source word into the typed D2 carrier.
+    ///
+    /// Structural roles remain language-owned; width is the only fact here.
+    pub const fn d2(self) -> Option<crate::Racana2> {
+        match self {
+            Self::W2(word) => Some(crate::Racana2::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact three-bit source word into the typed D3 carrier.
+    ///
+    /// Primitive roles remain language-owned; no legacy Function8 mapping is
+    /// performed at this boundary.
+    pub const fn d3(self) -> Option<crate::Bija3> {
+        match self {
+            Self::W3(word) => Some(crate::Bija3::from_word(word)),
+            _ => None,
+        }
+    }
+}
+
+impl From<crate::PredicateBit> for BinarySourceWord {
+    fn from(value: crate::PredicateBit) -> Self {
+        Self::W1(value.word())
+    }
+}
+
+impl From<crate::Racana2> for BinarySourceWord {
+    fn from(value: crate::Racana2) -> Self {
+        Self::W2(value.word())
+    }
+}
+
+impl From<crate::Bija3> for BinarySourceWord {
+    fn from(value: crate::Bija3) -> Self {
+        Self::W3(value.word())
+    }
 }
 
 impl fmt::Display for BinarySourceWord {
@@ -187,6 +236,48 @@ mod tests {
         assert_ne!(tokens[0].word, tokens[1].word);
         assert_ne!(tokens[1].word, tokens[2].word);
         assert_ne!(tokens[2].word, tokens[3].word);
+    }
+
+    #[test]
+    fn d1_d2_d3_bridge_is_exact_and_lossless_for_every_small_word() {
+        for raw in 0..=1 {
+            let source = BinarySourceWord::W1(Bit1::new(raw).unwrap());
+            let typed = source.d1().expect("W1 must enter D1");
+            assert_eq!(BinarySourceWord::from(typed), source);
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
+        }
+
+        for raw in 0..=3 {
+            let source = BinarySourceWord::W2(Bit2::new(raw).unwrap());
+            let typed = source.d2().expect("W2 must enter D2");
+            assert_eq!(BinarySourceWord::from(typed), source);
+            assert!(source.d1().is_none());
+            assert!(source.d3().is_none());
+        }
+
+        for raw in 0..=7 {
+            let source = BinarySourceWord::W3(Bit3::new(raw).unwrap());
+            let typed = source.d3().expect("W3 must enter D3");
+            assert_eq!(BinarySourceWord::from(typed), source);
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+        }
+    }
+
+    #[test]
+    fn wider_source_words_do_not_enter_d1_d2_d3() {
+        for source in [
+            BinarySourceWord::W4(Bit4::new(0).unwrap()),
+            BinarySourceWord::W5(Bit5::new(0).unwrap()),
+            BinarySourceWord::W6(Bit6::new(0).unwrap()),
+            BinarySourceWord::W7(Bit7::new(0).unwrap()),
+            BinarySourceWord::W8(Bit8::new(0).unwrap()),
+        ] {
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
+        }
     }
 
     #[test]
