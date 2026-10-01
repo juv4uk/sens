@@ -1,0 +1,16 @@
+exhaustive words checked (widths 1..12): 8190
+fixture law: 001 != 00000001
+fixture law: 101 prefix-of 1011
+fixture law: parent(1011) = 101
+fixture law: append(101,1) = 1011
+fixture law: Sens8 projection succeeds iff width == 8
+
+candidate	unbounded	short-word logical payload	append beyond 64	verdict
+Inline64	no	9	no	bounded fast representation only
+BitBytes	yes	5	yes	universal but variable storage/copy cost
+
+RESULT: both candidates preserve exact width/bits on the tested laws.
+RESULT: Inline64 is falsified as a universal carrier by its 64-bit ceiling.
+RESULT: BitBytes is universal in this model but pays variable storage/copy cost.
+RECOMMENDATION: insufficient evidence for a production carrier; prototype a small-inline+spill hybrid next.
+PRODUCTION IMPACT: none.
