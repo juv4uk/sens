@@ -105,7 +105,20 @@ def main() -> None:
     cadr_exec = Term("car", (Term("cdr", ("x",)),))
 
     weak = Evidence(implementation_equal=True, semantic_identical=False)
-    assert normalize(second_exec, {}) == normalize(cadr_exec, {})
+    untyped_second = normalize(second_exec, {})
+    untyped_cadr = normalize(cadr_exec, {})
+    assert untyped_second == untyped_cadr
+
+    # Falsifier for the over-simple model:
+    # executable normal form alone erases the admitted distinction evidence.
+    untyped_semantic_key_second = untyped_second
+    untyped_semantic_key_cadr = untyped_cadr
+    assert untyped_semantic_key_second == untyped_semantic_key_cadr
+
+    # Typed proof normal form retains semantic role separately from executable core.
+    typed_semantic_key_second = (second.role, untyped_second)
+    typed_semantic_key_cadr = (cadr.role, untyped_cadr)
+    assert typed_semantic_key_second != typed_semantic_key_cadr
     assert not may_semantic_quotient(second, cadr, weak)
 
     # Direct alias is still not promoted automatically without typed semantic evidence.
@@ -129,7 +142,9 @@ def main() -> None:
     print(f"normal-form-size={size(n_direct)}")
 
     print("\nequivalence-guard")
-    print("second/cadr executable-normal-form-equal=true")
+    print("untyped-normal-form second/cadr equal=true")
+    print("UNTYPED MODEL FALSIFIED for semantic identity: role distinction is erased")
+    print("typed-proof-key second/cadr equal=false")
     print("second/cadr semantic-quotient=false")
     print("fourth/cadddr semantic-quotient=false")
 
