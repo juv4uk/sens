@@ -236,6 +236,89 @@ def check_end_of_stream(env: Envelope, max_width: int, max_len: int) -> dict:
     return out
 
 
+# --- candidate frame C (suggested on #1980): the container carries the number of valid bits of the last byte
+def pack_valid_bits(wire: Wire) -> Tuple[Wire, int]:
+    """(packed bytes as bits, valid_bits_in_last_byte 1..8). The wire is empty -> no bytes, valid_bits 0 by convention."""
+    if not wire:
+        return "", 0
+    packed = wire + "0" * (-len(wire) % 8)
+    return packed, len(wire) - 8 * (len(packed) // 8 - 1)
+
+
+def unpack_valid_bits(packed: Wire, valid_bits: int) -> Wire:
+    if not packed:
+        if valid_bits != 0:
+            raise ValueError("empty container with valid bits")
+        return ""
+    if not 1 <= valid_bits <= 8 or len(packed) % 8:
+        raise ValueError("bad valid-bits frame")
+    wire = packed[:len(packed) - 8 + valid_bits]
+    if set(packed[len(wire):]) - {"0"}:
+        raise ValueError("non-zero padding")
+    return wire
+
+
+def check_frames(env: Envelope, max_width: int, max_len: int) -> dict:
+    """Frames compared on the same sequences: misreads, overhead, and self-delimiting (a concatenation of two
+    packed messages can be split back WITHOUT an external byte length)."""
+    words = all_words(max_width)
+    seqs = [s for n in range(0, max_len + 1) for s in itertools.product(words, repeat=n)]
+    out = {"sequences": len(seqs)}
+    overhead = {"stop_bit": 0, "length_prefix": 0, "valid_bits(3 bit field, bytes external)": 0}
+    bad = {"stop_bit": 0, "length_prefix": 0, "valid_bits": 0}
+    for seq in seqs:
+        wire = env.encode(seq)
+        overhead["stop_bit"] += len(pad_stop(wire)) - len(wire)
+        overhead["length_prefix"] += len(pack_length(env, seq)) - len(wire)
+        packed, vb = pack_valid_bits(wire)
+        overhead["valid_bits(3 bit field, bytes external)"] += len(packed) - len(wire) + 3
+        try:
+            if tuple(env.decode(unpad_stop(pad_stop(wire)))) != seq:
+                bad["stop_bit"] += 1
+            if tuple(unpack_length(env, pack_length(env, seq))) != seq:
+                bad["length_prefix"] += 1
+            if tuple(env.decode(unpack_valid_bits(packed, vb))) != seq:
+                bad["valid_bits"] += 1
+        except ValueError:
+            bad["stop_bit"] += 0
+    out["misreads"] = bad
+    out["mean_overhead_bits"] = {k: round(v / len(seqs), 2) for k, v in overhead.items()}
+    # self-delimiting? Concatenate two packed messages and ask whether the BYTES alone fix the split:
+    # count the concatenations that two or more different (first, second) pairs produce.
+    sample = seqs[:: max(1, len(seqs) // 400)]
+    shared = {"stop_bit": {}, "length_prefix": {}}
+    for a_, b_ in itertools.product(sample, repeat=2):
+        shared["stop_bit"].setdefault(pad_stop(env.encode(a_)) + pad_stop(env.encode(b_)), set()).add((a_, b_))
+        shared["length_prefix"].setdefault(pack_length(env, a_) + pack_length(env, b_), set()).add((a_, b_))
+    pairs = len(sample) ** 2
+    out["concatenations_shared_by_different_pairs"] = {
+        k: f"{sum(1 for s in v.values() if len(s) > 1)} of {pairs}" for k, v in shared.items()}
+    out["valid_bits_note"] = "the container must carry the byte length of each message (external), so no concatenation test"
+    return out
+
+
+CORPUS = {
+    "( QUOTE )": ["10", "001", "01"],
+    "dotted pair ( CAR . CDR )": ["10", "101", "11", "110", "01"],
+    "derived selectors": ["1010", "1011", "101111"],
+    "mixed widths 1,2,3,4+": ["0", "00", "001", "1010", "10101010", "1" * 11],
+}
+
+
+def check_corpus() -> List[Tuple[str, bool]]:
+    rows = []
+    for name, words in CORPUS.items():
+        ok = True
+        for env in (A, B):
+            ok &= env.decode(env.encode(words)) == words
+            ok &= env.decode(unpad_stop(pad_stop(env.encode(words)))) == words
+            ok &= unpack_length(env, pack_length(env, words)) == words
+            packed, vb = pack_valid_bits(env.encode(words))
+            ok &= env.decode(unpack_valid_bits(packed, vb)) == words
+        rows.append((name, ok))
+    return rows
+
+
 def cost_table(profile: Sequence[int]) -> List[Tuple[int, int, int]]:
     """Wire cost of a sequence of words of the given widths: (semantic width, A, B)."""
     rows = []
@@ -278,6 +361,15 @@ def main(argv: Sequence[str]) -> int:
     print("\n[4] full wire cost for one word of width w (bits): w, A, B")
     for w, a, b in cost_table([1]):
         print(f"      {w:>2} {a:>3} {b:>3}")
+    print("\n[6] frames (A and B), the same sequences:")
+    for env in (A, B):
+        r = check_frames(env, max_width, 2 if quick else 3)
+        print(f"    {env.name}: {r['sequences']} sequences; misreads {r['misreads']}; mean overhead bits {r['mean_overhead_bits']}")
+        print(f"      concatenations of two packed messages shared by different pairs (bytes alone cannot split): "
+              f"{r['concatenations_shared_by_different_pairs']}; {r['valid_bits_note']}")
+    print("\n[7] small corpus (the structures suggested on #1980), all frames, A and B:")
+    for name, ok in check_corpus():
+        print(f"      {name}: {'round-trips' if ok else 'FAILS'}")
     print(f"\n[5] racanā2 words 00 01 10 11 (the dot) survive as ordinary words: {check_racana2()}")
     return 0
 

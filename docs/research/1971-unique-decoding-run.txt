@@ -33,4 +33,16 @@
       11  19  18
       12  20  19
 
+[6] frames (A and B), the same sequences:
+    A width3+escape: 27931 sequences; misreads {'stop_bit': 0, 'length_prefix': 0, 'valid_bits': 0}; mean overhead bits {'stop_bit': 4.89, 'length_prefix': 12.88, 'valid_bits(3 bit field, bytes external)': 7.44}
+      concatenations of two packed messages shared by different pairs (bytes alone cannot split): {'stop_bit': '0 of 164025', 'length_prefix': '0 of 164025'}; the container must carry the byte length of each message (external), so no concatenation test
+    B gamma-only: 27931 sequences; misreads {'stop_bit': 0, 'length_prefix': 0, 'valid_bits': 0}; mean overhead bits {'stop_bit': 5.01, 'length_prefix': 12.98, 'valid_bits(3 bit field, bytes external)': 5.91}
+      concatenations of two packed messages shared by different pairs (bytes alone cannot split): {'stop_bit': '0 of 164025', 'length_prefix': '0 of 164025'}; the container must carry the byte length of each message (external), so no concatenation test
+
+[7] small corpus (the structures suggested on #1980), all frames, A and B:
+      ( QUOTE ): round-trips
+      dotted pair ( CAR . CDR ): round-trips
+      derived selectors: round-trips
+      mixed widths 1,2,3,4+: round-trips
+
 [5] racanā2 words 00 01 10 11 (the dot) survive as ordinary words: True
