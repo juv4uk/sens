@@ -3,11 +3,11 @@
   "issue": 1631,
   "source_evidence": "tests/data/numeral-silent-change-cohort.json",
   "authority": "migration-review-not-language-semantics",
-  "count": 6,
+  "count": 5,
   "route_counts": {
     "preserve-numeric-value": 0,
     "typed-machine-notation": 5,
-    "regenerate-from-authority": 1
+    "regenerate-from-authority": 0
   },
   "invariant": "classification selects a migration route; it does not change numeric meaning or source grammar",
   "rows": [
@@ -70,18 +70,6 @@
       "route": "typed-machine-notation",
       "owner_issue": 1636,
       "rationale": "opcode/prefix notation domain; lexical Symbol-vs-Number must not depend on digit composition or global numeric radix"
-    },
-    {
-      "path": "lib/machine/xed/generated/machine-evidence.lisp",
-      "line": 8080,
-      "token": "10",
-      "bucket": "active-lib",
-      "current_decimal_value": "10",
-      "future_binary_value": "2",
-      "silent_value_change": true,
-      "route": "regenerate-from-authority",
-      "owner_issue": 1632,
-      "rationale": "generated machine evidence; update generator/source authority, never hand-edit generated observation"
     }
   ]
 }
