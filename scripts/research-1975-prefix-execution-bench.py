@@ -83,7 +83,7 @@ def timed(fn, workload, value, rounds=5):
         start = time.perf_counter_ns()
         local = 0
         for word in workload:
-            local ^= int(fn(word, value))
+            local ^= id(fn(word, value))
         samples.append(time.perf_counter_ns() - start)
         checksum ^= local
     return statistics.median(samples), checksum
