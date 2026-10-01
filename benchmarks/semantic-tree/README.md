@@ -6,7 +6,8 @@ It compares the same canonical selector words through:
 
 - `flat`: dense predecoded table lookup;
 - `cold`: decode `root + suffix` on every call;
-- `cached`: decode distinct paths during preparation, reuse thereafter;
+- `compiled`: decode distinct paths during preparation and execute by compact descriptor index, with no runtime hash;
+- `cached`: decode distinct paths during preparation, then use a runtime HashMap lookup;
 - `hybrid`: direct root arm plus generated-path cache/fallback branch.
 
 The harness separates one-time preparation from execution. Cachegrind execution
