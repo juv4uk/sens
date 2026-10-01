@@ -158,13 +158,13 @@ done
   echo
   echo "Semantic parity is checked exhaustively for graph sizes 32, 128 and 512 before performance evidence is emitted."
   echo
-  echo "- git: `$git_sha`"
-  echo "- corpus/source sha256: `$corpus_sha`"
-  echo "- binary sha256: `$binary_sha`"
-  echo "- channels.scm sha256: `$channels_sha`"
-  echo "- toolchain: `$rustc_version`"
-  echo "- valgrind: `$valgrind_version`"
-  echo "- cpu: `$cpu`"
+  printf -- '- git: `%s`\n' "$git_sha"
+  printf -- '- corpus/source sha256: `%s`\n' "$corpus_sha"
+  printf -- '- binary sha256: `%s`\n' "$binary_sha"
+  printf -- '- channels.scm sha256: `%s`\n' "$channels_sha"
+  printf -- '- toolchain: `%s`\n' "$rustc_version"
+  printf -- '- valgrind: `%s`\n' "$valgrind_version"
+  printf -- '- cpu: `%s`\n' "$cpu"
   echo
   echo "## Cachegrind execute-delta rows (size 128)"
   echo
