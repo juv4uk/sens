@@ -199,7 +199,7 @@ impl BitPacker {
 }
 
 const fn byte_len_for_bits(bit_len: usize) -> usize {
-    (bit_len / 8) + if bit_len % 8 == 0 { 0 } else { 1 }
+    (bit_len / 8) + if bit_len.is_multiple_of(8) { 0 } else { 1 }
 }
 
 #[cfg(test)]
