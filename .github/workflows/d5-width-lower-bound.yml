@@ -1,0 +1,38 @@
+name: D5 width lower bound
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2199-d5-width-lower-bound.py"
+      - "docs/research/2199-d5-width-lower-bound.md"
+      - ".github/workflows/d5-width-lower-bound.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2199-d5-width-lower-bound.py"
+      - "docs/research/2199-d5-width-lower-bound.md"
+      - ".github/workflows/d5-width-lower-bound.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+
+jobs:
+  d5-width-lower-bound:
+    name: D5 shorter-width falsifier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run width lower-bound witness
+        run: python3 scripts/research-2199-d5-width-lower-bound.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D5 width lower bound"
+            echo
+            echo "- #2193 establishes a semantic discriminator lower bound."
+            echo "- D4 still has exact free words 0101 and 1001."
+            echo "- Current contract does not yet close allocation-only D4 escape hatches."
+            echo "- Expected result: D5-WIDTH-LOWER-BOUND=NOT-PROVED."
+            echo "- Do not ratify 00101 from geometry alone."
+          } >> "$GITHUB_STEP_SUMMARY"
