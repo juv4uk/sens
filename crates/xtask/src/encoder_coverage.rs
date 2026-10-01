@@ -279,8 +279,8 @@ pub fn render(entries: &[CoverageEntry]) -> String {
     out.push_str("; encoder covering at least one of its forms, `not-yet-implemented` is an\n");
     out.push_str("; explicit, justified gap. There is no third, silent outcome (#176).\n\n");
     out.push_str("(x86-encoder-coverage/1\n");
-    out.push_str(&format!("  (form-count {})\n", entries.len()));
-    out.push_str(&format!("  (partial-count {partial_count})\n"));
+    out.push_str(&format!("  (form-count #b{:b})\n", entries.len()));
+    out.push_str(&format!("  (partial-count #b{partial_count:b})\n"));
     for entry in entries {
         out.push_str("  (coverage\n");
         out.push_str(&format!(
