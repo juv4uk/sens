@@ -1,13 +1,17 @@
 use std::fs;
 use std::process::Command;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use wsm_clips_kernel::ClipsKernel;
 use wsm_common_lisp_kernel::CommonLispKernel;
 use wsm_prolog_kernel::PrologKernel;
 
+static NEXT_RUN_ID: AtomicU64 = AtomicU64::new(0);
+
 fn run_source(source: &str, core3: bool) -> (bool, String, String) {
+    let run_id = NEXT_RUN_ID.fetch_add(1, Ordering::Relaxed);
     let dir = std::env::temp_dir().join(format!(
-        "sens-raw-invoke-current-{}-{}",
+        "sens-raw-invoke-current-{}-{}-{run_id}",
         std::process::id(),
         if core3 { "core3" } else { "core4" }
     ));
