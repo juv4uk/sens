@@ -1,0 +1,35 @@
+name: D5 selector residue research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2175-d5-selector-residue.py"
+      - "docs/research/2175-d5-selector-residue*.md"
+      - ".github/workflows/d5-selector-residue.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2175-d5-selector-residue.py"
+      - "docs/research/2175-d5-selector-residue*.md"
+      - ".github/workflows/d5-selector-residue.yml"
+
+jobs:
+  d5-selector-residue:
+    name: D5 selector subtree + residue
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run D5 selector/residue witness
+        run: python3 scripts/research-2175-d5-selector-residue.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D5 selector/residue research"
+            echo
+            echo "- 32 exact 5-bit words"
+            echo "- 8 generator-owned selector descendants"
+            echo "- 24 unallocated residue words"
+            echo "- Research-only: no macro/staging code allocated."
+          } >> "$GITHUB_STEP_SUMMARY"
