@@ -340,23 +340,25 @@
     (00000111
       ((00000010 renames) () t)
       ((00000010 renames) (0)
-       (10011100 ((en (01000010 (00101111 (00000101 renames))))
-             (old (01000010 (00110000 (00000101 renames))))
+       (10011100 ((en-symbol (00101111 (00000101 renames)))
+             (old-symbol (00110000 (00000101 renames)))
              (sens (registry-sens-for-en
-                     (01000010 (00101111 (00000101 renames)))
+                     (00101111 (00000101 renames))
                      semantic-registry)))
          (00000111
            ((00000010 sens) ()
-            (fail (str+ "audit EN surface missing from semantic registry: " en)))
+            (fail
+              (str+ "audit EN surface missing from semantic registry: "
+                    (01000010 en-symbol))))
            ((00111110
-              (str+ "(00001001 " old " " (01001100 sens) ")")
+              (str+ "(00001001 " (01000010 old-symbol) " " (01001100 sens) ")")
               uk-surface)
             t
             (check-aliases (00000110 renames)))
            (t t
             (fail
               (str+ "missing exact-SENS compatibility alias (00001001 "
-                    old " " (01001100 sens) ")")))))))))
+                    (01000010 old-symbol) " " (01001100 sens) ")")))))))))
 (check-aliases audit-renames)
 (pass "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
 
