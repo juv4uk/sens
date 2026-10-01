@@ -166,6 +166,34 @@ fn checksum_cached(
     sum
 }
 
+fn build_compiled(workload: &[Word]) -> (Vec<ExecPath>, Vec<u32>) {
+    let mut by_key = HashMap::<u64, u32>::new();
+    let mut paths = Vec::<ExecPath>::new();
+    let mut calls = Vec::<u32>::with_capacity(workload.len());
+
+    for &word in workload {
+        let key = word.key();
+        let index = if let Some(&index) = by_key.get(&key) {
+            index
+        } else {
+            let index = paths.len() as u32;
+            paths.push(decode(word));
+            by_key.insert(key, index);
+            index
+        };
+        calls.push(index);
+    }
+    (paths, calls)
+}
+
+fn checksum_compiled(paths: &[ExecPath], calls: &[u32], tree: &[Node]) -> u64 {
+    let mut sum = 0u64;
+    for &index in calls {
+        sum = sum.wrapping_add(run_path(paths[index as usize], tree) as u64);
+    }
+    sum
+}
+
 fn checksum_hybrid(
     workload: &[Word],
     tree: &[Node],
@@ -215,6 +243,18 @@ fn print_metrics(mode: &str, depth: u8, calls: usize, distinct: usize, cache_ent
             println!("METRIC\tcache_misses\t0");
             println!("METRIC\tresidue_lookups\t0");
         }
+        "compiled" => {
+            println!("METRIC\tregistry_lookups\t0");
+            println!("METRIC\troot_selections\t0");
+            println!("METRIC\tprefix_bits_consumed\t0");
+            println!("METRIC\tgenerator_applications\t0");
+            println!("METRIC\tcache_hits\t0");
+            println!("METRIC\tcache_misses\t0");
+            println!("METRIC\tprepare_path_decodes\t{u}");
+            println!("METRIC\tprepare_prefix_bits\t{}", u * d);
+            println!("METRIC\tcompiled_descriptor_loads\t{n}");
+            println!("METRIC\tresidue_lookups\t0");
+        }
         "cached" => {
             println!("METRIC\tregistry_lookups\t0");
             println!("METRIC\troot_selections\t0");
@@ -250,11 +290,14 @@ fn verify(depth: u8, pattern: &str, calls: usize) {
 
     let a = checksum_flat(&workload, &tree, &flat);
     let b = checksum_cold(&workload, &tree);
-    let c = checksum_cached(&workload, &tree, &cache);
-    let d = checksum_hybrid(&workload, &tree, &cache);
+    let (compiled_paths, compiled_calls) = build_compiled(&workload);
+    let c = checksum_compiled(&compiled_paths, &compiled_calls, &tree);
+    let d = checksum_cached(&workload, &tree, &cache);
+    let e = checksum_hybrid(&workload, &tree, &cache);
     assert_eq!(a, b);
     assert_eq!(a, c);
     assert_eq!(a, d);
+    assert_eq!(a, e);
     println!("VERIFY\tPASS\tdepth={depth}\tpattern={pattern}\tcalls={calls}\tchecksum={a}");
 }
 
@@ -284,6 +327,11 @@ fn main() {
     let tree = build_tree(depth + 1);
 
     let flat = if mode == "flat" { Some(build_flat(depth)) } else { None };
+    let compiled = if mode == "compiled" {
+        Some(build_compiled(&workload))
+    } else {
+        None
+    };
     let cache = if mode == "cached" || mode == "hybrid" {
         Some(build_cache(&workload))
     } else {
@@ -293,10 +341,15 @@ fn main() {
     black_box(&workload);
     black_box(&tree);
     black_box(&flat);
+    black_box(&compiled);
     black_box(&cache);
 
     if phase == "prepare" {
+        let compiled_size = compiled
+            .as_ref()
+            .map_or(0usize, |(paths, calls)| paths.len() + calls.len());
         let prepared = flat.as_ref().map_or(0usize, Vec::len)
+            + compiled_size
             + cache.as_ref().map_or(0usize, HashMap::len)
             + workload.len()
             + tree.len();
@@ -309,6 +362,10 @@ fn main() {
     let checksum = match mode {
         "flat" => checksum_flat(&workload, &tree, flat.as_ref().unwrap()),
         "cold" => checksum_cold(&workload, &tree),
+        "compiled" => {
+            let (paths, calls) = compiled.as_ref().unwrap();
+            checksum_compiled(paths, calls, &tree)
+        }
         "cached" => checksum_cached(&workload, &tree, cache.as_ref().unwrap()),
         "hybrid" => checksum_hybrid(&workload, &tree, cache.as_ref().unwrap()),
         _ => panic!("unknown mode: {mode}"),
