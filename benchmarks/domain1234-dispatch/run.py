@@ -19,8 +19,13 @@ STRATEGIES = ("flat", "prefix", "direct")
 CANDIDATE = {
     "flat": "u8-flat-ready",
     "prefix": "d3d4-prefix-ready",
-    "direct": "direct-specialized",
 }
+
+
+def candidate_name(strategy: str, workload: str) -> str:
+    if strategy != "direct":
+        return CANDIDATE[strategy]
+    return "direct-static" if workload.startswith("repeat-") else "direct-dynamic"
 WORKLOADS = ("repeat-d3", "random-d3", "repeat-d4", "random-d4", "mixed")
 IREF_RE = re.compile(r"I\s+refs:\s*([0-9,]+)")
 BRANCH_RE = re.compile(r"Branches:\s*([0-9,]+)")
@@ -126,8 +131,8 @@ def main():
                     counters = logical[(strategy, workload)]
                     depth = "0" if workload.endswith("d3") else ("1" if workload.endswith("d4") else "mixed")
                     raw.append({
-                        "case_id": f"{workload}/{CANDIDATE[strategy]}",
-                        "candidate": CANDIDATE[strategy],
+                        "case_id": f"{workload}/{candidate_name(strategy, workload)}",
+                        "candidate": candidate_name(strategy, workload),
                         "family": "selector-d34",
                         "semantic_depth": depth,
                         "mode": "execute-delta",
@@ -195,13 +200,13 @@ def main():
             for strategy in STRATEGIES:
                 rows = [
                     row for row in raw
-                    if row["workload"] == workload and row["candidate"] == CANDIDATE[strategy]
+                    if row["workload"] == workload and row["candidate"] == candidate_name(strategy, workload)
                 ]
                 med_i = statistics.median(row["i_refs"] for row in rows) / args.calls
                 med_b = statistics.median(row["branches"] for row in rows) / args.calls
                 counters = logical[(strategy, workload)]
                 lines.append(
-                    f"| {workload} | {CANDIDATE[strategy]} | {med_i:.3f} | {med_b:.3f} | "
+                    f"| {workload} | {candidate_name(strategy, workload)} | {med_i:.3f} | {med_b:.3f} | "
                     f"{counters['lookups']/args.calls:.3f} | {counters['bits']/args.calls:.3f} | "
                     f"{counters['gens']/args.calls:.3f} | {counters['prepared_bytes']} |"
                 )
@@ -211,7 +216,8 @@ def main():
             "Interpretation boundary:",
             "- u8-flat-ready is a favorable 256-slot mechanical baseline, not a claim that the historical Function8 table contained a symmetric row for every D4 selector.",
             "- d3d4-prefix-ready uses the ratified 101/110 roots and one D4 suffix bit; no descendant row lookup.",
-            "- direct-specialized is the compile-away lower-bound lane, not separate semantics.",
+            "- direct-static is used only for repeated fixed call sites and is the compile-away lower-bound lane.",
+            "- direct-dynamic remains a switch-based control for random/mixed streams; it is not a compiled lower bound.",
             "- identity parsing/framing is intentionally excluded; #1993 owns framing cost.",
             "",
         ]
