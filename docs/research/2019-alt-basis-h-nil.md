@@ -1,7 +1,7 @@
 # Alternative basis H-NIL (#2019)
 
 **Agent:** grok-xai  
-**Epistemic status:** **conjecture** (not theorem, not production)  
+**Epistemic status:** **conjecture + bounded current-corpus witness** (not theorem, not production)  
 **Parent matrix:** `2019-seed-necessity.md`  
 **Lock:** does **not** change #2018 `bija3-seed=premise` and does **not** reassign codes
 
@@ -66,6 +66,47 @@ Proposed **operator** seed (size 7):
 
 Low exclusive pressure does **not** prove H-NIL. The smuggling audit is the actual argument shape.
 
+## Current-corpus kill test — 2026-10-01
+
+A reproducible witness now attacks the strongest immediate falsifier: does the
+**current executable SENS corpus** require empty/NIL as a callable operator?
+
+Exact witness:
+
+```text
+main baseline                     a56f570ada09…
+active NIL tokens in lib/*.lisp   54
+callable NIL/nil list heads       0
+00000000 executable heads         0
+00000000 non-metadata lib tokens  0
+00000000 evaluator SID route      absent
+00000000 mechanism row            absent
+Contract 10 ground separation     present
+```
+
+The 54 surviving `NIL` tokens are data/history uses, chiefly Core1 values,
+arguments, terminators and comparison subjects. They are **not** `(NIL ...)`
+operator calls. The lexer discards comments and strings before classifying list
+heads, so prose does not count as executable evidence.
+
+The second, independent signal is runtime shape: current evaluator route metadata
+starts at `00000001`, while structural `()` evaluates as its own empty value.
+Contract 10 also explicitly states that current Function8 `00000000` is not the
+empty-list value.
+
+This does **not** prove that the all-zero function slot can never hold an
+independent function. It proves only the H-NIL claim in the bounded current
+system: **ground data does not currently need callable/operator NIL authority**.
+If `00000000` later gains an unrelated function, that is a new function-role
+question, not evidence that structural empty has become an operator again.
+
+Executable evidence: `experiments/research-2019-h-nil-corpus.py` and the
+`H-NIL corpus witness` workflow.
+
+**Status consequence:** H-NIL remains a conjecture globally, but it now has an
+executable bounded witness over the current corpus. The next upgrade gate is the
+blind WSM comparison / stronger formal derivation, not another packaging essay.
+
 ## Falsifiers that would kill H-NIL
 
 1. A required corpus form whose only honest model is “invoke operator NIL”.
@@ -76,7 +117,8 @@ Low exclusive pressure does **not** prove H-NIL. The smuggling audit is the actu
 
 ```text
 conjecture H-NIL
-  → witnesses on corpus without operator-NIL
+  → bounded current-corpus witness ✓
+  → blind/formal independent evidence
   → #2018 row split: operator-bīja vs data-ground
   → owner review before any code map change
 ```
