@@ -125,7 +125,7 @@ fn graph_explain(graph: &[GraphNode], word: Word) -> Explanation {
     let mut idx = graph_index(word.root, word.suffix, word.depth);
     let mut suffix = 0u32;
     let mut shift = 0u8;
-    let mut depth = word.depth;
+    let depth = word.depth;
 
     while graph[idx].depth > 0 {
         let node = graph[idx];
@@ -134,15 +134,10 @@ fn graph_explain(graph: &[GraphNode], word: Word) -> Explanation {
         idx = node.parent as usize;
     }
 
-    // Traversal collected edge bits from leaf to root, which corresponds to
-    // rightmost suffix bit first. Reverse into canonical written suffix order.
-    let mut canonical = 0u32;
-    for i in 0..depth {
-        let bit = (suffix >> i) & 1;
-        canonical |= bit << (depth - 1 - i);
-    }
-
-    Explanation { root: graph[idx].root, suffix: canonical, depth }
+    // Parent uses suffix >> 1, so leaf-to-root traversal sees the least
+    // significant appended bit first. Re-inserting each observed edge at the
+    // same increasing bit position reconstructs the original canonical suffix.
+    Explanation { root: graph[idx].root, suffix, depth }
 }
 
 fn explanation_hash(x: Explanation) -> u64 {
