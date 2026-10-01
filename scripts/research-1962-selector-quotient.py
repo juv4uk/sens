@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""#1962 research-only: discover pure CAR/CDR selector identities and quotient by path.
+"""#1962 research-only: discover pure CAR/CDR path sharing without semantic collapse.
 
 This is not production semantic authority. It reads current Lisp source plus the
 generated legacy function table, discovers one-argument definitions made only
 from exact CAR/CDR composition, resolves direct aliases, and groups old fixed-8
-identities by the resulting variable-width selector path.
+identities by executable selector path.
+
+Important: a shared executable path is weaker than semantic identity. This
+script deliberately reports path-sharing classes but never quotients semantic
+nodes on path equality alone.
 """
 
 from __future__ import annotations
@@ -212,7 +216,7 @@ def main() -> None:
     for name, old8, path, alias in bounded:
         print(f"{name}\t{old8}\t{path}\t{alias}")
 
-    print("\nquotient-classes")
+    print("\npath-sharing-classes")
     for path in sorted(groups, key=lambda p: (len(p), p)):
         members = [name for name, _old8 in groups[path] if name in expected]
         if members:
@@ -220,16 +224,18 @@ def main() -> None:
 
     print("\nsummary")
     print(f"old registered selector-like identities: {len(bounded)}")
-    print(f"unique canonical selector paths:       {len(unique_paths)}")
-    print(f"duplicate identities eliminated:       {len(bounded) - len(unique_paths)}")
+    print(f"unique executable selector paths:        {len(unique_paths)}")
+    print(f"shared-path surplus spellings:           {len(bounded) - len(unique_paths)}")
     print(f"legacy #734 second/cadr distinct-policy present: {str(legacy_conflict).lower()}")
+    print("semantic nodes quotiented by this script: 0")
 
     print("\ninterpretation")
-    print("PASS: current core source mechanically discovers the same two duplicate path classes")
-    print("      as the hand-audited genealogy: second=cadr and fourth=cadddr.")
-    print("NOTE: this is research evidence for quotienting identity by canonical path; it is")
-    print("      not a production allocation decision. Any arity/error/effect difference would")
-    print("      falsify a collapse candidate before migration.")
+    print("PASS: current core source mechanically discovers two shared executable-path classes:")
+    print("      second/cadr and fourth/cadddr.")
+    print("GUARD: path equality is not semantic identity. #734 explicitly documents distinct")
+    print("       second-vs-cadr intent, so this script reports the conflict instead of collapsing it.")
+    print("       Direct aliasing or implementation equality may justify code sharing, but semantic")
+    print("       quotient requires a separate typed semantic-identical witness.")
 
 
 if __name__ == "__main__":
