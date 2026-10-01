@@ -275,6 +275,12 @@ int main(int argc, char **argv) {
         return 2;
     }
     const char *strategy=argv[1], *shape=argv[2];
+    int mode=-1;
+    if(strcmp(strategy,"base")==0) mode=0;
+    else if(strcmp(strategy,"explicit")==0) mode=1;
+    else if(strcmp(strategy,"compat")==0) mode=2;
+    else if(strcmp(strategy,"hybrid")==0) mode=3;
+    else return 5;
     uint32_t n=(uint32_t)strtoul(argv[3],NULL,10);
     size_t query_n=(size_t)strtoull(argv[4],NULL,10);
     size_t exec_n=(size_t)strtoull(argv[5],NULL,10);
@@ -325,12 +331,12 @@ int main(int argc, char **argv) {
     dsu_free(&oracle);
 
     DSU d={0};
-    if(strcmp(strategy,"compat")==0 || strcmp(strategy,"hybrid")==0) {
+    if(mode==2 || mode==3) {
         dsu_init(&d,2*n);
         for(size_t i=0;i<comp_n;i++) {
             dsu_union(&d,comp[i].a,comp[i].b);
         }
-        if(strcmp(strategy,"hybrid")==0) {
+        if(mode==3) {
             for(size_t i=0;i<residual_n;i++) {
                 dsu_union(&d,residual[i].a,residual[i].b);
             }
@@ -341,16 +347,12 @@ int main(int argc, char **argv) {
     for(size_t q=0;q<exec_n;q++) {
         Pair p=equal[q % equal_n];
         uint32_t ans=0;
-        if(strcmp(strategy,"base")==0) {
+        if(mode==0) {
             ans=(p.a ^ p.b) & 1u;
-        } else if(strcmp(strategy,"explicit")==0) {
+        } else if(mode==1) {
             ans=boundary_state(src,dst,p.a)==boundary_state(src,dst,p.b);
-        } else if(
-            strcmp(strategy,"compat")==0 || strcmp(strategy,"hybrid")==0
-        ) {
-            ans=dsu_find(&d,p.a)==dsu_find(&d,p.b);
         } else {
-            return 5;
+            ans=dsu_find(&d,p.a)==dsu_find(&d,p.b);
         }
         sink += ans + (uint32_t)(q&1u);
     }
