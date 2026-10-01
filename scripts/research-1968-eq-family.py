@@ -172,7 +172,10 @@ def call_heads(expr: object) -> list[str]:
         head = node[0]
         if isinstance(head, str):
             heads.append(head)
-        for child in node[1:]:
+        # A cond clause may itself have a list in head position, e.g.
+        # ((EQ a b) yes no). Traverse every child so nested calls in that
+        # head position are not silently dropped.
+        for child in node:
             visit(child)
 
     visit(expr)
