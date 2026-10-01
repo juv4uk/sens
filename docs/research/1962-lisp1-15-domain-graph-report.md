@@ -225,7 +225,7 @@ prefix edge --[typed evidence]--> semantic relation
 - `1962-lisp1-15-nodes.tsv` — seed/prefix/node roles;
 - `1962-lisp1-15-edges.tsv` — typed dependency evidence;
 - `scripts/research-domain-graph-1962.py` — SCC + dependency diagnostics;
-- `1962-lisp1-15-prefix-tree.lisp` — prefix research corpus;
+- `1962-lisp1-15-prefix-tree.txt` — prefix research corpus;
 - `scripts/research-1962-prefix-tree.py` — executable selector theorem;
 - `1962-lisp1-15-first-run.txt` — generated diagnostic snapshot.
 
