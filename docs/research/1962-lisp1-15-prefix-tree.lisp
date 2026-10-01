@@ -47,14 +47,11 @@
 
   ; Сильний позитивний witness: CAR/CDR composite selectors.
   ;
-  ; Визначення:
-  ;   0 => A => CAR
-  ;   1 => D => CDR
+  ; 0 => A => CAR
+  ; 1 => D => CDR
   ;
-  ; Корінь 101 already means CAR, корінь 110 already means CDR.
-  ; Кожен доданий bit додає ще один внутрішній selector.
-  ;
-  ; Тому prefix tree mechanically generates the historical C[AD]+R family.
+  ; У selector-family перший 3-bit root задає зовнішню операцію,
+  ; а кожен наступний bit додає ще одну внутрішню операцію.
   (selector-subtree
     (bit 0 A CAR)
     (bit 1 D CDR)
@@ -79,6 +76,41 @@
       (11010 CDDAR)
       (11011 CDDDR)))
 
+  ; Формальний зміст selector subtree:
+  ; слово над {A,D} є впорядкованою композицією unary selectors.
+  ; Prefix-код зберігає саме порядок, не лише множину залежностей.
+  (selector-path-theorem
+    (alphabet
+      (0 A CAR)
+      (1 D CDR))
+    (code-to-selector
+      "101 + suffix => C A phi(suffix) R"
+      "110 + suffix => C D phi(suffix) R")
+    (bijection
+      "selector words of length k"
+      "binary selector codes of length k+2")
+    (ordered-composition preserved))
+
+  ; Контрприклад до unordered dependency support:
+  ;
+  ; CADR = CAR(CDR(x))
+  ; CDAR = CDR(CAR(x))
+  ;
+  ; Обидві функції мають той самий support-set {CAR,CDR},
+  ; але це різні функції. Отже set/hyperedge без порядку не визначає
+  ; ні функцію, ні правильний prefix-parent.
+  (ordered-path-counterexample
+    (CADR
+      (support CAR CDR)
+      (path CAR CDR)
+      (code 1011))
+    (CDAR
+      (support CAR CDR)
+      (path CDR CAR)
+      (code 1100))
+    (conclusion
+      "dependency support must preserve ordered composition / term structure"))
+
   (historical-evidence
     (lisp-i
       (source "LISP I Programmer's Manual, MIT, March 1960")
@@ -90,11 +122,12 @@
       (fact "universal evalquote is defined through apply/eval")
       (fact "manual uses composite selectors including CAAR CADR CDAR and CDDR inside evaluator/helper definitions")))
 
-  (strong-observation
-    "The selector family is not a hand-authored table: bit extension itself is the composition path.")
+  (strong-observations
+    "The selector family is not a hand-authored table: bit extension itself is the composition path."
+    "Unordered dependency sets are insufficient; ordered path/term information is required.")
 
   (open-families
-    ; Не заповнювати на смак. Для кожного потрібен окремий witness.
+    ; Не заповнювати на смак. Для кожного потрібен окремий local law.
     (000 empty-ground)
     (001 quote-family)
     (010 atom-family)
@@ -107,7 +140,8 @@
     (child-with-wrong-prefix reject)
     (width-with-wrong-selector-cardinality reject)
     (manual-allocation-presented-as-derivation reject)
-    (prefix-parent-equals-semantic-parent without-evidence reject))
+    (prefix-parent-equals-semantic-parent without-evidence reject)
+    (unordered-support-presented-as-composition reject))
 
   (next
-    "Порівняти інші 3-bit families з Lisp I / Lisp 1.5 і шукати такі ж природні binary expansions; незручні сімейства не форсувати."))
+    "Шукати для кожного seed власний local binary law; якщо закон не природний — не форсувати. Для multi-root функцій дослідити ordered term graph / proof graph замість support-set."))
