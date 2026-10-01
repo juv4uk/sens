@@ -1,0 +1,86 @@
+#2027 selector self-description benchmark — first full matrix
+
+Environment
+-----------
+Intel Core i5-6400 @ 2.70 GHz
+WSL2 kernel 6.18.33.2-microsoft-standard-WSL2
+rustc 1.98.1
+Valgrind 3.27.0
+source SHA: 8c666f265fa9217212f17a9df559faf820b80ec6
+
+Protocol
+--------
+- selector positive control only;
+- exact parity before measurement;
+- depths 0,1,2,4,8,16;
+- repeated + deterministic-random workloads;
+- 20,000 explanations per row;
+- 3 Cachegrind samples;
+- differential I refs = full - prepare;
+- hybrid verifies each distinct identity against graph once, then serves hot explanations from certificate.
+
+Repeated-path I refs / explanation
+---------------------------------
+depth   flat      certificate   graph      hybrid
+0       19.996    10.496        23.997     10.497
+1       19.996    10.496        43.997     10.497
+2       19.996    10.496        53.997     10.497
+4       19.996    10.496        73.997     10.497
+8       19.996    10.496       113.997     10.497
+16      19.996    10.497       193.996     10.495
+
+Random workloads preserve the same qualitative relation.
+
+Cold graph-verification crossover: graph vs hybrid
+--------------------------------------------------
+pattern    depth   distinct words   crossover explanations
+repeated     0          1                 82.5
+repeated     1          1                 33.8
+repeated     2          1                 26.3
+repeated     4          1                 18.3
+repeated     8          1                 11.6
+repeated    16          1                  7.0
+
+random       0          2                 82.7
+random       1          4                 37.3
+random       2          8                 35.5
+random       4         32                 57.3
+random       8        512                610.8
+random      16      20000              21676.4
+
+Storage/fact observation
+------------------------
+At depth 16 in this complete selector family:
+- flat materialization stores 131,072 rows;
+- explicit graph materialization stores 262,142 graph nodes;
+- compact certificate stores no per-identity metadata rows in this mechanism model;
+- #2023 separately proves the selector relation instances root/parent/edge/suffix are derivable from canonical word plus two family-law facts.
+
+Interpretation
+--------------
+1. For this selector control, packed certificate explanation is about 10.5 I refs and does not grow with path depth in this representation.
+2. Flat metadata lookup is about 20 I refs/explanation and grows exponentially in stored rows with depth.
+3. Explicit graph traversal grows with path depth: about 24 I refs at depth 0 to about 194 at depth 16.
+4. Hybrid graph-verify-once + certificate-hotpath has certificate-like steady cost, but cold verification cost depends strongly on the number of distinct identities.
+5. Reuse therefore matters: one repeated depth-16 identity amortizes verification after about 7 explanations; 20,000 distinct depth-16 identities need about 21,676 explanations before hybrid beats repeated graph traversal on total I refs.
+
+Important boundaries
+--------------------
+- This is a standalone mechanism benchmark, not a production SENS runtime verdict.
+- The certificate is the packed canonical root/suffix proof; it does not walk each suffix bit to "pretty print" a proof.
+- Graph construction here materializes the complete selector prefix graph through the requested depth because every suffix is valid in this family.
+- No semantic identities are quotiented.
+- No result is generalized to CONS/QUOTE/ATOM/EQ/COND or evaluator SCCs.
+- The first implementation had a suffix-orientation bug; parity caught it before any performance result was accepted.
+- A second methodology bug verified every workload call in hybrid preparation; it was fixed so only distinct identities are verified before this recorded matrix.
+
+Decision pressure
+-----------------
+For the proven selector family:
+- do not use an explicit graph traversal as the hot explanation route;
+- do not store per-node selector relations that the canonical word already proves;
+- keep graph/evidence as cold validation where useful;
+- use compact certificate/path as the hot proof/explanation carrier;
+- compiler/FPGA may lower that certificate further into a recipe/transducer and erase it from runtime.
+
+Raw evidence and provenance are stored beside this file.
