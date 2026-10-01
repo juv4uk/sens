@@ -78,6 +78,17 @@ canonical variable-width identity
 
 without reintroducing a flat 256-peer semantic ontology.
 
+## Runtime carrier audit
+
+The internal Rust carrier layer confirms another important split:
+
+- `Value::Sid(Sens8)` and `ExprKind::Call(Sens8, ...)` are canonical-carrier blockers: a future variable-width identity cannot flow through them unchanged.
+- `Environment::code_slots` currently reduces the key to `sid.packed_byte()`; this blocks variable-width language-owned definitions even if the reader and AST are generalized.
+- necessary-form routing also compares generated rows through a packed byte and therefore must eventually consume the width-neutral identity.
+- the host-capability registry `HashMap<Sens8, SensHostFn>` is different: it can remain a compatibility/mechanism map for existing host anchors unless future variable-width identities explicitly need host registration.
+
+This reinforces the migration rule: **generalize semantic carriers first; preserve narrow mechanism maps when their domain is intentionally narrow.**
+
 ## Migration ordering suggested by evidence
 
 Do not migrate implementation bottom-up. The safe dependency direction is:
