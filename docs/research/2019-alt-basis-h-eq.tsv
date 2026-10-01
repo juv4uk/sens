@@ -1,0 +1,11 @@
+candidate	result	detail
+C1_host_pointer_eq	smuggle_or_wrong_theory	machine == is not SENS atom EQ
+C2_atom_plus_structure_only	incomplete	no leaf comparison
+C3_atoms_as_unique_trees	smuggle	host/infinite shape injection
+C4_domain_byte_eq	not_eliminated	identity_predicate relocated
+C5_only_empty_and_t	not_equivalent	weaker domain
+C6_unify_with_atom	category_error	unary type test ≠ binary sameness
+H_EQ_0_derivable	unsupported	leaf sameness reappears
+H_EQ_2_capability_distinct	best_fit	packaging open; capability not
+status_lock	premise	011 remains in bīja3 premise
+eq_suffix_generator	falsified_as_pattern	#2017 selector-strength children constrained
