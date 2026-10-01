@@ -1,0 +1,13 @@
+kind	word	width	epistemic_status	semantic_role_class	legacy_projection	identity_equals_legacy	descendant_admitted	evidence	note
+seed	000	3	ground	ground	00000000	0	0	contracts/core1-historical-sid-map.lisp;knowledge/semantic-ownership.lisp	historical empty-list ground
+seed	001	3	primitive-seed	syntax	00000001	0	0	contracts/core1-historical-sid-map.lisp;knowledge/semantic-ownership.lisp	QUOTE seed role
+seed	010	3	primitive-seed	predicate	00000010	0	0	contracts/core1-historical-sid-map.lisp;knowledge/semantic-ownership.lisp	ATOM seed role
+seed	011	3	primitive-seed	predicate	00000011	0	0	contracts/core1-historical-sid-map.lisp;knowledge/semantic-ownership.lisp	EQ seed role
+seed	100	3	primitive-seed	constructor	00000100	0	0	contracts/core1-historical-sid-map.lisp;knowledge/semantic-ownership.lisp	CONS seed role
+seed	101	3	primitive-seed	selector	00000101	0	0	contracts/core1-historical-sid-map.lisp;knowledge/semantic-ownership.lisp	CAR seed role
+seed	110	3	primitive-seed	selector	00000110	0	0	contracts/core1-historical-sid-map.lisp;knowledge/semantic-ownership.lisp	CDR seed role
+seed	111	3	primitive-seed	control	00000111	0	0	contracts/core1-historical-sid-map.lisp;knowledge/semantic-ownership.lisp	COND seed role
+negative	10	2	rejected	none	n/a	n/a	0	pilot admission law	too-short: D3 requires exact width=3, got width=2: 10
+negative	1010	4	rejected	none	n/a	n/a	0	pilot admission law	d4-not-admitted: D3 requires exact width=3, got width=4: 1010
+negative	00000101	8	rejected	none	n/a	n/a	0	pilot admission law	legacy-padding-not-d3: D3 requires exact width=3, got width=8: 00000101
+negative	10x	3	rejected	none	n/a	n/a	0	pilot admission law	malformed: invalid binary word: '10x'
