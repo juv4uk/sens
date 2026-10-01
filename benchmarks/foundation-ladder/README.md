@@ -40,3 +40,21 @@ The runner separates:
 No weighted winner is produced. Use the results as a Pareto vector together
 with semantic evidence from #2103/#2101/#2096/#2091/#2077 and whole-model
 accounting in #1973.
+
+
+## Evidence tiers
+
+The primary reproducible CPU row for #1987 is the pinned-Guix run recorded in
+`evidence/pinned-guix-i5-6400-f954fb9.md` and its compact TSV. It was executed
+through `guix time-machine -C channels.scm` on owner hardware.
+
+The GitHub-hosted workflow is deliberately labeled `hosted-smoke`. It reruns
+semantic parity and Cachegrind with the hosted Rust toolchain, publishes raw
+artifacts, and checks that the pinned primary evidence remains versioned. It is
+a secondary portability/regression witness, not a substitute for the pinned
+environment.
+
+GitHub's distro `apt guix 1.4.0` currently fails while bootstrapping the
+repository's modern pinned channels before this harness starts; that
+infrastructure problem is tracked separately in #2146 rather than weakening the
+pinned-environment requirement.
