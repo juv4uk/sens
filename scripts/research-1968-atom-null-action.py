@@ -108,7 +108,8 @@ def main() -> None:
     # Important research guard: current implementation is not used as proof of
     # the generator formula. It does not literally mention EQ in null?'s body.
     null_start = core.index("(00001001 null?")
-    null_body = core[null_start : null_start + 500]
+    next_definition = core.index("(00001001 subst", null_start)
+    null_body = core[null_start:next_definition]
     current_uses_eq = "00000011" in null_body
 
     print("historical typed relation")
