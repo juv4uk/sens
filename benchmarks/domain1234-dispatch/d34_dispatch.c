@@ -135,11 +135,22 @@ static int32_t exec_direct(const Call *call, int32_t value) {
     }
 }
 
-static int32_t execute(const char *strategy, const Call *call, int32_t value) {
-    if (strcmp(strategy, "flat") == 0) return exec_flat(call, value);
-    if (strcmp(strategy, "prefix") == 0) return exec_prefix(call, value);
-    if (strcmp(strategy, "direct") == 0) return exec_direct(call, value);
+typedef enum { STRAT_FLAT, STRAT_PREFIX, STRAT_DIRECT } Strategy;
+
+static Strategy parse_strategy(const char *name) {
+    if (strcmp(name, "flat") == 0) return STRAT_FLAT;
+    if (strcmp(name, "prefix") == 0) return STRAT_PREFIX;
+    if (strcmp(name, "direct") == 0) return STRAT_DIRECT;
     fprintf(stderr, "unknown strategy\n");
+    exit(5);
+}
+
+static int32_t execute_one(Strategy strategy, const Call *call, int32_t value) {
+    switch (strategy) {
+    case STRAT_FLAT: return exec_flat(call, value);
+    case STRAT_PREFIX: return exec_prefix(call, value);
+    case STRAT_DIRECT: return exec_direct(call, value);
+    }
     exit(5);
 }
 
@@ -162,14 +173,14 @@ static Call *prepare_calls(const char *workload, long calls) {
     return out;
 }
 
-static int check_parity(const char *strategy) {
+static int check_parity(Strategy strategy, const char *strategy_name) {
     int bad = 0;
     for (int i = 0; i < 6; i++) {
         int32_t expected = exec_direct(&OPS[i], 0);
-        int32_t got = execute(strategy, &OPS[i], 0);
+        int32_t got = execute_one(strategy, &OPS[i], 0);
         if (got != expected) bad++;
     }
-    printf("parity\t%s\tselectors=6\tmismatches=%d\n", strategy, bad);
+    printf("parity\t%s\tselectors=6\tmismatches=%d\n", strategy_name, bad);
     return bad;
 }
 
@@ -179,32 +190,41 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    const char *strategy = argv[1];
+    const char *strategy_name = argv[1];
+    const Strategy strategy = parse_strategy(strategy_name);
     const char *workload = argv[2];
     const long calls = atol(argv[3]);
     const char *mode = argv[4];
     if (calls <= 0) return 1;
 
     build_tree();
-    if (strcmp(strategy, "flat") == 0) build_flat();
+    if (strategy == STRAT_FLAT) build_flat();
 
     if (strcmp(mode, "check") == 0)
-        return check_parity(strategy) != 0;
+        return check_parity(strategy, strategy_name) != 0;
 
     Call *prepared = prepare_calls(workload, calls);
     int64_t checksum = 0;
 
     if (strcmp(mode, "setup") != 0) {
-        for (long i = 0; i < calls; i++)
-            checksum += execute(strategy, &prepared[i], 0);
+        if (strategy == STRAT_FLAT) {
+            for (long i = 0; i < calls; i++)
+                checksum += exec_flat(&prepared[i], 0);
+        } else if (strategy == STRAT_PREFIX) {
+            for (long i = 0; i < calls; i++)
+                checksum += exec_prefix(&prepared[i], 0);
+        } else {
+            for (long i = 0; i < calls; i++)
+                checksum += exec_direct(&prepared[i], 0);
+        }
     }
 
     if (strcmp(mode, "count") == 0) {
 #ifdef COUNT
         const uint64_t prepared_bytes =
-            strcmp(strategy, "flat") == 0 ? (uint64_t)sizeof(flat_table) : 0;
+            strategy == STRAT_FLAT ? (uint64_t)sizeof(flat_table) : 0;
         printf("counters\t%s\t%s\tcalls=%ld\tsteps=%llu\tlookups=%llu\tbits=%llu\tgens=%llu\tdispatches=%llu\troot_selections=%llu\tprepared_bytes=%llu\n",
-               strategy, workload, calls,
+               strategy_name, workload, calls,
                (unsigned long long)C.steps,
                (unsigned long long)C.lookups,
                (unsigned long long)C.bits,
