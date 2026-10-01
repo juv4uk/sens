@@ -1,0 +1,26 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-2072-foundation-split.py
+
+target          max-size  data-classes  bool-classes  match
+left            9         1208          9             NONE
+right           9         1208          9             NONE
+make_pair       9         4             3             NONE
+atom_identity   9         3874          3             NONE
+atom_class      9         2083          17            NONE
+
+INVARIANCE / LOWER-BOUND WITNESSES
+- without left: left(pair(a,b))=a, but a is outside the right-only subvalue closure
+- without right: right(pair(a,b))=b, but b is outside the left-only subvalue closure
+- without make_pair: pair(a,b) is fresh structure, not an input/ground/projection
+- without atom_identity: (a,a) and (a,b) have identical unary atom-class observations
+- without atom_class: projection/identity probes are partial across atom-vs-pair; no error-catch oracle admitted
+
+PASS: no removed structural role was reconstructed through size 9 on its
+adversarial finite domain.
+
+Scope:
+- bounded support only;
+- not a universal minimality theorem;
+- no QUOTE/COND claim;
+- host errors are not admitted as a hidden branch/catch oracle.

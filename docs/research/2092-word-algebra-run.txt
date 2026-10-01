@@ -1,0 +1,22 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-2092-word-algebra.py
+
+model                  exact extent refine parent prefix concat epsilon cancellation opaque
+A-semigroup            YES   YES    YES    YES    YES    YES    NO      YES          NO
+B-monoid               YES   YES    YES    YES    YES    YES    YES     YES          NO
+C-opaque+relation      YES   YES    YES    YES    NO     NO     NO      NO           YES
+D-productive-path      YES   YES    YES    YES    YES    NO     NO      NO           NO
+
+EXTERNAL BOUNDARY WITNESS
+((2,('1','0')),(3,('0','0','1')),(2,('0','1')))
+
+FOUNDATIONAL CONSEQUENCES
+- exact identity + extent do not imply total concatenation;
+- two-child generation can use one-step refinement without W×W concatenation;
+- epsilon is extra monoid structure;
+- arbitrary-concat cancellation is extra algebra;
+- parent-child relation may be external or productive;
+- framing metadata can remain outside identity symbols.
+
+PASS: total word concatenation is not forced by the modeled current obligations.
