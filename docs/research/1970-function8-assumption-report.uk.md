@@ -78,6 +78,17 @@ canonical variable-width identity
 
 без повернення плоскої semantic ontology з 256 рівноправних функцій.
 
+## Аудит runtime-carrier
+
+Внутрішній Rust-шар підтвердив ще одне важливе розділення:
+
+- `Value::Sid(Sens8)` і `ExprKind::Call(Sens8, ...)` є справжніми canonical-carrier blockers: майбутня variable-width identity не може пройти через них без втрати.
+- `Environment::code_slots` зараз зводить ключ до `sid.packed_byte()`; це блокує variable-width визначення мовою навіть після узагальнення reader/AST.
+- necessary-form routing також порівнює generated rows через packed byte і згодом має споживати width-neutral identity.
+- host-capability registry `HashMap<Sens8, SensHostFn>` — інший випадок: він може лишитися compatibility/mechanism map для наявних host anchors, якщо майбутні variable-width identities не потребують host registration.
+
+Це підсилює правило міграції: **спочатку узагальнюємо семантичні carriers; вузькі mechanism maps залишаємо вузькими, якщо їхній домен справді такий.**
+
 ## Порядок міграції, який випливає з evidence
 
 Не варто мігрувати implementation знизу догори. Безпечний напрям залежностей:
