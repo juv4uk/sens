@@ -5,6 +5,7 @@ on:
     paths:
       - "scripts/research-2199-d5-width-lower-bound.py"
       - "docs/research/2199-d5-width-lower-bound.md"
+      - "docs/research/2199-d5-width-lower-bound.uk.md"
       - ".github/workflows/d5-width-lower-bound.yml"
       - "knowledge/repo-tooling-inventory.lisp"
   push:
@@ -13,6 +14,7 @@ on:
     paths:
       - "scripts/research-2199-d5-width-lower-bound.py"
       - "docs/research/2199-d5-width-lower-bound.md"
+      - "docs/research/2199-d5-width-lower-bound.uk.md"
       - ".github/workflows/d5-width-lower-bound.yml"
       - "knowledge/repo-tooling-inventory.lisp"
 
