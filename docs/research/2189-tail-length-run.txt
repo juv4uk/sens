@@ -17,6 +17,12 @@
 [3] fixture #2166: 10|011|101|110: all frames round-trip
 [3] fixture racanā2 11 and 00 inside payload: 11|00|01|10: all frames round-trip
 
+[2b] truncation WITHOUT the grammar's widths (a receiver that only recovers the payload bits): proper byte prefixes of a frame accepted as a frame:
+      A bit length: 0 of 49434 proper prefixes accepted
+      C valid bits: 584 of 49434 proper prefixes accepted
+      D stop bit: 24735 of 24832 proper prefixes accepted
+      (with the grammar's widths a truncated frame fails the length check in every frame; the table in [2] uses them)
+
 [4] self-containment: frames shared by 2+ DIFFERENT word sequences (without the grammar's widths):
       A bit length: 4092 shared frames of 8191 distinct frames
       B count+widths: 0 shared frames of 27931 distinct frames

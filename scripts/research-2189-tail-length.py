@@ -178,6 +178,65 @@ def dec_d(frame: bytes, widths: Optional[Sequence[int]]) -> Seq:
     return split_words(bits[:n], widths)
 
 
+# --- payload-level decoders: what a receiver can recover WITHOUT the grammar's widths (the payload bits only)
+def payload_a(frame: bytes) -> str:
+    n, pos = read_varint(frame, 0)
+    body = frame[pos:]
+    if len(body) != (n + 7) // 8:
+        raise FrameError("payload byte count differs from the bit length")
+    bits = bits_of(body)
+    if set(bits[n:]) - {"0"}:
+        raise FrameError("non-zero tail padding")
+    return bits[:n]
+
+
+def payload_c(frame: bytes) -> str:
+    if not frame:
+        raise FrameError("empty container")
+    valid, body = frame[0], frame[1:]
+    if valid == 0:
+        if body:
+            raise FrameError("bytes after an empty payload")
+        return ""
+    if not 1 <= valid <= 8 or not body:
+        raise FrameError("bad valid-bit count")
+    bits = bits_of(body)
+    n = len(bits) - 8 + valid
+    if set(bits[n:]) - {"0"}:
+        raise FrameError("non-zero tail padding")
+    return bits[:n]
+
+
+def payload_d(frame: bytes) -> str:
+    bits = bits_of(frame).rstrip("0")
+    if not frame or not bits.endswith("1") or len(bits_of(frame)) - len(bits) > 7:
+        raise FrameError("no valid stop bit")
+    return bits[:-1]
+
+
+PAYLOAD_DECODERS = {"A bit length": payload_a, "C valid bits": payload_c, "D stop bit": payload_d}
+
+
+def check_truncation_without_widths(seqs: Sequence[Seq]) -> Dict[str, Tuple[int, int]]:
+    """per frame (A, C, D): proper byte prefixes of a frame, and how many of them are ACCEPTED as a frame
+    (the receiver has no grammar to compare the length with). Law: truncation fails closed."""
+    out = {}
+    for name, dec in PAYLOAD_DECODERS.items():
+        enc = FRAMES[name][0]
+        prefixes = accepted = 0
+        for seq in seqs:
+            frame = enc(seq)
+            for cut in range(1, len(frame)):
+                prefixes += 1
+                try:
+                    dec(frame[:cut])
+                    accepted += 1
+                except FrameError:
+                    pass
+        out[name] = (prefixes, accepted)
+    return out
+
+
 FRAMES = {"A bit length": (enc_a, dec_a), "B count+widths": (enc_b, dec_b),
           "C valid bits": (enc_c, dec_c), "D stop bit": (enc_d, dec_d)}
 
@@ -324,6 +383,10 @@ def main(argv: Sequence[str]) -> int:
     print()
     for name, ok in check_fixtures():
         print(f"[3] fixture {name}: {'all frames round-trip' if ok else 'FAILS'}")
+    print("\n[2b] truncation WITHOUT the grammar's widths (a receiver that only recovers the payload bits): proper byte prefixes of a frame accepted as a frame:")
+    for name, (prefixes, accepted) in check_truncation_without_widths(seqs).items():
+        print(f"      {name}: {accepted} of {prefixes} proper prefixes accepted")
+    print("      (with the grammar's widths a truncated frame fails the length check in every frame; the table in [2] uses them)")
     print("\n[4] self-containment: frames shared by 2+ DIFFERENT word sequences (without the grammar's widths):")
     for name, (shared, distinct) in check_self_containment(seqs).items():
         print(f"      {name}: {shared} shared frames of {distinct} distinct frames")
