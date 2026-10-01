@@ -1,0 +1,202 @@
+name: Research benchmark smoke
+
+# Fast, deterministic benchmark coverage for research harnesses that are not
+# already owned by dedicated Actions workflows. Performance numbers are
+# evidence artifacts; semantic/parity failures are the merge-blocking signal.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/research-bench-smoke.yml"
+      - "benchmarks/semantic-tree/**"
+      - "benchmarks/self-description/**"
+      - "benchmarks/agent-messages/run.py"
+      - "benchmarks/agent-messages/size_by_kind.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/research-bench-smoke.yml"
+      - "benchmarks/semantic-tree/**"
+      - "benchmarks/self-description/**"
+      - "benchmarks/agent-messages/run.py"
+      - "benchmarks/agent-messages/size_by_kind.py"
+  workflow_dispatch:
+
+concurrency:
+  group: research-bench-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  structural-smoke:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Agent-message deterministic size corpus
+        run: |
+          rm -rf /tmp/sens-agent-message-size
+          python3 benchmarks/agent-messages/size_by_kind.py \
+            --n 1000 \
+            --seed 1 \
+            --out /tmp/sens-agent-message-size
+
+      - name: Self-description semantic parity
+        run: |
+          rm -rf /tmp/sens-self-description-check
+          python3 benchmarks/self-description/run.py \
+            --depths 0,4,16 \
+            --patterns repeated \
+            --calls 5000 \
+            --out /tmp/sens-self-description-check \
+            --check-only
+
+      - name: Publish structural smoke summary
+        if: always()
+        run: |
+          {
+            echo "## Research structural smoke"
+            echo
+            echo "### Agent-message size corpus"
+            echo '~~~text'
+            if test -s /tmp/sens-agent-message-size/size_by_kind.tsv; then
+              cat /tmp/sens-agent-message-size/size_by_kind.tsv
+            else
+              echo "size artifact missing"
+            fi
+            echo '~~~'
+            echo
+            echo "Self-description parity is a correctness gate; no wall-clock threshold is used."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: research-structural-smoke
+          path: |
+            /tmp/sens-agent-message-size/
+            /tmp/sens-self-description-check/
+          retention-days: 7
+
+  semantic-tree-smoke:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          rustc --version
+          valgrind --version
+
+      - name: Run semantic-tree parity + bounded instruction smoke
+        run: |
+          rm -rf /tmp/sens-semantic-tree
+          python3 benchmarks/semantic-tree/run.py \
+            --smoke \
+            --out /tmp/sens-semantic-tree
+
+      - name: Publish semantic-tree smoke summary
+        if: always()
+        run: |
+          {
+            echo "## Semantic-tree benchmark smoke"
+            echo
+            echo "Same selector corpus is checked for semantic parity before Cachegrind evidence."
+            echo
+            if test -s /tmp/sens-semantic-tree/instructions.tsv; then
+              echo '~~~text'
+              cat /tmp/sens-semantic-tree/instructions.tsv
+              echo '~~~'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semantic-tree-smoke
+          path: /tmp/sens-semantic-tree/
+          retention-days: 7
+
+  manual-evidence:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          rustc --version
+          valgrind --version
+
+      - name: Agent-message deterministic size corpus
+        run: |
+          rm -rf /tmp/sens-agent-message-size
+          python3 benchmarks/agent-messages/size_by_kind.py \
+            --n 10000 \
+            --seed 1 \
+            --out /tmp/sens-agent-message-size
+
+      - name: Semantic-tree representative evidence matrix
+        run: |
+          rm -rf /tmp/sens-semantic-tree
+          python3 benchmarks/semantic-tree/run.py \
+            --depths 0,4,16 \
+            --patterns repeated,random \
+            --calls 20000 \
+            --samples 1 \
+            --out /tmp/sens-semantic-tree
+
+      - name: Self-description representative evidence matrix
+        run: |
+          rm -rf /tmp/sens-self-description
+          python3 benchmarks/self-description/run.py \
+            --depths 0,4,16 \
+            --patterns repeated,random \
+            --calls 10000 \
+            --samples 1 \
+            --out /tmp/sens-self-description
+
+      - name: Publish manual evidence summary
+        if: always()
+        run: |
+          {
+            echo "## Research benchmark evidence"
+            echo
+            echo "Performance rows are evidence, not merge thresholds. Correctness/parity failures remain hard failures."
+            for file in \
+              /tmp/sens-agent-message-size/size_by_kind.tsv \
+              /tmp/sens-semantic-tree/instructions.tsv \
+              /tmp/sens-self-description/instructions.tsv; do
+              if test -s "$file"; then
+                echo
+                echo "### \`$file\`"
+                echo '~~~text'
+                cat "$file"
+                echo '~~~'
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: research-benchmark-evidence
+          path: |
+            /tmp/sens-agent-message-size/
+            /tmp/sens-semantic-tree/
+            /tmp/sens-self-description/
+          retention-days: 14
