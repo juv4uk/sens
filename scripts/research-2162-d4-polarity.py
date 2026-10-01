@@ -120,7 +120,7 @@ def evidence(core1: str) -> dict[str, bool]:
         "C1-LAMBDA-NAMEP" in eval_
         and "FUNCTION" in eval_
         and "C1-DEFINE-NAMEP" in eval_program
-        and "(00000100\n                      (00000100" in eval_program
+        and re.search(r"\\(00000100\\s+\\(00000100", eval_program) is not None
         and "GLOBAL" in eval_program
     )
 
