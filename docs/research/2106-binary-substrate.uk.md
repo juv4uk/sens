@@ -89,6 +89,25 @@ Boundary потребує framing, escaping, out-of-band structure, length infor
 
 #2077 уже послаблено: epsilon механічно round-trip-иться, але semantic admission лишається unresolved.
 
+## 5. Порядок семантично спостережуваний
+
+Selector positive control прямо показує, що unordered bag of bits недостатній.
+
+За admitted локальною selector interpretation `0 -> left`, `1 -> right` на nested pair:
+
+```text
+suffix 01 -> один результат
+suffix 10 -> інший результат
+```
+
+В обох suffix той самий набір бітів із тією самою multiplicity. Відрізняється лише порядок.
+
+Так само `0` і `00` різняться під repeated projection, отже multiplicity/width теж observable.
+
+Тому carrier мусить зберігати ordered sequence position і exact multiplicity, а не лише binary labels.
+
+Це family-backed witness, не твердження, що кожна майбутня semantic family однаково інтерпретує order.
+
 ## Proposed epistemic split для #2018
 
 ```text
