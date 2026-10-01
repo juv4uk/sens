@@ -4,7 +4,7 @@
 Research/shadow only. This file does not change the ratified language contract.
 
 It tests the representation-independent candidate law:
-  canonical binary word = exact non-empty bounded bit sequence
+  canonical binary word = exact bounded bit sequence
   equality = same width + same bits
   semantic admission is separate from syntactic word validity
 
@@ -24,8 +24,6 @@ class BinaryWord:
     bits: str
 
     def __post_init__(self) -> None:
-        if not self.bits:
-            raise ValueError("binary word must be non-empty")
         if any(ch not in "01" for ch in self.bits):
             raise ValueError("binary word must contain only 0/1")
 
@@ -49,12 +47,14 @@ class BinaryWord:
 
     def packed_payload(self) -> bytes:
         byte_len = (self.width + 7) // 8
+        if self.width == 0:
+            return b""
         return int(self.bits, 2).to_bytes(byte_len, "big")
 
     @staticmethod
     def from_packed(width: int, payload: bytes) -> "BinaryWord":
-        if width <= 0:
-            raise ValueError("width must be positive")
+        if width < 0:
+            raise ValueError("width must be non-negative")
         expected = (width + 7) // 8
         if len(payload) != expected:
             raise ValueError("payload length does not match width")
@@ -63,6 +63,8 @@ class BinaryWord:
         if unused and (payload[0] >> (8 - unused)) != 0:
             raise ValueError("non-zero padding bits in canonical frame")
 
+        if width == 0:
+            return BinaryWord("")
         value = int.from_bytes(payload, "big")
         return BinaryWord(f"{value:0{width}b}")
 
@@ -75,8 +77,8 @@ def decode_frame(data: bytes, offset: int = 0) -> tuple[BinaryWord, int]:
     if offset + 4 > len(data):
         raise ValueError("truncated width prefix")
     width = int.from_bytes(data[offset : offset + 4], "big")
-    if width <= 0:
-        raise ValueError("zero-width word is invalid")
+    if width < 0:
+        raise ValueError("negative width is invalid")
     byte_len = (width + 7) // 8
     start = offset + 4
     end = start + byte_len
@@ -118,6 +120,11 @@ def exhaustive_small_roundtrip(max_width: int = 12) -> int:
 
 def main() -> None:
     # Exact identity and leading-zero law.
+    # Epsilon is admitted only as a carrier-level test value here; this does
+    # not assign it language meaning or ratify it as a callable identity.
+    epsilon = BinaryWord("")
+    assert decode_stream(encode_stream([epsilon])) == [epsilon]
+
     one = BinaryWord("1")
     zero_one = BinaryWord("01")
     zero_zero_one = BinaryWord("001")
@@ -185,6 +192,7 @@ def main() -> None:
 
     print("FOUNDATION-0 binary-word witness: PASS")
     print(f"small exhaustive round-trips: {small_checked}")
+    print("epsilon carrier round-trip: PASS (semantic admission unresolved)")
     print("leading-zero distinctness: PASS")
     print("prefix-without-equality-collapse: PASS")
     print("multi-word boundary round-trip: PASS")
@@ -194,6 +202,7 @@ def main() -> None:
     print("Sens8 checked projection: PASS")
     print("numeric-collapse-detected: PASS")
     print("semantic-admission-independent-of-width: PASS")
+    print("NON-CONCLUSION: epsilon semantic admission is unresolved")
     print("NON-CONCLUSION: no new word meaning is ratified")
     print("NON-CONCLUSION: framing format is witness-only, not semantic authority")
 
