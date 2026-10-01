@@ -1,0 +1,31 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-1962-framing-cost.py
+
+width	header	wire-cost
+1	000	4
+2	001	5
+3	010	6
+4	011	7
+5	100	8
+6	101	9
+7	110	10
+8	1111	12
+9	111010	15
+10	111011	16
+11	11100100	19
+12	11100101	20
+
+source:  10 0001 01
+tokens:  10 | 0001 | 01
+wire:    00110011000100101
+decoded: 10 | 0001 | 01
+
+PASS: arbitrary 1..8-bit words round-trip; all ordered pairs of
+1..4-bit words round-trip; internal 00/01/10/11 never act as delimiters.
+
+Interpretation:
+- semantic/source word boundaries and raw-wire framing are separate layers;
+- racanā2 can retain 11=dot without reserving 11 as a transport escape;
+- current Control2 remains a donor/current mechanism, not the new ontology;
+- full wire cost must be measured separately from semantic identifier width.
