@@ -28,14 +28,14 @@ CORPUS_DIR = "tests/fixtures/semantic"
 # (law section key, governing issue) — the corpus must carry each one.
 GOVERNING = [
     ("predicate-answer", "#1699"),
-    ("atom", "#1704"),
-    ("eq", "#1705"),
-    ("cond", "#1713"),
+    ("010", "#1704"),
+    ("111", "#1705"),
+    ("011", "#1713"),
     ("reader", "#1709"),
 ]
 
 REQUIRED_SECTIONS = [
-    "scope", "predicate-answer", "atom", "eq", "cond", "reader",
+    "scope", "predicate-answer", "010", "111", "011", "reader",
     "shared-identities", "negative-laws", "profile-coverage",
 ]
 
@@ -46,12 +46,14 @@ EXPECTED_LAW = {
         "empty-list-as-predicate-result": "forbidden",
         "host-boolean-defines-semantics": "forbidden",
     },
-    "atom": {"function8": "00000010", "empty-structure": 1, "non-pair": 1, "pair": 0},
-    "eq": {"function8": "00000011", "same-admitted-atom": 1,
-           "distinct-admitted-atom": 0, "pair-operand": "named-error"},
-    "cond": {"function8": "00000111", "clause-shape": "two-part", "test-1": "select",
-             "test-0": "skip", "unselected-expression": "not-evaluated",
-             "exhaustion": [], "three-part-clause": "rejected"},
+    "010": {"compat-function8": "00000010", "empty-structure": 1,
+            "non-pair": 1, "pair-structure": 0},
+    "111": {"compat-function8": "00000011", "same-admitted-atom": 1,
+            "distinct-admitted-atom": 0, "pair-operand": "named-error"},
+    "011": {"compat-function8": "00000111", "clause-shape": "two-part",
+            "test-1": "select", "test-0": "skip",
+            "unselected-expression": "not-evaluated",
+            "exhaustion": [], "three-part-clause": "rejected"},
     "reader": {"malformed-source": "rejected-not-repaired"},
 }
 
@@ -191,6 +193,7 @@ def check_contract(fail):
         if sec is None:
             continue
         # Law sections nest their law table: ((key . ((field . value) ...))).
+        # Exact-width D3 keys are quoted bit strings so leading zeroes survive.
         # A section whose own value is scalar keeps that scalar as a field.
         fields = {k: v for k, v in sec.items()}
         if isinstance(sec.get(key), list):
