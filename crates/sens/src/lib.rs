@@ -9,6 +9,7 @@
 
 
 mod bignum;
+mod bits;
 mod binary_framing;
 mod environment;
 mod error;
@@ -113,6 +114,7 @@ mod text7_projection;
 mod text7_projection_generated;
 mod value;
 
+pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
     BinaryFrame, BinaryFrameError,
