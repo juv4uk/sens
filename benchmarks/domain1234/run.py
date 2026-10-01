@@ -18,7 +18,6 @@ import subprocess
 from pathlib import Path
 
 CASES = ("d1", "d2", "d3", "d4", "ladder", "selector", "mixed")
-DIRECT_DOMAINS = {"d1", "d2", "d3", "d4"}
 IREF_RE = re.compile(r"I\s+refs:\s*([0-9,]+)")
 
 
@@ -76,13 +75,11 @@ def main() -> int:
     empty = statistics.median(baselines)
 
     rows = []
-    medians = {}
     for case in CASES:
         raw = [irefs(args.binary, case, args.iterations) for _ in range(args.reps)]
         net = [max(0, value - empty) for value in raw]
         median_raw = statistics.median(raw)
         median_net = statistics.median(net)
-        medians[case] = median_net
         rows.append(
             {
                 "case": case,
@@ -90,19 +87,13 @@ def main() -> int:
                 "reps": args.reps,
                 "empty_i_refs": int(empty),
                 "raw_i_refs_median": int(median_raw),
+                "raw_i_refs_per_iteration": median_raw / args.iterations,
                 "net_i_refs_median": int(median_net),
                 "net_i_refs_per_iteration": median_net / args.iterations,
                 "spread_pct": (
                     (max(raw) - min(raw)) / median_raw * 100.0 if median_raw else 0.0
                 ),
             }
-        )
-
-    d1 = medians["d1"]
-    for row in rows:
-        case = row["case"]
-        row["ratio_vs_d1"] = (
-            medians[case] / d1 if case in DIRECT_DOMAINS and d1 > 0 else ""
         )
 
     out = Path(args.out)
@@ -113,10 +104,10 @@ def main() -> int:
         "reps",
         "empty_i_refs",
         "raw_i_refs_median",
+        "raw_i_refs_per_iteration",
         "net_i_refs_median",
         "net_i_refs_per_iteration",
         "spread_pct",
-        "ratio_vs_d1",
     ]
     with out.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fields, delimiter="\t")
@@ -129,18 +120,13 @@ def main() -> int:
         f"Cachegrind I refs, median of {args.reps} runs, {args.iterations:,} iterations.",
         "The empty-loop baseline is subtracted. D1-D4 rows execute the same carrier shape.",
         "",
-        "| case | net I refs | I refs / iter | ratio vs D1 | spread |",
-        "|---|---:|---:|---:|---:|",
+        "| case | raw I refs / iter | extra I refs / iter vs empty | spread |",
+        "|---|---:|---:|---:|",
     ]
     for row in rows:
-        ratio = (
-            f"x{row['ratio_vs_d1']:.3f}"
-            if isinstance(row["ratio_vs_d1"], float)
-            else "-"
-        )
         lines.append(
-            f"| {row['case']} | {row['net_i_refs_median']:,} | "
-            f"{row['net_i_refs_per_iteration']:.3f} | {ratio} | "
+            f"| {row['case']} | {row['raw_i_refs_per_iteration']:.3f} | "
+            f"{row['net_i_refs_per_iteration']:.3f} | "
             f"{row['spread_pct']:.3f}% |"
         )
     lines += [
