@@ -1,0 +1,20 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-2017-falsification-ledger.py
+
+verified falsification classes: 9
+superseded premises (not counted as falsified): 1
+  F001 hamming-global-authority
+  F002 unordered-support-prefix-authority
+  F003 named-depth-semantic-rank
+  F004 transitive-seed-support-identity
+  F005 scc-topology-semantic-authority
+  F006 raw-00-inband-delimiter
+  F007 eq-immediate-selector-strength-children
+  F008 cons-named-helper-children
+  F009 cond-predicate-and-or-children
+  S001 exact8-semantic-ceiling [superseded-premise]
+
+PASS: schema, six local executable counterexamples, three external
+witness references, and resurrection self-test are consistent.
+IMPORTANT: bounded falsifiers remain bounded; no universal scope inflation.
