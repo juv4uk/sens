@@ -1,0 +1,4 @@
+left	right	implementation_equal	observational_equal	observational_domain	semantic_identity	evidence	note
+second	cadr	yes	yes	proper-list	no	experiments/function-genealogy.lisp + docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md	current CAR∘CDR body is shared; sequence ordinal vs pair-navigation intent remains distinct
+fourth	cadddr	yes	yes	current-implementation-domain	unknown	experiments/function-genealogy.lisp + docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md	current implementation is the same composition/closure; stronger semantic-identity evidence not established here
+pair	list	no	yes	exactly-two-arguments	no	experiments/function-genealogy.lisp + docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md	binary constructor and variadic list constructor overlap only on the declared arity-2 observation domain
