@@ -1,0 +1,30 @@
+# research-2189 tail length (words up to 4 bits, up to 3 words; 27931 sequences)
+
+[1] A bit length: 27931 sequences, 0 round-trip failures (widths from the grammar for A, C, D)
+[1] B count+widths: 27931 sequences, 0 round-trip failures (widths from the grammar for A, C, D)
+[1] C valid bits: 27931 sequences, 0 round-trip failures (widths from the grammar for A, C, D)
+[1] D stop bit: 27931 sequences, 0 round-trip failures (widths from the grammar for A, C, D)
+
+[2] A bit length: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
+[2] B count+widths: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
+[2] C valid bits: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
+[2] D stop bit: truncation_not_rejected=0, appended_zero_byte_accepted=0, nonzero_tail_accepted=0, suffix_zero_lost=0
+
+[3] fixture [0],[00] vs [000] (#1980: same zero-padded byte): all frames round-trip
+[3] fixture [1],[1,0] style: [1],[10] vs [110]: all frames round-trip
+[3] fixture #2166: 1|01|001: all frames round-trip
+[3] fixture #2166: 0|00|000: all frames round-trip
+[3] fixture #2166: 10|011|101|110: all frames round-trip
+[3] fixture racanā2 11 and 00 inside payload: 11|00|01|10: all frames round-trip
+
+[4] self-containment: frames shared by 2+ DIFFERENT word sequences (without the grammar's widths):
+      A bit length: 4092 shared frames of 8191 distinct frames
+      B count+widths: 0 shared frames of 27931 distinct frames
+      C valid bits: 4092 shared frames of 8191 distinct frames
+      D stop bit: 4092 shared frames of 8191 distinct frames
+
+[5] accounting, mean per sequence: frame | payload bits | payload bytes | tail bits | framing bytes | total bytes | utilization
+      A bit length | 9.69 | 1.77 | 4.47 | 1.0 | 2.77 | 0.4372
+      B count+widths | 9.69 | 1.77 | 4.47 | 2.97 | 4.74 | 0.2557
+      C valid bits | 9.69 | 1.77 | 4.47 | 1.0 | 2.77 | 0.4372
+      D stop bit | 9.69 | 1.77 | 4.43 | 0.12 | 1.89 | 0.641
