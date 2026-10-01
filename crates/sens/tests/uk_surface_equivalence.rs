@@ -7,8 +7,8 @@
 //! `runtime_peer_operators.rs` already assert is no longer executable
 //! authority (TEST-ARCHITECTURE-1 step 2 migration, 2026-09-12).
 
-use sens::{eval_program, load_core_library, Session, Value};
-use std::rc::Rc;
+use sens::{eval_program, load_core_library, lower_program, parse, ErrorKind, Session};
+use sens::syntax::ExprKind;
 
 fn registry_rows() -> Vec<(String, Vec<Surface>)> {
     sens::semantic_registry_export::admitted_semantic_ids()
@@ -82,79 +82,52 @@ fn uk_session() -> Session {
     session
 }
 
-fn is_same_runtime_value(left: &Value, right: &Value) -> bool {
-    match (left, right) {
-        // A builtin is an operation handle. Canon EN/UK/SA spellings and
-        // ordinary aliases must retain one allocation, not merely similar code.
-        (Value::Builtin(left), Value::Builtin(right)) => Rc::ptr_eq(left, right),
-        _ => left == right,
-    }
-}
-
 #[test]
-fn every_stable_uk_surface_entry_resolves_to_its_declared_operation() {
+fn every_stable_uk_surface_entry_lowers_to_its_declared_exact_sens() {
     let pairs = present_en_uk_pairs();
-    // Floor, not exact count: the registry only grows. An exact hardcoded
-    // count here would silently rot every time a new stable pair is added --
-    // this just guards against the parse producing an (almost) empty set.
     assert!(
         pairs.len() >= 100,
         "expected a substantial number of present EN/UK pairs, found {}",
         pairs.len()
     );
 
-    let mut session = uk_session();
-    // Evaluation-control/necessary forms (quote/cond/lambda/define) are
-    // syntax, not first-class values -- Rc-identity comparison is not
-    // meaningful for them, so they're verified behaviorally in
-    // uk_surface.rs / uk_sa_surface.rs instead of here.
-    let syntax = [
-        ("quote", "як-є"),
-        ("cond", "за-умовою"),
-        ("lambda", "функція"),
-        ("define", "визначити"),
-    ];
-    // Host primitives (process, tcp, fs) belong to sens-host substrate,
-    // not to the pure language session tested here.
-    let host_operations = [
-        "process-run",
-        "tcp-read",
-        "tcp-write",
-        "tcp-listen",
-        "read-file",
-        "write-file",
-    ];
-    let mut checked_values = 0;
+    // Loading the human projection must still succeed, but its spellings are
+    // no longer required to materialize as first-class runtime values.
+    let _session = uk_session();
 
-    let mut expected_checked = 0usize;
-    for (semantic_id, english, ukrainian) in &pairs {
-        if syntax.iter().any(|(en, uk)| en == english && uk == ukrainian)
-            || host_operations.iter().any(|name| *name == english)
-        {
-            continue;
-        }
-        expected_checked += 1;
-        let english_value = eval_program(english, &mut session)
-            .unwrap_or_else(|error| {
-                panic!("English value is missing: {semantic_id}/{english}: {error}")
-            })
-            .value;
-        let ukrainian_value = eval_program(ukrainian, &mut session)
-            .unwrap_or_else(|error| {
-                panic!("Ukrainian value is missing: {semantic_id}/{ukrainian}: {error}")
-            })
-            .value;
-        assert!(
-            is_same_runtime_value(&english_value, &ukrainian_value),
-            "surface changed runtime identity: {semantic_id}/{english} -> {ukrainian}"
+    for (declared_bits, english, ukrainian) in &pairs {
+        let declared = sens::semantic_registry_export::semantic_id_for_admitted_surface(english)
+            .expect("registry EN surface must resolve");
+        let ukrainian_declared =
+            sens::semantic_registry_export::semantic_id_for_admitted_surface(ukrainian)
+                .expect("registry UK surface must resolve");
+
+        assert_eq!(
+            sens::semantic_registry_export::semantic_id_bits(declared),
+            *declared_bits,
+            "registry row and EN reverse projection drifted for {english}"
         );
-        checked_values += 1;
-    }
+        assert_eq!(
+            ukrainian_declared, declared,
+            "EN/UK surfaces must project to one exact SENS: {english} / {ukrainian}"
+        );
 
-    // Derived, not restated: every pair except the syntax forms and host
-    // operations must have been checked above -- catches a silent early
-    // `continue`/`break` bug in the loop without hardcoding the pair count twice.
-    assert_eq!(checked_values, expected_checked);
+        for surface in [english.as_str(), ukrainian.as_str()] {
+            let source = format!("({surface})");
+            let parsed = parse(&source).expect("admitted surface call must parse");
+            let lowered = lower_program(&parsed);
+            assert_eq!(lowered.len(), 1);
+            match &lowered[0].kind {
+                ExprKind::Call(sens, _) => assert_eq!(
+                    *sens, declared,
+                    "surface head must lower directly to declared exact SENS: {surface}"
+                ),
+                other => panic!(
+                    "admitted surface head must lower to exact SENS Call: {surface} -> {other:?}"
+                ),
+            }
+        }
+    }
 }
 
 #[test]
@@ -175,24 +148,36 @@ fn ukrainian_surface_status_counts_are_internally_consistent() {
 
 
 #[test]
-fn admitted_invoke_surfaces_materialize_from_the_single_registry() {
+fn admitted_invoke_surfaces_lower_to_one_exact_sens_without_bare_value_fallback() {
+    let invoke_sens =
+        sens::semantic_registry_export::semantic_id_for_admitted_surface("invoke")
+            .expect("invoke must be admitted by the single registry");
+    let ukrainian_sens =
+        sens::semantic_registry_export::semantic_id_for_admitted_surface("викликати")
+            .expect("викликати must be admitted by the single registry");
+    assert_eq!(invoke_sens, ukrainian_sens);
+    assert_eq!(
+        sens::semantic_registry_export::semantic_id_bits(invoke_sens),
+        "10101000"
+    );
+
+    for surface in ["invoke", "викликати"] {
+        let parsed = parse(&format!("({surface})")).expect("invoke surface call must parse");
+        let lowered = lower_program(&parsed);
+        assert_eq!(lowered.len(), 1);
+        assert!(matches!(
+            &lowered[0].kind,
+            ExprKind::Call(sens, _) if *sens == invoke_sens
+        ));
+    }
+
+    // #1946 / M8 precedent: an admitted function spelling is an input
+    // projection in executable head position, not a lexical runtime value.
     let mut session = Session::default();
     load_core_library(&mut session).expect("core bootstrap");
-
-    let english = eval_program("invoke", &mut session)
-        .expect("registry-admitted invoke surface must resolve")
-        .value;
-    let ukrainian = eval_program("викликати", &mut session)
-        .expect("registry-admitted Ukrainian invoke surface must resolve")
-        .value;
-    let invoke_sid = sens::semantic_registry_export::semantic_id_for_admitted_surface("invoke")
-        .expect("invoke must be admitted by sr/2");
-    let ukrainian_sid =
-        sens::semantic_registry_export::semantic_id_for_admitted_surface("викликати")
-            .expect("викликати must be admitted by sr/2");
-
-    assert_eq!(invoke_sid, ukrainian_sid);
-    assert_eq!(english, Value::Sid(invoke_sid));
-    assert_eq!(ukrainian, Value::Sid(ukrainian_sid));
-    assert_eq!(english, ukrainian);
+    for surface in ["invoke", "викликати"] {
+        let error = eval_program(surface, &mut session)
+            .expect_err("bare admitted invoke spelling must not regain name fallback");
+        assert_eq!(error.kind, ErrorKind::UnknownSymbol);
+    }
 }
