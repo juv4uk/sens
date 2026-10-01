@@ -316,7 +316,9 @@ pub fn render(forms: &[XedForm], pinned_commit: &str) -> String {
     out.push_str("(xed-machine-evidence/1\n");
     out.push_str(&format!("  (pinned-commit \"{pinned_commit}\")\n"));
     out.push_str(&format!("  (source-digest \"sha256:{digest}\")\n"));
-    out.push_str(&format!("  (form-count {})\n", forms.len()));
+    // Counts are canonical numeric metadata: spell them explicitly in binary
+    // so regenerated evidence cannot reopen implicit-decimal source authority.
+    out.push_str(&format!("  (form-count #b{:b})\n", forms.len()));
     for form in forms {
         out.push_str("  (form\n");
         out.push_str(&format!(
@@ -339,7 +341,7 @@ pub fn render(forms: &[XedForm], pinned_commit: &str) -> String {
             )),
             None => out.push_str("    (isa-set ())\n"),
         }
-        out.push_str(&format!("    (form-count {})\n", form.form_count));
+        out.push_str(&format!("    (form-count #b{:b})\n", form.form_count));
         out.push_str(&format!(
             "    (operand-summary \"{}\")\n",
             escape_lisp_string(&form.operand_summary)

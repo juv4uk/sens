@@ -1,0 +1,4 @@
+model	semantic_nodes	explicit_execution_rows	generated_paths	generator_action_rules	unresolved_nodes	execution_coverage_nodes	execution_rows_avoided_vs_flat	semantic_identities_eliminated	status
+flat-explicit-donor	34	34	0	0	0	34	0	0	complete-donor-not-authority
+proven-root-plus-path	34	8	6	2	20	14	6	0	incomplete-proven-only
+hybrid-keep-unresolved-explicit	34	28	6	2	20	34	6	0	complete-accounting-bound-no-new-allocation

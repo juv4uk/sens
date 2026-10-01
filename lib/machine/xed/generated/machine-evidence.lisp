@@ -6,14 +6,14 @@
 (xed-machine-evidence/1
   (pinned-commit "0bcb6237345c5066726dcc08b3d87928df3b5b26")
   (source-digest "sha256:e7ff543c7fd22e599941393fd50799799ed4be3235449e19b3e6eab4da6ee524")
-  (form-count 1175)
+  (form-count #b10010010111)
   (form
     (extension AES-NI)
     (xed-extension AES)
     (iclass "AESDEC")
     (category "AES")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq  REG1=XMM_B():r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -22,7 +22,7 @@
     (iclass "AESDECLAST")
     (category "AES")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq  REG1=XMM_B():r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -31,7 +31,7 @@
     (iclass "AESENC")
     (category "AES")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq  REG1=XMM_B():r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -40,7 +40,7 @@
     (iclass "AESENCLAST")
     (category "AES")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq  REG1=XMM_B():r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -49,7 +49,7 @@
     (iclass "AESIMC")
     (category "AES")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq  REG1=XMM_B():r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -58,7 +58,7 @@
     (iclass "AESKEYGENASSIST")
     (category "AES")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq  REG1=XMM_B():r:dq IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -67,7 +67,7 @@
     (iclass "VADDPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -76,7 +76,7 @@
     (iclass "VADDPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -85,7 +85,7 @@
     (iclass "VADDSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -94,7 +94,7 @@
     (iclass "VADDSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -103,7 +103,7 @@
     (iclass "VADDSUBPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -112,7 +112,7 @@
     (iclass "VADDSUBPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -121,7 +121,7 @@
     (iclass "VANDNPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=XMM_N():r:dq:u64 MEM0:r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -130,7 +130,7 @@
     (iclass "VANDNPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq REG1=XMM_N():r:dq MEM0:r:dq")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -139,7 +139,7 @@
     (iclass "VANDPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=XMM_N():r:dq:u64 MEM0:r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -148,7 +148,7 @@
     (iclass "VANDPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq REG1=XMM_N():r:dq MEM0:r:dq")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -157,7 +157,7 @@
     (iclass "VBLENDPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -166,7 +166,7 @@
     (iclass "VBLENDPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -175,7 +175,7 @@
     (iclass "VBLENDVPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64 REG2=XMM_SE():r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -184,7 +184,7 @@
     (iclass "VBLENDVPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32 REG2=XMM_SE():r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -193,7 +193,7 @@
     (iclass "VBROADCASTF128")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=YMM_R():w:qq:f64 MEM0:r:dq:f64 EMX_BROADCAST_2TO4_64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -202,7 +202,7 @@
     (iclass "VBROADCASTSD")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=YMM_R():w:qq:f64 MEM0:r:q:f64 EMX_BROADCAST_1TO4_64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -211,7 +211,7 @@
     (iclass "VBROADCASTSS")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 MEM0:r:d:f32 EMX_BROADCAST_1TO4_32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -220,7 +220,7 @@
     (iclass "VCMPPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -229,7 +229,7 @@
     (iclass "VCMPPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -238,7 +238,7 @@
     (iclass "VCMPSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:q:f64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -247,7 +247,7 @@
     (iclass "VCMPSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -256,7 +256,7 @@
     (iclass "VCOMISD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:q:f64 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -265,7 +265,7 @@
     (iclass "VCOMISS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:d:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -274,7 +274,7 @@
     (iclass "VCVTDQ2PD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 MEM0:r:q:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -283,7 +283,7 @@
     (iclass "VCVTDQ2PS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -292,7 +292,7 @@
     (iclass "VCVTPD2DQ")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:i32 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -301,7 +301,7 @@
     (iclass "VCVTPD2PS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -310,7 +310,7 @@
     (iclass "VCVTPS2DQ")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:i32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -319,7 +319,7 @@
     (iclass "VCVTPS2PD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 MEM0:r:q:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -328,7 +328,7 @@
     (iclass "VCVTSD2SI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d:i32 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -337,7 +337,7 @@
     (iclass "VCVTSD2SS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -346,7 +346,7 @@
     (iclass "VCVTSI2SD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:d:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -355,7 +355,7 @@
     (iclass "VCVTSI2SS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -364,7 +364,7 @@
     (iclass "VCVTSS2SD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -373,7 +373,7 @@
     (iclass "VCVTSS2SI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d:i32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -382,7 +382,7 @@
     (iclass "VCVTTPD2DQ")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:i32 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -391,7 +391,7 @@
     (iclass "VCVTTPS2DQ")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:i32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -400,7 +400,7 @@
     (iclass "VCVTTSD2SI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d:i32 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -409,7 +409,7 @@
     (iclass "VCVTTSS2SI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d:i32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -418,7 +418,7 @@
     (iclass "VDIVPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -427,7 +427,7 @@
     (iclass "VDIVPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -436,7 +436,7 @@
     (iclass "VDIVSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -445,7 +445,7 @@
     (iclass "VDIVSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -454,7 +454,7 @@
     (iclass "VDPPD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -463,7 +463,7 @@
     (iclass "VDPPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -472,7 +472,7 @@
     (iclass "VEXTRACTF128")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:dq:f64 REG0=YMM_R():r:qq:f64  IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -481,7 +481,7 @@
     (iclass "VEXTRACTPS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:d:f32  REG0=XMM_R():r:dq:f32  IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -490,7 +490,7 @@
     (iclass "VHADDPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -499,7 +499,7 @@
     (iclass "VHADDPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -508,7 +508,7 @@
     (iclass "VHSUBPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -517,7 +517,7 @@
     (iclass "VHSUBPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -526,7 +526,7 @@
     (iclass "VINSERTF128")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:f64 REG1=YMM_N():r:qq:f64 MEM0:r:dq:f64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -535,7 +535,7 @@
     (iclass "VINSERTPS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -544,7 +544,7 @@
     (iclass "VLDDQU")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq  MEM0:r:dq")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -553,7 +553,7 @@
     (iclass "VLDMXCSR")
     (category "AVX")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:d REG0=XED_REG_MXCSR:w:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -562,7 +562,7 @@
     (iclass "VMASKMOVDQU")
     (category "AVX")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():r:xub REG1=XMM_B():r:xub MEM0:w:SUPP:xub BASE0=ArDI():r:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -571,7 +571,7 @@
     (iclass "VMASKMOVPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64   REG1=XMM_N():r:dq:u64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -580,7 +580,7 @@
     (iclass "VMASKMOVPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32   REG1=XMM_N():r:dq MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -589,7 +589,7 @@
     (iclass "VMAXPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -598,7 +598,7 @@
     (iclass "VMAXPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -607,7 +607,7 @@
     (iclass "VMAXSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -616,7 +616,7 @@
     (iclass "VMAXSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -625,7 +625,7 @@
     (iclass "VMINPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -634,7 +634,7 @@
     (iclass "VMINPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -643,7 +643,7 @@
     (iclass "VMINSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -652,7 +652,7 @@
     (iclass "VMINSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -661,7 +661,7 @@
     (iclass "VMOVAPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XMM_R():w:dq:f64  MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -670,7 +670,7 @@
     (iclass "VMOVAPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XMM_R():w:dq:f32  MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -679,7 +679,7 @@
     (iclass "VMOVD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "MEM0:w:d           REG0=XMM_R():r:d")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -688,7 +688,7 @@
     (iclass "VMOVDDUP")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64  MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -697,7 +697,7 @@
     (iclass "VMOVDQA")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XMM_R():w:dq  MEM0:r:dq")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -706,7 +706,7 @@
     (iclass "VMOVDQU")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XMM_R():w:dq  MEM0:r:dq")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -715,7 +715,7 @@
     (iclass "VMOVHLPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 REG2=XMM_B():r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -724,7 +724,7 @@
     (iclass "VMOVHPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64   REG1=XMM_N():r:q:f64   MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -733,7 +733,7 @@
     (iclass "VMOVHPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32   REG1=XMM_N():r:q:f32   MEM0:r:q:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -742,7 +742,7 @@
     (iclass "VMOVLHPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:q:f32 REG2=XMM_B():r:q:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -751,7 +751,7 @@
     (iclass "VMOVLPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64   REG1=XMM_N():r:dq:f64   MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -760,7 +760,7 @@
     (iclass "VMOVLPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32   REG1=XMM_N():r:dq:f32   MEM0:r:q:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -769,7 +769,7 @@
     (iclass "VMOVMSKPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=VGPR32_R():w:d   REG1=XMM_B():r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -778,7 +778,7 @@
     (iclass "VMOVMSKPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=VGPR32_R():w:d   REG1=XMM_B():r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -787,7 +787,7 @@
     (iclass "VMOVNTDQ")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:dq:i32  REG0=XMM_R():r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -796,7 +796,7 @@
     (iclass "VMOVNTDQA")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():w:dq MEM0:r:dq")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -805,7 +805,7 @@
     (iclass "VMOVNTPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:dq:f64  REG0=XMM_R():r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -814,7 +814,7 @@
     (iclass "VMOVNTPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:dq:f32  REG0=XMM_R():r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -823,7 +823,7 @@
     (iclass "VMOVQ")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "MEM0:w:q   REG0=XMM_R():r:q")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -832,7 +832,7 @@
     (iclass "VMOVSD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:q:f64           REG0=XMM_R():r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -841,7 +841,7 @@
     (iclass "VMOVSHDUP")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -850,7 +850,7 @@
     (iclass "VMOVSLDUP")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -859,7 +859,7 @@
     (iclass "VMOVSS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:d:f32          REG0=XMM_R():r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -868,7 +868,7 @@
     (iclass "VMOVUPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XMM_R():w:dq:f64   MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -877,7 +877,7 @@
     (iclass "VMOVUPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XMM_R():w:dq:f32   MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -886,7 +886,7 @@
     (iclass "VMPSADBW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -895,7 +895,7 @@
     (iclass "VMULPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -904,7 +904,7 @@
     (iclass "VMULPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -913,7 +913,7 @@
     (iclass "VMULSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -922,7 +922,7 @@
     (iclass "VMULSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -931,7 +931,7 @@
     (iclass "VORPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=XMM_N():r:dq:u64 MEM0:r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -940,7 +940,7 @@
     (iclass "VORPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u32 REG1=XMM_N():r:dq:u32 MEM0:r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -949,7 +949,7 @@
     (iclass "VPABSB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -958,7 +958,7 @@
     (iclass "VPABSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -967,7 +967,7 @@
     (iclass "VPABSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -976,7 +976,7 @@
     (iclass "VPACKSSDW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -985,7 +985,7 @@
     (iclass "VPACKSSWB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -994,7 +994,7 @@
     (iclass "VPACKUSDW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1003,7 +1003,7 @@
     (iclass "VPACKUSWB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1012,7 +1012,7 @@
     (iclass "VPADDB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1021,7 +1021,7 @@
     (iclass "VPADDD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1030,7 +1030,7 @@
     (iclass "VPADDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64 REG1=XMM_N():r:dq:i64 MEM0:r:dq:i64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1039,7 +1039,7 @@
     (iclass "VPADDSB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1048,7 +1048,7 @@
     (iclass "VPADDSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1057,7 +1057,7 @@
     (iclass "VPADDUSB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1066,7 +1066,7 @@
     (iclass "VPADDUSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1075,7 +1075,7 @@
     (iclass "VPADDW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1084,7 +1084,7 @@
     (iclass "VPALIGNR")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1093,7 +1093,7 @@
     (iclass "VPAND")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u128 REG1=XMM_N():r:dq:u128 MEM0:r:dq:u128")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1102,7 +1102,7 @@
     (iclass "VPANDN")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u128 REG1=XMM_N():r:dq:u128 MEM0:r:dq:u128")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1111,7 +1111,7 @@
     (iclass "VPAVGB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1120,7 +1120,7 @@
     (iclass "VPAVGW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1129,7 +1129,7 @@
     (iclass "VPBLENDVB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8 REG2=XMM_SE():r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1138,7 +1138,7 @@
     (iclass "VPBLENDW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1147,7 +1147,7 @@
     (iclass "VPCMPEQB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1156,7 +1156,7 @@
     (iclass "VPCMPEQD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32 REG1=XMM_N():r:dq:u32 MEM0:r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1165,7 +1165,7 @@
     (iclass "VPCMPEQQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=XMM_N():r:dq:u64 MEM0:r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1174,7 +1174,7 @@
     (iclass "VPCMPEQW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1183,7 +1183,7 @@
     (iclass "VPCMPESTRI")
     (category "STTNI")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_EDX:r:SUPP REG3=XED_REG_ECX:w:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1192,7 +1192,7 @@
     (iclass "VPCMPESTRI64")
     (category "STTNI")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_RAX:r:SUPP REG2=XED_REG_RDX:r:SUPP REG3=XED_REG_RCX:w:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1201,7 +1201,7 @@
     (iclass "VPCMPESTRM")
     (category "STTNI")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_EDX:r:SUPP REG3=XED_REG_XMM0:w:dq:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1210,7 +1210,7 @@
     (iclass "VPCMPESTRM64")
     (category "STTNI")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_RAX:r:SUPP REG2=XED_REG_RDX:r:SUPP REG3=XED_REG_XMM0:w:dq:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1219,7 +1219,7 @@
     (iclass "VPCMPGTB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1228,7 +1228,7 @@
     (iclass "VPCMPGTD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1237,7 +1237,7 @@
     (iclass "VPCMPGTQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i64 MEM0:r:dq:i64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1246,7 +1246,7 @@
     (iclass "VPCMPGTW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1255,7 +1255,7 @@
     (iclass "VPCMPISTRI")
     (category "STTNI")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_ECX:w:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1264,7 +1264,7 @@
     (iclass "VPCMPISTRI64")
     (category "STTNI")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_RCX:w:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1273,7 +1273,7 @@
     (iclass "VPCMPISTRM")
     (category "STTNI")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_XMM0:w:dq:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1282,7 +1282,7 @@
     (iclass "VPERM2F128")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:f64 REG1=YMM_N():r:qq:f64 MEM0:r:qq:f64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1291,7 +1291,7 @@
     (iclass "VPERMILPD")
     (category "AVX")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1300,7 +1300,7 @@
     (iclass "VPERMILPS")
     (category "AVX")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1309,7 +1309,7 @@
     (iclass "VPEXTRB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b           REG0=XMM_R():r:dq:u8 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1318,7 +1318,7 @@
     (iclass "VPEXTRD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:d REG0=XMM_R():r:dq:u32 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1327,7 +1327,7 @@
     (iclass "VPEXTRQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:q              REG0=XMM_R():r:dq:u64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1336,7 +1336,7 @@
     (iclass "VPEXTRW")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:w           REG0=XMM_R():r:dq:u16 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1345,7 +1345,7 @@
     (iclass "VPHADDD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1354,7 +1354,7 @@
     (iclass "VPHADDSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1363,7 +1363,7 @@
     (iclass "VPHADDW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1372,7 +1372,7 @@
     (iclass "VPHMINPOSUW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1381,7 +1381,7 @@
     (iclass "VPHSUBD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1390,7 +1390,7 @@
     (iclass "VPHSUBSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1399,7 +1399,7 @@
     (iclass "VPHSUBW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1408,7 +1408,7 @@
     (iclass "VPINSRB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8     REG1=XMM_N():r:dq:u8  MEM0:r:b:u8            IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1417,7 +1417,7 @@
     (iclass "VPINSRD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u32     REG1=XMM_N():r:dq:u32  MEM0:r:d:u32            IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1426,7 +1426,7 @@
     (iclass "VPINSRQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64     REG1=XMM_N():r:dq:u64  MEM0:r:q:u64            IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1435,7 +1435,7 @@
     (iclass "VPINSRW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16     REG1=XMM_N():r:dq:u16  MEM0:r:w:u16           IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1444,7 +1444,7 @@
     (iclass "VPMADDUBSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:u8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1453,7 +1453,7 @@
     (iclass "VPMADDWD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1462,7 +1462,7 @@
     (iclass "VPMAXSB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1471,7 +1471,7 @@
     (iclass "VPMAXSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1480,7 +1480,7 @@
     (iclass "VPMAXSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1489,7 +1489,7 @@
     (iclass "VPMAXUB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1498,7 +1498,7 @@
     (iclass "VPMAXUD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32 REG1=XMM_N():r:dq:u32 MEM0:r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1507,7 +1507,7 @@
     (iclass "VPMAXUW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1516,7 +1516,7 @@
     (iclass "VPMINSB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1525,7 +1525,7 @@
     (iclass "VPMINSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1534,7 +1534,7 @@
     (iclass "VPMINSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1543,7 +1543,7 @@
     (iclass "VPMINUB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1552,7 +1552,7 @@
     (iclass "VPMINUD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32 REG1=XMM_N():r:dq:u32 MEM0:r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1561,7 +1561,7 @@
     (iclass "VPMINUW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1570,7 +1570,7 @@
     (iclass "VPMOVMSKB")
     (category "AVX")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=VGPR32_R():w:d:u32   REG1=XMM_B():r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1579,7 +1579,7 @@
     (iclass "VPMOVSXBD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32   REG1=XMM_B():r:d:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1588,7 +1588,7 @@
     (iclass "VPMOVSXBQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64   REG1=XMM_B():r:w:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1597,7 +1597,7 @@
     (iclass "VPMOVSXBW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16   REG1=XMM_B():r:q:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1606,7 +1606,7 @@
     (iclass "VPMOVSXDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64   REG1=XMM_B():r:q:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1615,7 +1615,7 @@
     (iclass "VPMOVSXWD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32   REG1=XMM_B():r:q:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1624,7 +1624,7 @@
     (iclass "VPMOVSXWQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64   REG1=XMM_B():r:d:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1633,7 +1633,7 @@
     (iclass "VPMOVZXBD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32   REG1=XMM_B():r:d:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1642,7 +1642,7 @@
     (iclass "VPMOVZXBQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64   REG1=XMM_B():r:w:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1651,7 +1651,7 @@
     (iclass "VPMOVZXBW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16   REG1=XMM_B():r:q:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1660,7 +1660,7 @@
     (iclass "VPMOVZXDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64   REG1=XMM_B():r:q:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1669,7 +1669,7 @@
     (iclass "VPMOVZXWD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32   REG1=XMM_B():r:q:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1678,7 +1678,7 @@
     (iclass "VPMOVZXWQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64   REG1=XMM_B():r:d:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1687,7 +1687,7 @@
     (iclass "VPMULDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1696,7 +1696,7 @@
     (iclass "VPMULHRSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1705,7 +1705,7 @@
     (iclass "VPMULHUW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1714,7 +1714,7 @@
     (iclass "VPMULHW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1723,7 +1723,7 @@
     (iclass "VPMULLD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1732,7 +1732,7 @@
     (iclass "VPMULLW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1741,7 +1741,7 @@
     (iclass "VPMULUDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=XMM_N():r:dq:u32 MEM0:r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1750,7 +1750,7 @@
     (iclass "VPOR")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u128 REG1=XMM_N():r:dq:u128 MEM0:r:dq:u128")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1759,7 +1759,7 @@
     (iclass "VPSADBW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1768,7 +1768,7 @@
     (iclass "VPSHUFB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1777,7 +1777,7 @@
     (iclass "VPSHUFD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq MEM0:r:dq  IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1786,7 +1786,7 @@
     (iclass "VPSHUFHW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq MEM0:r:dq  IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1795,7 +1795,7 @@
     (iclass "VPSHUFLW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq MEM0:r:dq  IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1804,7 +1804,7 @@
     (iclass "VPSIGNB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1813,7 +1813,7 @@
     (iclass "VPSIGND")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1822,7 +1822,7 @@
     (iclass "VPSIGNW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1831,7 +1831,7 @@
     (iclass "VPSLLD")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_N():w:dq:u32 REG1=XMM_B():r:dq:u32 IMM0:r:b  #NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1840,7 +1840,7 @@
     (iclass "VPSLLDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_N():w:dq:u128 REG1=XMM_B():r:dq:u128 IMM0:r:b   # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1849,7 +1849,7 @@
     (iclass "VPSLLQ")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_N():w:dq:u64 REG1=XMM_B():r:dq:u64 IMM0:r:b # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1858,7 +1858,7 @@
     (iclass "VPSLLW")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_N():w:dq:u16 REG1=XMM_B():r:dq:u16 IMM0:r:b # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1867,7 +1867,7 @@
     (iclass "VPSRAD")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_N():w:dq:i32 REG1=XMM_B():r:dq:i32 IMM0:r:b # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1876,7 +1876,7 @@
     (iclass "VPSRAW")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_N():w:dq:i16 REG1=XMM_B():r:dq:i16 IMM0:r:b # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1885,7 +1885,7 @@
     (iclass "VPSRLD")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_N():w:dq:u32 REG1=XMM_B():r:dq:u32 IMM0:r:b # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1894,7 +1894,7 @@
     (iclass "VPSRLDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_N():w:dq:u128 REG1=XMM_B():r:dq:u128 IMM0:r:b   # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1903,7 +1903,7 @@
     (iclass "VPSRLQ")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_N():w:dq:u64 REG1=XMM_B():r:dq:u64 IMM0:r:b  # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1912,7 +1912,7 @@
     (iclass "VPSRLW")
     (category "AVX")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_N():w:dq:u16 REG1=XMM_B():r:dq:u16 IMM0:r:b # NDD")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1921,7 +1921,7 @@
     (iclass "VPSUBB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1930,7 +1930,7 @@
     (iclass "VPSUBD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 REG1=XMM_N():r:dq:i32 MEM0:r:dq:i32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1939,7 +1939,7 @@
     (iclass "VPSUBQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64 REG1=XMM_N():r:dq:i64 MEM0:r:dq:i64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1948,7 +1948,7 @@
     (iclass "VPSUBSB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i8 REG1=XMM_N():r:dq:i8 MEM0:r:dq:i8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1957,7 +1957,7 @@
     (iclass "VPSUBSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1966,7 +1966,7 @@
     (iclass "VPSUBUSB")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1975,7 +1975,7 @@
     (iclass "VPSUBUSW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1984,7 +1984,7 @@
     (iclass "VPSUBW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16 REG1=XMM_N():r:dq:i16 MEM0:r:dq:i16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -1993,7 +1993,7 @@
     (iclass "VPTEST")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq MEM0:r:dq")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2002,7 +2002,7 @@
     (iclass "VPUNPCKHBW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2011,7 +2011,7 @@
     (iclass "VPUNPCKHDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32 REG1=XMM_N():r:dq:u32 MEM0:r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2020,7 +2020,7 @@
     (iclass "VPUNPCKHQDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=XMM_N():r:dq:u64 MEM0:r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2029,7 +2029,7 @@
     (iclass "VPUNPCKHWD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2038,7 +2038,7 @@
     (iclass "VPUNPCKLBW")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u8 REG1=XMM_N():r:dq:u8 MEM0:r:dq:u8")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2047,7 +2047,7 @@
     (iclass "VPUNPCKLDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32 REG1=XMM_N():r:dq:u32 MEM0:r:dq:u32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2056,7 +2056,7 @@
     (iclass "VPUNPCKLQDQ")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=XMM_N():r:dq:u64 MEM0:r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2065,7 +2065,7 @@
     (iclass "VPUNPCKLWD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 REG1=XMM_N():r:dq:u16 MEM0:r:dq:u16")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2074,7 +2074,7 @@
     (iclass "VPXOR")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u128 REG1=XMM_N():r:dq:u128 MEM0:r:dq:u128")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2083,7 +2083,7 @@
     (iclass "VRCPPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32  MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2092,7 +2092,7 @@
     (iclass "VRCPSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2101,7 +2101,7 @@
     (iclass "VROUNDPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64  MEM0:r:dq:f64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2110,7 +2110,7 @@
     (iclass "VROUNDPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32  MEM0:r:dq:f32 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2119,7 +2119,7 @@
     (iclass "VROUNDSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64  REG1=XMM_N():r:dq:f64  MEM0:r:q:f64         IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2128,7 +2128,7 @@
     (iclass "VROUNDSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32  REG1=XMM_N():r:dq:f32  MEM0:r:d:f32         IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2137,7 +2137,7 @@
     (iclass "VRSQRTPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32  MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2146,7 +2146,7 @@
     (iclass "VRSQRTSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2155,7 +2155,7 @@
     (iclass "VSHUFPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2164,7 +2164,7 @@
     (iclass "VSHUFPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32 IMM0:r:b")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2173,7 +2173,7 @@
     (iclass "VSQRTPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2182,7 +2182,7 @@
     (iclass "VSQRTPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32  MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2191,7 +2191,7 @@
     (iclass "VSQRTSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2200,7 +2200,7 @@
     (iclass "VSQRTSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2209,7 +2209,7 @@
     (iclass "VSTMXCSR")
     (category "AVX")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:d REG0=XED_REG_MXCSR:r:SUPP")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2218,7 +2218,7 @@
     (iclass "VSUBPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2227,7 +2227,7 @@
     (iclass "VSUBPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2236,7 +2236,7 @@
     (iclass "VSUBSD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2245,7 +2245,7 @@
     (iclass "VSUBSS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2254,7 +2254,7 @@
     (iclass "VTESTPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2263,7 +2263,7 @@
     (iclass "VTESTPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2272,7 +2272,7 @@
     (iclass "VUCOMISD")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq:f64  MEM0:r:q:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2281,7 +2281,7 @@
     (iclass "VUCOMISS")
     (category "AVX")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq:f32  MEM0:r:d:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2290,7 +2290,7 @@
     (iclass "VUNPCKHPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2299,7 +2299,7 @@
     (iclass "VUNPCKHPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2308,7 +2308,7 @@
     (iclass "VUNPCKLPD")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2317,7 +2317,7 @@
     (iclass "VUNPCKLPS")
     (category "AVX")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2326,7 +2326,7 @@
     (iclass "VXORPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=XMM_N():r:dq:u64 MEM0:r:dq:u64")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2335,7 +2335,7 @@
     (iclass "VXORPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq REG1=XMM_N():r:dq MEM0:r:dq")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2344,7 +2344,7 @@
     (iclass "VZEROALL")
     (category "AVX")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2353,7 +2353,7 @@
     (iclass "VZEROUPPER")
     (category "AVX")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "avx/avx-isa.txt"))
   (form
@@ -2362,7 +2362,7 @@
     (iclass "VBROADCASTI128")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=YMM_R():w:qq:u128  MEM0:r:dq:u128 EMX_BROADCAST_2TO4_64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2371,7 +2371,7 @@
     (iclass "VBROADCASTSD")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=YMM_R():w:qq:f64  REG1=XMM_B():r:dq:f64 EMX_BROADCAST_1TO4_64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2380,7 +2380,7 @@
     (iclass "VBROADCASTSS")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:f32  REG1=XMM_B():r:dq:f32 EMX_BROADCAST_1TO4_32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2389,7 +2389,7 @@
     (iclass "VEXTRACTI128")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:dq:u128 REG0=YMM_R():r:qq:u128  IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2398,7 +2398,7 @@
     (iclass "VINSERTI128")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u128 REG1=YMM_N():r:qq:u128 MEM0:r:dq:u128 IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2407,7 +2407,7 @@
     (iclass "VMOVNTDQA")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=YMM_R():w:qq MEM0:r:qq")
     (source-file "avx2-fma/movnt-load-isa.txt"))
   (form
@@ -2416,7 +2416,7 @@
     (iclass "VMPSADBW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8 IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2425,7 +2425,7 @@
     (iclass "VPABSB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2434,7 +2434,7 @@
     (iclass "VPABSD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2443,7 +2443,7 @@
     (iclass "VPABSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2452,7 +2452,7 @@
     (iclass "VPACKSSDW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2461,7 +2461,7 @@
     (iclass "VPACKSSWB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2470,7 +2470,7 @@
     (iclass "VPACKUSDW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2479,7 +2479,7 @@
     (iclass "VPACKUSWB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2488,7 +2488,7 @@
     (iclass "VPADDB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2497,7 +2497,7 @@
     (iclass "VPADDD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2506,7 +2506,7 @@
     (iclass "VPADDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i64 REG1=YMM_N():r:qq:i64 MEM0:r:qq:i64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2515,7 +2515,7 @@
     (iclass "VPADDSB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2524,7 +2524,7 @@
     (iclass "VPADDSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2533,7 +2533,7 @@
     (iclass "VPADDUSB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2542,7 +2542,7 @@
     (iclass "VPADDUSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2551,7 +2551,7 @@
     (iclass "VPADDW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2560,7 +2560,7 @@
     (iclass "VPALIGNR")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8 IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2569,7 +2569,7 @@
     (iclass "VPAND")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u256 REG1=YMM_N():r:qq:u256 MEM0:r:qq:u256")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2578,7 +2578,7 @@
     (iclass "VPANDN")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u256 REG1=YMM_N():r:qq:u256 MEM0:r:qq:u256")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2587,7 +2587,7 @@
     (iclass "VPAVGB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2596,7 +2596,7 @@
     (iclass "VPAVGW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2605,7 +2605,7 @@
     (iclass "VPBLENDD")
     (category "AVX2")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u32  REG1=XMM_N():r:dq:u32  MEM0:r:dq:u32         IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2614,7 +2614,7 @@
     (iclass "VPBLENDVB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8 REG2=YMM_SE():r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2623,7 +2623,7 @@
     (iclass "VPBLENDW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16 IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2632,7 +2632,7 @@
     (iclass "VPBROADCASTB")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u8 MEM0:r:b:u8 EMX_BROADCAST_1TO16_8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2641,7 +2641,7 @@
     (iclass "VPBROADCASTD")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u32 MEM0:r:d:u32 EMX_BROADCAST_1TO4_32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2650,7 +2650,7 @@
     (iclass "VPBROADCASTQ")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u64 MEM0:r:q:u64 EMX_BROADCAST_1TO2_64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2659,7 +2659,7 @@
     (iclass "VPBROADCASTW")
     (category "BROADCAST")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:u16 MEM0:r:w:u16 EMX_BROADCAST_1TO8_16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2668,7 +2668,7 @@
     (iclass "VPCMPEQB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2677,7 +2677,7 @@
     (iclass "VPCMPEQD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32 REG1=YMM_N():r:qq:u32 MEM0:r:qq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2686,7 +2686,7 @@
     (iclass "VPCMPEQQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u64 REG1=YMM_N():r:qq:u64 MEM0:r:qq:u64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2695,7 +2695,7 @@
     (iclass "VPCMPEQW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2704,7 +2704,7 @@
     (iclass "VPCMPGTB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2713,7 +2713,7 @@
     (iclass "VPCMPGTD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2722,7 +2722,7 @@
     (iclass "VPCMPGTQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i64 REG1=YMM_N():r:qq:i64 MEM0:r:qq:i64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2731,7 +2731,7 @@
     (iclass "VPCMPGTW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2740,7 +2740,7 @@
     (iclass "VPERM2I128")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u128  REG1=YMM_N():r:qq:u128  MEM0:r:qq:u128         IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2749,7 +2749,7 @@
     (iclass "VPERMD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32  REG1=YMM_N():r:qq:u32  MEM0:r:qq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2758,7 +2758,7 @@
     (iclass "VPERMPD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:f64 MEM0:r:qq:f64  IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2767,7 +2767,7 @@
     (iclass "VPERMPS")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:f32  REG1=YMM_N():r:qq:f32  MEM0:r:qq:f32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2776,7 +2776,7 @@
     (iclass "VPERMQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u64 MEM0:r:qq:u64  IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2785,7 +2785,7 @@
     (iclass "VPHADDD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2794,7 +2794,7 @@
     (iclass "VPHADDSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2803,7 +2803,7 @@
     (iclass "VPHADDW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2812,7 +2812,7 @@
     (iclass "VPHSUBD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2821,7 +2821,7 @@
     (iclass "VPHSUBSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2830,7 +2830,7 @@
     (iclass "VPHSUBW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2839,7 +2839,7 @@
     (iclass "VPMADDUBSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:u8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2848,7 +2848,7 @@
     (iclass "VPMADDWD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2857,7 +2857,7 @@
     (iclass "VPMASKMOVD")
     (category "AVX2")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:dq:u32  REG0=XMM_N():r:dq:u32  REG1=XMM_R():r:dq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2866,7 +2866,7 @@
     (iclass "VPMASKMOVQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:dq:u64  REG0=XMM_N():r:dq:u64  REG1=XMM_R():r:dq:u64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2875,7 +2875,7 @@
     (iclass "VPMAXSB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2884,7 +2884,7 @@
     (iclass "VPMAXSD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2893,7 +2893,7 @@
     (iclass "VPMAXSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2902,7 +2902,7 @@
     (iclass "VPMAXUB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2911,7 +2911,7 @@
     (iclass "VPMAXUD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32 REG1=YMM_N():r:qq:u32 MEM0:r:qq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2920,7 +2920,7 @@
     (iclass "VPMAXUW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2929,7 +2929,7 @@
     (iclass "VPMINSB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2938,7 +2938,7 @@
     (iclass "VPMINSD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2947,7 +2947,7 @@
     (iclass "VPMINSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2956,7 +2956,7 @@
     (iclass "VPMINUB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2965,7 +2965,7 @@
     (iclass "VPMINUD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32 REG1=YMM_N():r:qq:u32 MEM0:r:qq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2974,7 +2974,7 @@
     (iclass "VPMINUW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2983,7 +2983,7 @@
     (iclass "VPMOVMSKB")
     (category "AVX2")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=VGPR32_R():w:d:u32   REG1=YMM_B():r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -2992,7 +2992,7 @@
     (iclass "VPMOVSXBD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32   REG1=XMM_B():r:q:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3001,7 +3001,7 @@
     (iclass "VPMOVSXBQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i64   REG1=XMM_B():r:d:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3010,7 +3010,7 @@
     (iclass "VPMOVSXBW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16   REG1=XMM_B():r:dq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3019,7 +3019,7 @@
     (iclass "VPMOVSXDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i64   REG1=XMM_B():r:dq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3028,7 +3028,7 @@
     (iclass "VPMOVSXWD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32   REG1=XMM_B():r:dq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3037,7 +3037,7 @@
     (iclass "VPMOVSXWQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i64   REG1=XMM_B():r:q:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3046,7 +3046,7 @@
     (iclass "VPMOVZXBD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32   REG1=XMM_B():r:q:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3055,7 +3055,7 @@
     (iclass "VPMOVZXBQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u64  REG1=XMM_B():r:d:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3064,7 +3064,7 @@
     (iclass "VPMOVZXBW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16   REG1=XMM_B():r:dq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3073,7 +3073,7 @@
     (iclass "VPMOVZXDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u64   REG1=XMM_B():r:dq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3082,7 +3082,7 @@
     (iclass "VPMOVZXWD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32   REG1=XMM_B():r:dq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3091,7 +3091,7 @@
     (iclass "VPMOVZXWQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u64   REG1=XMM_B():r:q:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3100,7 +3100,7 @@
     (iclass "VPMULDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i64 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3109,7 +3109,7 @@
     (iclass "VPMULHRSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3118,7 +3118,7 @@
     (iclass "VPMULHUW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3127,7 +3127,7 @@
     (iclass "VPMULHW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3136,7 +3136,7 @@
     (iclass "VPMULLD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3145,7 +3145,7 @@
     (iclass "VPMULLW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3154,7 +3154,7 @@
     (iclass "VPMULUDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u64 REG1=YMM_N():r:qq:u32 MEM0:r:qq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3163,7 +3163,7 @@
     (iclass "VPOR")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u256 REG1=YMM_N():r:qq:u256 MEM0:r:qq:u256")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3172,7 +3172,7 @@
     (iclass "VPSADBW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3181,7 +3181,7 @@
     (iclass "VPSHUFB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3190,7 +3190,7 @@
     (iclass "VPSHUFD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32 MEM0:r:qq:u32  IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3199,7 +3199,7 @@
     (iclass "VPSHUFHW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 MEM0:r:qq:u16  IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3208,7 +3208,7 @@
     (iclass "VPSHUFLW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 MEM0:r:qq:u16  IMM0:r:b")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3217,7 +3217,7 @@
     (iclass "VPSIGNB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3226,7 +3226,7 @@
     (iclass "VPSIGND")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3235,7 +3235,7 @@
     (iclass "VPSIGNW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3244,7 +3244,7 @@
     (iclass "VPSLLD")
     (category "AVX2")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=YMM_N():w:qq:u32 REG1=YMM_B():r:qq:u32 IMM0:r:b  #NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3253,7 +3253,7 @@
     (iclass "VPSLLDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=YMM_N():w:qq:u128 REG1=YMM_B():r:qq:u128 IMM0:r:b   # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3262,7 +3262,7 @@
     (iclass "VPSLLQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=YMM_N():w:qq:u64 REG1=YMM_B():r:qq:u64 IMM0:r:b # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3271,7 +3271,7 @@
     (iclass "VPSLLVD")
     (category "AVX2")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq REG1=XMM_N():r:dq MEM0:r:dq")
     (source-file "avx2-fma/hsw-vshift-isa.txt"))
   (form
@@ -3280,7 +3280,7 @@
     (iclass "VPSLLVQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq REG1=XMM_N():r:dq MEM0:r:dq")
     (source-file "avx2-fma/hsw-vshift-isa.txt"))
   (form
@@ -3289,7 +3289,7 @@
     (iclass "VPSLLW")
     (category "AVX2")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=YMM_N():w:qq:u16 REG1=YMM_B():r:qq:u16 IMM0:r:b # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3298,7 +3298,7 @@
     (iclass "VPSRAD")
     (category "AVX2")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=YMM_N():w:qq:i32 REG1=YMM_B():r:qq:i32 IMM0:r:b # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3307,7 +3307,7 @@
     (iclass "VPSRAVD")
     (category "AVX2")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq REG1=XMM_N():r:dq MEM0:r:dq")
     (source-file "avx2-fma/hsw-vshift-isa.txt"))
   (form
@@ -3316,7 +3316,7 @@
     (iclass "VPSRAW")
     (category "AVX2")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=YMM_N():w:qq:i16 REG1=YMM_B():r:qq:i16 IMM0:r:b # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3325,7 +3325,7 @@
     (iclass "VPSRLD")
     (category "AVX2")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=YMM_N():w:qq:u32 REG1=YMM_B():r:qq:u32 IMM0:r:b # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3334,7 +3334,7 @@
     (iclass "VPSRLDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=YMM_N():w:qq:u128 REG1=YMM_B():r:qq:u128 IMM0:r:b   # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3343,7 +3343,7 @@
     (iclass "VPSRLQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=YMM_N():w:qq:u64 REG1=YMM_B():r:qq:u64 IMM0:r:b  # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3352,7 +3352,7 @@
     (iclass "VPSRLVD")
     (category "AVX2")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq REG1=XMM_N():r:dq MEM0:r:dq")
     (source-file "avx2-fma/hsw-vshift-isa.txt"))
   (form
@@ -3361,7 +3361,7 @@
     (iclass "VPSRLVQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq REG1=XMM_N():r:dq MEM0:r:dq")
     (source-file "avx2-fma/hsw-vshift-isa.txt"))
   (form
@@ -3370,7 +3370,7 @@
     (iclass "VPSRLW")
     (category "AVX2")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=YMM_N():w:qq:u16 REG1=YMM_B():r:qq:u16 IMM0:r:b # NDD")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3379,7 +3379,7 @@
     (iclass "VPSUBB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3388,7 +3388,7 @@
     (iclass "VPSUBD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i32 REG1=YMM_N():r:qq:i32 MEM0:r:qq:i32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3397,7 +3397,7 @@
     (iclass "VPSUBQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i64 REG1=YMM_N():r:qq:i64 MEM0:r:qq:i64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3406,7 +3406,7 @@
     (iclass "VPSUBSB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i8 REG1=YMM_N():r:qq:i8 MEM0:r:qq:i8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3415,7 +3415,7 @@
     (iclass "VPSUBSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3424,7 +3424,7 @@
     (iclass "VPSUBUSB")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3433,7 +3433,7 @@
     (iclass "VPSUBUSW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3442,7 +3442,7 @@
     (iclass "VPSUBW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:i16 REG1=YMM_N():r:qq:i16 MEM0:r:qq:i16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3451,7 +3451,7 @@
     (iclass "VPUNPCKHBW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3460,7 +3460,7 @@
     (iclass "VPUNPCKHDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32 REG1=YMM_N():r:qq:u32 MEM0:r:qq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3469,7 +3469,7 @@
     (iclass "VPUNPCKHQDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u64 REG1=YMM_N():r:qq:u64 MEM0:r:qq:u64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3478,7 +3478,7 @@
     (iclass "VPUNPCKHWD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3487,7 +3487,7 @@
     (iclass "VPUNPCKLBW")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u8 REG1=YMM_N():r:qq:u8 MEM0:r:qq:u8")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3496,7 +3496,7 @@
     (iclass "VPUNPCKLDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u32 REG1=YMM_N():r:qq:u32 MEM0:r:qq:u32")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3505,7 +3505,7 @@
     (iclass "VPUNPCKLQDQ")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u64 REG1=YMM_N():r:qq:u64 MEM0:r:qq:u64")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3514,7 +3514,7 @@
     (iclass "VPUNPCKLWD")
     (category "AVX2")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u16 REG1=YMM_N():r:qq:u16 MEM0:r:qq:u16")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3523,7 +3523,7 @@
     (iclass "VPXOR")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=YMM_R():w:qq:u256 REG1=YMM_N():r:qq:u256 MEM0:r:qq:u256")
     (source-file "avx2-fma/hsw-int256-isa.txt"))
   (form
@@ -3532,7 +3532,7 @@
     (iclass "ANDN")
     (category "BMI1")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d REG1=VGPR32_N():r:d MEM0:r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3541,7 +3541,7 @@
     (iclass "BEXTR")
     (category "BMI1")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d MEM0:r:d REG1=VGPR32_N():r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3550,7 +3550,7 @@
     (iclass "BLSI")
     (category "BMI1")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_N():w:d MEM0:r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3559,7 +3559,7 @@
     (iclass "BLSMSK")
     (category "BMI1")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_N():w:d MEM0:r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3568,7 +3568,7 @@
     (iclass "BLSR")
     (category "BMI1")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_N():w:d MEM0:r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3577,7 +3577,7 @@
     (iclass "BZHI")
     (category "BMI2")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d MEM0:r:d REG1=VGPR32_N():r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3586,7 +3586,7 @@
     (iclass "MULX")
     (category "BMI2")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d REG1=VGPR32_N():w:d REG2=VGPR32_B():r:d REG3=XED_REG_EDX:r:SUPP")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3595,7 +3595,7 @@
     (iclass "PDEP")
     (category "BMI2")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d REG1=VGPR32_N():r:d MEM0:r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3604,7 +3604,7 @@
     (iclass "PEXT")
     (category "BMI2")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d REG1=VGPR32_N():r:d MEM0:r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3613,7 +3613,7 @@
     (iclass "RORX")
     (category "BMI2")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d REG1=VGPR32_B():r:d IMM0:r:b")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3622,7 +3622,7 @@
     (iclass "SARX")
     (category "BMI2")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d MEM0:r:d REG1=VGPR32_N():r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3631,7 +3631,7 @@
     (iclass "SHLX")
     (category "BMI2")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d MEM0:r:d REG1=VGPR32_N():r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3640,7 +3640,7 @@
     (iclass "SHRX")
     (category "BMI2")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=VGPR32_R():w:d MEM0:r:d REG1=VGPR32_N():r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
   (form
@@ -3649,7 +3649,7 @@
     (iclass "CLFLUSHOPT")
     (category "CLFLUSHOPT")
     (isa-set "CLFLUSHOPT")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mprefetch")
     (source-file "clflushopt/clflushopt.xed.txt"))
   (form
@@ -3658,7 +3658,7 @@
     (iclass "VCVTPH2PS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq:f32 MEM0:r:q:f16")
     (source-file "f16c/fp16-isa.txt"))
   (form
@@ -3667,7 +3667,7 @@
     (iclass "VCVTPS2PH")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:q:f16 REG0=XMM_R():r:dq:f32  IMM0:r:b")
     (source-file "f16c/fp16-isa.txt"))
   (form
@@ -3676,7 +3676,7 @@
     (iclass "VFMADD132PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3685,7 +3685,7 @@
     (iclass "VFMADD132PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3694,7 +3694,7 @@
     (iclass "VFMADD132SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64 MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3703,7 +3703,7 @@
     (iclass "VFMADD132SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32 MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3712,7 +3712,7 @@
     (iclass "VFMADD213PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64    MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3721,7 +3721,7 @@
     (iclass "VFMADD213PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3730,7 +3730,7 @@
     (iclass "VFMADD213SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64     MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3739,7 +3739,7 @@
     (iclass "VFMADD213SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32     MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3748,7 +3748,7 @@
     (iclass "VFMADD231PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3757,7 +3757,7 @@
     (iclass "VFMADD231PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3766,7 +3766,7 @@
     (iclass "VFMADD231SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64 MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3775,7 +3775,7 @@
     (iclass "VFMADD231SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32 MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3784,7 +3784,7 @@
     (iclass "VFMADDSUB132PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3793,7 +3793,7 @@
     (iclass "VFMADDSUB132PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3802,7 +3802,7 @@
     (iclass "VFMADDSUB213PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64    MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3811,7 +3811,7 @@
     (iclass "VFMADDSUB213PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3820,7 +3820,7 @@
     (iclass "VFMADDSUB231PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3829,7 +3829,7 @@
     (iclass "VFMADDSUB231PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3838,7 +3838,7 @@
     (iclass "VFMSUB132PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3847,7 +3847,7 @@
     (iclass "VFMSUB132PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3856,7 +3856,7 @@
     (iclass "VFMSUB132SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64 MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3865,7 +3865,7 @@
     (iclass "VFMSUB132SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32 MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3874,7 +3874,7 @@
     (iclass "VFMSUB213PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64    MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3883,7 +3883,7 @@
     (iclass "VFMSUB213PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3892,7 +3892,7 @@
     (iclass "VFMSUB213SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64     MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3901,7 +3901,7 @@
     (iclass "VFMSUB213SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32     MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3910,7 +3910,7 @@
     (iclass "VFMSUB231PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3919,7 +3919,7 @@
     (iclass "VFMSUB231PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3928,7 +3928,7 @@
     (iclass "VFMSUB231SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64 MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3937,7 +3937,7 @@
     (iclass "VFMSUB231SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32 MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3946,7 +3946,7 @@
     (iclass "VFMSUBADD132PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3955,7 +3955,7 @@
     (iclass "VFMSUBADD132PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3964,7 +3964,7 @@
     (iclass "VFMSUBADD213PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64    MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3973,7 +3973,7 @@
     (iclass "VFMSUBADD213PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3982,7 +3982,7 @@
     (iclass "VFMSUBADD231PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -3991,7 +3991,7 @@
     (iclass "VFMSUBADD231PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4000,7 +4000,7 @@
     (iclass "VFNMADD132PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4009,7 +4009,7 @@
     (iclass "VFNMADD132PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4018,7 +4018,7 @@
     (iclass "VFNMADD132SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64 MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4027,7 +4027,7 @@
     (iclass "VFNMADD132SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32 MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4036,7 +4036,7 @@
     (iclass "VFNMADD213PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64    MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4045,7 +4045,7 @@
     (iclass "VFNMADD213PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4054,7 +4054,7 @@
     (iclass "VFNMADD213SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64     MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4063,7 +4063,7 @@
     (iclass "VFNMADD213SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32     MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4072,7 +4072,7 @@
     (iclass "VFNMADD231PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4081,7 +4081,7 @@
     (iclass "VFNMADD231PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4090,7 +4090,7 @@
     (iclass "VFNMADD231SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64 MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4099,7 +4099,7 @@
     (iclass "VFNMADD231SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32 MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4108,7 +4108,7 @@
     (iclass "VFNMSUB132PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4117,7 +4117,7 @@
     (iclass "VFNMSUB132PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4126,7 +4126,7 @@
     (iclass "VFNMSUB132SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64 MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4135,7 +4135,7 @@
     (iclass "VFNMSUB132SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32 MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4144,7 +4144,7 @@
     (iclass "VFNMSUB213PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64    MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4153,7 +4153,7 @@
     (iclass "VFNMSUB213PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4162,7 +4162,7 @@
     (iclass "VFNMSUB213SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64     MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4171,7 +4171,7 @@
     (iclass "VFNMSUB213SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32     MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4180,7 +4180,7 @@
     (iclass "VFNMSUB231PD")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:dq:f64 MEM0:r:dq:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4189,7 +4189,7 @@
     (iclass "VFNMSUB231PS")
     (category "VFMA")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:dq:f32 MEM0:r:dq:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4198,7 +4198,7 @@
     (iclass "VFNMSUB231SD")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 REG1=XMM_N():r:q:f64 MEM0:r:q:f64")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4207,7 +4207,7 @@
     (iclass "VFNMSUB231SS")
     (category "VFMA")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 REG1=XMM_N():r:d:f32 MEM0:r:d:f32")
     (source-file "avx2-fma/avx-fma-isa.xed.txt"))
   (form
@@ -4216,7 +4216,7 @@
     (iclass "EMMS")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4225,7 +4225,7 @@
     (iclass "MASKMOVQ")
     (category "DATAXFER")
     (isa-set "PENTIUMMMX")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=MMX_R():r:q:u8 REG1=MMX_B():r:q:i8 MEM0:w:q:SUPP BASE0=ArDI():r:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4234,7 +4234,7 @@
     (iclass "MOVD")
     (category "DATAXFER")
     (isa-set "PENTIUMMMX")
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=MMX_R():w:q MEM0:r:d")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4243,7 +4243,7 @@
     (iclass "MOVNTQ")
     (category "DATAXFER")
     (isa-set "PENTIUMMMX")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:q REG0=MMX_R():r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4252,7 +4252,7 @@
     (iclass "MOVQ")
     (category "DATAXFER")
     (isa-set "PENTIUMMMX")
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=MMX_R():w:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4261,7 +4261,7 @@
     (iclass "PACKSSDW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i32 MEM0:r:q:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4270,7 +4270,7 @@
     (iclass "PACKSSWB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i16 MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4279,7 +4279,7 @@
     (iclass "PACKUSWB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i16 MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4288,7 +4288,7 @@
     (iclass "PADDB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4297,7 +4297,7 @@
     (iclass "PADDD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4306,7 +4306,7 @@
     (iclass "PADDQ")
     (category "MMX")
     (isa-set "SSE2MMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:u64 MEM0:r:q:u64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4315,7 +4315,7 @@
     (iclass "PADDSB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4324,7 +4324,7 @@
     (iclass "PADDSW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4333,7 +4333,7 @@
     (iclass "PADDUSB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4342,7 +4342,7 @@
     (iclass "PADDUSW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4351,7 +4351,7 @@
     (iclass "PADDW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4360,7 +4360,7 @@
     (iclass "PAND")
     (category "LOGICAL")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4369,7 +4369,7 @@
     (iclass "PANDN")
     (category "LOGICAL")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4378,7 +4378,7 @@
     (iclass "PAVGB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4387,7 +4387,7 @@
     (iclass "PAVGW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i16 MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4396,7 +4396,7 @@
     (iclass "PCMPEQB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i8 MEM0:r:q:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4405,7 +4405,7 @@
     (iclass "PCMPEQD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i32 MEM0:r:q:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4414,7 +4414,7 @@
     (iclass "PCMPEQW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i16 MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4423,7 +4423,7 @@
     (iclass "PCMPGTB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i8 MEM0:r:q:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4432,7 +4432,7 @@
     (iclass "PCMPGTD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i32 MEM0:r:q:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4441,7 +4441,7 @@
     (iclass "PCMPGTW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i16 MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4450,7 +4450,7 @@
     (iclass "PEXTRW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPR32_R():w REG1=MMX_B():r:q:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4459,7 +4459,7 @@
     (iclass "PINSRW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:u16 MEM0:r:w:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4468,7 +4468,7 @@
     (iclass "PMADDWD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i16 MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4477,7 +4477,7 @@
     (iclass "PMAXSW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4486,7 +4486,7 @@
     (iclass "PMAXUB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4495,7 +4495,7 @@
     (iclass "PMINSW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4504,7 +4504,7 @@
     (iclass "PMINUB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4513,7 +4513,7 @@
     (iclass "PMULHW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i16 MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4522,7 +4522,7 @@
     (iclass "PMULLW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:i16 MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4531,7 +4531,7 @@
     (iclass "POR")
     (category "LOGICAL")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4540,7 +4540,7 @@
     (iclass "PSADBW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4549,7 +4549,7 @@
     (iclass "PSHUFW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():w:q:u16 MEM0:r:q:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4558,7 +4558,7 @@
     (iclass "PSLLD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=MMX_B():rw:q:u32 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4567,7 +4567,7 @@
     (iclass "PSLLQ")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=MMX_B():rw:q:u64 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4576,7 +4576,7 @@
     (iclass "PSLLW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=MMX_B():rw:q:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4585,7 +4585,7 @@
     (iclass "PSRAD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=MMX_B():rw:q:i32 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4594,7 +4594,7 @@
     (iclass "PSRAW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=MMX_B():rw:q:i16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4603,7 +4603,7 @@
     (iclass "PSRLD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=MMX_B():rw:q:u32 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4612,7 +4612,7 @@
     (iclass "PSRLQ")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=MMX_B():rw:q:u64 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4621,7 +4621,7 @@
     (iclass "PSRLW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=MMX_B():rw:q:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4630,7 +4630,7 @@
     (iclass "PSUBB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4639,7 +4639,7 @@
     (iclass "PSUBD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4648,7 +4648,7 @@
     (iclass "PSUBSB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4657,7 +4657,7 @@
     (iclass "PSUBSW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4666,7 +4666,7 @@
     (iclass "PSUBUSB")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4675,7 +4675,7 @@
     (iclass "PSUBUSW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4684,7 +4684,7 @@
     (iclass "PSUBW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4693,7 +4693,7 @@
     (iclass "PUNPCKHBW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4702,7 +4702,7 @@
     (iclass "PUNPCKHDQ")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4711,7 +4711,7 @@
     (iclass "PUNPCKHWD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4720,7 +4720,7 @@
     (iclass "PUNPCKLBW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:u8 MEM0:r:d:u8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4729,7 +4729,7 @@
     (iclass "PUNPCKLDQ")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:u32 MEM0:r:d:u32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4738,7 +4738,7 @@
     (iclass "PUNPCKLWD")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:u16 MEM0:r:d:u16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4747,7 +4747,7 @@
     (iclass "PXOR")
     (category "LOGICAL")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4756,7 +4756,7 @@
     (iclass "BNDCL")
     (category "MPX")
     (isa-set "MPX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=BND_R():r AGEN:r")
     (source-file "mpx/mpx-isa.txt"))
   (form
@@ -4765,7 +4765,7 @@
     (iclass "BNDCN")
     (category "MPX")
     (isa-set "MPX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=BND_R():r AGEN:r")
     (source-file "mpx/mpx-isa.txt"))
   (form
@@ -4774,7 +4774,7 @@
     (iclass "BNDCU")
     (category "MPX")
     (isa-set "MPX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=BND_R():r AGEN:r")
     (source-file "mpx/mpx-isa.txt"))
   (form
@@ -4783,7 +4783,7 @@
     (iclass "BNDLDX")
     (category "MPX")
     (isa-set "MPX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=BND_R():w MEM0:r:bnd32")
     (source-file "mpx/mpx-isa.txt"))
   (form
@@ -4792,7 +4792,7 @@
     (iclass "BNDMK")
     (category "MPX")
     (isa-set "MPX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=BND_R():w  AGEN:r")
     (source-file "mpx/mpx-isa.txt"))
   (form
@@ -4801,7 +4801,7 @@
     (iclass "BNDMOV")
     (category "MPX")
     (isa-set "MPX")
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=BND_B():w   REG1=BND_R():r")
     (source-file "mpx/mpx-isa.txt"))
   (form
@@ -4810,7 +4810,7 @@
     (iclass "BNDSTX")
     (category "MPX")
     (isa-set "MPX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:bnd32 REG0=BND_R():r")
     (source-file "mpx/mpx-isa.txt"))
   (form
@@ -4819,7 +4819,7 @@
     (iclass "PCLMULQDQ")
     (category "PCLMULQDQ")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq  REG1=XMM_B():r:dq IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4828,7 +4828,7 @@
     (iclass "RDRAND")
     (category "RDRAND")
     (isa-set "RDRAND")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRv_B():w")
     (source-file "rdrand/rdrand-isa.xed.txt"))
   (form
@@ -4837,7 +4837,7 @@
     (iclass "RDSEED")
     (category "RDSEED")
     (isa-set "RDSEED")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRv_B():w")
     (source-file "rdseed/rdseed-isa.xed.txt"))
   (form
@@ -4846,7 +4846,7 @@
     (iclass "ENCLS")
     (category "SGX")
     (isa-set "SGX")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EAX:r:SUPP    \\")
     (source-file "sgx/sgx-isa.xed.txt"))
   (form
@@ -4855,7 +4855,7 @@
     (iclass "ENCLU")
     (category "SGX")
     (isa-set "SGX")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EAX:r:SUPP    \\")
     (source-file "sgx/sgx-isa.xed.txt"))
   (form
@@ -4864,7 +4864,7 @@
     (iclass "ADDPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4873,7 +4873,7 @@
     (iclass "ADDSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4882,7 +4882,7 @@
     (iclass "ANDNPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:xud MEM0:r:xud")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4891,7 +4891,7 @@
     (iclass "ANDPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:xud MEM0:r:xud")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4900,7 +4900,7 @@
     (iclass "CMPPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4909,7 +4909,7 @@
     (iclass "CMPSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4918,7 +4918,7 @@
     (iclass "COMISS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4927,7 +4927,7 @@
     (iclass "CVTPI2PS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:q:f32 MEM0:r:q:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4936,7 +4936,7 @@
     (iclass "CVTPS2PI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():w:q:i32 MEM0:r:q:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4945,7 +4945,7 @@
     (iclass "CVTSI2SS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:ss:f32 MEM0:r:d:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4954,7 +4954,7 @@
     (iclass "CVTSS2SI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=GPR32_R():w:d:i32 MEM0:r:ss:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4963,7 +4963,7 @@
     (iclass "CVTTPS2PI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():w:q:i32 MEM0:r:q:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4972,7 +4972,7 @@
     (iclass "CVTTSS2SI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=GPR32_R():w:d:i32 MEM0:r:ss:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4981,7 +4981,7 @@
     (iclass "DIVPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4990,7 +4990,7 @@
     (iclass "DIVSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -4999,7 +4999,7 @@
     (iclass "FXRSTOR")
     (category "SSE")
     (isa-set "FXSAVE")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mfpxenv REG0=XED_REG_X87CONTROL:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5008,7 +5008,7 @@
     (iclass "FXRSTOR64")
     (category "SSE")
     (isa-set "FXSAVE64")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mfpxenv REG0=XED_REG_X87CONTROL:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5017,7 +5017,7 @@
     (iclass "FXSAVE")
     (category "SSE")
     (isa-set "FXSAVE")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:mfpxenv REG0=XED_REG_X87CONTROL:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5026,7 +5026,7 @@
     (iclass "FXSAVE64")
     (category "SSE")
     (isa-set "FXSAVE64")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:mfpxenv REG0=XED_REG_X87CONTROL:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5035,7 +5035,7 @@
     (iclass "LDMXCSR")
     (category "SSE")
     (isa-set "SSEMXCSR")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:d REG0=XED_REG_MXCSR:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5044,7 +5044,7 @@
     (iclass "MAXPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5053,7 +5053,7 @@
     (iclass "MAXSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5062,7 +5062,7 @@
     (iclass "MINPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5071,7 +5071,7 @@
     (iclass "MINSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5080,7 +5080,7 @@
     (iclass "MOVAPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5089,7 +5089,7 @@
     (iclass "MOVHLPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():rw:q:f32 REG1=XMM_B():r:q:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5098,7 +5098,7 @@
     (iclass "MOVHPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:q:f32 REG0=XMM_R():r:ps:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5107,7 +5107,7 @@
     (iclass "MOVLHPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():rw:q:f32 REG1=XMM_B():r:q:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5116,7 +5116,7 @@
     (iclass "MOVLPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:q:f32 REG0=XMM_R():r:q:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5125,7 +5125,7 @@
     (iclass "MOVMSKPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPR32_R():w REG1=XMM_B():r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5134,7 +5134,7 @@
     (iclass "MOVNTPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:dq REG0=XMM_R():r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5143,7 +5143,7 @@
     (iclass "MOVSS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:ss REG0=XMM_R():r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5152,7 +5152,7 @@
     (iclass "MOVUPS")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5161,7 +5161,7 @@
     (iclass "MULPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5170,7 +5170,7 @@
     (iclass "MULSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5179,7 +5179,7 @@
     (iclass "ORPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:xud MEM0:r:xud")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5188,7 +5188,7 @@
     (iclass "PMOVMSKB")
     (category "MMX")
     (isa-set "SSE")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPR32_R():w REG1=MMX_B():r:q:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5197,7 +5197,7 @@
     (iclass "PMULHUW")
     (category "MMX")
     (isa-set "PENTIUMMMX")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():rw:q:u16 MEM0:r:q:u16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5206,7 +5206,7 @@
     (iclass "PREFETCHNTA")
     (category "PREFETCH")
     (isa-set "SSE_PREFETCH")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mprefetch")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5215,7 +5215,7 @@
     (iclass "PREFETCHT0")
     (category "PREFETCH")
     (isa-set "SSE_PREFETCH")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mprefetch")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5224,7 +5224,7 @@
     (iclass "PREFETCHT1")
     (category "PREFETCH")
     (isa-set "SSE_PREFETCH")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mprefetch")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5233,7 +5233,7 @@
     (iclass "PREFETCHT2")
     (category "PREFETCH")
     (isa-set "SSE_PREFETCH")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mprefetch")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5242,7 +5242,7 @@
     (iclass "RCPPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5251,7 +5251,7 @@
     (iclass "RCPSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5260,7 +5260,7 @@
     (iclass "RSQRTPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5269,7 +5269,7 @@
     (iclass "RSQRTSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5278,7 +5278,7 @@
     (iclass "SFENCE")
     (category "MISC")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5287,7 +5287,7 @@
     (iclass "SHUFPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5296,7 +5296,7 @@
     (iclass "SQRTPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5305,7 +5305,7 @@
     (iclass "SQRTSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5314,7 +5314,7 @@
     (iclass "STMXCSR")
     (category "SSE")
     (isa-set "SSEMXCSR")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:d REG0=XED_REG_MXCSR:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5323,7 +5323,7 @@
     (iclass "SUBPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5332,7 +5332,7 @@
     (iclass "SUBSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5341,7 +5341,7 @@
     (iclass "UCOMISS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:ss MEM0:r:ss")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5350,7 +5350,7 @@
     (iclass "UNPCKHPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5359,7 +5359,7 @@
     (iclass "UNPCKLPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5368,7 +5368,7 @@
     (iclass "XORPS")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:xud MEM0:r:xud")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5377,7 +5377,7 @@
     (iclass "ADDPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5386,7 +5386,7 @@
     (iclass "ADDSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5395,7 +5395,7 @@
     (iclass "ANDNPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:xuq MEM0:r:xuq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5404,7 +5404,7 @@
     (iclass "ANDPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:xuq MEM0:r:xuq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5413,7 +5413,7 @@
     (iclass "CMPPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5422,7 +5422,7 @@
     (iclass "CMPSD_XMM")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:sd IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5431,7 +5431,7 @@
     (iclass "COMISD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5440,7 +5440,7 @@
     (iclass "CVTDQ2PD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:pd:f64 MEM0:r:q:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5449,7 +5449,7 @@
     (iclass "CVTDQ2PS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:ps:f32 MEM0:r:dq:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5458,7 +5458,7 @@
     (iclass "CVTPD2DQ")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 MEM0:r:pd:f64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5467,7 +5467,7 @@
     (iclass "CVTPD2PI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():w:q:i32 MEM0:r:pd:f64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5476,7 +5476,7 @@
     (iclass "CVTPD2PS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:ps:f32 MEM0:r:pd:f64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5485,7 +5485,7 @@
     (iclass "CVTPI2PD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:pd:f64 MEM0:r:q:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5494,7 +5494,7 @@
     (iclass "CVTPS2DQ")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 MEM0:r:ps:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5503,7 +5503,7 @@
     (iclass "CVTPS2PD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:pd:f64 MEM0:r:q:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5512,7 +5512,7 @@
     (iclass "CVTSD2SI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=GPR32_R():w:d:i32 MEM0:r:sd:f64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5521,7 +5521,7 @@
     (iclass "CVTSD2SS")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ss:f32 MEM0:r:sd:f64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5530,7 +5530,7 @@
     (iclass "CVTSI2SD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():rw:sd:f64 MEM0:r:d:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5539,7 +5539,7 @@
     (iclass "CVTSS2SD")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd:f64 MEM0:r:ss:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5548,7 +5548,7 @@
     (iclass "CVTTPD2DQ")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 MEM0:r:pd:f64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5557,7 +5557,7 @@
     (iclass "CVTTPD2PI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=MMX_R():w:q:i32 MEM0:r:pd:f64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5566,7 +5566,7 @@
     (iclass "CVTTPS2DQ")
     (category "CONVERT")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32 MEM0:r:ps:f32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5575,7 +5575,7 @@
     (iclass "CVTTSD2SI")
     (category "CONVERT")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=GPR32_R():w:d:i32 MEM0:r:sd:f64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5584,7 +5584,7 @@
     (iclass "DIVPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5593,7 +5593,7 @@
     (iclass "DIVSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5602,7 +5602,7 @@
     (iclass "LFENCE")
     (category "MISC")
     (isa-set "SSE2")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5611,7 +5611,7 @@
     (iclass "MASKMOVDQU")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():r:xub REG1=XMM_B():r:xub MEM0:w:SUPP:xub BASE0=ArDI():r:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5620,7 +5620,7 @@
     (iclass "MAXPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5629,7 +5629,7 @@
     (iclass "MAXSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5638,7 +5638,7 @@
     (iclass "MFENCE")
     (category "MISC")
     (isa-set "SSE2")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5647,7 +5647,7 @@
     (iclass "MINPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5656,7 +5656,7 @@
     (iclass "MINSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5665,7 +5665,7 @@
     (iclass "MOVAPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5674,7 +5674,7 @@
     (iclass "MOVD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "MEM0:w:d REG0=XMM_R():r:d")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5683,7 +5683,7 @@
     (iclass "MOVDQ2Q")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=MMX_R():w:q:u64 REG1=XMM_B():r:q:u64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5692,7 +5692,7 @@
     (iclass "MOVDQA")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:dq REG0=XMM_R():r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5701,7 +5701,7 @@
     (iclass "MOVDQU")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5710,7 +5710,7 @@
     (iclass "MOVHPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5719,7 +5719,7 @@
     (iclass "MOVLPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5728,7 +5728,7 @@
     (iclass "MOVMSKPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPR32_R():w REG1=XMM_B():r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5737,7 +5737,7 @@
     (iclass "MOVNTDQ")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:dq REG0=XMM_R():r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5746,7 +5746,7 @@
     (iclass "MOVNTI")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:d REG0=GPR32_R():r")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5755,7 +5755,7 @@
     (iclass "MOVNTPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:dq REG0=XMM_R():r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5764,7 +5764,7 @@
     (iclass "MOVQ")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "MEM0:w:q REG0=XMM_R():r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5773,7 +5773,7 @@
     (iclass "MOVQ2DQ")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():w:dq:u64 REG1=MMX_B():r:q:u64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5782,7 +5782,7 @@
     (iclass "MOVSD_XMM")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:sd REG0=XMM_R():r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5791,7 +5791,7 @@
     (iclass "MOVUPD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():w:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5800,7 +5800,7 @@
     (iclass "MULPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5809,7 +5809,7 @@
     (iclass "MULSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5818,7 +5818,7 @@
     (iclass "ORPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:xuq MEM0:r:xuq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5827,7 +5827,7 @@
     (iclass "PACKSSDW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i32 MEM0:r:dq:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5836,7 +5836,7 @@
     (iclass "PACKSSWB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i16 MEM0:r:dq:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5845,7 +5845,7 @@
     (iclass "PACKUSWB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i16 MEM0:r:dq:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5854,7 +5854,7 @@
     (iclass "PADDB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5863,7 +5863,7 @@
     (iclass "PADDD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5872,7 +5872,7 @@
     (iclass "PADDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5881,7 +5881,7 @@
     (iclass "PADDSB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5890,7 +5890,7 @@
     (iclass "PADDSW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5899,7 +5899,7 @@
     (iclass "PADDUSB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5908,7 +5908,7 @@
     (iclass "PADDUSW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5917,7 +5917,7 @@
     (iclass "PADDW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i16 MEM0:r:dq:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5926,7 +5926,7 @@
     (iclass "PAND")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5935,7 +5935,7 @@
     (iclass "PANDN")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5944,7 +5944,7 @@
     (iclass "PAVGB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:u8 MEM0:r:dq:u8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5953,7 +5953,7 @@
     (iclass "PAVGW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:u16 MEM0:r:dq:u16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5962,7 +5962,7 @@
     (iclass "PCMPEQB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i8 MEM0:r:dq:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5971,7 +5971,7 @@
     (iclass "PCMPEQD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i32 MEM0:r:dq:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5980,7 +5980,7 @@
     (iclass "PCMPEQW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i16 MEM0:r:dq:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5989,7 +5989,7 @@
     (iclass "PCMPGTB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i8 MEM0:r:dq:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -5998,7 +5998,7 @@
     (iclass "PCMPGTD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i32 MEM0:r:dq:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6007,7 +6007,7 @@
     (iclass "PCMPGTW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i16 MEM0:r:dq:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6016,7 +6016,7 @@
     (iclass "PEXTRW")
     (category "SSE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPR32_R():w REG1=XMM_B():r:dq IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6025,7 +6025,7 @@
     (iclass "PINSRW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:w IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6034,7 +6034,7 @@
     (iclass "PMADDWD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i16 MEM0:r:dq:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6043,7 +6043,7 @@
     (iclass "PMAXSW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6052,7 +6052,7 @@
     (iclass "PMAXUB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6061,7 +6061,7 @@
     (iclass "PMINSW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6070,7 +6070,7 @@
     (iclass "PMINUB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6079,7 +6079,7 @@
     (iclass "PMOVMSKB")
     (category "SSE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPR32_R():w REG1=XMM_B():r:dq:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6088,7 +6088,7 @@
     (iclass "PMULHUW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:u16 MEM0:r:dq:u16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6097,7 +6097,7 @@
     (iclass "PMULHW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i16 MEM0:r:dq:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6106,7 +6106,7 @@
     (iclass "PMULLW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6115,7 +6115,7 @@
     (iclass "PMULUDQ")
     (category "MMX/SSE")
     (isa-set "SSE2MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q:u32 MEM0:r:q:u32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6124,7 +6124,7 @@
     (iclass "POR")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6133,7 +6133,7 @@
     (iclass "PSADBW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6142,7 +6142,7 @@
     (iclass "PSHUFD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32 MEM0:r:dq:u32 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6151,7 +6151,7 @@
     (iclass "PSHUFHW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 MEM0:r:dq:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6160,7 +6160,7 @@
     (iclass "PSHUFLW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16 MEM0:r:dq:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6169,7 +6169,7 @@
     (iclass "PSLLD")
     (category "SSE")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_B():rw:dq:u32 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6178,7 +6178,7 @@
     (iclass "PSLLDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_B():rw:dq:u128 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6187,7 +6187,7 @@
     (iclass "PSLLQ")
     (category "SSE")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_B():rw:dq:u64 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6196,7 +6196,7 @@
     (iclass "PSLLW")
     (category "SSE")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_B():rw:dq:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6205,7 +6205,7 @@
     (iclass "PSRAD")
     (category "SSE")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_B():rw:dq:i32 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6214,7 +6214,7 @@
     (iclass "PSRAW")
     (category "SSE")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_B():rw:dq:i16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6223,7 +6223,7 @@
     (iclass "PSRLD")
     (category "SSE")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_B():rw:dq:u32 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6232,7 +6232,7 @@
     (iclass "PSRLDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_B():rw:dq:u128 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6241,7 +6241,7 @@
     (iclass "PSRLQ")
     (category "SSE")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_B():rw:dq:u64 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6250,7 +6250,7 @@
     (iclass "PSRLW")
     (category "SSE")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XMM_B():rw:dq:u16 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6259,7 +6259,7 @@
     (iclass "PSUBB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6268,7 +6268,7 @@
     (iclass "PSUBD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6277,7 +6277,7 @@
     (iclass "PSUBQ")
     (category "MMX/SSE")
     (isa-set "SSE2MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6286,7 +6286,7 @@
     (iclass "PSUBSB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6295,7 +6295,7 @@
     (iclass "PSUBSW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6304,7 +6304,7 @@
     (iclass "PSUBUSB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6313,7 +6313,7 @@
     (iclass "PSUBUSW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6322,7 +6322,7 @@
     (iclass "PSUBW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6331,7 +6331,7 @@
     (iclass "PUNPCKHBW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6340,7 +6340,7 @@
     (iclass "PUNPCKHDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6349,7 +6349,7 @@
     (iclass "PUNPCKHQDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6358,7 +6358,7 @@
     (iclass "PUNPCKHWD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6367,7 +6367,7 @@
     (iclass "PUNPCKLBW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6376,7 +6376,7 @@
     (iclass "PUNPCKLDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6385,7 +6385,7 @@
     (iclass "PUNPCKLQDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6394,7 +6394,7 @@
     (iclass "PUNPCKLWD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6403,7 +6403,7 @@
     (iclass "PXOR")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6412,7 +6412,7 @@
     (iclass "SHUFPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6421,7 +6421,7 @@
     (iclass "SQRTPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6430,7 +6430,7 @@
     (iclass "SQRTSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6439,7 +6439,7 @@
     (iclass "SUBPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6448,7 +6448,7 @@
     (iclass "SUBSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6457,7 +6457,7 @@
     (iclass "UCOMISD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:sd MEM0:r:sd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6466,7 +6466,7 @@
     (iclass "UNPCKHPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6475,7 +6475,7 @@
     (iclass "UNPCKLPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6484,7 +6484,7 @@
     (iclass "XORPD")
     (category "LOGICAL_FP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:xuq MEM0:r:xuq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6493,7 +6493,7 @@
     (iclass "ADDSUBPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6502,7 +6502,7 @@
     (iclass "ADDSUBPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6511,7 +6511,7 @@
     (iclass "FISTTP")
     (category "X87_ALU")
     (isa-set "SSE3X87")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:m64int REG0=XED_REG_ST0:r:IMPL:f80 REG1=XED_REG_X87POP:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6520,7 +6520,7 @@
     (iclass "HADDPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6529,7 +6529,7 @@
     (iclass "HADDPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6538,7 +6538,7 @@
     (iclass "HSUBPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:pd MEM0:r:pd")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6547,7 +6547,7 @@
     (iclass "HSUBPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6556,7 +6556,7 @@
     (iclass "LDDQU")
     (category "SSE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():w:pd MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6565,7 +6565,7 @@
     (iclass "MOVDDUP")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6574,7 +6574,7 @@
     (iclass "MOVSHDUP")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6583,7 +6583,7 @@
     (iclass "MOVSLDUP")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:ps MEM0:r:ps")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6592,7 +6592,7 @@
     (iclass "BLENDPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 MEM0:r:dq:f64 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6601,7 +6601,7 @@
     (iclass "BLENDPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 MEM0:r:dq:f32 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6610,7 +6610,7 @@
     (iclass "BLENDVPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 MEM0:r:dq:f64 REG1=XED_REG_XMM0:r:SUPP:dq:u64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6619,7 +6619,7 @@
     (iclass "BLENDVPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 MEM0:r:dq:f32 REG1=XED_REG_XMM0:r:SUPP:dq:u32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6628,7 +6628,7 @@
     (iclass "CRC32")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=GPRy_R():rw:y     MEM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6637,7 +6637,7 @@
     (iclass "DPPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f64 MEM0:r:dq:f64  IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6646,7 +6646,7 @@
     (iclass "DPPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:f32 MEM0:r:dq:f32  IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6655,7 +6655,7 @@
     (iclass "EXTRACTPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:d REG0=XMM_R():r:ps  IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6664,7 +6664,7 @@
     (iclass "INSERTPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:ps MEM0:r:d IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6673,7 +6673,7 @@
     (iclass "MOVNTDQA")
     (category "SSE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XMM_R():w:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6682,7 +6682,7 @@
     (iclass "MPSADBW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:u8 MEM0:r:dq:u8 IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6691,7 +6691,7 @@
     (iclass "PACKUSDW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq:i32 MEM0:r:dq:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6700,7 +6700,7 @@
     (iclass "PBLENDVB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq REG1=XED_REG_XMM0:r:dq:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6709,7 +6709,7 @@
     (iclass "PBLENDW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6718,7 +6718,7 @@
     (iclass "PCMPEQQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6727,7 +6727,7 @@
     (iclass "PCMPESTRI")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_EDX:r:SUPP REG3=XED_REG_ECX:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6736,7 +6736,7 @@
     (iclass "PCMPESTRI64")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_RAX:r:SUPP REG2=XED_REG_RDX:r:SUPP REG3=XED_REG_RCX:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6745,7 +6745,7 @@
     (iclass "PCMPESTRM")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_EDX:r:SUPP REG3=XED_REG_XMM0:w:dq:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6754,7 +6754,7 @@
     (iclass "PCMPESTRM64")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_RAX:r:SUPP REG2=XED_REG_RDX:r:SUPP REG3=XED_REG_XMM0:w:dq:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6763,7 +6763,7 @@
     (iclass "PCMPGTQ")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq     MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6772,7 +6772,7 @@
     (iclass "PCMPISTRI")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_ECX:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6781,7 +6781,7 @@
     (iclass "PCMPISTRI64")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_RCX:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6790,7 +6790,7 @@
     (iclass "PCMPISTRM")
     (category "SSE")
     (isa-set "SSE42")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq     MEM0:r:dq         IMM0:r:b REG1=XED_REG_XMM0:w:dq:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6799,7 +6799,7 @@
     (iclass "PEXTRB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b           REG0=XMM_R():r:dq IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6808,7 +6808,7 @@
     (iclass "PEXTRD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:d           REG0=XMM_R():r:dq IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6817,7 +6817,7 @@
     (iclass "PEXTRQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:q           REG0=XMM_R():r:dq IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6826,7 +6826,7 @@
     (iclass "PEXTRW_SSE4")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:w           REG0=XMM_R():r:dq IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6835,7 +6835,7 @@
     (iclass "PHMINPOSUW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq   MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6844,7 +6844,7 @@
     (iclass "PINSRB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:b            IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6853,7 +6853,7 @@
     (iclass "PINSRD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:d            IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6862,7 +6862,7 @@
     (iclass "PINSRQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq MEM0:r:q            IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6871,7 +6871,7 @@
     (iclass "PMAXSB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6880,7 +6880,7 @@
     (iclass "PMAXSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6889,7 +6889,7 @@
     (iclass "PMAXUD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6898,7 +6898,7 @@
     (iclass "PMAXUW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6907,7 +6907,7 @@
     (iclass "PMINSB")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6916,7 +6916,7 @@
     (iclass "PMINSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6925,7 +6925,7 @@
     (iclass "PMINUD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6934,7 +6934,7 @@
     (iclass "PMINUW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6943,7 +6943,7 @@
     (iclass "PMOVSXBD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32    MEM0:r:d:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6952,7 +6952,7 @@
     (iclass "PMOVSXBQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64    MEM0:r:w:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6961,7 +6961,7 @@
     (iclass "PMOVSXBW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i16    MEM0:r:q:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6970,7 +6970,7 @@
     (iclass "PMOVSXDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64    MEM0:r:q:i32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6979,7 +6979,7 @@
     (iclass "PMOVSXWD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i32    MEM0:r:q:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6988,7 +6988,7 @@
     (iclass "PMOVSXWQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:i64    MEM0:r:d:i16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -6997,7 +6997,7 @@
     (iclass "PMOVZXBD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32    MEM0:r:d:u8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7006,7 +7006,7 @@
     (iclass "PMOVZXBQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64    MEM0:r:w:u8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7015,7 +7015,7 @@
     (iclass "PMOVZXBW")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u16    MEM0:r:q:u8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7024,7 +7024,7 @@
     (iclass "PMOVZXDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64    MEM0:r:q:u32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7033,7 +7033,7 @@
     (iclass "PMOVZXWD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u32    MEM0:r:q:u16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7042,7 +7042,7 @@
     (iclass "PMOVZXWQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:dq:u64    MEM0:r:d:u16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7051,7 +7051,7 @@
     (iclass "PMULDQ")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7060,7 +7060,7 @@
     (iclass "PMULLD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:dq    MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7069,7 +7069,7 @@
     (iclass "POPCNT")
     (category "SSE")
     (isa-set "POPCNT")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():w:v     MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7078,7 +7078,7 @@
     (iclass "PTEST")
     (category "LOGICAL")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():r:dq   MEM0:r:dq")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7087,7 +7087,7 @@
     (iclass "ROUNDPD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:pd   MEM0:r:pd           IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7096,7 +7096,7 @@
     (iclass "ROUNDPS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():w:ps   MEM0:r:ps           IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7105,7 +7105,7 @@
     (iclass "ROUNDSD")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:q   MEM0:r:q           IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7114,7 +7114,7 @@
     (iclass "ROUNDSS")
     (category "SSE")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XMM_R():rw:d   MEM0:r:d           IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7123,7 +7123,7 @@
     (iclass "PABSB")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():w:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7132,7 +7132,7 @@
     (iclass "PABSD")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():w:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7141,7 +7141,7 @@
     (iclass "PABSW")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():w:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7150,7 +7150,7 @@
     (iclass "PALIGNR")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7159,7 +7159,7 @@
     (iclass "PHADDD")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7168,7 +7168,7 @@
     (iclass "PHADDSW")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7177,7 +7177,7 @@
     (iclass "PHADDW")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7186,7 +7186,7 @@
     (iclass "PHSUBD")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7195,7 +7195,7 @@
     (iclass "PHSUBSW")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7204,7 +7204,7 @@
     (iclass "PHSUBW")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7213,7 +7213,7 @@
     (iclass "PMADDUBSW")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q:i8 MEM0:r:q:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7222,7 +7222,7 @@
     (iclass "PMULHRSW")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7231,7 +7231,7 @@
     (iclass "PSHUFB")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7240,7 +7240,7 @@
     (iclass "PSIGNB")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7249,7 +7249,7 @@
     (iclass "PSIGND")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7258,7 +7258,7 @@
     (iclass "PSIGNW")
     (category "MMX/SSE")
     (isa-set "SSSE3MMX")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=MMX_R():rw:q MEM0:r:q")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7267,7 +7267,7 @@
     (iclass "CDQE")
     (category "CONVERT")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_RAX:w:SUPP REG1=XED_REG_EAX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7276,7 +7276,7 @@
     (iclass "CMPSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:SUPP:q BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:r:SUPP:q BASE1=ArDI():rw:SUPP SEG1=FINAL_ESEG1():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7285,7 +7285,7 @@
     (iclass "CMPXCHG16B")
     (category "SEMAPHORE")
     (isa-set "CMPXCHG16B")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:rcw:dq REG0=XED_REG_RDX:rcw:SUPP REG1=XED_REG_RAX:rcw:SUPP REG2=XED_REG_RCX:r:SUPP REG3=XED_REG_RBX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7294,7 +7294,7 @@
     (iclass "CMPXCHG16B_LOCK")
     (category "SEMAPHORE")
     (isa-set "CMPXCHG16B")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:rcw:dq REG0=XED_REG_RDX:rcw:SUPP REG1=XED_REG_RAX:rcw:SUPP REG2=XED_REG_RCX:r:SUPP REG3=XED_REG_RBX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7303,7 +7303,7 @@
     (iclass "CQO")
     (category "CONVERT")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_RDX:w:SUPP REG1=XED_REG_RAX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7312,7 +7312,7 @@
     (iclass "IRETQ")
     (category "RET")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_STACKPOP:rw:spw5:SUPP REG1=XED_REG_RIP:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7321,7 +7321,7 @@
     (iclass "LODSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_RAX:w:SUPP MEM0:r:SUPP:q BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7330,7 +7330,7 @@
     (iclass "MOVSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:SUPP:q BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP MEM1:r:SUPP:q BASE1=ArSI():rw:SUPP SEG1=FINAL_DSEG1():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7339,7 +7339,7 @@
     (iclass "MOVSXD")
     (category "DATAXFER")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=GPRv_R():w REG1=GPRz_B():r")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7348,7 +7348,7 @@
     (iclass "POPFQ")
     (category "POP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_STACKPOP:rw:q:SUPP REG1=XED_REG_RFLAGS:rw:SUPP:q:u64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7357,7 +7357,7 @@
     (iclass "PUSHFQ")
     (category "PUSH")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_STACKPUSH:rw:q:SUPP REG1=XED_REG_RFLAGS:r:SUPP:q:u64")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7366,7 +7366,7 @@
     (iclass "REPE_CMPSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:cr:SUPP:q BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:cr:SUPP:q BASE1=ArDI():rcw:SUPP SEG1=FINAL_ESEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7375,7 +7375,7 @@
     (iclass "REPE_SCASQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_RAX:r:SUPP MEM0:cr:SUPP:q BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7384,7 +7384,7 @@
     (iclass "REPNE_CMPSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:cr:SUPP:q BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:cr:SUPP:q BASE1=ArDI():rcw:SUPP SEG1=FINAL_ESEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7393,7 +7393,7 @@
     (iclass "REPNE_SCASQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_RAX:r:SUPP MEM0:cr:SUPP:q BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7402,7 +7402,7 @@
     (iclass "REP_LODSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_RAX:cw:SUPP MEM0:cr:SUPP:q BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7411,7 +7411,7 @@
     (iclass "REP_MOVSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:cw:SUPP:q BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP MEM1:cr:SUPP:q BASE1=ArSI():rcw:SUPP SEG1=FINAL_DSEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7420,7 +7420,7 @@
     (iclass "REP_STOSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:cw:SUPP:q BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_RAX:r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7429,7 +7429,7 @@
     (iclass "SCASQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_RAX:r:SUPP MEM0:r:SUPP:q BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7438,7 +7438,7 @@
     (iclass "STOSQ")
     (category "STRINGOP")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:SUPP:q BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_RAX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7447,7 +7447,7 @@
     (iclass "SWAPGS")
     (category "SYSTEM")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_GSBASE:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7456,7 +7456,7 @@
     (iclass "SYSCALL")
     (category "SYSCALL")
     (isa-set "LONGMODE")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_RIP:w:SUPP REG1=XED_REG_RCX:w:SUPP REG2=XED_REG_R11:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7465,7 +7465,7 @@
     (iclass "SYSRET")
     (category "SYSRET")
     (isa-set "LONGMODE")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EIP:w:SUPP  REG1=XED_REG_ECX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7474,7 +7474,7 @@
     (iclass "SYSRET64")
     (category "SYSRET")
     (isa-set "LONGMODE")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_RIP:w:SUPP  REG1=XED_REG_RCX:r:SUPP  REG2=XED_REG_R11:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7483,7 +7483,7 @@
     (iclass "AAA")
     (category "DECIMAL")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:rw:SUPP REG1=XED_REG_AH:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7492,7 +7492,7 @@
     (iclass "AAD")
     (category "DECIMAL")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "IMM0:r:b:i8 REG0=XED_REG_AL:rw:SUPP REG1=XED_REG_AH:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7501,7 +7501,7 @@
     (iclass "AAM")
     (category "DECIMAL")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "IMM0:r:b:i8 REG0=XED_REG_AL:rw:SUPP REG1=XED_REG_AH:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7510,7 +7510,7 @@
     (iclass "AAS")
     (category "DECIMAL")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:rw:SUPP REG1=XED_REG_AH:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7519,7 +7519,7 @@
     (iclass "ADC")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 18)
+    (form-count #b10010)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7528,7 +7528,7 @@
     (iclass "ADC_LOCK")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7537,7 +7537,7 @@
     (iclass "ADD")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 18)
+    (form-count #b10010)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7546,7 +7546,7 @@
     (iclass "ADD_LOCK")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7555,7 +7555,7 @@
     (iclass "AND")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 18)
+    (form-count #b10010)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7564,7 +7564,7 @@
     (iclass "AND_LOCK")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7573,7 +7573,7 @@
     (iclass "ARPL")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:w REG0=GPR16_R():r")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7582,7 +7582,7 @@
     (iclass "BOUND")
     (category "INTERRUPT")
     (isa-set "I186")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=GPR16_R():r MEM0:r:a16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7591,7 +7591,7 @@
     (iclass "BSF")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7600,7 +7600,7 @@
     (iclass "BSR")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7609,7 +7609,7 @@
     (iclass "BSWAP")
     (category "DATAXFER")
     (isa-set "I486REAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRv_SB():rw")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7618,7 +7618,7 @@
     (iclass "BT")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:r:v IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7627,7 +7627,7 @@
     (iclass "BTC")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rw:v IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7636,7 +7636,7 @@
     (iclass "BTC_LOCK")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:v IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7645,7 +7645,7 @@
     (iclass "BTR")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rw:v IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7654,7 +7654,7 @@
     (iclass "BTR_LOCK")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:v IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7663,7 +7663,7 @@
     (iclass "BTS")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rw:v IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7672,7 +7672,7 @@
     (iclass "BTS_LOCK")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:v IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7681,7 +7681,7 @@
     (iclass "CALL_FAR")
     (category "CALL")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:p2 REG0=XED_REG_STACKPUSH:rw:spw2:SUPP REG1=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7690,7 +7690,7 @@
     (iclass "CALL_NEAR")
     (category "CALL")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:r:v REG0=XED_REG_STACKPUSH:rw:spw:SUPP REG1=rIP():rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7699,7 +7699,7 @@
     (iclass "CBW")
     (category "CONVERT")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_AX:w:SUPP REG1=XED_REG_AL:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7708,7 +7708,7 @@
     (iclass "CDQ")
     (category "CONVERT")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_EDX:w:SUPP REG1=XED_REG_EAX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7717,7 +7717,7 @@
     (iclass "CLC")
     (category "FLAGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7726,7 +7726,7 @@
     (iclass "CLD")
     (category "FLAGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7735,7 +7735,7 @@
     (iclass "CLI")
     (category "FLAGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7744,7 +7744,7 @@
     (iclass "CLTS")
     (category "SYSTEM")
     (isa-set "I286REAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7753,7 +7753,7 @@
     (iclass "CMC")
     (category "FLAGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7762,7 +7762,7 @@
     (iclass "CMOVB")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7771,7 +7771,7 @@
     (iclass "CMOVBE")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7780,7 +7780,7 @@
     (iclass "CMOVL")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7789,7 +7789,7 @@
     (iclass "CMOVLE")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7798,7 +7798,7 @@
     (iclass "CMOVNB")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7807,7 +7807,7 @@
     (iclass "CMOVNBE")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7816,7 +7816,7 @@
     (iclass "CMOVNL")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7825,7 +7825,7 @@
     (iclass "CMOVNLE")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7834,7 +7834,7 @@
     (iclass "CMOVNO")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7843,7 +7843,7 @@
     (iclass "CMOVNP")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7852,7 +7852,7 @@
     (iclass "CMOVNS")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7861,7 +7861,7 @@
     (iclass "CMOVNZ")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7870,7 +7870,7 @@
     (iclass "CMOVO")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7879,7 +7879,7 @@
     (iclass "CMOVP")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7888,7 +7888,7 @@
     (iclass "CMOVS")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7897,7 +7897,7 @@
     (iclass "CMOVZ")
     (category "CMOV")
     (isa-set "CMOV")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7906,7 +7906,7 @@
     (iclass "CMP")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 18)
+    (form-count #b10010)
     (operand-summary "REG0=OrAX():r:IMPL IMM0:r:z")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7915,7 +7915,7 @@
     (iclass "CMPSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:SUPP:b BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:r:SUPP:b BASE1=ArDI():rw:SUPP SEG1=FINAL_ESEG1():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7924,7 +7924,7 @@
     (iclass "CMPSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:r:SUPP:d BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:r:SUPP:d BASE1=ArDI():rw:SUPP SEG1=FINAL_ESEG1():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7933,7 +7933,7 @@
     (iclass "CMPSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:r:SUPP:w BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:r:SUPP:w BASE1=ArDI():rw:SUPP SEG1=FINAL_ESEG1():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7942,7 +7942,7 @@
     (iclass "CMPXCHG")
     (category "SEMAPHORE")
     (isa-set "I486REAL")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rcw:b REG0=GPR8_R():r REG1=XED_REG_AL:rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7951,7 +7951,7 @@
     (iclass "CMPXCHG8B")
     (category "SEMAPHORE")
     (isa-set "PENTIUMREAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rcw:q REG0=XED_REG_EDX:rcw:SUPP REG1=XED_REG_EAX:rcw:SUPP REG2=XED_REG_ECX:r:SUPP REG3=XED_REG_EBX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7960,7 +7960,7 @@
     (iclass "CMPXCHG8B_LOCK")
     (category "SEMAPHORE")
     (isa-set "PENTIUMREAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rcw:q REG0=XED_REG_EDX:rcw:SUPP REG1=XED_REG_EAX:rcw:SUPP REG2=XED_REG_ECX:r:SUPP REG3=XED_REG_EBX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7969,7 +7969,7 @@
     (iclass "CMPXCHG_LOCK")
     (category "SEMAPHORE")
     (isa-set "I486REAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rcw:b REG0=GPR8_R():r REG1=XED_REG_AL:rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7978,7 +7978,7 @@
     (iclass "CPUID")
     (category "MISC")
     (isa-set "I486REAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EAX:rw:SUPP REG1=XED_REG_EBX:w:SUPP REG2=XED_REG_ECX:crw:SUPP REG3=XED_REG_EDX:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7987,7 +7987,7 @@
     (iclass "CWD")
     (category "CONVERT")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_DX:w:SUPP REG1=XED_REG_AX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -7996,7 +7996,7 @@
     (iclass "CWDE")
     (category "CONVERT")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_EAX:w:SUPP REG1=XED_REG_AX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8005,7 +8005,7 @@
     (iclass "DAA")
     (category "DECIMAL")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8014,7 +8014,7 @@
     (iclass "DAS")
     (category "DECIMAL")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8023,7 +8023,7 @@
     (iclass "DEC")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 5)
+    (form-count #b101)
     (operand-summary "MEM0:rw:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8032,7 +8032,7 @@
     (iclass "DEC_LOCK")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8041,7 +8041,7 @@
     (iclass "DIV")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:r:b REG0=XED_REG_AX:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8050,7 +8050,7 @@
     (iclass "ENTER")
     (category "MISC")
     (isa-set "I186")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "IMM0:r:w IMM1:r:b REG0=XED_REG_STACKPUSH:rw:spw:SUPP REG1=OrBP():rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8059,7 +8059,7 @@
     (iclass "HLT")
     (category "SYSTEM")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8068,7 +8068,7 @@
     (iclass "IDIV")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:r:b REG0=XED_REG_AX:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8077,7 +8077,7 @@
     (iclass "IMUL")
     (category "BINARY")
     (isa-set "I186")
-    (form-count 10)
+    (form-count #b1010)
     (operand-summary "REG0=GPRv_R():w MEM0:r:v IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8086,7 +8086,7 @@
     (iclass "IN")
     (category "IO")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=OeAX():w:IMPL IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8095,7 +8095,7 @@
     (iclass "INC")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 5)
+    (form-count #b101)
     (operand-summary "MEM0:rw:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8104,7 +8104,7 @@
     (iclass "INC_LOCK")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8113,7 +8113,7 @@
     (iclass "INSB")
     (category "IOSTRINGOP")
     (isa-set "I186")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:SUPP:b BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_DX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8122,7 +8122,7 @@
     (iclass "INSD")
     (category "IOSTRINGOP")
     (isa-set "I386")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:w:SUPP:d BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_DX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8131,7 +8131,7 @@
     (iclass "INSW")
     (category "IOSTRINGOP")
     (isa-set "I186")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:SUPP:w BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_DX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8140,7 +8140,7 @@
     (iclass "INT")
     (category "INTERRUPT")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "IMM0:r:b REG0=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8149,7 +8149,7 @@
     (iclass "INT1")
     (category "INTERRUPT")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8158,7 +8158,7 @@
     (iclass "INT3")
     (category "INTERRUPT")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8167,7 +8167,7 @@
     (iclass "INTO")
     (category "INTERRUPT")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EIP:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8176,7 +8176,7 @@
     (iclass "INVD")
     (category "SYSTEM")
     (isa-set "I486REAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8185,7 +8185,7 @@
     (iclass "INVLPG")
     (category "SYSTEM")
     (isa-set "I486REAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8194,7 +8194,7 @@
     (iclass "IRET")
     (category "RET")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_STACKPOP:rw:spw5:SUPP REG1=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8203,7 +8203,7 @@
     (iclass "IRETD")
     (category "RET")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_STACKPOP:rw:spw5:SUPP REG1=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8212,7 +8212,7 @@
     (iclass "JB")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8221,7 +8221,7 @@
     (iclass "JBE")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8230,7 +8230,7 @@
     (iclass "JCXZ")
     (category "COND_BR")
     (isa-set "I386")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "RELBR:r:b:i8 REG0=XED_REG_CX:r:SUPP REG1=XED_REG_IP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8239,7 +8239,7 @@
     (iclass "JECXZ")
     (category "COND_BR")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "RELBR:r:b:i8 REG0=XED_REG_ECX:r:SUPP REG1=XED_REG_EIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8248,7 +8248,7 @@
     (iclass "JL")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8257,7 +8257,7 @@
     (iclass "JLE")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8266,7 +8266,7 @@
     (iclass "JMP")
     (category "UNCOND_BR")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:r:v REG0=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8275,7 +8275,7 @@
     (iclass "JMP_FAR")
     (category "UNCOND_BR")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:p2 REG0=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8284,7 +8284,7 @@
     (iclass "JNB")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8293,7 +8293,7 @@
     (iclass "JNBE")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8302,7 +8302,7 @@
     (iclass "JNL")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8311,7 +8311,7 @@
     (iclass "JNLE")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8320,7 +8320,7 @@
     (iclass "JNO")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8329,7 +8329,7 @@
     (iclass "JNP")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8338,7 +8338,7 @@
     (iclass "JNS")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8347,7 +8347,7 @@
     (iclass "JNZ")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8356,7 +8356,7 @@
     (iclass "JO")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8365,7 +8365,7 @@
     (iclass "JP")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8374,7 +8374,7 @@
     (iclass "JRCXZ")
     (category "COND_BR")
     (isa-set "LONGMODE")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "RELBR:r:b:i8 REG0=XED_REG_RCX:r:SUPP REG1=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8383,7 +8383,7 @@
     (iclass "JS")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8392,7 +8392,7 @@
     (iclass "JZ")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:d REG0=XED_REG_RIP:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8401,7 +8401,7 @@
     (iclass "LAHF")
     (category "FLAGOP")
     (isa-set "LAHF")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AH:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8410,7 +8410,7 @@
     (iclass "LAR")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:w")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8419,7 +8419,7 @@
     (iclass "LDS")
     (category "SEGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRz_R():w MEM0:r:p REG1=XED_REG_DS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8428,7 +8428,7 @@
     (iclass "LEA")
     (category "MISC")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRv_R():w AGEN:r")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8437,7 +8437,7 @@
     (iclass "LEAVE")
     (category "MISC")
     (isa-set "I186")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:SUPP:v BASE0=ArBP():r:SUPP SEG0=FINAL_SSEG0():r:SUPP REG0=OrBP():rw:SUPP REG1=OrSP():rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8446,7 +8446,7 @@
     (iclass "LES")
     (category "SEGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRz_R():w MEM0:r:p REG1=XED_REG_ES:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8455,7 +8455,7 @@
     (iclass "LFS")
     (category "SEGOP")
     (isa-set "I386")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRv_R():w MEM0:r:p2 REG1=XED_REG_FS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8464,7 +8464,7 @@
     (iclass "LGDT")
     (category "SYSTEM")
     (isa-set "I286REAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:s64 REG0=XED_REG_GDTR:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8473,7 +8473,7 @@
     (iclass "LGS")
     (category "SEGOP")
     (isa-set "I386")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRv_R():w MEM0:r:p2 REG1=XED_REG_GS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8482,7 +8482,7 @@
     (iclass "LIDT")
     (category "SYSTEM")
     (isa-set "I286REAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:s64 REG0=XED_REG_IDTR:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8491,7 +8491,7 @@
     (iclass "LLDT")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:w REG0=XED_REG_LDTR:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8500,7 +8500,7 @@
     (iclass "LMSW")
     (category "SYSTEM")
     (isa-set "I286REAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:w REG0=XED_REG_CR0:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8509,7 +8509,7 @@
     (iclass "LODSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:w:SUPP MEM0:r:SUPP:b BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8518,7 +8518,7 @@
     (iclass "LODSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_EAX:w:SUPP MEM0:r:SUPP:d BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8527,7 +8527,7 @@
     (iclass "LODSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_AX:w:SUPP MEM0:r:SUPP:w BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8536,7 +8536,7 @@
     (iclass "LOOP")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "RELBR:r:b:i8 REG0=ArCX():rw:SUPP REG1=rIP():rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8545,7 +8545,7 @@
     (iclass "LOOPE")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:b:i8 REG0=ArCX():rw:SUPP REG1=rIP():rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8554,7 +8554,7 @@
     (iclass "LOOPNE")
     (category "COND_BR")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "RELBR:r:b:i8 REG0=ArCX():rw:SUPP REG1=rIP():rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8563,7 +8563,7 @@
     (iclass "LSL")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPRv_R():rw MEM0:r:w")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8572,7 +8572,7 @@
     (iclass "LSS")
     (category "SEGOP")
     (isa-set "I386")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=GPRv_R():w MEM0:r:p2 REG1=XED_REG_SS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8581,7 +8581,7 @@
     (iclass "LTR")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:w REG0=XED_REG_TR:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8590,7 +8590,7 @@
     (iclass "MOV")
     (category "DATAXFER")
     (isa-set "I86")
-    (form-count 22)
+    (form-count #b10110)
     (operand-summary "MEM0:w:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8599,7 +8599,7 @@
     (iclass "MOVSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:SUPP:b BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP  MEM1:r:SUPP:b BASE1=ArSI():rw:SUPP SEG1=FINAL_DSEG1():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8608,7 +8608,7 @@
     (iclass "MOVSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:SUPP:d BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP MEM1:r:SUPP:d BASE1=ArSI():rw:SUPP SEG1=FINAL_DSEG1():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8617,7 +8617,7 @@
     (iclass "MOVSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:SUPP:w BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP MEM1:r:SUPP:w BASE1=ArSI():rw:SUPP SEG1=FINAL_DSEG1():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8626,7 +8626,7 @@
     (iclass "MOVSX")
     (category "DATAXFER")
     (isa-set "I386")
-    (form-count 7)
+    (form-count #b111)
     (operand-summary "REG0=GPRv_R():w MEM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8635,7 +8635,7 @@
     (iclass "MOVZX")
     (category "DATAXFER")
     (isa-set "I386")
-    (form-count 7)
+    (form-count #b111)
     (operand-summary "REG0=GPRv_R():w MEM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8644,7 +8644,7 @@
     (iclass "MOV_CR")
     (category "DATAXFER")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=CR_R():w REG1=GPR32_B():r")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8653,7 +8653,7 @@
     (iclass "MOV_DR")
     (category "DATAXFER")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=DR_R():w REG1=GPR32_B():r")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8662,7 +8662,7 @@
     (iclass "MUL")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:r:v REG0=OrAX():rw:SUPP REG1=OrDX():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8671,7 +8671,7 @@
     (iclass "NEG")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rw:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8680,7 +8680,7 @@
     (iclass "NEG_LOCK")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8689,7 +8689,7 @@
     (iclass "NOP")
     (category "NOP/WIDENOP")
     (isa-set "I86")
-    (form-count 35)
+    (form-count #b100011)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8698,7 +8698,7 @@
     (iclass "NOT")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rw:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8707,7 +8707,7 @@
     (iclass "NOT_LOCK")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8716,7 +8716,7 @@
     (iclass "OR")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 18)
+    (form-count #b10010)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8725,7 +8725,7 @@
     (iclass "OR_LOCK")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8734,7 +8734,7 @@
     (iclass "OUT")
     (category "IO")
     (isa-set "I86")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "IMM0:r:b REG0=OeAX():r:IMPL")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8743,7 +8743,7 @@
     (iclass "OUTSB")
     (category "IOSTRINGOP")
     (isa-set "I186")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_DX:r:SUPP MEM0:r:SUPP:b BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8752,7 +8752,7 @@
     (iclass "OUTSD")
     (category "IOSTRINGOP")
     (isa-set "I386")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XED_REG_DX:r:SUPP MEM0:r:SUPP:d BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8761,7 +8761,7 @@
     (iclass "OUTSW")
     (category "IOSTRINGOP")
     (isa-set "I186")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_DX:r:SUPP MEM0:r:SUPP:w BASE0=ArSI():rw:SUPP SEG0=FINAL_DSEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8770,7 +8770,7 @@
     (iclass "POP")
     (category "POP")
     (isa-set "I86")
-    (form-count 9)
+    (form-count #b1001)
     (operand-summary "REG0=XED_REG_DS:w:IMPL REG1=XED_REG_STACKPOP:rw:spw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8779,7 +8779,7 @@
     (iclass "POPA")
     (category "POP")
     (isa-set "I186")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_STACKPOP:rw:spw8:SUPP REG1=XED_REG_AX:w:SUPP REG2=XED_REG_CX:w:SUPP REG3=XED_REG_DX:w:SUPP REG4=XED_REG_BX:w:SUPP REG5=XED_REG_BP:w:SUPP REG6=XED_REG_SI:w:SUPP REG7=XED_REG_DI:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8788,7 +8788,7 @@
     (iclass "POPAD")
     (category "POP")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_STACKPOP:rw:spw8:SUPP REG1=XED_REG_EAX:w:SUPP REG2=XED_REG_ECX:w:SUPP REG3=XED_REG_EDX:w:SUPP REG4=XED_REG_EBX:w:SUPP REG5=XED_REG_EBP:w:SUPP REG6=XED_REG_ESI:w:SUPP REG7=XED_REG_EDI:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8797,7 +8797,7 @@
     (iclass "POPF")
     (category "POP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_STACKPOP:rw:w:SUPP REG1=XED_REG_FLAGS:rw:SUPP:w:u16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8806,7 +8806,7 @@
     (iclass "POPFD")
     (category "POP")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_STACKPOP:rw:d:SUPP REG1=XED_REG_EFLAGS:rw:SUPP:d:u32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8815,7 +8815,7 @@
     (iclass "PUSH")
     (category "PUSH")
     (isa-set "I186")
-    (form-count 12)
+    (form-count #b1100)
     (operand-summary "IMM0:r:b:i8 REG0=XED_REG_STACKPUSH:rw:spw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8824,7 +8824,7 @@
     (iclass "PUSHA")
     (category "PUSH")
     (isa-set "I186")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_STACKPUSH:rw:spw8:SUPP REG1=XED_REG_AX:r:SUPP REG2=XED_REG_CX:r:SUPP REG3=XED_REG_DX:r:SUPP REG4=XED_REG_BX:r:SUPP REG5=XED_REG_SP:r:SUPP REG6=XED_REG_BP:r:SUPP REG7=XED_REG_SI:r:SUPP REG8=XED_REG_DI:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8833,7 +8833,7 @@
     (iclass "PUSHAD")
     (category "PUSH")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_STACKPUSH:rw:spw8:SUPP REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_ECX:r:SUPP REG3=XED_REG_EDX:r:SUPP REG4=XED_REG_EBX:r:SUPP REG5=XED_REG_ESP:r:SUPP REG6=XED_REG_EBP:r:SUPP REG7=XED_REG_ESI:r:SUPP REG8=XED_REG_EDI:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8842,7 +8842,7 @@
     (iclass "PUSHF")
     (category "PUSH")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_STACKPUSH:rw:w:SUPP REG1=XED_REG_FLAGS:r:SUPP:w:u16")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8851,7 +8851,7 @@
     (iclass "PUSHFD")
     (category "PUSH")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_STACKPUSH:rw:d:SUPP REG1=XED_REG_EFLAGS:r:SUPP:d:u32")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8860,7 +8860,7 @@
     (iclass "RCL")
     (category "ROTATE")
     (isa-set "I186")
-    (form-count 12)
+    (form-count #b1100)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8869,7 +8869,7 @@
     (iclass "RCR")
     (category "ROTATE")
     (isa-set "I186")
-    (form-count 12)
+    (form-count #b1100)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8878,7 +8878,7 @@
     (iclass "RDMSR")
     (category "SYSTEM")
     (isa-set "PENTIUMREAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EAX:w:SUPP REG1=XED_REG_EDX:w:SUPP REG2=XED_REG_ECX:r:SUPP REG3=XED_REG_MSRS:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8887,7 +8887,7 @@
     (iclass "RDPMC")
     (category "SYSTEM")
     (isa-set "RDPMC")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EAX:w:SUPP REG1=XED_REG_EDX:w:SUPP REG2=XED_REG_ECX:r:SUPP REG3=XED_REG_MSRS:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8896,7 +8896,7 @@
     (iclass "RDTSC")
     (category "SYSTEM")
     (isa-set "PENTIUMREAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EAX:w:SUPP REG1=XED_REG_EDX:w:SUPP REG2=XED_REG_TSC:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8905,7 +8905,7 @@
     (iclass "REPE_CMPSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:cr:SUPP:b BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:cr:SUPP:b BASE1=ArDI():rcw:SUPP SEG1=FINAL_ESEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8914,7 +8914,7 @@
     (iclass "REPE_CMPSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:cr:SUPP:d BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:cr:SUPP:d BASE1=ArDI():rcw:SUPP SEG1=FINAL_ESEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8923,7 +8923,7 @@
     (iclass "REPE_CMPSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:cr:SUPP:w BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:cr:SUPP:w BASE1=ArDI():rcw:SUPP SEG1=FINAL_ESEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8932,7 +8932,7 @@
     (iclass "REPE_SCASB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:r:SUPP MEM0:cr:SUPP:b BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8941,7 +8941,7 @@
     (iclass "REPE_SCASD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_EAX:r:SUPP MEM0:cr:SUPP:d BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8950,7 +8950,7 @@
     (iclass "REPE_SCASW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_AX:r:SUPP MEM0:cr:SUPP:w BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8959,7 +8959,7 @@
     (iclass "REPNE_CMPSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:cr:SUPP:b BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:cr:SUPP:b BASE1=ArDI():rcw:SUPP SEG1=FINAL_ESEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8968,7 +8968,7 @@
     (iclass "REPNE_CMPSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:cr:SUPP:d BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:cr:SUPP:d BASE1=ArDI():rcw:SUPP SEG1=FINAL_ESEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8977,7 +8977,7 @@
     (iclass "REPNE_CMPSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:cr:SUPP:w BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP MEM1:cr:SUPP:w BASE1=ArDI():rcw:SUPP SEG1=FINAL_ESEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8986,7 +8986,7 @@
     (iclass "REPNE_SCASB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:r:SUPP MEM0:cr:SUPP:b BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -8995,7 +8995,7 @@
     (iclass "REPNE_SCASD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_EAX:r:SUPP MEM0:cr:SUPP:d BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9004,7 +9004,7 @@
     (iclass "REPNE_SCASW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_AX:r:SUPP MEM0:cr:SUPP:w BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9013,7 +9013,7 @@
     (iclass "REP_INSB")
     (category "IOSTRINGOP")
     (isa-set "I186")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:cw:SUPP:b BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_DX:r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9022,7 +9022,7 @@
     (iclass "REP_INSD")
     (category "IOSTRINGOP")
     (isa-set "I386")
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "MEM0:cw:SUPP:d BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_DX:r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9031,7 +9031,7 @@
     (iclass "REP_INSW")
     (category "IOSTRINGOP")
     (isa-set "I186")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:cw:SUPP:w BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_DX:r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9040,7 +9040,7 @@
     (iclass "REP_LODSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_AL:cw:SUPP MEM0:cr:SUPP:b BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9049,7 +9049,7 @@
     (iclass "REP_LODSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=XED_REG_EAX:cw:SUPP MEM0:cr:SUPP:d BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9058,7 +9058,7 @@
     (iclass "REP_LODSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=XED_REG_AX:cw:SUPP MEM0:cr:SUPP:w BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9067,7 +9067,7 @@
     (iclass "REP_MOVSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:cw:SUPP:b BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP  MEM1:cr:SUPP:b BASE1=ArSI():rcw:SUPP SEG1=FINAL_DSEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9076,7 +9076,7 @@
     (iclass "REP_MOVSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:cw:SUPP:d BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP MEM1:cr:SUPP:d BASE1=ArSI():rcw:SUPP SEG1=FINAL_DSEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9085,7 +9085,7 @@
     (iclass "REP_MOVSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:cw:SUPP:w BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP MEM1:cr:SUPP:w BASE1=ArSI():rcw:SUPP SEG1=FINAL_DSEG1():r:SUPP REG0=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9094,7 +9094,7 @@
     (iclass "REP_OUTSB")
     (category "IOSTRINGOP")
     (isa-set "I186")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_DX:r:SUPP MEM0:cr:SUPP:b BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9103,7 +9103,7 @@
     (iclass "REP_OUTSD")
     (category "IOSTRINGOP")
     (isa-set "I386")
-    (form-count 8)
+    (form-count #b1000)
     (operand-summary "REG0=XED_REG_DX:r:SUPP MEM0:cr:SUPP:d BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9112,7 +9112,7 @@
     (iclass "REP_OUTSW")
     (category "IOSTRINGOP")
     (isa-set "I186")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=XED_REG_DX:r:SUPP MEM0:cr:SUPP:w BASE0=ArSI():rcw:SUPP SEG0=FINAL_DSEG():r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9121,7 +9121,7 @@
     (iclass "REP_STOSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:cw:SUPP:b BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_AL:r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9130,7 +9130,7 @@
     (iclass "REP_STOSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:cw:SUPP:d BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_EAX:r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9139,7 +9139,7 @@
     (iclass "REP_STOSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:cw:SUPP:w BASE0=ArDI():rcw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_AX:r:SUPP REG1=ArCX():rcw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9148,7 +9148,7 @@
     (iclass "RET_FAR")
     (category "RET")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "IMM0:r:w REG0=XED_REG_STACKPOP:rw:spw2:SUPP REG1=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9157,7 +9157,7 @@
     (iclass "RET_NEAR")
     (category "RET")
     (isa-set "I86")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "IMM0:r:w REG0=XED_REG_STACKPOP:rw:spw:SUPP REG1=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9166,7 +9166,7 @@
     (iclass "ROL")
     (category "ROTATE")
     (isa-set "I186")
-    (form-count 12)
+    (form-count #b1100)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9175,7 +9175,7 @@
     (iclass "ROR")
     (category "ROTATE")
     (isa-set "I186")
-    (form-count 12)
+    (form-count #b1100)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9184,7 +9184,7 @@
     (iclass "RSM")
     (category "SYSRET")
     (isa-set "I486")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=rIP():w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9193,7 +9193,7 @@
     (iclass "SAHF")
     (category "FLAGOP")
     (isa-set "LAHF")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AH:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9202,7 +9202,7 @@
     (iclass "SALC")
     (category "FLAGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9211,7 +9211,7 @@
     (iclass "SAR")
     (category "SHIFT")
     (isa-set "I186")
-    (form-count 12)
+    (form-count #b1100)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9220,7 +9220,7 @@
     (iclass "SBB")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 18)
+    (form-count #b10010)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9229,7 +9229,7 @@
     (iclass "SBB_LOCK")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9238,7 +9238,7 @@
     (iclass "SCASB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_AL:r:SUPP MEM0:r:SUPP:b BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9247,7 +9247,7 @@
     (iclass "SCASD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_EAX:r:SUPP MEM0:r:SUPP:d BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9256,7 +9256,7 @@
     (iclass "SCASW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_AX:r:SUPP MEM0:r:SUPP:w BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9265,7 +9265,7 @@
     (iclass "SETB")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9274,7 +9274,7 @@
     (iclass "SETBE")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9283,7 +9283,7 @@
     (iclass "SETL")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9292,7 +9292,7 @@
     (iclass "SETLE")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9301,7 +9301,7 @@
     (iclass "SETNB")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9310,7 +9310,7 @@
     (iclass "SETNBE")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9319,7 +9319,7 @@
     (iclass "SETNL")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9328,7 +9328,7 @@
     (iclass "SETNLE")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9337,7 +9337,7 @@
     (iclass "SETNO")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9346,7 +9346,7 @@
     (iclass "SETNP")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9355,7 +9355,7 @@
     (iclass "SETNS")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9364,7 +9364,7 @@
     (iclass "SETNZ")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9373,7 +9373,7 @@
     (iclass "SETO")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9382,7 +9382,7 @@
     (iclass "SETP")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9391,7 +9391,7 @@
     (iclass "SETS")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9400,7 +9400,7 @@
     (iclass "SETZ")
     (category "SETCC")
     (isa-set "I386")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9409,7 +9409,7 @@
     (iclass "SGDT")
     (category "SYSTEM")
     (isa-set "I286REAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:s64 REG0=XED_REG_GDTR:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9418,7 +9418,7 @@
     (iclass "SHL")
     (category "SHIFT")
     (isa-set "I186")
-    (form-count 24)
+    (form-count #b11000)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9427,7 +9427,7 @@
     (iclass "SHLD")
     (category "SHIFT")
     (isa-set "I386")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rcw:v REG0=GPRv_R():r IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9436,7 +9436,7 @@
     (iclass "SHR")
     (category "SHIFT")
     (isa-set "I186")
-    (form-count 12)
+    (form-count #b1100)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9445,7 +9445,7 @@
     (iclass "SHRD")
     (category "SHIFT")
     (isa-set "I386")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rcw:v REG0=GPRv_R():r IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9454,7 +9454,7 @@
     (iclass "SIDT")
     (category "SYSTEM")
     (isa-set "I286REAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:s REG0=XED_REG_IDTR:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9463,7 +9463,7 @@
     (iclass "SLDT")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:w REG0=XED_REG_LDTR:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9472,7 +9472,7 @@
     (iclass "SMSW")
     (category "SYSTEM")
     (isa-set "I286REAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:w REG0=XED_REG_CR0:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9481,7 +9481,7 @@
     (iclass "STC")
     (category "FLAGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9490,7 +9490,7 @@
     (iclass "STD")
     (category "FLAGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9499,7 +9499,7 @@
     (iclass "STI")
     (category "FLAGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9508,7 +9508,7 @@
     (iclass "STOSB")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:SUPP:b BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_AL:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9517,7 +9517,7 @@
     (iclass "STOSD")
     (category "STRINGOP")
     (isa-set "I386")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:SUPP:d BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_EAX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9526,7 +9526,7 @@
     (iclass "STOSW")
     (category "STRINGOP")
     (isa-set "I86")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:SUPP:w BASE0=ArDI():rw:SUPP SEG0=FINAL_ESEG():r:SUPP REG0=XED_REG_AX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9535,7 +9535,7 @@
     (iclass "STR")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:w REG0=XED_REG_TR:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9544,7 +9544,7 @@
     (iclass "SUB")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 18)
+    (form-count #b10010)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9553,7 +9553,7 @@
     (iclass "SUB_LOCK")
     (category "BINARY")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:rw:b IMM0:r:b:i8")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9562,7 +9562,7 @@
     (iclass "SYSENTER")
     (category "SYSCALL")
     (isa-set "SEP")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_EIP:w:SUPP REG1=XED_REG_ESP:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9571,7 +9571,7 @@
     (iclass "SYSEXIT")
     (category "SYSRET")
     (isa-set "SEP")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_EIP:w:SUPP  REG1=XED_REG_ESP:w:SUPP REG2=XED_REG_ECX:r:SUPP REG3=XED_REG_EDX:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9580,7 +9580,7 @@
     (iclass "TEST")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 14)
+    (form-count #b1110)
     (operand-summary "MEM0:r:b REG0=GPR8_R():r")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9589,7 +9589,7 @@
     (iclass "UD0")
     (category "MISC")
     (isa-set "PPRO_UD0_LONG")
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=GPR32_R():r MEM0:r:d")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9598,7 +9598,7 @@
     (iclass "UD1")
     (category "MISC")
     (isa-set "PPRO")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=GPR32_R():r MEM0:r:d")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9607,7 +9607,7 @@
     (iclass "UD2")
     (category "MISC")
     (isa-set "PPRO")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9616,7 +9616,7 @@
     (iclass "UDB")
     (category "MISC")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9625,7 +9625,7 @@
     (iclass "VERR")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:w")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9634,7 +9634,7 @@
     (iclass "VERW")
     (category "SYSTEM")
     (isa-set "I286PROTECTED")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:r:w")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9643,7 +9643,7 @@
     (iclass "WBINVD")
     (category "SYSTEM")
     (isa-set "I486REAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9652,7 +9652,7 @@
     (iclass "WRMSR")
     (category "SYSTEM")
     (isa-set "PENTIUMREAL")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_EAX:r:SUPP REG1=XED_REG_EDX:r:SUPP REG2=XED_REG_ECX:r:SUPP REG3=XED_REG_MSRS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9661,7 +9661,7 @@
     (iclass "XADD")
     (category "SEMAPHORE")
     (isa-set "I486REAL")
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "MEM0:rw:b REG0=GPR8_R():rw")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9670,7 +9670,7 @@
     (iclass "XADD_LOCK")
     (category "SEMAPHORE")
     (isa-set "I486REAL")
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:rw:b REG0=GPR8_R():rw")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9679,7 +9679,7 @@
     (iclass "XCHG")
     (category "DATAXFER")
     (isa-set "I86")
-    (form-count 9)
+    (form-count #b1001)
     (operand-summary "REG0=GPR8_B():rw REG1=GPR8_R():rw")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9688,7 +9688,7 @@
     (iclass "XLAT")
     (category "MISC")
     (isa-set "I86")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:SUPP:b BASE0=ArBX():r:SUPP  INDEX=XED_REG_AL:r:SUPP  REG0=XED_REG_AL:w:SUPP SEG0=FINAL_DSEG():r:SUPP SCALE=1:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9697,7 +9697,7 @@
     (iclass "XOR")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 18)
+    (form-count #b10010)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9706,7 +9706,7 @@
     (iclass "XOR_LOCK")
     (category "LOGICAL")
     (isa-set "I86")
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "MEM0:rw:b IMM0:r:b")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9715,7 +9715,7 @@
     (iclass "F2XM1")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9724,7 +9724,7 @@
     (iclass "FABS")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9733,7 +9733,7 @@
     (iclass "FADD")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9742,7 +9742,7 @@
     (iclass "FADDP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9751,7 +9751,7 @@
     (iclass "FBLD")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:w:IMPL:f80 MEM0:r:mem80dec  REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9760,7 +9760,7 @@
     (iclass "FBSTP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:mem80dec REG0=XED_REG_ST0:r:IMPL:f80  REG1=XED_REG_X87POP:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9769,7 +9769,7 @@
     (iclass "FCHS")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9778,7 +9778,7 @@
     (iclass "FCMOVB")
     (category "FCMOV")
     (isa-set "FCMOV")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:cw:IMPL:f80 REG1=X87():r:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9787,7 +9787,7 @@
     (iclass "FCMOVBE")
     (category "FCMOV")
     (isa-set "FCMOV")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:cw:IMPL:f80 REG1=X87():r:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9796,7 +9796,7 @@
     (iclass "FCMOVE")
     (category "FCMOV")
     (isa-set "FCMOV")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:cw:IMPL:f80 REG1=X87():r:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9805,7 +9805,7 @@
     (iclass "FCMOVNB")
     (category "FCMOV")
     (isa-set "FCMOV")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:cw:IMPL:f80 REG1=X87():r:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9814,7 +9814,7 @@
     (iclass "FCMOVNBE")
     (category "FCMOV")
     (isa-set "FCMOV")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:cw:IMPL:f80 REG1=X87():r:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9823,7 +9823,7 @@
     (iclass "FCMOVNE")
     (category "FCMOV")
     (isa-set "FCMOV")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:cw:IMPL:f80 REG1=X87():r:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9832,7 +9832,7 @@
     (iclass "FCMOVNU")
     (category "FCMOV")
     (isa-set "FCMOV")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:cw:IMPL:f80 REG1=X87():r:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9841,7 +9841,7 @@
     (iclass "FCMOVU")
     (category "FCMOV")
     (isa-set "FCMOV")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:cw:IMPL:f80 REG1=X87():r:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9850,7 +9850,7 @@
     (iclass "FCOM")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 REG1=X87():r:f80   REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9859,7 +9859,7 @@
     (iclass "FCOMI")
     (category "X87_ALU")
     (isa-set "FCOMI")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 REG1=X87():r:f80  REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9868,7 +9868,7 @@
     (iclass "FCOMIP")
     (category "X87_ALU")
     (isa-set "FCOMI")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 REG1=X87():r:f80  REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9877,7 +9877,7 @@
     (iclass "FCOMP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 5)
+    (form-count #b101)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 MEM0:r:m64real REG1=XED_REG_X87POP:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9886,7 +9886,7 @@
     (iclass "FCOMPP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:SUPP:f80 REG1=XED_REG_ST1:r:SUPP:f80 REG2=XED_REG_X87POP2:r:SUPP REG3=XED_REG_X87STATUS:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9895,7 +9895,7 @@
     (iclass "FCOS")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9904,7 +9904,7 @@
     (iclass "FDECSTP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_X87STATUS:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9913,7 +9913,7 @@
     (iclass "FDISI8087_NOP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9922,7 +9922,7 @@
     (iclass "FDIV")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9931,7 +9931,7 @@
     (iclass "FDIVP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9940,7 +9940,7 @@
     (iclass "FDIVR")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9949,7 +9949,7 @@
     (iclass "FDIVRP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9958,7 +9958,7 @@
     (iclass "FENI8087_NOP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9967,7 +9967,7 @@
     (iclass "FFREE")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():r:f80 REG1=XED_REG_X87TAG:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9976,7 +9976,7 @@
     (iclass "FFREEP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():r:f80 REG1=XED_REG_X87TAG:w:SUPP REG2=XED_REG_X87POP:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9985,7 +9985,7 @@
     (iclass "FIADD")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_ST0:rw:IMPL:f80 MEM0:r:mem16int REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -9994,7 +9994,7 @@
     (iclass "FICOM")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 MEM0:r:mem16int REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10003,7 +10003,7 @@
     (iclass "FICOMP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 MEM0:r:mem16int REG1=XED_REG_X87POP:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10012,7 +10012,7 @@
     (iclass "FIDIV")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_ST0:rw:IMPL:f80 MEM0:r:mem16int REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10021,7 +10021,7 @@
     (iclass "FIDIVR")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_ST0:rw:IMPL:f80 MEM0:r:mem16int REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10030,7 +10030,7 @@
     (iclass "FILD")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_ST0:w:IMPL:f80 MEM0:r:m64int  REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10039,7 +10039,7 @@
     (iclass "FIMUL")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_ST0:rw:IMPL:f80 MEM0:r:mem16int REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10048,7 +10048,7 @@
     (iclass "FINCSTP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_X87STATUS:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10057,7 +10057,7 @@
     (iclass "FIST")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:mem16int REG0=XED_REG_ST0:r:IMPL:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10066,7 +10066,7 @@
     (iclass "FISTP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:m64int REG0=XED_REG_ST0:r:IMPL:f80 REG1=XED_REG_X87POP:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10075,7 +10075,7 @@
     (iclass "FISUB")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_ST0:rw:IMPL:f80 MEM0:r:mem16int REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10084,7 +10084,7 @@
     (iclass "FISUBR")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "REG0=XED_REG_ST0:rw:IMPL:f80 MEM0:r:mem16int REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10093,7 +10093,7 @@
     (iclass "FLD")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=XED_REG_ST0:w:IMPL:f80 MEM0:r:m64real  REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10102,7 +10102,7 @@
     (iclass "FLD1")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:w:SUPP:f80 REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10111,7 +10111,7 @@
     (iclass "FLDCW")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mem16 REG0=XED_REG_X87CONTROL:w:SUPP REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10120,7 +10120,7 @@
     (iclass "FLDENV")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 7)
+    (form-count #b111)
     (operand-summary "MEM0:r:mem14 REG0=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10129,7 +10129,7 @@
     (iclass "FLDL2E")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:w:SUPP:f80 REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10138,7 +10138,7 @@
     (iclass "FLDL2T")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:w:SUPP:f80 REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10147,7 +10147,7 @@
     (iclass "FLDLG2")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:w:SUPP:f80 REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10156,7 +10156,7 @@
     (iclass "FLDLN2")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:w:SUPP:f80 REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10165,7 +10165,7 @@
     (iclass "FLDPI")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:w:SUPP:f80 REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10174,7 +10174,7 @@
     (iclass "FLDZ")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:w:SUPP:f80 REG1=XED_REG_X87PUSH:r:SUPP REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10183,7 +10183,7 @@
     (iclass "FMUL")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10192,7 +10192,7 @@
     (iclass "FMULP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10201,7 +10201,7 @@
     (iclass "FNCLEX")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10210,7 +10210,7 @@
     (iclass "FNINIT")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_X87CONTROL:w:SUPP REG1=XED_REG_X87TAG:w:SUPP  REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10219,7 +10219,7 @@
     (iclass "FNOP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10228,7 +10228,7 @@
     (iclass "FNSAVE")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 7)
+    (form-count #b111)
     (operand-summary "MEM0:w:mem94 \\")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10237,7 +10237,7 @@
     (iclass "FNSTCW")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:w:mem16 REG0=XED_REG_X87CONTROL:r:SUPP REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10246,7 +10246,7 @@
     (iclass "FNSTENV")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 7)
+    (form-count #b111)
     (operand-summary "MEM0:w:mem14 REG0=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10255,7 +10255,7 @@
     (iclass "FNSTSW")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 2)
+    (form-count #b10)
     (operand-summary "MEM0:w:mem16 REG0=XED_REG_X87STATUS:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10264,7 +10264,7 @@
     (iclass "FPATAN")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:SUPP:f80 REG1=XED_REG_ST1:rw:SUPP:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10273,7 +10273,7 @@
     (iclass "FPREM")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_ST1:r:SUPP:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10282,7 +10282,7 @@
     (iclass "FPREM1")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_ST1:r:SUPP:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10291,7 +10291,7 @@
     (iclass "FPTAN")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_ST1:w:SUPP:f80 REG2=XED_REG_X87PUSH:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10300,7 +10300,7 @@
     (iclass "FRNDINT")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10309,7 +10309,7 @@
     (iclass "FRSTOR")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 7)
+    (form-count #b111)
     (operand-summary "MEM0:r:mem94 REG0=XED_REG_X87CONTROL:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10318,7 +10318,7 @@
     (iclass "FSCALE")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_ST1:r:SUPP:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10327,7 +10327,7 @@
     (iclass "FSETPM287_NOP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10336,7 +10336,7 @@
     (iclass "FSIN")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10345,7 +10345,7 @@
     (iclass "FSINCOS")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_ST1:w:SUPP:f80 REG2=XED_REG_X87PUSH:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10354,7 +10354,7 @@
     (iclass "FSQRT")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10363,7 +10363,7 @@
     (iclass "FST")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "MEM0:w:m64real REG0=XED_REG_ST0:r:IMPL:f80  REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10372,7 +10372,7 @@
     (iclass "FSTP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 6)
+    (form-count #b110)
     (operand-summary "REG0=X87():w:f80 REG1=XED_REG_ST0:r:IMPL:f80  REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10381,7 +10381,7 @@
     (iclass "FSTPNCE")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():w:f80 REG1=XED_REG_ST0:r:IMPL:f80  REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10390,7 +10390,7 @@
     (iclass "FSUB")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10399,7 +10399,7 @@
     (iclass "FSUBP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10408,7 +10408,7 @@
     (iclass "FSUBR")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 4)
+    (form-count #b100)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10417,7 +10417,7 @@
     (iclass "FSUBRP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=X87():rw:f80 REG1=XED_REG_ST0:r:IMPL:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10426,7 +10426,7 @@
     (iclass "FTST")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10435,7 +10435,7 @@
     (iclass "FUCOM")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 REG1=X87():r:f80  REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10444,7 +10444,7 @@
     (iclass "FUCOMI")
     (category "X87_ALU")
     (isa-set "FCOMI")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 REG1=X87():r:f80   REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10453,7 +10453,7 @@
     (iclass "FUCOMIP")
     (category "X87_ALU")
     (isa-set "FCOMI")
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 REG1=X87():r:f80   REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10462,7 +10462,7 @@
     (iclass "FUCOMP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:IMPL:f80 REG1=X87():r:f80  REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10471,7 +10471,7 @@
     (iclass "FUCOMPP")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:SUPP:f80  REG1=XED_REG_ST1:r:SUPP:f80 REG2=XED_REG_X87POP2:rw:SUPP REG3=XED_REG_X87STATUS:rw:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10480,7 +10480,7 @@
     (iclass "FWAIT")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10489,7 +10489,7 @@
     (iclass "FXAM")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10498,7 +10498,7 @@
     (iclass "FXCH")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 3)
+    (form-count #b11)
     (operand-summary "REG0=XED_REG_ST0:rw:IMPL:f80 REG1=X87():rw:f80   REG2=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10507,7 +10507,7 @@
     (iclass "FXTRACT")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:rw:SUPP:f80 REG1=XED_REG_ST1:w:SUPP:f80 REG2=XED_REG_X87PUSH:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10516,7 +10516,7 @@
     (iclass "FYL2X")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:SUPP:f80 REG1=XED_REG_ST1:rw:SUPP:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10525,7 +10525,7 @@
     (iclass "FYL2XP1")
     (category "X87_ALU")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ST0:r:SUPP:f80 REG1=XED_REG_ST1:rw:SUPP:f80 REG2=XED_REG_X87POP:r:SUPP REG3=XED_REG_X87STATUS:w:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10534,7 +10534,7 @@
     (iclass "XGETBV")
     (category "XSAVE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ECX:r:SUPP REG1=XED_REG_EDX:w:SUPP  REG2=XED_REG_EAX:w:SUPP REG3=XED_REG_XCR0:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10543,7 +10543,7 @@
     (iclass "XRSTOR")
     (category "XSAVE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mxsave REG0=XED_REG_EDX:r:SUPP REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_XCR0:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10552,7 +10552,7 @@
     (iclass "XRSTOR64")
     (category "XSAVE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:r:mxsave REG0=XED_REG_EDX:r:SUPP REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_XCR0:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10561,7 +10561,7 @@
     (iclass "XSAVE")
     (category "XSAVE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:rw:mxsave REG0=XED_REG_EDX:r:SUPP REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_XCR0:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10570,7 +10570,7 @@
     (iclass "XSAVE64")
     (category "XSAVE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "MEM0:rw:mxsave REG0=XED_REG_EDX:r:SUPP REG1=XED_REG_EAX:r:SUPP REG2=XED_REG_XCR0:r:SUPP")
     (source-file "base/xed-isa.txt"))
   (form
@@ -10579,7 +10579,7 @@
     (iclass "XSETBV")
     (category "XSAVE")
     (isa-set ())
-    (form-count 1)
+    (form-count #b1)
     (operand-summary "REG0=XED_REG_ECX:r:SUPP REG1=XED_REG_EDX:r:SUPP  REG2=XED_REG_EAX:r:SUPP REG3=XED_REG_XCR0:w:SUPP")
     (source-file "base/xed-isa.txt"))
 )
