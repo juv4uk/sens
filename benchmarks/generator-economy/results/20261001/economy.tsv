@@ -1,0 +1,361 @@
+case_id	candidate	family	semantic_depth	mode	rep	i_refs	tree_steps	root_selections	bits_consumed	generator_apps	registry_lookups	residue_lookups	cache_hits	cache_misses	allocations	allocated_bytes	object_bytes	wire_bits	compiler_phase	machine_insts	code_bytes	loads	stores	branches	calls	spills	corpus_sha	binary_sha	git_sha	guix_channels_sha	cpu	valgrind_version	utilisation	rows_avoided	semantic_nodes	path_sharing_nodes	rule_size	special_cases	residue_required	semantics_valid
+selector-carcdr-k10/u1.0/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	1		2047				1	0					16368										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	1		18438.0		10	2046		0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	1		2047		10			0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	16		2062				16	0					16368										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	16		18453.0		10	2046		0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	16		2062		10			0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	256		2302				256	0					16368										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	256		18693.0		10	2046		0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	256		2302		10			0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	4096		6142				4096	0					16368										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	4096		22533.0		10	2046		0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	4096		6142		10			0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	65536		67582				65536	0					16368										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	65536		83973.0		10	2046		0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u1.0/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	65536		67582		10			0					48										4dd29cd7fcf378b4						1.0	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	1		2047				1	0					16368										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	1		9221.0		10	1023		0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	1		1024		10			0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	16		2062				16	0					16368										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	16		9236.0		10	1023		0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	16		1039		10			0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	256		2302				256	0					16368										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	256		9476.0		10	1023		0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	256		1279		10			0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	4096		6142				4096	0					16368										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	4096		13316.0		10	1023		0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	4096		5119		10			0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	65536		67582				65536	0					16368										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	65536		74756.0		10	1023		0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.5/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	65536		66559		10			0					48										4dd29cd7fcf378b4						0.5	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	1		2047				1	0					16368										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	1		4617.004887585533		10	512		0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	1		513		10			0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	16		2062				16	0					16368										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	16		4632.004887585533		10	512		0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	16		528		10			0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	256		2302				256	0					16368										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	256		4872.004887585533		10	512		0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	256		768		10			0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	4096		6142				4096	0					16368										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	4096		8712.004887585532		10	512		0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	4096		4608		10			0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	65536		67582				65536	0					16368										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	65536		70152.00488758553		10	512		0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.25/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	65536		66048		10			0					48										4dd29cd7fcf378b4						0.25	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	1		2047				1	0					16368										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	1		1851.0039100684262		10	205		0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	1		206		10			0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	16		2062				16	0					16368										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	16		1866.0039100684262		10	205		0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	16		221		10			0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	256		2302				256	0					16368										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	256		2106.003910068426		10	205		0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	256		461		10			0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	4096		6142				4096	0					16368										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	4096		5946.003910068426		10	205		0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	4096		4301		10			0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/explicit-row	explicit-row	selector-carcdr-k10	10	step-model-once-vs-percall	65536		67582				65536	0					16368										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/generator-lazy	generator-lazy	selector-carcdr-k10	10	step-model-once-vs-percall	65536		67386.00391006842		10	205		0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k10/u0.1/compiled-route	compiled-route	selector-carcdr-k10	10	step-model-once-vs-percall	65536		65741		10			0					48										4dd29cd7fcf378b4						0.1	2046	2046	1022	3	0	0	1
+selector-carcdr-k4/u1.0/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	1		31				1	0					240										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	1		102.0		4	30		0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	1		31		4			0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	16		46				16	0					240										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	16		117.0		4	30		0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	16		46		4			0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	256		286				256	0					240										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	256		357.0		4	30		0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	256		286		4			0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4126				4096	0					240										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4197.0		4	30		0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4126		4			0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65566				65536	0					240										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65637.0		4	30		0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u1.0/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65566		4			0					48										c1c65d02b257bfe4						1.0	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	1		31				1	0					240										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	1		53.0		4	15		0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	1		16		4			0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	16		46				16	0					240										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	16		68.0		4	15		0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	16		31		4			0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	256		286				256	0					240										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	256		308.0		4	15		0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	256		271		4			0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4126				4096	0					240										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4148.0		4	15		0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4111		4			0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65566				65536	0					240										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65588.0		4	15		0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.5/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65551		4			0					48										c1c65d02b257bfe4						0.5	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	1		31				1	0					240										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	1		30.133333333333333		4	8		0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	1		9		4			0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	16		46				16	0					240										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	16		45.13333333333333		4	8		0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	16		24		4			0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	256		286				256	0					240										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	256		285.1333333333333		4	8		0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	256		264		4			0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4126				4096	0					240										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4125.133333333333		4	8		0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4104		4			0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65566				65536	0					240										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65565.13333333333		4	8		0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.25/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65544		4			0					48										c1c65d02b257bfe4						0.25	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	1		31				1	0					240										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	1		13.8		4	3		0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	1		4		4			0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	16		46				16	0					240										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	16		28.8		4	3		0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	16		19		4			0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	256		286				256	0					240										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	256		268.8		4	3		0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	256		259		4			0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4126				4096	0					240										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4108.8		4	3		0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	4096		4099		4			0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/explicit-row	explicit-row	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65566				65536	0					240										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/generator-lazy	generator-lazy	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65548.8		4	3		0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+selector-carcdr-k4/u0.1/compiled-route	compiled-route	selector-carcdr-k4	4	step-model-once-vs-percall	65536		65539		4			0					48										c1c65d02b257bfe4						0.1	30	30	14	3	0	0	1
+atom-null-oneoff/u1.0/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	1		2				1	0					8										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	1		6		1	1		0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	1		2		1			0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	16		17				16	0					8										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	16		21		1	1		0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	16		17		1			0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	256		257				256	0					8										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	256		261		1	1		0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	256		257		1			0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	4096		4097				4096	0					8										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	4096		4101		1	1		0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	4096		4097		1			0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	65536		65537				65536	0					8										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	65536		65541		1	1		0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u1.0/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	65536		65537		1			0					64										346e373023c0e350						1.0	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	1		2				1	0					8										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	1		6		1	1		0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	1		2		1			0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	16		17				16	0					8										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	16		21		1	1		0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	16		17		1			0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	256		257				256	0					8										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	256		261		1	1		0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	256		257		1			0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	4096		4097				4096	0					8										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	4096		4101		1	1		0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	4096		4097		1			0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	65536		65537				65536	0					8										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	65536		65541		1	1		0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.5/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	65536		65537		1			0					64										346e373023c0e350						0.5	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	1		2				1	0					8										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	1		6		1	1		0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	1		2		1			0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	16		17				16	0					8										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	16		21		1	1		0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	16		17		1			0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	256		257				256	0					8										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	256		261		1	1		0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	256		257		1			0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	4096		4097				4096	0					8										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	4096		4101		1	1		0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	4096		4097		1			0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	65536		65537				65536	0					8										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	65536		65541		1	1		0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.25/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	65536		65537		1			0					64										346e373023c0e350						0.25	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	1		2				1	0					8										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	1		6		1	1		0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	1		2		1			0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	16		17				16	0					8										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	16		21		1	1		0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	16		17		1			0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	256		257				256	0					8										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	256		261		1	1		0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	256		257		1			0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	4096		4097				4096	0					8										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	4096		4101		1	1		0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	4096		4097		1			0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/explicit-row	explicit-row	atom-null-oneoff	1	step-model-once-vs-percall	65536		65537				65536	0					8										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/generator-lazy	generator-lazy	atom-null-oneoff	1	step-model-once-vs-percall	65536		65541		1	1		0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+atom-null-oneoff/u0.1/compiled-route	compiled-route	atom-null-oneoff	1	step-model-once-vs-percall	65536		65537		1			0					64										346e373023c0e350						0.1	1	1	0	4	1	0	1
+eq-equal-typed-family/u1.0/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	1		3				1	0					16										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	1		9		1	2		0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	1		3		1			0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	16		18				16	0					16										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	16		24		1	2		0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	16		18		1			0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	256		258				256	0					16										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	256		264		1	2		0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	256		258		1			0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4098				4096	0					16										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4104		1	2		0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4098		1			0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65538				65536	0					16										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65544		1	2		0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u1.0/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65538		1			0					96										d645b72ec1da5854						1.0	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	1		3				1	0					16										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	1		8		1	1		0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	1		2		1			0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	16		18				16	0					16										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	16		23		1	1		0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	16		17		1			0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	256		258				256	0					16										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	256		263		1	1		0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	256		257		1			0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4098				4096	0					16										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4103		1	1		0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4097		1			0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65538				65536	0					16										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65543		1	1		0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.5/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65537		1			0					96										d645b72ec1da5854						0.5	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	1		3				1	0					16										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	1		8		1	1		0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	1		2		1			0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	16		18				16	0					16										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	16		23		1	1		0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	16		17		1			0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	256		258				256	0					16										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	256		263		1	1		0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	256		257		1			0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4098				4096	0					16										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4103		1	1		0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4097		1			0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65538				65536	0					16										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65543		1	1		0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.25/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65537		1			0					96										d645b72ec1da5854						0.25	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	1		3				1	0					16										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	1		8		1	1		0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	1		2		1			0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	16		18				16	0					16										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	16		23		1	1		0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	16		17		1			0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	256		258				256	0					16										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	256		263		1	1		0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	256		257		1			0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4098				4096	0					16										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4103		1	1		0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	4096		4097		1			0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/explicit-row	explicit-row	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65538				65536	0					16										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/generator-lazy	generator-lazy	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65543		1	1		0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+eq-equal-typed-family/u0.1/compiled-route	compiled-route	eq-equal-typed-family	1	step-model-once-vs-percall	65536		65537		1			0					96										d645b72ec1da5854						0.1	2	2	0	6	2	0	1
+cons-negative-evidence/u1.0/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	1		1				1	0					0										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	1		5		0	1		0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	1		2		0			0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	16		16				16	0					0										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	16		20		0	1		0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	16		17		0			0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	256		256				256	0					0										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	256		260		0	1		0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	256		257		0			0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	4096		4096				4096	0					0										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	4096		4100		0	1		0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	4096		4097		0			0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	65536		65536				65536	0					0										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	65536		65540		0	1		0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u1.0/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	65536		65537		0			0					48										740e08474492342a						1.0	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	1		1				1	0					0										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	1		5		0	1		0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	1		2		0			0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	16		16				16	0					0										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	16		20		0	1		0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	16		17		0			0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	256		256				256	0					0										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	256		260		0	1		0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	256		257		0			0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	4096		4096				4096	0					0										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	4096		4100		0	1		0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	4096		4097		0			0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	65536		65536				65536	0					0										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	65536		65540		0	1		0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.5/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	65536		65537		0			0					48										740e08474492342a						0.5	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	1		1				1	0					0										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	1		5		0	1		0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	1		2		0			0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	16		16				16	0					0										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	16		20		0	1		0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	16		17		0			0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	256		256				256	0					0										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	256		260		0	1		0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	256		257		0			0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	4096		4096				4096	0					0										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	4096		4100		0	1		0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	4096		4097		0			0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	65536		65536				65536	0					0										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	65536		65540		0	1		0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.25/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	65536		65537		0			0					48										740e08474492342a						0.25	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	1		1				1	0					0										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	1		5		0	1		0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	1		2		0			0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	16		16				16	0					0										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	16		20		0	1		0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	16		17		0			0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	256		256				256	0					0										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	256		260		0	1		0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	256		257		0			0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	4096		4096				4096	0					0										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	4096		4100		0	1		0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	4096		4097		0			0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/explicit-row	explicit-row	cons-negative-evidence	0	step-model-once-vs-percall	65536		65536				65536	0					0										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/generator-lazy	generator-lazy	cons-negative-evidence	0	step-model-once-vs-percall	65536		65540		0	1		0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cons-negative-evidence/u0.1/compiled-route	compiled-route	cons-negative-evidence	0	step-model-once-vs-percall	65536		65537		0			0					48										740e08474492342a						0.1	0	0	0	3	0	0	0
+cond-andor-falsifier/u1.0/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	1		2				1	0					8										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	1		10		1	1		0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	1		2		1			0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	16		17				16	0					8										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	16		25		1	1		0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	16		17		1			0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	256		257				256	0					8										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	256		265		1	1		0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	256		257		1			0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4097				4096	0					8										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4105		1	1		0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4097		1			0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65537				65536	0					8										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65545		1	1		0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u1.0/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65537		1			0					128										14dd8c79b439e5f2						1.0	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	1		2				1	0					8										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	1		10		1	1		0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	1		2		1			0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	16		17				16	0					8										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	16		25		1	1		0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	16		17		1			0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	256		257				256	0					8										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	256		265		1	1		0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	256		257		1			0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4097				4096	0					8										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4105		1	1		0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4097		1			0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65537				65536	0					8										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65545		1	1		0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.5/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65537		1			0					128										14dd8c79b439e5f2						0.5	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	1		2				1	0					8										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	1		10		1	1		0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	1		2		1			0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	16		17				16	0					8										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	16		25		1	1		0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	16		17		1			0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	256		257				256	0					8										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	256		265		1	1		0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	256		257		1			0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4097				4096	0					8										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4105		1	1		0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4097		1			0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65537				65536	0					8										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65545		1	1		0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.25/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65537		1			0					128										14dd8c79b439e5f2						0.25	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	1		2				1	0					8										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	1		10		1	1		0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	1		2		1			0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	16		17				16	0					8										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	16		25		1	1		0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	16		17		1			0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	256		257				256	0					8										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	256		265		1	1		0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	256		257		1			0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4097				4096	0					8										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4105		1	1		0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	4096		4097		1			0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/explicit-row	explicit-row	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65537				65536	0					8										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/generator-lazy	generator-lazy	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65545		1	1		0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
+cond-andor-falsifier/u0.1/compiled-route	compiled-route	cond-andor-falsifier	1	step-model-once-vs-percall	65536		65537		1			0					128										14dd8c79b439e5f2						0.1	1	1	0	8	3	0	0
