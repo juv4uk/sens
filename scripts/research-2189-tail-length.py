@@ -237,8 +237,86 @@ def check_truncation_without_widths(seqs: Sequence[Seq]) -> Dict[str, Tuple[int,
     return out
 
 
+# --- B2: the standalone envelope with a RUN-LENGTH width stream (a cheaper boundary description for runs of equal width)
+RUN_MAX = 32
+
+
+def runs_of(widths: Sequence[int]) -> List[Tuple[int, int]]:
+    """Canonical runs: a maximal run of one width, split into full runs of RUN_MAX and a remainder."""
+    out: List[Tuple[int, int]] = []
+    for w, group in itertools.groupby(widths):
+        n = len(list(group))
+        while n > RUN_MAX:
+            out.append((w, RUN_MAX))
+            n -= RUN_MAX
+        out.append((w, n))
+    return out
+
+
+def enc_b2(seq: Seq) -> bytes:
+    runs = runs_of(widths_of(seq))
+    body = bytes(((w - 1) << 5) | (n - 1) for w, n in runs)
+    return varint(len(runs)) + body + to_bytes(payload_bits(seq))
+
+
+def dec_b2(frame: bytes, widths: Optional[Sequence[int]] = None) -> Seq:
+    count, pos = read_varint(frame, 0)
+    if pos + count > len(frame):
+        raise FrameError("truncated run stream")
+    runs = [((b >> 5) + 1, (b & 31) + 1) for b in frame[pos:pos + count]]
+    for (w0, n0), (w1, _) in zip(runs, runs[1:]):
+        if w0 == w1 and n0 != RUN_MAX:
+            raise FrameError("non-canonical runs: equal widths must be merged")
+    ws = [w for w, n in runs for _ in range(n)]
+    pos += count
+    total = sum(ws)
+    body = frame[pos:]
+    if len(body) != (total + 7) // 8:
+        raise FrameError("payload byte count differs from the widths")
+    bits = bits_of(body)
+    if set(bits[total:]) - {"0"}:
+        raise FrameError("non-zero tail padding")
+    if widths is not None and list(widths) != ws:
+        raise FrameError("widths differ from the grammar")
+    return split_words(bits[:total], ws)
+
+
+def enc_bstar(seq: Seq) -> bytes:
+    """B*: one mode byte (0 = B, 1 = B2), then whichever of the two is shorter (a tie takes B): canonical by construction."""
+    b, b2 = enc_b(seq), enc_b2(seq)
+    return bytes([1]) + b2 if len(b2) < len(b) else bytes([0]) + b
+
+
+def dec_bstar(frame: bytes, widths: Optional[Sequence[int]] = None) -> Seq:
+    if not frame or frame[0] not in (0, 1):
+        raise FrameError("bad mode byte")
+    seq = (dec_b2 if frame[0] else dec_b)(frame[1:], widths)
+    if enc_bstar(seq) != frame:
+        raise FrameError("not the canonical (shorter) choice")
+    return seq
+
+
+def shape_costs() -> List[Tuple[str, int, int, int, int]]:
+    """(shape, words, B, B2, B* framing bytes) for sequences whose widths are generated, values all zero."""
+    shapes = {
+        "( QUOTE ) = 2,3,2": [2, 3, 2],
+        "20 words of width 3 (one run)": [3] * 20,
+        "100 words of width 3 (one run)": [3] * 100,
+        "alternating 2,3 x 10": [2, 3] * 10,
+        "alternating 2,3 x 50": [2, 3] * 50,
+        "widths 1..4 cycling x 25": [1, 2, 3, 4] * 25,
+    }
+    rows = []
+    for name, ws in shapes.items():
+        seq = tuple((w, 0) for w in ws)
+        pb = (sum(ws) + 7) // 8
+        rows.append((name, len(ws), len(enc_b(seq)) - pb, len(enc_b2(seq)) - pb, len(enc_bstar(seq)) - pb))
+    return rows
+
+
 FRAMES = {"A bit length": (enc_a, dec_a), "B count+widths": (enc_b, dec_b),
-          "C valid bits": (enc_c, dec_c), "D stop bit": (enc_d, dec_d)}
+          "C valid bits": (enc_c, dec_c), "D stop bit": (enc_d, dec_d),
+          "B2 runs": (enc_b2, dec_b2), "B* mode+shorter": (enc_bstar, dec_bstar)}
 
 
 # ----------------------------------------------------------------- the corpus
@@ -390,6 +468,9 @@ def main(argv: Sequence[str]) -> int:
     print("\n[4] self-containment: frames shared by 2+ DIFFERENT word sequences (without the grammar's widths):")
     for name, (shared, distinct) in check_self_containment(seqs).items():
         print(f"      {name}: {shared} shared frames of {distinct} distinct frames")
+    print("\n[4b] standalone-envelope width streams: framing bytes (everything except the payload bytes), B = count + 3 bits per width, B2 = run-length (1 byte per run), B* = a mode byte + the shorter of the two:")
+    for shape, n, b_bytes, b2_bytes, bs_bytes in shape_costs():
+        print(f"      {shape:36} {n:>4} words   B {b_bytes:>3}   B2 {b2_bytes:>3}   B* {bs_bytes:>3}")
     print("\n[5] accounting, mean per sequence: frame | payload bits | payload bytes | tail bits | framing bytes | total bytes | utilization")
     for r in accounting(seqs):
         print("      " + " | ".join(str(x) for x in r))
