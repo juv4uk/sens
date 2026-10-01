@@ -10,36 +10,49 @@ on:
   workflow_dispatch:
 
 jobs:
-  benchmark:
+  hosted-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install Guix bootstrap
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Cachegrind
         run: |
           sudo apt-get update
-          sudo apt-get install -y guix
-          guix --version
+          sudo apt-get install -y valgrind
+          rustc --version
+          valgrind --version
 
-      - name: Parity + logical counters + Cachegrind in pinned Guix environment
+      - name: Run semantic parity and secondary hosted benchmark
+        env:
+          FOUNDATION_BENCH_ENV: hosted-native-smoke
         run: |
           rm -rf /tmp/sens-foundation-ladder
-          guix time-machine -C channels.scm -- shell \
-            -m manifest.scm valgrind -- \
-            bash benchmarks/foundation-ladder/run.sh /tmp/sens-foundation-ladder
+          bash benchmarks/foundation-ladder/run.sh /tmp/sens-foundation-ladder
 
-      - name: Publish benchmark summary
+      - name: Verify pinned primary evidence is versioned
+        run: |
+          test -s benchmarks/foundation-ladder/evidence/pinned-guix-i5-6400-f954fb9.tsv
+          test -s benchmarks/foundation-ladder/evidence/pinned-guix-i5-6400-f954fb9.md
+          sha256sum benchmarks/foundation-ladder/foundation_ladder.rs
+
+      - name: Publish hosted smoke summary
         if: always()
         run: |
           if test -f /tmp/sens-foundation-ladder/report.md; then
-            cat /tmp/sens-foundation-ladder/report.md >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "> Secondary hosted-native smoke. Primary pinned-Guix evidence is versioned under benchmarks/foundation-ladder/evidence/."
+              echo
+              cat /tmp/sens-foundation-ladder/report.md
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Upload benchmark evidence
+      - name: Upload hosted smoke evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: foundation-ladder-benchmark
+          name: foundation-ladder-hosted-smoke
           path: /tmp/sens-foundation-ladder/
           retention-days: 7
