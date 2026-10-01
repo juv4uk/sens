@@ -180,10 +180,15 @@ fn verify_distinct(workload:&[Word], graph:&[GraphNode]) {
     }
 }
 
-fn unique_count(workload:&[Word])->usize {
-    let mut m=HashMap::<u64,()>::new();
-    for &w in workload { m.insert(w.key(),()); }
-    m.len()
+fn unique_words(workload: &[Word]) -> Vec<Word> {
+    let mut seen = HashMap::<u64, ()>::new();
+    let mut out = Vec::new();
+    for &word in workload {
+        if seen.insert(word.key(), ()).is_none() {
+            out.push(word);
+        }
+    }
+    out
 }
 
 fn print_metrics(mode:&str, depth:u8, calls:usize, distinct:usize, flat_rows:usize, graph_nodes:usize) {
@@ -242,11 +247,13 @@ fn main(){
     assert!(depth<=16);
 
     let workload=make_workload(depth,pattern,calls);
-    let distinct=unique_count(&workload);
+    let unique=unique_words(&workload);
+    let distinct=unique.len();
     let flat=if mode=="flat" {Some(build_flat(depth))} else {None};
     let graph=if mode=="graph" || mode=="hybrid" {Some(build_graph(depth))} else {None};
 
     black_box(&workload);
+    black_box(&unique);
     black_box(&flat);
     black_box(&graph);
 
@@ -264,7 +271,9 @@ fn main(){
     }
 
     if mode=="hybrid" {
-        verify_distinct(&workload,graph.as_ref().unwrap());
+        // Cold authority check: validate each distinct identity once, then the
+        // hot path uses the compact certificate directly.
+        verify_distinct(&unique,graph.as_ref().unwrap());
     }
 
     if phase=="prepare" {
