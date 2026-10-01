@@ -1,0 +1,25 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-1968-eq-family.py
+
+name	code	arity	seed-support	direct-EQ	COND	self-recursion	selector-strength-composition
+caar	00110011	1	CAR	false	false	false	true
+cadr	00110100	1	CAR,CDR	false	false	false	true
+null?	10101011	1	ATOM,COND,QUOTE	false	true	false	false
+equal?	00100010	2	ATOM,CAR,CDR,COND,EQ,QUOTE	true	true	true	false
+member?	00101100	2	ATOM,CAR,CDR,COND,QUOTE	false	true	true	false
+
+classification
+EQ -> EQUAL : typed-family candidate only; strong local binary action NOT proven
+EQ -> NULL  : rejected as immediate EQ child in this bounded corpus
+EQ -> MEMBER: rejected as immediate EQ child in this bounded corpus
+0110/0111   : remain unallocated by this experiment
+
+PASS: positive selector control succeeds while all three EQ candidates
+fail the same small composition-only/no-control/no-recursion criterion.
+This is bounded negative evidence, not a proof that no richer EQ generator exists.
+
+Investigation note:
+- first live run failed because dependency walker skipped calls appearing in the
+  head position of COND clauses;
+- analyzer was corrected and re-run before accepting the result.
