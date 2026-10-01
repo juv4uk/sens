@@ -1,0 +1,34 @@
+name: Foundation cost ladder
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/foundation-cost-ladder/**"
+      - ".github/workflows/foundation-cost-ladder.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/foundation-cost-ladder/**"
+      - ".github/workflows/foundation-cost-ladder.yml"
+  workflow_dispatch:
+
+jobs:
+  foundation-cost-ladder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run semantic-parity smoke benchmark
+        run: |
+          python3 benchmarks/foundation-cost-ladder/run.py \
+            --smoke --reps 3 \
+            --out /tmp/foundation-cost-ladder/results
+      - name: Upload raw benchmark evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: foundation-cost-ladder
+          path: |
+            /tmp/foundation-cost-ladder/results.tsv
+            /tmp/foundation-cost-ladder/results.json
+          retention-days: 7
