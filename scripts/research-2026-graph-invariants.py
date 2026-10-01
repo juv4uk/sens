@@ -75,6 +75,15 @@ def canon_colors(signatures: dict[str, object]) -> dict[str, int]:
     return {node: index[sig] for node, sig in signatures.items()}
 
 
+def same_partition(a: dict[str, int], b: dict[str, int]) -> bool:
+    names = sorted(a)
+    for i, x in enumerate(names):
+        for y in names[i:]:
+            if (a[x] == a[y]) != (b[x] == b[y]):
+                return False
+    return True
+
+
 def wl_refine(
     nodes: dict[str, Node],
     edges: list[Edge],
@@ -99,7 +108,7 @@ def wl_refine(
         new_colors = canon_colors(signatures)
         rounds += 1
         class_counts.append(len(set(new_colors.values())))
-        if all(new_colors[n] == colors[n] for n in nodes):
+        if same_partition(new_colors, colors):
             return new_colors, rounds, class_counts
         colors = new_colors
 
