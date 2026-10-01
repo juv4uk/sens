@@ -316,6 +316,8 @@ pub fn render(forms: &[XedForm], pinned_commit: &str) -> String {
     out.push_str("(xed-machine-evidence/1\n");
     out.push_str(&format!("  (pinned-commit \"{pinned_commit}\")\n"));
     out.push_str(&format!("  (source-digest \"sha256:{digest}\")\n"));
+    // Counts are canonical numeric metadata: spell them explicitly in binary
+    // so regenerated evidence cannot reopen implicit-decimal source authority.
     out.push_str(&format!("  (form-count #b{:b})\n", forms.len()));
     for form in forms {
         out.push_str("  (form\n");
