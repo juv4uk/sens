@@ -15,9 +15,9 @@ fn eval(source: &str) -> String {
 
 #[test]
 fn null_is_true_only_for_the_empty_list() {
-    assert_eq!(eval("(null? (00000001 ()))"), "t");
-    assert_eq!(eval("(null? (00000001 a))"), "()");
-    assert_eq!(eval("(null? (00000001 (a)))"), "()");
+    assert_eq!(eval("(null? (00000001 ()))"), "1");
+    assert_eq!(eval("(null? (00000001 a))"), "0");
+    assert_eq!(eval("(null? (00000001 (a)))"), "0");
 }
 
 #[test]
