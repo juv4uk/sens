@@ -1,0 +1,26 @@
+claim_id	axis	layer_class	status	authority_prereqs	evidence_refs	note
+distinction	content	substrate	premise		#2107	minimum ability to keep occurrences/candidates apart; no semantic identity claim
+binary-cardinality-2	carrier	carrier	premise	distinction	#2106	owner binary design choice; not claimed mathematically unique
+carrier-order	carrier	carrier	witness	binary-cardinality-2	#2106 #1975	selector 01 vs 10 makes sequence order observable
+carrier-boundary	carrier	carrier	witness	binary-cardinality-2;carrier-order	#2106 #2077	fixed raw delimiter fails for arbitrary binary payload; framing mechanism remains separate
+exact-word-identity	carrier	carrier	witness	carrier-order;carrier-boundary	#2077 #2083	exact bits positions multiplicity and boundary; meaning still absent
+epsilon-semantic-admission	admission	semantic	unknown	exact-word-identity	#2106 #2077	carrier can round-trip epsilon but semantic admission is unresolved
+predicate-polarity-d1	admission	semantic	premise	binary-cardinality-2	#2018 #2106	0=NO 1=YES is semantic orientation not bare carrier law
+racana2-role-inventory	content	semantic	premise	distinction	#2018 #2106	sep/open/close/dot role inventory remains premise
+racana2-code-assignment	addressing	semantic	premise	exact-word-identity;racana2-role-inventory	#2018 #2106	all 24 role/code bijections survive abstract round-trip; current assignment not derived here
+constraint-status	status	epistemic	witness	distinction	#2112	ADMITTED REFUTED UNKNOWN kept distinct; positive relation is admitted slice
+incidence	content	substrate	premise	distinction	#2107	which occurrences participate together; orientation not yet included
+orientation	content	substrate	witness	incidence	#2107	orientation is extra structure beyond undirected incidence
+relation-kind	content	semantic	unknown	orientation;constraint-status	#2107 #2103	typed relation identity admitted only when behavior distinguishes it
+partial-composition	content	substrate	conjecture	distinction	#2105	composition-only substrate candidate; does not reconstruct all incidence
+context-carrier	proof-context	epistemic	conjecture	distinction;constraint-status	#2110	set/multiset/sequence/provenance DAG alternatives still under test
+consequence-rules	proof-context	proof	unknown	context-carrier;constraint-status	#2108	weakening contraction exchange cut explosion not silently assumed
+observer-layer	observation	semantic	conjecture	relation-kind;constraint-status	#2103 #2101	observers may be queries over admitted behavior
+observational-equivalence	observation	semantic	witness	observer-layer	#1964 #2101	domain-scoped behavioral equivalence; not semantic identity
+semantic-identity-proof	identity	semantic	unknown	observational-equivalence;consequence-rules	#1967 #1964	quotient only with stronger evidence than shared mechanism
+semantic-admission	admission	semantic	premise	exact-word-identity;constraint-status	#2063 #2071	valid word does not gain meaning without admitted evidence
+proof-certificate	proof	proof	conjecture	semantic-admission;consequence-rules;relation-kind	#2024	machine-checkable explanation; no names or historical slots
+transport-framing	execution	mechanism	conjecture	carrier-boundary;exact-word-identity	#2059 #2077	preserves boundaries but must not mint meaning
+execution-mechanism	execution	mechanism	witness	semantic-admission	#1975 #2034	bit-walk/transducer/unroll/table are downstream mechanisms
+compiler-lowering	execution	mechanism	conjecture	proof-certificate;execution-mechanism	cml#404 #2058	compiler consumes proof/meaning but never authors it
+surface-projection	surface	surface	premise	semantic-admission	#2063 #1098	human spelling routes to identity but does not own meaning
