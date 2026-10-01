@@ -1,0 +1,57 @@
+name: Cross-language load formats
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/cross-language/**"
+      - "benchmarks/sens-surface/run.py"
+      - "crates/sens/examples/ci_bench.rs"
+      - ".github/workflows/cross-language-load-formats.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: cross-language-load-formats-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  load-formats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: cross-language-load-formats
+
+      - name: Install measurement tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          python3 --version
+          valgrind --version
+          rustc --version
+
+      - name: Build SENS benchmark binary
+        run: cargo build --release -p sens --example ci_bench
+
+      - name: Measure load formats
+        run: |
+          rm -rf /tmp/sens-load-formats
+          python3 benchmarks/cross-language/load_formats.py \
+            --sens-bench target/release/examples/ci_bench \
+            --reps 3 \
+            --out /tmp/sens-load-formats
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/sens-load-formats/report.md; then
+            cat /tmp/sens-load-formats/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cross-language-load-formats
+          path: /tmp/sens-load-formats

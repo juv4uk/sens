@@ -4,6 +4,21 @@
 Перший зовнішній орієнтир — CPython (#1546). Lua (#1547), Racket CS
 (#1548) і стандартний binary-trees (#1549) додаються окремими slices.
 
+## Current D1-D4 boundary
+
+The historical shared harness still uses the old Function8 FASL SENS lane.
+It is preserved for provenance but must not be relabeled as current D1-D4
+whole-program evidence. #1668 owns the replay onto ratified exact-width D1-D4.
+
+For load-format evidence, `load_formats.py` adds a fairer CPython cached lane:
+
+- CPython source: UTF-8 read + `compile()`;
+- CPython `.pyc`: direct magic/header validation + marshal code-object decode;
+- SENS: prebuilt historical Function8 FASL decode.
+
+The `.pyc` artifact is generated before timing by the same CPython version.
+Raw repetitions and binary/runtime provenance are emitted next to the summary.
+
 ## Правила чесності
 
 1. Правильність перевіряється **до** вимірювання.
