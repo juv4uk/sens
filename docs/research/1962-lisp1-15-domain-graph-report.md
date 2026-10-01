@@ -1,214 +1,246 @@
-# #1962 — перший графовий зріз LISP I → LISP 1.5
+# #1962 — LISP I → LISP 1.5: від плоскої таблиці до prefix-графа
 
 **Статус:** research-only, не semantic authority, без production migration.  
 **Branch:** `research/1962-lisp1-15-domain-graph`.
 
-## Питання
+## Поточна модель після owner pivot 2026-10-01
 
-Чи можна вивести `D3`, `mūla4`, `janya5+` не ручним призначенням, а зі
-стійкої структури залежностей між мовними сутностями?
+Початкова гіпотеза цього PR була:
 
-Перший corpus навмисно малий: історичне ядро, кілька простих похідних
-функцій і універсальний evaluator. Мета першої фази — перевірити метод
-раніше, ніж завантажувати весь каталог LISP 1.5.
+```text
+D3 = QUOTE / COND / LAMBDA / LABEL
+mūla4 = ATOM / EQ / CAR / CDR / CONS
+```
+
+Вона **більше не є current hypothesis**. Власник помітив сильнішу
+структуру: наш старий `() + McCarthy-7` уже утворює рівно повний
+3-бітний простір.
+
+```text
+000  ()
+001  QUOTE
+010  ATOM
+011  EQ
+100  CONS
+101  CAR
+110  CDR
+111  COND
+```
+
+Тобто:
+
+```text
+1 ground + 7 constitutive operations = 8 = 2^3
+```
+
+Старі перші вісім 8-бітних записів
+`00000000..00000111` у цьому research трактуються лише як
+zero-padded projection цього зерна, а не як доказ плоскої
+256-функціональної ontology.
+
+## Гіпотеза prefix-графа
+
+Для слова довжини більше 3:
+
+```text
+parent(code) = code без останнього біта
+children(p)  = p0, p1
+```
+
+Але дуже важлива межа:
+
+> prefix-parent ще НЕ дорівнює semantic derivation.
+
+Він може означати:
+- композиційного предка;
+- семантичну сім'ю;
+- allocation ancestry;
+- іншу typed relation.
+
+Це має визначатися evidence окремо для кожного піддерева.
+
+## Знахідка 1 — CAR/CDR дають точне бінарне дерево без ручної таблиці
+
+Це перший сильний позитивний witness.
+
+Беремо:
+
+```text
+0 -> A -> CAR
+1 -> D -> CDR
+```
+
+І два seed-вузли:
+
+```text
+101 -> CAR
+110 -> CDR
+```
+
+Тоді кожен доданий біт **буквально додає ще один selector**:
+
+```text
+1010   CAAR
+1011   CADR
+1100   CDAR
+1101   CDDR
+
+10100  CAAAR
+10101  CAADR
+10110  CADAR
+10111  CADDR
+
+11000  CDAAR
+11001  CDADR
+11010  CDDAR
+11011  CDDDR
+```
+
+Тут prefix relation має реальний compositional meaning, а не лише
+адресне сусідство.
+
+Для selector subtree на ширині `n >= 3`:
+
+```text
+count(n) = 2^(n-2)
+```
+
+і всі імена унікальні.
+
+`scripts/research-1962-prefix-tree.py` це перевіряє executable.
+
+### Чому це важливо
+
+Ми отримали перший приклад, де:
+
+```text
+довший binary word
+=
+точно один додатковий semantic/compositional step
+```
+
+Це саме та властивість, яку шукали в теорії графів/зв'язків.
+
+## Знахідка 2 — primary і derived справді можуть жити на одній ширині
+
+Ширина більше не кодує жорсткий клас
+`primitive -> primary -> derived`.
+
+Наприклад, на 4 бітах:
+- `CAAR/CADR/CDAR/CDDR` уже є **derived**;
+- водночас `LAMBDA/LABEL` можуть виявитися **primary** вузлами іншої
+  4-бітної сім'ї.
+
+Отже:
+
+```text
+bit width = depth/address in prefix graph
+semantic role = independent node property
+```
+
+Це сильніше й простіше за попередню role-per-width модель.
+
+## Знахідка 3 — evaluator SCC не визначає бітність
+
+Dependency corpus лишається корисним як другий тип графа.
+
+LISP I:
+
+```text
+{eval, evcon, evlis}
+```
+
+утворюють multi-node SCC, а `apply` стоїть над ним.
+
+LISP 1.5:
+
+```text
+{apply, eval, evcon, evlis}
+```
+
+вже є одним SCC.
+
+Отже recursive topology evaluator-а змінюється між двома історичними
+реалізаціями. SCC потрібні для аналізу, але вони не є кодовим доменом
+самі по собі.
+
+## Знахідка 4 — reachability і named depth недостатні
+
+Старі Model A/B лишаються як falsification evidence:
+
+- named dependency depth змінюється від helper refactoring;
+- transitive derivability сплющує майже все до того самого seed basis.
+
+Тому prefix allocation не можна виводити лише з call graph.
+
+Потрібні **два ортогональні графи**:
+
+```text
+A. dependency / derivability graph
+B. prefix / family graph
+```
+
+а потім доказаний міст між ними:
+
+```text
+prefix edge --[typed evidence]--> semantic relation
+```
+
+## Перші кандидати для інших seed families
+
+Це НЕ allocations; лише напрям перевірки.
+
+```text
+000 ()     -> NULL?                         medium; multi-root dependency
+001 QUOTE  -> LAMBDA / LABEL?               medium; representation/binding family
+010 ATOM   -> type predicates?              open
+011 EQ     -> EQUAL / MEMBER?               medium; equality/search family
+100 CONS   -> LIST / APPEND?                medium-to-strong construction family
+101 CAR    -> CAAR / CADR                   PROVEN prefix composition
+110 CDR    -> CDAR / CDDR                   PROVEN prefix composition
+111 COND   -> AND / OR / NOT / implication  historical derivability; binary placement open
+```
+
+Головне правило: **не заповнювати порожній child лише заради симетрії**.
 
 ## Первинні джерела
 
-- *LISP I Programmer's Manual*, MIT, 1 березня 1960:
-  https://softwarepreservation.computerhistory.org/LISP/book/LISP%20I%20Programmers%20Manual.pdf
-- *LISP 1.5 Programmer's Manual*, MIT Press, 1962:
-  https://softwarepreservation.computerhistory.org/LISP/book/LISP%201.5%20Programmers%20Manual.pdf
+- *LISP I Programmer's Manual*, MIT, March 1960:
+  Chapters 2 and 4; manual explicitly says the central core is built
+  from five elementary functions/predicates by composition,
+  conditional expressions, and recursive definitions.
+- *LISP 1.5 Programmer's Manual*, MIT, 1962:
+  §1.2 elementary functions; §1.6 universal `evalquote`;
+  pp. 18–21 derived list helpers and evaluator.
 - J. McCarthy, *Recursive Functions of Symbolic Expressions and Their
-  Computation by Machine, Part I*, CACM, 1960:
-  https://www-formal.stanford.edu/jmc/recursive.pdf
+  Computation by Machine, Part I*, CACM 1960.
 
-Внутрішні донори доказів:
+Внутрішні донори:
 `ecosystem/docs/correspondence/mccarthy-1960-eval-apply-*`,
 `ecosystem/docs/correspondence/manus-ai-mylisp-vs-lisp15-*`,
 `ecosystem/memory/mccarthy-eval-x86-64-prototype.md`.
 
-## Знахідка 1: історичний матеріал сам розділяє 5 + 4
-
-LISP I прямо каже: спочатку визначаються **п'ять elementary functions
-and predicates**, а ширший клас будується композицією, conditional
-expressions і recursion. Ці п'ять:
-
-```text
-ATOM EQ CAR CDR CONS
-```
-
-LISP 1.5 зберігає ту саму п'ятірку і ще сильніше відділяє її від
-evaluator forms. У pedagogical `evalquote/apply/eval`:
-
-```text
-APPLY: CAR CDR CONS ATOM EQ
-       + LAMBDA LABEL
-
-EVAL:  QUOTE COND
-       + general application
-```
-
-Після цього manual окремо зауважує, що в pure theory усі функції,
-крім п'яти basic functions, мають бути визначені.
-
-### Гіпотеза H3-A
-
-Звідси виникає перший **позитивний**, але ще не ратифікований кандидат
-для D3:
-
-```text
-D3 candidate = {QUOTE, COND, LAMBDA, LABEL}
-mūla4         = {ATOM, EQ, CAR, CDR, CONS}
-```
-
-Причина не в кількості слотів. Це два різні класи поведінки:
-
-- `mūla4` — ordinary elementary operations/predicates над S-expressions;
-- D3-кандидати змінюють evaluation/control/binding relation і не
-  поводяться як звичайні strict function calls.
-
-Це треба ще falsify: перевірити, чи клас лишається стійким при
-переході від математичного M-language до реального interpreter system,
-і чи не є це лише історичною нотаційною випадковістю.
-
-## Знахідка 2: SCC evaluator-а змінюється між LISP I та LISP 1.5
-
-Теоретичний LISP I:
-
-```text
-apply_lisp1 -> eval_lisp1
-
-eval_lisp1 <-> evcon_lisp1
-eval_lisp1 <-> evlis_lisp1
-```
-
-Отже multi-node SCC:
-
-```text
-{eval_lisp1, evcon_lisp1, evlis_lisp1}
-```
-
-`apply_lisp1` стоїть над цим компонентом, бо формує quoted call і
-передає його `eval`.
-
-У LISP 1.5 архітектура pedagogical evaluator змінена:
-
-```text
-eval_lisp15  -> apply_lisp15
-apply_lisp15 -> eval_lisp15
-```
-
-разом із `evcon`/`evlis`, тому multi-node SCC:
-
-```text
-{apply_lisp15, eval_lisp15, evcon_lisp15, evlis_lisp15}
-```
-
-Висновок: **належність до recursive SCC не є сама по собі ознакою
-первинності або домену**. Це може змінитися через організацію
-evaluator-а при збереженні тієї самої основної мовної ідеї.
-
-## Знахідка 3: два очевидні rank-алгоритми обидва недостатні
-
-### Model A — named dependency depth
-
-Стискаємо SCC, потім беремо глибину DAG залежностей від нижнього базису.
-
-Вона дає корисне розшарування, наприклад для LISP I:
-
-```text
-cadr/null/equal  -> depth 1 -> naive janya5
-append/assoc     -> depth 2 -> naive janya6
-eval SCC         -> depth 3 -> naive janya7
-apply            -> depth 4 -> naive janya8
-```
-
-Але ця модель **неінваріантна до refactoring**.
-
-Приклад:
-
-```text
-pairlis -> null -> atom/eq
-```
-
-Якщо `null` inline-нути в `pairlis`, семантика не зміниться, а named
-depth зменшиться. Отже сама по собі ця модель не може визначати
-бітність.
-
-### Model B — transitive basis support
-
-Повністю розгортаємо залежності і питаємо лише, з яких базових
-елементів D3∪D4 функція зрештою виражається.
-
-Це стійкіше до helper names, але губить відстань: `append`, `eval` і
-багато інших вузлів просто стають «виразні через той самий нижній
-базис». Отже transitive derivability **сплющує ієрархію**.
-
-## Що потрібно замість цього
-
-Наступний кандидат — **normalized derivation cost**, де definitional
-aliases/helper names не додають штучного шару, але реальна структурна
-складність не зникає.
-
-Початковий вектор для експерименту:
-
-```text
-C(v) = (
-  primitive/application count,
-  branch count,
-  binder count,
-  recursive-SCC count,
-  distinct lower-domain dependencies,
-  normalized description bits
-)
-```
-
-Ваги поки **не визначені**. Спочатку треба отримати 2–3 конкурентні
-нормалізації й перевірити їх на refactoring invariance.
-
-Можлива правильна математична форма — не простий directed graph, а
-directed hypergraph / implicational closure:
-
-```text
-{A, B, C} -> F
-```
-
-бо факт «F виводиться з множини A,B,C» не дорівнює трьом незалежним
-ребрам.
-
-## Важливий наслідок для D3
-
-До цього `saṃbhava3` не мав позитивної evidence. Тепер маємо H3-A:
-чотири evaluation/binding forms. Але **не перейменовувати D3 і не
-призначати коди**, доки не буде:
-
-1. перевірки LISP I system APPLY та Appendix B LISP 1.5 interpreter;
-2. порівняння operational role цих чотирьох;
-3. перевірки, чи існує контрприклад — інша сутність тієї ж ролі, яка
-   руйнує клас або переповнює 3-bit capacity;
-4. перевірки, що `quote/cond/lambda/label` справді утворюють один
-   relation class, а не два випадково сусідні класи.
-
 ## Артефакти
 
-- `1962-lisp1-15-nodes.tsv` — вузли та candidate-domain labels;
+- `1962-lisp1-15-nodes.tsv` — seed/prefix/node roles;
 - `1962-lisp1-15-edges.tsv` — typed dependency evidence;
-- `scripts/research-domain-graph-1962.py` — Tarjan SCC + дві
-  діагностичні rank-моделі;
-- `1962-lisp1-15-first-run.txt` — відтворюваний перший результат.
+- `scripts/research-domain-graph-1962.py` — SCC + dependency diagnostics;
+- `1962-lisp1-15-prefix-tree.lisp` — prefix research corpus;
+- `scripts/research-1962-prefix-tree.py` — executable selector theorem;
+- `1962-lisp1-15-first-run.txt` — generated diagnostic snapshot.
 
-Жоден із цих файлів не є contract/runtime authority.
+## Наступний крок
 
-## Наступний експеримент
+1. Зберегти `bīja3` незмінним як research premise.
+2. Для кожного з шести ще не доведених seed families шукати **локальний
+   закон породження**, а не красиву пару назв.
+3. Приймати 4-бітне призначення лише якщо prefix-parent має stable
+   typed meaning на Lisp I і Lisp 1.5.
+4. Перевірити, чи 5-бітні descendants продовжують той самий закон.
+5. Якщо family не має природної binary expansion — лишити child
+   unallocated, а не ламати модель.
 
-Побудувати **Model C**:
+## Принцип
 
-1. quotient graph за definitional equivalence / transparent helper
-   expansion;
-2. SCC condensation;
-3. normalized proof/description cost;
-4. capacity check для кожного `Dn`;
-5. stability test: LISP I → LISP 1.5.
-
-Критерій успіху: вставка або видалення допоміжної назви (`NULL`,
-`CADR`, тощо) не повинна пересувати незмінну семантику між доменами.
+**Код має не просто називати вузол. Там, де це можливо, доданий біт має
+нести ще один доведений зв'язок.**
