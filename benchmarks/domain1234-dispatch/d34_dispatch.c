@@ -40,6 +40,7 @@ static struct {
 
 static Node nodes[3];
 static Row flat_table[256];
+static volatile int32_t start_value;
 
 static const Call OPS[6] = {
     {0, 0, 3, 0b101},
@@ -59,6 +60,7 @@ static uint64_t rng64(void) {
 }
 
 static void build_tree(void) {
+    start_value = 0;
     nodes[0].car = 1;
     nodes[0].cdr = 2;
     nodes[1].car = -1;
@@ -214,32 +216,32 @@ int main(int argc, char **argv) {
     if (strcmp(mode, "setup") != 0) {
         if (strategy == STRAT_FLAT) {
             for (long i = 0; i < calls; i++)
-                checksum += exec_flat(&prepared[i], 0);
+                checksum += exec_flat(&prepared[i], (int32_t)start_value);
         } else if (strategy == STRAT_PREFIX) {
             if (strcmp(workload, "repeat-d3") == 0 || strcmp(workload, "random-d3") == 0) {
                 for (long i = 0; i < calls; i++)
-                    checksum += exec_prefix_d3(&prepared[i], 0);
+                    checksum += exec_prefix_d3(&prepared[i], (int32_t)start_value);
             } else if (strcmp(workload, "repeat-d4") == 0 || strcmp(workload, "random-d4") == 0) {
                 for (long i = 0; i < calls; i++)
-                    checksum += exec_prefix_d4(&prepared[i], 0);
+                    checksum += exec_prefix_d4(&prepared[i], (int32_t)start_value);
             } else {
                 for (long i = 0; i < calls; i++)
-                    checksum += exec_prefix(&prepared[i], 0);
+                    checksum += exec_prefix(&prepared[i], (int32_t)start_value);
             }
         } else {
             if (strcmp(workload, "repeat-d3") == 0) {
                 for (long i = 0; i < calls; i++) {
                     CNT(dispatches, 1);
-                    checksum += step(0, 0);
+                    checksum += step((int32_t)start_value, 0);
                 }
             } else if (strcmp(workload, "repeat-d4") == 0) {
                 for (long i = 0; i < calls; i++) {
                     CNT(dispatches, 1);
-                    checksum += step(step(0, 1), 0);
+                    checksum += step(step((int32_t)start_value, 1), 0);
                 }
             } else {
                 for (long i = 0; i < calls; i++)
-                    checksum += exec_direct(&prepared[i], 0);
+                    checksum += exec_direct(&prepared[i], (int32_t)start_value);
             }
         }
     }
