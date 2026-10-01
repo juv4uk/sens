@@ -1,0 +1,61 @@
+depth	locality	candidate	net_i_refs_per_call	setup_i_refs_over_base	cache_hits	cache_misses	cache_hit_rate	state_bytes	semantic_steps
+4	hot1	bitwalk	64.007	0				0	4
+4	hot1	flat	59.000	866				64	0
+4	hot1	cache	91.011	1553	1999	1	0.999500	8192	4
+4	hot16	bitwalk	64.007	-14				0	4
+4	hot16	flat	59.000	866				64	0
+4	hot16	cache	91.303	1539	1984	16	0.992000	8192	4
+4	mix80	bitwalk	64.007	-14				0	4
+4	mix80	flat	59.000	866				64	0
+4	mix80	cache	91.303	1539	1984	16	0.992000	8192	4
+4	uniform	bitwalk	63.993	14				0	4
+4	uniform	flat	59.000	866				64	0
+4	uniform	cache	91.289	1539	1984	16	0.992000	8192	4
+4	adversarial	bitwalk	63.993	14				0	4
+4	adversarial	flat	59.000	866				64	0
+4	adversarial	cache	91.011	1539	1999	1	0.999500	8192	4
+8	hot1	bitwalk	92.007	0				0	8
+8	hot1	flat	59.000	17618				1024	0
+8	hot1	cache	91.025	1553	1999	1	0.999500	8192	8
+8	hot16	bitwalk	92.007	-14				0	8
+8	hot16	flat	59.000	17618				1024	0
+8	hot16	cache	91.527	1539	1984	16	0.992000	8192	8
+8	mix80	bitwalk	92.007	-14				0	8
+8	mix80	flat	59.000	17618				1024	0
+8	mix80	cache	97.865	1539	1789	211	0.894500	8192	8
+8	uniform	bitwalk	91.993	14				0	8
+8	uniform	flat	59.000	17618				1024	0
+8	uniform	cache	99.313	1539	1744	256	0.872000	8192	8
+8	adversarial	bitwalk	91.993	14				0	8
+8	adversarial	flat	59.000	17618				1024	0
+8	adversarial	cache	91.025	1539	1999	1	0.999500	8192	8
+12	hot1	bitwalk	120.007	-14				0	12
+12	hot1	flat	59.000	393577				16384	0
+12	hot1	cache	91.053	1539	1999	1	0.999500	8192	12
+12	hot16	bitwalk	119.993	0				0	12
+12	hot16	flat	59.000	393577				16384	0
+12	hot16	cache	91.751	1525	1984	16	0.992000	8192	12
+12	mix80	bitwalk	119.993	0				0	12
+12	mix80	flat	59.000	393577				16384	0
+12	mix80	cache	109.514	1525	1602	398	0.801000	8192	12
+12	uniform	bitwalk	120.007	0				0	12
+12	uniform	flat	59.000	393577				16384	0
+12	uniform	cache	170.462	1553	291	1709	0.145500	8192	12
+12	adversarial	bitwalk	120.007	0				0	12
+12	adversarial	flat	59.000	393577				16384	0
+12	adversarial	cache	183.993	1553	0	2000	0.000000	8192	12
+16	hot1	bitwalk	148.007	-14				0	16
+16	hot1	flat	59.000	8126862				262144	0
+16	hot1	cache	91.067	1539	1999	1	0.999500	8192	16
+16	hot16	bitwalk	147.993	0				0	16
+16	hot16	flat	59.000	8126862				262144	0
+16	hot16	cache	91.975	1525	1984	16	0.992000	8192	16
+16	mix80	bitwalk	147.993	0				0	16
+16	mix80	flat	59.000	8126862				262144	0
+16	mix80	cache	115.873	1525	1589	411	0.794500	8192	16
+16	uniform	bitwalk	148.007	0				0	16
+16	uniform	flat	59.000	8126862				262144	0
+16	uniform	cache	211.207	1553	13	1987	0.006500	8192	16
+16	adversarial	bitwalk	148.007	0				0	16
+16	adversarial	flat	59.000	8126862				262144	0
+16	adversarial	cache	211.993	1553	0	2000	0.000000	8192	16
