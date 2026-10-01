@@ -1,0 +1,10 @@
+candidate	result	detail
+C1_car_fail_implies_atom	smuggle	exception/host tag as type channel
+C2_eq_known_atom_set	not_equivalent	finite closed set only
+C3_host_discriminant	smuggle	host ATOM renamed
+C4_unify_eq	category_error	binary sameness ≠ unary partition
+C5_pairs_only	not_equivalent	no atom domain
+C6_pair_p_rename	not_eliminated	same type_predicate root
+H_ATOM_0_derivable	unsupported	unary partition reappears
+H_ATOM_2_capability_distinct	best_fit	type ≠ identity
+status_lock	premise	010 remains in bīja3 premise
