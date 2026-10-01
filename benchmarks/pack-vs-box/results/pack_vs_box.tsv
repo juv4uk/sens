@@ -1,0 +1,21 @@
+kind	n	semantic_bits	box_bytes	pack_bytes	utilization_pct	density_gain_box_over_pack	pack_us_median	unpack_us_median	metric	notes
+D1	8	8	8	1	100.00	8.000	2.77	1.50	python_wall_diagnostic	not_cachegrind; mechanism model only
+D1	64	64	64	8	100.00	8.000	12.25	9.64	python_wall_diagnostic	not_cachegrind; mechanism model only
+D1	1024	1024	1024	128	100.00	8.000	187.33	149.46	python_wall_diagnostic	not_cachegrind; mechanism model only
+D1	8192	8192	8192	1024	100.00	8.000	1563.50	1314.72	python_wall_diagnostic	not_cachegrind; mechanism model only
+D2	8	16	8	2	100.00	4.000	3.20	2.14	python_wall_diagnostic	not_cachegrind; mechanism model only
+D2	64	128	64	16	100.00	4.000	17.76	14.97	python_wall_diagnostic	not_cachegrind; mechanism model only
+D2	1024	2048	1024	256	100.00	4.000	280.73	247.30	python_wall_diagnostic	not_cachegrind; mechanism model only
+D2	8192	16384	8192	2048	100.00	4.000	2362.20	3343.45	python_wall_diagnostic	not_cachegrind; mechanism model only
+D3	8	24	8	3	100.00	2.667	3.50	2.80	python_wall_diagnostic	not_cachegrind; mechanism model only
+D3	64	192	64	24	100.00	2.667	23.20	20.19	python_wall_diagnostic	not_cachegrind; mechanism model only
+D3	1024	3072	1024	384	100.00	2.667	480.92	403.31	python_wall_diagnostic	not_cachegrind; mechanism model only
+D3	8192	24576	8192	3072	100.00	2.667	5537.02	4072.32	python_wall_diagnostic	not_cachegrind; mechanism model only
+mixed123	8	15	8	2	93.75	4.000	2.64	2.14	python_wall_diagnostic	not_cachegrind; mechanism model only
+mixed123	64	127	64	16	99.22	4.000	17.77	20.15	python_wall_diagnostic	not_cachegrind; mechanism model only
+mixed123	1024	2047	1024	256	99.95	4.000	296.31	262.87	python_wall_diagnostic	not_cachegrind; mechanism model only
+mixed123	8192	16383	8192	2048	99.99	4.000	3575.71	2911.90	python_wall_diagnostic	not_cachegrind; mechanism model only
+Bit8	8	64	8	8	100.00	1.000	7.34	6.09	python_wall_diagnostic	not_cachegrind; mechanism model only
+Bit8	64	512	64	64	100.00	1.000	93.13	52.73	python_wall_diagnostic	not_cachegrind; mechanism model only
+Bit8	1024	8192	1024	1024	100.00	1.000	1333.36	1125.26	python_wall_diagnostic	not_cachegrind; mechanism model only
+Bit8	8192	65536	8192	8192	100.00	1.000	7410.27	7391.71	python_wall_diagnostic	not_cachegrind; mechanism model only
