@@ -14,6 +14,7 @@ import argparse
 import csv
 import importlib.util
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Callable, Dict, List, Sequence
@@ -24,6 +25,7 @@ SPEC = importlib.util.spec_from_file_location("reconstruction", HERE / "run.py")
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError("cannot load reconstruction harness")
 reconstruction = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = reconstruction
 SPEC.loader.exec_module(reconstruction)
 
 
