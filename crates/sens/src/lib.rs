@@ -20,6 +20,7 @@ mod language_items;
 mod parser;
 mod presentation;
 mod semantic_registry;
+mod source_words;
 pub mod sens;
 mod sid;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
@@ -129,6 +130,9 @@ pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 #[allow(deprecated)]
 pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
+pub use source_words::{
+    parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
+};
 pub use text7::{Text7, Text7CellError, Text7WireError};
 pub use text7_projection::{
     encode_text7, render_text7, Text7Layout, Text7ProjectionError, TEXT7_LAYOUT_SHA256,
