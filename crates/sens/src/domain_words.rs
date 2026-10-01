@@ -90,17 +90,17 @@ mod tests {
     fn domain_carriers_round_trip_all_mechanical_words() {
         for raw in 0..=1 {
             let word = Bit1::new(raw).unwrap();
-            assert_eq!(PredicateBit::from_word(word).word(), word);
+            assert!(PredicateBit::from_word(word).word() == word);
         }
 
         for raw in 0..=3 {
             let word = Bit2::new(raw).unwrap();
-            assert_eq!(Racana2::from_word(word).word(), word);
+            assert!(Racana2::from_word(word).word() == word);
         }
 
         for raw in 0..=7 {
             let word = Bit3::new(raw).unwrap();
-            assert_eq!(Bija3::from_word(word).word(), word);
+            assert!(Bija3::from_word(word).word() == word);
         }
     }
 
