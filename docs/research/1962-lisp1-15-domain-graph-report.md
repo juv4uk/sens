@@ -1,6 +1,6 @@
 # #1962 — LISP I → LISP 1.5: від плоскої таблиці до prefix-графа
 
-**Статус:** research-only, не semantic authority, без production migration.  
+**Статус:** research-only, не semantic authority, без production migration.
 **Branch:** `research/1962-lisp1-15-domain-graph`.
 
 ## Поточна модель після owner pivot 2026-10-01
