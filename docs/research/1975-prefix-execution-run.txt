@@ -1,0 +1,34 @@
+Verified live on WSL under user agents, 2026-10-01.
+
+$ python3 scripts/research-1975-prefix-execution.py
+
+name	word	root	suffix	parity
+caar	1010	101	0	PASS
+cadr	1011	101	1	PASS
+second	1011	101	1	PASS
+cddr	1101	110	1	PASS
+third	10111	101	11	PASS
+cadddr	101111	101	111	PASS
+fourth	101111	101	111	PASS
+fifth	1011111	101	1111	PASS
+
+mechanism-accounting
+root mechanisms known by executor:       2
+suffix actions known by executor:        2
+bounded selector names parity-checked:   8
+unique descendant/root words exercised:  6
+per-descendant execution lookup rows:    0
+semantic nodes quotiented by witness:    0
+
+PASS: proven selector words execute as root + suffix program
+without a descendant dispatch table; current bounded source definitions
+produce the same outcomes on all fixtures and domain-error controls.
+GUARD: shared execution paths remain weaker than semantic identity.
+
+Interpretation:
+- root+suffix execution is real for the proven CAR/CDR family;
+- the executor has no CAAR/CADR/CDDR/etc lookup table;
+- current core.lisp is parsed only as a parity oracle;
+- path sharing is confirmed but semantic-node collapse remains 0;
+- malformed/out-of-family words fail closed;
+- CAR/CDR domain errors match the ordinary selector mechanisms.
