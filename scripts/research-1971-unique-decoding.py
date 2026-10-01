@@ -90,19 +90,28 @@ class Envelope:
             out.append(word)
         return "".join(out)
 
-    def decode(self, wire: Wire, *, strict: bool = True) -> List[Word]:
-        """Read words until the wire is exhausted; a partial word raises. `strict` also demands canonical form."""
+    def decode(self, wire: Wire, *, strict: bool = True, lazy: bool = False) -> List[Word]:
+        """Read words until the wire is exhausted; a partial word raises. `strict` also demands canonical form.
+
+        `lazy`: an INCOMPLETE tail that is only zero bits is taken as padding and ignored (the receiver of a
+        zero-padded byte stream). A tail that completes a word is a word, even if it is all zeros.
+        """
         if set(wire) - {"0", "1"}:
             raise ValueError("wire must be bits")
         pos, out = 0, []
         while pos < len(wire):
-            width, pos = self.read(wire, pos)
-            end = pos + width
-            if end > len(wire):
-                raise ValueError("truncated word")
-            out.append(wire[pos:end])
+            try:
+                width, after = self.read(wire, pos)
+                end = after + width
+                if end > len(wire):
+                    raise ValueError("truncated word")
+            except ValueError:
+                if lazy and set(wire[pos:]) <= {"0"}:
+                    break
+                raise
+            out.append(wire[after:end])
             pos = end
-        if strict and self.encode(out) != wire:
+        if strict and not lazy and self.encode(out) != wire:
             raise ValueError("not the canonical wire of its words")
         return out
 
@@ -189,7 +198,8 @@ def check_strict(env: Envelope, max_bits: int) -> Tuple[int, int, int]:
 def check_end_of_stream(env: Envelope, max_width: int, max_len: int) -> dict:
     """What happens after byte packing. Counts sequences whose packed form is misread."""
     words = all_words(max_width)
-    out = {"sequences": 0, "plain_zero_padding_misread": 0, "stop_bit_misread": 0, "length_prefix_misread": 0}
+    out = {"sequences": 0, "plain_zero_padding_strict_reader_error": 0, "plain_zero_padding_lazy_reader_wrong_sequence": 0,
+           "stop_bit_misread": 0, "length_prefix_misread": 0}
     seen_plain = {}
     for n in range(0, max_len + 1):
         for seq in itertools.product(words, repeat=n):
@@ -202,7 +212,13 @@ def check_end_of_stream(env: Envelope, max_width: int, max_len: int) -> dict:
             except ValueError:
                 got = None
             if got != seq:
-                out["plain_zero_padding_misread"] += 1
+                out["plain_zero_padding_strict_reader_error"] += 1
+            try:
+                lazy = tuple(env.decode(padded, strict=False, lazy=True))
+            except ValueError:
+                lazy = None
+            if lazy != seq:
+                out["plain_zero_padding_lazy_reader_wrong_sequence"] += 1
             seen_plain.setdefault(padded, set()).add(seq)
             try:
                 if tuple(env.decode(unpad_stop(pad_stop(wire)))) != seq:
@@ -254,8 +270,8 @@ def main(argv: Sequence[str]) -> int:
     for env in (A, B):
         r = check_end_of_stream(env, max_width, 2 if quick else 3)
         print(f"[3] {env.name} end of stream over {r['sequences']} sequences:")
-        for k in ("plain_zero_padding_misread", "stop_bit_misread", "length_prefix_misread",
-                  "padded_wires_shared_by_two_or_more_sequences"):
+        for k in ("plain_zero_padding_strict_reader_error", "plain_zero_padding_lazy_reader_wrong_sequence",
+                  "stop_bit_misread", "length_prefix_misread", "padded_wires_shared_by_two_or_more_sequences"):
             print(f"      {k}: {r[k]}")
         for wire, seqs in r["example_shared_padded_wire"]:
             print(f"      e.g. padded wire {wire} is the packing of {seqs}")

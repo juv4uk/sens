@@ -5,14 +5,16 @@
 [2] A width3+escape: 131071 bit strings up to 16 bits, 17163 accepted, 0 accepted but not canonical (non-strict decoding)
 [2] B gamma-only: 131071 bit strings up to 16 bits, 19371 accepted, 0 accepted but not canonical (non-strict decoding)
 [3] A width3+escape end of stream over 27931 sequences:
-      plain_zero_padding_misread: 26390
+      plain_zero_padding_strict_reader_error: 26390
+      plain_zero_padding_lazy_reader_wrong_sequence: 20874
       stop_bit_misread: 0
       length_prefix_misread: 0
       padded_wires_shared_by_two_or_more_sequences: 386
       e.g. padded wire 00000000 is the packing of [('0',), ('0', '0')]
       e.g. padded wire 00010000 is the packing of [('1',), ('1', '0')]
 [3] B gamma-only end of stream over 27931 sequences:
-      plain_zero_padding_misread: 20602
+      plain_zero_padding_strict_reader_error: 20602
+      plain_zero_padding_lazy_reader_wrong_sequence: 0
       stop_bit_misread: 0
       length_prefix_misread: 0
       padded_wires_shared_by_two_or_more_sequences: 0
