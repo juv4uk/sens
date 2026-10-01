@@ -701,3 +701,7 @@ fn sexpr_protocol_connections_do_not_share_state() {
 // focused CI target (`cargo test -p sens-cli --test cli`).
 #[path = "active_lib_sens_completion.rs"]
 mod active_lib_sens_completion;
+
+// #1006: exact 10101000 remains denied in Core4 and admitted only via explicit Core3.
+#[path = "raw_invoke_sens_1006.rs"]
+mod raw_invoke_sens_1006;

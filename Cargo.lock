@@ -373,12 +373,16 @@ name = "sens-cli"
 version = "0.41.0"
 dependencies = [
  "rustyline",
- "sens",
  "sens-host",
  "sens-lsp",
- "serde",
+ "sens",
  "serde_json",
+ "serde",
+ "wsm-clips-kernel",
+ "wsm-common-lisp-kernel",
+ "wsm-datalog-kernel",
  "wsm-guard-core",
+ "wsm-prolog-kernel",
 ]
 
 [[package]]
