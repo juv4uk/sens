@@ -89,4 +89,3 @@ fn define_target_is_syntax_fixed_not_runtime_selected() {
 
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }
-
