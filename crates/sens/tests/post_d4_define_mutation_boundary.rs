@@ -103,5 +103,4 @@ fn mutation_lower_bound_is_narrower_than_generic_rebinding() {
     // value change. The surviving SET/SETQ question is whether historical
     // semantics require updating an existing non-local location (and/or a
     // runtime-selected symbol) rather than constructing a shadow.
-    assert!(true);
 }
