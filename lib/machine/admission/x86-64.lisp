@@ -195,6 +195,9 @@
      (aesdeclast-xmm-mem-disp8 xmm-register register disp8)
      (aesimc-xmm-mem-disp8 xmm-register register disp8)
      (aeskeygenassist-xmm-mem-disp8-imm8
+       xmm-register register disp8 uimm8)
+     (pclmulqdq-xmm-xmm-imm8 xmm-register xmm-register uimm8)
+     (pclmulqdq-xmm-mem-disp8-imm8
        xmm-register register disp8 uimm8))))
 
 ; A disp8 slot only admits an exact integer in [-128,127].
@@ -775,6 +778,19 @@
              xmm-register register disp8 uimm8))
          form)
        (x86-encode-aeskeygenassist-xmm-mem-disp8-imm8
+         (00101111 form) (00110000 form) (00110001 form) (00110010 form)))
+      ((x86-admission-pattern-match?
+         (00000001
+           (pclmulqdq-xmm-xmm-imm8 xmm-register xmm-register uimm8))
+         form)
+       (x86-encode-pclmulqdq-xmm-xmm-imm8
+         (00101111 form) (00110000 form) (00110001 form)))
+      ((x86-admission-pattern-match?
+         (00000001
+           (pclmulqdq-xmm-mem-disp8-imm8
+             xmm-register register disp8 uimm8))
+         form)
+       (x86-encode-pclmulqdq-xmm-mem-disp8-imm8
          (00101111 form) (00110000 form) (00110001 form) (00110010 form)))
       ; Unreachable after admission. Keep fail-closed data instead of inventing
       ; a fallback encoder.
