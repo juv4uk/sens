@@ -35,7 +35,10 @@ def require(condition: bool, message: str) -> None:
         raise SystemExit(f"GENERATION-ACCOUNTING=FAIL\n{message}")
 
 
-def classify_selector_ledger_support(ledger: dict[str, Any]) -> dict[str, Any]:
+def classify_selector_ledger_support(
+    ledger: dict[str, Any],
+    ledger_summary: dict[str, Any],
+) -> dict[str, Any]:
     facts = ledger.get("facts", [])
 
     selector_facts = []
@@ -56,32 +59,59 @@ def classify_selector_ledger_support(ledger: dict[str, Any]) -> dict[str, Any]:
         if fact.get("accounting_class") == "proof"
     ]
 
-    # The current census may use CAR/CDR as a local generator basis while still
-    # leaving their global independence UNKNOWN. A semantic compression claim
-    # therefore requires an explicit atomic selector fact family in #2304.
-    required_roles = {
-        "selector-basis-car",
-        "selector-basis-cdr",
-        "selector-law-A",
-        "selector-law-D",
-        "selector-family-premise",
+    model_by_id = {
+        model["id"]: model
+        for model in ledger_summary.get("models", [])
     }
+    flat = model_by_id.get("selector-flat-current")
+    generated = model_by_id.get("selector-root-law-current")
+    interval_ready = flat is not None and generated is not None
 
-    # We intentionally do not guess IDs. Presence is only informational until
-    # the ledger grows explicit machine-readable role tags for this family.
-    ready = False
+    if interval_ready:
+        flat_interval = [
+            int(flat["semantic_fact_lower_bound"]),
+            int(flat["semantic_fact_upper_bound"]),
+        ]
+        generated_interval = [
+            int(generated["semantic_fact_lower_bound"]),
+            int(generated["semantic_fact_upper_bound"]),
+        ]
+        require(
+            generated_interval[1] <= flat_interval[1],
+            "selector generated-model upper bound exceeds flat-model upper bound",
+        )
+        reason = (
+            "validated #2304 selector models narrow the independent-semantic-fact "
+            "upper bound while leaving the lower bound unresolved"
+        )
+        upper_bound_reduction = flat_interval[1] - generated_interval[1]
+        lower_bound_reduction = flat_interval[0] - generated_interval[0]
+    else:
+        flat_interval = None
+        generated_interval = None
+        upper_bound_reduction = None
+        lower_bound_reduction = None
+        reason = (
+            "selector fact-ledger models are absent; semantic compression remains UNKNOWN"
+        )
 
     return {
         "selector_fact_rows_found": len(selector_facts),
         "selector_semantic_fact_rows_found": len(semantic),
         "selector_proof_fact_rows_found": len(proof),
-        "required_roles": sorted(required_roles),
-        "roles_machine_mapped": False,
-        "independence_ready": ready,
-        "reason": (
-            "selector root/law independence is not yet machine-mapped in the "
-            "#2304 ledger; semantic compression remains UNKNOWN"
+        "interval_ready": interval_ready,
+        "flat_model_id": "selector-flat-current",
+        "generated_model_id": "selector-root-law-current",
+        "flat_semantic_fact_interval": flat_interval,
+        "generated_semantic_fact_interval": generated_interval,
+        "semantic_fact_upper_bound_reduction": upper_bound_reduction,
+        "semantic_fact_lower_bound_reduction": lower_bound_reduction,
+        "exact_minimality_proven": (
+            interval_ready
+            and flat_interval[0] == flat_interval[1]
+            and generated_interval[0] == generated_interval[1]
         ),
+        "reason": reason,
     }
 
 
@@ -173,7 +203,7 @@ def main() -> int:
         "certificate dump and storage table disagree",
     )
 
-    ledger_support = classify_selector_ledger_support(ledger)
+    ledger_support = classify_selector_ledger_support(ledger, ledger_summary)
 
     # Proof/mechanism counts are taken from the validated #2304 summary, but we
     # do not pretend unrelated proof facts are selector proof costs.
@@ -188,8 +218,13 @@ def main() -> int:
         "residue_rows": len(residue_rows),
         "exact_generated_identity_bits": flat_identity_bits,
         "semantic_fact_count": None,
+        "selector_semantic_fact_interval": ledger_support[
+            "flat_semantic_fact_interval"
+        ],
         "semantic_fact_status": (
-            "UNKNOWN: active registry rows are not proven mutually independent semantic facts"
+            "interval-only: active registry rows are not proven mutually independent semantic facts"
+            if ledger_support["interval_ready"]
+            else "UNKNOWN: selector fact-ledger models unavailable"
         ),
     }
 
@@ -221,10 +256,13 @@ def main() -> int:
             instruction_by_mode["flat"]["net_i_refs_per_operation"]
         ),
         "semantic_fact_count": None,
+        "selector_semantic_fact_interval": ledger_support[
+            "generated_semantic_fact_interval"
+        ],
         "semantic_compression_status": (
-            "UNKNOWN"
-            if not ledger_support["independence_ready"]
-            else "ready-for-ledger-accounting"
+            "bounded-upper-bound-narrowing"
+            if ledger_support["interval_ready"]
+            else "UNKNOWN"
         ),
         "semantic_compression_reason": ledger_support["reason"],
     }
@@ -343,9 +381,31 @@ def main() -> int:
             "unit": "bits",
         },
         {
-            "metric": "semantic_fact_count",
-            "flat": "UNKNOWN",
-            "hybrid": "UNKNOWN",
+            "metric": "selector_semantic_fact_lower_bound",
+            "flat": (
+                ledger_support["flat_semantic_fact_interval"][0]
+                if ledger_support["interval_ready"]
+                else "UNKNOWN"
+            ),
+            "hybrid": (
+                ledger_support["generated_semantic_fact_interval"][0]
+                if ledger_support["interval_ready"]
+                else "UNKNOWN"
+            ),
+            "unit": "independent semantic facts",
+        },
+        {
+            "metric": "selector_semantic_fact_upper_bound",
+            "flat": (
+                ledger_support["flat_semantic_fact_interval"][1]
+                if ledger_support["interval_ready"]
+                else "UNKNOWN"
+            ),
+            "hybrid": (
+                ledger_support["generated_semantic_fact_interval"][1]
+                if ledger_support["interval_ready"]
+                else "UNKNOWN"
+            ),
             "unit": "independent semantic facts",
         },
     ]
@@ -362,6 +422,41 @@ def main() -> int:
     flat_i = hybrid_model["flat_coordinate_read_i_refs_per_function"]
     replay_i = hybrid_model["certificate_replay_i_refs_per_generated_function"]
     verify_i = hybrid_model["certificate_verify_i_refs_per_generated_function"]
+
+    if ledger_support["interval_ready"]:
+        flat_interval = ledger_support["flat_semantic_fact_interval"]
+        generated_interval = ledger_support["generated_semantic_fact_interval"]
+        verdict_lines = [
+            "## Semantic compression verdict",
+            "",
+            "**BOUNDED INTERVAL NARROWING.**",
+            "",
+            f"- flat selector model: **[{flat_interval[0]}, {flat_interval[1]}]** independent semantic facts;",
+            f"- root+law selector model: **[{generated_interval[0]}, {generated_interval[1]}]**;",
+            f"- upper bound narrows by **{ledger_support['semantic_fact_upper_bound_reduction']}**;",
+            f"- lower bound changes by **{ledger_support['semantic_fact_lower_bound_reduction']}**;",
+            "",
+            "This is not a proof that the root+law model contains exactly five independent facts.",
+            "The lower bound remains zero because CAR/CDR, selector-family premises and",
+            "extend-A/extend-D law necessity have not yet passed remove-one/minimality proofs.",
+            "",
+            "What is proved here is narrower: 12 current descendants are reconstructible,",
+            "so they no longer need to remain in the model's independent-UNKNOWN upper-bound bucket.",
+            "",
+        ]
+    else:
+        verdict_lines = [
+            "## Semantic compression verdict",
+            "",
+            "**UNKNOWN.**",
+            "",
+            ledger_support["reason"] + ".",
+            "",
+            "The current evidence proves that 12 registry rows are reconstructible and",
+            "that their certificates replay exactly. It does not yet provide a",
+            "machine-validated semantic-fact interval for the selector family.",
+            "",
+        ]
 
     report = [
         "# Exact-width generation accounting — #2370",
@@ -385,17 +480,7 @@ def main() -> int:
         f"- certificate replay: **{replay_i:.3f} I refs/op** ({replay_i/flat_i:.3f}x flat control)",
         f"- certificate verify: **{verify_i:.3f} I refs/op** ({verify_i/flat_i:.3f}x flat control)",
         "",
-        "## Semantic compression verdict",
-        "",
-        "**UNKNOWN.**",
-        "",
-        ledger_support["reason"] + ".",
-        "",
-        "The current evidence proves that 12 registry rows are reconstructible and",
-        "that their certificates replay exactly. It does not yet prove how many",
-        "independent semantic facts the selector root/law model contains after",
-        "typing premises and remove-one independence are charged.",
-        "",
+        *verdict_lines,
         "## Negative controls",
         "",
         f"- hidden instance-map model: **REJECTED** — {len(generated_rows)} independent maps "
@@ -404,9 +489,9 @@ def main() -> int:
         f"- self-framed certificate storage: **{self_framed_certificate_bits-flat_identity_bits:+d} bits** "
         "versus flat identities, so certificate storage alone is not the win;",
         "",
-        "Next unlock: add machine-readable selector basis/law/typing facts to #2304",
-        "with explicit independence status. Then rerun this exact benchmark rather",
-        "than changing the accounting rule.",
+        "Next unlock: run remove-one/root-minimality attacks on selector basis/law/premise",
+        "facts to raise the lower bounds or tighten the upper bounds. Keep this accounting",
+        "rule unchanged while the evidence improves.",
         "",
     ]
     (args.out / "report.md").write_text("\n".join(report), encoding="utf-8")
