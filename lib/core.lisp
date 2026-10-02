@@ -275,8 +275,13 @@
 (00001001 reduce
   (00001000 (f acc values)
     (00000111
-      ((00000010 values) () acc)
-      ((00000010 values) (0)
+      ((00000010 values)
+       (00000111
+         ((00000011 values (00000001 ()))
+          acc)
+         ((00000010 (00000001 ()))
+          (00000001 ()))))
+      ((00000010 (00000001 ()))
        (00111001 f (f acc (00000101 values)) (00000110 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
