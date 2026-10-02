@@ -1,0 +1,116 @@
+{
+  "schema": "core-math-neutral/v1",
+  "status": "research-only",
+  "carrier": {
+    "id": "Q",
+    "kind": "exact-rational",
+    "normalization": "canonical-reduced",
+    "partiality": "explicit"
+  },
+  "constants": [
+    {
+      "id": "neg_one",
+      "carrier": "Q",
+      "value": "-1/1"
+    }
+  ],
+  "basis_operations": [
+    {
+      "id": "add",
+      "inputs": [
+        "Q",
+        "Q"
+      ],
+      "output": "Q",
+      "partiality": "total"
+    },
+    {
+      "id": "mul",
+      "inputs": [
+        "Q",
+        "Q"
+      ],
+      "output": "Q",
+      "partiality": "total"
+    },
+    {
+      "id": "recip",
+      "inputs": [
+        "Q"
+      ],
+      "output": "Q",
+      "partiality": "undefined-at-zero"
+    }
+  ],
+  "generation_rules": [
+    {
+      "id": "neg",
+      "inputs": [
+        "x"
+      ],
+      "output": "Q",
+      "partiality": "total",
+      "expression": {
+        "call": "mul",
+        "args": [
+          {
+            "const": "neg_one"
+          },
+          {
+            "var": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sub",
+      "inputs": [
+        "x",
+        "y"
+      ],
+      "output": "Q",
+      "partiality": "total",
+      "expression": {
+        "call": "add",
+        "args": [
+          {
+            "var": "x"
+          },
+          {
+            "call": "neg",
+            "args": [
+              {
+                "var": "y"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "div",
+      "inputs": [
+        "x",
+        "y"
+      ],
+      "output": "Q",
+      "partiality": "undefined-when-y-zero",
+      "expression": {
+        "call": "mul",
+        "args": [
+          {
+            "var": "x"
+          },
+          {
+            "call": "recip",
+            "args": [
+              {
+                "var": "y"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
