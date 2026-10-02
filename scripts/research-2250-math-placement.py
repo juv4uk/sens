@@ -34,10 +34,13 @@ def verify_group_family() -> dict[str, int]:
     additive_cases = 0
     multiplicative_inverse_cases = 0
     multiplicative_quotient_cases = 0
+    quotient_swap_inverse_cases = 0
 
     for a, b in product(Q, repeat=2):
         assert a - b == a + (-b)
+        assert b - a == -(a - b)
         additive_cases += 1
+        quotient_swap_inverse_cases += 1
 
         if a != 0:
             assert a * (1 / a) == 1
@@ -46,6 +49,9 @@ def verify_group_family() -> dict[str, int]:
         if b != 0:
             assert a / b == a * (1 / b)
             multiplicative_quotient_cases += 1
+            if a != 0:
+                assert b / a == 1 / (a / b)
+                quotient_swap_inverse_cases += 1
 
     for thunk in (
         lambda: Fraction(1, 0),
@@ -62,6 +68,7 @@ def verify_group_family() -> dict[str, int]:
         "additive_quotient_cases": additive_cases,
         "multiplicative_inverse_cases": multiplicative_inverse_cases,
         "multiplicative_quotient_cases": multiplicative_quotient_cases,
+        "quotient_swap_inverse_cases": quotient_swap_inverse_cases,
         "zero_inverse_rejected": 1,
         "zero_division_rejected": 1,
     }
@@ -495,6 +502,7 @@ def main() -> None:
     print("LATTICE-FAMILIES=MIN/MAX,GCD/LCM")
     print("ORDER-REVERSING-DUALITIES=NEG,RECIP-POSITIVE")
     print("FUNCTION-CONJUGATION=NEG-AND-RECIP-ACTIONS")
+    print("ABELIAN-QUOTIENT-LAW=swap-arguments->inverse-output")
     print("GENERATED-OPERATION=PARALLEL-SUM:RECIP∘ADD∘(RECIP×RECIP)")
     print("STATUS=PASS-BOUNDED-MATH-ALGEBRA-WITNESS")
     print("AUTHORITY=RESEARCH-ONLY-NO-PRODUCTION-ALLOCATION")
