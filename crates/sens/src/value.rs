@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sens8, Text7};
+use crate::{Bit1, Environment, Exactness, Expr, PredicateBit, Sens8, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -500,7 +500,7 @@ pub enum Value {
     Nil,
     /// Exact contextual SENS predicate result. This runtime carrier is
     /// neither Number nor host Bool and has no source literal.
-    PredicateBit(bool),
+    PredicateBit(PredicateBit),
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
@@ -690,13 +690,19 @@ impl Value {
         !matches!(self, Value::Pair(_, _))
     }
 
+    /// Audited host-decision boundary for ratified D1.
+    ///
+    /// Rust supplies only the observed decision; the stored language value is
+    /// the exact one-bit carrier. No Number/Bool/NIL identity is introduced.
     pub fn predicate_bit(holds: bool) -> Self {
-        Self::PredicateBit(holds)
+        let raw = u8::from(holds);
+        let word = Bit1::new(raw).expect("a host decision always fits one exact bit");
+        Self::PredicateBit(PredicateBit::from_word(word))
     }
 
     pub fn as_predicate_bit(&self) -> Option<bool> {
         match self {
-            Self::PredicateBit(bit) => Some(*bit),
+            Self::PredicateBit(bit) => bit.word().bit(0),
             _ => None,
         }
     }
@@ -800,8 +806,13 @@ fn render(value: &Value, quote_strings: bool) -> String {
             format!("#f32({})", items.join(" "))
         }
         Value::Nil => "()".to_string(),
-        Value::PredicateBit(true) => "1".to_string(),
-        Value::PredicateBit(false) => "0".to_string(),
+        Value::PredicateBit(bit) => {
+            if bit.word().packed_bits() == 1 {
+                "1".to_string()
+            } else {
+                "0".to_string()
+            }
+        }
         Value::Bool(true) => "t".to_string(),
         Value::Bool(false) => "()".to_string(),
         Value::Number(number, Exactness::Exact) => number.to_string(),

@@ -28,7 +28,7 @@ use crate::bits::{Bit1, Bit2, Bit3};
 /// The mapping/orientation of the bit is language-owned and deliberately absent
 /// here. In particular, there is no `bool` constructor or conversion.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct PredicateBit(Bit1);
 
 impl PredicateBit {
