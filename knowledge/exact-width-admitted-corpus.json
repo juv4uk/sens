@@ -1,0 +1,648 @@
+{
+  "meta": {
+    "schema": "exact-width-admitted-corpus/v1",
+    "authority": "projection-only",
+    "authority_refs": [
+      "#2151",
+      "#2170",
+      "#2175",
+      "#2329"
+    ],
+    "forbidden_input": "lib/surface/semantic-registry.lisp",
+    "row_count": 62,
+    "status_counts": {
+      "admitted": 24,
+      "generated": 12,
+      "unallocated": 26
+    },
+    "function_like_active_rows": 30,
+    "d4_reserved_holes": [
+      "0101",
+      "1001"
+    ],
+    "d5_generated_selector_count": 8,
+    "d5_nonselector_admitted_count": 0
+  },
+  "rows": [
+    {
+      "word": "0",
+      "width": 1,
+      "role": "answer",
+      "status": "admitted",
+      "family": "answer",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "NO"
+    },
+    {
+      "word": "1",
+      "width": 1,
+      "role": "answer",
+      "status": "admitted",
+      "family": "answer",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "YES"
+    },
+    {
+      "word": "00",
+      "width": 2,
+      "role": "structure",
+      "status": "admitted",
+      "family": "structure",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "separator"
+    },
+    {
+      "word": "01",
+      "width": 2,
+      "role": "structure",
+      "status": "admitted",
+      "family": "structure",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "close"
+    },
+    {
+      "word": "10",
+      "width": 2,
+      "role": "structure",
+      "status": "admitted",
+      "family": "structure",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "open"
+    },
+    {
+      "word": "11",
+      "width": 2,
+      "role": "structure",
+      "status": "admitted",
+      "family": "structure",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "dot"
+    },
+    {
+      "word": "000",
+      "width": 3,
+      "role": "foundation",
+      "status": "admitted",
+      "family": "foundation",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "()"
+    },
+    {
+      "word": "001",
+      "width": 3,
+      "role": "foundation",
+      "status": "admitted",
+      "family": "foundation",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "QUOTE"
+    },
+    {
+      "word": "010",
+      "width": 3,
+      "role": "foundation",
+      "status": "admitted",
+      "family": "foundation",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "ATOM"
+    },
+    {
+      "word": "011",
+      "width": 3,
+      "role": "foundation",
+      "status": "admitted",
+      "family": "foundation",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "COND"
+    },
+    {
+      "word": "100",
+      "width": 3,
+      "role": "foundation",
+      "status": "admitted",
+      "family": "foundation",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "CONS"
+    },
+    {
+      "word": "101",
+      "width": 3,
+      "role": "selector-root",
+      "status": "admitted",
+      "family": "selector",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "CAR"
+    },
+    {
+      "word": "110",
+      "width": 3,
+      "role": "selector-root",
+      "status": "admitted",
+      "family": "selector",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "CDR"
+    },
+    {
+      "word": "111",
+      "width": 3,
+      "role": "foundation",
+      "status": "admitted",
+      "family": "foundation",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "EQ"
+    },
+    {
+      "word": "0000",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "APPLY"
+    },
+    {
+      "word": "0001",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "EVAL"
+    },
+    {
+      "word": "0010",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "LAMBDA"
+    },
+    {
+      "word": "0011",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "DEFINE"
+    },
+    {
+      "word": "0100",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "NOT"
+    },
+    {
+      "word": "0101",
+      "width": 4,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "0110",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "EVCON"
+    },
+    {
+      "word": "0111",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "EVLIS"
+    },
+    {
+      "word": "1000",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "LIST"
+    },
+    {
+      "word": "1001",
+      "width": 4,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "1010",
+      "width": 4,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CAAR"
+    },
+    {
+      "word": "1011",
+      "width": 4,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CADR"
+    },
+    {
+      "word": "1100",
+      "width": 4,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CDAR"
+    },
+    {
+      "word": "1101",
+      "width": 4,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CDDR"
+    },
+    {
+      "word": "1110",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "LOOKUP"
+    },
+    {
+      "word": "1111",
+      "width": 4,
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#2151/#2170",
+      "generator_ref": null,
+      "human_label_optional": "BIND"
+    },
+    {
+      "word": "00000",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "00001",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "00010",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "00011",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "00100",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "00101",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "00110",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "00111",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "01000",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "01001",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "01010",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "01011",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "01100",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "01101",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "01110",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "01111",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "10000",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "10001",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "10010",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "10011",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "10100",
+      "width": 5,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CAAAR"
+    },
+    {
+      "word": "10101",
+      "width": 5,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CAADR"
+    },
+    {
+      "word": "10110",
+      "width": 5,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CADAR"
+    },
+    {
+      "word": "10111",
+      "width": 5,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CADDR"
+    },
+    {
+      "word": "11000",
+      "width": 5,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CDAAR"
+    },
+    {
+      "word": "11001",
+      "width": 5,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CDADR"
+    },
+    {
+      "word": "11010",
+      "width": 5,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CDDAR"
+    },
+    {
+      "word": "11011",
+      "width": 5,
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": "#1968/#2329",
+      "human_label_optional": "CDDDR"
+    },
+    {
+      "word": "11100",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "11101",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "11110",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    },
+    {
+      "word": "11111",
+      "width": 5,
+      "role": "unallocated",
+      "status": "unallocated",
+      "family": "unallocated",
+      "authority_ref": "#2175/#2329",
+      "generator_ref": null,
+      "human_label_optional": null
+    }
+  ]
+}
