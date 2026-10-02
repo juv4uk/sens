@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from fractions import Fraction
 from itertools import product
+from math import gcd, lcm
 
 
 def corpus(limit: int = 4) -> tuple[Fraction, ...]:
@@ -149,6 +150,143 @@ def verify_derived_basics() -> dict[str, int]:
     }
 
 
+def euclidean_divmod(a: int, b: int) -> tuple[int, int]:
+    """Euclidean division: a = b*q + r and 0 <= r < abs(b)."""
+    if b == 0:
+        raise ZeroDivisionError("euclidean divmod by zero")
+    d = abs(b)
+    q_for_positive_divisor = a // d
+    r = a - d * q_for_positive_divisor
+    q = q_for_positive_divisor if b > 0 else -q_for_positive_divisor
+    assert a == b * q + r
+    assert 0 <= r < d
+    return q, r
+
+
+def gcd_via_divmod(a: int, b: int) -> int:
+    x, y = abs(a), abs(b)
+    while y != 0:
+        _, r = euclidean_divmod(x, y)
+        x, y = y, r
+    return x
+
+
+def verify_divmod_selector_family() -> dict[str, int]:
+    selector_cases = 0
+    gcd_cases = 0
+    lcm_cases = 0
+
+    for a in range(-12, 13):
+        for b in range(-7, 8):
+            if b == 0:
+                continue
+            pair = euclidean_divmod(a, b)
+            quotient = pair[0]   # CAR ∘ DIVMOD
+            remainder = pair[1]  # CDR ∘ DIVMOD
+            assert a == b * quotient + remainder
+            assert 0 <= remainder < abs(b)
+            selector_cases += 2
+
+    for a, b in product(range(-12, 13), repeat=2):
+        g = gcd_via_divmod(a, b)
+        assert g == gcd(a, b)
+        gcd_cases += 1
+
+        expected_lcm = lcm(a, b)
+        derived_lcm = 0 if a == 0 or b == 0 else abs(a * b) // g
+        assert derived_lcm == expected_lcm
+        lcm_cases += 1
+
+    try:
+        euclidean_divmod(1, 0)
+    except ZeroDivisionError:
+        pass
+    else:
+        raise AssertionError("DIVMOD divisor zero must be rejected")
+
+    return {
+        "divmod_selector_projection_cases": selector_cases,
+        "gcd_via_remainder_cases": gcd_cases,
+        "lcm_via_gcd_cases": lcm_cases,
+        "divmod_zero_rejected": 1,
+    }
+
+
+def check_lattice(values, meet, join) -> tuple[int, int, int, int]:
+    commutative = 0
+    idempotent = 0
+    absorption = 0
+    associative = 0
+
+    for a, b in product(values, repeat=2):
+        assert meet(a, b) == meet(b, a)
+        assert join(a, b) == join(b, a)
+        commutative += 2
+
+        assert meet(a, a) == a
+        assert join(a, a) == a
+        idempotent += 2
+
+        assert meet(a, join(a, b)) == a
+        assert join(a, meet(a, b)) == a
+        absorption += 2
+
+    for a, b, d in product(values, repeat=3):
+        assert meet(meet(a, b), d) == meet(a, meet(b, d))
+        assert join(join(a, b), d) == join(a, join(b, d))
+        associative += 2
+
+    return commutative, idempotent, absorption, associative
+
+
+def verify_lattice_families() -> dict[str, int]:
+    q_values = Q
+    z_values = tuple(range(0, 13))
+
+    q_counts = check_lattice(q_values, min, max)
+    z_counts = check_lattice(z_values, gcd, lcm)
+
+    return {
+        "q_lattice_commutative_cases": q_counts[0],
+        "q_lattice_idempotent_cases": q_counts[1],
+        "q_lattice_absorption_cases": q_counts[2],
+        "q_lattice_associative_cases": q_counts[3],
+        "divisibility_lattice_commutative_cases": z_counts[0],
+        "divisibility_lattice_idempotent_cases": z_counts[1],
+        "divisibility_lattice_absorption_cases": z_counts[2],
+        "divisibility_lattice_associative_cases": z_counts[3],
+    }
+
+
+def verify_order_reversing_dualities() -> dict[str, int]:
+    negation_cases = 0
+    reciprocal_cases = 0
+    abs_cases = 0
+
+    for a, b in product(Q, repeat=2):
+        assert -min(a, b) == max(-a, -b)
+        assert -max(a, b) == min(-a, -b)
+        negation_cases += 2
+
+    positive = tuple(x for x in Q if x > 0)
+    for a, b in product(positive, repeat=2):
+        assert 1 / min(a, b) == max(1 / a, 1 / b)
+        assert 1 / max(a, b) == min(1 / a, 1 / b)
+        reciprocal_cases += 2
+
+    for x in Q:
+        assert abs(x) == max(x, -x)
+        sign = -1 if x < 0 else (1 if x > 0 else 0)
+        assert Fraction(sign) * abs(x) == x
+        abs_cases += 2
+
+    return {
+        "negation_lattice_duality_cases": negation_cases,
+        "reciprocal_positive_order_duality_cases": reciprocal_cases,
+        "abs_sign_factorization_cases": abs_cases,
+    }
+
+
 def group_family_candidate() -> tuple[tuple[str, str, int], ...]:
     return (
         ("additive-root", "0", 1),
@@ -164,6 +302,9 @@ def main() -> None:
     group = verify_group_family()
     order = verify_order_klein4()
     derived = verify_derived_basics()
+    divmod_family = verify_divmod_selector_family()
+    lattices = verify_lattice_families()
+    dualities = verify_order_reversing_dualities()
     placement = group_family_candidate()
 
     print(f"Q-CORPUS-SIZE={len(Q)}")
@@ -171,10 +312,11 @@ def main() -> None:
         print(f"{key.upper().replace('_', '-')}={value}")
     for key, value in order.items():
         print(f"{key.upper().replace('_', '-')}={value}")
-    for key, value in derived.items():
-        print(f"{key.upper().replace('_', '-')}={value}")
+    for group_results in (derived, divmod_family, lattices, dualities):
+        for key, value in group_results.items():
+            print(f"{key.upper().replace('_', '-')}={value}")
 
-    print("DERIVED-BASIC-CANDIDATES=EQ,NE,MIN,MAX,ZERO?,ABS,SIGN")
+    print("DERIVED-BASIC-CANDIDATES=EQ,NE,MIN,MAX,ZERO?,ABS,SIGN,GCD,LCM")
     print("DERIVED-BASIC-ROOTS=LT,NEG,+constants/control")
     print("GROUP-FAMILY-CANDIDATE:")
     for role, code, width in placement:
@@ -193,7 +335,10 @@ def main() -> None:
     print("  10 GE   ; predicate-negation")
     print("  11 LE   ; swap+predicate-negation")
     print("ORDER-ACTION-LAW=compose-actions-via-xor")
-    print("STATUS=PASS-BOUNDED-EXACT-Q-WITNESS")
+    print("DIVMOD-SELECTOR-LAW=CAR->QUOTIENT,CDR->REMAINDER")
+    print("LATTICE-FAMILIES=MIN/MAX,GCD/LCM")
+    print("ORDER-REVERSING-DUALITIES=NEG,RECIP-POSITIVE")
+    print("STATUS=PASS-BOUNDED-MATH-ALGEBRA-WITNESS")
     print("AUTHORITY=RESEARCH-ONLY-NO-PRODUCTION-ALLOCATION")
 
 
