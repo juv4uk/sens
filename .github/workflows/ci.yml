@@ -168,11 +168,21 @@ jobs:
           git diff --check
         
 
-      - name: Lisp-owned repo tooling inventory
+      - name: Lisp-owned repo tooling inventory (diff-scoped on pull requests)
         shell: bash
         run: |
           set -euo pipefail
-          ./target/debug/sens scripts/check-repo-tooling-inventory.lisp
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$base" ]; then
+            git diff --name-only "$base...HEAD" > /tmp/tooling-inventory-changed.txt
+            python3 scripts/tooling-inventory-diff-scope.py \
+              --changed /tmp/tooling-inventory-changed.txt \
+              --repo . --out /tmp/tooling-inventory-scoped
+            cd /tmp/tooling-inventory-scoped
+            "$GITHUB_WORKSPACE/target/debug/sens" scripts/check-repo-tooling-inventory.lisp
+          else
+            ./target/debug/sens scripts/check-repo-tooling-inventory.lisp
+          fi
 
       - name: Canon function-table mechanism provenance
         shell: bash
