@@ -29,10 +29,11 @@
 ;      closure / identity / inverse лише там, де це доведено
 ;      generated functions + irreducible residue
 ;
-;   3. D7 research:
-;      sound + number questions.
-;      Sound і Number не ототожнюються лише через спільну ширину/біти.
-;      Точний закон D7 має бути виведений окремо.
+;   3. Зовнішні мости/споживачі:
+;      Core D7 Sound+Number (#2415) є окремим дослідженням Core.
+;      Core-Math не залежить від D7 і не мусить мати Sound.
+;      D7 може спожити окремо доведений математичний закон лише через
+;      явний typed bridge (#2430), без перенесення semantic authority.
 ;
 ; Статуси дослідницького твердження:
 ;   HYPOTHESIS
