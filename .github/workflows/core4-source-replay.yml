@@ -4,13 +4,13 @@ on:
   pull_request:
     paths:
       - "lib/core.lisp"
-      - "lib/core.lisp.fasl"
+      - "lib/core4.lisp.fasl"
       - ".github/workflows/core4-source-replay.yml"
   push:
     branches: [main]
     paths:
       - "lib/core.lisp"
-      - "lib/core.lisp.fasl"
+      - "lib/core4.lisp.fasl"
       - ".github/workflows/core4-source-replay.yml"
   workflow_dispatch:
 
@@ -29,11 +29,11 @@ jobs:
         run: |
           set -euo pipefail
           test -s lib/core.lisp
-          test -s lib/core.lisp.fasl
+          test -s lib/core4.lisp.fasl
           printf 'core source sha256: '
           sha256sum lib/core.lisp
           printf 'core fasl sha256: '
-          sha256sum lib/core.lisp.fasl
+          sha256sum lib/core4.lisp.fasl
 
       - name: No active Core4 replay authority
         shell: bash
