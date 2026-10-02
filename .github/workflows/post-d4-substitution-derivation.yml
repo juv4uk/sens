@@ -1,0 +1,32 @@
+name: Post-D4 SUBST/SUBLIS derivation research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_substitution.rs"
+      - ".github/workflows/post-d4-substitution-derivation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/post_d4_substitution.rs"
+      - ".github/workflows/post-d4-substitution-derivation.yml"
+
+jobs:
+  focused:
+    name: Post-D4 SUBST/SUBLIS derivation research
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused substitution derivation witness
+        run: cargo test -p sens --test post_d4_substitution -- --nocapture
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Post-D4 SUBST/SUBLIS derivation research"
+            echo
+            echo "- D3/D4 identity whitelist enforced"
+            echo "- Historical SUBST/SUBLIS and canonical ASSOC forbidden in derivation"
+            echo "- No post-D4 identity allocation"
+          } >> "$GITHUB_STEP_SUMMARY"
