@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,9 +55,9 @@ def extract_apply_body() -> str:
         line.split(";", 1)[0]
         for line in CORE1.read_text(encoding="utf-8").splitlines()
     )
-    marker = "(00001001 C1-APPLY"
-    start = text.find(marker)
-    assert start >= 0, "C1-APPLY missing"
+    match = re.search(r"\(00001001\s+C1-APPLY(?=\s|\))", text)
+    assert match is not None, "C1-APPLY missing"
+    start = match.start()
 
     depth = 0
     end = start
