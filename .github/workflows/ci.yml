@@ -89,6 +89,17 @@ jobs:
         shell: bash
         run: bash scripts/rust-one-way-valve.sh "$BASE_SHA" "$HEAD_SHA"
 
+      - name: Exact-width paradigm one-way self-test
+        shell: bash
+        run: bash scripts/test-domain-paradigm-one-way-guard.sh
+
+      - name: Exact-width paradigm legacy-dependency ratchet
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: bash scripts/domain-paradigm-one-way-guard.sh "$BASE_SHA" "$HEAD_SHA"
+
       - name: SID exact-binary identity guard
         if: steps.changes.outputs.rust == 'true'
         shell: bash
