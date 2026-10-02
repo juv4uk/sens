@@ -1,0 +1,22 @@
+name: GF2 affine certificate economy
+
+on:
+  pull_request:
+    paths:
+      - "scripts/bench-2346-gf2-affine-certificate-economy.py"
+      - ".github/workflows/gf2-affine-certificate-economy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare direct coordinates and shortest generator paths
+        run: python3 scripts/bench-2346-gf2-affine-certificate-economy.py
