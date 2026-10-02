@@ -78,3 +78,32 @@ python3 benchmarks/pack-efficiency/random_scale.py \
   --cases w1,d1234,w8 \
   --accesses 4096 --reps 1
 ```
+
+
+## Current measured representation boundary
+
+The combined #2247 sequential evidence and #2264 random-access evidence support
+this **mechanism** matrix. It is not a semantic law and does not replace the
+framing or FPGA benchmark owners.
+
+| Use shape | Current measured mechanism | Quantitative boundary |
+|---|---|---|
+| cold dense payload / storage | packed | payload reaches the bit lower bound |
+| repeated sequential execution | decode once -> u8 cache | #2247 crossover ~1.04..1.15 passes |
+| hot random fixed-width arrays | u8 cache when CPU matters | packed random reads cost ~6.3x W1 to ~18.7x W8 I/access in hosted replication |
+| hot random mixed-width arrays | decode once -> u8 cache | D1-D4-shaped packed random ~9.7x cache I/access |
+| mixed-width packed random index | **do not use naive usize-per-word index as density solution** | payload ~0.344 B/word but host offset proxy adds 8 B/word |
+| wire / FASL payload | packed remains a candidate | framing/boundary metadata belongs to #2189 |
+| FPGA transfer | packed remains a candidate | area/Fmax/cycle evidence belongs to FPGA benchmark work |
+
+The important distinction is:
+
+```text
+payload density
+!=
+hot random-access representation
+```
+
+A compact boundary index, block index, checkpoint scheme, or grammar-derived
+offset mechanism should be benchmarked against the explicit host-offset proxy
+rather than silently excluded from accounting.
