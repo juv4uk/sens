@@ -55,3 +55,66 @@ jobs:
         with:
           name: pack-efficiency
           path: /tmp/pack-efficiency
+
+
+  random-scale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: pack-efficiency-random
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+          rustc --version
+
+      - name: Build benchmark
+        run: cargo build --release -p sens --example pack_efficiency_bench
+
+      - name: Measure random access across bounded scale ladder
+        run: |
+          rm -rf /tmp/pack-random
+          python3 benchmarks/pack-efficiency/random_scale.py \
+            --binary target/release/examples/pack_efficiency_bench \
+            --out /tmp/pack-random/ladder \
+            --sizes 8,64,1024,65536 \
+            --cases w1,d1234,w8 \
+            --accesses 4096 \
+            --scan-repeats 1 \
+            --reps 1
+
+      - name: Measure one-million-word mixed control
+        run: |
+          python3 benchmarks/pack-efficiency/random_scale.py \
+            --binary target/release/examples/pack_efficiency_bench \
+            --out /tmp/pack-random/million \
+            --sizes 1000000 \
+            --cases d1234 \
+            --accesses 4096 \
+            --scan-repeats 1 \
+            --reps 1
+
+      - name: Publish random-access reports
+        if: always()
+        run: |
+          {
+            if test -f /tmp/pack-random/ladder/random-report.md; then
+              cat /tmp/pack-random/ladder/random-report.md
+            fi
+            echo
+            if test -f /tmp/pack-random/million/random-report.md; then
+              cat /tmp/pack-random/million/random-report.md
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pack-efficiency-random-scale
+          path: /tmp/pack-random
