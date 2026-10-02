@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/research-2271-q-minimal-signature.py"
+      - "scripts/research-2271-q-remove-one.py"
       - ".github/workflows/q-minimal-signature-research.yml"
   workflow_dispatch:
 
@@ -20,3 +21,5 @@ jobs:
           python-version: "3.12"
       - name: Desugar exact-Q arithmetic to ADD + MUL + RECIP
         run: python3 scripts/research-2271-q-minimal-signature.py
+      - name: Attack each surviving generator
+        run: python3 scripts/research-2271-q-remove-one.py
