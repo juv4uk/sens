@@ -1,0 +1,45 @@
+name: Anti-numerology research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2241-anti-numerology.py"
+      - "knowledge/function-status-census.json"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/anti-numerology.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2241-anti-numerology.py"
+      - "knowledge/function-status-census.json"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/anti-numerology.yml"
+  workflow_dispatch:
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run semantic-vs-coordinate falsifier
+        run: |
+          rm -rf /tmp/anti-numerology
+          python3 scripts/research-2241-anti-numerology.py \
+            --out /tmp/anti-numerology
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/anti-numerology/report.md; then
+            cat /tmp/anti-numerology/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: anti-numerology-classification
+          path: /tmp/anti-numerology/
+          retention-days: 14
