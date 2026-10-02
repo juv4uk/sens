@@ -1,0 +1,57 @@
+name: Packed bits efficiency benchmark
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/examples/pack_efficiency_bench.rs"
+      - "benchmarks/pack-efficiency/**"
+      - ".github/workflows/pack-efficiency.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: pack-efficiency-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pack-efficiency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: pack-efficiency
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+          rustc --version
+
+      - name: Build benchmark
+        run: cargo build --release -p sens --example pack_efficiency_bench
+
+      - name: Measure density and CPU cost
+        run: |
+          rm -rf /tmp/pack-efficiency
+          python3 benchmarks/pack-efficiency/run.py \
+            --binary target/release/examples/pack_efficiency_bench \
+            --out /tmp/pack-efficiency \
+            --count 65536 \
+            --scan-repeats 4 \
+            --reps 3
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/pack-efficiency/report.md; then
+            cat /tmp/pack-efficiency/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pack-efficiency
+          path: /tmp/pack-efficiency
