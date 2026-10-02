@@ -1,0 +1,149 @@
+{
+  "authority": "research-only",
+  "basis": [
+    "add",
+    "mul",
+    "recip"
+  ],
+  "cross_model_findings": {
+    "cache_filling_is_semantic_growth": false,
+    "ephemeral_derivation_mutates_global_language": false,
+    "law_withdrawal_retracts_dependents": [
+      "neg",
+      "sub"
+    ],
+    "naive_monotone_requires_retraction_or_versioning": true,
+    "ratified_promotion_is_explicit_state_change": true,
+    "static_and_cached_share_semantics": true
+  },
+  "decision": "NO-WINNER-SELECTED",
+  "generated_dependency_graph": {
+    "div": [],
+    "neg": [],
+    "sub": [
+      "neg"
+    ]
+  },
+  "models": {
+    "A_static_closure": {
+      "cache_is_semantic": false,
+      "classification": "mathematical-closure-state",
+      "order_independent": true,
+      "semantic_after_neg_withdrawal": [
+        "add",
+        "div",
+        "mul",
+        "recip"
+      ],
+      "semantic_before": [
+        "add",
+        "div",
+        "mul",
+        "neg",
+        "recip",
+        "sub"
+      ],
+      "withdrawal_retracts": [
+        "neg",
+        "sub"
+      ]
+    },
+    "B_monotone_state": {
+      "classification": "unsafe-without-retraction-versioning",
+      "durable_state_before_withdrawal": [
+        "add",
+        "div",
+        "mul",
+        "neg",
+        "recip",
+        "sub"
+      ],
+      "mathematically_valid_after_withdrawal": [
+        "add",
+        "div",
+        "mul",
+        "recip"
+      ],
+      "order_independent_final_if_fair": true,
+      "requires_versioned_revalidation": true,
+      "stale_after_withdrawal": [
+        "neg",
+        "sub"
+      ]
+    },
+    "C_ephemeral": {
+      "classification": "context-local-derivation",
+      "ephemeral_context": [
+        "neg",
+        "sub"
+      ],
+      "global_state_unchanged": true,
+      "query_target": "sub",
+      "sub_derivable_after_neg_withdrawal": false
+    },
+    "D_cached": {
+      "cache_after_clear": [],
+      "cache_after_sub_query": [
+        "neg",
+        "sub"
+      ],
+      "cache_clear_changes_semantics": false,
+      "classification": "mechanism-only-cache",
+      "semantic_after_cache_clear": [
+        "add",
+        "div",
+        "mul",
+        "neg",
+        "recip",
+        "sub"
+      ],
+      "semantic_after_neg_withdrawal": [
+        "add",
+        "div",
+        "mul",
+        "recip"
+      ],
+      "semantic_before": [
+        "add",
+        "div",
+        "mul",
+        "neg",
+        "recip",
+        "sub"
+      ]
+    },
+    "E_ratified": {
+      "classification": "explicit-ratified-state",
+      "durable_after_ratify_neg_sub": [
+        "add",
+        "mul",
+        "neg",
+        "recip",
+        "sub"
+      ],
+      "durable_after_revoke_neg": [
+        "add",
+        "mul",
+        "recip"
+      ],
+      "durable_before_ratification": [
+        "add",
+        "mul",
+        "recip"
+      ],
+      "event_log": [
+        "ratify:neg",
+        "ratify:sub",
+        "revoke:neg",
+        "revalidate:sub->retract"
+      ],
+      "explicit_state_transition_required": true,
+      "mathematical_candidates": [
+        "div",
+        "neg",
+        "sub"
+      ]
+    }
+  },
+  "schema": "core-math-growth-phase-tournament/v1"
+}
