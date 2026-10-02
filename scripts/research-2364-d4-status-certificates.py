@@ -178,7 +178,7 @@ def load_exact_width_d4() -> dict[str, dict[str, Any]]:
         if row["width"] == 4 and row["status"] != "unallocated"
     }
 
-    for identity, label in D4.items():
+    for identity, label in sorted(D4.items()):
         assert identity in rows, identity
         assert rows[identity]["human_label_optional"] == label
         assert rows[identity]["status"] == "admitted"
