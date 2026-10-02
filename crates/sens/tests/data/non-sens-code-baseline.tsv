@@ -341,7 +341,6 @@ source	knowledge/sanskrit-cyrillic-phoneme-map.lisp	10
 source	knowledge/semantic-lineage-core-v1.lisp	18
 source	knowledge/swarm-no-live-callers-audit.lisp	1
 source	lib/core.lisp	11
-source	lib/core4.lisp	11
 source	lib/forward.lisp	2
 source	lib/generated/meta-semantic-registry.lisp	661
 source	lib/life-1-scheduler.lisp	1
