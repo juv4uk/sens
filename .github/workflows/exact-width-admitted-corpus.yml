@@ -1,0 +1,70 @@
+name: Exact-width admitted corpus research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2352-exact-width-corpus.py"
+      - "knowledge/exact-width-admitted-corpus.json"
+      - "knowledge/exact-width-admitted-corpus.tsv"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/exact-width-admitted-corpus.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/research-2352-exact-width-corpus.py"
+      - "knowledge/exact-width-admitted-corpus.json"
+      - "knowledge/exact-width-admitted-corpus.tsv"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/exact-width-admitted-corpus.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: exact-width-admitted-corpus-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  projection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check exact-width authority projection
+        run: |
+          rm -rf /tmp/exact-width-admitted-corpus
+          python3 scripts/research-2352-exact-width-corpus.py \
+            --check \
+            --target-dir knowledge \
+            --out /tmp/exact-width-admitted-corpus
+
+      - name: Publish summary
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          p = Path("/tmp/exact-width-admitted-corpus/summary.json")
+          print("## Exact-width admitted corpus — #2352")
+          print()
+          if not p.exists():
+              print("summary missing")
+          else:
+              s = json.loads(p.read_text())
+              print(f"- rows: {s['row_count']}")
+              print(f"- admitted: {s['status_counts']['admitted']}")
+              print(f"- generated: {s['status_counts']['generated']}")
+              print(f"- unallocated: {s['status_counts']['unallocated']}")
+              print(f"- function-like active D3+: {s['function_like_active_rows']}")
+              print(f"- D4 holes: {', '.join(s['d4_reserved_holes'])}")
+              print(f"- D5 generated selectors: {s['d5_generated_selector_count']}")
+              print(f"- D5 non-selector admitted: {s['d5_nonselector_admitted_count']}")
+              print()
+              print("Projection-only: semantic-registry.lisp is deliberately not an input.")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exact-width-admitted-corpus
+          path: /tmp/exact-width-admitted-corpus/
+          retention-days: 14
