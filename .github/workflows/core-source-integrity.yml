@@ -1,0 +1,48 @@
+name: Core source integrity
+
+on:
+  pull_request:
+    paths:
+      - "lib/core.lisp"
+      - "lib/core.lisp.fasl"
+      - ".github/workflows/core-source-integrity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/core.lisp"
+      - "lib/core.lisp.fasl"
+      - ".github/workflows/core-source-integrity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Single active core artifacts exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Prove byte-for-byte replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s lib/core.lisp
+          test -s lib/core4.lisp
+          cmp --silent lib/core.lisp lib/core4.lisp
+          printf 'core donor sha256: '
+          sha256sum lib/core.lisp
+          printf 'core4 replay sha256: '
+          sha256sum lib/core4.lisp
+
+      - name: Contract-8 landmarks survive replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F '(1)' lib/core4.lisp
+          grep -F '(1)' lib/core4.lisp
+          grep -F '(1)' lib/core4.lisp
+
+      - name: Diff hygiene
+        run: git diff --check
