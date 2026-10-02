@@ -134,5 +134,5 @@ fn completion_gate_exclusions_are_narrow_and_explicit() {
     assert!(!is_explicit_non_implementation(
         "lib/machine/dispatch/native-first-coverage.lisp"
     ));
-    assert!(!is_explicit_non_implementation("lib/core4.lisp"));
+    assert!(!is_explicit_non_implementation("lib/core.lisp"));
 }
