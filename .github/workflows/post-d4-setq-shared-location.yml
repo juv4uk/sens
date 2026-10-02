@@ -1,0 +1,35 @@
+name: Post-D4 SETQ shared-location lower bound
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_setq_shared_location.rs"
+      - "docs/research/2402-setq-shared-location*.md"
+      - ".github/workflows/post-d4-setq-shared-location.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/post_d4_setq_shared_location.rs"
+      - "docs/research/2402-setq-shared-location*.md"
+      - ".github/workflows/post-d4-setq-shared-location.yml"
+
+jobs:
+  focused:
+    name: SETQ shared-location lower bound
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused lower-bound witness
+        run: cargo test -p sens --test post_d4_setq_shared_location -- --nocapture
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## SETQ shared-location lower bound"
+            echo
+            echo "- Live D4 child DEFINE shadows inherited bindings"
+            echo "- Countermodel updates the nearest already-existing location"
+            echo "- Pre-existing observers distinguish the two models"
+            echo "- Research-only: no address or production mutation operator"
+          } >> "$GITHUB_STEP_SUMMARY"
