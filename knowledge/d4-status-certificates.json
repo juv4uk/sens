@@ -1,0 +1,304 @@
+{
+  "rows": [
+    {
+      "certificate_kind": "pure-lisp-variadic-lambda+constitutive-runtime",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml + tests/fixtures/d4-status-certificate-s0.lisp",
+      "dependencies": [
+        "LAMBDA",
+        "DEFINE"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:no-host-capability-marker-in-proof-body; Lisp-owned execution evidence required",
+      "identity": "1000",
+      "proof_bytes": 36,
+      "proof_scope": "current D4/Core1 bridge; residency does not imply primitiveness",
+      "remove_one_ref": null,
+      "semantic_claim": "LIST behavior is reconstructed by admitted Lisp-owned program",
+      "status_candidate": "generated",
+      "verify_i_refs": [
+        "scripts/research-2364-d4-status-certificates.py",
+        ".github/workflows/d4-status-certificates.yml"
+      ]
+    },
+    {
+      "certificate_kind": "core1-lisp-body+s0-replay",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml + tests/fixtures/d4-status-certificate-s0.lisp",
+      "dependencies": [
+        "EQ",
+        "COND",
+        "CAR",
+        "CDR",
+        "DEFINE"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:no-host-capability-marker-in-proof-body; Lisp-owned execution evidence required",
+      "identity": "1110",
+      "proof_bytes": 370,
+      "proof_scope": "current D4/Core1 bridge; residency does not imply primitiveness",
+      "remove_one_ref": null,
+      "semantic_claim": "LOOKUP behavior is reconstructed by admitted Lisp-owned program",
+      "status_candidate": "generated",
+      "verify_i_refs": [
+        "scripts/research-2364-d4-status-certificates.py",
+        ".github/workflows/d4-status-certificates.yml"
+      ]
+    },
+    {
+      "certificate_kind": "core1-lisp-body+s0-replay",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml + tests/fixtures/d4-status-certificate-s0.lisp",
+      "dependencies": [
+        "EQ",
+        "COND",
+        "CONS",
+        "CAR",
+        "CDR",
+        "DEFINE"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:no-host-capability-marker-in-proof-body; Lisp-owned execution evidence required",
+      "identity": "1111",
+      "proof_bytes": 515,
+      "proof_scope": "current D4/Core1 bridge; residency does not imply primitiveness",
+      "remove_one_ref": null,
+      "semantic_claim": "BIND behavior is reconstructed by admitted Lisp-owned program",
+      "status_candidate": "generated",
+      "verify_i_refs": [
+        "scripts/research-2364-d4-status-certificates.py",
+        ".github/workflows/d4-status-certificates.yml"
+      ]
+    },
+    {
+      "certificate_kind": "core1-lisp-body+s0-replay",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml + tests/fixtures/d4-status-certificate-s0.lisp",
+      "dependencies": [
+        "COND",
+        "LAMBDA",
+        "DEFINE"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:no-host-capability-marker-in-proof-body; Lisp-owned execution evidence required",
+      "identity": "0000",
+      "proof_bytes": 293,
+      "proof_scope": "current D4/Core1 bridge; residency does not imply primitiveness",
+      "remove_one_ref": null,
+      "semantic_claim": "APPLY behavior is reconstructed by admitted Lisp-owned program",
+      "status_candidate": "generated",
+      "verify_i_refs": [
+        "scripts/research-2364-d4-status-certificates.py",
+        ".github/workflows/d4-status-certificates.yml"
+      ]
+    },
+    {
+      "certificate_kind": "core1-lisp-body+s0-replay",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml + tests/fixtures/d4-status-certificate-s0.lisp",
+      "dependencies": [
+        "QUOTE",
+        "ATOM",
+        "EQ",
+        "COND",
+        "CAR",
+        "CDR",
+        "CONS",
+        "LAMBDA",
+        "DEFINE",
+        "LOOKUP",
+        "BIND",
+        "EVLIS",
+        "EVCON",
+        "APPLY"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:no-host-capability-marker-in-proof-body; Lisp-owned execution evidence required",
+      "identity": "0001",
+      "proof_bytes": 1621,
+      "proof_scope": "current D4/Core1 bridge; residency does not imply primitiveness",
+      "remove_one_ref": null,
+      "semantic_claim": "EVAL behavior is reconstructed by admitted Lisp-owned program",
+      "status_candidate": "generated",
+      "verify_i_refs": [
+        "scripts/research-2364-d4-status-certificates.py",
+        ".github/workflows/d4-status-certificates.yml"
+      ]
+    },
+    {
+      "certificate_kind": "bounded-remove-one-necessity",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml",
+      "dependencies": [
+        "D1-D3"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:necessity attacked inside Lisp-owned Core1 evaluator; S0 is explicit mechanism provenance",
+      "identity": "0010",
+      "proof_bytes": 1819,
+      "proof_scope": "bounded-current-Core1-bootstrap; not a global algebraic independence theorem",
+      "remove_one_ref": ".github/workflows/d4-status-certificates.yml#remove-LAMBDA",
+      "semantic_claim": "construct first-class lexical closure/application behavior",
+      "status_candidate": "root",
+      "verify_i_refs": [
+        "tests/fixtures/core1-s0-witness.lisp",
+        "tests/fixtures/d4-status-certificate-s0.lisp"
+      ]
+    },
+    {
+      "certificate_kind": "bounded-remove-one-necessity",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml",
+      "dependencies": [
+        "D1-D3"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:necessity attacked inside Lisp-owned Core1 evaluator; S0 is explicit mechanism provenance",
+      "identity": "0011",
+      "proof_bytes": 1252,
+      "proof_scope": "bounded-current-Core1-bootstrap; not a global algebraic independence theorem",
+      "remove_one_ref": ".github/workflows/d4-status-certificates.yml#remove-DEFINE",
+      "semantic_claim": "extend top-level global binding frame and enable recursive named definitions",
+      "status_candidate": "root",
+      "verify_i_refs": [
+        "tests/fixtures/core1-s0-witness.lisp",
+        "tests/fixtures/d4-status-certificate-s0.lisp"
+      ]
+    },
+    {
+      "certificate_kind": "pure-lisp-prelude+s0-replay",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml + tests/fixtures/d4-status-certificate-s0.lisp",
+      "dependencies": [
+        "QUOTE",
+        "COND",
+        "LAMBDA",
+        "DEFINE"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:no-host-capability-marker-in-proof-body; Lisp-owned execution evidence required",
+      "identity": "0100",
+      "proof_bytes": 112,
+      "proof_scope": "current D4/Core1 bridge; residency does not imply primitiveness",
+      "remove_one_ref": null,
+      "semantic_claim": "NOT behavior is reconstructed by admitted Lisp-owned program",
+      "status_candidate": "generated",
+      "verify_i_refs": [
+        "scripts/research-2364-d4-status-certificates.py",
+        ".github/workflows/d4-status-certificates.yml"
+      ]
+    },
+    {
+      "certificate_kind": "core1-lisp-body+s0-replay",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml + tests/fixtures/d4-status-certificate-s0.lisp",
+      "dependencies": [
+        "EQ",
+        "COND",
+        "CAR",
+        "CDR",
+        "EVAL",
+        "DEFINE"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:no-host-capability-marker-in-proof-body; Lisp-owned execution evidence required",
+      "identity": "0110",
+      "proof_bytes": 642,
+      "proof_scope": "current D4/Core1 bridge; residency does not imply primitiveness",
+      "remove_one_ref": null,
+      "semantic_claim": "EVCON behavior is reconstructed by admitted Lisp-owned program",
+      "status_candidate": "generated",
+      "verify_i_refs": [
+        "scripts/research-2364-d4-status-certificates.py",
+        ".github/workflows/d4-status-certificates.yml"
+      ]
+    },
+    {
+      "certificate_kind": "core1-lisp-body+s0-replay",
+      "certificate_ref": ".github/workflows/d4-status-certificates.yml + tests/fixtures/d4-status-certificate-s0.lisp",
+      "dependencies": [
+        "EQ",
+        "COND",
+        "CONS",
+        "CAR",
+        "CDR",
+        "EVAL",
+        "DEFINE"
+      ],
+      "fact_ledger_refs": [
+        "#2156",
+        "#2304",
+        "#2351",
+        "#2364"
+      ],
+      "host_smuggling_check": "PASS:no-host-capability-marker-in-proof-body; Lisp-owned execution evidence required",
+      "identity": "0111",
+      "proof_bytes": 507,
+      "proof_scope": "current D4/Core1 bridge; residency does not imply primitiveness",
+      "remove_one_ref": null,
+      "semantic_claim": "EVLIS behavior is reconstructed by admitted Lisp-owned program",
+      "status_candidate": "generated",
+      "verify_i_refs": [
+        "scripts/research-2364-d4-status-certificates.py",
+        ".github/workflows/d4-status-certificates.yml"
+      ]
+    }
+  ],
+  "summary": {
+    "authority": "research-only-proof-bridge",
+    "census_effect_if_accepted": {
+      "UNKNOWN": 8,
+      "generated": 20,
+      "root": 2
+    },
+    "exact_width_membership_ref": "#2352/#2363",
+    "generated_candidates": 8,
+    "non_conclusions": [
+      "root candidate is not a global algebraic independence theorem",
+      "generated resident need not lose its dedicated identity",
+      "D4 address geometry is not evidence",
+      "runtime/performance cost is outside this proof bridge"
+    ],
+    "ratified_classification_ref": "#2156",
+    "root_candidates": 2,
+    "root_scope": "bounded Core1-bootstrap necessity only",
+    "schema": "d4-status-certificates/v1",
+    "unknown_candidates": 0
+  }
+}
