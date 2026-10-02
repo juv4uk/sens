@@ -1,0 +1,22 @@
+name: Binary semantic naturalness research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2307-binary-semantic-naturalness.py"
+      - ".github/workflows/binary-semantic-naturalness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare B3 action bits, B1 algebraic coordinates and B0 labels
+        run: python3 scripts/research-2307-binary-semantic-naturalness.py
