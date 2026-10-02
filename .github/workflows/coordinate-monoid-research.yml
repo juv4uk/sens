@@ -1,0 +1,22 @@
+name: Coordinate monoid research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2324-coordinate-monoid-checker.py"
+      - ".github/workflows/coordinate-monoid-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify shared coordinate composition interface
+        run: python3 scripts/research-2324-coordinate-monoid-checker.py
