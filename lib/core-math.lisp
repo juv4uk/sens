@@ -1,12 +1,15 @@
-; core-math.lisp — дослідницьке математичне ядро SENS.
+; core-math.lisp — тимчасовий research carrier для окремої мови Core-Math.
 ;
-; ВЛАДА:
-;   lib/core.lisp      = лише ратифіковані домени та закони.
-;   lib/core-math.lisp = лабораторія математичних гіпотез і доказів.
+; МЕЖА:
+;   Core      = окрема Lisp-derived SENS lineage; ratified authority у lib/core.lisp.
+;   Core-Math = окрема Lisp-independent mathematical-language lineage.
 ;
-; Цей файл НЕ є другим runtime Core і НЕ може сам ратифікувати семантику.
-; Жодна математична операція, закон, координата або function identity
-; не переходить звідси до lib/core.lisp без окремої owner-ratification.
+; Цей файл НЕ є другим runtime Core, Lisp-бібліотекою чи semantic authority.
+; Це лише тимчасовий лабораторний носій, поки language-neutral semantics
+; Core-Math виводяться та отримують власні executable witnesses.
+;
+; S-expression syntax, .lisp extension і current evaluator тут є mechanism only.
+; Вони не дають Lisp/Core семантичної влади над Core-Math.
 ;
 ; Поточні напрями дослідження:
 ;
@@ -38,21 +41,27 @@
 ;   PROVED-BOUNDED
 ;   RATIFICATION-CANDIDATE
 ;
-; Мінімальний шлях до Core:
+; Мінімальний шлях до Core-Math language law:
 ;
 ;   hypothesis
-;     -> executable law
+;     -> language-neutral object/law statement
+;     -> executable witness
 ;     -> explicit falsifier
 ;     -> typed domain/codomain
 ;     -> anti-numerology / re-encoding check where applicable
-;     -> mechanism/benchmark evidence where relevant
-;     -> owner ratification
-;     -> lib/core.lisp
+;     -> second non-Lisp model/interpreter where required
+;     -> Core-Math admission by its own law
+;
+; Міст до Core не є promotion path за замовчуванням.
+; Якщо та сама структура окремо потрібна Core, це нове незалежне Core proof +
+; owner-ratification. Core-Math може залишатись валідним без Core і без Lisp.
 ;
 ; Початковий scaffold навмисно не містить executable definitions.
-; Це захищає межу: створення core-math не створює жодної нової семантики.
+; Це захищає межу: створення carrier-файлу не створює жодної нової семантики.
 ;
 ; Umbrella: #2411
+; Language independence: #2424
+; Core lineage boundary: #2423
 ; Ratified-domain architecture: #2410
 ; Function algebra: #2239
 ; Math free placement: #2248
