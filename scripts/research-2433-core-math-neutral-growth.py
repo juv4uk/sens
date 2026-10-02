@@ -197,14 +197,18 @@ def compile_spec(
         for entry in spec["constants"]
     }
 
-    basis: dict[str, Callable[..., Any]] = {
+    implementations: dict[str, Callable[..., Any]] = {
         "add": model.add,
         "mul": model.mul,
         "recip": model.recip,
     }
 
-    declared_basis = {entry["id"] for entry in spec["basis_operations"]}
-    assert declared_basis == set(basis)
+    declared_basis = [entry["id"] for entry in spec["basis_operations"]]
+    assert set(declared_basis) <= set(implementations)
+    basis = {
+        name: implementations[name]
+        for name in declared_basis
+    }
 
     operations = dict(basis)
     rules = {entry["id"]: entry for entry in spec["generation_rules"]}
@@ -212,7 +216,7 @@ def compile_spec(
 
     while rules:
         progress = False
-        for name in sorted(list(rules)):
+        for name in list(rules):
             rule = rules[name]
             calls = called_operations(rule["expression"])
             consts = used_constants(rule["expression"])
@@ -308,7 +312,6 @@ def all_certificates(spec: dict[str, Any], model: Model) -> tuple[list[dict[str,
         certificate_for(rules[name], operations[name], model)
         for name in generated_order
     ]
-    certs.sort(key=lambda cert: cert["operation"])
     return certs, generated_order
 
 
