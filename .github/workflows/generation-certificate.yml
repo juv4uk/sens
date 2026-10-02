@@ -1,0 +1,61 @@
+name: Selector generation certificate research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/examples/selector_certificate_bench.rs"
+      - "benchmarks/generation-certificate/**"
+      - ".github/workflows/generation-certificate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/examples/selector_certificate_bench.rs"
+      - "benchmarks/generation-certificate/**"
+      - ".github/workflows/generation-certificate.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: generation-certificate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selector-certificate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: generation-certificate
+
+      - name: Install Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+
+      - name: Build selector certificate verifier
+        run: cargo build --release -p sens --example selector_certificate_bench
+
+      - name: Verify certificates and measure replay
+        run: |
+          rm -rf /tmp/generation-certificate
+          python3 benchmarks/generation-certificate/run.py \
+            --binary target/release/examples/selector_certificate_bench \
+            --out /tmp/generation-certificate \
+            --reps 10000
+
+      - name: Publish certificate report
+        if: always()
+        run: |
+          if test -f /tmp/generation-certificate/report.md; then
+            cat /tmp/generation-certificate/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selector-generation-certificate
+          path: /tmp/generation-certificate/
+          retention-days: 14
