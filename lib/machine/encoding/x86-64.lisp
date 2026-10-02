@@ -1041,6 +1041,25 @@
         58 223 dst base displacement)
       (00100111 immediate))))
 
+; PCLMULQDQ xmm, xmm, imm8: 66 0F 3A 44 /r ib.
+; Pinned #175 XED evidence exposes exactly register-source and memory-source
+; forms. The immediate selects the source 64-bit lanes; that ISA meaning is
+; not redefined here -- this layer only materializes the admitted bytes.
+(00001001 x86-encode-pclmulqdq-xmm-xmm-imm8
+  (00001000 (dst src immediate)
+    (00101001
+      (x86-encode-sse-66-map-xmm-xmm #b111010 #b1000100 dst src)
+      (00100111 immediate))))
+
+; Bounded memory projection: base+disp8 reuses the already witnessed
+; ModR/M/SIB/REX mechanism. This is not a claim of general x86 addressing.
+(00001001 x86-encode-pclmulqdq-xmm-mem-disp8-imm8
+  (00001000 (dst base displacement immediate)
+    (00101001
+      (x86-encode-sse-66-map-xmm-mem-disp8
+        #b111010 #b1000100 dst base displacement)
+      (00100111 immediate))))
+
 ; MOVSD xmm, xmm: opcode 0xF2 0x0F 0x10 /r
 (00001001 x86-encode-movsd-xmm-xmm
   (00001000 (dst src)

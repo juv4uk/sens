@@ -596,6 +596,50 @@
        102 69 15 56 223 126 127
        102 15 56 219 101 128
        102 65 15 58 223 117 1 27))
+     ; #176 PCLMULQDQ slice. Pinned XED has exactly two source shapes:
+     ; XMM and memory, both with UIMM8. Keep the memory witness bounded to
+     ; base+disp8 because that is the addressing mechanism already proved here.
+     ((encode pclmulqdq-xmm-xmm-imm8)
+      (x86-encode-pclmulqdq-xmm-xmm-imm8
+        (quote xmm0) (quote xmm1) #b10001)
+      (#b1100110 #b1111 #b111010 #b1000100 #b11000001 #b10001))
+     ((encode pclmulqdq-xmm-xmm-imm8-rex)
+      (x86-encode-pclmulqdq-xmm-xmm-imm8
+        (quote xmm8) (quote xmm9) 1)
+      (#b1100110 #b1000101 #b1111 #b111010 #b1000100 #b11000001 1))
+     ((encode pclmulqdq-xmm-mem-disp8-imm8)
+      (x86-encode-pclmulqdq-xmm-mem-disp8-imm8
+        (quote xmm2) (quote rsp) 0 #b10000)
+      (#b1100110 #b1111 #b111010 #b1000100 #b1010100 #b100100 0 #b10000))
+     ((encode pclmulqdq-xmm-mem-disp8-imm8-rex)
+      (x86-encode-pclmulqdq-xmm-mem-disp8-imm8
+        (quote xmm8) (quote r12) #b-10000 1)
+      (#b1100110 #b1000101 #b1111 #b111010 #b1000100 #b1000100
+       #b100100 #b11110000 1))
+     ((admission pclmulqdq-register-valid)
+      (x86-admitted-instruction?
+        (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #b10001)))
+      t)
+     ((admission pclmulqdq-memory-valid)
+      (x86-admitted-instruction?
+        (quote (pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #b-10000 1)))
+      t)
+     ((admission pclmulqdq-uimm8-overflow)
+      (x86-admitted-instruction?
+        (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #b100000000)))
+      ())
+     ((admission pclmulqdq-disp8-overflow)
+      (x86-admitted-instruction?
+        (quote (pclmulqdq-xmm-mem-disp8-imm8 xmm0 rax #b10000000 1)))
+      ())
+     ((encode pclmulqdq-admitted-program)
+      (x86-encode-admitted-program
+        (quote
+          ((pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #b10001)
+           (pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #b-10000 1))))
+      (#b1100110 #b1111 #b111010 #b1000100 #b11000001 #b10001
+       #b1100110 #b1000101 #b1111 #b111010 #b1000100 #b1000100
+       #b100100 #b11110000 1))
      ((admission rdtsc-valid)
       (x86-admitted-instruction? (quote (rdtsc)))
       t)
