@@ -1,0 +1,26 @@
+name: LIST rest-lambda research
+
+on:
+  pull_request:
+    paths:
+      - "lib/core.lisp"
+      - "lib/core4.lisp"
+      - "tests/fixtures/conformance.lisp"
+      - "knowledge/function-status-census.json"
+      - "scripts/research-2404-list-rest-lambda.py"
+      - ".github/workflows/list-rest-lambda-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  witness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check LIST against bare-symbol rest binding
+        run: python3 scripts/research-2404-list-rest-lambda.py
