@@ -1,0 +1,24 @@
+name: Behavior vs identity research
+
+on:
+  pull_request:
+    paths:
+      - "lib/surface/semantic-registry.lisp"
+      - "experiments/function-genealogy.lisp"
+      - "scripts/research-2360-behavior-vs-identity.py"
+      - ".github/workflows/behavior-vs-identity-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  anti-collapse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reject behavior-only semantic quotienting
+        run: python3 scripts/research-2360-behavior-vs-identity.py
