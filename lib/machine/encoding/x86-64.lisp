@@ -1142,6 +1142,28 @@
       (00100111 102 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
             15 126 (x86-encode-modrm 3 (x86-low3 src-code) (x86-low3 dst-code))))))
 
+; RDRAND/RDSEED r64 використовують спільну XED-доведену форму 0F C7 /digit.
+; REX.W вибирає 64-бітний GPRv, REX.B розширює rm до r8-r15.
+; Цей шар матеріалізує лише машинні байти; випадковість/ентропія не є
+; семантичною владою SENS і тут не визначається.
+(00001001 x86-encode-rdrand-r64
+  (00001000 (register)
+    (10011100 ((code (x86-reg-code register)))
+      (00100111
+        (x86-encode-rex 1 0 0 (x86-high1 code))
+        #b1111
+        #b11000111
+        (x86-encode-modrm 3 #b110 (x86-low3 code))))))
+
+(00001001 x86-encode-rdseed-r64
+  (00001000 (register)
+    (10011100 ((code (x86-reg-code register)))
+      (00100111
+        (x86-encode-rex 1 0 0 (x86-high1 code))
+        #b1111
+        #b11000111
+        (x86-encode-modrm 3 #b111 (x86-low3 code))))))
+
 ; RDTSC: opcode 0x0F 0x31
 (00001001 x86-encode-rdtsc
   (00001000 ()
