@@ -180,7 +180,7 @@ fn main() {
     const CORE_SRC: &str = sens::CORE_LIBRARY_SOURCE;
     if !sens::core_library_fasl_is_current() {
         eprintln!(
-            "warning: lib/core.lisp.fasl is stale (source changed); run gen-fasl to regenerate"
+            "warning: transitional lib/core4.lisp.fasl is stale against lib/core.lisp; run gen-fasl to regenerate"
         );
     }
     if let Err(e) = bootstrap_core(&mut session, cli_core) {
