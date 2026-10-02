@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - "crates/sens/examples/pack_efficiency_bench.rs"
+      - "crates/sens/examples/boundary_index_bench.rs"
       - "benchmarks/pack-efficiency/**"
+      - "benchmarks/boundary-index/**"
       - ".github/workflows/pack-efficiency.yml"
   workflow_dispatch:
 
@@ -118,3 +120,70 @@ jobs:
         with:
           name: pack-efficiency-random-scale
           path: /tmp/pack-random
+
+
+  boundary-index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: boundary-index-bench
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+          rustc --version
+
+      - name: Build boundary-index benchmark
+        run: cargo build --release -p sens --example boundary_index_bench
+
+      - name: Run mixed D1-D4 checkpoint tournament
+        run: |
+          rm -rf /tmp/boundary-index
+          python3 benchmarks/boundary-index/run.py \
+            --binary target/release/examples/boundary_index_bench \
+            --out /tmp/boundary-index/mixed \
+            --cases d1234 \
+            --sizes 64,65536,1000000 \
+            --ks 8,16,32,64,256 \
+            --queries 4096 \
+            --query-repeats 1 \
+            --reps 1
+
+      - name: Run fixed-width no-index controls
+        run: |
+          python3 benchmarks/boundary-index/run.py \
+            --binary target/release/examples/boundary_index_bench \
+            --out /tmp/boundary-index/fixed \
+            --cases w1,w3,w8 \
+            --sizes 65536 \
+            --candidates formula,u32,cache2 \
+            --queries 4096 \
+            --query-repeats 1 \
+            --reps 1
+
+      - name: Publish boundary-index reports
+        if: always()
+        run: |
+          {
+            echo "## Mixed boundary-index tournament"
+            if test -f /tmp/boundary-index/mixed/report.md; then
+              cat /tmp/boundary-index/mixed/report.md
+            fi
+            echo
+            echo "## Fixed-width controls"
+            if test -f /tmp/boundary-index/fixed/report.md; then
+              cat /tmp/boundary-index/fixed/report.md
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boundary-index-tournament
+          path: /tmp/boundary-index
