@@ -181,8 +181,8 @@ pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
 /// therefore does not belong in this capability-free core crate.
 pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 
-/// The current Core4 sens bootstrap library, evaluated after the macro layer.
-pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
+/// The single active SENS core library, evaluated after the macro layer.
+pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
 
 /// Parse-output кеш для точного вбудованого core source. Це лише bootstrap-
 /// оптимізація: hash source перевіряється перед використанням, а stale/invalid
@@ -362,7 +362,7 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     load_core_library_with_fasl(session, CORE_LIBRARY_FASL)
 }
 
-/// Read-only діагностика для embedder-а: чи відповідає Core4 FASL точному
+/// Read-only діагностика для embedder-а: чи відповідає core FASL точному
 /// вбудованому source. Не вибирає profile і не змінює bootstrap.
 pub fn core_library_fasl_is_current() -> bool {
     fasl_decode_program(CORE_LIBRARY_FASL)
