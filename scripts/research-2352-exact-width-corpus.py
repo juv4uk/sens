@@ -194,7 +194,11 @@ def write_outputs(out_dir: Path) -> None:
     ) as fh:
         writer = csv.DictWriter(fh, fieldnames=fields, delimiter="\t", lineterminator="\n")
         writer.writeheader()
-        writer.writerows(corpus)
+        for row in corpus:
+            writer.writerow({
+                key: ("-" if value is None else value)
+                for key, value in row.items()
+            })
 
     (out_dir / "summary.json").write_text(
         json.dumps(meta, indent=2, sort_keys=True) + "\n",
