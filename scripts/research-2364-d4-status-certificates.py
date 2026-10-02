@@ -262,7 +262,7 @@ def root_row(identity: str, label: str) -> dict[str, Any]:
     else:
         eval_program = extract_form(core1, "(00001001 C1-EVAL-PROGRAM\n")
         definitionp = extract_form(core1, "(00001001 C1-DEFINITIONP\n")
-        assert "C1-DEFINE-NAMEP" in eval_program
+        assert "C1-DEFINITIONP" in eval_program
         assert "GLOBAL" in eval_program
         assert "C1-DEFINE-NAMEP" in definitionp
         proof = definitionp + eval_program
