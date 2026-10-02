@@ -187,7 +187,7 @@ pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
 /// Parse-output кеш для точного вбудованого core source. Це лише bootstrap-
 /// оптимізація: hash source перевіряється перед використанням, а stale/invalid
 /// bytes переходять на parsing CORE_LIBRARY_SOURCE.
-const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core.lisp.fasl");
+const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 
 /// Generated runtime projection of admitted surface spellings to opaque Sens8
 /// identities. semantic-registry.lisp remains the only spelling authority.
