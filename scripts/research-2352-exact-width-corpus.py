@@ -181,7 +181,7 @@ def write_outputs(out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     (out_dir / "exact-width-admitted-corpus.json").write_text(
-        json.dumps({"meta": meta, "rows": corpus}, indent=2, sort_keys=True) + "\n",
+        json.dumps({"meta": meta, "rows": corpus}, indent=2) + "\n",
         encoding="utf-8",
     )
 
