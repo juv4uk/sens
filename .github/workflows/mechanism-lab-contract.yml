@@ -1,0 +1,48 @@
+name: Mechanism lab contract
+
+on:
+  pull_request:
+    paths:
+      - "contracts/mechanism-lab-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "lib/mechanism-lab.lisp"
+      - "lib/mechanism-selector.lisp"
+      - "scripts/check-mechanism-lab-contract.lisp"
+      - ".github/workflows/mechanism-lab-contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "contracts/mechanism-lab-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "lib/mechanism-lab.lisp"
+      - "lib/mechanism-selector.lisp"
+      - "scripts/check-mechanism-lab-contract.lisp"
+      - ".github/workflows/mechanism-lab-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mechanism-lab:
+    name: Experimental mechanism laboratory
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build semantic oracle
+        run: cargo build -p sens-cli --bin sens
+
+      - name: Verify mechanism lab route selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          verdict="$(./target/debug/sens scripts/check-mechanism-lab-contract.lisp)"
+          printf '%s\n' "$verdict"
+          test "$verdict" = "(mechanism-lab-contract-ok (routes 4) (canon-round-trip pending-992) (clips-result available))"
+
+      - name: Diff hygiene
+        run: git diff --check
