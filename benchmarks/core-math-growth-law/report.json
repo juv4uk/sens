@@ -1,0 +1,111 @@
+{
+  "claim_status": {
+    "autonomous_enumerative_growth": "NOT-YET-PROVED",
+    "depth_at_least_2": "WITNESSED",
+    "final_operation_identity": "OUT-OF-SCOPE-#2435",
+    "generated_result_reuse": "WITNESSED",
+    "growth_phase_semantics": "OUT-OF-SCOPE-#2431",
+    "minimal_basis": "OUT-OF-SCOPE-#2426",
+    "recursive_declared_closure": "WITNESSED"
+  },
+  "events": [
+    {
+      "basis_dependencies": [
+        "mul"
+      ],
+      "constant_dependencies": [
+        "neg_one"
+      ],
+      "depth": 1,
+      "expression_sha256": "6f8ad87217d78faf57b72c05b26f676f58c3e34ca3510689ee4bed193ce58890",
+      "generated_dependencies": [],
+      "operation_ref": "neg",
+      "partiality": "total",
+      "round": 1
+    },
+    {
+      "basis_dependencies": [
+        "mul",
+        "recip"
+      ],
+      "constant_dependencies": [],
+      "depth": 1,
+      "expression_sha256": "5d75896964f2944836c54e64077df0834e4184f9c1be5c9ee2c1b3cd0dc82c33",
+      "generated_dependencies": [],
+      "operation_ref": "div",
+      "partiality": "undefined-when-y-zero",
+      "round": 1
+    },
+    {
+      "basis_dependencies": [
+        "add"
+      ],
+      "constant_dependencies": [],
+      "depth": 2,
+      "expression_sha256": "8c1906b7755999736a08cf41ed9d1f250a0f89996f6857599bf0a581dc59a989",
+      "generated_dependencies": [
+        "neg"
+      ],
+      "operation_ref": "sub",
+      "partiality": "total",
+      "round": 2
+    }
+  ],
+  "growth_event_definition": {
+    "deterministic_result_construction": true,
+    "generated_result_reusable": true,
+    "prior_dependencies_admitted": true,
+    "replayable_certificate_required": true,
+    "rule_already_admitted": true
+  },
+  "invalid_controls": [
+    {
+      "label": "remove-neg_one",
+      "unresolved": [
+        "neg",
+        "sub"
+      ]
+    },
+    {
+      "label": "remove-mul",
+      "unresolved": [
+        "div",
+        "neg",
+        "sub"
+      ]
+    },
+    {
+      "label": "remove-add",
+      "unresolved": [
+        "sub"
+      ]
+    },
+    {
+      "label": "remove-recip",
+      "unresolved": [
+        "div"
+      ]
+    },
+    {
+      "label": "dependency-cycle",
+      "unresolved": [
+        "left",
+        "right"
+      ]
+    }
+  ],
+  "metrics": {
+    "autodiscovered_operation_rules": 0,
+    "certificate_bytes_canonical_rows": 1103,
+    "closure_operation_count": 6,
+    "declared_generation_rules": 3,
+    "generated_operations": 3,
+    "generated_per_depth": {
+      "1": 2,
+      "2": 1
+    },
+    "initial_basis_operations": 3,
+    "max_generation_depth": 2,
+    "registry_slots_required": 0
+  }
+}
