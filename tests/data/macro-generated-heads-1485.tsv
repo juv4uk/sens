@@ -7,11 +7,3 @@ lib/core.lisp	let*	10011101	code-template-operator
 lib/core.lisp	->	10011110	code-template-operator
 lib/core.lisp	->>	10011111	code-template-operator
 lib/core.lisp	define	00001001	code-template-operator
-lib/core4.lisp	binary	10101001	ordinary-data
-lib/core4.lisp	and	10011010	code-template-operator
-lib/core4.lisp	or	10011011	code-template-operator
-lib/core4.lisp	let	10011100	code-template-operator
-lib/core4.lisp	let*	10011101	code-template-operator
-lib/core4.lisp	->	10011110	code-template-operator
-lib/core4.lisp	->>	10011111	code-template-operator
-lib/core4.lisp	define	00001001	code-template-operator
