@@ -583,7 +583,7 @@ mod tests {
         // A closure captures exactly an Environment handle. The body is not
         // needed for this lower-bound witness: the observable under test is
         // which captured binding/location the closure would resolve.
-        let observer = Closure {
+        let observer = crate::Closure {
             parameters: Vec::new(),
             rest: None,
             body: Rc::from(Vec::<crate::syntax::Expr>::new()),
@@ -612,7 +612,7 @@ mod tests {
         // a child binding.
         let root = Environment::root();
         root.define("x", Value::Number(1.0, Exactness::Exact));
-        let observer = Closure {
+        let observer = crate::Closure {
             parameters: Vec::new(),
             rest: None,
             body: Rc::from(Vec::<crate::syntax::Expr>::new()),
