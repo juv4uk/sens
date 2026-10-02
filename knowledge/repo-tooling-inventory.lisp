@@ -10,6 +10,7 @@
   (authority governance-metadata-not-language-semantics)
   (python-migration-authority #b1001100)
   (rust-retirement-valve #b100101011))
+(tool (path "scripts/check-identity-witness-gate.py") (kind check) (language python) (role identity-law-witness-gate) (lifecycle transitional) (callers (".github/workflows/identity-witness-gate.yml")) (authority-source "contracts/core-universal-contract.lisp") (migration-issue #b1001100) (replacement ()) (removal-condition migration-issue-complete-and-callers-switched))
 
 (tool (path "scripts/benchmark-semantic-registry-read.lisp") (kind benchmark) (language lisp) (role semantic-registry-read-benchmark) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
 (tool (path "scripts/benchmark.mjs") (kind benchmark) (language javascript) (role repository-benchmark) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
