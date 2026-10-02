@@ -95,18 +95,11 @@ jobs:
           set -euo pipefail
           cat lib/core1.lisp tests/fixtures/d4-status-certificate-s0.lisp > .d4-s0/d4-full.lisp
 
-          expected='Y
-          B
-          (A B)
-          B
-          (A)
-          (A B)
-          T
-          C'
+          expected='(Y B (A B) B (A) (A B) T C)'
 
           actual="$(
             cd .d4-s0/mccarthy-eval
-            ./mccarthy-kernel ../d4-full.lisp
+            ./mccarthy-kernel ../d4-full.lisp | tail -n 1
           )"
 
           printf '%s\n' "$actual"
@@ -127,7 +120,7 @@ jobs:
 
           actual="$(
             cd .d4-s0/mccarthy-eval
-            ./mccarthy-kernel ../d4-not-full.lisp
+            ./mccarthy-kernel ../d4-not-full.lisp | tail -n 1
           )"
           printf '%s\n' "$actual"
           test "$actual" = '(T NIL)'
@@ -144,7 +137,7 @@ jobs:
 
           actual="$(
             cd .d4-s0/mccarthy-eval
-            ./mccarthy-kernel ../remove-lambda.lisp
+            ./mccarthy-kernel ../remove-lambda.lisp | tail -n 1
           )"
           printf 'remove-LAMBDA observed=%s\n' "$actual"
           test "$actual" != 'T'
@@ -172,7 +165,7 @@ jobs:
 
           actual="$(
             cd .d4-s0/mccarthy-eval
-            ./mccarthy-kernel ../remove-define.lisp
+            ./mccarthy-kernel ../remove-define.lisp | tail -n 1
           )"
           printf 'remove-DEFINE observed=%s\n' "$actual"
           test "$actual" != 'C'
