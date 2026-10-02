@@ -1,0 +1,24 @@
+{
+  "schema": "core-math-autonomous-closure/v1",
+  "authority": "research-only",
+  "carrier": "Q",
+  "constants": [
+    {"id": "neg_one", "value": "-1/1"}
+  ],
+  "basis_operations": [
+    {"id": "add", "arity": 2, "partiality": "total"},
+    {"id": "mul", "arity": 2, "partiality": "total"},
+    {"id": "recip", "arity": 1, "partiality": "undefined-at-zero"}
+  ],
+  "constructor_schemas": [
+    {"id": "bind-left-constant", "binary_arity": 2, "result_arity": 1},
+    {"id": "map-right", "binary_arity": 2, "unary_arity": 1, "result_arity": 2}
+  ],
+  "max_depth": 2,
+  "normalization_laws": [
+    "Q.add.commutative/v1",
+    "Q.add.associative/v1",
+    "Q.mul.commutative/v1",
+    "Q.mul.associative/v1"
+  ]
+}
