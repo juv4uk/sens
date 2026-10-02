@@ -125,7 +125,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo run --release -p sens-cli --bin gen-fasl -- lib/core.lisp lib/core4.lisp.fasl
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core.lisp lib/core.lisp.fasl
           cargo build -p sens-cli --bin sens
           : > tests/semantic-authority-changes.lisp
           while IFS= read -r path; do
@@ -156,7 +156,7 @@ jobs:
         continue-on-error: true
         with:
           name: core-fasl-771
-          path: lib/core4.lisp.fasl
+          path: lib/core.lisp.fasl
           if-no-files-found: error
           retention-days: 1
 
@@ -164,7 +164,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -s lib/core4.lisp.fasl
+          test -s lib/core.lisp.fasl
           git diff --check
         
 
