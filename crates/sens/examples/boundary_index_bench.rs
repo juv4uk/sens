@@ -211,6 +211,7 @@ enum Index {
         widths: PackedBitstream,
     },
     TieredW2 {
+        k: usize,
         checkpoints: Vec<u32>,
         locals: Vec<u8>,
         widths: PackedBitstream,
@@ -240,6 +241,7 @@ impl Index {
                 checkpoints,
                 locals,
                 widths,
+                ..
             } => {
                 checkpoints.len() * size_of::<u32>() + locals.len() + widths.byte_len()
             }
@@ -304,12 +306,12 @@ impl Index {
                 (width, read_word(packed, offset, width), steps)
             }
             Self::TieredW2 {
+                k,
                 checkpoints,
                 locals,
                 widths,
             } => {
-                let k = locals.len().div_ceil(checkpoints.len());
-                let offset = checkpoints[index / k] as usize + locals[index] as usize;
+                let offset = checkpoints[index / *k] as usize + locals[index] as usize;
                 let width = packed_width2(widths, index);
                 (width, read_word(packed, offset, width), 0)
             }
@@ -365,6 +367,7 @@ fn build_index(candidate: &str, case: &str, words: &[Word], packed: &PackedBitst
             return None;
         }
         return Some(Index::TieredW2 {
+            k,
             checkpoints: checkpoint_offsets(words, k),
             locals: block_local_offsets_u8(words, k)?,
             widths: packed_width_stream2(words)?,
