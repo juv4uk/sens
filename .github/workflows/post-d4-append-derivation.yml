@@ -1,0 +1,31 @@
+name: Post-D4 APPEND derivation research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_append_derivation.rs"
+      - ".github/workflows/post-d4-append-derivation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/post_d4_append_derivation.rs"
+      - ".github/workflows/post-d4-append-derivation.yml"
+
+jobs:
+  focused:
+    name: Post-D4 APPEND derivation research
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused APPEND derivation witness
+        run: cargo test -p sens --test post_d4_append_derivation -- --nocapture
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Post-D4 APPEND derivation research"
+            echo
+            echo "- Independent structural recursion witness for #2347"
+            echo "- No post-D4 identity allocation"
+          } >> "$GITHUB_STEP_SUMMARY"
