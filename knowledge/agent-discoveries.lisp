@@ -62,9 +62,9 @@
     (one-core-and-core-math
       . ((status . owner-ratified-direction)
          (agent . "chatgpt-sol")
-         (claim . "one active Core: lib/core.lisp contains only ratified domains; D5/D6 closeout separately; D7 researches Sound+Number; lib/core-math.lisp is research-only mathematics")
-         (evidence . ("#2410" "#2411" "#2414" "#2415" "PR #2417" "#1599 comment 5957748054"))
-         (action . "do not create numbered Core profiles; route math hypotheses through core-math and require separate owner ratification before core admission"))))
+         (claim . "one active Core is Lisp-derived SENS authority; Core-Math is a separate Lisp-independent mathematical language; lib/core-math.lisp is only a temporary research carrier")
+         (evidence . ("#2410" "#2411" "#2414" "#2415" "#2423" "#2424" "PR #2417"))
+         (action . "do not create numbered Core profiles; do not treat Core-Math as a Lisp library or promotion queue into Core; bridges are explicit and optional"))))
 
   (pending-slots
     (post-m8-three-way-bench . needs-valgrind-machine)
