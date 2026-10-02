@@ -157,6 +157,8 @@
      (rol-r64-imm8 register uimm8)
      (ror-r64-imm8 register uimm8)
      (xchg-r64-r64 register register)
+     (rdrand-r64 register)
+     (rdseed-r64 register)
      (cld)
      (std)
      (stosq)
