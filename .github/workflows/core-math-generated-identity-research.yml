@@ -1,0 +1,28 @@
+name: Core-Math generated identity research
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2433-core-math-neutral-v1.json"
+      - "docs/research/2433-core-math-generation-certificates.json"
+      - "docs/research/2435-core-math-generated-identity.json"
+      - "scripts/research-2433-core-math-neutral-growth.py"
+      - "scripts/research-2435-core-math-generated-identity.py"
+      - ".github/workflows/core-math-generated-identity-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generated-identity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Recheck two-model neutral growth prerequisite
+        run: python3 scripts/research-2433-core-math-neutral-growth.py --check
+      - name: Verify generated operation identity candidates
+        run: python3 scripts/research-2435-core-math-generated-identity.py --check
