@@ -105,6 +105,7 @@ def bfs(max_depth: int, state_cap: int):
     values = [
         Expr("x", 0, tuple(VALUES)),
         Expr("()", 0, tuple(NIL for _ in VALUES)),
+        Expr("FAIL", 0, tuple(("FAIL",) for _ in VALUES)),
         Expr("k", 0, tuple(atom("k") for _ in VALUES)),
     ]
     predicates = []
