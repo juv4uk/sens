@@ -312,7 +312,7 @@ source	contracts/core1-generation-manifest.lisp	1
 source	contracts/core1-s2-compiler-admission.lisp	3
 source	contracts/core1-s3-compiler-prelude.lisp	1
 source	contracts/core2-profile-contract.lisp	7
-source	contracts/core3-profile-contract.lisp	6
+source	contracts/mechanism-lab-contract.lisp	6
 source	contracts/core4-predicate-answer-scale.lisp	3
 source	contracts/datalog-math-capability-1001.lisp	2
 source	contracts/exact-q-binary-contract.lisp	5
