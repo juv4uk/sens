@@ -1,0 +1,35 @@
+name: Historical SETQ research
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2441-setq-history.json"
+      - "docs/research/2441-setq-history.md"
+      - "docs/research/2441-setq-history.uk.md"
+      - "scripts/research-2441-setq-history.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/historical-setq-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-setq:
+    name: Lisp 1.5 SETQ historical classification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate historical evidence record
+        run: python3 scripts/research-2441-setq-history.py
+      - name: Publish result
+        run: |
+          {
+            echo "## #2441 Lisp 1.5 SET/SETQ"
+            echo
+            echo "HISTORICAL-SETQ=SHARED-LOCATION-UPDATE"
+            echo "Target: first/most-recent existing a-list binding pair"
+            echo "Missing name: historical A4/A5 error"
+            echo "Caveat: dynamic a-list semantics, not a claim about modern lexical-cell representation"
+            echo "No address/width decision."
+          } >> "$GITHUB_STEP_SUMMARY"

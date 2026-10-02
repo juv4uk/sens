@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "issue": 2441,
+  "source": {
+    "title": "LISP 1.5 Programmer's Manual",
+    "publisher": "MIT Press",
+    "year": 1962,
+    "url": "https://softwarepreservation.computerhistory.org/LISP/book/LISP%201.5%20Programmers%20Manual.pdf",
+    "sections": [
+      "Chapter V / PROG discussion",
+      "Appendix B / The PROG Feature",
+      "Interpreter error diagnostics"
+    ]
+  },
+  "observations": [
+    {
+      "id": "program-vars-enter-current-alist",
+      "claim": "Entering PROG creates bindings for program variables on the current a-list with NIL values.",
+      "status": "confirmed",
+      "source_locator": "Appendix B, The PROG Feature, item 1"
+    },
+    {
+      "id": "setq-updates-existing-pair",
+      "claim": "SET/SETQ locates the variable name on the current a-list and replaces the value cell of that existing binding pair.",
+      "status": "confirmed",
+      "source_locator": "Appendix B, The PROG Feature, item 3"
+    },
+    {
+      "id": "nearest-most-recent-binding-wins",
+      "claim": "If the variable occurs multiple times on the a-list, only the first/most-recent occurrence is changed.",
+      "status": "confirmed",
+      "source_locator": "Appendix B, continuation of item 3"
+    },
+    {
+      "id": "higher-level-binding-remains-mutated",
+      "claim": "If the changed binding belongs to a higher-level scope, the new value remains effective throughout that binding's scope and the old value is lost.",
+      "status": "confirmed",
+      "source_locator": "Appendix B, continuation of item 3"
+    },
+    {
+      "id": "missing-binding-errors",
+      "claim": "If the variable is absent from the a-list, SET/SETQ signals historical A4/A5 rather than creating a fresh binding.",
+      "status": "confirmed",
+      "source_locator": "Appendix B, continuation of item 3; interpreter diagnostics"
+    },
+    {
+      "id": "setq-quotes-target",
+      "claim": "SETQ differs from SET by quoting its first argument; SET evaluates the target expression to obtain the variable name.",
+      "status": "confirmed",
+      "source_locator": "Chapter V, PROG discussion"
+    },
+    {
+      "id": "assignment-returns-new-value",
+      "claim": "The value of SET/SETQ is the value of the second argument.",
+      "status": "confirmed",
+      "source_locator": "Chapter V, PROG discussion"
+    },
+    {
+      "id": "higher-level-alist-variables-are-settable",
+      "claim": "SET/SETQ may change variables residing on the a-list from higher-level functions.",
+      "status": "confirmed",
+      "source_locator": "Chapter V, PROG discussion"
+    },
+    {
+      "id": "compiled-mode-caveat",
+      "claim": "Compiled-variable representation has additional SPECIAL/COMMON restrictions; this is a compilation caveat, not evidence against interpreter a-list update semantics.",
+      "status": "confirmed",
+      "source_locator": "Appendix B/D compiler notes"
+    }
+  ],
+  "comparison_to_2402": {
+    "lower_bound": "nearest-existing shared-location update",
+    "rows": [
+      [
+        "updates existing location",
+        true
+      ],
+      [
+        "nearest existing binding selected",
+        true
+      ],
+      [
+        "no fresh binding on miss",
+        true
+      ],
+      [
+        "higher-level observers using same binding subsequently see new value",
+        true
+      ],
+      [
+        "computed SET target distinct from SETQ quoted target",
+        true
+      ],
+      [
+        "modern lexical-closure cell specifically required by source",
+        false
+      ]
+    ],
+    "classification": "HISTORICAL-SETQ=SHARED-LOCATION-UPDATE",
+    "caveat": "Historical carrier is the dynamically scoped a-list binding pair. Do not rewrite this as modern lexical-cell semantics."
+  }
+}
