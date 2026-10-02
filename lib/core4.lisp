@@ -487,19 +487,16 @@
 (00001001 string-membership-helper
   (00001000 (value)
     (00000111
-      ((00000010 value) ()
+      ((00000011 value (00000001 ()))
        (00000001 (class-membership string nonmember)))
-      ((00000010 value) (1)
+      ((00000010 value)
        (00000111
          ((00000011 (00111111 (01001100 value))
               (00111111 (01001100 "")))
-          (1)
           (00000001 (class-membership string member)))
-         ((00000011 (00111111 (01001100 value))
-              (00111111 (01001100 "")))
-          (0)
+         ((00000010 (00000001 ()))
           (00000001 (class-membership string nonmember)))))
-      ((00000010 value) (0)
+      ((00000010 (00000001 ()))
        (00000001 (class-membership string nonmember))))))
 
 (00001001 string-order-helper
