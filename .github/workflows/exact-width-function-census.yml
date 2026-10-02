@@ -1,0 +1,63 @@
+name: Exact-width function status census
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2351-exact-width-function-census.py"
+      - "knowledge/function-status-census.json"
+      - "knowledge/function-status-census.tsv"
+      - "knowledge/exact-width-admitted-corpus.json"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/exact-width-function-census.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/research-2351-exact-width-function-census.py"
+      - "knowledge/function-status-census.json"
+      - "knowledge/function-status-census.tsv"
+      - "knowledge/exact-width-admitted-corpus.json"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/exact-width-function-census.yml"
+  workflow_dispatch:
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check exact-width census
+        run: |
+          rm -rf /tmp/function-status-census
+          python3 scripts/research-2351-exact-width-function-census.py \
+            --check \
+            --out /tmp/function-status-census
+      - name: Publish summary
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          p=Path("/tmp/function-status-census/function-status-census-summary.json")
+          print("## Exact-width function census — #2351")
+          print()
+          if not p.exists():
+              print("summary missing")
+          else:
+              s=json.loads(p.read_text())
+              c=s["counts"]
+              print(f"- active function-like rows: {s['active_function_rows']}")
+              print(f"- generated: {c['generated']}")
+              print(f"- UNKNOWN: {c['UNKNOWN']}")
+              print(f"- proven roots: {c['root']}")
+              print(f"- bounded residue: {c['residue']}")
+              print(f"- generated lower bound: {s['generated_fraction_of_active_rows']:.1%}")
+              print()
+              print("UNKNOWN is not an independent-root claim.")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exact-width-function-census
+          path: /tmp/function-status-census/
+          retention-days: 14
