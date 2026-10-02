@@ -39,6 +39,20 @@ fn width_at(case: &str, index: usize) -> Option<u8> {
     Some(width)
 }
 
+fn fixed_width(case: &str) -> Option<u8> {
+    match case {
+        "w1" => Some(1),
+        "w2" => Some(2),
+        "w3" => Some(3),
+        "w4" => Some(4),
+        "w5" => Some(5),
+        "w6" => Some(6),
+        "w7" => Some(7),
+        "w8" => Some(8),
+        _ => None,
+    }
+}
+
 fn build_words(case: &str, count: usize) -> Option<Vec<Word>> {
     let mut words = Vec::with_capacity(count);
     let mut state = 0x9e37_79b9_u32 ^ count as u32;
@@ -162,6 +176,80 @@ fn scan_cache(cache: &[u8], repeats: usize) -> u64 {
     black_box(checksum)
 }
 
+fn pack_words_with_offsets(words: &[Word]) -> (PackedBitstream, Vec<usize>) {
+    let bits = words.iter().map(|word| word.width as usize).sum();
+    let mut packer = BitPacker::with_capacity_bits(bits);
+    let mut offsets = Vec::with_capacity(words.len());
+    for &word in words {
+        offsets.push(packer.bit_len());
+        push_word(&mut packer, word);
+    }
+    (packer.finish(), offsets)
+}
+
+fn build_random_indices(count: usize, accesses: usize) -> Vec<usize> {
+    let mut out = Vec::with_capacity(accesses);
+    let mut state = 0x243f_6a88_u32 ^ count as u32 ^ accesses as u32;
+    for _ in 0..accesses {
+        state ^= state << 13;
+        state ^= state >> 17;
+        state ^= state << 5;
+        out.push((state as usize) % count);
+    }
+    out
+}
+
+fn random_unpacked(bytes: &[u8], indices: &[usize], repeats: usize) -> u64 {
+    let mut checksum = 0u64;
+    for rep in 0..repeats {
+        for &index in indices {
+            checksum = checksum
+                .wrapping_mul(33)
+                .wrapping_add(black_box(bytes[index]) as u64)
+                .wrapping_add(rep as u64 & 1);
+        }
+    }
+    black_box(checksum)
+}
+
+fn random_packed(
+    words: &[Word],
+    packed: &PackedBitstream,
+    offsets: &[usize],
+    fixed_width: Option<u8>,
+    indices: &[usize],
+    repeats: usize,
+) -> u64 {
+    let mut checksum = 0u64;
+    for rep in 0..repeats {
+        for &index in indices {
+            let offset = match fixed_width {
+                Some(width) => index * width as usize,
+                None => offsets[index],
+            };
+            let raw = read_word(packed, offset, words[index].width);
+            checksum = checksum
+                .wrapping_mul(33)
+                .wrapping_add(black_box(raw) as u64)
+                .wrapping_add(rep as u64 & 1);
+        }
+    }
+    black_box(checksum)
+}
+
+fn random_cache(cache: &[u8], indices: &[usize], repeats: usize) -> u64 {
+    let mut checksum = 0u64;
+    for rep in 0..repeats {
+        for &index in indices {
+            checksum = checksum
+                .wrapping_mul(33)
+                .wrapping_add(black_box(cache[index]) as u64)
+                .wrapping_add(rep as u64 & 1);
+        }
+    }
+    black_box(checksum)
+}
+
 fn main() -> ExitCode {
     let mut args = env::args().skip(1);
     let case = args.next().unwrap_or_else(|| "d1234".to_owned());
@@ -171,9 +259,13 @@ fn main() -> ExitCode {
         .and_then(|s| s.parse().ok())
         .unwrap_or(65_536usize);
     let repeats = args.next().and_then(|s| s.parse().ok()).unwrap_or(8usize);
+    let random_accesses = args
+        .next()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or_else(|| count.min(65_536));
 
-    if count == 0 || repeats == 0 {
-        eprintln!("count and repeats must be positive");
+    if count == 0 || repeats == 0 || random_accesses == 0 {
+        eprintln!("count, repeats and random_accesses must be positive");
         return ExitCode::from(2);
     }
 
@@ -184,22 +276,22 @@ fn main() -> ExitCode {
     let semantic_bits: usize = words.iter().map(|word| word.width as usize).sum();
     let unpacked_bytes = words.len();
 
-    let (checksum, packed_bytes, cache_bytes) = match mode.as_str() {
+    let (checksum, packed_bytes, cache_bytes, offset_index_bytes, access_index_bytes) = match mode.as_str() {
         "prepare-logical" => {
             black_box(&words);
-            (words.len() as u64, 0usize, 0usize)
+            (words.len() as u64, 0usize, 0usize, 0usize, 0usize)
         }
         "prepare-unpacked" => {
             let bytes = materialize_unpacked_bytes(&words);
             let len = bytes.len();
             black_box(&bytes);
-            (len as u64, 0usize, len)
+            (len as u64, 0usize, len, 0usize, 0usize)
         }
         "prepare-packed" => {
             let packed = pack_words(&words);
             let bytes = packed.byte_len();
             black_box(&packed);
-            (packed.bit_len() as u64, bytes, 0)
+            (packed.bit_len() as u64, bytes, 0, 0usize, 0usize)
         }
         "prepare-cached" => {
             let packed = pack_words(&words);
@@ -207,19 +299,19 @@ fn main() -> ExitCode {
             let cache = decode_cache(&words, &packed);
             let cache_len = cache.len();
             black_box(&cache);
-            (cache_len as u64, bytes, cache_len)
+            (cache_len as u64, bytes, cache_len, 0usize, 0usize)
         }
         "scan-unpacked" => {
             let bytes = materialize_unpacked_bytes(&words);
             let len = bytes.len();
             let checksum = scan_unpacked(&bytes, repeats);
-            (checksum, 0, len)
+            (checksum, 0, len, 0usize, 0usize)
         }
         "scan-packed" => {
             let packed = pack_words(&words);
             let bytes = packed.byte_len();
             let checksum = scan_packed(&words, &packed, repeats);
-            (checksum, bytes, 0)
+            (checksum, bytes, 0, 0usize, 0usize)
         }
         "scan-cached" => {
             let packed = pack_words(&words);
@@ -227,7 +319,79 @@ fn main() -> ExitCode {
             let cache = decode_cache(&words, &packed);
             let cache_len = cache.len();
             let checksum = scan_cache(&cache, repeats);
-            (checksum, bytes, cache_len)
+            (checksum, bytes, cache_len, 0usize, 0usize)
+        }
+        "prepare-random-unpacked" => {
+            let bytes = materialize_unpacked_bytes(&words);
+            let indices = build_random_indices(count, random_accesses);
+            let index_bytes = indices.len() * std::mem::size_of::<usize>();
+            let len = bytes.len();
+            black_box((&bytes, &indices));
+            (len as u64, 0usize, len, 0usize, index_bytes)
+        }
+        "prepare-random-packed" => {
+            let (packed, offsets) = match fixed_width(&case) {
+                Some(_) => (pack_words(&words), Vec::new()),
+                None => pack_words_with_offsets(&words),
+            };
+            let indices = build_random_indices(count, random_accesses);
+            let packed_bytes = packed.byte_len();
+            let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
+            let index_bytes = indices.len() * std::mem::size_of::<usize>();
+            black_box((&packed, &offsets, &indices));
+            (
+                packed.bit_len() as u64,
+                packed_bytes,
+                0usize,
+                offset_bytes,
+                index_bytes,
+            )
+        }
+        "prepare-random-cached" => {
+            let packed = pack_words(&words);
+            let cache = decode_cache(&words, &packed);
+            let indices = build_random_indices(count, random_accesses);
+            let packed_bytes = packed.byte_len();
+            let cache_bytes = cache.len();
+            let index_bytes = indices.len() * std::mem::size_of::<usize>();
+            black_box((&cache, &indices));
+            (
+                cache_bytes as u64,
+                packed_bytes,
+                cache_bytes,
+                0usize,
+                index_bytes,
+            )
+        }
+        "random-unpacked" => {
+            let bytes = materialize_unpacked_bytes(&words);
+            let indices = build_random_indices(count, random_accesses);
+            let index_bytes = indices.len() * std::mem::size_of::<usize>();
+            let checksum = random_unpacked(&bytes, &indices, repeats);
+            (checksum, 0usize, bytes.len(), 0usize, index_bytes)
+        }
+        "random-packed" => {
+            let fixed = fixed_width(&case);
+            let (packed, offsets) = match fixed {
+                Some(_) => (pack_words(&words), Vec::new()),
+                None => pack_words_with_offsets(&words),
+            };
+            let indices = build_random_indices(count, random_accesses);
+            let packed_bytes = packed.byte_len();
+            let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
+            let index_bytes = indices.len() * std::mem::size_of::<usize>();
+            let checksum = random_packed(&words, &packed, &offsets, fixed, &indices, repeats);
+            (checksum, packed_bytes, 0usize, offset_bytes, index_bytes)
+        }
+        "random-cached" => {
+            let packed = pack_words(&words);
+            let cache = decode_cache(&words, &packed);
+            let indices = build_random_indices(count, random_accesses);
+            let packed_bytes = packed.byte_len();
+            let cache_bytes = cache.len();
+            let index_bytes = indices.len() * std::mem::size_of::<usize>();
+            let checksum = random_cache(&cache, &indices, repeats);
+            (checksum, packed_bytes, cache_bytes, 0usize, index_bytes)
         }
         _ => {
             eprintln!("unknown mode: {mode}");
@@ -236,7 +400,7 @@ fn main() -> ExitCode {
     };
 
     println!(
-        "case={case} mode={mode} count={count} repeats={repeats} semantic_bits={semantic_bits} unpacked_bytes={unpacked_bytes} packed_bytes={packed_bytes} cache_bytes={cache_bytes} checksum={checksum}"
+        "case={case} mode={mode} count={count} repeats={repeats} random_accesses={random_accesses} semantic_bits={semantic_bits} unpacked_bytes={unpacked_bytes} packed_bytes={packed_bytes} cache_bytes={cache_bytes} offset_index_bytes={offset_index_bytes} access_index_bytes={access_index_bytes} checksum={checksum}"
     );
     ExitCode::SUCCESS
 }
