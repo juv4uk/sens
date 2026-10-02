@@ -306,6 +306,73 @@ def minimum_unique_word_bits(count: int) -> int:
     return total
 
 
+def verify_law_transport() -> dict[str, int]:
+    """Generate parallel sum by reciprocal conjugation of ADD on positive Q."""
+    positive = tuple(x for x in Q if x > 0)
+
+    def parallel(a: Fraction, b: Fraction) -> Fraction:
+        return 1 / ((1 / a) + (1 / b))
+
+    generated_cases = 0
+    commutative_cases = 0
+    associative_cases = 0
+
+    for a, b in product(positive, repeat=2):
+        generated = parallel(a, b)
+        closed_form = (a * b) / (a + b)
+        assert generated == closed_form
+        generated_cases += 1
+
+        assert parallel(a, b) == parallel(b, a)
+        commutative_cases += 1
+
+    for a, b, d in product(positive, repeat=3):
+        assert parallel(parallel(a, b), d) == parallel(a, parallel(b, d))
+        associative_cases += 1
+
+    # ADD's identity 0 maps through reciprocal outside finite positive Q.
+    # Record the missing identity honestly rather than inventing one.
+    finite_identity_found = any(
+        all(parallel(a, e) == a and parallel(e, a) == a for a in positive)
+        for e in positive
+    )
+    assert not finite_identity_found
+
+    return {
+        "parallel_sum_generated_cases": generated_cases,
+        "parallel_sum_commutative_cases": commutative_cases,
+        "parallel_sum_associative_cases": associative_cases,
+        "parallel_sum_finite_identity_found": int(finite_identity_found),
+    }
+
+
+def verify_function_conjugation() -> dict[str, int]:
+    additive_fixed_cases = 0
+    multiplicative_fixed_cases = 0
+    order_cases = 0
+
+    for a, b in product(Q, repeat=2):
+        assert -((-a) + (-b)) == a + b
+        assert -((-a) - (-b)) == a - b
+        additive_fixed_cases += 2
+
+        assert ((-a) < (-b)) == (a > b)
+        assert ((-a) <= (-b)) == (a >= b)
+        order_cases += 2
+
+    nonzero = tuple(x for x in Q if x != 0)
+    for a, b in product(nonzero, repeat=2):
+        assert 1 / ((1 / a) * (1 / b)) == a * b
+        assert 1 / ((1 / a) / (1 / b)) == a / b
+        multiplicative_fixed_cases += 2
+
+    return {
+        "neg_conjugation_add_sub_fixed_cases": additive_fixed_cases,
+        "neg_input_order_reversal_cases": order_cases,
+        "recip_conjugation_mul_div_fixed_cases": multiplicative_fixed_cases,
+    }
+
+
 def group_family_candidate() -> tuple[tuple[str, str, int], ...]:
     return (
         ("additive-root", "0", 1),
@@ -324,6 +391,8 @@ def main() -> None:
     divmod_family = verify_divmod_selector_family()
     lattices = verify_lattice_families()
     dualities = verify_order_reversing_dualities()
+    conjugation = verify_function_conjugation()
+    law_transport = verify_law_transport()
     placement = group_family_candidate()
 
     print(f"Q-CORPUS-SIZE={len(Q)}")
@@ -331,7 +400,9 @@ def main() -> None:
         print(f"{key.upper().replace('_', '-')}={value}")
     for key, value in order.items():
         print(f"{key.upper().replace('_', '-')}={value}")
-    for group_results in (derived, divmod_family, lattices, dualities):
+    for group_results in (
+        derived, divmod_family, lattices, dualities, conjugation, law_transport
+    ):
         for key, value in group_results.items():
             print(f"{key.upper().replace('_', '-')}={value}")
 
@@ -366,6 +437,8 @@ def main() -> None:
     print("DIVMOD-SELECTOR-LAW=CAR->QUOTIENT,CDR->REMAINDER")
     print("LATTICE-FAMILIES=MIN/MAX,GCD/LCM")
     print("ORDER-REVERSING-DUALITIES=NEG,RECIP-POSITIVE")
+    print("FUNCTION-CONJUGATION=NEG-AND-RECIP-ACTIONS")
+    print("GENERATED-OPERATION=PARALLEL-SUM:RECIP∘ADD∘(RECIP×RECIP)")
     print("STATUS=PASS-BOUNDED-MATH-ALGEBRA-WITNESS")
     print("AUTHORITY=RESEARCH-ONLY-NO-PRODUCTION-ALLOCATION")
 
