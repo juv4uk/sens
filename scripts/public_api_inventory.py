@@ -32,7 +32,7 @@ PUBLIC_API_EXCLUDED_ROOT = re.compile(
 )
 DEFINE_SIGNATURE_ROW = re.compile(r"^\s*\(([01]{8})\s+\(kind syntax\)\s+\(form define\)")
 DEFMACRO_SIGNATURE_ROW = re.compile(r"^\s*\(([01]{8})\s+\(kind macro\).*\(sig \"\(defmacro ")
-PUBLIC_API_EXCLUDED_SOURCE = re.compile(
+PUBLIC_API_NONCURRENT_SOURCE = re.compile(
     r'^\s*\(public-api-excluded-source\s+\.\s+"([^"]+)"\)+\s*$'
 )
 
