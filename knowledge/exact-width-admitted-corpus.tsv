@@ -1,54 +1,54 @@
 word	width	role	status	family	authority_ref	generator_ref	human_label_optional
-0	1	answer	admitted	answer	#2151/#2170		NO
-1	1	answer	admitted	answer	#2151/#2170		YES
-00	2	structure	admitted	structure	#2151/#2170		separator
-01	2	structure	admitted	structure	#2151/#2170		close
-10	2	structure	admitted	structure	#2151/#2170		open
-11	2	structure	admitted	structure	#2151/#2170		dot
-000	3	foundation	admitted	foundation	#2151/#2170		()
-001	3	foundation	admitted	foundation	#2151/#2170		QUOTE
-010	3	foundation	admitted	foundation	#2151/#2170		ATOM
-011	3	foundation	admitted	foundation	#2151/#2170		COND
-100	3	foundation	admitted	foundation	#2151/#2170		CONS
-101	3	selector-root	admitted	selector	#2151/#2170		CAR
-110	3	selector-root	admitted	selector	#2151/#2170		CDR
-111	3	foundation	admitted	foundation	#2151/#2170		EQ
-0000	4	bootstrap	admitted	bootstrap	#2151/#2170		APPLY
-0001	4	bootstrap	admitted	bootstrap	#2151/#2170		EVAL
-0010	4	bootstrap	admitted	bootstrap	#2151/#2170		LAMBDA
-0011	4	bootstrap	admitted	bootstrap	#2151/#2170		DEFINE
-0100	4	bootstrap	admitted	bootstrap	#2151/#2170		NOT
-0101	4	unallocated	unallocated	unallocated	#2151/#2170		
-0110	4	bootstrap	admitted	bootstrap	#2151/#2170		EVCON
-0111	4	bootstrap	admitted	bootstrap	#2151/#2170		EVLIS
-1000	4	bootstrap	admitted	bootstrap	#2151/#2170		LIST
-1001	4	unallocated	unallocated	unallocated	#2151/#2170		
+0	1	answer	admitted	answer	#2151/#2170	-	NO
+1	1	answer	admitted	answer	#2151/#2170	-	YES
+00	2	structure	admitted	structure	#2151/#2170	-	separator
+01	2	structure	admitted	structure	#2151/#2170	-	close
+10	2	structure	admitted	structure	#2151/#2170	-	open
+11	2	structure	admitted	structure	#2151/#2170	-	dot
+000	3	foundation	admitted	foundation	#2151/#2170	-	()
+001	3	foundation	admitted	foundation	#2151/#2170	-	QUOTE
+010	3	foundation	admitted	foundation	#2151/#2170	-	ATOM
+011	3	foundation	admitted	foundation	#2151/#2170	-	COND
+100	3	foundation	admitted	foundation	#2151/#2170	-	CONS
+101	3	selector-root	admitted	selector	#2151/#2170	-	CAR
+110	3	selector-root	admitted	selector	#2151/#2170	-	CDR
+111	3	foundation	admitted	foundation	#2151/#2170	-	EQ
+0000	4	bootstrap	admitted	bootstrap	#2151/#2170	-	APPLY
+0001	4	bootstrap	admitted	bootstrap	#2151/#2170	-	EVAL
+0010	4	bootstrap	admitted	bootstrap	#2151/#2170	-	LAMBDA
+0011	4	bootstrap	admitted	bootstrap	#2151/#2170	-	DEFINE
+0100	4	bootstrap	admitted	bootstrap	#2151/#2170	-	NOT
+0101	4	unallocated	unallocated	unallocated	#2151/#2170	-	-
+0110	4	bootstrap	admitted	bootstrap	#2151/#2170	-	EVCON
+0111	4	bootstrap	admitted	bootstrap	#2151/#2170	-	EVLIS
+1000	4	bootstrap	admitted	bootstrap	#2151/#2170	-	LIST
+1001	4	unallocated	unallocated	unallocated	#2151/#2170	-	-
 1010	4	selector	generated	selector	#2151/#2170	#1968/#2329	CAAR
 1011	4	selector	generated	selector	#2151/#2170	#1968/#2329	CADR
 1100	4	selector	generated	selector	#2151/#2170	#1968/#2329	CDAR
 1101	4	selector	generated	selector	#2151/#2170	#1968/#2329	CDDR
-1110	4	bootstrap	admitted	bootstrap	#2151/#2170		LOOKUP
-1111	4	bootstrap	admitted	bootstrap	#2151/#2170		BIND
-00000	5	unallocated	unallocated	unallocated	#2175/#2329		
-00001	5	unallocated	unallocated	unallocated	#2175/#2329		
-00010	5	unallocated	unallocated	unallocated	#2175/#2329		
-00011	5	unallocated	unallocated	unallocated	#2175/#2329		
-00100	5	unallocated	unallocated	unallocated	#2175/#2329		
-00101	5	unallocated	unallocated	unallocated	#2175/#2329		
-00110	5	unallocated	unallocated	unallocated	#2175/#2329		
-00111	5	unallocated	unallocated	unallocated	#2175/#2329		
-01000	5	unallocated	unallocated	unallocated	#2175/#2329		
-01001	5	unallocated	unallocated	unallocated	#2175/#2329		
-01010	5	unallocated	unallocated	unallocated	#2175/#2329		
-01011	5	unallocated	unallocated	unallocated	#2175/#2329		
-01100	5	unallocated	unallocated	unallocated	#2175/#2329		
-01101	5	unallocated	unallocated	unallocated	#2175/#2329		
-01110	5	unallocated	unallocated	unallocated	#2175/#2329		
-01111	5	unallocated	unallocated	unallocated	#2175/#2329		
-10000	5	unallocated	unallocated	unallocated	#2175/#2329		
-10001	5	unallocated	unallocated	unallocated	#2175/#2329		
-10010	5	unallocated	unallocated	unallocated	#2175/#2329		
-10011	5	unallocated	unallocated	unallocated	#2175/#2329		
+1110	4	bootstrap	admitted	bootstrap	#2151/#2170	-	LOOKUP
+1111	4	bootstrap	admitted	bootstrap	#2151/#2170	-	BIND
+00000	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+00001	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+00010	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+00011	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+00100	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+00101	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+00110	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+00111	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+01000	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+01001	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+01010	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+01011	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+01100	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+01101	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+01110	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+01111	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+10000	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+10001	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+10010	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+10011	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
 10100	5	selector	generated	selector	#2175/#2329	#1968/#2329	CAAAR
 10101	5	selector	generated	selector	#2175/#2329	#1968/#2329	CAADR
 10110	5	selector	generated	selector	#2175/#2329	#1968/#2329	CADAR
@@ -57,7 +57,7 @@ word	width	role	status	family	authority_ref	generator_ref	human_label_optional
 11001	5	selector	generated	selector	#2175/#2329	#1968/#2329	CDADR
 11010	5	selector	generated	selector	#2175/#2329	#1968/#2329	CDDAR
 11011	5	selector	generated	selector	#2175/#2329	#1968/#2329	CDDDR
-11100	5	unallocated	unallocated	unallocated	#2175/#2329		
-11101	5	unallocated	unallocated	unallocated	#2175/#2329		
-11110	5	unallocated	unallocated	unallocated	#2175/#2329		
-11111	5	unallocated	unallocated	unallocated	#2175/#2329		
+11100	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+11101	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+11110	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
+11111	5	unallocated	unallocated	unallocated	#2175/#2329	-	-
