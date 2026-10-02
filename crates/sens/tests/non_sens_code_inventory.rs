@@ -337,7 +337,6 @@ fn is_runtime_embedded_source(file: &str) -> bool {
         "lib/macro.lisp"
             | "lib/core2.lisp"
             | "lib/core3.lisp"
-            | "lib/core4.lisp"
             | "lib/meta-eval.lisp"
             | "lib/time.lisp"
             | "lib/utf8.lisp"
