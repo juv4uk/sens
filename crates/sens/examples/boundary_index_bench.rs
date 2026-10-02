@@ -150,6 +150,20 @@ fn checkpoint_offsets(words: &[Word], k: usize) -> Vec<u32> {
     checkpoints
 }
 
+fn block_local_offsets_u8(words: &[Word], k: usize) -> Option<Vec<u8>> {
+    assert!(k > 0);
+    let mut locals = Vec::with_capacity(words.len());
+    let mut local_bit = 0usize;
+    for (index, word) in words.iter().enumerate() {
+        if index % k == 0 {
+            local_bit = 0;
+        }
+        locals.push(u8::try_from(local_bit).ok()?);
+        local_bit += word.width as usize;
+    }
+    Some(locals)
+}
+
 fn packed_width_stream2(words: &[Word]) -> Option<PackedBitstream> {
     let mut packer = BitPacker::with_capacity_bits(words.len() * 2);
     for word in words {
@@ -196,6 +210,11 @@ enum Index {
         checkpoints: Vec<u32>,
         widths: PackedBitstream,
     },
+    TieredW2 {
+        checkpoints: Vec<u32>,
+        locals: Vec<u8>,
+        widths: PackedBitstream,
+    },
     Cache2 {
         widths: Vec<u8>,
         raws: Vec<u8>,
@@ -216,6 +235,13 @@ impl Index {
             }
             Self::CheckpointW3 { checkpoints, widths, .. } => {
                 checkpoints.len() * size_of::<u32>() + widths.byte_len()
+            }
+            Self::TieredW2 {
+                checkpoints,
+                locals,
+                widths,
+            } => {
+                checkpoints.len() * size_of::<u32>() + locals.len() + widths.byte_len()
             }
             Self::Cache2 { widths, raws } => widths.len() + raws.len(),
         }
@@ -277,6 +303,16 @@ impl Index {
                 steps += 1;
                 (width, read_word(packed, offset, width), steps)
             }
+            Self::TieredW2 {
+                checkpoints,
+                locals,
+                widths,
+            } => {
+                let k = locals.len().div_ceil(checkpoints.len());
+                let offset = checkpoints[index / k] as usize + locals[index] as usize;
+                let width = packed_width2(widths, index);
+                (width, read_word(packed, offset, width), 0)
+            }
             Self::Cache2 { widths, raws } => (widths[index], raws[index], 0),
         }
     }
@@ -322,6 +358,16 @@ fn build_index(candidate: &str, case: &str, words: &[Word], packed: &PackedBitst
             k,
             checkpoints: checkpoint_offsets(words, k),
             widths: packed_width_stream(words),
+        });
+    }
+    if let Some(k) = parse_checkpoint(candidate, "t2-") {
+        if case != "d1234" || k > 64 {
+            return None;
+        }
+        return Some(Index::TieredW2 {
+            checkpoints: checkpoint_offsets(words, k),
+            locals: block_local_offsets_u8(words, k)?,
+            widths: packed_width_stream2(words)?,
         });
     }
     if candidate == "cache2" {
