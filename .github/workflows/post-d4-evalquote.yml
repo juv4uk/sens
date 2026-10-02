@@ -1,0 +1,81 @@
+name: Post-D4 EVALQUOTE derivation research
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1.lisp"
+      - "tests/fixtures/post-d4-evalquote-witness.lisp"
+      - ".github/workflows/post-d4-evalquote.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evalquote-derived:
+    name: Pinned S0 EVALQUOTE derivation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SENS
+        uses: actions/checkout@v5
+
+      - name: Checkout pinned typed-SID8 S0 seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
+          ref: 6031f92652066825a245c806c0773e9e524257bd
+          path: .core1-s0/mccarthy-eval
+
+      - name: Verify and build exact pinned S0 source
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          seed_sha="$(git -C .core1-s0/mccarthy-eval rev-parse HEAD)"
+          test "$seed_sha" = "6031f92652066825a245c806c0773e9e524257bd"
+          printf "S0 seed commit: %s\n" "$seed_sha"
+          gcc -no-pie -O0 -s -o .core1-s0/mccarthy-eval/mccarthy-kernel \
+            .core1-s0/mccarthy-eval/mccarthy-kernel.s
+
+      - name: Execute ordinary EVALQUOTE derivation
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          witness="tests/fixtures/post-d4-evalquote-witness.lisp"
+
+          if sed '/^[[:space:]]*;/d' "$witness" | grep -Eq '\b(FEXPR|FSUBR)\b'; then
+            echo "::error::ordinary EVALQUOTE executable witness must not import FEXPR/FSUBR staging"
+            exit 1
+          fi
+
+          cat lib/core1.lisp "$witness" > .core1-s0/post-d4-evalquote-full.lisp
+          expected='NIL
+((A . B) A (A . B) (C1-ERROR ARITY 00000101))'
+          actual="$(
+            cd .core1-s0/mccarthy-eval
+            ./mccarthy-kernel ../post-d4-evalquote-full.lisp
+          )"
+
+          printf "EVALQUOTE expected raw output:\n%s\n" "$expected"
+          printf "EVALQUOTE actual raw output:\n%s\n" "$actual"
+          test "$actual" = "$expected"
+
+          {
+            echo "## #2279 ordinary EVALQUOTE derivation"
+            echo "- pinned S0 seed: 6031f926..."
+            echo "- primitive/value-list: PASS"
+            echo "- nested data preservation: PASS"
+            echo "- raw LAMBDA -> closure -> APPLY: PASS"
+            echo "- APPLY arity failure propagation: PASS"
+            echo "- FEXPR/FSUBR staging excluded from this witness"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail closed when private S0 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "::error::Private Core1 S0 evidence is unavailable to untrusted fork PRs."
+          exit 1
