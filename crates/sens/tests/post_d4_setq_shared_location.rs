@@ -162,4 +162,3 @@ fn nearest_existing_update_fails_closed_for_a_missing_name() {
     assert!(!child.borrow().bindings.contains_key("missing"));
     assert!(!root.borrow().bindings.contains_key("missing"));
 }
-
