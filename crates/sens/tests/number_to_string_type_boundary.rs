@@ -42,7 +42,7 @@ fn ordinary_non_numbers_fail_closed() {
     ] {
         let mut session = core_session();
         let error = eval_program(source, &mut session)
-            .unwrap_or_else(|_| panic!("{source}: expected a named type failure"));
-        let _ = error;
+            .expect_err("non-Number must fail the Number boundary");
+        assert_eq!(error.kind, ErrorKind::Type, "{source}: {error:?}");
     }
 }
