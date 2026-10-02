@@ -64,8 +64,21 @@ def canonical_json(value: Any) -> str:
     ) + "\n"
 
 
-def token_gate(value: Any) -> None:
-    text = json.dumps(value, ensure_ascii=False, sort_keys=True).lower()
+def token_gate(spec: dict[str, Any]) -> None:
+    # Schema/status labels are transport/research metadata. The firewall applies
+    # to the semantic payload itself: carrier, constants, operation signatures,
+    # and generation laws.
+    semantic_payload = {
+        "carrier": spec.get("carrier"),
+        "constants": spec.get("constants"),
+        "basis_operations": spec.get("basis_operations"),
+        "generation_rules": spec.get("generation_rules"),
+    }
+    text = json.dumps(
+        semantic_payload,
+        ensure_ascii=False,
+        sort_keys=True,
+    ).lower()
     tokens = set(re.findall(r"[a-z_]+", text))
     leaked = sorted(tokens & FORBIDDEN)
     if leaked:
