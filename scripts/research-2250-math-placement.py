@@ -117,6 +117,60 @@ def verify_order_klein4() -> dict[str, int]:
     }
 
 
+def verify_order_orbits() -> dict[str, int]:
+    """Classify LT and EQ orbits under swap S and predicate-negation N."""
+    lt_images: set[str] = set()
+    eq_images: set[str] = set()
+    eq_swap_fixed_cases = 0
+    eq_negation_cases = 0
+
+    for action in (I, S, N, NS):
+        lt_truth = tuple(
+            transformed_lt(action, a, b)
+            for a, b in product(Q, repeat=2)
+        )
+        lt_labels = {
+            tuple(a < b for a, b in product(Q, repeat=2)): "LT",
+            tuple(a > b for a, b in product(Q, repeat=2)): "GT",
+            tuple(a >= b for a, b in product(Q, repeat=2)): "GE",
+            tuple(a <= b for a, b in product(Q, repeat=2)): "LE",
+        }
+        lt_images.add(lt_labels[lt_truth])
+
+        swap = bool(action & S)
+        negate = bool(action & N)
+        eq_truth = []
+        for a, b in product(Q, repeat=2):
+            if swap:
+                a, b = b, a
+            answer = a == b
+            if negate:
+                answer = not answer
+            eq_truth.append(answer)
+        eq_truth_tuple = tuple(eq_truth)
+        eq_labels = {
+            tuple(a == b for a, b in product(Q, repeat=2)): "EQ",
+            tuple(a != b for a, b in product(Q, repeat=2)): "NE",
+        }
+        eq_images.add(eq_labels[eq_truth_tuple])
+
+    for a, b in product(Q, repeat=2):
+        assert (a == b) == (b == a)
+        eq_swap_fixed_cases += 1
+        assert (a != b) == (not (a == b))
+        eq_negation_cases += 1
+
+    assert lt_images == {"LT", "GT", "GE", "LE"}
+    assert eq_images == {"EQ", "NE"}
+
+    return {
+        "lt_orbit_size": len(lt_images),
+        "eq_orbit_size": len(eq_images),
+        "eq_swap_stabilizer_cases": eq_swap_fixed_cases,
+        "eq_negation_cases": eq_negation_cases,
+    }
+
+
 def verify_derived_basics() -> dict[str, int]:
     """Check basic operations that may not need independent semantic roots."""
     cases = 0
@@ -387,6 +441,7 @@ def group_family_candidate() -> tuple[tuple[str, str, int], ...]:
 def main() -> None:
     group = verify_group_family()
     order = verify_order_klein4()
+    order_orbits = verify_order_orbits()
     derived = verify_derived_basics()
     divmod_family = verify_divmod_selector_family()
     lattices = verify_lattice_families()
@@ -401,7 +456,8 @@ def main() -> None:
     for key, value in order.items():
         print(f"{key.upper().replace('_', '-')}={value}")
     for group_results in (
-        derived, divmod_family, lattices, dualities, conjugation, law_transport
+        order_orbits, derived, divmod_family, lattices, dualities,
+        conjugation, law_transport
     ):
         for key, value in group_results.items():
             print(f"{key.upper().replace('_', '-')}={value}")
@@ -434,6 +490,7 @@ def main() -> None:
     print("  10 GE   ; predicate-negation")
     print("  11 LE   ; swap+predicate-negation")
     print("ORDER-ACTION-LAW=compose-actions-via-xor")
+    print("ORDER-ORBITS=LT:{LT,GT,GE,LE};EQ:{EQ,NE}")
     print("DIVMOD-SELECTOR-LAW=CAR->QUOTIENT,CDR->REMAINDER")
     print("LATTICE-FAMILIES=MIN/MAX,GCD/LCM")
     print("ORDER-REVERSING-DUALITIES=NEG,RECIP-POSITIVE")
