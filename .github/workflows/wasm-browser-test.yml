@@ -9,8 +9,8 @@ on:
       - 'crates/sens/Cargo.toml'
       - 'crates/sens-literate/**'
       - 'crates/sens-lsp/**'
-      - 'lib/core4.lisp'      # current Core4 profile (#1135)
-      - 'lib/core4.lisp.fasl' # current Core4 compiled snapshot
+      - 'lib/core.lisp'       # single active SENS core (#2367)
+      - 'lib/core.lisp.fasl'  # canonical compiled snapshot
       # legacy aliases kept for reference: lib/core.my, lib/core.my.fasl
       - 'Cargo.toml'
       - 'Cargo.lock'
