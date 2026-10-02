@@ -18,7 +18,7 @@ Negative control:
 from __future__ import annotations
 
 from fractions import Fraction
-from itertools import product
+from itertools import permutations, product
 
 Q = tuple(sorted({
     Fraction(n, d)
@@ -201,6 +201,37 @@ def verify_predicate_affine_b3() -> tuple[int, int, int, int]:
     )
 
 
+
+def verify_predicate_affine_relabeling() -> tuple[int, int, tuple[tuple[int, ...], ...]]:
+    """Enumerate all label permutations that preserve the same composition law.
+
+    A preserving relabeling is a genuine monoid automorphism, not evidence that
+    arbitrary labels are semantic.
+    """
+    codes = (0b00, 0b01, 0b10, 0b11)
+    preserving: list[tuple[int, ...]] = []
+    rejected = 0
+
+    for perm in permutations(codes):
+        mapping = dict(zip(codes, perm))
+        ok = True
+        for outer, inner in product(codes, repeat=2):
+            lhs = mapping[compose_predicate_affine(outer, inner)]
+            rhs = compose_predicate_affine(mapping[outer], mapping[inner])
+            if lhs != rhs:
+                ok = False
+                break
+        if ok:
+            preserving.append(tuple(perm))
+        else:
+            rejected += 1
+
+    assert tuple(codes) in preserving
+    assert rejected > 0
+    assert len(preserving) + rejected == 24
+    return len(preserving), rejected, tuple(preserving)
+
+
 Matrix = tuple[Fraction, Fraction, Fraction, Fraction]
 INF = "inf"
 MI: Matrix = (Fraction(1), Fraction(0), Fraction(0), Fraction(1))
@@ -284,6 +315,9 @@ def main() -> None:
         pred_affine_identity,
         pred_affine_not,
     ) = verify_predicate_affine_b3()
+    affine_autos, affine_rejected, affine_auto_maps = (
+        verify_predicate_affine_relabeling()
+    )
     mobius_comp = verify_mobius_b1()
     negative = arbitrary_label_negative_control()
 
@@ -317,6 +351,13 @@ def main() -> None:
     print("SEMANTICS=f_ab(x)=(a&x)^b")
     print("COORDINATE-COMPOSITION=(a&c,(a&d)^b)")
     print("SEMANTIC-OP=UNARY-FUNCTION-COMPOSITION")
+    print(f"RELABELINGS-PRESERVING-LAW={affine_autos}")
+    print(f"RELABELINGS-REJECTED={affine_rejected}")
+    print("PRESERVING-RELABELINGS=" + ";".join(
+        ",".join(format(code, "02b") for code in perm)
+        for perm in affine_auto_maps
+    ))
+    print("ANTI-NUMEROLOGY=ONLY-MONOID-AUTOMORPHISMS-MAY-PRESERVE-LAW")
 
     print("FAMILY=MOBIUS-P1Q")
     print("CLASS=B1")
