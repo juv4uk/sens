@@ -1,0 +1,184 @@
+name: D4 status certificates
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2364-d4-status-certificates.py"
+      - "knowledge/d4-status-certificates.json"
+      - "knowledge/d4-status-certificates.tsv"
+      - "knowledge/exact-width-admitted-corpus.json"
+      - "tests/fixtures/d4-status-certificate-s0.lisp"
+      - "lib/core1.lisp"
+      - "lib/core1-compiler-prelude.lisp"
+      - "lib/core.lisp"
+      - "contracts/core1-bootstrap-contract.lisp"
+      - "tests/fixtures/conformance.lisp"
+      - "crates/sens/tests/mccarthy.rs"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d4-status-certificates.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-certificate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check D4 certificate projection
+        run: |
+          rm -rf /tmp/d4-status-certificates
+          python3 scripts/research-2364-d4-status-certificates.py \
+            --check \
+            --out /tmp/d4-status-certificates
+      - name: Publish summary
+        if: always()
+        run: |
+          cat /tmp/d4-status-certificates/d4-status-certificates-summary.json || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d4-status-certificates
+          path: /tmp/d4-status-certificates/
+          retention-days: 14
+
+  list-reconstruction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Bare-symbol variadic lambda is constitutive
+        run: |
+          cargo test -p sens --test mccarthy bare_symbol_lambda_list_binds_every_argument_as_one_list
+      - name: LIST is Lisp-owned, not Rust builtin
+        run: |
+          cargo test -p sens --test mccarthy list_is_a_sens_function_in_core_my_not_a_rust_builtin
+
+  s0-replay:
+    name: pinned S0 replay and remove-one
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Checkout pinned typed-SID8 S0 seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
+          ref: 6031f92652066825a245c806c0773e9e524257bd
+          path: .d4-s0/mccarthy-eval
+
+      - name: Install Guix
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix
+
+      - name: Build pinned S0 seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        working-directory: .d4-s0/mccarthy-eval
+        run: |
+          set -euo pipefail
+          guix time-machine -C ../../channels.scm -- shell gcc-toolchain -- \
+            gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+
+      - name: Replay six Lisp-owned D4 residents plus root positive controls
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          set -euo pipefail
+          cat lib/core1.lisp tests/fixtures/d4-status-certificate-s0.lisp > .d4-s0/d4-full.lisp
+
+          expected='Y
+          B
+          (A B)
+          B
+          (A)
+          (A B)
+          T
+          C'
+
+          actual="$(
+            cd .d4-s0/mccarthy-eval
+            ./mccarthy-kernel ../d4-full.lisp
+          )"
+
+          printf '%s\n' "$actual"
+          test "$actual" = "$expected"
+
+      - name: Replay pure-Lisp NOT prelude through Core1
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          set -euo pipefail
+          {
+            cat lib/core1.lisp
+            printf '%s\n' '(C1-EVAL-PROGRAM-THEN'
+            printf '%s\n' '  (QUOTE ('
+            sed '/^[[:space:]]*;/d' lib/core1-compiler-prelude.lisp
+            printf '%s\n' '  ))'
+            printf '%s\n' '  (QUOTE (list (not (quote ())) (not (quote A)))))'
+          } > .d4-s0/d4-not-full.lisp
+
+          actual="$(
+            cd .d4-s0/mccarthy-eval
+            ./mccarthy-kernel ../d4-not-full.lisp
+          )"
+          printf '%s\n' "$actual"
+          test "$actual" = '(T NIL)'
+
+      - name: remove-LAMBDA
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          set -euo pipefail
+          {
+            cat lib/core1.lisp
+            printf '%s\n' '(DEFINE C1-LAMBDA-NAMEP (LAMBDA (NAME) NIL))'
+            printf '%s\n' '(C1-FUNARGP (C1-EVAL (QUOTE (LAMBDA (X) X)) NIL NIL))'
+          } > .d4-s0/remove-lambda.lisp
+
+          actual="$(
+            cd .d4-s0/mccarthy-eval
+            ./mccarthy-kernel ../remove-lambda.lisp
+          )"
+          printf 'remove-LAMBDA observed=%s\n' "$actual"
+          test "$actual" != 'T'
+
+      - name: remove-DEFINE
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          set -euo pipefail
+          {
+            cat lib/core1.lisp
+            printf '%s\n' '(DEFINE C1-DEFINE-NAMEP (LAMBDA (NAME) NIL))'
+            cat <<'LISP'
+          (C1-WORLD-VALUE
+            (C1-EVAL-PROGRAM
+              (QUOTE
+                ((DEFINE LAST
+                   (LAMBDA (XS)
+                     (COND
+                       ((EQ (CDR XS) NIL) (CAR XS))
+                       (T (LAST (CDR XS))))))
+                 (LAST (QUOTE (A B C)))))
+              NIL))
+          LISP
+          } > .d4-s0/remove-define.lisp
+
+          actual="$(
+            cd .d4-s0/mccarthy-eval
+            ./mccarthy-kernel ../remove-define.lisp
+          )"
+          printf 'remove-DEFINE observed=%s\n' "$actual"
+          test "$actual" != 'C'
+
+      - name: Fail closed when private S0 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "::error::Private pinned S0 evidence is unavailable to untrusted forks."
+          exit 1
