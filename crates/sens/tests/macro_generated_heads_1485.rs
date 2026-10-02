@@ -9,7 +9,6 @@ use sens::{
 
 const INVENTORY: &str = include_str!("../../../tests/data/macro-generated-heads-1485.tsv");
 const CORE: &str = include_str!("../../../lib/core.lisp");
-const CORE4: &str = include_str!("../../../lib/core4.lisp");
 
 #[derive(Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
 struct Row {
@@ -99,8 +98,7 @@ fn quoted_admitted_single_atoms(path: &str, source: &str) -> BTreeSet<Row> {
 }
 
 fn discovered_rows_without_class() -> BTreeSet<Row> {
-    let mut rows = quoted_admitted_single_atoms("lib/core.lisp", CORE);
-    rows.extend(quoted_admitted_single_atoms("lib/core4.lisp", CORE4));
+    let rows = quoted_admitted_single_atoms("lib/core.lisp", CORE);
     rows
 }
 
@@ -139,7 +137,7 @@ fn discovery_is_structural_and_recognizes_quote_surface_aliases() {
 }
 
 #[test]
-fn inventory_covers_every_quoted_admitted_single_atom_in_core_and_core4() {
+fn inventory_covers_every_quoted_admitted_single_atom_in_single_core() {
     let inventoried: BTreeSet<_> = inventory_rows()
         .into_iter()
         .map(|mut row| {
@@ -160,8 +158,8 @@ fn inventory_has_only_explicit_data_or_code_template_classes() {
     let rows = inventory_rows();
     assert_eq!(
         rows.len(),
-        16,
-        "current audit is exactly eight rows per core profile"
+        8,
+        "current audit is exactly eight rows in the single active core"
     );
 
     for row in &rows {
@@ -178,14 +176,14 @@ fn inventory_has_only_explicit_data_or_code_template_classes() {
         .iter()
         .filter(|row| row.class == "ordinary-data")
         .collect();
-    assert_eq!(ordinary.len(), 2);
+    assert_eq!(ordinary.len(), 1);
     assert!(ordinary.iter().all(|row| row.surface == "binary"));
     assert!(ordinary.iter().all(|row| row.exact_sens == "10101001"));
 }
 
 #[test]
 fn ordinary_data_is_not_promoted_to_exact_sens() {
-    for (path, source) in [("lib/core.lisp", CORE), ("lib/core4.lisp", CORE4)] {
+    for (path, source) in [("lib/core.lisp", CORE)] {
         assert!(
             source.contains("(00000001 binary)"),
             "{path}: the admitted-looking symbol binary is ordinary quoted data and must remain data"
