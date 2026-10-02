@@ -63,6 +63,8 @@ def candidates_for(case: str, ks: tuple[int, ...], explicit: tuple[str, ...] | N
                 if k <= 64:
                     out.append(f"t2-{k}")
         for k in ks:
+            out.append(f"sel-{k}")
+        for k in ks:
             out.append(f"cp3-{k}")
     else:
         out.append("formula")
@@ -311,6 +313,7 @@ def main() -> int:
         "- cp2-K: D1-D4-only u32 checkpoint every K words + packed 2-bit (width-1) stream;",
         "- cp3-K: generic W1..W8 u32 checkpoint every K words + packed 3-bit (width-1) stream;",
         "- t2-K: D1-D4-only u32 checkpoint every K + one u8 local bit offset per word + packed 2-bit width stream; O(1) boundary recovery for K<=64;",
+        "- sel-K: one boundary bit at each packed word start + u32 select checkpoint every K words; query uses bounded u64 popcount/select probes and derives width from the next boundary;",
         "- cache2: decoded exact hot cache storing one width byte + one raw byte per word; packed payload may be cold/discarded.",
         "",
         "Pareto means non-dominated on (active bytes, query I/access) only. No weighted score is used.",
