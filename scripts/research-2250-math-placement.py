@@ -116,6 +116,39 @@ def verify_order_klein4() -> dict[str, int]:
     }
 
 
+def verify_derived_basics() -> dict[str, int]:
+    """Check basic operations that may not need independent semantic roots."""
+    cases = 0
+    unary_cases = 0
+
+    for a, b in product(Q, repeat=2):
+        eq_from_lt = (not (a < b)) and (not (b < a))
+        ne_from_lt = (a < b) or (b < a)
+        min_from_lt = a if a < b else b
+        max_from_lt = b if a < b else a
+
+        assert eq_from_lt == (a == b)
+        assert ne_from_lt == (a != b)
+        assert min_from_lt == min(a, b)
+        assert max_from_lt == max(a, b)
+        cases += 4
+
+    for x in Q:
+        zero_from_eq = (x == 0)
+        abs_from_lt_neg = -x if x < 0 else x
+        sign_from_order = -1 if x < 0 else (1 if x > 0 else 0)
+
+        assert zero_from_eq == (x == 0)
+        assert abs_from_lt_neg == abs(x)
+        assert sign_from_order == ((x > 0) - (x < 0))
+        unary_cases += 3
+
+    return {
+        "derived_binary_cases": cases,
+        "derived_unary_cases": unary_cases,
+    }
+
+
 def group_family_candidate() -> tuple[tuple[str, str, int], ...]:
     return (
         ("additive-root", "0", 1),
@@ -130,6 +163,7 @@ def group_family_candidate() -> tuple[tuple[str, str, int], ...]:
 def main() -> None:
     group = verify_group_family()
     order = verify_order_klein4()
+    derived = verify_derived_basics()
     placement = group_family_candidate()
 
     print(f"Q-CORPUS-SIZE={len(Q)}")
@@ -137,7 +171,11 @@ def main() -> None:
         print(f"{key.upper().replace('_', '-')}={value}")
     for key, value in order.items():
         print(f"{key.upper().replace('_', '-')}={value}")
+    for key, value in derived.items():
+        print(f"{key.upper().replace('_', '-')}={value}")
 
+    print("DERIVED-BASIC-CANDIDATES=EQ,NE,MIN,MAX,ZERO?,ABS,SIGN")
+    print("DERIVED-BASIC-ROOTS=LT,NEG,+constants/control")
     print("GROUP-FAMILY-CANDIDATE:")
     for role, code, width in placement:
         print(f"  {code}\twidth={width}\t{role}")
