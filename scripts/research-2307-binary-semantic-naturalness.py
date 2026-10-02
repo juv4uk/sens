@@ -257,6 +257,111 @@ def verify_predicate_affine_relabeling() -> tuple[int, int, tuple[tuple[int, ...
     return len(preserving), rejected, tuple(preserving)
 
 
+
+def gf2_mat_bit(matrix: int, row: int, col: int) -> int:
+    return (matrix >> (row * 2 + col)) & 1
+
+
+def gf2_mat_vec(matrix: int, vector: int) -> int:
+    x0 = vector & 1
+    x1 = (vector >> 1) & 1
+    y0 = (gf2_mat_bit(matrix, 0, 0) & x0) ^ (
+        gf2_mat_bit(matrix, 0, 1) & x1
+    )
+    y1 = (gf2_mat_bit(matrix, 1, 0) & x0) ^ (
+        gf2_mat_bit(matrix, 1, 1) & x1
+    )
+    return y0 | (y1 << 1)
+
+
+def gf2_mat_mul(left: int, right: int) -> int:
+    out = 0
+    for row in range(2):
+        for col in range(2):
+            bit = 0
+            for k in range(2):
+                bit ^= (
+                    gf2_mat_bit(left, row, k)
+                    & gf2_mat_bit(right, k, col)
+                )
+            out |= bit << (row * 2 + col)
+    return out
+
+
+def affine2_apply(coord: tuple[int, int], x: int) -> int:
+    matrix, offset = coord
+    return gf2_mat_vec(matrix, x) ^ offset
+
+
+def affine2_compose(
+    outer: tuple[int, int],
+    inner: tuple[int, int],
+) -> tuple[int, int]:
+    a, b = outer
+    c, d = inner
+    return gf2_mat_mul(a, c), gf2_mat_vec(a, d) ^ b
+
+
+def gf2_det2(matrix: int) -> int:
+    return (
+        (gf2_mat_bit(matrix, 0, 0) & gf2_mat_bit(matrix, 1, 1))
+        ^ (gf2_mat_bit(matrix, 0, 1) & gf2_mat_bit(matrix, 1, 0))
+    )
+
+
+def verify_affine2_b3() -> tuple[int, int, int, int]:
+    coords = tuple((matrix, offset) for matrix in range(16) for offset in range(4))
+    truth_tables = {
+        coord: tuple(affine2_apply(coord, x) for x in range(4))
+        for coord in coords
+    }
+    assert len(set(truth_tables.values())) == 64
+
+    composition_cases = 0
+    for outer, inner in product(coords, repeat=2):
+        composed = affine2_compose(outer, inner)
+        for x in range(4):
+            lhs = affine2_apply(composed, x)
+            rhs = affine2_apply(outer, affine2_apply(inner, x))
+            assert lhs == rhs, (outer, inner, x, composed, lhs, rhs)
+            composition_cases += 1
+
+    identity = (0b1001, 0b00)
+    identity_cases = 0
+    for coord in coords:
+        assert affine2_compose(identity, coord) == coord
+        assert affine2_compose(coord, identity) == coord
+        identity_cases += 2
+
+    invertible = sum(
+        1
+        for matrix, _offset in coords
+        if gf2_det2(matrix) == 1
+    )
+    assert invertible == 24
+
+    # Explicit nonlinear negative control: x0 AND x1 cannot be affine GF(2)->GF(2).
+    nonlinear_table = tuple(
+        ((x & 1) & ((x >> 1) & 1))
+        for x in range(4)
+    )
+    scalar_affine_tables = {
+        tuple(
+            ((a0 & (x & 1)) ^ (a1 & ((x >> 1) & 1)) ^ b)
+            for x in range(4)
+        )
+        for a0, a1, b in product((0, 1), repeat=3)
+    }
+    assert nonlinear_table not in scalar_affine_tables
+
+    return (
+        len(truth_tables),
+        composition_cases,
+        identity_cases,
+        invertible,
+    )
+
+
 Matrix = tuple[Fraction, Fraction, Fraction, Fraction]
 INF = "inf"
 MI: Matrix = (Fraction(1), Fraction(0), Fraction(0), Fraction(1))
@@ -344,6 +449,9 @@ def main() -> None:
     affine_autos, affine_rejected, affine_auto_maps = (
         verify_predicate_affine_relabeling()
     )
+    affine2_unique, affine2_comp, affine2_identity, affine2_invertible = (
+        verify_affine2_b3()
+    )
     mobius_comp = verify_mobius_b1()
     negative = arbitrary_label_negative_control()
 
@@ -390,6 +498,18 @@ def main() -> None:
         for perm in affine_auto_maps
     ))
     print("ANTI-NUMEROLOGY=ONLY-MONOID-AUTOMORPHISMS-MAY-PRESERVE-LAW")
+
+    print("FAMILY=GF2-AFFINE-N2")
+    print("CLASS=B3")
+    print(f"UNIQUE-FUNCTIONS={affine2_unique}")
+    print(f"COMPOSITION-CASES={affine2_comp}")
+    print(f"IDENTITY-LAW-CASES={affine2_identity}")
+    print(f"INVERTIBLE-COORDINATES={affine2_invertible}")
+    print("COORDINATE=(2X2-BINARY-MATRIX,2BIT-OFFSET)")
+    print("SEMANTICS=f_(A,b)(x)=A*x XOR b")
+    print("COORDINATE-COMPOSITION=(A*C,A*d XOR b)")
+    print("NONLINEAR-NEGATIVE-CONTROL=x0-AND-x1")
+    print("SEMANTIC-OP=BITVECTOR-FUNCTION-COMPOSITION")
 
     print("FAMILY=MOBIUS-P1Q")
     print("CLASS=B1")
