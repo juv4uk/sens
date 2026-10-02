@@ -4,7 +4,7 @@
 ; shared language-owned facilities; Core3 must not fork or duplicate them.
 ;
 ; Load order:
-;   lib/core4.lisp (current runtime substrate for these profile tools)
+;   lib/core.lisp (current runtime substrate for these lab tools)
 ;   lib/surface/semantic-registry-api.lisp
 ;   lib/mechanism-selector.lisp
 ;   lib/core3.lisp
