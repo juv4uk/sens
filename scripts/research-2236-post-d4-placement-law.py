@@ -35,6 +35,7 @@ class Candidate:
     strongest_parent: str | None = None
     same_base_object: bool | None = None
     one_new_delta: bool | None = None
+    delta_axes: tuple[str, ...] = ()
     suffix_0_fit: bool = False
     suffix_1_fit: bool = False
     delta: str = ""
@@ -92,6 +93,11 @@ def classify(candidate: Candidate) -> Decision:
     if candidate.one_new_delta is not True:
         return Decision.NEEDS_WIDER_WIDTH
 
+    assert len(candidate.delta_axes) == 1, (
+        f"{candidate.name}: a one-bit generated child must name exactly one "
+        f"independent observable delta axis, got {candidate.delta_axes}"
+    )
+
     if candidate.suffix_0_fit and not candidate.suffix_1_fit:
         return Decision.GENERATED_CHILD_0
 
@@ -131,6 +137,7 @@ def main() -> None:
         strongest_parent="0010",
         same_base_object=True,
         one_new_delta=True,
+        delta_axes=("local-self-binding",),
         suffix_1_fit=True,
         delta="add local recursive self-binding to closure environment",
     )
@@ -149,6 +156,7 @@ def main() -> None:
         strongest_parent="0010",
         same_base_object=True,
         one_new_delta=True,
+        delta_axes=("local-self-binding",),
         suffix_1_fit=True,
         delta="would be local recursive self-binding",
     )
@@ -164,7 +172,8 @@ def main() -> None:
         d1_d4_derivable=False,
         strongest_parent="0011",
         same_base_object=False,
-        one_new_delta=None,
+        one_new_delta=False,
+        delta_axes=("base-object-kind", "binding-lifetime", "local-self-reference"),
         suffix_0_fit=False,
         suffix_1_fit=False,
         delta="global/persistent binding -> local recursive closure is not proven",
@@ -201,6 +210,8 @@ def main() -> None:
     print("FREE-SLOT-ALLOCATION=FORBIDDEN")
     print("LABEL-IF-DERIVED=NO-ADDRESS")
     print("LABEL-IF-ONE-DELTA-GAP=00101")
+    print("LABEL-LAMBDA-DELTA-AXES=local-self-binding")
+    print("LABEL-DEFINE-DELTA-AXES=base-object-kind,binding-lifetime,local-self-reference")
     print("LABEL-DEFINE-COUNTERMODEL=RESIDUE")
     print("FIXED-D5-SELECTORS=" + ",".join(sorted(FIXED_D5_SELECTORS)))
     print("UNRESOLVED-LADDER=" + ",".join(c.name for c in ladder))
