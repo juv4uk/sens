@@ -1,257 +1,257 @@
 function_identity	width	status	basis_role	root_basis	law_path	certificate_ref	search_grammar	search_bound	counterexample	independence_status	semantic_fact_refs	surface_exposed	human_surface_optional	note
-00000000	8	UNKNOWN					not-run	none		unknown		false		
-00000001	8	UNKNOWN					not-run	none		unknown		true	quote	
-00000010	8	UNKNOWN					not-run	none		unknown		true	atom?	
-00000011	8	UNKNOWN					not-run	none		unknown		true	eq?	
-00000100	8	UNKNOWN					not-run	none		unknown		true	cons	
-00000101	8	UNKNOWN	selector-root-candidate				not-run	none		unknown		true	car	
-00000110	8	UNKNOWN	selector-root-candidate				not-run	none		unknown		true	cdr	
-00000111	8	UNKNOWN					not-run	none		unknown		true	cond	
-00001000	8	UNKNOWN					not-run	none		unknown		true	lambda	
-00001001	8	UNKNOWN					not-run	none		unknown		true	define	
-00001010	8	UNKNOWN					not-run	none		unknown		true	defmacro	
-00001011	8	UNKNOWN					not-run	none		unknown		true	def	
-00001100	8	UNKNOWN					not-run	none		unknown		true	plus	
-00001101	8	UNKNOWN					not-run	none		unknown		true	difference	
-00001110	8	UNKNOWN					not-run	none		unknown		true	times	
-00001111	8	UNKNOWN					not-run	none		unknown		true	divide	
-00010000	8	UNKNOWN					not-run	none		unknown		true	abs	
-00010001	8	UNKNOWN					not-run	none		unknown		true	min	
-00010010	8	UNKNOWN					not-run	none		unknown		true	max	
-00010011	8	UNKNOWN					not-run	none		unknown		true	mod	
-00010100	8	UNKNOWN					not-run	none		unknown		true	quotient	
-00010101	8	UNKNOWN					not-run	none		unknown		true	sqrt	
-00010110	8	UNKNOWN					not-run	none		unknown		true	isqrt	
-00010111	8	UNKNOWN					not-run	none		unknown		true	min-list	
-00011000	8	UNKNOWN					not-run	none		unknown		true	max-list	
-00011001	8	UNKNOWN					not-run	none		unknown		true	largest-chunk	
-00011010	8	UNKNOWN					not-run	none		unknown		true	lessp?	
-00011011	8	UNKNOWN			SWAP>LT	#2335 draft	typed-composition-BFS	depth<=3,bounded-Q-corpus		bounded-candidate-not-admitted	#2254,#2321,#2335	true	greaterp?	candidate GT derivation; evidence gate not merged
-00011100	8	UNKNOWN				#2335 draft	typed-composition-BFS	depth<=4,bounded-Q-corpus		bounded-candidate-not-admitted	#2321,#2335	true	equalp?	EQ unresolved in bounded pure-composition search; not independence
-00011101	8	UNKNOWN			SWAP>LT>NOT	#2335 draft	typed-composition-BFS	depth<=3,bounded-Q-corpus		bounded-candidate-not-admitted	#2254,#2321,#2335	true	not-greaterp?	candidate LE derivation; evidence gate not merged
-00011110	8	UNKNOWN			LT>NOT	#2335 draft	typed-composition-BFS	depth<=3,bounded-Q-corpus		bounded-candidate-not-admitted	#2254,#2321,#2335	true	not-lessp?	candidate GE derivation; evidence gate not merged
-00011111	8	UNKNOWN					not-run	none		unknown		true	nondecreasing-from?	
-00100000	8	UNKNOWN					not-run	none		unknown		true	nonincreasing-from?	
-00100001	8	UNKNOWN					not-run	none		unknown		true	not?	
-00100010	8	UNKNOWN					not-run	none		unknown		true	equal?	
-00100011	8	UNKNOWN					not-run	none		unknown		true	symbol?	
-00100100	8	UNKNOWN					not-run	none		unknown		true	string?	
-00100101	8	UNKNOWN					not-run	none		unknown		true	string<?	
-00100110	8	UNKNOWN					not-run	none		unknown		true	numeric-buffer?	
-00100111	8	UNKNOWN					not-run	none		unknown		true	list	
-00101000	8	UNKNOWN					not-run	none		unknown		true	length	
-00101001	8	UNKNOWN					not-run	none		unknown		true	append	
-00101010	8	UNKNOWN					not-run	none		unknown		true	reverse	
-00101011	8	UNKNOWN					not-run	none		unknown		true	nth	
-00101100	8	UNKNOWN					not-run	none		unknown		true	member?	
-00101101	8	UNKNOWN					not-run	none		unknown		true	assoc	
-00101110	8	UNKNOWN					not-run	none		unknown		true	pair	
-00101111	8	UNKNOWN					not-run	none		unknown		true	second	
-00110000	8	UNKNOWN					not-run	none		unknown		true	third	
-00110001	8	UNKNOWN					not-run	none		unknown		true	fourth	
-00110010	8	UNKNOWN					not-run	none		unknown		true	fifth	
-00110011	8	generated		00000101,00000110	CAR>CAR	#2345 merged; #2329 merged	selector-composition	merged-executable-certificate		derived	#1962,#2054,#2329,#2345	true	caar	current identity retained; behavior reconstructible from merged selector law
-00110100	8	generated		00000101,00000110	CDR>CAR	#2345 merged; #2329 merged	selector-composition	merged-executable-certificate		derived	#1962,#2054,#2329,#2345	true	cadr	current identity retained; behavior reconstructible from merged selector law
-00110101	8	generated		00000101,00000110	CDR>CDR	#2345 merged; #2329 merged	selector-composition	merged-executable-certificate		derived	#1962,#2054,#2329,#2345	true	cddr	current identity retained; behavior reconstructible from merged selector law
-00110110	8	generated		00000101,00000110	CDR>CDR>CDR>CAR	#2345 merged; #2329 merged	selector-composition	merged-executable-certificate		derived	#1962,#2054,#2329,#2345	true	cadddr	current identity retained; behavior reconstructible from merged selector law
-00110111	8	UNKNOWN					not-run	none		unknown		true	map	
-00111000	8	UNKNOWN					not-run	none		unknown		true	filter	
-00111001	8	UNKNOWN					not-run	none		unknown		true	reduce	
-00111010	8	UNKNOWN					not-run	none		unknown		true	string-append	
-00111011	8	UNKNOWN					not-run	none		unknown		true	string-length	
-00111100	8	UNKNOWN					not-run	none		unknown		true	string-empty?	
-00111101	8	UNKNOWN					not-run	none		unknown		true	string-prefix?	
-00111110	8	UNKNOWN					not-run	none		unknown		true	string-contains?	
-00111111	8	UNKNOWN					not-run	none		unknown		true	string-first	
-01000000	8	UNKNOWN					not-run	none		unknown		true	string-rest	
-01000001	8	UNKNOWN					not-run	none		unknown		true	string-slice	
-01000010	8	UNKNOWN					not-run	none		unknown		true	symbol->string	
-01000011	8	UNKNOWN					not-run	none		unknown		true	string->symbol	
-01000100	8	UNKNOWN					not-run	none		unknown		true	codepoint->string	
-01000101	8	UNKNOWN					not-run	none		unknown		true	string->codepoint	
-01000110	8	UNKNOWN					not-run	none		unknown		true	number->string	
-01000111	8	UNKNOWN					not-run	none		unknown		true	digit->string	
-01001000	8	UNKNOWN					not-run	none		unknown		true	print	
-01001001	8	UNKNOWN					not-run	none		unknown		true	princ	
-01001010	8	UNKNOWN					not-run	none		unknown		true	read	
-01001011	8	UNKNOWN					not-run	none		unknown		true	read-all	
-01001100	8	UNKNOWN					not-run	none		unknown		true	write-to-string	
-01001101	8	UNKNOWN					not-run	none		unknown		true	eval	
-01001110	8	UNKNOWN					not-run	none		unknown		true	env	
-01001111	8	UNKNOWN					not-run	none		unknown		true	vector	
-01010000	8	UNKNOWN					not-run	none		unknown		true	make-vector	
-01010001	8	UNKNOWN					not-run	none		unknown		true	vector-length	
-01010010	8	UNKNOWN					not-run	none		unknown		true	vector-ref	
-01010011	8	UNKNOWN					not-run	none		unknown		true	vector-set!	
-01010100	8	UNKNOWN					not-run	none		unknown		true	i32-buffer	
-01010101	8	UNKNOWN					not-run	none		unknown		true	f32-buffer	
-01010110	8	UNKNOWN					not-run	none		unknown		true	numeric-buffer-type	
-01010111	8	UNKNOWN					not-run	none		unknown		true	numeric-buffer-length	
-01011000	8	UNKNOWN					not-run	none		unknown		true	numeric-buffer-ref	
-01011001	8	UNKNOWN					not-run	none		unknown		true	numeric-buffer-map	
-01011010	8	UNKNOWN					not-run	none		unknown		true	mono-ns	
-01011011	8	UNKNOWN					not-run	none		unknown		true	unix-time-now	
-01011100	8	UNKNOWN					not-run	none		unknown		true	ntp-query-raw	
-01011101	8	UNKNOWN					not-run	none		unknown		true	timezone-declarations-raw	
-01011110	8	UNKNOWN					not-run	none		unknown		true	utc-now	
-01011111	8	UNKNOWN					not-run	none		unknown		true	utc-from-unix	
-01100000	8	UNKNOWN					not-run	none		unknown		true	unix-time-observation->utc	
-01100001	8	UNKNOWN					not-run	none		unknown		true	milliseconds-from-nanoseconds	
-01100010	8	UNKNOWN					not-run	none		unknown		true	mono-ms	
-01100011	8	UNKNOWN					not-run	none		unknown		true	timezone-name	
-01100100	8	UNKNOWN					not-run	none		unknown		true	timezone-detect	
-01100101	8	UNKNOWN					not-run	none		unknown		true	timezone-offset-seconds	
-01100110	8	UNKNOWN					not-run	none		unknown		true	deadline-reached?	
-01100111	8	UNKNOWN					not-run	none		unknown		true	deadline-reached-at?	
-01101000	8	UNKNOWN					not-run	none		unknown		true	elapsed-ns	
-01101001	8	UNKNOWN					not-run	none		unknown		true	deadline-from	
-01101010	8	UNKNOWN					not-run	none		unknown		true	deadline-after-ns	
-01101011	8	UNKNOWN					not-run	none		unknown		true	internet-time-sync	
-01101100	8	UNKNOWN					not-run	none		unknown		true	map-empty	
-01101101	8	UNKNOWN					not-run	none		unknown		true	map-get	
-01101110	8	UNKNOWN					not-run	none		unknown		true	map-insert	
-01101111	8	UNKNOWN					not-run	none		unknown		true	map-contains?	
-01110000	8	UNKNOWN					not-run	none		unknown		true	map->list	
-01110001	8	UNKNOWN					not-run	none		unknown		true	vec-empty	
-01110010	8	UNKNOWN					not-run	none		unknown		true	vec-conj	
-01110011	8	UNKNOWN					not-run	none		unknown		true	vec-count	
-01110100	8	UNKNOWN					not-run	none		unknown		true	vec-nth	
-01110101	8	UNKNOWN					not-run	none		unknown		true	vec->list	
-01110110	8	UNKNOWN					not-run	none		unknown		true	vec-from-list	
-01110111	8	UNKNOWN					not-run	none		unknown		true	is-fact?	
-01111000	8	UNKNOWN					not-run	none		unknown		true	describe	
-01111001	8	UNKNOWN					not-run	none		unknown		true	collect-facts-about	
-01111010	8	UNKNOWN					not-run	none		unknown		true	contains-atom?	
-01111011	8	UNKNOWN					not-run	none		unknown		true	forward-in	
-01111100	8	UNKNOWN					not-run	none		unknown		true	reason-in	
-01111101	8	UNKNOWN					not-run	none		unknown		true	check-conflict?	
-01111110	8	UNKNOWN					not-run	none		unknown		true	module-known?	
-01111111	8	UNKNOWN					not-run	none		unknown		true	module-clauses-now	
-10000000	8	UNKNOWN					not-run	none		unknown		true	prove-goal	
-10000001	8	UNKNOWN					not-run	none		unknown		true	prove-goals	
-10000010	8	UNKNOWN					not-run	none		unknown		true	explain-proof	
-10000011	8	UNKNOWN					not-run	none		unknown		true	source-of	
-10000100	8	UNKNOWN					not-run	none		unknown		true	provenance	
-10000101	8	UNKNOWN					not-run	none		unknown		true	reason	
-10000110	8	UNKNOWN					not-run	none		unknown		true	reason-explain	
-10000111	8	UNKNOWN					not-run	none		unknown		true	unify	
-10001000	8	UNKNOWN					not-run	none		unknown		true	logic-var	
-10001001	8	UNKNOWN					not-run	none		unknown		true	var?	
-10001010	8	UNKNOWN					not-run	none		unknown		true	apply-subst	
-10001011	8	UNKNOWN					not-run	none		unknown		true	walk	
-10001100	8	UNKNOWN					not-run	none		unknown		true	occurs-check?	
-10001101	8	UNKNOWN					not-run	none		unknown		true	claim?	
-10001110	8	UNKNOWN					not-run	none		unknown		true	claim-statement	
-10001111	8	UNKNOWN					not-run	none		unknown		true	claim-review	
-10010000	8	UNKNOWN					not-run	none		unknown		true	evidence?	
-10010001	8	UNKNOWN					not-run	none		unknown		true	evidence-method	
-10010010	8	UNKNOWN					not-run	none		unknown		true	evidence-outcome	
-10010011	8	UNKNOWN					not-run	none		unknown		true	observation?	
-10010100	8	UNKNOWN					not-run	none		unknown		true	observation-statement	
-10010101	8	UNKNOWN					not-run	none		unknown		true	intent?	
-10010110	8	UNKNOWN					not-run	none		unknown		true	intent-goal	
-10010111	8	UNKNOWN					not-run	none		unknown		true	supporting-evidence	
-10011000	8	UNKNOWN					not-run	none		unknown		true	identity	
-10011001	8	UNKNOWN					not-run	none		unknown		true	gensym	
-10011010	8	UNKNOWN					not-run	none		unknown		true	and	
-10011011	8	UNKNOWN					not-run	none		unknown		true	or	
-10011100	8	UNKNOWN					not-run	none		unknown		true	let	
-10011101	8	UNKNOWN					not-run	none		unknown		true	let*	
-10011110	8	UNKNOWN					not-run	none		unknown		true	thread-first	
-10011111	8	UNKNOWN					not-run	none		unknown		true	thread-last	
-10100000	8	UNKNOWN					not-run	none		unknown		true	json-parse	
-10100001	8	UNKNOWN					not-run	none		unknown		true	sha256-hex	
-10100010	8	UNKNOWN					not-run	none		unknown		true	process-run	
-10100011	8	UNKNOWN					not-run	none		unknown		true	tcp-read	
-10100100	8	UNKNOWN					not-run	none		unknown		true	tcp-write	
-10100101	8	UNKNOWN					not-run	none		unknown		true	tcp-listen	
-10100110	8	UNKNOWN					not-run	none		unknown		true	read-file	
-10100111	8	UNKNOWN					not-run	none		unknown		true	write-file	
-10101000	8	UNKNOWN					not-run	none		unknown		true	invoke	
-10101001	8	UNKNOWN					not-run	none		unknown		true	binary	
-10101010	8	UNKNOWN					not-run	none		unknown		true	label	
-10101011	8	UNKNOWN					not-run	none		unknown		true	null?	
-10101100	8	UNKNOWN					not-run	none		unknown		true	subst	
-10101101	8	UNKNOWN					not-run	none		unknown		true	sublis	
-10101110	8	UNKNOWN					not-run	none		unknown		true	maplist	
-10101111	8	UNKNOWN					not-run	none		unknown		true	apply	
-10110000	8	UNKNOWN					not-run	none		unknown		true	divmod	
-10110001	8	UNKNOWN					not-run	none		unknown		true	answer-not	
-10110010	8	UNKNOWN					not-run	none		unknown		true	answer-and	
-10110011	8	UNKNOWN					not-run	none		unknown		true	answer-or	
-10110100	8	UNKNOWN					not-run	none		unknown		true	answer-weaken	
-10110101	8	UNKNOWN					not-run	none		unknown		true	answer-atom	
-10110110	8	UNKNOWN					not-run	none		unknown		true	answer-eq	
-10110111	8	UNKNOWN					not-run	none		unknown		false		
-10111000	8	UNKNOWN					not-run	none		unknown		false		
-10111001	8	UNKNOWN					not-run	none		unknown		false		
-10111010	8	UNKNOWN					not-run	none		unknown		false		
-10111011	8	UNKNOWN					not-run	none		unknown		false		
-10111100	8	UNKNOWN					not-run	none		unknown		false		
-10111101	8	UNKNOWN					not-run	none		unknown		false		
-10111110	8	UNKNOWN					not-run	none		unknown		false		
-10111111	8	UNKNOWN					not-run	none		unknown		false		
-11000000	8	UNKNOWN					not-run	none		unknown		false		
-11000001	8	UNKNOWN					not-run	none		unknown		false		
-11000010	8	UNKNOWN					not-run	none		unknown		false		
-11000011	8	UNKNOWN					not-run	none		unknown		false		
-11000100	8	UNKNOWN					not-run	none		unknown		false		
-11000101	8	UNKNOWN					not-run	none		unknown		false		
-11000110	8	UNKNOWN					not-run	none		unknown		false		
-11000111	8	UNKNOWN					not-run	none		unknown		false		
-11001000	8	UNKNOWN					not-run	none		unknown		false		
-11001001	8	UNKNOWN					not-run	none		unknown		false		
-11001010	8	UNKNOWN					not-run	none		unknown		false		
-11001011	8	UNKNOWN					not-run	none		unknown		false		
-11001100	8	UNKNOWN					not-run	none		unknown		false		
-11001101	8	UNKNOWN					not-run	none		unknown		false		
-11001110	8	UNKNOWN					not-run	none		unknown		false		
-11001111	8	UNKNOWN					not-run	none		unknown		false		
-11010000	8	UNKNOWN					not-run	none		unknown		false		
-11010001	8	UNKNOWN					not-run	none		unknown		false		
-11010010	8	UNKNOWN					not-run	none		unknown		false		
-11010011	8	UNKNOWN					not-run	none		unknown		false		
-11010100	8	UNKNOWN					not-run	none		unknown		false		
-11010101	8	UNKNOWN					not-run	none		unknown		false		
-11010110	8	UNKNOWN					not-run	none		unknown		false		
-11010111	8	UNKNOWN					not-run	none		unknown		false		
-11011000	8	UNKNOWN					not-run	none		unknown		false		
-11011001	8	UNKNOWN					not-run	none		unknown		false		
-11011010	8	UNKNOWN					not-run	none		unknown		false		
-11011011	8	UNKNOWN					not-run	none		unknown		false		
-11011100	8	UNKNOWN					not-run	none		unknown		false		
-11011101	8	UNKNOWN					not-run	none		unknown		false		
-11011110	8	UNKNOWN					not-run	none		unknown		false		
-11011111	8	UNKNOWN					not-run	none		unknown		false		
-11100000	8	UNKNOWN					not-run	none		unknown		false		
-11100001	8	UNKNOWN					not-run	none		unknown		false		
-11100010	8	UNKNOWN					not-run	none		unknown		false		
-11100011	8	UNKNOWN					not-run	none		unknown		false		
-11100100	8	UNKNOWN					not-run	none		unknown		false		
-11100101	8	UNKNOWN					not-run	none		unknown		false		
-11100110	8	UNKNOWN					not-run	none		unknown		false		
-11100111	8	UNKNOWN					not-run	none		unknown		false		
-11101000	8	UNKNOWN					not-run	none		unknown		false		
-11101001	8	UNKNOWN					not-run	none		unknown		false		
-11101010	8	UNKNOWN					not-run	none		unknown		false		
-11101011	8	UNKNOWN					not-run	none		unknown		false		
-11101100	8	UNKNOWN					not-run	none		unknown		false		
-11101101	8	UNKNOWN					not-run	none		unknown		false		
-11101110	8	UNKNOWN					not-run	none		unknown		false		
-11101111	8	UNKNOWN					not-run	none		unknown		false		
-11110000	8	UNKNOWN					not-run	none		unknown		false		
-11110001	8	UNKNOWN					not-run	none		unknown		false		
-11110010	8	UNKNOWN					not-run	none		unknown		false		
-11110011	8	UNKNOWN					not-run	none		unknown		false		
-11110100	8	UNKNOWN					not-run	none		unknown		false		
-11110101	8	UNKNOWN					not-run	none		unknown		false		
-11110110	8	UNKNOWN					not-run	none		unknown		false		
-11110111	8	UNKNOWN					not-run	none		unknown		false		
-11111000	8	UNKNOWN					not-run	none		unknown		false		
-11111001	8	UNKNOWN					not-run	none		unknown		false		
-11111010	8	UNKNOWN					not-run	none		unknown		false		
-11111011	8	UNKNOWN					not-run	none		unknown		false		
-11111100	8	UNKNOWN					not-run	none		unknown		false		
-11111101	8	UNKNOWN					not-run	none		unknown		false		
-11111110	8	UNKNOWN					not-run	none		unknown		false		
-11111111	8	UNKNOWN					not-run	none		unknown		false		
+00000000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+00000001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	quote	-
+00000010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	atom?	-
+00000011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	eq?	-
+00000100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	cons	-
+00000101	8	UNKNOWN	selector-root-candidate	-	-	-	not-run	none	-	unknown	-	true	car	-
+00000110	8	UNKNOWN	selector-root-candidate	-	-	-	not-run	none	-	unknown	-	true	cdr	-
+00000111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	cond	-
+00001000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	lambda	-
+00001001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	define	-
+00001010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	defmacro	-
+00001011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	def	-
+00001100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	plus	-
+00001101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	difference	-
+00001110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	times	-
+00001111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	divide	-
+00010000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	abs	-
+00010001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	min	-
+00010010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	max	-
+00010011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	mod	-
+00010100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	quotient	-
+00010101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	sqrt	-
+00010110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	isqrt	-
+00010111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	min-list	-
+00011000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	max-list	-
+00011001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	largest-chunk	-
+00011010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	lessp?	-
+00011011	8	UNKNOWN	-	-	SWAP>LT	#2335 draft	typed-composition-BFS	depth<=3,bounded-Q-corpus	-	bounded-candidate-not-admitted	#2254,#2321,#2335	true	greaterp?	candidate GT derivation; evidence gate not merged
+00011100	8	UNKNOWN	-	-	-	#2335 draft	typed-composition-BFS	depth<=4,bounded-Q-corpus	-	bounded-candidate-not-admitted	#2321,#2335	true	equalp?	EQ unresolved in bounded pure-composition search; not independence
+00011101	8	UNKNOWN	-	-	SWAP>LT>NOT	#2335 draft	typed-composition-BFS	depth<=3,bounded-Q-corpus	-	bounded-candidate-not-admitted	#2254,#2321,#2335	true	not-greaterp?	candidate LE derivation; evidence gate not merged
+00011110	8	UNKNOWN	-	-	LT>NOT	#2335 draft	typed-composition-BFS	depth<=3,bounded-Q-corpus	-	bounded-candidate-not-admitted	#2254,#2321,#2335	true	not-lessp?	candidate GE derivation; evidence gate not merged
+00011111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	nondecreasing-from?	-
+00100000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	nonincreasing-from?	-
+00100001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	not?	-
+00100010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	equal?	-
+00100011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	symbol?	-
+00100100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string?	-
+00100101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string<?	-
+00100110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	numeric-buffer?	-
+00100111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	list	-
+00101000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	length	-
+00101001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	append	-
+00101010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	reverse	-
+00101011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	nth	-
+00101100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	member?	-
+00101101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	assoc	-
+00101110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	pair	-
+00101111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	second	-
+00110000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	third	-
+00110001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	fourth	-
+00110010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	fifth	-
+00110011	8	generated	-	00000101,00000110	CAR>CAR	#2345 merged; #2329 merged	selector-composition	merged-executable-certificate	-	derived	#1962,#2054,#2329,#2345	true	caar	current identity retained; behavior reconstructible from merged selector law
+00110100	8	generated	-	00000101,00000110	CDR>CAR	#2345 merged; #2329 merged	selector-composition	merged-executable-certificate	-	derived	#1962,#2054,#2329,#2345	true	cadr	current identity retained; behavior reconstructible from merged selector law
+00110101	8	generated	-	00000101,00000110	CDR>CDR	#2345 merged; #2329 merged	selector-composition	merged-executable-certificate	-	derived	#1962,#2054,#2329,#2345	true	cddr	current identity retained; behavior reconstructible from merged selector law
+00110110	8	generated	-	00000101,00000110	CDR>CDR>CDR>CAR	#2345 merged; #2329 merged	selector-composition	merged-executable-certificate	-	derived	#1962,#2054,#2329,#2345	true	cadddr	current identity retained; behavior reconstructible from merged selector law
+00110111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	map	-
+00111000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	filter	-
+00111001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	reduce	-
+00111010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string-append	-
+00111011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string-length	-
+00111100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string-empty?	-
+00111101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string-prefix?	-
+00111110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string-contains?	-
+00111111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string-first	-
+01000000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string-rest	-
+01000001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string-slice	-
+01000010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	symbol->string	-
+01000011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string->symbol	-
+01000100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	codepoint->string	-
+01000101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	string->codepoint	-
+01000110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	number->string	-
+01000111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	digit->string	-
+01001000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	print	-
+01001001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	princ	-
+01001010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	read	-
+01001011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	read-all	-
+01001100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	write-to-string	-
+01001101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	eval	-
+01001110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	env	-
+01001111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vector	-
+01010000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	make-vector	-
+01010001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vector-length	-
+01010010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vector-ref	-
+01010011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vector-set!	-
+01010100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	i32-buffer	-
+01010101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	f32-buffer	-
+01010110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	numeric-buffer-type	-
+01010111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	numeric-buffer-length	-
+01011000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	numeric-buffer-ref	-
+01011001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	numeric-buffer-map	-
+01011010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	mono-ns	-
+01011011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	unix-time-now	-
+01011100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	ntp-query-raw	-
+01011101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	timezone-declarations-raw	-
+01011110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	utc-now	-
+01011111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	utc-from-unix	-
+01100000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	unix-time-observation->utc	-
+01100001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	milliseconds-from-nanoseconds	-
+01100010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	mono-ms	-
+01100011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	timezone-name	-
+01100100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	timezone-detect	-
+01100101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	timezone-offset-seconds	-
+01100110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	deadline-reached?	-
+01100111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	deadline-reached-at?	-
+01101000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	elapsed-ns	-
+01101001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	deadline-from	-
+01101010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	deadline-after-ns	-
+01101011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	internet-time-sync	-
+01101100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	map-empty	-
+01101101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	map-get	-
+01101110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	map-insert	-
+01101111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	map-contains?	-
+01110000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	map->list	-
+01110001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vec-empty	-
+01110010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vec-conj	-
+01110011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vec-count	-
+01110100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vec-nth	-
+01110101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vec->list	-
+01110110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	vec-from-list	-
+01110111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	is-fact?	-
+01111000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	describe	-
+01111001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	collect-facts-about	-
+01111010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	contains-atom?	-
+01111011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	forward-in	-
+01111100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	reason-in	-
+01111101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	check-conflict?	-
+01111110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	module-known?	-
+01111111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	module-clauses-now	-
+10000000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	prove-goal	-
+10000001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	prove-goals	-
+10000010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	explain-proof	-
+10000011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	source-of	-
+10000100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	provenance	-
+10000101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	reason	-
+10000110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	reason-explain	-
+10000111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	unify	-
+10001000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	logic-var	-
+10001001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	var?	-
+10001010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	apply-subst	-
+10001011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	walk	-
+10001100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	occurs-check?	-
+10001101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	claim?	-
+10001110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	claim-statement	-
+10001111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	claim-review	-
+10010000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	evidence?	-
+10010001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	evidence-method	-
+10010010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	evidence-outcome	-
+10010011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	observation?	-
+10010100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	observation-statement	-
+10010101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	intent?	-
+10010110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	intent-goal	-
+10010111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	supporting-evidence	-
+10011000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	identity	-
+10011001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	gensym	-
+10011010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	and	-
+10011011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	or	-
+10011100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	let	-
+10011101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	let*	-
+10011110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	thread-first	-
+10011111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	thread-last	-
+10100000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	json-parse	-
+10100001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	sha256-hex	-
+10100010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	process-run	-
+10100011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	tcp-read	-
+10100100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	tcp-write	-
+10100101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	tcp-listen	-
+10100110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	read-file	-
+10100111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	write-file	-
+10101000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	invoke	-
+10101001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	binary	-
+10101010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	label	-
+10101011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	null?	-
+10101100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	subst	-
+10101101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	sublis	-
+10101110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	maplist	-
+10101111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	apply	-
+10110000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	divmod	-
+10110001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	answer-not	-
+10110010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	answer-and	-
+10110011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	answer-or	-
+10110100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	answer-weaken	-
+10110101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	answer-atom	-
+10110110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	true	answer-eq	-
+10110111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+10111000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+10111001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+10111010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+10111011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+10111100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+10111101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+10111110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+10111111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11000000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11000001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11000010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11000011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11000100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11000101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11000110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11000111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11001000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11001001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11001010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11001011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11001100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11001101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11001110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11001111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11010000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11010001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11010010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11010011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11010100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11010101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11010110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11010111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11011000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11011001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11011010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11011011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11011100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11011101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11011110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11011111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11100000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11100001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11100010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11100011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11100100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11100101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11100110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11100111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11101000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11101001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11101010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11101011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11101100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11101101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11101110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11101111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11110000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11110001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11110010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11110011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11110100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11110101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11110110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11110111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11111000	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11111001	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11111010	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11111011	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11111100	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11111101	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11111110	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
+11111111	8	UNKNOWN	-	-	-	-	not-run	none	-	unknown	-	false	-	-
