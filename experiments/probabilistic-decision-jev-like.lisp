@@ -92,7 +92,7 @@
       ((00000010 options) (1) t)
       (t
        (00000111
-         ((pd-member? (00000101 options) (00110111 car distribution))
+         ((pd-member? (00000101 options) (00110111 (00001000 (entry) (00000101 entry)) distribution))
           (pd-all-options-present? (00000110 options) distribution))
          (t (00000001 ())))))))
 
