@@ -38,6 +38,10 @@ import shutil
 import sys
 
 INVENTORY = os.path.join("knowledge", "repo-tooling-inventory.lisp")
+# The gate script itself lives under scripts/ and must stay visible in the
+# scoped root, or the gate cannot be loaded at all. It is unchanged and
+# registered, so keeping it does not widen the PR's own scope.
+KEEP = ["scripts/check-repo-tooling-inventory.lisp"]
 TOOL_LINE = re.compile(r'\(tool\s+\(path\s+"([^"]+)"\)')
 STATUS_LETTERS = {"A", "C", "D", "M", "R", "T", "U", "X", "B"}
 
@@ -113,7 +117,7 @@ def link_children(src, dst, skip=()):
         os.symlink(os.path.abspath(os.path.join(src, name)), target)
 
 
-def build(repo, out, scripts):
+def build(repo, out, scripts, keep=()):
     if os.path.lexists(out):
         shutil.rmtree(out)
     os.makedirs(out)
@@ -121,29 +125,32 @@ def build(repo, out, scripts):
     link_children(os.path.join(repo, "knowledge"), os.path.join(out, "knowledge"),
                   skip=(os.path.basename(INVENTORY),))
 
+    present = sorted(set(scripts) | set(keep))
     os.makedirs(os.path.join(out, "scripts"), exist_ok=True)
-    for p in scripts:
+    for p in present:
         dest = os.path.join(out, p)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         shutil.copy2(os.path.join(repo, p), dest)
 
     header, rows = inventory_header_and_rows(os.path.join(repo, INVENTORY))
-    kept = scoped_row_lines(rows, scripts)
+    kept = scoped_row_lines(rows, present)
     with open(os.path.join(out, INVENTORY), "w", encoding="utf-8") as fh:
         fh.write("\n".join(header) + "\n")
         for line in kept:
             fh.write(line + "\n")
-    return len(rows), len(kept)
+    return len(rows), len(kept), len(present)
 
 
-def run(changed_path, repo, out):
+def run(changed_path, repo, out, keep=KEEP):
     text = sys.stdin.read() if changed_path == "-" else open(changed_path, encoding="utf-8").read()
     scripts = changed_scripts(parse_changed(text), repo)
-    total, kept = build(repo, out, scripts)
+    total, kept, present = build(repo, out, scripts, keep=keep)
     print(f"(tooling-inventory-diff-scope (mode diff) (changed-scripts {len(scripts)}) "
-          f"(scoped-rows {kept} of {total}) (out {out}))")
+          f"(kept {present - len(scripts)}) (scoped-rows {kept} of {total}) (out {out}))")
     for p in scripts:
         print(f"  changed-script {p}")
+    for p in sorted(set(keep) - set(scripts)):
+        print(f"  kept-script {p}")
     return 0
 
 
@@ -158,6 +165,7 @@ SELFTEST_INVENTORY = """; synthetic inventory for the self-test
 
 (tool (path "scripts/registered.py") (kind check) (language python) (role r) (lifecycle transitional) (callers unknown) (authority-source unknown) (migration-issue #b1001100) (replacement ()) (removal-condition x))
 (tool (path "scripts/foreign.py") (kind check) (language python) (role f) (lifecycle transitional) (callers unknown) (authority-source unknown) (migration-issue #b1001100) (replacement ()) (removal-condition x))
+(tool (path "scripts/check-repo-tooling-inventory.lisp") (kind check) (language lisp) (role gate) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition x))
 """
 
 
@@ -171,17 +179,20 @@ def self_test():
         os.makedirs(os.path.join(repo, "lib"))
         open(os.path.join(repo, "lib", "core.lisp"), "w").write("; core\n")
         open(os.path.join(repo, INVENTORY), "w").write(SELFTEST_INVENTORY)
-        for name in ("registered.py", "mine-unregistered.py", "foreign.py"):
+        for name in ("registered.py", "mine-unregistered.py", "foreign.py",
+                     "check-repo-tooling-inventory.lisp"):
             open(os.path.join(repo, "scripts", name), "w").write("# script\n")
 
         changed = ("scripts/registered.py\nscripts/mine-unregistered.py\n"
                    "lib/core.lisp\nREADME.md\n")
         out = os.path.join(tmp, "scoped")
         scripts = changed_scripts(parse_changed(changed), repo)
-        total, kept = build(repo, out, scripts)
+        keep = ["scripts/check-repo-tooling-inventory.lisp"]
+        total, kept, present = build(repo, out, scripts, keep=keep)
 
         got_scripts = sorted(os.listdir(os.path.join(out, "scripts")))
-        ok = got_scripts == ["mine-unregistered.py", "registered.py"]
+        ok = got_scripts == ["check-repo-tooling-inventory.lisp",
+                             "mine-unregistered.py", "registered.py"]
         failures += 0 if ok else 1
         print(f"  [{'ok' if ok else 'FAIL'}] only changed scripts are visible: {got_scripts}")
 
@@ -191,17 +202,17 @@ def self_test():
 
         scoped = open(os.path.join(out, INVENTORY), encoding="utf-8").read()
         rows = [m.group(1) for m in TOOL_LINE.finditer(scoped)]
-        ok = rows == ["scripts/registered.py"]
+        ok = rows == ["scripts/registered.py", "scripts/check-repo-tooling-inventory.lisp"]
         failures += 0 if ok else 1
-        print(f"  [{'ok' if ok else 'FAIL'}] scoped inventory keeps only changed rows: {rows}")
+        print(f"  [{'ok' if ok else 'FAIL'}] scoped inventory keeps changed rows plus the gate: {rows}")
 
         ok = "(about" in scoped
         failures += 0 if ok else 1
         print(f"  [{'ok' if ok else 'FAIL'}] scoped inventory keeps the (about ...) block")
 
-        ok = kept == 1 and total == 2
+        ok = kept == 2 and total == 3 and present == 3
         failures += 0 if ok else 1
-        print(f"  [{'ok' if ok else 'FAIL'}] row accounting ({kept} of {total})")
+        print(f"  [{'ok' if ok else 'FAIL'}] row accounting ({kept} of {total}, present {present})")
 
         ok = os.path.islink(os.path.join(out, "lib"))
         failures += 0 if ok else 1
@@ -224,11 +235,13 @@ def main():
     ap.add_argument("--changed", default="-")
     ap.add_argument("--repo", default=".")
     ap.add_argument("--out", default="/tmp/tooling-inventory-scoped")
+    ap.add_argument("--keep", action="append", default=None,
+                    help="script the gate needs in the scoped root (repeatable)")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
     if args.self_test:
         return self_test()
-    return run(args.changed, args.repo, args.out)
+    return run(args.changed, args.repo, args.out, keep=args.keep or KEEP)
 
 
 if __name__ == "__main__":
