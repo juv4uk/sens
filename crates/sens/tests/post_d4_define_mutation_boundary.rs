@@ -90,18 +90,3 @@ fn define_target_is_syntax_fixed_not_runtime_selected() {
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }
 
-#[test]
-fn mutation_lower_bound_is_narrower_than_generic_rebinding() {
-    // Current evidence:
-    //
-    //   current-frame slot update  -> already D4 DEFINE
-    //   global redefinition        -> already D4 DEFINE
-    //   child shadows parent       -> D4 behavior, not parent-location update
-    //   runtime-selected target    -> not expressible by DEFINE syntax
-    //
-    // Therefore #2314 must not claim "state transition" merely from seeing a
-    // value change. The surviving SET/SETQ question is whether historical
-    // semantics require updating an existing non-local location (and/or a
-    // runtime-selected symbol) rather than constructing a shadow.
-    assert!(true);
-}
