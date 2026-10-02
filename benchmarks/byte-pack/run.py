@@ -55,9 +55,15 @@ def main():
             utilization=semantic_bits/(physical_bytes*8) if physical_bytes else 1.0
             density=physical_bytes/unpacked_bytes if unpacked_bytes else 0.0
 
+            base_irefs,base_result=cachegrind(args.binary,"base",workload,n,args.reps)
             for mode in MODES:
                 irefs,result=cachegrind(args.binary,mode,workload,n,args.reps)
                 ops=n*args.reps
+                net_irefs=irefs-base_irefs
+                if net_irefs < 0:
+                    raise RuntimeError(
+                        f"negative base-adjusted I refs: {workload=} {n=} {mode=}"
+                    )
                 rows.append({
                     "workload":workload,
                     "n":n,
@@ -68,11 +74,19 @@ def main():
                     "packed_bytes":physical_bytes,
                     "packed_to_unpacked_ratio":f"{density:.6f}",
                     "payload_utilization":f"{utilization:.6f}",
-                    "i_refs":irefs,
-                    "i_refs_per_word":f"{irefs/ops:.3f}",
+                    "base_i_refs":base_irefs,
+                    "raw_i_refs":irefs,
+                    "net_i_refs":net_irefs,
+                    "net_i_refs_per_word":f"{net_irefs/ops:.3f}",
                     "checksum":result["checksum"],
                 })
-                print(workload,n,mode,irefs,physical_bytes)
+                print(
+                    workload,n,mode,
+                    f"raw={irefs}",
+                    f"base={base_irefs}",
+                    f"net={net_irefs}",
+                    f"bytes={physical_bytes}",
+                )
 
     keys=list(rows[0])
     with (args.out/"results.tsv").open("w",newline="",encoding="utf-8") as f:
