@@ -129,11 +129,11 @@ fn main() -> ExitCode {
     let words = corpus(workload, n);
     let semantic_bits: usize = words.iter().map(|w| w.width()).sum();
     let minimum_bytes = semantic_bits.div_ceil(8);
-    let (packed_bits, packed_bytes, parity_checksum) = verify(&words);
-    assert_eq!(packed_bits, semantic_bits);
-    assert_eq!(packed_bytes, minimum_bytes);
 
     if mode == "verify" {
+        let (packed_bits, packed_bytes, parity_checksum) = verify(&words);
+        assert_eq!(packed_bits, semantic_bits);
+        assert_eq!(packed_bytes, minimum_bytes);
         println!(
             "PACK_BENCH\tmode=verify\tworkload={workload}\tn={n}\treps={reps}\tsemantic_bits={semantic_bits}\tphysical_bytes={packed_bytes}\tchecksum={parity_checksum}"
         );
@@ -141,6 +141,7 @@ fn main() -> ExitCode {
     }
 
     let checksum = match mode.as_str() {
+        "base" => black_box(words.len() as u64),
         "unpacked" => unpacked_scan(&words, reps),
         "pack" => pack_scan(&words, reps),
         "decode" => packed_decode(&words, reps),
@@ -151,7 +152,7 @@ fn main() -> ExitCode {
     };
 
     println!(
-        "PACK_BENCH\tmode={mode}\tworkload={workload}\tn={n}\treps={reps}\tsemantic_bits={semantic_bits}\tphysical_bytes={packed_bytes}\tchecksum={checksum}"
+        "PACK_BENCH\tmode={mode}\tworkload={workload}\tn={n}\treps={reps}\tsemantic_bits={semantic_bits}\tphysical_bytes={minimum_bytes}\tchecksum={checksum}"
     );
     ExitCode::SUCCESS
 }
