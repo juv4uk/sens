@@ -126,6 +126,26 @@ def assert_no_collision(word: str | None, name: str) -> None:
     )
 
 
+def assert_unique_generated_child(
+    first: Candidate,
+    second: Candidate,
+    first_decision: Decision,
+    second_decision: Decision,
+) -> None:
+    first_word = generated_word(first, first_decision)
+    second_word = generated_word(second, second_decision)
+    if first_word is None or second_word is None:
+        return
+    assert not (
+        first_word == second_word and first.delta_axes != second.delta_axes
+    ), (
+        f"{first.name} and {second.name} demand the same exact child "
+        f"{first_word} for independent delta axes "
+        f"{first.delta_axes} vs {second.delta_axes}; one extra bit cannot "
+        "encode two unrelated refinements"
+    )
+
+
 def main() -> None:
     # Positive control: if LABEL is proven irreducible exactly as
     # "LAMBDA closure + local self-reference binding", the placement law
@@ -146,6 +166,39 @@ def main() -> None:
     label_gap_word = generated_word(label_if_gap, label_gap_decision)
     assert label_gap_word == "00101"
     assert_no_collision(label_gap_word, "LABEL")
+
+    # Historical-reset collision control: the old macro-first TRANSFORMER
+    # hypothesis wanted the same LAMBDA+suffix-1 address for a different
+    # semantic axis (raw/staged invocation). If both LABEL recursion and
+    # TRANSFORMER staging survive as independent observable deltas, D5 cannot
+    # encode both under the same parent/suffix. One must derive, find another
+    # honest parent, or move to a wider representation.
+    transformer_if_gap = Candidate(
+        name="TRANSFORMER",
+        era="post-Lisp-1.5-macro",
+        d1_d4_derivable=False,
+        strongest_parent="0010",
+        same_base_object=True,
+        one_new_delta=True,
+        delta_axes=("raw-staged-invocation",),
+        suffix_1_fit=True,
+        delta="change ordinary eager closure invocation to raw staged invocation",
+    )
+    transformer_decision = classify(transformer_if_gap)
+    assert transformer_decision is Decision.GENERATED_CHILD_1
+    assert generated_word(transformer_if_gap, transformer_decision) == "00101"
+
+    collision_detected = False
+    try:
+        assert_unique_generated_child(
+            label_if_gap,
+            transformer_if_gap,
+            label_gap_decision,
+            transformer_decision,
+        )
+    except AssertionError:
+        collision_detected = True
+    assert collision_detected
 
     # Strong falsifier: if #2234 proves LABEL derivable from D4, no address
     # is admitted and 00101 remains empty.
@@ -213,6 +266,8 @@ def main() -> None:
     print("LABEL-LAMBDA-DELTA-AXES=local-self-binding")
     print("LABEL-DEFINE-DELTA-AXES=base-object-kind,binding-lifetime,local-self-reference")
     print("LABEL-DEFINE-COUNTERMODEL=RESIDUE")
+    print("LAMBDA-SUFFIX1-COLLISION=LABEL-vs-TRANSFORMER")
+    print("COLLISION-RESULT=derive-or-reparent-or-widen")
     print("FIXED-D5-SELECTORS=" + ",".join(sorted(FIXED_D5_SELECTORS)))
     print("UNRESOLVED-LADDER=" + ",".join(c.name for c in ladder))
     print("NON-CONCLUSION: 00101 LABEL is not ratified")
