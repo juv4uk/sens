@@ -1,0 +1,38 @@
+name: Silent fallback classes
+
+# #2134. For a language that sells itself on named refusals, a silent "almost
+# right" is poison. This lane names the classes of silent fallback that exist in
+# the live tree and fails only when a NEW one appears that the baseline does not
+# name. It is not a blanket gate: existing sites pass.
+on:
+  pull_request:
+    paths:
+      - "crates/**"
+      - "scripts/**"
+      - "lib/generated/**"
+      - ".github/workflows/**"
+      - "knowledge/silent-fallback-inventory.lisp"
+      - "scripts/check-silent-fallback-classes.py"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  silent-fallback-classes:
+    name: No unnamed silent fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Self-test the class detectors
+        run: python3 scripts/check-silent-fallback-classes.py --self-test
+
+      - name: No new silent-fallback site without a name
+        run: |
+          python3 scripts/check-silent-fallback-classes.py \
+            --root . \
+            --inventory knowledge/silent-fallback-inventory.lisp
