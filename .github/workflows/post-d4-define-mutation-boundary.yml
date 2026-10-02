@@ -1,0 +1,33 @@
+name: Post-D4 DEFINE mutation boundary
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_define_mutation_boundary.rs"
+      - ".github/workflows/post-d4-define-mutation-boundary.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/post_d4_define_mutation_boundary.rs"
+      - ".github/workflows/post-d4-define-mutation-boundary.yml"
+
+jobs:
+  focused:
+    name: D4 DEFINE mutation boundary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused boundary witness
+        run: cargo test -p sens --test post_d4_define_mutation_boundary -- --nocapture
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D4 DEFINE mutation boundary"
+            echo
+            echo "- Current-frame/global update is already observable in D4"
+            echo "- Child-frame DEFINE shadows inherited parent bindings"
+            echo "- Runtime-selected DEFINE target is rejected"
+            echo "- Research-only: no SET/SETQ identity allocated"
+          } >> "$GITHUB_STEP_SUMMARY"
