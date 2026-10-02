@@ -1,0 +1,35 @@
+name: Post-D4 SETQ lower bound
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/environment.rs"
+      - "docs/research/2402-nearest-binding-mutation.md"
+      - ".github/workflows/post-d4-setq-lower-bound.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/environment.rs"
+      - "docs/research/2402-nearest-binding-mutation.md"
+      - ".github/workflows/post-d4-setq-lower-bound.yml"
+
+jobs:
+  lower-bound:
+    name: nearest-existing mutation vs D4 shadow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused Environment lower bound
+        run: cargo test -p sens environment::tests::nearest_existing_update -- --nocapture
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Post-D4 mutation lower bound"
+            echo
+            echo "- D4 child DEFINE constructs a shadow."
+            echo "- Research countermodel updates the nearest existing shared location."
+            echo "- Missing binding fails closed."
+            echo "- Research-only: no SET/SETQ identity or production mutation API is introduced."
+          } >> "$GITHUB_STEP_SUMMARY"
