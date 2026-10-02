@@ -1,0 +1,50 @@
+name: Möbius semantic accounting research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2326-mobius-semantic-accounting.py"
+      - "scripts/research-2304-semantic-fact-ledger.py"
+      - "scripts/research-2324-coordinate-monoid-checker.py"
+      - "benchmarks/generator-economy/semantic-fact-ledger.json"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/mobius-semantic-accounting.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mobius-accounting:
+    name: Flat vs projective-coordinate semantic facts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run bounded Möbius semantic accounting
+        run: |
+          python3 scripts/research-2326-mobius-semantic-accounting.py \
+            --summary-json mobius-semantic-accounting-summary.json
+          cat mobius-semantic-accounting-summary.json
+
+      - name: Publish summary
+        run: |
+          {
+            echo "## Möbius semantic accounting"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2326-mobius-semantic-accounting.py \
+              --summary-json /tmp/mobius-summary.json
+            echo "~~~"
+            echo
+            echo "- Same bounded corpus in all models: 224 projective functions."
+            echo "- Flat opaque rows, direct coordinate identity, and opaque-ID mapping control are compared separately."
+            echo "- Proof/certificate facts and normalization mechanism remain separate from semantic-fact totals."
+            echo "- Research only; no production allocation."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload raw summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobius-semantic-accounting-summary
+          path: mobius-semantic-accounting-summary.json
