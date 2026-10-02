@@ -41,9 +41,10 @@
    (active-runtime-core . no)
    (status . retired))
 
-  ((identity . core3)
+  ((identity . mechanism-lab)
    (role . mechanism-laboratory)
-   (execution-source . "lib/core3.lisp")
+   (historical-name . core3)
+   (execution-source . "lib/mechanism-lab.lisp")
    (mechanism-families . (common-lisp prolog clips datalog))
    (active-runtime-core . no)
    (native-observation-is-language-law . no)
@@ -62,7 +63,7 @@
    (historical-source . "lib/core1-compiler-sid-resolver.lisp")
    (historical-source . "lib/core1-sid8-bootstrap-overlay.lisp")
    (historical-source . "lib/core2.lisp")
-   (laboratory-source . "lib/core3.lisp")
+   (laboratory-source . "lib/mechanism-lab.lisp")
    (former-source . "lib/core4.lisp"))
 
   ((identity . selection-law)
