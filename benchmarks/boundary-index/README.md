@@ -21,7 +21,8 @@ for the same deterministic query corpus before Cachegrind evidence is accepted.
 - `usize` — one host `usize` start offset per word plus final end offset.
 - `u32` — one 32-bit start offset per word plus final end offset.
 - `cp8-K` — one u32 checkpoint every K words + one width byte per word.
-- `cp3-K` — one u32 checkpoint every K words + packed 3-bit `width-1` stream.
+- `cp2-K` — **D1-D4-only** u32 checkpoint every K words + packed 2-bit `width-1` stream; rejects any width >4.
+- `cp3-K` — generic W1..W8 u32 checkpoint every K words + packed 3-bit `width-1` stream.
 - `cache2` — decoded hot cache with one width byte + one raw byte per word.
 
 For `usize` / `u32`, width is recovered from adjacent offsets. The benchmark
@@ -78,3 +79,19 @@ This benchmark does not:
 
 A framing/index mechanism can consume these results later, but it must still
 satisfy exact-width identity and the framing laws independently.
+
+
+## D1-D4 two-bit control (#2269)
+
+For the current D1-D4-shaped schedule, exact width belongs to `{1,2,3,4}`.
+Therefore `width-1` has exactly four states and fits in two bits without loss.
+
+This is intentionally narrower than `cp3-K`:
+
+```text
+cp2-K: valid only when every width <= 4
+cp3-K: generic control for widths 1..8
+```
+
+The benchmark must fail closed rather than truncate when cp2 is requested for
+a corpus containing width 5..8.

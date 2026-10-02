@@ -150,6 +150,21 @@ fn checkpoint_offsets(words: &[Word], k: usize) -> Vec<u32> {
     checkpoints
 }
 
+fn packed_width_stream2(words: &[Word]) -> Option<PackedBitstream> {
+    let mut packer = BitPacker::with_capacity_bits(words.len() * 2);
+    for word in words {
+        if !(1..=4).contains(&word.width) {
+            return None;
+        }
+        packer.push(Bit2::new(word.width - 1).unwrap());
+    }
+    Some(packer.finish())
+}
+
+fn packed_width2(widths: &PackedBitstream, index: usize) -> u8 {
+    widths.read::<2>(index * 2).unwrap().packed_bits() + 1
+}
+
 fn packed_width_stream(words: &[Word]) -> PackedBitstream {
     let mut packer = BitPacker::with_capacity_bits(words.len() * 3);
     for word in words {
@@ -171,6 +186,11 @@ enum Index {
         checkpoints: Vec<u32>,
         widths: Vec<u8>,
     },
+    CheckpointW2 {
+        k: usize,
+        checkpoints: Vec<u32>,
+        widths: PackedBitstream,
+    },
     CheckpointW3 {
         k: usize,
         checkpoints: Vec<u32>,
@@ -190,6 +210,9 @@ impl Index {
             Self::FullU32 { offsets } => offsets.len() * size_of::<u32>(),
             Self::CheckpointU8 { checkpoints, widths, .. } => {
                 checkpoints.len() * size_of::<u32>() + widths.len()
+            }
+            Self::CheckpointW2 { checkpoints, widths, .. } => {
+                checkpoints.len() * size_of::<u32>() + widths.byte_len()
             }
             Self::CheckpointW3 { checkpoints, widths, .. } => {
                 checkpoints.len() * size_of::<u32>() + widths.byte_len()
@@ -227,6 +250,18 @@ impl Index {
                     steps += 1;
                 }
                 let width = widths[index];
+                steps += 1;
+                (width, read_word(packed, offset, width), steps)
+            }
+            Self::CheckpointW2 { k, checkpoints, widths } => {
+                let block_start = (index / *k) * *k;
+                let mut offset = checkpoints[index / *k] as usize;
+                let mut steps = 0u64;
+                for position in block_start..index {
+                    offset += packed_width2(widths, position) as usize;
+                    steps += 1;
+                }
+                let width = packed_width2(widths, index);
                 steps += 1;
                 (width, read_word(packed, offset, width), steps)
             }
@@ -273,6 +308,13 @@ fn build_index(candidate: &str, case: &str, words: &[Word], packed: &PackedBitst
             k,
             checkpoints: checkpoint_offsets(words, k),
             widths: words.iter().map(|word| word.width).collect(),
+        });
+    }
+    if let Some(k) = parse_checkpoint(candidate, "cp2-") {
+        return Some(Index::CheckpointW2 {
+            k,
+            checkpoints: checkpoint_offsets(words, k),
+            widths: packed_width_stream2(words)?,
         });
     }
     if let Some(k) = parse_checkpoint(candidate, "cp3-") {
