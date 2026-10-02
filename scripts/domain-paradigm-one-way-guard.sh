@@ -32,7 +32,10 @@ is_exact_width_file() {
   local path="$1"
 
   is_protected_path "$path" && return 0
-  [[ "$path" == crates/sens/src/*.rs ]] || return 1
+  case "$path" in
+    crates/sens/src/*.rs|crates/sens/examples/*.rs|crates/sens/tests/*.rs) ;;
+    *) return 1 ;;
+  esac
 
   git cat-file -e "$head_sha:$path" 2>/dev/null || return 1
   git show "$head_sha:$path"     | grep -Eq 'Bits<|\bBit[1-8]\b|BinarySourceWord|PackedBitstream|PredicateBit|Racana2|Bija3|DomainWord'
