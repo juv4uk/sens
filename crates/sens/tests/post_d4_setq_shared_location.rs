@@ -163,7 +163,3 @@ fn nearest_existing_update_fails_closed_for_a_missing_name() {
     assert!(!root.borrow().bindings.contains_key("missing"));
 }
 
-#[test]
-fn lower_bound_is_location_identity_not_generic_value_change() {
-    assert!(true);
-}
