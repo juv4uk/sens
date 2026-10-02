@@ -184,10 +184,10 @@ pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 /// The current Core4 sens bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
-/// Parse-output кеш для точного вбудованого Core4 source. Це лише bootstrap-
+/// Parse-output кеш для точного вбудованого core source. Це лише bootstrap-
 /// оптимізація: hash source перевіряється перед використанням, а stale/invalid
 /// bytes переходять на parsing CORE_LIBRARY_SOURCE.
-const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
+const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core.lisp.fasl");
 
 /// Generated runtime projection of admitted surface spellings to opaque Sens8
 /// identities. semantic-registry.lisp remains the only spelling authority.
@@ -541,7 +541,7 @@ mod core4_bootstrap_cache_tests {
 
     #[test]
     fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
-        let expressions = parse(CORE_LIBRARY_SOURCE).expect("current Core4 parses");
+        let expressions = parse(CORE_LIBRARY_SOURCE).expect("current core parses");
         let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
         let fasl = fasl_encode(&expressions, &hash);
         let mut session = Session::default();
