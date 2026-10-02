@@ -10,6 +10,7 @@
   (authority governance-metadata-not-language-semantics)
   (python-migration-authority #b1001100)
   (rust-retirement-valve #b100101011))
+(tool (path "scripts/check-identity-witness-gate.py") (kind check) (language python) (role identity-law-witness-gate) (lifecycle transitional) (callers (".github/workflows/identity-witness-gate.yml")) (authority-source "contracts/core-universal-contract.lisp") (migration-issue #b1001100) (replacement ()) (removal-condition migration-issue-complete-and-callers-switched))
 
 (tool (path "scripts/benchmark-semantic-registry-read.lisp") (kind benchmark) (language lisp) (role semantic-registry-read-benchmark) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
 (tool (path "scripts/benchmark.mjs") (kind benchmark) (language javascript) (role repository-benchmark) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
@@ -130,4 +131,3 @@
 (tool (path "scripts/research-2324-coordinate-monoid-checker.py") (kind check) (language python) (role generic-function-coordinate-composition-checker) (lifecycle transitional) (callers (".github/workflows/coordinate-monoid-research.yml")) (authority-source (issue #b100100010100)) (migration-issue #b1001100) (replacement ()) (removal-condition research-issue-2324-complete))
 (tool (path "scripts/research-2181-d5-transformer-boundary.py") (kind check) (language python) (role d5-transformer-boundary-witness) (lifecycle transitional) (callers (".github/workflows/d5-transformer-boundary.yml" "#2181" "#2174")) (authority-source (issue #b100010000101)) (migration-issue #b100010000101) (replacement ()) (removal-condition issue-2181-research-complete))
 (tool (path "scripts/research-2193-d5-lower-bound.py") (kind check) (language python) (role d5-semantic-lower-bound-witness) (lifecycle transitional) (callers (".github/workflows/d5-semantic-lower-bound.yml" "#2193" "#2185")) (authority-source (issue #b100010010001)) (migration-issue #b100010010001) (replacement ()) (removal-condition issue-2193-research-complete))
-(tool (path "scripts/check-identity-witness-gate.py") (kind check) (language python) (role identity-law-witness-gate) (lifecycle transitional) (callers (".github/workflows/identity-witness-gate.yml")) (authority-source "contracts/core-universal-contract.lisp") (migration-issue #b1001100) (replacement ()) (removal-condition migration-issue-complete-and-callers-switched))
