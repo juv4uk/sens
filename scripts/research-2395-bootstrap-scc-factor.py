@@ -99,9 +99,12 @@ def current_unknown_labels() -> set[str]:
     }
 
 
-def word_references(body: str, names: set[str]) -> set[str]:
-    tokens = set(re.findall(r"\bC1-[A-Z0-9?-]+\b", body))
-    return tokens & names
+def word_reference_counts(body: str, names: set[str]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for token in re.findall(r"\bC1-[A-Z0-9?-]+\b", body):
+        if token in names:
+            counts[token] = counts.get(token, 0) + 1
+    return counts
 
 
 def build_graph(defs: dict[str, str]) -> tuple[dict[str, set[str]], dict[str, bool], dict[str, list[str]]]:
@@ -120,10 +123,20 @@ def build_graph(defs: dict[str, str]) -> tuple[dict[str, set[str]], dict[str, bo
             assert helper in defs, f"missing helper: {helper}"
             bodies.append(defs[helper])
 
-        refs: set[str] = set()
-        for body in bodies:
-            refs |= word_references(body, known_impls)
+        ref_counts: dict[str, int] = {}
+        for body_name, body in [(impl, defs[impl])] + [
+            (helper, defs[helper]) for helper in helpers
+        ]:
+            counts = word_reference_counts(body, known_impls)
+            # One occurrence is the top-level definition header, not a call.
+            if body_name in counts:
+                counts[body_name] -= 1
+                if counts[body_name] == 0:
+                    del counts[body_name]
+            for ref, count in counts.items():
+                ref_counts[ref] = ref_counts.get(ref, 0) + count
 
+        refs = set(ref_counts)
         for ref in sorted(refs):
             if ref in HELPER_OWNER:
                 target = HELPER_OWNER[ref]
@@ -206,6 +219,7 @@ def main() -> None:
     assert comp_of["APPLY"] == ("APPLY",)
     assert "APPLY" in graph["EVAL"]
     assert "EVAL" not in graph["APPLY"]
+    assert not self_recursive["APPLY"]
     assert self_recursive["BIND"]
     assert self_recursive["LOOKUP"]
 
@@ -231,6 +245,7 @@ def main() -> None:
 
     print("EXPECTED-EVALUATOR-SCC=EVAL+EVCON+EVLIS")
     print("APPLY-IN-EVALUATOR-SCC=0")
+    print("APPLY-SELF-RECURSIVE=0")
     print("BIND-SELF-RECURSIVE=1")
     print("LOOKUP-SELF-RECURSIVE=1")
     print("SEMANTIC-PROMOTIONS=0")
