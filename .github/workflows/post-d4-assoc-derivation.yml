@@ -1,0 +1,32 @@
+name: Post-D4 ASSOC derivation research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_assoc_derivation.rs"
+      - ".github/workflows/post-d4-assoc-derivation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/post_d4_assoc_derivation.rs"
+      - ".github/workflows/post-d4-assoc-derivation.yml"
+
+jobs:
+  focused:
+    name: Post-D4 ASSOC derivation research
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused ASSOC derivation witness
+        run: cargo test -p sens --test post_d4_assoc_derivation -- --nocapture
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Post-D4 ASSOC derivation research"
+            echo
+            echo "- Independent structural equality + alist recursion witness for #2285"
+            echo "- D4 LOOKUP is not required"
+            echo "- No post-D4 identity allocation"
+          } >> "$GITHUB_STEP_SUMMARY"
