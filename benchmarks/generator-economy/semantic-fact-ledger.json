@@ -1,0 +1,708 @@
+{
+  "version": 1,
+  "accounting_unit": "independent-semantic-fact",
+  "definition": "one independently necessary executable semantic assertion that cannot be reconstructed from already-counted facts plus admitted generic logic",
+  "allowed_generic_logic": [
+    "exact substitution of already-proven equal expressions",
+    "ordinary tuple/list bookkeeping that carries no domain-specific meaning",
+    "model-declared derivation edges whose law fact is explicitly counted"
+  ],
+  "facts": [
+    {
+      "id": "q.carrier.exact-rational",
+      "kind": "carrier-premise",
+      "accounting_class": "semantic",
+      "claim": "values are exact rationals and exact rational literals/constants are admitted",
+      "domain": "Q",
+      "applies_to": [
+        "exact-q-flat6",
+        "exact-q-factor3"
+      ],
+      "dependencies": [],
+      "witness": "#2271",
+      "status": "confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "non-rational or approximate numeric carrier",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "q.constant.minus-one",
+      "kind": "constant-premise",
+      "accounting_class": "semantic",
+      "claim": "the exact rational constant -1 is available without invoking NEG",
+      "domain": "Q",
+      "applies_to": [
+        "exact-q-flat6",
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.carrier.exact-rational"
+      ],
+      "witness": "#2271 premise and generated corpus",
+      "status": "bounded-confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "literal system that requires NEG to construct -1",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "q.op.add",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact rational addition",
+      "domain": "Q x Q -> Q",
+      "applies_to": [
+        "exact-q-flat6",
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.carrier.exact-rational"
+      ],
+      "witness": "#2271",
+      "status": "confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "assignment where result differs from exact rational sum",
+      "independence_evidence": "#2271 remove-one search: ADD not synthesized from MUL+RECIP through cost 5"
+    },
+    {
+      "id": "q.op.mul",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact rational multiplication",
+      "domain": "Q x Q -> Q",
+      "applies_to": [
+        "exact-q-flat6",
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.carrier.exact-rational"
+      ],
+      "witness": "#2271",
+      "status": "confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "assignment where result differs from exact rational product",
+      "independence_evidence": "#2271 remove-one search: MUL not synthesized from ADD+RECIP through cost 5"
+    },
+    {
+      "id": "q.op.recip-nonzero",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "RECIP(x)=1/x for nonzero exact rational x",
+      "domain": "Q\\\\{0} -> Q",
+      "applies_to": [
+        "exact-q-flat6",
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.carrier.exact-rational"
+      ],
+      "witness": "#2271",
+      "status": "confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "nonzero x where exact reciprocal differs",
+      "independence_evidence": "#2271 remove-one search: RECIP not synthesized from ADD+MUL through cost 5"
+    },
+    {
+      "id": "q.partial.recip-zero",
+      "kind": "partiality",
+      "accounting_class": "semantic",
+      "claim": "RECIP is undefined at exact zero",
+      "domain": "Q",
+      "applies_to": [
+        "exact-q-flat6",
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.op.recip-nonzero"
+      ],
+      "witness": "#2271 undefined-parity corpus",
+      "status": "bounded-confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "RECIP(0) admitted as an ordinary exact-Q result",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "q.op.neg",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "NEG(x)=-x",
+      "domain": "Q -> Q",
+      "applies_to": [
+        "exact-q-flat6"
+      ],
+      "dependencies": [
+        "q.carrier.exact-rational"
+      ],
+      "witness": "#2271 surface corpus",
+      "status": "confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "x where NEG differs from additive inverse",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "q.op.sub",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "SUB(a,b)=a-b",
+      "domain": "Q x Q -> Q",
+      "applies_to": [
+        "exact-q-flat6"
+      ],
+      "dependencies": [
+        "q.carrier.exact-rational"
+      ],
+      "witness": "#2271 surface corpus",
+      "status": "confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "a,b where SUB differs from exact difference",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "q.op.div-nonzero",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "DIV(a,b)=a/b for nonzero b",
+      "domain": "Q x (Q\\\\{0}) -> Q",
+      "applies_to": [
+        "exact-q-flat6"
+      ],
+      "dependencies": [
+        "q.carrier.exact-rational"
+      ],
+      "witness": "#2271 surface corpus",
+      "status": "confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "a,b!=0 where DIV differs from exact quotient",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "q.partial.div-zero",
+      "kind": "partiality",
+      "accounting_class": "semantic",
+      "claim": "DIV(a,0) is undefined",
+      "domain": "Q x Q",
+      "applies_to": [
+        "exact-q-flat6"
+      ],
+      "dependencies": [
+        "q.op.div-nonzero"
+      ],
+      "witness": "#2271 undefined-parity corpus",
+      "status": "bounded-confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "DIV(a,0) admitted as an ordinary exact-Q result",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "q.law.neg-via-mul-minus-one",
+      "kind": "law",
+      "accounting_class": "semantic",
+      "claim": "NEG(x)=MUL(-1,x)",
+      "domain": "Q -> Q",
+      "applies_to": [
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.op.mul",
+        "q.constant.minus-one"
+      ],
+      "witness": "#2271 PR #2273: 2,277,600 parity comparisons include NEG desugaring",
+      "status": "bounded-confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "exact-Q assignment where derived NEG differs",
+      "independence_evidence": "#2271 bounded derivation parity; law is explicitly charged when replacing a surface operation"
+    },
+    {
+      "id": "q.law.sub-via-add-mul-minus-one",
+      "kind": "law",
+      "accounting_class": "semantic",
+      "claim": "SUB(a,b)=ADD(a,MUL(-1,b))",
+      "domain": "Q x Q -> Q",
+      "applies_to": [
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.op.add",
+        "q.op.mul",
+        "q.constant.minus-one"
+      ],
+      "witness": "#2271 PR #2273: 2,277,600 parity comparisons include SUB desugaring",
+      "status": "bounded-confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "exact-Q assignment where derived SUB differs",
+      "independence_evidence": "#2271 bounded derivation parity; law is explicitly charged when replacing a surface operation"
+    },
+    {
+      "id": "q.law.div-via-mul-recip",
+      "kind": "law",
+      "accounting_class": "semantic",
+      "claim": "DIV(a,b)=MUL(a,RECIP(b)); RECIP partiality transports to DIV",
+      "domain": "Q x Q -> Q or undefined",
+      "applies_to": [
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.op.mul",
+        "q.op.recip-nonzero",
+        "q.partial.recip-zero"
+      ],
+      "witness": "#2271 PR #2273: value and undefined-result parity",
+      "status": "bounded-confirmed",
+      "provenance": "#2271",
+      "counterexample_class": "value or undefined mismatch between DIV and MUL+RECIP",
+      "independence_evidence": "#2271 bounded derivation parity; law is explicitly charged when replacing a surface operation"
+    },
+    {
+      "id": "q.cert.remove-add-cost5",
+      "kind": "certificate",
+      "accounting_class": "proof",
+      "claim": "ADD not synthesized from MUL+RECIP through operation cost 5 on bounded corpus",
+      "domain": "25 assignments over {-2,-1,0,1,2}",
+      "applies_to": [
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.op.mul",
+        "q.op.recip-nonzero"
+      ],
+      "witness": "#2271: 649 semantic signatures explored",
+      "status": "bounded-negative",
+      "provenance": "#2271",
+      "counterexample_class": "a synthesized ADD expression within declared search bound",
+      "independence_evidence": "certificate only; not counted as semantic fact"
+    },
+    {
+      "id": "q.cert.remove-mul-cost5",
+      "kind": "certificate",
+      "accounting_class": "proof",
+      "claim": "MUL not synthesized from ADD+RECIP through operation cost 5 on bounded corpus",
+      "domain": "25 assignments over {-2,-1,0,1,2}",
+      "applies_to": [
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.op.add",
+        "q.op.recip-nonzero"
+      ],
+      "witness": "#2271: 3,693 semantic signatures explored",
+      "status": "bounded-negative",
+      "provenance": "#2271",
+      "counterexample_class": "a synthesized MUL expression within declared search bound",
+      "independence_evidence": "certificate only; not counted as semantic fact"
+    },
+    {
+      "id": "q.cert.remove-recip-cost5",
+      "kind": "certificate",
+      "accounting_class": "proof",
+      "claim": "RECIP not synthesized from ADD+MUL through operation cost 5 on bounded corpus",
+      "domain": "25 assignments over {-2,-1,0,1,2}",
+      "applies_to": [
+        "exact-q-factor3"
+      ],
+      "dependencies": [
+        "q.op.add",
+        "q.op.mul"
+      ],
+      "witness": "#2271: 17,335 semantic signatures explored",
+      "status": "bounded-negative",
+      "provenance": "#2271",
+      "counterexample_class": "a synthesized RECIP expression within declared search bound",
+      "independence_evidence": "certificate only; not counted as semantic fact"
+    },
+    {
+      "id": "lat.carrier.numeric-order-q",
+      "kind": "carrier-premise",
+      "accounting_class": "semantic",
+      "claim": "exact-Q values carry ordinary total order",
+      "domain": "Q",
+      "applies_to": [
+        "lattice-flat4",
+        "lattice-local-grammar"
+      ],
+      "dependencies": [],
+      "witness": "#2263 PR #2260",
+      "status": "bounded-confirmed",
+      "provenance": "#2263",
+      "counterexample_class": "carrier value pair without the declared order",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "lat.carrier.divisibility-nonnegative",
+      "kind": "carrier-premise",
+      "accounting_class": "semantic",
+      "claim": "nonnegative integers carry divisibility order with declared zero convention",
+      "domain": "N0",
+      "applies_to": [
+        "lattice-flat4",
+        "lattice-local-grammar"
+      ],
+      "dependencies": [],
+      "witness": "#2263 PR #2260",
+      "status": "bounded-confirmed",
+      "provenance": "#2263",
+      "counterexample_class": "sign/zero convention requiring undeclared exception",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "lat.op.min",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "MIN is meet on exact-Q numeric order",
+      "domain": "Q x Q -> Q",
+      "applies_to": [
+        "lattice-flat4"
+      ],
+      "dependencies": [
+        "lat.carrier.numeric-order-q"
+      ],
+      "witness": "#2263 PR #2260",
+      "status": "bounded-confirmed",
+      "provenance": "#2263",
+      "counterexample_class": "bounded Q pair where MIN differs from meet",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "lat.op.max",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "MAX is join on exact-Q numeric order",
+      "domain": "Q x Q -> Q",
+      "applies_to": [
+        "lattice-flat4"
+      ],
+      "dependencies": [
+        "lat.carrier.numeric-order-q"
+      ],
+      "witness": "#2263 PR #2260",
+      "status": "bounded-confirmed",
+      "provenance": "#2263",
+      "counterexample_class": "bounded Q pair where MAX differs from join",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "lat.op.gcd",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "GCD is meet on nonnegative-integer divisibility order",
+      "domain": "N0 x N0 -> N0",
+      "applies_to": [
+        "lattice-flat4"
+      ],
+      "dependencies": [
+        "lat.carrier.divisibility-nonnegative"
+      ],
+      "witness": "#2263 PR #2260",
+      "status": "bounded-confirmed",
+      "provenance": "#2263",
+      "counterexample_class": "bounded integer pair where GCD differs from divisibility meet",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "lat.op.lcm",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "LCM is join on nonnegative-integer divisibility order",
+      "domain": "N0 x N0 -> N0",
+      "applies_to": [
+        "lattice-flat4"
+      ],
+      "dependencies": [
+        "lat.carrier.divisibility-nonnegative"
+      ],
+      "witness": "#2263 PR #2260",
+      "status": "bounded-confirmed",
+      "provenance": "#2263",
+      "counterexample_class": "bounded integer pair where LCM differs from divisibility join",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "lat.law.meet",
+      "kind": "law",
+      "accounting_class": "semantic",
+      "claim": "meet returns the greatest lower bound under the declared carrier order",
+      "domain": "typed lattice carrier",
+      "applies_to": [
+        "lattice-local-grammar"
+      ],
+      "dependencies": [],
+      "witness": "#2263 shared law checker",
+      "status": "candidate",
+      "provenance": "#2263",
+      "counterexample_class": "carrier where declared meet role fails greatest-lower-bound semantics",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "lat.law.join",
+      "kind": "law",
+      "accounting_class": "semantic",
+      "claim": "join returns the least upper bound under the declared carrier order",
+      "domain": "typed lattice carrier",
+      "applies_to": [
+        "lattice-local-grammar"
+      ],
+      "dependencies": [],
+      "witness": "#2263 shared law checker",
+      "status": "candidate",
+      "provenance": "#2263",
+      "counterexample_class": "carrier where declared join role fails least-upper-bound semantics",
+      "independence_evidence": "model-specific counted premise; no stronger derivation currently admitted in this control"
+    },
+    {
+      "id": "lat.map.numeric-meet-min",
+      "kind": "instance-map",
+      "accounting_class": "semantic",
+      "claim": "numeric-order meet coordinate corresponds to current MIN semantic row",
+      "domain": "Q",
+      "applies_to": [
+        "lattice-local-grammar"
+      ],
+      "dependencies": [
+        "lat.carrier.numeric-order-q",
+        "lat.law.meet"
+      ],
+      "witness": "#2263",
+      "status": "unknown",
+      "provenance": "#2263/#2280",
+      "counterexample_class": "coordinate reconstruction that needs an independent MIN lookup",
+      "independence_evidence": "UNKNOWN: must be resolved by derivation/remove-one attack before an exact local-grammar total is claimed"
+    },
+    {
+      "id": "lat.map.numeric-join-max",
+      "kind": "instance-map",
+      "accounting_class": "semantic",
+      "claim": "numeric-order join coordinate corresponds to current MAX semantic row",
+      "domain": "Q",
+      "applies_to": [
+        "lattice-local-grammar"
+      ],
+      "dependencies": [
+        "lat.carrier.numeric-order-q",
+        "lat.law.join"
+      ],
+      "witness": "#2263",
+      "status": "unknown",
+      "provenance": "#2263/#2280",
+      "counterexample_class": "coordinate reconstruction that needs an independent MAX lookup",
+      "independence_evidence": "UNKNOWN: must be resolved by derivation/remove-one attack before an exact local-grammar total is claimed"
+    },
+    {
+      "id": "lat.map.div-meet-gcd",
+      "kind": "instance-map",
+      "accounting_class": "semantic",
+      "claim": "divisibility meet coordinate corresponds to current GCD semantic row",
+      "domain": "N0",
+      "applies_to": [
+        "lattice-local-grammar"
+      ],
+      "dependencies": [
+        "lat.carrier.divisibility-nonnegative",
+        "lat.law.meet"
+      ],
+      "witness": "#2263",
+      "status": "unknown",
+      "provenance": "#2263/#2280",
+      "counterexample_class": "coordinate reconstruction that needs an independent GCD lookup",
+      "independence_evidence": "UNKNOWN: must be resolved by derivation/remove-one attack before an exact local-grammar total is claimed"
+    },
+    {
+      "id": "lat.map.div-join-lcm",
+      "kind": "instance-map",
+      "accounting_class": "semantic",
+      "claim": "divisibility join coordinate corresponds to current LCM semantic row",
+      "domain": "N0",
+      "applies_to": [
+        "lattice-local-grammar"
+      ],
+      "dependencies": [
+        "lat.carrier.divisibility-nonnegative",
+        "lat.law.join"
+      ],
+      "witness": "#2263",
+      "status": "unknown",
+      "provenance": "#2263/#2280",
+      "counterexample_class": "coordinate reconstruction that needs an independent LCM lookup",
+      "independence_evidence": "UNKNOWN: must be resolved by derivation/remove-one attack before an exact local-grammar total is claimed"
+    }
+  ],
+  "models": [
+    {
+      "id": "exact-q-flat6",
+      "corpus": "ADD MUL RECIP NEG SUB DIV over exact Q",
+      "independent_facts": [
+        "q.carrier.exact-rational",
+        "q.constant.minus-one",
+        "q.op.add",
+        "q.op.mul",
+        "q.op.recip-nonzero",
+        "q.partial.recip-zero",
+        "q.op.neg",
+        "q.op.sub",
+        "q.op.div-nonzero",
+        "q.partial.div-zero"
+      ],
+      "unknown_facts": [],
+      "derived_facts": [],
+      "covers": [
+        "q.op.add",
+        "q.op.mul",
+        "q.op.recip-nonzero",
+        "q.partial.recip-zero",
+        "q.op.neg",
+        "q.op.sub",
+        "q.op.div-nonzero",
+        "q.partial.div-zero"
+      ],
+      "expected_semantic_fact_interval": [
+        10,
+        10
+      ]
+    },
+    {
+      "id": "exact-q-factor3",
+      "corpus": "same exact-Q surface reconstructed from ADD MUL RECIP + explicit laws",
+      "independent_facts": [
+        "q.carrier.exact-rational",
+        "q.constant.minus-one",
+        "q.op.add",
+        "q.op.mul",
+        "q.op.recip-nonzero",
+        "q.partial.recip-zero",
+        "q.law.neg-via-mul-minus-one",
+        "q.law.sub-via-add-mul-minus-one",
+        "q.law.div-via-mul-recip"
+      ],
+      "unknown_facts": [],
+      "derived_facts": [
+        {
+          "target": "q.op.neg",
+          "via": [
+            "q.op.mul",
+            "q.constant.minus-one",
+            "q.law.neg-via-mul-minus-one"
+          ]
+        },
+        {
+          "target": "q.op.sub",
+          "via": [
+            "q.op.add",
+            "q.op.mul",
+            "q.constant.minus-one",
+            "q.law.sub-via-add-mul-minus-one"
+          ]
+        },
+        {
+          "target": "q.op.div-nonzero",
+          "via": [
+            "q.op.mul",
+            "q.op.recip-nonzero",
+            "q.law.div-via-mul-recip"
+          ]
+        },
+        {
+          "target": "q.partial.div-zero",
+          "via": [
+            "q.partial.recip-zero",
+            "q.law.div-via-mul-recip"
+          ]
+        }
+      ],
+      "covers": [
+        "q.op.add",
+        "q.op.mul",
+        "q.op.recip-nonzero",
+        "q.partial.recip-zero",
+        "q.op.neg",
+        "q.op.sub",
+        "q.op.div-nonzero",
+        "q.partial.div-zero"
+      ],
+      "expected_semantic_fact_interval": [
+        9,
+        9
+      ]
+    },
+    {
+      "id": "lattice-flat4",
+      "corpus": "MIN MAX GCD LCM with explicit carrier premises",
+      "independent_facts": [
+        "lat.carrier.numeric-order-q",
+        "lat.carrier.divisibility-nonnegative",
+        "lat.op.min",
+        "lat.op.max",
+        "lat.op.gcd",
+        "lat.op.lcm"
+      ],
+      "unknown_facts": [],
+      "derived_facts": [],
+      "covers": [
+        "lat.op.min",
+        "lat.op.max",
+        "lat.op.gcd",
+        "lat.op.lcm"
+      ],
+      "expected_semantic_fact_interval": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "lattice-local-grammar",
+      "corpus": "two typed carriers x meet/join roles",
+      "independent_facts": [
+        "lat.carrier.numeric-order-q",
+        "lat.carrier.divisibility-nonnegative",
+        "lat.law.meet",
+        "lat.law.join"
+      ],
+      "unknown_facts": [
+        "lat.map.numeric-meet-min",
+        "lat.map.numeric-join-max",
+        "lat.map.div-meet-gcd",
+        "lat.map.div-join-lcm"
+      ],
+      "derived_facts": [
+        {
+          "target": "lat.op.min",
+          "via": [
+            "lat.carrier.numeric-order-q",
+            "lat.law.meet",
+            "lat.map.numeric-meet-min"
+          ]
+        },
+        {
+          "target": "lat.op.max",
+          "via": [
+            "lat.carrier.numeric-order-q",
+            "lat.law.join",
+            "lat.map.numeric-join-max"
+          ]
+        },
+        {
+          "target": "lat.op.gcd",
+          "via": [
+            "lat.carrier.divisibility-nonnegative",
+            "lat.law.meet",
+            "lat.map.div-meet-gcd"
+          ]
+        },
+        {
+          "target": "lat.op.lcm",
+          "via": [
+            "lat.carrier.divisibility-nonnegative",
+            "lat.law.join",
+            "lat.map.div-join-lcm"
+          ]
+        }
+      ],
+      "covers": [
+        "lat.op.min",
+        "lat.op.max",
+        "lat.op.gcd",
+        "lat.op.lcm"
+      ],
+      "expected_semantic_fact_interval": [
+        4,
+        8
+      ]
+    }
+  ]
+}
