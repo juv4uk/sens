@@ -197,7 +197,7 @@ def scan(root):
 
 INV_SITE = re.compile(
     r'\(site\s+\(class\s+"([^"]+)"\)\s+\(file\s+"([^"]+)"\)\s+'
-    r'\(key\s+"((?:[^"\\]|\\.)*)"\)\s+\(line\s+(\d+)\)\)')
+    r'\(key\s+"((?:[^"\\]|\\.)*)"\)\s+\(line\s+"(\d+)"\)\)')
 
 
 def read_inventory(path):
@@ -221,7 +221,7 @@ def emit_inventory(hits):
     for h in hits:
         key = h["key"].replace('"', '\\"')
         lines.append(f'  (site (class "{h["class"]}") (file "{h["file"]}") '
-                     f'(key "{key}") (line {h["line"]}))')
+                     f'(key "{key}") (line "{h["line"]}"))')
     lines.append(")")
     return "\n".join(lines) + "\n"
 
@@ -329,6 +329,19 @@ def self_test():
         failures += 0 if ok else 1
         print(f"  [{'ok' if ok else 'FAIL'}] baseline round-trips "
               f"(new {len(new)}, stale {len(stale)})")
+        # Source-line coordinates are provenance, not SENS Number literals.
+        # Prove that the emitted quoted representation reads back losslessly.
+        inventory_path = os.path.join(tmp, "inventory.lisp")
+        open(inventory_path, "w", encoding="utf-8").write(emit_inventory(hits))
+        parsed = read_inventory(inventory_path)
+        expected = {
+            h["key"]: (h["class"], h["file"], h["line"])
+            for h in hits
+        }
+        ok = parsed == expected
+        failures += 0 if ok else 1
+        print(f"  [{'ok' if ok else 'FAIL'}] quoted line provenance round-trips")
+
         extra = list(hits) + [{"class": "total-serializer-fallback", "file": "x.rs", "line": 1,
                                "key": "total-serializer-fallback|x.rs|_ => render(y, true)",
                                "snippet": "_ => render(y, true)"}]
