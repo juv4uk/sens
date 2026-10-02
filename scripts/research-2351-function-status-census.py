@@ -231,8 +231,7 @@ FIELDS = [
 
 
 def render_json(data: dict[str, object]) -> str:
-    # Preserve deterministic construction order used by the committed artifact.
-    return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    return json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
 def render_tsv(data: dict[str, object]) -> str:
