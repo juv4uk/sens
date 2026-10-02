@@ -1,0 +1,19 @@
+{
+  "schema": "core-math-research-projection/v1",
+  "authority": "non-authoritative-projection",
+  "neutral_spec": "docs/research/2433-core-math-neutral-v1.json",
+  "current_research_labels": {
+    "ADD": "add",
+    "MUL": "mul",
+    "RECIP": "recip",
+    "NEG": "neg",
+    "SUB": "sub",
+    "DIV": "div"
+  },
+  "refs": [
+    "#2271",
+    "#2280",
+    "#2433"
+  ],
+  "note": "Projection aids current research surfaces; it does not define neutral semantics or allocate identities."
+}
