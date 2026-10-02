@@ -1,0 +1,80 @@
+name: Post-D4 PAIRLIS derivation research
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1.lisp"
+      - "tests/fixtures/2286-pairlis-bind-witness.lisp"
+      - ".github/workflows/post-d4-pairlis-derivation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pairlis-bind:
+    name: Core1 BIND / PAIRLIS witness
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SENS
+        uses: actions/checkout@v5
+
+      - name: Checkout pinned typed-SID8 S0 seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
+          ref: 6031f92652066825a245c806c0773e9e524257bd
+          path: .core1-s0/mccarthy-eval
+
+      - name: Verify and build exact S0 seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        working-directory: .core1-s0/mccarthy-eval
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          test "$actual_sha" = "6031f92652066825a245c806c0773e9e524257bd"
+          gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+
+      - name: Execute C1-BIND / PAIRLIS behavior
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat lib/core1.lisp tests/fixtures/2286-pairlis-bind-witness.lisp             > .core1-s0/2286-pairlis-full.lisp
+
+          expected='((X . 1) (Y . 2) (OLD . ENV))
+          ((Y . 2) (X . 1) (OLD . ENV))
+          (C1-FOUND FIRST)
+          (C1-FOUND SECOND)
+          ((OLD . ENV))
+          (C1-ERROR ARITY TOO-MANY-ARGUMENTS)
+          (C1-ERROR ARITY TOO-FEW-ARGUMENTS)'
+
+          actual="$(
+            cd .core1-s0/mccarthy-eval
+            ./mccarthy-kernel ../2286-pairlis-full.lisp
+          )"
+
+          printf '%s\n' "$actual"
+          test "$actual" = "$expected"
+
+          {
+            echo "## #2286 PAIRLIS / BIND research"
+            echo
+            echo "- Historical PAIRLIS preserves parameter order."
+            echo "- Current C1-BIND reverses a multi-parameter batch because it extends ENV before recurring."
+            echo "- Duplicate-parameter lookup is observably different: PAIRLIS -> FIRST, BIND -> SECOND."
+            echo "- Empty parameter/argument lists preserve ENV."
+            echo "- Arity mismatch fails closed in BIND."
+            echo "- Evidence direction: PAIRLIS is structural recursion, but is not semantically identical to current BIND."
+            echo "- Evidence only: final Phase-C classification still waits for #2279."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail closed when private S0 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "::error::Private Core1 S0 evidence is unavailable to untrusted fork PRs."
+          exit 1

@@ -1,0 +1,51 @@
+(00001001 PAIRLIS-HIST
+  (10101010 PAIRLIS-HIST
+    (00001000 (PARAMS ARGS ENV)
+      (00000111
+        ((00000011 PARAMS NIL) ENV)
+        (T
+         (00000100
+           (00000100 (00000101 PARAMS) (00000101 ARGS))
+           (PAIRLIS-HIST
+             (00000110 PARAMS)
+             (00000110 ARGS)
+             ENV)))))))
+
+(PAIRLIS-HIST
+  (QUOTE (X Y))
+  (QUOTE (1 2))
+  (QUOTE ((OLD . ENV))))
+
+(C1-BIND
+  (QUOTE (X Y))
+  (QUOTE (1 2))
+  (QUOTE ((OLD . ENV))))
+
+(C1-LOOKUP-IN
+  (QUOTE X)
+  (PAIRLIS-HIST
+    (QUOTE (X X))
+    (QUOTE (FIRST SECOND))
+    NIL))
+
+(C1-LOOKUP-IN
+  (QUOTE X)
+  (C1-BIND
+    (QUOTE (X X))
+    (QUOTE (FIRST SECOND))
+    NIL))
+
+(C1-BIND
+  (QUOTE ())
+  (QUOTE ())
+  (QUOTE ((OLD . ENV))))
+
+(C1-BIND
+  (QUOTE (X))
+  (QUOTE (1 2))
+  NIL)
+
+(C1-BIND
+  (QUOTE (X Y))
+  (QUOTE (1))
+  NIL)
