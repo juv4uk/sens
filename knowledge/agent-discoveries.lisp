@@ -8,7 +8,7 @@
 
 (agent-discoveries
   (schema . 3)
-  (updated . "2026-09-28")
+  (updated . "2026-10-02")
   (board-issue . 1599)
   (gpu-witness-journal . 1598)
   (related . (1590 1413 1485 1454))
@@ -58,6 +58,13 @@
          (claim . "GitHub↔WSL discovery bridge live; one board only")
          (evidence . ("ecosystem#36" "ecosystem#37"))
          (action . "GitHub agents: #1599 + agent field; local: agent-send → agents-live-bus"))))
+
+    (one-core-and-core-math
+      . ((status . owner-ratified-direction)
+         (agent . "chatgpt-sol")
+         (claim . "one active Core: lib/core.lisp contains only ratified domains; D5/D6 closeout separately; D7 researches Sound+Number; lib/core-math.lisp is research-only mathematics")
+         (evidence . ("#2410" "#2411" "#2414" "#2415" "PR #2417" "#1599 comment 5957748054"))
+         (action . "do not create numbered Core profiles; route math hypotheses through core-math and require separate owner ratification before core admission"))))
 
   (pending-slots
     (post-m8-three-way-bench . needs-valgrind-machine)
