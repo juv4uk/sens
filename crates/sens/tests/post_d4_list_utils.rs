@@ -13,7 +13,6 @@ const DERIVED: &str = r#"
   (00001000 (left right)
     (00000111
       ((00000010 left) () right)
-      ((00000010 left) (1) right)
       ((00000010 left) (0)
        (00000100
          (00000101 left)
@@ -120,7 +119,6 @@ fn append_is_reconstructible_from_structure_and_recursion() {
         ("(quote ())", "(quote (c d))"),
         ("(quote (a b))", "(quote (c d))"),
         ("(quote (a (b c)))", "(quote (d))"),
-        ("(quote atom)", "(quote (tail))"),
     ];
 
     for (left, right) in cases {
@@ -128,6 +126,15 @@ fn append_is_reconstructible_from_structure_and_recursion() {
         let canonical = run(&mut s, &format!("(append {left} {right})"));
         assert_eq!(derived, canonical, "left={left} right={right}");
     }
+
+    let derived_error = eval_program(
+        "(post-d4-append (quote atom) (quote (tail)))",
+        &mut s,
+    )
+    .unwrap_err();
+    let canonical_error =
+        eval_program("(append (quote atom) (quote (tail)))", &mut s).unwrap_err();
+    assert_eq!(derived_error.kind, canonical_error.kind);
 }
 
 #[test]
