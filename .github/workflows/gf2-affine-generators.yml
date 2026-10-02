@@ -1,0 +1,22 @@
+name: GF2 affine generator research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2339-gf2-affine-generators.py"
+      - ".github/workflows/gf2-affine-generators.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exhaustive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Search minimal generator sets
+        run: python3 scripts/research-2339-gf2-affine-generators.py
