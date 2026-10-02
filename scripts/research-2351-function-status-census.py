@@ -112,6 +112,28 @@ LOCAL_BASIS_ROLES = {
     "00000110": "selector-root-candidate",
 }
 
+# Executable implementation/genealogy evidence is intentionally weaker than
+# semantic identity generation. These rows may be behaviorally reconstructible
+# while their semantic_status remains UNKNOWN.
+BEHAVIOR_DERIVED = {
+    "00101110": "experiments/function-genealogy.lisp",  # pair
+    "00101111": "experiments/function-genealogy.lisp",  # second
+    "00110000": "experiments/function-genealogy.lisp",  # third
+    "00110001": "experiments/function-genealogy.lisp",  # fourth
+    "00110010": "experiments/function-genealogy.lisp",  # fifth
+    "00110011": "#2345 merged",                         # caar
+    "00110100": "#2345 merged",                         # cadr
+    "00110101": "#2345 merged",                         # cddr
+    "00110110": "#2345 merged; #2362",                  # cadddr
+}
+
+OVERLAP_NO_MERGE = {
+    "00101111": "00110100",  # second / cadr
+    "00110100": "00101111",
+    "00110001": "00110110",  # fourth / cadddr
+    "00110110": "00110001",
+}
+
 
 def parse_registry() -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
@@ -160,6 +182,9 @@ def classify(base: dict[str, object]) -> dict[str, object]:
             "counterexample": "",
             "independence_status": "unknown",
             "semantic_fact_refs": "",
+            "behavior_derivability": "unresolved",
+            "behavior_evidence_ref": "",
+            "identity_equivalence": "no-equivalence-claim",
             "note": "",
         }
     )
@@ -175,6 +200,15 @@ def classify(base: dict[str, object]) -> dict[str, object]:
         row["status"] = "UNKNOWN"
         row["independence_status"] = "bounded-candidate-not-admitted"
 
+    if identity in BEHAVIOR_DERIVED:
+        row["behavior_derivability"] = "derived"
+        row["behavior_evidence_ref"] = BEHAVIOR_DERIVED[identity]
+
+    if identity in OVERLAP_NO_MERGE:
+        row["identity_equivalence"] = (
+            "overlap-no-merge-authority-with:" + OVERLAP_NO_MERGE[identity]
+        )
+
     assert row["status"] in STATUSES
     return row
 
@@ -183,6 +217,9 @@ def census() -> dict[str, object]:
     rows = [classify(r) for r in parse_registry()]
     counts = {status: sum(r["status"] == status for r in rows) for status in STATUSES}
     surface_exposed = sum(bool(r["surface_exposed"]) for r in rows)
+    behavior_derived = sum(
+        r["behavior_derivability"] == "derived" for r in rows
+    )
 
     summary = {
         "admitted_total": len(rows),
@@ -195,7 +232,9 @@ def census() -> dict[str, object]:
         "generated_fraction": counts["generated"] / len(rows),
         "independent_fact_upper_bound": len(rows) - counts["generated"],
         "registry_rows_potentially_derivable": counts["generated"],
+        "behavior_derived": behavior_derived,
         "epistemic_rule": "failed-search-is-not-independence",
+        "identity_rule": "shared-behavior-is-not-shared-identity",
         "authority": "research-only",
     }
 
@@ -207,6 +246,7 @@ def census() -> dict[str, object]:
     assert summary["generated"] == 4
     assert summary["bounded_residue"] == 0
     assert summary["unknown"] == 252
+    assert summary["behavior_derived"] == 9
 
     return {"summary": summary, "rows": rows}
 
@@ -224,6 +264,9 @@ FIELDS = [
     "counterexample",
     "independence_status",
     "semantic_fact_refs",
+    "behavior_derivability",
+    "behavior_evidence_ref",
+    "identity_equivalence",
     "surface_exposed",
     "human_surface_optional",
     "note",
