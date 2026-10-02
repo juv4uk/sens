@@ -144,6 +144,45 @@ Likewise:
 
 would be allocation-only uses of free D4 capacity and are not placement laws.
 
+## One child word cannot carry two independent axes
+
+An exact parent/suffix pair is one construction path. Therefore two independent
+semantic refinements may not silently claim the same child word.
+
+This matters immediately for the historical reset:
+
+```text
+0010  LAMBDA
+
+candidate A:
+00101 LABEL
+delta axis = local-self-binding
+
+old candidate B:
+00101 TRANSFORMER
+delta axis = raw-staged-invocation
+```
+
+If both deltas survive as independently observable capabilities, D5 is too
+narrow to encode both under the same LAMBDA+1 edge.
+
+Allowed outcomes are then:
+
+```text
+derive one capability
+find a different honest parent for one capability
+move one/both refinements to a wider stratum
+```
+
+Not allowed:
+
+```text
+same exact word = two unrelated semantic refinements
+```
+
+This gives the historical ordering real force: LABEL is tested first because it
+appears earlier in the Lisp lineage, not because it is preferred aesthetically.
+
 ## Historical search order
 
 The current ladder is intentionally unresolved:
