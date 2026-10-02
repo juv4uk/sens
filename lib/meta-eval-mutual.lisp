@@ -1,5 +1,5 @@
 ; Experimental extension for mutually recursive top-level lambda definitions.
-; Load after the current Core4 profile (`lib/core4.lisp`) and lib/meta-eval.lisp.
+; Load after the current core (`lib/core.lisp`) and lib/meta-eval.lisp.
 ;
 ; This deliberately proves the representation before changing the main
 ; evaluator. Consecutive top-level `(def name (lambda ...))` forms are treated
