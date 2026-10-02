@@ -1,0 +1,165 @@
+{
+  "allocation_order_attack": {
+    "original_slots": {
+      "div": 2,
+      "neg": 0,
+      "sub": 1
+    },
+    "reversed_rule_order_slots": {
+      "div": 0,
+      "neg": 2,
+      "sub": 1
+    },
+    "stable": false
+  },
+  "authority": "research-only",
+  "claims": {
+    "current_status": "bounded-positive-candidate-not-ratified",
+    "current_strongest_candidate": "expanded_math_normal_form",
+    "executor_evidence": "#2433 / PR #2437 independently cross-checks bounded semantic signatures with Fraction and normalized-pair exact-Q models",
+    "generated_registry_rows": 0,
+    "sens_function_slot_required": false,
+    "serialization_replay_required": true
+  },
+  "equivalent_derivation_test": {
+    "alternate": "add(x, mul(neg_one, y))",
+    "direct_alternate": "derivation-v1:4d805b5c01fc959d9f6979448b40ffbd9b2d2b3f3fc049517522a3c4c06b94e9",
+    "direct_original": "derivation-v1:77c8d9164e0d15af610d2839b237115ddda5980629e3ff1aefdd88f119c6b914",
+    "direct_same": false,
+    "expanded_alternate": "math-normal-v1:4d805b5c01fc959d9f6979448b40ffbd9b2d2b3f3fc049517522a3c4c06b94e9",
+    "expanded_original": "math-normal-v1:4d805b5c01fc959d9f6979448b40ffbd9b2d2b3f3fc049517522a3c4c06b94e9",
+    "expanded_payload_same": true,
+    "expanded_same": true,
+    "operation": "sub",
+    "original": "add(x, neg(y))"
+  },
+  "identity_models": {
+    "allocated_slot": {
+      "property": "order-sensitive allocation, not mathematical identity",
+      "role": "negative-control"
+    },
+    "bounded_semantic_signature": {
+      "property": "agrees across the two non-Lisp #2433 exact-Q models on the bounded corpus; insufficient as universal identity proof",
+      "role": "observational-control"
+    },
+    "direct_derivation_tree": {
+      "property": "preserves named generated dependencies; equivalent derivations may differ",
+      "role": "provenance-sensitive-candidate"
+    },
+    "expanded_math_normal_form": {
+      "property": "generated aliases expanded; variables alpha-normalized; commutative add/mul arguments sorted",
+      "role": "positive-candidate"
+    }
+  },
+  "non_conclusions": [
+    "bounded semantic signatures are not universal semantic identity",
+    "expanded normal form is not yet proved complete for all Core-Math operations",
+    "commutativity normalization is admitted here only for the exact-Q add/mul witness",
+    "no Core identity or SENS function coordinate is allocated",
+    "no claim is made that all future residue operations have generated identities"
+  ],
+  "operations": [
+    {
+      "allocated_slot_control": 0,
+      "bounded_semantic_signature_control": "bounded-semantic-v1:b301de2d636f0aca433282e392d0249be8080cabb65e82b69c0b86c9ec29c322",
+      "dedicated_semantic_registry_row": false,
+      "direct_derivation_identity": "derivation-v1:b331181e7578016f51d1ca572849f04f0b3caaa38e5388b018cb377640c42786",
+      "expanded_math_identity": "math-normal-v1:b331181e7578016f51d1ca572849f04f0b3caaa38e5388b018cb377640c42786",
+      "expanded_math_normal_form": {
+        "arity": 1,
+        "carrier": "Q",
+        "expression": {
+          "args": [
+            {
+              "const": "neg_one"
+            },
+            {
+              "var": "v0"
+            }
+          ],
+          "call": "mul"
+        },
+        "inputs": [
+          "Q"
+        ],
+        "output": "Q",
+        "partiality": "total"
+      },
+      "operation": "neg"
+    },
+    {
+      "allocated_slot_control": 1,
+      "bounded_semantic_signature_control": "bounded-semantic-v1:12f770e83f110ee34435213517695b19b034c105e2e8155a3cce5acc39239a7c",
+      "dedicated_semantic_registry_row": false,
+      "direct_derivation_identity": "derivation-v1:77c8d9164e0d15af610d2839b237115ddda5980629e3ff1aefdd88f119c6b914",
+      "expanded_math_identity": "math-normal-v1:4d805b5c01fc959d9f6979448b40ffbd9b2d2b3f3fc049517522a3c4c06b94e9",
+      "expanded_math_normal_form": {
+        "arity": 2,
+        "carrier": "Q",
+        "expression": {
+          "args": [
+            {
+              "args": [
+                {
+                  "const": "neg_one"
+                },
+                {
+                  "var": "v1"
+                }
+              ],
+              "call": "mul"
+            },
+            {
+              "var": "v0"
+            }
+          ],
+          "call": "add"
+        },
+        "inputs": [
+          "Q",
+          "Q"
+        ],
+        "output": "Q",
+        "partiality": "total"
+      },
+      "operation": "sub"
+    },
+    {
+      "allocated_slot_control": 2,
+      "bounded_semantic_signature_control": "bounded-semantic-v1:721c462e593d62d7c227284c633e00bcfe5bf383e02c9e2c621d9043186fe112",
+      "dedicated_semantic_registry_row": false,
+      "direct_derivation_identity": "derivation-v1:bca2215b2fb67d9644adb60670ae85107f7e656d36594475788a33b53a54c60a",
+      "expanded_math_identity": "math-normal-v1:bca2215b2fb67d9644adb60670ae85107f7e656d36594475788a33b53a54c60a",
+      "expanded_math_normal_form": {
+        "arity": 2,
+        "carrier": "Q",
+        "expression": {
+          "args": [
+            {
+              "args": [
+                {
+                  "var": "v1"
+                }
+              ],
+              "call": "recip"
+            },
+            {
+              "var": "v0"
+            }
+          ],
+          "call": "mul"
+        },
+        "inputs": [
+          "Q",
+          "Q"
+        ],
+        "output": "Q",
+        "partiality": "undefined-when-y-zero"
+      },
+      "operation": "div"
+    }
+  ],
+  "schema": "core-math-generated-identity-research/v1",
+  "source_certificates": "docs/research/2433-core-math-generation-certificates.json",
+  "source_spec": "docs/research/2433-core-math-neutral-v1.json"
+}
