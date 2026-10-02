@@ -5,6 +5,8 @@ Research only. No production identity allocation.
 
 Positive controls:
 - ORDER/V4: two action bits, composition by XOR (B3 candidate).
+- SELECTOR/PATH: each bit is CAR/CDR and path concatenation is function
+  composition (B3 candidate).
 - MOBIUS/P1(Q): exact projective coordinate, composition by matrix multiply
   (B1 coordinate algebra; no simple bitwise claim).
 
@@ -63,6 +65,71 @@ def verify_order_b3() -> tuple[int, int]:
             assert semantic == order_action(composed, a, b)
             composition_cases += 1
     return relation_cases, composition_cases
+
+
+
+Pair = tuple[object, object]
+
+
+def make_binary_tree(depth: int, prefix: str = "") -> object:
+    if depth == 0:
+        return prefix or "root"
+    return (
+        make_binary_tree(depth - 1, prefix + "0"),
+        make_binary_tree(depth - 1, prefix + "1"),
+    )
+
+
+TREE = make_binary_tree(6)
+
+
+def selector(bit: str, value: object) -> object:
+    assert isinstance(value, tuple) and len(value) == 2
+    return value[0] if bit == "0" else value[1]
+
+
+def selector_path(path: str, value: object) -> object:
+    """Interpret path outer-to-inner: 01 = CAR(CDR(value)) = CADR."""
+    out = value
+    for bit in reversed(path):
+        out = selector(bit, out)
+    return out
+
+
+def verify_selector_b3() -> tuple[int, int, int]:
+    naming_cases = 0
+    composition_cases = 0
+    semantic_bit_cases = 0
+
+    expected = {
+        "0": TREE[0],                 # CAR
+        "1": TREE[1],                 # CDR
+        "00": TREE[0][0],             # CAAR
+        "01": TREE[1][0],             # CADR = CAR(CDR x)
+        "10": TREE[0][1],             # CDAR = CDR(CAR x)
+        "11": TREE[1][1],             # CDDR
+    }
+    for path, value in expected.items():
+        assert selector_path(path, TREE) == value
+        naming_cases += 1
+
+    # Each bit has an independently fixed semantic action.
+    for bit in ("0", "1"):
+        for subtree in (TREE, TREE[0], TREE[1]):
+            assert selector_path(bit, subtree) == selector(bit, subtree)
+            semantic_bit_cases += 1
+
+    # T(p||q) = T(p) o T(q), where || is bitstring concatenation.
+    paths = ("0", "1", "00", "01", "10", "11")
+    for p, q in product(paths, repeat=2):
+        if len(p) + len(q) > 4:
+            continue
+        lhs = selector_path(p + q, TREE)
+        rhs = selector_path(p, selector_path(q, TREE))
+        assert lhs == rhs, (p, q, lhs, rhs)
+        composition_cases += 1
+
+    return naming_cases, semantic_bit_cases, composition_cases
 
 
 Matrix = tuple[Fraction, Fraction, Fraction, Fraction]
@@ -141,6 +208,7 @@ def arbitrary_label_negative_control() -> int:
 
 def main() -> None:
     order_rel, order_comp = verify_order_b3()
+    selector_names, selector_bits, selector_comp = verify_selector_b3()
     mobius_comp = verify_mobius_b1()
     negative = arbitrary_label_negative_control()
 
@@ -152,6 +220,17 @@ def main() -> None:
     print("BIT1=NEGATE-PREDICATE")
     print("COORDINATE-OP=XOR")
     print("SEMANTIC-OP=ACTION-COMPOSITION")
+
+    print("FAMILY=SELECTOR-PATH")
+    print("CLASS=B3")
+    print(f"NAMING-COMPATIBILITY-CASES={selector_names}")
+    print(f"SEMANTIC-BIT-CASES={selector_bits}")
+    print(f"CONCAT-COMPOSITION-CASES={selector_comp}")
+    print("BIT0=CAR")
+    print("BIT1=CDR")
+    print("COORDINATE-OP=BITSTRING-CONCAT")
+    print("SEMANTIC-OP=FUNCTION-COMPOSITION")
+    print("LAW=T(p||q)=T(p)∘T(q)")
 
     print("FAMILY=MOBIUS-P1Q")
     print("CLASS=B1")
