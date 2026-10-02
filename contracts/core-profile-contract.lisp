@@ -67,6 +67,8 @@
   ((identity . public-api-discovery)
    (current-source . "lib/core.lisp")
    (historical-source . "lib/core1.lisp")
+   (historical-source . "lib/core1-compiler-sid-resolver.lisp")
+   (historical-source . "lib/core1-sid8-bootstrap-overlay.lisp")
    (historical-source . "lib/core2.lisp")
    (laboratory-source . "lib/core3.lisp")
    (former-source . "lib/core4.lisp"))
