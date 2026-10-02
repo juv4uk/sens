@@ -132,6 +132,75 @@ def verify_selector_b3() -> tuple[int, int, int]:
     return naming_cases, semantic_bit_cases, composition_cases
 
 
+
+def predicate_affine(code: int, x: int) -> int:
+    """2-bit coordinate ab for f(x) = (a & x) ^ b."""
+    a = (code >> 1) & 1
+    b = code & 1
+    return (a & x) ^ b
+
+
+def compose_predicate_affine(outer: int, inner: int) -> int:
+    """Coordinate of outer(inner(x))."""
+    a = (outer >> 1) & 1
+    b = outer & 1
+    c = (inner >> 1) & 1
+    d = inner & 1
+    new_a = a & c
+    new_b = (a & d) ^ b
+    return (new_a << 1) | new_b
+
+
+def verify_predicate_affine_b3() -> tuple[int, int, int, int]:
+    codes = (0b00, 0b01, 0b10, 0b11)
+    composition_cases = 0
+    bijection_cases = 0
+    identity_cases = 0
+    not_involution_cases = 0
+
+    truth_tables = {}
+    for code in codes:
+        table = tuple(predicate_affine(code, x) for x in (0, 1))
+        truth_tables[code] = table
+        bijection_cases += 1
+    assert len(set(truth_tables.values())) == 4
+    assert truth_tables == {
+        0b00: (0, 0),
+        0b01: (1, 1),
+        0b10: (0, 1),
+        0b11: (1, 0),
+    }
+
+    identity = 0b10
+    negation = 0b11
+
+    for outer, inner, x in product(codes, codes, (0, 1)):
+        composed = compose_predicate_affine(outer, inner)
+        lhs = predicate_affine(composed, x)
+        rhs = predicate_affine(outer, predicate_affine(inner, x))
+        assert lhs == rhs, (outer, inner, x, composed, lhs, rhs)
+        composition_cases += 1
+
+    for code in codes:
+        assert compose_predicate_affine(identity, code) == code
+        assert compose_predicate_affine(code, identity) == code
+        identity_cases += 2
+
+    assert compose_predicate_affine(negation, negation) == identity
+    for x in (0, 1):
+        assert predicate_affine(
+            compose_predicate_affine(negation, negation), x
+        ) == x
+        not_involution_cases += 1
+
+    return (
+        composition_cases,
+        bijection_cases,
+        identity_cases,
+        not_involution_cases,
+    )
+
+
 Matrix = tuple[Fraction, Fraction, Fraction, Fraction]
 INF = "inf"
 MI: Matrix = (Fraction(1), Fraction(0), Fraction(0), Fraction(1))
@@ -209,6 +278,12 @@ def arbitrary_label_negative_control() -> int:
 def main() -> None:
     order_rel, order_comp = verify_order_b3()
     selector_names, selector_bits, selector_comp = verify_selector_b3()
+    (
+        pred_affine_comp,
+        pred_affine_bijection,
+        pred_affine_identity,
+        pred_affine_not,
+    ) = verify_predicate_affine_b3()
     mobius_comp = verify_mobius_b1()
     negative = arbitrary_label_negative_control()
 
@@ -231,6 +306,17 @@ def main() -> None:
     print("COORDINATE-OP=BITSTRING-CONCAT")
     print("SEMANTIC-OP=FUNCTION-COMPOSITION")
     print("LAW=T(p||q)=T(p)∘T(q)")
+
+    print("FAMILY=PREDICATEBIT-AFFINE")
+    print("CLASS=B3")
+    print(f"COMPOSITION-CASES={pred_affine_comp}")
+    print(f"BIJECTION-CASES={pred_affine_bijection}")
+    print(f"IDENTITY-LAW-CASES={pred_affine_identity}")
+    print(f"NOT-INVOLUTION-CASES={pred_affine_not}")
+    print("COORDINATE=ab")
+    print("SEMANTICS=f_ab(x)=(a&x)^b")
+    print("COORDINATE-COMPOSITION=(a&c,(a&d)^b)")
+    print("SEMANTIC-OP=UNARY-FUNCTION-COMPOSITION")
 
     print("FAMILY=MOBIUS-P1Q")
     print("CLASS=B1")
