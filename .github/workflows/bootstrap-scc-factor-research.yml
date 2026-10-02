@@ -1,0 +1,24 @@
+name: Bootstrap SCC factor research
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/function-status-census.json"
+      - "lib/core1.lisp"
+      - "scripts/research-2395-bootstrap-scc-factor.py"
+      - ".github/workflows/bootstrap-scc-factor-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scc-factor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Factor current UNKNOWN bootstrap dependency graph
+        run: python3 scripts/research-2395-bootstrap-scc-factor.py
