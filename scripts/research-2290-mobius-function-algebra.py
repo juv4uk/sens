@@ -25,6 +25,7 @@ Q = tuple(sorted({
     for n in range(-3, 4)
     for d in range(1, 4)
 }))
+INF = "∞"
 COEFFS = tuple(Fraction(n) for n in range(-2, 3))
 
 
@@ -45,10 +46,25 @@ def mul(a: Matrix, b: Matrix) -> Matrix:
 
 
 def apply(m: Matrix, x: Fraction) -> Fraction | None:
+    """Finite-Q partial semantics."""
     a,b,c,d = m
     den = c*x + d
     if den == 0:
         return None
+    return (a*x + b) / den
+
+
+def apply_p1(m: Matrix, x: Fraction | str) -> Fraction | str:
+    """Projective-line semantics Q ∪ {∞} for invertible matrices."""
+    a,b,c,d = m
+    if x == INF:
+        if c == 0:
+            return INF
+        return a / c
+    assert isinstance(x, Fraction)
+    den = c*x + d
+    if den == 0:
+        return INF
     return (a*x + b) / den
 
 
@@ -133,22 +149,42 @@ def verify_projective() -> int:
     return cases
 
 
-def verify_composition() -> tuple[int,int]:
-    exact = 0
-    undefined = 0
+def verify_composition() -> tuple[int,int,int,int]:
+    finite_common = 0
+    finite_pole = 0
+    pole_recovered_via_infinity = 0
+    projective_cases = 0
     sample = MS[:80]
+    p1_inputs = Q + (INF,)
+
     for a,b in product(sample, repeat=2):
         ab = mul(a,b)
+
         for x in Q:
             bx = apply(b,x)
             lhs = None if bx is None else apply(a,bx)
             rhs = apply(ab,x)
-            assert lhs == rhs, (a,b,x,lhs,rhs)
             if lhs is None:
-                undefined += 1
+                finite_pole += 1
+                if rhs is not None:
+                    pole_recovered_via_infinity += 1
             else:
-                exact += 1
-    return exact, undefined
+                assert lhs == rhs, (a,b,x,lhs,rhs)
+                finite_common += 1
+
+        for x in p1_inputs:
+            lhs_p1 = apply_p1(a, apply_p1(b,x))
+            rhs_p1 = apply_p1(ab,x)
+            assert lhs_p1 == rhs_p1, (a,b,x,lhs_p1,rhs_p1)
+            projective_cases += 1
+
+    assert pole_recovered_via_infinity > 0
+    return (
+        finite_common,
+        finite_pole,
+        pole_recovered_via_infinity,
+        projective_cases,
+    )
 
 
 def verify_inverse() -> tuple[int,int]:
@@ -185,20 +221,29 @@ def verify_decomposition() -> tuple[int,int]:
 
 def main() -> None:
     projective = verify_projective()
-    comp_exact, comp_undefined = verify_composition()
+    (
+        comp_finite_common,
+        comp_finite_poles,
+        comp_pole_recovered,
+        comp_projective,
+    ) = verify_composition()
     inv_exact, inv_undefined = verify_inverse()
     dec_m, dec_v = verify_decomposition()
 
     print(f"Q-CORPUS={len(Q)}")
     print(f"PROJECTIVE-CLASSES={len(MS)}")
     print(f"PROJECTIVE-EQUIVALENCE-CASES={projective}")
-    print(f"COMPOSITION-EXACT-CASES={comp_exact}")
-    print(f"COMPOSITION-UNDEFINED-PARITY-CASES={comp_undefined}")
+    print(f"FINITE-Q-COMPOSITION-COMMON-DOMAIN-CASES={comp_finite_common}")
+    print(f"FINITE-Q-INTERMEDIATE-POLE-CASES={comp_finite_poles}")
+    print(f"FINITE-Q-POLE-RECOVERED-VIA-INFINITY={comp_pole_recovered}")
+    print(f"P1-COMPOSITION-CASES={comp_projective}")
     print(f"INVERSE-EXACT-CASES={inv_exact}")
     print(f"INVERSE-UNDEFINED-INPUTS={inv_undefined}")
     print(f"DECOMPOSITION-MATRIX-CASES={dec_m}")
     print(f"DECOMPOSITION-VALUE-CASES={dec_v}")
-    print("LAW=T_A∘T_B=T_(A*B)")
+    print("LAW-P1=T_A∘T_B=T_(A*B)")
+    print("FINITE-Q-BOUNDARY=NOT-CLOSED-UNDER-MOBIUS-COMPOSITION")
+    print("NATURAL-CARRIER=P1(Q)=Q∪{∞}")
     print("GENERATORS=TRANSLATION,SCALING,RECIPROCAL")
     print("COORDINATE=PROJECTIVE-2X2-EXACT-Q-MATRIX")
     print("STATUS=PASS-BOUNDED-MOBIUS-FUNCTION-ALGEBRA")
