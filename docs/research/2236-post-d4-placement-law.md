@@ -38,6 +38,41 @@ The search order is:
 
 Empty addresses are a successful result.
 
+## Observable delta vector
+
+Before a child may consume one extra bit, the proposed parent/child relation
+must name the independent observable changes.
+
+For a one-bit child:
+
+```text
+same base object = yes
+independent delta axes = exactly 1
+```
+
+This is not a global semantic-distance metric. It is a local falsifier after a
+parent relation has already been proposed.
+
+Current LABEL comparison:
+
+```text
+LAMBDA -> LABEL
+  base object: closure/callable
+  delta axes: local-self-binding
+  count: 1
+
+DEFINE -> LABEL
+  base object: persistent binding operation -> closure value
+  delta axes:
+    base-object-kind
+    binding-lifetime
+    local-self-reference
+  count: >1
+```
+
+Therefore the DEFINE counterplacement does not currently qualify as a one-bit
+generated child.
+
 ## Bit orientation
 
 The D4 weak polarity may be reused only where the executable relation fits:
