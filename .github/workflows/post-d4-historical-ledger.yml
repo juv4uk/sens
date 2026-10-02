@@ -1,0 +1,61 @@
+name: Post-D4 historical capability ledger
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "docs/research/2344-post-d4-historical-ledger.md"
+      - "docs/research/2344-post-d4-historical-ledger.uk.md"
+      - "scripts/research-2344-historical-ledger.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/post-d4-historical-ledger.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "docs/research/2344-post-d4-historical-ledger.md"
+      - "docs/research/2344-post-d4-historical-ledger.uk.md"
+      - "scripts/research-2344-historical-ledger.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/post-d4-historical-ledger.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Chronological post-D4 capability ledger
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full evidence history
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate historical ledger
+        run: |
+          python3 scripts/research-2344-historical-ledger.py \
+            --summary-json post-d4-historical-ledger-summary.json
+          cat post-d4-historical-ledger-summary.json
+
+      - name: Publish summary
+        run: |
+          {
+            echo "## Post-D4 historical capability ledger"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2344-historical-ledger.py
+            echo "~~~"
+            echo
+            echo "- Resolved rows must cite a commit that exists in git history."
+            echo "- UNRESOLVED rows cannot allocate an address."
+            echo "- Placement remains blocked until chronology reaches a surviving new capability."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload raw summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-d4-historical-ledger-summary
+          path: post-d4-historical-ledger-summary.json
