@@ -39,6 +39,20 @@ fn width_at(case: &str, index: usize) -> Option<u8> {
     Some(width)
 }
 
+fn fixed_width(case: &str) -> Option<u8> {
+    match case {
+        "w1" => Some(1),
+        "w2" => Some(2),
+        "w3" => Some(3),
+        "w4" => Some(4),
+        "w5" => Some(5),
+        "w6" => Some(6),
+        "w7" => Some(7),
+        "w8" => Some(8),
+        _ => None,
+    }
+}
+
 fn build_words(case: &str, count: usize) -> Option<Vec<Word>> {
     let mut words = Vec::with_capacity(count);
     let mut state = 0x9e37_79b9_u32 ^ count as u32;
@@ -202,13 +216,18 @@ fn random_packed(
     words: &[Word],
     packed: &PackedBitstream,
     offsets: &[usize],
+    fixed_width: Option<u8>,
     indices: &[usize],
     repeats: usize,
 ) -> u64 {
     let mut checksum = 0u64;
     for rep in 0..repeats {
         for &index in indices {
-            let raw = read_word(packed, offsets[index], words[index].width);
+            let offset = match fixed_width {
+                Some(width) => index * width as usize,
+                None => offsets[index],
+            };
+            let raw = read_word(packed, offset, words[index].width);
             checksum = checksum
                 .wrapping_mul(33)
                 .wrapping_add(black_box(raw) as u64)
@@ -311,7 +330,10 @@ fn main() -> ExitCode {
             (len as u64, 0usize, len, 0usize, index_bytes)
         }
         "prepare-random-packed" => {
-            let (packed, offsets) = pack_words_with_offsets(&words);
+            let (packed, offsets) = match fixed_width(&case) {
+                Some(_) => (pack_words(&words), Vec::new()),
+                None => pack_words_with_offsets(&words),
+            };
             let indices = build_random_indices(count, random_accesses);
             let packed_bytes = packed.byte_len();
             let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
@@ -326,19 +348,18 @@ fn main() -> ExitCode {
             )
         }
         "prepare-random-cached" => {
-            let (packed, offsets) = pack_words_with_offsets(&words);
+            let packed = pack_words(&words);
             let cache = decode_cache(&words, &packed);
             let indices = build_random_indices(count, random_accesses);
             let packed_bytes = packed.byte_len();
             let cache_bytes = cache.len();
-            let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
             let index_bytes = indices.len() * std::mem::size_of::<usize>();
-            black_box((&cache, &offsets, &indices));
+            black_box((&cache, &indices));
             (
                 cache_bytes as u64,
                 packed_bytes,
                 cache_bytes,
-                offset_bytes,
+                0usize,
                 index_bytes,
             )
         }
@@ -350,24 +371,27 @@ fn main() -> ExitCode {
             (checksum, 0usize, bytes.len(), 0usize, index_bytes)
         }
         "random-packed" => {
-            let (packed, offsets) = pack_words_with_offsets(&words);
+            let fixed = fixed_width(&case);
+            let (packed, offsets) = match fixed {
+                Some(_) => (pack_words(&words), Vec::new()),
+                None => pack_words_with_offsets(&words),
+            };
             let indices = build_random_indices(count, random_accesses);
             let packed_bytes = packed.byte_len();
             let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
             let index_bytes = indices.len() * std::mem::size_of::<usize>();
-            let checksum = random_packed(&words, &packed, &offsets, &indices, repeats);
+            let checksum = random_packed(&words, &packed, &offsets, fixed, &indices, repeats);
             (checksum, packed_bytes, 0usize, offset_bytes, index_bytes)
         }
         "random-cached" => {
-            let (packed, offsets) = pack_words_with_offsets(&words);
+            let packed = pack_words(&words);
             let cache = decode_cache(&words, &packed);
             let indices = build_random_indices(count, random_accesses);
             let packed_bytes = packed.byte_len();
             let cache_bytes = cache.len();
-            let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
             let index_bytes = indices.len() * std::mem::size_of::<usize>();
             let checksum = random_cache(&cache, &indices, repeats);
-            (checksum, packed_bytes, cache_bytes, offset_bytes, index_bytes)
+            (checksum, packed_bytes, cache_bytes, 0usize, index_bytes)
         }
         _ => {
             eprintln!("unknown mode: {mode}");
