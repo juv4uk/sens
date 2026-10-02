@@ -521,6 +521,346 @@
       "provenance": "#2263/#2280",
       "counterexample_class": "coordinate reconstruction that needs an independent LCM lookup",
       "independence_evidence": "UNKNOWN: must be resolved by derivation/remove-one attack before an exact local-grammar total is claimed"
+    },
+    {
+      "id": "sel.carrier.selector-family",
+      "kind": "carrier-premise",
+      "accounting_class": "semantic",
+      "claim": "selector semantics is a typed family of repeated first/rest projection composition over pair/list structure",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector witness whose repeated projection path cannot be replayed on the declared carrier",
+      "independence_evidence": "UNKNOWN: family premise is required by these models but no remove-one/minimality theorem proves it independently necessary"
+    },
+    {
+      "id": "sel.op.101",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact D3 identity 101 denotes first projection within the selector family",
+      "domain": "Pair -> Value",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2151/#2329",
+      "status": "confirmed",
+      "provenance": "#1968/#2151/#2329",
+      "counterexample_class": "admitted pair where identity 101 does not return the first component",
+      "independence_evidence": "UNKNOWN: CAR participates in the admitted generator basis, but global root independence remains under #2019 attack"
+    },
+    {
+      "id": "sel.op.110",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact D3 identity 110 denotes rest projection within the selector family",
+      "domain": "Pair -> Value",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2151/#2329",
+      "status": "confirmed",
+      "provenance": "#1968/#2151/#2329",
+      "counterexample_class": "admitted pair where identity 110 does not return the rest component",
+      "independence_evidence": "UNKNOWN: CDR participates in the admitted generator basis, but global root independence remains under #2019 attack"
+    },
+    {
+      "id": "sel.law.extend-a",
+      "kind": "law",
+      "accounting_class": "semantic",
+      "claim": "within the selector family, extend-A composes the current selector result with first projection",
+      "domain": "Selector -> Selector",
+      "applies_to": [
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family",
+        "sel.op.101"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345/#2366",
+      "counterexample_class": "generated selector descendant whose semantic replay differs from first-projection extension",
+      "independence_evidence": "UNKNOWN: executable law is admitted, but remove-one/minimality evidence has not proved it independently necessary"
+    },
+    {
+      "id": "sel.law.extend-d",
+      "kind": "law",
+      "accounting_class": "semantic",
+      "claim": "within the selector family, extend-D composes the current selector result with rest projection",
+      "domain": "Selector -> Selector",
+      "applies_to": [
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family",
+        "sel.op.110"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345/#2366",
+      "counterexample_class": "generated selector descendant whose semantic replay differs from rest-projection extension",
+      "independence_evidence": "UNKNOWN: executable law is admitted, but remove-one/minimality evidence has not proved it independently necessary"
+    },
+    {
+      "id": "sel.op.1010",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 1010 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 1010 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.1011",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 1011 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 1011 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.1100",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 1100 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 1100 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.1101",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 1101 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 1101 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.10100",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 10100 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 10100 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.10101",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 10101 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 10101 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.10110",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 10110 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 10110 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.10111",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 10111 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 10111 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.11000",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 11000 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 11000 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.11001",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 11001 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 11001 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.11010",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 11010 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 11010 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.op.11011",
+      "kind": "operation",
+      "accounting_class": "semantic",
+      "claim": "exact identity 11011 is the selector behavior reconstructed from its admitted parent by one selector extension law",
+      "domain": "typed selector carrier",
+      "applies_to": [
+        "selector-flat-current",
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.carrier.selector-family"
+      ],
+      "witness": "#1968/#2329/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#1968/#2329/#2345",
+      "counterexample_class": "selector corpus case where exact identity 11011 differs from its certified projection path",
+      "independence_evidence": "derived in selector-root-law-current; explicit-row independence is UNKNOWN in selector-flat-current"
+    },
+    {
+      "id": "sel.cert.root-law-path",
+      "kind": "certificate",
+      "accounting_class": "proof",
+      "claim": "root choice plus selector law path reconstructs exact D3-D8 selector identities and fails closed on malformed certificates",
+      "domain": "selector certificate family v1",
+      "applies_to": [
+        "selector-root-law-current"
+      ],
+      "dependencies": [
+        "sel.law.extend-a",
+        "sel.law.extend-d"
+      ],
+      "witness": "#2323/#2345",
+      "status": "bounded-confirmed",
+      "provenance": "#2323/#2345",
+      "counterexample_class": "valid selector identity that cannot be replayed or malformed certificate that is accepted",
+      "independence_evidence": "proof artifact only; never counted as an independent semantic fact"
     }
   ],
   "models": [
@@ -711,6 +1051,171 @@
       ],
       "binary_participation": "B1",
       "binary_participation_note": "typed local coordinate exists, but no per-bit executable semantic action or bit-operation homomorphism is admitted by this control"
+    },
+    {
+      "id": "selector-flat-current",
+      "corpus": "current selector corpus: CAR/CDR plus admitted generated D4/D5 selector identities as explicit semantic rows",
+      "independent_facts": [],
+      "unknown_facts": [
+        "sel.carrier.selector-family",
+        "sel.op.101",
+        "sel.op.110",
+        "sel.op.1010",
+        "sel.op.1011",
+        "sel.op.1100",
+        "sel.op.1101",
+        "sel.op.10100",
+        "sel.op.10101",
+        "sel.op.10110",
+        "sel.op.10111",
+        "sel.op.11000",
+        "sel.op.11001",
+        "sel.op.11010",
+        "sel.op.11011"
+      ],
+      "derived_facts": [],
+      "covers": [
+        "sel.op.101",
+        "sel.op.110",
+        "sel.op.1010",
+        "sel.op.1011",
+        "sel.op.1100",
+        "sel.op.1101",
+        "sel.op.10100",
+        "sel.op.10101",
+        "sel.op.10110",
+        "sel.op.10111",
+        "sel.op.11000",
+        "sel.op.11001",
+        "sel.op.11010",
+        "sel.op.11011"
+      ],
+      "expected_semantic_fact_interval": [
+        0,
+        15
+      ],
+      "binary_participation": "B1",
+      "binary_participation_note": "exact coordinates are visible, but no per-bit semantic action is needed by the flat-row model"
+    },
+    {
+      "id": "selector-root-law-current",
+      "corpus": "same current selector corpus reconstructed from local projection basis plus semantic extend-A/extend-D laws",
+      "independent_facts": [],
+      "unknown_facts": [
+        "sel.carrier.selector-family",
+        "sel.op.101",
+        "sel.op.110",
+        "sel.law.extend-a",
+        "sel.law.extend-d"
+      ],
+      "derived_facts": [
+        {
+          "target": "sel.op.1010",
+          "via": [
+            "sel.op.101",
+            "sel.law.extend-a"
+          ]
+        },
+        {
+          "target": "sel.op.1011",
+          "via": [
+            "sel.op.101",
+            "sel.law.extend-d"
+          ]
+        },
+        {
+          "target": "sel.op.1100",
+          "via": [
+            "sel.op.110",
+            "sel.law.extend-a"
+          ]
+        },
+        {
+          "target": "sel.op.1101",
+          "via": [
+            "sel.op.110",
+            "sel.law.extend-d"
+          ]
+        },
+        {
+          "target": "sel.op.10100",
+          "via": [
+            "sel.op.1010",
+            "sel.law.extend-a"
+          ]
+        },
+        {
+          "target": "sel.op.10101",
+          "via": [
+            "sel.op.1010",
+            "sel.law.extend-d"
+          ]
+        },
+        {
+          "target": "sel.op.10110",
+          "via": [
+            "sel.op.1011",
+            "sel.law.extend-a"
+          ]
+        },
+        {
+          "target": "sel.op.10111",
+          "via": [
+            "sel.op.1011",
+            "sel.law.extend-d"
+          ]
+        },
+        {
+          "target": "sel.op.11000",
+          "via": [
+            "sel.op.1100",
+            "sel.law.extend-a"
+          ]
+        },
+        {
+          "target": "sel.op.11001",
+          "via": [
+            "sel.op.1100",
+            "sel.law.extend-d"
+          ]
+        },
+        {
+          "target": "sel.op.11010",
+          "via": [
+            "sel.op.1101",
+            "sel.law.extend-a"
+          ]
+        },
+        {
+          "target": "sel.op.11011",
+          "via": [
+            "sel.op.1101",
+            "sel.law.extend-d"
+          ]
+        }
+      ],
+      "covers": [
+        "sel.op.101",
+        "sel.op.110",
+        "sel.op.1010",
+        "sel.op.1011",
+        "sel.op.1100",
+        "sel.op.1101",
+        "sel.op.10100",
+        "sel.op.10101",
+        "sel.op.10110",
+        "sel.op.10111",
+        "sel.op.11000",
+        "sel.op.11001",
+        "sel.op.11010",
+        "sel.op.11011"
+      ],
+      "expected_semantic_fact_interval": [
+        0,
+        5
+      ],
+      "binary_participation": "B2",
+      "binary_participation_note": "within the selector family, path choices carry executable first/rest projection meaning; #2366 keeps append-bit arithmetic classified only as canonical-coordinate law"
     }
   ],
   "binary_participation_classes": {
