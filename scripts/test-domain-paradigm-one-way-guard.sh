@@ -14,7 +14,7 @@ fail() {
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 repo="$tmp/repo"
-mkdir -p "$repo/crates/sens/src"
+mkdir -p "$repo/crates/sens/src" "$repo/crates/sens/examples" "$repo/crates/sens/tests"
 cd "$repo"
 
 git init -q
@@ -108,10 +108,54 @@ pub fn bad_mix(_: &PackedBitstream, _: Sens8) {}
 EOF
 }
 
+green_exact_example() {
+  mkdir -p crates/sens/examples
+  cat > crates/sens/examples/exact.rs <<'EOF'
+use sens::PackedBitstream;
+
+fn observe(_: &PackedBitstream) {}
+fn main() {}
+EOF
+}
+
+green_compat_example() {
+  mkdir -p crates/sens/examples
+  cat > crates/sens/examples/compat.rs <<'EOF'
+use sens::Sid8;
+
+fn compatibility_only(_: Sid8) {}
+fn main() {}
+EOF
+}
+
+red_exact_example_legacy() {
+  mkdir -p crates/sens/examples
+  cat > crates/sens/examples/exact_bad.rs <<'EOF'
+use sens::{Function8, PackedBitstream};
+
+fn bad(_: &PackedBitstream, _: Function8) {}
+fn main() {}
+EOF
+}
+
+red_exact_test_legacy() {
+  mkdir -p crates/sens/tests
+  cat > crates/sens/tests/exact_bad.rs <<'EOF'
+use sens::{BinarySourceWord, Sid8};
+
+#[test]
+fn bad(_: BinarySourceWord, _: Sid8) {}
+EOF
+}
+
 run_guard_expect_green exact-width-growth green_exact_growth
 run_guard_expect_green compatibility-growth green_compat_growth
 run_guard_expect_green historical-comment green_historical_comment
+run_guard_expect_green exact-example green_exact_example
+run_guard_expect_green compat-example green_compat_example
 run_guard_expect_red legacy-import red_legacy_import
 run_guard_expect_red mixed-new-file red_mixed_new_file
+run_guard_expect_red exact-example-legacy red_exact_example_legacy
+run_guard_expect_red exact-test-legacy red_exact_test_legacy
 
 echo "domain-paradigm-one-way self-test: PASS"
