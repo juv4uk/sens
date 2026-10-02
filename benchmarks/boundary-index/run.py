@@ -56,6 +56,9 @@ def candidates_for(case: str, ks: tuple[int, ...], explicit: tuple[str, ...] | N
     if not case.startswith("w"):
         for k in ks:
             out.append(f"cp8-{k}")
+        if case == "d1234":
+            for k in ks:
+                out.append(f"cp2-{k}")
         for k in ks:
             out.append(f"cp3-{k}")
     else:
@@ -302,7 +305,8 @@ def main() -> int:
         "- formula: fixed-width negative control; no boundary metadata;",
         "- usize/u32: full per-word start-offset tables; width is inferred from adjacent offsets;",
         "- cp8-K: u32 checkpoint every K words + one-byte width stream;",
-        "- cp3-K: u32 checkpoint every K words + packed 3-bit (width-1) stream;",
+        "- cp2-K: D1-D4-only u32 checkpoint every K words + packed 2-bit (width-1) stream;",
+        "- cp3-K: generic W1..W8 u32 checkpoint every K words + packed 3-bit (width-1) stream;",
         "- cache2: decoded exact hot cache storing one width byte + one raw byte per word; packed payload may be cold/discarded.",
         "",
         "Pareto means non-dominated on (active bytes, query I/access) only. No weighted score is used.",
