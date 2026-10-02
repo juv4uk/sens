@@ -231,7 +231,8 @@ FIELDS = [
 
 
 def render_json(data: dict[str, object]) -> str:
-    return json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    # Preserve deterministic construction order used by the committed artifact.
+    return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
 
 def render_tsv(data: dict[str, object]) -> str:
@@ -239,7 +240,13 @@ def render_tsv(data: dict[str, object]) -> str:
     writer = csv.DictWriter(out, fieldnames=FIELDS, delimiter="\t", lineterminator="\n")
     writer.writeheader()
     for row in data["rows"]:
-        writer.writerow({field: row.get(field, "") for field in FIELDS})
+        rendered = {}
+        for field in FIELDS:
+            value = row.get(field, "")
+            if isinstance(value, bool):
+                value = "true" if value else "false"
+            rendered[field] = value
+        writer.writerow(rendered)
     return out.getvalue()
 
 
