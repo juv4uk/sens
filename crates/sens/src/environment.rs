@@ -535,6 +535,166 @@ mod tests {
         assert_eq!(root.get("x"), Some(Value::Number(2.0, Exactness::Exact)));
     }
 
+    /// Research-only #2402 countermodel.
+    ///
+    /// This deliberately lives inside the test module so no production SET/SETQ
+    /// mechanism or language-visible mutation API is introduced. It walks the
+    /// same Environment graph that closures capture and updates the nearest
+    /// already-existing binding instead of constructing a shadow.
+    fn update_nearest_existing_for_research(
+        environment: &Environment,
+        name: &str,
+        value: Value,
+    ) -> bool {
+        let mut frame = Rc::clone(&environment.0);
+
+        loop {
+            let parent = {
+                let mut current = frame.borrow_mut();
+
+                if let Some(index) = current.slot_index(name) {
+                    current.slots[index] = value;
+                    return true;
+                }
+
+                if let Some(existing) = current.values.get_mut(name) {
+                    *existing = value;
+                    return true;
+                }
+
+                current
+                    .parent
+                    .as_ref()
+                    .map(|parent| Rc::clone(&parent.0))
+            };
+
+            match parent {
+                Some(parent) => frame = parent,
+                None => return false,
+            }
+        }
+    }
+
+    #[test]
+    fn nearest_existing_update_is_observably_different_from_child_define_shadowing() {
+        let root = Environment::root();
+        root.define("x", Value::Number(1.0, Exactness::Exact));
+
+        // A closure captures exactly an Environment handle. The body is not
+        // needed for this lower-bound witness: the observable under test is
+        // which captured binding/location the closure would resolve.
+        let observer = Closure {
+            parameters: Vec::new(),
+            rest: None,
+            body: Rc::from(Vec::<crate::syntax::Expr>::new()),
+            environment: root.clone(),
+            slot_names: Rc::from(Vec::<Rc<str>>::new()),
+            pure: true,
+            resolved: None,
+        };
+
+        let child = root.child();
+        child.define("x", Value::Number(2.0, Exactness::Exact));
+
+        assert_eq!(
+            child.get("x"),
+            Some(Value::Number(2.0, Exactness::Exact)),
+            "D4 child DEFINE sees its new shadow"
+        );
+        assert_eq!(
+            observer.environment.get("x"),
+            Some(Value::Number(1.0, Exactness::Exact)),
+            "a closure created before the child shadow still sees the parent location"
+        );
+
+        // Independent graph with the same initial shape, but the candidate
+        // operation updates the nearest existing location instead of creating
+        // a child binding.
+        let root = Environment::root();
+        root.define("x", Value::Number(1.0, Exactness::Exact));
+        let observer = Closure {
+            parameters: Vec::new(),
+            rest: None,
+            body: Rc::from(Vec::<crate::syntax::Expr>::new()),
+            environment: root.clone(),
+            slot_names: Rc::from(Vec::<Rc<str>>::new()),
+            pure: true,
+            resolved: None,
+        };
+        let child = root.child();
+
+        assert!(update_nearest_existing_for_research(
+            &child,
+            "x",
+            Value::Number(2.0, Exactness::Exact)
+        ));
+
+        assert_eq!(
+            child.get("x"),
+            Some(Value::Number(2.0, Exactness::Exact)),
+            "the caller sees NEW through inherited lookup"
+        );
+        assert_eq!(
+            observer.environment.get("x"),
+            Some(Value::Number(2.0, Exactness::Exact)),
+            "the pre-existing closure sees NEW because the same parent location changed"
+        );
+        assert!(
+            !child.0.borrow().values.contains_key("x"),
+            "nearest-existing mutation must not create a child shadow"
+        );
+    }
+
+    #[test]
+    fn nearest_existing_update_chooses_the_nearest_location_in_a_deep_chain() {
+        let root = Environment::root();
+        root.define("x", Value::Number(1.0, Exactness::Exact));
+
+        let middle = root.child();
+        middle.define("x", Value::Number(2.0, Exactness::Exact));
+
+        let leaf = middle.child();
+
+        assert!(update_nearest_existing_for_research(
+            &leaf,
+            "x",
+            Value::Number(3.0, Exactness::Exact)
+        ));
+
+        assert_eq!(
+            leaf.get("x"),
+            Some(Value::Number(3.0, Exactness::Exact))
+        );
+        assert_eq!(
+            middle.get("x"),
+            Some(Value::Number(3.0, Exactness::Exact)),
+            "nearest existing middle location changed"
+        );
+        assert_eq!(
+            root.get("x"),
+            Some(Value::Number(1.0, Exactness::Exact)),
+            "farther shadowed parent location is untouched"
+        );
+        assert!(
+            !leaf.0.borrow().values.contains_key("x"),
+            "no leaf binding is created"
+        );
+    }
+
+    #[test]
+    fn nearest_existing_update_fails_closed_when_no_binding_exists() {
+        let root = Environment::root();
+        let leaf = root.child().child();
+
+        assert!(!update_nearest_existing_for_research(
+            &leaf,
+            "missing",
+            Value::Number(9.0, Exactness::Exact)
+        ));
+        assert_eq!(leaf.get("missing"), None);
+        assert_eq!(root.get("missing"), None);
+    }
+
     #[test]
     fn host_policies_are_unrestricted_by_default_and_shared_with_children() {
         let root = Environment::root();
