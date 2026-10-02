@@ -244,6 +244,8 @@ def render_tsv(data: dict[str, object]) -> str:
             value = row.get(field, "")
             if isinstance(value, bool):
                 value = "true" if value else "false"
+            if value == "":
+                value = "-"
             rendered[field] = value
         writer.writerow(rendered)
     return out.getvalue()
