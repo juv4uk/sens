@@ -27,6 +27,7 @@ import csv
 from hashlib import sha256
 import importlib.util
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +57,7 @@ def load_donor_module():
     spec = importlib.util.spec_from_file_location("core_math_growth_2433", DONOR_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
