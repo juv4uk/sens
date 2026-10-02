@@ -17,7 +17,7 @@
         "neg_one"
       ],
       "depth": 1,
-      "expression_sha256": "6f8ad87217d78faf57b72c05b26f676f58c3e34ca3510689ee4bed193ce58890",
+      "expression_sha256": "9afc5843b7bccae63e55a3df1f60f02bda36d5ba8257f54de7a3d3b583d9925f",
       "generated_dependencies": [],
       "operation_ref": "neg",
       "partiality": "total",
@@ -30,7 +30,7 @@
       ],
       "constant_dependencies": [],
       "depth": 1,
-      "expression_sha256": "5d75896964f2944836c54e64077df0834e4184f9c1be5c9ee2c1b3cd0dc82c33",
+      "expression_sha256": "b64c2cff323e6e967fa0f29a0beae59cbce4949a985f308b62db7e4835c43fed",
       "generated_dependencies": [],
       "operation_ref": "div",
       "partiality": "undefined-when-y-zero",
@@ -42,7 +42,7 @@
       ],
       "constant_dependencies": [],
       "depth": 2,
-      "expression_sha256": "8c1906b7755999736a08cf41ed9d1f250a0f89996f6857599bf0a581dc59a989",
+      "expression_sha256": "77ee0aea8080eb4794ea14a577effad3be86c4d9690634875c30110946529607",
       "generated_dependencies": [
         "neg"
       ],
@@ -96,7 +96,7 @@
   ],
   "metrics": {
     "autodiscovered_operation_rules": 0,
-    "certificate_bytes_canonical_rows": 1103,
+    "certificate_bytes_canonical_rows": 891,
     "closure_operation_count": 6,
     "declared_generation_rules": 3,
     "generated_operations": 3,
