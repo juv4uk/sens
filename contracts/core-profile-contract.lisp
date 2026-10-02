@@ -28,12 +28,6 @@
    (generic-truthiness . forbidden)
    (graded-predicate-answer . forbidden))
 
-  ((identity . active-core)
-   (role . current-language-core)
-   (execution-source . "lib/core.lisp")
-   (fasl-source . "lib/core.lisp.fasl")
-   (status . admitted))
-
   ((identity . core1)
    (role . bootstrap-historical-witness)
    (execution-source . "lib/core1.lisp")
