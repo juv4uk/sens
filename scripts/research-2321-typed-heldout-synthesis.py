@@ -21,6 +21,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from fractions import Fraction
 from collections import deque
+from hashlib import sha256
+import json
 from typing import Callable, Any
 
 
@@ -160,6 +162,71 @@ def target_structural(name: str) -> tuple[int, ...]:
     raise AssertionError(name)
 
 
+def stable_signature_hash(values: tuple[Any, ...]) -> str:
+    payload = json.dumps([repr(v) for v in values], separators=(",", ":"))
+    return sha256(payload.encode("utf-8")).hexdigest()
+
+
+def certificate_object(
+    target_name: str,
+    path: tuple[Morphism, ...],
+    source: str,
+    target: str,
+    corpus: tuple[Any, ...],
+) -> dict[str, Any]:
+    return {
+        "target_display": target_name,
+        "source": source,
+        "target": target,
+        "depth": len(path),
+        "path": [
+            {
+                "primitive": m.name,
+                "source": m.source,
+                "target": m.target,
+            }
+            for m in path
+        ],
+        "semantic_signature_sha256": stable_signature_hash(
+            signature(path, corpus)
+        ),
+        "authority": "research-only",
+    }
+
+
+def replay_certificate(
+    cert: dict[str, Any],
+    corpus: tuple[Any, ...],
+    expected_signature: tuple[Any, ...],
+) -> bool:
+    by_name = {m.name: m for m in PRIMITIVES}
+    current = cert["source"]
+    path: list[Morphism] = []
+
+    for edge in cert["path"]:
+        name = edge["primitive"]
+        if name not in by_name:
+            return False
+        morphism = by_name[name]
+        if edge["source"] != current:
+            return False
+        if morphism.source != edge["source"]:
+            return False
+        if morphism.target != edge["target"]:
+            return False
+        current = edge["target"]
+        path.append(morphism)
+
+    if current != cert["target"]:
+        return False
+
+    actual = signature(tuple(path), corpus)
+    if actual != expected_signature:
+        return False
+
+    return stable_signature_hash(actual) == cert["semantic_signature_sha256"]
+
+
 def certificate(path: tuple[Morphism, ...], source: str) -> str:
     current = source
     parts = []
@@ -205,17 +272,29 @@ def main() -> None:
     )
 
     found = 0
+    certificates: list[dict[str, Any]] = []
     for name, source, target, corpus, oracle, depth in positives:
         path = synthesize(source, target, corpus, oracle, depth)
         assert path is not None, name
         assert path_types_ok(path, source)
         assert signature(path, corpus) == oracle
+        cert = certificate_object(name, path, source, target, corpus)
+        assert replay_certificate(cert, corpus, oracle)
+        certificates.append(cert)
         found += 1
         print(
             f"FOUND target={name} depth={len(path)} "
             f"path={'>'.join(m.name for m in path)} "
             f"certificate={certificate(path, source)}"
         )
+
+    malformed = json.loads(json.dumps(certificates[0]))
+    malformed["path"][0]["primitive"] = "NOT"
+    assert not replay_certificate(
+        malformed,
+        ORDER_CORPUS,
+        target_order("GT"),
+    )
 
     unresolved = 0
     for name, source, target, corpus, oracle, depth in negative:
@@ -224,6 +303,12 @@ def main() -> None:
         unresolved += 1
         print(f"UNRESOLVED target={name} max_depth={depth}")
 
+    print("CERTIFICATES-JSON=" + json.dumps(
+        certificates,
+        sort_keys=True,
+        separators=(",", ":"),
+    ))
+    print("MALFORMED-CERTIFICATE-REJECTED=1")
     print(f"POSITIVE-TARGETS-FOUND={found}")
     print(f"NEGATIVE-TARGETS-UNRESOLVED={unresolved}")
     print(f"ORDER-CORPUS={len(ORDER_CORPUS)}")
