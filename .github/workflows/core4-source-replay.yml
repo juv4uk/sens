@@ -1,16 +1,16 @@
-name: Core4 source replay
+name: Core source integrity
 
 on:
   pull_request:
     paths:
       - "lib/core.lisp"
-      - "lib/core4.lisp"
+      - "lib/core.lisp.fasl"
       - ".github/workflows/core4-source-replay.yml"
   push:
     branches: [main]
     paths:
       - "lib/core.lisp"
-      - "lib/core4.lisp"
+      - "lib/core.lisp.fasl"
       - ".github/workflows/core4-source-replay.yml"
   workflow_dispatch:
 
@@ -18,31 +18,29 @@ permissions:
   contents: read
 
 jobs:
-  replay:
-    name: Current core donor replays exactly as Core4
+  verify:
+    name: Single active core artifacts exist
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Prove byte-for-byte replay
+      - name: Prove canonical source and snapshot exist
         shell: bash
         run: |
           set -euo pipefail
           test -s lib/core.lisp
-          test -s lib/core4.lisp
-          cmp --silent lib/core.lisp lib/core4.lisp
-          printf 'core donor sha256: '
+          test -s lib/core.lisp.fasl
+          printf 'core source sha256: '
           sha256sum lib/core.lisp
-          printf 'core4 replay sha256: '
-          sha256sum lib/core4.lisp
+          printf 'core fasl sha256: '
+          sha256sum lib/core.lisp.fasl
 
-      - name: Contract-8 landmarks survive replay
+      - name: No active Core4 replay authority
         shell: bash
         run: |
           set -euo pipefail
-          grep -F '(1)' lib/core4.lisp
-          grep -F '(1)' lib/core4.lisp
-          grep -F '(1)' lib/core4.lisp
+          ! grep -F 'current-profile-source . "lib/core4.lisp"' contracts/core-profile-contract.lisp
+          grep -F '(active-core-source . "lib/core.lisp")' contracts/core-profile-contract.lisp
 
       - name: Diff hygiene
         run: git diff --check
