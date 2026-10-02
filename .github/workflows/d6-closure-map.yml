@@ -1,0 +1,36 @@
+name: D6 closure map research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-closure-map/**"
+      - ".github/workflows/d6-closure-map.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-closure-map/**"
+      - ".github/workflows/d6-closure-map.yml"
+  workflow_dispatch:
+
+jobs:
+  closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build exact D6 closure map
+        run: |
+          rm -rf /tmp/d6-closure-map
+          python3 benchmarks/d6-closure-map/run.py --out /tmp/d6-closure-map
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d6-closure-map/report.md; then
+            cat /tmp/d6-closure-map/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-closure-map
+          path: /tmp/d6-closure-map/
+          retention-days: 14
