@@ -287,6 +287,25 @@ def verify_order_reversing_dualities() -> dict[str, int]:
     }
 
 
+def minimum_unique_word_bits(count: int) -> int:
+    """Minimum total bits for count distinct non-empty bounded binary words.
+
+    Prefix relations are allowed because SENS word boundaries are explicit.
+    This is an information/packing lower bound only, not semantic evidence.
+    """
+    if count < 0:
+        raise ValueError("count must be non-negative")
+    remaining = count
+    width = 1
+    total = 0
+    while remaining:
+        take = min(remaining, 1 << width)
+        total += take * width
+        remaining -= take
+        width += 1
+    return total
+
+
 def group_family_candidate() -> tuple[tuple[str, str, int], ...]:
     return (
         ("additive-root", "0", 1),
@@ -324,9 +343,18 @@ def main() -> None:
 
     total_bits = sum(width for _, _, width in placement)
     flat3_bits = 6 * 3
+    minimum_six_bits = minimum_unique_word_bits(6)
+    minimum_four_bits = minimum_unique_word_bits(4)
+    order_fixed2_bits = 4 * 2
     print(f"GROUP-FAMILY-TOTAL-IDENTITY-BITS={total_bits}")
     print(f"FLAT-3BIT-SIX-OPS-BITS={flat3_bits}")
-    print(f"IDENTITY-BIT-DELTA={total_bits-flat3_bits}")
+    print(f"MINIMUM-ARBITRARY-SIX-WORD-BITS={minimum_six_bits}")
+    print(f"IDENTITY-BIT-DELTA-VS-FLAT3={total_bits-flat3_bits}")
+    print(f"IDENTITY-BIT-DELTA-VS-ARBITRARY-MIN={total_bits-minimum_six_bits}")
+    print(f"ORDER-FIXED2-TOTAL-BITS={order_fixed2_bits}")
+    print(f"MINIMUM-ARBITRARY-FOUR-WORD-BITS={minimum_four_bits}")
+    print(f"ORDER-ACTION-COORDINATE-BIT-PREMIUM={order_fixed2_bits-minimum_four_bits}")
+    print("BIT-COST-WARNING=short identities alone are not semantic evidence")
     print("NOTE=framing/domain-tag/proof-metadata costs excluded")
 
     print("ORDER-KLEIN4-CANDIDATE:")
