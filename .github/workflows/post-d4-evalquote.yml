@@ -1,0 +1,53 @@
+name: Post-D4 EVALQUOTE derivation research
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1.lisp"
+      - "tests/fixtures/post-d4-evalquote-witness.lisp"
+      - "scripts/research-2279-evalquote.sh"
+      - ".github/workflows/post-d4-evalquote.yml"
+  push:
+    paths:
+      - "lib/core1.lisp"
+      - "tests/fixtures/post-d4-evalquote-witness.lisp"
+      - "scripts/research-2279-evalquote.sh"
+      - ".github/workflows/post-d4-evalquote.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evalquote-derived:
+    name: Pinned S0 EVALQUOTE derivation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SENS
+        uses: actions/checkout@v5
+
+      - name: Checkout pinned typed-SID8 S0 seed
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/mccarthy-eval
+          ssh-key: ${{ secrets.MCCARTHY_EVAL_SSH_KEY }}
+          persist-credentials: false
+          ref: 6031f92652066825a245c806c0773e9e524257bd
+          path: .core1-s0/mccarthy-eval
+
+      - name: Execute ordinary EVALQUOTE derivation
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        run: bash scripts/research-2279-evalquote.sh
+
+      - name: Publish summary
+        if: ${{ success() }}
+        run: |
+          echo "## #2279 ordinary EVALQUOTE derivation" >> "$GITHUB_STEP_SUMMARY"
+          echo "- pinned S0 seed: 6031f926..." >> "$GITHUB_STEP_SUMMARY"
+          echo "- EVAL + APPLY ordinary-function reconstruction: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- FEXPR/FSUBR staging excluded" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail closed when private S0 evidence is unavailable
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: exit 1
