@@ -273,7 +273,7 @@ jobs:
           ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           bash scripts/test-current-semantic-slice.sh
-          cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
+          cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract --test english_names_in_code
           cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
           cargo test -p sens-cli --test cli
           cargo test -p xtask --test license_policy
@@ -457,7 +457,7 @@ jobs:
       - name: Current Lisp-owned semantic witnesses
         run: bash scripts/test-current-semantic-slice.sh
       - name: Critical machine and surface witnesses
-        run: cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
+        run: cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract --test english_names_in_code
       - name: Native CPU vertical witnesses
         run: cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
       - name: CLI smoke
