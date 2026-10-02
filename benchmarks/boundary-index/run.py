@@ -172,6 +172,7 @@ def main() -> int:
             base_key = (case, count, "payload")
             base_i = grouped[(base_key, "prepare-payload", "i_refs")]
             cache_query_i = None
+            cache_prepare_i_per_word = None
             temporary = []
             for candidate in cs:
                 fact = run_native(
@@ -204,13 +205,33 @@ def main() -> int:
                 }
                 if candidate == "cache2":
                     cache_query_i = row["query_i_per_access"]
+                    cache_prepare_i_per_word = row["prepare_i_per_word"]
                 temporary.append(row)
-            if cache_query_i is None:
+            if cache_query_i is None or cache_prepare_i_per_word is None:
                 cache_query_i = math.nan
+                cache_prepare_i_per_word = math.nan
             for row in temporary:
                 row["query_slowdown_vs_cache2"] = (
                     row["query_i_per_access"] / cache_query_i
                     if cache_query_i and not math.isnan(cache_query_i) else math.nan
+                )
+                if row["candidate"] == "cache2":
+                    crossover = 0.0
+                else:
+                    candidate_prepare = row["prepare_i_per_word"] * count
+                    cache_prepare = cache_prepare_i_per_word * count
+                    candidate_query = row["query_i_per_access"]
+                    denominator = candidate_query - cache_query_i
+                    numerator = cache_prepare - candidate_prepare
+                    if denominator > 0 and numerator > 0:
+                        crossover = numerator / denominator
+                    elif denominator <= 0 and candidate_prepare <= cache_prepare:
+                        crossover = math.inf
+                    else:
+                        crossover = 0.0
+                row["cache2_crossover_accesses"] = crossover
+                row["cache2_crossover_accesses_per_word"] = (
+                    crossover / count if not math.isinf(crossover) else math.inf
                 )
                 rows.append(row)
 
@@ -259,16 +280,19 @@ def main() -> int:
         "Query counters subtract the matching candidate preparation path.",
         "",
         "| case | words | candidate | active B/word | prep I/word | query I/access | "
-        "vs cache2 | width steps/access | D1 miss/1k | Pareto |",
-        "|---|---:|---|---:|---:|---:|---:|---:|---:|---|",
+        "vs cache2 | cache crossover access/word | width steps/access | D1 miss/1k | Pareto |",
+        "|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for row in rows:
+        crossover = row["cache2_crossover_accesses_per_word"]
+        crossover_text = "never" if math.isinf(crossover) else f"{crossover:.3f}"
         lines.append(
             f"| {row['case']} | {row['words']:,} | {row['candidate']} | "
             f"{row['active_bytes_per_word']:.3f} | "
             f"{row['prepare_i_per_word']:.2f} | "
             f"{row['query_i_per_access']:.2f} | "
             f"x{row['query_slowdown_vs_cache2']:.2f} | "
+            f"{crossover_text} | "
             f"{row['local_width_steps_per_access']:.2f} | "
             f"{row['d1_misses_per_1k']:.2f} | {row['pareto']} |"
         )
@@ -282,6 +306,8 @@ def main() -> int:
         "- cache2: decoded exact hot cache storing one width byte + one raw byte per word; packed payload may be cold/discarded.",
         "",
         "Pareto means non-dominated on (active bytes, query I/access) only. No weighted score is used.",
+        "Cache crossover is the random-access count per word where cache2's higher one-time preparation is repaid by its lower query I/access.",
+        "A value below 1.0 means decode-to-cache becomes cheaper before one random lookup per logical word on average.",
         "No candidate is a framing or semantic authority.",
     ]
     report = "\n".join(lines) + "\n"
