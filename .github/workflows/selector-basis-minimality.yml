@@ -1,0 +1,40 @@
+name: Selector basis minimality research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2390-selector-basis-minimality.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/selector-basis-minimality.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/research-2390-selector-basis-minimality.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/selector-basis-minimality.yml"
+  workflow_dispatch:
+
+jobs:
+  remove-one:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run bounded selector remove-one attacks
+        run: |
+          rm -rf /tmp/selector-basis-minimality
+          python3 scripts/research-2390-selector-basis-minimality.py \
+            --max-depth 6 \
+            --out /tmp/selector-basis-minimality
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/selector-basis-minimality/report.md; then
+            cat /tmp/selector-basis-minimality/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selector-basis-minimality
+          path: /tmp/selector-basis-minimality/
+          retention-days: 14
