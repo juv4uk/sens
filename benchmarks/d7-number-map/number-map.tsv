@@ -1,0 +1,10 @@
+carrier	semantic_domain	semantic_width	representation_width	mechanism_width	exact	generated_law	core_law	core_math_only	sound_relation	evidence	status
+Value::Number(_,Exact)	exact integer	unbounded mathematical integer; compact carrier only within exact binary64 integer range	binary64 compact representation when exact	64 host bits	YES	NO	YES	NO	NONE	crates/sens/src/value.rs; docs/exact-number-representation.md	MECHANISM-COMPACT
+Value::Rational(Rational)	exact rational Q	unbounded / value-dependent	variable numerator+denominator bitstrings	BigInt base-2^32 limbs	YES	NO	YES	NO	NONE	crates/sens/src/value.rs; crates/sens/src/bignum.rs; contracts/exact-q-binary-contract.lisp	CORE-NUMBER
+Value::Number(_,Inexact)	inexact numeric value	not a fixed semantic bit width	IEEE-754 binary64	64 host bits	NO	NO	YES	NO	NONE	crates/sens/src/value.rs; crates/sens/src/eval/arithmetic.rs	INEXACT-NUMBER
+NumericBuffer::I32	typed fixed-width numeric data	32-bit data element, not scalar Number identity	32	32	YES	NO	NO	NO	NONE	docs/exact-number-representation.md	MECHANISM-DATA
+NumericBuffer::F32	typed fixed-width numeric data	32-bit data element, explicitly inexact	32	32	NO	NO	NO	NO	NONE	docs/exact-number-representation.md	MECHANISM-DATA
+exact-Q comparison result	PredicateBit	1	1	Bit1 / predicate carrier	N/A	NO	YES	NO	NONE	contracts/exact-q-binary-contract.lisp	NOT-NUMBER
+Text7 cell	Text7 / Sound-side coordinate	7	7	one u8 per cell in host	N/A	NO	NO	NO	EXPLICITLY-NOT-NUMBER	crates/sens/src/text7.rs	SEPARATE-DOMAIN
+Core-Math exact-Q basis	Core-Math Q	language-neutral; no SENS width authority	none required by semantic spec	Fraction / normalized integer-pair models	YES	YES	NO	YES	NONE	issue #2433 / PR #2437	DONOR-ONLY
+FPGA limb candidate	exact-number mechanism	no semantic width claim	candidate limb width (16/18/24/28 experiments)	hardware limb	YES	NO	NO	YES	NONE	issue #1990	MECHANISM-ONLY
