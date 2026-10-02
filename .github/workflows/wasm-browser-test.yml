@@ -10,7 +10,7 @@ on:
       - 'crates/sens-literate/**'
       - 'crates/sens-lsp/**'
       - 'lib/core.lisp'       # single active SENS core (#2367)
-      - 'lib/core.lisp.fasl'  # canonical compiled snapshot
+      - 'lib/core4.lisp.fasl' # transitional filename; source authority is lib/core.lisp
       # legacy aliases kept for reference: lib/core.my, lib/core.my.fasl
       - 'Cargo.toml'
       - 'Cargo.lock'
