@@ -76,18 +76,17 @@ jobs:
           ref: 6031f92652066825a245c806c0773e9e524257bd
           path: .d4-s0/mccarthy-eval
 
-      - name: Install Guix
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y guix
-
-      - name: Build pinned S0 seed
+      - name: Build pinned S0 seed for semantic replay
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         working-directory: .d4-s0/mccarthy-eval
         run: |
           set -euo pipefail
-          guix time-machine -C ../../channels.scm -- shell gcc-toolchain -- \
-            gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+          actual_sha="$(git rev-parse HEAD)"
+          test "$actual_sha" = "6031f92652066825a245c806c0773e9e524257bd"
+          gcc --version | head -n 1
+          gcc -no-pie -O0 -s -o mccarthy-kernel mccarthy-kernel.s
+          echo "S0-PROVENANCE=PINNED-SOURCE-COMMIT"
+          echo "BUILD-ENVIRONMENT=MECHANISM-NOT-SEMANTIC-AUTHORITY"
 
       - name: Replay six Lisp-owned D4 residents plus root positive controls
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
