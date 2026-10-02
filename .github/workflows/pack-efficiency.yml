@@ -3,6 +3,7 @@ name: Packed bits efficiency benchmark
 on:
   pull_request:
     paths:
+      - "crates/sens/src/packed_bits.rs"
       - "crates/sens/examples/pack_efficiency_bench.rs"
       - "crates/sens/examples/boundary_index_bench.rs"
       - "benchmarks/pack-efficiency/**"
