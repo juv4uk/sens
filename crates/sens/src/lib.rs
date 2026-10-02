@@ -181,13 +181,13 @@ pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
 /// therefore does not belong in this capability-free core crate.
 pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 
-/// The current Core4 sens bootstrap library, evaluated after the macro layer.
-pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
+/// The single active SENS core library, evaluated after the macro layer.
+pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
 
-/// Parse-output кеш для точного вбудованого Core4 source. Це лише bootstrap-
+/// Parse-output кеш для точного вбудованого core source. Це лише bootstrap-
 /// оптимізація: hash source перевіряється перед використанням, а stale/invalid
 /// bytes переходять на parsing CORE_LIBRARY_SOURCE.
-const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
+const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core.lisp.fasl");
 
 /// Generated runtime projection of admitted surface spellings to opaque Sens8
 /// identities. semantic-registry.lisp remains the only spelling authority.
@@ -362,8 +362,8 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     load_core_library_with_fasl(session, CORE_LIBRARY_FASL)
 }
 
-/// Read-only діагностика для embedder-а: чи відповідає Core4 FASL точному
-/// вбудованому source. Не вибирає profile і не змінює bootstrap.
+/// Read-only діагностика для embedder-а: чи відповідає core FASL точному
+/// вбудованому source. Не змінює bootstrap.
 pub fn core_library_fasl_is_current() -> bool {
     fasl_decode_program(CORE_LIBRARY_FASL)
         .map(|(_, source_hash)| source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()))
@@ -541,7 +541,7 @@ mod core4_bootstrap_cache_tests {
 
     #[test]
     fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
-        let expressions = parse(CORE_LIBRARY_SOURCE).expect("current Core4 parses");
+        let expressions = parse(CORE_LIBRARY_SOURCE).expect("current core parses");
         let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
         let fasl = fasl_encode(&expressions, &hash);
         let mut session = Session::default();
