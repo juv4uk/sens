@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/research-2250-math-placement.py"
+      - "scripts/research-2276-law-fingerprints.py"
       - ".github/workflows/math-free-placement-research.yml"
   workflow_dispatch:
 
@@ -20,3 +21,5 @@ jobs:
           python-version: "3.12"
       - name: Verify arithmetic family and order action algebra
         run: python3 scripts/research-2250-math-placement.py
+      - name: Recover candidate domains from law fingerprints
+        run: python3 scripts/research-2276-law-fingerprints.py
