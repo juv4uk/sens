@@ -142,6 +142,13 @@ jobs:
       - name: Build boundary-index benchmark
         run: cargo build --release -p sens --example boundary_index_bench
 
+      - name: Prove cp2 rejects widths above D4
+        run: |
+          if target/release/examples/boundary_index_bench mixed18 cp2-8 query 64 64 1; then
+            echo "cp2 unexpectedly accepted a width >4 corpus" >&2
+            exit 1
+          fi
+
       - name: Run mixed D1-D4 checkpoint tournament
         run: |
           rm -rf /tmp/boundary-index
