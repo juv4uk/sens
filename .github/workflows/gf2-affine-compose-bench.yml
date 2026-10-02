@@ -1,0 +1,22 @@
+name: GF2 affine composition accounting
+
+on:
+  pull_request:
+    paths:
+      - "scripts/bench-2325-gf2-affine-compose.py"
+      - ".github/workflows/gf2-affine-compose-bench.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exhaustive n=1,2 and analytic n=1..8
+        run: python3 scripts/bench-2325-gf2-affine-compose.py
