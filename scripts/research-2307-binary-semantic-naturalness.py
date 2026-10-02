@@ -68,6 +68,31 @@ def verify_order_b3() -> tuple[int, int]:
 
 
 
+
+def verify_order_v4_relabeling() -> tuple[int, int, tuple[tuple[int, ...], ...]]:
+    """Enumerate automorphisms of the XOR coordinate group Z2^2."""
+    codes = (I, S, N, NS)
+    preserving: list[tuple[int, ...]] = []
+    rejected = 0
+
+    for perm in permutations(codes):
+        mapping = dict(zip(codes, perm))
+        ok = True
+        for x, y in product(codes, repeat=2):
+            if mapping[x ^ y] != (mapping[x] ^ mapping[y]):
+                ok = False
+                break
+        if ok:
+            preserving.append(tuple(perm))
+        else:
+            rejected += 1
+
+    assert tuple(codes) in preserving
+    assert len(preserving) == 6
+    assert rejected == 18
+    return len(preserving), rejected, tuple(preserving)
+
+
 Pair = tuple[object, object]
 
 
@@ -308,6 +333,7 @@ def arbitrary_label_negative_control() -> int:
 
 def main() -> None:
     order_rel, order_comp = verify_order_b3()
+    order_autos, order_rejected, order_auto_maps = verify_order_v4_relabeling()
     selector_names, selector_bits, selector_comp = verify_selector_b3()
     (
         pred_affine_comp,
@@ -329,6 +355,12 @@ def main() -> None:
     print("BIT1=NEGATE-PREDICATE")
     print("COORDINATE-OP=XOR")
     print("SEMANTIC-OP=ACTION-COMPOSITION")
+    print(f"RELABELINGS-PRESERVING-XOR={order_autos}")
+    print(f"RELABELINGS-REJECTED={order_rejected}")
+    print("V4-AUTOMORPHISMS=" + ";".join(
+        ",".join(format(code, "02b") for code in perm)
+        for perm in order_auto_maps
+    ))
 
     print("FAMILY=SELECTOR-PATH")
     print("CLASS=B3")
