@@ -45,14 +45,14 @@
   (release-run "git" (00000001 ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
 (release-run "cargo"
   (00000001 ("run" "--release" "--locked" "-p" "sens-cli" "--bin" "gen-fasl"
-          "--" "lib/core.lisp" "lib/core.lisp.fasl")))
+          "--" "lib/core.lisp" "lib/core4.lisp.fasl")))
 (00001001 release-fasl-diff-status
-  (00000101 (10100010 "git" (00000001 ("diff" "--quiet" "--" "lib/core.lisp.fasl")))))
+  (00000101 (10100010 "git" (00000001 ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
 (00000111
   ((00000011 release-fasl-diff-status 0) (1) (00000001 ()))
   ((00000011 release-fasl-diff-status 1) (1)
    ((00001000 ()
-      (release-run "git" (00000001 ("add" "lib/core.lisp.fasl")))
+      (release-run "git" (00000001 ("add" "lib/core4.lisp.fasl")))
       (release-run "git" (00000001 ("commit" "-m" "chore(fasl): regenerate Core4 snapshot")))
       (release-run "timeout" (00000001 ("60" "git" "push" "origin" "main")))))
   (t
