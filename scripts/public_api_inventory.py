@@ -193,17 +193,17 @@ def classified_excluded_top_level_dirs() -> set[str]:
 
 
 def classified_excluded_source_files() -> set[str]:
-    """Read profile-source exclusions from the Lisp-owned four-core contract."""
+    """Exclude only sources explicitly classified non-current by SENS authority."""
     source = CORE_PROFILE_AUTHORITY.read_text(encoding="utf-8")
     excluded = {
         match.group(1)
         for line in source.splitlines()
-        if (match := PUBLIC_API_EXCLUDED_SOURCE.match(line)) is not None
+        if (match := PUBLIC_API_NONCURRENT_SOURCE.match(line)) is not None
     }
     if not excluded:
         raise ValueError(
             f"{CORE_PROFILE_AUTHORITY.relative_to(REPO_ROOT)} has no "
-            "public-api-excluded-source classification"
+            "historical/laboratory/former source classification"
         )
     return excluded
 
