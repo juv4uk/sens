@@ -1,0 +1,32 @@
+name: Post-D4 MAPLIST derivation research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_maplist.rs"
+      - ".github/workflows/post-d4-maplist-derivation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/post_d4_maplist.rs"
+      - ".github/workflows/post-d4-maplist-derivation.yml"
+
+jobs:
+  focused:
+    name: Post-D4 MAPLIST derivation research
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused MAPLIST derivation witness
+        run: cargo test -p sens --test post_d4_maplist -- --nocapture
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Post-D4 MAPLIST derivation research"
+            echo
+            echo "- D3 recursion + D4 first-class closure witness"
+            echo "- Historical MAPLIST identity forbidden in derivation"
+            echo "- No post-D4 identity allocation"
+          } >> "$GITHUB_STEP_SUMMARY"
