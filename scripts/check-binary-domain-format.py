@@ -42,7 +42,7 @@ def field_value(body, label):
         (
             "value",
             re.compile(
-                rf"^[ \t]*#{{1,6}}[ \t]*\**{label}\**[ \t]*:?[ \t]*(.*)$",
+                rf"^[ \t]*#{{1,6}}[ \t]*\**{label}\**(?:[ \t]*:[ \t]*(.*)|[ \t]*)$",
                 re.I | re.M,
             ),
             True,
