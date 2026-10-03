@@ -413,4 +413,31 @@ mod tests {
         assert!(parse_binary_source_words("").unwrap().is_empty());
         assert!(parse_binary_source_words(" ; comment only\n").unwrap().is_empty());
     }
+    #[test]
+    fn every_visible_binary_width_maps_to_the_ratified_domain_width() {
+        let words = [
+            BinarySourceWord::W1(Bit1::new(0).unwrap()),
+            BinarySourceWord::W2(Bit2::new(0).unwrap()),
+            BinarySourceWord::W3(Bit3::new(0).unwrap()),
+            BinarySourceWord::W4(Bit4::new(0).unwrap()),
+            BinarySourceWord::W5(Bit5::new(0).unwrap()),
+            BinarySourceWord::W6(Bit6::new(0).unwrap()),
+            BinarySourceWord::W7(Bit7::new(0).unwrap()),
+            BinarySourceWord::W8(Bit8::new(0).unwrap()),
+        ];
+        let domains = [
+            crate::RatifiedDomainWidth::D1,
+            crate::RatifiedDomainWidth::D2,
+            crate::RatifiedDomainWidth::D3,
+            crate::RatifiedDomainWidth::D4,
+            crate::RatifiedDomainWidth::D5,
+            crate::RatifiedDomainWidth::D6,
+            crate::RatifiedDomainWidth::D7,
+            crate::RatifiedDomainWidth::D8,
+        ];
+        for (word, domain) in words.into_iter().zip(domains) {
+            assert_eq!(word.domain_width(), domain);
+        }
+    }
+
 }
