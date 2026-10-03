@@ -28,7 +28,7 @@ use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6};
 /// The mapping/orientation of the bit is language-owned and deliberately absent
 /// here. In particular, there is no `bool` constructor or conversion.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct PredicateBit(Bit1);
 
 impl PredicateBit {
@@ -47,7 +47,7 @@ impl PredicateBit {
 ///
 /// This type does not encode which two-bit pattern has which structural role.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Racana2(Bit2);
 
 impl Racana2 {
@@ -66,7 +66,7 @@ impl Racana2 {
 ///
 /// Individual three-bit meanings remain in SENS-owned contracts/witnesses.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Bija3(Bit3);
 
 impl Bija3 {
@@ -88,7 +88,7 @@ impl Bija3 {
 /// coordinates are occupied or reserved; this representation never derives
 /// semantics from the packed nibble.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CoreD4(Bit4);
 
 impl CoreD4 {
@@ -108,7 +108,7 @@ impl CoreD4 {
 /// This proves domain membership only. Individual D5 coordinate meanings are
 /// owned by the SENS owner map/laws, not by this Rust representation type.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CoreD5(Bit5);
 
 impl CoreD5 {
@@ -128,7 +128,7 @@ impl CoreD5 {
 /// This proves domain membership only. It deliberately has no implicit
 /// relationship to Core.D5 or Sens8 identity.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CoreD6(Bit6);
 
 impl CoreD6 {
@@ -149,7 +149,7 @@ impl CoreD6 {
 /// may still be reserved, derived, or unavailable to the evaluator. Keeping
 /// the domain variant attached prevents equal packed payloads at different
 /// widths from collapsing into one identity.
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum DomainWord {
     D1(PredicateBit),
     D2(Racana2),
@@ -160,6 +160,38 @@ pub enum DomainWord {
 }
 
 impl DomainWord {
+    /// Reconstruct a ratified domain word from its explicit width and payload.
+    /// Width is part of identity; unsupported widths fail closed.
+    pub const fn from_width_bits(width: usize, bits: u8) -> Option<Self> {
+        match width {
+            1 => match Bit1::new(bits) {
+                Some(word) => Some(Self::D1(PredicateBit::from_word(word))),
+                None => None,
+            },
+            2 => match Bit2::new(bits) {
+                Some(word) => Some(Self::D2(Racana2::from_word(word))),
+                None => None,
+            },
+            3 => match Bit3::new(bits) {
+                Some(word) => Some(Self::D3(Bija3::from_word(word))),
+                None => None,
+            },
+            4 => match Bit4::new(bits) {
+                Some(word) => Some(Self::D4(CoreD4::from_word(word))),
+                None => None,
+            },
+            5 => match Bit5::new(bits) {
+                Some(word) => Some(Self::D5(CoreD5::from_word(word))),
+                None => None,
+            },
+            6 => match Bit6::new(bits) {
+                Some(word) => Some(Self::D6(CoreD6::from_word(word))),
+                None => None,
+            },
+            _ => None,
+        }
+    }
+
     /// Exact domain width carried by this value.
     pub const fn width(self) -> usize {
         match self {
@@ -221,6 +253,18 @@ mod tests {
             let word = Bit6::new(raw).unwrap();
             assert!(CoreD6::from_word(word).word() == word);
         }
+    }
+
+    #[test]
+    fn domain_word_reconstruction_requires_exact_width() {
+        for width in 1..=6 {
+            let word = DomainWord::from_width_bits(width, 1).expect("valid exact-width payload");
+            assert_eq!(word.width(), width);
+            assert_eq!(word.packed_bits(), 1);
+        }
+        assert!(DomainWord::from_width_bits(0, 0).is_none());
+        assert!(DomainWord::from_width_bits(7, 0).is_none());
+        assert!(DomainWord::from_width_bits(3, 0b1000).is_none());
     }
 
     #[test]
