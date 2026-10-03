@@ -17,6 +17,9 @@ protected_paths=(
   crates/sens/src/source_words.rs
   crates/sens/src/source_packing.rs
   crates/sens/src/packed_bits.rs
+  crates/sens/src/domain_identity.rs
+  crates/sens/src/binary_framing.rs
+  crates/sens/src/syntax.rs
 )
 
 is_protected_path() {
@@ -38,7 +41,7 @@ is_exact_width_file() {
   esac
 
   git cat-file -e "$head_sha:$path" 2>/dev/null || return 1
-  git show "$head_sha:$path"     | grep -Eq 'Bits<|\bBit[1-8]\b|BinarySourceWord|PackedBitstream|PredicateBit|Racana2|Bija3|DomainWord'
+  git show "$head_sha:$path"     | grep -Eq 'Bits<|\bBit[1-8]\b|BinarySourceWord|PackedBitstream|PredicateBit|Racana2|Bija3|DomainWord|CoreDomainIdentity|DomainIdentity|DomainCall'
 }
 
 is_executable_line() {
@@ -54,6 +57,7 @@ is_executable_line() {
 }
 
 legacy_pattern='(^|[^[:alnum:]_])(Sid8|Sens8|Function8)([^[:alnum:]_]|$)|Value::Sid|sens!\([01]{8}\)'
+byte_scatter_pattern='TAG_DOMAIN_IDENTITY|TAG_CALLABLE_DOMAIN|out\.push\([^)]*\.width\(\)[^)]*\)|out\.push\([^)]*\.packed_(bits|byte)\(\)[^)]*\)'
 
 failed=0
 while IFS= read -r path; do
@@ -64,6 +68,12 @@ while IFS= read -r path; do
     is_executable_line "$added" || continue
     if printf '%s\n' "$added" | grep -Eq "$legacy_pattern"; then
       echo "PARADIGM-ONE-WAY violation: exact-width code adds legacy identity dependency" >&2
+      echo "  file: $path" >&2
+      echo "  line: $added" >&2
+      failed=1
+    fi
+    if printf '%s\n' "$added" | grep -Eq "$byte_scatter_pattern"; then
+      echo "PARADIGM-ONE-WAY violation: canonical domain identity is being scattered into byte fields" >&2
       echo "  file: $path" >&2
       echo "  line: $added" >&2
       failed=1
