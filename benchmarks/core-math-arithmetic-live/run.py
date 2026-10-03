@@ -98,8 +98,7 @@ def main() -> int:
             fh,
             fieldnames=list(perf_rows[0].keys()),
             delimiter="	",
-            lineterminator="
-",
+            lineterminator="\\n",
         )
         writer.writeheader()
         writer.writerows(perf_rows)
@@ -175,8 +174,7 @@ def main() -> int:
         ],
     }
     (args.out / "result.json").write_text(
-        json.dumps(artifact, indent=2, sort_keys=True) + "
-",
+        json.dumps(artifact, indent=2, sort_keys=True) + "\\n",
         encoding="utf-8",
     )
 
@@ -212,8 +210,7 @@ def main() -> int:
         "Performance is evidence only, never semantic authority.",
         "",
     ]
-    text = "
-".join(report)
+    text = "\\n".join(report)
     (args.out / "report.md").write_text(text, encoding="utf-8")
     print(text)
     return 0
