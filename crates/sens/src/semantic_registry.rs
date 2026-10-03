@@ -8,7 +8,7 @@
 use std::{collections::HashMap, sync::OnceLock};
 
 use crate::{
-    Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6, CoreDomainIdentity,
+    Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity,
 };
 
 mod generated {
@@ -25,12 +25,6 @@ fn identity_from_row(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
         4 => Bit4::new(bits)
             .map(CoreD4::from_word)
             .map(CoreDomainIdentity::D4),
-        5 => Bit5::new(bits)
-            .map(CoreD5::from_word)
-            .map(CoreDomainIdentity::D5),
-        6 => Bit6::new(bits)
-            .map(CoreD6::from_word)
-            .map(CoreDomainIdentity::D6),
         _ => None,
     }
 }
