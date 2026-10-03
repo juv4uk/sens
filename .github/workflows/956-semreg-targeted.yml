@@ -4,9 +4,12 @@ on:
   pull_request:
     paths:
       - "lib/surface/semantic-registry-api.lisp"
+      - "knowledge/domain-surface-registry.lisp"
       - "crates/sens/tests/semantic_registry_lisp.rs"
       - "tests/fixtures/semantic-registry-self-hosted-witness.lisp"
       - "scripts/generate-rust-semantic-registry.lisp"
+      - "scripts/generate-rust-domain-registry.lisp"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
       - ".github/workflows/956-semreg-targeted.yml"
 
 jobs:
@@ -18,3 +21,5 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Run Lisp-owned semantic registry witness
         run: cargo test -p sens --test semantic_registry_lisp -- --nocapture
+      - name: Check exact-domain Rust projection
+        run: cargo run --quiet -p sens-cli --bin sens -- scripts/generate-rust-domain-registry.lisp --check
