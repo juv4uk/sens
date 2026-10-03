@@ -44,6 +44,23 @@ is_exact_width_file() {
   git show "$head_sha:$path"     | grep -Eq 'Bits<|\bBit[1-8]\b|BinarySourceWord|PackedBitstream|PredicateBit|Racana2|Bija3|DomainWord|CoreDomainIdentity|DomainIdentity|DomainCall'
 }
 
+is_canonical_runtime_path() {
+  local path="$1"
+  case "$path" in
+    crates/sens/src/eval/*.rs|crates/sens/src/environment.rs|crates/sens/src/domain_identity.rs|crates/sens/src/syntax.rs)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_surface_projection_boundary() {
+  local path="$1"
+  [[ "$path" == "crates/sens/src/eval/lower.rs" ]]
+}
+
 is_executable_line() {
   local line="$1"
   local trimmed
@@ -58,6 +75,8 @@ is_executable_line() {
 
 legacy_pattern='(^|[^[:alnum:]_])(Sid8|Sens8|Function8)([^[:alnum:]_]|$)|Value::Sid|sens!\([01]{8}\)'
 byte_scatter_pattern='TAG_DOMAIN_IDENTITY|TAG_CALLABLE_DOMAIN|out\.push\([^)]*\.width\(\)[^)]*\)|out\.push\([^)]*\.packed_(bits|byte)\(\)[^)]*\)'
+name_dispatch_pattern='semantic_id_for_surface|admitted_semantic_id_for_surface|registry_byte_for_surface|legacy_domain_identity_from_registry_byte|routed_sid_for_surface|surface_has_sid'
+exact_domain_projection_pattern='domain_identity_for_surface|domain_identity_for_symbol'
 
 failed=0
 while IFS= read -r path; do
@@ -74,6 +93,21 @@ while IFS= read -r path; do
     fi
     if printf '%s\n' "$added" | grep -Eq "$byte_scatter_pattern"; then
       echo "PARADIGM-ONE-WAY violation: canonical domain identity is being scattered into byte fields" >&2
+      echo "  file: $path" >&2
+      echo "  line: $added" >&2
+      failed=1
+    fi
+    if is_canonical_runtime_path "$path" \
+      && printf '%s\n' "$added" | grep -Eq "$name_dispatch_pattern"; then
+      echo "PARADIGM-ONE-WAY violation: canonical runtime adds name/legacy-driven semantic dispatch" >&2
+      echo "  file: $path" >&2
+      echo "  line: $added" >&2
+      failed=1
+    fi
+    if is_canonical_runtime_path "$path" \
+      && ! is_surface_projection_boundary "$path" \
+      && printf '%s\n' "$added" | grep -Eq "$exact_domain_projection_pattern"; then
+      echo "PARADIGM-ONE-WAY violation: runtime performs surface-to-domain projection after lowering boundary" >&2
       echo "  file: $path" >&2
       echo "  line: $added" >&2
       failed=1
