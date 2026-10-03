@@ -20,9 +20,9 @@
 
   ((identity . shared-foundation)
    (predicate-result . exact-one-bit)
-   (atom-object . (Core.D3 010))
-   (eq-object . (Core.D3 111))
-   (cond-object . (Core.D3 011))
+   (atom-object . (Core.D3 "010"))
+   (eq-object . (Core.D3 "111"))
+   (cond-object . (Core.D3 "011"))
    (cond-clause . (test expression))
    (cond-select . exact-one)
    (cond-skip . exact-zero)
