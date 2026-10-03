@@ -1,0 +1,158 @@
+{
+  "schema": "d5-eligibility/v1",
+  "authority": "research-only-no-placement",
+  "phase": "SENS-DERIVATION",
+  "domain": "Core.D5",
+  "binary_object": "UNPLACED",
+  "rows": [
+    {
+      "factor_id": "shared-location-update",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "classification": "SAME-PARENT-MULTI-DELTA",
+      "strongest_same_base_parent": "D4-DEFINE",
+      "delta_count": 2,
+      "root_theorem": null,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "d5_eligible": "NO",
+      "reason": "DEFINE shares the binding/mutation family but SETQ-style shared-location semantics require two independently evidenced policy deltas",
+      "evidence": [
+        "#2492",
+        "#2518",
+        "#2527",
+        "#2589",
+        "#2598",
+        "#2609",
+        "#2611"
+      ],
+      "falsifier": "prove the same D4 DEFINE base object plus exactly one independently witnessed semantic delta"
+    },
+    {
+      "factor_id": "non-local-exit",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "classification": "ROOT-RESIDUE",
+      "strongest_same_base_parent": null,
+      "delta_count": null,
+      "root_theorem": "#2488/#2504",
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "d5_eligible": "NO",
+      "reason": "non-local exit is a residue/root capability with no proved D1-D4 same-base parent; roothood does not imply D5 residency",
+      "evidence": [
+        "#2488",
+        "#2504",
+        "#2590",
+        "#2606",
+        "#2609",
+        "#2611"
+      ],
+      "falsifier": "prove an exact D4 same-base parent and exactly one semantic delta without changing the base control object"
+    },
+    {
+      "factor_id": "raw-form-input",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "classification": "UNKNOWN",
+      "strongest_same_base_parent": null,
+      "delta_count": null,
+      "root_theorem": null,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "d5_eligible": "UNKNOWN",
+      "reason": "the protocol axis is observable, but no theorem isolates it as a one-delta child of one exact D4 semantic object",
+      "evidence": [
+        "#2522",
+        "#2530",
+        "#2591"
+      ],
+      "falsifier": "supply an exact D4 same-base parent with one executable raw-form delta"
+    },
+    {
+      "factor_id": "explicit-caller-env",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "classification": "UNKNOWN",
+      "strongest_same_base_parent": null,
+      "delta_count": null,
+      "root_theorem": null,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "d5_eligible": "UNKNOWN",
+      "reason": "caller-env is independently observable, but no exact D4 same-base one-delta parent theorem is admitted",
+      "evidence": [
+        "#2522",
+        "#2530",
+        "#2591"
+      ],
+      "falsifier": "supply an exact D4 same-base parent with one executable caller-env delta"
+    },
+    {
+      "factor_id": "returned-form-protocol",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "classification": "UNKNOWN",
+      "strongest_same_base_parent": null,
+      "delta_count": null,
+      "root_theorem": null,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "d5_eligible": "UNKNOWN",
+      "reason": "returned-form behavior is observable, but current TRANSFORMER differs from D4 LAMBDA by raw-form plus returned-form together, not this factor alone",
+      "evidence": [
+        "#2522",
+        "#2530",
+        "#2591"
+      ],
+      "falsifier": "prove a same-base D4 parent whose only semantic difference is returned-form re-evaluation"
+    },
+    {
+      "factor_id": "expansion-timing",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "classification": "UNKNOWN",
+      "strongest_same_base_parent": null,
+      "delta_count": null,
+      "root_theorem": null,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "d5_eligible": "UNKNOWN",
+      "reason": "definition-time versus evaluation-time expansion is observable but currently has no exact D4 same-base one-delta parent theorem",
+      "evidence": [
+        "#2568",
+        "#2569",
+        "#2591"
+      ],
+      "falsifier": "prove one exact D4 base object differing only by expansion timing"
+    },
+    {
+      "factor_id": "invocation-packaging",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "classification": "UNKNOWN",
+      "strongest_same_base_parent": null,
+      "delta_count": null,
+      "root_theorem": null,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "d5_eligible": "UNKNOWN",
+      "reason": "whole-call versus operands-only packaging is independently observable but has no exact D4 one-delta parent theorem",
+      "evidence": [
+        "#2580",
+        "#2588",
+        "#2591"
+      ],
+      "falsifier": "prove one exact D4 base object differing only by invocation packaging"
+    }
+  ],
+  "summary": {
+    "factors_classified": 7,
+    "d5_eligible_yes": 0,
+    "d5_eligible_no": 2,
+    "d5_eligible_unknown": 5,
+    "new_nonselector_d5_candidates": 0,
+    "coordinates_allocated": 0,
+    "d5_selector_generated": 8,
+    "d5_unknown_free": 24
+  },
+  "non_conclusions": [
+    "seven structural facts do not imply seven roots",
+    "roothood does not imply D5 residency",
+    "UNKNOWN/free coordinates are not spare placement authority",
+    "factor count does not imply bit width"
+  ]
+}
