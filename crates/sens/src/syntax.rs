@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sens8;
+use crate::{CoreDomainIdentity, Sens8};
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -49,6 +49,9 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
+    /// Canonical Core identity: domain is part of equality and transport.
+    CoreIdentity(CoreDomainIdentity),
+    /// Historical exact-eight identity retained only for compatibility.
     Sid(Sens8),
     String(Rc<str>),
     Symbol(Rc<str>),
@@ -128,6 +131,8 @@ pub(crate) mod fasl {
     const TAG_F32_BUFFER: u8 = 9;
     // #1697: числові координати локальної змінної; ім'я не записується.
     const TAG_LOCAL: u8 = 10;
+    // #2840: explicit domain-qualified identity; legacy TAG_BINARY stays byte-compatible.
+    const TAG_CORE_IDENTITY: u8 = 11;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -161,6 +166,16 @@ pub(crate) mod fasl {
             ExprKind::Rational(rational) => {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
+            }
+            ExprKind::CoreIdentity(identity) => {
+                out.push(TAG_CORE_IDENTITY);
+                out.push(identity.width() as u8);
+                out.push(identity.packed_bits());
+            }
+            ExprKind::CoreIdentity(identity) => {
+                out.push(TAG_CORE_IDENTITY);
+                out.push(identity.width() as u8);
+                out.push(identity.packed_bits());
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
@@ -238,6 +253,32 @@ pub(crate) mod fasl {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+            }
+            TAG_CORE_IDENTITY => {
+                let width = *bytes.get(*pos)?;
+                let payload = *bytes.get(*pos + 1)?;
+                *pos += 2;
+                let identity = match width {
+                    3 => crate::CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(payload)?)),
+                    4 => crate::CoreDomainIdentity::D4(crate::CoreD4::from_word(crate::Bit4::new(payload)?)),
+                    5 => crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(payload)?)),
+                    6 => crate::CoreDomainIdentity::D6(crate::CoreD6::from_word(crate::Bit6::new(payload)?)),
+                    _ => return None,
+                };
+                ExprKind::CoreIdentity(identity)
+            }
+            TAG_CORE_IDENTITY => {
+                let width = *bytes.get(*pos)?;
+                let payload = *bytes.get(*pos + 1)?;
+                *pos += 2;
+                let identity = match width {
+                    3 => crate::CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(payload)?)),
+                    4 => crate::CoreDomainIdentity::D4(crate::CoreD4::from_word(crate::Bit4::new(payload)?)),
+                    5 => crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(payload)?)),
+                    6 => crate::CoreDomainIdentity::D6(crate::CoreD6::from_word(crate::Bit6::new(payload)?)),
+                    _ => return None,
+                };
+                ExprKind::CoreIdentity(identity)
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
@@ -362,6 +403,7 @@ pub(crate) mod wire {
     const TAG_SYMBOL: u8 = 0x56;
     const TAG_PAIR: u8 = 0x57;
     const TAG_LOCAL: u8 = 0x58;
+    const TAG_CORE_IDENTITY: u8 = 0x59;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
 
