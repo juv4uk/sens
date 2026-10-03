@@ -178,13 +178,15 @@
       "semantic_observable": "transformer result is a replacement/executable form rather than a direct value"
     },
     {
-      "current_status": "surviving-observable-candidate",
+      "current_status": "bounded-independent-observable",
       "dependency_on_other_factor": [],
       "evidence": [
         "#2441",
         "#2442",
         "#2480",
-        "#2492"
+        "#2492",
+        "#2589",
+        "f48956fc94e3eb5c7534dbfe0cbcb46c393a74c5"
       ],
       "factor_id": "shared-location-update",
       "falsifier": "remove shared-location state while preserving all bounded SET/SETQ observations locally under admitted semantics",
