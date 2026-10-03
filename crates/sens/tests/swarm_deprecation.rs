@@ -29,7 +29,7 @@ const RETIRED_COORDINATION_OPS: &[&str] = &[
 #[test]
 fn legacy_coordination_deprecation_records_retired_physical_surface() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(DEPRECATION, &mut session).unwrap();
 
     let value = session
@@ -57,7 +57,7 @@ fn legacy_coordination_deprecation_records_retired_physical_surface() {
 #[test]
 fn no_live_callers_audit_records_physical_removal() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(NO_LIVE_CALLERS_AUDIT, &mut session).unwrap();
 
     let value = session
