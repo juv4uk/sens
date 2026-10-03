@@ -87,10 +87,8 @@ pub(crate) enum EvalStep {
     },
 }
 
-fn legacy_sid(identity: CallableIdentity) -> Option<crate::Sens8> {
-    identity
-        .legacy8_bits()
-        .map(crate::Sens8::from_packed_byte)
+fn legacy_bits(identity: CallableIdentity) -> Option<u8> {
+    identity.legacy8_bits()
 }
 
 fn invoke_callable_identity(
@@ -110,7 +108,7 @@ fn invoke_callable_identity(
             )),
         };
     }
-    let Some(sid) = legacy_sid(identity) else {
+    let Some(bits) = legacy_bits(identity) else {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
             format!(
@@ -119,7 +117,7 @@ fn invoke_callable_identity(
             span,
         ));
     };
-    canon::invoke_semantic_ref(sid, arguments, environment, span)
+    canon::invoke_legacy8_bits(bits, arguments, environment, span)
 }
 
 pub(crate) fn invoke_value(
@@ -175,11 +173,11 @@ pub(crate) fn evaluate_step(
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
-            if let Some(sid) = canon::routed_sid_for_surface(symbol) {
+            if let Some(bits) = canon::routed_legacy8_bits_for_surface(symbol) {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
                     format!(
-                        "function SID is syntax-only in this position · function SID тут лише синтаксис · Funktions-SID ist hier nur Syntax: {sid}"
+                        "historical exact-eight identity is syntax-only in this position: {bits:08b}"
                     ),
                     expression.span,
                 ));
@@ -243,8 +241,8 @@ fn evaluate_list(
     )
 }
 
-/// Спільний диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
-/// функція — лише 1 байт `head_sid`.
+/// Shared call dispatcher. ExprKind::Call carries a complete CallableIdentity;
+/// historical exact-eight routing is only one explicit compatibility variant.
 fn dispatch_call(
     head_name: Option<&str>,
     head_sid: Option<CallableIdentity>,
@@ -253,15 +251,15 @@ fn dispatch_call(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    let legacy_head_sid = head_sid.and_then(legacy_sid);
-    let routed_head_sid = legacy_head_sid
-        .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
-        .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
+    let legacy_head_bits = head_sid.and_then(legacy_bits);
+    let routed_head_bits = legacy_head_bits
+        .filter(|bits| canon::route_kind_for_legacy8_bits(*bits).is_some())
+        .or_else(|| head_name.and_then(canon::routed_legacy8_bits_for_surface));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| legacy_head_sid.and_then(necessary_forms::identity_for_semantic_id));
+        .or_else(|| legacy_head_bits.and_then(necessary_forms::identity_for_legacy8_bits));
 
-    if routed_head_sid == Some(crate::sens!(00000001)) {
+    if routed_head_bits == Some(0b0000_0001) {
         special_forms::exact_callable_arity(CallableIdentity::legacy8(0b0000_0001), arguments, 1, span)?;
         let value = special_forms::quoted(&arguments[0])?;
         return Ok(EvalStep::Value(value));
@@ -272,7 +270,7 @@ fn dispatch_call(
     if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Define) {
         return special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value);
     }
-    if routed_head_sid == Some(crate::sens!(00000111)) {
+    if routed_head_bits == Some(0b0000_0111) {
         return special_forms::evaluate_cond(arguments, environment, span);
     }
 
