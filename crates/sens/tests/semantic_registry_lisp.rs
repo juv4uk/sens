@@ -70,9 +70,9 @@ fn exact_domain_projection_carries_width_and_bits_not_legacy_byte_identity() {
     let source = include_str!("../../../lib/surface/domain-registry.lisp");
     let generated = include_str!("../src/domain_surface_registry_generated.rs");
 
-    assert!(source.contains("(3 \"001\""));
-    assert!(source.contains("(4 \"0010\""));
-    assert!(source.contains("(5 \"01010\""));
+    assert!(source.contains("(#b11 \"001\""));
+    assert!(source.contains("(#b100 \"0010\""));
+    assert!(source.contains("(#b101 \"01010\""));
     assert!(!generated.contains("semantic_id:"));
     assert!(generated.contains("width: 3"));
     assert!(generated.contains("width: 4"));
