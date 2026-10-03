@@ -1,8 +1,9 @@
 //! Canonical exact-domain surface registry.
 //!
 //! Authority: `lib/surface/domain-registry.lisp`.
-//! Identity is exact domain + exact bits. This module has no Sens8/Sid8/
-//! Function8 table and performs no legacy-byte-to-domain inference.
+//! Identity is exact domain + exact bits. Historical flat-byte machinery is
+//! physically isolated in `legacy_registry.rs`; this module cannot infer a
+//! domain from that compatibility axis.
 
 use std::{collections::HashMap, sync::OnceLock};
 
@@ -67,20 +68,6 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     surface_index().get(name).copied()
 }
 
-/// Reverse projection for UI/tooling over already-known exact identity.
-pub(crate) fn surfaces_for_identity(identity: CoreDomainIdentity) -> Vec<&'static str> {
-    let mut surfaces = DOMAIN_SURFACE_ROWS
-        .iter()
-        .filter_map(|row| {
-            (identity_from_row(row.width, row.bits) == Some(identity)).then_some(row.surfaces)
-        })
-        .flatten()
-        .map(|surface| surface.name)
-        .collect::<Vec<_>>();
-    surfaces.sort_unstable();
-    surfaces.dedup();
-    surfaces
-}
 
 #[cfg(test)]
 mod tests {
@@ -109,10 +96,4 @@ mod tests {
         assert_eq!(domain_identity_for_surface("sqrt"), None);
     }
 
-    #[test]
-    fn reverse_projection_uses_domain_identity_not_byte_position() {
-        let cadr = domain_identity_for_surface("cadr").unwrap();
-        assert!(surfaces_for_identity(cadr).contains(&"cadr"));
-        assert_eq!((cadr.width(), cadr.packed_bits()), (4, 0b1011));
-    }
 }
