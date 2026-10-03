@@ -1,8 +1,8 @@
-# 2845 — Full Historical Occupancy of Domain 8 (D8)
+# 2410 — Full Historical Occupancy of Domain 8 (D8)
 
 **Status:** OWNER-DIRECTED METHOD, AGENT-DERIVED CONTENT. The D3→D6 occupancy rule was directed by the owner on 2026-10-03; the 192 historical coordinates allocated here are an agent-derived chronological continuation and are **not** an owner-ratified semantic allocation.
 
-Українська версія: [2845-d8-historical-full-occupancy.uk.md](2845-d8-historical-full-occupancy.uk.md).
+Українська версія: [2410-d8-historical-full-occupancy.uk.md](2410-d8-historical-full-occupancy.uk.md).
 
 **Machine-readable map:** [`knowledge/d8-historical-full-map.json`](../../knowledge/d8-historical-full-map.json)
 **Builder:** [`scripts/build-d8-historical-full-map.py`](../../scripts/build-d8-historical-full-map.py)

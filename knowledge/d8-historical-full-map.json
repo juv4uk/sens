@@ -3,8 +3,8 @@
   "domain": "Core.D8",
   "width": 8,
   "capacity": 256,
-  "authority": "owner-directive-2026-10-03-d8-fill-by-d3-d6-method",
-  "issue": 2845,
+  "authority": "owner-ratified D8 domain width/ontology only (issue 2410, 2026-10-03). Occupancy below is AGENT-DERIVED EVIDENCE, not owner-ratified semantic authority: #2410 states that a D8 coordinate does not become occupied/callable without the relevant ratified law/witness, and that a PR occupancy map does not replace owner semantic authority.",
+  "issue": 2410,
   "description": "Full chronological early-Lisp capability occupancy of Domain 8 following D6 parents, applying the ratified D3-D6 occupancy rule at width 8.",
   "method": {
     "occupancy_rule": "A D8 coordinate is a D6 coordinate extended by two bits: each of the 64 D6 coordinates has exactly four D8 children, exactly as each D4 coordinate had two D5 children and each D5 coordinate had two D6 children.",

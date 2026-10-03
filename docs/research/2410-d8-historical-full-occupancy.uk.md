@@ -1,8 +1,8 @@
-# 2845 — Повна історична заповненість Домену 8 (D8)
+# 2410 — Повна історична заповненість Домену 8 (D8)
 
 **Статус:** МЕТОД — ДИРЕКТИВА ВЛАСНИКА; ЗМІСТ — АГЕНТСЬКА ПОХІДНА. Правило заповнення D3→D6 було задано власником 2026-10-03; 192 історичні координати розподілені тут агентом і **не** є ратифікованим власником семантичним розподілом.
 
-English version: [2845-d8-historical-full-occupancy.md](2845-d8-historical-full-occupancy.md).
+English version: [2410-d8-historical-full-occupancy.md](2410-d8-historical-full-occupancy.md).
 
 **Машиночитна карта:** [`knowledge/d8-historical-full-map.json`](../../knowledge/d8-historical-full-map.json)
 **Будильник:** [`scripts/build-d8-historical-full-map.py`](../../scripts/build-d8-historical-full-map.py)

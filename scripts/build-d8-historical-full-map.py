@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#2845 — build the D8 historical full map by the D3→D6 occupancy rule.
+"""#2410 — build the D8 historical full map by the D3→D6 occupancy rule.
 
 Method (identical to the ratified D5/D6 rule, applied at width 8):
 
@@ -42,7 +42,7 @@ D6_PATH = ROOT / "knowledge" / "d6-historical-full-map.json"
 OUT_PATH = ROOT / "knowledge" / "d8-historical-full-map.json"
 
 SCHEMA = "d8-historical-full-map/v1"
-ISSUE = 2845
+ISSUE = 2410
 
 SELECTOR_ROOTS = ("101", "110")
 
@@ -459,7 +459,13 @@ def build() -> dict:
         "domain": "Core.D8",
         "width": 8,
         "capacity": 256,
-        "authority": "owner-directive-2026-10-03-d8-fill-by-d3-d6-method",
+        "authority": (
+            "owner-ratified D8 domain width/ontology only (issue 2410, 2026-10-03). "
+            "Occupancy below is AGENT-DERIVED EVIDENCE, not owner-ratified semantic authority: "
+            "#2410 states that a D8 coordinate does not become occupied/callable without the "
+            "relevant ratified law/witness, and that a PR occupancy map does not replace owner "
+            "semantic authority."
+        ),
         "issue": ISSUE,
         "description": DESCRIPTION,
         "method": {

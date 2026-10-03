@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#2845 — D8 historical full-map constitutional guard.
+"""#2410 — D8 historical full-map constitutional guard.
 
 Checks only facts that follow from the ratified D3-D6 occupancy rule plus the
 already admitted D3 selector law:
