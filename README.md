@@ -266,6 +266,12 @@ Canonical source extension: **`.lisp`**.
 
 ---
 
+### Source/implementation compatibility
+
+- **Канонічне розширення вихідного коду — `.lisp`.**
+- `.wsm` і `.my` — **legacy aliases** для compatibility/history; вони не створюють окремої semantic identity.
+- Rust — **референсна реалізація** поточного runtime/mechanism layer, а не власник semantics.
+
 ## Execution substrates
 
 Rust — reference mechanism, не semantic authority.
