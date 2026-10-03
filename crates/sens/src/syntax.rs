@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sens8;
+use crate::{CallableDomainId, Sens8};
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -49,7 +49,10 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
-    Sid(Sens8),
+    /// Canonical callable identity: exact binary word + semantic domain.
+    Sid(CallableDomainId),
+    /// Compatibility-only historical exact-eight identity.
+    LegacySid(Sens8),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -77,7 +80,10 @@ pub enum ExprKind {
     /// дають один і той самий вузол. Парсер цей варіант не породжує.
     /// SENS call: the function slot is exactly one byte (`Sens8`), no name
     /// text. Produced only by `eval::lower` after parsing.
-    Call(Sens8, Rc<[Expr]>),
+    /// Canonical domain-qualified call head.
+    Call(CallableDomainId, Rc<[Expr]>),
+    /// Compatibility-only historical exact-eight call head.
+    LegacyCall(Sens8, Rc<[Expr]>),
     /// Параметр замикання за числовими координатами: слот `index` кадру
     /// виклику на `depth` кадрів вище. Імені тут немає навмисно (#1697,
     /// контракт 10.0 `locals-are-slots-not-names`): виконання залежить лише від
@@ -90,8 +96,8 @@ pub enum ExprKind {
     Local { depth: u32, index: u32 },
 }
 
-// Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
-// збірка має впасти, а не мовчки розійтися з таблицею функцій.
+// Historical Sens8 transport remains exactly one host byte, but canonical
+// callable identity is now domain-qualified and intentionally wider in-memory.
 const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
 
 /// Shared nesting cap for every recursive structure walk over reader
@@ -128,6 +134,8 @@ pub(crate) mod fasl {
     const TAG_F32_BUFFER: u8 = 9;
     // #1697: числові координати локальної змінної; ім'я не записується.
     const TAG_LOCAL: u8 = 10;
+    // #2821: additive canonical callable-domain identity tag.
+    const TAG_CALLABLE_DOMAIN: u8 = 11;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -162,7 +170,12 @@ pub(crate) mod fasl {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
             }
-            ExprKind::Sid(sid) => {
+            ExprKind::Sid(identity) => {
+                out.push(TAG_CALLABLE_DOMAIN);
+                out.push(identity.transport_domain_tag());
+                out.push(identity.packed_bits());
+            }
+            ExprKind::LegacySid(sid) => {
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
             }
@@ -191,8 +204,18 @@ pub(crate) mod fasl {
                 encode_expr(head, out);
                 encode_expr(tail, out);
             }
-            // Зведений виклик зберігається як список із 1-байтовою головою.
-            ExprKind::Call(sid, arguments) => {
+            ExprKind::Call(identity, arguments) => {
+                out.push(TAG_LIST);
+                put_u32(out, arguments.len() as u32 + 1);
+                out.push(TAG_CALLABLE_DOMAIN);
+                out.push(identity.transport_domain_tag());
+                out.push(identity.packed_bits());
+                for argument in arguments.iter() {
+                    encode_expr(argument, out);
+                }
+            }
+            // Historical exact-eight call encoding remains compatibility-only.
+            ExprKind::LegacyCall(sid, arguments) => {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
                 out.push(TAG_BINARY);
@@ -237,7 +260,13 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::LegacySid(crate::Sens8::from_packed_byte(value))
+            }
+            TAG_CALLABLE_DOMAIN => {
+                let domain = *bytes.get(*pos)?;
+                let payload = *bytes.get(*pos + 1)?;
+                *pos += 2;
+                ExprKind::Sid(crate::CallableDomainId::from_transport_parts(domain, payload)?)
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
@@ -362,6 +391,7 @@ pub(crate) mod wire {
     const TAG_SYMBOL: u8 = 0x56;
     const TAG_PAIR: u8 = 0x57;
     const TAG_LOCAL: u8 = 0x58;
+    const TAG_CALLABLE_DOMAIN: u8 = 0x59;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
 
@@ -437,7 +467,12 @@ pub(crate) mod wire {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
             }
-            ExprKind::Sid(sid) => {
+            ExprKind::Sid(identity) => {
+                out.push(TAG_CALLABLE_DOMAIN);
+                out.push(identity.transport_domain_tag());
+                out.push(identity.packed_bits());
+            }
+            ExprKind::LegacySid(sid) => {
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
             }
@@ -459,7 +494,16 @@ pub(crate) mod wire {
                 encode_expr(head, out);
                 encode_expr(tail, out);
             }
-            ExprKind::Call(sid, arguments) => {
+            ExprKind::Call(identity, arguments) => {
+                put_list_header(out, arguments.len() + 1);
+                out.push(TAG_CALLABLE_DOMAIN);
+                out.push(identity.transport_domain_tag());
+                out.push(identity.packed_bits());
+                for argument in arguments.iter() {
+                    encode_expr(argument, out);
+                }
+            }
+            ExprKind::LegacyCall(sid, arguments) => {
                 put_list_header(out, arguments.len() + 1);
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
@@ -566,7 +610,13 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::LegacySid(crate::Sens8::from_packed_byte(value))
+            }
+            TAG_CALLABLE_DOMAIN => {
+                let domain = *bytes.get(*pos)?;
+                let payload = *bytes.get(*pos + 1)?;
+                *pos += 2;
+                ExprKind::Sid(crate::CallableDomainId::from_transport_parts(domain, payload)?)
             }
             TAG_LOCAL => {
                 let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
