@@ -213,7 +213,7 @@ mod tests {
     fn explicit_legacy_byte_does_not_infer_a_domain() {
         let expr = lower_one("(00000010 1)");
         match expr.kind {
-            ExprKind::Call(sid, _) => assert_eq!(sid, crate::sens!(00000010)),
+            ExprKind::Call(sid, _) => assert_eq!(sid.packed_byte(), 0b0000_0010),
             other => panic!("legacy byte must remain compatibility Call, got {other:?}"),
         }
     }
