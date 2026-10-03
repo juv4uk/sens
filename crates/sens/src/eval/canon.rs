@@ -312,6 +312,15 @@ pub(crate) fn invoke_domain_identity(
         }
     }
 
+    if let Some(byte) = semantic_registry::legacy_backend_byte_for_domain(identity) {
+        return super::legacy_backend::invoke_legacy_mechanism_byte(
+            byte,
+            args,
+            environment,
+            span,
+        );
+    }
+
     Err(LanguageError::new(
         ErrorKind::Type,
         format!("domain identity has no admitted value-call mechanism: {identity}"),
@@ -389,6 +398,17 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
             return;
         }
         environment.bind_domain_code_slot_once(identity, value.clone());
+
+        // Old Lisp bootstrap files still contain exact-eight call heads.
+        // Mirror only the mechanism, never the identity, until those sources
+        // are rewritten to domain-native binary source.
+        if let Some(byte) = semantic_registry::legacy_backend_byte_for_domain(identity) {
+            super::legacy_backend::bind_legacy_mechanism_alias_once(
+                byte,
+                value,
+                environment,
+            );
+        }
         return;
     }
 
