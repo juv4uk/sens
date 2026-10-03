@@ -192,11 +192,11 @@ def build() -> dict[str, Any]:
             placement_gap = "BLOCKED-BY-DOMAIN"
             missing = "exact-domain/width theorem; protocol axes are already factored by #2522/#2591"
         elif op == "TRANSFORMER":
-            readiness = "NEEDS-LAW"
-            capability_status = "PARTIALLY-FACTORIZED-PROTOCOL"
-            domain_gap = "BLOCKED-BY-PROTOCOL-LAW"
-            placement_gap = "BLOCKED-BY-LAW"
-            missing = "close #2567 whole-form + expansion-stage relation, then select exact domain/width"
+            readiness = "NEEDS-DOMAIN"
+            capability_status = "PROVEN-MULTI-DELTA-SPECIAL-CALL-PROTOCOL"
+            domain_gap = "EXACT-DOMAIN-UNRESOLVED"
+            placement_gap = "BLOCKED-BY-DOMAIN"
+            missing = "exact-domain/width theorem; #2616 already rejects D5 one-delta child"
         else:
             raise AssertionError(f"unclassified historical row: {op}")
 
@@ -229,8 +229,7 @@ def build() -> dict[str, Any]:
 
     require([r["historical_capability"] for r in owner_ready] == ["SETQ"],
             "owner-ready set changed; review required")
-    require([r["historical_capability"] for r in needs_law] == ["TRANSFORMER"],
-            "surviving NEEDS-LAW set changed; review required")
+    require(needs_law == [], "audit is trying to re-open already-proved capability laws")
     require(set(r["historical_capability"] for r in needs_domain) ==
             {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
             "surviving NEEDS-DOMAIN set changed; review required")
