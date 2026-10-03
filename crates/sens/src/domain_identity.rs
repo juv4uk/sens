@@ -35,6 +35,17 @@ impl fmt::Debug for CoreDomainIdentity {
     }
 }
 
+impl fmt::Display for CoreDomainIdentity {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            formatter,
+            "{:0width$b}",
+            self.packed_bits(),
+            width = self.width()
+        )
+    }
+}
+
 impl CoreDomainIdentity {
     /// Exact domain width carried by this identity.
     pub const fn width(self) -> usize {
