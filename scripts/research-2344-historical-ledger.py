@@ -24,6 +24,7 @@ PLACEMENT = {
     "unplaced-composite",
     "unplaced-two-axis-capability",
     "unplaced-active-comparison",
+    "unplaced-transformer-protocol",
 }
 SENS_CLASS = {
     "DERIVED-D1-D4",
@@ -31,6 +32,7 @@ SENS_CLASS = {
     "NEW-OBSERVABLE-CAPABILITY",
     "COMPOSITE",
     "RAW+ENV-TWO-CAPABILITIES",
+    "FORM-TRANSFORMER-PROTOCOL",
     "UNRESOLVED",
 }
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
