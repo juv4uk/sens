@@ -11,7 +11,7 @@ use sens::{eval_program, Session};
 
 fn eval_world(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
@@ -1001,7 +1001,7 @@ fn equal_current_clauses_do_not_erase_distinct_world_histories() {
 #[test]
 fn world_transition_witness_proves_contract_in_lisp() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
