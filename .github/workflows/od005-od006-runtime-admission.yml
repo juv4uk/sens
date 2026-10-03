@@ -44,7 +44,8 @@ jobs:
             echo "## OD-005 / OD-006 runtime admission"
             echo
             echo "- Owner residency: D5 32/32, D6 64/64"
-            echo "- Current direct owner-coordinate identity admission: 0/96"
-            echo "- Blocker: legacy Sens8-only reader/carrier"
-            echo "- This is a migration audit, not a residency rollback."
+            echo "- Exact-width W5/W6 identity admission: 96/96"
+            echo "- Semantic occupancy/callability: measured separately from identity"
+            echo "- Legacy Sens8 remains W8 compatibility only."
+            echo "- This is a migration audit, not a claim that all historical D5/D6 cells are callable."
           } >> "$GITHUB_STEP_SUMMARY"

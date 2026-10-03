@@ -6,10 +6,9 @@ Transitional integration guard. It measures the current gap between:
 and
   executable canonical identity admission (reader/carrier/registry).
 
-It intentionally makes no evaluator/lowering claims beyond UNMEASURED.
-When the identity carrier/reader migrates away from Sens8-only, this guard
-must fail and be updated to measure the new architecture rather than silently
-preserving the old baseline.
+It intentionally separates exact-width identity admission from semantic
+occupancy/callability. W5/W6 may be preserved as CoreDomainIdentity without
+claiming that every historical D5/D6 coordinate has current meaning.
 """
 
 from __future__ import annotations
@@ -50,14 +49,11 @@ def source_contract() -> dict:
     syntax = SYNTAX.read_text(encoding="utf-8")
     registry = REGISTRY.read_text(encoding="utf-8")
 
-    assert "token.len() == 8" in parser, (
-        "reader is no longer exact-8-only; update #2776 audit for the new identity grammar"
-    )
+    assert "promote_exact_domain_head" in parser
+    assert "CoreDomainIdentity::from_source_word" in parser
+    assert "DomainIdentity(CoreDomainIdentity)" in syntax
     assert "pub type Sens = Sens8" in sens, (
-        "runtime identity carrier changed; update #2776 audit instead of preserving legacy result"
-    )
-    assert "ExprKind::Sid(crate::Sens8::from_packed_byte(value))" in syntax, (
-        "FASL binary identity transport changed; update #2776 audit"
+        "legacy W8 compatibility carrier changed; update this audit explicitly"
     )
 
     widths = {
@@ -68,12 +64,12 @@ def source_contract() -> dict:
     assert widths == {8}, f"legacy registry key widths changed: {sorted(widths)}"
 
     return {
-        "reader": "bare binary SID is admitted only at exact width 8",
-        "runtime_identity": "Sens = Sens8",
-        "fasl_binary_payload": "one packed byte",
-        "registry_identity_keys": "exactly eight bits",
+        "reader": "W3-W6 executable list heads lift to CoreDomainIdentity; W8 remains legacy",
+        "runtime_identity": "CoreDomainIdentity preserves D3-D6 width; Sens8 remains compatibility",
+        "fasl_binary_payload": "legacy one-byte transport remains separate",
+        "registry_identity_keys": "legacy surface registry remains eight-bit compatibility metadata",
         "non_conclusion": (
-            "owner residency is not rejected; runtime admission is not yet implemented"
+            "identity admission does not imply current occupancy, callability, or semantic meaning"
         ),
     }
 
@@ -97,18 +93,18 @@ def build() -> dict:
                     "name_projection": name,
                     "category": item["category"],
                     "owner_resident": True,
-                    "direct_binary_reader_identity": False,
-                    "exact_width_preserved_in_runtime_identity": False,
+                    "direct_binary_reader_identity": True,
+                    "exact_width_preserved_in_runtime_identity": True,
                     "owner_coordinate_registry_identity": False,
                     "legacy_surface_sid8": legacy,
                     "legacy_surface_projection_present": legacy is not None,
                     "read_print_roundtrip": False,
-                    "lowering_class": "UNMEASURED",
-                    "native_evaluator": "UNMEASURED",
+                    "lowering_class": "DOMAIN-IDENTITY-AVAILABLE",
+                    "native_evaluator": "MEANING-UNMEASURED",
                     "derived_lisp": "UNMEASURED",
                     "compiler_support": "UNMEASURED",
-                    "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-                    "blocker": "LEGACY-SENS8-ONLY-CARRIER",
+                    "conformance": "IDENTITY-ADMITTED-MEANING-UNMEASURED",
+                    "blocker": None,
                 }
             )
 
@@ -118,7 +114,7 @@ def build() -> dict:
     assert all(row["owner_resident"] for row in rows)
 
     return {
-        "schema": "od005-od006-runtime-admission-audit/v1",
+        "schema": "od005-od006-runtime-admission-audit/v2",
         "authority": "#2538 OD-005/OD-006 + #2762/#2766",
         "generated_from": [
             "knowledge/d5-historical-full-map.json",
@@ -147,6 +143,10 @@ def build() -> dict:
             ),
             "blocked_by_identity_admission": sum(
                 row["conformance"] == "BLOCKED-BY-IDENTITY-ADMISSION"
+                for row in rows
+            ),
+            "meaning_unmeasured_after_identity_admission": sum(
+                row["conformance"] == "IDENTITY-ADMITTED-MEANING-UNMEASURED"
                 for row in rows
             ),
         },
@@ -180,7 +180,7 @@ def main() -> None:
     for key, value in summary.items():
         print(f"{key}={value}")
     print("NON-CONCLUSION: residency != irreducibility")
-    print("NON-CONCLUSION: no D5/D6 semantic implementation is added here")
+    print("NON-CONCLUSION: exact-width identity admission != D5/D6 semantic occupancy")
 
 
 if __name__ == "__main__":
