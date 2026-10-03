@@ -110,15 +110,22 @@ impl PackedBitstream {
             return None;
         }
 
-        let mut value = 0u8;
-        for position in bit_offset..end {
-            let byte = self.bytes[position / 8];
-            let bit_in_byte = position % 8;
-            let bit = (byte >> (7 - bit_in_byte)) & 1;
-            value = (value << 1) | bit;
-        }
+        let byte_index = bit_offset / 8;
+        let bit_in_byte = bit_offset % 8;
+        let first = *self.bytes.get(byte_index)? as u16;
+        let second = if bit_in_byte + N > 8 {
+            *self.bytes.get(byte_index + 1)? as u16
+        } else {
+            0
+        };
 
-        Bits::<N>::new(value)
+        // N <= 8, so every word fits in at most two adjacent bytes.
+        // Align those bytes into one MSB-first 16-bit window, then extract
+        // the requested exact-width field with one shift and mask.
+        let window = (first << 8) | second;
+        let shift = 16 - bit_in_byte - N;
+        let mask = (1u16 << N) - 1;
+        Bits::<N>::new(((window >> shift) & mask) as u8)
     }
 
     /// Split the mechanical container into its physical payload and exact bit
@@ -206,6 +213,88 @@ const fn byte_len_for_bits(bit_len: usize) -> usize {
 mod tests {
     use super::*;
     use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8};
+
+    fn reference_read<const N: usize>(
+        packed: &PackedBitstream,
+        bit_offset: usize,
+    ) -> Option<Bits<N>> {
+        if N == 0 || N > 8 {
+            return None;
+        }
+        let end = bit_offset.checked_add(N)?;
+        if end > packed.bit_len {
+            return None;
+        }
+
+        let mut value = 0u8;
+        for position in bit_offset..end {
+            let byte = packed.bytes[position / 8];
+            let bit_in_byte = position % 8;
+            let bit = (byte >> (7 - bit_in_byte)) & 1;
+            value = (value << 1) | bit;
+        }
+        Bits::<N>::new(value)
+    }
+
+    fn assert_read_parity<const N: usize>(packed: &PackedBitstream) {
+        for offset in 0..=packed.bit_len {
+            assert_eq!(
+                packed.read::<N>(offset).map(|word| word.packed_bits()),
+                reference_read::<N>(packed, offset).map(|word| word.packed_bits()),
+                "N={N} offset={offset} bit_len={}",
+                packed.bit_len
+            );
+        }
+    }
+
+    #[test]
+    fn two_byte_window_matches_reference_for_all_patterns_and_widths() {
+        for raw in 0u32..=u16::MAX as u32 {
+            let packed = PackedBitstream {
+                bytes: vec![(raw >> 8) as u8, raw as u8],
+                bit_len: 16,
+            };
+
+            assert_read_parity::<1>(&packed);
+            assert_read_parity::<2>(&packed);
+            assert_read_parity::<3>(&packed);
+            assert_read_parity::<4>(&packed);
+            assert_read_parity::<5>(&packed);
+            assert_read_parity::<6>(&packed);
+            assert_read_parity::<7>(&packed);
+            assert_read_parity::<8>(&packed);
+        }
+    }
+
+    #[test]
+    fn two_byte_window_matches_reference_on_partial_tails() {
+        for raw in [0x0000u16, 0xffff, 0xa55a, 0x5aa5] {
+            for bit_len in 1usize..16 {
+                let byte_len = byte_len_for_bits(bit_len);
+                let mut bytes = vec![(raw >> 8) as u8, raw as u8];
+                bytes.truncate(byte_len);
+
+                let remainder = bit_len % 8;
+                if remainder != 0 {
+                    let unused = 8 - remainder;
+                    let keep_mask = !(((1u16 << unused) - 1) as u8);
+                    *bytes.last_mut().unwrap() &= keep_mask;
+                }
+
+                let packed = PackedBitstream::from_parts(bytes, bit_len).unwrap();
+                assert_read_parity::<1>(&packed);
+                assert_read_parity::<2>(&packed);
+                assert_read_parity::<3>(&packed);
+                assert_read_parity::<4>(&packed);
+                assert_read_parity::<5>(&packed);
+                assert_read_parity::<6>(&packed);
+                assert_read_parity::<7>(&packed);
+                assert_read_parity::<8>(&packed);
+                assert!(packed.read::<0>(0).is_none());
+                assert!(packed.read::<9>(0).is_none());
+            }
+        }
+    }
 
     #[test]
     fn program_words_fill_bytes_sequentially() {
