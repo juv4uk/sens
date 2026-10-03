@@ -1,0 +1,443 @@
+{
+  "schema": "domain-legacy-compat-projection/v1",
+  "authority": "compatibility-only",
+  "semantic_authority": false,
+  "description": "Sparse historical surface/backend projection keyed by already-canonical exact domain identity. Removing a row must never remove domain residency.",
+  "source_snapshot": "feat/domain-registry-authority / PR #2941 hand-authored migration snapshot",
+  "rows": [
+    {
+      "domain": "Core.D3",
+      "coordinate": "001",
+      "name": "QUOTE",
+      "legacy_mechanism": "00000001",
+      "surfaces": [
+        "quote",
+        "як-є",
+        "як-є",
+        "svarūpa",
+        "'"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D3",
+      "coordinate": "010",
+      "name": "ATOM",
+      "legacy_mechanism": "00000010",
+      "surfaces": [
+        "atom?",
+        "атом?",
+        "атом?",
+        "aṇu",
+        ".?"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D3",
+      "coordinate": "011",
+      "name": "COND",
+      "legacy_mechanism": "00000111",
+      "surfaces": [
+        "cond",
+        "за-умовою",
+        "за-умовою",
+        "anukrama",
+        "?:"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D3",
+      "coordinate": "100",
+      "name": "CONS",
+      "legacy_mechanism": "00000100",
+      "surfaces": [
+        "cons",
+        "сполучити",
+        "сполучити",
+        "saṃyuj"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D3",
+      "coordinate": "101",
+      "name": "CAR",
+      "legacy_mechanism": "00000101",
+      "surfaces": [
+        "car",
+        "перше",
+        "перше",
+        "ādi",
+        ":п"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D3",
+      "coordinate": "110",
+      "name": "CDR",
+      "legacy_mechanism": "00000110",
+      "surfaces": [
+        "cdr",
+        "решта",
+        "решта",
+        "śeṣa",
+        ":р"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D3",
+      "coordinate": "111",
+      "name": "EQ",
+      "legacy_mechanism": "00000011",
+      "surfaces": [
+        "eq?",
+        "тотожне?",
+        "тотожне?",
+        "abheda",
+        "=?"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D4",
+      "coordinate": "0000",
+      "name": "APPLY",
+      "legacy_mechanism": "10101111",
+      "surfaces": [
+        "apply",
+        "застосувати",
+        "застосувати"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D4",
+      "coordinate": "0001",
+      "name": "EVAL",
+      "legacy_mechanism": "01001101",
+      "surfaces": [
+        "eval",
+        "обчислити",
+        "обчислити",
+        "vicāraṇa"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D4",
+      "coordinate": "0010",
+      "name": "LAMBDA",
+      "legacy_mechanism": "00001000",
+      "surfaces": [
+        "lambda",
+        "функція",
+        "функція"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D4",
+      "coordinate": "0011",
+      "name": "DEFINE",
+      "legacy_mechanism": "00001001",
+      "surfaces": [
+        "define",
+        "визначити",
+        "визначити"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D4",
+      "coordinate": "1000",
+      "name": "LIST",
+      "legacy_mechanism": "00100111",
+      "surfaces": [
+        "list",
+        "список",
+        "список",
+        "śreṇī"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D4",
+      "coordinate": "1010",
+      "name": "CAAR",
+      "legacy_mechanism": "00110011",
+      "surfaces": [
+        "caar",
+        "перше-від-першого"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D4",
+      "coordinate": "1011",
+      "name": "CADR",
+      "legacy_mechanism": "00110100",
+      "surfaces": [
+        "cadr",
+        "перше-від-решти"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D4",
+      "coordinate": "1101",
+      "name": "CDDR",
+      "legacy_mechanism": "00110101",
+      "surfaces": [
+        "cddr",
+        "решта-від-решти"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "00100",
+      "name": "LABEL",
+      "legacy_mechanism": "10101010",
+      "surfaces": [
+        "label",
+        "мітка",
+        "мітка"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "01010",
+      "name": "PLUS",
+      "legacy_mechanism": "00001100",
+      "surfaces": [
+        "plus",
+        "додати",
+        "додати",
+        "yoga",
+        "+"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "01011",
+      "name": "DIFFERENCE",
+      "legacy_mechanism": "00001101",
+      "surfaces": [
+        "difference",
+        "відняти",
+        "відняти",
+        "viyoga",
+        "-"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "10000",
+      "name": "APPEND",
+      "legacy_mechanism": "00101001",
+      "surfaces": [
+        "append",
+        "приєднати",
+        "приєднати",
+        "saṅkalana"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "10001",
+      "name": "REVERSE",
+      "legacy_mechanism": "00101010",
+      "surfaces": [
+        "reverse",
+        "зворот",
+        "зворот",
+        "viloma"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "10010",
+      "name": "TIMES",
+      "legacy_mechanism": "00001110",
+      "surfaces": [
+        "times",
+        "помножити",
+        "помножити",
+        "guṇana",
+        "*"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "10011",
+      "name": "QUOTIENT",
+      "legacy_mechanism": "00010100",
+      "surfaces": [
+        "quotient",
+        "частка",
+        "частка",
+        "bhāga"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "11100",
+      "name": "ASSOC",
+      "legacy_mechanism": "00101101",
+      "surfaces": [
+        "assoc",
+        "знайти-за-ключем",
+        "знайти-за-ключем",
+        "saṃbandha"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D5",
+      "coordinate": "11111",
+      "name": "SUBST",
+      "legacy_mechanism": "10101100",
+      "surfaces": [
+        "subst",
+        "замінити",
+        "замінити"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "001000",
+      "name": "LET",
+      "legacy_mechanism": "10011100",
+      "surfaces": [
+        "let",
+        "нехай",
+        "нехай"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "001001",
+      "name": "LET*",
+      "legacy_mechanism": "10011101",
+      "surfaces": [
+        "let*",
+        "нехай*",
+        "нехай-послідовно"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "010101",
+      "name": "ABS",
+      "legacy_mechanism": "00010000",
+      "surfaces": [
+        "abs",
+        "модуль",
+        "модуль",
+        "rūpa"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "011101",
+      "name": "MIN",
+      "legacy_mechanism": "00010001",
+      "surfaces": [
+        "min",
+        "найменше",
+        "найменше",
+        "alpatara"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "011111",
+      "name": "MAX",
+      "legacy_mechanism": "00010010",
+      "surfaces": [
+        "max",
+        "найбільше",
+        "найбільше",
+        "brhattara"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "100001",
+      "name": "LENGTH",
+      "legacy_mechanism": "00101000",
+      "surfaces": [
+        "length",
+        "довжина",
+        "довжина",
+        "pramāṇa"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "100011",
+      "name": "NTH",
+      "legacy_mechanism": "00101011",
+      "surfaces": [
+        "nth",
+        "елемент-списку-за-індексом",
+        "елемент-списку-за-індексом",
+        "kramāṅka"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "101111",
+      "name": "CADDDR",
+      "legacy_mechanism": "00110110",
+      "surfaces": [
+        "cadddr",
+        "перше-після-трьох-решт"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "111101",
+      "name": "MAPLIST",
+      "legacy_mechanism": "10101110",
+      "surfaces": [
+        "maplist",
+        "відобразити-залишки",
+        "відобразити-залишки"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    },
+    {
+      "domain": "Core.D6",
+      "coordinate": "111110",
+      "name": "SUBLIS",
+      "legacy_mechanism": "10101101",
+      "surfaces": [
+        "sublis",
+        "підставити-пари",
+        "підставити-пари"
+      ],
+      "provenance": "PR #2941 migration snapshot; compatibility projection only"
+    }
+  ]
+}
