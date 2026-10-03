@@ -87,6 +87,34 @@ pub struct ArityDiagnostic {
     pub span: Span,
 }
 
+const D3_QUOTE: (usize, u8) = (3, 0b001);
+
+/// Resolve an admitted human surface through tooling metadata that already
+/// carries exact domain identity. No legacy byte is used to infer a domain.
+fn surface_domain_coordinate(surface: &str) -> Option<(usize, u8)> {
+    sens::language_items()
+        .into_iter()
+        .find(|item| item.name == surface)
+        .and_then(|item| item.domain_identity)
+        .map(|identity| (identity.width(), identity.packed_bits()))
+}
+
+/// True when an expression is Core.D3 QUOTE.
+///
+/// Canonical domain AST and admitted surfaces use exact domain identity.
+/// Historical exact-eight QUOTE remains only as an explicit compatibility
+/// fallback while legacy human-parser output is retired.
+fn is_quote_head(expr: &Expr) -> bool {
+    match &expr.kind {
+        ExprKind::DomainIdentity(identity) => {
+            (identity.width(), identity.packed_bits()) == D3_QUOTE
+        }
+        ExprKind::Sid(legacy) => legacy.packed_byte() == 0b0000_0001,
+        ExprKind::Symbol(surface) => surface_domain_coordinate(surface) == Some(D3_QUOTE),
+        _ => false,
+    }
+}
+
 /// Diagnose only calls whose head is a canonical runtime builtin or
 /// syntax-dispatched form. Unknown/dynamic heads and locally shadowed
 /// first-class builtins remain untouched; quoted subtrees are data.
@@ -156,14 +184,13 @@ fn collect_arity_diagnostics(
                     }
                 }
             }
-            // Same bug class as the symbol-occurrence data-preservation check: routing
-            // must be by exact SID, never by one human surface.
-            let head_is_data_preserving_sid = head_name
-                .is_some_and(|name| sens::surface_has_sid(name, sens::sens!(00000001)));
+            // QUOTE is a Core.D3 identity. Surface spelling is only a
+            // projection, and old exact-eight parser output is compatibility.
+            let head_is_quote = elements.first().is_some_and(is_quote_head);
             for (index, element) in elements.iter().enumerate() {
                 collect_arity_diagnostics(
                     element,
-                    head_is_data_preserving_sid && index > 0,
+                    head_is_quote && index > 0,
                     local_defs,
                     items,
                     diagnostics,
@@ -202,23 +229,14 @@ fn walk_symbols(expr: &Expr, in_quote: bool, out: &mut Vec<SymbolOccurrence>) {
             }
         }
         ExprKind::List(items) => {
-            // SID 00000001 preserves its argument as data. Accept either
-            // the SID directly or a source/UI surface that mechanically routes
-            // to it; no named function identity participates.
-            let head_is_data_preserving_sid = items
-                .first()
-                .map(|h| match &h.kind {
-                    ExprKind::Sid(sid) => *sid == sens::sens!(00000001),
-                    ExprKind::Symbol(surface) => {
-                        sens::surface_has_sid(surface, sens::sens!(00000001))
-                    }
-                    _ => false,
-                })
-                .unwrap_or(false);
+            // Core.D3 QUOTE preserves its argument as data. Human spellings
+            // resolve through domain-qualified tooling metadata; old exact-8
+            // parser output is a compatibility-only fallback.
+            let head_is_quote = items.first().is_some_and(is_quote_head);
             for (i, item) in items.iter().enumerate() {
                 walk_symbols(
                     item,
-                    in_quote || (head_is_data_preserving_sid && i > 0),
+                    in_quote || (head_is_quote && i > 0),
                     out,
                 );
             }
@@ -365,6 +383,13 @@ mod quote_surface_tests {
     //! the Ukrainian surface (`як-є`) had its quoted symbols wrongly
     //! treated as live code references.
     use super::*;
+
+    #[test]
+    fn quote_surfaces_resolve_through_exact_d3_identity() {
+        assert_eq!(surface_domain_coordinate("quote"), Some(D3_QUOTE));
+        assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
+        assert_eq!(surface_domain_coordinate("+"), None);
+    }
 
     #[test]
     fn english_quote_excludes_its_datum_from_code_references() {
