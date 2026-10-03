@@ -1,6 +1,7 @@
-; Lisp-owned Rust projection of the canonical semantic registry.
+; Rust projection of the historical flat surface registry during domain migration.
 ;
-; Authority: lib/surface/semantic-registry.lisp
+; Migration source: lib/surface/semantic-registry.lisp
+; Canonical semantic authority is exact domain identity + admitted law.
 ;
 ; This generator reads the registry as ordinary Lisp data. It emits only a
 ; mechanical Rust runtime projection. Rust never parses the canonical Lisp
@@ -85,11 +86,11 @@
 (00001001 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
-    "// Authority: lib/surface/semantic-registry.lisp\n"
+    "// MIGRATION PROJECTION — DO NOT USE AS SEMANTIC AUTHORITY.\n"
+    "// Historical surface source: lib/surface/semantic-registry.lisp\n"
     "// Generator: scripts/generate-rust-semantic-registry.lisp\n"
-    "//\n"
-    "// Binary identities below are an implementation projection only.\n"
-    "// Canonical semantic identity remains the bare binary token in the Lisp registry.\n"
+    "// Canonical identity is exact domain + bits + admitted law.\n"
+    "// Historical byte rows exist only until their consumers migrate.\n"
     "\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
     "pub(super) struct SemanticSurface {\n"
