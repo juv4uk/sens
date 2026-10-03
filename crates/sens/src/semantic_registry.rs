@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::Sens8;
+use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity, Sens8};
 
 mod generated {
     include!("semantic_registry_generated.rs");
@@ -21,6 +21,28 @@ mod generated {
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
+
+pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
+    let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
+    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+    match byte {
+        0b0000_0001 => Some(d3(0b001)), // QUOTE
+        0b0000_0010 => Some(d3(0b010)), // ATOM
+        0b0000_0111 => Some(d3(0b011)), // COND
+        0b0000_0100 => Some(d3(0b100)), // CONS
+        0b0000_0101 => Some(d3(0b101)), // CAR
+        0b0000_0110 => Some(d3(0b110)), // CDR
+        0b0000_0011 => Some(d3(0b111)), // EQ
+        0b0000_1000 => Some(d4(0b0010)), // LAMBDA
+        0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        _ => None,
+    }
+}
+
+pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
+    admitted_semantic_id_for_surface(name)
+        .and_then(|legacy| domain_identity_from_registry_byte(legacy.packed_byte()))
+}
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
 }
@@ -128,6 +150,29 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 mod tests {
     use super::*;
     use generated::SemanticSurface;
+
+    #[test]
+    fn migrated_registry_roles_are_domain_qualified_and_not_truncated() {
+        let cond = domain_identity_for_surface("cond").unwrap();
+        let eq = domain_identity_for_surface("eq").unwrap();
+        let lambda = domain_identity_for_surface("lambda").unwrap();
+        let define = domain_identity_for_surface("define").unwrap();
+
+        assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
+        assert_eq!((eq.width(), eq.packed_bits()), (3, 0b111));
+        assert_eq!((lambda.width(), lambda.packed_bits()), (4, 0b0010));
+        assert_eq!((define.width(), define.packed_bits()), (4, 0b0011));
+
+        assert_ne!(cond.packed_bits(), 0b111);
+        assert_ne!(eq.packed_bits(), 0b011);
+        assert_ne!(lambda.packed_bits(), 0b1000);
+        assert_ne!(define.packed_bits(), 0b1001);
+    }
+
+    #[test]
+    fn unmigrated_registry_rows_have_no_fake_domain_identity() {
+        assert_eq!(domain_identity_for_surface("+"), None);
+    }
 
     #[test]
     fn generated_registry_is_one_contiguous_byte_axis() {
