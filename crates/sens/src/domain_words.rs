@@ -22,6 +22,7 @@
 //! ```
 
 use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6};
+use std::fmt;
 use crate::Sens8;
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
@@ -247,6 +248,30 @@ impl CallableDomainId {
         }
     }
 
+    /// Construct an exact canonical callable from a domain width and packed
+    /// payload. Only callable Core domains are admitted here.
+    pub const fn from_domain_bits(width: usize, payload: u8) -> Option<Self> {
+        match width {
+            3 => match Bit3::new(payload) {
+                Some(word) => Some(Self::D3(Bija3::from_word(word))),
+                None => None,
+            },
+            4 => match Bit4::new(payload) {
+                Some(word) => Some(Self::D4(CoreD4::from_word(word))),
+                None => None,
+            },
+            5 => match Bit5::new(payload) {
+                Some(word) => Some(Self::D5(CoreD5::from_word(word))),
+                None => None,
+            },
+            6 => match Bit6::new(payload) {
+                Some(word) => Some(Self::D6(CoreD6::from_word(word))),
+                None => None,
+            },
+            _ => None,
+        }
+    }
+
     /// Explicitly recover the historical exact-8 compatibility projection.
     /// Canonical domain-qualified identities never auto-project here.
     pub const fn legacy_sens8(self) -> Option<crate::Sens8> {
@@ -288,6 +313,36 @@ impl From<CoreD6> for CallableDomainId {
         Self::D6(value)
     }
 }
+
+impl fmt::Display for CallableDomainId {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            formatter,
+            "{:0width$b}",
+            self.packed_bits(),
+            width = self.width()
+        )
+    }
+}
+
+impl fmt::Debug for CallableDomainId {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::D3(_) => write!(formatter, "CallableDomainId::D3({self})"),
+            Self::D4(_) => write!(formatter, "CallableDomainId::D4({self})"),
+            Self::D5(_) => write!(formatter, "CallableDomainId::D5({self})"),
+            Self::D6(_) => write!(formatter, "CallableDomainId::D6({self})"),
+            Self::Legacy8(_) => write!(formatter, "CallableDomainId::Legacy8({self})"),
+        }
+    }
+}
+
+impl fmt::Debug for LegacySens8 {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "LegacySens8({})", self.0)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
