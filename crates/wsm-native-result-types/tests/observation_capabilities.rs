@@ -1,5 +1,6 @@
 use wsm_clips_kernel::{ClipsExecutionResult, SemanticId as ClipsSemanticId};
-use wsm_common_lisp_kernel::{CommonLispResult, SemanticId as CommonLispSemanticId};
+use sens::{Bija3, Bit3, CoreDomainIdentity};
+use wsm_common_lisp_kernel::CommonLispResult;
 use wsm_datalog_kernel::{Database, Value};
 use wsm_native_result_types::{
     FourKernelObservation, ObservationCapability, ObservationCapabilityError, ProducerSlot,
@@ -13,7 +14,7 @@ fn observation() -> FourKernelObservation {
 
     FourKernelObservation::new(
         CommonLispResult {
-            semantic_id: CommonLispSemanticId(5),
+            semantic_identity: CoreDomainIdentity::from(Bija3::from_word(Bit3::new(0b101).unwrap())),
             stdout: b"LEFT\n".to_vec(),
             stderr: Vec::new(),
         },
