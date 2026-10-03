@@ -141,8 +141,7 @@ def main() -> int:
             fh,
             fieldnames=list(fact_rows[0].keys()),
             delimiter="	",
-            lineterminator="
-",
+            lineterminator="\\n",
         )
         writer.writeheader()
         writer.writerows(fact_rows)
