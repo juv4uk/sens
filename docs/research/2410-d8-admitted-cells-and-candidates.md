@@ -209,6 +209,51 @@ allocations.
 The progress metric is the count of independent admitted laws that earned
 inhabitants, **not** occupancy out of 256.
 
+### Executed factoring tests, including the strongest candidates
+
+Verbal judgment is not evidence, so three parents have executable witnesses. Two
+were chosen because they are the *most likely* to pass, not the least.
+
+| Parent | Witness | Verdict |
+|---|---|---|
+| `010010` INTEGERP | `research-2934-d8-integerp-factoring.py` | refuted |
+| `001101` WHILE | `research-2934-d8-while-factoring.py` | refuted |
+| `000101` LEXPR | `research-2934-d8-lexpr-factoring.py` | refuted |
+
+`FLOOR/CEILING/TRUNCATE/ROUND` is the canonical illusion of a 2×2 product: two
+rounding "axes" that look orthogonal. The decisive test is that neither
+refinement is **injective**. Setting one bit of a real 2×2 product always yields
+four distinct results; here `toward_zero` maps the four corners onto only two:
+
+```text
+toward-zero refinement image : [(True, False), (True, True)]   # 2 of 4
+toward-+inf refinement image : [(False, True), (True, True)]  # 2 of 4
+```
+
+So these are projections that forget which corner they started from — two
+encodings of one decision ("where does the remainder go"), not two bits.
+
+`WHILE` is a genuinely orthogonal pair of axes, and that is exactly why it fails:
+`{loop-form, predicate} × {positive, negative}` generates four corners, and two
+candidates compete for one of them.
+
+```text
+(False, False) -> ALWAYS      (predicate, positive)
+(False, True)  -> NEVER       (predicate, negative)
+(True,  False) -> WHILE       (loop form, positive)
+(True,  True)  -> UNTIL       (loop form, negative)
+EVERY also wants (False, False), and differs observationally from ALWAYS
+```
+
+Four slots, five names, no forced assignment. The axes are real; the *names* are
+not the corners.
+
+Recorded honesty note: an early version of the WHILE witness reported `ALWAYS`
+and `EVERY` as identical, which would have been a stronger-looking refutation.
+It was a defect in a deliberately coarse test model, not a finding — in Common
+Lisp `EVERY` returns the last element's value while `ALWAYS` returns `T`. The
+model was corrected before any verdict was recorded.
+
 ## 5. Non-conflation: D8 is not a byte table
 
 D8 is an exact 8-bit Core domain. Legacy Sens8 is an 8-bit flat table in which
