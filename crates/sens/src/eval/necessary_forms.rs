@@ -95,19 +95,17 @@ mod tests {
 
     #[test]
     fn exact_domain_controls_necessary_form_routing() {
-        let lambda = domain_identity_for_symbol("lambda").expect("lambda D4 identity");
-        let define = domain_identity_for_symbol("define").expect("define D4 identity");
-        let compat_def = domain_identity_for_symbol("def").expect("def normalizes to DEFINE");
+        let d4_0010 = domain_identity_for_symbol("функція").expect("D4:0010 identity");
+        let d4_0011 = domain_identity_for_symbol("визначити").expect("D4:0011 identity");
 
-        assert_eq!((lambda.width(), lambda.packed_bits()), (4, 0b0010));
-        assert_eq!((define.width(), define.packed_bits()), (4, 0b0011));
-        assert_eq!(compat_def, define);
+        assert_eq!((d4_0010.width(), d4_0010.packed_bits()), (4, 0b0010));
+        assert_eq!((d4_0011.width(), d4_0011.packed_bits()), (4, 0b0011));
         assert_eq!(
-            identity_for_domain_identity(lambda),
+            identity_for_domain_identity(d4_0010),
             Some(NecessaryFormIdentity::Lambda)
         );
         assert_eq!(
-            identity_for_domain_identity(define),
+            identity_for_domain_identity(d4_0011),
             Some(NecessaryFormIdentity::Define)
         );
 
