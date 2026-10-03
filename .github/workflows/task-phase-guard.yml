@@ -1,0 +1,73 @@
+name: Task phase guard
+
+on:
+  pull_request:
+    paths:
+      - "scripts/check-task-phase.py"
+      - "scripts/task_schema_record.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/task-phase-guard.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "20 4 * * *"
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  phase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Self-test shared parser
+        run: python3 scripts/task_schema_record.py
+
+      - name: Self-test PHASE rules
+        run: python3 scripts/check-task-phase.py --self-test
+
+      - name: Snapshot open issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/${{ github.repository }}/issues?state=open&per_page=100" \
+            --jq '[.[] | select(.pull_request == null) | {number, title, body, state}]' > /tmp/pages.jsonl
+          python3 - <<'PY'
+          import json
+          items = []
+          for line in open("/tmp/pages.jsonl", encoding="utf-8"):
+              line = line.strip()
+              if line:
+                  items.extend(json.loads(line))
+          json.dump({"issues": items}, open("/tmp/issues.json", "w", encoding="utf-8"))
+          print("snapshot:", len(items))
+          PY
+
+      - name: Report PHASE debt
+        run: |
+          mkdir -p /tmp/task-phase
+          python3 scripts/check-task-phase.py \
+            --issues /tmp/issues.json \
+            --json-out /tmp/task-phase/audit.json \
+            --report-only | tee /tmp/task-phase/report.txt
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Task PHASE audit"
+            echo
+            echo '~~~text'
+            cat /tmp/task-phase/report.txt 2>/dev/null || true
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: task-phase-audit
+          path: /tmp/task-phase/
+          retention-days: 7
