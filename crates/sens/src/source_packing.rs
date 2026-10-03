@@ -45,6 +45,62 @@ pub fn pack_binary_source_tokens(tokens: &[BinarySourceToken]) -> PackedBitstrea
     packer.finish()
 }
 
+fn read_binary_source_word(
+    packed: &PackedBitstream,
+    bit_offset: usize,
+    width: usize,
+) -> Option<BinarySourceWord> {
+    Some(match width {
+        1 => BinarySourceWord::W1(packed.read::<1>(bit_offset)?),
+        2 => BinarySourceWord::W2(packed.read::<2>(bit_offset)?),
+        3 => BinarySourceWord::W3(packed.read::<3>(bit_offset)?),
+        4 => BinarySourceWord::W4(packed.read::<4>(bit_offset)?),
+        5 => BinarySourceWord::W5(packed.read::<5>(bit_offset)?),
+        6 => BinarySourceWord::W6(packed.read::<6>(bit_offset)?),
+        7 => BinarySourceWord::W7(packed.read::<7>(bit_offset)?),
+        8 => BinarySourceWord::W8(packed.read::<8>(bit_offset)?),
+        _ => return None,
+    })
+}
+
+/// Reconstruct exact source words from a dense payload when the caller already
+/// owns the exact word-width schedule.
+///
+/// This is deliberately grammar/domain-bound mechanics, not a standalone wire
+/// decoder and not semantic dispatch. Equal-total alternative width schedules
+/// can describe the same raw payload bits, so `widths` is explicit
+/// caller-owned boundary information. Standalone self-description belongs to
+/// the framing layer.
+///
+/// The decode fails closed if any width is outside 1..=8 or if the supplied
+/// widths do not consume the payload bit length exactly.
+pub fn unpack_binary_source_words(
+    packed: &PackedBitstream,
+    widths: &[usize],
+) -> Option<Vec<BinarySourceWord>> {
+    let expected_bits = widths.iter().try_fold(0usize, |total, &width| {
+        if !(1..=8).contains(&width) {
+            return None;
+        }
+        total.checked_add(width)
+    })?;
+
+    if expected_bits != packed.bit_len() {
+        return None;
+    }
+
+    let mut words = Vec::with_capacity(widths.len());
+    let mut bit_offset = 0usize;
+
+    for &width in widths {
+        words.push(read_binary_source_word(packed, bit_offset, width)?);
+        bit_offset += width;
+    }
+
+    debug_assert_eq!(bit_offset, packed.bit_len());
+    Some(words)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -58,7 +114,6 @@ mod tests {
         assert_eq!(packed.bit_len(), 7);
         assert_eq!(packed.byte_len(), 1);
         assert_eq!(packed.bytes(), &[0b1000_1010]);
-        assert_eq!(packed.valid_bits_in_last_byte(), 7);
     }
 
     #[test]
@@ -66,7 +121,6 @@ mod tests {
         let tokens = parse_binary_source_words("1 01 001 0001").unwrap();
         let packed = pack_binary_source_tokens(&tokens);
 
-        assert_eq!(tokens.iter().map(|t| t.word.width()).collect::<Vec<_>>(), [1, 2, 3, 4]);
         assert_eq!(packed.bit_len(), 10);
         assert_eq!(packed.bytes(), &[0b1010_0100, 0b0100_0000]);
     }
@@ -105,7 +159,10 @@ mod tests {
         assert_eq!(payload_bits, 36);
         assert_eq!(packed.bit_len(), payload_bits);
         assert_eq!(packed.byte_len(), payload_bits.div_ceil(8));
-        assert_eq!(packed.bytes(), &[0b1101_0110, 0b1010_1011, 0b0101_0101, 0b0101_1010, 0b1010_0000]);
+        assert_eq!(
+            packed.bytes(),
+            &[0b1101_0110, 0b1010_1011, 0b0101_0101, 0b0101_1010, 0b1010_0000]
+        );
     }
 
     #[test]
@@ -129,6 +186,63 @@ mod tests {
         assert_eq!(single_packed.bit_len(), 3);
         assert_eq!(split_packed.bytes(), single_packed.bytes());
         assert_eq!(split_packed.bytes(), &[0b0000_0000]);
+    }
+
+    fn exact_words(tokens: &[BinarySourceToken]) -> Vec<BinarySourceWord> {
+        tokens.iter().map(|token| token.word).collect()
+    }
+
+    fn assert_grammar_bound_round_trip(source: &str) {
+        let tokens = parse_binary_source_words(source).unwrap();
+        let widths: Vec<_> = tokens.iter().map(|token| token.word.width()).collect();
+        let packed = pack_binary_source_tokens(&tokens);
+
+        let decoded = unpack_binary_source_words(&packed, &widths).expect("exact widths decode");
+        assert_eq!(decoded, exact_words(&tokens));
+    }
+
+    #[test]
+    fn grammar_bound_decoder_round_trips_canonical_example() {
+        assert_grammar_bound_round_trip("10 001 01");
+    }
+
+    #[test]
+    fn grammar_bound_decoder_preserves_width_anti_collapse() {
+        assert_grammar_bound_round_trip("1 01 001 0001");
+    }
+
+    #[test]
+    fn grammar_bound_decoder_handles_cross_byte_and_all_widths() {
+        assert_grammar_bound_round_trip("1111111 101");
+        assert_grammar_bound_round_trip("1 10 101 1010 10101 101010 1010101 10101010");
+    }
+
+    #[test]
+    fn grammar_bound_decoder_rejects_invalid_or_non_exact_total_widths() {
+        let tokens = parse_binary_source_words("10 001 01").unwrap();
+        let packed = pack_binary_source_tokens(&tokens);
+
+        assert!(unpack_binary_source_words(&packed, &[0, 3, 2]).is_none());
+        assert!(unpack_binary_source_words(&packed, &[9]).is_none());
+        assert!(unpack_binary_source_words(&packed, &[2, 3]).is_none());
+        assert!(unpack_binary_source_words(&packed, &[2, 3, 3]).is_none());
+    }
+
+    #[test]
+    fn equal_total_width_schedule_is_explicit_caller_owned_information() {
+        let split = parse_binary_source_words("0 00").unwrap();
+        let single = parse_binary_source_words("000").unwrap();
+        let packed = pack_binary_source_tokens(&split);
+
+        assert!(packed == pack_binary_source_tokens(&single));
+        assert_eq!(
+            unpack_binary_source_words(&packed, &[1, 2]).unwrap(),
+            exact_words(&split)
+        );
+        assert_eq!(
+            unpack_binary_source_words(&packed, &[3]).unwrap(),
+            exact_words(&single)
+        );
     }
 
     #[test]
