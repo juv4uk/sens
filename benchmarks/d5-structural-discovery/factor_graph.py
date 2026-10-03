@@ -181,8 +181,11 @@ def validate_against_ledger(data: dict[str, Any]) -> None:
     assert by["FEXPR"]["protocol_axes"] == fexpr
     assert by["FSUBR"]["protocol_axes"] == fexpr
     assert by["TRANSFORMER"]["protocol_axes"] == macro
-    assert by["TRANSFORMER"]["historical_expansion_locus"] == "definition-time"
-    assert by["TRANSFORMER"]["current_sens_expansion_locus"] == "evaluation-time"
+
+    # Timing/locus is STRUCTURAL-DISCOVERY evidence owned by #2568/#2569.
+    # Do not require the historical ledger to carry later comparison fields.
+    # The history row records Hart's presence/protocol; timing is replayed by
+    # the independent factor gate.
 
     # Every historical row must be consumed by at least one structural bucket.
     for op in EXPECTED_OPERATIONS:
