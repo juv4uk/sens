@@ -1,94 +1,201 @@
-# Від Lisp Маккарті до машини, що працює зі змістом: Стратегія розвитку · From McCarthy's Lisp to a Machine That Works with Meaning: Development Strategy · Von McCarthys Lisp zur bedeutungsverarbeitenden Maschine: Entwicklungsstrategie
+# SENS vision — from historical Lisp to law-governed binary domains
+
+**Status:** CURRENT VISION · 2026-10-03
+
+The previous Advice-Taker/NLP-centered vision is preserved at
+[`docs/archive/vision-advice-taker-superseded-2026-10-03.md`](archive/vision-advice-taker-superseded-2026-10-03.md).
 
 ## Українська
 
-### 1. Поточний стан (Фундамент)
-Ми успішно реалізували базове бачення Маккарті з "Advice Taker" (1958):
-- **Символьний рушій (Unification & Backward Chaining)**: Мова `my-lisp` здатна робити логічні висновки (`reason`) з фактів та правил.
-- **Модульність Знань (Knowledge Packages)**: Система підтримує завантаження модулів (`physics`, `astronomy`) через `defmodule` і здійснює ізольовані запити через `reason-in`.
-- **Пояснення (Explainability)**: Завдяки `explain-proof` рушій пояснює *як* він дійшов висновку.
+### 1. Мета
 
-### 2. Найважливіший наступний крок: NLP Bridge
-Головна мета "Advice Taker" — можливість сказати машині факт природною мовою, щоб вона його зрозуміла і використовувала.
-Зараз знання записуються у Lisp-синтаксисі. Наступний крок — створення **NLP Bridge** (Містка Природної Мови).
+SENS досліджує мову, де машинний semantic object не залежить від людської
+назви, opcode або таблиці слотів.
 
-Перша, експериментальна версія цього мосту (`crates/my-lisp-cli/src/llm.rs`, команди REPL `:tell`/`:ask`) була реалізована й далі видалена — вона додала мережеву залежність і зовнішній API-ключ без тестів і без trilingual-конвенції проєкту. Якщо цей крок повертається, він має заслуговувати того ж рівня строгості, що `reason.lisp`/`unify.lisp`, а не лишатись REPL-хаком.
+Поточна цільова формула:
 
-#### Як це працюватиме:
-1. **Інтерфейс**: Користувач вводить текст: "Всі планети мають масу. Земля - планета."
-2. **LLM Translation**: Мовна модель (LLM) перекладає цей текст у Lisp-структури:
-   ```lisp
-   ((has-mass (var x)) (planet (var x)))
-   ((planet earth))
-   ```
-3. **Symbolic Verification**: Lisp-рушій валідує ці знання на суперечності з існуючою базою знань.
-4. **Integration**: Нові правила автоматично додаються в поточний модуль через `defmodule`.
+```text
+semantic object
+=
+binary number
++ exact semantic domain
++ proved/admitted law
+```
 
-### 3. Майбутні напрямки
-- **Динамічне навчання (Dynamic Learning)**: Здатність системи самостійно створювати нові модулі знань, коли LLM стикається з невідомою сферою (наприклад, автоматичне створення `biology.lisp`).
-- **Гібридний агент (Hybrid Agent)**: Поєднання гнучкості LLM (для розпізнавання намірів і тексту) зі строгою логікою Lisp (для гарантії відсутності галюцинацій).
+Ми шукаємо не “гарну нумерацію функцій”, а закони, які **змушують** структуру
+домену.
 
-### Висновок
-Ми успішно завершили створення символьного ядра. Тепер ми переходимо до створення гібридної AI-системи, де LLM є "очима та вухами", а `my-lisp` — "раціональним мозком".
+### 2. Core: від історії до теорії
 
-## English
+Core не починає з чистого аркуша. Він реконструює ранній Lisp як емпіричний
+матеріал:
 
-### 1. Current state (foundation)
-We have successfully implemented McCarthy's core "Advice Taker" vision (1958):
-- **Symbolic engine (unification & backward chaining)**: `my-lisp` can draw logical inferences (`reason`) from facts and rules.
-- **Knowledge modularity (knowledge packages)**: the system supports loading modules (`physics`, `astronomy`) via `defmodule`, and isolated per-module queries via `reason-in`.
-- **Explainability**: `explain-proof` lets the engine explain *how* it reached a conclusion.
+```text
+HISTORICAL-INGEST
+        ↓
+STRUCTURAL-DISCOVERY
+        ↓
+SENS-DERIVATION
+```
 
-### 2. The most important next step: NLP bridge
-The core goal of "Advice Taker" is being able to tell the machine a fact in natural language and have it understand and use it.
-Right now knowledge is written in Lisp syntax. The next step is building an **NLP bridge**.
+Ідея проста:
 
-A first, experimental version of this bridge (`crates/my-lisp-cli/src/llm.rs`, the REPL's `:tell`/`:ask` commands) was built and then removed — it added a network dependency and an external API key with no tests and no trilingual convention. If this step returns, it should earn the same rigor as `reason.lisp`/`unify.lisp`, not stay a REPL hack.
+- історія дає observations;
+- структура знаходить families/generators/independent axes;
+- SENS виводить мінімальні roots/laws/domains після цього.
 
-#### How it will work:
-1. **Interface**: the user types text: "All planets have mass. Earth is a planet."
-2. **LLM translation**: a language model (LLM) translates this text into Lisp structures:
-   ```lisp
-   ((has-mass (var x)) (planet (var x)))
-   ((planet earth))
-   ```
-3. **Symbolic verification**: the Lisp engine validates this knowledge for contradictions against the existing knowledge base.
-4. **Integration**: new rules are automatically added to the current module via `defmodule`.
+Тому історична функція може лишатися в historical ledger навіть якщо SENS
+пізніше доведе, що вона generated або derived.
 
-### 3. Future directions
-- **Dynamic learning**: the system's ability to create new knowledge modules on its own when the LLM encounters an unfamiliar domain (e.g. automatically creating `biology.lisp`).
-- **Hybrid agent**: combining the LLM's flexibility (for recognizing intent and parsing text) with Lisp's strict logic (to guarantee no hallucinations).
+### 3. Core-Math: математика над binary objects
 
-### Conclusion
-We have successfully completed the symbolic core. We are now moving toward a hybrid AI system, where the LLM is the "eyes and ears," and `my-lisp` is the "rational brain."
+Core-Math іде іншим шляхом. Він питає:
 
-## Deutsch
+> які binary objects і operations математично примушені законами, незалежно від Lisp vocabulary?
 
-### 1. Aktueller Stand (Fundament)
-Wir haben McCarthys Kernvision des "Advice Taker" (1958) erfolgreich umgesetzt:
-- **Symbolische Engine (Unifikation & Backward Chaining)**: `my-lisp` kann logische Schlussfolgerungen (`reason`) aus Fakten und Regeln ziehen.
-- **Wissensmodularität (Knowledge Packages)**: das System unterstützt das Laden von Modulen (`physics`, `astronomy`) über `defmodule` und isolierte Anfragen pro Modul über `reason-in`.
-- **Erklärbarkeit**: Dank `explain-proof` erklärt die Engine, *wie* sie zu einer Schlussfolgerung gelangt ist.
+Мінімальна машина:
 
-### 2. Der wichtigste nächste Schritt: NLP-Brücke
-Das Kernziel des "Advice Taker" ist es, der Maschine eine Tatsache in natürlicher Sprache mitteilen zu können, sodass sie diese versteht und nutzt.
-Derzeit wird Wissen in Lisp-Syntax geschrieben. Der nächste Schritt ist der Bau einer **NLP-Brücke**.
+```text
+bits + domain + law -> bits
+```
 
-Eine erste, experimentelle Version dieser Brücke (`crates/my-lisp-cli/src/llm.rs`, die REPL-Befehle `:tell`/`:ask`) wurde gebaut und dann wieder entfernt — sie brachte eine Netzwerkabhängigkeit und einen externen API-Schlüssel ohne Tests und ohne trilinguale Konvention mit sich. Kehrt dieser Schritt zurück, sollte er sich dieselbe Sorgfalt wie `reason.lisp`/`unify.lisp` verdienen, statt ein REPL-Hack zu bleiben.
+Core-Math може генерувати нові binary objects із законів, але не зобов'язаний
+мати ті самі domains або coordinates, що Core.
 
-#### Wie es funktionieren wird:
-1. **Schnittstelle**: der Nutzer gibt Text ein: "Alle Planeten haben Masse. Die Erde ist ein Planet."
-2. **LLM-Übersetzung**: ein Sprachmodell (LLM) übersetzt diesen Text in Lisp-Strukturen:
-   ```lisp
-   ((has-mass (var x)) (planet (var x)))
-   ((planet earth))
-   ```
-3. **Symbolische Verifikation**: die Lisp-Engine prüft dieses Wissen auf Widersprüche zur bestehenden Wissensbasis.
-4. **Integration**: neue Regeln werden automatisch über `defmodule` zum aktuellen Modul hinzugefügt.
+### 4. Де Core і Core-Math зустрічаються
 
-### 3. Zukünftige Richtungen
-- **Dynamisches Lernen**: die Fähigkeit des Systems, selbstständig neue Wissensmodule zu erstellen, wenn das LLM auf ein unbekanntes Gebiet stößt (z. B. automatisches Erstellen von `biology.lisp`).
-- **Hybrider Agent**: Kombination der Flexibilität des LLM (zur Erkennung von Absicht und Text) mit der strikten Logik von Lisp (zur Garantie, dass keine Halluzinationen auftreten).
+Ми не форсуємо єдність.
 
-### Fazit
-Wir haben den symbolischen Kern erfolgreich fertiggestellt. Wir bewegen uns nun auf ein hybrides KI-System zu, in dem das LLM die "Augen und Ohren" ist und `my-lisp` das "rationale Gehirn".
+Допустимі результати:
+
+```text
+DIVERGENT
+COMPLEMENTARY
+CONVERGENT
+```
+
+Зустріч вважається справжньою лише коли незалежно збігаються:
+
+```text
+binary object
+domain
+semantic equation
+law
+cross-proof
+```
+
+Selector composition уже має bounded positive convergence witness.
+Same-transform/different-domain має bounded negative witness.
+
+### 5. Exact domains замість “вільних слотів”
+
+Координата не отримує значення, бо вона порожня.
+
+Ми хочемо, щоб resident заробляв місце через:
+
+- generator;
+- lower bound;
+- independent root/domain law;
+- ratified exact evidence.
+
+Якщо доказу немає, **UNKNOWN/UNPLACED** є правильною відповіддю.
+
+### 6. Доменна карта
+
+Поточний напрям:
+
+```text
+D1        PredicateBit
+D2        structural racanā2
+D3/D4     ratified Core foundation
+D5/D6     ratified widths; historical/structural filling continues
+D7        Sound7 + local textual ordinals
+D14       Pāṇini grammar graph research
+D24/D48…  exact Number / FPGA-oriented research
+```
+
+Це не означає, що кожна координата всередині width уже має сенс.
+
+### 7. Hardware і transport
+
+FPGA/GPU/Rust/C/WASM/radio — важливі, але вони механізми.
+
+Мета:
+
+```text
+same semantic object/law
+        ↓
+multiple execution substrates
+```
+
+а не:
+
+```text
+hardware opcode -> language meaning
+```
+
+Exact-width binary domains природно цікаві для FPGA, але hardware convenience
+не може бути доказом semantic placement.
+
+### 8. Самоопис і proof
+
+Proofs/certificates важливі як evidence й addressing. Але proof format, hash,
+AST або JSON не стають semantic identity автоматично.
+
+Для parentless roots зараз окремо перевіряється, чи proof-address може бути
+semantic domain, чи лишається certificate-only. Відповідь не передбачається.
+
+### 9. Наука замість догми
+
+Сильний SENS task повинен мати:
+
+```text
+PHASE
+DOMAIN
+BINARY OBJECT
+LAW
+WITNESS
+FALSIFIER
+STATUS
+RELATION
+```
+
+Проєкт вважає успіхом не лише підтвердження, а й:
+
+- falsification;
+- NO-CANDIDATE;
+- UNKNOWN;
+- divergence;
+- доказ того, що красивий bit pattern є лише механізмом.
+
+### 10. Довга перспектива
+
+Якщо підхід працює, SENS має стати мовою, де:
+
+- значення не прив'язане до однієї людської поверхні;
+- функції/операції виникають із domain laws, а не з ручної таблиці;
+- machine representation є компактною й exact;
+- execution переноситься між CPU/FPGA/іншими substrates без зміни semantic law;
+- історичні мови, математика й hardware можуть незалежно давати докази одній структурі.
+
+Але convergence має бути **заробленою**, не запроєктованою наперед.
+
+## English summary
+
+SENS is moving from a flat function-table mindset toward a law-governed
+binary-domain language model:
+
+```text
+semantic object = binary number + exact domain + admitted law
+```
+
+Core reconstructs early Lisp first, discovers structure second, and derives
+native SENS semantics third. Core-Math independently studies mathematical laws
+over binary objects. They may diverge, complement each other, or converge only
+where independent evidence forces the same object/domain/semantics/law.
+
+Unknown coordinates remain unknown. Mechanisms such as Rust, FPGA, hashes,
+caches, ASTs, wire formats and RF profiles remain non-authoritative.
+
+The long-term vision is not a larger table of opcodes. It is a language whose
+binary structure is explained by reusable laws.
