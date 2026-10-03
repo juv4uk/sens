@@ -3,9 +3,12 @@
 use std::path::PathBuf;
 
 use wsm_clips_kernel::{
-    ClipsAbiAdapter, ClipsExecutionResult, ClipsKernel, SemanticId as ClipsSemanticId,
+    ClipsAbiAdapter, ClipsExecutionResult, ClipsKernel, LegacyAbiSemanticId as ClipsLegacyAbiSemanticId,
 };
-use wsm_common_lisp_kernel::{CommonLispAbiAdapter, CommonLispKernel, CommonLispRequest};
+use wsm_common_lisp_kernel::{
+    CommonLispAbiAdapter, CommonLispKernel, CommonLispRequest,
+    LegacyAbiSemanticId as CommonLispLegacyAbiSemanticId,
+};
 use wsm_datalog_kernel::{
     Atom, Database, DatalogAbiAdapter, Evaluator, Program, Rule, Term, Value,
 };
@@ -13,7 +16,10 @@ use wsm_kernel_c_abi::{
     WsmByteSpan, WsmKernelRequest, WsmKernelVTable, WsmMutableByteSpan, WsmStatus,
 };
 use wsm_native_result_types::{FourKernelObservation, ProducerSlot};
-use wsm_prolog_kernel::{PrologAbiAdapter, PrologKernel, PrologQuery, PrologRequest};
+use wsm_prolog_kernel::{
+    LegacyAbiSemanticId as PrologLegacyAbiSemanticId, PrologAbiAdapter, PrologKernel,
+    PrologQuery, PrologRequest,
+};
 
 fn prolog_fixture() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -47,7 +53,10 @@ fn datalog_closure() -> Database {
 #[cfg(feature = "native-clips")]
 fn four_real_kernels_keep_their_native_results_side_by_side() {
     let common_lisp = CommonLispKernel::default()
-        .evaluate(&CommonLispRequest::new(5, "(car (cons 'left 'right))"))
+        .evaluate(&CommonLispRequest::new(
+            CommonLispLegacyAbiSemanticId(5),
+            "(car (cons 'left 'right))",
+        ))
         .expect("real Common Lisp runtime");
     assert_eq!(String::from_utf8_lossy(&common_lisp.stdout).trim(), "LEFT");
 
@@ -55,7 +64,7 @@ fn four_real_kernels_keep_their_native_results_side_by_side() {
         .execute(
             prolog_fixture(),
             &PrologRequest::new(
-                3,
+                PrologLegacyAbiSemanticId(3),
                 PrologQuery::new("ancestor(alice, X)", "X"),
             ),
         )
@@ -79,7 +88,7 @@ fn four_real_kernels_keep_their_native_results_side_by_side() {
     let fired = clips_env.run(-1);
     let facts_after = clips_env.fact_count();
     let clips = ClipsExecutionResult::new(
-        Some(ClipsSemanticId(6)),
+        Some(ClipsLegacyAbiSemanticId(6)),
         fired,
         facts_before,
         facts_after,
@@ -188,7 +197,7 @@ fn one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_sema
         "LEFT"
     );
     assert_eq!(
-        common_lisp.last_semantic_id().map(|id| id.0),
+        common_lisp.last_legacy_abi_id().map(|id| id.0),
         Some(INVOKE_ID)
     );
 
@@ -198,7 +207,7 @@ fn one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_sema
         String::from_utf8_lossy(&prolog_output).trim(),
         "[bob,dave,carol]"
     );
-    assert_eq!(prolog.last_semantic_id().map(|id| id.0), Some(INVOKE_ID));
+    assert_eq!(prolog.last_legacy_abi_id().map(|id| id.0), Some(INVOKE_ID));
 
     let clips = ClipsAbiAdapter::new(
         "(defrule observe-signal (signal) => (assert (observed)))",
@@ -206,7 +215,7 @@ fn one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_sema
     );
     let clips_output = invoke_vtable(clips.vtable(), b"run");
     assert_eq!(String::from_utf8_lossy(&clips_output), "fired=1\n");
-    assert_eq!(clips.last_semantic_id().map(|id| id.0), Some(INVOKE_ID));
+    assert_eq!(clips.last_legacy_abi_id().map(|id| id.0), Some(INVOKE_ID));
 
     let mut datalog_db = Database::new();
     datalog_db.add_fact("edge", vec![Value::int(1), Value::int(2)]);
@@ -231,7 +240,7 @@ fn one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_sema
     let datalog_text = String::from_utf8_lossy(&datalog_output);
     assert!(datalog_text.contains("path(1,4)"));
     assert_eq!(
-        datalog.last_semantic_id().map(|id| id.0),
+        datalog.last_legacy_abi_id().map(|id| id.0),
         Some(INVOKE_ID)
     );
 
