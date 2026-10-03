@@ -1,6 +1,6 @@
 # D7 LocalOrdinal corpus (#2739)
 
-Generated from the pinned transmitted Śiva-sūtra canon.
+Generated from the pinned transmitted Śiva-sūtra canon. The committed projection lives under `fixtures/` because the D7 lock is identity authority and must travel with an explicit machine witness.
 
 This corpus means only:
 
