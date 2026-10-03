@@ -1,0 +1,276 @@
+{
+  "schema": "d5-historical-full-map/v1",
+  "domain": "Core.D5",
+  "width": 5,
+  "capacity": 32,
+  "authority": "owner-directive-2026-10-03",
+  "description": "Full chronological early-Lisp capability occupancy of Domain 5 following D1-D4 parents.",
+  "status_counts": {
+    "selector": 8,
+    "arithmetic": 4,
+    "predicate": 4,
+    "state_and_control": 4,
+    "evaluation_and_abstraction": 6,
+    "list_and_tree_structure": 6,
+    "total": 32,
+    "unallocated": 0
+  },
+  "coordinates": [
+    {
+      "coordinate": "00000",
+      "parent_d4": "0000",
+      "name": "EVALQUOTE",
+      "category": "evaluation",
+      "behavior": "top-level function application over argument list",
+      "provenance": "McCarthy 1960 / Lisp 1.5"
+    },
+    {
+      "coordinate": "00001",
+      "parent_d4": "0000",
+      "name": "FUNCTION",
+      "category": "abstraction",
+      "behavior": "functional closure wrapper / FUNARG creation",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "00010",
+      "parent_d4": "0001",
+      "name": "FEXPR",
+      "category": "evaluation",
+      "behavior": "special form execution over unevaluated operands",
+      "provenance": "Lisp 1.5 (§4.1)"
+    },
+    {
+      "coordinate": "00011",
+      "parent_d4": "0001",
+      "name": "MACRO",
+      "category": "evaluation",
+      "behavior": "syntactic form expansion and re-evaluation",
+      "provenance": "Hart 1963 / Lisp 1.5"
+    },
+    {
+      "coordinate": "00100",
+      "parent_d4": "0010",
+      "name": "LABEL",
+      "category": "binding",
+      "behavior": "anonymous recursive self-referential lambda",
+      "provenance": "McCarthy 1960"
+    },
+    {
+      "coordinate": "00101",
+      "parent_d4": "0010",
+      "name": "PROG",
+      "category": "control",
+      "behavior": "imperative block sequence with local bindings and tags",
+      "provenance": "Lisp 1.5 (§4.3)"
+    },
+    {
+      "coordinate": "00110",
+      "parent_d4": "0011",
+      "name": "SET",
+      "category": "state",
+      "behavior": "dynamic variable assignment to computed symbol",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "00111",
+      "parent_d4": "0011",
+      "name": "SETQ",
+      "category": "state",
+      "behavior": "static variable assignment to symbol",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "01000",
+      "parent_d4": "0100",
+      "name": "ZEROP",
+      "category": "predicate",
+      "behavior": "test if argument is numeric zero",
+      "provenance": "Lisp 1.5 (§4.2)"
+    },
+    {
+      "coordinate": "01001",
+      "parent_d4": "0100",
+      "name": "NUMBERP",
+      "category": "predicate",
+      "behavior": "test if argument is a numeric atom",
+      "provenance": "Lisp 1.5 (§4.2)"
+    },
+    {
+      "coordinate": "01010",
+      "parent_d4": "0101",
+      "name": "PLUS",
+      "category": "arithmetic",
+      "behavior": "exact rational addition (+)",
+      "provenance": "McCarthy 1960 / Lisp 1.5"
+    },
+    {
+      "coordinate": "01011",
+      "parent_d4": "0101",
+      "name": "DIFFERENCE",
+      "category": "arithmetic",
+      "behavior": "exact rational subtraction (-)",
+      "provenance": "McCarthy 1960 / Lisp 1.5"
+    },
+    {
+      "coordinate": "01100",
+      "parent_d4": "0110",
+      "name": "GO",
+      "category": "control",
+      "behavior": "unconditional jump to label inside PROG",
+      "provenance": "Lisp 1.5 (§4.3)"
+    },
+    {
+      "coordinate": "01101",
+      "parent_d4": "0110",
+      "name": "RETURN",
+      "category": "control",
+      "behavior": "non-local return from PROG with value",
+      "provenance": "Lisp 1.5 (§4.3)"
+    },
+    {
+      "coordinate": "01110",
+      "parent_d4": "0111",
+      "name": "LESSP",
+      "category": "predicate",
+      "behavior": "numeric strict less-than ordering (<)",
+      "provenance": "Lisp 1.5 (§4.2)"
+    },
+    {
+      "coordinate": "01111",
+      "parent_d4": "0111",
+      "name": "GREATERP",
+      "category": "predicate",
+      "behavior": "numeric strict greater-than ordering (>)",
+      "provenance": "Lisp 1.5 (§4.2)"
+    },
+    {
+      "coordinate": "10000",
+      "parent_d4": "1000",
+      "name": "APPEND",
+      "category": "list-structure",
+      "behavior": "concatenation of lists",
+      "provenance": "McCarthy 1960"
+    },
+    {
+      "coordinate": "10001",
+      "parent_d4": "1000",
+      "name": "REVERSE",
+      "category": "list-structure",
+      "behavior": "list element order reversal",
+      "provenance": "McCarthy 1960 / Lisp 1.5"
+    },
+    {
+      "coordinate": "10010",
+      "parent_d4": "1001",
+      "name": "TIMES",
+      "category": "arithmetic",
+      "behavior": "exact rational multiplication (*)",
+      "provenance": "McCarthy 1960 / Lisp 1.5"
+    },
+    {
+      "coordinate": "10011",
+      "parent_d4": "1001",
+      "name": "QUOTIENT",
+      "category": "arithmetic",
+      "behavior": "exact rational division (/)",
+      "provenance": "McCarthy 1960 / Lisp 1.5"
+    },
+    {
+      "coordinate": "10100",
+      "parent_d4": "1010",
+      "name": "CAAAR",
+      "category": "selector",
+      "behavior": "car(car(car(x)))",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "10101",
+      "parent_d4": "1010",
+      "name": "CAADR",
+      "category": "selector",
+      "behavior": "car(car(cdr(x)))",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "10110",
+      "parent_d4": "1011",
+      "name": "CADAR",
+      "category": "selector",
+      "behavior": "car(cdr(car(x)))",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "10111",
+      "parent_d4": "1011",
+      "name": "CADDR",
+      "category": "selector",
+      "behavior": "car(cdr(cdr(x)))",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "11000",
+      "parent_d4": "1100",
+      "name": "CDAAR",
+      "category": "selector",
+      "behavior": "cdr(car(car(x)))",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "11001",
+      "parent_d4": "1100",
+      "name": "CDADR",
+      "category": "selector",
+      "behavior": "cdr(car(cdr(x)))",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "11010",
+      "parent_d4": "1101",
+      "name": "CDDAR",
+      "category": "selector",
+      "behavior": "cdr(cdr(car(x)))",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "11011",
+      "parent_d4": "1101",
+      "name": "CDDDR",
+      "category": "selector",
+      "behavior": "cdr(cdr(cdr(x)))",
+      "provenance": "Lisp 1.5"
+    },
+    {
+      "coordinate": "11100",
+      "parent_d4": "1110",
+      "name": "ASSOC",
+      "category": "lookup",
+      "behavior": "association list key search",
+      "provenance": "McCarthy 1960"
+    },
+    {
+      "coordinate": "11101",
+      "parent_d4": "1110",
+      "name": "MEMBER",
+      "category": "lookup",
+      "behavior": "list membership testing",
+      "provenance": "McCarthy 1960 / Lisp 1.5"
+    },
+    {
+      "coordinate": "11110",
+      "parent_d4": "1111",
+      "name": "PAIRLIS",
+      "category": "binding",
+      "behavior": "parallel key-value association list construction",
+      "provenance": "McCarthy 1960"
+    },
+    {
+      "coordinate": "11111",
+      "parent_d4": "1111",
+      "name": "SUBST",
+      "category": "tree-structure",
+      "behavior": "expression tree subtree substitution",
+      "provenance": "McCarthy 1960"
+    }
+  ]
+}
