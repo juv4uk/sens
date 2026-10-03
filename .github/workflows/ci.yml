@@ -105,15 +105,13 @@ jobs:
         shell: bash
         run: bash scripts/sid-binary-identity-guard.sh
 
-      - name: Single SID runtime value guard
+      - name: Domain-qualified semantic identity ratchet
         if: steps.changes.outputs.rust == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         shell: bash
-        run: |
-          set -euo pipefail
-          if grep -R -n --include='*.rs' 'Value::SemanticRef\|SemanticRef(Sid8)\|SemanticRef(u8)' crates; then
-            echo "ERROR: SID identity across Rust crates must use only Value::Sid(Sid8)" >&2
-            exit 1
-          fi
+        run: bash scripts/domain-identity-ratchet.sh "$BASE_SHA" "$HEAD_SHA"
 
       - name: Debug post-core definition data shape for #771
         shell: bash
