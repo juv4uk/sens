@@ -28,7 +28,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, CallableDomainId, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -87,21 +87,6 @@ pub(crate) enum EvalStep {
     },
 }
 
-fn legacy_runtime_sid(
-    identity: CallableDomainId,
-    span: Span,
-) -> Result<Sens8, LanguageError> {
-    identity.legacy_sens8().ok_or_else(|| {
-        LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!(
-                "domain-qualified callable execution is not migrated in this runtime slice: {identity:?}"
-            ),
-            span,
-        )
-    })
-}
-
 pub(crate) fn invoke_value(
     function: &Value,
     arguments: &[Value],
@@ -109,10 +94,14 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::Sid(identity) => {
-            let sid = legacy_runtime_sid(*identity, span)?;
-            canon::invoke_semantic_ref(sid, arguments, environment, span)
-        },
+        Value::Sid(identity) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "domain-qualified callable execution is not migrated in this runtime slice: {identity:?}"
+            ),
+            span,
+        )),
+        Value::LegacySid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -274,10 +263,18 @@ fn dispatch_call(
     };
     match &function {
         Value::Sid(identity) => {
-            let sid = legacy_runtime_sid(*identity, span)?;
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!(
+                    "domain-qualified callable execution is not migrated in this runtime slice: {identity:?}"
+                ),
+                span,
+            ));
+        }
+        Value::LegacySid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
-            if !canon::has_primitive(sid) {
-                match &environment.code_slot(sid) {
+            if !canon::has_primitive(*sid) {
+                match &environment.code_slot(*sid) {
                     Some(Value::Macro(closure)) => {
                         return closures::apply_macro(closure.clone(), arguments, environment, span);
                     }
@@ -295,7 +292,7 @@ fn dispatch_call(
             for argument in arguments {
                 values.push(evaluate(argument, environment)?);
             }
-            canon::invoke_semantic_ref(sid, &values, environment, span)
+            canon::invoke_semantic_ref(*sid, &values, environment, span)
                 .map(EvalStep::Value)
         }
         Value::Builtin(builtin) => {
