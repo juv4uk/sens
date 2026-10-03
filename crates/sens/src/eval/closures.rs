@@ -229,7 +229,10 @@ enum Head {
 const EVAL: Sens8 = crate::sens!(01001101);
 
 fn sid_head(identity: SemanticRef, environment: &Environment) -> Head {
-    let Some(sid) = identity.legacy8_word() else {
+    let Some(sid) = identity
+        .legacy8_bits()
+        .map(crate::Sens8::from_packed_byte)
+    else {
         // Until a domain-native classifier exists, preserve syntax rather than
         // guessing that an exact-width identity is an ordinary pure call.
         return Head::Opaque;
@@ -263,7 +266,7 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
             if let Some(sid) = canon::routed_sid_for_surface(name) {
-                return sid_head(SemanticRef::legacy8(sid), environment);
+                return sid_head(SemanticRef::legacy8(sid.packed_byte()), environment);
             }
             match necessary_forms::identity_for_symbol(name) {
                 Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
