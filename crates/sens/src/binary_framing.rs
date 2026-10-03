@@ -23,7 +23,7 @@ pub enum BinaryFrame {
 pub enum BinaryFrameError {
     UnexpectedEnd { index: usize },
     LengthOverflow { index: usize },
-    LegacyFunction8Rejected { index: usize },
+    LegacyExact8Rejected { index: usize },
     NonCanonicalNumber { index: usize },
     InvalidNumber { index: usize },
     UnexpectedClose { index: usize },
@@ -272,7 +272,7 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
             let t1 = reader.read_bit()?;
             match [t0, t1] {
                 TYPE_LEGACY_FUNCTION8 => {
-                    Err(BinaryFrameError::LegacyFunction8Rejected { index: type_start })
+                    Err(BinaryFrameError::LegacyExact8Rejected { index: type_start })
                 }
                 TYPE_NUMBER => decode_number(reader, frame_start),
                 TYPE_TEXT => decode_text(reader),
@@ -460,9 +460,9 @@ impl fmt::Display for BinaryFrameError {
                 f,
                 "canonical binary length overflows host index at bit {index}"
             ),
-            Self::LegacyFunction8Rejected { index } => write!(
+            Self::LegacyExact8Rejected { index } => write!(
                 f,
-                "legacy Function8 frame is not canonical SENS identity at bit {index}"
+                "legacy exact-eight frame is not canonical SENS identity at bit {index}"
             ),
             Self::NonCanonicalNumber { index } => {
                 write!(f, "non-canonical exact Number frame begins at bit {index}")
@@ -681,7 +681,7 @@ mod tests {
     fn legacy_function8_and_malformed_payloads_fail_closed() {
         assert!(matches!(
             decode_binary_frame(&packed("110000000001")),
-            Err(BinaryFrameError::LegacyFunction8Rejected { .. })
+            Err(BinaryFrameError::LegacyExact8Rejected { .. })
         ));
         assert!(matches!(
             decode_binary_frame(&packed("111100")),
