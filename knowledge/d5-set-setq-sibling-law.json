@@ -1,0 +1,27 @@
+{
+  "schema": "d5-set-setq-sibling-law/v1",
+  "domain": "Core.D5",
+  "owner_occupancy_authority": "OD-005",
+  "evidence": {
+    "factor_witness": "crates/sens/tests/post_d4_set_setq_factor.rs",
+    "structural_issue": "#2589",
+    "historical_issue": "#2441",
+    "binding_policy_square": "#2498/#2511"
+  },
+  "coordinates": {
+    "00110": "SET",
+    "00111": "SETQ"
+  },
+  "fixed_shared_core": "nearest-existing/fail shared-location update",
+  "delta_axis": "target-symbol-acquisition",
+  "child0_semantics": "evaluate target expression to obtain Core symbol",
+  "child1_semantics": "take target symbol literally from syntax",
+  "classification": "LOCAL-SIBLING-LAW",
+  "relation_class": "SEMANTIC-LAW",
+  "one_delta_axis": true,
+  "d4_define_parenthood": "NOT-INFERRED",
+  "d6_search_scope_axis": "OUT-OF-SCOPE",
+  "d6_missing_name_axis": "OUT-OF-SCOPE",
+  "owner_map_mutation": "NONE",
+  "global_d5_suffix_theorem": "NOT-CLAIMED"
+}
