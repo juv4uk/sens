@@ -46,7 +46,7 @@ jobs:
           set -euo pipefail
           got="$(./target/debug/sens scripts/check-kernel-abi-transport-boundary.lisp)"
           printf '%s\n' "$got"
-          test "$got" = "(kernel-abi-transport-boundary-ok (kernels 4) (language-type Sens8) (abi-wrapper SemanticId))"
+          test "$got" = "(kernel-abi-transport-boundary-ok (kernels 4) (language-type CoreDomainIdentity) (abi-wrapper SemanticId))"
       - name: Verify mechanical transport boundary in host sources
         shell: bash
         run: |
