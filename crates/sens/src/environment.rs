@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{CoreDomainIdentity, Value};
 use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -89,10 +89,13 @@ struct Limits {
     /// (host-or-bind-address, first-port, last-port), inclusive.
     tcp_connect_allowlist: Option<Vec<(String, u16, u16)>>,
     tcp_listen_allowlist: Option<Vec<(String, u16, u16)>>,
-    /// #1455: визначення мовою для кодів СЕНС без примітиву Rust. Слот коду
-    /// заповнює перше визначення верхнього рівня з назвою з таблиці функцій;
-    /// пізніше затінення назви слот не змінює.
-    code_slots: HashMap<u8, Value>,
+    /// Canonical language-owned bindings keyed by exact semantic domain.
+    /// Equal payloads in D3/D4/D5/D6 remain distinct HashMap keys.
+    domain_code_slots: HashMap<CoreDomainIdentity, Value>,
+    /// Historical exact-eight compatibility slots. These are intentionally
+    /// separate storage so a legacy byte can never collide with a canonical
+    /// domain identity merely from its packed payload.
+    legacy_code_slots: HashMap<u8, Value>,
 }
 
 impl Environment {
@@ -238,19 +241,57 @@ impl Environment {
         self.0.borrow().parent.is_none()
     }
 
-    /// #1455: визначення мовою, прив'язане до коду СЕНС.
-    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
-        self.2.borrow().code_slots.get(&sid.packed_byte()).cloned()
+    /// Canonical exact-domain language slot.
+    pub(crate) fn domain_code_slot(&self, identity: CoreDomainIdentity) -> Option<Value> {
+        self.2.borrow().domain_code_slots.get(&identity).cloned()
     }
 
-    /// Прив'язує визначення до коду, лише якщо слот ще порожній.
-    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
+    /// Binds a canonical exact-domain identity once.
+    pub(crate) fn bind_domain_code_slot_once(
+        &self,
+        identity: CoreDomainIdentity,
+        value: Value,
+    ) -> bool {
         let mut limits = self.2.borrow_mut();
-        if limits.code_slots.contains_key(&sid.packed_byte()) {
+        if limits.domain_code_slots.contains_key(&identity) {
             return false;
         }
-        limits.code_slots.insert(sid.packed_byte(), value);
+        limits.domain_code_slots.insert(identity, value);
         true
+    }
+
+    /// Explicit historical exact-eight compatibility lookup.
+    pub(crate) fn legacy_code_slot(&self, sid: crate::Sens8) -> Option<Value> {
+        self.2
+            .borrow()
+            .legacy_code_slots
+            .get(&sid.packed_byte())
+            .cloned()
+    }
+
+    /// Explicit historical exact-eight compatibility binding.
+    pub(crate) fn bind_legacy_code_slot_once(
+        &self,
+        sid: crate::Sens8,
+        value: Value,
+    ) -> bool {
+        let mut limits = self.2.borrow_mut();
+        if limits.legacy_code_slots.contains_key(&sid.packed_byte()) {
+            return false;
+        }
+        limits.legacy_code_slots.insert(sid.packed_byte(), value);
+        true
+    }
+
+    /// Transitional alias for pre-#2831 callers. New code must use either
+    /// domain_code_slot or legacy_code_slot explicitly.
+    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
+        self.legacy_code_slot(sid)
+    }
+
+    /// Transitional alias for pre-#2831 callers.
+    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
+        self.bind_legacy_code_slot_once(sid, value)
     }
 
     /// A child frame is the future lexical boundary captured by a closure. It
@@ -449,6 +490,60 @@ impl Default for Session {
 mod tests {
     use super::*;
     use crate::Exactness;
+
+    #[test]
+    fn domain_code_slots_keep_equal_payloads_distinct() {
+        use crate::{Bija3, Bit3, Bit4, CoreD4};
+
+        let env = Environment::root();
+        let d3 = CoreDomainIdentity::from(Bija3::from_word(Bit3::new(1).unwrap()));
+        let d4 = CoreDomainIdentity::from(CoreD4::from_word(Bit4::new(1).unwrap()));
+
+        assert!(env.bind_domain_code_slot_once(
+            d3,
+            Value::Symbol(Rc::from("d3-one"))
+        ));
+        assert!(env.bind_domain_code_slot_once(
+            d4,
+            Value::Symbol(Rc::from("d4-one"))
+        ));
+
+        assert_eq!(
+            env.domain_code_slot(d3),
+            Some(Value::Symbol(Rc::from("d3-one")))
+        );
+        assert_eq!(
+            env.domain_code_slot(d4),
+            Some(Value::Symbol(Rc::from("d4-one")))
+        );
+    }
+
+    #[test]
+    fn legacy_byte_slot_cannot_collide_with_domain_slot() {
+        use crate::{Bija3, Bit3};
+
+        let env = Environment::root();
+        let domain = CoreDomainIdentity::from(Bija3::from_word(Bit3::new(1).unwrap()));
+        let legacy = crate::Sens8::from_packed_byte(1);
+
+        assert!(env.bind_domain_code_slot_once(
+            domain,
+            Value::Symbol(Rc::from("domain"))
+        ));
+        assert!(env.bind_legacy_code_slot_once(
+            legacy,
+            Value::Symbol(Rc::from("legacy"))
+        ));
+
+        assert_eq!(
+            env.domain_code_slot(domain),
+            Some(Value::Symbol(Rc::from("domain")))
+        );
+        assert_eq!(
+            env.legacy_code_slot(legacy),
+            Some(Value::Symbol(Rc::from("legacy")))
+        );
+    }
 
     #[test]
     fn root_predefines_t_as_the_self_evaluating_truth_symbol() {
