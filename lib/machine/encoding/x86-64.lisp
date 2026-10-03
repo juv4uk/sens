@@ -1142,6 +1142,27 @@
       (00100111 102 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
             15 126 (x86-encode-modrm 3 (x86-low3 src-code) (x86-low3 dst-code))))))
 
+; RDRAND/RDSEED r64 — перший positive control для #2372.
+; Обидві інструкції є нащадками однієї XED-доведеної машинної форми:
+; REX.W + 0F C7 /digit, MOD=3, RM=GPRv. Відмінність — лише /6 проти /7.
+; Цей helper є encoding law/mechanism, а mnemonic wrappers — похідні проєкції.
+(00001001 x86-encode-0f-c7-group-r64
+  (00001000 (opcode-extension register)
+    (10011100 ((code (x86-reg-code register)))
+      (00100111
+        (x86-encode-rex 1 0 0 (x86-high1 code))
+        #b1111
+        #b11000111
+        (x86-encode-modrm 3 opcode-extension (x86-low3 code))))))
+
+(00001001 x86-encode-rdrand-r64
+  (00001000 (register)
+    (x86-encode-0f-c7-group-r64 #b110 register)))
+
+(00001001 x86-encode-rdseed-r64
+  (00001000 (register)
+    (x86-encode-0f-c7-group-r64 #b111 register)))
+
 ; RDTSC: opcode 0x0F 0x31
 (00001001 x86-encode-rdtsc
   (00001000 ()
