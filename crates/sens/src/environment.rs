@@ -1,4 +1,4 @@
-use crate::{CoreDomainIdentity, Value};
+use crate::{CallableIdentity, Value};
 use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -89,13 +89,10 @@ struct Limits {
     /// (host-or-bind-address, first-port, last-port), inclusive.
     tcp_connect_allowlist: Option<Vec<(String, u16, u16)>>,
     tcp_listen_allowlist: Option<Vec<(String, u16, u16)>>,
-    /// Canonical language-owned bindings keyed by exact semantic domain.
-    /// Equal payloads in D3/D4/D5/D6 remain distinct HashMap keys.
-    domain_code_slots: HashMap<CoreDomainIdentity, Value>,
-    /// Historical exact-eight compatibility slots. These are intentionally
-    /// separate storage so a legacy byte can never collide with a canonical
-    /// domain identity merely from its packed payload.
-    legacy_code_slots: HashMap<u8, Value>,
+    /// Language-owned callable bindings keyed by complete semantic identity.
+    /// Equal packed payloads in Core.D3-D6 and legacy exact-eight space remain
+    /// distinct because the enum variant/domain is part of the key.
+    code_slots: HashMap<CallableIdentity, Value>,
 }
 
 impl Environment {
@@ -241,46 +238,22 @@ impl Environment {
         self.0.borrow().parent.is_none()
     }
 
-    /// Canonical exact-domain language slot.
-    pub(crate) fn domain_code_slot(&self, identity: CoreDomainIdentity) -> Option<Value> {
-        self.2.borrow().domain_code_slots.get(&identity).cloned()
+    /// Lookup one language-owned callable binding by its complete identity.
+    pub(crate) fn code_slot(&self, identity: CallableIdentity) -> Option<Value> {
+        self.2.borrow().code_slots.get(&identity).cloned()
     }
 
-    /// Binds a canonical exact-domain identity once.
-    pub(crate) fn bind_domain_code_slot_once(
+    /// Bind one callable identity once. Core and legacy payloads never alias.
+    pub(crate) fn bind_code_slot_once(
         &self,
-        identity: CoreDomainIdentity,
+        identity: CallableIdentity,
         value: Value,
     ) -> bool {
         let mut limits = self.2.borrow_mut();
-        if limits.domain_code_slots.contains_key(&identity) {
+        if limits.code_slots.contains_key(&identity) {
             return false;
         }
-        limits.domain_code_slots.insert(identity, value);
-        true
-    }
-
-    /// Transitional historical exact-eight compatibility lookup.
-    ///
-    /// Kept under the old method name so this slice does not grow Sens8 API
-    /// surface. New canonical code uses domain_code_slot.
-    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
-        self.2
-            .borrow()
-            .legacy_code_slots
-            .get(&sid.packed_byte())
-            .cloned()
-    }
-
-    /// Transitional historical exact-eight compatibility binding.
-    ///
-    /// New canonical code uses bind_domain_code_slot_once.
-    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
-        let mut limits = self.2.borrow_mut();
-        if limits.legacy_code_slots.contains_key(&sid.packed_byte()) {
-            return false;
-        }
-        limits.legacy_code_slots.insert(sid.packed_byte(), value);
+        limits.code_slots.insert(identity, value);
         true
     }
 
@@ -482,29 +455,30 @@ mod tests {
     use crate::Exactness;
 
     #[test]
-    fn domain_code_slots_keep_equal_payloads_distinct() {
-        use crate::{Bija3, Bit3, Bit4, CoreD4};
+    fn callable_code_slots_keep_equal_payloads_distinct() {
+        use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
 
         let env = Environment::root();
-        let d3 = CoreDomainIdentity::from(Bija3::from_word(Bit3::new(1).unwrap()));
-        let d4 = CoreDomainIdentity::from(CoreD4::from_word(Bit4::new(1).unwrap()));
-
-        assert!(env.bind_domain_code_slot_once(
-            d3,
-            Value::Symbol(Rc::from("d3-one"))
+        let d3 = CallableIdentity::core(CoreDomainIdentity::from(
+            Bija3::from_word(Bit3::new(1).unwrap()),
         ));
-        assert!(env.bind_domain_code_slot_once(
-            d4,
-            Value::Symbol(Rc::from("d4-one"))
+        let d4 = CallableIdentity::core(CoreDomainIdentity::from(
+            CoreD4::from_word(Bit4::new(1).unwrap()),
+        ));
+        let legacy = CallableIdentity::legacy8(1);
+
+        assert!(env.bind_code_slot_once(d3, Value::Symbol(Rc::from("d3-one"))));
+        assert!(env.bind_code_slot_once(d4, Value::Symbol(Rc::from("d4-one"))));
+        assert!(env.bind_code_slot_once(
+            legacy,
+            Value::Symbol(Rc::from("legacy-one")),
         ));
 
+        assert_eq!(env.code_slot(d3), Some(Value::Symbol(Rc::from("d3-one"))));
+        assert_eq!(env.code_slot(d4), Some(Value::Symbol(Rc::from("d4-one"))));
         assert_eq!(
-            env.domain_code_slot(d3),
-            Some(Value::Symbol(Rc::from("d3-one")))
-        );
-        assert_eq!(
-            env.domain_code_slot(d4),
-            Some(Value::Symbol(Rc::from("d4-one")))
+            env.code_slot(legacy),
+            Some(Value::Symbol(Rc::from("legacy-one")))
         );
     }
 
