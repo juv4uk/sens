@@ -6,6 +6,17 @@
 use super::arithmetic;
 use crate::{CoreDomainIdentity, Environment, LanguageError, Span, Value};
 
+pub(super) fn supports(identity: CoreDomainIdentity) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D5(word)
+            if matches!(
+                word.word().packed_bits(),
+                0b01010 | 0b01011 | 0b01110 | 0b01111 | 0b10010 | 0b10011
+            )
+    )
+}
+
 pub(super) fn invoke(
     identity: CoreDomainIdentity,
     args: &[Value],
