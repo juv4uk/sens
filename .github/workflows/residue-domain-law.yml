@@ -1,0 +1,43 @@
+name: Residue root domain law
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/residue-domain-law/**"
+      - "benchmarks/post-d4-root-min-closeout/**"
+      - "benchmarks/d5-structural-discovery/factor-graph.json"
+      - "benchmarks/d6-closure-map/**"
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - ".github/workflows/residue-domain-law.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/residue-domain-law/**"
+      - ".github/workflows/residue-domain-law.yml"
+  workflow_dispatch:
+
+jobs:
+  tournament:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run parentless-root domain tournament
+        run: |
+          rm -rf /tmp/residue-domain-law
+          python3 benchmarks/residue-domain-law/run.py --out /tmp/residue-domain-law
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/residue-domain-law/report.md; then
+            cat /tmp/residue-domain-law/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: residue-domain-law
+          path: /tmp/residue-domain-law/
+          retention-days: 14
