@@ -86,6 +86,17 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+    /// Lift an exact four-bit source word into the typed Core.D4 carrier.
+    ///
+    /// D4 coordinate meaning and allocation remain contract-owned; this
+    /// boundary only preserves exact width and domain membership.
+    pub const fn d4(self) -> Option<crate::CoreD4> {
+        match self {
+            Self::W4(word) => Some(crate::CoreD4::from_word(word)),
+            _ => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -103,6 +114,12 @@ impl From<crate::Racana2> for BinarySourceWord {
 impl From<crate::Bija3> for BinarySourceWord {
     fn from(value: crate::Bija3) -> Self {
         Self::W3(value.word())
+    }
+}
+
+impl From<crate::CoreD4> for BinarySourceWord {
+    fn from(value: crate::CoreD4) -> Self {
+        Self::W4(value.word())
     }
 }
 
@@ -239,7 +256,7 @@ mod tests {
     }
 
     #[test]
-    fn d1_d2_d3_bridge_is_exact_and_lossless_for_every_small_word() {
+    fn d1_d2_d3_d4_bridge_is_exact_and_lossless_for_every_ratified_foundation_word() {
         for raw in 0..=1 {
             let source = BinarySourceWord::W1(Bit1::new(raw).unwrap());
             let typed = source.d1().expect("W1 must enter D1");
@@ -262,13 +279,22 @@ mod tests {
             assert_eq!(BinarySourceWord::from(typed), source);
             assert!(source.d1().is_none());
             assert!(source.d2().is_none());
+            assert!(source.d4().is_none());
+        }
+
+        for raw in 0..=15 {
+            let source = BinarySourceWord::W4(Bit4::new(raw).unwrap());
+            let typed = source.d4().expect("W4 must enter Core.D4");
+            assert_eq!(BinarySourceWord::from(typed), source);
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
         }
     }
 
     #[test]
-    fn wider_source_words_do_not_enter_d1_d2_d3() {
+    fn wider_source_words_do_not_enter_d1_d2_d3_d4() {
         for source in [
-            BinarySourceWord::W4(Bit4::new(0).unwrap()),
             BinarySourceWord::W5(Bit5::new(0).unwrap()),
             BinarySourceWord::W6(Bit6::new(0).unwrap()),
             BinarySourceWord::W7(Bit7::new(0).unwrap()),
@@ -277,6 +303,7 @@ mod tests {
             assert!(source.d1().is_none());
             assert!(source.d2().is_none());
             assert!(source.d3().is_none());
+            assert!(source.d4().is_none());
         }
     }
 
