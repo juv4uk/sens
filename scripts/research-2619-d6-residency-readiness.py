@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""#2619 — compose current D6 evidence into an owner-readiness gate.
+"""#2619/#2723 — post-owner-decision D6 residency guard.
 
-This gate never admits a resident. It proves only that candidate 001111 has
-reached the state where evidence work is complete and owner authority is the
-remaining step.
+This gate now verifies that owner-ratified candidate 001111 is canonically
+admitted and that the decision did not leak into adjacent/intermediate or
+historically related capabilities.
 """
 
 from __future__ import annotations
@@ -32,11 +32,12 @@ def main() -> int:
 
     assert len(rows) == 64
     assert sum(row["status"] == "generated" for row in rows) == 16
-    assert sum(row["status"] == "UNKNOWN/free" for row in rows) == 48
-    assert target["status"] == "UNKNOWN/free"
-    assert target["semantic_member_of_ratified_domain"] is False
-    assert target["placement_ref"] == ""
-    assert target["manual_resident_required"] is False
+    assert sum(row["status"] == "ratified-manual" for row in rows) == 1
+    assert sum(row["status"] == "UNKNOWN/free" for row in rows) == 47
+    assert target["status"] == "ratified-manual"
+    assert target["semantic_member_of_ratified_domain"] is True
+    assert target["placement_ref"] == "#2538:OD-001/#2723"
+    assert target["manual_resident_required"] is True
 
     pressure = runpy.run_path(str(PRESSURE))
     pressure_map = pressure["build"]()
@@ -93,9 +94,10 @@ def main() -> int:
         "domain_ratified": True,
         "canonical_closure": {
             "generated": 16,
-            "unknown_free": 48,
+            "ratified_manual": 1,
+            "unknown_free": 47,
             "candidate_current_status": target["status"],
-            "candidate_admitted": False,
+            "candidate_admitted": True,
         },
         "local_placement_theorem": {
             "parent": setq["strongest_local_parent"],
@@ -113,13 +115,14 @@ def main() -> int:
             "nonprefix_scope": "survived-local-D6/distinct-standalone-D2",
             "cross_family_inheritance": "rejected",
         },
-        "owner_action_required": True,
-        "readiness": "READY-FOR-OWNER",
-        "admitted": False,
+        "owner_action_required": False,
+        "owner_decision": "#2538:OD-001/#2723",
+        "readiness": "OWNER-RATIFIED-APPLIED",
+        "admitted": True,
         "non_conclusions": [
-            "readiness is not ratification",
-            "001111 is not a resident until explicit owner decision",
-            "D6 pressure for SETQ does not transfer to SET, RETURN, FEXPR, FSUBR or TRANSFORMER",
+            "owner ratification of 001111 does not transfer to SET, RETURN, FEXPR, FSUBR or TRANSFORMER",
+            "001100 parent duplicate remains non-resident",
+            "001101/001110 proof intermediates remain non-residents",
             "standalone D2 product representation is a different domain and does not relocate the Core candidate",
             "one-axis D6 proof corners 001101/001110 remain non-residents",
         ],
