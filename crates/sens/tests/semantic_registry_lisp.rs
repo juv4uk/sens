@@ -85,7 +85,9 @@ fn exact_domain_projection_has_no_legacy_byte_axis() {
     let generated = include_str!("../src/domain_surface_registry_generated.rs");
 
     assert!(
-        source.contains("(\"11\" \"001\"") && source.contains("(\"100\" \"0010\""),
+        source.contains("(\"11\" \"001\"")
+            && source.contains("(\"100\" \"0010\"")
+            && source.contains("(\"101\" \"01010\""),
         "authority must state exact domain width in binary and exact bits explicitly"
     );
     assert!(
@@ -93,8 +95,10 @@ fn exact_domain_projection_has_no_legacy_byte_axis() {
         "exact-domain projection must not carry legacy semantic_id bytes"
     );
     assert!(
-        generated.contains("width: 0b11") && generated.contains("width: 0b100"),
-        "generated projection must preserve exact domain width"
+        generated.contains("width: 0b11")
+            && generated.contains("width: 0b100")
+            && generated.contains("width: 0b101"),
+        "generated projection must preserve exact D3/D4/D5 widths"
     );
 }
 
