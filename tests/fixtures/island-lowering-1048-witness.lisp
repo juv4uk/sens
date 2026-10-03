@@ -7,7 +7,7 @@
 ; write-to-string owns since #1648, not decimal text: this is a mechanism
 ; transport, not a human presentation (#1693, #1656).
 
-(load "lib/core4.lisp")
+(load "lib/core.lisp")
 (load "lib/surface/semantic-registry-api.lisp")
 (load "lib/mechanism-selector.lisp")
 (load "lib/island-lowering.lisp")
