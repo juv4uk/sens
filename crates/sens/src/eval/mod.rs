@@ -29,6 +29,7 @@ pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::CoreDomainIdentity;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -43,8 +44,9 @@ pub fn eval_parsed_expressions(
     eval_lowered_expressions(&lower::lower_program(expressions), session)
 }
 
-/// Виконати програму, вже зведену `lower_program` (функції — 1 байт).
-/// Дозволяє звести один раз і виконувати багато разів.
+/// Виконати програму, вже зведену `lower_program`.
+/// Мігрувані D3/D4 голови несуть exact domain identity; неперенесені
+/// compatibility-голови ще можуть нести historical Sens8.
 pub fn eval_lowered_expressions(
     expressions: &[Expr],
     session: &mut Session,
@@ -94,6 +96,9 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
+        Value::DomainIdentity(identity) => {
+            canon::invoke_domain_identity(*identity, arguments, environment, span)
+        }
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
@@ -174,13 +179,9 @@ pub(crate) fn evaluate_step(
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
-        ExprKind::DomainCall(identity, _) => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!(
-                "domain-qualified call routing is not admitted yet · marshrut domennoho vyklyku shche ne dopushchenyi: {identity}"
-            ),
-            expression.span,
-        )),
+        ExprKind::DomainCall(identity, arguments) => {
+            dispatch_domain_call(*identity, arguments, environment, expression.span)
+        }
         // Виконання залежить лише від числових координат (#1697): слот або є,
         // або названа помилка — пошуку за іменем більше немає.
         ExprKind::Local { depth, index } => environment
@@ -208,6 +209,9 @@ fn evaluate_list(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    if let Some(identity) = binary_head_domain_identity(&items[0]) {
+        return dispatch_domain_call(identity, &items[1..], environment, span);
+    }
     dispatch_call(
         items[0].kind.as_symbol(),
         binary_head_sid(&items[0]),
@@ -218,7 +222,59 @@ fn evaluate_list(
     )
 }
 
-/// Спільний диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
+fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D3(word) if word.word().packed_bits() == bits
+    )
+}
+
+fn dispatch_domain_call(
+    identity: CoreDomainIdentity,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
+    if is_d3(identity, 0b001) {
+        special_forms::exact_arity("quote", arguments, 1, span)?;
+        return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
+    }
+
+    match necessary_forms::identity_for_domain_identity(identity) {
+        Some(necessary_forms::NecessaryFormIdentity::Lambda) => {
+            return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
+        }
+        Some(necessary_forms::NecessaryFormIdentity::Define) => {
+            return special_forms::evaluate_definition(arguments, environment, span)
+                .map(EvalStep::Value);
+        }
+        None => {}
+    }
+
+    if is_d3(identity, 0b011) {
+        return special_forms::evaluate_cond(arguments, environment, span);
+    }
+
+    if let Some(bound) = environment.domain_code_slot(identity) {
+        match &bound {
+            Value::Macro(closure) => {
+                return closures::apply_macro(closure.clone(), arguments, environment, span);
+            }
+            Value::Closure(_) => {
+                return closures::apply(bound.clone(), arguments, environment, span);
+            }
+            _ => {}
+        }
+    }
+
+    let mut values = Vec::with_capacity(arguments.len());
+    for argument in arguments {
+        values.push(evaluate(argument, environment)?);
+    }
+    canon::invoke_domain_identity(identity, &values, environment, span).map(EvalStep::Value)
+}
+
+/// Спільний compatibility-диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
 /// функція — лише 1 байт `head_sid`.
 fn dispatch_call(
     head_name: Option<&str>,
@@ -265,6 +321,14 @@ fn dispatch_call(
         )?,
     };
     match &function {
+        Value::DomainIdentity(identity) => {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, environment)?);
+            }
+            canon::invoke_domain_identity(*identity, &values, environment, span)
+                .map(EvalStep::Value)
+        }
         Value::Sid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
             if !canon::has_primitive(*sid) {
@@ -306,6 +370,13 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
+fn binary_head_domain_identity(expression: &Expr) -> Option<CoreDomainIdentity> {
+    let ExprKind::DomainIdentity(identity) = expression.kind else {
+        return None;
+    };
+    Some(identity)
+}
+
 fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
     let ExprKind::Sid(sid) = expression.kind else {
         return None;
