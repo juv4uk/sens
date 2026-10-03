@@ -16,7 +16,7 @@
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
 
-const MAX_SELECTOR_DEPTH: usize = 4;
+const MAX_SELECTOR_DEPTH: usize = 6;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
@@ -32,7 +32,9 @@ struct SelectorProgram {
 
 fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let width = identity.width();
-    if !(3..=6).contains(&width) {
+    // D7 is the ratified Sound7/Text7 domain, not selector geometry.
+    // D8 re-enters the selector lineage only under the admitted root+suffix law.
+    if !((3..=6).contains(&width) || width == 8) {
         return None;
     }
 
@@ -103,7 +105,7 @@ pub(super) fn invoke(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6};
+    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, Bit8, CoreD4, CoreD5, CoreD6, CoreD8};
     use std::rc::Rc;
 
     fn pair(head: Value, tail: Value) -> Value {
@@ -131,6 +133,9 @@ mod tests {
     fn d6(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()))
     }
+    fn d8(raw: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(raw).unwrap()))
+    }
 
     #[test]
     fn selector_family_is_decoded_from_root_plus_suffix_only() {
@@ -148,6 +153,10 @@ mod tests {
         assert_eq!(
             decode(d6(0b101101)).unwrap().steps[..4],
             [Step::Car, Step::Cdr, Step::Car, Step::Cdr]
+        );
+        assert_eq!(
+            decode(d8(0b10110101)).unwrap().steps[..6],
+            [Step::Car, Step::Cdr, Step::Car, Step::Cdr, Step::Car, Step::Cdr]
         );
     }
 
@@ -198,6 +207,16 @@ mod tests {
             invoke(d6(0b101000), &[x2], span).unwrap().unwrap(),
             leaf(1.0)
         );
+
+        // D8 10100000 = six CAR applications under the same admitted law.
+        let mut x8 = leaf(9.0);
+        for _ in 0..6 {
+            x8 = pair(x8, Value::Nil);
+        }
+        assert_eq!(
+            invoke(d8(0b10100000), &[x8], span).unwrap().unwrap(),
+            leaf(9.0)
+        );
     }
 
     #[test]
@@ -216,8 +235,12 @@ mod tests {
         for raw in 0u8..64 {
             generated += usize::from(decode(d6(raw)).is_some());
         }
+        for raw in 0u8..=255 {
+            generated += usize::from(decode(d8(raw)).is_some());
+        }
 
-        // 2 roots + 4 D4 + 8 D5 + 16 D6 descendants.
-        assert_eq!(generated, 30);
+        // 2 roots + 4 D4 + 8 D5 + 16 D6 + 64 D8 descendants.
+        // D7 contributes zero: it is governed by Sound7/Text7 law.
+        assert_eq!(generated, 94);
     }
 }
