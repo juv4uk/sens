@@ -1,12 +1,13 @@
-use wsm_common_lisp_kernel::{CommonLispKernel, CommonLispRequest, SemanticId};
+use sens::{Bija3, Bit3, CoreDomainIdentity};
+use wsm_common_lisp_kernel::{CommonLispKernel, CommonLispRequest};
 
-// semantic-registry-experiment.lisp:
-//   00000100 cons
-//   00000101 car
-//   00000110 cdr
-const CONS_ID: u8 = 0b0000_0100;
-const CAR_ID: u8 = 0b0000_0101;
-const CDR_ID: u8 = 0b0000_0110;
+fn d3_car() -> CoreDomainIdentity {
+    CoreDomainIdentity::from(Bija3::from_word(Bit3::new(0b101).unwrap()))
+}
+
+fn d3_cdr() -> CoreDomainIdentity {
+    CoreDomainIdentity::from(Bija3::from_word(Bit3::new(0b110).unwrap()))
+}
 
 fn stdout_text(bytes: &[u8]) -> String {
     String::from_utf8_lossy(bytes).trim().to_string()
@@ -17,42 +18,37 @@ fn integration_enabled() -> bool {
 }
 
 #[test]
-fn common_lisp_car_witness_preserves_sens_semantic_id() {
+fn common_lisp_car_witness_preserves_domain_qualified_sens_identity() {
     if !integration_enabled() { return; }
     let kernel = CommonLispKernel::default();
-    let request = CommonLispRequest::new(CAR_ID, "(car '(left right))");
+    let request = CommonLispRequest::new(d3_car(), "(car '(left right))");
     let result = kernel.evaluate(&request).expect("SBCL must execute CAR witness");
 
-    assert_eq!(result.semantic_id, SemanticId(CAR_ID));
+    assert_eq!(result.semantic_identity, d3_car());
     assert_eq!(stdout_text(&result.stdout), "LEFT");
 }
 
 #[test]
-fn common_lisp_cdr_witness_preserves_sens_semantic_id() {
+fn common_lisp_cdr_witness_preserves_domain_qualified_sens_identity() {
     if !integration_enabled() { return; }
     let kernel = CommonLispKernel::default();
-    let request = CommonLispRequest::new(CDR_ID, "(cdr '(left right))");
+    let request = CommonLispRequest::new(d3_cdr(), "(cdr '(left right))");
     let result = kernel.evaluate(&request).expect("SBCL must execute CDR witness");
 
-    assert_eq!(result.semantic_id, SemanticId(CDR_ID));
+    assert_eq!(result.semantic_identity, d3_cdr());
     assert_eq!(stdout_text(&result.stdout), "(RIGHT)");
 }
 
 #[test]
-fn common_lisp_cons_then_car_reproduces_the_car_cons_law_slice() {
+fn common_lisp_cons_then_car_preserves_external_car_identity() {
     if !integration_enabled() { return; }
     let kernel = CommonLispKernel::default();
 
-    // The form exercises CL:CONS and CL:CAR while the externally observed
-    // semantic identity is CAR. sens still owns the car(cons(x,y)) = x law.
-    let request =
-        CommonLispRequest::new(CAR_ID, "(car (cons 'left 'right))");
+    // The mechanism form exercises CL:CONS and CL:CAR while the externally
+    // observed canonical semantic identity remains D3 CAR.
+    let request = CommonLispRequest::new(d3_car(), "(car (cons 'left 'right))");
     let result = kernel.evaluate(&request).expect("SBCL must execute witness");
 
-    assert_eq!(result.semantic_id, SemanticId(CAR_ID));
+    assert_eq!(result.semantic_identity, d3_car());
     assert_eq!(stdout_text(&result.stdout), "LEFT");
-
-    // Keep the related registry identity visible in the executable witness
-    // without teaching the adapter what CONS means.
-    assert_eq!(SemanticId(CONS_ID), SemanticId(0b0000_0100));
 }
