@@ -1,5 +1,6 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::{CoreD5, CoreD6, Sens8};
+use crate::{CoreD5, CoreD6};
+use crate::Sens8;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
