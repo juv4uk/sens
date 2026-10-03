@@ -143,7 +143,9 @@ fn expr_string(expr: &Expr) -> Option<&str> {
 /// A SENS identity in the docs index is a bare 8-bit token, never text.
 fn expr_byte_sid(expr: &Expr) -> Option<String> {
     match &expr.kind {
-        ExprKind::Sid(sid) => Some(sid.to_string()),
+        ExprKind::Sid(identity) => identity
+            .legacy8_bits()
+            .map(|bits| format!("{bits:08b}")),
         _ => None,
     }
 }
