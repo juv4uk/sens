@@ -70,7 +70,8 @@ def special_data() -> dict[str, Any]:
 def frontier_data() -> dict[str, Any]:
     ns = runpy.run_path(str(FRONTIER))
     result = ns["build"]()
-    assert result["canonical"]["occupancy_mutations"] == 0
+    assert result["canonical"]["research_occupancy_mutations"] == 0
+    assert result["canonical"]["ratified_manual_coordinates"] == ["001111"]
     assert result["frontier_counts"][ns["PURE_UNKNOWN"]] == 44
     return result
 
@@ -136,11 +137,8 @@ def build() -> dict[str, Any]:
     assert "OBSERVABLE-INDEPENDENT-DELTA-COUNT=2" in binding_out
     assert "D6-LOCAL-TWO-DELTA-SUFFICIENT=yes" in binding_out
     assert "D6-TARGET-CANDIDATE=001111" in binding_out
-    target_frontier = next(
-        row for row in frontier["frontier"] if row["coordinate"] == "001111"
-    )
-    assert target_frontier["research_evidence_class"] == "OWNER-READY-NONADMITTED"
-    assert target_frontier["canonical_semantic_member"] is False
+    assert all(row["coordinate"] != "001111" for row in frontier["frontier"])
+    assert frontier["canonical"]["ratified_manual_coordinates"] == ["001111"]
 
     controls = [
         candidate_row(
@@ -153,8 +151,8 @@ def build() -> dict[str, Any]:
             composition_law="PROVED",
             lower_bound="PROVED",
             collapse_reason=None,
-            existing_frontier_lane="001111 OWNER-READY-NONADMITTED",
-            verdict="POSITIVE-TWO-DELTA-CONTROL-BUT-NOT-PURE-UNKNOWN",
+            existing_frontier_lane="001111 OWNER-RATIFIED-RESIDENT",
+            verdict="POSITIVE-TWO-DELTA-CONTROL-ALREADY-RATIFIED-NONPURE",
         )
     ]
     assert controls[0]["pure_unknown_candidate"] is False
@@ -165,23 +163,32 @@ def build() -> dict[str, Any]:
 
     rows: list[dict[str, Any]] = []
 
-    # SET/SETQ pressure is already owned by the known binding-policy overlay,
-    # so lane A must not re-export it into one of the 44 PURE-UNKNOWN slots.
+    # SETQ is now owner-ratified at 001111. SET shares historical carrier
+    # pressure but does not inherit the ratified policy resident.
     for op in ("SET", "SETQ"):
         assert historical[op]["later_SENS_classification"] == "NEW-OBSERVABLE-CAPABILITY"
+        already_ratified = op == "SETQ"
         rows.append(
             candidate_row(
                 capability=op,
-                source=f"historical #{historical[op]['issue']} + #2518",
+                source=f"historical #{historical[op]['issue']} + #2518/#2538/#2723",
                 parent="D4 DEFINE 0011",
                 same_base="PROVED-FOR-SHARED-LOCATION-CORE",
                 deltas=["nearest-existing-scope", "fail-on-miss"],
                 delta_statuses=[roots["shared-location-update"], roots["shared-location-update"]],
                 composition_law="PROVED",
                 lower_bound="PROVED",
-                collapse_reason="SET/SETQ names collapse to one shared-location semantic core",
-                existing_frontier_lane="001100..001111 binding-policy overlay; 001111 owner-ready nonadmitted",
-                verdict="EXCLUDED-SEPARATE-NONPURE-OVERLAY",
+                collapse_reason=(
+                    "SETQ is already owner-ratified at D6:001111"
+                    if already_ratified
+                    else "SET shares carrier pressure but does not inherit SETQ's ratified policy resident"
+                ),
+                existing_frontier_lane="001111 OWNER-RATIFIED-RESIDENT",
+                verdict=(
+                    "EXCLUDED-ALREADY-RATIFIED-NONPURE"
+                    if already_ratified
+                    else "EXCLUDED-NO-TRANSFER-FROM-RATIFIED-SETQ"
+                ),
             )
         )
 
@@ -303,7 +310,7 @@ def build() -> dict[str, Any]:
     assert len(rows) == 8
     assert not any(row["pure_unknown_candidate"] for row in rows)
     assert frontier["frontier_counts"]["PURE-UNKNOWN"] == 44
-    assert frontier["canonical"]["occupancy_mutations"] == 0
+    assert frontier["canonical"]["research_occupancy_mutations"] == 0
 
     result = {
         "schema": "d6-pure-unknown-parent-tournament/v1",
@@ -326,7 +333,7 @@ def build() -> dict[str, Any]:
             "pure_unknown_coordinates": 44,
             "pure_unknown_candidates": 0,
             "known_nonpure_two_delta_controls": 1,
-            "occupancy_mutations": 0,
+            "research_occupancy_mutations": 0,
             "result": "NO-CANDIDATE",
         },
         "guards": [
@@ -334,7 +341,7 @@ def build() -> dict[str, Any]:
             "two observable deltas do not imply D6 without exact generator/lower-bound law",
             "parentless roots are not generated children",
             "composites are not primitive residents",
-            "known 001111 evidence does not transfer to PURE-UNKNOWN",
+            "owner-ratified 001111 law does not transfer to SET or PURE-UNKNOWN",
             "no Core-Math or mechanism donation",
         ],
     }
@@ -357,7 +364,7 @@ def main() -> int:
     print("current-sens-control-tested=1")
     print("known-nonpure-two-delta-control=PASS")
     print("pure-unknown-candidates=0")
-    print("occupancy-mutations=0")
+    print("research-occupancy-mutations=0")
     print("RESULT=NO-CANDIDATE")
     return 0
 
