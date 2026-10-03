@@ -1,0 +1,59 @@
+name: D14 Panini donor invariance research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d14-panini-donor-invariance/**"
+      - ".github/workflows/d14-panini-donor-invariance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  donor-invariance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Read pinned donor revision
+        id: pin
+        shell: bash
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          lock = json.loads(Path("benchmarks/d14-panini-donor-invariance/donor-lock.json").read_text())
+          print("repository=" + lock["repository"])
+          print("revision=" + lock["revision"])
+          PY
+
+      - name: Checkout pinned Panini donor
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.revision }}
+          path: .upstream/shiva-sutras
+
+      - name: Run independent SENS donor consumer
+        run: |
+          rm -rf /tmp/d14-panini-donor-invariance
+          python3 benchmarks/d14-panini-donor-invariance/run.py \
+            --upstream-root .upstream/shiva-sutras \
+            --out /tmp/d14-panini-donor-invariance \
+            --trials 64
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d14-panini-donor-invariance/report.md; then
+            cat /tmp/d14-panini-donor-invariance/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d14-panini-donor-invariance
+          path: /tmp/d14-panini-donor-invariance/
+          retention-days: 14
