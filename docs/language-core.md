@@ -23,14 +23,15 @@ Equal packed payloads in different domains are distinct identities.
 
 ```text
 D3 001 != D4 0001 != D5 00001 != D6 000001
+!= D7 0000001 != D8 00000001
 ```
 
 No zero-padding, truncation, low-bit extraction or integer equality may create
 or recover domain identity.
 
-## Current Core domains
+## Current ratified exact-width domains
 
-The current exact-width Core family includes:
+The current ratified domain ladder is:
 
 ```text
 D1  exact one-bit predicate answers
@@ -39,13 +40,19 @@ D3  exact three-bit foundation
 D4  exact four-bit bootstrap
 D5  exact five-bit typed domain
 D6  exact six-bit typed domain
+D7  exact seven-bit Sound7/Text7 local-ordinal domain
+D8  exact eight-bit Core domain
 ```
 
-D5/D6 carrier existence, residency, derivability, callability and runtime
+Domain existence, residency, derivability, callability and runtime
 implementation are separate facts. A free coordinate has no meaning until its
 owning law admits it.
 
-D7 sound/text work is separate and is not callable merely because it is binary.
+D7 is governed by its Sound7/Text7 law and does not enter callable Core routing
+merely because it is binary. D8 is distinct from historical Sens8/Function8:
+its selector descendants may execute only where the ratified root+suffix law
+admits them, and other D8 coordinates remain non-callable until another
+admitted law/mechanism says otherwise.
 
 ## D1 — PredicateBit
 
@@ -99,13 +106,17 @@ Canonical binary source preserves exact word width before semantic routing.
 10 001 01
 ```
 
-is structurally D2 open, one exact W3 word, and D2 close. A source-domain bridge
-may lift admitted W3/W4/W5/W6 words directly into their exact Core domains.
+is structurally D2 open, one exact W3 word, and D2 close. Canonical source
+preserves W1..W8 width before domain routing. Admitted W3/W4/W5/W6 and
+law-certified W8 Core words may lift to exact Core operation identity; W7 lifts
+to Sound7 domain identity and never becomes callable merely from width.
 
 The reader must never recover a domain by zero-extending an old eight-bit code.
 
-Historical exact-eight-bit source remains a bounded compatibility path while
-migration completes.
+Historical Function8/Sens8 source remains a bounded compatibility path while
+migration completes. Exact D8 identity uses its own domain-qualified path and
+must never alias that legacy byte merely because both occupy eight physical
+bits.
 
 At expression start, apostrophe is reader sugar for the already-admitted D3
 QUOTE identity; it must not create an intermediate human-name or Sens8
