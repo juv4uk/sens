@@ -1,45 +1,70 @@
-//! #1344: Foundation test for `sens` (СЕНС) vocabulary migration.
+//! Domain-era foundation for canonical callable identity (#2817/#2821).
 //!
-//! Validates that `Sens8` and the `sens!` macro provide the canonical
-//! eight-bit function sense representation with zero friction, completely
-//! compatible with existing `Sens8` mechanisms while establishing the
-//! ontological vocabulary for #1325.
+//! The old Sens8/Sid8 model survives only as explicit compatibility payload.
+//! Core identity is domain-qualified: equal packed bits in D3/D4/D5/D6 are
+//! different semantic identities.
 
-use sens::{sens, Sens, Sens8};
+use sens::{
+    Bija3, Bit3, Bit4, Bit5, CallableIdentity, CoreD4, CoreD5, CoreDomainIdentity,
+};
 
 #[test]
-fn sens_macro_produces_identical_bit_representation_as_sid() {
-    let s_eq = sens!(00000011);
-    let old_eq = sens!(00000011);
-    assert_eq!(s_eq, old_eq);
-    assert_eq!(s_eq.to_string(), "00000011");
+fn equal_payloads_in_different_domains_are_not_equal() {
+    let d3 = CallableIdentity::core(CoreDomainIdentity::from(
+        Bija3::from_word(Bit3::new(1).unwrap()),
+    ));
+    let d4 = CallableIdentity::core(CoreDomainIdentity::from(
+        CoreD4::from_word(Bit4::new(1).unwrap()),
+    ));
+    let d5 = CallableIdentity::core(CoreDomainIdentity::from(
+        CoreD5::from_word(Bit5::new(1).unwrap()),
+    ));
+
+    assert_eq!(d3.packed_bits(), 1);
+    assert_eq!(d4.packed_bits(), 1);
+    assert_eq!(d5.packed_bits(), 1);
+    assert_ne!(d3, d4);
+    assert_ne!(d3, d5);
+    assert_ne!(d4, d5);
 }
 
 #[test]
-fn sens8_and_sens_are_type_compatible() {
-    let s: Sens8 = sens!(00000001);
-    let s_alias: Sens = s;
-    let back: Sens8 = s_alias;
-    assert_eq!(s, back);
+fn exact_width_is_part_of_core_identity() {
+    let d3 = CallableIdentity::core(CoreDomainIdentity::from(
+        Bija3::from_word(Bit3::new(0b101).unwrap()),
+    ));
+    let d4 = CallableIdentity::core(CoreDomainIdentity::from(
+        CoreD4::from_word(Bit4::new(0b0101).unwrap()),
+    ));
+    let d5 = CallableIdentity::core(CoreDomainIdentity::from(
+        CoreD5::from_word(Bit5::new(0b00101).unwrap()),
+    ));
+
+    assert_eq!(d3.exact_width(), 3);
+    assert_eq!(d4.exact_width(), 4);
+    assert_eq!(d5.exact_width(), 5);
+    assert_eq!(d3.to_string(), "101");
+    assert_eq!(d4.to_string(), "0101");
+    assert_eq!(d5.to_string(), "00101");
 }
 
 #[test]
-fn sens8_alias_is_equivalent_to_sens_macro() {
-    let legacy: Sens8 = sens!(00000001);
-    assert_eq!(legacy, sens!(00000001));
+fn historical_eight_bit_payload_never_aliases_core_identity() {
+    let core = CallableIdentity::core(CoreDomainIdentity::from(
+        Bija3::from_word(Bit3::new(0b101).unwrap()),
+    ));
+    let legacy = CallableIdentity::legacy8(0b0000_0101);
+
+    assert_eq!(core.packed_bits(), legacy.packed_bits());
+    assert_ne!(core, legacy);
+    assert_eq!(core.legacy8_bits(), None);
+    assert_eq!(legacy.legacy8_bits(), Some(0b0000_0101));
 }
 
 #[test]
-fn sens_distinguishes_different_function_senses() {
-    let s_atom = sens!(00000010);
-    let s_eq = sens!(00000011);
-    let s_cons = sens!(00000100);
-
-    assert_ne!(s_atom, s_eq);
-    assert_ne!(s_eq, s_cons);
-    assert_ne!(s_atom, s_cons);
-
-    assert_eq!(s_atom.to_string(), "00000010");
-    assert_eq!(s_eq.to_string(), "00000011");
-    assert_eq!(s_cons.to_string(), "00000100");
+fn compatibility_payload_is_not_a_core_domain() {
+    let legacy = CallableIdentity::legacy8(0b1111_1111);
+    assert_eq!(legacy.exact_width(), 8);
+    assert_eq!(legacy.core_identity(), None);
+    assert_eq!(legacy.to_string(), "11111111");
 }
