@@ -51,7 +51,8 @@ jobs:
             echo
             echo "- Historical presence is independent of later derivability."
             echo "- No binary object is allocated during HISTORICAL-INGEST."
-            echo "- #2557 is the active final comparison row."
+            echo "- Phase F #2557 is complete: Hart MACRO 1963 provides the historical transformer row."
+            echo "- Structural discovery may start; placement remains blocked until a structural law survives."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
