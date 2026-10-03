@@ -1,0 +1,49 @@
+name: D5 SENS derivation closeout research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d5-sens-derivation-closeout/**"
+      - "scripts/research-2616-d5-sens-derivation-closeout.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d5-sens-derivation-closeout.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: D5 SENS derivation eligibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate D5 eligibility snapshot
+        run: |
+          python3 scripts/research-2616-d5-sens-derivation-closeout.py \
+            --summary-json d5-sens-derivation-closeout.json
+          cat d5-sens-derivation-closeout.json
+
+      - name: Publish summary
+        run: |
+          {
+            echo "## D5 SENS-derivation closeout snapshot"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2616-d5-sens-derivation-closeout.py
+            echo "~~~"
+            echo
+            echo "- Research only: no coordinate allocation."
+            echo "- YES requires exact D4 same-base parent + exactly one independently witnessed delta."
+            echo "- UNKNOWN remains visible; it is never treated as NO or as free capacity."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload raw summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: d5-sens-derivation-closeout
+          path: d5-sens-derivation-closeout.json
