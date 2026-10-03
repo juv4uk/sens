@@ -1,6 +1,7 @@
-; Lisp-owned Rust projection of the canonical semantic registry.
+; Lisp-owned Rust projection of the historical surface/byte compatibility registry.
 ;
-; Authority: lib/surface/semantic-registry.lisp
+; Compatibility source: lib/surface/semantic-registry.lisp
+; Canonical identity authority: Contract 11 D3/D4 + D5/D6 owner maps
 ;
 ; This generator reads the registry as ordinary Lisp data. It emits only a
 ; mechanical Rust runtime projection. Rust never parses the canonical Lisp
@@ -85,11 +86,12 @@
 (00001001 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
-    "// Authority: lib/surface/semantic-registry.lisp\n"
+    "// Compatibility source: lib/surface/semantic-registry.lisp\n"
+    "// Canonical identity authority is domain-qualified and lives elsewhere.\n"
     "// Generator: scripts/generate-rust-semantic-registry.lisp\n"
     "//\n"
-    "// Binary identities below are an implementation projection only.\n"
-    "// Canonical semantic identity remains the bare binary token in the Lisp registry.\n"
+    "// Historical bytes below are compatibility/export projection only.\n"
+    "// They MUST NOT determine CoreDomainIdentity or current semantic meaning.\n"
     "\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
     "pub(super) struct SemanticSurface {\n"
