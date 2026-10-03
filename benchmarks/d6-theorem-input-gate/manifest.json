@@ -1,0 +1,36 @@
+{
+  "schema": "d6-theorem-input-gate/v1",
+  "issue": "#2711",
+  "parent": "#2699",
+  "independent_falsifier": "#2702",
+  "principle": "freeze the evidence, not the answer",
+  "witnesses": [
+    {
+      "path": "benchmarks/d6-theorem-first-d5-child/run.py",
+      "expected_result": "RESULT=NO-NEW-D5-ONE-DELTA-CHILD",
+      "evidence": "#2704"
+    },
+    {
+      "path": "benchmarks/d6-theorem-first-d4-product/run.py",
+      "expected_result": "RESULT=NO-NEW-D4-TWO-DELTA-FAMILY",
+      "evidence": "#2708"
+    }
+  ],
+  "placement": {
+    "path": "benchmarks/post-d4-semantic-placement/placement.json",
+    "expected_candidate_coordinates": [
+      {
+        "operation": "SETQ",
+        "coordinate": "D6:001111 (OD-001 owner-ready only)",
+        "residency": "nonadmitted",
+        "owner_decision": "#2538:OD-001"
+      }
+    ]
+  },
+  "guards": {
+    "pure_unknown_is_search_space": false,
+    "owner_decision_in_this_gate": false,
+    "occupancy_mutation_in_this_gate": false,
+    "falsifier_logic_in_this_gate": false
+  }
+}
