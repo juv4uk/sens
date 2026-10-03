@@ -1,0 +1,42 @@
+name: D6 ratification non-contagion
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-ratification-noncontagion/**"
+      - "benchmarks/d6-closure-map/**"
+      - ".github/workflows/d6-ratification-noncontagion.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-ratification-noncontagion/**"
+      - "benchmarks/d6-closure-map/**"
+      - ".github/workflows/d6-ratification-noncontagion.yml"
+  workflow_dispatch:
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run D6 ratification non-contagion guard
+        run: |
+          rm -rf /tmp/d6-ratification-noncontagion
+          python3 benchmarks/d6-ratification-noncontagion/run.py \
+            --out /tmp/d6-ratification-noncontagion
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d6-ratification-noncontagion/report.md; then
+            cat /tmp/d6-ratification-noncontagion/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-ratification-noncontagion
+          path: /tmp/d6-ratification-noncontagion/
+          retention-days: 14
