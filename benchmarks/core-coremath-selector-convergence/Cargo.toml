@@ -1,0 +1,10 @@
+[package]
+name = "core-coremath-selector-convergence"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+core-math-binary-exec = { path = "../core-math-binary-exec" }
+
+[workspace]
