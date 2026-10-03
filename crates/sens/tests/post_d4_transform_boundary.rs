@@ -44,7 +44,7 @@ fn ordinary_helper_without_exit_protocol_cannot_skip_its_caller_continuation() {
 }
 
 #[test]
-fn rewritten_helper_with_exit_k_can_model_non_local_return() {
+fn rewritten_call_chain_with_exit_k_can_model_non_local_return() {
     let mut s = session();
 
     let result = run(
@@ -52,18 +52,14 @@ fn rewritten_helper_with_exit_k_can_model_non_local_return() {
         r#"
         ((00001000 (rewritten-helper)
            ((00001000 (exit-k)
-              (00000100
-                (00000001 should-not-be-after)
-                (00000100
-                  (rewritten-helper
-                    (00000001 early)
-                    (00001000 (value)
-                      (00000100
-                        (00000001 after)
-                        (00000100 value (00000001 ()))))
-                    exit-k
-                    (00000001 payload))
-                  (00000001 ()))))
+              (rewritten-helper
+                (00000001 early)
+                (00001000 (value)
+                  (00000100
+                    (00000001 after)
+                    (00000100 value (00000001 ()))))
+                exit-k
+                (00000001 payload)))
             (00001000 (value)
               (00000100
                 (00000001 returned)
@@ -77,9 +73,9 @@ fn rewritten_helper_with_exit_k_can_model_non_local_return() {
         "#,
     );
 
-    // The explicit exit-k returns from the rewritten protocol before the
-    // ordinary "after" continuation is selected.
-    assert_eq!(result, "(should-not-be-after (returned payload))");
+    // The caller itself is now in CPS tail position: early mode selects
+    // exit-k instead of the explicit "after" continuation.
+    assert_eq!(result, "(returned payload)");
 }
 
 #[test]
