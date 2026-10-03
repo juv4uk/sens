@@ -31,7 +31,7 @@ jobs:
       - name: Classify D6 UNKNOWN frontier
         run: |
           python3 benchmarks/d6-unknown-frontier/run.py --out /tmp/d6-unknown-frontier.json
-          python3 -c 'import json; d=json.load(open("/tmp/d6-unknown-frontier.json")); assert d["canonical"]["occupancy_mutations"] == 0; assert sum(d["frontier_counts"].values()) == 48'
+          python3 -c 'import json; d=json.load(open("/tmp/d6-unknown-frontier.json")); assert d["canonical"]["ratified_manual_residents"] == 1; assert d["canonical"]["unknown_free"] == 47; assert d["canonical"]["occupancy_mutations"] == 0; assert sum(d["frontier_counts"].values()) == 47; assert d["ratified_target"]["coordinate"] == "001111"'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
