@@ -2,7 +2,10 @@
 //! Pobudova `lambda` ta zastosuvannia zamykan/makrosiv do arhumentiv.
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
-use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
+use super::{
+    canon, capabilities, evaluate, necessary_forms, necessary_forms_legacy, special_forms::quoted,
+    EvalStep,
+};
 use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
 use std::{
     collections::HashSet,
@@ -232,7 +235,7 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
     if sid == EVAL {
         return Head::Opaque;
     }
-    match necessary_forms::identity_for_semantic_id(sid) {
+    match necessary_forms_legacy::identity_for_semantic_id(sid) {
         Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
         Some(necessary_forms::NecessaryFormIdentity::Define) => return Head::Define,
         _ => {}
