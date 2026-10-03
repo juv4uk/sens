@@ -86,6 +86,28 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+
+    /// Lift an exact five-bit source word into the typed Core.D5 carrier.
+    ///
+    /// This boundary proves width + explicit domain membership only; coordinate
+    /// meaning remains owned by the current Core.D5 map/laws.
+    pub const fn d5(self) -> Option<crate::CoreD5> {
+        match self {
+            Self::W5(word) => Some(crate::CoreD5::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact six-bit source word into the typed Core.D6 carrier.
+    ///
+    /// No prefix/parent relationship or human projection is inferred here.
+    pub const fn d6(self) -> Option<crate::CoreD6> {
+        match self {
+            Self::W6(word) => Some(crate::CoreD6::from_word(word)),
+            _ => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -103,6 +125,19 @@ impl From<crate::Racana2> for BinarySourceWord {
 impl From<crate::Bija3> for BinarySourceWord {
     fn from(value: crate::Bija3) -> Self {
         Self::W3(value.word())
+    }
+}
+
+
+impl From<crate::CoreD5> for BinarySourceWord {
+    fn from(value: crate::CoreD5) -> Self {
+        Self::W5(value.word())
+    }
+}
+
+impl From<crate::CoreD6> for BinarySourceWord {
+    fn from(value: crate::CoreD6) -> Self {
+        Self::W6(value.word())
     }
 }
 
@@ -262,6 +297,35 @@ mod tests {
             assert_eq!(BinarySourceWord::from(typed), source);
             assert!(source.d1().is_none());
             assert!(source.d2().is_none());
+        }
+    }
+
+    #[test]
+    fn d5_d6_bridge_is_exact_and_width_qualified() {
+        for raw in 0..=31 {
+            let source = BinarySourceWord::W5(Bit5::new(raw).unwrap());
+            let typed = source.d5().expect("W5 must enter Core.D5");
+            assert_eq!(BinarySourceWord::from(typed), source);
+            assert!(source.d6().is_none());
+        }
+
+        for raw in 0..=63 {
+            let source = BinarySourceWord::W6(Bit6::new(raw).unwrap());
+            let typed = source.d6().expect("W6 must enter Core.D6");
+            assert_eq!(BinarySourceWord::from(typed), source);
+            assert!(source.d5().is_none());
+        }
+
+        for source in [
+            BinarySourceWord::W1(Bit1::new(1).unwrap()),
+            BinarySourceWord::W2(Bit2::new(1).unwrap()),
+            BinarySourceWord::W3(Bit3::new(1).unwrap()),
+            BinarySourceWord::W4(Bit4::new(1).unwrap()),
+            BinarySourceWord::W7(Bit7::new(1).unwrap()),
+            BinarySourceWord::W8(Bit8::new(1).unwrap()),
+        ] {
+            assert!(source.d5().is_none());
+            assert!(source.d6().is_none());
         }
     }
 
