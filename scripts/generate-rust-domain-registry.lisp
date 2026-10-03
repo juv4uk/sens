@@ -65,8 +65,8 @@
        (bits (00000101 (00000110 row)))
        (surfaces (00000110 (00000110 row))))
       (str+
-        "    DomainSurfaceRow { width: "
-        (01001100 width)
+        "    DomainSurfaceRow { width: 0b"
+        width
         ", bits: 0b"
         bits
         ", surfaces: &["
@@ -128,11 +128,6 @@
       (00101111
         (00100111
           (01001000 "Rust exact-domain registry projection is stale")
-          (01001000 (00111011 (10100110 output-path)))
-          (01001000 (00111011 generated))
-          (01001000 (10100001 (10100110 output-path)))
-          (01001000 (10100001 generated))
-          (01001000 (01000001 generated 0 800))
           (00000101 (00000001 ())))))))
   ((00000001 write-projection)
    write-projection
