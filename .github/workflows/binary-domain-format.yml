@@ -1,4 +1,4 @@
-name: Binary-domain format
+name: Binary-domain semantic context
 
 on:
   pull_request:
@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   binary-domain-format:
-    name: DOMAIN names an exact width or says UNKNOWN
+    name: DOMAIN names semantic context, not carrier/mechanism
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
