@@ -306,8 +306,8 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
 /// owns source/UI routing independently of the lexical environment.
 fn bind_missing_stable_surface_peers(environment: &Environment) {
     let snapshot = environment.snapshot();
-    // HashMap, not BTreeMap: Sens8 is deliberately not Ord (identity
-    // comparison/hashing only, no ordering -- see sid.rs's own header).
+    // This map is compatibility metadata keyed by the historical flat
+    // registry coordinate; canonical semantic identity is domain-qualified.
     // Iteration order here is irrelevant; this is a lookup table.
     let mut values_by_legacy_registry_id = std::collections::HashMap::new();
 
@@ -315,8 +315,10 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         if eval::canon::routed_sid_for_surface(&name).is_some() {
             continue;
         }
-        if let Some(semantic_id) = semantic_registry::legacy_registry_id_for_surface(&name) {
-            values_by_legacy_registry_id.entry(legacy_registry_id).or_insert(value);
+        if let Some(legacy_registry_id) = semantic_registry::legacy_registry_id_for_surface(&name) {
+            values_by_legacy_registry_id
+                .entry(legacy_registry_id)
+                .or_insert(value);
         }
     }
 
