@@ -1,0 +1,13 @@
+{
+  "schema": "d14-panini-donor-lock/v1",
+  "authority": "research-only-donor-pin",
+  "repository": "juv4uk/shiva-sutras",
+  "revision": "a4e7b298b4f7e28eed18c181a73721f50ffbd16b",
+  "artifacts": {
+    "prototype/sutra_graph/curated_controls_edges.tsv": "ebc5615d70daf363358d075b322505220990efa2",
+    "prototype/sutra_graph/primary_text_anchors.json": "722a88c0b202c5c9ece73203ae90d2b37b95a123",
+    "prototype/sutra_graph/adhikara_6184_relation_evidence.json": "cd8f2af290912fc218c0566cca0d5ff8c0a9cdf5"
+  },
+  "relation_authority_ceiling": "commentarial-supported",
+  "d14_allocation": "NONE"
+}
