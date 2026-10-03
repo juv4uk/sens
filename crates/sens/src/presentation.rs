@@ -371,7 +371,7 @@ mod tests {
     #[test]
     fn ukrainian_presentation_localizes_builtin_and_function_markers() {
         let mut session = Session::default();
-        let builtin = Value::Sid(crate::sens!(00000010));
+        let builtin = Value::Sid(crate::SemanticRef::legacy8(crate::sens!(00000010)));
         assert_eq!(
             render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
             "#<вбудована атом?>"
