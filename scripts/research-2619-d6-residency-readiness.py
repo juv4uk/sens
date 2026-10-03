@@ -19,8 +19,10 @@ PRESSURE = REPO / "benchmarks/d6-width-pressure/run.py"
 ALT_PARENT = REPO / "benchmarks/d6-alt-parent-falsifier/run.py"
 NONPREFIX = REPO / "benchmarks/d6-nonprefix-falsifier/run.py"
 BINDING = REPO / "scripts/research-2506-d6-binding-policy-generator.py"
+MIDDLE_CORNERS = REPO / "scripts/research-2624-d6-middle-corners.py"
 
 TARGET = "001111"
+MIDDLE = {"001101", "001110"}
 
 
 def main() -> int:
@@ -73,6 +75,17 @@ def main() -> int:
     assert nonprefix["factor_preserving"](canonical)
     assert TARGET == "0011" + canonical["SETQ_CORE"]
 
+    # Fresh #2624/#2625 guard: the two one-axis product corners are real
+    # proof states, but proof-state existence is not language residency.
+    middle = runpy.run_path(str(MIDDLE_CORNERS))
+    assert middle["main"]() == 0
+    middle_rows = [row for row in rows if row["coordinate"] in MIDDLE]
+    assert len(middle_rows) == 2
+    for row in middle_rows:
+        assert row["status"] == "UNKNOWN/free"
+        assert row["semantic_member_of_ratified_domain"] is False
+        assert row["placement_ref"] == ""
+
     result = {
         "schema": "d6-residency-readiness/v1",
         "domain": "Core D6",
@@ -90,6 +103,11 @@ def main() -> int:
             "placement": setq["placement"],
             "independent_deltas": ["scope", "miss"],
         },
+        "middle_corners": {
+            "coordinates": sorted(MIDDLE),
+            "status": "PROOF-INTERMEDIATE-NOT-RESIDENT",
+            "admitted": False,
+        },
         "falsifiers": {
             "alternative_parent": "survived",
             "nonprefix_scope": "survived-local-D6/distinct-standalone-D2",
@@ -103,6 +121,7 @@ def main() -> int:
             "001111 is not a resident until explicit owner decision",
             "D6 pressure for SETQ does not transfer to SET, RETURN, FEXPR, FSUBR or TRANSFORMER",
             "standalone D2 product representation is a different domain and does not relocate the Core candidate",
+            "one-axis D6 proof corners 001101/001110 remain non-residents",
         ],
     }
 
