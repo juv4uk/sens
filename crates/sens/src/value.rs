@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sens8, Text7};
+use crate::{Environment, Exactness, Expr, SemanticRef, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -501,7 +501,7 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sens8),
+    Sid(SemanticRef),
     String(Rc<str>),
     /// Canonical SENS text: an exact UPC-7 cell stream. Never a human
     /// spelling, never Unicode/UTF-8, never a selected layout. Human layout
