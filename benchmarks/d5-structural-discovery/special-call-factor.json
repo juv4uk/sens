@@ -1,0 +1,209 @@
+{
+  "authority": "research-only-no-placement",
+  "axes": [
+    {
+      "evidence": [
+        "#2568",
+        "#2569"
+      ],
+      "factor_id": "expansion-timing",
+      "independence": "proved-with-single-head-timing-witness; packaging distinction is not exercised",
+      "observable": "definition-time expansion differs from evaluation-time expansion",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "macro redefinition can no longer distinguish OLD definition-time body from NEW evaluation-time behavior",
+      "root_status": "UNPROVEN",
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
+    },
+    {
+      "evidence": [
+        "#2522",
+        "#2530"
+      ],
+      "factor_id": "explicit-caller-env",
+      "independence": "proved-by-eight-corner-ABC-cube",
+      "observable": "call body receives caller environment as an explicit semantic input",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "caller-only binding cannot be observed without adding another environment channel",
+      "root_status": "UNPROVEN",
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
+    },
+    {
+      "evidence": [
+        "#2580",
+        "#2588",
+        "3d409736b994221561b413c42c837a428d242358"
+      ],
+      "factor_id": "invocation-packaging",
+      "independence": "proved-by-alias-collision-with-raw/env/result-held-fixed",
+      "observable": "whole invocation form exposes call head while operand-only input does not",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "two aliases of one transformer with identical operands collapse to identical input and the head cannot be reconstructed",
+      "root_status": "UNPROVEN",
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
+    },
+    {
+      "evidence": [
+        "#2522",
+        "#2530"
+      ],
+      "factor_id": "raw-form-input",
+      "independence": "proved-by-eight-corner-ABC-cube",
+      "observable": "call body receives unevaluated form structure rather than eager values",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "unused undefined operand becomes eager/fails instead of remaining inert raw syntax",
+      "root_status": "UNPROVEN",
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
+    },
+    {
+      "evidence": [
+        "#2522",
+        "#2530",
+        "#2557"
+      ],
+      "factor_id": "returned-form-protocol",
+      "independence": "proved-by-eight-corner-ABC-cube",
+      "observable": "returned object is treated as executable replacement form and evaluated in caller context",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "returned symbol/form stays a direct value instead of resolving/executing in caller context",
+      "root_status": "UNPROVEN",
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
+    }
+  ],
+  "binary_object": "UNPLACED",
+  "comparisons": {
+    "fexpr->sens-transformer": [
+      "explicit-caller-env",
+      "returned-form-protocol"
+    ],
+    "hart->sens-transformer": [
+      "expansion-timing",
+      "invocation-packaging"
+    ],
+    "lambda->fexpr": [
+      "explicit-caller-env",
+      "raw-form-input"
+    ],
+    "lambda->hart-macro": [
+      "expansion-timing",
+      "invocation-packaging",
+      "raw-form-input",
+      "returned-form-protocol"
+    ],
+    "lambda->sens-transformer": [
+      "raw-form-input",
+      "returned-form-protocol"
+    ]
+  },
+  "domain": "Core.PostD4.SpecialCallProtocol",
+  "phase": "STRUCTURAL-DISCOVERY",
+  "protocols": [
+    {
+      "axes": {
+        "expansion-timing": "evaluation-time",
+        "explicit-caller-env": false,
+        "invocation-packaging": "operands-only",
+        "raw-form-input": false,
+        "returned-form-protocol": false
+      },
+      "protocol": "ordinary-lambda-control"
+    },
+    {
+      "axes": {
+        "expansion-timing": "evaluation-time",
+        "explicit-caller-env": true,
+        "invocation-packaging": "operands-only",
+        "raw-form-input": true,
+        "returned-form-protocol": false
+      },
+      "protocol": "fexpr-fsubr"
+    },
+    {
+      "axes": {
+        "expansion-timing": "definition-time",
+        "explicit-caller-env": false,
+        "invocation-packaging": "whole-call",
+        "raw-form-input": true,
+        "returned-form-protocol": true
+      },
+      "protocol": "hart-macro"
+    },
+    {
+      "axes": {
+        "expansion-timing": "evaluation-time",
+        "explicit-caller-env": false,
+        "invocation-packaging": "operands-only",
+        "raw-form-input": true,
+        "returned-form-protocol": true
+      },
+      "protocol": "sens-transformer"
+    }
+  ],
+  "same_base_parent_tests": [
+    {
+      "candidate_parent": "D4-LAMBDA",
+      "evidence": [
+        "#2198",
+        "#2200"
+      ],
+      "observable_deltas": [
+        "raw-form-input",
+        "returned-form-protocol"
+      ],
+      "one_delta_child": false,
+      "protocol": "sens-transformer",
+      "same_base_object": true,
+      "verdict": "SAME-BASE-YES; D5-ONE-DELTA-NOT-PROVED"
+    },
+    {
+      "candidate_parent": "D4-LAMBDA",
+      "evidence": [
+        "#2522",
+        "#2530"
+      ],
+      "observable_deltas": [
+        "explicit-caller-env",
+        "raw-form-input"
+      ],
+      "one_delta_child": false,
+      "protocol": "fexpr-fsubr",
+      "same_base_object": "UNPROVEN",
+      "verdict": "NO-ADMITTED-SAME-BASE-PARENT-THEOREM"
+    },
+    {
+      "candidate_parent": "D4-LAMBDA",
+      "evidence": [
+        "#2557",
+        "#2568",
+        "#2580"
+      ],
+      "observable_deltas": [
+        "expansion-timing",
+        "invocation-packaging",
+        "raw-form-input",
+        "returned-form-protocol"
+      ],
+      "one_delta_child": false,
+      "protocol": "hart-macro",
+      "same_base_object": "UNPROVEN",
+      "verdict": "NO-ADMITTED-SAME-BASE-PARENT-THEOREM"
+    }
+  ],
+  "schema": "special-call-factor/1",
+  "summary": {
+    "archived_00101_transformer_reusable": false,
+    "coordinates_allocated": 0,
+    "independently_observable_protocol_axes": 5,
+    "placement_status": "UNPLACED",
+    "proved_d5_children": 0,
+    "proved_d6_children": 0,
+    "proved_semantic_roots": 0,
+    "proved_width_from_axis_count": false,
+    "reason_00101_not_reusable": "same LAMBDA payload does not reduce two independently separable deltas (raw input + returned-form protocol) to one observable delta",
+    "width_status": "UNKNOWN"
+  }
+}
