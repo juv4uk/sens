@@ -10,7 +10,7 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry, CoreDomainIdentity, LegacySens8, Sens8};
+use crate::{semantic_registry, CoreDomainIdentity, Sens8};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -50,7 +50,7 @@ pub struct LanguageItem {
     /// Canonical domain-qualified identity when this registry row has migrated.
     pub domain_identity: Option<CoreDomainIdentity>,
     /// Explicit compatibility-only registry identity for still-byte-shaped generated metadata.
-    pub legacy_registry_id: LegacySens8,
+    pub legacy_registry_id: Sens8,
     pub signature: &'static str,
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
@@ -79,7 +79,7 @@ fn semantic_language_items_with(
         items.extend(surfaces.into_iter().map(|name| LanguageItem {
             name: name.to_string(),
             domain_identity: semantic_registry::domain_identity_from_registry_byte(row.semantic_id),
-            legacy_registry_id: LegacySens8::from_sens8(semantic_id),
+            legacy_registry_id: semantic_id,
             signature: row.signature,
             documentation: row.documentation,
             kind: row.kind,
@@ -180,11 +180,11 @@ mod tests {
         let before = discover("comet");
         let after = discover("meteor");
         assert!(before.iter().any(|item| {
-            item.name == "comet" && item.legacy_registry_id.sens8() == crate::sens!(00001000)
+            item.name == "comet" && item.legacy_registry_id == crate::sens!(00001000)
         }));
         assert!(!before.iter().any(|item| item.name == "meteor"));
         assert!(after.iter().any(|item| {
-            item.name == "meteor" && item.legacy_registry_id.sens8() == crate::sens!(00001000)
+            item.name == "meteor" && item.legacy_registry_id == crate::sens!(00001000)
         }));
         assert!(!after.iter().any(|item| item.name == "comet"));
     }
@@ -211,8 +211,8 @@ mod tests {
         }
         let lambda = find("lambda");
         let define = find("define");
-        assert_eq!(lambda.legacy_registry_id.sens8(), crate::sens!(00001000));
-        assert_eq!(define.legacy_registry_id.sens8(), crate::sens!(00001001));
+        assert_eq!(lambda.legacy_registry_id, crate::sens!(00001000));
+        assert_eq!(define.legacy_registry_id, crate::sens!(00001001));
         assert_eq!(lambda.domain_identity.map(CoreDomainIdentity::width), Some(4));
         assert_eq!(lambda.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0010));
         assert_eq!(define.domain_identity.map(CoreDomainIdentity::width), Some(4));
@@ -238,7 +238,7 @@ mod tests {
                 .iter()
                 .find(|item| item.name == name)
                 .unwrap_or_else(|| panic!("missing macro tooling item {name}"));
-            assert_eq!(item.legacy_registry_id.sens8(), crate::sens!(00001010));
+            assert_eq!(item.legacy_registry_id, crate::sens!(00001010));
             assert_eq!(item.kind, LanguageItemKind::Macro);
         }
 
@@ -258,7 +258,7 @@ mod tests {
             .iter()
             .find(|item| item.name == "def")
             .expect("def tooling item");
-        assert_eq!(def.legacy_registry_id.sens8(), crate::sens!(00001011));
+        assert_eq!(def.legacy_registry_id, crate::sens!(00001011));
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
         assert_eq!(
             semantic_registry::stable_surfaces_for_semantic_id(crate::sens!(00001011)),
