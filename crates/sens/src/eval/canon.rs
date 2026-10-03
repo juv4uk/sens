@@ -298,6 +298,19 @@ pub(crate) fn invoke_domain_identity(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    if !crate::domain_registry::is_callable(identity) {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "exact-domain identity is not callable by current domain law: D{}:{:0width$b}",
+                identity.width(),
+                identity.packed_bits(),
+                width = identity.width()
+            ),
+            span,
+        ));
+    }
+
     if let Some(primitive) = domain_primitive(identity) {
         return primitive(args, environment, span);
     }
