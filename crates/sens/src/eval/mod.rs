@@ -17,6 +17,7 @@ mod closures;
 pub(crate) mod lower;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
+pub(crate) mod necessary_forms_legacy;
 mod profile_mechanisms_generated;
 mod special_forms;
 
@@ -233,7 +234,7 @@ fn dispatch_call(
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+        .or_else(|| head_sid.and_then(necessary_forms_legacy::identity_for_semantic_id));
 
     if routed_head_sid == Some(crate::sens!(00000001)) {
         special_forms::exact_sens_arity(crate::sens!(00000001), arguments, 1, span)?;
