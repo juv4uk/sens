@@ -22,7 +22,7 @@
 /// mask, widen, or zero-pad a word. No arithmetic/ordering traits are provided:
 /// the carrier proves shape, not semantics.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Bits<const N: usize>(u8);
 
 pub type Bit1 = Bits<1>;
