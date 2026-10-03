@@ -464,6 +464,13 @@ pub(super) fn apply(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     match function {
+        Value::CoreIdentity(identity) => {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("domain-qualified Core identity is not callable in this runtime slice: {identity:?}"),
+                span,
+            ));
+        }
         Value::Sid(sid) => {
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
@@ -635,6 +642,7 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Bool(false) => ExprKind::List(Rc::new([])),
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
+        Value::CoreIdentity(identity) => ExprKind::CoreIdentity(*identity),
         Value::Sid(sid) => ExprKind::Sid(*sid),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
         Value::String(val) => ExprKind::String(val.clone()),
