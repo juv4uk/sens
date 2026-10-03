@@ -60,17 +60,29 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
 ///
 /// This is useful for tooling that has already selected the semantic object and
 /// now wants human spellings; no legacy byte is required.
+fn domain_row_for_identity(
+    identity: CoreDomainIdentity,
+) -> Option<&'static domain_generated::DomainSurfaceRow> {
+    domain_generated::DOMAIN_SURFACE_ROWS.iter().find(|row| {
+        usize::from(row.width) == identity.width()
+            && row.bits == identity.packed_bits()
+    })
+}
+
 pub(crate) fn domain_surfaces_for_identity(
     identity: CoreDomainIdentity,
 ) -> Vec<&'static str> {
-    domain_generated::DOMAIN_SURFACE_ROWS
-        .iter()
-        .find(|row| {
-            usize::from(row.width) == identity.width()
-                && row.bits == identity.packed_bits()
-        })
+    domain_row_for_identity(identity)
         .map(|row| row.surfaces.to_vec())
         .unwrap_or_default()
+}
+
+/// Compatibility implementation coordinate for an already-selected domain
+/// identity. This never participates in identity or surface resolution.
+pub(crate) fn legacy_backend_byte_for_domain(
+    identity: CoreDomainIdentity,
+) -> Option<u8> {
+    domain_row_for_identity(identity).and_then(|row| row.legacy_backend_byte)
 }
 
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
@@ -208,8 +220,14 @@ mod tests {
     }
 
     #[test]
-    fn unmigrated_registry_rows_have_no_fake_domain_identity() {
-        assert_eq!(domain_identity_for_surface("+"), None);
+    fn backend_projection_is_separate_from_domain_identity() {
+        let plus = domain_identity_for_surface("+").unwrap();
+        let divide = domain_identity_for_surface("/").unwrap();
+        assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
+        assert_eq!(legacy_backend_byte_for_domain(plus), Some(0b0000_1100));
+        assert_eq!((divide.width(), divide.packed_bits()), (5, 0b10011));
+        assert_eq!(legacy_backend_byte_for_domain(divide), Some(0b0000_1111));
+        assert_ne!(divide.packed_bits(), 0b0000_1111);
     }
 
     #[test]
