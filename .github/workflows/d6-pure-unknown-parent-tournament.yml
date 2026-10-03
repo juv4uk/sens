@@ -1,0 +1,53 @@
+name: D6 PURE-UNKNOWN parent tournament
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-pure-unknown-parent-tournament/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d5-structural-discovery/special-call-factor.json"
+      - "benchmarks/post-d4-root-min-closeout/**"
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
+      - ".github/workflows/d6-pure-unknown-parent-tournament.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-pure-unknown-parent-tournament/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d5-structural-discovery/special-call-factor.json"
+      - "benchmarks/post-d4-root-min-closeout/**"
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
+      - ".github/workflows/d6-pure-unknown-parent-tournament.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tournament:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run admitted-parent tournament
+        run: |
+          python3 benchmarks/d6-pure-unknown-parent-tournament/run.py \
+            --out /tmp/d6-pure-unknown-parent-tournament.json \
+            | tee /tmp/d6-pure-unknown-parent-tournament.log
+          grep -F "D6-PURE-UNKNOWN-PARENT-TOURNAMENT=PASS" /tmp/d6-pure-unknown-parent-tournament.log
+          grep -F "known-nonpure-two-delta-control=PASS" /tmp/d6-pure-unknown-parent-tournament.log
+          grep -F "pure-unknown-candidates=0" /tmp/d6-pure-unknown-parent-tournament.log
+          grep -F "occupancy-mutations=0" /tmp/d6-pure-unknown-parent-tournament.log
+          grep -F "RESULT=NO-CANDIDATE" /tmp/d6-pure-unknown-parent-tournament.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-pure-unknown-parent-tournament
+          path: |
+            /tmp/d6-pure-unknown-parent-tournament.json
+            /tmp/d6-pure-unknown-parent-tournament.log
+          retention-days: 14
