@@ -7,7 +7,9 @@ Identity authority:
 - knowledge/d6-historical-full-map.json.
 
 lib/surface/semantic-registry.lisp is read only as a donor of human spellings.
-Its historical eight-bit coordinates are intentionally ignored.
+Its historical eight-bit coordinates are ignored for identity. When a ratified
+domain role already has an implementation on the old backend, the generator
+may carry that byte only as an explicitly named compatibility mechanism.
 """
 
 from __future__ import annotations
@@ -98,7 +100,11 @@ def old_surface_rows() -> list[dict]:
             if value is not None:
                 surfaces.append((namespace, value))
         en = next((name for namespace, name in surfaces if namespace == "en"), None)
-        rows.append({"en": en, "surfaces": surfaces})
+        rows.append({
+            "legacy_backend_byte": int(match.group(1), 2),
+            "en": en,
+            "surfaces": surfaces,
+        })
     if len(rows) != 256:
         raise SystemExit(f"expected 256 historical surface rows, got {len(rows)}")
     return rows
@@ -143,10 +149,18 @@ def generate() -> str:
 
     for role in domain_roles():
         surfaces = [("core", role["name"].lower())]
+        backend_bytes: set[int] = set()
         for candidate in candidates(role["name"]):
             donor = old.get(candidate)
             if donor:
                 surfaces.extend(donor["surfaces"])
+                backend_bytes.add(donor["legacy_backend_byte"])
+
+        if len(backend_bytes) > 1:
+            raise SystemExit(
+                f'{role["name"]}: multiple historical backend bytes: {sorted(backend_bytes)}'
+            )
+        legacy_backend_byte = next(iter(backend_bytes), None)
 
         unique = []
         local = set()
@@ -165,7 +179,11 @@ def generate() -> str:
                 )
             seen_surface[name] = identity
 
-        generated.append({**role, "surfaces": unique})
+        generated.append({
+            **role,
+            "legacy_backend_byte": legacy_backend_byte,
+            "surfaces": unique,
+        })
 
     lines = [
         "// GENERATED — DO NOT EDIT BY HAND.",
@@ -179,6 +197,8 @@ def generate() -> str:
         "    pub(super) width: u8,",
         "    pub(super) bits: u8,",
         "    pub(super) role: &'static str,",
+        "    // Compatibility implementation coordinate only; never identity.",
+        "    pub(super) legacy_backend_byte: Option<u8>,",
         "    pub(super) surfaces: &'static [&'static str],",
         "}",
         "",
@@ -186,9 +206,15 @@ def generate() -> str:
     ]
     for row in generated:
         surfaces = ", ".join(rust_string(name) for _, name in row["surfaces"])
+        backend = (
+            "None"
+            if row["legacy_backend_byte"] is None
+            else f'Some(0b{row["legacy_backend_byte"]:08b})'
+        )
         lines.append(
             f'    DomainSurfaceRow {{ width: {row["width"]}, bits: 0b{row["bits"]}, '
-            f'role: {rust_string(row["name"])}, surfaces: &[{surfaces}] }},'
+            f'role: {rust_string(row["name"])}, legacy_backend_byte: {backend}, '
+            f'surfaces: &[{surfaces}] }},'
         )
     lines.extend(["];", ""])
     return "\n".join(lines)
