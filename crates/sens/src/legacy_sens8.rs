@@ -20,6 +20,15 @@ impl LegacySens8 {
     pub const fn sens8(self) -> crate::Sens8 {
         self.0
     }
+
+    /// Compatibility-only byte entry used by old transport/backend paths.
+    pub const fn from_packed_byte(value: u8) -> Self {
+        Self(crate::Sens8::from_packed_byte(value))
+    }
+
+    pub const fn packed_byte(self) -> u8 {
+        self.0.packed_byte()
+    }
 }
 
 impl std::fmt::Debug for LegacySens8 {
