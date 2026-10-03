@@ -167,21 +167,57 @@ fn as_symbol(expr: &Expr) -> Option<&str> {
     }
 }
 
-/// True when `expr` is the SENS code `sid` or a surface routing to it.
-fn head_is_sid(expr: &Expr, sid: sens::Sens8) -> bool {
+const D3_QUOTE: (usize, u8) = (3, 0b001);
+const D4_LAMBDA: (usize, u8) = (4, 0b0010);
+const D4_DEFINE: (usize, u8) = (4, 0b0011);
+
+/// Tooling projection from an admitted human surface to its already-known
+/// domain identity. This consumes `LanguageItem.domain_identity`; it never
+/// reconstructs a domain from the legacy registry byte.
+fn surface_domain_coordinate(surface: &str) -> Option<(usize, u8)> {
+    sens::language_items()
+        .into_iter()
+        .find(|item| item.name == surface)
+        .and_then(|item| item.domain_identity)
+        .map(|identity| (identity.width(), identity.packed_bits()))
+}
+
+/// Domain-first head matcher.
+///
+/// Canonical domain AST and admitted surfaces compare through exact
+/// (domain-width, payload) identity. Historical exact-eight source remains a
+/// separately named compatibility branch so old guard files keep loading
+/// during the #2817 migration. The legacy byte is never converted into a
+/// domain identity.
+fn head_is_domain_or_legacy(
+    expr: &Expr,
+    domain: (usize, u8),
+    legacy_bytes: &[u8],
+) -> bool {
     match &expr.kind {
-        ExprKind::Sid(code) => *code == sid,
-        ExprKind::Symbol(surface) => sens::surface_has_sid(surface, sid),
+        ExprKind::DomainIdentity(identity) => {
+            (identity.width(), identity.packed_bits()) == domain
+        }
+        ExprKind::Sid(code) => legacy_bytes.contains(&code.packed_byte()),
+        ExprKind::Symbol(surface) => surface_domain_coordinate(surface) == Some(domain),
         _ => false,
     }
 }
 
-/// True when `expr` is a definition head: SENS code 00001001/00001011 or a
-/// surface routing to either.
+fn is_quote_head(expr: &Expr) -> bool {
+    head_is_domain_or_legacy(expr, D3_QUOTE, &[0b0000_0001])
+}
+
+/// True when `expr` is canonical Core.D4 DEFINE, an admitted DEFINE surface,
+/// or one of the explicitly preserved historical exact-eight definition heads.
 fn is_define_head(expr: &Expr) -> bool {
-    head_is_sid(expr, sens::sens!(00001001))
-        || head_is_sid(expr, sens::sens!(00001011))
+    head_is_domain_or_legacy(expr, D4_DEFINE, &[0b0000_1001, 0b0000_1011])
         || as_symbol(expr).is_some_and(sens::is_define_surface_name)
+}
+
+fn is_lambda_head(expr: &Expr) -> bool {
+    head_is_domain_or_legacy(expr, D4_LAMBDA, &[0b0000_1000])
+        || as_symbol(expr).is_some_and(sens::is_lambda_surface_name)
 }
 
 fn as_list(expr: &Expr) -> Option<&[Expr]> {
@@ -204,8 +240,9 @@ fn read_fields<'a>(
 
 /// Parse knowledge/guard-reference.lisp into topic entries.
 ///
-/// Structure: `(00001001 *guard-reference-directory* (00000001 ((reference ...) ...)))`
-/// (surface names `def`/`quote` are accepted too).
+/// Historical structure used exact-eight heads; canonical domain heads and
+/// admitted surfaces are accepted as well. Legacy bytes remain compatibility
+/// input only while the guard files migrate.
 /// where each `(reference ...)` is a series of `(field value)` pairs.
 fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
     let mut out = HashMap::new();
@@ -228,7 +265,7 @@ fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
         let Some(value_list) = as_list(value) else {
             continue;
         };
-        if !head_is_sid(&value_list[0], sens::sens!(00000001)) {
+        if !is_quote_head(&value_list[0]) {
             continue;
         }
         let Some(data) = value_list.get(1).and_then(as_list) else {
@@ -332,9 +369,7 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
         let Some(lambda) = head.get(2).and_then(as_list) else {
             continue;
         };
-        if !(head_is_sid(&lambda[0], sens::sens!(00001000))
-            || as_symbol(&lambda[0]).is_some_and(sens::is_lambda_surface_name))
-        {
+        if !is_lambda_head(&lambda[0]) {
             continue;
         }
         let Some(params) = lambda.get(1).and_then(as_list) else {
@@ -377,6 +412,14 @@ mod tests {
        (lifecycle current-design)
        (provenance repo commit def456)
        (unknown-route research-web)))))"#;
+
+    #[test]
+    fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
+        assert_eq!(surface_domain_coordinate("quote"), Some(D3_QUOTE));
+        assert_eq!(surface_domain_coordinate("lambda"), Some(D4_LAMBDA));
+        assert_eq!(surface_domain_coordinate("define"), Some(D4_DEFINE));
+        assert_eq!(surface_domain_coordinate("+"), None);
+    }
 
     #[test]
     fn parses_reference_topics() {
