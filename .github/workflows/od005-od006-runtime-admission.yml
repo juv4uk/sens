@@ -50,5 +50,6 @@ jobs:
             echo "- Current direct owner-coordinate identity admission: 96/96"
             echo "- Current automatic D5/D6 call-mechanism admission: 0/96"
             echo "- Boundary: identity is exact; execution still requires an admitted domain mechanism"
+            echo "- Bare W8 Function8/Sens8 is rejected from canonical source"
             echo "- This is a migration audit, not a residency rollback."
           } >> "$GITHUB_STEP_SUMMARY"
