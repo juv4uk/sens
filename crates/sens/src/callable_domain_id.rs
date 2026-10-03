@@ -24,7 +24,7 @@ impl CallableDomainId {
 
     /// Explicit compatibility admission; there is deliberately no conversion
     /// from a raw byte or implicit equality with historical identity.
-    pub const fn legacy(value: LegacySens8) -> Self { Self::Legacy8(value) }
+    pub const fn from_legacy(value: LegacySens8) -> Self { Self::Legacy8(value) }
 
     pub const fn width(self) -> usize {
         match self {
@@ -47,7 +47,7 @@ impl CallableDomainId {
     }
 
     /// Compatibility extraction is explicit and succeeds only for Legacy8.
-    pub const fn legacy(self) -> Option<LegacySens8> {
+    pub const fn as_legacy(self) -> Option<LegacySens8> {
         match self {
             Self::Legacy8(value) => Some(value),
             Self::D3(_) | Self::D4(_) | Self::D5(_) | Self::D6(_) => None,
@@ -115,9 +115,9 @@ mod tests {
     #[test]
     fn legacy_is_a_distinct_explicit_variant() {
         let typed = SelfId::d3(Bija3::from_word(Bit3::new(5).unwrap()));
-        let legacy = SelfId::legacy(LegacySens8::from_packed_byte(5));
+        let legacy = SelfId::from_legacy(LegacySens8::from_packed_byte(5));
         assert_ne!(typed, legacy);
-        assert!(typed.legacy().is_none());
-        assert_eq!(legacy.legacy().unwrap().packed_byte(), 5);
+        assert!(typed.as_legacy().is_none());
+        assert_eq!(legacy.as_legacy().unwrap().packed_byte(), 5);
     }
 }
