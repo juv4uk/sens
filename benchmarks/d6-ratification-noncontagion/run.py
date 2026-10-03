@@ -60,7 +60,10 @@ def is_member(row: dict[str, Any]) -> bool:
 
 
 def is_generated(row: dict[str, Any]) -> bool:
-    return row.get("status") == "generated" or bool(row.get("core_closure"))
+    # Core closure membership is broader than generator provenance.
+    # #2729 correctly marks the manual resident 001111 as core_closure=true,
+    # while its origin remains owner-ratified/manual rather than selector-generated.
+    return row.get("status") == "generated"
 
 
 def placement(row: dict[str, Any]) -> str:
@@ -196,14 +199,15 @@ def validate(rows: list[dict[str, Any]]) -> dict[str, Any]:
 def simulate_post_ratification(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     result = copy.deepcopy(rows)
     target = index(result)[TARGET]
-    target["status"] = "ratified-manual-resident"
+    # Mirror the exact canonical row shape used by #2729.
+    target["status"] = "ratified-resident"
     target["semantic_family"] = "binding-policy/shared-location"
     target["semantic_law"] = "nearest-existing scope + fail-on-miss"
     target["semantic_law_authority"] = "#2723/#2538"
     target["semantic_member_of_ratified_domain"] = True
     target["manual_resident_required"] = True
     target["placement_ref"] = "#2723/#2538-OD-001"
-    target["core_closure"] = False
+    target["core_closure"] = True
     return result
 
 
