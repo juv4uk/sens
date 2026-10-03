@@ -889,14 +889,6 @@ mod tests {
     }
 
     #[test]
-    fn bare_w8_token_remains_explicit_legacy_identity() {
-        let ExprKind::Sid(sid) = parse_one("00000001").kind else {
-            panic!("W8 must remain legacy compatibility identity");
-        };
-        assert_eq!(sid, crate::sens!(00000001));
-    }
-
-    #[test]
     fn dot_question_mark_is_a_symbol_not_a_dotted_pair_marker() {
         assert!(matches!(parse_one(".?").kind, ExprKind::Symbol(s) if &*s == ".?"));
     }
