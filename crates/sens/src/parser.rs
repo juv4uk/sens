@@ -80,7 +80,7 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Sid(crate::sens!(00000001)),
+                        kind: ExprKind::Sid(crate::CallableIdentity::legacy8(0b0000_0001)),
                         span: Span {
                             start,
                             end: start + 1,
@@ -566,7 +566,7 @@ mod tests {
         ));
         assert!(matches!(
             parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00001100)
+            ExprKind::Sid(identity) if identity.legacy8_bits() == Some(0b0000_1100)
         ));
         assert!(matches!(
             parse_one("#b-1010").kind,
@@ -622,23 +622,23 @@ mod tests {
     fn exact_eight_bit_sequences_are_sid_values() {
         assert!(matches!(
             parse_one("00000000").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00000000)
+            ExprKind::Sid(identity) if identity.legacy8_bits() == Some(0b0000_0000)
         ));
         assert!(matches!(
             parse_one("00000001").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00000001)
+            ExprKind::Sid(identity) if identity.legacy8_bits() == Some(0b0000_0001)
         ));
         assert!(matches!(
             parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00001100)
+            ExprKind::Sid(identity) if identity.legacy8_bits() == Some(0b0000_1100)
         ));
         assert!(matches!(
             parse_one("10101000").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(10101000)
+            ExprKind::Sid(identity) if identity.legacy8_bits() == Some(0b1010_1000)
         ));
         assert!(matches!(
             parse_one("11111111").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(11111111)
+            ExprKind::Sid(identity) if identity.legacy8_bits() == Some(0b1111_1111)
         ));
     }
 
@@ -814,7 +814,7 @@ mod tests {
         let ExprKind::List(items) = parse_one("'кіт").kind else {
             panic!("apostrophe should produce a SID 00000001 form");
         };
-        assert!(matches!(&items[0].kind, ExprKind::Sid(sid) if *sid == crate::sens!(00000001)));
+        assert!(matches!(&items[0].kind, ExprKind::Sid(identity) if identity.legacy8_bits() == Some(0b0000_0001)));
         assert!(matches!(&items[1].kind, ExprKind::Symbol(s) if &**s == "кіт"));
     }
 
