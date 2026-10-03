@@ -11,6 +11,7 @@ pub(crate) use special_forms::digest::sha256 as digest_sha256;
 
 mod arithmetic;
 mod d5_arithmetic;
+mod legacy_primitives;
 pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
