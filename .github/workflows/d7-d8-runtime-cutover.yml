@@ -1,0 +1,41 @@
+name: D7 D8 runtime cutover
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/eval/selector_law.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/domain_ast_value_identity.rs"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - ".github/workflows/d7-d8-runtime-cutover.yml"
+  workflow_dispatch:
+
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Domain carrier and identity unit tests
+        run: |
+          cargo test -p sens --lib domain_words::tests
+          cargo test -p sens --lib domain_identity::tests
+
+      - name: Canonical D2 plus W3-W8 reader tests
+        run: cargo test -p sens --lib canonical_reader::tests
+
+      - name: D8 selector law with D7 exclusion
+        run: cargo test -p sens --lib eval::selector_law::tests
+
+      - name: D7 D8 AST value wire identity
+        run: cargo test -p sens --test domain_ast_value_identity
+
+      - name: One-way domain paradigm guard
+        run: bash scripts/domain-paradigm-one-way-guard.sh
