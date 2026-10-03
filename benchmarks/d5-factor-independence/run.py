@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 GRAPH = ROOT / "benchmarks" / "d5-structural-discovery" / "factor-graph.json"
 CUBE = ROOT / "scripts" / "research-2522-fexpr-protocol-cube.py"
 TIMING = ROOT / "scripts" / "research-2568-macro-timing.py"
+SPECIAL_CALL = ROOT / "benchmarks" / "d5-structural-discovery" / "special-call-factor.json"
 
 POST_D4 = {
     "shared-location-update",
@@ -26,6 +27,7 @@ POST_D4 = {
     "explicit-caller-env",
     "returned-form-protocol",
     "expansion-timing",
+    "invocation-packaging",
 }
 
 def load_module(path: Path, name: str):
@@ -106,6 +108,13 @@ def main() -> int:
     assert "NON-CONCLUSION=no-placement-from-timing-axis" in timing_text
 
     cube = load_module(CUBE, "factor_independence_cube_2593")
+    special_call = json.loads(SPECIAL_CALL.read_text(encoding="utf-8"))
+    special_axes = {row["factor_id"]: row for row in special_call["axes"]}
+    packaging = special_axes["invocation-packaging"]
+    assert packaging["status"] == "independently-observable-axis"
+    assert packaging["root_status"] == "UNPROVEN"
+    assert special_call["summary"]["proved_semantic_roots"] == 0
+    assert special_call["summary"]["coordinates_allocated"] == 0
 
     results = []
     for factor_id in sorted(POST_D4):
@@ -144,6 +153,19 @@ def main() -> int:
                 },
                 "unresolved_dependency": None,
             })
+        elif factor_id == "invocation-packaging":
+            results.append({
+                **base,
+                "status": "BOUNDED-INDEPENDENT",
+                "witness": "#2580/#2588",
+                "remove_one_attack": {
+                    "whole_call_distinguishes_alias_heads": True,
+                    "operand_only_alias_payload_collides": True,
+                    "reconstructible_without_explicit_head_channel": False,
+                    "source": packaging["remove_one_attack"],
+                },
+                "unresolved_dependency": None,
+            })
         elif factor_id == "shared-location-update":
             results.append({
                 **base,
@@ -163,7 +185,7 @@ def main() -> int:
 
     by = {row["factor_id"]: row for row in results}
     assert set(by) == POST_D4
-    assert sum(row["status"] == "BOUNDED-INDEPENDENT" for row in results) == 4
+    assert sum(row["status"] == "BOUNDED-INDEPENDENT" for row in results) == 5
     assert sum(row["status"] == "UNKNOWN" for row in results) == 2
     assert not any(row["is_root"] for row in results)
     assert all(row["placement"] == "UNPLACED" for row in results)
@@ -177,8 +199,8 @@ def main() -> int:
         "binary_object": "UNPLACED",
         "results": results,
         "summary": {
-            "factors_tested": 6,
-            "bounded_independent": 4,
+            "factors_tested": 7,
+            "bounded_independent": 5,
             "unknown": 2,
             "proven_independent_roots": 0,
             "new_d5_residents": 0,
@@ -188,7 +210,7 @@ def main() -> int:
         "non_conclusions": [
             "factor independence does not imply semantic roothood",
             "factor count does not imply bit width",
-            "four bounded-independent factors do not imply four suffix bits",
+            "five bounded-independent factors do not imply five suffix bits",
             "UNKNOWN factors are not residues",
             "no D5 coordinate is allocated",
         ],
@@ -212,7 +234,7 @@ def main() -> int:
     lines += [
         "",
         "Summary:",
-        "- bounded-independent factors: 4;",
+        "- bounded-independent factors: 5;",
         "- unresolved factors: 2;",
         "- proven independent roots: 0;",
         "- new D5 residents: 0;",
@@ -220,8 +242,9 @@ def main() -> int:
         "",
         "The protocol cube proves remove-one non-reconstructibility for raw-form,",
         "caller-env and returned-form axes. The Hart/SENS timing trace witnesses",
-        "a distinct expansion-locus observable. Mutation and non-local-exit remain",
-        "UNKNOWN until their dedicated child attacks report.",
+        "a distinct expansion-locus observable, and the alias/head collision witness",
+        "separates invocation packaging. Mutation and non-local-exit remain UNKNOWN",
+        "until their dedicated child attacks report.",
         "",
     ]
     (args.out / "report.md").write_text("\n".join(lines), encoding="utf-8")
