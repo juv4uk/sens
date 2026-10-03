@@ -411,14 +411,15 @@ impl Parser<'_> {
             });
         }
 
-        // The complete 8-bit space is reserved for function identities.
-        // This is a direct SID read, not numeric conversion:
-        // `00001100` is function SID 00001100; decimal `12` remains a number.
+        // Historical exact-8 spellings remain an explicit compatibility
+        // projection during the domain migration. They are wrapped as
+        // SemanticRef::Legacy8 rather than becoming canonical domain identity.
+        // Decimal `12` remains a number.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
             let sid = crate::Sens8::from_exact_bits(token)
                 .expect("exact eight-bit SID validated above");
             return Ok(Expr {
-                kind: ExprKind::Sid(sid),
+                kind: ExprKind::Sid(crate::SemanticRef::legacy8(sid)),
                 span: Span {
                     start,
                     end: self.cursor,
