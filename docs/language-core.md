@@ -1,125 +1,289 @@
-# my-lisp language core — SID8-only
+# SENS language core — binary domains, laws, and evidence
 
-This document describes the current function-identity model. Historical named
-models belong in archive/research material and are not semantic authority.
+**Status:** CURRENT EXPLANATORY DOCUMENT · 2026-10-03
 
-## One function space
+The previous SID8-only document has been preserved at
+[`docs/archive/language-core-sid8-only-superseded-2026-10-03.md`](archive/language-core-sid8-only-superseded-2026-10-03.md).
 
-my-lisp has exactly one function-identity space:
+This document summarizes the current model. It is not semantic authority by itself.
+Use [`../CURRENT.md`](../CURRENT.md) and the referenced ratified/executable evidence.
 
-    00000000
-    ...
-    11111111
+## 1. Semantic object
 
-That is exactly 256 function slots. The identity is the eight bits themselves.
+Current owner paradigm (#2490):
 
-A SID is not text, String, Symbol, a literal category, a decimal number, a
-human name, an enum label, an opcode, or a backend identifier. Implementations
-may temporarily carry the bits in machine storage, but storage does not create
-another identity.
+```text
+semantic object
+=
+binary number
++ exact semantic domain
++ proved/admitted law
+```
 
-## Reader
+Bits alone do not carry meaning.
 
-Exactly eight bare 0/1 source characters are read directly into Sens8.
+The same bit string may legitimately appear in two domains and denote two different
+semantic objects.
 
-    00001100  -> Sens8 00001100
-    12        -> ordinary exact decimal number
-    101       -> ordinary exact decimal number
+## 2. Domain, carrier, mechanism
 
-There is no reader mode that turns an eight-bit SID into a mathematical binary
-integer.
+Keep three layers separate:
 
-At expression start, apostrophe is reader sugar for a list whose head is
-SID 00000001 directly:
+```text
+domain     = law-bearing semantic context
+carrier    = concrete width/bit representation
+mechanism  = executor/transport/substrate
+```
 
-    'об'єкт
-    (00000001 об'єкт)
+Examples:
 
-The reader must not create an intermediate named function identity.
+```text
+D7.SoundCell [carrier=W7]       semantic domain
+D7.LocalOrdinal [carrier=W7]    another semantic context
+W7                              carrier only
+Rust / FPGA / RF                mechanism only
+```
 
-## Surfaces
+A bare width is not enough to establish a semantic domain.
 
-Human-language and symbolic surfaces are optional source/UI routing metadata.
-They are not functions and do not own meaning.
+## 3. Core
 
-    surface/UI input
-          ↓ mechanical lookup
-    Sens8
+Core reconstructs the historical Lisp line before deriving native SENS structure:
 
-The forbidden model is:
+```text
+Lisp I -> Lisp 1.5 -> later early-Lisp evidence
+```
 
-    name -> meaning -> SID
-    SID  -> named semantic identity
+Research order (#2533):
 
-Runtime and compiler logic must operate on Sens8 after source/UI routing.
+```text
+HISTORICAL-INGEST
+        ↓
+STRUCTURAL-DISCOVERY
+        ↓
+SENS-DERIVATION
+```
 
-## Core profiles
+The historical inventory must remain intact even when SENS later derives or
+compresses an operation.
 
-Core1, Core2, Core3 and Core4 are profiles of laws over the same function IDs:
+### Current domain status
 
-    Sens8
-      ↓
-    selected Core profile
-      ↓
-    Lisp-owned law for that SID/profile
-      ↓
-    selected mechanism
-      ↓
-    observation/result
+| Domain | Current status |
+|---|---|
+| D1 | ratified PredicateBit |
+| D2 | ratified structural racanā2 |
+| D3 | ratified Core foundation |
+| D4 | ratified Core foundation |
+| D5 | ratified width/domain ontology; occupancy still under historical/structural research |
+| D6 | ratified width/domain ontology; many coordinates remain deliberately UNKNOWN |
+| D7 | ratified Sound7 + local śloka/sūtra ordinals; not arithmetic Number |
+| D14 | research candidate: Pāṇini grammar graph |
+| D24/D48/... | research candidates for exact Number / FPGA-friendly numeric domains |
 
-A Core profile never mints a new identity and never renames a SID.
+Ratified width is not blanket occupancy.
 
-## Execution mechanisms
+## 4. Generated descendants
 
-Rust, C, Common Lisp, Prolog, Datalog, CLIPS, GraalVM, WASM, FPGA and other
-substrates may provide mechanisms. A mechanism receives an already-selected
-Sens8 and cannot redefine what that SID is.
+A generated child may earn its candidate identity from an exact parent plus an
+admitted local generator:
 
-Native operator names, opcodes and helper enums are mechanism-local metadata,
-not my-lisp function identities.
+```text
+parent
++ delta / generator
+-> generated child
+```
 
-## Compiler / IR rule
+Selector composition is the strongest current positive control.
 
-Compiler IR provenance may carry Sens8 and mechanism/profile facts. It must not
-introduce a second named function ontology such as a canonical-identity enum or
-a necessary-form identity enum.
+For a selector-path coordinate, appending a semantic projection choice can agree
+with the binary relation:
 
-## Empty structure is not a function ID
+```text
+E(extend(s,b)) = 2*E(s) + b
+```
 
-Contract 9 reserves all 00000000..11111111 for functions. Therefore the
-historical implementation that reuses 00000000 for the empty-list ground
-value is explicit migration debt, tracked by #1332.
+The arithmetic formula is not the semantic law by itself. The semantic law is
+selector composition. #2502 cross-proves the current generated D4/D5 descendants
+against an independent Core-Math executor.
 
-The target invariant is:
+## 5. Parentless roots and residue
 
-    ()           -> structural value outside function SID space
-    00000000     -> function identity
+A semantic root does **not** earn width from free space.
 
-No replacement SID is to be allocated to ().
+Current research distinguishes:
 
-## Standing enforcement
+```text
+roothood
+width/domain membership
+coordinate placement
+```
 
-- #1325 — permanent SID8-only language law
-- #1327 — remove named runtime identity ontology
-- #1328 — remove named necessary-form identity ontology
-- #1329 — remove alternate-identity terminology
-- #1330 — keep surfaces outside function ontology
-- #1331 — executable standing guard
-- #1332 — remove the empty-list collision from SID 00000000
+These are separate claims.
 
-The reference Rust implementation is evidence/mechanism, not semantic
-authority. New code must make the eight-bit function identity visible instead
-of replacing it with a word.
+For parentless roots such as the current non-local-exit control:
 
-## Project boundary
+- roothood may be proved;
+- exact width may remain UNKNOWN;
+- coordinate may remain UNPLACED.
 
-Rust is a **reference implementation** and mechanism witness; Contract 9 and
-the Lisp-owned executable evidence remain the language authority.
+#2662/#2667/#2669 study how a parentless root can honestly earn an exact domain.
 
-The current canonical source extension is **`.lisp`**. `.wsm` and `.my` are
-legacy aliases only; file suffixes do not create language identity.
+## 6. D6 PURE-UNKNOWN discipline
 
-Authority precedence is documented in
-[`semantic-authority-map.md`](semantic-authority-map.md). Under Contract 9,
-older named-function descriptions in that map are migration debt/history where
-they conflict with the SID8-only function-space law.
+Unknown coordinates are not inventory defects.
+
+A PURE-UNKNOWN D6 coordinate may leave that class only after a same-base semantic
+law, lower-bound theorem, or other admitted placement evidence is established.
+
+Forbidden placement arguments include:
+
+- free capacity;
+- numeric adjacency;
+- attractive bit patterns;
+- chronology alone;
+- foreign Core-Math authority;
+- mechanism-local metadata.
+
+A successful research result may be **NO-CANDIDATE**.
+
+## 7. Core-Math
+
+Core-Math studies mathematical laws over binary objects independently of Core.
+
+Minimal execution idea:
+
+```text
+binary input(s)
++ admitted mathematical law
+-> binary output
+```
+
+Important evidence:
+
+- #2491 — first minimal bounded `bits + law -> bits` executor;
+- #2500 — exact-Q family/role factorization;
+- #2509 — same machine transform in a different domain does not merge semantics.
+
+Core-Math may diverge from Core. It does not inherit Core placement automatically.
+
+## 8. Core / Core-Math relation
+
+Three outcomes are admitted:
+
+```text
+DIVERGENT
+COMPLEMENTARY
+CONVERGENT
+```
+
+Convergence requires independent agreement on:
+
+```text
+binary object
++ exact domain
++ semantic equation
++ law
++ cross-proof
+```
+
+Matching syntax, names, hashes, ASTs, storage layouts, or machine formulas is not enough.
+
+## 9. Human surfaces
+
+Human names are source/UI projections.
+
+This includes:
+
+- Ukrainian;
+- English;
+- Sanskrit;
+- symbolic spellings;
+- historical Lisp names.
+
+A name may help humans discuss an object. It does not replace the object's
+binary-domain identity.
+
+The canonical source extension remains **`.lisp`**. The suffix is a source/tooling
+choice, not semantic identity.
+
+## 10. Execution substrates
+
+Rust is the current reference mechanism, not semantic authority.
+
+The same rule applies to:
+
+- C;
+- Common Lisp;
+- WASM;
+- GraalVM;
+- FPGA;
+- GPU;
+- Prolog / Datalog / CLIPS;
+- radio/wire transports.
+
+A mechanism may implement or carry an admitted object. It may not silently mint
+new language meaning.
+
+## 11. Wire and packed representation
+
+Packed/wire representations preserve exact payloads and boundaries. They do not
+create semantic domains.
+
+Correct conceptual layering:
+
+```text
+semantic object
+-> canonical SENS wire/container
+-> transport framing
+-> physical channel
+```
+
+CRC, FEC, ARQ, frequency, modulation and RF profile are transport mechanisms.
+
+## 12. Governed research record
+
+Current task grammar:
+
+```text
+PHASE
+DOMAIN
+BINARY OBJECT
+LAW
+WITNESS
+FALSIFIER
+STATUS
+RELATION
+```
+
+Allowed PHASE values:
+
+```text
+HISTORICAL-INGEST
+STRUCTURAL-DISCOVERY
+SENS-DERIVATION
+```
+
+The schema makes uncertainty explicit; it does not auto-ratify semantics.
+
+## 13. Historical SID8
+
+The earlier flat 256-slot SID8/Function8 model remains:
+
+- historical provenance;
+- compatibility evidence;
+- a migration donor;
+- a useful falsifier against accidental return to flat identity.
+
+It is **not** the current language ontology.
+
+## 14. Project boundary
+
+SENS owns admitted semantic meaning.
+
+Reference implementations, generated files, benchmarks, surfaces, proof-address
+formats and caches remain lower-level evidence/mechanism unless a separate law
+explicitly promotes a fact.
+
+Authority precedence:
+[`semantic-authority-map.md`](semantic-authority-map.md).
