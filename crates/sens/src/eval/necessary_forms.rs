@@ -6,7 +6,7 @@
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry;
-use crate::Sens8;
+use crate::{Bit4, CoreD4, CoreDomainIdentity, Sens8};
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -16,6 +16,48 @@ mod generated {
 pub(crate) enum NecessaryFormIdentity {
     Define,
     Lambda,
+}
+
+fn canonical_domain_identity(
+    mechanism: generated::NecessaryFormMechanism,
+) -> CoreDomainIdentity {
+    let bits = match mechanism {
+        generated::NecessaryFormMechanism::Lambda => 0b0010,
+        generated::NecessaryFormMechanism::Define => 0b0011,
+    };
+    CoreDomainIdentity::D4(CoreD4::from_word(
+        Bit4::new(bits).expect("necessary-form D4 coordinate must fit"),
+    ))
+}
+
+/// Select necessary-form mechanism from exact D4 identity only.
+pub(crate) fn identity_for_domain_identity(
+    identity: CoreDomainIdentity,
+) -> Option<NecessaryFormIdentity> {
+    let CoreDomainIdentity::D4(word) = identity else {
+        return None;
+    };
+    match word.word().packed_bits() {
+        0b0010 => Some(NecessaryFormIdentity::Lambda),
+        0b0011 => Some(NecessaryFormIdentity::Define),
+        _ => None,
+    }
+}
+
+/// Canonical D4 identity for a necessary-form surface. Historical aliases such
+/// as `def` normalize to the ratified D4 coordinate through the generated
+/// mechanism table; no numeric width inference is used.
+pub(crate) fn domain_identity_for_symbol(name: &str) -> Option<CoreDomainIdentity> {
+    if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
+        return identity_for_domain_identity(identity).map(|_| identity);
+    }
+
+    let legacy = semantic_registry::admitted_semantic_id_for_surface(name)?;
+    let mechanism = generated::NECESSARY_FORM_DISPATCH
+        .iter()
+        .find(|row| row.semantic_id == legacy.packed_byte())
+        .map(|row| row.mechanism)?;
+    Some(canonical_domain_identity(mechanism))
 }
 
 pub(crate) fn identity_for_legacy8_bits(bits: u8) -> Option<NecessaryFormIdentity> {
@@ -41,9 +83,7 @@ pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFo
 /// (previously duplicated in both `eval/mod.rs` and `ir.rs` for exactly
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
-    semantic_registry::admitted_semantic_id_for_surface(name)
-        .map(Sens8::packed_byte)
-        .and_then(identity_for_legacy8_bits)
+    domain_identity_for_symbol(name).and_then(identity_for_domain_identity)
 }
 
 #[cfg(test)]
