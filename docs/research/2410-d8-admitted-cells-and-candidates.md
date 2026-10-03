@@ -154,12 +154,40 @@ here**:
 | D6 parent | Its four candidates | Factors into commuting bits? |
 |---|---|---|
 | `000001` LOAD | OPEN, CLOSE, WITH-OPEN-FILE, DRIBBLE | **no** — OPEN and CLOSE are two poles of one operation, not two instances of one refinement |
-| `000101` LEXPR | ARGLIST, &REST, &OPTIONAL, &WHOLE | **no** — &REST/&OPTIONAL are parallel alternatives, not commuting bits |
+| `000101` LEXPR | ARGLIST, &REST, &OPTIONAL, &WHOLE | **axes commute, assigned names are not the corners** — see below |
 | `000010` CLOSURE | MAKE-CLOSURE, CLOSUREP, VALUES, VALUES-LIST | **no** — two unrelated pairs |
 | `000011` CURRY | APPLY, COMPOSE, PARTIAL, **FFI-CALL** | **no** — a foreign-function call is not a curry descendant |
 
-That last row is a category error produced by the rule itself, which is a
+The last row is a category error produced by the rule itself, which is a
 sufficient falsifier.
+
+### LEXPR is the instructive case: a real square that is not the assigned one
+
+`&REST` × `&OPTIONAL` is a genuine pair of commuting bits — a lambda list may
+independently declare a trailing rest parameter, optional leading parameters,
+both, or neither. That square is real, and it commutes.
+
+It is still not the square the rule assigned, and the executable witness
+`scripts/research-2934-d8-lexpr-factoring.py` proves where it breaks:
+
+```text
+00 = neither                 -> ARGLIST          (accepted: plain variadic eval)
+01 = optional only           -> &OPTIONAL        (accepted)
+10 = rest only               -> &REST            (accepted)
+11 = both                    -> &REST+&OPTIONAL  (assigned &WHOLE instead)
+```
+
+Two independent falsifiers:
+
+- the `11` corner of the real axis square is `&REST+&OPTIONAL`, which is not
+  `&WHOLE` — the witness checks they have different observation signatures;
+- the `00` corner must be the parent `LEXPR` itself, and `ARGLIST` is a distinct
+  accessor of the argument list rather than a parameterless `LEXPR`.
+
+Recorded distinction: the falsifier is *not* "these two names are alternatives,
+therefore they do not commute". Parallel independent choices are exactly what
+commuting bits look like. The falsifier is that the four assigned names are not
+the corners of the square the axes actually generate.
 
 ADR-005 §4 (owner directive) requires a primitive to earn a semantic identity
 through an **executable experiment**. A chronological capability list is neither a
