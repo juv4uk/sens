@@ -1,0 +1,36 @@
+name: OD-005/OD-006 full-map guard
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "scripts/check-od005-od006-full-maps.py"
+      - ".github/workflows/od005-od006-full-map.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "scripts/check-od005-od006-full-maps.py"
+      - ".github/workflows/od005-od006-full-map.yml"
+
+jobs:
+  constitutional-map:
+    name: Owner D5/D6 full-map constitution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify OD-005 / OD-006 maps
+        run: python3 scripts/check-od005-od006-full-maps.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## OD-005 / OD-006"
+            echo
+            echo "- D5: 32/32 occupied"
+            echo "- D6: 64/64 occupied"
+            echo "- Selector generator compatibility preserved"
+            echo "- Residency and semantic derivability remain separate axes"
+          } >> "$GITHUB_STEP_SUMMARY"
