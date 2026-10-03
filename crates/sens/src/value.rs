@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sens8, Text7};
+use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Sens8, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -501,7 +501,11 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
+    /// Legacy exact-eight compatibility identity. Canonical Core values use
+    /// `DomainIdentity` during the #2817 migration.
     Sid(Sens8),
+    /// Canonical domain-qualified Core identity.
+    DomainIdentity(CoreDomainIdentity),
     String(Rc<str>),
     /// Canonical SENS text: an exact UPC-7 cell stream. Never a human
     /// spelling, never Unicode/UTF-8, never a selected layout. Human layout
@@ -576,6 +580,7 @@ impl PartialEq for Value {
             }
             (Value::Rational(left), Value::Rational(right)) => left == right,
             (Value::Sid(left), Value::Sid(right)) => left == right,
+            (Value::DomainIdentity(left), Value::DomainIdentity(right)) => left == right,
             (Value::String(left), Value::String(right)) => left == right,
             (Value::Symbol(left), Value::Symbol(right)) => left == right,
             (Value::Pair(left_head, left_tail), Value::Pair(right_head, right_tail)) => {
@@ -649,6 +654,15 @@ impl Value {
     /// Legacy alias for [`Self::as_sens8`].
     pub fn as_sid8(&self) -> Option<crate::Sens8> {
         self.as_sens8()
+    }
+
+    /// Returns the canonical domain-qualified Core identity if this value
+    /// carries one. No legacy Sens8 projection is performed here.
+    pub fn as_core_domain_identity(&self) -> Option<CoreDomainIdentity> {
+        match self {
+            Self::DomainIdentity(identity) => Some(*identity),
+            _ => None,
+        }
     }
 
     /// Builds one host-provided callable value without adding a new evaluator
@@ -804,6 +818,7 @@ fn render(value: &Value, quote_strings: bool) -> String {
         }
         Value::Rational(number) => number.to_string(),
         Value::Sid(sid) => sid.to_string(),
+        Value::DomainIdentity(identity) => identity.to_string(),
         Value::String(text) => {
             if quote_strings {
                 let mut escaped = String::with_capacity(text.len() + 2);

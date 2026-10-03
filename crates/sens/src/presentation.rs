@@ -81,6 +81,7 @@ fn render_uk(value: &Value) -> String {
         Value::Sid(sid) => {
             format!("#<вбудована {}>", uk_semantic_name(*sid))
         }
+        Value::DomainIdentity(identity) => format!("#<домен {identity}>"),
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
             escaped.push('"');
