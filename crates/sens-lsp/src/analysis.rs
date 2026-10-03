@@ -386,21 +386,21 @@ mod quote_surface_tests {
 
     #[test]
     fn quote_surfaces_resolve_through_exact_d3_identity() {
-        assert_eq!(surface_domain_coordinate("quote"), Some(D3_QUOTE));
+        assert_eq!(surface_domain_coordinate("svarūpa"), Some(D3_QUOTE));
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
         assert_eq!(surface_domain_coordinate("+"), None);
     }
 
     #[test]
-    fn english_quote_excludes_its_datum_from_code_references() {
-        // The head `quote` symbol itself is a real reference; only the
-        // datum it quotes (alpha/beta) must be excluded as data.
-        let occurrences = symbol_occurrences("(quote (alpha beta))").unwrap();
+    fn sanskrit_projection_excludes_its_datum_from_code_references() {
+        // The admitted Sanskrit projection itself is a real reference; only its
+        // datum must be excluded as data.
+        let occurrences = symbol_occurrences("(svarūpa (alpha beta))").unwrap();
         let names: Vec<&str> = occurrences.iter().map(|o| o.name.as_str()).collect();
         assert_eq!(
             names,
-            vec!["quote"],
-            "only the head `quote` symbol should be a code reference, got {names:?}"
+            vec!["svarūpa"],
+            "only the exact D3 projection head should be a code reference, got {names:?}"
         );
     }
 
