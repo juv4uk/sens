@@ -65,6 +65,25 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     surface_index().get(name).copied()
 }
 
+/// Exact-domain spelling projection for consumers that need first-class
+/// domain values. The source rows already carry exact width+bits; no legacy
+/// byte lookup participates.
+pub(crate) fn domain_surface_bindings() -> Vec<(&'static str, CoreDomainIdentity)> {
+    let mut bindings = DOMAIN_SURFACE_ROWS
+        .iter()
+        .filter_map(|row| {
+            exact_domain_identity(row.width, row.bits)
+                .map(|identity| (identity, row.surfaces))
+        })
+        .flat_map(|(identity, surfaces)| {
+            surfaces.iter().map(move |surface| (surface.name, identity))
+        })
+        .collect::<Vec<_>>();
+    bindings.sort_unstable_by(|left, right| left.0.cmp(right.0));
+    bindings.dedup();
+    bindings
+}
+
 /// Reverse projection for tooling/presentation only.
 ///
 /// This returns spellings already admitted for a known exact-domain identity;
@@ -105,6 +124,17 @@ mod tests {
                 .unwrap_or_else(|| panic!("missing exact-domain surface: {surface}"));
             assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
         }
+    }
+
+    #[test]
+    fn first_class_binding_projection_is_exact_domain_only() {
+        let bindings = domain_surface_bindings();
+        assert!(bindings.iter().any(|(surface, identity)| {
+            *surface == "cadr" && (identity.width(), identity.packed_bits()) == (4, 0b1011)
+        }));
+        assert!(bindings.iter().any(|(surface, identity)| {
+            *surface == "<" && (identity.width(), identity.packed_bits()) == (5, 0b01110)
+        }));
     }
 
     #[test]
