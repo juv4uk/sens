@@ -292,16 +292,14 @@ fn dispatch_call(
     };
     match &function {
         Value::Sid(identity) => {
-            if let Some(bound) = environment.code_slot(*identity) {
-                match bound {
-                    Value::Macro(closure) => {
-                        return closures::apply_macro(closure, arguments, environment, span);
-                    }
-                    closure @ Value::Closure(_) => {
-                        return closures::apply(closure, arguments, environment, span);
-                    }
-                    _ => {}
+            match environment.code_slot(*identity) {
+                Some(Value::Macro(closure)) => {
+                    return closures::apply_macro(closure, arguments, environment, span);
                 }
+                Some(closure @ Value::Closure(_)) => {
+                    return closures::apply(closure, arguments, environment, span);
+                }
+                _ => {}
             }
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
