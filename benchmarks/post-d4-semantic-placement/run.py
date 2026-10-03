@@ -25,6 +25,7 @@ UNPLACED_KINDS = {
     "POLICY-OVER-CARRIER",
     "PROVEN-ROOT-UNPLACED",
 }
+RATIFIED_KINDS = {"RATIFIED-RESIDENT"}
 
 EXPECTED_ROOT_FACTORS = {
     "shared-location-update": "CARRIER-PREMISE",
@@ -76,6 +77,10 @@ def main() -> int:
         elif kind in UNPLACED_KINDS:
             assert row["exact_domain"] == "UNKNOWN", op
             assert row["coordinate"] == "UNPLACED", op
+        elif kind in RATIFIED_KINDS:
+            assert row["resident_required"] == "YES-OWNER-RATIFIED", op
+            assert row["exact_domain"] == "D6", op
+            assert row["coordinate"] == "001111", op
         else:
             raise AssertionError(f"{op}: unknown placement kind {kind}")
 
@@ -111,11 +116,13 @@ def main() -> int:
     root_rows = {r["factor"]: r for r in namespace["ROWS"]}
     assert {k: root_rows[k]["root_status"] for k in EXPECTED_ROOT_FACTORS} == EXPECTED_ROOT_FACTORS
 
-    # SETQ candidate remains a candidate only.
+    # Owner decision #2538 OD-001: SETQ/shared-location is the sole manual D6 resident.
     setq = placed_by_op["SETQ"]
-    assert setq["coordinate"] == "UNPLACED"
-    assert setq["candidate_coordinate"].startswith("D6:001111")
-    assert "owner-ready only" in setq["candidate_coordinate"]
+    assert setq["placement_kind"] == "RATIFIED-RESIDENT"
+    assert setq["exact_domain"] == "D6"
+    assert setq["coordinate"] == "001111"
+    assert setq["candidate_coordinate"] is None
+    assert placed_by_op["SET"]["coordinate"] == "UNPLACED"
 
     counts = Counter(r["placement_kind"] for r in rows)
     summary = {
@@ -126,7 +133,7 @@ def main() -> int:
         "d5_selector_generated": 8,
         "d5_unknown_free": 24,
         "proven_root_unplaced": ["RETURN"],
-        "candidate_only_not_ratified": ["SETQ:D6:001111"],
+        "ratified_d6_residents": ["SETQ:D6:001111"],
         "status": "PASS",
     }
 
@@ -135,7 +142,7 @@ def main() -> int:
     print("NEW-D5-RESIDENTS=0")
     print("D5=8-generated+24-UNKNOWN")
     print("RETURN=PROVEN-ROOT-UNPLACED")
-    print("SETQ-D6-001111=CANDIDATE-ONLY")
+    print("SETQ-D6-001111=RATIFIED-RESIDENT")
     for key, value in sorted(counts.items()):
         print(f"{key}={value}")
 
