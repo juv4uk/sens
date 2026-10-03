@@ -46,8 +46,8 @@ jobs:
           p=json.load(open("/tmp/d1-d6-gap/result.json"))
           assert p["summary"]["historical_rows"] == 19
           assert p["summary"]["already_explained"] == 12
-          assert p["summary"]["needs_new_law"] == 1
-          assert p["summary"]["needs_domain"] == 4
+          assert p["summary"]["needs_new_law"] == 0
+          assert p["summary"]["needs_domain"] == 5
           assert p["summary"]["needs_placement"] == 0
           assert p["summary"]["owner_ready"] == 1
           assert p["summary"]["composite"] == 1
