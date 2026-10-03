@@ -1,0 +1,27 @@
+name: D6 binding-policy factor audit
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2506-binding-policy-factor.py"
+      - "scripts/research-2489-setq-placement.py"
+      - ".github/workflows/d6-binding-policy-factor.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  factor-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Re-check donor policy square
+        run: python3 scripts/research-2489-setq-placement.py
+      - name: Check commutativity and coordinate orientation
+        run: python3 scripts/research-2506-binding-policy-factor.py
