@@ -643,7 +643,7 @@ impl Value {
     /// Canonical D3/D4/D5/D6 identities intentionally return None here.
     pub fn as_sens8(&self) -> Option<crate::Sens8> {
         match self {
-            Self::Sid(id) => id.legacy().map(|legacy| legacy.sens8()),
+            Self::Sid(id) => id.as_legacy().map(|legacy| legacy.sens8()),
             _ => None,
         }
     }
