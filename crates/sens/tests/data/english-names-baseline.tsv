@@ -2620,7 +2620,6 @@ rust-lisp	crates/sens/tests/semantic_registry_lisp.rs	invoke	1
 rust-lisp	crates/sens/tests/semantic_registry_lisp.rs	length	1
 rust-lisp	crates/sens/tests/semantic_registry_lisp.rs	quote	1
 rust-lisp	crates/sens/tests/sens_exactly_eight_bits.rs	atom?	1
-rust-lisp	crates/sens/tests/sens_priority_over_names.rs	def	2
 rust-lisp	crates/sens/tests/stack_safety.rs	append	1
 rust-lisp	crates/sens/tests/stack_safety.rs	atom?	8
 rust-lisp	crates/sens/tests/stack_safety.rs	car	5
