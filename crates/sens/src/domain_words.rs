@@ -21,7 +21,7 @@
 //! let _: PredicateBit = true;
 //! ```
 
-use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6};
+use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8};
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -143,6 +143,42 @@ impl CoreD6 {
     }
 }
 
+/// Exact seven-bit carrier for the ratified D7 Sound7/local-ordinal domain.
+///
+/// This proves D7 membership only. Sound7/local-ordinal laws own interpretation;
+/// callability or selector geometry must never be inferred from its width.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct SoundD7(Bit7);
+
+impl SoundD7 {
+    pub const fn from_word(word: Bit7) -> Self {
+        Self(word)
+    }
+
+    pub const fn word(self) -> Bit7 {
+        self.0
+    }
+}
+
+/// Exact eight-bit carrier for the ratified Core.D8 domain.
+///
+/// Core.D8 is a domain-qualified identity and is never interchangeable with
+/// historical flat Sens8/Sid8 compatibility bytes.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD8(Bit8);
+
+impl CoreD8 {
+    pub const fn from_word(word: Bit8) -> Self {
+        Self(word)
+    }
+
+    pub const fn word(self) -> Bit8 {
+        self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -179,6 +215,16 @@ mod tests {
             let word = Bit6::new(raw).unwrap();
             assert!(CoreD6::from_word(word).word() == word);
         }
+
+        for raw in 0..=127 {
+            let word = Bit7::new(raw).unwrap();
+            assert!(SoundD7::from_word(word).word() == word);
+        }
+
+        for raw in 0..=255 {
+            let word = Bit8::new(raw).unwrap();
+            assert!(CoreD8::from_word(word).word() == word);
+        }
     }
 
     #[test]
@@ -189,5 +235,7 @@ mod tests {
         assert_eq!(size_of::<CoreD4>(), 1);
         assert_eq!(size_of::<CoreD5>(), 1);
         assert_eq!(size_of::<CoreD6>(), 1);
+        assert_eq!(size_of::<SoundD7>(), 1);
+        assert_eq!(size_of::<CoreD8>(), 1);
     }
 }
