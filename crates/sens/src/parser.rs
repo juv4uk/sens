@@ -418,10 +418,9 @@ impl Parser<'_> {
 
         // Bare exact binary source words are width-sensitive.
         //
-        // W3..W6 are canonical Core domain identities. W8 survives only as an
-        // explicit legacy exact-eight compatibility lane. W1/W2/W7 do not gain
-        // Core call identity by width alone and continue into their existing
-        // reader paths until their own syntax laws are admitted.
+        // W3..W6 are canonical Core domain identities. Bare W8 has no second
+        // language meaning: historical Function8 is not admitted by the canonical
+        // reader. W1/W2/W7 continue into their own syntax/data laws.
         if let Some(source_word) = crate::source_words::parse_binary_source_word(token) {
             if let Some(identity) = crate::CoreDomainIdentity::from_source_word(source_word) {
                 return Ok(Expr {
@@ -432,14 +431,12 @@ impl Parser<'_> {
                     },
                 });
             }
-            if let crate::BinarySourceWord::W8(word) = source_word {
-                return Ok(Expr {
-                    kind: ExprKind::Sid(crate::Sens8::from_packed_byte(word.packed_bits())),
-                    span: Span {
-                        start,
-                        end: self.cursor,
-                    },
-                });
+            if matches!(source_word, crate::BinarySourceWord::W8(_)) {
+                return Err(self.error(
+                    "bare eight-bit Function8/Sens8 syntax is not part of canonical SENS",
+                    start,
+                    self.cursor,
+                ));
             }
         }
 
@@ -581,10 +578,8 @@ mod tests {
             parse_one("#b00001100").kind,
             ExprKind::Number(value, Exactness::Exact) if value == 12.0
         ));
-        assert!(matches!(
-            parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00001100)
-        ));
+        let error = parse("00001100").expect_err("bare eight-bit legacy identity must fail");
+        assert_eq!(error.kind, ErrorKind::Parse);
         assert!(matches!(
             parse_one("#b-1010").kind,
             ExprKind::Number(value, Exactness::Exact) if value == -10.0
@@ -636,27 +631,22 @@ mod tests {
     }
 
     #[test]
-    fn exact_eight_bit_sequences_remain_legacy_sid_values() {
-        assert!(matches!(
-            parse_one("00000000").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00000000)
-        ));
-        assert!(matches!(
-            parse_one("00000001").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00000001)
-        ));
-        assert!(matches!(
-            parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00001100)
-        ));
-        assert!(matches!(
-            parse_one("10101000").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(10101000)
-        ));
-        assert!(matches!(
-            parse_one("11111111").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(11111111)
-        ));
+    fn bare_eight_bit_sequences_have_no_second_legacy_language_meaning() {
+        for source in [
+            "00000000",
+            "00000001",
+            "00001100",
+            "10101000",
+            "11111111",
+        ] {
+            let error = parse(source).expect_err("bare W8 must be rejected");
+            assert_eq!(error.kind, ErrorKind::Parse, "{source}");
+            assert!(
+                error.message.contains("not part of canonical SENS"),
+                "{source}: {}",
+                error.message
+            );
+        }
     }
 
     #[test]
