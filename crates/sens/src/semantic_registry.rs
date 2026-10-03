@@ -19,7 +19,12 @@ mod generated {
     include!("semantic_registry_generated.rs");
 }
 
+mod domain_generated {
+    include!("domain_surface_registry_generated.rs");
+}
+
 use generated::{SemanticRow, SEMANTIC_ROWS};
+use domain_generated::DOMAIN_SURFACE_ROWS;
 
 pub(crate) type SemanticId = Sens8;
 
@@ -40,8 +45,49 @@ pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainI
     }
 }
 
+fn domain_identity_from_exact_row(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
+    match width {
+        3 => Bit3::new(bits)
+            .map(Bija3::from_word)
+            .map(CoreDomainIdentity::D3),
+        4 => Bit4::new(bits)
+            .map(CoreD4::from_word)
+            .map(CoreDomainIdentity::D4),
+        _ => None,
+    }
+}
+
+fn domain_surface_index() -> &'static HashMap<&'static str, CoreDomainIdentity> {
+    static INDEX: OnceLock<HashMap<&'static str, CoreDomainIdentity>> = OnceLock::new();
+    INDEX.get_or_init(|| {
+        let mut index = HashMap::new();
+        for row in DOMAIN_SURFACE_ROWS {
+            let identity = domain_identity_from_exact_row(row.width, row.bits)
+                .unwrap_or_else(|| panic!(
+                    "generated exact-domain row is unsupported: width={} bits={:b}",
+                    row.width, row.bits
+                ));
+            for surface in row.surfaces {
+                if let Some(previous) = index.insert(surface.name, identity) {
+                    assert_eq!(
+                        previous, identity,
+                        "exact-domain surface must not map to two identities: {}",
+                        surface.name
+                    );
+                }
+            }
+        }
+        index
+    })
+}
+
+/// Canonical migrated surface -> exact-domain identity route.
+///
+/// This lookup is independent of the historical 256-row byte registry. The
+/// flat registry remains available below only for explicit compatibility APIs
+/// and unmigrated operations.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(domain_identity_from_registry_byte)
+    domain_surface_index().get(name).copied()
 }
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
@@ -183,19 +229,32 @@ mod tests {
     }
 
     #[test]
-    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
-        assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("за-умовою")
-        );
-        assert_eq!(
-            registry_byte_for_surface("функція").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("функція")
-        );
+    fn canonical_domain_lookup_uses_exact_domain_projection() {
+        for (surface, width, bits) in [
+            ("за-умовою", 3, 0b011),
+            ("функція", 4, 0b0010),
+            ("caar", 4, 0b1010),
+            ("cadr", 4, 0b1011),
+            ("cddr", 4, 0b1101),
+        ] {
+            let identity = domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("missing exact-domain surface: {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
+        }
     }
 
     #[test]
-    fn generated_registry_is_one_contiguous_byte_axis() {
+    fn legacy_byte_axis_is_not_required_for_canonical_domain_lookup() {
+        let cadr_domain = domain_identity_for_surface("cadr").expect("cadr exact-domain route");
+        let historical_byte = registry_byte_for_surface("cadr").expect("legacy compatibility row");
+
+        assert_eq!((cadr_domain.width(), cadr_domain.packed_bits()), (4, 0b1011));
+        assert_eq!(historical_byte, 0b0011_0100);
+        assert_ne!(cadr_domain.packed_bits(), historical_byte);
+    }
+
+    #[test]
+    fn legacy_generated_registry_is_one_contiguous_byte_axis() {
         assert_eq!(SEMANTIC_ROWS.len(), 256);
         for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
             assert_eq!(usize::from(row.semantic_id), expected);
