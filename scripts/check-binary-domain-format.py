@@ -19,13 +19,21 @@ Slice 1 — DOMAIN (#2513)
     vague     neither concrete nor an honest unknown
     missing   the body carries the reformat block but no DOMAIN field
 
-Slice 2 — RELATION (#2514)
+Slice 2 — RELATION (#2539)
     ok                     exactly one of: Core-only | Core-Math-only |
                            bridge-candidate | shared-proved-law
     ok                     shared-proved-law WITH an executable witness
     unproved-shared-law    claims a proved shared law but cites no witness
     legend / empty / missing / prose
                            the enum was not filled (free prose is not a relation)
+
+Slice 3 — WITNESS (#2561)
+    ok             names checkable evidence: a PR/issue ref (#123), a witness
+                   file path, or a runner (cargo, python3, pytest, sens, gh)
+    legend         the copied legend ("executable evidence") — not a witness
+    aspirational   promises evidence later ("will be added", TBD, planned);
+                   a state without a witness belongs in STATUS, not here
+    prose / empty / missing
 
 Shape discrimination
 --------------------
@@ -104,6 +112,7 @@ LEGEND_TEXT = {
     "RELATION": re.compile(
         r"^(?:Core-only\s*\|\s*Core-Math-only\s*\|\s*bridge-candidate\s*\|\s*"
         r"shared-proved-law)\b", re.I),
+    "WITNESS": re.compile(r"^executable\b[^\n]*\bevidence\b", re.I),
 }
 
 
@@ -123,7 +132,7 @@ CIRCULAR = re.compile(
     r"domain (?:selected|chosen) by|domain in which the law)", re.I)
 
 
-def domain_verdict(kind, text):
+def domain_verdict(kind, text, body=""):
     if kind is None:
         return "missing"
     if text and LEGEND_TEXT["DOMAIN"].search(text):
@@ -168,12 +177,35 @@ def relation_verdict(kind, text, body=""):
     return "prose"
 
 
+# --- WITNESS -----------------------------------------------------------------
+
+# promising evidence later is not evidence
+ASPIRATIONAL = re.compile(
+    r"\b(?:will be added|to be added|to be written|to be provided|TBD|planned|not yet|pending|coming soon)\b",
+    re.I)
+
+
+def witness_verdict(kind, text, body=""):
+    if kind is None:
+        return "missing"
+    if text and LEGEND_TEXT["WITNESS"].search(text):
+        return "legend"
+    if not text:
+        return "empty"
+    if ASPIRATIONAL.search(text):
+        return "aspirational"
+    if EVIDENCE.search(text):
+        return "ok"
+    return "prose"
+
+
 # --- judging -----------------------------------------------------------------
 
-FIELDS = (("domain", "DOMAIN", domain_verdict), ("relation", "RELATION", relation_verdict))
+FIELDS = (("domain", "DOMAIN", domain_verdict), ("relation", "RELATION", relation_verdict),
+          ("witness", "WITNESS", witness_verdict))
 
 
-def judge(issues, fields=("domain", "relation")):
+def judge(issues, fields=("domain", "relation", "witness")):
     """Return (judged, skipped); judged is [(field, number, title, verdict, text)]."""
     judged, skipped = [], 0
     for it in issues:
@@ -188,7 +220,7 @@ def judge(issues, fields=("domain", "relation")):
             kind, text = field_value(body, label)
             if kind is None and not BLOCK.search(body):
                 continue
-            verdict = rule(kind, text, body) if key == "relation" else rule(kind, text)
+            verdict = rule(kind, text, body)
             rows.append((key, it.get("number"), it.get("title", ""), verdict, text))
         if not rows:
             skipped += 1
@@ -197,7 +229,7 @@ def judge(issues, fields=("domain", "relation")):
     return judged, skipped
 
 
-def run(path, baseline_path=None, emit=False, fields=("domain", "relation")):
+def run(path, baseline_path=None, emit=False, fields=("domain", "relation", "witness")):
     data = json.load(open(path, encoding="utf-8"))
     issues = data["issues"] if isinstance(data, dict) else data
     judged, skipped = judge(issues, fields)
@@ -296,6 +328,29 @@ SELFTEST = [
       "body": BLOCK_TEXT + "LAW: x\n"}, "relation", "missing"),
     ({"number": 30, "title": "t", "state": "open",
       "body": BLOCK_TEXT + "RELATION      Core-only\n"}, "relation", "ok"),
+    # WITNESS
+    ({"number": 40, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS: tests/fixtures/exact-q-commutes.lisp\n"}, "witness", "ok"),
+    ({"number": 41, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS: PR #2529 dedicated gate = GREEN\n"}, "witness", "ok"),
+    ({"number": 42, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS: cargo test -p sens --test exact_q\n"}, "witness", "ok"),
+    ({"number": 43, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS      executable evidence\n"}, "witness", "legend"),
+    ({"number": 44, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS: executable evidence in a bounded scope\n"},
+     "witness", "legend"),
+    ({"number": 49, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS: executable/documentary evidence\n"}, "witness", "legend"),
+    ({"number": 45, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS: Positive controls:\n"}, "witness", "prose"),
+    ({"number": 46, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS: will be added once the D5 map lands\n"},
+     "witness", "aspirational"),
+    ({"number": 47, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "WITNESS: \n"}, "witness", "empty"),
+    ({"number": 48, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "LAW: x\n"}, "witness", "missing"),
 ]
 
 
@@ -303,6 +358,7 @@ def selftest_shared_proved_law():
     body = (BLOCK_TEXT + "RELATION: shared-proved-law\n"
             "WITNESS: tests/fixtures/exact-q-commutes.lisp\nLAW: x\n")
     return {"number": 29, "title": "t", "state": "open", "body": body}
+
 
 def self_test():
     cases = list(SELFTEST) + [(selftest_shared_proved_law(), "relation", "ok")]
@@ -325,7 +381,7 @@ def self_test():
     if failures:
         print(f"binary-domain-selftest-failed ({failures})")
         return 1
-    print(f"(binary-domain-selftest-ok ({len(cases)} cases, 2 fields, 2 ignored))")
+    print(f"(binary-domain-selftest-ok ({len(cases)} cases, 3 fields, 2 ignored))")
     return 0
 
 
@@ -335,8 +391,8 @@ def main():
     ap.add_argument("--baseline", help="JSON of pre-existing violations; fail only on new ones")
     ap.add_argument("--emit-baseline", action="store_true",
                     help="print the baseline JSON for the current snapshot")
-    ap.add_argument("--fields", default="domain,relation",
-                    help="comma-separated subset of: domain,relation")
+    ap.add_argument("--fields", default="domain,relation,witness",
+                    help="comma-separated subset of: domain,relation,witness")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
     if args.self_test:
