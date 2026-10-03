@@ -10,7 +10,7 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
    - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.0 domain-qualified observable language contract.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`; current Core domains D1-D6 are width-qualified, while historical Sens8/Sid8 is compatibility/provenance only.
+   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`; current ratified Core domains D1-D8 are width-qualified, while historical Sens8/Sid8 is compatibility/provenance only.
 2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
 3. **Reference implementation and substrates**
    - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
@@ -39,6 +39,8 @@ D3  bija3 foundation
 D4  bootstrap domain
 D5  owner-ratified five-bit domain
 D6  owner-ratified six-bit domain
+D7  owner-ratified seven-bit Sound7 domain
+D8  owner-ratified eight-bit Core domain, distinct from legacy Sens8
 ```
 
 Equal packed bits in two domains do not imply equal identity. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
