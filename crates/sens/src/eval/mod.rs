@@ -237,7 +237,7 @@ fn dispatch_domain_call(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     if is_d3(identity, 0b001) {
-        special_forms::exact_arity("quote", arguments, 1, span)?;
+        special_forms::exact_arity("D3:001", arguments, 1, span)?;
         return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
     }
 
