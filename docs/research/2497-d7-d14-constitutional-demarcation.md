@@ -24,7 +24,11 @@ Consequently, articulatory geometry (2D place $\times$ effort matrix) and gramma
 SENS resolves this mathematical incompatibility not by a compromised synthetic encoding, but through strict domain separation under the constitutional principle:
 $$\mathbf{A\ domain\ owns\ the\ law\ it\ operates.}$$
 
-### 2.1 Domain D7 (Text7, 7-bit carrier): Phonetic Geometry
+### 2.1 Domain Text7 vs Sound7: Atlas Hygiene (#2490 Clarification)
+- **Atlas Hygiene:** Under #2490, `D7` was originally reserved as `Sound7 + local ordinals` (acoustic/music synthesis). To prevent semantic collisions, the atlas strictly distinguishes:
+  - **Text7 (UPC-7, textual phonetic geometry):** The 7-bit carrier for textual sounds, orthography, and phonetic sandhi.
+  - **Sound7 (acoustic sound, in reserve):** The 7-bit carrier for audio/acoustic music synthesis.
+  - Text7 and Sound7 are distinct domains despite sharing the 7-bit carrier width (`bits + domain + law -> semantic meaning`). Grammatical intervals and pratyāhāras belong strictly to Text7 and D14, NEVER to Sound7.
 - **Law:** Articulatory place (*sthāna*) and effort (*prayatna*).
 - **Consumer:** Orthography, phonetic sandhi, script transcription, surface representation.
 - **Representation:** Pinned UPC-7 table (`upc7-table.tsv`).
@@ -44,3 +48,11 @@ $$\mathbf{A\ domain\ owns\ the\ law\ it\ operates.}$$
 
 ### 2.4 Synthetic Hybrids Rejected
 Any synthetic hybrid layout attempting to interleave sūtra prefixes with articulatory suffixes is rejected as ungrounded complexity (#2494).
+
+### 2.5 Machine Oracle Witness
+- **Witness Address:** `shiva-sutras/prototype/verify_hakardvitva_c1p.py` (master: `e46b772`).
+- **Command:** `python3 prototype/verify_hakardvitva_c1p.py` (runtime ~1.5 s, zero external dependencies).
+- **Certified Invariants:**
+  1. No hitting set of size $\le 3$ over 84 minimal 3-obstructions $\implies$ 42-sound linear ceiling is strictly $\le 39$.
+  2. Unique size-4 hitting set $\mathcal{H}^* = \{\text{jhal}, \text{ral}, \text{val}, \text{śal}\}$ matches Sūtra 14 ($h_2$) in 1-to-1 bijection.
+  3. 43-node path with dual $h_1/h_2$ achieves $43/43 = 100.0\%$ contiguous intervals.
