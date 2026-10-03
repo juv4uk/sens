@@ -25,6 +25,59 @@ python3 scripts/uk-latynka.py self-test
 
 ---
 
+## Поточна semantic discipline — binary domains (2026-10-03)
+
+Перед будь-яким semantic/placement research агент зобов'язаний прочитати
+[`CURRENT.md`](CURRENT.md) і
+[`docs/current-binary-domain-architecture.md`](docs/current-binary-domain-architecture.md).
+
+Канонічна робоча формула:
+
+```text
+semantic object
+=
+binary number
++ exact semantic domain
++ proved/admitted law
+```
+
+Не можна виводити semantic identity лише з:
+- width;
+- free coordinate;
+- human name;
+- opcode;
+- hash/AST/registry/cache;
+- однакового machine transform у різних domains.
+
+Core research працює у фазах:
+
+```text
+HISTORICAL-INGEST
+STRUCTURAL-DISCOVERY
+SENS-DERIVATION
+```
+
+Для governed Core/Core-Math задач record має явно називати:
+
+```text
+PHASE
+DOMAIN
+BINARY OBJECT
+LAW
+WITNESS
+FALSIFIER
+STATUS
+RELATION
+```
+
+`UNKNOWN`, `UNRESOLVED` і `NO-CANDIDATE` є допустимими чесними результатами.
+Не заповнювати домени “щоб не було порожньо”.
+
+Standing guards:
+- #2508/#2509 — same transform != same semantic law across domains;
+- #2540 — domain != carrier != mechanism;
+- #2533 — history first, SENS derivation after structural discovery.
+
 ## Дисципліна співпраці з агентами — основний документ (2026-09-03)
 
 **Статус: основний (primary) для всіх активних репозиторіїв екосистеми.** Цей розділ визначає, як агенти працюють із власником над кодом, і застосовується одразу після ратифікованої мовної політики вище.
@@ -103,9 +156,9 @@ typedef uintptr_t Value;
 Яка частина цього рішення належить мові/предметній області, а яка — конкретній реалізації/субстрату?
 ```
 
-### Крос-субстратне порівняння (де застосовно — переважно `my-lisp` і суміжні репозиторії мови)
+### Крос-субстратне порівняння (де застосовно — переважно `sens` і суміжні репозиторії мови)
 
-Коли та сама ідея існує в кількох реалізаціях (наприклад, `my-lisp`: Rust, C, x86 asm, Guile, FPGA), корисний формат порівняння:
+Коли та сама ідея існує в кількох реалізаціях (наприклад, `sens`: Rust, C, x86 asm, Lisp, FPGA), корисний формат порівняння:
 
 ```text
 1. LANGUAGE FACT       — що стверджує сама мова?
@@ -124,7 +177,7 @@ typedef uintptr_t Value;
 Мета — не "вивчити мову X", а малими вертикальними зрізами повністю зрозуміти, як одна конкретна ідея проходить від задуму до фізичного втілення (біта в регістрі, гейта на кремнії, вузла в дереві коду). Генерувати можна багато — засвоювати варто малими, повністю зрозумілими кроками.
 
 ---
-# AGENTS.md — my-lisp
+# AGENTS.md — sens
 
 Див. також `docs/agent-doctrine.md` — міжрепозиторні правила (пріоритет prose/contract, дисципліна доказів, використання subagent/specialist-model), які застосовуються до всіх сусідніх репозиторіїв рою, не лише до цього.
 
@@ -148,13 +201,13 @@ contract-version                       claim-task / release-task
                                        sync-tasks / durable event journal
 ```
 
-1. Start or connect to `swarm-node --port 910x --node-id <your-id> --project my-lisp --data-dir ~/.swarm-node/<your-id> --connect <peer>:9101`.
+1. Start or connect to `swarm-node --port 910x --node-id <your-id> --project sens --data-dir ~/.swarm-node/<your-id> --connect <peer>:9101`.
 2. `(join (capabilities (...)))` → `(list-members)` → `(next-best-action (capabilities (...)))`.
 3. `(claim-task (task ...))` → work → `(complete-task (task ...) (generation N))` → `(emit (type ...) (payload ...))` for durable coordination events.
 
 Стара coordination surface на `:9999` фізично видалена. Retired operations (`hello`, `claim`, `notify`, `poll`, `subscribe`, task registry та інші) мають повертати `unknown op`; їхню відсутність перевіряє C5 removal gate. Машинний migration marker — `knowledge/swarm-legacy-deprecation.lisp`, історичні деталі лишаються в git history.
 
-`my-lisp --tcp=9999 --protocol=sexpr` лишається **лише semantic oracle**. Не змішуйте його з coordination plane `swarm-node :910x`.
+`sens --tcp=9999 --protocol=sexpr` лишається **лише semantic oracle**. Не змішуйте його з coordination plane `swarm-node :910x`.
 
 ## Журнал відкриттів (канон, без двозначності)
 
@@ -167,9 +220,9 @@ contract-version                       claim-task / release-task
 
 ## Role
 
-Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lisp`, `cml`, `my-idea`). Defines what a my-lisp program means; every other repository must match this, not the reverse.
+Цей репозиторій володіє SENS-specific contract/evidence у межах явно ратифікованого scope. Сусідні `fpga-lisp`, `cml`, `my-idea` та інші споживачі можуть давати незалежні witnesses і механізми, але не визначають SENS semantics у зворотному напрямку.
 
-`my-lisp-panini` and `shiva-sutras` research Pāṇinian Sanskrit grammar as a formal system feeding this repo's semantic-atom experiments. They do not become semantic authority for `my-lisp` until their own evidence gates pass.
+`shiva-sutras` та інші Sanskrit/Pāṇini donor-repositories можуть постачати історичні/структурні facts для D7/D14 research. Вони не стають SENS semantic authority без explicit domain/law bridge та власних evidence gates.
 
 ## Authoritative files
 
@@ -202,7 +255,7 @@ See `evidence/README.md`. A durable claim (“X now passes/fails”) needs execu
 
 ## How to check neighboring repositories
 
-Read the neighbor's own contract/evidence directly (`fpga-lisp/isa-contract.lisp`, `cml/compatibility.lisp`, etc.). Use `:9999` only when a remote evaluation of the my-lisp semantic oracle is needed. Use `swarm-node` for claims, tasks, presence, handoffs, and coordination events.
+Read the neighbor's own contract/evidence directly (`fpga-lisp/isa-contract.lisp`, `cml/compatibility.lisp`, etc.). Use `:9999` only when a remote evaluation of the SENS semantic oracle is needed. Use `swarm-node` for claims, tasks, presence, handoffs, and coordination events.
 
 ## Host capability boundary
 
@@ -222,11 +275,11 @@ tcp listen address/port ranges
 
 ## Environment: WSL2 + Guix
 
-Work in this repo from inside WSL2, under the Linux user named after this repo (`my-lisp`), not directly from Windows. Enter the declared environment before running anything:
+Для WSL2-workflow працюйте всередині Linux checkout SENS, а не редагуйте repo через випадковий Windows path. Конкретний user/path є локальним mechanism detail; перевірте свій checkout перед запуском:
 
 ```sh
-wsl -u my-lisp
-cd /mnt/c/GitHub/my-lisp
+wsl -u agents
+cd /home/agents/GitHub/sens
 guix shell -m manifest.scm
 ```
 
@@ -234,7 +287,7 @@ guix shell -m manifest.scm
 
 ## Live coordination context
 
-A separate, parallel coordination effort (Codex as primary agent, OpenCode as reviewer) runs through `C:\Users\user\Documents\GitHub\docs` — read `docs/AGENT_MEMORY.md` there before assuming an area is untouched.
+Не припускайте, що area вільна лише через відсутність локальної гілки. Перед роботою перевірте `swarm-node`, issue #1599, відкриті PR/CLAIM-и та current GitHub task state.
 
 ## Agent Guard
 

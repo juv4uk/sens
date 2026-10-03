@@ -1,5 +1,7 @@
 # my-lisp language core axioms · Аксіоми ядра my-lisp · my-lisp-Sprachkern-Axiome
 
+> **Superseded-scope note (2026-10-03):** ця 2026-08-09 axiom draft збережена як historical design record. Вона не є поточною ontology/ratification plan. Поточний model: `binary object + exact semantic domain + admitted law`, historical-first phase order і scoped owner ratifications. Див. [`../CURRENT.md`](../CURRENT.md) та [`current-binary-domain-architecture.md`](current-binary-domain-architecture.md).
+
 **Status: draft, not yet ratified — ratification deliberately deferred to the 1.0.0 release (decided 2026-08-09, `PLAN.md` item 5), not a separate event during 0.x development.** This document precedes `my-lisp-constitution.lisp` — the file becomes the executable proof of these axioms, not the starting point. Nothing here is final until discussed and agreed on explicitly.
 
 **Статус: чернетка, ще не затверджена — ратифікація свідомо відкладена до релізу 1.0.0 (рішення 2026-08-09, `PLAN.md` пункт 5), не окрема подія посеред 0.x-розробки.** Цей документ передує `my-lisp-constitution.lisp` — файл стане виконуваним доказом цих аксіом, не відправною точкою. Нічого тут не остаточне, поки не обговорено й не узгоджено явно.

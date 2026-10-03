@@ -1,125 +1,309 @@
-# my-lisp language core — SID8-only
+# Ядро мови SENS — бінарні домени, закони й докази
 
-This document describes the current function-identity model. Historical named
-models belong in archive/research material and are not semantic authority.
+**Статус:** CURRENT EXPLANATORY DOCUMENT · 2026-10-03
 
-## One function space
+Попередній SID8-only документ збережено в
+[`docs/archive/language-core-sid8-only-superseded-2026-10-03.md`](archive/language-core-sid8-only-superseded-2026-10-03.md).
 
-my-lisp has exactly one function-identity space:
+Цей документ пояснює поточну модель, але сам не створює semantic authority.
+Див. [`../CURRENT.md`](../CURRENT.md) і referenced ratified/executable evidence.
 
-    00000000
-    ...
-    11111111
+## 1. Semantic object
 
-That is exactly 256 function slots. The identity is the eight bits themselves.
+Поточна owner-парадигма (#2490):
 
-A SID is not text, String, Symbol, a literal category, a decimal number, a
-human name, an enum label, an opcode, or a backend identifier. Implementations
-may temporarily carry the bits in machine storage, but storage does not create
-another identity.
+```text
+semantic object
+=
+binary number
++ exact semantic domain
++ proved/admitted law
+```
 
-## Reader
+Біти самі по собі не несуть значення.
 
-Exactly eight bare 0/1 source characters are read directly into Sens8.
+Один і той самий bit string може легально існувати у двох доменах і означати
+два різні semantic objects.
 
-    00001100  -> Sens8 00001100
-    12        -> ordinary exact decimal number
-    101       -> ordinary exact decimal number
+## 2. Domain, carrier і mechanism
 
-There is no reader mode that turns an eight-bit SID into a mathematical binary
-integer.
+Три шари треба тримати окремо:
 
-At expression start, apostrophe is reader sugar for a list whose head is
-SID 00000001 directly:
+```text
+domain     = law-bearing semantic context
+carrier    = concrete width/bit representation
+mechanism  = executor/transport/substrate
+```
 
-    'об'єкт
-    (00000001 об'єкт)
+Приклади:
 
-The reader must not create an intermediate named function identity.
+```text
+D7.SoundCell [carrier=W7]       semantic domain
+D7.LocalOrdinal [carrier=W7]    інший semantic context
+W7                              лише carrier
+Rust / FPGA / RF                mechanism
+```
 
-## Surfaces
+Bare width недостатній для встановлення semantic domain.
 
-Human-language and symbolic surfaces are optional source/UI routing metadata.
-They are not functions and do not own meaning.
+## 3. Core
 
-    surface/UI input
-          ↓ mechanical lookup
-    Sens8
+Core реконструює історичну Lisp-лінію перед native SENS derivation:
 
-The forbidden model is:
+```text
+Lisp I -> Lisp 1.5 -> later early-Lisp evidence
+```
 
-    name -> meaning -> SID
-    SID  -> named semantic identity
+Порядок дослідження (#2533):
 
-Runtime and compiler logic must operate on Sens8 after source/UI routing.
+```text
+HISTORICAL-INGEST
+        ↓
+STRUCTURAL-DISCOVERY
+        ↓
+SENS-DERIVATION
+```
 
-## Core profiles
+Historical inventory не можна стирати, навіть якщо SENS пізніше виводить або
+стискає операцію.
 
-Core1, Core2, Core3 and Core4 are profiles of laws over the same function IDs:
+### Поточний status доменів
 
-    Sens8
-      ↓
-    selected Core profile
-      ↓
-    Lisp-owned law for that SID/profile
-      ↓
-    selected mechanism
-      ↓
-    observation/result
+| Domain | Поточний status |
+|---|---|
+| D1 | ratified PredicateBit |
+| D2 | ratified structural racanā2 |
+| D3 | ratified Core foundation |
+| D4 | ratified Core foundation |
+| D5 | ratified width/domain ontology; occupancy ще досліджується |
+| D6 | ratified width/domain ontology; багато coordinates лишаються UNKNOWN |
+| D7 | ratified Sound7 + local śloka/sūtra ordinals; не arithmetic Number |
+| D14 | research candidate: Pāṇini grammar graph |
+| D24/D48/... | research candidates: exact Number / FPGA-friendly numeric domains |
 
-A Core profile never mints a new identity and never renames a SID.
+Ratified width не означає blanket occupancy.
 
-## Execution mechanisms
+## 4. Generated descendants
 
-Rust, C, Common Lisp, Prolog, Datalog, CLIPS, GraalVM, WASM, FPGA and other
-substrates may provide mechanisms. A mechanism receives an already-selected
-Sens8 and cannot redefine what that SID is.
+Generated child може заробити candidate identity через exact parent + admitted
+local generator:
 
-Native operator names, opcodes and helper enums are mechanism-local metadata,
-not my-lisp function identities.
+```text
+parent
++ delta / generator
+-> generated child
+```
 
-## Compiler / IR rule
+Selector composition — найсильніший current positive control.
 
-Compiler IR provenance may carry Sens8 and mechanism/profile facts. It must not
-introduce a second named function ontology such as a canonical-identity enum or
-a necessary-form identity enum.
+Для selector-path coordinate додавання semantic projection choice може
+узгоджуватись із binary relation:
 
-## Empty structure is not a function ID
+```text
+E(extend(s,b)) = 2*E(s) + b
+```
 
-Contract 9 reserves all 00000000..11111111 for functions. Therefore the
-historical implementation that reuses 00000000 for the empty-list ground
-value is explicit migration debt, tracked by #1332.
+Але arithmetic formula сама по собі не є semantic law. Semantic law тут —
+selector composition. #2502 незалежно cross-proves current generated D4/D5
+selector descendants через Core-Math executor.
 
-The target invariant is:
+## 5. Parentless roots і residue
 
-    ()           -> structural value outside function SID space
-    00000000     -> function identity
+Semantic root **не** заробляє width через free space.
 
-No replacement SID is to be allocated to ().
+Розділяємо:
 
-## Standing enforcement
+```text
+roothood
+width/domain membership
+coordinate placement
+```
 
-- #1325 — permanent SID8-only language law
-- #1327 — remove named runtime identity ontology
-- #1328 — remove named necessary-form identity ontology
-- #1329 — remove alternate-identity terminology
-- #1330 — keep surfaces outside function ontology
-- #1331 — executable standing guard
-- #1332 — remove the empty-list collision from SID 00000000
+Це три різні claims.
 
-The reference Rust implementation is evidence/mechanism, not semantic
-authority. New code must make the eight-bit function identity visible instead
-of replacing it with a word.
+Для parentless root:
 
-## Project boundary
+- roothood може бути proved;
+- exact width може лишитися UNKNOWN;
+- coordinate може лишитися UNPLACED.
 
-Rust is a **reference implementation** and mechanism witness; Contract 9 and
-the Lisp-owned executable evidence remain the language authority.
+#2662/#2667/#2669 досліджують, як parentless root чесно заробляє exact domain.
 
-The current canonical source extension is **`.lisp`**. `.wsm` and `.my` are
-legacy aliases only; file suffixes do not create language identity.
+## 6. D6 PURE-UNKNOWN discipline
 
-Authority precedence is documented in
-[`semantic-authority-map.md`](semantic-authority-map.md). Under Contract 9,
-older named-function descriptions in that map are migration debt/history where
-they conflict with the SID8-only function-space law.
+Unknown coordinates — не дефект inventory.
+
+PURE-UNKNOWN D6 coordinate може покинути цей клас лише після same-base semantic
+law, lower-bound theorem або іншого admitted placement evidence.
+
+Заборонені placement arguments:
+
+- free capacity;
+- numeric adjacency;
+- attractive bit pattern;
+- chronology alone;
+- Core-Math authority без bridge/domain proof;
+- mechanism-local metadata.
+
+Успішний research result може бути **NO-CANDIDATE**.
+
+## 7. Core-Math
+
+Core-Math досліджує математичні закони над binary objects незалежно від Core.
+
+Мінімальна execution-ідея:
+
+```text
+binary input(s)
++ admitted mathematical law
+-> binary output
+```
+
+Ключове evidence:
+
+- #2491 — перший bounded `bits + law -> bits` executor;
+- #2500 — exact-Q family/role factorization;
+- #2509 — same machine transform у різних domains не зливає semantics.
+
+Core-Math може diverge від Core і не успадковує Core placement автоматично.
+
+## 8. Core / Core-Math relation
+
+Допустимі результати:
+
+```text
+DIVERGENT
+COMPLEMENTARY
+CONVERGENT
+```
+
+Convergence вимагає незалежного збігу:
+
+```text
+binary object
++ exact domain
++ semantic equation
++ law
++ cross-proof
+```
+
+Matching syntax, human names, hashes, ASTs, storage layouts або machine formula
+недостатньо.
+
+## 9. Human surfaces
+
+Human names — source/UI projections.
+
+До них належать:
+
+- українські;
+- English;
+- Sanskrit;
+- symbolic spellings;
+- historical Lisp names.
+
+Назва допомагає людині обговорювати об'єкт, але не замінює binary-domain
+identity.
+
+Canonical source extension лишається **`.lisp`**. File suffix не є semantic
+identity.
+
+### Source/implementation compatibility
+
+- Канонічне розширення вихідного коду — **`.lisp`**.
+- `.wsm` і `.my` — **legacy aliases** для compatibility/history; вони не створюють окремої semantic identity.
+- Rust — **референсна реалізація** поточного runtime/mechanism layer, а не власник semantics.
+
+## 10. Execution substrates
+
+Rust — current reference mechanism, не semantic authority.
+
+Те саме стосується:
+
+- C;
+- Common Lisp;
+- WASM;
+- GraalVM;
+- FPGA;
+- GPU;
+- Prolog / Datalog / CLIPS;
+- radio/wire transports.
+
+Mechanism може виконувати або переносити admitted object. Він не має права
+непомітно mint-ити нове language meaning.
+
+## 11. Wire і packed representation
+
+Packed/wire representation зберігає exact payload і boundaries. Воно не
+створює semantic domain.
+
+Conceptual layering:
+
+```text
+semantic object
+-> canonical SENS wire/container
+-> transport framing
+-> physical channel
+```
+
+CRC, FEC, ARQ, frequency, modulation і RF profile — transport mechanisms.
+
+## 12. Governed research record
+
+Поточна task grammar:
+
+```text
+PHASE
+DOMAIN
+BINARY OBJECT
+LAW
+WITNESS
+FALSIFIER
+STATUS
+RELATION
+```
+
+Allowed PHASE:
+
+```text
+HISTORICAL-INGEST
+STRUCTURAL-DISCOVERY
+SENS-DERIVATION
+```
+
+Schema робить uncertainty явною, але не auto-ratify-ить semantics.
+
+## 13. Historical SID8
+
+Попередня flat 256-slot SID8/Function8 модель лишається:
+
+- historical provenance;
+- compatibility evidence;
+- migration donor;
+- falsifier проти випадкового повернення до flat identity.
+
+Вона **не** є current ontology.
+
+## 14. Межа проєкту
+
+SENS володіє admitted semantic meaning.
+
+Reference implementations, generated files, benchmarks, surfaces, proof-address
+formats і caches лишаються evidence/mechanism нижчого рівня, якщо окремий law
+не встановив інше.
+
+Authority precedence:
+[`semantic-authority-map.md`](semantic-authority-map.md).
+
+## English · auxiliary
+
+The current SENS model is:
+
+```text
+semantic object = binary number + exact semantic domain + admitted law
+```
+
+Core reconstructs historical Lisp first, discovers structure second, and
+derives native SENS semantics third. Core-Math independently studies
+mathematical laws over binary objects. Domain, carrier and mechanism are
+separate; free coordinates remain unassigned until a law earns placement.
