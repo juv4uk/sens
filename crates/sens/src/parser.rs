@@ -80,7 +80,7 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Sid(crate::sens!(00000001)),
+                        kind: ExprKind::Sid(crate::CallableDomainId::from_legacy_sens8(crate::sens!(00000001))),
                         span: Span {
                             start,
                             end: start + 1,
@@ -418,7 +418,7 @@ impl Parser<'_> {
             let sid = crate::Sens8::from_exact_bits(token)
                 .expect("exact eight-bit SID validated above");
             return Ok(Expr {
-                kind: ExprKind::Sid(sid),
+                kind: ExprKind::Sid(crate::CallableDomainId::from_legacy_sens8(sid)),
                 span: Span {
                     start,
                     end: self.cursor,
