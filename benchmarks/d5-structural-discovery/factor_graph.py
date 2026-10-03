@@ -77,8 +77,8 @@ FACTOR_DEFS: dict[str, dict[str, Any]] = {
         "positive_rows": {"RETURN", "PROG"},
         "negative_controls": {"GO", "SETQ"},
         "dependency_on_other_factor": [],
-        "current_status": "surviving-observable-candidate",
-        "evidence": ["#2439", "#2480"],
+        "current_status": "bounded-independent-external-root-theorem",
+        "evidence": ["#2439", "#2480", "#2488", "#2504", "fcf3a410914882e52960647e49760d0152faa11d"],
         "falsifier": "local admitted control reconstructs RETURN without whole-call-graph CPS or an equivalent extra control channel",
     },
     "raw-form-input": {
@@ -237,6 +237,15 @@ def render(data: dict[str, Any]) -> dict[str, Any]:
             "post_d4_factor_candidates": len(POST_D4_CANDIDATES),
             "post_d4_factor_ids": sorted(POST_D4_CANDIDATES),
             "proven_independent_roots": 0,
+            "external_root_theorems": [
+                {
+                    "factor_id": "non-local-exit",
+                    "classification": "semantic-residue-root",
+                    "evidence": ["#2488", "#2504"],
+                    "width": "UNKNOWN",
+                    "coordinate": "UNPLACED",
+                }
+            ],
             "new_d5_residents": 0,
             "d5_selector_generated": 8,
             "d5_unknown_free": 24,
