@@ -259,8 +259,9 @@ mod tests {
     fn canonical_domain_lookup_does_not_consult_legacy_byte_position() {
         let plus = domain_identity_for_surface("+").unwrap();
         assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
-        assert_eq!(registry_byte_for_surface("+"), Some(0b0000_1100));
-        assert_ne!(plus.packed_bits(), 0b0_1100);
+        let compatibility = semantic_id_for_surface("+").expect("legacy surface remains explicit compatibility");
+        assert_eq!(compatibility.packed_byte(), 0b0000_1100);
+        assert_ne!(plus.packed_bits(), compatibility.packed_byte());
     }
 
     #[test]
