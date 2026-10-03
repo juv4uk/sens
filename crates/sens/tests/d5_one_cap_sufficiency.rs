@@ -81,12 +81,12 @@ fn d5_one_cap_w5_defmacro_remains_define_plus_transformer_derivation() {
     let macro_source = include_str!("../../../lib/macro.lisp");
 
     assert!(
-        macro_source.contains("00001001"),
-        "bootstrap macro derivation must still reference DEFINE"
+        macro_source.contains("(001 0011)"),
+        "bootstrap macro derivation must reference canonical D4 DEFINE=0011"
     );
     assert!(
-        macro_source.contains("00001000"),
-        "bootstrap macro derivation must still reference LAMBDA"
+        macro_source.contains("(001 0010)"),
+        "bootstrap macro derivation must reference canonical D4 LAMBDA=0010"
     );
     assert!(
         macro_source.contains("make-macro"),
