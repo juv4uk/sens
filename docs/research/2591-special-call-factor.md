@@ -1,7 +1,7 @@
 # #2591 — special-call protocol factorization
 
-Phase: **STRUCTURAL-DISCOVERY**  
-Domain: `Core.PostD4.SpecialCallProtocol`  
+Phase: **STRUCTURAL-DISCOVERY**
+Domain: `Core.PostD4.SpecialCallProtocol`
 Binary object: **UNPLACED**
 
 This report factors historical FEXPR/FSUBR, Hart MACRO, and current SENS
