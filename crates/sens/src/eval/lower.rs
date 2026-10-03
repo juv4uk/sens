@@ -15,18 +15,18 @@
 use super::{canon, necessary_forms};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
-use crate::Sens8;
+use crate::{CallableDomainId, Sens8};
 use std::rc::Rc;
 
-const QUOTE: Sens8 = crate::sens!(00000001);
-const COND: Sens8 = crate::sens!(00000111);
+const QUOTE: CallableDomainId = CallableDomainId::from_legacy_sens8(crate::sens!(00000001));
+const COND: CallableDomainId = CallableDomainId::from_legacy_sens8(crate::sens!(00000111));
 
 /// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
     expressions.iter().map(|expression| lower(expression, 0)).collect()
 }
 
-fn head_sid(head: &Expr) -> Option<Sens8> {
+fn head_sid(head: &Expr) -> Option<CallableDomainId> {
     match &head.kind {
         ExprKind::Sid(sid) => Some(*sid),
         ExprKind::Symbol(name) => immutable_surface_sid(name),
@@ -35,13 +35,14 @@ fn head_sid(head: &Expr) -> Option<Sens8> {
 }
 
 /// Написання, що маршрутизується до фіксованого SENS (не окрема identity).
-fn immutable_surface_sid(name: &str) -> Option<Sens8> {
+fn immutable_surface_sid(name: &str) -> Option<CallableDomainId> {
     if let Some(sid) = canon::routed_sid_for_surface(name) {
-        return Some(sid);
+        return Some(CallableDomainId::from_legacy_sens8(sid));
     }
-    // M8: будь-яка admitted surface → SENS. Необхідні форми лишаються
-    // підмножиною; раніше лише вони зводились, тож `+`/`-` шукались у runtime.
+    // Transitional compatibility: registry still exports historical exact-8
+    // anchors until #2832 migrates it to domain-qualified identities.
     semantic_registry::admitted_semantic_id_for_surface(name)
+        .map(CallableDomainId::from_legacy_sens8)
 }
 
 fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
@@ -71,7 +72,11 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                         })
                         .collect(),
                 ),
-                Some(sid) if necessary_forms::identity_for_semantic_id(sid).is_some() => {
+                Some(sid)
+                    if sid
+                        .legacy_sens8()
+                        .and_then(necessary_forms::identity_for_semantic_id)
+                        .is_some() => {
                     ExprKind::Call(
                         sid,
                         arguments
