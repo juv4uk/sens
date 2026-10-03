@@ -7,32 +7,28 @@ fn parsed_head(source: &str) -> Vec<sens::Expr> {
 }
 
 #[test]
-fn od005_od006_owner_coordinates_are_not_yet_direct_sid_tokens() {
-    for source in ["(00111)", "(001111)"] {
+fn od005_od006_owner_coordinates_are_exact_domain_identities() {
+    for (source, width, bits) in [("(00111)", 5, 0b00111), ("(001111)", 6, 0b001111)] {
         let expressions = parsed_head(source);
         let ExprKind::List(items) = &expressions[0].kind else {
             panic!("{source}: expected list")
         };
-
-        assert!(
-            !matches!(&items[0].kind, ExprKind::Sid(_)),
-            "{source}: D5/D6 bare owner coordinate must not be reported as admitted SID before exact-width carrier migration"
-        );
-        assert!(
-            matches!(&items[0].kind, ExprKind::Number(_, _) | ExprKind::Rational(_)),
-            "{source}: current reader collision witness should remain numeric until the explicit migration changes it"
-        );
+        let ExprKind::DomainIdentity(identity) = items[0].kind else {
+            panic!("{source}: expected exact Core domain identity")
+        };
+        assert_eq!(identity.width(), width, "{source}");
+        assert_eq!(identity.packed_bits(), bits, "{source}");
     }
 }
 
 #[test]
-fn exact_eight_bit_legacy_control_is_still_sid() {
+fn exact_eight_bit_legacy_control_is_still_explicit_compatibility_sid() {
     let expressions = parsed_head("(00000111)");
     let ExprKind::List(items) = &expressions[0].kind else {
         panic!("expected list")
     };
     assert!(
         matches!(&items[0].kind, ExprKind::Sid(_)),
-        "8-bit legacy control must remain a SID in this transitional audit"
+        "8-bit legacy control must remain isolated in the compatibility lane"
     );
 }
