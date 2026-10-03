@@ -512,7 +512,11 @@ SEMANTIC AUTHORITY = NONE
         print(f"binary-domain-selftest-failed ({failures})")
         return 1
 
-    print("SCHEMA-SCOPE-MECHANISM=PASS")\n    print("SCHEMA-SCOPE-INCOMPLETE-FAIL-CLOSED=PASS")\n    print("SCHEMA-SCOPE-NO-NAME-GUESSING=PASS")\n    print("SCHEMA-SCOPE-CONFLICT=PASS")\n    print(f"(binary-domain-selftest-ok ({len(cases) + 7} cases, 5 fields + scope))")
+    print("SCHEMA-SCOPE-MECHANISM=PASS")
+    print("SCHEMA-SCOPE-INCOMPLETE-FAIL-CLOSED=PASS")
+    print("SCHEMA-SCOPE-NO-NAME-GUESSING=PASS")
+    print("SCHEMA-SCOPE-CONFLICT=PASS")
+    print(f"(binary-domain-selftest-ok ({len(cases) + 7} cases, 5 fields + scope))")
     return 0
 
 
