@@ -59,7 +59,7 @@ fn immutable_surface_sid(name: &str) -> Option<Sens8> {
     if let Some(sid) = canon::routed_sid_for_surface(name) {
         return Some(sid);
     }
-    semantic_registry::admitted_semantic_id_for_surface(name)
+    semantic_registry::legacy_registry_id_for_surface(name)
 }
 
 fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
@@ -140,7 +140,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                         })
                         .collect(),
                 ),
-                Some(sid) if necessary_forms::identity_for_semantic_id(sid).is_some() => {
+                Some(sid) if necessary_forms::identity_for_legacy_registry_id(sid).is_some() => {
                     ExprKind::Call(
                         sid,
                         arguments
