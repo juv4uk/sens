@@ -17,7 +17,6 @@ has no placement implication.
 from __future__ import annotations
 
 import argparse
-from hashlib import sha256
 import importlib.util
 import json
 from pathlib import Path
@@ -36,9 +35,6 @@ def load_module(path: Path, name: str):
     spec.loader.exec_module(module)
     return module
 
-
-def file_sha(path: Path) -> str:
-    return sha256(path.read_bytes()).hexdigest()
 
 
 def canonical(value: Any) -> str:
@@ -201,10 +197,10 @@ def build_matrix() -> dict[str, Any]:
     return {
         "schema": "d5-factor-independence-protocol/1",
         "authority": "research-only-no-placement",
-        "source_witnesses": {
-            str(CUBE_PATH.relative_to(ROOT)): file_sha(CUBE_PATH),
-            str(TIMING_PATH.relative_to(ROOT)): file_sha(TIMING_PATH),
-        },
+        "source_witnesses": [
+            {"path": str(CUBE_PATH.relative_to(ROOT)), "issues": ["#2522", "#2530"]},
+            {"path": str(TIMING_PATH.relative_to(ROOT)), "issues": ["#2568", "#2569"]},
+        ],
         "rows": rows,
         "summary": {
             "protocol_factors_tested": 4,
