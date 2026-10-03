@@ -536,6 +536,31 @@ mod tests {
     }
 
     #[test]
+    fn code_slots_preserve_domain_width_in_identity() {
+        let root = Environment::root();
+        let d3 = crate::SemanticRef::from_width_bits(3, 0b101).unwrap();
+        let legacy = crate::SemanticRef::legacy8(crate::Sens8::from_packed_byte(0b0000_0101));
+
+        assert!(root.bind_code_slot_once(
+            d3,
+            Value::Number(3.0, crate::Exactness::Exact),
+        ));
+        assert!(root.bind_code_slot_once(
+            legacy,
+            Value::Number(8.0, crate::Exactness::Exact),
+        ));
+
+        assert_eq!(
+            root.code_slot(d3),
+            Some(Value::Number(3.0, crate::Exactness::Exact))
+        );
+        assert_eq!(
+            root.code_slot(legacy),
+            Some(Value::Number(8.0, crate::Exactness::Exact))
+        );
+    }
+
+    #[test]
     fn host_policies_are_unrestricted_by_default_and_shared_with_children() {
         let root = Environment::root();
         assert!(root.fs_read_roots().is_none());
