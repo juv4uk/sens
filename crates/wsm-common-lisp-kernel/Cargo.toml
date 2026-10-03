@@ -6,4 +6,5 @@ license-file = "../../LICENSE"
 description = "Independent Common Lisp process adapter for the WSM four-kernel experiment"
 
 [dependencies]
+sens = { path = "../sens" }
 wsm-kernel-c-abi = { path = "../wsm-kernel-c-abi" }
