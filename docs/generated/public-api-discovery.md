@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 40
-- top-level функцій: 890
+- top-level функцій: 887
 - top-level макросів: 34
-- усього визначень: 924
+- усього визначень: 921
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -91,9 +91,6 @@
 | `lib/core4.lisp` | function | `fourth` | unreviewed |
 | `lib/core4.lisp` | function | `cadddr` | unreviewed |
 | `lib/core4.lisp` | function | `fifth` | unreviewed |
-| `lib/core4.lisp` | function | `caar` | unreviewed |
-| `lib/core4.lisp` | function | `cadr` | unreviewed |
-| `lib/core4.lisp` | function | `cddr` | unreviewed |
 | `lib/core4.lisp` | function | `length-onto` | unreviewed |
 | `lib/core4.lisp` | function | `length` | unreviewed |
 | `lib/core4.lisp` | function | `reverse-onto` | unreviewed |
