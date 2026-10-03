@@ -14,8 +14,8 @@ from model import (
 class HumanWireModelTests(unittest.TestCase):
     def test_morse_mark_timing(self):
         self.assertEqual(1, morse_symbol_units("E"))
-        self.assertEqual(3, morse_symbol_units("T"))
         self.assertEqual(5, morse_symbol_units("A"))  # .- = 1 + gap + 3
+        self.assertEqual(9, morse_symbol_units("F"))  # ..-.
 
     def test_hex_zero_byte_has_exact_morse_cost(self):
         # "00": each zero is ----- = 19 units; character gap = 3.
