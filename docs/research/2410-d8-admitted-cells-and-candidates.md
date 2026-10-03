@@ -211,14 +211,45 @@ inhabitants, **not** occupancy out of 256.
 
 ### Executed factoring tests, including the strongest candidates
 
-Verbal judgment is not evidence, so three parents have executable witnesses. Two
-were chosen because they are the *most likely* to pass, not the least.
+Verbal judgment is not evidence, so four parents have executable witnesses. The
+first three were chosen because they are the *most likely* to pass, not the least.
 
 | Parent | Witness | Verdict |
 |---|---|---|
 | `010010` INTEGERP | `research-2934-d8-integerp-factoring.py` | refuted |
-| `001101` WHILE | `research-2934-d8-while-factoring.py` | refuted |
+| `001011` WHILE | `research-2934-d8-while-factoring.py` | refuted |
 | `000101` LEXPR | `research-2934-d8-lexpr-factoring.py` | refuted |
+| `000000` REPL | `research-2934-d8-repl-factoring.py` | refuted |
+
+`READ`/`PRINT`/`COMPILE`/`COMPILE-FILE` is the most promising row on the board:
+two genuinely orthogonal axes, direction and extent, and it still fails. `READ`
+and `COMPILE` occupy the *same* corner — both consume one datum — so neither
+refinement is injective. `COMPILE` differs by producing executable code rather
+than data, which is not the direction axis at all.
+
+```text
+toward-output image : [(F,F), (F,T)]      # 2 of 4
+toward-stream image : [(T,T), (F,T)]      # 2 of 4
+```
+
+### Scaling the screen: parent triage
+
+Four hand-written witnesses do not cover 48 parents, so
+`research-2934-d8-parent-triage.py` screens every row using only mechanical
+disqualifiers: wrong name count, hyphen-stem synonyms (`COPY-STRUCTURE` /
+`COPY-ARRAY` are one concept twice), polarity twins (`INCF`/`DECF`), and
+construction-level category drift (`FFI-CALL` under `CURRY`).
+
+Current screen:
+
+```text
+PLAUSIBLE=36 IMPAIRED=12 TOTAL=48
+```
+
+The 12 impaired rows are *cheaply* disqualified and do not each need a witness.
+The 36 plausible rows are the remaining work. The triage is a filter, not an
+admission: a plausible row is a row whose failure is not yet visible, not a row
+that passed.
 
 `FLOOR/CEILING/TRUNCATE/ROUND` is the canonical illusion of a 2×2 product: two
 rounding "axes" that look orthogonal. The decisive test is that neither
