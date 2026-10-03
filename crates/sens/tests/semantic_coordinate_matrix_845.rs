@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-use sens::{parse, Expr, ExprKind, Sens8};
+use sens::{parse, Expr, ExprKind};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -40,7 +40,7 @@ fn field_string<'a>(fields: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
-fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sens8>) {
+fn matrix_sources_and_scope() -> (String, String, String, String, Vec<u8>) {
     let source = read("contracts/semantic-coordinate-matrix-845.lisp");
     let forms = parse(&source).expect("#845 matrix v2 must parse");
     assert_eq!(forms.len(), 1);
@@ -88,8 +88,10 @@ fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sens8>) {
                 items[1..]
                     .iter()
                     .map(|expr| match &expr.kind {
-                        ExprKind::Sid(sid) => *sid,
-                        other => panic!("scope SID must be exact bare Sens8, got {other:?}"),
+                        ExprKind::Sid(identity) => identity
+                            .legacy8_bits()
+                            .expect("scope entry must be historical exact-8 identity"),
+                        other => panic!("scope SID must be exact bare legacy-8, got {other:?}"),
                     })
                     .collect::<Vec<_>>(),
             )
@@ -103,7 +105,7 @@ fn matrix_sources_and_scope() -> (String, String, String, String, Vec<Sens8>) {
 /// `semantic-coordinate-law-axis-v1`. A structural check: since the fixture
 /// is written in SENS codes, its own `(00001000 ...)` lambdas must not count
 /// as a lambda row.
-fn law_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
+fn law_axis_has_row(source: &str, wanted_sid: u8) -> bool {
     let exprs = parse(source).expect("law axis must parse");
     exprs.iter().any(|expr| {
         let ExprKind::List(definition) = &expr.kind else {
@@ -124,18 +126,18 @@ fn law_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
         };
         rows.iter().any(|row| match &row.kind {
             ExprKind::List(items) => {
-                matches!(items.first().map(|e| &e.kind), Some(ExprKind::Sid(sid)) if *sid == wanted_sid)
+                matches!(items.first().map(|e| &e.kind), Some(ExprKind::Sid(identity)) if identity.legacy8_bits() == Some(wanted_sid))
             }
             _ => false,
         })
     })
 }
 
-fn source_has_bare_sid(source: &str, sid: Sens8) -> bool {
-    source.contains(&format!("({sid}"))
+fn source_has_bare_sid(source: &str, sid: u8) -> bool {
+    source.contains(&format!("({sid:08b}"))
 }
 
-fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
+fn machine_axis_has_row(source: &str, wanted_sid: u8) -> bool {
     let exprs = parse(source).expect("machine capability axis must parse");
 
     exprs.iter().any(|expr| {
@@ -149,7 +151,7 @@ fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
         else {
             return false;
         };
-        if *define_sid != sens::sens!(00001001) {
+        if define_sid.legacy8_bits() != Some(0b0000_1001) {
             return false;
         }
         if !matches!(
@@ -167,7 +169,8 @@ fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
         };
         if !matches!(
             quote_form.first().map(|expr| &expr.kind),
-            Some(ExprKind::Sid(sid)) if *sid == sens::sens!(00000001)
+            Some(ExprKind::Sid(identity))
+                if identity.legacy8_bits() == Some(0b0000_0001)
         ) {
             return false;
         }
@@ -184,13 +187,13 @@ fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
             };
             matches!(
                 fields.first().map(|expr| &expr.kind),
-                Some(ExprKind::Sid(sid)) if *sid == wanted_sid
+                Some(ExprKind::Sid(identity)) if identity.legacy8_bits() == Some(wanted_sid)
             )
         })
     })
 }
 
-fn kernel_map_has_sid(source: &str, wanted_sid: Sens8) -> bool {
+fn kernel_map_has_sid(source: &str, wanted_sid: u8) -> bool {
     let exprs = parse(source).expect("kernel witness contract must parse");
     let ExprKind::List(items) = &exprs[0].kind else {
         panic!("kernel witness map must be a list");
@@ -212,7 +215,7 @@ fn kernel_map_has_sid(source: &str, wanted_sid: Sens8) -> bool {
                 return false;
             };
             matches!(&key.kind, ExprKind::Symbol(symbol) if &**symbol == "sid")
-                && matches!(&value.kind, ExprKind::Sid(sid) if *sid == wanted_sid)
+                && matches!(&value.kind, ExprKind::Sid(identity) if identity.legacy8_bits() == Some(wanted_sid))
         })
     })
 }
@@ -232,7 +235,7 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
 
     for sid in &scope {
         assert!(
-            identity.contains(&format!("({sid} ")),
+            identity.contains(&format!("({sid:08b} ")),
             "SID {sid} must exist in canonical semantic registry"
         );
 
@@ -252,24 +255,24 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
     // EQ remains a scoped semantic identity, but its retired relation-law row
     // is intentionally absent. Missing axis evidence must stay explicit rather
     // than recreating identity-relation authority.
-    assert!(!law_axis_has_row(&math, sens::sens!(00000011)));
+    assert!(!law_axis_has_row(&math, 0b0000_0011));
     for sid in [
-        sens::sens!(00001100),
-        sens::sens!(00000100),
-        sens::sens!(00000101),
-        sens::sens!(00000111),
+        0b0000_1100,
+        0b0000_0100,
+        0b0000_0101,
+        0b0000_0111,
     ] {
         assert!(law_axis_has_row(&math, sid), "math axis missing {sid}");
     }
 
     // Kernel evidence is intentionally asymmetric: + currently has no
     // sid-witness row, while eq/cons/car/cond do.
-    assert!(!kernel_map_has_sid(&kernel, sens::sens!(00001100)));
+    assert!(!kernel_map_has_sid(&kernel, 0b0000_1100));
     for sid in [
-        sens::sens!(00000011),
-        sens::sens!(00000100),
-        sens::sens!(00000101),
-        sens::sens!(00000111),
+        0b0000_0011,
+        0b0000_0100,
+        0b0000_0101,
+        0b0000_0111,
     ] {
         assert!(kernel_map_has_sid(&kernel, sid), "kernel axis missing {sid}");
     }
@@ -284,14 +287,14 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
     let (identity_path, math_path, kernel_path, machine_path, _) =
         matrix_sources_and_scope();
 
-    const LAMBDA_SID: Sens8 = sens::sens!(00001000);
+    const LAMBDA_SID: u8 = 0b0000_1000;
 
     let identity = read(&identity_path);
     let math = read(&math_path);
     let kernel = read(&kernel_path);
     let machine = read(&machine_path);
 
-    assert!(identity.contains(&format!("({LAMBDA_SID} ")));
+    assert!(identity.contains(&format!("({LAMBDA_SID:08b} ")));
     assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
     assert!(!law_axis_has_row(&math, LAMBDA_SID));
     assert!(!machine_axis_has_row(&machine, LAMBDA_SID));
