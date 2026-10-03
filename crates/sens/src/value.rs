@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sens8, Text7};
+use crate::{CallableDomainId, Environment, Exactness, Expr, Sens8, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -501,7 +501,10 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sens8),
+    /// Canonical callable identity: exact binary word in its semantic domain.
+    Sid(CallableDomainId),
+    /// Compatibility-only historical exact-eight identity.
+    LegacySid(Sens8),
     String(Rc<str>),
     /// Canonical SENS text: an exact UPC-7 cell stream. Never a human
     /// spelling, never Unicode/UTF-8, never a selected layout. Human layout
@@ -576,6 +579,7 @@ impl PartialEq for Value {
             }
             (Value::Rational(left), Value::Rational(right)) => left == right,
             (Value::Sid(left), Value::Sid(right)) => left == right,
+            (Value::LegacySid(left), Value::LegacySid(right)) => left == right,
             (Value::String(left), Value::String(right)) => left == right,
             (Value::Symbol(left), Value::Symbol(right)) => left == right,
             (Value::Pair(left_head, left_tail), Value::Pair(right_head, right_tail)) => {
@@ -803,7 +807,8 @@ fn render(value: &Value, quote_strings: bool) -> String {
             }
         }
         Value::Rational(number) => number.to_string(),
-        Value::Sid(sid) => sid.to_string(),
+        Value::Sid(identity) => identity.to_string(),
+        Value::LegacySid(sid) => sid.to_string(),
         Value::String(text) => {
             if quote_strings {
                 let mut escaped = String::with_capacity(text.len() + 2);
