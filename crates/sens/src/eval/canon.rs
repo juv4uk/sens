@@ -298,6 +298,10 @@ pub(crate) fn invoke_domain_identity(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    if let Some(result) = super::d5_arithmetic::invoke(identity, args, environment, span) {
+        return result;
+    }
+
     if let Some(primitive) = domain_primitive(identity) {
         return primitive(args, environment, span);
     }
