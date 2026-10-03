@@ -1,51 +1,238 @@
 # CURRENT — where the truth actually lives
 
-Українською: це єдина точка входу для «що зараз чинне». Якщо будь-який інший документ, включно з архівом, застарілим планом чи старим рев'ю, суперечить джерелам нижче — **чинні джерела нижче перемагають**. `docs/archive/**` зберігає історію, але не є специфікацією.
+**Оновлено:** 2026-10-03
 
-This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosystem/issues/5): **one active truth, many preserved histories**. Read this first. Historical material may explain how SENS arrived here, but it cannot override current contract and executable evidence.
+Це точка входу для питання **«що зараз чинне?»**. Якщо інший документ,
+старий план, historical report або archived PoC суперечить джерелам нижче,
+чинніші джерела перемагають.
 
-## Authority order (highest wins)
+Коротка карта нової архітектури:
+[`docs/current-binary-domain-architecture.md`](docs/current-binary-domain-architecture.md).
 
-1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current ratified observable language contract.
-   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — source/UI routing metadata from admitted human spellings to exact eight-bit SENS functions. A spelling is not a function identity and does not own meaning.
-   - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS has exactly 256 functions: `00000000..11111111`. The concrete empty list `()` is a structural value outside that function space.
-2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
-3. **Reference implementation and substrates**
-   - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
-   - Independent substrates such as C, WASM, FPGA, GraalVM, Common Lisp, Prolog, Datalog, and CLIPS may execute or observe admitted behavior without becoming semantic authority.
-4. **Active plans and standing doctrine** — [`AGENTS.md`](AGENTS.md), [`docs/agent-doctrine.md`](docs/agent-doctrine.md), [`PLAN.md`](PLAN.md), [`STATUS.md`](STATUS.md), [`ecosystem-status.md`](ecosystem-status.md), and the currently active scoped plans they reference.
-5. **Tests and evidence** — `cargo test --workspace`, `--oracle-check`, focused witnesses, and CI prove what the implementation currently satisfies. A claim without executable or source evidence is a hypothesis, not a fact.
+## 1. Поточна онтологія
 
-## Current identity rule
-
-The language is **sens / СЕНС**.
+Owner paradigm #2490:
 
 ```text
-00000000
-...
-11111111
+semantic object
+=
+binary number
++ exact semantic domain
++ proved/admitted law
 ```
 
-Those exact eight-bit forms are the 256 SENS functions. There is no parallel named-function identity layer. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings are source/UI routes only.
+Тобто:
 
-`()` is not function `00000000`, function `11111111`, or any other member of the 256-function space. It is a separate structural value.
+```text
+bits + domain + law -> meaning
+```
 
-Historical McCarthy names remain useful when discussing the 1960 evaluator, Core1, migration evidence, or provenance. They are not the current ontology of SENS.
+Наслідки:
 
-## What is explicitly NOT authoritative
+- однакові біти не гарантують однакової семантики;
+- однакова width не є semantic domain;
+- однакова machine transform не є автоматично одним semantic law;
+- free coordinate не є function/resident;
+- людська назва, opcode, registry row, AST, JSON, hash або cache не стають
+  canonical identity лише через реалізацію.
 
-- **`docs/archive/**`** — preserved superseded designs, completed plans, research spikes, historical audits, and reactions.
-- Any dated report or PoC not explicitly promoted into the current authority chain.
-- A host implementation detail merely because it is implemented in Rust, C, Java, Common Lisp, Prolog, Datalog, CLIPS, or another executor.
-- A peer agent's report that something is fixed without a verifiable commit/test/CI witness.
-- A human surface spelling as a substitute for the exact eight-bit SENS function it routes to.
+Standing negative control: #2508/#2509.
+Bounded positive convergence control: #2495/#2502.
 
-## For a new agent starting cold
+## 2. Authority order
 
-1. Read `AGENTS.md` and `docs/agent-doctrine.md`.
-2. Read `language-contract.lisp` and this file before trusting older design prose.
-3. Read `lib/surface/semantic-registry.lisp` only as routing metadata; do not infer function meaning from a spelling.
-4. Inspect `crates/sens` for the current Rust reference mechanism and the relevant executable witnesses for the behavior being changed.
-5. Run the focused tests for your slice and then the applicable repository gates before claiming the change works.
+Не всі типи тверджень мають одного власника. Поточна практична ієрархія:
+
+1. **Owner-ratified/current decisions для відповідного scope**
+   - #2490 — binary-domain ontology;
+   - #2533 — historical-first phase order;
+   - #2414 — D5/D6 width/domain ratification;
+   - #2415 — D7 role/domain ratification;
+   - інші явно ratified/owner decisions у відповідному домені.
+2. **Machine-readable language/runtime authority**
+   - [`language-contract.lisp`](language-contract.lisp) — current observable
+     runtime/language contract для охопленого ним scope;
+   - ratified machine-readable laws/guards;
+   - admitted executable conformance fixtures.
+3. **Executable witnesses and falsifiers**
+   - focused research harnesses;
+   - CI gates;
+   - cross-implementation parity;
+   - counterexamples.
+4. **Reference mechanisms**
+   - [`crates/sens`](crates/sens);
+   - independent Rust/C/WASM/FPGA/other implementations.
+5. **Generated reference and explanatory docs**
+   - generated maps/tables;
+   - README, CURRENT, architecture docs.
+6. **Historical/process material**
+   - `docs/archive/**`;
+   - dated research records;
+   - superseded plans/notes.
+
+Якщо owner decision ще не перенесений у machine-readable contract, це не
+означає, що старіша проза має право його скасувати. Це означає, що є
+**migration debt**, яку треба назвати явно.
+
+## 3. Core зараз
+
+Core — реконструкція/продовження лінії:
+
+```text
+Lisp I -> Lisp 1.5 -> SENS
+```
+
+Поточний порядок дослідження (#2533):
+
+```text
+HISTORICAL-INGEST
+        ↓
+STRUCTURAL-DISCOVERY
+        ↓
+SENS-DERIVATION
+```
+
+Тому:
+
+```text
+historically present != fundamental in SENS
+derivable in SENS     != absent from history
+```
+
+### Ratified domain status
+
+- **D1** — ratified PredicateBit.
+- **D2** — ratified `racanā2` structure.
+- **D3/D4** — ratified current Core foundation.
+- **D5/D6** — ratified **domain widths/ontology**, але historical occupancy і
+  final SENS maps ще не вважаються завершеними.
+- **D7** — ratified Sound7 + local śloka/sūtra ordinals; не general Number.
+- **D14** — research: full Pāṇini grammar graph.
+- **D24/D48/...** — research: exact Number / FPGA-oriented numeric domains.
+
+D6 PURE-UNKNOWN coordinates лишаються UNKNOWN, поки independent law не
+заробить placement. Вільний слот, chronology або numeric proximity не є
+доказом.
+
+Parentless semantic root теж не отримує width автоматично. #2662/#2667/#2669
+досліджують exact domain admission для residue/root cases.
+
+## 4. Core-Math зараз
+
+Core-Math — окрема mathematical language/research line.
+
+Мінімальна модель:
+
+```text
+binary input(s)
++ admitted mathematical law
+-> binary output
+```
+
+#2485/#2491 — bounded minimal binary executor.
+#2494/#2500 — exact-Q group factor law.
+#2460 та наступні experiments — evidence про law-generated operations.
+
+Core-Math не успадковує Core placement, Lisp vocabulary або Core domain
+membership автоматично.
+
+## 5. Core ↔ Core-Math
+
+Три допустимі результати:
+
+```text
+DIVERGENT
+COMPLEMENTARY
+CONVERGENT
+```
+
+Convergence вимагає незалежного збігу:
+
+```text
+same binary object
++ same exact domain
++ same semantics
++ same law
++ cross-proof
+```
+
+#2502 — bounded selector convergence.
+#2509 — negative control: same `2*x+b` mechanism у selector і Q-group domains
+не зливає semantic laws.
+
+## 6. Domain != carrier != mechanism
+
+#2540:
+
+```text
+domain     = law-bearing semantic context
+carrier    = exact bit/width representation
+mechanism  = execution/transport substrate
+```
+
+Приклади:
+
+```text
+D7.SoundCell [carrier=W7]       # semantic domain
+D7.LocalOrdinal [carrier=W7]    # distinct semantic context
+W7                              # carrier only
+FPGA / Rust / radio             # mechanism only
+```
+
+## 7. Research task grammar
+
+Для governed Core/Core-Math research:
+
+```text
+PHASE
+DOMAIN
+BINARY OBJECT
+LAW
+WITNESS
+FALSIFIER
+STATUS
+RELATION
+```
+
+Allowed phase values:
+
+```text
+HISTORICAL-INGEST
+STRUCTURAL-DISCOVERY
+SENS-DERIVATION
+```
+
+Explicit UNKNOWN/UNRESOLVED є валідним станом. Decorative completeness — ні.
+
+## 8. What is explicitly NOT authoritative
+
+- `docs/archive/**`;
+- human names as machine identity;
+- free-space placement;
+- benchmark speed as semantic proof;
+- host/runtime implementation detail;
+- hash/AST/JSON/cache/registry merely because tooling uses them;
+- RF frequency/modulation as semantic identity;
+- a peer-agent statement without reproducible evidence.
+
+## 9. For a new agent starting cold
+
+1. Read [`AGENTS.md`](AGENTS.md).
+2. Read this file.
+3. Read
+   [`docs/current-binary-domain-architecture.md`](docs/current-binary-domain-architecture.md).
+4. Read [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
+5. For Core work, identify PHASE first.
+6. For every semantic claim, name DOMAIN + BINARY OBJECT + LAW.
+7. Find the strongest WITNESS and FALSIFIER before changing placement.
+8. Treat UNKNOWN as a legitimate result.
+9. Run the focused CI gate before claiming a result.
+
+## 10. Historical note
+
+Earlier repository states used flat SID8/Function8 and multiple Core profiles.
+Those records remain useful provenance and compatibility evidence, but they are
+not the current ontology.
+
+The canonical source extension remains **`.lisp`**. File extension is not
+semantic identity.
