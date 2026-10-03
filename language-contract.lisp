@@ -48,8 +48,12 @@
        . "Core.D4 is the exact four-bit bootstrap domain ratified by #2169. Its resident coordinates execute only under D4 law; 0101 and 1001 remain unallocated. No historical Function8 identity may be reconstructed from a D4 word by bit-shape coincidence.")
       (d5-d6-residency
        . "Core.D5 and Core.D6 use exact five-bit and six-bit typed domains governed by their owner-ratified maps/laws. Residency, derivability, callability and runtime implementation are distinct facts: carrier existence alone grants neither occupancy nor callability.")
+      (d7-sound-local-ordinal
+       . "Core.D7 is the exact seven-bit Sound7 / Sanskrit sound-related domain with local sloka/sutra ordinal coordinates where admitted. D7 is not general arithmetic Number, and seven-bit width never grants selector geometry or callable Core-operation identity. Occupancy remains law/witness-specific.")
+      (d8-exact-core-domain
+       . "Core.D8 is the ratified exact eight-bit Core domain. Core.D8 identity is domain-qualified and is never historical Sens8/Sid8/Function8 merely because both use eight physical bits. D8 occupancy and callability remain separately law/witness-governed; admitted selector descendants may execute from the selector root+suffix law without legacy-byte authority.")
       (cross-domain-non-collapse
-       . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, later Core domains or Core-Math domains without semantic equality. Cross-domain reuse requires an explicit independently proved bridge law.")
+       . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, D7, D8 or Core-Math domains without semantic equality. Cross-domain reuse requires an explicit independently proved bridge law.")
       (atom-one-bit-core1-4
        . "Core.D3 010 ATOM has one law across Core1/Core2/Core3/Core4: structural empty () and every admitted non-pair value answer PredicateBit 1; pair answers PredicateBit 0. Structural () is an ATOM-yes subject, not a truth value. Historical Function8 00000010 is compatibility projection only.")
       (eq-one-bit-core1-4
@@ -57,7 +61,7 @@
       (cond-two-part-core1-4
        . "Core.D3 011 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and must return exact PredicateBit. PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips it. If no clause selects, COND returns structural (). Structural () is not a predicate answer. Historical Function8 00000111 is compatibility projection only.")
       (core-profile-law
-       . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D6 semantic domains or the D1/D3 predicate-control foundation.")
+       . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D8 semantic domains or the D1/D3 predicate-control foundation.")
       (kernel-archipelago
        . "Execution kernels may own native mechanisms and observations. They consume an already-selected domain-qualified semantic object or an explicitly compatibility-tagged legacy projection plus arguments/context. Kernel names, opcodes, packed bytes and native types never acquire SENS semantic identity by themselves.")
       (reader-apostrophe
