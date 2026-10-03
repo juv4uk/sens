@@ -99,15 +99,15 @@
 
 (00001001 second
   (00001000 (values)
-    (101 (110 values))))
+    (00000101 (00000110 values))))
 
 (00001001 third
   (00001000 (values)
-    (101 (110 (110 values)))))
+    (00000101 (00000110 (00000110 values)))))
 
 (00001001 fourth
   (00001000 (values)
-    (101 (110 (110 (110 values))))))
+    (00000101 (00000110 (00000110 (00000110 values))))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -133,7 +133,7 @@
 ; сама операція, виписана вручну замість названа.
 (00001001 fifth
   (00001000 (values)
-    (101 (110 (110 (110 (110 values)))))))
+    (00000101 (00000110 (00000110 (00000110 (00000110 values)))))))
 
 ; CAAR/CADR/CDAR/CDDR are ratified D4 selector identities.
 ; They are generated/executed from the CAR/CDR selector law and therefore
