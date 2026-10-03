@@ -34,12 +34,7 @@ GO                 DERIVED-D1-D4
 RETURN             NEW-OBSERVABLE-CAPABILITY
 
 FEXPR/FSUBR        RAW+ENV-TWO-CAPABILITIES
-```
-
-Active:
-
-```text
-TRANSFORMER / later macro staging -> #2557
+TRANSFORMER         FORM-TRANSFORMER-PROTOCOL
 ```
 
 ## Phase-D nuance
@@ -81,6 +76,23 @@ result re-eval      = 1
 
 The shared raw-operand axis does not collapse the protocols into one capability.
 
+## Phase-F protocol
+
+Hart, AI Memo 57 (October 1963), historically introduces MACRO as an expander
+integrated with DEFINE:
+
+```text
+Hart MACRO
+raw form            = 1
+explicit caller env = 0
+result re-eval      = 1
+```
+
+The macro function receives the whole form as one argument and its result replaces
+the original form during DEFINE expansion. This is protocol-aligned with current
+SENS TRANSFORMER on the three tracked axes, but it does not prove mechanism identity.
+Evidence: `docs/research/2557-hart-macro-protocol.md`.
+
 ## Placement boundary
 
 Every row in this ingest ledger keeps:
@@ -102,13 +114,16 @@ It does not terminate the historical inventory.
 
 ## Gate
 
-While #2557 is active:
+After Phase F closes:
 
 ```text
-historical-ingest-complete = no
-structural-discovery-may-start = no
+historical-ingest-complete = yes
+structural-discovery-may-start = yes
 placement-search-may-start = no
 ```
+
+Placement remains blocked on structural discovery: complete chronology permits law
+discovery, but does not itself allocate any new D5/D6 coordinate.
 
 ## Principle
 
