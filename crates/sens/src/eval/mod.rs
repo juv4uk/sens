@@ -10,6 +10,7 @@
 pub(crate) use special_forms::digest::sha256 as digest_sha256;
 
 mod arithmetic;
+mod d5_arithmetic;
 pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
@@ -18,6 +19,7 @@ pub(crate) mod lower;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
 mod profile_mechanisms_generated;
+mod selector_law;
 mod special_forms;
 
 pub use capabilities::{
@@ -236,7 +238,7 @@ fn dispatch_domain_call(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     if is_d3(identity, 0b001) {
-        special_forms::exact_arity("quote", arguments, 1, span)?;
+        special_forms::exact_arity("D3:001", arguments, 1, span)?;
         return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
     }
 

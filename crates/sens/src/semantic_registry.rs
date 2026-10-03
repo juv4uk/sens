@@ -23,7 +23,7 @@ use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
 
-pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
+pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
     let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
     match byte {
@@ -36,12 +36,19 @@ pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainI
         0b0000_0011 => Some(d3(0b111)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        // Existing selector surfaces project explicitly to their ratified D4
+        // identities. This is semantic-role mapping, never byte truncation.
+        0b0011_0011 => Some(d4(0b1010)), // CAAR
+        0b0011_0100 => Some(d4(0b1011)), // CADR
+        0b0011_0101 => Some(d4(0b1101)), // CDDR
         _ => None,
     }
 }
 
+/// Transitional canonical lookup. #2947 removes this legacy-byte detour and
+/// replaces it with the exact-domain surface registry.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(domain_identity_from_registry_byte)
+    registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
 }
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
@@ -178,6 +185,16 @@ mod tests {
     }
 
     #[test]
+    fn existing_selector_surfaces_project_to_ratified_d4() {
+        for (surface, bits) in [("перше-від-першого", 0b1010), ("перше-від-решти", 0b1011), ("решта-від-решти", 0b1101)] {
+            let identity = domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("selector surface must project: {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (4, bits));
+        }
+        assert_eq!(domain_identity_for_surface("cdar"), None);
+    }
+
+    #[test]
     fn unmigrated_registry_rows_have_no_fake_domain_identity() {
         assert_eq!(domain_identity_for_surface("+"), None);
     }
@@ -185,11 +202,11 @@ mod tests {
     #[test]
     fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
         assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(domain_identity_from_registry_byte),
+            registry_byte_for_surface("за-умовою").and_then(legacy_domain_identity_from_registry_byte),
             domain_identity_for_surface("за-умовою")
         );
         assert_eq!(
-            registry_byte_for_surface("функція").and_then(domain_identity_from_registry_byte),
+            registry_byte_for_surface("функція").and_then(legacy_domain_identity_from_registry_byte),
             domain_identity_for_surface("функція")
         );
     }

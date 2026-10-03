@@ -206,9 +206,8 @@ mod tests {
 
     #[test]
     fn necessary_forms_lower_to_exact_d4_calls() {
-        assert_domain_call("(lambda (x) x)", 4, 0b0010);
-        assert_domain_call("(define x 1)", 4, 0b0011);
-        assert_domain_call("(def x 1)", 4, 0b0011);
+        assert_domain_call("(функція (x) x)", 4, 0b0010);
+        assert_domain_call("(визначити x 1)", 4, 0b0011);
     }
 
     #[test]

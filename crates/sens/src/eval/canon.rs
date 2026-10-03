@@ -282,9 +282,9 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
         0b010 => Some(prim_00000010), // ATOM
         0b111 => Some(prim_00000011), // EQ
         0b100 => Some(prim_00000100), // CONS
-        0b101 => Some(prim_00000101), // CAR
-        0b110 => Some(prim_00000110), // CDR
-        _ => None, // QUOTE/COND are syntax routes, 000 is unallocated here
+        // CAR/CDR and all proven descendants are executed by selector_law.
+        0b101 | 0b110 => None,
+        _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
     }
 }
 
@@ -298,6 +298,14 @@ pub(crate) fn invoke_domain_identity(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    if let Some(result) = super::selector_law::invoke(identity, args, span) {
+        return result;
+    }
+
+    if let Some(result) = super::d5_arithmetic::invoke(identity, args, environment, span) {
+        return result;
+    }
+
     if let Some(primitive) = domain_primitive(identity) {
         return primitive(args, environment, span);
     }
@@ -337,6 +345,18 @@ pub(crate) fn invoke_semantic_ref(
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
+    }
+
+    // Explicit compatibility adapter: once a historical byte has a proven
+    // exact-domain successor, the old spelling delegates to that one
+    // canonical mechanism. We do not dual-bind the language definition into
+    // both legacy and domain slots.
+    if let Some(identity) =
+        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+    {
+        if environment.domain_code_slot(identity).is_some() || domain_primitive(identity).is_some() {
+            return invoke_domain_identity(identity, args, environment, span);
+        }
     }
 
     if let Some(profile) = environment.selected_core_profile() {
@@ -416,8 +436,8 @@ mod tests {
         assert!(domain_primitive(d3(0b010)).is_some()); // ATOM
         assert!(domain_primitive(d3(0b111)).is_some()); // EQ
         assert!(domain_primitive(d3(0b100)).is_some()); // CONS
-        assert!(domain_primitive(d3(0b101)).is_some()); // CAR
-        assert!(domain_primitive(d3(0b110)).is_some()); // CDR
+        assert!(domain_primitive(d3(0b101)).is_none()); // CAR -> selector law
+        assert!(domain_primitive(d3(0b110)).is_none()); // CDR -> selector law
         assert!(domain_primitive(d3(0b001)).is_none()); // QUOTE syntax
         assert!(domain_primitive(d3(0b011)).is_none()); // COND syntax
 
