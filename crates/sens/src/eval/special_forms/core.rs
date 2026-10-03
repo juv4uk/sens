@@ -214,7 +214,7 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
         Ok(match &expression.kind {
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
-            ExprKind::Sid(sid) => Value::Sid(*sid),
+            ExprKind::Sid(sid) => Value::legacy_sid(*sid),
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
             ExprKind::Symbol(symbol) => Value::Symbol(symbol.clone()),
@@ -240,7 +240,7 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             // Зведений виклик як дані — список із функцією СЕНС у голові.
             ExprKind::Call(sid, arguments) => {
                 let mut out = Vec::with_capacity(arguments.len() + 1);
-                out.push(Value::Sid(*sid));
+                out.push(Value::legacy_sid(*sid));
                 for argument in arguments.iter() {
                     out.push(go(argument, depth + 1)?);
                 }
