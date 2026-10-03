@@ -94,7 +94,12 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::Sid(identity) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("domain-qualified callable dispatch is not admitted yet: {identity}"),
+            span,
+        )),
+        Value::LegacySid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -136,7 +141,8 @@ pub(crate) fn evaluate_step(
     match &expression.kind {
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
-        ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
+        ExprKind::Sid(identity) => Ok(EvalStep::Value(Value::Sid(*identity))),
+        ExprKind::LegacySid(sid) => Ok(EvalStep::Value(Value::LegacySid(*sid))),
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
@@ -168,7 +174,12 @@ pub(crate) fn evaluate_step(
         // Empty structure is a structural value, not any function SID.
         ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
         ExprKind::List(items) => evaluate_list(items, environment, expression.span),
-        ExprKind::Call(sid, arguments) => {
+        ExprKind::Call(identity, _arguments) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("domain-qualified call dispatch is not admitted yet: {identity}"),
+            expression.span,
+        )),
+        ExprKind::LegacyCall(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
         // Виконання залежить лише від числових координат (#1697): слот або є,
@@ -248,14 +259,14 @@ fn dispatch_call(
         }
     }
     let function = match head_sid {
-        Some(sid) => Value::Sid(sid),
+        Some(sid) => Value::LegacySid(sid),
         None => evaluate(
             head_expr.expect("a call without a SID head keeps its head expression"),
             environment,
         )?,
     };
     match &function {
-        Value::Sid(sid) => {
+        Value::LegacySid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
             if !canon::has_primitive(*sid) {
                 match &environment.code_slot(*sid) {
@@ -293,11 +304,10 @@ fn dispatch_call(
     }
 }
 
-/// A fixed-width binary token names a semantic identity only as a list head.
-/// The same SID remains `Value::Sid` when it occurs as data or under
-/// QUOTE, so a source file can carry bit data without making it executable.
+/// Compatibility-only exact-eight token routing.
+/// Canonical domain-qualified identity never enters the old Sens8 dispatcher.
 fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
-    let ExprKind::Sid(sid) = expression.kind else {
+    let ExprKind::LegacySid(sid) = expression.kind else {
         return None;
     };
     Some(sid)
