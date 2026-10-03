@@ -5,7 +5,7 @@ fn function_without_admitted_callable_mechanism_fails_closed_when_invoked() {
     let mut session = Session::default();
     session
         .environment
-        .define("mystery-semantic", Value::Sid(sens::sens!(11111111)));
+        .define("mystery-semantic", Value::legacy_sid(sens::sens!(11111111)));
 
     let error = eval_program("(mystery-semantic)", &mut session)
         .expect_err("a function without a callable mechanism must fail closed");
