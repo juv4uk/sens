@@ -1,0 +1,39 @@
+name: D6 non-prefix falsifier research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-nonprefix-falsifier/**"
+      - ".github/workflows/d6-nonprefix-falsifier.yml"
+      - "scripts/research-2506-d6-binding-policy-generator.py"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-nonprefix-falsifier/**"
+      - ".github/workflows/d6-nonprefix-falsifier.yml"
+  workflow_dispatch:
+
+jobs:
+  representation-tournament:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Re-check D6 product donor
+        run: python3 scripts/research-2506-d6-binding-policy-generator.py
+      - name: Run non-prefix representation tournament
+        run: |
+          rm -rf /tmp/d6-nonprefix-falsifier
+          python3 benchmarks/d6-nonprefix-falsifier/run.py             --out /tmp/d6-nonprefix-falsifier
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d6-nonprefix-falsifier/report.md; then
+            cat /tmp/d6-nonprefix-falsifier/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-nonprefix-falsifier
+          path: /tmp/d6-nonprefix-falsifier/
+          retention-days: 14
