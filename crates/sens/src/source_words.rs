@@ -113,6 +113,22 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+
+    /// Lift an already-width-qualified Core source word into canonical
+    /// domain identity without numeric inference or zero-padding.
+    ///
+    /// D1/D2 are outside Core identity, while D7/D8 do not gain Core identity
+    /// merely from width. Only W3..W6 are admitted.
+    pub const fn core_identity(self) -> Option<crate::CoreDomainIdentity> {
+        match self {
+            Self::W3(word) => Some(crate::CoreDomainIdentity::D3(crate::Bija3::from_word(word))),
+            Self::W4(word) => Some(crate::CoreDomainIdentity::D4(crate::CoreD4::from_word(word))),
+            Self::W5(word) => Some(crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(word))),
+            Self::W6(word) => Some(crate::CoreDomainIdentity::D6(crate::CoreD6::from_word(word))),
+            Self::W1(_) | Self::W2(_) | Self::W7(_) | Self::W8(_) => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
