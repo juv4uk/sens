@@ -46,6 +46,15 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0011_0011 => Some(d4(0b1010)), // CAAR
         0b0011_0100 => Some(d4(0b1011)), // CADR
         0b0011_0101 => Some(d4(0b1101)), // CDDR
+
+        // Compatibility-only bridges into the one exact D5 mechanism.
+        // The historical bytes do not own arithmetic meaning.
+        0b0000_1100 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01010).unwrap()))), // PLUS
+        0b0000_1101 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01011).unwrap()))), // DIFFERENCE
+        0b0001_1010 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01110).unwrap()))), // LESSP
+        0b0001_1011 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01111).unwrap()))), // GREATERP
+        0b0000_1110 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b10010).unwrap()))), // TIMES
+        0b0000_1111 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b10011).unwrap()))), // QUOTIENT
         _ => None,
     }
 }

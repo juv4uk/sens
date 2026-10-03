@@ -65,6 +65,15 @@ pub(crate) fn surface_has_sid(surface: &str, sid: Sens8) -> bool {
 /// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
 /// M8 (#1590): після lower admitted surface → SENS, біндинг `+` не змінює Call.
 pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageError> {
+    if let Some(identity) = semantic_registry::domain_identity_for_surface(surface) {
+        if domain_has_native_mechanism(identity) {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("surface routes to immutable exact domain identity: {surface} -> {identity}"),
+                span,
+            ));
+        }
+    }
     if let Some(sid) = routed_sid_for_surface(surface) {
         return Err(immutable_surface_error(surface, sid, span));
     }
@@ -117,60 +126,54 @@ fn exact_args(
 
 type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
-const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
-    let mut table: [Option<PrimitiveFn>; 256] = [None; 256];
-    table[crate::sens!(00000010).packed_byte() as usize] = Some(prim_00000010);
-    table[crate::sens!(00000011).packed_byte() as usize] = Some(prim_00000011);
-    table[crate::sens!(00000100).packed_byte() as usize] = Some(prim_00000100);
-    table[crate::sens!(00000101).packed_byte() as usize] = Some(prim_00000101);
-    table[crate::sens!(00000110).packed_byte() as usize] = Some(prim_00000110);
-    table[crate::sens!(00001100).packed_byte() as usize] = Some(prim_00001100);
-    table[crate::sens!(00001101).packed_byte() as usize] = Some(prim_00001101);
-    table[crate::sens!(00001110).packed_byte() as usize] = Some(prim_00001110);
-    table[crate::sens!(00001111).packed_byte() as usize] = Some(prim_00001111);
-    table[crate::sens!(00011010).packed_byte() as usize] = Some(prim_00011010);
-    table[crate::sens!(00011011).packed_byte() as usize] = Some(prim_00011011);
-    table[crate::sens!(00011100).packed_byte() as usize] = Some(prim_00011100);
-    table[crate::sens!(01001101).packed_byte() as usize] = Some(prim_01001101);
-    table[crate::sens!(00111011).packed_byte() as usize] = Some(builtins::prim_00111011); // string-length
-    table[crate::sens!(00111100).packed_byte() as usize] = Some(builtins::prim_00111100); // string-empty?
-    table[crate::sens!(00111101).packed_byte() as usize] = Some(builtins::prim_00111101); // string-prefix?
-    table[crate::sens!(00111110).packed_byte() as usize] = Some(builtins::prim_00111110); // string-contains?
-    table[crate::sens!(01010000).packed_byte() as usize] = Some(builtins::prim_01010000); // make-vector
-    table[crate::sens!(01001111).packed_byte() as usize] = Some(builtins::prim_01001111); // vector
-    table[crate::sens!(01011010).packed_byte() as usize] = Some(builtins::prim_01011010); // mono-ns
-    table[crate::sens!(01011011).packed_byte() as usize] = Some(builtins::prim_01011011); // unix-time-now
-    table[crate::sens!(01011100).packed_byte() as usize] = Some(builtins::prim_01011100); // ntp-query-raw
-    table[crate::sens!(01011101).packed_byte() as usize] = Some(builtins::prim_01011101); // timezone-declarations-raw
-    table[crate::sens!(01010001).packed_byte() as usize] = Some(builtins::prim_01010001); // vector-length
-    table[crate::sens!(01010010).packed_byte() as usize] = Some(builtins::prim_01010010); // vector-ref
-    table[crate::sens!(01010011).packed_byte() as usize] = Some(builtins::prim_01010011); // vector-set!
-    table[crate::sens!(01010100).packed_byte() as usize] = Some(builtins::prim_01010100); // i32-buffer
-    table[crate::sens!(01010101).packed_byte() as usize] = Some(builtins::prim_01010101); // f32-buffer
-    table[crate::sens!(01000001).packed_byte() as usize] = Some(builtins::prim_01000001); // string-slice
-    table[crate::sens!(00111010).packed_byte() as usize] = Some(builtins::prim_00111010); // string-append
-    table[crate::sens!(00100100).packed_byte() as usize] = Some(builtins::prim_00100100); // string?
-    table[crate::sens!(01000010).packed_byte() as usize] = Some(builtins::prim_01000010); // symbol->string
-    table[crate::sens!(01000011).packed_byte() as usize] = Some(builtins::prim_01000011); // string->symbol
-    table[crate::sens!(00111111).packed_byte() as usize] = Some(builtins::prim_00111111); // string-first
-    table[crate::sens!(01000000).packed_byte() as usize] = Some(builtins::prim_01000000); // string-rest
-    table[crate::sens!(01000100).packed_byte() as usize] = Some(builtins::prim_01000100); // codepoint->string
-    table[crate::sens!(01000101).packed_byte() as usize] = Some(builtins::prim_01000101); // string->codepoint
-    table[crate::sens!(10100001).packed_byte() as usize] = Some(builtins::prim_10100001); // sha256-hex
-    table[crate::sens!(10100000).packed_byte() as usize] = Some(builtins::prim_10100000); // json-parse
-    table[crate::sens!(01001000).packed_byte() as usize] = Some(builtins::prim_01001000); // print
-    table[crate::sens!(01001001).packed_byte() as usize] = Some(builtins::prim_01001001); // princ
-    table[crate::sens!(01001100).packed_byte() as usize] = Some(builtins::prim_01001100); // write-to-string
-    table[crate::sens!(01001010).packed_byte() as usize] = Some(builtins::prim_01001010); // read
-    table[crate::sens!(01001011).packed_byte() as usize] = Some(builtins::prim_01001011); // read-all
-    table[crate::sens!(00100110).packed_byte() as usize] = Some(builtins::prim_00100110); // numeric-buffer?
-    table[crate::sens!(01010110).packed_byte() as usize] = Some(builtins::prim_01010110); // numeric-buffer-type
-    table[crate::sens!(01010111).packed_byte() as usize] = Some(builtins::prim_01010111); // numeric-buffer-length
-    table[crate::sens!(01011000).packed_byte() as usize] = Some(builtins::prim_01011000); // numeric-buffer-ref
-    table[crate::sens!(01011001).packed_byte() as usize] = Some(builtins::prim_01011001); // numeric-buffer-map
-    table[crate::sens!(01001110).packed_byte() as usize] = Some(builtins::prim_01001110); // env
-    table
-};
+fn legacy_primitive(sid: Sens8) -> Option<PrimitiveFn> {
+    // Compatibility-only host mechanisms that have not yet moved into exact
+    // domain law. Migrated D3/D5 bytes are deliberately absent: their old
+    // spellings must flow through legacy_domain_identity_from_registry_byte()
+    // into the one canonical domain mechanism.
+    match sid.packed_byte() {
+        0b0001_1100 => Some(prim_00011100), // numeric =
+        0b0100_1101 => Some(prim_01001101), // eval
+        0b0011_1011 => Some(builtins::prim_00111011),
+        0b0011_1100 => Some(builtins::prim_00111100),
+        0b0011_1101 => Some(builtins::prim_00111101),
+        0b0011_1110 => Some(builtins::prim_00111110),
+        0b0101_0000 => Some(builtins::prim_01010000),
+        0b0100_1111 => Some(builtins::prim_01001111),
+        0b0101_1010 => Some(builtins::prim_01011010),
+        0b0101_1011 => Some(builtins::prim_01011011),
+        0b0101_1100 => Some(builtins::prim_01011100),
+        0b0101_1101 => Some(builtins::prim_01011101),
+        0b0101_0001 => Some(builtins::prim_01010001),
+        0b0101_0010 => Some(builtins::prim_01010010),
+        0b0101_0011 => Some(builtins::prim_01010011),
+        0b0101_0100 => Some(builtins::prim_01010100),
+        0b0101_0101 => Some(builtins::prim_01010101),
+        0b0100_0001 => Some(builtins::prim_01000001),
+        0b0011_1010 => Some(builtins::prim_00111010),
+        0b0010_0100 => Some(builtins::prim_00100100),
+        0b0100_0010 => Some(builtins::prim_01000010),
+        0b0100_0011 => Some(builtins::prim_01000011),
+        0b0011_1111 => Some(builtins::prim_00111111),
+        0b0100_0000 => Some(builtins::prim_01000000),
+        0b0100_0100 => Some(builtins::prim_01000100),
+        0b0100_0101 => Some(builtins::prim_01000101),
+        0b1010_0001 => Some(builtins::prim_10100001),
+        0b1010_0000 => Some(builtins::prim_10100000),
+        0b0100_1000 => Some(builtins::prim_01001000),
+        0b0100_1001 => Some(builtins::prim_01001001),
+        0b0100_1100 => Some(builtins::prim_01001100),
+        0b0100_1010 => Some(builtins::prim_01001010),
+        0b0100_1011 => Some(builtins::prim_01001011),
+        0b0010_0110 => Some(builtins::prim_00100110),
+        0b0101_0110 => Some(builtins::prim_01010110),
+        0b0101_0111 => Some(builtins::prim_01010111),
+        0b0101_1000 => Some(builtins::prim_01011000),
+        0b0101_1001 => Some(builtins::prim_01011001),
+        0b0100_1110 => Some(builtins::prim_01001110),
+        _ => None,
+    }
+}
 
 fn prim_00000010(
     args: &[Value],
@@ -217,50 +220,6 @@ fn prim_00000110(
     special_forms::cdr_value(&args[0], span)
 }
 
-fn prim_00001100(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
-    arithmetic::arithmetic_on_values("+", args, env, span)
-}
-
-fn prim_00001101(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
-    arithmetic::arithmetic_on_values("-", args, env, span)
-}
-
-fn prim_00001110(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    // Довільна арність — за контрактом tests/fixtures/conformance.lisp.
-    arithmetic::arithmetic_on_values("*", args, env, span)
-}
-
-fn prim_00001111(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    // Довільна арність: (/ 5 6 8 7) -> 5/336 (conformance.lisp).
-    arithmetic::division_on_values(args, args.len(), env, span)
-}
-
-fn prim_00011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    arithmetic::comparison_on_values("<", args, span)
-}
-
-fn prim_00011011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    arithmetic::comparison_on_values(">", args, span)
-}
-
 fn prim_00011100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
     arithmetic::comparison_on_values("=", args, span)
 }
@@ -286,6 +245,13 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
         0b101 | 0b110 => None,
         _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
     }
+}
+
+fn domain_has_native_mechanism(identity: CoreDomainIdentity) -> bool {
+    domain_primitive(identity).is_some()
+        || super::selector_law::supports(identity)
+        || super::d5_arithmetic::supports(identity)
+        || necessary_forms::identity_for_domain_identity(identity).is_some()
 }
 
 /// Canonical value-call mechanism bridge for migrated exact-domain identities.
@@ -334,29 +300,26 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    // #1455: примітив Rust → визначення мовою, прив'язане до коду → помилка.
-    if let Some(primitive) = PRIMITIVE_TABLE
-        .get(sid.packed_byte() as usize)
-        .and_then(|function| *function)
+    // One-way compatibility adapter. Once a historical byte has a proven
+    // exact-domain successor, it delegates before any legacy primitive or code
+    // slot can participate. The old coordinate cannot shadow canonical domain
+    // meaning.
+    if let Some(identity) =
+        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
     {
+        if environment.domain_code_slot(identity).is_some() || domain_has_native_mechanism(identity) {
+            return invoke_domain_identity(identity, args, environment, span);
+        }
+    }
+
+    // Unmigrated compatibility-only mechanisms.
+    if let Some(primitive) = legacy_primitive(sid) {
         return primitive(args, environment, span);
     }
     match &environment.code_slot(sid) {
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
-    }
-
-    // Explicit compatibility adapter: once a historical byte has a proven
-    // exact-domain successor, the old spelling delegates to that one
-    // canonical mechanism. We do not dual-bind the language definition into
-    // both legacy and domain slots.
-    if let Some(identity) =
-        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
-    {
-        if environment.domain_code_slot(identity).is_some() || domain_primitive(identity).is_some() {
-            return invoke_domain_identity(identity, args, environment, span);
-        }
     }
 
     if let Some(profile) = environment.selected_core_profile() {
@@ -389,9 +352,9 @@ pub(crate) fn invoke_semantic_ref(
 
 /// #1455: чи має код примітив Rust.
 pub(crate) fn has_primitive(sid: Sens8) -> bool {
-    PRIMITIVE_TABLE
-        .get(sid.packed_byte() as usize)
-        .is_some_and(|function| function.is_some())
+    legacy_primitive(sid).is_some()
+        || semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+            .is_some_and(domain_has_native_mechanism)
 }
 
 /// #1455: визначення (функція або макрос) верхнього рівня з назвою з таблиці функцій, чий код не
@@ -403,9 +366,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     }
 
     if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
-        if domain_primitive(identity).is_some()
-            || super::necessary_forms::identity_for_domain_identity(identity).is_some()
-        {
+        if domain_has_native_mechanism(identity) {
             return;
         }
         environment.bind_domain_code_slot_once(identity, value.clone());
@@ -499,7 +460,48 @@ mod tests {
     }
 
     #[test]
-    fn plus_surface_is_not_bindable_after_m8() {
+    fn migrated_d3_d5_bytes_have_no_separate_legacy_primitive() {
+        for sid in [
+            crate::sens!(00000010),
+            crate::sens!(00000011),
+            crate::sens!(00000100),
+            crate::sens!(00000101),
+            crate::sens!(00000110),
+            crate::sens!(00001100),
+            crate::sens!(00001101),
+            crate::sens!(00001110),
+            crate::sens!(00001111),
+            crate::sens!(00011010),
+            crate::sens!(00011011),
+        ] {
+            assert!(legacy_primitive(sid).is_none(), "{sid} must delegate to exact domain");
+            assert!(has_primitive(sid), "{sid} must remain callable through the domain bridge");
+        }
+        assert!(legacy_primitive(crate::sens!(01001100)).is_some());
+    }
+
+    #[test]
+    fn historical_plus_byte_executes_the_one_d5_mechanism() {
+        let env = Environment::root();
+        let span = Span::default();
+        let n = |value| Value::Number(value, crate::Exactness::Exact);
+        let via_legacy = invoke_semantic_ref(
+            crate::sens!(00001100),
+            &[n(2.0), n(3.0)],
+            &env,
+            span,
+        )
+        .unwrap();
+        let d5 = CoreDomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0b01010).unwrap(),
+        ));
+        let via_domain = invoke_domain_identity(d5, &[n(2.0), n(3.0)], &env, span).unwrap();
+        assert_eq!(via_legacy, via_domain);
+        assert_eq!(via_domain.to_string(), "5");
+    }
+
+    #[test]
+    fn exact_d5_numeric_surfaces_are_not_bindable() {
         let span = Span { start: 0, end: 1 };
         assert!(ensure_bindable("+", span).is_err());
         assert!(ensure_bindable("-", span).is_err());
