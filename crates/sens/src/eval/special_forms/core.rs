@@ -215,6 +215,7 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
             ExprKind::Sid(sid) => Value::Sid(*sid),
+            ExprKind::DomainIdentity(identity) => Value::DomainIdentity(*identity),
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
             ExprKind::Symbol(symbol) => Value::Symbol(symbol.clone()),
@@ -241,6 +242,14 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             ExprKind::Call(sid, arguments) => {
                 let mut out = Vec::with_capacity(arguments.len() + 1);
                 out.push(Value::Sid(*sid));
+                for argument in arguments.iter() {
+                    out.push(go(argument, depth + 1)?);
+                }
+                Value::list(out)
+            }
+            ExprKind::DomainCall(identity, arguments) => {
+                let mut out = Vec::with_capacity(arguments.len() + 1);
+                out.push(Value::DomainIdentity(*identity));
                 for argument in arguments.iter() {
                     out.push(go(argument, depth + 1)?);
                 }
