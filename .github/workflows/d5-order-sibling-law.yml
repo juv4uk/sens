@@ -1,0 +1,38 @@
+name: D5 order sibling law research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d5-order-sibling-law/**"
+      - ".github/workflows/d5-order-sibling-law.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  order-sibling-law:
+    name: D5 LESSP/GREATERP sibling law
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run sibling-law witness
+        run: |
+          python3 benchmarks/d5-order-sibling-law/run.py
+          git diff --exit-code -- benchmarks/d5-order-sibling-law/result.json
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D5 order sibling law"
+            echo
+            echo "~~~text"
+            python3 benchmarks/d5-order-sibling-law/run.py
+            echo "~~~"
+            echo
+            echo "- OD-005 coordinates are not changed."
+            echo "- EVLIS parenthood is not inferred from the shared prefix."
+            echo "- Modern D1 result-carrier runtime admission remains separate."
+          } >> "$GITHUB_STEP_SUMMARY"
