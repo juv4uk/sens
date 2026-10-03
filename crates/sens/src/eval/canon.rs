@@ -9,8 +9,8 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{domain_registry, semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
-use crate::CoreDomainIdentity;
+use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{domain_registry, CoreDomainIdentity};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SidRouteKind {
@@ -317,7 +317,12 @@ pub(crate) fn invoke_domain_identity(
     // select that mechanism explicitly from the domain owner registry. This is
     // not a reverse identity projection and does not consult the old surface table.
     if let Some(byte) = domain_registry::legacy_mechanism_for(identity) {
-        return invoke_semantic_ref(Sens8::from_packed_byte(byte), args, environment, span);
+        return super::legacy_backend::invoke_legacy_mechanism_byte(
+            byte,
+            args,
+            environment,
+            span,
+        );
     }
 
     Err(LanguageError::new(
@@ -403,10 +408,11 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         // domain slot; the historical code points at the same closure/macro
         // until those sources are rewritten to domain-native binary source.
         if let Some(byte) = domain_registry::legacy_mechanism_for(identity) {
-            let sid = Sens8::from_packed_byte(byte);
-            if !has_primitive(sid) {
-                environment.bind_code_slot_once(sid, value.clone());
-            }
+            super::legacy_backend::bind_legacy_mechanism_alias_once(
+                byte,
+                value,
+                environment,
+            );
         }
         return;
     }
