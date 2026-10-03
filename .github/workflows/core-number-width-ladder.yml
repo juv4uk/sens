@@ -1,0 +1,36 @@
+name: Core Number width ladder research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-number-width-ladder/**"
+      - ".github/workflows/core-number-width-ladder.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-number-width-ladder/**"
+      - ".github/workflows/core-number-width-ladder.yml"
+  workflow_dispatch:
+
+jobs:
+  width-ladder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run Number width-ladder tournament
+        run: |
+          rm -rf /tmp/core-number-width-ladder
+          python3 benchmarks/core-number-width-ladder/run.py             --out /tmp/core-number-width-ladder
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-number-width-ladder/report.md; then
+            cat /tmp/core-number-width-ladder/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-number-width-ladder
+          path: /tmp/core-number-width-ladder/
+          retention-days: 14
