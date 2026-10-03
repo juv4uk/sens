@@ -1,5 +1,16 @@
 # GC M0.5 — ВИМОГИ ВЛАСНИКА: безпека даних і прозорість
 
+> **CURRENT OWNER DIRECTION — 2026-10-03 / #2544 (docs follow-up #2547) supersedes semantic observability below**
+>
+> The August safety goal remains: never reclaim reachable data; prefer a leak over
+> silent loss while the root protocol is untrusted. What changes is the boundary:
+> collection timing/count/journal/quarantine are engineering diagnostics only, not
+> language semantics. `(gc-promote ...)`-style resurrection is forbidden at the
+> semantic surface. Weak references and finalizers are not admitted language features.
+> Canonical contract: `docs/gc-reachability-contract.md`.
+
+
+
 **Статус:** OWNER DIRECTIVE · **Дата:** 2026-08-23
 **Джерело:** прямі вимоги власника (дослівно нижче) · **Автор перекладу
 у властивості:** Оксі (Vyasa)

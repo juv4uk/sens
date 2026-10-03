@@ -1,5 +1,15 @@
 # Garbage collector: цілісна карта теми
 
+> **POLICY OVERLAY — 2026-10-03 / #2544 (docs follow-up #2547)**
+>
+> This remains a technical survey, not semantic authority. SENS fixes GC as an
+> unobservable reachability mechanism. Weak refs/finalizers/resurrection are excluded
+> from the language contract. Collector choice is owned by #2544 and its actual
+> substrate lanes (`wsm-os-lisp#60`, `fpga-lisp#49`), not preselected here.
+> See `gc-reachability-contract.md`.
+
+
+
 **Статус:** технічний довідник для проєктування мовного runtime
 **Джерело:** Manus AI, через власника · **Дата:** 2026-08-23
 **Оформлення:** Сакші (ox-alpha) · **Доповнює:** [[gc-m0-design]] (M0-дизайн)
