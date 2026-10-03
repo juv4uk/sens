@@ -15,7 +15,7 @@
 use super::{canon, necessary_forms};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
-use crate::Sens8;
+use crate::{CoreDomainIdentity, Sens8};
 use std::rc::Rc;
 
 const QUOTE: Sens8 = crate::sens!(00000001);
@@ -24,6 +24,63 @@ const COND: Sens8 = crate::sens!(00000111);
 /// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
     expressions.iter().map(|expression| lower(expression, 0)).collect()
+}
+
+fn head_domain_identity(head: &Expr) -> Option<CoreDomainIdentity> {
+    match &head.kind {
+        ExprKind::DomainIdentity(identity) => Some(*identity),
+        ExprKind::Symbol(name) => semantic_registry::domain_identity_for_surface(name),
+        _ => None,
+    }
+}
+
+fn is_d3(identity: CoreDomainIdentity, raw: u8) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D3(word) if word.word().packed_bits() == raw
+    )
+}
+
+fn lower_domain_call(
+    identity: CoreDomainIdentity,
+    arguments: &[Expr],
+    depth: u32,
+) -> ExprKind {
+    if is_d3(identity, 0b001) {
+        return ExprKind::DomainCall(identity, arguments.into());
+    }
+    if is_d3(identity, 0b011) {
+        return ExprKind::DomainCall(
+            identity,
+            arguments
+                .iter()
+                .map(|clause| match &clause.kind {
+                    ExprKind::List(parts) => Expr {
+                        kind: ExprKind::List(lower_all(parts, depth + 1)),
+                        span: clause.span,
+                    },
+                    _ => clause.clone(),
+                })
+                .collect(),
+        );
+    }
+    if necessary_forms::identity_for_domain_identity(identity).is_some() {
+        return ExprKind::DomainCall(
+            identity,
+            arguments
+                .iter()
+                .enumerate()
+                .map(|(index, argument)| {
+                    if index == 0 {
+                        argument.clone()
+                    } else {
+                        lower(argument, depth + 1)
+                    }
+                })
+                .collect(),
+        );
+    }
+    ExprKind::DomainCall(identity, lower_all(arguments, depth))
 }
 
 fn head_sid(head: &Expr) -> Option<Sens8> {
@@ -36,6 +93,9 @@ fn head_sid(head: &Expr) -> Option<Sens8> {
 
 /// Написання, що маршрутизується до фіксованого SENS (не окрема identity).
 fn immutable_surface_sid(name: &str) -> Option<Sens8> {
+    if semantic_registry::domain_identity_for_surface(name).is_some() {
+        return None;
+    }
     if let Some(sid) = canon::routed_sid_for_surface(name) {
         return Some(sid);
     }
@@ -54,9 +114,15 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
     }
     let kind = match &expression.kind {
         ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
+        ExprKind::DomainCall(identity, arguments) => {
+            ExprKind::DomainCall(*identity, arguments.clone())
+        }
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
-            match head_sid(&items[0]) {
+            if let Some(identity) = head_domain_identity(&items[0]) {
+                lower_domain_call(identity, arguments, depth)
+            } else {
+                match head_sid(&items[0]) {
                 Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
                 Some(sid) if sid == COND => ExprKind::Call(
                     sid,
@@ -87,8 +153,9 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                             .collect(),
                     )
                 }
-                Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth)),
-                None => ExprKind::List(lower_all(items, depth)),
+                    Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth)),
+                    None => ExprKind::List(lower_all(items, depth)),
+                }
             }
         }
         _ => return expression.clone(),
@@ -109,6 +176,30 @@ mod tests {
         let lowered = lower_program(&program);
         assert_eq!(lowered.len(), 1);
         lowered.into_iter().next().expect("one form")
+    }
+
+    #[test]
+    fn d3_surface_lowers_to_domain_call() {
+        let expr = lower_one("(atom? (quote x))");
+        let ExprKind::DomainCall(identity, args) = expr.kind else {
+            panic!("expected canonical DomainCall");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (3, 0b010));
+        assert!(matches!(
+            args[0].kind,
+            ExprKind::DomainCall(quote, _) if (quote.width(), quote.packed_bits()) == (3, 0b001)
+        ));
+    }
+
+    #[test]
+    fn d4_lambda_surface_lowers_to_domain_call() {
+        let expr = lower_one("(lambda (x) x)");
+        let ExprKind::DomainCall(identity, args) = expr.kind else {
+            panic!("expected D4 DomainCall");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0010));
+        assert_eq!(args.len(), 2);
+        assert!(matches!(args[0].kind, ExprKind::List(_)));
     }
 
     #[test]
