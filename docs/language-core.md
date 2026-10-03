@@ -28,24 +28,33 @@ D3 001 != D4 0001 != D5 00001 != D6 000001
 No zero-padding, truncation, low-bit extraction or integer equality may create
 or recover domain identity.
 
-## Current Core domains
+## Current ratified domain ladder
 
-The current exact-width Core family includes:
+The current ratified exact-width language ladder is:
 
 ```text
-D1  exact one-bit predicate answers
+D1  exact one-bit PredicateBit
 D2  exact two-bit structural syntax
-D3  exact three-bit foundation
+D3  exact three-bit Core foundation
 D4  exact four-bit bootstrap
 D5  exact five-bit typed domain
 D6  exact six-bit typed domain
+D7  exact seven-bit Sound7 / provenance domain
+D8  exact eight-bit domain boundary
 ```
 
-D5/D6 carrier existence, residency, derivability, callability and runtime
-implementation are separate facts. A free coordinate has no meaning until its
-owning law admits it.
+The ratified identity model requires a general domain carrier to preserve D1
+through D8 exactly. Production cutover of that carrier is tracked by #2974;
+implementation status must not be confused with ratification. Callable Core
+identity is narrower: D1 and D2 are not callable domains; D7 keeps its Sound7
+law and is not promoted into callable Core merely because it has a width; D8 is
+distinct from historical Sens8/Function8 even though both occupy eight physical
+bits.
 
-D7 sound/text work is separate and is not callable merely because it is binary.
+Carrier existence, residency, derivability, callability and runtime
+implementation are separate facts. Width alone never mints occupancy or a
+semantic role. D5/D6/D8 residents execute only where their owning law admits
+them, and a free coordinate has no meaning until such evidence exists.
 
 ## D1 — PredicateBit
 
@@ -88,8 +97,31 @@ exact D3 coordinate under the D3 law.
 D4 is the exact four-bit bootstrap domain ratified by its owning law. Its
 coordinates are not reconstructed from historical eight-bit Function8 values.
 
-LAMBDA and DEFINE are current D4 bootstrap identities. Unallocated D4
-coordinates remain unallocated.
+LAMBDA and DEFINE are current D4 bootstrap identities. Ratified selector
+descendants are generated from their domain law rather than minted by legacy
+table rows. Unallocated D4 coordinates remain unallocated.
+
+## D5 / D6 — typed Core domains
+
+D5 and D6 are exact-width typed domains. Their complete coordinate capacity is
+not an automatic function table: only owner-ratified residents, proved
+generators and implemented mechanisms may be used.
+
+## D7 — Sound7
+
+D7 is an exact seven-bit domain with its own Sound7 / textual-provenance law.
+It may be carried by general domain identity, but it is not a callable Core
+operation merely because it is seven bits wide. Selector geometry and generic
+function-table rules must not be inferred for D7.
+
+## D8 — exact eight-bit domain
+
+D8 is an exact domain in the ratified ladder. It is **not** historical Sens8 or
+Function8. Equal eight-bit payloads across those two contexts do not collapse
+identity.
+
+D8 residents are admitted only by explicit D8 law/evidence. Width eight does
+not make every historical byte a D8 resident or callable operation.
 
 ## Reader
 
@@ -99,8 +131,11 @@ Canonical binary source preserves exact word width before semantic routing.
 10 001 01
 ```
 
-is structurally D2 open, one exact W3 word, and D2 close. A source-domain bridge
-may lift admitted W3/W4/W5/W6 words directly into their exact Core domains.
+is structurally D2 open, one exact W3 word, and D2 close. The canonical reader
+model must preserve exact W1..W8 words as domain-qualified identity; production
+support may advance domain-by-domain during the #2974 cutover. Callable lowering
+is a later law-specific step: carrying a D1, D2 or D7 identity does not make it
+a function.
 
 The reader must never recover a domain by zero-extending an old eight-bit code.
 
@@ -148,8 +183,9 @@ not create or override semantic domain law.
 
 ## Execution mechanisms
 
-Rust, C, Common Lisp, Prolog, Datalog, CLIPS, WASM, FPGA and other substrates
-are mechanism witnesses.
+The Rust runtime is the **reference implementation**, not semantic authority.
+C, Common Lisp, Prolog, Datalog, CLIPS, WASM, FPGA and other substrates are
+additional mechanism witnesses.
 
 A backend receives an already-selected domain-qualified semantic object or an
 explicitly tagged compatibility projection. Backend opcodes, host enums,
@@ -191,12 +227,13 @@ explicitly one of those roles.
 
 ## Project boundary
 
-Rust is a reference implementation: evidence and mechanism, not semantic
-authority. Current authority is Contract 11 plus ratified domain laws and
-language-owned executable evidence.
+The Rust runtime is the reference implementation, not semantic authority.
+Current authority is Contract 11 plus ratified domain laws and language-owned
+executable evidence.
 
-The canonical source extension remains **`.lisp`**. **`.wsm`** and **`.my`** are legacy aliases only. File suffixes do not
-create identity; exact source words and domain law do.
+The current canonical source extension is **`.lisp`**. **`.wsm`** and
+**`.my`** remain supported legacy aliases. File suffixes do not create
+identity; exact source words and domain law do.
 
 Authority precedence is documented in
 [`semantic-authority-map.md`](semantic-authority-map.md).
