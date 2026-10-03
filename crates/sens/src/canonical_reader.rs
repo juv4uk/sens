@@ -2,7 +2,9 @@
 //!
 //! This path is intentionally separate from the human/compatibility parser.
 //! It consumes already-bounded binary source words, applies the ratified D2
-//! structural law, and lifts W3-W6 payloads directly into CoreDomainIdentity.
+//! structural law, and lifts only the current Core-operation D3-D6 payloads
+//! directly into CoreDomainIdentity. D7/D8 remain ratified domain widths, but
+//! width alone does not grant this reader Core callability.
 //! No legacy exact-eight identity is constructed on this path.
 
 use crate::{
