@@ -340,9 +340,6 @@ fn load_core_library_with_fasl(
     core_fasl: &[u8],
 ) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core4);
-    session
-        .environment
-        .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
 
     let result = match fasl_decode_program(core_fasl) {
@@ -378,9 +375,6 @@ pub fn core_library_fasl_is_current() -> bool {
 /// remains stable across closures without exposing a shadowable Lisp binding.
 pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core2);
-    session
-        .environment
-        .set_cond_clause_mode(environment::CondClauseMode::Core2LegacyTwoPart);
     let result = eval_program(CORE2_LIBRARY_SOURCE, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)

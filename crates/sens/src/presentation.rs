@@ -74,6 +74,8 @@ fn render_uk(value: &Value) -> String {
             format!("#f32({})", items.join(" "))
         }
         Value::Nil | Value::Bool(false) => "()".to_string(),
+        Value::PredicateBit(true) => "1".to_string(),
+        Value::PredicateBit(false) => "0".to_string(),
         Value::Bool(true) => "істина".to_string(),
         Value::Number(number, Exactness::Exact) => number.to_string(),
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),

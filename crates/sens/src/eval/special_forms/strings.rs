@@ -127,7 +127,7 @@ pub(crate) fn string_predicate_values(
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_value_arity("string?", arguments, 1, span)?;
-    Ok(Value::truth(matches!(arguments[0], Value::String(_))))
+    Ok(Value::predicate_bit(matches!(arguments[0], Value::String(_))))
 }
 
 pub(crate) fn symbol_to_string_values(

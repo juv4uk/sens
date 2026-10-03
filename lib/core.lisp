@@ -30,53 +30,63 @@
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
 (00001001 list (00001000 args args))
 
-; and/or — раніше були відсутні і в цьому файлі, і як Rust-білтіни
-; (перевірено: обидва grep дають нуль збігів), тож кожен, хто підключав
-; my-lisp, мусив бутстрапити власні (знайдено живцем 2026-08-27 у
-; chess-lisp-zero/lib/chess.lisp). Макроси, не функції — інакше "and"/"or"
-; втратили б коротке замикання, обчислюючи всі аргументи наперед. Мусять
-; бути variadic (rest-параметр як голий символ, як `list` вище), не
-; фіксованої арності — саме так їх і використовує реальний код, що вже
-; існує. Порожній `(and)` -> t, порожній `(or)` -> () — той самий вибір,
-; що й у Common Lisp/Scheme, узгоджений з G8 (нейтральний елемент
-; логічного "і"/"або"). Перевірено живцем: коротке замикання (другий
-; аргумент дійсно не обчислюється), варіативність на 3+ аргументах,
-; передача самого значення, не лише t/() (напр. (and t 42) -> 42).
+; and/or are predicate combinators on the shared one-bit foundation.
+; They keep lazy short-circuiting, but no longer preserve arbitrary Lisp
+; truthy values: every completed result is an exact PredicateBit.
+;
+; A constant predicate bit has no source literal, so macro expansions use
+; ATOM itself as the language-owned producer:
+;   (00000010 '())          => YES
+;   (00000010 '(00000000))  => NO
 (00001010 and rest
   (00000111
-    ((00000010 rest) () t)
-    ((00000010 rest) (1) t)
-    ((00000010 (00000110 rest)) () (00000101 rest))
-    ((00000010 (00000110 rest)) (1) (00000101 rest))
-    (t
-     ; Build the short-circuit cond AST from the primitive tree substrate.
-     ; AND remains Lisp-owned; generic macro frontends need no private LIST
-     ; semantic just to execute this law.
+    ((00000010 rest)
+     (00000001 (00000010 (00000001 ()))))
+    ((00000010 (00000110 rest))
+     (00000101 rest))
+    ((00000010 (00000001 ()))
+     ; Expand to:
+     ;   (COND (first (and ...))
+     ;         (YES   NO))
+     ; so the recursive tail is evaluated only after a YES first operand.
      (00000100 (00000001 00000111)
-           (00000100 (00000100 (00000101 rest)
-                       (00000100 (00000100 (00000001 and) (00000110 rest))
-                             (00000001 ())))
-                 (00000100 (00000100 t
-                             (00000100 (00000001 ())
-                                   (00000001 ())))
-                       (00000001 ())))))))
+       (00000100
+         (00000100 (00000101 rest)
+           (00000100
+             (00000100 (00000001 and) (00000110 rest))
+             (00000001 ())))
+         (00000100
+           (00000100
+             (00000001 (00000010 (00000001 ())))
+             (00000100
+               (00000001 (00000010 (00000001 (00000000))))
+               (00000001 ())))
+           (00000001 ())))))))
 
 (00001010 or rest
   (00000111
-    ((00000010 rest) () (00000001 ()))
-    ((00000010 rest) (1) (00000001 ()))
-    ((00000010 (00000110 rest)) () (00000101 rest))
-    ((00000010 (00000110 rest)) (1) (00000101 rest))
-    (t
-     ; Same primitive constructor discipline as AND above: preserve lazy
-     ; short-circuit expansion without importing LIST into compiler authority.
+    ((00000010 rest)
+     (00000001 (00000010 (00000001 (00000000)))))
+    ((00000010 (00000110 rest))
+     (00000101 rest))
+    ((00000010 (00000001 ()))
+     ; Expand to:
+     ;   (COND (first YES)
+     ;         (YES   (or ...)))
+     ; and therefore never evaluate the recursive tail after a YES.
      (00000100 (00000001 00000111)
-           (00000100 (00000100 (00000101 rest)
-                       (00000100 t (00000001 ())))
-                 (00000100 (00000100 t
-                             (00000100 (00000100 (00000001 or) (00000110 rest))
-                                   (00000001 ())))
-                       (00000001 ())))))))
+       (00000100
+         (00000100 (00000101 rest)
+           (00000100
+             (00000001 (00000010 (00000001 ())))
+             (00000001 ())))
+         (00000100
+           (00000100
+             (00000001 (00000010 (00000001 ())))
+             (00000100
+               (00000100 (00000001 or) (00000110 rest))
+               (00000001 ())))
+           (00000001 ())))))))
 
 ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
 ; protection against accidental variable capture; verified live
@@ -190,9 +200,16 @@
 (00001001 reverse-onto
   (00001000 (values acc)
     (00000111
-      ((00000010 values) () acc)
-      ((00000010 values) (0)
-       (reverse-onto (00000110 values) (00000100 (00000101 values) acc))))))
+      ((00000010 values)
+       (00000111
+         ((00000011 values (00000001 ()))
+          acc)
+         ((00000010 (00000001 ()))
+          (00000101 values))))
+      ((00000010 (00000001 ()))
+       (reverse-onto
+         (00000110 values)
+         (00000100 (00000101 values) acc))))))
 
 (00001001 reverse
   (00001000 (values)
@@ -219,10 +236,17 @@
 (00001001 map-onto
   (00001000 (f values acc)
     (00000111
-      ((00000010 values) () (00101010 acc))
-      ((00000010 values) (1) (00000001 ()))
-      ((00000010 values) (0)
-       (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
+      ((00000010 values)
+       (00000111
+         ((00000011 values (00000001 ()))
+          (00101010 acc))
+         ((00000010 (00000001 ()))
+          (00000001 ()))))
+      ((00000010 (00000001 ()))
+       (map-onto
+         f
+         (00000110 values)
+         (00000100 (f (00000101 values)) acc))))))
 
 (00001001 map
   (00001000 (f values)
@@ -231,14 +255,16 @@
 (00001001 filter-onto
   (00001000 (predicate values acc)
     (00000111
-      ((00000010 values) () (00101010 acc))
-      ((00000010 values) (1) (00101010 acc))
-      (t t
+      ((00000010 values)
+       (00101010 acc))
+      ((00000010 (00000001 ()))
        (10011100 ((decision (predicate (00000101 values))))
          (00000111
-           ((truthy? decision) t
-            (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           ((truthy? decision) ()
+           (decision
+            (filter-onto predicate
+              (00000110 values)
+              (00000100 (00000101 values) acc)))
+           ((00000010 (00000001 ()))
             (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
@@ -318,71 +344,48 @@
 ; Makro-Expansionsmechanismus, den `unless` und `let` bereits nutzen —
 ; `let*`, das `let*` aufruft, ist gewöhnliche Rekursion, kein Sonderfall,
 ; von dem der Evaluator wissen müsste.
-; `eq` is deliberately atom-only per McCarthy's original primitive (see
-; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
-; structurally. `equal?` is the structural/deep-equality counterpart, built
-; on top of `eq` and `atom` rather than replacing them. Its answer is the
-; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
-; Canonical three-part `cond` consumes the answer explicitly; a two-part
-; clause selects only on a «yes» answer.
+; `eq` is deliberately atom-only per McCarthy's original primitive.
+; `equal?` is the structural/deep-equality predicate built on top of EQ,
+; ATOM, CAR and CDR. Contract 10 gives it the shared predicate result domain:
+; exact PredicateBit 1 for equal, 0 for different. No list-wrapped answer
+; scale and no three-part COND remain in this law.
 (00001001 equal?
   (00001000 (a b)
     (00000111
-      ((00000010 a) ()
+      ; ATOM already returns exact PredicateBit. If both values are atoms,
+      ; EQ owns the identity decision directly.
+      ((00000010 a)
        (00000111
-         ((00000010 b) ()
-          (00000001 (1)))
-         ((00000010 b) (1)
-          (00000001 (0)))
-         ((00000010 b) (0)
-          (00000001 (0)))))
-      ((00000010 a) (1)
+         ((00000010 b)
+          (00000011 a b))
+         ; b is a pair: atom vs pair is structurally unequal.
+         ((00000010 (00000001 ()))
+          (00000010 (00000001 (00000000))))))
+      ; a is a pair. The explicit YES test below is a constant predicate
+      ; producer used only as the exhaustive second COND branch.
+      ((00000010 (00000001 ()))
        (00000111
-         ((00000010 b) ()
-          (00000001 (0)))
-         ((00000010 b) (1)
+         ((00000010 b)
+          (00000010 (00000001 (00000000))))
+         ((00000010 (00000001 ()))
           (00000111
-            ((00000011 a b) (1)
-             (00000001 (1)))
-            ((00000011 a b) (0)
-             (00000001 (0)))))
-         ((00000010 b) (0)
-          (00000001 (0)))))
-      ((00000010 a) (0)
-       (00000111
-         ((00000010 b) ()
-          (00000001 (0)))
-         ((00000010 b) (1)
-          (00000001 (0)))
-         ((00000010 b) (0)
-          (00000111
-            ((00100010 (00000101 a) (00000101 b)) (1)
+            ; Deep equality short-circuits on the heads, then compares tails.
+            ((00100010 (00000101 a) (00000101 b))
              (00100010 (00000110 a) (00000110 b)))
-            ((00100010 (00000101 a) (00000101 b)) (0)
-             (00000001 (0))))))))))
+            ((00000010 (00000001 ()))
+             (00000010 (00000001 (00000000)))))))))))
 
-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
-; retain their own result domains, so predicate consumers normalize them here.
-(00001001 truthy?
-  (00001000 (value)
-    (00000111
-      ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1)
-       (00000111
-         ((00000011 value 0) (1) (00000001 ()))
-         ((00000011 value 0) (0) t)))
-      ((00000010 value) (0)
-       (00000111
-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
-         (t t t))))))
-
+; NOT is a predicate combinator, not a generic truthiness converter.
+; Its input must already be an exact PredicateBit; strict COND rejects every
+; other domain. Constant YES/NO are produced by ATOM because PredicateBit has
+; no source literal.
 (00001001 not?
   (00001000 (value)
     (00000111
-      ((truthy? value) t (00000001 ()))
-      ((truthy? value) () t))))
+      (value
+       (00000010 (00000001 (00000000))))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 ()))))))
 
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
@@ -421,17 +424,28 @@
 (00001001 assoc
   (00001000 (key alist)
     (00000111
-      ((00000010 alist) () (00000001 ()))
-      ((00000010 alist) (0)
+      ; ATOM is true for both structural () and malformed non-list atoms.
+      ; Distinguish the legitimate empty-alist base case with EQ; every other
+      ; atom deliberately reaches CAR and therefore fails Type instead of
+      ; being silently reclassified as an empty association list.
+      ((00000010 alist)
        (00000111
-         ((00100010 key (00000101 (00000101 alist))) (1) (00000101 alist))
-         ((00100010 key (00000101 (00000101 alist))) (0)
+         ((00000011 alist (00000001 ()))
+          (00000001 ()))
+         ((00000010 (00000001 ()))
+          (00000101 alist))))
+      ; Pair case: deep key equality is itself an exact PredicateBit.
+      ((00000010 (00000001 ()))
+       (00000111
+         ((00100010 key (00000101 (00000101 alist)))
+          (00000101 alist))
+         ((00000010 (00000001 ()))
           (00101101 key (00000110 alist))))))))
 
 (00001010 let* (bindings body)
   (00000111
-    ((00000010 bindings) () body)
-    ((00000010 bindings) (0)
+    ((00000010 bindings) body)
+    ((00000010 (00000001 ()))
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
@@ -483,24 +497,20 @@
 (00001001 string-order-helper
   (00001000 (left right)
     (00000111
-      ((00111100 left) (1)
+      ((00111100 left)
        (00000111
-         ((00111100 right) (1)
+         ((00111100 right)
           (00000001 (text-order same)))
-         ((00111100 right) (0)
+         ((00000010 (00000001 ()))
           (00000001 (text-order before)))))
-      ((00111100 left) (0)
+      ((00111100 right)
        (00000001 (text-order after)))
       ((00000011 (00111111 left) (00111111 right))
-       (1)
        (string-order-helper (01000000 left) (01000000 right)))
       ((00011010 (01000101 (00111111 left))
           (01000101 (00111111 right)))
-       1
        (00000001 (text-order before)))
-      ((00011010 (01000101 (00111111 left))
-          (01000101 (00111111 right)))
-       0
+      ((00000010 (00000001 ()))
        (00000001 (text-order after))))))
 
 (00001001 nonempty-string-membership-helper
@@ -527,16 +537,9 @@
 ; аргументів — Arity від прив'язки лямбди.
 (00001001 string<?
   (00001000 (a b)
-    (00000111
-      ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
-      ((00111100 b) (1)
-       (00101111 (00100111 (00111010 a "") (00000001 ()))))
-      ((00111100 a) (1)
-       (00101111 (00100111 (00111010 b "") t)))
-      ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) 1 t)
-      ((00000011 (00111111 a) (00111111 b)) (1)
-       (00100101 (01000000 a) (01000000 b)))
-      (t t (00000001 ())))))
+    (00100010
+      (string-order-helper a b)
+      (00000001 (text-order before)))))
 
 
 
@@ -956,51 +959,51 @@
 (00001001 my-postcore-peer-group
   (00001000 (semantic-id groups)
     (00000111
-      ((00000010 groups) ()
+      ((00000010 groups)
        (00000001 ()))
-      ((00000010 groups) (0)
+      ((00000010 (00000001 ()))
        (10011100 ((group (00000101 groups)))
          (00000111
-           ((00000011 semantic-id (00000101 group)) (1)
+           ((00000011 semantic-id (00000101 group))
             group)
-           ((00000011 semantic-id (00000101 group)) (0)
+           ((00000010 (00000001 ()))
             (my-postcore-peer-group semantic-id (00000110 groups)))))))))
 
 (00001001 my-postcore-binding-status
   (00001000 (surface bindings)
     (00000111
-      ((00000010 bindings) ()
+      ((00000010 bindings)
        (00000001 absent))
-      ((00000010 bindings) (0)
+      ((00000010 (00000001 ()))
        (10011100 ((binding (00000101 bindings)))
          (00000111
-           ((00000011 (01000010 surface) (00000101 binding)) (1)
+           ((00000011 (01000010 surface) (00000101 binding))
             (00000001 present))
-           ((00000011 (01000010 surface) (00000101 binding)) (0)
+           ((00000010 (00000001 ()))
             (my-postcore-binding-status surface (00000110 bindings)))))))))
 
 (00001001 my-postcore-missing-peers
   (00001000 (source peers bindings)
     (00000111
-      ((00000010 peers) ()
+      ((00000010 peers)
        (00000001 ()))
-      ((00000010 peers) (0)
+      ((00000010 (00000001 ()))
        (10011100 ((peer (00000101 peers)))
          (00000111
-           ((00000011 source peer) (1)
+           ((00000011 source peer)
             (my-postcore-missing-peers source (00000110 peers) bindings))
-           ((00000011 source peer) (0)
+           ((00000010 (00000001 ()))
             (00000111
-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 present))
-               (1)
+              ((00000011
+                 (my-postcore-binding-status peer bindings)
+                 (00000001 present))
                (my-postcore-missing-peers source (00000110 peers) bindings))
-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 absent))
-               (1)
+              ((00000010 (00000001 ()))
                (00000100 peer
-                     (my-postcore-missing-peers
-                       source
-                       (00000110 peers)
-                       bindings)))))))))))
+                 (my-postcore-missing-peers
+                   source
+                   (00000110 peers)
+                   bindings)))))))))))
 
 ; Build one expression whose nested DEFINE forms all execute in the caller's
 ; environment. This is why materialization is a macro rather than a function:
@@ -1008,9 +1011,9 @@
 (00001001 my-postcore-build-definitions
   (00001000 (source peers)
     (00000111
-      ((00000010 peers) ()
+      ((00000010 peers)
        source)
-      ((00000010 peers) (0)
+      ((00000010 (00000001 ()))
        (00100111 (00000001 define)
              (00000101 peers)
              (my-postcore-build-definitions source (00000110 peers)))))))
@@ -1023,9 +1026,9 @@
              semantic-id
              my-postcore-stable-peer-projection)))
     (00000111
-      ((00000010 group) ()
+      ((00000010 group)
        source)
-      ((00000010 group) (0)
+      ((00000010 (00000001 ()))
        (my-postcore-build-definitions
          source
          (my-postcore-missing-peers source (00000110 group) (01001110)))))))
@@ -1039,148 +1042,55 @@
 (00001001 null?
   (00001000 (x)
     (00000111
-      ((00000010 x) () t)
-      ((00000010 x) (0) (00000001 ()))
-      ((00000010 x) (1) (00000001 ())))))
+      ((00000010 x)
+       (00000011 x (00000001 ())))
+      ((00000011 0 0)
+       (00000010 x)))))
 
 (00001001 subst
   (00001000 (x y z)
     (00000111
-      ((00000010 z) (0)
-       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z))))
-      ((00000010 z) ()
+      ((00000010 z)
        (00000111
-         ((00000011 z y) (1) x)
-         ((00000011 z y) (0) z)))
-      ((00000010 z) (1)
-       (00000111
-         ((00000011 z y) (1) x)
-         ((00000011 z y) (0) z))))))
+         ((00000011 z y) x)
+         ((00000011 0 0) z)))
+      ((00000011 0 0)
+       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z)))))))
 
 (00001001 sublis-pair
   (00001000 (x z)
     (00000111
-      ((00000010 x) () z)
-      ((00000010 x) (0)
+      ((00000010 x) z)
+      ((00000011 0 0)
        (00000111
-         ((00000011 (00000101 (00000101 x)) z) (1)
+         ((00000011 (00000101 (00000101 x)) z)
           (00000101 (00000110 (00000101 x))))
-         ((00000011 (00000101 (00000101 x)) z) (0)
+         ((00000011 0 0)
           (sublis-pair (00000110 x) z)))))))
 
 (00001001 sublis
   (00001000 (x y)
     (00000111
-      ((00000010 y) (0)
-       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y))))
-      ((00000010 y) () (sublis-pair x y))
-      ((00000010 y) (1) (sublis-pair x y)))))
+      ((00000010 y)
+       (sublis-pair x y))
+      ((00000011 0 0)
+       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y)))))))
 
 (00001001 maplist
   (00001000 (x f)
     (00000111
-      ((00000010 x) () (00000001 ()))
-      ((00000010 x) (0)
+      ((00000010 x) (00000001 ()))
+      ((00000011 0 0)
        (00000100 (f x) (10101110 (00000110 x) f))))))
 
 (00001001 apply-quote-args
   (00001000 (m)
     (00000111
-      ((00000010 m) () (00000001 ()))
-      ((00000010 m) (0)
+      ((00000010 m) (00000001 ()))
+      ((00000011 0 0)
        (00000100 (00000100 (00000001 00000001) (00000100 (00000101 m) (00000001 ())))
                  (apply-quote-args (00000110 m)))))))
 
 (00001001 apply
   (00001000 (f args)
     (01001101 (00000100 f (apply-quote-args args)))))
-
-; #1391: логіка відповідей Core4 — закон contracts/core4-predicate-answer-scale.lisp /3.
-; Відповідь — список двійкових бітів: (1)…(1 1 1 1 1 1 1) «так»,
-; (0)…(0 0 0 0 0 0 0) «ні», () «невідомо». Лінія істинності:
-;   0 < 00 < … < 0000000 < () < 1111111 < … < 11 < 1
-; Виконуваний свідок законів — experiments/core4-logic15-algebra.lisp.
-
-; NOT: інвертувати кожен біт, ширина та сама; () лишається ().
-(00001001 answer-not
-  (00001000 (a)
-    (00000111
-      ((00000010 a) () (00000001 ()))
-      ((00000010 a) (0)
-       (00000100
-         (00000111
-           ((00000011 (00000101 a) 0) (1) 1)
-           ((00000011 (00000101 a) 0) (0) 0))
-         (10110001 (00000110 a)))))))
-
-; AND: мінімум на лінії. «Ні» перемагає; з двох «ні» — коротше (сильніше);
-; з двох «так» — довше (слабше); () поглинає «так».
-; Для двох відповідей одного напряму крок іде по обох списках разом.
-(00001001 answer-and
-  (00001000 (a b)
-    (00000111
-      ((00000010 a) ()
-       (00000111
-         ((00000010 b) () (00000001 ()))
-         ((00000010 b) (0)
-          (00000111
-            ((00000011 (00000101 b) 0) (1) b)
-            ((00000011 (00000101 b) 0) (0) (00000001 ()))))))
-      ((00000010 a) (0)
-       (00000111
-         ((00000010 b) ()
-          (00000111
-            ((00000011 (00000101 a) 0) (1) a)
-            ((00000011 (00000101 a) 0) (0) (00000001 ()))))
-         ((00000010 b) (0)
-          (00000111
-            ((00000011 (00000101 a) (00000101 b)) (0)
-             (00000111
-               ((00000011 (00000101 a) 0) (1) a)
-               ((00000011 (00000101 a) 0) (0) b)))
-            ((00000011 (00000101 a) (00000101 b)) (1)
-             (00000111
-               ((00000010 (00000110 a)) ()
-                (00000111
-                  ((00000011 (00000101 a) 0) (1) a)
-                  ((00000011 (00000101 a) 0) (0) b)))
-               ((00000010 (00000110 b)) ()
-                (00000111
-                  ((00000011 (00000101 b) 0) (1) b)
-                  ((00000011 (00000101 b) 0) (0) a)))
-               ((00000010 (00000110 b)) (0)
-                (00000100 (00000101 a)
-                          (10110010 (00000110 a) (00000110 b)))))))))))))
-
-; OR: максимум на лінії = NOT(AND(NOT a, NOT b)).
-(00001001 answer-or
-  (00001000 (a b)
-    (10110001 (10110010 (10110001 a) (10110001 b)))))
-
-; Послаблення: дописати той самий біт; восьмий біт належить 256 функціям,
-; тож із семи бітів шкала сходиться в ().
-(00001001 answer-weaken
-  (00001000 (a)
-    (00000111
-      ((00000010 a) () (00000001 ()))
-      ((00000010 a) (0)
-       (00000111
-         ((00000011 (00101000 a) 7) (1) (00000001 ()))
-         ((00000011 (00101000 a) 7) (0)
-          (00000100 (00000101 a) a)))))))
-
-; atom? відповіддю шкали: атом (1), пара (0), () — невідомо, бо () стоїть
-; вище розрізнення атом/пара.
-(00001001 answer-atom
-  (00001000 (x)
-    (00000111
-      ((00000010 x) (1) (00000001 (1)))
-      ((00000010 x) (0) (00000001 (0)))
-      ((00000010 x) () (00000001 ())))))
-
-; eq? відповіддю шкали: same (1), distinct (0). Область та сама, що в eq?: атоми.
-(00001001 answer-eq
-  (00001000 (a b)
-    (00000111
-      ((00000011 a b) (1) (00000001 (1)))
-      ((00000011 a b) (0) (00000001 (0))))))
