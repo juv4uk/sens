@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Check that the binary-domain format fields say something.
 
+Slice 0 — SCHEMA-SCOPE (#2552): explicit SEMANTIC vs MECHANISM boundary.
 Slice 1 — DOMAIN (#2513): width/carrier or honest UNKNOWN.
 Slice 2 — RELATION (#2514): exact enum token.
 
@@ -16,6 +17,8 @@ import argparse
 import json
 import re
 import sys
+
+from task_schema_record import parse_record
 
 BLOCK = re.compile(r"BINARY-DOMAIN\s+FORMAT", re.I)
 
@@ -83,6 +86,31 @@ LEGEND_TEXT = {
     ),
 }
 
+LAYER_MECHANISM = re.compile(
+    r"(?im)^\\s*(?:[-*]\\s*)?\\**LAYER\\**\\s*(?:=|:)\\s*MECHANISM\\s*$"
+)
+SEMANTIC_AUTHORITY_NONE = re.compile(
+    r"(?im)^\\s*(?:[-*]\\s*)?\\**SEMANTIC[ _-]+AUTHORITY\\**\\s*(?:=|:)\\s*NONE\\s*$"
+)
+
+
+def schema_scope(body):
+    """Classify semantic vs mechanism scope from explicit declarations only."""
+    b = body or ""
+    mechanism = bool(LAYER_MECHANISM.search(b))
+    nonauthority = bool(SEMANTIC_AUTHORITY_NONE.search(b))
+
+    if mechanism and not nonauthority:
+        return "mechanism-missing-nonauthority"
+    if nonauthority and not mechanism:
+        return "nonauthority-without-mechanism"
+    if mechanism and nonauthority:
+        if parse_record(b).marked:
+            return "mechanism-semantic-conflict"
+        return "mechanism"
+    return "semantic"
+
+
 CONCRETE = re.compile(
     r"\b(?:W\d+|D\d+|Function\d+|Sound\d+)[A-Za-z]*\b|"
     r"\bexact-[A-Za-z0-9]+\b|\b\d+-bit\b|"
@@ -146,6 +174,34 @@ def judge(issues):
         if str(it.get("state", "open")).lower() != "open":
             skipped += 1
             continue
+        scope = schema_scope(body)
+        if scope == "mechanism":
+            judged.append(
+                {
+                    "number": it.get("number"),
+                    "title": it.get("title", ""),
+                    "scope": scope,
+                    "domain": "not-applicable",
+                    "domain_value": None,
+                    "relation": "not-applicable",
+                    "relation_value": None,
+                }
+            )
+            continue
+        if scope != "semantic":
+            judged.append(
+                {
+                    "number": it.get("number"),
+                    "title": it.get("title", ""),
+                    "scope": scope,
+                    "domain": "not-applicable",
+                    "domain_value": None,
+                    "relation": "not-applicable",
+                    "relation_value": None,
+                }
+            )
+            continue
+
         has_block = bool(BLOCK.search(body))
         if not has_block:
             skipped += 1
@@ -156,6 +212,7 @@ def judge(issues):
             {
                 "number": it.get("number"),
                 "title": it.get("title", ""),
+                "scope": scope,
                 "domain": domain_verdict(d_val if d_kind else None),
                 "domain_value": d_val,
                 "relation": relation_verdict(r_val if r_kind else None, body),
@@ -174,6 +231,12 @@ VIOLATION_RELATION = {
     "unproved-shared-law",
 }
 
+VIOLATION_SCOPE = {
+    "mechanism-missing-nonauthority",
+    "nonauthority-without-mechanism",
+    "mechanism-semantic-conflict",
+}
+
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
@@ -183,6 +246,25 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     if args.self_test:
+        mechanism = """## LAYER
+
+```text
+LAYER = MECHANISM
+SEMANTIC AUTHORITY = NONE
+```
+"""
+        assert schema_scope(mechanism) == "mechanism"
+        assert schema_scope("LAYER = MECHANISM\n") == "mechanism-missing-nonauthority"
+        assert schema_scope("SEMANTIC AUTHORITY = NONE\n") == "nonauthority-without-mechanism"
+        assert schema_scope("codec GC FPGA runtime") == "semantic"
+        assert schema_scope(
+            mechanism
+            + "\n## BINARY-DOMAIN RECORD\n"
+            + "DOMAIN: D5\nBINARY OBJECT: 00101\nLAW: x\n"
+            + "WITNESS: #1\nFALSIFIER: remove x\nSTATUS: hypothesis\n"
+            + "RELATION: Core-only\n"
+        ) == "mechanism-semantic-conflict"
+
         cases = [
             ("ok", "## DOMAIN\nD5", "ok"),
             ("ok-unknown", "DOMAIN: UNKNOWN", "ok"),
@@ -211,7 +293,11 @@ def main(argv=None):
         assert scoped == [] and skipped == 1
         # Exact heading guard: "DOMAIN pass rule" is not the DOMAIN field.
         assert field_value("## DOMAIN pass rule\n", "DOMAIN") == (None, None)
-        print(f"(binary-domain-selftest-ok ({ok + 2} cases))")
+        print("SCHEMA-SCOPE-MECHANISM=PASS")
+        print("SCHEMA-SCOPE-INCOMPLETE-FAIL-CLOSED=PASS")
+        print("SCHEMA-SCOPE-NO-NAME-GUESSING=PASS")
+        print("SCHEMA-SCOPE-CONFLICT=PASS")
+        print(f"(binary-domain-selftest-ok ({ok + 2} field cases))")
         return 0
 
     if not args.issues:
@@ -229,9 +315,12 @@ def main(argv=None):
         baseline["domain"] = set(v.get("domain", []))
         baseline["relation"] = set(v.get("relation", []))
 
-    new_d, new_r = [], []
+    new_s, new_d, new_r = [], [], []
     for row in judged:
         n = row["number"]
+        if row.get("scope") in VIOLATION_SCOPE:
+            new_s.append(row)
+            continue
         if row["domain"] in VIOLATION_DOMAIN and n not in baseline["domain"]:
             new_d.append(row)
         if row["relation"] in VIOLATION_RELATION and n not in baseline["relation"]:
@@ -239,15 +328,18 @@ def main(argv=None):
 
     print(
         f"(binary-domain-format (judged {len(judged)}) "
-        f"(new-domain {len(new_d)}) (new-relation {len(new_r)}) "
+        f"(new-scope {len(new_s)}) (new-domain {len(new_d)}) "
+        f"(new-relation {len(new_r)}) "
         f"(skipped {skipped}))"
     )
+    for row in new_s:
+        print(f"  scope {row['scope']:32} #{row['number']}")
     for row in new_d:
         print(f"  domain {row['domain']:12} #{row['number']}  {row['domain_value']!r}")
     for row in new_r:
         print(f"  relation {row['relation']:12} #{row['number']}  {row['relation_value']!r}")
 
-    return 1 if new_d or new_r else 0
+    return 1 if new_s or new_d or new_r else 0
 
 
 if __name__ == "__main__":
