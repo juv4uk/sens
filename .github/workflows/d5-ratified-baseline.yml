@@ -4,9 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/research-2689-d5-ratified-baseline.py"
-      - "benchmarks/d5-closure-map/**"
-      - "scripts/research-2322-generative-domain-forecast.py"
-      - "benchmarks/generator-economy/semantic-fact-ledger.json"
+      - "knowledge/d5-historical-full-map.json"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/d5-ratified-baseline.yml"
   workflow_dispatch:
@@ -23,7 +21,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Verify owner-ratified D5 v1 baseline
+      - name: Verify current owner-ratified D5 OD-005 baseline
         run: |
           python3 scripts/research-2689-d5-ratified-baseline.py \
             --json-out /tmp/d5-ratified-baseline.json
@@ -36,11 +34,13 @@ jobs:
             echo
             echo "- width: 5"
             echo "- capacity: 32"
-            echo "- selector-generated residents: 8"
-            echo "- UNKNOWN/free non-residents: 24"
-            echo "- manual non-selector residents: 0"
-            echo "- occupancy change requires explicit owner baseline update"
-            echo "- UNKNOWN/free is not spare capacity"
+            echo "- resident coordinates: 32/32"
+            echo "- unallocated coordinates: 0"
+            echo "- selector residents retained: 8"
+            echo "- historical nonselector residents: 24"
+            echo "- every D4 parent has exact P0/P1 D5 children"
+            echo "- canonical authority: OD-005 / #2750"
+            echo "- old 8+24 sparse map is pre-OD005 research evidence, not current occupancy authority"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload machine-readable result
