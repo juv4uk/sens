@@ -28,7 +28,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::{parse, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -95,6 +95,9 @@ pub(crate) fn invoke_value(
 ) -> Result<Value, LanguageError> {
     match function {
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::DomainIdentity(identity) => {
+            canon::invoke_domain_identity(*identity, arguments, environment, span)
+        }
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -174,13 +177,9 @@ pub(crate) fn evaluate_step(
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
-        ExprKind::DomainCall(identity, _) => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!(
-                "domain-qualified call routing is not admitted yet · marshrut domennoho vyklyku shche ne dopushchenyi: {identity}"
-            ),
-            expression.span,
-        )),
+        ExprKind::DomainCall(identity, arguments) => {
+            dispatch_domain_call(*identity, arguments, environment, expression.span)
+        },
         // Виконання залежить лише від числових координат (#1697): слот або є,
         // або названа помилка — пошуку за іменем більше немає.
         ExprKind::Local { depth, index } => environment
@@ -208,6 +207,15 @@ fn evaluate_list(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    if let Some(identity) = binary_head_domain_identity(&items[0]).or_else(|| {
+        items[0]
+            .kind
+            .as_symbol()
+            .and_then(crate::semantic_registry::domain_identity_for_surface)
+    }) {
+        return dispatch_domain_call(identity, &items[1..], environment, span);
+    }
+
     dispatch_call(
         items[0].kind.as_symbol(),
         binary_head_sid(&items[0]),
@@ -216,6 +224,76 @@ fn evaluate_list(
         environment,
         span,
     )
+}
+
+fn domain_is_d3(identity: CoreDomainIdentity, raw: u8) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D3(word) if word.word().packed_bits() == raw
+    )
+}
+
+fn exact_domain_form_arity(
+    identity: CoreDomainIdentity,
+    arguments: &[Expr],
+    expected: usize,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if arguments.len() == expected {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!(
+            "{identity}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            arguments.len()
+        ),
+        span,
+    ))
+}
+
+fn dispatch_domain_call(
+    identity: CoreDomainIdentity,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
+    if domain_is_d3(identity, 0b001) {
+        exact_domain_form_arity(identity, arguments, 1, span)?;
+        return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
+    }
+
+    match necessary_forms::identity_for_domain_identity(identity) {
+        Some(necessary_forms::NecessaryFormIdentity::Lambda) => {
+            return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
+        }
+        Some(necessary_forms::NecessaryFormIdentity::Define) => {
+            return special_forms::evaluate_definition(arguments, environment, span)
+                .map(EvalStep::Value);
+        }
+        None => {}
+    }
+
+    if domain_is_d3(identity, 0b011) {
+        return special_forms::evaluate_cond(arguments, environment, span);
+    }
+
+    if canon::has_domain_primitive(identity) {
+        let mut values = Vec::with_capacity(arguments.len());
+        for argument in arguments {
+            values.push(evaluate(argument, environment)?);
+        }
+        return canon::invoke_domain_identity(identity, &values, environment, span)
+            .map(EvalStep::Value);
+    }
+
+    Err(LanguageError::new(
+        ErrorKind::Type,
+        format!(
+            "domain identity has no admitted callable mechanism · domenna identychnist ne maie dopushchenoho vyklyku: {identity}"
+        ),
+        span,
+    ))
 }
 
 /// Спільний диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
@@ -306,6 +384,13 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
+fn binary_head_domain_identity(expression: &Expr) -> Option<CoreDomainIdentity> {
+    let ExprKind::DomainIdentity(identity) = expression.kind else {
+        return None;
+    };
+    Some(identity)
+}
+
 fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
     let ExprKind::Sid(sid) = expression.kind else {
         return None;
@@ -329,6 +414,37 @@ impl ExprKindExt for ExprKind {
 #[cfg(test)]
 mod single_pass_eval_tests {
     use super::*;
+
+    #[test]
+    fn canonical_d3_and_d4_surfaces_execute_through_domain_calls() {
+        let source = r#"
+            (define pick
+              (lambda (pair)
+                (cond
+                  ((atom? pair) (quote atom))
+                  (t (car pair)))))
+            (pick (cons (quote left) (quote ())))
+        "#;
+        let mut session = Session::default();
+        let result = eval_program(source, &mut session)
+            .expect("D3/D4 domain-routed core should execute");
+        assert_eq!(result.value.to_string(), "left");
+    }
+
+    #[test]
+    fn first_class_d3_domain_identity_invokes_without_legacy_sid_projection() {
+        let identity = crate::semantic_registry::domain_identity_for_surface("atom?")
+            .expect("ATOM domain identity");
+        let environment = Environment::root();
+        let result = invoke_value(
+            &Value::DomainIdentity(identity),
+            &[Value::Symbol("x".into())],
+            &environment,
+            Span { start: 0, end: 0 },
+        )
+        .expect("D3 ATOM domain value should invoke");
+        assert_eq!(result.to_string(), "(1)");
+    }
 
     #[test]
     fn single_pass_eval_parsed_expressions_evaluates_preparsed_ast() {
