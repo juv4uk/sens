@@ -359,10 +359,9 @@ mod tests {
 
     #[test]
     fn d1_remains_a_dedicated_value_domain_not_expression_identity() {
-        for source in ["1"] {
-            let error = parse_canonical_binary(source).unwrap_err();
-            assert_eq!(error.kind, ErrorKind::Parse, "{source}");
-        }
+        let source = "1";
+        let error = parse_canonical_binary(source).unwrap_err();
+        assert_eq!(error.kind, ErrorKind::Parse, "{source}");
     }
 
     #[test]
