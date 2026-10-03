@@ -1,0 +1,45 @@
+name: FEXPR protocol cube research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2522-fexpr-protocol-cube.py"
+      - "docs/research/2522-fexpr-protocol-cube*.md"
+      - "crates/sens/src/eval/closures.rs"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/fexpr-protocol-cube.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2522-fexpr-protocol-cube.py"
+      - "docs/research/2522-fexpr-protocol-cube*.md"
+      - "crates/sens/src/eval/closures.rs"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/fexpr-protocol-cube.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cube:
+    name: FEXPR raw/env/result protocol cube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run Phase-E protocol cube
+        run: python3 scripts/research-2522-fexpr-protocol-cube.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2522 FEXPR/FSUBR protocol cube"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2522-fexpr-protocol-cube.py
+            echo "~~~"
+            echo
+            echo "- Historical source control: LISP 1.5 Appendix B pp. 70–71."
+            echo "- No width/address is allocated by this research gate."
+          } >> "$GITHUB_STEP_SUMMARY"
