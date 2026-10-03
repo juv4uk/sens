@@ -127,8 +127,8 @@ impl Text7 {
     ///
     /// Every cell occupies exactly seven bits (`BinarySourceWord::W7`), with zero
     /// interior byte padding. Eight 7-bit cells pack into exactly 56 bits (7 bytes),
-    /// achieving 100% information density without the wasted 8th bit of ASCII or
-    /// the variable multi-byte overhead of UTF-8.
+    /// using exactly seven payload bits per cell with no interior byte padding.
+    /// This is a storage/layout property, not a claim about Shannon capacity.
     pub fn to_packed_w7(&self) -> PackedBitstream {
         let mut packer = BitPacker::with_capacity_bits(self.cells.len() * 7);
         for &cell in self.cells.iter() {
@@ -359,7 +359,7 @@ mod tests {
 
     #[test]
     fn w7_packed_bitstream_round_trips_exact_cells_with_dense_packing() {
-        // 8 cells of 7 bits each = 56 bits = exactly 7 physical bytes (12.5% compression vs 8 bytes)
+        // 8 cells of 7 bits each = 56 payload bits = exactly 7 bytes before external framing
         let sample = vec![0x00, 0x11, 0x16, 0x18, 0x5c, 0x5d, 0x3e, 0x60];
         let text = Text7::from_cells(sample.clone()).unwrap();
 
