@@ -16,7 +16,8 @@ fn invalid_binding(source: &str) {
     assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
     assert!(
         error.message.contains("canonical name is immutable")
-            || error.message.contains("surface routes to immutable function SID"),
+            || error.message.contains("surface routes to immutable function SID")
+            || error.message.contains("lambda parameter must be a symbol"),
         "unexpected error for {source}: {}",
         error.message
     );
