@@ -1,8 +1,8 @@
 //! Independent Common Lisp execution kernel.
 //!
-//! sens owns semantic identities and laws. This crate owns only process
-//! execution against a real Common Lisp implementation and preserves the
-//! caller-provided 8-bit semantic identity as opaque provenance.
+//! sens owns semantic identities and laws. Canonical requests preserve
+//! `CoreDomainIdentity` exactly. Historical 8-bit ABI provenance is kept in
+//! a separately named compatibility type and is never promoted to a domain.
 //!
 //! The first witness uses SBCL, but SBCL names/functions are execution
 //! witnesses, never semantic authority.
@@ -12,20 +12,28 @@ use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use sens::CoreDomainIdentity;
 use wsm_kernel_c_abi::{
     WsmKernelKind, WsmKernelRequest, WsmKernelVTable, WsmMutableByteSpan, WsmStatus,
     WSM_KERNEL_ABI_VERSION,
 };
 
-/// Opaque sens experimental semantic identity.
+/// Compatibility-only identity carried by the historical C ABI.
 ///
-/// This crate deliberately does not attach meaning to the byte.
+/// This byte is provenance/transport data. It is deliberately not convertible
+/// to `CoreDomainIdentity` because the byte does not contain a domain proof.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct SemanticId(pub u8);
+pub struct LegacyAbiSemanticId(pub u8);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum CommonLispFailureIdentity {
+    Domain(CoreDomainIdentity),
+    LegacyAbi(LegacyAbiSemanticId),
+}
 
 const SID_ADD: u8 = 0b0000_1100;
 
-fn semantic_form_for_request(semantic_id: u8, payload: &str) -> Result<String, ()> {
+fn legacy_abi_form_for_request(semantic_id: u8, payload: &str) -> Result<String, ()> {
     if semantic_id != SID_ADD {
         return Ok(payload.to_string());
     }
@@ -42,29 +50,29 @@ fn semantic_form_for_request(semantic_id: u8, payload: &str) -> Result<String, (
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CommonLispRequest {
-    pub semantic_id: SemanticId,
+    pub identity: CoreDomainIdentity,
     pub form: String,
 }
 
 impl CommonLispRequest {
-    pub fn new(semantic_id: u8, form: impl Into<String>) -> Self {
+    pub fn new(identity: CoreDomainIdentity, form: impl Into<String>) -> Self {
         Self {
-            semantic_id: SemanticId(semantic_id),
+            identity,
             form: form.into(),
         }
-    }
-
-    fn printable_eval_form(&self) -> String {
-        format!(
-            "(let ((*print-readably* t)) (write (progn {}) :escape t) (terpri))",
-            self.form
-        )
     }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CommonLispResult {
-    pub semantic_id: SemanticId,
+    pub identity: CoreDomainIdentity,
+    pub stdout: Vec<u8>,
+    pub stderr: Vec<u8>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LegacyCommonLispResult {
+    pub identity: LegacyAbiSemanticId,
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
 }
@@ -79,7 +87,7 @@ pub struct ProcessResult {
 pub enum CommonLispKernelError {
     Spawn(std::io::Error),
     ProcessFailed {
-        semantic_id: Option<SemanticId>,
+        identity: Option<CommonLispFailureIdentity>,
         status: Option<i32>,
         stdout: Vec<u8>,
         stderr: Vec<u8>,
@@ -91,13 +99,13 @@ impl fmt::Display for CommonLispKernelError {
         match self {
             Self::Spawn(error) => write!(formatter, "failed to start Common Lisp runtime: {error}"),
             Self::ProcessFailed {
-                semantic_id,
+                identity,
                 status,
                 stderr,
                 ..
             } => write!(
                 formatter,
-                "Common Lisp process failed for semantic id {semantic_id:?} ({status:?}): {}",
+                "Common Lisp process failed for identity {identity:?} ({status:?}): {}",
                 String::from_utf8_lossy(stderr)
             ),
         }
@@ -143,7 +151,40 @@ impl CommonLispKernel {
 
         if !output.status.success() {
             return Err(CommonLispKernelError::ProcessFailed {
-                semantic_id: None,
+                identity: None,
+                status: output.status.code(),
+                stdout: output.stdout,
+                stderr: output.stderr,
+            });
+        }
+
+        Ok(ProcessResult {
+            stdout: output.stdout,
+            stderr: output.stderr,
+        })
+    }
+
+    fn execute_form(
+        &self,
+        form: &str,
+        identity: CommonLispFailureIdentity,
+    ) -> Result<ProcessResult, CommonLispKernelError> {
+        let printable = format!(
+            "(let ((*print-readably* t)) (write (progn {form}) :escape t) (terpri))"
+        );
+        let output = Command::new(&self.executable)
+            .arg("--noinform")
+            .arg("--disable-debugger")
+            .arg("--non-interactive")
+            .arg("--eval")
+            .arg(printable)
+            .arg("--quit")
+            .output()
+            .map_err(CommonLispKernelError::Spawn)?;
+
+        if !output.status.success() {
+            return Err(CommonLispKernelError::ProcessFailed {
+                identity: Some(identity),
                 status: output.status.code(),
                 stdout: output.stdout,
                 stderr: output.stderr,
@@ -160,27 +201,30 @@ impl CommonLispKernel {
         &self,
         request: &CommonLispRequest,
     ) -> Result<CommonLispResult, CommonLispKernelError> {
-        let output = Command::new(&self.executable)
-            .arg("--noinform")
-            .arg("--disable-debugger")
-            .arg("--non-interactive")
-            .arg("--eval")
-            .arg(request.printable_eval_form())
-            .arg("--quit")
-            .output()
-            .map_err(CommonLispKernelError::Spawn)?;
-
-        if !output.status.success() {
-            return Err(CommonLispKernelError::ProcessFailed {
-                semantic_id: Some(request.semantic_id),
-                status: output.status.code(),
-                stdout: output.stdout,
-                stderr: output.stderr,
-            });
-        }
-
+        let output = self.execute_form(
+            &request.form,
+            CommonLispFailureIdentity::Domain(request.identity),
+        )?;
         Ok(CommonLispResult {
-            semantic_id: request.semantic_id,
+            identity: request.identity,
+            stdout: output.stdout,
+            stderr: output.stderr,
+        })
+    }
+
+    /// Execute one historical C-ABI/raw-island request without inventing a
+    /// canonical domain identity from its byte.
+    pub fn evaluate_legacy_abi(
+        &self,
+        identity: LegacyAbiSemanticId,
+        form: impl AsRef<str>,
+    ) -> Result<LegacyCommonLispResult, CommonLispKernelError> {
+        let output = self.execute_form(
+            form.as_ref(),
+            CommonLispFailureIdentity::LegacyAbi(identity),
+        )?;
+        Ok(LegacyCommonLispResult {
+            identity,
             stdout: output.stdout,
             stderr: output.stderr,
         })
@@ -191,7 +235,7 @@ impl CommonLispKernel {
 struct CommonLispAbiContext {
     kernel: CommonLispKernel,
     running: bool,
-    last_semantic_id: Option<SemanticId>,
+    last_legacy_semantic_id: Option<LegacyAbiSemanticId>,
 }
 
 /// Owns the stable context behind the semantic-neutral C ABI vtable.
@@ -216,7 +260,7 @@ impl CommonLispAbiAdapter {
         let mut context = Box::new(CommonLispAbiContext {
             kernel,
             running: false,
-            last_semantic_id: None,
+            last_legacy_identity: None,
         });
         let context_ptr = (&mut *context) as *mut CommonLispAbiContext as *mut c_void;
 
@@ -237,8 +281,8 @@ impl CommonLispAbiAdapter {
         self.vtable
     }
 
-    pub fn last_semantic_id(&self) -> Option<SemanticId> {
-        self.context.last_semantic_id
+    pub fn last_legacy_semantic_id(&self) -> Option<LegacyAbiSemanticId> {
+        self.context.last_legacy_semantic_id
     }
 }
 
@@ -307,20 +351,20 @@ unsafe extern "C" fn common_lisp_exchange(
     let Ok(payload_text) = std::str::from_utf8(payload) else {
         return WsmStatus::InvalidArgument;
     };
-    let Ok(form) = semantic_form_for_request(request.semantic_id, payload_text) else {
+    let Ok(form) = legacy_abi_form_for_request(request.semantic_id, payload_text) else {
         return WsmStatus::InvalidArgument;
     };
 
-    let kernel_request = CommonLispRequest::new(request.semantic_id, form);
-    let result = match context.kernel.evaluate(&kernel_request) {
+    let legacy_identity = LegacyAbiSemanticId(request.semantic_id);
+    let result = match context.kernel.evaluate_legacy_abi(legacy_identity, form) {
         Ok(result) => result,
         Err(_) => return WsmStatus::KernelFailure,
     };
 
-    if result.semantic_id != SemanticId(request.semantic_id) {
+    if result.identity != legacy_identity {
         return WsmStatus::KernelFailure;
     }
-    context.last_semantic_id = Some(result.semantic_id);
+    context.last_legacy_semantic_id = Some(result.identity);
 
     if response.len < result.stdout.len() {
         unsafe {
@@ -352,24 +396,27 @@ mod tests {
     use super::*;
 
     #[test]
-    fn request_keeps_semantic_id_opaque() {
-        let request = CommonLispRequest::new(0b0000_0101, "(car '(left right))");
-        assert_eq!(request.semantic_id, SemanticId(0b0000_0101));
-        assert!(request.printable_eval_form().contains("(car '(left right))"));
+    fn canonical_request_keeps_exact_domain_identity() {
+        let identity = CoreDomainIdentity::D3(sens::Bija3::from_word(
+            sens::Bit3::new(0b101).unwrap(),
+        ));
+        let request = CommonLispRequest::new(identity, "(car '(left right))");
+        assert_eq!(request.identity, identity);
+        assert_eq!(request.form, "(car '(left right))");
     }
 
     #[test]
     fn semantic_add_uses_exact_sid8_and_arguments_only() {
         assert_eq!(
-            semantic_form_for_request(SID_ADD, "2 3"),
+            legacy_abi_form_for_request(SID_ADD, "2 3"),
             Ok("(+ 2 3)".to_string())
         );
         assert!(
-            semantic_form_for_request(SID_ADD, "(- 7 3)").is_err(),
+            legacy_abi_form_for_request(SID_ADD, "(- 7 3)").is_err(),
             "operator/form text must not override the + SID"
         );
         assert_eq!(
-            semantic_form_for_request(0b0000_0101, "(car '(left right))"),
+            legacy_abi_form_for_request(0b0000_0101, "(car '(left right))"),
             Ok("(car '(left right))".to_string()),
             "raw legacy semantic paths are unchanged in this first slice"
         );
@@ -378,7 +425,10 @@ mod tests {
     #[test]
     fn missing_runtime_is_a_transport_failure_not_a_semantic_result() {
         let kernel = CommonLispKernel::new("__wsm_common_lisp_that_does_not_exist__");
-        let request = CommonLispRequest::new(0b0000_0101, "(car '(left right))");
+        let identity = CoreDomainIdentity::D3(sens::Bija3::from_word(
+            sens::Bit3::new(0b101).unwrap(),
+        ));
+        let request = CommonLispRequest::new(identity, "(car '(left right))");
         assert!(matches!(
             kernel.evaluate(&request),
             Err(CommonLispKernelError::Spawn(_))
@@ -387,8 +437,11 @@ mod tests {
 
     #[test]
     fn process_failure_retains_the_semantic_id() {
+        let identity = CoreDomainIdentity::D3(sens::Bija3::from_word(
+            sens::Bit3::new(0b101).unwrap(),
+        ));
         let error = CommonLispKernelError::ProcessFailed {
-            semantic_id: Some(SemanticId(0b0000_0101)),
+            identity: Some(CommonLispFailureIdentity::Domain(identity)),
             status: Some(1),
             stdout: vec![],
             stderr: b"failure".to_vec(),
@@ -396,9 +449,9 @@ mod tests {
         assert!(matches!(
             error,
             CommonLispKernelError::ProcessFailed {
-                semantic_id: Some(SemanticId(0b0000_0101)),
+                identity: Some(CommonLispFailureIdentity::Domain(found)),
                 ..
-            }
+            } if found == identity
         ));
     }
 
@@ -437,7 +490,7 @@ mod tests {
         };
         assert_eq!(status, WsmStatus::Ok);
         assert_eq!(String::from_utf8_lossy(&output[..written]).trim(), "5");
-        assert_eq!(adapter.last_semantic_id(), Some(SemanticId(SID_ADD)));
+        assert_eq!(adapter.last_legacy_semantic_id(), Some(LegacyAbiSemanticId(SID_ADD)));
 
         let override_text = b"(- 7 3)";
         written = 0;
@@ -477,7 +530,7 @@ mod tests {
         assert_eq!(vtable.abi_version, WSM_KERNEL_ABI_VERSION);
         assert_eq!(vtable.kernel, WsmKernelKind::CommonLisp);
         assert!(vtable.is_mechanically_complete());
-        assert_eq!(adapter.last_semantic_id(), None);
+        assert_eq!(adapter.last_legacy_semantic_id(), None);
     }
 
     #[test]
