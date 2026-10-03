@@ -208,9 +208,9 @@ fn walk_symbols(expr: &Expr, in_quote: bool, out: &mut Vec<SymbolOccurrence>) {
             let head_is_data_preserving_sid = items
                 .first()
                 .map(|h| match &h.kind {
-                    ExprKind::Sid(sid) => *sid == sens::sens!(00000001),
+                    ExprKind::Sid(identity) => identity.legacy8_bits() == Some(0b0000_0001),
                     ExprKind::Symbol(surface) => {
-                        sens::surface_has_sid(surface, sens::sens!(00000001))
+                        sens::surface_has_legacy8_bits(surface, 0b0000_0001)
                     }
                     _ => false,
                 })
