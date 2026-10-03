@@ -3,10 +3,8 @@
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
-use crate::{
-    Closure, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8,
-    Span, Value,
-};
+use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
+use crate::CoreDomainIdentity;
 use std::{
     collections::HashSet,
     rc::Rc,
