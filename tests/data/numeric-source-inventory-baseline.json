@@ -1,12 +1,13 @@
 {
   "schema": 1,
-  "measured_from": "sens PR #1709, head 71e5bae2e57fd2081025d2340f74499e4007b16f",
-  "policy": "migration-sensitive counts are ceilings; decreases are progress, increases fail",
+  "measured_from": "pre-domain-reader main; Function8 debt ratchet seeded from 2026-10-03 inventory",
+  "policy": "migration-sensitive counts are ceilings; bare W3-W6 are canonical domain words; legacy bare W8 may only decrease",
   "categories": {
     "binary-shaped-multibit-number": 132,
     "decimal-integer-needs-migration": 4475,
     "decimal-fraction-or-exponent-needs-policy": 154,
-    "rational-literal": 35
+    "rational-literal": 35,
+    "legacy-function8-source-debt": 29050
   },
   "buckets": {
     "active-lib": {

@@ -1,6 +1,6 @@
 (
-    (schema island-math-evidence/1)
-  (authority "lib/surface/semantic-registry.lisp")
+  (schema island-math-evidence/2)
+  (authority "knowledge/d5-historical-full-map.json")
   (role mechanism-evidence-only)
   (rows
-    (00001101 common-lisp execution-witness "synthetic-unadmitted-route")))
+    (01011 common-lisp execution-witness "synthetic-unadmitted-route")))

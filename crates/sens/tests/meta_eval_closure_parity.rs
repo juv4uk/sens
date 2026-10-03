@@ -14,7 +14,7 @@ fn native(expr: &str) -> String {
 
 fn meta(expr: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+    sens::load_core_library(&mut session)
         .expect("core should load");
     sens::load_meta_evaluator_library(&mut session)
         .expect("meta evaluator should load");

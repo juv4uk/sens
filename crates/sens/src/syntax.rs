@@ -166,7 +166,18 @@ pub(crate) mod fasl {
     }
 
     fn put_domain_identity(out: &mut Vec<u8>, identity: crate::CoreDomainIdentity) {
-        out.push(identity.width() as u8);
+        let tag = match identity {
+            crate::CoreDomainIdentity::D1(_) => 1,
+            crate::CoreDomainIdentity::D2(_) => 2,
+            crate::CoreDomainIdentity::D3(_) => 3,
+            crate::CoreDomainIdentity::D4(_) => 4,
+            crate::CoreDomainIdentity::D5(_) => 5,
+            crate::CoreDomainIdentity::D6(_) => 6,
+            crate::CoreDomainIdentity::D7Sound(_) => 0x71,
+            crate::CoreDomainIdentity::D7LocalOrdinal(_) => 0x72,
+            crate::CoreDomainIdentity::D8(_) => 8,
+        };
+        out.push(tag);
         out.push(identity.packed_bits());
     }
 
@@ -178,10 +189,15 @@ pub(crate) mod fasl {
         let payload = *bytes.get(*pos + 1)?;
         *pos += 2;
         match domain {
+            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(payload)?).into()),
+            2 => Some(crate::Racana2::from_word(crate::Bit2::new(payload)?).into()),
             3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
             4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
             5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
             6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
+            0x71 => Some(crate::D7SoundCell::from_word(crate::Bit7::new(payload)?).into()),
+            0x72 => Some(crate::D7LocalOrdinal::from_word(crate::Bit7::new(payload)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
             _ => None,
         }
     }
@@ -450,7 +466,18 @@ pub(crate) mod wire {
     }
 
     fn put_domain_identity(out: &mut Vec<u8>, identity: crate::CoreDomainIdentity) {
-        out.push(identity.width() as u8);
+        let tag = match identity {
+            crate::CoreDomainIdentity::D1(_) => 1,
+            crate::CoreDomainIdentity::D2(_) => 2,
+            crate::CoreDomainIdentity::D3(_) => 3,
+            crate::CoreDomainIdentity::D4(_) => 4,
+            crate::CoreDomainIdentity::D5(_) => 5,
+            crate::CoreDomainIdentity::D6(_) => 6,
+            crate::CoreDomainIdentity::D7Sound(_) => 0x71,
+            crate::CoreDomainIdentity::D7LocalOrdinal(_) => 0x72,
+            crate::CoreDomainIdentity::D8(_) => 8,
+        };
+        out.push(tag);
         out.push(identity.packed_bits());
     }
 
@@ -462,10 +489,15 @@ pub(crate) mod wire {
         let payload = *bytes.get(*pos + 1)?;
         *pos += 2;
         match domain {
+            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(payload)?).into()),
+            2 => Some(crate::Racana2::from_word(crate::Bit2::new(payload)?).into()),
             3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
             4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
             5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
             6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
+            0x71 => Some(crate::D7SoundCell::from_word(crate::Bit7::new(payload)?).into()),
+            0x72 => Some(crate::D7LocalOrdinal::from_word(crate::Bit7::new(payload)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
             _ => None,
         }
     }

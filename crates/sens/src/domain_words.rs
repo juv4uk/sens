@@ -21,7 +21,7 @@
 //! let _: PredicateBit = true;
 //! ```
 
-use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6};
+use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8};
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -143,6 +143,61 @@ impl CoreD6 {
     }
 }
 
+/// Exact seven-bit D7 Sound7 cell identity.
+///
+/// D7 is role-qualified: the same seven payload bits used as a local ordinal
+/// are a different semantic object. No implicit conversion exists between the
+/// two wrappers.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct D7SoundCell(Bit7);
+
+impl D7SoundCell {
+    pub const fn from_word(word: Bit7) -> Self {
+        Self(word)
+    }
+
+    pub const fn word(self) -> Bit7 {
+        self.0
+    }
+}
+
+/// Exact seven-bit D7 local śloka/sūtra ordinal identity.
+///
+/// This is provenance/ordering identity only; it does not acquire arithmetic
+/// Number laws merely because its payload is seven bits.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct D7LocalOrdinal(Bit7);
+
+impl D7LocalOrdinal {
+    pub const fn from_word(word: Bit7) -> Self {
+        Self(word)
+    }
+
+    pub const fn word(self) -> Bit7 {
+        self.0
+    }
+}
+
+/// Exact eight-bit carrier for the ratified Core.D8 domain.
+///
+/// D8 is a domain identity, not the historical flat Sens8/Sid8 axis. Equal
+/// bits do not create any conversion between these types.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD8(Bit8);
+
+impl CoreD8 {
+    pub const fn from_word(word: Bit8) -> Self {
+        Self(word)
+    }
+
+    pub const fn word(self) -> Bit8 {
+        self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -179,6 +234,18 @@ mod tests {
             let word = Bit6::new(raw).unwrap();
             assert!(CoreD6::from_word(word).word() == word);
         }
+
+        for raw in 0..=127 {
+            let word = Bit7::new(raw).unwrap();
+            assert!(D7SoundCell::from_word(word).word() == word);
+            assert!(D7LocalOrdinal::from_word(word).word() == word);
+            assert!(D7SoundCell::from_word(word).word() == D7LocalOrdinal::from_word(word).word());
+        }
+
+        for raw in 0..=255 {
+            let word = Bit8::new(raw).unwrap();
+            assert!(CoreD8::from_word(word).word() == word);
+        }
     }
 
     #[test]
@@ -189,5 +256,8 @@ mod tests {
         assert_eq!(size_of::<CoreD4>(), 1);
         assert_eq!(size_of::<CoreD5>(), 1);
         assert_eq!(size_of::<CoreD6>(), 1);
+        assert_eq!(size_of::<D7SoundCell>(), 1);
+        assert_eq!(size_of::<D7LocalOrdinal>(), 1);
+        assert_eq!(size_of::<CoreD8>(), 1);
     }
 }

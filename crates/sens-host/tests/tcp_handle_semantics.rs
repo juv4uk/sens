@@ -10,7 +10,7 @@ use std::thread;
 fn tcp_session() -> Session {
     install();
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     load_tcp_library(&mut session).unwrap();
     session
 }

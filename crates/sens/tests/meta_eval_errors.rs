@@ -6,7 +6,7 @@ fn escape_lisp_string(source: &str) -> String {
 
 fn eval_meta(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     sens::load_meta_evaluator_library(&mut session).unwrap();
 
     let wrapper = format!(

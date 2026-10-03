@@ -45,7 +45,7 @@ fn shared_tails_do_not_overflow_stack() {
 #[test]
 fn core_lib_list_utilities_stay_stack_safe_on_a_long_list() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     let source = r#"
         (def build (lambda (n acc) (cond ((eq? n 0) acc) (t (build (- n 1) (cons n acc))))))
         (def big (build 100000 (quote ())))
@@ -72,7 +72,7 @@ fn core_lib_list_utilities_stay_stack_safe_on_a_long_list() {
 #[test]
 fn symbol_table_sort_stays_stack_safe() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     let helpers = r#"
         (def collect-symbols-onto
           (lambda (expr acc)

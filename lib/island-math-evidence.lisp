@@ -1,21 +1,16 @@
-; #990 — four-island execution evidence subordinate to Canon()/function table.
-; This is NOT a semantic contract and must not carry operation names, law or domain.
-; Semantic identity/meaning stays in lib/surface/semantic-registry.lisp and #1046.
-; Evidence donors: closed #1042 (executor observations), #1052 (Datalog replay).
-; Current bounded slice: SID 00001100 only, because #1053 already admits all four
-; executor routes for that existing SID. Final semantic ratification remains blocked
-; until law/domain are available from the one Canon/function-table authority row.
+; #990 — four-island execution evidence subordinate to exact Core domains.
+; This is NOT a semantic contract and carries no operation-name authority.
+; Semantic identity is Core.D5:01010; this file records executor evidence only.
 
 (
-    (schema island-math-evidence/1)
-  (authority "lib/surface/semantic-registry.lisp")
+  (schema island-math-evidence/2)
+  (authority "knowledge/d5-historical-full-map.json")
   (role mechanism-evidence-only)
   (parent-issue #b1111011110)
-  (canon-convergence-issue #b10000010110)
-  (mechanism-source "lib/function-table-mechanisms.lisp")
-  (ratification-state blocked-until-canon-law-domain)
+  (mechanism-source "lib/core-domain-mechanisms.lisp")
+  (ratification-state domain-identity-admitted-mechanisms-observed)
   (rows
-    (00001100 common-lisp execution-witness "#1042-donor")
-    (00001100 prolog execution-witness "#1042-donor")
-    (00001100 clips execution-witness "#1042-donor")
-    (00001100 datalog execution-witness "#1052-replay+#1042-donor")))
+    (01010 common-lisp execution-witness "#1042-donor")
+    (01010 prolog execution-witness "#1042-donor")
+    (01010 clips execution-witness "#1042-donor")
+    (01010 datalog execution-witness "#1052-replay+#1042-donor")))

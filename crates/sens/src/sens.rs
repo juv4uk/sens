@@ -1,17 +1,17 @@
-//! Exact eight-bit function sense (СЕНС).
+//! Historical exact-eight compatibility carrier.
 //!
-//! #1344 / #1386: Renames the technical acronym `SID` to the ontological term `sens` (СЕНС).
-//! In `sens` / `sens`, exactly 256 functions exist in the `00000000..11111111` space.
-//! Each eight-bit value is the direct `sens` (meaning, sense, вектор, сутність)
-//! of the function itself, not an arbitrary database identifier.
+//! Canonical SENS identity is now exact domain + exact bits
+//! (`CoreDomainIdentity` for D3-D6), not this type. `Sens8` remains only for
+//! legacy registry/backend/provenance consumers while #2817 removes them.
+//! There is no canonical 256-function ontology here.
 
 use std::fmt;
 
-/// Exact eight-bit function sense (СЕНС).
+/// Historical exact-eight compatibility carrier.
 ///
-/// The function identity is exactly the eight bits themselves (`00000000..11111111`).
-/// The packed byte is a private runtime/transport mechanism and is never the
-/// alternate identity of the sens.
+/// This type must not be used to mint canonical language identity. New language
+/// code uses exact domain words; this carrier survives only at named migration
+/// or external mechanism boundaries.
 ///
 /// Deliberately NOT `Ord`/`PartialOrd` (wsm-lazarus owner, 2026-09-23:
 /// "треба заборонити математичні операції над нашим сідом" -- mathematical
@@ -50,27 +50,6 @@ impl Sens8 {
         }
 
         Self(packed)
-    }
-
-    /// Reader-side construction of Sens8 from exactly eight 0/1 source characters.
-    pub(crate) const fn from_exact_bits(bits: &str) -> Option<Self> {
-        let bytes = bits.as_bytes();
-        if bytes.len() != 8 {
-            return None;
-        }
-
-        let mut packed = 0u8;
-        let mut index = 0usize;
-        while index < 8 {
-            let byte = bytes[index];
-            if byte != b'0' && byte != b'1' {
-                return None;
-            }
-            packed = (packed << 1) | (byte - b'0');
-            index += 1;
-        }
-
-        Some(Self(packed))
     }
 
     /// Mechanical boundary for serialization/dispatch only.

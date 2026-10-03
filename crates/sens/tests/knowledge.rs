@@ -13,7 +13,7 @@ fn install_file_capabilities() {
 fn eval_knowledge(source: &str) -> String {
     install_file_capabilities();
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(include_str!("../../../lib/utf8.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/fs.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();

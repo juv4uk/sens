@@ -1,213 +1,190 @@
-; #990 — fail-closed validation for mechanism evidence.
-; Evidence may only attach to an existing Canon/function-table SID and to an
-; executor route already admitted by #1046 mechanism metadata. This checker does
-; not define operation names, meaning, law, domain, or semantic equivalence.
+; #990 — fail-closed validation for exact-domain mechanism evidence.
+;
+; Semantic identity comes from the ratified Core domain map. This checker reads
+; only downstream mechanism/evidence projections keyed by exact domain values;
+; it never resolves through the historical Function8 registry.
 
-(00001001 registry
-  (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
+(0011 mechanisms
+  (101 (read-all (read-file "lib/core-domain-mechanisms.lisp"))))
 
-(00001001 mechanisms
-  (00000101 (01001011 (10100110 "lib/function-table-mechanisms.lisp"))))
+(0011 evidence
+  (101 (read-all (read-file "lib/island-math-evidence.lisp"))))
 
-(00001001 evidence
-  (00000101 (01001011 (10100110 "lib/island-math-evidence.lisp"))))
+(0011 find-section
+  (0010 (name sections)
+    (011
+      ((010 sections) () (001 ()))
+      ((010 sections) (0)
+       (011
+         ((111 (101 (101 sections)) name) (1)
+          (101 sections))
+         ((111 (101 (101 sections)) name) (0)
+          (find-section name (110 sections))))))))
 
-(00001001 registry-rows registry)
+(0011 mechanism-rows
+  (110 (find-section (001 rows) mechanisms)))
 
-(00001001 evidence-sid-bits
-  (00001000 (sid)
-    (00000111
-      ((00100100 sid) sid)
-      (t (01001100 sid)))))
+(0011 evidence-rows
+  (110 (find-section (001 rows) evidence)))
 
-(00001001 find-section
-  (00001000 (name sections)
-    (00000111
-      ((00000010 sections) () (00000001 ()))
-      ((00000010 sections) (0)
-       (00000111
-         ((00000011 (00000101 (00000101 sections)) name) (1)
-          (00000101 sections))
-         ((00000011 (00000101 (00000101 sections)) name) (0)
-          (find-section name (00000110 sections))))))))
+(0011 mechanism-has-route?
+  (0010 (identity executor rows)
+    (011
+      ((010 rows) () (001 no))
+      ((010 rows) (0)
+       (let ((row (101 rows)))
+         (011
+           ((equal? identity (101 row)) (1)
+            (011
+              ((111 executor (second row)) (1) (001 yes))
+              ((111 executor (second row)) (0)
+               (mechanism-has-route? identity executor (110 rows)))))
+           ((equal? identity (101 row)) (0)
+            (mechanism-has-route? identity executor (110 rows)))))))))
 
-(00001001 mechanism-rows
-  (00000110 (find-section (00000001 rows) mechanisms)))
+(0011 evidence-has-route?
+  (0010 (identity executor rows)
+    (011
+      ((010 rows) () (001 no))
+      ((010 rows) (0)
+       (let ((row (101 rows)))
+         (011
+           ((equal? identity (101 row)) (1)
+            (011
+              ((111 executor (second row)) (1) (001 yes))
+              ((111 executor (second row)) (0)
+               (evidence-has-route? identity executor (110 rows)))))
+           ((equal? identity (101 row)) (0)
+            (evidence-has-route? identity executor (110 rows)))))))))
 
-(00001001 evidence-rows
-  (00000110 (find-section (00000001 rows) evidence)))
+(0011 admitted-executor?
+  (0010 (executor)
+    (011
+      ((111 executor (001 common-lisp)) (1) (001 yes))
+      ((111 executor (001 prolog)) (1) (001 yes))
+      ((111 executor (001 clips)) (1) (001 yes))
+      ((111 executor (001 datalog)) (1) (001 yes))
+      (t (001 no)))))
 
-(00001001 registry-has-sid?
-  (00001000 (sid rows)
-    (00000111
-      ((00000010 rows) () (00000001 no))
-      ((00000010 rows) (0)
-       (00000111
-         ((00100010 sid (00000101 (00000101 rows))) (1) (00000001 yes))
-         ((00100010 sid (00000101 (00000101 rows))) (0)
-          (registry-has-sid? sid (00000110 rows))))))))
+(0011 admitted-status?
+  (0010 (status)
+    (011
+      ((111 status (001 execution-witness)) (1) (001 yes))
+      (t (001 no)))))
 
-(00001001 mechanism-has-route?
-  (00001000 (sid executor rows)
-    (00000111
-      ((00000010 rows) () (00000001 no))
-      ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00100010 (evidence-sid-bits sid) (evidence-sid-bits (00000101 row))) (1)
-            (00000111
-              ((00000011 executor (00101111 row)) (1) (00000001 yes))
-              ((00000011 executor (00101111 row)) (0)
-               (mechanism-has-route? sid executor (00000110 rows)))))
-           ((00100010 (evidence-sid-bits sid) (evidence-sid-bits (00000101 row))) (0)
-            (mechanism-has-route? sid executor (00000110 rows)))))))))
+(0011 forbidden-semantic-symbol?
+  (0010 (value)
+    (011
+      ((010 value) () (001 no))
+      ((010 value) (0) (001 no))
+      ((010 value) (1)
+       (011
+         ((111 value (001 operation)) (1) (001 yes))
+         ((111 value (001 meaning)) (1) (001 yes))
+         ((111 value (001 law)) (1) (001 yes))
+         ((111 value (001 domain)) (1) (001 yes))
+         ((111 value (001 operand-domain)) (1) (001 yes))
+         ((111 value (001 result-domain)) (1) (001 yes))
+         (t (001 no)))))))
 
-(00001001 evidence-has-route?
-  (00001000 (sid executor rows)
-    (00000111
-      ((00000010 rows) () (00000001 no))
-      ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00100010 sid (00000101 row)) (1)
-            (00000111
-              ((00000011 executor (00101111 row)) (1) (00000001 yes))
-              ((00000011 executor (00101111 row)) (0)
-               (evidence-has-route? sid executor (00000110 rows)))))
-           ((00100010 sid (00000101 row)) (0)
-            (evidence-has-route? sid executor (00000110 rows)))))))))
-
-(00001001 admitted-executor?
-  (00001000 (executor)
-    (00000111
-      ((00000011 executor (00000001 common-lisp)) (1) (00000001 yes))
-      ((00000011 executor (00000001 prolog)) (1) (00000001 yes))
-      ((00000011 executor (00000001 clips)) (1) (00000001 yes))
-      ((00000011 executor (00000001 datalog)) (1) (00000001 yes))
-      (t (00000001 no)))))
-
-(00001001 admitted-status?
-  (00001000 (status)
-    (00000111
-      ((00000011 status (00000001 execution-witness)) (1) (00000001 yes))
-      (t (00000001 no)))))
-
-(00001001 forbidden-semantic-symbol?
-  (00001000 (value)
-    (00000111
-      ((00000010 value) () (00000001 no))
-      ((00000010 value) (0) (00000001 no))
-      ((00000010 value) (1)
-       (00000111
-         ((00000011 value (00000001 operation)) (1) (00000001 yes))
-         ((00000011 value (00000001 meaning)) (1) (00000001 yes))
-         ((00000011 value (00000001 law)) (1) (00000001 yes))
-         ((00000011 value (00000001 domain)) (1) (00000001 yes))
-         ((00000011 value (00000001 operand-domain)) (1) (00000001 yes))
-         ((00000011 value (00000001 result-domain)) (1) (00000001 yes))
-         (t (00000001 no)))))))
-
-(00001001 contains-forbidden-semantic-section?
-  (00001000 (sections)
-    (00000111
-      ((00000010 sections) () (00000001 no))
-      ((00000010 sections) (0)
-       (10011100 ((section (00000101 sections)))
-         (00000111
-           ((00000010 section) (0)
-            (00000111
-              ((00000011 (forbidden-semantic-symbol? (00000101 section)) (00000001 yes))
+(0011 contains-forbidden-semantic-section?
+  (0010 (sections)
+    (011
+      ((010 sections) () (001 no))
+      ((010 sections) (0)
+       (let ((section (101 sections)))
+         (011
+           ((010 section) (0)
+            (011
+              ((111 (forbidden-semantic-symbol? (101 section)) (001 yes))
                (1)
-               (00000001 yes))
-              (t (contains-forbidden-semantic-section? (00000110 sections)))))
-           (t (contains-forbidden-semantic-section? (00000110 sections)))))))))
+               (001 yes))
+              (t (contains-forbidden-semantic-section? (110 sections)))))
+           (t (contains-forbidden-semantic-section? (110 sections)))))))))
 
-(00001001 validate-rows
-  (00001000 (rows)
-    (00000111
-      ((00000010 rows) ()
-       (00000001 (island-math-evidence-ok)))
-      ((00000010 rows) (0)
-       (10011101 ((row (00000101 rows))
-              (sid (00000101 row))
-              (executor (00101111 row))
-              (status (00110000 row))
-              (provenance-ref (00110001 row)))
-         (00000111
-           ((00100010 (00101000 row) 4)
+(0011 validate-rows
+  (0010 (rows)
+    (011
+      ((010 rows) ()
+       (001 (island-math-evidence-ok)))
+      ((010 rows) (0)
+       (let* ((row (101 rows))
+              (identity (101 row))
+              (executor (second row))
+              (status (third row))
+              (provenance-ref (fourth row)))
+         (011
+           ((equal? (length row) 4)
             (0)
-            (00100111 (00000001 island-math-evidence-violation)
-                  (00000001 invalid-evidence-row-shape) sid))
-           ((00100100 provenance-ref)
+            (list (001 island-math-evidence-violation)
+                  (001 invalid-evidence-row-shape) identity))
+           ((string? provenance-ref)
             (0)
-            (00100111 (00000001 island-math-evidence-violation)
-                  (00000001 provenance-must-be-string) sid executor))
-           ((00000011 (registry-has-sid? sid registry-rows) (00000001 no))
+            (list (001 island-math-evidence-violation)
+                  (001 provenance-must-be-string) identity executor))
+           ((111 (admitted-executor? executor) (001 no))
             (1)
-            (00100111 (00000001 island-math-evidence-violation)
-                  (00000001 sid-not-in-canon-function-table) sid))
-           ((00000011 (admitted-executor? executor) (00000001 no))
+            (list (001 island-math-evidence-violation)
+                  (001 unsupported-executor) identity executor))
+           ((111 (mechanism-has-route? identity executor mechanism-rows) (001 no))
             (1)
-            (00100111 (00000001 island-math-evidence-violation)
-                  (00000001 unsupported-executor) sid executor))
-           ((00000011 (mechanism-has-route? sid executor mechanism-rows) (00000001 no))
+            (list (001 island-math-evidence-violation)
+                  (001 executor-route-not-admitted-by-canon-projection)
+                  identity executor))
+           ((111 (admitted-status? status) (001 no))
             (1)
-            (00100111 (00000001 island-math-evidence-violation)
-                  (00000001 executor-route-not-admitted-by-canon-projection) sid executor))
-           ((00000011 (admitted-status? status) (00000001 no))
+            (list (001 island-math-evidence-violation)
+                  (001 unsupported-status) identity status))
+           ((111 (evidence-has-route? identity executor (110 rows)) (001 yes))
             (1)
-            (00100111 (00000001 island-math-evidence-violation)
-                  (00000001 unsupported-status) sid status))
-           ((00000011 (evidence-has-route? sid executor (00000110 rows)) (00000001 yes))
-            (1)
-            (00100111 (00000001 island-math-evidence-violation)
-                  (00000001 duplicate-executor-evidence) sid executor))
-           (t (validate-rows (00000110 rows)))))))))
+            (list (001 island-math-evidence-violation)
+                  (001 duplicate-executor-evidence) identity executor))
+           (t (validate-rows (110 rows)))))))))
 
-(00001001 same-sid?
-  (00001000 (sid rows)
-    (00000111
-      ((00000010 rows) () (00000001 yes))
-      ((00000010 rows) (0)
-       (00000111
-         ((00100010 sid (00000101 (00000101 rows))) (1)
-          (same-sid? sid (00000110 rows)))
-         ((00100010 sid (00000101 (00000101 rows))) (0)
-          (00000001 no)))))))
+(0011 same-identity?
+  (0010 (identity rows)
+    (011
+      ((010 rows) () (001 yes))
+      ((010 rows) (0)
+       (011
+         ((equal? identity (101 (101 rows))) (1)
+          (same-identity? identity (110 rows)))
+         ((equal? identity (101 (101 rows))) (0)
+          (001 no)))))))
 
-(00001001 four-island-slice?
-  (00001000 (sid)
-    (00000111
-      ((00000011 (evidence-has-route? sid (00000001 common-lisp) evidence-rows) (00000001 no))
-       (1) (00000001 no))
-      ((00000011 (evidence-has-route? sid (00000001 prolog) evidence-rows) (00000001 no))
-       (1) (00000001 no))
-      ((00000011 (evidence-has-route? sid (00000001 clips) evidence-rows) (00000001 no))
-       (1) (00000001 no))
-      ((00000011 (evidence-has-route? sid (00000001 datalog) evidence-rows) (00000001 no))
-       (1) (00000001 no))
-      (t (00000001 yes)))))
+(0011 four-island-slice?
+  (0010 (identity)
+    (011
+      ((111 (evidence-has-route? identity (001 common-lisp) evidence-rows) (001 no))
+       (1) (001 no))
+      ((111 (evidence-has-route? identity (001 prolog) evidence-rows) (001 no))
+       (1) (001 no))
+      ((111 (evidence-has-route? identity (001 clips) evidence-rows) (001 no))
+       (1) (001 no))
+      ((111 (evidence-has-route? identity (001 datalog) evidence-rows) (001 no))
+       (1) (001 no))
+      (t (001 yes)))))
 
-(00001001 row-verdict (validate-rows evidence-rows))
+(0011 row-verdict (validate-rows evidence-rows))
 
-(00001001 verdict
-  (00000111
-    ((00000011 (contains-forbidden-semantic-section? evidence) (00000001 yes))
+(0011 verdict
+  (011
+    ((111 (contains-forbidden-semantic-section? evidence) (001 yes))
      (1)
-     (00000001 (island-math-evidence-violation semantic-field-forbidden)))
-    ((00000010 evidence-rows) ()
-     (00000001 (island-math-evidence-violation empty-evidence)))
-    ((00100010 row-verdict (00000001 (island-math-evidence-ok)))
+     (001 (island-math-evidence-violation semantic-field-forbidden)))
+    ((010 evidence-rows) ()
+     (001 (island-math-evidence-violation empty-evidence)))
+    ((equal? row-verdict (001 (island-math-evidence-ok)))
      (1)
-     (10011100 ((target-sid (00000101 (00000101 evidence-rows))))
-       (00000111
-         ((00000011 (same-sid? target-sid evidence-rows) (00000001 no))
+     (let ((target-identity (101 (101 evidence-rows))))
+       (011
+         ((111 (same-identity? target-identity evidence-rows) (001 no))
           (1)
-          (00000001 (island-math-evidence-violation first-slice-must-have-one-sid)))
-         ((00000011 (four-island-slice? target-sid) (00000001 no))
+          (001 (island-math-evidence-violation first-slice-must-have-one-domain-identity)))
+         ((111 (four-island-slice? target-identity) (001 no))
           (1)
-          (00000001 (island-math-evidence-violation missing-required-four-island-slice)))
-         (t (00000001 (island-math-evidence-ok))))))
+          (001 (island-math-evidence-violation missing-required-four-island-slice)))
+         (t (001 (island-math-evidence-ok))))))
     (t row-verdict)))
 
-(01001000 verdict)
+(print verdict)

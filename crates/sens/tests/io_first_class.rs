@@ -10,15 +10,15 @@ fn eval(source: &str) -> Value {
 #[test]
 fn write_to_string_read_and_eval_are_first_class_values() {
     assert_eq!(
-        eval("(def render 01001100) (render (quote (a b)))"),
+        eval("(def render write-to-string) (render (quote (a b)))"),
         Value::String(Rc::from("(a b)")),
     );
     assert_eq!(
-        eval("(def parse-one 01001010) (parse-one \"(+ 1 2)\")").to_string(),
+        eval("(def parse-one read) (parse-one \"(+ 1 2)\")").to_string(),
         "(+ 1 2)",
     );
     assert_eq!(
-        eval("(def run 01001101) (run (quote (00001100 1 2)))"),
+        eval("(def run eval) (run (quote (01010 1 2)))"),
         Value::Number(3.0, sens::Exactness::Exact),
     );
 }
@@ -26,7 +26,7 @@ fn write_to_string_read_and_eval_are_first_class_values() {
 #[test]
 fn read_all_is_a_first_class_value() {
     assert_eq!(
-        eval("(def parse-all 01001011) (parse-all \"a b\")").to_string(),
+        eval("(def parse-all read-all) (parse-all \"a b\")").to_string(),
         "(a b)",
     );
 }
@@ -34,13 +34,13 @@ fn read_all_is_a_first_class_value() {
 #[test]
 fn print_and_princ_are_first_class_and_keep_transcript_semantics() {
     let mut print_session = Session::default();
-    let print_result = eval_program("(def emit 01001000) (emit \"hello\")", &mut print_session)
+    let print_result = eval_program("(def emit print) (emit \"hello\")", &mut print_session)
         .expect("first-class print should evaluate");
     assert_eq!(print_result.value, Value::String(Rc::from("hello")));
     assert_eq!(print_result.output, vec!["\"hello\"".to_string()]);
 
     let mut princ_session = Session::default();
-    let princ_result = eval_program("(def emit 01001001) (emit \"hello\")", &mut princ_session)
+    let princ_result = eval_program("(def emit princ) (emit \"hello\")", &mut princ_session)
         .expect("first-class princ should evaluate");
     assert_eq!(princ_result.value, Value::String(Rc::from("hello")));
     assert_eq!(princ_result.output, vec!["hello".to_string()]);

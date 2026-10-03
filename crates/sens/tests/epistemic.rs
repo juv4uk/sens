@@ -9,7 +9,7 @@ use sens::{eval_program, Session};
 
 fn eval_epistemic(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(include_str!("../../../lib/epistemic.lisp"), &mut session).unwrap();
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
@@ -306,7 +306,7 @@ fn intent_rejects_extra_trailing_field() {
 #[test]
 fn observation_accessors_extract_the_bare_values() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(include_str!("../../../lib/epistemic.lisp"), &mut session).unwrap();
     let obs = r#"(def o (make-observation (quote (digest "d")) (quote (build cml succeeds))))"#;
     eval_program(obs, &mut session).unwrap();

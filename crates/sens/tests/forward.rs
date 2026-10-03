@@ -10,7 +10,7 @@ use sens::{eval_program, Session};
 
 fn eval_forward(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
     eval_program(source, &mut session)

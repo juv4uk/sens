@@ -6,7 +6,7 @@ use sens::{eval_program, Session};
 
 fn eval_meta_program(program_source: &str, probe_source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     sens::load_meta_evaluator_library(&mut session).unwrap();
     let source = format!(
         r#"(let ((loaded (my-eval-program (read-all "{}") (quote ()))))

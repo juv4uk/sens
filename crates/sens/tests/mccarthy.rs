@@ -51,7 +51,7 @@ fn eval(source: &str) -> Value {
 #[test]
 fn native_binary_value_round_trips_through_eval_and_print() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+    sens::load_core_library(&mut session)
         .expect("core library loads");
     let first = eval_program("00000101", &mut session)
         .expect("SID value evaluates");
@@ -89,7 +89,7 @@ fn division_by_zero_has_the_contract_3_named_error() {
     }
 
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     for source in ["(quotient 5 0)", "(mod 5 0)"] {
         assert_eq!(
             eval_program(source, &mut session).unwrap_err().kind,
@@ -279,7 +279,7 @@ fn tail_recursion_uses_constant_rust_stack() {
 #[test]
 fn bootstrap_library_is_written_and_executed_in_sens() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     assert_eq!(
         eval_program("(second (quote (radio antenna)))", &mut session)
             .unwrap()
@@ -297,7 +297,7 @@ fn bootstrap_library_is_written_and_executed_in_sens() {
 #[test]
 fn bootstrap_library_provides_list_utilities() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     let run = |source: &str, session: &mut Session| {
         eval_program(source, session).unwrap().value.to_string()
     };
@@ -334,7 +334,7 @@ fn bootstrap_library_provides_list_utilities() {
 #[test]
 fn bootstrap_library_provides_let_and_let_star() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     let run = |source: &str, session: &mut Session| {
         eval_program(source, session).unwrap().value.to_string()
     };
@@ -604,7 +604,7 @@ fn princ_and_print_render_symbols_and_numbers_identically() {
 #[test]
 fn list_is_a_sens_function_in_core_my_not_a_rust_builtin() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     let result = eval_program("(list 1 2 3)", &mut session).unwrap();
     assert_eq!(
         result.value,
@@ -640,7 +640,7 @@ fn evaluator_still_errors_on_a_lone_unknown_symbol() {
 #[test]
 fn non_strict_comparisons_are_sens_functions_not_rust_builtins() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     assert_eq!(
         eval_program("(<=)", &mut session).unwrap_err().kind,
         ErrorKind::Arity
@@ -682,7 +682,7 @@ fn conformance_tests_from_my() {
         .expect("conformance.lisp should parse as valid sens source");
 
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+    sens::load_core_library(&mut session)
         .expect("lib/core.my should load before conformance fixtures run");
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session)
         .expect("lib/unify.my should load before conformance fixtures run");
@@ -801,7 +801,7 @@ fn macro_conformance_tests_from_my() {
         .expect("macro-conformance.lisp should parse as valid sens source");
 
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+    sens::load_core_library(&mut session)
         .expect("lib/core.my should load before macro-conformance fixtures run");
 
     for form in &forms {
@@ -852,7 +852,7 @@ fn linter_tests_from_my() {
         .expect("linter.my should parse as valid sens source");
 
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+    sens::load_core_library(&mut session)
         .expect("lib/core.my should load before linter fixtures run");
     eval_program(include_str!("../../../lib/linter.lisp"), &mut session)
         .expect("lib/linter.my should load before linter fixtures run");
@@ -969,7 +969,7 @@ fn property_tests_from_my() {
 
         for iteration in 0..100 {
             let mut session = Session::default();
-            eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+            sens::load_core_library(&mut session).unwrap();
             eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
             eval_program(include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
             eval_program(include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
@@ -1093,7 +1093,7 @@ fn string_predicate_distinguishes_strings_from_other_atoms() {
 #[test]
 fn symbol_predicate_is_a_sens_function_not_a_rust_builtin() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     assert_eq!(
         eval_program("(symbol? (quote hello))", &mut session)
             .unwrap()
@@ -1270,7 +1270,7 @@ fn constitution_my_stays_in_sync_with_conformance_my() {
 #[test]
 fn symbolic_reasoning_layer_stays_loaded_and_tested() {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+    sens::load_core_library(&mut session)
         .expect("lib/core.my should load before the symbolic layer");
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session)
         .expect("lib/unify.my should load — the symbolic reasoning layer must stay present");
@@ -1542,7 +1542,7 @@ fn meta_eval_lambda_witness_env_capture_and_application() {
     // Witness A: Lexical environment capture (env enters closure data structure)
     // Witness B: Operator-position application (my-apply unpacks closure, binds params, evaluates in frame)
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     sens::load_meta_evaluator_library(&mut session).unwrap();
 
     // 1. Witness A: Explicit environment capture
