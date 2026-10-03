@@ -17,6 +17,8 @@ on:
     branches: [main]
     paths:
       - "docs/research/2344-post-d4-historical-ledger.json"
+      - "docs/research/2709-lisp15-arithmetic-ledger.json"
+      - "docs/research/2715-memo24-arithmetic-comparison.json"
       - "benchmarks/post-d4-semantic-placement/**"
       - "benchmarks/d5-closure-map/**"
       - "scripts/research-2689-d5-ratified-baseline.py"
