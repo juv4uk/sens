@@ -1,0 +1,28 @@
+name: D6 historical-unplaced handoff
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-historical-unplaced-handoff/**"
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d6-pure-unknown-parent-tournament/**"
+      - "benchmarks/d6-pure-unknown-domain-firewall/**"
+      - "benchmarks/nonlocal-exit-domain/**"
+      - ".github/workflows/d6-historical-unplaced-handoff.yml"
+  workflow_dispatch:
+
+jobs:
+  handoff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Historical-unplaced handoff
+        run: |
+          python3 benchmarks/d6-historical-unplaced-handoff/run.py \
+            --out /tmp/d6-historical-unplaced
+          cat /tmp/d6-historical-unplaced/report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: d6-historical-unplaced-handoff
+          path: /tmp/d6-historical-unplaced
