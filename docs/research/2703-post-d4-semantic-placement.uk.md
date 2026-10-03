@@ -32,7 +32,7 @@
 | Історичний рядок | Семантична область | Поточне розміщення |
 |---|---|---|
 | SET | shared-location carrier | UNPLACED |
-| SETQ | shared-location carrier + quoted-target policy | UNPLACED; D6 001111 лише owner-ready candidate |
+| SETQ | shared-location carrier + quoted-target policy | **РАТИФІКОВАНИЙ Core D6 001111** за #2538 OD-001 / #2723 |
 | PROG | composite з derived GO + non-local RETURN | окремий resident не потрібний |
 | RETURN | доведений non-local-exit root | width UNKNOWN, UNPLACED |
 | FEXPR | raw-form + caller-env + invocation carrier family | UNPLACED |
@@ -88,7 +88,7 @@ HISTORICAL-ROWS=19
 NEW-D5-RESIDENTS=0
 D5=8-generated+24-UNKNOWN
 RETURN=PROVEN-ROOT-UNPLACED
-SETQ-D6-001111=CANDIDATE-ONLY
+SETQ-D6-001111=RATIFIED-RESIDENT
 ```
 
 ## Принцип
