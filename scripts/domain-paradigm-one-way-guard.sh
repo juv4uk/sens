@@ -38,7 +38,7 @@ is_exact_width_file() {
   esac
 
   git cat-file -e "$head_sha:$path" 2>/dev/null || return 1
-  git show "$head_sha:$path"     | grep -Eq 'Bits<|\bBit[1-8]\b|BinarySourceWord|PackedBitstream|PredicateBit|Racana2|Bija3|DomainWord'
+  git show "$head_sha:$path"     | grep -Eq 'Bits<|\bBit[1-8]\b|BinarySourceWord|PackedBitstream|PredicateBit|Racana2|Bija3|CoreDomainIdentity|CallableIdentity'
 }
 
 is_executable_line() {
