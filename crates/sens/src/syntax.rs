@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sens8;
+use crate::CallableDomainId;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -49,7 +49,7 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
-    Sid(Sens8),
+    Sid(CallableDomainId),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -70,14 +70,10 @@ pub enum ExprKind {
     /// (nur innerhalb von `quote`, oder wo ein Aufrufer es über `read` als
     /// Daten liest).
     Pair(Rc<Expr>, Rc<Expr>),
-    /// Виклик функції СЕНС: функція займає рівно 1 байт (`Sens8`), без
-    /// тексту імені. Створюється лише `eval::lower` після розбору — з голови
-    /// `(00000010 x)` або з написання, яке неможливо перевизначити
-    /// (`atom`, `атом?`, `aṇu` ...), тож усі написання однієї функції
-    /// дають один і той самий вузол. Парсер цей варіант не породжує.
-    /// SENS call: the function slot is exactly one byte (`Sens8`), no name
-    /// text. Produced only by `eval::lower` after parsing.
-    Call(Sens8, Rc<[Expr]>),
+    /// Domain-qualified call head. Human spellings are lowered away; the
+    /// semantic domain remains part of identity. Historical exact-eight heads
+    /// survive only as the explicit Legacy8 compatibility variant.
+    Call(CallableDomainId, Rc<[Expr]>),
     /// Параметр замикання за числовими координатами: слот `index` кадру
     /// виклику на `depth` кадрів вище. Імені тут немає навмисно (#1697,
     /// контракт 10.0 `locals-are-slots-not-names`): виконання залежить лише від
@@ -90,9 +86,8 @@ pub enum ExprKind {
     Local { depth: u32, index: u32 },
 }
 
-// Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
-// збірка має впасти, а не мовчки розійтися з таблицею функцій.
-const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
+// Callable identity is domain-qualified. Host size is an implementation
+// detail; exact semantic width lives inside CoreDomainIdentity/Legacy8.
 
 /// Shared nesting cap for every recursive structure walk over reader
 /// output: the parser itself, `quote`d-data conversion (`quoted`) and
@@ -164,7 +159,7 @@ pub(crate) mod fasl {
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                out.push(sid.legacy().expect("domain transport is owned by #2833").packed_byte());
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -196,7 +191,7 @@ pub(crate) mod fasl {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
                 out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                out.push(sid.legacy().expect("domain transport is owned by #2833").packed_byte());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -237,7 +232,7 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(crate::CallableDomainId::from_legacy(crate::LegacySens8::from_packed_byte(value)))
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
@@ -439,7 +434,7 @@ pub(crate) mod wire {
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                out.push(sid.legacy().expect("domain transport is owned by #2833").packed_byte());
             }
             ExprKind::String(value) => put_text(out, TAG_STRING, value),
             ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
@@ -462,7 +457,7 @@ pub(crate) mod wire {
             ExprKind::Call(sid, arguments) => {
                 put_list_header(out, arguments.len() + 1);
                 out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                out.push(sid.legacy().expect("domain transport is owned by #2833").packed_byte());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -566,7 +561,7 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(crate::CallableDomainId::from_legacy(crate::LegacySens8::from_packed_byte(value)))
             }
             TAG_LOCAL => {
                 let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
