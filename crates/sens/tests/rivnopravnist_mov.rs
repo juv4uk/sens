@@ -130,13 +130,16 @@ fn додавання_відділяє_людські_мови_від_спіль
 
     assert!(
         eval_program(en_surface, &mut сесія).is_err(),
-        "bare human surface must not become Function8 during evaluation"
+        "bare human surface must not become legacy exact-eight identity during evaluation"
     );
 
     let exact = eval_program("00001100", &mut сесія)
-        .expect("bare exact Function8 remains a binary value")
+        .expect("bare exact legacy exact-eight identity remains a binary value")
         .value;
-    assert_eq!(exact, Value::Sid(sens::sens!(00001100)));
+    assert_eq!(
+        exact,
+        Value::Sid(sens::CallableIdentity::legacy8(0b0000_1100))
+    );
 }
 #[test]
 fn executable_authority_більше_не_читає_legacy_en_shaped_таблицю() {
