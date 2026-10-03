@@ -7,9 +7,10 @@ and
   executable canonical identity admission (reader/carrier/registry).
 
 It intentionally makes no evaluator/lowering claims beyond UNMEASURED.
-When the identity carrier/reader migrates away from Sens8-only, this guard
-must fail and be updated to measure the new architecture rather than silently
-preserving the old baseline.
+The runtime carrier has now migrated to SemanticRef while the ordinary reader
+and legacy registry remain transitional. This guard therefore measures those
+boundaries independently instead of treating "carrier" and "admission" as one
+boolean.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 PARSER = ROOT / "crates" / "sens" / "src" / "parser.rs"
 SENS = ROOT / "crates" / "sens" / "src" / "sens.rs"
 SYNTAX = ROOT / "crates" / "sens" / "src" / "syntax.rs"
+SEMANTIC_REF = ROOT / "crates" / "sens" / "src" / "semantic_ref.rs"
 OUTPUT = ROOT / "knowledge" / "od005-od006-runtime-admission-audit.json"
 
 REGISTRY_ROW = re.compile(r"^\s*\(([01]{8})\s+\(en\s+([^\s()]+|\(\))\)")
@@ -48,16 +50,23 @@ def source_contract() -> dict:
     parser = PARSER.read_text(encoding="utf-8")
     sens = SENS.read_text(encoding="utf-8")
     syntax = SYNTAX.read_text(encoding="utf-8")
+    semantic_ref = SEMANTIC_REF.read_text(encoding="utf-8")
     registry = REGISTRY.read_text(encoding="utf-8")
 
     assert "token.len() == 8" in parser, (
         "reader is no longer exact-8-only; update #2776 audit for the new identity grammar"
     )
     assert "pub type Sens = Sens8" in sens, (
-        "runtime identity carrier changed; update #2776 audit instead of preserving legacy result"
+        "legacy Sens alias changed; update #2776 compatibility classification"
     )
-    assert "ExprKind::Sid(crate::Sens8::from_packed_byte(value))" in syntax, (
-        "FASL binary identity transport changed; update #2776 audit"
+    assert "pub enum SemanticRef" in semantic_ref, (
+        "width-preserving runtime identity carrier disappeared"
+    )
+    assert "Domain(DomainWord)" in semantic_ref and "Legacy8(Sens8)" in semantic_ref, (
+        "SemanticRef must keep canonical domain identity distinct from legacy-8 projection"
+    )
+    assert "TAG_DOMAIN_BINARY" in syntax and "SemanticRef::from_width_bits" in syntax, (
+        "FASL/wire exact-width domain transport disappeared"
     )
 
     widths = {
@@ -69,8 +78,8 @@ def source_contract() -> dict:
 
     return {
         "reader": "bare binary SID is admitted only at exact width 8",
-        "runtime_identity": "Sens = Sens8",
-        "fasl_binary_payload": "one packed byte",
+        "runtime_identity": "SemanticRef = Domain(DomainWord) | Legacy8(Sens8)",
+        "fasl_binary_payload": "legacy8: one packed byte; domain: explicit width + packed payload",
         "registry_identity_keys": "exactly eight bits",
         "non_conclusion": (
             "owner residency is not rejected; runtime admission is not yet implemented"
@@ -98,7 +107,7 @@ def build() -> dict:
                     "category": item["category"],
                     "owner_resident": True,
                     "direct_binary_reader_identity": False,
-                    "exact_width_preserved_in_runtime_identity": False,
+                    "exact_width_preserved_in_runtime_identity": True,
                     "owner_coordinate_registry_identity": False,
                     "legacy_surface_sid8": legacy,
                     "legacy_surface_projection_present": legacy is not None,
@@ -108,7 +117,7 @@ def build() -> dict:
                     "derived_lisp": "UNMEASURED",
                     "compiler_support": "UNMEASURED",
                     "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-                    "blocker": "LEGACY-SENS8-ONLY-CARRIER",
+                    "blocker": "READER-AND-REGISTRY-ADMISSION",
                 }
             )
 
@@ -127,6 +136,7 @@ def build() -> dict:
             "crates/sens/src/parser.rs",
             "crates/sens/src/sens.rs",
             "crates/sens/src/syntax.rs",
+            "crates/sens/src/semantic_ref.rs",
         ],
         "current_source_contract": source_contract(),
         "summary": {
