@@ -48,7 +48,8 @@ jobs:
             echo
             echo "The guard watches semantic evidence, not free coordinates."
             echo
-            echo "Current expected state: 8 generated selector residents / 24 protected UNKNOWN / 0 manual / 0 new candidates."
+            echo "HISTORICAL-PRE-OD005 snapshot: 8 generated selector residents / 24 protected UNKNOWN / 0 manual / 0 new candidates."
+            echo "Current D5 occupancy authority is OD-005/#2750 full 32/32; this workflow must not veto it."
             echo
             echo "Any future D5-eligible YES or historical row without semantic placement turns this lane into REVIEW-REQUIRED."
           } >> "$GITHUB_STEP_SUMMARY"
