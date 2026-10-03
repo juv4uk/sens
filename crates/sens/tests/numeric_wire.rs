@@ -42,10 +42,10 @@ fn tagged_binary_wire_round_trips_exact_numbers() {
 #[test]
 fn numeric_wire_never_aliases_the_exact_function_space() {
     let function = eval("(read \"00000000\")");
-    assert!(function.as_sens8().is_some());
+    assert!(function.as_legacy8_bits().is_some());
 
     let number = eval("(read \"#q2:00000000/1\")");
-    assert!(number.as_sens8().is_none());
+    assert!(number.as_legacy8_bits().is_none());
     assert_eq!(number, Value::Number(0.0, Exactness::Exact));
     assert_eq!(
         eval("(write-to-string (read \"#q2:00000000/1\"))"),
@@ -53,10 +53,10 @@ fn numeric_wire_never_aliases_the_exact_function_space() {
     );
 
     let max_function = eval("(read \"11111111\")");
-    assert!(max_function.as_sens8().is_some());
+    assert!(max_function.as_legacy8_bits().is_some());
 
     let numeric_255 = eval("(read \"#q2:11111111/1\")");
-    assert!(numeric_255.as_sens8().is_none());
+    assert!(numeric_255.as_legacy8_bits().is_none());
     assert_eq!(numeric_255, Value::Number(255.0, Exactness::Exact));
     assert_eq!(
         eval("(write-to-string 255)"),
