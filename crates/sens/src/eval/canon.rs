@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{semantic_registry, Environment, ErrorKind, LanguageError, SemanticRef, Sens8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SidRouteKind {
@@ -85,11 +85,11 @@ fn immutable_surface_error(surface: &str, sid: Sens8, span: Span) -> LanguageErr
     )
 }
 
-pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), LanguageError> {
+pub(crate) fn ensure_bindable_sid(identity: SemanticRef, span: Span) -> Result<(), LanguageError> {
     Err(LanguageError::new(
         ErrorKind::InvalidForm,
         format!(
-            "surface routes to immutable function SID · surface маршрутизується до незмінного function SID · Surface verweist auf unveränderliche Funktions-SID: {sid} -> {sid}"
+            "semantic identity is reserved and cannot be rebound · семантичну ідентичність не можна перевизначити: {identity}"
         ),
         span,
     ))
@@ -287,7 +287,7 @@ pub(crate) fn invoke_semantic_ref(
     {
         return primitive(args, environment, span);
     }
-    match &environment.code_slot(sid) {
+    match &environment.code_slot(SemanticRef::legacy8(sid)) {
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
@@ -341,7 +341,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
         return;
     }
-    environment.bind_code_slot_once(sid, value.clone());
+    environment.bind_code_slot_once(SemanticRef::legacy8(sid), value.clone());
 }
 
 #[cfg(test)]
