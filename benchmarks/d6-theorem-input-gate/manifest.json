@@ -1,0 +1,46 @@
+{
+  "schema": "d6-theorem-input-gate/v2",
+  "issue": "#2711",
+  "parent": "#2699",
+  "independent_falsifier": "#2702",
+  "principle": "freeze the evidence, not the answer",
+  "witnesses": [
+    {
+      "path": "benchmarks/d6-theorem-first-d5-child/run.py",
+      "expected_result": "RESULT=NO-NEW-D5-ONE-DELTA-CHILD",
+      "evidence": "#2704"
+    },
+    {
+      "path": "benchmarks/d6-theorem-first-d4-product/run.py",
+      "expected_result": "RESULT=NO-NEW-D4-TWO-DELTA-FAMILY",
+      "evidence": "#2708"
+    }
+  ],
+  "placement": {
+    "path": "benchmarks/post-d4-semantic-placement/placement.json",
+    "setq_operation": "SETQ",
+    "allowed_states": [
+      {
+        "state": "PRE-OWNER-READY",
+        "placement_kind": "POLICY-OVER-CARRIER",
+        "exact_domain": "UNKNOWN",
+        "coordinate": "UNPLACED",
+        "candidate_coordinate": "D6:001111 (OD-001 owner-ready only)"
+      },
+      {
+        "state": "POST-OWNER-RATIFIED",
+        "placement_kind": "RATIFIED-RESIDENT",
+        "exact_domain": "D6",
+        "coordinate": "001111",
+        "candidate_coordinate": null
+      }
+    ]
+  },
+  "guards": {
+    "pure_unknown_is_search_space": false,
+    "owner_decision_in_this_gate": false,
+    "occupancy_mutation_in_this_gate": false,
+    "falsifier_logic_in_this_gate": false,
+    "allowed_owner_transition": "PRE-OWNER-READY -> POST-OWNER-RATIFIED only"
+  }
+}
