@@ -42,6 +42,7 @@ BACKEND_MECHANISM = {
 
 GUARD_POLICY = {
     "scripts/domain-paradigm-one-way-guard.sh",
+    "scripts/test-domain-paradigm-one-way-guard.sh",
     "scripts/sid-binary-identity-guard.sh",
     "scripts/sens8-semantic-ratchet.py",
     ".github/workflows/ci.yml",
@@ -54,6 +55,13 @@ def norm(path: str) -> str:
 
 def classify(path: str, line: str) -> str:
     path = norm(path)
+    stripped = line.lstrip()
+
+    # Pure comments/documentation are provenance, not executable dependency.
+    # Tests and string literals remain visible because they can encode live
+    # authority; only comment-only lines are excluded from semantic debt.
+    if stripped.startswith(("//", "/*", "*", ";;")):
+        return "historical-doc"
 
     if path in EXPLICIT_COMPATIBILITY:
         return "compatibility"
@@ -279,6 +287,11 @@ def self_test() -> int:
             "scripts/domain-paradigm-one-way-guard.sh",
             "legacy_pattern='Sens8|Sid8'",
             "guard-policy",
+        ),
+        (
+            "crates/sens/src/domain_identity.rs",
+            "/// No implicit conversion from Sens8.",
+            "historical-doc",
         ),
     ]
 
