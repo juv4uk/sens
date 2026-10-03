@@ -44,6 +44,13 @@ jobs:
           grep -F "RULE=timing-units-are-not-information-bits" /tmp/human-wire-timing.log
           grep -F "SEMANTIC-AUTHORITY=NONE" /tmp/human-wire-timing.log
 
+      - name: Verify fail-closed human receiver
+        run: |
+          python3 benchmarks/human-wire/receiver.py --self-test | tee /tmp/human-wire-rx.log
+          grep -F "HUMAN-WIRE-RX=PASS" /tmp/human-wire-rx.log
+          grep -F "SEMANTIC-AUTHORITY=NONE" /tmp/human-wire-rx.log
+          grep -F "RULE=timing-errors-are-explicit-never-silently-shifted" /tmp/human-wire-rx.log
+
       - name: Publish report
         if: always()
         run: |
