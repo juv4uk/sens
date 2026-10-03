@@ -5,10 +5,8 @@ on:
     paths:
       - "scripts/research-2724-d5-fill-watch.py"
       - "benchmarks/d5-closure-map/run.py"
-      - "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
-      - "benchmarks/post-d4-root-min-closeout/run.py"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "benchmarks/post-d4-semantic-placement/placement.json"
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d5-d6-semantic-ledger.json"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/d5-fill-watch.yml"
   push:
@@ -17,10 +15,8 @@ on:
     paths:
       - "scripts/research-2724-d5-fill-watch.py"
       - "benchmarks/d5-closure-map/run.py"
-      - "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
-      - "benchmarks/post-d4-root-min-closeout/run.py"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "benchmarks/post-d4-semantic-placement/placement.json"
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d5-d6-semantic-ledger.json"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/d5-fill-watch.yml"
   workflow_dispatch:
@@ -30,12 +26,12 @@ permissions:
 
 jobs:
   watch:
-    name: D5 semantic-family fill watch
+    name: D5 OD-005 owner-map remap watch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Run D5 fill watchdog
+      - name: Run D5 owner-map watchdog
         run: |
           python3 scripts/research-2724-d5-fill-watch.py --out d5-fill-watch-out
           cat d5-fill-watch-out/d5-fill-watch.json
@@ -44,13 +40,15 @@ jobs:
         if: always()
         run: |
           {
-            echo "## D5 fill watch"
+            echo "## D5 owner-map watch"
             echo
-            echo "The guard watches semantic evidence, not free coordinates."
+            echo "OD-005 current occupancy is 32/32 with UNKNOWN=0."
             echo
-            echo "Current expected state: 8 generated selector residents / 24 protected UNKNOWN / 0 manual / 0 new candidates."
+            echo "Eight selector residents remain generator-backed; twenty-four are owner-historical placements."
             echo
-            echo "Any future D5-eligible YES or historical row without semantic placement turns this lane into REVIEW-REQUIRED."
+            echo "The watch now detects unauthorized coordinate/name/parent remaps rather than searching for free occupants."
+            echo
+            echo "Semantic derivability remains a separate #2765 axis."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload watch result

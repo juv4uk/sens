@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
-"""#2689 — standing guard for the owner-ratified Core D5 baseline.
+"""#2763 — standing OD-005 Core D5 current-baseline guard.
 
-This guard consumes the merged #2510 D5 closure-map generator. It does not
-rebuild or reinterpret the map. Its only job is to make the current owner
-ratification executable:
-
-    8 selector-generated semantic residents
-    24 UNKNOWN/free non-residents
-    0 manual non-selector residents
-
-Any occupancy change must therefore update the ratified baseline deliberately
-rather than arriving as incidental research fallout.
+Current occupancy authority is the owner map, not the pre-OD005 sparse closure
+snapshot. Semantic derivability remains an independent axis.
 """
 
 from __future__ import annotations
@@ -23,24 +15,19 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
 CLOSURE = REPO / "benchmarks" / "d5-closure-map" / "run.py"
+OWNER_MAP = REPO / "knowledge" / "d5-historical-full-map.json"
+SEMANTIC_LEDGER = REPO / "knowledge" / "d5-d6-semantic-ledger.json"
 
 WIDTH = 5
 CAPACITY = 1 << WIDTH
-RATIFIED_GENERATED = {
-    "10100",
-    "10101",
-    "10110",
-    "10111",
-    "11000",
-    "11001",
-    "11010",
-    "11011",
+SELECTOR_GENERATED = {
+    "10100", "10101", "10110", "10111",
+    "11000", "11001", "11010", "11011",
 }
-EXPECTED_UNKNOWN = CAPACITY - len(RATIFIED_GENERATED)
 
 
 def fail(message: str) -> None:
-    raise AssertionError(f"D5 ratified-baseline drift: {message}")
+    raise AssertionError(f"D5 OD-005 baseline drift: {message}")
 
 
 def require(condition: bool, message: str) -> None:
@@ -48,151 +35,83 @@ def require(condition: bool, message: str) -> None:
         fail(message)
 
 
+def load(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def build_result() -> dict[str, Any]:
     closure = runpy.run_path(str(CLOSURE))
     rows = closure["build_map"]()
     acct = closure["accounting"](rows)
+    owner = load(OWNER_MAP)
+    ledger = load(SEMANTIC_LEDGER)
 
     require(len(rows) == CAPACITY, f"expected {CAPACITY} rows, got {len(rows)}")
     require(len({row["coordinate"] for row in rows}) == CAPACITY, "duplicate coordinate")
     require(all(row["width"] == WIDTH for row in rows), "row width drift")
-    require(all(row["domain"] == "D5" for row in rows), "row domain drift")
-    require(all(row["domain_ratified"] is True for row in rows), "unratified D5 row")
+    require(all(row["residency"] == "YES" for row in rows), "current D5 contains non-resident row")
 
     generated = [row for row in rows if row["status"] == "generated"]
-    unknown = [row for row in rows if row["status"] == "UNKNOWN/free"]
-    other = [
-        row for row in rows
-        if row["status"] not in {"generated", "UNKNOWN/free"}
-    ]
+    historical = [row for row in rows if row["status"] == "owner-historical"]
+    unknown = [row for row in rows if "UNKNOWN" in row["status"]]
 
-    generated_words = {row["coordinate"] for row in generated}
-    unknown_words = {row["coordinate"] for row in unknown}
+    require({row["coordinate"] for row in generated} == SELECTOR_GENERATED, "selector set drift")
+    require(len(generated) == 8, "selector-generated count drift")
+    require(len(historical) == 24, "owner-historical count drift")
+    require(not unknown, "current OD-005 baseline must have UNKNOWN=0")
 
-    require(generated_words == RATIFIED_GENERATED, (
-        "generated set drift: "
-        f"expected={sorted(RATIFIED_GENERATED)} actual={sorted(generated_words)}"
-    ))
-    require(len(unknown) == EXPECTED_UNKNOWN, (
-        f"expected {EXPECTED_UNKNOWN} UNKNOWN rows, got {len(unknown)}"
-    ))
-    require(not other, f"unexpected manual/other statuses: {other}")
+    owner_by = {row["coordinate"]: row for row in owner["coordinates"]}
+    ledger_rows = [row for row in ledger["rows"] if row["domain"] == "Core.D5"]
+    ledger_by = {row["coordinate"]: row for row in ledger_rows}
+    require(len(owner_by) == CAPACITY, "owner map must contain 32 coordinates")
+    require(len(ledger_by) == CAPACITY, "semantic ledger must contain 32 D5 coordinates")
+
+    for row in rows:
+        coordinate = row["coordinate"]
+        require(row["display_name"] == owner_by[coordinate]["name"], f"{coordinate}: owner name drift")
+        require(row["parent_d4"] == owner_by[coordinate]["parent_d4"], f"{coordinate}: parent drift")
+        require(ledger_by[coordinate]["residency"] == "YES", f"{coordinate}: ledger residency drift")
+        require(row["semantic_class"] == ledger_by[coordinate]["semantic_class"], (
+            f"{coordinate}: semantic class drift"
+        ))
+        require(row["collision"] is False, f"{coordinate}: collision")
 
     for row in generated:
-        require(row["semantic_family"] == "selector", (
-            f"{row['coordinate']}: generated row is not selector family"
-        ))
+        require(row["semantic_family"] == "selector", f"{row['coordinate']}: not selector")
         require(row["semantic_law"] == "selector projection composition", (
-            f"{row['coordinate']}: semantic law drift"
-        ))
-        require(row["semantic_law_authority"] == "#2158", (
-            f"{row['coordinate']}: semantic law authority drift"
+            f"{row['coordinate']}: selector law drift"
         ))
         require(row["certificate_replay_ok"] is True, (
             f"{row['coordinate']}: selector certificate no longer replays"
         ))
-        require(row["certificate"] is not None, (
-            f"{row['coordinate']}: generated row lacks certificate"
-        ))
-        require(row["semantic_member_of_ratified_domain"] is True, (
-            f"{row['coordinate']}: generated row lost semantic membership"
-        ))
-        require(row["manual_resident_required"] is False, (
-            f"{row['coordinate']}: generated selector became manual resident"
-        ))
-        require(row["placement_ref"] == "", (
-            f"{row['coordinate']}: generated selector unexpectedly has placement_ref"
-        ))
-        require(row["collision"] is False, (
-            f"{row['coordinate']}: generated selector collision"
-        ))
 
-    for row in unknown:
-        coordinate = row["coordinate"]
-        require(row["semantic_member_of_ratified_domain"] is False, (
-            f"{coordinate}: UNKNOWN row became semantic member without baseline update"
-        ))
-        require(row["placement_ref"] == "", (
-            f"{coordinate}: UNKNOWN row has placement_ref"
-        ))
-        require(row["manual_resident_required"] is False, (
-            f"{coordinate}: UNKNOWN row marked manual resident"
-        ))
-        require(row["semantic_family"] == "", (
-            f"{coordinate}: UNKNOWN row gained semantic family"
-        ))
-        require(row["semantic_law"] == "", (
-            f"{coordinate}: UNKNOWN row gained semantic law"
-        ))
-        require(row["semantic_law_authority"] == "", (
-            f"{coordinate}: UNKNOWN row gained semantic law authority"
-        ))
-        require(row["certificate"] is None, (
-            f"{coordinate}: UNKNOWN row gained generation certificate"
-        ))
-        require(row["certificate_replay_ok"] is False, (
-            f"{coordinate}: UNKNOWN row claims certificate replay"
-        ))
-        require(row["collision"] is False, (
-            f"{coordinate}: UNKNOWN row collision"
-        ))
+    require(acct["owner_resident_count"] == 32, "accounting resident count drift")
+    require(acct["generated_coordinate_count"] == 8, "accounting selector count drift")
+    require(acct["owner_historical_count"] == 24, "accounting historical count drift")
+    require(acct["unknown_free_count"] == 0, "accounting UNKNOWN must be zero")
 
-    require(generated_words.isdisjoint(unknown_words), "generated/UNKNOWN overlap")
-    require(generated_words | unknown_words == {
-        format(value, "05b") for value in range(CAPACITY)
-    }, "map does not partition all D5 coordinates")
-
-    require(acct["domain_ratified"] is True, "accounting lost ratified-domain flag")
-    require(acct["generated_coordinate_count"] == len(RATIFIED_GENERATED), (
-        "accounting generated count drift"
-    ))
-    require(acct["unknown_free_count"] == EXPECTED_UNKNOWN, (
-        "accounting UNKNOWN count drift"
-    ))
-
-    excluded = acct["excluded_or_unplaced_nonselector_capabilities"]
-    expected_exclusions = {
-        "SET-SETQ": "d5-ineligible-shared-location-family",
-        "RETURN": "d5-ineligible-proven-root-domain-unresolved",
-        "FEXPR-FSUBR": "d5-ineligible-carrier-family",
-        "TRANSFORMER": "d5-ineligible-policy-over-carrier",
-    }
-    require(set(excluded) == set(expected_exclusions), (
-        f"D5 post-D4 exclusion set drift: {sorted(excluded)}"
-    ))
-    for capability, expected_decision in expected_exclusions.items():
-        require(excluded[capability]["decision"] == expected_decision, (
-            f"{capability} D5 exclusion drift: "
-            f"{excluded[capability]['decision']} != {expected_decision}"
-        ))
-        require(excluded[capability]["evidence"], (
-            f"{capability} D5 exclusion lost evidence"
-        ))
+    semantic_classes: dict[str, int] = {}
+    for row in rows:
+        semantic_classes[row["semantic_class"]] = semantic_classes.get(row["semantic_class"], 0) + 1
 
     return {
-        "schema": "d5-ratified-baseline-guard/v1",
-        "authority": "#2414/#2510/#2689",
-        "domain": "Core D5",
+        "schema": "d5-ratified-baseline-guard/v2",
+        "authority": "OD-005/#2538/#2750/#2763",
+        "domain": "Core.D5",
         "width": WIDTH,
         "capacity": CAPACITY,
         "domain_ratified": True,
         "baseline_ratified": True,
-        "generated_count": len(generated),
-        "unknown_count": len(unknown),
-        "manual_nonselector_count": len(other),
-        "collision_count": sum(bool(row["collision"]) for row in rows),
-        "generated_coordinates": sorted(generated_words),
-        "unknown_coordinates": sorted(unknown_words),
-        "owner_update_required_for_occupancy_change": True,
-        "unknown_is_spare_capacity": False,
-        "core_math_may_fill_core_d5_by_analogy": False,
+        "resident_count": 32,
+        "generated_selector_count": 8,
+        "owner_historical_nonselector_count": 24,
+        "unknown_count": 0,
+        "collision_count": 0,
+        "semantic_classes": semantic_classes,
+        "occupancy_change_requires_owner_map_revision": True,
+        "derivability_does_not_erase_residency": True,
+        "pre_od005_sparse_model": "ARCHIVED-RESEARCH",
         "status": "PASS",
-        "non_conclusions": [
-            "historical presence is not Core D5 occupancy",
-            "UNKNOWN/free is a protected epistemic state, not permission",
-            "research overlays do not become residents",
-            "same-bit or same-transform Core-Math evidence cannot populate Core D5",
-        ],
     }
 
 
@@ -200,9 +119,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json-out", type=Path)
     args = parser.parse_args()
-
     result = build_result()
-
     if args.json_out is not None:
         args.json_out.parent.mkdir(parents=True, exist_ok=True)
         args.json_out.write_text(
@@ -211,14 +128,13 @@ def main() -> int:
         )
 
     print("D5-RATIFIED-BASELINE=PASS")
-    print(f"width={result['width']}")
-    print(f"capacity={result['capacity']}")
-    print(f"generated={result['generated_count']}")
-    print(f"unknown={result['unknown_count']}")
-    print(f"manual={result['manual_nonselector_count']}")
-    print(f"collisions={result['collision_count']}")
-    print("owner-update-required-for-occupancy-change=yes")
-    print("unknown-is-spare-capacity=no")
+    print("width=5")
+    print("capacity=32")
+    print("resident=32")
+    print("selector-generated=8")
+    print("owner-historical=24")
+    print("unknown=0")
+    print("collisions=0")
     return 0
 
 
