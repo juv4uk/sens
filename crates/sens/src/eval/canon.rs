@@ -5,7 +5,7 @@
 //! second named function identity.
 
 use super::{
-    arithmetic, builtins, closures, necessary_forms,
+    arithmetic, builtins, closures, necessary_forms_legacy,
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
@@ -68,7 +68,7 @@ pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageE
         return Err(immutable_surface_error(surface, sid, span));
     }
     if let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(surface) {
-        if has_primitive(sid) || necessary_forms::identity_for_semantic_id(sid).is_some() {
+        if has_primitive(sid) || necessary_forms_legacy::identity_for_semantic_id(sid).is_some() {
             return Err(immutable_surface_error(surface, sid, span));
         }
     }
@@ -338,7 +338,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
-    if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
+    if has_primitive(sid) || super::necessary_forms_legacy::identity_for_semantic_id(sid).is_some() {
         return;
     }
     environment.bind_code_slot_once(sid, value.clone());
