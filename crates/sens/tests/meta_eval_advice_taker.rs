@@ -75,7 +75,7 @@ fn native_result(program: &str) -> String {
 
 fn meta_result(program: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).expect("core bootstrap");
+    sens::load_core_library(&mut session).expect("core bootstrap");
     sens::load_meta_evaluator_library(&mut session).expect("meta-eval bootstrap");
 
     eval_program(
