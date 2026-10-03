@@ -83,7 +83,7 @@ fn uk_session() -> Session {
 }
 
 #[test]
-fn every_stable_uk_surface_entry_lowers_to_its_declared_exact_sens() {
+fn every_stable_uk_surface_entry_lowers_to_one_canonical_identity() {
     let pairs = present_en_uk_pairs();
     assert!(
         pairs.len() >= 100,
@@ -112,20 +112,39 @@ fn every_stable_uk_surface_entry_lowers_to_its_declared_exact_sens() {
             "EN/UK surfaces must project to one exact SENS: {english} / {ukrainian}"
         );
 
-        for surface in [english.as_str(), ukrainian.as_str()] {
+        let lower_surface = |surface: &str| {
             let source = format!("({surface})");
             let parsed = parse(&source).expect("admitted surface call must parse");
             let lowered = lower_program(&parsed);
             assert_eq!(lowered.len(), 1);
-            match &lowered[0].kind {
-                ExprKind::Call(sens, _) => assert_eq!(
-                    *sens, declared,
-                    "surface head must lower directly to declared exact SENS: {surface}"
-                ),
-                other => panic!(
-                    "admitted surface head must lower to exact SENS Call: {surface} -> {other:?}"
-                ),
+            lowered.into_iter().next().unwrap().kind
+        };
+
+        let english_kind = lower_surface(english);
+        let ukrainian_kind = lower_surface(ukrainian);
+
+        match (&english_kind, &ukrainian_kind) {
+            (
+                ExprKind::DomainCall(english_domain, _),
+                ExprKind::DomainCall(ukrainian_domain, _),
+            ) => assert_eq!(
+                english_domain, ukrainian_domain,
+                "EN/UK surfaces must lower to one exact domain identity: {english} / {ukrainian}"
+            ),
+            (ExprKind::Call(english_sens, _), ExprKind::Call(ukrainian_sens, _)) => {
+                assert_eq!(
+                    english_sens, ukrainian_sens,
+                    "legacy EN/UK surfaces must lower to one compatibility identity: {english} / {ukrainian}"
+                );
+                assert_eq!(
+                    *english_sens, declared,
+                    "unmigrated compatibility surface must retain its declared legacy identity: {english}"
+                );
             }
+            _ => panic!(
+                "EN/UK surfaces must not split canonical and legacy identity paths: \
+                 {english} -> {english_kind:?}; {ukrainian} -> {ukrainian_kind:?}"
+            ),
         }
     }
 }

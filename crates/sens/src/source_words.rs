@@ -1,7 +1,7 @@
 //! Canonical visible-binary source boundary for SENS .lisp files.
 //!
 //! This module owns source token shape only. It deliberately does not assign
-//! D1-D6 meaning; semantic wrappers consume these exact-width words later.
+//! D1-D8 meaning; semantic wrappers consume these exact-width words later.
 
 use crate::{
     Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, ErrorKind, LanguageError, Span,
@@ -113,6 +113,31 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+    /// Lift an exact seven-bit source word into the ratified Core.D7 carrier.
+    /// This establishes domain membership only; Sound7/Text7 law owns meaning.
+    pub const fn d7(self) -> Option<crate::SoundD7> {
+        match self {
+            Self::W7(word) => Some(crate::SoundD7::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact eight-bit source word into the ratified Core.D8 carrier.
+    /// This never converts through the historical Sens8 compatibility type.
+    pub const fn d8(self) -> Option<crate::CoreD8> {
+        match self {
+            Self::W8(word) => Some(crate::CoreD8::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Total semantic-domain lift for the ratified D1→D8 ladder.
+    ///
+    /// This establishes domain identity only; callability remains law-specific.
+    pub const fn domain_identity(self) -> crate::DomainIdentity {
+        crate::DomainIdentity::from_source_word(self)
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -149,6 +174,18 @@ impl From<crate::CoreD5> for BinarySourceWord {
 impl From<crate::CoreD6> for BinarySourceWord {
     fn from(value: crate::CoreD6) -> Self {
         Self::W6(value.word())
+    }
+}
+
+impl From<crate::SoundD7> for BinarySourceWord {
+    fn from(value: crate::SoundD7) -> Self {
+        Self::W7(value.word())
+    }
+}
+
+impl From<crate::CoreD8> for BinarySourceWord {
+    fn from(value: crate::CoreD8) -> Self {
+        Self::W8(value.word())
     }
 }
 
@@ -285,7 +322,7 @@ mod tests {
     }
 
     #[test]
-    fn d1_through_d6_bridges_are_exact_and_lossless() {
+    fn d1_through_d8_bridges_are_exact_and_lossless() {
         for raw in 0..=1 {
             let source = BinarySourceWord::W1(Bit1::new(raw).unwrap());
             assert_eq!(BinarySourceWord::from(source.d1().unwrap()), source);
@@ -294,6 +331,8 @@ mod tests {
             assert!(source.d4().is_none());
             assert!(source.d5().is_none());
             assert!(source.d6().is_none());
+            assert!(source.d7().is_none());
+            assert!(source.d8().is_none());
         }
 
         for raw in 0..=3 {
@@ -304,6 +343,8 @@ mod tests {
             assert!(source.d4().is_none());
             assert!(source.d5().is_none());
             assert!(source.d6().is_none());
+            assert!(source.d7().is_none());
+            assert!(source.d8().is_none());
         }
 
         for raw in 0..=7 {
@@ -314,6 +355,8 @@ mod tests {
             assert!(source.d4().is_none());
             assert!(source.d5().is_none());
             assert!(source.d6().is_none());
+            assert!(source.d7().is_none());
+            assert!(source.d8().is_none());
         }
 
         for raw in 0..=15 {
@@ -324,6 +367,8 @@ mod tests {
             assert!(source.d3().is_none());
             assert!(source.d5().is_none());
             assert!(source.d6().is_none());
+            assert!(source.d7().is_none());
+            assert!(source.d8().is_none());
         }
 
         for raw in 0..=31 {
@@ -334,6 +379,8 @@ mod tests {
             assert!(source.d3().is_none());
             assert!(source.d4().is_none());
             assert!(source.d6().is_none());
+            assert!(source.d7().is_none());
+            assert!(source.d8().is_none());
         }
 
         for raw in 0..=63 {
@@ -344,21 +391,32 @@ mod tests {
             assert!(source.d3().is_none());
             assert!(source.d4().is_none());
             assert!(source.d5().is_none());
+            assert!(source.d7().is_none());
+            assert!(source.d8().is_none());
         }
-    }
 
-    #[test]
-    fn d7_and_d8_do_not_gain_callable_domain_identity_by_width_alone() {
-        for source in [
-            BinarySourceWord::W7(Bit7::new(0).unwrap()),
-            BinarySourceWord::W8(Bit8::new(0).unwrap()),
-        ] {
+        for raw in 0..=127 {
+            let source = BinarySourceWord::W7(Bit7::new(raw).unwrap());
+            assert_eq!(BinarySourceWord::from(source.d7().unwrap()), source);
             assert!(source.d1().is_none());
             assert!(source.d2().is_none());
             assert!(source.d3().is_none());
             assert!(source.d4().is_none());
             assert!(source.d5().is_none());
             assert!(source.d6().is_none());
+            assert!(source.d8().is_none());
+        }
+
+        for raw in 0..=255 {
+            let source = BinarySourceWord::W8(Bit8::new(raw).unwrap());
+            assert_eq!(BinarySourceWord::from(source.d8().unwrap()), source);
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
+            assert!(source.d4().is_none());
+            assert!(source.d5().is_none());
+            assert!(source.d6().is_none());
+            assert!(source.d7().is_none());
         }
     }
 
