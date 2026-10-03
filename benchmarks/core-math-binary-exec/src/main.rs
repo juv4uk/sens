@@ -54,7 +54,7 @@ fn permutation_attack(law: &Law) {
     let semantic_child = root.extend(Choice::First);
 
     let arithmetic_child = apply(
-        &law,
+        law,
         &[encode(&root), BinaryNumber::parse("0").unwrap()],
     ).unwrap();
 
@@ -93,11 +93,11 @@ fn main() {
     let seed = BinaryNumber::parse("101").unwrap();
     let generated = apply(
         &law,
-        &[seed, BinaryNumber::parse("0").unwrap()],
+        &[seed.clone(), BinaryNumber::parse("0").unwrap()],
     ).unwrap();
     let reused = apply(
         &law,
-        &[generated, BinaryNumber::parse("1").unwrap()],
+        &[generated.clone(), BinaryNumber::parse("1").unwrap()],
     ).unwrap();
 
     assert_eq!(generated.bits(), "1010");
@@ -107,7 +107,7 @@ fn main() {
     assert!(
         apply(
             &law,
-            &[seed, BinaryNumber::parse("10").unwrap()]
+            &[seed.clone(), BinaryNumber::parse("10").unwrap()]
         )
         .is_err()
     );
