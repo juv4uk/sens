@@ -1,0 +1,66 @@
+name: Post-D4 root minimization
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/post-d4-root-min/**"
+      - "docs/research/*root-min*.md"
+      - "crates/sens/tests/post_d4_setq_state_passing.rs"
+      - "crates/sens/tests/post_d4_transform_boundary.rs"
+      - "crates/sens/tests/post_d4_setq_shared_location.rs"
+      - ".github/workflows/post-d4-root-min.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/post-d4-root-min/**"
+      - "docs/research/*root-min*.md"
+      - "crates/sens/tests/post_d4_setq_state_passing.rs"
+      - "crates/sens/tests/post_d4_transform_boundary.rs"
+      - "crates/sens/tests/post_d4_setq_shared_location.rs"
+      - ".github/workflows/post-d4-root-min.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  root-min:
+    name: Shared-location carrier premise
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Re-check explicit D4 state-passing model
+        run: cargo test -p sens --test post_d4_setq_state_passing -- --nocapture
+
+      - name: Re-check local-vs-global protocol boundary
+        run: cargo test -p sens --test post_d4_transform_boundary -- --nocapture
+
+      - name: Re-check shared-location identity lower bound
+        run: cargo test -p sens --test post_d4_setq_shared_location -- --nocapture
+
+      - name: Verify shared-location root-min result
+        run: python3 benchmarks/post-d4-root-min/shared_location.py --check
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Post-D4 root minimization — shared location"
+            echo
+            echo "~~~text"
+            python3 benchmarks/post-d4-root-min/shared_location.py
+            echo "~~~"
+            echo
+            echo "- Global D4 compilability is distinct from local D4 derivation (#2468)."
+            echo "- CARRIER-PREMISE is not a root/width/resident/coordinate claim."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post-d4-root-min-shared-location
+          path: benchmarks/post-d4-root-min/shared-location-result.json
+          retention-days: 14
