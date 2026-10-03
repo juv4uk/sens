@@ -465,6 +465,122 @@ impl ExprKindExt for ExprKind {
 mod single_pass_eval_tests {
     use super::*;
 
+    fn test_span() -> Span {
+        Span { start: 0, end: 0 }
+    }
+
+    fn number(value: f64) -> Expr {
+        Expr {
+            kind: ExprKind::Number(value, crate::Exactness::Exact),
+            span: test_span(),
+        }
+    }
+
+    fn symbol(name: &str) -> Expr {
+        Expr {
+            kind: ExprKind::Symbol(name.into()),
+            span: test_span(),
+        }
+    }
+
+    fn list(items: impl IntoIterator<Item = Expr>) -> Expr {
+        Expr {
+            kind: ExprKind::List(items.into_iter().collect::<Vec<_>>().into()),
+            span: test_span(),
+        }
+    }
+
+    fn domain_identity(surface: &str) -> crate::CoreDomainIdentity {
+        crate::semantic_registry::domain_identity_for_surface(surface)
+            .unwrap_or_else(|| panic!("missing canonical domain identity for {surface}"))
+    }
+
+    fn domain_call(surface: &str, arguments: impl IntoIterator<Item = Expr>) -> Expr {
+        Expr {
+            kind: ExprKind::DomainCall(
+                domain_identity(surface),
+                arguments.into_iter().collect::<Vec<_>>().into(),
+            ),
+            span: test_span(),
+        }
+    }
+
+    #[test]
+    fn domain_d3_calls_execute_without_legacy_byte_projection() {
+        let environment = Environment::root();
+
+        let quoted = evaluate(
+            &domain_call("quote", [symbol("plum")]),
+            &environment,
+        )
+        .expect("D3 QUOTE");
+        assert_eq!(quoted.to_string(), "plum");
+
+        let pair = domain_call("cons", [number(7.0), list([])]);
+        let first = evaluate(&domain_call("car", [pair]), &environment)
+            .expect("D3 CONS/CAR");
+        assert_eq!(first.to_string(), "7");
+
+        let atom = evaluate(&domain_call("atom", [number(7.0)]), &environment)
+            .expect("D3 ATOM");
+        assert_eq!(atom.to_string(), "(1)");
+
+        let equal = evaluate(
+            &domain_call("eq", [number(7.0), number(7.0)]),
+            &environment,
+        )
+        .expect("D3 EQ");
+        assert_eq!(equal.to_string(), "(1)");
+    }
+
+    #[test]
+    fn domain_cond_keeps_raw_clause_semantics() {
+        let environment = Environment::root();
+        let query = domain_call("eq", [number(1.0), number(1.0)]);
+        let expected = list([number(1.0)]);
+        let selected = domain_call("quote", [symbol("selected")]);
+        let clause = list([query, expected, selected]);
+        let value = evaluate(&domain_call("cond", [clause]), &environment)
+            .expect("D3 COND");
+        assert_eq!(value.to_string(), "selected");
+    }
+
+    #[test]
+    fn domain_d4_lambda_and_define_execute_by_exact_domain_identity() {
+        let environment = Environment::root();
+
+        let lambda = domain_call("lambda", [list([symbol("x")]), symbol("x")]);
+        let closure = evaluate(&lambda, &environment).expect("D4 LAMBDA");
+        let value = invoke_value(
+            &closure,
+            &[Value::Number(9.0, crate::Exactness::Exact)],
+            &environment,
+            test_span(),
+        )
+        .expect("invoke domain-created closure");
+        assert_eq!(value.to_string(), "9");
+
+        let define = domain_call("define", [symbol("answer"), number(41.0)]);
+        evaluate(&define, &environment).expect("D4 DEFINE");
+        let answer = evaluate(&symbol("answer"), &environment).expect("defined binding");
+        assert_eq!(answer.to_string(), "41");
+    }
+
+    #[test]
+    fn unadmitted_d5_domain_call_fails_closed() {
+        let d5 = crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0).expect("five-bit fixture"),
+        ));
+        let expression = Expr {
+            kind: ExprKind::DomainCall(d5, Vec::<Expr>::new().into()),
+            span: test_span(),
+        };
+        let error = evaluate(&expression, &Environment::root())
+            .expect_err("unknown D5 coordinate must not inherit an eight-bit mechanism");
+        assert_eq!(error.kind, ErrorKind::Type);
+        assert!(error.message.contains("no admitted callable mechanism"));
+    }
+
     #[test]
     fn single_pass_eval_parsed_expressions_evaluates_preparsed_ast() {
         let source = "(def x (/ 1 3)) (cons x (quote ()))";
