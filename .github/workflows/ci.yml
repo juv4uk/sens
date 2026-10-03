@@ -100,6 +100,9 @@ jobs:
         shell: bash
         run: bash scripts/domain-paradigm-one-way-guard.sh "$BASE_SHA" "$HEAD_SHA"
 
+      - name: No growth of English semantic representation
+        run: cargo test -p sens --test english_names_in_code english_names_in_code_never_grow -- --nocapture
+
       - name: SID exact-binary identity guard
         if: steps.changes.outputs.rust == 'true'
         shell: bash
