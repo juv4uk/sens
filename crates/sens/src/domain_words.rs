@@ -145,24 +145,6 @@ impl CoreD6 {
 }
 
 
-/// Explicit compatibility wrapper for the historical exact-eight-bit carrier.
-///
-/// This exists only while old transport/backend paths are being migrated. It
-/// never compares equal to a domain-qualified callable merely from packed bits.
-#[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
-pub struct LegacySens8(crate::Sens8);
-
-impl LegacySens8 {
-    pub const fn from_sens8(value: crate::Sens8) -> Self {
-        Self(value)
-    }
-
-    pub const fn sens8(self) -> crate::Sens8 {
-        self.0
-    }
-}
-
 /// Domain-qualified callable identity for the Core D3..D6 strata.
 ///
 /// The variant is part of identity. This is a carrier, not a table of
@@ -174,7 +156,7 @@ pub enum CallableDomainId {
     D4(CoreD4),
     D5(CoreD5),
     D6(CoreD6),
-    Legacy8(LegacySens8),
+    Legacy8(crate::LegacySens8),
 }
 
 impl CallableDomainId {
@@ -195,7 +177,7 @@ impl CallableDomainId {
             Self::D4(word) => word.word().packed_bits(),
             Self::D5(word) => word.word().packed_bits(),
             Self::D6(word) => word.word().packed_bits(),
-            Self::Legacy8(word) => word.sens8().packed_byte(),
+            Self::Legacy8(word) => word.packed_byte(),
         }
     }
 
@@ -223,17 +205,17 @@ impl CallableDomainId {
         }
     }
 
-    /// Only the explicitly tagged compatibility variant can recover Sens8.
-    pub const fn legacy_sens8(self) -> Option<crate::Sens8> {
+    /// Recover only the explicitly tagged compatibility wrapper.
+    pub const fn legacy(self) -> Option<crate::LegacySens8> {
         match self {
-            Self::Legacy8(word) => Some(word.sens8()),
+            Self::Legacy8(word) => Some(word),
             Self::D3(_) | Self::D4(_) | Self::D5(_) | Self::D6(_) => None,
         }
     }
 
-    /// Named compatibility entry. Intentionally no implicit From<Sens8>.
-    pub const fn from_legacy_sens8(value: crate::Sens8) -> Self {
-        Self::Legacy8(LegacySens8::from_sens8(value))
+    /// Named compatibility entry. The exact-domain layer never imports Sens8.
+    pub const fn from_legacy(value: crate::LegacySens8) -> Self {
+        Self::Legacy8(value)
     }
 }
 
@@ -284,11 +266,6 @@ impl fmt::Debug for CallableDomainId {
     }
 }
 
-impl fmt::Debug for LegacySens8 {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "LegacySens8({})", self.0)
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -334,8 +311,7 @@ mod tests {
         let d4 = CallableDomainId::D4(CoreD4::from_word(Bit4::new(1).unwrap()));
         let d5 = CallableDomainId::D5(CoreD5::from_word(Bit5::new(1).unwrap()));
         let d6 = CallableDomainId::D6(CoreD6::from_word(Bit6::new(1).unwrap()));
-        let legacy =
-            CallableDomainId::from_legacy_sens8(crate::Sens8::__from_macro_bits("00000001"));
+        let legacy = CallableDomainId::from_legacy(crate::LegacySens8::from_packed_byte(1));
 
         for id in [d3, d4, d5, d6, legacy] {
             assert_eq!(id.packed_bits(), 1);
@@ -352,8 +328,8 @@ mod tests {
         assert!(d4 != legacy);
         assert!(d5 != legacy);
         assert!(d6 != legacy);
-        assert!(d3.legacy_sens8().is_none());
-        assert_eq!(legacy.legacy_sens8().unwrap().packed_byte(), 1);
+        assert!(d3.legacy().is_none());
+        assert_eq!(legacy.legacy().unwrap().packed_byte(), 1);
     }
 
     #[test]
