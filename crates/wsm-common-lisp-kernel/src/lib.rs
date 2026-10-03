@@ -240,10 +240,10 @@ struct CommonLispAbiContext {
 
 /// Owns the stable context behind the semantic-neutral C ABI vtable.
 ///
-/// The vtable transports a semantic ID byte plus mechanism arguments.
-/// Raw Common Lisp forms remain available through CommonLispKernel::evaluate,
-/// but the semantic ABI may bind an admitted SID directly to a native mechanism.
-/// The payload never redefines semantic identity.
+/// The vtable transports one historical opaque byte plus mechanism arguments.
+/// It never constructs `CoreDomainIdentity`. Canonical Common Lisp requests
+/// use `CommonLispKernel::evaluate`; the C ABI uses the explicitly legacy
+/// `evaluate_legacy_abi` path.
 pub struct CommonLispAbiAdapter {
     context: Box<CommonLispAbiContext>,
     vtable: WsmKernelVTable,
@@ -260,7 +260,7 @@ impl CommonLispAbiAdapter {
         let mut context = Box::new(CommonLispAbiContext {
             kernel,
             running: false,
-            last_legacy_identity: None,
+            last_legacy_semantic_id: None,
         });
         let context_ptr = (&mut *context) as *mut CommonLispAbiContext as *mut c_void;
 
