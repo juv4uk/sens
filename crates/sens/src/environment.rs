@@ -93,11 +93,12 @@ struct Limits {
     /// D3/D4/D5/D6 identities with the same packed payload remain distinct.
     /// Occupancy/callability is validated by routing law before this storage
     /// layer is used; the map itself grants no semantic meaning.
+    #[allow(dead_code)] // #2831: routing callers migrate in the next stacked slice.
     domain_code_slots: HashMap<CoreDomainIdentity, Value>,
-    /// Historical exact-eight compatibility storage. This remains physically
-    /// separate from canonical domain slots so a packed byte can never alias a
-    /// D3/D4/D5/D6 identity merely because the payload happens to match.
-    legacy_sens8_code_slots: HashMap<u8, Value>,
+    /// #1455: визначення мовою для кодів СЕНС без примітиву Rust. Слот коду
+    /// заповнює перше визначення верхнього рівня з назвою з таблиці функцій;
+    /// пізніше затінення назви слот не змінює.
+    code_slots: HashMap<u8, Value>,
 }
 
 impl Environment {
@@ -244,6 +245,7 @@ impl Environment {
     }
 
     /// Canonical language-owned slot lookup by exact Core domain identity.
+    #[allow(dead_code)] // #2831: routing callers migrate in the next stacked slice.
     pub(crate) fn domain_code_slot(&self, identity: CoreDomainIdentity) -> Option<Value> {
         self.2.borrow().domain_code_slots.get(&identity).cloned()
     }
@@ -253,6 +255,7 @@ impl Environment {
     /// Equal packed payloads in different domains intentionally do not
     /// collide because `CoreDomainIdentity` carries the domain in its hash
     /// and equality semantics.
+    #[allow(dead_code)] // #2831: routing callers migrate in the next stacked slice.
     pub(crate) fn bind_domain_code_slot_once(
         &self,
         identity: CoreDomainIdentity,
@@ -266,45 +269,19 @@ impl Environment {
         true
     }
 
-    /// Historical exact-eight compatibility lookup.
-    ///
-    /// This API is intentionally separate from `domain_code_slot`. Callers
-    /// that still hold `Sens8` are legacy-routing users until #2855/#2832
-    /// migrates them onto canonical domain identity.
-    pub(crate) fn legacy_sens8_code_slot(&self, sid: crate::Sens8) -> Option<Value> {
-        self.2
-            .borrow()
-            .legacy_sens8_code_slots
-            .get(&sid.packed_byte())
-            .cloned()
+    /// #1455: визначення мовою, прив'язане до коду СЕНС.
+    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
+        self.2.borrow().code_slots.get(&sid.packed_byte()).cloned()
     }
 
-    /// Historical exact-eight compatibility bind.
-    pub(crate) fn bind_legacy_sens8_code_slot_once(
-        &self,
-        sid: crate::Sens8,
-        value: Value,
-    ) -> bool {
+    /// Прив'язує визначення до коду, лише якщо слот ще порожній.
+    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
         let mut limits = self.2.borrow_mut();
-        if limits.legacy_sens8_code_slots.contains_key(&sid.packed_byte()) {
+        if limits.code_slots.contains_key(&sid.packed_byte()) {
             return false;
         }
-        limits
-            .legacy_sens8_code_slots
-            .insert(sid.packed_byte(), value);
+        limits.code_slots.insert(sid.packed_byte(), value);
         true
-    }
-
-    /// Temporary compatibility alias for callers owned by the parallel
-    /// registry/routing migration. It is deliberately implemented only over
-    /// the legacy map and can never see canonical domain slots.
-    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
-        self.legacy_sens8_code_slot(sid)
-    }
-
-    /// Temporary compatibility alias paired with `code_slot`.
-    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
-        self.bind_legacy_sens8_code_slot_once(sid, value)
     }
 
     /// A child frame is the future lexical boundary captured by a closure. It
@@ -619,33 +596,6 @@ mod tests {
             d3,
             Value::Symbol(Rc::from("replacement"))
         ));
-    }
-
-    #[test]
-    fn canonical_domain_and_legacy_sens8_slots_are_physically_disjoint() {
-        let root = Environment::root();
-
-        let domain: CoreDomainIdentity =
-            Bija3::from_word(Bit3::new(0b001).unwrap()).into();
-        let legacy = crate::sens!(00000001);
-
-        let domain_value = Value::Symbol(Rc::from("domain"));
-        let legacy_value = Value::Symbol(Rc::from("legacy"));
-
-        assert_eq!(domain.packed_bits(), legacy.packed_byte());
-
-        assert!(root.bind_domain_code_slot_once(domain, domain_value.clone()));
-        assert!(root.bind_legacy_sens8_code_slot_once(
-            legacy,
-            legacy_value.clone()
-        ));
-
-        assert_eq!(root.domain_code_slot(domain), Some(domain_value));
-        assert_eq!(root.legacy_sens8_code_slot(legacy), Some(legacy_value.clone()));
-
-        // The temporary legacy alias remains compatibility-only and therefore
-        // cannot observe the canonical domain slot.
-        assert_eq!(root.code_slot(legacy), Some(legacy_value));
     }
 
     #[test]
