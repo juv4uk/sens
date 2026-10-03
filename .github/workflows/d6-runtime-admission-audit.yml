@@ -1,0 +1,27 @@
+name: D6 runtime admission audit
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-historical-full-map.json"
+      - "knowledge/d6-runtime-admission-audit.json"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/lower.rs"
+      - "scripts/research-2766-d6-runtime-admission-audit.py"
+      - ".github/workflows/d6-runtime-admission-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify D6 admission matrix
+        run: python3 scripts/research-2766-d6-runtime-admission-audit.py --check
