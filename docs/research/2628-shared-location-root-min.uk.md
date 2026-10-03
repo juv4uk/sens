@@ -1,8 +1,8 @@
 # #2628 — мінімізація кореня shared-location
 
-Фаза: **SENS-DERIVATION**  
-Фактор: `shared-location-update`  
-Width: **UNKNOWN**  
+Фаза: **SENS-DERIVATION**
+Фактор: `shared-location-update`
+Width: **UNKNOWN**
 Coordinate: **UNPLACED**
 
 ## Результат
