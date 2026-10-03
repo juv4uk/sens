@@ -128,11 +128,38 @@ VIOLATION_SCOPE = {
 }
 
 
-def schema_scope(body):
-    """Classify task scope from explicit declarations only; never from names."""
+def _scope_metadata_text(body):
+    """Return only task-level scope metadata, excluding nested examples/ledgers.
+
+    Scope declarations are admitted from:
+    - the preamble before the first level-2 section;
+    - an explicit level-2 `## LAYER ...` section.
+
+    A nested ledger row that happens to say `LAYER = MECHANISM` must not
+    reclassify the whole issue.
+    """
     b = body or ""
-    mechanism = bool(LAYER_MECHANISM.search(b))
-    nonauthority = bool(SEMANTIC_AUTHORITY_NONE.search(b))
+    chunks = []
+
+    first_h2 = re.search(r"(?m)^##[ \t]+\S", b)
+    chunks.append(b[: first_h2.start() if first_h2 else len(b)])
+
+    layer_heading = re.compile(r"(?im)^##[ \t]+LAYER\b[^\n]*$")
+    for match in layer_heading.finditer(b):
+        start = match.end()
+        next_section = re.search(r"(?m)^#{1,2}[ \t]+\S", b[start:])
+        end = start + next_section.start() if next_section else len(b)
+        chunks.append(b[start:end])
+
+    return "\n".join(chunks)
+
+
+def schema_scope(body):
+    """Classify task scope from explicit task-level declarations only."""
+    b = body or ""
+    meta = _scope_metadata_text(b)
+    mechanism = bool(LAYER_MECHANISM.search(meta))
+    nonauthority = bool(SEMANTIC_AUTHORITY_NONE.search(meta))
 
     if mechanism and not nonauthority:
         return "mechanism-missing-nonauthority"
@@ -395,6 +422,12 @@ SEMANTIC AUTHORITY = NONE
     assert schema_scope("LAYER = MECHANISM\n") == "mechanism-missing-nonauthority"
     assert schema_scope("SEMANTIC AUTHORITY = NONE\n") == "nonauthority-without-mechanism"
     assert schema_scope("codec GC FPGA runtime\n") == "semantic"
+    assert schema_scope(
+        "## Ledger\n\n```text\nLAYER = MECHANISM\n```\n"
+    ) == "semantic"
+    assert schema_scope(
+        "## LAYER\n\n```text\nLAYER = MECHANISM\nSEMANTIC AUTHORITY = NONE\n```\n"
+    ) == "mechanism"
     assert schema_scope(
         mechanism
         + "\n## BINARY-DOMAIN RECORD\n"
