@@ -1,16 +1,16 @@
-# SENS language core — binary domains, laws, and evidence
+# Ядро мови SENS — бінарні домени, закони й докази
 
-**Status:** CURRENT EXPLANATORY DOCUMENT · 2026-10-03
+**Статус:** CURRENT EXPLANATORY DOCUMENT · 2026-10-03
 
-The previous SID8-only document has been preserved at
+Попередній SID8-only документ збережено в
 [`docs/archive/language-core-sid8-only-superseded-2026-10-03.md`](archive/language-core-sid8-only-superseded-2026-10-03.md).
 
-This document summarizes the current model. It is not semantic authority by itself.
-Use [`../CURRENT.md`](../CURRENT.md) and the referenced ratified/executable evidence.
+Цей документ пояснює поточну модель, але сам не створює semantic authority.
+Див. [`../CURRENT.md`](../CURRENT.md) і referenced ratified/executable evidence.
 
 ## 1. Semantic object
 
-Current owner paradigm (#2490):
+Поточна owner-парадигма (#2490):
 
 ```text
 semantic object
@@ -20,14 +20,14 @@ binary number
 + proved/admitted law
 ```
 
-Bits alone do not carry meaning.
+Біти самі по собі не несуть значення.
 
-The same bit string may legitimately appear in two domains and denote two different
-semantic objects.
+Один і той самий bit string може легально існувати у двох доменах і означати
+два різні semantic objects.
 
-## 2. Domain, carrier, mechanism
+## 2. Domain, carrier і mechanism
 
-Keep three layers separate:
+Три шари треба тримати окремо:
 
 ```text
 domain     = law-bearing semantic context
@@ -35,26 +35,26 @@ carrier    = concrete width/bit representation
 mechanism  = executor/transport/substrate
 ```
 
-Examples:
+Приклади:
 
 ```text
 D7.SoundCell [carrier=W7]       semantic domain
-D7.LocalOrdinal [carrier=W7]    another semantic context
-W7                              carrier only
-Rust / FPGA / RF                mechanism only
+D7.LocalOrdinal [carrier=W7]    інший semantic context
+W7                              лише carrier
+Rust / FPGA / RF                mechanism
 ```
 
-A bare width is not enough to establish a semantic domain.
+Bare width недостатній для встановлення semantic domain.
 
 ## 3. Core
 
-Core reconstructs the historical Lisp line before deriving native SENS structure:
+Core реконструює історичну Lisp-лінію перед native SENS derivation:
 
 ```text
 Lisp I -> Lisp 1.5 -> later early-Lisp evidence
 ```
 
-Research order (#2533):
+Порядок дослідження (#2533):
 
 ```text
 HISTORICAL-INGEST
@@ -64,29 +64,29 @@ STRUCTURAL-DISCOVERY
 SENS-DERIVATION
 ```
 
-The historical inventory must remain intact even when SENS later derives or
-compresses an operation.
+Historical inventory не можна стирати, навіть якщо SENS пізніше виводить або
+стискає операцію.
 
-### Current domain status
+### Поточний status доменів
 
-| Domain | Current status |
+| Domain | Поточний status |
 |---|---|
 | D1 | ratified PredicateBit |
 | D2 | ratified structural racanā2 |
 | D3 | ratified Core foundation |
 | D4 | ratified Core foundation |
-| D5 | ratified width/domain ontology; occupancy still under historical/structural research |
-| D6 | ratified width/domain ontology; many coordinates remain deliberately UNKNOWN |
-| D7 | ratified Sound7 + local śloka/sūtra ordinals; not arithmetic Number |
+| D5 | ratified width/domain ontology; occupancy ще досліджується |
+| D6 | ratified width/domain ontology; багато coordinates лишаються UNKNOWN |
+| D7 | ratified Sound7 + local śloka/sūtra ordinals; не arithmetic Number |
 | D14 | research candidate: Pāṇini grammar graph |
-| D24/D48/... | research candidates for exact Number / FPGA-friendly numeric domains |
+| D24/D48/... | research candidates: exact Number / FPGA-friendly numeric domains |
 
-Ratified width is not blanket occupancy.
+Ratified width не означає blanket occupancy.
 
 ## 4. Generated descendants
 
-A generated child may earn its candidate identity from an exact parent plus an
-admitted local generator:
+Generated child може заробити candidate identity через exact parent + admitted
+local generator:
 
 ```text
 parent
@@ -94,24 +94,24 @@ parent
 -> generated child
 ```
 
-Selector composition is the strongest current positive control.
+Selector composition — найсильніший current positive control.
 
-For a selector-path coordinate, appending a semantic projection choice can agree
-with the binary relation:
+Для selector-path coordinate додавання semantic projection choice може
+узгоджуватись із binary relation:
 
 ```text
 E(extend(s,b)) = 2*E(s) + b
 ```
 
-The arithmetic formula is not the semantic law by itself. The semantic law is
-selector composition. #2502 cross-proves the current generated D4/D5 descendants
-against an independent Core-Math executor.
+Але arithmetic formula сама по собі не є semantic law. Semantic law тут —
+selector composition. #2502 незалежно cross-proves current generated D4/D5
+selector descendants через Core-Math executor.
 
-## 5. Parentless roots and residue
+## 5. Parentless roots і residue
 
-A semantic root does **not** earn width from free space.
+Semantic root **не** заробляє width через free space.
 
-Current research distinguishes:
+Розділяємо:
 
 ```text
 roothood
@@ -119,39 +119,39 @@ width/domain membership
 coordinate placement
 ```
 
-These are separate claims.
+Це три різні claims.
 
-For parentless roots such as the current non-local-exit control:
+Для parentless root:
 
-- roothood may be proved;
-- exact width may remain UNKNOWN;
-- coordinate may remain UNPLACED.
+- roothood може бути proved;
+- exact width може лишитися UNKNOWN;
+- coordinate може лишитися UNPLACED.
 
-#2662/#2667/#2669 study how a parentless root can honestly earn an exact domain.
+#2662/#2667/#2669 досліджують, як parentless root чесно заробляє exact domain.
 
 ## 6. D6 PURE-UNKNOWN discipline
 
-Unknown coordinates are not inventory defects.
+Unknown coordinates — не дефект inventory.
 
-A PURE-UNKNOWN D6 coordinate may leave that class only after a same-base semantic
-law, lower-bound theorem, or other admitted placement evidence is established.
+PURE-UNKNOWN D6 coordinate може покинути цей клас лише після same-base semantic
+law, lower-bound theorem або іншого admitted placement evidence.
 
-Forbidden placement arguments include:
+Заборонені placement arguments:
 
 - free capacity;
 - numeric adjacency;
-- attractive bit patterns;
+- attractive bit pattern;
 - chronology alone;
-- foreign Core-Math authority;
+- Core-Math authority без bridge/domain proof;
 - mechanism-local metadata.
 
-A successful research result may be **NO-CANDIDATE**.
+Успішний research result може бути **NO-CANDIDATE**.
 
 ## 7. Core-Math
 
-Core-Math studies mathematical laws over binary objects independently of Core.
+Core-Math досліджує математичні закони над binary objects незалежно від Core.
 
-Minimal execution idea:
+Мінімальна execution-ідея:
 
 ```text
 binary input(s)
@@ -159,17 +159,17 @@ binary input(s)
 -> binary output
 ```
 
-Important evidence:
+Ключове evidence:
 
-- #2491 — first minimal bounded `bits + law -> bits` executor;
+- #2491 — перший bounded `bits + law -> bits` executor;
 - #2500 — exact-Q family/role factorization;
-- #2509 — same machine transform in a different domain does not merge semantics.
+- #2509 — same machine transform у різних domains не зливає semantics.
 
-Core-Math may diverge from Core. It does not inherit Core placement automatically.
+Core-Math може diverge від Core і не успадковує Core placement автоматично.
 
 ## 8. Core / Core-Math relation
 
-Three outcomes are admitted:
+Допустимі результати:
 
 ```text
 DIVERGENT
@@ -177,7 +177,7 @@ COMPLEMENTARY
 CONVERGENT
 ```
 
-Convergence requires independent agreement on:
+Convergence вимагає незалежного збігу:
 
 ```text
 binary object
@@ -187,31 +187,32 @@ binary object
 + cross-proof
 ```
 
-Matching syntax, names, hashes, ASTs, storage layouts, or machine formulas is not enough.
+Matching syntax, human names, hashes, ASTs, storage layouts або machine formula
+недостатньо.
 
 ## 9. Human surfaces
 
-Human names are source/UI projections.
+Human names — source/UI projections.
 
-This includes:
+До них належать:
 
-- Ukrainian;
+- українські;
 - English;
 - Sanskrit;
 - symbolic spellings;
 - historical Lisp names.
 
-A name may help humans discuss an object. It does not replace the object's
-binary-domain identity.
+Назва допомагає людині обговорювати об'єкт, але не замінює binary-domain
+identity.
 
-The canonical source extension remains **`.lisp`**. The suffix is a source/tooling
-choice, not semantic identity.
+Canonical source extension лишається **`.lisp`**. File suffix не є semantic
+identity.
 
 ## 10. Execution substrates
 
-Rust is the current reference mechanism, not semantic authority.
+Rust — current reference mechanism, не semantic authority.
 
-The same rule applies to:
+Те саме стосується:
 
 - C;
 - Common Lisp;
@@ -222,15 +223,15 @@ The same rule applies to:
 - Prolog / Datalog / CLIPS;
 - radio/wire transports.
 
-A mechanism may implement or carry an admitted object. It may not silently mint
-new language meaning.
+Mechanism може виконувати або переносити admitted object. Він не має права
+непомітно mint-ити нове language meaning.
 
-## 11. Wire and packed representation
+## 11. Wire і packed representation
 
-Packed/wire representations preserve exact payloads and boundaries. They do not
-create semantic domains.
+Packed/wire representation зберігає exact payload і boundaries. Воно не
+створює semantic domain.
 
-Correct conceptual layering:
+Conceptual layering:
 
 ```text
 semantic object
@@ -239,11 +240,11 @@ semantic object
 -> physical channel
 ```
 
-CRC, FEC, ARQ, frequency, modulation and RF profile are transport mechanisms.
+CRC, FEC, ARQ, frequency, modulation і RF profile — transport mechanisms.
 
 ## 12. Governed research record
 
-Current task grammar:
+Поточна task grammar:
 
 ```text
 PHASE
@@ -256,7 +257,7 @@ STATUS
 RELATION
 ```
 
-Allowed PHASE values:
+Allowed PHASE:
 
 ```text
 HISTORICAL-INGEST
@@ -264,26 +265,39 @@ STRUCTURAL-DISCOVERY
 SENS-DERIVATION
 ```
 
-The schema makes uncertainty explicit; it does not auto-ratify semantics.
+Schema робить uncertainty явною, але не auto-ratify-ить semantics.
 
 ## 13. Historical SID8
 
-The earlier flat 256-slot SID8/Function8 model remains:
+Попередня flat 256-slot SID8/Function8 модель лишається:
 
 - historical provenance;
 - compatibility evidence;
-- a migration donor;
-- a useful falsifier against accidental return to flat identity.
+- migration donor;
+- falsifier проти випадкового повернення до flat identity.
 
-It is **not** the current language ontology.
+Вона **не** є current ontology.
 
-## 14. Project boundary
+## 14. Межа проєкту
 
-SENS owns admitted semantic meaning.
+SENS володіє admitted semantic meaning.
 
 Reference implementations, generated files, benchmarks, surfaces, proof-address
-formats and caches remain lower-level evidence/mechanism unless a separate law
-explicitly promotes a fact.
+formats і caches лишаються evidence/mechanism нижчого рівня, якщо окремий law
+не встановив інше.
 
 Authority precedence:
 [`semantic-authority-map.md`](semantic-authority-map.md).
+
+## English · auxiliary
+
+The current SENS model is:
+
+```text
+semantic object = binary number + exact semantic domain + admitted law
+```
+
+Core reconstructs historical Lisp first, discovers structure second, and
+derives native SENS semantics third. Core-Math independently studies
+mathematical laws over binary objects. Domain, carrier and mechanism are
+separate; free coordinates remain unassigned until a law earns placement.
