@@ -16,6 +16,7 @@ mod capabilities;
 mod closures;
 pub(crate) mod lower;
 mod macro_substrate;
+mod legacy_backend;
 pub(crate) mod necessary_forms;
 mod profile_mechanisms_generated;
 mod special_forms;
