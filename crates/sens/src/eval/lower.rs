@@ -12,7 +12,7 @@
 //! Дані лишаються даними: аргумент `quote`, клаузи `cond` (самі клаузи — не
 //! виклики), параметри `lambda` та ім'я в `def`/`define`.
 
-use super::{canon, necessary_forms_legacy};
+use super::{canon, lower_domain, necessary_forms_legacy};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
 use crate::Sens8;
@@ -48,47 +48,56 @@ fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
     items.iter().map(|item| lower(item, depth + 1)).collect()
 }
 
-fn lower(expression: &Expr, depth: u32) -> Expr {
+pub(super) fn lower(expression: &Expr, depth: u32) -> Expr {
     if depth > MAX_STRUCTURE_DEPTH {
         return expression.clone();
     }
     let kind = match &expression.kind {
         ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
+        ExprKind::DomainCall(identity, arguments) => {
+            ExprKind::DomainCall(*identity, arguments.clone())
+        }
         ExprKind::List(items) if !items.is_empty() => {
-            let arguments = &items[1..];
-            match head_sid(&items[0]) {
-                Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
-                Some(sid) if sid == COND => ExprKind::Call(
-                    sid,
-                    arguments
-                        .iter()
-                        .map(|clause| match &clause.kind {
-                            ExprKind::List(parts) => Expr {
-                                kind: ExprKind::List(lower_all(parts, depth + 1)),
-                                span: clause.span,
-                            },
-                            _ => clause.clone(),
-                        })
-                        .collect(),
-                ),
-                Some(sid) if necessary_forms_legacy::identity_for_semantic_id(sid).is_some() => {
-                    ExprKind::Call(
+            if let Some(domain_call) = lower_domain::try_lower_necessary_form(items, depth) {
+                domain_call
+            } else {
+                let arguments = &items[1..];
+                match head_sid(&items[0]) {
+                    Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
+                    Some(sid) if sid == COND => ExprKind::Call(
                         sid,
                         arguments
                             .iter()
-                            .enumerate()
-                            .map(|(index, argument)| {
-                                if index == 0 {
-                                    argument.clone()
-                                } else {
-                                    lower(argument, depth + 1)
-                                }
+                            .map(|clause| match &clause.kind {
+                                ExprKind::List(parts) => Expr {
+                                    kind: ExprKind::List(lower_all(parts, depth + 1)),
+                                    span: clause.span,
+                                },
+                                _ => clause.clone(),
                             })
                             .collect(),
-                    )
+                    ),
+                    Some(sid)
+                        if necessary_forms_legacy::identity_for_semantic_id(sid).is_some() =>
+                    {
+                        ExprKind::Call(
+                            sid,
+                            arguments
+                                .iter()
+                                .enumerate()
+                                .map(|(index, argument)| {
+                                    if index == 0 {
+                                        argument.clone()
+                                    } else {
+                                        lower(argument, depth + 1)
+                                    }
+                                })
+                                .collect(),
+                        )
+                    }
+                    Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth)),
+                    None => ExprKind::List(lower_all(items, depth)),
                 }
-                Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth)),
-                None => ExprKind::List(lower_all(items, depth)),
             }
         }
         _ => return expression.clone(),
@@ -130,6 +139,37 @@ mod tests {
             ExprKind::Call(sid, _) => assert_eq!(sid, crate::sens!(00001101)),
             other => panic!("expected Call, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn lambda_surface_lowers_to_domain_call() {
+        let expr = lower_one("(lambda (x) x)");
+        match expr.kind {
+            ExprKind::DomainCall(identity, args) => {
+                assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0010));
+                assert_eq!(args.len(), 2);
+            }
+            other => panic!("expected DomainCall, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn define_surface_lowers_to_domain_call_and_nested_lambda_is_domain_call() {
+        let expr = lower_one("(define id (lambda (x) x))");
+        let ExprKind::DomainCall(identity, args) = expr.kind else {
+            panic!("expected DEFINE DomainCall");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0011));
+        assert!(matches!(args[1].kind, ExprKind::DomainCall(_, _)));
+    }
+
+    #[test]
+    fn compatibility_def_normalizes_to_canonical_d4_define() {
+        let expr = lower_one("(def id (lambda (x) x))");
+        let ExprKind::DomainCall(identity, _) = expr.kind else {
+            panic!("expected DEFINE DomainCall");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0011));
     }
 
     #[test]
