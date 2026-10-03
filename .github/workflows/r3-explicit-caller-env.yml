@@ -1,0 +1,41 @@
+name: R3 explicit caller-env minimization
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2630-explicit-caller-env-root.py"
+      - "docs/research/2630-explicit-caller-env-root*.md"
+      - "lib/core1.lisp"
+      - "crates/sens/src/eval/closures.rs"
+      - "docs/research/2162-d4-polarity.md"
+      - "scripts/research-2522-fexpr-protocol-cube.py"
+      - ".github/workflows/r3-explicit-caller-env.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/research-2630-explicit-caller-env-root.py"
+      - "docs/research/2630-explicit-caller-env-root*.md"
+      - "lib/core1.lisp"
+      - "crates/sens/src/eval/closures.rs"
+      - "docs/research/2162-d4-polarity.md"
+      - "scripts/research-2522-fexpr-protocol-cube.py"
+      - ".github/workflows/r3-explicit-caller-env.yml"
+
+jobs:
+  r3:
+    name: explicit caller-env root minimization
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run R3 witness
+        run: python3 scripts/research-2630-explicit-caller-env-root.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## R3 explicit caller environment"
+            echo "- Explicit env data + D4 lookup reproduces body-level observation."
+            echo "- Ordinary closure call does not inject current caller env into callee slots."
+            echo "- Automatic current-caller-env acquisition remains a carrier/channel premise."
+            echo "- No width or coordinate is allocated."
+          } >> "$GITHUB_STEP_SUMMARY"
