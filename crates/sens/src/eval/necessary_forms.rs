@@ -59,18 +59,18 @@ pub(crate) fn domain_identity_for_symbol(name: &str) -> Option<CoreDomainIdentit
         return identity_for_domain_identity(identity).map(|_| identity);
     }
 
-    let legacy = semantic_registry::admitted_semantic_id_for_surface(name)?;
+    let legacy = semantic_registry::legacy_registry_id_for_surface(name)?;
     let mechanism = generated::NECESSARY_FORM_DISPATCH
         .iter()
-        .find(|row| row.semantic_id == legacy.packed_byte())
+        .find(|row| row.legacy_registry_id == legacy.packed_byte())
         .map(|row| row.mechanism)?;
     Some(canonical_domain_identity(mechanism))
 }
 
-pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFormIdentity> {
+pub(crate) fn identity_for_legacy_registry_id(legacy_registry_id: Sens8) -> Option<NecessaryFormIdentity> {
     generated::NECESSARY_FORM_DISPATCH
         .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .find(|row| row.legacy_registry_id == legacy_registry_id.packed_byte())
         .map(|row| match row.mechanism {
             generated::NecessaryFormMechanism::Define => NecessaryFormIdentity::Define,
             generated::NecessaryFormMechanism::Lambda => NecessaryFormIdentity::Lambda,
@@ -125,12 +125,12 @@ mod tests {
     fn byte_sid_is_not_a_surface_spelling() {
         assert_eq!(identity_for_symbol("00001001"), None);
         assert_eq!(identity_for_symbol("0000SID 11"), None);
-        let define_id = semantic_registry::admitted_semantic_id_for_surface("define")
+        let define_id = semantic_registry::legacy_registry_id_for_surface("define")
             .expect("define must have one admitted semantic identity");
-        let lambda_id = semantic_registry::admitted_semantic_id_for_surface("lambda")
+        let lambda_id = semantic_registry::legacy_registry_id_for_surface("lambda")
             .expect("lambda must have one admitted semantic identity");
-        assert_eq!(identity_for_semantic_id(define_id), Some(NecessaryFormIdentity::Define));
-        assert_eq!(identity_for_semantic_id(lambda_id), Some(NecessaryFormIdentity::Lambda));
+        assert_eq!(identity_for_legacy_registry_id(define_id), Some(NecessaryFormIdentity::Define));
+        assert_eq!(identity_for_legacy_registry_id(lambda_id), Some(NecessaryFormIdentity::Lambda));
     }
 
     #[test]
@@ -145,19 +145,19 @@ mod tests {
             ("define", NecessaryFormIdentity::Define),
             ("lambda", NecessaryFormIdentity::Lambda),
         ] {
-            let semantic_id = semantic_registry::admitted_semantic_id_for_surface(surface)
+            let legacy_registry_id = semantic_registry::legacy_registry_id_for_surface(surface)
                 .expect("necessary form must have one admitted semantic identity");
-            let surfaces = semantic_registry::admitted_surfaces_for_semantic_id(semantic_id);
+            let surfaces = semantic_registry::admitted_surfaces_for_legacy_registry_id(legacy_registry_id);
             assert!(
                 surfaces.len() >= 2,
-                "{semantic_id} should admit at least two surfaces for this invariant to be \
+                "{legacy_registry_id} should admit at least two surfaces for this invariant to be \
                  meaningful, got {surfaces:?}"
             );
             for surface in &surfaces {
                 assert_eq!(
                     identity_for_symbol(surface),
                     Some(identity),
-                    "registry-admitted surface {surface:?} for {semantic_id} did not route to \
+                    "registry-admitted surface {surface:?} for {legacy_registry_id} did not route to \
                      {identity:?}"
                 );
             }
@@ -169,14 +169,14 @@ mod tests {
         // Status-free canonical semantic registry has no compatibility-only admission class.
         // A present spelling is directly routable; SID 11 still maps to the
         // compatibility `def` form without any hardcoded spelling fallback.
-        let def_id = semantic_registry::semantic_id_for_surface("def")
+        let def_id = semantic_registry::legacy_registry_id_for_surface("def")
             .expect("def must remain present in the semantic registry");
         assert_eq!(
-            semantic_registry::admitted_semantic_id_for_surface("def"),
+            semantic_registry::legacy_registry_id_for_surface("def"),
             Some(def_id)
         );
         assert_eq!(
-            identity_for_semantic_id(def_id),
+            identity_for_legacy_registry_id(def_id),
             Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(identity_for_symbol("def"), Some(NecessaryFormIdentity::Define));
@@ -192,22 +192,22 @@ mod tests {
     #[test]
     fn exact_sid_identities_control_necessary_form_routing() {
         assert_eq!(
-            identity_for_semantic_id(
-                semantic_registry::admitted_semantic_id_for_surface("lambda")
+            identity_for_legacy_registry_id(
+                semantic_registry::legacy_registry_id_for_surface("lambda")
                     .expect("lambda semantic identity")
             ),
             Some(NecessaryFormIdentity::Lambda)
         );
         assert_eq!(
-            identity_for_semantic_id(
-                semantic_registry::admitted_semantic_id_for_surface("define")
+            identity_for_legacy_registry_id(
+                semantic_registry::legacy_registry_id_for_surface("define")
                     .expect("define semantic identity")
             ),
             Some(NecessaryFormIdentity::Define)
         );
         assert_eq!(
-            identity_for_semantic_id(
-                semantic_registry::admitted_semantic_id_for_surface("def")
+            identity_for_legacy_registry_id(
+                semantic_registry::legacy_registry_id_for_surface("def")
                     .expect("def compatibility semantic identity")
             ),
             Some(NecessaryFormIdentity::Define)
@@ -216,7 +216,7 @@ mod tests {
 
     #[test]
     fn unrelated_registry_rows_do_not_gain_necessary_form_meaning() {
-        assert_eq!(semantic_registry::semantic_id_for_surface("+"), Some(crate::sens!(00001100)));
+        assert_eq!(semantic_registry::legacy_registry_id_for_surface("+"), Some(crate::sens!(00001100)));
         assert_eq!(identity_for_symbol("+"), None);
     }
 }

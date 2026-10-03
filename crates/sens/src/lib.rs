@@ -63,10 +63,10 @@ pub mod semantic_registry_export {
 
     /// Stable and compatibility-only spellings admitted for `semantic_id`,
     /// each tagged with which namespace (en/uk/sa/sym/...) it belongs to.
-    pub fn admitted_surfaces_for_semantic_id(
+    pub fn admitted_surfaces_for_legacy_registry_id(
         semantic_id: impl ProjectionSidInput,
     ) -> Vec<SurfaceRow> {
-        super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(
+        super::semantic_registry::admitted_surfaces_with_namespace_for_legacy_registry_id(
             semantic_id.into_projection_sid(),
         )
         .into_iter()
@@ -74,10 +74,16 @@ pub mod semantic_registry_export {
         .collect()
     }
 
-    /// Повертає opaque semantic ID для stable або compatibility-only surface.
-    /// Значення операції лишається у мовному контракті, не в цій проєкції.
+    /// Explicit compatibility projection: historical flat registry coordinate
+    /// for one admitted surface. This is not the canonical language identity.
+    pub fn legacy_registry_id_for_admitted_surface(name: &str) -> Option<super::Sens8> {
+        super::semantic_registry::legacy_registry_id_for_surface(name)
+    }
+
+    /// Compatibility alias retained for external consumers during #2817.
+    #[deprecated(note = "use legacy_registry_id_for_admitted_surface; canonical identity is domain-qualified")]
     pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sens8> {
-        super::semantic_registry::admitted_semantic_id_for_surface(name)
+        legacy_registry_id_for_admitted_surface(name)
     }
 
     /// Legacy packed-byte export for external projection consumers.
@@ -86,11 +92,16 @@ pub mod semantic_registry_export {
     /// preserves the pre-#1098 projection ABI so untouched observers do not
     /// become semantic participants merely because the runtime identity type
     /// changed.
-    pub fn admitted_semantic_ids() -> Vec<u8> {
-        super::semantic_registry::admitted_semantic_ids()
+    pub fn legacy_registry_ids() -> Vec<u8> {
+        super::semantic_registry::legacy_registry_ids()
             .into_iter()
             .map(super::Sens8::packed_byte)
             .collect()
+    }
+
+    #[deprecated(note = "use legacy_registry_ids; canonical identity is domain-qualified")]
+    pub fn admitted_semantic_ids() -> Vec<u8> {
+        legacy_registry_ids()
     }
 
     /// Роль функції таблиці за кодом — з таблиці функцій, не з рукописного
@@ -99,7 +110,7 @@ pub mod semantic_registry_export {
     /// метаданих (lib/surface/function-signatures.lisp).
     pub fn function_role(semantic_id: impl ProjectionSidInput) -> Option<&'static str> {
         let sid = semantic_id.into_projection_sid();
-        match super::language_items::signature_kind(sid)? {
+        match super::language_items::signature_kind_for_legacy_registry_id(sid)? {
             super::LanguageItemKind::SyntaxForm | super::LanguageItemKind::Macro => Some("syntax"),
             super::LanguageItemKind::Builtin if super::eval::canon::has_primitive(sid) => {
                 Some("primitive")
@@ -109,8 +120,15 @@ pub mod semantic_registry_export {
     }
 
     /// Canonical 8-bit textual serialization for provenance/export.
+    pub fn legacy_registry_id_bits(legacy_registry_id: impl ProjectionSidInput) -> String {
+        super::semantic_registry::legacy_registry_id_bits(
+            legacy_registry_id.into_projection_sid(),
+        )
+    }
+
+    #[deprecated(note = "use legacy_registry_id_bits; canonical identity is domain-qualified")]
     pub fn semantic_id_bits(semantic_id: impl ProjectionSidInput) -> String {
-        super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())
+        legacy_registry_id_bits(semantic_id)
     }
 }
 pub mod syntax;
@@ -250,7 +268,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
         ));
     }
 
-    let defmacro_semantic_id = semantic_registry::admitted_semantic_id_for_surface("defmacro")
+    let defmacro_legacy_registry_id = semantic_registry::legacy_registry_id_for_surface("defmacro")
         .ok_or_else(|| {
             LanguageError::new(
                 ErrorKind::InvalidForm,
@@ -258,7 +276,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
                 Span { start: 0, end: 0 },
             )
         })?;
-    let admitted = semantic_registry::admitted_surfaces_for_semantic_id(defmacro_semantic_id);
+    let admitted = semantic_registry::admitted_surfaces_for_legacy_registry_id(defmacro_legacy_registry_id);
     if admitted.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
@@ -273,7 +291,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
     // тож `(00001010 назва параметри тіло)` працює так само, як назва.
     session
         .environment
-        .bind_code_slot_once(defmacro_semantic_id, result.value.clone());
+        .bind_code_slot_once(defmacro_legacy_registry_id, result.value.clone());
 
     Ok(result)
 }
@@ -288,17 +306,19 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
 /// owns source/UI routing independently of the lexical environment.
 fn bind_missing_stable_surface_peers(environment: &Environment) {
     let snapshot = environment.snapshot();
-    // HashMap, not BTreeMap: Sens8 is deliberately not Ord (identity
-    // comparison/hashing only, no ordering -- see sid.rs's own header).
+    // This map is compatibility metadata keyed by the historical flat
+    // registry coordinate; canonical semantic identity is domain-qualified.
     // Iteration order here is irrelevant; this is a lookup table.
-    let mut values_by_semantic_id = std::collections::HashMap::new();
+    let mut values_by_legacy_registry_id = std::collections::HashMap::new();
 
     for (name, value) in snapshot {
         if eval::canon::routed_sid_for_surface(&name).is_some() {
             continue;
         }
-        if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(&name) {
-            values_by_semantic_id.entry(semantic_id).or_insert(value);
+        if let Some(legacy_registry_id) = semantic_registry::legacy_registry_id_for_surface(&name) {
+            values_by_legacy_registry_id
+                .entry(legacy_registry_id)
+                .or_insert(value);
         }
     }
 
@@ -306,8 +326,8 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     // evaluator може знайти точну функцію без placeholder у середовищі.
     // Stable peer копіюємо лише тоді, коли реальне значення вже існує; інакше
     // Value::Sid зайняв би ім'я і заблокував пізніший Lisp-owned closure.
-    for semantic_id in semantic_registry::admitted_semantic_ids() {
-        let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
+    for legacy_registry_id in semantic_registry::legacy_registry_ids() {
+        let peers = semantic_registry::stable_surfaces_for_legacy_registry_id(legacy_registry_id);
 
         // Special/necessary forms мають власний routing і тут не стають
         // першокласними lexical values.
@@ -318,7 +338,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
             continue;
         }
 
-        let Some(value) = values_by_semantic_id.get(&semantic_id).cloned() else {
+        let Some(value) = values_by_legacy_registry_id.get(&legacy_registry_id).cloned() else {
             continue;
         };
 
@@ -487,8 +507,8 @@ pub fn is_define_surface_name(name: &str) -> bool {
 /// `defmacro` surface. No decimal SID is maintained here.
 pub fn is_defmacro_surface_name(name: &str) -> bool {
     match (
-        semantic_registry::admitted_semantic_id_for_surface(name),
-        semantic_registry::admitted_semantic_id_for_surface("defmacro"),
+        semantic_registry::legacy_registry_id_for_surface(name),
+        semantic_registry::legacy_registry_id_for_surface("defmacro"),
     ) {
         (Some(candidate), Some(defmacro)) => candidate == defmacro,
         _ => false,
@@ -499,8 +519,8 @@ pub fn is_defmacro_surface_name(name: &str) -> bool {
 /// `lambda` surface. No decimal SID is maintained here.
 pub fn is_lambda_surface_name(name: &str) -> bool {
     match (
-        semantic_registry::admitted_semantic_id_for_surface(name),
-        semantic_registry::admitted_semantic_id_for_surface("lambda"),
+        semantic_registry::legacy_registry_id_for_surface(name),
+        semantic_registry::legacy_registry_id_for_surface("lambda"),
     ) {
         (Some(candidate), Some(lambda)) => candidate == lambda,
         _ => false,

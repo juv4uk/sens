@@ -64,22 +64,22 @@ mod generated {
 /// Метадані для інструментів (LSP, довідка REPL) — лише за кодом СЕНС, зі
 /// згенерованої проєкції lib/surface/function-signatures.lisp. Назви дає
 /// таблиця функцій; Rust не тримає власної копії назв чи описів.
-fn semantic_language_items_with(
+fn language_items_with_legacy_registry(
     stable_surfaces: impl Fn(Sens8) -> Vec<&'static str>,
     admitted_surfaces: impl Fn(Sens8) -> Vec<&'static str>,
 ) -> Vec<LanguageItem> {
     let mut items = Vec::new();
     for row in generated::FUNCTION_SIGNATURES {
-        let semantic_id = Sens8::from_packed_byte(row.semantic_id);
+        let legacy_registry_id = Sens8::from_packed_byte(row.semantic_id);
         let surfaces = if row.admitted_surfaces {
-            admitted_surfaces(semantic_id)
+            admitted_surfaces(legacy_registry_id)
         } else {
-            stable_surfaces(semantic_id)
+            stable_surfaces(legacy_registry_id)
         };
         items.extend(surfaces.into_iter().map(|name| LanguageItem {
             name: name.to_string(),
             domain_identity: semantic_registry::domain_identity_for_surface(name),
-            legacy_registry_id: semantic_id,
+            legacy_registry_id,
             signature: row.signature,
             documentation: row.documentation,
             kind: row.kind,
@@ -90,17 +90,19 @@ fn semantic_language_items_with(
 }
 
 /// Вид функції таблиці за кодом (з lib/surface/function-signatures.lisp).
-pub(crate) fn signature_kind(semantic_id: Sens8) -> Option<LanguageItemKind> {
+pub(crate) fn signature_kind_for_legacy_registry_id(
+    legacy_registry_id: Sens8,
+) -> Option<LanguageItemKind> {
     generated::FUNCTION_SIGNATURES
         .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .find(|row| row.semantic_id == legacy_registry_id.packed_byte())
         .map(|row| row.kind)
 }
 
 pub fn language_items() -> Vec<LanguageItem> {
-    semantic_language_items_with(
-        semantic_registry::stable_surfaces_for_semantic_id,
-        semantic_registry::admitted_surfaces_for_semantic_id,
+    language_items_with_legacy_registry(
+        semantic_registry::stable_surfaces_for_legacy_registry_id,
+        semantic_registry::admitted_surfaces_for_legacy_registry_id,
     )
 }
 
@@ -160,7 +162,7 @@ mod tests {
     #[test]
     fn registry_mutation_changes_discovered_surface_without_changing_metadata_key() {
         let discover = |sid8_surface: &'static str| {
-            semantic_language_items_with(
+            language_items_with_legacy_registry(
                 |semantic_id| {
                     if semantic_id == crate::sens!(00001000) {
                         vec![sid8_surface]
@@ -261,11 +263,11 @@ mod tests {
         assert_eq!(def.legacy_registry_id, crate::sens!(00001011));
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
         assert_eq!(
-            semantic_registry::stable_surfaces_for_semantic_id(crate::sens!(00001011)),
+            semantic_registry::stable_surfaces_for_legacy_registry_id(crate::sens!(00001011)),
             vec!["def"]
         );
         assert_eq!(
-            semantic_registry::admitted_surfaces_for_semantic_id(crate::sens!(00001011)),
+            semantic_registry::admitted_surfaces_for_legacy_registry_id(crate::sens!(00001011)),
             vec!["def"]
         );
     }
