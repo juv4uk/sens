@@ -10,7 +10,8 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{domain_registry, semantic_registry, CoreDomainIdentity, Sens8};
+use crate::{semantic_registry, CoreDomainIdentity, Sens8};
+use crate::domain_registry;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -68,7 +69,6 @@ pub struct DomainLanguageItem {
     pub identity: CoreDomainIdentity,
     pub kind: LanguageItemKind,
     pub arity: Arity,
-    pub legacy_registry_id: Option<Sens8>,
     pub law: &'static str,
 }
 
@@ -86,7 +86,6 @@ pub fn domain_language_items() -> Vec<DomainLanguageItem> {
                     identity: resident.identity,
                     kind: LanguageItemKind::Builtin,
                     arity: Arity::Exact(1),
-                    legacy_registry_id: None,
                     law: "selector-composition",
                 },
             )
@@ -154,7 +153,6 @@ mod tests {
             .iter()
             .map(|item| {
                 assert_eq!(item.identity.width(), 4);
-                assert_eq!(item.legacy_registry_id, None);
                 assert_eq!(item.law, "selector-composition");
                 item.identity.packed_bits()
             })
