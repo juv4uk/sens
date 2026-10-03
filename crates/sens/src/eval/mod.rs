@@ -14,7 +14,9 @@ pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
 mod closures;
+mod domain_calls;
 pub(crate) mod lower;
+mod lower_domain;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
 pub(crate) mod necessary_forms_legacy;
@@ -175,13 +177,9 @@ pub(crate) fn evaluate_step(
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
-        ExprKind::DomainCall(identity, _) => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!(
-                "domain-qualified call routing is not admitted yet · marshrut domennoho vyklyku shche ne dopushchenyi: {identity}"
-            ),
-            expression.span,
-        )),
+        ExprKind::DomainCall(identity, arguments) => {
+            domain_calls::dispatch(*identity, arguments, environment, expression.span)
+        },
         // Виконання залежить лише від числових координат (#1697): слот або є,
         // або названа помилка — пошуку за іменем більше немає.
         ExprKind::Local { depth, index } => environment
