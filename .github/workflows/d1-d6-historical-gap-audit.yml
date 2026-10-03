@@ -52,5 +52,8 @@ jobs:
           assert p["summary"]["composite"] == 1
           assert p["summary"]["new_d5_manual_residents"] == 0
           assert p["summary"]["new_d6_admissions"] == 0
-          assert p["owner_facing"]["ready_now"][0]["binary_object"] == "D6:001111"
+          assert p["owner_facing_snapshot_only"]["ready_now"][0]["binary_object"] == "D6:001111"
+assert p["current_decision_use"] is False
+assert "#2750" in p["superseded_by"]
+assert "#2761" in p["superseded_by"]
           PY
