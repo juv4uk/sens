@@ -13,6 +13,7 @@ on:
       - "scripts/task_schema_record.py"
       - "scripts/check-task-record-structure.py"
       - "knowledge/binary-domain-format-baseline.json"
+      - "knowledge/task-record-structure-baseline.json"
       - ".github/workflows/binary-domain-format.yml"
   workflow_dispatch:
   schedule:
@@ -62,12 +63,12 @@ jobs:
             --issues /tmp/issues.json \
             --baseline knowledge/binary-domain-format-baseline.json
 
-      - name: Report seven-field structural debt
+      - name: No new seven-field structural debt
         if: always()
         run: |
           python3 scripts/check-task-record-structure.py \
             --issues /tmp/issues.json \
-            --report-only
+            --baseline knowledge/task-record-structure-baseline.json
 
       - name: Emit structural baseline candidate
         if: always()
