@@ -2,6 +2,8 @@
 
 use std::path::PathBuf;
 
+use sens::{Bija3, Bit3, CoreDomainIdentity};
+
 use wsm_clips_kernel::{
     ClipsAbiAdapter, ClipsExecutionResult, ClipsKernel, SemanticId as ClipsSemanticId,
 };
@@ -47,7 +49,10 @@ fn datalog_closure() -> Database {
 #[cfg(feature = "native-clips")]
 fn four_real_kernels_keep_their_native_results_side_by_side() {
     let common_lisp = CommonLispKernel::default()
-        .evaluate(&CommonLispRequest::new(5, "(car (cons 'left 'right))"))
+        .evaluate(&CommonLispRequest::new(
+            CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(0b101).unwrap())),
+            "(car (cons 'left 'right))",
+        ))
         .expect("real Common Lisp runtime");
     assert_eq!(String::from_utf8_lossy(&common_lisp.stdout).trim(), "LEFT");
 
@@ -188,7 +193,7 @@ fn one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_sema
         "LEFT"
     );
     assert_eq!(
-        common_lisp.last_semantic_id().map(|id| id.0),
+        common_lisp.last_legacy_semantic_id().map(|id| id.0),
         Some(INVOKE_ID)
     );
 
