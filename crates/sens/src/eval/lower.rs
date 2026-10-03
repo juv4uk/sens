@@ -2,7 +2,7 @@
 //!
 //! Surface-и, для яких уже ратифіковано exact domain identity, стають
 //! `ExprKind::DomainCall`. Старий точний 8-бітний token лишається окремим
-//! compatibility-шляхом `ExprKind::Call(Sens8, ...)`: lower ніколи не
+//! compatibility-шляхом `ExprKind::Call` зі старим байтом: lower ніколи не
 //! виводить домен із історичного байта.
 //!
 //! M8 (#1590): зводяться **усі** admitted surface з реєстру, не лише Canon
