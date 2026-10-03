@@ -17,6 +17,7 @@ Current first-pass post-D4 factor candidates:
 - raw-form input;
 - explicit caller environment;
 - returned-form protocol;
-- expansion timing.
+- expansion timing;
+- invocation packaging.
 
 These are attack targets, not placements or roots.
