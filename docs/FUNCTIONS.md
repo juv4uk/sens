@@ -1,4 +1,6 @@
-# FUNCTION REFERENCE — my-lisp
+# FUNCTION REFERENCE — SENS implementation inventory
+
+> **Scope note (2026-10-03):** цей файл є implementation/library inventory, а не картою canonical binary-domain residents. Наявність builtin/helper/library function тут не означає окремий semantic root, domain placement або ratified binary coordinate. Для поточної онтології див. [`../CURRENT.md`](../CURRENT.md) і [`current-binary-domain-architecture.md`](current-binary-domain-architecture.md).
 
 **Live builtin section refreshed:** 2026-09-11 · base `6c82490`
 **Library inventory base:** 2026-09-02 · `8b4529f`
