@@ -1,0 +1,38 @@
+name: Core-Math goal proof gate research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-goal-proof-gate/**"
+      - ".github/workflows/core-math-goal-proof-gate.yml"
+      - "benchmarks/core-math-autonomous-closure/**"
+      - "benchmarks/core-math-demand-derivation/**"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-goal-proof-gate/**"
+      - ".github/workflows/core-math-goal-proof-gate.yml"
+  workflow_dispatch:
+
+jobs:
+  proof-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run goal proof gate
+        run: |
+          rm -rf /tmp/core-math-goal-proof-gate
+          python3 benchmarks/core-math-goal-proof-gate/run.py             --out /tmp/core-math-goal-proof-gate
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-math-goal-proof-gate/report.md; then
+            cat /tmp/core-math-goal-proof-gate/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-math-goal-proof-gate
+          path: /tmp/core-math-goal-proof-gate/
+          retention-days: 14
