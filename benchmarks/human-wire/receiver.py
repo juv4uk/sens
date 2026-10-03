@@ -133,6 +133,7 @@ class PhaseCandidate:
     frame_start_ns: int
     sync_matches: int
     sync_errors: int
+    timing_error_ns: int
     sync_complete: bool
 
 
@@ -176,11 +177,16 @@ def search_phase(
                 for actual, expected in zip(decoded.accepted_bits, sync_bits)
             )
             errors = len(sync_bits) - matches
+            timing_error_ns = int(
+                sum(abs(delta_ms) for row in decoded.verdicts for delta_ms in row.deltas_ms)
+                * 1_000_000
+            )
             candidates.append(
                 PhaseCandidate(
                     frame_start_ns=start,
                     sync_matches=matches,
                     sync_errors=errors,
+                    timing_error_ns=timing_error_ns,
                     sync_complete=decoded.complete and errors == 0,
                 )
             )
@@ -189,8 +195,11 @@ def search_phase(
     if not candidates:
         return PhaseSearch("NO-CANDIDATE", None, ())
 
-    best_errors = min(row.sync_errors for row in candidates)
-    best = [row for row in candidates if row.sync_errors == best_errors]
+    best_key = min((row.sync_errors, row.timing_error_ns) for row in candidates)
+    best = [
+        row for row in candidates
+        if (row.sync_errors, row.timing_error_ns) == best_key
+    ]
     perfect = [row for row in best if row.sync_complete]
     if len(perfect) == 1:
         return PhaseSearch("LOCKED", perfect[0].frame_start_ns, tuple(candidates))
