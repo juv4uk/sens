@@ -417,9 +417,10 @@ impl Parser<'_> {
         }
 
         // Canonical bare binary source is width-sensitive.
-        // D3..D6 become exact Core identities. Historical bare W8 has no
-        // second language meaning and fails closed. W1/W2/W7 continue into
-        // their own data/structure laws.
+        // D3..D6 and ratified D8 become exact domain identities directly.
+        // W1/W2 remain context-owned predicate/structure carriers. W7 cannot
+        // be admitted by width alone because SoundCell and LocalOrdinal are
+        // distinct semantic roles over the same seven-bit carrier.
         if let Some(source_word) = crate::source_words::parse_binary_source_word(token) {
             if let Some(identity) = crate::CoreDomainIdentity::from_source_word(source_word) {
                 return Ok(Expr {
@@ -429,13 +430,6 @@ impl Parser<'_> {
                         end: self.cursor,
                     },
                 });
-            }
-            if matches!(source_word, crate::BinarySourceWord::W8(_)) {
-                return Err(self.error(
-                    "bare eight-bit Function8/Sens8 syntax is not part of canonical SENS",
-                    start,
-                    self.cursor,
-                ));
             }
         }
 
