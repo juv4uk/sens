@@ -1,5 +1,5 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Authority: lib/surface/domain-registry.lisp
+// Authority: knowledge/domain-surface-registry.lisp
 // Generator: scripts/generate-rust-domain-registry.lisp
 // No legacy Function8/Sens8 byte is present in this projection.
 
