@@ -1,0 +1,41 @@
+name: GC historical donor witness
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/gc-mccarthy-donor/**"
+      - ".github/workflows/gc-mccarthy-donor.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/gc-mccarthy-donor/**"
+      - ".github/workflows/gc-mccarthy-donor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  donor-law:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run historical donor witness
+        run: python3 benchmarks/gc-mccarthy-donor/run.py
+      - name: Publish boundary
+        if: always()
+        run: |
+          {
+            echo "## #2549 GC historical donor witness"
+            echo
+            echo '~~~text'
+            python3 benchmarks/gc-mccarthy-donor/run.py
+            echo '~~~'
+            echo
+            echo "- Historical donor only; not a SENS heap implementation."
+            echo "- Slot names/addresses are not semantic identities."
+          } >> "$GITHUB_STEP_SUMMARY"
