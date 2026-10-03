@@ -214,6 +214,7 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
         Ok(match &expression.kind {
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
+            ExprKind::CoreIdentity(identity) => Value::CoreIdentity(*identity),
             ExprKind::Sid(sid) => Value::Sid(*sid),
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
