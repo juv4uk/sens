@@ -646,16 +646,10 @@ impl Value {
         }
     }
 
-    /// Compatibility-only view of an exact legacy eight-bit identity.
+    /// Compatibility payload for historical exact-8 data.
     /// Canonical domain values deliberately return None instead of being padded.
-    pub fn as_sens8(&self) -> Option<crate::Sens8> {
-        self.as_semantic_ref().and_then(SemanticRef::legacy8_word)
-    }
-
-    /// Legacy alias for [`Self::as_sens8`].
-    #[deprecated(note = "use as_semantic_ref; Sid8 is a compatibility projection")]
-    pub fn as_sid8(&self) -> Option<crate::Sens8> {
-        self.as_sens8()
+    pub fn as_legacy8_bits(&self) -> Option<u8> {
+        self.as_semantic_ref().and_then(SemanticRef::legacy8_bits)
     }
 
     /// Builds one host-provided callable value without adding a new evaluator
