@@ -42,7 +42,7 @@ fn sens_for_admitted_surface(surface: &str) -> Option<sens::Sens8> {
 
 fn is_quote_head(expr: &Expr) -> bool {
     match &expr.kind {
-        ExprKind::Sid(sens) => *sens == sens::sens!(00000001),
+        ExprKind::Sid(identity) => identity.legacy8_word() == Some(sens::sens!(00000001)),
         ExprKind::Symbol(surface) => {
             sens_for_admitted_surface(surface.as_ref()) == Some(sens::sens!(00000001))
         }
