@@ -63,7 +63,7 @@ pub mod semantic_registry_export {
 
     /// Stable and compatibility-only spellings admitted for `semantic_id`,
     /// each tagged with which namespace (en/uk/sa/sym/...) it belongs to.
-    pub fn admitted_surfaces_for_semantic_id(
+    pub fn admitted_surfaces_for_legacy_registry_id(
         semantic_id: impl ProjectionSidInput,
     ) -> Vec<SurfaceRow> {
         super::semantic_registry::admitted_surfaces_with_namespace_for_legacy_registry_id(
@@ -268,7 +268,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
         ));
     }
 
-    let defmacro_semantic_id = semantic_registry::legacy_registry_id_for_surface("defmacro")
+    let defmacro_legacy_registry_id = semantic_registry::legacy_registry_id_for_surface("defmacro")
         .ok_or_else(|| {
             LanguageError::new(
                 ErrorKind::InvalidForm,
@@ -276,7 +276,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
                 Span { start: 0, end: 0 },
             )
         })?;
-    let admitted = semantic_registry::admitted_surfaces_for_semantic_id(defmacro_semantic_id);
+    let admitted = semantic_registry::admitted_surfaces_for_legacy_registry_id(defmacro_legacy_registry_id);
     if admitted.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
@@ -291,7 +291,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
     // тож `(00001010 назва параметри тіло)` працює так само, як назва.
     session
         .environment
-        .bind_code_slot_once(defmacro_semantic_id, result.value.clone());
+        .bind_code_slot_once(defmacro_legacy_registry_id, result.value.clone());
 
     Ok(result)
 }
@@ -309,14 +309,14 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     // HashMap, not BTreeMap: Sens8 is deliberately not Ord (identity
     // comparison/hashing only, no ordering -- see sid.rs's own header).
     // Iteration order here is irrelevant; this is a lookup table.
-    let mut values_by_semantic_id = std::collections::HashMap::new();
+    let mut values_by_legacy_registry_id = std::collections::HashMap::new();
 
     for (name, value) in snapshot {
         if eval::canon::routed_sid_for_surface(&name).is_some() {
             continue;
         }
-        if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(&name) {
-            values_by_semantic_id.entry(semantic_id).or_insert(value);
+        if let Some(semantic_id) = semantic_registry::legacy_registry_id_for_surface(&name) {
+            values_by_legacy_registry_id.entry(legacy_registry_id).or_insert(value);
         }
     }
 
@@ -324,8 +324,8 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     // evaluator може знайти точну функцію без placeholder у середовищі.
     // Stable peer копіюємо лише тоді, коли реальне значення вже існує; інакше
     // Value::Sid зайняв би ім'я і заблокував пізніший Lisp-owned closure.
-    for semantic_id in semantic_registry::admitted_semantic_ids() {
-        let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
+    for legacy_registry_id in semantic_registry::legacy_registry_ids() {
+        let peers = semantic_registry::stable_surfaces_for_legacy_registry_id(legacy_registry_id);
 
         // Special/necessary forms мають власний routing і тут не стають
         // першокласними lexical values.
@@ -336,7 +336,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
             continue;
         }
 
-        let Some(value) = values_by_semantic_id.get(&semantic_id).cloned() else {
+        let Some(value) = values_by_legacy_registry_id.get(&legacy_registry_id).cloned() else {
             continue;
         };
 
