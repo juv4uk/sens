@@ -28,6 +28,20 @@ pub use capabilities::{
     unregister_sens_capability,
 };
 pub(crate) use macro_substrate::install as install_macro_substrate;
+
+/// Bind human spellings for selector-family identities to the exact domain
+/// value itself. Spelling admission is projection-only; selector_law decides
+/// family membership and therefore callability.
+pub(crate) fn install_selector_domain_values(environment: &Environment) {
+    for (surface, identity) in crate::semantic_registry::domain_surface_bindings() {
+        if selector_law::supports(identity) && environment.get(surface).is_none() {
+            environment.define(
+                surface,
+                Value::DomainIdentity(crate::DomainIdentity::from(identity)),
+            );
+        }
+    }
+}
 pub use special_forms::{exact_arity, json::parse_json};
 
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
