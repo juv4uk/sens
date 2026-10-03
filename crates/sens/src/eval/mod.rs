@@ -427,6 +427,20 @@ mod single_pass_eval_tests {
     use super::*;
 
     #[test]
+    fn mechanism_presence_cannot_mint_unallocated_domain_callability() {
+        let identity = CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b0101).unwrap(),
+        ));
+        let environment = Environment::root();
+        assert!(environment.bind_domain_code_slot_once(identity, Value::Nil));
+
+        let error = dispatch_domain_call(identity, &[], &environment, Span::default())
+            .expect_err("unallocated D4 coordinate must fail before mechanism lookup");
+        assert_eq!(error.kind, ErrorKind::Type);
+        assert!(error.message.contains("unallocated exact-domain identity"));
+    }
+
+    #[test]
     fn single_pass_eval_parsed_expressions_evaluates_preparsed_ast() {
         let source = "(def x (/ 1 3)) (cons x (quote ()))";
         let forms = parse(source).expect("parsing should succeed");
