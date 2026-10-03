@@ -44,7 +44,7 @@ fn ensure_bindable_identity(
             span,
         ));
     };
-    canon::ensure_bindable_sid(crate::Sens8::from_packed_byte(bits), span)
+    canon::ensure_bindable_legacy8_bits(bits, span)
 }
 
 fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
@@ -252,13 +252,12 @@ fn sid_head(identity: CallableIdentity, environment: &Environment) -> Head {
     if bits == EVAL {
         return Head::Opaque;
     }
-    let sid = crate::Sens8::from_packed_byte(bits);
-    match necessary_forms::identity_for_semantic_id(sid) {
+    match necessary_forms::identity_for_legacy8_bits(bits) {
         Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
         Some(necessary_forms::NecessaryFormIdentity::Define) => return Head::Define,
         _ => {}
     }
-    if canon::route_kind_for_sid(sid).is_some() {
+    if canon::route_kind_for_legacy8_bits(bits).is_some() {
         if bits == 0b0000_0001 {
             return Head::Quote;
         }
@@ -273,8 +272,8 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
     match &head.kind {
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
-            if let Some(sid) = canon::routed_sid_for_surface(name) {
-                return sid_head(CallableIdentity::legacy8(sid.packed_byte()), environment);
+            if let Some(bits) = canon::routed_legacy8_bits_for_surface(name) {
+                return sid_head(CallableIdentity::legacy8(bits), environment);
             }
             match necessary_forms::identity_for_symbol(name) {
                 Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
