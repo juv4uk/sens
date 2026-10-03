@@ -4,9 +4,13 @@ on:
   pull_request:
     paths:
       - "crates/sens/tests/post_d4_macro_timing.rs"
+      - "crates/sens/tests/post_d4_macro_call_form.rs"
+      - "crates/sens/src/eval/mod.rs"
       - "crates/sens/src/eval/closures.rs"
       - "scripts/research-2568-macro-timing.py"
+      - "scripts/research-2580-macro-call-form.py"
       - "docs/research/2568-macro-timing*.md"
+      - "docs/research/2580-macro-call-form*.md"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/macro-expansion-timing.yml"
   push:
@@ -14,9 +18,13 @@ on:
       - main
     paths:
       - "crates/sens/tests/post_d4_macro_timing.rs"
+      - "crates/sens/tests/post_d4_macro_call_form.rs"
+      - "crates/sens/src/eval/mod.rs"
       - "crates/sens/src/eval/closures.rs"
       - "scripts/research-2568-macro-timing.py"
+      - "scripts/research-2580-macro-call-form.py"
       - "docs/research/2568-macro-timing*.md"
+      - "docs/research/2580-macro-call-form*.md"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/macro-expansion-timing.yml"
 
@@ -38,6 +46,12 @@ jobs:
       - name: Run bounded historical timing countermodel
         run: python3 scripts/research-2568-macro-timing.py
 
+      - name: Run live SENS call-form witness
+        run: cargo test -p sens --test post_d4_macro_call_form -- --nocapture
+
+      - name: Run bounded whole-call vs operand-only witness
+        run: python3 scripts/research-2580-macro-call-form.py
+
       - name: Publish summary
         if: always()
         run: |
@@ -46,9 +60,11 @@ jobs:
             echo
             echo "~~~text"
             python3 scripts/research-2568-macro-timing.py
+            python3 scripts/research-2580-macro-call-form.py
             echo "~~~"
             echo
             echo "- Historical premise: Hart AIM-057 (1963) expands through DEFINE."
-            echo "- Current SENS control is executed, not inferred."
+            echo "- Current SENS controls are executed, not inferred."
+            echo "- Hart whole-call vs SENS operand-only packaging is tested separately from timing."
             echo "- No binary placement follows from this gate."
           } >> "$GITHUB_STEP_SUMMARY"
