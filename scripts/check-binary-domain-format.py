@@ -40,12 +40,21 @@ def _heading_text(b, m):
 
 
 def field_value(body, label):
+    """Return (kind, text) for the field, preferring a filled value over the legend.
+
+    Three shapes occur in the wild, and a body may carry more than one. The label
+    may carry a plural `s` (`## Falsifiers`) but must not be a prefix of a longer
+    word, or the tail would be read as the value. A body that quotes the format
+    preamble carries the legend first; the legend is a *description* of the field,
+    not its value, so the first non-legend occurrence wins and the legend is only
+    returned when nothing else is present.
+    """
     b = body or ""
     pats = (
         (
             "value",
             re.compile(
-                rf"^[ \t]*#{{1,6}}[ \t]*\**{label}\**(?:[ \t]*:[ \t]*(.*)|[ \t]*)$",
+                rf"^[ \t]*#{{1,6}}[ \t]*\**{label}s?(?![A-Za-z0-9_])(?:[ \t]*:[ \t]*(.*)|[ \t]*)$",
                 re.I | re.M,
             ),
             True,
@@ -53,7 +62,7 @@ def field_value(body, label):
         (
             "value",
             re.compile(
-                rf"^[ \t]*(?:[-*][ \t]*)?\**{label}\**[ \t]*:[ \t]*(.*)$",
+                rf"^[ \t]*(?:[-*][ \t]*)?\**{label}s?(?![A-Za-z0-9_])[ \t]*:[ \t]*(.*)$",
                 re.I | re.M,
             ),
             False,
@@ -61,20 +70,24 @@ def field_value(body, label):
         (
             "twocol",
             re.compile(
-                rf"^[ \t]*\**{label}\**[ \t]{{2,}}(\S.*)$", re.I | re.M
+                rf"^[ \t]*\**{label}s?(?![A-Za-z0-9_])[ \t]{{2,}}(\S.*)$", re.I | re.M
             ),
             False,
         ),
     )
-    best = None
+    cands = []
     for kind, rx, is_heading in pats:
-        m = rx.search(b)
-        if not m:
-            continue
-        text = _heading_text(b, m) if is_heading else m.group(1).strip()
-        if best is None or m.start() < best[0]:
-            best = (m.start(), kind, text)
-    return (best[1], best[2]) if best else (None, None)
+        for m in rx.finditer(b):
+            text = _heading_text(b, m) if is_heading else m.group(1).strip()
+            cands.append((m.start(), kind, text))
+    if not cands:
+        return (None, None)
+    cands.sort(key=lambda c: c[0])
+    legend = LEGEND_TEXT.get(label)
+    for _pos, kind, text in cands:
+        if not (text and legend and legend.search(text)):
+            return (kind, text)
+    return (cands[0][1], cands[0][2])
 
 
 LEGEND_TEXT = {
@@ -301,6 +314,12 @@ def self_test():
         ("s-foreign-target", "STATUS: implementation-target", "status", "foreign"),
         ("s-legend", "STATUS: hypothesis | generated | ratified | falsified | unknown", "status", "legend"),
         ("s-empty", "STATUS:\n", "status", "empty"),
+        # extraction: a plural section heading must not be read as a value,
+        # and the preamble legend must not hide a filled value below it
+        ("d-plural-heading", "## DOMAINS\nD5", "domain", "ok"),
+        ("f-plural-heading", "## Falsifiers\nif the law fails", "falsifier", "ok"),
+        ("f-legend-then-real", "FALSIFIER        explicit counter-test\nFALSIFIER: if the law fails",
+         "falsifier", "ok"),
     ]
 
     field_map = {k: rule for k, _, rule in FIELDS}
