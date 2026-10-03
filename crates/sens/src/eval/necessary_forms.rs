@@ -6,7 +6,8 @@
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry;
-use crate::{Bit4, CoreD4, CoreDomainIdentity, Sens8};
+use crate::{Bit4, CoreD4, CoreDomainIdentity};
+use crate::Sens8;
 
 mod generated {
     include!("necessary_forms_generated.rs");
