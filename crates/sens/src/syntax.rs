@@ -112,7 +112,7 @@ mod core_d6_ast_tests {
                 },
             };
 
-            let ExprKind::CoreD6(recovered) = node.kind else {
+            let ExprKind::CoreD6(recovered) = &node.kind else {
                 panic!("Core.D6 AST identity changed variant");
             };
             assert_eq!(recovered.word(), word);
