@@ -100,7 +100,7 @@
                   (00000001 (owner sens)))
                 (kab-row-check
                   (00000001 language-identity-type)
-                  (00000001 (language-identity-type Sens8)))
+                  (00000001 (language-identity-type CoreDomainIdentity)))
                 (kab-row-check
                   (00000001 shared-abi-type)
                   (00000001 (shared-abi-type WsmKernelRequest)))
@@ -112,7 +112,7 @@
                   (00000001 (shared-abi-storage opaque-u8)))
                 (kab-row-check
                   (00000001 kernel-wrapper-type)
-                  (00000001 (kernel-wrapper-type SemanticId)))
+                  (00000001 (kernel-wrapper-type LegacyAbiSemanticId)))
                 (kab-row-check
                   (00000001 kernel-wrapper-role)
                   (00000001 (kernel-wrapper-role transport-coordinate-only)))
@@ -126,8 +126,8 @@
                   (00000001 kernel-may-query-semantic-registry)
                   (00000001 (kernel-may-query-semantic-registry forbidden)))
                 (kab-row-check
-                  (00000001 kernel-may-import-language-sid-type)
-                  (00000001 (kernel-may-import-language-sid-type forbidden)))
+                  (00000001 kernel-may-import-language-identity-type)
+                  (00000001 (kernel-may-import-language-identity-type forbidden)))
                 (kab-row-check
                   (00000001 kernel-may-mint-semantic-identity)
                   (00000001 (kernel-may-mint-semantic-identity forbidden)))
@@ -176,8 +176,8 @@
          (00000001
            (kernel-abi-transport-boundary-ok
              (kernels 4)
-             (language-type Sens8)
-             (abi-wrapper SemanticId))))
+             (language-type CoreDomainIdentity)
+             (abi-wrapper LegacyAbiSemanticId))))
         ((00000010 failure)
          (0)
          (00100111

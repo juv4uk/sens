@@ -46,7 +46,7 @@ jobs:
           set -euo pipefail
           got="$(./target/debug/sens scripts/check-kernel-abi-transport-boundary.lisp)"
           printf '%s\n' "$got"
-          test "$got" = "(kernel-abi-transport-boundary-ok (kernels 4) (language-type Sens8) (abi-wrapper SemanticId))"
+          test "$got" = "(kernel-abi-transport-boundary-ok (kernels 4) (language-type CoreDomainIdentity) (abi-wrapper LegacyAbiSemanticId))"
       - name: Verify mechanical transport boundary in host sources
         shell: bash
         run: |
@@ -65,8 +65,8 @@ jobs:
           fi
 
           while IFS='|' read -r source manifest; do
-            grep -Fq 'pub struct SemanticId(pub u8);' "$source"
-            if grep -Eq 'Sens8|Sid8|sens::|use[[:space:]]+sens|semantic_registry|CanonicalIdentity' "$source"; then
+            grep -Fq 'pub struct LegacyAbiSemanticId(pub u8);' "$source"
+            if grep -Eq 'Sens8|Sid8|CoreDomainIdentity|sens::|use[[:space:]]+sens|semantic_registry|CanonicalIdentity' "$source"; then
               echo "kernel ABI wrapper crossed into language authority: $source" >&2
               exit 1
             fi

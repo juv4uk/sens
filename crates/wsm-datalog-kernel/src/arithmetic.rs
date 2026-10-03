@@ -22,7 +22,7 @@ pub const SID_MAX: u8 = 0b0001_0010;
 pub const SID_MOD: u8 = 0b0001_0011;
 pub const SID_QUOTIENT: u8 = 0b0001_0100;
 
-pub fn is_math_sid(sid: u8) -> bool {
+pub fn is_legacy_math_id(sid: u8) -> bool {
     matches!(
         sid,
         SID_ADD
@@ -109,7 +109,7 @@ pub enum DatalogMathError {
     MissingVariable(String),
     NonIntegerValue(Value),
     InvalidArgument(String),
-    UnsupportedSemanticId(u8),
+    UnsupportedLegacyAbiId(u8),
     DivisionByZero,
     Overflow,
 }
@@ -120,7 +120,7 @@ impl fmt::Display for DatalogMathError {
             Self::MissingVariable(name) => write!(formatter, "datalog-math-missing-variable:{name}"),
             Self::NonIntegerValue(value) => write!(formatter, "datalog-math-non-integer:{value:?}"),
             Self::InvalidArgument(value) => write!(formatter, "datalog-math-invalid-argument:{value}"),
-            Self::UnsupportedSemanticId(sid) => {
+            Self::UnsupportedLegacyAbiId(sid) => {
                 write!(formatter, "datalog-math-unsupported-semantic-id:{sid:08b}")
             }
             Self::DivisionByZero => write!(formatter, "datalog-math-division-by-zero"),
@@ -131,7 +131,7 @@ impl fmt::Display for DatalogMathError {
 
 impl std::error::Error for DatalogMathError {}
 
-pub fn parse_semantic_request(
+pub fn parse_legacy_abi_request(
     semantic_id: u8,
     payload: &str,
 ) -> Result<NumericExpr, DatalogMathError> {
@@ -199,7 +199,7 @@ pub fn parse_semantic_request(
             let (left, right) = need_two(&args)?;
             Quotient(Box::new(Literal(left)), Box::new(Literal(right)))
         }
-        other => return Err(DatalogMathError::UnsupportedSemanticId(other)),
+        other => return Err(DatalogMathError::UnsupportedLegacyAbiId(other)),
     };
 
     Ok(expr)
@@ -292,19 +292,19 @@ mod tests {
 
     #[test]
     fn semantic_request_uses_sid_as_operation_identity() {
-        let add = parse_semantic_request(SID_ADD, "2 3").expect("add request");
+        let add = parse_legacy_abi_request(SID_ADD, "2 3").expect("add request");
         assert_eq!(add.evaluate(&HashMap::new()), Ok(Value::Int(5)));
 
-        let sub = parse_semantic_request(SID_SUB, "7 3").expect("sub request");
+        let sub = parse_legacy_abi_request(SID_SUB, "7 3").expect("sub request");
         assert_eq!(sub.evaluate(&HashMap::new()), Ok(Value::Int(4)));
 
         assert!(
-            parse_semantic_request(SID_ADD, "+ 2 3").is_err(),
+            parse_legacy_abi_request(SID_ADD, "+ 2 3").is_err(),
             "operator text must not be accepted as semantic identity"
         );
         assert!(matches!(
-            parse_semantic_request(0xff, "2 3"),
-            Err(DatalogMathError::UnsupportedSemanticId(0xff))
+            parse_legacy_abi_request(0xff, "2 3"),
+            Err(DatalogMathError::UnsupportedLegacyAbiId(0xff))
         ));
     }
 }

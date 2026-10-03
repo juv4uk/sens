@@ -1,5 +1,5 @@
 use wsm_datalog_kernel::{
-    Atom, Database, DatalogAbiAdapter, Program, Rule, SemanticId, Term, Value,
+    Atom, Database, DatalogAbiAdapter, Program, Rule, LegacyAbiSemanticId, Term, Value,
 };
 use wsm_kernel_c_abi::{
     WsmByteSpan, WsmKernelKind, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
@@ -32,7 +32,7 @@ fn fixture() -> (Database, Program) {
 }
 
 #[test]
-fn opaque_semantic_id_crosses_same_c_abi_into_datalog_fixpoint() {
+fn opaque_legacy_abi_id_crosses_same_c_abi_into_datalog_fixpoint() {
     let (db, program) = fixture();
     let adapter = DatalogAbiAdapter::new(db, program);
     let vtable = adapter.vtable();
@@ -69,7 +69,7 @@ fn opaque_semantic_id_crosses_same_c_abi_into_datalog_fixpoint() {
         String::from_utf8_lossy(&output[..written]),
         "path(1,2)\npath(1,3)\npath(1,4)\npath(2,3)\npath(2,4)\npath(3,4)\n"
     );
-    assert_eq!(adapter.last_semantic_id(), Some(SemanticId(PROBE_ID)));
+    assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
 
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
@@ -124,7 +124,7 @@ fn datalog_native_relations_preserve_zero_one_many_without_truth_projection() {
     assert_eq!(many_status, WsmStatus::Ok);
     assert_eq!(many.iter().filter(|byte| **byte == b'\n').count(), 6);
 
-    assert_eq!(adapter.last_semantic_id(), Some(SemanticId(PROBE_ID)));
+    assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
         WsmStatus::Ok
