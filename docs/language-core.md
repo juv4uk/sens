@@ -191,11 +191,11 @@ explicitly one of those roles.
 
 ## Project boundary
 
-The Rust reference implementation is evidence and mechanism, not semantic
+Rust is a reference implementation: evidence and mechanism, not semantic
 authority. Current authority is Contract 11 plus ratified domain laws and
 language-owned executable evidence.
 
-The canonical source extension remains **`.lisp`**. File suffixes do not
+The canonical source extension remains **`.lisp`**. **`.wsm`** and **`.my`** are legacy aliases only. File suffixes do not
 create identity; exact source words and domain law do.
 
 Authority precedence is documented in
