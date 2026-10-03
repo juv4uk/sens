@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::CoreDomainIdentity;
+use crate::{CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 use std::rc::Rc;
 
@@ -54,9 +54,9 @@ pub enum ExprKind {
     /// uses `DomainIdentity`; this variant remains for historical parser,
     /// FASL/wire, and backend paths during #2817 migration.
     Sid(Sens8),
-    /// Canonical domain-qualified Core identity. Width/domain is part of
-    /// identity; equal packed payloads in D3/D4/D5/D6 do not collapse.
-    DomainIdentity(CoreDomainIdentity),
+    /// Canonical exact domain identity across the ratified D1→D8 ladder.
+    /// Domain membership does not itself grant callability.
+    DomainIdentity(DomainIdentity),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -165,7 +165,7 @@ pub(crate) mod fasl {
         std::str::from_utf8(slice).ok()
     }
 
-    fn put_domain_identity(out: &mut Vec<u8>, identity: crate::CoreDomainIdentity) {
+    fn put_domain_identity(out: &mut Vec<u8>, identity: crate::DomainIdentity) {
         out.push(identity.width() as u8);
         out.push(identity.packed_bits());
     }
@@ -173,15 +173,19 @@ pub(crate) mod fasl {
     fn get_domain_identity(
         bytes: &[u8],
         pos: &mut usize,
-    ) -> Option<crate::CoreDomainIdentity> {
+    ) -> Option<crate::DomainIdentity> {
         let domain = *bytes.get(*pos)?;
         let payload = *bytes.get(*pos + 1)?;
         *pos += 2;
         match domain {
+            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(payload)?).into()),
+            2 => Some(crate::Racana2::from_word(crate::Bit2::new(payload)?).into()),
             3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
             4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
             5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
             6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
+            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(payload)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
             _ => None,
         }
     }
@@ -244,7 +248,7 @@ pub(crate) mod fasl {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
                 out.push(TAG_DOMAIN_IDENTITY);
-                put_domain_identity(out, *identity);
+                put_domain_identity(out, (*identity).into());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -449,7 +453,7 @@ pub(crate) mod wire {
         std::str::from_utf8(slice).ok()
     }
 
-    fn put_domain_identity(out: &mut Vec<u8>, identity: crate::CoreDomainIdentity) {
+    fn put_domain_identity(out: &mut Vec<u8>, identity: crate::DomainIdentity) {
         out.push(identity.width() as u8);
         out.push(identity.packed_bits());
     }
@@ -457,15 +461,19 @@ pub(crate) mod wire {
     fn get_domain_identity(
         bytes: &[u8],
         pos: &mut usize,
-    ) -> Option<crate::CoreDomainIdentity> {
+    ) -> Option<crate::DomainIdentity> {
         let domain = *bytes.get(*pos)?;
         let payload = *bytes.get(*pos + 1)?;
         *pos += 2;
         match domain {
+            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(payload)?).into()),
+            2 => Some(crate::Racana2::from_word(crate::Bit2::new(payload)?).into()),
             3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
             4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
             5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
             6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
+            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(payload)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
             _ => None,
         }
     }
@@ -545,7 +553,7 @@ pub(crate) mod wire {
             ExprKind::DomainCall(identity, arguments) => {
                 put_list_header(out, arguments.len() + 1);
                 out.push(TAG_DOMAIN_IDENTITY);
-                put_domain_identity(out, *identity);
+                put_domain_identity(out, (*identity).into());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
