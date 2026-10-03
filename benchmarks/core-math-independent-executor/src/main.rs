@@ -319,6 +319,11 @@ fn minimal_mutant_divergence(
 }
 
 fn main() {
+    assert_eq!(
+        sha256_hex("abc"),
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
+
     let root = repo_root();
     let spec = load_json(&root.join("docs/research/2433-core-math-neutral-v1.json"));
     let certs = load_json(&root.join("docs/research/2433-core-math-generation-certificates.json"));
@@ -376,6 +381,7 @@ fn main() {
         sub, &constants, &operations, &corpus
     );
 
+    println!("SHA256-KNOWN-VECTOR=PASS");
     println!("EXECUTOR=standalone-rust");
     println!("INTERNAL-Q=i128-pair-gcd-normalized");
     println!("GENERATED-ORDER={}", order.join(","));
