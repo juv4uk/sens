@@ -127,9 +127,9 @@ def build() -> dict:
             "semantic_identity_test": "NO",
             "selector_generator_evidence": "YES" if selector else "NO",
             "implementation_status": (
-                "MECHANICAL-W6+GENERATOR-EVIDENCE"
+                "TYPED-D6-CARRIER+GENERATOR-EVIDENCE"
                 if selector else
-                "MECHANICAL-W6-ONLY"
+                "TYPED-D6-CARRIER"
             ),
         })
 
