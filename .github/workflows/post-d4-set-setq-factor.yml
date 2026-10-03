@@ -1,0 +1,40 @@
+name: Post-D4 SET SETQ factor
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - "docs/research/2589-set-setq-factor*.md"
+      - ".github/workflows/post-d4-set-setq-factor.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - "docs/research/2589-set-setq-factor*.md"
+      - ".github/workflows/post-d4-set-setq-factor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mutation-factor:
+    name: SET SETQ mutation factor
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run focused mutation-factor witnesses
+        run: cargo test -p sens --test post_d4_set_setq_factor -- --nocapture
+      - name: Clippy focused mutation-factor target
+        run: cargo clippy -p sens --test post_d4_set_setq_factor -- -D warnings
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2589 SET/SETQ structural factor"
+            echo
+            echo "- Target acquisition and shared-location mutation are checked separately."
+            echo "- SET width/coordinate remains UNKNOWN/UNPLACED."
+            echo "- No SETQ D6 coordinate transfers to SET by name or history."
+          } >> "$GITHUB_STEP_SUMMARY"
