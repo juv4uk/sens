@@ -1,0 +1,380 @@
+{
+  "schema": "task-record-structure-baseline/v1",
+  "violations": [
+    {
+      "field": "BINARY OBJECT",
+      "issue": 197,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 218,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 225,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "DOMAIN",
+      "issue": 225,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "FALSIFIER",
+      "issue": 225,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "LAW",
+      "issue": 225,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "STATUS",
+      "issue": 225,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "WITNESS",
+      "issue": 225,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 226,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 585,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "DOMAIN",
+      "issue": 585,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "FALSIFIER",
+      "issue": 585,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "LAW",
+      "issue": 585,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "STATUS",
+      "issue": 585,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "WITNESS",
+      "issue": 585,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1259,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1330,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1355,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1393,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1614,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1624,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1631,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1632,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1635,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1636,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1643,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1663,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1693,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1694,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1700,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1701,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1702,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1703,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1704,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1705,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1707,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1708,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1709,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1713,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1981,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 1990,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "DOMAIN",
+      "issue": 1990,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "FALSIFIER",
+      "issue": 1990,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "LAW",
+      "issue": 1990,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "STATUS",
+      "issue": 1990,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "WITNESS",
+      "issue": 1990,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2055,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2151,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2153,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2157,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2159,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2169,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2170,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2199,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2204,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2233,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2236,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2314,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2315,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2359,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2367,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2375,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2377,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2403,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2407,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2408,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2422,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2432,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "DOMAIN",
+      "issue": 2432,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "FALSIFIER",
+      "issue": 2432,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "LAW",
+      "issue": 2432,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "STATUS",
+      "issue": 2432,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "WITNESS",
+      "issue": 2432,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2446,
+      "verdict": "MISSING-FIELD"
+    },
+    {
+      "field": "BINARY OBJECT",
+      "issue": 2487,
+      "verdict": "MISSING-FIELD"
+    }
+  ]
+}
