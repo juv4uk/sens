@@ -1,1 +1,44 @@
-# Core-Math minimal binary executor — #2485\n\nThis experiment deliberately keeps the semantic core smaller than the surrounding research stack.\n\nSemantic value: exact-width binary number.\n\nFirst admitted law:\n\n    y = 2x + b\n    width(y) = width(x) + 1\n    b in {0,1}\n\nThe executable semantic module is src/lib.rs. It requires no Lisp, JSON, AST, hash identity, registry, cache, operation label, or proof-file representation.\n\n## Why this is a selector law rather than arbitrary numbering\n\nIndependently of the binary encoding, a selector is modeled as a root projection followed by a finite sequence of projection choices. Extending a selector appends one semantic choice.\n\nThe canonical coordinate is the choice path itself. By positional binary arithmetic:\n\n    E(extend(s,b)) = 2 * E(s) + b\n\nThis is structural for every admitted selector path, not a lookup-table observation. The research executable enumerates both admitted selector roots and all suffixes through depth 5 as a bounded machine witness.\n\n## Re-encoding attack\n\nThe executable deliberately swaps the two width-4 child coordinates under one root. Under that arbitrary slot permutation the same arithmetic no longer represents semantic extension.\n\nSo arbitrary numbering does not preserve the law, while the canonical path coordinate does. The bit is meaningful because it is the semantic projection choice, not because a table assigned a convenient number.\n\nThis is still a scoped selector-coordinate result. It does not prove that every future Core-Math function family has such a binary arithmetic law.\n\n## Reuse\n\n    101 + 0 -> 1010\n    1010 + 1 -> 10101\n\nThe generated result is immediately reused as the next binary input. Human selector names are unnecessary to execution and are not part of the semantic core.\n
+# Core-Math minimal binary executor — #2485
+
+This experiment implements the canonical ontology of #2490:
+```text
+semantic object = binary number + declared domain + proved law
+```
+
+The semantic core is strictly smaller than the surrounding research stack:
+- Semantic object: exact-width `BinaryNumber` qualified by `Domain` (`SelectorPath` or `QGroupFactor`).
+- Canonical mechanism:
+  ```text
+  y = 2x + b
+  width(y) = width(x) + 1
+  b in {0,1}
+  ```
+- Domain firewall: cross-domain application fails closed with `DomainMismatch` (#2508, #2509).
+- Reusable: generated binary objects in a domain feed directly into further law applications.
+- Zero dependencies: no external crates, no Lisp, JSON, AST, hashes, registry rows, or caches required.
+
+## Domains and Laws
+
+### 1. `SelectorPath` (#2485, #2495)
+- Roots: `101` (`Choice::First`), `110` (`Choice::Rest`).
+- Semantic law: `extend(selector, b)(x) = selector(project_b(x))`.
+- 252 bounded semantic witnesses through suffix depth 5.
+- Slot permutation attack catches arbitrary swapping.
+
+### 2. `QGroupFactor` (#2494, #2500)
+- Roots: `0` (additive family), `1` (multiplicative family).
+- Role bit: `0` (inverse), `1` (quotient).
+- Children:
+  - `00`: additive inverse (`NEG`)
+  - `01`: additive quotient (`SUB`)
+  - `10`: multiplicative inverse (`RECIP`, partial at 0)
+  - `11`: multiplicative quotient (`DIV`, partial at y=0)
+- 104 defined exact-Q cases and 8 undefined cases on 7-element corpus.
+- Anti-numerology: 22/24 arbitrary width-2 permutations rejected by the factor law.
+
+## Domain Firewall (#2508, #2509)
+
+The binary factor-2 append mechanism is shared between `SelectorPath` and `QGroupFactor`, but:
+- Cross-domain application (`apply(selector_law, q_object, delta)`) is rejected with `DomainMismatch`.
+- Objects with identical bit strings in different domains (`10` Selector vs `10` QGroupFactor) remain distinct semantic objects.
+- Erasing the domain tag loses semantic meaning (`AMBIGUOUS-WITHOUT-DOMAIN`).
