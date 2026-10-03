@@ -14,7 +14,7 @@
     "runtime_identity": "CallableIdentity = Core(CoreDomainIdentity) | Legacy8(u8)",
     "fasl_binary_payload": "legacy8: one packed byte; Core: explicit domain width + packed payload",
     "registry_identity_keys": "exactly eight bits",
-    "non_conclusion": "owner residency is not rejected; registry/lowering admission is not yet complete"
+    "non_conclusion": "owner residency is not rejected; runtime admission is not yet implemented"
   },
   "summary": {
     "d5_owner_residents": 32,
