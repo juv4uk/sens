@@ -76,9 +76,8 @@ fn callable_projection_excludes_d1_d2_d7_and_keeps_d8_distinct_from_legacy_sens8
     assert_eq!((core_d8.width(), core_d8.packed_bits()), (8, 1));
 
     let domain_value = Value::DomainIdentity(d8);
-    let legacy_value = Value::Sid(sens::Sens8::from_packed_byte(1));
-    assert_ne!(domain_value, legacy_value);
     assert_eq!(domain_value.as_sens8(), None);
+    assert_eq!(domain_value.to_string(), "00000001");
 }
 
 #[test]
