@@ -1,0 +1,36 @@
+name: Foundation orientation closeout research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/foundation-orientation/**"
+      - ".github/workflows/foundation-orientation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/foundation-orientation/**"
+      - ".github/workflows/foundation-orientation.yml"
+  workflow_dispatch:
+
+jobs:
+  orientation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run D1/D2 automorphism witness
+        run: |
+          rm -rf /tmp/foundation-orientation
+          python3 benchmarks/foundation-orientation/run.py --out /tmp/foundation-orientation
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/foundation-orientation/report.md; then
+            cat /tmp/foundation-orientation/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: foundation-orientation
+          path: /tmp/foundation-orientation/
+          retention-days: 14
