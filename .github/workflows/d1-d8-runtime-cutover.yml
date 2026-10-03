@@ -1,0 +1,52 @@
+name: D1 D8 runtime cutover
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/domain_ast_value_identity.rs"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - ".github/workflows/d1-d8-runtime-cutover.yml"
+  workflow_dispatch:
+
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: D1 D8 carriers and identity split
+        run: |
+          cargo test -p sens --lib domain_words::tests
+          cargo test -p sens --lib domain_identity::tests
+
+      - name: Canonical D2 plus W3-W8 reader
+        run: cargo test -p sens --lib canonical_reader::tests
+
+      - name: D8 selector law with D7 non-callable
+        run: cargo test -p sens --lib eval::selector_law::tests
+
+      - name: D1 D8 AST value FASL wire identity
+        run: cargo test -p sens --test domain_ast_value_identity
+
+      - name: One-way domain paradigm guard
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if test -n "$BASE_SHA" && test -n "$HEAD_SHA"; then
+            bash scripts/domain-paradigm-one-way-guard.sh "$BASE_SHA" "$HEAD_SHA"
+          else
+            bash scripts/test-domain-paradigm-one-way-guard.sh
+          fi
