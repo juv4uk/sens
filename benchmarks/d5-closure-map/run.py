@@ -226,20 +226,37 @@ def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_basis_semantic_fact_interval": load_selector_fact_interval(),
         "new_d5_generated_rows_charged_as_independent_facts": 0,
         "excluded_or_unplaced_nonselector_capabilities": {
-            "SETQ": {
-                "decision": "not-an-honest-D5-child",
-                "reason": "two independent binding-policy axes survive",
-                "evidence": "#2492/#2498",
+            "SET-SETQ": {
+                "decision": "d5-ineligible-shared-location-family",
+                "reason": (
+                    "shared-location behavior survives only with explicit carrier/policy "
+                    "structure; DEFINE->SETQ requires two independent local refinements"
+                ),
+                "evidence": "#2492/#2498/#2518/#2616/#2617",
             },
             "RETURN": {
-                "decision": "residue-root-domain-unresolved",
-                "reason": "no same-base D4 parent; exact width remains unresolved",
-                "evidence": "#2488",
+                "decision": "d5-ineligible-proven-root-domain-unresolved",
+                "reason": (
+                    "non-local-exit is a proven parentless root; no same-base D4 parent "
+                    "exists and roothood/free capacity do not select D5"
+                ),
+                "evidence": "#2488/#2504/#2616/#2662",
             },
             "FEXPR-FSUBR": {
-                "decision": "historical-phase-e-active-unplaced",
-                "reason": "raw-call capability classification is not placement authority",
-                "evidence": "#2343",
+                "decision": "d5-ineligible-carrier-family",
+                "reason": (
+                    "raw-form input and explicit caller-env are separable carrier facts; "
+                    "the historical protocol has no exact one-delta D4 parent theorem"
+                ),
+                "evidence": "#2522/#2530/#2616/#2617/#2705",
+            },
+            "TRANSFORMER": {
+                "decision": "d5-ineligible-policy-over-carrier",
+                "reason": (
+                    "current transformer behavior spans raw-form carrier plus returned-form "
+                    "and timing policy factors; the LAMBDA comparison is multi-delta"
+                ),
+                "evidence": "#2522/#2567/#2591/#2616/#2617/#2705",
             },
         },
         "no_scalar_winner": True,
