@@ -1,6 +1,7 @@
 {
   "issue": "#2766",
   "mechanism_facts": {
+    "ast_d6_identity": true,
     "bit6_packing": true,
     "bit6_source_display": true,
     "bit6_source_parse": true,
@@ -9,13 +10,13 @@
     "lowering_d6_identity": false,
     "registry_d6_identity": false,
     "typed_d6_carrier": true,
-    "value_d6_identity": false,
-    "ast_d6_identity": true
+    "value_d6_identity": false
   },
   "owner_map": "knowledge/d6-historical-full-map.json",
   "principle": "mechanical W6 representation is not semantic D6 admission",
   "rows": [
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "000000",
       "implementation_status": "TYPED-D6+AST",
@@ -32,10 +33,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "000001",
       "implementation_status": "TYPED-D6+AST",
@@ -52,10 +53,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "000010",
       "implementation_status": "TYPED-D6+AST",
@@ -72,10 +73,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "000011",
       "implementation_status": "TYPED-D6+AST",
@@ -92,10 +93,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "000100",
       "implementation_status": "TYPED-D6+AST",
@@ -112,10 +113,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "000101",
       "implementation_status": "TYPED-D6+AST",
@@ -132,10 +133,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "000110",
       "implementation_status": "TYPED-D6+AST",
@@ -152,10 +153,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "000111",
       "implementation_status": "TYPED-D6+AST",
@@ -172,10 +173,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "001000",
       "implementation_status": "TYPED-D6+AST",
@@ -192,10 +193,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "001001",
       "implementation_status": "TYPED-D6+AST",
@@ -212,10 +213,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "001010",
       "implementation_status": "TYPED-D6+AST",
@@ -232,10 +233,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "001011",
       "implementation_status": "TYPED-D6+AST",
@@ -252,10 +253,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "001100",
       "implementation_status": "TYPED-D6+AST",
@@ -272,10 +273,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "001101",
       "implementation_status": "TYPED-D6+AST",
@@ -292,10 +293,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "001110",
       "implementation_status": "TYPED-D6+AST",
@@ -312,10 +313,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "001111",
       "implementation_status": "TYPED-D6+AST",
@@ -332,10 +333,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "010000",
       "implementation_status": "TYPED-D6+AST",
@@ -352,10 +353,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "010001",
       "implementation_status": "TYPED-D6+AST",
@@ -372,10 +373,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "010010",
       "implementation_status": "TYPED-D6+AST",
@@ -392,10 +393,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "010011",
       "implementation_status": "TYPED-D6+AST",
@@ -412,10 +413,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "010100",
       "implementation_status": "TYPED-D6+AST",
@@ -432,10 +433,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "010101",
       "implementation_status": "TYPED-D6+AST",
@@ -452,10 +453,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "010110",
       "implementation_status": "TYPED-D6+AST",
@@ -472,10 +473,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "010111",
       "implementation_status": "TYPED-D6+AST",
@@ -492,10 +493,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "011000",
       "implementation_status": "TYPED-D6+AST",
@@ -512,10 +513,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "011001",
       "implementation_status": "TYPED-D6+AST",
@@ -532,10 +533,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "011010",
       "implementation_status": "TYPED-D6+AST",
@@ -552,10 +553,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "011011",
       "implementation_status": "TYPED-D6+AST",
@@ -572,10 +573,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "011100",
       "implementation_status": "TYPED-D6+AST",
@@ -592,10 +593,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "011101",
       "implementation_status": "TYPED-D6+AST",
@@ -612,10 +613,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "011110",
       "implementation_status": "TYPED-D6+AST",
@@ -632,10 +633,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "011111",
       "implementation_status": "TYPED-D6+AST",
@@ -652,10 +653,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "100000",
       "implementation_status": "TYPED-D6+AST",
@@ -672,10 +673,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "100001",
       "implementation_status": "TYPED-D6+AST",
@@ -692,10 +693,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "100010",
       "implementation_status": "TYPED-D6+AST",
@@ -712,10 +713,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "100011",
       "implementation_status": "TYPED-D6+AST",
@@ -732,10 +733,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "100100",
       "implementation_status": "TYPED-D6+AST",
@@ -752,10 +753,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "100101",
       "implementation_status": "TYPED-D6+AST",
@@ -772,10 +773,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "100110",
       "implementation_status": "TYPED-D6+AST",
@@ -792,10 +793,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "100111",
       "implementation_status": "TYPED-D6+AST",
@@ -812,10 +813,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "101000",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -832,10 +833,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "101001",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -852,10 +853,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "101010",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -872,10 +873,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "101011",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -892,10 +893,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "101100",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -912,10 +913,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "101101",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -932,10 +933,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "101110",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -952,10 +953,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "101111",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -972,10 +973,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "110000",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -992,10 +993,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "110001",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -1012,10 +1013,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "110010",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -1032,10 +1033,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "110011",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -1052,10 +1053,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "110100",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -1072,10 +1073,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "110101",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -1092,10 +1093,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "110110",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -1112,10 +1113,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "110111",
       "implementation_status": "TYPED-D6+AST+GENERATOR-EVIDENCE",
@@ -1132,10 +1133,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "111000",
       "implementation_status": "TYPED-D6+AST",
@@ -1152,10 +1153,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "111001",
       "implementation_status": "TYPED-D6+AST",
@@ -1172,10 +1173,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "111010",
       "implementation_status": "TYPED-D6+AST",
@@ -1192,10 +1193,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "111011",
       "implementation_status": "TYPED-D6+AST",
@@ -1212,10 +1213,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "111100",
       "implementation_status": "TYPED-D6+AST",
@@ -1232,10 +1233,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "111101",
       "implementation_status": "TYPED-D6+AST",
@@ -1252,10 +1253,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "111110",
       "implementation_status": "TYPED-D6+AST",
@@ -1272,10 +1273,10 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     },
     {
+      "ast_d6_identity": "YES",
       "compiler_d6_identity": "NOT-AUDITED",
       "coordinate": "111111",
       "implementation_status": "TYPED-D6+AST",
@@ -1292,12 +1293,12 @@
       "semantic_registry_d6_identity": "NO",
       "source_exact_w6": "YES",
       "source_print_exact_w6": "YES",
-      "typed_d6_carrier": "YES",
-      "ast_d6_identity": "YES"
+      "typed_d6_carrier": "YES"
     }
   ],
   "schema": "d6-runtime-admission-audit/v1",
   "summary": {
+    "ast_d6_identity": 64,
     "compiler_d6_identity": "NOT-AUDITED",
     "lowering_d6_identity": 0,
     "native_evaluator_d6_identity": 0,
@@ -1307,7 +1308,6 @@
     "selector_generator_evidence": 16,
     "semantic_registry_d6_identity": 0,
     "source_exact_w6": 64,
-    "typed_d6_carrier": 64,
-    "ast_d6_identity": 64
+    "typed_d6_carrier": 64
   }
 }
