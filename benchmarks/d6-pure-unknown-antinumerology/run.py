@@ -79,8 +79,11 @@ def build() -> dict[str, Any]:
     ]
 
     assert len(pure_rows) == 44
-    assert len(nonpure_rows) == 4
+    assert len(nonpure_rows) == 3
     assert frontier_result["canonical"]["occupancy_mutations"] == 0
+    assert frontier_result["canonical"]["ratified_manual_residents"] == 1
+    assert frontier_result["ratified_target"]["coordinate"] == TARGET
+    assert frontier_result["ratified_target"]["semantic_member"] is True
 
     # All 44 slots carry exactly the same admitted evidence.
     signatures = {evidence_signature(row) for row in pure_rows}
@@ -193,9 +196,11 @@ def build() -> dict[str, Any]:
             "invariant_singleton_exists": False,
         },
         "coordinate_only_rankings": ranking_results,
-        "fixed_nonpure_coordinates": sorted(row["coordinate"] for row in nonpure_rows),
+        "fixed_nonpure_unknown_coordinates": sorted(row["coordinate"] for row in nonpure_rows),
+        "ratified_target_coordinate": TARGET,
         "canonical": {
             "generated_members": frontier_result["canonical"]["generated_members"],
+            "ratified_manual_residents": frontier_result["canonical"]["ratified_manual_residents"],
             "unknown_free": frontier_result["canonical"]["unknown_free"],
             "occupancy_mutations": 0,
         },
@@ -208,7 +213,7 @@ def build() -> dict[str, Any]:
             "numeric adjacency is not semantic evidence",
             "Hamming distance is not semantic evidence",
             "prefix proximity is not semantic evidence",
-            "001111 owner evidence does not transfer to PURE-UNKNOWN slots",
+            "001111 ratified residency does not transfer to PURE-UNKNOWN slots",
             "no coordinate allocation",
         ],
     }
