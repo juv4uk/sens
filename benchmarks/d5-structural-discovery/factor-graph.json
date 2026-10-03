@@ -449,10 +449,10 @@
         "returned-form-protocol"
       ],
       "derived_by_existing_core": false,
-      "evidence_sha": "1ad012de96eceecae3927b98f99429093cdff354",
+      "evidence_sha": "b7798f4849db5ba1bbcac8201deff38e0609a4e7",
       "historical_operation": "TRANSFORMER",
       "historical_phase": "F",
-      "later_classification": "PARTIAL-PROTOCOL-ALIGNMENT-TIMING-DISTINCT",
+      "later_classification": "FORM-TRANSFORMER-PROTOCOL",
       "placement": "UNPLACED",
       "presence": "yes",
       "source_issue": 2557
