@@ -167,11 +167,12 @@ fn as_symbol(expr: &Expr) -> Option<&str> {
     }
 }
 
-/// True when `expr` is the SENS code `sid` or a surface routing to it.
-fn head_is_sid(expr: &Expr, sid: sens::Sens8) -> bool {
+/// True when `expr` is a historical exact-8 payload or a surface routing
+/// to that payload. Canonical domain identity is not widened here.
+fn head_is_legacy8(expr: &Expr, bits: u8) -> bool {
     match &expr.kind {
-        ExprKind::Sid(code) => *code == sid,
-        ExprKind::Symbol(surface) => sens::surface_has_sid(surface, sid),
+        ExprKind::Sid(identity) => identity.legacy8_bits() == Some(bits),
+        ExprKind::Symbol(surface) => sens::surface_has_legacy8_bits(surface, bits),
         _ => false,
     }
 }
@@ -179,8 +180,8 @@ fn head_is_sid(expr: &Expr, sid: sens::Sens8) -> bool {
 /// True when `expr` is a definition head: SENS code 00001001/00001011 or a
 /// surface routing to either.
 fn is_define_head(expr: &Expr) -> bool {
-    head_is_sid(expr, sens::sens!(00001001))
-        || head_is_sid(expr, sens::sens!(00001011))
+    head_is_legacy8(expr, 0b0000_1001)
+        || head_is_legacy8(expr, 0b0000_1011)
         || as_symbol(expr).is_some_and(sens::is_define_surface_name)
 }
 
@@ -228,7 +229,7 @@ fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
         let Some(value_list) = as_list(value) else {
             continue;
         };
-        if !head_is_sid(&value_list[0], sens::sens!(00000001)) {
+        if !head_is_legacy8(&value_list[0], 0b0000_0001) {
             continue;
         }
         let Some(data) = value_list.get(1).and_then(as_list) else {
@@ -332,7 +333,7 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
         let Some(lambda) = head.get(2).and_then(as_list) else {
             continue;
         };
-        if !(head_is_sid(&lambda[0], sens::sens!(00001000))
+        if !(head_is_legacy8(&lambda[0], 0b0000_1000)
             || as_symbol(&lambda[0]).is_some_and(sens::is_lambda_surface_name))
         {
             continue;
