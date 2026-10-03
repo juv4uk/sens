@@ -343,6 +343,18 @@ pub(crate) fn invoke_semantic_ref(
         _ => {}
     }
 
+    // Explicit compatibility adapter: once a historical byte has a proven
+    // exact-domain successor, the old spelling delegates to that one
+    // canonical mechanism. We do not dual-bind the language definition into
+    // both legacy and domain slots.
+    if let Some(identity) =
+        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+    {
+        if environment.domain_code_slot(identity).is_some() || domain_primitive(identity).is_some() {
+            return invoke_domain_identity(identity, args, environment, span);
+        }
+    }
+
     if let Some(profile) = environment.selected_core_profile() {
         if matches!(
             profile_mechanism_route(profile, sid),
