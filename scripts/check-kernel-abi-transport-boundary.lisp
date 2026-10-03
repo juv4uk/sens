@@ -100,7 +100,7 @@
                   (00000001 (owner sens)))
                 (kab-row-check
                   (00000001 language-identity-type)
-                  (00000001 (language-identity-type Sens8)))
+                  (00000001 (language-identity-type CoreDomainIdentity)))
                 (kab-row-check
                   (00000001 shared-abi-type)
                   (00000001 (shared-abi-type WsmKernelRequest)))
@@ -110,6 +110,15 @@
                 (kab-row-check
                   (00000001 shared-abi-storage)
                   (00000001 (shared-abi-storage opaque-u8)))
+                (kab-row-check
+                  (00000001 shared-abi-identity-scope)
+                  (00000001 (shared-abi-identity-scope legacy-backend-anchor-only)))
+                (kab-row-check
+                  (00000001 domain-to-kernel-transport)
+                  (00000001 (domain-to-kernel-transport explicit-projection-required)))
+                (kab-row-check
+                  (00000001 domain-width-fit-implies-abi-admission)
+                  (00000001 (domain-width-fit-implies-abi-admission forbidden)))
                 (kab-row-check
                   (00000001 kernel-wrapper-type)
                   (00000001 (kernel-wrapper-type SemanticId)))
@@ -176,7 +185,7 @@
          (00000001
            (kernel-abi-transport-boundary-ok
              (kernels 4)
-             (language-type Sens8)
+             (language-type CoreDomainIdentity)
              (abi-wrapper SemanticId))))
         ((00000010 failure)
          (0)
