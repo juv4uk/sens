@@ -1,14 +1,12 @@
-//! Runtime projection of the Lisp-owned semantic registry.
+//! Exact-domain surface projection plus isolated historical compatibility.
 //!
-//! The canonical authority is lib/surface/semantic-registry.lisp and its
-//! Lisp-owned reader/API. This module contains no parser for canonical source
-//! text. The generated table is emitted by
-//! scripts/generate-rust-semantic-registry.lisp and is only a mechanical
-//! runtime projection for fast lookup.
-//
-//! Generated rows may carry a packed byte as substrate representation of an
-//! already understood Lisp Binary identity. This wrapper converts that byte to
-//! opaque Sens8 immediately; runtime registry APIs never expose decimal IDs.
+//! Canonical migrated surface identity comes from
+//! `lib/surface/domain-registry.lisp` -> `domain_surface_registry_generated.rs`
+//! and is keyed by exact `CoreDomainIdentity`.
+//!
+//! The older `semantic-registry.lisp` / `SEMANTIC_ROWS` byte axis remains
+//! below only for explicit compatibility consumers that have not migrated yet.
+//! It is not an authority for domain identity, occupancy, or callability.
 
 use std::{collections::HashMap, sync::OnceLock};
 
