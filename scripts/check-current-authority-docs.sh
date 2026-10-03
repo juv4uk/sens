@@ -42,13 +42,25 @@ for path in CURRENT.md docs/semantic-authority-map.md docs/semantic-authority-ma
   require_literal "$path" 'crates/sens'
 done
 
-# Чинна онтологія: рівно 256 точних функцій, а () — окреме структурне значення.
-require_literal CURRENT.md 'SENS has exactly 256 functions'
-require_literal CURRENT.md 'outside that function space'
-require_literal docs/semantic-authority-map.md 'SENS has exactly 256 functions'
-require_literal docs/semantic-authority-map.md 'outside the 256-function space'
-require_literal docs/semantic-authority-map.uk.md 'У СЕНС є рівно 256 функцій'
-require_literal docs/semantic-authority-map.uk.md 'поза простором 256 функцій'
+# Чинна онтологія: exact bits + exact domain + admitted/proved law.
+require_literal CURRENT.md 'SENS no longer has one universal 256-slot function ontology'
+require_literal CURRENT.md 'exact binary number'
+require_literal docs/semantic-authority-map.md 'Canonical semantic identity is domain-qualified'
+require_literal docs/semantic-authority-map.md 'Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility'
+require_literal docs/semantic-authority-map.uk.md 'Канонічна семантична ідентичність є доменно-кваліфікованою'
+require_literal docs/semantic-authority-map.uk.md 'Історичні exact-eight-bit Sens8/Sid8/Function8 лишаються обмеженими compatibility'
+
+# Старий flat-256 текст більше не може з'являтися у чинних authority docs.
+forbid_literal CURRENT.md 'Those exact eight-bit forms are the 256 SENS functions'
+forbid_literal docs/semantic-authority-map.md 'SENS has exactly 256 functions'
+forbid_literal docs/semantic-authority-map.md 'outside the 256-function space'
+forbid_literal docs/semantic-authority-map.uk.md 'У СЕНС є рівно 256 функцій'
+forbid_literal docs/semantic-authority-map.uk.md 'поза простором 256 функцій'
+
+# Structural empty is an exact D3 resident, not a legacy eight-bit/numeric alias.
+require_literal CURRENT.md 'Core.D3 `000`'
+require_literal docs/semantic-authority-map.md 'Core.D3 `000`'
+require_literal docs/semantic-authority-map.uk.md 'Core.D3 `000`'
 
 # Surface — routing/UI metadata, а не друга identity.
 require_literal CURRENT.md 'source/UI routing metadata'
