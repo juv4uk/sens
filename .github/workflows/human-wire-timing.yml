@@ -40,7 +40,7 @@ jobs:
             --framing-bits 16 \
             --checksum-bits 16 \
             --out /tmp/human-wire-timing | tee /tmp/human-wire-timing.log
-          grep -F "HUMAN-WIRE-TIMING=PASS" /tmp/human-wire-timing.log
+          grep -F "HUMAN-WIRE-CORPUS-TIMING=PASS" /tmp/human-wire-timing.log
           grep -F "RULE=timing-units-are-not-information-bits" /tmp/human-wire-timing.log
           grep -F "SEMANTIC-AUTHORITY=NONE" /tmp/human-wire-timing.log
 
