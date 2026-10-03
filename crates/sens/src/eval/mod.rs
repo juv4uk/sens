@@ -28,7 +28,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::{parse, CallableIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -87,6 +87,41 @@ pub(crate) enum EvalStep {
     },
 }
 
+fn legacy_sid(identity: CallableIdentity) -> Option<crate::Sens8> {
+    identity
+        .legacy8_bits()
+        .map(crate::Sens8::from_packed_byte)
+}
+
+fn invoke_callable_identity(
+    identity: CallableIdentity,
+    arguments: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if let Some(bound) = environment.code_slot(identity) {
+        return match bound {
+            Value::Closure(closure) => closures::apply_values(closure, arguments, span),
+            Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
+            other => Err(LanguageError::new(
+                ErrorKind::Type,
+                format!("callable identity is bound to a non-callable value: {other}"),
+                span,
+            )),
+        };
+    }
+    let Some(sid) = legacy_sid(identity) else {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "domain-qualified identity has no admitted evaluator mechanism yet: {identity}"
+            ),
+            span,
+        ));
+    };
+    canon::invoke_semantic_ref(sid, arguments, environment, span)
+}
+
 pub(crate) fn invoke_value(
     function: &Value,
     arguments: &[Value],
@@ -94,7 +129,7 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::Sid(identity) => invoke_callable_identity(*identity, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -136,10 +171,7 @@ pub(crate) fn evaluate_step(
     match &expression.kind {
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
-        ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
-        ExprKind::DomainIdentity(identity) => {
-            Ok(EvalStep::Value(Value::DomainIdentity(*identity)))
-        }
+        ExprKind::Sid(identity) => Ok(EvalStep::Value(Value::Sid(*identity))),
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
@@ -171,16 +203,9 @@ pub(crate) fn evaluate_step(
         // Empty structure is a structural value, not any function SID.
         ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
         ExprKind::List(items) => evaluate_list(items, environment, expression.span),
-        ExprKind::Call(sid, arguments) => {
-            dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
+        ExprKind::Call(identity, arguments) => {
+            dispatch_call(None, Some(*identity), None, arguments, environment, expression.span)
         }
-        ExprKind::DomainCall(identity, _) => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!(
-                "domain-qualified call routing is not admitted yet · marshrut domennoho vyklyku shche ne dopushchenyi: {identity}"
-            ),
-            expression.span,
-        )),
         // Виконання залежить лише від числових координат (#1697): слот або є,
         // або названа помилка — пошуку за іменем більше немає.
         ExprKind::Local { depth, index } => environment
@@ -222,18 +247,19 @@ fn evaluate_list(
 /// функція — лише 1 байт `head_sid`.
 fn dispatch_call(
     head_name: Option<&str>,
-    head_sid: Option<Sens8>,
+    head_sid: Option<CallableIdentity>,
     head_expr: Option<&Expr>,
     arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    let routed_head_sid = head_sid
+    let legacy_head_sid = head_sid.and_then(legacy_sid);
+    let routed_head_sid = legacy_head_sid
         .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+        .or_else(|| legacy_head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
     if routed_head_sid == Some(crate::sens!(00000001)) {
         special_forms::exact_sens_arity(crate::sens!(00000001), arguments, 1, span)?;
@@ -258,26 +284,21 @@ fn dispatch_call(
         }
     }
     let function = match head_sid {
-        Some(sid) => Value::Sid(sid),
+        Some(identity) => Value::Sid(identity),
         None => evaluate(
             head_expr.expect("a call without a SID head keeps its head expression"),
             environment,
         )?,
     };
     match &function {
-        Value::Sid(sid) => {
-            // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
-            if !canon::has_primitive(*sid) {
-                match &environment.code_slot(*sid) {
-                    Some(Value::Macro(closure)) => {
-                        return closures::apply_macro(closure.clone(), arguments, environment, span);
+        Value::Sid(identity) => {
+            if let Some(bound) = environment.code_slot(*identity) {
+                match bound {
+                    Value::Macro(closure) => {
+                        return closures::apply_macro(closure, arguments, environment, span);
                     }
-                    // A language-defined function reached through its code
-                    // takes the same path as a call by name: arguments and
-                    // body run through `closures::apply`, whose tail call
-                    // keeps deep recursion (meta-eval) off the Rust stack.
-                    Some(closure @ Value::Closure(_)) => {
-                        return closures::apply(closure.clone(), arguments, environment, span);
+                    closure @ Value::Closure(_) => {
+                        return closures::apply(closure, arguments, environment, span);
                     }
                     _ => {}
                 }
@@ -286,7 +307,7 @@ fn dispatch_call(
             for argument in arguments {
                 values.push(evaluate(argument, environment)?);
             }
-            canon::invoke_semantic_ref(*sid, &values, environment, span)
+            invoke_callable_identity(*identity, &values, environment, span)
                 .map(EvalStep::Value)
         }
         Value::Builtin(builtin) => {
@@ -306,11 +327,11 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
-    let ExprKind::Sid(sid) = expression.kind else {
+fn binary_head_sid(expression: &Expr) -> Option<CallableIdentity> {
+    let ExprKind::Sid(identity) = expression.kind else {
         return None;
     };
-    Some(sid)
+    Some(identity)
 }
 
 trait ExprKindExt {
