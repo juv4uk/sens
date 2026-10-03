@@ -69,7 +69,7 @@ impl Racana2 {
 /// It does not encode a coordinate->name table, behavior table, or Sens8
 /// compatibility mapping.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CoreD5Word(Bit5);
 
 impl CoreD5Word {
