@@ -636,6 +636,7 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
         Value::Sid(sid) => ExprKind::Sid(*sid),
+        Value::DomainIdentity(identity) => ExprKind::DomainIdentity(*identity),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
         Value::String(val) => ExprKind::String(val.clone()),
         // A legacy host builtin is callable but not syntax either.
