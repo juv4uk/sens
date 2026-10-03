@@ -464,6 +464,18 @@
     "candidate_factors_total": 9,
     "d5_selector_generated": 8,
     "d5_unknown_free": 24,
+    "external_root_theorems": [
+      {
+        "classification": "semantic-residue-root",
+        "coordinate": "UNPLACED",
+        "evidence": [
+          "#2488",
+          "#2504"
+        ],
+        "exact_width": "UNKNOWN",
+        "factor_id": "non-local-exit"
+      }
+    ],
     "historical_rows_consumed": 19,
     "new_d5_residents": 0,
     "placement_search_authorized": false,
@@ -477,6 +489,6 @@
       "returned-form-protocol",
       "shared-location-update"
     ],
-    "proven_independent_roots": 0
+    "roots_promoted_by_this_model": 0
   }
 }
