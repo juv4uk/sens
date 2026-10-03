@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sens8;
+use crate::SemanticRef;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -49,7 +49,7 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
-    Sid(Sens8),
+    Sid(SemanticRef),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -70,14 +70,14 @@ pub enum ExprKind {
     /// (nur innerhalb von `quote`, oder wo ein Aufrufer es über `read` als
     /// Daten liest).
     Pair(Rc<Expr>, Rc<Expr>),
-    /// Виклик функції СЕНС: функція займає рівно 1 байт (`Sens8`), без
+    /// Виклик функції СЕНС: голова несе exact-width `SemanticRef`, без
     /// тексту імені. Створюється лише `eval::lower` після розбору — з голови
     /// `(00000010 x)` або з написання, яке неможливо перевизначити
     /// (`atom`, `атом?`, `aṇu` ...), тож усі написання однієї функції
     /// дають один і той самий вузол. Парсер цей варіант не породжує.
-    /// SENS call: the function slot is exactly one byte (`Sens8`), no name
-    /// text. Produced only by `eval::lower` after parsing.
-    Call(Sens8, Rc<[Expr]>),
+    /// SENS call: the function slot carries an exact-width `SemanticRef`, no
+    /// name text. Produced only by `eval::lower` after parsing.
+    Call(SemanticRef, Rc<[Expr]>),
     /// Параметр замикання за числовими координатами: слот `index` кадру
     /// виклику на `depth` кадрів вище. Імені тут немає навмисно (#1697,
     /// контракт 10.0 `locals-are-slots-not-names`): виконання залежить лише від
@@ -90,9 +90,8 @@ pub enum ExprKind {
     Local { depth: u32, index: u32 },
 }
 
-// Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
-// збірка має впасти, а не мовчки розійтися з таблицею функцій.
-const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
+// Host representation size is deliberately not semantic width. Exact width
+// lives inside SemanticRef/DomainWord and is serialized explicitly.
 
 /// Shared nesting cap for every recursive structure walk over reader
 /// output: the parser itself, `quote`d-data conversion (`quoted`) and
@@ -113,7 +112,7 @@ pub(crate) mod fasl {
     use std::rc::Rc;
     use std::sync::Arc;
 
-    pub const FASL_FORMAT_VERSION: u32 = 3;
+    pub const FASL_FORMAT_VERSION: u32 = 4;
 
     const TAG_NUMBER: u8 = 1;
     const TAG_RATIONAL: u8 = 2;
@@ -128,6 +127,8 @@ pub(crate) mod fasl {
     const TAG_F32_BUFFER: u8 = 9;
     // #1697: числові координати локальної змінної; ім'я не записується.
     const TAG_LOCAL: u8 = 10;
+    // v4: exact-width domain identity. Payload is [width, packed_bits].
+    const TAG_DOMAIN_BINARY: u8 = 11;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -151,6 +152,20 @@ pub(crate) mod fasl {
         std::str::from_utf8(slice).ok()
     }
 
+    fn encode_semantic_ref(identity: SemanticRef, out: &mut Vec<u8>) {
+        match identity {
+            SemanticRef::Legacy8(word) => {
+                out.push(TAG_BINARY);
+                out.push(word.packed_byte());
+            }
+            SemanticRef::Domain(word) => {
+                out.push(TAG_DOMAIN_BINARY);
+                out.push(word.width() as u8);
+                out.push(word.packed_bits());
+            }
+        }
+    }
+
     pub(crate) fn encode_expr(expr: &Expr, out: &mut Vec<u8>) {
         match &expr.kind {
             ExprKind::Number(f, exactness) => {
@@ -162,9 +177,8 @@ pub(crate) mod fasl {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
             }
-            ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+            ExprKind::Sid(identity) => {
+                encode_semantic_ref(*identity, out);
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -191,12 +205,11 @@ pub(crate) mod fasl {
                 encode_expr(head, out);
                 encode_expr(tail, out);
             }
-            // Зведений виклик зберігається як список із 1-байтовою головою.
-            ExprKind::Call(sid, arguments) => {
+            // Зведений виклик зберігається як список з exact-width головою.
+            ExprKind::Call(identity, arguments) => {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                encode_semantic_ref(*identity, out);
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -237,7 +250,19 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(crate::SemanticRef::legacy8(
+                    crate::Sens8::from_packed_byte(value),
+                ))
+            }
+            TAG_DOMAIN_BINARY => {
+                let width = usize::from(*bytes.get(*pos)?);
+                *pos += 1;
+                let bits = *bytes.get(*pos)?;
+                *pos += 1;
+                if width == 8 {
+                    return None;
+                }
+                ExprKind::Sid(crate::SemanticRef::from_width_bits(width, bits)?)
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
@@ -347,6 +372,7 @@ pub(crate) mod fasl {
 pub(crate) mod wire {
     use super::{Exactness, Expr, ExprKind, MAX_STRUCTURE_DEPTH};
     use crate::value::Rational;
+    use crate::SemanticRef;
     use std::rc::Rc;
 
     const MAGIC: &[u8; 3] = b"SW\x01";
@@ -362,6 +388,7 @@ pub(crate) mod wire {
     const TAG_SYMBOL: u8 = 0x56;
     const TAG_PAIR: u8 = 0x57;
     const TAG_LOCAL: u8 = 0x58;
+    const TAG_DOMAIN_BINARY: u8 = 0x59;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
 
@@ -417,6 +444,20 @@ pub(crate) mod wire {
         ((integer as f64).to_bits() == value.to_bits()).then_some(integer)
     }
 
+    fn encode_semantic_ref(identity: SemanticRef, out: &mut Vec<u8>) {
+        match identity {
+            SemanticRef::Legacy8(word) => {
+                out.push(TAG_BINARY);
+                out.push(word.packed_byte());
+            }
+            SemanticRef::Domain(word) => {
+                out.push(TAG_DOMAIN_BINARY);
+                out.push(word.width() as u8);
+                out.push(word.packed_bits());
+            }
+        }
+    }
+
     fn encode_expr(expr: &Expr, out: &mut Vec<u8>) {
         match &expr.kind {
             ExprKind::Number(value, exactness) => match exact_integer(*value, exactness) {
@@ -437,9 +478,8 @@ pub(crate) mod wire {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
             }
-            ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+            ExprKind::Sid(identity) => {
+                encode_semantic_ref(*identity, out);
             }
             ExprKind::String(value) => put_text(out, TAG_STRING, value),
             ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
@@ -459,10 +499,9 @@ pub(crate) mod wire {
                 encode_expr(head, out);
                 encode_expr(tail, out);
             }
-            ExprKind::Call(sid, arguments) => {
+            ExprKind::Call(identity, arguments) => {
                 put_list_header(out, arguments.len() + 1);
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                encode_semantic_ref(*identity, out);
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -566,7 +605,19 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(crate::SemanticRef::legacy8(
+                    crate::Sens8::from_packed_byte(value),
+                ))
+            }
+            TAG_DOMAIN_BINARY => {
+                let width = usize::from(*bytes.get(*pos)?);
+                *pos += 1;
+                let bits = *bytes.get(*pos)?;
+                *pos += 1;
+                if width == 8 {
+                    return None;
+                }
+                ExprKind::Sid(crate::SemanticRef::from_width_bits(width, bits)?)
             }
             TAG_LOCAL => {
                 let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
