@@ -105,15 +105,20 @@ jobs:
         shell: bash
         run: bash scripts/sid-binary-identity-guard.sh
 
-      - name: Single SID runtime value guard
-        if: steps.changes.outputs.rust == 'true'
+      - name: Sens8/Sid8 semantic ratchet self-test
         shell: bash
-        run: |
-          set -euo pipefail
-          if grep -R -n --include='*.rs' 'Value::SemanticRef\|SemanticRef(Sid8)\|SemanticRef(u8)' crates; then
-            echo "ERROR: SID identity across Rust crates must use only Value::Sid(Sid8)" >&2
-            exit 1
-          fi
+        run: python3 scripts/sens8-semantic-ratchet.py --self-test
+
+      - name: Sens8/Sid8 semantic debt summary
+        shell: bash
+        run: python3 scripts/sens8-semantic-ratchet.py --summary
+
+      - name: No growth of semantic Sens8/Sid8 debt
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: python3 scripts/sens8-semantic-ratchet.py --diff "$BASE_SHA" "$HEAD_SHA"
 
       - name: Debug post-core definition data shape for #771
         shell: bash
