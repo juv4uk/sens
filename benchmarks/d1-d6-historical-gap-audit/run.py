@@ -124,11 +124,15 @@ def build() -> dict[str, Any]:
             "unresolved_relation": memo24["counts"]["unresolved_relation"],
         }
 
-    require(d5["domain_ratified"] is True, "D5 domain lost ratification")
-    require(d5["baseline_ratified"] is True, "D5 baseline lost ratification")
-    require(d5["generated_count"] == 8, "D5 generated count changed")
-    require(d5["unknown_count"] == 24, "D5 protected UNKNOWN count changed")
-    require(d5["manual_nonselector_count"] == 0, "D5 gained manual resident")
+    # OD-005 current owner occupancy is complete.  Historical residency and
+    # semantic derivability are intentionally independent axes (#2762/#2765).
+    require(d5["resident_count"] == 32, "D5 owner residency is not 32/32")
+    require(d5["generated_selector_count"] == 8, "D5 selector-generated count changed")
+    require(d5["owner_historical_nonselector_count"] == 24,
+            "D5 owner-historical nonselector count changed")
+    require(d5["unknown_count"] == 0, "D5 current occupancy regained UNKNOWN rows")
+    require(d5["derivability_does_not_erase_residency"] is True,
+            "D5 residency/derivability separation lost")
 
     require(d6["canonical"]["generated_members"] == 16, "D6 selector closure changed")
     require(d6["canonical"]["unknown_free"] == 48, "D6 canonical UNKNOWN count changed")
