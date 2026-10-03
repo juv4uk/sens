@@ -1,7 +1,7 @@
 //! Canonical visible-binary source boundary for SENS .lisp files.
 //!
 //! This module owns source token shape only. It deliberately does not assign
-//! D1/D2/D3 meaning; semantic wrappers consume these exact-width words later.
+//! D1-D6 meaning; semantic wrappers consume these exact-width words later.
 
 use crate::{
     Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, ErrorKind, LanguageError, Span,
@@ -86,6 +86,33 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+
+    /// Lift an exact four-bit source word into the typed Core.D4 carrier.
+    ///
+    /// Occupancy and operation meaning remain owned by the D4 contract.
+    pub const fn d4(self) -> Option<crate::CoreD4> {
+        match self {
+            Self::W4(word) => Some(crate::CoreD4::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact five-bit source word into the typed Core.D5 carrier.
+    pub const fn d5(self) -> Option<crate::CoreD5> {
+        match self {
+            Self::W5(word) => Some(crate::CoreD5::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact six-bit source word into the typed Core.D6 carrier.
+    pub const fn d6(self) -> Option<crate::CoreD6> {
+        match self {
+            Self::W6(word) => Some(crate::CoreD6::from_word(word)),
+            _ => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -103,6 +130,25 @@ impl From<crate::Racana2> for BinarySourceWord {
 impl From<crate::Bija3> for BinarySourceWord {
     fn from(value: crate::Bija3) -> Self {
         Self::W3(value.word())
+    }
+}
+
+
+impl From<crate::CoreD4> for BinarySourceWord {
+    fn from(value: crate::CoreD4) -> Self {
+        Self::W4(value.word())
+    }
+}
+
+impl From<crate::CoreD5> for BinarySourceWord {
+    fn from(value: crate::CoreD5) -> Self {
+        Self::W5(value.word())
+    }
+}
+
+impl From<crate::CoreD6> for BinarySourceWord {
+    fn from(value: crate::CoreD6) -> Self {
+        Self::W6(value.word())
     }
 }
 
@@ -239,44 +285,80 @@ mod tests {
     }
 
     #[test]
-    fn d1_d2_d3_bridge_is_exact_and_lossless_for_every_small_word() {
+    fn d1_through_d6_bridges_are_exact_and_lossless() {
         for raw in 0..=1 {
             let source = BinarySourceWord::W1(Bit1::new(raw).unwrap());
-            let typed = source.d1().expect("W1 must enter D1");
-            assert_eq!(BinarySourceWord::from(typed), source);
+            assert_eq!(BinarySourceWord::from(source.d1().unwrap()), source);
             assert!(source.d2().is_none());
             assert!(source.d3().is_none());
+            assert!(source.d4().is_none());
+            assert!(source.d5().is_none());
+            assert!(source.d6().is_none());
         }
 
         for raw in 0..=3 {
             let source = BinarySourceWord::W2(Bit2::new(raw).unwrap());
-            let typed = source.d2().expect("W2 must enter D2");
-            assert_eq!(BinarySourceWord::from(typed), source);
+            assert_eq!(BinarySourceWord::from(source.d2().unwrap()), source);
             assert!(source.d1().is_none());
             assert!(source.d3().is_none());
+            assert!(source.d4().is_none());
+            assert!(source.d5().is_none());
+            assert!(source.d6().is_none());
         }
 
         for raw in 0..=7 {
             let source = BinarySourceWord::W3(Bit3::new(raw).unwrap());
-            let typed = source.d3().expect("W3 must enter D3");
-            assert_eq!(BinarySourceWord::from(typed), source);
+            assert_eq!(BinarySourceWord::from(source.d3().unwrap()), source);
             assert!(source.d1().is_none());
             assert!(source.d2().is_none());
+            assert!(source.d4().is_none());
+            assert!(source.d5().is_none());
+            assert!(source.d6().is_none());
+        }
+
+        for raw in 0..=15 {
+            let source = BinarySourceWord::W4(Bit4::new(raw).unwrap());
+            assert_eq!(BinarySourceWord::from(source.d4().unwrap()), source);
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
+            assert!(source.d5().is_none());
+            assert!(source.d6().is_none());
+        }
+
+        for raw in 0..=31 {
+            let source = BinarySourceWord::W5(Bit5::new(raw).unwrap());
+            assert_eq!(BinarySourceWord::from(source.d5().unwrap()), source);
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
+            assert!(source.d4().is_none());
+            assert!(source.d6().is_none());
+        }
+
+        for raw in 0..=63 {
+            let source = BinarySourceWord::W6(Bit6::new(raw).unwrap());
+            assert_eq!(BinarySourceWord::from(source.d6().unwrap()), source);
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
+            assert!(source.d4().is_none());
+            assert!(source.d5().is_none());
         }
     }
 
     #[test]
-    fn wider_source_words_do_not_enter_d1_d2_d3() {
+    fn d7_and_d8_do_not_gain_callable_domain_identity_by_width_alone() {
         for source in [
-            BinarySourceWord::W4(Bit4::new(0).unwrap()),
-            BinarySourceWord::W5(Bit5::new(0).unwrap()),
-            BinarySourceWord::W6(Bit6::new(0).unwrap()),
             BinarySourceWord::W7(Bit7::new(0).unwrap()),
             BinarySourceWord::W8(Bit8::new(0).unwrap()),
         ] {
             assert!(source.d1().is_none());
             assert!(source.d2().is_none());
             assert!(source.d3().is_none());
+            assert!(source.d4().is_none());
+            assert!(source.d5().is_none());
+            assert!(source.d6().is_none());
         }
     }
 
