@@ -51,17 +51,24 @@ def d5_state() -> dict[str, Any]:
 def d6_state() -> dict[str, Any]:
     rows = runpy.run_path(str(D6_MAP))["build_map"]()
     generated = sum(row["status"] == "generated" for row in rows)
+    ratified = [row for row in rows if row["status"] == "ratified-resident"]
     unknown = sum(row["status"] == "UNKNOWN/free" for row in rows)
     assert len(rows) == 64
     assert generated == 16
-    assert unknown == 48
-    assert not any(row["placement_ref"] for row in rows)
+    assert len(ratified) == 1 and ratified[0]["coordinate"] == "001111"
+    assert ratified[0]["placement_ref"] == "#2538-OD-001"
+    assert unknown == 47
+    assert [
+        row["coordinate"] for row in rows if row["placement_ref"]
+    ] == ["001111"]
     return {
         "width": 6,
         "ratified_domain": True,
         "generated": generated,
+        "ratified_manual_residents": 1,
         "unknown_free": unknown,
         "root_membership_proved": False,
+        "unrelated_manual_resident": "001111",
     }
 
 
@@ -104,9 +111,9 @@ def model_rows(
             "model": "R0-smallest-free-domain",
             "domain_selection_rule": "choose smallest ratified domain with unused capacity",
             "machine_attack": (
-                "D5 and D6 both have UNKNOWN/free coordinates while the root "
-                "ledger keeps width UNKNOWN; choosing either imports an unstated "
-                "semantic-membership rule"
+                "D5 and D6 both retain UNKNOWN/free coordinates while the root "
+                "ledger keeps width UNKNOWN; the unrelated ratified D6:001111 resident "
+                "does not supply a membership rule for this root"
             ),
             "minimum_width_theorem": False,
             "coordinate_assigned": False,
