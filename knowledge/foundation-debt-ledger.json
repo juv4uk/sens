@@ -1,0 +1,195 @@
+{
+  "schema": "foundation-debt-ledger/v1",
+  "authority": "research-accounting-only",
+  "vocabulary": {
+    "origin": [
+      "HISTORICAL-DONOR",
+      "SENS-PREMISE",
+      "SENS-DERIVED",
+      "EXTERNAL-THEOREM",
+      "UNKNOWN"
+    ],
+    "authority": [
+      "DONOR-ONLY",
+      "RESEARCH",
+      "WITNESSED",
+      "SENS-RATIFIED",
+      "SUPERSEDED",
+      "NONE"
+    ],
+    "layer": [
+      "SEMANTICS",
+      "STRUCTURE",
+      "MECHANISM",
+      "BOUNDARY"
+    ],
+    "epistemic": [
+      "premise",
+      "conjecture",
+      "witness",
+      "theorem",
+      "falsified",
+      "unknown"
+    ],
+    "phase": [
+      "HISTORICAL-INGEST",
+      "STRUCTURAL-DISCOVERY",
+      "SENS-DERIVATION"
+    ],
+    "debt": [
+      "OPEN",
+      "PARTIAL",
+      "NONE",
+      "DISCHARGED-DERIVED",
+      "CLOSED-IRREDUCIBLE"
+    ]
+  },
+  "rows": [
+    {
+      "id": "FD-001",
+      "claim": "current bīja3 seed, including 000 () and seven constitutive roles",
+      "origin": "HISTORICAL-DONOR",
+      "authority": "SENS-RATIFIED",
+      "layer": "SEMANTICS",
+      "epistemic": "premise",
+      "phase": "SENS-DERIVATION",
+      "historical_external_donor": "bounded early-Lisp basis",
+      "exact_borrowed_admitted_premise": "current bīja3 root inventory is admitted while wider root independence remains unresolved",
+      "current_witness": "#1961/#2067 current bounded foundation; #2019 owns root-independence attack",
+      "derivation_parents": [],
+      "internally_derived": false,
+      "heritage_debt": "OPEN",
+      "premise_debt": "OPEN",
+      "discharge_condition": "derive, replace, or close the bīja3 basis from weaker admitted SENS laws without using Lisp history or owner selection as proof; #2019 owns the attack",
+      "evidence_refs": [
+        "#1961",
+        "#2018",
+        "#2019",
+        "#2067"
+      ]
+    },
+    {
+      "id": "FD-002",
+      "claim": "CAR/CDR selector extension law: append 0/1 corresponds to composing first/rest projection",
+      "origin": "SENS-DERIVED",
+      "authority": "SENS-RATIFIED",
+      "layer": "STRUCTURE",
+      "epistemic": "theorem",
+      "phase": "SENS-DERIVATION",
+      "historical_external_donor": "historical CAR/CDR provenance retained, but local generator law has internal structural witnesses",
+      "exact_borrowed_admitted_premise": "current CAR/CDR root substrate still depends on FD-001",
+      "current_witness": "#2502 independently cross-proves current generated D4/D5 descendants; local selector generation is already replayable",
+      "derivation_parents": [
+        "FD-001"
+      ],
+      "internally_derived": true,
+      "heritage_debt": "PARTIAL",
+      "premise_debt": "PARTIAL",
+      "discharge_condition": "resolve FD-001/root independence while preserving the selector generator theorem; downstream law need not be reclassified as underived",
+      "evidence_refs": [
+        "#1968",
+        "#2158",
+        "#2329",
+        "#2345",
+        "#2390",
+        "#2409",
+        "#2502"
+      ]
+    },
+    {
+      "id": "FD-003",
+      "claim": "historical GC collector family and reachability donor",
+      "origin": "HISTORICAL-DONOR",
+      "authority": "DONOR-ONLY",
+      "layer": "MECHANISM",
+      "epistemic": "witness",
+      "phase": "HISTORICAL-INGEST",
+      "historical_external_donor": "McCarthy/LISP 1.5 mark-sweep lineage and Cheney-family implementation donors",
+      "exact_borrowed_admitted_premise": "historical collector algorithms are donor mechanisms; any shared reachability contract still requiring donor authority must be tracked separately",
+      "current_witness": "#2558 independently oracle-checks the extracted historical reachability donor without installing a SENS runtime collector",
+      "derivation_parents": [],
+      "internally_derived": false,
+      "heritage_debt": "PARTIAL",
+      "premise_debt": "OPEN",
+      "discharge_condition": "separate and prove the current SENS reachability contract from present object/root laws; collector algorithm provenance may remain historical without semantic authority",
+      "evidence_refs": [
+        "#2544",
+        "#2549",
+        "#2558"
+      ]
+    },
+    {
+      "id": "FD-004",
+      "claim": "historical Lisp capability rows such as APPEND, PAIRLIS, ASSOC, SETQ, FEXPR and related forms",
+      "origin": "HISTORICAL-DONOR",
+      "authority": "RESEARCH",
+      "layer": "SEMANTICS",
+      "epistemic": "witness",
+      "phase": "HISTORICAL-INGEST",
+      "historical_external_donor": "primary early-Lisp capability sources",
+      "exact_borrowed_admitted_premise": "none by default; historical presence is an observation dataset",
+      "current_witness": "#2533/#2535 historical ingest ledger",
+      "derivation_parents": [],
+      "internally_derived": false,
+      "heritage_debt": "NONE",
+      "premise_debt": "NONE",
+      "discharge_condition": "none; a row becomes debt only if later SENS authority materially depends on it as an undischarged premise",
+      "evidence_refs": [
+        "#2235",
+        "#2344",
+        "#2533",
+        "#2535"
+      ]
+    },
+    {
+      "id": "FD-005",
+      "claim": "D1 PredicateBit polarity 0=NO, 1=YES",
+      "origin": "SENS-PREMISE",
+      "authority": "SENS-RATIFIED",
+      "layer": "SEMANTICS",
+      "epistemic": "premise",
+      "phase": "SENS-DERIVATION",
+      "historical_external_donor": "none established for current exact polarity",
+      "exact_borrowed_admitted_premise": "owner-ratified one-bit semantic orientation",
+      "current_witness": "merged #2570: both 2/2 coherent D1 relabelings survive; classification EQUIVALENT-UP-TO-C2",
+      "derivation_parents": [],
+      "internally_derived": false,
+      "heritage_debt": "NONE",
+      "premise_debt": "CLOSED-IRREDUCIBLE",
+      "discharge_condition": "closed within tested scope: retain ratified orientation as a premise unless a future independent orienting law breaks the surviving C2 automorphism",
+      "evidence_refs": [
+        "#1699",
+        "#2106",
+        "#2151",
+        "#2566",
+        "#2570",
+        "3540e435"
+      ]
+    },
+    {
+      "id": "FD-006",
+      "claim": "D2 racanā2 exact code assignment 00 separator / 01 close / 10 open / 11 dot",
+      "origin": "SENS-PREMISE",
+      "authority": "SENS-RATIFIED",
+      "layer": "STRUCTURE",
+      "epistemic": "premise",
+      "phase": "SENS-DERIVATION",
+      "historical_external_donor": "none established for current exact role-to-code bijection",
+      "exact_borrowed_admitted_premise": "owner-ratified four-role to two-bit assignment",
+      "current_witness": "merged #2570: all 24/24 coherent role-to-code bijections survive; classification EQUIVALENCE-CLASS-OF-24",
+      "derivation_parents": [],
+      "internally_derived": false,
+      "heritage_debt": "NONE",
+      "premise_debt": "CLOSED-IRREDUCIBLE",
+      "discharge_condition": "closed within tested scope: retain ratified placement as a premise unless a future independent law breaks the 24-way equivalence class",
+      "evidence_refs": [
+        "#1702",
+        "#2106",
+        "#2151",
+        "#2566",
+        "#2570",
+        "3540e435"
+      ]
+    }
+  ]
+}
