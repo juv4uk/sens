@@ -6,13 +6,13 @@
 //! Keeping the two variants distinct prevents accidental zero-padding from
 //! becoming semantic equality.
 
-use crate::{DomainWord, Sens8};
+use crate::DomainWord;
 use std::fmt;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SemanticRef {
     Domain(DomainWord),
-    Legacy8(Sens8),
+    Legacy8(u8),
 }
 
 impl SemanticRef {
@@ -20,8 +20,8 @@ impl SemanticRef {
         Self::Domain(word)
     }
 
-    pub const fn legacy8(word: Sens8) -> Self {
-        Self::Legacy8(word)
+    pub const fn legacy8(bits: u8) -> Self {
+        Self::Legacy8(bits)
     }
 
     pub const fn exact_width(self) -> usize {
@@ -34,7 +34,7 @@ impl SemanticRef {
     pub const fn packed_bits(self) -> u8 {
         match self {
             Self::Domain(word) => word.packed_bits(),
-            Self::Legacy8(word) => word.packed_byte(),
+            Self::Legacy8(bits) => bits,
         }
     }
 
@@ -45,18 +45,18 @@ impl SemanticRef {
         }
     }
 
-    /// Compatibility projection only. Canonical domain identities deliberately
+    /// Compatibility payload only. Canonical domain identities deliberately
     /// do not acquire an 8-bit meaning merely because their payload fits in u8.
-    pub const fn legacy8_word(self) -> Option<Sens8> {
+    pub const fn legacy8_bits(self) -> Option<u8> {
         match self {
-            Self::Legacy8(word) => Some(word),
+            Self::Legacy8(bits) => Some(bits),
             Self::Domain(_) => None,
         }
     }
 
     pub const fn from_width_bits(width: usize, bits: u8) -> Option<Self> {
         if width == 8 {
-            return Some(Self::Legacy8(Sens8::from_packed_byte(bits)));
+            return Some(Self::Legacy8(bits));
         }
         match DomainWord::from_width_bits(width, bits) {
             Some(word) => Some(Self::Domain(word)),
@@ -71,17 +71,11 @@ impl From<DomainWord> for SemanticRef {
     }
 }
 
-impl From<Sens8> for SemanticRef {
-    fn from(value: Sens8) -> Self {
-        Self::Legacy8(value)
-    }
-}
-
 impl fmt::Display for SemanticRef {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Self::Domain(word) => write!(f, "{:0width$b}", word.packed_bits(), width = word.width()),
-            Self::Legacy8(word) => write!(f, "{word}"),
+            Self::Legacy8(bits) => write!(f, "{bits:08b}"),
         }
     }
 }
@@ -96,7 +90,7 @@ mod tests {
         let d3 = SemanticRef::domain(DomainWord::D3(Bija3::from_word(
             Bit3::new(0b101).unwrap(),
         )));
-        let legacy = SemanticRef::legacy8(Sens8::from_packed_byte(0b0000_0101));
+        let legacy = SemanticRef::legacy8(0b0000_0101);
 
         assert_ne!(d3, legacy);
         assert_eq!(d3.packed_bits(), legacy.packed_bits());
