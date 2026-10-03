@@ -4,7 +4,7 @@
 
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
-use crate::environment::{CondClauseMode, CoreProfile};
+use crate::environment::CondClauseMode;
 use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 
 use std::rc::Rc;
@@ -22,13 +22,10 @@ fn answer(bit: Option<u8>) -> Value {
 /// атом `(1)`, пара `(0)`. `()` стоїть вище розрізнення атом/пара, тож у Core4
 /// (і Core3, що стоїть на ньому) відповідь `()`. Core1–2 мають лише ступінь 1,
 /// тож там `()` — атом, як у Маккарті 1960: `(1)`.
-pub(crate) fn atom_value(value: &Value, environment: &Environment) -> Value {
+pub(crate) fn atom_value(value: &Value, _environment: &Environment) -> Value {
     match value {
         Value::Pair(_, _) => answer(Some(0)),
-        Value::Nil => match environment.selected_core_profile() {
-            Some(CoreProfile::Core1 | CoreProfile::Core2) => answer(Some(1)),
-            _ => answer(None),
-        },
+        Value::Nil => answer(Some(1)),
         _ => answer(Some(1)),
     }
 }
