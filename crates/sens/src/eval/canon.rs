@@ -397,6 +397,17 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
             return;
         }
         environment.bind_domain_code_slot_once(identity, value.clone());
+
+        // Transitional mechanism alias only: old Lisp bootstrap sources still
+        // contain exact-eight call heads. Semantic ownership stays with the
+        // domain slot; the historical code points at the same closure/macro
+        // until those sources are rewritten to domain-native binary source.
+        if let Some(byte) = domain_registry::legacy_mechanism_for(identity) {
+            let sid = Sens8::from_packed_byte(byte);
+            if !has_primitive(sid) {
+                environment.bind_code_slot_once(sid, value.clone());
+            }
+        }
         return;
     }
 
