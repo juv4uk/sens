@@ -12,37 +12,67 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6, CoreDomainIdentity};
 use crate::Sens8;
 
 mod generated {
     include!("semantic_registry_generated.rs");
 }
 
+mod domain_generated {
+    include!("domain_surface_registry_generated.rs");
+}
+
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
 
-pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
-    let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
-    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
-    match byte {
-        0b0000_0001 => Some(d3(0b001)), // QUOTE
-        0b0000_0010 => Some(d3(0b010)), // ATOM
-        0b0000_0111 => Some(d3(0b011)), // COND
-        0b0000_0100 => Some(d3(0b100)), // CONS
-        0b0000_0101 => Some(d3(0b101)), // CAR
-        0b0000_0110 => Some(d3(0b110)), // CDR
-        0b0000_0011 => Some(d3(0b111)), // EQ
-        0b0000_1000 => Some(d4(0b0010)), // LAMBDA
-        0b0000_1001 => Some(d4(0b0011)), // DEFINE
+fn domain_identity_from_parts(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
+    match width {
+        3 => Bit3::new(bits)
+            .map(Bija3::from_word)
+            .map(CoreDomainIdentity::D3),
+        4 => Bit4::new(bits)
+            .map(CoreD4::from_word)
+            .map(CoreDomainIdentity::D4),
+        5 => Bit5::new(bits)
+            .map(CoreD5::from_word)
+            .map(CoreDomainIdentity::D5),
+        6 => Bit6::new(bits)
+            .map(CoreD6::from_word)
+            .map(CoreDomainIdentity::D6),
         _ => None,
     }
 }
 
+/// Canonical surface -> domain identity lookup.
+///
+/// The identity is read from the domain-generated projection. The historical
+/// eight-bit row is not consulted.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(domain_identity_from_registry_byte)
+    domain_generated::DOMAIN_SURFACE_ROWS
+        .iter()
+        .find(|row| row.surfaces.contains(&name))
+        .and_then(|row| domain_identity_from_parts(row.width, row.bits))
 }
+
+/// Canonical surfaces for one exact domain identity.
+///
+/// This is useful for tooling that has already selected the semantic object and
+/// now wants human spellings; no legacy byte is required.
+pub(crate) fn domain_surfaces_for_identity(
+    identity: CoreDomainIdentity,
+) -> Vec<&'static str> {
+    domain_generated::DOMAIN_SURFACE_ROWS
+        .iter()
+        .find(|row| {
+            usize::from(row.width) == identity.width()
+                && row.bits == identity.packed_bits()
+        })
+        .map(|row| row.surfaces.to_vec())
+        .unwrap_or_default()
+}
+
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
 }
@@ -183,19 +213,48 @@ mod tests {
     }
 
     #[test]
-    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
-        assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("за-умовою")
-        );
-        assert_eq!(
-            registry_byte_for_surface("функція").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("функція")
-        );
+    fn canonical_domain_lookup_does_not_depend_on_legacy_byte_position() {
+        let plus = domain_identity_for_surface("+").expect("D5 PLUS");
+        let setq = domain_identity_for_surface("setq").expect("D5 SETQ");
+        let let_form = domain_identity_for_surface("нехай").expect("D6 LET");
+        let mapcar = domain_identity_for_surface("mapcar").expect("D6 MAPCAR");
+
+        assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
+        assert_eq!((setq.width(), setq.packed_bits()), (5, 0b00111));
+        assert_eq!((let_form.width(), let_form.packed_bits()), (6, 0b001000));
+        assert_eq!((mapcar.width(), mapcar.packed_bits()), (6, 0b111100));
+
+        // The historical '+' row lives at byte 00001100. Canonical PLUS is
+        // D5:01010; the old byte is therefore visibly not the authority.
+        assert_eq!(registry_byte_for_surface("+"), Some(0b0000_1100));
+        assert_ne!(plus.packed_bits(), 0b0_1100);
     }
 
     #[test]
-    fn generated_registry_is_one_contiguous_byte_axis() {
+    fn owner_map_roles_exist_without_historical_surface_rows() {
+        let setq = domain_identity_for_surface("setq").expect("owner-map SETQ surface");
+        let mapcar = domain_identity_for_surface("mapcar").expect("owner-map MAPCAR surface");
+        assert_eq!((setq.width(), setq.packed_bits()), (5, 0b00111));
+        assert_eq!((mapcar.width(), mapcar.packed_bits()), (6, 0b111100));
+    }
+
+    #[test]
+    fn old_surface_row_without_domain_authority_stays_compatibility_only() {
+        assert_eq!(registry_byte_for_surface("sqrt"), Some(0b0001_0101));
+        assert_eq!(domain_identity_for_surface("sqrt"), None);
+    }
+
+    #[test]
+    fn domain_reverse_projection_needs_no_legacy_registry() {
+        let plus = domain_identity_for_surface("+").unwrap();
+        let surfaces = domain_surfaces_for_identity(plus);
+        assert!(surfaces.contains(&"plus"));
+        assert!(surfaces.contains(&"додати"));
+        assert!(surfaces.contains(&"+"));
+    }
+
+    #[test]
+    fn legacy_generated_registry_remains_one_contiguous_compatibility_axis() {
         assert_eq!(SEMANTIC_ROWS.len(), 256);
         for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
             assert_eq!(usize::from(row.semantic_id), expected);
