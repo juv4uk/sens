@@ -1,8 +1,9 @@
-//! Одноразове зведення голови виклику до функції СЕНС (1 байт).
+//! Одноразове зведення голови виклику до канонічної доменної identity.
 //!
-//! Після розбору `(atom x)`, `(атом? x)`, `(aṇu x)` і `(00000010 x)` стають
-//! одним і тим самим вузлом `ExprKind::Call(00000010, [x])`: функція
-//! займає 1 байт, а виконання більше не шукає ім'я на кожному виклику.
+//! Surface-и, для яких уже ратифіковано exact domain identity, стають
+//! `ExprKind::DomainCall`. Старий точний 8-бітний token лишається окремим
+//! compatibility-шляхом `ExprKind::Call(Sens8, ...)`: lower ніколи не
+//! виводить домен із історичного байта.
 //!
 //! M8 (#1590): зводяться **усі** admitted surface з реєстру, не лише Canon
 //! і necessary forms. Написання (`+`, `-`, `додати`, …) — маршрутизація до
@@ -15,6 +16,7 @@
 use super::{canon, necessary_forms};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
+use crate::CoreDomainIdentity;
 use crate::Sens8;
 use std::rc::Rc;
 
@@ -24,6 +26,19 @@ const COND: Sens8 = crate::sens!(00000111);
 /// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
     expressions.iter().map(|expression| lower(expression, 0)).collect()
+}
+
+fn head_domain_identity(head: &Expr) -> Option<CoreDomainIdentity> {
+    match &head.kind {
+        ExprKind::DomainIdentity(identity) => Some(*identity),
+        ExprKind::Symbol(name) => immutable_surface_domain_identity(name),
+        _ => None,
+    }
+}
+
+fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
+    necessary_forms::domain_identity_for_symbol(name)
+        .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
 
 fn head_sid(head: &Expr) -> Option<Sens8> {
@@ -36,12 +51,22 @@ fn head_sid(head: &Expr) -> Option<Sens8> {
 
 /// Написання, що маршрутизується до фіксованого SENS (не окрема identity).
 fn immutable_surface_sid(name: &str) -> Option<Sens8> {
+    // Once a surface has an exact domain identity, the legacy byte route is no
+    // longer allowed to win. Unmigrated registry rows keep the old path.
+    if immutable_surface_domain_identity(name).is_some() {
+        return None;
+    }
     if let Some(sid) = canon::routed_sid_for_surface(name) {
         return Some(sid);
     }
-    // M8: будь-яка admitted surface → SENS. Необхідні форми лишаються
-    // підмножиною; раніше лише вони зводились, тож `+`/`-` шукались у runtime.
     semantic_registry::admitted_semantic_id_for_surface(name)
+}
+
+fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D3(word) if word.word().packed_bits() == bits
+    )
 }
 
 fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
@@ -54,8 +79,52 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
     }
     let kind = match &expression.kind {
         ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
+        ExprKind::DomainCall(identity, arguments) => {
+            ExprKind::DomainCall(*identity, arguments.clone())
+        }
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
+
+            if let Some(identity) = head_domain_identity(&items[0]) {
+                return Expr {
+                    kind: if is_d3(identity, 0b001) {
+                        ExprKind::DomainCall(identity, arguments.into())
+                    } else if is_d3(identity, 0b011) {
+                        ExprKind::DomainCall(
+                            identity,
+                            arguments
+                                .iter()
+                                .map(|clause| match &clause.kind {
+                                    ExprKind::List(parts) => Expr {
+                                        kind: ExprKind::List(lower_all(parts, depth + 1)),
+                                        span: clause.span,
+                                    },
+                                    _ => clause.clone(),
+                                })
+                                .collect(),
+                        )
+                    } else if necessary_forms::identity_for_domain_identity(identity).is_some() {
+                        ExprKind::DomainCall(
+                            identity,
+                            arguments
+                                .iter()
+                                .enumerate()
+                                .map(|(index, argument)| {
+                                    if index == 0 {
+                                        argument.clone()
+                                    } else {
+                                        lower(argument, depth + 1)
+                                    }
+                                })
+                                .collect(),
+                        )
+                    } else {
+                        ExprKind::DomainCall(identity, lower_all(arguments, depth))
+                    },
+                    span: expression.span,
+                };
+            }
+
             match head_sid(&items[0]) {
                 Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
                 Some(sid) if sid == COND => ExprKind::Call(
@@ -109,6 +178,44 @@ mod tests {
         let lowered = lower_program(&program);
         assert_eq!(lowered.len(), 1);
         lowered.into_iter().next().expect("one form")
+    }
+
+    fn assert_domain_call(source: &str, width: usize, bits: u8) {
+        let expr = lower_one(source);
+        match expr.kind {
+            ExprKind::DomainCall(identity, _) => {
+                assert_eq!(identity.width(), width);
+                assert_eq!(identity.packed_bits(), bits);
+            }
+            other => panic!("expected DomainCall, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn migrated_d3_surfaces_lower_to_exact_domain_calls() {
+        assert_domain_call("(quote x)", 3, 0b001);
+        assert_domain_call("(atom x)", 3, 0b010);
+        assert_domain_call("(cond (x y))", 3, 0b011);
+        assert_domain_call("(cons 1 2)", 3, 0b100);
+        assert_domain_call("(car x)", 3, 0b101);
+        assert_domain_call("(cdr x)", 3, 0b110);
+        assert_domain_call("(eq x y)", 3, 0b111);
+    }
+
+    #[test]
+    fn necessary_forms_lower_to_exact_d4_calls() {
+        assert_domain_call("(lambda (x) x)", 4, 0b0010);
+        assert_domain_call("(define x 1)", 4, 0b0011);
+        assert_domain_call("(def x 1)", 4, 0b0011);
+    }
+
+    #[test]
+    fn explicit_legacy_byte_does_not_infer_a_domain() {
+        let expr = lower_one("(00000010 1)");
+        match expr.kind {
+            ExprKind::Call(sid, _) => assert_eq!(sid, crate::sens!(00000010)),
+            other => panic!("legacy byte must remain compatibility Call, got {other:?}"),
+        }
     }
 
     #[test]
