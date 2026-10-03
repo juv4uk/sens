@@ -221,24 +221,19 @@ mod tests {
     }
 
     #[test]
-    fn plus_surface_lowers_to_sens_call() {
-        let expr = lower_one("(+ 1 2)");
-        match expr.kind {
-            ExprKind::Call(sid, args) => {
-                assert_eq!(sid, crate::sens!(00001100));
-                assert_eq!(args.len(), 2);
-            }
-            other => panic!("expected Call, got {other:?}"),
-        }
+    fn d5_arithmetic_surfaces_lower_to_domain_calls() {
+        assert_domain_call("(+ 1 2)", 5, 0b01010);
+        assert_domain_call("(додати 1 2)", 5, 0b01010);
+        assert_domain_call("(- 5 3)", 5, 0b01011);
+        assert_domain_call("(* 5 3)", 5, 0b10010);
     }
 
     #[test]
-    fn minus_surface_lowers_to_sens_call() {
-        let expr = lower_one("(- 5 3)");
-        match expr.kind {
-            ExprKind::Call(sid, _) => assert_eq!(sid, crate::sens!(00001101)),
-            other => panic!("expected Call, got {other:?}"),
-        }
+    fn d6_surfaces_lower_to_domain_calls() {
+        assert_domain_call("(abs -5)", 6, 0b010101);
+        assert_domain_call("(length x)", 6, 0b100001);
+        assert_domain_call("(let ((x 1)) x)", 6, 0b001000);
+        assert_domain_call("(maplist f x)", 6, 0b111101);
     }
 
     #[test]
