@@ -1,0 +1,27 @@
+name: Root minimization R4 returned-form protocol
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/eval/closures.rs"
+      - "crates/sens/src/eval/special_forms/io.rs"
+      - "scripts/research-2631-returned-form-root.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/root-min-r4-returned-form.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Minimize returned-form protocol
+        run: python3 scripts/research-2631-returned-form-root.py
