@@ -1,4 +1,4 @@
-name: D5 fill watch
+name: D5 fill watch pre-OD005 snapshot
 
 on:
   pull_request:
