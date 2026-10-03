@@ -10,7 +10,7 @@ use super::{
     special_forms,
 };
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
-use crate::CoreDomainIdentity;
+use crate::{domain_registry, CoreDomainIdentity};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SidRouteKind {
@@ -109,6 +109,27 @@ fn exact_args(
         ErrorKind::Arity,
         format!(
             "{sid}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            args.len()
+        ),
+        span,
+    ))
+}
+
+fn exact_domain_args(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    expected: usize,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if args.len() == expected {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!(
+            "D{}:{}: expected {expected}; received {}",
+            identity.width(),
+            identity,
             args.len()
         ),
         span,
@@ -274,6 +295,35 @@ fn prim_01001101(
     special_forms::eval_values(args, env, span)
 }
 
+fn apply_selector_projection(
+    projection: domain_registry::SelectorProjection,
+    value: &Value,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    match projection {
+        domain_registry::SelectorProjection::First => special_forms::car_value(value, span),
+        domain_registry::SelectorProjection::Rest => special_forms::cdr_value(value, span),
+    }
+}
+
+/// Execute a resident generated directly by a domain law.
+///
+/// This path intentionally has no Sens8/legacy-registry input.  The exact D4
+/// identity selects the selector-composition law and that law alone determines
+/// the two projection steps.
+fn invoke_generated_domain_resident(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let selector = domain_registry::selector_composition(identity)?;
+    Some((|| {
+        exact_domain_args(identity, args, 1, span)?;
+        let inner = apply_selector_projection(selector.suffix, &args[0], span)?;
+        apply_selector_projection(selector.root, &inner, span)
+    })())
+}
+
 fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
     let CoreDomainIdentity::D3(word) = identity else {
         return None;
@@ -298,6 +348,10 @@ pub(crate) fn invoke_domain_identity(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    if let Some(result) = invoke_generated_domain_resident(identity, args, span) {
+        return result;
+    }
+
     if let Some(primitive) = domain_primitive(identity) {
         return primitive(args, environment, span);
     }
@@ -406,6 +460,47 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d4_generated_selectors_execute_without_legacy_registry_identity() {
+        let env = Environment::new();
+        let atom = |name: &str| Value::Symbol(name.to_string());
+        let nested = Value::Pair(
+            std::rc::Rc::new(Value::Pair(
+                std::rc::Rc::new(atom("a")),
+                std::rc::Rc::new(atom("b")),
+            )),
+            std::rc::Rc::new(Value::Pair(
+                std::rc::Rc::new(atom("c")),
+                std::rc::Rc::new(atom("d")),
+            )),
+        );
+
+        let d4 = |bits| {
+            CoreDomainIdentity::D4(crate::CoreD4::from_word(crate::Bit4::new(bits).unwrap()))
+        };
+
+        assert_eq!(
+            invoke_domain_identity(d4(0b1010), &[nested.clone()], &env, Span { start: 0, end: 0 })
+                .unwrap(),
+            atom("a")
+        );
+        assert_eq!(
+            invoke_domain_identity(d4(0b1011), &[nested.clone()], &env, Span { start: 0, end: 0 })
+                .unwrap(),
+            atom("c")
+        );
+        assert_eq!(
+            invoke_domain_identity(d4(0b1100), &[nested.clone()], &env, Span { start: 0, end: 0 })
+                .unwrap(),
+            atom("b")
+        );
+        assert_eq!(
+            invoke_domain_identity(d4(0b1101), &[nested], &env, Span { start: 0, end: 0 })
+                .unwrap(),
+            atom("d")
+        );
+    }
 
     #[test]
     fn canonical_d3_primitive_route_is_role_aware_not_numeric_projection() {
