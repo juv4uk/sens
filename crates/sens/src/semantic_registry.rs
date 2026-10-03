@@ -41,8 +41,7 @@ pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainI
 }
 
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    admitted_semantic_id_for_surface(name)
-        .and_then(|legacy| domain_identity_from_registry_byte(legacy.packed_byte()))
+    registry_byte_for_surface(name).and_then(domain_identity_from_registry_byte)
 }
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
@@ -51,6 +50,14 @@ pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
 fn live_rows() -> &'static [SemanticRow] {
     SEMANTIC_ROWS
 }
+
+fn registry_byte_for_surface(name: &str) -> Option<u8> {
+    live_rows()
+        .iter()
+        .find(|row| row.surfaces.iter().any(|surface| surface.name == name))
+        .map(|row| row.semantic_id)
+}
+
 
 pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
     live_rows()
@@ -173,6 +180,18 @@ mod tests {
     #[test]
     fn unmigrated_registry_rows_have_no_fake_domain_identity() {
         assert_eq!(domain_identity_for_surface("+"), None);
+    }
+
+    #[test]
+    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
+        assert_eq!(
+            registry_byte_for_surface("cond").and_then(domain_identity_from_registry_byte),
+            domain_identity_for_surface("cond")
+        );
+        assert_eq!(
+            registry_byte_for_surface("lambda").and_then(domain_identity_from_registry_byte),
+            domain_identity_for_surface("lambda")
+        );
     }
 
     #[test]
