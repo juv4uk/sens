@@ -14,12 +14,14 @@ It is deliberately **not** a placement search.
 Current expected result:
 
 - 12 historical rows already explained by D1-D4;
-- 5 rows still need a domain/placement law: SET, RETURN, FEXPR, FSUBR, TRANSFORMER;
+- only TRANSFORMER still needs a new structural law;
+- SET, RETURN, FEXPR and FSUBR have established capability/root/protocol evidence but still need exact domain + placement theorems;
 - PROG is a composite, not a resident conclusion;
 - SETQ/D6:001111 is the only owner-ready/nonadmitted residency decision;
 - D5 stays 8 generated + 24 protected UNKNOWN + 0 manual residents;
 - D6 stays 16 generated + 48 canonical UNKNOWN; 44 PURE-UNKNOWN are not a search space;
-- arithmetic remains historical/Core-Math bridge work until a typed bridge is independently proved.
+- Memo 24 (1961) refines arithmetic chronology but contributes 0 rows to the 19-row Core residency denominator;
+- arithmetic remains historical/Core-Math bridge work, never Core occupancy by shared spelling.
 
 Run:
 

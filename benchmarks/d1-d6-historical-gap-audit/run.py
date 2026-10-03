@@ -22,6 +22,7 @@ LEDGER = ROOT / "docs/research/2344-post-d4-historical-ledger.json"
 PLACEMENT = ROOT / "benchmarks/post-d4-semantic-placement/placement.json"
 D5_GUARD = ROOT / "scripts/research-2689-d5-ratified-baseline.py"
 D6_FRONTIER = ROOT / "benchmarks/d6-unknown-frontier/run.py"
+MEMO24 = ROOT / "docs/research/2715-memo24-arithmetic-comparison.json"
 
 # This table is not new semantic authority. It is the smallest explicit
 # projection of the merged #2705 placement evidence into the question
@@ -71,12 +72,47 @@ def build() -> dict[str, Any]:
     placement = load_json(PLACEMENT)
     d5 = runpy.run_path(str(D5_GUARD))["build_result"]()
     d6 = runpy.run_path(str(D6_FRONTIER))["build"]()
+    memo24 = load_json(MEMO24)
 
     require(ledger["authority"] == "historical-evidence-ledger-not-language-semantic-authority",
             "historical ledger authority changed")
     require(ledger["phase"] == "HISTORICAL-INGEST", "historical phase changed")
     require(placement["authority"].startswith("aggregation of merged historical"),
             "placement aggregation authority changed")
+    require(memo24["schema"] == "memo24-lisp15-arithmetic-chronology/v1",
+            "Memo 24 chronology schema changed")
+    require(memo24["phase"] == "HISTORICAL-INGEST",
+            "Memo 24 chronology left historical-ingest phase")
+    require(memo24["authority"].startswith("primary-source chronology/provenance only"),
+            "Memo 24 chronology acquired placement authority")
+    require(memo24["counts"] == {
+        "rows": 26,
+        "attested": 21,
+        "not_attested": 5,
+        "unresolved_presence": 0,
+        "same": 15,
+        "changed": 4,
+        "extended": 5,
+        "unresolved_relation": 2,
+    }, "Memo 24 bounded chronology counts changed")
+    memo_not_attested = [
+        row["historical_name"] for row in memo24["rows"]
+        if row["memo24_presence"] == "NOT-ATTESTED-IN-MEMO24"
+    ]
+    memo_changed = [
+        row["historical_name"] for row in memo24["rows"]
+        if row["manual1962_relation"] == "CHANGED"
+    ]
+    memo_unresolved = [
+        row["historical_name"] for row in memo24["rows"]
+        if row["manual1962_relation"] == "UNRESOLVED"
+    ]
+    require(memo_not_attested == ["QUOTIENT", "REMAINDER", "DIVIDE", "EXPT", "LEFTSHIFT"],
+            "Memo 24 non-attested set changed")
+    require(memo_changed == ["LESSP", "GREATERP", "ONEP", "EQUAL"],
+            "1961->1962 changed-law set changed")
+    require(memo_unresolved == ["ZEROP", "FLOATP"],
+            "Memo 24 unresolved-law set changed")
 
     historical = {row["operation"]: row for row in ledger["rows"]}
     placed = {row["operation"]: row for row in placement["rows"]}
@@ -110,16 +146,25 @@ def build() -> dict[str, Any]:
         earliest = EARLIEST_EXPLAINING_DOMAIN.get(op, "NONE")
         delta = SURVIVING_DELTAS.get(op, "NONE")
 
+        needs_law = False
+        needs_domain = False
+        needs_placement = False
+        owner_decision = False
+
         if op in EARLIEST_EXPLAINING_DOMAIN:
             readiness = "ALREADY-EXPLAINED"
             missing = "NONE"
             require(p["resident_required"] == "NO", f"{op}: explained row now requires resident")
             require(p["coordinate"] == "NONE", f"{op}: explained row gained coordinate")
         elif op == "SET":
-            readiness = "NEEDS-LAW"
-            missing = "exact-domain theorem + residency/coordinate theorem"
+            readiness = "NEEDS-DOMAIN"
+            needs_domain = True
+            needs_placement = True
+            missing = "shared-location carrier is established; exact-domain + residency/coordinate theorem remain"
+            require(p["placement_kind"] == "CARRIER-FAMILY", "SET carrier classification drift")
         elif op == "SETQ":
             readiness = "OWNER-READY"
+            owner_decision = True
             missing = "owner decision only for candidate D6:001111; historical row remains UNPLACED"
             require(p["candidate_coordinate"] == "D6:001111 (OD-001 owner-ready only)",
                     "SETQ owner-ready candidate drift")
@@ -128,12 +173,25 @@ def build() -> dict[str, Any]:
             missing = "NONE-as-resident; decompose GO + RETURN"
             require(p["resident_required"] == "NO-AS-COMPOSITE", "PROG composite status drift")
         elif op == "RETURN":
-            readiness = "NEEDS-LAW"
-            missing = "domain-selection theorem; proven roothood does not determine width"
+            readiness = "NEEDS-DOMAIN"
+            needs_domain = True
+            needs_placement = True
+            missing = "non-local-exit root is proven; exact domain/width + placement theorem remain"
             require(p["placement_kind"] == "PROVEN-ROOT-UNPLACED", "RETURN root status drift")
-        elif op in {"FEXPR", "FSUBR", "TRANSFORMER"}:
+        elif op in {"FEXPR", "FSUBR"}:
+            readiness = "NEEDS-DOMAIN"
+            needs_domain = True
+            needs_placement = True
+            missing = "raw/env protocol factorization is established; exact domain/width + placement theorem remain"
+            require(p["placement_kind"] == "CARRIER-FAMILY", f"{op}: carrier classification drift")
+        elif op == "TRANSFORMER":
             readiness = "NEEDS-LAW"
-            missing = "same-domain generator/lower-bound + exact-domain theorem"
+            needs_law = True
+            needs_domain = True
+            needs_placement = True
+            missing = "carrier+returned-form+timing protocol still needs a canonical structural law before domain/placement"
+            require(p["placement_kind"] == "POLICY-OVER-CARRIER",
+                    "TRANSFORMER policy-over-carrier classification drift")
         else:
             raise AssertionError(f"unclassified historical row: {op}")
 
@@ -148,6 +206,10 @@ def build() -> dict[str, Any]:
             "current_domain_status": p["exact_domain"],
             "binary_object": h["binary_object"],
             "ratification_readiness": readiness,
+            "needs_law": needs_law,
+            "needs_domain": needs_domain,
+            "needs_placement": needs_placement,
+            "owner_decision": owner_decision,
             "missing_evidence": missing,
             "placement_kind": p["placement_kind"],
             "candidate_coordinate": p["candidate_coordinate"],
@@ -155,20 +217,27 @@ def build() -> dict[str, Any]:
         })
 
     already = [r for r in rows if r["ratification_readiness"] == "ALREADY-EXPLAINED"]
-    needs_law = [r for r in rows if r["ratification_readiness"] == "NEEDS-LAW"]
+    needs_law = [r for r in rows if r["needs_law"]]
+    needs_domain = [r for r in rows if r["needs_domain"]]
+    needs_placement = [r for r in rows if r["needs_placement"]]
     owner_ready = [r for r in rows if r["ratification_readiness"] == "OWNER-READY"]
     composite = [r for r in rows if r["ratification_readiness"] == "COMPOSITE"]
 
     require([r["historical_capability"] for r in owner_ready] == ["SETQ"],
             "owner-ready set changed; review required")
-    require(set(r["historical_capability"] for r in needs_law) ==
-            {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
+    require([r["historical_capability"] for r in needs_law] == ["TRANSFORMER"],
             "surviving NEEDS-LAW set changed; review required")
+    require(set(r["historical_capability"] for r in needs_domain) ==
+            {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
+            "NEEDS-DOMAIN set changed; review required")
+    require(set(r["historical_capability"] for r in needs_placement) ==
+            {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
+            "NEEDS-PLACEMENT set changed; review required")
     require([r["historical_capability"] for r in composite] == ["PROG"],
             "composite set changed")
 
     return {
-        "schema": "d1-d6-historical-gap-audit/v1",
+        "schema": "d1-d6-historical-gap-audit/v2",
         "issue": 2718,
         "authority": "joined evidence / ratification-readiness report; not residency authority",
         "phase": "HISTORICAL-INGEST -> STRUCTURAL-DISCOVERY -> RATIFICATION-READINESS",
@@ -203,11 +272,27 @@ def build() -> dict[str, Any]:
         ],
         "foreign_or_pending_ingest": {
             "lisp15_arithmetic": {
-                "status": "HISTORICAL-INGEST-IN-SEPARATE-LANE",
-                "refs": ["#2697", "#2710", "#2715"],
+                "status": "HISTORICAL-CHRONOLOGY-REFINED / OUTSIDE-CORE-RESIDENCY-DENOMINATOR",
+                "refs": ["#2697", "#2710", "#2721", "#2715", "#2722"],
                 "domain_rule": "Core-Math bridge required; historical spelling cannot populate Core D5/D6",
+                "residency_denominator_rows": 0,
+                "memo24_1961": {
+                    "rows_compared": memo24["counts"]["rows"],
+                    "attested": memo24["counts"]["attested"],
+                    "not_attested": memo_not_attested,
+                    "changed_by_1962_manual": memo_changed,
+                    "unresolved_relation": memo_unresolved,
+                    "stable_negative_control": "RECIP fixed-point -> 0 is not exact-Q reciprocal",
+                },
             }
         },
+        "reopen_on_change_inputs": [
+            "docs/research/2344-post-d4-historical-ledger.json",
+            "benchmarks/post-d4-semantic-placement/placement.json",
+            "docs/research/2715-memo24-arithmetic-comparison.json",
+            "scripts/research-2689-d5-ratified-baseline.py",
+            "benchmarks/d6-unknown-frontier/run.py",
+        ],
         "owner_facing": {
             "ready_now": [
                 {
@@ -218,15 +303,19 @@ def build() -> dict[str, Any]:
                     "authority": "#2538",
                 }
             ],
-            "not_ready": [r["historical_capability"] for r in needs_law],
+            "not_ready": [r["historical_capability"] for r in rows if r["needs_domain"] or r["needs_law"]],
             "do_not_ratify_as_resident": [r["historical_capability"] for r in already + composite],
         },
         "summary": {
             "historical_rows": len(rows),
             "already_explained": len(already),
             "needs_new_law": len(needs_law),
+            "needs_domain": len(needs_domain),
+            "needs_placement": len(needs_placement),
             "owner_ready": len(owner_ready),
             "composite": len(composite),
+            "memo24_arithmetic_rows": memo24["counts"]["rows"],
+            "arithmetic_rows_in_core_residency_denominator": 0,
             "new_d5_manual_residents": 0,
             "new_d6_admissions": 0,
         },
@@ -236,6 +325,7 @@ def build() -> dict[str, Any]:
             "roothood != width",
             "factor count != domain",
             "same name != same semantic law",
+            "historical chronology delta != Core residency pressure",
             "Core-Math/mechanism cannot donate Core residency",
             "D6 PURE-UNKNOWN coordinates are not enumerated as search targets",
         ],
@@ -248,15 +338,19 @@ def render_md(result: dict[str, Any]) -> str:
         "",
         "This report asks what the already-ratified domains fail to explain. It does not allocate bits.",
         "",
-        "| historical row | earliest explaining domain | surviving delta | readiness | missing |",
-        "|---|---|---|---|---|",
+        "| historical row | earliest explaining domain | surviving delta | readiness | law? | domain? | placement? | missing |",
+        "|---|---|---|---|---:|---:|---:|---|",
     ]
     for row in result["rows"]:
         lines.append(
             f"| {row['historical_capability']} | "
             f"{row['earliest_ratified_domain_that_explains_it']} | "
             f"{row['surviving_observable_delta']} | "
-            f"**{row['ratification_readiness']}** | {row['missing_evidence']} |"
+            f"**{row['ratification_readiness']}** | "
+            f"{'yes' if row['needs_law'] else 'no'} | "
+            f"{'yes' if row['needs_domain'] else 'no'} | "
+            f"{'yes' if row['needs_placement'] else 'no'} | "
+            f"{row['missing_evidence']} |"
         )
 
     lines += [
@@ -280,10 +374,14 @@ def render_md(result: dict[str, Any]) -> str:
         "",
         "- OD-001: D6:001111 is owner-ready but nonadmitted. No other historical row is owner-ready.",
         "",
-        "## Arithmetic",
+        "## Arithmetic chronology — outside the 19-row Core residency denominator",
         "",
-        "- Lisp 1.5 arithmetic remains historical ingest / Core-Math bridge work (#2697/#2710/#2715).",
-        "- It cannot populate Core D5/D6 by shared spelling or spare capacity.",
+        f"- Memo 24 (1961) directly attests {result['foreign_or_pending_ingest']['lisp15_arithmetic']['memo24_1961']['attested']}/26 rows.",
+        "- Five 1962-manual rows are not attested in Memo 24: QUOTIENT, REMAINDER, DIVIDE, EXPT, LEFTSHIFT.",
+        "- Four laws change from Memo 24 to the 1962 manual: LESSP, GREATERP, ONEP, EQUAL.",
+        "- ZEROP and FLOATP remain source-level UNRESOLVED in the comparison.",
+        "- RECIP fixed-point -> 0 is a stable #2508 negative control against exact-Q reciprocal identity.",
+        "- Arithmetic chronology contributes 0 rows to the Core D5/D6 residency denominator.",
         "",
         "## Non-conclusion",
         "",
@@ -303,6 +401,9 @@ def main() -> int:
     for key, value in result["summary"].items():
         print(f"{key}={value}")
     print("owner-ready=D6:001111")
+    print("needs-law=TRANSFORMER")
+    print("needs-domain=SET,RETURN,FEXPR,FSUBR,TRANSFORMER")
+    print("arithmetic-core-residency-denominator=0")
     print("RULE=fill-history-not-free-slots")
 
     if args.out:
