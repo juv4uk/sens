@@ -14,6 +14,7 @@ pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
 mod closures;
+mod d5_arithmetic;
 pub(crate) mod lower;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
