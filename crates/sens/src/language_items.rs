@@ -47,10 +47,9 @@ impl Arity {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LanguageItem {
     pub name: String,
-    /// Canonical domain-qualified identity when this registry row has migrated.
+    /// Canonical domain-qualified identity when this item has migrated.
+    /// Compatibility-only items remain None; no historical byte is exported.
     pub domain_identity: Option<CoreDomainIdentity>,
-    /// Compatibility-only registry identity. Migrated exact-domain items have no legacy key.
-    pub legacy_registry_id: Option<Sens8>,
     pub signature: &'static str,
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
@@ -79,7 +78,6 @@ fn domain_language_items() -> Vec<LanguageItem> {
                 .map(|name| LanguageItem {
                     name: name.to_string(),
                     domain_identity: Some(identity),
-                    legacy_registry_id: None,
                     signature: row.signature,
                     documentation: row.documentation,
                     kind: row.kind,
@@ -109,7 +107,6 @@ fn semantic_language_items_with(
                 .map(|name| LanguageItem {
                     name: name.to_string(),
                     domain_identity: None,
-                    legacy_registry_id: Some(semantic_id),
                     signature: row.signature,
                     documentation: row.documentation,
                     kind: row.kind,
@@ -191,7 +188,7 @@ mod tests {
     }
 
     #[test]
-    fn registry_mutation_changes_discovered_surface_without_changing_metadata_key() {
+    fn compatibility_registry_mutation_changes_only_discovered_surface() {
         let discover = |sid8_surface: &'static str| {
             semantic_language_items_with(
                 |semantic_id| {
@@ -212,13 +209,9 @@ mod tests {
         };
         let before = discover("comet");
         let after = discover("meteor");
-        assert!(before.iter().any(|item| {
-            item.name == "comet" && item.legacy_registry_id == Some(crate::sens!(00001000))
-        }));
+        assert!(before.iter().any(|item| item.name == "comet"));
         assert!(!before.iter().any(|item| item.name == "meteor"));
-        assert!(after.iter().any(|item| {
-            item.name == "meteor" && item.legacy_registry_id == Some(crate::sens!(00001000))
-        }));
+        assert!(after.iter().any(|item| item.name == "meteor"));
         assert!(!after.iter().any(|item| item.name == "comet"));
     }
 
@@ -235,8 +228,6 @@ mod tests {
             let left = find(pair[0]);
             let right = find(pair[1]);
             assert_eq!(left.domain_identity, right.domain_identity);
-            assert_eq!(left.legacy_registry_id, None);
-            assert_eq!(right.legacy_registry_id, None);
             assert_eq!(left.signature, right.signature);
             assert_eq!(left.documentation, right.documentation);
             assert_eq!(left.arity, right.arity);
@@ -245,8 +236,6 @@ mod tests {
         }
         let d4_0010 = find("lambda");
         let d4_0011 = find("define");
-        assert_eq!(d4_0010.legacy_registry_id, None);
-        assert_eq!(d4_0011.legacy_registry_id, None);
         assert_eq!(d4_0010.domain_identity.map(CoreDomainIdentity::width), Some(4));
         assert_eq!(d4_0010.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0010));
         assert_eq!(d4_0011.domain_identity.map(CoreDomainIdentity::width), Some(4));
@@ -265,7 +254,7 @@ mod tests {
     }
 
     #[test]
-    fn d5_numeric_tooling_has_no_legacy_registry_key() {
+    fn d5_numeric_tooling_is_keyed_by_exact_domain_identity() {
         let items = language_items();
         for (name, bits) in [
             ("+", 0b01010),
@@ -281,7 +270,6 @@ mod tests {
                 .unwrap_or_else(|| panic!("missing exact-domain tooling item {name}"));
             let identity = item.domain_identity.expect("migrated item needs domain identity");
             assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
-            assert_eq!(item.legacy_registry_id, None);
         }
     }
 
@@ -293,7 +281,6 @@ mod tests {
                 .iter()
                 .find(|item| item.name == name)
                 .unwrap_or_else(|| panic!("missing macro tooling item {name}"));
-            assert_eq!(item.legacy_registry_id, Some(crate::sens!(00001010)));
             assert_eq!(item.kind, LanguageItemKind::Macro);
         }
 
@@ -313,7 +300,6 @@ mod tests {
             .iter()
             .find(|item| item.name == "def")
             .expect("def tooling item");
-        assert_eq!(def.legacy_registry_id, None);
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
         assert_eq!(
             semantic_registry::stable_surfaces_for_semantic_id(crate::sens!(00001011)),
