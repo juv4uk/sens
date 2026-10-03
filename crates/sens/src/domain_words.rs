@@ -22,6 +22,7 @@
 //! ```
 
 use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6};
+use crate::Sens8;
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -292,6 +293,7 @@ impl From<CoreD6> for CallableDomainId {
 mod tests {
     use super::*;
     use std::mem::size_of;
+    use std::collections::HashSet;
 
     #[test]
     fn domain_carriers_round_trip_all_mechanical_words() {
@@ -388,6 +390,29 @@ mod tests {
         assert_eq!(widths, [3, 4, 5, 6]);
     }
 
+    #[test]
+    fn callable_identity_keeps_domain_in_identity() {
+        let d3 = CallableDomainId::D3(Bija3::from_word(Bit3::new(0b101).unwrap()));
+        let d4 = CallableDomainId::D4(CoreD4::from_word(Bit4::new(0b0101).unwrap()));
+        let d5 = CallableDomainId::D5(CoreD5::from_word(Bit5::new(0b00101).unwrap()));
+        let d6 = CallableDomainId::D6(CoreD6::from_word(Bit6::new(0b000101).unwrap()));
+        let identities = HashSet::from([d3, d4, d5, d6]);
+        assert_eq!(identities.len(), 4);
+        assert_eq!(d3.packed_payload(), d4.packed_payload());
+        assert_eq!(d4.packed_payload(), d5.packed_payload());
+        assert_eq!(d5.packed_payload(), d6.packed_payload());
+    }
+
+    #[test]
+    fn legacy_sens8_is_explicit_and_distinct() {
+        let typed = CallableDomainId::D3(Bija3::from_word(Bit3::new(0b101).unwrap()));
+        let legacy = CallableDomainId::LegacySens8(crate::sens!(00000101));
+        assert_ne!(typed, legacy);
+        assert_eq!(typed.width(), 3);
+        assert_eq!(legacy.width(), 8);
+        assert!(typed.legacy_sens8().is_none());
+        assert_eq!(legacy.legacy_sens8(), Some(crate::sens!(00000101)));
+    }
     #[test]
     fn domain_carriers_remain_one_host_byte() {
         assert_eq!(size_of::<PredicateBit>(), 1);
