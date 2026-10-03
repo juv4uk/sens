@@ -5,9 +5,10 @@
 //! compatibility-шляхом `ExprKind::Call` зі старим байтом: lower ніколи не
 //! виводить домен із історичного байта.
 //!
-//! Surface-и з admitted exact-domain projection (`+`, `-`, `додати`, …)
-//! зводяться прямо до domain identity. Лише ще не перенесені spelling-и
-//! залишаються compatibility-маршрутами старого Function8 реєстру.
+//! M8 (#1590): зводяться **усі** admitted surface з реєстру, не лише Canon
+//! і necessary forms. Написання (`+`, `-`, `додати`, …) — маршрутизація до
+//! фіксованого SENS, не окрема identity, яку можна перевизначити й тим
+//! самим змусити runtime шукати ім'я на кожному виклику (#1413).
 //!
 //! Дані лишаються даними: аргумент `quote`, клаузи `cond` (самі клаузи — не
 //! виклики), параметри `lambda` та ім'я в `def`/`define`.
@@ -219,16 +220,23 @@ mod tests {
     }
 
     #[test]
-    fn d5_numeric_surfaces_lower_to_exact_domain_calls() {
-        for (source, bits) in [
-            ("(+ 1 2)", 0b01010),
-            ("(- 5 3)", 0b01011),
-            ("(< 1 2)", 0b01110),
-            ("(> 2 1)", 0b01111),
-            ("(* 2 3)", 0b10010),
-            ("(/ 6 3)", 0b10011),
-        ] {
-            assert_domain_call(source, 5, bits);
+    fn plus_surface_lowers_to_sens_call() {
+        let expr = lower_one("(+ 1 2)");
+        match expr.kind {
+            ExprKind::Call(sid, args) => {
+                assert_eq!(sid, crate::sens!(00001100));
+                assert_eq!(args.len(), 2);
+            }
+            other => panic!("expected Call, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn minus_surface_lowers_to_sens_call() {
+        let expr = lower_one("(- 5 3)");
+        match expr.kind {
+            ExprKind::Call(sid, _) => assert_eq!(sid, crate::sens!(00001101)),
+            other => panic!("expected Call, got {other:?}"),
         }
     }
 
