@@ -1,15 +1,18 @@
-//! SID-keyed evaluator mechanism routing.
+//! Evaluator mechanism routing.
 //!
-//! Contract 9 / #1325: function identity is only Sens8. This module may record
-//! mechanism shape for an already-selected SID, but it must never invent a
-//! second named function identity.
+//! Contract 11 canonical identity is exact domain + exact bits. Historical
+//! Sens8 tables remain a compatibility/backend lane while migrated D3 calls
+//! route directly from `CoreDomainIdentity` without reconstructing a byte.
 
 use super::{
     arithmetic, builtins, closures, necessary_forms,
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{
+    semantic_registry, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Sens8, Span,
+    Value,
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SidRouteKind {
@@ -273,7 +276,42 @@ fn prim_01001101(
     special_forms::eval_values(args, env, span)
 }
 
-/// Mechanism bridge selected only by Sens8.
+fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
+    let CoreDomainIdentity::D3(word) = identity else {
+        return None;
+    };
+    match word.word().packed_bits() {
+        0b010 => Some(prim_00000010), // ATOM
+        0b111 => Some(prim_00000011), // EQ
+        0b100 => Some(prim_00000100), // CONS
+        0b101 => Some(prim_00000101), // CAR
+        0b110 => Some(prim_00000110), // CDR
+        _ => None, // QUOTE/COND are syntax routes, 000 is unallocated here
+    }
+}
+
+/// Canonical value-call mechanism bridge for migrated exact-domain identities.
+///
+/// The D3 role mapping is explicit and law-shaped; it is intentionally not a
+/// numeric projection to the historical Function8 byte axis.
+pub(crate) fn invoke_domain_identity(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if let Some(primitive) = domain_primitive(identity) {
+        return primitive(args, environment, span);
+    }
+
+    Err(LanguageError::new(
+        ErrorKind::Type,
+        format!("domain identity has no admitted value-call mechanism: {identity}"),
+        span,
+    ))
+}
+
+/// Compatibility/backend mechanism bridge selected by historical Sens8.
 pub(crate) fn invoke_semantic_ref(
     sid: Sens8,
     args: &[Value],
@@ -347,6 +385,26 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn canonical_d3_primitive_route_is_role_aware_not_numeric_projection() {
+        let d3 = |bits| {
+            CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(bits).unwrap()))
+        };
+
+        assert!(domain_primitive(d3(0b010)).is_some()); // ATOM
+        assert!(domain_primitive(d3(0b111)).is_some()); // EQ
+        assert!(domain_primitive(d3(0b100)).is_some()); // CONS
+        assert!(domain_primitive(d3(0b101)).is_some()); // CAR
+        assert!(domain_primitive(d3(0b110)).is_some()); // CDR
+        assert!(domain_primitive(d3(0b001)).is_none()); // QUOTE syntax
+        assert!(domain_primitive(d3(0b011)).is_none()); // COND syntax
+
+        let d4_same_payload = CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b0010).unwrap(),
+        ));
+        assert!(domain_primitive(d4_same_payload).is_none());
+    }
 
     #[test]
     fn sid_zero_is_not_owned_by_route_metadata() {
