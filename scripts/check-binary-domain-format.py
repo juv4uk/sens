@@ -100,10 +100,7 @@ LEGEND_TEXT = {
         r"shared-proved-law)\b",
         re.I,
     ),
-    "WITNESS": re.compile(
-        r"^executable evidence\b|^executable/documentary evidence\b",
-        re.I,
-    ),
+    "WITNESS": re.compile(r"^executable\b[^\n]*\bevidence\b", re.I),
     "FALSIFIER": re.compile(
         r"^explicit counter-test\b|^observable failure condition\b",
         re.I,
@@ -285,7 +282,9 @@ def status_verdict(value, body=""):
         return "empty"
     norm = re.sub(r"[`'\".,;]+", "", value).strip().lower()
     norm = re.sub(r"\s+", " ", norm)
-    if LEGEND_TEXT["STATUS"].search(value) or ("|" in norm and any(tok in norm for tok in STATUSES)):
+    # the legend is the declared enum, not any private scale that happens to
+    # contain one declared token behind a pipe (those are `foreign`, below)
+    if LEGEND_TEXT["STATUS"].search(value) or all(tok in norm for tok in STATUSES):
         return "legend"
     if norm in STATUSES:
         return "ok"
@@ -494,6 +493,10 @@ SEMANTIC AUTHORITY = NONE
         ("f-plural-heading", "## Falsifiers\nif the law fails", "falsifier", "ok"),
         ("f-legend-then-real", "FALSIFIER        explicit counter-test\nFALSIFIER: if the law fails",
          "falsifier", "ok"),
+        # rule quality: the WITNESS legend has variants, and a private status scale
+        # is `foreign`, not `legend`, even when it contains a declared token
+        ("w-legend-variant", "WITNESS: executable or source-grounded evidence", "witness", "legend"),
+        ("s-private-enum", "STATUS: confirmed | partial | hypothesis", "status", "foreign"),
     ]
 
     field_map = {k: rule for k, _, rule in FIELDS}
