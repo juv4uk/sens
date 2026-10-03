@@ -100,8 +100,8 @@ fn invoke_callable_identity(
     span: Span,
 ) -> Result<Value, LanguageError> {
     if let Some(bound) = environment.code_slot(identity) {
-        return match bound {
-            Value::Closure(closure) => closures::apply_values(closure, arguments, span),
+        return match &bound {
+            Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
             Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
             other => Err(LanguageError::new(
                 ErrorKind::Type,
