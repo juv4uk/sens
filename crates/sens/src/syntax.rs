@@ -155,9 +155,9 @@ pub(crate) mod fasl {
 
     fn encode_semantic_ref(identity: SemanticRef, out: &mut Vec<u8>) {
         match identity {
-            SemanticRef::Legacy8(word) => {
+            SemanticRef::Legacy8(bits) => {
                 out.push(TAG_BINARY);
-                out.push(word.packed_byte());
+                out.push(bits);
             }
             SemanticRef::Domain(word) => {
                 out.push(TAG_DOMAIN_BINARY);
@@ -251,9 +251,7 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::SemanticRef::legacy8(
-                    crate::Sens8::from_packed_byte(value),
-                ))
+                ExprKind::Sid(crate::SemanticRef::legacy8(value))
             }
             TAG_DOMAIN_BINARY => {
                 let width = usize::from(*bytes.get(*pos)?);
@@ -447,9 +445,9 @@ pub(crate) mod wire {
 
     fn encode_semantic_ref(identity: SemanticRef, out: &mut Vec<u8>) {
         match identity {
-            SemanticRef::Legacy8(word) => {
+            SemanticRef::Legacy8(bits) => {
                 out.push(TAG_BINARY);
-                out.push(word.packed_byte());
+                out.push(bits);
             }
             SemanticRef::Domain(word) => {
                 out.push(TAG_DOMAIN_BINARY);
@@ -606,9 +604,7 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::SemanticRef::legacy8(
-                    crate::Sens8::from_packed_byte(value),
-                ))
+                ExprKind::Sid(crate::SemanticRef::legacy8(value))
             }
             TAG_DOMAIN_BINARY => {
                 let width = usize::from(*bytes.get(*pos)?);
@@ -708,9 +704,7 @@ mod wire_tests {
         assert_eq!(encode_program(&decoded), encoded);
 
         let legacy = Expr {
-            kind: ExprKind::Sid(crate::SemanticRef::legacy8(
-                crate::Sens8::from_packed_byte(0b0000_0101),
-            )),
+            kind: ExprKind::Sid(crate::SemanticRef::legacy8(0b0000_0101)),
             span: crate::Span { start: 0, end: 8 },
         };
         assert_ne!(encode_program(&[legacy]), encoded);
@@ -884,7 +878,7 @@ mod fasl_tests {
         };
         assert!(matches!(
             &outer[0].kind,
-            ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(01011001))
+            ExprKind::Sid(sid) if sid.legacy8_bits() == Some(0b0101_1001)
         ));
         let ExprKind::NumericBuffer(crate::NumericBuffer::I32(values)) = &outer[2].kind else {
             panic!("third argument must stay an i32 buffer");
