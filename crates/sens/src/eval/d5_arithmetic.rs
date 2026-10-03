@@ -19,6 +19,8 @@ pub(super) fn invoke(
     Some(match word.word().packed_bits() {
         0b01010 => arithmetic::arithmetic_on_values("+", args, environment, span), // PLUS
         0b01011 => arithmetic::arithmetic_on_values("-", args, environment, span), // DIFFERENCE
+        0b01110 => arithmetic::comparison_on_values("<", args, span), // LESSP
+        0b01111 => arithmetic::comparison_on_values(">", args, span), // GREATERP
         0b10010 => arithmetic::arithmetic_on_values("*", args, environment, span), // TIMES
         0b10011 => arithmetic::division_on_values(args, args.len(), environment, span), // QUOTIENT
         _ => return None,
@@ -39,7 +41,7 @@ mod tests {
     }
 
     #[test]
-    fn four_ratified_d5_arithmetic_roles_execute_directly() {
+    fn six_ratified_d5_numeric_roles_execute_directly() {
         let env = Environment::root();
         let span = Span::default();
 
@@ -52,6 +54,16 @@ mod tests {
             invoke(d5(0b01011), &[n(7.0), n(2.0), n(1.0)], &env, span)
                 .unwrap().unwrap().to_string(),
             "4"
+        );
+        assert_eq!(
+            invoke(d5(0b01110), &[n(2.0), n(3.0)], &env, span)
+                .unwrap().unwrap().to_string(),
+            "1"
+        );
+        assert_eq!(
+            invoke(d5(0b01111), &[n(3.0), n(2.0)], &env, span)
+                .unwrap().unwrap().to_string(),
+            "1"
         );
         assert_eq!(
             invoke(d5(0b10010), &[n(2.0), n(3.0), n(4.0)], &env, span)
