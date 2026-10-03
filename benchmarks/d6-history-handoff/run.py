@@ -104,7 +104,7 @@ def build() -> dict[str, Any]:
         assert frow["d6_membership_inferred"] is False
         assert trow["pure_unknown_candidate"] is False
 
-        related_nonpure_overlay = trow.get("existing_frontier_lane")
+        related_nonpure_overlay = trow.get("existing_nonpure_frontier_lane")
         verdict = "KEEP-UNPLACED"
         if related_nonpure_overlay:
             verdict = "KEEP-HISTORICAL-NAME-UNPLACED; HANDOFF-SEPARATE-NONPURE-LANE"
@@ -120,9 +120,9 @@ def build() -> dict[str, Any]:
                     "UNKNOWN unless independent Core D6 theorem exists"
                 ),
                 "placement_evidence": trow["verdict"],
-                "same_base_parent": trow["same_base"],
-                "composition_law": trow["composition_law"],
-                "lower_bound": trow["lower_bound"],
+                "same_base_parent": trow["same_base_parent"],
+                "composition_law": trow["two_delta_composition_law"],
+                "lower_bound": trow["local_lower_bound"],
                 "related_nonpure_overlay": related_nonpure_overlay,
                 "binary_object": "UNPLACED",
                 "d6_coordinate": None,
