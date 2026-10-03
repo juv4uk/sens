@@ -1,4 +1,6 @@
-# my-lisp capabilities — how complete is the language today? · Можливості my-lisp — наскільки повна мова сьогодні? · my-lisp-Fähigkeiten — wie vollständig ist die Sprache heute?
+# SENS capability inventory — historical/runtime snapshot · Інвентар можливостей · Capability-Bestand
+
+> **Scope note (2026-10-03):** цей документ є старішим runtime/ecosystem capability inventory. Він не визначає поточну Core/Core-Math binary-domain ontology і не перетворює listed runtime facilities на semantic roots. Поточна архітектура: [`../CURRENT.md`](../CURRENT.md), [`current-binary-domain-architecture.md`](current-binary-domain-architecture.md). Історичні назви McCarthy/my-lisp нижче збережені як provenance.
 
 ## Українська
 
