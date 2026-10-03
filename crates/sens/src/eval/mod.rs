@@ -137,6 +137,9 @@ pub(crate) fn evaluate_step(
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
         ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
+        ExprKind::DomainIdentity(identity) => {
+            Ok(EvalStep::Value(Value::DomainIdentity(*identity)))
+        }
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
@@ -171,6 +174,13 @@ pub(crate) fn evaluate_step(
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
+        ExprKind::DomainCall(identity, _) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "domain-qualified call routing is not admitted yet · marshrut domennoho vyklyku shche ne dopushchenyi: {identity}"
+            ),
+            expression.span,
+        )),
         // Виконання залежить лише від числових координат (#1697): слот або є,
         // або названа помилка — пошуку за іменем більше немає.
         ExprKind::Local { depth, index } => environment
