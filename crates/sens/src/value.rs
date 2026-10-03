@@ -501,6 +501,9 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
+    /// Canonical domain-qualified Core identity. Domain is part of the value.
+    CoreIdentity(crate::CoreDomainIdentity),
+    /// Historical exact-eight identity retained only for compatibility.
     Sid(Sens8),
     String(Rc<str>),
     /// Canonical SENS text: an exact UPC-7 cell stream. Never a human
@@ -575,6 +578,7 @@ impl PartialEq for Value {
                 left == right && left_exactness == right_exactness
             }
             (Value::Rational(left), Value::Rational(right)) => left == right,
+            (Value::CoreIdentity(left), Value::CoreIdentity(right)) => left == right,
             (Value::Sid(left), Value::Sid(right)) => left == right,
             (Value::String(left), Value::String(right)) => left == right,
             (Value::Symbol(left), Value::Symbol(right)) => left == right,
@@ -638,7 +642,15 @@ impl Value {
         }
     }
 
-    /// Returns the exact eight-bit function sense (СЕНС) if this value is one.
+    /// Returns the canonical domain-qualified Core identity, if present.
+    pub fn as_core_identity(&self) -> Option<crate::CoreDomainIdentity> {
+        match self {
+            Self::CoreIdentity(identity) => Some(*identity),
+            _ => None,
+        }
+    }
+
+    /// Returns the historical exact-eight compatibility identity, if present.
     pub fn as_sens8(&self) -> Option<crate::Sens8> {
         match self {
             Self::Sid(s) => Some(*s),
@@ -803,6 +815,7 @@ fn render(value: &Value, quote_strings: bool) -> String {
             }
         }
         Value::Rational(number) => number.to_string(),
+        Value::CoreIdentity(identity) => format!("D{}:{:0width$b}", identity.width(), identity.packed_bits(), width = identity.width()),
         Value::Sid(sid) => sid.to_string(),
         Value::String(text) => {
             if quote_strings {
