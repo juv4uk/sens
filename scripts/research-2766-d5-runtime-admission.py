@@ -26,6 +26,7 @@ MAP = ROOT / "knowledge/d5-historical-full-map.json"
 SOURCE_WORDS = ROOT / "crates/sens/src/source_words.rs"
 DOMAIN_WORDS = ROOT / "crates/sens/src/domain_words.rs"
 PARSER = ROOT / "crates/sens/src/parser.rs"
+SYNTAX = ROOT / "crates/sens/src/syntax.rs"
 SENS = ROOT / "crates/sens/src/sens.rs"
 REGISTRY = ROOT / "crates/sens/src/semantic_registry.rs"
 LOWER = ROOT / "crates/sens/src/eval/lower.rs"
@@ -74,6 +75,7 @@ def detect_runtime_shape() -> dict[str, Any]:
     source_words = read(SOURCE_WORDS)
     domain_words = read(DOMAIN_WORDS)
     parser = read(PARSER)
+    syntax = read(SYNTAX)
     sens = read(SENS)
     registry = read(REGISTRY)
     lower = read(LOWER)
@@ -128,12 +130,15 @@ def detect_runtime_shape() -> dict[str, Any]:
         and re.search(r"fn\s+head_sid\s*\([^)]*\)\s*->\s*Option<Sens8>", lower) is not None
     )
 
-    canonical_d5_ast_identity = (
+    ast_can_represent_d5 = (
         typed_d5_carrier
-        and parser_mentions_w5_identity
-        and not sens8_only_identity
+        and "CoreD5(CoreD5Word)" in syntax
     )
-    canonical_d5_registry_identity = canonical_d5_ast_identity and not registry_sens8
+    reader_admits_d5_identity = (
+        ast_can_represent_d5
+        and parser_mentions_w5_identity
+    )
+    canonical_d5_registry_identity = reader_admits_d5_identity and not registry_sens8
     canonical_d5_lowering_identity = canonical_d5_registry_identity and not lower_sens8
 
     return {
@@ -143,13 +148,16 @@ def detect_runtime_shape() -> dict[str, Any]:
             "width_preserving_display": source_w5_roundtrip_display,
             "supported": source_w5_variant and source_w5_parse_case and source_w5_roundtrip_display,
         },
+        "typed_domain_carrier": {
+            "d5_type_detected": typed_d5_carrier,
+        },
+        "ast": {
+            "can_represent_d5": ast_can_represent_d5,
+        },
         "ordinary_parser": {
             "exact_8bit_sens_path_present": parser_exact_8_sid,
             "explicit_d5_identity_path_detected": parser_mentions_w5_identity,
-            "canonical_d5_identity_admitted": canonical_d5_ast_identity,
-        },
-        "typed_domain_carrier": {
-            "d5_type_detected": typed_d5_carrier,
+            "reader_admits_d5_identity": reader_admits_d5_identity,
         },
         "semantic_registry": {
             "sens8_identity_type": registry_sens8,
@@ -171,8 +179,9 @@ def detect_runtime_shape() -> dict[str, Any]:
 
 def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]:
     source_ok = shape["source_boundary"]["supported"]
-    ast_ok = shape["ordinary_parser"]["canonical_d5_identity_admitted"]
     carrier_ok = shape["typed_domain_carrier"]["d5_type_detected"]
+    ast_ok = shape["ast"]["can_represent_d5"]
+    reader_ok = shape["ordinary_parser"]["reader_admits_d5_identity"]
     registry_ok = shape["semantic_registry"]["canonical_d5_identity_admitted"]
     lowering_ok = shape["lowering"]["canonical_d5_identity_admitted"]
     evaluator_status = shape["evaluator"]["canonical_d5_identity_status"]
@@ -186,6 +195,8 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
                 "owner_map_resident": True,
                 "exact_width_source_boundary": source_ok,
                 "typed_d5_carrier": carrier_ok,
+                "ast_can_represent_d5": ast_ok,
+                "reader_admits_d5_identity": reader_ok,
                 "canonical_ast_identity": ast_ok,
                 "canonical_registry_identity": registry_ok,
                 "canonical_lowering_identity": lowering_ok,
@@ -218,6 +229,8 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
             "owner_map_residents": count_bool("owner_map_resident"),
             "exact_width_source_boundary": count_bool("exact_width_source_boundary"),
             "typed_d5_carrier": count_bool("typed_d5_carrier"),
+            "ast_can_represent_d5": count_bool("ast_can_represent_d5"),
+            "reader_admits_d5_identity": count_bool("reader_admits_d5_identity"),
             "canonical_ast_identity": count_bool("canonical_ast_identity"),
             "canonical_registry_identity": count_bool("canonical_registry_identity"),
             "canonical_lowering_identity": count_bool("canonical_lowering_identity"),
@@ -228,8 +241,8 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
         },
         "rows": rows,
         "next_boundary": (
-            "Carry CoreD5Word into an explicit AST identity without widening/zero-padding to Sens8; "
-            "keep registry/lowering/evaluator stages independently visible."
+            "Prove an explicit source-domain admission rule from W5 to Core.D5; "
+            "AST capability alone must not make width=5 imply Core.D5."
         ),
     }
 
@@ -255,6 +268,8 @@ def main() -> None:
     print(f"owner-map-residents={summary['owner_map_residents']}/32")
     print(f"exact-width-source-boundary={summary['exact_width_source_boundary']}/32")
     print(f"typed-d5-carrier={summary['typed_d5_carrier']}/32")
+    print(f"ast-can-represent-d5={summary['ast_can_represent_d5']}/32")
+    print(f"reader-admits-d5-identity={summary['reader_admits_d5_identity']}/32")
     print(f"canonical-ast-identity={summary['canonical_ast_identity']}/32")
     print(f"canonical-registry-identity={summary['canonical_registry_identity']}/32")
     print(f"canonical-lowering-identity={summary['canonical_lowering_identity']}/32")
