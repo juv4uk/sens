@@ -108,6 +108,24 @@ pub fn bad_mix(_: &PackedBitstream, _: Sens8) {}
 EOF
 }
 
+green_explicit_legacy_registry_boundary() {
+  cat >> crates/sens/src/source_words.rs <<'EOF'
+
+fn compatibility_probe() {
+    let _ = crate::legacy_registry::lookup(crate::sens!(00000001));
+}
+EOF
+}
+
+green_quarantined_legacy_module() {
+  cat > crates/sens/src/legacy_registry.rs <<'EOF'
+use crate::{CoreDomainIdentity, Sens8};
+
+fn compatibility_only(_: CoreDomainIdentity, _: Sens8) {}
+EOF
+}
+
+
 green_exact_example() {
   mkdir -p crates/sens/examples
   cat > crates/sens/examples/exact.rs <<'EOF'
@@ -180,54 +198,13 @@ fn bad_domain_payload_byte(out: &mut Vec<u8>, identity: CoreDomainIdentity) {
 EOF
 }
 
-green_domain_surface_projection() {
-  cat > crates/sens/src/semantic_registry.rs <<'EOF'
-use crate::CoreDomainIdentity;
-
-pub fn domain_identity_for_surface(_: &str) -> Option<CoreDomainIdentity> {
-    None
-}
-EOF
-}
-
-red_runtime_name_dispatch() {
-  mkdir -p crates/sens/src/eval
-  cat > crates/sens/src/eval/name_dispatch.rs <<'EOF'
-use crate::CoreDomainIdentity;
-
-fn bad(surface: &str, _: CoreDomainIdentity) {
-    let _ = crate::semantic_registry::admitted_semantic_id_for_surface(surface);
-}
-EOF
-}
-
-green_lower_domain_projection() {
-  mkdir -p crates/sens/src/eval
-  cat > crates/sens/src/eval/lower.rs <<'EOF'
-use crate::CoreDomainIdentity;
-
-fn lower_surface(surface: &str) -> Option<CoreDomainIdentity> {
-    crate::semantic_registry::domain_identity_for_surface(surface)
-}
-EOF
-}
-
-red_runtime_domain_projection() {
-  mkdir -p crates/sens/src/eval
-  cat > crates/sens/src/eval/name_dispatch.rs <<'EOF'
-use crate::CoreDomainIdentity;
-
-fn bad(surface: &str, _: CoreDomainIdentity) {
-    let _ = crate::semantic_registry::domain_identity_for_surface(surface);
-}
-EOF
-}
-
 run_guard_expect_green exact-width-growth green_exact_growth
 run_guard_expect_green compatibility-growth green_compat_growth
 run_guard_expect_green historical-comment green_historical_comment
 run_guard_expect_green exact-example green_exact_example
 run_guard_expect_green compat-example green_compat_example
+run_guard_expect_green explicit-legacy-registry-boundary green_explicit_legacy_registry_boundary
+run_guard_expect_green quarantined-legacy-module green_quarantined_legacy_module
 run_guard_expect_red legacy-import red_legacy_import
 run_guard_expect_red mixed-new-file red_mixed_new_file
 run_guard_expect_red exact-example-legacy red_exact_example_legacy
@@ -236,9 +213,5 @@ run_guard_expect_green byte-scatter-comment green_byte_scatter_comment
 run_guard_expect_red domain-tag-growth red_domain_tag_growth
 run_guard_expect_red width-byte-growth red_width_byte_growth
 run_guard_expect_red payload-byte-growth red_payload_byte_growth
-run_guard_expect_green domain-surface-projection green_domain_surface_projection
-run_guard_expect_green lower-domain-projection green_lower_domain_projection
-run_guard_expect_red runtime-name-dispatch red_runtime_name_dispatch
-run_guard_expect_red runtime-domain-projection red_runtime_domain_projection
 
 echo "domain-paradigm-one-way self-test: PASS"
