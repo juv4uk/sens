@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""#2422 exact D6 closure map from admitted selector evidence.
+"""#2422 exact D6 closure map after owner ratification of the domain.
 
-Research-only. This script classifies D6 conservatively:
-- selector-law closure is generated evidence;
+The D6 domain is ratified. Occupancy is not.
+
+This script classifies D6 conservatively:
+- selector-law closure is generated evidence inside the ratified domain;
 - every other coordinate remains UNKNOWN/free;
-- no row becomes Core-admissible without separate owner ratification.
+- no non-selector resident is pre-placed by this map.
 
 Hardening:
 - cross-check generated coordinates against merged #2329;
@@ -117,6 +119,8 @@ def selector_rows() -> dict[str, dict[str, Any]]:
             rows[coordinate] = {
                 "coordinate": coordinate,
                 "width": WIDTH,
+                "domain": "D6",
+                "domain_ratified": True,
                 "display_name": selector_display_name(root_bits, suffix),
                 "display_name_authority": False,
                 "semantic_family": "selector",
@@ -135,8 +139,9 @@ def selector_rows() -> dict[str, dict[str, Any]]:
                 "certificate_replay_ok": True,
                 "collision": False,
                 "core_closure": True,
-                "core_admissible": False,
-                "admission_reason": "requires separate D6 owner ratification via #2414",
+                "semantic_member_of_ratified_domain": True,
+                "manual_resident_required": False,
+                "placement_ref": "",
                 "research_overlay_refs": [],
             }
     return rows
@@ -161,6 +166,8 @@ def build_map() -> list[dict[str, Any]]:
             row = {
                 "coordinate": coordinate,
                 "width": WIDTH,
+                "domain": "D6",
+                "domain_ratified": True,
                 "display_name": "",
                 "display_name_authority": False,
                 "semantic_family": "",
@@ -179,8 +186,9 @@ def build_map() -> list[dict[str, Any]]:
                 "certificate_replay_ok": False,
                 "collision": False,
                 "core_closure": False,
-                "core_admissible": False,
-                "admission_reason": "no admitted Core root/law evidence for this coordinate",
+                "semantic_member_of_ratified_domain": False,
+                "manual_resident_required": False,
+                "placement_ref": "",
                 "research_overlay_refs": [],
             }
         rows.append(row)
@@ -193,8 +201,12 @@ def build_map() -> list[dict[str, Any]]:
         raise AssertionError("D6 must conservatively retain exactly 48 UNKNOWN/free coordinates")
     if any(r["collision"] for r in rows):
         raise AssertionError("D6 closure collision detected")
-    if any(r["core_admissible"] for r in rows):
-        raise AssertionError("#2422 is evidence-only; no D6 row may be admitted by this map")
+    if sum(bool(r["semantic_member_of_ratified_domain"]) for r in rows) != 16:
+        raise AssertionError("exactly the 16 generated selectors are D6 semantic members")
+    if any(r["manual_resident_required"] for r in rows):
+        raise AssertionError("selector generation must not become manual occupancy")
+    if any(r["placement_ref"] for r in rows):
+        raise AssertionError("non-selector capability must not be pre-placed by closure map")
     return rows
 
 
@@ -214,7 +226,9 @@ def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
         }
 
     return {
+        "domain_ratified": True,
         "generated_coordinate_count": generated,
+        "unknown_free_count": 64 - generated,
         "flat_exact_coordinate": totals(flat_each),
         "self_framed_selector_certificate": totals(self_framed_each),
         "outer_framed_certificate_payload": totals(outer_framed_each),
@@ -235,7 +249,7 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
     lines = [
         "# D6 closure map — #2422",
         "",
-        "This is a closure/proof map, not an allocation table.",
+        "Owner status: D6 domain is RATIFIED. Occupancy remains law-driven.",
         "",
         "| class | count |",
         "|---|---:|",
@@ -243,7 +257,7 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
         f"| selector-law generated | {len(generated)} |",
         f"| UNKNOWN/free | {len(unknown)} |",
         f"| collisions | {sum(bool(r['collision']) for r in rows)} |",
-        f"| core-admissible before owner ratification | {sum(bool(r['core_admissible']) for r in rows)} |",
+        f"| semantic members of ratified D6 | {sum(bool(r['semantic_member_of_ratified_domain']) for r in rows)} |",
         "",
         "Cross-checks:",
         "- generated set equals merged #2329 D6 forecast;",
@@ -266,7 +280,8 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
         "- certificate storage is not semantic compression;",
         "- the [0,5] basis interval does not claim global selector minimality;",
         "- Core-Math hypotheses cannot change Core closure status;",
-        "- no D6 coordinate becomes Core-admissible without separate #2414 owner ratification.",
+        "- D6 domain ratification does not admit any UNKNOWN/free coordinate;",
+        "- binding-policy 0011xx remains overlay-only pending separate residency evidence.",
         "",
     ]
     return "\n".join(lines)
@@ -275,12 +290,15 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
 def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -> None:
     out.mkdir(parents=True, exist_ok=True)
     payload = {
-        "schema": "d6-closure-map/v2",
-        "authority": "research-only",
+        "schema": "d6-closure-map/v3",
+        "authority": "core-closeout-evidence",
+        "domain": "D6",
+        "domain_ratified": True,
         "width": WIDTH,
         "capacity": 1 << WIDTH,
         "provenance": {
             "core_authority": "#2410",
+            "owner_domain_ratification": "#2414/#2490",
             "ratified_selector_law": "#2158",
             "forecast": "#2322/#2329",
             "generation_certificates": "#2323/#2345",
@@ -295,7 +313,6 @@ def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -
             "ratified-residue": 0,
             "UNKNOWN/free": 48,
             "collisions": 0,
-            "core-admissible": 0,
         },
         "accounting": acct,
         "rows": rows,
@@ -305,12 +322,13 @@ def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -
     )
 
     fields = [
-        "coordinate", "width", "display_name", "semantic_family", "status",
+        "coordinate", "width", "domain", "domain_ratified", "display_name", "semantic_family", "status",
         "root_basis", "root_name", "law_path", "canonical_coordinate_path_bits",
         "semantic_law", "semantic_law_authority", "coordinate_realization",
         "coordinate_realization_authority", "certificate_ref",
-        "certificate_replay_ok", "collision", "core_closure", "core_admissible",
-        "admission_reason", "research_overlay_refs",
+        "certificate_replay_ok", "collision", "core_closure",
+        "semantic_member_of_ratified_domain", "manual_resident_required",
+        "placement_ref", "research_overlay_refs",
     ]
     with (out / "d6-closure-map.tsv").open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fields, delimiter="\t", lineterminator="\n")
