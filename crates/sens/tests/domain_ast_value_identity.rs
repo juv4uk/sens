@@ -1,18 +1,37 @@
 use sens::{
     fasl_decode_program, fasl_encode_program, wire_decode_program, wire_encode_program, Bija3,
-    Bit3, Bit4, CoreD4, CoreDomainIdentity, Exactness, Expr, ExprKind, Span, Value,
+    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, CoreD4, CoreD5, CoreD6, CoreD8,
+    CoreDomainIdentity, DomainIdentity, Exactness, Expr, ExprKind, PredicateBit, Racana2,
+    SoundD7, Span, Value,
 };
 use std::rc::Rc;
 
-fn d3(raw: u8) -> CoreDomainIdentity {
+fn d1(raw: u8) -> DomainIdentity {
+    PredicateBit::from_word(Bit1::new(raw).unwrap()).into()
+}
+fn d2(raw: u8) -> DomainIdentity {
+    Racana2::from_word(Bit2::new(raw).unwrap()).into()
+}
+fn d3(raw: u8) -> DomainIdentity {
     Bija3::from_word(Bit3::new(raw).unwrap()).into()
 }
-
-fn d4(raw: u8) -> CoreDomainIdentity {
+fn d4(raw: u8) -> DomainIdentity {
     CoreD4::from_word(Bit4::new(raw).unwrap()).into()
 }
+fn d5(raw: u8) -> DomainIdentity {
+    CoreD5::from_word(Bit5::new(raw).unwrap()).into()
+}
+fn d6(raw: u8) -> DomainIdentity {
+    CoreD6::from_word(Bit6::new(raw).unwrap()).into()
+}
+fn d7(raw: u8) -> DomainIdentity {
+    SoundD7::from_word(Bit7::new(raw).unwrap()).into()
+}
+fn d8(raw: u8) -> DomainIdentity {
+    CoreD8::from_word(Bit8::new(raw).unwrap()).into()
+}
 
-fn expr(identity: CoreDomainIdentity) -> Expr {
+fn expr(identity: DomainIdentity) -> Expr {
     Expr {
         kind: ExprKind::DomainIdentity(identity),
         span: Span { start: 0, end: 0 },
@@ -20,52 +39,76 @@ fn expr(identity: CoreDomainIdentity) -> Expr {
 }
 
 #[test]
-fn same_payload_in_d3_and_d4_remains_distinct_in_ast_and_value() {
-    let d3 = d3(1);
-    let d4 = d4(1);
+fn same_payload_across_all_d1_d8_remains_distinct_in_ast_and_value() {
+    let identities = [d1(1), d2(1), d3(1), d4(1), d5(1), d6(1), d7(1), d8(1)];
 
-    assert_eq!(d3.packed_bits(), d4.packed_bits());
-    assert_ne!(d3, d4);
-    assert_ne!(expr(d3).kind, expr(d4).kind);
+    for identity in identities {
+        assert_eq!(identity.packed_bits(), 1);
+    }
+    for left in 0..identities.len() {
+        for right in left + 1..identities.len() {
+            assert_ne!(identities[left], identities[right]);
+            assert_ne!(expr(identities[left]).kind, expr(identities[right]).kind);
+            assert_ne!(
+                Value::DomainIdentity(identities[left]),
+                Value::DomainIdentity(identities[right])
+            );
+        }
+    }
 
-    let v3 = Value::DomainIdentity(d3);
-    let v4 = Value::DomainIdentity(d4);
-    assert_ne!(v3, v4);
-    assert_eq!(v3.to_string(), "001");
-    assert_eq!(v4.to_string(), "0001");
-    assert_eq!(v3.as_core_domain_identity(), Some(d3));
-    assert_eq!(v4.as_core_domain_identity(), Some(d4));
-    assert_eq!(v3.as_sens8(), None);
-    assert_eq!(v4.as_sens8(), None);
+    assert_eq!(Value::DomainIdentity(d1(1)).to_string(), "1");
+    assert_eq!(Value::DomainIdentity(d2(1)).to_string(), "01");
+    assert_eq!(Value::DomainIdentity(d7(1)).to_string(), "0000001");
+    assert_eq!(Value::DomainIdentity(d8(1)).to_string(), "00000001");
 }
 
 #[test]
-fn domain_identity_round_trips_through_fasl_and_wire_without_sens8_projection() {
-    for identity in [d3(0b101), d4(0b1010)] {
+fn callable_projection_excludes_d1_d2_d7_and_keeps_d8_distinct_from_legacy_sens8() {
+    for identity in [d1(1), d2(1), d7(1)] {
+        assert_eq!(Value::DomainIdentity(identity).as_core_domain_identity(), None);
+    }
+
+    let d8 = d8(1);
+    let core_d8 = Value::DomainIdentity(d8)
+        .as_core_domain_identity()
+        .expect("D8 has Core-operation identity carrier");
+    assert!(matches!(core_d8, CoreDomainIdentity::D8(_)));
+    assert_eq!((core_d8.width(), core_d8.packed_bits()), (8, 1));
+
+    let domain_value = Value::DomainIdentity(d8);
+    let legacy_value = Value::Sid(sens::Sens8::from_packed_byte(1));
+    assert_ne!(domain_value, legacy_value);
+    assert_eq!(domain_value.as_sens8(), None);
+}
+
+#[test]
+fn every_domain_identity_round_trips_through_fasl_and_wire_without_width_loss() {
+    for identity in [
+        d1(1),
+        d2(0b10),
+        d3(0b101),
+        d4(0b1010),
+        d5(0b10101),
+        d6(0b101010),
+        d7(0b1010101),
+        d8(0b10101010),
+    ] {
         let original = vec![expr(identity)];
 
         let fasl = fasl_encode_program(&original, &[7; 32]);
         let (fasl_decoded, hash) = fasl_decode_program(&fasl).expect("domain FASL");
         assert_eq!(hash, [7; 32]);
         assert_eq!(fasl_decoded, original);
-        assert!(matches!(
-            fasl_decoded[0].kind,
-            ExprKind::DomainIdentity(decoded) if decoded == identity
-        ));
 
         let wire = wire_encode_program(&original);
         let wire_decoded = wire_decode_program(&wire).expect("domain wire");
         assert_eq!(wire_decoded, original);
-        assert!(matches!(
-            wire_decoded[0].kind,
-            ExprKind::DomainIdentity(decoded) if decoded == identity
-        ));
     }
 }
 
 #[test]
-fn domain_call_serializes_as_list_with_domain_head_not_legacy_sid() {
-    let identity = d4(0b0010);
+fn domain_call_uses_only_core_operation_identity_but_serializes_with_domain_head() {
+    let identity = CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0010).unwrap()));
     let call = Expr {
         kind: ExprKind::DomainCall(
             identity,
@@ -83,7 +126,8 @@ fn domain_call_serializes_as_list_with_domain_head_not_legacy_sid() {
     };
     assert!(matches!(
         items[0].kind,
-        ExprKind::DomainIdentity(decoded_identity) if decoded_identity == identity
+        ExprKind::DomainIdentity(decoded_identity)
+            if decoded_identity == DomainIdentity::from(identity)
     ));
     assert!(!matches!(items[0].kind, ExprKind::Sid(_)));
 }
