@@ -34,7 +34,7 @@ fn uk_semantic_name(semantic_id: Sens8) -> String {
 }
 
 fn uk_identity_name(identity: SemanticRef) -> String {
-    match identity.legacy8_word() {
+    match crate::domain_bridge::legacy_mechanism_for(identity) {
         Some(semantic_id) => uk_semantic_name(semantic_id),
         None => format!("domain {}", identity),
     }

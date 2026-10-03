@@ -1,8 +1,8 @@
-//! Одноразове зведення голови виклику до функції СЕНС (1 байт).
+//! Одноразове зведення голови виклику до exact-width semantic identity.
 //!
-//! Після розбору `(atom x)`, `(атом? x)`, `(aṇu x)` і `(00000010 x)` стають
-//! одним і тим самим вузлом `ExprKind::Call(00000010, [x])`: функція
-//! займає 1 байт, а виконання більше не шукає ім'я на кожному виклику.
+//! Ратифіковані D3 ролі з людських surface зводяться до трьох бітів.
+//! Старі exact-8 записи лишаються окремою compatibility identity; рольовий
+//! міст до старого механізму ніколи не виводиться zero-padding-ом.
 //!
 //! M8 (#1590): зводяться **усі** admitted surface з реєстру, не лише Canon
 //! і necessary forms. Написання (`+`, `-`, `додати`, …) — маршрутизація до
@@ -17,9 +17,6 @@ use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
 use crate::SemanticRef;
 use std::rc::Rc;
-
-const QUOTE: SemanticRef = SemanticRef::legacy8(crate::sens!(00000001));
-const COND: SemanticRef = SemanticRef::legacy8(crate::sens!(00000111));
 
 /// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
@@ -37,11 +34,12 @@ fn head_sid(head: &Expr) -> Option<SemanticRef> {
 /// Написання, що маршрутизується до фіксованого SENS (не окрема identity).
 fn immutable_surface_sid(name: &str) -> Option<SemanticRef> {
     if let Some(sid) = canon::routed_sid_for_surface(name) {
-        return Some(SemanticRef::legacy8(sid));
+        return Some(crate::domain_bridge::canonical_role_for_legacy(sid));
     }
     // M8: будь-яка admitted surface → SENS. Необхідні форми лишаються
     // підмножиною; раніше лише вони зводились, тож `+`/`-` шукались у runtime.
-    semantic_registry::admitted_semantic_id_for_surface(name).map(SemanticRef::legacy8)
+    semantic_registry::admitted_semantic_id_for_surface(name)
+        .map(crate::domain_bridge::canonical_role_for_legacy)
 }
 
 fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
@@ -57,8 +55,12 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
             match head_sid(&items[0]) {
-                Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
-                Some(sid) if sid == COND => ExprKind::Call(
+                Some(sid)
+                    if crate::domain_bridge::legacy_mechanism_for(sid)
+                        == Some(crate::sens!(00000001)) => ExprKind::Call(sid, arguments.into()),
+                Some(sid)
+                    if crate::domain_bridge::legacy_mechanism_for(sid)
+                        == Some(crate::sens!(00000111)) => ExprKind::Call(
                     sid,
                     arguments
                         .iter()
@@ -72,8 +74,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                         .collect(),
                 ),
                 Some(sid)
-                    if sid
-                        .legacy8_word()
+                    if crate::domain_bridge::legacy_mechanism_for(sid)
                         .and_then(necessary_forms::identity_for_semantic_id)
                         .is_some() => {
                     ExprKind::Call(
@@ -113,6 +114,31 @@ mod tests {
         let lowered = lower_program(&program);
         assert_eq!(lowered.len(), 1);
         lowered.into_iter().next().expect("one form")
+    }
+
+    #[test]
+    fn ratified_d3_surfaces_lower_to_three_bit_identity() {
+        for (surface, bits, legacy) in [
+            ("quote", 0b001, crate::sens!(00000001)),
+            ("atom?", 0b010, crate::sens!(00000010)),
+            ("cond", 0b011, crate::sens!(00000111)),
+            ("cons", 0b100, crate::sens!(00000100)),
+            ("car", 0b101, crate::sens!(00000101)),
+            ("cdr", 0b110, crate::sens!(00000110)),
+            ("eq?", 0b111, crate::sens!(00000011)),
+        ] {
+            let expr = lower_one(&format!("({surface} x)"));
+            let ExprKind::Call(identity, _) = expr.kind else {
+                panic!("{surface}: expected lowered Call");
+            };
+            assert_eq!(identity.exact_width(), 3, "{surface}");
+            assert_eq!(identity.packed_bits(), bits, "{surface}");
+            assert_eq!(
+                crate::domain_bridge::legacy_mechanism_for(identity),
+                Some(legacy),
+                "{surface}"
+            );
+        }
     }
 
     #[test]

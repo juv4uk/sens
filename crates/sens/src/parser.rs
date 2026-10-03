@@ -63,9 +63,9 @@ impl Parser<'_> {
         }
     }
 
-    /// Reader sugar: `'form` currently targets the explicit legacy QUOTE
-    /// mechanism. The D3 001 identity will replace this projection only with
-    /// the role-aware D3 bridge; no zero-padding is inferred here.
+    /// Reader sugar: `'form` carries the ratified D3 QUOTE identity 001.
+    /// The remaining legacy evaluator mechanism is selected only by the
+    /// role-aware bridge, never by zero-padding.
     fn quote_sugar(&mut self, start: usize) -> Result<Expr, LanguageError> {
         self.bump();
         self.skip_ignored();
@@ -81,7 +81,7 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Sid(crate::SemanticRef::legacy8(crate::sens!(00000001))),
+                        kind: ExprKind::Sid(crate::domain_bridge::canonical_role_for_legacy(crate::sens!(00000001))),
                         span: Span {
                             start,
                             end: start + 1,
@@ -812,11 +812,18 @@ mod tests {
     }
 
     #[test]
-    fn apostrophe_desugars_to_sid_00000001_form() {
+    fn apostrophe_desugars_to_d3_quote_identity() {
         let ExprKind::List(items) = parse_one("'кіт").kind else {
-            panic!("apostrophe should produce a SID 00000001 form");
+            panic!("apostrophe should produce a D3 QUOTE form");
         };
-        assert!(matches!(&items[0].kind, ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(00000001))));
+        assert!(matches!(
+            &items[0].kind,
+            ExprKind::Sid(identity)
+                if identity.exact_width() == 3
+                    && identity.packed_bits() == 0b001
+                    && crate::domain_bridge::legacy_mechanism_for(*identity)
+                        == Some(crate::sens!(00000001))
+        ));
         assert!(matches!(&items[1].kind, ExprKind::Symbol(s) if &**s == "кіт"));
     }
 
