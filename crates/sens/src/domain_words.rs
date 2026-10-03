@@ -62,6 +62,27 @@ impl Racana2 {
     }
 }
 
+/// Exact five-bit semantic carrier for owner-ratified Core.D5 membership.
+///
+/// This wrapper says only that the exact-width payload belongs to Core.D5.
+/// It does not encode a coordinate->name table, behavior table, or Sens8
+/// compatibility mapping.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD5Word(Bit5);
+
+impl CoreD5Word {
+    /// Wrap an already validated exact five-bit word as Core.D5.
+    pub const fn from_word(word: Bit5) -> Self {
+        Self(word)
+    }
+
+    /// Recover the exact mechanical five-bit payload without interpretation.
+    pub const fn word(self) -> Bit5 {
+        self.0
+    }
+}
+
 /// Exact three-bit carrier for the ratified bīja3 foundation domain.
 ///
 /// Individual three-bit meanings remain in SENS-owned contracts/witnesses.
@@ -146,6 +167,11 @@ mod tests {
 
         for raw in 0..=31 {
             let word = Bit5::new(raw).unwrap();
+            assert!(CoreD5Word::from_word(word).word() == word);
+        }
+
+        for raw in 0..=31 {
+            let word = Bit5::new(raw).unwrap();
             assert!(CoreD5::from_word(word).word() == word);
         }
 
@@ -160,6 +186,7 @@ mod tests {
         assert_eq!(size_of::<PredicateBit>(), 1);
         assert_eq!(size_of::<Racana2>(), 1);
         assert_eq!(size_of::<Bija3>(), 1);
+        assert_eq!(size_of::<CoreD5Word>(), 1);
         assert_eq!(size_of::<CoreD5>(), 1);
         assert_eq!(size_of::<CoreD6>(), 1);
     }
