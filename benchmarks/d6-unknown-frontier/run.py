@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""#2660 — partition the canonical D6 UNKNOWN frontier without allocating it.
+"""#2660 — PRE-OD006 historical D6 UNKNOWN-frontier theorem.
 
-This is research accounting only.  It joins existing evidence while preserving
-the canonical D6 closure map as the sole occupancy source.
+This runner preserves the superseded sparse 16+48 model as executable research
+evidence.  It is NOT current occupancy authority after owner decision OD-006.
 
-Key invariant:
+Current authority:
+    knowledge/d6-historical-full-map.json
+    scripts/research-2764-d6-owner-baseline.py
+
+Historical invariant retained here:
     evidence-about-an-UNKNOWN != semantic-membership != residency
 """
 
@@ -30,6 +34,10 @@ PURE_UNKNOWN = "PURE-UNKNOWN"
 PARENT_DUPLICATE_NOT_EARNED = "PARENT-DUPLICATE-NOT-EARNED"
 OVERLAY_CANDIDATE_NONADMITTED = "OVERLAY-CANDIDATE-NONADMITTED"
 OWNER_READY_NONADMITTED = "OWNER-READY-NONADMITTED"
+
+ERA = "PRE-OD006"
+CURRENT_OCCUPANCY_AUTHORITY = False
+SUPERSEDED_BY = "OD-006/#2764/#2777"
 
 
 def load_closure() -> list[dict[str, Any]]:
@@ -131,11 +139,15 @@ def build() -> dict[str, Any]:
     result = {
         "schema": "d6-unknown-frontier/v1",
         "domain": "Core D6",
+        "era": ERA,
+        "current_occupancy_authority": CURRENT_OCCUPANCY_AUTHORITY,
+        "superseded_by": SUPERSEDED_BY,
         "canonical": {
             "capacity": 64,
             "generated_members": 16,
             "unknown_free": 48,
             "occupancy_mutations": 0,
+            "scope": "historical-sparse-snapshot-only",
         },
         "frontier_counts": counts,
         "frontier": frontier,
@@ -170,7 +182,9 @@ def main() -> int:
         args.out.write_text(rendered, encoding="utf-8")
 
     print("D6-UNKNOWN-FRONTIER=PASS")
-    print("canonical=16-generated+48-unknown")
+    print("era=PRE-OD006")
+    print("current-occupancy-authority=false")
+    print("historical-snapshot=16-generated+48-unknown")
     for key, count in sorted(result["frontier_counts"].items()):
         print(f"{key}={count}")
     print(f"historical-unplaced={len(result['historical_unplaced_sidecar'])}")
