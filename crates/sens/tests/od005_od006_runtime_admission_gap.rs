@@ -22,13 +22,11 @@ fn od005_od006_owner_coordinates_are_exact_domain_identities() {
 }
 
 #[test]
-fn exact_eight_bit_legacy_control_is_still_explicit_compatibility_sid() {
-    let expressions = parsed_head("(00000111)");
-    let ExprKind::List(items) = &expressions[0].kind else {
-        panic!("expected list")
-    };
+fn bare_exact_eight_bit_legacy_control_is_rejected_from_canonical_source() {
+    let error = parse("(00000111)")
+        .expect_err("bare Function8/Sens8 source must fail closed");
     assert!(
-        matches!(&items[0].kind, ExprKind::Sid(_)),
-        "8-bit legacy control must remain isolated in the compatibility lane"
+        error.message.contains("bare eight-bit Function8/Sens8 syntax is not part of canonical SENS"),
+        "unexpected error: {error:?}"
     );
 }
