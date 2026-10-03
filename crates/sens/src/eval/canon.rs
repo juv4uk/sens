@@ -1,6 +1,6 @@
 //! SID-keyed evaluator mechanism routing.
 //!
-//! Contract 9 / #1325: function identity is only Sens8. This module may record
+//! Transitional registry/mechanism bridge for historical exact-eight anchors. This module may record
 //! mechanism shape for an already-selected SID, but it must never invent a
 //! second named function identity.
 
@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{semantic_registry, CallableIdentity, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SidRouteKind {
@@ -273,7 +273,7 @@ fn prim_01001101(
     special_forms::eval_values(args, env, span)
 }
 
-/// Mechanism bridge selected only by Sens8.
+/// Compatibility mechanism bridge selected by a historical exact-eight anchor.
 pub(crate) fn invoke_semantic_ref(
     sid: Sens8,
     args: &[Value],
@@ -287,7 +287,7 @@ pub(crate) fn invoke_semantic_ref(
     {
         return primitive(args, environment, span);
     }
-    match &environment.code_slot(sid) {
+    match &environment.code_slot(CallableIdentity::legacy8(sid.packed_byte())) {
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
@@ -341,7 +341,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
         return;
     }
-    environment.bind_code_slot_once(sid, value.clone());
+    environment.bind_code_slot_once(CallableIdentity::legacy8(sid.packed_byte()), value.clone());
 }
 
 #[cfg(test)]
