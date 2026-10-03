@@ -8,28 +8,31 @@
 ; Data-only audit. This file is NOT a semantic contract and cannot mint a SID,
 ; define a Lisp law, or admit an execution mechanism.
 ;
-; One row records one place that can currently assign, project, transport,
-; document, or realize SID-related meaning/mechanism information.
-; The only row allowed to claim canon-function-table-authority is the existing
-; Lisp-owned semantic registry. Everything else must be either a projection,
-; executor-local mechanism detail, historical/compatibility evidence, or an
-; explicitly tracked duplicate authority with a retirement path.
+; Historical inventory, updated by #2939 for the domain cutover.
+; Canonical identity authority is no longer one flat SID/function table.
+; Contract 11 owns D3/D4, while the ratified D5/D6 owner maps own those
+; exact-width residents. The old surface registry may donate spellings and
+; compatibility bytes only; it cannot assign domain identity.
 
 (schema canon-authority-inventory/1)
 (as-of "2026-09-20")
 (parent-issue 997)
 (issue 1060)
-(authority-root "lib/surface/semantic-registry.lisp")
-(scope "active SID/meaning/mechanism mappings plus risk-bearing generated/tooling projections")
+(authority-root "language-contract.lisp + knowledge/d5-historical-full-map.json + knowledge/d6-historical-full-map.json")
+(scope "domain-qualified identity authority plus compatibility surface/transport projections")
 
 ; authority PATH MAPPING CLASS PROVENANCE CONSUMERS RETIREMENT NOTE
-(authority (path "lib/surface/semantic-registry.lisp") (mapping "surface<->sid identity root") (class canon-function-table-authority) (provenance "self; language-contract.lisp") (consumers "semantic_registry_generated.rs; function-table/meta projections; downstream repos") (retirement ()) (note "Sole existing numeric identity root; #1046 converges meaning/domain/law/mechanisms onto this row model without creating another registry."))
+(authority (path "language-contract.lisp") (mapping "D3/D4 exact-domain law and coordinates") (class domain-semantic-authority) (provenance "#2490; #2155; #2158; #2162; Contract 11") (consumers "CoreDomainIdentity; domain surface projection; evaluator routing") (retirement ()) (note "Current D3/D4 identity authority; no universal Function8 space."))
+(authority (path "knowledge/d5-historical-full-map.json") (mapping "Core.D5 coordinate->role/behavior/provenance") (class domain-owner-map-authority) (provenance "owner directive 2026-10-03; #2762") (consumers "domain surface projection; D5 admission gates") (retirement ()) (note "Owns D5 identity/residency; runtime admission remains separately gated."))
+(authority (path "knowledge/d6-historical-full-map.json") (mapping "Core.D6 coordinate->role/behavior/provenance") (class domain-owner-map-authority) (provenance "owner directive 2026-10-03; #2762") (consumers "domain surface projection; D6 admission gates") (retirement ()) (note "Owns D6 identity/residency; runtime admission remains separately gated."))
+(authority (path "lib/surface/semantic-registry.lisp") (mapping "historical byte row->human surface aliases") (class compatibility-surface-projection) (provenance "historical flat-Sens8 registry") (consumers "legacy semantic_registry_generated.rs; compatibility exports; domain-surface alias donor") (retirement 2939) (note "Donates spellings only. Historical byte positions MUST NOT determine CoreDomainIdentity."))
+(authority (path "crates/sens/src/domain_surface_registry_generated.rs") (mapping "domain coordinate->canonical/alias surfaces") (class generated-domain-projection) (provenance "Contract 11 D3/D4 + D5/D6 owner maps; old registry aliases only") (consumers "crates/sens/src/semantic_registry.rs") (retirement ()) (note "Canonical runtime surface projection; generated without using legacy byte positions as identity."))
 (authority (path "lib/canon.lisp") (mapping "canon-law-name->semantic expectation") (class forbidden-duplicate-semantic-authority) (provenance "language-contract.lisp; historical Canon laws") (consumers "canon witnesses; conformance tests") (retirement 1046) (note "Keep executable laws, but key/validate them downstream of the one function-table SID row instead of leaving a parallel law authority."))
 (authority (path "lib/generated/function-table.lisp") (mapping "sid->generated display/function-table projection") (class generated-mechanical-projection) (provenance "lib/surface/semantic-registry.lisp via scripts/generate-function-table.lisp") (consumers "docs/tooling") (retirement 1004) (note "Projection only; #1004 retires it as an input API."))
 (authority (path "scripts/generate-function-table.lisp") (mapping "registry->generated function-table projection") (class generated-mechanical-projection) (provenance "lib/surface/semantic-registry.lisp") (consumers "lib/generated/function-table.lisp; docs/generated/function-table.md") (retirement ()) (note "Generator mechanics only; must not add meaning absent from source rows."))
 
-(authority (path "crates/sens/src/semantic_registry_generated.rs") (mapping "sid<->surface generated runtime rows") (class generated-mechanical-projection) (provenance "lib/surface/semantic-registry.lisp via scripts/generate-rust-semantic-registry.lisp") (consumers "crates/sens/src/semantic_registry.rs") (retirement ()) (note "Generated runtime projection; no semantic role/domain fields."))
-(authority (path "crates/sens/src/semantic_registry.rs") (mapping "surface<->sid runtime lookup") (class generated-mechanical-projection) (provenance "crates/sens/src/semantic_registry_generated.rs") (consumers "evaluator; IR; tooling; public semantic_registry_export") (retirement ()) (note "Mechanical lookup over generated rows; it must remain unable to assign operation meaning."))
+(authority (path "crates/sens/src/semantic_registry_generated.rs") (mapping "legacy byte<->surface compatibility rows") (class generated-compatibility-projection) (provenance "lib/surface/semantic-registry.lisp via scripts/generate-rust-semantic-registry.lisp") (consumers "legacy exports/adapters in crates/sens/src/semantic_registry.rs") (retirement 2939) (note "Historical 256-row compatibility projection only; never canonical domain identity."))
+(authority (path "crates/sens/src/semantic_registry.rs") (mapping "surface->CoreDomainIdentity plus explicit legacy projection") (class domain-routing-projection) (provenance "domain_surface_registry_generated.rs; legacy semantic_registry_generated.rs only for compatibility") (consumers "lowering; evaluator routing; tooling; compatibility exports") (retirement ()) (note "Canonical lookup is domain-first; historical bytes are isolated to legacy APIs."))
 (authority (path "scripts/generate-rust-semantic-registry.lisp") (mapping "registry->Rust surface projection") (class generated-mechanical-projection) (provenance "lib/surface/semantic-registry.lisp") (consumers "crates/sens/src/semantic_registry_generated.rs") (retirement ()) (note "Projection generator only."))
 
 (authority (path "crates/sens/src/eval/canon.rs") (mapping "sid->CanonicalIdentity/kind->Rust evaluator meaning") (class forbidden-duplicate-semantic-authority) (provenance "hand-maintained Rust CANON constants/table plus semantic_registry lookup") (consumers "eval/mod.rs; lib.rs") (retirement 1046) (note "Primary split-authority hotspot: hard-coded SID constants, CanonicalKind, identity map and invoke_semantic_ref reconstruct language meaning outside the function-table row."))
@@ -58,8 +61,9 @@
 (authority (path "contracts/semantic-ownership-audit-733.lisp") (mapping "component->semantic authority category") (class compatibility-historical-fixture) (provenance "earlier ownership audit") (consumers "audit/research tooling") (retirement 1062) (note "Labels lib/surface/function-signatures.lisp (formerly evaluator-dispatch.lisp) as the language-owned evaluator operation classification; preserve as evidence, never as live dispatch source."))
 (authority (path "CURRENT.md") (mapping "authority-order->claimed semantic owner") (class forbidden-duplicate-semantic-authority) (provenance "active human guidance") (consumers "agents/contributors") (retirement 1062) (note "Still names canon.rs/necessary_forms.rs in authority order; active guidance contradicts #997 and can recreate split authority even without code changes."))
 
-; Audit conclusion (2026-09-20):
-; - one identity root exists: lib/surface/semantic-registry.lisp;
+; Audit conclusion updated by #2939:
+; - canonical identity is distributed by explicit domain authority (Contract 11 D3/D4 + D5/D6 owner maps);
+; - lib/surface/semantic-registry.lisp is no longer an identity root and survives only as a spelling/compatibility projection;
 ; - the most important active duplicate-meaning table is canon.rs (cml-export.rs roles
 ;   derived from the function table since 2026-09-26)
 ;   (evaluator-dispatch and language_items.rs retired 2026-09-26 into
