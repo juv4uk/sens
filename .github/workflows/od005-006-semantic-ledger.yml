@@ -1,0 +1,23 @@
+name: OD005 OD006 semantic ledger
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "knowledge/d5-d6-semantic-ledger.json"
+      - "benchmarks/post-d4-semantic-placement/placement.json"
+      - "scripts/research-2765-od005-006-semantic-ledger.py"
+      - ".github/workflows/od005-006-semantic-ledger.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify residency/derivability split
+        run: python3 scripts/research-2765-od005-006-semantic-ledger.py --check
