@@ -4,8 +4,8 @@
 //! select an optional legacy mechanism coordinate, but only this compatibility
 //! boundary materializes that coordinate as `Sens8`.
 //!
-//! No reverse edge exists here: a legacy byte/Sens8 never creates a
-//! `CoreDomainIdentity`.
+//! No reverse edge exists here: a legacy byte/Sens8 never creates canonical
+//! language identity.
 
 use super::canon;
 use crate::{Environment, LanguageError, Sens8, Span, Value};
