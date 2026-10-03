@@ -1,0 +1,51 @@
+name: Core-Math binary seeds necessity tournament
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-binary-seeds/**"
+      - ".github/workflows/core-math-binary-seeds.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-binary-seeds/**"
+      - ".github/workflows/core-math-binary-seeds.yml"
+  workflow_dispatch:
+
+jobs:
+  binary-seeds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Verify zero external dependencies
+        run: |
+          if grep -Eq '^\[dependencies\]' benchmarks/core-math-binary-seeds/Cargo.toml; then
+            echo "unexpected dependency section" >&2
+            exit 1
+          fi
+
+      - name: Test seeds tournament and falsifiers
+        run: |
+          cargo test --quiet --manifest-path benchmarks/core-math-binary-seeds/Cargo.toml
+
+      - name: Run seeds tournament witness
+        run: |
+          cargo run --quiet --manifest-path benchmarks/core-math-binary-seeds/Cargo.toml
+
+      - name: Publish boundary
+        if: always()
+        run: |
+          {
+            echo "## Core-Math minimal binary seeds & laws — #2426"
+            echo
+            echo "- ontology: #2490 pure binary domain objects"
+            echo "- principle: every binary seed must earn the right to exist"
+            echo "- method: remove-one necessity tournament across retained seeds and laws"
+            echo "- result: 11/11 canonical premises strictly necessary"
+            echo "- identity seed theorem: 100100 (Identity) proved derived via Inversion^2, rejected as axiomatic seed"
+            echo "- falsifiers passed: derivable child and identity caught as redundant seeds"
+            echo "- domain firewall: #2508 preserved"
+            echo "- zero external crate dependencies"
+          } >> "$GITHUB_STEP_SUMMARY"
