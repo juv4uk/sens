@@ -19,6 +19,7 @@ OWNER_MAP = ROOT / "knowledge" / "d6-historical-full-map.json"
 SOURCE_WORDS = ROOT / "crates" / "sens" / "src" / "source_words.rs"
 SOURCE_PACKING = ROOT / "crates" / "sens" / "src" / "source_packing.rs"
 DOMAIN_WORDS = ROOT / "crates" / "sens" / "src" / "domain_words.rs"
+SYNTAX = ROOT / "crates" / "sens" / "src" / "syntax.rs"
 VALUE = ROOT / "crates" / "sens" / "src" / "value.rs"
 REGISTRY = ROOT / "crates" / "sens" / "src" / "semantic_registry.rs"
 LOWER = ROOT / "crates" / "sens" / "src" / "eval" / "lower.rs"
@@ -42,6 +43,7 @@ def mechanism_facts() -> dict:
     source = text(SOURCE_WORDS)
     packing = text(SOURCE_PACKING)
     domain = text(DOMAIN_WORDS)
+    syntax = text(SYNTAX)
     value = text(VALUE)
     registry = text(REGISTRY)
     lower = text(LOWER)
@@ -52,11 +54,8 @@ def mechanism_facts() -> dict:
         "bit6_source_display": 'width = self.width()' in source and '"{:0width$b}"' in source,
         "bit6_packing": "BinarySourceWord::W6(word) => packer.push(word)" in packing,
         "bit6_unpacking": "6 => BinarySourceWord::W6(packed.read::<6>(bit_offset)?)" in packing,
-        "typed_d6_carrier": (
-            "Bit6" in domain
-            or "Domain6" in domain
-            or "D6" in domain
-        ),
+        "typed_d6_carrier": "pub struct CoreD6(Bit6);" in domain,
+        "ast_d6_identity": "CoreD6(crate::CoreD6)" in syntax,
         "value_d6_identity": (
             "Value::D6" in value
             or "D6(" in value
@@ -80,7 +79,8 @@ def mechanism_facts() -> dict:
         "bit6_source_display": True,
         "bit6_packing": True,
         "bit6_unpacking": True,
-        "typed_d6_carrier": False,
+        "typed_d6_carrier": True,
+        "ast_d6_identity": True,
         "value_d6_identity": False,
         "registry_d6_identity": False,
         "lowering_d6_identity": False,
@@ -118,7 +118,8 @@ def build() -> dict:
             "source_exact_w6": "YES",
             "source_print_exact_w6": "YES",
             "packed_roundtrip_w6": "YES",
-            "typed_d6_carrier": "NO",
+            "typed_d6_carrier": "YES",
+            "ast_d6_identity": "YES",
             "runtime_value_identity": "NO",
             "semantic_registry_d6_identity": "NO",
             "lowering_d6_identity": "NO",
@@ -136,7 +137,8 @@ def build() -> dict:
     assert sum(r["selector_generator_evidence"] == "YES" for r in rows) == 16
     assert all(r["owner_residency"] == "YES" for r in rows)
     assert all(r["source_exact_w6"] == "YES" for r in rows)
-    assert all(r["typed_d6_carrier"] == "NO" for r in rows)
+    assert all(r["typed_d6_carrier"] == "YES" for r in rows)
+    assert all(r["ast_d6_identity"] == "YES" for r in rows)
     assert all(r["native_evaluator_d6_identity"] == "NO" for r in rows)
 
     return {
@@ -149,7 +151,8 @@ def build() -> dict:
             "owner_resident": 64,
             "source_exact_w6": 64,
             "packed_roundtrip_w6": 64,
-            "typed_d6_carrier": 0,
+            "typed_d6_carrier": 64,
+            "ast_d6_identity": 64,
             "runtime_value_identity": 0,
             "semantic_registry_d6_identity": 0,
             "lowering_d6_identity": 0,

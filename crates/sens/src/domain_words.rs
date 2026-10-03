@@ -107,7 +107,7 @@ impl CoreD5 {
 /// This proves domain membership only. It deliberately has no implicit
 /// relationship to Core.D5 or Sens8 identity.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CoreD6(Bit6);
 
 impl CoreD6 {
