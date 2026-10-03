@@ -28,7 +28,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::{parse, CallableDomainId, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -87,6 +87,21 @@ pub(crate) enum EvalStep {
     },
 }
 
+fn legacy_runtime_sid(
+    identity: CallableDomainId,
+    span: Span,
+) -> Result<Sens8, LanguageError> {
+    identity.legacy_sens8().ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "domain-qualified callable execution is not migrated in this runtime slice: {identity:?}"
+            ),
+            span,
+        )
+    })
+}
+
 pub(crate) fn invoke_value(
     function: &Value,
     arguments: &[Value],
@@ -94,7 +109,10 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::Sid(identity) => {
+            let sid = legacy_runtime_sid(*identity, span)?;
+            canon::invoke_semantic_ref(sid, arguments, environment, span)
+        },
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -136,7 +154,7 @@ pub(crate) fn evaluate_step(
     match &expression.kind {
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
-        ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
+        ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::legacy_sid(*sid))),
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
@@ -248,17 +266,18 @@ fn dispatch_call(
         }
     }
     let function = match head_sid {
-        Some(sid) => Value::Sid(sid),
+        Some(sid) => Value::legacy_sid(sid),
         None => evaluate(
             head_expr.expect("a call without a SID head keeps its head expression"),
             environment,
         )?,
     };
     match &function {
-        Value::Sid(sid) => {
+        Value::Sid(identity) => {
+            let sid = legacy_runtime_sid(*identity, span)?;
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
-            if !canon::has_primitive(*sid) {
-                match &environment.code_slot(*sid) {
+            if !canon::has_primitive(sid) {
+                match &environment.code_slot(sid) {
                     Some(Value::Macro(closure)) => {
                         return closures::apply_macro(closure.clone(), arguments, environment, span);
                     }
@@ -276,7 +295,7 @@ fn dispatch_call(
             for argument in arguments {
                 values.push(evaluate(argument, environment)?);
             }
-            canon::invoke_semantic_ref(*sid, &values, environment, span)
+            canon::invoke_semantic_ref(sid, &values, environment, span)
                 .map(EvalStep::Value)
         }
         Value::Builtin(builtin) => {
