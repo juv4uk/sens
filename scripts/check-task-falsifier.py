@@ -21,7 +21,7 @@ _SPACE = re.compile(r"\s+")
 _PUNCT = re.compile(r"[\x60*_#]+")
 _PLACEHOLDER = re.compile(
     r"^(?:todo|tbd|fixme|test more|more testing|check ci|verify law|"
-    r"needs testing|pending)$",
+    r"needs testing|pending|explicit counter-test|counter-test placeholder)$",
     re.I,
 )
 _EXPLICIT_UNKNOWN = re.compile(
@@ -40,8 +40,10 @@ _POSITIVE_ONLY = re.compile(
 _DISPROOF_SIGNAL = re.compile(
     r"\b(?:falsif(?:y|ied|ies)|counterexample|fails?\s+if|"
     r"reject(?:ed)?\s+if|breaks?\s+if|would\s+fail\s+if|"
-    r"disproved?\s+if|must\s+fail\s+when|if\b.+\bthen\b.+\bfail|"
-    r"if\b.+(?:!=|≠|changes?|collides?|diverges?|becomes?|accepts?|rejects?))",
+    r"disproved?\s+if|must\s+fail(?:\s+when)?|must\s+not\b|must\s+make\b|"
+    r"if\b.+\bthen\b.+\bfail|"
+    r"if\b.+(?:!=|≠|changes?|collides?|diverges?|becomes?|accepts?|rejects?)|"
+    r"\b(?:rejects?|invalidates?|violates?|contradicts?)\b.{0,80}\b(?:model|law|claim|bridge|placement|coordinate|hypothesis)\b)",
     re.I,
 )
 
@@ -165,6 +167,17 @@ def self_test() -> int:
         ("same bits do not imply same domain law", "counterexample: cross-domain apply accepts instead of DOMAIN-MISMATCH", "ok"),
         ("coordinate law is permutation-stable", "reject if an admissible relabel changes the claimed invariant", "ok"),
         ("x -> y", "compare three implementations", "unknown"),
+        ("x -> y", "explicit counter-test", "placeholder"),
+        (
+            "exact-Q coordinates obey normalization",
+            "Noncanonical raw coordinate, skipped gcd normalization, or width collapse reject the model.",
+            "ok",
+        ),
+        (
+            "cross-domain laws stay separated",
+            "Cross-domain law application must fail DOMAIN-MISMATCH; shared helpers must not authorize semantic equality.",
+            "ok",
+        ),
     ]
     failures = 0
     for law, fal, expected in cases:
