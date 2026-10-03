@@ -106,15 +106,12 @@ def detect_runtime_shape() -> dict[str, Any]:
         )
     )
 
-    typed_d5_carrier = any(
-        marker in domain_words
-        for marker in (
-            "Bit5",
-            "Bits<5>",
-            "D5Word",
-            "Domain5",
-            "D5Identity",
-        )
+    typed_d5_carrier = (
+        "pub struct CoreD5Word(Bit5)" in domain_words
+        and "pub const fn from_word(word: Bit5) -> Self" in domain_words
+        and "pub const fn word(self) -> Bit5" in domain_words
+        and "pub const fn core_d5(self) -> Option<crate::CoreD5Word>" in source_words
+        and "impl From<crate::CoreD5Word> for BinarySourceWord" in source_words
     )
 
     sens8_only_identity = (
@@ -196,7 +193,11 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
                 "implementation_status": (
                     "CANONICAL-IDENTITY-PATH"
                     if lowering_ok
-                    else "OWNER-MAP+W5-BOUNDARY-ONLY"
+                    else (
+                        "OWNER-MAP+W5+TYPED-D5-CARRIER"
+                        if carrier_ok
+                        else "OWNER-MAP+W5-BOUNDARY-ONLY"
+                    )
                 ),
             }
         )
@@ -227,8 +228,8 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
         },
         "rows": rows,
         "next_boundary": (
-            "Introduce an exact D5 semantic identity path without widening/zero-padding to Sens8; "
-            "then re-run this audit before implementing row semantics."
+            "Carry CoreD5Word into an explicit AST identity without widening/zero-padding to Sens8; "
+            "keep registry/lowering/evaluator stages independently visible."
         ),
     }
 
