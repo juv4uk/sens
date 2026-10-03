@@ -23,7 +23,7 @@ fn exact_function_carries_itself_across_two_language_stages() {
     // не бере участі в перенесенні: на вхід і вихід проходить сама функція
     // 00000101.
     let carried = eval_value(&mut session, "((00001000 (f) f) 00000101)");
-    assert_eq!(carried, Value::Sid(sens::sens!(00000101)));
+    assert_eq!(carried, Value::legacy_sid(sens::sens!(00000101)));
 
     // Стадія B отримує результат стадії A як виконувану голову. Якби стадія A
     // реконструювала ім'я/рядок/число замість перенесення самої функції,
@@ -73,7 +73,7 @@ fn exact_path_ignores_poisoned_surface_bindings() {
     );
 
     let carried = eval_value(&mut session, "((00001000 (f) f) 00000101)");
-    assert_eq!(carried, Value::Sid(sens::sens!(00000101)));
+    assert_eq!(carried, Value::legacy_sid(sens::sens!(00000101)));
 
     let result = eval_value(
         &mut session,
@@ -87,7 +87,7 @@ fn unsupported_exact_function_is_still_carried_as_the_same_function() {
     let mut session = Session::default();
 
     let carried = eval_value(&mut session, "((00001000 (f) f) 11111111)");
-    assert_eq!(carried, Value::Sid(sens::sens!(11111111)));
+    assert_eq!(carried, Value::legacy_sid(sens::sens!(11111111)));
 
     let error = eval_program(
         "(((00001000 (f) f) 11111111))",
