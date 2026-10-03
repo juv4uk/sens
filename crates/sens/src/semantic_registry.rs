@@ -51,7 +51,7 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     registry_byte_for_surface(name).and_then(domain_identity_from_registry_byte)
 }
 pub(crate) fn legacy_registry_id_bits(legacy_registry_id: LegacyRegistryId) -> String {
-    semantic_id.to_string()
+    legacy_registry_id.to_string()
 }
 
 fn live_rows() -> &'static [SemanticRow] {
@@ -78,8 +78,8 @@ fn insert_surface_mapping(
     surface: &'static str,
     legacy_registry_id: LegacyRegistryId,
 ) {
-    if let Some(previous) = index.insert(surface, semantic_id) {
-        if previous != semantic_id {
+    if let Some(previous) = index.insert(surface, legacy_registry_id) {
+        if previous != legacy_registry_id {
             panic!(
                 "generated semantic registry surface must be unique: {surface} maps to both {} and {}",
                 legacy_registry_id_bits(previous),
@@ -135,13 +135,13 @@ fn admitted_surfaces_from_legacy_rows(
 pub(crate) fn stable_surfaces_for_legacy_registry_id(
     legacy_registry_id: LegacyRegistryId,
 ) -> Vec<&'static str> {
-    stable_surfaces_from_legacy_index(surface_index(), semantic_id)
+    stable_surfaces_from_legacy_index(surface_index(), legacy_registry_id)
 }
 
 pub(crate) fn admitted_surfaces_for_legacy_registry_id(
     legacy_registry_id: LegacyRegistryId,
 ) -> Vec<&'static str> {
-    admitted_surfaces_from_legacy_rows(live_rows(), semantic_id)
+    admitted_surfaces_from_legacy_rows(live_rows(), legacy_registry_id)
 }
 
 pub(crate) fn admitted_surfaces_with_namespace_for_legacy_registry_id(
