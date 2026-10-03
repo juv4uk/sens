@@ -1,0 +1,44 @@
+name: Human-wire block framing ARQ
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/human-wire-arq/**"
+      - ".github/workflows/human-wire-arq.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/human-wire-arq/**"
+      - ".github/workflows/human-wire-arq.yml"
+  workflow_dispatch:
+
+jobs:
+  human-wire-arq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Verify zero external dependencies
+        run: |
+          if grep -Eq '^\[dependencies\]' benchmarks/human-wire-arq/Cargo.toml; then
+            echo "unexpected dependency section" >&2
+            exit 1
+          fi
+
+      - name: Test
+        run: cargo test --quiet --manifest-path benchmarks/human-wire-arq/Cargo.toml
+
+      - name: Run benchmark
+        run: cargo run --release --quiet --manifest-path benchmarks/human-wire-arq/Cargo.toml | tee /tmp/out.txt
+
+      - name: Publish boundary
+        if: always()
+        run: |
+          {
+            echo "## Human-wire block framing + CRC + selective retry — #2646"
+            echo
+            echo "- mechanism only: transport framing, no semantic authority (#2508)"
+            echo "- result: $(grep '^STATUS=' /tmp/out.txt || echo STATUS=missing)"
+            echo "- zero external crate dependencies"
+          } >> "$GITHUB_STEP_SUMMARY"
