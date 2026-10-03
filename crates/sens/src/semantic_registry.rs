@@ -28,23 +28,6 @@ use domain_generated::DOMAIN_SURFACE_ROWS;
 
 pub(crate) type SemanticId = Sens8;
 
-pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
-    let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
-    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
-    match byte {
-        0b0000_0001 => Some(d3(0b001)), // QUOTE
-        0b0000_0010 => Some(d3(0b010)), // ATOM
-        0b0000_0111 => Some(d3(0b011)), // COND
-        0b0000_0100 => Some(d3(0b100)), // CONS
-        0b0000_0101 => Some(d3(0b101)), // CAR
-        0b0000_0110 => Some(d3(0b110)), // CDR
-        0b0000_0011 => Some(d3(0b111)), // EQ
-        0b0000_1000 => Some(d4(0b0010)), // LAMBDA
-        0b0000_1001 => Some(d4(0b0011)), // DEFINE
-        _ => None,
-    }
-}
-
 fn domain_identity_from_exact_row(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
     match width {
         3 => Bit3::new(bits)
@@ -95,13 +78,6 @@ pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
 
 fn live_rows() -> &'static [SemanticRow] {
     SEMANTIC_ROWS
-}
-
-fn registry_byte_for_surface(name: &str) -> Option<u8> {
-    live_rows()
-        .iter()
-        .find(|row| row.surfaces.iter().any(|surface| surface.name == name))
-        .map(|row| row.semantic_id)
 }
 
 
@@ -246,7 +222,9 @@ mod tests {
     #[test]
     fn legacy_byte_axis_is_not_required_for_canonical_domain_lookup() {
         let cadr_domain = domain_identity_for_surface("cadr").expect("cadr exact-domain route");
-        let historical_byte = registry_byte_for_surface("cadr").expect("legacy compatibility row");
+        let historical_byte = semantic_id_for_surface("cadr")
+            .expect("legacy compatibility row")
+            .packed_byte();
 
         assert_eq!((cadr_domain.width(), cadr_domain.packed_bits()), (4, 0b1011));
         assert_eq!(historical_byte, 0b0011_0100);
