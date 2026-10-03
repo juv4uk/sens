@@ -1,0 +1,36 @@
+name: Binary domain separation research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/binary-domain-separation/**"
+      - ".github/workflows/binary-domain-separation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/binary-domain-separation/**"
+      - ".github/workflows/binary-domain-separation.yml"
+  workflow_dispatch:
+
+jobs:
+  separation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run binary domain separation witness
+        run: |
+          rm -rf /tmp/binary-domain-separation
+          python3 benchmarks/binary-domain-separation/run.py             --out /tmp/binary-domain-separation
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/binary-domain-separation/report.md; then
+            cat /tmp/binary-domain-separation/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: binary-domain-separation
+          path: /tmp/binary-domain-separation/
+          retention-days: 14
