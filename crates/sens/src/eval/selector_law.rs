@@ -177,7 +177,7 @@ mod tests {
 
         // CAR
         assert_eq!(
-            invoke(d3(0b101), &[x.clone()], span).unwrap().unwrap(),
+            invoke(d3(0b101), std::slice::from_ref(&x), span).unwrap().unwrap(),
             pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0)))
         );
         // CADR = CAR(CDR(x))
@@ -189,7 +189,7 @@ mod tests {
         );
         // CAAAR = CAR(CAR(CAR(x)))
         assert_eq!(
-            invoke(d5(0b10100), &[x.clone()], span).unwrap().unwrap(),
+            invoke(d5(0b10100), std::slice::from_ref(&x), span).unwrap().unwrap(),
             leaf(1.0)
         );
         // CAAAAR = CAR(CAR(CAR(CAR(x2))))
