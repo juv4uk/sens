@@ -1,14 +1,13 @@
-//! Runtime projection of the Lisp-owned semantic registry.
+//! Runtime surface/compatibility projection.
 //!
-//! The canonical authority is lib/surface/semantic-registry.lisp and its
-//! Lisp-owned reader/API. This module contains no parser for canonical source
-//! text. The generated table is emitted by
-//! scripts/generate-rust-semantic-registry.lisp and is only a mechanical
-//! runtime projection for fast lookup.
-//
-//! Generated rows may carry a packed byte as substrate representation of an
-//! already understood Lisp Binary identity. This wrapper converts that byte to
-//! opaque Sens8 immediately; runtime registry APIs never expose decimal IDs.
+//! Canonical Core semantic identity is domain-qualified and is admitted by the
+//! ratified domain laws. The historical flat surface table may donate spellings
+//! and legacy compatibility coordinates, but it does not mint Core identity.
+//!
+//! The generated flat table is emitted by
+//! scripts/generate-rust-semantic-registry.lisp. Its packed byte is historical
+//! projection metadata only; canonical D3/D4 lookup below declares the domain
+//! identity first and consults a legacy row only for its spellings.
 
 use std::{collections::HashMap, sync::OnceLock};
 
@@ -23,26 +22,57 @@ use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
 
-pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
-    let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
-    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
-    match byte {
-        0b0000_0001 => Some(d3(0b001)), // QUOTE
-        0b0000_0010 => Some(d3(0b010)), // ATOM
-        0b0000_0111 => Some(d3(0b011)), // COND
-        0b0000_0100 => Some(d3(0b100)), // CONS
-        0b0000_0101 => Some(d3(0b101)), // CAR
-        0b0000_0110 => Some(d3(0b110)), // CDR
-        0b0000_0011 => Some(d3(0b111)), // EQ
-        0b0000_1000 => Some(d4(0b0010)), // LAMBDA
-        0b0000_1001 => Some(d4(0b0011)), // DEFINE
-        _ => None,
-    }
+#[derive(Clone, Copy)]
+struct CanonicalSurfaceProjection {
+    identity: CoreDomainIdentity,
+    /// Historical flat row used only as a spelling donor.
+    ///
+    /// This byte is never converted into the canonical identity.
+    legacy_surface_row: u8,
+}
+
+fn d3(raw: u8) -> CoreDomainIdentity {
+    CoreDomainIdentity::D3(Bija3::from_word(
+        Bit3::new(raw).expect("canonical D3 projection must fit"),
+    ))
+}
+
+fn d4(raw: u8) -> CoreDomainIdentity {
+    CoreDomainIdentity::D4(CoreD4::from_word(
+        Bit4::new(raw).expect("canonical D4 projection must fit"),
+    ))
+}
+
+fn canonical_surface_projections() -> [CanonicalSurfaceProjection; 9] {
+    [
+        CanonicalSurfaceProjection { identity: d3(0b001), legacy_surface_row: 0b0000_0001 }, // QUOTE
+        CanonicalSurfaceProjection { identity: d3(0b010), legacy_surface_row: 0b0000_0010 }, // ATOM
+        CanonicalSurfaceProjection { identity: d3(0b011), legacy_surface_row: 0b0000_0111 }, // COND
+        CanonicalSurfaceProjection { identity: d3(0b100), legacy_surface_row: 0b0000_0100 }, // CONS
+        CanonicalSurfaceProjection { identity: d3(0b101), legacy_surface_row: 0b0000_0101 }, // CAR
+        CanonicalSurfaceProjection { identity: d3(0b110), legacy_surface_row: 0b0000_0110 }, // CDR
+        CanonicalSurfaceProjection { identity: d3(0b111), legacy_surface_row: 0b0000_0011 }, // EQ
+        CanonicalSurfaceProjection { identity: d4(0b0010), legacy_surface_row: 0b0000_1000 }, // LAMBDA
+        CanonicalSurfaceProjection { identity: d4(0b0011), legacy_surface_row: 0b0000_1001 }, // DEFINE
+    ]
+}
+
+fn legacy_row(byte: u8) -> Option<&'static SemanticRow> {
+    live_rows().iter().find(|row| row.semantic_id == byte)
 }
 
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(domain_identity_from_registry_byte)
+    canonical_surface_projections()
+        .into_iter()
+        .find_map(|projection| {
+            let row = legacy_row(projection.legacy_surface_row)?;
+            row.surfaces
+                .iter()
+                .any(|surface| surface.name == name)
+                .then_some(projection.identity)
+        })
 }
+
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
 }
@@ -50,14 +80,6 @@ pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
 fn live_rows() -> &'static [SemanticRow] {
     SEMANTIC_ROWS
 }
-
-fn registry_byte_for_surface(name: &str) -> Option<u8> {
-    live_rows()
-        .iter()
-        .find(|row| row.surfaces.iter().any(|surface| surface.name == name))
-        .map(|row| row.semantic_id)
-}
-
 
 pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
     live_rows()
@@ -183,19 +205,30 @@ mod tests {
     }
 
     #[test]
-    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
-        assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("за-умовою")
-        );
-        assert_eq!(
-            registry_byte_for_surface("функція").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("функція")
-        );
+    fn canonical_domain_lookup_declares_identity_before_legacy_spelling_projection() {
+        let cond = canonical_surface_projections()
+            .into_iter()
+            .find(|projection| projection.identity == d3(0b011))
+            .expect("COND must have a canonical projection");
+        let lambda = canonical_surface_projections()
+            .into_iter()
+            .find(|projection| projection.identity == d4(0b0010))
+            .expect("LAMBDA must have a canonical projection");
+
+        assert_eq!(cond.legacy_surface_row, 0b0000_0111);
+        assert_eq!(lambda.legacy_surface_row, 0b0000_1000);
+
+        assert_eq!(domain_identity_for_surface("за-умовою"), Some(d3(0b011)));
+        assert_eq!(domain_identity_for_surface("функція"), Some(d4(0b0010)));
+
+        // Historical byte payload and canonical exact-domain payload are
+        // deliberately different facts. The row donates spelling only.
+        assert_ne!(cond.legacy_surface_row, cond.identity.packed_bits());
+        assert_ne!(lambda.legacy_surface_row, lambda.identity.packed_bits());
     }
 
     #[test]
-    fn generated_registry_is_one_contiguous_byte_axis() {
+    fn legacy_generated_registry_is_one_contiguous_byte_axis_only() {
         assert_eq!(SEMANTIC_ROWS.len(), 256);
         for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
             assert_eq!(usize::from(row.semantic_id), expected);
