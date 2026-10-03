@@ -884,7 +884,7 @@ mod fasl_tests {
         };
         assert!(matches!(
             &outer[0].kind,
-            ExprKind::Sid(sid) if *sid == crate::sens!(01011001)
+            ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(01011001))
         ));
         let ExprKind::NumericBuffer(crate::NumericBuffer::I32(values)) = &outer[2].kind else {
             panic!("third argument must stay an i32 buffer");
