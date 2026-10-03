@@ -78,6 +78,12 @@ fn render_uk(value: &Value) -> String {
         Value::Number(number, Exactness::Exact) => number.to_string(),
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
         Value::Rational(number) => number.to_string(),
+        Value::CoreIdentity(identity) => format!(
+            "#<core D{}:{:0width$b}>",
+            identity.width(),
+            identity.packed_bits(),
+            width = identity.width()
+        ),
         Value::Sid(sid) => {
             format!("#<вбудована {}>", uk_semantic_name(*sid))
         }
