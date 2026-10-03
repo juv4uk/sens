@@ -3,7 +3,7 @@
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
-use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
+use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, SemanticRef, Sens8, Span, Value};
 use std::{
     collections::HashSet,
     rc::Rc,
@@ -228,7 +228,12 @@ enum Head {
 
 const EVAL: Sens8 = crate::sens!(01001101);
 
-fn sid_head(sid: Sens8, environment: &Environment) -> Head {
+fn sid_head(identity: SemanticRef, environment: &Environment) -> Head {
+    let Some(sid) = identity.legacy8_word() else {
+        // Until a domain-native classifier exists, preserve syntax rather than
+        // guessing that an exact-width identity is an ordinary pure call.
+        return Head::Opaque;
+    };
     if sid == EVAL {
         return Head::Opaque;
     }
@@ -245,7 +250,9 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
             return Head::Cond;
         }
     }
-    if !canon::has_primitive(sid) && matches!(environment.code_slot(sid), Some(Value::Macro(_))) {
+    if !canon::has_primitive(sid)
+        && matches!(environment.code_slot(identity), Some(Value::Macro(_)))
+    {
         return Head::Opaque;
     }
     Head::Call
@@ -256,7 +263,7 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
             if let Some(sid) = canon::routed_sid_for_surface(name) {
-                return sid_head(sid, environment);
+                return sid_head(SemanticRef::legacy8(sid), environment);
             }
             match necessary_forms::identity_for_symbol(name) {
                 Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
@@ -464,12 +471,18 @@ pub(super) fn apply(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     match function {
-        Value::Sid(sid) => {
+        Value::Sid(identity) => {
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
                 values.push(evaluate(argument, calling_environment)?);
             }
-            canon::invoke_semantic_ref(sid, &values, calling_environment, span).map(EvalStep::Value)
+            super::invoke_value(
+                &Value::Sid(identity),
+                &values,
+                calling_environment,
+                span,
+            )
+            .map(EvalStep::Value)
         }
         Value::Closure(ref closure) => {
             check_arity(
