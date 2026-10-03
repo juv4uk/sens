@@ -4,7 +4,7 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
+use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -21,16 +21,21 @@ fn uk_operation_name(name: &str) -> String {
         "PRIM_CAR" => "перше".to_string(),
         "PRIM_CDR" => "решта".to_string(),
         other => semantic_registry::semantic_id_for_surface(other)
-            .map(uk_semantic_name)
+            .map(|legacy_id| {
+                semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(legacy_id)
+                    .into_iter()
+                    .find_map(|(namespace, name)| {
+                        (namespace == "ук").then_some(name.to_string())
+                    })
+                    .unwrap_or_else(|| {
+                        format!(
+                            "legacy SID {}",
+                            semantic_registry::semantic_id_bits(legacy_id)
+                        )
+                    })
+            })
             .unwrap_or_else(|| other.to_string()),
     }
-}
-
-fn uk_semantic_name(semantic_id: Sens8) -> String {
-    semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
-        .into_iter()
-        .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
-        .unwrap_or_else(|| format!("SID {}", semantic_registry::semantic_id_bits(semantic_id)))
 }
 
 fn canonical_inexact(number: f64) -> String {
@@ -79,9 +84,20 @@ fn render_uk(value: &Value) -> String {
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
         Value::Rational(number) => number.to_string(),
         Value::Sid(sid) => {
-            format!("#<вбудована {}>", uk_semantic_name(*sid))
+            let legacy_name =
+                semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(*sid)
+                    .into_iter()
+                    .find_map(|(namespace, name)| {
+                        (namespace == "ук").then_some(name.to_string())
+                    })
+                    .unwrap_or_else(|| {
+                        format!("legacy SID {}", semantic_registry::semantic_id_bits(*sid))
+                    });
+            format!("#<legacy-вбудована {legacy_name}>")
         }
-        Value::DomainIdentity(identity) => format!("#<домен {identity}>"),
+        Value::DomainIdentity(identity) => {
+            format!("#<домен D{}:{identity}>", identity.width())
+        }
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
             escaped.push('"');
@@ -308,7 +324,7 @@ pub fn render_error_for_presentation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{eval_program, parse, Rational, Session, Span};
+    use crate::{eval_program, parse, Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity, Rational, Session, Span};
 
     #[test]
     fn ukrainian_value_presentation_changes_only_the_human_view() {
@@ -363,13 +379,36 @@ mod tests {
     }
 
     #[test]
-    fn ukrainian_presentation_localizes_builtin_and_function_markers() {
-        let mut session = Session::default();
+    fn ukrainian_presentation_keeps_legacy_sid_explicitly_compatibility_only() {
         let builtin = Value::Sid(crate::sens!(00000010));
         assert_eq!(
             render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
-            "#<вбудована атом?>"
+            "#<legacy-вбудована атом?>"
         );
+    }
+
+    #[test]
+    fn ukrainian_presentation_preserves_exact_domain_and_width() {
+        let d3 = Value::DomainIdentity(CoreDomainIdentity::from(Bija3::from_word(
+            Bit3::new(0b001).unwrap(),
+        )));
+        let d4 = Value::DomainIdentity(CoreDomainIdentity::from(CoreD4::from_word(
+            Bit4::new(0b0001).unwrap(),
+        )));
+
+        let d3_text =
+            render_value_for_presentation(&d3, PresentationLanguage::Ukrainian);
+        let d4_text =
+            render_value_for_presentation(&d4, PresentationLanguage::Ukrainian);
+
+        assert_eq!(d3_text, "#<домен D3:001>");
+        assert_eq!(d4_text, "#<домен D4:0001>");
+        assert_ne!(d3_text, d4_text);
+    }
+
+    #[test]
+    fn ukrainian_presentation_localizes_function_marker() {
+        let mut session = Session::default();
         let closure = eval_program("(lambda (x) x)", &mut session)
             .expect("closure")
             .value;
