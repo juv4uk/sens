@@ -1,44 +1,34 @@
-//! #1414 — Core3 selection is a mechanical session fact only.
-//! SENS-owned Core3 contracts remain the authority for meaning and admission.
+//! #1414/#2375 — the former Core3 selector is an explicit mechanism lab.
+//! It does not select a language Core or semantic law.
 
-use sens::{load_core3_library, load_core_library, CoreProfile, Session};
+use sens::{load_core_library, load_mechanism_lab_library, Session};
 
 #[test]
-fn core3_loader_selects_core3_only_after_the_profile_layer_loads() {
+fn mechanism_lab_is_disabled_until_explicitly_loaded() {
     let mut session = Session::default();
-    assert_eq!(session.environment.selected_core_profile(), None);
+    assert!(!session.environment.mechanism_lab_enabled());
 
-    load_core3_library(&mut session).expect("Core3 profile must load");
+    load_mechanism_lab_library(&mut session).expect("mechanism lab must load");
 
-    assert_eq!(
-        session.environment.selected_core_profile(),
-        Some(CoreProfile::Core3)
-    );
+    assert!(session.environment.mechanism_lab_enabled());
 }
 
 #[test]
-fn lexical_child_shares_selected_core3_signal() {
+fn lexical_child_shares_mechanism_lab_admission() {
     let mut session = Session::default();
-    load_core3_library(&mut session).expect("Core3 profile must load");
+    load_mechanism_lab_library(&mut session).expect("mechanism lab must load");
 
     let child = session.environment.child();
-
-    assert_eq!(child.selected_core_profile(), Some(CoreProfile::Core3));
+    assert!(child.mechanism_lab_enabled());
 }
 
 #[test]
-fn later_explicit_core4_load_replaces_core3_signal_without_implicit_fallback() {
+fn reloading_the_one_core_does_not_turn_the_lab_into_a_core_profile() {
     let mut session = Session::default();
-    load_core3_library(&mut session).expect("Core3 profile must load");
-    assert_eq!(
-        session.environment.selected_core_profile(),
-        Some(CoreProfile::Core3)
-    );
+    load_mechanism_lab_library(&mut session).expect("mechanism lab must load");
+    assert!(session.environment.mechanism_lab_enabled());
 
-    load_core_library(&mut session).expect("explicit Core4 load must succeed");
+    load_core_library(&mut session).expect("one Core reload must succeed");
 
-    assert_eq!(
-        session.environment.selected_core_profile(),
-        Some(CoreProfile::Core4)
-    );
+    assert!(session.environment.mechanism_lab_enabled());
 }
