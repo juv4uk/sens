@@ -28,7 +28,24 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::{parse, CallableDomainId, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+
+fn legacy_sid_for_runtime(
+    id: CallableDomainId,
+    span: Span,
+) -> Result<Sens8, LanguageError> {
+    id.legacy_sens8().ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "domain-qualified callable {} (D{}) reached legacy runtime routing before #2832",
+                id,
+                id.width()
+            ),
+            span,
+        )
+    })
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -94,7 +111,7 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::Sid(id) => canon::invoke_semantic_ref(legacy_sid_for_runtime(*id, span)?, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -212,18 +229,19 @@ fn evaluate_list(
 /// функція — лише 1 байт `head_sid`.
 fn dispatch_call(
     head_name: Option<&str>,
-    head_sid: Option<Sens8>,
+    head_sid: Option<CallableDomainId>,
     head_expr: Option<&Expr>,
     arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    let routed_head_sid = head_sid
+    let legacy_head_sid = head_sid.and_then(CallableDomainId::legacy_sens8);
+    let routed_head_sid = legacy_head_sid
         .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+        .or_else(|| legacy_head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
     if routed_head_sid == Some(crate::sens!(00000001)) {
         special_forms::exact_sens_arity(crate::sens!(00000001), arguments, 1, span)?;
@@ -255,10 +273,12 @@ fn dispatch_call(
         )?,
     };
     match &function {
-        Value::Sid(sid) => {
-            // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
-            if !canon::has_primitive(*sid) {
-                match &environment.code_slot(*sid) {
+        Value::Sid(id) => {
+            let sid = legacy_sid_for_runtime(*id, span)?;
+            // #1455 compatibility path: language-owned slots are still keyed
+            // by historical exact-8 until #2831 migrates Environment.
+            if !canon::has_primitive(sid) {
+                match &environment.code_slot(sid) {
                     Some(Value::Macro(closure)) => {
                         return closures::apply_macro(closure.clone(), arguments, environment, span);
                     }
@@ -276,7 +296,7 @@ fn dispatch_call(
             for argument in arguments {
                 values.push(evaluate(argument, environment)?);
             }
-            canon::invoke_semantic_ref(*sid, &values, environment, span)
+            canon::invoke_semantic_ref(sid, &values, environment, span)
                 .map(EvalStep::Value)
         }
         Value::Builtin(builtin) => {
@@ -296,7 +316,7 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
+fn binary_head_sid(expression: &Expr) -> Option<CallableDomainId> {
     let ExprKind::Sid(sid) = expression.kind else {
         return None;
     };
