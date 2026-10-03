@@ -30,6 +30,7 @@ ALLOWED_KINDS = {
     "partiality",
     "instance-map",
     "residue",
+    "factor",
     "certificate",
 }
 ALLOWED_CLASSES = {"semantic", "proof", "mechanism"}
