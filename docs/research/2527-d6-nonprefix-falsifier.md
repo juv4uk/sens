@@ -1,6 +1,6 @@
 # #2527 — D6 non-prefix/product/quotient falsifier
 
-Status: research-only.  
+Status: research-only.
 Phase: **STRUCTURAL-DISCOVERY**.
 
 ## Binary-domain record
