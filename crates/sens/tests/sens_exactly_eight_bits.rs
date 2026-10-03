@@ -1,272 +1,95 @@
-//! #1413: кожна функція СЕНС — рівно 8 двійкових біт (1 байт), не більше
-//! і не менше, у всьому коді проєкту.
+//! Compatibility-width regression after the domain migration.
 //!
-//! Перевіряє:
-//! 1. пам'ять: `Sens8` — рівно 1 байт; зведений виклик тримає функцію в 1 байті;
-//! 2. парсер: 8 біт у голові списку — функція; 7 і 9 біт — ні;
-//! 3. реєстр і таблицю функцій: кожен код — рівно 8 цифр 0/1, без повторів;
-//! 4. увесь Rust-код проєкту: кожен `sens!(...)`/`sens!(...)` і кожен
-//!    `semantic_id: 0b...` — рівно 8 біт;
-//! 5. увесь Lisp-код проєкту: жодна голова виклику не записана двійковим
-//!    кодом довжиною 6–7 чи 9–16 біт.
-//!
-//! Поза перевіркою лише `vendor/`, `target*`, `.git`, `node_modules`.
+//! Historical exact-eight source remains readable while the canonical Core
+//! identity is domain-qualified. The test name is retained for CI continuity;
+//! the old "every function is eight bits" ontology is intentionally gone.
 
-use sens::{lower_program, parse, ExprKind, Sens8};
-use std::fs;
-use std::path::{Path, PathBuf};
+use sens::{
+    lower_program, parse, parse_binary_source_words, Bija3, Bit3, Bit4, Bit5, Bit6,
+    CallableIdentity, CoreD4, CoreD5, CoreD6, CoreDomainIdentity, ExprKind,
+};
 
-fn repo_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").canonicalize().unwrap()
-}
-
-fn project_files(extensions: &[&str]) -> Vec<PathBuf> {
-    fn walk(dir: &Path, extensions: &[&str], out: &mut Vec<PathBuf>) {
-        let Ok(entries) = fs::read_dir(dir) else { return };
-        for entry in entries.flatten() {
-            let path = entry.path();
-            let name = entry.file_name().to_string_lossy().into_owned();
-            if path.is_dir() {
-                if name == "vendor"
-                    || name == ".git"
-                    || name == "node_modules"
-                    || name.starts_with("target")
-                {
-                    continue;
-                }
-                walk(&path, extensions, out);
-            } else if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                if extensions.contains(&ext) {
-                    out.push(path);
-                }
-            }
-        }
-    }
-    let mut out = Vec::new();
-    walk(&repo_root(), extensions, &mut out);
-    out.sort();
-    out
-}
-
-fn rel(path: &Path) -> String {
-    path.strip_prefix(repo_root()).unwrap_or(path).display().to_string()
-}
-
-fn is_bits(text: &str, width: usize) -> bool {
-    text.len() == width && text.bytes().all(|b| b == b'0' || b == b'1')
+#[test]
+fn bounded_domain_carriers_remain_one_host_byte() {
+    assert_eq!(std::mem::size_of::<Bija3>(), 1);
+    assert_eq!(std::mem::size_of::<CoreD4>(), 1);
+    assert_eq!(std::mem::size_of::<CoreD5>(), 1);
+    assert_eq!(std::mem::size_of::<CoreD6>(), 1);
 }
 
 #[test]
-fn sens_function_is_exactly_one_byte_in_memory() {
-    assert_eq!(std::mem::size_of::<Sens8>(), 1, "функція СЕНС має займати рівно 1 байт");
+fn equal_payloads_do_not_collapse_across_domain_widths() {
+    let d3 = CallableIdentity::core(CoreDomainIdentity::from(
+        Bija3::from_word(Bit3::new(1).unwrap()),
+    ));
+    let d4 = CallableIdentity::core(CoreDomainIdentity::from(
+        CoreD4::from_word(Bit4::new(1).unwrap()),
+    ));
+    let d5 = CallableIdentity::core(CoreDomainIdentity::from(
+        CoreD5::from_word(Bit5::new(1).unwrap()),
+    ));
+    let d6 = CallableIdentity::core(CoreDomainIdentity::from(
+        CoreD6::from_word(Bit6::new(1).unwrap()),
+    ));
+    let legacy = CallableIdentity::legacy8(1);
 
-    // Усі написання однієї функції зводяться до того самого 1-байтового вузла.
+    for identity in [d3, d4, d5, d6, legacy] {
+        assert_eq!(identity.packed_bits(), 1);
+    }
+    assert_ne!(d3, d4);
+    assert_ne!(d4, d5);
+    assert_ne!(d5, d6);
+    assert_ne!(d3, legacy);
+    assert_ne!(d6, legacy);
+}
+
+#[test]
+fn canonical_binary_source_preserves_exact_widths() {
+    let tokens = parse_binary_source_words("10 001 0101 00101 000001").unwrap();
+    assert_eq!(
+        tokens.iter().map(|token| token.word.width()).collect::<Vec<_>>(),
+        [2, 3, 4, 5, 6],
+    );
+    assert_eq!(
+        tokens.iter().map(|token| token.word.to_string()).collect::<Vec<_>>(),
+        ["10", "001", "0101", "00101", "000001"],
+    );
+}
+
+#[test]
+fn historical_exact_eight_reader_path_is_explicit_compatibility() {
+    let parsed = parse("(00000010 x)").unwrap();
+    let ExprKind::List(items) = &parsed[0].kind else {
+        panic!("expected list");
+    };
+    let ExprKind::Sid(identity) = items[0].kind else {
+        panic!("historical exact-eight head must enter identity carrier");
+    };
+    assert_eq!(identity.legacy8_bits(), Some(0b0000_0010));
+    assert_eq!(identity.core_identity(), None);
+}
+
+#[test]
+fn lowered_legacy_surfaces_remain_explicit_compatibility_not_core_identity() {
     for source in ["(atom? x)", "(атом? x)", "(aṇu x)", "(00000010 x)"] {
         let lowered = lower_program(&parse(source).unwrap());
-        let ExprKind::Call(function, arguments) = &lowered[0].kind else {
-            panic!("{source}: очікувався зведений виклик, отримано {:?}", lowered[0].kind);
+        let ExprKind::Call(identity, arguments) = &lowered[0].kind else {
+            panic!("{source}: expected lowered call");
         };
-        assert_eq!(function.to_string(), "00000010", "{source}");
+        assert_eq!(identity.legacy8_bits(), Some(0b0000_0010), "{source}");
+        assert_eq!(identity.core_identity(), None, "{source}");
         assert_eq!(arguments.len(), 1, "{source}");
     }
 }
 
 #[test]
-fn parser_admits_exactly_eight_bits_as_a_function() {
-    let head = |source: &str| parse(source).unwrap()[0].clone();
-    let ExprKind::List(items) = head("(00000010 x)").kind else { panic!("список") };
-    assert!(matches!(items[0].kind, ExprKind::Sid(_)), "8 біт — функція СЕНС");
+fn core_identity_and_legacy_eight_bits_have_distinct_serialized_spelling() {
+    let core = CallableIdentity::core(CoreDomainIdentity::from(
+        CoreD4::from_word(Bit4::new(0b1010).unwrap()),
+    ));
+    let legacy = CallableIdentity::legacy8(0b0000_1010);
 
-    for source in ["(0000010 x)", "(000000010 x)"] {
-        if let ExprKind::List(items) = head(source).kind {
-            assert!(
-                !matches!(items[0].kind, ExprKind::Sid(_)),
-                "{source}: не 8 біт — не може бути функцією СЕНС"
-            );
-        }
-    }
-}
-
-#[test]
-fn registry_and_function_table_codes_are_exactly_eight_bits_and_unique() {
-    let root = repo_root();
-    let mut problems = Vec::new();
-
-    // Згенерований Rust-реєстр.
-    let generated = root.join("crates/sens/src/semantic_registry_generated.rs");
-    let text = fs::read_to_string(&generated).unwrap();
-    let mut seen = std::collections::BTreeSet::new();
-    for (line_no, line) in text.lines().enumerate() {
-        if let Some(rest) = line.split("semantic_id: 0b").nth(1) {
-            let bits: String = rest.chars().take_while(|c| *c == '0' || *c == '1').collect();
-            if bits.len() != 8 {
-                problems.push(format!("{}:{}: {} біт: 0b{bits}", rel(&generated), line_no + 1, bits.len()));
-            } else if !seen.insert(bits.clone()) {
-                problems.push(format!("{}:{}: повтор коду {bits}", rel(&generated), line_no + 1));
-            }
-        }
-    }
-    assert!(!seen.is_empty(), "реєстр не прочитано");
-
-    // Згенерована Lisp-таблиця функцій: рядки (xxxxxxxx ...) — голі 8 біт, не текст.
-    let table = root.join("lib/generated/function-table.lisp");
-    let text = fs::read_to_string(&table).unwrap();
-    let mut table_seen = std::collections::BTreeSet::new();
-    for (line_no, line) in text.lines().enumerate() {
-        let Some(rest) = line.trim_start().strip_prefix('(') else { continue };
-        let code: String = rest.chars().take_while(|c| !c.is_whitespace() && *c != ')').collect();
-        if code.is_empty() || !code.chars().all(|c| c == '0' || c == '1') {
-            continue;
-        }
-        assert!(
-            !line.contains(&format!("\"{code}\"")),
-            "{}:{}: SENS у лапках — текстовий сурогат, не ідентичність",
-            rel(&table),
-            line_no + 1
-        );
-        if !is_bits(&code, 8) {
-            problems.push(format!("{}:{}: {} біт: {code}", rel(&table), line_no + 1, code.len()));
-        } else if !table_seen.insert(code.clone()) {
-            problems.push(format!("{}:{}: повтор коду {code}", rel(&table), line_no + 1));
-        }
-    }
-
-    assert!(problems.is_empty(), "коди функцій не рівно 8 біт:\n{}", problems.join("\n"));
-
-    assert_eq!(
-        seen.len(),
-        256,
-        "generated Rust registry must expose the complete 256-function SENS space"
-    );
-    assert_eq!(
-        table_seen.len(),
-        256,
-        "generated function table must contain exactly 256 SENS rows"
-    );
-    assert_eq!(
-        &table_seen, &seen,
-        "function-table projection must contain exactly the same SENS identities as the registry"
-    );
-    assert_eq!(
-        table_seen.first().map(String::as_str),
-        Some("00000000"),
-        "the first exact SENS identity must never be dropped"
-    );
-    assert_eq!(
-        table_seen.last().map(String::as_str),
-        Some("11111111"),
-        "the complete exact SENS range must end at 11111111"
-    );
-
-    let zero_row = text
-        .lines()
-        .find(|line| line.trim_start().starts_with("(00000000 "))
-        .expect("generated function table must project exact SENS 00000000");
-    assert!(
-        zero_row.contains("identity:00000000")
-            && !zero_row.contains("identity:00000000/surface:"),
-        "00000000 is an exact function identity with no invented human surface: {zero_row}"
-    );
-}
-
-#[test]
-fn every_rust_sens_literal_in_project_is_exactly_eight_bits() {
-    let mut problems = Vec::new();
-    for path in project_files(&["rs"]) {
-        let Ok(text) = fs::read_to_string(&path) else { continue };
-        for (line_no, line) in text.lines().enumerate() {
-            let code = line.split("//").next().unwrap_or("");
-            for marker in ["sens!(", "sens!("] {
-                let mut pieces = code.split(marker);
-                let mut before = pieces.next().unwrap_or("");
-                for piece in pieces {
-                    // Макрос усередині рядкового літерала ("sens!(") — не виклик.
-                    let quoted = before.ends_with('"');
-                    before = piece;
-                    if quoted {
-                        continue;
-                    }
-                    let inside: String = piece.chars().take_while(|c| *c != ')').collect();
-                    let bits: String = inside.chars().filter(|c| !c.is_whitespace() && *c != '_').collect();
-                    // Визначення макросів (`$($token:tt)*`) — не літерал.
-                    if bits.contains('$') || bits.is_empty() {
-                        continue;
-                    }
-                    if !is_bits(&bits, 8) {
-                        problems.push(format!("{}:{}: {marker}{inside})", rel(&path), line_no + 1));
-                    }
-                }
-            }
-        }
-    }
-    assert!(problems.is_empty(), "Rust-літерали СЕНС не рівно 8 біт:\n{}", problems.join("\n"));
-}
-
-/// Голови викликів у Lisp-коді: `(` + двійкові цифри. Коментарі (`;`) і
-/// рядки пропускаються. 1–5 біт не перевіряються — це нерозрізненні від
-/// десяткових чисел (`(10 20)`, `(100 ...)`) дані.
-fn binary_heads(text: &str) -> Vec<(usize, String)> {
-    let mut out = Vec::new();
-    for (line_no, line) in text.lines().enumerate() {
-        let mut in_string = false;
-        let chars: Vec<char> = line.chars().collect();
-        let mut i = 0;
-        while i < chars.len() {
-            let c = chars[i];
-            if in_string {
-                if c == '\\' {
-                    i += 1;
-                } else if c == '"' {
-                    in_string = false;
-                }
-            } else if c == '"' {
-                in_string = true;
-            } else if c == ';' {
-                break;
-            } else if c == '(' {
-                let mut j = i + 1;
-                while j < chars.len() && chars[j] == ' ' {
-                    j += 1;
-                }
-                let start = j;
-                while j < chars.len() && (chars[j] == '0' || chars[j] == '1') {
-                    j += 1;
-                }
-                let delimited = j == chars.len() || chars[j].is_whitespace() || chars[j] == ')' || chars[j] == '(';
-                if j > start && delimited {
-                    out.push((line_no + 1, chars[start..j].iter().collect()));
-                }
-            }
-            i += 1;
-        }
-    }
-    out
-}
-
-#[test]
-fn every_lisp_call_head_in_project_is_exactly_eight_bits() {
-    let mut problems = Vec::new();
-    let mut checked = 0usize;
-    for path in project_files(&["lisp", "sens", "my", "wsm", "всм", "мій", "лісп"]) {
-        let Ok(text) = fs::read_to_string(&path) else { continue };
-        for (line_no, bits) in binary_heads(&text) {
-            match bits.len() {
-                8 => checked += 1,
-                6 | 7 | 9..=16 => problems.push(format!(
-                    "{}:{line_no}: ({bits} ...) — {} біт",
-                    rel(&path),
-                    bits.len()
-                )),
-                _ => {}
-            }
-        }
-    }
-    eprintln!("перевірено 8-бітових голів викликів: {checked}");
-    assert!(checked > 0, "жодної 8-бітової голови не знайдено — сканер зламаний");
-    assert!(
-        problems.is_empty(),
-        "голови викликів не рівно 8 біт ({}):\n{}",
-        problems.len(),
-        problems.join("\n")
-    );
+    assert_eq!(core.to_string(), "1010");
+    assert_eq!(legacy.to_string(), "00001010");
+    assert_ne!(core, legacy);
 }
