@@ -415,9 +415,9 @@ mod tests {
 
     #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
-        assert_eq!(surface_domain_coordinate("quote"), Some(D3_QUOTE));
-        assert_eq!(surface_domain_coordinate("lambda"), Some(D4_LAMBDA));
-        assert_eq!(surface_domain_coordinate("define"), Some(D4_DEFINE));
+        assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
+        assert_eq!(surface_domain_coordinate("функція"), Some(D4_LAMBDA));
+        assert_eq!(surface_domain_coordinate("визначити"), Some(D4_DEFINE));
         assert_eq!(surface_domain_coordinate("+"), None);
     }
 
