@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sens8;
+use crate::{CoreD5, CoreD6, Sens8};
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -50,6 +50,11 @@ pub enum ExprKind {
     Rational(Rational),
     NumericBuffer(NumericBuffer),
     Sid(Sens8),
+    /// Already-typed Core.D5 identity. The ordinary reader does not mint this
+    /// solely from width; domain admission is an explicit earlier proof step.
+    CoreD5(CoreD5),
+    /// Already-typed Core.D6 identity, kept distinct from Core.D5 and Sens8.
+    CoreD6(CoreD6),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -128,6 +133,8 @@ pub(crate) mod fasl {
     const TAG_F32_BUFFER: u8 = 9;
     // #1697: числові координати локальної змінної; ім'я не записується.
     const TAG_LOCAL: u8 = 10;
+    const TAG_CORE_D5: u8 = 11;
+    const TAG_CORE_D6: u8 = 12;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -165,6 +172,14 @@ pub(crate) mod fasl {
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
+            }
+            ExprKind::CoreD5(word) => {
+                out.push(TAG_CORE_D5);
+                out.push(word.word().packed_bits());
+            }
+            ExprKind::CoreD6(word) => {
+                out.push(TAG_CORE_D6);
+                out.push(word.word().packed_bits());
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -238,6 +253,16 @@ pub(crate) mod fasl {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+            }
+            TAG_CORE_D5 => {
+                let value = *bytes.get(*pos)?;
+                *pos += 1;
+                ExprKind::CoreD5(crate::CoreD5::from_word(crate::Bit5::new(value)?))
+            }
+            TAG_CORE_D6 => {
+                let value = *bytes.get(*pos)?;
+                *pos += 1;
+                ExprKind::CoreD6(crate::CoreD6::from_word(crate::Bit6::new(value)?))
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
@@ -362,6 +387,8 @@ pub(crate) mod wire {
     const TAG_SYMBOL: u8 = 0x56;
     const TAG_PAIR: u8 = 0x57;
     const TAG_LOCAL: u8 = 0x58;
+    const TAG_CORE_D5: u8 = 0x59;
+    const TAG_CORE_D6: u8 = 0x5A;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
 
@@ -440,6 +467,14 @@ pub(crate) mod wire {
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
+            }
+            ExprKind::CoreD5(word) => {
+                out.push(TAG_CORE_D5);
+                out.push(word.word().packed_bits());
+            }
+            ExprKind::CoreD6(word) => {
+                out.push(TAG_CORE_D6);
+                out.push(word.word().packed_bits());
             }
             ExprKind::String(value) => put_text(out, TAG_STRING, value),
             ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
@@ -567,6 +602,16 @@ pub(crate) mod wire {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+            }
+            TAG_CORE_D5 => {
+                let value = *bytes.get(*pos)?;
+                *pos += 1;
+                ExprKind::CoreD5(crate::CoreD5::from_word(crate::Bit5::new(value)?))
+            }
+            TAG_CORE_D6 => {
+                let value = *bytes.get(*pos)?;
+                *pos += 1;
+                ExprKind::CoreD6(crate::CoreD6::from_word(crate::Bit6::new(value)?))
             }
             TAG_LOCAL => {
                 let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
