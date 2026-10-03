@@ -83,7 +83,7 @@ fn uk_session() -> Session {
 }
 
 #[test]
-fn every_stable_uk_surface_entry_lowers_to_one_canonical_identity() {
+fn every_stable_uk_surface_entry_lowers_to_its_declared_exact_sens() {
     let pairs = present_en_uk_pairs();
     assert!(
         pairs.len() >= 100,
@@ -112,30 +112,20 @@ fn every_stable_uk_surface_entry_lowers_to_one_canonical_identity() {
             "EN/UK surfaces must project to one exact SENS: {english} / {ukrainian}"
         );
 
-        let lower_head = |surface: &str| {
+        for surface in [english.as_str(), ukrainian.as_str()] {
             let source = format!("({surface})");
             let parsed = parse(&source).expect("admitted surface call must parse");
             let lowered = lower_program(&parsed);
             assert_eq!(lowered.len(), 1);
-            lowered[0].kind.clone()
-        };
-
-        let en_head = lower_head(english);
-        let uk_head = lower_head(ukrainian);
-        match (&en_head, &uk_head) {
-            (ExprKind::DomainCall(en, _), ExprKind::DomainCall(uk, _)) => {
-                assert_eq!(
-                    en, uk,
-                    "EN/UK migrated surfaces must share one exact domain identity: {english} / {ukrainian}"
-                );
+            match &lowered[0].kind {
+                ExprKind::Call(sens, _) => assert_eq!(
+                    *sens, declared,
+                    "surface head must lower directly to declared exact SENS: {surface}"
+                ),
+                other => panic!(
+                    "admitted surface head must lower to exact SENS Call: {surface} -> {other:?}"
+                ),
             }
-            (ExprKind::Call(en, _), ExprKind::Call(uk, _)) => {
-                assert_eq!(*en, declared, "legacy EN route drifted: {english}");
-                assert_eq!(*uk, declared, "legacy UK route drifted: {ukrainian}");
-            }
-            other => panic!(
-                "peer surfaces must agree on canonical identity class: {english} / {ukrainian} -> {other:?}"
-            ),
         }
     }
 }
