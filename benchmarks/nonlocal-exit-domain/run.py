@@ -90,19 +90,21 @@ def validate_inputs(d5_row, root_row, d6_rows, frontier):
     assert root_row["coordinate"] == "UNPLACED"
 
     generated = [r for r in d6_rows if r["status"] == "generated"]
+    ratified = [r for r in d6_rows if r["status"] == "ratified-resident"]
     unknown = [r for r in d6_rows if r["status"] == "UNKNOWN/free"]
     assert len(generated) == 16
-    assert len(unknown) == 48
+    assert len(ratified) == 1 and ratified[0]["coordinate"] == "001111"
+    assert len(unknown) == 47
     assert all(not r["semantic_member_of_ratified_domain"] for r in unknown)
 
     assert frontier["canonical"]["generated_members"] == 16
-    assert frontier["canonical"]["unknown_free"] == 48
+    assert frontier["canonical"]["ratified_manual_residents"] == 1
+    assert frontier["canonical"]["unknown_free"] == 47
     assert frontier["canonical"]["occupancy_mutations"] == 0
     assert frontier["frontier_counts"] == {
         "PURE-UNKNOWN": 44,
         "PARENT-DUPLICATE-NOT-EARNED": 1,
         "OVERLAY-CANDIDATE-NONADMITTED": 2,
-        "OWNER-READY-NONADMITTED": 1,
     }
     return_rows = [
         row for row in frontier["historical_unplaced_sidecar"]
@@ -124,9 +126,11 @@ def validate_inputs(d5_row, root_row, d6_rows, frontier):
         "d6": {
             "eligible": "UNRESOLVED",
             "generated_members": 16,
-            "unknown_free": 48,
+            "ratified_manual_residents": 1,
+            "unknown_free": 47,
             "reason": (
-                "D6 width is ratified, but UNKNOWN/free capacity is not membership evidence. "
+                "D6 has one unrelated owner-ratified shared-location resident, while remaining "
+                "UNKNOWN/free capacity is still not membership evidence. "
                 "No domain-selection theorem maps non-local-exit into D6."
             ),
         },
