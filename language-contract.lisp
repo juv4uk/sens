@@ -48,6 +48,8 @@
        . "Core.D4 is the exact four-bit bootstrap domain ratified by #2169. Its resident coordinates execute only under D4 law; 0101 and 1001 remain unallocated. No historical Function8 identity may be reconstructed from a D4 word by bit-shape coincidence.")
       (d5-d6-residency
        . "Core.D5 and Core.D6 use exact five-bit and six-bit typed domains governed by their owner-ratified maps/laws. Residency, derivability, callability and runtime implementation are distinct facts: carrier existence alone grants neither occupancy nor callability.")
+      (d7-d8-residency
+       . "Core.D7 and Core.D8 are owner-ratified exact seven-bit and eight-bit domains. D7 is governed by its Sound7 law and does not inherit selector or callable meaning from width. D8 is a Core domain under its own ratified laws and is never historical Sens8/Function8 merely because both are eight bits. Residency, derivability and callability remain law-specific.")
       (cross-domain-non-collapse
        . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, later Core domains or Core-Math domains without semantic equality. Cross-domain reuse requires an explicit independently proved bridge law.")
       (atom-one-bit-core1-4
@@ -57,7 +59,7 @@
       (cond-two-part-core1-4
        . "Core.D3 011 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and must return exact PredicateBit. PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips it. If no clause selects, COND returns structural (). Structural () is not a predicate answer. Historical Function8 00000111 is compatibility projection only.")
       (core-profile-law
-       . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D6 semantic domains or the D1/D3 predicate-control foundation.")
+       . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D8 semantic domains or the D1/D3 predicate-control foundation.")
       (kernel-archipelago
        . "Execution kernels may own native mechanisms and observations. They consume an already-selected domain-qualified semantic object or an explicitly compatibility-tagged legacy projection plus arguments/context. Kernel names, opcodes, packed bytes and native types never acquire SENS semantic identity by themselves.")
       (reader-apostrophe
