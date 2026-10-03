@@ -126,55 +126,6 @@ fn exact_args(
 
 type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
-fn legacy_primitive(sid: Sens8) -> Option<PrimitiveFn> {
-    // Compatibility-only host mechanisms that have not yet moved into exact
-    // domain law. Migrated D3/D5 bytes are deliberately absent: their old
-    // spellings must flow through legacy_domain_identity_from_registry_byte()
-    // into the one canonical domain mechanism.
-    match sid.packed_byte() {
-        0b0001_1100 => Some(prim_00011100), // numeric =
-        0b0100_1101 => Some(prim_01001101), // eval
-        0b0011_1011 => Some(builtins::prim_00111011),
-        0b0011_1100 => Some(builtins::prim_00111100),
-        0b0011_1101 => Some(builtins::prim_00111101),
-        0b0011_1110 => Some(builtins::prim_00111110),
-        0b0101_0000 => Some(builtins::prim_01010000),
-        0b0100_1111 => Some(builtins::prim_01001111),
-        0b0101_1010 => Some(builtins::prim_01011010),
-        0b0101_1011 => Some(builtins::prim_01011011),
-        0b0101_1100 => Some(builtins::prim_01011100),
-        0b0101_1101 => Some(builtins::prim_01011101),
-        0b0101_0001 => Some(builtins::prim_01010001),
-        0b0101_0010 => Some(builtins::prim_01010010),
-        0b0101_0011 => Some(builtins::prim_01010011),
-        0b0101_0100 => Some(builtins::prim_01010100),
-        0b0101_0101 => Some(builtins::prim_01010101),
-        0b0100_0001 => Some(builtins::prim_01000001),
-        0b0011_1010 => Some(builtins::prim_00111010),
-        0b0010_0100 => Some(builtins::prim_00100100),
-        0b0100_0010 => Some(builtins::prim_01000010),
-        0b0100_0011 => Some(builtins::prim_01000011),
-        0b0011_1111 => Some(builtins::prim_00111111),
-        0b0100_0000 => Some(builtins::prim_01000000),
-        0b0100_0100 => Some(builtins::prim_01000100),
-        0b0100_0101 => Some(builtins::prim_01000101),
-        0b1010_0001 => Some(builtins::prim_10100001),
-        0b1010_0000 => Some(builtins::prim_10100000),
-        0b0100_1000 => Some(builtins::prim_01001000),
-        0b0100_1001 => Some(builtins::prim_01001001),
-        0b0100_1100 => Some(builtins::prim_01001100),
-        0b0100_1010 => Some(builtins::prim_01001010),
-        0b0100_1011 => Some(builtins::prim_01001011),
-        0b0010_0110 => Some(builtins::prim_00100110),
-        0b0101_0110 => Some(builtins::prim_01010110),
-        0b0101_0111 => Some(builtins::prim_01010111),
-        0b0101_1000 => Some(builtins::prim_01011000),
-        0b0101_1001 => Some(builtins::prim_01011001),
-        0b0100_1110 => Some(builtins::prim_01001110),
-        _ => None,
-    }
-}
-
 fn prim_00000010(
     args: &[Value],
     env: &Environment,
@@ -218,19 +169,6 @@ fn prim_00000110(
 ) -> Result<Value, LanguageError> {
     exact_args(crate::sens!(00000110), args, 1, span)?;
     special_forms::cdr_value(&args[0], span)
-}
-
-fn prim_00011100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
-    arithmetic::comparison_on_values("=", args, span)
-}
-
-fn prim_01001101(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(01001101), args, 1, span)?;
-    special_forms::eval_values(args, env, span)
 }
 
 fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
@@ -313,8 +251,8 @@ pub(crate) fn invoke_semantic_ref(
     }
 
     // Unmigrated compatibility-only mechanisms.
-    if let Some(primitive) = legacy_primitive(sid) {
-        return primitive(args, environment, span);
+    if let Some(result) = super::legacy_primitives::invoke(sid, args, environment, span) {
+        return result;
     }
     match &environment.code_slot(sid) {
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
@@ -352,7 +290,7 @@ pub(crate) fn invoke_semantic_ref(
 
 /// #1455: чи має код примітив Rust.
 pub(crate) fn has_primitive(sid: Sens8) -> bool {
-    legacy_primitive(sid).is_some()
+    super::legacy_primitives::has(sid)
         || semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
             .is_some_and(domain_has_native_mechanism)
 }
@@ -457,47 +395,6 @@ mod tests {
             }
         }
         assert!(!is_reserved_surface("map"));
-    }
-
-    #[test]
-    fn migrated_d3_d5_bytes_have_no_separate_legacy_primitive() {
-        for sid in [
-            crate::sens!(00000010),
-            crate::sens!(00000011),
-            crate::sens!(00000100),
-            crate::sens!(00000101),
-            crate::sens!(00000110),
-            crate::sens!(00001100),
-            crate::sens!(00001101),
-            crate::sens!(00001110),
-            crate::sens!(00001111),
-            crate::sens!(00011010),
-            crate::sens!(00011011),
-        ] {
-            assert!(legacy_primitive(sid).is_none(), "{sid} must delegate to exact domain");
-            assert!(has_primitive(sid), "{sid} must remain callable through the domain bridge");
-        }
-        assert!(legacy_primitive(crate::sens!(01001100)).is_some());
-    }
-
-    #[test]
-    fn historical_plus_byte_executes_the_one_d5_mechanism() {
-        let env = Environment::root();
-        let span = Span::default();
-        let n = |value| Value::Number(value, crate::Exactness::Exact);
-        let via_legacy = invoke_semantic_ref(
-            crate::sens!(00001100),
-            &[n(2.0), n(3.0)],
-            &env,
-            span,
-        )
-        .unwrap();
-        let d5 = CoreDomainIdentity::D5(crate::CoreD5::from_word(
-            crate::Bit5::new(0b01010).unwrap(),
-        ));
-        let via_domain = invoke_domain_identity(d5, &[n(2.0), n(3.0)], &env, span).unwrap();
-        assert_eq!(via_legacy, via_domain);
-        assert_eq!(via_domain.to_string(), "5");
     }
 
     #[test]
