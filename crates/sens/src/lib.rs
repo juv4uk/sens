@@ -80,6 +80,17 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
+    /// Canonical exact-domain identity for a migrated admitted surface.
+    ///
+    /// Returns None for registry rows that still exist only on the legacy
+    /// exact-eight projection axis. No byte truncation or width inference is
+    /// performed here.
+    pub fn domain_identity_for_admitted_surface(
+        name: &str,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::domain_identity_for_surface(name)
+    }
+
     /// Legacy packed-byte export for external projection consumers.
     ///
     /// Runtime/source semantics use opaque `Sens8`; this function deliberately
