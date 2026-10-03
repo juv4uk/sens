@@ -57,10 +57,9 @@ def ordinary_callee_explicit_env(
     explicit_env: list[dict[str, Any]],
     name: str,
 ) -> Any:
-    # Environment is ordinary explicit data; the callee does not inspect
-    # evaluator/host state.
-    if name in local_frame:
-        return local_frame[name]
+    # Environment is ordinary explicit data; querying it is distinct from
+    # ordinary lookup in the callee's own lexical frame.
+    _ = local_frame
     return lookup_explicit_env(explicit_env, name)
 
 
@@ -70,8 +69,8 @@ def hidden_reflection_callee(
     name: str,
 ) -> Any:
     # This mode is a control: it succeeds by importing evaluator state.
-    if name in local_frame:
-        return local_frame[name]
+    # The caller environment remains a distinct object from the callee frame.
+    _ = local_frame
     return lookup_explicit_env(evaluator_current_caller_env, name)
 
 
@@ -163,7 +162,7 @@ def main() -> int:
             "only_outer",
         ),
         run_case(
-            "callee-local-wins",
+            "callee-local-does-not-substitute-caller-env",
             local_shadow,
             caller_env,
             explicit_env,
@@ -181,9 +180,12 @@ def main() -> int:
     # Hidden evaluator reflection also works, but only by importing a channel.
     assert all(row["hidden_reflection_matches"] for row in rows)
 
-    # Nearest binding and callee-local shadowing remain observable.
+    # Nearest caller binding remains observable even when the callee happens
+    # to have a local binding with the same spelling: the explicit caller-env
+    # is a separate semantic input.
     assert rows[1]["explicit_env_result"] == "NEAREST-X"
-    assert rows[3]["explicit_env_result"] == "CALLEE-X"
+    assert rows[3]["explicit_env_result"] == "NEAREST-X"
+    assert rows[3]["no_env_result"] == "CALLEE-X"
 
     classification = "CARRIER-PREMISE"
 
@@ -233,7 +235,7 @@ def main() -> int:
             "ordinary_callee_without_env_sees_caller_only_binding": False,
             "explicit_environment_data_reconstructs_lookup": True,
             "nearest_binding_order_preserved": True,
-            "callee_local_shadowing_preserved": True,
+            "caller_env_remains_distinct_from_callee_local_frame": True,
             "transparent_current_env_access_requires_reification_channel": True,
             "host_reflection_counts_as_imported_authority": True,
         },
@@ -274,7 +276,7 @@ def main() -> int:
         "| caller-only binding visible without env input | NO |",
         "| explicit environment-as-data reconstructs lookup | YES |",
         "| nearest caller binding preserved | YES |",
-        "| callee-local shadowing preserved | YES |",
+        "| caller-env remains distinct from callee-local frame | YES |",
         "| hidden evaluator reflection reconstructs lookup | YES, but imports a channel |",
         "",
         "Interpretation:",
