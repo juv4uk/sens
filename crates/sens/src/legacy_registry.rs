@@ -126,8 +126,6 @@ pub(crate) fn domain_identity_from_byte(byte: u8) -> Option<CoreDomainIdentity> 
         0b0011_0101 => Some(d4(0b1101)),
         0b0000_1100 => Some(d5(0b01010)), // PLUS
         0b0000_1101 => Some(d5(0b01011)), // DIFFERENCE
-        0b0001_1010 => Some(d5(0b01110)), // LESSP
-        0b0001_1011 => Some(d5(0b01111)), // GREATERP
         0b0000_1110 => Some(d5(0b10010)), // TIMES
         0b0000_1111 => Some(d5(0b10011)), // QUOTIENT
         _ => None,
