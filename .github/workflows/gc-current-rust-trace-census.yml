@@ -1,0 +1,46 @@
+name: GC current Rust trace census
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/gc-current-rust-trace-census/**"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/environment.rs"
+      - "crates/sens/src/text7.rs"
+      - "crates/sens/src/bignum.rs"
+      - ".github/workflows/gc-current-rust-trace-census.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/gc-current-rust-trace-census/**"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/environment.rs"
+      - "crates/sens/src/text7.rs"
+      - "crates/sens/src/bignum.rs"
+      - ".github/workflows/gc-current-rust-trace-census.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify current Rust representation census
+        run: python3 benchmarks/gc-current-rust-trace-census/run.py
+      - name: Publish current boundary
+        if: always()
+        run: |
+          {
+            echo "## #2548 current Rust trace-layout census"
+            echo
+            echo '~~~text'
+            python3 benchmarks/gc-current-rust-trace-census/run.py
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
