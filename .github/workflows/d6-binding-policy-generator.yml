@@ -1,0 +1,43 @@
+name: D6 binding-policy generator
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2506-d6-binding-policy-generator.py"
+      - "docs/research/2506-d6-binding-policy-generator*.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d6-binding-policy-generator.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2506-d6-binding-policy-generator.py"
+      - "docs/research/2506-d6-binding-policy-generator*.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d6-binding-policy-generator.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generator:
+    name: D6 DEFINE binding-policy product
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run D6 binding-policy generator witness
+        run: python3 scripts/research-2506-d6-binding-policy-generator.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2506 D6 binding-policy generator"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2506-d6-binding-policy-generator.py
+            echo "~~~"
+            echo
+            echo "- Research only: semantic product law is tested separately from residency."
+            echo "- No D6 coordinate is ratified by this gate."
+          } >> "$GITHUB_STEP_SUMMARY"
