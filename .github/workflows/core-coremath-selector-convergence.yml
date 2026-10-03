@@ -1,0 +1,47 @@
+name: Core Core-Math selector convergence research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-coremath-selector-convergence/**"
+      - "benchmarks/core-math-binary-exec/**"
+      - "knowledge/function-status-census.json"
+      - ".github/workflows/core-coremath-selector-convergence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-coremath-selector-convergence/**"
+      - "benchmarks/core-math-binary-exec/**"
+      - "knowledge/function-status-census.json"
+      - ".github/workflows/core-coremath-selector-convergence.yml"
+  workflow_dispatch:
+
+jobs:
+  cross-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build independent Core-Math binary helper
+        run: |
+          cargo build --release             --manifest-path benchmarks/core-coremath-selector-convergence/Cargo.toml
+
+      - name: Run selector convergence cross-proof
+        run: |
+          rm -rf /tmp/core-coremath-selector-convergence
+          python3 benchmarks/core-coremath-selector-convergence/run.py             --binary benchmarks/core-coremath-selector-convergence/target/release/core-coremath-selector-convergence             --out /tmp/core-coremath-selector-convergence
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-coremath-selector-convergence/report.md; then
+            cat /tmp/core-coremath-selector-convergence/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-coremath-selector-convergence
+          path: /tmp/core-coremath-selector-convergence/
+          retention-days: 14
