@@ -549,30 +549,31 @@
       "order": 19,
       "phase": "F",
       "operation": "TRANSFORMER",
-      "historical_era": "later-macro-lineage",
-      "first_attested_lineage": "pending-Phase-F-#2557",
-      "source_provenance": "#2557; archived SENS macro research #2174/#2181/#2193/#2196",
-      "historical_presence": "uncertain",
-      "historical_behavior": "raw-form transformer whose returned form is re-evaluated in caller context",
+      "historical_era": "Lisp-1.5-postmanual-1963",
+      "first_attested_lineage": "Hart AI Memo 57, October 1963",
+      "source_provenance": "docs/research/2557-hart-macro-protocol.md; Hart AIM-57; CHM LISP 1.5 family archive",
+      "historical_presence": "yes",
+      "historical_behavior": "full raw macro form is passed to a one-argument expander whose returned form replaces the original form during DEFINE expansion",
       "historical_dependencies": [
+        "DEFINE",
         "raw form data",
-        "closure",
-        "post-transform evaluation"
+        "list/form construction",
+        "subsequent processing of replacement form"
       ],
       "current_domain_candidate": "unresolved",
       "binary_object": "unplaced",
-      "placement_status": "unplaced-active-comparison",
-      "later_structural_classification": "protocol corner raw=1 env-input=0 result-reeval=1",
-      "later_SENS_classification": "UNRESOLVED",
+      "placement_status": "unplaced-transformer-protocol",
+      "later_structural_classification": "protocol-aligned with current SENS TRANSFORMER on raw-form/caller-env/result-re-eval axes; mechanism staging boundary may differ",
+      "later_SENS_classification": "FORM-TRANSFORMER-PROTOCOL",
       "protocol_axes": {
         "raw_operands": true,
         "explicit_caller_env": false,
         "result_reeval": true
       },
       "issue": 2557,
-      "evidence_sha": "pending",
-      "phase_status": "active",
-      "notes": "Phase F must establish historical lineage/provenance and relation to FEXPR before structural discovery."
+      "evidence_sha": "8884d6f34263578e622a38f50eff07d8f9695cb5",
+      "phase_status": "complete",
+      "notes": "Historical presence/protocol resolved from Hart 1963. No width or coordinate follows; placement remains for later STRUCTURAL-DISCOVERY/SENS-DERIVATION."
     }
   ]
 }
