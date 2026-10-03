@@ -70,7 +70,7 @@ pub(crate) fn evaluate_definition(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
+    exact_callable_arity(crate::CallableIdentity::legacy8(0b0000_1011), arguments, 2, span)?;
     let ExprKind::Symbol(name) = &arguments[0].kind else {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
@@ -183,8 +183,8 @@ pub fn exact_arity(
 /// Arity check for a SENS form inside the core: the form is named by its
 /// 8-bit code, never by a surface spelling. `exact_arity` stays for host
 /// capabilities, which are not SENS identities.
-pub fn exact_sens_arity(
-    operator: crate::Sens8,
+pub fn exact_callable_arity(
+    operator: crate::CallableIdentity,
     arguments: &[Expr],
     expected: usize,
     span: Span,
@@ -214,8 +214,7 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
         Ok(match &expression.kind {
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
-            ExprKind::Sid(sid) => Value::Sid(*sid),
-            ExprKind::DomainIdentity(identity) => Value::DomainIdentity(*identity),
+            ExprKind::Sid(identity) => Value::Sid(*identity),
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
             ExprKind::Symbol(symbol) => Value::Symbol(symbol.clone()),
@@ -239,17 +238,9 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
                 Value::Pair(Rc::new(go(head, depth + 1)?), Rc::new(go(tail, depth + 1)?))
             }
             // Зведений виклик як дані — список із функцією СЕНС у голові.
-            ExprKind::Call(sid, arguments) => {
+            ExprKind::Call(identity, arguments) => {
                 let mut out = Vec::with_capacity(arguments.len() + 1);
-                out.push(Value::Sid(*sid));
-                for argument in arguments.iter() {
-                    out.push(go(argument, depth + 1)?);
-                }
-                Value::list(out)
-            }
-            ExprKind::DomainCall(identity, arguments) => {
-                let mut out = Vec::with_capacity(arguments.len() + 1);
-                out.push(Value::DomainIdentity(*identity));
+                out.push(Value::Sid(*identity));
                 for argument in arguments.iter() {
                     out.push(go(argument, depth + 1)?);
                 }
