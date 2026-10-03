@@ -118,11 +118,14 @@
       "semantic_observable": "whole invocation form exposes call head while operand-only input does not"
     },
     {
-      "current_status": "surviving-observable-candidate",
+      "current_status": "bounded-independent-external-root-theorem",
       "dependency_on_other_factor": [],
       "evidence": [
         "#2439",
-        "#2480"
+        "#2480",
+        "#2488",
+        "#2504",
+        "fcf3a410914882e52960647e49760d0152faa11d"
       ],
       "factor_id": "non-local-exit",
       "falsifier": "local admitted control reconstructs RETURN without whole-call-graph CPS or an equivalent extra control channel",
@@ -462,6 +465,18 @@
     "candidate_factors_total": 9,
     "d5_selector_generated": 8,
     "d5_unknown_free": 24,
+    "external_root_theorems": [
+      {
+        "classification": "semantic-residue-root",
+        "coordinate": "UNPLACED",
+        "evidence": [
+          "#2488",
+          "#2504"
+        ],
+        "factor_id": "non-local-exit",
+        "width": "UNKNOWN"
+      }
+    ],
     "historical_rows_consumed": 19,
     "new_d5_residents": 0,
     "placement_search_authorized": false,
