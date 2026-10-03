@@ -21,7 +21,7 @@
 //! let _: PredicateBit = true;
 //! ```
 
-use crate::bits::{Bit1, Bit2, Bit3};
+use crate::bits::{Bit1, Bit2, Bit3, Bit5, Bit6};
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -81,6 +81,47 @@ impl Bija3 {
     }
 }
 
+
+/// Exact five-bit carrier for the ratified Core.D5 domain.
+///
+/// This proves domain membership only. Individual D5 coordinate meanings are
+/// owned by the SENS owner map/laws, not by this Rust representation type.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD5(Bit5);
+
+impl CoreD5 {
+    /// Wrap an already validated five-bit word as a Core.D5 member.
+    pub const fn from_word(word: Bit5) -> Self {
+        Self(word)
+    }
+
+    /// Recover the mechanical five-bit word without interpreting it.
+    pub const fn word(self) -> Bit5 {
+        self.0
+    }
+}
+
+/// Exact six-bit carrier for the ratified Core.D6 domain.
+///
+/// This proves domain membership only. It deliberately has no implicit
+/// relationship to Core.D5 or Sens8 identity.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD6(Bit6);
+
+impl CoreD6 {
+    /// Wrap an already validated six-bit word as a Core.D6 member.
+    pub const fn from_word(word: Bit6) -> Self {
+        Self(word)
+    }
+
+    /// Recover the mechanical six-bit word without interpreting it.
+    pub const fn word(self) -> Bit6 {
+        self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,6 +143,16 @@ mod tests {
             let word = Bit3::new(raw).unwrap();
             assert!(Bija3::from_word(word).word() == word);
         }
+
+        for raw in 0..=31 {
+            let word = Bit5::new(raw).unwrap();
+            assert!(CoreD5::from_word(word).word() == word);
+        }
+
+        for raw in 0..=63 {
+            let word = Bit6::new(raw).unwrap();
+            assert!(CoreD6::from_word(word).word() == word);
+        }
     }
 
     #[test]
@@ -109,5 +160,7 @@ mod tests {
         assert_eq!(size_of::<PredicateBit>(), 1);
         assert_eq!(size_of::<Racana2>(), 1);
         assert_eq!(size_of::<Bija3>(), 1);
+        assert_eq!(size_of::<CoreD5>(), 1);
+        assert_eq!(size_of::<CoreD6>(), 1);
     }
 }
