@@ -132,15 +132,19 @@ pub(crate) mod fasl {
     const TAG_SYMBOL: u8 = 4;
     const TAG_LIST: u8 = 5;
     const TAG_PAIR: u8 = 6;
-    const TAG_BINARY: u8 = 7;
+    const TAG_LEGACY_SENS8: u8 = 7;
     // Адитивні v3 tags: старі snapshots лишаються байт-в-байт незмінними,
     // а старий decoder fail-closed відхилить новий tag як невідомий.
     const TAG_I32_BUFFER: u8 = 8;
     const TAG_F32_BUFFER: u8 = 9;
     // #1697: числові координати локальної змінної; ім'я не записується.
     const TAG_LOCAL: u8 = 10;
-    // #2840: domain-qualified Core identity, encoded as exact domain width
-    // followed by its packed payload. Old decoders fail closed on this tag.
+    // #2817/#2833: tag 7 is the historical exact-eight compatibility lane.
+    // It must never reconstruct a domain-qualified identity.
+    //
+    // FASL v3 is the first domain-aware format. Domain identity is encoded as
+    // exact domain width followed by its packed payload. Old decoders fail
+    // closed on tag 11, while historical tag 7 remains byte-compatible.
     const TAG_DOMAIN_IDENTITY: u8 = 11;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
@@ -198,7 +202,7 @@ pub(crate) mod fasl {
                 rational.write_fasl(out);
             }
             ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
+                out.push(TAG_LEGACY_SENS8);
                 out.push(sid.packed_byte());
             }
             ExprKind::DomainIdentity(identity) => {
@@ -234,7 +238,7 @@ pub(crate) mod fasl {
             ExprKind::Call(sid, arguments) => {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
-                out.push(TAG_BINARY);
+                out.push(TAG_LEGACY_SENS8);
                 out.push(sid.packed_byte());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
@@ -282,7 +286,7 @@ pub(crate) mod fasl {
                 ExprKind::Number(f64::from_le_bytes(bits.try_into().ok()?), exact)
             }
             TAG_RATIONAL => ExprKind::Rational(Rational::read_fasl(bytes, pos)?),
-            TAG_BINARY => {
+            TAG_LEGACY_SENS8 => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
@@ -391,7 +395,9 @@ pub(crate) mod fasl {
 ///
 /// На відміну від fasl (кеш розбору ядра з хешем джерела), тут немає хешу й
 /// фіксованих u32: малі цілі — 1 байт, список до 15 елементів — 1 байт
-/// заголовка, довжини — varint, функція СЕНС — тег + 1 байт. Вхід вважається
+/// заголовка, довжини — varint. Historical exact-eight compatibility uses
+/// one legacy tag + byte; canonical Core identity uses tag + width + payload.
+/// Вхід вважається
 /// недовіреним: глибина й розміри обмежені, будь-яка невідповідність — None.
 pub(crate) mod wire {
     use super::{Exactness, Expr, ExprKind, MAX_STRUCTURE_DEPTH};
@@ -403,7 +409,7 @@ pub(crate) mod wire {
     const SHORT_LIST: u8 = 0x40; // 0x40..0x4F — список із 0..15 елементів
     const SHORT_LIST_END: u8 = 0x50;
     const TAG_LIST: u8 = 0x50;
-    const TAG_BINARY: u8 = 0x51;
+    const TAG_LEGACY_SENS8: u8 = 0x51;
     const TAG_INTEGER: u8 = 0x52;
     const TAG_NUMBER: u8 = 0x53;
     const TAG_RATIONAL: u8 = 0x54;
@@ -411,6 +417,9 @@ pub(crate) mod wire {
     const TAG_SYMBOL: u8 = 0x56;
     const TAG_PAIR: u8 = 0x57;
     const TAG_LOCAL: u8 = 0x58;
+    // #2817/#2833: 0x51 remains the historical exact-eight compatibility
+    // lane. 0x59 preserves canonical Core domain + exact payload; an unknown
+    // width fails closed instead of being inferred or widened.
     const TAG_DOMAIN_IDENTITY: u8 = 0x59;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
@@ -509,7 +518,7 @@ pub(crate) mod wire {
                 rational.write_fasl(out);
             }
             ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
+                out.push(TAG_LEGACY_SENS8);
                 out.push(sid.packed_byte());
             }
             ExprKind::DomainIdentity(identity) => {
@@ -536,7 +545,7 @@ pub(crate) mod wire {
             }
             ExprKind::Call(sid, arguments) => {
                 put_list_header(out, arguments.len() + 1);
-                out.push(TAG_BINARY);
+                out.push(TAG_LEGACY_SENS8);
                 out.push(sid.packed_byte());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
@@ -646,7 +655,7 @@ pub(crate) mod wire {
                 return open_list(bytes, *pos, count);
             }
             TAG_PAIR => return Some(Step::Open(Open::Pair { head: None })),
-            TAG_BINARY => {
+            TAG_LEGACY_SENS8 => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
@@ -787,6 +796,57 @@ mod wire_tests {
     }
 
     #[test]
+    fn wire_domain_transport_preserves_domain_and_fails_closed() {
+        let span = crate::Span { start: 0, end: 0 };
+        let d3: crate::CoreDomainIdentity =
+            crate::Bija3::from_word(crate::Bit3::new(1).unwrap()).into();
+        let d4: crate::CoreDomainIdentity =
+            crate::CoreD4::from_word(crate::Bit4::new(1).unwrap()).into();
+
+        let encoded_d3 = encode_program(&[Expr {
+            kind: ExprKind::DomainIdentity(d3),
+            span,
+        }]);
+        let encoded_d4 = encode_program(&[Expr {
+            kind: ExprKind::DomainIdentity(d4),
+            span,
+        }]);
+
+        assert_eq!(&encoded_d3[4..7], &[0x59, 3, 1]);
+        assert_eq!(&encoded_d4[4..7], &[0x59, 4, 1]);
+        assert_ne!(encoded_d3, encoded_d4);
+
+        let decoded_d3 = decode_program(&encoded_d3).expect("D3 wire decodes");
+        let decoded_d4 = decode_program(&encoded_d4).expect("D4 wire decodes");
+        assert!(matches!(decoded_d3[0].kind, ExprKind::DomainIdentity(id) if id == d3));
+        assert!(matches!(decoded_d4[0].kind, ExprKind::DomainIdentity(id) if id == d4));
+
+        for width in [0u8, 1, 2, 7, 8, 9] {
+            let malformed = [b'S', b'W', 1, 1, 0x59, width, 1];
+            assert!(
+                decode_program(&malformed).is_none(),
+                "wire must reject non-Core domain width {width}"
+            );
+        }
+
+        let overwide_d3 = [b'S', b'W', 1, 1, 0x59, 3, 0b1000];
+        assert!(
+            decode_program(&overwide_d3).is_none(),
+            "wire must reject payload that does not fit declared D3 width"
+        );
+    }
+
+    #[test]
+    fn wire_legacy_exact8_tag_never_becomes_domain_identity() {
+        let legacy = parse("00000001").expect("legacy exact-eight source parses");
+        let encoded = encode_program(&legacy);
+        assert_eq!(&encoded[4..6], &[0x51, 1]);
+        let decoded = decode_program(&encoded).expect("legacy exact-eight wire decodes");
+        assert!(matches!(decoded[0].kind, ExprKind::Sid(_)));
+        assert!(!matches!(decoded[0].kind, ExprKind::DomainIdentity(_)));
+    }
+
+    #[test]
     fn wire_rejects_untrusted_garbage_without_panicking() {
         assert!(decode_program(b"").is_none());
         assert!(decode_program(b"not wire").is_none());
@@ -854,7 +914,7 @@ mod fasl_tests {
         let expressions = parse(SOURCE).expect("exact SENS numeric-buffer-map parses");
         let encoded = encode_program(&expressions, &source_hash);
 
-        // FASL TAG_BINARY = 7; наступний байт є самою функцією СЕНС.
+        // Historical FASL tag 7 is legacy exact-eight transport only.
         assert!(
             encoded.windows(2).any(|bytes| bytes == [7, 0b01011001]),
             "numeric-buffer-map must travel as one exact SENS byte"
@@ -932,6 +992,70 @@ mod fasl_tests {
         };
         assert_eq!(rational.to_string(), SOURCE);
         assert_eq!(encode_program(&decoded, &source_hash), encoded);
+    }
+
+    #[test]
+    fn fasl_domain_transport_preserves_domain_and_fails_closed() {
+        let span = crate::Span { start: 0, end: 0 };
+        let hash = [0u8; 32];
+        let d3: crate::CoreDomainIdentity =
+            crate::Bija3::from_word(crate::Bit3::new(1).unwrap()).into();
+        let d4: crate::CoreDomainIdentity =
+            crate::CoreD4::from_word(crate::Bit4::new(1).unwrap()).into();
+
+        let encoded_d3 = encode_program(
+            &[super::Expr {
+                kind: ExprKind::DomainIdentity(d3),
+                span,
+            }],
+            &hash,
+        );
+        let encoded_d4 = encode_program(
+            &[super::Expr {
+                kind: ExprKind::DomainIdentity(d4),
+                span,
+            }],
+            &hash,
+        );
+
+        // MYF1(4) + payload-len(4) + version(4) + hash(32) + count(4).
+        const EXPR_OFFSET: usize = 48;
+        assert_eq!(&encoded_d3[EXPR_OFFSET..EXPR_OFFSET + 3], &[11, 3, 1]);
+        assert_eq!(&encoded_d4[EXPR_OFFSET..EXPR_OFFSET + 3], &[11, 4, 1]);
+        assert_ne!(encoded_d3, encoded_d4);
+
+        let (decoded_d3, _) = decode_program(&encoded_d3).expect("D3 FASL decodes");
+        let (decoded_d4, _) = decode_program(&encoded_d4).expect("D4 FASL decodes");
+        assert!(matches!(decoded_d3[0].kind, ExprKind::DomainIdentity(id) if id == d3));
+        assert!(matches!(decoded_d4[0].kind, ExprKind::DomainIdentity(id) if id == d4));
+
+        for width in [0u8, 1, 2, 7, 8, 9] {
+            let mut malformed = encoded_d3.clone();
+            malformed[EXPR_OFFSET + 1] = width;
+            assert!(
+                decode_program(&malformed).is_none(),
+                "FASL must reject non-Core domain width {width}"
+            );
+        }
+
+        let mut overwide = encoded_d3.clone();
+        overwide[EXPR_OFFSET + 2] = 0b1000;
+        assert!(
+            decode_program(&overwide).is_none(),
+            "FASL must reject payload that does not fit declared D3 width"
+        );
+    }
+
+    #[test]
+    fn fasl_legacy_exact8_tag_never_becomes_domain_identity() {
+        let hash = [0u8; 32];
+        let legacy = parse("00000001").expect("legacy exact-eight source parses");
+        let encoded = encode_program(&legacy, &hash);
+        const EXPR_OFFSET: usize = 48;
+        assert_eq!(&encoded[EXPR_OFFSET..EXPR_OFFSET + 2], &[7, 1]);
+        let (decoded, _) = decode_program(&encoded).expect("legacy exact-eight FASL decodes");
+        assert!(matches!(decoded[0].kind, ExprKind::Sid(_)));
+        assert!(!matches!(decoded[0].kind, ExprKind::DomainIdentity(_)));
     }
 
     #[test]
