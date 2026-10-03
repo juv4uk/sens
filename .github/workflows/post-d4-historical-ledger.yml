@@ -1,0 +1,60 @@
+name: Historical ingest ledger
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "docs/research/2344-post-d4-historical-ledger.md"
+      - "docs/research/2344-post-d4-historical-ledger.uk.md"
+      - "scripts/research-2344-historical-ledger.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/post-d4-historical-ledger.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "docs/research/2344-post-d4-historical-ledger.md"
+      - "docs/research/2344-post-d4-historical-ledger.uk.md"
+      - "scripts/research-2344-historical-ledger.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/post-d4-historical-ledger.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Early-Lisp historical ingest ledger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate ledger
+        run: |
+          python3 scripts/research-2344-historical-ledger.py \
+            --summary-json historical-ingest-summary.json
+          cat historical-ingest-summary.json
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Historical ingest ledger"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2344-historical-ledger.py
+            echo "~~~"
+            echo
+            echo "- Historical presence is independent of later derivability."
+            echo "- No binary object is allocated during HISTORICAL-INGEST."
+            echo "- #2557 is the active final comparison row."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: historical-ingest-summary
+          path: historical-ingest-summary.json
