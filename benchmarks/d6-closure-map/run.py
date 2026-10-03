@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """#2422 exact D6 closure map after owner ratification of the domain.
 
-The D6 domain is ratified. Occupancy is not.
+The D6 domain is ratified. Occupancy is law/decision driven.
 
-This script classifies D6 conservatively:
-- selector-law closure is generated evidence inside the ratified domain;
-- every other coordinate remains UNKNOWN/free;
-- no non-selector resident is pre-placed by this map.
+This script classifies D6 canonically after owner decision #2538 OD-001 / #2723:
+- selector-law closure contributes 16 generated residents;
+- 001111 is the single owner-ratified manual/nonselector resident;
+- every other non-generated coordinate remains UNKNOWN/free.
 
 Hardening:
 - cross-check generated coordinates against merged #2329;
@@ -39,6 +39,8 @@ LAW_BITS = {
 REPO = Path(__file__).resolve().parents[2]
 FORECAST = REPO / "scripts/research-2322-generative-domain-forecast.py"
 LEDGER = REPO / "benchmarks/generator-economy/semantic-fact-ledger.json"
+
+MANUAL_RESIDENT = "001111"
 
 
 def load_forecast_words() -> set[str]:
@@ -147,6 +149,37 @@ def selector_rows() -> dict[str, dict[str, Any]]:
     return rows
 
 
+def manual_resident_row() -> dict[str, Any]:
+    return {
+        "coordinate": MANUAL_RESIDENT,
+        "width": WIDTH,
+        "domain": "D6",
+        "domain_ratified": True,
+        "display_name": "SETQ/shared-location",
+        "display_name_authority": False,
+        "semantic_family": "binding-policy/shared-location",
+        "status": "ratified-manual",
+        "root_basis": "0011",
+        "root_name": "DEFINE",
+        "law_path": ["nearest-existing-scope", "fail-on-miss"],
+        "law_steps_display": ["nearest-existing-scope", "fail-on-miss"],
+        "canonical_coordinate_path_bits": "11",
+        "semantic_law": "nearest-existing scope + fail-on-miss",
+        "semantic_law_authority": "#2538:OD-001/#2723",
+        "coordinate_realization": "0011 || 11",
+        "coordinate_realization_authority": "#2538:OD-001/#2723",
+        "certificate_ref": "#2511/#2518/#2537/#2541/#2634",
+        "certificate": None,
+        "certificate_replay_ok": False,
+        "collision": False,
+        "core_closure": True,
+        "semantic_member_of_ratified_domain": True,
+        "manual_resident_required": True,
+        "placement_ref": "#2538:OD-001/#2723",
+        "research_overlay_refs": ["#2506", "#2511", "#2518", "#2537", "#2541", "#2634"],
+    }
+
+
 def build_map() -> list[dict[str, Any]]:
     generated = selector_rows()
     forecast_words = load_forecast_words()
@@ -162,6 +195,8 @@ def build_map() -> list[dict[str, Any]]:
         coordinate = format(n, f"0{WIDTH}b")
         if coordinate in generated:
             row = generated[coordinate]
+        elif coordinate == MANUAL_RESIDENT:
+            row = manual_resident_row()
         else:
             row = {
                 "coordinate": coordinate,
@@ -197,21 +232,26 @@ def build_map() -> list[dict[str, Any]]:
         raise AssertionError("D6 map must contain every exact coordinate exactly once")
     if sum(r["status"] == "generated" for r in rows) != 16:
         raise AssertionError("D6 selector closure must contain exactly 16 generated coordinates")
-    if sum(r["status"] == "UNKNOWN/free" for r in rows) != 48:
-        raise AssertionError("D6 must conservatively retain exactly 48 UNKNOWN/free coordinates")
+    if sum(r["status"] == "ratified-manual" for r in rows) != 1:
+        raise AssertionError("D6 must contain exactly one owner-ratified manual resident")
+    if sum(r["status"] == "UNKNOWN/free" for r in rows) != 47:
+        raise AssertionError("D6 must conservatively retain exactly 47 UNKNOWN/free coordinates")
     if any(r["collision"] for r in rows):
         raise AssertionError("D6 closure collision detected")
-    if sum(bool(r["semantic_member_of_ratified_domain"]) for r in rows) != 16:
-        raise AssertionError("exactly the 16 generated selectors are D6 semantic members")
-    if any(r["manual_resident_required"] for r in rows):
-        raise AssertionError("selector generation must not become manual occupancy")
-    if any(r["placement_ref"] for r in rows):
-        raise AssertionError("non-selector capability must not be pre-placed by closure map")
+    if sum(bool(r["semantic_member_of_ratified_domain"]) for r in rows) != 17:
+        raise AssertionError("exactly 16 generated selectors + 1 ratified manual resident are D6 semantic members")
+    manual = [r for r in rows if r["manual_resident_required"]]
+    if len(manual) != 1 or manual[0]["coordinate"] != MANUAL_RESIDENT:
+        raise AssertionError("001111 must be the only manual D6 resident")
+    placed = [r for r in rows if r["placement_ref"]]
+    if len(placed) != 1 or placed[0]["coordinate"] != MANUAL_RESIDENT:
+        raise AssertionError("only owner-ratified 001111 may carry a manual placement_ref")
     return rows
 
 
 def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
     generated = sum(r["status"] == "generated" for r in rows)
+    manual = sum(r["status"] == "ratified-manual" for r in rows)
     depth = WIDTH - 3
     flat_each = WIDTH
     self_framed_each = 4 + depth
@@ -228,7 +268,8 @@ def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "domain_ratified": True,
         "generated_coordinate_count": generated,
-        "unknown_free_count": 64 - generated,
+        "ratified_manual_resident_count": manual,
+        "unknown_free_count": 64 - generated - manual,
         "flat_exact_coordinate": totals(flat_each),
         "self_framed_selector_certificate": totals(self_framed_each),
         "outer_framed_certificate_payload": totals(outer_framed_each),
@@ -245,6 +286,7 @@ def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
     generated = [r for r in rows if r["status"] == "generated"]
+    manual = [r for r in rows if r["status"] == "ratified-manual"]
     unknown = [r for r in rows if r["status"] == "UNKNOWN/free"]
     lines = [
         "# D6 closure map — #2422",
@@ -255,6 +297,7 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
         "|---|---:|",
         f"| exact D6 coordinates | {len(rows)} |",
         f"| selector-law generated | {len(generated)} |",
+        f"| owner-ratified manual residents | {len(manual)} |",
         f"| UNKNOWN/free | {len(unknown)} |",
         f"| collisions | {sum(bool(r['collision']) for r in rows)} |",
         f"| semantic members of ratified D6 | {sum(bool(r['semantic_member_of_ratified_domain']) for r in rows)} |",
@@ -280,8 +323,9 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
         "- certificate storage is not semantic compression;",
         "- the [0,5] basis interval does not claim global selector minimality;",
         "- Core-Math hypotheses cannot change Core closure status;",
-        "- D6 domain ratification does not admit any UNKNOWN/free coordinate;",
-        "- binding-policy 0011xx remains overlay-only pending separate residency evidence.",
+        "- owner decision #2538 OD-001 admits only 001111; it does not transfer to neighboring coordinates;",
+        "- 001100 remains a parent duplicate and 001101/001110 remain proof intermediates, not residents;",
+        "- the remaining 47 UNKNOWN/free coordinates are not allocation invitations.",
         "",
     ]
     return "\n".join(lines)
@@ -290,7 +334,7 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
 def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -> None:
     out.mkdir(parents=True, exist_ok=True)
     payload = {
-        "schema": "d6-closure-map/v3",
+        "schema": "d6-closure-map/v4",
         "authority": "core-closeout-evidence",
         "domain": "D6",
         "domain_ratified": True,
@@ -305,13 +349,15 @@ def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -
             "anti_numerology": "#2366",
             "semantic_fact_ledger": "#2304/#2385",
             "closeout_parent": "#2414",
+            "manual_resident_owner_decision": "#2538:OD-001/#2723",
         },
         "core_math_overlay_policy": "separate overlay only; never mutates Core status",
         "counts": {
             "generated": 16,
+            "ratified-manual": 1,
             "ratified-root": 0,
             "ratified-residue": 0,
-            "UNKNOWN/free": 48,
+            "UNKNOWN/free": 47,
             "collisions": 0,
         },
         "accounting": acct,
