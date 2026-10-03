@@ -18,7 +18,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[1]
+REPO = Path(__file__).resolve().parents[2]
 LEDGER = REPO / "docs/research/2344-post-d4-historical-ledger.json"
 
 DERIVED = {
