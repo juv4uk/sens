@@ -8,12 +8,12 @@ use wsm_prolog_kernel::PrologKernel;
 
 static NEXT_RUN_ID: AtomicU64 = AtomicU64::new(0);
 
-fn run_source(source: &str, core3: bool) -> (bool, String, String) {
+fn run_source(source: &str, mechanism_lab: bool) -> (bool, String, String) {
     let run_id = NEXT_RUN_ID.fetch_add(1, Ordering::Relaxed);
     let dir = std::env::temp_dir().join(format!(
         "sens-raw-invoke-current-{}-{}-{run_id}",
         std::process::id(),
-        if core3 { "core3" } else { "core4" }
+        if mechanism_lab { "mechanism-lab" } else { "core" }
     ));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).expect("temporary test directory");
@@ -21,8 +21,8 @@ fn run_source(source: &str, core3: bool) -> (bool, String, String) {
     fs::write(&file, source).expect("source");
 
     let mut command = Command::new(env!("CARGO_BIN_EXE_sens"));
-    if core3 {
-        command.arg("--core=3");
+    if mechanism_lab {
+        command.arg("--lab=mechanism");
     }
     let output = command
         .arg(&file)
@@ -36,10 +36,10 @@ fn run_source(source: &str, core3: bool) -> (bool, String, String) {
 }
 
 #[test]
-fn registration_stays_unavailable_under_default_core4() {
+fn registration_stays_unavailable_under_default_core() {
     let (ok, _stdout, stderr) =
         run_source(r#"(10101000 "datalog" "path")"#, false);
-    assert!(!ok, "default Core4 must not inherit Core3 raw admission");
+    assert!(!ok, "default Core must not inherit mechanism-lab raw admission");
     assert!(
         stderr.contains("SENS function has no admitted callable mechanism: 10101000"),
         "stderr: {stderr}"
@@ -47,7 +47,7 @@ fn registration_stays_unavailable_under_default_core4() {
 }
 
 #[test]
-fn exact_10101000_reaches_datalog_only_after_explicit_core3_selection() {
+fn exact_10101000_reaches_datalog_only_after_explicit_mechanism_lab() {
     let (ok, stdout, stderr) =
         run_source(r#"(10101000 "datalog" "path")"#, true);
     assert!(ok, "stderr: {stderr}");
