@@ -4,6 +4,7 @@
 
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
 use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
+use crate::CoreDomainIdentity;
 use std::{
     collections::HashSet,
     rc::Rc,
@@ -228,6 +229,31 @@ enum Head {
 
 const EVAL: Sens8 = crate::sens!(01001101);
 
+fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head {
+    if let Some(necessary) = necessary_forms::identity_for_domain_identity(identity) {
+        return match necessary {
+            necessary_forms::NecessaryFormIdentity::Lambda => Head::Lambda,
+            necessary_forms::NecessaryFormIdentity::Define => Head::Define,
+        };
+    }
+
+    let routed = match identity {
+        CoreDomainIdentity::D3(word) => match word.word().packed_bits() {
+            0b001 => Head::Quote,
+            0b011 => Head::Cond,
+            _ => Head::Call,
+        },
+        _ => Head::Call,
+    };
+    if matches!(routed, Head::Call)
+        && matches!(environment.domain_code_slot(identity), Some(Value::Macro(_)))
+    {
+        Head::Opaque
+    } else {
+        routed
+    }
+}
+
 fn sid_head(sid: Sens8, environment: &Environment) -> Head {
     if sid == EVAL {
         return Head::Opaque;
@@ -253,6 +279,7 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
 
 fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Head {
     match &head.kind {
+        ExprKind::DomainIdentity(identity) => domain_head(*identity, environment),
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
             if let Some(sid) = canon::routed_sid_for_surface(name) {
@@ -271,6 +298,7 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
             }
             match environment.get(name) {
                 Some(Value::Macro(_) | Value::Builtin(_)) => Head::Opaque,
+                Some(Value::DomainIdentity(identity)) => domain_head(identity, environment),
                 Some(Value::Sid(sid)) => sid_head(sid, environment),
                 _ => Head::Call,
             }
@@ -286,6 +314,9 @@ fn is_pure(expression: &Expr, own: &[Rc<str>], environment: &Environment) -> boo
             (classify_head(&items[0], own, environment), &items[..])
         }
         ExprKind::Call(sid, arguments) => (sid_head(*sid, environment), &arguments[..]),
+        ExprKind::DomainCall(identity, arguments) => {
+            (domain_head(*identity, environment), &arguments[..])
+        },
         _ => return true,
     };
     match head {
@@ -364,7 +395,9 @@ fn resolve(
                 Head::Call => {
                     // Голова лишається як є: диспетчер вирішує за нею.
                     let head = match &items[0].kind {
-                        ExprKind::Symbol(_) | ExprKind::Sid(_) => items[0].clone(),
+                        ExprKind::Symbol(_) | ExprKind::Sid(_) | ExprKind::DomainIdentity(_) => {
+                            items[0].clone()
+                        },
                         _ => resolve(&items[0], scopes, environment, changed),
                     };
                     let mut out = Vec::with_capacity(items.len());
@@ -378,6 +411,17 @@ fn resolve(
             Head::Call => ExprKind::Call(*sid, resolve_all(arguments, changed)),
             Head::Cond => ExprKind::Call(
                 *sid,
+                arguments
+                    .iter()
+                    .map(|clause| resolve_cond_clause(clause, scopes, environment, changed))
+                    .collect(),
+            ),
+            _ => return expression.clone(),
+        },
+        ExprKind::DomainCall(identity, arguments) => match domain_head(*identity, environment) {
+            Head::Call => ExprKind::DomainCall(*identity, resolve_all(arguments, changed)),
+            Head::Cond => ExprKind::DomainCall(
+                *identity,
                 arguments
                     .iter()
                     .map(|clause| resolve_cond_clause(clause, scopes, environment, changed))
@@ -464,6 +508,14 @@ pub(super) fn apply(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     match function {
+        Value::DomainIdentity(identity) => {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, calling_environment)?);
+            }
+            canon::invoke_domain_identity(identity, &values, calling_environment, span)
+                .map(EvalStep::Value)
+        }
         Value::Sid(sid) => {
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
