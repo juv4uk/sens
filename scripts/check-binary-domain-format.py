@@ -315,12 +315,12 @@ def falsifier_verdict(value, body=""):
         return "empty"
     if LEGEND_TEXT["FALSIFIER"].search(value):
         return "legend"
-    if ASPIRATIONAL.search(value):
-        return "aspirational"
 
     norm = _claim_norm(value)
     if FALSIFIER_PLACEHOLDER.fullmatch(norm):
         return "placeholder"
+    if ASPIRATIONAL.search(value):
+        return "aspirational"
 
     # A FALSIFIER must attack the LAW, not merely repeat or trivially negate it.
     _, law = field_value(body, "LAW")
