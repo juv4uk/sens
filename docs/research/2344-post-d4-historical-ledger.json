@@ -549,30 +549,33 @@
       "order": 19,
       "phase": "F",
       "operation": "TRANSFORMER",
-      "historical_era": "later-macro-lineage",
-      "first_attested_lineage": "pending-Phase-F-#2557",
-      "source_provenance": "#2557; archived SENS macro research #2174/#2181/#2193/#2196",
-      "historical_presence": "uncertain",
-      "historical_behavior": "raw-form transformer whose returned form is re-evaluated in caller context",
+      "historical_era": "Hart-MACRO-1963",
+      "first_attested_lineage": "Hart-AIM-057-1963-10",
+      "source_provenance": "Timothy P. Hart, MACRO Definitions for LISP, MIT AI Memo 57 (Oct 1963); #2557; executable timing witness #2568/#2569",
+      "historical_presence": "yes",
+      "historical_behavior": "macro function consumes the full raw form and returns a replacement form expanded by DEFINE before later execution",
       "historical_dependencies": [
-        "raw form data",
-        "closure",
-        "post-transform evaluation"
+        "DEFINE expansion",
+        "raw full-form data",
+        "form construction",
+        "macro function"
       ],
       "current_domain_candidate": "unresolved",
       "binary_object": "unplaced",
-      "placement_status": "unplaced-active-comparison",
-      "later_structural_classification": "protocol corner raw=1 env-input=0 result-reeval=1",
-      "later_SENS_classification": "UNRESOLVED",
+      "placement_status": "unplaced-historical-macro",
+      "later_structural_classification": "A/B/C protocol-aligned with current SENS transformer; expansion locus observably timing-distinct",
+      "later_SENS_classification": "PARTIAL-PROTOCOL-ALIGNMENT-TIMING-DISTINCT",
       "protocol_axes": {
         "raw_operands": true,
         "explicit_caller_env": false,
         "result_reeval": true
       },
       "issue": 2557,
-      "evidence_sha": "pending",
-      "phase_status": "active",
-      "notes": "Phase F must establish historical lineage/provenance and relation to FEXPR before structural discovery."
+      "evidence_sha": "1ad012de96eceecae3927b98f99429093cdff354",
+      "phase_status": "complete",
+      "notes": "Hart MACRO and current SENS TRANSFORMER align on raw syntax, no explicit caller-env input, and returned-form protocol, but #2568/#2569 proves expansion timing is independently observable. No coordinate or width follows.",
+      "historical_expansion_locus": "definition-time",
+      "current_sens_expansion_locus": "evaluation-time"
     }
   ]
 }
