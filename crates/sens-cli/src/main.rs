@@ -73,6 +73,10 @@ fn main() {
         .into_iter()
         .filter(|arg| !arg.starts_with("--allow-process=") && arg != "--protocol=sexpr")
         .collect();
+    if args.iter().any(|arg| arg == "--core" || arg.starts_with("--core=")) {
+        eprintln!("sens: --core was removed; SENS has one Core");
+        process::exit(2);
+    }
     let (args, repl_surface) = match extract_repl_surface(args) {
         Ok(parsed) => parsed,
         Err(error) => {
