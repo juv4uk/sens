@@ -37,6 +37,7 @@ EXPLICIT_COMPATIBILITY = {
 
 BACKEND_MECHANISM = {
     "crates/sens/src/eval/capabilities.rs",
+    "crates/sens/src/eval/legacy_backend.rs",
     "crates/sens-cli/src/island_invoke.rs",
 }
 
@@ -280,6 +281,11 @@ def self_test() -> int:
         (
             "crates/sens/src/eval/capabilities.rs",
             "fn host(id: Sens8) {}",
+            "backend-mechanism",
+        ),
+        (
+            "crates/sens/src/eval/legacy_backend.rs",
+            "fn invoke(id: Sens8) {}",
             "backend-mechanism",
         ),
         ("docs/research/old.md", "Sens8 was the old identity", "historical-doc"),
