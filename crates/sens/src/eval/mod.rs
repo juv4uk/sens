@@ -14,6 +14,7 @@ pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
 mod closures;
+mod legacy_backend;
 pub(crate) mod lower;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
