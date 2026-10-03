@@ -1,8 +1,10 @@
 //! #3003 — D5 arithmetic sibling-law falsifier.
 //!
-//! This is a negative structural witness:
-//! owner adjacency does not yet imply a one-delta semantic sibling law.
-//! It consumes only ratified/provenance data and does not change occupancy.
+//! This is the full-protocol scope witness.
+//! Exact D5 runtime separately proves the binary-value inverse-orientation
+//! equations. Here we verify that the entire historical calling protocols
+//! contain extra independent deltas, so no global suffix theorem follows.
+//! Occupancy is unchanged.
 
 const OWNER: &str = include_str!("../../../knowledge/d5-historical-full-map.json");
 const WIDTHS: &str = include_str!("../../../knowledge/exact-width-admitted-corpus.json");
@@ -59,12 +61,14 @@ fn full_historical_protocol_is_more_than_one_orientation_delta() {
 }
 
 #[test]
-fn classification_stays_coordinate_law_not_global_suffix_theorem() {
+fn classification_separates_value_law_from_full_protocol_scope() {
     let result = include_str!("../../../benchmarks/d5-arithmetic-sibling-law/result.json");
 
-    assert!(result.contains(r#""additive_classification": "MULTI-DELTA-NOT-LOCAL-SIBLING-LAW""#));
-    assert!(result.contains(r#""multiplicative_classification": "MULTI-DELTA-NOT-LOCAL-SIBLING-LAW""#));
-    assert!(result.contains(r#""relation_class": "COORDINATE-LAW""#));
+    assert!(result.contains(r#""additive_value_semantics_classification": "LOCAL-SIBLING-LAW""#));
+    assert!(result.contains(r#""multiplicative_value_semantics_classification": "LOCAL-SIBLING-LAW""#));
+    assert!(result.contains(r#""additive_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW""#));
+    assert!(result.contains(r#""multiplicative_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW""#));
+    assert!(result.contains(r#""relation_class": "VALUE-LOCAL-LAW_PLUS_FULL-PROTOCOL-COORDINATE-SCOPE""#));
     assert!(result.contains(r#""core_math_inverse_law_transfer": "FORBIDDEN-WITHOUT-BRIDGE""#));
     assert!(result.contains(r#""owner_map_mutation": "NONE""#));
 }
