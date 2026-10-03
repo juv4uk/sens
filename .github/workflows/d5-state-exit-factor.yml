@@ -1,0 +1,25 @@
+name: D5 state exit factor research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_setq_state_passing.rs"
+      - "crates/sens/tests/post_d4_control_derivation.rs"
+      - "scripts/research-2472-transform-footprint.py"
+      - "benchmarks/d5-structural-discovery/state_exit_independence.py"
+      - ".github/workflows/d5-state-exit-factor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  factor-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check bounded state and exit factor separation
+        run: python3 benchmarks/d5-structural-discovery/state_exit_independence.py
