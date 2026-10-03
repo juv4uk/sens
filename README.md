@@ -10,7 +10,7 @@
 
 *SENS досліджує domain-derived semantics, точну ширину двійкової identity, щільне packed-представлення, виконувані закони та різні execution substrates. Lisp був початковим синтаксичним носієм і середовищем прототипування.*
 
-> **Поточний фундамент:** ратифіковані D1→D4 exact-width domains. Історичні SENS8 / Function8 механізми лишаються compatibility/research provenance під час міграції, але більше не є описом поточної онтології мови.
+> **Поточний фундамент:** ратифіковані D1→D8 exact-width domains. Історичні SENS8 / Function8 механізми лишаються compatibility/research provenance під час міграції, але більше не є описом поточної онтології мови.
 
 <p><a href="https://github.com/juv4uk/sens/releases/latest/download/sens-cli-web.html"><strong>▶ Спробувати sens у вебі</strong></a></p>
 <sub>Один автономний portable-файл <code>.html</code> · без встановлення · працює локально у браузері</sub>
@@ -29,7 +29,7 @@
 
 `sens` (СЕНС) — експериментальна мова програмування й дослідницька платформа для exact-width двійкової identity, domain-derived semantics, точної арифметики, компактного packed-представлення та незалежних execution kernels.
 
-Історично проєкт розвивався під робочою назвою `my-lisp`. Lisp слугував початковим синтаксичним носієм і середовищем прототипування; пізніше проєкт пройшов через flat SENS8 / Function8 фазу. Поточний ратифікований фундамент інший: ширина є частиною identity, а D1, D2, D3 і D4 є різними exact-width доменами. Людські назви лишаються проєкціями й не визначають машинну identity.
+Історично проєкт розвивався під робочою назвою `my-lisp`. Lisp слугував початковим синтаксичним носієм і середовищем прототипування; пізніше проєкт пройшов через flat SENS8 / Function8 фазу. Поточний ратифікований фундамент інший: ширина є частиною identity, а D1→D8 є окремими exact-width доменами під власними законами; D7 має Sound7/local-ordinal роль, а Core.D8 не тотожний історичному Sens8. Людські назви лишаються проєкціями й не визначають машинну identity.
 
 Головний архітектурний принцип:
 
@@ -85,7 +85,7 @@ D3-слово `011` (`COND`) має двочленний закон `(test expre
 Для evidence layer достатньо простої межі:
 
 - width є частиною identity: `1 != 01 != 001 != 0001`;
-- ратифікований фундамент D1→D4 використовує точні ширини 1, 2, 3 і 4 біти;
+- ратифікований фундамент D1→D8 використовує точні ширини від 1 до 8 бітів;
 - packed payload переносить біти щільно, але сам payload не вигадує межі слів;
 - surface — лише необов'язкова людська проєкція;
 - witness — виконуваний доказ конкретного обмеженого твердження.
@@ -93,10 +93,10 @@ D3-слово `011` (`COND`) має двочленний закон `(test expre
 На сьогодні README може чесно показати такі результати:
 
 - **Exact-width carriers працюють механічно.** `Bits<N>`, `BinarySourceWord`, `BitPacker` і `PackedBitstream` зберігають width + bits без zero-padding identity.
-- **D1→D4 ратифіковані як різні домени.** D1 — PredicateBit, D2 — структура, D3 — фундаментальні операції, D4 — bootstrap-шар.
+- **D1→D8 ратифіковані як різні exact-width домени.** D1 — PredicateBit, D2 — структура, D3 — фундаментальні операції, D4 — bootstrap-шар; D5/D6 мають власні ратифіковані owner-карти, D7 належить Sound7/Text7 закону, а D8 лишається окремою domain-qualified identity і не тотожний legacy Sens8.
 - **Packed source має явну boundary-межу.** Однаковий payload може мати різні valid width schedules; standalone framing досліджується окремо.
 - **Міграція одностороння.** Новий exact-width код не повинен створювати нову залежність від legacy SENS8 / Function8 identity.
-- **Vertical Day — історичний bounded machine-path доказ.** Зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) передує поточній D1→D4 моделі й зберігається як provenance, а не як доказ сучасної identity-схеми.
+- **Vertical Day — історичний bounded machine-path доказ.** Зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) передує поточній D1→D8 моделі й зберігається як provenance, а не як доказ сучасної identity-схеми.
 - **Machine path fail-closed.** Raw/malformed/unadmitted requests відхиляються до входу в host.
 
 **Ще не доведено:** complete native GC/general heap, first-class escaping native pairs, automatic GPU/FPGA scheduler, complete Lisp machine або OS. Повний список меж твердження й exact evidence ledger лежить у датованому [`Vertical Day record`](docs/research/2026-09-14-vertical-day.md).
@@ -136,7 +136,7 @@ Packed transport не надає слову семантики: він пере�
 
 ### Compatibility reader/UI examples
 
-Наступні приклади документують чинні reader/surface compatibility paths під час міграції. Вони не перевизначають exact-width D1→D4 identity.
+Наступні приклади документують чинні reader/surface compatibility paths під час міграції. Вони не перевизначають exact-width D1→D8 identity.
 
 ### Апостроф
 
@@ -169,7 +169,7 @@ Packed transport не надає слову семантики: він пере�
 
 ## Українською можна програмувати
 
-Українська — не лише мова README. Людські слова є source/UI-проєкціями, а не machine identity. Чинний [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) ще містить compatibility SID8 routing під час міграції; exact-width D1→D4 фундамент від цього registry не залежить.
+Українська — не лише мова README. Людські слова є source/UI-проєкціями, а не machine identity. Чинний [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) ще містить compatibility SID8 routing під час міграції; exact-width D1→D8 фундамент від цього registry не залежить.
 
 У проєкті розрізняються **дві українські поверхні**:
 
@@ -436,7 +436,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · auxiliary
 
-`sens` (СЕНС) is an experimental programming language and research platform exploring exact-width binary identities, domain-derived semantics, compact packed representation, executable laws, and multiple execution substrates. Its current ratified foundation is D1→D4, where width is part of identity. The earlier flat SENS8 / Function8 model remains compatibility and research provenance during migration, not the current ontology. Human names (Ukrainian, English, Sanskrit, symbols) are non-authoritative source/UI projections.
+`sens` (СЕНС) is an experimental programming language and research platform exploring exact-width binary identities, domain-derived semantics, compact packed representation, executable laws, and multiple execution substrates. Its current ratified foundation is D1→D8, where width is part of identity. The earlier flat SENS8 / Function8 model remains compatibility and research provenance during migration, not the current ontology. Human names (Ukrainian, English, Sanskrit, symbols) are non-authoritative source/UI projections.
 
 Ukrainian is the project's primary human language. English and German are auxiliary. The Rust runtime is the reference implementation, not semantic authority; start with [`language-contract.lisp`](language-contract.lisp) and [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
 
@@ -444,7 +444,7 @@ The central research question is now: **how simple can the language remain while
 
 ## Deutsch · ergänzend
 
-`sens` (СЕНС) ist eine experimentelle Programmiersprache und Forschungsplattform für exakt breite binäre Identitäten, domänenabgeleitete Semantik, kompakte gepackte Darstellung, ausführbare Gesetze und mehrere Ausführungssubstrate. Das aktuell ratifizierte Fundament ist D1→D4; die Bitbreite ist Teil der Identität. Das frühere flache SENS8-/Function8-Modell bleibt während der Migration nur Kompatibilitäts- und Forschungsprovenienz. Menschliche Namen (Ukrainisch, Englisch, Sanskrit, Symbole) sind nicht-autoritative Source-/UI-Projektionen.
+`sens` (СЕНС) ist eine experimentelle Programmiersprache und Forschungsplattform für exakt breite binäre Identitäten, domänenabgeleitete Semantik, kompakte gepackte Darstellung, ausführbare Gesetze und mehrere Ausführungssubstrate. Das aktuell ratifizierte Fundament ist D1→D8; die Bitbreite ist Teil der Identität. Das frühere flache SENS8-/Function8-Modell bleibt während der Migration nur Kompatibilitäts- und Forschungsprovenienz. Menschliche Namen (Ukrainisch, Englisch, Sanskrit, Symbole) sind nicht-autoritative Source-/UI-Projektionen.
 
 Ukrainisch ist die primäre menschliche Sprache des Projekts; Englisch und Deutsch sind Hilfssprachen. Rust ist die Referenzimplementierung, aber nicht die semantische Autorität. Maßgeblich sind [`language-contract.lisp`](language-contract.lisp), ratifizierte Entscheidungen und ausführbare Konformitätsbelege.
 
