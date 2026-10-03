@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""#2660 — partition the canonical D6 UNKNOWN frontier without allocating it.
+"""#2660/#2723 — partition the canonical D6 UNKNOWN frontier after 001111 ratification.
 
-This is research accounting only.  It joins existing evidence while preserving
-the canonical D6 closure map as the sole occupancy source.
+This is research accounting only. The canonical D6 closure map remains the
+sole occupancy source. 001111 is no longer part of the UNKNOWN frontier.
 
 Key invariant:
     evidence-about-an-UNKNOWN != semantic-membership != residency
@@ -29,14 +29,18 @@ TARGET = "001111"
 PURE_UNKNOWN = "PURE-UNKNOWN"
 PARENT_DUPLICATE_NOT_EARNED = "PARENT-DUPLICATE-NOT-EARNED"
 OVERLAY_CANDIDATE_NONADMITTED = "OVERLAY-CANDIDATE-NONADMITTED"
-OWNER_READY_NONADMITTED = "OWNER-READY-NONADMITTED"
+RATIFIED_TARGET = "RATIFIED-MANUAL-RESIDENT"
 
 
 def load_closure() -> list[dict[str, Any]]:
     rows = runpy.run_path(str(CLOSURE))["build_map"]()
     assert len(rows) == 64
     assert sum(r["status"] == "generated" for r in rows) == 16
-    assert sum(r["status"] == "UNKNOWN/free" for r in rows) == 48
+    assert sum(r["status"] == "ratified-resident" for r in rows) == 1
+    assert sum(r["status"] == "UNKNOWN/free" for r in rows) == 47
+    target = next(r for r in rows if r["coordinate"] == TARGET)
+    assert target["status"] == "ratified-resident"
+    assert target["semantic_member_of_ratified_domain"] is True
     return rows
 
 
@@ -73,8 +77,12 @@ def build() -> dict[str, Any]:
     readiness_ns = runpy.run_path(str(READINESS))
     assert readiness_ns["TARGET"] == TARGET
 
-    overlay_coords = {PARENT_DUPLICATE, *middle, TARGET}
+    overlay_coords = {PARENT_DUPLICATE, *middle}
     assert overlay_coords <= set(unknown)
+    assert TARGET not in unknown
+    ratified_target = next(r for r in rows if r["coordinate"] == TARGET)
+    assert ratified_target["status"] == "ratified-resident"
+    assert ratified_target["semantic_member_of_ratified_domain"] is True
 
     frontier = []
     for coordinate in sorted(unknown):
@@ -86,10 +94,6 @@ def build() -> dict[str, Any]:
             evidence_class = OVERLAY_CANDIDATE_NONADMITTED
             refs = ["#2506", "#2624"]
             note = "proved one-axis semantic product corner; exact orientation/residency is unproven"
-        elif coordinate == TARGET:
-            evidence_class = OWNER_READY_NONADMITTED
-            refs = ["#2511", "#2518", "#2537", "#2541", "#2634", "#2538"]
-            note = "local D6 placement/readiness evidence complete; canonical admission remains false"
         else:
             evidence_class = PURE_UNKNOWN
             refs = []
@@ -119,7 +123,6 @@ def build() -> dict[str, Any]:
         PURE_UNKNOWN: 44,
         PARENT_DUPLICATE_NOT_EARNED: 1,
         OVERLAY_CANDIDATE_NONADMITTED: 2,
-        OWNER_READY_NONADMITTED: 1,
     }
 
     historical = load_historical_unplaced()
@@ -134,8 +137,16 @@ def build() -> dict[str, Any]:
         "canonical": {
             "capacity": 64,
             "generated_members": 16,
-            "unknown_free": 48,
+            "ratified_manual_residents": 1,
+            "unknown_free": 47,
             "occupancy_mutations": 0,
+        },
+        "ratified_target": {
+            "coordinate": TARGET,
+            "status": ratified_target["status"],
+            "semantic_member": ratified_target["semantic_member_of_ratified_domain"],
+            "placement_ref": ratified_target["placement_ref"],
+            "research_evidence_class": RATIFIED_TARGET,
         },
         "frontier_counts": counts,
         "frontier": frontier,
@@ -144,14 +155,14 @@ def build() -> dict[str, Any]:
             "research overlay never mutates canonical closure",
             "historical presence never implies D6 width",
             "unresolved width never implies a free D6 coordinate",
-            "001111 remains nonadmitted until explicit owner decision",
+            "001111 is admitted only by explicit owner decision #2538 OD-001",
             "same bits in another domain confer no Core D6 law",
         ],
         "handoff": {
             PURE_UNKNOWN: "needs a new exact same-base law/theorem before any placement search",
             PARENT_DUPLICATE_NOT_EARNED: "needs an independently observable delta; printed width is insufficient",
             OVERLAY_CANDIDATE_NONADMITTED: "needs independent resident necessity plus coordinate-orientation evidence",
-            OWNER_READY_NONADMITTED: "research complete for current proposal; decision authority is external to this gate",
+            RATIFIED_TARGET: "already removed from UNKNOWN frontier by owner-ratified canonical occupancy",
             "historical-unplaced": "continue structural discovery/root/width proofs; never choose D6 by name or free capacity",
         },
     }
@@ -170,7 +181,7 @@ def main() -> int:
         args.out.write_text(rendered, encoding="utf-8")
 
     print("D6-UNKNOWN-FRONTIER=PASS")
-    print("canonical=16-generated+48-unknown")
+    print("canonical=16-generated+1-ratified+47-unknown")
     for key, count in sorted(result["frontier_counts"].items()):
         print(f"{key}={count}")
     print(f"historical-unplaced={len(result['historical_unplaced_sidecar'])}")
