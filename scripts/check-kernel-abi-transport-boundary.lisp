@@ -126,8 +126,8 @@
                   (00000001 kernel-may-query-semantic-registry)
                   (00000001 (kernel-may-query-semantic-registry forbidden)))
                 (kab-row-check
-                  (00000001 kernel-may-import-language-sid-type)
-                  (00000001 (kernel-may-import-language-sid-type forbidden)))
+                  (00000001 kernel-may-import-language-identity-type)
+                  (00000001 (kernel-may-import-language-identity-type forbidden)))
                 (kab-row-check
                   (00000001 kernel-may-mint-semantic-identity)
                   (00000001 (kernel-may-mint-semantic-identity forbidden)))
