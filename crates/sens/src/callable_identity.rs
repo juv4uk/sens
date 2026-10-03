@@ -1,13 +1,10 @@
 //! Domain-qualified callable identity for the staged Sens8 exit (#2821).
 //!
-//! Canonical callable identity is a binary object inside its semantic domain.
-//! The exact-eight legacy runtime remains available only through an explicit
-//! compatibility wrapper while downstream evaluator/registry layers migrate.
-//!
-//! No implicit widening, truncation, low-bit mapping, human-name lookup, or
-//! width=>domain inference lives here.
+//! This module carries only canonical callable-domain identity. Historical
+//! exact-eight runtime identity stays in explicitly named LegacySid/LegacyCall
+//! AST/value variants while downstream layers migrate.
 
-use crate::{Bija3, CoreD4, CoreD5, CoreD6, Sens8};
+use crate::{Bija3, CoreD4, CoreD5, CoreD6};
 use std::fmt;
 
 /// Canonical callable identities admitted by the current domain ontology.
@@ -32,6 +29,8 @@ impl CallableDomainId {
         }
     }
 
+    /// Mechanical bits inside the already-known domain.
+    /// Detached from the domain, this byte has no semantic identity.
     pub const fn packed_bits(self) -> u8 {
         match self {
             Self::D3(value) => value.word().packed_bits(),
@@ -74,127 +73,24 @@ impl fmt::Debug for CallableDomainId {
     }
 }
 
-/// Explicit compatibility wrapper for the historical universal eight-bit path.
-///
-/// Construction is intentionally named: callers cannot obtain this wrapper via
-/// an implicit conversion, so every remaining legacy producer is visible.
-#[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
-pub struct LegacySens8(Sens8);
-
-impl LegacySens8 {
-    pub const fn new(value: Sens8) -> Self {
-        Self(value)
-    }
-
-    pub const fn sens8(self) -> Sens8 {
-        self.0
-    }
-}
-
-impl fmt::Display for LegacySens8 {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(formatter)
-    }
-}
-
-impl fmt::Debug for LegacySens8 {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "LegacySens8({})", self.0)
-    }
-}
-
-/// Staged runtime/AST callable carrier.
-///
-/// Domain is canonical. LegacySens8 exists only so the old parser/lowering
-/// path can keep compiling while it is migrated family by family.
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
-pub enum CallableIdentity {
-    Domain(CallableDomainId),
-    LegacySens8(LegacySens8),
-}
-
-impl CallableIdentity {
-    pub const fn domain(value: CallableDomainId) -> Self {
-        Self::Domain(value)
-    }
-
-    /// Explicit compatibility constructor. Do not replace this with From.
-    pub const fn legacy_sens8(value: Sens8) -> Self {
-        Self::LegacySens8(LegacySens8::new(value))
-    }
-
-    pub const fn canonical_domain(self) -> Option<CallableDomainId> {
-        match self {
-            Self::Domain(value) => Some(value),
-            Self::LegacySens8(_) => None,
-        }
-    }
-
-    pub const fn legacy_projection(self) -> Option<Sens8> {
-        match self {
-            Self::Domain(_) => None,
-            Self::LegacySens8(value) => Some(value.sens8()),
-        }
-    }
-}
-
-impl fmt::Display for CallableIdentity {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Domain(value) => value.fmt(formatter),
-            Self::LegacySens8(value) => value.fmt(formatter),
-        }
-    }
-}
-
-impl fmt::Debug for CallableIdentity {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Domain(value) => value.fmt(formatter),
-            Self::LegacySens8(value) => value.fmt(formatter),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn equal_packed_payloads_in_different_domains_are_not_equal() {
-        let d3 = CallableIdentity::domain(CallableDomainId::D3(Bija3::from_word(
-            crate::Bit3::new(0b101).unwrap(),
-        )));
-        let d4 = CallableIdentity::domain(CallableDomainId::D4(CoreD4::from_word(
-            crate::Bit4::new(0b0101).unwrap(),
-        )));
-        let d5 = CallableIdentity::domain(CallableDomainId::D5(CoreD5::from_word(
-            crate::Bit5::new(0b00101).unwrap(),
-        )));
-        let d6 = CallableIdentity::domain(CallableDomainId::D6(CoreD6::from_word(
-            crate::Bit6::new(0b000101).unwrap(),
-        )));
+        let d3 = CallableDomainId::D3(Bija3::from_word(crate::Bit3::new(0b101).unwrap()));
+        let d4 = CallableDomainId::D4(CoreD4::from_word(crate::Bit4::new(0b0101).unwrap()));
+        let d5 = CallableDomainId::D5(CoreD5::from_word(crate::Bit5::new(0b00101).unwrap()));
+        let d6 = CallableDomainId::D6(CoreD6::from_word(crate::Bit6::new(0b000101).unwrap()));
 
         assert_ne!(d3, d4);
         assert_ne!(d4, d5);
         assert_ne!(d5, d6);
-        assert_eq!(d3.canonical_domain().unwrap().packed_bits(), 5);
-        assert_eq!(d4.canonical_domain().unwrap().packed_bits(), 5);
-        assert_eq!(d5.canonical_domain().unwrap().packed_bits(), 5);
-        assert_eq!(d6.canonical_domain().unwrap().packed_bits(), 5);
-    }
-
-    #[test]
-    fn legacy_eight_bit_identity_never_equals_domain_identity() {
-        let domain = CallableIdentity::domain(CallableDomainId::D3(Bija3::from_word(
-            crate::Bit3::new(0b101).unwrap(),
-        )));
-        let legacy = CallableIdentity::legacy_sens8(crate::sens!(00000101));
-
-        assert_ne!(domain, legacy);
-        assert_eq!(legacy.legacy_projection(), Some(crate::sens!(00000101)));
-        assert_eq!(domain.legacy_projection(), None);
+        assert_eq!(d3.packed_bits(), 5);
+        assert_eq!(d4.packed_bits(), 5);
+        assert_eq!(d5.packed_bits(), 5);
+        assert_eq!(d6.packed_bits(), 5);
     }
 
     #[test]
