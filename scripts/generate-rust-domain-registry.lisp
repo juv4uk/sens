@@ -8,85 +8,80 @@
 ;   cargo run -p sens-cli -- scripts/generate-rust-domain-registry.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-domain-registry.lisp --check
 
-(00001001 source-path "lib/surface/domain-registry.lisp")
-(00001001 output-path "crates/sens/src/domain_surface_registry_generated.rs")
+(0011 source-path "lib/surface/domain-registry.lisp")
+(0011 output-path "crates/sens/src/domain_surface_registry_generated.rs")
 
-(00001001 str+
-  (00001000 args
-    (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
+(0011 str+
+  (0010 args
+    (reduce (0010 (acc s) (string-append acc s)) "" args)))
 
-(00001001 registry-form
-  (00000101 (01001011 (10100110 source-path))))
+(0011 registry-form
+  (101 (read-all (read-file source-path))))
 
-(00001001 rows registry-form)
+(0011 rows registry-form)
 
-(00001001 rust-string
-  (00001000 (value)
-    (00000111
+(0011 rust-string
+  (0010 (value)
+    (011
       ((string-membership-helper value)
        (class-membership string member)
-       (01001100 value))
+       (write-to-string value))
       ((string-membership-helper value)
        (class-membership string nonmember)
-       (01001100 (01000010 value))))))
+       (write-to-string (symbol->string value))))))
 
-(00001001 render-surface
-  (00001000 (entry)
-    (10011100 ((name (00000101 (00000110 entry))))
-      (00000111
-        ((00100010 name (00000001 ()))
+(0011 render-surface
+  (0010 (entry)
+    (let ((name (101 (110 entry))))
+      (011
+        ((equal? name (001 ()))
          (1)
          "")
-        ((00100010 name (00000001 ()))
+        ((equal? name (001 ()))
          (0)
          (str+
            "DomainSurface { namespace: "
-           (rust-string (00000101 entry))
+           (rust-string (101 entry))
            ", name: "
            (rust-string name)
            " }, "))))))
 
-(00001001 render-surfaces
-  (00001000 (surfaces)
-    (00000111
-      ((00000010 surfaces)
+(0011 render-surfaces
+  (0010 (surfaces)
+    (011
+      ((010 surfaces)
        ()
        "")
-      ((00000010 surfaces)
+      ((010 surfaces)
        (0)
        (str+
-         (render-surface (00000101 surfaces))
-         (render-surfaces (00000110 surfaces)))))))
+         (render-surface (101 surfaces))
+         (render-surfaces (110 surfaces)))))))
 
-(00001001 render-row
-  (00001000 (row)
-    (10011100
-      ((width (00000101 row))
-       (row-parts (00000110 row))
-       (bits (00000101 row-parts))
-       (surfaces (00000110 row-parts)))
-      (str+
-        "    DomainSurfaceRow { width: "
-        (01001100 width)
-        ", bits: 0b"
-        bits
-        ", surfaces: &["
-        (render-surfaces surfaces)
-        "] },\n"))))
+(0011 render-row
+  (0010 (row)
+    (str+
+      "    DomainSurfaceRow { width: "
+      (write-to-string (101 row))
+      ", bits: 0b"
+      (101 (110 row))
+      ", surfaces: &["
+      (render-surfaces (110 (110 row)))
+      "] },\n")))
 
-(00001001 render-rows
-  (00001000 (remaining)
-    (00000111
-      ((00000010 remaining)
+(0011 render-rows
+  (0010 (remaining)
+    (011
+      ((010 remaining)
        ()
        "")
-      ((00000010 remaining)
+      ((010 remaining)
        (0)
        (str+
-         (render-row (00000101 remaining))
-         (render-rows (00000110 remaining)))))))
+         (render-row (101 remaining))
+         (render-rows (110 remaining)))))))
 
-(00001001 header
+(0011 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/surface/domain-registry.lisp\n"
@@ -108,32 +103,32 @@
     "\n"
     "pub(super) const DOMAIN_SURFACE_ROWS: &[DomainSurfaceRow] = &[\n"))
 
-(00001001 generated
+(0011 generated
   (str+ header (render-rows rows) "];\n"))
 
-(00000111
-  ((00000010 *argv*)
+(011
+  ((010 *argv*)
    ()
-   (00101111
-     (00100111
-       (10100111 output-path generated)
-       (01001000 "Rust exact-domain registry projection written"))))
-  ((00100010 (00000101 *argv*) "--check")
+   (second
+     (list
+       (write-file output-path generated)
+       (print "Rust exact-domain registry projection written"))))
+  ((equal? (101 *argv*) "--check")
    (1)
-   (10011100 ((current (10100110 output-path)))
-     (00000111
-       ((00100010 current generated)
+   (let ((current (read-file output-path)))
+     (011
+       ((equal? current generated)
         (1)
-        (01001000 "Rust exact-domain registry projection is current"))
-       ((00100010 current generated)
+        (print "Rust exact-domain registry projection is current"))
+       ((equal? current generated)
         (0)
-        (00101111
-          (00100111
-            (01001000 "Rust exact-domain registry projection is stale")
-            (00000101 (00000001 ()))))))))
-  ((00000001 write-projection)
+        (second
+          (list
+            (print "Rust exact-domain registry projection is stale")
+            (101 (001 ()))))))))
+  ((001 write-projection)
    write-projection
-   (00101111
-     (00100111
-       (10100111 output-path generated)
-       (01001000 "Rust exact-domain registry projection written")))))
+   (second
+     (list
+       (write-file output-path generated)
+       (print "Rust exact-domain registry projection written")))))
