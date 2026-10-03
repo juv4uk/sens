@@ -4,7 +4,8 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
+use crate::legacy_registry::{self, LegacyRegistryId};
+use crate::{ErrorKind, Exactness, LanguageError, NumericBuffer, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -20,17 +21,17 @@ fn uk_operation_name(name: &str) -> String {
         "PRIM_CONS" => "сполучити".to_string(),
         "PRIM_CAR" => "перше".to_string(),
         "PRIM_CDR" => "решта".to_string(),
-        other => semantic_registry::semantic_id_for_surface(other)
+        other => legacy_registry::id_for_surface(other)
             .map(uk_semantic_name)
             .unwrap_or_else(|| other.to_string()),
     }
 }
 
-fn uk_semantic_name(semantic_id: Sens8) -> String {
-    semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
+fn uk_semantic_name(semantic_id: LegacyRegistryId) -> String {
+    legacy_registry::admitted_surfaces_with_namespace_for_id(semantic_id)
         .into_iter()
         .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
-        .unwrap_or_else(|| format!("SID {}", semantic_registry::semantic_id_bits(semantic_id)))
+        .unwrap_or_else(|| format!("SID {}", legacy_registry::id_bits(semantic_id)))
 }
 
 fn canonical_inexact(number: f64) -> String {
