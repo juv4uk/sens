@@ -165,7 +165,7 @@ pub(crate) mod fasl {
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
-                out.push(sid.legacy_sens8().expect("domain callable transport waits for #2833").packed_byte());
+                out.push(sid.legacy().expect("domain callable transport waits for #2833").packed_byte());
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -197,7 +197,7 @@ pub(crate) mod fasl {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
                 out.push(TAG_BINARY);
-                out.push(sid.legacy_sens8().expect("domain callable transport waits for #2833").packed_byte());
+                out.push(sid.legacy().expect("domain callable transport waits for #2833").packed_byte());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -238,7 +238,7 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::CallableDomainId::from_legacy_sens8(crate::Sens8::from_packed_byte(value)))
+                ExprKind::Sid(crate::CallableDomainId::legacy(crate::LegacySens8::from_packed_byte(value)))
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
@@ -440,7 +440,7 @@ pub(crate) mod wire {
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
-                out.push(sid.legacy_sens8().expect("domain callable transport waits for #2833").packed_byte());
+                out.push(sid.legacy().expect("domain callable transport waits for #2833").packed_byte());
             }
             ExprKind::String(value) => put_text(out, TAG_STRING, value),
             ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
@@ -463,7 +463,7 @@ pub(crate) mod wire {
             ExprKind::Call(sid, arguments) => {
                 put_list_header(out, arguments.len() + 1);
                 out.push(TAG_BINARY);
-                out.push(sid.legacy_sens8().expect("domain callable transport waits for #2833").packed_byte());
+                out.push(sid.legacy().expect("domain callable transport waits for #2833").packed_byte());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -567,7 +567,7 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::CallableDomainId::from_legacy_sens8(crate::Sens8::from_packed_byte(value)))
+                ExprKind::Sid(crate::CallableDomainId::legacy(crate::LegacySens8::from_packed_byte(value)))
             }
             TAG_LOCAL => {
                 let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
