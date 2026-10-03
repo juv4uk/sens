@@ -128,6 +128,11 @@
       (00101111
         (00100111
           (01001000 "Rust exact-domain registry projection is stale")
+          (01001000 (00111011 (10100110 output-path)))
+          (01001000 (00111011 generated))
+          (01001000 (10100001 (10100110 output-path)))
+          (01001000 (10100001 generated))
+          (01001000 (01000001 generated 0 800))
           (00000101 (00000001 ())))))))
   ((00000001 write-projection)
    write-projection
