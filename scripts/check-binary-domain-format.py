@@ -203,7 +203,15 @@ def main(argv=None):
                 got = domain_verdict(v)
             assert got == expected, (name, got, expected)
             ok += 1
-        print(f"(binary-domain-selftest-ok ({ok} cases))")
+        # Scope guard: examples/legacy prose without the canonical marker are ignored.
+        scoped, skipped = judge([
+            {"number": 90, "title": "legacy example", "state": "open",
+             "body": "## DOMAIN pass rule\nRELATION: prose only\n"}
+        ])
+        assert scoped == [] and skipped == 1
+        # Exact heading guard: "DOMAIN pass rule" is not the DOMAIN field.
+        assert field_value("## DOMAIN pass rule\n", "DOMAIN") == (None, None)
+        print(f"(binary-domain-selftest-ok ({ok + 2} cases))")
         return 0
 
     if not args.issues:
