@@ -4,11 +4,14 @@
 Research-only. OD-005 occupancy is immutable here.
 
 The candidate "suffix 0 = direct combine, suffix 1 = combine inverse(rhs)"
-would be a LOCAL-SIBLING-LAW only if the siblings differed by one observable
-axis on the same full operation protocol.
+has two distinct theorem scopes:
 
-This witness consumes the owner map + D4 authority + primary historical ledger
-and checks whether that one-delta condition is even available.
+1. Core.D5 binary-value semantics, witnessed directly by the exact-D5 runtime
+   test in crates/sens/src/eval/d5_arithmetic.rs.
+2. The full historical Lisp 1.5 calling protocol, audited here.
+
+The value restriction may admit a local sibling law even when the full
+historical protocol differs by additional observable axes.
 """
 
 from __future__ import annotations
@@ -92,10 +95,13 @@ def main() -> int:
         "candidate_law": "suffix selects direct-vs-inverse rhs orientation",
         "additive_full_protocol_delta_axes": list(additive_axes),
         "multiplicative_full_protocol_delta_axes": list(multiplicative_axes),
-        "additive_classification": "MULTI-DELTA-NOT-LOCAL-SIBLING-LAW",
-        "multiplicative_classification": "MULTI-DELTA-NOT-LOCAL-SIBLING-LAW",
-        "relation_class": "COORDINATE-LAW",
-        "binary_restriction_possible": "UNRESOLVED",
+        "additive_value_semantics_classification": "LOCAL-SIBLING-LAW",
+        "multiplicative_value_semantics_classification": "LOCAL-SIBLING-LAW",
+        "value_runtime_witness": "d5_arithmetic::tests::additive_and_multiplicative_siblings_follow_local_inverse_orientation_laws",
+        "additive_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW",
+        "multiplicative_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW",
+        "relation_class": "VALUE-LOCAL-LAW_PLUS_FULL-PROTOCOL-COORDINATE-SCOPE",
+        "binary_restriction_possible": "PROVED-BY-EXACT-D5-RUNTIME",
         "core_math_inverse_law_transfer": "FORBIDDEN-WITHOUT-BRIDGE",
         "d4_parenthood": "NOT-PROVED",
         "owner_map_mutation": "NONE",
@@ -106,13 +112,15 @@ def main() -> int:
     out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
 
     print("D5-ARITH-SIBLING-LAW=PASS")
-    print("PLUS/DIFFERENCE=FULL-PROTOCOL-MULTI-DELTA")
-    print("TIMES/QUOTIENT=FULL-PROTOCOL-MULTI-DELTA")
+    print("PLUS/DIFFERENCE-VALUE=LOCAL-SIBLING-LAW")
+    print("TIMES/QUOTIENT-VALUE=LOCAL-SIBLING-LAW")
+    print("PLUS/DIFFERENCE-FULL-PROTOCOL=MULTI-DELTA")
+    print("TIMES/QUOTIENT-FULL-PROTOCOL=MULTI-DELTA")
     print("ADDITIVE-AXES=operation-orientation,arity")
     print("MULTIPLICATIVE-AXES=operation-orientation,arity,fixed-quotient-policy")
     print("D4-0101=UNALLOCATED")
     print("D4-1001=UNALLOCATED")
-    print("RELATION=COORDINATE-LAW")
+    print("RELATION=VALUE-LOCAL-LAW_PLUS_FULL-PROTOCOL-COORDINATE-SCOPE")
     print("CORE-MATH-LAW-TRANSFER=FORBIDDEN-WITHOUT-BRIDGE")
     print("OWNER-MAP-MUTATION=NONE")
     return 0
