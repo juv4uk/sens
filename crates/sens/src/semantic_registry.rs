@@ -186,7 +186,7 @@ mod tests {
 
     #[test]
     fn existing_selector_surfaces_project_to_ratified_d4() {
-        for (surface, bits) in [("caar", 0b1010), ("cadr", 0b1011), ("cddr", 0b1101)] {
+        for (surface, bits) in [("перше-від-першого", 0b1010), ("перше-від-решти", 0b1011), ("решта-від-решти", 0b1101)] {
             let identity = domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("selector surface must project: {surface}"));
             assert_eq!((identity.width(), identity.packed_bits()), (4, bits));
