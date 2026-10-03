@@ -1,0 +1,32 @@
+name: Post-D4 SETQ state-passing research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_setq_state_passing.rs"
+      - ".github/workflows/post-d4-setq-state-passing.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  state-passing:
+    name: Explicit D4 store-passing witness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused mutation derivation witness
+        run: cargo test -p sens --test post_d4_setq_state_passing -- --nocapture
+      - name: Publish scope
+        if: always()
+        run: |
+          {
+            echo "## #2442 explicit D4 state passing"
+            echo "- immutable store data only"
+            echo "- observers receive current store explicitly"
+            echo "- no production SET/SETQ operator"
+            echo "- no host mutable cell counted as derivation"
+            echo "- whole-program representation-transform question remains separate"
+          } >> "$GITHUB_STEP_SUMMARY"
