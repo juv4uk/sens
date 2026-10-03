@@ -1,0 +1,48 @@
+name: Post-D4 cross-family parent guard
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2609-cross-family-parent.py"
+      - "docs/research/2609-cross-family-parent.md"
+      - "docs/research/2609-cross-family-parent.uk.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/post-d4-cross-family-parent.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2609-cross-family-parent.py"
+      - "docs/research/2609-cross-family-parent.md"
+      - "docs/research/2609-cross-family-parent.uk.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/post-d4-cross-family-parent.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cross-family-parent:
+    name: Typed post-D4 same-base guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run cross-family parent falsifier
+        run: python3 scripts/research-2609-cross-family-parent.py
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2609 cross-family parent guard"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2609-cross-family-parent.py
+            echo "~~~"
+            echo
+            echo "- Same-family is necessary but not sufficient for generated-child placement."
+            echo "- Cross-family vocabulary/bit-shape similarity does not establish semantic parenthood."
+            echo "- Research only: no width, root, resident, or coordinate inference."
+          } >> "$GITHUB_STEP_SUMMARY"
