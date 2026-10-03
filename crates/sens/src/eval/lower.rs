@@ -12,7 +12,7 @@
 //! Дані лишаються даними: аргумент `quote`, клаузи `cond` (самі клаузи — не
 //! виклики), параметри `lambda` та ім'я в `def`/`define`.
 
-use super::{canon, necessary_forms};
+use super::{canon, necessary_forms_legacy};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
 use crate::Sens8;
@@ -71,7 +71,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                         })
                         .collect(),
                 ),
-                Some(sid) if necessary_forms::identity_for_semantic_id(sid).is_some() => {
+                Some(sid) if necessary_forms_legacy::identity_for_semantic_id(sid).is_some() => {
                     ExprKind::Call(
                         sid,
                         arguments
