@@ -1,0 +1,43 @@
+name: D5 D6 SETQ identity consistency
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "benchmarks/d5-d6-setq-identity/**"
+      - ".github/workflows/d5-d6-setq-identity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "benchmarks/d5-d6-setq-identity/**"
+      - ".github/workflows/d5-d6-setq-identity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Reject stale cross-domain SETQ identity replay
+        run: |
+          rm -rf /tmp/d5-d6-setq-identity
+          python3 benchmarks/d5-d6-setq-identity/run.py \
+            --out /tmp/d5-d6-setq-identity | tee /tmp/d5-d6-setq-identity.log
+          grep -F "D5-D6-SETQ-IDENTITY=PASS" /tmp/d5-d6-setq-identity.log
+          grep -F "D6-SETQ-NAME=ABSENT" /tmp/d5-d6-setq-identity.log
+          grep -F "STALE-D6-SETQ-REPLAY=REJECTED" /tmp/d5-d6-setq-identity.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d5-d6-setq-identity
+          path: |
+            /tmp/d5-d6-setq-identity/
+            /tmp/d5-d6-setq-identity.log
+          retention-days: 14
