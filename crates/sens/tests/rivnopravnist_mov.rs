@@ -136,7 +136,7 @@ fn додавання_відділяє_людські_мови_від_спіль
     let exact = eval_program("00001100", &mut сесія)
         .expect("bare exact Function8 remains a binary value")
         .value;
-    assert_eq!(exact, Value::Sid(sens::sens!(00001100)));
+    assert_eq!(exact, Value::legacy_sid(sens::sens!(00001100)));
 }
 #[test]
 fn executable_authority_більше_не_читає_legacy_en_shaped_таблицю() {
