@@ -1,0 +1,578 @@
+{
+  "schema": "historical-ingest-ledger/2",
+  "authority": "historical-evidence-ledger-not-language-semantic-authority",
+  "phase": "HISTORICAL-INGEST",
+  "principle": "history is the dataset; structural laws and SENS placement follow only after ingest",
+  "selector_baseline": {
+    "status": "generated",
+    "law": "selector suffix composition only",
+    "binary_objects": [
+      "10100",
+      "10101",
+      "10110",
+      "10111",
+      "11000",
+      "11001",
+      "11010",
+      "11011"
+    ],
+    "note": "baseline fact only; does not close the historical D5 inventory"
+  },
+  "rows": [
+    {
+      "order": 1,
+      "phase": "A",
+      "operation": "LABEL",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 Part I; #2234/#2238",
+      "historical_presence": "yes",
+      "historical_behavior": "local recursive function expression with self reference",
+      "historical_dependencies": [
+        "LAMBDA",
+        "application/evaluation"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "fixed-point/self-application recursion",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2234,
+      "evidence_sha": "a104f9d7ca23a84df48e5f35329fb34c347314e1",
+      "phase_status": "complete",
+      "notes": "LABEL history is preserved even though the observable recursion capability is locally derivable from D4."
+    },
+    {
+      "order": 2,
+      "phase": "A",
+      "operation": "FUNCTION",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 Programmer's Manual; #2235/#2259",
+      "historical_presence": "yes",
+      "historical_behavior": "closure/function-value representation wrapper",
+      "historical_dependencies": [
+        "LAMBDA",
+        "closure representation"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-historical-mechanism",
+      "later_structural_classification": "closure representation adapter",
+      "later_SENS_classification": "HISTORICAL-MECHANISM",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2235,
+      "evidence_sha": "6a7ee0099066cf9469151813be04d456b037cb00",
+      "phase_status": "complete",
+      "notes": "Current D4 LAMBDA already owns first-class closure behavior."
+    },
+    {
+      "order": 3,
+      "phase": "A",
+      "operation": "FUNARG",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 Programmer's Manual; #2235/#2259",
+      "historical_presence": "yes",
+      "historical_behavior": "function plus captured environment representation/application",
+      "historical_dependencies": [
+        "LAMBDA",
+        "captured environment",
+        "APPLY"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-historical-mechanism",
+      "later_structural_classification": "captured-environment closure adapter",
+      "later_SENS_classification": "HISTORICAL-MECHANISM",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2235,
+      "evidence_sha": "6a7ee0099066cf9469151813be04d456b037cb00",
+      "phase_status": "complete",
+      "notes": "Historical representation is retained in the record; no new SENS resident follows."
+    },
+    {
+      "order": 4,
+      "phase": "B",
+      "operation": "EVALQUOTE",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 Programmer's Manual; #2279/#2282",
+      "historical_presence": "yes",
+      "historical_behavior": "top-level ordinary function plus already-valued argument-list entry point",
+      "historical_dependencies": [
+        "EVAL",
+        "APPLY",
+        "QUOTE/value list"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "composition of evaluator and applicator",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2279,
+      "evidence_sha": "163c30d96d66ea0098304a6b341f257d1ee86278",
+      "phase_status": "complete",
+      "notes": "Later FEXPR/FSUBR Appendix-B exception is intentionally excluded from ordinary EVALQUOTE derivation."
+    },
+    {
+      "order": 5,
+      "phase": "C",
+      "operation": "APPEND",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; #2347/#2371",
+      "historical_presence": "yes",
+      "historical_behavior": "list concatenation preserving right tail",
+      "historical_dependencies": [
+        "CONS",
+        "CAR",
+        "CDR",
+        "COND",
+        "recursion"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "ordinary structural recursion",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2347,
+      "evidence_sha": "e2bd9b84650820fe84acd127c2588f034a54ad3a",
+      "phase_status": "complete",
+      "notes": "No CONS-family child is earned merely by historical naming."
+    },
+    {
+      "order": 6,
+      "phase": "C",
+      "operation": "PAIR",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; grouped Phase-C evidence #2286/#2300",
+      "historical_presence": "yes",
+      "historical_behavior": "pair corresponding structural elements",
+      "historical_dependencies": [
+        "CONS",
+        "CAR",
+        "CDR",
+        "COND",
+        "recursion"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "ordinary pair/list structural recursion",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2286,
+      "evidence_sha": "2bf549d1693f678de6d1ce0e85444fccca00c569",
+      "phase_status": "complete",
+      "notes": "Recorded with the PAIR/PAIRLIS Phase-C structural family; no separate resident is inferred."
+    },
+    {
+      "order": 7,
+      "phase": "C",
+      "operation": "PAIRLIS",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 lineage; #2286/#2300",
+      "historical_presence": "yes",
+      "historical_behavior": "pair parameter/value lists onto an environment tail preserving historical order",
+      "historical_dependencies": [
+        "CONS",
+        "CAR",
+        "CDR",
+        "COND",
+        "environment tail"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "structural recursion distinct from current BIND ordering",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2286,
+      "evidence_sha": "2bf549d1693f678de6d1ce0e85444fccca00c569",
+      "phase_status": "complete",
+      "notes": "PAIRLIS != current BIND ordering, but the historical recurrence is still ordinary structure recursion."
+    },
+    {
+      "order": 8,
+      "phase": "C",
+      "operation": "ASSOC",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; #2285/#2296",
+      "historical_presence": "yes",
+      "historical_behavior": "first-match association-list search",
+      "historical_dependencies": [
+        "CAR",
+        "CDR",
+        "COND",
+        "equality",
+        "recursion"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "generic structural recursion; D4 LOOKUP not required",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2285,
+      "evidence_sha": "81b50d3331e19bc79c310987c75b6d36175b9f8f",
+      "phase_status": "complete",
+      "notes": "Broader alist domain than environment LOOKUP does not create irreducibility."
+    },
+    {
+      "order": 9,
+      "phase": "C",
+      "operation": "SUBST",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; #2348/#2386",
+      "historical_presence": "yes",
+      "historical_behavior": "recursive structural substitution",
+      "historical_dependencies": [
+        "structure",
+        "equality",
+        "recursion"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "tree recursion",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2348,
+      "evidence_sha": "9b5841ad7beffda412d77942f81d83018a9b3f25",
+      "phase_status": "complete",
+      "notes": "Independent Phase-C witness; no resident required."
+    },
+    {
+      "order": 10,
+      "phase": "C",
+      "operation": "SUBLIS",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 lineage; #2348/#2386",
+      "historical_presence": "yes",
+      "historical_behavior": "association-driven recursive substitution",
+      "historical_dependencies": [
+        "ASSOC-like search",
+        "structure",
+        "recursion"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "tree recursion plus derived association search",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2348,
+      "evidence_sha": "9b5841ad7beffda412d77942f81d83018a9b3f25",
+      "phase_status": "complete",
+      "notes": "Historical row retained despite derivability."
+    },
+    {
+      "order": 11,
+      "phase": "C",
+      "operation": "MAPLIST",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; #2349/#2387",
+      "historical_presence": "yes",
+      "historical_behavior": "apply a first-class callable to successive list tails",
+      "historical_dependencies": [
+        "LAMBDA/application",
+        "CAR/CDR",
+        "CONS",
+        "recursion"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "ordinary higher-order list recursion",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2349,
+      "evidence_sha": "ff326671920c9d813e10bdb2efa0a773c156c0cf",
+      "phase_status": "complete",
+      "notes": "No new higher-order resident beyond existing closure/application semantics."
+    },
+    {
+      "order": 12,
+      "phase": "D",
+      "operation": "SET",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 SET/SETQ lineage; #2442",
+      "historical_presence": "yes",
+      "historical_behavior": "update an already-existing shared binding/location",
+      "historical_dependencies": [
+        "binding lookup",
+        "shared location",
+        "evaluation"
+      ],
+      "current_domain_candidate": "unresolved",
+      "binary_object": "unplaced",
+      "placement_status": "unplaced-new-capability",
+      "later_structural_classification": "shared-location update; globally compilable to explicit store",
+      "later_SENS_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2442,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "phase_status": "complete",
+      "notes": "SET versus SETQ target syntax is not itself the new root; the surviving delta is shared-location update."
+    },
+    {
+      "order": 13,
+      "phase": "D",
+      "operation": "SETQ",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 SET/SETQ lineage; #2441/#2442",
+      "historical_presence": "yes",
+      "historical_behavior": "quoted-target interface to shared-location update",
+      "historical_dependencies": [
+        "shared-location update",
+        "binding lookup"
+      ],
+      "current_domain_candidate": "unresolved",
+      "binary_object": "unplaced",
+      "placement_status": "unplaced-new-capability",
+      "later_structural_classification": "surface variant over shared-location update core",
+      "later_SENS_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2442,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "phase_status": "complete",
+      "notes": "SET and SETQ share one surviving semantic core; two historical names do not imply two new binary roots."
+    },
+    {
+      "order": 14,
+      "phase": "D",
+      "operation": "PROG",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 PROG feature; #2315/#2438/#2439",
+      "historical_presence": "yes",
+      "historical_behavior": "control container with labels/GO and dynamically scoped RETURN target",
+      "historical_dependencies": [
+        "GO",
+        "RETURN",
+        "local values"
+      ],
+      "current_domain_candidate": "unresolved",
+      "binary_object": "unplaced",
+      "placement_status": "unplaced-composite",
+      "later_structural_classification": "composite: local finite-state GO plus non-local RETURN",
+      "later_SENS_classification": "COMPOSITE",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2315,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "phase_status": "complete",
+      "notes": "PROG as a historical container is not promoted to a primitive; surviving semantic pressure is in RETURN, while GO derives locally."
+    },
+    {
+      "order": 15,
+      "phase": "D",
+      "operation": "GO",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 PROG feature; #2438",
+      "historical_presence": "yes",
+      "historical_behavior": "intra-PROG label-directed transfer",
+      "historical_dependencies": [
+        "PROG labels",
+        "state transition"
+      ],
+      "current_domain_candidate": "D1-D4",
+      "binary_object": "unplaced",
+      "placement_status": "not-required-derived",
+      "later_structural_classification": "finite-state dispatcher plus tail recursion",
+      "later_SENS_classification": "DERIVED-D1-D4",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2438,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "phase_status": "complete",
+      "notes": "The state remains inside the rewritten PROG region; unrelated external protocols remain unchanged."
+    },
+    {
+      "order": 16,
+      "phase": "D",
+      "operation": "RETURN",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 PROG feature; #2439",
+      "historical_presence": "yes",
+      "historical_behavior": "exit the most-recent active PROG across an ordinary call boundary",
+      "historical_dependencies": [
+        "active PROG context",
+        "non-local control transfer"
+      ],
+      "current_domain_candidate": "unresolved",
+      "binary_object": "unplaced",
+      "placement_status": "unplaced-new-capability",
+      "later_structural_classification": "non-local exit; globally compilable by CPS but not locally derivable",
+      "later_SENS_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "issue": 2439,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "phase_status": "complete",
+      "notes": "Whole-call-graph CPS proves compilability, not local semantic derivation under #2468."
+    },
+    {
+      "order": 17,
+      "phase": "E",
+      "operation": "FEXPR",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5 Appendix-B",
+      "source_provenance": "LISP 1.5 Programmer's Manual Appendix B pp.70-71; #2522/#2530",
+      "historical_presence": "yes",
+      "historical_behavior": "receive raw operand forms plus explicit caller a-list and return a direct value",
+      "historical_dependencies": [
+        "raw form data",
+        "caller environment",
+        "APPLY/EVAL special-call path"
+      ],
+      "current_domain_candidate": "unresolved",
+      "binary_object": "unplaced",
+      "placement_status": "unplaced-two-axis-capability",
+      "later_structural_classification": "independent operand-mode and caller-environment axes; direct-value result",
+      "later_SENS_classification": "RAW+ENV-TWO-CAPABILITIES",
+      "protocol_axes": {
+        "raw_operands": true,
+        "explicit_caller_env": true,
+        "result_reeval": false
+      },
+      "issue": 2343,
+      "evidence_sha": "3166bdee2cf21758bcc5cc6ae7a6d9a117aa3c1f",
+      "phase_status": "complete",
+      "notes": "No property-list tag or human spelling counts as semantic authority."
+    },
+    {
+      "order": 18,
+      "phase": "E",
+      "operation": "FSUBR",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5 Appendix-B",
+      "source_provenance": "LISP 1.5 Programmer's Manual Appendix B pp.70-71; #2522/#2530",
+      "historical_presence": "yes",
+      "historical_behavior": "subroutine special-call protocol with raw operands and explicit caller a-list",
+      "historical_dependencies": [
+        "raw form data",
+        "caller environment",
+        "special-call path"
+      ],
+      "current_domain_candidate": "unresolved",
+      "binary_object": "unplaced",
+      "placement_status": "unplaced-two-axis-capability",
+      "later_structural_classification": "independent operand-mode and caller-environment axes; direct-value result",
+      "later_SENS_classification": "RAW+ENV-TWO-CAPABILITIES",
+      "protocol_axes": {
+        "raw_operands": true,
+        "explicit_caller_env": true,
+        "result_reeval": false
+      },
+      "issue": 2343,
+      "evidence_sha": "3166bdee2cf21758bcc5cc6ae7a6d9a117aa3c1f",
+      "phase_status": "complete",
+      "notes": "Historical mechanism differs from current SENS transformer on caller-env input and result protocol."
+    },
+    {
+      "order": 19,
+      "phase": "F",
+      "operation": "TRANSFORMER",
+      "historical_era": "later-macro-lineage",
+      "first_attested_lineage": "pending-Phase-F-#2557",
+      "source_provenance": "#2557; archived SENS macro research #2174/#2181/#2193/#2196",
+      "historical_presence": "uncertain",
+      "historical_behavior": "raw-form transformer whose returned form is re-evaluated in caller context",
+      "historical_dependencies": [
+        "raw form data",
+        "closure",
+        "post-transform evaluation"
+      ],
+      "current_domain_candidate": "unresolved",
+      "binary_object": "unplaced",
+      "placement_status": "unplaced-active-comparison",
+      "later_structural_classification": "protocol corner raw=1 env-input=0 result-reeval=1",
+      "later_SENS_classification": "UNRESOLVED",
+      "protocol_axes": {
+        "raw_operands": true,
+        "explicit_caller_env": false,
+        "result_reeval": true
+      },
+      "issue": 2557,
+      "evidence_sha": "pending",
+      "phase_status": "active",
+      "notes": "Phase F must establish historical lineage/provenance and relation to FEXPR before structural discovery."
+    }
+  ]
+}
