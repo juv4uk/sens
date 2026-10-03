@@ -7,10 +7,10 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current ratified observable language contract.
-   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — source/UI routing metadata from admitted human spellings to exact eight-bit SENS functions. A spelling is not a function identity and does not own meaning.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.0 domain-qualified observable language contract.
+   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS has exactly 256 functions: `00000000..11111111`. The concrete empty list `()` is a structural value outside that function space.
+   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `bits + exact domain + admitted/proved law`; current Core domains D1-D6 are width-qualified, and compatibility Sens8/Sid8 does not define canonical identity. Structural `()` is Core.D3 `000` as a semantic object and remains distinct from predicate/number domains.
 2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
 3. **Reference implementation and substrates**
    - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
