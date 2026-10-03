@@ -416,7 +416,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 1. [`language-contract.lisp`](language-contract.lisp) — що саме обіцяє мова;
 2. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — хто має право визначати істину;
-3. [`docs/language-core.md`](docs/language-core.md) — історична SID8-only архітектура; читати як migration/provenance donor, не як поточний exact-width фундамент;
+3. [`docs/language-core.md`](docs/language-core.md) — поточна exact-domain модель ядра та межі reference implementation;
 4. [`lib/canon.lisp`](lib/canon.lisp) — legacy law witness під міграцією #1325;
 5. [`lib/surface/uk-acceptance.lisp`](lib/surface/uk-acceptance.lisp) — українська мова як виконуваний програмний інтерфейс;
 6. [`lib/meta-eval.lisp`](lib/meta-eval.lisp) — як мова починає обчислювати саму себе;

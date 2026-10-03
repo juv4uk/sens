@@ -1,0 +1,42 @@
+name: D6 OD-006 cross-era authority
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2764-d6-owner-baseline.py"
+      - "scripts/research-2764-d6-pre-od006-archival-guard.py"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "scripts/research-2619-d6-residency-readiness.py"
+      - "benchmarks/d6-ratification-noncontagion/**"
+      - "knowledge/d6-historical-full-map.json"
+      - ".github/workflows/d6-od006-cross-era-authority.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/research-2764-d6-owner-baseline.py"
+      - "scripts/research-2764-d6-pre-od006-archival-guard.py"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "scripts/research-2619-d6-residency-readiness.py"
+      - "benchmarks/d6-ratification-noncontagion/**"
+      - "knowledge/d6-historical-full-map.json"
+      - ".github/workflows/d6-od006-cross-era-authority.yml"
+
+jobs:
+  authority:
+    name: Current OD-006 vs PRE-OD006 evidence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify current and historical D6 authority separation
+        run: python3 scripts/research-2764-d6-pre-od006-archival-guard.py
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## D6 cross-era authority"
+            echo
+            echo "- Current occupancy: OD-006, 64/64, UNKNOWN=0."
+            echo "- D6:001111 current owner projection: DEFVAR."
+            echo "- Sparse 16+48 / PURE-UNKNOWN / SETQ-readiness tools remain PRE-OD006 evidence only."
+            echo "- Semantic derivability remains independent of residency."
+          } >> "$GITHUB_STEP_SUMMARY"
