@@ -229,7 +229,7 @@ enum Head {
 
 const EVAL: Sens8 = crate::sens!(01001101);
 
-fn domain_head(identity: CoreDomainIdentity) -> Head {
+fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head {
     if let Some(necessary) = necessary_forms::identity_for_domain_identity(identity) {
         return match necessary {
             necessary_forms::NecessaryFormIdentity::Lambda => Head::Lambda,
@@ -237,13 +237,20 @@ fn domain_head(identity: CoreDomainIdentity) -> Head {
         };
     }
 
-    match identity {
+    let routed = match identity {
         CoreDomainIdentity::D3(word) => match word.word().packed_bits() {
             0b001 => Head::Quote,
             0b011 => Head::Cond,
             _ => Head::Call,
         },
         _ => Head::Call,
+    };
+    if matches!(routed, Head::Call)
+        && matches!(environment.domain_code_slot(identity), Some(Value::Macro(_)))
+    {
+        Head::Opaque
+    } else {
+        routed
     }
 }
 
@@ -272,7 +279,7 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
 
 fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Head {
     match &head.kind {
-        ExprKind::DomainIdentity(identity) => domain_head(*identity),
+        ExprKind::DomainIdentity(identity) => domain_head(*identity, environment),
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
             if let Some(sid) = canon::routed_sid_for_surface(name) {
@@ -291,7 +298,7 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
             }
             match environment.get(name) {
                 Some(Value::Macro(_) | Value::Builtin(_)) => Head::Opaque,
-                Some(Value::DomainIdentity(identity)) => domain_head(identity),
+                Some(Value::DomainIdentity(identity)) => domain_head(identity, environment),
                 Some(Value::Sid(sid)) => sid_head(sid, environment),
                 _ => Head::Call,
             }
@@ -307,7 +314,9 @@ fn is_pure(expression: &Expr, own: &[Rc<str>], environment: &Environment) -> boo
             (classify_head(&items[0], own, environment), &items[..])
         }
         ExprKind::Call(sid, arguments) => (sid_head(*sid, environment), &arguments[..]),
-        ExprKind::DomainCall(identity, arguments) => (domain_head(*identity), &arguments[..]),
+        ExprKind::DomainCall(identity, arguments) => {
+            (domain_head(*identity, environment), &arguments[..])
+        },
         _ => return true,
     };
     match head {
@@ -409,7 +418,7 @@ fn resolve(
             ),
             _ => return expression.clone(),
         },
-        ExprKind::DomainCall(identity, arguments) => match domain_head(*identity) {
+        ExprKind::DomainCall(identity, arguments) => match domain_head(*identity, environment) {
             Head::Call => ExprKind::DomainCall(*identity, resolve_all(arguments, changed)),
             Head::Cond => ExprKind::DomainCall(
                 *identity,
