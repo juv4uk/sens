@@ -137,6 +137,14 @@ pub(crate) fn evaluate_step(
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
         ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
+        // AST transport can carry these domains before runtime semantics are
+        // admitted. Reaching the evaluator must fail closed rather than widen
+        // the identity through legacy Sens8.
+        ExprKind::CoreD5(_) | ExprKind::CoreD6(_) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            "typed domain identity is not yet executable in this runtime",
+            expression.span,
+        )),
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
