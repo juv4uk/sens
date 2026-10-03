@@ -5,7 +5,7 @@ on:
     paths:
       - "benchmarks/residue-domain-law/**"
       - "benchmarks/post-d4-root-min-closeout/**"
-      - "benchmarks/d5-structural-discovery/factor-graph.json"
+      - "knowledge/d5-historical-full-map.json"
       - "benchmarks/d6-closure-map/**"
       - "docs/research/2344-post-d4-historical-ledger.json"
       - ".github/workflows/residue-domain-law.yml"
