@@ -1,0 +1,25 @@
+name: Exact-Q minimal signature research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2271-q-minimal-signature.py"
+      - "scripts/research-2271-q-remove-one.py"
+      - ".github/workflows/q-minimal-signature-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-sufficiency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Desugar exact-Q arithmetic to ADD + MUL + RECIP
+        run: python3 scripts/research-2271-q-minimal-signature.py
+      - name: Attack each surviving generator
+        run: python3 scripts/research-2271-q-remove-one.py
