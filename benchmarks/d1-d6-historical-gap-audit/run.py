@@ -99,8 +99,8 @@ def build() -> dict[str, Any]:
     require(target["coordinate"] == "001111", "ratified D6 target moved")
     require(target["research_evidence_class"] == "RATIFIED-MANUAL-RESIDENT",
             "001111 owner-readiness changed")
-    require(target["canonical_semantic_member"] is False,
-            "001111 became admitted without audit update")
+    require(target["canonical_semantic_member"] is True,
+            "001111 lost owner-ratified D6 membership")
 
     rows: list[dict[str, Any]] = []
     for op in EXPECTED_OPS:
@@ -121,10 +121,14 @@ def build() -> dict[str, Any]:
             readiness = "NEEDS-LAW"
             missing = "exact-domain theorem + residency/coordinate theorem"
         elif op == "SETQ":
-            readiness = "OWNER-READY"
-            missing = "owner decision only for candidate D6:001111; historical row remains UNPLACED"
-            require(p["candidate_coordinate"] == "D6:001111 (OD-001 owner-ready only)",
-                    "SETQ owner-ready candidate drift")
+            readiness = "RATIFIED"
+            missing = "NONE; owner decision #2538 OD-001 applied by #2723"
+            require(p["placement_kind"] == "RATIFIED-RESIDENT",
+                    "SETQ ratified placement kind drift")
+            require(p["exact_domain"] == "D6" and p["coordinate"] == "001111",
+                    "SETQ ratified D6 coordinate drift")
+            require(p["candidate_coordinate"] is None,
+                    "SETQ must not remain a candidate after ratification")
         elif op == "PROG":
             readiness = "COMPOSITE"
             missing = "NONE-as-resident; decompose GO + RETURN"
@@ -159,10 +163,12 @@ def build() -> dict[str, Any]:
     already = [r for r in rows if r["ratification_readiness"] == "ALREADY-EXPLAINED"]
     needs_law = [r for r in rows if r["ratification_readiness"] == "NEEDS-LAW"]
     owner_ready = [r for r in rows if r["ratification_readiness"] == "OWNER-READY"]
+    ratified = [r for r in rows if r["ratification_readiness"] == "RATIFIED"]
     composite = [r for r in rows if r["ratification_readiness"] == "COMPOSITE"]
 
-    require([r["historical_capability"] for r in owner_ready] == ["SETQ"],
-            "owner-ready set changed; review required")
+    require(owner_ready == [], "owner-ready set must be empty after OD-001")
+    require([r["historical_capability"] for r in ratified] == ["SETQ"],
+            "ratified historical placement set changed; review required")
     require(set(r["historical_capability"] for r in needs_law) ==
             {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
             "surviving NEEDS-LAW set changed; review required")
@@ -211,13 +217,14 @@ def build() -> dict[str, Any]:
             }
         },
         "owner_facing": {
-            "ready_now": [
+            "ready_now": [],
+            "decided": [
                 {
                     "decision": "OD-001",
                     "binary_object": "D6:001111",
-                    "status": "OWNER-READY-NONADMITTED",
-                    "meaning": "shared-location / SETQ binding-policy product candidate",
-                    "authority": "#2538",
+                    "status": "RATIFIED-RESIDENT",
+                    "meaning": "shared-location / SETQ binding-policy product",
+                    "authority": "#2538/#2723",
                 }
             ],
             "not_ready": [r["historical_capability"] for r in needs_law],
@@ -228,9 +235,10 @@ def build() -> dict[str, Any]:
             "already_explained": len(already),
             "needs_new_law": len(needs_law),
             "owner_ready": len(owner_ready),
+            "ratified": len(ratified),
             "composite": len(composite),
             "new_d5_manual_residents": 0,
-            "new_d6_admissions": 0,
+            "new_d6_admissions": 1,
         },
         "guards": [
             "historical presence != resident necessity",
@@ -278,9 +286,10 @@ def render_md(result: dict[str, Any]) -> str:
         f"{result['domain_summary']['D6']['canonical_unknown']} canonical UNKNOWN; "
         f"{result['domain_summary']['D6']['pure_unknown_not_search_space']} PURE-UNKNOWN are not a search space.",
         "",
-        "## Owner-ready now",
+        "## Owner decision applied",
         "",
-        "- OD-001: D6:001111 is owner-ready but nonadmitted. No other historical row is owner-ready.",
+        "- OD-001: D6:001111 is RATIFIED for SETQ/shared-location under #2538/#2723.",
+        "- No other historical row is owner-ready; additional residents still require a new theorem.",
         "",
         "## Arithmetic",
         "",
