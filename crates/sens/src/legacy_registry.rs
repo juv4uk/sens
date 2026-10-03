@@ -126,6 +126,8 @@ pub(crate) fn domain_identity_from_byte(byte: u8) -> Option<CoreDomainIdentity> 
         0b0011_0101 => Some(d4(0b1101)),
         0b0000_1100 => Some(d5(0b01010)), // PLUS
         0b0000_1101 => Some(d5(0b01011)), // DIFFERENCE
+        0b0001_1010 => Some(d5(0b01110)), // LESSP
+        0b0001_1011 => Some(d5(0b01111)), // GREATERP
         0b0000_1110 => Some(d5(0b10010)), // TIMES
         0b0000_1111 => Some(d5(0b10011)), // QUOTIENT
         _ => None,
@@ -156,8 +158,12 @@ mod tests {
         let cond = domain_identity_from_byte(0b0000_0111).unwrap();
         let eq = domain_identity_from_byte(0b0000_0011).unwrap();
         let plus = domain_identity_from_byte(0b0000_1100).unwrap();
+        let less = domain_identity_from_byte(0b0001_1010).unwrap();
+        let greater = domain_identity_from_byte(0b0001_1011).unwrap();
         assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
         assert_eq!((eq.width(), eq.packed_bits()), (3, 0b111));
         assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
+        assert_eq!((less.width(), less.packed_bits()), (5, 0b01110));
+        assert_eq!((greater.width(), greater.packed_bits()), (5, 0b01111));
     }
 }
