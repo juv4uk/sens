@@ -25,6 +25,11 @@ from pathlib import Path
 from typing import Any
 
 
+ROOT = Path(__file__).resolve().parents[2]
+CORE1 = ROOT / "lib" / "core1.lisp"
+CLOSURES = ROOT / "crates" / "sens" / "src" / "eval" / "closures.rs"
+
+
 class LookupErrorSemantic(RuntimeError):
     pass
 
@@ -125,11 +130,58 @@ def run_case(
     }
 
 
+def assert_live_d4_boundary() -> dict[str, bool]:
+    """Pin the bounded model to the current admitted Core1/runtime call boundary."""
+    core1 = CORE1.read_text(encoding="utf-8")
+    closures = CLOSURES.read_text(encoding="utf-8")
+
+    lookup_explicit_env = (
+        "(00001001 C1-LOOKUP\n  (00001000 (NAME ENV GLOBAL)" in core1
+    )
+    bind_explicit_env = (
+        "(00001001 C1-BIND\n"
+        "  (10101010 C1-BIND\n"
+        "    (00001000 (PARAMS ARGS ENV)" in core1
+    )
+
+    ordinary_start = closures.index("Value::Closure(ref closure) => {")
+    ordinary_end = closures.index("_ => Err(LanguageError::new(", ordinary_start)
+    ordinary = closures[ordinary_start:ordinary_end]
+
+    caller_evaluates_args = (
+        "slots.push(evaluate(argument, calling_environment)?);" in ordinary
+    )
+    local_frame_created = "let local_environment = call_frame(closure, slots);" in ordinary
+    no_direct_caller_env_slot = "slots.push(calling_environment" not in ordinary
+
+    call_frame_start = closures.index("fn call_frame(closure: &Closure")
+    call_frame_end = closures.index("\n}\n", call_frame_start) + 2
+    call_frame = closures[call_frame_start:call_frame_end]
+    captured_env_owns_frame = (
+        "closure" in call_frame
+        and ".environment" in call_frame
+        and ".child_with_slots" in call_frame
+    )
+
+    checks = {
+        "core1_lookup_takes_explicit_env": lookup_explicit_env,
+        "core1_bind_takes_explicit_env": bind_explicit_env,
+        "ordinary_call_evaluates_args_in_caller": caller_evaluates_args,
+        "ordinary_call_builds_local_frame": local_frame_created,
+        "ordinary_call_does_not_inject_caller_env_slot": no_direct_caller_env_slot,
+        "call_frame_extends_captured_closure_env": captured_env_owns_frame,
+    }
+    assert all(checks.values()), checks
+    return checks
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
+
+    live_boundary = assert_live_d4_boundary()
 
     outer = frame(x="OUTER-X", only_outer="OUTER-ONLY")
     nearest = frame(x="NEAREST-X", caller_only="CALLER-ONLY")
@@ -238,6 +290,7 @@ def main() -> int:
             "caller_env_remains_distinct_from_callee_local_frame": True,
             "transparent_current_env_access_requires_reification_channel": True,
             "host_reflection_counts_as_imported_authority": True,
+            "live_d4_source_boundary": live_boundary,
         },
         "interpretation": (
             "Caller-environment behavior is reconstructible once an environment "
@@ -278,6 +331,7 @@ def main() -> int:
         "| nearest caller binding preserved | YES |",
         "| caller-env remains distinct from callee-local frame | YES |",
         "| hidden evaluator reflection reconstructs lookup | YES, but imports a channel |",
+        "| live Core1/runtime boundary matches model | YES |",
         "",
         "Interpretation:",
         "environment lookup is expressible once the environment is explicit ordinary data,",
