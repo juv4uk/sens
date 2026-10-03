@@ -7,9 +7,9 @@ and
   executable canonical identity admission (reader/carrier/registry).
 
 It intentionally makes no evaluator/lowering claims beyond UNMEASURED.
-When the identity carrier/reader migrates away from Sens8-only, this guard
-must fail and be updated to measure the new architecture rather than silently
-preserving the old baseline.
+The runtime carrier is now domain-qualified through CallableIdentity while
+the ordinary reader and semantic registry remain transitional. This guard
+measures those boundaries independently.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ D5 = ROOT / "knowledge" / "d5-historical-full-map.json"
 D6 = ROOT / "knowledge" / "d6-historical-full-map.json"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 PARSER = ROOT / "crates" / "sens" / "src" / "parser.rs"
-SENS = ROOT / "crates" / "sens" / "src" / "sens.rs"
+CALLABLE = ROOT / "crates" / "sens" / "src" / "callable_identity.rs"
 SYNTAX = ROOT / "crates" / "sens" / "src" / "syntax.rs"
 OUTPUT = ROOT / "knowledge" / "od005-od006-runtime-admission-audit.json"
 
@@ -46,18 +46,24 @@ def legacy_surface_map(text: str) -> dict[str, str]:
 
 def source_contract() -> dict:
     parser = PARSER.read_text(encoding="utf-8")
-    sens = SENS.read_text(encoding="utf-8")
+    callable_identity = CALLABLE.read_text(encoding="utf-8")
     syntax = SYNTAX.read_text(encoding="utf-8")
     registry = REGISTRY.read_text(encoding="utf-8")
 
     assert "token.len() == 8" in parser, (
         "reader is no longer exact-8-only; update #2776 audit for the new identity grammar"
     )
-    assert "pub type Sens = Sens8" in sens, (
-        "runtime identity carrier changed; update #2776 audit instead of preserving legacy result"
+    assert "pub enum CallableIdentity" in callable_identity, (
+        "domain-qualified runtime callable identity disappeared"
     )
-    assert "ExprKind::Sid(crate::Sens8::from_packed_byte(value))" in syntax, (
-        "FASL binary identity transport changed; update #2776 audit"
+    assert "Core(CoreDomainIdentity)" in callable_identity and "Legacy8(u8)" in callable_identity, (
+        "CallableIdentity must keep Core domains distinct from exact-eight compatibility"
+    )
+    assert "Sid(CallableIdentity)" in syntax, (
+        "AST no longer carries the unified callable identity"
+    )
+    assert "TAG_DOMAIN_IDENTITY" in syntax and "CallableIdentity::legacy8(value)" in syntax, (
+        "FASL/wire identity transport changed; update #2776 audit deliberately"
     )
 
     widths = {
@@ -69,8 +75,8 @@ def source_contract() -> dict:
 
     return {
         "reader": "bare binary SID is admitted only at exact width 8",
-        "runtime_identity": "Sens = Sens8",
-        "fasl_binary_payload": "one packed byte",
+        "runtime_identity": "CallableIdentity = Core(CoreDomainIdentity) | Legacy8(u8)",
+        "fasl_binary_payload": "legacy8: one packed byte; Core: explicit domain width + packed payload",
         "registry_identity_keys": "exactly eight bits",
         "non_conclusion": (
             "owner residency is not rejected; runtime admission is not yet implemented"
@@ -98,7 +104,7 @@ def build() -> dict:
                     "category": item["category"],
                     "owner_resident": True,
                     "direct_binary_reader_identity": False,
-                    "exact_width_preserved_in_runtime_identity": False,
+                    "exact_width_preserved_in_runtime_identity": True,
                     "owner_coordinate_registry_identity": False,
                     "legacy_surface_sid8": legacy,
                     "legacy_surface_projection_present": legacy is not None,
@@ -108,7 +114,7 @@ def build() -> dict:
                     "derived_lisp": "UNMEASURED",
                     "compiler_support": "UNMEASURED",
                     "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-                    "blocker": "LEGACY-SENS8-ONLY-CARRIER",
+                    "blocker": "READER-AND-REGISTRY-ADMISSION",
                 }
             )
 
@@ -125,7 +131,7 @@ def build() -> dict:
             "knowledge/d6-historical-full-map.json",
             "lib/surface/semantic-registry.lisp",
             "crates/sens/src/parser.rs",
-            "crates/sens/src/sens.rs",
+            "crates/sens/src/callable_identity.rs",
             "crates/sens/src/syntax.rs",
         ],
         "current_source_contract": source_contract(),
