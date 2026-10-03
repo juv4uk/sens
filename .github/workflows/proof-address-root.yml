@@ -1,0 +1,30 @@
+name: Proof-addressed root identity
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/proof-address-root/**"
+      - ".github/workflows/proof-address-root.yml"
+      - "benchmarks/d5-closure-map/run.py"
+      - "benchmarks/post-d4-root-min-closeout/run.py"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/proof-address-root/**"
+      - ".github/workflows/proof-address-root.yml"
+      - "benchmarks/d5-closure-map/run.py"
+      - "benchmarks/post-d4-root-min-closeout/run.py"
+
+jobs:
+  proof-address:
+    name: Proof address vs semantic domain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run proof-address falsifier
+        run: python3 benchmarks/proof-address-root/run.py --out /tmp/proof-address-root
+      - name: Verify verdict
+        run: |
+          grep -q '"proof_address": "CERTIFICATE-ONLY"' /tmp/proof-address-root/result.json
+          grep -q '"exact_semantic_domain": "UNRESOLVED"' /tmp/proof-address-root/result.json
+          grep -q '"coordinate": "UNPLACED"' /tmp/proof-address-root/result.json
