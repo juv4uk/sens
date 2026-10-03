@@ -18,6 +18,7 @@ pub(crate) mod lower;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
 mod profile_mechanisms_generated;
+mod selector_law;
 mod special_forms;
 
 pub use capabilities::{
