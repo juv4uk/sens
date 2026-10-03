@@ -148,6 +148,38 @@ fn bad(_: BinarySourceWord, _: Sid8) {}
 EOF
 }
 
+green_byte_scatter_comment() {
+  cat >> crates/sens/src/source_words.rs <<'EOF'
+
+// Historical TAG_DOMAIN_IDENTITY byte framing is migration debt, not authority.
+EOF
+}
+
+red_domain_tag_growth() {
+  cat >> crates/sens/src/source_words.rs <<'EOF'
+
+const TAG_DOMAIN_IDENTITY: u8 = 0x59;
+EOF
+}
+
+red_width_byte_growth() {
+  cat >> crates/sens/src/source_words.rs <<'EOF'
+
+fn bad_domain_width_byte(out: &mut Vec<u8>, identity: CoreDomainIdentity) {
+    out.push(identity.width() as u8);
+}
+EOF
+}
+
+red_payload_byte_growth() {
+  cat >> crates/sens/src/source_words.rs <<'EOF'
+
+fn bad_domain_payload_byte(out: &mut Vec<u8>, identity: CoreDomainIdentity) {
+    out.push(identity.packed_bits());
+}
+EOF
+}
+
 run_guard_expect_green exact-width-growth green_exact_growth
 run_guard_expect_green compatibility-growth green_compat_growth
 run_guard_expect_green historical-comment green_historical_comment
@@ -157,5 +189,9 @@ run_guard_expect_red legacy-import red_legacy_import
 run_guard_expect_red mixed-new-file red_mixed_new_file
 run_guard_expect_red exact-example-legacy red_exact_example_legacy
 run_guard_expect_red exact-test-legacy red_exact_test_legacy
+run_guard_expect_green byte-scatter-comment green_byte_scatter_comment
+run_guard_expect_red domain-tag-growth red_domain_tag_growth
+run_guard_expect_red width-byte-growth red_width_byte_growth
+run_guard_expect_red payload-byte-growth red_payload_byte_growth
 
 echo "domain-paradigm-one-way self-test: PASS"
