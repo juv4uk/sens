@@ -144,7 +144,7 @@ def main() -> int:
     assert "EXACT-DOMAIN=UNRESOLVED" in return_text
     assert "BINARY-COORDINATE=UNALLOCATED" in return_text
     assert "NONLOCAL-EXIT-FACTOR=PASS" in nonlocal_text
-    assert "STRONGEST-PARENT=NO-PARENT" in nonlocal_text
+    assert "STRONGEST-HONEST-PARENT=NO-PARENT" in nonlocal_text
     assert "PROG-CLASSIFICATION=COMPOSITE" in nonlocal_text
     assert "NEW-D5-RESIDENTS=0" in nonlocal_text
     assert "COORDINATES-ALLOCATED=0" in nonlocal_text
