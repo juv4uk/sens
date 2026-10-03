@@ -7,6 +7,7 @@ on:
       - "benchmarks/d5-sens-derivation-closeout/**"
       - "benchmarks/post-d4-root-min-closeout/**"
       - "benchmarks/d6-closure-map/**"
+      - "benchmarks/d6-unknown-frontier/**"
       - "scripts/research-2488-return-placement.py"
       - ".github/workflows/nonlocal-exit-domain.yml"
   workflow_dispatch:
