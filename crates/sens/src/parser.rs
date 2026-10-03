@@ -63,8 +63,9 @@ impl Parser<'_> {
         }
     }
 
-    /// Reader sugar: `'form` produces a list headed directly by SID 00000001.
-    /// No named function identity is introduced by the reader.
+    /// Reader sugar: `'form` currently targets the explicit legacy QUOTE
+    /// mechanism. The D3 001 identity will replace this projection only with
+    /// the role-aware D3 bridge; no zero-padding is inferred here.
     fn quote_sugar(&mut self, start: usize) -> Result<Expr, LanguageError> {
         self.bump();
         self.skip_ignored();
@@ -80,7 +81,7 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Sid(crate::sens!(00000001)),
+                        kind: ExprKind::Sid(crate::SemanticRef::legacy8(crate::sens!(00000001))),
                         span: Span {
                             start,
                             end: start + 1,
