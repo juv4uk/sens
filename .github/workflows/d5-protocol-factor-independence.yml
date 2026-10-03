@@ -1,0 +1,30 @@
+name: D5 protocol factor independence
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2522-fexpr-protocol-cube.py"
+      - "scripts/research-2568-macro-timing.py"
+      - "benchmarks/d5-structural-discovery/protocol_independence.py"
+      - ".github/workflows/d5-protocol-factor-independence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protocol-independence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compose existing protocol witnesses
+        run: |
+          python3 benchmarks/d5-structural-discovery/protocol_independence.py --write
+          cat benchmarks/d5-structural-discovery/protocol-independence.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: d5-protocol-independence-matrix
+          path: benchmarks/d5-structural-discovery/protocol-independence.json
