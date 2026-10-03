@@ -165,5 +165,23 @@ fn nearest_existing_update_fails_closed_for_a_missing_name() {
 
 #[test]
 fn lower_bound_is_location_identity_not_generic_value_change() {
-    assert!(true);
+    let root = root_frame();
+    let parent_x = define_local(&root, "x", "old");
+    let observer_before = Rc::clone(&parent_x);
+
+    let child = child_frame(&root);
+    let child_shadow = define_local(&child, "x", "new");
+
+    // A generic value change can make two bindings carry the same payload,
+    // but that does not make them the same semantic location.
+    *parent_x.borrow_mut() = "new";
+
+    assert_eq!(*observer_before.borrow(), "new");
+    assert_eq!(*child_shadow.borrow(), "new");
+    assert!(!Rc::ptr_eq(&observer_before, &child_shadow));
+
+    // Lookup from the child still resolves its distinct shadow location.
+    let child_lookup = lookup_location(&child, "x").expect("child shadow must resolve");
+    assert!(Rc::ptr_eq(&child_lookup, &child_shadow));
+    assert!(!Rc::ptr_eq(&child_lookup, &observer_before));
 }
