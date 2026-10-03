@@ -1,0 +1,54 @@
+name: Core-Math arithmetic live research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/examples/core_math_arithmetic_live.rs"
+      - "benchmarks/core-math-arithmetic-live/**"
+      - ".github/workflows/core-math-arithmetic-live.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/examples/core_math_arithmetic_live.rs"
+      - "benchmarks/core-math-arithmetic-live/**"
+      - ".github/workflows/core-math-arithmetic-live.yml"
+  workflow_dispatch:
+
+jobs:
+  arithmetic-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Build research executor
+        run: |
+          cargo build --release -p sens --example core_math_arithmetic_live
+
+      - name: Run semantic parity and instruction evidence
+        run: |
+          rm -rf /tmp/core-math-arithmetic-live
+          python3 benchmarks/core-math-arithmetic-live/run.py \
+            --binary target/release/examples/core_math_arithmetic_live \
+            --program benchmarks/core-math-arithmetic-live/program.lisp \
+            --iterations 5000 \
+            --out /tmp/core-math-arithmetic-live
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-math-arithmetic-live/report.md; then
+            cat /tmp/core-math-arithmetic-live/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-math-arithmetic-live
+          path: /tmp/core-math-arithmetic-live/
+          retention-days: 14
