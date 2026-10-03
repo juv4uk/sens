@@ -1,0 +1,41 @@
+name: Core-Math exact-Q binary group factors
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2494-q-group-bits.py"
+      - ".github/workflows/core-math-q-group-bits.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  q-group-bits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify binary factor law and semantic witness
+        run: |
+          rm -rf /tmp/core-math-q-group-bits
+          python3 scripts/research-2494-q-group-bits.py --out /tmp/core-math-q-group-bits
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-math-q-group-bits/report.md; then
+            cat /tmp/core-math-q-group-bits/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-math-q-group-bits
+          path: /tmp/core-math-q-group-bits/
+          retention-days: 14
