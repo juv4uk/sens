@@ -136,11 +136,10 @@ def build() -> dict[str, Any]:
     assert "OBSERVABLE-INDEPENDENT-DELTA-COUNT=2" in binding_out
     assert "D6-LOCAL-TWO-DELTA-SUFFICIENT=yes" in binding_out
     assert "D6-TARGET-CANDIDATE=001111" in binding_out
-    target_frontier = next(
-        row for row in frontier["frontier"] if row["coordinate"] == "001111"
-    )
-    assert target_frontier["research_evidence_class"] == "OWNER-READY-NONADMITTED"
-    assert target_frontier["canonical_semantic_member"] is False
+    target_frontier = frontier["ratified_target"]
+    assert target_frontier["coordinate"] == "001111"
+    assert target_frontier["research_evidence_class"] == "RATIFIED-MANUAL-RESIDENT"
+    assert target_frontier["semantic_member"] is True
 
     controls = [
         candidate_row(
@@ -153,8 +152,8 @@ def build() -> dict[str, Any]:
             composition_law="PROVED",
             lower_bound="PROVED",
             collapse_reason=None,
-            existing_frontier_lane="001111 OWNER-READY-NONADMITTED",
-            verdict="POSITIVE-TWO-DELTA-CONTROL-BUT-NOT-PURE-UNKNOWN",
+            existing_frontier_lane="001111 RATIFIED-MANUAL-RESIDENT",
+            verdict="POSITIVE-TWO-DELTA-CONTROL-RATIFIED-OUTSIDE-PURE-UNKNOWN",
         )
     ]
     assert controls[0]["pure_unknown_candidate"] is False
@@ -180,7 +179,7 @@ def build() -> dict[str, Any]:
                 composition_law="PROVED",
                 lower_bound="PROVED",
                 collapse_reason="SET/SETQ names collapse to one shared-location semantic core",
-                existing_frontier_lane="001100..001111 binding-policy overlay; 001111 owner-ready nonadmitted",
+                existing_frontier_lane="001100..001110 proof overlay; 001111 ratified manual resident",
                 verdict="EXCLUDED-SEPARATE-NONPURE-OVERLAY",
             )
         )
@@ -334,7 +333,7 @@ def build() -> dict[str, Any]:
             "two observable deltas do not imply D6 without exact generator/lower-bound law",
             "parentless roots are not generated children",
             "composites are not primitive residents",
-            "known 001111 evidence does not transfer to PURE-UNKNOWN",
+            "ratified 001111 residency does not transfer to PURE-UNKNOWN",
             "no Core-Math or mechanism donation",
         ],
     }
