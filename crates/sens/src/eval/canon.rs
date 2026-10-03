@@ -460,7 +460,48 @@ mod tests {
     }
 
     #[test]
-    fn plus_surface_is_not_bindable_after_m8() {
+    fn migrated_d3_d5_bytes_have_no_separate_legacy_primitive() {
+        for sid in [
+            crate::sens!(00000010),
+            crate::sens!(00000011),
+            crate::sens!(00000100),
+            crate::sens!(00000101),
+            crate::sens!(00000110),
+            crate::sens!(00001100),
+            crate::sens!(00001101),
+            crate::sens!(00001110),
+            crate::sens!(00001111),
+            crate::sens!(00011010),
+            crate::sens!(00011011),
+        ] {
+            assert!(legacy_primitive(sid).is_none(), "{sid} must delegate to exact domain");
+            assert!(has_primitive(sid), "{sid} must remain callable through the domain bridge");
+        }
+        assert!(legacy_primitive(crate::sens!(01001100)).is_some());
+    }
+
+    #[test]
+    fn historical_plus_byte_executes_the_one_d5_mechanism() {
+        let env = Environment::root();
+        let span = Span::default();
+        let n = |value| Value::Number(value, crate::Exactness::Exact);
+        let via_legacy = invoke_semantic_ref(
+            crate::sens!(00001100),
+            &[n(2.0), n(3.0)],
+            &env,
+            span,
+        )
+        .unwrap();
+        let d5 = CoreDomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0b01010).unwrap(),
+        ));
+        let via_domain = invoke_domain_identity(d5, &[n(2.0), n(3.0)], &env, span).unwrap();
+        assert_eq!(via_legacy, via_domain);
+        assert_eq!(via_domain.to_string(), "5");
+    }
+
+    #[test]
+    fn exact_d5_numeric_surfaces_are_not_bindable() {
         let span = Span { start: 0, end: 1 };
         assert!(ensure_bindable("+", span).is_err());
         assert!(ensure_bindable("-", span).is_err());
