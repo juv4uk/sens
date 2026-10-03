@@ -56,8 +56,8 @@
     (8 (no parallel canonical identity beside exact-domain-identity))
     (9 (conflict historical-flat-sens8-vs-current-domain-law
          -> current-domain-law-wins))
-    (10 (identity not-callability))
-    (11 (compatibility not-canonical-domain)))
+    (identity-is-not-callability)
+    (compatibility-is-not-canonical-domain))
 
   (design-question
     "Як би система виглядала, якби exact-domain SENS був первинним,
