@@ -10,7 +10,7 @@ Important:
 - no D5 coordinate may be proposed here;
 - existing D1-D4 derivations are charged as zero post-D4 residue.
 
-The six post-D4 factor candidates in this first slice are observations/axes
+The seven post-D4 factor candidates in the current slice are observations/axes
 already established by earlier bounded work:
   shared-location-update
   non-local-exit
@@ -18,6 +18,7 @@ already established by earlier bounded work:
   explicit-caller-env
   returned-form-protocol
   expansion-timing
+  invocation-packaging
 
 None is promoted to a proved independent root in this slice.
 """
@@ -116,6 +117,15 @@ FACTOR_DEFS: dict[str, dict[str, Any]] = {
         "evidence": ["#2568", "#2569", "#2579"],
         "falsifier": "macro redefinition/order cannot distinguish definition-time from evaluation-time expansion",
     },
+    "invocation-packaging": {
+        "semantic_observable": "whole invocation form exposes call head while operand-only input does not",
+        "positive_rows": {"TRANSFORMER"},
+        "negative_controls": {"FEXPR", "FSUBR", "EVALQUOTE"},
+        "dependency_on_other_factor": [],
+        "current_status": "protocol-axis-candidate",
+        "evidence": ["#2580", "#2588", "3d409736b994221561b413c42c837a428d242358"],
+        "falsifier": "two aliases of one transformer with identical operands remain distinguishable without an explicit head/input channel",
+    },
 }
 
 POST_D4_CANDIDATES = {
@@ -125,6 +135,7 @@ POST_D4_CANDIDATES = {
     "explicit-caller-env",
     "returned-form-protocol",
     "expansion-timing",
+    "invocation-packaging",
 }
 
 
@@ -251,7 +262,7 @@ def main() -> None:
     # Critical phase/placement guards.
     summary = graph["summary"]
     assert summary["historical_rows_consumed"] == 19
-    assert summary["post_d4_factor_candidates"] == 6
+    assert summary["post_d4_factor_candidates"] == 7
     assert summary["proven_independent_roots"] == 0
     assert summary["new_d5_residents"] == 0
     assert summary["d5_selector_generated"] == 8
@@ -268,7 +279,7 @@ def main() -> None:
     print("D5-STRUCTURAL-FACTOR=PASS")
     print("historical-rows-consumed=19")
     print(f"factors-total={summary['candidate_factors_total']}")
-    print("post-d4-factor-candidates=6")
+    print("post-d4-factor-candidates=7")
     print("proven-independent-roots=0")
     print("new-d5-residents=0")
     print("d5-selector-generated=8")
