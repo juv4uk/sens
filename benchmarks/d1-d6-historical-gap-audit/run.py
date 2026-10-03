@@ -232,7 +232,7 @@ def build() -> dict[str, Any]:
     require([r["historical_capability"] for r in needs_law] == ["TRANSFORMER"],
             "surviving NEEDS-LAW set changed; review required")
     require(set(r["historical_capability"] for r in needs_domain) ==
-            {"SET", "RETURN", "FEXPR", "FSUBR"},
+            {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
             "surviving NEEDS-DOMAIN set changed; review required")
     require(needs_placement == [], "placement-only queue changed; review required")
     require([r["historical_capability"] for r in composite] == ["PROG"],
