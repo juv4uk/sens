@@ -275,7 +275,10 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
     // тож `(00001010 назва параметри тіло)` працює так само, як назва.
     session
         .environment
-        .bind_code_slot_once(defmacro_semantic_id, result.value.clone());
+        .bind_code_slot_once(
+            CallableIdentity::legacy8(defmacro_semantic_id.packed_byte()),
+            result.value.clone(),
+        );
 
     Ok(result)
 }
