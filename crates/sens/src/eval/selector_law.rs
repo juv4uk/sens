@@ -201,12 +201,23 @@ mod tests {
     }
 
     #[test]
-    fn selector_program_has_no_table_sized_state() {
-        assert_eq!(std::mem::size_of::<SelectorProgram>(), MAX_SELECTOR_DEPTH + 8);
-        for width in 3usize..=6 {
-            let count = 1usize << (width - 3);
-            let selector_words = count * 2;
-            assert_eq!(selector_words, 1usize << (width - 2));
+    fn one_root_law_generates_the_complete_bounded_selector_family() {
+        let mut generated = 0usize;
+
+        for raw in 0u8..8 {
+            generated += usize::from(decode(d3(raw)).is_some());
         }
+        for raw in 0u8..16 {
+            generated += usize::from(decode(d4(raw)).is_some());
+        }
+        for raw in 0u8..32 {
+            generated += usize::from(decode(d5(raw)).is_some());
+        }
+        for raw in 0u8..64 {
+            generated += usize::from(decode(d6(raw)).is_some());
+        }
+
+        // 2 roots + 4 D4 + 8 D5 + 16 D6 descendants.
+        assert_eq!(generated, 30);
     }
 }
