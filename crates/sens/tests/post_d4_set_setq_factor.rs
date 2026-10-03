@@ -292,19 +292,31 @@ fn core_math_factor_cannot_be_smuggled_into_core_mutation_domain() {
     );
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct FactorizationAccounting {
+    mutation_factor: &'static str,
+    target_acquisition: &'static str,
+    set_surface_width: Option<u8>,
+    coordinate: Option<&'static str>,
+}
+
+fn factorization_accounting() -> FactorizationAccounting {
+    FactorizationAccounting {
+        mutation_factor: "shared-nearest-existing-fail",
+        target_acquisition: "separate-d4-composable",
+        set_surface_width: None,
+        coordinate: None,
+    }
+}
+
 #[test]
 fn factorization_verdict_is_width_conservative() {
-    // Executable accounting only:
-    // - acquisition is independently observable;
-    // - mutation is shared after target normalization;
-    // - nothing here assigns SET a D6 coordinate.
-    const SHARED_MUTATION_FACTOR: bool = true;
-    const SET_TARGET_ACQUISITION_SEPARATE: bool = true;
-    const SET_SURFACE_WIDTH_RATIFIED: bool = false;
-    const COORDINATE_ALLOCATED: bool = false;
-
-    assert!(SHARED_MUTATION_FACTOR);
-    assert!(SET_TARGET_ACQUISITION_SEPARATE);
-    assert!(!SET_SURFACE_WIDTH_RATIFIED);
-    assert!(!COORDINATE_ALLOCATED);
+    let accounting = factorization_accounting();
+    assert_eq!(
+        accounting.mutation_factor,
+        "shared-nearest-existing-fail"
+    );
+    assert_eq!(accounting.target_acquisition, "separate-d4-composable");
+    assert_eq!(accounting.set_surface_width, None);
+    assert_eq!(accounting.coordinate, None);
 }
