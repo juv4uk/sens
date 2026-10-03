@@ -10,7 +10,8 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{legacy_registry, semantic_registry, CoreDomainIdentity, Sens8};
+use crate::legacy_registry;
+use crate::{semantic_registry, CoreDomainIdentity, Sens8};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
