@@ -469,10 +469,10 @@ pub fn is_reserved_surface_name(name: &str) -> bool {
     eval::canon::is_reserved_surface(name)
 }
 
-/// Mechanical source/UI routing query: does this surface resolve to this exact
-/// eight-bit function SID?
-pub fn surface_has_sid(name: &str, sid: Sens8) -> bool {
-    eval::canon::surface_has_sid(name, sid)
+/// Mechanical compatibility query for historical exact-8 registry payloads.
+/// Canonical domain identity is carried by SemanticRef/DomainWord.
+pub fn surface_has_legacy8_bits(name: &str, bits: u8) -> bool {
+    eval::canon::surface_has_legacy8_bits(name, bits)
 }
 
 /// True for any admitted surface whose Lisp-owned evaluator dispatch class is Define.
