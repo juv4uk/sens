@@ -7,7 +7,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity, Sens8};
+use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity, Sens8};
 
 mod generated {
     include!("semantic_registry_generated.rs");
@@ -109,6 +109,7 @@ pub(crate) fn admitted_surfaces_with_namespace_for_id(
 pub(crate) fn domain_identity_from_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
     let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+    let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
 
     match byte {
         0b0000_0001 => Some(d3(0b001)),
@@ -123,6 +124,12 @@ pub(crate) fn domain_identity_from_byte(byte: u8) -> Option<CoreDomainIdentity> 
         0b0011_0011 => Some(d4(0b1010)),
         0b0011_0100 => Some(d4(0b1011)),
         0b0011_0101 => Some(d4(0b1101)),
+        0b0000_1100 => Some(d5(0b01010)), // PLUS
+        0b0000_1101 => Some(d5(0b01011)), // DIFFERENCE
+        0b0001_1010 => Some(d5(0b01110)), // LESSP
+        0b0001_1011 => Some(d5(0b01111)), // GREATERP
+        0b0000_1110 => Some(d5(0b10010)), // TIMES
+        0b0000_1111 => Some(d5(0b10011)), // QUOTIENT
         _ => None,
     }
 }
@@ -150,7 +157,9 @@ mod tests {
     fn compatibility_bridge_is_role_mapping_not_truncation() {
         let cond = domain_identity_from_byte(0b0000_0111).unwrap();
         let eq = domain_identity_from_byte(0b0000_0011).unwrap();
+        let plus = domain_identity_from_byte(0b0000_1100).unwrap();
         assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
         assert_eq!((eq.width(), eq.packed_bits()), (3, 0b111));
+        assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
     }
 }
