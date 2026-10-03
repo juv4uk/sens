@@ -22,6 +22,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Domain carrier and identity unit tests
         run: |
@@ -38,4 +40,12 @@ jobs:
         run: cargo test -p sens --test domain_ast_value_identity
 
       - name: One-way domain paradigm guard
-        run: bash scripts/domain-paradigm-one-way-guard.sh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if test -n "$BASE_SHA" && test -n "$HEAD_SHA"; then
+            bash scripts/domain-paradigm-one-way-guard.sh "$BASE_SHA" "$HEAD_SHA"
+          else
+            bash scripts/test-domain-paradigm-one-way-guard.sh
+          fi
