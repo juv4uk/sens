@@ -1,0 +1,38 @@
+name: Residue semantic width lower bound
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/residue-width-lb/**"
+      - "benchmarks/post-d4-root-min-closeout/**"
+      - "benchmarks/d6-nonprefix-falsifier/**"
+      - ".github/workflows/residue-width-lb.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/residue-width-lb/**"
+      - ".github/workflows/residue-width-lb.yml"
+  workflow_dispatch:
+
+jobs:
+  width-lb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run semantic width lower-bound attack
+        run: |
+          rm -rf /tmp/residue-width-lb
+          python3 benchmarks/residue-width-lb/run.py --out /tmp/residue-width-lb
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/residue-width-lb/report.md; then
+            cat /tmp/residue-width-lb/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: residue-width-lb
+          path: /tmp/residue-width-lb/
+          retention-days: 14
