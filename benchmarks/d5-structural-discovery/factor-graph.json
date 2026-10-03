@@ -1,0 +1,482 @@
+{
+  "authority": "research-only-no-placement",
+  "factors": [
+    {
+      "current_status": "derived-existing-core",
+      "dependency_on_other_factor": [],
+      "evidence": [
+        "#2238",
+        "#2279",
+        "#2300",
+        "#2296",
+        "#2386",
+        "#2387",
+        "#2480"
+      ],
+      "factor_id": "existing-core-structural",
+      "falsifier": "a listed positive row exhibits a bounded observation not reconstructible from admitted D1-D4 semantics",
+      "negative_controls": [
+        "FEXPR",
+        "RETURN",
+        "SET",
+        "TRANSFORMER"
+      ],
+      "positive_rows": [
+        "APPEND",
+        "ASSOC",
+        "EVALQUOTE",
+        "GO",
+        "LABEL",
+        "MAPLIST",
+        "PAIR",
+        "PAIRLIS",
+        "SUBLIS",
+        "SUBST"
+      ],
+      "semantic_observable": "behavior already reconstructed by existing D1-D4 semantics"
+    },
+    {
+      "current_status": "protocol-axis-candidate",
+      "dependency_on_other_factor": [
+        "returned-form-protocol"
+      ],
+      "evidence": [
+        "#2568",
+        "#2569"
+      ],
+      "factor_id": "expansion-timing",
+      "falsifier": "macro redefinition/order cannot distinguish definition-time from evaluation-time expansion",
+      "negative_controls": [
+        "FEXPR",
+        "FSUBR"
+      ],
+      "positive_rows": [
+        "TRANSFORMER"
+      ],
+      "semantic_observable": "definition-time expansion differs observably from evaluation-time expansion"
+    },
+    {
+      "current_status": "protocol-axis-candidate",
+      "dependency_on_other_factor": [
+        "raw-form-input"
+      ],
+      "evidence": [
+        "#2522",
+        "#2530"
+      ],
+      "factor_id": "explicit-caller-env",
+      "falsifier": "caller-env observations are reconstructed from raw operands alone without an additional semantic input",
+      "negative_controls": [
+        "EVALQUOTE",
+        "TRANSFORMER"
+      ],
+      "positive_rows": [
+        "FEXPR",
+        "FSUBR"
+      ],
+      "semantic_observable": "receive caller environment as an explicit semantic input"
+    },
+    {
+      "current_status": "historical-mechanism-only",
+      "dependency_on_other_factor": [
+        "existing-core-structural"
+      ],
+      "evidence": [
+        "#2259"
+      ],
+      "factor_id": "historical-representation-mechanism",
+      "falsifier": "FUNCTION/FUNARG yields an observable not reproduced by current closure/application semantics",
+      "negative_controls": [
+        "RETURN",
+        "SET"
+      ],
+      "positive_rows": [
+        "FUNARG",
+        "FUNCTION"
+      ],
+      "semantic_observable": "historical representation wrapper with no current independent semantic residue established"
+    },
+    {
+      "current_status": "protocol-axis-candidate",
+      "dependency_on_other_factor": [],
+      "evidence": [
+        "#2580",
+        "#2588",
+        "3d409736b994221561b413c42c837a428d242358"
+      ],
+      "factor_id": "invocation-packaging",
+      "falsifier": "two aliases of one transformer with identical operands remain distinguishable without an explicit head/input channel",
+      "negative_controls": [
+        "EVALQUOTE",
+        "FEXPR",
+        "FSUBR"
+      ],
+      "positive_rows": [
+        "TRANSFORMER"
+      ],
+      "semantic_observable": "whole invocation form exposes call head while operand-only input does not"
+    },
+    {
+      "current_status": "bounded-independent-observable",
+      "dependency_on_other_factor": [],
+      "evidence": [
+        "#2439",
+        "#2488",
+        "#2504",
+        "#2611"
+      ],
+      "factor_id": "non-local-exit",
+      "falsifier": "local admitted control reconstructs RETURN without whole-call-graph CPS or an equivalent extra control channel",
+      "negative_controls": [
+        "GO",
+        "SETQ"
+      ],
+      "positive_rows": [
+        "PROG",
+        "RETURN"
+      ],
+      "semantic_observable": "exit the most-recent active PROG across an ordinary call boundary"
+    },
+    {
+      "current_status": "protocol-axis-candidate",
+      "dependency_on_other_factor": [],
+      "evidence": [
+        "#2522",
+        "#2530",
+        "#2557"
+      ],
+      "factor_id": "raw-form-input",
+      "falsifier": "raw-call observations are reproduced without access to raw form structure",
+      "negative_controls": [
+        "EVALQUOTE",
+        "FUNCTION"
+      ],
+      "positive_rows": [
+        "FEXPR",
+        "FSUBR",
+        "TRANSFORMER"
+      ],
+      "semantic_observable": "receive unevaluated operand/form structure as input"
+    },
+    {
+      "current_status": "protocol-axis-candidate",
+      "dependency_on_other_factor": [
+        "raw-form-input"
+      ],
+      "evidence": [
+        "#2557",
+        "#2568"
+      ],
+      "factor_id": "returned-form-protocol",
+      "falsifier": "direct-value and returned-form behavior are observationally interchangeable in the bounded protocol corpus",
+      "negative_controls": [
+        "FEXPR",
+        "FSUBR"
+      ],
+      "positive_rows": [
+        "TRANSFORMER"
+      ],
+      "semantic_observable": "transformer result is a replacement/executable form rather than a direct value"
+    },
+    {
+      "current_status": "bounded-independent-observable",
+      "dependency_on_other_factor": [],
+      "evidence": [
+        "#2441",
+        "#2442",
+        "#2480",
+        "#2492",
+        "#2589",
+        "#2598",
+        "#2611"
+      ],
+      "factor_id": "shared-location-update",
+      "falsifier": "remove shared-location state while preserving all bounded SET/SETQ observations locally under admitted semantics",
+      "negative_controls": [
+        "FEXPR",
+        "GO",
+        "RETURN"
+      ],
+      "positive_rows": [
+        "SET",
+        "SETQ"
+      ],
+      "semantic_observable": "update nearest existing shared binding/location with fail-on-miss semantics"
+    }
+  ],
+  "historical_rows": [
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "a104f9d7ca23a84df48e5f35329fb34c347314e1",
+      "historical_operation": "LABEL",
+      "historical_phase": "A",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2234
+    },
+    {
+      "candidate_factors": [
+        "historical-representation-mechanism"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "6a7ee0099066cf9469151813be04d456b037cb00",
+      "historical_operation": "FUNCTION",
+      "historical_phase": "A",
+      "later_classification": "HISTORICAL-MECHANISM",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2235
+    },
+    {
+      "candidate_factors": [
+        "historical-representation-mechanism"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "6a7ee0099066cf9469151813be04d456b037cb00",
+      "historical_operation": "FUNARG",
+      "historical_phase": "A",
+      "later_classification": "HISTORICAL-MECHANISM",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2235
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "163c30d96d66ea0098304a6b341f257d1ee86278",
+      "historical_operation": "EVALQUOTE",
+      "historical_phase": "B",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2279
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "e2bd9b84650820fe84acd127c2588f034a54ad3a",
+      "historical_operation": "APPEND",
+      "historical_phase": "C",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2347
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "2bf549d1693f678de6d1ce0e85444fccca00c569",
+      "historical_operation": "PAIR",
+      "historical_phase": "C",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2286
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "2bf549d1693f678de6d1ce0e85444fccca00c569",
+      "historical_operation": "PAIRLIS",
+      "historical_phase": "C",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2286
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "81b50d3331e19bc79c310987c75b6d36175b9f8f",
+      "historical_operation": "ASSOC",
+      "historical_phase": "C",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2285
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "9b5841ad7beffda412d77942f81d83018a9b3f25",
+      "historical_operation": "SUBST",
+      "historical_phase": "C",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2348
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "9b5841ad7beffda412d77942f81d83018a9b3f25",
+      "historical_operation": "SUBLIS",
+      "historical_phase": "C",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2348
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "ff326671920c9d813e10bdb2efa0a773c156c0cf",
+      "historical_operation": "MAPLIST",
+      "historical_phase": "C",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2349
+    },
+    {
+      "candidate_factors": [
+        "shared-location-update"
+      ],
+      "derived_by_existing_core": false,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "historical_operation": "SET",
+      "historical_phase": "D",
+      "later_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2442
+    },
+    {
+      "candidate_factors": [
+        "shared-location-update"
+      ],
+      "derived_by_existing_core": false,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "historical_operation": "SETQ",
+      "historical_phase": "D",
+      "later_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2442
+    },
+    {
+      "candidate_factors": [
+        "non-local-exit"
+      ],
+      "derived_by_existing_core": false,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "historical_operation": "PROG",
+      "historical_phase": "D",
+      "later_classification": "COMPOSITE",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2315
+    },
+    {
+      "candidate_factors": [
+        "existing-core-structural"
+      ],
+      "derived_by_existing_core": true,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "historical_operation": "GO",
+      "historical_phase": "D",
+      "later_classification": "DERIVED-D1-D4",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2438
+    },
+    {
+      "candidate_factors": [
+        "non-local-exit"
+      ],
+      "derived_by_existing_core": false,
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "historical_operation": "RETURN",
+      "historical_phase": "D",
+      "later_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2439
+    },
+    {
+      "candidate_factors": [
+        "explicit-caller-env",
+        "raw-form-input"
+      ],
+      "derived_by_existing_core": false,
+      "evidence_sha": "3166bdee2cf21758bcc5cc6ae7a6d9a117aa3c1f",
+      "historical_operation": "FEXPR",
+      "historical_phase": "E",
+      "later_classification": "RAW+ENV-TWO-CAPABILITIES",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2343
+    },
+    {
+      "candidate_factors": [
+        "explicit-caller-env",
+        "raw-form-input"
+      ],
+      "derived_by_existing_core": false,
+      "evidence_sha": "3166bdee2cf21758bcc5cc6ae7a6d9a117aa3c1f",
+      "historical_operation": "FSUBR",
+      "historical_phase": "E",
+      "later_classification": "RAW+ENV-TWO-CAPABILITIES",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2343
+    },
+    {
+      "candidate_factors": [
+        "expansion-timing",
+        "invocation-packaging",
+        "raw-form-input",
+        "returned-form-protocol"
+      ],
+      "derived_by_existing_core": false,
+      "evidence_sha": "1ad012de96eceecae3927b98f99429093cdff354",
+      "historical_operation": "TRANSFORMER",
+      "historical_phase": "F",
+      "later_classification": "PARTIAL-PROTOCOL-ALIGNMENT-TIMING-DISTINCT",
+      "placement": "UNPLACED",
+      "presence": "yes",
+      "source_issue": 2557
+    }
+  ],
+  "schema": "d5-structural-factor-graph/1",
+  "source_ledger": "docs/research/2344-post-d4-historical-ledger.json",
+  "summary": {
+    "candidate_factors_total": 9,
+    "d5_selector_generated": 8,
+    "d5_unknown_free": 24,
+    "historical_rows_consumed": 19,
+    "new_d5_residents": 0,
+    "placement_search_authorized": false,
+    "post_d4_factor_candidates": 7,
+    "post_d4_factor_ids": [
+      "expansion-timing",
+      "explicit-caller-env",
+      "invocation-packaging",
+      "non-local-exit",
+      "raw-form-input",
+      "returned-form-protocol",
+      "shared-location-update"
+    ],
+    "proven_independent_roots": 0
+  }
+}
