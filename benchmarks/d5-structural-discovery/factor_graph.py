@@ -239,8 +239,17 @@ def render(data: dict[str, Any]) -> dict[str, Any]:
             "candidate_factors_total": len(factors),
             "post_d4_factor_candidates": len(POST_D4_CANDIDATES),
             "post_d4_factor_ids": sorted(POST_D4_CANDIDATES),
-            "proven_independent_roots": 0,
+            "roots_promoted_by_this_model": 0,
             "new_d5_residents": 0,
+            "external_root_theorems": [
+                {
+                    "factor_id": "non-local-exit",
+                    "classification": "semantic-residue-root",
+                    "evidence": ["#2488", "#2504"],
+                    "exact_width": "UNKNOWN",
+                    "coordinate": "UNPLACED",
+                }
+            ],
             "d5_selector_generated": 8,
             "d5_unknown_free": 24,
             "placement_search_authorized": False,
@@ -266,8 +275,10 @@ def main() -> None:
     summary = graph["summary"]
     assert summary["historical_rows_consumed"] == 19
     assert summary["post_d4_factor_candidates"] == 7
-    assert summary["proven_independent_roots"] == 0
+    assert summary["roots_promoted_by_this_model"] == 0
     assert summary["new_d5_residents"] == 0
+    assert len(summary["external_root_theorems"]) == 1
+    assert summary["external_root_theorems"][0]["factor_id"] == "non-local-exit"
     assert summary["d5_selector_generated"] == 8
     assert summary["d5_unknown_free"] == 24
     assert summary["placement_search_authorized"] is False
@@ -283,8 +294,9 @@ def main() -> None:
     print("historical-rows-consumed=19")
     print(f"factors-total={summary['candidate_factors_total']}")
     print("post-d4-factor-candidates=7")
-    print("proven-independent-roots=0")
+    print("roots-promoted-by-this-model=0")
     print("new-d5-residents=0")
+    print("external-root-theorems=1")
     print("d5-selector-generated=8")
     print("d5-unknown-free=24")
     print("placement-search-authorized=no")
