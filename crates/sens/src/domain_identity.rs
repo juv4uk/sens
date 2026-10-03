@@ -36,7 +36,6 @@ impl DomainIdentity {
             Self::D4(_) => 4,
             Self::D5(_) => 5,
             Self::D6(_) => 6,
-            Self::D8(_) => 8,
             Self::D7(_) => 7,
             Self::D8(_) => 8,
         }
@@ -50,7 +49,6 @@ impl DomainIdentity {
             Self::D4(value) => value.word().packed_bits(),
             Self::D5(value) => value.word().packed_bits(),
             Self::D6(value) => value.word().packed_bits(),
-            Self::D8(value) => value.word().packed_bits(),
             Self::D7(value) => value.word().packed_bits(),
             Self::D8(value) => value.word().packed_bits(),
         }
@@ -77,7 +75,6 @@ impl DomainIdentity {
             Self::D4(value) => BinarySourceWord::W4(value.word()),
             Self::D5(value) => BinarySourceWord::W5(value.word()),
             Self::D6(value) => BinarySourceWord::W6(value.word()),
-            Self::D8(value) => BinarySourceWord::W8(value.word()),
             Self::D7(value) => BinarySourceWord::W7(value.word()),
             Self::D8(value) => BinarySourceWord::W8(value.word()),
         }
@@ -151,6 +148,7 @@ impl CoreDomainIdentity {
             Self::D4(_) => 4,
             Self::D5(_) => 5,
             Self::D6(_) => 6,
+            Self::D8(_) => 8,
         }
     }
 
@@ -164,6 +162,7 @@ impl CoreDomainIdentity {
             Self::D4(value) => value.word().packed_bits(),
             Self::D5(value) => value.word().packed_bits(),
             Self::D6(value) => value.word().packed_bits(),
+            Self::D8(value) => value.word().packed_bits(),
         }
     }
 
@@ -191,6 +190,7 @@ impl CoreDomainIdentity {
             Self::D4(value) => BinarySourceWord::W4(value.word()),
             Self::D5(value) => BinarySourceWord::W5(value.word()),
             Self::D6(value) => BinarySourceWord::W6(value.word()),
+            Self::D8(value) => BinarySourceWord::W8(value.word()),
         }
     }
 }
