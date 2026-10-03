@@ -1,34 +1,29 @@
-//! #1272 — runtime carries only which Core profile a loader selected.
-//! SENS-owned contracts remain semantic authority for what that profile means.
+//! #1272/#2375 — one active Core has no runtime profile selector.
+//! Mechanism-lab admission is an orthogonal session fact.
 
-use sens::{load_core2_library, load_core_library, CoreProfile, Environment, Session};
+use sens::{load_core_library, Environment, Session};
 
 #[test]
-fn bare_root_has_no_implicit_core_profile() {
+fn bare_root_has_no_mechanism_lab_admission() {
     let environment = Environment::root();
-    assert_eq!(environment.selected_core_profile(), None);
+    assert!(!environment.mechanism_lab_enabled());
 }
 
 #[test]
-fn core4_loader_selects_core4_explicitly() {
+fn core_loader_does_not_select_or_enable_a_profile() {
     let mut session = Session::default();
-    assert_eq!(session.environment.selected_core_profile(), None);
-    load_core_library(&mut session).expect("Core4 library must load");
-    assert_eq!(session.environment.selected_core_profile(), Some(CoreProfile::Core4));
+    assert!(!session.environment.mechanism_lab_enabled());
+
+    load_core_library(&mut session).expect("one Core library must load");
+
+    assert!(!session.environment.mechanism_lab_enabled());
 }
 
 #[test]
-fn core2_loader_selects_core2_explicitly() {
+fn lexical_child_shares_the_same_non_lab_session_state() {
     let mut session = Session::default();
-    assert_eq!(session.environment.selected_core_profile(), None);
-    load_core2_library(&mut session).expect("Core2 library must load");
-    assert_eq!(session.environment.selected_core_profile(), Some(CoreProfile::Core2));
-}
+    load_core_library(&mut session).expect("one Core library must load");
 
-#[test]
-fn lexical_child_shares_the_selected_profile_signal() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("Core4 library must load");
     let child = session.environment.child();
-    assert_eq!(child.selected_core_profile(), Some(CoreProfile::Core4));
+    assert!(!child.mechanism_lab_enabled());
 }
