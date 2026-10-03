@@ -14,7 +14,8 @@ It is deliberately **not** a placement search.
 Current expected result:
 
 - 12 historical rows already explained by D1-D4;
-- 5 rows still need a domain/placement law: SET, RETURN, FEXPR, FSUBR, TRANSFORMER;
+- 4 rows need an exact domain/placement theorem: SET, RETURN, FEXPR, FSUBR;
+- TRANSFORMER remains NEEDS-LAW until #2567 closes the Hart whole-form + expansion-stage relation;
 - PROG is a composite, not a resident conclusion;
 - SETQ/D6:001111 is the only owner-ready/nonadmitted residency decision;
 - D5 stays 8 generated + 24 protected UNKNOWN + 0 manual residents;
