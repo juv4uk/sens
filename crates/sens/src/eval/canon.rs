@@ -275,16 +275,23 @@ fn prim_01001101(
 }
 
 fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
-    let CoreDomainIdentity::D3(word) = identity else {
-        return None;
-    };
-    match word.word().packed_bits() {
-        0b010 => Some(prim_00000010), // ATOM
-        0b111 => Some(prim_00000011), // EQ
-        0b100 => Some(prim_00000100), // CONS
-        0b101 => Some(prim_00000101), // CAR
-        0b110 => Some(prim_00000110), // CDR
-        _ => None, // QUOTE/COND are syntax routes, 000 is unallocated here
+    match identity {
+        CoreDomainIdentity::D3(word) => match word.word().packed_bits() {
+            0b010 => Some(prim_00000010), // ATOM
+            0b111 => Some(prim_00000011), // EQ
+            0b100 => Some(prim_00000100), // CONS
+            0b101 => Some(prim_00000101), // CAR
+            0b110 => Some(prim_00000110), // CDR
+            _ => None, // QUOTE/COND are syntax routes, 000 is unallocated here
+        },
+        CoreDomainIdentity::D5(word) => match word.word().packed_bits() {
+            0b01010 => Some(prim_00001100), // PLUS
+            0b01011 => Some(prim_00001101), // DIFFERENCE
+            0b10010 => Some(prim_00001110), // TIMES
+            0b10011 => Some(prim_00001111), // QUOTIENT
+            _ => None,
+        },
+        CoreDomainIdentity::D4(_) | CoreDomainIdentity::D6(_) => None,
     }
 }
 
@@ -423,6 +430,28 @@ mod tests {
 
         let d4_same_payload = CoreDomainIdentity::D4(crate::CoreD4::from_word(
             crate::Bit4::new(0b0010).unwrap(),
+        ));
+        assert!(domain_primitive(d4_same_payload).is_none());
+    }
+
+    #[test]
+    fn canonical_d5_arithmetic_routes_by_owner_coordinate_not_old_byte() {
+        let d5 = |bits| {
+            CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(bits).unwrap()))
+        };
+
+        assert!(domain_primitive(d5(0b01010)).is_some()); // PLUS
+        assert!(domain_primitive(d5(0b01011)).is_some()); // DIFFERENCE
+        assert!(domain_primitive(d5(0b10010)).is_some()); // TIMES
+        assert!(domain_primitive(d5(0b10011)).is_some()); // QUOTIENT
+
+        // Old byte slots 00001100..00001111 are not D5 coordinates.
+        assert_ne!(d5(0b01010).packed_bits(), crate::sens!(00001100).packed_byte());
+        assert_ne!(d5(0b01011).packed_bits(), crate::sens!(00001101).packed_byte());
+
+        // Same payload in another domain does not inherit arithmetic meaning.
+        let d4_same_payload = CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b1010).unwrap(),
         ));
         assert!(domain_primitive(d4_same_payload).is_none());
     }
