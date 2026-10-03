@@ -68,8 +68,8 @@ FACTOR_DEFS: dict[str, dict[str, Any]] = {
         "positive_rows": {"SET", "SETQ"},
         "negative_controls": {"GO", "RETURN", "FEXPR"},
         "dependency_on_other_factor": [],
-        "current_status": "surviving-observable-candidate",
-        "evidence": ["#2441", "#2442", "#2480", "#2492"],
+        "current_status": "bounded-independent-observable",
+        "evidence": ["#2441", "#2442", "#2480", "#2492", "#2589", "f48956fc94e3eb5c7534dbfe0cbcb46c393a74c5"],
         "falsifier": "remove shared-location state while preserving all bounded SET/SETQ observations locally under admitted semantics",
     },
     "non-local-exit": {
