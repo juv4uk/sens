@@ -22,6 +22,8 @@ LEDGER = ROOT / "docs/research/2344-post-d4-historical-ledger.json"
 PLACEMENT = ROOT / "benchmarks/post-d4-semantic-placement/placement.json"
 D5_GUARD = ROOT / "scripts/research-2689-d5-ratified-baseline.py"
 D6_FRONTIER = ROOT / "benchmarks/d6-unknown-frontier/run.py"
+ARITHMETIC_LEDGER = ROOT / "docs/research/2709-lisp15-arithmetic-ledger.json"
+MEMO24_CHRONOLOGY = ROOT / "docs/research/2715-memo24-arithmetic-comparison.json"
 
 # This table is not new semantic authority. It is the smallest explicit
 # projection of the merged #2705 placement evidence into the question
@@ -69,6 +71,8 @@ def load_json(path: Path) -> dict[str, Any]:
 def build() -> dict[str, Any]:
     ledger = load_json(LEDGER)
     placement = load_json(PLACEMENT)
+    arithmetic = load_json(ARITHMETIC_LEDGER)
+    memo24 = load_json(MEMO24_CHRONOLOGY) if MEMO24_CHRONOLOGY.exists() else None
     d5 = runpy.run_path(str(D5_GUARD))["build_result"]()
     d6 = runpy.run_path(str(D6_FRONTIER))["build"]()
 
@@ -85,6 +89,41 @@ def build() -> dict[str, Any]:
     require(len(historical) == placement["invariants"]["historical_rows"] == 19,
             "19-row merged historical baseline changed")
 
+    # Arithmetic is a historical completeness input, not Core residency
+    # authority. Keep every historical numeric row explicitly outside the
+    # Core D5/D6 allocation question until a typed Core-Math bridge exists.
+    require(arithmetic["phase"] == "HISTORICAL-INGEST", "arithmetic phase changed")
+    require(arithmetic["counts"]["rows"] == 26, "1962 arithmetic row count changed")
+    require(len(arithmetic["rows"]) == 26, "1962 arithmetic ledger length changed")
+    require(all(row["binary_object"] == "UNPLACED" for row in arithmetic["rows"]),
+            "historical arithmetic allocated a binary object")
+    require(all(row["current_domain_candidate"] == "unresolved" for row in arithmetic["rows"]),
+            "historical arithmetic entered a Core domain without bridge proof")
+
+    memo24_status: dict[str, Any]
+    if memo24 is None:
+        memo24_status = {
+            "status": "PENDING-MERGE",
+            "ref": "#2715/#2722",
+            "note": "audit will consume Memo 24 automatically once the chronology sidecar lands",
+        }
+    else:
+        require(memo24["phase"] == "HISTORICAL-INGEST", "Memo 24 phase changed")
+        require(memo24["counts"]["rows"] == 26, "Memo 24 row count changed")
+        require(len(memo24["rows"]) == 26, "Memo 24 chronology length changed")
+        require(all(row["binary_object"] == "UNPLACED" for row in memo24["rows"]),
+                "Memo 24 chronology allocated a binary object")
+        require(all(row["current_domain_candidate"] == "unresolved" for row in memo24["rows"]),
+                "Memo 24 chronology entered a Core domain without bridge proof")
+        memo24_status = {
+            "status": "CONSUMED",
+            "ref": "#2715/#2722",
+            "attested_1961": memo24["counts"]["attested"],
+            "not_attested_1961": memo24["counts"]["not_attested"],
+            "changed_by_1962": memo24["counts"]["changed"],
+            "unresolved_relation": memo24["counts"]["unresolved_relation"],
+        }
+
     require(d5["domain_ratified"] is True, "D5 domain lost ratification")
     require(d5["baseline_ratified"] is True, "D5 baseline lost ratification")
     require(d5["generated_count"] == 8, "D5 generated count changed")
@@ -98,8 +137,8 @@ def build() -> dict[str, Any]:
     target = d6["ratified_target"]
     require(target["coordinate"] == "001111", "ratified D6 target moved")
     require(target["research_evidence_class"] == "RATIFIED-MANUAL-RESIDENT",
-            "001111 owner-readiness changed")
-    require(target["canonical_semantic_member"] is True,
+            "001111 ratified evidence class changed")
+    require(target["semantic_member"] is True,
             "001111 lost owner-ratified D6 membership")
 
     rows: list[dict[str, Any]] = []
@@ -114,14 +153,23 @@ def build() -> dict[str, Any]:
 
         if op in EARLIEST_EXPLAINING_DOMAIN:
             readiness = "ALREADY-EXPLAINED"
+            capability_status = "EXPLAINED-BY-RATIFIED-DOMAIN"
+            domain_gap = "NONE"
+            placement_gap = "NONE"
             missing = "NONE"
             require(p["resident_required"] == "NO", f"{op}: explained row now requires resident")
             require(p["coordinate"] == "NONE", f"{op}: explained row gained coordinate")
         elif op == "SET":
-            readiness = "NEEDS-LAW"
-            missing = "exact-domain theorem + residency/coordinate theorem"
+            readiness = "NEEDS-DOMAIN"
+            capability_status = "PROVEN-SHARED-LOCATION-CARRIER"
+            domain_gap = "EXACT-DOMAIN-UNRESOLVED"
+            placement_gap = "BLOCKED-BY-DOMAIN"
+            missing = "exact-domain theorem + residency/coordinate theorem; do not re-prove mutation lower bound"
         elif op == "SETQ":
             readiness = "RATIFIED"
+            capability_status = "PROVEN-POLICY-OVER-SHARED-LOCATION-CARRIER"
+            domain_gap = "RESOLVED-D6"
+            placement_gap = "NONE-RATIFIED"
             missing = "NONE; owner decision #2538 OD-001 applied by #2723"
             require(p["placement_kind"] == "RATIFIED-RESIDENT",
                     "SETQ ratified placement kind drift")
@@ -131,15 +179,30 @@ def build() -> dict[str, Any]:
                     "SETQ must not remain a candidate after ratification")
         elif op == "PROG":
             readiness = "COMPOSITE"
+            capability_status = "COMPOSITE-GO+RETURN"
+            domain_gap = "NONE-AS-RESIDENT"
+            placement_gap = "NONE-AS-RESIDENT"
             missing = "NONE-as-resident; decompose GO + RETURN"
             require(p["resident_required"] == "NO-AS-COMPOSITE", "PROG composite status drift")
         elif op == "RETURN":
-            readiness = "NEEDS-LAW"
-            missing = "domain-selection theorem; proven roothood does not determine width"
+            readiness = "NEEDS-DOMAIN"
+            capability_status = "PROVEN-NON-LOCAL-EXIT-ROOT"
+            domain_gap = "EXACT-DOMAIN-UNRESOLVED"
+            placement_gap = "BLOCKED-BY-DOMAIN"
+            missing = "domain-selection theorem; proven roothood does not determine width; do not re-prove roothood"
             require(p["placement_kind"] == "PROVEN-ROOT-UNPLACED", "RETURN root status drift")
-        elif op in {"FEXPR", "FSUBR", "TRANSFORMER"}:
-            readiness = "NEEDS-LAW"
-            missing = "same-domain generator/lower-bound + exact-domain theorem"
+        elif op in {"FEXPR", "FSUBR"}:
+            readiness = "NEEDS-DOMAIN"
+            capability_status = "PROVEN-RAW+CALLER-ENV-PROTOCOL"
+            domain_gap = "EXACT-DOMAIN-UNRESOLVED"
+            placement_gap = "BLOCKED-BY-DOMAIN"
+            missing = "exact-domain/width theorem; protocol axes are already factored by #2522/#2591"
+        elif op == "TRANSFORMER":
+            readiness = "NEEDS-DOMAIN"
+            capability_status = "PROVEN-MULTI-DELTA-SPECIAL-CALL-PROTOCOL"
+            domain_gap = "EXACT-DOMAIN-UNRESOLVED"
+            placement_gap = "BLOCKED-BY-DOMAIN"
+            missing = "exact-domain/width theorem; #2616 already rejects D5 one-delta child"
         else:
             raise AssertionError(f"unclassified historical row: {op}")
 
@@ -151,7 +214,10 @@ def build() -> dict[str, Any]:
             "explanation_region": p["semantic_region"],
             "explanation_owner": p["primary_owner"],
             "surviving_observable_delta": delta,
+            "capability_evidence_status": capability_status,
             "current_domain_status": p["exact_domain"],
+            "domain_gap": domain_gap,
+            "placement_gap": placement_gap,
             "binary_object": h["binary_object"],
             "ratification_readiness": readiness,
             "missing_evidence": missing,
@@ -162,16 +228,20 @@ def build() -> dict[str, Any]:
 
     already = [r for r in rows if r["ratification_readiness"] == "ALREADY-EXPLAINED"]
     needs_law = [r for r in rows if r["ratification_readiness"] == "NEEDS-LAW"]
+    needs_domain = [r for r in rows if r["ratification_readiness"] == "NEEDS-DOMAIN"]
+    needs_placement = [r for r in rows if r["ratification_readiness"] == "NEEDS-PLACEMENT"]
     owner_ready = [r for r in rows if r["ratification_readiness"] == "OWNER-READY"]
     ratified = [r for r in rows if r["ratification_readiness"] == "RATIFIED"]
     composite = [r for r in rows if r["ratification_readiness"] == "COMPOSITE"]
 
     require(owner_ready == [], "owner-ready set must be empty after OD-001")
     require([r["historical_capability"] for r in ratified] == ["SETQ"],
-            "ratified historical placement set changed; review required")
-    require(set(r["historical_capability"] for r in needs_law) ==
+            "ratified set changed; review required")
+    require(needs_law == [], "audit is trying to re-open already-proved capability laws")
+    require(set(r["historical_capability"] for r in needs_domain) ==
             {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
-            "surviving NEEDS-LAW set changed; review required")
+            "surviving NEEDS-DOMAIN set changed; review required")
+    require(needs_placement == [], "placement-only queue changed; review required")
     require([r["historical_capability"] for r in composite] == ["PROG"],
             "composite set changed")
 
@@ -211,9 +281,13 @@ def build() -> dict[str, Any]:
         ],
         "foreign_or_pending_ingest": {
             "lisp15_arithmetic": {
-                "status": "HISTORICAL-INGEST-IN-SEPARATE-LANE",
-                "refs": ["#2697", "#2710", "#2715"],
-                "domain_rule": "Core-Math bridge required; historical spelling cannot populate Core D5/D6",
+                "status": "HISTORICAL-INGEST-FOREIGN-TO-CORE-RESIDENCY",
+                "refs": ["#2697", "#2710", "#2715", "#2720", "#2721", "#2722"],
+                "rows_1962": arithmetic["counts"]["rows"],
+                "all_binary_objects": "UNPLACED",
+                "all_current_domain_candidates": "unresolved",
+                "memo24_chronology": memo24_status,
+                "domain_rule": "typed Core-Math bridge required; historical spelling/count cannot populate Core D5/D6",
             }
         },
         "owner_facing": {
@@ -227,13 +301,15 @@ def build() -> dict[str, Any]:
                     "authority": "#2538/#2723",
                 }
             ],
-            "not_ready": [r["historical_capability"] for r in needs_law],
+            "not_ready": [r["historical_capability"] for r in needs_law + needs_domain + needs_placement],
             "do_not_ratify_as_resident": [r["historical_capability"] for r in already + composite],
         },
         "summary": {
             "historical_rows": len(rows),
             "already_explained": len(already),
             "needs_new_law": len(needs_law),
+            "needs_domain": len(needs_domain),
+            "needs_placement": len(needs_placement),
             "owner_ready": len(owner_ready),
             "ratified": len(ratified),
             "composite": len(composite),
@@ -293,8 +369,9 @@ def render_md(result: dict[str, Any]) -> str:
         "",
         "## Arithmetic",
         "",
-        "- Lisp 1.5 arithmetic remains historical ingest / Core-Math bridge work (#2697/#2710/#2715).",
-        "- It cannot populate Core D5/D6 by shared spelling or spare capacity.",
+        f"- Lisp 1.5 arithmetic: {result['foreign_or_pending_ingest']['lisp15_arithmetic']['rows_1962']} historical rows, all UNPLACED.",
+        f"- Memo 24 chronology: {result['foreign_or_pending_ingest']['lisp15_arithmetic']['memo24_chronology']['status']}.",
+        "- Arithmetic cannot populate Core D5/D6 by shared spelling, row count or spare capacity.",
         "",
         "## Non-conclusion",
         "",
@@ -313,7 +390,7 @@ def main() -> int:
     print("D1-D6-HISTORICAL-GAP-AUDIT=PASS")
     for key, value in result["summary"].items():
         print(f"{key}={value}")
-    print("owner-ready=D6:001111")
+    print("ratified=D6:001111")
     print("RULE=fill-history-not-free-slots")
 
     if args.out:
