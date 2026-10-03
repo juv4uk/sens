@@ -25,8 +25,6 @@
 
   (#b101 "01010" (kind builtin) (arity (at-least 0)) (sig "(+ number ...)") (doc "Sum all arguments"))
   (#b101 "01011" (kind builtin) (arity (at-least 1)) (sig "(- number ...)") (doc "Subtract or negate"))
-  (#b101 "01110" (kind builtin) (arity (at-least 1)) (sig "(< number ...)") (doc "Less-than chain comparison"))
-  (#b101 "01111" (kind builtin) (arity (at-least 1)) (sig "(> number ...)") (doc "Greater-than chain comparison"))
   (#b101 "10010" (kind builtin) (arity (at-least 0)) (sig "(* number ...)") (doc "Multiply all arguments"))
   (#b101 "10011" (kind builtin) (arity (at-least 1)) (sig "(/ number ...)") (doc "Perform exact rational division"))
 )
