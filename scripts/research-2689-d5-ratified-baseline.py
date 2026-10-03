@@ -100,6 +100,8 @@ def build_result() -> dict[str, Any]:
         "domain": "Core.D5",
         "width": WIDTH,
         "capacity": CAPACITY,
+        "domain_ratified": True,
+        "baseline_ratified": True,
         "resident_count": 32,
         "generated_selector_count": 8,
         "owner_historical_nonselector_count": 24,
