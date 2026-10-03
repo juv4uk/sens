@@ -5,6 +5,9 @@
 //! spelling (Unicode/UTF-8/layout), that Text7 stays a distinct domain from
 //! Number, String and the bare eight-bit Function8 space, and that every
 //! malformed shape fails closed rather than masking or transcoding.
+//!
+//! Canonical framing is physically bit-packed; one logical bit is never stored
+//! as one standalone transport byte.
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -160,13 +163,14 @@ fn fasl_frame_carries_text7_cells_without_utf8_transcoding() {
     // the exact cell stream survives with no UTF-8/Unicode spelling in the bytes.
     let text = cells(&[0x41, 0x7F]);
     let frame = BinaryFrame::Text(text);
-    let bytes = encode_binary_frame(&frame).expect("frame encodes");
+    let packed = encode_binary_frame(&frame).expect("frame encodes");
 
-    assert_eq!(&bytes[..4], &[1, 1, 1, 0]);
+    assert_eq!(packed.read::<4>(0).unwrap().packed_bits(), 0b1110);
+    assert_eq!(packed.byte_len(), (packed.bit_len() + 7) / 8);
 
-    let (decoded, consumed) = decode_binary_frame(&bytes).expect("frame decodes");
+    let (decoded, consumed) = decode_binary_frame(&packed).expect("frame decodes");
     assert_eq!(decoded, frame);
-    assert_eq!(consumed, bytes.len());
+    assert_eq!(consumed, packed.bit_len());
 }
 
 #[test]
