@@ -17,7 +17,7 @@ mod generated {
 
 use generated::DOMAIN_SURFACE_ROWS;
 
-fn identity_from_row(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
+pub(crate) fn exact_domain_identity(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
     match width {
         0b11 => Bit3::new(bits)
             .map(Bija3::from_word)
@@ -37,7 +37,7 @@ fn surface_index() -> &'static HashMap<&'static str, CoreDomainIdentity> {
     INDEX.get_or_init(|| {
         let mut index = HashMap::new();
         for row in DOMAIN_SURFACE_ROWS {
-            let identity = identity_from_row(row.width, row.bits).unwrap_or_else(|| {
+            let identity = exact_domain_identity(row.width, row.bits).unwrap_or_else(|| {
                 panic!(
                     "generated exact-domain row is unsupported: width={} bits={:b}",
                     row.width, row.bits
@@ -63,6 +63,21 @@ fn surface_index() -> &'static HashMap<&'static str, CoreDomainIdentity> {
 /// callability, and there is no fallback through the historical byte table.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     surface_index().get(name).copied()
+}
+
+/// Reverse projection for tooling/presentation only.
+///
+/// This does not create identity or occupancy; it returns spellings already
+/// admitted by the exact-domain projection for one known identity.
+pub(crate) fn surfaces_for_domain_identity(identity: CoreDomainIdentity) -> Vec<&'static str> {
+    let mut surfaces = DOMAIN_SURFACE_ROWS
+        .iter()
+        .filter(|row| exact_domain_identity(row.width, row.bits) == Some(identity))
+        .flat_map(|row| row.surfaces.iter().map(|surface| surface.name))
+        .collect::<Vec<_>>();
+    surfaces.sort_unstable();
+    surfaces.dedup();
+    surfaces
 }
 
 
