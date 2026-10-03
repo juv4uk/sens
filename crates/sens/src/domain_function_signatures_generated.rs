@@ -31,8 +31,6 @@ pub(crate) const DOMAIN_FUNCTION_SIGNATURES: &[DomainFunctionSignature] = &[
 
     DomainFunctionSignature { width: 5, bits: 0b01010, kind: LanguageItemKind::Builtin, arity: Arity::AtLeast(0), signature: "(+ number ...)", documentation: "Sum all arguments" },
     DomainFunctionSignature { width: 5, bits: 0b01011, kind: LanguageItemKind::Builtin, arity: Arity::AtLeast(1), signature: "(- number ...)", documentation: "Subtract or negate" },
-    DomainFunctionSignature { width: 5, bits: 0b01110, kind: LanguageItemKind::Builtin, arity: Arity::AtLeast(1), signature: "(< number ...)", documentation: "Less-than chain comparison" },
-    DomainFunctionSignature { width: 5, bits: 0b01111, kind: LanguageItemKind::Builtin, arity: Arity::AtLeast(1), signature: "(> number ...)", documentation: "Greater-than chain comparison" },
     DomainFunctionSignature { width: 5, bits: 0b10010, kind: LanguageItemKind::Builtin, arity: Arity::AtLeast(0), signature: "(* number ...)", documentation: "Multiply all arguments" },
     DomainFunctionSignature { width: 5, bits: 0b10011, kind: LanguageItemKind::Builtin, arity: Arity::AtLeast(1), signature: "(/ number ...)", documentation: "Perform exact rational division" },
 ];
