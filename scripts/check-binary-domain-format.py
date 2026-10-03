@@ -222,7 +222,22 @@ WITNESS_EVIDENCE = re.compile(
 FALSIFIER_CONDITION = re.compile(
     r"\b(?:if|when|unless|any|fails?|shows\s+that|refut(?:e|ed|es)|counter-?|"
     r"breaks?|violates?|contradicts?|disprov(?:e|ed|es)|diverges|overflows?|"
-    r"mismatch|cannot|panics?|corrupts?)\b",
+    r"mismatch|cannot|panics?|corrupts?|rejects?|invalidates?)\b",
+    re.I,
+)
+
+FALSIFIER_PLACEHOLDER = re.compile(
+    r"^(?:todo|tbd|fixme|test more|more testing|test it|check ci|verify law|"
+    r"needs testing|pending)$",
+    re.I,
+)
+FALSIFIER_COMMAND_ONLY = re.compile(
+    r"^(?:(?:run|execute|check)\s+)?(?:cargo\s+test|pytest|python3?\b.*|"
+    r"gh\s+workflow\b.*|ci|tests?)\s*[.;]?$",
+    re.I,
+)
+FALSIFIER_POSITIVE_ONLY = re.compile(
+    r"^(?:positive\s+example|example|witness)\s*:\s*.+$",
     re.I,
 )
 
@@ -287,6 +302,12 @@ def witness_verdict(value, body=""):
     return "prose"
 
 
+def _claim_norm(value):
+    text = re.sub(r"[\x60*_#]+", "", value or "")
+    text = text.strip(" \t\r\n.;:")
+    return re.sub(r"\s+", " ", text).lower()
+
+
 def falsifier_verdict(value, body=""):
     if value is None:
         return "missing"
@@ -296,6 +317,28 @@ def falsifier_verdict(value, body=""):
         return "legend"
     if ASPIRATIONAL.search(value):
         return "aspirational"
+
+    norm = _claim_norm(value)
+    if FALSIFIER_PLACEHOLDER.fullmatch(norm):
+        return "placeholder"
+
+    # A FALSIFIER must attack the LAW, not merely repeat or trivially negate it.
+    _, law = field_value(body, "LAW")
+    law_norm = _claim_norm(law or "")
+    if law_norm and norm in {
+        law_norm,
+        f"not {law_norm}",
+        f"falsify {law_norm}",
+        f"law fails {law_norm}",
+        f"the law fails {law_norm}",
+    }:
+        return "restatement"
+
+    if FALSIFIER_COMMAND_ONLY.fullmatch(norm):
+        return "non-falsifying"
+    if FALSIFIER_POSITIVE_ONLY.fullmatch(value.strip()) and not FALSIFIER_CONDITION.search(value):
+        return "non-falsifying"
+
     if FALSIFIER_CONDITION.search(value):
         return "ok"
     return "vague"
@@ -421,7 +464,7 @@ def judge(issues, requested_fields=None):
         for key, label, rule in FIELDS:
             if key in requested_fields:
                 _, val = field_value(body, label)
-                entry[key] = rule(val, body) if key == "relation" else rule(val)
+                entry[key] = rule(val, body) if key in {"relation", "falsifier"} else rule(val)
                 entry[f"{key}_value"] = val
         judged.append(entry)
 
@@ -432,7 +475,7 @@ VIOLATION_RULES = {
     "domain": {"carrier-only", "mechanism-only", "circular", "empty", "vague", "missing", "legend"},
     "relation": {"prose", "empty", "missing", "legend", "unproved-shared-law"},
     "witness": {"prose", "empty", "missing", "legend", "aspirational"},
-    "falsifier": {"vague", "empty", "missing", "legend", "aspirational"},
+    "falsifier": {"vague", "empty", "missing", "legend", "aspirational", "placeholder", "restatement", "non-falsifying"},
     "status": {"foreign", "empty", "missing", "legend"},
 }
 
@@ -510,6 +553,10 @@ SEMANTIC AUTHORITY = NONE
         # FALSIFIER
         ("f-ok-if", "FALSIFIER: if any test fails or diverges", "falsifier", "ok"),
         ("f-ok-when", "FALSIFIER: when stack overflow occurs", "falsifier", "ok"),
+        ("f-ok-reject-model", "FALSIFIER: noncanonical coordinate or skipped normalization rejects the model", "falsifier", "ok"),
+        ("f-ok-reject-bridge", "FALSIFIER: shared-bit identity inferred across domains rejects the bridge", "falsifier", "ok"),
+        ("f-placeholder", "FALSIFIER: TBD", "falsifier", "placeholder"),
+        ("f-command-only", "FALSIFIER: run cargo test", "falsifier", "non-falsifying"),
         ("f-legend", "FALSIFIER: explicit counter-test", "falsifier", "legend"),
         ("f-aspirational", "FALSIFIER: will be specified later", "falsifier", "aspirational"),
         ("f-vague", "FALSIFIER: none", "falsifier", "vague"),
@@ -533,6 +580,23 @@ SEMANTIC AUTHORITY = NONE
         ("w-legend-variant", "WITNESS: executable or source-grounded evidence", "witness", "legend"),
         ("s-private-enum", "STATUS: confirmed | partial | hypothesis", "status", "foreign"),
     ]
+
+    # Deep #2532 controls consume LAW context through the same canonical parser.
+    restatement_body = (
+        "BINARY-DOMAIN FORMAT\n"
+        "LAW: two independent refinements commute\n"
+        "FALSIFIER: two independent refinements commute\n"
+    )
+    _, restatement_value = field_value(restatement_body, "FALSIFIER")
+    assert falsifier_verdict(restatement_value, restatement_body) == "restatement"
+
+    negation_body = (
+        "BINARY-DOMAIN FORMAT\n"
+        "LAW: two independent refinements commute\n"
+        "FALSIFIER: not two independent refinements commute\n"
+    )
+    _, negation_value = field_value(negation_body, "FALSIFIER")
+    assert falsifier_verdict(negation_value, negation_body) == "restatement"
 
     field_map = {k: rule for k, _, rule in FIELDS}
     failures = 0
