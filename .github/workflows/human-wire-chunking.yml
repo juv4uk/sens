@@ -1,0 +1,38 @@
+name: Human-wire D1-D5 chunking research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/human-wire/payloads.json"
+      - "benchmarks/human-wire/chunking.py"
+      - ".github/workflows/human-wire-chunking.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/human-wire/payloads.json"
+      - "benchmarks/human-wire/chunking.py"
+      - ".github/workflows/human-wire-chunking.yml"
+  workflow_dispatch:
+
+jobs:
+  chunking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build D1-D5 chunking matrix
+        run: |
+          rm -rf /tmp/human-wire-chunking
+          python3 benchmarks/human-wire/chunking.py             --out /tmp/human-wire-chunking
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/human-wire-chunking/report.md; then
+            cat /tmp/human-wire-chunking/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: human-wire-d1-d5-chunking
+          path: /tmp/human-wire-chunking/
+          retention-days: 14
