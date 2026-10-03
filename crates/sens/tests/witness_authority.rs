@@ -6,7 +6,6 @@ use std::path::PathBuf;
 
 use sens::{
     eval_program, load_core_library, load_meta_evaluator_library, parse, Expr, ExprKind, Session,
-    Sens8,
 };
 
 #[derive(Clone)]
@@ -37,7 +36,7 @@ fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
-fn alist_sid(entries: &[Expr], key: &str) -> Option<Sens8> {
+fn alist_legacy8_bits(entries: &[Expr], key: &str) -> Option<u8> {
     entries.iter().find_map(|entry| {
         let ExprKind::Pair(k, v) = &entry.kind else {
             return None;
@@ -49,8 +48,8 @@ fn alist_sid(entries: &[Expr], key: &str) -> Option<Sens8> {
             return None;
         }
         match &v.kind {
-            ExprKind::Sid(sid) => Some(*sid),
-            other => panic!("{key} must be exact bare Sens8, got {other:?}"),
+            ExprKind::Sid(identity) => identity.legacy8_bits(),
+            other => panic!("{key} must be exact bare legacy-8 identity, got {other:?}"),
         }
     })
 }
@@ -167,8 +166,8 @@ fn structure_core_rows() -> Vec<WitnessRow> {
             if !alist_flag(entries, "structure-core") {
                 return None;
             }
-            alist_sid(entries, "semantic-id")
-                .expect("every structure-core row must carry exact bare Sens8 identity");
+            alist_legacy8_bits(entries, "semantic-id")
+                .expect("every structure-core row must carry exact bare legacy-8 identity");
             Some(WitnessRow {
                 source: source[form.span.start..form.span.end].to_string(),
                 expr: alist_str(entries, "expr")?.to_string(),
@@ -717,7 +716,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
             ExprKind::Symbol(s) if &**s == "sid-witness"
         ));
 
-        let mut sid: Option<Sens8> = None;
+        let mut sid: Option<u8> = None;
         let mut witnesses: Vec<Expr> = Vec::new();
         for field in &fields[1..] {
             match &field.kind {
@@ -725,8 +724,10 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                     if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
                 {
                     sid = Some(match &value.kind {
-                        ExprKind::Sid(sid) => *sid,
-                        other => panic!("semantic sid must be exact bare Sens8, got {other:?}"),
+                        ExprKind::Sid(identity) => identity
+                            .legacy8_bits()
+                            .expect("semantic witness currently records a historical exact-8 payload"),
+                        other => panic!("semantic identity must be exact bare legacy-8, got {other:?}"),
                     });
                 }
                 ExprKind::List(items)
@@ -740,7 +741,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
         }
 
         let sid = sid.expect("every semantic witness row needs a SID");
-        assert!(seen_sids.insert(sid), "duplicate SID {sid}");
+        assert!(seen_sids.insert(sid), "duplicate legacy-8 payload {sid:08b}");
 
         for witness in witnesses {
             let fields = match witness.kind {
@@ -755,7 +756,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
 
             let mut kernel: Option<String> = None;
             let mut status: Option<String> = None;
-            let mut probe_id: Option<Sens8> = None;
+            let mut probe_id: Option<u8> = None;
             let mut evidence_class: Option<String> = None;
             let mut evidence: Option<String> = None;
 
@@ -778,9 +779,11 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                         }
                         "probe-id" => {
                             probe_id = Some(match &value.kind {
-                                ExprKind::Sid(sid) => *sid,
+                                ExprKind::Sid(identity) => identity
+                                    .legacy8_bits()
+                                    .expect("probe-id currently records a historical exact-8 payload"),
                                 other => panic!(
-                                    "semantic witness probe-id must be exact bare Sens8, got {other:?}"
+                                    "semantic witness probe-id must be exact bare legacy-8, got {other:?}"
                                 ),
                             });
                         }
@@ -816,7 +819,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                 assert_eq!(
                     probe_id,
                     Some(sid),
-                    "semantic execution witness must intentionally receive the mapped SID"
+                    "semantic execution witness must intentionally receive the mapped legacy-8 payload"
                 );
                 let evidence = evidence.expect("semantic execution witness needs evidence");
                 assert!(
