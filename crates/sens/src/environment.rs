@@ -539,7 +539,7 @@ mod tests {
     fn code_slots_preserve_domain_width_in_identity() {
         let root = Environment::root();
         let d3 = crate::SemanticRef::from_width_bits(3, 0b101).unwrap();
-        let legacy = crate::SemanticRef::legacy8(crate::Sens8::from_packed_byte(0b0000_0101));
+        let legacy = crate::SemanticRef::legacy8(0b0000_0101);
 
         assert!(root.bind_code_slot_once(
             d3,
