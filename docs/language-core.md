@@ -1,125 +1,202 @@
-# my-lisp language core — SID8-only
+# SENS language core — exact-domain identity
 
-This document describes the current function-identity model. Historical named
-models belong in archive/research material and are not semantic authority.
+This document describes the current Contract 11 identity model.
 
-## One function space
+Historical flat SENS8 / SID8 / Function8 descriptions remain useful as
+provenance and compatibility evidence, but they are not current semantic
+authority.
 
-my-lisp has exactly one function-identity space:
+## Canonical semantic identity
 
-    00000000
-    ...
-    11111111
+A canonical SENS semantic object is:
 
-That is exactly 256 function slots. The identity is the eight bits themselves.
+```text
+exact binary object
++ exact domain
++ proved / ratified law
+```
 
-A SID is not text, String, Symbol, a literal category, a decimal number, a
-human name, an enum label, an opcode, or a backend identifier. Implementations
-may temporarily carry the bits in machine storage, but storage does not create
-another identity.
+Bits alone do not carry meaning. Width alone does not grant occupancy,
+callability or semantic membership.
+
+Equal packed payloads in different domains are distinct identities.
+
+```text
+D3 001 != D4 0001 != D5 00001 != D6 000001
+```
+
+No zero-padding, truncation, low-bit extraction or integer equality may create
+or recover domain identity.
+
+## Current Core domains
+
+The current exact-width Core family includes:
+
+```text
+D1  exact one-bit predicate answers
+D2  exact two-bit structural syntax
+D3  exact three-bit foundation
+D4  exact four-bit bootstrap
+D5  exact five-bit typed domain
+D6  exact six-bit typed domain
+```
+
+D5/D6 carrier existence, residency, derivability, callability and runtime
+implementation are separate facts. A free coordinate has no meaning until its
+owning law admits it.
+
+D7 sound/text work is separate and is not callable merely because it is binary.
+
+## D1 — PredicateBit
+
+```text
+0 = NO
+1 = YES
+```
+
+PredicateBit is not Number, host Bool, T/NIL or structural empty.
+
+## D2 — structure
+
+```text
+00  separator
+01  close
+10  open
+11  dot
+```
+
+These are structural-domain objects, not function identities.
+
+## D3 — foundation
+
+```text
+000  structural empty ()
+001  QUOTE
+010  ATOM
+011  COND
+100  CONS
+101  CAR
+110  CDR
+111  EQ
+```
+
+Role names above are documentation projections. The canonical identity is the
+exact D3 coordinate under the D3 law.
+
+## D4 — bootstrap
+
+D4 is the exact four-bit bootstrap domain ratified by its owning law. Its
+coordinates are not reconstructed from historical eight-bit Function8 values.
+
+LAMBDA and DEFINE are current D4 bootstrap identities. Unallocated D4
+coordinates remain unallocated.
 
 ## Reader
 
-Exactly eight bare 0/1 source characters are read directly into Sens8.
+Canonical binary source preserves exact word width before semantic routing.
 
-    00001100  -> Sens8 00001100
-    12        -> ordinary exact decimal number
-    101       -> ordinary exact decimal number
+```text
+10 001 01
+```
 
-There is no reader mode that turns an eight-bit SID into a mathematical binary
-integer.
+is structurally D2 open, one exact W3 word, and D2 close. A source-domain bridge
+may lift admitted W3/W4/W5/W6 words directly into their exact Core domains.
 
-At expression start, apostrophe is reader sugar for a list whose head is
-SID 00000001 directly:
+The reader must never recover a domain by zero-extending an old eight-bit code.
 
-    'об'єкт
-    (00000001 об'єкт)
+Historical exact-eight-bit source remains a bounded compatibility path while
+migration completes.
 
-The reader must not create an intermediate named function identity.
+At expression start, apostrophe is reader sugar for the already-admitted D3
+QUOTE identity; it must not create an intermediate human-name or Sens8
+identity.
 
 ## Surfaces
 
-Human-language and symbolic surfaces are optional source/UI routing metadata.
-They are not functions and do not own meaning.
+Human-language and symbolic spellings are optional projections.
 
-    surface/UI input
-          ↓ mechanical lookup
-    Sens8
+```text
+surface/UI input
+      ↓ mechanical registry projection
+exact domain identity
+```
 
-The forbidden model is:
+where a domain mapping is admitted.
 
-    name -> meaning -> SID
-    SID  -> named semantic identity
+Unmigrated historical registry rows may still project explicitly to a legacy
+eight-bit compatibility identity. That path must be named as legacy and must
+not infer a domain from the byte.
 
-Runtime and compiler logic must operate on Sens8 after source/UI routing.
+Forbidden models include:
 
-## Core profiles
+```text
+name -> meaning
+legacy byte -> guessed domain
+width -> semantic role
+```
 
-Core1, Core2, Core3 and Core4 are profiles of laws over the same function IDs:
+## One active language core
 
-    Sens8
-      ↓
-    selected Core profile
-      ↓
-    Lisp-owned law for that SID/profile
-      ↓
-    selected mechanism
-      ↓
-    observation/result
+SENS is returning to one active language core: `lib/core.lisp`.
 
-A Core profile never mints a new identity and never renames a SID.
+Historical Core1 evidence is bootstrap/provenance. Core2 is retired
+compatibility history. Core3 mechanisms belong to a mechanism laboratory.
+The former Core4 name is folded into the one active core.
+
+Execution/research profiles and backend choices may select mechanisms; they may
+not create or override semantic domain law.
 
 ## Execution mechanisms
 
-Rust, C, Common Lisp, Prolog, Datalog, CLIPS, GraalVM, WASM, FPGA and other
-substrates may provide mechanisms. A mechanism receives an already-selected
-Sens8 and cannot redefine what that SID is.
+Rust, C, Common Lisp, Prolog, Datalog, CLIPS, WASM, FPGA and other substrates
+are mechanism witnesses.
 
-Native operator names, opcodes and helper enums are mechanism-local metadata,
-not my-lisp function identities.
+A backend receives an already-selected domain-qualified semantic object or an
+explicitly tagged compatibility projection. Backend opcodes, host enums,
+packed bytes and native types never mint SENS meaning.
 
 ## Compiler / IR rule
 
-Compiler IR provenance may carry Sens8 and mechanism/profile facts. It must not
-introduce a second named function ontology such as a canonical-identity enum or
-a necessary-form identity enum.
+Canonical compiler and IR identities preserve exact domain and exact bits.
 
-## Empty structure is not a function ID
+A historical eight-bit ABI or fast path may remain only as an explicitly named
+compatibility/backend projection. Reverse byte-to-domain inference is
+forbidden.
 
-Contract 9 reserves all 00000000..11111111 for functions. Therefore the
-historical implementation that reuses 00000000 for the empty-list ground
-value is explicit migration debt, tracked by #1332.
+## Structural empty is not zero in another domain
 
-The target invariant is:
+```text
+D3 000 structural empty
+!= D1 0 PredicateBit NO
+!= Number 0
+!= historical exact8 00000000
+```
 
-    ()           -> structural value outside function SID space
-    00000000     -> function identity
+Equal packed numeric zero does not collapse domains.
 
-No replacement SID is to be allocated to ().
+## Historical Sens8 / Sid8 / Function8
 
-## Standing enforcement
+Historical exact-eight-bit machinery may remain only in bounded roles:
 
-- #1325 — permanent SID8-only language law
-- #1327 — remove named runtime identity ontology
-- #1328 — remove named necessary-form identity ontology
-- #1329 — remove alternate-identity terminology
-- #1330 — keep surfaces outside function ontology
-- #1331 — executable standing guard
-- #1332 — remove the empty-list collision from SID 00000000
+- compatibility;
+- transport;
+- backend mechanism;
+- archived provenance;
+- explicit legacy external ABI.
 
-The reference Rust implementation is evidence/mechanism, not semantic
-authority. New code must make the eight-bit function identity visible instead
-of replacing it with a word.
+It is not the universal semantic identity.
+
+New canonical code must not add a Sens8/Sid8 dependency unless the boundary is
+explicitly one of those roles.
 
 ## Project boundary
 
-Rust is a **reference implementation** and mechanism witness; Contract 9 and
-the Lisp-owned executable evidence remain the language authority.
+The reference Rust implementation is evidence and mechanism, not semantic
+authority. Current authority is Contract 11 plus ratified domain laws and
+language-owned executable evidence.
 
-The current canonical source extension is **`.lisp`**. `.wsm` and `.my` are
-legacy aliases only; file suffixes do not create language identity.
+The canonical source extension remains **`.lisp`**. File suffixes do not
+create identity; exact source words and domain law do.
 
 Authority precedence is documented in
-[`semantic-authority-map.md`](semantic-authority-map.md). Under Contract 9,
-older named-function descriptions in that map are migration debt/history where
-they conflict with the SID8-only function-space law.
+[`semantic-authority-map.md`](semantic-authority-map.md).
