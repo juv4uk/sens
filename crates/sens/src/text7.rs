@@ -1,5 +1,7 @@
 use std::{fmt, rc::Rc};
 
+use crate::{BinarySourceWord, Bit7, BitPacker, PackedBitstream};
+
 /// Canonical SENS text identity: an exact sequence of UPC-7 cells.
 ///
 /// Each cell is logically seven bits wide (`0000000..1111111`). The host
@@ -120,6 +122,72 @@ impl Text7 {
     pub fn is_empty(&self) -> bool {
         self.cells.is_empty()
     }
+
+    /// Pack the exact UPC-7 cells into a dense sequential W7 bitstream.
+    ///
+    /// Every cell occupies exactly seven bits (`BinarySourceWord::W7`), with zero
+    /// interior byte padding. Eight 7-bit cells pack into exactly 56 bits (7 bytes),
+    /// using exactly seven payload bits per cell with no interior byte padding.
+    /// This is a storage/layout property, not a claim about Shannon capacity.
+    pub fn to_packed_w7(&self) -> PackedBitstream {
+        let mut packer = BitPacker::with_capacity_bits(self.cells.len() * 7);
+        for &cell in self.cells.iter() {
+            let bit7 = Bit7::new(cell).expect("Text7 cells are guaranteed <= 0x7F");
+            packer.push(bit7);
+        }
+        packer.finish()
+    }
+
+    /// Reconstruct a Text7 value from a dense W7 packed bitstream.
+    ///
+    /// Fails closed if the total bit length is not an exact multiple of seven.
+    pub fn from_packed_w7(packed: &PackedBitstream) -> Result<Self, Text7W7Error> {
+        if !packed.bit_len().is_multiple_of(7) {
+            return Err(Text7W7Error::UnalignedBitLen {
+                bit_len: packed.bit_len(),
+            });
+        }
+        let count = packed.bit_len() / 7;
+        let mut cells = Vec::with_capacity(count);
+        for i in 0..count {
+            let bit7 = packed
+                .read::<7>(i * 7)
+                .expect("offset is guaranteed within bit_len");
+            cells.push(bit7.packed_bits());
+        }
+        Ok(Self {
+            cells: cells.into(),
+        })
+    }
+
+    /// Convert the sequence of Text7 cells into canonical binary source words (`BinarySourceWord::W7`).
+    pub fn to_source_words(&self) -> Vec<BinarySourceWord> {
+        self.cells
+            .iter()
+            .map(|&c| BinarySourceWord::W7(Bit7::new(c).expect("cell <= 0x7F")))
+            .collect()
+    }
+
+    /// Reconstruct Text7 from a slice of binary source words.
+    ///
+    /// Fails closed if any word is not an exact 7-bit word (`BinarySourceWord::W7`).
+    pub fn from_source_words(words: &[BinarySourceWord]) -> Result<Self, Text7WordError> {
+        let mut cells = Vec::with_capacity(words.len());
+        for (index, &word) in words.iter().enumerate() {
+            match word {
+                BinarySourceWord::W7(bit7) => cells.push(bit7.packed_bits()),
+                other => {
+                    return Err(Text7WordError::InvalidWordWidth {
+                        index,
+                        width: other.width(),
+                    })
+                }
+            }
+        }
+        Ok(Self {
+            cells: cells.into(),
+        })
+    }
 }
 
 impl TryFrom<Vec<u8>> for Text7 {
@@ -186,6 +254,50 @@ impl fmt::Display for Text7CellError {
 
 impl std::error::Error for Text7CellError {}
 
+/// Failure when unpacking Text7 from a packed bitstream.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Text7W7Error {
+    UnalignedBitLen { bit_len: usize },
+}
+
+impl fmt::Display for Text7W7Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::UnalignedBitLen { bit_len } => {
+                write!(
+                    f,
+                    "Packed bitstream length {} is not a multiple of 7 bits",
+                    bit_len
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for Text7W7Error {}
+
+/// Failure when reconstructing Text7 from binary source words.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Text7WordError {
+    InvalidWordWidth { index: usize, width: usize },
+}
+
+impl fmt::Display for Text7WordError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InvalidWordWidth { index, width } => {
+                write!(
+                    f,
+                    "Source word at index {} has width {} bits; expected exact 7-bit W7",
+                    index, width
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for Text7WordError {}
+
 impl fmt::Debug for Text7 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Text7(")?;
@@ -243,5 +355,52 @@ mod tests {
         assert!(text.is_empty());
         assert_eq!(text.cells(), &[]);
         assert_eq!(format!("{text:?}"), "Text7()");
+    }
+
+    #[test]
+    fn w7_packed_bitstream_round_trips_exact_cells_with_dense_packing() {
+        // 8 cells of 7 bits each = 56 payload bits = exactly 7 bytes before external framing
+        let sample = vec![0x00, 0x11, 0x16, 0x18, 0x5c, 0x5d, 0x3e, 0x60];
+        let text = Text7::from_cells(sample.clone()).unwrap();
+
+        let packed = text.to_packed_w7();
+        assert_eq!(packed.bit_len(), 56);
+        assert_eq!(packed.byte_len(), 7);
+
+        let recovered = Text7::from_packed_w7(&packed).expect("dense W7 round trips");
+        assert_eq!(recovered, text);
+        assert_eq!(recovered.cells(), &sample[..]);
+    }
+
+    #[test]
+    fn w7_packed_bitstream_rejects_unaligned_bit_length() {
+        // Construct bitstream with 13 bits (not a multiple of 7)
+        let mut packer = BitPacker::new();
+        packer.push(Bit7::new(0x2A).unwrap());
+        packer.push(crate::Bit6::new(0x1F).unwrap());
+        let packed = packer.finish();
+        assert_eq!(packed.bit_len(), 13);
+
+        let err = Text7::from_packed_w7(&packed).unwrap_err();
+        assert_eq!(err, Text7W7Error::UnalignedBitLen { bit_len: 13 });
+    }
+
+    #[test]
+    fn source_words_round_trip_via_w7_variants() {
+        let text = Text7::from_cells(vec![0x05, 0x24, 0x44]).unwrap();
+        let words = text.to_source_words();
+        assert_eq!(words.len(), 3);
+        assert!(matches!(words[0], BinarySourceWord::W7(_)));
+
+        let reconstructed = Text7::from_source_words(&words).expect("W7 words reconstruct Text7");
+        assert_eq!(reconstructed, text);
+
+        // Reject non-W7 word
+        let bad_words = vec![
+            BinarySourceWord::W7(Bit7::new(0x01).unwrap()),
+            BinarySourceWord::W1(crate::Bit1::new(1).unwrap()),
+        ];
+        let err = Text7::from_source_words(&bad_words).unwrap_err();
+        assert_eq!(err, Text7WordError::InvalidWordWidth { index: 1, width: 1 });
     }
 }

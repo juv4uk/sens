@@ -139,7 +139,7 @@ pub use source_words::{
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, unpack_binary_source_words,
 };
-pub use text7::{Text7, Text7CellError, Text7WireError};
+pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{
     encode_text7, render_text7, Text7Layout, Text7ProjectionError, TEXT7_LAYOUT_SHA256,
     TEXT7_TABLE_SHA256, TEXT7_UPSTREAM_REVISION,
