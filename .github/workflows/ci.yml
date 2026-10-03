@@ -100,6 +100,21 @@ jobs:
         shell: bash
         run: bash scripts/domain-paradigm-one-way-guard.sh "$BASE_SHA" "$HEAD_SHA"
 
+      - name: Packed-wire one-model self-test
+        shell: bash
+        run: bash scripts/test-packed-wire-one-way-guard.sh
+
+      - name: Packed-wire byte-inflation ratchet
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: bash scripts/packed-wire-one-way-guard.sh "$BASE_SHA" "$HEAD_SHA"
+
+      - name: Packed-wire exact-bit witnesses
+        shell: bash
+        run: cargo test -p sens source_packing::tests:: -- --nocapture
+
       - name: SID exact-binary identity guard
         if: steps.changes.outputs.rust == 'true'
         shell: bash
