@@ -35,22 +35,33 @@ pub(crate) const SID_ROUTES: [SidRoute; 7] = [
     SidRoute { sid: crate::sens!(00000111), kind: SidRouteKind::SpecialForm },
 ];
 
-pub(crate) fn route_kind_for_sid(sid: Sens8) -> Option<SidRouteKind> {
-    let index = sid.packed_byte().checked_sub(1)? as usize;
+pub(crate) fn route_kind_for_legacy8_bits(bits: u8) -> Option<SidRouteKind> {
+    let index = bits.checked_sub(1)? as usize;
     let row = SID_ROUTES.get(index)?;
     debug_assert_eq!(
-        row.sid, sid,
-        "SID route rows must stay aligned with 00000001..00000111"
+        row.sid.packed_byte(),
+        bits,
+        "legacy route rows must stay aligned with 00000001..00000111"
     );
     Some(row.kind)
 }
 
+pub(crate) fn route_kind_for_sid(sid: Sens8) -> Option<SidRouteKind> {
+    route_kind_for_legacy8_bits(sid.packed_byte())
+}
+
 /// Optional source/UI routing only. The returned value is the function SID;
 /// no named meaning is materialized.
-pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<Sens8> {
+pub(crate) fn routed_legacy8_bits_for_surface(surface: &str) -> Option<u8> {
     let sid = semantic_registry::semantic_id_for_surface(surface)?;
-    route_kind_for_sid(sid)?;
-    Some(sid)
+    let bits = sid.packed_byte();
+    route_kind_for_legacy8_bits(bits)?;
+    Some(bits)
+}
+
+pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<Sens8> {
+    let bits = routed_legacy8_bits_for_surface(surface)?;
+    Some(Sens8::from_packed_byte(bits))
 }
 
 pub(crate) fn is_reserved_surface(surface: &str) -> bool {
@@ -90,14 +101,18 @@ fn immutable_surface_error(surface: &str, sid: Sens8, span: Span) -> LanguageErr
     )
 }
 
-pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), LanguageError> {
+pub(crate) fn ensure_bindable_legacy8_bits(bits: u8, span: Span) -> Result<(), LanguageError> {
     Err(LanguageError::new(
         ErrorKind::InvalidForm,
         format!(
-            "surface routes to immutable function SID · surface маршрутизується до незмінного function SID · Surface verweist auf unveränderliche Funktions-SID: {sid} -> {sid}"
+            "surface routes to immutable historical exact-eight identity: {bits:08b} -> {bits:08b}"
         ),
         span,
     ))
+}
+
+pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), LanguageError> {
+    ensure_bindable_legacy8_bits(sid.packed_byte(), span)
 }
 
 fn exact_args(
@@ -279,20 +294,21 @@ fn prim_01001101(
 }
 
 /// Compatibility mechanism bridge selected by a historical exact-eight anchor.
-pub(crate) fn invoke_semantic_ref(
-    sid: Sens8,
+pub(crate) fn invoke_legacy8_bits(
+    bits: u8,
     args: &[Value],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    let sid = Sens8::from_packed_byte(bits);
     // #1455: примітив Rust → визначення мовою, прив'язане до коду → помилка.
     if let Some(primitive) = PRIMITIVE_TABLE
-        .get(sid.packed_byte() as usize)
+        .get(bits as usize)
         .and_then(|function| *function)
     {
         return primitive(args, environment, span);
     }
-    match &environment.code_slot(CallableIdentity::legacy8(sid.packed_byte())) {
+    match &environment.code_slot(CallableIdentity::legacy8(bits)) {
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
@@ -321,16 +337,29 @@ pub(crate) fn invoke_semantic_ref(
 
     Err(LanguageError::new(
         ErrorKind::Type,
-        format!("SENS function has no admitted callable mechanism: {sid}"),
+        format!("historical exact-eight identity has no admitted callable mechanism: {bits:08b}"),
         span,
     ))
 }
 
-/// #1455: чи має код примітив Rust.
-pub(crate) fn has_primitive(sid: Sens8) -> bool {
+pub(crate) fn invoke_semantic_ref(
+    sid: Sens8,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    invoke_legacy8_bits(sid.packed_byte(), args, environment, span)
+}
+
+/// #1455: чи має compatibility-код примітив Rust.
+pub(crate) fn has_primitive_legacy8_bits(bits: u8) -> bool {
     PRIMITIVE_TABLE
-        .get(sid.packed_byte() as usize)
+        .get(bits as usize)
         .is_some_and(|function| function.is_some())
+}
+
+pub(crate) fn has_primitive(sid: Sens8) -> bool {
+    has_primitive_legacy8_bits(sid.packed_byte())
 }
 
 /// #1455: визначення (функція або макрос) верхнього рівня з назвою з таблиці функцій, чий код не
@@ -346,7 +375,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
         return;
     }
-    environment.bind_code_slot_once(CallableIdentity::legacy8(sid.packed_byte()), value.clone());
+    environment.bind_code_slot_once(CallableIdentity::legacy8(bits), value.clone());
 }
 
 #[cfg(test)]
