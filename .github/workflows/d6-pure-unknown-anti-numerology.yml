@@ -1,0 +1,46 @@
+name: D6 PURE-UNKNOWN anti-numerology
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d6-closure-map/**"
+      - ".github/workflows/d6-pure-unknown-anti-numerology.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d6-closure-map/**"
+      - ".github/workflows/d6-pure-unknown-anti-numerology.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  symmetry:
+    name: PURE-UNKNOWN relabeling symmetry
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run anti-numerology witness
+        run: |
+          python3 benchmarks/d6-unknown-frontier/anti_numerology.py \
+            --out /tmp/d6-pure-unknown-symmetry.json
+          python3 - <<'PY'
+          import json
+          p="/tmp/d6-pure-unknown-symmetry.json"
+          d=json.load(open(p))
+          assert d["pure_unknown"] == 44
+          assert d["symmetry"]["orbit_size"] == 44
+          assert d["semantic_conclusion"]["new_candidates"] == 0
+          assert d["semantic_conclusion"]["occupancy_mutations"] == 0
+          assert d["semantic_conclusion"]["coordinate_only_candidate_selection"] == "REJECT"
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-pure-unknown-symmetry
+          path: /tmp/d6-pure-unknown-symmetry.json
+          retention-days: 14
