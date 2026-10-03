@@ -1,0 +1,55 @@
+name: D5 runtime admission audit
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/sens.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/lower.rs"
+      - "crates/sens/tests/d5_source_boundary.rs"
+      - "scripts/research-2766-d5-runtime-admission.py"
+      - ".github/workflows/d5-runtime-admission-audit.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: D5 canonical identity path
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Prove all 32 exact W5 source words
+        run: cargo test -p sens --test d5_source_boundary
+
+      - name: Emit D5 runtime admission matrix
+        run: |
+          python3 scripts/research-2766-d5-runtime-admission.py --json d5-runtime-admission.json
+          cat d5-runtime-admission.json
+
+      - name: Upload matrix
+        uses: actions/upload-artifact@v4
+        with:
+          name: d5-runtime-admission
+          path: d5-runtime-admission.json
+
+      - name: Publish summary
+        run: |
+          {
+            echo "## D5 runtime admission audit"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2766-d5-runtime-admission.py
+            echo "~~~"
+            echo
+            echo "- Occupancy authority: OD-005 owner map."
+            echo "- Semantic residency is not inferred by this audit."
+            echo "- Human names are projection only; no D5 -> Sens8 alias is admitted."
+          } >> "$GITHUB_STEP_SUMMARY"
