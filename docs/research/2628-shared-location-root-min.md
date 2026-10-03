@@ -1,8 +1,8 @@
 # #2628 — shared-location root minimization
 
-Phase: **SENS-DERIVATION**  
-Factor: `shared-location-update`  
-Width: **UNKNOWN**  
+Phase: **SENS-DERIVATION**
+Factor: `shared-location-update`
+Width: **UNKNOWN**
 Coordinate: **UNPLACED**
 
 ## Result
