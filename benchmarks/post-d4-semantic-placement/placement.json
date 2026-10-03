@@ -8,7 +8,9 @@
     "d5_selector_generated": 8,
     "d5_unknown_free": 24,
     "d5_manual_nonselector_residents": 0,
-    "new_nonselector_d5_candidates": 0
+    "new_nonselector_d5_candidates": 0,
+    "d6_owner_ratified_manual_residents": 1,
+    "d6_setq_coordinate": "001111"
   },
   "rows": [
     {
@@ -293,25 +295,26 @@
       "operation": "SETQ",
       "historical_order": 13,
       "historical_classification": "NEW-OBSERVABLE-CAPABILITY",
-      "semantic_region": "Core.PostD4.SharedLocationCarrier",
+      "semantic_region": "Core.D6.BindingPolicy.SharedLocation",
       "primary_owner": "0011:DEFINE-lineage",
       "secondary_owners": [
         "carrier:Store+Location",
         "policy:quoted-target"
       ],
-      "placement_kind": "POLICY-OVER-CARRIER",
-      "resident_required": "OWNER-DECISION-SEPARATE",
-      "exact_domain": "UNKNOWN",
-      "coordinate": "UNPLACED",
-      "candidate_coordinate": "D6:001111 (OD-001 owner-ready only)",
+      "placement_kind": "OWNER-RATIFIED-RESIDENT",
+      "resident_required": "YES-OWNER-RATIFIED",
+      "exact_domain": "D6",
+      "coordinate": "001111",
+      "candidate_coordinate": null,
       "evidence": [
         "#2441",
         "#2442",
         "#2518",
         "#2538:OD-001",
-        "#2617"
+        "#2617",
+        "#2723"
       ],
-      "reason": "SETQ shares the location-update carrier with SET plus target policy; its D6 candidate is explicitly not ratified by this placement ledger."
+      "reason": "Owner decision #2538 OD-001, applied by #2723, ratifies D6:001111 as the shared-location / SETQ two-axis resident. This placement does not transfer to SET or other post-D4 capabilities."
     },
     {
       "operation": "PROG",
