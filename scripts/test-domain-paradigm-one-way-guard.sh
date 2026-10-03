@@ -201,6 +201,28 @@ fn bad(surface: &str, _: CoreDomainIdentity) {
 EOF
 }
 
+green_lower_domain_projection() {
+  mkdir -p crates/sens/src/eval
+  cat > crates/sens/src/eval/lower.rs <<'EOF'
+use crate::CoreDomainIdentity;
+
+fn lower_surface(surface: &str) -> Option<CoreDomainIdentity> {
+    crate::semantic_registry::domain_identity_for_surface(surface)
+}
+EOF
+}
+
+red_runtime_domain_projection() {
+  mkdir -p crates/sens/src/eval
+  cat > crates/sens/src/eval/name_dispatch.rs <<'EOF'
+use crate::CoreDomainIdentity;
+
+fn bad(surface: &str, _: CoreDomainIdentity) {
+    let _ = crate::semantic_registry::domain_identity_for_surface(surface);
+}
+EOF
+}
+
 run_guard_expect_green exact-width-growth green_exact_growth
 run_guard_expect_green compatibility-growth green_compat_growth
 run_guard_expect_green historical-comment green_historical_comment
@@ -215,6 +237,8 @@ run_guard_expect_red domain-tag-growth red_domain_tag_growth
 run_guard_expect_red width-byte-growth red_width_byte_growth
 run_guard_expect_red payload-byte-growth red_payload_byte_growth
 run_guard_expect_green domain-surface-projection green_domain_surface_projection
+run_guard_expect_green lower-domain-projection green_lower_domain_projection
 run_guard_expect_red runtime-name-dispatch red_runtime_name_dispatch
+run_guard_expect_red runtime-domain-projection red_runtime_domain_projection
 
 echo "domain-paradigm-one-way self-test: PASS"
