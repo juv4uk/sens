@@ -1,0 +1,27 @@
+name: D5 closure map
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d5-closure-map/**"
+      - ".github/workflows/d5-closure-map.yml"
+      - "scripts/research-2322-generative-domain-forecast.py"
+      - "benchmarks/generator-economy/semantic-fact-ledger.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closure-map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build exact D5 closure map
+        run: |
+          rm -rf /tmp/d5-map
+          python3 benchmarks/d5-closure-map/run.py --out /tmp/d5-map
+          python3 -c 'import json; p=json.load(open("/tmp/d5-map/d5-closure-map.json")); assert p["counts"]["generated"]==8 and p["counts"]["UNKNOWN/free"]==24 and p["domain_ratified"] is True'

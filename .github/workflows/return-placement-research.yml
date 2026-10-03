@@ -1,0 +1,43 @@
+name: RETURN placement research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2488-return-placement.py"
+      - "docs/research/2488-return-placement*.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/return-placement-research.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2488-return-placement.py"
+      - "docs/research/2488-return-placement*.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/return-placement-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  placement:
+    name: RETURN parent + delta witness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run RETURN placement falsifier
+        run: python3 scripts/research-2488-return-placement.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2488 RETURN placement"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2488-return-placement.py
+            echo "~~~"
+            echo
+            echo "- Research only: no D5/D6 coordinate allocated."
+            echo "- Parent must own the same base operation before prefix placement."
+          } >> "$GITHUB_STEP_SUMMARY"
