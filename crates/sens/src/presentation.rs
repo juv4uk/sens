@@ -4,7 +4,7 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
+use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, SemanticRef, Sens8, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -31,6 +31,13 @@ fn uk_semantic_name(semantic_id: Sens8) -> String {
         .into_iter()
         .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
         .unwrap_or_else(|| format!("SID {}", semantic_registry::semantic_id_bits(semantic_id)))
+}
+
+fn uk_identity_name(identity: SemanticRef) -> String {
+    match identity.legacy8_word() {
+        Some(semantic_id) => uk_semantic_name(semantic_id),
+        None => format!("domain {}", identity),
+    }
 }
 
 fn canonical_inexact(number: f64) -> String {
@@ -79,7 +86,7 @@ fn render_uk(value: &Value) -> String {
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
         Value::Rational(number) => number.to_string(),
         Value::Sid(sid) => {
-            format!("#<вбудована {}>", uk_semantic_name(*sid))
+            format!("#<вбудована {}>", uk_identity_name(*sid))
         }
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
