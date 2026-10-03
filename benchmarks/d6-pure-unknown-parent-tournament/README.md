@@ -25,7 +25,7 @@ D6 local lower bound = proved
 The tournament must recognize that theorem.
 
 But #2660 already classifies its D6 pressure in the separate binding-policy
-overlay, with `001111` as `OWNER-READY-NONADMITTED`.
+overlay; `001111` has now left the UNKNOWN frontier as the owner-ratified manual resident.
 
 Therefore that evidence may not migrate into the 44 PURE-UNKNOWN coordinates.
 
@@ -66,4 +66,4 @@ occupancy-mutations=0
 This is a successful result. It means the current admitted evidence does not
 justify moving any coordinate out of `PURE-UNKNOWN`.
 
-No width, coordinate, resident or owner decision is made here.
+No additional width, coordinate, resident or owner decision is made here; ratified `001111` is only a fixed positive control.
