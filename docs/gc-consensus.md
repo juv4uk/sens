@@ -1,5 +1,14 @@
 # GC CONSENSUS — спільне рішення Vyasa + Sakshi
 
+> **HISTORICAL DRAFT — semantic boundary superseded by #2544 (docs follow-up #2547) (2026-10-03)**
+>
+> Keep this document for its root-safety, stress-test and implementation discussion.
+> `gc-journal`, `gc-stats`, quarantine inspection or owner tooling may exist only as
+> out-of-band engineering instrumentation. They are not SENS semantics and may not
+> alter liveness or resurrect an unreachable object. See `gc-reachability-contract.md`.
+
+
+
 **Статус:** DRAFT v1 (чернетка для ревʼю Vyasa → ратифікація власника)
 **Дата:** 2026-08-23
 **Співавтори:** Оксі (Vyasa, ox-alpha) · Сакші (sākṣī, ox-alpha)

@@ -1,5 +1,15 @@
 # GC M0 DESIGN — Stop-the-world mark-and-sweep для my-lisp
 
+> **SUPERSEDED BOUNDARY — 2026-10-03 / #2544 (docs follow-up #2547)**
+>
+> This document remains a historical/proposed mechanism design. Its older wording
+> that GC is part of machine semantics is no longer authority. Canonical boundary:
+> `docs/gc-reachability-contract.md`: GC is an unobservable reachability mechanism;
+> weak references, finalizers and resurrection are not language semantics. The M0
+> mark-sweep material remains a mechanism donor and test source.
+
+
+
 **Статус:** PROPOSED DESIGN · **Дата:** 2026-08-23
 **Джерело:** зовнішній рецензент (ChatGPT), через власника
 **Редагування/оформлення:** Сакші (ox-alpha)
