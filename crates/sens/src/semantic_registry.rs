@@ -50,7 +50,7 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
     }
 }
 
-fn exact_domain_identity(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
+pub(crate) fn exact_domain_identity(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
     match width {
         3 => Bit3::new(bits)
             .map(Bija3::from_word)
@@ -91,6 +91,17 @@ fn exact_domain_surface_index() -> &'static HashMap<&'static str, CoreDomainIden
 /// This path never consults the historical 256-row Function8 registry.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     exact_domain_surface_index().get(name).copied()
+}
+
+pub(crate) fn surfaces_for_domain_identity(identity: CoreDomainIdentity) -> Vec<&'static str> {
+    let mut surfaces = DOMAIN_SURFACE_ROWS
+        .iter()
+        .filter(|row| exact_domain_identity(row.width, row.bits) == Some(identity))
+        .flat_map(|row| row.surfaces.iter().map(|surface| surface.name))
+        .collect::<Vec<_>>();
+    surfaces.sort_unstable();
+    surfaces.dedup();
+    surfaces
 }
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
