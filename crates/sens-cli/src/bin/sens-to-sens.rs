@@ -1,6 +1,4 @@
-use sens::{
-    installed_capabilities, parse, semantic_registry_export, Expr, ExprKind, Sens8,
-};
+use sens::{installed_capabilities, parse, semantic_registry_export, Expr, ExprKind};
 use std::collections::HashSet;
 use std::env;
 use std::fs;
@@ -34,31 +32,31 @@ enum HeadKind {
     Other,
 }
 
-fn head_kind(sens: Sens8) -> HeadKind {
-    if sens == sens::sens!(00000001) {
+fn head_kind(bits: u8) -> HeadKind {
+    if bits == 0b0000_0001 {
         HeadKind::Quote
-    } else if sens == sens::sens!(00000111) {
+    } else if bits == 0b0000_0111 {
         HeadKind::Cond
-    } else if sens == sens::sens!(00001000) {
+    } else if bits == 0b0000_1000 {
         HeadKind::Lambda
-    } else if sens == sens::sens!(00001001) || sens == sens::sens!(00001011) {
+    } else if bits == 0b0000_1001 || bits == 0b0000_1011 {
         HeadKind::Define
-    } else if sens == sens::sens!(00001010) {
+    } else if bits == 0b0000_1010 {
         HeadKind::Defmacro
-    } else if sens == sens::sens!(10011100) {
+    } else if bits == 0b1001_1100 {
         HeadKind::Let
-    } else if sens == sens::sens!(10011101) {
+    } else if bits == 0b1001_1101 {
         HeadKind::LetStar
     } else {
         HeadKind::Other
     }
 }
 
-fn target_sens(sens: Sens8) -> Sens8 {
-    if sens == sens::sens!(00001011) {
-        sens::sens!(00001001)
+fn target_legacy8(bits: u8) -> u8 {
+    if bits == 0b0000_1011 {
+        0b0000_1001
     } else {
-        sens
+        bits
     }
 }
 
@@ -72,9 +70,9 @@ fn resolve_head<'a>(
     bound: &HashSet<String>,
     host_capabilities: &HashSet<String>,
     analysis: &mut Analysis,
-) -> Option<(Option<&'a str>, Sens8)> {
+) -> Option<(Option<&'a str>, u8)> {
     match &head.kind {
-        ExprKind::Sid(sens) => Some((None, *sens)),
+        ExprKind::Sid(identity) => identity.legacy8_bits().map(|bits| (None, bits)),
         ExprKind::Symbol(name) if !bound.contains(name.as_ref()) => {
             if host_capabilities.contains(name.as_ref()) {
                 if semantic_registry_export::semantic_id_for_admitted_surface(name).is_some() {
@@ -83,17 +81,17 @@ fn resolve_head<'a>(
                 return None;
             }
             semantic_registry_export::semantic_id_for_admitted_surface(name)
-                .map(|sens| (Some(name.as_ref()), sens))
+                .map(|sid| (Some(name.as_ref()), sid.packed_byte()))
         }
         _ => None,
     }
 }
 
-fn push_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysis) {
+fn push_head_edit(head: &Expr, bits: u8, analysis: &mut Analysis) {
     analysis.edits.push(Edit {
         start: head.span.start,
         end: head.span.end,
-        replacement: target_sens(sens).to_string(),
+        replacement: format!("{:08b}", target_legacy8(bits)),
     });
 }
 
@@ -631,7 +629,7 @@ mod tests {
 
     #[test]
     fn public_sens_display_is_the_replacement_format() {
-        assert_eq!(target_sens(sens::sens!(00000101)).to_string(), "00000101");
-        assert_eq!(target_sens(sens::sens!(00001011)).to_string(), "00001001");
+        assert_eq!(format!("{:08b}", target_legacy8(0b0000_0101)), "00000101");
+        assert_eq!(format!("{:08b}", target_legacy8(0b0000_1011)), "00001001");
     }
 }
