@@ -10,12 +10,59 @@
 use crate::{Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6};
 use std::fmt;
 
+
+/// Ratified SENS domain width/ontology marker.
+///
+/// This is meta-semantic typing context, not a language resident and not a
+/// callability claim. Width alone never assigns meaning; each domain's law and
+/// occupancy remain independently owned.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum RatifiedDomainWidth {
+    D1,
+    D2,
+    D3,
+    D4,
+    D5,
+    D6,
+    D7,
+    D8,
+}
+
+impl RatifiedDomainWidth {
+    pub const fn width(self) -> usize {
+        match self {
+            Self::D1 => 1,
+            Self::D2 => 2,
+            Self::D3 => 3,
+            Self::D4 => 4,
+            Self::D5 => 5,
+            Self::D6 => 6,
+            Self::D7 => 7,
+            Self::D8 => 8,
+        }
+    }
+
+    pub const fn from_width(width: usize) -> Option<Self> {
+        match width {
+            1 => Some(Self::D1),
+            2 => Some(Self::D2),
+            3 => Some(Self::D3),
+            4 => Some(Self::D4),
+            5 => Some(Self::D5),
+            6 => Some(Self::D6),
+            7 => Some(Self::D7),
+            8 => Some(Self::D8),
+            _ => None,
+        }
+    }
+}
+
 /// Exact domain-qualified identity for the current Core operation domains.
 ///
 /// D1 predicate answers and D2 structure are intentionally absent because this
-/// key is for the D3+ Core identity migration. D7 is intentionally absent:
-/// sharing a bounded binary representation does not grant Core identity or
-/// callability.
+/// key is for Core operation identity. D7/D8 are also intentionally absent:
+/// ratified domain width does not by itself grant Core operation identity or
+/// callability. See `RatifiedDomainWidth` for the D1-D8 ontology marker.
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub enum CoreDomainIdentity {
     D3(Bija3),
