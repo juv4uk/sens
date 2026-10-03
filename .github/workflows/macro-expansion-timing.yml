@@ -1,0 +1,54 @@
+name: Macro expansion timing research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_macro_timing.rs"
+      - "crates/sens/src/eval/closures.rs"
+      - "scripts/research-2568-macro-timing.py"
+      - "docs/research/2568-macro-timing*.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/macro-expansion-timing.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "crates/sens/tests/post_d4_macro_timing.rs"
+      - "crates/sens/src/eval/closures.rs"
+      - "scripts/research-2568-macro-timing.py"
+      - "docs/research/2568-macro-timing*.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/macro-expansion-timing.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  timing:
+    name: Hart DEFINE-time vs SENS evaluation-time
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Run live SENS timing witnesses
+        run: cargo test -p sens --test post_d4_macro_timing -- --nocapture
+
+      - name: Run bounded historical timing countermodel
+        run: python3 scripts/research-2568-macro-timing.py
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Macro expansion timing"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2568-macro-timing.py
+            echo "~~~"
+            echo
+            echo "- Historical premise: Hart AIM-057 (1963) expands through DEFINE."
+            echo "- Current SENS control is executed, not inferred."
+            echo "- No binary placement follows from this gate."
+          } >> "$GITHUB_STEP_SUMMARY"
