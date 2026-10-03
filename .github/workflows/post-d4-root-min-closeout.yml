@@ -1,0 +1,41 @@
+name: Post-D4 root minimization closeout
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/post-d4-root-min-closeout/**"
+      - "benchmarks/post-d4-root-min-r1/**"
+      - ".github/workflows/post-d4-root-min-closeout.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/post-d4-root-min-closeout/**"
+      - ".github/workflows/post-d4-root-min-closeout.yml"
+  workflow_dispatch:
+
+jobs:
+  closeout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Re-check R1 donor
+        run: |
+          rm -rf /tmp/post-d4-root-min-r1
+          python3 benchmarks/post-d4-root-min-r1/run.py             --out /tmp/post-d4-root-min-r1
+      - name: Build root-minimization ledger
+        run: |
+          rm -rf /tmp/post-d4-root-min-closeout
+          python3 benchmarks/post-d4-root-min-closeout/run.py             --out /tmp/post-d4-root-min-closeout
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/post-d4-root-min-closeout/report.md; then
+            cat /tmp/post-d4-root-min-closeout/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post-d4-root-min-closeout
+          path: /tmp/post-d4-root-min-closeout/
+          retention-days: 14
