@@ -136,6 +136,7 @@ def build() -> dict[str, Any]:
             "capacity": 64,
             "generated_members": 16,
             "ratified_manual_residents": 1,
+            "ratified_manual_coordinates": [TARGET],
             "unknown_free": 47,
             "research_occupancy_mutations": 0,
         },
