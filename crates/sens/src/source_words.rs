@@ -86,6 +86,17 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+    /// Lift an exact five-bit source word into owner-ratified Core.D5.
+    ///
+    /// Width alone does not define arbitrary 5-bit domains; this explicit
+    /// bridge makes the Core.D5 membership claim without widening to Sens8.
+    pub const fn core_d5(self) -> Option<crate::CoreD5Word> {
+        match self {
+            Self::W5(word) => Some(crate::CoreD5Word::from_word(word)),
+            _ => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -103,6 +114,12 @@ impl From<crate::Racana2> for BinarySourceWord {
 impl From<crate::Bija3> for BinarySourceWord {
     fn from(value: crate::Bija3) -> Self {
         Self::W3(value.word())
+    }
+}
+
+impl From<crate::CoreD5Word> for BinarySourceWord {
+    fn from(value: crate::CoreD5Word) -> Self {
+        Self::W5(value.word())
     }
 }
 
