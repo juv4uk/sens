@@ -35,6 +35,19 @@ Slice 3 — WITNESS (#2561)
                    a state without a witness belongs in STATUS, not here
     prose / empty / missing
 
+Slice 4 — FALSIFIER (#2574)
+    ok             names a condition under which the claim fails (if, when,
+                   unless, fails, counter-, refutes, breaks, violates, disproves)
+    legend         the copied legend ("explicit counter-test") — not a condition
+    aspirational   promises a falsifier later (TBD, planned, will be added)
+    vague / empty / missing
+
+Slice 5 — STATUS (#2575)
+    ok             exactly one state from: hypothesis | generated | ratified |
+                   falsified | unknown
+    foreign        a status value outside the declared enum (e.g. implementation-target)
+    legend / empty / missing
+
 Shape discrimination
 --------------------
     ## DOMAIN            heading, value on the next non-empty line
@@ -113,6 +126,9 @@ LEGEND_TEXT = {
         r"^(?:Core-only\s*\|\s*Core-Math-only\s*\|\s*bridge-candidate\s*\|\s*"
         r"shared-proved-law)\b", re.I),
     "WITNESS": re.compile(r"^executable\b[^\n]*\bevidence\b", re.I),
+    "FALSIFIER": re.compile(r"^explicit\s+counter-test\b", re.I),
+    "STATUS": re.compile(
+        r"^hypothesis\s*\|\s*generated\s*\|\s*ratified\s*\|\s*falsified\s*\|\s*unknown\b", re.I),
 }
 
 
@@ -199,13 +215,56 @@ def witness_verdict(kind, text, body=""):
     return "prose"
 
 
+# --- FALSIFIER ---------------------------------------------------------------
+
+FALSIFIER_CONDITION = re.compile(
+    r"\b(?:if|when|unless|any|fails?|shows\s+that|refut(?:e|ed|es)|counter-?|breaks?|violates?|contradicts?|disprov(?:e|ed|es))\b",
+    re.I)
+
+
+def falsifier_verdict(kind, text, body=""):
+    if kind is None:
+        return "missing"
+    if text and LEGEND_TEXT["FALSIFIER"].search(text):
+        return "legend"
+    if not text:
+        return "empty"
+    if ASPIRATIONAL.search(text):
+        return "aspirational"
+    if FALSIFIER_CONDITION.search(text):
+        return "ok"
+    return "vague"
+
+
+# --- STATUS ------------------------------------------------------------------
+
+STATUSES = ("hypothesis", "generated", "ratified", "falsified", "unknown")
+
+
+def status_verdict(kind, text, body=""):
+    if kind is None:
+        return "missing"
+    if text and LEGEND_TEXT["STATUS"].search(text):
+        return "legend"
+    if not text:
+        return "empty"
+    norm = re.sub(r"[`'\".,;]+", "", text).strip().lower()
+    norm = re.sub(r"\s+", " ", norm)
+    if norm in STATUSES:
+        return "ok"
+    if "|" in norm and all(tok in norm for tok in STATUSES):
+        return "legend"
+    return "foreign"
+
+
 # --- judging -----------------------------------------------------------------
 
 FIELDS = (("domain", "DOMAIN", domain_verdict), ("relation", "RELATION", relation_verdict),
-          ("witness", "WITNESS", witness_verdict))
+          ("witness", "WITNESS", witness_verdict), ("falsifier", "FALSIFIER", falsifier_verdict),
+          ("status", "STATUS", status_verdict))
 
 
-def judge(issues, fields=("domain", "relation", "witness")):
+def judge(issues, fields=("domain", "relation", "witness", "falsifier", "status")):
     """Return (judged, skipped); judged is [(field, number, title, verdict, text)]."""
     judged, skipped = [], 0
     for it in issues:
@@ -229,7 +288,7 @@ def judge(issues, fields=("domain", "relation", "witness")):
     return judged, skipped
 
 
-def run(path, baseline_path=None, emit=False, fields=("domain", "relation", "witness")):
+def run(path, baseline_path=None, emit=False, fields=("domain", "relation", "witness", "falsifier", "status")):
     data = json.load(open(path, encoding="utf-8"))
     issues = data["issues"] if isinstance(data, dict) else data
     judged, skipped = judge(issues, fields)
@@ -277,12 +336,19 @@ def run(path, baseline_path=None, emit=False, fields=("domain", "relation", "wit
 BLOCK_TEXT = "## BINARY-DOMAIN FORMAT — 2026-10-03\n\nAuthority: #2490.\n"
 
 
-def issue(number, domain=None, relation=None, state="open", with_block=True, form="inline"):
+def issue(number, domain=None, relation=None, witness=None, falsifier=None, status=None,
+          state="open", with_block=True, form="inline"):
     body = BLOCK_TEXT if with_block else ""
     if domain is not None:
         body += f"## DOMAIN\n{domain}\n" if form == "heading" else f"DOMAIN: {domain}\n"
     if relation is not None:
         body += f"RELATION: {relation}\n"
+    if witness is not None:
+        body += f"WITNESS: {witness}\n"
+    if falsifier is not None:
+        body += f"FALSIFIER: {falsifier}\n"
+    if status is not None:
+        body += f"STATUS: {status}\n"
     body += "LAW: something\n"
     return {"number": number, "title": "t", "body": body, "state": state}
 
@@ -351,6 +417,26 @@ SELFTEST = [
       "body": BLOCK_TEXT + "WITNESS: \n"}, "witness", "empty"),
     ({"number": 48, "title": "t", "state": "open",
       "body": BLOCK_TEXT + "LAW: x\n"}, "witness", "missing"),
+    # FALSIFIER (#2574)
+    (issue(60, falsifier="fails if child bits do not match"), "falsifier", "ok"),
+    (issue(61, falsifier="when domain width differs"), "falsifier", "ok"),
+    (issue(62, falsifier="counter-example shows law breaks"), "falsifier", "ok"),
+    (issue(63, falsifier="explicit counter-test"), "falsifier", "legend"),
+    (issue(64, falsifier="will be added once the D5 map lands"), "falsifier", "aspirational"),
+    (issue(65, falsifier="Positive controls:"), "falsifier", "vague"),
+    (issue(66, falsifier=""), "falsifier", "empty"),
+    ({"number": 67, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "LAW: x\n"}, "falsifier", "missing"),
+    # STATUS (#2575)
+    (issue(70, status="hypothesis"), "status", "ok"),
+    (issue(71, status="ratified"), "status", "ok"),
+    (issue(72, status="unknown"), "status", "ok"),
+    (issue(73, status="hypothesis | generated | ratified | falsified | unknown"), "status", "legend"),
+    (issue(74, status="READY-FOR-OWNER"), "status", "foreign"),
+    (issue(75, status="implementation-target"), "status", "foreign"),
+    (issue(76, status=""), "status", "empty"),
+    ({"number": 77, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "LAW: x\n"}, "status", "missing"),
 ]
 
 
@@ -368,7 +454,7 @@ def self_test():
     for it, field, expected in cases:
         ok = got.get((field, it["number"])) == expected
         failures += 0 if ok else 1
-        print(f"  [{'ok' if ok else 'FAIL'}] {field:8} #{it['number']}: "
+        print(f"  [{'ok' if ok else 'FAIL'}] {field:10} #{it['number']}: "
               f"{got.get((field, it['number']))} (expected {expected})")
     # a closed body and an un-stamped, field-less body are ignored
     ignored, skipped = judge([
@@ -381,7 +467,7 @@ def self_test():
     if failures:
         print(f"binary-domain-selftest-failed ({failures})")
         return 1
-    print(f"(binary-domain-selftest-ok ({len(cases)} cases, 3 fields, 2 ignored))")
+    print(f"(binary-domain-selftest-ok ({len(cases)} cases, 5 fields, 2 ignored))")
     return 0
 
 
@@ -391,8 +477,8 @@ def main():
     ap.add_argument("--baseline", help="JSON of pre-existing violations; fail only on new ones")
     ap.add_argument("--emit-baseline", action="store_true",
                     help="print the baseline JSON for the current snapshot")
-    ap.add_argument("--fields", default="domain,relation,witness",
-                    help="comma-separated subset of: domain,relation,witness")
+    ap.add_argument("--fields", default="domain,relation,witness,falsifier,status",
+                    help="comma-separated subset of: domain,relation,witness,falsifier,status")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
     if args.self_test:
