@@ -1,0 +1,46 @@
+name: Core Core-Math Q final-fit bridge research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-coremath-q-final-fit/**"
+      - "benchmarks/core-number-q-product-ladder/**"
+      - ".github/workflows/core-coremath-q-final-fit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-coremath-q-final-fit/**"
+      - "benchmarks/core-number-q-product-ladder/**"
+      - ".github/workflows/core-coremath-q-final-fit.yml"
+  workflow_dispatch:
+
+jobs:
+  final-fit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Re-check current Core Q ladder
+        run: |
+          rm -rf /tmp/core-number-q-product-ladder
+          python3 benchmarks/core-number-q-product-ladder/run.py             --out /tmp/core-number-q-product-ladder
+
+      - name: Replay complementary bridge final-fit cases
+        run: |
+          rm -rf /tmp/core-coremath-q-final-fit
+          python3 benchmarks/core-coremath-q-final-fit/run.py             --out /tmp/core-coremath-q-final-fit
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-coremath-q-final-fit/report.md; then
+            cat /tmp/core-coremath-q-final-fit/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-coremath-q-final-fit
+          path: /tmp/core-coremath-q-final-fit/
+          retention-days: 14
