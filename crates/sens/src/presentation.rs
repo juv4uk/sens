@@ -34,8 +34,8 @@ fn uk_semantic_name(semantic_id: Sens8) -> String {
 }
 
 fn uk_identity_name(identity: SemanticRef) -> String {
-    match identity.legacy8_word() {
-        Some(semantic_id) => uk_semantic_name(semantic_id),
+    match identity.legacy8_bits() {
+        Some(bits) => uk_semantic_name(Sens8::from_packed_byte(bits)),
         None => format!("domain {}", identity),
     }
 }
@@ -371,7 +371,7 @@ mod tests {
     #[test]
     fn ukrainian_presentation_localizes_builtin_and_function_markers() {
         let mut session = Session::default();
-        let builtin = Value::Sid(crate::SemanticRef::legacy8(crate::sens!(00000010)));
+        let builtin = Value::Sid(crate::SemanticRef::legacy8(0b0000_0010));
         assert_eq!(
             render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
             "#<вбудована атом?>"
