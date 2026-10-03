@@ -30,8 +30,8 @@ def main() -> None:
 
     # Lisp-owned derivation uses existing DEFINE/LAMBDA/form construction and
     # names make-macro as the explicit temporary host substrate.
-    require(macro_lisp, "00001001", "DEFINE mechanism reference")
-    require(macro_lisp, "00001000", "LAMBDA mechanism reference")
+    require(macro_lisp, "(001 0011)", "canonical D4 DEFINE mechanism reference")
+    require(macro_lisp, "(001 0010)", "canonical D4 LAMBDA mechanism reference")
     require(macro_lisp, "make-macro", "temporary transformer materializer")
     require(
         macro_lisp,
