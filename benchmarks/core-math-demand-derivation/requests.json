@@ -1,0 +1,31 @@
+{
+  "schema": "core-math-demand-requests/v1",
+  "authority": "research-only",
+  "lawset_version": "exact-q-equivalence-set/v1",
+  "requests": [
+    {
+      "id": "r1",
+      "certificate": {
+        "constructor": "bind-left-constant",
+        "binary": {"basis": "mul"},
+        "constant": "neg_one"
+      }
+    },
+    {
+      "id": "r2",
+      "certificate": {
+        "constructor": "map-right",
+        "binary": {"basis": "add"},
+        "unary": {"ref": "r1"}
+      }
+    },
+    {
+      "id": "r3",
+      "certificate": {
+        "constructor": "map-right",
+        "binary": {"basis": "mul"},
+        "unary": {"basis": "recip"}
+      }
+    }
+  ]
+}
