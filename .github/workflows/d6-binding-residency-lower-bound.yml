@@ -1,0 +1,43 @@
+name: D6 binding-policy lower bound
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
+      - "scripts/research-2489-setq-placement.py"
+      - "scripts/research-2506-d6-binding-policy-generator.py"
+      - ".github/workflows/d6-binding-residency-lower-bound.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
+      - "scripts/research-2489-setq-placement.py"
+      - "scripts/research-2506-d6-binding-policy-generator.py"
+      - ".github/workflows/d6-binding-residency-lower-bound.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lower-bound:
+    name: D6 local-width lower bound
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Prove D5 insufficiency and D6 local sufficiency
+        run: python3 scripts/research-2518-d6-binding-residency-lower-bound.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2518 D6 binding-policy lower bound"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2518-d6-binding-residency-lower-bound.py
+            echo "~~~"
+            echo
+            echo "- Scope: local parent + independent observable deltas."
+            echo "- This gate does not ratify a D6 resident or axis polarity."
+          } >> "$GITHUB_STEP_SUMMARY"
