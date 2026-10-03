@@ -281,7 +281,7 @@ def main() -> int:
         },
         "quotient_result": {
             "scope_then_miss_equals_miss_then_scope": True,
-            "semantic_target": sorted(quotient["11"]),
+            "semantic_target": sorted(quotient["SETQ_CORE"]),
             "reduces_independent_axis_count": False,
         },
         "permutation_attack": {
