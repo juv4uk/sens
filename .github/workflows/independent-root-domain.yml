@@ -1,0 +1,33 @@
+name: Independent root domain attack
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/independent-root-domain/**"
+      - "benchmarks/post-d4-root-min-closeout/**"
+      - "benchmarks/d6-closure-map/**"
+      - "benchmarks/nonlocal-exit-domain/**"
+      - "benchmarks/root-domain-automorphism/**"
+      - ".github/workflows/independent-root-domain.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: independent-root-domain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  attack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run independent root-domain attack
+        run: |
+          rm -rf /tmp/independent-root-domain
+          python3 benchmarks/independent-root-domain/run.py \
+            --out /tmp/independent-root-domain
+      - name: Publish report
+        run: cat /tmp/independent-root-domain/report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: independent-root-domain
+          path: /tmp/independent-root-domain
