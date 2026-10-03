@@ -1,6 +1,6 @@
 //! Canonical exact-domain surface registry.
 //!
-//! Authority: `lib/surface/domain-registry.lisp`.
+//! Authority: `knowledge/domain-surface-registry.lisp`.
 //! Identity is exact domain + exact bits. Historical flat-byte machinery is
 //! physically isolated in `legacy_registry.rs`; this module cannot infer a
 //! domain from that compatibility axis.
@@ -74,9 +74,9 @@ mod tests {
             ("тотожне?", 3, 0b111),
             ("функція", 4, 0b0010),
             ("визначити", 4, 0b0011),
-            ("caar", 4, 0b1010),
-            ("cadr", 4, 0b1011),
-            ("cddr", 4, 0b1101),
+            ("перше-від-першого", 4, 0b1010),
+            ("перше-від-решти", 4, 0b1011),
+            ("решта-від-решти", 4, 0b1101),
         ] {
             let identity = domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("missing exact-domain surface: {surface}"));
@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn historical_only_surface_cannot_mint_domain_identity() {
         assert_eq!(domain_identity_for_surface("+"), None);
-        assert_eq!(domain_identity_for_surface("sqrt"), None);
+        assert_eq!(domain_identity_for_surface("корінь"), None);
     }
 
 }
