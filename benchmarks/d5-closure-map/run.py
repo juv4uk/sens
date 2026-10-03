@@ -170,6 +170,43 @@ def unknown_row(coordinate: str) -> dict[str, Any]:
     }
 
 
+def post_d4_exclusion_metadata() -> dict[str, dict[str, str]]:
+    return {
+        "SET-SETQ": {
+            "decision": "d5-ineligible-shared-location-family",
+            "reason": (
+                "shared-location behavior survives only with explicit carrier/policy "
+                "structure; DEFINE->SETQ requires two independent local refinements"
+            ),
+            "evidence": "#2492/#2498/#2518/#2616/#2617/#2705",
+        },
+        "RETURN": {
+            "decision": "d5-ineligible-proven-root-domain-unresolved",
+            "reason": (
+                "non-local-exit is a proven parentless root; no same-base D4 parent "
+                "exists and roothood/free capacity do not select D5"
+            ),
+            "evidence": "#2488/#2504/#2616/#2662/#2705",
+        },
+        "FEXPR-FSUBR": {
+            "decision": "d5-ineligible-carrier-family",
+            "reason": (
+                "raw-form input and explicit caller-env are separable carrier facts; "
+                "the historical protocol has no exact one-delta D4 parent theorem"
+            ),
+            "evidence": "#2522/#2530/#2616/#2617/#2705",
+        },
+        "TRANSFORMER": {
+            "decision": "d5-ineligible-policy-over-carrier",
+            "reason": (
+                "current transformer behavior spans raw-form carrier plus returned-form "
+                "and timing policy factors; the LAMBDA comparison is multi-delta"
+            ),
+            "evidence": "#2522/#2567/#2591/#2616/#2617/#2705",
+        },
+    }
+
+
 def build_map() -> list[dict[str, Any]]:
     generated = selector_rows()
     forecast_words = load_forecast_words()
@@ -200,6 +237,17 @@ def build_map() -> list[dict[str, Any]]:
     if any(r["manual_resident_required"] for r in rows):
         raise AssertionError("selector generation must not become manual occupancy")
 
+    # Completed post-D4 closeout is explanatory metadata only. These capabilities
+    # must never gain D5 placement authority through the closure-map artifact.
+    expected_post_d4_nonselector_ids = {
+        "SET-SETQ",
+        "RETURN",
+        "FEXPR-FSUBR",
+        "TRANSFORMER",
+    }
+    if expected_post_d4_nonselector_ids != set(post_d4_exclusion_metadata()):
+        raise AssertionError("post-D4 D5 exclusion metadata drifted")
+
     return rows
 
 
@@ -225,23 +273,7 @@ def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "semantic_fact_model": "selector-root-law-current",
         "shared_basis_semantic_fact_interval": load_selector_fact_interval(),
         "new_d5_generated_rows_charged_as_independent_facts": 0,
-        "excluded_or_unplaced_nonselector_capabilities": {
-            "SETQ": {
-                "decision": "not-an-honest-D5-child",
-                "reason": "two independent binding-policy axes survive",
-                "evidence": "#2492/#2498",
-            },
-            "RETURN": {
-                "decision": "residue-root-domain-unresolved",
-                "reason": "no same-base D4 parent; exact width remains unresolved",
-                "evidence": "#2488",
-            },
-            "FEXPR-FSUBR": {
-                "decision": "historical-phase-e-active-unplaced",
-                "reason": "raw-call capability classification is not placement authority",
-                "evidence": "#2343",
-            },
-        },
+        "excluded_or_unplaced_nonselector_capabilities": post_d4_exclusion_metadata(),
         "no_scalar_winner": True,
     }
 
@@ -266,7 +298,7 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
         "- generated selector rows are semantic consequences of #2158;",
         "- append-bit realization is canonical-coordinate evidence, not the semantic law;",
         "- UNKNOWN/free is legitimate inside a ratified domain;",
-        "- SETQ is excluded as a direct D5 child by #2492; RETURN has unresolved domain by #2488;",
+        "- SET/SETQ, RETURN, FEXPR/FSUBR and TRANSFORMER are D5-NO under #2616/#2617/#2705;",
         "- Core-Math cannot fill D5 by analogy.",
         "",
         "Accounting:",
@@ -295,9 +327,11 @@ def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -
             "coordinate_classification": "#2366",
             "fact_ledger": "#2304/#2385",
             "placement_law": "#2236",
-            "setq_d5_falsifier": "#2492/#2498",
-            "return_residue_root": "#2488",
-            "fexpr_phase_e": "#2343",
+            "post_d4_d5_closeout": "#2616/#2617/#2705",
+            "shared_location_carrier": "#2617/#2705",
+            "return_residue_root": "#2488/#2617/#2705",
+            "special_call_protocol": "#2522/#2616/#2705",
+            "transformer_closeout": "#2616/#2617/#2705",
         },
         "counts": {
             "generated": 8,

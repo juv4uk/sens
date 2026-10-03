@@ -151,13 +151,23 @@ def build_result() -> dict[str, Any]:
     ))
 
     excluded = acct["excluded_or_unplaced_nonselector_capabilities"]
-    require(excluded["SETQ"]["decision"] == "not-an-honest-D5-child", (
-        "SETQ D5 exclusion drift"
+    expected_exclusions = {
+        "SET-SETQ": "d5-ineligible-shared-location-family",
+        "RETURN": "d5-ineligible-proven-root-domain-unresolved",
+        "FEXPR-FSUBR": "d5-ineligible-carrier-family",
+        "TRANSFORMER": "d5-ineligible-policy-over-carrier",
+    }
+    require(set(excluded) == set(expected_exclusions), (
+        f"D5 post-D4 exclusion set drift: {sorted(excluded)}"
     ))
-    require(excluded["RETURN"]["decision"] == "residue-root-domain-unresolved", (
-        "RETURN D5 exclusion drift"
-    ))
-    require("FEXPR-FSUBR" in excluded, "FEXPR/FSUBR D5 exclusion disappeared")
+    for capability, expected_decision in expected_exclusions.items():
+        require(excluded[capability]["decision"] == expected_decision, (
+            f"{capability} D5 exclusion drift: "
+            f"{excluded[capability]['decision']} != {expected_decision}"
+        ))
+        require(excluded[capability]["evidence"], (
+            f"{capability} D5 exclusion lost evidence"
+        ))
 
     return {
         "schema": "d5-ratified-baseline-guard/v1",
