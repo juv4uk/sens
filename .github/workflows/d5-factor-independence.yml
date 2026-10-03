@@ -1,0 +1,51 @@
+name: D5 factor independence research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d5-factor-independence/**"
+      - "benchmarks/d5-structural-discovery/**"
+      - "scripts/research-2522-fexpr-protocol-cube.py"
+      - "scripts/research-2568-macro-timing.py"
+      - ".github/workflows/d5-factor-independence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d5-factor-independence/**"
+      - ".github/workflows/d5-factor-independence.yml"
+  workflow_dispatch:
+
+jobs:
+  independence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Re-check structural factor graph
+        run: python3 benchmarks/d5-structural-discovery/factor_graph.py --check
+
+      - name: Re-check protocol cube
+        run: python3 scripts/research-2522-fexpr-protocol-cube.py
+
+      - name: Re-check macro timing
+        run: python3 scripts/research-2568-macro-timing.py
+
+      - name: Run six-factor independence gate
+        run: |
+          rm -rf /tmp/d5-factor-independence
+          python3 benchmarks/d5-factor-independence/run.py             --out /tmp/d5-factor-independence
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d5-factor-independence/report.md; then
+            cat /tmp/d5-factor-independence/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d5-factor-independence
+          path: /tmp/d5-factor-independence/
+          retention-days: 14
