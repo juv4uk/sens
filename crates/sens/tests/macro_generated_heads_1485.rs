@@ -36,15 +36,15 @@ fn inventory_rows() -> Vec<Row> {
         .collect()
 }
 
-fn sens_for_admitted_surface(surface: &str) -> Option<sens::Sens8> {
-    semantic_id_for_admitted_surface(surface)
+fn legacy8_bits_for_admitted_surface(surface: &str) -> Option<u8> {
+    semantic_id_for_admitted_surface(surface).map(|identity| identity.packed_byte())
 }
 
 fn is_quote_head(expr: &Expr) -> bool {
     match &expr.kind {
-        ExprKind::Sid(sens) => *sens == sens::sens!(00000001),
+        ExprKind::Sid(identity) => identity.legacy8_bits() == Some(0b0000_0001),
         ExprKind::Symbol(surface) => {
-            sens_for_admitted_surface(surface.as_ref()) == Some(sens::sens!(00000001))
+            legacy8_bits_for_admitted_surface(surface.as_ref()) == Some(0b0000_0001)
         }
         _ => false,
     }
@@ -59,7 +59,7 @@ fn collect_quoted_admitted_single_atoms(
         ExprKind::List(items) => {
             if items.len() == 2 && is_quote_head(&items[0]) {
                 if let ExprKind::Symbol(surface) = &items[1].kind {
-                    if let Some(exact_sens) = sens_for_admitted_surface(surface.as_ref()) {
+                    if let Some(exact_sens) = legacy8_bits_for_admitted_surface(surface.as_ref()) {
                         out.insert(Row {
                             path: path.to_string(),
                             surface: surface.to_string(),
@@ -204,7 +204,7 @@ fn code_template_operator_rows_name_the_exact_registry_function() {
         .filter(|row| row.class == "code-template-operator")
     {
         assert_eq!(
-            sens_for_admitted_surface(&row.surface).map(|sens| sens.to_string()),
+            legacy8_bits_for_admitted_surface(&row.surface).map(|sens| sens.to_string()),
             Some(row.exact_sens.clone()),
             "inventory exact SENS must be derived from the current registry: {row:?}"
         );
