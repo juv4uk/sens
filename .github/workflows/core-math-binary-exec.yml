@@ -1,0 +1,48 @@
+name: Core-Math minimal binary executor
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-binary-exec/**"
+      - ".github/workflows/core-math-binary-exec.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-binary-exec/**"
+      - ".github/workflows/core-math-binary-exec.yml"
+  workflow_dispatch:
+
+jobs:
+  binary-exec:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Verify zero external dependencies
+        run: |
+          if grep -Eq '^\[dependencies\]' benchmarks/core-math-binary-exec/Cargo.toml; then
+            echo "unexpected dependency section" >&2
+            exit 1
+          fi
+
+      - name: Test semantic core
+        run: |
+          cargo test --quiet --manifest-path benchmarks/core-math-binary-exec/Cargo.toml
+
+      - name: Run semantic-law witness
+        run: |
+          cargo run --quiet --manifest-path benchmarks/core-math-binary-exec/Cargo.toml
+
+      - name: Publish boundary
+        if: always()
+        run: |
+          {
+            echo "## Core-Math minimal binary executor — #2485"
+            echo
+            echo "- semantic core: exact-width binary number + admitted mathematical law -> binary number"
+            echo "- zero external crate dependencies"
+            echo "- no Lisp/JSON/AST/hash/registry/cache required for execution"
+            echo "- generated binary result is reused in a second law application"
+            echo "- arbitrary permutation falsifier is exercised separately"
+          } >> "$GITHUB_STEP_SUMMARY"
