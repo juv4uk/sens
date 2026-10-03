@@ -35,7 +35,7 @@ exact binary number
 + admitted / proved law
 ```
 
-Current Core examples are exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, and owner-ratified D5/D6 domains. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
+Current Core domains are exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ratified D5/D6, D7 Sound7, and D8 under its own ratified Core laws. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
 
 Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility, transport, backend, and provenance projections while #2817 migrates runtime consumers. They are not the universal current ontology.
 
