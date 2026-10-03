@@ -57,8 +57,9 @@ pub(crate) fn is_reserved_surface(surface: &str) -> bool {
     routed_sid_for_surface(surface).is_some()
 }
 
-pub(crate) fn surface_has_sid(surface: &str, sid: Sens8) -> bool {
-    semantic_registry::semantic_id_for_surface(surface) == Some(sid)
+pub(crate) fn surface_has_legacy8_bits(surface: &str, bits: u8) -> bool {
+    semantic_registry::semantic_id_for_surface(surface)
+        .is_some_and(|sid| sid.packed_byte() == bits)
 }
 
 /// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
@@ -393,7 +394,7 @@ mod tests {
         ] {
             for surface in semantic_registry::admitted_surfaces_for_semantic_id(sid) {
                 assert!(is_reserved_surface(surface));
-                assert!(surface_has_sid(surface, sid));
+                assert!(surface_has_legacy8_bits(surface, sid.packed_byte()));
             }
         }
         assert!(!is_reserved_surface("map"));
