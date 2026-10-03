@@ -36,8 +36,8 @@ fn head_sid(head: &Expr) -> Option<CallableIdentity> {
 
 /// Написання, що маршрутизується до фіксованого SENS (не окрема identity).
 fn immutable_surface_sid(name: &str) -> Option<CallableIdentity> {
-    if let Some(sid) = canon::routed_sid_for_surface(name) {
-        return Some(CallableIdentity::legacy8(sid.packed_byte()));
+    if let Some(bits) = canon::routed_legacy8_bits_for_surface(name) {
+        return Some(CallableIdentity::legacy8(bits));
     }
     // M8: будь-яка admitted surface → SENS. Необхідні форми лишаються
     // підмножиною; раніше лише вони зводились, тож `+`/`-` шукались у runtime.
@@ -75,8 +75,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                 Some(identity)
                     if identity
                         .legacy8_bits()
-                        .map(crate::Sens8::from_packed_byte)
-                        .and_then(necessary_forms::identity_for_semantic_id)
+                        .and_then(necessary_forms::identity_for_legacy8_bits)
                         .is_some() => {
                     let sid = identity;
                     ExprKind::Call(
