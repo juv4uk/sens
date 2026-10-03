@@ -4,8 +4,8 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::legacy_registry;
-use crate::{ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
+use crate::legacy_registry::{self, LegacyRegistryId};
+use crate::{ErrorKind, Exactness, LanguageError, NumericBuffer, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -27,7 +27,7 @@ fn uk_operation_name(name: &str) -> String {
     }
 }
 
-fn uk_semantic_name(semantic_id: Sens8) -> String {
+fn uk_semantic_name(semantic_id: LegacyRegistryId) -> String {
     legacy_registry::admitted_surfaces_with_namespace_for_id(semantic_id)
         .into_iter()
         .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
