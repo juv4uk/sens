@@ -1,0 +1,36 @@
+name: D6 alternative parent falsifier research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-alt-parent-falsifier/**"
+      - ".github/workflows/d6-alt-parent-falsifier.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-alt-parent-falsifier/**"
+      - ".github/workflows/d6-alt-parent-falsifier.yml"
+  workflow_dispatch:
+
+jobs:
+  parent-tournament:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run D6 alternative-parent tournament
+        run: |
+          rm -rf /tmp/d6-alt-parent-falsifier
+          python3 benchmarks/d6-alt-parent-falsifier/run.py             --out /tmp/d6-alt-parent-falsifier
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d6-alt-parent-falsifier/report.md; then
+            cat /tmp/d6-alt-parent-falsifier/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-alt-parent-falsifier
+          path: /tmp/d6-alt-parent-falsifier/
+          retention-days: 14
