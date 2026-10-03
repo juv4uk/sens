@@ -253,6 +253,53 @@ fn prim_00001111(
     arithmetic::division_on_values(args, args.len(), env, span)
 }
 
+fn d5_plus(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    arithmetic::arithmetic_on_values_by_operation(
+        arithmetic::ArithmeticOperation::Add,
+        args,
+        env,
+        span,
+    )
+}
+
+fn d5_difference(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    arithmetic::arithmetic_on_values_by_operation(
+        arithmetic::ArithmeticOperation::Subtract,
+        args,
+        env,
+        span,
+    )
+}
+
+fn d5_times(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    arithmetic::arithmetic_on_values_by_operation(
+        arithmetic::ArithmeticOperation::Multiply,
+        args,
+        env,
+        span,
+    )
+}
+
+fn d5_quotient(
+    args: &[Value],
+    env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    arithmetic::division_on_values(args, args.len(), env, span)
+}
+
 fn prim_00011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, LanguageError> {
     arithmetic::comparison_on_values("<", args, span)
 }
@@ -275,16 +322,23 @@ fn prim_01001101(
 }
 
 fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
-    let CoreDomainIdentity::D3(word) = identity else {
-        return None;
-    };
-    match word.word().packed_bits() {
-        0b010 => Some(prim_00000010), // ATOM
-        0b111 => Some(prim_00000011), // EQ
-        0b100 => Some(prim_00000100), // CONS
-        0b101 => Some(prim_00000101), // CAR
-        0b110 => Some(prim_00000110), // CDR
-        _ => None, // QUOTE/COND are syntax routes, 000 is unallocated here
+    match identity {
+        CoreDomainIdentity::D3(word) => match word.word().packed_bits() {
+            0b010 => Some(prim_00000010), // ATOM
+            0b111 => Some(prim_00000011), // EQ
+            0b100 => Some(prim_00000100), // CONS
+            0b101 => Some(prim_00000101), // CAR
+            0b110 => Some(prim_00000110), // CDR
+            _ => None, // QUOTE/COND are syntax routes, 000 is structural ground
+        },
+        CoreDomainIdentity::D5(word) => match word.word().packed_bits() {
+            0b01010 => Some(d5_plus),       // PLUS
+            0b01011 => Some(d5_difference), // DIFFERENCE
+            0b10010 => Some(d5_times),      // TIMES
+            0b10011 => Some(d5_quotient),   // QUOTIENT
+            _ => None,
+        },
+        CoreDomainIdentity::D4(_) | CoreDomainIdentity::D6(_) => None,
     }
 }
 
@@ -450,6 +504,58 @@ mod tests {
             crate::Bit4::new(0b0010).unwrap(),
         ));
         assert!(domain_primitive(d4_same_payload).is_none());
+    }
+
+    #[test]
+    fn canonical_d5_arithmetic_route_is_exact_domain_native() {
+        let d5 = |bits| {
+            CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(bits).unwrap()))
+        };
+
+        assert!(domain_primitive(d5(0b01010)).is_some()); // PLUS
+        assert!(domain_primitive(d5(0b01011)).is_some()); // DIFFERENCE
+        assert!(domain_primitive(d5(0b10010)).is_some()); // TIMES
+        assert!(domain_primitive(d5(0b10011)).is_some()); // QUOTIENT
+
+        // Other D5 residents do not gain arithmetic execution from width alone.
+        assert!(domain_primitive(d5(0b00111)).is_none()); // SETQ
+
+        // Equal payload in another domain never inherits D5 arithmetic.
+        let d4 = CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b1010).unwrap(),
+        ));
+        let d6 = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b001010).unwrap(),
+        ));
+        assert!(domain_primitive(d4).is_none());
+        assert!(domain_primitive(d6).is_none());
+    }
+
+    #[test]
+    fn d5_arithmetic_mechanisms_match_existing_backend_mechanisms() {
+        let environment = Environment::new();
+        let span = Span::default();
+        let values = [
+            Value::Number(5.0, crate::Exactness::Exact),
+            Value::Number(2.0, crate::Exactness::Exact),
+        ];
+        let cases = [
+            (0b01010, crate::sens!(00001100)), // PLUS
+            (0b01011, crate::sens!(00001101)), // DIFFERENCE
+            (0b10010, crate::sens!(00001110)), // TIMES
+            (0b10011, crate::sens!(00001111)), // QUOTIENT
+        ];
+
+        for (bits, legacy_sid) in cases {
+            let identity = CoreDomainIdentity::D5(crate::CoreD5::from_word(
+                crate::Bit5::new(bits).unwrap(),
+            ));
+            let via_domain = invoke_domain_identity(identity, &values, &environment, span)
+                .expect("D5 arithmetic mechanism should execute");
+            let via_legacy = invoke_semantic_ref(legacy_sid, &values, &environment, span)
+                .expect("existing arithmetic backend mechanism should execute");
+            assert_eq!(via_domain.to_string(), via_legacy.to_string());
+        }
     }
 
     #[test]
