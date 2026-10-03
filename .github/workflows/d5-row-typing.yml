@@ -1,0 +1,31 @@
+name: D5 historical semantic typing guard
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d5-historical-semantic-status.json"
+      - "benchmarks/d5-row-typing/**"
+      - ".github/workflows/d5-row-typing.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  typing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate historical occupancy vs semantic residency
+        run: |
+          rm -rf /tmp/d5-row-typing
+          python3 benchmarks/d5-row-typing/validate.py \
+            --out /tmp/d5-row-typing/result.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d5-row-typing
+          path: /tmp/d5-row-typing/
+          retention-days: 14
