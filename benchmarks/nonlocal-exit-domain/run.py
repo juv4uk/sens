@@ -15,6 +15,7 @@ REPO = Path(__file__).resolve().parents[2]
 D5 = REPO / "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
 ROOT_CLOSEOUT = REPO / "benchmarks/post-d4-root-min-closeout/run.py"
 D6_CLOSEOUT = REPO / "benchmarks/d6-closure-map/run.py"
+D6_FRONTIER = REPO / "benchmarks/d6-unknown-frontier/run.py"
 RETURN_WITNESS = REPO / "scripts/research-2488-return-placement.py"
 
 
@@ -22,12 +23,14 @@ def load_inputs():
     d5 = json.loads(D5.read_text(encoding="utf-8"))
     root_ns = runpy.run_path(str(ROOT_CLOSEOUT))
     d6_ns = runpy.run_path(str(D6_CLOSEOUT))
+    frontier_ns = runpy.run_path(str(D6_FRONTIER))
     ret_ns = runpy.run_path(str(RETURN_WITNESS))
 
     d5_row = next(row for row in d5["factors"] if row["factor_id"] == "non-local-exit")
     root_row = next(row for row in root_ns["ROWS"] if row["factor"] == "non-local-exit")
     d6_rows = d6_ns["build_map"]()
-    return d5_row, root_row, d6_rows, ret_ns
+    frontier = frontier_ns["build"]()
+    return d5_row, root_row, d6_rows, frontier, ret_ns
 
 
 def observable_controls(ret_ns):
@@ -76,7 +79,7 @@ def observable_controls(ret_ns):
     }
 
 
-def validate_inputs(d5_row, root_row, d6_rows):
+def validate_inputs(d5_row, root_row, d6_rows, frontier):
     assert d5_row["classification"] == "ROOT-RESIDUE"
     assert d5_row["root_theorem"] is True
     assert d5_row["d5_eligible"] == "NO"
@@ -91,6 +94,23 @@ def validate_inputs(d5_row, root_row, d6_rows):
     assert len(generated) == 16
     assert len(unknown) == 48
     assert all(not r["semantic_member_of_ratified_domain"] for r in unknown)
+
+    assert frontier["canonical"]["generated_members"] == 16
+    assert frontier["canonical"]["unknown_free"] == 48
+    assert frontier["canonical"]["occupancy_mutations"] == 0
+    assert frontier["frontier_counts"] == {
+        "PURE-UNKNOWN": 44,
+        "PARENT-DUPLICATE-NOT-EARNED": 1,
+        "OVERLAY-CANDIDATE-NONADMITTED": 2,
+        "OWNER-READY-NONADMITTED": 1,
+    }
+    return_rows = [
+        row for row in frontier["historical_unplaced_sidecar"]
+        if row["operation"] == "RETURN"
+    ]
+    assert len(return_rows) == 1
+    assert return_rows[0]["d6_coordinate"] is None
+    assert return_rows[0]["d6_membership_inferred"] is False
 
     return {
         "d5": {
@@ -197,8 +217,8 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
-    d5_row, root_row, d6_rows, ret_ns = load_inputs()
-    domain_status = validate_inputs(d5_row, root_row, d6_rows)
+    d5_row, root_row, d6_rows, frontier, ret_ns = load_inputs()
+    domain_status = validate_inputs(d5_row, root_row, d6_rows, frontier)
     observations = observable_controls(ret_ns)
     rows = models()
 
@@ -226,6 +246,12 @@ def main() -> int:
         },
         "observations": observations,
         "domain_status": domain_status,
+        "d6_frontier_control": {
+            "frontier_counts": frontier["frontier_counts"],
+            "return_membership_inferred": False,
+            "occupancy_mutations": frontier["canonical"]["occupancy_mutations"],
+            "evidence": "#2660/#2661",
+        },
         "models": rows,
         "final": final,
         "guards": [
