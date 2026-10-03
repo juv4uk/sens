@@ -63,12 +63,14 @@ jobs:
             --baseline knowledge/binary-domain-format-baseline.json
 
       - name: Report seven-field structural debt
+        if: always()
         run: |
           python3 scripts/check-task-record-structure.py \
             --issues /tmp/issues.json \
             --report-only
 
       - name: Emit structural baseline candidate
+        if: always()
         run: |
           python3 scripts/check-task-record-structure.py \
             --issues /tmp/issues.json \
@@ -76,6 +78,7 @@ jobs:
           cat /tmp/task-record-structure-baseline.json
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: task-record-structure-baseline-candidate
           path: /tmp/task-record-structure-baseline.json
