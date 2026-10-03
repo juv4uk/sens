@@ -61,6 +61,11 @@ pub(crate) fn surface_has_sid(surface: &str, sid: Sens8) -> bool {
     semantic_registry::semantic_id_for_surface(surface) == Some(sid)
 }
 
+pub(crate) fn surface_has_legacy8_bits(surface: &str, bits: u8) -> bool {
+    semantic_registry::semantic_id_for_surface(surface)
+        .is_some_and(|sid| sid.packed_byte() == bits)
+}
+
 /// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
 /// M8 (#1590): після lower admitted surface → SENS, біндинг `+` не змінює Call.
 pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageError> {
