@@ -86,6 +86,46 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+    /// Lift an exact four-bit source word into the ratified Core.D4 carrier.
+    pub const fn d4(self) -> Option<crate::CoreD4> {
+        match self {
+            Self::W4(word) => Some(crate::CoreD4::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact five-bit source word into the ratified Core.D5 carrier.
+    pub const fn d5(self) -> Option<crate::CoreD5> {
+        match self {
+            Self::W5(word) => Some(crate::CoreD5::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact six-bit source word into the ratified Core.D6 carrier.
+    pub const fn d6(self) -> Option<crate::CoreD6> {
+        match self {
+            Self::W6(word) => Some(crate::CoreD6::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Attach the currently ratified Core domain to this source word.
+    ///
+    /// W7/W8 remain mechanical source words here: D7 is not promoted by this
+    /// carrier, and legacy width-8 projection is intentionally not a domain.
+    pub const fn domain(self) -> Option<crate::DomainWord> {
+        match self {
+            Self::W1(word) => Some(crate::DomainWord::D1(crate::PredicateBit::from_word(word))),
+            Self::W2(word) => Some(crate::DomainWord::D2(crate::Racana2::from_word(word))),
+            Self::W3(word) => Some(crate::DomainWord::D3(crate::Bija3::from_word(word))),
+            Self::W4(word) => Some(crate::DomainWord::D4(crate::CoreD4::from_word(word))),
+            Self::W5(word) => Some(crate::DomainWord::D5(crate::CoreD5::from_word(word))),
+            Self::W6(word) => Some(crate::DomainWord::D6(crate::CoreD6::from_word(word))),
+            Self::W7(_) | Self::W8(_) => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -103,6 +143,24 @@ impl From<crate::Racana2> for BinarySourceWord {
 impl From<crate::Bija3> for BinarySourceWord {
     fn from(value: crate::Bija3) -> Self {
         Self::W3(value.word())
+    }
+}
+
+impl From<crate::CoreD4> for BinarySourceWord {
+    fn from(value: crate::CoreD4) -> Self {
+        Self::W4(value.word())
+    }
+}
+
+impl From<crate::CoreD5> for BinarySourceWord {
+    fn from(value: crate::CoreD5) -> Self {
+        Self::W5(value.word())
+    }
+}
+
+impl From<crate::CoreD6> for BinarySourceWord {
+    fn from(value: crate::CoreD6) -> Self {
+        Self::W6(value.word())
     }
 }
 
@@ -263,6 +321,20 @@ mod tests {
             assert!(source.d1().is_none());
             assert!(source.d2().is_none());
         }
+    }
+
+    #[test]
+    fn ratified_d1_through_d6_attach_domain_without_width_loss() {
+        for spelling in ["1", "01", "001", "0001", "00001", "000001"] {
+            let token = parse_binary_source_words(spelling).unwrap()[0];
+            let domain = token.word.domain().expect("D1-D6 must attach a ratified domain");
+            assert_eq!(domain.width(), spelling.len());
+            assert_eq!(domain.packed_bits(), 1);
+            assert_eq!(token.word.to_string(), spelling);
+        }
+
+        assert!(BinarySourceWord::W7(Bit7::new(1).unwrap()).domain().is_none());
+        assert!(BinarySourceWord::W8(Bit8::new(1).unwrap()).domain().is_none());
     }
 
     #[test]
