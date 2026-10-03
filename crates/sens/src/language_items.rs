@@ -10,7 +10,7 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry, CoreDomainIdentity, Sens8};
+use crate::{domain_registry, semantic_registry, CoreDomainIdentity, Sens8};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -55,6 +55,43 @@ pub struct LanguageItem {
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
     pub arity: Arity,
+}
+
+/// Canonical tooling item sourced from an exact domain resident rather than
+/// from the historical 256-row registry.
+///
+/// Surface spellings and legacy byte projections are optional downstream
+/// metadata. A generated domain resident therefore needs neither in order to
+/// be discoverable by exact identity.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DomainLanguageItem {
+    pub identity: CoreDomainIdentity,
+    pub kind: LanguageItemKind,
+    pub arity: Arity,
+    pub legacy_registry_id: Option<Sens8>,
+    pub law: &'static str,
+}
+
+/// First domain-first tooling projection.
+///
+/// The four generated D4 selector descendants are described entirely by their
+/// exact D4 identity plus selector-composition law. No Function8 row is a
+/// prerequisite. D3/bootstrap metadata migration follows in later #2937 slices.
+pub fn domain_language_items() -> Vec<DomainLanguageItem> {
+    domain_registry::d3_d4_residents()
+        .into_iter()
+        .filter_map(|resident| {
+            (resident.law == domain_registry::ResidentLaw::SelectorComposition).then_some(
+                DomainLanguageItem {
+                    identity: resident.identity,
+                    kind: LanguageItemKind::Builtin,
+                    arity: Arity::Exact(1),
+                    legacy_registry_id: None,
+                    law: "selector-composition",
+                },
+            )
+        })
+        .collect()
 }
 
 mod generated {
@@ -108,6 +145,23 @@ pub fn language_items() -> Vec<LanguageItem> {
 mod tests {
     use super::*;
     use crate::Value;
+
+    #[test]
+    fn generated_d4_domain_items_need_no_legacy_registry_primary_key() {
+        let items = domain_language_items();
+        assert_eq!(items.len(), 4);
+        let mut coordinates = items
+            .iter()
+            .map(|item| {
+                assert_eq!(item.identity.width(), 4);
+                assert_eq!(item.legacy_registry_id, None);
+                assert_eq!(item.law, "selector-composition");
+                item.identity.packed_bits()
+            })
+            .collect::<Vec<_>>();
+        coordinates.sort_unstable();
+        assert_eq!(coordinates, vec![0b1010, 0b1011, 0b1100, 0b1101]);
+    }
 
     #[test]
     fn every_primitive_code_has_tooling_metadata() {
