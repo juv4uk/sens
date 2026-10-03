@@ -1,19 +1,12 @@
 #!/usr/bin/env python3
-"""#2725 — D6 ratification non-contagion guard.
+"""#2725 — PRE-OD006 historical D6 ratification non-contagion theorem.
 
-This guard is deliberately future-compatible with #2723.
+This runner preserves the old sparse-model claim that a one-coordinate owner
+transition must not spread to adjacent/proof-state coordinates.
 
-It accepts either:
-1. the current pre-application state where D6:001111 is still non-resident; or
-2. the post-owner-decision state where exactly D6:001111 is a manual resident.
-
-In both states, residency must not spread to:
-- 001100 (parent duplicate),
-- 001101 / 001110 (proof intermediates), or
-- any of the 44 PURE-UNKNOWN coordinates.
-
-The guard mutates copies of the canonical map to prove those promotions fail.
-It never mutates repository occupancy.
+OD-006 later ratified a full 64/64 historical owner map, so the 44
+PURE-UNKNOWN occupancy premise is historical only.  The non-contagion proof is
+retained as semantic evidence, not current occupancy authority.
 """
 
 from __future__ import annotations
@@ -34,6 +27,10 @@ PARENT_DUPLICATE = "001100"
 MIDDLE = {"001101", "001110"}
 OVERLAY = {PARENT_DUPLICATE, *MIDDLE, TARGET}
 PROTECTED_HISTORY = {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"}
+
+ERA = "PRE-OD006"
+CURRENT_OCCUPANCY_AUTHORITY = False
+SUPERSEDED_BY = "OD-006/#2764/#2777"
 
 
 class GuardFailure(AssertionError):
@@ -261,7 +258,10 @@ def main() -> int:
 
     artifact = {
         "schema": "d6-ratification-noncontagion/v1",
-        "authority": "research-guard-only",
+        "authority": "historical-research-guard-only",
+        "era": ERA,
+        "current_occupancy_authority": CURRENT_OCCUPANCY_AUTHORITY,
+        "superseded_by": SUPERSEDED_BY,
         "issue": "#2725",
         "ratification_parent": "#2723",
         "current": current_result,
@@ -311,7 +311,8 @@ def main() -> int:
     report += [
         "",
         "Interpretation:",
-        "ratifying D6:001111 is a one-coordinate authority transition.",
+        "PRE-OD006 historical theorem only; current occupancy authority is OD-006 64/64.",
+        "Historically, ratifying D6:001111 was modeled as a one-coordinate authority transition.",
         "Adjacency, shared prefix, and proof-square membership confer no residency.",
         "SETQ ratification also does not transfer residency to SET/RETURN/FEXPR/FSUBR/TRANSFORMER.",
         "",
