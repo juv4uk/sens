@@ -40,7 +40,7 @@ fn eight_sound_atoms_pack_into_exactly_seven_bytes() {
     assert_eq!(stream.bit_len(), 56);
     assert_eq!(stream.byte_len(), 7);
 
-    // Zero byte padding: 12.5% physical space saving vs 8-bit ASCII
+    // No interior byte padding: 56 payload bits occupy 7 bytes
     let decoded = Text7::from_packed_w7(&stream).expect("exact decode");
     assert_eq!(decoded.cells(), &cells[..]);
 }
