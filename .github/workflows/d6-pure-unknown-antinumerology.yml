@@ -1,0 +1,57 @@
+name: D6 PURE-UNKNOWN anti-numerology
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-pure-unknown-antinumerology/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d6-closure-map/**"
+      - ".github/workflows/d6-pure-unknown-antinumerology.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-pure-unknown-antinumerology/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d6-closure-map/**"
+      - ".github/workflows/d6-pure-unknown-antinumerology.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  anti-numerology:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Re-check canonical D6 UNKNOWN frontier
+        run: |
+          python3 benchmarks/d6-unknown-frontier/run.py --out /tmp/d6-frontier.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/d6-frontier.json"))
+          assert d["canonical"]["generated_members"] == 16
+          assert d["canonical"]["unknown_free"] == 48
+          assert d["canonical"]["occupancy_mutations"] == 0
+          assert d["frontier_counts"]["PURE-UNKNOWN"] == 44
+          PY
+
+      - name: Prove PURE-UNKNOWN relabeling symmetry
+        run: |
+          python3 benchmarks/d6-pure-unknown-antinumerology/run.py             --out /tmp/d6-pure-unknown-antinumerology.json             | tee /tmp/d6-pure-unknown-antinumerology.log
+          grep -F "D6-PURE-UNKNOWN-ANTI-NUMEROLOGY=PASS" /tmp/d6-pure-unknown-antinumerology.log
+          grep -F "class-preserving-transpositions=946" /tmp/d6-pure-unknown-antinumerology.log
+          grep -F "invariant-singleton=false" /tmp/d6-pure-unknown-antinumerology.log
+          grep -F "occupancy-mutations=0" /tmp/d6-pure-unknown-antinumerology.log
+          grep -F "RESULT=NO-CANDIDATE-FROM-COORDINATE-ONLY" /tmp/d6-pure-unknown-antinumerology.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-pure-unknown-antinumerology
+          path: |
+            /tmp/d6-pure-unknown-antinumerology.json
+            /tmp/d6-pure-unknown-antinumerology.log
+          retention-days: 14
