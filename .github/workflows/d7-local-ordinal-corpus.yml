@@ -1,0 +1,46 @@
+name: D7 local ordinal provenance corpus
+
+on:
+  pull_request:
+    paths:
+      - "contracts/d7-local-ordinal.lock"
+      - "benchmarks/d7-local-ordinal-corpus/**"
+      - ".github/workflows/d7-local-ordinal-corpus.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  corpus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Read pinned donor
+        id: pin
+        shell: bash
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import re
+          from pathlib import Path
+          text = Path("contracts/d7-local-ordinal.lock").read_text(encoding="utf-8")
+          for name in ("repository", "revision"):
+              m = re.search(r"\(" + name + r'\s+"([^"]+)"\)', text)
+              if not m:
+                  raise SystemExit(f"missing {name}")
+              print(f"{name}={m.group(1)}")
+          PY
+
+      - name: Checkout pinned Shiva-sutra canon
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.revision }}
+          path: .upstream/shiva-sutras
+
+      - name: Verify generated D7 local ordinal corpus
+        run: >-
+          python3 benchmarks/d7-local-ordinal-corpus/generate.py
+          --upstream-root .upstream/shiva-sutras
+          --check
