@@ -161,20 +161,20 @@ mod tests {
 
     #[test]
     fn migrated_registry_roles_are_domain_qualified_and_not_truncated() {
-        let cond = domain_identity_for_surface("cond").unwrap();
-        let eq = domain_identity_for_surface("eq?").unwrap();
-        let lambda = domain_identity_for_surface("lambda").unwrap();
-        let define = domain_identity_for_surface("define").unwrap();
+        let d3_011 = domain_identity_for_surface("за-умовою").unwrap();
+        let d3_111 = domain_identity_for_surface("тотожне?").unwrap();
+        let d4_0010 = domain_identity_for_surface("функція").unwrap();
+        let d4_0011 = domain_identity_for_surface("визначити").unwrap();
 
-        assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
-        assert_eq!((eq.width(), eq.packed_bits()), (3, 0b111));
-        assert_eq!((lambda.width(), lambda.packed_bits()), (4, 0b0010));
-        assert_eq!((define.width(), define.packed_bits()), (4, 0b0011));
+        assert_eq!((d3_011.width(), d3_011.packed_bits()), (3, 0b011));
+        assert_eq!((d3_111.width(), d3_111.packed_bits()), (3, 0b111));
+        assert_eq!((d4_0010.width(), d4_0010.packed_bits()), (4, 0b0010));
+        assert_eq!((d4_0011.width(), d4_0011.packed_bits()), (4, 0b0011));
 
-        assert_ne!(cond.packed_bits(), 0b111);
-        assert_ne!(eq.packed_bits(), 0b011);
-        assert_ne!(lambda.packed_bits(), 0b1000);
-        assert_ne!(define.packed_bits(), 0b1001);
+        assert_ne!(d3_011.packed_bits(), 0b111);
+        assert_ne!(d3_111.packed_bits(), 0b011);
+        assert_ne!(d4_0010.packed_bits(), 0b1000);
+        assert_ne!(d4_0011.packed_bits(), 0b1001);
     }
 
     #[test]
@@ -185,12 +185,12 @@ mod tests {
     #[test]
     fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
         assert_eq!(
-            registry_byte_for_surface("cond").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("cond")
+            registry_byte_for_surface("за-умовою").and_then(domain_identity_from_registry_byte),
+            domain_identity_for_surface("за-умовою")
         );
         assert_eq!(
-            registry_byte_for_surface("lambda").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("lambda")
+            registry_byte_for_surface("функція").and_then(domain_identity_from_registry_byte),
+            domain_identity_for_surface("функція")
         );
     }
 
