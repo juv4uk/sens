@@ -274,6 +274,31 @@ fn prim_01001101(
     special_forms::eval_values(args, env, span)
 }
 
+/// Exact D5 arithmetic/comparison mechanisms.
+///
+/// Coordinates come from the ratified D5 owner map. No historical byte lookup
+/// participates in selection.
+fn invoke_d5_numeric(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let CoreDomainIdentity::D5(word) = identity else {
+        return None;
+    };
+
+    Some(match word.word().packed_bits() {
+        0b01010 => arithmetic::arithmetic_on_values("+", args, environment, span),
+        0b01011 => arithmetic::arithmetic_on_values("-", args, environment, span),
+        0b10010 => arithmetic::arithmetic_on_values("*", args, environment, span),
+        0b10011 => arithmetic::division_on_values(args, args.len(), environment, span),
+        0b01110 => arithmetic::comparison_on_values("<", args, span),
+        0b01111 => arithmetic::comparison_on_values(">", args, span),
+        _ => return None,
+    })
+}
+
 fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
     let CoreDomainIdentity::D3(word) = identity else {
         return None;
@@ -299,6 +324,10 @@ pub(crate) fn invoke_domain_identity(
     span: Span,
 ) -> Result<Value, LanguageError> {
     if let Some(result) = super::selector_law::invoke(identity, args, span) {
+        return result;
+    }
+
+    if let Some(result) = invoke_d5_numeric(identity, args, environment, span) {
         return result;
     }
 
@@ -422,6 +451,50 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d5_numeric_family_executes_from_exact_domain_coordinates() {
+        let env = Environment::new();
+        let span = Span::default();
+        let exact = |n: f64| Value::Number(n, crate::Exactness::Exact);
+        let d5 = |bits| {
+            CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(bits).unwrap()))
+        };
+
+        assert_eq!(
+            invoke_domain_identity(d5(0b01010), &[exact(2.0), exact(3.0)], &env, span).unwrap(),
+            exact(5.0)
+        );
+        assert_eq!(
+            invoke_domain_identity(d5(0b01011), &[exact(7.0), exact(2.0)], &env, span).unwrap(),
+            exact(5.0)
+        );
+        assert_eq!(
+            invoke_domain_identity(d5(0b10010), &[exact(3.0), exact(4.0)], &env, span).unwrap(),
+            exact(12.0)
+        );
+        assert_eq!(
+            invoke_domain_identity(d5(0b10011), &[exact(8.0), exact(2.0)], &env, span).unwrap(),
+            exact(4.0)
+        );
+
+        let less = invoke_domain_identity(d5(0b01110), &[exact(2.0), exact(3.0)], &env, span)
+            .unwrap();
+        let greater = invoke_domain_identity(d5(0b01111), &[exact(3.0), exact(2.0)], &env, span)
+            .unwrap();
+        assert_eq!(less.to_string(), "1");
+        assert_eq!(greater.to_string(), "1");
+    }
+
+    #[test]
+    fn d5_equal_payload_never_falls_back_to_legacy_byte_meaning() {
+        let env = Environment::new();
+        let identity =
+            CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(0b01100).unwrap()));
+        let error = invoke_domain_identity(identity, &[], &env, Span::default())
+            .expect_err("unimplemented D5 resident must fail closed");
+        assert!(error.message.contains("domain identity has no admitted value-call mechanism"));
+    }
 
     #[test]
     fn canonical_d3_primitive_route_is_role_aware_not_numeric_projection() {
