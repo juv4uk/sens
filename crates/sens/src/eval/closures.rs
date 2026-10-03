@@ -39,7 +39,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             canon::ensure_bindable(name, expr.span)?;
             Ok((Vec::new(), Some(name.clone())))
         }
-        ExprKind::Sid(sid) => {
+        ExprKind::LegacySid(sid) => {
             canon::ensure_bindable_sid(*sid, expr.span)?;
             Ok((Vec::new(), Some(sid.to_string().into())))
         }
@@ -52,7 +52,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                         canon::ensure_bindable(name, parameter.span)?;
                         name.clone()
                     }
-                    ExprKind::Sid(sid) => {
+                    ExprKind::LegacySid(sid) => {
                         canon::ensure_bindable_sid(*sid, parameter.span)?;
                         sid.to_string().into()
                     }
@@ -87,7 +87,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                                 canon::ensure_bindable(name, head.span)?;
                                 name.clone()
                             }
-                            ExprKind::Sid(sid) => {
+                            ExprKind::LegacySid(sid) => {
                                 canon::ensure_bindable_sid(*sid, head.span)?;
                                 sid.to_string().into()
                             }
@@ -120,7 +120,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                         }
                         break name.clone();
                     }
-                    ExprKind::Sid(sid) => {
+                    ExprKind::LegacySid(sid) => {
                         canon::ensure_bindable_sid(*sid, current.span)?;
                         break sid.to_string().into();
                     }
@@ -253,7 +253,8 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
 
 fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Head {
     match &head.kind {
-        ExprKind::Sid(sid) => sid_head(*sid, environment),
+        ExprKind::LegacySid(sid) => sid_head(*sid, environment),
+        ExprKind::Sid(_) => Head::Opaque,
         ExprKind::Symbol(name) => {
             if let Some(sid) = canon::routed_sid_for_surface(name) {
                 return sid_head(sid, environment);
@@ -270,8 +271,8 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
                 return Head::Call;
             }
             match environment.get(name) {
-                Some(Value::Macro(_) | Value::Builtin(_)) => Head::Opaque,
-                Some(Value::Sid(sid)) => sid_head(sid, environment),
+                Some(Value::Macro(_) | Value::Builtin(_) | Value::Sid(_)) => Head::Opaque,
+                Some(Value::LegacySid(sid)) => sid_head(sid, environment),
                 _ => Head::Call,
             }
         }
@@ -285,7 +286,8 @@ fn is_pure(expression: &Expr, own: &[Rc<str>], environment: &Environment) -> boo
         ExprKind::List(items) if !items.is_empty() => {
             (classify_head(&items[0], own, environment), &items[..])
         }
-        ExprKind::Call(sid, arguments) => (sid_head(*sid, environment), &arguments[..]),
+        ExprKind::LegacyCall(sid, arguments) => (sid_head(*sid, environment), &arguments[..]),
+        ExprKind::Call(_, arguments) => (Head::Opaque, &arguments[..]),
         _ => return true,
     };
     match head {
@@ -374,8 +376,9 @@ fn resolve(
                 }
             }
         }
-        ExprKind::Call(sid, arguments) => match sid_head(*sid, environment) {
-            Head::Call => ExprKind::Call(*sid, resolve_all(arguments, changed)),
+        ExprKind::Call(_, _) => return expression.clone(),
+        ExprKind::LegacyCall(sid, arguments) => match sid_head(*sid, environment) {
+            Head::Call => ExprKind::LegacyCall(*sid, resolve_all(arguments, changed)),
             Head::Cond => ExprKind::Call(
                 *sid,
                 arguments
@@ -464,7 +467,12 @@ pub(super) fn apply(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     match function {
-        Value::Sid(sid) => {
+        Value::Sid(identity) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("domain-qualified callable dispatch is not admitted yet: {identity}"),
+            span,
+        )),
+        Value::LegacySid(sid) => {
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
                 values.push(evaluate(argument, calling_environment)?);
@@ -635,7 +643,7 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Bool(false) => ExprKind::List(Rc::new([])),
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
-        Value::Sid(sid) => ExprKind::Sid(*sid),
+        Value::LegacySid(sid) => ExprKind::Sid(*sid),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
         Value::String(val) => ExprKind::String(val.clone()),
         // A legacy host builtin is callable but not syntax either.
@@ -728,8 +736,12 @@ mod resolved_form_tests {
             ExprKind::List(items) => {
                 format!("({})", items.iter().map(shape).collect::<Vec<_>>().join(" "))
             }
-            ExprKind::Call(sid, arguments) => format!(
-                "[{sid} {}]",
+            ExprKind::Call(identity, arguments) => format!(
+                "[{identity} {}]",
+                arguments.iter().map(shape).collect::<Vec<_>>().join(" ")
+            ),
+            ExprKind::LegacyCall(sid, arguments) => format!(
+                "[legacy:{sid} {}]",
                 arguments.iter().map(shape).collect::<Vec<_>>().join(" ")
             ),
             other => format!("{other:?}"),
