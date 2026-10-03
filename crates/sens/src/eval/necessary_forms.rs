@@ -18,14 +18,18 @@ pub(crate) enum NecessaryFormIdentity {
     Lambda,
 }
 
-pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFormIdentity> {
+pub(crate) fn identity_for_legacy8_bits(bits: u8) -> Option<NecessaryFormIdentity> {
     generated::NECESSARY_FORM_DISPATCH
         .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .find(|row| row.semantic_id == bits)
         .map(|row| match row.mechanism {
             generated::NecessaryFormMechanism::Define => NecessaryFormIdentity::Define,
             generated::NecessaryFormMechanism::Lambda => NecessaryFormIdentity::Lambda,
         })
+}
+
+pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFormIdentity> {
+    identity_for_legacy8_bits(semantic_id.packed_byte())
 }
 
 /// Resolve an executable list-head symbol through the shared authority
@@ -38,7 +42,8 @@ pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFo
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
     semantic_registry::admitted_semantic_id_for_surface(name)
-        .and_then(identity_for_semantic_id)
+        .map(Sens8::packed_byte)
+        .and_then(identity_for_legacy8_bits)
 }
 
 #[cfg(test)]
