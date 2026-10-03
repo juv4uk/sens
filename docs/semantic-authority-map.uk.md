@@ -1,91 +1,190 @@
-# Карта семантичної влади sens / СЕНС
+# Карта семантичної влади SENS
 
-Статус: **ЧИННА АРХІТЕКТУРНА КАРТА**. Це український супровід до `semantic-authority-map.md`; обидва файли описують ту саму поточну модель і не створюють нової семантики.
+**Статус:** CURRENT ARCHITECTURE MAP · 2026-10-03
 
-## Одне правило
+Головне правило:
 
-> Мова володіє значенням та ідентичністю функцій; runtime-и дають механізми й докази відповідності.
+> **Значення допускається через domain + law + evidence. Реалізація, назва, storage або transport не мають права тихо стати сильнішими за це.**
 
-Жоден implementation-файл, README-абзац, нотатка агента, бенчмарк чи історичний план не може мовчки переважити чинний контракт мови.
+Детальна англійська/current карта:
+[`semantic-authority-map.md`](semantic-authority-map.md).
 
-## Порядок влади
+## Поточна identity
 
-1. **`language-contract.lisp`** — чинний машинно-читаний контракт і ратифіковані спостережувані інваріанти.
-2. **Ратифіковані ADR у `docs/adr/`** — рішення з явно визначеною областю дії. Історичний ADR може зберігати McCarthy/Lisp provenance, але не перетворює старі назви на чинні ідентичності функцій.
-3. **Виконувані докази відповідності** — `tests/fixtures/conformance.lisp`, `macro-conformance.lisp` та інші допущені witnesses.
-4. **Референсна реалізація** — `crates/sens` (Rust). Це поточний механізм перевірки й виконання, а не власник семантики лише через те, що він написаний на Rust.
-5. **Незалежні реалізації та execution substrates** — C, WASM, FPGA, GraalVM, Common Lisp, Prolog, Datalog, CLIPS та інші виконавці. Вони можуть спростовувати host-specific припущення й давати механізми, але не створюють другу мову.
-6. **Згенеровані довідники** — наприклад `docs/generated/function-table.md`; вони описують проєкцію, а не перевизначають контракт.
-7. **Пояснювальна проза** — `README.md`, `CURRENT.md`, туторіали й архітектурні нотатки.
-8. **Історичні/процесні матеріали** — архіви, датовані аудити, старі плани й нотатки агентів. Це докази історії, не чинна семантична влада.
-
-Якщо нижчий пункт суперечить вищому — нижчий є застарілим до узгодження.
-
-## Чинна ідентичність функцій СЕНС
-
-У СЕНС є рівно 256 функцій:
+Owner paradigm #2490:
 
 ```text
-00000000
-...
-11111111
+semantic object
+=
+binary number
++ exact semantic domain
++ proved/admitted law
 ```
 
-Кожна точна восьмибітна форма є самою функцією. Паралельного текстового, символічного, історичного чи host-defined шару ідентичності функцій немає.
-
-Українські, англійські, санскритські, символьні та compatibility-написання — лише **source/UI routing metadata**. Написання може маршрутизувати до функції СЕНС, але не володіє її ідентичністю чи значенням.
-
-Конкретний порожній список `()` — **структурне значення поза простором 256 функцій**. Він не є псевдонімом жодного endpoint і не займає одну з 256 позицій.
-
-## Історичний Lisp і Core1
-
-Lisp був початковим синтаксичним носієм та експериментальним середовищем, з якого розвинувся СЕНС. Евалюатор Маккарті 1960 року лишається важливим історичним доказом і свідомо зберігається в дослідженнях сумісності/bootstrap **Core1**.
-
-Тому історичні Lisp-назви можуть залишатися в Core1, архівних дослідженнях, provenance-нотатках, історичному контексті ADR і compatibility-witnesses. Там це історичні описи або поверхні, а не чинна онтологія функцій СЕНС.
-
-Різні Core можуть задавати різні ратифіковані закони/простори результатів для тієї самої точної восьмибітної функції, але не створюють іншого набору функцій.
-
-## Bootstrap і механізми реалізації
-
-Не можна змішувати три різні речі:
-
-- **ідентичність і закони мови** — влада контракту СЕНС та допущених executable evidence;
-- **bootstrap/evaluator механізми** — технічна реалізація потрібної поведінки;
-- **поведінка, визначена мовою** — код СЕНС, який реалізує функцію після bootstrap.
-
-Rust може містити parser, evaluator, closure, macro, lowering та host-boundary механізми. Ці структури не стають функціональними ідентичностями. Так само мовне closure чи macro може стати механізмом виконання точної функції СЕНС без надання влади її людському написанню.
-
-## Назва проєкту й розширення
-
-Назва проєкту/репозиторію — **`sens`**. Історична provenance проєкту включає колишню робочу назву **`my-lisp`**.
-
-Чинне канонічне розширення вихідного коду — **`.lisp`** (див. [sens#81](https://github.com/juv4uk/sens/issues/81): розширення ніколи не є семантикою). **`.wsm`** і **`.my`** лишаються підтримуваними legacy-псевдонімами. Українські filename spellings, які підтримує tooling, так само є вибором source-surface, а не семантичною ідентичністю.
-
-## Термінологія референсної реалізації
+Тому:
 
 ```text
-семантична влада       = language-contract + ратифіковані рішення + executable conformance
-функція СЕНС           = рівно одна з 00000000..11111111
-surface                 = source/UI routing metadata
-референсна реалізація  = crates/sens (Rust)
-незалежний субстрат    = інша ціль conformance/execution
+bits alone          != meaning
+width alone         != semantic domain
+machine transform   != semantic law
+human name          != canonical identity
+free coordinate     != resident
+hash/cache/registry != semantic authority
 ```
 
-Не називати Rust, surface spelling, історичну Lisp-назву чи execution island канонічним володарем значення мови.
+## Порядок сили тверджень
 
-## Межа host
+Для відповідного scope:
 
-Host-операція потрібна, якщо дає інформацію/ефект, недоступний у чистій семантиці мови, або впроваджує trusted authorization boundary, яку обмежувана програма не повинна вміти сама собі надати.
+1. explicit owner/ratified decisions;
+2. machine-readable contract / admitted laws / conformance;
+3. executable witnesses і falsifiers;
+4. reference/independent implementations;
+5. generated projections і current documentation;
+6. dated research/history/archive.
 
-Не змішувати:
+Старіший machine-readable artifact, який ще не мігрований під новішу explicit
+ratification, є migration debt, а не правом скасувати owner decision.
 
-1. **семантичну/прикладну політику** — що означає спостереження, як байти стають текстом, як класифікується результат; коли це вивідне, воно належить мові;
-2. **embedding authorization policy** — які filesystem roots, процеси чи мережеві цілі дозволені частково довіреній сесії; це належить trusted host boundary.
+## Domain, carrier, mechanism
 
-Rust/host може механічно рости. Заборонений напрям — коли host-механізм стає джерелом значення СЕНС.
+#2540:
 
-## Правило документації
+```text
+domain     = law-bearing semantic context
+carrier    = bits/width representation
+mechanism  = execution/storage/transport
+```
 
-Нова проза про contract-level факт має посилатися на authoritative source, а не створювати незалежну версію закону. Архівні та датовані документи можуть зберігати старі назви, шляхи, онтології й висновки; їх не треба переписувати лише заради сучасної термінології.
+Наприклад:
 
-Мета — не менше документів, а одна влада для кожного типу твердження.
+```text
+D7.SoundCell [carrier=W7]
+D7.LocalOrdinal [carrier=W7]
+```
+
+Однакова W7 не робить ці об'єкти одним semantic domain.
+
+## Core
+
+Core працює historical-first:
+
+```text
+HISTORICAL-INGEST
+        ↓
+STRUCTURAL-DISCOVERY
+        ↓
+SENS-DERIVATION
+```
+
+History дає observations. Structure дає laws. SENS виводиться після цього.
+
+## Placement
+
+Координата заробляється законом.
+
+Допустимі джерела:
+
+- exact parent + generator;
+- lower-bound theorem;
+- independent root/domain law;
+- explicit ratification із evidence.
+
+Недопустимі заміни:
+
+- free slot;
+- numeric proximity;
+- красивий bit pattern;
+- chronology alone;
+- host metadata;
+- foreign-domain transform.
+
+## Parentless roots
+
+```text
+PROVEN-ROOT
+!=
+PROVEN-WIDTH
+!=
+PROVEN-COORDINATE
+```
+
+Root може лишатися `domain=UNKNOWN`, `coordinate=UNPLACED`.
+
+## Core-Math
+
+Core-Math має власну mathematical authority:
+
+```text
+binary input(s)
++ admitted mathematical law
+-> binary output
+```
+
+Він не успадковує Core placement автоматично.
+
+## Cross-domain firewall
+
+#2508/#2509:
+
+Два domains можуть використовувати той самий mechanism:
+
+```text
+child = 2*parent + bit
+```
+
+і все одно мати різні semantic laws.
+
+Cross-domain apply має fail closed.
+
+## Convergence
+
+#2495 допускає:
+
+```text
+DIVERGENT
+COMPLEMENTARY
+CONVERGENT
+```
+
+Convergence потребує:
+
+```text
+same binary object
++ same exact domain
++ same semantic equation
++ same law
++ independent cross-proof
+```
+
+#2502 — bounded selector positive control.
+
+## Mechanisms
+
+Rust, FPGA, C, WASM, GPU, caches, ASTs, hashes, wire, radio, CRC/FEC/ARQ —
+mechanisms/evidence, не semantic authority.
+
+## Human surfaces
+
+Українські, English, Sanskrit, symbols і historical Lisp names — projections.
+Вони допомагають людині, але не визначають machine identity.
+
+## Документаційне правило
+
+Current prose мусить відрізняти:
+
+- ratified;
+- bounded witness;
+- hypothesis;
+- falsified;
+- UNKNOWN/UNRESOLVED;
+- historical.
+
+Старі research документи не переписуються заднім числом. Вони архівуються або
+чітко маркуються, а current layer оновлюється окремо.
+
+Див. також:
+
+- [`../CURRENT.md`](../CURRENT.md)
+- [`current-binary-domain-architecture.md`](current-binary-domain-architecture.md)
+- [`language-core.md`](language-core.md)
