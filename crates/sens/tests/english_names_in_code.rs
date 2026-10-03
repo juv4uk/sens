@@ -55,6 +55,7 @@ fn english_names() -> BTreeSet<String> {
 /// Таблиця функцій і її проєкції — джерело імен, не код.
 fn is_table_source(rel: &str) -> bool {
     rel == "lib/surface/semantic-registry.lisp"
+        || rel == "knowledge/domain-surface-registry.lisp"
         || rel == "lib/surface/function-signatures.lisp"
         || rel.starts_with("lib/generated/")
         || rel.ends_with("_generated.rs")
