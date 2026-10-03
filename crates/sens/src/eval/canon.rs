@@ -9,6 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
+use crate::legacy_registry;
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 
@@ -49,7 +50,7 @@ pub(crate) fn route_kind_for_sid(sid: Sens8) -> Option<SidRouteKind> {
 /// Optional source/UI routing only. The returned value is the function SID;
 /// no named meaning is materialized.
 pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<Sens8> {
-    let sid = semantic_registry::semantic_id_for_surface(surface)?;
+    let sid = legacy_registry::id_for_surface(surface)?;
     route_kind_for_sid(sid)?;
     Some(sid)
 }
@@ -59,7 +60,7 @@ pub(crate) fn is_reserved_surface(surface: &str) -> bool {
 }
 
 pub(crate) fn surface_has_sid(surface: &str, sid: Sens8) -> bool {
-    semantic_registry::semantic_id_for_surface(surface) == Some(sid)
+    legacy_registry::id_for_surface(surface) == Some(sid)
 }
 
 /// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
@@ -68,7 +69,7 @@ pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageE
     if let Some(sid) = routed_sid_for_surface(surface) {
         return Err(immutable_surface_error(surface, sid, span));
     }
-    if let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(surface) {
+    if let Some(sid) = legacy_registry::id_for_surface(surface) {
         if has_primitive(sid) || necessary_forms::identity_for_semantic_id(sid).is_some() {
             return Err(immutable_surface_error(surface, sid, span));
         }
@@ -352,7 +353,7 @@ pub(crate) fn invoke_semantic_ref(
     // canonical mechanism. We do not dual-bind the language definition into
     // both legacy and domain slots.
     if let Some(identity) =
-        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+        legacy_registry::domain_identity_from_byte(sid.packed_byte())
     {
         if environment.domain_code_slot(identity).is_some() || domain_primitive(identity).is_some() {
             return invoke_domain_identity(identity, args, environment, span);
@@ -414,7 +415,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 
     // Compatibility-only lane for registry rows that do not yet have a
     // canonical domain identity.
-    let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
+    let Some(sid) = legacy_registry::id_for_surface(name) else {
         return;
     };
     if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
@@ -469,7 +470,7 @@ mod tests {
     #[test]
     fn every_surface_for_sid_00000101_routes_back_to_that_sid() {
         let surfaces =
-            semantic_registry::admitted_surfaces_for_semantic_id(crate::sens!(00000101));
+            legacy_registry::admitted_surfaces_for_id(crate::sens!(00000101));
         assert!(surfaces.len() >= 2, "expected multiple routing surfaces");
         for surface in &surfaces {
             assert_eq!(
@@ -490,7 +491,7 @@ mod tests {
             crate::sens!(00000110),
             crate::sens!(00000111),
         ] {
-            for surface in semantic_registry::admitted_surfaces_for_semantic_id(sid) {
+            for surface in legacy_registry::admitted_surfaces_for_id(sid) {
                 assert!(is_reserved_surface(surface));
                 assert!(surface_has_sid(surface, sid));
             }

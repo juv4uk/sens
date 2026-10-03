@@ -63,8 +63,8 @@ def mechanism_facts() -> dict:
             or "Bit6" in value
         ),
         "registry_d6_identity": (
-            "type SemanticId = Sens8" not in registry
-            or "Bit6" in registry
+            "Bit6" in registry
+            or "CoreD6" in registry
             or "Domain6" in registry
         ),
         "lowering_d6_identity": (

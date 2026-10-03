@@ -57,6 +57,47 @@ fn rust_semantic_registry_generator_is_valid_lisp() {
 }
 
 
+
+#[test]
+fn canonical_registry_is_physically_separate_from_flat_byte_compatibility() {
+    let canonical = include_str!("../src/semantic_registry.rs");
+    let legacy = include_str!("../src/legacy_registry.rs");
+
+    assert!(!canonical.contains("SEMANTIC_ROWS"));
+    assert!(!canonical.contains("semantic_registry_generated.rs"));
+    assert!(!canonical.contains("use crate::Sens8"));
+    assert!(legacy.contains("SEMANTIC_ROWS"));
+    assert!(legacy.contains("semantic_registry_generated.rs"));
+    assert!(legacy.contains("LegacyRegistryId"));
+}
+
+#[test]
+fn exact_domain_registry_source_and_generator_are_valid_lisp() {
+    parse(include_str!("../../../knowledge/domain-surface-registry.lisp"))
+        .expect("exact-domain surface registry must remain valid Lisp data");
+    parse(include_str!("../../../scripts/generate-rust-domain-registry.lisp"))
+        .expect("exact-domain Rust projection generator must remain valid Lisp source");
+}
+
+#[test]
+fn exact_domain_projection_has_no_legacy_byte_axis() {
+    let source = include_str!("../../../knowledge/domain-surface-registry.lisp");
+    let generated = include_str!("../src/domain_surface_registry_generated.rs");
+
+    assert!(
+        source.contains("(#b11 \"001\"") && source.contains("(#b100 \"0010\""),
+        "authority must state exact domain width in binary and exact bits explicitly"
+    );
+    assert!(
+        !generated.contains("semantic_id:"),
+        "exact-domain projection must not carry legacy semantic_id bytes"
+    );
+    assert!(
+        generated.contains("width: 3") && generated.contains("width: 4"),
+        "generated projection must preserve exact domain width"
+    );
+}
+
 #[test]
 fn decimal_values_do_not_mint_semantic_identity() {
     let mut session = Session::default();

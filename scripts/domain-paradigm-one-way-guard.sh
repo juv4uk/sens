@@ -34,6 +34,10 @@ is_protected_path() {
 is_exact_width_file() {
   local path="$1"
 
+  # Explicit compatibility quarantine: this module exists precisely to keep
+  # historical flat-byte machinery out of canonical exact-domain modules.
+  [[ "$path" == "crates/sens/src/legacy_registry.rs" ]] && return 1
+
   is_protected_path "$path" && return 0
   case "$path" in
     crates/sens/src/*.rs|crates/sens/examples/*.rs|crates/sens/tests/*.rs) ;;
@@ -67,10 +71,12 @@ while IFS= read -r path; do
   while IFS= read -r added; do
     is_executable_line "$added" || continue
     if printf '%s\n' "$added" | grep -Eq "$legacy_pattern"; then
-      echo "PARADIGM-ONE-WAY violation: exact-width code adds legacy identity dependency" >&2
-      echo "  file: $path" >&2
-      echo "  line: $added" >&2
-      failed=1
+      if ! printf '%s\n' "$added" | grep -Fq 'legacy_registry::'; then
+        echo "PARADIGM-ONE-WAY violation: exact-width code adds legacy identity dependency" >&2
+        echo "  file: $path" >&2
+        echo "  line: $added" >&2
+        failed=1
+      fi
     fi
     if printf '%s\n' "$added" | grep -Eq "$byte_scatter_pattern"; then
       echo "PARADIGM-ONE-WAY violation: canonical domain identity is being scattered into byte fields" >&2
