@@ -154,6 +154,11 @@ def selector_rows() -> dict[str, dict[str, Any]]:
             if decode_certificate(cert) != coordinate:
                 raise AssertionError(f"certificate replay drift: {coordinate}")
             rows[coordinate] = {
+                "coordinate": coordinate,
+                "width": WIDTH,
+                "domain": "D5",
+                "status": "generated",
+                "semantic_family": "selector",
                 "root_basis": root_bits,
                 "root_name": meta["root_name"],
                 "law_path": [LAW_BITS[bit]["law_id"] for bit in suffix],
