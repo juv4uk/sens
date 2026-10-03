@@ -285,7 +285,10 @@ impl Parser<'_> {
                         };
                     }
 
-                    let item = self.expression()?;
+                    let mut item = self.expression()?;
+                    if items.is_empty() {
+                        item = self.promote_exact_domain_head(item);
+                    }
                     items.push(item);
                 }
                 None => {
@@ -296,6 +299,31 @@ impl Parser<'_> {
                     ))
                 }
             }
+        }
+    }
+
+    /// Interpret an exact W3-W6 binary word as a Core operation identity
+    /// only in list-head position. Outside the head, the ordinary reader keeps
+    /// numeric/data meaning, so decimal `100` remains usable as data while
+    /// `(100 ...)` denotes D3:100 (CONS).
+    fn promote_exact_domain_head(&self, expression: Expr) -> Expr {
+        let token = &self.source[expression.span.start..expression.span.end];
+        if !(3..=6).contains(&token.len())
+            || !token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+        {
+            return expression;
+        }
+
+        let Some(source_word) = crate::source_words::parse_binary_source_word(token) else {
+            return expression;
+        };
+        let Some(identity) = crate::CoreDomainIdentity::from_source_word(source_word) else {
+            return expression;
+        };
+
+        Expr {
+            kind: ExprKind::DomainIdentity(identity),
+            span: expression.span,
         }
     }
 
@@ -414,26 +442,6 @@ impl Parser<'_> {
             return Ok(Expr {
                 kind,
                 span: Span { start, end: self.cursor },
-            });
-        }
-
-        // Canonical Core operation words are exact-width domain identities.
-        // Width is part of identity: 001 (D3) != 0001 (D4). W3-W6 are lifted
-        // directly through the source-word carrier; no legacy byte lookup,
-        // zero-extension or truncation participates in this path.
-        if (3..=6).contains(&token.len())
-            && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
-        {
-            let source_word = crate::source_words::parse_binary_source_word(token)
-                .expect("exact bounded binary source word validated above");
-            let identity = crate::CoreDomainIdentity::from_source_word(source_word)
-                .expect("W3-W6 are exact Core operation domains");
-            return Ok(Expr {
-                kind: ExprKind::DomainIdentity(identity),
-                span: Span {
-                    start,
-                    end: self.cursor,
-                },
             });
         }
 
@@ -847,18 +855,37 @@ mod tests {
     }
 
     #[test]
-    fn bare_w3_through_w6_tokens_are_exact_domain_identities() {
-        for (token, width, bits) in [
-            ("001", 3usize, 0b001u8),
-            ("0000", 4, 0b0000),
-            ("10100", 5, 0b10100),
-            ("101010", 6, 0b101010),
+    fn w3_through_w6_list_heads_are_exact_domain_identities() {
+        for (source, width, bits) in [
+            ("(001 x)", 3usize, 0b001u8),
+            ("(0000 x)", 4, 0b0000),
+            ("(10100 x)", 5, 0b10100),
+            ("(101010 x)", 6, 0b101010),
         ] {
-            let ExprKind::DomainIdentity(identity) = parse_one(token).kind else {
-                panic!("{token} must parse as CoreDomainIdentity");
+            let ExprKind::List(items) = parse_one(source).kind else {
+                panic!("{source} must parse as a list");
+            };
+            let ExprKind::DomainIdentity(identity) = items[0].kind else {
+                panic!("{source} head must be CoreDomainIdentity");
             };
             assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
         }
+    }
+
+    #[test]
+    fn exact_binary_looking_data_is_not_promoted_outside_list_head() {
+        for source in ["001", "0000", "10100", "101010"] {
+            assert!(
+                matches!(parse_one(source).kind, ExprKind::Number(_, Exactness::Exact)),
+                "{source} outside list head must keep ordinary exact-number/data reading"
+            );
+        }
+
+        let ExprKind::List(items) = parse_one("(100 100)").kind else {
+            panic!("list expected");
+        };
+        assert!(matches!(items[0].kind, ExprKind::DomainIdentity(_)));
+        assert!(matches!(items[1].kind, ExprKind::Number(n, Exactness::Exact) if n == 100.0));
     }
 
     #[test]
