@@ -193,13 +193,15 @@ mod tests {
 
     #[test]
     fn migrated_d3_surfaces_lower_to_exact_domain_calls() {
-        assert_domain_call("(quote x)", 3, 0b001);
-        assert_domain_call("(atom x)", 3, 0b010);
-        assert_domain_call("(cond (x y))", 3, 0b011);
-        assert_domain_call("(cons 1 2)", 3, 0b100);
-        assert_domain_call("(car x)", 3, 0b101);
-        assert_domain_call("(cdr x)", 3, 0b110);
-        assert_domain_call("(eq x y)", 3, 0b111);
+        // Use already-admitted Ukrainian projections so this witness proves
+        // domain routing without reinstalling an English spelling as identity.
+        assert_domain_call("(як-є x)", 3, 0b001);
+        assert_domain_call("(атом? x)", 3, 0b010);
+        assert_domain_call("(за-умовою (x y))", 3, 0b011);
+        assert_domain_call("(сполучити 1 2)", 3, 0b100);
+        assert_domain_call("(перше x)", 3, 0b101);
+        assert_domain_call("(решта x)", 3, 0b110);
+        assert_domain_call("(тотожне? x y)", 3, 0b111);
     }
 
     #[test]
