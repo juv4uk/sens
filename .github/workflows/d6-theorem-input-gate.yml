@@ -1,0 +1,25 @@
+name: D6 theorem input stability
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-theorem-input-gate/**"
+      - "benchmarks/d6-theorem-first-d5-child/**"
+      - "benchmarks/d6-theorem-first-d4-product/**"
+      - "benchmarks/d5-closure-map/**"
+      - "benchmarks/d6-closure-map/**"
+      - "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
+      - "benchmarks/post-d4-semantic-placement/placement.json"
+      - ".github/workflows/d6-theorem-input-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stable-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify neutral D6 theorem inputs and reopen behavior
+        run: python3 benchmarks/d6-theorem-input-gate/run.py --self-test
