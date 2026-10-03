@@ -44,6 +44,77 @@ def review(reason: str) -> None:
     raise SystemExit(f"D5-FILL-WATCH=REVIEW-REQUIRED\nreason={reason}")
 
 
+def classify_d5_placement_claims(rows: list[dict[str, Any]]) -> dict[str, list[str]]:
+    """Separate semantic D5 claims from untyped five-bit carrier evidence."""
+    direct_d5: list[str] = []
+    candidate_d5: list[str] = []
+    untyped_w5: list[str] = []
+
+    for row in rows:
+        operation = str(row["operation"])
+        exact_domain = str(row.get("exact_domain", ""))
+        coordinate = str(row.get("coordinate", ""))
+        candidate = row.get("candidate_coordinate")
+
+        typed_coordinate = coordinate.startswith("D5:")
+        raw_w5 = (
+            coordinate not in {"", "NONE", "UNPLACED"}
+            and len(coordinate) == 5
+            and set(coordinate) <= {"0", "1"}
+        )
+
+        if exact_domain == "D5" or typed_coordinate:
+            direct_d5.append(operation)
+        elif raw_w5:
+            # #2540: width/carrier alone is not semantic domain identity.
+            untyped_w5.append(operation)
+
+        if isinstance(candidate, str) and candidate.startswith("D5:"):
+            candidate_d5.append(operation)
+
+    return {
+        "direct_d5": sorted(direct_d5),
+        "candidate_d5": sorted(candidate_d5),
+        "untyped_w5": sorted(untyped_w5),
+    }
+
+
+def self_check_domain_width_separation() -> None:
+    controls = [
+        {
+            "operation": "width-only-control",
+            "exact_domain": "unresolved",
+            "coordinate": "10101",
+            "candidate_coordinate": None,
+        },
+        {
+            "operation": "explicit-domain-control",
+            "exact_domain": "D5",
+            "coordinate": "10101",
+            "candidate_coordinate": None,
+        },
+        {
+            "operation": "typed-coordinate-control",
+            "exact_domain": "unresolved",
+            "coordinate": "D5:10101",
+            "candidate_coordinate": None,
+        },
+        {
+            "operation": "candidate-control",
+            "exact_domain": "unresolved",
+            "coordinate": "UNPLACED",
+            "candidate_coordinate": "D5:10101",
+        },
+    ]
+    result = classify_d5_placement_claims(controls)
+    assert result["direct_d5"] == [
+        "explicit-domain-control",
+        "typed-coordinate-control",
+    ]
+    assert result["candidate_d5"] == ["candidate-control"]
+    assert result["untyped_w5"] == ["width-only-control"]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path)
@@ -124,21 +195,21 @@ def main() -> int:
     if invariants.get("new_nonselector_d5_candidates") != 0:
         review("semantic-placement reports new nonselector D5 candidate")
 
-    direct_d5_rows = []
-    candidate_d5_rows = []
-    for row in placement["rows"]:
-        exact_domain = str(row.get("exact_domain", ""))
-        coordinate = str(row.get("coordinate", ""))
-        candidate = row.get("candidate_coordinate")
-        if exact_domain == "D5" or (coordinate not in {"", "NONE", "UNPLACED"} and len(coordinate) == 5):
-            direct_d5_rows.append(row["operation"])
-        if isinstance(candidate, str) and candidate.startswith("D5:"):
-            candidate_d5_rows.append(row["operation"])
+    self_check_domain_width_separation()
+    placement_claims = classify_d5_placement_claims(placement["rows"])
+    direct_d5_rows = placement_claims["direct_d5"]
+    candidate_d5_rows = placement_claims["candidate_d5"]
+    untyped_w5_rows = placement_claims["untyped_w5"]
 
     if direct_d5_rows:
-        review("historical placement now claims D5 resident(s): " + ",".join(sorted(direct_d5_rows)))
+        review("historical placement now claims D5 resident(s): " + ",".join(direct_d5_rows))
     if candidate_d5_rows:
-        review("historical placement now nominates D5 candidate(s): " + ",".join(sorted(candidate_d5_rows)))
+        review("historical placement now nominates D5 candidate(s): " + ",".join(candidate_d5_rows))
+    if untyped_w5_rows:
+        review(
+            "historical placement has untyped W5 coordinate(s); domain review required: "
+            + ",".join(untyped_w5_rows)
+        )
 
     unknown_eligibility = sorted(
         row["factor_id"]
@@ -158,6 +229,7 @@ def main() -> int:
         "unknown_count": len(unknown),
         "manual_nonselector_residents": 0,
         "new_d5_eligible_factors": [],
+        "untyped_w5_placement_rows": [],
         "historical_rows": len(historical_ops),
         "semantic_placement_rows": len(placement_ops),
         "unresolved_d5_eligibility_factors_in_legacy_ledger": unknown_eligibility,
