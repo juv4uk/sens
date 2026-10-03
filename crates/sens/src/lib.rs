@@ -120,8 +120,8 @@ mod text7_projection_generated;
 mod value;
 
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
-pub use domain_identity::CoreDomainIdentity;
-pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, PredicateBit, Racana2};
+pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
+pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
 pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
