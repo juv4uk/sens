@@ -64,7 +64,7 @@ fn main() {
     // capability layer (filesystem, process execution, TCP). The semantic
     // core itself ships none.
     sens_host::install();
-    // Availability only; Core3×10101000 admission remains SENS-owned.
+    // Availability only; mechanism-lab × 10101000 admission remains SENS-owned.
     island_invoke::install();
     let args: Vec<String> = env::args().collect();
     let allowed = allowed_processes(&args);
@@ -77,6 +77,15 @@ fn main() {
         eprintln!("sens: --core was removed; SENS has one Core");
         process::exit(2);
     }
+    let mechanism_lab = args.iter().any(|arg| arg == "--lab=mechanism");
+    if args.iter().any(|arg| arg == "--lab" || (arg.starts_with("--lab=") && arg != "--lab=mechanism")) {
+        eprintln!("sens: --lab supports only --lab=mechanism");
+        process::exit(2);
+    }
+    let args: Vec<String> = args
+        .into_iter()
+        .filter(|arg| arg != "--lab=mechanism")
+        .collect();
     let (args, repl_surface) = match extract_repl_surface(args) {
         Ok(parsed) => parsed,
         Err(error) => {
@@ -124,8 +133,14 @@ fn main() {
             "warning: lib/core.lisp.fasl is stale against lib/core.lisp; run gen-fasl to regenerate"
         );
     }
-    if let Err(e) = sens::load_core_library(&mut session) {
-        eprintln!("Error loading Core: {}", e.render(CORE_SRC));
+    let bootstrap = if mechanism_lab {
+        sens::load_mechanism_lab_library(&mut session)
+    } else {
+        sens::load_core_library(&mut session)
+    };
+    if let Err(e) = bootstrap {
+        let label = if mechanism_lab { "mechanism lab" } else { "Core" };
+        eprintln!("Error loading {label}: {}", e.render(CORE_SRC));
         process::exit(1);
     }
 
@@ -235,6 +250,7 @@ fn main() {
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
             println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
+            println!("  --lab=mechanism              Explicitly enable the mechanism laboratory; does not select a Core");
             println!(
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
             );
