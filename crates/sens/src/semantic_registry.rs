@@ -19,10 +19,10 @@ use generated::DOMAIN_SURFACE_ROWS;
 
 fn identity_from_row(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
     match width {
-        3 => Bit3::new(bits)
+        0b11 => Bit3::new(bits)
             .map(Bija3::from_word)
             .map(CoreDomainIdentity::D3),
-        4 => Bit4::new(bits)
+        0b100 => Bit4::new(bits)
             .map(CoreD4::from_word)
             .map(CoreDomainIdentity::D4),
         _ => None,
@@ -70,13 +70,13 @@ mod tests {
     #[test]
     fn canonical_lookup_is_exact_domain_only() {
         for (surface, width, bits) in [
-            ("за-умовою", 3usize, 0b011u8),
-            ("тотожне?", 3, 0b111),
-            ("функція", 4, 0b0010),
-            ("визначити", 4, 0b0011),
-            ("перше-від-першого", 4, 0b1010),
-            ("перше-від-решти", 4, 0b1011),
-            ("решта-від-решти", 4, 0b1101),
+            ("за-умовою", 0b11usize, 0b011u8),
+            ("тотожне?", 0b11, 0b111),
+            ("функція", 0b100, 0b0010),
+            ("визначити", 0b100, 0b0011),
+            ("перше-від-першого", 0b100, 0b1010),
+            ("перше-від-решти", 0b100, 0b1011),
+            ("решта-від-решти", 0b100, 0b1101),
         ] {
             let identity = domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("missing exact-domain surface: {surface}"));
