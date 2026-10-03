@@ -215,6 +215,13 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
             ExprKind::Sid(sid) => Value::Sid(*sid),
+            ExprKind::CoreD5(_) | ExprKind::CoreD6(_) => {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    "typed domain identity has no quoted runtime value yet",
+                    expression.span,
+                ));
+            }
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
             ExprKind::Symbol(symbol) => Value::Symbol(symbol.clone()),
