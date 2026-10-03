@@ -35,6 +35,21 @@ Slice 3 — WITNESS (#2561)
                    a state without a witness belongs in STATUS, not here
     prose / empty / missing
 
+Slice 4 — FALSIFIER (#2574)
+    ok        names a condition under which the claim fails (if / when / unless /
+              fails / shows that / refute / counter / breaks / violates / …)
+    legend    the copied legend ("explicit counter-test") — not a falsifier
+    vague     no refutation condition at all (a restatement, or a bare header)
+    empty / missing
+
+Slice 5 — STATUS (#2575)
+    ok        exactly one declared state: hypothesis | generated | ratified |
+              falsified | unknown
+    legend    the copied enum — not a state
+    foreign   a self-invented status ("READY-FOR-OWNER", "implementation-target");
+              a substituted vocabulary is not prose, so it gets its own verdict
+    empty / missing
+
 Shape discrimination
 --------------------
     ## DOMAIN            heading, value on the next non-empty line
@@ -87,12 +102,14 @@ def field_value(body, label):
     Three shapes occur in the wild, and a body may carry more than one, so the
     earliest one wins: heading (`## DOMAIN` + next line), inline (`DOMAIN: x`),
     two-column (`DOMAIN` + spaces + x — used for both the legend and real values).
+    The label may carry a plural `s` (`## Falsifiers`) but must not be a prefix of
+    a longer word, or the tail would be read as the value.
     """
     b = body or ""
     pats = (
-        ("value", re.compile(rf"^[ \t]*#{{1,6}}[ \t]*\**{label}\**[ \t]*:?[ \t]*(.*)$", re.I | re.M), True),
-        ("value", re.compile(rf"^[ \t]*(?:[-*][ \t]*)?\**{label}\**[ \t]*:[ \t]*(.*)$", re.I | re.M), False),
-        ("twocol", re.compile(rf"^[ \t]*\**{label}\**[ \t]{{2,}}(\S.*)$", re.I | re.M), False),
+        ("value", re.compile(rf"^[ \t]*#{{1,6}}[ \t]*\**{label}s?(?![A-Za-z0-9_])[ \t]*:?[ \t]*(.*)$", re.I | re.M), True),
+        ("value", re.compile(rf"^[ \t]*(?:[-*][ \t]*)?\**{label}s?(?![A-Za-z0-9_])[ \t]*:[ \t]*(.*)$", re.I | re.M), False),
+        ("twocol", re.compile(rf"^[ \t]*\**{label}s?(?![A-Za-z0-9_])[ \t]{{2,}}(\S.*)$", re.I | re.M), False),
     )
     best = None
     for kind, rx, is_heading in pats:
@@ -113,6 +130,9 @@ LEGEND_TEXT = {
         r"^(?:Core-only\s*\|\s*Core-Math-only\s*\|\s*bridge-candidate\s*\|\s*"
         r"shared-proved-law)\b", re.I),
     "WITNESS": re.compile(r"^executable\b[^\n]*\bevidence\b", re.I),
+    "FALSIFIER": re.compile(r"^explicit counter-test\b", re.I),
+    "STATUS": re.compile(
+        r"^hypothesis\s*\|\s*generated\s*\|\s*ratified\s*\|\s*falsified\s*\|\s*unknown\b", re.I),
 }
 
 
@@ -199,13 +219,74 @@ def witness_verdict(kind, text, body=""):
     return "prose"
 
 
+# --- FALSIFIER ---------------------------------------------------------------
+
+# a falsifier names the condition under which the claim would fail; without one
+# the claim is unfalsifiable by construction — the other half of "no witness is
+# numerology". The rule judges the presence of a condition, not its quality.
+REFUTATION = re.compile(
+    r"\b(?:if|when|unless|would|fails?|shows? that|refut\w*|counter\w*|reject\w*|breaks?|"
+    r"violat\w*|contradict\w*|disprov\w*|invalidat\w*|falsif\w*|becomes?|observ\w*|"
+    r"changes?|invents?|needs?|requires?|omit\w*|miss\w*|mismatch\w*|swap\w*|duplicat\w*|"
+    r"silently|collision\w*|attack\w*|distinguish\w*|truncat\w*|accept\w*|infer\w*|without)\b",
+    re.I)
+
+
+def falsifier_verdict(kind, text, body=""):
+    if kind is None:
+        return "missing"
+    if text and LEGEND_TEXT["FALSIFIER"].search(text):
+        return "legend"
+    if not text:
+        return "empty"
+    if REFUTATION.search(text):
+        return "ok"
+    # an enumeration of counter-cases names failure modes even without a verb
+    # ("collision/derivability/necessity attack", "a, b, or c")
+    if text.count(",") + text.count("/") + text.count(";") >= 2:
+        return "ok"
+    # only a bare header or fragment says nothing at all
+    if len(text.split()) <= 4:
+        return "vague"
+    return "ok"
+
+
+# --- STATUS ------------------------------------------------------------------
+
+STATUSES = ("hypothesis", "generated", "ratified", "falsified", "unknown")
+
+
+def status_verdict(kind, text, body=""):
+    if kind is None:
+        return "missing"
+    if text and LEGEND_TEXT["STATUS"].search(text):
+        return "legend"
+    if not text:
+        return "empty"
+    norm = text.strip().lower()
+    for _c in (96, 39, 34, 46, 44, 59):   # backtick, quote, dquote, dot, comma, semicolon
+        norm = norm.replace(chr(_c), "")
+    norm = " ".join(norm.split())
+    if norm in STATUSES:
+        return "ok"
+    # tolerate a short annotation after the state, e.g. "ratified (see #123)"
+    head = re.split(r"[ (—\-:/]", norm, 1)[0].strip()
+    if head in STATUSES:
+        return "ok"
+    # the whole enum copied as the value, in any separator style
+    if all(tok in norm for tok in STATUSES):
+        return "legend"
+    return "foreign"
+
+
 # --- judging -----------------------------------------------------------------
 
 FIELDS = (("domain", "DOMAIN", domain_verdict), ("relation", "RELATION", relation_verdict),
-          ("witness", "WITNESS", witness_verdict))
+          ("witness", "WITNESS", witness_verdict), ("falsifier", "FALSIFIER", falsifier_verdict),
+          ("status", "STATUS", status_verdict))
 
 
-def judge(issues, fields=("domain", "relation", "witness")):
+def judge(issues, fields=("domain", "relation", "witness", "falsifier", "status")):
     """Return (judged, skipped); judged is [(field, number, title, verdict, text)]."""
     judged, skipped = [], 0
     for it in issues:
@@ -229,7 +310,8 @@ def judge(issues, fields=("domain", "relation", "witness")):
     return judged, skipped
 
 
-def run(path, baseline_path=None, emit=False, fields=("domain", "relation", "witness")):
+def run(path, baseline_path=None, emit=False,
+        fields=("domain", "relation", "witness", "falsifier", "status")):
     data = json.load(open(path, encoding="utf-8"))
     issues = data["issues"] if isinstance(data, dict) else data
     judged, skipped = judge(issues, fields)
@@ -267,6 +349,9 @@ def run(path, baseline_path=None, emit=False, fields=("domain", "relation", "wit
         print("  DOMAIN: name a width/carrier (W8, D5, exact-Q, ...) or say UNKNOWN.")
         print("  RELATION: one of Core-only | Core-Math-only | bridge-candidate |")
         print("  shared-proved-law — free prose is not a relation.")
+        print("  WITNESS: name a path, a #ref, or a runner — not the legend.")
+        print("  FALSIFIER: name the condition under which the claim fails.")
+        print("  STATUS: one of hypothesis | generated | ratified | falsified | unknown.")
         return 1
     print("(binary-domain-ok)")
     return 0
@@ -351,6 +436,45 @@ SELFTEST = [
       "body": BLOCK_TEXT + "WITNESS: \n"}, "witness", "empty"),
     ({"number": 48, "title": "t", "state": "open",
       "body": BLOCK_TEXT + "LAW: x\n"}, "witness", "missing"),
+    # FALSIFIER
+    ({"number": 50, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "FALSIFIER: if any two records collapse to the same binary, the law fails\n"},
+     "falsifier", "ok"),
+    ({"number": 51, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "FALSIFIER: a counter-test that shows the placement breaks\n"},
+     "falsifier", "ok"),
+    ({"number": 52, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "FALSIFIER      explicit counter-test\n"}, "falsifier", "legend"),
+    ({"number": 53, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "FALSIFIER: Any of:\n"}, "falsifier", "vague"),
+    ({"number": 54, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "FALSIFIER: restated claim\n"}, "falsifier", "vague"),
+    ({"number": 55, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "FALSIFIER: \n"}, "falsifier", "empty"),
+    ({"number": 56, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "LAW: x\n"}, "falsifier", "missing"),
+    ({"number": 57, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "FALSIFIER: collision/derivability/necessity attack\n"},
+     "falsifier", "ok"),
+    ({"number": 58, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "## Falsifiers\n- desugaring changes error/undefined behavior;\n"},
+     "falsifier", "ok"),
+    # STATUS
+    ({"number": 60, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "STATUS: hypothesis\n"}, "status", "ok"),
+    ({"number": 61, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "STATUS: ratified (see #2521)\n"}, "status", "ok"),
+    ({"number": 62, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "STATUS      hypothesis | generated | ratified | falsified | unknown\n"},
+     "status", "legend"),
+    ({"number": 63, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "STATUS: READY-FOR-OWNER\n"}, "status", "foreign"),
+    ({"number": 64, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "STATUS: implementation-target\n"}, "status", "foreign"),
+    ({"number": 65, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "STATUS: \n"}, "status", "empty"),
+    ({"number": 66, "title": "t", "state": "open",
+      "body": BLOCK_TEXT + "LAW: x\n"}, "status", "missing"),
 ]
 
 
@@ -381,7 +505,7 @@ def self_test():
     if failures:
         print(f"binary-domain-selftest-failed ({failures})")
         return 1
-    print(f"(binary-domain-selftest-ok ({len(cases)} cases, 3 fields, 2 ignored))")
+    print(f"(binary-domain-selftest-ok ({len(cases)} cases, 5 fields, 2 ignored))")
     return 0
 
 
@@ -391,8 +515,8 @@ def main():
     ap.add_argument("--baseline", help="JSON of pre-existing violations; fail only on new ones")
     ap.add_argument("--emit-baseline", action="store_true",
                     help="print the baseline JSON for the current snapshot")
-    ap.add_argument("--fields", default="domain,relation,witness",
-                    help="comma-separated subset of: domain,relation,witness")
+    ap.add_argument("--fields", default="domain,relation,witness,falsifier,status",
+                    help="comma-separated subset of: domain,relation,witness,falsifier,status")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
     if args.self_test:

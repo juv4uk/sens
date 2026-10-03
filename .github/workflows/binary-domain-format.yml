@@ -1,10 +1,11 @@
 name: Binary-domain format
 
-# #2513. The binary-domain reformat (#2490) requires every task body to name the
-# exact domain that owns its binary number. In practice many filled DOMAIN values
-# define the domain by the domain itself, so the field looks answered and is not.
-# This lane names those and refuses a NEW one. It is a ratchet, not a blanket
-# gate: the pre-existing sites are listed in
+# #2513, #2539, #2561, #2574, #2575. The binary-domain reformat (#2490) requires
+# every task body to fill a small set of fields, and in practice they are often
+# present but empty of content: the preamble's legend is mistaken for a value, or
+# the field is left blank. This lane judges five of them (DOMAIN, RELATION,
+# WITNESS, FALSIFIER, STATUS) and refuses a NEW unnamed site. It is a ratchet, not
+# a blanket gate: the pre-existing sites are listed in
 # knowledge/binary-domain-format-baseline.json and pass.
 on:
   pull_request:
@@ -22,7 +23,7 @@ permissions:
 
 jobs:
   binary-domain-format:
-    name: DOMAIN names an exact width or says UNKNOWN
+    name: five format fields name real values
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
