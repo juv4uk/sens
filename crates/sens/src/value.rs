@@ -1,6 +1,6 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sens8, Text7};
-use crate::{CoreDomainIdentity, DomainIdentity};
+use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Sens8, Text7};
+use crate::DomainIdentity;
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
