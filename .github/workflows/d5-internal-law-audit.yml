@@ -1,0 +1,48 @@
+name: D5 internal law audit
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d5-internal-law-audit.json"
+      - "scripts/research-2986-d5-internal-law-audit.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d5-internal-law-audit.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d5-internal-law-audit.json"
+      - "scripts/research-2986-d5-internal-law-audit.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d5-internal-law-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: D5 occupancy vs semantic-generator law
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate D5 internal law classification
+        run: python3 scripts/research-2986-d5-internal-law-audit.py
+
+      - name: Publish result
+        if: always()
+        run: |
+          {
+            echo "## Core.D5 internal-law audit"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2986-d5-internal-law-audit.py
+            echo "~~~"
+            echo
+            echo "- OD-005 32/32 occupancy is not modified."
+            echo "- Prefix ancestry is reported separately from semantic generation."
+            echo "- Selector suffix law remains local to the selector family."
+          } >> "$GITHUB_STEP_SUMMARY"
