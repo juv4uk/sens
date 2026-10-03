@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
-"""#2505 exact D5 closure map after owner ratification of the domain.
+"""#2505 historical selector-closure map.
 
-The D5 domain is ratified. Occupancy is not.
+HISTORICAL-PRE-OD005 / NOT CURRENT OCCUPANCY AUTHORITY.
+
+OD-005 / merged #2750 now owns current D5 occupancy via
+knowledge/d5-historical-full-map.json. This script remains only as a replayable
+selector-family closure witness from the earlier sparse research phase.
+
+The D5 domain is ratified. This artifact's UNKNOWN/free rows are historical
+closure-state placeholders, not current D5 non-residents.
 
 This map:
 - enumerates all 32 exact D5 coordinates;
@@ -117,6 +124,8 @@ def selector_rows() -> dict[str, dict[str, Any]]:
                 "width": WIDTH,
                 "domain": "D5",
                 "domain_ratified": True,
+        "current_occupancy_authority": False,
+        "superseded_by": "#2750/knowledge/d5-historical-full-map.json",
                 "display_name": selector_display_name(root_bits, suffix),
                 "display_name_authority": False,
                 "semantic_family": "selector",
@@ -314,7 +323,7 @@ def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -
     out.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema": "d5-closure-map/v1",
-        "authority": "core-closeout-evidence",
+        "authority": "historical-pre-od005-selector-closure-evidence",
         "domain": "D5",
         "domain_ratified": True,
         "width": WIDTH,

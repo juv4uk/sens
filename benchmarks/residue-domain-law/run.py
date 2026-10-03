@@ -17,7 +17,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 ROOT_MIN = ROOT / "benchmarks" / "post-d4-root-min-closeout" / "run.py"
-D5_GRAPH = ROOT / "benchmarks" / "d5-structural-discovery" / "factor-graph.json"
+D5_MAP = ROOT / "knowledge" / "d5-historical-full-map.json"
 D6_MAP = ROOT / "benchmarks" / "d6-closure-map" / "run.py"
 HISTORY = ROOT / "docs" / "research" / "2344-post-d4-historical-ledger.json"
 
@@ -34,17 +34,20 @@ def root_row() -> dict[str, Any]:
 
 
 def d5_state() -> dict[str, Any]:
-    graph = json.loads(D5_GRAPH.read_text(encoding="utf-8"))
-    summary = graph["summary"]
-    assert summary["d5_selector_generated"] == 8
-    assert summary["d5_unknown_free"] == 24
-    assert summary["placement_search_authorized"] is False
+    data = json.loads(D5_MAP.read_text(encoding="utf-8"))
+    assert data["schema"] == "d5-historical-full-map/v1"
+    assert data["domain"] == "Core.D5"
+    assert data["width"] == 5
+    assert data["capacity"] == 32
+    assert len(data["coordinates"]) == 32
+    assert data["status_counts"]["unallocated"] == 0
     return {
         "width": 5,
         "ratified_domain": True,
-        "generated": 8,
-        "unknown_free": 24,
+        "resident": 32,
+        "unknown_free": 0,
         "root_membership_proved": False,
+        "authority": "#2750/OD-005",
     }
 
 
@@ -97,21 +100,22 @@ def model_rows(
         for domain in (d5, d6)
         if domain["ratified_domain"] and domain["unknown_free"] > 0
     ]
-    assert free_domains == [5, 6]
+    assert free_domains == [6]
 
     return [
         {
             "model": "R0-smallest-free-domain",
             "domain_selection_rule": "choose smallest ratified domain with unused capacity",
             "machine_attack": (
-                "D5 and D6 both have UNKNOWN/free coordinates while the root "
-                "ledger keeps width UNKNOWN; choosing either imports an unstated "
-                "semantic-membership rule"
+                "OD-005 leaves D5 with no unallocated coordinates while D6 still "
+                "has UNKNOWN/free capacity; choosing D6 merely because it is the "
+                "smallest available ratified domain imports an unstated semantic-"
+                "membership rule while the root width remains UNKNOWN"
             ),
             "minimum_width_theorem": False,
             "coordinate_assigned": False,
             "verdict": "FALSIFIED",
-            "reason": "free capacity is not semantic evidence",
+            "reason": "unique smallest free capacity is still not semantic evidence",
         },
         {
             "model": "R1-historical-stratum-domain",
@@ -242,7 +246,7 @@ def report(result: dict[str, Any]) -> str:
         "    coordinate     = UNPLACED",
         "",
         "Domain controls:",
-        f"    D5 generated={result['domain_controls']['D5']['generated']} "
+        f"    D5 resident={result['domain_controls']['D5']['resident']} "
         f"UNKNOWN/free={result['domain_controls']['D5']['unknown_free']}",
         f"    D6 generated={result['domain_controls']['D6']['generated']} "
         f"UNKNOWN/free={result['domain_controls']['D6']['unknown_free']}",
@@ -267,8 +271,8 @@ def report(result: dict[str, Any]) -> str:
         "    COORDINATE=UNPLACED",
         "    NEW-RESIDENTS=0",
         "",
-        "Negative progress is decisive here: neither capacity nor chronology can",
-        "select an exact domain for a parentless root.",
+        "Negative progress is decisive here: even a unique smallest free domain",
+        "cannot select an exact domain for a parentless root; chronology also cannot.",
         "",
     ]
     return "\n".join(lines)

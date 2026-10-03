@@ -20,7 +20,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 LEDGER = ROOT / "docs/research/2344-post-d4-historical-ledger.json"
 PLACEMENT = ROOT / "benchmarks/post-d4-semantic-placement/placement.json"
-D5_GUARD = ROOT / "scripts/research-2689-d5-ratified-baseline.py"
+D5_CLOSURE = ROOT / "benchmarks/d5-closure-map/run.py"
 D6_FRONTIER = ROOT / "benchmarks/d6-unknown-frontier/run.py"
 ARITHMETIC_LEDGER = ROOT / "docs/research/2709-lisp15-arithmetic-ledger.json"
 MEMO24_CHRONOLOGY = ROOT / "docs/research/2715-memo24-arithmetic-comparison.json"
@@ -73,7 +73,15 @@ def build() -> dict[str, Any]:
     placement = load_json(PLACEMENT)
     arithmetic = load_json(ARITHMETIC_LEDGER)
     memo24 = load_json(MEMO24_CHRONOLOGY) if MEMO24_CHRONOLOGY.exists() else None
-    d5 = runpy.run_path(str(D5_GUARD))["build_result"]()
+    d5_ns = runpy.run_path(str(D5_CLOSURE))
+    d5_rows = d5_ns["build_map"]()
+    d5 = {
+        "domain_ratified": True,
+        "baseline_ratified": False,
+        "generated_count": sum(r["status"] == "generated" for r in d5_rows),
+        "unknown_count": sum(r["status"] == "UNKNOWN/free" for r in d5_rows),
+        "manual_nonselector_count": 0,
+    }
     d6 = runpy.run_path(str(D6_FRONTIER))["build"]()
 
     require(ledger["authority"] == "historical-evidence-ledger-not-language-semantic-authority",
@@ -125,7 +133,7 @@ def build() -> dict[str, Any]:
         }
 
     require(d5["domain_ratified"] is True, "D5 domain lost ratification")
-    require(d5["baseline_ratified"] is True, "D5 baseline lost ratification")
+    require(d5["baseline_ratified"] is False, "pre-OD005 snapshot must not claim current baseline authority")
     require(d5["generated_count"] == 8, "D5 generated count changed")
     require(d5["unknown_count"] == 24, "D5 protected UNKNOWN count changed")
     require(d5["manual_nonselector_count"] == 0, "D5 gained manual resident")
@@ -238,10 +246,10 @@ def build() -> dict[str, Any]:
             "composite set changed")
 
     return {
-        "schema": "d1-d6-historical-gap-audit/v1",
+        "schema": "d1-d6-historical-gap-audit/pre-od005-v1",
         "issue": 2718,
-        "authority": "joined evidence / ratification-readiness report; not residency authority",
-        "phase": "HISTORICAL-INGEST -> STRUCTURAL-DISCOVERY -> RATIFICATION-READINESS",
+        "authority": "HISTORICAL-PRE-OD005 snapshot; not current residency/readiness authority",
+        "phase": "HISTORICAL-PRE-OD005-SNAPSHOT",
         "rows": rows,
         "domain_summary": {
             "D1-D4": {
@@ -282,7 +290,9 @@ def build() -> dict[str, Any]:
                 "domain_rule": "typed Core-Math bridge required; historical spelling/count cannot populate Core D5/D6",
             }
         },
-        "owner_facing": {
+        "superseded_by": ["#2750", "#2761"],
+        "current_decision_use": False,
+        "owner_facing_snapshot_only": {
             "ready_now": [
                 {
                     "decision": "OD-001",
@@ -320,9 +330,9 @@ def build() -> dict[str, Any]:
 
 def render_md(result: dict[str, Any]) -> str:
     lines = [
-        "# D1-D6 historical gap audit — #2718",
+        "# D1-D6 historical gap audit — PRE-OD005 snapshot (#2718)",
         "",
-        "This report asks what the already-ratified domains fail to explain. It does not allocate bits.",
+        "Historical snapshot only. OD-005/#2750 supersedes its D5 occupancy conclusions; #2761 blocks reuse of the old D6 SETQ readiness as current authority.",
         "",
         "| historical row | earliest explaining domain | surviving delta | readiness | missing |",
         "|---|---|---|---|---|",
@@ -352,9 +362,9 @@ def render_md(result: dict[str, Any]) -> str:
         f"{result['domain_summary']['D6']['canonical_unknown']} canonical UNKNOWN; "
         f"{result['domain_summary']['D6']['pure_unknown_not_search_space']} PURE-UNKNOWN are not a search space.",
         "",
-        "## Owner-ready now",
+        "## Owner-ready at snapshot time (NOT CURRENT)"
         "",
-        "- OD-001: D6:001111 is owner-ready but nonadmitted. No other historical row is owner-ready.",
+        "- Snapshot fact only: OD-001 had D6:001111 owner-ready/nonadmitted. Current SETQ identity is under #2761 after OD-005."
         "",
         "## Arithmetic",
         "",
@@ -376,10 +386,12 @@ def main() -> int:
     args = ap.parse_args()
 
     result = build()
-    print("D1-D6-HISTORICAL-GAP-AUDIT=PASS")
+    print("D1-D6-HISTORICAL-GAP-AUDIT=PASS-HISTORICAL-PRE-OD005")
     for key, value in result["summary"].items():
         print(f"{key}={value}")
-    print("owner-ready=D6:001111")
+    print("owner-ready-snapshot=D6:001111")
+    print("current-decision-use=NO")
+    print("superseded-by=#2750,#2761")
     print("RULE=fill-history-not-free-slots")
 
     if args.out:

@@ -23,15 +23,17 @@ It rejects two invalid domain-selection rules.
 
 ### R0 — smallest free domain
 
-Both ratified Core D5 and D6 have unused coordinates:
+After OD-005 the current asymmetry is stronger:
 
 ```text
-D5  8 generated / 24 UNKNOWN-free
-D6 16 generated / 48 UNKNOWN-free
+D5  32/32 historical residents / 0 unallocated
+D6  has UNKNOWN/free capacity under the current closure map
 ```
 
-The same root theorem supplies no width. Free capacity is therefore
-underdetermined even before applying `free coordinate != semantic membership`.
+So the naive rule "choose the smallest ratified domain with free capacity"
+would now deterministically nominate D6. That still fails: the root theorem
+supplies no width/domain membership law. **Unique availability is not semantic
+evidence.**
 
 ### R1 — historical stratum
 
