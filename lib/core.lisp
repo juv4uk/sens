@@ -135,17 +135,8 @@
   (00001000 (values)
     (00000101 (00000110 (00000110 (00000110 (00000110 values)))))))
 
-(00001001 caar
-  (00001000 (values)
-    (00000101 (00000101 values))))
-
-(00001001 cadr
-  (00001000 (values)
-    (00000101 (00000110 values))))
-
-(00001001 cddr
-  (00001000 (values)
-    (00000110 (00000110 values))))
+; CAAR/CADR/CDDR are no longer derived Lisp closures here.
+; Their ratified D4 identities execute through selector_law from CAR/CDR + suffix.
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
