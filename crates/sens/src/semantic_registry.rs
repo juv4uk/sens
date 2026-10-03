@@ -162,7 +162,7 @@ mod tests {
     #[test]
     fn migrated_registry_roles_are_domain_qualified_and_not_truncated() {
         let cond = domain_identity_for_surface("cond").unwrap();
-        let eq = domain_identity_for_surface("eq").unwrap();
+        let eq = domain_identity_for_surface("eq?").unwrap();
         let lambda = domain_identity_for_surface("lambda").unwrap();
         let define = domain_identity_for_surface("define").unwrap();
 
