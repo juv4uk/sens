@@ -25,7 +25,8 @@ fn answer(bit: Option<u8>) -> Value {
 pub(crate) fn atom_value(value: &Value, _environment: &Environment) -> Value {
     match value {
         Value::Pair(_, _) => answer(Some(0)),
-        Value::Nil => answer(Some(1)),
+        // Preserve the current active-Core result until strict-D1 #2246 lands atomically.
+        Value::Nil => answer(None),
         _ => answer(Some(1)),
     }
 }
