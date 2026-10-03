@@ -65,22 +65,6 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     surface_index().get(name).copied()
 }
 
-/// Reverse projection for tooling/presentation only.
-///
-/// This does not create identity or occupancy; it returns spellings already
-/// admitted by the exact-domain projection for one known identity.
-pub(crate) fn surfaces_for_domain_identity(identity: CoreDomainIdentity) -> Vec<&'static str> {
-    let mut surfaces = DOMAIN_SURFACE_ROWS
-        .iter()
-        .filter(|row| exact_domain_identity(row.width, row.bits) == Some(identity))
-        .flat_map(|row| row.surfaces.iter().map(|surface| surface.name))
-        .collect::<Vec<_>>();
-    surfaces.sort_unstable();
-    surfaces.dedup();
-    surfaces
-}
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
