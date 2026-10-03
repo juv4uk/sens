@@ -621,6 +621,14 @@ impl PartialEq for Value {
 }
 
 impl Value {
+    /// Explicitly wrap a historical exact-eight callable for compatibility.
+    ///
+    /// New Core domain identities must use `Value::Sid(CallableDomainId::D*)`
+    /// directly; this helper never widens a short domain word.
+    pub const fn legacy_sid(sid: crate::Sens8) -> Self {
+        Self::Sid(crate::CallableDomainId::from_legacy_sens8(sid))
+    }
+
     /// Creates an embedding-owned opaque handle. Only a host integration can
     /// construct it; the reader deliberately has no corresponding syntax.
     pub fn host_handle(kind: impl Into<Rc<str>>, token: u64) -> Self {
