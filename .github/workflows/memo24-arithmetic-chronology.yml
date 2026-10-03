@@ -1,0 +1,20 @@
+name: Memo 24 arithmetic chronology
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2715-memo24-arithmetic-comparison.json"
+      - "benchmarks/memo24-arithmetic-ingest/**"
+      - ".github/workflows/memo24-arithmetic-chronology.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chronology:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Memo 24 chronology sidecar
+        run: python3 benchmarks/memo24-arithmetic-ingest/run.py
