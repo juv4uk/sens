@@ -12,6 +12,8 @@ mod bignum;
 mod bits;
 mod domain_words;
 mod domain_identity;
+#[allow(dead_code)]
+mod domain_owner_generated;
 mod packed_bits;
 mod binary_framing;
 mod environment;
