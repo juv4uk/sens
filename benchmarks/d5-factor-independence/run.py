@@ -169,10 +169,16 @@ def main() -> int:
         elif factor_id == "shared-location-update":
             results.append({
                 **base,
-                "status": "UNKNOWN",
-                "witness": "pending #2589",
-                "remove_one_attack": None,
-                "unresolved_dependency": "#2589",
+                "status": "BOUNDED-INDEPENDENT",
+                "witness": "#2589/#2598/f48956fc",
+                "remove_one_attack": {
+                    "normalized_set_setq_mutation_signature_equal": True,
+                    "target_acquisition_separate": True,
+                    "missing_binding_policy_equal": True,
+                    "nearest_existing_shadow_policy_equal": True,
+                    "reconstructible_without_shared_location_update": False,
+                },
+                "unresolved_dependency": None,
             })
         elif factor_id == "non-local-exit":
             results.append({
@@ -185,8 +191,8 @@ def main() -> int:
 
     by = {row["factor_id"]: row for row in results}
     assert set(by) == POST_D4
-    assert sum(row["status"] == "BOUNDED-INDEPENDENT" for row in results) == 5
-    assert sum(row["status"] == "UNKNOWN" for row in results) == 2
+    assert sum(row["status"] == "BOUNDED-INDEPENDENT" for row in results) == 6
+    assert sum(row["status"] == "UNKNOWN" for row in results) == 1
     assert not any(row["is_root"] for row in results)
     assert all(row["placement"] == "UNPLACED" for row in results)
     assert all(row["width_inference"] == "NONE" for row in results)
@@ -200,8 +206,8 @@ def main() -> int:
         "results": results,
         "summary": {
             "factors_tested": 7,
-            "bounded_independent": 5,
-            "unknown": 2,
+            "bounded_independent": 6,
+            "unknown": 1,
             "proven_independent_roots": 0,
             "new_d5_residents": 0,
             "coordinates_allocated": 0,
@@ -210,7 +216,7 @@ def main() -> int:
         "non_conclusions": [
             "factor independence does not imply semantic roothood",
             "factor count does not imply bit width",
-            "five bounded-independent factors do not imply five suffix bits",
+            "six bounded-independent factors do not imply six suffix bits",
             "UNKNOWN factors are not residues",
             "no D5 coordinate is allocated",
         ],
@@ -234,8 +240,8 @@ def main() -> int:
     lines += [
         "",
         "Summary:",
-        "- bounded-independent factors: 5;",
-        "- unresolved factors: 2;",
+        "- bounded-independent factors: 6;",
+        "- unresolved factors: 1;",
         "- proven independent roots: 0;",
         "- new D5 residents: 0;",
         "- coordinates allocated: 0.",
@@ -243,8 +249,8 @@ def main() -> int:
         "The protocol cube proves remove-one non-reconstructibility for raw-form,",
         "caller-env and returned-form axes. The Hart/SENS timing trace witnesses",
         "a distinct expansion-locus observable, and the alias/head collision witness",
-        "separates invocation packaging. Mutation and non-local-exit remain UNKNOWN",
-        "until their dedicated child attacks report.",
+        "separates invocation packaging. Merged #2589 resolves shared-location-update",
+        "as bounded-independent; non-local-exit remains UNKNOWN pending #2590.",
         "",
     ]
     (args.out / "report.md").write_text("\n".join(lines), encoding="utf-8")
