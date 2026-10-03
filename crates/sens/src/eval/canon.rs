@@ -287,7 +287,7 @@ pub(crate) fn invoke_semantic_ref(
     {
         return primitive(args, environment, span);
     }
-    match &environment.code_slot(SemanticRef::legacy8(sid)) {
+    match &environment.code_slot(SemanticRef::legacy8(sid.packed_byte())) {
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
@@ -341,7 +341,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
         return;
     }
-    environment.bind_code_slot_once(SemanticRef::legacy8(sid), value.clone());
+    environment.bind_code_slot_once(SemanticRef::legacy8(sid.packed_byte()), value.clone());
 }
 
 #[cfg(test)]
