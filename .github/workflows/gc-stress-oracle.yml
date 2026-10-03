@@ -1,0 +1,43 @@
+name: GC adversarial graph oracle
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/gc-stress-oracle/**"
+      - "benchmarks/gc-current-rust-trace-census/**"
+      - ".github/workflows/gc-stress-oracle.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/gc-stress-oracle/**"
+      - ".github/workflows/gc-stress-oracle.yml"
+  workflow_dispatch:
+
+jobs:
+  oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Re-check current Rust trace census
+        run: python3 benchmarks/gc-current-rust-trace-census/run.py
+
+      - name: Run adversarial graph corpus
+        run: |
+          rm -rf /tmp/gc-stress-oracle
+          python3 benchmarks/gc-stress-oracle/run.py             --deep-chain 100000             --out /tmp/gc-stress-oracle
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/gc-stress-oracle/report.md; then
+            cat /tmp/gc-stress-oracle/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gc-stress-oracle
+          path: /tmp/gc-stress-oracle/
+          retention-days: 14
