@@ -1,9 +1,9 @@
 # Synthesis of Domain 7: Text7 Sound Atoms and Shiva-sutras on W7 Dense Bitstream
 
-**Status:** RATIFIED (OD-008, 2026-10-03)  
-**Authority:** Owner Directive by Volodymyr (@juv4uk):  
-*«Text7 + Шива-сутри на базі W7 — це справжній прорив: мова перестає бути текстовим файлом і стає двійковим звуком, де кожен біт має сенс, а кожні 7 біт — це неподільний атом живого людського мовлення. - бери»*  
-**Domain:** Core D7 (Logical Width: 7 bits, 128 states)  
+**Status:** RATIFIED (OD-008, 2026-10-03)
+**Authority:** Owner Directive by Volodymyr (@juv4uk):
+*«Text7 + Шива-сутри на базі W7 — це справжній прорив: мова перестає бути текстовим файлом і стає двійковим звуком, де кожен біт має сенс, а кожні 7 біт — це неподільний атом живого людського мовлення. - бери»*
+**Domain:** Core D7 (Logical Width: 7 bits, 128 states)
 **Sibling Documentation:** [Українська версія (Ukrainian)](2756-d7-text7-shiva-w7-synthesis.uk.md)
 
 ---
@@ -15,7 +15,7 @@ For over six decades, modern computing has modeled human language as an arbitrar
 - The adjacency of `'A'` and `'B'` is an arbitrary alphabetical convention, not a phonetic relationship.
 - UTF-8 introduces multi-byte variable-length framing where significant bit budgets are wasted on continuation prefixes (`10xxxxxx`), fragmenting characters across 1 to 4 host bytes without semantic phonological meaning.
 
-**SENS Domain 7 ($D7$) achieves a foundational paradigm shift:**  
+**SENS Domain 7 ($D7$) achieves a foundational paradigm shift:**
 Language ceases to be a text file of graphic glyphs and becomes **binary sound**.
 - **Every bit has meaning:** The 7 bits of each cell encode articulatory class, place of articulation, manner of phonation, vocalic quality, and syntactic function.
 - **Every 7 bits constitute an indivisible atom of living human speech:** The 128 cells of `Text7` (UPC-7: Universal Phonetic Code) represent human vocal tract states across Ukrainian and Sanskrit phonologies.
