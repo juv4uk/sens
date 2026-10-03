@@ -1,6 +1,6 @@
 use sens::{
     fasl_decode_program, fasl_encode_program, wire_decode_program, wire_encode_program, Bija3,
-    Bit3, Bit4, CoreD4, CoreDomainIdentity, Exactness, Expr, ExprKind, Span, Value,
+    Bit3, Bit4, CallableIdentity, CoreD4, CoreDomainIdentity, Exactness, Expr, ExprKind, Span, Value,
 };
 use std::rc::Rc;
 
@@ -14,7 +14,7 @@ fn d4(raw: u8) -> CoreDomainIdentity {
 
 fn expr(identity: CoreDomainIdentity) -> Expr {
     Expr {
-        kind: ExprKind::DomainIdentity(identity),
+        kind: ExprKind::Sid(CallableIdentity::core(identity)),
         span: Span { start: 0, end: 0 },
     }
 }
@@ -28,15 +28,15 @@ fn same_payload_in_d3_and_d4_remains_distinct_in_ast_and_value() {
     assert_ne!(d3, d4);
     assert_ne!(expr(d3).kind, expr(d4).kind);
 
-    let v3 = Value::DomainIdentity(d3);
-    let v4 = Value::DomainIdentity(d4);
+    let v3 = Value::Sid(CallableIdentity::core(d3));
+    let v4 = Value::Sid(CallableIdentity::core(d4));
     assert_ne!(v3, v4);
     assert_eq!(v3.to_string(), "001");
     assert_eq!(v4.to_string(), "0001");
     assert_eq!(v3.as_core_domain_identity(), Some(d3));
     assert_eq!(v4.as_core_domain_identity(), Some(d4));
-    assert_eq!(v3.as_sens8(), None);
-    assert_eq!(v4.as_sens8(), None);
+    assert_eq!(v3.as_legacy8_bits(), None);
+    assert_eq!(v4.as_legacy8_bits(), None);
 }
 
 #[test]
@@ -50,7 +50,7 @@ fn domain_identity_round_trips_through_fasl_and_wire_without_sens8_projection() 
         assert_eq!(fasl_decoded, original);
         assert!(matches!(
             fasl_decoded[0].kind,
-            ExprKind::DomainIdentity(decoded) if decoded == identity
+            ExprKind::Sid(decoded) if decoded.core_identity() == Some(identity)
         ));
 
         let wire = wire_encode_program(&original);
@@ -67,8 +67,8 @@ fn domain_identity_round_trips_through_fasl_and_wire_without_sens8_projection() 
 fn domain_call_serializes_as_list_with_domain_head_not_legacy_sid() {
     let identity = d4(0b0010);
     let call = Expr {
-        kind: ExprKind::DomainCall(
-            identity,
+        kind: ExprKind::Call(
+            CallableIdentity::core(identity),
             Rc::from([Expr {
                 kind: ExprKind::Number(42.0, Exactness::Exact),
                 span: Span { start: 0, end: 0 },
@@ -83,7 +83,12 @@ fn domain_call_serializes_as_list_with_domain_head_not_legacy_sid() {
     };
     assert!(matches!(
         items[0].kind,
-        ExprKind::DomainIdentity(decoded_identity) if decoded_identity == identity
+        ExprKind::Sid(decoded_identity)
+            if decoded_identity.core_identity() == Some(identity)
     ));
-    assert!(!matches!(items[0].kind, ExprKind::Sid(_)));
+    assert!(matches!(
+        items[0].kind,
+        ExprKind::Sid(decoded_identity)
+            if decoded_identity.core_identity() == Some(identity)
+    ));
 }
