@@ -12,6 +12,7 @@ mod bignum;
 mod bits;
 mod domain_words;
 mod domain_identity;
+mod domain_registry;
 mod packed_bits;
 mod binary_framing;
 mod environment;
