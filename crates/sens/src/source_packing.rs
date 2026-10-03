@@ -165,6 +165,52 @@ mod tests {
     }
 
     #[test]
+    fn exact_domain_widths_do_not_expand_to_host_bytes() {
+        let d5 = parse_binary_source_words(
+            "00000 00001 00010 00011 00100 00101 00110 00111"
+        ).unwrap();
+        let d6 = parse_binary_source_words(
+            "000000 000001 000010 000011"
+        ).unwrap();
+        let d7 = parse_binary_source_words(
+            "0000000 0000001 0000010 0000011 0000100 0000101 0000110 0000111"
+        ).unwrap();
+
+        let packed_d5 = pack_binary_source_tokens(&d5);
+        let packed_d6 = pack_binary_source_tokens(&d6);
+        let packed_d7 = pack_binary_source_tokens(&d7);
+
+        // Semantic width is the domain width, regardless of the host carrier.
+        assert_eq!(packed_d5.bit_len(), 8 * 5);
+        assert_eq!(packed_d5.byte_len(), 5);
+
+        assert_eq!(packed_d6.bit_len(), 4 * 6);
+        assert_eq!(packed_d6.byte_len(), 3);
+
+        assert_eq!(packed_d7.bit_len(), 8 * 7);
+        assert_eq!(packed_d7.byte_len(), 7);
+
+        // These examples end exactly on a byte boundary, so the physical
+        // container contributes no tail bits at all.
+        assert_eq!(packed_d5.valid_bits_in_last_byte(), 8);
+        assert_eq!(packed_d6.valid_bits_in_last_byte(), 8);
+        assert_eq!(packed_d7.valid_bits_in_last_byte(), 8);
+    }
+
+    #[test]
+    fn canonical_mixed_example_counts_bits_not_words_or_host_objects() {
+        let tokens = parse_binary_source_words("10 001 01").unwrap();
+        let packed = pack_binary_source_tokens(&tokens);
+
+        assert_eq!(
+            tokens.iter().map(|token| token.word.width()).sum::<usize>(),
+            2 + 3 + 2
+        );
+        assert_eq!(packed.bit_len(), 7);
+        assert_eq!(packed.byte_len(), 1);
+    }
+
+    #[test]
     fn packed_payload_does_not_claim_source_word_boundaries() {
         let split = parse_binary_source_words("0 00").unwrap();
         let single = parse_binary_source_words("000").unwrap();
