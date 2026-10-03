@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sens8;
+use crate::{CoreD6, Sens8};
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -15,6 +15,27 @@ pub struct Span {
 pub struct Expr {
     pub kind: ExprKind,
     pub span: Span,
+}
+
+/// Typed AST identity node for an already-admitted Core.D6 value.
+///
+/// This is deliberately separate from `ExprKind`: carrying a D6 domain object
+/// in syntax does not by itself authorize the reader, FASL/wire, lowering or
+/// evaluator to construct or execute one.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CoreD6Expr {
+    pub value: CoreD6,
+    pub span: Span,
+}
+
+impl CoreD6Expr {
+    pub const fn new(value: CoreD6, span: Span) -> Self {
+        Self { value, span }
+    }
+
+    pub const fn value(self) -> CoreD6 {
+        self.value
+    }
 }
 
 /// Whether a numeric value is a precise quantity or a floating-point
@@ -88,6 +109,34 @@ pub enum ExprKind {
     /// A closure parameter by numeric lexical coordinates only; the human name
     /// lives in the closure's debug metadata, never in the node.
     Local { depth: u32, index: u32 },
+}
+
+
+#[cfg(test)]
+mod core_d6_ast_tests {
+    use super::{CoreD6Expr, Span};
+    use crate::{Bit6, CoreD6};
+
+    #[test]
+    fn core_d6_ast_identity_round_trips_all_64_words() {
+        for raw in 0u8..64 {
+            let word = Bit6::new(raw).unwrap();
+            let domain = CoreD6::from_word(word);
+            let node = CoreD6Expr::new(
+                domain,
+                Span {
+                    start: raw as usize,
+                    end: raw as usize + 1,
+                },
+            );
+
+            assert_eq!(node.value().word(), word);
+            assert_eq!(node.span.start, raw as usize);
+            assert_eq!(node.span.end, raw as usize + 1);
+            assert_eq!(node, node.clone());
+            assert!(format!("{node:?}").contains("CoreD6"));
+        }
+    }
 }
 
 // Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
