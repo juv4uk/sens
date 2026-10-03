@@ -10,7 +10,7 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry, Sens8};
+use crate::{semantic_registry, CallableDomainId, Sens8};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -47,9 +47,10 @@ impl Arity {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LanguageItem {
     pub name: String,
-    /// Exact eight-bit semantic identity when governed by the surface registry.
+    /// Domain-qualified semantic identity when governed by the surface registry.
+    /// Unmigrated rows are explicitly `Legacy8`, never silently treated as canonical.
     /// Runtime-only host capabilities may legitimately have no registry identity yet.
-    pub semantic_id: Option<Sens8>,
+    pub semantic_id: Option<CallableDomainId>,
     pub signature: &'static str,
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
@@ -64,12 +65,12 @@ mod generated {
 /// згенерованої проєкції lib/surface/function-signatures.lisp. Назви дає
 /// таблиця функцій; Rust не тримає власної копії назв чи описів.
 fn semantic_language_items_with(
-    stable_surfaces: impl Fn(Sens8) -> Vec<&'static str>,
-    admitted_surfaces: impl Fn(Sens8) -> Vec<&'static str>,
+    stable_surfaces: impl Fn(CallableDomainId) -> Vec<&'static str>,
+    admitted_surfaces: impl Fn(CallableDomainId) -> Vec<&'static str>,
 ) -> Vec<LanguageItem> {
     let mut items = Vec::new();
     for row in generated::FUNCTION_SIGNATURES {
-        let semantic_id = Sens8::from_packed_byte(row.semantic_id);
+        let semantic_id = semantic_registry::domain_semantic_id_from_registry_byte(row.semantic_id);
         let surfaces = if row.admitted_surfaces {
             admitted_surfaces(semantic_id)
         } else {
@@ -95,10 +96,20 @@ pub(crate) fn signature_kind(semantic_id: Sens8) -> Option<LanguageItemKind> {
         .map(|row| row.kind)
 }
 
+pub(crate) fn signature_kind_for_domain(
+    semantic_id: CallableDomainId,
+) -> Option<LanguageItemKind> {
+    let legacy_byte = semantic_registry::registry_byte_for_domain_semantic_id(semantic_id);
+    generated::FUNCTION_SIGNATURES
+        .iter()
+        .find(|row| row.semantic_id == legacy_byte)
+        .map(|row| row.kind)
+}
+
 pub fn language_items() -> Vec<LanguageItem> {
     semantic_language_items_with(
-        semantic_registry::stable_surfaces_for_semantic_id,
-        semantic_registry::admitted_surfaces_for_semantic_id,
+        semantic_registry::stable_surfaces_for_domain_semantic_id,
+        semantic_registry::admitted_surfaces_for_domain_semantic_id,
     )
 }
 
@@ -206,8 +217,12 @@ mod tests {
             assert_eq!(left.kind, LanguageItemKind::SyntaxForm);
             assert_eq!(right.kind, LanguageItemKind::SyntaxForm);
         }
-        assert_eq!(find("lambda").semantic_id, Some(crate::sens!(00001000)));
-        assert_eq!(find("define").semantic_id, Some(crate::sens!(00001001)));
+        let lambda = find("lambda").semantic_id.expect("lambda identity");
+        let define = find("define").semantic_id.expect("define identity");
+        assert_eq!(lambda.width(), 4);
+        assert_eq!(lambda.packed_bits(), 0b0010);
+        assert_eq!(define.width(), 4);
+        assert_eq!(define.packed_bits(), 0b0011);
     }
 
     #[test]
@@ -218,7 +233,10 @@ mod tests {
                 .iter()
                 .find(|item| item.name == name)
                 .unwrap_or_else(|| panic!("missing macro tooling item {name}"));
-            assert_eq!(item.semantic_id, Some(crate::sens!(00001010)));
+            let semantic_id = item.semantic_id.expect("defmacro identity");
+            assert_eq!(semantic_id.width(), 8);
+            assert_eq!(semantic_id.packed_bits(), 0b00001010);
+            assert!(semantic_id.legacy().is_some());
             assert_eq!(item.kind, LanguageItemKind::Macro);
         }
 
@@ -238,14 +256,17 @@ mod tests {
             .iter()
             .find(|item| item.name == "def")
             .expect("def tooling item");
-        assert_eq!(def.semantic_id, Some(crate::sens!(00001011)));
+        let def_id = def.semantic_id.expect("def identity");
+        assert_eq!(def_id.width(), 8);
+        assert_eq!(def_id.packed_bits(), 0b00001011);
+        assert!(def_id.legacy().is_some());
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
         assert_eq!(
-            semantic_registry::stable_surfaces_for_semantic_id(crate::sens!(00001011)),
+            semantic_registry::stable_surfaces_for_domain_semantic_id(def_id),
             vec!["def"]
         );
         assert_eq!(
-            semantic_registry::admitted_surfaces_for_semantic_id(crate::sens!(00001011)),
+            semantic_registry::admitted_surfaces_for_domain_semantic_id(def_id),
             vec!["def"]
         );
     }
