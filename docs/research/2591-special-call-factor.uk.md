@@ -1,7 +1,7 @@
 # #2591 — факторизація special-call протоколів
 
-Фаза: **STRUCTURAL-DISCOVERY**  
-Домен: `Core.PostD4.SpecialCallProtocol`  
+Фаза: **STRUCTURAL-DISCOVERY**
+Домен: `Core.PostD4.SpecialCallProtocol`
 Binary object: **UNPLACED**
 
 Тут історичні FEXPR/FSUBR, Hart MACRO і поточний SENS TRANSFORMER
