@@ -25,6 +25,59 @@ python3 scripts/uk-latynka.py self-test
 
 ---
 
+## Поточна semantic discipline — binary domains (2026-10-03)
+
+Перед будь-яким semantic/placement research агент зобов'язаний прочитати
+[`CURRENT.md`](CURRENT.md) і
+[`docs/current-binary-domain-architecture.md`](docs/current-binary-domain-architecture.md).
+
+Канонічна робоча формула:
+
+```text
+semantic object
+=
+binary number
++ exact semantic domain
++ proved/admitted law
+```
+
+Не можна виводити semantic identity лише з:
+- width;
+- free coordinate;
+- human name;
+- opcode;
+- hash/AST/registry/cache;
+- однакового machine transform у різних domains.
+
+Core research працює у фазах:
+
+```text
+HISTORICAL-INGEST
+STRUCTURAL-DISCOVERY
+SENS-DERIVATION
+```
+
+Для governed Core/Core-Math задач record має явно називати:
+
+```text
+PHASE
+DOMAIN
+BINARY OBJECT
+LAW
+WITNESS
+FALSIFIER
+STATUS
+RELATION
+```
+
+`UNKNOWN`, `UNRESOLVED` і `NO-CANDIDATE` є допустимими чесними результатами.
+Не заповнювати домени “щоб не було порожньо”.
+
+Standing guards:
+- #2508/#2509 — same transform != same semantic law across domains;
+- #2540 — domain != carrier != mechanism;
+- #2533 — history first, SENS derivation after structural discovery.
+
 ## Дисципліна співпраці з агентами — основний документ (2026-09-03)
 
 **Статус: основний (primary) для всіх активних репозиторіїв екосистеми.** Цей розділ визначає, як агенти працюють із власником над кодом, і застосовується одразу після ратифікованої мовної політики вище.
@@ -124,7 +177,7 @@ typedef uintptr_t Value;
 Мета — не "вивчити мову X", а малими вертикальними зрізами повністю зрозуміти, як одна конкретна ідея проходить від задуму до фізичного втілення (біта в регістрі, гейта на кремнії, вузла в дереві коду). Генерувати можна багато — засвоювати варто малими, повністю зрозумілими кроками.
 
 ---
-# AGENTS.md — my-lisp
+# AGENTS.md — sens
 
 Див. також `docs/agent-doctrine.md` — міжрепозиторні правила (пріоритет prose/contract, дисципліна доказів, використання subagent/specialist-model), які застосовуються до всіх сусідніх репозиторіїв рою, не лише до цього.
 
