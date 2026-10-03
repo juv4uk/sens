@@ -92,10 +92,12 @@ def build() -> dict[str, Any]:
     require(d5["manual_nonselector_count"] == 0, "D5 gained manual resident")
 
     require(d6["canonical"]["generated_members"] == 16, "D6 selector closure changed")
-    require(d6["canonical"]["unknown_free"] == 48, "D6 canonical UNKNOWN count changed")
+    require(d6["canonical"]["ratified_manual_residents"] == 1, "D6 manual resident count drifted")
+    require(d6["canonical"]["unknown_free"] == 47, "D6 canonical UNKNOWN count changed")
     require(d6["canonical"]["occupancy_mutations"] == 0, "D6 research mutated occupancy")
-    target = next(row for row in d6["frontier"] if row["coordinate"] == "001111")
-    require(target["research_evidence_class"] == "OWNER-READY-NONADMITTED",
+    target = d6["ratified_target"]
+    require(target["coordinate"] == "001111", "ratified D6 target moved")
+    require(target["research_evidence_class"] == "RATIFIED-MANUAL-RESIDENT",
             "001111 owner-readiness changed")
     require(target["canonical_semantic_member"] is False,
             "001111 became admitted without audit update")
@@ -191,8 +193,8 @@ def build() -> dict[str, Any]:
                 "generated_residents": d6["canonical"]["generated_members"],
                 "canonical_unknown": d6["canonical"]["unknown_free"],
                 "pure_unknown_not_search_space": d6["frontier_counts"]["PURE-UNKNOWN"],
-                "owner_ready_nonadmitted": ["001111"],
-                "missing": "owner decision for 001111; new theorem for anything else",
+                "ratified_manual_residents": ["001111"],
+                "missing": "new theorem for any additional resident",
             },
         },
         "missing_from_previous_domains": [
