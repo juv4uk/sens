@@ -1,0 +1,318 @@
+#!/usr/bin/env python3
+"""#2718 — D1-D6 historical gap / ratification-readiness audit.
+
+This gate joins existing authorities. It does not allocate a coordinate,
+invent a domain law, or ratify occupancy.
+
+Question:
+    what did early Lisp actually have that the already-ratified domains do not
+    yet explain, and which surviving rows are genuinely owner-ready?
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import runpy
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[2]
+LEDGER = ROOT / "docs/research/2344-post-d4-historical-ledger.json"
+PLACEMENT = ROOT / "benchmarks/post-d4-semantic-placement/placement.json"
+D5_GUARD = ROOT / "scripts/research-2689-d5-ratified-baseline.py"
+D6_FRONTIER = ROOT / "benchmarks/d6-unknown-frontier/run.py"
+
+# This table is not new semantic authority. It is the smallest explicit
+# projection of the merged #2705 placement evidence into the question
+# "which earliest ratified domain already explains the historical capability?"
+EARLIEST_EXPLAINING_DOMAIN = {
+    "LABEL": "D4",
+    "FUNCTION": "D4",
+    "FUNARG": "D4",
+    "EVALQUOTE": "D4",
+    "APPEND": "D3",
+    "PAIR": "D3",
+    "PAIRLIS": "D3",
+    "ASSOC": "D3",
+    "SUBST": "D3",
+    "SUBLIS": "D3",
+    "MAPLIST": "D4",
+    "GO": "D4",
+}
+
+SURVIVING_DELTAS = {
+    "SET": "shared-location-update",
+    "SETQ": "shared-location-update+quoted-target-policy",
+    "RETURN": "non-local-exit-root",
+    "FEXPR": "raw-operands+explicit-caller-env",
+    "FSUBR": "raw-operands+explicit-caller-env",
+    "TRANSFORMER": "raw-form+returned-form-reevaluation",
+}
+
+EXPECTED_OPS = [
+    "LABEL", "FUNCTION", "FUNARG", "EVALQUOTE",
+    "APPEND", "PAIR", "PAIRLIS", "ASSOC", "SUBST", "SUBLIS", "MAPLIST",
+    "SET", "SETQ", "PROG", "GO", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER",
+]
+
+
+def require(condition: bool, message: str) -> None:
+    if not condition:
+        raise AssertionError(f"D1-D6 historical gap audit drift: {message}")
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def build() -> dict[str, Any]:
+    ledger = load_json(LEDGER)
+    placement = load_json(PLACEMENT)
+    d5 = runpy.run_path(str(D5_GUARD))["build_result"]()
+    d6 = runpy.run_path(str(D6_FRONTIER))["build"]()
+
+    require(ledger["authority"] == "historical-evidence-ledger-not-language-semantic-authority",
+            "historical ledger authority changed")
+    require(ledger["phase"] == "HISTORICAL-INGEST", "historical phase changed")
+    require(placement["authority"].startswith("aggregation of merged historical"),
+            "placement aggregation authority changed")
+
+    historical = {row["operation"]: row for row in ledger["rows"]}
+    placed = {row["operation"]: row for row in placement["rows"]}
+    require(list(historical) == EXPECTED_OPS, "historical operation/order set changed")
+    require(set(placed) == set(EXPECTED_OPS), "placement operation set changed")
+    require(len(historical) == placement["invariants"]["historical_rows"] == 19,
+            "19-row merged historical baseline changed")
+
+    require(d5["domain_ratified"] is True, "D5 domain lost ratification")
+    require(d5["baseline_ratified"] is True, "D5 baseline lost ratification")
+    require(d5["generated_count"] == 8, "D5 generated count changed")
+    require(d5["unknown_count"] == 24, "D5 protected UNKNOWN count changed")
+    require(d5["manual_nonselector_count"] == 0, "D5 gained manual resident")
+
+    require(d6["canonical"]["generated_members"] == 16, "D6 selector closure changed")
+    require(d6["canonical"]["unknown_free"] == 48, "D6 canonical UNKNOWN count changed")
+    require(d6["canonical"]["occupancy_mutations"] == 0, "D6 research mutated occupancy")
+    target = next(row for row in d6["frontier"] if row["coordinate"] == "001111")
+    require(target["research_evidence_class"] == "OWNER-READY-NONADMITTED",
+            "001111 owner-readiness changed")
+    require(target["canonical_semantic_member"] is False,
+            "001111 became admitted without audit update")
+
+    rows: list[dict[str, Any]] = []
+    for op in EXPECTED_OPS:
+        h = historical[op]
+        p = placed[op]
+        require(h["phase_status"] == "complete", f"{op}: historical ingest not complete")
+        require(h["binary_object"] == "unplaced", f"{op}: historical ingest allocated bits")
+
+        earliest = EARLIEST_EXPLAINING_DOMAIN.get(op, "NONE")
+        delta = SURVIVING_DELTAS.get(op, "NONE")
+
+        if op in EARLIEST_EXPLAINING_DOMAIN:
+            readiness = "ALREADY-EXPLAINED"
+            missing = "NONE"
+            require(p["resident_required"] == "NO", f"{op}: explained row now requires resident")
+            require(p["coordinate"] == "NONE", f"{op}: explained row gained coordinate")
+        elif op == "SET":
+            readiness = "NEEDS-LAW"
+            missing = "exact-domain theorem + residency/coordinate theorem"
+        elif op == "SETQ":
+            readiness = "OWNER-READY"
+            missing = "owner decision only for candidate D6:001111; historical row remains UNPLACED"
+            require(p["candidate_coordinate"] == "D6:001111 (OD-001 owner-ready only)",
+                    "SETQ owner-ready candidate drift")
+        elif op == "PROG":
+            readiness = "COMPOSITE"
+            missing = "NONE-as-resident; decompose GO + RETURN"
+            require(p["resident_required"] == "NO-AS-COMPOSITE", "PROG composite status drift")
+        elif op == "RETURN":
+            readiness = "NEEDS-LAW"
+            missing = "domain-selection theorem; proven roothood does not determine width"
+            require(p["placement_kind"] == "PROVEN-ROOT-UNPLACED", "RETURN root status drift")
+        elif op in {"FEXPR", "FSUBR", "TRANSFORMER"}:
+            readiness = "NEEDS-LAW"
+            missing = "same-domain generator/lower-bound + exact-domain theorem"
+        else:
+            raise AssertionError(f"unclassified historical row: {op}")
+
+        rows.append({
+            "historical_capability": op,
+            "first_attested_lineage": h["first_attested_lineage"],
+            "historical_evidence": h["source_provenance"],
+            "earliest_ratified_domain_that_explains_it": earliest,
+            "explanation_region": p["semantic_region"],
+            "explanation_owner": p["primary_owner"],
+            "surviving_observable_delta": delta,
+            "current_domain_status": p["exact_domain"],
+            "binary_object": h["binary_object"],
+            "ratification_readiness": readiness,
+            "missing_evidence": missing,
+            "placement_kind": p["placement_kind"],
+            "candidate_coordinate": p["candidate_coordinate"],
+            "falsifier_guard": "chronology!=residency; #2508 domain firewall; no free-slot search",
+        })
+
+    already = [r for r in rows if r["ratification_readiness"] == "ALREADY-EXPLAINED"]
+    needs_law = [r for r in rows if r["ratification_readiness"] == "NEEDS-LAW"]
+    owner_ready = [r for r in rows if r["ratification_readiness"] == "OWNER-READY"]
+    composite = [r for r in rows if r["ratification_readiness"] == "COMPOSITE"]
+
+    require([r["historical_capability"] for r in owner_ready] == ["SETQ"],
+            "owner-ready set changed; review required")
+    require(set(r["historical_capability"] for r in needs_law) ==
+            {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
+            "surviving NEEDS-LAW set changed; review required")
+    require([r["historical_capability"] for r in composite] == ["PROG"],
+            "composite set changed")
+
+    return {
+        "schema": "d1-d6-historical-gap-audit/v1",
+        "issue": 2718,
+        "authority": "joined evidence / ratification-readiness report; not residency authority",
+        "phase": "HISTORICAL-INGEST -> STRUCTURAL-DISCOVERY -> RATIFICATION-READINESS",
+        "rows": rows,
+        "domain_summary": {
+            "D1-D4": {
+                "status": "RATIFIED-FOUNDATION",
+                "historical_rows_explained": len(already),
+                "note": "derived historical names remain in the ledger; explanation does not erase history",
+            },
+            "D5": {
+                "status": "RATIFIED-BASELINE",
+                "generated_residents": d5["generated_count"],
+                "protected_unknown": d5["unknown_count"],
+                "manual_nonselector_residents": d5["manual_nonselector_count"],
+                "missing": "new same-domain law, not occupancy",
+            },
+            "D6": {
+                "status": "RATIFIED-WIDTH / LAW-DRIVEN-OCCUPANCY",
+                "generated_residents": d6["canonical"]["generated_members"],
+                "canonical_unknown": d6["canonical"]["unknown_free"],
+                "pure_unknown_not_search_space": d6["frontier_counts"]["PURE-UNKNOWN"],
+                "owner_ready_nonadmitted": ["001111"],
+                "missing": "owner decision for 001111; new theorem for anything else",
+            },
+        },
+        "missing_from_previous_domains": [
+            "shared-location update carrier/policy",
+            "non-local exit root",
+            "raw-operands + explicit caller environment special-call carrier",
+            "returned-form re-evaluation / transformer staging policy",
+        ],
+        "foreign_or_pending_ingest": {
+            "lisp15_arithmetic": {
+                "status": "HISTORICAL-INGEST-IN-SEPARATE-LANE",
+                "refs": ["#2697", "#2710", "#2715"],
+                "domain_rule": "Core-Math bridge required; historical spelling cannot populate Core D5/D6",
+            }
+        },
+        "owner_facing": {
+            "ready_now": [
+                {
+                    "decision": "OD-001",
+                    "binary_object": "D6:001111",
+                    "status": "OWNER-READY-NONADMITTED",
+                    "meaning": "shared-location / SETQ binding-policy product candidate",
+                    "authority": "#2538",
+                }
+            ],
+            "not_ready": [r["historical_capability"] for r in needs_law],
+            "do_not_ratify_as_resident": [r["historical_capability"] for r in already + composite],
+        },
+        "summary": {
+            "historical_rows": len(rows),
+            "already_explained": len(already),
+            "needs_new_law": len(needs_law),
+            "owner_ready": len(owner_ready),
+            "composite": len(composite),
+            "new_d5_manual_residents": 0,
+            "new_d6_admissions": 0,
+        },
+        "guards": [
+            "historical presence != resident necessity",
+            "free coordinate != candidate",
+            "roothood != width",
+            "factor count != domain",
+            "same name != same semantic law",
+            "Core-Math/mechanism cannot donate Core residency",
+            "D6 PURE-UNKNOWN coordinates are not enumerated as search targets",
+        ],
+    }
+
+
+def render_md(result: dict[str, Any]) -> str:
+    lines = [
+        "# D1-D6 historical gap audit — #2718",
+        "",
+        "This report asks what the already-ratified domains fail to explain. It does not allocate bits.",
+        "",
+        "| historical row | earliest explaining domain | surviving delta | readiness | missing |",
+        "|---|---|---|---|---|",
+    ]
+    for row in result["rows"]:
+        lines.append(
+            f"| {row['historical_capability']} | "
+            f"{row['earliest_ratified_domain_that_explains_it']} | "
+            f"{row['surviving_observable_delta']} | "
+            f"**{row['ratification_readiness']}** | {row['missing_evidence']} |"
+        )
+
+    lines += [
+        "",
+        "## What previous domains still do not explain",
+        "",
+    ]
+    lines += [f"- {item}" for item in result["missing_from_previous_domains"]]
+    lines += [
+        "",
+        "## Domain state",
+        "",
+        f"- D1-D4: {result['domain_summary']['D1-D4']['historical_rows_explained']} historical rows already explained.",
+        f"- D5: {result['domain_summary']['D5']['generated_residents']} generated / "
+        f"{result['domain_summary']['D5']['protected_unknown']} protected UNKNOWN / 0 manual.",
+        f"- D6: {result['domain_summary']['D6']['generated_residents']} generated / "
+        f"{result['domain_summary']['D6']['canonical_unknown']} canonical UNKNOWN; "
+        f"{result['domain_summary']['D6']['pure_unknown_not_search_space']} PURE-UNKNOWN are not a search space.",
+        "",
+        "## Owner-ready now",
+        "",
+        "- OD-001: D6:001111 is owner-ready but nonadmitted. No other historical row is owner-ready.",
+        "",
+        "## Arithmetic",
+        "",
+        "- Lisp 1.5 arithmetic remains historical ingest / Core-Math bridge work (#2697/#2710/#2715).",
+        "- It cannot populate Core D5/D6 by shared spelling or spare capacity.",
+        "",
+        "## Non-conclusion",
+        "",
+        "Historical completeness is not domain density. Empty coordinates are a valid result.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--out", type=Path)
+    args = ap.parse_args()
+
+    result = build()
+    print("D1-D6-HISTORICAL-GAP-AUDIT=PASS")
+    for key, value in result["summary"].items():
+        print(f"{key}={value}")
+    print("owner-ready=D6:001111")
+    print("RULE=fill-history-not-free-slots")
+
+    if args.out:
+        args.out.mkdir(parents=True, exist_ok=True)
+        (args.out / "result.json").write_text(
+            json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        (args.out / "report.md").write_text(render_md(result), encoding="utf-8")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
