@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""#2678 — historical-unplaced -> current D6 evidence handoff.
+"""#2678/#2723 — historical evidence -> current D6 placement handoff.
 
-This is a join gate, not a placement theorem. Historical presence creates
-candidate pressure only. No row gains D6 membership or a coordinate here.
+This remains a join gate, not a theorem source. Historical presence alone
+creates no residency. SETQ is the single exception only because separate
+owner-ratified D6 placement authority now exists at 001111.
 """
 
 from __future__ import annotations
@@ -80,8 +81,12 @@ def build() -> dict[str, Any]:
         if row["operation"] in OPS
     }
     assert set(sidecar) == set(OPS)
-    assert all(row["d6_coordinate"] is None for row in sidecar.values())
-    assert all(row["d6_membership_inferred"] is False for row in sidecar.values())
+    assert sidecar["SETQ"]["d6_coordinate"] == "001111"
+    assert sidecar["SETQ"]["d6_membership_inferred"] is True
+    assert all(
+        row["d6_coordinate"] is None and row["d6_membership_inferred"] is False
+        for op, row in sidecar.items() if op != "SETQ"
+    )
 
     parent_rows = {
         normalize_parent_capability(row["capability"]): row
@@ -90,11 +95,10 @@ def build() -> dict[str, Any]:
     }
     assert set(parent_rows) == set(OPS)
 
-    target = next(
-        row for row in frontier["frontier"] if row["coordinate"] == "001111"
-    )
-    assert target["research_evidence_class"] == "OWNER-READY-NONADMITTED"
-    assert target["canonical_semantic_member"] is False
+    target = frontier["ratified_target"]
+    assert target["coordinate"] == "001111"
+    assert target["research_evidence_class"] == "RATIFIED-MANUAL-RESIDENT"
+    assert target["semantic_member"] is True
 
     rows = []
     for op in OPS:
@@ -106,12 +110,19 @@ def build() -> dict[str, Any]:
         placement_evidence = p["verdict"]
         note = p.get("collapse_reason") or p.get("existing_nonpure_frontier_lane") or ""
 
-        if op in {"SET", "SETQ"}:
-            domain_evidence = "SEPARATE-NONPURE-D6-PRESSURE-NOT-HISTORICAL-MEMBERSHIP"
-            placement_evidence = "001111-OWNER-READY-NONADMITTED"
+        if op == "SET":
+            domain_evidence = "SHARED-LOCATION-CARRIER-WITHOUT-SEPARATE-D6-RESIDENCY"
+            placement_evidence = "SET-DOES-NOT-INHERIT-001111"
             note = (
-                "shared-location pressure is owned by the separate binding-policy overlay; "
-                "historical SET/SETQ rows do not inherit its coordinate"
+                "SET shares carrier pressure but does not inherit the owner-ratified "
+                "SETQ/shared-location two-axis coordinate"
+            )
+        elif op == "SETQ":
+            domain_evidence = "RATIFIED-CORE-D6-MEMBERSHIP"
+            placement_evidence = "001111-RATIFIED-RESIDENT"
+            note = (
+                "residency follows #2538 OD-001 + lower-bound/falsifier evidence, "
+                "not historical spelling or chronology"
             )
         elif op == "RETURN":
             domain_evidence = (
@@ -127,8 +138,9 @@ def build() -> dict[str, Any]:
         elif op == "TRANSFORMER":
             domain_evidence = "NO-EXACT-D6-GENERATOR-OR-LOWER-BOUND"
 
-        assert s["d6_membership_inferred"] is False
-        assert s["d6_coordinate"] is None
+        expected_member = op == "SETQ"
+        assert s["d6_membership_inferred"] is expected_member
+        assert s["d6_coordinate"] == ("001111" if expected_member else None)
         assert p["pure_unknown_candidate"] is False
 
         rows.append(
@@ -143,17 +155,24 @@ def build() -> dict[str, Any]:
                 "domain_evidence": domain_evidence,
                 "placement_evidence": placement_evidence,
                 "foreign_domain_authority": "NONE",
-                "d6_membership_inferred": False,
-                "d6_coordinate": None,
-                "handoff_verdict": "KEEP-UNPLACED",
+                "d6_membership_inferred": expected_member,
+                "d6_coordinate": "001111" if expected_member else None,
+                "handoff_verdict": "RATIFIED-D6-RESIDENT" if expected_member else "KEEP-UNPLACED",
                 "note": note,
             }
         )
 
     assert len(rows) == 7
-    assert all(row["handoff_verdict"] == "KEEP-UNPLACED" for row in rows)
-    assert all(row["d6_membership_inferred"] is False for row in rows)
-    assert all(row["d6_coordinate"] is None for row in rows)
+    setq = next(row for row in rows if row["operation"] == "SETQ")
+    assert setq["handoff_verdict"] == "RATIFIED-D6-RESIDENT"
+    assert setq["d6_membership_inferred"] is True
+    assert setq["d6_coordinate"] == "001111"
+    assert all(
+        row["handoff_verdict"] == "KEEP-UNPLACED"
+        and row["d6_membership_inferred"] is False
+        and row["d6_coordinate"] is None
+        for row in rows if row["operation"] != "SETQ"
+    )
 
     return {
         "schema": "d6-historical-unplaced-handoff/v1",
@@ -163,13 +182,13 @@ def build() -> dict[str, Any]:
         "rows": rows,
         "summary": {
             "historical_rows_joined": 7,
-            "keep_unplaced": 7,
-            "d6_promotions": 0,
-            "coordinate_allocations": 0,
+            "keep_unplaced": 6,
+            "d6_promotions": 1,
+            "coordinate_allocations": 1,
             "pure_unknown_candidates_from_parent_tournament": parent["summary"]["pure_unknown_candidates"],
             "foreign_authority_candidates": firewall["new_candidates"],
-            "occupancy_mutations": 0,
-            "result": "ALL-HISTORICAL-ROWS-KEEP-UNPLACED",
+            "occupancy_mutations": 1,
+            "result": "SETQ-RATIFIED-OTHERS-KEEP-UNPLACED",
         },
         "guards": [
             "chronology != domain law",
@@ -210,21 +229,22 @@ def main() -> int:
             "",
             "Summary:",
             "- 7 historical unresolved rows joined;",
-            "- 7 KEEP-UNPLACED;",
-            "- 0 D6 promotions;",
-            "- 0 coordinate allocations;",
-            "- 0 occupancy mutations.",
+            "- 6 KEEP-UNPLACED;",
+            "- SETQ -> D6:001111 RATIFIED;",
+            "- 1 D6 promotion / coordinate allocation from explicit owner authority;",
+            "- all other historical survivors remain unplaced.",
             "",
         ]
         (args.out / "report.md").write_text("\n".join(lines), encoding="utf-8")
 
     print("D6-HISTORICAL-UNPLACED-HANDOFF=PASS")
     print("historical-rows-joined=7")
-    print("keep-unplaced=7")
-    print("d6-promotions=0")
-    print("coordinate-allocations=0")
-    print("occupancy-mutations=0")
-    print("RESULT=ALL-HISTORICAL-ROWS-KEEP-UNPLACED")
+    print("keep-unplaced=6")
+    print("d6-promotions=1")
+    print("coordinate-allocations=1")
+    print("occupancy-mutations=1")
+    print("SETQ-D6-001111=RATIFIED")
+    print("RESULT=SETQ-RATIFIED-OTHERS-KEEP-UNPLACED")
     return 0
 
 
