@@ -1,0 +1,23 @@
+name: D5 structural discovery research
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "benchmarks/d5-structural-discovery/**"
+      - ".github/workflows/d5-structural-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  factor-graph:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify completed historical dataset factor graph
+        run: python3 benchmarks/d5-structural-discovery/factor_graph.py --check
