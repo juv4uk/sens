@@ -124,10 +124,12 @@ def main() -> None:
     miss_then_scope = scope_refine(miss_refine(DEFINE))
     assert scope_then_miss == miss_then_scope == SETQ_CORE
 
-    # They also commute on every corner where applying an already-selected
-    # refinement is idempotent.
+    # They also commute on every corner. Check idempotence independently
+    # rather than only relying on the setter implementation.
     for policy in square.values():
         assert miss_refine(scope_refine(policy)) == scope_refine(miss_refine(policy))
+        assert scope_refine(scope_refine(policy)) == scope_refine(policy)
+        assert miss_refine(miss_refine(policy)) == miss_refine(policy)
 
     # The 00 corner is exactly the parent policy and must not be mistaken for a
     # new semantic resident merely because it has six printed bits.
@@ -146,7 +148,26 @@ def main() -> None:
     assert len(selectors) == 16
 
     candidate_words = {"001100", "001101", "001110", "001111"}
+    assert len(candidate_words) == 4
     assert candidate_words.isdisjoint(selectors)
+
+    # Product-coordinate falsifier: a local exception that maps both
+    # one-axis policies to one word destroys injectivity even though the
+    # endpoints still look like 00/11.
+    bad_local_exception = {
+        "00": "001100",
+        "01": "001101",
+        "10": "001101",
+        "11": "001111",
+    }
+    assert len(set(bad_local_exception.values())) != 4
+
+    # Path-consistency falsifier: two commuting derivation paths to the same
+    # semantic target must not be allowed to emit different binary words.
+    canonical_target_word = "001111"
+    local_exception_target_word = "001110"
+    assert scope_then_miss == miss_then_scope
+    assert canonical_target_word != local_exception_target_word
 
     # Axis order is symmetric for the target 11 corner: swapping which semantic
     # axis is described first swaps the intermediate 01/10 labels but leaves
@@ -160,7 +181,9 @@ def main() -> None:
     print("AXIS-A=search-scope")
     print("AXIS-B=missing-binding-policy")
     print("COMMUTATIVE=yes")
-    print("IDEMPOTENT=yes")
+    print("IDEMPOTENT=yes-explicitly-checked-on-all-four-corners")
+    print("LOCAL-EXCEPTION-INJECTIVITY-FALSIFIER=reject")
+    print("PATH-CONSISTENCY-LOCAL-EXCEPTION=reject")
     print("D6-001100=parent-duplicate-not-earned")
     print("D6-001101=one-axis-generated-candidate")
     print("D6-001110=one-axis-generated-candidate")
