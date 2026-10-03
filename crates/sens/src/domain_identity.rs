@@ -8,6 +8,7 @@
 //! D3 `001` is not D4 `0001`.
 
 use crate::{Bija3, CoreD4, CoreD5, CoreD6};
+use std::fmt;
 
 /// Exact domain-qualified identity for the current Core operation domains.
 ///
@@ -21,6 +22,17 @@ pub enum CoreDomainIdentity {
     D4(CoreD4),
     D5(CoreD5),
     D6(CoreD6),
+}
+
+impl fmt::Debug for CoreDomainIdentity {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let width = self.width();
+        write!(
+            formatter,
+            "CoreDomainIdentity<D{width}>({:0width$b})",
+            self.packed_bits()
+        )
+    }
 }
 
 impl CoreDomainIdentity {
