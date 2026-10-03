@@ -142,8 +142,8 @@ mod tests {
     #[test]
     fn legacy_surface_projection_remains_available_for_compatibility() {
         assert_eq!(id_for_surface("+"), Some(crate::sens!(00001100)));
-        let quote = &SEMANTIC_ROWS[1].surfaces;
-        assert!(quote.contains(&SemanticSurface { namespace: "en", name: "quote" }));
+        let surfaces = &SEMANTIC_ROWS[1].surfaces;
+        assert!(surfaces.contains(&SemanticSurface { namespace: "ук", name: "як-є" }));
     }
 
     #[test]
