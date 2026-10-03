@@ -13,7 +13,7 @@ use std::rc::Rc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use wsm_clips_kernel::ClipsKernel;
-use wsm_common_lisp_kernel::{CommonLispKernel, CommonLispRequest};
+use wsm_common_lisp_kernel::{CommonLispKernel, LegacyAbiSemanticId, LegacyCommonLispRequest};
 use wsm_datalog_kernel::{
     Atom, Database, Evaluator, Program, Rule, Term, Value as DatalogValue,
 };
@@ -86,8 +86,14 @@ ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 }
 
 fn invoke_common_lisp(sens: Sens8, payload: &str) -> Result<Vec<u8>, String> {
+    // RAW_INVOKE is an explicit historical low-level escape hatch. Preserve
+    // its byte only as ABI compatibility provenance; never infer a Core domain.
+    let request = LegacyCommonLispRequest::new(
+        LegacyAbiSemanticId(sens.packed_byte()),
+        payload,
+    );
     CommonLispKernel::default()
-        .evaluate(&CommonLispRequest::new(sens.packed_byte(), payload))
+        .evaluate_legacy_abi(&request)
         .map(|result| result.stdout)
         .map_err(|error| error.to_string())
 }
