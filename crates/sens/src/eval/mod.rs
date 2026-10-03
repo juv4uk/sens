@@ -94,6 +94,11 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
+        Value::CoreIdentity(identity) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("domain-qualified Core identity is not callable in this runtime slice: {identity:?}"),
+            span,
+        )),
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
@@ -136,6 +141,7 @@ pub(crate) fn evaluate_step(
     match &expression.kind {
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
+        ExprKind::CoreIdentity(identity) => Ok(EvalStep::Value(Value::CoreIdentity(*identity))),
         ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
