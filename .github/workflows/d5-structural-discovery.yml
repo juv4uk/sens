@@ -5,6 +5,7 @@ on:
     paths:
       - "docs/research/2344-post-d4-historical-ledger.json"
       - "benchmarks/d5-structural-discovery/**"
+      - "docs/research/2591-special-call-factor*.md"
       - ".github/workflows/d5-structural-discovery.yml"
   workflow_dispatch:
 
@@ -21,3 +22,6 @@ jobs:
           python-version: "3.12"
       - name: Verify completed historical dataset factor graph
         run: python3 benchmarks/d5-structural-discovery/factor_graph.py --check
+
+      - name: Verify special-call protocol factorization
+        run: python3 benchmarks/d5-structural-discovery/special_call_factor.py --check
