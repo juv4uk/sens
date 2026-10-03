@@ -6,7 +6,6 @@
 //! while evaluator/registry consumers are migrated in later #2817 slices.
 
 use crate::domain_words::{Bija3, CoreD4, CoreD5, CoreD6, DomainWord};
-use crate::Sens8;
 use std::fmt;
 
 /// One callable binary object together with its exact semantic domain.
@@ -19,12 +18,6 @@ pub enum CallableDomainId {
     D4(CoreD4),
     D5(CoreD5),
     D6(CoreD6),
-
-    /// Explicit compatibility projection for the historical exact-8 runtime.
-    ///
-    /// This variant is not equal to any D3..D6 identity and has no implicit
-    /// zero-extension/truncation conversion.
-    LegacySens8(Sens8),
 }
 
 impl CallableDomainId {
@@ -44,11 +37,6 @@ impl CallableDomainId {
         Self::D6(value)
     }
 
-    /// Enter the old exact-eight mechanism explicitly.
-    pub const fn from_legacy_sens8(value: Sens8) -> Self {
-        Self::LegacySens8(value)
-    }
-
     /// Exact domain width. Width stays attached to identity.
     pub const fn width(self) -> usize {
         match self {
@@ -56,7 +44,6 @@ impl CallableDomainId {
             Self::D4(_) => 4,
             Self::D5(_) => 5,
             Self::D6(_) => 6,
-            Self::LegacySens8(_) => 8,
         }
     }
 
@@ -67,7 +54,6 @@ impl CallableDomainId {
             Self::D4(value) => value.word().packed_bits(),
             Self::D5(value) => value.word().packed_bits(),
             Self::D6(value) => value.word().packed_bits(),
-            Self::LegacySens8(value) => value.packed_byte(),
         }
     }
 
@@ -78,22 +64,9 @@ impl CallableDomainId {
             Self::D4(value) => Some(DomainWord::D4(value)),
             Self::D5(value) => Some(DomainWord::D5(value)),
             Self::D6(value) => Some(DomainWord::D6(value)),
-            Self::LegacySens8(_) => None,
         }
     }
 
-    /// Historical mechanism projection, available only for the explicit
-    /// compatibility variant. Domain-qualified identities never zero-extend.
-    pub const fn legacy_sens8(self) -> Option<Sens8> {
-        match self {
-            Self::LegacySens8(value) => Some(value),
-            Self::D3(_) | Self::D4(_) | Self::D5(_) | Self::D6(_) => None,
-        }
-    }
-
-    pub const fn is_legacy(self) -> bool {
-        matches!(self, Self::LegacySens8(_))
-    }
 }
 
 impl fmt::Display for CallableDomainId {
@@ -114,7 +87,6 @@ impl fmt::Debug for CallableDomainId {
             Self::D4(_) => "Core.D4",
             Self::D5(_) => "Core.D5",
             Self::D6(_) => "Core.D6",
-            Self::LegacySens8(_) => "LegacySens8",
         };
         write!(formatter, "{domain}({self})")
     }
@@ -141,25 +113,10 @@ mod tests {
     }
 
     #[test]
-    fn legacy_exact8_never_equals_short_domain_identity() {
-        let d3 = CallableDomainId::d3(Bija3::from_word(Bit3::new(0b101).unwrap()));
-        let legacy = CallableDomainId::from_legacy_sens8(
-            Sens8::from_packed_byte(0b0000_0101),
-        );
-
-        assert_eq!(d3.packed_bits(), legacy.packed_bits());
-        assert_ne!(d3, legacy);
-        assert_eq!(d3.legacy_sens8(), None);
-        assert_eq!(legacy.legacy_sens8(), Some(Sens8::from_packed_byte(5)));
-    }
-
-    #[test]
-    fn only_domain_qualified_variants_expose_domain_word() {
+    fn domain_word_round_trip_preserves_callable_domain() {
         let d4 = CallableDomainId::d4(CoreD4::from_word(Bit4::new(0b0010).unwrap()));
-        let legacy =
-            CallableDomainId::from_legacy_sens8(Sens8::from_packed_byte(0b0000_0010));
-
         assert!(matches!(d4.domain_word(), Some(DomainWord::D4(_))));
-        assert_eq!(legacy.domain_word(), None);
+        assert_eq!(d4.width(), 4);
+        assert_eq!(d4.to_string(), "0010");
     }
 }
