@@ -861,6 +861,118 @@
       "provenance": "#2323/#2345",
       "counterexample_class": "valid selector identity that cannot be replayed or malformed certificate that is accepted",
       "independence_evidence": "proof artifact only; never counted as an independent semantic fact"
+    },
+    {
+      "id": "postd4.factor.raw-form-input",
+      "kind": "factor",
+      "accounting_class": "semantic",
+      "claim": "special-call protocol exposes raw source operands/forms without eager operand evaluation",
+      "domain": "Core.PostD4.SpecialCallProtocol",
+      "applies_to": [
+        "post-d4-factor-current"
+      ],
+      "dependencies": [],
+      "witness": "#2522/#2530/#2597",
+      "status": "bounded-confirmed",
+      "provenance": "#2522 #2530 #2597",
+      "counterexample_class": "raw/eager distinction reconstructed after removing the factor while other protocol axes are fixed",
+      "independence_evidence": "#2597 replays #2522 remove-one control with caller-env/result held fixed"
+    },
+    {
+      "id": "postd4.factor.explicit-caller-env",
+      "kind": "factor",
+      "accounting_class": "semantic",
+      "claim": "special-call body receives an explicit caller-environment semantic input",
+      "domain": "Core.PostD4.SpecialCallProtocol",
+      "applies_to": [
+        "post-d4-factor-current"
+      ],
+      "dependencies": [],
+      "witness": "#2522/#2530/#2597",
+      "status": "bounded-confirmed",
+      "provenance": "#2522 #2530 #2597",
+      "counterexample_class": "caller-env access reconstructed with env axis removed while raw/result axes are fixed",
+      "independence_evidence": "#2597 replays #2522 axis-B remove-one evidence"
+    },
+    {
+      "id": "postd4.factor.returned-form-protocol",
+      "kind": "factor",
+      "accounting_class": "semantic",
+      "claim": "special-call result is a replacement/re-evaluated form rather than a direct value",
+      "domain": "Core.PostD4.SpecialCallProtocol",
+      "applies_to": [
+        "post-d4-factor-current"
+      ],
+      "dependencies": [],
+      "witness": "#2522/#2530/#2597",
+      "status": "bounded-confirmed",
+      "provenance": "#2522 #2530 #2597",
+      "counterexample_class": "direct-value and returned-form observations collapse after result-protocol removal",
+      "independence_evidence": "#2597 replays #2522 axis-C remove-one evidence"
+    },
+    {
+      "id": "postd4.factor.expansion-timing",
+      "kind": "factor",
+      "accounting_class": "semantic",
+      "claim": "syntax transformation occurs at definition/compiler time versus evaluation/call time",
+      "domain": "Core.PostD4.SpecialCallProtocol",
+      "applies_to": [
+        "post-d4-factor-current"
+      ],
+      "dependencies": [],
+      "witness": "#2568/#2569/#2579/#2597",
+      "status": "bounded-confirmed",
+      "provenance": "#2568 #2569 #2579 #2597",
+      "counterexample_class": "definition-time and evaluation-time expansion reconstructed as one observation with timing factor removed",
+      "independence_evidence": "#2597 replays the #2568/#2569 timing countermodel"
+    },
+    {
+      "id": "postd4.factor.call-packaging",
+      "kind": "factor",
+      "accounting_class": "semantic",
+      "claim": "transformer input exposes the whole invocation including head versus operands-only payload",
+      "domain": "Core.PostD4.SpecialCallProtocol",
+      "applies_to": [
+        "post-d4-factor-current"
+      ],
+      "dependencies": [],
+      "witness": "#2580 merged as 3d409736...",
+      "status": "bounded-confirmed",
+      "provenance": "#2580 #2588 3d409736",
+      "counterexample_class": "whole-call head reconstructed deterministically from identical operand-only payload without an additional channel",
+      "independence_evidence": "#2580/#2588 alias-collision witness: same raw operand payload under two heads is distinguishable only in whole-call protocol"
+    },
+    {
+      "id": "postd4.factor.shared-location-update",
+      "kind": "factor",
+      "accounting_class": "semantic",
+      "claim": "update nearest existing shared binding/location without creating a new binding",
+      "domain": "Core.PostD4.Mutation",
+      "applies_to": [
+        "post-d4-factor-current"
+      ],
+      "dependencies": [],
+      "witness": "#2402/#2441/#2489; structural child #2589 pending",
+      "status": "unknown",
+      "provenance": "#2402 #2441 #2489 #2589",
+      "counterexample_class": "factor reconstructible from remaining post-D4 factors or collapses under SET/SETQ structural attack",
+      "independence_evidence": "UNKNOWN pending #2589 same-base structural factorization; known observable capability is not yet an independent root theorem"
+    },
+    {
+      "id": "postd4.factor.non-local-exit",
+      "kind": "factor",
+      "accounting_class": "semantic",
+      "claim": "transfer a value to the nearest active PROG exit context rather than ordinary caller completion",
+      "domain": "Core.PostD4.NonLocalControl",
+      "applies_to": [
+        "post-d4-factor-current"
+      ],
+      "dependencies": [],
+      "witness": "#2439/#2488/#2504; structural child #2590 pending",
+      "status": "unknown",
+      "provenance": "#2439 #2488 #2504 #2590",
+      "counterexample_class": "non-local exit reconstructed from remaining factors or an admitted same-base D1-D4 parent",
+      "independence_evidence": "UNKNOWN pending #2590 parent/control factor attack; residue placement is not an independence proof"
     }
   ],
   "models": [
@@ -1216,6 +1328,40 @@
       ],
       "binary_participation": "B2",
       "binary_participation_note": "within the selector family, path choices carry executable first/rest projection meaning; #2366 keeps append-bit arithmetic classified only as canonical-coordinate law"
+    },
+    {
+      "id": "post-d4-factor-current",
+      "corpus": "current post-D4 structural-discovery factor candidates over the completed 19-row historical dataset",
+      "independent_facts": [
+        "postd4.factor.raw-form-input",
+        "postd4.factor.explicit-caller-env",
+        "postd4.factor.returned-form-protocol",
+        "postd4.factor.expansion-timing",
+        "postd4.factor.call-packaging"
+      ],
+      "unknown_facts": [
+        "postd4.factor.shared-location-update",
+        "postd4.factor.non-local-exit"
+      ],
+      "derived_facts": [],
+      "covers": [
+        "postd4.factor.raw-form-input",
+        "postd4.factor.explicit-caller-env",
+        "postd4.factor.returned-form-protocol",
+        "postd4.factor.expansion-timing",
+        "postd4.factor.call-packaging",
+        "postd4.factor.shared-location-update",
+        "postd4.factor.non-local-exit"
+      ],
+      "expected_semantic_fact_interval": [
+        5,
+        7
+      ],
+      "binary_participation": "B0",
+      "binary_participation_note": "all factors are UNPLACED structural observations; factor count is not width and does not allocate coordinates",
+      "semantic_root_count": 0,
+      "d5_resident_count": 0,
+      "coordinate_count": 0
     }
   ],
   "binary_participation_classes": {
