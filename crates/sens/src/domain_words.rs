@@ -21,7 +21,7 @@
 //! let _: PredicateBit = true;
 //! ```
 
-use crate::bits::{Bit1, Bit2, Bit3};
+use crate::bits::{Bit1, Bit2, Bit3, Bit5};
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -81,6 +81,37 @@ impl Bija3 {
     }
 }
 
+/// Exact five-bit carrier for the owner-ratified Core.D5 semantic domain.
+///
+/// This is intentionally distinct from `Bit5`: the latter proves only width,
+/// while `CoreD5Word` asserts membership in Core.D5. Individual coordinate
+/// meanings remain owner/Lisp-owned and are not encoded in this Rust type.
+///
+/// No conversion to `Sens8` exists: a five-bit Core.D5 identity must never be
+/// zero-padded or widened into the legacy eight-bit identity space.
+///
+/// ```compile_fail
+/// use sens::{Bit5, CoreD5Word, Sens8};
+///
+/// let d5 = CoreD5Word::from_word(Bit5::new(0b00101).unwrap());
+/// let _: Sens8 = d5;
+/// ```
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD5Word(Bit5);
+
+impl CoreD5Word {
+    /// Wrap an already validated five-bit mechanical word as Core.D5.
+    pub const fn from_word(word: Bit5) -> Self {
+        Self(word)
+    }
+
+    /// Recover the exact mechanical five-bit word without interpreting it.
+    pub const fn word(self) -> Bit5 {
+        self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,6 +133,11 @@ mod tests {
             let word = Bit3::new(raw).unwrap();
             assert!(Bija3::from_word(word).word() == word);
         }
+
+        for raw in 0..=31 {
+            let word = Bit5::new(raw).unwrap();
+            assert!(CoreD5Word::from_word(word).word() == word);
+        }
     }
 
     #[test]
@@ -109,5 +145,6 @@ mod tests {
         assert_eq!(size_of::<PredicateBit>(), 1);
         assert_eq!(size_of::<Racana2>(), 1);
         assert_eq!(size_of::<Bija3>(), 1);
+        assert_eq!(size_of::<CoreD5Word>(), 1);
     }
 }
