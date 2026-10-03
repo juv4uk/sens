@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::Sens8;
+use crate::{Bija3, Bit3, Bit4, CallableDomainId, CoreD4, LegacySens8, Sens8};
 
 mod generated {
     include!("semantic_registry_generated.rs");
@@ -21,6 +21,102 @@ mod generated {
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
+
+pub(crate) type DomainSemanticId = CallableDomainId;
+
+/// Role-aware migration from the historical generated registry byte axis.
+///
+/// This is intentionally not a truncation/zero-extension rule.  The D3
+/// EQ/COND swap is the negative witness: legacy 00000011 -> D3 111 while
+/// legacy 00000111 -> D3 011.  D4 LAMBDA/DEFINE likewise use their ratified
+/// bootstrap coordinates rather than low nibbles.
+///
+/// Rows not yet migrated remain explicitly Legacy8 until their D5/D6 owner-map
+/// slice is wired in.
+pub(crate) fn domain_semantic_id_from_registry_byte(byte: u8) -> DomainSemanticId {
+    let d3 = |raw| {
+        CallableDomainId::D3(Bija3::from_word(
+            Bit3::new(raw).expect("constant D3 coordinate must fit"),
+        ))
+    };
+    let d4 = |raw| {
+        CallableDomainId::D4(CoreD4::from_word(
+            Bit4::new(raw).expect("constant D4 coordinate must fit"),
+        ))
+    };
+
+    match byte {
+        0b0000_0001 => d3(0b001), // QUOTE
+        0b0000_0010 => d3(0b010), // ATOM
+        0b0000_0111 => d3(0b011), // COND
+        0b0000_0100 => d3(0b100), // CONS
+        0b0000_0101 => d3(0b101), // CAR
+        0b0000_0110 => d3(0b110), // CDR
+        0b0000_0011 => d3(0b111), // EQ
+        0b0000_1000 => d4(0b0010), // LAMBDA
+        0b0000_1001 => d4(0b0011), // DEFINE
+        other => CallableDomainId::from_legacy(LegacySens8::from_packed_byte(other)),
+    }
+}
+
+/// Compatibility reverse edge used only to index the still-byte-shaped
+/// generated projection. Exact-domain identity remains canonical.
+pub(crate) fn registry_byte_for_domain_semantic_id(id: DomainSemanticId) -> u8 {
+    match id {
+        CallableDomainId::D3(word) => match word.word().packed_bits() {
+            0b001 => 0b0000_0001, // QUOTE
+            0b010 => 0b0000_0010, // ATOM
+            0b011 => 0b0000_0111, // COND
+            0b100 => 0b0000_0100, // CONS
+            0b101 => 0b0000_0101, // CAR
+            0b110 => 0b0000_0110, // CDR
+            0b111 => 0b0000_0011, // EQ
+            other => panic!("unmapped D3 registry coordinate {other:03b}"),
+        },
+        CallableDomainId::D4(word) => match word.word().packed_bits() {
+            0b0010 => 0b0000_1000, // LAMBDA
+            0b0011 => 0b0000_1001, // DEFINE
+            other => panic!("D4 coordinate {other:04b} is not migrated into registry yet"),
+        },
+        CallableDomainId::Legacy8(word) => word.packed_byte(),
+        CallableDomainId::D5(_) | CallableDomainId::D6(_) => {
+            panic!("D5/D6 registry reverse map must come from owner-map migration")
+        }
+    }
+}
+
+pub(crate) fn admitted_domain_semantic_ids() -> Vec<DomainSemanticId> {
+    live_rows()
+        .iter()
+        .map(|row| domain_semantic_id_from_registry_byte(row.semantic_id))
+        .collect()
+}
+
+pub(crate) fn admitted_domain_semantic_id_for_surface(name: &str) -> Option<DomainSemanticId> {
+    admitted_semantic_id_for_surface(name)
+        .map(|legacy| domain_semantic_id_from_registry_byte(legacy.packed_byte()))
+}
+
+pub(crate) fn domain_semantic_id_for_surface(name: &str) -> Option<DomainSemanticId> {
+    admitted_domain_semantic_id_for_surface(name)
+}
+
+pub(crate) fn stable_surfaces_for_domain_semantic_id(
+    semantic_id: DomainSemanticId,
+) -> Vec<&'static str> {
+    stable_surfaces_for_semantic_id(Sens8::from_packed_byte(
+        registry_byte_for_domain_semantic_id(semantic_id),
+    ))
+}
+
+pub(crate) fn admitted_surfaces_for_domain_semantic_id(
+    semantic_id: DomainSemanticId,
+) -> Vec<&'static str> {
+    admitted_surfaces_for_semantic_id(Sens8::from_packed_byte(
+        registry_byte_for_domain_semantic_id(semantic_id),
+    ))
+}
+
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
 }
@@ -128,6 +224,37 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 mod tests {
     use super::*;
     use generated::SemanticSurface;
+
+
+    #[test]
+    fn domain_projection_is_role_aware_not_bit_truncation() {
+        let cond = domain_semantic_id_for_surface("cond").expect("COND surface");
+        let eq = domain_semantic_id_for_surface("eq").expect("EQ surface");
+        let lambda = domain_semantic_id_for_surface("lambda").expect("LAMBDA surface");
+        let define = domain_semantic_id_for_surface("define").expect("DEFINE surface");
+
+        assert_eq!(cond.width(), 3);
+        assert_eq!(cond.packed_bits(), 0b011);
+        assert_eq!(eq.width(), 3);
+        assert_eq!(eq.packed_bits(), 0b111);
+        assert_eq!(lambda.width(), 4);
+        assert_eq!(lambda.packed_bits(), 0b0010);
+        assert_eq!(define.width(), 4);
+        assert_eq!(define.packed_bits(), 0b0011);
+
+        // Explicit falsifiers for zero-padding / low-nibble migration.
+        assert_ne!(cond.packed_bits(), 0b111);
+        assert_ne!(eq.packed_bits(), 0b011);
+        assert_ne!(lambda.packed_bits(), 0b1000);
+        assert_ne!(define.packed_bits(), 0b1001);
+    }
+
+    #[test]
+    fn unmigrated_registry_rows_are_explicit_legacy_only() {
+        let plus = domain_semantic_id_for_surface("+").expect("+ surface");
+        assert_eq!(plus.width(), 8);
+        assert!(plus.legacy().is_some());
+    }
 
     #[test]
     fn generated_registry_is_one_contiguous_byte_axis() {
