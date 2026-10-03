@@ -13,11 +13,15 @@ use std::rc::Rc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use wsm_clips_kernel::ClipsKernel;
-use wsm_common_lisp_kernel::{CommonLispKernel, CommonLispRequest};
+use wsm_common_lisp_kernel::{
+    CommonLispKernel, CommonLispRequest, LegacyAbiSemanticId as CommonLispLegacyAbiSemanticId,
+};
 use wsm_datalog_kernel::{
     Atom, Database, Evaluator, Program, Rule, Term, Value as DatalogValue,
 };
-use wsm_prolog_kernel::{PrologKernel, PrologQuery, PrologRequest};
+use wsm_prolog_kernel::{
+    LegacyAbiSemanticId as PrologLegacyAbiSemanticId, PrologKernel, PrologQuery, PrologRequest,
+};
 
 const RAW_INVOKE_SENS: Sens8 = sens::sens!(10101000);
 
@@ -87,7 +91,10 @@ ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 
 fn invoke_common_lisp(sens: Sens8, payload: &str) -> Result<Vec<u8>, String> {
     CommonLispKernel::default()
-        .evaluate(&CommonLispRequest::new(sens.packed_byte(), payload))
+        .evaluate(&CommonLispRequest::new(
+            CommonLispLegacyAbiSemanticId(sens.packed_byte()),
+            payload,
+        ))
         .map(|result| result.stdout)
         .map_err(|error| error.to_string())
 }
@@ -98,7 +105,7 @@ fn invoke_prolog(sens: Sens8, payload: &str) -> Result<Vec<u8>, String> {
     let result = PrologKernel::default().execute(
         &program,
         &PrologRequest::new(
-            sens.packed_byte(),
+            PrologLegacyAbiSemanticId(sens.packed_byte()),
             PrologQuery::new(payload, template),
         ),
     );
