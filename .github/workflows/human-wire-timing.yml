@@ -1,0 +1,61 @@
+name: Human wire timing research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/human-wire/**"
+      - "benchmarks/agent-messages/run.py"
+      - "crates/sens/examples/agent_bench.rs"
+      - ".github/workflows/human-wire-timing.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/human-wire/**"
+      - "benchmarks/agent-messages/run.py"
+      - "crates/sens/examples/agent_bench.rs"
+      - ".github/workflows/human-wire-timing.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  timing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build current wire encoder
+        run: cargo build -p sens --release --example agent_bench
+
+      - name: Run deterministic human-wire timing model
+        run: |
+          rm -rf /tmp/human-wire-timing
+          python3 benchmarks/human-wire/timing.py \
+            --agent-bench target/release/examples/agent_bench \
+            --wire-sample-n 100 \
+            --unit-ms 60 \
+            --framing-bits 16 \
+            --checksum-bits 16 \
+            --out /tmp/human-wire-timing | tee /tmp/human-wire-timing.log
+          grep -F "HUMAN-WIRE-CORPUS-TIMING=PASS" /tmp/human-wire-timing.log
+          grep -F "RULE=timing-units-are-not-information-bits" /tmp/human-wire-timing.log
+          grep -F "SEMANTIC-AUTHORITY=NONE" /tmp/human-wire-timing.log
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/human-wire-timing/report.md; then
+            cat /tmp/human-wire-timing/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: human-wire-timing
+          path: |
+            /tmp/human-wire-timing/
+            /tmp/human-wire-timing.log
+          retention-days: 14
