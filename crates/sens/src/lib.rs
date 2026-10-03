@@ -10,6 +10,7 @@
 
 mod bignum;
 mod bits;
+mod canonical_reader;
 mod domain_words;
 mod domain_identity;
 mod packed_bits;
