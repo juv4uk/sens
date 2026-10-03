@@ -191,7 +191,7 @@ mod tests {
                 .unwrap_or_else(|| panic!("selector surface must project: {surface}"));
             assert_eq!((identity.width(), identity.packed_bits()), (4, bits));
         }
-        assert_eq!(domain_identity_for_surface("cdar"), None);
+        assert_eq!(domain_identity_for_surface("решта-від-першого"), None);
     }
 
     #[test]
