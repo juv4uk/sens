@@ -240,6 +240,55 @@ FIELDS = (
 )
 
 
+def _declares_real_field(body, label):
+    """True when an unscoped body already carries a non-empty, non-legend field value."""
+    _, value = field_value(body, label)
+    if value is None or not value:
+        return False
+    legend = LEGEND_TEXT.get(label)
+    return not (legend and legend.search(value))
+
+
+def scope_stats(issues):
+    """Describe the current policy scope without changing which issues are judged.
+
+    Policy remains intentionally narrow: only open issues containing the literal
+    BINARY-DOMAIN FORMAT block are governed by this ratchet.
+    """
+    open_issues = [
+        it for it in issues
+        if str(it.get("state", "open")).lower() == "open"
+    ]
+    scoped = [
+        it for it in open_issues
+        if BLOCK.search(it.get("body") or "")
+    ]
+    unscoped = [
+        it for it in open_issues
+        if not BLOCK.search(it.get("body") or "")
+    ]
+
+    declarations = {}
+    declared_issue_numbers = set()
+    for _key, label, _rule in FIELDS:
+        numbers = [
+            it.get("number")
+            for it in unscoped
+            if _declares_real_field(it.get("body") or "", label)
+        ]
+        declarations[label.lower()] = len(numbers)
+        declared_issue_numbers.update(number for number in numbers if number is not None)
+
+    return {
+        "scope": "explicit-format-block-only",
+        "open": len(open_issues),
+        "judged": len(scoped),
+        "unscoped_open": len(unscoped),
+        "unscoped_with_declared_fields": len(declared_issue_numbers),
+        "outside_scope_declarations": declarations,
+    }
+
+
 def judge(issues, requested_fields=None):
     if requested_fields is None:
         requested_fields = tuple(k for k, _, _ in FIELDS)
@@ -332,13 +381,33 @@ def self_test():
             print(f"  [FAIL] {name}: got {got!r}, expected {expected!r}")
             failures += 1
 
-    # Scope guard: issues without BINARY-DOMAIN FORMAT are ignored
-    scoped, skipped = judge([
-        {"number": 90, "title": "legacy", "state": "open", "body": "## DOMAIN pass rule\nRELATION: prose only\n"},
+    # Scope guard: issues without BINARY-DOMAIN FORMAT are ignored.
+    # #2627 requires that this policy remain explicit until the owner changes it.
+    scope_fixture = [
+        {"number": 90, "title": "legacy", "state": "open", "body": "## DOMAIN\nD5\nRELATION: prose only\n"},
         {"number": 91, "title": "closed", "state": "closed", "body": "BINARY-DOMAIN FORMAT\nDOMAIN: D5\n"},
-    ])
-    if scoped or skipped != 2:
+        {"number": 92, "title": "scoped", "state": "open", "body": "BINARY-DOMAIN FORMAT\nDOMAIN: D5\n"},
+    ]
+    scoped, skipped = judge(scope_fixture)
+    stats = scope_stats(scope_fixture)
+    if len(scoped) != 1 or skipped != 2:
         print(f"  [FAIL] scope guard: scoped={scoped}, skipped={skipped}")
+        failures += 1
+    if stats != {
+        "scope": "explicit-format-block-only",
+        "open": 2,
+        "judged": 1,
+        "unscoped_open": 1,
+        "unscoped_with_declared_fields": 1,
+        "outside_scope_declarations": {
+            "domain": 1,
+            "relation": 1,
+            "witness": 0,
+            "falsifier": 0,
+            "status": 0,
+        },
+    }:
+        print(f"  [FAIL] scope diagnostics: {stats}")
         failures += 1
 
     if failures:
@@ -387,6 +456,7 @@ def main(argv=None):
 
     active_fields = tuple(k for k in ("domain", "relation", "witness", "falsifier", "status") if k in baseline["violations"])
     judged, skipped = judge(issues, requested_fields=active_fields)
+    scope = scope_stats(issues)
 
     new_violations = {}
     for key in active_fields:
@@ -396,12 +466,29 @@ def main(argv=None):
             if row.get(key) in VIOLATION_RULES[key] and row["number"] not in known
         ]
 
-    summary_parts = [f"(judged {len(judged)})"]
+    summary_parts = [
+        f"(scope {scope['scope']})",
+        f"(open {scope['open']})",
+        f"(judged {len(judged)})",
+    ]
     for key in active_fields:
         summary_parts.append(f"(new-{key} {len(new_violations[key])})")
-    summary_parts.append(f"(skipped {skipped})")
+    summary_parts.extend([
+        f"(skipped {skipped})",
+        f"(unscoped-open {scope['unscoped_open']})",
+        f"(unscoped-with-declared-fields {scope['unscoped_with_declared_fields']})",
+    ])
 
     print(f"(binary-domain-format {' '.join(summary_parts)})")
+    outside = scope["outside_scope_declarations"]
+    print(
+        "(binary-domain-format-outside-scope "
+        + " ".join(
+            f"({key}-declared {outside[key]})"
+            for key in ("domain", "relation", "witness", "falsifier", "status")
+        )
+        + ")"
+    )
 
     has_new = False
     for key in active_fields:
