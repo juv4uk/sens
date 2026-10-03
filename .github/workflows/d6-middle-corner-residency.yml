@@ -1,0 +1,21 @@
+name: D6 middle-corner residency
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research-2624-d6-middle-corners.py'
+      - 'scripts/research-2506-d6-binding-policy-generator.py'
+      - 'benchmarks/d6-alt-parent-falsifier/**'
+      - 'benchmarks/d6-width-pressure/**'
+      - 'benchmarks/d6-closure-map/**'
+      - 'knowledge/repo-tooling-inventory.lisp'
+      - '.github/workflows/d6-middle-corner-residency.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify D6 middle corners remain proof-only
+        run: python3 scripts/research-2624-d6-middle-corners.py
