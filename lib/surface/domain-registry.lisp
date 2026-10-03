@@ -29,10 +29,10 @@
 
   ; D5 exact-domain arithmetic/comparison surfaces. These coordinates are
   ; owner-map residents and execute through the domain-first runtime.
-  (5 "01010" (en plus) (ук додати) (укр додати) (sa yoga) (sym +))
-  (5 "01011" (en difference) (ук відняти) (укр відняти) (sa viyoga) (sym -))
-  (5 "01110" (en lessp?) (ук менше?) (укр менше?) (sa hīna?) (sym <))
-  (5 "01111" (en greaterp?) (ук більше?) (укр більше?) (sa adhika?) (sym >))
-  (5 "10010" (en times) (ук помножити) (укр помножити) (sa guṇana) (sym *))
-  (5 "10011" (en divide) (ук поділити) (укр поділити) (sa haraṇa) (sym /))
+  (#b101 "01010" (en plus) (ук додати) (укр додати) (sa yoga) (sym +))
+  (#b101 "01011" (en difference) (ук відняти) (укр відняти) (sa viyoga) (sym -))
+  (#b101 "01110" (en lessp?) (ук менше?) (укр менше?) (sa hīna?) (sym <))
+  (#b101 "01111" (en greaterp?) (ук більше?) (укр більше?) (sa adhika?) (sym >))
+  (#b101 "10010" (en times) (ук помножити) (укр помножити) (sa guṇana) (sym *))
+  (#b101 "10011" (en divide) (ук поділити) (укр поділити) (sa haraṇa) (sym /))
 )
