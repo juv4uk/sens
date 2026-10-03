@@ -33,7 +33,7 @@
    (execution-source . "lib/core1.lisp")
    (historical-mechanism-map . "contracts/core1-historical-sid-map.lisp")
    (active-runtime-core . no)
-   (status . provenance))
+   (status . historical-evidence))
 
   ((identity . core2)
    (role . retired-compatibility-history)
