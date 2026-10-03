@@ -21,7 +21,7 @@
 //! let _: PredicateBit = true;
 //! ```
 
-use crate::bits::{Bit1, Bit2, Bit3};
+use crate::bits::{Bit1, Bit2, Bit3, Bit5};
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -58,6 +58,28 @@ impl Racana2 {
 
     /// Recover the mechanical two-bit word without interpreting it.
     pub const fn word(self) -> Bit2 {
+        self.0
+    }
+}
+
+
+/// Exact five-bit semantic carrier for owner-ratified Core.D5 membership.
+///
+/// This wrapper says only that the exact-width payload belongs to Core.D5.
+/// It does not encode a coordinate->name table, behavior table, or Sens8
+/// compatibility mapping.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD5Word(Bit5);
+
+impl CoreD5Word {
+    /// Wrap an already validated exact five-bit word as Core.D5.
+    pub const fn from_word(word: Bit5) -> Self {
+        Self(word)
+    }
+
+    /// Recover the exact mechanical five-bit payload without interpretation.
+    pub const fn word(self) -> Bit5 {
         self.0
     }
 }
@@ -102,6 +124,11 @@ mod tests {
             let word = Bit3::new(raw).unwrap();
             assert!(Bija3::from_word(word).word() == word);
         }
+
+        for raw in 0..=31 {
+            let word = Bit5::new(raw).unwrap();
+            assert!(CoreD5Word::from_word(word).word() == word);
+        }
     }
 
     #[test]
@@ -109,5 +136,6 @@ mod tests {
         assert_eq!(size_of::<PredicateBit>(), 1);
         assert_eq!(size_of::<Racana2>(), 1);
         assert_eq!(size_of::<Bija3>(), 1);
+        assert_eq!(size_of::<CoreD5Word>(), 1);
     }
 }
