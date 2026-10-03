@@ -286,6 +286,7 @@ jobs:
         if: steps.changes.outputs.workflow == 'true'
         run: |
           ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
+          python3 scripts/generate-domain-surface-registry.py --check
           python3 scripts/public_api_inventory.py --check
           bash scripts/test-current-semantic-slice.sh
           cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract --test english_names_in_code
@@ -309,6 +310,7 @@ jobs:
         run: |
           ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           ./target/debug/sens scripts/generate-rust-semantic-registry.lisp --check
+          python3 scripts/generate-domain-surface-registry.py --check
           ./target/debug/sens scripts/generate-rust-evaluator-dispatch.lisp --check
           ./target/debug/sens scripts/generate-rust-profile-mechanism-routes.lisp --check
           ./target/debug/sens scripts/generate-rust-function-signatures.lisp --check
