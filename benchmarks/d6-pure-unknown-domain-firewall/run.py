@@ -230,7 +230,8 @@ def build() -> dict[str, Any]:
 
     # The synthetic positive bridge is a harness control only. It does not
     # mutate the frontier or count as real evidence.
-    assert frontier["canonical"]["occupancy_mutations"] == 0
+    assert frontier["canonical"]["ratified_manual_coordinates"] == ["001111"]
+    assert frontier["canonical"]["research_occupancy_mutations"] == 0
 
     return {
         "schema": "d6-pure-unknown-domain-firewall/v1",
@@ -246,7 +247,7 @@ def build() -> dict[str, Any]:
         },
         "result": "NO-FOREIGN-AUTHORITY-FOR-D6-PURE-UNKNOWN",
         "new_candidates": 0,
-        "occupancy_mutations": 0,
+        "research_occupancy_mutations": 0,
         "guards": [
             "same raw bits do not imply same semantic object",
             "shared 2*x+b mechanism does not imply shared semantic law",
@@ -254,6 +255,7 @@ def build() -> dict[str, Any]:
             "GC/runtime tags have no semantic-domain authority",
             "only a separately proved same-object+same-law+cross-proof bridge can cross the firewall",
             "synthetic bridge control is not a production bridge claim",
+            "owner-ratified 001111 is outside PURE-UNKNOWN and grants no foreign bridge authority",
         ],
     }
 
@@ -275,7 +277,7 @@ def main() -> int:
     print("MECHANISM-NONAUTHORITY=88")
     print("REAL-BRIDGES=0")
     print("NEW-CANDIDATES=0")
-    print("OCCUPANCY-MUTATIONS=0")
+    print("RESEARCH-OCCUPANCY-MUTATIONS=0")
     print("RESULT=NO-FOREIGN-AUTHORITY-FOR-D6-PURE-UNKNOWN")
     return 0
 
