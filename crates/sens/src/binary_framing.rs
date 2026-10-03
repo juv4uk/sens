@@ -520,7 +520,9 @@ mod tests {
             let mut writer = BitWriter::new();
             encode_len_into(length, &mut writer).unwrap();
             let encoded = writer.finish();
-            assert_eq!(encoded, packed(expected), "length {length}");
+            let expected = packed(expected);
+            assert_eq!(encoded.bit_len(), expected.bit_len(), "length {length}");
+            assert_eq!(encoded.bytes(), expected.bytes(), "length {length}");
 
             let mut reader = BitReader::new(&encoded);
             assert_eq!(reader.read_len().unwrap(), length);
@@ -596,9 +598,9 @@ mod tests {
         ];
         let encoded = frames.map(|frame| encode_binary_frame(&frame).unwrap());
         assert_eq!(encoded.each_ref().map(|bits| bits.bit_len()), [9, 10, 11, 12]);
-        assert_ne!(encoded[0], encoded[1]);
-        assert_ne!(encoded[1], encoded[2]);
-        assert_ne!(encoded[2], encoded[3]);
+        assert!(encoded[0] != encoded[1]);
+        assert!(encoded[1] != encoded[2]);
+        assert!(encoded[2] != encoded[3]);
     }
 
     #[test]
