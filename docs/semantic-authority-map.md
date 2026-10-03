@@ -4,7 +4,7 @@ Status: CURRENT ARCHITECTURE MAP. This file does not create new language semanti
 
 ## One rule
 
-> The language owns meaning and function identity; runtimes provide mechanisms and conformance evidence.
+> The language owns meaning and domain-qualified semantic identity; runtimes provide mechanisms and conformance evidence.
 
 No implementation file, README paragraph, agent note, benchmark, or historical plan may silently outrank the current language contract.
 
@@ -23,21 +23,25 @@ When two sources disagree, use this order:
 
 If a lower item conflicts with a higher item, the lower item is stale until reconciled.
 
-## Current SENS function identity
+## Current SENS semantic identity
 
-SENS has exactly 256 functions:
+Canonical semantic identity is domain-qualified:
 
 ```text
-00000000
-...
-11111111
+semantic object
+=
+exact binary number
++ exact domain
++ admitted / proved law
 ```
 
-Each exact eight-bit form is the function itself. There is no parallel textual, symbolic, historical, or host-defined function identity layer.
+Current Core examples are exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, and owner-ratified D5/D6 domains. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
 
-Human spellings in Ukrainian, English, Sanskrit, symbolic notation, and compatibility surfaces are **source/UI routing metadata**. A surface may route to a SENS function; it does not own that function's identity or meaning.
+Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility, transport, backend, and provenance projections while #2817 migrates runtime consumers. They are not the universal current ontology.
 
-The concrete empty proper list `()` is a **structural value outside the 256-function space**. It is not an alias for either endpoint and does not consume one of the 256 function positions.
+Human spellings in Ukrainian, English, Sanskrit, symbolic notation, and compatibility surfaces are **source/UI routing metadata**. A surface may route to an already-admitted domain-qualified semantic object; it does not own identity or meaning.
+
+The concrete empty proper list `()` is Core.D3 `000`. It is distinct from historical exact-eight-bit `00000000`, PredicateBit `0`, and Number zero even though their packed numeric payloads may look related.
 
 ## Historical Lisp and Core1 provenance
 
@@ -45,7 +49,7 @@ Lisp was the original syntactic carrier and experimental substrate from which SE
 
 Names such as historical Lisp operations may therefore appear in Core1 material, archived research, provenance notes, old ADR context, and compatibility witnesses. Such names are historical descriptions or surfaces; they are not the active function ontology of SENS.
 
-Current Core profiles may assign different ratified laws/result domains to the same exact eight-bit SENS function. A Core profile does not mint another set of functions.
+Current Core profiles may select mechanisms and separately ratified profile behavior, but they do not mint or renumber domain residents and may not override the shared D1/D3 predicate-control foundation.
 
 ## Bootstrap and implementation mechanisms
 
@@ -55,7 +59,7 @@ Do not collapse three different questions:
 - **bootstrap/evaluator mechanisms** — implementation machinery needed to realize admitted behavior;
 - **derived language behavior** — behavior defined by SENS programs once the bootstrap substrate exists.
 
-Rust may contain parser, evaluator, closure, macro, lowering, host-boundary, or other mechanisms. Those implementation structures do not become function identities. Likewise, a language-defined closure or macro can become the execution mechanism for an exact SENS function without making its human spelling authoritative.
+Rust may contain parser, evaluator, closure, macro, lowering, host-boundary, or other mechanisms. Those implementation structures do not become function identities. Likewise, a language-defined closure or macro can become the execution mechanism for an admitted domain resident without making its human spelling authoritative.
 
 ## Project identity and source extensions
 
@@ -69,7 +73,7 @@ Use these terms consistently:
 
 ```text
 semantic authority        = language-contract + ratified decisions + executable conformance
-SENS function             = exact one of 00000000..11111111
+SENS semantic object      = exact bits + exact domain + admitted/proved law
 surface                   = source/UI routing metadata
 reference implementation  = crates/sens (Rust)
 independent substrate      = another conformance/execution target
