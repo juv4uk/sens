@@ -50,6 +50,27 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
 }
+
+/// Transitional spelling projection for already-migrated exact-domain roles.
+///
+/// The flat row supplies human spelling only; semantic identity comes solely
+/// from the explicit role bridge above. #2947 replaces the spelling source
+/// with the exact-domain registry without changing consumers of this API.
+pub(crate) fn domain_surface_bindings() -> Vec<(&'static str, CoreDomainIdentity)> {
+    let mut bindings = live_rows()
+        .iter()
+        .filter_map(|row| {
+            legacy_domain_identity_from_registry_byte(row.semantic_id)
+                .map(|identity| (identity, row.surfaces))
+        })
+        .flat_map(|(identity, surfaces)| {
+            surfaces.iter().map(move |surface| (surface.name, identity))
+        })
+        .collect::<Vec<_>>();
+    bindings.sort_unstable_by(|left, right| left.0.cmp(right.0));
+    bindings.dedup();
+    bindings
+}
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
 }
