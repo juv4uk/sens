@@ -302,6 +302,12 @@ pub(crate) fn invoke_domain_identity(
         return primitive(args, environment, span);
     }
 
+    match environment.domain_code_slot(identity) {
+        Some(Value::Closure(closure)) => return closures::apply_values(closure, args, span),
+        Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
+        _ => {}
+    }
+
     Err(LanguageError::new(
         ErrorKind::Type,
         format!("domain identity has no admitted value-call mechanism: {identity}"),
@@ -371,6 +377,19 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     if !environment.is_root() || !matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
         return;
     }
+
+    if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
+        if domain_primitive(identity).is_some()
+            || super::necessary_forms::identity_for_domain_identity(identity).is_some()
+        {
+            return;
+        }
+        environment.bind_domain_code_slot_once(identity, value.clone());
+        return;
+    }
+
+    // Compatibility-only lane for registry rows that do not yet have a
+    // canonical domain identity.
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
