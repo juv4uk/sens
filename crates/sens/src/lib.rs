@@ -10,6 +10,7 @@
 
 mod bignum;
 mod bits;
+mod canonical_reader;
 mod domain_words;
 mod domain_identity;
 mod packed_bits;
@@ -120,6 +121,7 @@ mod text7_projection_generated;
 mod value;
 
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
+pub use canonical_reader::parse_canonical_binary;
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
