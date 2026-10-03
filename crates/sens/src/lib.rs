@@ -10,6 +10,7 @@
 
 mod bignum;
 mod bits;
+mod callable_identity;
 mod domain_words;
 mod packed_bits;
 mod binary_framing;
@@ -119,6 +120,7 @@ mod text7_projection_generated;
 mod value;
 
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
+pub use callable_identity::CallableDomainId;
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, DomainWord, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
 pub use binary_framing::{
