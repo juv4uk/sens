@@ -53,7 +53,7 @@ Rust лишається важливим механічним substrate/referenc
 
 Нова дисципліна проста: `sens` має вміти **висловити, адресувати, передати, прийняти й композиційно використати** результат, але не зобов'язаний повторно реалізовувати всередині себе найкращий алгоритм кожного острова.
 
-Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **10.0**.
+Поточний машинний семантичний контракт — [`language-contract.lisp`](language-contract.lisp), версія **10.1** (domain-authority cutover; Contract 10.0 flat-Function8 збережений як NON-NORMATIVE provenance у `contracts/history/`).
 
 
 ### Одна мова, різні субстрати
