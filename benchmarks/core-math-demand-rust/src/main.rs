@@ -120,7 +120,7 @@ fn sha256_hex(text: &str) -> String {
         0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
         0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
         0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
-        0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb5,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+        0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
         0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2,
     ];
     let mut h: [u32; 8] = [
@@ -765,6 +765,9 @@ fn negative_controls(spec: &Value, requests: &Value) -> Result<(), String> {
 }
 
 fn main() -> Result<(), String> {
+    if sha256_hex("abc") != "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" {
+        return Err("SHA-256 known-vector self-test failed".to_string());
+    }
     let args: Vec<String> = env::args().collect();
     let out_dir = args
         .windows(2)
