@@ -1,0 +1,558 @@
+{
+  "schema": "memo24-lisp15-arithmetic-chronology/v1",
+  "issue": "#2715",
+  "parent": "#2697",
+  "consumes": "#2709 / merged PR #2710",
+  "phase": "HISTORICAL-INGEST",
+  "authority": "primary-source chronology/provenance only; no SENS placement authority",
+  "source": {
+    "citation": "Michael Levin, Arithmetic in LISP 1.5, Artificial Intelligence Project Memo 24, RLE and MIT Computation Center, April 28, 1961",
+    "url": "https://bitsavers.org/pdf/mit/ai/aim/AIM-024.pdf",
+    "original_pages": "1-8",
+    "note": "Page numbers in rows refer to original memo pages; OCR ambiguity is preserved as UNRESOLVED rather than silently corrected."
+  },
+  "comparison_target": {
+    "citation": "McCarthy et al., LISP 1.5 Programmer's Manual, Chapter IV §4.2, printed pp.25-27; Appendix A printed pp.63-64",
+    "url": "https://www.bitsavers.org/pdf/mit/rle_lisp/McCarthy_LISP_1.5_Programmers_Manual_2ed_1985.pdf",
+    "ledger": "docs/research/2709-lisp15-arithmetic-ledger.json"
+  },
+  "counts": {
+    "rows": 26,
+    "attested": 21,
+    "not_attested": 5,
+    "unresolved_presence": 0,
+    "same": 15,
+    "changed": 4,
+    "extended": 5,
+    "unresolved_relation": 2
+  },
+  "non_conclusions": [
+    "absence from Memo 24 does not prove absence from all 1961 Lisp 1.5 artifacts",
+    "Memo 24 chronology does not allocate D5/D6 coordinates",
+    "shared human names do not imply shared law/domain/identity",
+    "Core-Math exact-Q semantics are not back-projected into historical fixed/floating arithmetic",
+    "self-contradictory or OCR-ambiguous source text remains UNRESOLVED rather than silently corrected"
+  ],
+  "rows": [
+    {
+      "historical_name": "PLUS",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 3,
+      "memo24_behavior": "algebraic sum of n arguments",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "numeric arguments under Memo 24 arithmetic rules",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "algebraic sum of arguments",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error; mixed numeric types allowed",
+        "historical_result": "fixed if all fixed, floating if any floating"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "DIFFERENCE",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 3,
+      "memo24_behavior": "algebraic difference x-y",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "numeric arguments under Memo 24 arithmetic rules",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "x-y",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "numeric"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "MINUS",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 3,
+      "memo24_behavior": "changes the sign of x",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "numeric argument under Memo 24 arithmetic rules",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "-x",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "numeric"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "TIMES",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 3,
+      "memo24_behavior": "product of n arguments with correct sign",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "numeric arguments under Memo 24 arithmetic rules",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "product of arguments",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error; mixed numeric types allowed",
+        "historical_result": "fixed if all fixed, floating if any floating"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "ADD1",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 4,
+      "memo24_behavior": "x+1; result fixed or floating depending on argument",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "numeric argument under Memo 24 arithmetic rules",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "Scan OCR renders the name as addl; context is ADD1.",
+      "manual1962_attestation": {
+        "historical_behavior": "x+1",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "same numeric carrier class as argument"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "SUB1",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 4,
+      "memo24_behavior": "x-1",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "numeric argument under Memo 24 arithmetic rules",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "Scan OCR renders the name as subtl; context is SUB1.",
+      "manual1962_attestation": {
+        "historical_behavior": "x-1",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "same numeric carrier class as argument"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "MAX",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 4,
+      "memo24_behavior": "largest argument",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "numeric arguments under Memo 24 arithmetic rules",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "largest argument",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "numeric"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "MIN",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 4,
+      "memo24_behavior": "smallest argument",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "numeric arguments under Memo 24 arithmetic rules",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "smallest argument",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "numeric"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "RECIP",
+      "category": "arithmetic",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 4,
+      "memo24_behavior": "1/x; reciprocal of any fixed-point number is defined as zero",
+      "memo24_carrier_rule": "Memo 24: fixed and floating may be mixed; if any argument is floating all numbers are floated and the value is floating; octal/logical input counts as fixed point.",
+      "memo24_partiality": "historical fixed-point reciprocal is zero, not exact-Q reciprocal",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "Strong #2508 negative control versus exact-Q RECIP.",
+      "manual1962_attestation": {
+        "historical_behavior": "1/x concept; fixed-point reciprocal is defined as zero",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "historical fixed-point rule is not exact-Q reciprocal",
+        "historical_result": "fixed input -> 0; floating input -> reciprocal"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "QUOTIENT",
+      "category": "arithmetic",
+      "memo24_presence": "NOT-ATTESTED-IN-MEMO24",
+      "memo24_page": null,
+      "memo24_behavior": null,
+      "memo24_carrier_rule": null,
+      "memo24_partiality": null,
+      "manual1962_relation": "EXTENDED",
+      "first_attested_lineage": "UNRESOLVED-BEFORE-1962; #2710 attests Lisp 1.5 manual 1962",
+      "notes": "Not listed in Memo 24 arithmetic-function section; presence in 1962 remains a later attestation for this comparison.",
+      "manual1962_attestation": {
+        "historical_behavior": "quotient of x and y",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "fixed-point uses number-theoretic quotient; divide check/trap can signal error",
+        "historical_result": "numeric quotient"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "REMAINDER",
+      "category": "arithmetic",
+      "memo24_presence": "NOT-ATTESTED-IN-MEMO24",
+      "memo24_page": null,
+      "memo24_behavior": null,
+      "memo24_carrier_rule": null,
+      "memo24_partiality": null,
+      "manual1962_relation": "EXTENDED",
+      "first_attested_lineage": "UNRESOLVED-BEFORE-1962; #2710 attests Lisp 1.5 manual 1962",
+      "notes": "Not listed in Memo 24 arithmetic-function section; presence in 1962 remains a later attestation for this comparison.",
+      "manual1962_attestation": {
+        "historical_behavior": "number-theoretic remainder for fixed; floating residue for floating",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "division-related exceptional cases remain historical machine behavior",
+        "historical_result": "numeric remainder/residue"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "DIVIDE",
+      "category": "arithmetic",
+      "memo24_presence": "NOT-ATTESTED-IN-MEMO24",
+      "memo24_page": null,
+      "memo24_behavior": null,
+      "memo24_carrier_rule": null,
+      "memo24_partiality": null,
+      "manual1962_relation": "EXTENDED",
+      "first_attested_lineage": "UNRESOLVED-BEFORE-1962; #2710 attests Lisp 1.5 manual 1962",
+      "notes": "Not listed in Memo 24 arithmetic-function section; presence in 1962 remains a later attestation for this comparison.",
+      "manual1962_attestation": {
+        "historical_behavior": "compute quotient and remainder together",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "inherits quotient/remainder partiality",
+        "historical_result": "proper two-element list [quotient,remainder]"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "EXPT",
+      "category": "arithmetic",
+      "memo24_presence": "NOT-ATTESTED-IN-MEMO24",
+      "memo24_page": null,
+      "memo24_behavior": null,
+      "memo24_carrier_rule": null,
+      "memo24_partiality": null,
+      "manual1962_relation": "EXTENDED",
+      "first_attested_lineage": "UNRESOLVED-BEFORE-1962; #2710 attests Lisp 1.5 manual 1962",
+      "notes": "Not listed in Memo 24 arithmetic-function section; presence in 1962 remains a later attestation for this comparison.",
+      "manual1962_attestation": {
+        "historical_behavior": "x^y",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "first argument cannot be negative in documented implementation",
+        "historical_result": "numeric power"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "LESSP",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "true if x <= y; false otherwise",
+      "memo24_carrier_rule": "Memo 24 says mixed fixed/floating expression and argument-evaluation rules are the same as arithmetic functions; predicate result is NIL or true.",
+      "memo24_partiality": "numeric arguments",
+      "manual1962_relation": "CHANGED",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "1962 manual uses strict x < y.",
+      "manual1962_attestation": {
+        "historical_behavior": "x < y",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "GREATERP",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "true if x >= y",
+      "memo24_carrier_rule": "Memo 24 says mixed fixed/floating expression and argument-evaluation rules are the same as arithmetic functions; predicate result is NIL or true.",
+      "memo24_partiality": "numeric arguments",
+      "manual1962_relation": "CHANGED",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "Primary OCR loses the second formal parameter in the signature, but the comparison law is inclusive; 1962 manual uses strict x > y.",
+      "manual1962_attestation": {
+        "historical_behavior": "x > y",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "ZEROP",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "true if x=0 or |x| <= [scan OCR: 3^-6]",
+      "memo24_carrier_rule": "Memo 24 says mixed fixed/floating expression and argument-evaluation rules are the same as arithmetic functions; predicate result is NIL or true.",
+      "memo24_partiality": "numeric arguments; tolerance notation is not cleanly recovered by OCR",
+      "manual1962_relation": "UNRESOLVED",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "Presence and <= near-zero law are clear; exact printed scale stays scan-level unresolved rather than silently normalized.",
+      "manual1962_attestation": {
+        "historical_behavior": "true when x=0 or |x| <= 3e-6",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "fixed/floating numeric inputs; historical near-zero tolerance is <= 3e-6",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "ONEP",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "true if x=1",
+      "memo24_carrier_rule": "Memo 24 says mixed fixed/floating expression and argument-evaluation rules are the same as arithmetic functions; predicate result is NIL or true.",
+      "memo24_partiality": "numeric argument",
+      "manual1962_relation": "CHANGED",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "1962 manual broadens to |x-1| <= 3e-6.",
+      "manual1962_attestation": {
+        "historical_behavior": "true when |x-1| <= 3e-6",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "fixed/floating numeric inputs; historical near-one tolerance is <= 3e-6",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "MINUSP",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "true if x is negative; '-0' is negative",
+      "memo24_carrier_rule": "Memo 24 says mixed fixed/floating expression and argument-evaluation rules are the same as arithmetic functions; predicate result is NIL or true.",
+      "memo24_partiality": "numeric argument",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "x is negative; historical -0 is explicitly negative",
+        "historical_numeric_domain": "fixed-or-floating",
+        "partiality": "nonnumeric -> error",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "NUMBERP",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "true if x is a fixed-point or floating-point number",
+      "memo24_carrier_rule": "value predicate",
+      "memo24_partiality": "ordinary value input",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "x is a number",
+        "historical_numeric_domain": "value",
+        "partiality": "none documented for ordinary value input",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "FIXP",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "true only for fixed-point number; non-number is error",
+      "memo24_carrier_rule": "value predicate",
+      "memo24_partiality": "non-number -> error",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "x is fixed-point number",
+        "historical_numeric_domain": "value",
+        "partiality": "manual says non-number input errors",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "FLOATP",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "text says 'similar to FIXP but for fixed point numbers'",
+      "memo24_carrier_rule": "value predicate",
+      "memo24_partiality": "primary text/OCR is internally self-contradictory for FLOATP",
+      "manual1962_relation": "UNRESOLVED",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "Do not silently correct this row from the later manual; 1962 says floating-point.",
+      "manual1962_attestation": {
+        "historical_behavior": "x is floating-point number",
+        "historical_numeric_domain": "value",
+        "partiality": "non-number input errors, by the manual's stated similarity to FIXP",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "EQUAL",
+      "category": "numeric-predicate",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "works on lists, fixed-point and floating-point numbers; floating-point numbers must be exactly equal",
+      "memo24_carrier_rule": "general S-expression/numeric equality",
+      "memo24_partiality": "general value comparison",
+      "manual1962_relation": "CHANGED",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "1962 manual uses floating tolerance |x-y| < 3e-6.",
+      "manual1962_attestation": {
+        "historical_behavior": "general S-expression equality; floating numeric comparison requires |x-y| < 3e-6",
+        "historical_numeric_domain": "any-s-expression",
+        "partiality": "works on general S-expressions; floating numeric equality uses strict < 3e-6 tolerance",
+        "historical_result": "historical *T* or NIL"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "LOGOR",
+      "category": "logical-word",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "logical OR of n arguments",
+      "memo24_carrier_rule": "Memo 24 logical functions operate on 36-bit patterns; only fixed-point arguments are accepted, read as octal/decimal or produced by computation.",
+      "memo24_partiality": "fixed-point only",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "bitwise OR",
+        "historical_numeric_domain": "fixed-point/36-bit-logical-word",
+        "partiality": "only fixed-point/logical-word inputs accepted",
+        "historical_result": "36-bit logical word"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "LOGAND",
+      "category": "logical-word",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "logical AND of n arguments",
+      "memo24_carrier_rule": "Memo 24 logical functions operate on 36-bit patterns; only fixed-point arguments are accepted, read as octal/decimal or produced by computation.",
+      "memo24_partiality": "fixed-point only",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "bitwise AND",
+        "historical_numeric_domain": "fixed-point/36-bit-logical-word",
+        "partiality": "only fixed-point/logical-word inputs accepted",
+        "historical_result": "36-bit logical word"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "LOGXOR",
+      "category": "logical-word",
+      "memo24_presence": "ATTESTED-IN-MEMO24",
+      "memo24_page": 5,
+      "memo24_behavior": "exclusive OR of n arguments",
+      "memo24_carrier_rule": "Memo 24 logical functions operate on 36-bit patterns; only fixed-point arguments are accepted, read as octal/decimal or produced by computation.",
+      "memo24_partiality": "fixed-point only",
+      "manual1962_relation": "SAME",
+      "first_attested_lineage": "LISP-1.5-Memo24-1961-04-28",
+      "notes": "",
+      "manual1962_attestation": {
+        "historical_behavior": "bitwise exclusive OR",
+        "historical_numeric_domain": "fixed-point/36-bit-logical-word",
+        "partiality": "only fixed-point/logical-word inputs accepted",
+        "historical_result": "36-bit logical word"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    },
+    {
+      "historical_name": "LEFTSHIFT",
+      "category": "logical-word",
+      "memo24_presence": "NOT-ATTESTED-IN-MEMO24",
+      "memo24_page": null,
+      "memo24_behavior": null,
+      "memo24_carrier_rule": null,
+      "memo24_partiality": null,
+      "manual1962_relation": "EXTENDED",
+      "first_attested_lineage": "UNRESOLVED-BEFORE-1962; #2710 attests Lisp 1.5 manual 1962",
+      "notes": "Not listed in Memo 24 logical-function section; the 1962 manual later includes LEFTSHIFT.",
+      "manual1962_attestation": {
+        "historical_behavior": "x * 2^n as word shift; negative n shifts right",
+        "historical_numeric_domain": "fixed-point/36-bit-logical-word",
+        "partiality": "word-size/machine representation is historical mechanism",
+        "historical_result": "36-bit logical word"
+      },
+      "current_domain_candidate": "unresolved",
+      "binary_object": "UNPLACED"
+    }
+  ]
+}
