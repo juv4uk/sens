@@ -351,8 +351,10 @@ def render_md(result: dict[str, Any]) -> str:
         "## Domain state",
         "",
         f"- D1-D4: {result['domain_summary']['D1-D4']['historical_rows_explained']} historical rows already explained.",
-        f"- D5: {result['domain_summary']['D5']['generated_residents']} generated / "
-        f"{result['domain_summary']['D5']['protected_unknown']} protected UNKNOWN / 0 manual.",
+        f"- D5: {result['domain_summary']['D5']['resident']} owner residents / "
+        f"{result['domain_summary']['D5']['selector_generated']} selector-generated / "
+        f"{result['domain_summary']['D5']['owner_historical_nonselector']} owner-historical / "
+        f"{result['domain_summary']['D5']['current_unknown']} current UNKNOWN.",
         f"- D6: {result['domain_summary']['D6']['generated_residents']} generated / "
         f"{result['domain_summary']['D6']['canonical_unknown']} canonical UNKNOWN; "
         f"{result['domain_summary']['D6']['pure_unknown_not_search_space']} PURE-UNKNOWN are not a search space.",
