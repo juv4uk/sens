@@ -1,0 +1,24 @@
+name: D6 residency readiness
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research-2619-d6-residency-readiness.py'
+      - 'scripts/research-2506-d6-binding-policy-generator.py'
+      - 'scripts/research-2624-d6-middle-corners.py'
+      - 'benchmarks/d6-closure-map/**'
+      - 'benchmarks/d6-width-pressure/**'
+      - 'benchmarks/d6-alt-parent-falsifier/**'
+      - 'benchmarks/d6-nonprefix-falsifier/**'
+      - 'docs/research/2344-post-d4-historical-ledger.json'
+      - 'knowledge/repo-tooling-inventory.lisp'
+      - '.github/workflows/d6-residency-readiness.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify D6 owner-readiness without admission
+        run: python3 scripts/research-2619-d6-residency-readiness.py
