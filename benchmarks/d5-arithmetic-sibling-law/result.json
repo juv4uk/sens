@@ -1,0 +1,33 @@
+{
+  "schema": "d5-arithmetic-sibling-law/v1",
+  "domain": "Core.D5",
+  "owner_occupancy_authority": "OD-005",
+  "coordinates": {
+    "10010": "TIMES",
+    "10011": "QUOTIENT",
+    "01010": "PLUS",
+    "01011": "DIFFERENCE"
+  },
+  "d4_prefixes": {
+    "1001": "UNALLOCATED",
+    "0101": "UNALLOCATED"
+  },
+  "candidate_law": "suffix selects direct-vs-inverse rhs orientation",
+  "additive_full_protocol_delta_axes": [
+    "operation-orientation",
+    "arity"
+  ],
+  "multiplicative_full_protocol_delta_axes": [
+    "operation-orientation",
+    "arity",
+    "fixed-quotient-policy"
+  ],
+  "additive_classification": "MULTI-DELTA-NOT-LOCAL-SIBLING-LAW",
+  "multiplicative_classification": "MULTI-DELTA-NOT-LOCAL-SIBLING-LAW",
+  "relation_class": "COORDINATE-LAW",
+  "binary_restriction_possible": "UNRESOLVED",
+  "core_math_inverse_law_transfer": "FORBIDDEN-WITHOUT-BRIDGE",
+  "d4_parenthood": "NOT-PROVED",
+  "owner_map_mutation": "NONE",
+  "global_d5_suffix_theorem": "NOT-CLAIMED"
+}
