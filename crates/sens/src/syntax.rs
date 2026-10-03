@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sens8;
+use crate::{CoreDomainIdentity, Sens8};
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -49,7 +49,13 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
+    /// Legacy exact-eight compatibility identity. New canonical Core identity
+    /// uses `DomainIdentity`; this variant remains for historical parser,
+    /// FASL/wire, and backend paths during #2817 migration.
     Sid(Sens8),
+    /// Canonical domain-qualified Core identity. Width/domain is part of
+    /// identity; equal packed payloads in D3/D4/D5/D6 do not collapse.
+    DomainIdentity(CoreDomainIdentity),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -78,6 +84,10 @@ pub enum ExprKind {
     /// SENS call: the function slot is exactly one byte (`Sens8`), no name
     /// text. Produced only by `eval::lower` after parsing.
     Call(Sens8, Rc<[Expr]>),
+    /// Canonical lowered call head. Construction of this node does not itself
+    /// grant callability: lowering/routing may create it only after the
+    /// corresponding domain law admits the identity as callable.
+    DomainCall(CoreDomainIdentity, Rc<[Expr]>),
     /// Параметр замикання за числовими координатами: слот `index` кадру
     /// виклику на `depth` кадрів вище. Імені тут немає навмисно (#1697,
     /// контракт 10.0 `locals-are-slots-not-names`): виконання залежить лише від
@@ -128,6 +138,9 @@ pub(crate) mod fasl {
     const TAG_F32_BUFFER: u8 = 9;
     // #1697: числові координати локальної змінної; ім'я не записується.
     const TAG_LOCAL: u8 = 10;
+    // #2840: domain-qualified Core identity, encoded as exact domain width
+    // followed by its packed payload. Old decoders fail closed on this tag.
+    const TAG_DOMAIN_IDENTITY: u8 = 11;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -151,6 +164,27 @@ pub(crate) mod fasl {
         std::str::from_utf8(slice).ok()
     }
 
+    fn put_domain_identity(out: &mut Vec<u8>, identity: crate::CoreDomainIdentity) {
+        out.push(identity.width() as u8);
+        out.push(identity.packed_bits());
+    }
+
+    fn get_domain_identity(
+        bytes: &[u8],
+        pos: &mut usize,
+    ) -> Option<crate::CoreDomainIdentity> {
+        let domain = *bytes.get(*pos)?;
+        let payload = *bytes.get(*pos + 1)?;
+        *pos += 2;
+        match domain {
+            3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
+            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
+            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
+            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
+            _ => None,
+        }
+    }
+
     pub(crate) fn encode_expr(expr: &Expr, out: &mut Vec<u8>) {
         match &expr.kind {
             ExprKind::Number(f, exactness) => {
@@ -165,6 +199,10 @@ pub(crate) mod fasl {
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
+            }
+            ExprKind::DomainIdentity(identity) => {
+                out.push(TAG_DOMAIN_IDENTITY);
+                put_domain_identity(out, *identity);
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -197,6 +235,15 @@ pub(crate) mod fasl {
                 put_u32(out, arguments.len() as u32 + 1);
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
+                for argument in arguments.iter() {
+                    encode_expr(argument, out);
+                }
+            }
+            ExprKind::DomainCall(identity, arguments) => {
+                out.push(TAG_LIST);
+                put_u32(out, arguments.len() as u32 + 1);
+                out.push(TAG_DOMAIN_IDENTITY);
+                put_domain_identity(out, *identity);
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -239,6 +286,7 @@ pub(crate) mod fasl {
                 *pos += 1;
                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
             }
+            TAG_DOMAIN_IDENTITY => ExprKind::DomainIdentity(get_domain_identity(bytes, pos)?),
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
             TAG_LOCAL => {
@@ -362,6 +410,7 @@ pub(crate) mod wire {
     const TAG_SYMBOL: u8 = 0x56;
     const TAG_PAIR: u8 = 0x57;
     const TAG_LOCAL: u8 = 0x58;
+    const TAG_DOMAIN_IDENTITY: u8 = 0x59;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
 
@@ -397,6 +446,27 @@ pub(crate) mod wire {
         let slice = bytes.get(*pos..pos.checked_add(len)?)?;
         *pos += len;
         std::str::from_utf8(slice).ok()
+    }
+
+    fn put_domain_identity(out: &mut Vec<u8>, identity: crate::CoreDomainIdentity) {
+        out.push(identity.width() as u8);
+        out.push(identity.packed_bits());
+    }
+
+    fn get_domain_identity(
+        bytes: &[u8],
+        pos: &mut usize,
+    ) -> Option<crate::CoreDomainIdentity> {
+        let domain = *bytes.get(*pos)?;
+        let payload = *bytes.get(*pos + 1)?;
+        *pos += 2;
+        match domain {
+            3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
+            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
+            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
+            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
+            _ => None,
+        }
     }
 
     fn put_list_header(out: &mut Vec<u8>, count: usize) {
@@ -441,6 +511,10 @@ pub(crate) mod wire {
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
             }
+            ExprKind::DomainIdentity(identity) => {
+                out.push(TAG_DOMAIN_IDENTITY);
+                put_domain_identity(out, *identity);
+            }
             ExprKind::String(value) => put_text(out, TAG_STRING, value),
             ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
             ExprKind::Local { depth, index } => {
@@ -463,6 +537,14 @@ pub(crate) mod wire {
                 put_list_header(out, arguments.len() + 1);
                 out.push(TAG_BINARY);
                 out.push(sid.packed_byte());
+                for argument in arguments.iter() {
+                    encode_expr(argument, out);
+                }
+            }
+            ExprKind::DomainCall(identity, arguments) => {
+                put_list_header(out, arguments.len() + 1);
+                out.push(TAG_DOMAIN_IDENTITY);
+                put_domain_identity(out, *identity);
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -567,6 +649,9 @@ pub(crate) mod wire {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+            }
+            TAG_DOMAIN_IDENTITY => {
+                ExprKind::DomainIdentity(get_domain_identity(bytes, pos)?)
             }
             TAG_LOCAL => {
                 let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
