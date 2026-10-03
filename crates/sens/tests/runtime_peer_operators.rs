@@ -1,7 +1,7 @@
 use sens::{
-    eval_program, language_items, render_value_for_presentation, PresentationLanguage, Session, Value,
+    eval_program, language_items, render_value_for_presentation, ErrorKind, PresentationLanguage,
+    Session, Value,
 };
-use std::rc::Rc;
 
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
@@ -46,36 +46,25 @@ const CASES: &[PeerCase] = &[
     },
 ];
 
-fn assert_same_builtin(left: &Value, right: &Value) {
-    match (left, right) {
-        (Value::Builtin(left), Value::Builtin(right)) => assert!(
-            Rc::ptr_eq(left, right),
-            "peer spellings must point to one builtin allocation"
-        ),
-        // Після кроку «Rust лише примітиви» всі написання ведуть до одного
-        // SENS-коду — спільна ідентичність тепер сам 1-байтовий код.
-        (Value::Sid(left), Value::Sid(right)) => assert_eq!(left, right),
-        other => panic!("expected builtin peer values, got {other:?}"),
-    }
-}
-
-fn value(session: &mut Session, source: &str) -> Value {
-    eval_program(source, session)
-        .unwrap_or_else(|error| panic!("{source}: {error:?}"))
-        .value
+fn assert_not_preloaded_runtime_binding(session: &mut Session, source: &str) {
+    let error = match eval_program(source, session) {
+        Ok(result) => panic!("{source}: unexpectedly resolved to {:?}", result.value),
+        Err(error) => error,
+    };
+    assert_eq!(
+        error.kind,
+        ErrorKind::UnknownSymbol,
+        "{source}: human/symbolic projection must not become implicit runtime authority"
+    );
 }
 
 #[test]
-fn stable_operator_peers_exist_before_human_surface_libraries_load() {
+fn human_operator_peers_are_not_preloaded_runtime_authority() {
     for case in CASES {
         let mut session = Session::default();
-        let uk = value(&mut session, case.uk);
-        let sa = value(&mut session, case.sa);
-        let sym = value(&mut session, case.sym);
-
-        assert_same_builtin(&uk, &sa);
-        assert_same_builtin(&sa, &sym);
-
+        assert_not_preloaded_runtime_binding(&mut session, case.uk);
+        assert_not_preloaded_runtime_binding(&mut session, case.sa);
+        assert_not_preloaded_runtime_binding(&mut session, case.sym);
     }
 }
 
@@ -127,10 +116,11 @@ fn runtime_peer_slice_matches_numeric_registry_rows() {
 fn ukrainian_builtin_presentation_uses_numeric_authority_not_legacy_audit() {
     assert!(!PRESENTATION.contains("uk-sa-coverage.lisp"));
     for case in CASES {
-        let mut session = Session::default();
-        let builtin = value(&mut session, case.sym);
+        let sid = sens::semantic_registry_export::semantic_id_for_admitted_surface(case.sym)
+            .expect("symbolic projection must map to one numeric semantic identity");
+        let identity = Value::Sid(sid);
         assert_eq!(
-            render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
+            render_value_for_presentation(&identity, PresentationLanguage::Ukrainian),
             format!("#<вбудована {}>", case.uk),
             "{} presentation",
             case.uk
