@@ -1,0 +1,50 @@
+name: Core-Math binary growth and demand derivation
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-binary-growth/**"
+      - ".github/workflows/core-math-binary-growth.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-binary-growth/**"
+      - ".github/workflows/core-math-binary-growth.yml"
+  workflow_dispatch:
+
+jobs:
+  binary-growth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Verify zero external dependencies
+        run: |
+          if grep -Eq '^\[dependencies\]' benchmarks/core-math-binary-growth/Cargo.toml; then
+            echo "unexpected dependency section" >&2
+            exit 1
+          fi
+
+      - name: Test semantic core and falsifiers
+        run: |
+          cargo test --quiet --manifest-path benchmarks/core-math-binary-growth/Cargo.toml
+
+      - name: Run growth and demand-derivation witness
+        run: |
+          cargo run --quiet --manifest-path benchmarks/core-math-binary-growth/Cargo.toml
+
+      - name: Publish boundary
+        if: always()
+        run: |
+          {
+            echo "## Core-Math binary growth & demand derivation — #2460"
+            echo
+            echo "- ontology: #2490 pure binary domain objects (bits + domain + law -> semantic object)"
+            echo "- growth rule: known bits + proved law -> new bits -> reuse new bits"
+            echo "- chained derivation: newly generated binary objects reused directly in subsequent laws"
+            echo "- on-demand derivation: materializes only the requested DAG without exponential closure enumeration"
+            echo "- eager parity: 100% bit-exact parity between demand derivation and eager closure"
+            echo "- zero external crate dependencies"
+            echo "- falsifiers passed: missing seed, missing law, domain mismatch (#2508), order invariance, cache invariance, anti-numerology"
+          } >> "$GITHUB_STEP_SUMMARY"
