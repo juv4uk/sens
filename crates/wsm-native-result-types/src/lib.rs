@@ -345,15 +345,15 @@ impl FourKernelObservation {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use sens::{Bija3, Bit3, CoreDomainIdentity};
     use wsm_clips_kernel::SemanticId as ClipsSemanticId;
-    use wsm_common_lisp_kernel::SemanticId as CommonLispSemanticId;
     use wsm_prolog_kernel::SemanticId as PrologSemanticId;
 
     #[test]
     fn artifact_preserves_four_concrete_producer_types() {
         let observation = FourKernelObservation::new(
             CommonLispResult {
-                semantic_id: CommonLispSemanticId(5),
+                identity: CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(0b101).unwrap())),
                 stdout: b"LEFT\n".to_vec(),
                 stderr: Vec::new(),
             },
