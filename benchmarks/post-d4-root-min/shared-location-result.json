@@ -1,0 +1,69 @@
+{
+  "bounded_countermodel": {
+    "alias_location": "l0",
+    "explicit_observer_new_store": "new",
+    "explicit_observer_old_store": "old",
+    "immutable_store_persistence": true,
+    "local_protocol_preserved_by_explicit_state_model": false,
+    "missing_name_fails_closed": true,
+    "unchanged_zero_arg_observer_after_external_update": "old"
+  },
+  "carrier_premise": {
+    "explicit_data_encoding": "frames + location ids + immutable store",
+    "name": "ambient-current-store/shared-location",
+    "observable_role": "an unchanged pre-existing observer must resolve the current value of the same logical location without receiving a new store argument",
+    "why_not_derived_locally": "the D3/D4 explicit-state encoding changes observer() into observer(store)"
+  },
+  "coordinate": "UNPLACED",
+  "derived_components": [
+    "nearest-existing lookup over explicit frame data",
+    "existing-location update over explicit immutable store data",
+    "alias preservation when names map to one explicit location id",
+    "fail-on-miss policy over explicit data"
+  ],
+  "escape_hatches": [
+    {
+      "classification": "whole-program observer protocol rewrite",
+      "escape": "pass new store explicitly"
+    },
+    {
+      "classification": "imports mutable shared-location carrier",
+      "escape": "mutate captured store/location in place"
+    },
+    {
+      "classification": "imports ambient state carrier",
+      "escape": "read implicit global/current store"
+    },
+    {
+      "classification": "whole-program value/protocol rewrite",
+      "escape": "replace every old observer with a new closure"
+    }
+  ],
+  "evidence": [
+    "#2402",
+    "#2442",
+    "#2468",
+    "#2480",
+    "#2589",
+    "#2598",
+    "#2615"
+  ],
+  "factor": "shared-location-update",
+  "falsifier": "A context-preserving D1-D4 replacement that leaves pre-existing zero-argument observers/callers unchanged yet makes them observe the nearest existing location's new value without importing an ambient/mutable store-location channel.",
+  "global_compilability": "COMPILABLE-TO-D4-GLOBAL",
+  "issue": "#2628",
+  "local_derivation": "NOT-DERIVED-D4-LOCAL",
+  "new_residents": 0,
+  "non_conclusions": [
+    "CARRIER-PREMISE is not a bit-width theorem",
+    "global D4 compilability is not local semantic derivation",
+    "the carrier premise is not assigned a D5/D6 coordinate here"
+  ],
+  "parent": "#2617",
+  "phase": "SENS-DERIVATION",
+  "root_promoted_by_this_result": false,
+  "root_status": "CARRIER-PREMISE",
+  "schema": "post-d4-root-min/1",
+  "structural_status": "BOUNDED-INDEPENDENT",
+  "width": "UNKNOWN"
+}
