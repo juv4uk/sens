@@ -98,6 +98,26 @@
       "semantic_observable": "historical representation wrapper with no current independent semantic residue established"
     },
     {
+      "current_status": "protocol-axis-candidate",
+      "dependency_on_other_factor": [],
+      "evidence": [
+        "#2580",
+        "#2588",
+        "3d409736b994221561b413c42c837a428d242358"
+      ],
+      "factor_id": "invocation-packaging",
+      "falsifier": "two aliases of one transformer with identical operands remain distinguishable without an explicit head/input channel",
+      "negative_controls": [
+        "EVALQUOTE",
+        "FEXPR",
+        "FSUBR"
+      ],
+      "positive_rows": [
+        "TRANSFORMER"
+      ],
+      "semantic_observable": "whole invocation form exposes call head while operand-only input does not"
+    },
+    {
       "current_status": "surviving-observable-candidate",
       "dependency_on_other_factor": [],
       "evidence": [
@@ -420,6 +440,7 @@
     {
       "candidate_factors": [
         "expansion-timing",
+        "invocation-packaging",
         "raw-form-input",
         "returned-form-protocol"
       ],
@@ -436,16 +457,17 @@
   "schema": "d5-structural-factor-graph/1",
   "source_ledger": "docs/research/2344-post-d4-historical-ledger.json",
   "summary": {
-    "candidate_factors_total": 8,
+    "candidate_factors_total": 9,
     "d5_selector_generated": 8,
     "d5_unknown_free": 24,
     "historical_rows_consumed": 19,
     "new_d5_residents": 0,
     "placement_search_authorized": false,
-    "post_d4_factor_candidates": 6,
+    "post_d4_factor_candidates": 7,
     "post_d4_factor_ids": [
       "expansion-timing",
       "explicit-caller-env",
+      "invocation-packaging",
       "non-local-exit",
       "raw-form-input",
       "returned-form-protocol",
