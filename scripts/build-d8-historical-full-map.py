@@ -46,6 +46,11 @@ ISSUE = 2410
 
 SELECTOR_ROOTS = ("101", "110")
 
+# Evidence classes. Only the first is an admitted law; the second is a
+# chronological list that is explicitly NOT a law.
+SELECTOR_EVIDENCE = "generated-by-admitted-d3-selector-law-2322"
+HISTORICAL_EVIDENCE = "agent-derived-historical-continuation"
+
 # ---------------------------------------------------------------------------
 # Historical capability continuation, four children per D6 parent.
 #
@@ -445,12 +450,29 @@ def build() -> dict:
     if duplicates:
         raise AssertionError(f"duplicate D8 resident names: {duplicates}")
 
-    counts = Counter(row["category"] for row in coordinates)
-    status_counts = dict(sorted(counts.items()))
-    status_counts["selector"] = status_counts.get("selector", 0)
-    status_counts["total"] = len(coordinates)
-    status_counts["unallocated"] = 0
-    status_counts = dict(sorted(status_counts.items(), key=lambda kv: (kv[0] != "selector", kv[0])))
+    # --- admission partition -------------------------------------------------
+    # Only the D3 CAR/CDR selector law is admitted, so only the 64 selector
+    # coordinates are occupants. The 192 historical rows keep their provenance
+    # as attested-but-unadmitted candidates: ADR-005 §4 requires an executable
+    # witness before a primitive earns a semantic identity, and the
+    # chronological four-per-parent rule is not a law (see falsified_rules).
+    admitted = [row for row in coordinates if row["evidence"] == SELECTOR_EVIDENCE]
+    unadmitted = [row for row in coordinates if row["evidence"] != SELECTOR_EVIDENCE]
+    for row in unadmitted:
+        row["admission"] = "attested-not-admitted"
+        row["admission_reason"] = (
+            "no admitted law generates this coordinate; ADR-005 §4 requires an executable "
+            "witness before a coordinate gains a semantic identity"
+        )
+    for row in admitted:
+        row["admission"] = "admitted-by-law"
+
+    status_counts = {
+        "total_coordinates": len(coordinates),
+        "admitted": len(admitted),
+        "attested_not_admitted": len(unadmitted),
+        "selector": len(admitted),
+    }
 
     evidence_counts = dict(sorted(Counter(row["evidence"] for row in coordinates).items()))
 
@@ -481,9 +503,11 @@ def build() -> dict:
                 "reproduces exactly the D8 selector forecast of #2322."
             ),
             "historical_rule": (
-                "The 192 remaining coordinates receive four chronological historical Lisp "
-                "capabilities per D6 parent, each one an extension of that parent, each carrying "
-                "its own provenance."
+                "FALSIFIED AND DEMOTED. The earlier rule assigned four chronological "
+                "historical Lisp capabilities per D6 parent. Factor-analysis showed it does "
+                "not factor into two independent commuting policies the way #2506 does, so it "
+                "is not a law. Its 192 coordinates are now attested-not-admitted candidates "
+                "whose provenance is preserved, not occupants."
             ),
             "lineage_note": LINEAGE_NOTE,
             "derived_from": {
@@ -492,12 +516,82 @@ def build() -> dict:
                 "selector_forecast": "scripts/research-2322-generative-domain-forecast.py",
             },
         },
+        "ratification_scope": {
+            "precedent": (
+                "#2415 (ratified D7): 'Ratification covers the domain width/ontology and "
+                "semantic role, not blanket occupancy of all 128 coordinates.' The same "
+                "boundary is applied to D8."
+            ),
+            "ratified": [
+                "width = 8 bits",
+                "ontology = exact 256-coordinate Core domain",
+                "lineage = each D6 coordinate has exactly four D8 children",
+            ],
+            "not_ratified": [
+                "blanket occupancy of all 256 coordinates",
+                "any individual coordinate assignment outside the admitted selector law",
+            ],
+        },
+        "non_conflation": {
+            "rule": (
+                "D8 is an exact 8-bit Core domain. Legacy Sens8 is an 8-bit flat byte table "
+                "where the byte is simultaneously address and identity. Equal width does not "
+                "imply shared type or shared law, and neither domain implies the other."
+            ),
+            "precedent": (
+                "#2415: Sound7 cells and local sloka/sutra ordinals both use seven-bit values "
+                "without implying one arithmetic Number type or law."
+            ),
+            "measured_overlap": (
+                "8 of 183 legacy Sens8 EN surface names also appear in this map, and none of "
+                "the eight shares a coordinate with its legacy byte (for example APPLY is "
+                "Sens8 10101111 but D8 00001100). D8 is not a relabelled byte table."
+            ),
+        },
+        "falsified_rules": [
+            {
+                "rule": "four chronological historical Lisp capabilities per D6 parent",
+                "falsifier": (
+                    "the four children of a parent do not factor into two independent "
+                    "commuting policies"
+                ),
+                "worked_counterexample": (
+                    "D6 000001 LOAD -> OPEN, CLOSE, WITH-OPEN-FILE, DRIBBLE. OPEN and CLOSE "
+                    "are two poles of one operation, not two instances of one refinement, so "
+                    "no commuting square exists."
+                ),
+                "second_counterexample": (
+                    "D6 000011 CURRY -> APPLY, COMPOSE, PARTIAL, FFI-CALL. A foreign-function "
+                    "call is not a curry descendant, so the rule produced a category error."
+                ),
+                "action": "192 coordinates demoted to attested-not-admitted; provenance kept",
+            }
+        ],
+        "next_step": {
+            "method": (
+                "Derive remaining coordinates one admitted law at a time. Each D8 cell needs "
+                "two independent one-bit refinements of its D6 parent plus an executable "
+                "witness that the refinements commute, exactly as #2506 did for D6. "
+                "Historical Lisp functions then become positive controls, not allocations."
+            ),
+            "progress_metric": (
+                "count of independent admitted laws that earned inhabitants, NOT occupancy "
+                "out of 256"
+            ),
+            "unresolved_parents": 48,
+        },
         "honesty": {
             "selector_rows": "generated by an admitted law, not by allocation",
             "historical_rows": (
-                "agent-derived chronological continuation. No single historical source attests "
-                "this particular coordinate assignment; per-row provenance names the dialect "
-                "lineage each capability comes from."
+                "NOT admitted. These are attested-but-unadmitted candidates whose provenance is "
+                "preserved as witness material. A chronological capability list is not a law, "
+                "and ADR-005 §4 requires an executable witness before a primitive earns a "
+                "semantic identity. They are kept visible so the witness material is not lost, "
+                "and are not counted as occupancy."
+            ),
+            "occupancy_claim_withdrawn": (
+                "This map no longer claims full 256/256 occupancy. Claiming unallocated=0 "
+                "asserted blanket occupancy, which #2415 explicitly declines to ratify."
             ),
             "residency": (
                 "Occupancy does not claim semantic irreducibility. Derivability is tracked "
@@ -510,7 +604,8 @@ def build() -> dict:
         },
         "status_counts": status_counts,
         "evidence_counts": evidence_counts,
-        "coordinates": coordinates,
+        "coordinates": admitted,
+        "unassigned_candidates": unadmitted,
     }
 
 
@@ -520,10 +615,11 @@ def main() -> None:
         json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(f"wrote {OUT_PATH.relative_to(ROOT)}")
-    print(f"D8 width=8 capacity={data['capacity']} occupied={data['status_counts']['total']}")
-    print(f"D8 selectors={data['status_counts']['selector']} historical={data['capacity'] - data['status_counts']['selector']}")
-    print("unallocated=0")
+    print(f"D8 width=8 capacity={data['capacity']}")
+    print(f"admitted={data['status_counts']['admitted']} (all by the D3 selector law)")
+    print(f"attested_not_admitted={data['status_counts']['attested_not_admitted']}")
     print(f"evidence={json.dumps(data['evidence_counts'])}")
+    print("metric=independent admitted laws, NOT occupancy out of 256")
 
 
 if __name__ == "__main__":

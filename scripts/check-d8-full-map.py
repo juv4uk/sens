@@ -79,11 +79,23 @@ def main() -> None:
     require(d8["width"] == 8, "D8 width drift")
     require(d8["capacity"] == 1 << 8, "D8 capacity drift")
     require(d8["domain"] == "Core.D8", "D8 domain drift")
-    require(d8["status_counts"]["total"] == 256, "D8 total drift")
-    require(d8["status_counts"]["unallocated"] == 0, "D8 must be fully occupied")
 
-    rows = d8["coordinates"]
-    require(len(rows) == 256, f"D8 row count drift: {len(rows)}")
+    admitted = d8["coordinates"]
+    unadmitted = d8["unassigned_candidates"]
+    rows = admitted + unadmitted
+
+    require(len(admitted) == 64, f"D8 admitted count drift: {len(admitted)}")
+    require(len(unadmitted) == 192, f"D8 candidate count drift: {len(unadmitted)}")
+    require(len(rows) == 256, f"D8 total row drift: {len(rows)}")
+
+    counts = d8["status_counts"]
+    require(counts["total_coordinates"] == 256, "D8 total_coordinates drift")
+    require(counts["admitted"] == len(admitted), "D8 admitted accounting drift")
+    require(
+        counts["attested_not_admitted"] == len(unadmitted),
+        "D8 attested_not_admitted accounting drift",
+    )
+    require("unallocated" not in counts, "D8 must not claim blanket occupancy")
 
     coords = [row["coordinate"] for row in rows]
     names = [row["name"] for row in rows]
@@ -96,6 +108,64 @@ def main() -> None:
     )
 
     by_coord = {row["coordinate"]: row for row in rows}
+
+    # --- admission partition is honest ---------------------------------------
+    for row in admitted:
+        require(
+            row["evidence"] == SELECTOR_EVIDENCE,
+            f"{row['coordinate']}: admitted row must rest on the admitted D3 selector law",
+        )
+        require(
+            row["admission"] == "admitted-by-law",
+            f"{row['coordinate']}: admitted row missing admission marker",
+        )
+    for row in unadmitted:
+        require(
+            row["evidence"] == HISTORICAL_EVIDENCE,
+            f"{row['coordinate']}: candidate evidence drift",
+        )
+        require(
+            row["admission"] == "attested-not-admitted",
+            f"{row['coordinate']}: candidate must not be marked admitted",
+        )
+        require(
+            bool(row.get("admission_reason")),
+            f"{row['coordinate']}: candidate missing admission_reason",
+        )
+        require(
+            bool(row["provenance"]),
+            f"{row['coordinate']}: candidate must keep its provenance as witness material",
+        )
+    require(
+        {row["coordinate"] for row in admitted}
+        == {row["coordinate"] for row in rows if row["coordinate"].startswith(SELECTOR_ROOTS)},
+        "exactly the selector coordinates may be admitted",
+    )
+
+    # --- the honesty record cannot be silently dropped ----------------------
+    require("ratification_scope" in d8, "D8 map must record its ratification scope")
+    require(
+        "2415" in d8["ratification_scope"]["precedent"],
+        "D8 ratification must cite the #2415 width/ontology boundary",
+    )
+    require(
+        any("blanket occupancy" in item for item in d8["ratification_scope"]["not_ratified"]),
+        "D8 must explicitly not claim blanket occupancy",
+    )
+    require("non_conflation" in d8, "D8 map must record the 8-bit non-conflation rule")
+    require(
+        "Sens8" in d8["non_conflation"]["rule"],
+        "D8 non-conflation must name legacy Sens8 explicitly",
+    )
+    require(
+        d8.get("falsified_rules"),
+        "D8 map must keep the falsified historical rule on record",
+    )
+    require(
+        d8["next_step"]["progress_metric"].startswith("count of independent admitted laws"),
+        "D8 progress metric must be laws, not occupancy",
+    )
+    require(d8["next_step"]["unresolved_parents"] == 48, "D8 unresolved parent count drift")
 
     # --- lineage -------------------------------------------------------------
     for row in rows:
@@ -232,19 +302,20 @@ def main() -> None:
     )
 
     print("D8-HISTORICAL-FULL-MAP-GUARD=PASS")
-    print("D8 width=8 capacity=256 occupied=256 unknown=0")
+    print("D8 width=8 capacity=256")
+    print("D8 admitted=64 (every one of them by the admitted D3 CAR/CDR selector law)")
+    print("D8 attested-not-admitted=192 (provenance preserved as witness material)")
+    print("D8 blanket-occupancy claim: WITHDRAWN (see #2415 ratification scope)")
     print("D8 lineage: parent_d6 = full D6 map (4 children each)")
     print("D8 mechanical: parent_d7 = one-bit prefix (2 children each)")
-    print("D8 selector-generated compatibility=64/64")
-    print("D8 selector parents = 16 D6 selector parents x 4 children")
     print("D8 selector word set == #2322 generator forecast (independent witness)")
-    print("D8 historical continuation rows=192 (agent-derived, not ratified)")
-    print("D8 resident names unique within D8 and against D5/D6")
+    print("D8 names unique within D8 and against D5/D6")
     print("D7 rung crossed by fact: d7-full-map.json documents D7 is not a one-bit extension")
+    print("NON-CONFLATION: D8 (8-bit Core domain) != legacy Sens8 (8-bit flat byte table)")
+    print("PROGRESS METRIC: independent admitted laws, NOT occupancy out of 256")
+    print("NEXT: 48 D6 parents still need two commuting refinements plus a witness")
     print("NON-CONCLUSION: residency does not imply semantic irreducibility")
-    print("NON-CONCLUSION: the 192 historical coordinates are an agent-derived")
-    print("              chronological continuation, not an owner-ratified allocation")
-    print("NON-CONCLUSION: this map is an occupancy claim, not language authority")
+    print("NON-CONCLUSION: the 192 candidates are attested witnesses, not admitted identities")
 
 
 if __name__ == "__main__":

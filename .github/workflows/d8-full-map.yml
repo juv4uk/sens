@@ -1,4 +1,4 @@
-name: D8 historical full-map guard
+name: D8 admitted-cells and candidates guard
 
 on:
   pull_request:
@@ -23,7 +23,7 @@ on:
 
 jobs:
   historical-map:
-    name: D8 full-map constitution
+    name: D8 admission constitution
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -37,11 +37,14 @@ jobs:
         if: always()
         run: |
           {
-            echo "## D8 historical full map"
+            echo "## D8 admitted cells and attested candidates"
             echo
-            echo "- D8: 256/256 occupied, 0 unallocated"
+            echo "- D8: capacity 256; admitted 64; attested-not-admitted 192"
+            echo "- Blanket occupancy is NOT claimed; the guard fails if unallocated=0 returns"
+            echo "- All 64 admitted coordinates come from the admitted D3 CAR/CDR selector law"
+            echo "- The 192 candidates keep provenance as witness material but are not identities"
+            echo "- D8 is an exact 8-bit Core domain, NOT a legacy Sens8 byte table"
             echo "- Lineage: 4 children per D6 coordinate; the D7 rung is crossed by documented fact"
-            echo "- 64 selector coordinates equal the #2322 generator word set"
-            echo "- 192 historical coordinates are an agent-derived continuation, not ratified allocation"
+            echo "- Progress metric: independent admitted laws, NOT occupancy out of 256"
             echo "- Residency and semantic derivability remain separate axes"
           } >> "$GITHUB_STEP_SUMMARY"
