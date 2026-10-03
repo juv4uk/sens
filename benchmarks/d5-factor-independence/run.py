@@ -123,7 +123,8 @@ def main() -> int:
     assert set(factors) == POST_D4
     assert graph["summary"]["historical_rows_consumed"] == 19
     assert graph["summary"]["post_d4_factor_candidates"] == 7
-    assert graph["summary"]["proven_independent_roots"] == 0
+    assert graph["summary"]["roots_promoted_by_this_model"] == 0
+    assert len(graph["summary"]["external_root_theorems"]) == 1
     assert graph["summary"]["new_d5_residents"] == 0
     assert graph["summary"]["placement_search_authorized"] is False
 
