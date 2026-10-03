@@ -1,0 +1,45 @@
+name: Core-Math equivalence law research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-equivalence-law/**"
+      - ".github/workflows/core-math-equivalence-law.yml"
+      - "benchmarks/core-math-generated-identity/**"
+      - "docs/research/2433-core-math-neutral-v1.json"
+      - "scripts/research-2433-core-math-neutral-growth.py"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-equivalence-law/**"
+      - ".github/workflows/core-math-equivalence-law.yml"
+  workflow_dispatch:
+
+jobs:
+  equivalence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Re-check neutral growth donor
+        run: python3 scripts/research-2433-core-math-neutral-growth.py --check
+      - name: Re-check generated identity donor
+        run: |
+          rm -rf /tmp/core-math-generated-identity
+          python3 benchmarks/core-math-generated-identity/run.py             --out /tmp/core-math-generated-identity
+      - name: Run equivalence-law gate
+        run: |
+          rm -rf /tmp/core-math-equivalence-law
+          python3 benchmarks/core-math-equivalence-law/run.py             --out /tmp/core-math-equivalence-law
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-math-equivalence-law/report.md; then
+            cat /tmp/core-math-equivalence-law/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-math-equivalence-law
+          path: /tmp/core-math-equivalence-law/
+          retention-days: 14
