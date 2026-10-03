@@ -15,7 +15,8 @@
 use super::{canon, necessary_forms};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
-use crate::{CoreDomainIdentity, Sens8};
+use crate::Sens8;
+use crate::CoreDomainIdentity;
 use std::rc::Rc;
 
 const QUOTE: Sens8 = crate::sens!(00000001);
