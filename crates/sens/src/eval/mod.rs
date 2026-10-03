@@ -95,6 +95,9 @@ pub(crate) fn invoke_value(
 ) -> Result<Value, LanguageError> {
     match function {
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::DomainIdentity(identity) => {
+            invoke_domain_values(*identity, arguments, environment, span)
+        }
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -174,13 +177,9 @@ pub(crate) fn evaluate_step(
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
-        ExprKind::DomainCall(identity, _) => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!(
-                "domain-qualified call routing is not admitted yet · marshrut domennoho vyklyku shche ne dopushchenyi: {identity}"
-            ),
-            expression.span,
-        )),
+        ExprKind::DomainCall(identity, arguments) => {
+            dispatch_domain_call(*identity, arguments, environment, expression.span)
+        }
         // Виконання залежить лише від числових координат (#1697): слот або є,
         // або названа помилка — пошуку за іменем більше немає.
         ExprKind::Local { depth, index } => environment
@@ -216,6 +215,142 @@ fn evaluate_list(
         environment,
         span,
     )
+}
+
+fn d3_bits(identity: crate::CoreDomainIdentity) -> Option<u8> {
+    match identity {
+        crate::CoreDomainIdentity::D3(word) => Some(word.word().packed_bits()),
+        _ => None,
+    }
+}
+
+fn exact_domain_value_arity(
+    identity: crate::CoreDomainIdentity,
+    arguments: &[Value],
+    expected: usize,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if arguments.len() == expected {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!(
+            "{identity}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            arguments.len()
+        ),
+        span,
+    ))
+}
+
+fn invoke_domain_values(
+    identity: crate::CoreDomainIdentity,
+    arguments: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if let Some(bits) = d3_bits(identity) {
+        return match bits {
+            0b010 => {
+                exact_domain_value_arity(identity, arguments, 1, span)?;
+                Ok(special_forms::atom_value(&arguments[0], environment))
+            }
+            0b100 => {
+                exact_domain_value_arity(identity, arguments, 2, span)?;
+                special_forms::cons_values(
+                    arguments[0].clone(),
+                    arguments[1].clone(),
+                    environment,
+                    span,
+                )
+            }
+            0b101 => {
+                exact_domain_value_arity(identity, arguments, 1, span)?;
+                special_forms::car_value(&arguments[0], span)
+            }
+            0b110 => {
+                exact_domain_value_arity(identity, arguments, 1, span)?;
+                special_forms::cdr_value(&arguments[0], span)
+            }
+            0b111 => {
+                exact_domain_value_arity(identity, arguments, 2, span)?;
+                special_forms::eq_values(arguments[0].clone(), arguments[1].clone(), span)
+            }
+            0b001 | 0b011 => Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("{identity} is a syntax form and requires expression dispatch"),
+                span,
+            )),
+            _ => Err(LanguageError::new(
+                ErrorKind::Type,
+                format!("domain identity has no admitted callable mechanism: {identity}"),
+                span,
+            )),
+        };
+    }
+
+    match environment.domain_code_slot(identity) {
+        Some(Value::Closure(closure)) => closures::apply_values(closure, arguments, span),
+        Some(Value::Builtin(builtin)) => (builtin.func)(arguments, environment, span),
+        _ => Err(LanguageError::new(
+            ErrorKind::Type,
+            format!("domain identity has no admitted callable mechanism: {identity}"),
+            span,
+        )),
+    }
+}
+
+fn dispatch_domain_call(
+    identity: crate::CoreDomainIdentity,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
+    if d3_bits(identity) == Some(0b001) {
+        special_forms::exact_arity(&identity.to_string(), arguments, 1, span)?;
+        return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
+    }
+
+    if let Some(necessary) = necessary_forms::identity_for_domain_identity(identity) {
+        return match necessary {
+            necessary_forms::NecessaryFormIdentity::Lambda => {
+                closures::create_lambda(arguments, environment, span).map(EvalStep::Value)
+            }
+            necessary_forms::NecessaryFormIdentity::Define => {
+                special_forms::evaluate_definition(arguments, environment, span)
+                    .map(EvalStep::Value)
+            }
+        };
+    }
+
+    if d3_bits(identity) == Some(0b011) {
+        return special_forms::evaluate_cond(arguments, environment, span);
+    }
+
+    if let Some(bound) = environment.domain_code_slot(identity) {
+        match bound {
+            Value::Macro(closure) => {
+                return closures::apply_macro(closure, arguments, environment, span);
+            }
+            closure @ Value::Closure(_) => {
+                return closures::apply(closure, arguments, environment, span);
+            }
+            Value::Builtin(builtin) => {
+                let mut values = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    values.push(evaluate(argument, environment)?);
+                }
+                return (builtin.func)(&values, environment, span).map(EvalStep::Value);
+            }
+            _ => {}
+        }
+    }
+
+    let mut values = Vec::with_capacity(arguments.len());
+    for argument in arguments {
+        values.push(evaluate(argument, environment)?);
+    }
+    invoke_domain_values(identity, &values, environment, span).map(EvalStep::Value)
 }
 
 /// Спільний диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
