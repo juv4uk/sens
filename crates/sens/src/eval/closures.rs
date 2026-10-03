@@ -3,7 +3,7 @@
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
-use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
+use crate::{CallableIdentity, Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 use std::{
     collections::HashSet,
     rc::Rc,
@@ -33,6 +33,20 @@ fn parse_lambda_list(expr: &Expr) -> LambdaListResult {
 type LambdaList = (Vec<Rc<str>>, Option<Rc<str>>);
 type LambdaListResult = Result<LambdaList, LanguageError>;
 
+fn ensure_bindable_identity(
+    identity: CallableIdentity,
+    span: Span,
+) -> Result<(), LanguageError> {
+    let Some(bits) = identity.legacy8_bits() else {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            "domain-qualified callable identity cannot be a lambda parameter",
+            span,
+        ));
+    };
+    canon::ensure_bindable_sid(crate::Sens8::from_packed_byte(bits), span)
+}
+
 fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
     match &expr.kind {
         ExprKind::Symbol(name) => {
@@ -40,7 +54,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             Ok((Vec::new(), Some(name.clone())))
         }
         ExprKind::Sid(sid) => {
-            canon::ensure_bindable_sid(*sid, expr.span)?;
+            ensure_bindable_identity(*sid, expr.span)?;
             Ok((Vec::new(), Some(sid.to_string().into())))
         }
         ExprKind::List(parameter_forms) => {
@@ -53,7 +67,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                         name.clone()
                     }
                     ExprKind::Sid(sid) => {
-                        canon::ensure_bindable_sid(*sid, parameter.span)?;
+                        ensure_bindable_identity(*sid, parameter.span)?;
                         sid.to_string().into()
                     }
                     _ => {
@@ -88,7 +102,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                                 name.clone()
                             }
                             ExprKind::Sid(sid) => {
-                                canon::ensure_bindable_sid(*sid, head.span)?;
+                                ensure_bindable_identity(*sid, head.span)?;
                                 sid.to_string().into()
                             }
                             _ => {
@@ -121,7 +135,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                         break name.clone();
                     }
                     ExprKind::Sid(sid) => {
-                        canon::ensure_bindable_sid(*sid, current.span)?;
+                        ensure_bindable_identity(*sid, current.span)?;
                         break sid.to_string().into();
                     }
                     _ => {
@@ -226,27 +240,31 @@ enum Head {
     Call,
 }
 
-const EVAL: Sens8 = crate::sens!(01001101);
+const EVAL: u8 = 0b0100_1101;
 
-fn sid_head(sid: Sens8, environment: &Environment) -> Head {
-    if sid == EVAL {
+fn sid_head(identity: CallableIdentity, environment: &Environment) -> Head {
+    if matches!(environment.code_slot(identity), Some(Value::Macro(_))) {
         return Head::Opaque;
     }
+    let Some(bits) = identity.legacy8_bits() else {
+        return Head::Opaque;
+    };
+    if bits == EVAL {
+        return Head::Opaque;
+    }
+    let sid = crate::Sens8::from_packed_byte(bits);
     match necessary_forms::identity_for_semantic_id(sid) {
         Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
         Some(necessary_forms::NecessaryFormIdentity::Define) => return Head::Define,
         _ => {}
     }
     if canon::route_kind_for_sid(sid).is_some() {
-        if sid == crate::sens!(00000001) {
+        if bits == 0b0000_0001 {
             return Head::Quote;
         }
-        if sid == crate::sens!(00000111) {
+        if bits == 0b0000_0111 {
             return Head::Cond;
         }
-    }
-    if !canon::has_primitive(sid) && matches!(environment.code_slot(sid), Some(Value::Macro(_))) {
-        return Head::Opaque;
     }
     Head::Call
 }
@@ -256,7 +274,7 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
             if let Some(sid) = canon::routed_sid_for_surface(name) {
-                return sid_head(sid, environment);
+                return sid_head(CallableIdentity::legacy8(sid.packed_byte()), environment);
             }
             match necessary_forms::identity_for_symbol(name) {
                 Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
@@ -464,12 +482,18 @@ pub(super) fn apply(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     match function {
-        Value::Sid(sid) => {
+        Value::Sid(identity) => {
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
                 values.push(evaluate(argument, calling_environment)?);
             }
-            canon::invoke_semantic_ref(sid, &values, calling_environment, span).map(EvalStep::Value)
+            super::invoke_value(
+                &Value::Sid(identity),
+                &values,
+                calling_environment,
+                span,
+            )
+            .map(EvalStep::Value)
         }
         Value::Closure(ref closure) => {
             check_arity(
@@ -635,8 +659,7 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Bool(false) => ExprKind::List(Rc::new([])),
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
-        Value::Sid(sid) => ExprKind::Sid(*sid),
-        Value::DomainIdentity(identity) => ExprKind::DomainIdentity(*identity),
+        Value::Sid(identity) => ExprKind::Sid(*identity),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
         Value::String(val) => ExprKind::String(val.clone()),
         // A legacy host builtin is callable but not syntax either.
