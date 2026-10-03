@@ -14,6 +14,32 @@
   (00001000 args
     (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
+; Exact D1 helpers for projection control only.
+(00001001 dispatch-predicate-yes
+  (00001000 ()
+    (00000010 (00000001 ()))))
+
+(00001001 dispatch-predicate-no
+  (00001000 ()
+    (00000010 (00000001 (00000000)))))
+
+(00001001 dispatch-empty-list?
+  (00001000 (value)
+    (00100010 value (00000001 ()))))
+
+(00001001 dispatch-nonempty-atom?
+  (00001000 (value)
+    (00000111
+      ((dispatch-empty-list? value) (dispatch-predicate-no))
+      ((00000010 value) (dispatch-predicate-yes))
+      ((dispatch-predicate-yes) (dispatch-predicate-no)))))
+
+(00001001 dispatch-pair?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (dispatch-predicate-no))
+      ((dispatch-predicate-yes) (dispatch-predicate-yes)))))
+
 ;; Особливі форми — рядки таблиці з полем (form lambda|define).
 (00001001 all-rows
   (00000101 (01001011 (10100110 source-path))))
@@ -25,17 +51,15 @@
 (00001001 form-rows
   (00001000 (remaining)
     (00000111
-      ((00000010 remaining)
-       ()
+      ((dispatch-empty-list? remaining)
        (00000001 ()))
-      ((00000010 remaining)
-       (0)
+      ((dispatch-pair? remaining)
        (00000111
-         ((00000010 (00101101 (00000001 form) (00000110 (00000101 remaining))))
-          ()
+         ((dispatch-empty-list?
+            (00101101 (00000001 form) (00000110 (00000101 remaining))))
           (form-rows (00000110 remaining)))
-         ((00000010 (00101101 (00000001 form) (00000110 (00000101 remaining))))
-          (0)
+         ((dispatch-pair?
+            (00101101 (00000001 form) (00000110 (00000101 remaining))))
           (00000100 (00000101 remaining) (form-rows (00000110 remaining)))))))))
 
 (00001001 rows (form-rows all-rows))
@@ -44,24 +68,19 @@
   (00001000 (name)
     (00000111
       ((00100010 name (00000001 lambda))
-       (1)
        "NecessaryFormMechanism::Lambda")
       ((00100010 name (00000001 define))
-       (1)
        "NecessaryFormMechanism::Define")
-      ((00000001 no-known-mechanism)
-       no-known-mechanism
+      ((dispatch-predicate-yes)
        (00000101 (00000001 ()))))))
 
 (00001001 render-row
   (00001000 (row)
     (10011100 ((mechanism (rust-mechanism (row-form row))))
       (00000111
-        ((00000010 mechanism)
-         ()
+        ((dispatch-empty-list? mechanism)
          (00000101 (00000001 ())))
-        ((00000010 mechanism)
-         (1)
+        ((dispatch-nonempty-atom? mechanism)
          (str+
            "    NecessaryFormDispatchRow { semantic_id: 0b"
            (01001100 (00000101 row))
@@ -72,11 +91,9 @@
 (00001001 render-rows
   (00001000 (remaining)
     (00000111
-      ((00000010 remaining)
-       ()
+      ((dispatch-empty-list? remaining)
        "")
-      ((00000010 remaining)
-       (0)
+      ((dispatch-pair? remaining)
        (str+ (render-row (00000101 remaining))
              (render-rows (00000110 remaining)))))))
 
@@ -101,27 +118,22 @@
   (str+ header (render-rows rows) "];\n"))
 
 (00000111
-  ((00000010 *argv*)
-   ()
+  ((dispatch-empty-list? *argv*)
    (00101111
      (00100111
        (10100111 output-path generated)
        (01001000 "Rust evaluator dispatch projection written"))))
   ((00100010 (00000101 *argv*) "--check")
-   (1)
    (10011100 ((current (10100110 output-path)))
      (00000111
        ((00100010 current generated)
-        (1)
         (01001000 "Rust evaluator dispatch projection is current"))
-       ((00100010 current generated)
-        (0)
+       ((dispatch-predicate-yes)
         (00101111
           (00100111
             (01001000 "Rust evaluator dispatch projection is stale")
             (00000101 (00000001 ()))))))))
-  ((00000001 write-projection)
-   write-projection
+  ((dispatch-predicate-yes)
    (00101111
      (00100111
        (10100111 output-path generated)

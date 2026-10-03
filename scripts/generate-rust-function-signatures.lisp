@@ -12,6 +12,36 @@
   (00001000 args
     (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
 
+; Local exact D1 control helpers for generator-only structure tests.
+(00001001 sig-predicate-yes
+  (00001000 ()
+    (00000010 (00000001 ()))))
+
+(00001001 sig-predicate-no
+  (00001000 ()
+    (00000010 (00000001 (00000000)))))
+
+(00001001 sig-predicate-no?
+  (00001000 (value)
+    (00000011 value (sig-predicate-no))))
+
+(00001001 sig-empty-list?
+  (00001000 (value)
+    (00100010 value (00000001 ()))))
+
+(00001001 sig-nonempty-atom?
+  (00001000 (value)
+    (00000111
+      ((sig-empty-list? value) (sig-predicate-no))
+      ((00000010 value) (sig-predicate-yes))
+      ((sig-predicate-yes) (sig-predicate-no)))))
+
+(00001001 sig-pair?
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (sig-predicate-no))
+      ((sig-predicate-yes) (sig-predicate-yes)))))
+
 ; Rust arity fields are machine projection, not human number presentation.
 ; number->string deliberately returns the canonical #q2:<bits>/1 wire.
 ; Arity metadata is non-negative integer data, so consume its binary numerator
@@ -19,8 +49,8 @@
 (00001001 wire-integer-bits-onto
   (00001000 (remaining acc)
     (00000111
-      ((00100010 (00111111 remaining) "/") (1) acc)
-      ((00100010 (00111111 remaining) "/") (0)
+      ((00100010 (00111111 remaining) "/") acc)
+      ((sig-predicate-yes)
        (wire-integer-bits-onto
          (01000000 remaining)
          (00111010 acc (00111111 remaining)))))))
@@ -30,14 +60,12 @@
     (10011100 ((wire (01000110 n)))
       (00000111
         ((00111101 "#q2:" wire)
-         t
          (str+
            "0b"
            (wire-integer-bits-onto
              (01000000 (01000000 (01000000 (01000000 wire))))
              "")))
-        ((00111101 "#q2:" wire)
-         ()
+        ((sig-predicate-yes)
          (00000101 (00000001 ())))))))
 
 (00001001 rows (00000101 (01001011 (10100110 source-path))))
@@ -48,37 +76,35 @@
 
 (00001001 has-field?
   (00001000 (key row)
-    (00000111
-      ((00000010 (00101101 key (00000110 row))) () (00000001 ()))
-      ((00000010 (00101101 key (00000110 row))) (0) t))))
+    (sig-pair? (00101101 key (00000110 row)))))
 
 (00001001 render-kind
   (00001000 (kind)
     (00000111
-      ((00100010 kind (00000001 builtin)) (1) "LanguageItemKind::Builtin")
-      ((00100010 kind (00000001 syntax)) (1) "LanguageItemKind::SyntaxForm")
-      ((00100010 kind (00000001 macro)) (1) "LanguageItemKind::Macro")
-      ((00000001 unknown-kind) unknown-kind (00000101 (00000001 ()))))))
+      ((00100010 kind (00000001 builtin)) "LanguageItemKind::Builtin")
+      ((00100010 kind (00000001 syntax)) "LanguageItemKind::SyntaxForm")
+      ((00100010 kind (00000001 macro)) "LanguageItemKind::Macro")
+      ((sig-predicate-yes) (00000101 (00000001 ()))))))
 
 (00001001 render-arity
   (00001000 (arity)
     (00000111
-      ((00000010 arity) (1)
+      ((sig-nonempty-atom? arity)
        (str+ "Arity::Exact(" (render-rust-nat arity) ")"))
-      ((00000010 arity) (0)
+      ((sig-pair? arity)
        (00000111
-         ((00100010 (00000101 arity) (00000001 at-least)) (1)
+         ((00100010 (00000101 arity) (00000001 at-least))
           (str+ "Arity::AtLeast(" (render-rust-nat (00101111 arity)) ")"))
-         ((00100010 (00000101 arity) (00000001 between)) (1)
+         ((00100010 (00000101 arity) (00000001 between))
           (str+ "Arity::Between { min: " (render-rust-nat (00101111 arity))
                 ", max: " (render-rust-nat (00110000 arity)) " }"))
-         ((00000001 unknown-arity) unknown-arity (00000101 (00000001 ()))))))))
+         ((sig-predicate-yes) (00000101 (00000001 ()))))))))
 
 (00001001 render-admitted
   (00001000 (row)
     (00000111
-      ((00100010 (field (00000001 surfaces) row) (00000001 admitted)) (1) "true")
-      ((00100010 (field (00000001 surfaces) row) (00000001 admitted)) (0) "false"))))
+      ((00100010 (field (00000001 surfaces) row) (00000001 admitted)) "true")
+      ((sig-predicate-yes) "false"))))
 
 (00001001 render-row
   (00001000 (row)
@@ -95,8 +121,8 @@
 (00001001 render-rows
   (00001000 (remaining)
     (00000111
-      ((00000010 remaining) () "")
-      ((00000010 remaining) (0)
+      ((sig-empty-list? remaining) "")
+      ((sig-pair? remaining)
        (str+ (render-row (00000101 remaining)) (render-rows (00000110 remaining)))))))
 
 (00001001 header
@@ -120,26 +146,21 @@
   (str+ header (render-rows rows) "];\n"))
 
 (00000111
-  ((00000010 *argv*)
-   ()
+  ((sig-empty-list? *argv*)
    (00101111
      (00100111
        (10100111 output-path generated)
        (01001000 "Rust function signatures projection written"))))
   ((00100010 (00000101 *argv*) "--check")
-   (1)
    (00000111
      ((00100010 (10100110 output-path) generated)
-      (1)
       (01001000 "Rust function signatures projection is current"))
-     ((00100010 (10100110 output-path) generated)
-      (0)
+     ((sig-predicate-yes)
       (00101111
         (00100111
           (01001000 "Rust function signatures projection is stale")
           (00000101 (00000001 ())))))))
-  ((00000001 write-projection)
-   write-projection
+  ((sig-predicate-yes)
    (00101111
      (00100111
        (10100111 output-path generated)

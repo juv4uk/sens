@@ -31,6 +31,12 @@ use crate::bits::{Bit1, Bit2, Bit3};
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct PredicateBit(Bit1);
 
+impl core::fmt::Debug for PredicateBit {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(formatter, "PredicateBit({})", self.word().packed_bits())
+    }
+}
+
 impl PredicateBit {
     /// Wrap an already validated one-bit word.
     pub const fn from_word(word: Bit1) -> Self {

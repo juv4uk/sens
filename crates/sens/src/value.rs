@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sens8, Text7};
+use crate::{Bit1, Environment, Exactness, Expr, PredicateBit, Sens8, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -498,6 +498,9 @@ impl std::fmt::Debug for Builtin {
 #[derive(Clone, Debug)]
 pub enum Value {
     Nil,
+    /// Exact contextual SENS predicate result. This runtime carrier is
+    /// neither Number nor host Bool and has no source literal.
+    PredicateBit(PredicateBit),
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
@@ -562,6 +565,7 @@ impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Value::Nil, Value::Nil) => true,
+            (Value::PredicateBit(left), Value::PredicateBit(right)) => left == right,
             (Value::Bool(left), Value::Bool(right)) => left == right,
             // Exactness is part of a number's identity (PLAN.md item 10, Path
             // A): (eq 3 3.0) is () because these are different values in the
@@ -686,6 +690,25 @@ impl Value {
         !matches!(self, Value::Pair(_, _))
     }
 
+    /// Audited host-decision boundary for ratified D1.
+    ///
+    /// Rust supplies only the observed decision; the stored language value is
+    /// the exact one-bit carrier. No Number/Bool/NIL identity is introduced.
+    pub fn predicate_bit(holds: bool) -> Self {
+        let raw = u8::from(holds);
+        let word = Bit1::new(raw).expect("a host decision always fits one exact bit");
+        Self::PredicateBit(PredicateBit::from_word(word))
+    }
+
+    pub fn as_predicate_bit(&self) -> Option<bool> {
+        match self {
+            Self::PredicateBit(bit) => bit.word().bit(0),
+            _ => None,
+        }
+    }
+
+    /// Legacy host/boundary truthiness. Core predicate/control execution must
+    /// not call this; COND accepts PredicateBit only.
     pub fn is_truthy(&self) -> bool {
         !matches!(self, Value::Nil | Value::Bool(false))
     }
@@ -783,6 +806,13 @@ fn render(value: &Value, quote_strings: bool) -> String {
             format!("#f32({})", items.join(" "))
         }
         Value::Nil => "()".to_string(),
+        Value::PredicateBit(bit) => {
+            if bit.word().packed_bits() == 1 {
+                "1".to_string()
+            } else {
+                "0".to_string()
+            }
+        }
         Value::Bool(true) => "t".to_string(),
         Value::Bool(false) => "()".to_string(),
         Value::Number(number, Exactness::Exact) => number.to_string(),

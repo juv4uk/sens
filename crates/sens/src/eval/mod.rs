@@ -356,8 +356,7 @@ mod single_pass_eval_tests {
     fn binary_sids_keep_quote_and_cond_as_syntax() {
         let source = r#"
             (00000111
-              ((00000010 (00000001 atom)) (1) (00000001 selected))
-              (t t (00000001 missed)))
+              ((00000010 (00000001 atom)) (00000001 selected)))
         "#;
         let mut session = Session::default();
         let result = eval_program(source, &mut session)
@@ -372,7 +371,7 @@ mod single_pass_eval_tests {
               (lambda (n)
                 (cond
                   ((eq? n 0) (quote done))
-                  (t (count-down (- n 1))))))
+                  ((00000011 0 0) (count-down (- n 1))))))
             (count-down 1000)
         "#;
         let mut session = Session::default();
@@ -393,11 +392,12 @@ mod single_pass_eval_tests {
     #[test]
     fn macros_expand_and_evaluate_correctly() {
         let source = r#"
-            (defmacro unless (condition body)
+            (defmacro when-predicate (condition body)
                 (cons (quote cond)
-                    (cons (cons condition (cons (quote ()) (quote ())))
-                    (cons (cons (quote t) (cons body (quote ()))) (quote ())))))
-            (unless () (quote success))
+                    (cons
+                      (cons condition (cons body (quote ())))
+                      (quote ()))))
+            (when-predicate (eq? 0 0) (quote success))
         "#;
         let mut session = Session::default();
         let result = eval_program(source, &mut session).expect("eval should succeed");
@@ -427,15 +427,10 @@ mod single_pass_eval_tests {
     fn ukrainian_canonical_surface_executes_the_core() {
         let source = r#"
             (за-умовою
-              ((атом? (як-є кіт)) () (перше
+              ((атом? (як-є кіт)) (перше
                  (сполучити
                    (як-є груша)
-                   (сполучити (як-є слива) ()))))
-              ((атом? (як-є кіт)) (1) (перше
-                 (сполучити
-                   (як-є груша)
-                   (сполучити (як-є слива) ()))))
-              (t (як-є помилка)))
+                   (сполучити (як-є слива) ())))))
         "#;
         let mut session = Session::default();
         let result = eval_program(source, &mut session)

@@ -33,7 +33,7 @@
       ((00000011 register (00000001 r14b)) 14)
       ((00000011 register (00000001 r15)) 15)
       ((00000011 register (00000001 r15b)) 15)
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-xmm-reg-code
   (00001000 (register)
@@ -54,7 +54,7 @@
       ((00000011 register (00000001 xmm13)) 13)
       ((00000011 register (00000001 xmm14)) 14)
       ((00000011 register (00000001 xmm15)) 15)
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-low3
   (00001000 (code)
@@ -146,7 +146,7 @@
                   modrm
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
-              (t
+              ((00000010 (00000001 ()))
                 (00100111 rex 139 modrm (x86-disp8-byte displacement))))))))))
 
 ; MOV [base + disp8], r64, opcode 89 /r.
@@ -164,7 +164,7 @@
                   modrm
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
-              (t
+              ((00000010 (00000001 ()))
                 (00100111 rex 137 modrm (x86-disp8-byte displacement))))))))))
 
 ; LEA r64, [base + disp8], opcode 0x8D /r -- per #175's pinned XED evidence
@@ -191,7 +191,7 @@
                   modrm
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
-              (t
+              ((00000010 (00000001 ()))
                 (00100111 rex 141 modrm (x86-disp8-byte displacement))))))))))
 
 ; Group-1 ALU r/m64, r64 (mod=3 register/register), opcode base+1: ADD 0x01,
@@ -318,7 +318,7 @@
       (00000111
         ((00000011 (x86-high1 code) 1)
           (00100111 (x86-encode-rex 0 0 0 1) (00001100 80 (x86-low3 code))))
-        (t
+        ((00000010 (00000001 ()))
           (00100111 (00001100 80 (x86-low3 code))))))))
 
 (00001001 x86-encode-pop-r64
@@ -327,7 +327,7 @@
       (00000111
         ((00000011 (x86-high1 code) 1)
           (00100111 (x86-encode-rex 0 0 0 1) (00001100 88 (x86-low3 code))))
-        (t
+        ((00000010 (00000001 ()))
           (00100111 (00001100 88 (x86-low3 code))))))))
 
 ; INC r64 / DEC r64: group-5 opcode 0xFF, /reg extension (not a register
@@ -537,7 +537,7 @@
             (x86-encode-rex 0 0 0 1)
             255
             (x86-encode-modrm 3 opcode-extension (x86-low3 code))))
-        (t
+        ((00000010 (00000001 ()))
           (00100111
             255
             (x86-encode-modrm 3 opcode-extension (x86-low3 code))))))))
@@ -559,17 +559,16 @@
 (00001001 x86-encode-setcc-r8
   (00001000 (condition-code register)
     (10011100 ((code (x86-reg-code register)))
-      ; two-part `((> code 3) REX ...)` mis-branched once exact-Q made
-      ; false comparisons answer 0 (which is truthy): REX was emitted for
-      ; every register. E1 (#216): explicit expected-result domains.
+      ; D1 strict PredicateBit: (> code 3) selects the REX path only on
+      ; exact YES; exact NO reaches the explicit always-YES fallback below.
       (00000111
-        ((00011011 code 3) 1
+        ((00011011 code 3)
          (00100111
            (x86-encode-rex 0 0 0 (x86-high1 code))
            15
            (00001100 144 condition-code)
            (x86-encode-modrm 3 0 (x86-low3 code))))
-        ((00011011 code 3) 0
+        ((00000010 (00000001 ()))
          (00100111
            15
            (00001100 144 condition-code)
@@ -895,7 +894,7 @@
       (00000111
         ((10011010 (00000011 (x86-high1 dst-code) 0) (00000011 (x86-high1 src-code) 0))
          (00100111 242 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
-        (t
+        ((00000010 (00000001 ()))
          (00100111 242 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
                15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))))
 
@@ -906,7 +905,7 @@
       (00000111
         ((10011010 (00000011 (x86-high1 dst-code) 0) (00000011 (x86-high1 src-code) 0))
          (00100111 102 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
-        (t
+        ((00000010 (00000001 ()))
          (00100111 102 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
                15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))))
 
@@ -926,7 +925,7 @@
            map-byte
            opcode-byte
            (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
-        (t
+        ((00000010 (00000001 ()))
          (00100111
            102
            (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -986,7 +985,7 @@
                 (00000111
                   ((00000011 (x86-low3 base-code) 4)
                    (00100111 modrm (x86-encode-sib 0 4 4) disp-byte))
-                  (t
+                  ((00000010 (00000001 ()))
                    (00100111 modrm disp-byte)))))
           (00000111
             ((10011010
@@ -995,7 +994,7 @@
              (00101001
                (00100111 102 15 map-byte opcode-byte)
                address-tail))
-            (t
+            ((00000010 (00000001 ()))
              (00101001
                (00100111
                  102
@@ -1158,9 +1157,9 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (00000111
-      ((00000010 instructions) () (00000001 ()))
-      ((00000010 instructions) (1) (00000001 ()))
-      (t
-        (00101001
-          (00000101 instructions)
-          (x86-encode-program (00000110 instructions)))))))
+      ((00000010 instructions)
+       (00000001 ()))
+      ((00000010 (00000001 ()))
+       (00101001
+         (00000101 instructions)
+         (x86-encode-program (00000110 instructions)))))))

@@ -58,14 +58,15 @@
                     different-bridge-contract
                     observation-42))))))
       (00000111
-        ((00000010 selection) ()
+        ((00000010 selection)
          (00100111
            (00000001 life-1-scheduler-witness)
            (00100111 (00000001 status) (00000001 fail))
            (00100111 (00000001 detail) (00000001 missing-selection))))
-        ((00000010 selection) (0)
+        ((00000010 (00000001 ()))
          (10011101 ((ready (00000101 (00000110 selection)))
                 (remaining (00000101 (00000110 (00000110 (00000110 selection)))))
+                (ready-ok (00000011 ready (00000001 ready)))
                 (dedup-ok (00100010 remaining (00100111 second-ref)))
                 (quiescence-ok
                   (00100010
@@ -79,32 +80,41 @@
                     (00100111 wrong-provenance wrong-bridge)
                     (00000001 (absent absent)))))
            (00000111
-             ((00100010
-                (00100111 ready dedup-ok quiescence-ok adversarial-ok)
-                (00000001
-                  (ready
-                    (1)
-                    (1)
-                    (1))))
-              (1)
+             (adversarial-ok
+              (00000111
+                (ready-ok
+                 (00000111
+                   (dedup-ok
+                    (00000111
+                      (quiescence-ok
+                       (00100111
+                         (00000001 life-1-scheduler-witness)
+                         (00100111 (00000001 status) (00000001 pass))
+                         (00100111 (00000001 detail)
+                               (00000001 deduplicated-activation-and-quiescence))))
+                      ((00000010 (00000001 ()))
+                       (00100111
+                         (00000001 life-1-scheduler-witness)
+                         (00100111 (00000001 status) (00000001 fail))
+                         (00100111 (00000001 detail)
+                               (00000001 scheduler-invariant-mismatch))))))
+                   ((00000010 (00000001 ()))
+                    (00100111
+                      (00000001 life-1-scheduler-witness)
+                      (00100111 (00000001 status) (00000001 fail))
+                      (00100111 (00000001 detail)
+                            (00000001 scheduler-invariant-mismatch))))))
+                ((00000010 (00000001 ()))
+                 (00100111
+                   (00000001 life-1-scheduler-witness)
+                   (00100111 (00000001 status) (00000001 fail))
+                   (00100111 (00000001 detail)
+                         (00000001 scheduler-invariant-mismatch))))))
+             ((00000010 (00000001 ()))
               (00100111
                 (00000001 life-1-scheduler-witness)
-                (00100111 (00000001 status) (00000001 pass))
+                (00100111 (00000001 status) (00000001 fail))
                 (00100111 (00000001 detail)
-                      (00000001 deduplicated-activation-and-quiescence))))
-             ((00100010 (00100111 wrong-provenance wrong-bridge)
-                      (00000001 (absent absent)))
-              (1)
-              (00100111
-                (00000001 life-1-scheduler-witness)
-                (00100111 (00000001 status) (00000001 fail))
-                (00100111 (00000001 detail) (00000001 scheduler-invariant-mismatch))))
-             ((00100010 (00100111 wrong-provenance wrong-bridge)
-                      (00000001 (absent absent)))
-              (0)
-              (00100111
-                (00000001 life-1-scheduler-witness)
-                (00100111 (00000001 status) (00000001 fail))
-                (00100111 (00000001 detail) (00000001 adversarial-readiness-mismatch)))))))))))
+                      (00000001 adversarial-readiness-mismatch)))))))))))
 
 (life-1-scheduler-witness)

@@ -33,13 +33,31 @@ pub(crate) fn princ_values(
     Ok(value)
 }
 
+fn contains_predicate_bit(value: &Value) -> bool {
+    match value {
+        Value::PredicateBit(_) => true,
+        Value::Pair(head, tail) => contains_predicate_bit(head) || contains_predicate_bit(tail),
+        Value::Vector(values) => values.borrow().iter().any(contains_predicate_bit),
+        _ => false,
+    }
+}
+
 pub(crate) fn write_to_string_values(
     arguments: &[Value],
     _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_values("write-to-string", arguments, 1, span)?;
-    Ok(Value::String(Rc::from(arguments[0].to_canonical_wire_string())))
+    if contains_predicate_bit(&arguments[0]) {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "write-to-string cannot serialize contextual predicate results",
+            span,
+        ));
+    }
+    Ok(Value::String(Rc::from(
+        arguments[0].to_canonical_wire_string(),
+    )))
 }
 
 pub(crate) fn read_values(
@@ -161,4 +179,37 @@ fn exact_values(
         ));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn assert_predicate_wire_rejected(value: Value) {
+        let error = write_to_string_values(&[value], &Environment::root(), Span::default())
+            .expect_err("PredicateBit must not enter canonical wire");
+        assert_eq!(error.kind, ErrorKind::Type);
+    }
+
+    #[test]
+    fn canonical_wire_rejects_predicate_bit_without_numeric_coercion() {
+        assert_predicate_wire_rejected(Value::predicate_bit(true));
+        assert_predicate_wire_rejected(Value::predicate_bit(false));
+
+        assert_predicate_wire_rejected(Value::list([Value::predicate_bit(true)]));
+
+        let vector = Value::Vector(Rc::new(std::cell::RefCell::new(vec![
+            Value::Number(7.0, crate::Exactness::Exact),
+            Value::predicate_bit(false),
+        ])));
+        assert_predicate_wire_rejected(vector);
+
+        let number = write_to_string_values(
+            &[Value::Number(1.0, crate::Exactness::Exact)],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("ordinary exact Number wire remains supported");
+        assert_eq!(number, Value::String(Rc::from("#q2:1/1")));
+    }
 }

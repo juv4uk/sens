@@ -8,6 +8,40 @@
 (00001001 second (00001000 (x) (00000101 (00000110 x))))
 (00001001 third (00001000 (x) (00000101 (00000110 (00000110 x)))))
 
+; Local structural predicates preserve the retired three-state ATOM
+; classification while machine authority control uses exact PredicateBit.
+(00001001 machine-authority-predicate-yes
+  (00001000 ()
+    (00000010 (00000001 ()))))
+
+(00001001 machine-authority-predicate-no
+  (00001000 ()
+    (00000010 (00000001 (00000000)))))
+
+(00001001 machine-authority-predicate-no?
+  (00001000 (value)
+    (00000011 value (machine-authority-predicate-no))))
+
+(00001001 machine-authority-empty-list?
+  (00001000 (value)
+    (00100010 value (00000001 ()))))
+
+(00001001 machine-authority-nonempty-atom?
+  (00001000 (value)
+    (00000111
+      ((00000010 value)
+       (machine-authority-predicate-no? (machine-authority-empty-list? value)))
+      ((machine-authority-predicate-yes)
+       (machine-authority-predicate-no)))))
+
+(00001001 machine-authority-pair?
+  (00001000 (value)
+    (00000111
+      ((00000010 value)
+       (machine-authority-predicate-no))
+      ((machine-authority-predicate-yes)
+       (machine-authority-predicate-yes)))))
+
 (00001001 authority-edges
   (01001011 (10100110 "tests/machine-authority-edges.lisp")))
 
@@ -27,81 +61,77 @@
 (00001001 machine-provenance-field-from
   (00001000 (name fields)
     (00000111
-      ((00000010 fields) () (00000001 missing))
-      ((00000010 fields) (1) (00000001 missing))
-      ((00000010 fields) (0)
+      ((machine-authority-empty-list? fields) (00000001 missing))
+      ((machine-authority-nonempty-atom? fields) (00000001 missing))
+      ((machine-authority-pair? fields)
        (10011100 ((field (00000101 fields)))
          (00000111
-           ((00000010 field) ()
+           ((machine-authority-empty-list? field)
             (machine-provenance-field-from name (00000110 fields)))
-           ((00000010 field) (1)
+           ((machine-authority-nonempty-atom? field)
             (machine-provenance-field-from name (00000110 fields)))
-           ((00000010 field) (0)
+           ((machine-authority-pair? field)
             (00000111
-              ((00000011 (00000101 field) name) (1)
+              ((00000011 (00000101 field) name)
                (second field))
-              ((00000011 (00000101 field) name) (0)
+              ((machine-authority-predicate-no? (00000011 (00000101 field) name))
                (machine-provenance-field-from name (00000110 fields)))))))))))
 
 (00001001 machine-provenance-field
   (00001000 (name row)
     (00000111
-      ((00000010 row) () (00000001 missing))
-      ((00000010 row) (1) (00000001 missing))
-      ((00000010 row) (0)
+      ((machine-authority-empty-list? row) (00000001 missing))
+      ((machine-authority-nonempty-atom? row) (00000001 missing))
+      ((machine-authority-pair? row)
        (machine-provenance-field-from name (00000110 row))))))
 
 (00001001 machine-required-fields-state
   (00001000 (required row)
     (00000111
-      ((00000010 required) () (00000001 complete))
-      ((00000010 required) (1) (00000001 malformed))
-      ((00000010 required) (0)
+      ((machine-authority-empty-list? required) (00000001 complete))
+      ((machine-authority-nonempty-atom? required) (00000001 malformed))
+      ((machine-authority-pair? required)
        (10011100 ((value (machine-provenance-field (00000101 required) row)))
          (00000111
-           ((00100010 value (00000001 missing)) (1)
+           ((00100010 value (00000001 missing))
             (00000001 missing))
-           ((00100010 value (00000001 missing)) (0)
+           ((machine-authority-predicate-no? (00100010 value (00000001 missing)))
             (machine-required-fields-state (00000110 required) row))))))))
 
 (00001001 lisp-owned-independent-witness-state
   (00001000 (witness)
     (00000111
-      ((00000010 witness) () (00000001 rejected))
-      ((00000010 witness) (1) (00000001 rejected))
-      ((00000010 witness) (0)
+      ((machine-authority-empty-list? witness) (00000001 rejected))
+      ((machine-authority-nonempty-atom? witness) (00000001 rejected))
+      ((machine-authority-pair? witness)
        (00000111
          ((00000011 (00000101 witness) (00000001 lisp-owned-expression))
-          (1)
           (00000001 admitted))
-         ((00000011 (00000101 witness) (00000001 lisp-owned-expression))
-          (0)
+         ((machine-authority-predicate-no? (00000011 (00000101 witness) (00000001 lisp-owned-expression)))
           (00000111
             ((00000011 (00000101 witness) (00000001 lisp-owned-corpus))
-             (1)
              (00000001 admitted))
-            ((00000011 (00000101 witness) (00000001 lisp-owned-corpus))
-             (0)
+            ((machine-authority-predicate-no? (00000011 (00000101 witness) (00000001 lisp-owned-corpus)))
              (00000001 rejected)))))))))
 
 (00001001 allowed-machine-edge-state
   (00001000 (row)
     (00000111
-      ((00000010 row) () (00000001 denied))
-      ((00000010 row) (1) (00000001 denied))
-      ((00000010 row) (0)
+      ((machine-authority-empty-list? row) (00000001 denied))
+      ((machine-authority-nonempty-atom? row) (00000001 denied))
+      ((machine-authority-pair? row)
        (00000111
-         ((00000011 (00000101 row) (00000001 authority-edge)) (1)
+         ((00000011 (00000101 row) (00000001 authority-edge))
           (00000111
-            ((00000011 (second row) (00000001 semantic)) (1)
+            ((00000011 (second row) (00000001 semantic))
              (00000111
-               ((00000011 (third row) (00000001 machine)) (1)
+               ((00000011 (third row) (00000001 machine))
                 (00000001 allowed))
-               ((00000011 (third row) (00000001 machine)) (0)
+               ((machine-authority-predicate-no? (00000011 (third row) (00000001 machine)))
                 (00000001 denied))))
-            ((00000011 (second row) (00000001 semantic)) (0)
+            ((machine-authority-predicate-no? (00000011 (second row) (00000001 semantic)))
              (00000001 denied))))
-         ((00000011 (00000101 row) (00000001 authority-edge)) (0)
+         ((machine-authority-predicate-no? (00000011 (00000101 row) (00000001 authority-edge)))
           (00000001 denied)))))))
 
 ; Deliberately unbound diagnostic symbols make fail-closed violations visible
@@ -117,30 +147,30 @@
 (00001001 check-machine-edges
   (00001000 (rows)
     (00000111
-      ((00000010 rows) () (00000001 machine-authority-ok))
-      ((00000010 rows) (1) (fail-machine-authority rows))
-      ((00000010 rows) (0)
+      ((machine-authority-empty-list? rows) (00000001 machine-authority-ok))
+      ((machine-authority-nonempty-atom? rows) (fail-machine-authority rows))
+      ((machine-authority-pair? rows)
        (10011100 ((state (allowed-machine-edge-state (00000101 rows))))
          (00000111
-           ((00000011 state (00000001 allowed)) (1)
+           ((00000011 state (00000001 allowed))
             (check-machine-edges (00000110 rows)))
-           ((00000011 state (00000001 allowed)) (0)
+           ((machine-authority-predicate-no? (00000011 state (00000001 allowed)))
             (fail-machine-authority (00000101 rows)))))))))
 
 (00001001 machine-provenance-row-safe-state
   (00001000 (row)
     (00000111
-      ((00000010 row) () (00000001 rejected))
-      ((00000010 row) (1) (00000001 rejected))
-      ((00000010 row) (0)
+      ((machine-authority-empty-list? row) (00000001 rejected))
+      ((machine-authority-nonempty-atom? row) (00000001 rejected))
+      ((machine-authority-pair? row)
        (00000111
-         ((00000011 (00000101 row) (00000001 capability-provenance)) (1)
+         ((00000011 (00000101 row) (00000001 capability-provenance))
           (10011100 ((required-state
                   (machine-required-fields-state
                     machine-provenance-required-fields
                     row)))
             (00000111
-              ((00000011 required-state (00000001 complete)) (1)
+              ((00000011 required-state (00000001 complete))
                (10011101 ((semantic-authority
                         (machine-provenance-field
                           (00000001 semantic-authority)
@@ -162,45 +192,37 @@
                           independent-witness)))
                  (00000111
                    ((00000011 semantic-authority (00000001 my-lisp))
-                    (1)
                     (00000111
                       ((00000011 reverse-edge (00000001 forbidden))
-                       (1)
                        (00000111
                          ((00000011 independent-state (00000001 admitted))
-                          (1)
                           (00000111
                             ((00100010 independent-witness machine-witness)
-                             (1)
                              (00000001 rejected))
-                            ((00100010 independent-witness machine-witness)
-                             (0)
+                            ((machine-authority-predicate-no? (00100010 independent-witness machine-witness))
                              (00000001 admitted))))
-                         ((00000011 independent-state (00000001 admitted))
-                          (0)
+                         ((machine-authority-predicate-no? (00000011 independent-state (00000001 admitted)))
                           (00000001 rejected))))
-                      ((00000011 reverse-edge (00000001 forbidden))
-                       (0)
+                      ((machine-authority-predicate-no? (00000011 reverse-edge (00000001 forbidden)))
                        (00000001 rejected))))
-                   ((00000011 semantic-authority (00000001 my-lisp))
-                    (0)
+                   ((machine-authority-predicate-no? (00000011 semantic-authority (00000001 my-lisp)))
                     (00000001 rejected)))))
-              ((00000011 required-state (00000001 complete)) (0)
+              ((machine-authority-predicate-no? (00000011 required-state (00000001 complete)))
                (00000001 rejected)))))
-         ((00000011 (00000101 row) (00000001 capability-provenance)) (0)
+         ((machine-authority-predicate-no? (00000011 (00000101 row) (00000001 capability-provenance)))
           (00000001 rejected)))))))
 
 (00001001 check-machine-capability-provenance
   (00001000 (rows)
     (00000111
-      ((00000010 rows) () (00000001 machine-anti-hybrid-ok))
-      ((00000010 rows) (1) (fail-machine-hybrid rows))
-      ((00000010 rows) (0)
+      ((machine-authority-empty-list? rows) (00000001 machine-anti-hybrid-ok))
+      ((machine-authority-nonempty-atom? rows) (fail-machine-hybrid rows))
+      ((machine-authority-pair? rows)
        (10011100 ((state (machine-provenance-row-safe-state (00000101 rows))))
          (00000111
-           ((00000011 state (00000001 admitted)) (1)
+           ((00000011 state (00000001 admitted))
             (check-machine-capability-provenance (00000110 rows)))
-           ((00000011 state (00000001 admitted)) (0)
+           ((machine-authority-predicate-no? (00000011 state (00000001 admitted)))
             (fail-machine-hybrid (00000101 rows)))))))))
 
 (check-machine-edges authority-edges)
