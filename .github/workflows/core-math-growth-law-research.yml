@@ -1,0 +1,24 @@
+name: Core-Math growth law research
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2433-core-math-neutral-v1.json"
+      - "docs/research/2433-core-math-generation-certificates.json"
+      - "benchmarks/core-math-growth-law/**"
+      - ".github/workflows/core-math-growth-law-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  growth-law:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify recursive mathematical growth event
+        run: python3 benchmarks/core-math-growth-law/analyze.py

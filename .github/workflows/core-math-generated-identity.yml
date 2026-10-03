@@ -1,0 +1,50 @@
+name: Core-Math generated identity research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-generated-identity/**"
+      - ".github/workflows/core-math-generated-identity.yml"
+      - "docs/research/2433-core-math-neutral-v1.json"
+      - "docs/research/2433-core-math-generation-certificates.json"
+      - "scripts/research-2433-core-math-neutral-growth.py"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-generated-identity/**"
+      - ".github/workflows/core-math-generated-identity.yml"
+      - "docs/research/2433-core-math-neutral-v1.json"
+      - "docs/research/2433-core-math-generation-certificates.json"
+      - "scripts/research-2433-core-math-neutral-growth.py"
+  workflow_dispatch:
+
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Re-check neutral growth donor
+        run: |
+          python3 scripts/research-2433-core-math-neutral-growth.py --check
+
+      - name: Run generated identity tournament
+        run: |
+          rm -rf /tmp/core-math-generated-identity
+          python3 benchmarks/core-math-generated-identity/run.py \
+            --out /tmp/core-math-generated-identity
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-math-generated-identity/report.md; then
+            cat /tmp/core-math-generated-identity/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-math-generated-identity
+          path: /tmp/core-math-generated-identity/
+          retention-days: 14

@@ -1,0 +1,94 @@
+{
+  "authority": "research-only",
+  "certificates": [
+    {
+      "carrier": "Q",
+      "cases": "7",
+      "dependencies": [
+        "mul"
+      ],
+      "expression": {
+        "args": [
+          {
+            "const": "neg_one"
+          },
+          {
+            "var": "x"
+          }
+        ],
+        "call": "mul"
+      },
+      "operation": "neg",
+      "partiality": "total",
+      "semantic_signature_sha256": "b301de2d636f0aca433282e392d0249be8080cabb65e82b69c0b86c9ec29c322",
+      "undefined_cases": "0"
+    },
+    {
+      "carrier": "Q",
+      "cases": "49",
+      "dependencies": [
+        "add",
+        "neg"
+      ],
+      "expression": {
+        "args": [
+          {
+            "var": "x"
+          },
+          {
+            "args": [
+              {
+                "var": "y"
+              }
+            ],
+            "call": "neg"
+          }
+        ],
+        "call": "add"
+      },
+      "operation": "sub",
+      "partiality": "total",
+      "semantic_signature_sha256": "12f770e83f110ee34435213517695b19b034c105e2e8155a3cce5acc39239a7c",
+      "undefined_cases": "0"
+    },
+    {
+      "carrier": "Q",
+      "cases": "49",
+      "dependencies": [
+        "mul",
+        "recip"
+      ],
+      "expression": {
+        "args": [
+          {
+            "var": "x"
+          },
+          {
+            "args": [
+              {
+                "var": "y"
+              }
+            ],
+            "call": "recip"
+          }
+        ],
+        "call": "mul"
+      },
+      "operation": "div",
+      "partiality": "undefined-when-y-zero",
+      "semantic_signature_sha256": "721c462e593d62d7c227284c633e00bcfe5bf383e02c9e2c621d9043186fe112",
+      "undefined_cases": "7"
+    }
+  ],
+  "corpus": [
+    "-2/1",
+    "-1/1",
+    "-1/2",
+    "0/1",
+    "1/2",
+    "1/1",
+    "2/1"
+  ],
+  "schema": "core-math-generation-certificates/v1",
+  "spec": "docs/research/2433-core-math-neutral-v1.json"
+}
