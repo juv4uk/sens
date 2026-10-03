@@ -115,10 +115,10 @@ LEGEND_TEXT = {
 }
 
 LAYER_MECHANISM = re.compile(
-    r"(?im)^\\s*(?:[-*]\\s*)?\\**LAYER\\**\\s*(?:=|:)\\s*MECHANISM\\s*$"
+    r"(?im)^\s*(?:[-*]\s*)?(?:\*\*)?LAYER(?:\*\*)?\s*(?:=|:)\s*MECHANISM\s*$"
 )
 SEMANTIC_AUTHORITY_NONE = re.compile(
-    r"(?im)^\\s*(?:[-*]\\s*)?\\**SEMANTIC[ _-]+AUTHORITY\\**\\s*(?:=|:)\\s*NONE\\s*$"
+    r"(?im)^\s*(?:[-*]\s*)?(?:\*\*)?SEMANTIC[ _-]+AUTHORITY(?:\*\*)?\s*(?:=|:)\s*NONE\s*$"
 )
 
 VIOLATION_SCOPE = {
