@@ -30,6 +30,8 @@
   ; D5 owner-map residents with live exact-domain mechanisms.
   ("101" "01010" (en plus) (ук додати) (укр додати) (sa yoga) (sym +))
   ("101" "01011" (en difference) (ук відняти) (укр відняти) (sa viyoga) (sym -))
+  ("101" "01110" (en lessp?) (ук менше?) (укр менше?) (sa hīna?) (sym <))
+  ("101" "01111" (en greaterp?) (ук більше?) (укр більше?) (sa adhika?) (sym >))
   ("101" "10010" (en times) (ук помножити) (укр помножити) (sa guṇana) (sym *))
   ("101" "10011" (en divide) (ук поділити) (укр поділити) (sa haraṇa) (sym /))
 )
