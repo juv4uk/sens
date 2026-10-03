@@ -113,6 +113,22 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+    /// Lift an exact D3-D6 source word into the canonical Core identity key.
+    ///
+    /// This is the binary-source -> semantic-identity bridge for the current
+    /// Core identity domains. D1/D2 belong to predicate/structure domains here;
+    /// D7 and legacy exact-eight remain separate domains and are therefore
+    /// rejected rather than inferred or padded.
+    pub const fn core_domain_identity(self) -> Option<crate::CoreDomainIdentity> {
+        match self {
+            Self::W3(word) => Some(crate::CoreDomainIdentity::D3(crate::Bija3::from_word(word))),
+            Self::W4(word) => Some(crate::CoreDomainIdentity::D4(crate::CoreD4::from_word(word))),
+            Self::W5(word) => Some(crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(word))),
+            Self::W6(word) => Some(crate::CoreDomainIdentity::D6(crate::CoreD6::from_word(word))),
+            Self::W1(_) | Self::W2(_) | Self::W7(_) | Self::W8(_) => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -348,7 +364,75 @@ mod tests {
     }
 
     #[test]
-    fn d7_and_d8_do_not_gain_callable_domain_identity_by_width_alone() {
+    fn d3_through_d6_source_words_lift_directly_to_distinct_core_identities() {
+        for raw in 0..=7 {
+            let source = BinarySourceWord::W3(Bit3::new(raw).unwrap());
+            let identity = source.core_domain_identity().expect("W3 -> D3");
+            assert_eq!(identity.width(), 3);
+            assert_eq!(identity.packed_bits(), raw);
+            assert!(matches!(identity, crate::CoreDomainIdentity::D3(_)));
+        }
+        for raw in 0..=15 {
+            let source = BinarySourceWord::W4(Bit4::new(raw).unwrap());
+            let identity = source.core_domain_identity().expect("W4 -> D4");
+            assert_eq!(identity.width(), 4);
+            assert_eq!(identity.packed_bits(), raw);
+            assert!(matches!(identity, crate::CoreDomainIdentity::D4(_)));
+        }
+        for raw in 0..=31 {
+            let source = BinarySourceWord::W5(Bit5::new(raw).unwrap());
+            let identity = source.core_domain_identity().expect("W5 -> D5");
+            assert_eq!(identity.width(), 5);
+            assert_eq!(identity.packed_bits(), raw);
+            assert!(matches!(identity, crate::CoreDomainIdentity::D5(_)));
+        }
+        for raw in 0..=63 {
+            let source = BinarySourceWord::W6(Bit6::new(raw).unwrap());
+            let identity = source.core_domain_identity().expect("W6 -> D6");
+            assert_eq!(identity.width(), 6);
+            assert_eq!(identity.packed_bits(), raw);
+            assert!(matches!(identity, crate::CoreDomainIdentity::D6(_)));
+        }
+    }
+
+    #[test]
+    fn equal_payload_source_words_remain_distinct_after_core_identity_lift() {
+        let d3 = BinarySourceWord::W3(Bit3::new(1).unwrap())
+            .core_domain_identity()
+            .unwrap();
+        let d4 = BinarySourceWord::W4(Bit4::new(1).unwrap())
+            .core_domain_identity()
+            .unwrap();
+        let d5 = BinarySourceWord::W5(Bit5::new(1).unwrap())
+            .core_domain_identity()
+            .unwrap();
+        let d6 = BinarySourceWord::W6(Bit6::new(1).unwrap())
+            .core_domain_identity()
+            .unwrap();
+
+        assert_eq!([d3.packed_bits(), d4.packed_bits(), d5.packed_bits(), d6.packed_bits()], [1; 4]);
+        assert_ne!(d3, d4);
+        assert_ne!(d3, d5);
+        assert_ne!(d3, d6);
+        assert_ne!(d4, d5);
+        assert_ne!(d4, d6);
+        assert_ne!(d5, d6);
+    }
+
+    #[test]
+    fn non_core_source_widths_do_not_lift_to_core_domain_identity() {
+        for source in [
+            BinarySourceWord::W1(Bit1::new(1).unwrap()),
+            BinarySourceWord::W2(Bit2::new(1).unwrap()),
+            BinarySourceWord::W7(Bit7::new(1).unwrap()),
+            BinarySourceWord::W8(Bit8::new(1).unwrap()),
+        ] {
+            assert!(source.core_domain_identity().is_none());
+        }
+    }
+
+    #[test]
+    fn d7_and_d8_do_not_gain_core_domain_identity_by_width_alone() {
         for source in [
             BinarySourceWord::W7(Bit7::new(0).unwrap()),
             BinarySourceWord::W8(Bit8::new(0).unwrap()),
