@@ -93,7 +93,7 @@ D3-слово `011` (`COND`) має двочленний закон `(test expre
 На сьогодні README може чесно показати такі результати:
 
 - **Exact-width carriers працюють механічно.** `Bits<N>`, `BinarySourceWord`, `BitPacker` і `PackedBitstream` зберігають width + bits без zero-padding identity.
-- **D1→D4 ратифіковані як різні домени.** D1 — PredicateBit, D2 — структура, D3 — фундаментальні операції, D4 — bootstrap-шар.
+- **D1→D8 ратифіковані як різні домени.** D1 — PredicateBit, D2 — структура, D3 — фундаментальні операції, D4 — bootstrap-шар.
 - **Packed source має явну boundary-межу.** Однаковий payload може мати різні valid width schedules; standalone framing досліджується окремо.
 - **Міграція одностороння.** Новий exact-width код не повинен створювати нову залежність від legacy SENS8 / Function8 identity.
 - **Vertical Day — історичний bounded machine-path доказ.** Зріз [`2026-09-14`](docs/research/2026-09-14-vertical-day.md) передує поточній D1→D4 моделі й зберігається як provenance, а не як доказ сучасної identity-схеми.
@@ -436,7 +436,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · auxiliary
 
-`sens` (СЕНС) is an experimental programming language and research platform exploring exact-width binary identities, domain-derived semantics, compact packed representation, executable laws, and multiple execution substrates. Its current ratified foundation is D1→D4, where width is part of identity. The earlier flat SENS8 / Function8 model remains compatibility and research provenance during migration, not the current ontology. Human names (Ukrainian, English, Sanskrit, symbols) are non-authoritative source/UI projections.
+`sens` (СЕНС) is an experimental programming language and research platform exploring exact-width binary identities, domain-derived semantics, compact packed representation, executable laws, and multiple execution substrates. Its current ratified foundation is D1→D8, where exact domain and width are part of identity. The earlier flat SENS8 / Function8 model remains compatibility and research provenance during migration, not the current ontology. Human names (Ukrainian, English, Sanskrit, symbols) are non-authoritative source/UI projections.
 
 Ukrainian is the project's primary human language. English and German are auxiliary. The Rust runtime is the reference implementation, not semantic authority; start with [`language-contract.lisp`](language-contract.lisp) and [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
 
