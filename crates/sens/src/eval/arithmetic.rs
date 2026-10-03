@@ -229,6 +229,32 @@ fn small_rational_fast_path(
 // builtin closures in eval/builtins.rs call these directly with
 // pre-evaluated values. Single compute path, two front doors.
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) enum ArithmeticOperation {
+    Add,
+    Subtract,
+    Multiply,
+}
+
+impl ArithmeticOperation {
+    fn mechanism_token(self) -> &'static str {
+        match self {
+            Self::Add => "+",
+            Self::Subtract => "-",
+            Self::Multiply => "*",
+        }
+    }
+}
+
+pub(super) fn arithmetic_on_values_by_operation(
+    operation: ArithmeticOperation,
+    values: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    arithmetic_on_values(operation.mechanism_token(), values, environment, span)
+}
+
 pub(super) fn arithmetic_on_values(
     operator: &str,
     values: &[Value],
