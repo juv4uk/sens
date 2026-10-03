@@ -16,7 +16,7 @@
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
 
-const MAX_SELECTOR_DEPTH: usize = 4;
+const MAX_SELECTOR_DEPTH: usize = 6;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
@@ -32,7 +32,9 @@ struct SelectorProgram {
 
 fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let width = identity.width();
-    if !(3..=6).contains(&width) {
+    // D7 is the ratified Sound7 domain, not a selector rung. The selector
+    // lineage continues at D8, where five suffix bits extend the D3 root.
+    if !matches!(width, 3 | 4 | 5 | 6 | 8) {
         return None;
     }
 
@@ -103,7 +105,10 @@ pub(super) fn invoke(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6};
+    use crate::{
+        Bija3, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, CoreD4, CoreD5, CoreD6, CoreD7,
+        CoreD8,
+    };
     use std::rc::Rc;
 
     fn pair(head: Value, tail: Value) -> Value {
@@ -131,6 +136,12 @@ mod tests {
     fn d6(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()))
     }
+    fn d7(raw: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D7(CoreD7::from_word(Bit7::new(raw).unwrap()))
+    }
+    fn d8(raw: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(raw).unwrap()))
+    }
 
     #[test]
     fn selector_family_is_decoded_from_root_plus_suffix_only() {
@@ -149,6 +160,10 @@ mod tests {
             decode(d6(0b101101)).unwrap().steps[..4],
             [Step::Car, Step::Cdr, Step::Car, Step::Cdr]
         );
+        assert_eq!(
+            decode(d8(0b10110101)).unwrap().steps[..6],
+            [Step::Car, Step::Cdr, Step::Car, Step::Cdr, Step::Car, Step::Cdr]
+        );
     }
 
     #[test]
@@ -159,13 +174,15 @@ mod tests {
             d4(0b0010),
             d5(0b01010),
             d6(0b011111),
+            d7(0b1010101),
+            d8(0b01111111),
         ] {
             assert_eq!(decode(identity), None);
         }
     }
 
     #[test]
-    fn d3_through_d6_selectors_execute_without_descendant_rows() {
+    fn d3_through_d8_selectors_execute_without_descendant_rows() {
         let leaf = |n| Value::Number(n, crate::Exactness::Exact);
 
         // x = (((1 . 2) . (3 . 4)) . ((5 . 6) . (7 . 8)))
@@ -198,6 +215,17 @@ mod tests {
             invoke(d6(0b101000), &[x2], span).unwrap().unwrap(),
             leaf(1.0)
         );
+
+        // D8 10100000 = CAR composed six times. D7 is deliberately skipped:
+        // this D8 identity belongs to the selector lineage, not Sound7.
+        let mut deep = leaf(9.0);
+        for _ in 0..6 {
+            deep = pair(deep, Value::Nil);
+        }
+        assert_eq!(
+            invoke(d8(0b10100000), &[deep], span).unwrap().unwrap(),
+            leaf(9.0)
+        );
     }
 
     #[test]
@@ -216,8 +244,12 @@ mod tests {
         for raw in 0u8..64 {
             generated += usize::from(decode(d6(raw)).is_some());
         }
+        for raw in 0u8..=255 {
+            generated += usize::from(decode(d8(raw)).is_some());
+        }
 
-        // 2 roots + 4 D4 + 8 D5 + 16 D6 descendants.
-        assert_eq!(generated, 30);
+        // 2 roots + 4 D4 + 8 D5 + 16 D6 + 64 D8 descendants.
+        // D7 contributes zero because it is Sound7 under a different law.
+        assert_eq!(generated, 94);
     }
 }
