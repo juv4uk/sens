@@ -217,6 +217,44 @@ impl DomainWord {
     }
 }
 
+/// Opaque canonical identity exported from the exact-width domain layer.
+///
+/// Legacy/compatibility layers may depend on this type. This type never knows
+/// about historical Sid8/Sens8 identities, preserving the one-way dependency.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct DomainIdentity(DomainWord);
+
+impl DomainIdentity {
+    pub const fn from_word(word: DomainWord) -> Self {
+        Self(word)
+    }
+
+    pub const fn from_width_bits(width: usize, bits: u8) -> Option<Self> {
+        match DomainWord::from_width_bits(width, bits) {
+            Some(word) => Some(Self(word)),
+            None => None,
+        }
+    }
+
+    pub const fn width(self) -> usize {
+        self.0.width()
+    }
+
+    pub const fn packed_bits(self) -> u8 {
+        self.0.packed_bits()
+    }
+
+    pub const fn word(self) -> DomainWord {
+        self.0
+    }
+}
+
+impl From<DomainWord> for DomainIdentity {
+    fn from(value: DomainWord) -> Self {
+        Self(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
