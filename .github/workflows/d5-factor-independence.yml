@@ -1,0 +1,73 @@
+name: D5 factor independence research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d5-factor-independence/**"
+      - "benchmarks/d5-structural-discovery/**"
+      - "scripts/research-2522-fexpr-protocol-cube.py"
+      - "scripts/research-2568-macro-timing.py"
+      - "scripts/research-2488-return-placement.py"
+      - "scripts/research-2609-cross-family-parent.py"
+      - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - ".github/workflows/d5-factor-independence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d5-factor-independence/**"
+      - "benchmarks/d5-structural-discovery/**"
+      - "scripts/research-2522-fexpr-protocol-cube.py"
+      - "scripts/research-2568-macro-timing.py"
+      - "scripts/research-2488-return-placement.py"
+      - "scripts/research-2609-cross-family-parent.py"
+      - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - ".github/workflows/d5-factor-independence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Re-check structural factor graph
+        run: python3 benchmarks/d5-structural-discovery/factor_graph.py --check
+
+      - name: Re-check protocol cube
+        run: python3 scripts/research-2522-fexpr-protocol-cube.py
+
+      - name: Re-check macro timing
+        run: python3 scripts/research-2568-macro-timing.py
+
+      - name: Re-check mutation-factor witness
+        run: cargo test -p sens --test post_d4_set_setq_factor -- --nocapture
+
+      - name: Re-check RETURN residue/root theorem
+        run: python3 scripts/research-2488-return-placement.py
+
+      - name: Re-check typed cross-family guard
+        run: python3 scripts/research-2609-cross-family-parent.py
+
+      - name: Run seven-factor current-main independence gate
+        run: |
+          rm -rf /tmp/d5-factor-independence
+          python3 benchmarks/d5-factor-independence/run.py --out /tmp/d5-factor-independence
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d5-factor-independence/report.md; then
+            cat /tmp/d5-factor-independence/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d5-factor-independence
+          path: /tmp/d5-factor-independence/
+          retention-days: 14
