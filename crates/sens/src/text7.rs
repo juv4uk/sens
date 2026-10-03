@@ -142,7 +142,7 @@ impl Text7 {
     ///
     /// Fails closed if the total bit length is not an exact multiple of seven.
     pub fn from_packed_w7(packed: &PackedBitstream) -> Result<Self, Text7W7Error> {
-        if packed.bit_len() % 7 != 0 {
+        if !packed.bit_len().is_multiple_of(7) {
             return Err(Text7W7Error::UnalignedBitLen {
                 bit_len: packed.bit_len(),
             });
