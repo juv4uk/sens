@@ -225,7 +225,7 @@ mod tests {
         let find = |name: &str| items.iter().find(|item| item.name == name).unwrap();
 
         let cond = find("cond").domain_identity.unwrap();
-        let eq = find("eq").domain_identity.unwrap();
+        let eq = find("eq?").domain_identity.unwrap();
         assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
         assert_eq!((eq.width(), eq.packed_bits()), (3, 0b111));
     }
