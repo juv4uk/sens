@@ -21,7 +21,7 @@ BLOCK = re.compile(r"BINARY-DOMAIN\s+FORMAT", re.I)
 
 
 def _heading_text(b, m):
-    rest = m.group(1).strip()
+    rest = (m.group(1) or "").strip()
     if rest:
         return rest
     for line in b[m.end() :].splitlines():
@@ -42,7 +42,7 @@ def field_value(body, label):
         (
             "value",
             re.compile(
-                rf"^[ \t]*#{{1,6}}[ \t]*\**{label}\**[ \t]*:?[ \t]*(.*)$",
+                rf"^[ \t]*#{{1,6}}[ \t]*\**{label}\**(?:[ \t]*:[ \t]*(.*)|[ \t]*)$",
                 re.I | re.M,
             ),
             True,
@@ -146,12 +146,12 @@ def judge(issues):
         if str(it.get("state", "open")).lower() != "open":
             skipped += 1
             continue
-        d_kind, d_val = field_value(body, "DOMAIN")
-        r_kind, r_val = field_value(body, "RELATION")
         has_block = bool(BLOCK.search(body))
-        if d_kind is None and r_kind is None and not has_block:
+        if not has_block:
             skipped += 1
             continue
+        d_kind, d_val = field_value(body, "DOMAIN")
+        r_kind, r_val = field_value(body, "RELATION")
         judged.append(
             {
                 "number": it.get("number"),
@@ -203,7 +203,15 @@ def main(argv=None):
                 got = domain_verdict(v)
             assert got == expected, (name, got, expected)
             ok += 1
-        print(f"(binary-domain-selftest-ok ({ok} cases))")
+        # Scope guard: examples/legacy prose without the canonical marker are ignored.
+        scoped, skipped = judge([
+            {"number": 90, "title": "legacy example", "state": "open",
+             "body": "## DOMAIN pass rule\nRELATION: prose only\n"}
+        ])
+        assert scoped == [] and skipped == 1
+        # Exact heading guard: "DOMAIN pass rule" is not the DOMAIN field.
+        assert field_value("## DOMAIN pass rule\n", "DOMAIN") == (None, None)
+        print(f"(binary-domain-selftest-ok ({ok + 2} cases))")
         return 0
 
     if not args.issues:
