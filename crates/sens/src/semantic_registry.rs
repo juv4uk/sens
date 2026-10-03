@@ -7,12 +7,13 @@
 //! runtime projection for fast lookup.
 //
 //! Generated rows may carry a packed byte as substrate representation of an
-//! already understood Lisp Binary identity. This wrapper converts that byte to
-//! opaque Sens8 immediately; runtime registry APIs never expose decimal IDs.
+//! already understood historical byte identity. Canonical callable identity is
+//! owned by domain_registry; this module is now only a surface/compatibility
+//! projection for rows not yet migrated to exact-domain routing.
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
+use crate::{domain_registry, CoreDomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -23,26 +24,10 @@ use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
 
-pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
-    let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
-    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
-    match byte {
-        0b0000_0001 => Some(d3(0b001)), // QUOTE
-        0b0000_0010 => Some(d3(0b010)), // ATOM
-        0b0000_0111 => Some(d3(0b011)), // COND
-        0b0000_0100 => Some(d3(0b100)), // CONS
-        0b0000_0101 => Some(d3(0b101)), // CAR
-        0b0000_0110 => Some(d3(0b110)), // CDR
-        0b0000_0011 => Some(d3(0b111)), // EQ
-        0b0000_1000 => Some(d4(0b0010)), // LAMBDA
-        0b0000_1001 => Some(d4(0b0011)), // DEFINE
-        _ => None,
-    }
+pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
+    domain_registry::identity_for_surface(name)
 }
 
-pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(domain_identity_from_registry_byte)
-}
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
 }
@@ -178,20 +163,21 @@ mod tests {
     }
 
     #[test]
-    fn unmigrated_registry_rows_have_no_fake_domain_identity() {
-        assert_eq!(domain_identity_for_surface("+"), None);
+    fn migrated_d5_d6_surfaces_are_no_longer_legacy_identity() {
+        let plus = domain_identity_for_surface("+").unwrap();
+        let length = domain_identity_for_surface("length").unwrap();
+        assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
+        assert_eq!((length.width(), length.packed_bits()), (6, 0b100001));
     }
 
     #[test]
-    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
-        assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("за-умовою")
-        );
-        assert_eq!(
-            registry_byte_for_surface("функція").and_then(domain_identity_from_registry_byte),
-            domain_identity_for_surface("функція")
-        );
+    fn canonical_domain_lookup_is_owned_by_domain_registry() {
+        let cond = domain_identity_for_surface("за-умовою").expect("COND domain identity");
+        let plus = domain_identity_for_surface("+").expect("PLUS domain identity");
+        let let_form = domain_identity_for_surface("let").expect("LET domain identity");
+        assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
+        assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
+        assert_eq!((let_form.width(), let_form.packed_bits()), (6, 0b001000));
     }
 
     #[test]
