@@ -20,8 +20,8 @@
 (ownership necessary-define 00001001 necessary-form bootstrap confirmed no "DEFINE: evaluator-controlled immutable binding form" "crates/sens/src/eval/necessary_forms.rs;crates/sens/src/eval/mod.rs" "crates/sens/tests/mccarthy.rs" - -)
 (ownership macro-definition 00001010 lisp-owned bootstrap confirmed no "Поведінка визначення макросів виведена у lib/macro.lisp поверх вузького make-macro substrate" "lib/macro.lisp;crates/sens/src/eval/macro_substrate.rs;crates/sens/src/lib.rs" "crates/sens/tests/macro_derivation.rs" host-mechanism 3fff9e9fbb7171a81ba128baedd68f093fc0c65b)
 
-(ownership list-constructor - lisp-owned stdlib confirmed no "Варіадичний list-конструктор виведений із lambda/rest семантики самої мови" "lib/core4.lisp" "crates/sens/tests/mccarthy.rs" host-mechanism efdd9252fd4ca4af4503b219ab3ae79130ef0e64)
-(ownership gensym - lisp-owned stdlib confirmed no "Політика свіжого символу складена в Lisp зі string-операцій і monotonic observation" "lib/core4.lisp" "tests/fixtures/conformance.lisp;crates/sens/tests/mccarthy.rs" - -)
+(ownership list-constructor - lisp-owned stdlib confirmed no "Варіадичний list-конструктор виведений із lambda/rest семантики самої мови" "lib/core.lisp" "crates/sens/tests/mccarthy.rs" host-mechanism efdd9252fd4ca4af4503b219ab3ae79130ef0e64)
+(ownership gensym - lisp-owned stdlib confirmed no "Політика свіжого символу складена в Lisp зі string-операцій і monotonic observation" "lib/core.lisp" "tests/fixtures/conformance.lisp;crates/sens/tests/mccarthy.rs" - -)
 (ownership meta-evaluator - lisp-owned self-hosting confirmed no "Lisp-owned metacircular evaluator witness; усі 34 required parity rows підтверджені machine evidence matrix" "lib/meta-eval.lisp;knowledge/meta-eval-evidence.lisp" "scripts/verify-repo.lisp;crates/sens/tests/witness_authority.rs;tests/fixtures/meta-semantic-registry-witness.lisp;crates/sens/tests/meta_eval_error_kind_parity.rs;crates/sens/tests/meta_eval_error_detail_boundary.rs" - -)
 
 (ownership unification - lisp-owned reasoning confirmed no "Уніфікація логічних змінних з occurs-check" "lib/unify.lisp" "tests/fixtures/conformance.lisp" - -)
@@ -49,7 +49,7 @@
 (ownership tooling-syntax-discovery - derived-tooling tooling confirmed no "Tooling metadata ключується semantic identity, а spelling отримує з registry" "crates/sens/src/language_items.rs;crates/sens/src/semantic_registry.rs" "crates/sens/src/language_items.rs;crates/sens/tests/uk_surface_inventory.rs" human-spelling-tooling e8f60f659199686205376ca4fd1c570034c05de6)
 
 ; migration KEY FROM_OWNER TO_OWNER STATUS COMMIT "BEHAVIOR" "CURRENT_EVIDENCE_PATHS"
-(migration list-rust-to-lisp host-mechanism lisp-owned confirmed efdd9252fd4ca4af4503b219ab3ae79130ef0e64 "Rust special form list видалено; list визначено в lib/core4.lisp" "lib/core4.lisp;crates/sens/tests/mccarthy.rs")
+(migration list-rust-to-lisp host-mechanism lisp-owned confirmed efdd9252fd4ca4af4503b219ab3ae79130ef0e64 "Rust special form list видалено; list визначено в lib/core.lisp" "lib/core.lisp;crates/sens/tests/mccarthy.rs")
 (migration defmacro-fallback-to-lisp host-mechanism lisp-owned confirmed 3fff9e9fbb7171a81ba128baedd68f093fc0c65b "Rust defmacro evaluator fallback видалено; поведінкою володіє language macro path" "lib/macro.lisp;crates/sens/tests/macro_derivation.rs")
 (migration necessary-form-surface-authority host-hardcoded registry-data confirmed 3fa2ae1f5e5786cd5c0b41489648a23bb1f405f5 "LAMBDA/DEFINE stable surface routing перенесено з Rust spelling tables у numeric registry projection" "crates/sens/src/eval/necessary_forms.rs;crates/sens/src/semantic_registry.rs")
 (migration canon-surface-authority host-hardcoded registry-data confirmed 668794caf6f3e2e1d0d6c8e740f218cc6ef04db9 "Canon stable surface routing перенесено у shared numeric semantic registry projection" "crates/sens/src/eval/canon.rs;crates/sens/src/semantic_registry.rs")
