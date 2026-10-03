@@ -1,0 +1,37 @@
+name: LISP 1.5 numeric predicate factorization
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2709-lisp15-arithmetic-ledger.json"
+      - "contracts/exact-q-binary-contract.lisp"
+      - "benchmarks/lisp15-numeric-predicate-factor/**"
+      - ".github/workflows/lisp15-numeric-predicate-factor.yml"
+  workflow_dispatch:
+
+jobs:
+  factor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Factor historical numeric predicates
+        run: |
+          rm -rf /tmp/lisp15-numeric-predicate-factor
+          python3 benchmarks/lisp15-numeric-predicate-factor/run.py \
+            --out /tmp/lisp15-numeric-predicate-factor
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/lisp15-numeric-predicate-factor/report.md; then
+            cat /tmp/lisp15-numeric-predicate-factor/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lisp15-numeric-predicate-factor
+          path: /tmp/lisp15-numeric-predicate-factor/
+          retention-days: 14
