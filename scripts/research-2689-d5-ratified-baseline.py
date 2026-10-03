@@ -1,46 +1,73 @@
 #!/usr/bin/env python3
-"""#2689 — standing guard for the owner-ratified Core D5 baseline.
+"""Standing guard for the current owner-ratified Core D5 baseline.
 
-This guard consumes the merged #2510 D5 closure-map generator. It does not
-rebuild or reinterpret the map. Its only job is to make the current owner
-ratification executable:
+OD-005 / merged #2750 supersedes the earlier sparse 8+24 occupancy model.
 
-    8 selector-generated semantic residents
-    24 UNKNOWN/free non-residents
-    0 manual non-selector residents
+Canonical input:
+    knowledge/d5-historical-full-map.json
 
-Any occupancy change must therefore update the ratified baseline deliberately
-rather than arriving as incidental research fallout.
+This guard validates the owner baseline as binary-domain structure. Historical
+selector-closure research remains useful evidence, but is not occupancy
+authority after OD-005.
+
+No D6 state is changed here.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import runpy
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
-CLOSURE = REPO / "benchmarks" / "d5-closure-map" / "run.py"
+FULL_MAP = REPO / "knowledge" / "d5-historical-full-map.json"
 
 WIDTH = 5
 CAPACITY = 1 << WIDTH
-RATIFIED_GENERATED = {
-    "10100",
-    "10101",
-    "10110",
-    "10111",
-    "11000",
-    "11001",
-    "11010",
-    "11011",
+ALL_COORDS = {format(i, "05b") for i in range(CAPACITY)}
+ALL_PARENTS = {format(i, "04b") for i in range(1 << 4)}
+SELECTORS = {
+    "10100", "10101", "10110", "10111",
+    "11000", "11001", "11010", "11011",
 }
-EXPECTED_UNKNOWN = CAPACITY - len(RATIFIED_GENERATED)
+
+EXPECTED_STATUS_COUNTS = {
+    "selector": 8,
+    "arithmetic": 4,
+    "predicate": 4,
+    "state_and_control": 4,
+    "evaluation_and_abstraction": 6,
+    "list_and_tree_structure": 6,
+    "total": 32,
+    "unallocated": 0,
+}
+
+# OD-005 owner groups are coarser than each row's descriptive category.
+# Validate them by exact binary coordinates rather than guessing from names.
+EXPECTED_GROUPS = {
+    "evaluation_and_abstraction": {
+        "00000", "00001", "00010", "00011", "00100", "00101",
+    },
+    "state_and_control": {
+        "00110", "00111", "01100", "01101",
+    },
+    "predicate": {
+        "01000", "01001", "01110", "01111",
+    },
+    "arithmetic": {
+        "01010", "01011", "10010", "10011",
+    },
+    "selector": SELECTORS,
+    "list_and_tree_structure": {
+        "10000", "10001", "11100", "11101", "11110", "11111",
+    },
+}
 
 
 def fail(message: str) -> None:
-    raise AssertionError(f"D5 ratified-baseline drift: {message}")
+    raise AssertionError(f"D5 OD-005 baseline drift: {message}")
 
 
 def require(condition: bool, message: str) -> None:
@@ -48,177 +75,134 @@ def require(condition: bool, message: str) -> None:
         fail(message)
 
 
+def load_map() -> dict[str, Any]:
+    return json.loads(FULL_MAP.read_text(encoding="utf-8"))
+
+
+
 def build_result() -> dict[str, Any]:
-    closure = runpy.run_path(str(CLOSURE))
-    rows = closure["build_map"]()
-    acct = closure["accounting"](rows)
+    data = load_map()
 
-    require(len(rows) == CAPACITY, f"expected {CAPACITY} rows, got {len(rows)}")
-    require(len({row["coordinate"] for row in rows}) == CAPACITY, "duplicate coordinate")
-    require(all(row["width"] == WIDTH for row in rows), "row width drift")
-    require(all(row["domain"] == "D5" for row in rows), "row domain drift")
-    require(all(row["domain_ratified"] is True for row in rows), "unratified D5 row")
+    require(data["schema"] == "d5-historical-full-map/v1", "schema")
+    require(data["domain"] == "Core.D5", "domain")
+    require(data["width"] == WIDTH, "width")
+    require(data["capacity"] == CAPACITY, "capacity")
+    require(
+        data["authority"] == "owner-directive-2026-10-03",
+        "owner authority",
+    )
 
-    generated = [row for row in rows if row["status"] == "generated"]
-    unknown = [row for row in rows if row["status"] == "UNKNOWN/free"]
-    other = [
-        row for row in rows
-        if row["status"] not in {"generated", "UNKNOWN/free"}
-    ]
+    rows = data["coordinates"]
+    require(len(rows) == CAPACITY, f"expected 32 rows, got {len(rows)}")
 
-    generated_words = {row["coordinate"] for row in generated}
-    unknown_words = {row["coordinate"] for row in unknown}
+    coords = [row["coordinate"] for row in rows]
+    require(len(set(coords)) == CAPACITY, "duplicate coordinate")
+    require(set(coords) == ALL_COORDS, "coordinate coverage is not exact 00000..11111")
 
-    require(generated_words == RATIFIED_GENERATED, (
-        "generated set drift: "
-        f"expected={sorted(RATIFIED_GENERATED)} actual={sorted(generated_words)}"
-    ))
-    require(len(unknown) == EXPECTED_UNKNOWN, (
-        f"expected {EXPECTED_UNKNOWN} UNKNOWN rows, got {len(unknown)}"
-    ))
-    require(not other, f"unexpected manual/other statuses: {other}")
+    by_parent: dict[str, list[str]] = defaultdict(list)
+    selector_coords = set()
 
-    for row in generated:
-        require(row["semantic_family"] == "selector", (
-            f"{row['coordinate']}: generated row is not selector family"
-        ))
-        require(row["semantic_law"] == "selector projection composition", (
-            f"{row['coordinate']}: semantic law drift"
-        ))
-        require(row["semantic_law_authority"] == "#2158", (
-            f"{row['coordinate']}: semantic law authority drift"
-        ))
-        require(row["certificate_replay_ok"] is True, (
-            f"{row['coordinate']}: selector certificate no longer replays"
-        ))
-        require(row["certificate"] is not None, (
-            f"{row['coordinate']}: generated row lacks certificate"
-        ))
-        require(row["semantic_member_of_ratified_domain"] is True, (
-            f"{row['coordinate']}: generated row lost semantic membership"
-        ))
-        require(row["manual_resident_required"] is False, (
-            f"{row['coordinate']}: generated selector became manual resident"
-        ))
-        require(row["placement_ref"] == "", (
-            f"{row['coordinate']}: generated selector unexpectedly has placement_ref"
-        ))
-        require(row["collision"] is False, (
-            f"{row['coordinate']}: generated selector collision"
-        ))
+    for row in rows:
+        coord = row["coordinate"]
+        parent = row["parent_d4"]
 
-    for row in unknown:
-        coordinate = row["coordinate"]
-        require(row["semantic_member_of_ratified_domain"] is False, (
-            f"{coordinate}: UNKNOWN row became semantic member without baseline update"
-        ))
-        require(row["placement_ref"] == "", (
-            f"{coordinate}: UNKNOWN row has placement_ref"
-        ))
-        require(row["manual_resident_required"] is False, (
-            f"{coordinate}: UNKNOWN row marked manual resident"
-        ))
-        require(row["semantic_family"] == "", (
-            f"{coordinate}: UNKNOWN row gained semantic family"
-        ))
-        require(row["semantic_law"] == "", (
-            f"{coordinate}: UNKNOWN row gained semantic law"
-        ))
-        require(row["semantic_law_authority"] == "", (
-            f"{coordinate}: UNKNOWN row gained semantic law authority"
-        ))
-        require(row["certificate"] is None, (
-            f"{coordinate}: UNKNOWN row gained generation certificate"
-        ))
-        require(row["certificate_replay_ok"] is False, (
-            f"{coordinate}: UNKNOWN row claims certificate replay"
-        ))
-        require(row["collision"] is False, (
-            f"{coordinate}: UNKNOWN row collision"
-        ))
+        require(
+            isinstance(coord, str)
+            and len(coord) == WIDTH
+            and set(coord) <= {"0", "1"},
+            f"{coord!r}: not exact 5-bit coordinate",
+        )
+        require(
+            isinstance(parent, str)
+            and len(parent) == 4
+            and set(parent) <= {"0", "1"},
+            f"{coord}: invalid D4 parent {parent!r}",
+        )
+        require(
+            coord[:4] == parent,
+            f"{coord}: parent-prefix mismatch {parent}",
+        )
+        require(
+            coord == parent + coord[-1],
+            f"{coord}: not exact one-bit extension of {parent}",
+        )
+        require(row.get("name"), f"{coord}: missing projection name")
+        require(row.get("behavior"), f"{coord}: missing behavior")
+        require(row.get("provenance"), f"{coord}: missing historical provenance")
 
-    require(generated_words.isdisjoint(unknown_words), "generated/UNKNOWN overlap")
-    require(generated_words | unknown_words == {
-        format(value, "05b") for value in range(CAPACITY)
-    }, "map does not partition all D5 coordinates")
+        by_parent[parent].append(coord)
+        if row["category"] == "selector":
+            selector_coords.add(coord)
 
-    require(acct["domain_ratified"] is True, "accounting lost ratified-domain flag")
-    require(acct["generated_coordinate_count"] == len(RATIFIED_GENERATED), (
-        "accounting generated count drift"
-    ))
-    require(acct["unknown_free_count"] == EXPECTED_UNKNOWN, (
-        "accounting UNKNOWN count drift"
-    ))
+    require(set(by_parent) == ALL_PARENTS, "not all D4 parents represented")
+    for parent in sorted(ALL_PARENTS):
+        children = sorted(by_parent[parent])
+        require(
+            children == [parent + "0", parent + "1"],
+            f"{parent}: expected P0/P1, got {children}",
+        )
 
-    excluded = acct["excluded_or_unplaced_nonselector_capabilities"]
-    expected_exclusions = {
-        "SET-SETQ": "d5-ineligible-shared-location-family",
-        "RETURN": "d5-ineligible-proven-root-domain-unresolved",
-        "FEXPR-FSUBR": "d5-ineligible-carrier-family",
-        "TRANSFORMER": "d5-ineligible-policy-over-carrier",
-    }
-    require(set(excluded) == set(expected_exclusions), (
-        f"D5 post-D4 exclusion set drift: {sorted(excluded)}"
-    ))
-    for capability, expected_decision in expected_exclusions.items():
-        require(excluded[capability]["decision"] == expected_decision, (
-            f"{capability} D5 exclusion drift: "
-            f"{excluded[capability]['decision']} != {expected_decision}"
-        ))
-        require(excluded[capability]["evidence"], (
-            f"{capability} D5 exclusion lost evidence"
-        ))
+    require(
+        selector_coords == SELECTORS,
+        f"selector coordinates drifted: {sorted(selector_coords)}",
+    )
+
+    # Owner status groups are exact coordinate partitions.
+    group_union: set[str] = set()
+    for group, expected_coords in EXPECTED_GROUPS.items():
+        require(
+            not (group_union & expected_coords),
+            f"owner status groups overlap at {sorted(group_union & expected_coords)}",
+        )
+        group_union |= expected_coords
+        require(
+            len(expected_coords) == EXPECTED_STATUS_COUNTS[group],
+            f"{group}: coordinate group count drift",
+        )
+    require(group_union == ALL_COORDS, "owner status groups do not partition D5")
+
+    require(
+        data["status_counts"] == EXPECTED_STATUS_COUNTS,
+        f"declared status counts drifted: {data['status_counts']}",
+    )
 
     return {
-        "schema": "d5-ratified-baseline-guard/v1",
-        "authority": "#2414/#2510/#2689",
-        "domain": "Core D5",
+        "schema": "d5-owner-baseline-guard/v2",
+        "authority": "#2750/OD-005",
+        "domain": "Core.D5",
         "width": WIDTH,
         "capacity": CAPACITY,
-        "domain_ratified": True,
-        "baseline_ratified": True,
-        "generated_count": len(generated),
-        "unknown_count": len(unknown),
-        "manual_nonselector_count": len(other),
-        "collision_count": sum(bool(row["collision"]) for row in rows),
-        "generated_coordinates": sorted(generated_words),
-        "unknown_coordinates": sorted(unknown_words),
-        "owner_update_required_for_occupancy_change": True,
-        "unknown_is_spare_capacity": False,
-        "core_math_may_fill_core_d5_by_analogy": False,
+        "resident_count": len(rows),
+        "unallocated_count": 0,
+        "unique_coordinate_count": len(set(coords)),
+        "d4_parent_count": len(by_parent),
+        "children_per_d4_parent": 2,
+        "parent_extension_law": "child = parent_d4 || one_suffix_bit",
+        "selector_coordinates": sorted(selector_coords),
+        "selector_count": len(selector_coords),
+        "historical_nonselector_count": len(rows) - len(selector_coords),
+        "status_counts": EXPECTED_STATUS_COUNTS,
+        "owner_coordinate_groups": {
+            key: sorted(value)
+            for key, value in sorted(EXPECTED_GROUPS.items())
+        },
+        "core_math_occupancy_donation": False,
+        "d6_mutation": False,
+        "legacy_sparse_baseline_authority": False,
         "status": "PASS",
-        "non_conclusions": [
-            "historical presence is not Core D5 occupancy",
-            "UNKNOWN/free is a protected epistemic state, not permission",
-            "research overlays do not become residents",
-            "same-bit or same-transform Core-Math evidence cannot populate Core D5",
-        ],
     }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--json-out", type=Path)
-    args = parser.parse_args()
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--json-out", type=Path)
+    args = ap.parse_args()
 
     result = build_result()
-
-    if args.json_out is not None:
-        args.json_out.parent.mkdir(parents=True, exist_ok=True)
-        args.json_out.write_text(
-            json.dumps(result, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
-
-    print("D5-RATIFIED-BASELINE=PASS")
-    print(f"width={result['width']}")
-    print(f"capacity={result['capacity']}")
-    print(f"generated={result['generated_count']}")
-    print(f"unknown={result['unknown_count']}")
-    print(f"manual={result['manual_nonselector_count']}")
-    print(f"collisions={result['collision_count']}")
-    print("owner-update-required-for-occupancy-change=yes")
-    print("unknown-is-spare-capacity=no")
+    payload = json.dumps(result, indent=2, sort_keys=True) + "\n"
+    print(payload, end="")
+    if args.json_out:
+        args.json_out.write_text(payload, encoding="utf-8")
     return 0
 
 
