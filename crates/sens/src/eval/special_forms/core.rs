@@ -70,7 +70,7 @@ pub(crate) fn evaluate_definition(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
+    exact_semantic_arity(crate::SemanticRef::legacy8(0b0000_1011), arguments, 2, span)?;
     let ExprKind::Symbol(name) = &arguments[0].kind else {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
@@ -180,11 +180,10 @@ pub fn exact_arity(
     ))
 }
 
-/// Arity check for a SENS form inside the core: the form is named by its
-/// 8-bit code, never by a surface spelling. `exact_arity` stays for host
-/// capabilities, which are not SENS identities.
-pub fn exact_sens_arity(
-    operator: crate::Sens8,
+/// Arity check for a canonical semantic form. `exact_arity` stays for host
+/// capabilities, which are not language identities.
+pub fn exact_semantic_arity(
+    operator: crate::SemanticRef,
     arguments: &[Expr],
     expected: usize,
     span: Span,
