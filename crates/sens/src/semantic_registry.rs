@@ -8,7 +8,7 @@
 use std::{collections::HashMap, sync::OnceLock};
 
 use crate::{
-    Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity,
+    Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity,
 };
 
 mod generated {
@@ -25,6 +25,9 @@ fn identity_from_row(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
         0b100 => Bit4::new(bits)
             .map(CoreD4::from_word)
             .map(CoreDomainIdentity::D4),
+        0b101 => Bit5::new(bits)
+            .map(CoreD5::from_word)
+            .map(CoreDomainIdentity::D5),
         _ => None,
     }
 }
@@ -77,6 +80,12 @@ mod tests {
             ("перше-від-першого", 0b100, 0b1010),
             ("перше-від-решти", 0b100, 0b1011),
             ("решта-від-решти", 0b100, 0b1101),
+            ("+", 0b101, 0b01010),
+            ("-", 0b101, 0b01011),
+            ("<", 0b101, 0b01110),
+            (">", 0b101, 0b01111),
+            ("*", 0b101, 0b10010),
+            ("/", 0b101, 0b10011),
         ] {
             let identity = domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("missing exact-domain surface: {surface}"));
@@ -86,7 +95,6 @@ mod tests {
 
     #[test]
     fn historical_only_surface_cannot_mint_domain_identity() {
-        assert_eq!(domain_identity_for_surface("+"), None);
         assert_eq!(domain_identity_for_surface("корінь"), None);
     }
 
