@@ -21,7 +21,7 @@
 //! let _: PredicateBit = true;
 //! ```
 
-use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6};
+use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8};
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -143,6 +143,47 @@ impl CoreD6 {
     }
 }
 
+
+/// Exact seven-bit carrier for the ratified Core.D7 Sound7 domain.
+///
+/// This type proves only exact D7 membership. Sound identity, reserved cells,
+/// articulatory relations and callability remain owned by the D7 law/map.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD7(Bit7);
+
+impl CoreD7 {
+    /// Wrap an already validated seven-bit word as a Core.D7 member.
+    pub const fn from_word(word: Bit7) -> Self {
+        Self(word)
+    }
+
+    /// Recover the mechanical seven-bit word without interpreting it.
+    pub const fn word(self) -> Bit7 {
+        self.0
+    }
+}
+
+/// Exact eight-bit carrier for the ratified Core.D8 domain.
+///
+/// Core.D8 is not historical Sens8/Function8 merely because both occupy eight
+/// physical bits. Residency and executable meaning remain owned by D8 laws.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD8(Bit8);
+
+impl CoreD8 {
+    /// Wrap an already validated eight-bit word as a Core.D8 member.
+    pub const fn from_word(word: Bit8) -> Self {
+        Self(word)
+    }
+
+    /// Recover the mechanical eight-bit word without interpreting it.
+    pub const fn word(self) -> Bit8 {
+        self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -179,6 +220,16 @@ mod tests {
             let word = Bit6::new(raw).unwrap();
             assert!(CoreD6::from_word(word).word() == word);
         }
+
+        for raw in 0..=127 {
+            let word = Bit7::new(raw).unwrap();
+            assert!(CoreD7::from_word(word).word() == word);
+        }
+
+        for raw in 0..=255 {
+            let word = Bit8::new(raw).unwrap();
+            assert!(CoreD8::from_word(word).word() == word);
+        }
     }
 
     #[test]
@@ -189,5 +240,7 @@ mod tests {
         assert_eq!(size_of::<CoreD4>(), 1);
         assert_eq!(size_of::<CoreD5>(), 1);
         assert_eq!(size_of::<CoreD6>(), 1);
+        assert_eq!(size_of::<CoreD7>(), 1);
+        assert_eq!(size_of::<CoreD8>(), 1);
     }
 }
