@@ -12,7 +12,8 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity, Sens8};
+use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
+use crate::Sens8;
 
 mod generated {
     include!("semantic_registry_generated.rs");
