@@ -1,0 +1,205 @@
+{
+  "schema": "task-falsifier-baseline/v1",
+  "debt": [
+    {
+      "issue": 197,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 218,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 226,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1259,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1330,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1355,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1393,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1614,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1624,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1631,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1632,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1635,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1636,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1643,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1663,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1693,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1694,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1700,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1701,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1702,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1703,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1704,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1705,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1707,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1708,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1709,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1713,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 1981,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2055,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2151,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2153,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2157,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2159,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2169,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2170,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2199,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2204,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2233,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2236,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2314,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2315,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2359,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2367,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2375,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2377,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2403,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2407,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2408,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2422,
+      "verdict": "placeholder"
+    },
+    {
+      "issue": 2446,
+      "verdict": "placeholder"
+    }
+  ]
+}
