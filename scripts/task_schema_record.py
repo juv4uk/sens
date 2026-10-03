@@ -12,7 +12,7 @@ or:
 Structural law for the seven semantic fields:
   count(field) == 1
 
-UNKNOWN is a value, not absence. Semantic quality is judged elsewhere.
+UNKNOWN is a value, not absence. Semantic quality is judged elsewhere.\nMarked-record scope is deliberate: unmarked legacy/examples are not governed records.
 """
 
 from __future__ import annotations
