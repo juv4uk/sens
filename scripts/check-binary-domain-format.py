@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Check that the binary-domain format fields say something.
+"""Check binary-domain fields after explicit semantic/mechanism scope classification.
 
+Slice 0 — SCHEMA-SCOPE (#2552): explicit SEMANTIC vs MECHANISM boundary.
 Slice 1 — DOMAIN (#2513): width/carrier or honest UNKNOWN.
 Slice 2 — RELATION (#2514): exact enum token.
 Slice 3 — WITNESS (#2561): verifiable evidence reference.
@@ -19,6 +20,8 @@ import argparse
 import json
 import re
 import sys
+
+from task_schema_record import parse_record
 
 BLOCK = re.compile(r"BINARY-DOMAIN\s+FORMAT", re.I)
 
@@ -110,6 +113,37 @@ LEGEND_TEXT = {
         re.I,
     ),
 }
+
+LAYER_MECHANISM = re.compile(
+    r"(?im)^\\s*(?:[-*]\\s*)?\\**LAYER\\**\\s*(?:=|:)\\s*MECHANISM\\s*$"
+)
+SEMANTIC_AUTHORITY_NONE = re.compile(
+    r"(?im)^\\s*(?:[-*]\\s*)?\\**SEMANTIC[ _-]+AUTHORITY\\**\\s*(?:=|:)\\s*NONE\\s*$"
+)
+
+VIOLATION_SCOPE = {
+    "mechanism-missing-nonauthority",
+    "nonauthority-without-mechanism",
+    "mechanism-semantic-conflict",
+}
+
+
+def schema_scope(body):
+    """Classify task scope from explicit declarations only; never from names."""
+    b = body or ""
+    mechanism = bool(LAYER_MECHANISM.search(b))
+    nonauthority = bool(SEMANTIC_AUTHORITY_NONE.search(b))
+
+    if mechanism and not nonauthority:
+        return "mechanism-missing-nonauthority"
+    if nonauthority and not mechanism:
+        return "nonauthority-without-mechanism"
+    if mechanism and nonauthority:
+        if parse_record(b).marked:
+            return "mechanism-semantic-conflict"
+        return "mechanism"
+    return "semantic"
+
 
 CONCRETE = re.compile(
     r"\b(?:W\d+|D\d+|Function\d+|Sound\d+)[A-Za-z]*\b|"
@@ -250,40 +284,48 @@ def _declares_real_field(body, label):
 
 
 def scope_stats(issues):
-    """Describe the current policy scope without changing which issues are judged.
-
-    Policy remains intentionally narrow: only open issues containing the literal
-    BINARY-DOMAIN FORMAT block are governed by this ratchet.
-    """
+    """Describe semantic/mechanism governance without inferring scope from names."""
     open_issues = [
         it for it in issues
         if str(it.get("state", "open")).lower() == "open"
     ]
-    scoped = [
-        it for it in open_issues
-        if BLOCK.search(it.get("body") or "")
-    ]
-    unscoped = [
-        it for it in open_issues
-        if not BLOCK.search(it.get("body") or "")
-    ]
+
+    semantic_marked = []
+    mechanism = []
+    scope_errors = []
+    unscoped_semantic = []
+
+    for it in open_issues:
+        body = it.get("body") or ""
+        scope = schema_scope(body)
+        if scope == "mechanism":
+            mechanism.append(it)
+        elif scope in VIOLATION_SCOPE:
+            scope_errors.append(it)
+        elif BLOCK.search(body):
+            semantic_marked.append(it)
+        else:
+            unscoped_semantic.append(it)
 
     declarations = {}
     declared_issue_numbers = set()
     for _key, label, _rule in FIELDS:
         numbers = [
             it.get("number")
-            for it in unscoped
+            for it in unscoped_semantic
             if _declares_real_field(it.get("body") or "", label)
         ]
         declarations[label.lower()] = len(numbers)
         declared_issue_numbers.update(number for number in numbers if number is not None)
 
     return {
-        "scope": "explicit-format-block-only",
+        "scope": "semantic-format-or-explicit-mechanism",
         "open": len(open_issues),
-        "judged": len(scoped),
-        "unscoped_open": len(unscoped),
+        "judged": len(semantic_marked) + len(mechanism) + len(scope_errors),
+        "semantic_marked": len(semantic_marked),
+        "mechanism": len(mechanism),
+        "scope_errors": len(scope_errors),
+        "unscoped_open": len(unscoped_semantic),
         "unscoped_with_declared_fields": len(declared_issue_numbers),
         "outside_scope_declarations": declarations,
     }
@@ -293,18 +335,36 @@ def judge(issues, requested_fields=None):
     if requested_fields is None:
         requested_fields = tuple(k for k, _, _ in FIELDS)
     judged, skipped = [], 0
+
     for it in issues:
         body = it.get("body") or ""
         if str(it.get("state", "open")).lower() != "open":
             skipped += 1
             continue
-        has_block = bool(BLOCK.search(body))
-        if not has_block:
+
+        scope = schema_scope(body)
+
+        if scope == "mechanism" or scope in VIOLATION_SCOPE:
+            entry = {
+                "number": it.get("number"),
+                "title": it.get("title", ""),
+                "scope": scope,
+            }
+            for key, _label, _rule in FIELDS:
+                if key in requested_fields:
+                    entry[key] = "not-applicable"
+                    entry[f"{key}_value"] = None
+            judged.append(entry)
+            continue
+
+        if not BLOCK.search(body):
             skipped += 1
             continue
+
         entry = {
             "number": it.get("number"),
             "title": it.get("title", ""),
+            "scope": "semantic",
         }
         for key, label, rule in FIELDS:
             if key in requested_fields:
@@ -312,6 +372,7 @@ def judge(issues, requested_fields=None):
                 entry[key] = rule(val, body) if key == "relation" else rule(val)
                 entry[f"{key}_value"] = val
         judged.append(entry)
+
     return judged, skipped
 
 
@@ -325,6 +386,37 @@ VIOLATION_RULES = {
 
 
 def self_test():
+    mechanism = """## LAYER
+
+LAYER = MECHANISM
+SEMANTIC AUTHORITY = NONE
+"""
+    assert schema_scope(mechanism) == "mechanism"
+    assert schema_scope("LAYER = MECHANISM\n") == "mechanism-missing-nonauthority"
+    assert schema_scope("SEMANTIC AUTHORITY = NONE\n") == "nonauthority-without-mechanism"
+    assert schema_scope("codec GC FPGA runtime\n") == "semantic"
+    assert schema_scope(
+        mechanism
+        + "\n## BINARY-DOMAIN RECORD\n"
+        + "DOMAIN: D5\nBINARY OBJECT: 00101\nLAW: x\n"
+        + "WITNESS: #1\nFALSIFIER: if x fails\nSTATUS: hypothesis\n"
+        + "RELATION: Core-only\n"
+    ) == "mechanism-semantic-conflict"
+
+    mechanism_rows, mechanism_skipped = judge([
+        {"number": 80, "state": "open", "body": mechanism},
+        {"number": 81, "state": "open", "body": "LAYER: MECHANISM\n"},
+        {"number": 82, "state": "open", "body": "SEMANTIC AUTHORITY: NONE\n"},
+    ])
+    assert mechanism_skipped == 0
+    assert [row["scope"] for row in mechanism_rows] == [
+        "mechanism",
+        "mechanism-missing-nonauthority",
+        "nonauthority-without-mechanism",
+    ]
+    assert mechanism_rows[0]["domain"] == "not-applicable"
+    assert mechanism_rows[0]["relation"] == "not-applicable"
+
     cases = [
         # DOMAIN
         ("d-ok", "DOMAIN: D5", "domain", "ok"),
@@ -381,22 +473,27 @@ def self_test():
             print(f"  [FAIL] {name}: got {got!r}, expected {expected!r}")
             failures += 1
 
-    # Scope guard: issues without BINARY-DOMAIN FORMAT are ignored.
-    # #2627 requires that this policy remain explicit until the owner changes it.
+    # Scope guard: unmarked semantic legacy prose stays outside the ratchet,
+    # while explicit mechanism declarations are governed without fake DOMAIN.
     scope_fixture = [
         {"number": 90, "title": "legacy", "state": "open", "body": "## DOMAIN\nD5\nRELATION: prose only\n"},
         {"number": 91, "title": "closed", "state": "closed", "body": "BINARY-DOMAIN FORMAT\nDOMAIN: D5\n"},
-        {"number": 92, "title": "scoped", "state": "open", "body": "BINARY-DOMAIN FORMAT\nDOMAIN: D5\n"},
+        {"number": 92, "title": "semantic", "state": "open", "body": "BINARY-DOMAIN FORMAT\nDOMAIN: D5\n"},
+        {"number": 93, "title": "mechanism", "state": "open", "body": mechanism},
+        {"number": 94, "title": "bad mechanism", "state": "open", "body": "LAYER: MECHANISM\n"},
     ]
     scoped, skipped = judge(scope_fixture)
     stats = scope_stats(scope_fixture)
-    if len(scoped) != 1 or skipped != 2:
+    if len(scoped) != 3 or skipped != 2:
         print(f"  [FAIL] scope guard: scoped={scoped}, skipped={skipped}")
         failures += 1
     if stats != {
-        "scope": "explicit-format-block-only",
-        "open": 2,
-        "judged": 1,
+        "scope": "semantic-format-or-explicit-mechanism",
+        "open": 4,
+        "judged": 3,
+        "semantic_marked": 1,
+        "mechanism": 1,
+        "scope_errors": 1,
         "unscoped_open": 1,
         "unscoped_with_declared_fields": 1,
         "outside_scope_declarations": {
@@ -410,11 +507,12 @@ def self_test():
         print(f"  [FAIL] scope diagnostics: {stats}")
         failures += 1
 
+
     if failures:
         print(f"binary-domain-selftest-failed ({failures})")
         return 1
 
-    print(f"(binary-domain-selftest-ok ({len(cases) + 2} cases, 5 fields))")
+    print("SCHEMA-SCOPE-MECHANISM=PASS")\n    print("SCHEMA-SCOPE-INCOMPLETE-FAIL-CLOSED=PASS")\n    print("SCHEMA-SCOPE-NO-NAME-GUESSING=PASS")\n    print("SCHEMA-SCOPE-CONFLICT=PASS")\n    print(f"(binary-domain-selftest-ok ({len(cases) + 7} cases, 5 fields + scope))")
     return 0
 
 
@@ -439,6 +537,11 @@ def main(argv=None):
     if args.emit_baseline:
         judged, _ = judge(issues)
         baseline = {"violations": {}}
+        baseline["violations"]["scope"] = sorted({
+            row["number"]
+            for row in judged
+            if row.get("scope") in VIOLATION_SCOPE
+        })
         for key in ("domain", "relation", "witness", "falsifier", "status"):
             bad = sorted({
                 row["number"]
@@ -449,6 +552,7 @@ def main(argv=None):
         print(json.dumps(baseline, indent=2))
         return 0
 
+
     baseline = {"violations": {}}
     if args.baseline:
         b = json.load(open(args.baseline, encoding="utf-8"))
@@ -457,6 +561,12 @@ def main(argv=None):
     active_fields = tuple(k for k in ("domain", "relation", "witness", "falsifier", "status") if k in baseline["violations"])
     judged, skipped = judge(issues, requested_fields=active_fields)
     scope = scope_stats(issues)
+
+    known_scope = set(baseline["violations"].get("scope", []))
+    new_scope = [
+        row for row in judged
+        if row.get("scope") in VIOLATION_SCOPE and row["number"] not in known_scope
+    ]
 
     new_violations = {}
     for key in active_fields:
@@ -470,6 +580,10 @@ def main(argv=None):
         f"(scope {scope['scope']})",
         f"(open {scope['open']})",
         f"(judged {len(judged)})",
+        f"(semantic-marked {scope['semantic_marked']})",
+        f"(mechanism {scope['mechanism']})",
+        f"(scope-errors {scope['scope_errors']})",
+        f"(new-scope {len(new_scope)})",
     ]
     for key in active_fields:
         summary_parts.append(f"(new-{key} {len(new_violations[key])})")
@@ -490,7 +604,10 @@ def main(argv=None):
         + ")"
     )
 
-    has_new = False
+    has_new = bool(new_scope)
+    for row in new_scope:
+        print(f"  scope {row['scope']:32} #{row['number']}")
+
     for key in active_fields:
         if new_violations[key]:
             has_new = True
