@@ -8,8 +8,10 @@ on:
       - "scripts/research-2522-fexpr-protocol-cube.py"
       - "scripts/research-2568-macro-timing.py"
       - "scripts/research-2488-return-placement.py"
+      - "scripts/research-2590-nonlocal-exit.py"
       - "scripts/research-2609-cross-family-parent.py"
       - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - "crates/sens/tests/post_d4_nonlocal_exit_factor.rs"
       - ".github/workflows/d5-factor-independence.yml"
   push:
     branches: [main]
@@ -19,8 +21,10 @@ on:
       - "scripts/research-2522-fexpr-protocol-cube.py"
       - "scripts/research-2568-macro-timing.py"
       - "scripts/research-2488-return-placement.py"
+      - "scripts/research-2590-nonlocal-exit.py"
       - "scripts/research-2609-cross-family-parent.py"
       - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - "crates/sens/tests/post_d4_nonlocal_exit_factor.rs"
       - ".github/workflows/d5-factor-independence.yml"
   workflow_dispatch:
 
@@ -49,6 +53,11 @@ jobs:
 
       - name: Re-check RETURN residue/root theorem
         run: python3 scripts/research-2488-return-placement.py
+
+      - name: Re-check non-local-exit factor witness
+        run: |
+          cargo test -p sens --test post_d4_nonlocal_exit_factor -- --nocapture
+          python3 scripts/research-2590-nonlocal-exit.py
 
       - name: Re-check typed cross-family guard
         run: python3 scripts/research-2609-cross-family-parent.py
