@@ -179,7 +179,7 @@ pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
 /// shared bootstrap substrate. Mechanism selection is loaded separately by
 /// the execution layer because the current selector reads SENS-owned files and
 /// therefore does not belong in this capability-free core crate.
-pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
+pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/mechanism-lab.lisp");
 
 /// The single active SENS core library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");

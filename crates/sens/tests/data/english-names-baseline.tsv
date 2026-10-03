@@ -382,7 +382,7 @@ lisp	contracts/core1-s2-compiler-admission.lisp	list	1
 lisp	contracts/core1-s2-compiler-admission.lisp	quote	1
 lisp	contracts/core1-s3-compiler-prelude.lisp	reason	1
 lisp	contracts/core2-profile-contract.lisp	identity	7
-lisp	contracts/core3-profile-contract.lisp	identity	6
+lisp	contracts/mechanism-lab-contract.lisp	identity	6
 lisp	contracts/core4-predicate-answer-scale.lisp	answer-and	1
 lisp	contracts/core4-predicate-answer-scale.lisp	answer-atom	1
 lisp	contracts/core4-predicate-answer-scale.lisp	answer-eq	1
