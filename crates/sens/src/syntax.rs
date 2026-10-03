@@ -696,6 +696,27 @@ mod wire_tests {
 "#;
 
     #[test]
+    fn wire_preserves_domain_width_as_identity() {
+        let identity = crate::SemanticRef::from_width_bits(3, 0b101).unwrap();
+        let expression = Expr {
+            kind: ExprKind::Sid(identity),
+            span: crate::Span { start: 0, end: 3 },
+        };
+        let encoded = encode_program(&[expression]);
+        let decoded = decode_program(&encoded).expect("domain identity decodes");
+        assert_eq!(decoded[0].kind, ExprKind::Sid(identity));
+        assert_eq!(encode_program(&decoded), encoded);
+
+        let legacy = Expr {
+            kind: ExprKind::Sid(crate::SemanticRef::legacy8(
+                crate::Sens8::from_packed_byte(0b0000_0101),
+            )),
+            span: crate::Span { start: 0, end: 8 },
+        };
+        assert_ne!(encode_program(&[legacy]), encoded);
+    }
+
+    #[test]
     fn wire_local_carries_numeric_coordinates_and_no_name() {
         // #1697: канонічний wire несе координати слота, а не людське ім'я.
         let local = |depth, index| Expr {
@@ -796,6 +817,21 @@ mod fasl_tests {
 (print "рядок з кирилицею")
 (quote (a b . c))
 "#;
+
+    #[test]
+    fn fasl_preserves_domain_width_as_identity() {
+        let identity = crate::SemanticRef::from_width_bits(5, 0b10101).unwrap();
+        let expression = crate::Expr {
+            kind: ExprKind::Sid(identity),
+            span: crate::Span { start: 0, end: 5 },
+        };
+        let hash = [9u8; 32];
+        let encoded = encode_program(&[expression], &hash);
+        let (decoded, decoded_hash) = decode_program(&encoded).expect("domain FASL decodes");
+        assert_eq!(decoded_hash, hash);
+        assert_eq!(decoded[0].kind, ExprKind::Sid(identity));
+        assert_eq!(encode_program(&decoded, &hash), encoded);
+    }
 
     #[test]
     fn fasl_round_trip_is_byte_identical_and_hash_bound() {
