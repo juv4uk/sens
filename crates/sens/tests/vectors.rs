@@ -1,11 +1,11 @@
 //! Vector family acceptance — contract 2.1 style, value-level semantics.
 
-use sens::{eval_program, ErrorKind, Session};
+use sens::{eval_program, load_core_library, ErrorKind, Session};
 
 fn session_with_core() -> Session {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("core.my should preload cleanly");
+    load_core_library(&mut session)
+        .expect("canonical core loader should preload cleanly");
     session
 }
 
