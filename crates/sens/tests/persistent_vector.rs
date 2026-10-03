@@ -8,7 +8,7 @@ use sens::{eval_program, Session};
 
 fn eval_vec(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(
         include_str!("../../../lib/persistent-vector.lisp"),
         &mut session,
