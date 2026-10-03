@@ -10,7 +10,7 @@ mod io;
 pub mod json;
 mod strings;
 
-pub use core::{exact_arity, exact_sens_arity};
+pub use core::{exact_arity, exact_callable_arity};
 pub(super) use codepoint::{codepoint_to_string_values, string_to_codepoint_values};
 pub(super) use core::{
     atom_value, car_value, cdr_value, cons_values, eq_values, evaluate_cond, evaluate_definition,
