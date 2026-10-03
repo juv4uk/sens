@@ -14,7 +14,7 @@
 //! виклики), параметри `lambda` та ім'я в `def`/`define`.
 
 use super::{canon, necessary_forms};
-use crate::semantic_registry;
+use crate::{legacy_registry, semantic_registry};
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
 use crate::CoreDomainIdentity;
 use crate::Sens8;
@@ -59,7 +59,7 @@ fn immutable_surface_sid(name: &str) -> Option<Sens8> {
     if let Some(sid) = canon::routed_sid_for_surface(name) {
         return Some(sid);
     }
-    semantic_registry::admitted_semantic_id_for_surface(name)
+    legacy_registry::id_for_surface(name)
 }
 
 fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
