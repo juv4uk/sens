@@ -279,6 +279,25 @@ fn dispatch_domain_call(
         return special_forms::evaluate_cond(arguments, environment, span);
     }
 
+    if !canon::has_domain_primitive(identity) {
+        match environment.domain_code_slot(identity) {
+            Some(Value::Macro(closure)) => {
+                return closures::apply_macro(closure, arguments, environment, span);
+            }
+            Some(closure @ Value::Closure(_)) => {
+                return closures::apply(closure, arguments, environment, span);
+            }
+            Some(Value::Builtin(builtin)) => {
+                let mut values = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    values.push(evaluate(argument, environment)?);
+                }
+                return (builtin.func)(&values, environment, span).map(EvalStep::Value);
+            }
+            _ => {}
+        }
+    }
+
     if canon::has_domain_primitive(identity) {
         let mut values = Vec::with_capacity(arguments.len());
         for argument in arguments {
