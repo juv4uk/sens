@@ -201,15 +201,22 @@ mod tests {
         for pair in [["lambda", "функція"], ["define", "визначити"]] {
             let left = find(pair[0]);
             let right = find(pair[1]);
-            assert_eq!(left.semantic_id, right.semantic_id);
+            assert_eq!(left.domain_identity, right.domain_identity);
+            assert_eq!(left.legacy_registry_id, right.legacy_registry_id);
             assert_eq!(left.signature, right.signature);
             assert_eq!(left.documentation, right.documentation);
             assert_eq!(left.arity, right.arity);
             assert_eq!(left.kind, LanguageItemKind::SyntaxForm);
             assert_eq!(right.kind, LanguageItemKind::SyntaxForm);
         }
-        assert_eq!(find("lambda").legacy_registry_id.sens8(), crate::sens!(00001000));
-        assert_eq!(find("define").legacy_registry_id.sens8(), crate::sens!(00001001));
+        let lambda = find("lambda");
+        let define = find("define");
+        assert_eq!(lambda.legacy_registry_id.sens8(), crate::sens!(00001000));
+        assert_eq!(define.legacy_registry_id.sens8(), crate::sens!(00001001));
+        assert_eq!(lambda.domain_identity.map(CoreDomainIdentity::width), Some(4));
+        assert_eq!(lambda.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0010));
+        assert_eq!(define.domain_identity.map(CoreDomainIdentity::width), Some(4));
+        assert_eq!(define.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0011));
     }
 
     #[test]
