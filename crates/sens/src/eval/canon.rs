@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{semantic_registry, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SidRouteKind {
@@ -112,6 +112,80 @@ fn exact_args(
         ),
         span,
     ))
+}
+
+fn exact_domain_args(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    expected: usize,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if args.len() == expected {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!(
+            "{identity}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            args.len()
+        ),
+        span,
+    ))
+}
+
+/// Canonical Core-domain mechanism projection for already-ratified D3 value
+/// operations. This path never reconstructs a historical eight-bit identity.
+pub(crate) fn invoke_domain_identity(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    let CoreDomainIdentity::D3(word) = identity else {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            format!("domain identity has no admitted value-call mechanism: {identity}"),
+            span,
+        ));
+    };
+
+    match word.word().packed_bits() {
+        0b010 => {
+            exact_domain_args(identity, args, 1, span)?;
+            Ok(special_forms::atom_value(&args[0], environment))
+        }
+        0b111 => {
+            exact_domain_args(identity, args, 2, span)?;
+            special_forms::eq_values(args[0].clone(), args[1].clone(), span)
+        }
+        0b100 => {
+            exact_domain_args(identity, args, 2, span)?;
+            special_forms::cons_values(args[0].clone(), args[1].clone(), environment, span)
+        }
+        0b101 => {
+            exact_domain_args(identity, args, 1, span)?;
+            special_forms::car_value(&args[0], span)
+        }
+        0b110 => {
+            exact_domain_args(identity, args, 1, span)?;
+            special_forms::cdr_value(&args[0], span)
+        }
+        _ => Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "domain identity is not a value-call primitive · domenna identychnist ne ye value-call prymityvom: {identity}"
+            ),
+            span,
+        )),
+    }
+}
+
+pub(crate) fn has_domain_primitive(identity: CoreDomainIdentity) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D3(word)
+            if matches!(word.word().packed_bits(), 0b010 | 0b111 | 0b100 | 0b101 | 0b110)
+    )
 }
 
 type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageError>;
@@ -347,6 +421,25 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d3_domain_primitives_route_without_legacy_sid_projection() {
+        use crate::{Bija3, Bit3};
+
+        for raw in [0b010, 0b100, 0b101, 0b110, 0b111] {
+            let identity = CoreDomainIdentity::from(
+                Bija3::from_word(Bit3::new(raw).expect("D3 word"))
+            );
+            assert!(has_domain_primitive(identity));
+        }
+
+        for raw in [0b000, 0b001, 0b011] {
+            let identity = CoreDomainIdentity::from(
+                Bija3::from_word(Bit3::new(raw).expect("D3 word"))
+            );
+            assert!(!has_domain_primitive(identity));
+        }
+    }
 
     #[test]
     fn sid_zero_is_not_owned_by_route_metadata() {
