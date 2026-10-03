@@ -113,7 +113,8 @@ jobs:
 
       - name: Packed-wire exact-bit witnesses
         shell: bash
-        run: cargo test -p sens source_packing::tests:: -- --nocapture
+        run: |
+          cargo test -p sens 'source_packing::tests::' -- --nocapture
 
       - name: SID exact-binary identity guard
         if: steps.changes.outputs.rust == 'true'
