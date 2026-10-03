@@ -44,3 +44,4 @@ jobs:
           python3 benchmarks/d7-local-ordinal-corpus/generate.py
           --upstream-root .upstream/shiva-sutras
           --check
+          --self-test
