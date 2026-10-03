@@ -1,4 +1,4 @@
-name: D6 residency readiness
+name: D6 residency ratification guard
 
 on:
   pull_request:
@@ -20,5 +20,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify D6 owner-readiness without admission
+      - name: Verify owner-ratified D6 residency and no spillover
         run: python3 scripts/research-2619-d6-residency-readiness.py
