@@ -448,6 +448,25 @@ mod tests {
     }
 
     #[test]
+    fn d8_non_selector_without_mechanism_fails_closed() {
+        let identity = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b00000000).unwrap(),
+        ));
+        let error = invoke_domain_identity(
+            identity,
+            &[],
+            &Environment::root(),
+            Span { start: 0, end: 0 },
+        )
+        .expect_err("D8 width alone must not grant a value-call mechanism");
+
+        assert_eq!(error.kind, ErrorKind::Type);
+        assert!(error
+            .message
+            .contains("domain identity has no admitted value-call mechanism"));
+    }
+
+    #[test]
     fn sid_zero_is_not_owned_by_route_metadata() {
         assert_eq!(route_kind_for_sid(crate::sens!(00000000)), None);
         assert_eq!(SID_ROUTES[0].sid, crate::sens!(00000001));
