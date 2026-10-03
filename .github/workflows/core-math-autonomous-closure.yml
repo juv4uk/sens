@@ -1,0 +1,56 @@
+name: Core-Math autonomous closure research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-autonomous-closure/**"
+      - ".github/workflows/core-math-autonomous-closure.yml"
+      - "benchmarks/core-math-generated-identity/**"
+      - "benchmarks/core-math-equivalence-law/**"
+      - "docs/research/2433-core-math-neutral-v1.json"
+      - "scripts/research-2433-core-math-neutral-growth.py"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-autonomous-closure/**"
+      - ".github/workflows/core-math-autonomous-closure.yml"
+  workflow_dispatch:
+
+jobs:
+  closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Re-check neutral growth donor
+        run: python3 scripts/research-2433-core-math-neutral-growth.py --check
+
+      - name: Re-check generated identity donor
+        run: |
+          rm -rf /tmp/core-math-generated-identity
+          python3 benchmarks/core-math-generated-identity/run.py             --out /tmp/core-math-generated-identity
+
+      - name: Re-check equivalence-law donor
+        run: |
+          rm -rf /tmp/core-math-equivalence-law
+          python3 benchmarks/core-math-equivalence-law/run.py             --out /tmp/core-math-equivalence-law
+
+      - name: Run autonomous closure
+        run: |
+          rm -rf /tmp/core-math-autonomous-closure
+          python3 benchmarks/core-math-autonomous-closure/run.py             --out /tmp/core-math-autonomous-closure
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-math-autonomous-closure/report.md; then
+            cat /tmp/core-math-autonomous-closure/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-math-autonomous-closure
+          path: /tmp/core-math-autonomous-closure/
+          retention-days: 14

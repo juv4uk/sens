@@ -1,0 +1,23 @@
+name: Core-Math growth phase research
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2433-core-math-neutral-v1.json"
+      - "benchmarks/core-math-growth-phase/**"
+      - ".github/workflows/core-math-growth-phase-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tournament:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare growth phase semantics
+        run: python3 benchmarks/core-math-growth-phase/analyze.py

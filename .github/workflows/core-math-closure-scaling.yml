@@ -1,0 +1,43 @@
+name: Core-Math closure scaling benchmark
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-closure-scaling/**"
+      - ".github/workflows/core-math-closure-scaling.yml"
+      - "benchmarks/core-math-autonomous-closure/**"
+      - "benchmarks/core-math-generated-identity/**"
+      - "benchmarks/core-math-equivalence-law/**"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-closure-scaling/**"
+      - ".github/workflows/core-math-closure-scaling.yml"
+  workflow_dispatch:
+
+jobs:
+  scaling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Re-check autonomous closure donor
+        run: |
+          rm -rf /tmp/core-math-autonomous-closure
+          python3 benchmarks/core-math-autonomous-closure/run.py             --out /tmp/core-math-autonomous-closure
+      - name: Run depth scaling sweep
+        run: |
+          rm -rf /tmp/core-math-closure-scaling
+          python3 benchmarks/core-math-closure-scaling/run.py             --max-depth 3             --out /tmp/core-math-closure-scaling
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-math-closure-scaling/report.md; then
+            cat /tmp/core-math-closure-scaling/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-math-closure-scaling
+          path: /tmp/core-math-closure-scaling/
+          retention-days: 14
