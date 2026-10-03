@@ -50,7 +50,7 @@ pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainI
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     registry_byte_for_surface(name).and_then(domain_identity_from_registry_byte)
 }
-pub(crate) fn legacy_registry_id_bits(semantic_id: LegacyRegistryId) -> String {
+pub(crate) fn legacy_registry_id_bits(legacy_registry_id: LegacyRegistryId) -> String {
     semantic_id.to_string()
 }
 
@@ -76,14 +76,14 @@ pub(crate) fn legacy_registry_ids() -> Vec<LegacyRegistryId> {
 fn insert_surface_mapping(
     index: &mut HashMap<&'static str, LegacyRegistryId>,
     surface: &'static str,
-    semantic_id: LegacyRegistryId,
+    legacy_registry_id: LegacyRegistryId,
 ) {
     if let Some(previous) = index.insert(surface, semantic_id) {
         if previous != semantic_id {
             panic!(
                 "generated semantic registry surface must be unique: {surface} maps to both {} and {}",
                 legacy_registry_id_bits(previous),
-                legacy_registry_id_bits(semantic_id)
+                legacy_registry_id_bits(legacy_registry_id)
             );
         }
     }
@@ -108,11 +108,11 @@ pub(crate) fn legacy_registry_id_for_surface(name: &str) -> Option<LegacyRegistr
 
 fn stable_surfaces_from_legacy_index(
     index: &HashMap<&'static str, LegacyRegistryId>,
-    semantic_id: LegacyRegistryId,
+    legacy_registry_id: LegacyRegistryId,
 ) -> Vec<&'static str> {
     let mut surfaces = index
         .iter()
-        .filter_map(|(surface, mapped_id)| (*mapped_id == semantic_id).then_some(*surface))
+        .filter_map(|(surface, mapped_id)| (*mapped_id == legacy_registry_id).then_some(*surface))
         .collect::<Vec<_>>();
     surfaces.sort_unstable();
     surfaces
@@ -120,11 +120,11 @@ fn stable_surfaces_from_legacy_index(
 
 fn admitted_surfaces_from_legacy_rows(
     rows: &[SemanticRow],
-    semantic_id: LegacyRegistryId,
+    legacy_registry_id: LegacyRegistryId,
 ) -> Vec<&'static str> {
     let mut surfaces = rows
         .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .find(|row| row.semantic_id == legacy_registry_id.packed_byte())
         .into_iter()
         .flat_map(|row| row.surfaces.iter().map(|surface| surface.name))
         .collect::<Vec<_>>();
@@ -132,28 +132,24 @@ fn admitted_surfaces_from_legacy_rows(
     surfaces
 }
 
-pub(crate) fn legacy_registry_id_for_surface(name: &str) -> Option<LegacyRegistryId> {
-    legacy_registry_id_for_surface(name)
-}
-
 pub(crate) fn stable_surfaces_for_legacy_registry_id(
-    semantic_id: LegacyRegistryId,
+    legacy_registry_id: LegacyRegistryId,
 ) -> Vec<&'static str> {
     stable_surfaces_from_legacy_index(surface_index(), semantic_id)
 }
 
 pub(crate) fn admitted_surfaces_for_legacy_registry_id(
-    semantic_id: LegacyRegistryId,
+    legacy_registry_id: LegacyRegistryId,
 ) -> Vec<&'static str> {
     admitted_surfaces_from_legacy_rows(live_rows(), semantic_id)
 }
 
 pub(crate) fn admitted_surfaces_with_namespace_for_legacy_registry_id(
-    semantic_id: LegacyRegistryId,
+    legacy_registry_id: LegacyRegistryId,
 ) -> Vec<(&'static str, &'static str)> {
     let mut surfaces = live_rows()
         .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .find(|row| row.semantic_id == legacy_registry_id.packed_byte())
         .into_iter()
         .flat_map(|row| row.surfaces.iter().map(|s| (s.namespace, s.name)))
         .collect::<Vec<_>>();
