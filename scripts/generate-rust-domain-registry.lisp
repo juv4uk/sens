@@ -62,9 +62,8 @@
   (00001000 (row)
     (10011100
       ((width (00000101 row))
-       (row-parts (00000110 row))
-       (bits (00000101 row-parts))
-       (surfaces (00000110 row-parts)))
+       (bits (00000101 (00000110 row)))
+       (surfaces (00000110 (00000110 row))))
       (str+
         "    DomainSurfaceRow { width: "
         (01001100 width)
