@@ -1,9 +1,10 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Authority: lib/surface/semantic-registry.lisp
+// Compatibility source: lib/surface/semantic-registry.lisp
+// Canonical identity authority is domain-qualified and lives elsewhere.
 // Generator: scripts/generate-rust-semantic-registry.lisp
 //
-// Binary identities below are an implementation projection only.
-// Canonical semantic identity remains the bare binary token in the Lisp registry.
+// Historical bytes below are compatibility/export projection only.
+// They MUST NOT determine CoreDomainIdentity or current semantic meaning.
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct SemanticSurface {
