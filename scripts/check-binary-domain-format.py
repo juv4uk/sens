@@ -2,7 +2,7 @@
 """Check binary-domain fields after explicit semantic/mechanism scope classification.
 
 Slice 0 — SCHEMA-SCOPE (#2552): explicit SEMANTIC vs MECHANISM boundary.
-Slice 1 — DOMAIN (#2513): width/carrier or honest UNKNOWN.
+Slice 1 — DOMAIN (#2513 + #2540): law-bearing semantic context or honest UNKNOWN.
 Slice 2 — RELATION (#2514): exact enum token.
 Slice 3 — WITNESS (#2561): verifiable evidence reference.
 Slice 4 — FALSIFIER (#2574): concrete falsification condition.
@@ -94,7 +94,7 @@ def field_value(body, label):
 
 
 LEGEND_TEXT = {
-    "DOMAIN": re.compile(r"^exact width/type/carrier\b", re.I),
+    "DOMAIN": re.compile(r"^(?:exact width/type/carrier|law-bearing semantic context)\b", re.I),
     "RELATION": re.compile(
         r"^(?:Core-only\s*\|\s*Core-Math-only\s*\|\s*bridge-candidate\s*\|\s*"
         r"shared-proved-law)\b",
@@ -169,10 +169,23 @@ def schema_scope(body):
     return "semantic"
 
 
-CONCRETE = re.compile(
-    r"\b(?:W\d+|D\d+|Function\d+|Sound\d+)[A-Za-z]*\b|"
-    r"\bexact-[A-Za-z0-9]+\b|\b\d+-bit\b|"
-    r"\b(?:śloka|sūtra|pāṇini|fpga|binary source word)\b",
+SEMANTIC_DOMAIN = re.compile(
+    r"\bD\d+(?:\.[A-Za-z][A-Za-z0-9._-]*)?\b|"
+    r"\b(?:Core[.-]Number[.-]D\d+[A-Za-z0-9._-]*|"
+    r"Core\.Number\.D\d+[A-Za-z0-9._-]*|"
+    r"CoreMath\.[A-Za-z][A-Za-z0-9._-]*|"
+    r"Core-Math[.-][A-Z][A-Za-z0-9._-]*)\b|"
+    r"\b(?:Function\d+|Sound\d+)\b|"
+    r"\bexact-Q\b",
+    re.I,
+)
+CARRIER_ONLY = re.compile(
+    r"^(?:W\d+|\d+-bit|binary source word)(?:\s|$|\[|\()",
+    re.I,
+)
+MECHANISM_ONLY = re.compile(
+    r"^(?:FPGA|CPU|GPU|CUDA|backend|Limb\d+|x86(?:-64)?|"
+    r"runtime-[A-Za-z0-9-]+|historical-gc-donor)(?:\s|$|/|\[|\()",
     re.I,
 )
 HONEST_UNKNOWN = re.compile(
@@ -223,12 +236,25 @@ def domain_verdict(value):
         return "empty"
     if LEGEND_TEXT["DOMAIN"].search(value):
         return "legend"
-    if CONCRETE.search(value):
-        return "ok"
     if CIRCULAR.search(value):
         return "circular"
     if HONEST_UNKNOWN.search(value):
-        return "ok"
+        return "unknown"
+    # A semantic context may carry width metadata, but the carrier does not
+    # become the semantic identity.
+    if SEMANTIC_DOMAIN.search(value):
+        return "domain-ok"
+    plain = value.strip(" `'\"")
+    normalized = plain.lower()
+    if CARRIER_ONLY.search(plain):
+        return "carrier-only"
+    if (
+        MECHANISM_ONLY.search(plain)
+        or "mechanism-only" in normalized
+        or normalized.startswith("runtime-")
+        or normalized.startswith("historical-gc-donor")
+    ):
+        return "mechanism-only"
     return "vague"
 
 
@@ -403,7 +429,7 @@ def judge(issues, requested_fields=None):
 
 
 VIOLATION_RULES = {
-    "domain": {"circular", "empty", "vague", "missing", "legend"},
+    "domain": {"carrier-only", "mechanism-only", "circular", "empty", "vague", "missing", "legend"},
     "relation": {"prose", "empty", "missing", "legend", "unproved-shared-law"},
     "witness": {"prose", "empty", "missing", "legend", "aspirational"},
     "falsifier": {"vague", "empty", "missing", "legend", "aspirational"},
@@ -451,8 +477,17 @@ SEMANTIC AUTHORITY = NONE
 
     cases = [
         # DOMAIN
-        ("d-ok", "DOMAIN: D5", "domain", "ok"),
-        ("d-unknown", "DOMAIN: UNKNOWN", "domain", "ok"),
+        ("d-ok", "DOMAIN: D5", "domain", "domain-ok"),
+        ("d-role", "DOMAIN: D7.SoundCell [carrier=W7]", "domain", "domain-ok"),
+        ("d-local-ordinal", "DOMAIN: D7.LocalOrdinal [carrier=W7]", "domain", "domain-ok"),
+        ("d-number", "DOMAIN: Core.Number.D24Z-candidate [carrier=W24]", "domain", "domain-ok"),
+        ("d-exact-q", "DOMAIN: CoreMath.ExactQ [carrier=variable]", "domain", "domain-ok"),
+        ("d-unknown", "DOMAIN: UNKNOWN", "domain", "unknown"),
+        ("d-carrier-w", "DOMAIN: W7", "domain", "carrier-only"),
+        ("d-carrier-bit", "DOMAIN: 7-bit", "domain", "carrier-only"),
+        ("d-carrier-source", "DOMAIN: binary source word", "domain", "carrier-only"),
+        ("d-mechanism-fpga", "DOMAIN: FPGA", "domain", "mechanism-only"),
+        ("d-mechanism-limb", "DOMAIN: Limb24", "domain", "mechanism-only"),
         ("d-circular", "DOMAIN: Exact Core-Math domain selected by the admitted law.", "domain", "circular"),
         ("d-vague", "DOMAIN: One explicit Core-Math binary domain at a time.", "domain", "vague"),
         ("d-empty", "## DOMAIN\n\n## LAW\nx", "domain", "empty"),
@@ -489,7 +524,7 @@ SEMANTIC AUTHORITY = NONE
         ("s-empty", "STATUS:\n", "status", "empty"),
         # extraction: a plural section heading must not be read as a value,
         # and the preamble legend must not hide a filled value below it
-        ("d-plural-heading", "## DOMAINS\nD5", "domain", "ok"),
+        ("d-plural-heading", "## DOMAINS\nD5", "domain", "domain-ok"),
         ("f-plural-heading", "## Falsifiers\nif the law fails", "falsifier", "ok"),
         ("f-legend-then-real", "FALSIFIER        explicit counter-test\nFALSIFIER: if the law fails",
          "falsifier", "ok"),
@@ -608,12 +643,26 @@ def main(argv=None):
         if row.get("scope") in VIOLATION_SCOPE and row["number"] not in known_scope
     ]
 
+    def known_violation(key, row, known):
+        if row["number"] in known:
+            return True
+        # #2555 is the classifier cutover. Carrier/mechanism DOMAIN debt from
+        # older semantic tasks remains visible but does not become a retroactive
+        # blanket failure; new tasks must use semantic DOMAIN or explicit
+        # mechanism scope.
+        return (
+            key == "domain"
+            and row.get("domain") in {"carrier-only", "mechanism-only"}
+            and isinstance(row.get("number"), int)
+            and row["number"] < 2556
+        )
+
     new_violations = {}
     for key in active_fields:
         known = set(baseline["violations"].get(key, []))
         new_violations[key] = [
             row for row in judged
-            if row.get(key) in VIOLATION_RULES[key] and row["number"] not in known
+            if row.get(key) in VIOLATION_RULES[key] and not known_violation(key, row, known)
         ]
 
     summary_parts = [
