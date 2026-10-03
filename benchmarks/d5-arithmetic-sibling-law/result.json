@@ -1,0 +1,36 @@
+{
+  "schema": "d5-arithmetic-sibling-law/v1",
+  "domain": "Core.D5",
+  "owner_occupancy_authority": "OD-005",
+  "coordinates": {
+    "10010": "TIMES",
+    "10011": "QUOTIENT",
+    "01010": "PLUS",
+    "01011": "DIFFERENCE"
+  },
+  "d4_prefixes": {
+    "1001": "UNALLOCATED",
+    "0101": "UNALLOCATED"
+  },
+  "candidate_law": "suffix selects direct-vs-inverse rhs orientation",
+  "additive_full_protocol_delta_axes": [
+    "operation-orientation",
+    "arity"
+  ],
+  "multiplicative_full_protocol_delta_axes": [
+    "operation-orientation",
+    "arity",
+    "fixed-quotient-policy"
+  ],
+  "core_math_inverse_law_transfer": "FORBIDDEN-WITHOUT-BRIDGE",
+  "d4_parenthood": "NOT-PROVED",
+  "owner_map_mutation": "NONE",
+  "global_d5_suffix_theorem": "NOT-CLAIMED",
+  "additive_value_semantics_classification": "LOCAL-SIBLING-LAW",
+  "multiplicative_value_semantics_classification": "LOCAL-SIBLING-LAW",
+  "value_runtime_witness": "d5_arithmetic::tests::additive_and_multiplicative_siblings_follow_local_inverse_orientation_laws",
+  "additive_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW",
+  "multiplicative_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW",
+  "relation_class": "VALUE-LOCAL-LAW_PLUS_FULL-PROTOCOL-COORDINATE-SCOPE",
+  "binary_restriction_possible": "PROVED-BY-EXACT-D5-RUNTIME"
+}
