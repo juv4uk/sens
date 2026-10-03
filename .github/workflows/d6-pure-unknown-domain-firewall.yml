@@ -1,0 +1,49 @@
+name: D6 PURE-UNKNOWN domain firewall
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-pure-unknown-domain-firewall/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/binary-domain-separation/**"
+      - ".github/workflows/d6-pure-unknown-domain-firewall.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-pure-unknown-domain-firewall/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/binary-domain-separation/**"
+      - ".github/workflows/d6-pure-unknown-domain-firewall.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  firewall:
+    name: D6 foreign-authority rejection matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run D6 domain-firewall witness
+        run: |
+          python3 benchmarks/d6-pure-unknown-domain-firewall/run.py \
+            --out /tmp/d6-pure-unknown-domain-firewall.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/d6-pure-unknown-domain-firewall.json"))
+          assert d["pure_unknown_count"] == 44
+          assert len(d["attack_rows"]) == 176
+          assert d["verdict_counts"]["DOMAIN-MISMATCH"] == 88
+          assert d["verdict_counts"]["MECHANISM-NONAUTHORITY"] == 88
+          assert d["bridge_escape_hatch_control"]["real_bridge_claimed"] is False
+          assert d["new_candidates"] == 0
+          assert d["occupancy_mutations"] == 0
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-pure-unknown-domain-firewall
+          path: /tmp/d6-pure-unknown-domain-firewall.json
+          retention-days: 14
