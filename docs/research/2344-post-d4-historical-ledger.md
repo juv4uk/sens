@@ -34,12 +34,7 @@ GO                 DERIVED-D1-D4
 RETURN             NEW-OBSERVABLE-CAPABILITY
 
 FEXPR/FSUBR        RAW+ENV-TWO-CAPABILITIES
-```
-
-Active:
-
-```text
-TRANSFORMER / later macro staging -> #2557
+Hart MACRO          PARTIAL-PROTOCOL-ALIGNMENT / TIMING-DISTINCT
 ```
 
 ## Phase-D nuance
@@ -81,6 +76,28 @@ result re-eval      = 1
 
 The shared raw-operand axis does not collapse the protocols into one capability.
 
+## Phase-F macro timing
+
+Hart's 1963 MACRO protocol and the current SENS transformer agree on the three
+tracked form-protocol axes:
+
+```text
+raw/full syntax input       = yes
+explicit caller-env input   = no
+returned replacement form   = yes
+```
+
+They are **not the same protocol overall**, because expansion time is observable:
+
+```text
+Hart MACRO       = DEFINE / definition-time expansion
+SENS TRANSFORMER = evaluation-time expansion
+```
+
+#2568/#2569 demonstrates the distinction with macro redefinition: a body already
+expanded under Hart's model retains OLD, while current SENS observes NEW at call
+time. Timing is historical/protocol evidence only; it is not a SENS bit or width.
+
 ## Placement boundary
 
 Every row in this ingest ledger keeps:
@@ -102,13 +119,16 @@ It does not terminate the historical inventory.
 
 ## Gate
 
-While #2557 is active:
+Phase F is complete:
 
 ```text
-historical-ingest-complete = no
-structural-discovery-may-start = no
+historical-ingest-complete = yes
+structural-discovery-may-start = yes
 placement-search-may-start = no
 ```
+
+The last line remains `no` deliberately: completing the dataset authorizes
+structural discovery, not automatic placement into free D5/D6 coordinates.
 
 ## Principle
 
