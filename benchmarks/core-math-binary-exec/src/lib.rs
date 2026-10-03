@@ -115,10 +115,21 @@ pub struct Law {
 }
 
 impl Law {
-    /// Create a domain-scoped law.
-    ///
-    /// The canonical factor-2 append mechanism is characterized by factor 10₂ = 2.
-    pub fn new(domain: Domain, factor: BinaryNumber, semantic_equation: &'static str) -> Result<Self, Error> {
+    /// Backwards-compatible constructor defaulting to `Domain::SelectorPath`.
+    pub fn new(factor: BinaryNumber) -> Result<Self, Error> {
+        Self::new_scoped(
+            Domain::SelectorPath,
+            factor,
+            "extend(selector,b)(x)=selector(project_b(x))",
+        )
+    }
+
+    /// Construct a domain-scoped law with explicit domain and semantic equation.
+    pub fn new_scoped(
+        domain: Domain,
+        factor: BinaryNumber,
+        semantic_equation: &'static str,
+    ) -> Result<Self, Error> {
         if factor.is_exactly(&[1, 0]) {
             Ok(Self {
                 domain,
@@ -159,31 +170,43 @@ impl Law {
     }
 }
 
-/// Apply a domain-scoped binary law to a semantic object.
+/// Apply the binary law mechanism to raw binary numbers.
 ///
 /// Mathematical statement:
 /// output = 2 * parent + delta
 /// output_width = parent_width + 1
+pub fn apply(law: &Law, inputs: &[BinaryNumber]) -> Result<BinaryNumber, Error> {
+    if inputs.len() != 2 {
+        return Err(Error::WrongArity);
+    }
+    if !law.factor.is_exactly(&[1, 0]) {
+        return Err(Error::UnknownLaw);
+    }
+
+    let parent = &inputs[0];
+    let delta = &inputs[1];
+    if delta.width() != 1 {
+        return Err(Error::DeltaMustBeOneBit);
+    }
+
+    let mut bits = parent.bits.clone();
+    bits.push(delta.bits[0]);
+    Ok(BinaryNumber { bits })
+}
+
+/// Apply a domain-scoped binary law to a semantic object.
 ///
 /// Under #2490 and #2508:
 /// 1. `parent.domain()` must match `law.domain()`; cross-domain application fails with `DomainMismatch`.
 /// 2. `delta.width()` must be 1 bit.
 /// 3. `law.factor()` must be 10₂.
 /// 4. Resulting semantic object inherits the parent's domain with extended bits.
-pub fn apply(law: &Law, parent: &SemanticObject, delta: &BinaryNumber) -> Result<SemanticObject, Error> {
+pub fn apply_scoped(law: &Law, parent: &SemanticObject, delta: &BinaryNumber) -> Result<SemanticObject, Error> {
     if parent.domain() != law.domain() {
         return Err(Error::DomainMismatch);
     }
-    if delta.width() != 1 {
-        return Err(Error::DeltaMustBeOneBit);
-    }
-    if !law.factor().is_exactly(&[1, 0]) {
-        return Err(Error::UnknownLaw);
-    }
-
-    let mut bits = parent.bits().raw_bits().to_vec();
-    bits.push(delta.raw_bits()[0]);
-    Ok(SemanticObject::new(parent.domain(), BinaryNumber::from_raw(bits)))
+    let raw = apply(law, &[parent.bits().clone(), delta.clone()])?;
+    Ok(SemanticObject::new(parent.domain(), raw))
 }
 
 #[cfg(test)]
@@ -201,17 +224,26 @@ mod tests {
     #[test]
     fn exact_width_and_leading_zeroes_are_preserved() {
         let x = SemanticObject::new(Domain::SelectorPath, BinaryNumber::parse("001").unwrap());
-        let y = apply(&selector_law(), &x, &BinaryNumber::parse("0").unwrap()).unwrap();
+        let y = apply_scoped(&selector_law(), &x, &BinaryNumber::parse("0").unwrap()).unwrap();
         assert_eq!(y.bits().bits(), "0010");
         assert_eq!(y.width(), 4);
         assert_eq!(y.domain(), Domain::SelectorPath);
     }
 
     #[test]
+    fn raw_apply_backwards_compatible() {
+        let law = Law::new(BinaryNumber::parse("10").unwrap()).unwrap();
+        let x = BinaryNumber::parse("001").unwrap();
+        let delta = BinaryNumber::parse("0").unwrap();
+        let y = apply(&law, &[x, delta]).unwrap();
+        assert_eq!(y.bits(), "0010");
+    }
+
+    #[test]
     fn result_is_reusable() {
         let x = SemanticObject::new(Domain::SelectorPath, BinaryNumber::parse("101").unwrap());
-        let y = apply(&selector_law(), &x, &BinaryNumber::parse("0").unwrap()).unwrap();
-        let z = apply(&selector_law(), &y, &BinaryNumber::parse("1").unwrap()).unwrap();
+        let y = apply_scoped(&selector_law(), &x, &BinaryNumber::parse("0").unwrap()).unwrap();
+        let z = apply_scoped(&selector_law(), &y, &BinaryNumber::parse("1").unwrap()).unwrap();
         assert_eq!(z.bits().bits(), "10101");
         assert_eq!(z.domain(), Domain::SelectorPath);
     }
@@ -220,7 +252,7 @@ mod tests {
     fn width_has_no_host_integer_ceiling() {
         let source = "1".repeat(4096);
         let x = SemanticObject::new(Domain::SelectorPath, BinaryNumber::parse(&source).unwrap());
-        let y = apply(&selector_law(), &x, &BinaryNumber::parse("1").unwrap()).unwrap();
+        let y = apply_scoped(&selector_law(), &x, &BinaryNumber::parse("1").unwrap()).unwrap();
         assert_eq!(y.width(), 4097);
         assert!(y.bits().bits().ends_with('1'));
     }
@@ -232,12 +264,16 @@ mod tests {
 
         let x = SemanticObject::new(Domain::SelectorPath, BinaryNumber::parse("101").unwrap());
         assert_eq!(
-            apply(&selector_law(), &x, &BinaryNumber::parse("10").unwrap()),
+            apply_scoped(&selector_law(), &x, &BinaryNumber::parse("10").unwrap()),
             Err(Error::DeltaMustBeOneBit)
         );
         assert_eq!(
-            Law::new(Domain::SelectorPath, BinaryNumber::parse("11").unwrap(), "test"),
+            Law::new_scoped(Domain::SelectorPath, BinaryNumber::parse("11").unwrap(), "test"),
             Err(Error::UnknownLaw)
+        );
+        assert_eq!(
+            apply(&selector_law(), &[x.bits().clone()]),
+            Err(Error::WrongArity)
         );
     }
 
@@ -248,12 +284,12 @@ mod tests {
         let delta = BinaryNumber::parse("0").unwrap();
 
         // Cross-domain execution must fail closed:
-        assert_eq!(apply(&q_law(), &sel_obj, &delta), Err(Error::DomainMismatch));
-        assert_eq!(apply(&selector_law(), &q_obj, &delta), Err(Error::DomainMismatch));
+        assert_eq!(apply_scoped(&q_law(), &sel_obj, &delta), Err(Error::DomainMismatch));
+        assert_eq!(apply_scoped(&selector_law(), &q_obj, &delta), Err(Error::DomainMismatch));
 
         // Same-domain execution succeeds:
-        assert!(apply(&selector_law(), &sel_obj, &delta).is_ok());
-        assert!(apply(&q_law(), &q_obj, &delta).is_ok());
+        assert!(apply_scoped(&selector_law(), &sel_obj, &delta).is_ok());
+        assert!(apply_scoped(&q_law(), &q_obj, &delta).is_ok());
     }
 
     #[test]
@@ -274,10 +310,10 @@ mod tests {
         let d0 = BinaryNumber::parse("0").unwrap();
         let d1 = BinaryNumber::parse("1").unwrap();
 
-        let add_inv = apply(&law, &add_root, &d0).unwrap(); // 00
-        let add_quot = apply(&law, &add_root, &d1).unwrap(); // 01
-        let mul_inv = apply(&law, &mul_root, &d0).unwrap(); // 10
-        let mul_quot = apply(&law, &mul_root, &d1).unwrap(); // 11
+        let add_inv = apply_scoped(&law, &add_root, &d0).unwrap(); // 00
+        let add_quot = apply_scoped(&law, &add_root, &d1).unwrap(); // 01
+        let mul_inv = apply_scoped(&law, &mul_root, &d0).unwrap(); // 10
+        let mul_quot = apply_scoped(&law, &mul_root, &d1).unwrap(); // 11
 
         assert_eq!(add_inv.bits().bits(), "00");
         assert_eq!(add_quot.bits().bits(), "01");

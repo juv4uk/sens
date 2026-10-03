@@ -1,4 +1,4 @@
-use core_math_binary_exec::{apply, BinaryNumber, Domain, Error, Law, SemanticObject};
+use core_math_binary_exec::{apply_scoped, BinaryNumber, Domain, Error, Law, SemanticObject};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Choice {
@@ -56,7 +56,7 @@ fn selector_permutation_attack(law: &Law) {
     let root = Selector { root: Choice::First, suffix: vec![] };
     let semantic_child = root.extend(Choice::First);
 
-    let arithmetic_child = apply(
+    let arithmetic_child = apply_scoped(
         law,
         &encode_selector(&root),
         &BinaryNumber::parse("0").unwrap(),
@@ -138,10 +138,10 @@ fn q_group_factor_witness(q_law: &Law) -> (usize, usize, usize) {
     let d0 = BinaryNumber::parse("0").unwrap();
     let d1 = BinaryNumber::parse("1").unwrap();
 
-    let add_inv = apply(q_law, &add_root, &d0).unwrap(); // 00
-    let add_quot = apply(q_law, &add_root, &d1).unwrap(); // 01
-    let mul_inv = apply(q_law, &mul_root, &d0).unwrap(); // 10
-    let mul_quot = apply(q_law, &mul_root, &d1).unwrap(); // 11
+    let add_inv = apply_scoped(q_law, &add_root, &d0).unwrap(); // 00
+    let add_quot = apply_scoped(q_law, &add_root, &d1).unwrap(); // 01
+    let mul_inv = apply_scoped(q_law, &mul_root, &d0).unwrap(); // 10
+    let mul_quot = apply_scoped(q_law, &mul_root, &d1).unwrap(); // 11
 
     assert_eq!(add_inv.bits().bits(), "00");
     assert_eq!(add_quot.bits().bits(), "01");
@@ -247,8 +247,8 @@ fn cross_domain_firewall_attack(sel_law: &Law, q_law: &Law) {
     let delta = BinaryNumber::parse("0").unwrap();
 
     // 1. Cross-domain application MUST fail with DomainMismatch
-    assert_eq!(apply(sel_law, &q_obj, &delta), Err(Error::DomainMismatch));
-    assert_eq!(apply(q_law, &sel_obj, &delta), Err(Error::DomainMismatch));
+    assert_eq!(apply_scoped(sel_law, &q_obj, &delta), Err(Error::DomainMismatch));
+    assert_eq!(apply_scoped(q_law, &sel_obj, &delta), Err(Error::DomainMismatch));
 
     // 2. Same bit strings across domains MUST NOT be equal as semantic objects
     let sel_10 = SemanticObject::new(
@@ -278,7 +278,7 @@ fn main() {
                         Choice::First => BinaryNumber::parse("0").unwrap(),
                         Choice::Rest => BinaryNumber::parse("1").unwrap(),
                     };
-                    let mathematical = apply(&sel_law, &encode_selector(&selector), &delta).unwrap();
+                    let mathematical = apply_scoped(&sel_law, &encode_selector(&selector), &delta).unwrap();
                     let semantic = encode_selector(&selector.extend(choice));
                     assert_eq!(mathematical, semantic);
                     assert_eq!(mathematical.width(), encode_selector(&selector).width() + 1);
@@ -294,12 +294,12 @@ fn main() {
         Domain::SelectorPath,
         BinaryNumber::parse("101").unwrap(),
     );
-    let generated = apply(
+    let generated = apply_scoped(
         &sel_law,
         &seed,
         &BinaryNumber::parse("0").unwrap(),
     ).unwrap();
-    let reused = apply(
+    let reused = apply_scoped(
         &sel_law,
         &generated,
         &BinaryNumber::parse("1").unwrap(),
