@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{CoreDomainIdentity, Value};
 use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -89,10 +89,13 @@ struct Limits {
     /// (host-or-bind-address, first-port, last-port), inclusive.
     tcp_connect_allowlist: Option<Vec<(String, u16, u16)>>,
     tcp_listen_allowlist: Option<Vec<(String, u16, u16)>>,
-    /// #1455: визначення мовою для кодів СЕНС без примітиву Rust. Слот коду
-    /// заповнює перше визначення верхнього рівня з назвою з таблиці функцій;
-    /// пізніше затінення назви слот не змінює.
-    code_slots: HashMap<u8, Value>,
+    /// Canonical language-owned bindings keyed by exact semantic domain.
+    /// Equal payloads in D3/D4/D5/D6 remain distinct HashMap keys.
+    domain_code_slots: HashMap<CoreDomainIdentity, Value>,
+    /// Historical exact-eight compatibility slots. These are intentionally
+    /// separate storage so a legacy byte can never collide with a canonical
+    /// domain identity merely from its packed payload.
+    legacy_code_slots: HashMap<u8, Value>,
 }
 
 impl Environment {
@@ -238,18 +241,46 @@ impl Environment {
         self.0.borrow().parent.is_none()
     }
 
-    /// #1455: визначення мовою, прив'язане до коду СЕНС.
-    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
-        self.2.borrow().code_slots.get(&sid.packed_byte()).cloned()
+    /// Canonical exact-domain language slot.
+    pub(crate) fn domain_code_slot(&self, identity: CoreDomainIdentity) -> Option<Value> {
+        self.2.borrow().domain_code_slots.get(&identity).cloned()
     }
 
-    /// Прив'язує визначення до коду, лише якщо слот ще порожній.
-    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
+    /// Binds a canonical exact-domain identity once.
+    pub(crate) fn bind_domain_code_slot_once(
+        &self,
+        identity: CoreDomainIdentity,
+        value: Value,
+    ) -> bool {
         let mut limits = self.2.borrow_mut();
-        if limits.code_slots.contains_key(&sid.packed_byte()) {
+        if limits.domain_code_slots.contains_key(&identity) {
             return false;
         }
-        limits.code_slots.insert(sid.packed_byte(), value);
+        limits.domain_code_slots.insert(identity, value);
+        true
+    }
+
+    /// Transitional historical exact-eight compatibility lookup.
+    ///
+    /// Kept under the old method name so this slice does not grow Sens8 API
+    /// surface. New canonical code uses domain_code_slot.
+    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
+        self.2
+            .borrow()
+            .legacy_code_slots
+            .get(&sid.packed_byte())
+            .cloned()
+    }
+
+    /// Transitional historical exact-eight compatibility binding.
+    ///
+    /// New canonical code uses bind_domain_code_slot_once.
+    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
+        let mut limits = self.2.borrow_mut();
+        if limits.legacy_code_slots.contains_key(&sid.packed_byte()) {
+            return false;
+        }
+        limits.legacy_code_slots.insert(sid.packed_byte(), value);
         true
     }
 
@@ -449,6 +480,33 @@ impl Default for Session {
 mod tests {
     use super::*;
     use crate::Exactness;
+
+    #[test]
+    fn domain_code_slots_keep_equal_payloads_distinct() {
+        use crate::{Bija3, Bit3, Bit4, CoreD4};
+
+        let env = Environment::root();
+        let d3 = CoreDomainIdentity::from(Bija3::from_word(Bit3::new(1).unwrap()));
+        let d4 = CoreDomainIdentity::from(CoreD4::from_word(Bit4::new(1).unwrap()));
+
+        assert!(env.bind_domain_code_slot_once(
+            d3,
+            Value::Symbol(Rc::from("d3-one"))
+        ));
+        assert!(env.bind_domain_code_slot_once(
+            d4,
+            Value::Symbol(Rc::from("d4-one"))
+        ));
+
+        assert_eq!(
+            env.domain_code_slot(d3),
+            Some(Value::Symbol(Rc::from("d3-one")))
+        );
+        assert_eq!(
+            env.domain_code_slot(d4),
+            Some(Value::Symbol(Rc::from("d4-one")))
+        );
+    }
 
     #[test]
     fn root_predefines_t_as_the_self_evaluating_truth_symbol() {
