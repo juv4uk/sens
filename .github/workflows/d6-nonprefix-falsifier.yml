@@ -1,0 +1,46 @@
+name: D6 non-prefix falsifier
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2527-d6-nonprefix-falsifier.py"
+      - "scripts/research-2506-d6-binding-policy-generator.py"
+      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
+      - "docs/research/2527-d6-nonprefix-falsifier.md"
+      - ".github/workflows/d6-nonprefix-falsifier.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2527-d6-nonprefix-falsifier.py"
+      - "scripts/research-2506-d6-binding-policy-generator.py"
+      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
+      - "docs/research/2527-d6-nonprefix-falsifier.md"
+      - ".github/workflows/d6-nonprefix-falsifier.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  falsifier:
+    name: D6 non-prefix theorem-scope attack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run non-prefix/product/quotient falsifier
+        run: python3 scripts/research-2527-d6-nonprefix-falsifier.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2527 D6 non-prefix falsifier"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2527-d6-nonprefix-falsifier.py
+            echo "~~~"
+            echo
+            echo "- Product structure is separated from coordinate orientation."
+            echo "- Fewer printed bits with table authority do not count as semantic compression."
+            echo "- No D6 resident or coordinate is admitted by this gate."
+          } >> "$GITHUB_STEP_SUMMARY"
