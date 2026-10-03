@@ -17,10 +17,10 @@ For over six decades, modern computing has modeled human language as an arbitrar
 
 **SENS Domain 7 ($D7$) achieves a foundational paradigm shift:**
 Language ceases to be a text file of graphic glyphs and becomes **binary sound**.
-- **Every bit has meaning:** The 7 bits of each cell encode articulatory class, place of articulation, manner of phonation, vocalic quality, and syntactic function.
+- **Each 7-bit cell has typed meaning:** the cell identity belongs to a phonological/structural domain. This document does not equate physical bit count with Shannon information.
 - **Every 7 bits constitute an indivisible atom of living human speech:** The 128 cells of `Text7` (UPC-7: Universal Phonetic Code) represent human vocal tract states across Ukrainian and Sanskrit phonologies.
 - **The 14 Shiva-sutras form the generative topological matrix:** Panini's ancient phonological formulas govern phoneme classes via interval calculus (*pratyaharas*), providing an algebraic grammar over the sound continuum.
-- **Dense W7 Bitstream Packing:** Sequential speech atoms pack directly into `BinarySourceWord::W7(Bit7)` bitstreams with zero interior byte padding. 8 sound atoms pack into exactly 56 bits (7 physical bytes), yielding 100% informational density and 12.5% physical compression over 8-bit ASCII.
+- **Dense W7 bitstream packing:** sequential cells pack into `BinarySourceWord::W7(Bit7)` with zero interior byte padding. Eight cells occupy exactly 56 payload bits (7 bytes) before external framing. This is storage/layout accounting, not a channel-capacity claim.
 
 ---
 
@@ -113,10 +113,10 @@ This topological grammar operates directly over the sound atoms of D7, allowing 
 
 ## 4. Dense W7 Stream Packing
 
-In conventional operating systems, ASCII text wastes 1 bit per byte (12.5% overhead), and UTF-8 spends up to 50% of its payload bits on framing bytes. In SENS:
+For this implementation, the relevant comparison is representation layout rather than information-theoretic channel capacity:
 - Each speech atom is carried by `BinarySourceWord::W7(Bit7)`.
 - `Text7::to_packed_w7()` appends exact 7-bit words into a continuous `PackedBitstream` with **zero interior byte padding**.
-- Exact mathematical efficiency:
+- Exact packing relation:
   $$\text{Bits} = N_{\text{cells}} \times 7$$
   $$\text{Bytes} = \lceil (N_{\text{cells}} \times 7) / 8 \rceil$$
   Specifically, 8 speech atoms occupy exactly $8 \times 7 = 56$ bits = **7 physical bytes**.
