@@ -50,6 +50,9 @@ pub enum ExprKind {
     Rational(Rational),
     NumericBuffer(NumericBuffer),
     Sid(Sens8),
+    /// Exact Core.D6 semantic identity already proven by an upstream domain
+    /// boundary. The reader does not mint this variant by width alone.
+    CoreD6(crate::CoreD6),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -88,6 +91,35 @@ pub enum ExprKind {
     /// A closure parameter by numeric lexical coordinates only; the human name
     /// lives in the closure's debug metadata, never in the node.
     Local { depth: u32, index: u32 },
+}
+
+#[cfg(test)]
+mod core_d6_ast_tests {
+    use super::{Expr, ExprKind, Span};
+    use crate::{Bit6, CoreD6};
+
+    #[test]
+    fn core_d6_ast_identity_round_trips_all_64_words() {
+        for raw in 0u8..64 {
+            let word = Bit6::new(raw).unwrap();
+            let domain = CoreD6::from_word(word);
+            let node = Expr {
+                kind: ExprKind::CoreD6(domain),
+                span: Span {
+                    start: raw as usize,
+                    end: raw as usize + 1,
+                },
+            };
+
+            let ExprKind::CoreD6(recovered) = &node.kind else {
+                panic!("Core.D6 AST identity changed variant");
+            };
+            assert_eq!(recovered.word(), word);
+            assert_eq!(node.span.start, raw as usize);
+            assert_eq!(node.span.end, raw as usize + 1);
+            assert!(format!("{node:?}").contains("CoreD6"));
+        }
+    }
 }
 
 // Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
