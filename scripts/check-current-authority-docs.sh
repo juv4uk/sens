@@ -66,11 +66,11 @@ for path in README.md CURRENT.md docs/current-binary-domain-architecture.md docs
 done
 
 # Free-space placement and shared mechanism are not semantic authority.
-require_literal README.md 'free coordinate'
+require_literal README.md 'вільна binary coordinate'
 require_literal CURRENT.md 'free coordinate'
 require_literal docs/semantic-authority-map.md 'free coordinate'
-require_literal docs/current-binary-domain-architecture.md 'free coordinate'
-require_literal docs/current-binary-domain-architecture.md 'same machine transform'
+require_literal docs/current-binary-domain-architecture.md 'вільна координата'
+require_literal docs/current-binary-domain-architecture.md 'A shared machine transform is not a shared semantic'
 
 # Historical-first phase order must be explicit in current Core docs.
 for path in README.md CURRENT.md docs/current-binary-domain-architecture.md docs/language-core.md docs/vision.md; do
@@ -81,7 +81,7 @@ done
 
 # Human names and implementation mechanisms remain projections/mechanisms.
 require_literal README.md 'людська назва'
-require_literal docs/current-binary-domain-architecture.md 'Human names'
+require_literal docs/current-binary-domain-architecture.md 'людська назва'
 require_literal docs/semantic-authority-map.md 'Human names'
 require_literal docs/semantic-authority-map.uk.md 'Human surfaces'
 
