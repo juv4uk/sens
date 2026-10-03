@@ -1,4 +1,5 @@
-use crate::{DomainIdentity, Rational, Sens8, Text7};
+use crate::{Rational, Sens8, Text7};
+use crate::DomainIdentity;
 use std::fmt;
 
 /// Host-side view of one canonical SENS binary frame.
@@ -499,7 +500,7 @@ mod tests {
         let d8 = BinaryFrame::Domain(
             crate::BinarySourceWord::W8(crate::Bit8::new(1).unwrap()).domain_identity(),
         );
-        let legacy = BinaryFrame::Function(Sens8::from_packed_byte(1));
+        let legacy = BinaryFrame::Function(crate::sens!(00000001));
         assert_ne!(encode_binary_frame(&d8).unwrap(), encode_binary_frame(&legacy).unwrap());
         assert_ne!(d8, legacy);
     }
