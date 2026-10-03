@@ -1,35 +1,17 @@
 //! Cachegrind micro-benchmark for the owner-ratified D1->D4 foundation.
 //!
 //! This executable measures the exact-width carrier path only. It does not
-//! assign or redefine SENS semantics. D1-D3 use their semantic newtypes;
-//! D4 remains a benchmark-local transparent wrapper over Bit4 until #2169
-//! lands the production D4 semantic layer.
+//! assign or redefine SENS semantics. D1-D4 use production exact-domain newtypes.
 
-use sens::{Bija3, Bit1, Bit2, Bit3, Bit4, PredicateBit, Racana2};
+use sens::{Bija3, Bit1, Bit2, Bit3, Bit4, CoreD4, PredicateBit, Racana2};
 use std::{env, hint::black_box, process::ExitCode};
-
-#[repr(transparent)]
-#[derive(Clone, Copy)]
-struct BenchD4Word(Bit4);
-
-impl BenchD4Word {
-    #[inline(always)]
-    fn from_word(word: Bit4) -> Self {
-        Self(word)
-    }
-
-    #[inline(always)]
-    fn word(self) -> Bit4 {
-        self.0
-    }
-}
 
 #[derive(Clone, Copy)]
 enum MixedWord {
     D1(PredicateBit),
     D2(Racana2),
     D3(Bija3),
-    D4(BenchD4Word),
+    D4(CoreD4),
 }
 
 fn verify_foundation_mechanics() {
@@ -43,7 +25,7 @@ fn verify_foundation_mechanics() {
         assert_eq!(Bija3::from_word(Bit3::new(raw).unwrap()).word().packed_bits(), raw);
     }
     for raw in 0..=15 {
-        assert_eq!(BenchD4Word::from_word(Bit4::new(raw).unwrap()).word().packed_bits(), raw);
+        assert_eq!(CoreD4::from_word(Bit4::new(raw).unwrap()).word().packed_bits(), raw);
     }
 
     // Exact-width anti-collapse is carried by the Rust types, not numeric value.
@@ -127,7 +109,7 @@ fn run_d4(iterations: u64) -> u64 {
     for i in 0..iterations {
         let i = black_box(i);
         let word = Bit4::new((i & 0b1111) as u8).unwrap();
-        let domain = BenchD4Word::from_word(word);
+        let domain = CoreD4::from_word(word);
         let word = domain.word();
         acc = acc
             .wrapping_add(word.packed_bits() as u64)
@@ -177,7 +159,7 @@ fn run_mixed(iterations: u64) -> u64 {
             0 => MixedWord::D1(PredicateBit::from_word(Bit1::new((i & 1) as u8).unwrap())),
             1 => MixedWord::D2(Racana2::from_word(Bit2::new((i & 3) as u8).unwrap())),
             2 => MixedWord::D3(Bija3::from_word(Bit3::new((i & 7) as u8).unwrap())),
-            _ => MixedWord::D4(BenchD4Word::from_word(Bit4::new((i & 15) as u8).unwrap())),
+            _ => MixedWord::D4(CoreD4::from_word(Bit4::new((i & 15) as u8).unwrap())),
         };
         let packed = match value {
             MixedWord::D1(x) => x.word().packed_bits(),
