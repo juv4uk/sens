@@ -19,7 +19,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 LOCK = ROOT / "contracts" / "d7-local-ordinal.lock"
-OUTPUT = ROOT / "benchmarks" / "d7-local-ordinal-corpus" / "projection.json"
+OUTPUT = ROOT / "benchmarks" / "d7-local-ordinal-corpus" / "fixtures" / "projection.json"
 
 
 def quoted(text: str, name: str) -> str:
