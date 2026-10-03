@@ -34,12 +34,7 @@ GO                 DERIVED-D1-D4
 RETURN             NEW-OBSERVABLE-CAPABILITY
 
 FEXPR/FSUBR        RAW+ENV-TWO-CAPABILITIES
-```
-
-Активно:
-
-```text
-TRANSFORMER / later macro staging -> #2557
+TRANSFORMER         FORM-TRANSFORMER-PROTOCOL
 ```
 
 ## Важлива межа Phase D
@@ -81,6 +76,22 @@ result re-eval      = 1
 
 Спільна raw-operand вісь не робить ці протоколи однією capability.
 
+## Phase F protocol
+
+Hart, AI Memo 57 (October 1963), історично вводить MACRO як expander у DEFINE:
+
+```text
+Hart MACRO
+raw form            = 1
+explicit caller env = 0
+result re-eval      = 1
+```
+
+Macro-функція отримує цілу форму одним аргументом, а її результат замінює
+початкову форму під час DEFINE expansion. Це протокольно збігається з поточним
+SENS TRANSFORMER по трьох відстежуваних осях, але не доводить тотожність механізму.
+Evidence: `docs/research/2557-hart-macro-protocol.md`.
+
 ## Placement boundary
 
 Кожен ряд цього ingest ledger лишає:
@@ -102,13 +113,16 @@ Generated D5 selector subtree — окремий baseline fact:
 
 ## Gate
 
-Поки #2557 активний:
+Після закриття Phase F:
 
 ```text
-historical-ingest-complete = no
-structural-discovery-may-start = no
+historical-ingest-complete = yes
+structural-discovery-may-start = yes
 placement-search-may-start = no
 ```
+
+Placement лишається заблокованим до structural-discovery: завершена хронологія
+дозволяє шукати закони, але сама по собі не дає нових D5/D6 координат.
 
 ## Принцип
 
