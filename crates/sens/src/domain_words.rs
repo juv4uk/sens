@@ -314,6 +314,18 @@ impl From<CoreD6> for CallableDomainId {
     }
 }
 
+impl PartialEq<crate::Sens8> for CallableDomainId {
+    fn eq(&self, other: &crate::Sens8) -> bool {
+        self.legacy_sens8() == Some(*other)
+    }
+}
+
+impl PartialEq<CallableDomainId> for crate::Sens8 {
+    fn eq(&self, other: &CallableDomainId) -> bool {
+        other == self
+    }
+}
+
 impl fmt::Display for CallableDomainId {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
