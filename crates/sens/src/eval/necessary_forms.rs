@@ -6,7 +6,7 @@
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry;
-use crate::Sens8;
+use crate::{CoreDomainIdentity, Sens8};
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -28,6 +28,19 @@ pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFo
         })
 }
 
+pub(crate) fn identity_for_domain_identity(
+    identity: CoreDomainIdentity,
+) -> Option<NecessaryFormIdentity> {
+    let CoreDomainIdentity::D4(word) = identity else {
+        return None;
+    };
+    match word.word().packed_bits() {
+        0b0010 => Some(NecessaryFormIdentity::Lambda),
+        0b0011 => Some(NecessaryFormIdentity::Define),
+        _ => None,
+    }
+}
+
 /// Resolve an executable list-head symbol through the shared authority
 /// registry, then select the evaluator mechanism by exact SID identity.
 /// Uses the admitted (stable OR compatibility-only) surface index, not the
@@ -37,13 +50,40 @@ pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFo
 /// (previously duplicated in both `eval/mod.rs` and `ir.rs` for exactly
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
-    semantic_registry::admitted_semantic_id_for_surface(name)
-        .and_then(identity_for_semantic_id)
+    semantic_registry::domain_identity_for_surface(name)
+        .and_then(identity_for_domain_identity)
+        .or_else(|| {
+            semantic_registry::admitted_semantic_id_for_surface(name)
+                .and_then(identity_for_semantic_id)
+        })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d4_domain_identity_routes_lambda_and_define_without_legacy_byte_recovery() {
+        let lambda = semantic_registry::domain_identity_for_surface("lambda")
+            .expect("lambda domain identity");
+        let define = semantic_registry::domain_identity_for_surface("define")
+            .expect("define domain identity");
+        assert_eq!(
+            identity_for_domain_identity(lambda),
+            Some(NecessaryFormIdentity::Lambda)
+        );
+        assert_eq!(
+            identity_for_domain_identity(define),
+            Some(NecessaryFormIdentity::Define)
+        );
+        assert_eq!(
+            identity_for_domain_identity(
+                semantic_registry::domain_identity_for_surface("atom")
+                    .expect("atom domain identity")
+            ),
+            None
+        );
+    }
 
     #[test]
     fn byte_sid_is_not_a_surface_spelling() {
