@@ -4,7 +4,8 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{legacy_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
+use crate::legacy_registry;
+use crate::{ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
