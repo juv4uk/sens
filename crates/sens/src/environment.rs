@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{SemanticRef, Value};
 use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -92,7 +92,7 @@ struct Limits {
     /// #1455: визначення мовою для кодів СЕНС без примітиву Rust. Слот коду
     /// заповнює перше визначення верхнього рівня з назвою з таблиці функцій;
     /// пізніше затінення назви слот не змінює.
-    code_slots: HashMap<u8, Value>,
+    code_slots: HashMap<SemanticRef, Value>,
 }
 
 impl Environment {
@@ -239,17 +239,17 @@ impl Environment {
     }
 
     /// #1455: визначення мовою, прив'язане до коду СЕНС.
-    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
-        self.2.borrow().code_slots.get(&sid.packed_byte()).cloned()
+    pub(crate) fn code_slot(&self, semantic_ref: SemanticRef) -> Option<Value> {
+        self.2.borrow().code_slots.get(&semantic_ref).cloned()
     }
 
     /// Прив'язує визначення до коду, лише якщо слот ще порожній.
-    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
+    pub(crate) fn bind_code_slot_once(&self, semantic_ref: SemanticRef, value: Value) -> bool {
         let mut limits = self.2.borrow_mut();
-        if limits.code_slots.contains_key(&sid.packed_byte()) {
+        if limits.code_slots.contains_key(&semantic_ref) {
             return false;
         }
-        limits.code_slots.insert(sid.packed_byte(), value);
+        limits.code_slots.insert(semantic_ref, value);
         true
     }
 
