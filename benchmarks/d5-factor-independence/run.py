@@ -183,16 +183,21 @@ def main() -> int:
         elif factor_id == "non-local-exit":
             results.append({
                 **base,
-                "status": "UNKNOWN",
-                "witness": "pending #2590",
-                "remove_one_attack": None,
-                "unresolved_dependency": "#2590",
+                "status": "BOUNDED-INDEPENDENT",
+                "witness": "#2488/#2504 + #2593/#2614",
+                "remove_one_attack": {
+                    "local_d1_d4_reconstruction": False,
+                    "global_cps_rewrite_counts_as_protocol_change": True,
+                    "nearest_active_prog_exit_observable": True,
+                    "external_root_theorem": "semantic-residue-root",
+                },
+                "unresolved_dependency": None,
             })
 
     by = {row["factor_id"]: row for row in results}
     assert set(by) == POST_D4
-    assert sum(row["status"] == "BOUNDED-INDEPENDENT" for row in results) == 6
-    assert sum(row["status"] == "UNKNOWN" for row in results) == 1
+    assert sum(row["status"] == "BOUNDED-INDEPENDENT" for row in results) == 7
+    assert sum(row["status"] == "UNKNOWN" for row in results) == 0
     assert not any(row["is_root"] for row in results)
     assert all(row["placement"] == "UNPLACED" for row in results)
     assert all(row["width_inference"] == "NONE" for row in results)
@@ -206,17 +211,27 @@ def main() -> int:
         "results": results,
         "summary": {
             "factors_tested": 7,
-            "bounded_independent": 6,
-            "unknown": 1,
+            "bounded_independent": 7,
+            "unknown": 0,
             "proven_independent_roots": 0,
             "new_d5_residents": 0,
             "coordinates_allocated": 0,
             "placement_authorized": False,
+            "roots_promoted_by_this_model": 0,
+            "external_root_theorems": [
+                {
+                    "factor_id": "non-local-exit",
+                    "classification": "semantic-residue-root",
+                    "evidence": "#2488/#2504",
+                    "width": "UNKNOWN",
+                    "coordinate": "UNPLACED",
+                }
+            ],
         },
         "non_conclusions": [
             "factor independence does not imply semantic roothood",
             "factor count does not imply bit width",
-            "six bounded-independent factors do not imply six suffix bits",
+            "seven bounded-independent factors do not imply seven suffix bits",
             "UNKNOWN factors are not residues",
             "no D5 coordinate is allocated",
         ],
@@ -240,8 +255,8 @@ def main() -> int:
     lines += [
         "",
         "Summary:",
-        "- bounded-independent factors: 6;",
-        "- unresolved factors: 1;",
+        "- bounded-independent factors: 7;",
+        "- unresolved factors: 0;",
         "- proven independent roots: 0;",
         "- new D5 residents: 0;",
         "- coordinates allocated: 0.",
@@ -249,8 +264,9 @@ def main() -> int:
         "The protocol cube proves remove-one non-reconstructibility for raw-form,",
         "caller-env and returned-form axes. The Hart/SENS timing trace witnesses",
         "a distinct expansion-locus observable, and the alias/head collision witness",
-        "separates invocation packaging. Merged #2589 resolves shared-location-update",
-        "as bounded-independent; non-local-exit remains UNKNOWN pending #2590.",
+        "separates invocation packaging. Merged #2589 resolves shared-location-update,",
+        "and #2488/#2504 plus #2593/#2614 resolve non-local-exit as a bounded fact",
+        "with an external semantic-residue-root theorem. This model promotes zero roots.",
         "",
     ]
     (args.out / "report.md").write_text("\n".join(lines), encoding="utf-8")
