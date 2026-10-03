@@ -1,9 +1,9 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Authority: lib/surface/semantic-registry.lisp
+// MIGRATION PROJECTION — DO NOT USE AS SEMANTIC AUTHORITY.
+// Historical surface source: lib/surface/semantic-registry.lisp
 // Generator: scripts/generate-rust-semantic-registry.lisp
-//
-// Binary identities below are an implementation projection only.
-// Canonical semantic identity remains the bare binary token in the Lisp registry.
+// Canonical identity is exact domain + bits + admitted law.
+// Historical byte rows exist only until their consumers migrate.
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct SemanticSurface {
