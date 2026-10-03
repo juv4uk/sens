@@ -366,7 +366,7 @@ fn resolve(
                 Head::Call => {
                     // Голова лишається як є: диспетчер вирішує за нею.
                     let head = match &items[0].kind {
-                        ExprKind::Symbol(_) | ExprKind::Sid(_) => items[0].clone(),
+                        ExprKind::Symbol(_) | ExprKind::Sid(_) | ExprKind::LegacySid(_) => items[0].clone(),
                         _ => resolve(&items[0], scopes, environment, changed),
                     };
                     let mut out = Vec::with_capacity(items.len());
@@ -379,7 +379,7 @@ fn resolve(
         ExprKind::Call(_, _) => return expression.clone(),
         ExprKind::LegacyCall(sid, arguments) => match sid_head(*sid, environment) {
             Head::Call => ExprKind::LegacyCall(*sid, resolve_all(arguments, changed)),
-            Head::Cond => ExprKind::Call(
+            Head::Cond => ExprKind::LegacyCall(
                 *sid,
                 arguments
                     .iter()
@@ -643,7 +643,8 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Bool(false) => ExprKind::List(Rc::new([])),
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
-        Value::LegacySid(sid) => ExprKind::Sid(*sid),
+        Value::Sid(identity) => ExprKind::Sid(*identity),
+        Value::LegacySid(sid) => ExprKind::LegacySid(*sid),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
         Value::String(val) => ExprKind::String(val.clone()),
         // A legacy host builtin is callable but not syntax either.
