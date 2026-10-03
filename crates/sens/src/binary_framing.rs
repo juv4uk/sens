@@ -500,9 +500,12 @@ mod tests {
         let d8 = BinaryFrame::Domain(
             crate::BinarySourceWord::W8(crate::Bit8::new(1).unwrap()).domain_identity(),
         );
-        let legacy = BinaryFrame::Function(crate::sens!(00000001));
-        assert_ne!(encode_binary_frame(&d8).unwrap(), encode_binary_frame(&legacy).unwrap());
-        assert_ne!(d8, legacy);
+        let d8_encoded = encode_binary_frame(&d8).unwrap();
+        assert_eq!(&d8_encoded[..6], &[1, 1, 1, 1, 0, 0]);
+        // The existing compatibility Function8 witness below uses 1100.
+        // Domain identity therefore has a disjoint frame tag without creating
+        // any new exact-domain -> legacy identity dependency.
+        assert_ne!(&d8_encoded[..4], &[1, 1, 0, 0]);
     }
 
     #[test]
