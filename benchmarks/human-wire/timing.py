@@ -20,6 +20,7 @@ import json
 import random
 import struct
 import subprocess
+import sys
 import tempfile
 from dataclasses import asdict
 from pathlib import Path
@@ -35,6 +36,7 @@ def load_module(path: Path, name: str):
     spec = importlib.util.spec_from_file_location(name, path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
