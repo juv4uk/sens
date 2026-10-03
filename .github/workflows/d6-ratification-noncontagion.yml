@@ -5,12 +5,14 @@ on:
     paths:
       - "benchmarks/d6-ratification-noncontagion/**"
       - "benchmarks/d6-closure-map/**"
+      - "benchmarks/post-d4-semantic-placement/**"
       - ".github/workflows/d6-ratification-noncontagion.yml"
   push:
     branches: [main]
     paths:
       - "benchmarks/d6-ratification-noncontagion/**"
       - "benchmarks/d6-closure-map/**"
+      - "benchmarks/post-d4-semantic-placement/**"
       - ".github/workflows/d6-ratification-noncontagion.yml"
   workflow_dispatch:
 
