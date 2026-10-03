@@ -1,0 +1,28 @@
+name: Root minimization R6 invocation packaging
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2633-invocation-packaging-root.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/root-min-r6-invocation-packaging.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Replay mandatory alias/head collision witness
+        run: python3 scripts/research-2580-macro-call-form.py
+
+      - name: Minimize invocation packaging
+        run: python3 scripts/research-2633-invocation-packaging-root.py
