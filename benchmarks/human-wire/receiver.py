@@ -279,18 +279,50 @@ def self_test() -> None:
     assert phase.status == "LOCKED"
     assert phase.chosen_start_ns == shifted_start
 
-    # Repetitive sync can legitimately be ambiguous: fail closed.
-    repetitive = [Event("0", start + i * slot_ns) for i in range(3)]
+    # Exact tie control: candidate starts are 20 ms apart and every event
+    # sits exactly midway between them. Both candidates decode the same sync
+    # perfectly with equal timing residual, so choosing either would be an
+    # arbitrary phase preference.
+    tie_sync = "01101"
+    midpoint_events = [
+        Event(bit, start + 10_000_000 + i * slot_ns)
+        for i, bit in enumerate(tie_sync)
+    ]
     phase = search_phase(
-        repetitive,
-        nominal_start_ns=start,
+        midpoint_events,
+        nominal_start_ns=start + 10_000_000,
         slot_ns=slot_ns,
-        sync_bits="000",
+        sync_bits=tie_sync,
         search_ns=10_000_000,
-        step_ns=10_000_000,
+        step_ns=20_000_000,
     )
-    assert phase.status in {"LOCKED", "AMBIGUOUS"}
+    assert phase.status == "AMBIGUOUS"
+    assert phase.chosen_start_ns is None
+    perfect_candidates = [
+        row for row in phase.candidates
+        if row.sync_complete and row.sync_errors == 0
+    ]
+    assert len(perfect_candidates) == 2
+    assert len({row.timing_error_ns for row in perfect_candidates}) == 1
 
+    # Neighbor control: moving the same events 5 ms from one candidate makes
+    # that candidate uniquely better while both still decode the sync.
+    near_left = [
+        Event(bit, start + 5_000_000 + i * slot_ns)
+        for i, bit in enumerate(tie_sync)
+    ]
+    phase = search_phase(
+        near_left,
+        nominal_start_ns=start + 10_000_000,
+        slot_ns=slot_ns,
+        sync_bits=tie_sync,
+        search_ns=10_000_000,
+        step_ns=20_000_000,
+    )
+    assert phase.status == "LOCKED"
+    assert phase.chosen_start_ns == start
+
+    print("HUMAN-WIRE-RX-AMBIGUOUS-TIE=PASS")
     print("HUMAN-WIRE-RX=PASS")
     print("SEMANTIC-AUTHORITY=NONE")
     print("RULE=timing-errors-are-explicit-never-silently-shifted")

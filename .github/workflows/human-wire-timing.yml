@@ -48,6 +48,7 @@ jobs:
         run: |
           python3 benchmarks/human-wire/receiver.py --self-test | tee /tmp/human-wire-rx.log
           grep -F "HUMAN-WIRE-RX=PASS" /tmp/human-wire-rx.log
+          grep -F "HUMAN-WIRE-RX-AMBIGUOUS-TIE=PASS" /tmp/human-wire-rx.log
           grep -F "SEMANTIC-AUTHORITY=NONE" /tmp/human-wire-rx.log
           grep -F "RULE=timing-errors-are-explicit-never-silently-shifted" /tmp/human-wire-rx.log
 
