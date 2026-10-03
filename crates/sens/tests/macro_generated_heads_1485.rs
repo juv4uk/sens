@@ -98,8 +98,7 @@ fn quoted_admitted_single_atoms(path: &str, source: &str) -> BTreeSet<Row> {
 }
 
 fn discovered_rows_without_class() -> BTreeSet<Row> {
-    let rows = quoted_admitted_single_atoms("lib/core.lisp", CORE);
-    rows
+    quoted_admitted_single_atoms("lib/core.lisp", CORE)
 }
 
 #[test]
@@ -183,16 +182,15 @@ fn inventory_has_only_explicit_data_or_code_template_classes() {
 
 #[test]
 fn ordinary_data_is_not_promoted_to_exact_sens() {
-    for (path, source) in [("lib/core.lisp", CORE)] {
-        assert!(
-            source.contains("(00000001 binary)"),
-            "{path}: the admitted-looking symbol binary is ordinary quoted data and must remain data"
-        );
-        assert!(
-            !source.contains("(00000001 10101001)"),
-            "{path}: #1485 must not blanket-rewrite ordinary quoted data to exact SENS"
-        );
-    }
+    let (path, source) = ("lib/core.lisp", CORE);
+    assert!(
+        source.contains("(00000001 binary)"),
+        "{path}: the admitted-looking symbol binary is ordinary quoted data and must remain data"
+    );
+    assert!(
+        !source.contains("(00000001 10101001)"),
+        "{path}: #1485 must not blanket-rewrite ordinary quoted data to exact SENS"
+    );
 }
 
 #[test]
