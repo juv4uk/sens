@@ -108,6 +108,7 @@ pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 pub(crate) mod fasl {
     use super::{Exactness, Expr, ExprKind};
     use crate::value::{NumericBuffer, Rational};
+    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CallableDomainId, CoreD4, CoreD5, CoreD6};
     use std::rc::Rc;
     use std::sync::Arc;
 
@@ -126,6 +127,7 @@ pub(crate) mod fasl {
     const TAG_F32_BUFFER: u8 = 9;
     // #1697: числові координати локальної змінної; ім'я не записується.
     const TAG_LOCAL: u8 = 10;
+    const TAG_CALLABLE_DOMAIN: u8 = 11;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -149,6 +151,30 @@ pub(crate) mod fasl {
         std::str::from_utf8(slice).ok()
     }
 
+    fn encode_callable(id: CallableDomainId, out: &mut Vec<u8>) {
+        match id {
+            CallableDomainId::LegacySens8(sens) => {
+                out.push(TAG_BINARY);
+                out.push(sens.packed_byte());
+            }
+            typed => {
+                out.push(TAG_CALLABLE_DOMAIN);
+                out.push(typed.width() as u8);
+                out.push(typed.packed_payload());
+            }
+        }
+    }
+
+    fn decode_callable(width: u8, payload: u8) -> Option<CallableDomainId> {
+        match width {
+            3 => Some(CallableDomainId::D3(Bija3::from_word(Bit3::new(payload)?))),
+            4 => Some(CallableDomainId::D4(CoreD4::from_word(Bit4::new(payload)?))),
+            5 => Some(CallableDomainId::D5(CoreD5::from_word(Bit5::new(payload)?))),
+            6 => Some(CallableDomainId::D6(CoreD6::from_word(Bit6::new(payload)?))),
+            _ => None,
+        }
+    }
+
     pub(crate) fn encode_expr(expr: &Expr, out: &mut Vec<u8>) {
         match &expr.kind {
             ExprKind::Number(f, exactness) => {
@@ -160,10 +186,7 @@ pub(crate) mod fasl {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
             }
-            ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
-            }
+            ExprKind::Sid(sid) => encode_callable(*sid, out),
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
                 put_str(out, value);
@@ -193,8 +216,7 @@ pub(crate) mod fasl {
             ExprKind::Call(sid, arguments) => {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                encode_callable(*sid, out);
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -235,7 +257,15 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(CallableDomainId::from_legacy_sens8(
+                    crate::Sens8::from_packed_byte(value),
+                ))
+            }
+            TAG_CALLABLE_DOMAIN => {
+                let width = *bytes.get(*pos)?;
+                let payload = *bytes.get(*pos + 1)?;
+                *pos += 2;
+                ExprKind::Sid(decode_callable(width, payload)?)
             }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
