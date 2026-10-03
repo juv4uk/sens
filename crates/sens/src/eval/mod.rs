@@ -235,6 +235,31 @@ fn dispatch_domain_call(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    let Some(domain_entry) = crate::domain_registry::lookup(identity) else {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "unallocated exact-domain identity: D{}:{:0width$b}",
+                identity.width(),
+                identity.packed_bits(),
+                width = identity.width()
+            ),
+            span,
+        ));
+    };
+    if !domain_entry.callable() {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "exact-domain identity is occupied but not callable: D{}:{:0width$b}",
+                identity.width(),
+                identity.packed_bits(),
+                width = identity.width()
+            ),
+            span,
+        ));
+    }
+
     if is_d3(identity, 0b001) {
         special_forms::exact_arity("quote", arguments, 1, span)?;
         return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
