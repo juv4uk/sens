@@ -49,12 +49,12 @@ fn enumerate_suffixes(depth: usize) -> Vec<Vec<Choice>> {
     out
 }
 
-fn permutation_attack(law: Law) {
+fn permutation_attack(law: &Law) {
     let root = Selector { root: Choice::First, suffix: vec![] };
     let semantic_child = root.extend(Choice::First);
 
     let arithmetic_child = apply(
-        law,
+        &law,
         &[encode(&root), BinaryNumber::parse("0").unwrap()],
     ).unwrap();
 
@@ -80,7 +80,7 @@ fn main() {
                         Choice::First => BinaryNumber::parse("0").unwrap(),
                         Choice::Rest => BinaryNumber::parse("1").unwrap(),
                     };
-                    let mathematical = apply(law, &[encode(&selector), delta]).unwrap();
+                    let mathematical = apply(&law, &[encode(&selector), delta]).unwrap();
                     let semantic = encode(&selector.extend(choice));
                     assert_eq!(mathematical, semantic);
                     assert_eq!(mathematical.width(), encode(&selector).width() + 1);
@@ -92,11 +92,11 @@ fn main() {
 
     let seed = BinaryNumber::parse("101").unwrap();
     let generated = apply(
-        law,
+        &law,
         &[seed, BinaryNumber::parse("0").unwrap()],
     ).unwrap();
     let reused = apply(
-        law,
+        &law,
         &[generated, BinaryNumber::parse("1").unwrap()],
     ).unwrap();
 
@@ -106,13 +106,13 @@ fn main() {
     assert!(Law::new(BinaryNumber::parse("11").unwrap()).is_err());
     assert!(
         apply(
-            law,
+            &law,
             &[seed, BinaryNumber::parse("10").unwrap()]
         )
         .is_err()
     );
 
-    permutation_attack(law);
+    permutation_attack(&law);
 
     println!("EXECUTOR=bits-plus-law-to-bits");
     println!("CANONICAL-LAW=output=2*parent+delta;width=parent_width+1");
