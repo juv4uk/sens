@@ -4,7 +4,7 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
+use crate::{semantic_registry, CallableIdentity, ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -78,10 +78,15 @@ fn render_uk(value: &Value) -> String {
         Value::Number(number, Exactness::Exact) => number.to_string(),
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
         Value::Rational(number) => number.to_string(),
-        Value::Sid(sid) => {
-            format!("#<вбудована {}>", uk_semantic_name(*sid))
-        }
-        Value::DomainIdentity(identity) => format!("#<домен {identity}>"),
+        Value::Sid(identity) => match identity {
+            CallableIdentity::Legacy8(bits) => {
+                format!(
+                    "#<вбудована {}>",
+                    uk_semantic_name(Sens8::from_packed_byte(*bits))
+                )
+            }
+            CallableIdentity::Core(core) => format!("#<домен {core}>"),
+        },
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
             escaped.push('"');
@@ -365,7 +370,7 @@ mod tests {
     #[test]
     fn ukrainian_presentation_localizes_builtin_and_function_markers() {
         let mut session = Session::default();
-        let builtin = Value::Sid(crate::sens!(00000010));
+        let builtin = Value::Sid(CallableIdentity::legacy8(0b0000_0010));
         assert_eq!(
             render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
             "#<вбудована атом?>"
