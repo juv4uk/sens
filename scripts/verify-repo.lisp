@@ -57,7 +57,7 @@
   (00001000 (path)
     (10011100 ((doc (10100110 path)))
       (00000111
-        ((any-needle? doc (00000001 ("reference implementation" "референсна реалізація")))
+        ((any-needle? doc (00000001 ("reference implementation" "reference Rust implementation" "референсна реалізація" "референсна реалізація Rust")))
          t
          (00000111
            ((any-needle? doc (00000001 ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
