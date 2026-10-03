@@ -1,0 +1,188 @@
+{
+  "schema": "d5-sens-derivation-closeout/v1",
+  "issue": "#2616",
+  "phase": "SENS-DERIVATION",
+  "domain": "Core.D5",
+  "map_invariant": {
+    "capacity": 32,
+    "selector_generated": 8,
+    "unknown_free": 24,
+    "manual_nonselector_residents": 0,
+    "source": "#2510/#2414"
+  },
+  "decision_rule": "D5 eligible only if exact D4 same-base parent exists and exactly one independently witnessed semantic delta is required.",
+  "factors": [
+    {
+      "factor_id": "shared-location-update",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "strongest_same_base_parent": "0011",
+      "parent_display": "DEFINE",
+      "delta_count": 2,
+      "root_theorem": false,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "classification": "SAME-PARENT-MULTI-DELTA",
+      "d5_eligible": "NO",
+      "reason": "D4 DEFINE is the strongest local parent, but target-resolution and missing-binding policy survive as two independent deltas.",
+      "evidence": [
+        "#2492",
+        "#2518",
+        "#2527",
+        "#2537",
+        "#2541"
+      ],
+      "falsifier": "An executable one-delta quotient from DEFINE reproduces all shared-location observations without hidden table/domain authority."
+    },
+    {
+      "factor_id": "non-local-exit",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "strongest_same_base_parent": null,
+      "parent_display": null,
+      "delta_count": null,
+      "root_theorem": true,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "classification": "ROOT-RESIDUE",
+      "d5_eligible": "NO",
+      "reason": "Canonical RETURN evidence proves residue/root status with no honest D4 parent; roothood does not imply D5 residency.",
+      "evidence": [
+        "#2488",
+        "#2504",
+        "#2590",
+        "#2604"
+      ],
+      "falsifier": "A D4 same-base parent plus exactly one executable delta reproduces RETURN without whole-callgraph CPS rewrite."
+    },
+    {
+      "factor_id": "raw-form-input",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "strongest_same_base_parent": null,
+      "parent_display": null,
+      "delta_count": null,
+      "root_theorem": false,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "classification": "UNKNOWN",
+      "d5_eligible": "UNKNOWN",
+      "reason": "Raw-vs-eager is observable, but no exact D4 same-base parent + one-delta placement theorem has been proved for this factor alone.",
+      "evidence": [
+        "#2193",
+        "#2522",
+        "#2591"
+      ],
+      "falsifier": "Prove exact D4 same-base parent and one-delta derivation, or derive raw-form behavior from existing D1-D4 without new semantics."
+    },
+    {
+      "factor_id": "explicit-caller-env",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "strongest_same_base_parent": null,
+      "parent_display": null,
+      "delta_count": null,
+      "root_theorem": false,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "classification": "UNKNOWN",
+      "d5_eligible": "UNKNOWN",
+      "reason": "Caller-env access is independently observable in the FEXPR protocol, but no D4 parent theorem exists.",
+      "evidence": [
+        "#2522",
+        "#2530",
+        "#2591"
+      ],
+      "falsifier": "Show derivation from D1-D4 or exact D4 same-base parent plus one semantic delta."
+    },
+    {
+      "factor_id": "returned-form-protocol",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "strongest_same_base_parent": null,
+      "parent_display": null,
+      "delta_count": null,
+      "root_theorem": false,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "classification": "UNKNOWN",
+      "d5_eligible": "UNKNOWN",
+      "reason": "Returned-form caller re-evaluation is independently observable, but not yet a proved one-delta child of an exact D4 resident.",
+      "evidence": [
+        "#2522",
+        "#2530",
+        "#2591"
+      ],
+      "falsifier": "Show exact D4 same-base parent + one delta, or derive behavior without new semantic authority."
+    },
+    {
+      "factor_id": "expansion-timing",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "strongest_same_base_parent": null,
+      "parent_display": null,
+      "delta_count": null,
+      "root_theorem": false,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "classification": "UNKNOWN",
+      "d5_eligible": "UNKNOWN",
+      "reason": "Definition-time versus evaluation-time expansion is observable, but timing alone has no D4 parent/placement theorem.",
+      "evidence": [
+        "#2568",
+        "#2569",
+        "#2591"
+      ],
+      "falsifier": "Show timing is derived from existing stage semantics or one exact D4 parent plus one delta."
+    },
+    {
+      "factor_id": "call-packaging",
+      "structural_status": "BOUNDED-INDEPENDENT",
+      "strongest_same_base_parent": null,
+      "parent_display": null,
+      "delta_count": null,
+      "root_theorem": false,
+      "derivable_from_d1_d4": false,
+      "cross_family_shortcuts_rejected": true,
+      "classification": "UNKNOWN",
+      "d5_eligible": "UNKNOWN",
+      "reason": "WHOLE-CALL versus OPERANDS-ONLY is observable, but no exact D4 parent theorem has been established.",
+      "evidence": [
+        "#2580",
+        "#2588",
+        "#2591"
+      ],
+      "falsifier": "Show packaging is derivable or a one-delta refinement of an exact D4 semantic object."
+    }
+  ],
+  "composite_controls": [
+    {
+      "control_id": "current-transformer-vs-lambda",
+      "parent": "0010",
+      "parent_display": "LAMBDA",
+      "observed_deltas": [
+        "raw-form-input",
+        "returned-form-protocol"
+      ],
+      "delta_count": 2,
+      "classification": "SAME-PARENT-MULTI-DELTA",
+      "d5_eligible": "NO",
+      "evidence": [
+        "#2522",
+        "#2591"
+      ],
+      "reason": "Current TRANSFORMER differs from ordinary LAMBDA call behavior on at least two separable axes."
+    },
+    {
+      "control_id": "setq-core-vs-define",
+      "parent": "0011",
+      "parent_display": "DEFINE",
+      "observed_deltas": [
+        "target-resolution-scope",
+        "missing-binding-policy"
+      ],
+      "delta_count": 2,
+      "classification": "SAME-PARENT-MULTI-DELTA",
+      "d5_eligible": "NO",
+      "evidence": [
+        "#2492",
+        "#2518"
+      ],
+      "reason": "SETQ/shared-location endpoint needs two independent local refinements over DEFINE."
+    }
+  ]
+}
