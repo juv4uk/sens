@@ -12,6 +12,8 @@ mod bignum;
 mod bits;
 mod domain_words;
 mod domain_identity;
+mod callable_domain_id;
+mod legacy_sens8;
 mod packed_bits;
 mod binary_framing;
 mod environment;
@@ -121,6 +123,8 @@ mod value;
 
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use domain_identity::CoreDomainIdentity;
+pub use callable_domain_id::CallableDomainId;
+pub use legacy_sens8::LegacySens8;
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
 pub use binary_framing::{
