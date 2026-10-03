@@ -42,6 +42,23 @@ impl BinarySourceWord {
         }
     }
 
+    /// Ratified domain-width context for this exact source word.
+    ///
+    /// This reports ontology width only. It does not infer occupancy,
+    /// callability, or a Core operation identity.
+    pub const fn domain_width(self) -> crate::RatifiedDomainWidth {
+        match self {
+            Self::W1(_) => crate::RatifiedDomainWidth::D1,
+            Self::W2(_) => crate::RatifiedDomainWidth::D2,
+            Self::W3(_) => crate::RatifiedDomainWidth::D3,
+            Self::W4(_) => crate::RatifiedDomainWidth::D4,
+            Self::W5(_) => crate::RatifiedDomainWidth::D5,
+            Self::W6(_) => crate::RatifiedDomainWidth::D6,
+            Self::W7(_) => crate::RatifiedDomainWidth::D7,
+            Self::W8(_) => crate::RatifiedDomainWidth::D8,
+        }
+    }
+
     /// Mechanical payload only. Width must remain attached to the enum value.
     pub const fn packed_bits(self) -> u8 {
         match self {
