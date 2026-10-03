@@ -36,6 +36,12 @@ pub(crate) fn domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainI
         0b0000_0011 => Some(d3(0b111)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        // Historical registry coordinates for already-defined selector
+        // surfaces project explicitly to their ratified D4 selector identities.
+        // This is a role mapping, not byte truncation or nibble inference.
+        0b0011_0011 => Some(d4(0b1010)), // CAAR
+        0b0011_0100 => Some(d4(0b1011)), // CADR
+        0b0011_0101 => Some(d4(0b1101)), // CDDR
         _ => None,
     }
 }
@@ -175,6 +181,19 @@ mod tests {
         assert_ne!(eq.packed_bits(), 0b011);
         assert_ne!(lambda.packed_bits(), 0b1000);
         assert_ne!(define.packed_bits(), 0b1001);
+    }
+
+    #[test]
+    fn ratified_d4_selector_surfaces_use_exact_domain_identities() {
+        for (surface, bits) in [("caar", 0b1010), ("cadr", 0b1011), ("cddr", 0b1101)] {
+            let identity = domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("{surface} must have a D4 identity"));
+            assert_eq!((identity.width(), identity.packed_bits()), (4, bits));
+        }
+
+        // CDAR is ratified as D4:1100, but there is no current legacy registry
+        // surface/definition to project. Absence must not mint one from width.
+        assert_eq!(domain_identity_for_surface("cdar"), None);
     }
 
     #[test]
