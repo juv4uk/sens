@@ -1,7 +1,7 @@
 //! Canonical visible-binary source boundary for SENS .lisp files.
 //!
 //! This module owns source token shape only. It deliberately does not assign
-//! D1-D6 meaning; semantic wrappers consume these exact-width words later.
+//! D1-D8 meaning; semantic wrappers consume these exact-width words later.
 
 use crate::{
     Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, ErrorKind, LanguageError, Span,
@@ -113,6 +113,24 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+    /// Lift an exact seven-bit source word into the typed Core.D7 carrier.
+    pub const fn d7(self) -> Option<crate::CoreD7> {
+        match self {
+            Self::W7(word) => Some(crate::CoreD7::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Lift an exact eight-bit source word into the typed Core.D8 carrier.
+    ///
+    /// This never projects to legacy Sens8/Function8.
+    pub const fn d8(self) -> Option<crate::CoreD8> {
+        match self {
+            Self::W8(word) => Some(crate::CoreD8::from_word(word)),
+            _ => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -149,6 +167,18 @@ impl From<crate::CoreD5> for BinarySourceWord {
 impl From<crate::CoreD6> for BinarySourceWord {
     fn from(value: crate::CoreD6) -> Self {
         Self::W6(value.word())
+    }
+}
+
+impl From<crate::CoreD7> for BinarySourceWord {
+    fn from(value: crate::CoreD7) -> Self {
+        Self::W7(value.word())
+    }
+}
+
+impl From<crate::CoreD8> for BinarySourceWord {
+    fn from(value: crate::CoreD8) -> Self {
+        Self::W8(value.word())
     }
 }
 
