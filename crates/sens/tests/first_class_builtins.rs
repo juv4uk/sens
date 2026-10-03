@@ -7,7 +7,7 @@ use sens::{eval_program, ErrorKind, Session};
 
 fn session_with_core() -> Session {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
+    sens::load_core_library(&mut session)
         .expect("core.my should preload cleanly");
     session
 }
