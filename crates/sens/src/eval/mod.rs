@@ -28,7 +28,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, SemanticRef, Session, Span, Value};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
@@ -87,6 +87,18 @@ pub(crate) enum EvalStep {
     },
 }
 
+fn legacy_mechanism(identity: SemanticRef, span: Span) -> Result<crate::Sens8, LanguageError> {
+    identity.legacy8_word().ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "exact-width domain identity has no admitted legacy mechanism · exact-width домен ще не має дозволеного legacy-механізму: {identity}"
+            ),
+            span,
+        )
+    })
+}
+
 pub(crate) fn invoke_value(
     function: &Value,
     arguments: &[Value],
@@ -94,7 +106,10 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
+        Value::Sid(identity) => {
+            let sid = legacy_mechanism(*identity, span)?;
+            canon::invoke_semantic_ref(sid, arguments, environment, span)
+        },
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
@@ -168,8 +183,8 @@ pub(crate) fn evaluate_step(
         // Empty structure is a structural value, not any function SID.
         ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
         ExprKind::List(items) => evaluate_list(items, environment, expression.span),
-        ExprKind::Call(sid, arguments) => {
-            dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
+        ExprKind::Call(identity, arguments) => {
+            dispatch_call(None, Some(*identity), None, arguments, environment, expression.span)
         }
         // Виконання залежить лише від числових координат (#1697): слот або є,
         // або названа помилка — пошуку за іменем більше немає.
@@ -212,18 +227,19 @@ fn evaluate_list(
 /// функція — лише 1 байт `head_sid`.
 fn dispatch_call(
     head_name: Option<&str>,
-    head_sid: Option<Sens8>,
+    head_sid: Option<SemanticRef>,
     head_expr: Option<&Expr>,
     arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    let routed_head_sid = head_sid
+    let legacy_head_sid = head_sid.and_then(SemanticRef::legacy8_word);
+    let routed_head_sid = legacy_head_sid
         .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
     let necessary_head = head_name
         .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+        .or_else(|| legacy_head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
     if routed_head_sid == Some(crate::sens!(00000001)) {
         special_forms::exact_sens_arity(crate::sens!(00000001), arguments, 1, span)?;
@@ -248,17 +264,22 @@ fn dispatch_call(
         }
     }
     let function = match head_sid {
-        Some(sid) => Value::Sid(sid),
+        Some(identity) => Value::Sid(identity),
         None => evaluate(
             head_expr.expect("a call without a SID head keeps its head expression"),
             environment,
         )?,
     };
     match &function {
-        Value::Sid(sid) => {
+        Value::Sid(identity) => {
+            // Exact-width identities reach legacy evaluator machinery only
+            // through an explicit compatibility projection. Until a domain
+            // gains such a mechanism, execution fails closed rather than
+            // zero-padding its payload.
+            let sid = legacy_mechanism(*identity, span)?;
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
-            if !canon::has_primitive(*sid) {
-                match &environment.code_slot(*sid) {
+            if !canon::has_primitive(sid) {
+                match &environment.code_slot(*identity) {
                     Some(Value::Macro(closure)) => {
                         return closures::apply_macro(closure.clone(), arguments, environment, span);
                     }
@@ -276,7 +297,7 @@ fn dispatch_call(
             for argument in arguments {
                 values.push(evaluate(argument, environment)?);
             }
-            canon::invoke_semantic_ref(*sid, &values, environment, span)
+            canon::invoke_semantic_ref(sid, &values, environment, span)
                 .map(EvalStep::Value)
         }
         Value::Builtin(builtin) => {
@@ -296,7 +317,7 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
+fn binary_head_sid(expression: &Expr) -> Option<SemanticRef> {
     let ExprKind::Sid(sid) = expression.kind else {
         return None;
     };
