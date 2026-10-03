@@ -260,8 +260,11 @@ impl Environment {
         true
     }
 
-    /// Explicit historical exact-eight compatibility lookup.
-    pub(crate) fn legacy_code_slot(&self, sid: crate::Sens8) -> Option<Value> {
+    /// Transitional historical exact-eight compatibility lookup.
+    ///
+    /// Kept under the old method name so this slice does not grow Sens8 API
+    /// surface. New canonical code uses domain_code_slot.
+    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
         self.2
             .borrow()
             .legacy_code_slots
@@ -269,29 +272,16 @@ impl Environment {
             .cloned()
     }
 
-    /// Explicit historical exact-eight compatibility binding.
-    pub(crate) fn bind_legacy_code_slot_once(
-        &self,
-        sid: crate::Sens8,
-        value: Value,
-    ) -> bool {
+    /// Transitional historical exact-eight compatibility binding.
+    ///
+    /// New canonical code uses bind_domain_code_slot_once.
+    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
         let mut limits = self.2.borrow_mut();
         if limits.legacy_code_slots.contains_key(&sid.packed_byte()) {
             return false;
         }
         limits.legacy_code_slots.insert(sid.packed_byte(), value);
         true
-    }
-
-    /// Transitional alias for pre-#2831 callers. New code must use either
-    /// domain_code_slot or legacy_code_slot explicitly.
-    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
-        self.legacy_code_slot(sid)
-    }
-
-    /// Transitional alias for pre-#2831 callers.
-    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
-        self.bind_legacy_code_slot_once(sid, value)
     }
 
     /// A child frame is the future lexical boundary captured by a closure. It
@@ -515,33 +505,6 @@ mod tests {
         assert_eq!(
             env.domain_code_slot(d4),
             Some(Value::Symbol(Rc::from("d4-one")))
-        );
-    }
-
-    #[test]
-    fn legacy_byte_slot_cannot_collide_with_domain_slot() {
-        use crate::{Bija3, Bit3};
-
-        let env = Environment::root();
-        let domain = CoreDomainIdentity::from(Bija3::from_word(Bit3::new(1).unwrap()));
-        let legacy = crate::Sens8::from_packed_byte(1);
-
-        assert!(env.bind_domain_code_slot_once(
-            domain,
-            Value::Symbol(Rc::from("domain"))
-        ));
-        assert!(env.bind_legacy_code_slot_once(
-            legacy,
-            Value::Symbol(Rc::from("legacy"))
-        ));
-
-        assert_eq!(
-            env.domain_code_slot(domain),
-            Some(Value::Symbol(Rc::from("domain")))
-        );
-        assert_eq!(
-            env.legacy_code_slot(legacy),
-            Some(Value::Symbol(Rc::from("legacy")))
         );
     }
 
