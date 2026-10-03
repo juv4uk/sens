@@ -90,19 +90,22 @@ def validate_inputs(d5_row, root_row, d6_rows, frontier):
     assert root_row["coordinate"] == "UNPLACED"
 
     generated = [r for r in d6_rows if r["status"] == "generated"]
+    manual = [r for r in d6_rows if r["status"] == "ratified-manual"]
     unknown = [r for r in d6_rows if r["status"] == "UNKNOWN/free"]
     assert len(generated) == 16
-    assert len(unknown) == 48
+    assert len(manual) == 1 and manual[0]["coordinate"] == "001111"
+    assert len(unknown) == 47
     assert all(not r["semantic_member_of_ratified_domain"] for r in unknown)
 
     assert frontier["canonical"]["generated_members"] == 16
-    assert frontier["canonical"]["unknown_free"] == 48
-    assert frontier["canonical"]["occupancy_mutations"] == 0
+    assert frontier["canonical"]["ratified_manual_residents"] == 1
+    assert frontier["canonical"]["ratified_manual_coordinates"] == ["001111"]
+    assert frontier["canonical"]["unknown_free"] == 47
+    assert frontier["canonical"]["research_occupancy_mutations"] == 0
     assert frontier["frontier_counts"] == {
         "PURE-UNKNOWN": 44,
         "PARENT-DUPLICATE-NOT-EARNED": 1,
         "OVERLAY-CANDIDATE-NONADMITTED": 2,
-        "OWNER-READY-NONADMITTED": 1,
     }
     return_rows = [
         row for row in frontier["historical_unplaced_sidecar"]
@@ -124,10 +127,12 @@ def validate_inputs(d5_row, root_row, d6_rows, frontier):
         "d6": {
             "eligible": "UNRESOLVED",
             "generated_members": 16,
-            "unknown_free": 48,
+            "ratified_manual_residents": 1,
+            "unknown_free": 47,
             "reason": (
-                "D6 width is ratified, but UNKNOWN/free capacity is not membership evidence. "
-                "No domain-selection theorem maps non-local-exit into D6."
+                "D6 has one owner-ratified SETQ/shared-location resident at 001111, "
+                "but that law does not transfer to non-local-exit. Remaining UNKNOWN/free "
+                "capacity is not membership evidence, and no domain-selection theorem maps RETURN into D6."
             ),
         },
     }
@@ -249,7 +254,8 @@ def main() -> int:
         "d6_frontier_control": {
             "frontier_counts": frontier["frontier_counts"],
             "return_membership_inferred": False,
-            "occupancy_mutations": frontier["canonical"]["occupancy_mutations"],
+            "owner_ratified_manual_coordinates": frontier["canonical"]["ratified_manual_coordinates"],
+            "research_occupancy_mutations": frontier["canonical"]["research_occupancy_mutations"],
             "evidence": "#2660/#2661",
         },
         "models": rows,
@@ -260,7 +266,8 @@ def main() -> int:
             "free coordinate != evidence",
             "chronology != domain law",
             "independent fact count != bit width",
-            "D6 ratification != UNKNOWN-row membership",
+            "owner-ratified SETQ/shared-location != RETURN membership",
+            "remaining D6 UNKNOWN capacity != membership",
             "no Core-Math donation without #2508 bridge",
         ],
     }
