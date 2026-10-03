@@ -63,8 +63,8 @@ impl Parser<'_> {
         }
     }
 
-    /// Reader sugar: `'form` produces a list headed directly by SID 00000001.
-    /// No named function identity is introduced by the reader.
+    /// Reader sugar: `'form` produces a list headed directly by canonical
+    /// D3:001 (QUOTE). No legacy byte or human-name identity is introduced.
     fn quote_sugar(&mut self, start: usize) -> Result<Expr, LanguageError> {
         self.bump();
         self.skip_ignored();
@@ -80,7 +80,13 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Sid(crate::sens!(00000001)),
+                        kind: ExprKind::DomainIdentity(
+                            crate::CoreDomainIdentity::from_source_word(
+                                crate::source_words::parse_binary_source_word("001")
+                                    .expect("D3 QUOTE source word"),
+                            )
+                            .expect("D3 QUOTE is a Core operation identity"),
+                        ),
                         span: Span {
                             start,
                             end: start + 1,
@@ -411,12 +417,31 @@ impl Parser<'_> {
             });
         }
 
-        // The complete 8-bit space is reserved for function identities.
-        // This is a direct SID read, not numeric conversion:
-        // `00001100` is function SID 00001100; decimal `12` remains a number.
+        // Canonical Core operation words are exact-width domain identities.
+        // Width is part of identity: 001 (D3) != 0001 (D4). W3-W6 are lifted
+        // directly through the source-word carrier; no legacy byte lookup,
+        // zero-extension or truncation participates in this path.
+        if (3..=6).contains(&token.len())
+            && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+        {
+            let source_word = crate::source_words::parse_binary_source_word(token)
+                .expect("exact bounded binary source word validated above");
+            let identity = crate::CoreDomainIdentity::from_source_word(source_word)
+                .expect("W3-W6 are exact Core operation domains");
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
+            });
+        }
+
+        // Exactly eight bare bits remain an explicit compatibility identity.
+        // W8 is never promoted into a Core domain by numeric resemblance.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
             let sid = crate::Sens8::from_exact_bits(token)
-                .expect("exact eight-bit SID validated above");
+                .expect("exact eight-bit legacy identity validated above");
             return Ok(Expr {
                 kind: ExprKind::Sid(sid),
                 span: Span {
@@ -810,12 +835,38 @@ mod tests {
     }
 
     #[test]
-    fn apostrophe_desugars_to_sid_00000001_form() {
+    fn apostrophe_desugars_to_canonical_d3_quote_form() {
         let ExprKind::List(items) = parse_one("'кіт").kind else {
-            panic!("apostrophe should produce a SID 00000001 form");
+            panic!("apostrophe should produce a D3 QUOTE form");
         };
-        assert!(matches!(&items[0].kind, ExprKind::Sid(sid) if *sid == crate::sens!(00000001)));
+        let ExprKind::DomainIdentity(identity) = items[0].kind else {
+            panic!("apostrophe head must be canonical domain identity");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (3, 0b001));
         assert!(matches!(&items[1].kind, ExprKind::Symbol(s) if &**s == "кіт"));
+    }
+
+    #[test]
+    fn bare_w3_through_w6_tokens_are_exact_domain_identities() {
+        for (token, width, bits) in [
+            ("001", 3usize, 0b001u8),
+            ("0000", 4, 0b0000),
+            ("10100", 5, 0b10100),
+            ("101010", 6, 0b101010),
+        ] {
+            let ExprKind::DomainIdentity(identity) = parse_one(token).kind else {
+                panic!("{token} must parse as CoreDomainIdentity");
+            };
+            assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
+        }
+    }
+
+    #[test]
+    fn bare_w8_token_remains_explicit_legacy_identity() {
+        let ExprKind::Sid(sid) = parse_one("00000001").kind else {
+            panic!("W8 must remain legacy compatibility identity");
+        };
+        assert_eq!(sid, crate::sens!(00000001));
     }
 
     #[test]
