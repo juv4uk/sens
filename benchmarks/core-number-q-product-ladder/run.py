@@ -24,6 +24,10 @@ from math import gcd
 from pathlib import Path
 from typing import Optional
 
+VALUE = "VALUE"
+NEEDS_WIDENING = "NEEDS-WIDENING"
+UNDEFINED_MATHEMATICALLY = "UNDEFINED-MATHEMATICALLY"
+
 
 def signed_range(width: int) -> tuple[int, int]:
     return (-(1 << (width - 1)), (1 << (width - 1)) - 1)
@@ -132,20 +136,39 @@ class RationalDomain:
         except OverflowError:
             return None
 
-    def recip(self, a: tuple[int, int]) -> Optional[tuple[int, int]]:
+    def recip_classified(
+        self, a: tuple[int, int]
+    ) -> tuple[str, Optional[tuple[int, int]]]:
         an, ad = a
         if an == 0:
-            return None
+            return UNDEFINED_MATHEMATICALLY, None
         try:
-            return self.normalize(ad, an)
+            return VALUE, self.normalize(ad, an)
         except OverflowError:
-            return None
+            return NEEDS_WIDENING, None
+
+    def recip(self, a: tuple[int, int]) -> Optional[tuple[int, int]]:
+        status, value = self.recip_classified(a)
+        return value if status == VALUE else None
+
+    def div_classified(
+        self, a: tuple[int, int], b: tuple[int, int]
+    ) -> tuple[str, Optional[tuple[int, int]]]:
+        an, ad = a
+        bn, bd = b
+        if bn == 0:
+            return UNDEFINED_MATHEMATICALLY, None
+
+        # Decide residency from the final exact quotient after cancellation.
+        # Do not require the intermediate reciprocal of b to fit this tier.
+        try:
+            return VALUE, self.normalize(an * bd, ad * bn)
+        except OverflowError:
+            return NEEDS_WIDENING, None
 
     def div(self, a: tuple[int, int], b: tuple[int, int]) -> Optional[tuple[int, int]]:
-        inv = self.recip(b)
-        if inv is None:
-            return None
-        return self.mul(a, inv)
+        status, value = self.div_classified(a, b)
+        return value if status == VALUE else None
 
 
 D48Q = RationalDomain("Core-Number-D48Q-candidate", 24)
@@ -207,8 +230,22 @@ def main() -> int:
     assert D48Q.mul(D48Q.normalize(2, 3), D48Q.normalize(3, 5)) == (2, 5)
     assert D48Q.recip(third) == (3, 1)
     assert D48Q.recip((0, 1)) is None
+    assert D48Q.recip_classified((0, 1)) == (UNDEFINED_MATHEMATICALLY, None)
     assert D48Q.div(D48Q.normalize(2, 3), D48Q.normalize(4, 5)) == (5, 6)
     assert D48Q.div((1, 2), (0, 1)) is None
+    assert D48Q.div_classified((1, 2), (0, 1)) == (
+        UNDEFINED_MATHEMATICALLY,
+        None,
+    )
+
+    # Final-fit DIV falsifier from #2516/#2519 review.
+    # The reciprocal of 1/(2^24-1) does not fit signed-24, but the exact
+    # quotient of the value by itself is 1 and must stay in D48Q.
+    d48_den_max = D48Q.denominator_hi
+    cancel = D48Q.normalize(1, d48_den_max)
+    assert D48Q.recip_classified(cancel) == (NEEDS_WIDENING, None)
+    assert D48Q.div_classified(cancel, cancel) == (VALUE, (1, 1))
+    assert D48Q.div(cancel, cancel) == (1, 1)
 
     # Integer embedding: every D24Z point maps to n/1 in D48Q.
     d24_lo, d24_hi = signed_range(24)
@@ -336,7 +373,10 @@ def main() -> int:
             "two_fourths_normalizes": "1/2",
             "negative_sign_normalizes": "1/2",
             "zero_normalizes": "0/1",
-            "reciprocal_zero": "UNDEFINED",
+            "reciprocal_zero": UNDEFINED_MATHEMATICALLY,
+            "reciprocal_out_of_tier": NEEDS_WIDENING,
+            "division_by_zero": UNDEFINED_MATHEMATICALLY,
+            "division_final_fit_cancellation": "VALUE 1/1",
             "d24_integer_embedding_max": f"{d24_hi}/1",
             "numerator_widening_required": f"{d24_hi}^2 requires D96Q",
             "denominator_widening_required": "1/max + 1/(max-1) requires D96Q",
@@ -379,7 +419,9 @@ def main() -> int:
         "- 1/3 + 1/6 = 1/2;",
         "- 2/4 and -2/-4 canonicalize to 1/2;",
         "- zero canonicalizes to 0/1;",
-        "- reciprocal/division by zero are undefined;",
+        "- reciprocal/division by zero are UNDEFINED-MATHEMATICALLY;",
+        "- out-of-tier reciprocal is NEEDS-WIDENING, not mathematically undefined;",
+        "- DIV final-fit cancellation keeps (1/d)/(1/d)=1 inside D48Q even when recip(1/d) needs widening;",
         "- D24Z max embeds as max/1;",
         "- max^2 overflows D48Q factor width but is exact in D96Q;",
         "- denominator-growth example also requires D96Q.",
