@@ -34,12 +34,7 @@ GO                 DERIVED-D1-D4
 RETURN             NEW-OBSERVABLE-CAPABILITY
 
 FEXPR/FSUBR        RAW+ENV-TWO-CAPABILITIES
-```
-
-Активно:
-
-```text
-TRANSFORMER / later macro staging -> #2557
+Hart MACRO          PARTIAL-PROTOCOL-ALIGNMENT / TIMING-DISTINCT
 ```
 
 ## Важлива межа Phase D
@@ -81,6 +76,28 @@ result re-eval      = 1
 
 Спільна raw-operand вісь не робить ці протоколи однією capability.
 
+## Phase F — час macro expansion
+
+Історичний Hart MACRO 1963 і поточний SENS transformer збігаються по трьох
+відстежуваних form-protocol осях:
+
+```text
+raw/full syntax input       = так
+explicit caller-env input   = ні
+returned replacement form   = так
+```
+
+Але загалом це **не той самий протокол**, бо час expansion спостережуваний:
+
+```text
+Hart MACRO       = DEFINE / definition-time expansion
+SENS TRANSFORMER = evaluation-time expansion
+```
+
+#2568/#2569 показує різницю через перевизначення macro: уже розгорнуте тіло у
+моделі Hart зберігає OLD, тоді як поточний SENS бачить NEW під час виклику.
+Timing — історичний/protocol факт, а не SENS-біт і не доказ ширини.
+
 ## Placement boundary
 
 Кожен ряд цього ingest ledger лишає:
@@ -102,13 +119,16 @@ Generated D5 selector subtree — окремий baseline fact:
 
 ## Gate
 
-Поки #2557 активний:
+Phase F завершено:
 
 ```text
-historical-ingest-complete = no
-structural-discovery-may-start = no
+historical-ingest-complete = yes
+structural-discovery-may-start = yes
 placement-search-may-start = no
 ```
+
+Останній рядок навмисно лишається `no`: завершення історичного набору дозволяє
+структурне дослідження, але не автоматичне заселення вільних D5/D6 координат.
 
 ## Принцип
 
