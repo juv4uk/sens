@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "docs/research/2344-post-d4-historical-ledger.json"
+      - "docs/research/2709-lisp15-arithmetic-ledger.json"
+      - "docs/research/2715-memo24-arithmetic-comparison.json"
       - "benchmarks/post-d4-semantic-placement/**"
       - "benchmarks/d5-closure-map/**"
       - "scripts/research-2689-d5-ratified-baseline.py"
@@ -42,7 +44,9 @@ jobs:
           p=json.load(open("/tmp/d1-d6-gap/result.json"))
           assert p["summary"]["historical_rows"] == 19
           assert p["summary"]["already_explained"] == 12
-          assert p["summary"]["needs_new_law"] == 5
+          assert p["summary"]["needs_new_law"] == 0
+          assert p["summary"]["needs_domain"] == 5
+          assert p["summary"]["needs_placement"] == 0
           assert p["summary"]["owner_ready"] == 1
           assert p["summary"]["composite"] == 1
           assert p["summary"]["new_d5_manual_residents"] == 0
