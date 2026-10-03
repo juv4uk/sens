@@ -27,8 +27,10 @@ GRAPH = ROOT / "benchmarks" / "d5-structural-discovery" / "factor-graph.json"
 CUBE = ROOT / "scripts" / "research-2522-fexpr-protocol-cube.py"
 TIMING = ROOT / "scripts" / "research-2568-macro-timing.py"
 RETURN_PLACEMENT = ROOT / "scripts" / "research-2488-return-placement.py"
+NONLOCAL_EXIT = ROOT / "scripts" / "research-2590-nonlocal-exit.py"
 CROSS_FAMILY = ROOT / "scripts" / "research-2609-cross-family-parent.py"
 MUTATION_TEST = ROOT / "crates" / "sens" / "tests" / "post_d4_set_setq_factor.rs"
+NONLOCAL_TEST = ROOT / "crates" / "sens" / "tests" / "post_d4_nonlocal_exit_factor.rs"
 SPECIAL_CALL = ROOT / "benchmarks" / "d5-structural-discovery" / "special-call-factor.json"
 
 POST_D4 = {
@@ -131,6 +133,7 @@ def main() -> int:
     cube_text = run_text(CUBE)
     timing_text = run_text(TIMING)
     return_text = run_text(RETURN_PLACEMENT)
+    nonlocal_text = run_text(NONLOCAL_EXIT)
     cross_text = run_text(CROSS_FAMILY)
 
     assert "FEXPR-PROTOCOL-CUBE=PASS" in cube_text
@@ -140,10 +143,16 @@ def main() -> int:
     assert "RETURN-ROOT=RESIDUE" in return_text
     assert "EXACT-DOMAIN=UNRESOLVED" in return_text
     assert "BINARY-COORDINATE=UNALLOCATED" in return_text
+    assert "NONLOCAL-EXIT-FACTOR=PASS" in nonlocal_text
+    assert "STRONGEST-PARENT=NO-PARENT" in nonlocal_text
+    assert "PROG-CLASSIFICATION=COMPOSITE" in nonlocal_text
+    assert "NEW-D5-RESIDENTS=0" in nonlocal_text
+    assert "COORDINATES-ALLOCATED=0" in nonlocal_text
     assert "CROSS-FAMILY-PARENT-GUARD=PASS" in cross_text
     assert "ROOTS-PROVEN=0" in cross_text
     assert "D5-RESIDENTS=0" in cross_text
     assert MUTATION_TEST.exists()
+    assert NONLOCAL_TEST.exists()
 
     cube = load_module(CUBE, "factor_independence_cube_2583")
     special_call = json.loads(SPECIAL_CALL.read_text(encoding="utf-8"))
@@ -194,7 +203,7 @@ def main() -> int:
             }
 
         elif factor_id == "non-local-exit":
-            row["witness"] = "#2488/#2504 + #2609/#2611"
+            row["witness"] = "#2488/#2504 + #2590/#2606 + #2609/#2611"
             row["external_root_theorem"] = {
                 "classification": "semantic-residue-root",
                 "evidence": "#2488/#2504",
