@@ -28,7 +28,12 @@ ROOT = Path(__file__).resolve().parents[2]
 DONOR = ROOT / "scripts" / "research-2506-d6-binding-policy-generator.py"
 
 PARENT_PREFIX = "0011"
-SEMANTIC_STATES = ("00", "01", "10", "11")
+SEMANTIC_STATES = (
+    "DEFINE",
+    "CURRENT_FAIL",
+    "NEAREST_CREATE",
+    "SETQ_CORE",
+)
 CODES_2BIT = ("00", "01", "10", "11")
 
 
@@ -48,12 +53,20 @@ def min_binary_width(n_states: int) -> int:
 
 
 def factor_preserving(mapping: dict[str, str]) -> bool:
-    """Anchored factor law: none->00, both->11, one-axis states occupy 01/10."""
-    if mapping["00"] != "00":
+    """Preserve the oriented product law from the fixed DEFINE parent.
+
+    DEFINE is the no-refinement endpoint; SETQ_CORE is both refinements.
+    The two one-axis semantic states may exchange coordinate-axis order, but
+    arbitrary semantic-to-code table permutations are not factor coordinates.
+    """
+    if mapping["DEFINE"] != "00":
         return False
-    if mapping["11"] != "11":
+    if mapping["SETQ_CORE"] != "11":
         return False
-    return {mapping["01"], mapping["10"]} == {"01", "10"}
+    return {
+        mapping["CURRENT_FAIL"],
+        mapping["NEAREST_CREATE"],
+    } == {"01", "10"}
 
 
 def enumerate_permutations():
@@ -69,11 +82,11 @@ def enumerate_permutations():
     return rows
 
 
-def quotient_certificate(state: str):
+def quotient_certificate(policy: Any, donor: Any):
     active = []
-    if state[0] == "1":
+    if policy.scope is donor.Scope.NEAREST:
         active.append("scope")
-    if state[1] == "1":
+    if policy.miss is donor.Miss.FAIL:
         active.append("miss")
     return frozenset(active)
 
@@ -86,10 +99,10 @@ def main() -> int:
 
     donor = load_donor()
     square = {
-        "00": donor.DEFINE,
-        "01": donor.CURRENT_FAIL,
-        "10": donor.NEAREST_CREATE,
-        "11": donor.SETQ_CORE,
+        "DEFINE": donor.DEFINE,
+        "CURRENT_FAIL": donor.CURRENT_FAIL,
+        "NEAREST_CREATE": donor.NEAREST_CREATE,
+        "SETQ_CORE": donor.SETQ_CORE,
     }
 
     signatures = {state: donor.signature(policy) for state, policy in square.items()}
@@ -100,32 +113,47 @@ def main() -> int:
     assert (1 << 1) < len(signatures) <= (1 << 2)
 
     # Model 1: local ordered path under D4 DEFINE.
-    local_mapping = {state: PARENT_PREFIX + state for state in SEMANTIC_STATES}
-    assert all(len(code) == 6 for code in local_mapping.values())
-    assert local_mapping["11"] == "001111"
+    canonical_factor_mapping = {
+        "DEFINE": "00",
+        "CURRENT_FAIL": "01",
+        "NEAREST_CREATE": "10",
+        "SETQ_CORE": "11",
+    }
 
-    # Model 2: standalone two-factor product coordinate.
-    factor_mapping = {state: state for state in SEMANTIC_STATES}
+    local_mapping = {
+        state: PARENT_PREFIX + canonical_factor_mapping[state]
+        for state in SEMANTIC_STATES
+    }
+    assert all(len(code) == 6 for code in local_mapping.values())
+    assert local_mapping["SETQ_CORE"] == "001111"
+
+    # Model 2: standalone two-factor product coordinate. The semantic state
+    # names remain bit-free; the encoder supplies the 2-bit coordinates.
+    factor_mapping = dict(canonical_factor_mapping)
     assert len(set(factor_mapping.values())) == 4
     assert all(len(code) == 2 for code in factor_mapping.values())
 
-    # Axis relabel swaps the intermediate identities but not endpoints.
+    # Axis relabel swaps only the two one-axis coordinate assignments.
     axis_swapped = {
-        state: state[1] + state[0]
-        for state in SEMANTIC_STATES
+        "DEFINE": "00",
+        "CURRENT_FAIL": "10",
+        "NEAREST_CREATE": "01",
+        "SETQ_CORE": "11",
     }
-    assert axis_swapped["00"] == "00"
-    assert axis_swapped["11"] == "11"
-    assert axis_swapped["01"] == "10"
-    assert axis_swapped["10"] == "01"
+    assert factor_preserving(canonical_factor_mapping)
+    assert factor_preserving(axis_swapped)
+    assert canonical_factor_mapping != axis_swapped
 
     # Model 3: quotient commuting derivation paths by active-factor set.
-    quotient = {state: quotient_certificate(state) for state in SEMANTIC_STATES}
+    quotient = {
+        state: quotient_certificate(policy, donor)
+        for state, policy in square.items()
+    }
     assert len(set(quotient.values())) == 4
-    assert quotient["11"] == frozenset({"scope", "miss"})
+    assert quotient["SETQ_CORE"] == frozenset({"scope", "miss"})
     scope_then_miss = frozenset(["scope", "miss"])
     miss_then_scope = frozenset(["miss", "scope"])
-    assert scope_then_miss == miss_then_scope == quotient["11"]
+    assert scope_then_miss == miss_then_scope == quotient["SETQ_CORE"]
 
     # Model 4/5 permutation attack.
     permutations = enumerate_permutations()
@@ -145,6 +173,7 @@ def main() -> int:
             "derivation_order_invariant": False,
             "axis_relabel_target_invariant": True,
             "arbitrary_enumeration_dependency": False,
+            "evidence_class": "semantic-law+coordinate-law",
             "decision": "VALID-LOCAL-D6",
         },
         {
@@ -157,6 +186,7 @@ def main() -> int:
             "derivation_order_invariant": True,
             "axis_relabel_target_invariant": True,
             "arbitrary_enumeration_dependency": False,
+            "evidence_class": "canonical-factor-coordinate-law",
             "decision": "VALID-STANDALONE-D2-DIFFERENT-DOMAIN",
         },
         {
@@ -169,6 +199,7 @@ def main() -> int:
             "derivation_order_invariant": True,
             "axis_relabel_target_invariant": True,
             "arbitrary_enumeration_dependency": False,
+            "evidence_class": "semantic-law+canonical-factor-coordinate-law",
             "decision": "VALID-ORDER-INVARIANT-D2-DIFFERENT-DOMAIN",
         },
         {
@@ -181,6 +212,7 @@ def main() -> int:
             "derivation_order_invariant": True,
             "axis_relabel_target_invariant": False,
             "arbitrary_enumeration_dependency": True,
+            "evidence_class": "accidental",
             "decision": "REPRESENTS-STATES-BUT-IMPORTS-TABLE-AUTHORITY",
         },
         {
@@ -193,6 +225,7 @@ def main() -> int:
             "derivation_order_invariant": False,
             "axis_relabel_target_invariant": False,
             "arbitrary_enumeration_dependency": True,
+            "evidence_class": "accidental",
             "decision": "REJECT-AS-CANONICAL-WITHOUT-TABLE",
         },
     ]
@@ -211,10 +244,10 @@ def main() -> int:
     for row in permutations:
         m = row["mapping"]
         perm_rows.append({
-            "map_00": m["00"],
-            "map_01": m["01"],
-            "map_10": m["10"],
-            "map_11": m["11"],
+            "map_DEFINE": m["DEFINE"],
+            "map_CURRENT_FAIL": m["CURRENT_FAIL"],
+            "map_NEAREST_CREATE": m["NEAREST_CREATE"],
+            "map_SETQ_CORE": m["SETQ_CORE"],
             "factor_preserving": row["factor_preserving"],
             "requires_arbitrary_table_authority": not row["factor_preserving"],
         })
@@ -252,8 +285,9 @@ def main() -> int:
             "reduces_independent_axis_count": False,
         },
         "permutation_attack": {
+            "semantic_states_are_bit_free": True,
             "all_injective_2bit_numberings": 24,
-            "anchored_factor_preserving": factor_preserving_count,
+            "oriented_parent_factor_preserving": factor_preserving_count,
             "arbitrary_table_dependent": table_dependent_count,
             "exact_intermediate_axis_orientation_forced": False,
         },
@@ -281,13 +315,14 @@ def main() -> int:
         f"Observed semantic states: **{len(signatures)}**",
         f"Standalone binary information lower bound: **{info_lower_bound} bits**",
         "",
-        "| model | printed width | mapping rows | result |",
-        "|---|---:|---:|---|",
+        "| model | printed width | mapping rows | evidence class | result |",
+        "|---|---:|---:|---|---|",
     ]
     for row in models:
         report.append(
             f"| {row['model']} | {row['printed_width']} | "
-            f"{row['mapping_table_rows']} | {row['decision']} |"
+            f"{row['mapping_table_rows']} | {row['evidence_class']} | "
+            f"{row['decision']} |"
         )
 
     report += [
