@@ -378,6 +378,9 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
         }
         ExprKind::Rational(rational) => Ok(rational.to_string()),
         ExprKind::Sid(sid) => Ok(sid.to_string()),
+        ExprKind::DomainIdentity(_) => {
+            Err(Unsupported::new("external-oracle/domain-identity"))
+        }
         ExprKind::String(_) => Err(Unsupported::new("external-oracle/string")),
         ExprKind::Pair(_, _) => Err(Unsupported::new("external-oracle/pair")),
         ExprKind::NumericBuffer(_) => Err(Unsupported::new("external-oracle/numeric-buffer")),
@@ -385,6 +388,9 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
         ExprKind::List(items) => translate_call(items),
         // Парсер не породжує зведених викликів; сюди надходить лише parse().
         ExprKind::Call(_, _) => Err(Unsupported::new("external-oracle/lowered-call")),
+        ExprKind::DomainCall(_, _) => {
+            Err(Unsupported::new("external-oracle/domain-lowered-call"))
+        }
         ExprKind::Local { .. } => Err(Unsupported::new("external-oracle/slot-local")),
     }
 }
