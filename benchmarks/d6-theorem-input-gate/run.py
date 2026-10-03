@@ -61,10 +61,17 @@ def current_snapshot(manifest: dict) -> dict:
         for row in placement["rows"]
         if row.get("candidate_coordinate")
     ]
+    setq = next(row for row in placement["rows"] if row["operation"] == manifest["placement"]["setq_operation"])
 
     return {
         "witnesses": witnesses,
         "candidate_coordinates": candidates,
+        "setq_state": {
+            "placement_kind": setq["placement_kind"],
+            "exact_domain": setq["exact_domain"],
+            "coordinate": setq["coordinate"],
+            "candidate_coordinate": setq.get("candidate_coordinate"),
+        },
     }
 
 
@@ -83,13 +90,20 @@ def evaluate(snapshot: dict, manifest: dict) -> list[str]:
         if row["path"] not in expected_by_path:
             reasons.append(f"unexpected-witness:{row['path']}")
 
-    expected_candidates = [
-        {
-            "operation": row["operation"],
-            "coordinate": row["coordinate"],
-        }
-        for row in manifest["placement"]["expected_candidate_coordinates"]
+    allowed_states = manifest["placement"]["allowed_states"]
+    matching_states = [
+        state["state"]
+        for state in allowed_states
+        if all(snapshot["setq_state"].get(key) == value for key, value in state.items() if key != "state")
     ]
+    if len(matching_states) != 1:
+        reasons.append("setq-owner-transition-outside-allowed-states")
+
+    expected_candidates = (
+        [{"operation": "SETQ", "coordinate": "D6:001111 (OD-001 owner-ready only)"}]
+        if matching_states == ["PRE-OWNER-READY"]
+        else []
+    )
     if snapshot["candidate_coordinates"] != expected_candidates:
         reasons.append("historical-placement-candidate-set-changed")
 
@@ -105,6 +119,12 @@ def self_test(snapshot: dict, manifest: dict) -> None:
     )
     reasons = evaluate(changed, manifest)
     assert "historical-placement-candidate-set-changed" in reasons
+
+    changed = copy.deepcopy(snapshot)
+    changed["setq_state"]["coordinate"] = "001110"
+    changed["setq_state"]["candidate_coordinate"] = None
+    reasons = evaluate(changed, manifest)
+    assert "setq-owner-transition-outside-allowed-states" in reasons
 
     changed = copy.deepcopy(snapshot)
     changed["witnesses"][0]["expected_result_seen"] = False
@@ -134,8 +154,9 @@ def main() -> int:
     print("D6-INPUTS-STABLE")
     print("d5-child-witness=#2704")
     print("d4-product-witness=#2708")
-    print("historical-candidate-count=1")
-    print("owner-isolated-candidate=SETQ:D6:001111")
+    print(f"historical-candidate-count={len(snapshot['candidate_coordinates'])}")
+    print("owner-isolated-coordinate=SETQ:D6:001111")
+    print("owner-transition=PRE-OWNER-READY|POST-OWNER-RATIFIED")
     print("independent-falsifier=#2702")
     return 0
 
