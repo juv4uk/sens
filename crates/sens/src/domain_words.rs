@@ -21,7 +21,7 @@
 //! let _: PredicateBit = true;
 //! ```
 
-use crate::bits::{Bit1, Bit2, Bit3, Bit5, Bit6};
+use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6};
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -77,6 +77,26 @@ impl Bija3 {
 
     /// Recover the mechanical three-bit word without interpreting it.
     pub const fn word(self) -> Bit3 {
+        self.0
+    }
+}
+
+/// Exact four-bit carrier for the ratified Core.D4 domain.
+///
+/// This type proves only Core.D4 membership and exact width. Individual D4
+/// coordinate meanings remain owned by the language contract and witnesses.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD4(Bit4);
+
+impl CoreD4 {
+    /// Wrap an already validated four-bit word as a Core.D4 member.
+    pub const fn from_word(word: Bit4) -> Self {
+        Self(word)
+    }
+
+    /// Recover the mechanical four-bit word without interpreting it.
+    pub const fn word(self) -> Bit4 {
         self.0
     }
 }
@@ -144,6 +164,11 @@ mod tests {
             assert!(Bija3::from_word(word).word() == word);
         }
 
+        for raw in 0..=15 {
+            let word = Bit4::new(raw).unwrap();
+            assert!(CoreD4::from_word(word).word() == word);
+        }
+
         for raw in 0..=31 {
             let word = Bit5::new(raw).unwrap();
             assert!(CoreD5::from_word(word).word() == word);
@@ -160,6 +185,7 @@ mod tests {
         assert_eq!(size_of::<PredicateBit>(), 1);
         assert_eq!(size_of::<Racana2>(), 1);
         assert_eq!(size_of::<Bija3>(), 1);
+        assert_eq!(size_of::<CoreD4>(), 1);
         assert_eq!(size_of::<CoreD5>(), 1);
         assert_eq!(size_of::<CoreD6>(), 1);
     }
