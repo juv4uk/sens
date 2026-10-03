@@ -3,7 +3,7 @@
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
-use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
+use crate::{CallableDomainId, Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, LegacySens8, Sens8, Span, Value};
 use std::{
     collections::HashSet,
     rc::Rc,
@@ -33,6 +33,22 @@ fn parse_lambda_list(expr: &Expr) -> LambdaListResult {
 type LambdaList = (Vec<Rc<str>>, Option<Rc<str>>);
 type LambdaListResult = Result<LambdaList, LanguageError>;
 
+fn ensure_bindable_callable(
+    id: CallableDomainId,
+    span: Span,
+) -> Result<(), LanguageError> {
+    match id.legacy().map(LegacySens8::sens8) {
+        Some(sid) => canon::ensure_bindable_sid(sid, span),
+        None => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "domain-qualified identity {id} is semantic code, not a binding name"
+            ),
+            span,
+        )),
+    }
+}
+
 fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
     match &expr.kind {
         ExprKind::Symbol(name) => {
@@ -40,7 +56,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             Ok((Vec::new(), Some(name.clone())))
         }
         ExprKind::Sid(sid) => {
-            canon::ensure_bindable_sid(*sid, expr.span)?;
+            ensure_bindable_callable(*sid, expr.span)?;
             Ok((Vec::new(), Some(sid.to_string().into())))
         }
         ExprKind::List(parameter_forms) => {
@@ -53,7 +69,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                         name.clone()
                     }
                     ExprKind::Sid(sid) => {
-                        canon::ensure_bindable_sid(*sid, parameter.span)?;
+                        ensure_bindable_callable(*sid, parameter.span)?;
                         sid.to_string().into()
                     }
                     _ => {
@@ -88,7 +104,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                                 name.clone()
                             }
                             ExprKind::Sid(sid) => {
-                                canon::ensure_bindable_sid(*sid, head.span)?;
+                                ensure_bindable_callable(*sid, head.span)?;
                                 sid.to_string().into()
                             }
                             _ => {
@@ -228,7 +244,12 @@ enum Head {
 
 const EVAL: Sens8 = crate::sens!(01001101);
 
-fn sid_head(sid: Sens8, environment: &Environment) -> Head {
+fn sid_head(id: CallableDomainId, environment: &Environment) -> Head {
+    let Some(sid) = id.legacy().map(LegacySens8::sens8) else {
+        // Canonical D3-D6 routing lands in #2832. Until then, do not infer an
+        // old byte identity from packed bits.
+        return Head::Call;
+    };
     if sid == EVAL {
         return Head::Opaque;
     }
@@ -256,7 +277,10 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
             if let Some(sid) = canon::routed_sid_for_surface(name) {
-                return sid_head(sid, environment);
+                return sid_head(
+                    CallableDomainId::from_legacy(LegacySens8::from_sens8(sid)),
+                    environment,
+                );
             }
             match necessary_forms::identity_for_symbol(name) {
                 Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
@@ -464,7 +488,8 @@ pub(super) fn apply(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     match function {
-        Value::Sid(sid) => {
+        Value::Sid(id) => {
+            let sid = super::legacy_sid_for_runtime(id, span)?;
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
                 values.push(evaluate(argument, calling_environment)?);
