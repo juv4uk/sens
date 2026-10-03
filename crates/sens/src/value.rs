@@ -638,15 +638,22 @@ impl Value {
         }
     }
 
-    /// Returns the exact eight-bit function sense (СЕНС) if this value is one.
-    pub fn as_sens8(&self) -> Option<crate::Sens8> {
+    /// Returns the exact semantic identity carried by this value.
+    pub fn as_semantic_ref(&self) -> Option<SemanticRef> {
         match self {
-            Self::Sid(s) => Some(*s),
+            Self::Sid(identity) => Some(*identity),
             _ => None,
         }
     }
 
+    /// Compatibility-only view of an exact legacy eight-bit identity.
+    /// Canonical domain values deliberately return None instead of being padded.
+    pub fn as_sens8(&self) -> Option<crate::Sens8> {
+        self.as_semantic_ref().and_then(SemanticRef::legacy8_word)
+    }
+
     /// Legacy alias for [`Self::as_sens8`].
+    #[deprecated(note = "use as_semantic_ref; Sid8 is a compatibility projection")]
     pub fn as_sid8(&self) -> Option<crate::Sens8> {
         self.as_sens8()
     }
