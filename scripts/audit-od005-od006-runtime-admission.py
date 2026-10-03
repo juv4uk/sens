@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""#2776 — OD-005/OD-006 runtime admission audit.
+"""#2776 — OD-005/OD-006 exact-domain runtime admission audit.
 
-Transitional integration guard. It measures the current gap between:
-  owner-ratified historical residency (D5/D6 full maps)
-and
-  executable canonical identity admission (reader/carrier/registry).
+The audit now measures two independent axes:
 
-It intentionally makes no evaluator/lowering claims beyond UNMEASURED.
-When the identity carrier/reader migrates away from Sens8-only, this guard
-must fail and be updated to measure the new architecture rather than silently
-preserving the old baseline.
+1. identity admission — can the exact D5/D6 owner coordinate enter the runtime
+   without Sens8 projection while preserving width?
+2. executable admission — does that identity have an admitted call mechanism?
+
+After the #2817 reader migration D5/D6 identity admission is complete, but
+callability must still be proved/installed per domain law. Width never grants
+execution by itself.
 """
 
 from __future__ import annotations
@@ -24,8 +24,10 @@ D5 = ROOT / "knowledge" / "d5-historical-full-map.json"
 D6 = ROOT / "knowledge" / "d6-historical-full-map.json"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 PARSER = ROOT / "crates" / "sens" / "src" / "parser.rs"
-SENS = ROOT / "crates" / "sens" / "src" / "sens.rs"
+SOURCE_WORDS = ROOT / "crates" / "sens" / "src" / "source_words.rs"
+DOMAIN_IDENTITY = ROOT / "crates" / "sens" / "src" / "domain_identity.rs"
 SYNTAX = ROOT / "crates" / "sens" / "src" / "syntax.rs"
+CANON = ROOT / "crates" / "sens" / "src" / "eval" / "canon.rs"
 OUTPUT = ROOT / "knowledge" / "od005-od006-runtime-admission-audit.json"
 
 REGISTRY_ROW = re.compile(r"^\s*\(([01]{8})\s+\(en\s+([^\s()]+|\(\))\)")
@@ -46,18 +48,29 @@ def legacy_surface_map(text: str) -> dict[str, str]:
 
 def source_contract() -> dict:
     parser = PARSER.read_text(encoding="utf-8")
-    sens = SENS.read_text(encoding="utf-8")
+    source_words = SOURCE_WORDS.read_text(encoding="utf-8")
+    domain_identity = DOMAIN_IDENTITY.read_text(encoding="utf-8")
     syntax = SYNTAX.read_text(encoding="utf-8")
+    canon = CANON.read_text(encoding="utf-8")
     registry = REGISTRY.read_text(encoding="utf-8")
 
-    assert "token.len() == 8" in parser, (
-        "reader is no longer exact-8-only; update #2776 audit for the new identity grammar"
+    assert "CoreDomainIdentity::from_source_word" in parser, (
+        "reader lost exact-domain identity admission; update #2776 audit"
     )
-    assert "pub type Sens = Sens8" in sens, (
-        "runtime identity carrier changed; update #2776 audit instead of preserving legacy result"
+    assert "BinarySourceWord::W8" in parser and "bare eight-bit Function8/Sens8 syntax is not part of canonical SENS" in parser, (
+        "bare W8 rejection changed; update #2776 audit explicitly"
     )
-    assert "ExprKind::Sid(crate::Sens8::from_packed_byte(value))" in syntax, (
-        "FASL binary identity transport changed; update #2776 audit"
+    assert "parse_binary_source_word" in source_words, (
+        "exact-width source-word parser is not shared by the general reader"
+    )
+    assert "pub const fn from_source_word" in domain_identity, (
+        "CoreDomainIdentity lost exact source-word bridge"
+    )
+    assert "TAG_DOMAIN_IDENTITY" in syntax and "ExprKind::DomainIdentity" in syntax, (
+        "domain-aware FASL/wire transport changed; update #2776 audit"
+    )
+    assert "domain identity has no admitted value-call mechanism" in canon, (
+        "D5/D6 fail-closed callability boundary changed; update #2776 audit"
     )
 
     widths = {
@@ -65,16 +78,15 @@ def source_contract() -> dict:
         for line in registry.splitlines()
         if (match := REGISTRY_ROW.match(line))
     }
-    assert widths == {8}, f"legacy registry key widths changed: {sorted(widths)}"
+    assert widths == {8}, f"legacy registry projection widths changed: {sorted(widths)}"
 
     return {
-        "reader": "bare binary SID is admitted only at exact width 8",
-        "runtime_identity": "Sens = Sens8",
-        "fasl_binary_payload": "one packed byte",
-        "registry_identity_keys": "exactly eight bits",
-        "non_conclusion": (
-            "owner residency is not rejected; runtime admission is not yet implemented"
-        ),
+        "reader": "bare W3-W6 binary words become exact CoreDomainIdentity; bare W8 is rejected from canonical source",
+        "runtime_identity": "CoreDomainIdentity preserves D3-D6 width; Sens8 survives only outside canonical source",
+        "fasl_binary_payload": "domain identity carries exact width+payload; legacy exact8 remains separately tagged",
+        "registry_identity_keys": "existing eight-bit keys are legacy surface projections, not canonical D5/D6 identity",
+        "callability": "D5/D6 identity does not imply an admitted evaluator mechanism",
+        "non_conclusion": "96/96 identity admission is not 96/96 executable admission",
     }
 
 
@@ -97,18 +109,18 @@ def build() -> dict:
                     "name_projection": name,
                     "category": item["category"],
                     "owner_resident": True,
-                    "direct_binary_reader_identity": False,
-                    "exact_width_preserved_in_runtime_identity": False,
+                    "direct_binary_reader_identity": True,
+                    "exact_width_preserved_in_runtime_identity": True,
                     "owner_coordinate_registry_identity": False,
                     "legacy_surface_sid8": legacy,
                     "legacy_surface_projection_present": legacy is not None,
-                    "read_print_roundtrip": False,
-                    "lowering_class": "UNMEASURED",
-                    "native_evaluator": "UNMEASURED",
+                    "read_print_roundtrip": True,
+                    "lowering_class": "DOMAIN-CALL",
+                    "native_evaluator": "FAIL-CLOSED-WITHOUT-ADMITTED-MECHANISM",
                     "derived_lisp": "UNMEASURED",
                     "compiler_support": "UNMEASURED",
-                    "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-                    "blocker": "LEGACY-SENS8-ONLY-CARRIER",
+                    "conformance": "IDENTITY-ADMITTED-CALLABILITY-PENDING",
+                    "blocker": "NO-ADMITTED-D5-D6-CALL-MECHANISM",
                 }
             )
 
@@ -116,17 +128,21 @@ def build() -> dict:
     assert len(d6["coordinates"]) == 64
     assert len(rows) == 96
     assert all(row["owner_resident"] for row in rows)
+    assert all(row["direct_binary_reader_identity"] for row in rows)
+    assert all(row["exact_width_preserved_in_runtime_identity"] for row in rows)
 
     return {
-        "schema": "od005-od006-runtime-admission-audit/v1",
-        "authority": "#2538 OD-005/OD-006 + #2762/#2766",
+        "schema": "od005-od006-runtime-admission-audit/v2",
+        "authority": "#2538 OD-005/OD-006 + #2762/#2766 + #2817",
         "generated_from": [
             "knowledge/d5-historical-full-map.json",
             "knowledge/d6-historical-full-map.json",
             "lib/surface/semantic-registry.lisp",
             "crates/sens/src/parser.rs",
-            "crates/sens/src/sens.rs",
+            "crates/sens/src/source_words.rs",
+            "crates/sens/src/domain_identity.rs",
             "crates/sens/src/syntax.rs",
+            "crates/sens/src/eval/canon.rs",
         ],
         "current_source_contract": source_contract(),
         "summary": {
@@ -145,10 +161,11 @@ def build() -> dict:
             "legacy_surface_projection_present": sum(
                 row["legacy_surface_projection_present"] for row in rows
             ),
-            "blocked_by_identity_admission": sum(
-                row["conformance"] == "BLOCKED-BY-IDENTITY-ADMISSION"
+            "identity_admitted_callability_pending": sum(
+                row["conformance"] == "IDENTITY-ADMITTED-CALLABILITY-PENDING"
                 for row in rows
             ),
+            "blocked_by_identity_admission": 0,
         },
         "rows": rows,
     }
@@ -179,8 +196,8 @@ def main() -> None:
     print("OD005/OD006 runtime admission audit: PASS")
     for key, value in summary.items():
         print(f"{key}={value}")
+    print("NON-CONCLUSION: identity admission != callable-mechanism admission")
     print("NON-CONCLUSION: residency != irreducibility")
-    print("NON-CONCLUSION: no D5/D6 semantic implementation is added here")
 
 
 if __name__ == "__main__":
