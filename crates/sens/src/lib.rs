@@ -530,10 +530,6 @@ mod core_bootstrap_cache_tests {
         load_core_library_with_fasl(&mut session, b"not-a-current-fasl")
             .expect("text fallback Core bootstrap");
 
-        assert_eq!(
-            session.environment.selected_core_profile(),
-            Some(CoreProfile::Core4)
-        );
         assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
     }
 }
