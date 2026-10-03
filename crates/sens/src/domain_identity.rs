@@ -177,6 +177,29 @@ mod tests {
     use crate::{Bit3, Bit4, Bit5, Bit6};
 
     #[test]
+    fn ratified_domain_width_accepts_exactly_d1_through_d8() {
+        let expected = [
+            RatifiedDomainWidth::D1,
+            RatifiedDomainWidth::D2,
+            RatifiedDomainWidth::D3,
+            RatifiedDomainWidth::D4,
+            RatifiedDomainWidth::D5,
+            RatifiedDomainWidth::D6,
+            RatifiedDomainWidth::D7,
+            RatifiedDomainWidth::D8,
+        ];
+
+        for (index, domain) in expected.into_iter().enumerate() {
+            let width = index + 1;
+            assert_eq!(RatifiedDomainWidth::from_width(width), Some(domain));
+            assert_eq!(domain.width(), width);
+        }
+
+        assert_eq!(RatifiedDomainWidth::from_width(0), None);
+        assert_eq!(RatifiedDomainWidth::from_width(9), None);
+    }
+
+    #[test]
     fn source_word_bridge_preserves_exact_domain() {
         for raw in 0..=7 {
             let source = BinarySourceWord::W3(Bit3::new(raw).unwrap());
