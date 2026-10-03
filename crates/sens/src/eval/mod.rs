@@ -88,7 +88,10 @@ pub(crate) enum EvalStep {
 }
 
 fn legacy_mechanism(identity: SemanticRef, span: Span) -> Result<crate::Sens8, LanguageError> {
-    identity.legacy8_word().ok_or_else(|| {
+    identity
+        .legacy8_bits()
+        .map(crate::Sens8::from_packed_byte)
+        .ok_or_else(|| {
         LanguageError::new(
             ErrorKind::InvalidForm,
             format!(
@@ -233,7 +236,9 @@ fn dispatch_call(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    let legacy_head_sid = head_sid.and_then(SemanticRef::legacy8_word);
+    let legacy_head_sid = head_sid
+        .and_then(SemanticRef::legacy8_bits)
+        .map(crate::Sens8::from_packed_byte);
     let routed_head_sid = legacy_head_sid
         .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
