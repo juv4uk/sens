@@ -247,7 +247,7 @@ fn dispatch_call(
         .or_else(|| legacy_head_sid.and_then(necessary_forms::identity_for_semantic_id));
 
     if routed_head_sid == Some(crate::sens!(00000001)) {
-        special_forms::exact_sens_arity(crate::sens!(00000001), arguments, 1, span)?;
+        special_forms::exact_semantic_arity(SemanticRef::legacy8(0b0000_0001), arguments, 1, span)?;
         let value = special_forms::quoted(&arguments[0])?;
         return Ok(EvalStep::Value(value));
     }
