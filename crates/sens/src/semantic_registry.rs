@@ -1,14 +1,12 @@
-//! Runtime projection of the Lisp-owned semantic registry.
+//! Migration projection of the historical flat surface registry.
 //!
-//! The canonical authority is lib/surface/semantic-registry.lisp and its
-//! Lisp-owned reader/API. This module contains no parser for canonical source
-//! text. The generated table is emitted by
-//! scripts/generate-rust-semantic-registry.lisp and is only a mechanical
-//! runtime projection for fast lookup.
-//
-//! Generated rows may carry a packed byte as substrate representation of an
-//! already understood Lisp Binary identity. This wrapper converts that byte to
-//! opaque Sens8 immediately; runtime registry APIs never expose decimal IDs.
+//! Canonical language identity is `CoreDomainIdentity` plus admitted law.
+//! `lib/surface/semantic-registry.lisp` is retained only while human surfaces
+//! and still-unmigrated families are being detached from the former 256-slot
+//! axis. It must not define domain occupancy, derivation, or execution.
+//!
+//! Generated rows may still carry a historical byte for compatibility lookup.
+//! That byte is migration metadata, not a second semantic identity.
 
 use std::{collections::HashMap, sync::OnceLock};
 
@@ -195,13 +193,13 @@ mod tests {
     }
 
     #[test]
-    fn generated_registry_is_one_contiguous_byte_axis() {
-        assert_eq!(SEMANTIC_ROWS.len(), 256);
-        for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
-            assert_eq!(usize::from(row.semantic_id), expected);
-        }
-        assert_eq!(SEMANTIC_ROWS.first().map(|row| row.semantic_id), Some(0));
-        assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(255));
+    fn flat_registry_shape_is_not_a_language_invariant() {
+        // Migration rows may currently cover the historical byte axis, but
+        // canonical domain identity must never be reconstructed from row index
+        // or table contiguity. Only explicitly admitted role bridges may map.
+        assert_eq!(domain_identity_from_registry_byte(0b0000_0001).map(CoreDomainIdentity::width), Some(3));
+        assert_eq!(domain_identity_from_registry_byte(0b0000_1000).map(CoreDomainIdentity::width), Some(4));
+        assert_eq!(domain_identity_from_registry_byte(0b1111_1111), None);
     }
 
     #[test]
