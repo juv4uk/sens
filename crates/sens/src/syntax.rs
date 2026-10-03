@@ -1,6 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::CoreDomainIdentity;
-use crate::Sens8;
+use crate::CallableIdentity;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -50,13 +49,9 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
-    /// Legacy exact-eight compatibility identity. New canonical Core identity
-    /// uses `DomainIdentity`; this variant remains for historical parser,
-    /// FASL/wire, and backend paths during #2817 migration.
-    Sid(Sens8),
-    /// Canonical domain-qualified Core identity. Width/domain is part of
-    /// identity; equal packed payloads in D3/D4/D5/D6 do not collapse.
-    DomainIdentity(CoreDomainIdentity),
+    /// Callable identity is always explicit about its semantic context:
+    /// canonical Core.D3-D6 or historical exact-eight compatibility.
+    Sid(CallableIdentity),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -77,18 +72,10 @@ pub enum ExprKind {
     /// (nur innerhalb von `quote`, oder wo ein Aufrufer es über `read` als
     /// Daten liest).
     Pair(Rc<Expr>, Rc<Expr>),
-    /// Виклик функції СЕНС: функція займає рівно 1 байт (`Sens8`), без
-    /// тексту імені. Створюється лише `eval::lower` після розбору — з голови
-    /// `(00000010 x)` або з написання, яке неможливо перевизначити
-    /// (`atom`, `атом?`, `aṇu` ...), тож усі написання однієї функції
-    /// дають один і той самий вузол. Парсер цей варіант не породжує.
-    /// SENS call: the function slot is exactly one byte (`Sens8`), no name
-    /// text. Produced only by `eval::lower` after parsing.
-    Call(Sens8, Rc<[Expr]>),
-    /// Canonical lowered call head. Construction of this node does not itself
-    /// grant callability: lowering/routing may create it only after the
-    /// corresponding domain law admits the identity as callable.
-    DomainCall(CoreDomainIdentity, Rc<[Expr]>),
+    /// Lowered callable head. Construction does not grant callability:
+    /// routing may create this node only after the corresponding law admits
+    /// the identity. Core domain and compatibility identities never alias.
+    Call(CallableIdentity, Rc<[Expr]>),
     /// Параметр замикання за числовими координатами: слот `index` кадру
     /// виклику на `depth` кадрів вище. Імені тут немає навмисно (#1697,
     /// контракт 10.0 `locals-are-slots-not-names`): виконання залежить лише від
@@ -100,10 +87,6 @@ pub enum ExprKind {
     /// lives in the closure's debug metadata, never in the node.
     Local { depth: u32, index: u32 },
 }
-
-// Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
-// збірка має впасти, а не мовчки розійтися з таблицею функцій.
-const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
 
 /// Shared nesting cap for every recursive structure walk over reader
 /// output: the parser itself, `quote`d-data conversion (`quoted`) and
@@ -186,6 +169,19 @@ pub(crate) mod fasl {
         }
     }
 
+    fn put_callable_identity(out: &mut Vec<u8>, identity: crate::CallableIdentity) {
+        match identity {
+            crate::CallableIdentity::Legacy8(bits) => {
+                out.push(TAG_BINARY);
+                out.push(bits);
+            }
+            crate::CallableIdentity::Core(identity) => {
+                out.push(TAG_DOMAIN_IDENTITY);
+                put_domain_identity(out, identity);
+            }
+        }
+    }
+
     pub(crate) fn encode_expr(expr: &Expr, out: &mut Vec<u8>) {
         match &expr.kind {
             ExprKind::Number(f, exactness) => {
@@ -197,13 +193,8 @@ pub(crate) mod fasl {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
             }
-            ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
-            }
-            ExprKind::DomainIdentity(identity) => {
-                out.push(TAG_DOMAIN_IDENTITY);
-                put_domain_identity(out, *identity);
+            ExprKind::Sid(identity) => {
+                put_callable_identity(out, *identity);
             }
             ExprKind::String(value) => {
                 out.push(TAG_STRING);
@@ -230,21 +221,10 @@ pub(crate) mod fasl {
                 encode_expr(head, out);
                 encode_expr(tail, out);
             }
-            // Зведений виклик зберігається як список із 1-байтовою головою.
-            ExprKind::Call(sid, arguments) => {
+            ExprKind::Call(identity, arguments) => {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
-                for argument in arguments.iter() {
-                    encode_expr(argument, out);
-                }
-            }
-            ExprKind::DomainCall(identity, arguments) => {
-                out.push(TAG_LIST);
-                put_u32(out, arguments.len() as u32 + 1);
-                out.push(TAG_DOMAIN_IDENTITY);
-                put_domain_identity(out, *identity);
+                put_callable_identity(out, *identity);
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -285,9 +265,11 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(crate::CallableIdentity::legacy8(value))
             }
-            TAG_DOMAIN_IDENTITY => ExprKind::DomainIdentity(get_domain_identity(bytes, pos)?),
+            TAG_DOMAIN_IDENTITY => ExprKind::Sid(crate::CallableIdentity::core(
+                get_domain_identity(bytes, pos)?,
+            )),
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
             TAG_LOCAL => {
@@ -488,6 +470,19 @@ pub(crate) mod wire {
         ((integer as f64).to_bits() == value.to_bits()).then_some(integer)
     }
 
+    fn put_callable_identity(out: &mut Vec<u8>, identity: crate::CallableIdentity) {
+        match identity {
+            crate::CallableIdentity::Legacy8(bits) => {
+                out.push(TAG_BINARY);
+                out.push(bits);
+            }
+            crate::CallableIdentity::Core(identity) => {
+                out.push(TAG_DOMAIN_IDENTITY);
+                put_domain_identity(out, identity);
+            }
+        }
+    }
+
     fn encode_expr(expr: &Expr, out: &mut Vec<u8>) {
         match &expr.kind {
             ExprKind::Number(value, exactness) => match exact_integer(*value, exactness) {
@@ -508,13 +503,8 @@ pub(crate) mod wire {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
             }
-            ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
-            }
-            ExprKind::DomainIdentity(identity) => {
-                out.push(TAG_DOMAIN_IDENTITY);
-                put_domain_identity(out, *identity);
+            ExprKind::Sid(identity) => {
+                put_callable_identity(out, *identity);
             }
             ExprKind::String(value) => put_text(out, TAG_STRING, value),
             ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
@@ -534,18 +524,9 @@ pub(crate) mod wire {
                 encode_expr(head, out);
                 encode_expr(tail, out);
             }
-            ExprKind::Call(sid, arguments) => {
+            ExprKind::Call(identity, arguments) => {
                 put_list_header(out, arguments.len() + 1);
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
-                for argument in arguments.iter() {
-                    encode_expr(argument, out);
-                }
-            }
-            ExprKind::DomainCall(identity, arguments) => {
-                put_list_header(out, arguments.len() + 1);
-                out.push(TAG_DOMAIN_IDENTITY);
-                put_domain_identity(out, *identity);
+                put_callable_identity(out, *identity);
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -649,11 +630,11 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(crate::CallableIdentity::legacy8(value))
             }
-            TAG_DOMAIN_IDENTITY => {
-                ExprKind::DomainIdentity(get_domain_identity(bytes, pos)?)
-            }
+            TAG_DOMAIN_IDENTITY => ExprKind::Sid(crate::CallableIdentity::core(
+                get_domain_identity(bytes, pos)?,
+            )),
             TAG_LOCAL => {
                 let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
                 let index = u32::try_from(get_varint(bytes, pos)?).ok()?;
@@ -882,7 +863,7 @@ mod fasl_tests {
         };
         assert!(matches!(
             &outer[0].kind,
-            ExprKind::Sid(sid) if *sid == crate::sens!(01011001)
+            ExprKind::Sid(identity) if identity.legacy8_bits() == Some(0b0101_1001)
         ));
         let ExprKind::NumericBuffer(crate::NumericBuffer::I32(values)) = &outer[2].kind else {
             panic!("third argument must stay an i32 buffer");
