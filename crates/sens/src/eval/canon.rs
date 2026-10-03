@@ -142,40 +142,44 @@ pub(crate) fn invoke_domain_identity(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let CoreDomainIdentity::D3(word) = identity else {
-        return Err(LanguageError::new(
+    if let CoreDomainIdentity::D3(word) = identity {
+        return match word.word().packed_bits() {
+            0b010 => {
+                exact_domain_args(identity, args, 1, span)?;
+                Ok(special_forms::atom_value(&args[0], environment))
+            }
+            0b111 => {
+                exact_domain_args(identity, args, 2, span)?;
+                special_forms::eq_values(args[0].clone(), args[1].clone(), span)
+            }
+            0b100 => {
+                exact_domain_args(identity, args, 2, span)?;
+                special_forms::cons_values(args[0].clone(), args[1].clone(), environment, span)
+            }
+            0b101 => {
+                exact_domain_args(identity, args, 1, span)?;
+                special_forms::car_value(&args[0], span)
+            }
+            0b110 => {
+                exact_domain_args(identity, args, 1, span)?;
+                special_forms::cdr_value(&args[0], span)
+            }
+            _ => Err(LanguageError::new(
+                ErrorKind::Type,
+                format!(
+                    "domain identity is not a value-call primitive · domenna identychnist ne ye value-call prymityvom: {identity}"
+                ),
+                span,
+            )),
+        };
+    }
+
+    match environment.domain_code_slot(identity) {
+        Some(Value::Closure(closure)) => closures::apply_values(closure, args, span),
+        Some(Value::Builtin(builtin)) => (builtin.func)(args, environment, span),
+        Some(_) | None => Err(LanguageError::new(
             ErrorKind::Type,
             format!("domain identity has no admitted value-call mechanism: {identity}"),
-            span,
-        ));
-    };
-
-    match word.word().packed_bits() {
-        0b010 => {
-            exact_domain_args(identity, args, 1, span)?;
-            Ok(special_forms::atom_value(&args[0], environment))
-        }
-        0b111 => {
-            exact_domain_args(identity, args, 2, span)?;
-            special_forms::eq_values(args[0].clone(), args[1].clone(), span)
-        }
-        0b100 => {
-            exact_domain_args(identity, args, 2, span)?;
-            special_forms::cons_values(args[0].clone(), args[1].clone(), environment, span)
-        }
-        0b101 => {
-            exact_domain_args(identity, args, 1, span)?;
-            special_forms::car_value(&args[0], span)
-        }
-        0b110 => {
-            exact_domain_args(identity, args, 1, span)?;
-            special_forms::cdr_value(&args[0], span)
-        }
-        _ => Err(LanguageError::new(
-            ErrorKind::Type,
-            format!(
-                "domain identity is not a value-call primitive · domenna identychnist ne ye value-call prymityvom: {identity}"
-            ),
             span,
         )),
     }
@@ -410,6 +414,17 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     if !environment.is_root() || !matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
         return;
     }
+
+    if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
+        if has_domain_primitive(identity)
+            || super::necessary_forms::identity_for_domain_identity(identity).is_some()
+        {
+            return;
+        }
+        environment.bind_domain_code_slot_once(identity, value.clone());
+        return;
+    }
+
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
