@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{Environment, Exactness, Expr, Sens8, Text7};
+use crate::{CallableDomainId, Environment, Exactness, Expr, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -501,7 +501,7 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
-    Sid(Sens8),
+    Sid(CallableDomainId),
     String(Rc<str>),
     /// Canonical SENS text: an exact UPC-7 cell stream. Never a human
     /// spelling, never Unicode/UTF-8, never a selected layout. Human layout
@@ -638,10 +638,12 @@ impl Value {
         }
     }
 
-    /// Returns the exact eight-bit function sense (СЕНС) if this value is one.
+    /// Returns the explicit historical exact-eight compatibility projection.
+    ///
+    /// Canonical D3/D4/D5/D6 identities intentionally return None here.
     pub fn as_sens8(&self) -> Option<crate::Sens8> {
         match self {
-            Self::Sid(s) => Some(*s),
+            Self::Sid(id) => id.legacy_sens8(),
             _ => None,
         }
     }
