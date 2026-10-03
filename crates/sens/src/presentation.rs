@@ -78,8 +78,11 @@ fn render_uk(value: &Value) -> String {
         Value::Number(number, Exactness::Exact) => number.to_string(),
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
         Value::Rational(number) => number.to_string(),
-        Value::Sid(sid) => {
-            format!("#<вбудована {}>", uk_semantic_name(*sid))
+        Value::Sid(identity) => {
+            match identity.legacy_sens8() {
+                Some(sid) => format!("#<вбудована {}>", uk_semantic_name(sid)),
+                None => format!("#<вбудована {identity:?}>"),
+            }
         }
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
@@ -364,7 +367,7 @@ mod tests {
     #[test]
     fn ukrainian_presentation_localizes_builtin_and_function_markers() {
         let mut session = Session::default();
-        let builtin = Value::Sid(crate::sens!(00000010));
+        let builtin = Value::legacy_sid(crate::sens!(00000010));
         assert_eq!(
             render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
             "#<вбудована атом?>"
