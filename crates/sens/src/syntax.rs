@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::Sens8;
+use crate::CallableDomainId;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -49,7 +49,7 @@ pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
     NumericBuffer(NumericBuffer),
-    Sid(Sens8),
+    Sid(CallableDomainId),
     String(Rc<str>),
     Symbol(Rc<str>),
     List(Rc<[Expr]>),
@@ -77,7 +77,7 @@ pub enum ExprKind {
     /// дають один і той самий вузол. Парсер цей варіант не породжує.
     /// SENS call: the function slot is exactly one byte (`Sens8`), no name
     /// text. Produced only by `eval::lower` after parsing.
-    Call(Sens8, Rc<[Expr]>),
+    Call(CallableDomainId, Rc<[Expr]>),
     /// Параметр замикання за числовими координатами: слот `index` кадру
     /// виклику на `depth` кадрів вище. Імені тут немає навмисно (#1697,
     /// контракт 10.0 `locals-are-slots-not-names`): виконання залежить лише від
@@ -90,9 +90,7 @@ pub enum ExprKind {
     Local { depth: u32, index: u32 },
 }
 
-// Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
-// збірка має впасти, а не мовчки розійтися з таблицею функцій.
-const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
+// Callable identity carries domain + payload; host size is not semantic width.
 
 /// Shared nesting cap for every recursive structure walk over reader
 /// output: the parser itself, `quote`d-data conversion (`quoted`) and
