@@ -182,6 +182,8 @@ pub(crate) mod fasl {
             4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
             5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
             6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
+            7 => Some(crate::CoreD7::from_word(crate::Bit7::new(payload)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
             _ => None,
         }
     }
