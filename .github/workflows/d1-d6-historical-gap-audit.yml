@@ -43,9 +43,12 @@ jobs:
           assert p["summary"]["historical_rows"] == 19
           assert p["summary"]["already_explained"] == 12
           assert p["summary"]["needs_new_law"] == 5
-          assert p["summary"]["owner_ready"] == 1
+          assert p["summary"]["owner_ready"] == 0
+          assert p["summary"]["ratified"] == 1
           assert p["summary"]["composite"] == 1
           assert p["summary"]["new_d5_manual_residents"] == 0
-          assert p["summary"]["new_d6_admissions"] == 0
-          assert p["owner_facing"]["ready_now"][0]["binary_object"] == "D6:001111"
+          assert p["summary"]["new_d6_admissions"] == 1
+          assert p["owner_facing"]["ready_now"] == []
+          assert p["owner_facing"]["decided"][0]["binary_object"] == "D6:001111"
+          assert p["owner_facing"]["decided"][0]["status"] == "RATIFIED-RESIDENT"
           PY
