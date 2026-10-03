@@ -1,0 +1,15 @@
+(d7-local-ordinal-lock/1
+  (repository "juv4uk/shiva-sutras")
+  (revision "208c56a997b06934532ee6579f1e9383216b3315")
+  (path "ksetra/canon/siva-sutras.yaml")
+  (git-blob-sha1 "fb6bcb011ebab0f7621b0fc613ea60aaec54c549")
+  (logical-width 7)
+  (role local-shiva-sutra-ordinal)
+  (ordinal-count 14)
+  (arithmetic-number no)
+  (d14-relation provenance-only)
+  (authority-boundary
+    ((upstream-role "canonical Shiva-sutra sequence and source order")
+     (sens-role "D7 LocalOrdinal provenance projection and domain guard")
+     (copy-canon-into-sens no)))
+  (status ratified-domain-generated-projection))
