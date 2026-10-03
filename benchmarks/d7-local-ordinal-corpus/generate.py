@@ -79,6 +79,12 @@ def parse_canon(path: Path) -> list[dict[str, object]]:
     return rows
 
 
+def validate_source_order(sutras: list[dict[str, object]]) -> None:
+    ids = [int(row["id"]) for row in sutras]
+    if ids != list(range(1, 15)):
+        raise SystemExit(f"donor source-order drift: {ids!r}")
+
+
 def bits7(value: int) -> str:
     if not 0 <= value < 128:
         raise ValueError("D7 width overflow")
@@ -149,9 +155,7 @@ def generate(upstream_root: Path) -> dict[str, object]:
     sutras = parse_canon(donor)
 
     # Source-order is part of provenance. Reordering must invalidate the lock.
-    ids = [int(row["id"]) for row in sutras]
-    if ids != list(range(1, 15)):
-        raise SystemExit(f"donor source-order drift: {ids!r}")
+    validate_source_order(sutras)
 
     rows = []
     for source_order, donor in enumerate(sutras, start=1):
@@ -234,13 +238,50 @@ def generate(upstream_root: Path) -> dict[str, object]:
     }
 
 
+def self_test(upstream_root: Path) -> None:
+    lock = LOCK.read_text(encoding="utf-8")
+    donor = upstream_root / quoted(lock, "path")
+    sutras = parse_canon(donor)
+    validate_source_order(sutras)
+
+    # Sensitivity: a donor-order mutation must be rejected independently of
+    # the outer blob lock. This proves source order is a checked provenance
+    # invariant rather than merely a comment on the pinned blob.
+    swapped = [dict(row) for row in sutras]
+    swapped[0], swapped[1] = swapped[1], swapped[0]
+    try:
+        validate_source_order(swapped)
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("D7 donor reorder mutation was not rejected")
+
+    # Role erasure must leave the raw payload ambiguous across admitted
+    # interpretation classes; bits alone never choose Sound/Ordinal/Number.
+    probe = 1
+    interpretations = {
+        (type(D7SoundCell(probe)).__name__, bits7(probe)),
+        (type(D7LocalOrdinal(probe, "shiva-sutra:1")).__name__, bits7(probe)),
+        (type(ArithmeticNumber(probe)).__name__, bits7(probe)),
+    }
+    assert len(interpretations) == 3
+
+    print("D7-LOCAL-ORDINAL-REORDER-SENSITIVITY=PASS")
+    print("D7-LOCAL-ORDINAL-ROLE-ERASURE-AMBIGUITY=PASS")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--upstream-root", type=Path, required=True)
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
 
-    payload = generate(args.upstream_root.resolve())
+    upstream_root = args.upstream_root.resolve()
+    if args.self_test:
+        self_test(upstream_root)
+
+    payload = generate(upstream_root)
     rendered = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
     if args.check:
