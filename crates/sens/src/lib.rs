@@ -480,6 +480,12 @@ pub fn surface_has_sid(name: &str, sid: Sens8) -> bool {
     eval::canon::surface_has_sid(name, sid)
 }
 
+/// Compatibility-only query for tooling that still observes the historical
+/// exact-eight registry. Canonical Core identity is carried by CallableIdentity.
+pub fn surface_has_legacy8_bits(name: &str, bits: u8) -> bool {
+    eval::canon::surface_has_legacy8_bits(name, bits)
+}
+
 /// True for any admitted surface whose Lisp-owned evaluator dispatch class is Define.
 pub fn is_define_surface_name(name: &str) -> bool {
     matches!(
