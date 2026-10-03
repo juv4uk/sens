@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{domain_registry, semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -310,6 +310,14 @@ pub(crate) fn invoke_domain_identity(
             Value::Builtin(builtin) => return (builtin.func)(args, environment, span),
             _ => {}
         }
+    }
+
+    // Migration bridge: identity selection is already domain-native. For an
+    // operation whose implementation still lives on the historical backend,
+    // select that mechanism explicitly from the domain owner registry. This is
+    // not a reverse identity projection and does not consult the old surface table.
+    if let Some(byte) = domain_registry::legacy_mechanism_for(identity) {
+        return invoke_semantic_ref(Sens8::from_packed_byte(byte), args, environment, span);
     }
 
     Err(LanguageError::new(
