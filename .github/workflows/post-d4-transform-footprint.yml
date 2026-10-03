@@ -1,0 +1,38 @@
+name: Post-D4 transformation footprint
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_control_derivation.rs"
+      - "crates/sens/tests/post_d4_setq_state_passing.rs"
+      - "scripts/research-2472-transform-footprint.py"
+      - "docs/research/2472-transform-footprint*.md"
+      - ".github/workflows/post-d4-transform-footprint.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/post_d4_control_derivation.rs"
+      - "crates/sens/tests/post_d4_setq_state_passing.rs"
+      - "scripts/research-2472-transform-footprint.py"
+      - "docs/research/2472-transform-footprint*.md"
+      - ".github/workflows/post-d4-transform-footprint.yml"
+
+jobs:
+  footprint:
+    name: Phase-D rewrite footprint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run transformation-footprint audit
+        run: python3 scripts/research-2472-transform-footprint.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2472 transformation footprint"
+            echo
+            echo "- GO: LOCAL-REGION-REWRITE"
+            echo "- RETURN: CALLCHAIN-PROTOCOL-REWRITE"
+            echo "- SETQ: OBSERVER-PROTOCOL-REWRITE"
+            echo "- Research only: no DERIVED/NEW verdict and no address allocation."
+          } >> "$GITHUB_STEP_SUMMARY"
