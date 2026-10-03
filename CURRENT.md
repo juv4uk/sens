@@ -7,10 +7,10 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current ratified observable language contract.
-   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — source/UI routing metadata from admitted human spellings to exact eight-bit SENS functions. A spelling is not a function identity and does not own meaning.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.0 domain-qualified observable language contract.
+   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS has exactly 256 functions: `00000000..11111111`. The concrete empty list `()` is a structural value outside that function space.
+   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`; current Core domains D1-D6 are width-qualified, while historical Sens8/Sid8 is compatibility/provenance only.
 2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
 3. **Reference implementation and substrates**
    - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
@@ -23,16 +23,31 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 The language is **sens / СЕНС**.
 
 ```text
-00000000
-...
-11111111
+semantic object
+=
+exact binary number
++ exact domain
++ admitted / proved law
 ```
 
-Those exact eight-bit forms are the 256 SENS functions. There is no parallel named-function identity layer. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings are source/UI routes only.
+Current Core examples:
 
-`()` is not function `00000000`, function `11111111`, or any other member of the 256-function space. It is a separate structural value.
+```text
+D1  PredicateBit
+D2  racana2 structure
+D3  bija3 foundation
+D4  bootstrap domain
+D5  owner-ratified five-bit domain
+D6  owner-ratified six-bit domain
+```
 
-Historical McCarthy names remain useful when discussing the 1960 evaluator, Core1, migration evidence, or provenance. They are not the current ontology of SENS.
+Equal packed bits in two domains do not imply equal identity. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
+
+Historical exact-eight-bit Sens8/Sid8/Function8 forms remain bounded compatibility, transport, backend and provenance mechanisms while #2817 migrates runtime consumers. They are not current universal semantic authority.
+
+Structural `()` is the admitted Core.D3 `000` object. It is not historical exact-eight-bit `00000000`, PredicateBit `0`, or Number zero; those equal-looking numeric payloads remain distinct across domains.
+
+Historical McCarthy names remain useful when discussing the 1960 evaluator, Core1, migration evidence, or provenance. They do not create a second current identity ontology.
 
 ## What is explicitly NOT authoritative
 
@@ -40,12 +55,12 @@ Historical McCarthy names remain useful when discussing the 1960 evaluator, Core
 - Any dated report or PoC not explicitly promoted into the current authority chain.
 - A host implementation detail merely because it is implemented in Rust, C, Java, Common Lisp, Prolog, Datalog, CLIPS, or another executor.
 - A peer agent's report that something is fixed without a verifiable commit/test/CI witness.
-- A human surface spelling as a substitute for the exact eight-bit SENS function it routes to.
+- A human surface spelling as a substitute for the exact domain-qualified semantic object it routes to.
 
 ## For a new agent starting cold
 
 1. Read `AGENTS.md` and `docs/agent-doctrine.md`.
 2. Read `language-contract.lisp` and this file before trusting older design prose.
-3. Read `lib/surface/semantic-registry.lisp` only as routing metadata; do not infer function meaning from a spelling.
+3. Read `lib/surface/semantic-registry.lisp` only as transitional routing/compatibility metadata; do not infer domain membership or meaning from a spelling or eight-bit row.
 4. Inspect `crates/sens` for the current Rust reference mechanism and the relevant executable witnesses for the behavior being changed.
 5. Run the focused tests for your slice and then the applicable repository gates before claiming the change works.
