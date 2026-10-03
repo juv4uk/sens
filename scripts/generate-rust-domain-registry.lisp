@@ -111,8 +111,8 @@
   (str+ header (render-rows rows) "];\n"))
 
 (00000111
-  ((00100010 *argv* (00000001 ()))
-   (1)
+  ((00000010 *argv*)
+   ()
    (00101111
      (00100111
        (10100111 output-path generated)
