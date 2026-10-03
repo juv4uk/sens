@@ -20,9 +20,10 @@ impl CallableDomainId {
         Self::Domain(identity)
     }
 
-    /// Named compatibility entry. Intentionally no `From<Sens8>`.
-    pub const fn from_legacy_sens8(value: crate::Sens8) -> Self {
-        Self::Legacy8(LegacySens8::from_sens8(value))
+    /// Named compatibility entry. The exact-width module never sees Sens8
+    /// directly; byte conversion is confined to the compatibility module.
+    pub const fn from_legacy(value: LegacySens8) -> Self {
+        Self::Legacy8(value)
     }
 
     pub const fn width(self) -> usize {
@@ -36,7 +37,7 @@ impl CallableDomainId {
     pub const fn packed_bits(self) -> u8 {
         match self {
             Self::Domain(identity) => identity.packed_bits(),
-            Self::Legacy8(value) => value.sens8().packed_byte(),
+            Self::Legacy8(value) => value.packed_byte(),
         }
     }
 
@@ -47,11 +48,12 @@ impl CallableDomainId {
         }
     }
 
-    /// Only explicit compatibility identities can recover Sens8.
-    pub const fn legacy_sens8(self) -> Option<crate::Sens8> {
+    /// Only the explicit compatibility variant can recover the opaque legacy
+    /// wrapper. Converting that wrapper to Sens8 is a boundary-layer action.
+    pub const fn legacy(self) -> Option<LegacySens8> {
         match self {
             Self::Domain(_) => None,
-            Self::Legacy8(value) => Some(value.sens8()),
+            Self::Legacy8(value) => Some(value),
         }
     }
 }
@@ -95,9 +97,7 @@ mod tests {
         let d4 = CallableDomainId::from_domain(CoreDomainIdentity::from(
             CoreD4::from_word(Bit4::new(1).unwrap()),
         ));
-        let legacy = CallableDomainId::from_legacy_sens8(
-            crate::Sens8::__from_macro_bits("00000001"),
-        );
+        let legacy = CallableDomainId::from_legacy(LegacySens8::from_packed_byte(1));
 
         assert_eq!(d3.packed_bits(), 1);
         assert_eq!(d4.packed_bits(), 1);
@@ -105,9 +105,9 @@ mod tests {
         assert_ne!(d3, d4);
         assert_ne!(d3, legacy);
         assert_ne!(d4, legacy);
-        assert!(d3.legacy_sens8().is_none());
-        assert!(d4.legacy_sens8().is_none());
-        assert_eq!(legacy.legacy_sens8().unwrap().packed_byte(), 1);
+        assert!(d3.legacy().is_none());
+        assert!(d4.legacy().is_none());
+        assert_eq!(legacy.legacy().unwrap().packed_byte(), 1);
     }
 
     #[test]
