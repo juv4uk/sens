@@ -936,11 +936,11 @@
         "post-d4-factor-current"
       ],
       "dependencies": [],
-      "witness": "#2580/#2588 merged focused evidence; #2591 integration pending",
-      "status": "unknown",
-      "provenance": "#2580 #2588 #2591",
+      "witness": "#2580/#2588 merged 3d409736 + #2591/#2602 structural integration",
+      "status": "bounded-confirmed",
+      "provenance": "#2580 #2588 #2591 #2602 1c9d6fa7",
       "counterexample_class": "whole-call head reconstructed deterministically from identical operand-only payload without an additional channel",
-      "independence_evidence": "UNKNOWN for full post-D4 factor model until #2591 integrates call-packaging against the complete protocol family; merged alias-collision evidence already separates WHOLE-CALL from OPERANDS-ONLY"
+      "independence_evidence": "#2591/#2602 integrates the merged alias/head collision into the five-axis special-call family; WHOLE-CALL distinguishes alias heads that OPERANDS-ONLY cannot reconstruct from identical payload"
     },
     {
       "id": "postd4.factor.shared-location-update",
@@ -1338,11 +1338,10 @@
         "postd4.factor.returned-form-protocol",
         "postd4.factor.expansion-timing",
         "postd4.factor.shared-location-update",
-        "postd4.factor.non-local-exit"
-      ],
-      "unknown_facts": [
+        "postd4.factor.non-local-exit",
         "postd4.factor.call-packaging"
       ],
+      "unknown_facts": [],
       "derived_facts": [],
       "covers": [
         "postd4.factor.raw-form-input",
@@ -1354,14 +1353,23 @@
         "postd4.factor.non-local-exit"
       ],
       "expected_semantic_fact_interval": [
-        6,
+        7,
         7
       ],
       "binary_participation": "B0",
-      "binary_participation_note": "all seven are UNPLACED structural factors; bounded independence does not imply roothood, width, or coordinate",
-      "semantic_root_count": 0,
+      "binary_participation_note": "seven bounded-independent structural factors are UNPLACED; factor independence does not imply seven roots, bit width, or coordinates",
       "d5_resident_count": 0,
-      "coordinate_count": 0
+      "coordinate_count": 0,
+      "roots_promoted_by_this_model": 0,
+      "external_root_theorems": [
+        {
+          "fact": "postd4.factor.non-local-exit",
+          "evidence": "#2488/#2504",
+          "classification": "semantic-residue-root",
+          "width": "UNKNOWN",
+          "coordinate": "UNPLACED"
+        }
+      ]
     }
   ],
   "binary_participation_classes": {
