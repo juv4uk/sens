@@ -185,6 +185,109 @@ impl DomainWord {
     }
 }
 
+
+/// Explicit compatibility wrapper for the historical exact-eight-bit semantic
+/// carrier.
+///
+/// This type exists only so staged migration can keep old backend/transport
+/// paths compiling while canonical runtime identity moves to domain-qualified
+/// words. It is intentionally not interchangeable with D3/D4/D5/D6 values.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct LegacySens8(crate::Sens8);
+
+impl LegacySens8 {
+    /// Wrap an already-existing historical Sens8 value explicitly.
+    pub const fn from_sens8(value: crate::Sens8) -> Self {
+        Self(value)
+    }
+
+    /// Recover the historical compatibility value.
+    pub const fn sens8(self) -> crate::Sens8 {
+        self.0
+    }
+}
+
+/// Canonical callable identity during the Sens8-exit migration.
+///
+/// Width alone is not enough: the domain variant is part of identity. D1
+/// predicate answers and D2 structure are deliberately absent because they are
+/// not callable merely by being binary.
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub enum CallableDomainId {
+    D3(Bija3),
+    D4(CoreD4),
+    D5(CoreD5),
+    D6(CoreD6),
+    Legacy8(LegacySens8),
+}
+
+impl CallableDomainId {
+    /// Exact binary width carried by this callable identity.
+    pub const fn width(self) -> usize {
+        match self {
+            Self::D3(_) => 3,
+            Self::D4(_) => 4,
+            Self::D5(_) => 5,
+            Self::D6(_) => 6,
+            Self::Legacy8(_) => 8,
+        }
+    }
+
+    /// Mechanical payload only. Domain/compatibility variant remains required
+    /// for semantic identity.
+    pub const fn packed_bits(self) -> u8 {
+        match self {
+            Self::D3(word) => word.word().packed_bits(),
+            Self::D4(word) => word.word().packed_bits(),
+            Self::D5(word) => word.word().packed_bits(),
+            Self::D6(word) => word.word().packed_bits(),
+            Self::Legacy8(word) => word.sens8().packed_byte(),
+        }
+    }
+
+    /// Explicitly recover the historical exact-8 compatibility projection.
+    /// Canonical domain-qualified identities never auto-project here.
+    pub const fn legacy_sens8(self) -> Option<crate::Sens8> {
+        match self {
+            Self::Legacy8(word) => Some(word.sens8()),
+            Self::D3(_) | Self::D4(_) | Self::D5(_) | Self::D6(_) => None,
+        }
+    }
+
+    /// Construct the compatibility variant from historical Sens8.
+    ///
+    /// Kept as a named operation instead of implementing `From<Sens8>` so
+    /// compatibility entry is visible at every call site during migration.
+    pub const fn from_legacy_sens8(value: crate::Sens8) -> Self {
+        Self::Legacy8(LegacySens8::from_sens8(value))
+    }
+}
+
+impl From<Bija3> for CallableDomainId {
+    fn from(value: Bija3) -> Self {
+        Self::D3(value)
+    }
+}
+
+impl From<CoreD4> for CallableDomainId {
+    fn from(value: CoreD4) -> Self {
+        Self::D4(value)
+    }
+}
+
+impl From<CoreD5> for CallableDomainId {
+    fn from(value: CoreD5) -> Self {
+        Self::D5(value)
+    }
+}
+
+impl From<CoreD6> for CallableDomainId {
+    fn from(value: CoreD6) -> Self {
+        Self::D6(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -242,6 +345,47 @@ mod tests {
         assert!(d3 != d4);
         assert!(d4 != d5);
         assert!(d5 != d6);
+    }
+
+    #[test]
+    fn callable_domain_identity_never_collapses_equal_payloads() {
+        let d3 = CallableDomainId::D3(Bija3::from_word(Bit3::new(1).unwrap()));
+        let d4 = CallableDomainId::D4(CoreD4::from_word(Bit4::new(1).unwrap()));
+        let d5 = CallableDomainId::D5(CoreD5::from_word(Bit5::new(1).unwrap()));
+        let d6 = CallableDomainId::D6(CoreD6::from_word(Bit6::new(1).unwrap()));
+        let legacy =
+            CallableDomainId::from_legacy_sens8(crate::Sens8::__from_macro_bits("00000001"));
+
+        for id in [d3, d4, d5, d6, legacy] {
+            assert_eq!(id.packed_bits(), 1);
+        }
+
+        assert_eq!([d3.width(), d4.width(), d5.width(), d6.width(), legacy.width()],
+                   [3, 4, 5, 6, 8]);
+        assert!(d3 != d4);
+        assert!(d4 != d5);
+        assert!(d5 != d6);
+        assert!(d3 != legacy);
+        assert!(d4 != legacy);
+        assert_eq!(legacy.legacy_sens8().unwrap().packed_byte(), 1);
+        assert!(d3.legacy_sens8().is_none());
+        assert!(d4.legacy_sens8().is_none());
+        assert!(d5.legacy_sens8().is_none());
+        assert!(d6.legacy_sens8().is_none());
+    }
+
+    #[test]
+    fn callable_domain_identity_excludes_d1_and_d2_by_construction() {
+        // There are intentionally no D1/D2 variants on CallableDomainId.
+        // This runtime assertion pins the admitted variant widths so a future
+        // accidental callable promotion becomes a deliberate test change.
+        let widths = [
+            CallableDomainId::D3(Bija3::from_word(Bit3::new(0).unwrap())).width(),
+            CallableDomainId::D4(CoreD4::from_word(Bit4::new(0).unwrap())).width(),
+            CallableDomainId::D5(CoreD5::from_word(Bit5::new(0).unwrap())).width(),
+            CallableDomainId::D6(CoreD6::from_word(Bit6::new(0).unwrap())).width(),
+        ];
+        assert_eq!(widths, [3, 4, 5, 6]);
     }
 
     #[test]
