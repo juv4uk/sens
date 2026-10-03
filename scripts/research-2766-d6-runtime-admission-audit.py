@@ -80,7 +80,7 @@ def mechanism_facts() -> dict:
         "bit6_source_display": True,
         "bit6_packing": True,
         "bit6_unpacking": True,
-        "typed_d6_carrier": False,
+        "typed_d6_carrier": True,
         "value_d6_identity": False,
         "registry_d6_identity": False,
         "lowering_d6_identity": False,
@@ -118,7 +118,7 @@ def build() -> dict:
             "source_exact_w6": "YES",
             "source_print_exact_w6": "YES",
             "packed_roundtrip_w6": "YES",
-            "typed_d6_carrier": "NO",
+            "typed_d6_carrier": "YES",
             "runtime_value_identity": "NO",
             "semantic_registry_d6_identity": "NO",
             "lowering_d6_identity": "NO",
@@ -127,29 +127,29 @@ def build() -> dict:
             "semantic_identity_test": "NO",
             "selector_generator_evidence": "YES" if selector else "NO",
             "implementation_status": (
-                "MECHANICAL-W6+GENERATOR-EVIDENCE"
+                "TYPED-D6+GENERATOR-EVIDENCE"
                 if selector else
-                "MECHANICAL-W6-ONLY"
+                "TYPED-D6-CARRIER-ONLY"
             ),
         })
 
     assert sum(r["selector_generator_evidence"] == "YES" for r in rows) == 16
     assert all(r["owner_residency"] == "YES" for r in rows)
     assert all(r["source_exact_w6"] == "YES" for r in rows)
-    assert all(r["typed_d6_carrier"] == "NO" for r in rows)
+    assert all(r["typed_d6_carrier"] == "YES" for r in rows)
     assert all(r["native_evaluator_d6_identity"] == "NO" for r in rows)
 
     return {
         "schema": "d6-runtime-admission-audit/v1",
         "issue": "#2766",
-        "principle": "mechanical W6 representation is not semantic D6 admission",
+        "principle": "typed Core.D6 representation is not runtime/evaluator D6 admission",
         "owner_map": "knowledge/d6-historical-full-map.json",
         "mechanism_facts": facts,
         "summary": {
             "owner_resident": 64,
             "source_exact_w6": 64,
             "packed_roundtrip_w6": 64,
-            "typed_d6_carrier": 0,
+            "typed_d6_carrier": 64,
             "runtime_value_identity": 0,
             "semantic_registry_d6_identity": 0,
             "lowering_d6_identity": 0,
