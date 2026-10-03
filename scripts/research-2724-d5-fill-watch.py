@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
-"""#2724 — standing D5 fill watchdog.
+"""#2724 historical D5 sparse-phase fill watch.
 
-This is coordination/proof plumbing, not a resident allocator.
+HISTORICAL-PRE-OD005 / NOT CURRENT OCCUPANCY AUTHORITY.
 
-It composes existing authoritative artifacts:
-- #2510 current D5 closure map;
-- #2616 D5 eligibility ledger;
-- #2617 post-D4 root minimization;
-- #2703 historical semantic placement.
-
-The watchdog stays GREEN while current evidence yields no exact new D5
-candidate. It turns RED with REVIEW-REQUIRED when a new historical row appears
-without placement, when any factor becomes D5-eligible YES, or when semantic
-placement starts naming D5 without a separately updated ratified baseline.
+OD-005/#2750 fully occupies Core.D5. This script is retained only to replay the
+older semantic-family-first research protocol and its 8+24 snapshot. It must
+never veto or reinterpret current D5 occupancy.
 """
 
 from __future__ import annotations
@@ -218,9 +211,9 @@ def main() -> int:
     )
 
     summary = {
-        "schema": "d5-fill-watch/v1",
+        "schema": "d5-fill-watch/pre-od005-v1",
         "issue": "#2724",
-        "status": "PASS",
+        "status": "PASS-HISTORICAL-PRE-OD005",
         "width": 5,
         "capacity": 32,
         "generated_residents": sorted(generated),
@@ -238,7 +231,9 @@ def main() -> int:
         "fill_rule": "semantic-family-first; never enumerate UNKNOWN coordinates",
     }
 
-    print("D5-FILL-WATCH=PASS")
+    print("D5-FILL-WATCH=PASS-HISTORICAL-PRE-OD005")
+    print("current-occupancy-authority=NO")
+    print("superseded-by=#2750")
     print("width=5")
     print("generated=8")
     print("unknown=24")
