@@ -1,0 +1,27 @@
+name: Post-D4 control derivation research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/post_d4_control_derivation.rs"
+      - ".github/workflows/post-d4-control-derivation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  control-derivation:
+    name: D4 state/CPS control witness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run GO/RETURN derivation witness
+        run: cargo test -p sens --test post_d4_control_derivation -- --nocapture
+      - name: Publish scope
+        if: always()
+        run: |
+          echo "## #2315 Phase-D control research" >> "$GITHUB_STEP_SUMMARY"
+          echo "- GO candidate: explicit state + tail recursion" >> "$GITHUB_STEP_SUMMARY"
+          echo "- RETURN candidate: explicit first-class exit continuation" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Research only: no address allocation" >> "$GITHUB_STEP_SUMMARY"
