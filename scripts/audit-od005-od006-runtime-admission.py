@@ -57,8 +57,8 @@ def source_contract() -> dict:
     assert "CoreDomainIdentity::from_source_word" in parser, (
         "reader lost exact-domain identity admission; update #2776 audit"
     )
-    assert "BinarySourceWord::W8" in parser and "ExprKind::Sid" in parser, (
-        "legacy W8 compatibility lane changed; update #2776 audit explicitly"
+    assert "BinarySourceWord::W8" in parser and "bare eight-bit Function8/Sens8 syntax is not part of canonical SENS" in parser, (
+        "bare W8 rejection changed; update #2776 audit explicitly"
     )
     assert "parse_binary_source_word" in source_words, (
         "exact-width source-word parser is not shared by the general reader"
@@ -81,8 +81,8 @@ def source_contract() -> dict:
     assert widths == {8}, f"legacy registry projection widths changed: {sorted(widths)}"
 
     return {
-        "reader": "bare W3-W6 binary words become exact CoreDomainIdentity; W8 is legacy compatibility",
-        "runtime_identity": "CoreDomainIdentity preserves D3-D6 width; legacy Sens8 is a separate lane",
+        "reader": "bare W3-W6 binary words become exact CoreDomainIdentity; bare W8 is rejected from canonical source",
+        "runtime_identity": "CoreDomainIdentity preserves D3-D6 width; Sens8 survives only outside canonical source",
         "fasl_binary_payload": "domain identity carries exact width+payload; legacy exact8 remains separately tagged",
         "registry_identity_keys": "existing eight-bit keys are legacy surface projections, not canonical D5/D6 identity",
         "callability": "D5/D6 identity does not imply an admitted evaluator mechanism",
