@@ -222,7 +222,13 @@ WITNESS_EVIDENCE = re.compile(
 FALSIFIER_CONDITION = re.compile(
     r"\b(?:if|when|unless|any|fails?|shows\s+that|refut(?:e|ed|es)|counter-?|"
     r"breaks?|violates?|contradicts?|disprov(?:e|ed|es)|diverges|overflows?|"
-    r"mismatch|cannot|panics?|corrupts?)\b",
+    r"mismatch|cannot|panics?|corrupts?|must\s+not|must\s+fail)\b",
+    re.I,
+)
+
+DECLARATIVE_DISPROOF = re.compile(
+    r"\b(?:rejects?|invalidates?|contradicts?)\b.{0,80}"
+    r"\b(?:model|law|claim|bridge|placement|coordinate|hypothesis)\b",
     re.I,
 )
 
@@ -296,7 +302,7 @@ def falsifier_verdict(value, body=""):
         return "legend"
     if ASPIRATIONAL.search(value):
         return "aspirational"
-    if FALSIFIER_CONDITION.search(value):
+    if FALSIFIER_CONDITION.search(value) or DECLARATIVE_DISPROOF.search(value):
         return "ok"
     return "vague"
 
@@ -510,6 +516,8 @@ SEMANTIC AUTHORITY = NONE
         # FALSIFIER
         ("f-ok-if", "FALSIFIER: if any test fails or diverges", "falsifier", "ok"),
         ("f-ok-when", "FALSIFIER: when stack overflow occurs", "falsifier", "ok"),
+        ("f-ok-declarative", "FALSIFIER: noncanonical coordinate rejects the model", "falsifier", "ok"),
+        ("f-ok-negative-invariant", "FALSIFIER: shared helper must not authorize semantic equality", "falsifier", "ok"),
         ("f-legend", "FALSIFIER: explicit counter-test", "falsifier", "legend"),
         ("f-aspirational", "FALSIFIER: will be specified later", "falsifier", "aspirational"),
         ("f-vague", "FALSIFIER: none", "falsifier", "vague"),
