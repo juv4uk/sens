@@ -33,8 +33,11 @@ jobs:
           import json
           d=json.load(open("/tmp/d6-frontier.json"))
           assert d["canonical"]["generated_members"] == 16
-          assert d["canonical"]["unknown_free"] == 48
+          assert d["canonical"]["ratified_manual_residents"] == 1
+          assert d["canonical"]["unknown_free"] == 47
           assert d["canonical"]["occupancy_mutations"] == 0
+          assert d["ratified_target"]["coordinate"] == "001111"
+          assert d["ratified_target"]["semantic_member"] is True
           assert d["frontier_counts"]["PURE-UNKNOWN"] == 44
           PY
 
