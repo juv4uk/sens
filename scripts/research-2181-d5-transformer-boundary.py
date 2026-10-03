@@ -35,7 +35,7 @@ def main() -> None:
     require(macro_lisp, "make-macro", "temporary transformer materializer")
     require(
         macro_lisp,
-        "temporary host substrate with no SID",
+        "explicit temporary host substrate with no language",
         "documented non-language make-macro boundary",
     )
 
