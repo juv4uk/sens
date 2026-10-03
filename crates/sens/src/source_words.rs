@@ -1,7 +1,8 @@
 //! Canonical visible-binary source boundary for SENS .lisp files.
 //!
 //! This module owns source token shape only. It deliberately does not assign
-//! D1/D2/D3 meaning; semantic wrappers consume these exact-width words later.
+//! per-coordinate semantic roles; typed domain wrappers consume exact-width
+//! words explicitly at their admitted domain boundaries.
 
 use crate::{
     Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, ErrorKind, LanguageError, Span,
@@ -86,6 +87,18 @@ impl BinarySourceWord {
             _ => None,
         }
     }
+
+    /// Lift an exact five-bit source word into the owner-ratified Core.D5
+    /// semantic-domain carrier.
+    ///
+    /// This assigns no coordinate meaning and performs no widening to Sens8.
+    /// Width alone is not the authority: the explicit method names Core.D5.
+    pub const fn core_d5(self) -> Option<crate::CoreD5Word> {
+        match self {
+            Self::W5(word) => Some(crate::CoreD5Word::from_word(word)),
+            _ => None,
+        }
+    }
 }
 
 impl From<crate::PredicateBit> for BinarySourceWord {
@@ -103,6 +116,12 @@ impl From<crate::Racana2> for BinarySourceWord {
 impl From<crate::Bija3> for BinarySourceWord {
     fn from(value: crate::Bija3) -> Self {
         Self::W3(value.word())
+    }
+}
+
+impl From<crate::CoreD5Word> for BinarySourceWord {
+    fn from(value: crate::CoreD5Word) -> Self {
+        Self::W5(value.word())
     }
 }
 
@@ -262,6 +281,35 @@ mod tests {
             assert_eq!(BinarySourceWord::from(typed), source);
             assert!(source.d1().is_none());
             assert!(source.d2().is_none());
+        }
+    }
+
+
+    #[test]
+    fn core_d5_bridge_is_exact_and_lossless_for_all_32_words() {
+        for raw in 0..=31 {
+            let source = BinarySourceWord::W5(Bit5::new(raw).unwrap());
+            let typed = source.core_d5().expect("W5 must enter Core.D5");
+            assert_eq!(typed.word().packed_bits(), raw);
+            assert_eq!(BinarySourceWord::from(typed), source);
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
+        }
+    }
+
+    #[test]
+    fn only_w5_enters_core_d5() {
+        for source in [
+            BinarySourceWord::W1(Bit1::new(0).unwrap()),
+            BinarySourceWord::W2(Bit2::new(0).unwrap()),
+            BinarySourceWord::W3(Bit3::new(0).unwrap()),
+            BinarySourceWord::W4(Bit4::new(0).unwrap()),
+            BinarySourceWord::W6(Bit6::new(0).unwrap()),
+            BinarySourceWord::W7(Bit7::new(0).unwrap()),
+            BinarySourceWord::W8(Bit8::new(0).unwrap()),
+        ] {
+            assert!(source.core_d5().is_none());
         }
     }
 
