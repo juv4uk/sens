@@ -58,19 +58,16 @@ def mechanism_facts() -> dict:
             or "D6" in domain
         ),
         "value_d6_identity": (
-            "Value::D6" in value
-            or "D6(" in value
-            or "Bit6" in value
+            "DomainIdentity(CoreDomainIdentity)" in value
+            or "Value::D6" in value
         ),
         "registry_d6_identity": (
-            "type SemanticId = Sens8" not in registry
-            or "Bit6" in registry
-            or "Domain6" in registry
+            "domain_generated::DOMAIN_SURFACE_ROWS" in registry
+            and "Bit6" in registry
         ),
         "lowering_d6_identity": (
-            "Bit6" in lower
-            or "Domain6" in lower
-            or "D6" in lower
+            "semantic_registry::domain_identity_for_surface" in lower
+            and "ExprKind::DomainCall" in lower
         ),
     }
 
@@ -81,9 +78,9 @@ def mechanism_facts() -> dict:
         "bit6_packing": True,
         "bit6_unpacking": True,
         "typed_d6_carrier": True,
-        "value_d6_identity": False,
-        "registry_d6_identity": False,
-        "lowering_d6_identity": False,
+        "value_d6_identity": True,
+        "registry_d6_identity": True,
+        "lowering_d6_identity": True,
     }
     if facts != expected:
         raise AssertionError(
@@ -119,17 +116,17 @@ def build() -> dict:
             "source_print_exact_w6": "YES",
             "packed_roundtrip_w6": "YES",
             "typed_d6_carrier": "YES",
-            "runtime_value_identity": "NO",
-            "semantic_registry_d6_identity": "NO",
-            "lowering_d6_identity": "NO",
+            "runtime_value_identity": "YES",
+            "semantic_registry_d6_identity": "YES",
+            "lowering_d6_identity": "YES",
             "native_evaluator_d6_identity": "NO",
             "compiler_d6_identity": "NOT-AUDITED",
             "semantic_identity_test": "NO",
             "selector_generator_evidence": "YES" if selector else "NO",
             "implementation_status": (
-                "TYPED-D6+GENERATOR-EVIDENCE"
+                "DOMAIN-IDENTITY-ADMITTED+GENERATOR-EVIDENCE"
                 if selector else
-                "TYPED-D6-CARRIER-ONLY"
+                "DOMAIN-IDENTITY-ADMITTED"
             ),
         })
 
@@ -142,7 +139,7 @@ def build() -> dict:
     return {
         "schema": "d6-runtime-admission-audit/v1",
         "issue": "#2766",
-        "principle": "typed Core.D6 representation is not runtime/evaluator D6 admission",
+        "principle": "Core.D6 identity is admitted independently from native mechanism completion",
         "owner_map": "knowledge/d6-historical-full-map.json",
         "mechanism_facts": facts,
         "summary": {
@@ -150,9 +147,9 @@ def build() -> dict:
             "source_exact_w6": 64,
             "packed_roundtrip_w6": 64,
             "typed_d6_carrier": 64,
-            "runtime_value_identity": 0,
-            "semantic_registry_d6_identity": 0,
-            "lowering_d6_identity": 0,
+            "runtime_value_identity": 64,
+            "semantic_registry_d6_identity": 64,
+            "lowering_d6_identity": 64,
             "native_evaluator_d6_identity": 0,
             "selector_generator_evidence": 16,
             "compiler_d6_identity": "NOT-AUDITED",
