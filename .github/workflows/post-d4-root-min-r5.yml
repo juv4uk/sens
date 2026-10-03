@@ -1,0 +1,36 @@
+name: Post-D4 root minimization R5
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/post-d4-root-min-r5/**"
+      - ".github/workflows/post-d4-root-min-r5.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/post-d4-root-min-r5/**"
+      - ".github/workflows/post-d4-root-min-r5.yml"
+  workflow_dispatch:
+
+jobs:
+  r5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run expansion-timing root minimization
+        run: |
+          rm -rf /tmp/post-d4-root-min-r5
+          python3 benchmarks/post-d4-root-min-r5/run.py             --out /tmp/post-d4-root-min-r5
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/post-d4-root-min-r5/report.md; then
+            cat /tmp/post-d4-root-min-r5/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post-d4-root-min-r5
+          path: /tmp/post-d4-root-min-r5/
+          retention-days: 14
