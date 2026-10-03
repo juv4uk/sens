@@ -98,8 +98,19 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::DomainIdentity(identity) => {
-            canon::invoke_domain_identity(*identity, arguments, environment, span)
+        Value::DomainIdentity(identity) => match identity.core_operation() {
+            Some(core_identity) => {
+                canon::invoke_domain_identity(core_identity, arguments, environment, span)
+            }
+            None => Err(LanguageError::new(
+                ErrorKind::Type,
+                format!(
+                    "domain identity is not callable under its ratified law: D{} {}",
+                    identity.width(),
+                    identity
+                ),
+                span,
+            )),
         }
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
@@ -324,11 +335,22 @@ fn dispatch_call(
     };
     match &function {
         Value::DomainIdentity(identity) => {
+            let Some(core_identity) = identity.core_operation() else {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "domain identity is not callable under its ratified law: D{} {}",
+                        identity.width(),
+                        identity
+                    ),
+                    span,
+                ));
+            };
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
                 values.push(evaluate(argument, environment)?);
             }
-            canon::invoke_domain_identity(*identity, &values, environment, span)
+            canon::invoke_domain_identity(core_identity, &values, environment, span)
                 .map(EvalStep::Value)
         }
         Value::Sid(sid) => {
@@ -376,7 +398,7 @@ fn binary_head_domain_identity(expression: &Expr) -> Option<CoreDomainIdentity> 
     let ExprKind::DomainIdentity(identity) = expression.kind else {
         return None;
     };
-    Some(identity)
+    identity.core_operation()
 }
 
 fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
