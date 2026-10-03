@@ -1,0 +1,41 @@
+name: Core Core-Math exact-Q bridge research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-coremath-q-bridge/**"
+      - ".github/workflows/core-coremath-q-bridge.yml"
+      - "benchmarks/core-number-q-product-ladder/**"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-coremath-q-bridge/**"
+      - ".github/workflows/core-coremath-q-bridge.yml"
+  workflow_dispatch:
+
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Re-check Core rational ladder donor
+        run: |
+          rm -rf /tmp/core-number-q-product-ladder
+          python3 benchmarks/core-number-q-product-ladder/run.py             --out /tmp/core-number-q-product-ladder
+      - name: Run complementary exact-Q bridge
+        run: |
+          rm -rf /tmp/core-coremath-q-bridge
+          python3 benchmarks/core-coremath-q-bridge/run.py             --out /tmp/core-coremath-q-bridge
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-coremath-q-bridge/report.md; then
+            cat /tmp/core-coremath-q-bridge/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-coremath-q-bridge
+          path: /tmp/core-coremath-q-bridge/
+          retention-days: 14
