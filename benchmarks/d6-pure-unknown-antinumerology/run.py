@@ -8,7 +8,8 @@ Research only.  This proves a negative result:
 when every PURE-UNKNOWN slot has the same admitted evidence and class-preserving
 relabelings are allowed.
 
-No canonical occupancy, width, resident, or owner decision is changed.
+No new canonical occupancy, width, resident, or owner decision is made here.
+The already owner-ratified 001111 resident is treated as fixed external evidence.
 """
 
 from __future__ import annotations
@@ -79,8 +80,9 @@ def build() -> dict[str, Any]:
     ]
 
     assert len(pure_rows) == 44
-    assert len(nonpure_rows) == 4
-    assert frontier_result["canonical"]["occupancy_mutations"] == 0
+    assert len(nonpure_rows) == 3
+    assert frontier_result["canonical"]["ratified_manual_coordinates"] == [TARGET]
+    assert frontier_result["canonical"]["research_occupancy_mutations"] == 0
 
     # All 44 slots carry exactly the same admitted evidence.
     signatures = {evidence_signature(row) for row in pure_rows}
@@ -193,11 +195,13 @@ def build() -> dict[str, Any]:
             "invariant_singleton_exists": False,
         },
         "coordinate_only_rankings": ranking_results,
-        "fixed_nonpure_coordinates": sorted(row["coordinate"] for row in nonpure_rows),
+        "fixed_nonpure_unknown_coordinates": sorted(row["coordinate"] for row in nonpure_rows),
+        "fixed_owner_ratified_coordinates": [TARGET],
         "canonical": {
             "generated_members": frontier_result["canonical"]["generated_members"],
+            "ratified_manual_residents": frontier_result["canonical"]["ratified_manual_residents"],
             "unknown_free": frontier_result["canonical"]["unknown_free"],
-            "occupancy_mutations": 0,
+            "research_occupancy_mutations": 0,
         },
         "result": "NO-CANDIDATE-FROM-COORDINATE-ONLY",
         "falsifier": (
@@ -233,7 +237,7 @@ def main() -> int:
     print("orbit-size=44")
     print("invariant-singleton=false")
     print("coordinate-only-rankings-rejected=5")
-    print("occupancy-mutations=0")
+    print("research-occupancy-mutations=0")
     print("RESULT=NO-CANDIDATE-FROM-COORDINATE-ONLY")
     return 0
 
