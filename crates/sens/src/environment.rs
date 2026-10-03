@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{CoreDomainIdentity, Value};
 use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -93,6 +93,12 @@ struct Limits {
     /// заповнює перше визначення верхнього рівня з назвою з таблиці функцій;
     /// пізніше затінення назви слот не змінює.
     code_slots: HashMap<u8, Value>,
+    /// Canonical language-owned definitions keyed by exact domain-qualified
+    /// identity. This path never reduces identity to a packed byte.
+    ///
+    /// The legacy `code_slots` map remains alongside it temporarily for
+    /// explicit Sens8 compatibility while callers migrate under #2817.
+    domain_slots: HashMap<CoreDomainIdentity, Value>,
 }
 
 impl Environment {
@@ -250,6 +256,28 @@ impl Environment {
             return false;
         }
         limits.code_slots.insert(sid.packed_byte(), value);
+        true
+    }
+
+    /// Canonical lookup by exact Core domain identity.
+    ///
+    /// Equal packed payloads in different domains are distinct keys.
+    pub fn domain_slot(&self, identity: CoreDomainIdentity) -> Option<Value> {
+        self.2.borrow().domain_slots.get(&identity).cloned()
+    }
+
+    /// Bind a language-owned definition exactly once for one domain-qualified
+    /// identity. No Sens8 projection or packed-byte lookup is involved.
+    pub fn bind_domain_slot_once(
+        &self,
+        identity: CoreDomainIdentity,
+        value: Value,
+    ) -> bool {
+        let mut limits = self.2.borrow_mut();
+        if limits.domain_slots.contains_key(&identity) {
+            return false;
+        }
+        limits.domain_slots.insert(identity, value);
         true
     }
 
