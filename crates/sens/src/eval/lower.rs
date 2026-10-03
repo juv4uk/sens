@@ -15,18 +15,18 @@
 use super::{canon, necessary_forms};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
-use crate::Sens8;
+use crate::SemanticRef;
 use std::rc::Rc;
 
-const QUOTE: Sens8 = crate::sens!(00000001);
-const COND: Sens8 = crate::sens!(00000111);
+const QUOTE: SemanticRef = SemanticRef::legacy8(crate::sens!(00000001));
+const COND: SemanticRef = SemanticRef::legacy8(crate::sens!(00000111));
 
 /// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
     expressions.iter().map(|expression| lower(expression, 0)).collect()
 }
 
-fn head_sid(head: &Expr) -> Option<Sens8> {
+fn head_sid(head: &Expr) -> Option<SemanticRef> {
     match &head.kind {
         ExprKind::Sid(sid) => Some(*sid),
         ExprKind::Symbol(name) => immutable_surface_sid(name),
@@ -35,13 +35,13 @@ fn head_sid(head: &Expr) -> Option<Sens8> {
 }
 
 /// Написання, що маршрутизується до фіксованого SENS (не окрема identity).
-fn immutable_surface_sid(name: &str) -> Option<Sens8> {
+fn immutable_surface_sid(name: &str) -> Option<SemanticRef> {
     if let Some(sid) = canon::routed_sid_for_surface(name) {
-        return Some(sid);
+        return Some(SemanticRef::legacy8(sid));
     }
     // M8: будь-яка admitted surface → SENS. Необхідні форми лишаються
     // підмножиною; раніше лише вони зводились, тож `+`/`-` шукались у runtime.
-    semantic_registry::admitted_semantic_id_for_surface(name)
+    semantic_registry::admitted_semantic_id_for_surface(name).map(SemanticRef::legacy8)
 }
 
 fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
@@ -71,7 +71,11 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                         })
                         .collect(),
                 ),
-                Some(sid) if necessary_forms::identity_for_semantic_id(sid).is_some() => {
+                Some(sid)
+                    if sid
+                        .legacy8_word()
+                        .and_then(necessary_forms::identity_for_semantic_id)
+                        .is_some() => {
                     ExprKind::Call(
                         sid,
                         arguments
@@ -116,7 +120,7 @@ mod tests {
         let expr = lower_one("(+ 1 2)");
         match expr.kind {
             ExprKind::Call(sid, args) => {
-                assert_eq!(sid, crate::sens!(00001100));
+                assert_eq!(sid, SemanticRef::legacy8(crate::sens!(00001100)));
                 assert_eq!(args.len(), 2);
             }
             other => panic!("expected Call, got {other:?}"),
@@ -127,7 +131,7 @@ mod tests {
     fn minus_surface_lowers_to_sens_call() {
         let expr = lower_one("(- 5 3)");
         match expr.kind {
-            ExprKind::Call(sid, _) => assert_eq!(sid, crate::sens!(00001101)),
+            ExprKind::Call(sid, _) => assert_eq!(sid, SemanticRef::legacy8(crate::sens!(00001101))),
             other => panic!("expected Call, got {other:?}"),
         }
     }
