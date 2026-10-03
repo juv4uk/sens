@@ -189,7 +189,10 @@ def main() -> int:
     direct = graph_adhikara_query(edges, anchor)
     derived = derive_scope_children(anchors, relation)
 
-    assert derived == direct
+    # Graph edge iteration / opaque-ID lexical order is not semantic.
+    # Compare relation membership as a set; the derived tuple keeps canonical
+    # textual source order only as provenance within the scope-law witness.
+    assert set(derived) == set(direct)
     assert len(derived) == 5
 
     leave_one_out = 0
@@ -227,10 +230,10 @@ def main() -> int:
 
         rderived = derive_scope_children(ra, rr)
         rdirect = graph_adhikara_query(re, rr["anchor_node"])
-        assert rderived == rdirect
+        assert set(rderived) == set(rdirect)
 
         recovered = tuple(reverse[node] for node in rderived)
-        assert recovered == direct
+        assert recovered == derived
         reverse_checks += 1
         lawful += 1
 
@@ -261,7 +264,7 @@ def main() -> int:
     encoded_a = tuple(cb_a[node] for node in derived)
     encoded_b = tuple(cb_b[node] for node in derived)
     assert encoded_a != encoded_b
-    assert derived == direct
+    assert set(derived) == set(direct)
 
     result = {
         "schema": "sens-d14-panini-donor-invariance/v1",
