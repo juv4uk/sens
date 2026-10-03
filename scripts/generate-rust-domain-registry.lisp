@@ -1,6 +1,6 @@
 ; Mechanical Rust projection of the exact-domain surface registry.
 ;
-; Authority: lib/surface/domain-registry.lisp
+; Authority: knowledge/domain-surface-registry.lisp
 ; This generator emits only width + exact bits + surfaces. It never reads or
 ; emits a legacy Function8/Sens8 byte.
 ;
@@ -8,7 +8,7 @@
 ;   cargo run -p sens-cli -- scripts/generate-rust-domain-registry.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-domain-registry.lisp --check
 
-(00001001 source-path "lib/surface/domain-registry.lisp")
+(00001001 source-path "knowledge/domain-surface-registry.lisp")
 (00001001 output-path "crates/sens/src/domain_surface_registry_generated.rs")
 
 (00001001 str+
@@ -88,7 +88,7 @@
 (00001001 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
-    "// Authority: lib/surface/domain-registry.lisp\n"
+    "// Authority: knowledge/domain-surface-registry.lisp\n"
     "// Generator: scripts/generate-rust-domain-registry.lisp\n"
     "// No legacy Function8/Sens8 byte is present in this projection.\n"
     "\n"
@@ -111,8 +111,8 @@
   (str+ header (render-rows rows) "];\n"))
 
 (00000111
-  ((00000010 *argv*)
-   ()
+  ((00100010 *argv* (00000001 ()))
+   (1)
    (00101111
      (00100111
        (10100111 output-path generated)
