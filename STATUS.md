@@ -1,30 +1,64 @@
-# My-Lisp Status
+# SENS Status
 
-## Current milestone
+**Current paradigm:** binary-domain ontology (#2490)
 
-Self-hosting boundary and semantic core completion.
+```text
+semantic object = binary number + exact domain + proved/admitted law
+```
 
-## DONE
+## RATIFIED / ESTABLISHED
 
-- Canonical language contract foundation
-- Semantic evaluator work
-- Environment semantics witnesses
-- Mutual recursion groundwork
+- D1 PredicateBit and D2 `racanā2`.
+- D3/D4 current Core foundation.
+- D5/D6 domain widths/ontology — occupancy/final native maps still under research.
+- D7 Sound7 + local śloka/sūtra ordinals; not general arithmetic Number.
+- Historical-first Core workflow: HISTORICAL-INGEST -> STRUCTURAL-DISCOVERY -> SENS-DERIVATION.
+- Domain/carrier/mechanism separation.
+- Same machine bit transform does not imply the same semantic law across domains.
+- Core/Core-Math selector convergence has a bounded executable positive control.
 
-## IN PROGRESS
+## ACTIVE
 
-- Move evaluation logic toward My-Lisp level
-- Reduce Rust semantic responsibility
-- Expand executable language contracts
+- Finish historical D5/D6 inventory without free-slot placement.
+- Attack D6 PURE-UNKNOWN coordinates by laws, not by numerical adjacency.
+- Derive exact-domain admission rules for parentless semantic roots.
+- Continue Core-Math `bits + law -> bits` research.
+- Research D14 Pāṇini as a graph domain.
+- Research D24/D48/... exact Number domains for FPGA-oriented execution.
+- Keep canonical wire/transport/RF mechanisms semantically non-authoritative.
+- Ratchet governed tasks to explicit PHASE + seven semantic fields.
 
-## NEXT
+## DO NOT ASSUME
 
-1. Self-hosted evaluator milestone
-2. Macro system completion
-3. Standard library migration from runtime primitives
-4. Contract-driven regression tests
-5. Prepare abstract machine boundary for future VM/FPGA experiments
+- width == semantic domain;
+- bits alone == meaning;
+- free coordinate == function;
+- historical presence == SENS primitive;
+- derivable in SENS == absent from history;
+- same `2*x+b` transform == same law;
+- cache/hash/AST/JSON/registry == semantic identity;
+- Core and Core-Math must converge.
+
+## NEXT DECISIONS COME FROM EVIDENCE
+
+The preferred outcome of a research task may be:
+
+```text
+RATIFIED
+GENERATED
+DERIVED
+FALSIFIED
+UNKNOWN / UNRESOLVED
+DIVERGENT
+COMPLEMENTARY
+CONVERGENT
+```
+
+Negative results are first-class evidence.
+
+See [`CURRENT.md`](CURRENT.md) and
+[`docs/current-binary-domain-architecture.md`](docs/current-binary-domain-architecture.md).
 
 ## Design principle
 
-Rust provides mechanism. My-Lisp defines meaning.
+**Bits carry an object only inside a law-bearing domain. History supplies observations; structure supplies laws; SENS is derived afterward.**
