@@ -6,7 +6,7 @@
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry;
-use crate::Sens8;
+use crate::{Bit4, CoreD4, CoreDomainIdentity, Sens8};
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -16,6 +16,54 @@ mod generated {
 pub(crate) enum NecessaryFormIdentity {
     Define,
     Lambda,
+}
+
+fn canonical_domain_identity(
+    mechanism: generated::NecessaryFormMechanism,
+) -> CoreDomainIdentity {
+    let bits = match mechanism {
+        generated::NecessaryFormMechanism::Lambda => 0b0010,
+        generated::NecessaryFormMechanism::Define => 0b0011,
+    };
+    CoreDomainIdentity::D4(CoreD4::from_word(
+        Bit4::new(bits).expect("necessary-form D4 coordinate must fit"),
+    ))
+}
+
+/// Select the evaluator mechanism from the exact canonical domain identity.
+///
+/// Only D4 LAMBDA=0010 and DEFINE=0011 are necessary forms. Equal packed
+/// payloads in D3/D5/D6 do not inherit this meaning.
+pub(crate) fn identity_for_domain_identity(
+    identity: CoreDomainIdentity,
+) -> Option<NecessaryFormIdentity> {
+    let CoreDomainIdentity::D4(word) = identity else {
+        return None;
+    };
+    match word.word().packed_bits() {
+        0b0010 => Some(NecessaryFormIdentity::Lambda),
+        0b0011 => Some(NecessaryFormIdentity::Define),
+        _ => None,
+    }
+}
+
+/// Canonical domain identity for one necessary-form surface.
+///
+/// Stable lambda/define spellings arrive from the domain-qualified registry.
+/// The historical `def` surface is compatibility-only: its legacy row is used
+/// solely to recover the already-known Define mechanism and is normalized
+/// immediately to canonical D4:0011. No numeric truncation is permitted.
+pub(crate) fn domain_identity_for_symbol(name: &str) -> Option<CoreDomainIdentity> {
+    if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
+        return identity_for_domain_identity(identity).map(|_| identity);
+    }
+
+    let legacy = semantic_registry::admitted_semantic_id_for_surface(name)?;
+    let mechanism = generated::NECESSARY_FORM_DISPATCH
+        .iter()
+        .find(|row| row.semantic_id == legacy.packed_byte())
+        .map(|row| row.mechanism)?;
+    Some(canonical_domain_identity(mechanism))
 }
 
 pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFormIdentity> {
@@ -37,13 +85,40 @@ pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFo
 /// (previously duplicated in both `eval/mod.rs` and `ir.rs` for exactly
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
-    semantic_registry::admitted_semantic_id_for_surface(name)
-        .and_then(identity_for_semantic_id)
+    domain_identity_for_symbol(name).and_then(identity_for_domain_identity)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn exact_domain_controls_necessary_form_routing() {
+        let lambda = domain_identity_for_symbol("lambda").expect("lambda D4 identity");
+        let define = domain_identity_for_symbol("define").expect("define D4 identity");
+        let compat_def = domain_identity_for_symbol("def").expect("def normalizes to DEFINE");
+
+        assert_eq!((lambda.width(), lambda.packed_bits()), (4, 0b0010));
+        assert_eq!((define.width(), define.packed_bits()), (4, 0b0011));
+        assert_eq!(compat_def, define);
+        assert_eq!(
+            identity_for_domain_identity(lambda),
+            Some(NecessaryFormIdentity::Lambda)
+        );
+        assert_eq!(
+            identity_for_domain_identity(define),
+            Some(NecessaryFormIdentity::Define)
+        );
+
+        let d3_atom = crate::CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b010).unwrap(),
+        ));
+        let d3_cond = crate::CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b011).unwrap(),
+        ));
+        assert_eq!(identity_for_domain_identity(d3_atom), None);
+        assert_eq!(identity_for_domain_identity(d3_cond), None);
+    }
 
     #[test]
     fn byte_sid_is_not_a_surface_spelling() {
