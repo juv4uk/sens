@@ -10,7 +10,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -34,6 +34,9 @@ fn domain_identity_from_exact_row(width: u8, bits: u8) -> Option<CoreDomainIdent
         4 => Bit4::new(bits)
             .map(CoreD4::from_word)
             .map(CoreDomainIdentity::D4),
+        5 => Bit5::new(bits)
+            .map(CoreD5::from_word)
+            .map(CoreDomainIdentity::D5),
         _ => None,
     }
 }
@@ -199,7 +202,7 @@ mod tests {
 
     #[test]
     fn unmigrated_registry_rows_have_no_fake_domain_identity() {
-        assert_eq!(domain_identity_for_surface("+"), None);
+        assert_eq!(domain_identity_for_surface("sqrt"), None);
     }
 
     #[test]
@@ -210,6 +213,12 @@ mod tests {
             ("caar", 4, 0b1010),
             ("cadr", 4, 0b1011),
             ("cddr", 4, 0b1101),
+            ("+", 5, 0b01010),
+            ("додати", 5, 0b01010),
+            ("-", 5, 0b01011),
+            ("*", 5, 0b10010),
+            ("/", 5, 0b10011),
+            ("quotient", 5, 0b10011),
         ] {
             let identity = domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("missing exact-domain surface: {surface}"));

@@ -22,6 +22,17 @@
   (#b100 "0011" (en define) (ук визначити) (укр визначити) (sa ()) (sym ()))
   (#b100 "0011" (en def) (ук ()) (укр ()) (sa ()) (sym ()))
 
+  ; D5 arithmetic roles with direct domain mechanisms (#2960).
+  (#b101 "01010" (en plus) (ук додати) (укр додати) (sa yoga) (sym +))
+  (#b101 "01011" (en difference) (ук відняти) (укр відняти) (sa viyoga) (sym -))
+  (#b101 "10010" (en times) (ук помножити) (укр помножити) (sa guṇana) (sym *))
+  (#b101 "10011"
+    (en quotient) (en divide)
+    (ук частка) (ук поділити)
+    (укр частка) (укр поділити)
+    (sa bhāga) (sa haraṇa)
+    (sym /))
+
   ; D4 selector descendants. Runtime admission is completed by #2928.
   (#b100 "1010" (en caar) (ук ()) (укр перше-від-першого) (sa ()) (sym ()))
   (#b100 "1011" (en cadr) (ук ()) (укр перше-від-решти) (sa ()) (sym ()))
