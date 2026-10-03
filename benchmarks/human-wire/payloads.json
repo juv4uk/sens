@@ -1,0 +1,31 @@
+{
+  "schema": "human-wire-payloads/v1",
+  "authority": "research-fixtures-only",
+  "generator": "python-random-getrandbits-seeded-v1",
+  "fixtures": [
+    {
+      "id": "historical-34-byte-fixture",
+      "payload_bits": 272,
+      "seed": 1,
+      "purpose": "reproduce the bounded 34-byte/272-bit discussion from #1845 without treating it as current wire authority"
+    },
+    {
+      "id": "equal-width-study-fixture",
+      "payload_bits": 480,
+      "seed": 2,
+      "word_widths": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "purpose": "byte-aligned equal-bit-count fixture divisible by every D1-D5 word width for #2647"
+    }
+  ],
+  "guards": [
+    "fixture size is not semantic width authority",
+    "fixture bits are synthetic and carry no semantic labels",
+    "transport overhead is added separately by each protocol model"
+  ]
+}
