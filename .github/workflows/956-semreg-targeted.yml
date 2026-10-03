@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "lib/surface/semantic-registry-api.lisp"
-      - "lib/surface/domain-registry.lisp"
+      - "knowledge/domain-surface-registry.lisp"
       - "crates/sens/tests/semantic_registry_lisp.rs"
       - "tests/fixtures/semantic-registry-self-hosted-witness.lisp"
       - "scripts/generate-rust-semantic-registry.lisp"
