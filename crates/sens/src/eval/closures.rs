@@ -271,10 +271,8 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
             }
             match environment.get(name) {
                 Some(Value::Macro(_) | Value::Builtin(_)) => Head::Opaque,
-                Some(Value::Sid(identity)) => identity
-                    .legacy_sens8()
-                    .map(|sid| sid_head(sid, environment))
-                    .unwrap_or(Head::Call),
+                Some(Value::Sid(_)) => Head::Call,
+                Some(Value::LegacySid(sid)) => sid_head(sid, environment),
                 _ => Head::Call,
             }
         }
@@ -468,15 +466,15 @@ pub(super) fn apply(
 ) -> Result<EvalStep, LanguageError> {
     match function {
         Value::Sid(identity) => {
-            let sid = identity.legacy_sens8().ok_or_else(|| {
-                LanguageError::new(
-                    ErrorKind::InvalidForm,
-                    format!(
-                        "domain-qualified callable execution is not migrated in this runtime slice: {identity:?}"
-                    ),
-                    span,
-                )
-            })?;
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!(
+                    "domain-qualified callable execution is not migrated in this runtime slice: {identity:?}"
+                ),
+                span,
+            ));
+        }
+        Value::LegacySid(sid) => {
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
                 values.push(evaluate(argument, calling_environment)?);
@@ -648,17 +646,15 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
         Value::Sid(identity) => {
-            let sid = identity.legacy_sens8().ok_or_else(|| {
-                LanguageError::new(
-                    ErrorKind::InvalidForm,
-                    format!(
-                        "domain-qualified callable cannot lower through the legacy Sens8 AST path: {identity:?}"
-                    ),
-                    span,
-                )
-            })?;
-            ExprKind::Sid(sid)
-        },
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!(
+                    "domain-qualified callable cannot lower through the legacy Sens8 AST path: {identity:?}"
+                ),
+                span,
+            ));
+        }
+        Value::LegacySid(sid) => ExprKind::Sid(*sid),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
         Value::String(val) => ExprKind::String(val.clone()),
         // A legacy host builtin is callable but not syntax either.
