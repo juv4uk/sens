@@ -27,7 +27,7 @@ Both ratified Core D5 and D6 have unused coordinates:
 
 ```text
 D5  8 generated / 24 UNKNOWN-free
-D6 16 generated / 48 UNKNOWN-free
+D6 16 generated / 1 ratified manual resident / 47 UNKNOWN-free
 ```
 
 The same root theorem supplies no width. Free capacity is therefore
@@ -63,7 +63,7 @@ semantic object = binary number + exact domain + proved law
 - non-local-exit is not placed in D5;
 - non-local-exit is not placed in D6;
 - control-observation count does not imply bit width;
-- D6 owner candidate `001111` is separate from this root-domain problem;
+- owner-ratified D6 resident `001111` is separate from this root-domain problem;
 - no coordinate is allocated.
 
 ## Reproduce
