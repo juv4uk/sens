@@ -7,10 +7,12 @@ on:
       - "crates/sens/src/source_words.rs"
       - "crates/sens/src/domain_words.rs"
       - "crates/sens/src/parser.rs"
+      - "crates/sens/src/syntax.rs"
       - "crates/sens/src/sens.rs"
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/eval/lower.rs"
       - "crates/sens/tests/d5_source_boundary.rs"
+      - "crates/sens/tests/d5_ast_identity.rs"
       - "scripts/research-2766-d5-runtime-admission.py"
       - ".github/workflows/d5-runtime-admission-audit.yml"
       - "knowledge/repo-tooling-inventory.lisp"
@@ -28,6 +30,9 @@ jobs:
 
       - name: Prove all 32 exact W5 source words
         run: cargo test -p sens --test d5_source_boundary
+
+      - name: Prove all 32 Core.D5 AST identities
+        run: cargo test -p sens --test d5_ast_identity
 
       - name: Emit D5 runtime admission matrix
         run: |
