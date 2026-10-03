@@ -78,11 +78,9 @@ fn render_uk(value: &Value) -> String {
         Value::Number(number, Exactness::Exact) => number.to_string(),
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
         Value::Rational(number) => number.to_string(),
-        Value::Sid(identity) => {
-            match identity.legacy_sens8() {
-                Some(sid) => format!("#<вбудована {}>", uk_semantic_name(sid)),
-                None => format!("#<вбудована {identity:?}>"),
-            }
+        Value::Sid(identity) => format!("#<вбудована {identity:?}>"),
+        Value::LegacySid(sid) => {
+            format!("#<вбудована {}>", uk_semantic_name(*sid))
         }
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
