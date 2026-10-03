@@ -119,17 +119,16 @@
        (01001000 "Rust exact-domain registry projection written"))))
   ((00100010 (00000101 *argv*) "--check")
    (1)
-   (10011100 ((current (10100110 output-path)))
-     (00000111
-       ((00100010 current generated)
-        (1)
-        (01001000 "Rust exact-domain registry projection is current"))
-       ((00100010 current generated)
-        (0)
-        (00101111
-          (00100111
-            (01001000 "Rust exact-domain registry projection is stale")
-            (00000101 (00000001 ()))))))))
+   (00000111
+     ((00100010 (10100110 output-path) generated)
+      (1)
+      (01001000 "Rust exact-domain registry projection is current"))
+     ((00100010 (10100110 output-path) generated)
+      (0)
+      (00101111
+        (00100111
+          (01001000 "Rust exact-domain registry projection is stale")
+          (00000101 (00000001 ())))))))
   ((00000001 write-projection)
    write-projection
    (00101111
