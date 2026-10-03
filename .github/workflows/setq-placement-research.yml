@@ -1,0 +1,45 @@
+name: SETQ placement research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2489-setq-placement.py"
+      - "docs/research/2489-setq-placement.md"
+      - "docs/research/2489-setq-placement.uk.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/setq-placement-research.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-2489-setq-placement.py"
+      - "docs/research/2489-setq-placement.md"
+      - "docs/research/2489-setq-placement.uk.md"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/setq-placement-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  placement:
+    name: SETQ parent + delta witness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run SETQ placement falsifier
+        run: python3 scripts/research-2489-setq-placement.py
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## #2489 SETQ-core placement"
+            echo
+            echo "~~~text"
+            python3 scripts/research-2489-setq-placement.py
+            echo "~~~"
+            echo
+            echo "- Research only: no D5/D6 identity is allocated."
+            echo "- A free D5 child word is not sufficient placement evidence."
+          } >> "$GITHUB_STEP_SUMMARY"
