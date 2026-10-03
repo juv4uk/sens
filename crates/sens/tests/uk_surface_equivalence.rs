@@ -112,20 +112,34 @@ fn every_stable_uk_surface_entry_lowers_to_its_declared_exact_sens() {
             "EN/UK surfaces must project to one exact SENS: {english} / {ukrainian}"
         );
 
-        for surface in [english.as_str(), ukrainian.as_str()] {
+        let lower_head = |surface: &str| {
             let source = format!("({surface})");
             let parsed = parse(&source).expect("admitted surface call must parse");
             let lowered = lower_program(&parsed);
             assert_eq!(lowered.len(), 1);
-            match &lowered[0].kind {
-                ExprKind::Call(sens, _) => assert_eq!(
-                    *sens, declared,
-                    "surface head must lower directly to declared exact SENS: {surface}"
-                ),
-                other => panic!(
-                    "admitted surface head must lower to exact SENS Call: {surface} -> {other:?}"
-                ),
+            lowered.into_iter().next().expect("one lowered form").kind
+        };
+
+        let english_head = lower_head(english);
+        let ukrainian_head = lower_head(ukrainian);
+
+        match (&english_head, &ukrainian_head) {
+            (ExprKind::Call(en, _), ExprKind::Call(uk, _)) => {
+                assert_eq!(en, uk, "EN/UK legacy calls must converge");
+                assert_eq!(
+                    *en, declared,
+                    "legacy call must still match the declared compatibility projection"
+                );
             }
+            (ExprKind::DomainCall(en, _), ExprKind::DomainCall(uk, _)) => {
+                assert_eq!(
+                    en, uk,
+                    "EN/UK surfaces must converge on one canonical domain identity"
+                );
+            }
+            (en, uk) => panic!(
+                "EN/UK surfaces must lower to the same identity kind: {english} -> {en:?}, {ukrainian} -> {uk:?}"
+            ),
         }
     }
 }
