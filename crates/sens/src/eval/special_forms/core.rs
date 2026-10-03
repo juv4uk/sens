@@ -249,7 +249,7 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             }
             ExprKind::DomainCall(identity, arguments) => {
                 let mut out = Vec::with_capacity(arguments.len() + 1);
-                out.push(Value::DomainIdentity(*identity));
+                out.push(Value::DomainIdentity((*identity).into()));
                 for argument in arguments.iter() {
                     out.push(go(argument, depth + 1)?);
                 }
