@@ -130,7 +130,10 @@ pub use binary_framing::{
 };
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
-pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
+pub use language_items::{
+    domain_language_items, language_items, Arity, DomainLanguageItem, LanguageItem,
+    LanguageItemKind,
+};
 #[allow(deprecated)]
 pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
