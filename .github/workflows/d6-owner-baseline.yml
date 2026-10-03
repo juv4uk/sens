@@ -1,0 +1,58 @@
+name: D6 owner baseline guard
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2764-d6-owner-baseline.py"
+      - "knowledge/d6-historical-full-map.json"
+      - ".github/workflows/d6-owner-baseline.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/research-2764-d6-owner-baseline.py"
+      - "knowledge/d6-historical-full-map.json"
+      - ".github/workflows/d6-owner-baseline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify current owner-ratified D6 OD-006 baseline
+        run: |
+          python3 scripts/research-2764-d6-owner-baseline.py             --json-out /tmp/d6-owner-baseline.json
+          cat /tmp/d6-owner-baseline.json
+
+      - name: Publish invariant summary
+        run: |
+          {
+            echo "## Core D6 owner baseline"
+            echo
+            echo "- width: 6"
+            echo "- capacity: 64"
+            echo "- resident coordinates: 64/64"
+            echo "- unallocated coordinates: 0"
+            echo "- selector residents retained: 16"
+            echo "- historical nonselector residents: 48"
+            echo "- every D5 parent has exact P0/P1 D6 children"
+            echo "- canonical authority: OD-006 / #2753"
+            echo "- D6:001111 current owner projection: DEFVAR"
+            echo "- old 16+48 / PURE-UNKNOWN model is pre-OD006 research evidence"
+            echo "- semantic derivability is separate (#2765)"
+            echo "- runtime executability is separate (#2766)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: d6-owner-baseline
+          path: /tmp/d6-owner-baseline.json
+          retention-days: 14
