@@ -19,6 +19,25 @@ pub enum Error {
     WidthOverflow,
     ValueOverflow,
     DeltaMustBeOneBit,
+    UnknownLaw,
+    WrongArity,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Law {
+    factor: BinaryNumber,
+}
+
+impl Law {
+    /// The first admitted law is characterized by its mathematical factor
+    /// 10₂ = 2, not by an assigned operation ID or human name.
+    pub fn new(factor: BinaryNumber) -> Result<Self, Error> {
+        if factor.width() == 2 && factor.value() == 2 {
+            Ok(Self { factor })
+        } else {
+            Err(Error::UnknownLaw)
+        }
+    }
 }
 
 impl BinaryNumber {
@@ -75,7 +94,12 @@ impl BinaryNumber {
 ///
 /// Delta is itself an exact one-bit binary number. The returned object can
 /// immediately become parent in another application.
-pub fn apply(parent: BinaryNumber, delta: BinaryNumber) -> Result<BinaryNumber, Error> {
+pub fn apply(law: Law, inputs: &[BinaryNumber]) -> Result<BinaryNumber, Error> {
+    if inputs.len() != 2 {
+        return Err(Error::WrongArity);
+    }
+    let parent = inputs[0];
+    let delta = inputs[1];
     if delta.width != 1 {
         return Err(Error::DeltaMustBeOneBit);
     }
@@ -85,7 +109,7 @@ pub fn apply(parent: BinaryNumber, delta: BinaryNumber) -> Result<BinaryNumber, 
     }
     let value = parent
         .value
-        .checked_mul(2)
+        .checked_mul(law.factor.value)
         .and_then(|v| v.checked_add(delta.value))
         .ok_or(Error::ValueOverflow)?;
     BinaryNumber::new(value, width)
@@ -98,7 +122,8 @@ mod tests {
     #[test]
     fn exact_width_is_preserved() {
         let x = BinaryNumber::parse("001").unwrap();
-        let y = apply(x, BinaryNumber::parse("0").unwrap()).unwrap();
+        let law = Law::new(BinaryNumber::parse("10").unwrap()).unwrap();
+        let y = apply(law, &[x, BinaryNumber::parse("0").unwrap()]).unwrap();
         assert_eq!(y.bits(), "0010");
         assert_eq!(y.width(), 4);
     }
@@ -106,8 +131,9 @@ mod tests {
     #[test]
     fn result_is_reusable() {
         let x = BinaryNumber::parse("101").unwrap();
-        let y = apply(x, BinaryNumber::parse("0").unwrap()).unwrap();
-        let z = apply(y, BinaryNumber::parse("1").unwrap()).unwrap();
+        let law = Law::new(BinaryNumber::parse("10").unwrap()).unwrap();
+        let y = apply(law, &[x, BinaryNumber::parse("0").unwrap()]).unwrap();
+        let z = apply(law, &[y, BinaryNumber::parse("1").unwrap()]).unwrap();
         assert_eq!(z.bits(), "10101");
     }
 
@@ -117,8 +143,22 @@ mod tests {
         assert_eq!(BinaryNumber::parse("10x"), Err(Error::InvalidBit));
         let x = BinaryNumber::parse("101").unwrap();
         assert_eq!(
-            apply(x, BinaryNumber::parse("10").unwrap()),
+            apply(
+                Law::new(BinaryNumber::parse("10").unwrap()).unwrap(),
+                &[x, BinaryNumber::parse("10").unwrap()]
+            ),
             Err(Error::DeltaMustBeOneBit)
+        );
+        assert_eq!(
+            Law::new(BinaryNumber::parse("11").unwrap()),
+            Err(Error::UnknownLaw)
+        );
+        assert_eq!(
+            apply(
+                Law::new(BinaryNumber::parse("10").unwrap()).unwrap(),
+                &[x]
+            ),
+            Err(Error::WrongArity)
         );
     }
 }
