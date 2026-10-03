@@ -1,0 +1,51 @@
+name: D1-D6 historical gap audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "benchmarks/post-d4-semantic-placement/**"
+      - "benchmarks/d5-closure-map/**"
+      - "scripts/research-2689-d5-ratified-baseline.py"
+      - "benchmarks/d6-closure-map/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d1-d6-historical-gap-audit/**"
+      - ".github/workflows/d1-d6-historical-gap-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - "benchmarks/post-d4-semantic-placement/**"
+      - "benchmarks/d5-closure-map/**"
+      - "scripts/research-2689-d5-ratified-baseline.py"
+      - "benchmarks/d6-closure-map/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d1-d6-historical-gap-audit/**"
+      - ".github/workflows/d1-d6-historical-gap-audit.yml"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build historical gap / ratification-readiness matrix
+        run: |
+          rm -rf /tmp/d1-d6-gap
+          python3 benchmarks/d1-d6-historical-gap-audit/run.py --out /tmp/d1-d6-gap
+          python3 - <<'PY'
+          import json
+          p=json.load(open("/tmp/d1-d6-gap/result.json"))
+          assert p["summary"]["historical_rows"] == 19
+          assert p["summary"]["already_explained"] == 12
+          assert p["summary"]["needs_new_law"] == 5
+          assert p["summary"]["owner_ready"] == 1
+          assert p["summary"]["composite"] == 1
+          assert p["summary"]["new_d5_manual_residents"] == 0
+          assert p["summary"]["new_d6_admissions"] == 0
+          assert p["owner_facing"]["ready_now"][0]["binary_object"] == "D6:001111"
+          PY
