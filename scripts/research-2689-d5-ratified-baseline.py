@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +33,7 @@ SELECTORS = {
     "11000", "11001", "11010", "11011",
 }
 
-EXPECTED_CATEGORY_COUNTS = {
+EXPECTED_STATUS_COUNTS = {
     "selector": 8,
     "arithmetic": 4,
     "predicate": 4,
@@ -42,6 +42,27 @@ EXPECTED_CATEGORY_COUNTS = {
     "list_and_tree_structure": 6,
     "total": 32,
     "unallocated": 0,
+}
+
+# OD-005 owner groups are coarser than each row's descriptive category.
+# Validate them by exact binary coordinates rather than guessing from names.
+EXPECTED_GROUPS = {
+    "evaluation_and_abstraction": {
+        "00000", "00001", "00010", "00011", "00100", "00101",
+    },
+    "state_and_control": {
+        "00110", "00111", "01100", "01101",
+    },
+    "predicate": {
+        "01000", "01001", "01110", "01111",
+    },
+    "arithmetic": {
+        "01010", "01011", "10010", "10011",
+    },
+    "selector": SELECTORS,
+    "list_and_tree_structure": {
+        "10000", "10001", "11100", "11101", "11110", "11111",
+    },
 }
 
 
@@ -57,25 +78,6 @@ def require(condition: bool, message: str) -> None:
 def load_map() -> dict[str, Any]:
     return json.loads(FULL_MAP.read_text(encoding="utf-8"))
 
-
-def category_bucket(row: dict[str, Any]) -> str:
-    category = row["category"]
-    if category == "selector":
-        return "selector"
-    if category == "arithmetic":
-        return "arithmetic"
-    if category == "predicate":
-        return "predicate"
-    if category in {"state", "control"}:
-        return "state_and_control"
-    if category in {"evaluation", "abstraction"}:
-        return "evaluation_and_abstraction"
-    if category in {
-        "list-structure", "tree-structure", "lookup", "binding"
-    }:
-        return "list_and_tree_structure"
-    fail(f"unknown category {category!r} for {row['coordinate']}")
-    raise AssertionError
 
 
 def build_result() -> dict[str, Any]:
@@ -99,7 +101,6 @@ def build_result() -> dict[str, Any]:
 
     by_parent: dict[str, list[str]] = defaultdict(list)
     selector_coords = set()
-    category_counts: Counter[str] = Counter()
 
     for row in rows:
         coord = row["coordinate"]
@@ -130,8 +131,6 @@ def build_result() -> dict[str, Any]:
         require(row.get("provenance"), f"{coord}: missing historical provenance")
 
         by_parent[parent].append(coord)
-        category_counts[category_bucket(row)] += 1
-
         if row["category"] == "selector":
             selector_coords.add(coord)
 
@@ -148,22 +147,22 @@ def build_result() -> dict[str, Any]:
         f"selector coordinates drifted: {sorted(selector_coords)}",
     )
 
-    computed_status = {
-        "selector": category_counts["selector"],
-        "arithmetic": category_counts["arithmetic"],
-        "predicate": category_counts["predicate"],
-        "state_and_control": category_counts["state_and_control"],
-        "evaluation_and_abstraction": category_counts["evaluation_and_abstraction"],
-        "list_and_tree_structure": category_counts["list_and_tree_structure"],
-        "total": len(rows),
-        "unallocated": 0,
-    }
+    # Owner status groups are exact coordinate partitions.
+    group_union: set[str] = set()
+    for group, expected_coords in EXPECTED_GROUPS.items():
+        require(
+            not (group_union & expected_coords),
+            f"owner status groups overlap at {sorted(group_union & expected_coords)}",
+        )
+        group_union |= expected_coords
+        require(
+            len(expected_coords) == EXPECTED_STATUS_COUNTS[group],
+            f"{group}: coordinate group count drift",
+        )
+    require(group_union == ALL_COORDS, "owner status groups do not partition D5")
+
     require(
-        computed_status == EXPECTED_CATEGORY_COUNTS,
-        f"computed category counts drifted: {computed_status}",
-    )
-    require(
-        data["status_counts"] == EXPECTED_CATEGORY_COUNTS,
+        data["status_counts"] == EXPECTED_STATUS_COUNTS,
         f"declared status counts drifted: {data['status_counts']}",
     )
 
@@ -182,7 +181,11 @@ def build_result() -> dict[str, Any]:
         "selector_coordinates": sorted(selector_coords),
         "selector_count": len(selector_coords),
         "historical_nonselector_count": len(rows) - len(selector_coords),
-        "category_counts": computed_status,
+        "status_counts": EXPECTED_STATUS_COUNTS,
+        "owner_coordinate_groups": {
+            key: sorted(value)
+            for key, value in sorted(EXPECTED_GROUPS.items())
+        },
         "core_math_occupancy_donation": False,
         "d6_mutation": False,
         "legacy_sparse_baseline_authority": False,
