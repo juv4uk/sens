@@ -154,18 +154,14 @@ fn bridge_adds_no_d5_or_d6_identity() {
     }
 }
 
-
 #[test]
 fn historical_lisp15_recip_is_a_domain_mismatch_control() {
     let ledger = include_str!("../../../docs/research/2709-lisp15-arithmetic-ledger.json");
 
     assert!(ledger.contains("\"historical_name\": \"RECIP\""));
-    assert!(ledger.contains(
-        "\"historical_result\": \"fixed input -> 0; floating input -> reciprocal\""
-    ));
-    assert!(ledger.contains(
-        "\"relation_to_core_math\": \"comparison-only-no-shared-identity\""
-    ));
+    assert!(ledger
+        .contains("\"historical_result\": \"fixed input -> 0; floating input -> reciprocal\""));
+    assert!(ledger.contains("\"relation_to_core_math\": \"comparison-only-no-shared-identity\""));
 
     // Same human label, different law/domain.
     assert_eq!(eval_exact(&recip("2")), "1/2");
