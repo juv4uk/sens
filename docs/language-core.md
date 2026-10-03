@@ -208,6 +208,12 @@ identity.
 Canonical source extension лишається **`.lisp`**. File suffix не є semantic
 identity.
 
+### Source/implementation compatibility
+
+- **Канонічне розширення вихідного коду — `.lisp`.**
+- `.wsm` і `.my` — **legacy aliases** для compatibility/history; вони не створюють окремої semantic identity.
+- Rust — **референсна реалізація** поточного runtime/mechanism layer, а не власник semantics.
+
 ## 10. Execution substrates
 
 Rust — current reference mechanism, не semantic authority.
