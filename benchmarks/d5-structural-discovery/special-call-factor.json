@@ -1,140 +1,81 @@
 {
-  "schema": "special-call-factor/1",
-  "phase": "STRUCTURAL-DISCOVERY",
   "authority": "research-only-no-placement",
-  "domain": "Core.PostD4.SpecialCallProtocol",
-  "binary_object": "UNPLACED",
   "axes": [
     {
-      "factor_id": "expansion-timing",
-      "observable": "definition-time expansion differs from evaluation-time expansion",
       "evidence": [
         "#2568",
         "#2569"
       ],
-      "remove_one_attack": "macro redefinition can no longer distinguish OLD definition-time body from NEW evaluation-time behavior",
+      "factor_id": "expansion-timing",
       "independence": "proved-with-single-head-timing-witness; packaging distinction is not exercised",
-      "status": "independently-observable-axis",
+      "observable": "definition-time expansion differs from evaluation-time expansion",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "macro redefinition can no longer distinguish OLD definition-time body from NEW evaluation-time behavior",
       "root_status": "UNPROVEN",
-      "width_consequence": "NONE",
-      "placement_consequence": "NONE"
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
     },
     {
-      "factor_id": "explicit-caller-env",
-      "observable": "call body receives caller environment as an explicit semantic input",
       "evidence": [
         "#2522",
         "#2530"
       ],
-      "remove_one_attack": "caller-only binding cannot be observed without adding another environment channel",
+      "factor_id": "explicit-caller-env",
       "independence": "proved-by-eight-corner-ABC-cube",
-      "status": "independently-observable-axis",
+      "observable": "call body receives caller environment as an explicit semantic input",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "caller-only binding cannot be observed without adding another environment channel",
       "root_status": "UNPROVEN",
-      "width_consequence": "NONE",
-      "placement_consequence": "NONE"
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
     },
     {
-      "factor_id": "invocation-packaging",
-      "observable": "whole invocation form exposes call head while operand-only input does not",
       "evidence": [
         "#2580",
         "#2588",
         "3d409736b994221561b413c42c837a428d242358"
       ],
-      "remove_one_attack": "two aliases of one transformer with identical operands collapse to identical input and the head cannot be reconstructed",
+      "factor_id": "invocation-packaging",
       "independence": "proved-by-alias-collision-with-raw/env/result-held-fixed",
-      "status": "independently-observable-axis",
+      "observable": "whole invocation form exposes call head while operand-only input does not",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "two aliases of one transformer with identical operands collapse to identical input and the head cannot be reconstructed",
       "root_status": "UNPROVEN",
-      "width_consequence": "NONE",
-      "placement_consequence": "NONE"
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
     },
     {
-      "factor_id": "raw-form-input",
-      "observable": "call body receives unevaluated form structure rather than eager values",
       "evidence": [
         "#2522",
         "#2530"
       ],
-      "remove_one_attack": "unused undefined operand becomes eager/fails instead of remaining inert raw syntax",
+      "factor_id": "raw-form-input",
       "independence": "proved-by-eight-corner-ABC-cube",
-      "status": "independently-observable-axis",
+      "observable": "call body receives unevaluated form structure rather than eager values",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "unused undefined operand becomes eager/fails instead of remaining inert raw syntax",
       "root_status": "UNPROVEN",
-      "width_consequence": "NONE",
-      "placement_consequence": "NONE"
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
     },
     {
-      "factor_id": "returned-form-protocol",
-      "observable": "returned object is treated as executable replacement form and evaluated in caller context",
       "evidence": [
         "#2522",
         "#2530",
         "#2557"
       ],
-      "remove_one_attack": "returned symbol/form stays a direct value instead of resolving/executing in caller context",
+      "factor_id": "returned-form-protocol",
       "independence": "proved-by-eight-corner-ABC-cube",
-      "status": "independently-observable-axis",
+      "observable": "returned object is treated as executable replacement form and evaluated in caller context",
+      "placement_consequence": "NONE",
+      "remove_one_attack": "returned symbol/form stays a direct value instead of resolving/executing in caller context",
       "root_status": "UNPROVEN",
-      "width_consequence": "NONE",
-      "placement_consequence": "NONE"
+      "status": "independently-observable-axis",
+      "width_consequence": "NONE"
     }
   ],
-  "protocols": [
-    {
-      "protocol": "ordinary-lambda-control",
-      "axes": {
-        "raw-form-input": false,
-        "explicit-caller-env": false,
-        "returned-form-protocol": false,
-        "expansion-timing": "evaluation-time",
-        "invocation-packaging": "operands-only"
-      }
-    },
-    {
-      "protocol": "fexpr-fsubr",
-      "axes": {
-        "raw-form-input": true,
-        "explicit-caller-env": true,
-        "returned-form-protocol": false,
-        "expansion-timing": "evaluation-time",
-        "invocation-packaging": "operands-only"
-      }
-    },
-    {
-      "protocol": "hart-macro",
-      "axes": {
-        "raw-form-input": true,
-        "explicit-caller-env": false,
-        "returned-form-protocol": true,
-        "expansion-timing": "definition-time",
-        "invocation-packaging": "whole-call"
-      }
-    },
-    {
-      "protocol": "sens-transformer",
-      "axes": {
-        "raw-form-input": true,
-        "explicit-caller-env": false,
-        "returned-form-protocol": true,
-        "expansion-timing": "evaluation-time",
-        "invocation-packaging": "operands-only"
-      }
-    }
-  ],
+  "binary_object": "UNPLACED",
   "comparisons": {
-    "lambda->fexpr": [
-      "explicit-caller-env",
-      "raw-form-input"
-    ],
-    "lambda->sens-transformer": [
-      "raw-form-input",
-      "returned-form-protocol"
-    ],
-    "lambda->hart-macro": [
-      "expansion-timing",
-      "invocation-packaging",
-      "raw-form-input",
-      "returned-form-protocol"
-    ],
     "fexpr->sens-transformer": [
       "explicit-caller-env",
       "returned-form-protocol"
@@ -142,13 +83,69 @@
     "hart->sens-transformer": [
       "expansion-timing",
       "invocation-packaging"
+    ],
+    "lambda->fexpr": [
+      "explicit-caller-env",
+      "raw-form-input"
+    ],
+    "lambda->hart-macro": [
+      "expansion-timing",
+      "invocation-packaging",
+      "raw-form-input",
+      "returned-form-protocol"
+    ],
+    "lambda->sens-transformer": [
+      "raw-form-input",
+      "returned-form-protocol"
     ]
   },
+  "domain": "Core.PostD4.SpecialCallProtocol",
+  "phase": "STRUCTURAL-DISCOVERY",
+  "protocols": [
+    {
+      "axes": {
+        "expansion-timing": "evaluation-time",
+        "explicit-caller-env": false,
+        "invocation-packaging": "operands-only",
+        "raw-form-input": false,
+        "returned-form-protocol": false
+      },
+      "protocol": "ordinary-lambda-control"
+    },
+    {
+      "axes": {
+        "expansion-timing": "evaluation-time",
+        "explicit-caller-env": true,
+        "invocation-packaging": "operands-only",
+        "raw-form-input": true,
+        "returned-form-protocol": false
+      },
+      "protocol": "fexpr-fsubr"
+    },
+    {
+      "axes": {
+        "expansion-timing": "definition-time",
+        "explicit-caller-env": false,
+        "invocation-packaging": "whole-call",
+        "raw-form-input": true,
+        "returned-form-protocol": true
+      },
+      "protocol": "hart-macro"
+    },
+    {
+      "axes": {
+        "expansion-timing": "evaluation-time",
+        "explicit-caller-env": false,
+        "invocation-packaging": "operands-only",
+        "raw-form-input": true,
+        "returned-form-protocol": true
+      },
+      "protocol": "sens-transformer"
+    }
+  ],
   "same_base_parent_tests": [
     {
-      "protocol": "sens-transformer",
       "candidate_parent": "D4-LAMBDA",
-      "same_base_object": true,
       "evidence": [
         "#2198",
         "#2200"
@@ -158,12 +155,12 @@
         "returned-form-protocol"
       ],
       "one_delta_child": false,
+      "protocol": "sens-transformer",
+      "same_base_object": true,
       "verdict": "SAME-BASE-YES; D5-ONE-DELTA-NOT-PROVED"
     },
     {
-      "protocol": "fexpr-fsubr",
       "candidate_parent": "D4-LAMBDA",
-      "same_base_object": "UNPROVEN",
       "evidence": [
         "#2522",
         "#2530"
@@ -173,12 +170,12 @@
         "raw-form-input"
       ],
       "one_delta_child": false,
+      "protocol": "fexpr-fsubr",
+      "same_base_object": "UNPROVEN",
       "verdict": "NO-ADMITTED-SAME-BASE-PARENT-THEOREM"
     },
     {
-      "protocol": "hart-macro",
       "candidate_parent": "D4-LAMBDA",
-      "same_base_object": "UNPROVEN",
       "evidence": [
         "#2557",
         "#2568",
@@ -191,19 +188,22 @@
         "returned-form-protocol"
       ],
       "one_delta_child": false,
+      "protocol": "hart-macro",
+      "same_base_object": "UNPROVEN",
       "verdict": "NO-ADMITTED-SAME-BASE-PARENT-THEOREM"
     }
   ],
+  "schema": "special-call-factor/1",
   "summary": {
+    "archived_00101_transformer_reusable": false,
+    "coordinates_allocated": 0,
     "independently_observable_protocol_axes": 5,
-    "proved_semantic_roots": 0,
-    "proved_width_from_axis_count": false,
+    "placement_status": "UNPLACED",
     "proved_d5_children": 0,
     "proved_d6_children": 0,
-    "coordinates_allocated": 0,
-    "archived_00101_transformer_reusable": false,
+    "proved_semantic_roots": 0,
+    "proved_width_from_axis_count": false,
     "reason_00101_not_reusable": "same LAMBDA payload does not reduce two independently separable deltas (raw input + returned-form protocol) to one observable delta",
-    "width_status": "UNKNOWN",
-    "placement_status": "UNPLACED"
+    "width_status": "UNKNOWN"
   }
 }
