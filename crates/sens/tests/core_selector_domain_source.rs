@@ -46,3 +46,16 @@ fn cdar_is_a_real_d4_resident_without_historical_descendant_row() {
     let mut session = session_with_active_core();
     assert_eq!(eval(&mut session, "(1100 (001 ((11 12) 13)))"), "(12)");
 }
+
+#[test]
+fn list_position_helpers_use_d3_car_cdr_path() {
+    let mut session = session_with_active_core();
+    assert_eq!(eval(&mut session, "(second (001 (7 8 9 10 11)))"), "8");
+    assert_eq!(eval(&mut session, "(third (001 (7 8 9 10 11)))"), "9");
+    assert_eq!(eval(&mut session, "(fourth (001 (7 8 9 10 11)))"), "10");
+    assert_eq!(eval(&mut session, "(fifth (001 (7 8 9 10 11)))"), "11");
+
+    let core = include_str!("../../../lib/core.lisp");
+    assert!(core.contains("(101 (110 values))"));
+    assert!(core.contains("(101 (110 (110 values)))"));
+}
