@@ -131,13 +131,15 @@ def build() -> dict[str, Any]:
     require(d5["manual_nonselector_count"] == 0, "D5 gained manual resident")
 
     require(d6["canonical"]["generated_members"] == 16, "D6 selector closure changed")
-    require(d6["canonical"]["unknown_free"] == 48, "D6 canonical UNKNOWN count changed")
+    require(d6["canonical"]["ratified_manual_residents"] == 1, "D6 manual resident count drifted")
+    require(d6["canonical"]["unknown_free"] == 47, "D6 canonical UNKNOWN count changed")
     require(d6["canonical"]["occupancy_mutations"] == 0, "D6 research mutated occupancy")
-    target = next(row for row in d6["frontier"] if row["coordinate"] == "001111")
-    require(target["research_evidence_class"] == "OWNER-READY-NONADMITTED",
-            "001111 owner-readiness changed")
-    require(target["canonical_semantic_member"] is False,
-            "001111 became admitted without audit update")
+    target = d6["ratified_target"]
+    require(target["coordinate"] == "001111", "ratified D6 target moved")
+    require(target["research_evidence_class"] == "RATIFIED-MANUAL-RESIDENT",
+            "001111 ratified evidence class changed")
+    require(target["semantic_member"] is True,
+            "001111 lost owner-ratified D6 membership")
 
     rows: list[dict[str, Any]] = []
     for op in EXPECTED_OPS:
@@ -164,13 +166,17 @@ def build() -> dict[str, Any]:
             placement_gap = "BLOCKED-BY-DOMAIN"
             missing = "exact-domain theorem + residency/coordinate theorem; do not re-prove mutation lower bound"
         elif op == "SETQ":
-            readiness = "OWNER-READY"
+            readiness = "RATIFIED"
             capability_status = "PROVEN-POLICY-OVER-SHARED-LOCATION-CARRIER"
-            domain_gap = "RESOLVED-FOR-CURRENT-CANDIDATE"
-            placement_gap = "OWNER-READY-NONADMITTED"
-            missing = "owner decision only for candidate D6:001111; historical row remains UNPLACED"
-            require(p["candidate_coordinate"] == "D6:001111 (OD-001 owner-ready only)",
-                    "SETQ owner-ready candidate drift")
+            domain_gap = "RESOLVED-D6"
+            placement_gap = "NONE-RATIFIED"
+            missing = "NONE; owner decision #2538 OD-001 applied by #2723"
+            require(p["placement_kind"] == "RATIFIED-RESIDENT",
+                    "SETQ ratified placement kind drift")
+            require(p["exact_domain"] == "D6" and p["coordinate"] == "001111",
+                    "SETQ ratified D6 coordinate drift")
+            require(p["candidate_coordinate"] is None,
+                    "SETQ must not remain a candidate after ratification")
         elif op == "PROG":
             readiness = "COMPOSITE"
             capability_status = "COMPOSITE-GO+RETURN"
@@ -225,10 +231,12 @@ def build() -> dict[str, Any]:
     needs_domain = [r for r in rows if r["ratification_readiness"] == "NEEDS-DOMAIN"]
     needs_placement = [r for r in rows if r["ratification_readiness"] == "NEEDS-PLACEMENT"]
     owner_ready = [r for r in rows if r["ratification_readiness"] == "OWNER-READY"]
+    ratified = [r for r in rows if r["ratification_readiness"] == "RATIFIED"]
     composite = [r for r in rows if r["ratification_readiness"] == "COMPOSITE"]
 
-    require([r["historical_capability"] for r in owner_ready] == ["SETQ"],
-            "owner-ready set changed; review required")
+    require(owner_ready == [], "owner-ready set must be empty after OD-001")
+    require([r["historical_capability"] for r in ratified] == ["SETQ"],
+            "ratified set changed; review required")
     require(needs_law == [], "audit is trying to re-open already-proved capability laws")
     require(set(r["historical_capability"] for r in needs_domain) ==
             {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"},
@@ -261,8 +269,8 @@ def build() -> dict[str, Any]:
                 "generated_residents": d6["canonical"]["generated_members"],
                 "canonical_unknown": d6["canonical"]["unknown_free"],
                 "pure_unknown_not_search_space": d6["frontier_counts"]["PURE-UNKNOWN"],
-                "owner_ready_nonadmitted": ["001111"],
-                "missing": "owner decision for 001111; new theorem for anything else",
+                "ratified_manual_residents": ["001111"],
+                "missing": "new theorem for any additional resident",
             },
         },
         "missing_from_previous_domains": [
@@ -283,13 +291,14 @@ def build() -> dict[str, Any]:
             }
         },
         "owner_facing": {
-            "ready_now": [
+            "ready_now": [],
+            "decided": [
                 {
                     "decision": "OD-001",
                     "binary_object": "D6:001111",
-                    "status": "OWNER-READY-NONADMITTED",
-                    "meaning": "shared-location / SETQ binding-policy product candidate",
-                    "authority": "#2538",
+                    "status": "RATIFIED-RESIDENT",
+                    "meaning": "shared-location / SETQ binding-policy product",
+                    "authority": "#2538/#2723",
                 }
             ],
             "not_ready": [r["historical_capability"] for r in needs_law + needs_domain + needs_placement],
@@ -302,9 +311,10 @@ def build() -> dict[str, Any]:
             "needs_domain": len(needs_domain),
             "needs_placement": len(needs_placement),
             "owner_ready": len(owner_ready),
+            "ratified": len(ratified),
             "composite": len(composite),
             "new_d5_manual_residents": 0,
-            "new_d6_admissions": 0,
+            "new_d6_admissions": 1,
         },
         "guards": [
             "historical presence != resident necessity",
@@ -352,9 +362,10 @@ def render_md(result: dict[str, Any]) -> str:
         f"{result['domain_summary']['D6']['canonical_unknown']} canonical UNKNOWN; "
         f"{result['domain_summary']['D6']['pure_unknown_not_search_space']} PURE-UNKNOWN are not a search space.",
         "",
-        "## Owner-ready now",
+        "## Owner decision applied",
         "",
-        "- OD-001: D6:001111 is owner-ready but nonadmitted. No other historical row is owner-ready.",
+        "- OD-001: D6:001111 is RATIFIED for SETQ/shared-location under #2538/#2723.",
+        "- No other historical row is owner-ready; additional residents still require a new theorem.",
         "",
         "## Arithmetic",
         "",
@@ -379,7 +390,7 @@ def main() -> int:
     print("D1-D6-HISTORICAL-GAP-AUDIT=PASS")
     for key, value in result["summary"].items():
         print(f"{key}={value}")
-    print("owner-ready=D6:001111")
+    print("ratified=D6:001111")
     print("RULE=fill-history-not-free-slots")
 
     if args.out:
