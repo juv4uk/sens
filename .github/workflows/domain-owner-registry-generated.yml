@@ -1,0 +1,49 @@
+name: Domain owner registry generation
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/exact-width-admitted-corpus.json"
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "knowledge/domain-legacy-compat-projection.json"
+      - "scripts/generate-domain-owner-registry.py"
+      - "crates/sens/src/domain_registry.rs"
+      - "crates/sens/src/domain_registry_generated.rs"
+      - ".github/workflows/domain-owner-registry-generated.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generated-domain-owner-registry:
+    name: D3-D6 owner projection is reproducible
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check generated projection
+        run: python3 scripts/generate-domain-owner-registry.py --check
+
+      - name: Assert authority counts and positive controls
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          d5 = json.loads(Path("knowledge/d5-historical-full-map.json").read_text())
+          d6 = json.loads(Path("knowledge/d6-historical-full-map.json").read_text())
+          compat = json.loads(Path("knowledge/domain-legacy-compat-projection.json").read_text())
+
+          assert len(d5["coordinates"]) == 32
+          assert len(d6["coordinates"]) == 64
+          assert compat["semantic_authority"] is False
+          assert not any(row["domain"] == "Core.D4" and row["coordinate"] == "1100" for row in compat["rows"])
+          plus = next(row for row in compat["rows"] if row["domain"] == "Core.D5" and row["coordinate"] == "01010")
+          assert "+" in plus["surfaces"] and "додати" in plus["surfaces"]
+          print("DOMAIN-OWNER-PROJECTION=PASS")
+          PY
+
+      - name: Focused Rust tests
+        run: cargo test -p sens domain_registry::tests --lib
