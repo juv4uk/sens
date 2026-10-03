@@ -78,7 +78,7 @@ fn semantic_language_items_with(
         };
         items.extend(surfaces.into_iter().map(|name| LanguageItem {
             name: name.to_string(),
-            domain_identity: semantic_registry::domain_identity_from_registry_byte(row.semantic_id),
+            domain_identity: semantic_registry::domain_identity_for_surface(name),
             legacy_registry_id: semantic_id,
             signature: row.signature,
             documentation: row.documentation,
