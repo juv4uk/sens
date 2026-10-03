@@ -175,12 +175,12 @@ fn main() {
         environment: Environment::root(),
     };
 
-    // Канонічний Core4 bootstrap і FASL fallback належать одному loader-у:
-    // CLI не повинен виконувати Core4 в обхід loader-owned selected profile.
+    // Канонічний active Core bootstrap і FASL fallback належать одному loader-у:
+    // CLI не повинен виконувати active Core в обхід loader-owned selected profile.
     const CORE_SRC: &str = sens::CORE_LIBRARY_SOURCE;
     if !sens::core_library_fasl_is_current() {
         eprintln!(
-            "warning: lib/core4.lisp.fasl is stale (source changed); run gen-fasl to regenerate"
+            "warning: lib/core.lisp.fasl is stale (source changed); run gen-fasl to regenerate"
         );
     }
     if let Err(e) = bootstrap_core(&mut session, cli_core) {
