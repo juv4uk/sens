@@ -22,6 +22,7 @@
 //! ```
 
 use crate::bits::{Bit1, Bit2, Bit3, Bit5, Bit6};
+use std::fmt;
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -87,8 +88,14 @@ impl Bija3 {
 /// This proves domain membership only. Individual D5 coordinate meanings are
 /// owned by the SENS owner map/laws, not by this Rust representation type.
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD5(Bit5);
+
+impl fmt::Debug for CoreD5 {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "CoreD5({:05b})", self.0.packed_bits())
+    }
+}
 
 impl CoreD5 {
     /// Wrap an already validated five-bit word as a Core.D5 member.
@@ -107,8 +114,14 @@ impl CoreD5 {
 /// This proves domain membership only. It deliberately has no implicit
 /// relationship to Core.D5 or Sens8 identity.
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD6(Bit6);
+
+impl fmt::Debug for CoreD6 {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "CoreD6({:06b})", self.0.packed_bits())
+    }
+}
 
 impl CoreD6 {
     /// Wrap an already validated six-bit word as a Core.D6 member.
