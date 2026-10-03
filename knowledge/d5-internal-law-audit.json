@@ -1,0 +1,338 @@
+{
+  "schema": "d5-internal-law-audit/v1",
+  "domain": "Core.D5",
+  "occupancy_authority": "#2414 / OD-005 / merged #2750",
+  "audit_authority": "#2986",
+  "d4_authority": "#2169",
+  "placement_guard": "#2236",
+  "domain_firewall": "#2508",
+  "classification_vocabulary": "#2494",
+  "invariant": {
+    "d5_width": 5,
+    "d5_capacity": 32,
+    "d5_occupancy": 32,
+    "coordinates_must_not_change": true
+  },
+  "d4_ratified_residents": {
+    "1000": "LIST",
+    "1010": "CAAR",
+    "1011": "CADR",
+    "1100": "CDAR",
+    "1101": "CDDR",
+    "1110": "LOOKUP",
+    "1111": "BIND",
+    "0000": "APPLY",
+    "0001": "EVAL",
+    "0010": "LAMBDA",
+    "0011": "DEFINE",
+    "0100": "NOT",
+    "0110": "EVCON",
+    "0111": "EVLIS"
+  },
+  "d4_unallocated": [
+    "0101",
+    "1001"
+  ],
+  "classes": [
+    "SEMANTIC-GENERATOR",
+    "LOCAL-SIBLING-LAW",
+    "COORDINATE-PARENT-ONLY",
+    "HISTORICAL-PAIRING",
+    "UNRESOLVED"
+  ],
+  "relation_classes": [
+    "SEMANTIC-LAW",
+    "COORDINATE-LAW",
+    "ACCIDENTAL",
+    "UNKNOWN"
+  ],
+  "pairs": [
+    {
+      "prefix": "0000",
+      "parent": "APPLY",
+      "children": [
+        "EVALQUOTE",
+        "FUNCTION"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "#2279 EVALQUOTE=DERIVED-D4",
+        "#2277 FUNCTION/FUNARG=HISTORICAL-MECHANISM"
+      ],
+      "falsifier": "an executable one-bit APPLY refinement law that reconstructs both children without name/table authority"
+    },
+    {
+      "prefix": "0001",
+      "parent": "EVAL",
+      "children": [
+        "FEXPR",
+        "MACRO"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "#2343 FEXPR=RAW+ENV-TWO-CAPABILITIES",
+        "TRANSFORMER relation=ORTHOGONAL"
+      ],
+      "falsifier": "one exact EVAL refinement axis that generates both raw+env direct-value FEXPR and raw+reeval MACRO protocols"
+    },
+    {
+      "prefix": "0010",
+      "parent": "LAMBDA",
+      "children": [
+        "LABEL",
+        "PROG"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "#2234 LABEL=DERIVED-D4",
+        "#2403 PROG/GO/RETURN capability analysis"
+      ],
+      "falsifier": "one LAMBDA-local action that generates both LABEL and PROG observable behavior"
+    },
+    {
+      "prefix": "0011",
+      "parent": "DEFINE",
+      "children": [
+        "SET",
+        "SETQ"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": true,
+      "one_delta_axis": null,
+      "replay_law": null,
+      "candidate_sibling_axis": "assignment target source: computed/evaluated symbol vs literal/quoted symbol",
+      "evidence": [
+        "#2492 DEFINE->SETQ requires two independently observable policy axes",
+        "#2498 binding-policy square"
+      ],
+      "falsifier": "prove SET/SETQ sibling distinction as one executable local axis and separately prove both are one-bit refinements of DEFINE"
+    },
+    {
+      "prefix": "0100",
+      "parent": "NOT",
+      "children": [
+        "ZEROP",
+        "NUMBERP"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "OD-005 historical predicate pairing"
+      ],
+      "falsifier": "one NOT-parent predicate generator reconstructing ZEROP and NUMBERP from suffix only"
+    },
+    {
+      "prefix": "0101",
+      "parent": null,
+      "children": [
+        "PLUS",
+        "DIFFERENCE"
+      ],
+      "primary_class": "COORDINATE-PARENT-ONLY",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": null,
+      "one_delta_axis": null,
+      "replay_law": null,
+      "candidate_sibling_axis": "additive operation orientation: add vs subtract",
+      "evidence": [
+        "#2169 D4 0101 is unallocated",
+        "OD-005 owner placement"
+      ],
+      "falsifier": "separate D4 ratification of 0101 plus executable parent->PLUS/DIFFERENCE generator"
+    },
+    {
+      "prefix": "0110",
+      "parent": "EVCON",
+      "children": [
+        "GO",
+        "RETURN"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "#2403 GO derived/local vs RETURN new observable capability"
+      ],
+      "falsifier": "one EVCON-local action generating both GO and RETURN control semantics"
+    },
+    {
+      "prefix": "0111",
+      "parent": "EVLIS",
+      "children": [
+        "LESSP",
+        "GREATERP"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "OD-005 numeric predicate pairing"
+      ],
+      "falsifier": "one EVLIS refinement law generating strict order predicates from suffix only"
+    },
+    {
+      "prefix": "1000",
+      "parent": "LIST",
+      "children": [
+        "APPEND",
+        "REVERSE"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "#2287 list utilities derived structurally"
+      ],
+      "falsifier": "one LIST-parent operation that generates APPEND and REVERSE as suffix projections"
+    },
+    {
+      "prefix": "1001",
+      "parent": null,
+      "children": [
+        "TIMES",
+        "QUOTIENT"
+      ],
+      "primary_class": "COORDINATE-PARENT-ONLY",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": null,
+      "one_delta_axis": null,
+      "replay_law": null,
+      "candidate_sibling_axis": "multiplicative operation orientation: multiply vs divide",
+      "evidence": [
+        "#2169 D4 1001 is unallocated",
+        "OD-005 owner placement"
+      ],
+      "falsifier": "separate D4 ratification of 1001 plus executable parent->TIMES/QUOTIENT generator"
+    },
+    {
+      "prefix": "1010",
+      "parent": "CAAR",
+      "children": [
+        "CAAAR",
+        "CAADR"
+      ],
+      "primary_class": "SEMANTIC-GENERATOR",
+      "relation_class": "SEMANTIC-LAW",
+      "same_base_object": true,
+      "one_delta_axis": true,
+      "replay_law": "suffix 0 compose CAR; suffix 1 compose CDR",
+      "evidence": [
+        "#2176 selector theorem",
+        "#1968 local T0/T1 generator"
+      ],
+      "falsifier": "selector replay mismatch for either suffix"
+    },
+    {
+      "prefix": "1011",
+      "parent": "CADR",
+      "children": [
+        "CADAR",
+        "CADDR"
+      ],
+      "primary_class": "SEMANTIC-GENERATOR",
+      "relation_class": "SEMANTIC-LAW",
+      "same_base_object": true,
+      "one_delta_axis": true,
+      "replay_law": "suffix 0 compose CAR; suffix 1 compose CDR",
+      "evidence": [
+        "#2176 selector theorem",
+        "#1968 local T0/T1 generator"
+      ],
+      "falsifier": "selector replay mismatch for either suffix"
+    },
+    {
+      "prefix": "1100",
+      "parent": "CDAR",
+      "children": [
+        "CDAAR",
+        "CDADR"
+      ],
+      "primary_class": "SEMANTIC-GENERATOR",
+      "relation_class": "SEMANTIC-LAW",
+      "same_base_object": true,
+      "one_delta_axis": true,
+      "replay_law": "suffix 0 compose CAR; suffix 1 compose CDR",
+      "evidence": [
+        "#2176 selector theorem",
+        "#1968 local T0/T1 generator"
+      ],
+      "falsifier": "selector replay mismatch for either suffix"
+    },
+    {
+      "prefix": "1101",
+      "parent": "CDDR",
+      "children": [
+        "CDDAR",
+        "CDDDR"
+      ],
+      "primary_class": "SEMANTIC-GENERATOR",
+      "relation_class": "SEMANTIC-LAW",
+      "same_base_object": true,
+      "one_delta_axis": true,
+      "replay_law": "suffix 0 compose CAR; suffix 1 compose CDR",
+      "evidence": [
+        "#2176 selector theorem",
+        "#1968 local T0/T1 generator"
+      ],
+      "falsifier": "selector replay mismatch for either suffix"
+    },
+    {
+      "prefix": "1110",
+      "parent": "LOOKUP",
+      "children": [
+        "ASSOC",
+        "MEMBER"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "#2285 ASSOC=DERIVED-STRUCTURE",
+        "historical search-family placement"
+      ],
+      "falsifier": "one LOOKUP-parent semantic action reconstructing both generic ASSOC and MEMBER"
+    },
+    {
+      "prefix": "1111",
+      "parent": "BIND",
+      "children": [
+        "PAIRLIS",
+        "SUBST"
+      ],
+      "primary_class": "HISTORICAL-PAIRING",
+      "relation_class": "COORDINATE-LAW",
+      "same_base_object": false,
+      "one_delta_axis": false,
+      "replay_law": null,
+      "evidence": [
+        "#2286 PAIRLIS differs observably from current BIND ordering",
+        "#2287 SUBST derived structurally"
+      ],
+      "falsifier": "one BIND-parent semantic action reconstructing both PAIRLIS and SUBST"
+    }
+  ]
+}
