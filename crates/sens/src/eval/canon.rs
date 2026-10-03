@@ -5,7 +5,7 @@
 //! route directly from `CoreDomainIdentity` without reconstructing a byte.
 
 use super::{
-    arithmetic, builtins, closures, necessary_forms,
+    closures, necessary_forms,
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
@@ -151,24 +151,6 @@ fn prim_00000100(
 ) -> Result<Value, LanguageError> {
     exact_args(crate::sens!(00000100), args, 2, span)?;
     special_forms::cons_values(args[0].clone(), args[1].clone(), env, span)
-}
-
-fn prim_00000101(
-    args: &[Value],
-    _env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00000101), args, 1, span)?;
-    special_forms::car_value(&args[0], span)
-}
-
-fn prim_00000110(
-    args: &[Value],
-    _env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00000110), args, 1, span)?;
-    special_forms::cdr_value(&args[0], span)
 }
 
 fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
