@@ -12,8 +12,8 @@
     "crates/sens/src/eval/canon.rs"
   ],
   "current_source_contract": {
-    "reader": "bare W3-W6 binary words become exact CoreDomainIdentity; W8 is legacy compatibility",
-    "runtime_identity": "CoreDomainIdentity preserves D3-D6 width; legacy Sens8 is a separate lane",
+    "reader": "bare W3-W6 binary words become exact CoreDomainIdentity; bare W8 is rejected from canonical source",
+    "runtime_identity": "CoreDomainIdentity preserves D3-D6 width; Sens8 survives only outside canonical source",
     "fasl_binary_payload": "domain identity carries exact width+payload; legacy exact8 remains separately tagged",
     "registry_identity_keys": "existing eight-bit keys are legacy surface projections, not canonical D5/D6 identity",
     "callability": "D5/D6 identity does not imply an admitted evaluator mechanism",
