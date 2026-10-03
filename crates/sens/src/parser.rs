@@ -81,7 +81,7 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Sid(crate::SemanticRef::legacy8(crate::sens!(00000001))),
+                        kind: ExprKind::Sid(crate::SemanticRef::legacy8(0b0000_0001)),
                         span: Span {
                             start,
                             end: start + 1,
@@ -420,7 +420,7 @@ impl Parser<'_> {
             let sid = crate::Sens8::from_exact_bits(token)
                 .expect("exact eight-bit SID validated above");
             return Ok(Expr {
-                kind: ExprKind::Sid(crate::SemanticRef::legacy8(sid)),
+                kind: ExprKind::Sid(crate::SemanticRef::legacy8(bits)),
                 span: Span {
                     start,
                     end: self.cursor,
@@ -568,7 +568,7 @@ mod tests {
         ));
         assert!(matches!(
             parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(00001100))
+            ExprKind::Sid(sid) if sid.legacy8_bits() == Some(0b0000_1100)
         ));
         assert!(matches!(
             parse_one("#b-1010").kind,
@@ -624,23 +624,23 @@ mod tests {
     fn exact_eight_bit_sequences_are_sid_values() {
         assert!(matches!(
             parse_one("00000000").kind,
-            ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(00000000))
+            ExprKind::Sid(sid) if sid.legacy8_bits() == Some(0b0000_0000)
         ));
         assert!(matches!(
             parse_one("00000001").kind,
-            ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(00000001))
+            ExprKind::Sid(sid) if sid.legacy8_bits() == Some(0b0000_0001)
         ));
         assert!(matches!(
             parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(00001100))
+            ExprKind::Sid(sid) if sid.legacy8_bits() == Some(0b0000_1100)
         ));
         assert!(matches!(
             parse_one("10101000").kind,
-            ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(10101000))
+            ExprKind::Sid(sid) if sid.legacy8_bits() == Some(0b1010_1000)
         ));
         assert!(matches!(
             parse_one("11111111").kind,
-            ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(11111111))
+            ExprKind::Sid(sid) if sid.legacy8_bits() == Some(0b1111_1111)
         ));
     }
 
@@ -816,7 +816,7 @@ mod tests {
         let ExprKind::List(items) = parse_one("'кіт").kind else {
             panic!("apostrophe should produce a SID 00000001 form");
         };
-        assert!(matches!(&items[0].kind, ExprKind::Sid(sid) if sid.legacy8_word() == Some(crate::sens!(00000001))));
+        assert!(matches!(&items[0].kind, ExprKind::Sid(sid) if sid.legacy8_bits() == Some(0b0000_0001)));
         assert!(matches!(&items[1].kind, ExprKind::Symbol(s) if &**s == "кіт"));
     }
 
