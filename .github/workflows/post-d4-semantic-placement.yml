@@ -1,4 +1,4 @@
-name: Post-D4 semantic placement
+name: Post-D4 semantic placement pre-OD005 snapshot
 
 on:
   pull_request:
@@ -38,7 +38,8 @@ jobs:
             echo
             echo "- 19/19 historical rows must be placed exactly once."
             echo "- Derived/mechanism rows receive no resident coordinate."
-            echo "- D5 remains 8 generated + 24 UNKNOWN/free."
+            echo "- HISTORICAL-PRE-OD005: this snapshot recorded D5 as 8 generated + 24 UNKNOWN/free."
+            echo "- CURRENT: OD-005/#2750 supersedes D5 occupancy; do not use this snapshot as current authority."
             echo "- RETURN remains a proven root with width UNKNOWN."
-            echo "- SETQ D6 001111 remains candidate-only here."
+            echo "- Snapshot-only D6 SETQ evidence is superseded for decision use by #2761 conflict resolution."
           } >> "$GITHUB_STEP_SUMMARY"
