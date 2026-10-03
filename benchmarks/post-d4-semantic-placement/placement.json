@@ -1,0 +1,456 @@
+{
+  "schema": "post-d4-semantic-placement/v1",
+  "issue": "#2703",
+  "phase": "SENS-DERIVATION",
+  "authority": "aggregation of merged historical/structural/SENS-derivation evidence; not new residency authority",
+  "invariants": {
+    "historical_rows": 19,
+    "d5_selector_generated": 8,
+    "d5_unknown_free": 24,
+    "d5_manual_nonselector_residents": 0,
+    "new_nonselector_d5_candidates": 0
+  },
+  "rows": [
+    {
+      "operation": "LABEL",
+      "historical_order": 1,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D4.ClosureRecursion",
+      "primary_owner": "0010:LAMBDA",
+      "secondary_owners": [
+        "0000:APPLY",
+        "0001:EVAL"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2234",
+        "a104f9d7ca23a84df48e5f35329fb34c347314e1"
+      ],
+      "reason": "Fixed-point/self-application recursion is reproducible from D4 closure semantics; LABEL keeps historical provenance only."
+    },
+    {
+      "operation": "FUNCTION",
+      "historical_order": 2,
+      "historical_classification": "HISTORICAL-MECHANISM",
+      "semantic_region": "Core.D4.ClosureRepresentation",
+      "primary_owner": "0010:LAMBDA",
+      "secondary_owners": [],
+      "placement_kind": "HISTORICAL-ADAPTER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2235",
+        "#2259",
+        "6a7ee0099066cf9469151813be04d456b037cb00"
+      ],
+      "reason": "FUNCTION is the Lisp 1.5 closure wrapper/representation mechanism; D4 LAMBDA owns the observable closure capability."
+    },
+    {
+      "operation": "FUNARG",
+      "historical_order": 3,
+      "historical_classification": "HISTORICAL-MECHANISM",
+      "semantic_region": "Core.D4.ClosureRepresentation",
+      "primary_owner": "0010:LAMBDA",
+      "secondary_owners": [
+        "0000:APPLY"
+      ],
+      "placement_kind": "HISTORICAL-ADAPTER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2235",
+        "#2259",
+        "6a7ee0099066cf9469151813be04d456b037cb00"
+      ],
+      "reason": "FUNARG packages captured environment/application for a closure; observable semantics are already owned by D4 LAMBDA/APPLY."
+    },
+    {
+      "operation": "EVALQUOTE",
+      "historical_order": 4,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D4.EvaluatorComposition",
+      "primary_owner": "0001:EVAL",
+      "secondary_owners": [
+        "0000:APPLY",
+        "001:QUOTE/value-list"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2279",
+        "#2282",
+        "163c30d96d66ea0098304a6b341f257d1ee86278"
+      ],
+      "reason": "Ordinary EVALQUOTE is composition of EVAL and APPLY over an already-valued argument list; later FEXPR staging is a separate protocol."
+    },
+    {
+      "operation": "APPEND",
+      "historical_order": 5,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D3.StructuralRecursion",
+      "primary_owner": "basis:D3-STRUCTURAL-RECURSION",
+      "secondary_owners": [
+        "100:CONS",
+        "101:CAR",
+        "110:CDR",
+        "011:COND"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2347",
+        "#2371",
+        "e2bd9b84650820fe84acd127c2588f034a54ad3a"
+      ],
+      "reason": "List concatenation is ordinary structural recursion; no CONS-family resident is earned by the historical name."
+    },
+    {
+      "operation": "PAIR",
+      "historical_order": 6,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D3.StructuralRecursion",
+      "primary_owner": "basis:D3-STRUCTURAL-RECURSION",
+      "secondary_owners": [
+        "100:CONS",
+        "101:CAR",
+        "110:CDR",
+        "011:COND"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2286",
+        "#2300",
+        "2bf549d1693f678de6d1ce0e85444fccca00c569"
+      ],
+      "reason": "PAIR is ordinary recursive pair/list construction from D3 structure operators."
+    },
+    {
+      "operation": "PAIRLIS",
+      "historical_order": 7,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D3.StructuralRecursion",
+      "primary_owner": "basis:D3-STRUCTURAL-RECURSION",
+      "secondary_owners": [
+        "100:CONS",
+        "101:CAR",
+        "110:CDR",
+        "011:COND",
+        "data:environment-tail"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2286",
+        "#2300",
+        "2bf549d1693f678de6d1ce0e85444fccca00c569"
+      ],
+      "reason": "Historical PAIRLIS ordering differs from current BIND, but the recurrence remains structural; it is explicitly not a BIND child."
+    },
+    {
+      "operation": "ASSOC",
+      "historical_order": 8,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D3.StructuralSearch",
+      "primary_owner": "basis:D3-STRUCTURAL-RECURSION",
+      "secondary_owners": [
+        "111:EQ",
+        "101:CAR",
+        "110:CDR",
+        "011:COND"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2285",
+        "#2296",
+        "81b50d3331e19bc79c310987c75b6d36175b9f8f"
+      ],
+      "reason": "Generic alist search derives directly from structure/equality recursion; broader domain than D4 LOOKUP does not make ASSOC a LOOKUP child."
+    },
+    {
+      "operation": "SUBST",
+      "historical_order": 9,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D3.TreeRecursion",
+      "primary_owner": "basis:D3-STRUCTURAL-RECURSION",
+      "secondary_owners": [
+        "010:ATOM",
+        "111:EQ",
+        "101:CAR",
+        "110:CDR",
+        "100:CONS",
+        "011:COND"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2348",
+        "#2386",
+        "9b5841ad7beffda412d77942f81d83018a9b3f25"
+      ],
+      "reason": "SUBST is recursive structural substitution over existing D3 observations and constructors."
+    },
+    {
+      "operation": "SUBLIS",
+      "historical_order": 10,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D3.TreeRecursion",
+      "primary_owner": "basis:D3-STRUCTURAL-RECURSION",
+      "secondary_owners": [
+        "derived:ASSOC",
+        "101:CAR",
+        "110:CDR",
+        "100:CONS",
+        "011:COND"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2348",
+        "#2386",
+        "9b5841ad7beffda412d77942f81d83018a9b3f25"
+      ],
+      "reason": "SUBLIS composes derived association search with ordinary tree recursion; no new resident is required."
+    },
+    {
+      "operation": "MAPLIST",
+      "historical_order": 11,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D4.HigherOrderListRecursion",
+      "primary_owner": "basis:D4-HIGHER-ORDER-APPLICATION",
+      "secondary_owners": [
+        "0000:APPLY",
+        "0010:LAMBDA",
+        "101:CAR",
+        "110:CDR",
+        "100:CONS"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2349",
+        "#2387",
+        "ff326671920c9d813e10bdb2efa0a773c156c0cf"
+      ],
+      "reason": "MAPLIST is ordinary higher-order recursion over successive list tails using existing closure/application semantics."
+    },
+    {
+      "operation": "SET",
+      "historical_order": 12,
+      "historical_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "semantic_region": "Core.PostD4.SharedLocationCarrier",
+      "primary_owner": "0011:DEFINE-lineage",
+      "secondary_owners": [
+        "carrier:Store+Location",
+        "1110:LOOKUP-lineage"
+      ],
+      "placement_kind": "CARRIER-FAMILY",
+      "resident_required": "SEPARATE-THEOREM",
+      "exact_domain": "UNKNOWN",
+      "coordinate": "UNPLACED",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2442",
+        "#2589",
+        "#2617"
+      ],
+      "reason": "Shared-location update survives, but root minimization classifies it as a carrier premise; D5 placement is ineligible and exact residency needs separate authority."
+    },
+    {
+      "operation": "SETQ",
+      "historical_order": 13,
+      "historical_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "semantic_region": "Core.PostD4.SharedLocationCarrier",
+      "primary_owner": "0011:DEFINE-lineage",
+      "secondary_owners": [
+        "carrier:Store+Location",
+        "policy:quoted-target"
+      ],
+      "placement_kind": "POLICY-OVER-CARRIER",
+      "resident_required": "OWNER-DECISION-SEPARATE",
+      "exact_domain": "UNKNOWN",
+      "coordinate": "UNPLACED",
+      "candidate_coordinate": "D6:001111 (OD-001 owner-ready only)",
+      "evidence": [
+        "#2441",
+        "#2442",
+        "#2518",
+        "#2538:OD-001",
+        "#2617"
+      ],
+      "reason": "SETQ shares the location-update carrier with SET plus target policy; its D6 candidate is explicitly not ratified by this placement ledger."
+    },
+    {
+      "operation": "PROG",
+      "historical_order": 14,
+      "historical_classification": "COMPOSITE",
+      "semantic_region": "Core.PostD4.ControlComposite",
+      "primary_owner": "composite:GO+RETURN",
+      "secondary_owners": [
+        "derived:GO",
+        "root:non-local-exit"
+      ],
+      "placement_kind": "COMPOSITE",
+      "resident_required": "NO-AS-COMPOSITE",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2315",
+        "#2438",
+        "#2439",
+        "#2617"
+      ],
+      "reason": "PROG is a historical control container; GO derives locally while RETURN carries the surviving non-local-exit pressure."
+    },
+    {
+      "operation": "GO",
+      "historical_order": 15,
+      "historical_classification": "DERIVED-D1-D4",
+      "semantic_region": "Core.D4.LocalControlRewrite",
+      "primary_owner": "basis:D1-D4-FSM+TAIL-RECURSION",
+      "secondary_owners": [
+        "011:COND"
+      ],
+      "placement_kind": "DERIVED-UNDER-OWNER",
+      "resident_required": "NO",
+      "exact_domain": "NONE",
+      "coordinate": "NONE",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2438",
+        "786921915b70d3bfe89611ad239345adeb365890"
+      ],
+      "reason": "Intra-PROG transfer rewrites to finite-state dispatch plus tail recursion; no non-local authority is required."
+    },
+    {
+      "operation": "RETURN",
+      "historical_order": 16,
+      "historical_classification": "NEW-OBSERVABLE-CAPABILITY",
+      "semantic_region": "Core.PostD4.NonLocalExitRoot",
+      "primary_owner": "root:non-local-exit",
+      "secondary_owners": [],
+      "placement_kind": "PROVEN-ROOT-UNPLACED",
+      "resident_required": "ROOT-IDENTITY-NEEDS-DOMAIN-THEOREM",
+      "exact_domain": "UNKNOWN",
+      "coordinate": "UNPLACED",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2488",
+        "#2504",
+        "#2590",
+        "#2617",
+        "#2662"
+      ],
+      "reason": "Non-local exit is the sole proven post-D4 semantic root in the bounded corpus, but roothood does not determine width or coordinate."
+    },
+    {
+      "operation": "FEXPR",
+      "historical_order": 17,
+      "historical_classification": "RAW+ENV-TWO-CAPABILITIES",
+      "semantic_region": "Core.PostD4.SpecialCallCarrier",
+      "primary_owner": "carrier:raw-form-input",
+      "secondary_owners": [
+        "carrier:explicit-caller-env",
+        "carrier:invocation-packaging",
+        "policy:direct-value-result"
+      ],
+      "placement_kind": "CARRIER-FAMILY",
+      "resident_required": "NO-CURRENT-RESIDENT-THEOREM",
+      "exact_domain": "UNKNOWN",
+      "coordinate": "UNPLACED",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2343",
+        "#2522",
+        "#2530",
+        "#2591",
+        "#2617"
+      ],
+      "reason": "FEXPR combines independently observed special-call carriers; factor count and historical naming do not select a binary resident."
+    },
+    {
+      "operation": "FSUBR",
+      "historical_order": 18,
+      "historical_classification": "RAW+ENV-TWO-CAPABILITIES",
+      "semantic_region": "Core.PostD4.SpecialCallCarrier",
+      "primary_owner": "carrier:raw-form-input",
+      "secondary_owners": [
+        "carrier:explicit-caller-env",
+        "carrier:invocation-packaging",
+        "policy:direct-value-result"
+      ],
+      "placement_kind": "CARRIER-FAMILY",
+      "resident_required": "NO-CURRENT-RESIDENT-THEOREM",
+      "exact_domain": "UNKNOWN",
+      "coordinate": "UNPLACED",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2343",
+        "#2522",
+        "#2530",
+        "#2591",
+        "#2617"
+      ],
+      "reason": "FSUBR shares the historical raw+caller-env protocol family; no exact domain or coordinate follows from that protocol."
+    },
+    {
+      "operation": "TRANSFORMER",
+      "historical_order": 19,
+      "historical_classification": "FORM-TRANSFORMER-PROTOCOL",
+      "semantic_region": "Core.PostD4.SpecialCallProtocol",
+      "primary_owner": "carrier:raw-form-input",
+      "secondary_owners": [
+        "carrier:invocation-packaging",
+        "policy:returned-form-protocol",
+        "policy:expansion-timing"
+      ],
+      "placement_kind": "POLICY-OVER-CARRIER",
+      "resident_required": "NO-CURRENT-RESIDENT-THEOREM",
+      "exact_domain": "UNKNOWN",
+      "coordinate": "UNPLACED",
+      "candidate_coordinate": null,
+      "evidence": [
+        "#2557",
+        "#2568",
+        "#2591",
+        "#2616",
+        "#2617"
+      ],
+      "reason": "Transformer behavior spans carrier plus returned-form/timing policies; #2616 rejects collapsing the multi-delta shape into a D5 LAMBDA child."
+    }
+  ]
+}
