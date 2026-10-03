@@ -7,12 +7,13 @@
     "lib/surface/semantic-registry.lisp",
     "crates/sens/src/parser.rs",
     "crates/sens/src/sens.rs",
-    "crates/sens/src/syntax.rs"
+    "crates/sens/src/syntax.rs",
+    "crates/sens/src/semantic_ref.rs"
   ],
   "current_source_contract": {
     "reader": "bare binary SID is admitted only at exact width 8",
-    "runtime_identity": "Sens = Sens8",
-    "fasl_binary_payload": "one packed byte",
+    "runtime_identity": "SemanticRef = Domain(DomainWord) | Legacy8(Sens8)",
+    "fasl_binary_payload": "legacy8: one packed byte; domain: explicit width + packed payload",
     "registry_identity_keys": "exactly eight bits",
     "non_conclusion": "owner residency is not rejected; runtime admission is not yet implemented"
   },
@@ -21,7 +22,7 @@
     "d6_owner_residents": 64,
     "total_owner_residents": 96,
     "direct_binary_reader_identity": 0,
-    "exact_width_runtime_identity": 0,
+    "exact_width_runtime_identity": 96,
     "owner_coordinate_registry_identity": 0,
     "legacy_surface_projection_present": 19,
     "blocked_by_identity_admission": 96
@@ -35,7 +36,7 @@
       "category": "evaluation",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -45,7 +46,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -55,7 +56,7 @@
       "category": "abstraction",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -65,7 +66,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -75,7 +76,7 @@
       "category": "evaluation",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -85,7 +86,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -95,7 +96,7 @@
       "category": "evaluation",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -105,7 +106,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -115,7 +116,7 @@
       "category": "binding",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "10101010",
       "legacy_surface_projection_present": true,
@@ -125,7 +126,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -135,7 +136,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -145,7 +146,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -155,7 +156,7 @@
       "category": "state",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -165,7 +166,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -175,7 +176,7 @@
       "category": "state",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -185,7 +186,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -195,7 +196,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -205,7 +206,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -215,7 +216,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -225,7 +226,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -235,7 +236,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00001100",
       "legacy_surface_projection_present": true,
@@ -245,7 +246,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -255,7 +256,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00001101",
       "legacy_surface_projection_present": true,
@@ -265,7 +266,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -275,7 +276,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -285,7 +286,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -295,7 +296,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -305,7 +306,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -315,7 +316,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -325,7 +326,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -335,7 +336,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -345,7 +346,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -355,7 +356,7 @@
       "category": "list-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00101001",
       "legacy_surface_projection_present": true,
@@ -365,7 +366,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -375,7 +376,7 @@
       "category": "list-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00101010",
       "legacy_surface_projection_present": true,
@@ -385,7 +386,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -395,7 +396,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00001110",
       "legacy_surface_projection_present": true,
@@ -405,7 +406,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -415,7 +416,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00010100",
       "legacy_surface_projection_present": true,
@@ -425,7 +426,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -435,7 +436,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -445,7 +446,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -455,7 +456,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -465,7 +466,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -475,7 +476,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -485,7 +486,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -495,7 +496,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -505,7 +506,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -515,7 +516,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -525,7 +526,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -535,7 +536,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -545,7 +546,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -555,7 +556,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -565,7 +566,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -575,7 +576,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -585,7 +586,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -595,7 +596,7 @@
       "category": "lookup",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00101101",
       "legacy_surface_projection_present": true,
@@ -605,7 +606,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -615,7 +616,7 @@
       "category": "lookup",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -625,7 +626,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -635,7 +636,7 @@
       "category": "binding",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -645,7 +646,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D5",
@@ -655,7 +656,7 @@
       "category": "tree-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "10101100",
       "legacy_surface_projection_present": true,
@@ -665,7 +666,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -675,7 +676,7 @@
       "category": "system",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -685,7 +686,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -695,7 +696,7 @@
       "category": "system",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -705,7 +706,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -715,7 +716,7 @@
       "category": "abstraction",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -725,7 +726,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -735,7 +736,7 @@
       "category": "abstraction",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -745,7 +746,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -755,7 +756,7 @@
       "category": "special-form",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -765,7 +766,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -775,7 +776,7 @@
       "category": "special-form",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -785,7 +786,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -795,7 +796,7 @@
       "category": "macro",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -805,7 +806,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -815,7 +816,7 @@
       "category": "macro",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -825,7 +826,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -835,7 +836,7 @@
       "category": "binding",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "10011100",
       "legacy_surface_projection_present": true,
@@ -845,7 +846,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -855,7 +856,7 @@
       "category": "binding",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "10011101",
       "legacy_surface_projection_present": true,
@@ -865,7 +866,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -875,7 +876,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -885,7 +886,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -895,7 +896,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -905,7 +906,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -915,7 +916,7 @@
       "category": "physical-mutation",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -925,7 +926,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -935,7 +936,7 @@
       "category": "physical-mutation",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -945,7 +946,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -955,7 +956,7 @@
       "category": "generalized-place",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -965,7 +966,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -975,7 +976,7 @@
       "category": "state",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -985,7 +986,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -995,7 +996,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1005,7 +1006,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1015,7 +1016,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1025,7 +1026,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1035,7 +1036,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1045,7 +1046,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1055,7 +1056,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1065,7 +1066,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1075,7 +1076,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1085,7 +1086,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1095,7 +1096,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00010000",
       "legacy_surface_projection_present": true,
@@ -1105,7 +1106,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1115,7 +1116,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1125,7 +1126,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1135,7 +1136,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1145,7 +1146,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1155,7 +1156,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1165,7 +1166,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1175,7 +1176,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1185,7 +1186,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1195,7 +1196,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1205,7 +1206,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1215,7 +1216,7 @@
       "category": "control",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1225,7 +1226,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1235,7 +1236,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1245,7 +1246,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1255,7 +1256,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00010001",
       "legacy_surface_projection_present": true,
@@ -1265,7 +1266,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1275,7 +1276,7 @@
       "category": "predicate",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1285,7 +1286,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1295,7 +1296,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00010010",
       "legacy_surface_projection_present": true,
@@ -1305,7 +1306,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1315,7 +1316,7 @@
       "category": "list-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1325,7 +1326,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1335,7 +1336,7 @@
       "category": "list-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00101000",
       "legacy_surface_projection_present": true,
@@ -1345,7 +1346,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1355,7 +1356,7 @@
       "category": "list-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1365,7 +1366,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1375,7 +1376,7 @@
       "category": "list-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00101011",
       "legacy_surface_projection_present": true,
@@ -1385,7 +1386,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1395,7 +1396,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1405,7 +1406,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1415,7 +1416,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1425,7 +1426,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1435,7 +1436,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1445,7 +1446,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1455,7 +1456,7 @@
       "category": "arithmetic",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1465,7 +1466,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1475,7 +1476,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1485,7 +1486,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1495,7 +1496,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1505,7 +1506,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1515,7 +1516,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1525,7 +1526,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1535,7 +1536,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1545,7 +1546,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1555,7 +1556,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1565,7 +1566,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1575,7 +1576,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1585,7 +1586,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1595,7 +1596,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1605,7 +1606,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1615,7 +1616,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "00110110",
       "legacy_surface_projection_present": true,
@@ -1625,7 +1626,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1635,7 +1636,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1645,7 +1646,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1655,7 +1656,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1665,7 +1666,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1675,7 +1676,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1685,7 +1686,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1695,7 +1696,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1705,7 +1706,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1715,7 +1716,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1725,7 +1726,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1735,7 +1736,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1745,7 +1746,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1755,7 +1756,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1765,7 +1766,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1775,7 +1776,7 @@
       "category": "selector",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1785,7 +1786,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1795,7 +1796,7 @@
       "category": "lookup",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1805,7 +1806,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1815,7 +1816,7 @@
       "category": "lookup",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1825,7 +1826,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1835,7 +1836,7 @@
       "category": "set-operation",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1845,7 +1846,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1855,7 +1856,7 @@
       "category": "set-operation",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1865,7 +1866,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1875,7 +1876,7 @@
       "category": "higher-order",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1885,7 +1886,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1895,7 +1896,7 @@
       "category": "higher-order",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "10101110",
       "legacy_surface_projection_present": true,
@@ -1905,7 +1906,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1915,7 +1916,7 @@
       "category": "tree-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": "10101101",
       "legacy_surface_projection_present": true,
@@ -1925,7 +1926,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     },
     {
       "domain": "Core.D6",
@@ -1935,7 +1936,7 @@
       "category": "tree-structure",
       "owner_resident": true,
       "direct_binary_reader_identity": false,
-      "exact_width_preserved_in_runtime_identity": false,
+      "exact_width_preserved_in_runtime_identity": true,
       "owner_coordinate_registry_identity": false,
       "legacy_surface_sid8": null,
       "legacy_surface_projection_present": false,
@@ -1945,7 +1946,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "blocker": "READER-AND-REGISTRY-ADMISSION"
     }
   ]
 }
