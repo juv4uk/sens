@@ -73,109 +73,90 @@ fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
     items.iter().map(|item| lower(item, depth + 1)).collect()
 }
 
-fn lower_domain_call(
-    identity: CoreDomainIdentity,
-    arguments: &[Expr],
-    depth: u32,
-) -> ExprKind {
-    if is_d3(identity, 0b001) {
-        ExprKind::DomainCall(identity, arguments.into())
-    } else if is_d3(identity, 0b011) {
-        ExprKind::DomainCall(
-            identity,
-            arguments
-                .iter()
-                .map(|clause| match &clause.kind {
-                    ExprKind::List(parts) => Expr {
-                        kind: ExprKind::List(lower_all(parts, depth + 1)),
-                        span: clause.span,
-                    },
-                    _ => clause.clone(),
-                })
-                .collect(),
-        )
-    } else if necessary_forms::identity_for_domain_identity(identity).is_some() {
-        ExprKind::DomainCall(
-            identity,
-            arguments
-                .iter()
-                .enumerate()
-                .map(|(index, argument)| {
-                    if index == 0 {
-                        argument.clone()
-                    } else {
-                        lower(argument, depth + 1)
-                    }
-                })
-                .collect(),
-        )
-    } else {
-        ExprKind::DomainCall(identity, lower_all(arguments, depth))
-    }
-}
-
-fn lower_legacy_call(sid: Sens8, arguments: &[Expr], depth: u32) -> ExprKind {
-    if sid == QUOTE {
-        ExprKind::Call(sid, arguments.into())
-    } else if sid == COND {
-        ExprKind::Call(
-            sid,
-            arguments
-                .iter()
-                .map(|clause| match &clause.kind {
-                    ExprKind::List(parts) => Expr {
-                        kind: ExprKind::List(lower_all(parts, depth + 1)),
-                        span: clause.span,
-                    },
-                    _ => clause.clone(),
-                })
-                .collect(),
-        )
-    } else if necessary_forms::identity_for_semantic_id(sid).is_some() {
-        ExprKind::Call(
-            sid,
-            arguments
-                .iter()
-                .enumerate()
-                .map(|(index, argument)| {
-                    if index == 0 {
-                        argument.clone()
-                    } else {
-                        lower(argument, depth + 1)
-                    }
-                })
-                .collect(),
-        )
-    } else {
-        ExprKind::Call(sid, lower_all(arguments, depth))
-    }
-}
-
 fn lower(expression: &Expr, depth: u32) -> Expr {
     if depth > MAX_STRUCTURE_DEPTH {
         return expression.clone();
     }
     let kind = match &expression.kind {
-        // A compatibility head stays compatibility, but its executable
-        // descendants must keep moving toward exact-domain identity.
-        ExprKind::Call(sid, arguments) => lower_legacy_call(*sid, arguments, depth),
-        // Domain calls are already canonical at the head. Recurse only through
-        // positions that are executable under that domain form's law.
+        ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
         ExprKind::DomainCall(identity, arguments) => {
-            lower_domain_call(*identity, arguments, depth)
+            ExprKind::DomainCall(*identity, arguments.clone())
         }
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
 
             if let Some(identity) = head_domain_identity(&items[0]) {
                 return Expr {
-                    kind: lower_domain_call(identity, arguments, depth),
+                    kind: if is_d3(identity, 0b001) {
+                        ExprKind::DomainCall(identity, arguments.into())
+                    } else if is_d3(identity, 0b011) {
+                        ExprKind::DomainCall(
+                            identity,
+                            arguments
+                                .iter()
+                                .map(|clause| match &clause.kind {
+                                    ExprKind::List(parts) => Expr {
+                                        kind: ExprKind::List(lower_all(parts, depth + 1)),
+                                        span: clause.span,
+                                    },
+                                    _ => clause.clone(),
+                                })
+                                .collect(),
+                        )
+                    } else if necessary_forms::identity_for_domain_identity(identity).is_some() {
+                        ExprKind::DomainCall(
+                            identity,
+                            arguments
+                                .iter()
+                                .enumerate()
+                                .map(|(index, argument)| {
+                                    if index == 0 {
+                                        argument.clone()
+                                    } else {
+                                        lower(argument, depth + 1)
+                                    }
+                                })
+                                .collect(),
+                        )
+                    } else {
+                        ExprKind::DomainCall(identity, lower_all(arguments, depth))
+                    },
                     span: expression.span,
                 };
             }
 
             match head_sid(&items[0]) {
-                Some(sid) => lower_legacy_call(sid, arguments, depth),
+                Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
+                Some(sid) if sid == COND => ExprKind::Call(
+                    sid,
+                    arguments
+                        .iter()
+                        .map(|clause| match &clause.kind {
+                            ExprKind::List(parts) => Expr {
+                                kind: ExprKind::List(lower_all(parts, depth + 1)),
+                                span: clause.span,
+                            },
+                            _ => clause.clone(),
+                        })
+                        .collect(),
+                ),
+                Some(sid) if necessary_forms::identity_for_semantic_id(sid).is_some() => {
+                    ExprKind::Call(
+                        sid,
+                        arguments
+                            .iter()
+                            .enumerate()
+                            .map(|(index, argument)| {
+                                if index == 0 {
+                                    argument.clone()
+                                } else {
+                                    lower(argument, depth + 1)
+                                }
+                            })
+                            .collect(),
+                    )
+                }
+                Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth)),
                 None => ExprKind::List(lower_all(items, depth)),
             }
         }
@@ -228,48 +209,6 @@ mod tests {
         assert_domain_call("(lambda (x) x)", 4, 0b0010);
         assert_domain_call("(define x 1)", 4, 0b0011);
         assert_domain_call("(def x 1)", 4, 0b0011);
-    }
-
-    #[test]
-    fn legacy_define_and_lambda_heads_do_not_freeze_migrated_body_calls() {
-        let expr = lower_one(
-            "(00001001 selector (00001000 (values) (cadr values)))",
-        );
-
-        let ExprKind::Call(define_sid, define_args) = expr.kind else {
-            panic!("historical DEFINE head must remain compatibility Call");
-        };
-        assert_eq!(define_sid, crate::sens!(00001001));
-
-        let ExprKind::Call(lambda_sid, lambda_args) = &define_args[1].kind else {
-            panic!("historical LAMBDA head must remain compatibility Call");
-        };
-        assert_eq!(*lambda_sid, crate::sens!(00001000));
-
-        let ExprKind::DomainCall(identity, _) = &lambda_args[1].kind else {
-            panic!("migrated CADR body call must become exact DomainCall");
-        };
-        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b1011));
-    }
-
-    #[test]
-    fn recursive_legacy_lowering_still_respects_quote_data_boundary() {
-        let expr = lower_one(
-            "(00001001 quoted (00000001 (cadr values)))",
-        );
-
-        let ExprKind::Call(_, define_args) = expr.kind else {
-            panic!("historical DEFINE head must remain compatibility Call");
-        };
-        let ExprKind::Call(quote_sid, quote_args) = &define_args[1].kind else {
-            panic!("historical QUOTE head must remain compatibility Call");
-        };
-        assert_eq!(*quote_sid, crate::sens!(00000001));
-
-        let ExprKind::List(quoted) = &quote_args[0].kind else {
-            panic!("quoted form must remain list data");
-        };
-        assert!(matches!(quoted[0].kind, ExprKind::Symbol(ref name) if name.as_ref() == "cadr"));
     }
 
     #[test]
