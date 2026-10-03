@@ -292,12 +292,13 @@ fn dispatch_call(
     };
     match &function {
         Value::Sid(identity) => {
-            match environment.code_slot(*identity) {
+            let bound = environment.code_slot(*identity);
+            match bound.as_ref() {
                 Some(Value::Macro(closure)) => {
-                    return closures::apply_macro(closure, arguments, environment, span);
+                    return closures::apply_macro(closure.clone(), arguments, environment, span);
                 }
                 Some(closure @ Value::Closure(_)) => {
-                    return closures::apply(closure, arguments, environment, span);
+                    return closures::apply((*closure).clone(), arguments, environment, span);
                 }
                 _ => {}
             }
