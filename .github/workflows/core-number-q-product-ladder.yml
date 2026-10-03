@@ -1,0 +1,41 @@
+name: Core Number rational product ladder research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-number-q-product-ladder/**"
+      - ".github/workflows/core-number-q-product-ladder.yml"
+      - "benchmarks/core-number-width-ladder/**"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-number-q-product-ladder/**"
+      - ".github/workflows/core-number-q-product-ladder.yml"
+  workflow_dispatch:
+
+jobs:
+  q-product-ladder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Re-check integer width-ladder donor
+        run: |
+          rm -rf /tmp/core-number-width-ladder
+          python3 benchmarks/core-number-width-ladder/run.py             --out /tmp/core-number-width-ladder
+      - name: Run rational product-ladder witness
+        run: |
+          rm -rf /tmp/core-number-q-product-ladder
+          python3 benchmarks/core-number-q-product-ladder/run.py             --out /tmp/core-number-q-product-ladder
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/core-number-q-product-ladder/report.md; then
+            cat /tmp/core-number-q-product-ladder/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-number-q-product-ladder
+          path: /tmp/core-number-q-product-ladder/
+          retention-days: 14
