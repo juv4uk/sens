@@ -2,7 +2,7 @@ use sens::{eval_program, Session};
 
 fn eval_guard(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::load_core_library(&mut session).unwrap();
     eval_program(include_str!("../../../lib/guard.lisp"), &mut session).unwrap();
     eval_program(
         include_str!("../../../knowledge/guard-reference.lisp"),
