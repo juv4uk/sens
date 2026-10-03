@@ -125,7 +125,7 @@ pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
     BinaryFrame, BinaryFrameError,
 };
-pub use environment::{CoreProfile, Environment, Session};
+pub use environment::{Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 #[allow(deprecated)]
@@ -172,14 +172,10 @@ pub use syntax::wire::{
 /// that same value after evaluation.
 pub const MACRO_LIBRARY_SOURCE: &str = include_str!("../../../lib/macro.lisp");
 
-/// Frozen Contract-6 compatibility profile.
-pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
-
-/// Core3 experimental kernel-laboratory profile layered over the current
-/// shared bootstrap substrate. Mechanism selection is loaded separately by
-/// the execution layer because the current selector reads SENS-owned files and
-/// therefore does not belong in this capability-free core crate.
-pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/mechanism-lab.lisp");
+/// Explicit mechanism laboratory layered over the one active Core.
+/// This source cannot select language semantics; it only installs lab-owned
+/// routing helpers before the session enables lab mechanism admission.
+pub const MECHANISM_LAB_SOURCE: &str = include_str!("../../../lib/mechanism-lab.lisp");
 
 /// The single active SENS core library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
@@ -339,7 +335,6 @@ fn load_core_library_with_fasl(
     session: &mut Session,
     core_fasl: &[u8],
 ) -> Result<EvalResult, LanguageError> {
-    session.environment.select_core_profile(CoreProfile::Core4);
     session
         .environment
         .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
@@ -370,39 +365,16 @@ pub fn core_library_fasl_is_current() -> bool {
         .unwrap_or(false)
 }
 
-/// Activate the frozen Core2/Contract-6 compatibility profile.
+/// Load the explicit mechanism laboratory on top of the one active Core.
 ///
-/// This loader deliberately does not install the current Core4 macro layer:
-/// Core2 is a historical compatibility profile, not Core4 plus legacy answers.
-/// The environment mode is shared by lexical children, so lazy COND behavior
-/// remains stable across closures without exposing a shadowable Lisp binding.
-pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    session.environment.select_core_profile(CoreProfile::Core2);
-    session
-        .environment
-        .set_cond_clause_mode(environment::CondClauseMode::Core2LegacyTwoPart);
-    let result = eval_program(CORE2_LIBRARY_SOURCE, session)?;
-    bind_missing_stable_surface_peers(&session.environment);
-    Ok(result)
-}
-
-/// Activate the Core3 experimental kernel-laboratory profile.
-///
-/// Core3 currently reuses the Core4 bootstrap as a shared execution substrate.
-/// The temporary Core4 selection performed by `load_core_library` is substrate
-/// setup only: Core3 becomes the mechanically selected profile only after its
-/// thin profile layer loads successfully.
-///
-/// The SENS-owned mechanism selector is deliberately NOT loaded here. Its
-/// current implementation reads authority files through the filesystem, while
-/// this crate is capability-free. #1411 owns the later admitted execution path.
-///
-/// This loader carries only the selected-profile fact. Core3 laws, result
-/// domains, and mechanism admission remain owned by SENS contracts/Lisp.
-pub fn load_core3_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+/// Enabling the lab changes only host-mechanism admission for lab routes. It
+/// cannot select a language Core or change any semantic law.
+pub fn load_mechanism_lab_library(
+    session: &mut Session,
+) -> Result<EvalResult, LanguageError> {
     load_core_library(session)?;
-    let result = eval_program(CORE3_LIBRARY_SOURCE, session)?;
-    session.environment.select_core_profile(CoreProfile::Core3);
+    let result = eval_program(MECHANISM_LAB_SOURCE, session)?;
+    session.environment.enable_mechanism_lab();
     Ok(result)
 }
 
@@ -529,7 +501,7 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
 
 
 #[cfg(test)]
-mod core4_bootstrap_cache_tests {
+mod core_bootstrap_cache_tests {
     use super::*;
 
     fn result_of(session: &mut Session, source: &str) -> String {
@@ -540,27 +512,23 @@ mod core4_bootstrap_cache_tests {
     }
 
     #[test]
-    fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
+    fn valid_fasl_path_evaluates_current_core() {
         let expressions = parse(CORE_LIBRARY_SOURCE).expect("current core parses");
         let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
         let fasl = fasl_encode(&expressions, &hash);
         let mut session = Session::default();
 
-        load_core_library_with_fasl(&mut session, &fasl).expect("valid FASL Core4 bootstrap");
+        load_core_library_with_fasl(&mut session, &fasl).expect("valid FASL Core bootstrap");
 
-        assert_eq!(
-            session.environment.selected_core_profile(),
-            Some(CoreProfile::Core4)
-        );
         assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
     }
 
     #[test]
-    fn stale_or_invalid_fasl_falls_back_to_text_and_still_selects_core4() {
+    fn stale_or_invalid_fasl_falls_back_to_text() {
         let mut session = Session::default();
 
         load_core_library_with_fasl(&mut session, b"not-a-current-fasl")
-            .expect("text fallback Core4 bootstrap");
+            .expect("text fallback Core bootstrap");
 
         assert_eq!(
             session.environment.selected_core_profile(),
