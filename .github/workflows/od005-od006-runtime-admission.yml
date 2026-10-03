@@ -1,0 +1,50 @@
+name: OD005/OD006 runtime admission audit
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "knowledge/od005-od006-runtime-admission-audit.json"
+      - "lib/surface/semantic-registry.lisp"
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/sens.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/tests/od005_od006_runtime_admission_gap.rs"
+      - "scripts/audit-od005-od006-runtime-admission.py"
+      - ".github/workflows/od005-od006-runtime-admission.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "knowledge/od005-od006-runtime-admission-audit.json"
+      - "lib/surface/semantic-registry.lisp"
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/sens.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/tests/od005_od006_runtime_admission_gap.rs"
+      - "scripts/audit-od005-od006-runtime-admission.py"
+      - ".github/workflows/od005-od006-runtime-admission.yml"
+
+jobs:
+  admission-audit:
+    name: D5/D6 owner residency vs runtime identity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check 96-row runtime admission matrix
+        run: python3 scripts/audit-od005-od006-runtime-admission.py --check
+      - name: Run exact-width reader collision witness
+        run: cargo test -p sens --test od005_od006_runtime_admission_gap -- --nocapture
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## OD-005 / OD-006 runtime admission"
+            echo
+            echo "- Owner residency: D5 32/32, D6 64/64"
+            echo "- Current direct owner-coordinate identity admission: 0/96"
+            echo "- Blocker: legacy Sens8-only reader/carrier"
+            echo "- This is a migration audit, not a residency rollback."
+          } >> "$GITHUB_STEP_SUMMARY"
