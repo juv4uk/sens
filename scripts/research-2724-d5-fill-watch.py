@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-"""#2724 — standing D5 fill watchdog.
+"""#2763 — D5 owner-map remap watchdog.
 
-This is coordination/proof plumbing, not a resident allocator.
+This file keeps the historical name "fill watch", but OD-005 changed its job.
+There are no current free D5 coordinates to fill.
 
-It composes existing authoritative artifacts:
-- #2510 current D5 closure map;
-- #2616 D5 eligibility ledger;
-- #2617 post-D4 root minimization;
-- #2703 historical semantic placement.
+The watchdog now protects:
+- exact 32/32 owner residency;
+- zero UNKNOWN current occupancy;
+- eight selector-law generated residents;
+- exact owner coordinate/name/parent mapping;
+- orthogonal semantic-class ledger;
+- explicit owner-map revision for any remap.
 
-The watchdog stays GREEN while current evidence yields no exact new D5
-candidate. It turns RED with REVIEW-REQUIRED when a new historical row appears
-without placement, when any factor becomes D5-eligible YES, or when semantic
-placement starts naming D5 without a separately updated ratified baseline.
+PRE-OD005 sparse eligibility/placement studies remain research evidence and do
+not veto current owner residency.
 """
 
 from __future__ import annotations
@@ -25,10 +26,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 D5_MAP = ROOT / "benchmarks" / "d5-closure-map" / "run.py"
-ELIGIBILITY = ROOT / "benchmarks" / "d5-sens-derivation-closeout" / "factor-eligibility.json"
-ROOT_MIN = ROOT / "benchmarks" / "post-d4-root-min-closeout" / "run.py"
-HISTORY = ROOT / "docs" / "research" / "2344-post-d4-historical-ledger.json"
-PLACEMENT = ROOT / "benchmarks" / "post-d4-semantic-placement" / "placement.json"
+OWNER_MAP = ROOT / "knowledge" / "d5-historical-full-map.json"
+SEMANTIC_LEDGER = ROOT / "knowledge" / "d5-d6-semantic-ledger.json"
 
 EXPECTED_GENERATED = {
     "10100", "10101", "10110", "10111",
@@ -44,211 +43,80 @@ def review(reason: str) -> None:
     raise SystemExit(f"D5-FILL-WATCH=REVIEW-REQUIRED\nreason={reason}")
 
 
-def classify_d5_placement_claims(rows: list[dict[str, Any]]) -> dict[str, list[str]]:
-    """Separate semantic D5 claims from untyped five-bit carrier evidence."""
-    direct_d5: list[str] = []
-    candidate_d5: list[str] = []
-    untyped_w5: list[str] = []
-
-    for row in rows:
-        operation = str(row["operation"])
-        exact_domain = str(row.get("exact_domain", ""))
-        coordinate = str(row.get("coordinate", ""))
-        candidate = row.get("candidate_coordinate")
-
-        typed_coordinate = coordinate.startswith("D5:")
-        raw_w5 = (
-            coordinate not in {"", "NONE", "UNPLACED"}
-            and len(coordinate) == 5
-            and set(coordinate) <= {"0", "1"}
-        )
-
-        if exact_domain == "D5" or typed_coordinate:
-            direct_d5.append(operation)
-        elif raw_w5:
-            # #2540: width/carrier alone is not semantic domain identity.
-            untyped_w5.append(operation)
-
-        if isinstance(candidate, str) and candidate.startswith("D5:"):
-            candidate_d5.append(operation)
-
-    return {
-        "direct_d5": sorted(direct_d5),
-        "candidate_d5": sorted(candidate_d5),
-        "untyped_w5": sorted(untyped_w5),
-    }
-
-
-def self_check_domain_width_separation() -> None:
-    controls = [
-        {
-            "operation": "width-only-control",
-            "exact_domain": "unresolved",
-            "coordinate": "10101",
-            "candidate_coordinate": None,
-        },
-        {
-            "operation": "explicit-domain-control",
-            "exact_domain": "D5",
-            "coordinate": "10101",
-            "candidate_coordinate": None,
-        },
-        {
-            "operation": "typed-coordinate-control",
-            "exact_domain": "unresolved",
-            "coordinate": "D5:10101",
-            "candidate_coordinate": None,
-        },
-        {
-            "operation": "candidate-control",
-            "exact_domain": "unresolved",
-            "coordinate": "UNPLACED",
-            "candidate_coordinate": "D5:10101",
-        },
-    ]
-    result = classify_d5_placement_claims(controls)
-    assert result["direct_d5"] == [
-        "explicit-domain-control",
-        "typed-coordinate-control",
-    ]
-    assert result["candidate_d5"] == ["candidate-control"]
-    assert result["untyped_w5"] == ["width-only-control"]
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path)
     args = ap.parse_args()
 
     d5_ns = runpy.run_path(str(D5_MAP))
-    d5_rows = d5_ns["build_map"]()
-    generated = {r["coordinate"] for r in d5_rows if r["status"] == "generated"}
-    unknown = {r["coordinate"] for r in d5_rows if r["status"] == "UNKNOWN/free"}
+    rows = d5_ns["build_map"]()
+    generated = {r["coordinate"] for r in rows if r["status"] == "generated"}
+    historical = {r["coordinate"] for r in rows if r["status"] == "owner-historical"}
+    unknown = {r["coordinate"] for r in rows if "UNKNOWN" in r["status"]}
 
     if generated != EXPECTED_GENERATED:
         review(f"selector generated set drifted: {sorted(generated)}")
-    if len(generated) != 8 or len(unknown) != 24:
-        review(f"ratified 8/24 baseline drifted: generated={len(generated)} unknown={len(unknown)}")
-    if any(r["manual_resident_required"] for r in d5_rows):
-        review("closure map contains manual resident requirement")
-    if any(r["placement_ref"] for r in d5_rows):
-        review("closure map contains pre-placement reference")
-
-    eligibility = load_json(ELIGIBILITY)
-    invariant = eligibility["map_invariant"]
-    expected_invariant = {
-        "capacity": 32,
-        "selector_generated": 8,
-        "unknown_free": 24,
-        "manual_nonselector_residents": 0,
-        "source": "#2510/#2414",
-    }
-    if invariant != expected_invariant:
-        review(f"eligibility baseline invariant drifted: {invariant}")
-
-    yes_factors = [
-        row["factor_id"]
-        for row in eligibility["factors"]
-        if row["d5_eligible"] == "YES"
-    ]
-    if yes_factors:
-        review("new D5-eligible factor(s): " + ",".join(sorted(yes_factors)))
-
-    yes_controls = [
-        row["control_id"]
-        for row in eligibility.get("composite_controls", [])
-        if row["d5_eligible"] == "YES"
-    ]
-    if yes_controls:
-        review("new D5-eligible composite control(s): " + ",".join(sorted(yes_controls)))
-
-    root_ns = runpy.run_path(str(ROOT_MIN))
-    root_rows = root_ns["ROWS"]
-    unresolved_root_rows = [
-        row["factor"]
-        for row in root_rows
-        if row["root_status"] == "UNRESOLVED"
-    ]
-    if unresolved_root_rows:
-        review("root-min ledger reopened: " + ",".join(sorted(unresolved_root_rows)))
-
-    history = load_json(HISTORY)
-    placement = load_json(PLACEMENT)
-    historical_ops = {row["operation"] for row in history["rows"]}
-    placement_ops = {row["operation"] for row in placement["rows"]}
-
-    missing_placement = sorted(historical_ops - placement_ops)
-    if missing_placement:
-        review("historical row(s) need semantic placement: " + ",".join(missing_placement))
-
-    orphan_placement = sorted(placement_ops - historical_ops)
-    if orphan_placement:
-        review("placement row(s) have no historical source: " + ",".join(orphan_placement))
-
-    invariants = placement["invariants"]
-    if invariants.get("d5_selector_generated") != 8:
-        review("semantic-placement selector count drifted")
-    if invariants.get("d5_unknown_free") != 24:
-        review("semantic-placement UNKNOWN count drifted")
-    if invariants.get("d5_manual_nonselector_residents") != 0:
-        review("semantic-placement manual D5 residents appeared")
-    if invariants.get("new_nonselector_d5_candidates") != 0:
-        review("semantic-placement reports new nonselector D5 candidate")
-
-    self_check_domain_width_separation()
-    placement_claims = classify_d5_placement_claims(placement["rows"])
-    direct_d5_rows = placement_claims["direct_d5"]
-    candidate_d5_rows = placement_claims["candidate_d5"]
-    untyped_w5_rows = placement_claims["untyped_w5"]
-
-    if direct_d5_rows:
-        review("historical placement now claims D5 resident(s): " + ",".join(direct_d5_rows))
-    if candidate_d5_rows:
-        review("historical placement now nominates D5 candidate(s): " + ",".join(candidate_d5_rows))
-    if untyped_w5_rows:
+    if len(rows) != 32 or len(generated) != 8 or len(historical) != 24 or unknown:
         review(
-            "historical placement has untyped W5 coordinate(s); domain review required: "
-            + ",".join(untyped_w5_rows)
+            "OD-005 occupancy drifted: "
+            f"rows={len(rows)} generated={len(generated)} "
+            f"owner-historical={len(historical)} unknown={len(unknown)}"
         )
 
-    unknown_eligibility = sorted(
-        row["factor_id"]
-        for row in eligibility["factors"]
-        if row["d5_eligible"] == "UNKNOWN"
-    )
+    owner = load_json(OWNER_MAP)
+    owner_by = {row["coordinate"]: row for row in owner["coordinates"]}
+    if len(owner_by) != 32:
+        review("owner map is not exact 32/32")
+
+    ledger = load_json(SEMANTIC_LEDGER)
+    ledger_rows = [row for row in ledger["rows"] if row["domain"] == "Core.D5"]
+    ledger_by = {row["coordinate"]: row for row in ledger_rows}
+    if len(ledger_by) != 32:
+        review("semantic ledger is not exact 32-row D5 coverage")
+
+    for row in rows:
+        coordinate = row["coordinate"]
+        owner_row = owner_by.get(coordinate)
+        ledger_row = ledger_by.get(coordinate)
+        if owner_row is None or ledger_row is None:
+            review(f"{coordinate}: missing owner/semantic row")
+        if row["display_name"] != owner_row["name"]:
+            review(f"{coordinate}: unauthorized owner-name remap")
+        if row["parent_d4"] != owner_row["parent_d4"]:
+            review(f"{coordinate}: unauthorized parent remap")
+        if ledger_row["residency"] != "YES":
+            review(f"{coordinate}: semantic ledger lost owner residency")
+        if row["semantic_class"] != ledger_row["semantic_class"]:
+            review(f"{coordinate}: semantic class disagrees with #2765 ledger")
 
     summary = {
-        "schema": "d5-fill-watch/v1",
-        "issue": "#2724",
+        "schema": "d5-fill-watch/v2",
+        "issue": "#2724/#2763",
         "status": "PASS",
         "width": 5,
         "capacity": 32,
+        "resident_count": 32,
         "generated_residents": sorted(generated),
-        "generated_count": len(generated),
-        "unknown_coordinates": sorted(unknown),
-        "unknown_count": len(unknown),
-        "manual_nonselector_residents": 0,
-        "new_d5_eligible_factors": [],
-        "untyped_w5_placement_rows": [],
-        "historical_rows": len(historical_ops),
-        "semantic_placement_rows": len(placement_ops),
-        "unresolved_d5_eligibility_factors_in_legacy_ledger": unknown_eligibility,
-        "root_min_unresolved": [],
+        "generated_count": 8,
+        "owner_historical_coordinates": sorted(historical),
+        "owner_historical_count": 24,
+        "unknown_coordinates": [],
+        "unknown_count": 0,
         "review_required": False,
-        "fill_rule": "semantic-family-first; never enumerate UNKNOWN coordinates",
+        "fill_rule": "owner-map-guard; there is no current free D5 occupancy",
+        "remap_rule": "coordinate/name/parent changes require explicit owner-map revision",
+        "semantic_rule": "derivability/classification remains orthogonal to residency",
+        "pre_od005_sparse_research": "ARCHIVED-NOT-CURRENT-OCCUPANCY",
     }
 
     print("D5-FILL-WATCH=PASS")
     print("width=5")
+    print("resident=32")
     print("generated=8")
-    print("unknown=24")
-    print("manual=0")
-    print("new-d5-candidates=0")
-    print(f"historical-rows={len(historical_ops)}")
+    print("owner-historical=24")
+    print("unknown=0")
     print("review-required=no")
-    if unknown_eligibility:
-        print("legacy-eligibility-unknown=" + ",".join(unknown_eligibility))
-        print("note=root-min closeout is authoritative for those factor statuses")
+    print("rule=guard-owner-map-not-find-occupant")
 
     if args.out:
         args.out.mkdir(parents=True, exist_ok=True)
@@ -256,7 +124,6 @@ def main() -> int:
             json.dumps(summary, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-
     return 0
 
 
