@@ -63,8 +63,8 @@ impl Parser<'_> {
         }
     }
 
-    /// Reader sugar: `'form` produces a list headed directly by SID 00000001.
-    /// No named function identity is introduced by the reader.
+    /// Reader sugar: `'form` produces a list headed by canonical Core.D3 QUOTE=001.
+    /// No legacy Sens8 identity and no human-name identity is introduced here.
     fn quote_sugar(&mut self, start: usize) -> Result<Expr, LanguageError> {
         self.bump();
         self.skip_ignored();
@@ -80,7 +80,12 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Sid(crate::sens!(00000001)),
+                        kind: ExprKind::DomainIdentity(
+                            crate::CoreDomainIdentity::from_source_word(
+                                crate::BinarySourceWord::W3(crate::Bit3::new(0b001).unwrap()),
+                            )
+                            .expect("Core.D3 QUOTE source word"),
+                        ),
                         span: Span {
                             start,
                             end: start + 1,
@@ -411,19 +416,31 @@ impl Parser<'_> {
             });
         }
 
-        // The complete 8-bit space is reserved for function identities.
-        // This is a direct SID read, not numeric conversion:
-        // `00001100` is function SID 00001100; decimal `12` remains a number.
-        if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            let sid = crate::Sens8::from_exact_bits(token)
-                .expect("exact eight-bit SID validated above");
-            return Ok(Expr {
-                kind: ExprKind::Sid(sid),
-                span: Span {
-                    start,
-                    end: self.cursor,
-                },
-            });
+        // Bare exact binary source words are width-sensitive.
+        //
+        // W3..W6 are canonical Core domain identities. W8 survives only as an
+        // explicit legacy exact-eight compatibility lane. W1/W2/W7 do not gain
+        // Core call identity by width alone and continue into their existing
+        // reader paths until their own syntax laws are admitted.
+        if let Some(source_word) = crate::source_words::parse_binary_source_word(token) {
+            if let Some(identity) = crate::CoreDomainIdentity::from_source_word(source_word) {
+                return Ok(Expr {
+                    kind: ExprKind::DomainIdentity(identity),
+                    span: Span {
+                        start,
+                        end: self.cursor,
+                    },
+                });
+            }
+            if let crate::BinarySourceWord::W8(word) = source_word {
+                return Ok(Expr {
+                    kind: ExprKind::Sid(crate::Sens8::from_packed_byte(word.packed_bits())),
+                    span: Span {
+                        start,
+                        end: self.cursor,
+                    },
+                });
+            }
         }
 
         let decimal_with_dot = if token.contains(',') && !token.contains('.') {
@@ -619,7 +636,7 @@ mod tests {
     }
 
     #[test]
-    fn exact_eight_bit_sequences_are_sid_values() {
+    fn exact_eight_bit_sequences_remain_legacy_sid_values() {
         assert!(matches!(
             parse_one("00000000").kind,
             ExprKind::Sid(sid) if sid == crate::sens!(00000000)
@@ -643,10 +660,34 @@ mod tests {
     }
 
     #[test]
-    fn non_eight_bit_numeric_tokens_remain_ordinary_decimal_numbers() {
+    fn bare_w3_through_w6_are_exact_core_domain_identities() {
+        for (source, width, bits) in [
+            ("101", 3, 0b101),
+            ("1010", 4, 0b1010),
+            ("10101", 5, 0b10101),
+            ("101010", 6, 0b101010),
+        ] {
+            let ExprKind::DomainIdentity(identity) = parse_one(source).kind else {
+                panic!("{source}: expected DomainIdentity");
+            };
+            assert_eq!(identity.width(), width);
+            assert_eq!(identity.packed_bits(), bits);
+        }
+    }
+
+    #[test]
+    fn non_core_width_binary_shapes_keep_existing_non_callable_reader_meaning() {
         assert!(matches!(
-            parse_one("101").kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 101.0
+            parse_one("1").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 1.0
+        ));
+        assert!(matches!(
+            parse_one("01").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 1.0
+        ));
+        assert!(matches!(
+            parse_one("1010100").kind,
+            ExprKind::Number(value, Exactness::Exact) if value == 1_010_100.0
         ));
         assert!(matches!(
             parse_one("101010000").kind,
@@ -810,11 +851,15 @@ mod tests {
     }
 
     #[test]
-    fn apostrophe_desugars_to_sid_00000001_form() {
+    fn apostrophe_desugars_to_canonical_d3_quote_form() {
         let ExprKind::List(items) = parse_one("'кіт").kind else {
-            panic!("apostrophe should produce a SID 00000001 form");
+            panic!("apostrophe should produce a Core.D3 QUOTE form");
         };
-        assert!(matches!(&items[0].kind, ExprKind::Sid(sid) if *sid == crate::sens!(00000001)));
+        assert!(matches!(
+            &items[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b001
+        ));
         assert!(matches!(&items[1].kind, ExprKind::Symbol(s) if &**s == "кіт"));
     }
 
