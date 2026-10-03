@@ -32,7 +32,7 @@ Important negative placements:
 | Historical row | Semantic region | Current placement |
 |---|---|---|
 | SET | shared-location carrier | UNPLACED |
-| SETQ | shared-location carrier + quoted-target policy | UNPLACED; D6 001111 remains owner-ready candidate only |
+| SETQ | shared-location carrier + quoted-target policy | **RATIFIED Core D6 001111** under #2538 OD-001 / #2723 |
 | PROG | composite of derived GO + non-local RETURN | no independent resident |
 | RETURN | proven non-local-exit root | width UNKNOWN, UNPLACED |
 | FEXPR | raw-form + caller-env + invocation carrier family | UNPLACED |
@@ -88,7 +88,7 @@ HISTORICAL-ROWS=19
 NEW-D5-RESIDENTS=0
 D5=8-generated+24-UNKNOWN
 RETURN=PROVEN-ROOT-UNPLACED
-SETQ-D6-001111=CANDIDATE-ONLY
+SETQ-D6-001111=RATIFIED-RESIDENT
 ```
 
 ## Principle
