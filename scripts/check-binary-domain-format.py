@@ -21,7 +21,7 @@ BLOCK = re.compile(r"BINARY-DOMAIN\s+FORMAT", re.I)
 
 
 def _heading_text(b, m):
-    rest = m.group(1).strip()
+    rest = (m.group(1) or "").strip()
     if rest:
         return rest
     for line in b[m.end() :].splitlines():
@@ -146,12 +146,12 @@ def judge(issues):
         if str(it.get("state", "open")).lower() != "open":
             skipped += 1
             continue
-        d_kind, d_val = field_value(body, "DOMAIN")
-        r_kind, r_val = field_value(body, "RELATION")
         has_block = bool(BLOCK.search(body))
-        if d_kind is None and r_kind is None and not has_block:
+        if not has_block:
             skipped += 1
             continue
+        d_kind, d_val = field_value(body, "DOMAIN")
+        r_kind, r_val = field_value(body, "RELATION")
         judged.append(
             {
                 "number": it.get("number"),
