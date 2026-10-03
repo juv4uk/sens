@@ -1,7 +1,7 @@
 //! Одноразове зведення голови виклику до функції СЕНС (1 байт).
 //!
 //! Після розбору `(atom x)`, `(атом? x)`, `(aṇu x)` і `(00000010 x)` стають
-//! одним і тим самим вузлом `ExprKind::Call(00000010, [x])`: функція
+//! одним і тим самим вузлом `ExprKind::LegacyCall(00000010, [x])`: функція
 //! займає 1 байт, а виконання більше не шукає ім'я на кожному виклику.
 //!
 //! M8 (#1590): зводяться **усі** admitted surface з реєстру, не лише Canon
@@ -21,14 +21,14 @@ use std::rc::Rc;
 const QUOTE: Sens8 = crate::sens!(00000001);
 const COND: Sens8 = crate::sens!(00000111);
 
-/// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
+/// Звести legacy surface-виклики. Канонічні domain Call лишаються незмінними.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
     expressions.iter().map(|expression| lower(expression, 0)).collect()
 }
 
 fn head_sid(head: &Expr) -> Option<Sens8> {
     match &head.kind {
-        ExprKind::Sid(sid) => Some(*sid),
+        ExprKind::LegacySid(sid) => Some(*sid),
         ExprKind::Symbol(name) => immutable_surface_sid(name),
         _ => None,
     }
@@ -53,12 +53,13 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
         return expression.clone();
     }
     let kind = match &expression.kind {
-        ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
+        ExprKind::Call(identity, arguments) => ExprKind::Call(*identity, arguments.clone()),
+        ExprKind::LegacyCall(sid, arguments) => ExprKind::LegacyCall(*sid, arguments.clone()),
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
             match head_sid(&items[0]) {
-                Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
-                Some(sid) if sid == COND => ExprKind::Call(
+                Some(sid) if sid == QUOTE => ExprKind::LegacyCall(sid, arguments.into()),
+                Some(sid) if sid == COND => ExprKind::LegacyCall(
                     sid,
                     arguments
                         .iter()
@@ -72,7 +73,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                         .collect(),
                 ),
                 Some(sid) if necessary_forms::identity_for_semantic_id(sid).is_some() => {
-                    ExprKind::Call(
+                    ExprKind::LegacyCall(
                         sid,
                         arguments
                             .iter()
@@ -87,7 +88,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                             .collect(),
                     )
                 }
-                Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth)),
+                Some(sid) => ExprKind::LegacyCall(sid, lower_all(arguments, depth)),
                 None => ExprKind::List(lower_all(items, depth)),
             }
         }
@@ -115,7 +116,7 @@ mod tests {
     fn plus_surface_lowers_to_sens_call() {
         let expr = lower_one("(+ 1 2)");
         match expr.kind {
-            ExprKind::Call(sid, args) => {
+            ExprKind::LegacyCall(sid, args) => {
                 assert_eq!(sid, crate::sens!(00001100));
                 assert_eq!(args.len(), 2);
             }
@@ -127,7 +128,7 @@ mod tests {
     fn minus_surface_lowers_to_sens_call() {
         let expr = lower_one("(- 5 3)");
         match expr.kind {
-            ExprKind::Call(sid, _) => assert_eq!(sid, crate::sens!(00001101)),
+            ExprKind::LegacyCall(sid, _) => assert_eq!(sid, crate::sens!(00001101)),
             other => panic!("expected Call, got {other:?}"),
         }
     }
