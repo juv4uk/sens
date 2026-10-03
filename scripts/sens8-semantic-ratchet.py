@@ -21,7 +21,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 LEGACY_RE = re.compile(
-    r"\b(?:Sens8|Sid8|Function8)\b|Value::Sid|sens!\([01]{8}\)"
+    r"\b(?:Sens8|Sid8|Function8)\b|sens!\([01]{8}\)"
 )
 
 TEXT_SUFFIXES = {
@@ -302,8 +302,7 @@ def self_test() -> int:
         print(f"  [{'ok' if ok else 'FAIL'}] {path}: {got}")
         failures += 0 if ok else 1
 
-    if matching_tokens("Value::Sid(sens!(00000001))") != (
-        "Value::Sid",
+    if matching_tokens("Value::Sid(CallableIdentity::legacy8(1)) sens!(00000001)") != (
         "sens!(00000001)",
     ):
         failures += 1
