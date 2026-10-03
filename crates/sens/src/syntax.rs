@@ -109,6 +109,7 @@ pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 pub(crate) mod fasl {
     use super::{Exactness, Expr, ExprKind};
     use crate::value::{NumericBuffer, Rational};
+    use crate::SemanticRef;
     use std::rc::Rc;
     use std::sync::Arc;
 
