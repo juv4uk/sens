@@ -1,0 +1,38 @@
+name: Post-D4 root minimization R1
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/post-d4-root-min-r1/**"
+      - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - ".github/workflows/post-d4-root-min-r1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/post-d4-root-min-r1/**"
+      - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - ".github/workflows/post-d4-root-min-r1.yml"
+  workflow_dispatch:
+
+jobs:
+  r1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run shared-location root minimization
+        run: |
+          rm -rf /tmp/post-d4-root-min-r1
+          python3 benchmarks/post-d4-root-min-r1/run.py             --out /tmp/post-d4-root-min-r1
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/post-d4-root-min-r1/report.md; then
+            cat /tmp/post-d4-root-min-r1/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post-d4-root-min-r1
+          path: /tmp/post-d4-root-min-r1/
+          retention-days: 14
