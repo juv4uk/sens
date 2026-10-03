@@ -1,3 +1,9 @@
+; HISTORICAL FLAT SURFACE REGISTRY — MIGRATION DONOR ONLY.
+; Canonical semantic identity is exact domain + bits + admitted law.
+; This 256-row axis may supply human-surface/provenance compatibility while
+; consumers migrate, but row position / eight-bit code is not language authority.
+; New semantic families must not be added here as the primary model.
+;
 (
   (00000000 (en ()) (ук ()) (укр ()) (sa ()) (sym ()))
   (00000001 (en quote) (ук як-є) (укр як-є) (sa svarūpa) (sym "'"))
