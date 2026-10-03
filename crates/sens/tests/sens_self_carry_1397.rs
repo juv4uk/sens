@@ -1,7 +1,7 @@
 use sens::{
     eval_program,
     semantic_registry_export::admitted_surfaces_for_semantic_id,
-    ErrorKind, Sens8, Session, Value,
+    CallableIdentity, ErrorKind, Session, Value,
 };
 
 fn eval_value(session: &mut Session, source: &str) -> Value {
@@ -19,11 +19,11 @@ fn exact_function_carries_itself_across_two_language_stages() {
         "свідок не повинен залежати від завантажувача профілю Core"
     );
 
-    // Стадія A — exact-SENS тотожне замикання. Жодне поверхневе ім'я функції
+    // Стадія A — legacy exact-8 тотожне замикання. Жодне поверхневе ім'я функції
     // не бере участі в перенесенні: на вхід і вихід проходить сама функція
     // 00000101.
     let carried = eval_value(&mut session, "((00001000 (f) f) 00000101)");
-    assert_eq!(carried, Value::Sid(sens::sens!(00000101)));
+    assert_eq!(carried, Value::Sid(CallableIdentity::legacy8(0b0000_0101)));
 
     // Стадія B отримує результат стадії A як виконувану голову. Якби стадія A
     // реконструювала ім'я/рядок/число замість перенесення самої функції,
@@ -37,11 +37,11 @@ fn exact_function_carries_itself_across_two_language_stages() {
     assert_eq!(
         session.environment.selected_core_profile(),
         None,
-        "виконання перенесеної exact-функції не повинно неявно вибирати Core"
+        "виконання перенесеної legacy-функції не повинно неявно вибирати Core"
     );
 }
 
-fn poison_surfaces_for(session: &mut Session, function: Sens8) -> usize {
+fn poison_surfaces_for(session: &mut Session, function: u8) -> usize {
     let surfaces = admitted_surfaces_for_semantic_id(function);
     for surface in &surfaces {
         session
@@ -55,12 +55,12 @@ fn poison_surfaces_for(session: &mut Session, function: Sens8) -> usize {
 fn exact_path_ignores_poisoned_surface_bindings() {
     let mut session = Session::default();
 
-    // Це adversarial setup, а не transport: exact-функціями знаходимо лише
+    // Це adversarial setup, а не transport: legacy-функціями знаходимо лише
     // їхні людські peer-surfaces і робимо ці bindings явно непридатними.
     let poisoned = [
-        sens::sens!(00000001),
-        sens::sens!(00000101),
-        sens::sens!(00001000),
+        0b0000_0001,
+        0b0000_0101,
+        0b0000_1000,
     ]
     .into_iter()
     .map(|function| poison_surfaces_for(&mut session, function))
@@ -73,7 +73,7 @@ fn exact_path_ignores_poisoned_surface_bindings() {
     );
 
     let carried = eval_value(&mut session, "((00001000 (f) f) 00000101)");
-    assert_eq!(carried, Value::Sid(sens::sens!(00000101)));
+    assert_eq!(carried, Value::Sid(CallableIdentity::legacy8(0b0000_0101)));
 
     let result = eval_value(
         &mut session,
@@ -87,13 +87,13 @@ fn unsupported_exact_function_is_still_carried_as_the_same_function() {
     let mut session = Session::default();
 
     let carried = eval_value(&mut session, "((00001000 (f) f) 11111111)");
-    assert_eq!(carried, Value::Sid(sens::sens!(11111111)));
+    assert_eq!(carried, Value::Sid(CallableIdentity::legacy8(0b1111_1111)));
 
     let error = eval_program(
         "(((00001000 (f) f) 11111111))",
         &mut session,
     )
-    .expect_err("exact-функція має впасти лише на admission виконуваного механізму");
+    .expect_err("legacy-функція має впасти лише на admission виконуваного механізму");
 
     assert_eq!(error.kind, ErrorKind::Type);
     assert_eq!(
