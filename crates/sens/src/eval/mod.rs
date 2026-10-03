@@ -255,14 +255,16 @@ fn dispatch_domain_call(
         return special_forms::evaluate_cond(arguments, environment, span);
     }
 
-    match environment.domain_code_slot(identity) {
-        Some(Value::Macro(closure)) => {
-            return closures::apply_macro(closure, arguments, environment, span);
+    if let Some(bound) = environment.domain_code_slot(identity) {
+        match &bound {
+            Value::Macro(closure) => {
+                return closures::apply_macro(closure.clone(), arguments, environment, span);
+            }
+            Value::Closure(_) => {
+                return closures::apply(bound.clone(), arguments, environment, span);
+            }
+            _ => {}
         }
-        Some(closure @ Value::Closure(_)) => {
-            return closures::apply(closure, arguments, environment, span);
-        }
-        _ => {}
     }
 
     let mut values = Vec::with_capacity(arguments.len());
