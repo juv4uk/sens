@@ -725,16 +725,14 @@
 
 (00001001 number->string
   (00001000 (n)
-    ; Canonical serialization for every number (FIX-NUMBER-TO-STRING-
-    ; RATIONAL, docs/BUG-number-to-string-rational.md): integers render
-    ; as themselves, non-integer rationals render REDUCED exactly —
-    ; "1/3", never a decimal approximation, per the same G6 law that
-    ; makes 10/20 serialize as "1/2". The previous quotient/mod descent
-    ; crashed on fractional digit indices ((nth 1/3 <digit-table>)) and
-    ; its misleading error surfaced as an apparent memory corruption.
-    ; Delegation, not re-implementation: write-to-string is already the
-    ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
-    (01001100 n)))
+    ; Canonical serialization remains delegated to write-to-string, but only
+    ; after the existing numeric equality primitive validates the input domain.
+    ; The equality result is deliberately ignored: it is a type gate, not a
+    ; semantic transformation of n.  This keeps exact/inexact presentation
+    ; unchanged while Text7 and every other non-Number fail closed.
+    ((00001000 (v)
+       (01001100 n))
+     (00011100 n n))))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
 ; without deep nesting (PLAN.md item / clean-code policy).
