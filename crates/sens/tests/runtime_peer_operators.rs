@@ -47,8 +47,10 @@ const CASES: &[PeerCase] = &[
 ];
 
 fn assert_not_preloaded_runtime_binding(session: &mut Session, source: &str) {
-    let error = eval_program(source, session)
-        .unwrap_err_or_else(|result| panic!("{source}: unexpectedly resolved to {:?}", result.value));
+    let error = match eval_program(source, session) {
+        Ok(result) => panic!("{source}: unexpectedly resolved to {:?}", result.value),
+        Err(error) => error,
+    };
     assert_eq!(
         error.kind,
         ErrorKind::UnknownSymbol,
