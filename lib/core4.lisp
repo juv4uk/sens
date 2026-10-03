@@ -135,17 +135,11 @@
   (00001000 (values)
     (00000101 (00000110 (00000110 (00000110 (00000110 values)))))))
 
-(00001001 caar
-  (00001000 (values)
-    (00000101 (00000101 values))))
-
-(00001001 cadr
-  (00001000 (values)
-    (00000101 (00000110 values))))
-
-(00001001 cddr
-  (00001000 (values)
-    (00000110 (00000110 values))))
+; CAAR/CADR/CDAR/CDDR are ratified D4 selector identities.
+; They are generated/executed from the CAR/CDR selector law and therefore
+; must not be rebound here as derived closures. CDAR 1100 is intentionally
+; covered by the same law even though no historical flat-row definition
+; existed for it.
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
