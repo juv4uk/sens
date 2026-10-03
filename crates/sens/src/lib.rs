@@ -19,6 +19,7 @@ mod environment;
 mod error;
 pub(crate) mod eval;
 mod language_items;
+mod legacy_registry;
 mod parser;
 mod presentation;
 mod semantic_registry;
@@ -67,7 +68,7 @@ pub mod semantic_registry_export {
     pub fn admitted_surfaces_for_semantic_id(
         semantic_id: impl ProjectionSidInput,
     ) -> Vec<SurfaceRow> {
-        super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(
+        super::legacy_registry::admitted_surfaces_with_namespace_for_id(
             semantic_id.into_projection_sid(),
         )
         .into_iter()
@@ -78,7 +79,7 @@ pub mod semantic_registry_export {
     /// Повертає opaque semantic ID для stable або compatibility-only surface.
     /// Значення операції лишається у мовному контракті, не в цій проєкції.
     pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sens8> {
-        super::semantic_registry::admitted_semantic_id_for_surface(name)
+        super::legacy_registry::id_for_surface(name)
     }
 
     /// Legacy packed-byte export for external projection consumers.
@@ -88,7 +89,7 @@ pub mod semantic_registry_export {
     /// become semantic participants merely because the runtime identity type
     /// changed.
     pub fn admitted_semantic_ids() -> Vec<u8> {
-        super::semantic_registry::admitted_semantic_ids()
+        super::legacy_registry::admitted_ids()
             .into_iter()
             .map(super::Sens8::packed_byte)
             .collect()
@@ -111,7 +112,7 @@ pub mod semantic_registry_export {
 
     /// Canonical 8-bit textual serialization for provenance/export.
     pub fn semantic_id_bits(semantic_id: impl ProjectionSidInput) -> String {
-        super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())
+        super::legacy_registry::id_bits(semantic_id.into_projection_sid())
     }
 }
 pub mod syntax;
@@ -252,7 +253,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
         ));
     }
 
-    let defmacro_semantic_id = semantic_registry::admitted_semantic_id_for_surface("defmacro")
+    let defmacro_semantic_id = legacy_registry::id_for_surface("defmacro")
         .ok_or_else(|| {
             LanguageError::new(
                 ErrorKind::InvalidForm,
@@ -260,7 +261,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
                 Span { start: 0, end: 0 },
             )
         })?;
-    let admitted = semantic_registry::admitted_surfaces_for_semantic_id(defmacro_semantic_id);
+    let admitted = legacy_registry::admitted_surfaces_for_id(defmacro_semantic_id);
     if admitted.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
@@ -299,7 +300,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         if eval::canon::routed_sid_for_surface(&name).is_some() {
             continue;
         }
-        if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(&name) {
+        if let Some(semantic_id) = legacy_registry::id_for_surface(&name) {
             values_by_semantic_id.entry(semantic_id).or_insert(value);
         }
     }
@@ -308,8 +309,8 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     // evaluator може знайти точну функцію без placeholder у середовищі.
     // Stable peer копіюємо лише тоді, коли реальне значення вже існує; інакше
     // Value::Sid зайняв би ім'я і заблокував пізніший Lisp-owned closure.
-    for semantic_id in semantic_registry::admitted_semantic_ids() {
-        let peers = semantic_registry::stable_surfaces_for_semantic_id(semantic_id);
+    for semantic_id in legacy_registry::admitted_ids() {
+        let peers = legacy_registry::stable_surfaces_for_id(semantic_id);
 
         // Special/necessary forms мають власний routing і тут не стають
         // першокласними lexical values.
@@ -489,8 +490,8 @@ pub fn is_define_surface_name(name: &str) -> bool {
 /// `defmacro` surface. No decimal SID is maintained here.
 pub fn is_defmacro_surface_name(name: &str) -> bool {
     match (
-        semantic_registry::admitted_semantic_id_for_surface(name),
-        semantic_registry::admitted_semantic_id_for_surface("defmacro"),
+        legacy_registry::id_for_surface(name),
+        legacy_registry::id_for_surface("defmacro"),
     ) {
         (Some(candidate), Some(defmacro)) => candidate == defmacro,
         _ => false,
@@ -501,8 +502,8 @@ pub fn is_defmacro_surface_name(name: &str) -> bool {
 /// `lambda` surface. No decimal SID is maintained here.
 pub fn is_lambda_surface_name(name: &str) -> bool {
     match (
-        semantic_registry::admitted_semantic_id_for_surface(name),
-        semantic_registry::admitted_semantic_id_for_surface("lambda"),
+        legacy_registry::id_for_surface(name),
+        legacy_registry::id_for_surface("lambda"),
     ) {
         (Some(candidate), Some(lambda)) => candidate == lambda,
         _ => false,
