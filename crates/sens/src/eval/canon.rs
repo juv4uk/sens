@@ -302,10 +302,14 @@ pub(crate) fn invoke_domain_identity(
         return primitive(args, environment, span);
     }
 
-    match environment.domain_code_slot(identity) {
-        Some(Value::Closure(closure)) => return closures::apply_values(closure, args, span),
-        Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
-        _ => {}
+    if let Some(bound) = environment.domain_code_slot(identity) {
+        match &bound {
+            Value::Closure(closure) => {
+                return closures::apply_values(closure.clone(), args, span);
+            }
+            Value::Builtin(builtin) => return (builtin.func)(args, environment, span),
+            _ => {}
+        }
     }
 
     Err(LanguageError::new(
