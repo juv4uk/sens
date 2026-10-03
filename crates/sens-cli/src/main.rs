@@ -178,11 +178,10 @@ fn main() {
     // Канонічний Core4 bootstrap і FASL fallback належать одному loader-у:
     // CLI не повинен виконувати Core4 в обхід loader-owned selected profile.
     const CORE_SRC: &str = sens::CORE_LIBRARY_SOURCE;
-    if !sens::core_library_fasl_is_current() {
-        eprintln!(
-            "warning: lib/core4.lisp.fasl is stale (source changed); run gen-fasl to regenerate"
-        );
-    }
+    // The loader already validates the embedded FASL hash and falls back to
+    // CORE_LIBRARY_SOURCE when stale. Normal program stderr must stay reserved
+    // for program/CLI diagnostics; FASL freshness is available through the
+    // explicit core_library_fasl_is_current() diagnostic API.
     if let Err(e) = bootstrap_core(&mut session, cli_core) {
         let label = match cli_core {
             CliCore::Core3 => "Core3",
