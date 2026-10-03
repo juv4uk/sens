@@ -40,5 +40,5 @@ jobs:
             echo "- Derived/mechanism rows receive no resident coordinate."
             echo "- D5 remains 8 generated + 24 UNKNOWN/free."
             echo "- RETURN remains a proven root with width UNKNOWN."
-            echo "- SETQ D6 001111 remains candidate-only here."
+            echo "- SETQ D6 001111 is the sole owner-ratified manual resident."
           } >> "$GITHUB_STEP_SUMMARY"
