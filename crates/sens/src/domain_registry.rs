@@ -11,7 +11,11 @@ use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6, CoreDomainIde
 pub(crate) struct DomainOwnerRow {
     pub width: u8,
     pub bits: u8,
+    // Generated diagnostic/provenance metadata. Runtime selection deliberately
+    // does not depend on these human-facing fields.
+    #[allow(dead_code)]
     pub name: &'static str,
+    #[allow(dead_code)]
     pub authority: &'static str,
     pub legacy_mechanism: Option<u8>,
     pub surfaces: &'static [&'static str],
@@ -46,9 +50,6 @@ pub(crate) fn legacy_mechanism_for(identity_key: CoreDomainIdentity) -> Option<u
     row_for_identity(identity_key).and_then(|row| row.legacy_mechanism)
 }
 
-pub(crate) fn owner_name(identity_key: CoreDomainIdentity) -> Option<&'static str> {
-    row_for_identity(identity_key).map(|row| row.name)
-}
 
 #[cfg(test)]
 mod tests {
