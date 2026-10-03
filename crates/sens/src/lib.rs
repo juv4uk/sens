@@ -24,7 +24,6 @@ mod semantic_registry;
 mod source_words;
 mod source_packing;
 pub mod sens;
-mod sid;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
 /// exactly the (namespace, spelling) pairs a consumer like the CML semantic
 /// export needs, without making the internal parsing/index machinery public.
@@ -130,8 +129,6 @@ pub use binary_framing::{
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
-#[allow(deprecated)]
-pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
 pub use source_words::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
