@@ -56,3 +56,6 @@ Any synthetic hybrid layout attempting to interleave sūtra prefixes with articu
   1. No hitting set of size $\le 3$ over 84 minimal 3-obstructions $\implies$ 42-sound linear ceiling is strictly $\le 39$.
   2. Unique size-4 hitting set $\mathcal{H}^* = \{\text{jhal}, \text{ral}, \text{val}, \text{śal}\}$ matches Sūtra 14 ($h_2$) in 1-to-1 bijection.
   3. 43-node path with dual $h_1/h_2$ achieves $43/43 = 100.0\%$ contiguous intervals.
+
+### 2.6 Research Backlog (Future Theoretical Frontier)
+- **General C1P Transversal-Splitting Conjecture:** For any hypergraph violating the Consecutive Ones Property (C1P), the minimal hitting sets of Tucker asteroidal obstructions correspond isomorphically to the minimal set of vertex splits required to embed the hypergraph into an interval graph (interval completion via vertex duplication). To be formalized and proved in general graph-theoretic terms. (Status: research backlog, off critical path).
