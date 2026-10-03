@@ -1,105 +1,278 @@
-# sens (СЕНС) semantic authority map
+# SENS semantic authority map
 
-Status: CURRENT ARCHITECTURE MAP. This file does not create new language semantics. It records where a current claim must be checked before prose is trusted.
+**Status:** CURRENT ARCHITECTURE MAP · 2026-10-03
+
+The previous SID8-oriented map is preserved at
+[`docs/archive/semantic-authority-map-sid8-superseded-2026-10-03.md`](archive/semantic-authority-map-sid8-superseded-2026-10-03.md).
 
 ## One rule
 
-> The language owns meaning and function identity; runtimes provide mechanisms and conformance evidence.
+> Meaning is admitted by domain + law + evidence. Implementations, names and storage do not silently outrank that admission.
 
-No implementation file, README paragraph, agent note, benchmark, or historical plan may silently outrank the current language contract.
+## Authority by claim type
 
-## Authority order
+SENS no longer treats every claim as if it were the same kind of authority.
 
-When two sources disagree, use this order:
+### Owner/ratified architectural decisions
 
-1. **`language-contract.lisp`** — the current machine-readable contract and ratified observable invariants.
-2. **Ratified ADRs under `docs/adr/`** — scoped decision records. A historical ADR can preserve McCarthy/Lisp provenance without turning historical names into current function identities.
-3. **Executable conformance evidence** — admitted fixtures such as `tests/fixtures/conformance.lisp`, `tests/fixtures/macro-conformance.lisp`, and focused executable witnesses.
-4. **Reference implementation** — `crates/sens` (Rust). It is the current reference mechanism, not the owner of semantics merely because it is Rust.
-5. **Independent implementations and execution substrates** — C, WASM, FPGA, GraalVM, Common Lisp, Prolog, Datalog, CLIPS, and other declared executors. They can falsify implementation-specific assumptions and provide mechanisms without creating a second language.
-6. **Generated reference** — for example `docs/generated/function-table.md` and other generated inventories. Generated output describes an admitted projection; it does not redefine the contract.
-7. **Human explanatory prose** — `README.md`, `CURRENT.md`, tutorials, and architecture notes.
-8. **Historical/process material** — archived plans, dated audits, old agent notes, and superseded decisions. These remain evidence of history, not current semantic authority.
+Examples:
 
-If a lower item conflicts with a higher item, the lower item is stale until reconciled.
+- #2490 — binary-domain ontology;
+- #2533 — historical-first Core phase order;
+- #2414 — D5/D6 domain-width ratification;
+- #2415 — D7 semantic-role/domain ratification.
 
-## Current SENS function identity
+These decisions define the current research frame until superseded.
 
-SENS has exactly 256 functions:
+### Machine-readable language/runtime authority
 
-```text
-00000000
-...
-11111111
-```
+- `language-contract.lisp` for the observable runtime/language scope it covers;
+- ratified machine-readable laws and guards;
+- admitted conformance fixtures.
 
-Each exact eight-bit form is the function itself. There is no parallel textual, symbolic, historical, or host-defined function identity layer.
+A stale machine-readable artifact is migration debt; it is not permission to ignore a newer explicit owner ratification.
 
-Human spellings in Ukrainian, English, Sanskrit, symbolic notation, and compatibility surfaces are **source/UI routing metadata**. A surface may route to a SENS function; it does not own that function's identity or meaning.
+### Executable evidence
 
-The concrete empty proper list `()` is a **structural value outside the 256-function space**. It is not an alias for either endpoint and does not consume one of the 256 function positions.
+- focused witnesses;
+- falsifier harnesses;
+- independent implementation parity;
+- CI gates;
+- counterexamples.
 
-## Historical Lisp and Core1 provenance
+Executable evidence can prove or falsify a bounded claim. It does not automatically generalize beyond its declared scope.
 
-Lisp was the original syntactic carrier and experimental substrate from which SENS developed. McCarthy's 1960 evaluator remains important historical evidence and is intentionally preserved in **Core1** compatibility/bootstrap research.
+### Reference mechanisms
 
-Names such as historical Lisp operations may therefore appear in Core1 material, archived research, provenance notes, old ADR context, and compatibility witnesses. Such names are historical descriptions or surfaces; they are not the active function ontology of SENS.
+- `crates/sens`;
+- Rust/C/WASM/FPGA/GPU executors;
+- parsers, compilers, caches, hashes, ASTs;
+- wire/radio transports.
 
-Current Core profiles may assign different ratified laws/result domains to the same exact eight-bit SENS function. A Core profile does not mint another set of functions.
+Mechanisms implement or carry semantics; they do not create semantic authority merely by existing.
 
-## Bootstrap and implementation mechanisms
+### Documentation and generated projections
 
-Do not collapse three different questions:
+- README/CURRENT;
+- generated tables;
+- research reports;
+- benchmark summaries.
 
-- **language identity and laws** — owned by SENS contract and admitted executable evidence;
-- **bootstrap/evaluator mechanisms** — implementation machinery needed to realize admitted behavior;
-- **derived language behavior** — behavior defined by SENS programs once the bootstrap substrate exists.
+These explain evidence and must point back to stronger sources.
 
-Rust may contain parser, evaluator, closure, macro, lowering, host-boundary, or other mechanisms. Those implementation structures do not become function identities. Likewise, a language-defined closure or macro can become the execution mechanism for an exact SENS function without making its human spelling authoritative.
+### History/archive
 
-## Project identity and source extensions
+- `docs/archive/**`;
+- dated reports;
+- superseded plans;
+- old SID8/Core-profile documentation.
 
-The project/repository name is **`sens`**. Historical project provenance includes the former working name **`my-lisp`**.
+History is evidence of lineage, not current ontology.
 
-The current canonical source extension is **`.lisp`** (see [sens#81](https://github.com/juv4uk/sens/issues/81): extension is never semantics). **`.wsm`** and **`.my`** remain supported legacy aliases. Ukrainian filename spellings supported by the tooling are likewise source-surface choices, not semantic identities.
+## Current semantic identity
 
-## Reference implementation terminology
-
-Use these terms consistently:
-
-```text
-semantic authority        = language-contract + ratified decisions + executable conformance
-SENS function             = exact one of 00000000..11111111
-surface                   = source/UI routing metadata
-reference implementation  = crates/sens (Rust)
-independent substrate      = another conformance/execution target
-```
-
-Avoid wording that makes Rust, a surface spelling, a historical Lisp name, or an execution island the canonical owner of language meaning.
-
-## Host boundary
-
-A host operation earns its place by providing information/effects unavailable inside pure language semantics or by enforcing an embedding security boundary that untrusted language code must not be able to self-grant.
-
-Two different meanings of policy must not be collapsed:
-
-1. **semantic/application policy** — what an observation means, how bytes become text, how a result is classified; keep this language-owned when it is derivable there;
-2. **embedding authorization policy** — which filesystem roots, process names, connect targets, or listen targets a partially trusted session may touch; this belongs at the trusted host boundary.
-
-A useful split is:
+Canonical owner rule (#2490):
 
 ```text
-host observation/effect       -> mechanism
-SENS law/result interpretation -> language
-authorization                 -> trusted host boundary
+semantic object
+=
+binary number
++ exact semantic domain
++ proved/admitted law
 ```
 
-Rust/host code may grow as needed. The architectural prohibition is the reverse semantic flow: a host mechanism must not become the source of SENS meaning.
+Therefore:
+
+```text
+bits alone             != meaning
+width alone            != semantic domain
+machine transform      != semantic law identity
+human name             != canonical identity
+free coordinate        != resident
+hash/cache/registry    != semantic authority
+```
+
+## Domain is not carrier
+
+#2540 separates:
+
+```text
+domain     = law-bearing semantic context
+carrier    = exact bits/width representation
+mechanism  = implementation/execution/transport
+```
+
+Example:
+
+```text
+D7.SoundCell [carrier=W7]
+D7.LocalOrdinal [carrier=W7]
+```
+
+Both may use seven bits without becoming the same semantic domain.
+
+## Current Core authority discipline
+
+Core research follows #2533:
+
+```text
+HISTORICAL-INGEST
+        ↓
+STRUCTURAL-DISCOVERY
+        ↓
+SENS-DERIVATION
+```
+
+Historical presence is evidence about the historical language, not automatic proof of SENS fundamentality.
+
+Structural compression may later explain several historical operations by one generator.
+
+Native SENS placement is earned only after the historical sample and structural law are explicit.
+
+## Placement authority
+
+A binary coordinate may be admitted only when its placement is earned.
+
+Examples of admissible evidence:
+
+- exact parent + proved local generator;
+- lower-bound theorem;
+- independently stated root/domain law;
+- owner ratification supported by explicit evidence.
+
+Forbidden substitutes:
+
+- free capacity;
+- numeric proximity;
+- aesthetically pleasing binary pattern;
+- chronology alone;
+- host metadata;
+- foreign-domain bit transform.
+
+D6 PURE-UNKNOWN is a positive example of refusing to allocate without law.
+
+## Parentless roots
+
+Roothood, width, and coordinate are separate claims.
+
+A root may be semantically independent while its exact domain remains UNKNOWN.
+
+Current residue-root research (#2662/#2667/#2669) exists precisely because:
+
+```text
+PROVEN-ROOT
+!=
+PROVEN-WIDTH
+!=
+PROVEN-COORDINATE
+```
+
+## Core-Math authority
+
+Core-Math is independently governed by binary mathematical laws.
+
+Minimal model:
+
+```text
+binary input(s)
++ admitted mathematical law
+-> binary output
+```
+
+Core-Math does not inherit Core placement or historical Lisp authority.
+
+Its proof/certificate/AST/hash/cache formats remain evidence/mechanism unless the semantic law itself says otherwise.
+
+## Cross-domain firewall
+
+#2508/#2509 are standing negative controls.
+
+Selector-path and exact-Q group-factor structures can share:
+
+```text
+child = 2*parent + bit
+```
+
+while remaining different semantic laws in different domains.
+
+Cross-domain application must fail closed.
+
+## Core ↔ Core-Math convergence
+
+#2495 admits:
+
+```text
+DIVERGENT
+COMPLEMENTARY
+CONVERGENT
+```
+
+A convergence claim needs:
+
+```text
+same binary object
++ same exact domain
++ same semantic equation
++ same law
++ independent cross-proof
+```
+
+#2502 is the bounded positive selector control.
+
+A similar bit pattern or implementation formula is insufficient.
+
+## Surfaces and historical names
+
+Human names are projections:
+
+- Ukrainian;
+- English;
+- Sanskrit;
+- symbols;
+- historical Lisp names.
+
+They may be valuable explanation or source syntax, but do not own semantic identity.
+
+## Host and transport boundary
+
+Useful split:
+
+```text
+semantic object/law     -> SENS authority
+execution               -> mechanism
+authorization           -> trusted host boundary
+wire/framing/RF         -> transport mechanism
+```
+
+Radio frequency, modulation, CRC, FEC and ARQ are not SENS semantic domains.
+
+## Benchmark authority
+
+Benchmarks measure mechanism cost.
+
+They can compare:
+
+- instruction counts;
+- allocations;
+- wire size;
+- derivation work;
+- cache behavior;
+- closure growth.
+
+They cannot prove semantic identity from speed.
+
+Performance regression policy belongs in benchmark/CI documentation, not the semantic contract.
 
 ## Documentation rule
 
-New prose that states a contract-level fact should point to the authoritative source instead of inventing an independent restatement. If repetition is useful for teaching, phrase it explicitly as a summary and keep executable drift checks for facts that can be verified mechanically.
+A current document must distinguish:
 
-Archived and dated documents may preserve old names, paths, ontologies, and conclusions. They are not rewritten merely to resemble current terminology. Current implementation claims must be checked against current contract, source, and executable evidence.
+- ratified fact;
+- executable bounded witness;
+- research hypothesis;
+- UNKNOWN/UNRESOLVED;
+- historical record.
 
-The goal is not fewer documents. The goal is one authority for each kind of claim.
+Do not rewrite old research documents merely to resemble current terminology. Preserve them and create/update the current explanatory layer.
+
+The repository goal is not “one file contains truth.” The goal is **one explicit authority chain for every claim**.
