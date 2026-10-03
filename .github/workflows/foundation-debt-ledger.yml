@@ -1,0 +1,45 @@
+name: Foundation debt ledger
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/foundation-debt-ledger.json"
+      - "scripts/check-foundation-debt.py"
+      - ".github/workflows/foundation-debt-ledger.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/foundation-debt-ledger.json"
+      - "scripts/check-foundation-debt.py"
+      - ".github/workflows/foundation-debt-ledger.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+  workflow_dispatch:
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Self-test accounting rules
+        run: python3 scripts/check-foundation-debt.py --self-test
+      - name: Validate committed ledger
+        run: |
+          rm -rf /tmp/foundation-debt
+          mkdir -p /tmp/foundation-debt
+          python3 scripts/check-foundation-debt.py             --ledger knowledge/foundation-debt-ledger.json             --out /tmp/foundation-debt/metrics.json
+      - name: Publish metrics
+        run: |
+          {
+            echo "## Foundation debt ledger"
+            echo
+            echo '~~~json'
+            cat /tmp/foundation-debt/metrics.json
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: foundation-debt-ledger
+          path: /tmp/foundation-debt/
+          retention-days: 14
