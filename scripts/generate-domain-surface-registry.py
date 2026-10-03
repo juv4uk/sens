@@ -51,6 +51,12 @@ D4 = {
     "BIND": "1111",
 }
 
+CORE_SURFACE_OVERRIDES = {
+    # D5 QUOTIENT is the exact-rational division role. The historical
+    # `quotient` surface is integer quotient and must not be silently reused.
+    "QUOTIENT": "divide",
+}
+
 ALIASES = {
     "ATOM": ["atom?"],
     "EQ": ["eq?"],
@@ -65,7 +71,7 @@ ALIASES = {
     "GREATERP": ["greaterp?", "greater?"],
     "LEQ": ["not-greaterp?", "leq?"],
     "GEQ": ["not-lessp?", "geq?"],
-    "QUOTIENT": ["quotient", "divide"],
+    "QUOTIENT": [],
     "SETQ": ["setq"],
     "SET": ["set"],
     "DEFVAR": ["defvar"],
@@ -131,7 +137,8 @@ def domain_roles() -> list[dict]:
 
 
 def candidates(name: str) -> list[str]:
-    out = [name.lower(), *ALIASES.get(name, [])]
+    core_surface = CORE_SURFACE_OVERRIDES.get(name, name.lower())
+    out = [core_surface, *ALIASES.get(name, [])]
     if name.endswith("P") and len(name) > 1:
         base = name[:-1].lower()
         out.extend([f"{base}?", f"{name.lower()}?"])
@@ -148,7 +155,8 @@ def generate() -> str:
     generated = []
 
     for role in domain_roles():
-        surfaces = [("core", role["name"].lower())]
+        core_surface = CORE_SURFACE_OVERRIDES.get(role["name"], role["name"].lower())
+        surfaces = [("core", core_surface)]
         backend_bytes: set[int] = set()
         for candidate in candidates(role["name"]):
             donor = old.get(candidate)
