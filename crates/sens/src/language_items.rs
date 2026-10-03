@@ -209,14 +209,14 @@ mod tests {
             assert_eq!(left.kind, LanguageItemKind::SyntaxForm);
             assert_eq!(right.kind, LanguageItemKind::SyntaxForm);
         }
-        let lambda = find("lambda");
-        let define = find("define");
-        assert_eq!(lambda.legacy_registry_id, crate::sens!(00001000));
-        assert_eq!(define.legacy_registry_id, crate::sens!(00001001));
-        assert_eq!(lambda.domain_identity.map(CoreDomainIdentity::width), Some(4));
-        assert_eq!(lambda.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0010));
-        assert_eq!(define.domain_identity.map(CoreDomainIdentity::width), Some(4));
-        assert_eq!(define.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0011));
+        let d4_0010 = find("lambda");
+        let d4_0011 = find("define");
+        assert_eq!(d4_0010.legacy_registry_id, crate::sens!(00001000));
+        assert_eq!(d4_0011.legacy_registry_id, crate::sens!(00001001));
+        assert_eq!(d4_0010.domain_identity.map(CoreDomainIdentity::width), Some(4));
+        assert_eq!(d4_0010.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0010));
+        assert_eq!(d4_0011.domain_identity.map(CoreDomainIdentity::width), Some(4));
+        assert_eq!(d4_0011.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0011));
     }
 
     #[test]
@@ -224,10 +224,10 @@ mod tests {
         let items = language_items();
         let find = |name: &str| items.iter().find(|item| item.name == name).unwrap();
 
-        let cond = find("cond").domain_identity.unwrap();
-        let eq = find("eq?").domain_identity.unwrap();
-        assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
-        assert_eq!((eq.width(), eq.packed_bits()), (3, 0b111));
+        let d3_011 = find("за-умовою").domain_identity.unwrap();
+        let d3_111 = find("тотожне?").domain_identity.unwrap();
+        assert_eq!((d3_011.width(), d3_011.packed_bits()), (3, 0b011));
+        assert_eq!((d3_111.width(), d3_111.packed_bits()), (3, 0b111));
     }
 
     #[test]
