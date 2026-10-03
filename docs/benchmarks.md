@@ -1,18 +1,18 @@
-# SENS benchmarks and executable evidence
+# Бенчмарки й executable evidence SENS
 
-**Status:** CURRENT INDEX · 2026-10-03
+**Статус:** CURRENT INDEX · 2026-10-03
 
-The previous pre-domain performance document is preserved at
+Попередній pre-domain performance document збережено в
 [`docs/archive/benchmarks-pre-binary-domain-2026-10-03.md`](archive/benchmarks-pre-binary-domain-2026-10-03.md).
 
-This file is the current benchmark/evidence index. It deliberately separates
-**semantic evidence** from **mechanism cost**.
+Цей файл — current index для benchmark/evidence lanes. Він навмисно розділяє
+**semantic evidence** і **mechanism cost**.
 
-## 1. Rule
+## 1. Головне правило
 
-> Correctness, law, domain and identity are not inferred from speed.
+> Correctness, law, domain та identity не виводяться зі швидкості.
 
-A benchmark may measure:
+Benchmark може вимірювати:
 
 - instruction count;
 - allocations;
@@ -24,12 +24,12 @@ A benchmark may measure:
 - host/runtime cost;
 - FPGA-oriented mechanism cost.
 
-A benchmark does **not** promote a semantic law merely because one encoding is
-faster or smaller.
+Benchmark **не** ратифікує semantic law лише тому, що encoding швидший або
+менший.
 
 ## 2. CI policy
 
-Prefer blocking CI on:
+Blocking CI бажано будувати на:
 
 - semantic parity;
 - fail-closed behavior;
@@ -37,16 +37,14 @@ Prefer blocking CI on:
 - exact-width preservation;
 - deterministic replay;
 - conformance fixtures;
-- falsifiers that must continue to fail.
+- falsifiers, які мусять продовжувати ламати хибний model.
 
-Hosted-runner wall time is usually noisy evidence. Collect it as an artifact or
-diagnostic unless a benchmark has a controlled, justified regression threshold.
+Hosted-runner wall time часто шумний. Його слід збирати як artifact/diagnostic,
+якщо немає окремо обґрунтованого controlled regression threshold.
 
 ## 3. Current binary-domain evidence lanes
 
-Representative current workflows:
-
-### Domain and law structure
+### Domain і law structure
 
 - `.github/workflows/binary-domain-format.yml`
 - `.github/workflows/binary-domain-separation.yml`
@@ -58,7 +56,7 @@ Representative current workflows:
 - `.github/workflows/root-domain-automorphism.yml`
 - `.github/workflows/independent-root-domain.yml`
 
-These lanes test placement/domain claims, not raw speed.
+Ці lanes перевіряють domain/placement claims, а не raw speed.
 
 ### Core-Math
 
@@ -68,15 +66,15 @@ These lanes test placement/domain claims, not raw speed.
 - `.github/workflows/core-math-q-group-bits.yml`
 - `.github/workflows/coordinate-monoid-research.yml`
 
-These study `bits + domain + law -> bits`, generated operations, factor laws and
-candidate mathematical structure.
+Тут досліджуються `bits + domain + law -> bits`, generated operations,
+factor laws і mathematical structure.
 
 ### Core ↔ Core-Math
 
 - `.github/workflows/core-coremath-selector-convergence.yml`
 - `.github/workflows/binary-domain-separation.yml`
 
-Use both positive and negative controls:
+Треба мати і positive, і negative controls:
 
 ```text
 same object + same domain + same semantics + same law
@@ -95,22 +93,22 @@ same machine transform + different domain
 - `.github/workflows/foundation-compatibility-bench.yml`
 - `.github/workflows/foundation-debt-ledger.yml`
 
-Foundation experiments must state which premises are borrowed and which facts
-are derived.
+Foundation experiment має вказувати, які premises borrowed, а які facts
+derived.
 
-### Wire and human/manual transport
+### Wire / human-manual transport
 
 - `.github/workflows/numeric-wire-roundtrip.yml`
 - `.github/workflows/human-wire-chunking.yml`
 - `.github/workflows/human-wire-timing.yml`
 - `.github/workflows/witness-presentation-wire.yml`
 
-Wire/framing/RF are mechanisms. Their benchmarks must preserve semantic payload
-without turning modulation/frequency/framing into domain identity.
+Wire/framing/RF — mechanisms. Benchmark має доводити збереження semantic
+payload, а не робити modulation/frequency/framing частиною identity.
 
 ## 4. Exact-width benchmark discipline
 
-Every result must name enough context to be reproducible:
+Кожен результат має містити достатній reproducibility context:
 
 ```text
 workload
@@ -124,11 +122,11 @@ metric
 semantic parity status
 ```
 
-Do not compare rows that silently change domain, data type or workload shape.
+Не порівнювати rows, які мовчки змінюють domain, data type або workload shape.
 
-## 5. Research benchmark interpretation
+## 5. Як трактувати research benchmark
 
-A research benchmark should say what kind of output it produces:
+Research benchmark має назвати тип output:
 
 ```text
 WITNESS
@@ -140,15 +138,15 @@ SCALING-EVIDENCE
 UNKNOWN
 ```
 
-A bounded search failure is not automatically a theorem of impossibility.
+Bounded search failure не є автоматично theorem of impossibility.
 
-A finite semantic signature match is not mathematical identity.
+Finite semantic signature match не є mathematical identity.
 
-A successful host benchmark is not semantic ratification.
+Успішний host benchmark не є semantic ratification.
 
-## 6. Closure/generation benchmarks
+## 6. Closure/generation benchmark
 
-For law-generated operation/domain research, report at least:
+Для law-generated domain/operation research звітувати щонайменше:
 
 - roots/premises;
 - generator/law count;
@@ -156,26 +154,32 @@ For law-generated operation/domain research, report at least:
 - type/domain rejects;
 - identity/equivalence dedup;
 - unique generated objects;
-- semantic classes where measured;
+- semantic classes, якщо виміряні;
 - unresolved/UNKNOWN residue;
 - search depth/budget;
-- proof/certificate cost when applicable.
+- proof/certificate cost, якщо застосовно.
 
-Do not hide combinatorial explosion.
+Combinatorial explosion не приховувати.
 
 ## 7. Performance history
 
-Older cold/warm interpreter numbers, rational-chain measurements, Python
-comparisons and pre-domain SID8/function-table benchmarks remain valuable as
+Старі cold/warm interpreter numbers, rational-chain measurements, Python
+comparisons і pre-domain SID8/function-table benchmarks лишаються корисними
 **historical mechanism measurements**.
 
-They are preserved here:
+Вони preserved тут:
 
 [`docs/archive/benchmarks-pre-binary-domain-2026-10-03.md`](archive/benchmarks-pre-binary-domain-2026-10-03.md)
 
-Do not use those measurements as evidence for the current binary-domain
-ontology.
+Не використовувати їх як evidence для current binary-domain ontology.
 
-## 8. Current principle
+## 8. Принцип
 
-**CI fails on semantic breakage. Performance evidence informs mechanism choices. Mathematics and executable laws decide semantic structure.**
+**CI падає на semantic breakage. Performance evidence допомагає вибирати mechanism. Mathematics і executable laws визначають semantic structure.**
+
+## English · auxiliary
+
+Current benchmark policy separates semantic evidence from mechanism cost.
+Correctness/domain/law claims are gated by parity and falsifiers; noisy hosted
+wall time is normally diagnostic evidence. Historical pre-domain benchmark
+numbers remain archived and must not be used as proof of the current ontology.
