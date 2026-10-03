@@ -1,0 +1,20 @@
+name: LISP 1.5 arithmetic historical ingest
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/2709-lisp15-arithmetic-ledger.json"
+      - "benchmarks/lisp15-arithmetic-ingest/**"
+      - ".github/workflows/lisp15-arithmetic-ingest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate primary-source arithmetic ingest sidecar
+        run: python3 benchmarks/lisp15-arithmetic-ingest/run.py
