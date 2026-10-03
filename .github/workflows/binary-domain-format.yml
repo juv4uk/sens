@@ -1,10 +1,19 @@
 name: Binary-domain format
 
+# #2513. The binary-domain reformat (#2490) requires every task body to name the
+# exact domain that owns its binary number. In practice many filled DOMAIN values
+# define the domain by the domain itself, so the field looks answered and is not.
+# This lane names those and refuses a NEW one. It is a ratchet, not a blanket
+# gate: the pre-existing sites are listed in
+# knowledge/binary-domain-format-baseline.json and pass.
 on:
   pull_request:
     paths:
       - "scripts/check-binary-domain-format.py"
+      - "scripts/task_schema_record.py"
+      - "scripts/check-task-record-structure.py"
       - "knowledge/binary-domain-format-baseline.json"
+      - "knowledge/task-record-structure-baseline.json"
       - ".github/workflows/binary-domain-format.yml"
   workflow_dispatch:
   schedule:
@@ -21,8 +30,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - name: Self-test the rule
+
+      - name: Self-test the field rules
         run: python3 scripts/check-binary-domain-format.py --self-test
+
+      - name: Self-test shared task-record parser
+        run: |
+          python3 scripts/task_schema_record.py
+          python3 scripts/check-task-record-structure.py --self-test
+
       - name: Snapshot open issues
         env:
           GH_TOKEN: ${{ github.token }}
@@ -40,8 +56,31 @@ jobs:
           json.dump({"issues": items}, open("/tmp/issues.json", "w"))
           print("snapshot:", len(items))
           PY
-      - name: No new unnamed DOMAIN
+
+      - name: No new unnamed DOMAIN / invalid RELATION
         run: |
           python3 scripts/check-binary-domain-format.py \
             --issues /tmp/issues.json \
             --baseline knowledge/binary-domain-format-baseline.json
+
+      - name: No new seven-field structural debt
+        if: always()
+        run: |
+          python3 scripts/check-task-record-structure.py \
+            --issues /tmp/issues.json \
+            --baseline knowledge/task-record-structure-baseline.json
+
+      - name: Emit structural baseline candidate
+        if: always()
+        run: |
+          python3 scripts/check-task-record-structure.py \
+            --issues /tmp/issues.json \
+            --emit-baseline > /tmp/task-record-structure-baseline.json
+          cat /tmp/task-record-structure-baseline.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: task-record-structure-baseline-candidate
+          path: /tmp/task-record-structure-baseline.json
+          retention-days: 7
