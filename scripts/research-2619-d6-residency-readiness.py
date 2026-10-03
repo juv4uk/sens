@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""#2619 — compose current D6 evidence into an owner-readiness gate.
+"""#2619/#2723 — guard the owner-ratified D6 001111 residency.
 
-This gate never admits a resident. It proves only that candidate 001111 has
-reached the state where evidence work is complete and owner authority is the
-remaining step.
+The pre-decision readiness evidence remains executable, but owner authority has
+now admitted exactly one manual resident: 001111. This gate fails if that
+resident disappears, if extra manual residents appear, or if the proof
+intermediate corners become semantic members.
 """
 
 from __future__ import annotations
@@ -32,11 +33,12 @@ def main() -> int:
 
     assert len(rows) == 64
     assert sum(row["status"] == "generated" for row in rows) == 16
-    assert sum(row["status"] == "UNKNOWN/free" for row in rows) == 48
-    assert target["status"] == "UNKNOWN/free"
-    assert target["semantic_member_of_ratified_domain"] is False
-    assert target["placement_ref"] == ""
-    assert target["manual_resident_required"] is False
+    assert sum(row["status"] == "ratified-resident" for row in rows) == 1
+    assert sum(row["status"] == "UNKNOWN/free" for row in rows) == 47
+    assert target["status"] == "ratified-resident"
+    assert target["semantic_member_of_ratified_domain"] is True
+    assert target["placement_ref"] == "#2538-OD-001"
+    assert target["manual_resident_required"] is True
 
     pressure = runpy.run_path(str(PRESSURE))
     pressure_map = pressure["build"]()
@@ -87,15 +89,16 @@ def main() -> int:
         assert row["placement_ref"] == ""
 
     result = {
-        "schema": "d6-residency-readiness/v1",
+        "schema": "d6-residency-ratification-guard/v2",
         "domain": "Core D6",
         "candidate": TARGET,
         "domain_ratified": True,
         "canonical_closure": {
             "generated": 16,
-            "unknown_free": 48,
+            "ratified_manual_residents": 1,
+            "unknown_free": 47,
             "candidate_current_status": target["status"],
-            "candidate_admitted": False,
+            "candidate_admitted": True,
         },
         "local_placement_theorem": {
             "parent": setq["strongest_local_parent"],
@@ -113,12 +116,11 @@ def main() -> int:
             "nonprefix_scope": "survived-local-D6/distinct-standalone-D2",
             "cross_family_inheritance": "rejected",
         },
-        "owner_action_required": True,
-        "readiness": "READY-FOR-OWNER",
-        "admitted": False,
+        "owner_action_required": False,
+        "readiness": "DECIDED-RATIFIED",
+        "admitted": True,
         "non_conclusions": [
-            "readiness is not ratification",
-            "001111 is not a resident until explicit owner decision",
+            "ratification is local to 001111 and its proved shared-location law",
             "D6 pressure for SETQ does not transfer to SET, RETURN, FEXPR, FSUBR or TRANSFORMER",
             "standalone D2 product representation is a different domain and does not relocate the Core candidate",
             "one-axis D6 proof corners 001101/001110 remain non-residents",
