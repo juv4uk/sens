@@ -24,6 +24,7 @@ PLACEMENT = {
     "unplaced-composite",
     "unplaced-two-axis-capability",
     "unplaced-active-comparison",
+    "unplaced-historical-macro",
 }
 SENS_CLASS = {
     "DERIVED-D1-D4",
@@ -32,6 +33,7 @@ SENS_CLASS = {
     "COMPOSITE",
     "RAW+ENV-TWO-CAPABILITIES",
     "UNRESOLVED",
+    "PARTIAL-PROTOCOL-ALIGNMENT-TIMING-DISTINCT",
 }
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
 
@@ -158,6 +160,19 @@ def main() -> None:
     require(by["FEXPR"]["protocol_axes"] == fexpr_axes, "FEXPR protocol-axis drift")
     require(by["FSUBR"]["protocol_axes"] == fexpr_axes, "FSUBR protocol-axis drift")
     require(by["TRANSFORMER"]["protocol_axes"] == transformer_axes, "TRANSFORMER comparison-axis drift")
+    require(
+        by["TRANSFORMER"].get("historical_expansion_locus") == "definition-time",
+        "Hart MACRO expansion-locus drift",
+    )
+    require(
+        by["TRANSFORMER"].get("current_sens_expansion_locus") == "evaluation-time",
+        "current SENS transformer expansion-locus drift",
+    )
+    require(
+        by["TRANSFORMER"]["later_SENS_classification"]
+        == "PARTIAL-PROTOCOL-ALIGNMENT-TIMING-DISTINCT",
+        "Phase-F classification drift",
+    )
 
     unresolved=[r for r in rows if r["phase_status"] != "complete"]
     first_new=next(
