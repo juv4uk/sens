@@ -10,7 +10,7 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry, Sens8};
+use crate::{semantic_registry, CoreDomainIdentity, Sens8};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -47,9 +47,10 @@ impl Arity {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LanguageItem {
     pub name: String,
-    /// Exact eight-bit semantic identity when governed by the surface registry.
-    /// Runtime-only host capabilities may legitimately have no registry identity yet.
-    pub semantic_id: Option<Sens8>,
+    /// Canonical domain-qualified identity when this registry row has migrated.
+    pub domain_identity: Option<CoreDomainIdentity>,
+    /// Explicit compatibility-only registry identity for still-byte-shaped generated metadata.
+    pub legacy_registry_id: Sens8,
     pub signature: &'static str,
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
@@ -77,7 +78,8 @@ fn semantic_language_items_with(
         };
         items.extend(surfaces.into_iter().map(|name| LanguageItem {
             name: name.to_string(),
-            semantic_id: Some(semantic_id),
+            domain_identity: semantic_registry::domain_identity_for_surface(name),
+            legacy_registry_id: semantic_id,
             signature: row.signature,
             documentation: row.documentation,
             kind: row.kind,
@@ -178,11 +180,11 @@ mod tests {
         let before = discover("comet");
         let after = discover("meteor");
         assert!(before.iter().any(|item| {
-            item.name == "comet" && item.semantic_id == Some(crate::sens!(00001000))
+            item.name == "comet" && item.legacy_registry_id == crate::sens!(00001000)
         }));
         assert!(!before.iter().any(|item| item.name == "meteor"));
         assert!(after.iter().any(|item| {
-            item.name == "meteor" && item.semantic_id == Some(crate::sens!(00001000))
+            item.name == "meteor" && item.legacy_registry_id == crate::sens!(00001000)
         }));
         assert!(!after.iter().any(|item| item.name == "comet"));
     }
@@ -199,15 +201,33 @@ mod tests {
         for pair in [["lambda", "функція"], ["define", "визначити"]] {
             let left = find(pair[0]);
             let right = find(pair[1]);
-            assert_eq!(left.semantic_id, right.semantic_id);
+            assert_eq!(left.domain_identity, right.domain_identity);
+            assert_eq!(left.legacy_registry_id, right.legacy_registry_id);
             assert_eq!(left.signature, right.signature);
             assert_eq!(left.documentation, right.documentation);
             assert_eq!(left.arity, right.arity);
             assert_eq!(left.kind, LanguageItemKind::SyntaxForm);
             assert_eq!(right.kind, LanguageItemKind::SyntaxForm);
         }
-        assert_eq!(find("lambda").semantic_id, Some(crate::sens!(00001000)));
-        assert_eq!(find("define").semantic_id, Some(crate::sens!(00001001)));
+        let lambda = find("lambda");
+        let define = find("define");
+        assert_eq!(lambda.legacy_registry_id, crate::sens!(00001000));
+        assert_eq!(define.legacy_registry_id, crate::sens!(00001001));
+        assert_eq!(lambda.domain_identity.map(CoreDomainIdentity::width), Some(4));
+        assert_eq!(lambda.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0010));
+        assert_eq!(define.domain_identity.map(CoreDomainIdentity::width), Some(4));
+        assert_eq!(define.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0011));
+    }
+
+    #[test]
+    fn d3_tooling_uses_canonical_domain_identity() {
+        let items = language_items();
+        let find = |name: &str| items.iter().find(|item| item.name == name).unwrap();
+
+        let cond = find("cond").domain_identity.unwrap();
+        let eq = find("eq").domain_identity.unwrap();
+        assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
+        assert_eq!((eq.width(), eq.packed_bits()), (3, 0b111));
     }
 
     #[test]
@@ -218,7 +238,7 @@ mod tests {
                 .iter()
                 .find(|item| item.name == name)
                 .unwrap_or_else(|| panic!("missing macro tooling item {name}"));
-            assert_eq!(item.semantic_id, Some(crate::sens!(00001010)));
+            assert_eq!(item.legacy_registry_id, crate::sens!(00001010));
             assert_eq!(item.kind, LanguageItemKind::Macro);
         }
 
@@ -238,7 +258,7 @@ mod tests {
             .iter()
             .find(|item| item.name == "def")
             .expect("def tooling item");
-        assert_eq!(def.semantic_id, Some(crate::sens!(00001011)));
+        assert_eq!(def.legacy_registry_id, crate::sens!(00001011));
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
         assert_eq!(
             semantic_registry::stable_surfaces_for_semantic_id(crate::sens!(00001011)),
