@@ -12,14 +12,19 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity};
 use crate::Sens8;
 
 mod generated {
     include!("semantic_registry_generated.rs");
 }
 
+mod domain_generated {
+    include!("domain_surface_registry_generated.rs");
+}
+
 use generated::{SemanticRow, SEMANTIC_ROWS};
+use domain_generated::DOMAIN_SURFACE_ROWS;
 
 pub(crate) type SemanticId = Sens8;
 
@@ -45,10 +50,47 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
     }
 }
 
-/// Transitional canonical lookup. #2947 removes this legacy-byte detour and
-/// replaces it with the exact-domain surface registry.
+fn exact_domain_identity(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
+    match width {
+        3 => Bit3::new(bits)
+            .map(Bija3::from_word)
+            .map(CoreDomainIdentity::D3),
+        4 => Bit4::new(bits)
+            .map(CoreD4::from_word)
+            .map(CoreDomainIdentity::D4),
+        5 => Bit5::new(bits)
+            .map(CoreD5::from_word)
+            .map(CoreDomainIdentity::D5),
+        _ => None,
+    }
+}
+
+fn exact_domain_surface_index() -> &'static HashMap<&'static str, CoreDomainIdentity> {
+    static INDEX: OnceLock<HashMap<&'static str, CoreDomainIdentity>> = OnceLock::new();
+    INDEX.get_or_init(|| {
+        let mut index = HashMap::new();
+        for row in DOMAIN_SURFACE_ROWS {
+            let identity = exact_domain_identity(row.width, row.bits)
+                .unwrap_or_else(|| panic!("unsupported exact-domain surface row D{}:{:b}", row.width, row.bits));
+            for surface in row.surfaces {
+                if let Some(previous) = index.insert(surface.name, identity) {
+                    assert_eq!(
+                        previous, identity,
+                        "one surface cannot name two exact domain identities: {}",
+                        surface.name
+                    );
+                }
+            }
+        }
+        index
+    })
+}
+
+/// Canonical surface -> exact domain identity.
+///
+/// This path never consults the historical 256-row Function8 registry.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
+    exact_domain_surface_index().get(name).copied()
 }
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
@@ -195,20 +237,27 @@ mod tests {
     }
 
     #[test]
-    fn unmigrated_registry_rows_have_no_fake_domain_identity() {
-        assert_eq!(domain_identity_for_surface("+"), None);
+    fn d5_arithmetic_surfaces_are_exact_domain_identities() {
+        for (surface, bits) in [
+            ("+", 0b01010),
+            ("-", 0b01011),
+            ("<", 0b01110),
+            (">", 0b01111),
+            ("*", 0b10010),
+            ("/", 0b10011),
+        ] {
+            let identity = domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("missing exact D5 surface: {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
+        }
     }
 
     #[test]
-    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
-        assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(legacy_domain_identity_from_registry_byte),
-            domain_identity_for_surface("за-умовою")
-        );
-        assert_eq!(
-            registry_byte_for_surface("функція").and_then(legacy_domain_identity_from_registry_byte),
-            domain_identity_for_surface("функція")
-        );
+    fn canonical_domain_lookup_does_not_consult_legacy_byte_position() {
+        let plus = domain_identity_for_surface("+").unwrap();
+        assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
+        assert_eq!(registry_byte_for_surface("+"), Some(0b0000_1100));
+        assert_ne!(plus.packed_bits(), 0b0_1100);
     }
 
     #[test]
