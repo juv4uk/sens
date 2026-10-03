@@ -27,11 +27,13 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parents[2]
 CLOSURE = REPO / "benchmarks/d6-closure-map/run.py"
+PLACEMENT = REPO / "benchmarks/post-d4-semantic-placement/placement.json"
 
 TARGET = "001111"
 PARENT_DUPLICATE = "001100"
 MIDDLE = {"001101", "001110"}
 OVERLAY = {PARENT_DUPLICATE, *MIDDLE, TARGET}
+PROTECTED_HISTORY = {"SET", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"}
 
 
 class GuardFailure(AssertionError):
@@ -69,6 +71,32 @@ def placement(row: dict[str, Any]) -> str:
 def classify_mode(rows: list[dict[str, Any]]) -> str:
     target = index(rows)[TARGET]
     return "POST-RATIFICATION" if is_member(target) else "PRE-RATIFICATION"
+
+
+def validate_historical_nontransfer(mode: str) -> None:
+    data = json.loads(PLACEMENT.read_text(encoding="utf-8"))
+    rows = {row["operation"]: row for row in data["rows"]}
+    require("SETQ" in rows, "SETQ missing from placement ledger")
+
+    for operation in sorted(PROTECTED_HISTORY):
+        require(operation in rows, f"{operation} missing from placement ledger")
+        row = rows[operation]
+        exact = str(row.get("exact_domain", ""))
+        coordinate = str(row.get("coordinate", ""))
+        candidate = str(row.get("candidate_coordinate", ""))
+        require(exact != "D6", f"{operation} inherited D6 exact domain")
+        require(not coordinate.startswith("D6:"), f"{operation} inherited D6 coordinate")
+        require("D6:" not in candidate, f"{operation} inherited D6 candidate coordinate")
+
+    setq = rows["SETQ"]
+    evidence = " ".join(
+        str(setq.get(key, ""))
+        for key in (
+            "exact_domain", "coordinate", "candidate_coordinate",
+            "placement_kind", "resident_required",
+        )
+    )
+    require("001111" in evidence, f"{mode}: SETQ lost 001111 placement evidence")
 
 
 def validate(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -202,6 +230,7 @@ def main() -> int:
 
     current = load_rows()
     current_result = validate(current)
+    validate_historical_nontransfer(current_result["mode"])
 
     # Future compatibility: on today's pre-ratification map, synthesize only the
     # exact owner-approved target transition and prove the same guard accepts it.
@@ -242,6 +271,7 @@ def main() -> int:
             "44 PURE-UNKNOWN coordinates remain non-members",
             "selector-generated count remains 16",
             "post-ratification manual resident set is exactly {001111}",
+            "SET/RETURN/FEXPR/FSUBR/TRANSFORMER never inherit D6 residency",
         ],
         "non_conclusions": [
             "this guard does not ratify 001111",
@@ -279,6 +309,7 @@ def main() -> int:
         "Interpretation:",
         "ratifying D6:001111 is a one-coordinate authority transition.",
         "Adjacency, shared prefix, and proof-square membership confer no residency.",
+        "SETQ ratification also does not transfer residency to SET/RETURN/FEXPR/FSUBR/TRANSFORMER.",
         "",
     ]
     text = "\n".join(report)
