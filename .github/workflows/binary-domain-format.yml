@@ -1,0 +1,56 @@
+name: Binary-domain format
+
+# #2513. The binary-domain reformat (#2490) requires every task body to name the
+# exact domain that owns its binary number. In practice many filled DOMAIN values
+# define the domain by the domain itself, so the field looks answered and is not.
+# This lane names those and refuses a NEW one. It is a ratchet, not a blanket
+# gate: the pre-existing sites are listed in
+# knowledge/binary-domain-format-baseline.json and pass.
+on:
+  pull_request:
+    paths:
+      - "scripts/check-binary-domain-format.py"
+      - "knowledge/binary-domain-format-baseline.json"
+      - ".github/workflows/binary-domain-format.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  binary-domain-format:
+    name: DOMAIN names an exact width or says UNKNOWN
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Self-test the rule
+        run: python3 scripts/check-binary-domain-format.py --self-test
+
+      - name: Snapshot open issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/${{ github.repository }}/issues?state=open&per_page=100" \
+            --jq '[.[] | select(.pull_request == null) | {number, title, body, state}]' > /tmp/pages.jsonl
+          python3 - <<'PY'
+          import json
+          items = []
+          for line in open("/tmp/pages.jsonl"):
+              line = line.strip()
+              if line:
+                  items.extend(json.loads(line))
+          json.dump({"issues": items}, open("/tmp/issues.json", "w"))
+          print("snapshot:", len(items))
+          PY
+
+      - name: No new unnamed DOMAIN
+        run: |
+          python3 scripts/check-binary-domain-format.py \
+            --issues /tmp/issues.json \
+            --baseline knowledge/binary-domain-format-baseline.json
