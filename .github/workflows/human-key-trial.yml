@@ -1,0 +1,44 @@
+name: Human-key two-key trial harness
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/human-wire/payloads.json"
+      - "benchmarks/human-wire/chunking.py"
+      - "benchmarks/human-wire/trial.py"
+      - ".github/workflows/human-key-trial.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/human-wire/payloads.json"
+      - "benchmarks/human-wire/chunking.py"
+      - "benchmarks/human-wire/trial.py"
+      - ".github/workflows/human-key-trial.yml"
+  workflow_dispatch:
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run deterministic alignment/scorer self-tests
+        run: python3 benchmarks/human-wire/trial.py --self-test
+      - name: Run synthetic dry-run without human claim
+        run: |
+          rm -rf /tmp/human-key-trial
+          python3 benchmarks/human-wire/trial.py             --dry-run             --condition D3-silent-known-randomized             --mode fixed-slot             --slot-ms 120             --session 0             --out /tmp/human-key-trial
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('/tmp/human-key-trial/trial.json').read_text())
+          assert data['metrics']['synthetic'] is True
+          assert data['metrics']['human_measurement'] is False
+          assert data['metrics']['edit_distance'] == 0
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: human-key-trial-synthetic-check
+          path: /tmp/human-key-trial/
+          retention-days: 7
