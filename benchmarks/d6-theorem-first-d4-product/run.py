@@ -39,10 +39,11 @@ def main() -> int:
     assert placement["invariants"]["historical_rows"] == 19
     assert placement["invariants"]["new_nonselector_d5_candidates"] == 0
     candidate_rows = [row for row in placement["rows"] if row.get("candidate_coordinate")]
-    assert len(candidate_rows) == 1, f"new placement candidate requires review: {candidate_rows}"
-    assert candidate_rows[0]["operation"] == "SETQ"
-    assert candidate_rows[0]["candidate_coordinate"].startswith("D6:001111")
-    assert candidate_rows[0]["coordinate"] == "UNPLACED"
+    assert candidate_rows == [], f"ratified placement must clear candidate rows: {candidate_rows}"
+    setq = next(row for row in placement["rows"] if row["operation"] == "SETQ")
+    assert setq["placement_kind"] == "RATIFIED-RESIDENT"
+    assert setq["exact_domain"] == "D6"
+    assert setq["coordinate"] == "001111"
 
     # Factor rows: only the already-known binding family has a proved exact
     # D4 same-base parent with delta_count=2.
@@ -101,8 +102,8 @@ def main() -> int:
     print("transformer-middle-corners-proved=0")
     print("transformer-commutation-proved=0")
     print("transformer-exact-d6-generator-proved=0")
-    print("historical-placement-candidates=1")
-    print("known-owner-ready-candidate=SETQ:D6:001111")
+    print("historical-placement-candidates=0")
+    print("known-ratified-resident=SETQ:D6:001111")
     print("new-d4-two-delta-product-families=0")
     print("RESULT=NO-NEW-D4-TWO-DELTA-FAMILY")
     return 0
