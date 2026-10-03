@@ -1,0 +1,50 @@
+name: D5 ratified baseline guard
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2689-d5-ratified-baseline.py"
+      - "benchmarks/d5-closure-map/**"
+      - "scripts/research-2322-generative-domain-forecast.py"
+      - "benchmarks/generator-economy/semantic-fact-ledger.json"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d5-ratified-baseline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify owner-ratified D5 v1 baseline
+        run: |
+          python3 scripts/research-2689-d5-ratified-baseline.py \
+            --json-out /tmp/d5-ratified-baseline.json
+          cat /tmp/d5-ratified-baseline.json
+
+      - name: Publish invariant summary
+        run: |
+          {
+            echo "## Core D5 ratified baseline"
+            echo
+            echo "- width: 5"
+            echo "- capacity: 32"
+            echo "- selector-generated residents: 8"
+            echo "- UNKNOWN/free non-residents: 24"
+            echo "- manual non-selector residents: 0"
+            echo "- occupancy change requires explicit owner baseline update"
+            echo "- UNKNOWN/free is not spare capacity"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload machine-readable result
+        uses: actions/upload-artifact@v4
+        with:
+          name: d5-ratified-baseline
+          path: /tmp/d5-ratified-baseline.json
