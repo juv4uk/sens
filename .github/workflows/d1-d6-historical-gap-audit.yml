@@ -1,4 +1,4 @@
-name: D1-D6 historical gap audit
+name: D1-D6 historical gap audit pre-OD005 snapshot
 
 on:
   pull_request:
@@ -8,7 +8,6 @@ on:
       - "docs/research/2715-memo24-arithmetic-comparison.json"
       - "benchmarks/post-d4-semantic-placement/**"
       - "benchmarks/d5-closure-map/**"
-      - "scripts/research-2689-d5-ratified-baseline.py"
       - "benchmarks/d6-closure-map/**"
       - "benchmarks/d6-unknown-frontier/**"
       - "benchmarks/d1-d6-historical-gap-audit/**"
