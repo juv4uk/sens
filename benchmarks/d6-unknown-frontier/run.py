@@ -51,6 +51,7 @@ def load_historical_unplaced() -> list[dict[str, Any]]:
     for row in data["rows"]:
         if row["current_domain_candidate"] == "unresolved":
             assert row["binary_object"] == "unplaced"
+            is_ratified_setq = row["operation"] == "SETQ"
             result.append(
                 {
                     "operation": row["operation"],
@@ -58,8 +59,9 @@ def load_historical_unplaced() -> list[dict[str, Any]]:
                     "later_sens_classification": row["later_SENS_classification"],
                     "placement_status": row["placement_status"],
                     "binary_object": row["binary_object"],
-                    "d6_coordinate": None,
-                    "d6_membership_inferred": False,
+                    "d6_coordinate": TARGET if is_ratified_setq else None,
+                    "d6_membership_inferred": is_ratified_setq,
+                    "d6_placement_authority": "#2538-OD-001" if is_ratified_setq else None,
                     "evidence_issue": row["issue"],
                 }
             )
@@ -128,8 +130,13 @@ def build() -> dict[str, Any]:
     historical = load_historical_unplaced()
     historical_ops = {r["operation"] for r in historical}
     assert {"SET", "SETQ", "PROG", "RETURN", "FEXPR", "FSUBR", "TRANSFORMER"} <= historical_ops
-    assert all(r["d6_coordinate"] is None for r in historical)
-    assert all(r["d6_membership_inferred"] is False for r in historical)
+    placed_hist = [r for r in historical if r["d6_membership_inferred"]]
+    assert len(placed_hist) == 1 and placed_hist[0]["operation"] == "SETQ"
+    assert placed_hist[0]["d6_coordinate"] == TARGET
+    assert all(
+        r["d6_coordinate"] is None and r["d6_membership_inferred"] is False
+        for r in historical if r["operation"] != "SETQ"
+    )
 
     result = {
         "schema": "d6-unknown-frontier/v1",
