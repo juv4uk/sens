@@ -17,7 +17,8 @@ has no placement implication.
 from __future__ import annotations
 
 import argparse
-import importlib.util
+import runpy
+from types import SimpleNamespace
 import json
 from pathlib import Path
 from typing import Any
@@ -29,12 +30,10 @@ OUT = ROOT / "benchmarks" / "d5-structural-discovery" / "protocol-independence.j
 
 
 def load_module(path: Path, name: str):
-    spec = importlib.util.spec_from_file_location(name, path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
+    # Re-run the original witness as __main__ so its own assertions/source
+    # guards execute too; expose the resulting namespace for composition.
+    values = runpy.run_path(str(path), run_name="__main__")
+    return SimpleNamespace(**values)
 
 
 def canonical(value: Any) -> str:
