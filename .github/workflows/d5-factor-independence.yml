@@ -31,7 +31,7 @@ jobs:
       - name: Re-check macro timing
         run: python3 scripts/research-2568-macro-timing.py
 
-      - name: Run six-factor independence gate
+      - name: Run seven-factor independence gate
         run: |
           rm -rf /tmp/d5-factor-independence
           python3 benchmarks/d5-factor-independence/run.py             --out /tmp/d5-factor-independence
