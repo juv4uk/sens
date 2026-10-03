@@ -1,5 +1,5 @@
 use crate::bignum::BigInt;
-use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Sens8, Text7};
+use crate::{CoreDomainIdentity, DomainIdentity, Environment, Exactness, Expr, Sens8, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -505,7 +505,7 @@ pub enum Value {
     /// `DomainIdentity` during the #2817 migration.
     Sid(Sens8),
     /// Canonical domain-qualified Core identity.
-    DomainIdentity(CoreDomainIdentity),
+    DomainIdentity(DomainIdentity),
     String(Rc<str>),
     /// Canonical SENS text: an exact UPC-7 cell stream. Never a human
     /// spelling, never Unicode/UTF-8, never a selected layout. Human layout
@@ -656,13 +656,20 @@ impl Value {
         self.as_sens8()
     }
 
-    /// Returns the canonical domain-qualified Core identity if this value
-    /// carries one. No legacy Sens8 projection is performed here.
-    pub fn as_core_domain_identity(&self) -> Option<CoreDomainIdentity> {
+    /// Returns the exact D1→D8 domain identity if this value carries one.
+    pub fn as_domain_identity(&self) -> Option<DomainIdentity> {
         match self {
             Self::DomainIdentity(identity) => Some(*identity),
             _ => None,
         }
+    }
+
+    /// Explicit callable/Core-operation projection.
+    ///
+    /// D1/D2/D7 return None; D8 returns a Core identity only as a coordinate,
+    /// and execution still requires a separately admitted law.
+    pub fn as_core_domain_identity(&self) -> Option<CoreDomainIdentity> {
+        self.as_domain_identity().and_then(DomainIdentity::core_operation)
     }
 
     /// Builds one host-provided callable value without adding a new evaluator
