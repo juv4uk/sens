@@ -72,8 +72,8 @@ fn exact_domain_projection_has_no_legacy_byte_axis() {
     let generated = include_str!("../src/domain_surface_registry_generated.rs");
 
     assert!(
-        source.contains("(3 \"001\"") && source.contains("(4 \"0010\""),
-        "authority must state exact domain width and exact bits explicitly"
+        source.contains("(#b11 \"001\"") && source.contains("(#b100 \"0010\""),
+        "authority must state exact domain width in binary and exact bits explicitly"
     );
     assert!(
         !generated.contains("semantic_id:"),
