@@ -9,6 +9,7 @@ on:
       - "scripts/check-task-falsifier.py"
       - "knowledge/binary-domain-format-baseline.json"
       - "knowledge/task-record-structure-baseline.json"
+      - "knowledge/task-falsifier-baseline.json"
       - ".github/workflows/binary-domain-format.yml"
   workflow_dispatch:
   schedule:
@@ -128,23 +129,30 @@ jobs:
           retention-days: 7
 
 
-      # #2532 first live slice: report-only until the emitted baseline is reviewed.
-      # The checker already supports --baseline non-growth enforcement.
-      - name: Report FALSIFIER quality debt
-        if: always() && hashFiles('scripts/check-task-falsifier.py') != ''
+      # #2532 ratchet: the first live audit found exactly 50 historical
+      # placeholder rows ("explicit counter-test") and 4 real falsifiers.
+      # The named baseline may shrink, but no new decorative debt may appear.
+      - name: Enforce no new FALSIFIER quality debt
+        if: github.event_name != 'pull_request'
+        run: |
+          python3 scripts/check-task-falsifier.py \
+            --issues /tmp/issues.json \
+            --baseline knowledge/task-falsifier-baseline.json
+
+      - name: Report FALSIFIER quality debt on PRs
+        if: github.event_name == 'pull_request'
         continue-on-error: true
         run: |
-          if [ -f /tmp/issues.json ]; then
-            mkdir -p /tmp/task-falsifier
-            python3 scripts/check-task-falsifier.py \
-              --issues /tmp/issues.json \
-              --json-out /tmp/task-falsifier/audit.json \
-              --report-only | tee /tmp/task-falsifier/report.txt
-            python3 scripts/check-task-falsifier.py \
-              --issues /tmp/issues.json \
-              --emit-baseline > /tmp/task-falsifier/baseline-candidate.json
-            cat /tmp/task-falsifier/baseline-candidate.json
-          fi
+          mkdir -p /tmp/task-falsifier
+          python3 scripts/check-task-falsifier.py \
+            --issues /tmp/issues.json \
+            --baseline knowledge/task-falsifier-baseline.json \
+            --json-out /tmp/task-falsifier/audit.json \
+            --report-only | tee /tmp/task-falsifier/report.txt
+          python3 scripts/check-task-falsifier.py \
+            --issues /tmp/issues.json \
+            --emit-baseline > /tmp/task-falsifier/baseline-candidate.json
+          cat /tmp/task-falsifier/baseline-candidate.json
 
       - uses: actions/upload-artifact@v4
         if: always()
