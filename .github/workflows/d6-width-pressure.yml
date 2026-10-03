@@ -1,0 +1,42 @@
+name: D6 structural width pressure
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-width-pressure/**"
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - ".github/workflows/d6-width-pressure.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-width-pressure/**"
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - ".github/workflows/d6-width-pressure.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pressure:
+    name: D6 historical width pressure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Classify completed historical sample
+        run: |
+          rm -rf /tmp/d6-width-pressure
+          python3 benchmarks/d6-width-pressure/run.py --out /tmp/d6-width-pressure
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d6-width-pressure/report.md; then
+            cat /tmp/d6-width-pressure/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-width-pressure
+          path: /tmp/d6-width-pressure/
+          retention-days: 14
