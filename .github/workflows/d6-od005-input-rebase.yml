@@ -1,0 +1,24 @@
+name: D6 OD005 input rebase
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "benchmarks/post-d4-semantic-placement/placement.json"
+      - "benchmarks/d6-theorem-input-gate/**"
+      - "benchmarks/d6-od005-input-rebase/**"
+      - ".github/workflows/d6-od005-input-rebase.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove OD-005 changed D6 theorem inputs
+        run: |
+          python3 benchmarks/d6-od005-input-rebase/run.py | tee /tmp/d6-rebase.txt
+          grep -Fq 'RESULT=D6-INPUT-REBASE-REQUIRED' /tmp/d6-rebase.txt
