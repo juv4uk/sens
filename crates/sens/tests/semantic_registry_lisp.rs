@@ -59,6 +59,19 @@ fn rust_semantic_registry_generator_is_valid_lisp() {
 
 
 #[test]
+fn canonical_registry_is_physically_separate_from_flat_byte_compatibility() {
+    let canonical = include_str!("../src/semantic_registry.rs");
+    let legacy = include_str!("../src/legacy_registry.rs");
+
+    assert!(!canonical.contains("SEMANTIC_ROWS"));
+    assert!(!canonical.contains("semantic_registry_generated.rs"));
+    assert!(!canonical.contains("use crate::Sens8"));
+    assert!(legacy.contains("SEMANTIC_ROWS"));
+    assert!(legacy.contains("semantic_registry_generated.rs"));
+    assert!(legacy.contains("LegacyRegistryId"));
+}
+
+#[test]
 fn exact_domain_registry_source_and_generator_are_valid_lisp() {
     parse(include_str!("../../../lib/surface/domain-registry.lisp"))
         .expect("exact-domain surface registry must remain valid Lisp data");
