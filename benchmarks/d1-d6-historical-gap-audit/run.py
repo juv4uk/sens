@@ -254,11 +254,12 @@ def build() -> dict[str, Any]:
                 "note": "derived historical names remain in the ledger; explanation does not erase history",
             },
             "D5": {
-                "status": "RATIFIED-BASELINE",
-                "generated_residents": d5["generated_count"],
-                "protected_unknown": d5["unknown_count"],
-                "manual_nonselector_residents": d5["manual_nonselector_count"],
-                "missing": "new same-domain law, not occupancy",
+                "status": "OD-005 / FULL-OWNER-BASELINE",
+                "resident": d5["resident_count"],
+                "selector_generated": d5["generated_selector_count"],
+                "owner_historical_nonselector": d5["owner_historical_nonselector_count"],
+                "current_unknown": d5["unknown_count"],
+                "missing": "semantic implementation/derivation where unresolved; not occupancy",
             },
             "D6": {
                 "status": "RATIFIED-WIDTH / LAW-DRIVEN-OCCUPANCY",
