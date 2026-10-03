@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""#2619 — compose current D6 evidence into an owner-readiness gate.
+"""#2619 — PRE-OD006 historical D6 owner-readiness theorem.
 
-This gate never admits a resident. It proves only that candidate 001111 has
-reached the state where evidence work is complete and owner authority is the
-remaining step.
+This file preserves the sparse-model proof that 001111 once reached an
+owner-readiness state.  OD-006 superseded that occupancy question with the
+full 64/64 owner map, where 001111 projects as DEFVAR.
+
+The theorem remains semantic/history evidence; it is not current residency
+authority and must not trigger a new owner action.
 """
 
 from __future__ import annotations
@@ -23,6 +26,10 @@ MIDDLE_CORNERS = REPO / "scripts/research-2624-d6-middle-corners.py"
 
 TARGET = "001111"
 MIDDLE = {"001101", "001110"}
+
+ERA = "PRE-OD006"
+CURRENT_OCCUPANCY_AUTHORITY = False
+SUPERSEDED_BY = "OD-006/#2764/#2777"
 
 
 def main() -> int:
@@ -89,6 +96,10 @@ def main() -> int:
     result = {
         "schema": "d6-residency-readiness/v1",
         "domain": "Core D6",
+        "era": ERA,
+        "current_occupancy_authority": CURRENT_OCCUPANCY_AUTHORITY,
+        "superseded_by": SUPERSEDED_BY,
+        "current_owner_action_required": False,
         "candidate": TARGET,
         "domain_ratified": True,
         "canonical_closure": {
@@ -115,6 +126,7 @@ def main() -> int:
         },
         "owner_action_required": True,
         "readiness": "READY-FOR-OWNER",
+        "current_readiness": "SUPERSEDED-BY-OD006",
         "admitted": False,
         "non_conclusions": [
             "readiness is not ratification",
