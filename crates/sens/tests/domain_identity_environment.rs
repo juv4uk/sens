@@ -6,7 +6,7 @@ fn symbol(text: &str) -> Value {
 }
 
 fn assert_symbol(value: Value, expected: &str) {
-    let Value::Symbol(actual) = value else {
+    let Value::Symbol(ref actual) = value else {
         panic!("expected symbol value");
     };
     assert_eq!(actual.as_ref(), expected);
