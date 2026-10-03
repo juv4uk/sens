@@ -300,7 +300,19 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    // #1455: примітив Rust → визначення мовою, прив'язане до коду → помилка.
+    // One-way compatibility adapter. Once a historical byte has a proven
+    // exact-domain successor, it delegates before any legacy primitive or code
+    // slot can participate. The old coordinate cannot shadow canonical domain
+    // meaning.
+    if let Some(identity) =
+        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+    {
+        if environment.domain_code_slot(identity).is_some() || domain_has_native_mechanism(identity) {
+            return invoke_domain_identity(identity, args, environment, span);
+        }
+    }
+
+    // Unmigrated compatibility-only mechanisms.
     if let Some(primitive) = legacy_primitive(sid) {
         return primitive(args, environment, span);
     }
@@ -308,18 +320,6 @@ pub(crate) fn invoke_semantic_ref(
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
-    }
-
-    // Explicit compatibility adapter: once a historical byte has a proven
-    // exact-domain successor, the old spelling delegates to that one
-    // canonical mechanism. We do not dual-bind the language definition into
-    // both legacy and domain slots.
-    if let Some(identity) =
-        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
-    {
-        if environment.domain_code_slot(identity).is_some() || domain_has_native_mechanism(identity) {
-            return invoke_domain_identity(identity, args, environment, span);
-        }
     }
 
     if let Some(profile) = environment.selected_core_profile() {
@@ -353,6 +353,8 @@ pub(crate) fn invoke_semantic_ref(
 /// #1455: чи має код примітив Rust.
 pub(crate) fn has_primitive(sid: Sens8) -> bool {
     legacy_primitive(sid).is_some()
+        || semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+            .is_some_and(domain_has_native_mechanism)
 }
 
 /// #1455: визначення (функція або макрос) верхнього рівня з назвою з таблиці функцій, чий код не
