@@ -1,0 +1,20 @@
+name: D6 theorem-first D4 product census
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-theorem-first-d4-product/**"
+      - "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
+      - ".github/workflows/d6-theorem-first-d4-product.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  witness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify no new D4 two-delta D6 product family
+        run: python3 benchmarks/d6-theorem-first-d4-product/run.py
