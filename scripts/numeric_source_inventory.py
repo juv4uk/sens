@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Inventory numeric source spellings before the binary-first reader migration.
+"""Inventory numeric/domain source spellings during exact-domain migration.
 
-This tool is observational. It does not define SENS numeric semantics.
-It scans tracked *.lisp files, ignores comments and string contents, and
-classifies source tokens so #1614 can migrate them deliberately.
+This tool is observational; parser/domain contracts define semantics.
 
-Exact eight-bit binary tokens are SENS function identities, never numbers.
-Human presentation is out of scope: #1622 preserves exact-rational display.
+Bare W3-W6 tokens are canonical Core domain words, not numeric migration debt.
+Historical bare W8 tokens are no longer canonical source under #2817 and are
+tracked as legacy Function8 source debt that may only decrease.
 """
 
 from __future__ import annotations
@@ -22,7 +21,8 @@ from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-SENS_FUNCTION = re.compile(r"^[01]{8}$")
+CORE_DOMAIN_WORD = re.compile(r"^[01]{3,6}$")
+LEGACY_FUNCTION8 = re.compile(r"^[01]{8}$")
 SIGNED_INTEGER = re.compile(r"^[+-]?[0-9]+$")
 RATIONAL = re.compile(r"^[+-]?[0-9]+/[+-]?[0-9]+$")
 DECIMAL_OR_SCIENTIFIC = re.compile(
@@ -129,8 +129,11 @@ def bucket(path: Path) -> str:
 
 
 def classify(token: str) -> str | None:
-    if SENS_FUNCTION.fullmatch(token):
-        return "sens-function"
+    if CORE_DOMAIN_WORD.fullmatch(token):
+        return "core-domain-word"
+
+    if LEGACY_FUNCTION8.fullmatch(token):
+        return "legacy-function8-source-debt"
 
     if RATIONAL.fullmatch(token):
         return "rational-literal"
@@ -229,6 +232,7 @@ def print_summary(data: dict) -> None:
 
 
 MIGRATION_SENSITIVE = (
+    "legacy-function8-source-debt",
     "binary-shaped-multibit-number",
     "decimal-integer-needs-migration",
     "decimal-fraction-or-exponent-needs-policy",
@@ -253,8 +257,10 @@ def check_baseline(data: dict, baseline_path: Path) -> int:
         current_counts = data["buckets"].get(bucket_name, {})
         ceiling_counts = baseline.get("buckets", {}).get(bucket_name, {})
         for category in MIGRATION_SENSITIVE:
+            if category not in ceiling_counts:
+                continue
             current = current_counts.get(category, 0)
-            ceiling = ceiling_counts.get(category, 0)
+            ceiling = ceiling_counts[category]
             if current > ceiling:
                 failures.append(
                     f"bucket {bucket_name}/{category}: "
@@ -335,9 +341,9 @@ def self_test() -> int:
 """
     got = [(token, classify(token)) for token in source_tokens(sample)]
     expected = [
-        ("00001100", "sens-function"),
+        ("00001100", "legacy-function8-source-debt"),
         ("10", "binary-shaped-multibit-number"),
-        ("101", "binary-shaped-multibit-number"),
+        ("101", "core-domain-word"),
         ("42", "decimal-integer-needs-migration"),
         ("1/2", "rational-literal"),
         ("3.5", "decimal-fraction-or-exponent-needs-policy"),
