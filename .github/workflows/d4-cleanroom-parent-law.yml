@@ -1,0 +1,36 @@
+name: D4 clean-room parent law gate
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d4-cleanroom-parent-law/**"
+      - ".github/workflows/d4-cleanroom-parent-law.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d4-cleanroom-parent-law/**"
+      - ".github/workflows/d4-cleanroom-parent-law.yml"
+  workflow_dispatch:
+
+jobs:
+  parent-law:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run clean-room parent-law gate
+        run: |
+          rm -rf /tmp/d4-cleanroom-parent-law
+          python3 benchmarks/d4-cleanroom-parent-law/run.py             --out /tmp/d4-cleanroom-parent-law
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d4-cleanroom-parent-law/report.md; then
+            cat /tmp/d4-cleanroom-parent-law/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d4-cleanroom-parent-law
+          path: /tmp/d4-cleanroom-parent-law/
+          retention-days: 14
