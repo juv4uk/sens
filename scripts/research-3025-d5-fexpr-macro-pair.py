@@ -148,7 +148,7 @@ def main() -> None:
         OUT.write_text(text, encoding="utf-8")
     if args.check:
         assert OUT.exists(), "D5 FEXPR/MACRO report missing"
-        assert OUT.read_text(encoding="utf-8") == text, "D5 FEXPR/MACRO report stale"
+        assert json.loads(OUT.read_text(encoding="utf-8")) == result, "D5 FEXPR/MACRO report stale"
 
     print("D5-FEXPR-MACRO-PAIR=PASS")
     print("coordinates=00010,00011")
