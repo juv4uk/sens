@@ -5,18 +5,18 @@
 //! Current proved family:
 //! - D3 root 100 -> CAR
 //! - D3 root 011 -> CDR
-//! - D4 suffix 0 -> compose CAR
-//! - D4 suffix 1 -> compose CDR
+//! - selector-family suffix 0 -> compose CAR
+//! - selector-family suffix 1 -> compose CDR
+//! - D4 admits one selector suffix bit
+//! - owner-ratified D5 v2 (#3305/#3331) admits two selector suffix bits
 //!
-//! This implementation is deliberately bounded to D3/D4. Extending the new
-//! roots mechanically into D5 would collide with owner-ratified OD-005
-//! (for example D5:10000 = APPEND). #3209 owns re-derivation beyond D4.
-//! D5/D6/D7/D8 therefore fail closed here.
+//! This law is family-local. It does not create a universal D5 suffix meaning.
+//! D6/D7/D8 remain outside this production selector decoder and fail closed.
 
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
 
-const MAX_SELECTOR_DEPTH: usize = 2;
+const MAX_SELECTOR_DEPTH: usize = 3;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
@@ -32,7 +32,7 @@ struct SelectorProgram {
 
 fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let width = identity.width();
-    if !(3..=4).contains(&width) {
+    if !(3..=5).contains(&width) {
         return None;
     }
 
@@ -48,8 +48,9 @@ fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let mut steps = [Step::Car; MAX_SELECTOR_DEPTH];
     steps[0] = root;
 
-    if suffix_len == 1 {
-        steps[1] = if (payload & 1) == 0 {
+    for index in 0..suffix_len {
+        let shift = suffix_len - 1 - index;
+        steps[index + 1] = if ((payload >> shift) & 1) == 0 {
             Step::Car
         } else {
             Step::Cdr
@@ -133,7 +134,7 @@ mod tests {
     }
 
     #[test]
-    fn selector_family_is_decoded_from_new_root_plus_one_d4_suffix() {
+    fn selector_family_is_decoded_from_ratified_roots_and_selector_suffixes() {
         assert_eq!(decode(d3(0b100)).unwrap().steps[..1], [Step::Car]);
         assert_eq!(decode(d3(0b011)).unwrap().steps[..1], [Step::Cdr]);
 
@@ -141,6 +142,15 @@ mod tests {
         assert_eq!(decode(d4(0b1001)).unwrap().steps[..2], [Step::Car, Step::Cdr]);
         assert_eq!(decode(d4(0b0110)).unwrap().steps[..2], [Step::Cdr, Step::Car]);
         assert_eq!(decode(d4(0b0111)).unwrap().steps[..2], [Step::Cdr, Step::Cdr]);
+
+        assert_eq!(decode(d5(0b10000)).unwrap().steps[..3], [Step::Car, Step::Car, Step::Car]);
+        assert_eq!(decode(d5(0b10001)).unwrap().steps[..3], [Step::Car, Step::Car, Step::Cdr]);
+        assert_eq!(decode(d5(0b10010)).unwrap().steps[..3], [Step::Car, Step::Cdr, Step::Car]);
+        assert_eq!(decode(d5(0b10011)).unwrap().steps[..3], [Step::Car, Step::Cdr, Step::Cdr]);
+        assert_eq!(decode(d5(0b01100)).unwrap().steps[..3], [Step::Cdr, Step::Car, Step::Car]);
+        assert_eq!(decode(d5(0b01101)).unwrap().steps[..3], [Step::Cdr, Step::Car, Step::Cdr]);
+        assert_eq!(decode(d5(0b01110)).unwrap().steps[..3], [Step::Cdr, Step::Cdr, Step::Car]);
+        assert_eq!(decode(d5(0b01111)).unwrap().steps[..3], [Step::Cdr, Step::Cdr, Step::Cdr]);
     }
 
     #[test]
@@ -152,8 +162,8 @@ mod tests {
             d4(0b1011),
             d4(0b1100),
             d4(0b1101),
-            d5(0b10000), // OD-005 APPEND, never CAAAR
-            d5(0b11101), // OD-005 MEMBER
+            d5(0b10100), // REVERSE, not a selector
+            d5(0b11101), // MEMBER, not a selector
             d6(0b100000),
             d8(0b10000000),
         ] {
@@ -162,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn d3_and_d4_selectors_execute_without_descendant_rows() {
+    fn d3_d4_and_d5_selectors_execute_without_descendant_rows() {
         let leaf = |n| Value::Number(n, crate::Exactness::Exact);
         let x = pair(
             pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0))),
@@ -184,6 +194,15 @@ mod tests {
                 .unwrap(),
             leaf(20.0)
         );
+
+        assert_eq!(invoke(d5(0b10000), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(1.0)); // CAAAR
+        assert_eq!(invoke(d5(0b10001), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(5.0)); // CAADR
+        assert_eq!(invoke(d5(0b10010), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(3.0)); // CADAR
+        assert_eq!(invoke(d5(0b10011), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(7.0)); // CADDR
+        assert_eq!(invoke(d5(0b01100), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(2.0)); // CDAAR
+        assert_eq!(invoke(d5(0b01101), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(6.0)); // CDADR
+        assert_eq!(invoke(d5(0b01110), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(4.0)); // CDDAR
+        assert_eq!(invoke(d5(0b01111), &[x], span).unwrap().unwrap(), leaf(8.0)); // CDDDR
     }
 
     #[test]
@@ -200,7 +219,7 @@ mod tests {
     }
 
     #[test]
-    fn exactly_two_d3_roots_and_four_d4_descendants_are_admitted() {
+    fn exactly_two_d3_four_d4_and_eight_d5_selectors_are_admitted() {
         let mut generated = 0usize;
         for raw in 0u8..8 {
             generated += usize::from(decode(d3(raw)).is_some());
@@ -208,6 +227,9 @@ mod tests {
         for raw in 0u8..16 {
             generated += usize::from(decode(d4(raw)).is_some());
         }
-        assert_eq!(generated, 6);
+        for raw in 0u8..32 {
+            generated += usize::from(decode(d5(raw)).is_some());
+        }
+        assert_eq!(generated, 14);
     }
 }
