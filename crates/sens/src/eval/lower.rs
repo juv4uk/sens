@@ -221,6 +221,16 @@ mod tests {
     }
 
     #[test]
+    fn d5_uk_sa_surfaces_lower_directly_to_exact_domain_calls() {
+        assert_domain_call("(додати 1 2)", 5, 0b01010);
+        assert_domain_call("(yoga 1 2)", 5, 0b01010);
+        assert_domain_call("(зворот x)", 5, 0b10100);
+        assert_domain_call("(viloma x)", 5, 0b10100);
+        assert_domain_call("(перше-від-решти-від-першого x)", 5, 0b10010);
+        assert_domain_call("(ādi-śeṣa-ādi x)", 5, 0b10010);
+    }
+
+    #[test]
     fn explicit_legacy_byte_does_not_infer_a_domain() {
         let expr = lower_one("(00000010 1)");
         match expr.kind {
