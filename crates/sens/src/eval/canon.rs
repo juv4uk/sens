@@ -362,6 +362,18 @@ pub(crate) fn invoke_semantic_ref(
         _ => {}
     }
 
+    // #3070 compatibility: exact D5 owns the stored Lisp closure. A legacy
+    // Sens8 call may borrow that closure, but must never enter a D5 direct
+    // primitive. This preserves historical QUOTIENT behavior for old callers.
+    if let Some(identity) =
+        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
+    {
+        match environment.domain_code_slot(identity) {
+            Some(Value::Closure(closure)) => return closures::apply_values(closure, args, span),
+            Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
+            _ => {}
+        }
+    }
     // Explicit compatibility adapter: once a historical byte has a proven
     // exact-domain successor, the old spelling delegates to that one
     // canonical mechanism. We do not dual-bind the language definition into
@@ -432,6 +444,21 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
+
+    // #3070 bootstrap-only projection: one Lisp definition is stored in its
+    // exact D5 slot. Historical invocation remains a compatibility observer.
+    if let Some(identity) =
+        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
+    {
+        if domain_primitive(identity).is_some()
+            || super::necessary_forms::identity_for_domain_identity(identity).is_some()
+        {
+            return;
+        }
+        environment.bind_domain_code_slot_once(identity, value.clone());
+        return;
+    }
+
     if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
         return;
     }
