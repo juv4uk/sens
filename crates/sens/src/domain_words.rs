@@ -126,8 +126,8 @@ impl CoreD5 {
 
 /// Exact six-bit mechanical/research carrier historically named CoreD6.
 ///
-/// D6 semantic ratification is revoked by #3278. This type preserves exact
-/// width only and deliberately has no implicit relationship to D5 or Sens8.
+/// D6 is UNRATIFIED / RESEARCH under #3331 / Contract 11.4. This type preserves
+/// exact width only and deliberately has no implicit relationship to D5 or Sens8.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD6(Bit6);
@@ -144,10 +144,11 @@ impl CoreD6 {
     }
 }
 
-/// Exact seven-bit carrier for the ratified D7 Sound7/local-ordinal domain.
+/// Exact seven-bit Sound7/local-ordinal research carrier.
 ///
-/// This proves D7 membership only. Sound7/local-ordinal laws own interpretation;
-/// callability or selector geometry must never be inferred from its width.
+/// D7 is UNRATIFIED / RESEARCH under #3331 / Contract 11.4. This carrier proves
+/// exact width only; callability, residency, or selector geometry must never be
+/// inferred from its width.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct SoundD7(Bit7);
@@ -164,8 +165,9 @@ impl SoundD7 {
 
 /// Exact eight-bit mechanical/research carrier historically named CoreD8.
 ///
-/// D8 semantic ratification is revoked by #3278. This carrier remains distinct
-/// from historical flat Sens8/Sid8 bytes but does not itself admit Core.D8 semantics.
+/// D8 is UNRATIFIED / RESEARCH under #3331 / Contract 11.4. This carrier remains
+/// distinct from historical flat Sens8/Sid8 bytes but does not itself admit
+/// Core.D8 semantics.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD8(Bit8);
