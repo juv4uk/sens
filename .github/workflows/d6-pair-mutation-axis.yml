@@ -1,0 +1,36 @@
+name: D6 pair mutation axis research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-pair-mutation-axis/**"
+      - ".github/workflows/d6-pair-mutation-axis.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-pair-mutation-axis/**"
+      - ".github/workflows/d6-pair-mutation-axis.yml"
+  workflow_dispatch:
+
+jobs:
+  mutation-axis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run selector-indexed mutation witness
+        run: |
+          rm -rf /tmp/d6-pair-mutation-axis
+          python3 benchmarks/d6-pair-mutation-axis/run.py             --out /tmp/d6-pair-mutation-axis
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d6-pair-mutation-axis/report.md; then
+            cat /tmp/d6-pair-mutation-axis/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-pair-mutation-axis
+          path: /tmp/d6-pair-mutation-axis/
+          retention-days: 14
