@@ -8,6 +8,8 @@ semantic identity.
 
 ## Boundary
 
+Fixed-width Core object:
+
 ```text
 semantic object
   -> exact (subject, semantic_width, bits)
@@ -15,8 +17,56 @@ semantic object
   -> LUT / FF / BSRAM / DSP
 ```
 
-`semantic_width` and `physical_word_width` are separate fields. A wider
-physical carrier must never be reported as a wider semantic domain.
+Unbounded Number:
+
+```text
+semantic Number (unbounded)
+  -> backend limb_width / limb_count / temporary_width
+  -> LUT / FF / BSRAM / DSP
+  -> normalized semantic Number
+```
+
+Mixed packed stream:
+
+```text
+multiple exact domain objects
+  -> explicit framing/discriminator + packed physical words
+  -> exact original domain objects
+```
+
+The rules are deliberately asymmetric:
+
+- fixed Core domains use an integer `semantic_width`;
+- canonical Number uses `semantic_width=null` with
+  `semantic_width_mode="unbounded"`;
+- a mixed-domain packed stream uses `semantic_width=null` with
+  `semantic_width_mode="mixed"`;
+- `limb_width`, `physical_word_width`, BSRAM port width and padding are
+  backend mechanism fields and never semantic identity.
+
+Therefore a 24-bit limb row cannot silently create a 24-bit Number domain.
+
+## Families
+
+The v1 evidence contract currently admits:
+
+```text
+decoder
+alu-add-xor
+ram1024
+ram-packed
+limb-add
+limb-mul
+multi-limb
+```
+
+`ram-packed` rows carry capacity/accounting fields such as
+`packing_strategy`, `depth_values`, `logical_bits`, `physical_bits`,
+`reserved_bits` and `packing_efficiency`.
+
+Limb rows carry mechanism fields such as `limb_width`, `limb_count`,
+`operation`, `temporary_width`, `cycles`, timing and memory-traffic
+counters. They must keep Number semantic width unbounded.
 
 ## First measured baseline — 2026-10-04
 
@@ -64,12 +114,15 @@ semantic width.
 
 - `schema.json` — hardware evidence contract.
 - `validate.py` — fail-closed JSONL validator.
+- `selftest.py` — semantic-guard tests, including rejection of a fixed-width
+  Number masquerading as a limb result.
 - `evidence/2026-10-04-gw5a25a.jsonl` — first measured rows.
 - `repro/bench.v`, `repro/clk.sdc` — exact source used for this first slice.
 
 ## Validate
 
 ```bash
+python3 benchmarks/fpga-exact-width/selftest.py
 python3 benchmarks/fpga-exact-width/validate.py \
   benchmarks/fpga-exact-width/evidence/2026-10-04-gw5a25a.jsonl
 ```
