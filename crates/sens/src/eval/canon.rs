@@ -356,16 +356,23 @@ fn canonicalize_domain_result(
                 return Ok(Value::predicate_bit(bit));
             }
 
-            // Exact D3:010 ATOM classifies structural empty as an atom.  The
-            // old active mechanism represented that case as NIL/unknown.
+            // Exact D3:010 ATOM is total: the legacy NIL/unknown carrier for
+            // structural empty is normalized to D1:YES.
             if bits == 0b010 && matches!(value, Value::Nil) {
                 return Ok(Value::predicate_bit(true));
+            }
+
+            // #3161: exact D3:111 EQ is partial over the admitted atom domain.
+            // Structural EMPTY is its canonical no-witness result for inputs
+            // outside that domain; it must not be coerced to D1:NO.
+            if bits == 0b111 && matches!(value, Value::Nil) {
+                return Ok(Value::Nil);
             }
 
             Err(LanguageError::new(
                 ErrorKind::Type,
                 format!(
-                    "exact D3 predicate must return D1 PredicateBit at the domain boundary, got {value}"
+                    "exact D3 predicate must return D1 PredicateBit or its explicitly admitted EMPTY/no-witness result, got {value}"
                 ),
                 span,
             ))
