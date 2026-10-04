@@ -308,10 +308,11 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
 /// The D3 role mapping is explicit and law-shaped; it is intentionally not a
 /// numeric projection to the historical Function8 byte axis.
 pub(crate) fn has_language_result_boundary(identity: CoreDomainIdentity) -> bool {
-    matches!(
-        identity,
-        CoreDomainIdentity::D5(word) if word.word().packed_bits() == 0b11101
-    )
+    match identity {
+        CoreDomainIdentity::D3(word) => matches!(word.word().packed_bits(), 0b010 | 0b111),
+        CoreDomainIdentity::D5(word) => word.word().packed_bits() == 0b11101,
+        _ => false,
+    }
 }
 
 fn canonicalize_domain_result(
@@ -323,29 +324,72 @@ fn canonicalize_domain_result(
         return Ok(value);
     }
 
-    // #3060: MEMBER search/equality remains Lisp-owned.  This boundary only
-    // upgrades the transitional Lisp truth carrier into the canonical D1
-    // PredicateBit result required by the ratified D5 law.  Already-canonical
-    // D1 is accepted so the wrapper disappears harmlessly once the Lisp body
-    // itself can construct D1 values.
+    // Already-canonical D1 passes through.  Transitional compatibility
+    // carriers are accepted only at the exact operation boundary that owns
+    // their migration; no generic Number/list/NIL -> D1 coercion exists.
     if value.as_predicate_bit().is_some() {
         return Ok(value);
     }
 
-    if matches!(&value, Value::Symbol(symbol) if symbol.as_ref() == "t") {
-        return Ok(Value::predicate_bit(true));
-    }
-    if matches!(&value, Value::Nil) {
-        return Ok(Value::predicate_bit(false));
-    }
+    match identity {
+        CoreDomainIdentity::D3(word) => {
+            let bits = word.word().packed_bits();
 
-    Err(LanguageError::new(
-        ErrorKind::Type,
-        format!(
-            "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {value}"
-        ),
-        span,
-    ))
+            // The historical D3 primitive mechanism still returns the old
+            // one-element exact-number answer carrier.  Exact-domain callers
+            // receive only D1.  Legacy SID callers never pass this boundary.
+            let legacy_bit = match &value {
+                Value::Pair(head, tail) if matches!(tail.as_ref(), Value::Nil) => {
+                    match head.as_ref() {
+                        Value::Number(number, crate::Exactness::Exact) if *number == 0.0 => {
+                            Some(false)
+                        }
+                        Value::Number(number, crate::Exactness::Exact) if *number == 1.0 => {
+                            Some(true)
+                        }
+                        _ => None,
+                    }
+                }
+                _ => None,
+            };
+            if let Some(bit) = legacy_bit {
+                return Ok(Value::predicate_bit(bit));
+            }
+
+            // Exact D3:010 ATOM classifies structural empty as an atom.  The
+            // old active mechanism represented that case as NIL/unknown.
+            if bits == 0b010 && matches!(value, Value::Nil) {
+                return Ok(Value::predicate_bit(true));
+            }
+
+            Err(LanguageError::new(
+                ErrorKind::Type,
+                format!(
+                    "exact D3 predicate must return D1 PredicateBit at the domain boundary, got {value}"
+                ),
+                span,
+            ))
+        }
+        CoreDomainIdentity::D5(_) => {
+            // #3060: MEMBER search/equality remains Lisp-owned. This boundary
+            // upgrades only its transitional t/() carrier into exact D1.
+            if matches!(&value, Value::Symbol(symbol) if symbol.as_ref() == "t") {
+                return Ok(Value::predicate_bit(true));
+            }
+            if matches!(&value, Value::Nil) {
+                return Ok(Value::predicate_bit(false));
+            }
+
+            Err(LanguageError::new(
+                ErrorKind::Type,
+                format!(
+                    "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {value}"
+                ),
+                span,
+            ))
+        }
+        _ => Ok(value),
+    }
 }
 
 pub(crate) fn invoke_domain_identity(
@@ -363,7 +407,8 @@ pub(crate) fn invoke_domain_identity(
     }
 
     if let Some(primitive) = domain_primitive(identity) {
-        return primitive(args, environment, span);
+        let value = primitive(args, environment, span)?;
+        return canonicalize_domain_result(identity, value, span);
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
@@ -571,6 +616,48 @@ mod tests {
             crate::Bit4::new(0b0010).unwrap(),
         ));
         assert!(domain_primitive(d4_same_payload).is_none());
+    }
+
+    #[test]
+    fn exact_d3_predicate_results_cross_only_as_d1() {
+        let d3 = |bits| {
+            CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(bits).unwrap()))
+        };
+        let span = Span { start: 0, end: 0 };
+        let env = Environment::root();
+
+        let atom_yes = invoke_domain_identity(d3(0b010), &[Value::Nil], &env, span)
+            .expect("D3:010 must classify structural empty");
+        assert_eq!(atom_yes.as_predicate_bit(), Some(true));
+
+        let atom_no = invoke_domain_identity(
+            d3(0b010),
+            &[Value::list([Value::Number(1.0, crate::Exactness::Exact)])],
+            &env,
+            span,
+        )
+        .expect("D3:010 must classify pairs");
+        assert_eq!(atom_no.as_predicate_bit(), Some(false));
+
+        let left = Value::Symbol(std::rc::Rc::from("x"));
+        let same = Value::Symbol(std::rc::Rc::from("x"));
+        let other = Value::Symbol(std::rc::Rc::from("y"));
+
+        let equal = invoke_domain_identity(d3(0b111), &[left.clone(), same], &env, span)
+            .expect("D3:111 equal atoms");
+        let different = invoke_domain_identity(d3(0b111), &[left, other], &env, span)
+            .expect("D3:111 distinct atoms");
+        assert_eq!(equal.as_predicate_bit(), Some(true));
+        assert_eq!(different.as_predicate_bit(), Some(false));
+
+        assert!(has_language_result_boundary(d3(0b010)));
+        assert!(has_language_result_boundary(d3(0b111)));
+        assert!(!has_language_result_boundary(d3(0b100)));
+
+        let number = Value::Number(1.0, crate::Exactness::Exact);
+        let error = canonicalize_domain_result(d3(0b111), number, span)
+            .expect_err("bare Number 1 must not collapse into D1");
+        assert_eq!(error.kind, ErrorKind::Type);
     }
 
     #[test]
