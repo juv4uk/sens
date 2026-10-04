@@ -1,11 +1,12 @@
 ; contracts/d5-ratification.lisp
-; OWNER-RATIFIED 2026-10-04 — issue #3305.
-; Current D5 semantic residency authority.
+; FORMER OWNER-RATIFICATION #3305 — revoked by owner reset #3327.
+; Preserved as D5 research/provenance evidence; not current semantic authority.
 
 (
   (schema . d5-ratification/1)
-  (status . owner-ratified)
-  (owner-ratification . #3305)
+  (status . revoked-research-evidence)
+  (former-owner-ratification . #3305)
+  (revoked-by . #3327)
   (date . "2026-10-04")
   (domain . D5)
   (width . 5)
