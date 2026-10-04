@@ -1,0 +1,26 @@
+name: D1 D5 foundation authority
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d1-d5-foundation.json"
+      - "contracts/d1-d5-foundation-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d1-d5-foundation.py"
+      - ".github/workflows/d1-d5-foundation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d1-d5-foundation.json"
+      - "contracts/d1-d5-foundation-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d1-d5-foundation.py"
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d1-d5-foundation.py
