@@ -98,7 +98,7 @@ def main() -> None:
     require(member["label"] == "MEMBER", "11101 report label drift")
     require(member["canonical_result_domain"] == "Core.D1", "MEMBER canonical result domain must be D1")
     require(member["canonical_yes"] == "1" and member["canonical_no"] == "0", "MEMBER PredicateBit law drift")
-    require("t/()" in member["runtime_transition_debt"], "MEMBER transition debt must stay explicit until #3060 lands")
+    require(member["runtime_transition_debt"].startswith("NONE"), "MEMBER runtime transition debt must be closed after #3060")
 
     require(
         data["stable_identity"]["status"] == "PENDING-STABLE-ID-BACKFILL",

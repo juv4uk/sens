@@ -307,6 +307,47 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
 ///
 /// The D3 role mapping is explicit and law-shaped; it is intentionally not a
 /// numeric projection to the historical Function8 byte axis.
+pub(crate) fn has_language_result_boundary(identity: CoreDomainIdentity) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D5(word) if word.word().packed_bits() == 0b11101
+    )
+}
+
+fn canonicalize_domain_result(
+    identity: CoreDomainIdentity,
+    value: Value,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if !has_language_result_boundary(identity) {
+        return Ok(value);
+    }
+
+    // #3060: MEMBER search/equality remains Lisp-owned.  This boundary only
+    // upgrades the transitional Lisp truth carrier into the canonical D1
+    // PredicateBit result required by the ratified D5 law.  Already-canonical
+    // D1 is accepted so the wrapper disappears harmlessly once the Lisp body
+    // itself can construct D1 values.
+    if value.as_predicate_bit().is_some() {
+        return Ok(value);
+    }
+
+    if matches!(&value, Value::Symbol(symbol) if symbol.as_ref() == "t") {
+        return Ok(Value::predicate_bit(true));
+    }
+    if matches!(&value, Value::Nil) {
+        return Ok(Value::predicate_bit(false));
+    }
+
+    Err(LanguageError::new(
+        ErrorKind::Type,
+        format!(
+            "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {value}"
+        ),
+        span,
+    ))
+}
+
 pub(crate) fn invoke_domain_identity(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -326,12 +367,13 @@ pub(crate) fn invoke_domain_identity(
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
-        match &bound {
-            Value::Closure(closure) => {
-                return closures::apply_values(closure.clone(), args, span);
-            }
-            Value::Builtin(builtin) => return (builtin.func)(args, environment, span),
-            _ => {}
+        let result = match &bound {
+            Value::Closure(closure) => Some(closures::apply_values(closure.clone(), args, span)?),
+            Value::Builtin(builtin) => Some((builtin.func)(args, environment, span)?),
+            _ => None,
+        };
+        if let Some(value) = result {
+            return canonicalize_domain_result(identity, value, span);
         }
     }
 
@@ -467,6 +509,49 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d5_member_result_boundary_accepts_only_predicate_semantics() {
+        let member = CoreDomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0b11101).unwrap(),
+        ));
+        let assoc = CoreDomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0b11100).unwrap(),
+        ));
+        let span = Span { start: 0, end: 0 };
+
+        let yes = canonicalize_domain_result(
+            member,
+            Value::Symbol(std::rc::Rc::from("t")),
+            span,
+        )
+        .expect("legacy YES carrier should normalize");
+        let no = canonicalize_domain_result(member, Value::Nil, span)
+            .expect("legacy NO carrier should normalize");
+        assert_eq!(yes.as_predicate_bit(), Some(true));
+        assert_eq!(no.as_predicate_bit(), Some(false));
+
+        let already_exact = Value::predicate_bit(true);
+        assert_eq!(
+            canonicalize_domain_result(member, already_exact.clone(), span).unwrap(),
+            already_exact
+        );
+
+        let numeric_truth = Value::Number(1.0, crate::Exactness::Exact);
+        let error = canonicalize_domain_result(member, numeric_truth, span)
+            .expect_err("Number 1 must never collapse into D1 YES");
+        assert_eq!(error.kind, ErrorKind::Type);
+
+        let assoc_pair = Value::list([
+            Value::Symbol(std::rc::Rc::from("key")),
+            Value::Symbol(std::rc::Rc::from("value")),
+        ]);
+        assert_eq!(
+            canonicalize_domain_result(assoc, assoc_pair.clone(), span).unwrap(),
+            assoc_pair,
+            "non-MEMBER D5 results must pass through unchanged"
+        );
+    }
 
     #[test]
     fn canonical_d3_primitive_route_is_role_aware_not_numeric_projection() {
