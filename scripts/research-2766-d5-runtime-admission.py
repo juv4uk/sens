@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-"""#2766 — D5 canonical runtime-admission audit.
+"""#2766 / #3290 — D5 historical-donor and W5 mechanism-boundary audit.
 
-Research/integration audit only. This script does not allocate semantics and
-does not infer semantic residency from historical occupancy or human names.
+D5 semantics are UNRATIFIED / RESEARCH under #3278. This script preserves the
+old OD-005 map only as donor/provenance input and asks how far exact W5 mechanics
+travel through the current implementation.
 
-It answers a narrower question:
-    how far does an OD-005 exact five-bit coordinate currently travel through
-    the executable canonical identity path?
-
-Owner occupancy and semantic derivability remain separate concerns.
+It never allocates or re-admits D5 semantics from width, occupancy, coordinates,
+or human projection names.
 """
 
 from __future__ import annotations
@@ -186,7 +184,9 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
             {
                 "coordinate": row["coordinate"],
                 "projection_name": row["name"],
-                "owner_map_resident": True,
+                "historical_donor_resident": True,
+                "current_semantic_status": "UNRATIFIED-RESEARCH",
+                "current_semantic_admission": False,
                 "exact_width_source_boundary": source_ok,
                 "typed_d5_carrier": carrier_ok,
                 "canonical_ast_identity": ast_ok,
@@ -194,9 +194,9 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
                 "canonical_lowering_identity": lowering_ok,
                 "canonical_evaluator_identity": evaluator_status,
                 "implementation_status": (
-                    "CANONICAL-IDENTITY-PATH"
+                    "W5-MECHANISM+IDENTITY-PATH"
                     if lowering_ok
-                    else "OWNER-MAP+W5-BOUNDARY-ONLY"
+                    else "W5-MECHANISM-ONLY"
                 ),
             }
         )
@@ -205,16 +205,18 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
         return sum(row[field] is True for row in rows)
 
     return {
-        "schema": "d5-runtime-admission-audit/v1",
+        "schema": "d5-research-boundary-audit/v2",
         "authority": {
-            "occupancy": "OD-005 / knowledge/d5-historical-full-map.json",
-            "semantic_residency": "NOT-INFERRED-HERE",
+            "current_semantic_status": "UNRATIFIED-RESEARCH (#3278)",
+            "historical_donor_map": "OD-005 / knowledge/d5-historical-full-map.json",
+            "width_status": "MECHANICAL-W5-AVAILABLE",
             "human_names": "PROJECTION-ONLY",
         },
         "runtime_shape": shape,
         "summary": {
             "rows": len(rows),
-            "owner_map_residents": count_bool("owner_map_resident"),
+            "historical_donor_rows": count_bool("historical_donor_resident"),
+            "current_semantic_admission": count_bool("current_semantic_admission"),
             "exact_width_source_boundary": count_bool("exact_width_source_boundary"),
             "typed_d5_carrier": count_bool("typed_d5_carrier"),
             "canonical_ast_identity": count_bool("canonical_ast_identity"),
@@ -227,8 +229,8 @@ def build_report(owner: dict[str, Any], shape: dict[str, Any]) -> dict[str, Any]
         },
         "rows": rows,
         "next_boundary": (
-            "Introduce an exact D5 semantic identity path without widening/zero-padding to Sens8; "
-            "then re-run this audit before implementing row semantics."
+            "Any future D5 semantics must be independently re-derived and explicitly owner-ratified "
+            "under #3278; this W5 mechanism audit cannot admit semantics."
         ),
     }
 
@@ -250,15 +252,17 @@ def main() -> None:
         target.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     summary = report["summary"]
-    print("D5-RUNTIME-ADMISSION-AUDIT=PASS")
-    print(f"owner-map-residents={summary['owner_map_residents']}/32")
+    print("D5-RESEARCH-W5-BOUNDARY-AUDIT=PASS")
+    print(f"historical-donor-rows={summary['historical_donor_rows']}/32")
+    print(f"current-semantic-admission={summary['current_semantic_admission']}/32")
     print(f"exact-width-source-boundary={summary['exact_width_source_boundary']}/32")
     print(f"typed-d5-carrier={summary['typed_d5_carrier']}/32")
     print(f"canonical-ast-identity={summary['canonical_ast_identity']}/32")
     print(f"canonical-registry-identity={summary['canonical_registry_identity']}/32")
     print(f"canonical-lowering-identity={summary['canonical_lowering_identity']}/32")
     print(f"canonical-evaluator-ready={summary['canonical_evaluator_ready']}/32")
-    print("RULE=owner-residency-does-not-imply-runtime-admission")
+    print("RULE=historical-donor-residency-does-not-imply-current-semantic-admission")
+    print("RULE=exact-W5-mechanics-do-not-ratify-D5")
     print("RULE=human-projection-does-not-alias-D5-to-Sens8")
 
 
