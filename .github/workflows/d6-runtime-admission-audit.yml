@@ -1,4 +1,4 @@
-name: D6 runtime admission audit
+name: D6 research W6 mechanism audit
 
 on:
   pull_request:
@@ -23,5 +23,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify D6 admission matrix
+      - name: Verify D6 research donor matrix and W6 mechanism boundary
         run: python3 scripts/research-2766-d6-runtime-admission-audit.py --check
