@@ -265,3 +265,114 @@ fn recip_is_exact_q_multiplicative_inverse() {
         assert_same(&format!("(/ 1 (/ 1 {x}))"), x);
     }
 }
+
+
+#[test]
+fn reduce_respects_append_partitioning() {
+    for (xs, ys) in [
+        ("()", "()"),
+        ("(1 2)", "(3 4)"),
+        ("(5)", "(6 7 8)"),
+    ] {
+        assert_same(
+            &format!(
+                "(reduce (lambda (acc x) (+ acc x)) 0 (append (quote {xs}) (quote {ys})))"
+            ),
+            &format!(
+                "(reduce (lambda (acc x) (+ acc x)) (reduce (lambda (acc x) (+ acc x)) 0 (quote {xs})) (quote {ys}))"
+            ),
+        );
+    }
+}
+
+#[test]
+fn compose_is_observationally_associative() {
+    let prelude = r#"
+        (define d6-compose
+          (lambda (f g)
+            (lambda (x) (f (g x)))))
+    "#;
+
+    for x in ["-2", "0", "5"] {
+        assert_same(
+            &format!(
+                "{prelude}
+                 ((d6-compose
+                    (lambda (x) (+ x 1))
+                    (d6-compose
+                      (lambda (x) (* x 2))
+                      (lambda (x) (- x 3))))
+                  {x})"
+            ),
+            &format!(
+                "{prelude}
+                 ((d6-compose
+                    (d6-compose
+                      (lambda (x) (+ x 1))
+                      (lambda (x) (* x 2)))
+                    (lambda (x) (- x 3)))
+                  {x})"
+            ),
+        );
+    }
+}
+
+#[test]
+fn flip_is_an_involution_on_binary_application() {
+    let prelude = r#"
+        (define d6-flip
+          (lambda (f)
+            (lambda (a b) (f b a))))
+    "#;
+
+    assert_same(
+        &format!("{prelude} ((d6-flip (lambda (a b) (- a b))) 2 5)"),
+        "3",
+    );
+
+    for (a, b) in [("2", "5"), ("7", "3"), ("-1", "4")] {
+        assert_same(
+            &format!(
+                "{prelude} ((d6-flip (d6-flip (lambda (x y) (- x y)))) {a} {b})"
+            ),
+            &format!("(- {a} {b})"),
+        );
+    }
+}
+
+#[test]
+fn take_drop_form_a_lossless_list_split() {
+    let prelude = r#"
+        (define d6-take
+          (lambda (n xs)
+            (cond
+              ((= n 0) (quote ()))
+              ((= (length xs) 0) (quote ()))
+              (t (cons (car xs) (d6-take (- n 1) (cdr xs)))))))
+        (define d6-drop
+          (lambda (n xs)
+            (cond
+              ((= n 0) xs)
+              ((= (length xs) 0) (quote ()))
+              (t (d6-drop (- n 1) (cdr xs))))))
+    "#;
+
+    let xs = "(a b c d)";
+    for n in 0..=6 {
+        assert_same(
+            &format!(
+                "{prelude} (append (d6-take {n} (quote {xs})) (d6-drop {n} (quote {xs})))"
+            ),
+            &format!("(quote {xs})"),
+        );
+    }
+
+    assert_same(
+        &format!("{prelude} (length (d6-take 3 (quote {xs})))"),
+        "3",
+    );
+    assert_same(
+        &format!("{prelude} (d6-drop 0 (quote {xs}))"),
+        &format!("(quote {xs})"),
+    );
+}
