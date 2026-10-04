@@ -4,10 +4,9 @@
 //! separate. Width never grants a semantic role by itself.
 //!
 //! - D1-D4 and D7 retain current semantic authority.
-//! - D5 is owner-ratified again by #3305; D6/D8 remain research carriers after #3278.
-//! - `CoreDomainIdentity` retains historical/research variants for migration,
-//!   but canonical source projection currently admits callable D3/D4 only.
-//! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
+//! - Owner reset #3327 leaves only D1/D2 semantically ratified.
+//! - `CoreDomainIdentity` retains D3/D4/D5/D6/D8 variants as exact-width research/migration carriers.
+//! - No D3-D8 variant is currently admitted as a callable Core operation.
 //! - Eight-bit research carriers and historical Sens8/Sid8 remain distinct.
 
 use crate::{
@@ -83,17 +82,11 @@ impl DomainIdentity {
 
     /// Explicit callable/Core-operation projection.
     ///
-    /// Current owner authority admits exact D3/D4/D5 Core-operation identity.
-    /// D1/D2/D7 are non-callable by their domain laws; D6/D8 remain revoked
-    /// under #3278. D5 residency is full 32/32 under #3305, while actual
-    /// resident mechanisms remain independently fail-closed when unavailable.
+    /// Current owner authority (#3327) ratifies only D1/D2, which are not
+    /// callable Core-operation domains. D3-D8 remain exact-width research
+    /// carriers and fail closed at this semantic admission boundary.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
-        match self {
-            Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
-            Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
-            Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
-            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
-        }
+        None
     }
 }
 
@@ -283,31 +276,20 @@ mod tests {
     }
 
     #[test]
-    fn callable_projection_admits_d3_d4_d5_and_fails_closed_for_noncallable_or_unratified_domains() {
-        for source in [
+    fn owner_reset_3327_fails_closed_for_all_callable_core_projections() {
+        let sources = [
             BinarySourceWord::W1(Bit1::new(1).unwrap()),
             BinarySourceWord::W2(Bit2::new(1).unwrap()),
+            BinarySourceWord::W3(Bit3::new(1).unwrap()),
+            BinarySourceWord::W4(Bit4::new(1).unwrap()),
+            BinarySourceWord::W5(Bit5::new(1).unwrap()),
             BinarySourceWord::W6(Bit6::new(1).unwrap()),
             BinarySourceWord::W7(Bit7::new(1).unwrap()),
             BinarySourceWord::W8(Bit8::new(1).unwrap()),
-        ] {
+        ];
+        for source in sources {
             assert!(DomainIdentity::from_source_word(source).core_operation().is_none());
         }
-
-        let d3 = DomainIdentity::from_source_word(
-            BinarySourceWord::W3(Bit3::new(1).unwrap())
-        ).core_operation().unwrap();
-        assert_eq!((d3.width(), d3.packed_bits()), (3, 1));
-
-        let d4 = DomainIdentity::from_source_word(
-            BinarySourceWord::W4(Bit4::new(1).unwrap())
-        ).core_operation().unwrap();
-        assert_eq!((d4.width(), d4.packed_bits()), (4, 1));
-
-        let d5 = DomainIdentity::from_source_word(
-            BinarySourceWord::W5(Bit5::new(1).unwrap())
-        ).core_operation().unwrap();
-        assert_eq!((d5.width(), d5.packed_bits()), (5, 1));
     }
 
     #[test]
