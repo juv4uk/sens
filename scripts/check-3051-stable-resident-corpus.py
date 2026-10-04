@@ -128,7 +128,7 @@ def main() -> int:
     )
     assert member["semantic_status"] == "RECOVERED"
     assert member["semantic_role"] == "predicate"
-    assert member["canonical_result_domain"] == "D1.PredicateBit"
+    # Domain and role stay separate: D1 is the domain; PredicateBit is the role.\n    assert member["canonical_result_domain"] == "D1"
     assert member["canonical_result_values"] == {"NO": "0", "YES": "1"}
     assert member["canonical_result_law"] == {"no": "0", "yes": "1", "authority_refs": ["#3020", "#3029", "#3060"]}
     assert member["implementation_status"] == "TRANSITION-DEBT:#3060"
