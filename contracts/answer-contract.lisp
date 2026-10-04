@@ -6,7 +6,7 @@
 ; Shared law:
 ;   ()        = structural empty, never predicate FALSE
 ;   predicate = exact one contextual bit: 0 NO / 1 YES
-;   COND      = exactly (test expression), consuming PredicateBit only
+;   COND      = exactly (test expression), consuming PredicateBit or structural EMPTY/no-witness
 ;
 ; Human spellings remain surface projections. Function identity remains exact
 ; Function8. No rich classifier record is a predicate answer.
@@ -63,10 +63,11 @@
   ((identity . 00000111)
    (domain-owner . control)
    (clause-shape . (test expression))
-   (test-domain . predicate-one-bit)
+   (test-domain . (predicate-one-bit structural-empty-no-witness))
    (select-on . one)
-   (skip-on . zero)
+   (skip-on . (zero structural-empty))
    (exhaustion-result . structural-empty)
+   (zero-empty-distinct . required)
    (three-part-clause . forbidden)
    (explicit-result-match . forbidden)
    (generic-truthiness . forbidden)
