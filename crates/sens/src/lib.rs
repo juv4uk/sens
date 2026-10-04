@@ -13,6 +13,11 @@ mod bits;
 mod canonical_reader;
 mod domain_words;
 mod domain_identity;
+// #2958 lands the generated owner projection before its runtime consumer (#2992).
+// Compile it as a conformance artifact for now; #2992 removes this gate when it
+// becomes a real canonical registry dependency.
+#[cfg(test)]
+mod domain_owner_generated;
 mod packed_bits;
 mod binary_framing;
 mod environment;
