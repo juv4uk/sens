@@ -224,10 +224,10 @@ mod tests {
         let items = language_items();
         let find = |name: &str| items.iter().find(|item| item.name == name).unwrap();
 
-        let d3_011 = find("за-умовою").domain_identity.unwrap();
-        let d3_111 = find("тотожне?").domain_identity.unwrap();
-        assert_eq!((d3_011.width(), d3_011.packed_bits()), (3, 0b011));
-        assert_eq!((d3_111.width(), d3_111.packed_bits()), (3, 0b111));
+        let d3_110 = find("за-умовою").domain_identity.unwrap();
+        let d3_101 = find("тотожне?").domain_identity.unwrap();
+        assert_eq!((d3_110.width(), d3_110.packed_bits()), (3, 0b110));
+        assert_eq!((d3_101.width(), d3_101.packed_bits()), (3, 0b101));
     }
 
     #[test]
