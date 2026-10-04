@@ -1,0 +1,16 @@
+name: D4 D5 APPEND dedup probe
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/d4_d5_append_dedup.rs"
+      - ".github/workflows/d4-d5-append-dedup.yml"
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: cargo test -p sens --test d4_d5_append_dedup -- --nocapture
+      - run: cargo test -p sens --test post_d4_append_derivation -- --nocapture
