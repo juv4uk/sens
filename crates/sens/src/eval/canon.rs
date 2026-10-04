@@ -362,10 +362,25 @@ pub(crate) fn invoke_semantic_ref(
         _ => {}
     }
 
-    // Explicit compatibility adapter: once a historical byte has a proven
-    // exact-domain successor, the old spelling delegates to that one
-    // canonical mechanism. We do not dual-bind the language definition into
-    // both legacy and domain slots.
+    // #3070 transitional compatibility: Lisp-owned D5 definitions are stored
+    // only in their exact-domain slots. A historical Sens8 call may borrow that
+    // bound closure/builtin, but it MUST NOT enter D5 direct primitives. This is
+    // essential for QUOTIENT: legacy 00010100 preserves the old Lisp mechanism,
+    // while exact D5:10011 may use the newer direct arithmetic implementation.
+    if let Some(identity) =
+        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
+    {
+        match environment.domain_code_slot(identity) {
+            Some(Value::Closure(closure)) => {
+                return closures::apply_values(closure, args, span);
+            }
+            Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
+            _ => {}
+        }
+    }
+
+    // Explicit compatibility adapter for older D3/D4 migrations whose
+    // historical byte has one proven exact-domain successor.
     if let Some(identity) =
         semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
     {
