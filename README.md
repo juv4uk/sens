@@ -415,7 +415,7 @@ cargo build --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Канонічне розширення source — **`.lisp`**.
+Канонічне розширення вихідного коду — **`.lisp`**. Історичні `.wsm` і `.my` — лише legacy aliases; вони не визначають сучасну source identity.
 
 ---
 
