@@ -208,17 +208,17 @@ mod tests {
     }
 
     #[test]
-    fn lisp_owned_d5_surfaces_project_to_owner_ratified_coordinates() {
-        for (surface, bits) in [
-            ("append", 0b10000),
-            ("reverse", 0b10001),
-            ("quotient", 0b10011),
-            ("assoc", 0b11100),
-            ("member?", 0b11101),
-            ("subst", 0b11111),
+    fn lisp_owned_d5_projection_is_explicit_and_not_truncated() {
+        for (legacy_byte, bits) in [
+            (0b0010_1001, 0b10000),
+            (0b0010_1010, 0b10001),
+            (0b0001_0100, 0b10011),
+            (0b0010_1101, 0b11100),
+            (0b0010_1100, 0b11101),
+            (0b1010_1100, 0b11111),
         ] {
-            let identity = domain_identity_for_surface(surface)
-                .unwrap_or_else(|| panic!("missing D5 projection for {surface}"));
+            let identity = legacy_domain_identity_from_registry_byte(legacy_byte)
+                .expect("ratified D5 projection");
             assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
         }
     }
