@@ -96,6 +96,22 @@ pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), Language
     ))
 }
 
+pub(crate) fn immutable_domain_binding_error(
+    identity: crate::DomainIdentity,
+    span: Span,
+) -> LanguageError {
+    LanguageError::new(
+        ErrorKind::InvalidForm,
+        format!(
+            "canonical name is immutable after exact-domain lowering · канонічне ім'я незмінне після exact-domain lowering · kanonischer Name ist nach Exact-Domain-Lowering unveränderlich: D{} {}",
+            identity.width(),
+            identity
+        ),
+        span,
+    )
+}
+
+
 fn exact_args(
     sid: crate::Sens8,
     args: &[Value],
