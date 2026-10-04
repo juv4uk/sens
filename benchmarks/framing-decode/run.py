@@ -5,9 +5,13 @@ Measures CPU instruction cost of finding exact bounded word spans and message
 boundaries. It deliberately stops before identity-carrier construction (#1989).
 
 Matrix:
-  word codec: A Width3+escape, B gamma-only
+  word codec: A Width3+escape, B gamma-only, S current outer-record candidate
   message boundary: raw exact-bits, stop-bit, outer gamma length,
                     container valid-bits metadata
+
+Candidate S follows #3155 exactly for the word classes exercised here:
+D1..D7 use the three-bit width prefix, D8 uses 1110, and widths >8 are
+carried as canonical BinaryNumber records under 11110 + gamma0(width).
 """
 
 from __future__ import annotations
@@ -28,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(__file__).with_name("bench.rs")
 IREF_RE = re.compile(r"I\s+refs:\s+([0-9,]+)")
 
-CODECS = ("a", "b")
+CODECS = ("a", "b", "s")
 WRAPPERS = ("raw", "stop", "gamma", "container")
 WIDTHS = (1,2,3,4,5,6,7,8,9,16,32,64,65,128)
 PROGRAM_CASES = ("repeated3", "mixed", "corpus")
