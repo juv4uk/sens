@@ -1,0 +1,988 @@
+{
+  "schema": "d6-v2-law-first-ledger/v1",
+  "status": "research-not-authority",
+  "issue": "#3333",
+  "foundation": "#3331 / Contract 11.4",
+  "rules": [
+    "old D6 occupancy is donor/provenance only",
+    "selector generator placements are proved",
+    "non-selector placements require independent law plus geometry evidence",
+    "width alone never grants residency or callability",
+    "mutation-only distinctions require observable current-SENS semantics"
+  ],
+  "summary": {
+    "capacity": 64,
+    "proved_selectors": 16,
+    "law_anchored_candidates": 16,
+    "unknown": 32
+  },
+  "review_first": [
+    "RPLACA",
+    "RPLACD",
+    "NCONC",
+    "NREVERSE",
+    "SETF"
+  ],
+  "rows": [
+    {
+      "coordinate": "100000",
+      "status": "PROVED",
+      "name": "CAAAAR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "NCONC",
+        "category": "list-structure",
+        "parent_d5": "10000",
+        "provenance": "Lisp 1.5 (§4.4)"
+      }
+    },
+    {
+      "coordinate": "100001",
+      "status": "PROVED",
+      "name": "CAAADR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "LENGTH",
+        "category": "list-structure",
+        "parent_d5": "10000",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "100010",
+      "status": "PROVED",
+      "name": "CAADAR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "NREVERSE",
+        "category": "list-structure",
+        "parent_d5": "10001",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "100011",
+      "status": "PROVED",
+      "name": "CAADDR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "NTH",
+        "category": "list-structure",
+        "parent_d5": "10001",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "100100",
+      "status": "PROVED",
+      "name": "CADAAR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "EXPT",
+        "category": "arithmetic",
+        "parent_d5": "10010",
+        "provenance": "Lisp 1.5 (§4.2)"
+      }
+    },
+    {
+      "coordinate": "100101",
+      "status": "PROVED",
+      "name": "CADADR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "GCD",
+        "category": "arithmetic",
+        "parent_d5": "10010",
+        "provenance": "Lisp 1.5 / Core-Math"
+      }
+    },
+    {
+      "coordinate": "100110",
+      "status": "PROVED",
+      "name": "CADDAR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "REMAINDER",
+        "category": "arithmetic",
+        "parent_d5": "10011",
+        "provenance": "Lisp 1.5 (§4.2)"
+      }
+    },
+    {
+      "coordinate": "100111",
+      "status": "PROVED",
+      "name": "CADDDR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "RECIP",
+        "category": "arithmetic",
+        "parent_d5": "10011",
+        "provenance": "Lisp 1.5 / Core-Math"
+      }
+    },
+    {
+      "coordinate": "101000",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "MAP",
+      "law_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs"
+      ],
+      "donor": {
+        "name": "CAAAAR",
+        "category": "selector",
+        "parent_d5": "10100",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "closed forms are EMPTY-accumulator specializations of their -ONTO forms"
+    },
+    {
+      "coordinate": "101001",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "FILTER",
+      "law_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs"
+      ],
+      "donor": {
+        "name": "CAAADR",
+        "category": "selector",
+        "parent_d5": "10100",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "closed forms are EMPTY-accumulator specializations of their -ONTO forms"
+    },
+    {
+      "coordinate": "101010",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "MAP-ONTO",
+      "law_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs"
+      ],
+      "donor": {
+        "name": "CAADAR",
+        "category": "selector",
+        "parent_d5": "10101",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "closed forms are EMPTY-accumulator specializations of their -ONTO forms"
+    },
+    {
+      "coordinate": "101011",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "FILTER-ONTO",
+      "law_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs"
+      ],
+      "donor": {
+        "name": "CAADDR",
+        "category": "selector",
+        "parent_d5": "10101",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "closed forms are EMPTY-accumulator specializations of their -ONTO forms"
+    },
+    {
+      "coordinate": "101100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CADAAR",
+        "category": "selector",
+        "parent_d5": "10110",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "101101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CADADR",
+        "category": "selector",
+        "parent_d5": "10110",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "101110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CADDAR",
+        "category": "selector",
+        "parent_d5": "10111",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "101111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CADDDR",
+        "category": "selector",
+        "parent_d5": "10111",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "110000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CDAAAR",
+        "category": "selector",
+        "parent_d5": "11000",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "110001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CDAADR",
+        "category": "selector",
+        "parent_d5": "11000",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "110010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CDADAR",
+        "category": "selector",
+        "parent_d5": "11001",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "110011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CDADDR",
+        "category": "selector",
+        "parent_d5": "11001",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "110100",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "LEQ",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106"
+      ],
+      "donor": {
+        "name": "CDDAAR",
+        "category": "selector",
+        "parent_d5": "11010",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "LEQ/GEQ are order duals; MIN/MAX are meet/join; NEG reverses the order"
+    },
+    {
+      "coordinate": "110101",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "MIN",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106"
+      ],
+      "donor": {
+        "name": "CDDADR",
+        "category": "selector",
+        "parent_d5": "11010",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "LEQ/GEQ are order duals; MIN/MAX are meet/join; NEG reverses the order"
+    },
+    {
+      "coordinate": "110110",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "GEQ",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106"
+      ],
+      "donor": {
+        "name": "CDDDAR",
+        "category": "selector",
+        "parent_d5": "11011",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "LEQ/GEQ are order duals; MIN/MAX are meet/join; NEG reverses the order"
+    },
+    {
+      "coordinate": "110111",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "MAX",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106"
+      ],
+      "donor": {
+        "name": "CDDDDR",
+        "category": "selector",
+        "parent_d5": "11011",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "LEQ/GEQ are order duals; MIN/MAX are meet/join; NEG reverses the order"
+    },
+    {
+      "coordinate": "111000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "RASSOC",
+        "category": "lookup",
+        "parent_d5": "11100",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "111001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "ACONS",
+        "category": "lookup",
+        "parent_d5": "11100",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "111010",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "INTERSECTION",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3085",
+        "#3089"
+      ],
+      "donor": {
+        "name": "INTERSECTION",
+        "category": "set-operation",
+        "parent_d5": "11101",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "finite-set meet/join lattice with absorption, identities and annihilators"
+    },
+    {
+      "coordinate": "111011",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "UNION",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3085",
+        "#3089"
+      ],
+      "donor": {
+        "name": "UNION",
+        "category": "set-operation",
+        "parent_d5": "11101",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "finite-set meet/join lattice with absorption, identities and annihilators"
+    },
+    {
+      "coordinate": "111100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "MAPCAR",
+        "category": "higher-order",
+        "parent_d5": "11110",
+        "provenance": "Lisp 1.5 (§4.3)"
+      }
+    },
+    {
+      "coordinate": "111101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "MAPLIST",
+        "category": "higher-order",
+        "parent_d5": "11110",
+        "provenance": "Lisp 1.5 (§4.3)"
+      }
+    },
+    {
+      "coordinate": "111110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "SUBLIS",
+        "category": "tree-structure",
+        "parent_d5": "11111",
+        "provenance": "Lisp 1.5 (§4.3)"
+      }
+    },
+    {
+      "coordinate": "111111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "COPY-TREE",
+        "category": "tree-structure",
+        "parent_d5": "11111",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "000000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "REPL",
+        "category": "system",
+        "parent_d5": "00000",
+        "provenance": "Early interactive Lisp"
+      }
+    },
+    {
+      "coordinate": "000001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "LOAD",
+        "category": "system",
+        "parent_d5": "00000",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "000010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CLOSURE",
+        "category": "abstraction",
+        "parent_d5": "00001",
+        "provenance": "Lisp 1.5 / Scheme"
+      }
+    },
+    {
+      "coordinate": "000011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "CURRY",
+        "category": "abstraction",
+        "parent_d5": "00001",
+        "provenance": "Functional Lisp tradition"
+      }
+    },
+    {
+      "coordinate": "000100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "FSUBR",
+        "category": "special-form",
+        "parent_d5": "00010",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "000101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "LEXPR",
+        "category": "special-form",
+        "parent_d5": "00010",
+        "provenance": "MacLisp / Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "000110",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "MACROEXPAND-1",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3083",
+        "#3094"
+      ],
+      "donor": {
+        "name": "MACROEXPAND-1",
+        "category": "macro",
+        "parent_d5": "00011",
+        "provenance": "Lisp 1.5 / Common Lisp"
+      },
+      "law": "FULL is repeated STEP until a reached fixed point"
+    },
+    {
+      "coordinate": "000111",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "MACROEXPAND",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3083",
+        "#3094"
+      ],
+      "donor": {
+        "name": "MACROEXPAND",
+        "category": "macro",
+        "parent_d5": "00011",
+        "provenance": "Lisp 1.5 / Common Lisp"
+      },
+      "law": "FULL is repeated STEP until a reached fixed point"
+    },
+    {
+      "coordinate": "001000",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "LET",
+      "law_status": "PRODUCT-AXIS-CANDIDATE",
+      "evidence": [
+        "#3081",
+        "#3091"
+      ],
+      "donor": {
+        "name": "LET",
+        "category": "binding",
+        "parent_d5": "00100",
+        "provenance": "MacLisp / Scheme"
+      },
+      "law": "parallel initializers use incoming environment; sequential initializers see prior bindings"
+    },
+    {
+      "coordinate": "001001",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "LET*",
+      "law_status": "PRODUCT-AXIS-CANDIDATE",
+      "evidence": [
+        "#3081",
+        "#3091"
+      ],
+      "donor": {
+        "name": "LET*",
+        "category": "binding",
+        "parent_d5": "00100",
+        "provenance": "MacLisp / Scheme"
+      },
+      "law": "parallel initializers use incoming environment; sequential initializers see prior bindings"
+    },
+    {
+      "coordinate": "001010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "DO",
+        "category": "control",
+        "parent_d5": "00101",
+        "provenance": "Lisp 1.5 / MacLisp"
+      }
+    },
+    {
+      "coordinate": "001011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "WHILE",
+        "category": "control",
+        "parent_d5": "00101",
+        "provenance": "Algorithmic Lisp"
+      }
+    },
+    {
+      "coordinate": "001100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "RPLACA",
+        "category": "physical-mutation",
+        "parent_d5": "00110",
+        "provenance": "Lisp 1.5 (§4.4)"
+      }
+    },
+    {
+      "coordinate": "001101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "RPLACD",
+        "category": "physical-mutation",
+        "parent_d5": "00110",
+        "provenance": "Lisp 1.5 (§4.4)"
+      }
+    },
+    {
+      "coordinate": "001110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "SETF",
+        "category": "generalized-place",
+        "parent_d5": "00111",
+        "provenance": "MacLisp / Common Lisp"
+      }
+    },
+    {
+      "coordinate": "001111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "DEFVAR",
+        "category": "state",
+        "parent_d5": "00111",
+        "provenance": "Lisp 1.5 / Common Lisp"
+      }
+    },
+    {
+      "coordinate": "010000",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "EVENP",
+      "law_status": "NEIGHBORHOOD-CANDIDATE",
+      "evidence": [
+        "#3078",
+        "#3079"
+      ],
+      "donor": {
+        "name": "EVENP",
+        "category": "predicate",
+        "parent_d5": "01000",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "on exact integers, ODDP(n)=NOT(EVENP(n)) and EVENP(n)=NOT(ODDP(n))"
+    },
+    {
+      "coordinate": "010001",
+      "status": "CANDIDATE-WITH-LAW",
+      "name": "ODDP",
+      "law_status": "NEIGHBORHOOD-CANDIDATE",
+      "evidence": [
+        "#3078",
+        "#3079"
+      ],
+      "donor": {
+        "name": "ODDP",
+        "category": "predicate",
+        "parent_d5": "01000",
+        "provenance": "Lisp 1.5"
+      },
+      "law": "on exact integers, ODDP(n)=NOT(EVENP(n)) and EVENP(n)=NOT(ODDP(n))"
+    },
+    {
+      "coordinate": "010010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "INTEGERP",
+        "category": "predicate",
+        "parent_d5": "01001",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "010011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "RATIONALP",
+        "category": "predicate",
+        "parent_d5": "01001",
+        "provenance": "Lisp 1.5 / Core-Math"
+      }
+    },
+    {
+      "coordinate": "010100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "ADD1",
+        "category": "arithmetic",
+        "parent_d5": "01010",
+        "provenance": "Lisp 1.5 (§4.2)"
+      }
+    },
+    {
+      "coordinate": "010101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "ABS",
+        "category": "arithmetic",
+        "parent_d5": "01010",
+        "provenance": "Lisp 1.5 (§4.2)"
+      }
+    },
+    {
+      "coordinate": "010110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "SUB1",
+        "category": "arithmetic",
+        "parent_d5": "01011",
+        "provenance": "Lisp 1.5 (§4.2)"
+      }
+    },
+    {
+      "coordinate": "010111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law_status": "NONE",
+      "evidence": [],
+      "donor": {
+        "name": "NEG",
+        "category": "arithmetic",
+        "parent_d5": "01011",
+        "provenance": "Lisp 1.5 (§4.2)"
+      }
+    },
+    {
+      "coordinate": "011000",
+      "status": "PROVED",
+      "name": "CDAAAR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "TAGBODY",
+        "category": "control",
+        "parent_d5": "01100",
+        "provenance": "Common Lisp / Scheme"
+      }
+    },
+    {
+      "coordinate": "011001",
+      "status": "PROVED",
+      "name": "CDAADR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "BLOCK",
+        "category": "control",
+        "parent_d5": "01100",
+        "provenance": "Common Lisp / Scheme"
+      }
+    },
+    {
+      "coordinate": "011010",
+      "status": "PROVED",
+      "name": "CDADAR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "RETURN-FROM",
+        "category": "control",
+        "parent_d5": "01101",
+        "provenance": "Common Lisp"
+      }
+    },
+    {
+      "coordinate": "011011",
+      "status": "PROVED",
+      "name": "CDADDR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "CATCH",
+        "category": "control",
+        "parent_d5": "01101",
+        "provenance": "MacLisp"
+      }
+    },
+    {
+      "coordinate": "011100",
+      "status": "PROVED",
+      "name": "CDDAAR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "LEQ",
+        "category": "predicate",
+        "parent_d5": "01110",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "011101",
+      "status": "PROVED",
+      "name": "CDDADR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "MIN",
+        "category": "arithmetic",
+        "parent_d5": "01110",
+        "provenance": "Lisp 1.5 (§4.2)"
+      }
+    },
+    {
+      "coordinate": "011110",
+      "status": "PROVED",
+      "name": "CDDDAR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "GEQ",
+        "category": "predicate",
+        "parent_d5": "01111",
+        "provenance": "Lisp 1.5"
+      }
+    },
+    {
+      "coordinate": "011111",
+      "status": "PROVED",
+      "name": "CDDDDR",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json"
+      ],
+      "donor": {
+        "name": "MAX",
+        "category": "arithmetic",
+        "parent_d5": "01111",
+        "provenance": "Lisp 1.5 (§4.2)"
+      }
+    }
+  ]
+}
