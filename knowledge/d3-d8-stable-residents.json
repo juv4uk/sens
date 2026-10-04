@@ -1428,7 +1428,7 @@
       "semantic_status": "RECOVERED",
       "semantic_role": "predicate",
       "semantic_class": "predicate",
-      "typed_behavior": "list membership predicate -> exact D1 PredicateBit (hit=1, miss=0)",
+      "typed_behavior": "structural membership predicate over list; canonical result is exact D1 PredicateBit",
       "partiality": null,
       "semantic_law_refs": [
         "#3053",
@@ -1443,7 +1443,8 @@
       ],
       "map_independent_witness_refs": [
         "#2986",
-        "#3059"
+        "#3059",
+        "#3060"
       ],
       "current_domain": "D5",
       "current_bits": "11101",
@@ -1452,12 +1453,22 @@
       "human_labels_optional": [
         "MEMBER"
       ],
-      "canonical_result_domain": "D1",
+      "canonical_result_domain": "D1.PredicateBit",
       "canonical_result_values": {
         "NO": "0",
         "YES": "1"
       },
-      "implementation_status": "TRANSITION-DEBT:#3060"
+      "implementation_status": "TRANSITION-DEBT:#3060",
+      "canonical_result_law": {
+        "no": "0",
+        "yes": "1",
+        "authority_refs": [
+          "#3020",
+          "#3029",
+          "#3060"
+        ]
+      },
+      "transition_debt": "CURRENT t/() runtime result is non-canonical until #3060 lands"
     },
     {
       "stable_resident_id": "sr-tmmvgwmmahhh",
@@ -12278,6 +12289,6 @@
       "human_labels_optional": []
     }
   ],
-  "corpus_hash": "sha256:0db354952be205fd4861af96ea5d7aea320f382cec2dbbcc935e03cf252af68f",
+  "corpus_hash": "sha256:436981b11ab0c528900cc638e48ce20dae8ef7981669e6284150f88c81dabd1c",
   "hash_contract": "SHA-256 over UTF-8 compact JSON serialization of rows in committed order"
 }
