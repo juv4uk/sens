@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "knowledge/d4-cleanroom.json"
+      - "knowledge/d4-parent-law-tournament.json"
       - "scripts/check-d4-cleanroom.py"
       - "benchmarks/d4-prefix-lift/**"
       - ".github/workflows/d4-cleanroom.yml"
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - "knowledge/d4-cleanroom.json"
+      - "knowledge/d4-parent-law-tournament.json"
       - "scripts/check-d4-cleanroom.py"
 
 jobs:
