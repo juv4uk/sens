@@ -1,0 +1,24 @@
+name: D5 GO RETURN residual law
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d5-d6-semantic-ledger.json"
+      - "scripts/research-2590-nonlocal-exit.py"
+      - "knowledge/d5-go-return-pair.json"
+      - "scripts/research-3040-d5-go-return-pair.py"
+      - ".github/workflows/d5-go-return-pair.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    name: D5 GO/RETURN pair classification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Replay non-local-exit donor and classify pair
+        run: python3 scripts/research-3040-d5-go-return-pair.py --check
