@@ -310,7 +310,10 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
 pub(crate) fn has_language_result_boundary(identity: CoreDomainIdentity) -> bool {
     match identity {
         CoreDomainIdentity::D3(word) => matches!(word.word().packed_bits(), 0b010 | 0b101),
-        CoreDomainIdentity::D5(word) => word.word().packed_bits() == 0b11101,
+        CoreDomainIdentity::D5(word) => matches!(
+            word.word().packed_bits(),
+            0b11010 | 0b11011 | 0b11101
+        ),
         _ => false,
     }
 }
@@ -370,23 +373,54 @@ fn canonicalize_domain_result(
                 span,
             ))
         }
-        CoreDomainIdentity::D5(_) => {
-            // #3060: MEMBER search/equality remains Lisp-owned. This boundary
-            // upgrades only its transitional t/() carrier into exact D1.
-            if matches!(&value, Value::Symbol(symbol) if symbol.as_ref() == "t") {
-                return Ok(Value::predicate_bit(true));
-            }
-            if matches!(&value, Value::Nil) {
-                return Ok(Value::predicate_bit(false));
+        CoreDomainIdentity::D5(word) => {
+            let bits = word.word().packed_bits();
+
+            if bits == 0b11101 {
+                // #3060: MEMBER search/equality remains Lisp-owned. This boundary
+                // upgrades only its transitional t/() carrier into exact D1.
+                if matches!(&value, Value::Symbol(symbol) if symbol.as_ref() == "t") {
+                    return Ok(Value::predicate_bit(true));
+                }
+                if matches!(&value, Value::Nil) {
+                    return Ok(Value::predicate_bit(false));
+                }
+
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {value}"
+                    ),
+                    span,
+                ));
             }
 
-            Err(LanguageError::new(
-                ErrorKind::Type,
-                format!(
-                    "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {value}"
-                ),
-                span,
-            ))
+            if matches!(bits, 0b11010 | 0b11011) {
+                // #3004/#3008: LESSP/GREATERP are strict D5 predicates whose
+                // observable result domain is D1.  The old exact-rational
+                // arithmetic backend still emits numeric 0/1; accept only that
+                // bounded migration carrier at these exact owning identities.
+                let legacy_bit = match &value {
+                    Value::Number(number, crate::Exactness::Exact) if *number == 0.0 => Some(false),
+                    Value::Number(number, crate::Exactness::Exact) if *number == 1.0 => Some(true),
+                    Value::Rational(number) if number == &crate::Rational::integer(0) => Some(false),
+                    Value::Rational(number) if number == &crate::Rational::integer(1) => Some(true),
+                    _ => None,
+                };
+                if let Some(bit) = legacy_bit {
+                    return Ok(Value::predicate_bit(bit));
+                }
+
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "D5 order predicate must return exact D1 PredicateBit at the domain boundary, got {value}"
+                    ),
+                    span,
+                ));
+            }
+
+            Ok(value)
         }
         _ => Ok(value),
     }
@@ -403,7 +437,8 @@ pub(crate) fn invoke_domain_identity(
     }
 
     if let Some(result) = super::d5_arithmetic::invoke(identity, args, environment, span) {
-        return result;
+        let value = result?;
+        return canonicalize_domain_result(identity, value, span);
     }
 
     if let Some(primitive) = domain_primitive(identity) {
@@ -596,6 +631,70 @@ mod tests {
             assoc_pair,
             "non-MEMBER D5 results must pass through unchanged"
         );
+    }
+
+    #[test]
+    fn exact_d5_order_predicates_cross_only_as_d1() {
+        let d5 = |bits| {
+            CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(bits).unwrap()))
+        };
+        let span = Span { start: 0, end: 0 };
+        let env = Environment::root();
+
+        let less_yes = invoke_domain_identity(
+            d5(0b11010),
+            &[
+                Value::Number(2.0, crate::Exactness::Exact),
+                Value::Number(3.0, crate::Exactness::Exact),
+            ],
+            &env,
+            span,
+        )
+        .expect("D5 LESSP exact-rational path");
+        let less_no = invoke_domain_identity(
+            d5(0b11010),
+            &[
+                Value::Number(3.0, crate::Exactness::Exact),
+                Value::Number(2.0, crate::Exactness::Exact),
+            ],
+            &env,
+            span,
+        )
+        .expect("D5 LESSP false path");
+        let greater_yes = invoke_domain_identity(
+            d5(0b11011),
+            &[
+                Value::Number(3.0, crate::Exactness::Exact),
+                Value::Number(2.0, crate::Exactness::Exact),
+            ],
+            &env,
+            span,
+        )
+        .expect("D5 GREATERP exact-rational path");
+
+        assert_eq!(less_yes.as_predicate_bit(), Some(true));
+        assert_eq!(less_no.as_predicate_bit(), Some(false));
+        assert_eq!(greater_yes.as_predicate_bit(), Some(true));
+
+        let inexact = invoke_domain_identity(
+            d5(0b11010),
+            &[
+                Value::Number(2.0, crate::Exactness::Inexact),
+                Value::Number(3.0, crate::Exactness::Inexact),
+            ],
+            &env,
+            span,
+        )
+        .expect_err("inexact/unknown order must not silently collapse into D1 NO");
+        assert_eq!(inexact.kind, ErrorKind::Type);
+
+        let numeric_truth = canonicalize_domain_result(
+            d5(0b11101),
+            Value::Number(1.0, crate::Exactness::Exact),
+            span,
+        )
+        .expect_err("MEMBER must not accept numeric 1 as predicate truth");
+        assert_eq!(numeric_truth.kind, ErrorKind::Type);
     }
 
     #[test]
