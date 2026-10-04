@@ -307,6 +307,41 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
 ///
 /// The D3 role mapping is explicit and law-shaped; it is intentionally not a
 /// numeric projection to the historical Function8 byte axis.
+fn canonicalize_domain_result(
+    identity: CoreDomainIdentity,
+    value: Value,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    let is_member = matches!(
+        identity,
+        CoreDomainIdentity::D5(word) if word.word().packed_bits() == 0b11101
+    );
+    if !is_member {
+        return Ok(value);
+    }
+
+    // #3060: MEMBER search/equality remains Lisp-owned.  This boundary only
+    // upgrades the transitional Lisp truth carrier into the canonical D1
+    // PredicateBit result required by the ratified D5 law.  Already-canonical
+    // D1 is accepted so the wrapper disappears harmlessly once the Lisp body
+    // itself can construct D1 values.
+    if value.as_predicate_bit().is_some() {
+        return Ok(value);
+    }
+
+    match value {
+        Value::Symbol(symbol) if symbol.as_ref() == "t" => Ok(Value::predicate_bit(true)),
+        Value::Nil => Ok(Value::predicate_bit(false)),
+        other => Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {other}"
+            ),
+            span,
+        )),
+    }
+}
+
 pub(crate) fn invoke_domain_identity(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -326,12 +361,13 @@ pub(crate) fn invoke_domain_identity(
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
-        match &bound {
-            Value::Closure(closure) => {
-                return closures::apply_values(closure.clone(), args, span);
-            }
-            Value::Builtin(builtin) => return (builtin.func)(args, environment, span),
-            _ => {}
+        let result = match &bound {
+            Value::Closure(closure) => Some(closures::apply_values(closure.clone(), args, span)?),
+            Value::Builtin(builtin) => Some((builtin.func)(args, environment, span)?),
+            _ => None,
+        };
+        if let Some(value) = result {
+            return canonicalize_domain_result(identity, value, span);
         }
     }
 
