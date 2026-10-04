@@ -3,11 +3,11 @@
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1-D4 and D7 retain current semantic authority.
-//! - D5 is owner-ratified again by #3305; D6/D8 remain research carriers after #3278.
-//! - `CoreDomainIdentity` retains historical/research variants for migration,
-//!   but canonical source projection currently admits callable D3/D4 only.
-//! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
+//! - D1-D5 are the current owner-ratified foundation under #3331 / Contract 11.4.
+//! - D6-D8 remain UNRATIFIED / RESEARCH carriers.
+//! - `CoreDomainIdentity` retains D6/D8 research variants for migration/evidence,
+//!   but `core_operation()` admits callable identity only for D3/D4/D5.
+//! - D7 is Sound7/local-ordinal research/provenance and never enters callable routing by width.
 //! - Eight-bit research carriers and historical Sens8/Sid8 remain distinct.
 
 use crate::{
@@ -84,9 +84,10 @@ impl DomainIdentity {
     /// Explicit callable/Core-operation projection.
     ///
     /// Current owner authority admits exact D3/D4/D5 Core-operation identity.
-    /// D1/D2/D7 are non-callable by their domain laws; D6/D8 remain revoked
-    /// under #3278. D5 residency is full 32/32 under #3305, while actual
-    /// resident mechanisms remain independently fail-closed when unavailable.
+    /// D1/D2 are non-callable by their domain laws; D6/D7/D8 are research and
+    /// fail closed under #3331 / Contract 11.4. D5 residency is full 32/32
+    /// under #3305, while resident mechanisms remain independently fail-closed
+    /// when unavailable.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
