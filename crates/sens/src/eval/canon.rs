@@ -368,10 +368,14 @@ pub(crate) fn invoke_semantic_ref(
     if let Some(identity) =
         semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
     {
-        match environment.domain_code_slot(identity) {
-            Some(Value::Closure(closure)) => return closures::apply_values(closure, args, span),
-            Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
-            _ => {}
+        if let Some(bound) = environment.domain_code_slot(identity) {
+            match &bound {
+                Value::Closure(closure) => {
+                    return closures::apply_values(closure.clone(), args, span);
+                }
+                Value::Builtin(builtin) => return (builtin.func)(args, environment, span),
+                _ => {}
+            }
         }
     }
     // Explicit compatibility adapter: once a historical byte has a proven
