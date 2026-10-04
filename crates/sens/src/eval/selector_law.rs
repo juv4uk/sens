@@ -5,18 +5,17 @@
 //! Current proved family:
 //! - D3 root 100 -> CAR
 //! - D3 root 011 -> CDR
-//! - D4 suffix 0 -> compose CAR
-//! - D4 suffix 1 -> compose CDR
+//! - each admitted selector suffix bit 0 -> compose CAR
+//! - each admitted selector suffix bit 1 -> compose CDR
+//! - Contract 11.3 admits exactly the D5 depth-3 descendants of the same law
 //!
-//! This implementation is deliberately bounded to D3/D4. Extending the new
-//! roots mechanically into D5 would collide with owner-ratified OD-005
-//! (for example D5:10000 = APPEND). #3209 owns re-derivation beyond D4.
-//! D5/D6/D7/D8 therefore fail closed here.
+//! The proved production family is bounded to D3/D4/D5. D6+ ancestry is not
+//! inferred from width or prefix shape and remains fail-closed under #3209.
 
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
 
-const MAX_SELECTOR_DEPTH: usize = 2;
+const MAX_SELECTOR_DEPTH: usize = 3;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
@@ -32,7 +31,7 @@ struct SelectorProgram {
 
 fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let width = identity.width();
-    if !(3..=4).contains(&width) {
+    if !(3..=5).contains(&width) {
         return None;
     }
 
@@ -48,8 +47,9 @@ fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let mut steps = [Step::Car; MAX_SELECTOR_DEPTH];
     steps[0] = root;
 
-    if suffix_len == 1 {
-        steps[1] = if (payload & 1) == 0 {
+    for suffix_index in 0..suffix_len {
+        let shift = suffix_len - 1 - suffix_index;
+        steps[1 + suffix_index] = if ((payload >> shift) & 1) == 0 {
             Step::Car
         } else {
             Step::Cdr
@@ -133,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    fn selector_family_is_decoded_from_new_root_plus_one_d4_suffix() {
+    fn selector_family_is_decoded_from_root_plus_ratified_d4_d5_suffixes() {
         assert_eq!(decode(d3(0b100)).unwrap().steps[..1], [Step::Car]);
         assert_eq!(decode(d3(0b011)).unwrap().steps[..1], [Step::Cdr]);
 
@@ -141,10 +141,19 @@ mod tests {
         assert_eq!(decode(d4(0b1001)).unwrap().steps[..2], [Step::Car, Step::Cdr]);
         assert_eq!(decode(d4(0b0110)).unwrap().steps[..2], [Step::Cdr, Step::Car]);
         assert_eq!(decode(d4(0b0111)).unwrap().steps[..2], [Step::Cdr, Step::Cdr]);
+
+        assert_eq!(decode(d5(0b10000)).unwrap().steps[..3], [Step::Car, Step::Car, Step::Car]);
+        assert_eq!(decode(d5(0b10001)).unwrap().steps[..3], [Step::Car, Step::Car, Step::Cdr]);
+        assert_eq!(decode(d5(0b10010)).unwrap().steps[..3], [Step::Car, Step::Cdr, Step::Car]);
+        assert_eq!(decode(d5(0b10011)).unwrap().steps[..3], [Step::Car, Step::Cdr, Step::Cdr]);
+        assert_eq!(decode(d5(0b01100)).unwrap().steps[..3], [Step::Cdr, Step::Car, Step::Car]);
+        assert_eq!(decode(d5(0b01101)).unwrap().steps[..3], [Step::Cdr, Step::Car, Step::Cdr]);
+        assert_eq!(decode(d5(0b01110)).unwrap().steps[..3], [Step::Cdr, Step::Cdr, Step::Car]);
+        assert_eq!(decode(d5(0b01111)).unwrap().steps[..3], [Step::Cdr, Step::Cdr, Step::Cdr]);
     }
 
     #[test]
-    fn old_roots_and_higher_width_prefix_collisions_fail_closed() {
+    fn old_roots_nonselector_d5_and_unratified_higher_widths_fail_closed() {
         for identity in [
             d3(0b101),
             d3(0b110),
@@ -152,8 +161,8 @@ mod tests {
             d4(0b1011),
             d4(0b1100),
             d4(0b1101),
-            d5(0b10000), // OD-005 APPEND, never CAAAR
-            d5(0b11101), // OD-005 MEMBER
+            d5(0b10100), // REVERSE, not a selector
+            d5(0b11101), // MEMBER, not a selector
             d6(0b100000),
             d8(0b10000000),
         ] {
@@ -162,7 +171,7 @@ mod tests {
     }
 
     #[test]
-    fn d3_and_d4_selectors_execute_without_descendant_rows() {
+    fn d3_d4_d5_selectors_execute_without_descendant_tables() {
         let leaf = |n| Value::Number(n, crate::Exactness::Exact);
         let x = pair(
             pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0))),
@@ -184,6 +193,21 @@ mod tests {
                 .unwrap(),
             leaf(20.0)
         );
+
+        let nested = proper([
+            proper([
+                proper([leaf(10.0), leaf(20.0)]),
+                proper([leaf(30.0), leaf(40.0)]),
+            ]),
+            proper([
+                proper([leaf(50.0), leaf(60.0)]),
+                proper([leaf(70.0), leaf(80.0)]),
+            ]),
+        ]);
+        assert_eq!(
+            invoke(d5(0b10010), &[nested], span).unwrap().unwrap(),
+            leaf(30.0)
+        );
     }
 
     #[test]
@@ -200,7 +224,7 @@ mod tests {
     }
 
     #[test]
-    fn exactly_two_d3_roots_and_four_d4_descendants_are_admitted() {
+    fn exactly_two_d3_four_d4_and_eight_d5_selectors_are_admitted() {
         let mut generated = 0usize;
         for raw in 0u8..8 {
             generated += usize::from(decode(d3(raw)).is_some());
@@ -208,6 +232,12 @@ mod tests {
         for raw in 0u8..16 {
             generated += usize::from(decode(d4(raw)).is_some());
         }
-        assert_eq!(generated, 6);
+        for raw in 0u8..32 {
+            generated += usize::from(decode(d5(raw)).is_some());
+        }
+        assert_eq!(generated, 14);
+
+        assert_eq!(decode(d6(0b100000)), None);
+        assert_eq!(decode(d8(0b10000000)), None);
     }
 }
