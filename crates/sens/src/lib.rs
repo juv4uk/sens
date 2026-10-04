@@ -9,6 +9,7 @@
 
 
 mod bignum;
+mod binary_number;
 mod bits;
 mod canonical_reader;
 mod domain_words;
@@ -120,6 +121,7 @@ mod text7_projection;
 mod text7_projection_generated;
 mod value;
 
+pub use binary_number::{BinaryNumber, BinaryNumberError};
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::parse_canonical_binary;
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
