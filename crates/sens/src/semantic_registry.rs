@@ -23,6 +23,11 @@ mod domain_surface_generated {
     include!("domain_surface_registry_generated.rs");
 }
 
+mod d5_definition_bindings_generated {
+    include!("d5_definition_bindings_generated.rs");
+}
+
+use d5_definition_bindings_generated::D5_DEFINITION_BINDINGS;
 use domain_surface_generated::DOMAIN_SURFACE_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
@@ -83,6 +88,17 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
 /// consumer is `bind_language_definition`: a definition discovered through
 /// the compatibility surface registry is bound once into an already-ratified
 /// exact D5 slot. #3062 removes this bootstrap detour.
+/// Binding-only exact D5 lookup for existing Lisp definitions.
+///
+/// The table is generated from Lisp-owned projection data and may only supply
+/// a mechanism to an identity already ratified by #3305/#3331.
+pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomainIdentity> {
+    D5_DEFINITION_BINDINGS
+        .iter()
+        .find(|row| row.name == name)
+        .map(|row| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(row.bits).unwrap())))
+}
+
 pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
     byte: u8,
 ) -> Option<CoreDomainIdentity> {

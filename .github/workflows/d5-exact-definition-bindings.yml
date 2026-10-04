@@ -1,0 +1,27 @@
+name: D5 exact definition bindings
+
+on:
+  pull_request:
+    paths:
+      - "lib/surface/d5-definition-bindings.lisp"
+      - "scripts/check-d5-definition-bindings.py"
+      - "crates/sens/src/d5_definition_bindings_generated.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/tests/d5_exact_definition_bindings.rs"
+      - ".github/workflows/d5-exact-definition-bindings.yml"
+  workflow_dispatch:
+
+jobs:
+  exact-bindings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: python3 scripts/check-d5-definition-bindings.py
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test -p sens --test d5_exact_definition_bindings -- --nocapture
+      - run: cargo test -p sens --test d5_reverse_onto_law
