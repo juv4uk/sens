@@ -28,6 +28,13 @@
   (00001000 (source)
     (00000110 (my-eval-program (01001011 source) (00000001 ())))))
 
+; Independent exact-D1 YES witness. D5:11101 MEMBER is already ratified and
+; merged with a canonical D1 result boundary (#3060), so this does not define
+; D3 predicate semantics by self-comparison.
+(00001001 registry-d1-yes
+  (00001000 ()
+    (11101 (00000001 x) (00000001 (x)))))
+
 (00001001 registry-witness-failure
   (00001000 (case actual expected)
     (00100111
@@ -90,21 +97,29 @@
             (00000010 (my-semantic-id-for-surface (00000001 unmapped-surface)))
             (00000001 ()))
 
-      ; Canon ATOM peer surfaces: native evaluator.
-      (00100111 (00000001 atom-native-en)
+      ; Canon ATOM native routes.
+      ;
+      ; The explicit historical byte remains a compatibility witness and still
+      ; exposes its historical one-element answer carrier. Admitted human
+      ; surfaces lower to exact D3:010; those results must be exact D1. Their
+      ; expected YES is generated independently by ratified D5 MEMBER (#3060).
+      (00100111 (00000001 atom-native-legacy-byte)
             (registry-native-value "(00000010 (quote x))")
             (00000001 (1)))
       (00100111 (00000001 atom-native-uk)
             (registry-native-value "(атом? (як-є x))")
-            (00000001 (1)))
+            (registry-d1-yes))
       (00100111 (00000001 atom-native-sa)
             (registry-native-value "(aṇu (svarūpa x))")
-            (00000001 (1)))
+            (registry-d1-yes))
       (00100111 (00000001 atom-native-symbolic)
             (registry-native-value "(.? (quote x))")
-            (00000001 (1)))
+            (registry-d1-yes))
 
-      ; The same peer surfaces through the metacircular evaluator.
+      ; The metacircular evaluator still exercises the explicit compatibility
+      ; mechanism in my-apply-primitive. Its D1 cutover remains #2184 follow-up,
+      ; so these rows deliberately retain the historical carrier until that
+      ; evaluator can consume exact D1 false without generic truth coercion.
       (00100111 (00000001 atom-meta-en)
             (registry-meta-value "(00000010 (quote x))")
             (00000001 (1)))
