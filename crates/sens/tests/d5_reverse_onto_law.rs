@@ -17,6 +17,11 @@ fn assert_same(a: &str, b: &str) {
     assert_eq!(left, right, "{a} != {b}");
 }
 
+fn assert_err(source: &str) {
+    let result = run(source);
+    assert!(result.is_err(), "{source} unexpectedly succeeded as {result:?}");
+}
+
 #[test]
 fn reverse_is_closed_reverse_onto() {
     for value in ["()", "(a)", "(a b c)", "((a b) c (d e))"] {
@@ -57,6 +62,36 @@ fn append_is_generated_by_reverse_and_reverse_onto() {
             &format!("(append (quote {x}) (quote {y}))"),
             &format!("(reverse-onto (reverse (quote {x})) (quote {y}))"),
         );
+    }
+}
+
+#[test]
+fn exact_d4_append_is_the_append_oracle() {
+    for (x, y) in [
+        ("()", "()"),
+        ("(a)", "(b c)"),
+        ("(a b)", "(c . d)"),
+        ("((a b) c)", "(d)"),
+    ] {
+        assert_same(
+            &format!("(append (quote {x}) (quote {y}))"),
+            &format!("(1111 (quote {x}) (quote {y}))"),
+        );
+    }
+}
+
+#[test]
+fn improper_left_is_not_silently_normalized() {
+    // The generalized transform must preserve APPEND/REVERSE's proper-left
+    // boundary. If REVERSE-ONTO quietly drops the dotted tail, the proposed
+    // D5 list law is false and this research should stay RED.
+    for source in [
+        "(reverse (quote (a . b)))",
+        "(reverse-onto (quote (a . b)) (quote (c)))",
+        "(append (quote (a . b)) (quote (c)))",
+        "(1111 (quote (a . b)) (quote (c)))",
+    ] {
+        assert_err(source);
     }
 }
 
