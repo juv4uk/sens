@@ -74,8 +74,8 @@ def render() -> dict[str, Any]:
     assert ret["coordinate"] == "01101"
     assert go["semantic_class"] == "derived"
     assert ret["semantic_class"] == "root"
-    assert "intra-PROG transfer" in go["semantic_note"]
-    assert "non-local exit" in ret["semantic_note"]
+    assert "intra-prog transfer" in go["semantic_note"].lower()
+    assert "non-local exit" in ret["semantic_note"].lower()
 
     # The donor's SemanticShape table makes all three differences explicit.
     axes = ["payload-kind", "control-extent", "stack-effect"]
