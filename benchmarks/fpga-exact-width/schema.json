@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sens-fpga-width-evidence/v1",
+  "title": "SENS FPGA exact-width evidence row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "case_id",
+    "candidate",
+    "family",
+    "semantic_subject",
+    "semantic_width",
+    "physical_word_width",
+    "logic",
+    "registers",
+    "bsram_blocks",
+    "dsp_blocks",
+    "fmax_hz",
+    "timing_status",
+    "tool",
+    "tool_version",
+    "device",
+    "source_kind",
+    "bench_source_sha256",
+    "source_rpt_sha256",
+    "notes"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sens-fpga-width-evidence/v1"
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "family": {
+      "type": "string",
+      "enum": [
+        "decoder",
+        "alu-add-xor",
+        "ram1024",
+        "ram-packed",
+        "limb-add",
+        "limb-mul",
+        "multi-limb"
+      ]
+    },
+    "semantic_subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semantic_width": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "physical_word_width": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "logic": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "registers": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cls": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "bsram_blocks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "dsp_blocks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "fmax_hz": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "timing_status": {
+      "type": "string",
+      "enum": [
+        "measured",
+        "no-register-to-register-path",
+        "not-run"
+      ]
+    },
+    "latency_cycles": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "initiation_interval": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "logical_bits": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "reserved_bits": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "packing_efficiency": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "tool": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "device": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_kind": {
+      "type": "string",
+      "enum": [
+        "local-pnr",
+        "ci-pnr",
+        "imported-vendor-report"
+      ]
+    },
+    "bench_source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_rpt_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "semantic_width_mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "fixed",
+        "mixed",
+        "unbounded",
+        null
+      ]
+    },
+    "packing_strategy": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "naive-byte",
+        "word-aligned-32",
+        "tight-32",
+        "tagged-mixed",
+        null
+      ]
+    },
+    "depth_values": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "physical_bits": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "operation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "add",
+        "sub",
+        "cmp",
+        "mul",
+        "add-multi",
+        "mul-multi",
+        null
+      ]
+    },
+    "limb_width": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "limb_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "cycles": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "timing_slack_ns": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "clock_constraint_hz": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "temporary_width": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "state_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "memory_reads": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "memory_writes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "correctness": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "pass",
+        "fail",
+        null
+      ]
+    },
+    "input_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "board": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  }
+}
