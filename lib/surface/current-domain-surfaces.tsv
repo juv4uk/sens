@@ -1,0 +1,8 @@
+domain	bits	en	uk	sa	status
+D3	001	quote	як-є	svarūpa	stable
+D3	010	atom	атом?	aṇu	stable
+D3	011	cond	за-умовою	anukrama	stable
+D3	100	cons	сполучити	saṃyuj	stable
+D3	101	car	перше	ādi	stable
+D3	110	cdr	решта	śeṣa	stable
+D3	111	eq	тотожне?	abheda	stable
