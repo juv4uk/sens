@@ -37,7 +37,7 @@ MINIX-3/HECI паралельно.
 (car (quote (radio antenna)))                    => radio
 (cdr (quote (radio antenna)))                    => (antenna)
 (cons (quote radio) (quote (antenna)))           => (radio antenna)
-(cond (() (quote wrong)) (t (quote right)))      => right
+(за-умовою (() (як-є wrong)) ((тотожне? (як-є x) (як-є x)) (як-є right))) => right  [current SENS; C witness pending]
 ```
 
 Жодного рядка C-коду тут ще немає.
