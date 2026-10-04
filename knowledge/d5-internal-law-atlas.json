@@ -316,7 +316,7 @@
         "canonical_result_domain": "Core.D1",
         "canonical_yes": "1",
         "canonical_no": "0",
-        "runtime_transition_debt": "NONE on canonical exact-D5 path via #3060; legacy surface/Sens8 compatibility may still expose t/() until #3062"
+        "runtime_transition_debt": "NONE on canonical exact-D5 path via #3060; legacy surface/flat exact-8 compatibility may still expose t/() until #3062"
       },
       "relation_class": "MULTI-DELTA-FAMILY",
       "law_kind": "search-family",
