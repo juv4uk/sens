@@ -1,0 +1,32 @@
+name: D1-D2-bija3 recursive cube
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/bija123-recursive-cube/**"
+      - ".github/workflows/bija123-recursive-cube.yml"
+  workflow_dispatch:
+
+jobs:
+  exhaustive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Exhaustive D1-D2-D3 cube search
+        run: |
+          python3 benchmarks/bija123-recursive-cube/run.py --json-out /tmp/bija123.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/bija123.json'))
+          assert d['counts'] == {
+              'exact_d2_x_d1': 8,
+              'recursive_complement_111': 2,
+              'spine_zero_orientation': 1,
+              'total': 5040,
+              'uniform_semantic_dual': 4,
+          }
+          assert d['user_candidate']['evaluation']['d2_fibre_hits'] == 4
+          assert d['pure_d3_factorized_candidate']['evaluation']['d2_fibre_hits'] == 0
+          assert d['user_candidate']['evaluation']['recursive_complement_111'] is True
+          print('D1-D2-bija3 recursive cube: PASS')
+          PY
