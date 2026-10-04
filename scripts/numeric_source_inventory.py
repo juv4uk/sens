@@ -22,13 +22,6 @@ from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Exact binary words in these owner-ratified contract files are semantic
-# domain coordinates, not numeric literals awaiting Number migration.
-# Keep this list narrow and authority-backed; it is classification metadata,
-# not a second semantic registry.
-DOMAIN_COORDINATE_FILES = {
-    "contracts/bija3-l1-l5-ratification.lisp",  # #3202 / Contract 11.1
-}
 SENS_FUNCTION = re.compile(r"^[01]{8}$")
 SIGNED_INTEGER = re.compile(r"^[+-]?[0-9]+$")
 RATIONAL = re.compile(r"^[+-]?[0-9]+/[+-]?[0-9]+$")
@@ -156,16 +149,6 @@ def classify(token: str) -> str | None:
     return None
 
 
-def classify_for_path(path: Path, token: str) -> str | None:
-    category = classify(token)
-    if category != "binary-shaped-multibit-number":
-        return category
-    rel = path.relative_to(REPO_ROOT).as_posix()
-    if rel in DOMAIN_COORDINATE_FILES:
-        return "domain-coordinate"
-    return category
-
-
 def inventory(files: Iterable[Path]) -> dict:
     category_counts: Counter[str] = Counter()
     category_files: dict[str, set[str]] = defaultdict(set)
@@ -177,7 +160,7 @@ def inventory(files: Iterable[Path]) -> dict:
         path_bucket = bucket(path)
         text = path.read_text(encoding="utf-8", errors="replace")
         for token in source_tokens(text):
-            category = classify_for_path(path, token)
+            category = classify(token)
             if category is None:
                 continue
             category_counts[category] += 1
@@ -214,7 +197,7 @@ def list_category(files: Iterable[Path], category: str, bucket_name: str | None)
         rel = path.relative_to(REPO_ROOT).as_posix()
         text = path.read_text(encoding="utf-8", errors="replace")
         for token, line in source_token_locations(text):
-            if classify_for_path(path, token) == category:
+            if classify(token) == category:
                 print(f"{rel}:{line}:{token}")
                 count += 1
     print(f"TOTAL {category} bucket={bucket_name or 'all'} count={count}")
@@ -311,7 +294,7 @@ def check_active_routes(files: Iterable[Path], routes_path: Path) -> int:
         rel = path.relative_to(REPO_ROOT).as_posix()
         text = path.read_text(encoding="utf-8", errors="replace")
         for token, _line in source_token_locations(text):
-            if classify_for_path(path, token) == "binary-shaped-multibit-number":
+            if classify(token) == "binary-shaped-multibit-number":
                 live[(rel, token)] += 1
 
     declared: Counter[tuple[str, str]] = Counter()
