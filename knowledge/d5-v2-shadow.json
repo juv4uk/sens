@@ -1,0 +1,636 @@
+{
+  "schema": "d5-v2-shadow/v1",
+  "issue": "#3284",
+  "status": "research-shadow-not-authority",
+  "base_authority": {
+    "d4": "#3272 / Contract 11.2",
+    "d5_occupancy": "OD-005 / #2414",
+    "d5_internal_law": "OD-D5-LAW-001 / #3055"
+  },
+  "rule": "restore only law-forced selector geometry first; preserve all D5 pair blocks and local-law classes; legacy coordinates have zero semantic score",
+  "block_permutation": {
+    "1000": "1010",
+    "1001": "1011",
+    "1010": "1000",
+    "1011": "1001",
+    "1100": "0110",
+    "1101": "0111",
+    "1110": "1110",
+    "1111": "1111",
+    "0000": "0000",
+    "0001": "0001",
+    "0010": "0010",
+    "0011": "0011",
+    "0100": "0100",
+    "0101": "0101",
+    "0110": "1100",
+    "0111": "1101"
+  },
+  "metrics": {
+    "occupancy": 32,
+    "moved": 16,
+    "unchanged": 16,
+    "pair_blocks": 16,
+    "selector_children": 8
+  },
+  "selector_target": {
+    "1000": [
+      "CAAAR",
+      "CAADR"
+    ],
+    "1001": [
+      "CADAR",
+      "CADDR"
+    ],
+    "0110": [
+      "CDAAR",
+      "CDADR"
+    ],
+    "0111": [
+      "CDDAR",
+      "CDDDR"
+    ]
+  },
+  "lower_domain_duplicate_audit": [
+    {
+      "name": "APPEND",
+      "d4_coordinate": "1111",
+      "d5_shadow_coordinate": "10100",
+      "status": "REQUIRES-SEMANTIC-DEDUP-DECISION"
+    }
+  ],
+  "coordinates": [
+    {
+      "old_coordinate": "00000",
+      "coordinate": "00000",
+      "name": "EVALQUOTE",
+      "category": "evaluation",
+      "behavior": "top-level function application over argument list",
+      "provenance": "McCarthy 1960 / Lisp 1.5",
+      "old_prefix": "0000",
+      "new_prefix": "0000",
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3044"
+      ]
+    },
+    {
+      "old_coordinate": "00001",
+      "coordinate": "00001",
+      "name": "FUNCTION",
+      "category": "abstraction",
+      "behavior": "functional closure wrapper / FUNARG creation",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "0000",
+      "new_prefix": "0000",
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3044"
+      ]
+    },
+    {
+      "old_coordinate": "00010",
+      "coordinate": "00010",
+      "name": "FEXPR",
+      "category": "evaluation",
+      "behavior": "special form execution over unevaluated operands",
+      "provenance": "Lisp 1.5 (§4.1)",
+      "old_prefix": "0001",
+      "new_prefix": "0001",
+      "relation_class": "MULTI-DELTA-FAMILY",
+      "law_kind": "protocol-product",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#2522",
+        "#2528",
+        "#3025",
+        "#3027"
+      ]
+    },
+    {
+      "old_coordinate": "00011",
+      "coordinate": "00011",
+      "name": "MACRO",
+      "category": "evaluation",
+      "behavior": "syntactic form expansion and re-evaluation",
+      "provenance": "Hart 1963 / Lisp 1.5",
+      "old_prefix": "0001",
+      "new_prefix": "0001",
+      "relation_class": "MULTI-DELTA-FAMILY",
+      "law_kind": "protocol-product",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#2522",
+        "#2528",
+        "#3025",
+        "#3027"
+      ]
+    },
+    {
+      "old_coordinate": "00100",
+      "coordinate": "00100",
+      "name": "LABEL",
+      "category": "binding",
+      "behavior": "anonymous recursive self-referential lambda",
+      "provenance": "McCarthy 1960",
+      "old_prefix": "0010",
+      "new_prefix": "0010",
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3044"
+      ]
+    },
+    {
+      "old_coordinate": "00101",
+      "coordinate": "00101",
+      "name": "PROG",
+      "category": "control",
+      "behavior": "imperative block sequence with local bindings and tags",
+      "provenance": "Lisp 1.5 (§4.3)",
+      "old_prefix": "0010",
+      "new_prefix": "0010",
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3044"
+      ]
+    },
+    {
+      "old_coordinate": "00110",
+      "coordinate": "00110",
+      "name": "SET",
+      "category": "state",
+      "behavior": "dynamic variable assignment to computed symbol",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "0011",
+      "new_prefix": "0011",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "target-acquisition-axis",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#3005",
+        "#3016"
+      ]
+    },
+    {
+      "old_coordinate": "00111",
+      "coordinate": "00111",
+      "name": "SETQ",
+      "category": "state",
+      "behavior": "static variable assignment to symbol",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "0011",
+      "new_prefix": "0011",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "target-acquisition-axis",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#3005",
+        "#3016"
+      ]
+    },
+    {
+      "old_coordinate": "01000",
+      "coordinate": "01000",
+      "name": "ZEROP",
+      "category": "predicate",
+      "behavior": "test if argument is numeric zero",
+      "provenance": "Lisp 1.5 (§4.2)",
+      "old_prefix": "0100",
+      "new_prefix": "0100",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "entailment",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3032",
+        "#3035"
+      ]
+    },
+    {
+      "old_coordinate": "01001",
+      "coordinate": "01001",
+      "name": "NUMBERP",
+      "category": "predicate",
+      "behavior": "test if argument is a numeric atom",
+      "provenance": "Lisp 1.5 (§4.2)",
+      "old_prefix": "0100",
+      "new_prefix": "0100",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "entailment",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3032",
+        "#3035"
+      ]
+    },
+    {
+      "old_coordinate": "01010",
+      "coordinate": "01010",
+      "name": "PLUS",
+      "category": "arithmetic",
+      "behavior": "exact rational addition (+)",
+      "provenance": "McCarthy 1960 / Lisp 1.5",
+      "old_prefix": "0101",
+      "new_prefix": "0101",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "additive-inverse-orientation",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#3010"
+      ]
+    },
+    {
+      "old_coordinate": "01011",
+      "coordinate": "01011",
+      "name": "DIFFERENCE",
+      "category": "arithmetic",
+      "behavior": "exact rational subtraction (-)",
+      "provenance": "McCarthy 1960 / Lisp 1.5",
+      "old_prefix": "0101",
+      "new_prefix": "0101",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "additive-inverse-orientation",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#3010"
+      ]
+    },
+    {
+      "old_coordinate": "11000",
+      "coordinate": "01100",
+      "name": "CDAAR",
+      "category": "selector",
+      "behavior": "cdr(car(car(x)))",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "1100",
+      "new_prefix": "0110",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "old_coordinate": "11001",
+      "coordinate": "01101",
+      "name": "CDADR",
+      "category": "selector",
+      "behavior": "cdr(car(cdr(x)))",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "1100",
+      "new_prefix": "0110",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "old_coordinate": "11010",
+      "coordinate": "01110",
+      "name": "CDDAR",
+      "category": "selector",
+      "behavior": "cdr(cdr(car(x)))",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "1101",
+      "new_prefix": "0111",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "old_coordinate": "11011",
+      "coordinate": "01111",
+      "name": "CDDDR",
+      "category": "selector",
+      "behavior": "cdr(cdr(cdr(x)))",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "1101",
+      "new_prefix": "0111",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "old_coordinate": "10100",
+      "coordinate": "10000",
+      "name": "CAAAR",
+      "category": "selector",
+      "behavior": "car(car(car(x)))",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "1010",
+      "new_prefix": "1000",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "old_coordinate": "10101",
+      "coordinate": "10001",
+      "name": "CAADR",
+      "category": "selector",
+      "behavior": "car(car(cdr(x)))",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "1010",
+      "new_prefix": "1000",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "old_coordinate": "10110",
+      "coordinate": "10010",
+      "name": "CADAR",
+      "category": "selector",
+      "behavior": "car(cdr(car(x)))",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "1011",
+      "new_prefix": "1001",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "old_coordinate": "10111",
+      "coordinate": "10011",
+      "name": "CADDR",
+      "category": "selector",
+      "behavior": "car(cdr(cdr(x)))",
+      "provenance": "Lisp 1.5",
+      "old_prefix": "1011",
+      "new_prefix": "1001",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "old_coordinate": "10000",
+      "coordinate": "10100",
+      "name": "APPEND",
+      "category": "list-structure",
+      "behavior": "concatenation of lists",
+      "provenance": "McCarthy 1960",
+      "old_prefix": "1000",
+      "new_prefix": "1010",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "list-involution-anti-homomorphism",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3052",
+        "#3059"
+      ]
+    },
+    {
+      "old_coordinate": "10001",
+      "coordinate": "10101",
+      "name": "REVERSE",
+      "category": "list-structure",
+      "behavior": "list element order reversal",
+      "provenance": "McCarthy 1960 / Lisp 1.5",
+      "old_prefix": "1000",
+      "new_prefix": "1010",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "list-involution-anti-homomorphism",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3052",
+        "#3059"
+      ]
+    },
+    {
+      "old_coordinate": "10010",
+      "coordinate": "10110",
+      "name": "TIMES",
+      "category": "arithmetic",
+      "behavior": "exact rational multiplication (*)",
+      "provenance": "McCarthy 1960 / Lisp 1.5",
+      "old_prefix": "1001",
+      "new_prefix": "1011",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "multiplicative-inverse-orientation",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#3010"
+      ]
+    },
+    {
+      "old_coordinate": "10011",
+      "coordinate": "10111",
+      "name": "QUOTIENT",
+      "category": "arithmetic",
+      "behavior": "exact rational division (/)",
+      "provenance": "McCarthy 1960 / Lisp 1.5",
+      "old_prefix": "1001",
+      "new_prefix": "1011",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "multiplicative-inverse-orientation",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#3010"
+      ]
+    },
+    {
+      "old_coordinate": "01100",
+      "coordinate": "11000",
+      "name": "GO",
+      "category": "control",
+      "behavior": "unconditional jump to label inside PROG",
+      "provenance": "Lisp 1.5 (§4.3)",
+      "old_prefix": "0110",
+      "new_prefix": "1100",
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3040",
+        "#3042"
+      ]
+    },
+    {
+      "old_coordinate": "01101",
+      "coordinate": "11001",
+      "name": "RETURN",
+      "category": "control",
+      "behavior": "non-local return from PROG with value",
+      "provenance": "Lisp 1.5 (§4.3)",
+      "old_prefix": "0110",
+      "new_prefix": "1100",
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3040",
+        "#3042"
+      ]
+    },
+    {
+      "old_coordinate": "01110",
+      "coordinate": "11010",
+      "name": "LESSP",
+      "category": "predicate",
+      "behavior": "numeric strict less-than ordering (<)",
+      "provenance": "Lisp 1.5 (§4.2)",
+      "old_prefix": "0111",
+      "new_prefix": "1101",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "operand-swap-duality",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#3004",
+        "#3008"
+      ]
+    },
+    {
+      "old_coordinate": "01111",
+      "coordinate": "11011",
+      "name": "GREATERP",
+      "category": "predicate",
+      "behavior": "numeric strict greater-than ordering (>)",
+      "provenance": "Lisp 1.5 (§4.2)",
+      "old_prefix": "0111",
+      "new_prefix": "1101",
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "operand-swap-duality",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "evidence": [
+        "#3004",
+        "#3008"
+      ]
+    },
+    {
+      "old_coordinate": "11100",
+      "coordinate": "11100",
+      "name": "ASSOC",
+      "category": "lookup",
+      "behavior": "association list key search",
+      "provenance": "McCarthy 1960",
+      "old_prefix": "1110",
+      "new_prefix": "1110",
+      "relation_class": "MULTI-DELTA-FAMILY",
+      "law_kind": "search-family",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3053",
+        "#3059",
+        "#3060"
+      ]
+    },
+    {
+      "old_coordinate": "11101",
+      "coordinate": "11101",
+      "name": "MEMBER",
+      "category": "lookup",
+      "behavior": "list membership testing",
+      "provenance": "McCarthy 1960 / Lisp 1.5",
+      "old_prefix": "1110",
+      "new_prefix": "1110",
+      "relation_class": "MULTI-DELTA-FAMILY",
+      "law_kind": "search-family",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3053",
+        "#3059",
+        "#3060"
+      ]
+    },
+    {
+      "old_coordinate": "11110",
+      "coordinate": "11110",
+      "name": "PAIRLIS",
+      "category": "binding",
+      "behavior": "parallel key-value association list construction",
+      "provenance": "McCarthy 1960",
+      "old_prefix": "1111",
+      "new_prefix": "1111",
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3054"
+      ]
+    },
+    {
+      "old_coordinate": "11111",
+      "coordinate": "11111",
+      "name": "SUBST",
+      "category": "tree-structure",
+      "behavior": "expression tree subtree substitution",
+      "provenance": "McCarthy 1960",
+      "old_prefix": "1111",
+      "new_prefix": "1111",
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "evidence": [
+        "#3054"
+      ]
+    }
+  ]
+}
