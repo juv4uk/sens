@@ -405,7 +405,13 @@ pub(crate) fn invoke_domain_identity(
         identity,
         CoreDomainIdentity::D3(word) if word.word().packed_bits() == 0b111
     ) {
-        exact_args(crate::sens!(00000011), args, 2, span)?;
+        if args.len() != 2 {
+            return Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!("D3:111 · 2 != {}", args.len()),
+                span,
+            ));
+        }
         if !args[0].is_atom() || !args[1].is_atom() {
             return Ok(Value::Nil);
         }
