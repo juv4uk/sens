@@ -1,0 +1,59 @@
+name: D4 to D5 selector boundary guard
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d4-cleanroom.json"
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d5-internal-law-atlas.json"
+      - "scripts/check-d4-d5-selector-boundary.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d4-d5-selector-boundary.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "knowledge/d4-cleanroom.json"
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d5-internal-law-atlas.json"
+      - "scripts/check-d4-d5-selector-boundary.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d4-d5-selector-boundary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  boundary:
+    name: D4 selector law stops before D5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check D4 to D5 selector boundary
+        run: |
+          python3 scripts/check-d4-d5-selector-boundary.py \
+            --output d4-d5-selector-boundary.json
+          cat d4-d5-selector-boundary.json
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D4 -> D5 selector boundary"
+            echo
+            echo "~~~text"
+            python3 scripts/check-d4-d5-selector-boundary.py
+            echo "~~~"
+            echo
+            echo "- No D5 remap or occupancy mutation."
+            echo "- Higher-selector encoding remains unresolved under #3209."
+            echo "- OD-D5-LAW-001 remains semantic authority for Core.D5."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload collision report
+        uses: actions/upload-artifact@v4
+        with:
+          name: d4-d5-selector-boundary
+          path: d4-d5-selector-boundary.json
