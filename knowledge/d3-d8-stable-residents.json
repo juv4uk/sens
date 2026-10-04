@@ -15,7 +15,9 @@
   "remap_policy": {
     "current_is_projection": true,
     "shadow_moves_coordinate_not_resident": true,
-    "provenance_missing_rows_are_pinned": true
+    "provenance_missing_rows_are_pinned": true,
+    "d3_fixed_authority": "#3202",
+    "active_shadow_scope": "D4-D8"
   },
   "source_refs": {
     "D3_D4": "knowledge/exact-width-admitted-corpus.json (semantic donor only; stale occupancy flags ignored under #3029)",
@@ -69,17 +71,20 @@
       "semantic_class": "foundation",
       "typed_behavior": null,
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3202"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "#2151/#2170"
       ],
       "map_independent_witness_refs": [
-        "#2151/#2170"
+        "#2151/#2170",
+        "#3202"
       ],
       "current_domain": "D3",
       "current_bits": "000",
-      "placement_policy": "SHADOW-ELIGIBLE",
+      "placement_policy": "RATIFIED-FIXED-D3:#3202",
       "source_status": "admitted",
       "human_labels_optional": [
         "()"
@@ -92,17 +97,20 @@
       "semantic_class": "foundation",
       "typed_behavior": null,
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3202"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "#2151/#2170"
       ],
       "map_independent_witness_refs": [
-        "#2151/#2170"
+        "#2151/#2170",
+        "#3202"
       ],
       "current_domain": "D3",
       "current_bits": "001",
-      "placement_policy": "SHADOW-ELIGIBLE",
+      "placement_policy": "RATIFIED-FIXED-D3:#3202",
       "source_status": "admitted",
       "human_labels_optional": [
         "QUOTE"
@@ -115,17 +123,20 @@
       "semantic_class": "foundation",
       "typed_behavior": null,
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3202"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "#2151/#2170"
       ],
       "map_independent_witness_refs": [
-        "#2151/#2170"
+        "#2151/#2170",
+        "#3202"
       ],
       "current_domain": "D3",
       "current_bits": "010",
-      "placement_policy": "SHADOW-ELIGIBLE",
+      "placement_policy": "RATIFIED-FIXED-D3:#3202",
       "source_status": "admitted",
       "human_labels_optional": [
         "ATOM"
@@ -138,17 +149,20 @@
       "semantic_class": "foundation",
       "typed_behavior": null,
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3202"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "#2151/#2170"
       ],
       "map_independent_witness_refs": [
-        "#2151/#2170"
+        "#2151/#2170",
+        "#3202"
       ],
       "current_domain": "D3",
-      "current_bits": "011",
-      "placement_policy": "SHADOW-ELIGIBLE",
+      "current_bits": "110",
+      "placement_policy": "RATIFIED-FIXED-D3:#3202",
       "source_status": "admitted",
       "human_labels_optional": [
         "COND"
@@ -161,17 +175,20 @@
       "semantic_class": "foundation",
       "typed_behavior": null,
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3202"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "#2151/#2170"
       ],
       "map_independent_witness_refs": [
-        "#2151/#2170"
+        "#2151/#2170",
+        "#3202"
       ],
       "current_domain": "D3",
-      "current_bits": "100",
-      "placement_policy": "SHADOW-ELIGIBLE",
+      "current_bits": "111",
+      "placement_policy": "RATIFIED-FIXED-D3:#3202",
       "source_status": "admitted",
       "human_labels_optional": [
         "CONS"
@@ -184,17 +201,20 @@
       "semantic_class": "selector",
       "typed_behavior": null,
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3202"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "#2151/#2170"
       ],
       "map_independent_witness_refs": [
-        "#2151/#2170"
+        "#2151/#2170",
+        "#3202"
       ],
       "current_domain": "D3",
-      "current_bits": "101",
-      "placement_policy": "SHADOW-ELIGIBLE",
+      "current_bits": "100",
+      "placement_policy": "RATIFIED-FIXED-D3:#3202",
       "source_status": "admitted",
       "human_labels_optional": [
         "CAR"
@@ -207,17 +227,20 @@
       "semantic_class": "selector",
       "typed_behavior": null,
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3202"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "#2151/#2170"
       ],
       "map_independent_witness_refs": [
-        "#2151/#2170"
+        "#2151/#2170",
+        "#3202"
       ],
       "current_domain": "D3",
-      "current_bits": "110",
-      "placement_policy": "SHADOW-ELIGIBLE",
+      "current_bits": "011",
+      "placement_policy": "RATIFIED-FIXED-D3:#3202",
       "source_status": "admitted",
       "human_labels_optional": [
         "CDR"
@@ -230,17 +253,20 @@
       "semantic_class": "foundation",
       "typed_behavior": null,
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3202"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "#2151/#2170"
       ],
       "map_independent_witness_refs": [
-        "#2151/#2170"
+        "#2151/#2170",
+        "#3202"
       ],
       "current_domain": "D3",
-      "current_bits": "111",
-      "placement_policy": "SHADOW-ELIGIBLE",
+      "current_bits": "101",
+      "placement_policy": "RATIFIED-FIXED-D3:#3202",
       "source_status": "admitted",
       "human_labels_optional": [
         "EQ"
@@ -12288,6 +12314,6 @@
       "human_labels_optional": []
     }
   ],
-  "corpus_hash": "sha256:ee5d2c408fd143f0e2f801864ce1d1ab63c3a2cf9893ea422f9264efff775d7a",
+  "corpus_hash": "sha256:ed89698ff76de3daaeeb43c12e9b3b57070af1dc402a113a106ea6cabb48c63f",
   "hash_contract": "SHA-256 over UTF-8 compact JSON serialization of rows in committed order"
 }
