@@ -1,0 +1,34 @@
+name: Text7 packed codec benchmark
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/packed_bits.rs"
+      - "crates/sens/examples/text7_pack_bench.rs"
+      - "docs/research/data/1700-uk-literals-vs-upc7.tsv"
+      - ".github/workflows/text7-pack-bench.yml"
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build benchmark
+        run: cargo build --release -p sens --example text7_pack_bench
+      - name: Run Text7 speed benchmark
+        run: target/release/examples/text7_pack_bench | tee /tmp/text7-pack-bench.txt
+      - name: Publish result
+        if: always()
+        run: |
+          echo "## Text7 packed codec benchmark" >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/text7-pack-bench.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: text7-pack-bench
+          path: /tmp/text7-pack-bench.txt
+          retention-days: 14
