@@ -92,18 +92,16 @@ fn same_payload_across_all_d1_d8_remains_distinct_in_ast_and_value() {
 }
 
 #[test]
-fn callable_projection_excludes_d1_d2_d7_and_keeps_d8_distinct_from_legacy_sens8() {
-    for identity in [d1(1), d2(1), d7(1)] {
+fn callable_projection_fails_closed_for_unratified_d5_d6_d8() {
+    for identity in [d1(1), d2(1), d5(1), d6(1), d7(1), d8(1)] {
         assert_eq!(Value::DomainIdentity(identity).as_core_domain_identity(), None);
     }
 
-    let d8 = d8(1);
-    let core_d8 = Value::DomainIdentity(d8)
-        .as_core_domain_identity()
-        .expect("D8 has Core-operation identity carrier");
-    assert!(matches!(core_d8, CoreDomainIdentity::D8(_)));
-    assert_eq!((core_d8.width(), core_d8.packed_bits()), (8, 1));
+    for identity in [d3(1), d4(1)] {
+        assert!(Value::DomainIdentity(identity).as_core_domain_identity().is_some());
+    }
 
+    let d8 = d8(1);
     let domain_value = Value::DomainIdentity(d8);
     assert_eq!(domain_value.as_sens8(), None);
     assert_eq!(domain_value.to_string(), "00000001");

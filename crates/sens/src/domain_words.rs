@@ -103,10 +103,10 @@ impl CoreD4 {
 }
 
 
-/// Exact five-bit carrier for the ratified Core.D5 domain.
+/// Exact five-bit mechanical/research carrier historically named CoreD5.
 ///
-/// This proves domain membership only. Individual D5 coordinate meanings are
-/// owned by the SENS owner map/laws, not by this Rust representation type.
+/// D5 semantic ratification is revoked by #3278. This type preserves exact
+/// width only and does not prove current Core.D5 membership or resident meaning.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD5(Bit5);
@@ -123,10 +123,10 @@ impl CoreD5 {
     }
 }
 
-/// Exact six-bit carrier for the ratified Core.D6 domain.
+/// Exact six-bit mechanical/research carrier historically named CoreD6.
 ///
-/// This proves domain membership only. It deliberately has no implicit
-/// relationship to Core.D5 or Sens8 identity.
+/// D6 semantic ratification is revoked by #3278. This type preserves exact
+/// width only and deliberately has no implicit relationship to D5 or Sens8.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD6(Bit6);
@@ -161,10 +161,10 @@ impl SoundD7 {
     }
 }
 
-/// Exact eight-bit carrier for the ratified Core.D8 domain.
+/// Exact eight-bit mechanical/research carrier historically named CoreD8.
 ///
-/// Core.D8 is a domain-qualified identity and is never interchangeable with
-/// historical flat Sens8/Sid8 compatibility bytes.
+/// D8 semantic ratification is revoked by #3278. This carrier remains distinct
+/// from historical flat Sens8/Sid8 bytes but does not itself admit Core.D8 semantics.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD8(Bit8);

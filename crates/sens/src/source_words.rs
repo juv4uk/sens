@@ -98,7 +98,7 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact five-bit source word into the typed Core.D5 carrier.
+    /// Lift an exact five-bit source word into the transitional D5 research carrier.
     pub const fn d5(self) -> Option<crate::CoreD5> {
         match self {
             Self::W5(word) => Some(crate::CoreD5::from_word(word)),
@@ -106,7 +106,7 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact six-bit source word into the typed Core.D6 carrier.
+    /// Lift an exact six-bit source word into the transitional D6 research carrier.
     pub const fn d6(self) -> Option<crate::CoreD6> {
         match self {
             Self::W6(word) => Some(crate::CoreD6::from_word(word)),
@@ -123,8 +123,9 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact eight-bit source word into the ratified Core.D8 carrier.
-    /// This never converts through the historical Sens8 compatibility type.
+    /// Lift an exact eight-bit source word into the transitional D8 research carrier.
+    /// This never converts through the historical Sens8 compatibility type and
+    /// does not admit D8 semantics while #3278 is active.
     pub const fn d8(self) -> Option<crate::CoreD8> {
         match self {
             Self::W8(word) => Some(crate::CoreD8::from_word(word)),
@@ -132,9 +133,10 @@ impl BinarySourceWord {
         }
     }
 
-    /// Total semantic-domain lift for the ratified D1→D8 ladder.
+    /// Total exact-width qualified lift for the W1→W8 carrier ladder.
     ///
-    /// This establishes domain identity only; callability remains law-specific.
+    /// D1-D4/D7 have current semantic authority; D5/D6/D8 variants are
+    /// transitional research carriers under #3278. Callability is separate.
     pub const fn domain_identity(self) -> crate::DomainIdentity {
         crate::DomainIdentity::from_source_word(self)
     }
