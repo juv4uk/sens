@@ -7,7 +7,7 @@
 ;   D1:1      = YES
 ;   D1:0      = NO
 ;   D3:000 () = structural EMPTY / NO-WITNESS, never predicate FALSE
-;   COND      = exactly (test expression)
+;   D3:110    = exactly (test expression)
 ;               D1:1 -> select
 ;               D1:0 -> continue as explicit NO
 ;               D3:000 -> continue as EMPTY/no-witness
@@ -35,29 +35,29 @@
    (distinct-from-D1-zero . yes))
 
   ((identity . D3:001)
-   (role . quote)
+   (role . D3:001)
    (domain-owner . D3)
    (result-form . data))
 
   ((identity . D3:111)
-   (role . cons)
+   (role . D3:111)
    (domain-owner . D3)
    (result-form . pair))
 
   ((identity . D3:100)
-   (role . car)
+   (role . D3:100)
    (domain-owner . D3)
    (input-domain . pair)
    (result-form . value))
 
   ((identity . D3:011)
-   (role . cdr)
+   (role . D3:011)
    (domain-owner . D3)
    (input-domain . pair)
    (result-form . value))
 
   ((identity . D3:010)
-   (role . atom)
+   (role . D3:010)
    (domain-owner . D3)
    (result-domain . D1)
    (result-form . predicate-one-bit)
@@ -70,7 +70,7 @@
    (host-bool-authority . forbidden))
 
   ((identity . D3:101)
-   (role . eq)
+   (role . D3:101)
    (domain-owner . D3)
    (input-domain . (admitted-atom admitted-atom))
    (result-domain . (D1 D3:000))
@@ -85,7 +85,7 @@
    (host-bool-authority . forbidden))
 
   ((identity . D3:110)
-   (role . cond)
+   (role . D3:110)
    (domain-owner . D3)
    (clause-shape . (test expression))
    (test-domain . (D1:1 D1:0 D3:000))
