@@ -1,4 +1,4 @@
-name: Current English vs D1-D8 evidence
+name: Current English vs exact-domain evidence
 
 on:
   pull_request:
