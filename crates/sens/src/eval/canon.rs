@@ -432,6 +432,23 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
+
+    // #3070: a narrow bootstrap-only bridge for Lisp-owned D5 definitions.
+    // It binds an already-known OD-005 identity once, but does NOT change how
+    // the historical Sens8 byte is invoked. #3062 replaces this with the
+    // canonical exact-domain registry.
+    if let Some(identity) =
+        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
+    {
+        if domain_primitive(identity).is_some()
+            || super::necessary_forms::identity_for_domain_identity(identity).is_some()
+        {
+            return;
+        }
+        environment.bind_domain_code_slot_once(identity, value.clone());
+        return;
+    }
+
     if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
         return;
     }
