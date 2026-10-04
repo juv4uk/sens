@@ -1,8 +1,8 @@
 {
   "schema": "d6-v2-law-anchors/v2",
-  "status": "research-semantic-anchors",
+  "status": "research-semantic-inventory-complete-coordinate-unratified",
   "issue": "#3333",
-  "note": "semantic law and coordinate placement are tracked separately; candidate coordinates are never authority until owner ratification",
+  "note": "All 64 D6 semantic meanings are law-covered in research; only 16 selectors are proved placements and 16 further candidates are coordinate-anchored. The remaining 32 meanings are deliberately UNPLACED until geometry is proved.",
   "families": [
     {
       "names": [
@@ -147,7 +147,322 @@
         "crates/sens/tests/d6_pure_laws.rs",
         "lib/core.lisp"
       ]
+    },
+    {
+      "names": [
+        "NTH"
+      ],
+      "law": "NTH(0,xs)=CAR(xs); NTH(n+1,xs)=NTH(n,CDR(xs)) on proper lists with non-negative in-range indices",
+      "evidence": [
+        "#3350",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "MAPLIST"
+      ],
+      "law": "MAPLIST(xs,CAR)=xs; mapping LENGTH over successive tails yields descending suffix lengths",
+      "evidence": [
+        "#3350",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "SUBLIS"
+      ],
+      "law": "singleton SUBLIS equals SUBST; multi-key SUBLIS performs simultaneous substitution",
+      "evidence": [
+        "#3350",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "RASSOC"
+      ],
+      "law": "RASSOC is ASSOC under involutive key/value pair transposition",
+      "evidence": [
+        "#3365",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "ACONS"
+      ],
+      "law": "ACONS(k,v,a)=CONS(CONS(k,v),a)",
+      "evidence": [
+        "#3365",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "ADD1",
+        "SUB1"
+      ],
+      "law": "SUB1(ADD1(x))=x and ADD1(SUB1(x))=x; derived from D5 PLUS/DIFFERENCE with unit 1",
+      "evidence": [
+        "#3334",
+        "#3365",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "NEG",
+        "ABS"
+      ],
+      "law": "NEG is involutive; ABS(NEG(x))=ABS(x); ABS is idempotent",
+      "evidence": [
+        "#3334",
+        "#3106",
+        "#3365",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "REMAINDER"
+      ],
+      "law": "REMAINDER(a,b)=a-TIMES(b,QUOTIENT(a,b)) on admitted integer lane",
+      "evidence": [
+        "#3334",
+        "#3365",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "EXPT"
+      ],
+      "law": "EXPT(x,0)=1; for non-negative integer exponents EXPT(x,m+n)=TIMES(EXPT(x,m),EXPT(x,n))",
+      "evidence": [
+        "#3334",
+        "#3365",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "GCD"
+      ],
+      "law": "GCD(a,0)=ABS(a); GCD(a,b)=GCD(b,REMAINDER(a,b)) on admitted integer lane",
+      "evidence": [
+        "#3334",
+        "#3365",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "CURRY"
+      ],
+      "law": "CURRY2(f,a)(b)=f(a,b) via existing lexical closure semantics",
+      "evidence": [
+        "#3365",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "RECIP"
+      ],
+      "law": "RECIP(x)=1/x on nonzero exact-Q carrier; x*RECIP(x)=1 and RECIP(RECIP(x))=x",
+      "evidence": [
+        "#3356",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "REDUCE"
+      ],
+      "law": "REDUCE(f,z,APPEND(xs,ys))=REDUCE(f,REDUCE(f,z,xs),ys) for associative admitted fold witnesses",
+      "evidence": [
+        "#3368",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "COMPOSE"
+      ],
+      "law": "COMPOSE(f,g)(x)=f(g(x)); composition is observationally associative",
+      "evidence": [
+        "#3368",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "FLIP"
+      ],
+      "law": "FLIP(f)(a,b)=f(b,a); FLIP(FLIP(f))=f observationally",
+      "evidence": [
+        "#3368",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "TAKE",
+        "DROP"
+      ],
+      "law": "APPEND(TAKE(n,xs),DROP(n,xs))=xs on proper lists; DROP(0,xs)=xs",
+      "evidence": [
+        "#3368",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "DO",
+        "WHILE"
+      ],
+      "law": "pure tail-iteration laws over explicit state and exact-D1 stopping predicates",
+      "evidence": [
+        "#3370",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "ZIP",
+        "UNZIP"
+      ],
+      "law": "UNZIP(ZIP(xs,ys))=(xs,ys) on the admitted equal-length proper-list lane",
+      "evidence": [
+        "#3370",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "SCAN"
+      ],
+      "law": "SCAN exposes successive prefix folds; final SCAN value equals REDUCE terminal fold on non-empty input",
+      "evidence": [
+        "#3370",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "ANY",
+        "ALL"
+      ],
+      "law": "exact-D1 quantified traversal pair with empty identities ANY=false and ALL=true; predicates remain PredicateBit-valued",
+      "evidence": [
+        "#3370",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "INTEGERP",
+        "RATIONALP"
+      ],
+      "law": "RATIONALP recognizes canonical exact-Q wire; INTEGERP iff exact-Q denominator is 1; INTEGERP(x)=>RATIONALP(x)",
+      "evidence": [
+        "#3355",
+        "#3370",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "candidate_coordinates": [],
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN"
     }
   ],
-  "law_covered_semantics": 36
+  "law_covered_semantics": 64,
+  "semantic_inventory": {
+    "capacity": 64,
+    "selectors_proved_and_placed": 16,
+    "coordinate_anchored_candidates": 16,
+    "unplaced_law_semantics": 32,
+    "coordinate_ratification": "INCOMPLETE"
+  }
 }
