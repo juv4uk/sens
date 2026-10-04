@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{compatibility_registry, semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -49,7 +49,7 @@ pub(crate) fn route_kind_for_sid(sid: Sens8) -> Option<SidRouteKind> {
 /// Optional source/UI routing only. The returned value is the function SID;
 /// no named meaning is materialized.
 pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<Sens8> {
-    let sid = semantic_registry::semantic_id_for_surface(surface)?;
+    let sid = compatibility_registry::id_for_surface(surface)?;
     route_kind_for_sid(sid)?;
     Some(sid)
 }
@@ -59,7 +59,7 @@ pub(crate) fn is_reserved_surface(surface: &str) -> bool {
 }
 
 pub(crate) fn surface_has_sid(surface: &str, sid: Sens8) -> bool {
-    semantic_registry::semantic_id_for_surface(surface) == Some(sid)
+    compatibility_registry::id_for_surface(surface) == Some(sid)
 }
 
 /// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
@@ -68,7 +68,7 @@ pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageE
     if let Some(sid) = routed_sid_for_surface(surface) {
         return Err(immutable_surface_error(surface, sid, span));
     }
-    if let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(surface) {
+    if let Some(sid) = compatibility_registry::id_for_surface(surface) {
         if has_primitive(sid) || necessary_forms::identity_for_semantic_id(sid).is_some() {
             return Err(immutable_surface_error(surface, sid, span));
         }
@@ -367,7 +367,7 @@ pub(crate) fn invoke_semantic_ref(
     // canonical mechanism. We do not dual-bind the language definition into
     // both legacy and domain slots.
     if let Some(identity) =
-        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+        compatibility_registry::domain_successor_from_byte(sid.packed_byte())
     {
         if super::selector_law::supports(identity)
             || environment.domain_code_slot(identity).is_some()
@@ -420,19 +420,31 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         return;
     }
 
-    if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
+    if let Some(identity) = semantic_registry::domain_identity_for_surface(name).and_then(|identity| identity.core_operation()) {
         if domain_primitive(identity).is_some()
             || super::necessary_forms::identity_for_domain_identity(identity).is_some()
         {
             return;
         }
         environment.bind_domain_code_slot_once(identity, value.clone());
+
+        // Old recursive Core bodies may still call a historical byte. If that
+        // byte is the explicitly admitted D5 bootstrap alias for THIS exact
+        // identity, store the same Value/Rc in the compatibility slot. The byte
+        // does not define identity; it only preserves the old call mechanism.
+        if let Some(sid) = compatibility_registry::id_for_surface(name) {
+            if compatibility_registry::d5_bootstrap_identity_from_byte(sid.packed_byte())
+                == Some(identity)
+            {
+                environment.bind_code_slot_once(sid, value.clone());
+            }
+        }
         return;
     }
 
     // Compatibility-only lane for registry rows that do not yet have a
     // canonical domain identity.
-    let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
+    let Some(sid) = compatibility_registry::id_for_surface(name) else {
         return;
     };
     // #3070 transitional bootstrap.
@@ -443,7 +455,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     // incomplete. It does not mint a second semantic identity, and #3062
     // removes this alias when exact-domain source/registry routing is complete.
     if let Some(identity) =
-        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
+        compatibility_registry::d5_bootstrap_identity_from_byte(sid.packed_byte())
     {
         if super::necessary_forms::identity_for_domain_identity(identity).is_some() {
             return;
@@ -532,7 +544,7 @@ mod tests {
     #[test]
     fn every_surface_for_sid_00000101_routes_back_to_that_sid() {
         let surfaces =
-            semantic_registry::admitted_surfaces_for_semantic_id(crate::sens!(00000101));
+            compatibility_registry::admitted_surfaces_for_id(crate::sens!(00000101));
         assert!(surfaces.len() >= 2, "expected multiple routing surfaces");
         for surface in &surfaces {
             assert_eq!(
@@ -553,7 +565,7 @@ mod tests {
             crate::sens!(00000110),
             crate::sens!(00000111),
         ] {
-            for surface in semantic_registry::admitted_surfaces_for_semantic_id(sid) {
+            for surface in compatibility_registry::admitted_surfaces_for_id(sid) {
                 assert!(is_reserved_surface(surface));
                 assert!(surface_has_sid(surface, sid));
             }
