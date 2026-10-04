@@ -256,3 +256,12 @@ fn curry2_is_prefix_application_via_lexical_closure() {
         "42",
     );
 }
+
+
+#[test]
+fn recip_is_exact_q_multiplicative_inverse() {
+    for x in ["2", "-3", "1/2", "5/7"] {
+        assert_same(&format!("(* {x} (/ 1 {x}))"), "1");
+        assert_same(&format!("(/ 1 (/ 1 {x}))"), x);
+    }
+}
