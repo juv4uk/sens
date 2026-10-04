@@ -33,7 +33,7 @@
 ; D3 predicate semantics by self-comparison.
 (00001001 registry-d1-yes
   (00001000 ()
-    (11101 (00000001 x) (00000001 (x)))))
+    (значення-у-списку? (00000001 x) (00000001 (x)))))
 
 (00001001 registry-witness-failure
   (00001000 (case actual expected)
