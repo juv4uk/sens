@@ -1,0 +1,27 @@
+name: D1-D4 Ukrainian/Sanskrit surfaces
+
+on:
+  pull_request:
+    paths:
+      - "lib/surface/domain-surfaces-d1-d4.lisp"
+      - "docs/domain-surfaces-d1-d4.md"
+      - "scripts/check-domain-surfaces-d1-d4.py"
+      - ".github/workflows/d1-d4-surfaces.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/surface/domain-surfaces-d1-d4.lisp"
+      - "docs/domain-surfaces-d1-d4.md"
+      - "scripts/check-domain-surfaces-d1-d4.py"
+      - ".github/workflows/d1-d4-surfaces.yml"
+
+jobs:
+  exact-domain-surface:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Check D1-D4 uk/sa projection
+        run: python3 scripts/check-domain-surfaces-d1-d4.py
