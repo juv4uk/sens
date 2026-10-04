@@ -142,30 +142,19 @@ def entangled() -> bool:
     return bool(changed_probes(refine_toward_zero) & changed_probes(refine_toward_plus_inf))
 
 
-def refine_image(refine) -> set:
-    """Corners reached by applying one refinement to all four corners."""
-    return {bits(refine(mode)) for mode in ASSIGNED.values()}
+OPS = {"zero": toward_zero, "inf": toward_plus_inf, "round": to_nearest_even}
 
 
-def injective(refine) -> bool:
-    """A genuine one-bit refinement must distinguish its two sides.
-
-    Setting one bit is injective on a real 2x2 product: the four corners map to
-    four distinct results. If the map collapses pairs, the "refinement" is a
-    projection that forgets which of two corners it started from, which means
-    the four names are not corners of this square.
-    """
-    return len(refine_image(refine)) == 4
+def chain(x, order_names):
+    """Apply rounding operations in the given order, left to right."""
+    value = x
+    for name in order_names:
+        value = OPS[name](value)
+    return value
 
 
-def non_commutation_witness() -> tuple[Fraction, Fraction, Fraction]:
-    """Return (x, floor_then_round, round_then_floor) that actually differ."""
-    for x in PROBES:
-        a = to_nearest_even(toward_zero(x))
-        b = toward_zero(to_nearest_even(x))
-        if a != b:
-            return x, a, b
-    raise AssertionError("expected a non-commuting probe")
+def chain_signature(order_names):
+    return tuple(chain(x, order_names) for x in PROBES)
 
 
 def main() -> None:
@@ -175,32 +164,28 @@ def main() -> None:
     # Forced: the reading is not arbitrary.
     assert forced(), "the two-bit reading must be forced"
 
-    # Syntactic commutation holds only because the refinements are field
-    # setters. It is recorded, not treated as evidence of independence.
-    assert commutes(), "field setters are expected to commute syntactically"
+    # Structural tests all pass on this row, and none of them can detect the
+    # failure. Recorded so the docs can say so precisely.
+    assert commutes(), "field setters commute syntactically"
+    assert entangled(), "the two axes move the same probes"
+    assert forced(), "the 00 corner has a unique sibling per axis"
 
-    # The real discriminator: the two "bits" move the same probes, so they are
-    # not orthogonal refinements of one base policy.
-    assert entangled(), "expected the two candidate axes to be entangled"
+    # The decisive test is semantic composition. Two independent bits commute, so
+    # applying the two rounding operations in either order must give ROUND.
+    zero_then_inf = chain_signature(["zero", "inf"])
+    inf_then_zero = chain_signature(["inf", "zero"])
+    round_only = chain_signature(["round"])
 
-    # The decisive test: neither refinement is injective on the four corners.
-    # Setting one bit of a real 2x2 product always yields four distinct results.
-    assert not injective(refine_toward_zero), "toward-zero must collapse corners"
-    assert not injective(refine_toward_plus_inf), "toward-+inf must collapse corners"
+    assert zero_then_inf != inf_then_zero, "the two orderings must disagree"
+    assert zero_then_inf != round_only, "toward-zero then toward-+inf is not ROUND"
+    assert inf_then_zero != round_only, "toward-+inf then toward-zero is not ROUND"
 
-    # Both refinements forget which side they started from: they are projections
-    # onto a two-valued choice, not bits that can be set.
-    assert refine_image(refine_toward_zero) == {
-        bits(TRUNCATE),
-        bits(ROUND),
-    }
-    assert refine_image(refine_toward_plus_inf) == {
-        bits(CEILING),
-        bits(ROUND),
-    }
-
-    x, floor_then_round, round_then_floor = non_commutation_witness()
-    assert floor_then_round != round_then_floor
+    # A concrete witness pair, kept so the refutation is quotable rather than
+    # merely a boolean.
+    witness = next(
+        x for x in PROBES if to_nearest_even(toward_zero(x)) != toward_zero(to_nearest_even(x))
+    )
+    assert toward_zero(toward_plus_inf(witness)) != toward_plus_inf(toward_zero(witness))
 
 
 if __name__ == "__main__":

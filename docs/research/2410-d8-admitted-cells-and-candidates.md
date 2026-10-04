@@ -221,15 +221,15 @@ first three were chosen because they are the *most likely* to pass, not the leas
 | `000101` LEXPR | `research-2934-d8-lexpr-factoring.py` | refuted |
 | `000000` REPL | `research-2934-d8-repl-factoring.py` | refuted |
 
-`READ`/`PRINT`/`COMPILE`/`COMPILE-FILE` is the most promising row on the board:
-two genuinely orthogonal axes, direction and extent, and it still fails. `READ`
-and `COMPILE` occupy the *same* corner — both consume one datum — so neither
-refinement is injective. `COMPILE` differs by producing executable code rather
-than data, which is not the direction axis at all.
+`READ`/`PRINT`/`COMPILE`/`COMPILE-FILE` looks like the most promising row on the
+board: two genuinely orthogonal axes, direction and extent. It still fails, but
+on a coordinate collision and not on any counting argument. `READ` and `COMPILE`
+occupy the *same* corner — both consume one datum — so four attested names fill
+only three corners. `COMPILE` differs by producing executable code rather than
+data, which is not the direction axis at all.
 
 ```text
-toward-output image : [(F,F), (F,T)]      # 2 of 4
-toward-stream image : [(T,T), (F,T)]      # 2 of 4
+occupied corners : (F,F), (T,F), (T,T)     # 3 corners for 4 names
 ```
 
 ### Scaling the screen: parent triage
@@ -246,20 +246,91 @@ Current screen:
 PLAUSIBLE=36 IMPAIRED=12 TOTAL=48
 ```
 
-The 12 impaired rows are *cheaply* disqualified and do not each need a witness.
-The 36 plausible rows are the remaining work. The triage is a filter, not an
-admission: a plausible row is a row whose failure is not yet visible, not a row
-that passed.
+Of those 12, four are now backed by a parent-specific executable witness and
+eight are disqualified by a mechanical flag only. The 36 plausible rows are the
+remaining work. The triage is a filter, not an admission: a plausible row is a
+row whose failure is not yet visible, not a row that passed.
+
+### The factoring discipline, and a retracted test
 
 `FLOOR/CEILING/TRUNCATE/ROUND` is the canonical illusion of a 2×2 product: two
-rounding "axes" that look orthogonal. The decisive test is that neither
-refinement is **injective**. Setting one bit of a real 2×2 product always yields
-four distinct results; here `toward_zero` maps the four corners onto only two:
+rounding "axes" that look orthogonal. Every *structural* test passes on it. The
+four corners are distinct, each axis flips one bit of the parent, no two corners
+collide, and each refinement reaches a well-formed two-state image.
+
+The decisive test is **semantic composition**. Two independent bits must
+commute, so applying both axes in either order must reproduce the assigned joint
+corner `ROUND`:
 
 ```text
-toward-zero refinement image : [(True, False), (True, True)]   # 2 of 4
-toward-+inf refinement image : [(False, True), (True, True)]  # 2 of 4
+x=  7/2   toward-zero then toward-+inf = 3    ROUND = 4
+x= -7/2   toward-+inf then toward-zero = -3   ROUND = -4
 ```
+
+Both orderings disagree with each other *and* with `ROUND`. Rounding direction
+and rounding style are not independent bits; they are two answers to one
+question, "where does the remainder go".
+
+#### Retracted: the injectivity test
+
+Earlier revisions of this document and of the REPL and INTEGERP witnesses
+refuted five rows by claiming that neither refinement was **injective** — that
+setting one bit of a real 2×2 product yields four distinct results.
+
+That was false. Setting one bit of a genuine 2×2 product maps
+
+```text
+(0,0) -> (1,0)    (1,0) -> (1,0)
+(0,1) -> (1,1)    (1,1) -> (1,1)
+```
+
+so it reaches exactly **two** of four states, always. The test demanded an
+impossible outcome and therefore failed every row, including correct ones. It
+was a false test that produced five confident refutations.
+
+Two further defects were found while correcting it and are recorded here rather
+than quietly removed:
+
+- `corner_set` did not normalise `1`/`0` against `True`/`False`, so corners built
+  from integer slices compared unequal to corners built from string slices and
+  one witness reported two contradictory verdicts about the same pair.
+- an "ill-typed composition" argument in the REMAINDER witness was false: `DIV`
+  and `CHAR-CODE` both return integers, so nothing raises. Only the shared-base
+  argument survives, and only it is asserted.
+- a first draft of `one_domain` checked merely that two axis names were
+  non-empty, which returns `True` for all input and tests nothing. It now
+  requires the caller to supply a real membership predicate.
+
+The refutations themselves mostly survive on independent grounds — REPL on a
+coordinate collision, INTEGERP on composition, LEXPR and WHILE on distinctness
+— but they now stand on tests that can actually distinguish the cases.
+
+#### Five questions, not four
+
+`scripts/d8_factoring_discipline.py` encodes the discipline once:
+
+| question | falsifier |
+|---|---|
+| `distinct` | two corners observationally identical |
+| `forced` | an axis does not flip exactly one bit of the `00` parent |
+| `routes` | two corners share one coordinate |
+| `consistent` | a refinement does not reach a well-formed two-state image |
+| `one_domain` | the four names do not all instance one base policy |
+
+with `compose_ok` as the decisive semantic check applied per row.
+
+`EQL`/`EQUAL`/`CHAR=`/`STRING=` (parent `011100 LEQ`) is the first row that
+satisfies all five: depth over element type, with all four names being equality
+predicates. `research-2934-d8-leq-factoring.py` is the witness. Its verdict is
+**structurally admissible and still not ratified** — ADR-005 requires an
+owner-ratified semantic role, and admitting 64 more cells on my own authority
+would repeat the `#2415` mistake.
+
+`DIV`/`REM` and `CHAR-CODE`/`CODE-CHAR` (parent `010101 REMAINDER`) is the case
+that shows why `one_domain` is needed: each pair is a genuine binary pair, so the
+2×2 is a real cartesian product and every structural test passes. But the two
+pairs share no base policy — one is arithmetic, the other character encoding.
+Four names that pair up by counting to two and two is an accident, not a law.
 
 So these are projections that forget which corner they started from — two
 encodings of one decision ("where does the remainder go"), not two bits.
