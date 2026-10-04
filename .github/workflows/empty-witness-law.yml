@@ -1,0 +1,48 @@
+name: EMPTY witness law
+
+on:
+  pull_request:
+    paths:
+      - "language-contract.lisp"
+      - "contracts/control-dispatch-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "contracts/core-universal-contract.lisp"
+      - "scripts/check-core-universal-contract.py"
+      - "tests/fixtures/semantic/cond-2part-v1.lisp"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/special_forms.rs"
+      - "crates/sens/src/eval/special_forms/core.rs"
+      - "crates/sens/src/error.rs"
+      - "crates/sens/tests/empty_witness_law.rs"
+      - ".github/workflows/empty-witness-law.yml"
+  push:
+    branches: [main]
+    paths:
+      - "language-contract.lisp"
+      - "contracts/control-dispatch-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "contracts/core-universal-contract.lisp"
+      - "scripts/check-core-universal-contract.py"
+      - "tests/fixtures/semantic/cond-2part-v1.lisp"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/special_forms.rs"
+      - "crates/sens/src/eval/special_forms/core.rs"
+      - "crates/sens/src/error.rs"
+      - "crates/sens/tests/empty_witness_law.rs"
+      - ".github/workflows/empty-witness-law.yml"
+  workflow_dispatch:
+
+jobs:
+  empty-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Check universal predicate/control contract
+        run: python3 scripts/check-core-universal-contract.py
+
+      - name: Run exact-domain EMPTY witness law tests
+        run: cargo test -p sens --test empty_witness_law
