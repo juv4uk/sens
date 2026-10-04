@@ -213,7 +213,7 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
         }
         Ok(match &expression.kind {
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
-            ExprKind::Rational(rational) => Value::Rational(rational.clone()),
+            ExprKind::Rational(rational) => Value::Rational(rational.clone()),\n            ExprKind::BinaryNumber(number) => Value::BinaryNumber(number.clone()),
             ExprKind::Sid(sid) => Value::Sid(*sid),
             ExprKind::DomainIdentity(identity) => Value::DomainIdentity(*identity),
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
