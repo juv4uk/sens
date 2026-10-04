@@ -214,10 +214,10 @@ mod tests {
         let d4_0011 = find("define");
         assert_eq!(d4_0010.legacy_registry_id, crate::sens!(00001000));
         assert_eq!(d4_0011.legacy_registry_id, crate::sens!(00001001));
-        assert_eq!(d4_0010.domain_identity.map(CoreDomainIdentity::width), Some(4));
-        assert_eq!(d4_0010.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0010));
-        assert_eq!(d4_0011.domain_identity.map(CoreDomainIdentity::width), Some(4));
-        assert_eq!(d4_0011.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0011));
+        assert_eq!(d4_0010.domain_identity.map(DomainIdentity::width), Some(4));
+        assert_eq!(d4_0010.domain_identity.map(DomainIdentity::packed_bits), Some(0b0010));
+        assert_eq!(d4_0011.domain_identity.map(DomainIdentity::width), Some(4));
+        assert_eq!(d4_0011.domain_identity.map(DomainIdentity::packed_bits), Some(0b0011));
     }
 
     #[test]
