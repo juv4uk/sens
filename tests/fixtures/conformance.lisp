@@ -20,7 +20,7 @@
 ((expr . "(car (quote (radio antenna)))") (expected . "radio") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
 ((expr . "(cdr (quote (radio antenna)))") (expected . "(antenna)") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
 ((expr . "(cons (quote radio) (quote (antenna)))") (expected . "(radio antenna)") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
-((expr . "(cond (() (quote wrong)) (t (quote right)))") (expected . "right") (tier . 1) (axioms . (G8)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . confirmed) (harness . "harness-cond") (witness-commit . "wsm-my-lisp@32c1b33"))) (meta-eval . t))
+((expr . "(cond (() (quote wrong)) ((atom ()) (quote right)))") (expected . "right") (tier . 1) (axioms . (G8)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . confirmed) (harness . "harness-cond") (witness-commit . "wsm-my-lisp@32c1b33"))) (meta-eval . t))
 ((expr . "(/ 5 6 8 7)") (expected . "5/336") (tier . 2) (axioms . (S1)) (compiler-corpus . t) (meta-eval-gap . t) (wsm-native . ((status . pending))))
 ((expr . "(+ (/ 1 3) (/ 1 3))") (expected . "2/3") (tier . 2) (axioms . (S1)))
 ((expr . "(- 1 (/ 1 3))") (expected . "2/3") (tier . 2) (axioms . (S1)))
