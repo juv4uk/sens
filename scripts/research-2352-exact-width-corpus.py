@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""#2352 exact-width admitted corpus projection.
+"""Current admitted exact-width D1-D4 projection.
 
-Research projection from owner-ratified issue authority:
-- #2151 / #2170 for D1-D4;
-- #2175 / merged #2329 for generated D5 selectors.
+Authority:
+- #3202 owns current D3/bīja3 A;
+- #3272 owns current dense D4 16/16;
+- #3278 explicitly revokes current semantic admission for D5/D6/D8.
 
-This script intentionally does not read lib/surface/semantic-registry.lisp.
-That registry remains a compatibility/surface mechanism during the exact-width
-migration and must not become authority for this projection.
+This projection therefore stops at D4. Exact W5/W6/W8 carriers remain
+mechanically representable elsewhere, but carrier existence is not semantic
+admission. D5+ selector continuation is fail-closed pending #3209.
+
+The compatibility surface registry is intentionally not an authority input.
 """
 
 from __future__ import annotations
@@ -15,7 +18,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-from itertools import product
 from pathlib import Path
 from typing import Any
 
@@ -35,11 +37,11 @@ D3 = {
     "000": ("foundation", "admitted", "()"),
     "001": ("foundation", "admitted", "QUOTE"),
     "010": ("foundation", "admitted", "ATOM"),
-    "011": ("foundation", "admitted", "COND"),
-    "100": ("foundation", "admitted", "CONS"),
-    "101": ("selector-root", "admitted", "CAR"),
-    "110": ("selector-root", "admitted", "CDR"),
-    "111": ("foundation", "admitted", "EQ"),
+    "011": ("selector-root", "admitted", "CDR"),
+    "100": ("selector-root", "admitted", "CAR"),
+    "101": ("foundation", "admitted", "EQ"),
+    "110": ("foundation", "admitted", "COND"),
+    "111": ("foundation", "admitted", "CONS"),
 }
 
 D4 = {
@@ -48,78 +50,44 @@ D4 = {
     "0010": ("bootstrap", "admitted", "LAMBDA"),
     "0011": ("bootstrap", "admitted", "DEFINE"),
     "0100": ("bootstrap", "admitted", "NOT"),
-    "0101": ("unallocated", "unallocated", None),
-    "0110": ("bootstrap", "admitted", "EVCON"),
-    "0111": ("bootstrap", "admitted", "EVLIS"),
-    "1000": ("bootstrap", "admitted", "LIST"),
-    "1001": ("unallocated", "unallocated", None),
-    "1010": ("selector", "generated", "CAAR"),
-    "1011": ("selector", "generated", "CADR"),
-    "1100": ("selector", "generated", "CDAR"),
-    "1101": ("selector", "generated", "CDDR"),
-    "1110": ("bootstrap", "admitted", "LOOKUP"),
-    "1111": ("bootstrap", "admitted", "BIND"),
+    "0101": ("bootstrap", "admitted", "NULL"),
+    "0110": ("selector", "generated", "CDAR"),
+    "0111": ("selector", "generated", "CDDR"),
+    "1000": ("selector", "generated", "CAAR"),
+    "1001": ("selector", "generated", "CADR"),
+    "1010": ("bootstrap", "admitted", "LOOKUP"),
+    "1011": ("bootstrap", "admitted", "BIND"),
+    "1100": ("bootstrap", "admitted", "EVCON"),
+    "1101": ("bootstrap", "admitted", "EVLIS"),
+    "1110": ("bootstrap", "admitted", "LIST"),
+    "1111": ("bootstrap", "admitted", "APPEND"),
 }
-
-ROOTS = {
-    "101": "A",
-    "110": "D",
-}
-
-
-def selector_name(root_letter: str, suffix: str) -> str:
-    letters = root_letter + "".join("A" if bit == "0" else "D" for bit in suffix)
-    return "C" + letters + "R"
-
-
-def d5() -> dict[str, tuple[str, str, str | None]]:
-    out: dict[str, tuple[str, str, str | None]] = {
-        f"{value:05b}": ("unallocated", "unallocated", None)
-        for value in range(32)
-    }
-    for root, root_letter in ROOTS.items():
-        for bits in product("01", repeat=2):
-            suffix = "".join(bits)
-            word = root + suffix
-            out[word] = ("selector", "generated", selector_name(root_letter, suffix))
-    return dict(sorted(out.items()))
-
-
-def authority_for(width: int, status: str) -> tuple[str, str | None]:
-    if width <= 4:
-        if status == "generated":
-            return ("#2151/#2170", "#1968/#2329")
-        return ("#2151/#2170", None)
-    if width == 5 and status == "generated":
-        return ("#2175/#2329", "#1968/#2329")
-    if width == 5:
-        return ("#2175/#2329", None)
-    raise AssertionError(width)
-
 
 def rows() -> list[dict[str, Any]]:
-    domains = {1: D1, 2: D2, 3: D3, 4: D4, 5: d5()}
     result: list[dict[str, Any]] = []
-    for width, mapping in domains.items():
+    for width, mapping, authority, generator in (
+        (1, D1, "#2151", None),
+        (2, D2, "#2151", None),
+        (3, D3, "#3202", None),
+        (4, D4, "#3272", "#2055/#3272"),
+    ):
         assert len(mapping) == 1 << width
         for word in sorted(mapping):
             role, status, label = mapping[word]
-            authority_ref, generator_ref = authority_for(width, status)
             result.append({
                 "word": word,
                 "width": width,
                 "role": role,
                 "status": status,
                 "family": "selector" if role in {"selector", "selector-root"} else role,
-                "authority_ref": authority_ref,
-                "generator_ref": generator_ref,
+                "authority_ref": authority,
+                "generator_ref": generator if status == "generated" else None,
                 "human_label_optional": label,
             })
     return result
 
-
 def validate(corpus: list[dict[str, Any]]) -> dict[str, Any]:
-    assert len(corpus) == 62
+    assert len(corpus) == 30
     seen = set()
     for row in corpus:
         key = (row["width"], row["word"])
@@ -127,64 +95,58 @@ def validate(corpus: list[dict[str, Any]]) -> dict[str, Any]:
         seen.add(key)
         assert len(row["word"]) == row["width"]
         assert set(row["word"]) <= {"0", "1"}
-        assert row["status"] in {"admitted", "generated", "unallocated"}
+        assert row["status"] in {"admitted", "generated"}
 
     by = {(row["width"], row["word"]): row for row in corpus}
-    assert by[(4, "0101")]["status"] == "unallocated"
-    assert by[(4, "1001")]["status"] == "unallocated"
+    expected_d3 = {
+        "000": "()", "001": "QUOTE", "010": "ATOM", "011": "CDR",
+        "100": "CAR", "101": "EQ", "110": "COND", "111": "CONS",
+    }
+    expected_d4 = {
+        "0000": "APPLY", "0001": "EVAL", "0010": "LAMBDA", "0011": "DEFINE",
+        "0100": "NOT", "0101": "NULL", "0110": "CDAR", "0111": "CDDR",
+        "1000": "CAAR", "1001": "CADR", "1010": "LOOKUP", "1011": "BIND",
+        "1100": "EVCON", "1101": "EVLIS", "1110": "LIST", "1111": "APPEND",
+    }
+    for word, name in expected_d3.items():
+        assert by[(3, word)]["human_label_optional"] == name
+    for word, name in expected_d4.items():
+        assert by[(4, word)]["human_label_optional"] == name
 
     d4_generated = {
         word for (width, word), row in by.items()
         if width == 4 and row["status"] == "generated"
     }
-    assert d4_generated == {"1010", "1011", "1100", "1101"}
-
-    d5_generated = {
-        word for (width, word), row in by.items()
-        if width == 5 and row["status"] == "generated"
-    }
-    expected_d5 = {
-        root + "".join(bits)
-        for root in ROOTS
-        for bits in product("01", repeat=2)
-    }
-    assert d5_generated == expected_d5
-    assert len(d5_generated) == 8
+    assert d4_generated == {"0110", "0111", "1000", "1001"}
 
     counts = {
         status: sum(row["status"] == status for row in corpus)
-        for status in ("admitted", "generated", "unallocated")
+        for status in ("admitted", "generated")
     }
-    assert counts == {"admitted": 24, "generated": 12, "unallocated": 26}
+    assert counts == {"admitted": 26, "generated": 4}
 
-    function_rows = [
-        row for row in corpus
-        if row["width"] >= 3 and row["status"] != "unallocated"
-    ]
     return {
-        "schema": "exact-width-admitted-corpus/v1",
+        "schema": "exact-width-admitted-corpus/v2",
         "authority": "projection-only",
-        "authority_refs": ["#2151", "#2170", "#2175", "#2329"],
+        "authority_refs": ["#2151", "#3202", "#3272", "#3278"],
         "forbidden_input": "lib/surface/semantic-registry.lisp",
         "row_count": len(corpus),
         "status_counts": counts,
-        "function_like_active_rows": len(function_rows),
-        "d4_reserved_holes": ["0101", "1001"],
-        "d5_generated_selector_count": len(d5_generated),
-        "d5_nonselector_admitted_count": 0,
+        "function_like_active_rows": sum(row["width"] >= 3 for row in corpus),
+        "current_semantic_widths": [1, 2, 3, 4, 7],
+        "d4_generated_selector_count": len(d4_generated),
+        "d5_plus_semantic_admission": "revoked/research by #3278",
+        "selector_generation_above_d4": "fail-closed pending #3209",
     }
-
 
 def write_outputs(out_dir: Path) -> None:
     corpus = rows()
     meta = validate(corpus)
     out_dir.mkdir(parents=True, exist_ok=True)
-
     (out_dir / "exact-width-admitted-corpus.json").write_text(
         json.dumps({"meta": meta, "rows": corpus}, indent=2) + "\n",
         encoding="utf-8",
     )
-
     fields = [
         "word", "width", "role", "status", "family",
         "authority_ref", "generator_ref", "human_label_optional",
@@ -195,37 +157,23 @@ def write_outputs(out_dir: Path) -> None:
         writer = csv.DictWriter(fh, fieldnames=fields, delimiter="\t", lineterminator="\n")
         writer.writeheader()
         for row in corpus:
-            writer.writerow({
-                key: ("-" if value is None else value)
-                for key, value in row.items()
-            })
-
+            writer.writerow({key: ("-" if value is None else value) for key, value in row.items()})
     (out_dir / "summary.json").write_text(
-        json.dumps(meta, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+        json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-
 
 def check_projection(target_dir: Path) -> None:
     import tempfile
     with tempfile.TemporaryDirectory() as tmp:
         tmp_dir = Path(tmp)
         write_outputs(tmp_dir)
-        for name in (
-            "exact-width-admitted-corpus.json",
-            "exact-width-admitted-corpus.tsv",
-        ):
+        for name in ("exact-width-admitted-corpus.json", "exact-width-admitted-corpus.tsv"):
             expected = (tmp_dir / name).read_bytes()
             actual_path = target_dir / name
             if not actual_path.exists():
                 raise SystemExit(f"missing generated projection: {actual_path}")
-            actual = actual_path.read_bytes()
-            if actual != expected:
-                raise SystemExit(
-                    f"stale exact-width corpus projection: {actual_path}; "
-                    "run script with --write"
-                )
-
+            if actual_path.read_bytes() != expected:
+                raise SystemExit(f"stale exact-width corpus projection: {actual_path}; run script with --write")
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
@@ -235,19 +183,14 @@ def main() -> int:
     ap.add_argument("--target-dir", type=Path, default=Path("knowledge"))
     ap.add_argument("--out", type=Path)
     args = ap.parse_args()
-
     if args.write:
         write_outputs(args.target_dir)
     else:
         check_projection(args.target_dir)
-
     if args.out is not None:
         write_outputs(args.out)
-
-    meta = validate(rows())
-    print(json.dumps(meta, sort_keys=True))
+    print(json.dumps(validate(rows()), sort_keys=True))
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())
