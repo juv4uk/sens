@@ -1,5 +1,5 @@
 {
-  "schema": "d6-v2-law-first-ledger/v1",
+  "schema": "d6-v2-law-first-ledger/v2",
   "status": "research-not-authority",
   "issue": "#3333",
   "foundation": "#3331 / Contract 11.4",
@@ -13,8 +13,10 @@
   "summary": {
     "capacity": 64,
     "proved_selectors": 16,
-    "law_anchored_candidates": 16,
-    "unknown": 32
+    "coordinate_anchored_candidates": 16,
+    "unplaced_law_anchors": 4,
+    "law_covered_semantics": 36,
+    "coordinate_unknown": 32
   },
   "review_first": [
     "RPLACA",
@@ -983,6 +985,36 @@
         "parent_d5": "01111",
         "provenance": "Lisp 1.5 (§4.2)"
       }
+    }
+  ],
+  "unplaced_law_anchors": [
+    {
+      "names": [
+        "LENGTH",
+        "LENGTH-ONTO"
+      ],
+      "law_status": "SEMANTIC-GENERATOR",
+      "law": "LENGTH(x) = LENGTH-ONTO(x, 0)",
+      "evidence": [
+        "#3339",
+        "#3340",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "placement": "UNPLACED"
+    },
+    {
+      "names": [
+        "MIN-LIST",
+        "MAX-LIST"
+      ],
+      "law_status": "ORDER-DUAL-FOLDS",
+      "law": "permutation invariant; additive-negation duality",
+      "evidence": [
+        "#3339",
+        "#3340",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "placement": "UNPLACED"
     }
   ]
 }
