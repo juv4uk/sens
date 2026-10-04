@@ -384,7 +384,7 @@ fn implements_mccarthys_seven_primitives() {
         ])
     );
     assert_eq!(
-        eval("(cond (() (quote wrong)) ((atom ()) (quote right)))"),
+        eval("(за-умовою (() (як-є wrong)) ((тотожне? (як-є x) (як-є x)) (як-є right)))"),
         Value::Symbol("right".into())
     );
 }
