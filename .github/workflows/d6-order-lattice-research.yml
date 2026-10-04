@@ -1,0 +1,40 @@
+name: D6 order lattice research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-3084-d6-order-lattice.py"
+      - "knowledge/d6-order-lattice-law.json"
+      - "knowledge/d3-d8-stable-residents.json"
+      - ".github/workflows/d6-order-lattice-research.yml"
+  workflow_dispatch:
+
+jobs:
+  order-lattice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Replay coordinate-independent law witness
+        run: python3 scripts/research-3084-d6-order-lattice.py
+
+      - name: Publish concise evidence
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("knowledge/d6-order-lattice-law.json").read_text())
+          q = data["numeric_oracle"]
+          control = data["cross_domain_falsifier"]["control"]
+          print("## D6 order/lattice — #3084")
+          print()
+          print(f"- exact Q values: {q['value_count']}")
+          print(f"- ordered pairs: {q['pair_count']}")
+          print(f"- ordered triples: {q['triple_count']}")
+          print(f"- set-lattice control values/pairs/triples: {control['value_count']}/{control['pair_count']}/{control['triple_count']}")
+          print(f"- geometry status: {data['geometry_conclusion']['status']}")
+          print("- solver credit: 0")
+          print("- CURRENT coordinates used as evidence: false")
+          PY
