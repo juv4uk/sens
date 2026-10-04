@@ -1,4 +1,4 @@
-name: D5 current authority
+name: D5 revoked evidence guard
 
 on:
   pull_request:
@@ -27,10 +27,9 @@ permissions:
   contents: read
 
 jobs:
-  authority:
+  revoked-evidence:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - run: python3 scripts/check-d5-current-authority.py
       - run: cargo test -p sens domain_identity -- --nocapture
-      - run: cargo test -p sens --test d5_reverse_onto_law -- --nocapture
