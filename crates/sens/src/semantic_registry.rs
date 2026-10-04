@@ -1,85 +1,123 @@
-//! Runtime projection of the Lisp-owned semantic registry.
+//! Canonical exact-domain registry projection.
 //!
-//! The canonical authority is lib/surface/semantic-registry.lisp and its
-//! Lisp-owned reader/API. This module contains no parser for canonical source
-//! text. The generated table is emitted by
-//! scripts/generate-rust-semantic-registry.lisp and is only a mechanical
-//! runtime projection for fast lookup.
-//
-//! Generated rows may carry a packed byte as substrate representation of an
-//! already understood Lisp Binary identity. This wrapper converts that byte to
-//! opaque Sens8 immediately; runtime registry APIs never expose decimal IDs.
+//! Occupancy authority is the generated 510/510 D1-D8 projection from #3029.
+//! Human surfaces are optional projections from knowledge/domain-surface-registry.lisp.
+//! Neither surface presence nor callability can create or erase a domain resident.
+//! Historical flat Sens8 metadata lives only in legacy_registry.rs.
 
-use std::{collections::HashMap, sync::OnceLock};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::OnceLock,
+};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity};
-use crate::Sens8;
+use crate::{
+    domain_owner_generated::DOMAIN_OWNER_COORDINATES, BinarySourceWord, Bit1, Bit2, Bit3, Bit4,
+    Bit5, Bit6, Bit7, Bit8, DomainIdentity,
+};
 
 mod generated {
-    include!("semantic_registry_generated.rs");
+    include!("domain_surface_registry_generated.rs");
 }
 
-use generated::{SemanticRow, SEMANTIC_ROWS};
+use generated::DOMAIN_SURFACE_ROWS;
 
-pub(crate) type SemanticId = Sens8;
-
-pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
-    let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
-    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
-    match byte {
-        0b0000_0001 => Some(d3(0b001)), // QUOTE
-        0b0000_0010 => Some(d3(0b010)), // ATOM
-        0b0000_0111 => Some(d3(0b011)), // COND
-        0b0000_0100 => Some(d3(0b100)), // CONS
-        0b0000_0101 => Some(d3(0b101)), // CAR
-        0b0000_0110 => Some(d3(0b110)), // CDR
-        0b0000_0011 => Some(d3(0b111)), // EQ
-        0b0000_1000 => Some(d4(0b0010)), // LAMBDA
-        0b0000_1001 => Some(d4(0b0011)), // DEFINE
-        // Existing selector surfaces project explicitly to their ratified D4
-        // identities. This is semantic-role mapping, never byte truncation.
-        0b0011_0011 => Some(d4(0b1010)), // CAAR
-        0b0011_0100 => Some(d4(0b1011)), // CADR
-        0b0011_0101 => Some(d4(0b1101)), // CDDR
-        _ => None,
-    }
+pub(crate) fn exact_domain_identity(width: u8, bits: u8) -> Option<DomainIdentity> {
+    let source = match width {
+        1 => BinarySourceWord::W1(Bit1::new(bits)?),
+        2 => BinarySourceWord::W2(Bit2::new(bits)?),
+        3 => BinarySourceWord::W3(Bit3::new(bits)?),
+        4 => BinarySourceWord::W4(Bit4::new(bits)?),
+        5 => BinarySourceWord::W5(Bit5::new(bits)?),
+        6 => BinarySourceWord::W6(Bit6::new(bits)?),
+        7 => BinarySourceWord::W7(Bit7::new(bits)?),
+        8 => BinarySourceWord::W8(Bit8::new(bits)?),
+        _ => return None,
+    };
+    Some(DomainIdentity::from_source_word(source))
 }
 
-/// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
+fn occupancy() -> &'static HashSet<DomainIdentity> {
+    static OCCUPANCY: OnceLock<HashSet<DomainIdentity>> = OnceLock::new();
+    OCCUPANCY.get_or_init(|| {
+        let set = DOMAIN_OWNER_COORDINATES
+            .iter()
+            .map(|row| {
+                exact_domain_identity(row.width, row.bits).unwrap_or_else(|| {
+                    panic!(
+                        "generated owner coordinate is not a valid exact domain: D{}:{:b}",
+                        row.width, row.bits
+                    )
+                })
+            })
+            .collect::<HashSet<_>>();
+        assert_eq!(
+            set.len(),
+            DOMAIN_OWNER_COORDINATES.len(),
+            "generated owner occupancy must contain unique exact-domain identities"
+        );
+        set
+    })
+}
+
+pub(crate) fn is_occupied(identity: DomainIdentity) -> bool {
+    occupancy().contains(&identity)
+}
+
+pub(crate) fn occupied_domain_identities() -> Vec<DomainIdentity> {
+    DOMAIN_OWNER_COORDINATES
+        .iter()
+        .map(|row| {
+            exact_domain_identity(row.width, row.bits)
+                .expect("generated owner coordinate must be exact D1-D8 identity")
+        })
+        .collect()
+}
+
+fn surface_index() -> &'static HashMap<&'static str, DomainIdentity> {
+    static INDEX: OnceLock<HashMap<&'static str, DomainIdentity>> = OnceLock::new();
+    INDEX.get_or_init(|| {
+        let mut index = HashMap::new();
+        for row in DOMAIN_SURFACE_ROWS {
+            let identity = exact_domain_identity(row.width, row.bits).unwrap_or_else(|| {
+                panic!(
+                    "generated surface row is not a valid exact domain: D{}:{:b}",
+                    row.width, row.bits
+                )
+            });
+            assert!(
+                is_occupied(identity),
+                "surface projection may only name an owner-ratified resident: D{}:{:0width$b}",
+                identity.width(),
+                identity.packed_bits(),
+                width = identity.width()
+            );
+            for surface in row.surfaces {
+                if let Some(previous) = index.insert(surface.name, identity) {
+                    assert_eq!(
+                        previous, identity,
+                        "one surface may not project to two exact-domain identities: {}",
+                        surface.name
+                    );
+                }
+            }
+        }
+        index
+    })
+}
+
+/// Resolve an admitted human/symbolic spelling to an already-existing exact-domain identity.
 ///
-/// This MUST NOT be used to reinterpret historical Sens8 calls. Its only
-/// consumer is `bind_language_definition`: a definition discovered through
-/// the compatibility surface registry is bound once into an already-ratified
-/// exact D5 slot. #3062 removes this bootstrap detour.
-pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
-    byte: u8,
-) -> Option<CoreDomainIdentity> {
-    let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
-    match byte {
-        0b0010_1001 => Some(d5(0b10000)), // APPEND
-        0b0010_1010 => Some(d5(0b10001)), // REVERSE
-        0b0001_0100 => Some(d5(0b10011)), // QUOTIENT
-        0b0010_1101 => Some(d5(0b11100)), // ASSOC
-        0b0010_1100 => Some(d5(0b11101)), // MEMBER
-        0b1010_1100 => Some(d5(0b11111)), // SUBST
-        _ => None,
-    }
+/// Surface presence is projection-only. It grants neither occupancy nor callability.
+pub(crate) fn domain_identity_for_surface(name: &str) -> Option<DomainIdentity> {
+    surface_index().get(name).copied()
 }
-/// Transitional canonical lookup. #2947 removes this legacy-byte detour and
-/// replaces it with the exact-domain surface registry.
-pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
-}
-/// Transitional spelling projection for already-migrated exact-domain roles.
-///
-/// The flat registry supplies spelling only; exact-domain identity comes from
-/// the explicit migration bridge. #2947 replaces this projection with the
-/// canonical DomainIdentity registry.
-pub(crate) fn domain_surface_bindings() -> Vec<(&'static str, CoreDomainIdentity)> {
-    let mut bindings = live_rows()
+
+pub(crate) fn domain_surface_bindings() -> Vec<(&'static str, DomainIdentity)> {
+    let mut bindings = DOMAIN_SURFACE_ROWS
         .iter()
         .filter_map(|row| {
-            legacy_domain_identity_from_registry_byte(row.semantic_id)
+            exact_domain_identity(row.width, row.bits)
+                .filter(|identity| is_occupied(*identity))
                 .map(|identity| (identity, row.surfaces))
         })
         .flat_map(|(identity, surfaces)| {
@@ -91,238 +129,99 @@ pub(crate) fn domain_surface_bindings() -> Vec<(&'static str, CoreDomainIdentity
     bindings
 }
 
-pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
-    semantic_id.to_string()
-}
-
-fn live_rows() -> &'static [SemanticRow] {
-    SEMANTIC_ROWS
-}
-
-fn registry_byte_for_surface(name: &str) -> Option<u8> {
-    live_rows()
-        .iter()
-        .find(|row| row.surfaces.iter().any(|surface| surface.name == name))
-        .map(|row| row.semantic_id)
-}
-
-
-pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
-    live_rows()
-        .iter()
-        .map(|row| Sens8::from_packed_byte(row.semantic_id))
-        .collect()
-}
-
-fn insert_surface_mapping(
-    index: &mut HashMap<&'static str, SemanticId>,
-    surface: &'static str,
-    semantic_id: SemanticId,
-) {
-    if let Some(previous) = index.insert(surface, semantic_id) {
-        if previous != semantic_id {
-            panic!(
-                "generated semantic registry surface must be unique: {surface} maps to both {} and {}",
-                semantic_id_bits(previous),
-                semantic_id_bits(semantic_id)
-            );
-        }
+pub(crate) fn surfaces_for_domain_identity(identity: DomainIdentity) -> Vec<&'static str> {
+    if !is_occupied(identity) {
+        return Vec::new();
     }
-}
-
-fn surface_index() -> &'static HashMap<&'static str, SemanticId> {
-    static INDEX: OnceLock<HashMap<&'static str, SemanticId>> = OnceLock::new();
-    INDEX.get_or_init(|| {
-        let mut index = HashMap::new();
-        for row in live_rows() {
-            for surface in row.surfaces {
-                insert_surface_mapping(&mut index, surface.name, Sens8::from_packed_byte(row.semantic_id));
-            }
-        }
-        index
-    })
-}
-
-pub(crate) fn admitted_semantic_id_for_surface(name: &str) -> Option<SemanticId> {
-    surface_index().get(name).copied()
-}
-
-fn stable_surfaces_from_index(
-    index: &HashMap<&'static str, SemanticId>,
-    semantic_id: SemanticId,
-) -> Vec<&'static str> {
-    let mut surfaces = index
+    let mut surfaces = DOMAIN_SURFACE_ROWS
         .iter()
-        .filter_map(|(surface, mapped_id)| (*mapped_id == semantic_id).then_some(*surface))
-        .collect::<Vec<_>>();
-    surfaces.sort_unstable();
-    surfaces
-}
-
-fn admitted_surfaces_from_rows(
-    rows: &[SemanticRow],
-    semantic_id: SemanticId,
-) -> Vec<&'static str> {
-    let mut surfaces = rows
-        .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
-        .into_iter()
+        .filter(|row| exact_domain_identity(row.width, row.bits) == Some(identity))
         .flat_map(|row| row.surfaces.iter().map(|surface| surface.name))
         .collect::<Vec<_>>();
     surfaces.sort_unstable();
-    surfaces
-}
-
-pub(crate) fn semantic_id_for_surface(name: &str) -> Option<SemanticId> {
-    admitted_semantic_id_for_surface(name)
-}
-
-pub(crate) fn stable_surfaces_for_semantic_id(
-    semantic_id: SemanticId,
-) -> Vec<&'static str> {
-    stable_surfaces_from_index(surface_index(), semantic_id)
-}
-
-pub(crate) fn admitted_surfaces_for_semantic_id(
-    semantic_id: SemanticId,
-) -> Vec<&'static str> {
-    admitted_surfaces_from_rows(live_rows(), semantic_id)
-}
-
-pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
-    semantic_id: SemanticId,
-) -> Vec<(&'static str, &'static str)> {
-    let mut surfaces = live_rows()
-        .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
-        .into_iter()
-        .flat_map(|row| row.surfaces.iter().map(|s| (s.namespace, s.name)))
-        .collect::<Vec<_>>();
-    surfaces.sort_unstable();
+    surfaces.dedup();
     surfaces
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use generated::SemanticSurface;
 
     #[test]
-    fn migrated_registry_roles_are_domain_qualified_and_not_truncated() {
-        let d3_011 = domain_identity_for_surface("за-умовою").unwrap();
-        let d3_111 = domain_identity_for_surface("тотожне?").unwrap();
-        let d4_0010 = domain_identity_for_surface("функція").unwrap();
-        let d4_0011 = domain_identity_for_surface("визначити").unwrap();
+    fn owner_occupancy_is_full_d1_d8_and_surface_independent() {
+        let occupied = occupied_domain_identities();
+        assert_eq!(occupied.len(), 510);
 
-        assert_eq!((d3_011.width(), d3_011.packed_bits()), (3, 0b011));
-        assert_eq!((d3_111.width(), d3_111.packed_bits()), (3, 0b111));
-        assert_eq!((d4_0010.width(), d4_0010.packed_bits()), (4, 0b0010));
-        assert_eq!((d4_0011.width(), d4_0011.packed_bits()), (4, 0b0011));
-
-        assert_ne!(d3_011.packed_bits(), 0b111);
-        assert_ne!(d3_111.packed_bits(), 0b011);
-        assert_ne!(d4_0010.packed_bits(), 0b1000);
-        assert_ne!(d4_0011.packed_bits(), 0b1001);
-    }
-
-    #[test]
-    fn existing_selector_surfaces_project_to_ratified_d4() {
-        for (surface, bits) in [("перше-від-першого", 0b1010), ("перше-від-решти", 0b1011), ("решта-від-решти", 0b1101)] {
-            let identity = domain_identity_for_surface(surface)
-                .unwrap_or_else(|| panic!("selector surface must project: {surface}"));
-            assert_eq!((identity.width(), identity.packed_bits()), (4, bits));
-        }
-        assert_eq!(domain_identity_for_surface("решта-від-першого"), None);
-    }
-
-    #[test]
-    fn lisp_owned_d5_binding_projection_is_explicit_but_not_global_legacy_meaning() {
-        for (legacy_byte, bits) in [
-            (0b0010_1001, 0b10000),
-            (0b0010_1010, 0b10001),
-            (0b0001_0100, 0b10011),
-            (0b0010_1101, 0b11100),
-            (0b0010_1100, 0b11101),
-            (0b1010_1100, 0b11111),
+        for (width, expected) in [
+            (1usize, 2usize),
+            (2, 4),
+            (3, 8),
+            (4, 16),
+            (5, 32),
+            (6, 64),
+            (7, 128),
+            (8, 256),
         ] {
-            let identity = transitional_d5_binding_identity_from_registry_byte(legacy_byte)
-                .expect("ratified D5 bootstrap binding projection");
-            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
-
-            // A historical byte remains a historical byte during invocation.
-            // Only definition binding is allowed to consult the D5 bootstrap map.
-            assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
-        }
-    }
-    #[test]
-    fn unmigrated_registry_rows_have_no_fake_domain_identity() {
-        assert_eq!(domain_identity_for_surface("+"), None);
-    }
-
-    #[test]
-    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
-        assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(legacy_domain_identity_from_registry_byte),
-            domain_identity_for_surface("за-умовою")
-        );
-        assert_eq!(
-            registry_byte_for_surface("функція").and_then(legacy_domain_identity_from_registry_byte),
-            domain_identity_for_surface("функція")
-        );
-    }
-
-    #[test]
-    fn generated_registry_is_one_contiguous_byte_axis() {
-        assert_eq!(SEMANTIC_ROWS.len(), 256);
-        for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
-            assert_eq!(usize::from(row.semantic_id), expected);
-        }
-        assert_eq!(SEMANTIC_ROWS.first().map(|row| row.semantic_id), Some(0));
-        assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(255));
-    }
-
-    #[test]
-    fn generated_registry_contains_fixed_surface_namespaces() {
-        let quote = &SEMANTIC_ROWS[1].surfaces;
-        assert!(quote.contains(&SemanticSurface { namespace: "en", name: "quote" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "ук", name: "як-є" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "укр", name: "як-є" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "sa", name: "svarūpa" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "sym", name: "'" }));
-    }
-
-    #[test]
-    fn binary_spelling_is_identity_not_a_surface() {
-        assert_eq!(semantic_id_for_surface("00001010"), None);
-        assert_eq!(semantic_id_for_surface("10101000"), None);
-    }
-
-    #[test]
-    fn public_reverse_projection_preserves_identity() {
-        for surface in admitted_surfaces_for_semantic_id(crate::sens!(00001111)) {
             assert_eq!(
-                crate::semantic_registry_export::semantic_id_for_admitted_surface(surface),
-                Some(crate::sens!(00001111))
+                occupied.iter().filter(|identity| identity.width() == width).count(),
+                expected
             );
         }
-        assert_eq!(
-            crate::semantic_registry_export::semantic_id_for_admitted_surface("not-a-surface"),
-            None
-        );
+
+        let d7_zero = exact_domain_identity(7, 0).unwrap();
+        let d8_zero = exact_domain_identity(8, 0).unwrap();
+        assert!(is_occupied(d7_zero));
+        assert!(is_occupied(d8_zero));
+        assert!(surfaces_for_domain_identity(d7_zero).is_empty());
+        assert!(surfaces_for_domain_identity(d8_zero).is_empty());
     }
 
     #[test]
-    fn unrelated_rows_are_projected_without_assigning_evaluator_meaning() {
-        assert_eq!(semantic_id_for_surface("+"), Some(crate::sens!(00001100)));
+    fn equal_payloads_remain_distinct_across_domains() {
+        let d3 = exact_domain_identity(3, 1).unwrap();
+        let d4 = exact_domain_identity(4, 1).unwrap();
+        let d7 = exact_domain_identity(7, 1).unwrap();
+        let d8 = exact_domain_identity(8, 1).unwrap();
+        assert_ne!(d3, d4);
+        assert_ne!(d4, d7);
+        assert_ne!(d7, d8);
+        assert!(is_occupied(d3) && is_occupied(d4) && is_occupied(d7) && is_occupied(d8));
     }
 
     #[test]
-    fn surfaces_with_namespace_align_with_present_names_and_keep_namespace() {
-        let with_namespace = admitted_surfaces_with_namespace_for_semantic_id(crate::sens!(00000001));
-        let names_only = admitted_surfaces_for_semantic_id(crate::sens!(00000001));
-        assert_eq!(with_namespace.len(), names_only.len());
-        assert!(with_namespace.contains(&("en", "quote")));
-        assert!(with_namespace.contains(&("ук", "як-є")));
-        assert!(with_namespace.contains(&("sym", "'")));
+    fn surfaced_rows_project_to_existing_exact_domain_identity() {
+        for (surface, width, bits) in [
+            ("за-умовою", 3usize, 0b011u8),
+            ("функція", 4, 0b0010),
+            ("перше-від-решти", 4, 0b1011),
+            ("+", 5, 0b01010),
+        ] {
+            let identity = domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("missing exact-domain surface {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
+            assert!(is_occupied(identity));
+        }
+    }
+
+    #[test]
+    fn lisp_owned_d5_surfaces_are_exact_domain_projection() {
+        for (surface, bits) in [
+            ("append", 0b10000),
+            ("reverse", 0b10001),
+            ("assoc", 0b11100),
+            ("member?", 0b11101),
+            ("subst", 0b11111),
+        ] {
+            let identity = domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("missing exact D5 projection for {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
+            assert!(is_occupied(identity));
+        }
+    }
+
+    #[test]
+    fn historical_surface_absence_cannot_mint_or_delete_occupancy() {
+        assert_eq!(domain_identity_for_surface("корінь"), None);
+        assert!(is_occupied(exact_domain_identity(8, 0b1111_1111).unwrap()));
     }
 }
