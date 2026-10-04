@@ -88,8 +88,8 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 ) -> Option<CoreDomainIdentity> {
     let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
     match byte {
-        0b0010_1010 => Some(d5(0b10001)), // REVERSE
-        0b0001_0100 => Some(d5(0b10011)), // QUOTIENT
+        0b0010_1010 => Some(d5(0b10100)), // REVERSE
+        0b0001_0100 => Some(d5(0b10111)), // QUOTIENT
         0b0010_1101 => Some(d5(0b11100)), // ASSOC
         0b0010_1100 => Some(d5(0b11101)), // MEMBER
         0b1010_1100 => Some(d5(0b11111)), // SUBST
@@ -271,8 +271,8 @@ mod tests {
     #[test]
     fn lisp_owned_d5_binding_projection_is_explicit_but_not_global_legacy_meaning() {
         for (legacy_byte, bits) in [
-            (0b0010_1010, 0b10001),
-            (0b0001_0100, 0b10011),
+            (0b0010_1010, 0b10100),
+            (0b0001_0100, 0b10111),
             (0b0010_1101, 0b11100),
             (0b0010_1100, 0b11101),
             (0b1010_1100, 0b11111),
@@ -296,6 +296,18 @@ mod tests {
             None,
             "APPEND must not retain a transitional D5 binding"
         );
+    }
+
+    #[test]
+    fn transitional_d5_binding_never_targets_ratified_selector_slots() {
+        for legacy_byte in [0b0010_1010, 0b0001_0100] {
+            let identity = transitional_d5_binding_identity_from_registry_byte(legacy_byte)
+                .expect("compatibility binding should resolve");
+            assert!(
+                !matches!(identity.packed_bits(), 0b10001 | 0b10011),
+                "REVERSE/QUOTIENT compatibility binding must not target D5 selector coordinates"
+            );
+        }
     }
 
     #[test]
