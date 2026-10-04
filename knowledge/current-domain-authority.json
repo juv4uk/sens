@@ -1,0 +1,43 @@
+{
+  "schema": "current-domain-authority/v1",
+  "authority": "#3327",
+  "date": "2026-10-04",
+  "current_ratified": [
+    "D1",
+    "D2"
+  ],
+  "unratified_research": [
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
+    "D8"
+  ],
+  "mechanical_carriers": [
+    "W1",
+    "W2",
+    "W3",
+    "W4",
+    "W5",
+    "W6",
+    "W7",
+    "W8"
+  ],
+  "callable_core_domains": [],
+  "preserved_evidence": [
+    "#3202",
+    "#3272",
+    "#3305",
+    "#2415",
+    "all prior D3-D8 maps/laws/witnesses"
+  ],
+  "rebuild_order": [
+    "D1+D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6+ higher"
+  ],
+  "rule": "keep evidence; reset authority; no higher-domain premise before lower-domain re-admission"
+}
