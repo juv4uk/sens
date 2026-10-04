@@ -102,6 +102,26 @@ fn every_binder_shape_rejects_canon_names() {
 }
 
 #[test]
+fn macro_expanded_canonical_binder_keeps_immutability_diagnostic() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("core bootstrap for binder regression");
+    let error = eval_program("(let ((car 42)) car)", &mut session)
+        .expect_err("canonical surface must remain immutable through macro expansion");
+    assert_eq!(error.kind, ErrorKind::InvalidForm);
+    assert!(
+        error.message.contains("canonical name is immutable")
+            || error.message.contains("surface routes to immutable function SID"),
+        "unexpected binder diagnostic: {}",
+        error.message
+    );
+    assert!(
+        !error.message.contains("lambda parameter must be a symbol"),
+        "domain lowering must not erase the immutability reason: {}",
+        error.message
+    );
+}
+
+#[test]
 fn ordinary_nonregistry_values_remain_lexical() {
     assert_eq!(
         eval("(def local-add (lambda (x y) (як-є локально))) (local-add 1 2)"),
