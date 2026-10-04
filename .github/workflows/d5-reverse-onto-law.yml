@@ -1,0 +1,15 @@
+name: D5 reverse onto law
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/d5_reverse_onto_law.rs"
+      - ".github/workflows/d5-reverse-onto-law.yml"
+  workflow_dispatch:
+
+jobs:
+  law:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: cargo test -p sens --test d5_reverse_onto_law -- --nocapture
