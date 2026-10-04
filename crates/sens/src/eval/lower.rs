@@ -89,7 +89,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                 return Expr {
                     kind: if is_d3(identity, 0b001) {
                         ExprKind::DomainCall(identity, arguments.into())
-                    } else if is_d3(identity, 0b011) {
+                    } else if is_d3(identity, 0b110) {
                         ExprKind::DomainCall(
                             identity,
                             arguments
