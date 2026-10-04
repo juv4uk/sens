@@ -118,6 +118,7 @@
       ((00000011 kind (00000001 not-callable)) "Type")
       ((00000011 kind (00000001 arity)) "Arity")
       ((00000011 kind (00000001 invalid-form)) "InvalidForm")
+      ((00000011 kind (00000001 type)) "Type")
       (t "UnsupportedMetaError"))))
 
 (00001001 witness-meta-error?
