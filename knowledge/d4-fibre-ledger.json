@@ -1,0 +1,188 @@
+{
+  "schema": "d4-cleanroom-fibre-ledger/v1",
+  "authority": "#3257",
+  "parent_cleanroom": "#3225",
+  "cleanroom_source": "knowledge/d4-cleanroom.json",
+  "atlas_policy": {
+    "authoritative": false,
+    "posterior_only": true,
+    "history_sidecar": "knowledge/d4-history-filtered-bootstrap-candidate.json"
+  },
+  "statuses": [
+    "PROVED-GENERATOR",
+    "REFUTED",
+    "UNKNOWN"
+  ],
+  "certificate_contract": [
+    "both suffix children 0 and 1",
+    "one shared semantic generator equation",
+    "exact suffix-bit meaning",
+    "preserved parent invariant",
+    "parent recovery / factor forgetting",
+    "executable witness",
+    "falsifier",
+    "clean-room premise audit",
+    "evidence reference"
+  ],
+  "fibres": [
+    {
+      "parent": "000",
+      "role": "EMPTY",
+      "status": "UNKNOWN",
+      "children": null,
+      "generator": null,
+      "suffix_meaning": null,
+      "parent_invariant": null,
+      "parent_recovery": null,
+      "witness_ref": null,
+      "falsifier": null,
+      "evidence_refs": [
+        "#3237"
+      ],
+      "reason": "no complete two-child certificate yet"
+    },
+    {
+      "parent": "001",
+      "role": "QUOTE",
+      "status": "UNKNOWN",
+      "children": null,
+      "generator": null,
+      "suffix_meaning": null,
+      "parent_invariant": null,
+      "parent_recovery": null,
+      "witness_ref": null,
+      "falsifier": null,
+      "evidence_refs": [
+        "#3238",
+        "#3254"
+      ],
+      "reason": "current late-bound-construction/stage-entry pair is orthogonal; no common one-factor generator proved"
+    },
+    {
+      "parent": "010",
+      "role": "ATOM",
+      "status": "UNKNOWN",
+      "children": null,
+      "generator": null,
+      "suffix_meaning": null,
+      "parent_invariant": null,
+      "parent_recovery": null,
+      "witness_ref": null,
+      "falsifier": null,
+      "evidence_refs": [
+        "#3239"
+      ],
+      "reason": "no complete two-child certificate yet"
+    },
+    {
+      "parent": "011",
+      "role": "CDR",
+      "status": "PROVED-GENERATOR",
+      "children": {
+        "0": {
+          "code": "0110",
+          "label": "CDAR"
+        },
+        "1": {
+          "code": "0111",
+          "label": "CDDR"
+        }
+      },
+      "generator": "selector-compose",
+      "suffix_meaning": {
+        "0": "compose-CAR",
+        "1": "compose-CDR"
+      },
+      "parent_invariant": "selector path composition",
+      "parent_recovery": "forget appended selector-choice bit",
+      "witness_ref": "#2055/#3244",
+      "falsifier": "non-selector parent does not satisfy selector composition law",
+      "evidence_refs": [
+        "#2055",
+        "#3244",
+        "#3250"
+      ],
+      "reason": "independently proved selector composition positive control"
+    },
+    {
+      "parent": "100",
+      "role": "CAR",
+      "status": "PROVED-GENERATOR",
+      "children": {
+        "0": {
+          "code": "1000",
+          "label": "CAAR"
+        },
+        "1": {
+          "code": "1001",
+          "label": "CADR"
+        }
+      },
+      "generator": "selector-compose",
+      "suffix_meaning": {
+        "0": "compose-CAR",
+        "1": "compose-CDR"
+      },
+      "parent_invariant": "selector path composition",
+      "parent_recovery": "forget appended selector-choice bit",
+      "witness_ref": "#2055/#3244",
+      "falsifier": "non-selector parent does not satisfy selector composition law",
+      "evidence_refs": [
+        "#2055",
+        "#3244",
+        "#3250"
+      ],
+      "reason": "independently proved selector composition positive control"
+    },
+    {
+      "parent": "101",
+      "role": "EQ",
+      "status": "UNKNOWN",
+      "children": null,
+      "generator": null,
+      "suffix_meaning": null,
+      "parent_invariant": null,
+      "parent_recovery": null,
+      "witness_ref": null,
+      "falsifier": null,
+      "evidence_refs": [
+        "#3240",
+        "#3253"
+      ],
+      "reason": "dedicated fibre witness is GREEN but remains pending merge/review before clean-room admission"
+    },
+    {
+      "parent": "110",
+      "role": "COND",
+      "status": "UNKNOWN",
+      "children": null,
+      "generator": null,
+      "suffix_meaning": null,
+      "parent_invariant": null,
+      "parent_recovery": null,
+      "witness_ref": null,
+      "falsifier": null,
+      "evidence_refs": [
+        "#3241",
+        "#3249"
+      ],
+      "reason": "dedicated fibre witness is GREEN but remains pending merge/review before clean-room admission"
+    },
+    {
+      "parent": "111",
+      "role": "CONS",
+      "status": "UNKNOWN",
+      "children": null,
+      "generator": null,
+      "suffix_meaning": null,
+      "parent_invariant": null,
+      "parent_recovery": null,
+      "witness_ref": null,
+      "falsifier": null,
+      "evidence_refs": [
+        "#3242"
+      ],
+      "reason": "no complete two-child certificate yet"
+    }
+  ]
+}
