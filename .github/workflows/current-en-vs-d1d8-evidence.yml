@@ -1,0 +1,18 @@
+name: Current English vs D1-D8 evidence
+
+on:
+  pull_request:
+    paths:
+      - 'benchmarks/current-en-vs-d1d8/**'
+      - '.github/workflows/current-en-vs-d1d8-evidence.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Test paired evidence validator
+        run: python3 -m unittest discover -s benchmarks/current-en-vs-d1d8/tests -p 'test_*.py'
