@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#3001 initial D1-D8 exact-domain carrier/runtime benchmark."""
+"""#3001 W1-W8 exact-width carrier/runtime mechanism benchmark."""
 
 from __future__ import annotations
 
@@ -111,15 +111,15 @@ def main() -> int:
         "machine": platform.machine(),
         "iterations": args.iterations,
         "reps": args.reps,
-        "scope": "D1-D8 exact source-word -> DomainIdentity carrier/runtime",
-        "semantic_authority": "none; benchmark consumes production APIs only",
+        "scope": "W1-W8 exact source-word -> DomainIdentity carrier/runtime mechanics",
+        "semantic_authority": "D1-D4 + D7 current; W5/W6/W8 mechanical/research only; benchmark admits no semantics",
     }
     (args.out_dir / "environment.json").write_text(
         json.dumps(environment, indent=2) + "\n", encoding="utf-8"
     )
 
     lines = [
-        "# Ratified D1-D8 exact-domain benchmark — initial carrier/runtime slice",
+        "# W1-W8 exact-width mechanism benchmark — carrier/runtime slice",
         "",
         f"Cachegrind I refs, paired empty-loop subtraction, median of {args.reps} runs, "
         f"{args.iterations:,} iterations.",
@@ -140,15 +140,15 @@ def main() -> int:
     lines += [
         "",
         "Correctness invariants checked before measurement:",
-        "- D1..D8 exact source words round-trip through DomainIdentity;",
+        "- W1..W8 exact source words round-trip through DomainIdentity mechanically;",
         "- equal payload=1 at widths 1..8 never collapses;",
-        "- D1/D2/D7 fail the callable-Core projection;",
-        "- D3/D4/D5/D6/D8 retain the callable projection boundary only; "
-        "this benchmark does not infer execution law from width.",
+        "- current D1/D2/D7 remain non-callable at the Core projection boundary;",
+        "- current D3/D4 may project to admitted Core operations; W5/W6/W8 fail closed while unratified;",
+        "- no benchmark row infers semantic admission or execution law from width.",
         "",
         "Deferred lanes:",
         "- packed/framing accounting follows #3026/#2833;",
-        "- registry/surface comparisons follow the full 510-owner projection -> #2992;",
+        "- registry/surface comparisons require the current exact-domain projection; revoked donor maps are excluded;",
         "- domain-law execution benchmarks are separate from carrier cost.",
         "",
     ]
