@@ -37,11 +37,13 @@ D1  PredicateBit
 D2  racana2 structure
 D3  bija3 foundation
 D4  bootstrap domain
-D5  owner-ratified five-bit domain
+D5  owner-ratified five-bit domain, 32/32 occupied; local-algebra federation
 D6  owner-ratified six-bit domain
 D7  Sound7 + local śloka/sūtra ordinal domain
 D8  owner-ratified exact eight-bit Core domain
 ```
+
+Core.D5 has no universal fifth-bit/suffix theorem: its semantic organization is a federation of independently replayable local laws, plus explicit coordinate/historical organization where no such local law is proved. Current occupancy is 32/32; SHADOW remap research does not change CURRENT authority without a separate owner re-ratification.
 
 Equal packed bits in two domains do not imply equal identity. In particular Core.D8 is not historical Sens8 merely because both occupy eight physical bits. D7 is Sound7/local-ordinal identity and does not inherit selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
 

@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""#2583/#2593 — current-main post-D4 factor independence gate.
+"""#2583/#2593 — post-D4 factor independence gate.
+
+Authority note:
+- this benchmark preserves a HISTORICAL-PRE-OD005 structural snapshot;
+- its 8-generated + 24-UNKNOWN accounting is research provenance, not current occupancy;
+- current Core.D5 owner occupancy is 32/32 with UNKNOWN=0 under OD-005;
+- #3055 owns the ratified internal-law doctrine.
 
 Consumes only evidence already landed on main:
 - #2522/#2530 protocol cube;
@@ -233,6 +239,13 @@ def main() -> int:
         "binary_object": "UNPLACED",
         "declared_corpus": "completed 19-row Early-Lisp historical dataset factored against current D1-D4 and post-D4 witnesses",
         "results": results,
+        "authority_scope": "HISTORICAL-PRE-OD005",
+        "current_owner_authority": {
+            "authority": "OD-005/#2750",
+            "occupied": 32,
+            "unknown": 0,
+            "internal_law": "#3055",
+        },
         "summary": {
             "historical_rows_consumed": 19,
             "factors_tested": 7,
@@ -282,7 +295,9 @@ def main() -> int:
         "- external root theorems preserved: 1 (RETURN, #2488/#2504);",
         "- new D5 residents: 0;",
         "- coordinates allocated: 0;",
-        "- D5 map remains 8 selector-generated + 24 UNKNOWN/free.",
+        "- historical PRE-OD005 snapshot: 8 selector-generated + 24 UNKNOWN/free;",
+        "- current OD-005 occupancy authority: 32/32 occupied, UNKNOWN=0;",
+        "- this factor model does not mutate current occupancy.",
         "",
         "Seven corpus facts are not seven roots or seven bits.",
         "",
@@ -297,8 +312,10 @@ def main() -> int:
     print("external-root-theorems=1")
     print("new-d5-residents=0")
     print("coordinates-allocated=0")
-    print("d5-selector-generated=8")
-    print("d5-unknown-free=24")
+    print("historical-pre-od005-selector-generated=8")
+    print("historical-pre-od005-unknown-free=24")
+    print("current-od005-occupied=32")
+    print("current-od005-unknown=0")
     print("RULE=seven-corpus-facts-are-not-seven-roots")
     return 0
 
