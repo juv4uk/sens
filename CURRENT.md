@@ -1,70 +1,70 @@
 # CURRENT — where the truth actually lives
 
-Українською: це єдина точка входу для «що зараз чинне». Якщо будь-який інший документ, включно з архівом, застарілим планом чи старим рев'ю, суперечить джерелам нижче — **чинні джерела нижче перемагають**. `docs/archive/**` зберігає історію, але не є специфікацією.
+Це єдина точка входу для питання «що зараз чинне». Owner reset **#3327** скасовує всі semantic ratification вище D2.
 
-This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosystem/issues/5): **one active truth, many preserved histories**. Read this first. Historical material may explain how SENS arrived here, but it cannot override current contract and executable evidence.
+## Current authority
 
-## Authority order (highest wins)
+```text
+D1  RATIFIED / CURRENT
+    PredicateBit: 0 = NO, 1 = YES
 
-1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.3 domain-qualified observable language contract.
-   - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
-   - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are D1-D5 and D7. D5 is re-ratified by #3305 after the #3278 reset; D6/D8 remain UNRATIFIED/RESEARCH under #3278. Historical Sens8/Sid8 is compatibility/provenance only.
-2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
-3. **Reference implementation and substrates**
-   - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
-   - Independent substrates such as C, WASM, FPGA, GraalVM, Common Lisp, Prolog, Datalog, and CLIPS may execute or observe admitted behavior without becoming semantic authority.
-4. **Active plans and standing doctrine** — [`AGENTS.md`](AGENTS.md), [`docs/agent-doctrine.md`](docs/agent-doctrine.md), [`PLAN.md`](PLAN.md), [`STATUS.md`](STATUS.md), [`ecosystem-status.md`](ecosystem-status.md), and the currently active scoped plans they reference.
-5. **Tests and evidence** — `cargo test --workspace`, `--oracle-check`, focused witnesses, and CI prove what the implementation currently satisfies. A claim without executable or source evidence is a hypothesis, not a fact.
+D2  RATIFIED / CURRENT
+    racanā2: 00 separator, 01 close, 10 open, 11 dot
 
-## Current identity rule
+D3  UNRATIFIED / RESEARCH
+D4  UNRATIFIED / RESEARCH
+D5  UNRATIFIED / RESEARCH
+D6  UNRATIFIED / RESEARCH
+D7  UNRATIFIED / RESEARCH
+D8  UNRATIFIED / RESEARCH
+```
 
-The language is **sens / СЕНС**.
+Current contract: **Contract 11.4** in `language-contract.lisp`.
+
+## Meaning of #3327
+
+- #1699 D1 and #1702 D2 remain current authority.
+- #3202 D3, #3272 D4, #3305 D5, #2415 D7, and every other D3-D8 occupancy/placement ratification are revoked.
+- Old D3-D8 maps, proofs, tests, benchmarks and implementation work remain evidence/provenance only.
+- W1-W8 exact-width carriers remain mechanical objects. Parsing, packing or serialization does not imply semantic admission.
+- D3-D8 callable/Core-operation admission fails closed until a new explicit owner ratification.
+
+## Rebuild order
+
+```text
+D1 + D2
+   ↓
+derive D3
+   ↓
+derive D4 from accepted D3
+   ↓
+derive D5 from accepted D3→D4 tree
+   ↓
+continue upward
+```
+
+A higher-domain result cannot be used as a premise before the lower-domain chain supporting it is current again.
+
+## Authority order
+
+1. `language-contract.lisp` + owner reset #3327.
+2. D1/D2 ratified decisions.
+3. Executable witnesses that do not claim revoked D3-D8 semantic authority.
+4. Research maps / old ratifications as evidence only.
+5. Historical Sens8/Sid8/Function8 as compatibility/provenance only.
+
+## Current identity discipline
 
 ```text
 semantic object
 =
-exact binary number
+exact binary object
 + exact domain
-+ admitted / proved law
++ CURRENT admitted/proved law
 ```
 
-Current Core examples:
+For D3-D8 today the final term is absent. Those widths are research carriers, not current semantic residents.
 
-```text
-D1  PredicateBit
-D2  racana2 structure
-D3  bīja3 foundation — 000 (), 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS
-D4  full compact bootstrap — 0000 APPLY, 0001 EVAL, 0010 LAMBDA, 0011 DEFINE, 0100 NOT, 0101 NULL, 0110 CDAR, 0111 CDDR, 1000 CAAR, 1001 CADR, 1010 LOOKUP, 1011 BIND, 1100 EVCON, 1101 EVLIS, 1110 LIST, 1111 APPEND
-D5  full compact 32/32 — owner-ratified #3305; canonical map in knowledge/d5-ratified.json
-D6  UNRATIFIED / RESEARCH — clean-room rebuild #3280
-D7  Sound7 + local śloka/sūtra ordinal domain
-D8  UNRATIFIED / RESEARCH — clean-room rebuild #3281
-```
+## For agents
 
-Owner ratification #3202 fixes the D3/bīja3 A map above under laws L1–L5. Owner ratification #3272 fixes the full compact D4 16/16 map above; intermediate clean-room D4 maps are research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
-
-Equal packed bits in two domains do not imply equal identity. In particular an eight-bit D8 research carrier is not historical Sens8 merely because both occupy eight physical bits. D7 is Sound7/local-ordinal identity and does not inherit selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
-
-Historical exact-eight-bit Sens8/Sid8/Function8 forms remain bounded compatibility, transport, backend and provenance mechanisms while #2817 migrates runtime consumers. They are not current universal semantic authority.
-
-Structural `()` is the admitted Core.D3 `000` object. It is not historical exact-eight-bit `00000000`, PredicateBit `0`, or Number zero; those equal-looking numeric payloads remain distinct across domains.
-
-Historical McCarthy names remain useful when discussing the 1960 evaluator, Core1, migration evidence, or provenance. They do not create a second current identity ontology.
-
-## What is explicitly NOT authoritative
-
-- **`docs/archive/**`** — preserved superseded designs, completed plans, research spikes, historical audits, and reactions.
-- Any dated report or PoC not explicitly promoted into the current authority chain.
-- A host implementation detail merely because it is implemented in Rust, C, Java, Common Lisp, Prolog, Datalog, CLIPS, or another executor.
-- A peer agent's report that something is fixed without a verifiable commit/test/CI witness.
-- A human surface spelling as a substitute for the exact domain-qualified semantic object it routes to.
-
-## For a new agent starting cold
-
-1. Read `AGENTS.md` and `docs/agent-doctrine.md`.
-2. Read `language-contract.lisp` and this file before trusting older design prose.
-3. Read `lib/surface/semantic-registry.lisp` only as transitional routing/compatibility metadata; do not infer domain membership or meaning from a spelling or eight-bit row.
-4. Inspect `crates/sens` for the current Rust reference mechanism and the relevant executable witnesses for the behavior being changed.
-5. Run the focused tests for your slice and then the applicable repository gates before claiming the change works.
+Do not implement or infer D3-D8 placement from old ratification files. Start from D1/D2 and re-derive. Preserve old evidence; do not treat it as authority.
