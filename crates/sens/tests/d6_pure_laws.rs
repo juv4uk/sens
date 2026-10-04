@@ -195,8 +195,9 @@ fn expt_is_repeated_multiplication_over_nonnegative_integers() {
         (define d6-expt
           (lambda (base exponent)
             (cond
-              ((= exponent 0) 1)
-              (t (* base (d6-expt base (- exponent 1)))))))
+              ((тотожне? exponent 0) 1)
+              ((не (тотожне? exponent 0))
+               (* base (d6-expt base (- exponent 1)))))))
     "#;
 
     for x in ["-3", "0", "2", "7"] {
@@ -218,8 +219,9 @@ fn gcd_is_euclidean_fold_over_remainder() {
         (define d6-gcd
           (lambda (a b)
             (cond
-              ((= b 0) (abs a))
-              (t (d6-gcd b (mod a b))))))
+              ((тотожне? b 0) (abs a))
+              ((не (тотожне? b 0))
+               (d6-gcd b (mod a b))))))
     "#;
 
     for (a, b, expected) in [
@@ -346,15 +348,17 @@ fn take_drop_form_a_lossless_list_split() {
         (define d6-take
           (lambda (n xs)
             (cond
-              ((= n 0) (quote ()))
-              ((= (length xs) 0) (quote ()))
-              (t (cons (car xs) (d6-take (- n 1) (cdr xs)))))))
+              ((тотожне? n 0) (quote ()))
+              ((атом? xs) (quote ()))
+              ((не (атом? xs))
+               (cons (car xs) (d6-take (- n 1) (cdr xs)))))))
         (define d6-drop
           (lambda (n xs)
             (cond
-              ((= n 0) xs)
-              ((= (length xs) 0) (quote ()))
-              (t (d6-drop (- n 1) (cdr xs))))))
+              ((тотожне? n 0) xs)
+              ((атом? xs) (quote ()))
+              ((не (атом? xs))
+               (d6-drop (- n 1) (cdr xs))))))
     "#;
 
     let xs = "(a b c d)";
@@ -385,17 +389,18 @@ fn while_and_do_are_tail_iteration_laws() {
           (lambda (pred step state)
             (cond
               ((pred state) (d6-while pred step (step state)))
-              (t state))))
+              ((не (pred state)) state))))
         (define d6-do
           (lambda (step done result state)
             (cond
               ((done state) (result state))
-              (t (d6-do step done result (step state))))))
+              ((не (done state))
+               (d6-do step done result (step state))))))
     "#;
 
     assert_same(
         &format!(
-            "{prelude} (d6-while (lambda (x) (< x 5)) (lambda (x) (+ x 1)) 0)"
+            "{prelude} (d6-while (lambda (x) (не (тотожне? x 5))) (lambda (x) (+ x 1)) 0)"
         ),
         "5",
     );
@@ -405,7 +410,7 @@ fn while_and_do_are_tail_iteration_laws() {
             "{prelude}
              (d6-do
                (lambda (x) (+ x 2))
-               (lambda (x) (= x 10))
+               (lambda (x) (тотожне? x 10))
                (lambda (x) (* x 3))
                0)"
         ),
@@ -419,9 +424,9 @@ fn zip_unzip_are_product_inverses_on_equal_length_lists() {
         (define d6-zip
           (lambda (xs ys)
             (cond
-              ((= (length xs) 0) (quote ()))
-              ((= (length ys) 0) (quote ()))
-              (t
+              ((атом? xs) (quote ()))
+              ((атом? ys) (quote ()))
+              ((не (атом? xs))
                (cons
                  (list (car xs) (car ys))
                  (d6-zip (cdr xs) (cdr ys)))))))
@@ -450,8 +455,8 @@ fn scan_exposes_prefix_reductions_and_ends_at_reduce() {
         (define d6-scan
           (lambda (f acc xs)
             (cond
-              ((= (length xs) 0) (quote ()))
-              (t
+              ((атом? xs) (quote ()))
+              ((не (атом? xs))
                ((lambda (next)
                   (cons next (d6-scan f next (cdr xs))))
                 (f acc (car xs)))))))
@@ -488,35 +493,42 @@ fn any_all_form_a_predicate_dual_pair() {
         (define d6-any
           (lambda (pred xs)
             (cond
-              ((= (length xs) 0) 0)
-              ((pred (car xs)) 1)
-              (t (d6-any pred (cdr xs))))))
+              ((атом? xs) (тотожне? 0 1))
+              ((pred (car xs)) (тотожне? 0 0))
+              ((не (pred (car xs)))
+               (d6-any pred (cdr xs))))))
         (define d6-all
           (lambda (pred xs)
             (cond
-              ((= (length xs) 0) 1)
+              ((атом? xs) (тотожне? 0 0))
               ((pred (car xs)) (d6-all pred (cdr xs)))
-              (t 0))))
+              ((не (pred (car xs))) (тотожне? 0 1)))))
     "#;
 
-    for xs in ["()", "(1)", "(1 2 3)", "(1 0 3)", "(-1 2 3)"] {
+    for (xs, all_nonzero, any_zero) in [
+        ("()", "1", "0"),
+        ("(1)", "1", "0"),
+        ("(1 2 3)", "1", "0"),
+        ("(1 0 3)", "0", "1"),
+    ] {
         assert_same(
             &format!(
-                "{prelude}
-                 (+
-                   (d6-all (lambda (x) (> x 0)) (quote {xs}))
-                   (d6-any (lambda (x) (<= x 0)) (quote {xs})))"
+                "{prelude} (d6-all (lambda (x) (не (тотожне? x 0))) (quote {xs}))"
             ),
-            "1",
+            all_nonzero,
+        );
+        assert_same(
+            &format!(
+                "{prelude} (d6-any (lambda (x) (тотожне? x 0)) (quote {xs}))"
+            ),
+            any_zero,
         );
     }
 
     assert_same(
-        &format!("{prelude} (d6-any (lambda (x) (= x 2)) (quote (1 2 3)))"),
-        "1",
-    );
-    assert_same(
-        &format!("{prelude} (d6-all (lambda (x) (> x 0)) (quote (1 2 3)))"),
+        &format!(
+            "{prelude} (d6-any (lambda (x) (тотожне? x 2)) (quote (1 2 3)))"
+        ),
         "1",
     );
 }
@@ -525,44 +537,51 @@ fn any_all_form_a_predicate_dual_pair() {
 #[test]
 fn integerp_rationalp_derive_from_canonical_exact_q_wire() {
     let prelude = r##"
+        (define d6-yes
+          (lambda () (тотожне? 0 0)))
+        (define d6-no
+          (lambda () (тотожне? 0 1)))
         (define d6-wire-denominator-one?
           (lambda (text)
             (cond
-              ((string-empty? text) (quote ()))
-              ((eq (string-first text) "/")
+              ((тотожне? text "") (d6-no))
+              ((тотожне? (string-first text) "/")
                ((lambda (rest)
                   (cond
-                    ((string-empty? rest) (quote ()))
-                    ((eq (string-first rest) "1")
+                    ((тотожне? rest "") (d6-no))
+                    ((тотожне? (string-first rest) "1")
                      (cond
-                       ((string-empty? (string-rest rest)) t)
-                       (t (quote ()))))
-                    (t (quote ()))))
+                       ((тотожне? (string-rest rest) "") (d6-yes))
+                       ((не (тотожне? (string-rest rest) "")) (d6-no))))
+                    ((не (тотожне? (string-first rest) "1")) (d6-no))))
                 (string-rest text)))
-              (t (d6-wire-denominator-one? (string-rest text))))))
+              ((не (тотожне? (string-first text) "/"))
+               (d6-wire-denominator-one? (string-rest text))))))
         (define d6-rationalp
           (lambda (value)
-            (string-prefix? "#q2:" (write-to-string value))))
+            (тотожне?
+              (string-prefix? "#q2:" (write-to-string value))
+              (quote t))))
         (define d6-integerp
           (lambda (value)
             (cond
               ((d6-rationalp value)
                (d6-wire-denominator-one? (write-to-string value)))
-              (t (quote ())))))
+              ((не (d6-rationalp value)) (d6-no)))))
     "##;
 
     for x in ["0", "1", "-7", "42", "3.00"] {
-        assert_same(&format!("{prelude} (d6-rationalp {x})"), "t");
-        assert_same(&format!("{prelude} (d6-integerp {x})"), "t");
+        assert_same(&format!("{prelude} (d6-rationalp {x})"), "1");
+        assert_same(&format!("{prelude} (d6-integerp {x})"), "1");
     }
 
     for x in ["1/2", "-5/4", "10/20"] {
-        assert_same(&format!("{prelude} (d6-rationalp {x})"), "t");
-        assert_same(&format!("{prelude} (d6-integerp {x})"), "(quote ())");
+        assert_same(&format!("{prelude} (d6-rationalp {x})"), "1");
+        assert_same(&format!("{prelude} (d6-integerp {x})"), "0");
     }
 
     for x in ["(quote alpha)", "\"text\"", "(quote (a b))"] {
-        assert_same(&format!("{prelude} (d6-rationalp {x})"), "(quote ())");
-        assert_same(&format!("{prelude} (d6-integerp {x})"), "(quote ())");
+        assert_same(&format!("{prelude} (d6-rationalp {x})"), "0");
+        assert_same(&format!("{prelude} (d6-integerp {x})"), "0");
     }
 }
