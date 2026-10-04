@@ -1,0 +1,140 @@
+{
+  "schema": "d4-history-filtered-bootstrap-candidate/v3",
+  "authority": "posterior-history-candidate-only",
+  "parent_issue": 3225,
+  "rule": "history may propose/posterior-check capabilities; it must not seed clean-room placement; D1-D3 fibre certificates remain authoritative",
+  "evidence": {
+    "necessity": "#2156 and Core1 #1132",
+    "pairing": "#2162 interpreted by semantic roles only, not old coordinates",
+    "cleanroom_late_binding": "#3229/#3235",
+    "cleanroom_reentry": "#3230/#3233"
+  },
+  "rows": [
+    {
+      "code": "0000",
+      "parent": "000 EMPTY",
+      "name": "APPLY",
+      "status": "derived-bootstrap",
+      "reason": "execute an already-resolved callable with supplied arguments"
+    },
+    {
+      "code": "0001",
+      "parent": "000 EMPTY",
+      "name": "EVAL",
+      "status": "derived-bootstrap",
+      "reason": "interpret a represented expression in context"
+    },
+    {
+      "code": "0010",
+      "parent": "001 QUOTE",
+      "name": "LAMBDA",
+      "status": "irreducible-bootstrap-capability",
+      "reason": "construct late-bound executable behavior; independently supported by #3229/#3235"
+    },
+    {
+      "code": "0011",
+      "parent": "001 QUOTE",
+      "name": "DEFINE",
+      "status": "irreducible-bootstrap-capability",
+      "reason": "persistent named binding / recursion entry required by self-host bootstrap evidence"
+    },
+    {
+      "code": "0100",
+      "parent": "010 ATOM",
+      "name": "NOT",
+      "status": "derived-convenience",
+      "reason": "predicate complement expressible from PredicateBit/COND"
+    },
+    {
+      "code": "0101",
+      "parent": "010 ATOM",
+      "name": "UNALLOCATED",
+      "status": "hole",
+      "reason": "no necessary historical capability survives derivability filter"
+    },
+    {
+      "code": "0110",
+      "parent": "011 CDR",
+      "name": "CDAR",
+      "status": "generated-selector",
+      "reason": "selector composition"
+    },
+    {
+      "code": "0111",
+      "parent": "011 CDR",
+      "name": "CDDR",
+      "status": "generated-selector",
+      "reason": "selector composition"
+    },
+    {
+      "code": "1000",
+      "parent": "100 CAR",
+      "name": "CAAR",
+      "status": "generated-selector",
+      "reason": "selector composition"
+    },
+    {
+      "code": "1001",
+      "parent": "100 CAR",
+      "name": "CADR",
+      "status": "generated-selector",
+      "reason": "selector composition"
+    },
+    {
+      "code": "1010",
+      "parent": "101 EQ",
+      "name": "LOOKUP",
+      "status": "derived-bootstrap",
+      "reason": "identity-keyed environment read"
+    },
+    {
+      "code": "1011",
+      "parent": "101 EQ",
+      "name": "BIND",
+      "status": "derived-bootstrap",
+      "reason": "identity-keyed environment extension"
+    },
+    {
+      "code": "1100",
+      "parent": "110 COND",
+      "name": "EVCON",
+      "status": "derived-bootstrap",
+      "reason": "conditional evaluator helper"
+    },
+    {
+      "code": "1101",
+      "parent": "110 COND",
+      "name": "EVLIS",
+      "status": "derived-bootstrap",
+      "reason": "list-of-expressions evaluator helper"
+    },
+    {
+      "code": "1110",
+      "parent": "111 CONS",
+      "name": "LIST",
+      "status": "derived-convenience",
+      "reason": "finite list construction from CONS / variadic binding"
+    },
+    {
+      "code": "1111",
+      "parent": "111 CONS",
+      "name": "UNALLOCATED",
+      "status": "hole",
+      "reason": "no necessary historical capability survives derivability filter"
+    }
+  ],
+  "excluded_historical": [
+    "LABEL",
+    "FUNCTION/FUNARG",
+    "EVALQUOTE",
+    "PAIR/PAIRLIS",
+    "ASSOC",
+    "APPEND",
+    "SUBST/SUBLIS",
+    "MAPLIST"
+  ],
+  "note": "Posterior history/bootstrap comparison only. This file cannot admit D4 residents or seed clean-room placement.",
+  "may_seed_cleanroom": false,
+  "cleanroom_authority": "knowledge/d4-cleanroom.json",
+  "quarantine_issue": "#3260"
+}
