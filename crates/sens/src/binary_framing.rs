@@ -1,4 +1,5 @@
-use crate::{BinaryNumber, Rational, Sens8, Text7};
+use crate::BinaryNumber;
+use crate::{Rational, Sens8, Text7};
 use crate::DomainIdentity;
 use std::fmt;
 
