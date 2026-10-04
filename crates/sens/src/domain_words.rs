@@ -103,10 +103,11 @@ impl CoreD4 {
 }
 
 
-/// Exact five-bit mechanical/research carrier historically named CoreD5.
+/// Exact five-bit carrier for the ratified Core.D5 domain.
 ///
-/// D5 semantic ratification is revoked by #3278. This type preserves exact
-/// width only and does not prove current Core.D5 membership or resident meaning.
+/// D5 semantic membership is current under Contract 11.4 / #3331 / #3305.
+/// This type preserves exact width-qualified identity; resident meaning and
+/// runtime callability remain owned by the ratified map and per-resident law.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD5(Bit5);
