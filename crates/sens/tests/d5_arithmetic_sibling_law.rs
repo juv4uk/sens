@@ -33,8 +33,10 @@ fn owner_map_has_the_expected_arithmetic_siblings_without_d4_parents() {
     let d4_add_prefix = record(WIDTHS, r#""word": "0101""#, 260);
     let d4_mul_prefix = record(WIDTHS, r#""word": "1001""#, 260);
 
-    assert!(d4_add_prefix.contains(r#""status": "unallocated""#));
-    assert!(d4_mul_prefix.contains(r#""status": "unallocated""#));
+    assert!(d4_add_prefix.contains(r#""human_label_optional": "NULL""#));
+    assert!(d4_add_prefix.contains(r#""status": "admitted""#));
+    assert!(d4_mul_prefix.contains(r#""human_label_optional": "CADR""#));
+    assert!(d4_mul_prefix.contains(r#""status": "generated""#));
 }
 
 #[test]
