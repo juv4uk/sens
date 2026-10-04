@@ -1,0 +1,36 @@
+name: D4 clean-room late binding research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d4-cleanroom-late-binding/**"
+      - ".github/workflows/d4-cleanroom-late-binding.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d4-cleanroom-late-binding/**"
+      - ".github/workflows/d4-cleanroom-late-binding.yml"
+  workflow_dispatch:
+
+jobs:
+  lower-bound:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run clean-room late-binding lower bound
+        run: |
+          rm -rf /tmp/d4-cleanroom-late-binding
+          python3 benchmarks/d4-cleanroom-late-binding/run.py             --out /tmp/d4-cleanroom-late-binding
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d4-cleanroom-late-binding/report.md; then
+            cat /tmp/d4-cleanroom-late-binding/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d4-cleanroom-late-binding
+          path: /tmp/d4-cleanroom-late-binding/
+          retention-days: 14
