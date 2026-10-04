@@ -379,17 +379,10 @@ impl Parser<'_> {
         }
 
         if let Some(payload) = explicit_radix_payload(token, "#b") {
-            let Some(rational) =
-                crate::value::Rational::from_binary_wire_parts(payload, "1")
-            else {
-                return Err(self.error("invalid #b exact-integer projection", start, self.cursor));
-            };
-            let kind = match rational.as_precise_i64() {
-                Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
-                None => ExprKind::Rational(rational),
-            };
+            let number = crate::BinaryNumber::parse(payload)
+                .map_err(|_| self.error("invalid canonical binary Number", start, self.cursor))?;
             return Ok(Expr {
-                kind,
+                kind: ExprKind::BinaryNumber(number),
                 span: Span { start, end: self.cursor },
             });
         }
