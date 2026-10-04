@@ -1,11 +1,9 @@
-; #1131 / #1703 — four Core roles under one SENS language.
+; #1131 / #1703 / #2367 — historical Core roles under one active SENS Core.
 ;
-; A Core profile selects an execution/research role and may select mechanisms.
-; It does not select a different meaning for the shared predicate/control
-; foundation.
-;
-; Historical profile semantics remain provenance in git history. They are not
-; active language authority.
+; lib/core.lisp is the one active language bootstrap. Numbered Core sources
+; remain provenance, compatibility study or laboratory evidence. A historical
+; profile may select a research/mechanism viewpoint; it does not select a
+; different language identity or foundation law.
 
 (core-profile-contract/2
   ((identity . authority)
@@ -56,20 +54,26 @@
    (status . experimental))
 
   ((identity . core4)
-   (role . current-creative-language)
+   (role . historical-creative-profile)
    (execution-source . "lib/core4.lisp")
-   (fasl-source . "lib/core4.lisp.fasl")
-   (compatibility-donor . "lib/core.lisp")
-   (status . admitted))
+   (historical-semantics . provenance-only)
+   (status . historical))
+
+  ((identity . active-core)
+   (role . current-language-bootstrap)
+   (execution-source . "lib/core.lisp")
+   (fasl-source . "lib/core.lisp.fasl")
+   (numbered-core-authority . forbidden)
+   (status . active))
 
   ((identity . public-api-discovery)
-   (current-profile-source . "lib/core4.lisp")
-   (public-api-excluded-source . "lib/core.lisp")
+   (current-profile-source . "lib/core.lisp")
    (public-api-excluded-source . "lib/core1.lisp")
    (public-api-excluded-source . "lib/core1-compiler-sid-resolver.lisp")
    (public-api-excluded-source . "lib/core1-sid8-bootstrap-overlay.lisp")
    (public-api-excluded-source . "lib/core2.lisp")
-   (public-api-excluded-source . "lib/core3.lisp"))
+   (public-api-excluded-source . "lib/core3.lisp")
+   (public-api-excluded-source . "lib/core4.lisp"))
 
   ((identity . profile-selection)
    (role . mechanism-selection-only)
