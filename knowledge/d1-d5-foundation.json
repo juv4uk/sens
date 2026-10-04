@@ -1,0 +1,135 @@
+{
+  "schema": "d1-d5-foundation-ratification/v1",
+  "status": "owner-ratified",
+  "authority": "#3331",
+  "date": "2026-10-05",
+  "current_domains": [
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5"
+  ],
+  "research_domains": [
+    "D6",
+    "D7",
+    "D8"
+  ],
+  "identity_rule": "exact bits + exact domain + admitted/proved law",
+  "supersedes_for_current_authority": [
+    "#3327 D3-D5 revocation"
+  ],
+  "preserves_as_research_boundary": [
+    "#3327 D6-D8 reset"
+  ],
+  "domains": {
+    "D1": {
+      "width": 1,
+      "authority": "#1699",
+      "residents": {
+        "0": "NO",
+        "1": "YES"
+      }
+    },
+    "D2": {
+      "width": 2,
+      "authority": "#1702",
+      "residents": {
+        "10": "OPEN",
+        "11": "DOT",
+        "00": "SEPARATOR",
+        "01": "CLOSE"
+      }
+    },
+    "D3": {
+      "width": 3,
+      "authority": "#3202",
+      "residents": {
+        "100": "CAR",
+        "101": "EQ",
+        "110": "COND",
+        "111": "CONS",
+        "000": "EMPTY",
+        "001": "QUOTE",
+        "010": "ATOM",
+        "011": "CDR"
+      }
+    },
+    "D4": {
+      "width": 4,
+      "authority": "#3272",
+      "residents": {
+        "1000": "CAAR",
+        "1001": "CADR",
+        "1010": "LOOKUP",
+        "1011": "BIND",
+        "1100": "EVCON",
+        "1101": "EVLIS",
+        "1110": "LIST",
+        "1111": "APPEND",
+        "0000": "APPLY",
+        "0001": "EVAL",
+        "0010": "LAMBDA",
+        "0011": "DEFINE",
+        "0100": "NOT",
+        "0101": "NULL",
+        "0110": "CDAR",
+        "0111": "CDDR"
+      }
+    },
+    "D5": {
+      "width": 5,
+      "authority": "#3331 via #3305/#3330",
+      "residents": {
+        "10000": "CAAAR",
+        "10001": "CAADR",
+        "10010": "CADAR",
+        "10011": "CADDR",
+        "10100": "REVERSE",
+        "10101": "REVERSE-ONTO",
+        "10110": "TIMES",
+        "10111": "QUOTIENT",
+        "11000": "GO",
+        "11001": "RETURN",
+        "11010": "LESSP",
+        "11011": "GREATERP",
+        "11100": "ASSOC",
+        "11101": "MEMBER",
+        "11110": "PAIRLIS",
+        "11111": "SUBST",
+        "00000": "EVALQUOTE",
+        "00001": "FUNCTION",
+        "00010": "FEXPR",
+        "00011": "MACRO",
+        "00100": "LABEL",
+        "00101": "PROG",
+        "00110": "SET",
+        "00111": "SETQ",
+        "01000": "ZEROP",
+        "01001": "NUMBERP",
+        "01010": "PLUS",
+        "01011": "DIFFERENCE",
+        "01100": "CDAAR",
+        "01101": "CDADR",
+        "01110": "CDDAR",
+        "01111": "CDDDR"
+      },
+      "relation_classes": {
+        "COORDINATE-HISTORICAL": 4,
+        "MULTI-DELTA-FAMILY": 2,
+        "LOCAL-ALGEBRA": 5,
+        "SEMANTIC-GENERATOR": 5
+      }
+    }
+  },
+  "laws": [
+    "D1 PredicateBit 0/1 is distinct from structural EMPTY and Number zero",
+    "D2 is structural syntax only",
+    "D3 follows owner-ratified L1-L5",
+    "D4 is dense 16/16; compact residency does not imply primitive irreducibility",
+    "D5 is dense 32/32 with zero lower-domain duplicates and no universal fifth-bit meaning",
+    "width alone never grants semantic admission or callability",
+    "legacy SID8/Sens8/Function8 coordinates have zero current placement authority"
+  ],
+  "d6_entry_rule": "derive D6 only from this exact D1-D5 foundation plus independent D6 laws; old D6 maps are donor/provenance only"
+}
