@@ -316,7 +316,7 @@
         "canonical_result_domain": "Core.D1",
         "canonical_yes": "1",
         "canonical_no": "0",
-        "runtime_transition_debt": "t/() until #3060 lands"
+        "runtime_transition_debt": "NONE — exact D5 MEMBER returns Core.D1 PredicateBit via #3060"
       },
       "relation_class": "MULTI-DELTA-FAMILY",
       "law_kind": "search-family",
