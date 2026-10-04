@@ -8,8 +8,9 @@ pub enum ErrorKind {
     Arity,
     Type,
     InvalidForm,
-    /// A structurally valid canonical three-part `cond` exhausted without
-    /// any query result matching its explicit expected datum.
+    /// Historical/migration COND exhausted without an explicit expected-result
+    /// match. Canonical exact-domain D3:011 exhaustion returns structural EMPTY
+    /// under #3161 and does not use this error.
     UnsatisfiedConditional,
     MechanismUnavailable,
     /// A resource limit was hit, not a logic error — S3's own example
