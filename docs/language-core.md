@@ -64,7 +64,10 @@ carrier existence
 
 PredicateBit не є Number, host Bool, T/NIL або structural empty.
 
-Третього predicate-result немає.
+Для **total predicate** результат завжди рівно D1: `0` або `1`.
+Окремо, явно оголошений **partial predicate** може повернути D3:000 `()`
+як EMPTY/no-witness — це відсутність відповіді, а не третє значення D1 і не
+синонім `0`.
 
 ---
 
@@ -102,7 +105,10 @@ PredicateBit не є Number, host Bool, T/NIL або structural empty.
 - `EQ` повертає тільки D1 PredicateBit у своїй admissible області.
 - `COND` має двопольові clauses `(test expression)`.
 - D1 `1` вибирає clause.
-- D1 `0` переходить до наступного.
+- D1 `0` переходить до наступного як explicit NO.
+- D3:000 `()` переходить до наступного як EMPTY/no-witness.
+- `0 != ()`: однаковий control action не колапсує semantic values.
+- будь-яке інше значення в test-position — named type/contract failure.
 - exhaustion повертає D3 structural `()`, а не predicate false.
 
 ---
