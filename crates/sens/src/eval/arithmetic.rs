@@ -2,7 +2,7 @@
 //! Obrobka tochnykh/netochnykh chysel dlia `+`, `-`, `*` ta `/`.
 //! Verarbeitung exakter/inexakter Zahlen für `+`, `-`, `*` und `/`.
 
-use crate::{Environment, ErrorKind, Exactness, LanguageError, Rational, Span, Value};
+use crate::{BinaryNumber, Bit1, DomainIdentity, Environment, ErrorKind, Exactness, LanguageError, PredicateBit, Rational, Span, Value};
 
 // `Rational` wraps a heap-allocated `BigRational` (arbitrary precision), so
 // it isn't `Copy` — neither is `Numeric` anymore. Both accessor methods
@@ -235,6 +235,47 @@ pub(super) fn arithmetic_on_values(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    // #3022 canonical Number path. Once a BinaryNumber participates, every
+    // operand must be a BinaryNumber; no implicit bridge to legacy f64/Q is
+    // permitted. The first ratified live slice is natural ADD/MUL only.
+    if values.iter().any(|value| matches!(value, Value::BinaryNumber(_))) {
+        let numbers = values
+            .iter()
+            .map(|value| match value {
+                Value::BinaryNumber(number) => Ok(number),
+                _ => Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "binary Number does not implicitly coerce legacy numeric values",
+                    span,
+                )),
+            })
+            .collect::<Result<Vec<&BinaryNumber>, _>>()?;
+
+        let result = match operator {
+            "+" => numbers
+                .into_iter()
+                .fold(BinaryNumber::zero(), |acc, value| acc.add(value)),
+            "*" => numbers
+                .into_iter()
+                .fold(BinaryNumber::one(), |acc, value| acc.mul(value)),
+            _ => {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "signed/rational binary Number operation is not admitted in the natural-number slice",
+                    span,
+                ))
+            }
+        };
+
+        if environment
+            .numeric_bit_limit()
+            .is_some_and(|limit| result.width() > limit)
+        {
+            return Err(arithmetic_overflow(span));
+        }
+        return Ok(Value::BinaryNumber(result));
+    }
+
     if operator == "-" && values.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::Arity,
@@ -403,6 +444,33 @@ pub(super) fn comparison_on_values(
     values: &[Value],
     span: Span,
 ) -> Result<Value, LanguageError> {
+    // #3022 comparisons over canonical Number return the exact D1
+    // PredicateBit domain, not legacy numeric 0/1 and not a host bool.
+    if values.iter().any(|value| matches!(value, Value::BinaryNumber(_))) {
+        let numbers = values
+            .iter()
+            .map(|value| match value {
+                Value::BinaryNumber(number) => Ok(number),
+                _ => Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "binary Number comparison does not implicitly coerce legacy numeric values",
+                    span,
+                )),
+            })
+            .collect::<Result<Vec<&BinaryNumber>, _>>()?;
+
+        let holds = numbers.windows(2).all(|pair| match operator {
+            "<" => pair[0] < pair[1],
+            ">" => pair[0] > pair[1],
+            "=" => pair[0] == pair[1],
+            _ => unreachable!("known comparison operator"),
+        });
+        let bit = Bit1::new(u8::from(holds)).expect("boolean result fits exact D1");
+        return Ok(Value::DomainIdentity(DomainIdentity::D1(
+            PredicateBit::from_word(bit),
+        )));
+    }
+
     if values.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::Arity,
