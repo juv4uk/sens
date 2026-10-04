@@ -1,7 +1,7 @@
 {
   "schema": "d4-ratified/v2",
-  "status": "owner-ratified",
-  "authority": "#3272",
+  "status": "revoked-research-evidence",
+  "authority": "#3327",
   "date": "2026-10-04",
   "domain": "D4",
   "rule": "history may donate a capability; ratified D3 parent/fibre law and owner decision own the coordinate; legacy coordinates have zero authority",
@@ -98,5 +98,8 @@
     "Function8",
     "old D4 coordinates",
     "migration convenience"
-  ]
+  ],
+  "former_authority": "#3272",
+  "revoked_by": "#3327",
+  "note": "Former D4 map preserved as research/provenance evidence after owner reset #3327."
 }
