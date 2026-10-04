@@ -35,23 +35,19 @@
    (distinct-from-D1-zero . yes))
 
   ((identity . D3:001)
-   (role . quote)
    (domain-owner . D3)
    (result-form . data))
 
   ((identity . D3:111)
-   (role . cons)
    (domain-owner . D3)
    (result-form . pair))
 
   ((identity . D3:100)
-   (role . car)
    (domain-owner . D3)
    (input-domain . pair)
    (result-form . value))
 
   ((identity . D3:011)
-   (role . cdr)
    (domain-owner . D3)
    (input-domain . pair)
    (result-form . value))
@@ -85,7 +81,6 @@
    (host-bool-authority . forbidden))
 
   ((identity . D3:110)
-   (role . cond)
    (domain-owner . D3)
    (clause-shape . (test expression))
    (test-domain . (D1:1 D1:0 D3:000))
