@@ -129,7 +129,7 @@
     "D4 is dense 16/16; compact residency does not imply primitive irreducibility",
     "D5 is dense 32/32 with zero lower-domain duplicates and no universal fifth-bit meaning",
     "width alone never grants semantic admission or callability",
-    "legacy SID8/Sens8/Function8 coordinates have zero current placement authority"
+    "legacy flat 8-bit coordinates have zero current placement authority"
   ],
   "d6_entry_rule": "derive D6 only from this exact D1-D5 foundation plus independent D6 laws; old D6 maps are donor/provenance only"
 }
