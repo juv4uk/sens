@@ -70,11 +70,11 @@ PredicateBit — не Number, не host Bool, не T/NIL і не structural empt
 000  structural empty ()
 001  QUOTE
 010  ATOM
-011  COND
-100  CONS
-101  CAR
-110  CDR
-111  EQ
+011  CDR
+100  CAR
+101  EQ
+110  COND
+111  CONS
 ```
 
 Назви ролей — лише документаційні проєкції. Канонічна identity — exact D3
