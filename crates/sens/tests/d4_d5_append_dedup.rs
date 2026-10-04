@@ -34,37 +34,48 @@ fn run_surface(source: &str) -> Result<String, String> {
 }
 
 #[test]
-fn print_append_cutover_matrix() {
+fn ratified_d4_append_owns_the_one_live_semantics() {
     let d4 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1111).unwrap()));
     let d5 = DomainIdentity::D5(CoreD5::from_word(Bit5::new(0b10000).unwrap()));
 
     let cases = [
-        ("empty-empty", "'() '()"),
-        ("empty-list", "'() '(a b)"),
-        ("list-empty", "'(a b) '()"),
-        ("proper", "'(a b) '(c d)"),
-        ("nested", "'((a b) c) '(d)"),
-        ("dotted-right", "'(a b) '(c . d)"),
-        ("improper-left", "'(a . b) '(c)"),
+        ("empty-empty", "'() '()", "(append (quote ()) (quote ()))"),
+        ("empty-list", "'() '(a b)", "(append (quote ()) (quote (a b)))"),
+        ("list-empty", "'(a b) '()", "(append (quote (a b)) (quote ()))"),
+        ("proper", "'(a b) '(c d)", "(append (quote (a b)) (quote (c d)))"),
+        ("nested", "'((a b) c) '(d)", "(append (quote ((a b) c)) (quote (d)))"),
+        ("dotted-right", "'(a b) '(c . d)", "(append (quote (a b)) (quote (c . d)))"),
     ];
 
-    for (name,args) in cases {
-        let a = run_exact(d4, args);
-        let b = run_exact(d5, args);
-        println!("APPEND-PROBE case={name} D4={a:?} D5={b:?}");
+    for (name,args,surface_source) in cases {
+        let exact = run_exact(d4, args).unwrap_or_else(|e| panic!("{name}: D4 failed: {e}"));
+        let surface = run_surface(surface_source)
+            .unwrap_or_else(|e| panic!("{name}: surface failed: {e}"));
+        assert_eq!(exact, surface, "{name}: D4 and surface APPEND diverged");
+
+        let revoked = run_exact(d5, args).expect_err("revoked D5 APPEND must fail closed");
+        assert!(
+            revoked.contains("not callable") || revoked.contains("no admitted"),
+            "{name}: unexpected revoked-D5 error: {revoked}"
+        );
+        println!("APPEND-DEDUP case={name} result={exact}");
     }
 
-    for source in [
-        "(append (quote ()) (quote ()))",
-        "(append (quote ()) (quote (a b)))",
-        "(append (quote (a b)) (quote ()))",
-        "(append (quote (a b)) (quote (c d)))",
-        "(append (quote ((a b) c)) (quote (d)))",
-        "(append (quote (a b)) (quote (c . d)))",
-        "(append (quote (a . b)) (quote (c)))",
-    ] {
-        println!("APPEND-SURFACE source={source:?} result={:?}", run_surface(source));
-    }
+    let d4_bad = run_exact(d4, "'(a . b) '(c)").expect_err("D4 must reject improper left spine");
+    let surface_bad = run_surface("(append (quote (a . b)) (quote (c)))")
+        .expect_err("surface must reject improper left spine");
+    assert!(
+        d4_bad.contains("UnsatisfiedConditional"),
+        "unexpected D4 improper-left error: {d4_bad}"
+    );
+    assert!(
+        surface_bad.contains("UnsatisfiedConditional"),
+        "unexpected surface improper-left error: {surface_bad}"
+    );
+
+    let d5_bad = run_exact(d5, "'(a . b) '(c)")
+        .expect_err("revoked D5 APPEND must remain uncallable even on error boundary");
+    assert!(d5_bad.contains("not callable") || d5_bad.contains("no admitted"));
 }
 
 #[test]
