@@ -1,7 +1,7 @@
 {
   "schema": "d5-v2-generator-shadow/v2",
   "issue": "#3284",
-  "status": "research-shadow-not-authority",
+  "status": "superseded-research-evidence",
   "owner_reset": "#3278",
   "lower_authority": "D4 #3272 / Contract 11.2",
   "rules": [
@@ -620,5 +620,7 @@
         "#3054"
       ]
     }
-  ]
+  ],
+  "superseded_by": "#3305",
+  "note": "This shadow is the research witness that produced the owner-ratified D5 authority. Current authority: knowledge/d5-ratified.json and contracts/d5-ratification.lisp."
 }

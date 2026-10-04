@@ -4,7 +4,7 @@
 //! separate. Width never grants a semantic role by itself.
 //!
 //! - D1-D4 and D7 retain current semantic authority.
-//! - D5/D6/D8 variants are transitional research carriers after #3278.
+//! - D5 is owner-ratified again by #3305; D6/D8 remain research carriers after #3278.
 //! - `CoreDomainIdentity` retains historical/research variants for migration,
 //!   but canonical source projection currently admits callable D3/D4 only.
 //! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
@@ -83,15 +83,16 @@ impl DomainIdentity {
 
     /// Explicit callable/Core-operation projection.
     ///
-    /// Current owner authority admits D3/D4 only. D1/D2/D7 are non-callable
-    /// by their domain laws; D5/D6/D8 fail closed while their ratification is
-    /// revoked under #3278. Transitional enum variants remain for migration
-    /// and research but are not minted from source as callable operations.
+    /// Current owner authority admits exact D3/D4/D5 Core-operation identity.
+    /// D1/D2/D7 are non-callable by their domain laws; D6/D8 remain revoked
+    /// under #3278. D5 residency is full 32/32 under #3305, while actual
+    /// resident mechanisms remain independently fail-closed when unavailable.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
             Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
-            Self::D1(_) | Self::D2(_) | Self::D5(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
+            Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
+            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
         }
     }
 }
@@ -282,11 +283,10 @@ mod tests {
     }
 
     #[test]
-    fn callable_projection_admits_d3_d4_and_fails_closed_for_unratified_d5_d6_d8() {
+    fn callable_projection_admits_d3_d4_d5_and_fails_closed_for_noncallable_or_unratified_domains() {
         for source in [
             BinarySourceWord::W1(Bit1::new(1).unwrap()),
             BinarySourceWord::W2(Bit2::new(1).unwrap()),
-            BinarySourceWord::W5(Bit5::new(1).unwrap()),
             BinarySourceWord::W6(Bit6::new(1).unwrap()),
             BinarySourceWord::W7(Bit7::new(1).unwrap()),
             BinarySourceWord::W8(Bit8::new(1).unwrap()),
@@ -303,6 +303,11 @@ mod tests {
             BinarySourceWord::W4(Bit4::new(1).unwrap())
         ).core_operation().unwrap();
         assert_eq!((d4.width(), d4.packed_bits()), (4, 1));
+
+        let d5 = DomainIdentity::from_source_word(
+            BinarySourceWord::W5(Bit5::new(1).unwrap())
+        ).core_operation().unwrap();
+        assert_eq!((d5.width(), d5.packed_bits()), (5, 1));
     }
 
     #[test]

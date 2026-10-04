@@ -33,13 +33,13 @@ D1  exact one-bit PredicateBit — RATIFIED
 D2  exact two-bit structural syntax — RATIFIED
 D3  exact three-bit Core foundation — RATIFIED
 D4  exact four-bit bootstrap — RATIFIED
-D5  exact five-bit research carrier — UNRATIFIED
+D5  exact five-bit full compact domain — RATIFIED #3305
 D6  exact six-bit research carrier — UNRATIFIED
 D7  exact seven-bit sound/text provenance domain — RATIFIED
 D8  exact eight-bit research carrier — UNRATIFIED
 ```
 
-General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence; #3278 revokes D5/D6/D8 ratification.
+General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6/D8 remain revoked/unratified under #3278.
 
 При цьому:
 
@@ -192,11 +192,61 @@ D4 fibres пам'ятають семантичного D3-батька:
 
 ---
 
-## D5 — exact five-bit research space
+## D5 — full compact five-bit domain
 
-D5 наразі **UNRATIFIED / RESEARCH** (#3278, clean-room #3279).
+D5 **OWNER-RATIFIED #3305**, 32/32 occupied, 32 distinct residents, zero lower-domain duplicates.
 
-Старі карти, локальні алгебри й 32/32 occupancy зберігаються лише як donor/baseline evidence. Механічний Bit5/W5 carrier не створює semantic membership. Жоден D5 resident не є current authority лише тому, що існував у попередній карті.
+```text
+00000 EVALQUOTE    00001 FUNCTION
+00010 FEXPR        00011 MACRO
+00100 LABEL        00101 PROG
+00110 SET          00111 SETQ
+01000 ZEROP        01001 NUMBERP
+01010 PLUS         01011 DIFFERENCE
+01100 CDAAR        01101 CDADR
+01110 CDDAR        01111 CDDDR
+10000 CAAAR        10001 CAADR
+10010 CADAR        10011 CADDR
+10100 REVERSE      10101 REVERSE-ONTO
+10110 TIMES        10111 QUOTIENT
+11000 GO           11001 RETURN
+11010 LESSP        11011 GREATERP
+11100 ASSOC        11101 MEMBER
+11110 PAIRLIS      11111 SUBST
+```
+
+Внутрішня логіка D5 локальна, не глобальна:
+
+- **5 SEMANTIC-GENERATOR** families, включно з чотирма selector-pairs та `REVERSE/REVERSE-ONTO`;
+- **5 LOCAL-ALGEBRA** families;
+- **2 MULTI-DELTA-FAMILY** pairs;
+- **4 COORDINATE-HISTORICAL** pairs, для яких ратифіковано residency/coordinate, але не вигадано неіснуючий закон.
+
+Selector-family:
+
+```text
+D4:0110 CDAR -> 01100 CDAAR / 01101 CDADR
+D4:0111 CDDR -> 01110 CDDAR / 01111 CDDDR
+D4:1000 CAAR -> 10000 CAAAR / 10001 CAADR
+D4:1001 CADR -> 10010 CADAR / 10011 CADDR
+```
+
+List generator-family:
+
+```text
+10100 REVERSE
+10101 REVERSE-ONTO
+
+REVERSE(x) = REVERSE-ONTO(x, ())
+REVERSE-ONTO(x,y) = APPEND(REVERSE(x), y)
+APPEND(x,y) = REVERSE-ONTO(REVERSE(x), y)
+```
+
+`APPEND` не дублюється в D5: єдина чинна identity — `D4:1111 APPEND`.
+
+D5 semantic residency не дорівнює готовності всіх runtime mechanisms. Exact W5 coordinate є чинною D5 identity; якщо конкретний механізм ще не підключений, invocation fail-closed.
+
+Нормативні машинні джерела: `contracts/d5-ratification.lisp`, `knowledge/d5-ratified.json`.
 
 ---
 
@@ -368,7 +418,7 @@ Compatibility adapters дозволені лише як явно обмежен�
 
 Core1/Core2/Core3/Core4 у старих дослідженнях — execution/research profiles та historical stages, а не альтернативні semantic universes.
 
-Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification зараз охоплює D1–D4 і D7; D5/D6/D8 повернуті в research за #3278.
+Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D5 і D7; D5 re-ratified #3305 після reset #3278, а D6/D8 лишаються research.
 
 Profile може вибирати mechanism, але не може:
 

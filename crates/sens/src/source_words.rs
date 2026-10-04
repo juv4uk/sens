@@ -98,7 +98,7 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact five-bit source word into the transitional D5 research carrier.
+    /// Lift an exact five-bit source word into the owner-ratified D5 carrier (#3305).
     pub const fn d5(self) -> Option<crate::CoreD5> {
         match self {
             Self::W5(word) => Some(crate::CoreD5::from_word(word)),
