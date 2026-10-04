@@ -222,13 +222,13 @@ pub fn pack7_cells(cells: &[u8]) -> Option<(Vec<u8>, usize)> {
         let a6 = chunk[6];
         let a7 = chunk[7];
 
-        out.push((a0 << 1) | (a1 >> 6));
-        out.push((a1 << 2) | (a2 >> 5));
-        out.push((a2 << 3) | (a3 >> 4));
-        out.push((a3 << 4) | (a4 >> 3));
-        out.push((a4 << 5) | (a5 >> 2));
-        out.push((a5 << 6) | (a6 >> 1));
-        out.push((a6 << 7) | a7);
+        out.push((((u16::from(a0) << 1) | (u16::from(a1) >> 6)) & 0xff) as u8);
+        out.push((((u16::from(a1) << 2) | (u16::from(a2) >> 5)) & 0xff) as u8);
+        out.push((((u16::from(a2) << 3) | (u16::from(a3) >> 4)) & 0xff) as u8);
+        out.push((((u16::from(a3) << 4) | (u16::from(a4) >> 3)) & 0xff) as u8);
+        out.push((((u16::from(a4) << 5) | (u16::from(a5) >> 2)) & 0xff) as u8);
+        out.push((((u16::from(a5) << 6) | (u16::from(a6) >> 1)) & 0xff) as u8);
+        out.push((((u16::from(a6) << 7) | u16::from(a7)) & 0xff) as u8);
     }
 
     let tail = chunks.remainder();
