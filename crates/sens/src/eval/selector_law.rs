@@ -167,7 +167,7 @@ mod tests {
             d3(0b101),
             d4(0b0010),
             d5(0b01010),
-            d6(0b011111),
+            d6(0b010111),
         ] {
             assert_eq!(decode(identity), None);
         }
