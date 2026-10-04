@@ -35,13 +35,13 @@ exact binary number
 + admitted / proved law
 ```
 
-Current Core examples are exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, and owner-ratified D5/D6 domains. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
+After owner reset #3327, the only current semantic domains are exact-width D1 PredicateBit and D2 racanā2. D3-D8 are UNRATIFIED / RESEARCH. Equal packed numeric payloads at different widths do not imply equal semantic identity, and width alone does not grant occupancy or callability.
 
 Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility, transport, backend, and provenance projections while #2817 migrates runtime consumers. They are not the universal current ontology.
 
 Human spellings in Ukrainian, English, Sanskrit, symbolic notation, and compatibility surfaces are **source/UI routing metadata**. A surface may route to an already-admitted domain-qualified semantic object; it does not own identity or meaning.
 
-The concrete empty proper list `()` is Core.D3 `000`. It is distinct from historical exact-eight-bit `00000000`, PredicateBit `0`, and Number zero even though their packed numeric payloads may look related.
+Former Core.D3 `000 = ()` remains research hypothesis/evidence after #3327, not a current resident. PredicateBit `0`, Number zero, and a width-3 research carrier do not collapse merely because packed payloads look related.
 
 ## Historical Lisp and Core1 provenance
 
@@ -49,7 +49,7 @@ Lisp was the original syntactic carrier and experimental substrate from which SE
 
 Names such as historical Lisp operations may therefore appear in Core1 material, archived research, provenance notes, old ADR context, and compatibility witnesses. Such names are historical descriptions or surfaces; they are not the active function ontology of SENS.
 
-Current Core profiles may select mechanisms and separately ratified profile behavior, but they do not mint or renumber domain residents and may not override the shared D1/D3 predicate-control foundation.
+Current Core profiles may select mechanisms, but after #3327 they may not mint or renumber D3-D8 residents. The only current semantic foundation is D1 + D2.
 
 ## Bootstrap and implementation mechanisms
 
