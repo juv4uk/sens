@@ -1,0 +1,52 @@
+name: D3-D8 remap null research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d3-d8-remap-null/**"
+      - "benchmarks/d3-d8-remap-solver/**"
+      - ".github/workflows/d3-d8-remap-null.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d3-d8-remap-null/**"
+      - "benchmarks/d3-d8-remap-solver/**"
+      - ".github/workflows/d3-d8-remap-null.yml"
+  workflow_dispatch:
+
+jobs:
+  null-ensemble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Re-check merged candidate scorer
+        run: |
+          rm -rf /tmp/d3-d8-remap-solver
+          python3 benchmarks/d3-d8-remap-solver/run.py \
+            --out /tmp/d3-d8-remap-solver \
+            --random-seed 3043 \
+            --random-samples 4096
+
+      - name: Run matched null ensembles
+        run: |
+          rm -rf /tmp/d3-d8-remap-null
+          python3 benchmarks/d3-d8-remap-null/run.py \
+            --out /tmp/d3-d8-remap-null \
+            --samples 4096 \
+            --seed 3049
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d3-d8-remap-null/report.md; then
+            cat /tmp/d3-d8-remap-null/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d3-d8-remap-null
+          path: /tmp/d3-d8-remap-null/
+          retention-days: 14
