@@ -362,23 +362,6 @@ pub(crate) fn invoke_semantic_ref(
         _ => {}
     }
 
-    // #3070 transitional compatibility: Lisp-owned D5 definitions live
-    // only in exact-domain slots. Historical calls may borrow that bound
-    // mechanism, but they do not gain D5 identity or enter D5 direct primitives.
-    if let Some(identity) =
-        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
-    {
-        if let Some(bound) = environment.domain_code_slot(identity) {
-            match &bound {
-                Value::Closure(closure) => {
-                    return closures::apply_values(closure.clone(), args, span);
-                }
-                Value::Builtin(builtin) => return (builtin.func)(args, environment, span),
-                _ => {}
-            }
-        }
-    }
-
     // Explicit compatibility adapter: once a historical byte has a proven
     // exact-domain successor, the old spelling delegates to that one
     // canonical mechanism. We do not dual-bind the language definition into
@@ -449,18 +432,21 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
-    // #3070: a narrow bootstrap-only bridge for Lisp-owned D5 definitions.
-    // It binds an already-known OD-005 identity once, but does not reinterpret
-    // the historical byte as canonical domain identity.
+    // #3070 transitional bootstrap.
+    //
+    // Canonical storage/routing is the exact D5 slot. The historical code slot
+    // is only a mechanism alias to the SAME Value/Rc so recursive legacy Core
+    // bodies keep their old shallow dispatch path while source migration is
+    // incomplete. It does not mint a second semantic identity, and #3062
+    // removes this alias when exact-domain source/registry routing is complete.
     if let Some(identity) =
         semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
     {
-        if domain_primitive(identity).is_some()
-            || super::necessary_forms::identity_for_domain_identity(identity).is_some()
-        {
+        if super::necessary_forms::identity_for_domain_identity(identity).is_some() {
             return;
         }
         environment.bind_domain_code_slot_once(identity, value.clone());
+        environment.bind_code_slot_once(sid, value.clone());
         return;
     }
 
