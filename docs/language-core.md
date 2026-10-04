@@ -150,7 +150,7 @@ LAMBDA та DEFINE належать bootstrap-рівню. Selector descendants �
 
 Unallocated coordinates не отримують значення через схожість бітів.
 
-**Transition after #3202:** старі D4 selector addresses, виведені з попередніх D3 roots, більше не є чинним derivation source. Production selector regeneration from `CAR=100 / CDR=011` is tracked in #3204; до завершення cutover жодна стара selector address не створює альтернативної D3 семантики.
+**Transition after #3202:** старі D4 selector addresses, виведені з попередніх D3 roots, більше не є чинним derivation source. Production selector regeneration from `CAR=100 / CDR=011` is tracked in #2055; до завершення cutover жодна стара selector address не створює альтернативної D3 семантики.
 
 ---
 
