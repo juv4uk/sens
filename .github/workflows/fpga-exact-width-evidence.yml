@@ -1,0 +1,25 @@
+name: fpga-exact-width-evidence
+
+on:
+  pull_request:
+    paths:
+      - 'benchmarks/fpga-exact-width/**'
+      - '.github/workflows/fpga-exact-width-evidence.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'benchmarks/fpga-exact-width/**'
+      - '.github/workflows/fpga-exact-width-evidence.yml'
+
+jobs:
+  validate-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Validate checked-in FPGA evidence
+        run: |
+          python3 benchmarks/fpga-exact-width/validate.py \
+            benchmarks/fpga-exact-width/evidence/2026-10-04-gw5a25a.jsonl
