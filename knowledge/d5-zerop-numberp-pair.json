@@ -1,0 +1,34 @@
+{
+  "schema": "d5-zerop-numberp-pair/1",
+  "domain": "Core.D5",
+  "owner_map_authority": "owner-directive-2026-10-03",
+  "owner_map_mutation": "NONE",
+  "pair": {
+    "prefix_d4": "0100",
+    "child0": {
+      "coordinate": "01000",
+      "historical_name": "ZEROP"
+    },
+    "child1": {
+      "coordinate": "01001",
+      "historical_name": "NUMBERP"
+    }
+  },
+  "law": "ZEROP(x)=YES implies NUMBERP(x)=YES on the declared historical numeric carrier",
+  "converse": "FALSIFIED",
+  "converse_counterexample": "historical numeric 1: NUMBERP=YES, ZEROP=NO",
+  "classification": "ENTAILMENT-LAW",
+  "relation_class": "SEMANTIC-LAW",
+  "local_one_bit_sibling_transform": false,
+  "d4_parenthood": "NOT-INFERRED",
+  "global_d5_suffix_theorem": "NOT-PROVED",
+  "historical_tolerance_preserved": true,
+  "implication_checks": 6,
+  "zerop_yes_cases": 3,
+  "evidence": [
+    "#2720/#2730",
+    "#3019",
+    "#2508"
+  ],
+  "falsifier": "any declared historical numeric input with ZEROP=YES and NUMBERP!=YES"
+}

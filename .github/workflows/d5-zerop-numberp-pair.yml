@@ -1,0 +1,25 @@
+name: D5 ZEROP NUMBERP residual law
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-historical-full-map.json"
+      - "benchmarks/lisp15-numeric-predicate-factor/run.py"
+      - "knowledge/d5-zerop-numberp-pair.json"
+      - "scripts/research-3032-d5-zerop-numberp-pair.py"
+      - ".github/workflows/d5-zerop-numberp-pair.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    name: D5 ZEROP/NUMBERP entailment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Replay historical numeric predicate donor
+        run: python3 benchmarks/lisp15-numeric-predicate-factor/run.py --out /tmp/lisp15-predicate-factor
+      - name: Check D5 entailment classification
+        run: python3 scripts/research-3032-d5-zerop-numberp-pair.py --check
