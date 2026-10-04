@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guard the exact-domain D1-D4 Ukrainian/Sanskrit surface projection."""
+"""Guard the exact-domain D1-D5 Ukrainian/Sanskrit runtime projection."""
 
 from __future__ import annotations
 
@@ -8,49 +8,52 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "lib/surface/domain-surfaces-d1-d4.lisp"
+SOURCE_D14 = ROOT / "lib/surface/domain-surfaces-d1-d4.lisp"
+SOURCE_D5 = ROOT / "lib/surface/domain-surfaces-d5.lisp"
+SOURCES = (SOURCE_D14, SOURCE_D5)
 GENERATED = ROOT / "crates/sens/src/domain_surface_registry_generated.rs"
 
 ROW = re.compile(
-    r'^\s*\(row\s+(D[1-4])\s+"([01]+)"\s+(\S+)\s+'
-    r'"([^"]+)"\s+"([^"]+)"\s+"([^"]+)"\s+(\S+)\s+(\S+)\)\s*$'
+    r'^\\s*\\(row\\s+(D[1-5])\\s+"([01]+)"\\s+(\\S+)\\s+'
+    r'"([^"]+)"\\s+"([^"]+)"\\s+"([^"]+)"\\s+(\\S+)\\s+(\\S+)\\)\\s*$'
 )
 
-EXPECTED_COUNTS = {"D1": 2, "D2": 4, "D3": 8, "D4": 16}
+EXPECTED_COUNTS = {"D1": 2, "D2": 4, "D3": 8, "D4": 16, "D5": 32}
 DISPLAY_ONLY = {("D2", f"{n:02b}") for n in range(4)} | {("D3", "000")}
 
 
 def fail(message: str) -> None:
-    raise SystemExit(f"D1-D4-SURFACE-GUARD: FAIL: {message}")
+    raise SystemExit(f"D1-D5-SURFACE-GUARD: FAIL: {message}")
 
 
 def parse_rows() -> list[dict[str, str]]:
-    text = SOURCE.read_text(encoding="utf-8")
-    lowered = text.lower()
-    for forbidden in ("sid8", "sens8", "function8"):
-        if forbidden in lowered:
-            fail(f"legacy token {forbidden!r} is forbidden in the new projection source")
-
     rows: list[dict[str, str]] = []
-    for line_number, line in enumerate(text.splitlines(), 1):
-        if not line.lstrip().startswith("(row "):
-            continue
-        match = ROW.match(line)
-        if not match:
-            fail(f"cannot parse row at line {line_number}")
-        domain, bits, role, en, uk, sa, uk_status, sa_status = match.groups()
-        rows.append(
-            {
-                "domain": domain,
-                "bits": bits,
-                "role": role,
-                "en": en,
-                "uk": uk,
-                "sa": sa,
-                "uk_status": uk_status,
-                "sa_status": sa_status,
-            }
-        )
+    for source in SOURCES:
+        text = source.read_text(encoding="utf-8")
+        lowered = text.lower()
+        for forbidden in ("sid8", "sens8", "function8"):
+            if forbidden in lowered:
+                fail(f"legacy token {forbidden!r} is forbidden in {source}")
+
+        for line_number, line in enumerate(text.splitlines(), 1):
+            if not line.lstrip().startswith("(row "):
+                continue
+            match = ROW.match(line)
+            if not match:
+                fail(f"cannot parse row at {source}:{line_number}")
+            domain, bits, role, en, uk, sa, uk_status, sa_status = match.groups()
+            rows.append(
+                {
+                    "domain": domain,
+                    "bits": bits,
+                    "role": role,
+                    "en": en,
+                    "uk": uk,
+                    "sa": sa,
+                    "uk_status": uk_status,
+                    "sa_status": sa_status,
+                }
+            )
     return rows
 
 
@@ -61,7 +64,7 @@ def rust_string(value: str) -> str:
 def render_generated(rows: list[dict[str, str]]) -> str:
     lines = [
         "// GENERATED — DO NOT EDIT BY HAND.",
-        "// Authority: lib/surface/domain-surfaces-d1-d4.lisp",
+        "// Authority: lib/surface/domain-surfaces-d1-d4.lisp + domain-surfaces-d5.lisp",
         "// Checked by: scripts/check-domain-surfaces-d1-d4.py",
         "",
         "#[derive(Clone, Copy, Debug, Eq, PartialEq)]",
@@ -83,9 +86,7 @@ def render_generated(rows: list[dict[str, str]]) -> str:
 
     for row in rows:
         width = int(row["domain"][1:])
-        source_routable = (
-            row["domain"] in {"D3", "D4"} and row["role"] != "display"
-        )
+        source_routable = row["domain"] in {"D3", "D4", "D5"} and row["role"] != "display"
         surfaces = ", ".join(
             [
                 "DomainSurfaceName { namespace: "
@@ -111,8 +112,8 @@ def render_generated(rows: list[dict[str, str]]) -> str:
 
 
 def validate(rows: list[dict[str, str]]) -> None:
-    if len(rows) != 30:
-        fail(f"expected 30 exact-domain rows, found {len(rows)}")
+    if len(rows) != 62:
+        fail(f"expected 62 exact-domain rows, found {len(rows)}")
 
     keys = [(row["domain"], row["bits"]) for row in rows]
     if len(set(keys)) != len(keys):
@@ -128,7 +129,6 @@ def validate(rows: list[dict[str, str]]) -> None:
         if actual_bits != expected_bits:
             fail(f"{domain}: projection is not complete exact-width coverage")
 
-    # Every human spelling must map to exactly one exact-domain key.
     for language in ("uk", "sa"):
         seen: dict[str, tuple[str, str]] = {}
         for row in rows:
@@ -136,10 +136,7 @@ def validate(rows: list[dict[str, str]]) -> None:
             key = (row["domain"], row["bits"])
             previous = seen.get(spelling)
             if previous is not None and previous != key:
-                fail(
-                    f"{language}: duplicate spelling {spelling!r} for "
-                    f"{previous} and {key}"
-                )
+                fail(f"{language}: duplicate spelling {spelling!r} for {previous} and {key}")
             seen[spelling] = key
 
     for row in rows:
@@ -178,9 +175,9 @@ def main() -> int:
                 "python3 scripts/check-domain-surfaces-d1-d4.py --write-generated"
             )
 
-    print("D1-D4-SURFACE-GUARD: PASS")
-    print("rows=30 d1=2 d2=4 d3=8 d4=16")
-    print("projection=d1-d4 uk+sa exact-domain; source-routing=d3+d4 non-display")
+    print("D1-D5-SURFACE-GUARD: PASS")
+    print("rows=62 d1=2 d2=4 d3=8 d4=16 d5=32")
+    print("projection=d1-d5 uk+sa exact-domain; source-routing=d3+d4+d5 non-display")
     print("uk=unique sa=unique exact-width=preserved legacy-byte=absent")
     return 0
 
