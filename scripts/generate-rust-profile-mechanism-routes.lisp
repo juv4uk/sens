@@ -22,11 +22,11 @@
   (00001000 (name sections)
     (00000111
       ((00000010 sections) () (00000001 ()))
-      ((00000010 sections) (#b0)
+      ((00000010 sections) (0)
        (00000111
-         ((00000011 (00000101 (00000101 sections)) name) (#b1)
+         ((00000011 (00000101 (00000101 sections)) name) (1)
           (00000101 sections))
-         ((00000011 (00000101 (00000101 sections)) name) (#b0)
+         ((00000011 (00000101 (00000101 sections)) name) (0)
           (find-section name (00000110 sections))))))))
 
 (00001001 profile-rows
@@ -36,7 +36,7 @@
   (00001000 (profile)
     (00000111
       ((00000011 profile (00000001 core3))
-       (#b1)
+       (1)
        "CoreProfile::Core3")
       (t (00000101 (00000001 ()))))))
 
@@ -44,7 +44,7 @@
   (00001000 (mechanism)
     (00000111
       ((00000011 mechanism (00000001 registered-host-mechanism))
-       (#b1)
+       (1)
        "ProfileMechanismRouteKind::RegisteredHostMechanism")
       (t (00000101 (00000001 ()))))))
 
@@ -70,7 +70,7 @@
   (00001000 (rows)
     (00000111
       ((00000010 rows) () "")
-      ((00000010 rows) (#b0)
+      ((00000010 rows) (0)
        (str+ (render-row (00000101 rows))
              (render-rows (00000110 rows)))))))
 
@@ -116,14 +116,14 @@
        (10100111 output-path generated)
        (01001000 "Rust profile mechanism projection written"))))
   ((00100010 (00000101 *argv*) "--check")
-   (#b1)
+   (1)
    (10011100 ((current (10100110 output-path)))
      (00000111
        ((00100010 current generated)
-        (#b1)
+        (1)
         (01001000 "Rust profile mechanism projection is current"))
        ((00100010 current generated)
-        (#b0)
+        (0)
         (00101111
           (00100111
             (01001000 "Rust profile mechanism projection is stale")
