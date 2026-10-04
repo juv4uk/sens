@@ -1,2 +1,2 @@
-case	english_path	canonical_path	oracle
-d3-car-head	benchmarks/en-vs-d1d8-cpu/fixtures/selftest-en.lisp	benchmarks/en-vs-d1d8-cpu/fixtures/selftest-bin.lisp	preflight-only
+case	english_path	canonical_source	oracle
+d3-car-head	benchmarks/en-vs-d1d8-cpu/fixtures/selftest-en.lisp	10 101 01	preflight-only
