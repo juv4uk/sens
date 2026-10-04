@@ -75,8 +75,8 @@ def load_selector_model():
             raise AssertionError(f"missing selector parent for {root}/{path}")
         edges.append(Edge(parent, (root, path), path[-1]))
 
-    assert roots == ["101", "110"]
-    assert len(edges) == 12
+    assert roots == ["011", "100"]
+    assert len(edges) == 4
     return rows, coord, edges, all_by_width
 
 
@@ -303,6 +303,7 @@ def main() -> int:
             "canonical-coordinate-law is not representation-independent semantics",
             "numeric coincidence with an admitted coordinate is not a derivation",
             "this script allocates or promotes no function",
+            "D5+ selector continuation remains outside this proof while #3209 is unresolved",
             "a surviving formula still requires typed semantic proof and certificate evidence",
         ],
     }
