@@ -408,6 +408,7 @@ fn same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend() {
     let mut checked_values = 0usize;
 
     for row in &rows {
+        eprintln!("meta-eval-row: {}", row.expr);
         let verdict = meta_verdict(&mut session, row);
         assert!(
             verdict.starts_with("(witness-result (status pass)"),
