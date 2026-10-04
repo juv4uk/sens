@@ -13,7 +13,6 @@
   },
   "owner_map": "knowledge/d6-historical-full-map.json",
   "principle": "W6 mechanics do not imply current D6 semantic admission; historical D6 map is donor-only",
-  "semantic_status": "RESEARCH/UNRATIFIED",
   "rows": [
     {
       "compiler_d6_identity": "NOT-AUDITED",
@@ -1233,14 +1232,15 @@
     }
   ],
   "schema": "d6-runtime-admission-audit/v1",
+  "semantic_status": "RESEARCH/UNRATIFIED",
   "summary": {
     "compiler_d6_identity": "NOT-AUDITED",
+    "historical_map_rows": 64,
+    "historical_selector_projection": 16,
     "lowering_d6_identity": 0,
     "native_evaluator_d6_identity": 0,
-    "historical_map_rows": 64,
     "packed_roundtrip_w6": 64,
     "runtime_value_identity": 0,
-    "historical_selector_projection": 16,
     "semantic_registry_d6_identity": 0,
     "source_exact_w6": 64,
     "typed_d6_carrier": 64
