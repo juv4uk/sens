@@ -1,0 +1,50 @@
+{
+  "schema": "d1-d8-full-occupancy/v1",
+  "authority": "#3029",
+  "status": "owner-ratified",
+  "semantics": "occupancy-only; role/law/callability are separate",
+  "domains": [
+    {
+      "width": 1,
+      "capacity": 2,
+      "occupied": 2
+    },
+    {
+      "width": 2,
+      "capacity": 4,
+      "occupied": 4
+    },
+    {
+      "width": 3,
+      "capacity": 8,
+      "occupied": 8
+    },
+    {
+      "width": 4,
+      "capacity": 16,
+      "occupied": 16
+    },
+    {
+      "width": 5,
+      "capacity": 32,
+      "occupied": 32
+    },
+    {
+      "width": 6,
+      "capacity": 64,
+      "occupied": 64
+    },
+    {
+      "width": 7,
+      "capacity": 128,
+      "occupied": 128
+    },
+    {
+      "width": 8,
+      "capacity": 256,
+      "occupied": 256
+    }
+  ],
+  "total_capacity": 510,
+  "total_occupied": 510
+}
