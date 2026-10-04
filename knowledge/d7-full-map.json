@@ -3,13 +3,13 @@
   "domain": "Core.D7",
   "width": 7,
   "capacity": 128,
-  "authority": "derived-research-not-owner-directive",
+  "authority": "provenance-only-superseded-for-occupancy-by-#3029",
   "source": {
     "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
     "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
     "read": "2026-10-03"
   },
-  "description": "Occupancy of the 7-bit Core.D7 (Sound7) domain, read from the pinned upc7 cell table. Cells are the representation; the semantic families are counted from the sound map and use a different denominator.",
+  "description": "Historical/derived Sound7 placement snapshot. Its 107 assigned + 21 reserved split is preserved only as provenance and must not be read as current occupancy authority after #3029.",
   "occupancy_rule": "class = the top 2 bits; payload = the low 5 bits. Unlike D5/D6, D7 is NOT a one-bit extension of a parent domain: a sound cell is not the P0/P1 child of another sound cell, so the D5/D6 occupancy rule does not transfer. D7 needs its own rule: a cell is admitted only with an exact 7-bit object + a D7 law/relation + a witness (per #2415).",
   "status_counts": {
     "cells": {
@@ -1579,5 +1579,12 @@
       "deva": "@",
       "uk": "@"
     }
-  ]
+  ],
+  "current_occupancy": {
+    "authority": "#3029",
+    "occupied": 128,
+    "capacity": 128,
+    "unallocated": 0,
+    "note": "All D7 coordinates are current residents. Legacy reserved/unfilled labels below are provenance fields pending exact resident-map regeneration, not free slots."
+  }
 }
