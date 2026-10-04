@@ -1029,7 +1029,10 @@
       "semantic_class": "list-structure",
       "typed_behavior": "concatenation of lists",
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3052",
+        "#3019"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "McCarthy 1960",
@@ -1037,7 +1040,8 @@
         "OD-005"
       ],
       "map_independent_witness_refs": [
-        "#2986"
+        "#2986",
+        "#3059"
       ],
       "current_domain": "D5",
       "current_bits": "10000",
@@ -1054,7 +1058,10 @@
       "semantic_class": "list-structure",
       "typed_behavior": "list element order reversal",
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3052",
+        "#3019"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "McCarthy 1960 / Lisp 1.5",
@@ -1062,7 +1069,8 @@
         "OD-005"
       ],
       "map_independent_witness_refs": [
-        "#2986"
+        "#2986",
+        "#3059"
       ],
       "current_domain": "D5",
       "current_bits": "10001",
@@ -1393,7 +1401,10 @@
       "semantic_class": "lookup",
       "typed_behavior": "association list key search",
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3053",
+        "#3019"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "McCarthy 1960",
@@ -1401,7 +1412,8 @@
         "OD-005"
       ],
       "map_independent_witness_refs": [
-        "#2986"
+        "#2986",
+        "#3059"
       ],
       "current_domain": "D5",
       "current_bits": "11100",
@@ -1414,11 +1426,15 @@
     {
       "stable_resident_id": "sr-gpqenudbdeaz",
       "semantic_status": "RECOVERED",
-      "semantic_role": "lookup",
-      "semantic_class": "lookup",
-      "typed_behavior": "list membership testing",
+      "semantic_role": "predicate",
+      "semantic_class": "predicate",
+      "typed_behavior": "list membership predicate -> exact D1 PredicateBit (hit=1, miss=0)",
       "partiality": null,
-      "semantic_law_refs": [],
+      "semantic_law_refs": [
+        "#3053",
+        "#3019",
+        "#3060"
+      ],
       "derivation_certificate_refs": [],
       "historical_provenance_refs": [
         "McCarthy 1960 / Lisp 1.5",
@@ -1426,7 +1442,8 @@
         "OD-005"
       ],
       "map_independent_witness_refs": [
-        "#2986"
+        "#2986",
+        "#3059"
       ],
       "current_domain": "D5",
       "current_bits": "11101",
@@ -1434,7 +1451,13 @@
       "source_status": "owner-map",
       "human_labels_optional": [
         "MEMBER"
-      ]
+      ],
+      "canonical_result_domain": "D1",
+      "canonical_result_values": {
+        "NO": "0",
+        "YES": "1"
+      },
+      "implementation_status": "TRANSITION-DEBT:#3060"
     },
     {
       "stable_resident_id": "sr-tmmvgwmmahhh",
