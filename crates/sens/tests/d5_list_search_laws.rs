@@ -7,8 +7,8 @@
 //! the operation under test.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, parse, Bit5, CoreD5, DomainIdentity, Expr,
-    ExprKind, Session, Span,
+    eval_parsed_expressions, eval_program, load_core_library, parse, Bit5, CoreD5, DomainIdentity,
+    ErrorKind, Expr, ExprKind, Session, Span,
 };
 
 fn run_d5(bits: u8, arguments_source: &str) -> String {
@@ -57,6 +57,20 @@ fn compatibility_parser_does_not_mint_short_domain_words() {
     ));
 }
 
+#[test]
+fn legacy_quotient_requires_its_lisp_binding_and_never_borrows_direct_d5_primitive() {
+    let mut bare = Session::default();
+    let error = eval_program("(00010100 6 3)", &mut bare)
+        .expect_err("legacy QUOTIENT must not enter exact D5 arithmetic without Core binding");
+    assert_eq!(error.kind, ErrorKind::Type);
+
+    let mut loaded = Session::default();
+    load_core_library(&mut loaded).expect("active Core should load");
+    let value = eval_program("(00010100 6 3)", &mut loaded)
+        .expect("legacy QUOTIENT should use the bound Lisp closure")
+        .value;
+    assert_eq!(value.to_string(), "2");
+}
 #[test]
 fn exact_d5_append_reverse_form_a_local_list_algebra() {
     // CURRENT OD-005 identities:
