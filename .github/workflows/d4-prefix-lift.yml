@@ -1,0 +1,16 @@
+name: D4 prefix lift
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d4-prefix-lift/**"
+      - "benchmarks/d3-d8-remap-solver/d3-d4-fixture.json"
+      - ".github/workflows/d4-prefix-lift.yml"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 benchmarks/d4-prefix-lift/run.py
