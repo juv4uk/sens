@@ -1,6 +1,6 @@
 ; language-contract.lisp — current machine-readable Level 1/2 contract.
 ;
-; Contract 11.2 — domain-qualified identity authority + owner-ratified D3/D4.
+; Contract 11.3 — domain-qualified identity + EMPTY/no-witness convergence.
 ; Owner paradigm: #2490. Implementation cutover: #2817 / #2822.
 ;
 ; Contract 11 preserves the observable PredicateBit / ATOM / EQ / COND law
@@ -19,11 +19,11 @@
 ; bounded compatibility / transport / backend projection during migration.
 ; It cannot mint or redefine canonical semantic identity.
 
-((major . #d11) (minor . 2)
+((major . #d11) (minor . 3)
  (status . current-domain-qualified-authority)
  (supersedes . "Contract 10.0 flat Function8 identity authority")
  (historical-snapshot . "docs/archive/historical/language-contract-10.0.lisp")
- (note . "Contract 11.2 preserves the domain-qualified identity law, owner-ratifies D3/bīja3 A in #3202, and owner-ratifies the full compact D4 bootstrap map in #3272. Historical flat Function8/Sens8 remains compatibility/history only; old D4 coordinates and clean-room intermediate maps are provenance, never alternate current authority.")
+ (note . "Contract 11.3 preserves the domain-qualified identity law, owner-ratifies D3/bīja3 A in #3202 and full compact D4 in #3272, applies EMPTY/no-witness control law #3161, and preserves owner reset #3278: D5/D6/D8 semantic admission is revoked/research while their exact-width carriers remain representable. Historical flat Function8/Sens8 remains compatibility/history only.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((binary-domain-identity
@@ -55,19 +55,19 @@
       (d4-list-append-distinction
        . "D4 1110 LIST and 1111 APPEND are CONS-family derived residents: LIST collects supplied values into one proper list; APPEND combines admitted lists into one list. Their four-bit residency is for compact identity, not extra primitive power.")
       (d5-d6-residency
-       . "Core.D5 and Core.D6 use exact five-bit and six-bit typed domains governed by their owner-ratified maps/laws. Residency, derivability, callability and runtime implementation are distinct facts: carrier existence alone grants neither occupancy nor callability.")
+       . "Under owner reset #3278, D5 and D6 exact-width carriers remain mechanically representable but their previous semantic occupancy/maps are revoked as current authority. Residency/admission must be re-derived by #3279/#3280; carrier existence, derivability, callability and runtime implementation remain distinct facts.")
       (d7-sound-local-ordinal
        . "Core.D7 is the exact seven-bit Sound7 / Sanskrit sound-related domain with local sloka/sutra ordinal coordinates where admitted. D7 is not general arithmetic Number, and seven-bit width never grants selector geometry or callable Core-operation identity. Occupancy remains law/witness-specific.")
       (d8-exact-core-domain
-       . "Core.D8 is the ratified exact eight-bit Core domain. Core.D8 identity is domain-qualified and is never historical Sens8/Sid8/Function8 merely because both use eight physical bits. D8 occupancy and callability remain separately law/witness-governed; admitted selector descendants may execute from the selector root+suffix law without legacy-byte authority.")
+       . "Under owner reset #3278, D8 remains an exact eight-bit carrier/research domain but its previous semantic occupancy is not current authority. D8 must be rebuilt under #3281 and is never historical Sens8/Sid8/Function8 merely because both use eight physical bits.")
       (cross-domain-non-collapse
        . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, D7, D8 or Core-Math domains without semantic equality. Cross-domain reuse requires an explicit independently proved bridge law.")
       (atom-one-bit-core1-4
        . "Core.D3 010 ATOM has one law across Core1/Core2/Core3/Core4: structural empty () and every admitted non-pair value answer PredicateBit 1; pair answers PredicateBit 0. Structural () is an ATOM-yes subject, not a truth value. Historical Function8 00000010 is compatibility projection only.")
       (eq-one-bit-core1-4
-       . "Core.D3 101 EQ has one law across Core1/Core2/Core3/Core4: the same admitted atom answers PredicateBit 1; distinct admitted atoms answer PredicateBit 0; pair/out-of-domain input raises the named domain/type failure. EQ is not deep structural equality. Historical Function8 00000011 is compatibility projection only.")
+       . "Core.D3 101 EQ is a typed partial predicate across Core1/Core2/Core3/Core4: the same admitted atom answers PredicateBit 1; distinct admitted atoms answer PredicateBit 0; pair/out-of-admitted-atom-domain input returns structural D3:000 EMPTY/no-witness. EMPTY is not PredicateBit 0 and EQ is not deep structural equality. Historical Function8 00000011 is compatibility projection only.")
       (cond-two-part-core1-4
-       . "Core.D3 110 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and must return exact PredicateBit. PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips it. If no clause selects, COND returns structural (). Structural () is not a predicate answer. Historical Function8 00000111 is compatibility projection only.")
+       . "Core.D3 110 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and admit exactly D1:1, D1:0, or structural D3:000 EMPTY/no-witness. D1:1 selects and evaluates that clause expression; D1:0 continues as explicit NO; D3:000 continues as NO-WITNESS. Other values fail the named type/contract boundary. If no clause selects, COND returns structural D3:000. EMPTY is never PredicateBit 0. Historical Function8 00000111 is compatibility projection only.")
       (core-profile-law
        . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D8 semantic domains or the D1/D3 predicate-control foundation.")
       (kernel-archipelago
