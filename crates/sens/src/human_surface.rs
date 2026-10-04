@@ -153,4 +153,46 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn binary_uk_and_sa_sources_execute_to_the_same_observable_result() {
+        // Use a pure D3 selector witness rather than EQ so this surface proof
+        // stays independent of the separate D1 PredicateBit runtime migration.
+        const BINARY: &str =
+            "10 101 00 10 001 00 10 000 01 01 01";
+        const UK: &str = "(перше (як-є (())))";
+        const SA: &str = "(ādi (svarūpa (())))";
+
+        let binary =
+            crate::lower_program(&crate::parse_canonical_binary(BINARY).expect("binary parses"));
+        let uk = crate::lower_program(&crate::parse(UK).expect("UK surface parses"));
+        let sa = crate::lower_program(&crate::parse(SA).expect("SA surface parses"));
+
+        let binary_value = crate::eval_lowered_expressions(
+            &binary,
+            &mut crate::Session::default(),
+        )
+        .expect("binary D3 witness evaluates")
+        .value
+        .to_string();
+        let uk_value = crate::eval_lowered_expressions(
+            &uk,
+            &mut crate::Session::default(),
+        )
+        .expect("UK D3 witness evaluates")
+        .value
+        .to_string();
+        let sa_value = crate::eval_lowered_expressions(
+            &sa,
+            &mut crate::Session::default(),
+        )
+        .expect("SA D3 witness evaluates")
+        .value
+        .to_string();
+
+        assert_eq!(binary_value, "()");
+        assert_eq!(uk_value, binary_value);
+        assert_eq!(sa_value, binary_value);
+    }
+
 }
