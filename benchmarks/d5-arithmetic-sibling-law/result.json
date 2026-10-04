@@ -9,8 +9,8 @@
     "01011": "DIFFERENCE"
   },
   "d4_prefixes": {
-    "1001": "UNALLOCATED",
-    "0101": "UNALLOCATED"
+    "1001": "CADR",
+    "0101": "NULL"
   },
   "candidate_law": "suffix selects direct-vs-inverse rhs orientation",
   "additive_full_protocol_delta_axes": [
@@ -32,5 +32,6 @@
   "additive_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW",
   "multiplicative_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW",
   "relation_class": "VALUE-LOCAL-LAW_PLUS_FULL-PROTOCOL-COORDINATE-SCOPE",
-  "binary_restriction_possible": "PROVED-BY-EXACT-D5-RUNTIME"
+  "binary_restriction_possible": "PROVED-BY-EXACT-D5-RUNTIME",
+  "d4_prefix_occupancy": "OCCUPIED-NOT-PARENTHOOD-EVIDENCE"
 }
