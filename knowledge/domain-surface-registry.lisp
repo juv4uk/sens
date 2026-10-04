@@ -27,6 +27,13 @@
   ("100" "1011" (en cadr) (ук ()) (укр перше-від-решти) (sa ()) (sym ()))
   ("100" "1101" (en cddr) (ук ()) (укр решта-від-решти) (sa ()) (sym ()))
 
+  ; D5 Lisp-owned residents whose closures are already bound into exact D5 slots.
+  ("101" "10000" (en append) (ук приєднати) (укр приєднати) (sa saṅkalana) (sym ()))
+  ("101" "10001" (en reverse) (ук зворот) (укр зворот) (sa viloma) (sym ()))
+  ("101" "11100" (en assoc) (ук знайти-за-ключем) (укр знайти-за-ключем) (sa saṃbandha) (sym ()))
+  ("101" "11101" (en member?) (ук значення-у-списку?) (укр значення-у-списку?) (sa sambaddha?) (sym ()))
+  ("101" "11111" (en subst) (ук замінити) (укр замінити) (sa ()) (sym ()))
+
   ; D5 owner-map residents with live exact-domain mechanisms.
   ("101" "01010" (en plus) (ук додати) (укр додати) (sa yoga) (sym +))
   ("101" "01011" (en difference) (ук відняти) (укр відняти) (sa viyoga) (sym -))
