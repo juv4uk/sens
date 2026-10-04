@@ -1,0 +1,140 @@
+{
+  "schema": "d4-cleanroom-full-candidate/v1",
+  "authority": "research-candidate-only",
+  "parent_issue": 3225,
+  "premises": [
+    "ratified D1",
+    "ratified D2",
+    "ratified D3/bija3 A",
+    "D4 geometry = D3 || one bit",
+    "independently proved D4 selector law",
+    "clean-room capability evidence only"
+  ],
+  "forbidden_premises": [
+    "SID8",
+    "Sens8",
+    "Function8",
+    "pre-3225 D4 resident inventory",
+    "historical Lisp order",
+    "D5 parentage",
+    "migration-cost tie-break"
+  ],
+  "rows": [
+    {
+      "code": "0000",
+      "parent": "000 EMPTY",
+      "capability": "GROUND?",
+      "status": "derived-candidate",
+      "law": "observe whether value is structural EMPTY/ground"
+    },
+    {
+      "code": "0001",
+      "parent": "000 EMPTY",
+      "capability": "COALESCE",
+      "status": "derived-candidate",
+      "law": "if ground/no-witness select fallback, else preserve value"
+    },
+    {
+      "code": "0010",
+      "parent": "001 QUOTE",
+      "capability": "ABSTRACT",
+      "status": "new-capability-candidate",
+      "law": "construct parameterized executable behavior now; bind value later",
+      "evidence": "#3229"
+    },
+    {
+      "code": "0011",
+      "parent": "001 QUOTE",
+      "capability": "ENTER",
+      "status": "new-capability-candidate",
+      "law": "enter/evaluate represented executable semantics",
+      "evidence": "#3230 positive-control family"
+    },
+    {
+      "code": "0100",
+      "parent": "010 ATOM",
+      "capability": "COMPOSITE?",
+      "status": "derived-candidate",
+      "law": "D1 complement of ATOM: pair/non-atom classification"
+    },
+    {
+      "code": "0101",
+      "parent": "010 ATOM",
+      "capability": "EXECUTABLE?",
+      "status": "carrier-observer-candidate",
+      "law": "classify the first post-D3 executable-behavior carrier"
+    },
+    {
+      "code": "0110",
+      "parent": "011 CDR",
+      "capability": "CDAR",
+      "status": "generated",
+      "law": "compose CDR after CAR"
+    },
+    {
+      "code": "0111",
+      "parent": "011 CDR",
+      "capability": "CDDR",
+      "status": "generated",
+      "law": "compose CDR after CDR"
+    },
+    {
+      "code": "1000",
+      "parent": "100 CAR",
+      "capability": "CAAR",
+      "status": "generated",
+      "law": "compose CAR after CAR"
+    },
+    {
+      "code": "1001",
+      "parent": "100 CAR",
+      "capability": "CADR",
+      "status": "generated",
+      "law": "compose CAR after CDR"
+    },
+    {
+      "code": "1010",
+      "parent": "101 EQ",
+      "capability": "ASSOC-READ",
+      "status": "derived-candidate",
+      "law": "retrieve context entry selected by exact identity key"
+    },
+    {
+      "code": "1011",
+      "parent": "101 EQ",
+      "capability": "ASSOC-WRITE",
+      "status": "derived-candidate",
+      "law": "establish/extend identity-keyed association"
+    },
+    {
+      "code": "1100",
+      "parent": "110 COND",
+      "capability": "DISPATCH",
+      "status": "derived-candidate",
+      "law": "choose finite executable branch by classification and invoke"
+    },
+    {
+      "code": "1101",
+      "parent": "110 COND",
+      "capability": "REENTER",
+      "status": "proved-new-capability",
+      "law": "same behavior/control may re-enter on smaller semantic input",
+      "evidence": "#3230/#3233"
+    },
+    {
+      "code": "1110",
+      "parent": "111 CONS",
+      "capability": "COLLECT",
+      "status": "derived-candidate",
+      "law": "construct finite variadic pair-chain from supplied values"
+    },
+    {
+      "code": "1111",
+      "parent": "111 CONS",
+      "capability": "MAP-BUILD",
+      "status": "derived-with-reentry-candidate",
+      "law": "recursively transform inputs and construct result pair-chain"
+    }
+  ],
+  "note": "Names are neutral clean-room capability labels. Historical-name comparison is posterior only."
+}
