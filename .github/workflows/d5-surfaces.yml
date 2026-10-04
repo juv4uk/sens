@@ -1,0 +1,31 @@
+name: D5 Ukrainian/Sanskrit surfaces
+
+on:
+  pull_request:
+    paths:
+      - "lib/surface/domain-surfaces-d5.lisp"
+      - "docs/domain-surfaces-d5.md"
+      - "scripts/check-domain-surfaces-d5.py"
+      - "scripts/translate-domain-program.py"
+      - ".github/workflows/d5-surfaces.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/surface/domain-surfaces-d5.lisp"
+      - "docs/domain-surfaces-d5.md"
+      - "scripts/check-domain-surfaces-d5.py"
+      - "scripts/translate-domain-program.py"
+      - ".github/workflows/d5-surfaces.yml"
+
+jobs:
+  exact-domain-surface:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Check D5 uk/sa projection
+        run: python3 scripts/check-domain-surfaces-d5.py
+      - name: Check D1-D5 program translation
+        run: python3 scripts/translate-domain-program.py --self-test
