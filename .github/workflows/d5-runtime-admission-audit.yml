@@ -1,4 +1,4 @@
-name: D5 runtime admission audit
+name: D5 research W5 boundary audit
 
 on:
   pull_request:
@@ -21,35 +21,35 @@ permissions:
 
 jobs:
   audit:
-    name: D5 canonical identity path
+    name: D5 historical donor and W5 mechanism boundary
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Prove all 32 exact W5 source words
+      - name: Prove all 32 exact W5 mechanical source words
         run: cargo test -p sens --test d5_source_boundary
 
-      - name: Emit D5 runtime admission matrix
+      - name: Emit D5 research boundary matrix
         run: |
-          python3 scripts/research-2766-d5-runtime-admission.py --json d5-runtime-admission.json
-          cat d5-runtime-admission.json
+          python3 scripts/research-2766-d5-runtime-admission.py --json d5-research-boundary.json
+          cat d5-research-boundary.json
 
       - name: Upload matrix
         uses: actions/upload-artifact@v4
         with:
-          name: d5-runtime-admission
-          path: d5-runtime-admission.json
+          name: d5-research-boundary
+          path: d5-research-boundary.json
 
       - name: Publish summary
         run: |
           {
-            echo "## D5 runtime admission audit"
+            echo "## D5 research W5 boundary audit"
             echo
             echo "~~~text"
             python3 scripts/research-2766-d5-runtime-admission.py
             echo "~~~"
             echo
-            echo "- Occupancy authority: OD-005 owner map."
-            echo "- Semantic residency is not inferred by this audit."
-            echo "- Human names are projection only; no D5 -> Sens8 alias is admitted."
+            echo "- Historical donor map: OD-005; it is not current semantic authority."
+            echo "- Current D5 semantic status: UNRATIFIED / RESEARCH under #3278."
+            echo "- W5 mechanics and human projections do not admit D5 semantics."
           } >> "$GITHUB_STEP_SUMMARY"
