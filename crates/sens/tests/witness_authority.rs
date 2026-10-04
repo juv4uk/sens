@@ -286,7 +286,6 @@ fn init_meta_session() -> Session {
 
 fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
     let expr = escape_lisp_string(&row.expr);
-    eprintln!("meta-phase: begin {}", row.expr);
     eval_program(
         &format!(
             "(def --witness-meta-step-- (my-eval-program (read-all \"{expr}\") --witness-meta-env--))"
@@ -294,29 +293,24 @@ fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
         session,
     )
     .expect("meta step");
-    eprintln!("meta-phase: eval-done {}", row.expr);
     eval_program(
         "(def --witness-meta-env-- (car --witness-meta-step--))",
         session,
     )
     .expect("thread meta environment");
-    eprintln!("meta-phase: env-done {}", row.expr);
 
     let meta_value = eval_program("(cdr --witness-meta-step--)", session)
         .expect("meta value transport")
         .value;
-    eprintln!("meta-phase: transport-done {}", row.expr);
     let presented = escape_lisp_string(&meta_value.to_string());
     let program = format!(
         "(witness-verdict (quote {}) (witness-meta-outcome-presented (cdr --witness-meta-step--) \"{}\"))",
         row.source, presented
     );
-    let value = eval_program(&program, session)
+    eval_program(&program, session)
         .unwrap_or_else(|error| panic!("meta witness verdict failed for {}: {error}", row.expr))
         .value
-        .to_string();
-    eprintln!("meta-phase: verdict-done {}", row.expr);
-    value
+        .to_string()
 }
 
 #[test]
@@ -414,7 +408,6 @@ fn same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend() {
     let mut checked_values = 0usize;
 
     for row in &rows {
-        eprintln!("meta-eval-row: {}", row.expr);
         let verdict = meta_verdict(&mut session, row);
         assert!(
             verdict.starts_with("(witness-result (status pass)"),
