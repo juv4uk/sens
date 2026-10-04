@@ -8,6 +8,7 @@ on:
       - "crates/sens/src/eval/special_forms.rs"
       - "crates/sens/src/eval/special_forms/core.rs"
       - "crates/sens/tests/empty_witness_law.rs"
+      - "tests/fixtures/empty-witness-law-cases.lisp"
       - ".github/workflows/empty-witness-integration.yml"
   push:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - "crates/sens/src/eval/special_forms.rs"
       - "crates/sens/src/eval/special_forms/core.rs"
       - "crates/sens/tests/empty_witness_law.rs"
+      - "tests/fixtures/empty-witness-law-cases.lisp"
       - ".github/workflows/empty-witness-integration.yml"
   workflow_dispatch:
 
