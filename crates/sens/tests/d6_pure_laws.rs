@@ -75,3 +75,56 @@ fn print_representative_results() {
         println!("D6-PURE-LAW source={source:?} result={:?}", run(source));
     }
 }
+
+
+#[test]
+fn nth_obeys_indexed_projection_recurrence() {
+    for value in ["(a)", "(a b)", "(a b c d)"] {
+        assert_same(
+            &format!("(nth 0 (quote {value}))"),
+            &format!("(car (quote {value}))"),
+        );
+    }
+
+    let value = "(a b c d)";
+    for n in 0..3 {
+        assert_same(
+            &format!("(nth {} (quote {value}))", n + 1),
+            &format!("(nth {n} (cdr (quote {value})))"),
+        );
+    }
+}
+
+#[test]
+fn maplist_observes_successive_tails() {
+    for value in ["()", "(a)", "(a b c)", "(1 2 3 4)"] {
+        assert_same(
+            &format!("(maplist (quote {value}) (lambda (tail) (car tail)))"),
+            &format!("(quote {value})"),
+        );
+    }
+
+    assert_same(
+        "(maplist (quote (a b c)) (lambda (tail) (length tail)))",
+        "(quote (3 2 1))",
+    );
+    assert_same(
+        "(maplist (quote (a b c d)) (lambda (tail) (length tail)))",
+        "(quote (4 3 2 1))",
+    );
+}
+
+#[test]
+fn sublis_singleton_generalizes_subst_and_multi_key_is_distinct() {
+    for tree in ["a", "(a b a)", "((a) b (c a))"] {
+        assert_same(
+            &format!("(sublis (quote ((a z))) (quote {tree}))"),
+            &format!("(subst (quote z) (quote a) (quote {tree}))"),
+        );
+    }
+
+    assert_same(
+        "(sublis (quote ((a x) (b y))) (quote (a (b c) a)))",
+        "(quote (x (y c) x))",
+    );
+}
