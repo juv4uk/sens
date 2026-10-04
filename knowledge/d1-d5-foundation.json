@@ -1,7 +1,8 @@
 {
   "schema": "d1-d5-foundation-ratification/v1",
-  "status": "owner-ratified",
+  "status": "superseded-by-#3393",
   "authority": "#3331",
+  "superseded_by": "knowledge/d1-d6-foundation.json",
   "date": "2026-10-05",
   "current_domains": [
     "D1",
