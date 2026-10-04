@@ -1,0 +1,41 @@
+name: D7 convention residue research
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d3-d8-stable-residents.json"
+      - "benchmarks/d7-convention-residue/**"
+      - ".github/workflows/d7-convention-residue.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d3-d8-stable-residents.json"
+      - "benchmarks/d7-convention-residue/**"
+      - ".github/workflows/d7-convention-residue.yml"
+  workflow_dispatch:
+
+jobs:
+  firewall:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run D7 convention/residue firewall
+        run: |
+          rm -rf /tmp/d7-convention-residue
+          python3 benchmarks/d7-convention-residue/run.py             --out /tmp/d7-convention-residue
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d7-convention-residue/report.md; then
+            cat /tmp/d7-convention-residue/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d7-convention-residue
+          path: /tmp/d7-convention-residue/
+          retention-days: 14
