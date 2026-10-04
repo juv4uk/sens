@@ -1,0 +1,19 @@
+name: D5 v2 generator shadow
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-v2-generator-shadow.json"
+      - "docs/research/d5-v2-generator-shadow.md"
+      - "docs/research/d5-v2-generator-shadow.uk.md"
+      - "scripts/check-d5-v2-generator-shadow.py"
+      - ".github/workflows/d5-v2-generator-shadow.yml"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d5-v2-generator-shadow.py
+      - run: cargo test -p sens --test d5_reverse_onto_law
