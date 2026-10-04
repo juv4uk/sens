@@ -1,6 +1,8 @@
-# D3/D4 dispatch benchmark (#2209)
+# Historical pre-bīja3 D3/D4 dispatch benchmark (#2209)
 
-This is the current-main execution slice of #1988 after D1-D4 ratification.
+> **Historical evidence only.** This benchmark encodes the superseded pre-#3202 D3 selector roots `101 CAR` / `110 CDR` and their old D4 descendants. It is preserved for reproducibility and comparison, but it is **not** the current semantic baseline after bīja3 A ratification. Fresh D3→D4 measurements are owned by #3206 and remain blocked until the coherent post-#3202 D3/D4 cutover and conformance are GREEN.
+
+This was the current-main execution slice of #1988 under the earlier D1-D4 map.
 
 It asks one narrow question: when the identity is already available in the AST, what does selector dispatch itself cost?
 
@@ -38,4 +40,4 @@ python3 benchmarks/domain1234-dispatch/run.py \
 
 Primary CPU metric is Cachegrind instruction references. Setup and full runs are measured separately and execution is reported as the differential. Branches are also differential. Logical counters report table lookups, exact bits consumed, generator applications, root selections, tree steps and strategy-specific prepared bytes.
 
-This benchmark does not choose semantics. #2169 owns production D4 semantics, #1988 owns the broader execution-strategy matrix, cml#397/#398 own compiler compile-away/unroll, and fpga-lisp#44 owns hardware decoder metrics.
+This benchmark does not choose current semantics. Its coordinates are historical. #3212 owns the coherent post-bīja3 D4 map, #3206 owns fresh D3→D4 rebaseline work, #1988 owns the broader execution-strategy matrix, cml#397/#398 own compiler compile-away/unroll, and fpga-lisp#44 owns hardware decoder metrics.
