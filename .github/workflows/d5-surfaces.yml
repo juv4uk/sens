@@ -27,5 +27,7 @@ jobs:
           python-version: "3.13"
       - name: Check D5 uk/sa projection
         run: python3 scripts/check-domain-surfaces-d5.py
+      - name: Check D1-D5 generated runtime projection
+        run: python3 scripts/check-domain-surfaces-d1-d4.py
       - name: Check D1-D5 program translation
         run: python3 scripts/translate-domain-program.py --self-test
