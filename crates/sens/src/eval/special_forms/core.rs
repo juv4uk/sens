@@ -364,6 +364,10 @@ pub(crate) fn cons_values(
     Ok(Value::Pair(std::rc::Rc::new(head), std::rc::Rc::new(tail)))
 }
 
+/// Historical/profile EQ compatibility mechanism.
+///
+/// This keeps the pre-domain behavior for legacy Sens8 callers: non-atoms are
+/// a type failure and the result uses the old answer carrier.
 pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, LanguageError> {
     if !left.is_atom() || !right.is_atom() {
         return Err(LanguageError::new(
@@ -373,4 +377,16 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
         ));
     }
     Ok(answer(Some(u8::from(left == right))))
+}
+
+/// Canonical exact-domain D3:101 EQ.
+///
+/// EQ is a partial predicate under #3161. Admitted atoms answer exact D1.
+/// If either operand lies outside EQ's atom domain, the operation returns
+/// structural D3:000 EMPTY/no-witness — never D1:0 and never host truthiness.
+pub(crate) fn eq_domain_values(left: &Value, right: &Value) -> Value {
+    if !left.is_atom() || !right.is_atom() {
+        return Value::Nil;
+    }
+    Value::predicate_bit(left == right)
 }
