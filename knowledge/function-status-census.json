@@ -1,24 +1,24 @@
 {
   "summary": {
-    "schema": "function-status-census/v1",
+    "schema": "function-status-census/v2",
     "authority": "research-only",
-    "input_schema": "exact-width-admitted-corpus/v1",
+    "input_schema": "exact-width-admitted-corpus/v2",
     "input_authority_refs": [
       "#2151",
-      "#2170",
-      "#2175",
-      "#2329"
+      "#3202",
+      "#3272",
+      "#3278"
     ],
-    "active_function_rows": 30,
+    "active_function_rows": 24,
     "counts": {
       "root": 0,
-      "generated": 12,
+      "generated": 4,
       "residue": 0,
-      "UNKNOWN": 18
+      "UNKNOWN": 20
     },
-    "generated_fraction_of_active_rows": 0.4,
-    "registry_rows_potentially_derivable": 12,
-    "unclassified_upper_bound": 18,
+    "generated_fraction_of_active_rows": 0.16666666666666666,
+    "registry_rows_potentially_derivable": 4,
+    "unclassified_upper_bound": 20,
     "proven_independent_root_count": 0,
     "bounded_residue_count": 0,
     "status_law": {
@@ -28,10 +28,10 @@
       "UNKNOWN": "default when derivation/independence evidence is insufficient"
     },
     "non_conclusions": [
-      "40% is a fraction of active exact-width coordinate rows, not semantic power",
-      "UNKNOWN does not mean independent root",
-      "failed bounded search does not imply residue",
-      "no production row is deleted by this census"
+      "generated fraction counts certified current D4 selector residents only",
+      "D5/D6/D8 are absent because #3278 revoked current semantic admission",
+      "UNKNOWN does not mean unoccupied or independent root",
+      "D5+ selector continuation is not claimed while #3209 is unresolved"
     ]
   },
   "rows": [
@@ -46,7 +46,7 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
       "human_surface_optional": "()"
     },
@@ -61,7 +61,7 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
       "human_surface_optional": "QUOTE"
     },
@@ -76,7 +76,7 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
       "human_surface_optional": "ATOM"
     },
@@ -91,9 +91,9 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
-      "human_surface_optional": "COND"
+      "human_surface_optional": "CDR"
     },
     {
       "function_identity": "100",
@@ -106,9 +106,9 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
-      "human_surface_optional": "CONS"
+      "human_surface_optional": "CAR"
     },
     {
       "function_identity": "101",
@@ -121,9 +121,9 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
-      "human_surface_optional": "CAR"
+      "human_surface_optional": "EQ"
     },
     {
       "function_identity": "110",
@@ -136,9 +136,9 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
-      "human_surface_optional": "CDR"
+      "human_surface_optional": "COND"
     },
     {
       "function_identity": "111",
@@ -151,9 +151,9 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
-      "human_surface_optional": "EQ"
+      "human_surface_optional": "CONS"
     },
     {
       "function_identity": "0000",
@@ -166,7 +166,7 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_surface_optional": "APPLY"
     },
@@ -181,7 +181,7 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_surface_optional": "EVAL"
     },
@@ -196,7 +196,7 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_surface_optional": "LAMBDA"
     },
@@ -211,7 +211,7 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_surface_optional": "DEFINE"
     },
@@ -226,12 +226,12 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_surface_optional": "NOT"
     },
     {
-      "function_identity": "0110",
+      "function_identity": "0101",
       "width": 4,
       "status": "UNKNOWN",
       "root_basis": null,
@@ -241,28 +241,73 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
-      "human_surface_optional": "EVCON"
+      "human_surface_optional": "NULL"
+    },
+    {
+      "function_identity": "0110",
+      "width": 4,
+      "status": "generated",
+      "root_basis": "011",
+      "law_path": "0",
+      "certificate_ref": "#2055/#3272",
+      "search_grammar": "d3-selector-suffix-v2",
+      "search_bound": 1,
+      "independence_status": "derived",
+      "semantic_fact_refs": "#2055/#3202/#3272",
+      "authority_ref": "#3272",
+      "generator_ref": "#2055/#3272",
+      "human_surface_optional": "CDAR"
     },
     {
       "function_identity": "0111",
       "width": 4,
-      "status": "UNKNOWN",
-      "root_basis": null,
-      "law_path": null,
-      "certificate_ref": null,
-      "search_grammar": null,
-      "search_bound": null,
-      "independence_status": "unknown",
-      "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
-      "generator_ref": null,
-      "human_surface_optional": "EVLIS"
+      "status": "generated",
+      "root_basis": "011",
+      "law_path": "1",
+      "certificate_ref": "#2055/#3272",
+      "search_grammar": "d3-selector-suffix-v2",
+      "search_bound": 1,
+      "independence_status": "derived",
+      "semantic_fact_refs": "#2055/#3202/#3272",
+      "authority_ref": "#3272",
+      "generator_ref": "#2055/#3272",
+      "human_surface_optional": "CDDR"
     },
     {
       "function_identity": "1000",
       "width": 4,
+      "status": "generated",
+      "root_basis": "100",
+      "law_path": "0",
+      "certificate_ref": "#2055/#3272",
+      "search_grammar": "d3-selector-suffix-v2",
+      "search_bound": 1,
+      "independence_status": "derived",
+      "semantic_fact_refs": "#2055/#3202/#3272",
+      "authority_ref": "#3272",
+      "generator_ref": "#2055/#3272",
+      "human_surface_optional": "CAAR"
+    },
+    {
+      "function_identity": "1001",
+      "width": 4,
+      "status": "generated",
+      "root_basis": "100",
+      "law_path": "1",
+      "certificate_ref": "#2055/#3272",
+      "search_grammar": "d3-selector-suffix-v2",
+      "search_bound": 1,
+      "independence_status": "derived",
+      "semantic_fact_refs": "#2055/#3202/#3272",
+      "authority_ref": "#3272",
+      "generator_ref": "#2055/#3272",
+      "human_surface_optional": "CADR"
+    },
+    {
+      "function_identity": "1010",
+      "width": 4,
       "status": "UNKNOWN",
       "root_basis": null,
       "law_path": null,
@@ -271,69 +316,54 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
-      "human_surface_optional": "LIST"
-    },
-    {
-      "function_identity": "1010",
-      "width": 4,
-      "status": "generated",
-      "root_basis": "101",
-      "law_path": "0",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 1,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CAAR"
+      "human_surface_optional": "LOOKUP"
     },
     {
       "function_identity": "1011",
       "width": 4,
-      "status": "generated",
-      "root_basis": "101",
-      "law_path": "1",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 1,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CADR"
+      "status": "UNKNOWN",
+      "root_basis": null,
+      "law_path": null,
+      "certificate_ref": null,
+      "search_grammar": null,
+      "search_bound": null,
+      "independence_status": "unknown",
+      "semantic_fact_refs": null,
+      "authority_ref": "#3272",
+      "generator_ref": null,
+      "human_surface_optional": "BIND"
     },
     {
       "function_identity": "1100",
       "width": 4,
-      "status": "generated",
-      "root_basis": "110",
-      "law_path": "0",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 1,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CDAR"
+      "status": "UNKNOWN",
+      "root_basis": null,
+      "law_path": null,
+      "certificate_ref": null,
+      "search_grammar": null,
+      "search_bound": null,
+      "independence_status": "unknown",
+      "semantic_fact_refs": null,
+      "authority_ref": "#3272",
+      "generator_ref": null,
+      "human_surface_optional": "EVCON"
     },
     {
       "function_identity": "1101",
       "width": 4,
-      "status": "generated",
-      "root_basis": "110",
-      "law_path": "1",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 1,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CDDR"
+      "status": "UNKNOWN",
+      "root_basis": null,
+      "law_path": null,
+      "certificate_ref": null,
+      "search_grammar": null,
+      "search_bound": null,
+      "independence_status": "unknown",
+      "semantic_fact_refs": null,
+      "authority_ref": "#3272",
+      "generator_ref": null,
+      "human_surface_optional": "EVLIS"
     },
     {
       "function_identity": "1110",
@@ -346,9 +376,9 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
-      "human_surface_optional": "LOOKUP"
+      "human_surface_optional": "LIST"
     },
     {
       "function_identity": "1111",
@@ -361,129 +391,9 @@
       "search_bound": null,
       "independence_status": "unknown",
       "semantic_fact_refs": null,
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
-      "human_surface_optional": "BIND"
-    },
-    {
-      "function_identity": "10100",
-      "width": 5,
-      "status": "generated",
-      "root_basis": "101",
-      "law_path": "00",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 2,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CAAAR"
-    },
-    {
-      "function_identity": "10101",
-      "width": 5,
-      "status": "generated",
-      "root_basis": "101",
-      "law_path": "01",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 2,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CAADR"
-    },
-    {
-      "function_identity": "10110",
-      "width": 5,
-      "status": "generated",
-      "root_basis": "101",
-      "law_path": "10",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 2,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CADAR"
-    },
-    {
-      "function_identity": "10111",
-      "width": 5,
-      "status": "generated",
-      "root_basis": "101",
-      "law_path": "11",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 2,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CADDR"
-    },
-    {
-      "function_identity": "11000",
-      "width": 5,
-      "status": "generated",
-      "root_basis": "110",
-      "law_path": "00",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 2,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CDAAR"
-    },
-    {
-      "function_identity": "11001",
-      "width": 5,
-      "status": "generated",
-      "root_basis": "110",
-      "law_path": "01",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 2,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CDADR"
-    },
-    {
-      "function_identity": "11010",
-      "width": 5,
-      "status": "generated",
-      "root_basis": "110",
-      "law_path": "10",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 2,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CDDAR"
-    },
-    {
-      "function_identity": "11011",
-      "width": 5,
-      "status": "generated",
-      "root_basis": "110",
-      "law_path": "11",
-      "certificate_ref": "#2323/#2345",
-      "search_grammar": "selector-suffix-v1",
-      "search_bound": 2,
-      "independence_status": "derived",
-      "semantic_fact_refs": "#1968/#2304/#2329/#2345",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_surface_optional": "CDDDR"
+      "human_surface_optional": "APPEND"
     }
   ]
 }
