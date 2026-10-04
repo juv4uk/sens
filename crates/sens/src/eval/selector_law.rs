@@ -206,7 +206,7 @@ mod tests {
         ]);
         assert_eq!(
             invoke(d5(0b10010), &[nested], span).unwrap().unwrap(),
-            leaf(30.0)
+            proper([leaf(30.0), leaf(40.0)])
         );
     }
 
