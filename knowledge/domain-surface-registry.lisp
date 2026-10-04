@@ -6,7 +6,7 @@
   ; Row shape:
   ;   ("width-bits" "identity-bits" (namespace surface) ...)
   ;
-  ; No legacy Function8/Sens8 byte appears here.
+  ; No historical flat-byte semantic identity appears here.
 
   ; D3 bīja3 — surfaced residents.
   ("11" "001" (ук як-є) (укр як-є) (sa svarūpa) (sym "'"))

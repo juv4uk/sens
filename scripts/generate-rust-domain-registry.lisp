@@ -2,7 +2,7 @@
 ;
 ; Authority: knowledge/domain-surface-registry.lisp
 ; This generator emits only width + exact bits + surfaces. It never reads or
-; emits a legacy Function8/Sens8 byte.
+; emits a historical flat-byte semantic identity.
 ;
 ; Usage:
 ;   cargo run -p sens-cli --bin sens -- scripts/generate-rust-domain-registry.lisp
@@ -90,7 +90,7 @@
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: knowledge/domain-surface-registry.lisp\n"
     "// Generator: scripts/generate-rust-domain-registry.lisp\n"
-    "// No legacy Function8/Sens8 byte is present in this projection.\n"
+    "// No historical flat-byte semantic identity is present in this projection.\n"
     "\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
     "pub(super) struct DomainSurface {\n"

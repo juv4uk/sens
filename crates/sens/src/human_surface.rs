@@ -3,7 +3,7 @@
 //! Authority for spelling projection: `knowledge/domain-surface-registry.lisp`.
 //! Semantic authority remains the ratified domain laws.  The generated table
 //! contains exact width + exact bits + surface spellings and no historical
-//! SID8/SENS8/Function8 identity.
+//! historical flat-byte semantic identity.
 //!
 //! This first vertical slice admits the seven surfaced D3 residents.
 

@@ -1,7 +1,7 @@
 // GENERATED — DO NOT EDIT BY HAND.
 // Authority: knowledge/domain-surface-registry.lisp
 // Generator: scripts/generate-rust-domain-registry.lisp
-// No legacy Function8/Sens8 byte is present in this projection.
+// No historical flat-byte semantic identity is present in this projection.
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct DomainSurface {
