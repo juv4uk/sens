@@ -185,3 +185,5 @@
 (tool (path "scripts/research-2764-d6-pre-od006-archival-guard.py") (kind check) (language python) (role d6-cross-era-authority-guard) (lifecycle active) (callers (".github/workflows/d6-od006-cross-era-authority.yml" "#2764" "#2762")) (authority-source (issue #b101011001100)) (migration-issue #b101011001100) (replacement ()) (removal-condition never-while-od006-and-pre-od006-evidence-coexist))
 
 (tool (path "scripts/research-d6-v2-geometry-s3.py") (kind check) (language python) (role d6-v2-geometry-s3-theorem) (lifecycle transitional) (callers (".github/workflows/d6-v2-geometry-s3.yml" "#3384")) (authority-source (issue 3384)) (migration-issue 3384) (replacement ()) (removal-condition d6-v2-geometry-ratified-or-superseded))
+
+(tool (path "scripts/research-d6-v2-geometry-s4.py") (kind check) (language python) (role d6-v2-geometry-s4-gauge-verifier) (lifecycle transitional) (callers (".github/workflows/d6-v2-geometry-s4.yml" "#3390")) (authority-source (issue 3390)) (migration-issue 3390) (replacement ()) (removal-condition d6-v2-map-ratified-or-superseded))
