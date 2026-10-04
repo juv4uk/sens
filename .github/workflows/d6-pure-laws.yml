@@ -1,0 +1,15 @@
+name: D6 pure law witnesses
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/d6_pure_laws.rs"
+      - ".github/workflows/d6-pure-laws.yml"
+  workflow_dispatch:
+
+jobs:
+  laws:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: cargo test -p sens --test d6_pure_laws -- --nocapture

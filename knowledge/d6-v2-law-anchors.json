@@ -1,8 +1,8 @@
 {
-  "schema": "d6-v2-law-anchors/v1",
+  "schema": "d6-v2-law-anchors/v2",
   "status": "research-semantic-anchors",
-  "issue": "#3321",
-  "note": "semantic law is independent of coordinate; candidate coordinates come from the current D6 v2 selector-rebase shadow and are not ratified",
+  "issue": "#3333",
+  "note": "semantic law and coordinate placement are tracked separately; candidate coordinates are never authority until owner ratification",
   "families": [
     {
       "names": [
@@ -109,8 +109,45 @@
         "#3323",
         "lib/core.lisp",
         "crates/sens/tests/stack_safety.rs",
-        "crates/sens/tests/mccarthy.rs"
+        "crates/sens/tests/mccarthy.rs",
+        "#3339",
+        "#3340",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ],
+      "witness_status": "EXECUTABLE-GREEN"
+    },
+    {
+      "names": [
+        "LENGTH",
+        "LENGTH-ONTO"
+      ],
+      "candidate_coordinates": [],
+      "law": "LENGTH(x) = LENGTH-ONTO(x, 0)",
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN",
+      "evidence": [
+        "#3339",
+        "#3340",
+        "crates/sens/tests/d6_pure_laws.rs",
+        "lib/core.lisp"
+      ]
+    },
+    {
+      "names": [
+        "MIN-LIST",
+        "MAX-LIST"
+      ],
+      "candidate_coordinates": [],
+      "law": "permutation-invariant order folds; under additive negation MIN-LIST(-xs) = -MAX-LIST(xs) and MAX-LIST(-xs) = -MIN-LIST(xs)",
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN",
+      "evidence": [
+        "#3339",
+        "#3340",
+        "crates/sens/tests/d6_pure_laws.rs",
+        "lib/core.lisp"
       ]
     }
-  ]
+  ],
+  "law_covered_semantics": 36
 }
