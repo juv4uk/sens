@@ -35,6 +35,20 @@ pub(crate) fn evaluate_definition(
     Ok(value)
 }
 
+/// Mechanism-only projection from admitted predicate/no-witness values to
+/// the single control question "select this clause?".  Returning `false`
+/// for both D1:0 and `()` does not equate those language values.
+fn cond_selects(value: &Value, span: Span) -> Result<bool, LanguageError> {
+    match value.as_predicate_bit() {
+        Some(bit) => Ok(bit),
+        None if matches!(value, Value::Nil) => Ok(false),
+        None => Err(LanguageError::new(
+            ErrorKind::Type,
+            format!("cond test must return exact D1 PredicateBit or structural (); got {value}"),
+            span,
+        )),
+    }
+}
 pub(crate) fn evaluate_cond(
     clauses: &[Expr],
     environment: &Environment,
@@ -58,17 +72,8 @@ pub(crate) fn evaluate_cond(
         }
 
         let value = evaluate(&parts[0], environment)?;
-        match value.as_predicate_bit() {
-            Some(true) => return evaluate_step(&parts[1], environment),
-            Some(false) => continue,
-            None if matches!(value, Value::Nil) => continue,
-            None => {
-                return Err(LanguageError::new(
-                    ErrorKind::Type,
-                    format!("cond test must return exact D1 PredicateBit or structural (); got {value}"),
-                    parts[0].span,
-                ));
-            }
+        if cond_selects(&value, parts[0].span)? {
+            return evaluate_step(&parts[1], environment);
         }
     }
 
@@ -224,4 +229,58 @@ pub(crate) fn eq_values(left: Value, right: Value, _span: Span) -> Result<Value,
         return Ok(Value::Nil);
     }
     Ok(Value::predicate_bit(left == right))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Exactness;
+
+    fn span() -> Span {
+        Span { start: 0, end: 0 }
+    }
+
+    #[test]
+    fn empty_and_no_are_distinct_values_but_both_do_not_select_cond() {
+        let no = Value::predicate_bit(false);
+        let empty = Value::Nil;
+        assert_ne!(no, empty);
+        assert!(!cond_selects(&no, span()).unwrap());
+        assert!(!cond_selects(&empty, span()).unwrap());
+        assert!(cond_selects(&Value::predicate_bit(true), span()).unwrap());
+    }
+
+    #[test]
+    fn cond_rejects_ordinary_numeric_truthiness() {
+        let error = cond_selects(&Value::Number(1.0, Exactness::Exact), span())
+            .expect_err("ordinary Number 1 is not D1 PredicateBit");
+        assert_eq!(error.kind, ErrorKind::Type);
+    }
+
+    #[test]
+    fn atom_is_total_but_eq_can_return_empty_no_witness() {
+        let env = Environment::root();
+        assert_eq!(atom_value(&Value::Nil, &env).as_predicate_bit(), Some(true));
+        let pair = Value::Pair(Rc::new(Value::Nil), Rc::new(Value::Nil));
+        assert_eq!(atom_value(&pair, &env).as_predicate_bit(), Some(false));
+
+        assert_eq!(
+            eq_values(Value::Nil, Value::Nil, span()).unwrap().as_predicate_bit(),
+            Some(true)
+        );
+        assert_eq!(
+            eq_values(
+                Value::Number(1.0, Exactness::Exact),
+                Value::Number(2.0, Exactness::Exact),
+                span(),
+            )
+            .unwrap()
+            .as_predicate_bit(),
+            Some(false)
+        );
+        assert!(matches!(
+            eq_values(pair, Value::Nil, span()).unwrap(),
+            Value::Nil
+        ));
+    }
 }
