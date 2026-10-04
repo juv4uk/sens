@@ -208,6 +208,22 @@ mod tests {
     }
 
     #[test]
+    fn lisp_owned_d5_surfaces_project_to_owner_ratified_coordinates() {
+        for (surface, bits) in [
+            ("append", 0b10000),
+            ("reverse", 0b10001),
+            ("quotient", 0b10011),
+            ("assoc", 0b11100),
+            ("member?", 0b11101),
+            ("subst", 0b11111),
+        ] {
+            let identity = domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("missing D5 projection for {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
+        }
+    }
+
+    #[test]
     fn unmigrated_registry_rows_have_no_fake_domain_identity() {
         assert_eq!(domain_identity_for_surface("+"), None);
     }
