@@ -1,0 +1,36 @@
+name: D4 cleanroom QUOTE fibre research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d4-cleanroom-quote-fibre/**"
+      - ".github/workflows/d4-cleanroom-quote-fibre.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d4-cleanroom-quote-fibre/**"
+      - ".github/workflows/d4-cleanroom-quote-fibre.yml"
+  workflow_dispatch:
+
+jobs:
+  quote-fibre:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run QUOTE fibre orthogonality attack
+        run: |
+          rm -rf /tmp/d4-cleanroom-quote-fibre
+          python3 benchmarks/d4-cleanroom-quote-fibre/run.py             --out /tmp/d4-cleanroom-quote-fibre
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d4-cleanroom-quote-fibre/report.md; then
+            cat /tmp/d4-cleanroom-quote-fibre/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d4-cleanroom-quote-fibre
+          path: /tmp/d4-cleanroom-quote-fibre/
+          retention-days: 14
