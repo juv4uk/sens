@@ -75,7 +75,7 @@ def render_generated(rows: list[dict[str, str]]) -> str:
         "    pub(super) width: u8,",
         "    pub(super) bits: u8,",
         "    pub(super) source_routable: bool,",
-        "    pub(super) surfaces: &'static [DomainSurfaceName],"
+        "    pub(super) surfaces: &'static [DomainSurfaceName],",
         "}",
         "",
         "pub(super) const DOMAIN_SURFACE_ROWS: &[DomainSurfaceRow] = &[",
