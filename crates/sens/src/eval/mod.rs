@@ -266,7 +266,7 @@ fn dispatch_domain_call(
     }
 
     if is_d3(identity, 0b110) {
-        return special_forms::evaluate_cond(arguments, environment, span);
+        return special_forms::evaluate_domain_cond(arguments, environment, span);
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
