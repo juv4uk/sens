@@ -1,4 +1,4 @@
-name: Current English vs D1-D8 CPU harness
+name: Current English vs exact-domain CPU harness
 
 on:
   pull_request:
