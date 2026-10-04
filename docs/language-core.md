@@ -29,17 +29,17 @@ Zero-padding, truncation, low-bit extraction або integer equality не мож
 ## Current domain-width ladder and ratification status
 
 ```text
-D1  exact one-bit PredicateBit — RATIFIED
-D2  exact two-bit structural syntax — RATIFIED
-D3  exact three-bit Core foundation — RATIFIED
-D4  exact four-bit bootstrap — RATIFIED
-D5  exact five-bit full compact domain — RATIFIED #3305
-D6  exact six-bit research carrier — UNRATIFIED
-D7  exact seven-bit sound/text provenance domain — RATIFIED
-D8  exact eight-bit research carrier — UNRATIFIED
+D1  exact one-bit PredicateBit — RATIFIED / CURRENT
+D2  exact two-bit structural syntax — RATIFIED / CURRENT
+D3  exact three-bit carrier — UNRATIFIED / RESEARCH
+D4  exact four-bit carrier — UNRATIFIED / RESEARCH
+D5  exact five-bit carrier — UNRATIFIED / RESEARCH
+D6  exact six-bit carrier — UNRATIFIED / RESEARCH
+D7  exact seven-bit carrier — UNRATIFIED / RESEARCH
+D8  exact eight-bit carrier — UNRATIFIED / RESEARCH
 ```
 
-General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6/D8 remain revoked/unratified under #3278.
+General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. Owner reset #3327 leaves only D1/D2 ratified; every D3-D8 map below is research/provenance until independently re-derived.
 
 При цьому:
 
@@ -52,6 +52,18 @@ carrier existence
 ```
 
 Це одна з основних дисциплін Contract 11.
+
+---
+
+## Owner reset #3327
+
+Only D1 and D2 are current semantic authority. Every D3-D8 section below is retained as **research evidence / donor material**, not as current residency, placement or callability.
+
+Rebuild order:
+
+```text
+D1 + D2 -> derive D3 -> derive D4 -> derive D5 -> continue upward
+```
 
 ---
 
