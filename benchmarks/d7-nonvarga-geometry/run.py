@@ -153,8 +153,12 @@ def main():
       "- non-varga manner vocabulary is local, not the varga stop/nasal manner axis;",
       "- glottal is a local place extension;",
       "- uk-ext remains local residue/extension rather than forced varga geometry.","",
+      "Matched-null geometry check (4096 deterministic within-slice permutations):",
+      f"- same-place Hamming-1: observed={null_summary['same_place_h1']['observed']}, null mean={null_summary['same_place_h1']['mean']:.3f}, p95={null_summary['same_place_h1']['p95']}, exceedance={null_summary['same_place_h1']['exceedance_rate']:.4f};",
+      f"- same-manner Hamming-1: observed={null_summary['same_manner_h1']['observed']}, null mean={null_summary['same_manner_h1']['mean']:.3f}, p95={null_summary['same_manner_h1']['p95']}, exceedance={null_summary['same_manner_h1']['exceedance_rate']:.4f};",
+      f"- cross-varga same-place Hamming-1: observed={null_summary['cross_varga_place_h1']['observed']}, null mean={null_summary['cross_varga_place_h1']['mean']:.3f}, p95={null_summary['cross_varga_place_h1']['p95']}, exceedance={null_summary['cross_varga_place_h1']['exceedance_rate']:.4f};","",
       "Geometry status: **NOT-FORCED-BY-SEMANTIC-FACTOR-ALONE**.","",
-      "CURRENT-vs-matched-null scores are stored in result.json; CURRENT bits never define the features."
+      "CURRENT bits never define the features."
     ]
     (a.out/"report.md").write_text("\n".join(report)+"\n")
     print("\n".join(report))
