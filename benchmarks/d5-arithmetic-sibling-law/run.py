@@ -41,8 +41,10 @@ def main() -> int:
         for row in corpus["rows"]
         if row["width"] == 4
     }
-    assert d4["0101"]["status"] == "unallocated"
-    assert d4["1001"]["status"] == "unallocated"
+    assert d4["0101"]["human_label_optional"] == "NULL"
+    assert d4["0101"]["status"] == "admitted"
+    assert d4["1001"]["human_label_optional"] == "CADR"
+    assert d4["1001"]["status"] == "generated"
 
     rows = {
         row["historical_name"].upper(): row
@@ -89,9 +91,10 @@ def main() -> int:
             "10011": "QUOTIENT",
         },
         "d4_prefixes": {
-            "0101": "UNALLOCATED",
-            "1001": "UNALLOCATED",
+            "0101": "NULL",
+            "1001": "CADR",
         },
+        "d4_prefix_occupancy": "OCCUPIED-NOT-PARENTHOOD-EVIDENCE",
         "candidate_law": "suffix selects direct-vs-inverse rhs orientation",
         "additive_full_protocol_delta_axes": list(additive_axes),
         "multiplicative_full_protocol_delta_axes": list(multiplicative_axes),
@@ -118,8 +121,9 @@ def main() -> int:
     print("TIMES/QUOTIENT-FULL-PROTOCOL=MULTI-DELTA")
     print("ADDITIVE-AXES=operation-orientation,arity")
     print("MULTIPLICATIVE-AXES=operation-orientation,arity,fixed-quotient-policy")
-    print("D4-0101=UNALLOCATED")
-    print("D4-1001=UNALLOCATED")
+    print("D4-0101=NULL")
+    print("D4-1001=CADR")
+    print("D4-PREFIX-OCCUPANCY=NOT-PARENTHOOD-EVIDENCE")
     print("RELATION=VALUE-LOCAL-LAW_PLUS_FULL-PROTOCOL-COORDINATE-SCOPE")
     print("CORE-MATH-LAW-TRANSFER=FORBIDDEN-WITHOUT-BRIDGE")
     print("OWNER-MAP-MUTATION=NONE")
