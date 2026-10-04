@@ -5,8 +5,8 @@
 //! A selector descendant is not looked up in a flat function table.
 //! Its exact Core identity is decoded as:
 //!
-//! - D3 root 101 -> CAR
-//! - D3 root 110 -> CDR
+//! - D3 root 100 -> CAR
+//! - D3 root 011 -> CDR
 //! - every suffix bit 0 -> compose CAR
 //! - every suffix bit 1 -> compose CDR
 //!
@@ -41,8 +41,8 @@ fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let payload = identity.packed_bits();
     let prefix = payload >> (width - 3);
     let root = match prefix {
-        0b101 => Step::Car,
-        0b110 => Step::Cdr,
+        0b100 => Step::Car,
+        0b011 => Step::Cdr,
         _ => return None,
     };
 
@@ -139,23 +139,23 @@ mod tests {
 
     #[test]
     fn selector_family_is_decoded_from_root_plus_suffix_only() {
-        assert_eq!(decode(d3(0b101)).unwrap().len, 1);
-        assert_eq!(decode(d3(0b110)).unwrap().len, 1);
+        assert_eq!(decode(d3(0b100)).unwrap().len, 1);
+        assert_eq!(decode(d3(0b011)).unwrap().len, 1);
 
         assert_eq!(
-            decode(d4(0b1011)).unwrap().steps[..2],
+            decode(d4(0b1001)).unwrap().steps[..2],
             [Step::Car, Step::Cdr]
         );
         assert_eq!(
-            decode(d5(0b11010)).unwrap().steps[..3],
+            decode(d5(0b01110)).unwrap().steps[..3],
             [Step::Cdr, Step::Cdr, Step::Car]
         );
         assert_eq!(
-            decode(d6(0b101101)).unwrap().steps[..4],
+            decode(d6(0b100101)).unwrap().steps[..4],
             [Step::Car, Step::Cdr, Step::Car, Step::Cdr]
         );
         assert_eq!(
-            decode(d8(0b10110101)).unwrap().steps[..6],
+            decode(d8(0b10010101)).unwrap().steps[..6],
             [Step::Car, Step::Cdr, Step::Car, Step::Cdr, Step::Car, Step::Cdr]
         );
     }
@@ -164,7 +164,7 @@ mod tests {
     fn non_selector_words_are_not_minted_by_geometry() {
         for identity in [
             d3(0b001),
-            d3(0b100),
+            d3(0b101),
             d4(0b0010),
             d5(0b01010),
             d6(0b011111),
@@ -186,37 +186,76 @@ mod tests {
 
         // CAR
         assert_eq!(
-            invoke(d3(0b101), std::slice::from_ref(&x), span).unwrap().unwrap(),
+            invoke(d3(0b100), std::slice::from_ref(&x), span).unwrap().unwrap(),
             pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0)))
         );
         // CADR = CAR(CDR(x))
         assert_eq!(
-            invoke(d4(0b1011), &[proper([leaf(10.0), leaf(20.0)])], span)
+            invoke(d4(0b1001), &[proper([leaf(10.0), leaf(20.0)])], span)
                 .unwrap()
                 .unwrap(),
             leaf(20.0)
         );
         // CAAAR = CAR(CAR(CAR(x)))
         assert_eq!(
-            invoke(d5(0b10100), std::slice::from_ref(&x), span).unwrap().unwrap(),
+            invoke(d5(0b10000), std::slice::from_ref(&x), span).unwrap().unwrap(),
             leaf(1.0)
         );
         // CAAAAR = CAR(CAR(CAR(CAR(x2))))
         let x2 = pair(x.clone(), Value::Nil);
         assert_eq!(
-            invoke(d6(0b101000), &[x2], span).unwrap().unwrap(),
+            invoke(d6(0b100000), &[x2], span).unwrap().unwrap(),
             leaf(1.0)
         );
 
-        // D8 10100000 = six CAR applications under the same admitted law.
+        // D8 10000000 = six CAR applications under the same admitted law.
         let mut x8 = leaf(9.0);
         for _ in 0..6 {
             x8 = pair(x8, Value::Nil);
         }
         assert_eq!(
-            invoke(d8(0b10100000), &[x8], span).unwrap().unwrap(),
+            invoke(d8(0b10000000), &[x8], span).unwrap().unwrap(),
             leaf(9.0)
         );
+    }
+
+    #[test]
+    fn ratified_d3_complement_preserves_selector_duality_through_d6() {
+        // Under #3202, CAR=100 and CDR=011 are exact 3-bit complements.
+        // Extending a selector path and flipping every bit must produce the
+        // semantic dual path inside this proved selector family.
+        for width in 3usize..=6 {
+            let suffix_len = width - 3;
+            let limit = 1u8 << suffix_len;
+            for suffix in 0u8..limit {
+                let car_word = (0b100u8 << suffix_len) | suffix;
+                let mask = (1u8 << width) - 1;
+                let dual_word = car_word ^ mask;
+
+                let left = match width {
+                    3 => decode(d3(car_word)),
+                    4 => decode(d4(car_word)),
+                    5 => decode(d5(car_word)),
+                    6 => decode(d6(car_word)),
+                    _ => unreachable!(),
+                }
+                .unwrap();
+
+                let right = match width {
+                    3 => decode(d3(dual_word)),
+                    4 => decode(d4(dual_word)),
+                    5 => decode(d5(dual_word)),
+                    6 => decode(d6(dual_word)),
+                    _ => unreachable!(),
+                }
+                .unwrap();
+
+                assert_eq!(left.len, right.len);
+                for index in 0..left.len {
+                    assert_ne!(left.steps[index], right.steps[index]);
+                }
+            }
+        }
     }
 
     #[test]
