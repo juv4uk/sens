@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#3001 initial D1-D8 exact-domain carrier/runtime benchmark."""
+"""Exact-width W1-W8 carrier/runtime benchmark under Contract 11.4."""
 
 from __future__ import annotations
 
@@ -111,7 +111,7 @@ def main() -> int:
         "machine": platform.machine(),
         "iterations": args.iterations,
         "reps": args.reps,
-        "scope": "D1-D8 exact source-word -> DomainIdentity carrier/runtime",
+        "scope": "W1-W8 exact source-word -> DomainIdentity carrier/runtime",
         "semantic_authority": "none; benchmark consumes production APIs only",
     }
     (args.out_dir / "environment.json").write_text(
@@ -119,7 +119,7 @@ def main() -> int:
     )
 
     lines = [
-        "# Ratified D1-D8 exact-domain benchmark — initial carrier/runtime slice",
+        "# W1-W8 exact-width carrier benchmark — D1-D5 current, D6-D8 research",
         "",
         f"Cachegrind I refs, paired empty-loop subtraction, median of {args.reps} runs, "
         f"{args.iterations:,} iterations.",
@@ -142,8 +142,8 @@ def main() -> int:
         "Correctness invariants checked before measurement:",
         "- D1..D8 exact source words round-trip through DomainIdentity;",
         "- equal payload=1 at widths 1..8 never collapses;",
-        "- D1/D2/D7 fail the callable-Core projection;",
-        "- D3/D4/D5/D6/D8 retain the callable projection boundary only; "
+        "- D1/D2/D6/D7/D8 fail the current callable-Core projection;",
+        "- D3/D4/D5 retain the callable projection boundary only; "
         "this benchmark does not infer execution law from width.",
         "",
         "Deferred lanes:",
