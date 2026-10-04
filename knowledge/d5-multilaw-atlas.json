@@ -1,0 +1,417 @@
+{
+  "schema": "d5-multilaw-atlas/v1",
+  "authority": "research-only",
+  "parent_issue": "#3039",
+  "stable_resident_corpus": "#3051/#3061",
+  "production_map_authority": "#2414/OD-005",
+  "production_map_mutation": "NONE",
+  "policy": {
+    "human_names_in_objective": false,
+    "current_bits_in_objective": false,
+    "stable_resident_ids_are_research_handles": true,
+    "relation_type_is_explicit": true,
+    "geometry_preference_is_separate_from_semantic_law": true,
+    "no_global_d5_suffix_theorem": true
+  },
+  "pairs": [
+    {
+      "pair_id": "d5-pair-0000",
+      "residents": [
+        "sr-ebpkccfbfrzy",
+        "sr-mxaqkuwdtrby"
+      ],
+      "current_bits": [
+        "00000",
+        "00001"
+      ],
+      "relation_type": "HISTORICAL-PAIRING",
+      "law_status": "COORDINATE-LAW",
+      "semantic_equation": null,
+      "local_one_bit_law": false,
+      "geometry_preference": "NO-ADJACENCY-BONUS",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3044",
+        "#2765",
+        "#2772"
+      ],
+      "shadow_note": "current adjacency may move; no semantic-law reward"
+    },
+    {
+      "pair_id": "d5-pair-0001",
+      "residents": [
+        "sr-ckvxfcfujysj",
+        "sr-ktzngdtaeazp"
+      ],
+      "current_bits": [
+        "00010",
+        "00011"
+      ],
+      "relation_type": "PRODUCT-AXIS",
+      "law_status": "SEMANTIC-FAMILY",
+      "semantic_equation": "shared raw-form input with four independent protocol deltas",
+      "local_one_bit_law": false,
+      "geometry_preference": "PENALIZE-ONE-BIT-ADJACENCY",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3025",
+        "#3027",
+        "#2522",
+        "#2528",
+        "#2591",
+        "#2602"
+      ],
+      "shadow_note": "prefer explicit product/separated geometry over one-bit sibling encoding"
+    },
+    {
+      "pair_id": "d5-pair-0010",
+      "residents": [
+        "sr-qbecnrgmfuhy",
+        "sr-dhckwwdxwqud"
+      ],
+      "current_bits": [
+        "00100",
+        "00101"
+      ],
+      "relation_type": "HISTORICAL-PAIRING",
+      "law_status": "COORDINATE-LAW",
+      "semantic_equation": null,
+      "local_one_bit_law": false,
+      "geometry_preference": "NO-ADJACENCY-BONUS",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3044",
+        "#2765",
+        "#2772"
+      ],
+      "shadow_note": "derived recursion capability and composite control block are not one base operation"
+    },
+    {
+      "pair_id": "d5-pair-0011",
+      "residents": [
+        "sr-dddhgjcckuvw",
+        "sr-wnaghmekuqpe"
+      ],
+      "current_bits": [
+        "00110",
+        "00111"
+      ],
+      "relation_type": "PRODUCT-AXIS",
+      "law_status": "SEMANTIC-LAW",
+      "semantic_equation": "target-symbol acquisition = evaluated/computed | syntax-fixed/literal",
+      "local_one_bit_law": true,
+      "geometry_preference": "ONE-BIT-AXIS-CANDIDATE",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3005",
+        "#3016",
+        "#2589"
+      ],
+      "shadow_note": "local axis is real; D4 prefix parenthood remains not inferred"
+    },
+    {
+      "pair_id": "d5-pair-0100",
+      "residents": [
+        "sr-symchamwpptt",
+        "sr-cwvnutxtkjnv"
+      ],
+      "current_bits": [
+        "01000",
+        "01001"
+      ],
+      "relation_type": "ENTAILMENT",
+      "law_status": "SEMANTIC-LAW",
+      "semantic_equation": "ZEROP(x)=YES implies NUMBERP(x)=YES; converse false",
+      "local_one_bit_law": false,
+      "geometry_preference": "ENTAILMENT-RELATION-ONLY",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3032",
+        "#3035",
+        "#2720",
+        "#2730"
+      ],
+      "shadow_note": "consider lattice/implication geometry; sibling toggle has no semantic authority"
+    },
+    {
+      "pair_id": "d5-pair-0101",
+      "residents": [
+        "sr-xzsbmjactwqs",
+        "sr-jtyfmfksqqme"
+      ],
+      "current_bits": [
+        "01010",
+        "01011"
+      ],
+      "relation_type": "INVERSE",
+      "law_status": "SEMANTIC-LAW-SCOPED",
+      "semantic_equation": "DIFFERENCE(a,b)=PLUS(a,additive_inverse(b)) on binary-value semantics",
+      "local_one_bit_law": true,
+      "geometry_preference": "INVERSE-FAMILY-NEIGHBORHOOD",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3003",
+        "#3010"
+      ],
+      "shadow_note": "full historical call protocols are multi-delta; no D4 parenthood"
+    },
+    {
+      "pair_id": "d5-pair-0110",
+      "residents": [
+        "sr-dcteudhrfcdy",
+        "sr-zjppfckqpupw"
+      ],
+      "current_bits": [
+        "01100",
+        "01101"
+      ],
+      "relation_type": "HISTORICAL-PAIRING",
+      "law_status": "COORDINATE-LAW",
+      "semantic_equation": null,
+      "local_one_bit_law": false,
+      "geometry_preference": "PENALIZE-ONE-BIT-ADJACENCY",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3040",
+        "#3042",
+        "#2590",
+        "#2606"
+      ],
+      "shadow_note": "payload kind, control extent and stack effect differ"
+    },
+    {
+      "pair_id": "d5-pair-0111",
+      "residents": [
+        "sr-vxemswutucjg",
+        "sr-ztcsgavywstv"
+      ],
+      "current_bits": [
+        "01110",
+        "01111"
+      ],
+      "relation_type": "DUALITY",
+      "law_status": "SEMANTIC-LAW",
+      "semantic_equation": "GREATERP(a,b)=LESSP(b,a)",
+      "local_one_bit_law": true,
+      "geometry_preference": "DUALITY-NEIGHBORHOOD",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3004",
+        "#3008"
+      ],
+      "shadow_note": "operand-swap relation is real; EVLIS parenthood not inferred"
+    },
+    {
+      "pair_id": "d5-pair-1000",
+      "residents": [
+        "sr-djxxdktshxwq",
+        "sr-bkmjktcwfmhn"
+      ],
+      "current_bits": [
+        "10000",
+        "10001"
+      ],
+      "relation_type": "ANTI-HOMOMORPHISM",
+      "secondary_relation_types": [
+        "INVOLUTION"
+      ],
+      "law_status": "SEMANTIC-LAW",
+      "semantic_equation": "REVERSE(REVERSE(x))=x; REVERSE(APPEND(x,y))=APPEND(REVERSE(y),REVERSE(x))",
+      "local_one_bit_law": false,
+      "geometry_preference": "LOCAL-ALGEBRA-NEIGHBORHOOD",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3052",
+        "#3059"
+      ],
+      "shadow_note": "keep in one list-algebra neighborhood; equations do not force bit orientation"
+    },
+    {
+      "pair_id": "d5-pair-1001",
+      "residents": [
+        "sr-yqtadjuhuzhy",
+        "sr-tztrgtxtnedn"
+      ],
+      "current_bits": [
+        "10010",
+        "10011"
+      ],
+      "relation_type": "INVERSE",
+      "law_status": "SEMANTIC-LAW-SCOPED",
+      "semantic_equation": "QUOTIENT(a,b)=TIMES(a,multiplicative_inverse(b)) with zero partiality parity",
+      "local_one_bit_law": true,
+      "geometry_preference": "INVERSE-FAMILY-NEIGHBORHOOD",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3003",
+        "#3010"
+      ],
+      "shadow_note": "full historical call protocols are multi-delta; no D4 parenthood"
+    },
+    {
+      "pair_id": "d5-pair-1010",
+      "residents": [
+        "sr-jvjtjexukbjj",
+        "sr-cwfgfxdhhpyw"
+      ],
+      "current_bits": [
+        "10100",
+        "10101"
+      ],
+      "relation_type": "GENERATOR",
+      "law_status": "SEMANTIC-LAW",
+      "semantic_equation": "compose selector with first/rest projection",
+      "parent_resident": "sr-jfnhppjhzuwr",
+      "coordinate_equation": "child_bits=parent_bits||delta",
+      "local_one_bit_law": true,
+      "geometry_preference": "PREFIX-GENERATOR",
+      "orientation_forced": true,
+      "evidence_refs": [
+        "#1968",
+        "#2329",
+        "#3056"
+      ],
+      "shadow_note": "positive placement control"
+    },
+    {
+      "pair_id": "d5-pair-1011",
+      "residents": [
+        "sr-rvzzdbwuhdmu",
+        "sr-rwzaeumqbmva"
+      ],
+      "current_bits": [
+        "10110",
+        "10111"
+      ],
+      "relation_type": "GENERATOR",
+      "law_status": "SEMANTIC-LAW",
+      "semantic_equation": "compose selector with first/rest projection",
+      "parent_resident": "sr-weafvdfbcqma",
+      "coordinate_equation": "child_bits=parent_bits||delta",
+      "local_one_bit_law": true,
+      "geometry_preference": "PREFIX-GENERATOR",
+      "orientation_forced": true,
+      "evidence_refs": [
+        "#1968",
+        "#2329",
+        "#3056"
+      ],
+      "shadow_note": "positive placement control"
+    },
+    {
+      "pair_id": "d5-pair-1100",
+      "residents": [
+        "sr-rtsfhumrvjzx",
+        "sr-kskdfsmmbyxa"
+      ],
+      "current_bits": [
+        "11000",
+        "11001"
+      ],
+      "relation_type": "GENERATOR",
+      "law_status": "SEMANTIC-LAW",
+      "semantic_equation": "compose selector with first/rest projection",
+      "parent_resident": "sr-ucvnvbwzcybv",
+      "coordinate_equation": "child_bits=parent_bits||delta",
+      "local_one_bit_law": true,
+      "geometry_preference": "PREFIX-GENERATOR",
+      "orientation_forced": true,
+      "evidence_refs": [
+        "#1968",
+        "#2329",
+        "#3056"
+      ],
+      "shadow_note": "positive placement control"
+    },
+    {
+      "pair_id": "d5-pair-1101",
+      "residents": [
+        "sr-wstzayfjhjka",
+        "sr-varhfxvbxcgx"
+      ],
+      "current_bits": [
+        "11010",
+        "11011"
+      ],
+      "relation_type": "GENERATOR",
+      "law_status": "SEMANTIC-LAW",
+      "semantic_equation": "compose selector with first/rest projection",
+      "parent_resident": "sr-nmhjhrrvhxza",
+      "coordinate_equation": "child_bits=parent_bits||delta",
+      "local_one_bit_law": true,
+      "geometry_preference": "PREFIX-GENERATOR",
+      "orientation_forced": true,
+      "evidence_refs": [
+        "#1968",
+        "#2329",
+        "#3056"
+      ],
+      "shadow_note": "positive placement control"
+    },
+    {
+      "pair_id": "d5-pair-1110",
+      "residents": [
+        "sr-ehrktmewsrqx",
+        "sr-gpqenudbdeaz"
+      ],
+      "current_bits": [
+        "11100",
+        "11101"
+      ],
+      "relation_type": "SEMANTIC-FAMILY",
+      "law_status": "MULTI-DELTA",
+      "semantic_equation": "shared recursive structural search/fold with independent key-extraction and result-projection axes",
+      "local_one_bit_law": false,
+      "geometry_preference": "FAMILY-CLUSTER-WITH-EXPLICIT-AXES",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3053",
+        "#3059"
+      ],
+      "shadow_note": "co-location may be useful; one-bit sibling encoding is not justified"
+    },
+    {
+      "pair_id": "d5-pair-1111",
+      "residents": [
+        "sr-tmmvgwmmahhh",
+        "sr-yhqbcdyxwwkk"
+      ],
+      "current_bits": [
+        "11110",
+        "11111"
+      ],
+      "relation_type": "HISTORICAL-PAIRING",
+      "law_status": "COORDINATE-LAW",
+      "semantic_equation": null,
+      "local_one_bit_law": false,
+      "geometry_preference": "NO-ADJACENCY-BONUS",
+      "orientation_forced": false,
+      "evidence_refs": [
+        "#3054",
+        "#2286",
+        "#2300",
+        "#2348",
+        "#2386"
+      ],
+      "shadow_note": "construction vs tree rewrite; generic recursion/CONS is insufficient"
+    }
+  ],
+  "summary": {
+    "pair_count": 16,
+    "resident_coverage": 32,
+    "relation_type_counts": {
+      "HISTORICAL-PAIRING": 4,
+      "PRODUCT-AXIS": 2,
+      "ENTAILMENT": 1,
+      "INVERSE": 2,
+      "DUALITY": 1,
+      "ANTI-HOMOMORPHISM": 1,
+      "GENERATOR": 4,
+      "SEMANTIC-FAMILY": 1
+    },
+    "selector_generator_pairs": 4,
+    "local_one_bit_law_pairs": 8,
+    "orientation_forced_pairs": 4,
+    "negative_or_no_bonus_pairs": 5
+  }
+}
