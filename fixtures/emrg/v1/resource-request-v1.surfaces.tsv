@@ -1,0 +1,13 @@
+p	uk	pl	en
+1/1	Запит ресурсів	Prośba o zasoby	Resource request
+2	Ідентифікатор повідомлення	Identyfikator wiadomości	Message ID
+3	Час UTC	Czas UTC	UTC time
+4	Категорія ресурсу	Kategoria zasobu	Resource category
+4/0	Питна вода	Woda pitna	Potable water
+5	Кількість	Ilość	Quantity
+6	Одиниця	Jednostka	Unit
+6/0	Літр	Litr	Litre
+7	Місцезнаходження	Lokalizacja	Location
+7/0	Невідомо	Nieznana	Unknown
+8	Примітка	Notatka	Note
+8/0	Відсутня	Brak	Absent
