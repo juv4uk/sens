@@ -88,7 +88,67 @@ pub(crate) fn evaluate_definition(
     Ok(value)
 }
 
-pub(crate) fn evaluate_cond(
+/// Ratified current D3:011 COND law (#3161).
+///
+/// Canonical clauses are exactly `(test expression)`.  The test result is
+/// typed, not truthy:
+///
+/// - D1:1 selects/evaluates the expression;
+/// - D1:0 continues with an explicit NO;
+/// - D3:000 structural `()` continues with NO-WITNESS;
+/// - every other value fails closed.
+///
+/// Exhaustion returns structural `()`.  D1:0 and D3:000 therefore project to
+/// the same control action without becoming equal semantic values.
+pub(crate) fn evaluate_cond_current(
+    clauses: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
+    for clause in clauses {
+        let ExprKind::List(parts) = &clause.kind else {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                "D3:011 COND expects list clauses",
+                clause.span,
+            ));
+        };
+        if parts.len() != 2 {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                "D3:011 COND expects exactly (test expression); three-part migration clauses are not canonical",
+                clause.span,
+            ));
+        }
+
+        let value = evaluate(&parts[0], environment)?;
+        match value.as_predicate_bit() {
+            Some(true) => return evaluate_step(&parts[1], environment),
+            Some(false) => {}
+            None if matches!(value, Value::Nil) => {}
+            None => {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "D3:011 COND test must return exact D1 PredicateBit or D3:000 structural EMPTY/no-witness, got {value}"
+                    ),
+                    parts[0].span,
+                ));
+            }
+        }
+    }
+
+    let _ = span;
+    Ok(EvalStep::Value(Value::Nil))
+}
+
+/// Historical Function8/SID COND compatibility.
+///
+/// This preserves old library/profile execution while canonical exact-domain
+/// D3:011 uses `evaluate_cond_current`.  Nothing here is current semantic
+/// authority; it exists only so legacy `core.lisp` can be replayed/migrated
+/// without reintroducing truthiness into the canonical D3 path.
+pub(crate) fn evaluate_cond_compatibility(
     clauses: &[Expr],
     environment: &Environment,
     span: Span,
@@ -100,7 +160,7 @@ pub(crate) fn evaluate_cond(
         let ExprKind::List(parts) = &clause.kind else {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
-                "cond expects list clauses · cond ochikuie spysky-umovy · cond erwartet Listenklauseln",
+                "compatibility cond expects list clauses",
                 clause.span,
             ));
         };
@@ -110,7 +170,7 @@ pub(crate) fn evaluate_cond(
                 if parts.len() != 2 {
                     return Err(LanguageError::new(
                         ErrorKind::InvalidForm,
-                        "Core2 cond expects historical (test expression) clauses",
+                        "Core2 compatibility cond expects historical (test expression) clauses",
                         clause.span,
                     ));
                 }
@@ -120,9 +180,6 @@ pub(crate) fn evaluate_cond(
                 }
             }
             CondClauseMode::CurrentMigration => match parts.len() {
-                // #217 canonical path: the clause explicitly names the domain
-                // result that selects it. The expected form is data, not code.
-                // No Value -> bool conversion occurs on this path.
                 3 => {
                     let actual = evaluate(&parts[0], environment)?;
                     let expected = quoted(&parts[1])?;
@@ -130,8 +187,6 @@ pub(crate) fn evaluate_cond(
                         return evaluate_step(&parts[2], environment);
                     }
                 }
-                // Migration-only compatibility path for callers not yet moved
-                // to the canonical three-part form.
                 2 => {
                     migration_compatibility_seen = true;
                     let value = evaluate(&parts[0], environment)?;
@@ -142,7 +197,7 @@ pub(crate) fn evaluate_cond(
                 _ => {
                     return Err(LanguageError::new(
                         ErrorKind::InvalidForm,
-                        "cond expects canonical (query expected-result expression) clauses or migration-only (test expression) clauses · cond ochikuie kanonichni (zapyt ochikuvanyi-rezultat vyraz) abo tymchasovi (perevirka vyraz) · cond erwartet kanonische (Abfrage erwartetes-Ergebnis Ausdruck)- oder voruebergehende (Test Ausdruck)-Klauseln",
+                        "compatibility cond expects historical three-part or migration two-part clauses",
                         clause.span,
                     ));
                 }
@@ -156,7 +211,7 @@ pub(crate) fn evaluate_cond(
 
     Err(LanguageError::new(
         ErrorKind::UnsatisfiedConditional,
-        "канонічний cond: жоден query не збігся з expected-result · canonical cond: no query matched its expected result · kanonisches cond: keine Abfrage entsprach ihrem erwarteten Ergebnis",
+        "compatibility cond exhausted without an expected-result match",
         span,
     ))
 }
