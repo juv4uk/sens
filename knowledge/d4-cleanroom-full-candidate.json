@@ -1,140 +1,137 @@
 {
-  "schema": "d4-cleanroom-full-candidate/v1",
-  "authority": "research-candidate-only",
+  "schema": "d4-history-filtered-cleanroom/v2",
+  "authority": "research-candidate-for-owner-ratification",
   "parent_issue": 3225,
-  "premises": [
-    "ratified D1",
-    "ratified D2",
-    "ratified D3/bija3 A",
-    "D4 geometry = D3 || one bit",
-    "independently proved D4 selector law",
-    "clean-room capability evidence only"
-  ],
-  "forbidden_premises": [
-    "SID8",
-    "Sens8",
-    "Function8",
-    "pre-3225 D4 resident inventory",
-    "historical Lisp order",
-    "D5 parentage",
-    "migration-cost tie-break"
-  ],
+  "rule": "history proposes capabilities; D1-D3 derivability filters them; ratified D3 semantic parent chooses the fibre; old coordinates have zero authority",
+  "evidence": {
+    "necessity": "#2156 and Core1 #1132",
+    "pairing": "#2162 interpreted by semantic roles only, not old coordinates",
+    "cleanroom_late_binding": "#3229/#3235",
+    "cleanroom_reentry": "#3230/#3233"
+  },
   "rows": [
     {
       "code": "0000",
       "parent": "000 EMPTY",
-      "capability": "GROUND?",
-      "status": "derived-candidate",
-      "law": "observe whether value is structural EMPTY/ground"
+      "name": "APPLY",
+      "status": "derived-bootstrap",
+      "reason": "execute an already-resolved callable with supplied arguments"
     },
     {
       "code": "0001",
       "parent": "000 EMPTY",
-      "capability": "COALESCE",
-      "status": "derived-candidate",
-      "law": "if ground/no-witness select fallback, else preserve value"
+      "name": "EVAL",
+      "status": "derived-bootstrap",
+      "reason": "interpret a represented expression in context"
     },
     {
       "code": "0010",
       "parent": "001 QUOTE",
-      "capability": "ABSTRACT",
-      "status": "new-capability-candidate",
-      "law": "construct parameterized executable behavior now; bind value later",
-      "evidence": "#3229"
+      "name": "LAMBDA",
+      "status": "irreducible-bootstrap-capability",
+      "reason": "construct late-bound executable behavior; independently supported by #3229/#3235"
     },
     {
       "code": "0011",
       "parent": "001 QUOTE",
-      "capability": "ENTER",
-      "status": "new-capability-candidate",
-      "law": "enter/evaluate represented executable semantics",
-      "evidence": "#3230 positive-control family"
+      "name": "DEFINE",
+      "status": "irreducible-bootstrap-capability",
+      "reason": "persistent named binding / recursion entry required by self-host bootstrap evidence"
     },
     {
       "code": "0100",
       "parent": "010 ATOM",
-      "capability": "COMPOSITE?",
-      "status": "derived-candidate",
-      "law": "D1 complement of ATOM: pair/non-atom classification"
+      "name": "NOT",
+      "status": "derived-convenience",
+      "reason": "predicate complement expressible from PredicateBit/COND"
     },
     {
       "code": "0101",
       "parent": "010 ATOM",
-      "capability": "EXECUTABLE?",
-      "status": "carrier-observer-candidate",
-      "law": "classify the first post-D3 executable-behavior carrier"
+      "name": "UNALLOCATED",
+      "status": "hole",
+      "reason": "no necessary historical capability survives derivability filter"
     },
     {
       "code": "0110",
       "parent": "011 CDR",
-      "capability": "CDAR",
-      "status": "generated",
-      "law": "compose CDR after CAR"
+      "name": "CDAR",
+      "status": "generated-selector",
+      "reason": "selector composition"
     },
     {
       "code": "0111",
       "parent": "011 CDR",
-      "capability": "CDDR",
-      "status": "generated",
-      "law": "compose CDR after CDR"
+      "name": "CDDR",
+      "status": "generated-selector",
+      "reason": "selector composition"
     },
     {
       "code": "1000",
       "parent": "100 CAR",
-      "capability": "CAAR",
-      "status": "generated",
-      "law": "compose CAR after CAR"
+      "name": "CAAR",
+      "status": "generated-selector",
+      "reason": "selector composition"
     },
     {
       "code": "1001",
       "parent": "100 CAR",
-      "capability": "CADR",
-      "status": "generated",
-      "law": "compose CAR after CDR"
+      "name": "CADR",
+      "status": "generated-selector",
+      "reason": "selector composition"
     },
     {
       "code": "1010",
       "parent": "101 EQ",
-      "capability": "ASSOC-READ",
-      "status": "derived-candidate",
-      "law": "retrieve context entry selected by exact identity key"
+      "name": "LOOKUP",
+      "status": "derived-bootstrap",
+      "reason": "identity-keyed environment read"
     },
     {
       "code": "1011",
       "parent": "101 EQ",
-      "capability": "ASSOC-WRITE",
-      "status": "derived-candidate",
-      "law": "establish/extend identity-keyed association"
+      "name": "BIND",
+      "status": "derived-bootstrap",
+      "reason": "identity-keyed environment extension"
     },
     {
       "code": "1100",
       "parent": "110 COND",
-      "capability": "DISPATCH",
-      "status": "derived-candidate",
-      "law": "choose finite executable branch by classification and invoke"
+      "name": "EVCON",
+      "status": "derived-bootstrap",
+      "reason": "conditional evaluator helper"
     },
     {
       "code": "1101",
       "parent": "110 COND",
-      "capability": "REENTER",
-      "status": "proved-new-capability",
-      "law": "same behavior/control may re-enter on smaller semantic input",
-      "evidence": "#3230/#3233"
+      "name": "EVLIS",
+      "status": "derived-bootstrap",
+      "reason": "list-of-expressions evaluator helper"
     },
     {
       "code": "1110",
       "parent": "111 CONS",
-      "capability": "COLLECT",
-      "status": "derived-candidate",
-      "law": "construct finite variadic pair-chain from supplied values"
+      "name": "LIST",
+      "status": "derived-convenience",
+      "reason": "finite list construction from CONS / variadic binding"
     },
     {
       "code": "1111",
       "parent": "111 CONS",
-      "capability": "MAP-BUILD",
-      "status": "derived-with-reentry-candidate",
-      "law": "recursively transform inputs and construct result pair-chain"
+      "name": "UNALLOCATED",
+      "status": "hole",
+      "reason": "no necessary historical capability survives derivability filter"
     }
   ],
-  "note": "Names are neutral clean-room capability labels. Historical-name comparison is posterior only."
+  "excluded_historical": [
+    "LABEL",
+    "FUNCTION/FUNARG",
+    "EVALQUOTE",
+    "PAIR/PAIRLIS",
+    "ASSOC",
+    "APPEND",
+    "SUBST/SUBLIS",
+    "MAPLIST"
+  ],
+  "note": "Two holes are deliberate. Capacity is not a requirement to invent semantics."
 }
