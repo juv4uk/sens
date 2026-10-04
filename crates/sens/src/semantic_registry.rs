@@ -29,18 +29,18 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
     match byte {
         0b0000_0001 => Some(d3(0b001)), // QUOTE
         0b0000_0010 => Some(d3(0b010)), // ATOM
-        0b0000_0111 => Some(d3(0b011)), // COND
-        0b0000_0100 => Some(d3(0b100)), // CONS
-        0b0000_0101 => Some(d3(0b101)), // CAR
-        0b0000_0110 => Some(d3(0b110)), // CDR
-        0b0000_0011 => Some(d3(0b111)), // EQ
+        0b0000_0111 => Some(d3(0b110)), // COND
+        0b0000_0100 => Some(d3(0b111)), // CONS
+        0b0000_0101 => Some(d3(0b100)), // CAR
+        0b0000_0110 => Some(d3(0b011)), // CDR
+        0b0000_0011 => Some(d3(0b101)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
-        0b0011_0011 => Some(d4(0b1010)), // CAAR
-        0b0011_0100 => Some(d4(0b1011)), // CADR
-        0b0011_0101 => Some(d4(0b1101)), // CDDR
+        0b0011_0011 => Some(d4(0b1000)), // CAAR
+        0b0011_0100 => Some(d4(0b1001)), // CADR
+        0b0011_0101 => Some(d4(0b0111)), // CDDR
         _ => None,
     }
 }
@@ -188,25 +188,25 @@ mod tests {
 
     #[test]
     fn migrated_registry_roles_are_domain_qualified_and_not_truncated() {
-        let d3_011 = domain_identity_for_surface("за-умовою").unwrap();
-        let d3_111 = domain_identity_for_surface("тотожне?").unwrap();
+        let d3_110 = domain_identity_for_surface("за-умовою").unwrap();
+        let d3_101 = domain_identity_for_surface("тотожне?").unwrap();
         let d4_0010 = domain_identity_for_surface("функція").unwrap();
         let d4_0011 = domain_identity_for_surface("визначити").unwrap();
 
-        assert_eq!((d3_011.width(), d3_011.packed_bits()), (3, 0b011));
-        assert_eq!((d3_111.width(), d3_111.packed_bits()), (3, 0b111));
+        assert_eq!((d3_110.width(), d3_110.packed_bits()), (3, 0b110));
+        assert_eq!((d3_101.width(), d3_101.packed_bits()), (3, 0b101));
         assert_eq!((d4_0010.width(), d4_0010.packed_bits()), (4, 0b0010));
         assert_eq!((d4_0011.width(), d4_0011.packed_bits()), (4, 0b0011));
 
-        assert_ne!(d3_011.packed_bits(), 0b111);
-        assert_ne!(d3_111.packed_bits(), 0b011);
+        assert_ne!(d3_110.packed_bits(), 0b011);
+        assert_ne!(d3_101.packed_bits(), 0b111);
         assert_ne!(d4_0010.packed_bits(), 0b1000);
         assert_ne!(d4_0011.packed_bits(), 0b1001);
     }
 
     #[test]
     fn existing_selector_surfaces_project_to_ratified_d4() {
-        for (surface, bits) in [("перше-від-першого", 0b1010), ("перше-від-решти", 0b1011), ("решта-від-решти", 0b1101)] {
+        for (surface, bits) in [("перше-від-першого", 0b1000), ("перше-від-решти", 0b1001), ("решта-від-решти", 0b0111)] {
             let identity = domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("selector surface must project: {surface}"));
             assert_eq!((identity.width(), identity.packed_bits()), (4, bits));
