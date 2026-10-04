@@ -26,8 +26,15 @@ jobs:
       - name: Build preflight executable
         run: cargo build -p sens --example en_vs_d1d8_preflight
 
-      - name: Executable self-test
-        run: target/debug/examples/en_vs_d1d8_preflight --self-test
+      - name: Negative trace-mismatch control
+        run: |
+          printf '(%s)\n' 'car' > /tmp/preflight-en.lisp
+          printf '%s\n' '10 110 01' > /tmp/preflight-bin.lisp
+          set +e
+          target/debug/examples/en_vs_d1d8_preflight /tmp/preflight-en.lisp /tmp/preflight-bin.lisp
+          rc=$?
+          set -e
+          test "$rc" -eq 4
 
       - name: Run paired manifest preflight
         run: |
