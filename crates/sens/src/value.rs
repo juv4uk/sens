@@ -665,6 +665,28 @@ impl Value {
         }
     }
 
+    /// Build the canonical exact D1 predicate result from one host decision.
+    ///
+    /// The host `bool` exists only at this mechanism boundary. Language identity
+    /// is the resulting `DomainIdentity::D1(PredicateBit)`, never the host value.
+    pub fn predicate_bit(holds: bool) -> Self {
+        let word = crate::Bit1::new(u8::from(holds))
+            .expect("a host boolean always fits the exact one-bit carrier");
+        Self::DomainIdentity(DomainIdentity::D1(crate::PredicateBit::from_word(word)))
+    }
+
+    /// Observe an exact D1 predicate result for host-side control mechanics.
+    ///
+    /// Number 0/1, host Bool, NIL, symbols, and every non-D1 domain are rejected.
+    pub fn as_predicate_bit(&self) -> Option<bool> {
+        match self {
+            Self::DomainIdentity(DomainIdentity::D1(bit)) => {
+                Some(bit.word().packed_bits() == 1)
+            }
+            _ => None,
+        }
+    }
+
     /// Explicit callable/Core-operation projection.
     ///
     /// D1/D2/D7 return None; D8 returns a Core identity only as a coordinate,
