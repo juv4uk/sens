@@ -445,7 +445,15 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         if super::necessary_forms::identity_for_domain_identity(identity).is_some() {
             return;
         }
-        environment.bind_domain_code_slot_once(identity, value.clone());
+
+        // QUOTIENT already has an admitted direct D5 arithmetic mechanism.
+        // Keep only its historical closure alias for old Core callers; the
+        // exact D5 path must continue to select the direct mechanism first.
+        if domain_primitive(identity).is_none()
+            && super::d5_arithmetic::invoke(identity, &[], environment, Span::default()).is_none()
+        {
+            environment.bind_domain_code_slot_once(identity, value.clone());
+        }
         environment.bind_code_slot_once(sid, value.clone());
         return;
     }
