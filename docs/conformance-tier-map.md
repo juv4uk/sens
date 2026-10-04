@@ -1,5 +1,9 @@
 # conformance.lisp — tier and axiom map (working draft)
 
+> **Український контекст.** Це історичний людський індекс рівнів та аксіом, а не джерело семантичної влади. Поточні машинно-читані `tier` / `axioms` / `role` / `note` беруться безпосередньо з `tests/fixtures/conformance.lisp`. Коли ратифікована семантика змінює fixture, цей файл лише віддзеркалює відповідний рядок і не може переозначити його зміст.
+>
+> **English peer note.** This is a historical human-readable tier/axiom index, not semantic authority. Current machine-readable fixture metadata lives in `tests/fixtures/conformance.lisp`; this file only mirrors selected rows.
+
 Companion to `docs/language-core-axioms.md`, not a replacement for `conformance.lisp` itself — nothing in the actual fixture file changes here. This is the "next step" pass promised in that document: every fixture, in order, tagged with its tier (1 = CORE SEMANTICS, 2 = LANGUAGE CONTRACT, 3 = ECOSYSTEM CONFORMANCE) and, where one clearly applies, the axiom (G1–G7, S1–S3) it's evidence for.
 
 **Status: draft, not yet ratified.** Produced 2026-08-09 as a discussion basis, not a final classification.
