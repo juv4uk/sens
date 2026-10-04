@@ -18,6 +18,7 @@ mod packed_bits;
 mod binary_framing;
 mod environment;
 mod error;
+mod human_surface;
 pub(crate) mod eval;
 mod language_items;
 mod parser;
@@ -133,6 +134,7 @@ pub use binary_framing::{
 };
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
+pub use human_surface::{render_human_surface, resolve_human_surface, SurfaceLanguage};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 #[allow(deprecated)]
 pub use sid::Sid8;
