@@ -1071,12 +1071,12 @@
     (done . ())))
 
   ("SI-DEFINING-CONSTANTS-EXACT-RATIONAL" . (
-    (priority . 8.5)
-    (capabilities . (my-lisp physics mathematics rationals constants prelude))
-    (origin . my-lisp)
-    (context . "Owner architectural synthesis 2026-09-05: McCarthy's 7 axiomatic language primitives (quote atom eq car cdr cons cond) complemented by BIPM SI 2019's 7 defining physical constants (delta-nu-cs, c, h, e, k, n-a, k-cd). SI defines these values as exact terminating decimals with zero experimental uncertainty, making them representable as exact normalized rationals without floating point.")
-    (description . "Define the 7 BIPM SI defining constants as exact rational constants in a dedicated prelude/physics module: c (299792458), delta-nu-cs (9192631770), k-cd (683), n-a (602214076000000000000000), e (801088317/5000000000000000000000000000), k (1380649/100000000000000000000000000000), h (132521403/200000000000000000000000000000000000000000). Keep them strictly as predefined library/prelude bindings, not core language primitives.")
-    (done . t)))
+    (priority . 10.0)
+    (capabilities . (physics mathematics rationals constants world-knowledge axioms provenance))
+    (origin . sens)
+    (context . "OWNER CUTOVER 2026-10-05, authority #3374/#3386: the seven BIPM SI defining constants already implemented exactly in lib/si.lisp are initial WORLD-KNOWLEDGE AXIOMS / PRIMITIVES. This supersedes the old library-only/prelude-only interpretation. Primitive taxonomy is explicit: world-knowledge primitive != evaluator/function primitive; no function opcode is minted merely by axiom status.")
+    (description . "Promote delta-nu-cs, c, h, e, k, n-a and k-cd from exact scientific library data to canonical initial world axioms. Preserve exact rational/integer value, dimension/unit, exact-by-definition status, BIPM provenance and stable axiom identity; zero floats. Create/consume one machine-readable authority and make docs/tests/library projections validate against it. Distinguish AXIOM from DERIVED, OBSERVED and UNKNOWN. Feed #3387 exact derivation and #3388 observation-boundary work.")
+    (done . nil)))
 
   ("UKRAINIAN-SURFACE-INVENTORY" . (
     (priority . 9.2)
