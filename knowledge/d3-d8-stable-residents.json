@@ -12255,5 +12255,6 @@
       "human_labels_optional": []
     }
   ],
-  "corpus_hash": "fnv32-180dd222"
+  "corpus_hash": "sha256:b7ca2af0ae4b27f9003f18febaaa0ee8f2a7f5f63b82b6007d3d4c28caca8eac",
+  "hash_contract": "SHA-256 over UTF-8 compact JSON serialization of rows in committed order"
 }
