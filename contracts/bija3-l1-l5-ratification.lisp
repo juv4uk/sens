@@ -10,7 +10,7 @@
   (domain . D3)
   (name . bīja3)
 
-  (map
+  (bīja3
     . ((D3:000 EMPTY)
        (D3:001 QUOTE)
        (D3:010 ATOM)
