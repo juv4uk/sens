@@ -199,7 +199,7 @@
 
 (00001001 clips-deftemplate-slots
   (00001000 (form)
-    (clips-slot-names (00110101 form))))
+    (clips-slot-names (1101 form))))
 
 (00001001 clips-templates-from-forms
   (00001000 (forms)
@@ -386,7 +386,7 @@
 ; leaving just the fact list.
 (00001001 clips-deffacts->clauses
   (00001000 (form templates)
-    (clips-facts->clauses (00110101 form) templates)))
+    (clips-facts->clauses (1101 form) templates)))
 
 ; --- Step 2: defrule, with CLIPS's `?x` variable syntax ------------------
 ; CLIPS variables are ordinary symbols to my-lisp's reader (`?x` parses as
@@ -814,7 +814,7 @@
 ; umgewandelt bekommt.
 (00001001 clips-defrule->clauses
   (00001000 (form templates)
-    (10011100 ((split (clips-split-at-arrow (clips-strip-rule-preamble (00110101 form)))))
+    (10011100 ((split (clips-split-at-arrow (clips-strip-rule-preamble (1101 form)))))
       (10011100 ((conditions (clips-convert-vars (clips-convert-template-list (00000101 split) templates)))
             (relevant (clips-drop-printouts (00101111 split))))
         (00000111
