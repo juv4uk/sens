@@ -1,44 +1,65 @@
-; #1804 — minimal shared answer/control foundation.
+; #1804 / #3161 — minimal shared answer/control foundation.
 ;
 ; Pure Lisp data authority. Domain-specific mathematics/reasoning live in
 ; their own contracts and do not redefine the shared predicate/control law.
 ;
 ; Shared law:
-;   ()        = structural empty, never predicate FALSE
-;   predicate = exact one contextual bit: 0 NO / 1 YES
-;   COND      = exactly (test expression), consuming PredicateBit only
+;   D1:1      = YES
+;   D1:0      = NO
+;   D3:000 () = structural EMPTY / NO-WITNESS, never predicate FALSE
+;   COND      = exactly (test expression)
+;               D1:1 -> select
+;               D1:0 -> continue as explicit NO
+;               D3:000 -> continue as EMPTY/no-witness
+;               exhaustion -> D3:000
 ;
-; Human spellings remain surface projections. Function identity remains exact
-; Function8. No rich classifier record is a predicate answer.
+; Critical distinction:
+;   control(D1:0)   = continue
+;   control(D3:000) = continue
+;   but D1:0 != D3:000
+;
+; Human spellings remain surface projections. Canonical identity is exact
+; domain + exact bits + admitted law. No rich classifier record is a predicate
+; answer and no T/NIL truthiness is active authority.
 
-(answer-contract/2
+(answer-contract/3
 
-  ((identity . structural-empty)
-   (domain-owner . structure)
-   (result-form . empty-structure)
+  ((identity . D3:000)
+   (role . structural-empty)
+   (domain-owner . D3)
+   (result-form . empty-structure/no-witness)
    (predicate-answer . no)
-   (false-sentinel . no))
+   (false-sentinel . no)
+   (list-ground . yes)
+   (control-force . non-selection)
+   (distinct-from-D1-zero . yes))
 
-  ((identity . 00000001)
-   (domain-owner . structure)
+  ((identity . D3:001)
+   (role . quote)
+   (domain-owner . D3)
    (result-form . data))
 
-  ((identity . 00000100)
-   (domain-owner . structure)
+  ((identity . D3:111)
+   (role . cons)
+   (domain-owner . D3)
    (result-form . pair))
 
-  ((identity . 00000101)
-   (domain-owner . structure)
+  ((identity . D3:100)
+   (role . car)
+   (domain-owner . D3)
    (input-domain . pair)
    (result-form . value))
 
-  ((identity . 00000110)
-   (domain-owner . structure)
+  ((identity . D3:011)
+   (role . cdr)
+   (domain-owner . D3)
    (input-domain . pair)
    (result-form . value))
 
-  ((identity . 00000010)
-   (domain-owner . predicate)
+  ((identity . D3:010)
+   (role . atom)
+   (domain-owner . D3)
+   (result-domain . D1)
    (result-form . predicate-one-bit)
    (yes . one)
    (no . zero)
@@ -48,25 +69,31 @@
    (rich-result . forbidden)
    (host-bool-authority . forbidden))
 
-  ((identity . 00000011)
-   (domain-owner . predicate)
+  ((identity . D3:101)
+   (role . eq)
+   (domain-owner . D3)
    (input-domain . (admitted-atom admitted-atom))
-   (result-form . predicate-one-bit)
+   (result-domain . (D1 D3:000))
+   (result-form . partial-predicate)
    (yes . one)
    (no . zero)
    (same-atom-result . one)
    (distinct-atom-result . zero)
-   (outside-domain . type-error)
+   (outside-domain . D3:000)
+   (outside-domain-meaning . no-witness)
    (rich-result . forbidden)
    (host-bool-authority . forbidden))
 
-  ((identity . 00000111)
-   (domain-owner . control)
+  ((identity . D3:110)
+   (role . cond)
+   (domain-owner . D3)
    (clause-shape . (test expression))
-   (test-domain . predicate-one-bit)
-   (select-on . one)
-   (skip-on . zero)
-   (exhaustion-result . structural-empty)
+   (test-domain . (D1:1 D1:0 D3:000))
+   (select-on . D1:1)
+   (skip-explicit-no . D1:0)
+   (skip-no-witness . D3:000)
+   (zero-equals-empty . forbidden)
+   (exhaustion-result . D3:000)
    (three-part-clause . forbidden)
    (explicit-result-match . forbidden)
    (generic-truthiness . forbidden)

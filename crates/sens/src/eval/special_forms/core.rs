@@ -65,6 +65,67 @@ fn migration_only_cond_truthy(value: &Value) -> bool {
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ExactD3CondControl {
+    Select,
+    SkipNo,
+    SkipEmpty,
+}
+
+/// Canonical D3:110 control projection.
+///
+/// D1:1 selects. D1:0 is explicit NO. Structural () is EMPTY/no-witness.
+/// NO and EMPTY have the same control action but remain different values.
+fn exact_d3_cond_control(value: &Value, span: Span) -> Result<ExactD3CondControl, LanguageError> {
+    match value.as_predicate_bit() {
+        Some(true) => Ok(ExactD3CondControl::Select),
+        Some(false) => Ok(ExactD3CondControl::SkipNo),
+        None if matches!(value, Value::Nil) => Ok(ExactD3CondControl::SkipEmpty),
+        None => Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "D3:110 COND expects exact D1:1 / D1:0 / structural EMPTY (); got {value}"
+            ),
+            span,
+        )),
+    }
+}
+
+/// Exact-domain D3:110 COND.
+///
+/// This path is deliberately separate from historical Sens8/profile COND.
+/// It is two-part only and never consults host/Lisp truthiness.
+pub(crate) fn evaluate_domain_cond(
+    clauses: &[Expr],
+    environment: &Environment,
+    _span: Span,
+) -> Result<EvalStep, LanguageError> {
+    for clause in clauses {
+        let ExprKind::List(parts) = &clause.kind else {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                "D3:110 COND expects list clauses",
+                clause.span,
+            ));
+        };
+        if parts.len() != 2 {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                "D3:110 COND expects only (test expression) clauses",
+                clause.span,
+            ));
+        }
+
+        let value = evaluate(&parts[0], environment)?;
+        match exact_d3_cond_control(&value, parts[0].span)? {
+            ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
+            ExactD3CondControl::SkipNo | ExactD3CondControl::SkipEmpty => {}
+        }
+    }
+
+    Ok(EvalStep::Value(Value::Nil))
+}
+
 pub(crate) fn evaluate_definition(
     arguments: &[Expr],
     environment: &Environment,
