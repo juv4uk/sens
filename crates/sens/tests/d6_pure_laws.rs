@@ -668,3 +668,83 @@ fn sublis_induces_composable_tree_transformers() {
         );
     }
 }
+
+
+#[test]
+fn recip_and_expt_commute_on_nonzero_exact_q() {
+    let prelude = r#"
+        (define d6-expt-q
+          (lambda (base exponent)
+            (cond
+              ((тотожне? exponent 0) 1)
+              ((атом? 0)
+               (* base (d6-expt-q base (- exponent 1)))))))
+    "#;
+
+    for (x, n) in [("2", "1"), ("2", "3"), ("3/5", "2"), ("-2", "4")] {
+        assert_same(
+            &format!("{prelude} (d6-expt-q (/ 1 {x}) {n})"),
+            &format!("{prelude} (/ 1 (d6-expt-q {x} {n}))"),
+        );
+    }
+}
+
+#[test]
+fn while_is_a_specialization_of_do() {
+    let prelude = r#"
+        (define d6-not-pred
+          (lambda (pred)
+            (lambda (x)
+              (cond
+                ((pred x) (тотожне? 0 1))
+                ((атом? 0) (тотожне? 0 0))))))
+        (define d6-while2
+          (lambda (pred step state)
+            (cond
+              ((pred state) (d6-while2 pred step (step state)))
+              ((атом? 0) state))))
+        (define d6-do2
+          (lambda (step done result state)
+            (cond
+              ((done state) (result state))
+              ((атом? 0) (d6-do2 step done result (step state))))))
+    "#;
+
+    for limit in ["0", "1", "5", "9"] {
+        let pred = format!(
+            "(lambda (x) (cond ((тотожне? x {limit}) (тотожне? 0 1)) ((атом? 0) (тотожне? 0 0))))"
+        );
+        assert_same(
+            &format!(
+                "{prelude} (d6-while2 {pred} (lambda (x) (+ x 1)) 0)"
+            ),
+            &format!(
+                "{prelude} (d6-do2 (lambda (x) (+ x 1)) (d6-not-pred {pred}) (lambda (x) x) 0)"
+            ),
+        );
+    }
+}
+
+#[test]
+fn disjoint_sublis_equals_composed_single_substitutions() {
+    let prelude = r#"
+        (define d6-compose-tree
+          (lambda (f g)
+            (lambda (tree) (f (g tree)))))
+        (define d6-sub-a
+          (lambda (tree) (subst (quote x) (quote a) tree)))
+        (define d6-sub-b
+          (lambda (tree) (subst (quote y) (quote b) tree)))
+    "#;
+
+    for tree in ["(a b c)", "((a) b (c a))", "(b (a b) c)"] {
+        assert_same(
+            &format!(
+                "{prelude} (sublis (quote ((a x) (b y))) (quote {tree}))"
+            ),
+            &format!(
+                "{prelude} ((d6-compose-tree d6-sub-a d6-sub-b) (quote {tree}))"
+            ),
+        );
+    }
+}
