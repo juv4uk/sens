@@ -19,8 +19,11 @@ class Form:
     line:int
 
 def tracked(root):
-    p=subprocess.run(["git","ls-files","*.lisp"],cwd=root,check=True,capture_output=True,text=True)
-    return [root/x for x in p.stdout.splitlines() if x.strip()]
+    p=subprocess.run(
+        ["git","-c","core.quotepath=false","ls-files","-z","--","*.lisp"],
+        cwd=root,check=True,capture_output=True
+    )
+    return [root/pathlib.Path(x.decode("utf-8")) for x in p.stdout.split(b"\\0") if x]
 
 def tokens(text):
     out=[]; i=0; line=1
