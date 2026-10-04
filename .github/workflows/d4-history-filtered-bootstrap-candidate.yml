@@ -1,0 +1,27 @@
+name: D4 historical bootstrap candidate quarantine
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d4-history-filtered-bootstrap-candidate.json"
+      - "knowledge/d4-cleanroom.json"
+      - "docs/research/d4-history-filtered-bootstrap-candidate.md"
+      - "docs/research/d4-history-filtered-bootstrap-candidate.uk.md"
+      - "scripts/check-d4-history-filtered-bootstrap-candidate.py"
+      - ".github/workflows/d4-history-filtered-bootstrap-candidate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d4-history-filtered-bootstrap-candidate.json"
+      - "knowledge/d4-cleanroom.json"
+      - "scripts/check-d4-history-filtered-bootstrap-candidate.py"
+      - ".github/workflows/d4-history-filtered-bootstrap-candidate.yml"
+  workflow_dispatch:
+
+jobs:
+  quarantine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d4-history-filtered-bootstrap-candidate.py
