@@ -198,6 +198,112 @@ impl BitPacker {
     }
 }
 
+
+/// Pack a stream of canonical 7-bit cells eight-at-a-time.
+///
+/// Eight Text7/UPC-7 cells occupy exactly 56 bits, i.e. seven bytes. The
+/// block path avoids the per-bit loop used by the generic packer.
+pub fn pack7_cells(cells: &[u8]) -> Option<(Vec<u8>, usize)> {
+    if cells.iter().any(|&cell| cell > 0x7f) {
+        return None;
+    }
+
+    let bit_len = cells.len().checked_mul(7)?;
+    let mut out = Vec::with_capacity(byte_len_for_bits(bit_len));
+
+    let mut chunks = cells.chunks_exact(8);
+    for chunk in &mut chunks {
+        let a0 = chunk[0];
+        let a1 = chunk[1];
+        let a2 = chunk[2];
+        let a3 = chunk[3];
+        let a4 = chunk[4];
+        let a5 = chunk[5];
+        let a6 = chunk[6];
+        let a7 = chunk[7];
+
+        out.push((a0 << 1) | (a1 >> 6));
+        out.push((a1 << 2) | (a2 >> 5));
+        out.push((a2 << 3) | (a3 >> 4));
+        out.push((a3 << 4) | (a4 >> 3));
+        out.push((a4 << 5) | (a5 >> 2));
+        out.push((a5 << 6) | (a6 >> 1));
+        out.push((a6 << 7) | a7);
+    }
+
+    let tail = chunks.remainder();
+    if !tail.is_empty() {
+        let mut acc = 0u64;
+        for &cell in tail {
+            acc = (acc << 7) | u64::from(cell);
+        }
+        let bits = tail.len() * 7;
+        let shift = (8 - (bits % 8)) % 8;
+        let shifted = acc << shift;
+        let byte_count = byte_len_for_bits(bits);
+        for index in (0..byte_count).rev() {
+            out.push((shifted >> (index * 8)) as u8);
+        }
+    }
+
+    Some((out, bit_len))
+}
+
+/// Unpack a canonical 7-bit-cell stream encoded by pack7_cells.
+pub fn unpack7_cells(bytes: &[u8], bit_len: usize) -> Option<Vec<u8>> {
+    if bit_len % 7 != 0 || bytes.len() != byte_len_for_bits(bit_len) {
+        return None;
+    }
+    let cells_len = bit_len / 7;
+    let mut out = Vec::with_capacity(cells_len);
+
+    let full_blocks = cells_len / 8;
+    for block in 0..full_blocks {
+        let base = block * 7;
+        let b0 = bytes[base];
+        let b1 = bytes[base + 1];
+        let b2 = bytes[base + 2];
+        let b3 = bytes[base + 3];
+        let b4 = bytes[base + 4];
+        let b5 = bytes[base + 5];
+        let b6 = bytes[base + 6];
+
+        out.push(b0 >> 1);
+        out.push(((b0 & 0x01) << 6) | (b1 >> 2));
+        out.push(((b1 & 0x03) << 5) | (b2 >> 3));
+        out.push(((b2 & 0x07) << 4) | (b3 >> 4));
+        out.push(((b3 & 0x0f) << 3) | (b4 >> 5));
+        out.push(((b4 & 0x1f) << 2) | (b5 >> 6));
+        out.push(((b5 & 0x3f) << 1) | (b6 >> 7));
+        out.push(b6 & 0x7f);
+    }
+
+    let tail = cells_len % 8;
+    if tail != 0 {
+        let start = full_blocks * 7;
+        let bytes_for_tail = byte_len_for_bits(tail * 7);
+        let mut acc = 0u64;
+        for &byte in &bytes[start..start + bytes_for_tail] {
+            acc = (acc << 8) | u64::from(byte);
+        }
+        let shift = bytes_for_tail * 8 - tail * 7;
+        acc >>= shift;
+        for index in (0..tail).rev() {
+            out.push(((acc >> (index * 7)) & 0x7f) as u8);
+        }
+    }
+
+    if bit_len % 8 != 0 {
+        let valid = bit_len % 8;
+        let mask = 0xffu8 >> valid;
+        if bytes.last().copied().unwrap_or(0) & mask != 0 {
+            return None;
+        }
+    }
+
+    Some(out)
+}
+
 const fn byte_len_for_bits(bit_len: usize) -> usize {
     (bit_len / 8) + if bit_len.is_multiple_of(8) { 0 } else { 1 }
 }
@@ -387,6 +493,43 @@ mod tests {
         assert!(PackedBitstream::from_parts(vec![0b1010_0001], 3).is_none());
         assert!(PackedBitstream::from_parts(vec![0b1010_0000, 0], 3).is_none());
         assert!(PackedBitstream::from_parts(vec![0b1010_0000], 9).is_none());
+    }
+
+
+    #[test]
+    fn bit7_bulk_pack_matches_generic_bitpacker() {
+        let cells: Vec<u8> = (0..97).map(|i| ((i * 37 + 11) & 0x7f) as u8).collect();
+
+        let (packed_bytes, bit_len) = pack7_cells(&cells).unwrap();
+        let mut generic = BitPacker::with_capacity_bits(cells.len() * 7);
+        for &cell in &cells {
+            generic.push(Bit7::new(cell).unwrap());
+        }
+        let generic = generic.finish();
+
+        assert_eq!(bit_len, cells.len() * 7);
+        assert_eq!(packed_bytes, generic.bytes());
+        assert_eq!(unpack7_cells(&packed_bytes, bit_len).unwrap(), cells);
+    }
+
+    #[test]
+    fn bit7_bulk_rejects_noncanonical_cells_and_padding() {
+        assert!(pack7_cells(&[0x80]).is_none());
+        assert!(unpack7_cells(&[0xff], 7).is_none());
+
+        let (bytes, bits) = pack7_cells(&[1, 2, 3]).unwrap();
+        assert_eq!(bits, 21);
+        let mut padded = bytes.clone();
+        *padded.last_mut().unwrap() |= 0x01;
+        assert!(unpack7_cells(&padded, bits).is_none());
+    }
+
+    #[test]
+    fn bit7_bulk_empty_stream_is_canonical() {
+        let (bytes, bits) = pack7_cells(&[]).unwrap();
+        assert!(bytes.is_empty());
+        assert_eq!(bits, 0);
+        assert_eq!(unpack7_cells(&bytes, bits).unwrap(), Vec::<u8>::new());
     }
 
     #[test]
