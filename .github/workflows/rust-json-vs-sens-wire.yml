@@ -25,7 +25,7 @@ jobs:
 
       - name: Build benchmark binaries
         run: |
-          cargo build --release -p sens --example agent_bench --example transport_decode_bench
+          cargo build --profile ci-meta -p sens --example agent_bench --example transport_decode_bench
 
       - name: Generate identical semantic corpus
         run: |
@@ -58,20 +58,20 @@ jobs:
               ],
           )
           PY
-          target/release/examples/agent_bench encode wire             /tmp/rust-json-wire/messages-sens-text.bin             /tmp/rust-json-wire/messages-sens-wire.bin
+          target/ci-meta/examples/agent_bench encode wire             /tmp/rust-json-wire/messages-sens-text.bin             /tmp/rust-json-wire/messages-sens-wire.bin
 
       - name: Cachegrind decode control
         run: |
           set -euo pipefail
           for form in wire json; do
-            valgrind --tool=cachegrind --cache-sim=no               --cachegrind-out-file=/tmp/cachegrind-${form}.out               target/release/examples/transport_decode_bench               "${form}"               "/tmp/rust-json-wire/messages-sens-${form}.bin"               20               2>"/tmp/${form}.stderr"
+            valgrind --tool=cachegrind --cache-sim=no               --cachegrind-out-file=/tmp/cachegrind-${form}.out               target/ci-meta/examples/transport_decode_bench               "${form}"               "/tmp/rust-json-wire/messages-sens-${form}.bin"               20               2>"/tmp/${form}.stderr"
             grep -E "I[[:space:]]+refs:" "/tmp/${form}.stderr" || true
           done
 
       - name: Wall-clock decode control
         run: |
-          target/release/examples/transport_decode_bench             wire /tmp/rust-json-wire/messages-sens-wire.bin 200
-          target/release/examples/transport_decode_bench             json /tmp/rust-json-wire/messages-py-json.bin 200
+          target/ci-meta/examples/transport_decode_bench             wire /tmp/rust-json-wire/messages-sens-wire.bin 200
+          target/ci-meta/examples/transport_decode_bench             json /tmp/rust-json-wire/messages-py-json.bin 200
 
       - name: Publish benchmark evidence
         if: always()
