@@ -313,11 +313,204 @@ def assert_malformed_rejected() -> None:
         raise AssertionError("leading-zero Number accepted")
 
 
+
+
+# Candidate S: extend the proven Width3 tree rather than prepend a class bit.
+#
+# 000..110 -> D1..D7
+# 1110     -> D8
+# 11110    -> BinaryNumber
+# 111110   -> Local
+# 1111110  -> Sound7
+# 1111111  -> reserved
+#
+# This preserves the donor Width3+escape header cost for every D1..D8 word.
+
+def encode_record_s(record: Record) -> str:
+    if isinstance(record, Domain):
+        if not 1 <= record.width <= 8:
+            raise ValueError("domain width outside 1..8")
+        if not 0 <= record.bits < (1 << record.width):
+            raise ValueError("domain payload outside width")
+        prefix = f"{record.width - 1:03b}" if record.width <= 7 else "1110"
+        return prefix + f"{record.bits:0{record.width}b}"
+
+    if isinstance(record, Number):
+        payload = record.bits
+        if not payload or set(payload) - {"0", "1"}:
+            raise ValueError("Number payload is not binary")
+        if len(payload) > 1 and payload[0] == "0":
+            raise ValueError("Number has non-canonical leading zero")
+        return "11110" + gamma0(len(payload)) + payload
+
+    if isinstance(record, Local):
+        if record.depth < 0 or record.index < 0:
+            raise ValueError("negative lexical coordinate")
+        return "111110" + gamma0(record.depth) + gamma0(record.index)
+
+    if isinstance(record, Sound):
+        if any(not 0 <= cell < 128 for cell in record.cells):
+            raise ValueError("Sound7 cell outside 7 bits")
+        payload = "".join(f"{cell:07b}" for cell in record.cells)
+        return "1111110" + gamma0(len(record.cells)) + payload
+
+    raise TypeError(record)
+
+
+def decode_one_s(bits: str, pos: int) -> tuple[Record, int]:
+    if pos + 3 > len(bits):
+        raise ValueError("truncated candidate-S prefix")
+
+    head = bits[pos:pos + 3]
+    raw = int(head, 2)
+    pos += 3
+
+    if raw < 7:
+        width = raw + 1
+        end = pos + width
+        if end > len(bits):
+            raise ValueError("truncated domain payload")
+        return Domain(width, int(bits[pos:end], 2)), end
+
+    if pos >= len(bits):
+        raise ValueError("truncated candidate-S extension")
+    if bits[pos] == "0":
+        pos += 1
+        width = 8
+        end = pos + width
+        if end > len(bits):
+            raise ValueError("truncated D8 payload")
+        return Domain(width, int(bits[pos:end], 2)), end
+
+    pos += 1
+    if pos >= len(bits):
+        raise ValueError("truncated candidate-S extension")
+    if bits[pos] == "0":
+        pos += 1
+        width, pos = read_gamma0(bits, pos)
+        if width < 1:
+            raise ValueError("zero-width Number")
+        end = pos + width
+        if end > len(bits):
+            raise ValueError("truncated Number")
+        payload = bits[pos:end]
+        if width > 1 and payload[0] == "0":
+            raise ValueError("non-canonical Number")
+        return Number(payload), end
+
+    pos += 1
+    if pos >= len(bits):
+        raise ValueError("truncated candidate-S extension")
+    if bits[pos] == "0":
+        pos += 1
+        depth, pos = read_gamma0(bits, pos)
+        index, pos = read_gamma0(bits, pos)
+        return Local(depth, index), pos
+
+    pos += 1
+    if pos >= len(bits):
+        raise ValueError("truncated candidate-S extension")
+    if bits[pos] == "0":
+        pos += 1
+        count, pos = read_gamma0(bits, pos)
+        end = pos + 7 * count
+        if end > len(bits):
+            raise ValueError("truncated Sound7")
+        cells = tuple(
+            int(bits[offset:offset + 7], 2)
+            for offset in range(pos, end, 7)
+        )
+        return Sound(cells), end
+
+    raise ValueError("reserved candidate-S extension")
+
+
+def encode_program_s(records: Iterable[Record]) -> str:
+    return "".join(encode_record_s(record) for record in records)
+
+
+def decode_program_s(bits: str) -> tuple[Record, ...]:
+    if set(bits) - {"0", "1"}:
+        raise ValueError("wire contains non-bit")
+    pos = 0
+    out: list[Record] = []
+    while pos < len(bits):
+        record, pos = decode_one_s(bits, pos)
+        out.append(record)
+    if encode_program_s(out) != bits:
+        raise ValueError("non-canonical candidate-S wire")
+    return tuple(out)
+
+
+def candidate_s_domain_cost(width: int) -> int:
+    return width + (3 if width <= 7 else 4)
+
+
+def assert_candidate_s() -> tuple[int, int]:
+    records: list[Record] = []
+    records.extend(all_domain_words(8))
+    records.extend(canonical_numbers(8))
+    records.extend(Local(depth, index) for depth in range(3) for index in range(3))
+    records.append(Sound(()))
+    records.extend(Sound((cell,)) for cell in range(128))
+    assert len(records) == 904
+
+    for record in records:
+        wire = encode_record_s(record)
+        assert decode_program_s(wire) == (record,)
+
+    bounded: list[Record] = []
+    bounded.extend(all_domain_words(4))
+    bounded.extend(canonical_numbers(4))
+    bounded.extend(Local(depth, index) for depth in range(3) for index in range(3))
+    bounded.append(Sound(()))
+    bounded.extend(Sound((cell,)) for cell in range(128))
+    assert len(bounded) == 184
+
+    seen: dict[str, tuple[Record, ...]] = {}
+    checked = 0
+    for length in (1, 2):
+        for sequence in product(bounded, repeat=length):
+            checked += 1
+            wire = encode_program_s(sequence)
+            assert decode_program_s(wire) == sequence
+            previous = seen.setdefault(wire, sequence)
+            assert previous == sequence, (previous, sequence, wire)
+    assert checked == 34040
+    assert len(seen) == checked
+
+    assert encode_record_s(Domain(2, 0b11)) != encode_record_s(Number("11"))
+    assert decode_program_s(encode_record_s(Domain(2, 0b11))) == (Domain(2, 0b11),)
+    assert encode_record_s(Domain(1, 1)) != encode_record_s(Number("1"))
+    assert encode_record_s(Domain(3, 1)) != encode_record_s(Domain(4, 1))
+
+    for width in range(1, 9):
+        assert candidate_s_domain_cost(width) == donor_width3_cost(width)
+
+    for bad in ["111", "1111", "11110", "111110", "1111110", "1111111"]:
+        try:
+            decode_program_s(bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"candidate S accepted malformed wire: {bad}")
+
+    noncanonical_two = "11110" + gamma0(2) + "01"
+    try:
+        decode_program_s(noncanonical_two)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("candidate S accepted leading-zero Number")
+
+    return len(records), checked
+
 def main() -> int:
     singles = assert_single_roundtrips()
     sequences = assert_bounded_sequence_injectivity()
     assert_boundary_and_anti_collapse()
     assert_malformed_rejected()
+    s_singles, s_sequences = assert_candidate_s()
 
     print("#3151 outer-record-prefix witness")
     print(f"single_records={singles} roundtrip_failures=0")
@@ -326,14 +519,18 @@ def main() -> int:
     print("domain_number_anti_collapse=true")
     print("meaningful_bit_length_tail_roundtrip=true")
     print("malformed_fail_closed=true")
+    print(f"candidate_s_single_records={s_singles} roundtrip_failures=0")
+    print(f"candidate_s_bounded_sequences={s_sequences} collisions=0 roundtrip_failures=0")
+    print("candidate_s_preserves_donor_D1_D8_cost=true")
     print()
-    print("width donor_width3 gamma_only outer_record")
+    print("width donor_width3 gamma_only candidate_R candidate_S")
     for width in range(1, 9):
         print(
             width,
             donor_width3_cost(width),
             gamma_width_cost(width),
             candidate_domain_cost(width),
+            candidate_s_domain_cost(width),
         )
     return 0
 
