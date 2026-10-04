@@ -51,6 +51,8 @@ def main() -> int:
     assert data["remap_policy"]["current_is_projection"] is True
     assert data["remap_policy"]["shadow_moves_coordinate_not_resident"] is True
     assert data["remap_policy"]["provenance_missing_rows_are_pinned"] is True
+    assert data["remap_policy"]["d3_fixed_authority"] == "#3202"
+    assert data["remap_policy"]["active_shadow_scope"] == "D4-D8"
 
     assert len(rows) == 504
     ids = [row["stable_resident_id"] for row in rows]
@@ -81,7 +83,12 @@ def main() -> int:
             assert not row["map_independent_witness_refs"]
         else:
             assert row["semantic_status"] == "RECOVERED"
-            assert row["placement_policy"] == "SHADOW-ELIGIBLE"
+            if domain == "D3":
+                assert row["placement_policy"] == "RATIFIED-FIXED-D3:#3202"
+                assert "#3202" in row["semantic_law_refs"]
+                assert "#3202" in row["map_independent_witness_refs"]
+            else:
+                assert row["placement_policy"] == "SHADOW-ELIGIBLE"
 
     for stable_id in ids:
         opaque = stable_id.removeprefix("sr-")
@@ -118,6 +125,16 @@ def main() -> int:
     assert data["summary"]["recovered_semantics"] == recovered
     assert data["summary"]["provenance_missing"] == missing
 
+    # #3202 guard: D3 placement is now ratified and removed from active SHADOW search.
+    expected_d3 = {
+        "()": "000", "QUOTE": "001", "ATOM": "010", "CDR": "011",
+        "CAR": "100", "EQ": "101", "COND": "110", "CONS": "111",
+    }
+    actual_d3 = {
+        row["human_labels_optional"][0]: row["current_bits"]
+        for row in rows if row["current_domain"] == "D3"
+    }
+    assert actual_d3 == expected_d3
     # #3060 guard: the D5 MEMBER operation is a D5 resident, but its
     # canonical yes/no result domain is D1.  #3060 is merged: current
     # exact-domain runtime now returns D1 and the old t/() debt is closed.
@@ -140,14 +157,14 @@ def main() -> int:
     digest = hashlib.sha256(compact_rows(rows)).hexdigest()
     assert data["corpus_hash"] == f"sha256:{digest}"
 
-    # Demonstrate the semantic handle / map projection split without changing
-    # the corpus: move one recovered resident in a synthetic SHADOW projection.
-    sample = next(row for row in rows if row["current_domain"] == "D3")
+    # Demonstrate the semantic handle / map projection split on the active
+    # SHADOW scope only. D3 is fixed by #3202; use a recovered D5 resident.
+    sample = next(row for row in rows if row["current_domain"] == "D5")
     shadow = {
         "map_id": "SHADOW-VALIDATOR",
         "stable_resident_id": sample["stable_resident_id"],
-        "candidate_domain": "D4",
-        "candidate_bits": "1111",
+        "candidate_domain": "D6",
+        "candidate_bits": "111111",
     }
     assert shadow["stable_resident_id"] == sample["stable_resident_id"]
     assert (shadow["candidate_domain"], shadow["candidate_bits"]) != (
