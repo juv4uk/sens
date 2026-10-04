@@ -1,0 +1,19 @@
+name: D6 v2 geometry S4
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-v2-law-first-ledger.json"
+      - "knowledge/d6-v2-binary-law-families.json"
+      - "knowledge/d6-v2-gauge-fixed-candidate.json"
+      - "scripts/research-d6-v2-geometry-s4.py"
+      - ".github/workflows/d6-v2-geometry-s4.yml"
+  workflow_dispatch:
+
+jobs:
+  gauge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify canonical gauge-fixed D6 representative
+        run: python3 scripts/research-d6-v2-geometry-s4.py
