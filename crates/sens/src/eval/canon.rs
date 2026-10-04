@@ -96,6 +96,24 @@ pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), Language
     ))
 }
 
+/// Exact domain identity in binder position is already canonical executable
+/// identity, never a lexical slot name. Keep this rejection domain-qualified:
+/// do not stringify/round-trip through legacy Sens8 merely to report the error.
+pub(crate) fn ensure_bindable_domain_identity(
+    identity: crate::DomainIdentity,
+    span: Span,
+) -> Result<(), LanguageError> {
+    Err(LanguageError::new(
+        ErrorKind::InvalidForm,
+        format!(
+            "canonical name is immutable · kanonichne imia nezminne · kanonischer Name ist unveränderlich: D{}:{}",
+            identity.width(),
+            identity
+        ),
+        span,
+    ))
+}
+
 fn exact_args(
     sid: crate::Sens8,
     args: &[Value],
