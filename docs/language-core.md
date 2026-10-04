@@ -131,11 +131,13 @@ L1–L4 звужують повний простір перестановок д
 
 ### Predicate/control law
 
-- `ATOM` повертає тільки D1 PredicateBit.
-- `EQ` повертає тільки D1 PredicateBit у своїй admissible області.
-- `COND` має двопольові clauses `(test expression)`.
+- `ATOM` — total predicate і повертає тільки D1 PredicateBit.
+- `EQ` — typed partial predicate: у своїй admissible atom-domain повертає D1 `0|1`, поза нею — D3 `000 ()` як EMPTY/no-witness.
+- `COND` має рівно двопольові clauses `(test expression)`.
 - D1 `1` вибирає clause.
-- D1 `0` переходить до наступного.
+- D1 `0` переходить до наступного як explicit NO.
+- D3 `()` переходить до наступного як EMPTY/no-witness.
+- будь-яке інше значення тесту — type/contract failure.
 - exhaustion повертає D3 structural `()`, а не predicate false.
 
 ---
@@ -254,7 +256,7 @@ D4 selector slice inside the ratified #3272 map:
 0111 CDDR
 ```
 
-і далі родина продовжується за тим самим законом у ширших доменах, де цей law admitted.
+Далі родина **не** продовжується автоматично лише через prefix geometry. Після нової D3/D4 карти D5+ має collision boundary #3209; а після owner reset #3278 D5/D6/D8 узагалі не мають current semantic admission. Higher-width selector lineage лишається fail-closed до окремого доказу й ратифікації.
 
 Кожен generated resident бажано має certificate:
 
