@@ -376,3 +376,147 @@ fn take_drop_form_a_lossless_list_split() {
         &format!("(quote {xs})"),
     );
 }
+
+
+#[test]
+fn while_and_do_are_tail_iteration_laws() {
+    let prelude = r#"
+        (define d6-while
+          (lambda (pred step state)
+            (cond
+              ((pred state) (d6-while pred step (step state)))
+              (t state))))
+        (define d6-do
+          (lambda (step done result state)
+            (cond
+              ((done state) (result state))
+              (t (d6-do step done result (step state))))))
+    "#;
+
+    assert_same(
+        &format!(
+            "{prelude} (d6-while (lambda (x) (< x 5)) (lambda (x) (+ x 1)) 0)"
+        ),
+        "5",
+    );
+
+    assert_same(
+        &format!(
+            "{prelude}
+             (d6-do
+               (lambda (x) (+ x 2))
+               (lambda (x) (= x 10))
+               (lambda (x) (* x 3))
+               0)"
+        ),
+        "30",
+    );
+}
+
+#[test]
+fn zip_unzip_are_product_inverses_on_equal_length_lists() {
+    let prelude = r#"
+        (define d6-zip
+          (lambda (xs ys)
+            (cond
+              ((= (length xs) 0) (quote ()))
+              ((= (length ys) 0) (quote ()))
+              (t
+               (cons
+                 (list (car xs) (car ys))
+                 (d6-zip (cdr xs) (cdr ys)))))))
+        (define d6-unzip
+          (lambda (pairs)
+            (list
+              (map (lambda (p) (car p)) pairs)
+              (map (lambda (p) (car (cdr p))) pairs))))
+    "#;
+
+    for (xs, ys) in [
+        ("()", "()"),
+        ("(a)", "(1)"),
+        ("(a b c)", "(1 2 3)"),
+    ] {
+        assert_same(
+            &format!("{prelude} (d6-unzip (d6-zip (quote {xs}) (quote {ys})))"),
+            &format!("(list (quote {xs}) (quote {ys}))"),
+        );
+    }
+}
+
+#[test]
+fn scan_exposes_prefix_reductions_and_ends_at_reduce() {
+    let prelude = r#"
+        (define d6-scan
+          (lambda (f acc xs)
+            (cond
+              ((= (length xs) 0) (quote ()))
+              (t
+               ((lambda (next)
+                  (cons next (d6-scan f next (cdr xs))))
+                (f acc (car xs)))))))
+    "#;
+
+    assert_same(
+        &format!(
+            "{prelude} (d6-scan (lambda (acc x) (+ acc x)) 0 (quote (1 2 3 4)))"
+        ),
+        "(quote (1 3 6 10))",
+    );
+
+    for xs in ["(1)", "(1 2)", "(1 2 3 4)", "(5 -2 8)"] {
+        assert_same(
+            &format!(
+                "{prelude}
+                 (car
+                   (reverse
+                     (d6-scan
+                       (lambda (acc x) (+ acc x))
+                       0
+                       (quote {xs}))))"
+            ),
+            &format!(
+                "(reduce (lambda (acc x) (+ acc x)) 0 (quote {xs}))"
+            ),
+        );
+    }
+}
+
+#[test]
+fn any_all_form_a_predicate_dual_pair() {
+    let prelude = r#"
+        (define d6-any
+          (lambda (pred xs)
+            (cond
+              ((= (length xs) 0) 0)
+              ((pred (car xs)) 1)
+              (t (d6-any pred (cdr xs))))))
+        (define d6-all
+          (lambda (pred xs)
+            (cond
+              ((= (length xs) 0) 1)
+              ((pred (car xs)) (d6-all pred (cdr xs)))
+              (t 0))))
+    "#;
+
+    for xs in ["()", "(1)", "(1 2 3)", "(1 0 3)", "(-1 2 3)"] {
+        assert_same(
+            &format!(
+                "{prelude}
+                 (+
+                   (d6-all (lambda (x) (> x 0)) (quote {xs}))
+                   (d6-any (lambda (x) (<= x 0)) (quote {xs})))"
+            ),
+            "1",
+        );
+    }
+
+    assert_same(
+        &format!("{prelude} (d6-any (lambda (x) (= x 2)) (quote (1 2 3)))"),
+        "1",
+    );
+    assert_same(
+        &format!("{prelude} (d6-all (lambda (x) (> x 0)) (quote (1 2 3)))"),
+        "1",
+    );
+}
