@@ -36,6 +36,7 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0000_0011 => Some(d3(0b101)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        0b0010_1001 => Some(d4(0b1111)), // APPEND
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
         0b0011_0011 => Some(d4(0b1000)), // CAAR
@@ -56,7 +57,6 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 ) -> Option<CoreDomainIdentity> {
     let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
     match byte {
-        0b0010_1001 => Some(d5(0b10000)), // APPEND
         0b0010_1010 => Some(d5(0b10001)), // REVERSE
         0b0001_0100 => Some(d5(0b10011)), // QUOTIENT
         0b0010_1101 => Some(d5(0b11100)), // ASSOC
@@ -217,7 +217,6 @@ mod tests {
     #[test]
     fn lisp_owned_d5_binding_projection_is_explicit_but_not_global_legacy_meaning() {
         for (legacy_byte, bits) in [
-            (0b0010_1001, 0b10000),
             (0b0010_1010, 0b10001),
             (0b0001_0100, 0b10011),
             (0b0010_1101, 0b11100),
@@ -233,6 +232,18 @@ mod tests {
             assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
         }
     }
+    #[test]
+    fn append_surface_projects_only_to_ratified_d4() {
+        let identity = domain_identity_for_surface("append")
+            .expect("APPEND surface must project to ratified D4");
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b1111));
+        assert_eq!(
+            transitional_d5_binding_identity_from_registry_byte(0b0010_1001),
+            None,
+            "APPEND must not retain a transitional D5 binding"
+        );
+    }
+
     #[test]
     fn unmigrated_registry_rows_have_no_fake_domain_identity() {
         assert_eq!(domain_identity_for_surface("+"), None);
