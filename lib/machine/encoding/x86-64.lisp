@@ -1048,7 +1048,7 @@
 (00001001 x86-encode-pclmulqdq-xmm-xmm-imm8
   (00001000 (dst src immediate)
     (00101001
-      (x86-encode-sse-66-map-xmm-xmm #b111010 #b1000100 dst src)
+      (x86-encode-sse-66-map-xmm-xmm #d58 #d68 dst src)
       (00100111 immediate))))
 
 ; Bounded memory projection: base+disp8 reuses the already witnessed
@@ -1057,7 +1057,7 @@
   (00001000 (dst base displacement immediate)
     (00101001
       (x86-encode-sse-66-map-xmm-mem-disp8
-        #b111010 #b1000100 dst base displacement)
+        #d58 #d68 dst base displacement)
       (00100111 immediate))))
 
 ; MOVSD xmm, xmm: opcode 0xF2 0x0F 0x10 /r
