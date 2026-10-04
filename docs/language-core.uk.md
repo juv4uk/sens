@@ -30,19 +30,23 @@ Zero-padding, truncation, low-bit extraction чи integer equality не можу
 ## Поточні Core-домени
 
 ```text
-D1  точні однобітні predicate answers
-D2  точна двобітна структура
-D3  точна трибітна foundation
-D4  точна чотирибітна bootstrap
-D5  точний п'ятибітний typed domain
-D6  точний шестибітний typed domain
+D1  точні однобітні predicate answers        2/2
+D2  точна двобітна структура                 4/4
+D3  точна трибітна foundation                8/8
+D4  точна чотирибітна bootstrap             16/16
+D5  точний п'ятибітний typed domain         32/32
+D6  точний шестибітний typed domain         64/64
+D7  точний семибітний sound/text domain    128/128
+D8  точний восьмибітний Core domain        256/256
 ```
 
-Для D5/D6 існування носія, residency, derivability, callability та runtime
-implementation — різні факти. Вільна координата не має значення, доки її не
-допустить закон домену.
+Owner-ratification #3029 закриває occupancy D1–D8: current вільних,
+unallocated або reserved-unfilled координат немає. Residency, derivability,
+callability, compact-law explanation та runtime implementation при цьому
+залишаються різними фактами.
 
-D7 sound/text — окремий напрям і не є callable лише через двійковість.
+D7 sound/text не є callable лише через двійковість; Core.D8 не є історичним
+Sens8 лише через однакову фізичну ширину.
 
 ## D1 — PredicateBit
 
@@ -82,11 +86,25 @@ coordinate під D3 law.
 
 ## D4 — bootstrap
 
-D4 — точний чотирибітний bootstrap domain, ратифікований своїм законом.
+D4 — owner-ratified full compact domain (#3272), усі 16/16 координат зайняті.
 Його координати не реконструюються з історичних восьмибітних Function8.
 
-LAMBDA і DEFINE — поточні D4 bootstrap identity. Нерозміщені координати
-лишаються нерозміщеними.
+```text
+0000 APPLY    0001 EVAL
+0010 LAMBDA   0011 DEFINE
+0100 NOT      0101 NULL
+0110 CDAR     0111 CDDR
+1000 CAAR     1001 CADR
+1010 LOOKUP   1011 BIND
+1100 EVCON    1101 EVLIS
+1110 LIST     1111 APPEND
+```
+
+`NOT` і `NULL` різні, бо D1:0 ≠ D3:000 (). `LIST` і `APPEND` — різні
+CONS-family residents. Старі D4/SID8 координати не мають placement authority.
+
+Selector-law після D4 не продовжується автоматично: D5+ collision #3209
+fail-closed до окремого ратифікованого закону.
 
 ## Reader
 
