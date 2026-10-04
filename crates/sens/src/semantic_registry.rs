@@ -272,14 +272,14 @@ mod tests {
         }
     }
     #[test]
-    fn append_surface_projects_only_to_ratified_d4() {
+    fn d4_1111_surface_projects_only_to_ratified_d4() {
         let identity = domain_identity_for_surface("приєднати")
             .expect("D4:1111 surface must project to ratified D4");
         assert_eq!((identity.width(), identity.packed_bits()), (4, 0b1111));
         assert_eq!(
             transitional_d5_binding_identity_from_registry_byte(0b0010_1001),
             None,
-            "APPEND must not retain a transitional D5 binding"
+            "D4:1111 must not retain a transitional D5 binding"
         );
     }
 
