@@ -180,7 +180,7 @@
 ((expr . "(equal? (quote (mars is a planet)) (narrate-fact (car (understand (quote (mars is a planet))))))") (expected . "(1)") (tier . 3) (axioms . ()) (note . "understand and narrate-fact are direct inverses for the is-a shape"))
 ((expr . "(understand-query (quote (is socrates mortal)))") (expected . "(mortal socrates)") (tier . 3) (axioms . ()) (note . "lib/understand.my query form — a question shape -> a reason goal, the goal-shaped complement of understand"))
 ((expr . "(understand-query (quote (does socrates drink hemlock)))") (expected . "(drink socrates hemlock)") (tier . 3) (axioms . ()) (note . "does-question shape -> a relation goal"))
-((expr . "(cond (0 (quote truthy)) ((atom? (quote fallback)) (quote falsy)))") (error . "Type") (tier . 1) (since-contract . (11 3)) (axioms . (G8)) (role . "constitutive") (note . "Contract 11.3: Number 0 is neither D1:0 nor D3:000 EMPTY, so exact D3:110 COND rejects it instead of applying generic truthiness.") (meta-eval . t))
+((expr . "(cond (0 (quote truthy)) ((atom? (quote fallback)) (quote falsy)))") (error . "Type") (tier . 1) (axioms . (G8)) (role . "constitutive") (note . "Contract 11.3: Number 0 is neither D1:0 nor D3:000 EMPTY, so exact D3:110 COND rejects it instead of applying generic truthiness.") (meta-eval . t))
 ((expr . "(00000011 3 3.0)") (expected . "(1)") (tier . 1) (axioms . (S1)) (note . "decimal literals are exact by default (S1): 3.0 is the exact integer 3, so eq reports the same atom identity relation.") (meta-eval . t))
 ((expr . "(00000011 3 3)") (expected . "(1)") (tier . 1) (axioms . (S1)) (note . "same exactness, same magnitude") (meta-eval . t))
 ((expr . "(00000011 3.0 3.0)") (expected . "(1)") (tier . 1) (axioms . (S1)) (note . "same exact value both sides") (meta-eval . t))
@@ -239,7 +239,7 @@
 ((expr . "(list (equal? (read (write-to-string 42)) 42) (equal? (read (write-to-string 10/20)) 1/2))") (expected . "((1) (1))") (tier . 2) (axioms . (G6 S1)) (note . "canonical serialization round-trip: exact numbers"))
 ((expr . "(list (write-to-string 3.00) (write-to-string 1.25))") (expected . "(\"#q2:11/1\" \"#q2:101/100\")") (tier . 2) (axioms . (G6 S1)) (note . "canonical machine wire is binary and exact; source spelling 3.00/1.25 does not leak into the wire"))
 ((expr . "(list (equal? (read (write-to-string 3.00)) 3.0) (equal? (read (write-to-string 1.25)) 1.25))") (expected . "((1) (1))") (tier . 2) (axioms . (G6 S1)) (note . "canonical serialization round-trip: exact numbers, decimal literals are exact by default"))
-((expr . "(cond (0 (quote zero-is-truthy)) ((atom? (quote fallback)) (quote wrong)))") (error . "Type") (tier . 1) (since-contract . (11 3)) (axioms . (G8)) (role . "constitutive") (note . "Duplicate constitutional guard: exact D3:110 accepts only D1:1, D1:0 or D3:000; numeric zero must fail closed and can never alias predicate NO.") (meta-eval . t))
+((expr . "(cond (0 (quote zero-is-truthy)) ((atom? (quote fallback)) (quote wrong)))") (error . "Type") (tier . 1) (axioms . (G8)) (role . "constitutive") (note . "Duplicate constitutional guard: exact D3:110 accepts only D1:1, D1:0 or D3:000; numeric zero must fail closed and can never alias predicate NO.") (meta-eval . t))
 
 ((expr . "(-> 10 (+ 2) (* 3))") (expected . "36") (tier . 3) (axioms . (G5)) (note . "thread-first macro (->) unwraps forms recursively"))
 ((expr . "(->> 10 (+ 2) (* 3))") (expected . "36") (tier . 3) (axioms . (G5)) (note . "thread-last macro (->>) unwraps forms recursively, placing subject last"))
@@ -288,4 +288,4 @@
 ((expr . "(max-list (quote (5 2 8 1)))") (expected . "8") (tier . 3) (axioms . (G5)))
 ((expr . "(min-list (quote ()))") (expected . "()") (tier . 3) (axioms . (G5 G8)) (note . "empty list argument is Nil, distinct from min/max's own zero-argument Arity error above"))
 ((expr . "(max-list (quote ()))") (expected . "()") (tier . 3) (axioms . (G5 G8)))
-((expr . "(cond ((quote radio) antenna (quote wrong)))") (error . "InvalidForm") (tier . 1) (since-contract . (11 3)) (axioms . (G8 S2)) (role . "constitutive") (note . "Contract 11.3: three-part explicit-result COND is superseded and rejected; current clauses are exactly (test expression)."))
+((expr . "(cond ((quote radio) antenna (quote wrong)))") (error . "InvalidForm") (tier . 1) (axioms . (G8 S2)) (role . "constitutive") (note . "Contract 11.3: three-part explicit-result COND is superseded and rejected; current clauses are exactly (test expression)."))
