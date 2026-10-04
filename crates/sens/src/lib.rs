@@ -19,6 +19,7 @@ mod binary_framing;
 mod environment;
 mod error;
 mod human_surface;
+mod human_surface_generated;
 pub(crate) mod eval;
 mod language_items;
 mod parser;
