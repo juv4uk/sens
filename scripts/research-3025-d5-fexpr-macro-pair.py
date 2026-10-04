@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """#3025 — classify the ratified D5 FEXPR/MACRO pair from merged protocol donors.
 
-Research-only. This script does not execute legacy Function8 rows and does not
+Research-only. This script does not execute historical flat-registry rows and does not
 allocate or move any Core.D5 coordinate. It composes:
 - OD-005 owner occupancy;
 - the merged five-axis special-call factor artifact.
