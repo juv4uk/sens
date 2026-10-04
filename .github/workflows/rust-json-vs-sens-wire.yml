@@ -1,0 +1,101 @@
+name: Rust JSON vs SENS wire decode benchmark
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/Cargo.toml"
+      - "crates/sens/examples/transport_decode_bench.rs"
+      - "benchmarks/agent-messages/run.py"
+      - ".github/workflows/rust-json-vs-sens-wire.yml"
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          rustc --version
+          valgrind --version
+
+      - name: Build benchmark binaries
+        run: |
+          cargo build --release -p sens --example agent_bench --example transport_decode_bench
+
+      - name: Generate identical semantic corpus
+        run: |
+          python3 - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location(
+              "agent_messages",
+              "benchmarks/agent-messages/run.py",
+          )
+          mod = importlib.util.module_from_spec(spec)
+          assert spec.loader is not None
+          spec.loader.exec_module(mod)
+          import random
+          out = Path("/tmp/rust-json-wire")
+          out.mkdir()
+          rng = random.Random(1)
+          messages = [mod.gen_message(rng, i) for i in range(1000)]
+          mod.write_records(
+              out / "messages-sens-text.bin",
+              [mod.lisp(m, mod.SENS).encode() for m in messages],
+          )
+          mod.write_records(
+              out / "messages-py-json.bin",
+              [
+                  __import__("json").dumps(
+                      mod.json_ast(m), separators=(",", ":")
+                  ).encode()
+                  for m in messages
+              ],
+          )
+          PY
+          target/release/examples/agent_bench encode wire             /tmp/rust-json-wire/messages-sens-text.bin             /tmp/rust-json-wire/messages-sens-wire.bin
+
+      - name: Cachegrind decode control
+        run: |
+          set -euo pipefail
+          for form in wire json; do
+            valgrind --tool=cachegrind --cache-sim=no               --cachegrind-out-file=/tmp/cachegrind-${form}.out               target/release/examples/transport_decode_bench               "${form}"               "/tmp/rust-json-wire/messages-sens-${form}.bin"               20               2>"/tmp/${form}.stderr"
+            grep -E "I[[:space:]]+refs:" "/tmp/${form}.stderr" || true
+          done
+
+      - name: Wall-clock decode control
+        run: |
+          target/release/examples/transport_decode_bench             wire /tmp/rust-json-wire/messages-sens-wire.bin 200
+          target/release/examples/transport_decode_bench             json /tmp/rust-json-wire/messages-py-json.bin 200
+
+      - name: Publish benchmark evidence
+        if: always()
+        run: |
+          {
+            echo "## Rust serde_json vs SENS wire — decode only"
+            echo
+            echo "Corpus: N=1000, seed=1; 20 Cachegrind rounds; file I/O excluded from the timed loop."
+            echo
+            for form in wire json; do
+              echo "### ${form}"
+              echo '~~~text'
+              cat "/tmp/${form}.stderr" || true
+              echo '~~~'
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rust-json-vs-sens-wire-decode
+          path: |
+            /tmp/rust-json-wire/
+            /tmp/cachegrind-*.out
+            /tmp/wire.stderr
+            /tmp/json.stderr
+          retention-days: 14
