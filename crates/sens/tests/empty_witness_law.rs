@@ -93,6 +93,23 @@ fn canonical_d3_cond_skips_structural_empty_without_coercing_it_to_zero() {
 }
 
 #[test]
+fn two_structural_empty_tests_have_control_force_and_exhaust_to_empty() {
+    // EMPTY is not D1:0, but it is an admitted no-witness control result:
+    // each clause is skipped for its own typed reason, and exhaustion is EMPTY.
+    let value = eval(cond(vec![
+        clause(empty(), d1(1)),
+        clause(empty(), d1(0)),
+    ]))
+    .unwrap();
+
+    assert!(matches!(value, Value::Nil));
+    assert_eq!(value.as_predicate_bit(), None);
+
+    let no = eval(d1(0)).unwrap();
+    assert_ne!(value, no, "EMPTY control force must not collapse to D1:0 NO");
+}
+
+#[test]
 fn canonical_d3_cond_exhaustion_returns_structural_empty() {
     let value = eval(cond(vec![clause(d1(0), d1(1))])).unwrap();
     assert!(matches!(value, Value::Nil));
