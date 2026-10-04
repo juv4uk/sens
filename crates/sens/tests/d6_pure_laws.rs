@@ -520,3 +520,49 @@ fn any_all_form_a_predicate_dual_pair() {
         "1",
     );
 }
+
+
+#[test]
+fn integerp_rationalp_derive_from_canonical_exact_q_wire() {
+    let prelude = r#"
+        (define d6-wire-denominator-one?
+          (lambda (text)
+            (cond
+              ((string-empty? text) (quote ()))
+              ((eq (string-first text) "/")
+               ((lambda (rest)
+                  (cond
+                    ((string-empty? rest) (quote ()))
+                    ((eq (string-first rest) "1")
+                     (cond
+                       ((string-empty? (string-rest rest)) t)
+                       (t (quote ()))))
+                    (t (quote ()))))
+                (string-rest text)))
+              (t (d6-wire-denominator-one? (string-rest text))))))
+        (define d6-rationalp
+          (lambda (value)
+            (string-prefix? "#q2:" (write-to-string value))))
+        (define d6-integerp
+          (lambda (value)
+            (cond
+              ((d6-rationalp value)
+               (d6-wire-denominator-one? (write-to-string value)))
+              (t (quote ())))))
+    "#;
+
+    for x in ["0", "1", "-7", "42", "3.00"] {
+        assert_same(&format!("{prelude} (d6-rationalp {x})"), "t");
+        assert_same(&format!("{prelude} (d6-integerp {x})"), "t");
+    }
+
+    for x in ["1/2", "-5/4", "10/20"] {
+        assert_same(&format!("{prelude} (d6-rationalp {x})"), "t");
+        assert_same(&format!("{prelude} (d6-integerp {x})"), "(quote ())");
+    }
+
+    for x in ["(quote alpha)", ""text"", "(quote (a b))"] {
+        assert_same(&format!("{prelude} (d6-rationalp {x})"), "(quote ())");
+        assert_same(&format!("{prelude} (d6-integerp {x})"), "(quote ())");
+    }
+}
