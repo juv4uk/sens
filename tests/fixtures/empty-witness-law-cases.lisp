@@ -6,55 +6,55 @@
 ; here, in Lisp-owned data.
 (
   ((case . "d1-yes-selects")
-   (program . (cond
+   (program . (за-умовою
                 (clause (d1 "1") (d1 "0"))))
    (expect-value . (d1 "0")))
 
   ((case . "d1-no-skips")
-   (program . (cond
+   (program . (за-умовою
                 (clause (d1 "0") (d1 "1"))
                 (clause (d1 "1") (d1 "0"))))
    (expect-value . (d1 "0")))
 
   ((case . "empty-skips")
-   (program . (cond
+   (program . (за-умовою
                 (clause empty (d1 "1"))
                 (clause (d1 "1") (d1 "0"))))
    (expect-value . (d1 "0")))
 
   ((case . "two-empty-tests-exhaust-to-empty")
-   (program . (cond
+   (program . (за-умовою
                 (clause empty (d1 "1"))
                 (clause empty (d1 "0"))))
    (expect-value . empty))
 
   ((case . "d1-no-exhausts-to-empty")
-   (program . (cond
+   (program . (за-умовою
                 (clause (d1 "0") (d1 "1"))))
    (expect-value . empty))
 
   ((case . "other-domain-value-is-not-truth")
-   (program . (cond
+   (program . (за-умовою
                 (clause (d3-value "001") (d1 "1"))))
    (expect-error . "Type"))
 
   ((case . "number-one-is-not-d1")
-   (program . (cond
+   (program . (за-умовою
                 (clause (number "1") (d1 "1"))))
    (expect-error . "Type"))
 
   ((case . "symbol-t-is-not-d1")
-   (program . (cond
+   (program . (за-умовою
                 (clause (symbol "t") (d1 "1"))))
    (expect-error . "Type"))
 
   ((case . "three-part-clause-is-not-canonical")
-   (program . (cond
+   (program . (за-умовою
                 (clause (d1 "1") (d1 "0") (d1 "1"))))
    (expect-error . "InvalidForm"))
 
   ((case . "partial-eq-empty-feeds-cond")
-   (program . (cond
+   (program . (за-умовою
                 (clause
                   (call-d3 "111"
                     (call-d3 "100" (d1 "1") (d1 "0"))
@@ -64,9 +64,9 @@
    (expect-value . (d1 "0")))
 
   ((case . "computed-empty-feeds-cond")
-   (program . (cond
+   (program . (за-умовою
                 (clause
-                  (cond
+                  (за-умовою
                     (clause (d1 "0") (d1 "1")))
                   (d1 "1"))
                 (clause (d1 "1") (d1 "0"))))
