@@ -25,7 +25,6 @@
 (answer-contract/3
 
   ((identity . D3:000)
-   (role . structural-empty)
    (domain-owner . D3)
    (result-form . empty-structure/no-witness)
    (predicate-answer . no)
