@@ -484,7 +484,7 @@ mod single_pass_eval_tests {
               (lambda (n)
                 (cond
                   ((eq? n 0) (quote done))
-                  (t (count-down (- n 1))))))
+                  ((atom ()) (count-down (- n 1))))))
             (count-down 1000)
         "#;
         let mut session = Session::default();
@@ -539,15 +539,12 @@ mod single_pass_eval_tests {
     fn ukrainian_canonical_surface_executes_the_core() {
         let source = r#"
             (за-умовою
-              ((атом? (як-є кіт)) () (перше
+              ((тотожне? (як-є кіт) (як-є пес)) (як-є помилка))
+              ((атом? (як-є кіт)) (перше
                  (сполучити
                    (як-є груша)
                    (сполучити (як-є слива) ()))))
-              ((атом? (як-є кіт)) (1) (перше
-                 (сполучити
-                   (як-є груша)
-                   (сполучити (як-є слива) ()))))
-              (t (як-є помилка)))
+              ((атом? ()) (як-є помилка)))
         "#;
         let mut session = Session::default();
         let result = eval_program(source, &mut session)
@@ -580,7 +577,7 @@ mod single_pass_eval_tests {
                  (saṃyuj
                    (svarūpa prathama)
                    (saṃyuj (svarūpa śeṣaḥ) ()))))
-              (t (svarūpa doṣa)))
+              ((aṇu ()) (svarūpa doṣa)))
         "#;
         let mut session = Session::default();
         let result =
