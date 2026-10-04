@@ -43,7 +43,7 @@ D7  Sound7 + local śloka/sūtra ordinal domain
 D8  owner-ratified exact eight-bit Core domain
 ```
 
-Owner ratification #3202 fixes the D3/bīja3 A map above under laws L1–L5. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203–#3206, not an alternate language law.
+Owner ratification #3202 fixes the D3/bīja3 A map above under laws L1–L5. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
 
 Equal packed bits in two domains do not imply equal identity. In particular Core.D8 is not historical Sens8 merely because both occupy eight physical bits. D7 is Sound7/local-ordinal identity and does not inherit selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
 
