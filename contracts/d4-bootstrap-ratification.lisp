@@ -1,11 +1,12 @@
 ; contracts/d4-bootstrap-ratification.lisp
-; OWNER-RATIFIED 2026-10-04 — issue #3272.
-; Current D4 semantic authority together with language-contract.lisp.
+; FORMER OWNER-RATIFICATION #3272 — revoked by owner reset #3327.
+; Preserved as D4 research/provenance evidence; not current semantic authority.
 
 (
   (schema . d4-bootstrap-ratification/1)
-  (status . owner-ratified)
-  (owner-ratification . #3272)
+  (status . revoked-research-evidence)
+  (former-owner-ratification . #3272)
+  (revoked-by . #3327)
   (date . "2026-10-04")
   (domain . D4)
 
