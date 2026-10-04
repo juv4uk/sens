@@ -58,9 +58,11 @@ def git_sha(repo: Path) -> str:
 def read_manifest(path: Path):
     with path.open(encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, delimiter="\t")
-        required = {"case", "english_path", "oracle"}
+        required = {"case", "oracle"}
         if reader.fieldnames is None or not required.issubset(reader.fieldnames):
-            raise SystemExit("manifest must contain: case, english_path, oracle")
+            raise SystemExit("manifest must contain: case, oracle")
+        if "english_path" not in reader.fieldnames and "english_source" not in reader.fieldnames:
+            raise SystemExit("manifest needs english_path or english_source")
         if "canonical_path" not in reader.fieldnames and "canonical_source" not in reader.fieldnames:
             raise SystemExit("manifest needs canonical_path or canonical_source")
         rows = list(reader)
@@ -76,8 +78,11 @@ def corpus_sha(rows, repo: Path) -> str:
         digest.update(b"\0")
         digest.update(row["oracle"].encode())
         digest.update(b"\0")
-        english = (repo / row["english_path"]).resolve()
-        digest.update(english.read_bytes())
+        if row.get("english_source"):
+            digest.update(row["english_source"].encode())
+        else:
+            english = (repo / row["english_path"]).resolve()
+            digest.update(english.read_bytes())
         digest.update(b"\0")
         if row.get("canonical_source"):
             digest.update(row["canonical_source"].encode())
@@ -116,10 +121,16 @@ def main() -> int:
 
     output = []
     blocked = 0
-    temp_sources = args.out / "_canonical_sources"
+    temp_sources = args.out / "_paired_sources"
     temp_sources.mkdir(parents=True, exist_ok=True)
     for item in rows:
-        english = repo / item["english_path"]
+        if item.get("english_source"):
+            english = temp_sources / f"{item['case']}-english.lisp"
+            english.write_text(item["english_source"] + "\n", encoding="utf-8")
+            english_bytes = item["english_source"].encode()
+        else:
+            english = repo / item["english_path"]
+            english_bytes = english.read_bytes()
         if item.get("canonical_source"):
             canonical = temp_sources / f"{item['case']}.lisp"
             canonical.write_text(item["canonical_source"] + "\n", encoding="utf-8")
@@ -143,7 +154,7 @@ def main() -> int:
             "git_sha": commit,
             "binary_sha": binary_hash,
             "corpus_sha": corpus,
-            "english_sha": sha256_file(english),
+            "english_sha": sha256_bytes(english_bytes),
             "canonical_sha": sha256_bytes(canonical_bytes),
             "oracle": item["oracle"],
             "rep": None,
