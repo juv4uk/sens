@@ -1,0 +1,31 @@
+name: EMPTY witness exact-domain integration
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/special_forms.rs"
+      - "crates/sens/src/eval/special_forms/core.rs"
+      - "crates/sens/tests/empty_witness_law.rs"
+      - ".github/workflows/empty-witness-integration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/special_forms.rs"
+      - "crates/sens/src/eval/special_forms/core.rs"
+      - "crates/sens/tests/empty_witness_law.rs"
+      - ".github/workflows/empty-witness-integration.yml"
+  workflow_dispatch:
+
+jobs:
+  exact-domain-empty:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run exact-domain EMPTY/no-witness integration
+        run: cargo test -p sens --test empty_witness_law
