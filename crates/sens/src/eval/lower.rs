@@ -208,6 +208,16 @@ mod tests {
     fn necessary_forms_lower_to_exact_d4_calls() {
         assert_domain_call("(функція (x) x)", 4, 0b0010);
         assert_domain_call("(визначити x 1)", 4, 0b0011);
+        assert_domain_call("(phalana (x) x)", 4, 0b0010);
+        assert_domain_call("(nirvacana x 1)", 4, 0b0011);
+    }
+
+    #[test]
+    fn uk_sa_selector_surfaces_lower_directly_to_ratified_d4() {
+        assert_domain_call("(решта-від-першого x)", 4, 0b0110);
+        assert_domain_call("(śeṣa-ādi x)", 4, 0b0110);
+        assert_domain_call("(перше-від-першого x)", 4, 0b1000);
+        assert_domain_call("(ādi-ādi x)", 4, 0b1000);
     }
 
     #[test]

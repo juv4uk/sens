@@ -7,6 +7,9 @@ on:
       - "docs/domain-surfaces-d1-d4.md"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/translate-domain-program.py"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/lower.rs"
       - ".github/workflows/d1-d4-surfaces.yml"
   push:
     branches: [main]
@@ -15,6 +18,9 @@ on:
       - "docs/domain-surfaces-d1-d4.md"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/translate-domain-program.py"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/lower.rs"
       - ".github/workflows/d1-d4-surfaces.yml"
 
 jobs:
@@ -25,7 +31,13 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - name: Check D1-D4 uk/sa projection
+      - name: Check D1-D4 uk/sa projection and generated runtime table
         run: python3 scripts/check-domain-surfaces-d1-d4.py
       - name: Check D1-D4 program translation
         run: python3 scripts/translate-domain-program.py --self-test
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Prove direct UK/SA exact-domain runtime lowering
+        run: |
+          cargo test -p sens uk_sa_
+          cargo test -p sens necessary_forms_lower_to_exact_d4_calls
