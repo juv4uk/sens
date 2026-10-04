@@ -19,6 +19,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - name: Test FPGA evidence semantic guards
+        run: |
+          python3 benchmarks/fpga-exact-width/selftest.py
       - name: Validate checked-in FPGA evidence
         run: |
           python3 benchmarks/fpga-exact-width/validate.py \
