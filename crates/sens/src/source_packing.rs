@@ -12,6 +12,50 @@
 
 use crate::{BinarySourceToken, BinarySourceWord, BitPacker, PackedBitstream};
 
+/// Accounting for one canonical densely-packed semantic payload.
+///
+/// The payload carries only exact semantic bits. `framing_bits` is supplied by
+/// the caller because grammar/EOS/container framing is a separate protocol
+/// concern. `tail_unused_bits` is physical byte-container slack only; it is
+/// never semantic padding and never appears between words.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct PackedTransportAccounting {
+    pub semantic_payload_bits: usize,
+    pub framing_bits: usize,
+    pub tail_unused_bits: usize,
+    pub total_wire_bits: usize,
+}
+
+impl PackedTransportAccounting {
+    /// Fraction of physical wire bits that are semantic payload.
+    ///
+    /// Empty transport has no utilization ratio.
+    pub fn utilization(self) -> Option<f64> {
+        (self.total_wire_bits != 0)
+            .then(|| self.semantic_payload_bits as f64 / self.total_wire_bits as f64)
+    }
+}
+
+/// Report semantic payload, external framing and final physical-byte slack
+/// independently.
+///
+/// This function deliberately does not invent a width schedule or framing
+/// format. A caller that already owns grammar/context can pass `framing_bits=0`;
+/// a standalone container can pass its independently-accounted framing cost.
+pub fn packed_transport_accounting(
+    packed: &PackedBitstream,
+    framing_bits: usize,
+) -> PackedTransportAccounting {
+    let physical_payload_bits = packed.byte_len() * 8;
+    let tail_unused_bits = physical_payload_bits - packed.bit_len();
+    PackedTransportAccounting {
+        semantic_payload_bits: packed.bit_len(),
+        framing_bits,
+        tail_unused_bits,
+        total_wire_bits: physical_payload_bits + framing_bits,
+    }
+}
+
 /// Append one already-bounded source word to the current dense payload.
 ///
 /// Returns the starting bit offset of the word in the packed payload.
@@ -242,6 +286,50 @@ mod tests {
             unpack_binary_source_words(&packed, &[3]).unwrap(),
             exact_words(&single)
         );
+    }
+
+    #[test]
+    fn canonical_transport_accounting_keeps_payload_framing_and_tail_separate() {
+        let tokens = parse_binary_source_words("10 001 01").unwrap();
+        let packed = pack_binary_source_tokens(&tokens);
+
+        let grammar_bound = packed_transport_accounting(&packed, 0);
+        assert_eq!(
+            grammar_bound,
+            PackedTransportAccounting {
+                semantic_payload_bits: 7,
+                framing_bits: 0,
+                tail_unused_bits: 1,
+                total_wire_bits: 8,
+            }
+        );
+        assert_eq!(grammar_bound.utilization(), Some(7.0 / 8.0));
+
+        let standalone = packed_transport_accounting(&packed, 5);
+        assert_eq!(standalone.semantic_payload_bits, 7);
+        assert_eq!(standalone.framing_bits, 5);
+        assert_eq!(standalone.tail_unused_bits, 1);
+        assert_eq!(standalone.total_wire_bits, 13);
+        assert_eq!(standalone.utilization(), Some(7.0 / 13.0));
+    }
+
+    #[test]
+    fn homogeneous_exact_width_blocks_pay_no_interior_or_tail_padding() {
+        for (source, expected_bits, expected_bytes) in [
+            ("10101 10101 10101 10101 10101 10101 10101 10101", 40, 5),
+            ("101010 101010 101010 101010", 24, 3),
+            ("1010101 1010101 1010101 1010101 1010101 1010101 1010101 1010101", 56, 7),
+        ] {
+            let tokens = parse_binary_source_words(source).unwrap();
+            let packed = pack_binary_source_tokens(&tokens);
+            let accounting = packed_transport_accounting(&packed, 0);
+
+            assert_eq!(accounting.semantic_payload_bits, expected_bits);
+            assert_eq!(packed.byte_len(), expected_bytes);
+            assert_eq!(accounting.tail_unused_bits, 0);
+            assert_eq!(accounting.total_wire_bits, expected_bits);
+            assert_eq!(accounting.utilization(), Some(1.0));
+        }
     }
 
     #[test]
