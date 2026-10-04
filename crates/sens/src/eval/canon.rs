@@ -392,6 +392,47 @@ fn canonicalize_domain_result(
     }
 }
 
+fn invoke_exact_d3_predicate(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let CoreDomainIdentity::D3(word) = identity else {
+        return None;
+    };
+
+    let arity_error = |expected: usize| {
+        LanguageError::new(
+            ErrorKind::Arity,
+            format!(
+                "D3:{:03b} expects exactly {expected} argument(s); got {}",
+                word.word().packed_bits(),
+                args.len()
+            ),
+            span,
+        )
+    };
+
+    match word.word().packed_bits() {
+        0b010 => {
+            if args.len() != 1 {
+                return Some(Err(arity_error(1)));
+            }
+            Some(Ok(Value::predicate_bit(!matches!(args[0], Value::Pair(_, _)))))
+        }
+        0b101 => {
+            if args.len() != 2 {
+                return Some(Err(arity_error(2)));
+            }
+            if !args[0].is_atom() || !args[1].is_atom() {
+                return Some(Ok(Value::Nil));
+            }
+            Some(Ok(Value::predicate_bit(args[0] == args[1])))
+        }
+        _ => None,
+    }
+}
+
 pub(crate) fn invoke_domain_identity(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -403,6 +444,12 @@ pub(crate) fn invoke_domain_identity(
     }
 
     if let Some(result) = super::d5_arithmetic::invoke(identity, args, environment, span) {
+        return result;
+    }
+
+    // Contract 11.3 / #3161: exact D3 predicates have their own result
+    // boundary and must not inherit historical SID carrier/failure semantics.
+    if let Some(result) = invoke_exact_d3_predicate(identity, args, span) {
         return result;
     }
 
@@ -649,6 +696,20 @@ mod tests {
             .expect("D3:101 distinct atoms");
         assert_eq!(equal.as_predicate_bit(), Some(true));
         assert_eq!(different.as_predicate_bit(), Some(false));
+
+        let pair = Value::list([
+            Value::Symbol(std::rc::Rc::from("x")),
+            Value::Symbol(std::rc::Rc::from("y")),
+        ]);
+        let no_witness = invoke_domain_identity(
+            d3(0b101),
+            &[pair, Value::Symbol(std::rc::Rc::from("x"))],
+            &env,
+            span,
+        )
+        .expect("D3:101 outside atom-domain must return EMPTY/no-witness");
+        assert!(matches!(no_witness, Value::Nil));
+        assert_eq!(no_witness.as_predicate_bit(), None);
 
         assert!(has_language_result_boundary(d3(0b010)));
         assert!(has_language_result_boundary(d3(0b101)));
