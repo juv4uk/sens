@@ -539,6 +539,16 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         return;
     }
 
+    let direct_d5_binding = semantic_registry::d5_binding_identity_for_definition(name);
+    if let Some(identity) = direct_d5_binding {
+        if super::necessary_forms::identity_for_domain_identity(identity).is_none()
+            && domain_primitive(identity).is_none()
+            && !super::d5_arithmetic::has_mechanism(identity)
+        {
+            environment.bind_domain_code_slot_once(identity, value.clone());
+        }
+    }
+
     if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
         if domain_primitive(identity).is_some()
             || super::necessary_forms::identity_for_domain_identity(identity).is_some()
@@ -568,14 +578,19 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
             return;
         }
 
-        // QUOTIENT already has an admitted direct D5 arithmetic mechanism.
-        // Keep only its historical closure alias for old Core callers; the
-        // exact D5 path must continue to select the direct mechanism first.
-        if domain_primitive(identity).is_none()
+        if let Some(direct_identity) = direct_d5_binding {
+            assert_eq!(
+                direct_identity, identity,
+                "D5 definition binding projection disagrees with compatibility binding for {name}"
+            );
+        } else if domain_primitive(identity).is_none()
             && !super::d5_arithmetic::has_mechanism(identity)
         {
             environment.bind_domain_code_slot_once(identity, value.clone());
         }
+
+        // Temporary compatibility alias for still-unmigrated callers.
+        // It supplies no semantic identity and may disappear independently.
         environment.bind_code_slot_once(sid, value.clone());
         return;
     }
