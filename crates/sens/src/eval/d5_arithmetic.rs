@@ -12,7 +12,7 @@ pub(super) fn has_mechanism(identity: CoreDomainIdentity) -> bool {
     };
     matches!(
         word.word().packed_bits(),
-        0b01010 | 0b01011 | 0b01110 | 0b01111 | 0b10010 | 0b10011
+        0b01010 | 0b01011 | 0b10110 | 0b10111 | 0b11010 | 0b11011
     )
 }
 pub(super) fn invoke(
@@ -28,10 +28,10 @@ pub(super) fn invoke(
     Some(match word.word().packed_bits() {
         0b01010 => arithmetic::arithmetic_on_values("+", args, environment, span), // PLUS
         0b01011 => arithmetic::arithmetic_on_values("-", args, environment, span), // DIFFERENCE
-        0b01110 => arithmetic::comparison_on_values("<", args, span), // LESSP
-        0b01111 => arithmetic::comparison_on_values(">", args, span), // GREATERP
-        0b10010 => arithmetic::arithmetic_on_values("*", args, environment, span), // TIMES
-        0b10011 => arithmetic::division_on_values(args, args.len(), environment, span), // QUOTIENT
+        0b10110 => arithmetic::arithmetic_on_values("*", args, environment, span), // TIMES
+        0b10111 => arithmetic::division_on_values(args, args.len(), environment, span), // QUOTIENT
+        0b11010 => arithmetic::comparison_on_values("<", args, span), // LESSP
+        0b11011 => arithmetic::comparison_on_values(">", args, span), // GREATERP
         _ => return None,
     })
 }
@@ -65,22 +65,22 @@ mod tests {
             "4"
         );
         assert_eq!(
-            invoke(d5(0b01110), &[n(2.0), n(3.0)], &env, span)
+            invoke(d5(0b11010), &[n(2.0), n(3.0)], &env, span)
                 .unwrap().unwrap().to_string(),
             "1"
         );
         assert_eq!(
-            invoke(d5(0b01111), &[n(3.0), n(2.0)], &env, span)
+            invoke(d5(0b11011), &[n(3.0), n(2.0)], &env, span)
                 .unwrap().unwrap().to_string(),
             "1"
         );
         assert_eq!(
-            invoke(d5(0b10010), &[n(2.0), n(3.0), n(4.0)], &env, span)
+            invoke(d5(0b10110), &[n(2.0), n(3.0), n(4.0)], &env, span)
                 .unwrap().unwrap().to_string(),
             "24"
         );
         assert_eq!(
-            invoke(d5(0b10011), &[n(6.0), n(3.0)], &env, span)
+            invoke(d5(0b10111), &[n(6.0), n(3.0)], &env, span)
                 .unwrap().unwrap().to_string(),
             "2"
         );
@@ -129,7 +129,7 @@ mod tests {
                     "Core.D5 DIFFERENCE must equal PLUS with independently constructed additive inverse for {a_num}/{a_den}, {b_num}/{b_den}"
                 );
 
-                let quotient = call_d5(0b10011, &[a.clone(), b.clone()]);
+                let quotient = call_d5(0b10111, &[a.clone(), b.clone()]);
                 if b_num == 0 {
                     let error = quotient.expect_err(
                         "Core.D5 QUOTIENT must preserve division-by-zero partiality",
@@ -139,7 +139,7 @@ mod tests {
                     let quotient = quotient.unwrap();
                     let multiplicative_inverse = q(b_den, b_num);
                     let times_inverse =
-                        call_d5(0b10010, &[a.clone(), multiplicative_inverse]).unwrap();
+                        call_d5(0b10110, &[a.clone(), multiplicative_inverse]).unwrap();
                     assert_eq!(
                         quotient.to_string(),
                         times_inverse.to_string(),
@@ -166,13 +166,23 @@ mod tests {
     }
 
     #[test]
+    fn superseded_arithmetic_coordinates_do_not_dispatch_as_arithmetic() {
+        for bits in [0b01110, 0b01111, 0b10010, 0b10011] {
+            assert!(
+                invoke(d5(bits), &[n(2.0), n(1.0)], &Environment::root(), Span::default()).is_none(),
+                "superseded D5 arithmetic coordinate {bits:05b} must not dispatch through d5_arithmetic"
+            );
+        }
+    }
+
+    #[test]
     fn same_payload_in_d4_does_not_acquire_d5_arithmetic_meaning() {
         let d4 = CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1010).unwrap()));
         assert!(invoke(d4, &[n(1.0), n(2.0)], &Environment::root(), Span::default()).is_none());
     }
 
     #[test]
-    fn unassigned_d5_coordinate_is_not_minted_by_width() {
+    fn non_arithmetic_d5_coordinate_is_not_minted_by_width() {
         assert!(invoke(
             d5(0b00000),
             &[n(1.0)],
