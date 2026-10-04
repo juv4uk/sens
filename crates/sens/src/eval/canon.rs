@@ -130,6 +130,22 @@ fn exact_args(
     ))
 }
 
+fn exact_domain_args(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    expected: usize,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if args.len() == expected {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!("D{} {} · {} != {}", identity.width(), identity, expected, args.len()),
+        span,
+    ))
+}
+
 type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
 const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
