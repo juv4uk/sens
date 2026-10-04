@@ -1,0 +1,39 @@
+name: D3-D8 remap solver research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d3-d8-remap-solver/**"
+      - ".github/workflows/d3-d8-remap-solver.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d3-d8-remap-solver/**"
+      - ".github/workflows/d3-d8-remap-solver.yml"
+  workflow_dispatch:
+
+jobs:
+  s1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run exhaustive D3 and bounded D4 search
+        run: |
+          rm -rf /tmp/d3-d8-remap-solver
+          python3 benchmarks/d3-d8-remap-solver/run.py             --out /tmp/d3-d8-remap-solver
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d3-d8-remap-solver/report.md; then
+            cat /tmp/d3-d8-remap-solver/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d3-d8-remap-solver-s1
+          path: /tmp/d3-d8-remap-solver/
+          retention-days: 14
