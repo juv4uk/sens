@@ -377,6 +377,10 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
             }
         }
         ExprKind::Rational(rational) => Ok(rational.to_string()),
+        // BinaryNumber identity stays its exact normalized bits inside SENS.
+        // The external Wolfram oracle receives only an exact decimal projection;
+        // conversion is arbitrary-width and never passes through a host integer.
+        ExprKind::BinaryNumber(number) => Ok(number.to_decimal_string()),
         ExprKind::Sid(sid) => Ok(sid.to_string()),
         ExprKind::DomainIdentity(_) => {
             Err(Unsupported::new("external-oracle/domain-identity"))
@@ -509,6 +513,14 @@ mod tests {
         }
     }
 
+    #[test]
+    fn canonical_binary_number_projects_exactly_without_host_integer_identity() {
+        assert_eq!(translate_source("(+ #b10 #b11)").unwrap(), "Total[{2, 3}]");
+        assert_eq!(
+            translate_source("(+ #b1111111111111111111111111111111111111111111111111111111111111111 1)").unwrap(),
+            "Total[{18446744073709551615, 1}]"
+        );
+    }
     #[test]
     fn source_must_contain_exactly_one_top_level_expression() {
         let error = translate_source("(+ 1 2) (* 3 4)").unwrap_err();

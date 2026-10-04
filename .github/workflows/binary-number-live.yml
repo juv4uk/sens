@@ -1,0 +1,47 @@
+name: Binary Number live runtime
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/binary_number.rs"
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/binary_framing.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/tests/binary_number_live.rs"
+      - ".github/workflows/binary-number-live.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/binary_number.rs"
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/binary_framing.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/tests/binary_number_live.rs"
+      - ".github/workflows/binary-number-live.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: binary-number-live-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            crates/sens -> target
+      - name: Canonical BinaryNumber unit
+        run: cargo test -p sens --lib binary_number::tests
+      - name: Live source runtime transport path
+        run: cargo test -p sens --test binary_number_live
+      - name: Binary Number clippy
+        run: cargo clippy -p sens --lib --test binary_number_live -- -D warnings
