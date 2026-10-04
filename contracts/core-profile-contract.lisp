@@ -59,13 +59,6 @@
    (historical-semantics . provenance-only)
    (status . historical))
 
-  ((identity . active-core)
-   (role . current-language-bootstrap)
-   (execution-source . "lib/core.lisp")
-   (fasl-source . "lib/core.lisp.fasl")
-   (numbered-core-authority . forbidden)
-   (status . active))
-
   ((identity . public-api-discovery)
    (current-profile-source . "lib/core.lisp")
    (public-api-excluded-source . "lib/core1.lisp")
