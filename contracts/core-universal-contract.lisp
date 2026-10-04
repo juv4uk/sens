@@ -24,9 +24,11 @@
    (yes . 1)
    (no . 0)
    (graded-answers . forbidden)
-   (empty-list-as-predicate-result . forbidden)
+   (partial-predicate-no-witness . ())
+   (empty-no-witness-equals-no . forbidden)
    (host-boolean-defines-semantics . forbidden)
-   (governs . "#1699"))
+   (governs . "#1699")
+   (ratified-extension . "#3161"))
 
   (("010" . ((compat-function8 . "00000010")
              (empty-structure . 1)
@@ -44,6 +46,9 @@
              (clause-shape . two-part)
              (test-1 . select)
              (test-0 . skip)
+             (test-empty . skip-no-witness)
+             (zero-equals-empty . forbidden)
+             (other-test-value . named-type-error)
              (unselected-expression . not-evaluated)
              (exhaustion . ())
              (three-part-clause . rejected)))
@@ -57,7 +62,8 @@
    (identity-scope . observable-law-not-spelling))
 
   ((negative-laws . (graded-predicate-answer
-                     empty-list-predicate-result
+                     empty-equals-predicate-no
+                     untyped-empty-as-truth
                      structural-kind-substitution
                      host-truth-substitution))
    (host-truth-defines-semantics . forbidden))
