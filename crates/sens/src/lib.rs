@@ -494,7 +494,7 @@ pub fn is_define_surface_name(name: &str) -> bool {
 /// `defmacro` surface. No decimal SID is maintained here.
 pub fn is_defmacro_surface_name(name: &str) -> bool {
     match (
-        semantic_registry::admitted_semantic_id_for_surface(name),
+        legacy_registry::id_for_surface(name),
         legacy_registry::id_for_surface("defmacro"),
     ) {
         (Some(candidate), Some(defmacro)) => candidate == defmacro,
