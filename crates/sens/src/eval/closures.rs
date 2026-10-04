@@ -44,6 +44,10 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             canon::ensure_bindable_sid(*sid, expr.span)?;
             Ok((Vec::new(), Some(sid.to_string().into())))
         }
+        ExprKind::DomainIdentity(identity) => {
+            canon::ensure_bindable_domain_identity(*identity, expr.span)?;
+            unreachable!("canonical domain identities are never bindable")
+        }
         ExprKind::List(parameter_forms) => {
             let mut parameters = Vec::with_capacity(parameter_forms.len());
             let mut unique = HashSet::new();
@@ -56,6 +60,10 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                     ExprKind::Sid(sid) => {
                         canon::ensure_bindable_sid(*sid, parameter.span)?;
                         sid.to_string().into()
+                    }
+                    ExprKind::DomainIdentity(identity) => {
+                        canon::ensure_bindable_domain_identity(*identity, parameter.span)?;
+                        unreachable!("canonical domain identities are never bindable")
                     }
                     _ => {
                         return Err(LanguageError::new(
@@ -92,6 +100,10 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                                 canon::ensure_bindable_sid(*sid, head.span)?;
                                 sid.to_string().into()
                             }
+                            ExprKind::DomainIdentity(identity) => {
+                                canon::ensure_bindable_domain_identity(*identity, head.span)?;
+                                unreachable!("canonical domain identities are never bindable")
+                            }
                             _ => {
                                 return Err(LanguageError::new(
                                     ErrorKind::InvalidForm,
@@ -124,6 +136,10 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                     ExprKind::Sid(sid) => {
                         canon::ensure_bindable_sid(*sid, current.span)?;
                         break sid.to_string().into();
+                    }
+                    ExprKind::DomainIdentity(identity) => {
+                        canon::ensure_bindable_domain_identity(*identity, current.span)?;
+                        unreachable!("canonical domain identities are never bindable")
                     }
                     _ => {
                         return Err(LanguageError::new(
