@@ -82,7 +82,7 @@ def mechanism_facts() -> dict:
         "bit6_unpacking": True,
         "typed_d6_carrier": True,
         "value_d6_identity": False,
-        "registry_d6_identity": False,
+        "registry_d6_identity": True,
         "lowering_d6_identity": False,
     }
     if facts != expected:
@@ -120,16 +120,16 @@ def build() -> dict:
             "packed_roundtrip_w6": "YES",
             "typed_d6_carrier": "YES",
             "runtime_value_identity": "NO",
-            "semantic_registry_d6_identity": "NO",
+            "semantic_registry_d6_identity": "YES",
             "lowering_d6_identity": "NO",
             "native_evaluator_d6_identity": "NO",
             "compiler_d6_identity": "NOT-AUDITED",
             "semantic_identity_test": "NO",
             "selector_generator_evidence": "YES" if selector else "NO",
             "implementation_status": (
-                "TYPED-D6+GENERATOR-EVIDENCE"
+                "REGISTRY-D6+GENERATOR-EVIDENCE"
                 if selector else
-                "TYPED-D6-CARRIER-ONLY"
+                "REGISTRY-D6-IDENTITY"
             ),
         })
 
@@ -142,7 +142,7 @@ def build() -> dict:
     return {
         "schema": "d6-runtime-admission-audit/v1",
         "issue": "#2766",
-        "principle": "typed Core.D6 representation is not runtime/evaluator D6 admission",
+        "principle": "owner-ratified D6 registry identity is separate from lowering and evaluator mechanism admission",
         "owner_map": "knowledge/d6-historical-full-map.json",
         "mechanism_facts": facts,
         "summary": {
@@ -151,7 +151,7 @@ def build() -> dict:
             "packed_roundtrip_w6": 64,
             "typed_d6_carrier": 64,
             "runtime_value_identity": 0,
-            "semantic_registry_d6_identity": 0,
+            "semantic_registry_d6_identity": 64,
             "lowering_d6_identity": 0,
             "native_evaluator_d6_identity": 0,
             "selector_generator_evidence": 16,
