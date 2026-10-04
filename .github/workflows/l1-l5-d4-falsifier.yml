@@ -1,0 +1,26 @@
+name: L1-L5 D4 falsifier
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/l1-l5-d4-falsifier/**"
+      - ".github/workflows/l1-l5-d4-falsifier.yml"
+  workflow_dispatch:
+
+jobs:
+  falsifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Derive D3 and falsify D4 selector complement
+        run: |
+          python3 benchmarks/l1-l5-d4-falsifier/run.py --json-out /tmp/l1-l5-d4.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/l1-l5-d4.json'))
+          assert d['D3_derivation']['counts']['L1_L2_L3_L4_L5'] == 1
+          assert d['mandatory_D4_falsifier']['selector_pass_count'] == 4
+          assert len(d['mandatory_D4_falsifier']['unknown_coordinates']) == 12
+          assert d['theorem_boundary']['global_D4_complement_semantics'] == 'UNPROVEN'
+          print('L1-L5 D4 falsifier: PASS')
+          PY
