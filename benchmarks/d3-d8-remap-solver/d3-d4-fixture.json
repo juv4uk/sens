@@ -1,0 +1,72 @@
+{
+  "schema": "d3-d4-remap-solver-fixture/v1",
+  "authority": "research-only",
+  "refs": ["#3029", "#3037", "#3039", "#3043"],
+  "notes": [
+    "Stable resident IDs are opaque research identities and do not encode coordinates.",
+    "report_label is diagnostic-only and is never consumed by the objective.",
+    "CURRENT placement is a baseline projection, not a scoring feature."
+  ],
+  "domains": {
+    "D3": {
+      "width": 3,
+      "capacity": 8,
+      "residents": [
+        {"id": "r3-kappa", "report_label": "NIL", "current_bits": "000"},
+        {"id": "r3-lambda", "report_label": "QUOTE", "current_bits": "001"},
+        {"id": "r3-mu", "report_label": "ATOM", "current_bits": "010"},
+        {"id": "r3-nu", "report_label": "COND", "current_bits": "011"},
+        {"id": "r3-xi", "report_label": "CONS", "current_bits": "100"},
+        {"id": "r3-omicron", "report_label": "CAR", "current_bits": "101"},
+        {"id": "r3-pi", "report_label": "CDR", "current_bits": "110"},
+        {"id": "r3-rho", "report_label": "EQ", "current_bits": "111"}
+      ]
+    },
+    "D4": {
+      "width": 4,
+      "capacity": 16,
+      "residents": [
+        {"id": "r4-alpha", "report_label": "APPLY", "current_bits": "0000"},
+        {"id": "r4-beta", "report_label": "EVAL", "current_bits": "0001"},
+        {"id": "r4-gamma", "report_label": "LAMBDA", "current_bits": "0010"},
+        {"id": "r4-delta", "report_label": "DEFINE", "current_bits": "0011"},
+        {"id": "r4-epsilon", "report_label": "NOT", "current_bits": "0100"},
+        {"id": "r4-zeta", "report_label": "arithmetic-family-A", "current_bits": "0101"},
+        {"id": "r4-eta", "report_label": "EVCON", "current_bits": "0110"},
+        {"id": "r4-theta", "report_label": "EVLIS", "current_bits": "0111"},
+        {"id": "r4-iota", "report_label": "LIST", "current_bits": "1000"},
+        {"id": "r4-kappa", "report_label": "arithmetic-family-M", "current_bits": "1001"},
+        {"id": "r4-lambda", "report_label": "CAAR", "current_bits": "1010"},
+        {"id": "r4-mu", "report_label": "CADR", "current_bits": "1011"},
+        {"id": "r4-nu", "report_label": "CDAR", "current_bits": "1100"},
+        {"id": "r4-xi", "report_label": "CDDR", "current_bits": "1101"},
+        {"id": "r4-omicron", "report_label": "LOOKUP", "current_bits": "1110"},
+        {"id": "r4-pi", "report_label": "BIND", "current_bits": "1111"}
+      ]
+    }
+  },
+  "semantic_relations": [
+    {
+      "law_id": "selector-append/v1",
+      "relation_type": "GENERATOR",
+      "semantic_equation": "compose-projection(parent,choice)",
+      "semantic_valid": true,
+      "edges": [
+        {"parent": "r3-omicron", "delta": "0", "child": "r4-lambda"},
+        {"parent": "r3-omicron", "delta": "1", "child": "r4-mu"},
+        {"parent": "r3-pi", "delta": "0", "child": "r4-nu"},
+        {"parent": "r3-pi", "delta": "1", "child": "r4-xi"}
+      ]
+    },
+    {
+      "law_id": "false-prefix-coincidence/v1",
+      "relation_type": "NEGATIVE-CONTROL",
+      "semantic_equation": "intentionally false semantic relation despite numeric prefix coincidence",
+      "semantic_valid": false,
+      "edges": [
+        {"parent": "r3-kappa", "delta": "0", "child": "r4-alpha"},
+        {"parent": "r3-kappa", "delta": "1", "child": "r4-beta"}
+      ]
+    }
+  ]
+}
