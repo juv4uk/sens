@@ -1,0 +1,45 @@
+name: D3-D8 stable resident corpus
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d3-d8-stable-residents.json"
+      - "scripts/check-3051-stable-resident-corpus.py"
+      - ".github/workflows/d3-d8-stable-residents.yml"
+      - "knowledge/d1-d8-full-occupancy.json"
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "knowledge/d7-full-map.json"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d3-d8-stable-residents.json"
+      - "scripts/check-3051-stable-resident-corpus.py"
+      - ".github/workflows/d3-d8-stable-residents.yml"
+  workflow_dispatch:
+
+jobs:
+  corpus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate 504 stable residents
+        run: |
+          rm -rf /tmp/d3-d8-stable-residents
+          python3 scripts/check-3051-stable-resident-corpus.py             --out /tmp/d3-d8-stable-residents
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d3-d8-stable-residents/report.md; then
+            cat /tmp/d3-d8-stable-residents/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d3-d8-stable-resident-corpus
+          path: /tmp/d3-d8-stable-residents/
+          retention-days: 14
