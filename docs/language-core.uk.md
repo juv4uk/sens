@@ -84,6 +84,15 @@ PredicateBit — не Number, не host Bool, не T/NIL і не structural empt
 Назви ролей — лише документаційні проєкції. Канонічна identity — exact D3
 coordinate під D3 law.
 
+### Predicate/control law
+
+- `ATOM` — total predicate: результат тільки D1 `0|1`.
+- `EQ` — typed partial predicate: для admitted atoms повертає D1 `0|1`, а поза atom-domain — D3 `000 ()` як EMPTY/no-witness.
+- `COND` має тільки двопольові clauses `(test expression)`.
+- D1 `1` вибирає clause; D1 `0` продовжує як explicit NO; D3 `()` продовжує як EMPTY/no-witness.
+- інші test values дають type/contract failure; exhaustion повертає D3 `()`.
+- `()` ніколи не дорівнює D1 `0`: однакова control-action «continue» не означає однакову semantic identity.
+
 ## D4 — bootstrap
 
 D4 — owner-ratified full compact domain (#3272), усі 16/16 координат зайняті.
