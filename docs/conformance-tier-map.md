@@ -88,7 +88,7 @@ table was always secondary to, and it can't drift from itself.
 | 66 | `(unify '(var x) '(f (var x)) '())` | 3 | — | occurs-check, principle 3 evidence — prevents building an infinite structure |
 | 67 | `(defmacro foo)` error `Arity` | 2 | S2 | `defmacro` validates arity like any other special form |
 | 68 | `(defmacro 5 (x) x)` error `InvalidForm` | 2 | S2 | `defmacro` validates its name is a symbol, not just its arity |
-| 69 | `(def count-down (lambda (n) (за-умовою ((тотожне? n 0) (як-є done)) ((тотожне? n n) (count-down (- n 1)))))) (count-down 100000)` | 2 | S3 | 100,000-deep self-tail-call under exact D3 control: EQ(n,0) selects the base case; EQ(n,n) is the explicit numeric-domain fallback guard; no bare-T truthiness |
+| 69 | `(def count-down (lambda (n) (cond ((eq n 0) 'done) (t (count-down (- n 1)))))) (count-down 100000)` | 2 | S3 | 100,000-deep self-tail-call stays O(1) host-stack usage regardless of depth; previously only `stack_safety.rs` (Rust-specific), not the implementation-independent contract |
 | 70 | `(map (lambda (x) (+ x 1)) '())` | 3 | G5 | empty-list edge case, previously untested |
 | 71 | `(filter (lambda (x) (eq x 2)) '())` | 3 | G5 | empty-list edge case, previously untested |
 | 72 | `(reduce (lambda (acc x) (+ acc x)) 0 '())` | 3 | G5 | empty-list edge case — returns initial accumulator unchanged, previously untested |
