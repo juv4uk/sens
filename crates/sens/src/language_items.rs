@@ -10,7 +10,7 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry, CoreDomainIdentity, Sens8};
+use crate::{compatibility_registry, semantic_registry, DomainIdentity, Sens8};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -48,7 +48,7 @@ impl Arity {
 pub struct LanguageItem {
     pub name: String,
     /// Canonical domain-qualified identity when this registry row has migrated.
-    pub domain_identity: Option<CoreDomainIdentity>,
+    pub domain_identity: Option<DomainIdentity>,
     /// Explicit compatibility-only registry identity for still-byte-shaped generated metadata.
     pub legacy_registry_id: Sens8,
     pub signature: &'static str,
@@ -99,8 +99,8 @@ pub(crate) fn signature_kind(semantic_id: Sens8) -> Option<LanguageItemKind> {
 
 pub fn language_items() -> Vec<LanguageItem> {
     semantic_language_items_with(
-        semantic_registry::stable_surfaces_for_semantic_id,
-        semantic_registry::admitted_surfaces_for_semantic_id,
+        compatibility_registry::stable_surfaces_for_id,
+        compatibility_registry::admitted_surfaces_for_id,
     )
 }
 
@@ -213,10 +213,10 @@ mod tests {
         let d4_0011 = find("define");
         assert_eq!(d4_0010.legacy_registry_id, crate::sens!(00001000));
         assert_eq!(d4_0011.legacy_registry_id, crate::sens!(00001001));
-        assert_eq!(d4_0010.domain_identity.map(CoreDomainIdentity::width), Some(4));
-        assert_eq!(d4_0010.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0010));
-        assert_eq!(d4_0011.domain_identity.map(CoreDomainIdentity::width), Some(4));
-        assert_eq!(d4_0011.domain_identity.map(CoreDomainIdentity::packed_bits), Some(0b0011));
+        assert_eq!(d4_0010.domain_identity.map(DomainIdentity::width), Some(4));
+        assert_eq!(d4_0010.domain_identity.map(DomainIdentity::packed_bits), Some(0b0010));
+        assert_eq!(d4_0011.domain_identity.map(DomainIdentity::width), Some(4));
+        assert_eq!(d4_0011.domain_identity.map(DomainIdentity::packed_bits), Some(0b0011));
     }
 
     #[test]
@@ -261,11 +261,11 @@ mod tests {
         assert_eq!(def.legacy_registry_id, crate::sens!(00001011));
         assert_eq!(def.kind, LanguageItemKind::SyntaxForm);
         assert_eq!(
-            semantic_registry::stable_surfaces_for_semantic_id(crate::sens!(00001011)),
+            compatibility_registry::stable_surfaces_for_id(crate::sens!(00001011)),
             vec!["def"]
         );
         assert_eq!(
-            semantic_registry::admitted_surfaces_for_semantic_id(crate::sens!(00001011)),
+            compatibility_registry::admitted_surfaces_for_id(crate::sens!(00001011)),
             vec!["def"]
         );
     }
