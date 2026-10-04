@@ -118,6 +118,22 @@ def main() -> int:
     assert data["summary"]["recovered_semantics"] == recovered
     assert data["summary"]["provenance_missing"] == missing
 
+    # #3060 guard: the D5 MEMBER operation is a D5 resident, but its
+    # canonical yes/no result domain is D1.  Current t/() runtime output is
+    # explicit transition debt and must never become corpus semantics.
+    member = next(
+        row
+        for row in rows
+        if row["current_domain"] == "D5" and row["current_bits"] == "11101"
+    )
+    assert member["semantic_status"] == "RECOVERED"
+    assert member["semantic_role"] == "predicate"
+    assert member["canonical_result_domain"] == "D1"
+    assert member["canonical_result_values"] == {"NO": "0", "YES": "1"}
+    assert member["implementation_status"] == "TRANSITION-DEBT:#3060"
+    assert "#3059" in member["map_independent_witness_refs"]
+    assert "#3060" in member["semantic_law_refs"]
+
     digest = hashlib.sha256(compact_rows(rows)).hexdigest()
     assert data["corpus_hash"] == f"sha256:{digest}"
 
