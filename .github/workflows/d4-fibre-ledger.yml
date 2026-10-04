@@ -1,0 +1,28 @@
+name: D4 cleanroom fibre ledger
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d4-fibre-ledger.json"
+      - "knowledge/d4-cleanroom.json"
+      - "knowledge/d4-history-filtered-bootstrap-candidate.json"
+      - "scripts/check-d4-fibre-ledger.py"
+      - ".github/workflows/d4-fibre-ledger.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d4-fibre-ledger.json"
+      - "knowledge/d4-cleanroom.json"
+      - "knowledge/d4-history-filtered-bootstrap-candidate.json"
+      - "scripts/check-d4-fibre-ledger.py"
+      - ".github/workflows/d4-fibre-ledger.yml"
+  workflow_dispatch:
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate fibre certificates and derive D4 projection
+        run: python3 scripts/check-d4-fibre-ledger.py
