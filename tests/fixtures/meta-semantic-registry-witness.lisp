@@ -2,8 +2,9 @@
 ; is retired.  This preserves three laws from meta_eval_semantic_registry.rs:
 ;   1. admitted surfaces project to their numeric semantic identities and an
 ;      unadmitted spelling fails closed;
-;   2. peer spellings of Canon ATOM execute as one semantic identity in both
-;      the native evaluator and the metacircular evaluator;
+;   2. compatibility ATOM routing stays stable in the metacircular evaluator;
+;      exact native D3 predicate results are covered by a separate typed
+;      boundary witness whose cases remain Lisp-owned data;
 ;   3. LAMBDA/DEFINE plus compatibility DEF route through their numeric
 ;      semantic identities in both evaluators.
 ;
@@ -90,21 +91,18 @@
             (00000010 (my-semantic-id-for-surface (00000001 unmapped-surface)))
             (00000001 ()))
 
-      ; Canon ATOM peer surfaces: native evaluator.
-      (00100111 (00000001 atom-native-en)
+      ; Historical explicit-byte ATOM remains a compatibility witness.
+      ; Current exact-D3 predicate surfaces are verified by the typed,
+      ; Lisp-data-owned boundary corpus in witness_authority.rs; this older
+      ; meta-registry witness cannot manufacture free-standing D1 literals.
+      (00100111 (00000001 atom-native-legacy-byte)
             (registry-native-value "(00000010 (quote x))")
             (00000001 (1)))
-      (00100111 (00000001 atom-native-uk)
-            (registry-native-value "(атом? (як-є x))")
-            (00000001 (1)))
-      (00100111 (00000001 atom-native-sa)
-            (registry-native-value "(aṇu (svarūpa x))")
-            (00000001 (1)))
-      (00100111 (00000001 atom-native-symbolic)
-            (registry-native-value "(.? (quote x))")
-            (00000001 (1)))
 
-      ; The same peer surfaces through the metacircular evaluator.
+      ; The metacircular evaluator still exercises the compatibility
+      ; mechanism in my-apply-primitive. Its D1 cutover remains #2184 follow-up,
+      ; so these rows deliberately retain the historical carrier until that
+      ; evaluator can consume exact D1 false without generic truth coercion.
       (00100111 (00000001 atom-meta-en)
             (registry-meta-value "(00000010 (quote x))")
             (00000001 (1)))
