@@ -1,0 +1,116 @@
+{
+  "schema": "d6-v2-law-anchors/v1",
+  "status": "research-semantic-anchors",
+  "issue": "#3321",
+  "note": "semantic law is independent of coordinate; candidate coordinates come from the current D6 v2 selector-rebase shadow and are not ratified",
+  "families": [
+    {
+      "names": [
+        "MACROEXPAND-1",
+        "MACROEXPAND"
+      ],
+      "candidate_coordinates": [
+        "000110",
+        "000111"
+      ],
+      "law": "FULL is repeated STEP until a reached fixed point",
+      "geometry_status": "RELATION-ONLY",
+      "evidence": [
+        "#3083",
+        "#3094"
+      ]
+    },
+    {
+      "names": [
+        "LET",
+        "LET*"
+      ],
+      "candidate_coordinates": [
+        "001000",
+        "001001"
+      ],
+      "law": "parallel initializers use incoming environment; sequential initializers see prior bindings",
+      "geometry_status": "PRODUCT-AXIS-CANDIDATE",
+      "evidence": [
+        "#3081",
+        "#3091"
+      ]
+    },
+    {
+      "names": [
+        "EVENP",
+        "ODDP"
+      ],
+      "candidate_coordinates": [
+        "010000",
+        "010001"
+      ],
+      "law": "on exact integers, ODDP(n)=NOT(EVENP(n)) and EVENP(n)=NOT(ODDP(n))",
+      "geometry_status": "NEIGHBORHOOD-CANDIDATE",
+      "evidence": [
+        "#3078",
+        "#3079"
+      ]
+    },
+    {
+      "names": [
+        "LEQ",
+        "MIN",
+        "GEQ",
+        "MAX"
+      ],
+      "candidate_coordinates": [
+        "110100",
+        "110101",
+        "110110",
+        "110111"
+      ],
+      "law": "LEQ/GEQ are order duals; MIN/MAX are meet/join; NEG reverses the order",
+      "geometry_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106"
+      ]
+    },
+    {
+      "names": [
+        "INTERSECTION",
+        "UNION"
+      ],
+      "candidate_coordinates": [
+        "111010",
+        "111011"
+      ],
+      "law": "finite-set meet/join lattice with absorption, identities and annihilators",
+      "geometry_status": "RELATION-ONLY",
+      "evidence": [
+        "#3085",
+        "#3089"
+      ]
+    },
+    {
+      "names": [
+        "MAP",
+        "FILTER",
+        "MAP-ONTO",
+        "FILTER-ONTO"
+      ],
+      "candidate_coordinates": [
+        "101000",
+        "101001",
+        "101010",
+        "101011"
+      ],
+      "law": "closed forms are EMPTY-accumulator specializations of their -ONTO forms",
+      "geometry_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs"
+      ]
+    }
+  ]
+}

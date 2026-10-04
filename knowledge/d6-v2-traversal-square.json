@@ -1,0 +1,33 @@
+{
+  "schema": "d6-v2-traversal-square/v1",
+  "status": "research-law-candidate",
+  "issue": "#3323",
+  "lower_authority": "D5 #3305",
+  "coordinates": {
+    "101000": "MAP",
+    "101001": "FILTER",
+    "101010": "MAP-ONTO",
+    "101011": "FILTER-ONTO"
+  },
+  "axes": {
+    "d5_prefix": "closed vs accumulator-generalized",
+    "d6_suffix": "transform vs select"
+  },
+  "laws": [
+    "MAP(f,x) = MAP-ONTO(f,x,EMPTY)",
+    "FILTER(p,x) = FILTER-ONTO(p,x,EMPTY)"
+  ],
+  "evidence": [
+    "lib/core.lisp defines MAP through MAP-ONTO with EMPTY accumulator",
+    "lib/core.lisp defines FILTER through FILTER-ONTO with EMPTY accumulator",
+    "stack_safety.rs exercises MAP/FILTER on long lists",
+    "mccarthy.rs covers MAP/FILTER behavior"
+  ],
+  "replaces_old_donor_block": [
+    "NCONC",
+    "LENGTH",
+    "NREVERSE",
+    "NTH"
+  ],
+  "rationale": "prefer a witnessed commuting traversal square over mutation-oriented or weakly-related historical adjacency"
+}
