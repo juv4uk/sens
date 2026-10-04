@@ -123,6 +123,10 @@ jobs:
         shell: bash
         run: python3 scripts/sens8-semantic-ratchet.py --diff "$BASE_SHA" "$HEAD_SHA"
 
+      - name: Check generated D1-D8 full owner occupancy
+        shell: bash
+        run: python3 scripts/generate-domain-owner-registry.py --check
+
       - name: Debug post-core definition data shape for #771
         shell: bash
         run: |
