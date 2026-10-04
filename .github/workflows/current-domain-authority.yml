@@ -1,0 +1,28 @@
+name: D1 D2 only current authority
+
+on:
+  pull_request:
+    paths:
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "knowledge/current-domain-authority.json"
+      - "contracts/bija3-l1-l5-ratification.lisp"
+      - "contracts/d4-bootstrap-ratification.lisp"
+      - "contracts/d5-ratification.lisp"
+      - "knowledge/d4-cleanroom.json"
+      - "knowledge/d5-ratified.json"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/source_words.rs"
+      - "scripts/check-current-domain-authority.py"
+      - ".github/workflows/current-domain-authority.yml"
+  push:
+    branches: [main]
+
+jobs:
+  authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-current-domain-authority.py
+      - run: cargo test -p sens domain_identity -- --nocapture
