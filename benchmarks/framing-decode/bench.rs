@@ -2,7 +2,7 @@ use std::env;
 use std::hint::black_box;
 
 #[derive(Clone, Copy)]
-enum Codec { Width3Escape, GammaWidth }
+enum Codec { Width3Escape, GammaWidth, CandidateS }
 
 #[derive(Clone, Copy)]
 enum Wrapper { Raw, StopBit, GammaLength, ContainerBits }
@@ -91,6 +91,10 @@ fn write_gamma(bits: &mut Bits, value: usize) {
     write_uint(bits, value, width);
 }
 
+fn write_gamma0(bits: &mut Bits, value: usize) {
+    write_gamma(bits, value + 1);
+}
+
 fn read_uint(bits: &Bits, pos: &mut usize, end: usize, width: usize) -> Result<usize, ()> {
     if *pos + width > end { return Err(()); }
     let mut value = 0usize;
@@ -121,10 +125,21 @@ fn read_gamma(bits: &Bits, pos: &mut usize, end: usize, loops: &mut usize) -> Re
     Ok(value)
 }
 
+fn read_gamma0(bits: &Bits, pos: &mut usize, end: usize, loops: &mut usize) -> Result<usize, ()> {
+    read_gamma(bits, pos, end, loops)?.checked_sub(1).ok_or(())
+}
+
 fn payload(width: usize, salt: usize) -> Vec<u8> {
-    (0..width)
+    let mut bits: Vec<u8> = (0..width)
         .map(|i| (((i * 7 + salt * 3 + width) ^ (i >> 1)) & 1) as u8)
-        .collect()
+        .collect();
+    // Candidate S carries widths >8 as canonical BinaryNumber records, whose
+    // normalized representation has no leading zero. Use the same payload for
+    // every codec so the CPU comparison remains apples-to-apples.
+    if width > 8 {
+        bits[0] = 1;
+    }
+    bits
 }
 
 fn encode_words(codec: Codec, words: &[Vec<u8>]) -> Bits {
@@ -142,6 +157,16 @@ fn encode_words(codec: Codec, words: &[Vec<u8>]) -> Bits {
                 }
             }
             Codec::GammaWidth => write_gamma(&mut out, width),
+            Codec::CandidateS => {
+                if width <= 7 {
+                    write_uint(&mut out, width - 1, 3);
+                } else if width == 8 {
+                    write_uint(&mut out, 0b1110, 4);
+                } else {
+                    write_uint(&mut out, 0b11110, 5);
+                    write_gamma0(&mut out, width);
+                }
+            }
         }
         for &bit in word { out.push(bit); }
     }
@@ -276,6 +301,35 @@ fn decode(codec: Codec, frame: &Frame, wrapper: Wrapper) -> Result<(DecodeStats,
                 }
             }
             Codec::GammaWidth => read_gamma(&frame.bits, &mut pos, end, &mut stats.header_loop_iterations)?,
+            Codec::CandidateS => {
+                let head = read_uint(&frame.bits, &mut pos, end, 3)?;
+                stats.header_loop_iterations += 3;
+                if head < 7 {
+                    head + 1
+                } else {
+                    let extension = read_uint(&frame.bits, &mut pos, end, 1)?;
+                    stats.header_loop_iterations += 1;
+                    if extension == 0 {
+                        8
+                    } else {
+                        let class = read_uint(&frame.bits, &mut pos, end, 1)?;
+                        stats.header_loop_iterations += 1;
+                        if class != 0 {
+                            // Local/Sound/reserved classes are not generic word
+                            // payloads in this benchmark slice.
+                            return Err(());
+                        }
+                        let width = read_gamma0(
+                            &frame.bits,
+                            &mut pos,
+                            end,
+                            &mut stats.header_loop_iterations,
+                        )?;
+                        if width <= 8 { return Err(()); }
+                        width
+                    }
+                }
+            }
         };
         if width == 0 || pos + width > end { return Err(()); }
 
@@ -311,6 +365,24 @@ fn decode_collect(codec: Codec, frame: &Frame, wrapper: Wrapper) -> Result<Vec<V
             Codec::GammaWidth => {
                 let mut loops = 0;
                 read_gamma(&frame.bits, &mut pos, end, &mut loops)?
+            }
+            Codec::CandidateS => {
+                let head = read_uint(&frame.bits, &mut pos, end, 3)?;
+                if head < 7 {
+                    head + 1
+                } else {
+                    let extension = read_uint(&frame.bits, &mut pos, end, 1)?;
+                    if extension == 0 {
+                        8
+                    } else {
+                        let class = read_uint(&frame.bits, &mut pos, end, 1)?;
+                        if class != 0 { return Err(()); }
+                        let mut loops = 0;
+                        let width = read_gamma0(&frame.bits, &mut pos, end, &mut loops)?;
+                        if width <= 8 { return Err(()); }
+                        width
+                    }
+                }
             }
         };
         if width == 0 || pos + width > end { return Err(()); }
@@ -362,7 +434,12 @@ fn make_frame(codec: Codec, wrapper: Wrapper, case: &str) -> Frame {
 }
 
 fn parse_codec(s: &str) -> Codec {
-    match s { "a" => Codec::Width3Escape, "b" => Codec::GammaWidth, _ => panic!("codec") }
+    match s {
+        "a" => Codec::Width3Escape,
+        "b" => Codec::GammaWidth,
+        "s" => Codec::CandidateS,
+        _ => panic!("codec"),
+    }
 }
 
 fn parse_wrapper(s: &str) -> Wrapper {
@@ -381,7 +458,7 @@ fn verify_all() {
         "single-7","single-8","single-9","single-16","single-32","single-64",
         "single-65","single-128","repeated3","mixed","corpus",
     ];
-    for codec in [Codec::Width3Escape, Codec::GammaWidth] {
+    for codec in [Codec::Width3Escape, Codec::GammaWidth, Codec::CandidateS] {
         for wrapper in [Wrapper::Raw, Wrapper::StopBit, Wrapper::GammaLength, Wrapper::ContainerBits] {
             for case in cases {
                 let words = case_words(case);
