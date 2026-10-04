@@ -261,7 +261,7 @@ fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head 
     let routed = match identity {
         CoreDomainIdentity::D3(word) => match word.word().packed_bits() {
             0b001 => Head::Quote,
-            0b011 => Head::Cond,
+            0b110 => Head::Cond,
             _ => Head::Call,
         },
         _ => Head::Call,
