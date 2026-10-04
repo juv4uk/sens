@@ -43,7 +43,8 @@ EXPECTED_LAW = {
     "predicate-answer": {
         "predicate-answer": "one-bit", "yes": 1, "no": 0,
         "graded-answers": "forbidden",
-        "empty-list-as-predicate-result": "forbidden",
+        "partial-predicate-no-witness": [],
+        "empty-no-witness-equals-no": "forbidden",
         "host-boolean-defines-semantics": "forbidden",
     },
     "010": {"compat-function8": "00000010", "empty-structure": 1,
@@ -52,6 +53,8 @@ EXPECTED_LAW = {
             "distinct-admitted-atom": 0, "pair-operand": "named-error"},
     "011": {"compat-function8": "00000111", "clause-shape": "two-part",
             "test-1": "select", "test-0": "skip",
+            "test-empty": "skip-no-witness", "zero-equals-empty": "forbidden",
+            "other-test-value": "named-type-error",
             "unselected-expression": "not-evaluated",
             "exhaustion": [], "three-part-clause": "rejected"},
     "reader": {"malformed-source": "rejected-not-repaired"},
@@ -60,8 +63,9 @@ EXPECTED_LAW = {
 SHARED_IDENTITIES = ["00000001", "00000010", "00000011", "00000100",
                      "00000101", "00000110", "00000111"]
 
-NEGATIVE_LAWS = ["graded-predicate-answer", "empty-list-predicate-result",
-                 "structural-kind-substitution", "host-truth-substitution"]
+NEGATIVE_LAWS = ["graded-predicate-answer", "empty-equals-predicate-no",
+                 "untyped-empty-as-truth", "structural-kind-substitution",
+                 "host-truth-substitution"]
 
 PROFILE_COVERAGE = {"native": "proven", "core3": "proven", "core2": "measured-blocked",
                     "core1": "not-yet-exercisable", "core4": "not-yet-exercisable"}
