@@ -511,6 +511,49 @@ mod tests {
     use super::*;
 
     #[test]
+    fn d5_member_result_boundary_accepts_only_predicate_semantics() {
+        let member = CoreDomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0b11101).unwrap(),
+        ));
+        let assoc = CoreDomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0b11100).unwrap(),
+        ));
+        let span = Span { start: 0, end: 0 };
+
+        let yes = canonicalize_domain_result(
+            member,
+            Value::Symbol(std::rc::Rc::from("t")),
+            span,
+        )
+        .expect("legacy YES carrier should normalize");
+        let no = canonicalize_domain_result(member, Value::Nil, span)
+            .expect("legacy NO carrier should normalize");
+        assert_eq!(yes.as_predicate_bit(), Some(true));
+        assert_eq!(no.as_predicate_bit(), Some(false));
+
+        let already_exact = Value::predicate_bit(true);
+        assert_eq!(
+            canonicalize_domain_result(member, already_exact.clone(), span).unwrap(),
+            already_exact
+        );
+
+        let numeric_truth = Value::Number(1.0, crate::Exactness::Exact);
+        let error = canonicalize_domain_result(member, numeric_truth, span)
+            .expect_err("Number 1 must never collapse into D1 YES");
+        assert_eq!(error.kind, ErrorKind::Type);
+
+        let assoc_pair = Value::list([
+            Value::Symbol(std::rc::Rc::from("key")),
+            Value::Symbol(std::rc::Rc::from("value")),
+        ]);
+        assert_eq!(
+            canonicalize_domain_result(assoc, assoc_pair.clone(), span).unwrap(),
+            assoc_pair,
+            "non-MEMBER D5 results must pass through unchanged"
+        );
+    }
+
+    #[test]
     fn canonical_d3_primitive_route_is_role_aware_not_numeric_projection() {
         let d3 = |bits| {
             CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(bits).unwrap()))
