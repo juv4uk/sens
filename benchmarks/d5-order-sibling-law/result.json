@@ -1,0 +1,23 @@
+{
+  "schema": "d5-order-sibling-law/v1",
+  "domain": "Core.D5",
+  "owner_occupancy_authority": "OD-005",
+  "coordinates": {
+    "01110": "LESSP",
+    "01111": "GREATERP"
+  },
+  "law": "GREATERP(a,b) = LESSP(b,a)",
+  "historical_domain": "fixed-or-floating",
+  "partiality": "nonnumeric -> error on both siblings",
+  "checks": 64,
+  "equal_cases": 10,
+  "cross_carrier_cases": 32,
+  "classification": "LOCAL-SIBLING-LAW",
+  "relation_class": "SEMANTIC-LAW",
+  "d4_prefix": "0111",
+  "d4_parenthood": "NOT-INFERRED",
+  "modern_d1_result_carrier": "DOWNSTREAM-RUNTIME-GUARD",
+  "owner_map_mutation": "NONE",
+  "global_d5_suffix_theorem": "NOT-CLAIMED",
+  "domain_firewall": "Core-Math order similarity does not supply Core.D5 authority"
+}
