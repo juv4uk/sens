@@ -1,20 +1,27 @@
-name: D4 cleanroom guard
+name: D4 current authority
 
 on:
   pull_request:
     paths:
       - "knowledge/d4-cleanroom.json"
+      - "contracts/d4-bootstrap-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "docs/language-core.md"
       - "scripts/check-d4-cleanroom.py"
-      - "benchmarks/d4-prefix-lift/**"
       - ".github/workflows/d4-cleanroom.yml"
   push:
     branches: [main]
     paths:
       - "knowledge/d4-cleanroom.json"
+      - "contracts/d4-bootstrap-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "docs/language-core.md"
       - "scripts/check-d4-cleanroom.py"
 
 jobs:
-  cleanroom:
+  authority:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
