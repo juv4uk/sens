@@ -2,9 +2,9 @@
 //! helper), plus the compatibility `def` surface. Language-owned `defmacro`
 //! is bootstrapped from `lib/macro.lisp`; the Rust kernel no longer implements it.
 
+use crate::environment::{CondClauseMode, CoreProfile};
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
-use crate::environment::{CondClauseMode, CoreProfile};
 use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 
 use std::rc::Rc;
@@ -63,6 +63,67 @@ fn migration_only_cond_truthy(value: &Value) -> bool {
         Some(direction) => direction,
         None => value.is_truthy(),
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum CanonicalCondControl {
+    Select,
+    SkipExplicitNo,
+    SkipEmpty,
+}
+
+fn canonical_cond_control(
+    value: &Value,
+    span: Span,
+) -> Result<CanonicalCondControl, LanguageError> {
+    match value.as_predicate_bit() {
+        Some(true) => Ok(CanonicalCondControl::Select),
+        Some(false) => Ok(CanonicalCondControl::SkipExplicitNo),
+        None if matches!(value, Value::Nil) => Ok(CanonicalCondControl::SkipEmpty),
+        None => Err(LanguageError::new(
+            ErrorKind::Type,
+            format!("exact D3 COND expects D1:1 / D1:0 / structural EMPTY (); got {value}"),
+            span,
+        )),
+    }
+}
+
+/// Canonical exact-domain D3:011 COND.
+///
+/// The semantic distinction is preserved even when control behavior coincides:
+/// D1:0 is explicit NO, while () is structural EMPTY/no-witness. Both skip a
+/// clause; neither is coerced into the other. Every other test value fails closed.
+pub(crate) fn evaluate_domain_cond(
+    clauses: &[Expr],
+    environment: &Environment,
+    _span: Span,
+) -> Result<EvalStep, LanguageError> {
+    for clause in clauses {
+        let ExprKind::List(parts) = &clause.kind else {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                "exact D3 COND expects list clauses",
+                clause.span,
+            ));
+        };
+        if parts.len() != 2 {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                "exact D3 COND expects only (test expression) clauses",
+                clause.span,
+            ));
+        }
+
+        let value = evaluate(&parts[0], environment)?;
+        match canonical_cond_control(&value, parts[0].span)? {
+            CanonicalCondControl::Select => {
+                return evaluate_step(&parts[1], environment);
+            }
+            CanonicalCondControl::SkipExplicitNo | CanonicalCondControl::SkipEmpty => {}
+        }
+    }
+
+    Ok(EvalStep::Value(Value::Nil))
 }
 
 pub(crate) fn evaluate_definition(
@@ -312,4 +373,107 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
         ));
     }
     Ok(answer(Some(u8::from(left == right))))
+}
+
+#[cfg(test)]
+mod empty_witness_tests {
+    use super::*;
+
+    fn span() -> Span {
+        Span { start: 0, end: 0 }
+    }
+
+    fn expr(kind: ExprKind) -> Expr {
+        Expr { kind, span: span() }
+    }
+
+    fn d1(bit: bool) -> Expr {
+        let word = crate::Bit1::new(u8::from(bit)).unwrap();
+        expr(ExprKind::DomainIdentity(crate::DomainIdentity::D1(
+            crate::PredicateBit::from_word(word),
+        )))
+    }
+
+    fn empty() -> Expr {
+        expr(ExprKind::List(Rc::from([])))
+    }
+
+    fn number(value: f64) -> Expr {
+        expr(ExprKind::Number(value, crate::Exactness::Exact))
+    }
+
+    fn clause(test: Expr, result: Expr) -> Expr {
+        expr(ExprKind::List(Rc::from([test, result])))
+    }
+
+    fn value(step: EvalStep) -> Value {
+        match step {
+            EvalStep::Value(value) => value,
+            EvalStep::TailCall { .. } => panic!("test result must be a direct value"),
+        }
+    }
+
+    #[test]
+    fn exact_cond_distinguishes_no_from_empty_but_skips_both() {
+        let no = Value::predicate_bit(false);
+        assert_ne!(no, Value::Nil);
+        assert_eq!(
+            canonical_cond_control(&no, span()).unwrap(),
+            CanonicalCondControl::SkipExplicitNo
+        );
+        assert_eq!(
+            canonical_cond_control(&Value::Nil, span()).unwrap(),
+            CanonicalCondControl::SkipEmpty
+        );
+    }
+
+    #[test]
+    fn exact_cond_selects_only_d1_yes() {
+        let clauses = [
+            clause(d1(false), number(10.0)),
+            clause(empty(), number(20.0)),
+            clause(d1(true), number(30.0)),
+        ];
+        let result = evaluate_domain_cond(&clauses, &Environment::root(), span()).unwrap();
+        assert_eq!(value(result), Value::Number(30.0, crate::Exactness::Exact));
+    }
+
+    #[test]
+    fn exact_cond_exhaustion_returns_structural_empty() {
+        let clauses = [
+            clause(d1(false), number(10.0)),
+            clause(empty(), number(20.0)),
+        ];
+        let result = evaluate_domain_cond(&clauses, &Environment::root(), span()).unwrap();
+        assert_eq!(value(result), Value::Nil);
+    }
+
+    #[test]
+    fn exact_cond_rejects_generic_truthiness() {
+        for invalid in [number(1.0), expr(ExprKind::Symbol(Rc::from("t")))] {
+            let error = match evaluate_domain_cond(
+                &[clause(invalid, number(99.0))],
+                &Environment::root(),
+                span(),
+            ) {
+                Err(error) => error,
+                Ok(_) => panic!("non-D1/non-empty COND test must fail closed"),
+            };
+            assert_eq!(error.kind, ErrorKind::Type);
+        }
+    }
+
+    #[test]
+    fn exact_cond_remains_two_part_only() {
+        let three = expr(ExprKind::List(Rc::from([
+            d1(true),
+            number(1.0),
+            number(2.0),
+        ])));
+        let error = match evaluate_domain_cond(&[three], &Environment::root(), span()) {
+            Err(error) => error,
+            Ok(_) => panic!("three-part clauses are not canonical D3 COND"),
+        };
+        assert_eq!(error.kind, ErrorKind::InvalidForm);
+    }
 }
