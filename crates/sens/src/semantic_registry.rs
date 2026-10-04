@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -26,6 +26,7 @@ pub(crate) type SemanticId = Sens8;
 pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
     let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+    let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
     match byte {
         0b0000_0001 => Some(d3(0b001)), // QUOTE
         0b0000_0010 => Some(d3(0b010)), // ATOM
@@ -41,6 +42,18 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0011_0011 => Some(d4(0b1010)), // CAAR
         0b0011_0100 => Some(d4(0b1011)), // CADR
         0b0011_0101 => Some(d4(0b1101)), // CDDR
+
+        // Transitional OD-005 projection for Lisp-owned D5 mechanisms.
+        // These rows restore already-ratified exact-domain bindings after the
+        // D1-D8 cutover. They are explicit historical-surface projections,
+        // never byte truncation or a claim that every legacy byte has D5 meaning.
+        // #2947/#3062 replaces this detour with the exact-domain surface registry.
+        0b0010_1001 => Some(d5(0b10000)), // APPEND
+        0b0010_1010 => Some(d5(0b10001)), // REVERSE
+        0b0001_0100 => Some(d5(0b10011)), // QUOTIENT
+        0b0010_1100 => Some(d5(0b11101)), // MEMBER
+        0b0010_1101 => Some(d5(0b11100)), // ASSOC
+        0b1010_1100 => Some(d5(0b11111)), // SUBST
         _ => None,
     }
 }
