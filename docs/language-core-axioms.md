@@ -153,9 +153,9 @@ The unifying possibility all the others serve. Rust, `fpga-lisp` — implementat
 
 ### G8 — Predicate and structure are orthogonal binary domains · Предикат і структура — ортогональні двійкові домени
 
-**Binary reset (2026-09-29):** результат предиката — рівно один біт: `0` або `1`. Структурне порожнє `()` не є predicate FALSE і не перетворюється на нього неявно. `COND` приймає тільки PredicateBit: `1` вибирає expression, `0` пропускає клаузу; вичерпання повертає структурне `()`.
+**Contract 11.3 / EMPTY convergence (2026-10-04):** результат тотального предиката — рівно D1 `0` або `1`; структурне D3 `000 ()` не є predicate FALSE. Частковий `EQ` може повернути `()` як EMPTY/no-witness поза atom-domain. `COND` приймає рівно D1 `1`, D1 `0` або D3 `()` у двопольовій клаузі `(test expression)`: `1` вибирає expression, `0` продовжує як explicit NO, `()` продовжує як EMPTY/no-witness; інші значення відхиляються, а вичерпання повертає `()`.
 
-**Binary reset (2026-09-29):** a predicate result is exactly one bit, `0` or `1`. Structural empty `()` is not predicate FALSE and is never implicitly coerced into it. `COND` accepts PredicateBit only: `1` selects the expression, `0` skips the clause; exhaustion returns structural `()`.
+**Contract 11.3 / EMPTY convergence (2026-10-04):** a total predicate result is exactly D1 `0` or `1`; structural D3 `000 ()` is not predicate FALSE. Partial `EQ` may return `()` as EMPTY/no-witness outside its atom domain. `COND` accepts exactly D1 `1`, D1 `0`, or D3 `()` in a two-field `(test expression)` clause: `1` selects, `0` continues as explicit NO, `()` continues as EMPTY/no-witness; every other value is rejected, and exhaustion returns `()`.
 
 ## Safety axioms — what no conforming implementation may silently do · Безпекові аксіоми — чого жодна конформна реалізація не має права робити мовчки
 
