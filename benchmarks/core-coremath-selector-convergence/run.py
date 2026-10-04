@@ -41,7 +41,7 @@ def project(value, bit: str):
 
 
 def eval_selector(root_bits: str, law_path: str, value):
-    root_choice = {"101": "0", "110": "1"}[root_bits]
+    root_choice = {"100": "0", "011": "1"}[root_bits]
     descriptor = root_choice + law_path
     out = value
     for bit in reversed(descriptor):
@@ -93,9 +93,10 @@ def selector_rows():
         row
         for row in data["rows"]
         if row["status"] == "generated"
-        and row.get("search_grammar") == "selector-suffix-v1"
+        and row.get("search_grammar") == "d3-selector-suffix-v2"
     ]
-    assert len(rows) == 12
+    assert len(rows) == 4
+    assert {int(row["width"]) for row in rows} == {4}
     return sorted(rows, key=lambda row: (int(row["width"]), row["function_identity"]))
 
 
@@ -140,10 +141,10 @@ def main() -> int:
     # Re-encoding/permutation attack: leave Core semantics unchanged but swap two
     # width-4 child coordinates. Exact binary equality with Core-Math must fail.
     permuted = {r["core_child_bits"]: r["core_child_bits"] for r in results}
-    permuted["1010"], permuted["1011"] = "1011", "1010"
+    permuted["1000"], permuted["1001"] = "1001", "1000"
     attack_failures = 0
     for r in results:
-        if r["width"] == 4 and r["core_child_bits"] in {"1010", "1011"}:
+        if r["width"] == 4 and r["core_child_bits"] in {"1000", "1001"}:
             if r["coremath_generated_bits"] != permuted[r["core_child_bits"]]:
                 attack_failures += 1
     assert attack_failures == 2
@@ -162,7 +163,7 @@ def main() -> int:
         "schema": "core-coremath-selector-convergence/v1",
         "authority": "research-only",
         "candidate": "selector-composition",
-        "classification": "CONVERGENT-BOUNDED",
+        "classification": "CONVERGENT-BOUNDED-D4",
         "core_witness": {
             "source": "knowledge/function-status-census.json",
             "generated_rows": len(results),
@@ -182,7 +183,7 @@ def main() -> int:
             "total_rows": len(results),
         },
         "permutation_attack": {
-            "kind": "swap Core width-4 children 1010/1011 while preserving symbolic selector semantics",
+            "kind": "swap current Core width-4 children 1000/1001 while preserving symbolic selector semantics",
             "exact_convergence_failures": attack_failures,
             "passes_falsifier": attack_failures > 0,
         },
@@ -196,6 +197,7 @@ def main() -> int:
             "bounded convergence of selector law does not merge Core and Core-Math",
             "D3 selector-root independence is not proved by this witness",
             "human selector names are diagnostic projections only",
+            "D5+ selector continuation is not claimed while #3209 is unresolved",
             "other Core domains need separate cross-proofs",
         ],
     }
@@ -212,11 +214,12 @@ def main() -> int:
         f"Exact domain-width matches: **{artifact['cross_proof']['exact_domain_width_matches']}**",
         f"Independent semantic-extension checks: **{artifact['cross_proof']['semantic_extension_matches']}**",
         "",
-        "Bounded classification: **CONVERGENT** for the tested D4/D5 selector descendants.",
+        "Bounded classification: **CONVERGENT** for the four current D4 selector descendants.",
         "",
         "The Core side derives meaning from symbolic pair selection.",
         "The Core-Math side derives bits from the independent factor-10 binary law.",
-        "They meet on the same exact-width binary child for every tested generated row.",
+        "They meet on the same exact-width binary child for every tested generated D4 row.",
+        "D5+ selector continuation remains fail-closed pending #3209.",
         "",
         f"Permutation attack failures: **{attack_failures}** / 2 swapped rows.",
         "So arbitrary re-numbering preserves neither the cross-proof nor the binary law.",
