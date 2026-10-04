@@ -7,6 +7,11 @@ on:
       - "crates/sens/tests/semantic_registry_lisp.rs"
       - "tests/fixtures/semantic-registry-self-hosted-witness.lisp"
       - "scripts/generate-rust-semantic-registry.lisp"
+      - "knowledge/domain-surface-registry.lisp"
+      - "scripts/generate-rust-domain-registry.lisp"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "crates/sens/src/human_surface.rs"
+      - "crates/sens/src/eval/lower.rs"
       - ".github/workflows/956-semreg-targeted.yml"
 
 jobs:
@@ -18,3 +23,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Run Lisp-owned semantic registry witness
         run: cargo test -p sens --test semantic_registry_lisp -- --nocapture
+
+      - name: Check exact-domain surface projection
+        run: cargo run -p sens-cli --bin sens -- scripts/generate-rust-domain-registry.lisp --check
+
+      - name: Prove D3 Ukrainian and Sanskrit exact-domain parity
+        run: |
+          cargo test -p sens --lib human_surface::tests -- --nocapture
+          cargo test -p sens --lib migrated_d3_surfaces_lower_to_exact_domain_calls -- --nocapture
+          cargo test -p sens --test canon_surface -- --nocapture
