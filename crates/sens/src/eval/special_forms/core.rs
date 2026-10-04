@@ -222,13 +222,12 @@ pub(crate) fn cons_values(
     Ok(Value::Pair(std::rc::Rc::new(head), std::rc::Rc::new(tail)))
 }
 
-pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, LanguageError> {
+pub(crate) fn eq_values(left: Value, right: Value, _span: Span) -> Result<Value, LanguageError> {
+    // D3:111 EQ is partial over the admitted atom domain.
+    // Outside that domain, structural EMPTY is the exact no-witness result:
+    // it is neither D1:NO nor an error.
     if !left.is_atom() || !right.is_atom() {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "eq expects two admitted atoms",
-            span,
-        ));
+        return Ok(Value::Nil);
     }
     Ok(Value::predicate_bit(left == right))
 }
@@ -280,8 +279,10 @@ mod tests {
             .as_predicate_bit(),
             Some(false)
         );
-        let error = eq_values(pair, Value::Nil, span())
-            .expect_err("EQ outside its admitted atom domain must fail closed");
-        assert_eq!(error.kind, ErrorKind::Type);
+        assert_eq!(
+            eq_values(pair, Value::Nil, span()).unwrap(),
+            Value::Nil,
+            "EQ outside its atom domain returns structural EMPTY/no-witness"
+        );
     }
 }
