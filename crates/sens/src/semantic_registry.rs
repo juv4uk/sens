@@ -19,9 +19,39 @@ mod generated {
     include!("semantic_registry_generated.rs");
 }
 
+mod domain_surface_generated {
+    include!("domain_surface_registry_generated.rs");
+}
+
+use domain_surface_generated::DOMAIN_SURFACE_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
+
+fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
+    match width {
+        3 => Some(CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(bits)?))),
+        4 => Some(CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(bits)?))),
+        _ => None,
+    }
+}
+
+/// Direct D3/D4 human-surface projection.
+///
+/// This path consumes the exact-domain projection generated from
+/// lib/surface/domain-surfaces-d1-d4.lisp. It never consults a historical
+/// packed byte to recover domain identity.
+fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
+    DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
+        let matches_human_surface = row
+            .surfaces
+            .iter()
+            .any(|surface| matches!(surface.namespace, "uk" | "sa") && surface.name == name);
+        matches_human_surface
+            .then(|| exact_domain_identity_from_projection(row.width, row.bits))
+            .flatten()
+    })
+}
 
 pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
@@ -65,10 +95,15 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
         _ => None,
     }
 }
-/// Transitional canonical lookup. #2947 removes this legacy-byte detour and
-/// replaces it with the exact-domain surface registry.
+/// Current staged surface lookup.
+///
+/// Ukrainian and Sanskrit D3/D4 spellings resolve directly through the
+/// exact-domain projection. The byte-backed lookup remains only as a bounded
+/// compatibility fallback for still-unmigrated spellings.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
+    direct_domain_identity_for_surface(name).or_else(|| {
+        registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
+    })
 }
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
@@ -206,12 +241,16 @@ mod tests {
 
     #[test]
     fn existing_selector_surfaces_project_to_ratified_d4() {
-        for (surface, bits) in [("перше-від-першого", 0b1000), ("перше-від-решти", 0b1001), ("решта-від-решти", 0b0111)] {
+        for (surface, bits) in [
+            ("перше-від-першого", 0b1000),
+            ("перше-від-решти", 0b1001),
+            ("решта-від-першого", 0b0110),
+            ("решта-від-решти", 0b0111),
+        ] {
             let identity = domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("selector surface must project: {surface}"));
             assert_eq!((identity.width(), identity.packed_bits()), (4, bits));
         }
-        assert_eq!(domain_identity_for_surface("решта-від-першого"), None);
     }
 
     #[test]
@@ -250,14 +289,30 @@ mod tests {
     }
 
     #[test]
-    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
+    fn uk_sa_exact_domain_projection_does_not_need_a_legacy_byte_route() {
+        for (surface, width, bits) in [
+            ("aṇu?", 3, 0b010),
+            ("решта-від-першого", 4, 0b0110),
+            ("phalana", 4, 0b0010),
+            ("saṅkalana", 4, 0b1111),
+        ] {
+            let identity = direct_domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("exact-domain surface must resolve directly: {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
+            assert_eq!(domain_identity_for_surface(surface), Some(identity));
+        }
+
         assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(legacy_domain_identity_from_registry_byte),
-            domain_identity_for_surface("за-умовою")
+            registry_byte_for_surface("aṇu?")
+                .and_then(legacy_domain_identity_from_registry_byte),
+            None,
+            "new Sanskrit ATOM spelling must not depend on a historical byte"
         );
         assert_eq!(
-            registry_byte_for_surface("функція").and_then(legacy_domain_identity_from_registry_byte),
-            domain_identity_for_surface("функція")
+            registry_byte_for_surface("решта-від-першого")
+                .and_then(legacy_domain_identity_from_registry_byte),
+            None,
+            "CDAR must be admitted by D4 projection even without a legacy byte mapping"
         );
     }
 
