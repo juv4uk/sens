@@ -62,7 +62,7 @@ impl Racana2 {
     }
 }
 
-/// Exact three-bit carrier for the ratified bīja3 foundation domain.
+/// Exact three-bit mechanical/research carrier historically used for bīja3.
 ///
 /// Individual three-bit meanings remain in SENS-owned contracts/witnesses.
 #[repr(transparent)]
@@ -82,10 +82,9 @@ impl Bija3 {
 }
 
 
-/// Exact four-bit carrier for the ratified Core.D4 bootstrap domain.
+/// Exact four-bit mechanical/research carrier historically used for Core.D4.
 ///
-/// This type proves only exact Core.D4 membership. The occupied/free map and
-/// executable laws remain owned by #2169 and SENS conformance evidence.
+/// Owner reset #3327 revokes D4 semantic membership. This type preserves exact width only.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD4(Bit4);
@@ -105,7 +104,7 @@ impl CoreD4 {
 
 /// Exact five-bit mechanical/research carrier historically named CoreD5.
 ///
-/// D5 semantic ratification is revoked by #3278. This type preserves exact
+/// Owner reset #3327 revokes D5 semantic membership. This type preserves exact
 /// width only and does not prove current Core.D5 membership or resident meaning.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
@@ -125,7 +124,7 @@ impl CoreD5 {
 
 /// Exact six-bit mechanical/research carrier historically named CoreD6.
 ///
-/// D6 semantic ratification is revoked by #3278. This type preserves exact
+/// Owner reset #3327 leaves D6 unratified. This type preserves exact
 /// width only and deliberately has no implicit relationship to D5 or Sens8.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
@@ -143,10 +142,9 @@ impl CoreD6 {
     }
 }
 
-/// Exact seven-bit carrier for the ratified D7 Sound7/local-ordinal domain.
+/// Exact seven-bit mechanical/research carrier historically used for Sound7.
 ///
-/// This proves D7 membership only. Sound7/local-ordinal laws own interpretation;
-/// callability or selector geometry must never be inferred from its width.
+/// Owner reset #3327 revokes D7 semantic membership. The type preserves exact width only.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct SoundD7(Bit7);
@@ -163,7 +161,7 @@ impl SoundD7 {
 
 /// Exact eight-bit mechanical/research carrier historically named CoreD8.
 ///
-/// D8 semantic ratification is revoked by #3278. This carrier remains distinct
+/// Owner reset #3327 leaves D8 unratified. This carrier remains distinct
 /// from historical flat Sens8/Sid8 bytes but does not itself admit Core.D8 semantics.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
