@@ -132,7 +132,7 @@ fn descriptor_expr(descriptor: &Expr) -> Expr {
                     let args = items[2..].iter().map(descriptor_expr).collect();
                     d3_call(bits, args)
                 }
-                "cond" => {
+                "за-умовою" => {
                     let clauses = items[1..]
                         .iter()
                         .map(|clause_desc| {
