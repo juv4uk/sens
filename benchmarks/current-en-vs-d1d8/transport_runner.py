@@ -243,114 +243,175 @@ def evidence_row(
     }
 
 
-def main() -> int:
+
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--helper", type=Path)
-    args = parser.parse_args()
+    return parser.parse_args()
 
+
+def prepare_context(args: argparse.Namespace) -> tuple[
+    dict[str, object], str, str, Path, str, dict[str, object]
+]:
     repo = Path(__file__).resolve().parents[2]
     manifest_path = args.manifest.resolve()
     manifest_bytes = manifest_path.read_bytes()
     manifest = load_manifest(manifest_path)
-    corpus_sha = sha256_bytes(manifest_bytes)
-    current_git_sha = git_sha(repo)
-
     helper = args.helper.resolve() if args.helper else build_helper(repo)
     if not helper.is_file():
         raise FileNotFoundError(helper)
-    binary_sha = sha256_file(helper)
-    common_provenance = provenance()
+    return (
+        manifest,
+        sha256_bytes(manifest_bytes),
+        git_sha(repo),
+        helper,
+        sha256_file(helper),
+        provenance(),
+    )
 
+
+def observe_candidates(
+    helper: Path,
+    tmp: Path,
+    workload: dict[str, object],
+) -> tuple[str, dict[str, object], dict[str, object]]:
+    workload_id = str(workload["id"])
+    sources = {
+        "english-surface": str(workload["english_source"]),
+        "canonical-d1d8": str(workload["canonical_source"]),
+    }
+    observed = {}
+    for candidate in CANDIDATES:
+        path = write_source(tmp, workload_id, candidate, sources[candidate])
+        observed[candidate] = run_helper(helper, candidate, path)
+    return workload_id, observed["english-surface"], observed["canonical-d1d8"]
+
+
+def validate_preflight(
+    workload_id: str,
+    workload: dict[str, object],
+    english: dict[str, object],
+    binary: dict[str, object],
+) -> None:
+    for field in ("trace", "value", "output"):
+        if english[field] != binary[field]:
+            raise ValueError(
+                f"{workload_id}: preflight mismatch for {field}: "
+                f"english={english[field]!r} canonical={binary[field]!r}"
+            )
+
+    expected_value = workload.get("expected_value")
+    if expected_value is not None and english["value"] != expected_value:
+        raise ValueError(
+            f"{workload_id}: expected value {expected_value!r}, got {english['value']!r}"
+        )
+    expected_output = workload.get("expected_output")
+    if expected_output is not None and english["output"] != expected_output:
+        raise ValueError(
+            f"{workload_id}: expected output {expected_output!r}, got {english['output']!r}"
+        )
+
+
+def validate_transport_metrics(
+    workload_id: str,
+    english: dict[str, object],
+    binary: dict[str, object],
+) -> tuple[dict[str, object], dict[str, object]]:
+    en_metrics = dict(english["metrics"])
+    bin_metrics = dict(binary["metrics"])
+
+    if en_metrics["lowered_ast_nodes"] != bin_metrics["lowered_ast_nodes"]:
+        raise ValueError(
+            f"{workload_id}: lowered AST node count mismatch: "
+            f"{en_metrics['lowered_ast_nodes']} vs {bin_metrics['lowered_ast_nodes']}"
+        )
+
+    canonical_only = (
+        "semantic_payload_bits",
+        "framing_bits",
+        "tail_unused_bits",
+        "total_wire_bits",
+        "packed_bytes",
+        "payload_container_bits",
+        "packing_efficiency",
+        "canonical_artifact_bytes",
+    )
+    invented = [key for key in canonical_only if en_metrics[key] is not None]
+    if invented:
+        raise ValueError(
+            f"{workload_id}: English lane must not invent canonical metrics: {invented}"
+        )
+
+    if bin_metrics["semantic_payload_bits"] is None or bin_metrics["packed_bytes"] is None:
+        raise ValueError(f"{workload_id}: canonical payload accounting missing")
+    if bin_metrics["framing_bits"] is not None or bin_metrics["total_wire_bits"] is not None:
+        raise ValueError(
+            f"{workload_id}: standalone framing must remain unresolved until #2189"
+        )
+    return en_metrics, bin_metrics
+
+
+def process_workload(
+    helper: Path,
+    tmp: Path,
+    workload: dict[str, object],
+    current_git_sha: str,
+    binary_sha: str,
+    corpus_sha: str,
+    common_provenance: dict[str, object],
+) -> list[dict[str, object]]:
+    workload_id, english, binary = observe_candidates(helper, tmp, workload)
+    validate_preflight(workload_id, workload, english, binary)
+    en_metrics, bin_metrics = validate_transport_metrics(workload_id, english, binary)
+    return [
+        evidence_row(
+            candidate=candidate,
+            workload=workload_id,
+            current_git_sha=current_git_sha,
+            binary_sha=binary_sha,
+            corpus_sha=corpus_sha,
+            common_provenance=common_provenance,
+            metrics=metrics,
+        )
+        for candidate, metrics in (
+            ("english-surface", en_metrics),
+            ("canonical-d1d8", bin_metrics),
+        )
+    ]
+
+
+def write_rows(path: Path, rows: list[dict[str, object]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        for row in rows:
+            handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def main() -> int:
+    args = parse_args()
+    manifest, corpus_sha, current_git_sha, helper, binary_sha, common_provenance = (
+        prepare_context(args)
+    )
     rows: list[dict[str, object]] = []
 
     with tempfile.TemporaryDirectory(prefix="sens-current-transport-") as tmp_name:
         tmp = Path(tmp_name)
         for workload_obj in manifest["workloads"]:
-            workload = dict(workload_obj)
-            workload_id = str(workload["id"])
-            sources = {
-                "english-surface": str(workload["english_source"]),
-                "canonical-d1d8": str(workload["canonical_source"]),
-            }
-            observed: dict[str, dict[str, object]] = {}
-            for candidate in CANDIDATES:
-                path = write_source(tmp, workload_id, candidate, sources[candidate])
-                observed[candidate] = run_helper(helper, candidate, path)
-
-            english = observed["english-surface"]
-            binary = observed["canonical-d1d8"]
-            for field in ("trace", "value", "output"):
-                if english[field] != binary[field]:
-                    raise ValueError(
-                        f"{workload_id}: preflight mismatch for {field}: "
-                        f"english={english[field]!r} canonical={binary[field]!r}"
-                    )
-
-            expected_value = workload.get("expected_value")
-            if expected_value is not None and english["value"] != expected_value:
-                raise ValueError(
-                    f"{workload_id}: expected value {expected_value!r}, got {english['value']!r}"
+            rows.extend(
+                process_workload(
+                    helper,
+                    tmp,
+                    dict(workload_obj),
+                    current_git_sha,
+                    binary_sha,
+                    corpus_sha,
+                    common_provenance,
                 )
-            expected_output = workload.get("expected_output")
-            if expected_output is not None and english["output"] != expected_output:
-                raise ValueError(
-                    f"{workload_id}: expected output {expected_output!r}, got {english['output']!r}"
-                )
+            )
 
-            en_metrics = dict(english["metrics"])
-            bin_metrics = dict(binary["metrics"])
-
-            if en_metrics["lowered_ast_nodes"] != bin_metrics["lowered_ast_nodes"]:
-                raise ValueError(
-                    f"{workload_id}: lowered AST node count mismatch: "
-                    f"{en_metrics['lowered_ast_nodes']} vs {bin_metrics['lowered_ast_nodes']}"
-                )
-
-            for key in (
-                "semantic_payload_bits",
-                "framing_bits",
-                "tail_unused_bits",
-                "total_wire_bits",
-                "packed_bytes",
-                "payload_container_bits",
-                "packing_efficiency",
-                "canonical_artifact_bytes",
-            ):
-                if en_metrics[key] is not None:
-                    raise ValueError(
-                        f"{workload_id}: English lane must not invent canonical metric {key}"
-                    )
-
-            if bin_metrics["semantic_payload_bits"] is None or bin_metrics["packed_bytes"] is None:
-                raise ValueError(f"{workload_id}: canonical payload accounting missing")
-            if bin_metrics["framing_bits"] is not None or bin_metrics["total_wire_bits"] is not None:
-                raise ValueError(
-                    f"{workload_id}: standalone framing must remain unresolved until #2189"
-                )
-
-            for candidate, metrics in (
-                ("english-surface", en_metrics),
-                ("canonical-d1d8", bin_metrics),
-            ):
-                rows.append(
-                    evidence_row(
-                        candidate=candidate,
-                        workload=workload_id,
-                        current_git_sha=current_git_sha,
-                        binary_sha=binary_sha,
-                        corpus_sha=corpus_sha,
-                        common_provenance=common_provenance,
-                        metrics=metrics,
-                    )
-                )
-
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8") as handle:
-        for row in rows:
-            handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
-
+    write_rows(args.out, rows)
     print(f"wrote {len(rows)} current paired transport rows to {args.out}")
     print("standalone framing fields remain null until #2189")
     print("no compression ratio or language-wide winner is computed")
