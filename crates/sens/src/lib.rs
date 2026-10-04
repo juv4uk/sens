@@ -42,7 +42,7 @@ pub mod semantic_registry_export {
 
     /// Mechanical input accepted by the external projection boundary.
     ///
-    /// Runtime/source semantics use `Sens8`. The `u8` implementation exists
+    /// This compatibility projection API uses `Sens8`. Canonical language/runtime identity is domain-qualified; the `u8` implementation exists
     /// only so the pre-#1098 CML export can remain byte-for-byte unchanged in
     /// this first vertical slice; it must not be used as a SID constructor.
     #[doc(hidden)]
@@ -84,7 +84,7 @@ pub mod semantic_registry_export {
 
     /// Legacy packed-byte export for external projection consumers.
     ///
-    /// Runtime/source semantics use opaque `Sens8`; this function deliberately
+    /// This compatibility export uses opaque `Sens8`; canonical domain-qualified runtime semantics do not depend on it. This function deliberately
     /// preserves the pre-#1098 projection ABI so untouched observers do not
     /// become semantic participants merely because the runtime identity type
     /// changed.
@@ -198,8 +198,8 @@ pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 /// bytes переходять на parsing CORE_LIBRARY_SOURCE.
 const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 
-/// Generated runtime projection of admitted surface spellings to opaque Sens8
-/// identities. semantic-registry.lisp remains the only spelling authority.
+/// Generated compatibility projection of admitted surface spellings to opaque Sens8
+/// tokens. Canonical semantic identity is domain-qualified; semantic-registry.lisp remains spelling authority only.
 pub const META_SEMANTIC_REGISTRY_SOURCE: &str =
     include_str!("../../../lib/generated/meta-semantic-registry.lisp");
 
