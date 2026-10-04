@@ -1,40 +1,37 @@
-# Повний clean-room кандидат D4 — #3225
+# Мінімальний історичний bootstrap-кандидат D4 — #3225
 
-Повний дослідницький кандидат 16/16, виведений лише з ратифікованих D1–D3 та локальних законів D4-волокон.
+Історія може пропонувати capabilities, але старі координати не мають жодної влади.
 
-**Не ратифіковано.** Історичні таблиці D4/SID8/Sens8 заборонені як premises.
+Фільтр: залишаємо лише можливості, потрібні історичному/self-host bootstrap, та стабільні похідні residents; історичні механізми й зайві зручності окремих identities не отримують.
 
 ```text
-0000  GROUND?
-0001  COALESCE
-0010  ABSTRACT
-0011  ENTER
-0100  COMPOSITE?
-0101  EXECUTABLE?
-0110  CDAR
-0111  CDDR
-1000  CAAR
-1001  CADR
-1010  ASSOC-READ
-1011  ASSOC-WRITE
-1100  DISPATCH
-1101  REENTER
-1110  COLLECT
-1111  MAP-BUILD
+0000 APPLY
+0001 EVAL
+0010 LAMBDA
+0011 DEFINE
+0100 NOT
+0101 UNALLOCATED
+0110 CDAR
+0111 CDDR
+1000 CAAR
+1001 CADR
+1010 LOOKUP
+1011 BIND
+1100 EVCON
+1101 EVLIS
+1110 LIST
+1111 UNALLOCATED
 ```
 
-Локальні закони волокон:
-- EMPTY -> спостереження ground / fallback-відновлення;
-- QUOTE -> побудова відкладеної виконуваної поведінки / входження в представлену семантику;
-- ATOM -> завершення поточного поділу видів / спостереження нового executable-carrier;
-- CDR/CAR -> композиція селекторів;
-- EQ -> читання/запис асоціації за точною identity-key;
-- COND -> скінченний dispatch / необмежений re-entry;
-- CONS -> скінченне збирання / рекурсивне transform-and-build.
+Чому саме такі волокна нового ратифікованого D3:
+- EMPTY -> APPLY/EVAL: виконання вже вирішеного callable проти контекстної інтерпретації;
+- QUOTE -> LAMBDA/DEFINE: executable abstraction проти стійкого іменованого binding;
+- ATOM -> NOT + порожнє місце: похідний предикат; другої необхідної capability немає;
+- CDR/CAR -> доведений закон композиції селекторів;
+- EQ -> LOOKUP/BIND: читання/запис середовища за exact identity;
+- COND -> EVCON/EVLIS: helpers умовного та спискового evaluator;
+- CONS -> LIST + порожнє місце: повторне конструювання; другої необхідної capability немає.
 
-Дисципліна статусів:
-- селектори вже породжені законом;
-- REENTER має clean-room lower-bound witness (#3230/#3233);
-- ABSTRACT проходить незалежну clean-room перевірку (#3229);
-- усі інші нові рядки лишаються кандидатами, доки їхній fibre-witness не пройде;
-- жоден posterior historical match не створює semantic authority.
+Новими irreducible bootstrap capabilities вважаємо лише LAMBDA і DEFINE. Решта — generated/derived residents. Дві дірки навмисні.
+
+LABEL, FUNCTION/FUNARG, EVALQUOTE, PAIRLIS, ASSOC, APPEND та інші не отримують D4 identities, бо наші дослідження класифікували їх як derived або mechanism-only.
