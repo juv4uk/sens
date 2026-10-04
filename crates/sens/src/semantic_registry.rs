@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -26,6 +26,7 @@ pub(crate) type SemanticId = Sens8;
 pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
     let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+    let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
     match byte {
         0b0000_0001 => Some(d3(0b001)), // QUOTE
         0b0000_0010 => Some(d3(0b010)), // ATOM
@@ -41,14 +42,24 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0011_0011 => Some(d4(0b1010)), // CAAR
         0b0011_0100 => Some(d4(0b1011)), // CADR
         0b0011_0101 => Some(d4(0b1101)), // CDDR
+
+        // Explicit one-way compatibility delegation for Lisp-owned D5 list
+        // and search roles. The historical byte selects only a known role;
+        // canonical identity remains the ratified D5 coordinate.
+        0b0010_1001 => Some(d5(0b10000)), // APPEND
+        0b0010_1010 => Some(d5(0b10001)), // REVERSE
+        0b0010_1100 => Some(d5(0b11101)), // MEMBER
+        0b0010_1101 => Some(d5(0b11100)), // ASSOC
         _ => None,
     }
 }
 
-/// Transitional canonical lookup. #2947 removes this legacy-byte detour and
-/// replaces it with the exact-domain surface registry.
+/// Canonical callable lookup from the exact-domain surface projection.
+///
+/// Surface -> exact DomainIdentity happens without any historical byte.
+/// The Core projection is a downstream callable-boundary decision.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
+    crate::domain_surface_registry::core_identity_for_surface(name)
 }
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
@@ -57,14 +68,6 @@ pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
 fn live_rows() -> &'static [SemanticRow] {
     SEMANTIC_ROWS
 }
-
-fn registry_byte_for_surface(name: &str) -> Option<u8> {
-    live_rows()
-        .iter()
-        .find(|row| row.surfaces.iter().any(|surface| surface.name == name))
-        .map(|row| row.semantic_id)
-}
-
 
 pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
     live_rows()
@@ -195,19 +198,27 @@ mod tests {
     }
 
     #[test]
-    fn unmigrated_registry_rows_have_no_fake_domain_identity() {
-        assert_eq!(domain_identity_for_surface("+"), None);
+    fn migrated_d5_surface_projects_directly_to_exact_domain_identity() {
+        let plus = domain_identity_for_surface("+").expect("plus exact D5 identity");
+        assert_eq!((plus.width(), plus.packed_bits()), (5, 0b01010));
     }
 
     #[test]
-    fn canonical_domain_lookup_uses_registry_byte_without_sens8_round_trip() {
+    fn canonical_surface_lookup_is_independent_of_legacy_byte_projection() {
+        let cond = domain_identity_for_surface("за-умовою").expect("D3 cond identity");
+        let define = domain_identity_for_surface("функція").expect("D4 lambda identity");
+        assert_eq!((cond.width(), cond.packed_bits()), (3, 0b011));
+        assert_eq!((define.width(), define.packed_bits()), (4, 0b0010));
+
+        // A historical registry byte may still delegate one-way to an already
+        // known canonical role, but canonical lookup above never depends on it.
         assert_eq!(
-            registry_byte_for_surface("за-умовою").and_then(legacy_domain_identity_from_registry_byte),
-            domain_identity_for_surface("за-умовою")
+            legacy_domain_identity_from_registry_byte(0b0000_0111),
+            Some(cond)
         );
         assert_eq!(
-            registry_byte_for_surface("функція").and_then(legacy_domain_identity_from_registry_byte),
-            domain_identity_for_surface("функція")
+            legacy_domain_identity_from_registry_byte(0b0000_1000),
+            Some(define)
         );
     }
 

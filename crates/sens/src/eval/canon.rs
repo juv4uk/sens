@@ -538,4 +538,38 @@ mod tests {
         assert!(ensure_bindable("+", span).is_err());
         assert!(ensure_bindable("-", span).is_err());
     }
+
+    #[test]
+    fn exact_d5_surface_definition_binds_domain_slot() {
+        let mut session = crate::Session::default();
+        crate::eval_program(
+            "(00001001 append (00001000 (left right) left))",
+            &mut session,
+        )
+        .expect("language definition");
+        let identity = crate::semantic_registry::domain_identity_for_surface("append")
+            .expect("append exact D5 identity");
+        assert_eq!((identity.width(), identity.packed_bits()), (5, 0b10000));
+        assert!(session.environment.domain_code_slot(identity).is_some());
+    }
+
+    #[test]
+    fn active_core_binds_d5_list_search_domain_slots() {
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("active Core");
+        for (surface, bits) in [
+            ("append", 0b10000),
+            ("reverse", 0b10001),
+            ("assoc", 0b11100),
+            ("member?", 0b11101),
+        ] {
+            let identity = crate::semantic_registry::domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("missing exact domain surface: {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
+            assert!(
+                session.environment.domain_code_slot(identity).is_some(),
+                "active Core did not bind {surface} to D5:{bits:05b}"
+            );
+        }
+    }
 }

@@ -13,11 +13,10 @@ mod bits;
 mod canonical_reader;
 mod domain_words;
 mod domain_identity;
-// #2958/#3029: generated full D1-D8 occupancy identity is a conformance
-// artifact until the canonical registry consumer lands. It carries no
-// role/callability/mechanism authority.
-#[cfg(test)]
+// #3029/#3064 CURRENT occupancy is a production input for exact-domain
+// projections. It carries occupancy only; no role/callability/mechanism.
 mod domain_owner_generated;
+mod domain_surface_registry;
 mod packed_bits;
 mod binary_framing;
 mod environment;
