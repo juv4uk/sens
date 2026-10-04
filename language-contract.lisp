@@ -1,6 +1,6 @@
 ; language-contract.lisp — current machine-readable Level 1/2 contract.
 ;
-; Contract 11.0 — domain-qualified identity authority.
+; Contract 11.1 — domain-qualified identity authority + owner-ratified bīja3 A.
 ; Owner paradigm: #2490. Implementation cutover: #2817 / #2822.
 ;
 ; Contract 11 preserves the observable PredicateBit / ATOM / EQ / COND law
@@ -19,11 +19,11 @@
 ; bounded compatibility / transport / backend projection during migration.
 ; It cannot mint or redefine canonical semantic identity.
 
-((major . #d11) (minor . 0)
+((major . #d11) (minor . 1)
  (status . current-domain-qualified-authority)
  (supersedes . "Contract 10.0 flat Function8 identity authority")
  (historical-snapshot . "docs/archive/historical/language-contract-10.0.lisp")
- (note . "Contract 11.0 implements #2490/#2817/#2822. Canonical semantic identity is an exact binary object in an exact domain under a proved or ratified law. Contract 10 observable PredicateBit/ATOM/EQ/COND behavior is preserved; the flat 256-slot Function8/Sens8 ontology is now compatibility/history only.")
+ (note . "Contract 11.1 keeps the domain-qualified identity law from #2490/#2817/#2822 and owner-ratifies D3/bīja3 A in #3202 from the L1-L5 witnesses #3194/#3196/#3200. Contract 10 observable PredicateBit/ATOM/EQ/COND behavior is preserved while their canonical D3 coordinates follow the #3202 map. Historical flat Function8/Sens8 remains compatibility/history only.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((binary-domain-identity
@@ -43,7 +43,9 @@
       (structure-two-bit
        . "Core.D2 racana2 is exact two-bit structural syntax under its ratified law: 00 separator, 01 close, 10 open, 11 dot. These are structure-domain objects, not numeric or callable identities merely because they are binary.")
       (d3-foundation
-       . "Core.D3 bija3 is the exact three-bit foundation: 000 structural empty (), 001 QUOTE, 010 ATOM, 011 COND, 100 CONS, 101 CAR, 110 CDR, 111 EQ. Human role names are documentation projections. Historical exact-eight-bit forms are role-aware compatibility projections only.")
+       . "Core.D3 bīja3 is the owner-ratified exact three-bit foundation (#3202): 000 structural empty (), 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS. Human role names are documentation projections. Historical exact-eight-bit forms are role-aware compatibility projections only.")
+      (d3-l1-l5-constitution
+       . "The D3 map is fixed by the owner-ratified L1-L5 stack: L1 000 is structural empty; L2 D3 preserves exact D2 prefix fibres 00→()/QUOTE, 01→ATOM/CDR, 10→CAR/EQ, 11→COND/CONS; L3 one uniform semantic duality covers ()↔CONS, QUOTE↔COND, ATOM↔EQ, CDR↔CAR; L4 that D3 dual is XOR 111, recursively matching D1 XOR 1 and D2 XOR 11; L5 orients suffix-0 as the evaluator/metalinguistic spine ()→ATOM→CAR→COND. This law supersedes every previous current D3 coordinate ordering; old orderings survive only as historical/provenance evidence.")
       (d4-bootstrap
        . "Core.D4 is the exact four-bit bootstrap domain ratified by #2169. Its resident coordinates execute only under D4 law; 0101 and 1001 remain unallocated. No historical Function8 identity may be reconstructed from a D4 word by bit-shape coincidence.")
       (d5-d6-residency
@@ -57,9 +59,9 @@
       (atom-one-bit-core1-4
        . "Core.D3 010 ATOM has one law across Core1/Core2/Core3/Core4: structural empty () and every admitted non-pair value answer PredicateBit 1; pair answers PredicateBit 0. Structural () is an ATOM-yes subject, not a truth value. Historical Function8 00000010 is compatibility projection only.")
       (eq-one-bit-core1-4
-       . "Core.D3 111 EQ has one law across Core1/Core2/Core3/Core4: the same admitted atom answers PredicateBit 1; distinct admitted atoms answer PredicateBit 0; pair/out-of-domain input raises the named domain/type failure. EQ is not deep structural equality. Historical Function8 00000011 is compatibility projection only.")
+       . "Core.D3 101 EQ has one law across Core1/Core2/Core3/Core4: the same admitted atom answers PredicateBit 1; distinct admitted atoms answer PredicateBit 0; pair/out-of-domain input raises the named domain/type failure. EQ is not deep structural equality. Historical Function8 00000011 is compatibility projection only.")
       (cond-two-part-core1-4
-       . "Core.D3 011 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and must return exact PredicateBit. PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips it. If no clause selects, COND returns structural (). Structural () is not a predicate answer. Historical Function8 00000111 is compatibility projection only.")
+       . "Core.D3 110 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and must return exact PredicateBit. PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips it. If no clause selects, COND returns structural (). Structural () is not a predicate answer. Historical Function8 00000111 is compatibility projection only.")
       (core-profile-law
        . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D8 semantic domains or the D1/D3 predicate-control foundation.")
       (kernel-archipelago
@@ -71,7 +73,7 @@
       (reader-decimal-separator
        . "Dot and comma are equivalent decimal separators only for otherwise valid finite decimal/base-10 scientific numeric input. Numeric projection never creates Core domain identity.")
       (error-classification
-       . "Named error categories remain observable where separately admitted, but UnsatisfiedConditional is not the exhaustion law of Core.D3 011 COND. Any remaining three-part COND or alternate exhaustion behavior is migration/history debt, not alternate current law.")
+       . "Named error categories remain observable where separately admitted, but UnsatisfiedConditional is not the exhaustion law of Core.D3 110 COND. Any remaining three-part COND or alternate exhaustion behavior is migration/history debt, not alternate current law.")
       (structural-empty-non-alias
        . "Core.D3 000 structural empty is not historical exact-eight-bit 00000000 and is not PredicateBit 0 or Number zero. Equal packed numeric zero across domains never collapses those identities.")
       (migration-direction
