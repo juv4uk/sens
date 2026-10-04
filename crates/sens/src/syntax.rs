@@ -1,5 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
-use crate::{CoreDomainIdentity, DomainIdentity};
+use crate::{BinaryNumber, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 use std::rc::Rc;
 
@@ -49,6 +49,8 @@ pub enum Exactness {
 pub enum ExprKind {
     Number(f64, Exactness),
     Rational(Rational),
+    /// Canonical variable-width natural Number. Identity is the normalized bitstring.
+    BinaryNumber(BinaryNumber),
     NumericBuffer(NumericBuffer),
     /// Legacy exact-eight compatibility identity. New canonical Core identity
     /// uses `DomainIdentity`; this variant remains for historical parser,
@@ -121,6 +123,7 @@ pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 pub(crate) mod fasl {
     use super::{Exactness, Expr, ExprKind};
     use crate::value::{NumericBuffer, Rational};
+    use crate::BinaryNumber;
     use std::rc::Rc;
     use std::sync::Arc;
 
@@ -142,6 +145,8 @@ pub(crate) mod fasl {
     // #2840: domain-qualified Core identity, encoded as exact domain width
     // followed by its packed payload. Old decoders fail closed on this tag.
     const TAG_DOMAIN_IDENTITY: u8 = 11;
+    // #3022: canonical variable-width natural Number, encoded as exact bits.
+    const TAG_BINARY_NUMBER: u8 = 12;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -200,6 +205,11 @@ pub(crate) mod fasl {
             ExprKind::Rational(rational) => {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
+            }
+            ExprKind::BinaryNumber(number) => {
+                out.push(TAG_BINARY_NUMBER);
+                put_u32(out, number.width() as u32);
+                out.extend_from_slice(number.as_bits());
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
@@ -286,6 +296,12 @@ pub(crate) mod fasl {
                 ExprKind::Number(f64::from_le_bytes(bits.try_into().ok()?), exact)
             }
             TAG_RATIONAL => ExprKind::Rational(Rational::read_fasl(bytes, pos)?),
+            TAG_BINARY_NUMBER => {
+                let count = get_u32(bytes, pos)? as usize;
+                let raw = bytes.get(*pos..pos.checked_add(count)?)?;
+                *pos += count;
+                ExprKind::BinaryNumber(BinaryNumber::from_canonical_bits(raw).ok()?)
+            }
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
@@ -400,6 +416,7 @@ pub(crate) mod fasl {
 pub(crate) mod wire {
     use super::{Exactness, Expr, ExprKind, MAX_STRUCTURE_DEPTH};
     use crate::value::Rational;
+    use crate::BinaryNumber;
     use std::rc::Rc;
 
     const MAGIC: &[u8; 3] = b"SW\x01";
@@ -416,6 +433,7 @@ pub(crate) mod wire {
     const TAG_PAIR: u8 = 0x57;
     const TAG_LOCAL: u8 = 0x58;
     const TAG_DOMAIN_IDENTITY: u8 = 0x59;
+    const TAG_BINARY_NUMBER: u8 = 0x5A;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
 
@@ -515,6 +533,11 @@ pub(crate) mod wire {
             ExprKind::Rational(rational) => {
                 out.push(TAG_RATIONAL);
                 rational.write_fasl(out);
+            }
+            ExprKind::BinaryNumber(number) => {
+                out.push(TAG_BINARY_NUMBER);
+                put_varint(out, number.width() as u64);
+                out.extend_from_slice(number.as_bits());
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
@@ -687,6 +710,12 @@ pub(crate) mod wire {
                 ExprKind::Number(f64::from_le_bytes(bits.try_into().ok()?), exact)
             }
             TAG_RATIONAL => ExprKind::Rational(Rational::read_fasl(bytes, pos)?),
+            TAG_BINARY_NUMBER => {
+                let count = usize::try_from(get_varint(bytes, pos)?).ok()?;
+                let raw = bytes.get(*pos..pos.checked_add(count)?)?;
+                *pos += count;
+                ExprKind::BinaryNumber(BinaryNumber::from_canonical_bits(raw).ok()?)
+            }
             TAG_STRING => ExprKind::String(get_text(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_text(bytes, pos)?.into()),
             _ => return None,
