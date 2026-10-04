@@ -100,7 +100,7 @@ fn source_spelling<'a>(source: &'a str, expression: &Expr) -> Option<&'a str> {
 
 fn is_exact_quote(expression: &Expr) -> bool {
     matches!(
-        expression.kind,
+        &expression.kind,
         ExprKind::DomainIdentity(identity)
             if identity.width() == 3 && identity.packed_bits() == 0b001
     )
@@ -126,7 +126,7 @@ mod tests {
             panic!("expected list");
         };
         assert!(matches!(
-            items[0].kind,
+            &items[0].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 4 && identity.packed_bits() == 0b0010
         ));
@@ -134,13 +134,13 @@ mod tests {
         let ExprKind::List(params) = &items[1].kind else {
             panic!("expected parameter list");
         };
-        assert!(matches!(params[0].kind, ExprKind::Symbol(ref name) if &**name == "x"));
+        assert!(matches!(&params[0].kind, ExprKind::Symbol(name) if &**name == "x"));
 
         let ExprKind::List(body) = &items[2].kind else {
             panic!("expected body call");
         };
         assert!(matches!(
-            body[0].kind,
+            &body[0].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 3 && identity.packed_bits() == 0b100
         ));
@@ -169,7 +169,7 @@ mod tests {
         let ExprKind::List(items) = expression.kind else {
             panic!("expected list");
         };
-        assert!(matches!(items[2].kind, ExprKind::Number(value, _) if value == 100.0));
+        assert!(matches!(&items[2].kind, ExprKind::Number(value, _) if *value == 100.0));
     }
 
     #[test]
@@ -179,11 +179,11 @@ mod tests {
             panic!("expected list");
         };
         assert!(matches!(
-            items[0].kind,
+            &items[0].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 3 && identity.packed_bits() == 0b001
         ));
-        assert!(matches!(items[1].kind, ExprKind::Number(value, _) if value == 100.0));
+        assert!(matches!(&items[1].kind, ExprKind::Number(value, _) if *value == 100.0));
     }
 
     #[test]
@@ -194,7 +194,7 @@ mod tests {
         let ExprKind::List(items) = expression.kind else {
             panic!("expected list");
         };
-        assert!(matches!(items[0].kind, ExprKind::Sid(_)));
+        assert!(matches!(&items[0].kind, ExprKind::Sid(_)));
 
         let lowered = only(lower_program(&[Expr {
             kind: ExprKind::List(items),
@@ -219,7 +219,7 @@ mod tests {
             panic!("expected list");
         };
         assert!(matches!(
-            items[0].kind,
+            &items[0].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 5 && identity.packed_bits() == 0
         ));
