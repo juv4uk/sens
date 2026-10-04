@@ -7,10 +7,10 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.3 domain-qualified observable language contract.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.4 D1–D5 foundation contract.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are D1-D5 and D7. D5 is re-ratified by #3305 after the #3278 reset; D6/D8 remain UNRATIFIED/RESEARCH under #3278. Historical Sens8/Sid8 is compatibility/provenance only.
+   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are exactly D1–D5 under owner foundation #3331. D6–D8 remain UNRATIFIED/RESEARCH; their exact carriers are mechanical/research only. Historical Sens8/Sid8 is compatibility/provenance only.
 2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
 3. **Reference implementation and substrates**
    - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
@@ -37,15 +37,15 @@ D1  PredicateBit
 D2  racana2 structure
 D3  bīja3 foundation — 000 (), 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS
 D4  full compact bootstrap — 0000 APPLY, 0001 EVAL, 0010 LAMBDA, 0011 DEFINE, 0100 NOT, 0101 NULL, 0110 CDAR, 0111 CDDR, 1000 CAAR, 1001 CADR, 1010 LOOKUP, 1011 BIND, 1100 EVCON, 1101 EVLIS, 1110 LIST, 1111 APPEND
-D5  full compact 32/32 — owner-ratified #3305; canonical map in knowledge/d5-ratified.json
+D5  full compact 32/32 — owner-ratified #3331 via #3305/#3330; canonical map in knowledge/d5-ratified.json
 D6  UNRATIFIED / RESEARCH — clean-room rebuild #3280
-D7  Sound7 + local śloka/sūtra ordinal domain
+D7  UNRATIFIED / RESEARCH — Sound7 evidence retained as research/provenance
 D8  UNRATIFIED / RESEARCH — clean-room rebuild #3281
 ```
 
-Owner ratification #3202 fixes the D3/bīja3 A map above under laws L1–L5. Owner ratification #3272 fixes the full compact D4 16/16 map above; intermediate clean-room D4 maps are research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
+Owner foundation ratification #3331 restores and freezes D1–D5 as one current chain: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330. #3327 is superseded for D3–D5 but remains the reset boundary for D6–D8. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
 
-Equal packed bits in two domains do not imply equal identity. In particular an eight-bit D8 research carrier is not historical Sens8 merely because both occupy eight physical bits. D7 is Sound7/local-ordinal identity and does not inherit selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
+Equal packed bits in two domains do not imply equal identity. In particular an eight-bit D8 research carrier is not historical Sens8 merely because both occupy eight physical bits. D7 Sound7/local-ordinal material is currently research/provenance only and does not inherit selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
 
 Historical exact-eight-bit Sens8/Sid8/Function8 forms remain bounded compatibility, transport, backend and provenance mechanisms while #2817 migrates runtime consumers. They are not current universal semantic authority.
 
