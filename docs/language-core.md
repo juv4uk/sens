@@ -87,14 +87,47 @@ PredicateBit не є Number, host Bool, T/NIL або structural empty.
 000  structural empty ()
 001  QUOTE
 010  ATOM
-011  COND
-100  CONS
-101  CAR
-110  CDR
-111  EQ
+011  CDR
+100  CAR
+101  EQ
+110  COND
+111  CONS
 ```
 
 Назви — documentation/surface projections. Canonical identity — точна D3 coordinate під D3 law.
+
+### Ратифікована конституція L1–L5 (#3202)
+
+```text
+L1  000 = ()
+L2  D3 = exact D2-prefix fibre + one child bit
+L3  one uniform semantic duality on D3
+L4  dual3(x) = x XOR 111
+L5  suffix-0 = evaluator/metalinguistic spine
+```
+
+D2-prefix fibres:
+
+```text
+00 → ()    / QUOTE
+01 → ATOM  / CDR
+10 → CAR   / EQ
+11 → COND  / CONS
+```
+
+D3 semantic duals:
+
+```text
+()    ↔ CONS
+QUOTE ↔ COND
+ATOM  ↔ EQ
+CDR   ↔ CAR
+```
+
+Suffix-0 spine: `() → ATOM → CAR → COND`.
+Suffix-1 companion side: `QUOTE → CDR → EQ → CONS`.
+
+L1–L4 звужують повний простір перестановок до двох орієнтацій; L5 є окремою ратифікованою аксіомою орієнтації, що вибирає цю карту.
 
 ### Predicate/control law
 
@@ -116,6 +149,8 @@ D4 — exact four-bit bootstrap domain.
 LAMBDA та DEFINE належать bootstrap-рівню. Selector descendants можуть бути породжені з selector law.
 
 Unallocated coordinates не отримують значення через схожість бітів.
+
+**Transition after #3202:** старі D4 selector addresses, виведені з попередніх D3 roots, більше не є чинним derivation source. Production selector regeneration from `CAR=100 / CDR=011` is tracked in #3204; до завершення cutover жодна стара selector address не створює альтернативної D3 семантики.
 
 ---
 
@@ -173,22 +208,22 @@ Selector positive control:
 
 ```text
 roots:
-101 = CAR
-110 = CDR
+100 = CAR
+011 = CDR
 
 laws:
-suffix 0 = compose CAR
-suffix 1 = compose CDR
+suffix 0 = compose CAR / A
+suffix 1 = compose CDR / D
 ```
 
 Звідси:
 
 ```text
-D4:
-1010 CAAR
-1011 CADR
-1100 CDAR
-1101 CDDR
+D4 migration target derived from the ratified roots:
+1000 CAAR
+1001 CADR
+0110 CDAR
+0111 CDDR
 ```
 
 і далі родина продовжується за тим самим законом у ширших доменах, де цей law admitted.

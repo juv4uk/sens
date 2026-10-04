@@ -1,0 +1,25 @@
+name: bīja3 current authority
+
+on:
+  pull_request:
+    paths:
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "docs/language-core.md"
+      - "contracts/bija3-l1-l5-ratification.lisp"
+      - "scripts/check-bija3-current-authority.py"
+      - ".github/workflows/bija3-current-authority.yml"
+  push:
+    branches: [main]
+    paths:
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "docs/language-core.md"
+      - "contracts/bija3-l1-l5-ratification.lisp"
+
+jobs:
+  authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-bija3-current-authority.py

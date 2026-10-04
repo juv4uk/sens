@@ -7,7 +7,7 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.0 domain-qualified observable language contract.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.1 domain-qualified observable language contract.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
    - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`; current Core domains D1-D8 are width-qualified, while historical Sens8/Sid8 is compatibility/provenance only.
@@ -35,13 +35,15 @@ Current Core examples:
 ```text
 D1  PredicateBit
 D2  racana2 structure
-D3  bija3 foundation
+D3  bīja3 foundation — 000 (), 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS
 D4  bootstrap domain
 D5  owner-ratified five-bit domain
 D6  owner-ratified six-bit domain
 D7  Sound7 + local śloka/sūtra ordinal domain
 D8  owner-ratified exact eight-bit Core domain
 ```
+
+Owner ratification #3202 fixes the D3/bīja3 A map above under laws L1–L5. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203–#3206, not an alternate language law.
 
 Equal packed bits in two domains do not imply equal identity. In particular Core.D8 is not historical Sens8 merely because both occupy eight physical bits. D7 is Sound7/local-ordinal identity and does not inherit selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
 
