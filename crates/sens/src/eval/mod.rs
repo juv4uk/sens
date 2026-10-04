@@ -484,7 +484,7 @@ mod single_pass_eval_tests {
               (lambda (n)
                 (cond
                   ((eq? n 0) (quote done))
-                  ((eq? n n) (count-down (- n 1))))))
+                  ((тотожне? n n) (count-down (- n 1))))))
             (count-down 1000)
         "#;
         let mut session = Session::default();
