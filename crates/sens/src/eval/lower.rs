@@ -37,7 +37,8 @@ fn head_domain_identity(head: &Expr) -> Option<CoreDomainIdentity> {
 }
 
 fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
-    necessary_forms::domain_identity_for_symbol(name)
+    crate::resolve_human_surface(name)
+        .or_else(|| necessary_forms::domain_identity_for_symbol(name))
         .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
 
@@ -193,15 +194,20 @@ mod tests {
 
     #[test]
     fn migrated_d3_surfaces_lower_to_exact_domain_calls() {
-        // Use already-admitted Ukrainian projections so this witness proves
-        // domain routing without reinstalling an English spelling as identity.
-        assert_domain_call("(як-є x)", 3, 0b001);
-        assert_domain_call("(атом? x)", 3, 0b010);
-        assert_domain_call("(за-умовою (x y))", 3, 0b011);
-        assert_domain_call("(сполучити 1 2)", 3, 0b100);
-        assert_domain_call("(перше x)", 3, 0b101);
-        assert_domain_call("(решта x)", 3, 0b110);
-        assert_domain_call("(тотожне? x y)", 3, 0b111);
+        // Ukrainian and Sanskrit are peer projections of the same exact D3
+        // identities; neither passes through English or legacy byte identity.
+        for (ukrainian, sanskrit, bits) in [
+            ("(як-є x)", "(svarūpa x)", 0b001),
+            ("(атом? x)", "(aṇu x)", 0b010),
+            ("(за-умовою (x y))", "(anukrama (x y))", 0b011),
+            ("(сполучити 1 2)", "(saṃyuj 1 2)", 0b100),
+            ("(перше x)", "(ādi x)", 0b101),
+            ("(решта x)", "(śeṣa x)", 0b110),
+            ("(тотожне? x y)", "(abheda x y)", 0b111),
+        ] {
+            assert_domain_call(ukrainian, 3, bits);
+            assert_domain_call(sanskrit, 3, bits);
+        }
     }
 
     #[test]
