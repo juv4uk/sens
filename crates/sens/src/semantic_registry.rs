@@ -70,6 +70,27 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
 }
+/// Transitional spelling projection for already-migrated exact-domain roles.
+///
+/// The flat registry supplies spelling only; exact-domain identity comes from
+/// the explicit migration bridge. The canonical registry will replace this
+/// projection without changing selector consumers.
+pub(crate) fn domain_surface_bindings() -> Vec<(&'static str, CoreDomainIdentity)> {
+    let mut bindings = live_rows()
+        .iter()
+        .filter_map(|row| {
+            legacy_domain_identity_from_registry_byte(row.semantic_id)
+                .map(|identity| (identity, row.surfaces))
+        })
+        .flat_map(|(identity, surfaces)| {
+            surfaces.iter().map(move |surface| (surface.name, identity))
+        })
+        .collect::<Vec<_>>();
+    bindings.sort_unstable_by(|left, right| left.0.cmp(right.0));
+    bindings.dedup();
+    bindings
+}
+
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
 }
