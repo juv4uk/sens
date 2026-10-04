@@ -190,13 +190,15 @@ pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
 /// therefore does not belong in this capability-free core crate.
 pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 
-/// The current Core4 sens bootstrap library, evaluated after the macro layer.
-pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
+/// The one active SENS Core bootstrap library, evaluated after the macro layer.
+///
+/// Numbered Core sources remain historical/laboratory evidence; active runtime
+/// language authority enters through lib/core.lisp.
+pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
 
-/// Parse-output кеш для точного вбудованого Core4 source. Це лише bootstrap-
-/// оптимізація: hash source перевіряється перед використанням, а stale/invalid
-/// bytes переходять на parsing CORE_LIBRARY_SOURCE.
-const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
+/// Parse-output cache for the exact embedded active Core source. The source
+/// hash is checked before use; stale/invalid bytes fall back to parsing source.
+const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core.lisp.fasl");
 
 /// Generated runtime projection of admitted surface spellings to opaque Sens8
 /// identities. semantic-registry.lisp remains the only spelling authority.
@@ -562,6 +564,50 @@ mod core4_bootstrap_cache_tests {
             Some(CoreProfile::Core4)
         );
         assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
+    }
+
+    #[test]
+    fn active_core_fasl_is_exact_parse_projection() {
+        let parsed = parse(CORE_LIBRARY_SOURCE).expect("active Core parses");
+        let source_hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
+        let canonical_fasl = fasl_encode(&parsed, &source_hash);
+
+        let (decoded, decoded_hash) =
+            fasl_decode_program(CORE_LIBRARY_FASL).expect("active Core FASL decodes");
+
+        assert_eq!(decoded_hash, source_hash);
+        assert_eq!(
+            fasl_encode(&decoded, &decoded_hash),
+            canonical_fasl,
+            "active Core FASL must be an exact parse projection"
+        );
+    }
+
+    #[test]
+    fn active_core_fasl_and_text_execute_raw_foundation_equally() {
+        let expressions = parse(CORE_LIBRARY_SOURCE).expect("active Core parses");
+        let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
+        let fasl = fasl_encode(&expressions, &hash);
+
+        let mut via_fasl = Session::default();
+        load_core_library_with_fasl(&mut via_fasl, &fasl).expect("valid active-Core FASL");
+
+        let mut via_text = Session::default();
+        load_core_library_with_fasl(&mut via_text, b"force-text-fallback")
+            .expect("active-Core text fallback");
+
+        for source in [
+            "(00000011 2 2)",
+            "(00000011 2 3)",
+            "(00000111 ((00000011 2 2) 111) ((00000011 0 0) 222))",
+            "(00000111 ((00000011 2 3) 111) ((00000011 0 0) 222))",
+        ] {
+            assert_eq!(
+                result_of(&mut via_fasl, source),
+                result_of(&mut via_text, source),
+                "FASL/text bootstrap paths must execute the same raw foundation program"
+            );
+        }
     }
 
     #[test]
