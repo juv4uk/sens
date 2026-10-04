@@ -139,7 +139,8 @@ pub use source_words::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
 };
 pub use source_packing::{
-    append_binary_source_word, pack_binary_source_tokens, unpack_binary_source_words,
+    append_binary_source_word, pack_binary_source_tokens, packed_transport_accounting,
+    unpack_binary_source_words, PackedTransportAccounting,
 };
 pub use text7::{Text7, Text7CellError, Text7WireError};
 pub use text7_projection::{
