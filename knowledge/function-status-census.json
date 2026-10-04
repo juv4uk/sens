@@ -46,9 +46,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3202/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "()"
     },
     {
@@ -61,9 +61,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3202/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "QUOTE"
     },
     {
@@ -76,9 +76,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3202/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "ATOM"
     },
     {
@@ -91,9 +91,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3202/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CDR"
     },
     {
@@ -106,9 +106,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3202/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CAR"
     },
     {
@@ -121,9 +121,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3202/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "EQ"
     },
     {
@@ -136,9 +136,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3202/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "COND"
     },
     {
@@ -151,9 +151,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3202/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CONS"
     },
     {
@@ -166,9 +166,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "APPLY"
     },
     {
@@ -181,9 +181,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "EVAL"
     },
     {
@@ -196,9 +196,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "LAMBDA"
     },
     {
@@ -211,9 +211,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "DEFINE"
     },
     {
@@ -226,9 +226,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "NOT"
     },
     {
@@ -241,9 +241,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "NULL"
     },
     {
@@ -256,9 +256,9 @@
       "search_grammar": "d3-selector-suffix-v2",
       "search_bound": 1,
       "independence_status": "derived",
+      "semantic_fact_refs": "#2055/#3202/#3272",
       "authority_ref": "#3272/#3029",
       "generator_ref": "#2055/#3272",
-      "semantic_fact_refs": "#2055/#3202/#3272",
       "human_surface_optional": "CDAR"
     },
     {
@@ -271,9 +271,9 @@
       "search_grammar": "d3-selector-suffix-v2",
       "search_bound": 1,
       "independence_status": "derived",
+      "semantic_fact_refs": "#2055/#3202/#3272",
       "authority_ref": "#3272/#3029",
       "generator_ref": "#2055/#3272",
-      "semantic_fact_refs": "#2055/#3202/#3272",
       "human_surface_optional": "CDDR"
     },
     {
@@ -286,9 +286,9 @@
       "search_grammar": "d3-selector-suffix-v2",
       "search_bound": 1,
       "independence_status": "derived",
+      "semantic_fact_refs": "#2055/#3202/#3272",
       "authority_ref": "#3272/#3029",
       "generator_ref": "#2055/#3272",
-      "semantic_fact_refs": "#2055/#3202/#3272",
       "human_surface_optional": "CAAR"
     },
     {
@@ -301,9 +301,9 @@
       "search_grammar": "d3-selector-suffix-v2",
       "search_bound": 1,
       "independence_status": "derived",
+      "semantic_fact_refs": "#2055/#3202/#3272",
       "authority_ref": "#3272/#3029",
       "generator_ref": "#2055/#3272",
-      "semantic_fact_refs": "#2055/#3202/#3272",
       "human_surface_optional": "CADR"
     },
     {
@@ -316,9 +316,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "LOOKUP"
     },
     {
@@ -331,9 +331,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "BIND"
     },
     {
@@ -346,9 +346,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "EVCON"
     },
     {
@@ -361,9 +361,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "EVLIS"
     },
     {
@@ -376,9 +376,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "LIST"
     },
     {
@@ -391,9 +391,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#3272/#3029",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "APPEND"
     },
     {
@@ -406,9 +406,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "EVALQUOTE"
     },
     {
@@ -421,9 +421,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "FUNCTION"
     },
     {
@@ -436,9 +436,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "FEXPR"
     },
     {
@@ -451,9 +451,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "MACRO"
     },
     {
@@ -466,9 +466,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "LABEL"
     },
     {
@@ -481,9 +481,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "PROG"
     },
     {
@@ -496,9 +496,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "SET"
     },
     {
@@ -511,9 +511,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "SETQ"
     },
     {
@@ -526,9 +526,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "ZEROP"
     },
     {
@@ -541,9 +541,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "NUMBERP"
     },
     {
@@ -556,9 +556,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "PLUS"
     },
     {
@@ -571,9 +571,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "DIFFERENCE"
     },
     {
@@ -586,9 +586,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "GO"
     },
     {
@@ -601,9 +601,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "RETURN"
     },
     {
@@ -616,9 +616,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "LESSP"
     },
     {
@@ -631,9 +631,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "GREATERP"
     },
     {
@@ -646,9 +646,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "APPEND"
     },
     {
@@ -661,9 +661,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "REVERSE"
     },
     {
@@ -676,9 +676,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "TIMES"
     },
     {
@@ -691,9 +691,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "QUOTIENT"
     },
     {
@@ -706,9 +706,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CAAAR"
     },
     {
@@ -721,9 +721,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CAADR"
     },
     {
@@ -736,9 +736,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CADAR"
     },
     {
@@ -751,9 +751,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CADDR"
     },
     {
@@ -766,9 +766,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CDAAR"
     },
     {
@@ -781,9 +781,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CDADR"
     },
     {
@@ -796,9 +796,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CDDAR"
     },
     {
@@ -811,9 +811,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "CDDDR"
     },
     {
@@ -826,9 +826,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "ASSOC"
     },
     {
@@ -841,9 +841,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "MEMBER"
     },
     {
@@ -856,9 +856,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "PAIRLIS"
     },
     {
@@ -871,9 +871,9 @@
       "search_grammar": null,
       "search_bound": null,
       "independence_status": "unknown",
+      "semantic_fact_refs": null,
       "authority_ref": "#2538/OD-005/#2762",
       "generator_ref": null,
-      "semantic_fact_refs": null,
       "human_surface_optional": "SUBST"
     }
   ]
