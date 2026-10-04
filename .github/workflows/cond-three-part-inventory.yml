@@ -1,0 +1,34 @@
+name: COND migration inventory
+
+on:
+  pull_request:
+    paths:
+      - "scripts/cond-three-part-inventory.py"
+      - ".github/workflows/cond-three-part-inventory.yml"
+  workflow_dispatch:
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Self-test scanner
+        run: python3 scripts/cond-three-part-inventory.py --self-test
+      - name: Generate inventory
+        run: |
+          mkdir -p /tmp/cond3170
+          python3 scripts/cond-three-part-inventory.py \
+            --json-out /tmp/cond3170/inventory.json \
+            --report-out /tmp/cond3170/report.md
+          cat /tmp/cond3170/report.md
+      - name: Summary
+        run: |
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/cond3170/inventory.json'))
+          print(json.dumps(d['summary'], ensure_ascii=False, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cond-three-part-inventory
+          path: /tmp/cond3170
