@@ -26,9 +26,8 @@ def main() -> int:
     text = SOURCE.read_text(encoding="utf-8")
     lowered = text.lower()
     for forbidden in ("sid8", "sens8", "function8"):
-        # The header intentionally names forbidden legacy classes once.
-        if lowered.count(forbidden) != 1:
-            fail(f"legacy token {forbidden!r} must appear only in the prohibition comment")
+        if forbidden in lowered:
+            fail(f"legacy token {forbidden!r} is forbidden in the new projection source")
 
     rows = []
     for line_number, line in enumerate(text.splitlines(), 1):
@@ -89,7 +88,7 @@ def main() -> int:
 
     print("D1-D4-SURFACE-GUARD: PASS")
     print("rows=30 d1=2 d2=4 d3=8 d4=16")
-    print("uk=unique sa=unique exact-width=preserved legacy-byte=forbidden")
+    print("uk=unique sa=unique exact-width=preserved legacy-byte=absent")
     return 0
 
 
