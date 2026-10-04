@@ -339,10 +339,13 @@ def best_by_role_coordinate(records, role: str):
 
 
 def best_by_resident_at_zero(records):
-    return {
-        role: min(score for score, p in records if p[role] == 0)
-        for role in ROLES
-    }
+    out = {}
+    for role in ROLES:
+        scores = [score for score, p in records if p[role] == 0]
+        # Constrained positive-control runs can pin a resident away from 000,
+        # so "no such placement" is data, not an exception.
+        out[role] = min(scores) if scores else None
+    return out
 
 
 def summarize_records(records, current=CURRENT):
