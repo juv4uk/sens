@@ -613,7 +613,7 @@
       (#b1100110 #b1111 #b111010 #b1000100 #b1010100 #b100100 0 #b10000))
      ((encode pclmulqdq-xmm-mem-disp8-imm8-rex)
       (x86-encode-pclmulqdq-xmm-mem-disp8-imm8
-        'xmm8 'r12 #b-10000 1)
+        'xmm8 'r12 #d-16 1)
       (#b1100110 #b1000101 #b1111 #b111010 #b1000100 #b1000100
        #b100100 #b11110000 1))
      ((admission pclmulqdq-register-valid)
@@ -622,7 +622,7 @@
       t)
      ((admission pclmulqdq-memory-valid)
       (x86-admitted-instruction?
-        '(pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #b-10000 1))
+        '(pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #d-16 1))
       t)
      ((admission pclmulqdq-uimm8-overflow)
       (x86-admitted-instruction?
@@ -635,7 +635,7 @@
      ((encode pclmulqdq-admitted-program)
       (x86-encode-admitted-program
         '((pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #b10001)
-          (pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #b-10000 1)))
+          (pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #d-16 1)))
       (#b1100110 #b1111 #b111010 #b1000100 #b11000001 #b10001
        #b1100110 #b1000101 #b1111 #b111010 #b1000100 #b1000100
        #b100100 #b11110000 1))
