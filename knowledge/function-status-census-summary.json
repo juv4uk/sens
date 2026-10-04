@@ -1,0 +1,35 @@
+{
+  "schema": "function-status-census/v2",
+  "authority": "research-only",
+  "input_schema": "exact-width-admitted-corpus/v2",
+  "input_authority_refs": [
+    "#2151",
+    "#3202",
+    "#3272",
+    "#3278"
+  ],
+  "active_function_rows": 24,
+  "counts": {
+    "root": 0,
+    "generated": 4,
+    "residue": 0,
+    "UNKNOWN": 20
+  },
+  "generated_fraction_of_active_rows": 0.16666666666666666,
+  "registry_rows_potentially_derivable": 4,
+  "unclassified_upper_bound": 20,
+  "proven_independent_root_count": 0,
+  "bounded_residue_count": 0,
+  "status_law": {
+    "generated": "merged executable law + replayable certificate",
+    "root": "requires independence evidence; placement is insufficient",
+    "residue": "requires explicit bounded failure plus admitted necessity",
+    "UNKNOWN": "default when derivation/independence evidence is insufficient"
+  },
+  "non_conclusions": [
+    "generated fraction counts certified current D4 selector residents only",
+    "D5/D6/D8 are absent because #3278 revoked current semantic admission",
+    "UNKNOWN does not mean unoccupied or independent root",
+    "D5+ selector continuation is not claimed while #3209 is unresolved"
+  ]
+}
