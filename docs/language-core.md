@@ -1,14 +1,12 @@
 # SENS language core — exact-domain identity
 
-This document describes the current Contract 11 identity model.
+Цей документ описує технічну модель Contract 11.
 
-Historical flat SENS8 / SID8 / Function8 descriptions remain useful as
-provenance and compatibility evidence, but they are not current semantic
-authority.
+Для концептуального пояснення, чому SENS перейшов до domain-law growth, див. [`domain-paradigm.uk.md`](domain-paradigm.uk.md).
 
 ## Canonical semantic identity
 
-A canonical SENS semantic object is:
+Канонічний semantic object:
 
 ```text
 exact binary object
@@ -16,21 +14,19 @@ exact binary object
 + proved / ratified law
 ```
 
-Bits alone do not carry meaning. Width alone does not grant occupancy,
-callability or semantic membership.
+Bits не несуть значення самі по собі. Width не надає occupancy, callability чи semantic membership.
 
-Equal packed payloads in different domains are distinct identities.
+Однаковий packed payload у різних доменах — різні identity:
 
 ```text
 D3 001 != D4 0001 != D5 00001 != D6 000001
 ```
 
-No zero-padding, truncation, low-bit extraction or integer equality may create
-or recover domain identity.
+Zero-padding, truncation, low-bit extraction або integer equality не можуть створити чи відновити domain identity.
+
+---
 
 ## Current ratified domain ladder
-
-The current ratified exact-width language ladder is:
 
 ```text
 D1  exact one-bit PredicateBit
@@ -39,22 +35,25 @@ D3  exact three-bit Core foundation
 D4  exact four-bit bootstrap
 D5  exact five-bit typed domain
 D6  exact six-bit typed domain
-D7  exact seven-bit Sound7 / provenance domain
-D8  exact eight-bit domain boundary
+D7  exact seven-bit sound/text provenance domain
+D8  exact eight-bit Core domain
 ```
 
-The ratified identity model requires a general domain carrier to preserve D1
-through D8 exactly. Production cutover of that carrier is tracked by #2974;
-implementation status must not be confused with ratification. Callable Core
-identity is narrower: D1 and D2 are not callable domains; D7 keeps its Sound7
-law and is not promoted into callable Core merely because it has a width; D8 is
-distinct from historical Sens8/Function8 even though both occupy eight physical
-bits.
+General carrier має зберігати D1…D8 без втрати width або domain.
 
-Carrier existence, residency, derivability, callability and runtime
-implementation are separate facts. Width alone never mints occupancy or a
-semantic role. D5/D6/D8 residents execute only where their owning law admits
-them, and a free coordinate has no meaning until such evidence exists.
+При цьому:
+
+```text
+carrier existence
+≠ residency
+≠ derivability
+≠ callability
+≠ runtime implementation
+```
+
+Це одна з основних дисциплін Contract 11.
+
+---
 
 ## D1 — PredicateBit
 
@@ -63,7 +62,11 @@ them, and a free coordinate has no meaning until such evidence exists.
 1 = YES
 ```
 
-PredicateBit is not Number, host Bool, T/NIL or structural empty.
+PredicateBit не є Number, host Bool, T/NIL або structural empty.
+
+Третього predicate-result немає.
+
+---
 
 ## D2 — structure
 
@@ -74,7 +77,9 @@ PredicateBit is not Number, host Bool, T/NIL or structural empty.
 11  dot
 ```
 
-These are structural-domain objects, not function identities.
+Це exact structural-domain objects, а не function identities.
+
+---
 
 ## D3 — foundation
 
@@ -89,151 +94,331 @@ These are structural-domain objects, not function identities.
 111  EQ
 ```
 
-Role names above are documentation projections. The canonical identity is the
-exact D3 coordinate under the D3 law.
+Назви — documentation/surface projections. Canonical identity — точна D3 coordinate під D3 law.
+
+### Predicate/control law
+
+- `ATOM` повертає тільки D1 PredicateBit.
+- `EQ` повертає тільки D1 PredicateBit у своїй admissible області.
+- `COND` має двопольові clauses `(test expression)`.
+- D1 `1` вибирає clause.
+- D1 `0` переходить до наступного.
+- exhaustion повертає D3 structural `()`, а не predicate false.
+
+---
 
 ## D4 — bootstrap
 
-D4 is the exact four-bit bootstrap domain ratified by its owning law. Its
-coordinates are not reconstructed from historical eight-bit Function8 values.
+D4 — exact four-bit bootstrap domain.
 
-LAMBDA and DEFINE are current D4 bootstrap identities. Ratified selector
-descendants are generated from their domain law rather than minted by legacy
-table rows. Unallocated D4 coordinates remain unallocated.
+Його residents визначаються D4 law і не відновлюються з ширших numeric containers.
 
-## D5 / D6 — typed Core domains
+LAMBDA та DEFINE належать bootstrap-рівню. Selector descendants можуть бути породжені з selector law.
 
-D5 and D6 are exact-width typed domains. Their complete coordinate capacity is
-not an automatic function table: only owner-ratified residents, proved
-generators and implemented mechanisms may be used.
+Unallocated coordinates не отримують значення через схожість бітів.
 
-## D7 — Sound7
+---
 
-D7 is an exact seven-bit domain with its own Sound7 / textual-provenance law.
-It may be carried by general domain identity, but it is not a callable Core
-operation merely because it is seven bits wide. Selector geometry and generic
-function-table rules must not be inferred for D7.
+## D5 — exact five-bit domain
 
-## D8 — exact eight-bit domain
+D5 має власний owner-ratified domain law/map.
 
-D8 is an exact domain in the ratified ladder. It is **not** historical Sens8 or
-Function8. Equal eight-bit payloads across those two contexts do not collapse
-identity.
+Важливо: D5 capacity — це 32 coordinates, але спосіб появи resident має provenance:
 
-D8 residents are admitted only by explicit D8 law/evidence. Width eight does
-not make every historical byte a D8 resident or callable operation.
+- generated by law;
+- owner-ratified root/resident;
+- інша явно зафіксована authority.
+
+Наявність координати без provenance не є semantic admission.
+
+---
+
+## D6 — exact six-bit domain
+
+D6 ратифікований як exact typed domain.
+
+Selector closure може породжувати D6 descendants з certificate replay. Інші semantic families потребують власного доказу.
+
+Domain ratification не дозволяє переносити D5 placement, historical placement або numerical resemblance в D6.
+
+---
+
+## D7 — sound/text provenance domain
+
+D7 має точну семибітову identity і власні sound/text/provenance laws.
+
+D7 може містити sound cells, local ordinals та інші об'єкти, якщо вони явно admitted своїм законом.
+
+D7 не стає generic callable Core domain лише через ширину 7.
+
+Однаковий raw pattern у різних D7 semantic types не створює type equality.
+
+---
+
+## D8 — exact eight-bit Core domain
+
+D8 — окремий ратифікований domain.
+
+Факт, що physical width дорівнює 8, не дає йому спеціальної універсальної влади.
+
+D8 resident існує лише через D8 law/evidence. Ніяка історична flat-8 таблиця не може автоматично визначати D8 occupancy.
+
+---
+
+## Generative families
+
+Contract 11 допускає і заохочує law-derived residents.
+
+Selector positive control:
+
+```text
+roots:
+101 = CAR
+110 = CDR
+
+laws:
+suffix 0 = compose CAR
+suffix 1 = compose CDR
+```
+
+Звідси:
+
+```text
+D4:
+1010 CAAR
+1011 CADR
+1100 CDAR
+1101 CDDR
+```
+
+і далі родина продовжується за тим самим законом у ширших доменах, де цей law admitted.
+
+Кожен generated resident бажано має certificate:
+
+```text
+root + path + law version -> coordinate
+```
+
+---
+
+## UNKNOWN
+
+UNKNOWN/free — epistemic status.
+
+Він не означає:
+
+- spare opcode;
+- permission to allocate;
+- zero semantics;
+- future callable slot.
+
+UNKNOWN означає, що canonical law/evidence ще не пояснив coordinate.
+
+---
 
 ## Reader
 
-Canonical binary source preserves exact word width before semantic routing.
+Canonical binary reader зберігає exact width до semantic routing.
 
 ```text
 10 001 01
 ```
 
-is structurally D2 open, one exact W3 word, and D2 close. The canonical reader
-model must preserve exact W1..W8 words as domain-qualified identity; production
-support may advance domain-by-domain during the #2974 cutover. Callable lowering
-is a later law-specific step: carrying a D1, D2 or D7 identity does not make it
-a function.
+структурно читається як:
 
-The reader must never recover a domain by zero-extending an old eight-bit code.
+```text
+D2 open
+W3 exact word 001
+D2 close
+```
 
-Historical exact-eight-bit source remains a bounded compatibility path while
-migration completes.
+Reader не має zero-extend W3 до W8 для того, щоб знайти meaning.
 
-At expression start, apostrophe is reader sugar for the already-admitted D3
-QUOTE identity; it must not create an intermediate human-name or Sens8
-identity.
+Apostrophe на початку expression — reader sugar для already-admitted D3 QUOTE.
+
+---
 
 ## Surfaces
 
-Human-language and symbolic spellings are optional projections.
+Human-language і symbolic spellings — optional projections:
 
 ```text
 surface/UI input
-      ↓ mechanical registry projection
+      ↓
+mechanical projection
+      ↓
 exact domain identity
 ```
 
-where a domain mapping is admitted.
-
-Unmigrated historical registry rows may still project explicitly to a legacy
-eight-bit compatibility identity. That path must be named as legacy and must
-not infer a domain from the byte.
-
-Forbidden models include:
+Заборонені моделі:
 
 ```text
 name -> meaning
-legacy byte -> guessed domain
+raw integer -> guessed domain
 width -> semantic role
+host enum -> language identity
 ```
 
-## One active language core
+Surface registry може допомогти знайти already-admitted identity. Він не створює semantic law.
 
-SENS is returning to one active language core: `lib/core.lisp`.
+---
 
-Historical Core1 evidence is bootstrap/provenance. Core2 is retired
-compatibility history. Core3 mechanisms belong to a mechanism laboratory.
-The former Core4 name is folded into the one active core.
+## AST
 
-Execution/research profiles and backend choices may select mechanisms; they may
-not create or override semantic domain law.
+Canonical AST має зберігати domain-qualified identity:
+
+```text
+DomainIdentity {
+    domain,
+    exact_bits,
+    law/provenance
+}
+```
+
+Human spelling може зберігатися окремо для diagnostics/source mapping, але не визначає equality.
+
+---
+
+## Compiler / lowering
+
+Бажаний one-way pipeline:
+
+```text
+surface
+  ↓
+domain-qualified AST
+  ↓
+law-aware lowering
+  ↓
+IR
+  ↓
+backend
+```
+
+Після semantic lowering backend не повинен повторно вгадувати domain із packed bits.
+
+Compatibility adapters дозволені лише як явно обмежені migration/backend boundaries.
+
+---
+
+## Execution profiles
+
+Core1/Core2/Core3/Core4 у старих дослідженнях — execution/research profiles та historical stages, а не альтернативні semantic universes.
+
+Поточна domain ladder D1–D8 є спільною semantic constitution.
+
+Profile може вибирати mechanism, але не може:
+
+- mint new identity;
+- renumber domain;
+- змінити PredicateBit law;
+- змінити D3 control law;
+- оголосити raw backend code canonical identity.
+
+---
 
 ## Execution mechanisms
 
-The Rust runtime is the **reference implementation**, not semantic authority.
-C, Common Lisp, Prolog, Datalog, CLIPS, WASM, FPGA and other substrates are
-additional mechanism witnesses.
+Rust runtime — reference implementation, не semantic authority.
 
-A backend receives an already-selected domain-qualified semantic object or an
-explicitly tagged compatibility projection. Backend opcodes, host enums,
-packed bytes and native types never mint SENS meaning.
+Інші mechanisms можуть бути:
 
-## Compiler / IR rule
+- C;
+- Common Lisp;
+- Prolog;
+- Datalog;
+- CLIPS;
+- WASM;
+- FPGA;
+- GraalVM;
+- інші substrates.
 
-Canonical compiler and IR identities preserve exact domain and exact bits.
+Backend отримує already-selected semantic object.
 
-A historical eight-bit ABI or fast path may remain only as an explicitly named
-compatibility/backend projection. Reverse byte-to-domain inference is
-forbidden.
+Backend opcode, host type, native enum, register number або physical memory layout не створюють SENS meaning.
 
-## Structural empty is not zero in another domain
+---
+
+## Physical representation
+
+```text
+semantic_width != physical_width
+```
+
+Backend може:
+
+- pack several D3 values у physical word;
+- розмістити D5 у BRAM geometry;
+- widen temporary arithmetic;
+- vectorize values;
+- map operations to FPGA primitives.
+
+Але semantic identity до і після mechanism boundary має залишатися тією самою.
+
+---
+
+## Structural empty is not another zero
 
 ```text
 D3 000 structural empty
 != D1 0 PredicateBit NO
 != Number 0
-!= historical exact8 00000000
+!= any equal numeric payload in another domain
 ```
 
-Equal packed numeric zero does not collapse domains.
+Numeric equality не колапсує domains.
 
-## Historical Sens8 / Sid8 / Function8
+---
 
-Historical exact-eight-bit machinery may remain only in bounded roles:
+## Migration rule
+
+Source tree може містити bounded compatibility code від попередньої flat exact-8 архітектури.
+
+Такий код допустимий лише як:
 
 - compatibility;
 - transport;
 - backend mechanism;
 - archived provenance;
-- explicit legacy external ABI.
+- explicit external ABI.
 
-It is not the universal semantic identity.
+Новий canonical exact-domain code не повинен створювати нову залежність від legacy flat identity.
 
-New canonical code must not add a Sens8/Sid8 dependency unless the boundary is
-explicitly one of those roles.
+Для цього існує one-way paradigm guard.
+
+---
+
+## Ratification vs implementation
+
+Status треба читати окремими осями:
+
+```text
+domain ratified
+law ratified
+resident admitted
+certificate replayed
+runtime implemented
+backend implemented
+benchmarked
+optimized
+```
+
+Жоден нижчий status не переписує вищий semantic law.
+
+---
 
 ## Project boundary
 
-The Rust runtime is the reference implementation, not semantic authority.
-Current authority is Contract 11 plus ratified domain laws and language-owned
-executable evidence.
+Поточна semantic authority:
 
-The current canonical source extension is **`.lisp`**. **`.wsm`** and
-**`.my`** remain supported legacy aliases. File suffixes do not create
-identity; exact source words and domain law do.
+1. `language-contract.lisp`;
+2. ratified domain laws;
+3. executable conformance/witnesses;
+4. reference runtime;
+5. backends;
+6. generated docs;
+7. explanatory docs.
 
-Authority precedence is documented in
-[`semantic-authority-map.md`](semantic-authority-map.md).
+Канонічне source extension — `.lisp`.
+
+Authority precedence: [`semantic-authority-map.md`](semantic-authority-map.md).
