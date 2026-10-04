@@ -64,7 +64,11 @@ jobs:
         run: |
           set -euo pipefail
           for form in wire json; do
-            valgrind --tool=cachegrind --cache-sim=no               --cachegrind-out-file=/tmp/cachegrind-${form}.out               target/ci-meta/examples/transport_decode_bench               "${form}"               "/tmp/rust-json-wire/messages-sens-${form}.bin"               20               2>"/tmp/${form}.stderr"
+            case "${form}" in
+              wire) input=/tmp/rust-json-wire/messages-sens-wire.bin ;;
+              json) input=/tmp/rust-json-wire/messages-py-json.bin ;;
+            esac
+            valgrind --tool=cachegrind --cache-sim=no               --cachegrind-out-file=/tmp/cachegrind-${form}.out               target/ci-meta/examples/transport_decode_bench               "${form}"               "${input}"               20               2>"/tmp/${form}.stderr"
             grep -E "I[[:space:]]+refs:" "/tmp/${form}.stderr" || true
           done
 
