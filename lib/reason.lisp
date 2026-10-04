@@ -261,7 +261,7 @@
                      (00000001 proved)
                      goal
                      (00000101 renamed-rule)
-                     (00110100 res))))
+                     (1011 res))))
                body-results))))))))
 
 ; Prove a conjunction while threading `(subst proofs)` through the shared
