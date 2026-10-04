@@ -1,6 +1,6 @@
 {
   "schema": "d4-history-filtered-cleanroom/v2",
-  "authority": "research-candidate-for-owner-ratification",
+  "authority": "superseded-research-evidence",
   "parent_issue": 3225,
   "rule": "history proposes capabilities; D1-D3 derivability filters them; ratified D3 semantic parent chooses the fibre; old coordinates have zero authority",
   "evidence": {
@@ -133,5 +133,6 @@
     "SUBST/SUBLIS",
     "MAPLIST"
   ],
-  "note": "Two holes are deliberate. Capacity is not a requirement to invent semantics."
+  "note": "This 14+2 table is preserved as pre-ratification research evidence. Current D4 authority is #3272 / Contract 11.2.",
+  "superseded_by": "#3272"
 }

@@ -1,3 +1,5 @@
+> **SUPERSEDED BY OWNER RATIFICATION #3272.** This file preserves the pre-ratification 14+2 research candidate. It is not current D4 authority. Current authority is Contract 11.2 and `contracts/d4-bootstrap-ratification.lisp`.
+
 # D4 minimal historical bootstrap candidate — #3225
 
 History may propose capabilities, but old coordinates have zero authority.

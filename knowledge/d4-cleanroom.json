@@ -1,30 +1,102 @@
 {
-  "schema": "d4-cleanroom/v1",
-  "authority": "#3225",
-  "premises": [
-    "ratified D1",
-    "ratified D2",
-    "ratified D3/bija3 A",
-    "D4 geometry = D3 || one bit",
-    "selector composition law"
-  ],
-  "admitted": {
-    "0110": "CDAR",
-    "0111": "CDDR",
+  "schema": "d4-ratified/v2",
+  "status": "owner-ratified",
+  "authority": "#3272",
+  "date": "2026-10-04",
+  "domain": "D4",
+  "rule": "history may donate a capability; ratified D3 parent/fibre law and owner decision own the coordinate; legacy coordinates have zero authority",
+  "residents": {
     "1000": "CAAR",
-    "1001": "CADR"
+    "1001": "CADR",
+    "1010": "LOOKUP",
+    "1011": "BIND",
+    "1100": "EVCON",
+    "1101": "EVLIS",
+    "1110": "LIST",
+    "1111": "APPEND",
+    "0000": "APPLY",
+    "0001": "EVAL",
+    "0010": "LAMBDA",
+    "0011": "DEFINE",
+    "0100": "NOT",
+    "0101": "NULL",
+    "0110": "CDAR",
+    "0111": "CDDR"
   },
-  "unknown": [
-    "0000","0001","0010","0011","0100","0101",
-    "1010","1011","1100","1101","1110","1111"
+  "fibres": {
+    "000 EMPTY": [
+      "APPLY",
+      "EVAL"
+    ],
+    "001 QUOTE": [
+      "LAMBDA",
+      "DEFINE"
+    ],
+    "010 ATOM": [
+      "NOT",
+      "NULL"
+    ],
+    "011 CDR": [
+      "CDAR",
+      "CDDR"
+    ],
+    "100 CAR": [
+      "CAAR",
+      "CADR"
+    ],
+    "101 EQ": [
+      "LOOKUP",
+      "BIND"
+    ],
+    "110 COND": [
+      "EVCON",
+      "EVLIS"
+    ],
+    "111 CONS": [
+      "LIST",
+      "APPEND"
+    ]
+  },
+  "classification": {
+    "irreducible_bootstrap": [
+      "LAMBDA",
+      "DEFINE"
+    ],
+    "generated_selectors": [
+      "CAAR",
+      "CADR",
+      "CDAR",
+      "CDDR"
+    ],
+    "derived_bootstrap": [
+      "APPLY",
+      "EVAL",
+      "LOOKUP",
+      "BIND",
+      "EVCON",
+      "EVLIS"
+    ],
+    "compact_derived": [
+      "NOT",
+      "NULL",
+      "LIST",
+      "APPEND"
+    ]
+  },
+  "semantic_distinctions": {
+    "NOT_vs_NULL": "PredicateBit NO is not structural EMPTY; NOT complements D1 PredicateBit, NULL recognizes D3 structural empty",
+    "LIST_vs_APPEND": "LIST collects supplied values into a proper list; APPEND combines admitted lists into a list"
+  },
+  "supersedes": [
+    "#3225 intermediate 4+12 cleanroom map",
+    "#3247 14+2 research candidate",
+    "all pre-#3202 D4 placements"
   ],
-  "forbidden_premise_classes": [
+  "forbidden_authority": [
     "SID8",
     "Sens8",
     "Function8",
-    "pre-3225 D4 resident inventory",
-    "historical Lisp order",
-    "D5 parentage",
-    "migration-cost tie-break"
+    "old D4 coordinates",
+    "migration convenience"
   ]
 }

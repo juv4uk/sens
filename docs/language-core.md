@@ -142,15 +142,53 @@ L1–L4 звужують повний простір перестановок д
 
 ## D4 — bootstrap
 
-D4 — exact four-bit bootstrap domain.
+D4 — owner-ratified full compact four-bit bootstrap domain (#3272).
 
-Його residents визначаються D4 law і не відновлюються з ширших numeric containers.
+```text
+0000  APPLY
+0001  EVAL
+0010  LAMBDA
+0011  DEFINE
+0100  NOT
+0101  NULL
+0110  CDAR
+0111  CDDR
+1000  CAAR
+1001  CADR
+1010  LOOKUP
+1011  BIND
+1100  EVCON
+1101  EVLIS
+1110  LIST
+1111  APPEND
+```
 
-LAMBDA та DEFINE належать bootstrap-рівню. Selector descendants можуть бути породжені з selector law.
+D4 щільний: усі 16 координат зайняті. Це не означає, що всі 16 є незалежними примітивами.
 
-Unallocated coordinates не отримують значення через схожість бітів.
+Класифікація:
+- нові bootstrap capabilities: `LAMBDA`, `DEFINE`;
+- generated selectors: `CAAR`, `CADR`, `CDAR`, `CDDR`;
+- derived bootstrap residents: `APPLY`, `EVAL`, `LOOKUP`, `BIND`, `EVCON`, `EVLIS`;
+- compact derived conveniences: `NOT`, `NULL`, `LIST`, `APPEND`.
 
-**Transition after #3202:** старі D4 selector addresses, виведені з попередніх D3 roots, більше не є чинним derivation source. Production selector regeneration from `CAR=100 / CDR=011` is tracked in #2055; до завершення cutover жодна стара selector address не створює альтернативної D3 семантики.
+D4 fibres пам'ятають семантичного D3-батька:
+
+```text
+000 EMPTY → APPLY / EVAL
+001 QUOTE → LAMBDA / DEFINE
+010 ATOM  → NOT / NULL
+011 CDR   → CDAR / CDDR
+100 CAR   → CAAR / CADR
+101 EQ    → LOOKUP / BIND
+110 COND  → EVCON / EVLIS
+111 CONS  → LIST / APPEND
+```
+
+`NOT` і `NULL` не є синонімами: D1 `0` ≠ structural D3 `()`. `NOT` працює з PredicateBit, а `NULL` перевіряє structural empty.
+
+`LIST` і `APPEND` — CONS-family residents: перший збирає значення у список, другий з'єднує списки.
+
+Старі D4/SID8/Sens8/Function8 координати не мають placement authority. Історія може бути донором capability, але координата визначається чинним D3/D4 law та owner-ratification #3272.
 
 ---
 
@@ -219,7 +257,7 @@ suffix 1 = compose CDR / D
 Звідси:
 
 ```text
-D4 migration target derived from the ratified roots:
+D4 selector slice inside the ratified #3272 map:
 1000 CAAR
 1001 CADR
 0110 CDAR

@@ -1,6 +1,6 @@
 ; language-contract.lisp — current machine-readable Level 1/2 contract.
 ;
-; Contract 11.1 — domain-qualified identity authority + owner-ratified bīja3 A.
+; Contract 11.2 — domain-qualified identity authority + owner-ratified D3/D4.
 ; Owner paradigm: #2490. Implementation cutover: #2817 / #2822.
 ;
 ; Contract 11 preserves the observable PredicateBit / ATOM / EQ / COND law
@@ -19,11 +19,11 @@
 ; bounded compatibility / transport / backend projection during migration.
 ; It cannot mint or redefine canonical semantic identity.
 
-((major . #d11) (minor . 1)
+((major . #d11) (minor . 2)
  (status . current-domain-qualified-authority)
  (supersedes . "Contract 10.0 flat Function8 identity authority")
  (historical-snapshot . "docs/archive/historical/language-contract-10.0.lisp")
- (note . "Contract 11.1 keeps the domain-qualified identity law from #2490/#2817/#2822 and owner-ratifies D3/bīja3 A in #3202 from the L1-L5 witnesses #3194/#3196/#3200. Contract 10 observable PredicateBit/ATOM/EQ/COND behavior is preserved while their canonical D3 coordinates follow the #3202 map. Historical flat Function8/Sens8 remains compatibility/history only.")
+ (note . "Contract 11.2 preserves the domain-qualified identity law, owner-ratifies D3/bīja3 A in #3202, and owner-ratifies the full compact D4 bootstrap map in #3272. Historical flat Function8/Sens8 remains compatibility/history only; old D4 coordinates and clean-room intermediate maps are provenance, never alternate current authority.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((binary-domain-identity
@@ -47,7 +47,13 @@
       (d3-l1-l5-constitution
        . "The D3 map is fixed by the owner-ratified L1-L5 stack: L1 000 is structural empty; L2 D3 preserves exact D2 prefix fibres 00→()/QUOTE, 01→ATOM/CDR, 10→CAR/EQ, 11→COND/CONS; L3 one uniform semantic duality covers ()↔CONS, QUOTE↔COND, ATOM↔EQ, CDR↔CAR; L4 that D3 dual is XOR 111, recursively matching D1 XOR 1 and D2 XOR 11; L5 orients suffix-0 as the evaluator/metalinguistic spine ()→ATOM→CAR→COND. This law supersedes every previous current D3 coordinate ordering; old orderings survive only as historical/provenance evidence.")
       (d4-bootstrap
-       . "Core.D4 is the exact four-bit bootstrap domain ratified by #2169. Its resident coordinates execute only under D4 law; 0101 and 1001 remain unallocated. No historical Function8 identity may be reconstructed from a D4 word by bit-shape coincidence.")
+       . "Core.D4 is the owner-ratified full compact four-bit bootstrap domain (#3272): 0000 APPLY, 0001 EVAL, 0010 LAMBDA, 0011 DEFINE, 0100 NOT, 0101 NULL, 0110 CDAR, 0111 CDDR, 1000 CAAR, 1001 CADR, 1010 LOOKUP, 1011 BIND, 1100 EVCON, 1101 EVLIS, 1110 LIST, 1111 APPEND. Old D4/SID8/Sens8/Function8 coordinates have zero placement authority.")
+      (d4-fibre-law
+       . "D4 is dense 16/16 and grouped by the ratified D3 semantic parent: EMPTY→APPLY/EVAL, QUOTE→LAMBDA/DEFINE, ATOM→NOT/NULL, CDR→CDAR/CDDR, CAR→CAAR/CADR, EQ→LOOKUP/BIND, COND→EVCON/EVLIS, CONS→LIST/APPEND. Residency is compact identity, not a claim that every resident is an irreducible primitive.")
+      (d4-null-not-distinction
+       . "D4 0100 NOT and 0101 NULL are distinct because D1 PredicateBit 0 is not D3 structural empty (). NOT complements exact PredicateBit; NULL recognizes structural empty as a derived compact resident.")
+      (d4-list-append-distinction
+       . "D4 1110 LIST and 1111 APPEND are CONS-family derived residents: LIST collects supplied values into one proper list; APPEND combines admitted lists into one list. Their four-bit residency is for compact identity, not extra primitive power.")
       (d5-d6-residency
        . "Core.D5 and Core.D6 use exact five-bit and six-bit typed domains governed by their owner-ratified maps/laws. Residency, derivability, callability and runtime implementation are distinct facts: carrier existence alone grants neither occupancy nor callability.")
       (d7-sound-local-ordinal
