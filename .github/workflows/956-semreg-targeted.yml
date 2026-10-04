@@ -12,6 +12,7 @@ on:
       - "crates/sens/src/domain_surface_registry_generated.rs"
       - "crates/sens/src/human_surface.rs"
       - "crates/sens/src/eval/lower.rs"
+      - "crates/sens/tests/current_human_surface.rs"
       - ".github/workflows/956-semreg-targeted.yml"
 
 jobs:
@@ -32,3 +33,4 @@ jobs:
           cargo test -p sens --lib human_surface::tests -- --nocapture
           cargo test -p sens --lib migrated_d3_surfaces_lower_to_exact_domain_calls -- --nocapture
           cargo test -p sens --test canon_surface -- --nocapture
+          cargo test -p sens --test current_human_surface -- --nocapture
