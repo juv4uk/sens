@@ -1,27 +1,30 @@
 {
   "meta": {
-    "schema": "exact-width-admitted-corpus/v1",
+    "schema": "exact-width-admitted-corpus/v2",
     "authority": "projection-only",
     "authority_refs": [
       "#2151",
-      "#2170",
-      "#2175",
-      "#2329"
+      "#3202",
+      "#3272",
+      "#3278"
     ],
     "forbidden_input": "lib/surface/semantic-registry.lisp",
-    "row_count": 62,
+    "row_count": 30,
     "status_counts": {
-      "admitted": 24,
-      "generated": 12,
-      "unallocated": 26
+      "admitted": 26,
+      "generated": 4
     },
-    "function_like_active_rows": 30,
-    "d4_reserved_holes": [
-      "0101",
-      "1001"
+    "function_like_active_rows": 24,
+    "current_semantic_widths": [
+      1,
+      2,
+      3,
+      4,
+      7
     ],
-    "d5_generated_selector_count": 8,
-    "d5_nonselector_admitted_count": 0
+    "d4_generated_selector_count": 4,
+    "d5_plus_semantic_admission": "revoked/research by #3278",
+    "selector_generation_above_d4": "fail-closed pending #3209"
   },
   "rows": [
     {
@@ -30,7 +33,7 @@
       "role": "answer",
       "status": "admitted",
       "family": "answer",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#2151",
       "generator_ref": null,
       "human_label_optional": "NO"
     },
@@ -40,7 +43,7 @@
       "role": "answer",
       "status": "admitted",
       "family": "answer",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#2151",
       "generator_ref": null,
       "human_label_optional": "YES"
     },
@@ -50,7 +53,7 @@
       "role": "structure",
       "status": "admitted",
       "family": "structure",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#2151",
       "generator_ref": null,
       "human_label_optional": "separator"
     },
@@ -60,7 +63,7 @@
       "role": "structure",
       "status": "admitted",
       "family": "structure",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#2151",
       "generator_ref": null,
       "human_label_optional": "close"
     },
@@ -70,7 +73,7 @@
       "role": "structure",
       "status": "admitted",
       "family": "structure",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#2151",
       "generator_ref": null,
       "human_label_optional": "open"
     },
@@ -80,7 +83,7 @@
       "role": "structure",
       "status": "admitted",
       "family": "structure",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#2151",
       "generator_ref": null,
       "human_label_optional": "dot"
     },
@@ -90,7 +93,7 @@
       "role": "foundation",
       "status": "admitted",
       "family": "foundation",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
       "human_label_optional": "()"
     },
@@ -100,7 +103,7 @@
       "role": "foundation",
       "status": "admitted",
       "family": "foundation",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
       "human_label_optional": "QUOTE"
     },
@@ -110,49 +113,49 @@
       "role": "foundation",
       "status": "admitted",
       "family": "foundation",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
       "human_label_optional": "ATOM"
     },
     {
       "word": "011",
       "width": 3,
-      "role": "foundation",
+      "role": "selector-root",
       "status": "admitted",
-      "family": "foundation",
-      "authority_ref": "#2151/#2170",
+      "family": "selector",
+      "authority_ref": "#3202",
       "generator_ref": null,
-      "human_label_optional": "COND"
+      "human_label_optional": "CDR"
     },
     {
       "word": "100",
       "width": 3,
-      "role": "foundation",
-      "status": "admitted",
-      "family": "foundation",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": null,
-      "human_label_optional": "CONS"
-    },
-    {
-      "word": "101",
-      "width": 3,
       "role": "selector-root",
       "status": "admitted",
       "family": "selector",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
       "human_label_optional": "CAR"
     },
     {
+      "word": "101",
+      "width": 3,
+      "role": "foundation",
+      "status": "admitted",
+      "family": "foundation",
+      "authority_ref": "#3202",
+      "generator_ref": null,
+      "human_label_optional": "EQ"
+    },
+    {
       "word": "110",
       "width": 3,
-      "role": "selector-root",
+      "role": "foundation",
       "status": "admitted",
-      "family": "selector",
-      "authority_ref": "#2151/#2170",
+      "family": "foundation",
+      "authority_ref": "#3202",
       "generator_ref": null,
-      "human_label_optional": "CDR"
+      "human_label_optional": "COND"
     },
     {
       "word": "111",
@@ -160,9 +163,9 @@
       "role": "foundation",
       "status": "admitted",
       "family": "foundation",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3202",
       "generator_ref": null,
-      "human_label_optional": "EQ"
+      "human_label_optional": "CONS"
     },
     {
       "word": "0000",
@@ -170,7 +173,7 @@
       "role": "bootstrap",
       "status": "admitted",
       "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_label_optional": "APPLY"
     },
@@ -180,7 +183,7 @@
       "role": "bootstrap",
       "status": "admitted",
       "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_label_optional": "EVAL"
     },
@@ -190,7 +193,7 @@
       "role": "bootstrap",
       "status": "admitted",
       "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_label_optional": "LAMBDA"
     },
@@ -200,7 +203,7 @@
       "role": "bootstrap",
       "status": "admitted",
       "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_label_optional": "DEFINE"
     },
@@ -210,99 +213,99 @@
       "role": "bootstrap",
       "status": "admitted",
       "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
       "human_label_optional": "NOT"
     },
     {
       "word": "0101",
       "width": 4,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2151/#2170",
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#3272",
       "generator_ref": null,
-      "human_label_optional": null
+      "human_label_optional": "NULL"
     },
     {
       "word": "0110",
       "width": 4,
-      "role": "bootstrap",
-      "status": "admitted",
-      "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": null,
-      "human_label_optional": "EVCON"
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#3272",
+      "generator_ref": "#2055/#3272",
+      "human_label_optional": "CDAR"
     },
     {
       "word": "0111",
       "width": 4,
-      "role": "bootstrap",
-      "status": "admitted",
-      "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": null,
-      "human_label_optional": "EVLIS"
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#3272",
+      "generator_ref": "#2055/#3272",
+      "human_label_optional": "CDDR"
     },
     {
       "word": "1000",
       "width": 4,
-      "role": "bootstrap",
-      "status": "admitted",
-      "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": null,
-      "human_label_optional": "LIST"
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#3272",
+      "generator_ref": "#2055/#3272",
+      "human_label_optional": "CAAR"
     },
     {
       "word": "1001",
       "width": 4,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": null,
-      "human_label_optional": null
+      "role": "selector",
+      "status": "generated",
+      "family": "selector",
+      "authority_ref": "#3272",
+      "generator_ref": "#2055/#3272",
+      "human_label_optional": "CADR"
     },
     {
       "word": "1010",
       "width": 4,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CAAR"
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#3272",
+      "generator_ref": null,
+      "human_label_optional": "LOOKUP"
     },
     {
       "word": "1011",
       "width": 4,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CADR"
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#3272",
+      "generator_ref": null,
+      "human_label_optional": "BIND"
     },
     {
       "word": "1100",
       "width": 4,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CDAR"
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#3272",
+      "generator_ref": null,
+      "human_label_optional": "EVCON"
     },
     {
       "word": "1101",
       "width": 4,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2151/#2170",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CDDR"
+      "role": "bootstrap",
+      "status": "admitted",
+      "family": "bootstrap",
+      "authority_ref": "#3272",
+      "generator_ref": null,
+      "human_label_optional": "EVLIS"
     },
     {
       "word": "1110",
@@ -310,9 +313,9 @@
       "role": "bootstrap",
       "status": "admitted",
       "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
-      "human_label_optional": "LOOKUP"
+      "human_label_optional": "LIST"
     },
     {
       "word": "1111",
@@ -320,329 +323,9 @@
       "role": "bootstrap",
       "status": "admitted",
       "family": "bootstrap",
-      "authority_ref": "#2151/#2170",
+      "authority_ref": "#3272",
       "generator_ref": null,
-      "human_label_optional": "BIND"
-    },
-    {
-      "word": "00000",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "00001",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "00010",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "00011",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "00100",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "00101",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "00110",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "00111",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "01000",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "01001",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "01010",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "01011",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "01100",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "01101",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "01110",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "01111",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "10000",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "10001",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "10010",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "10011",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "10100",
-      "width": 5,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CAAAR"
-    },
-    {
-      "word": "10101",
-      "width": 5,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CAADR"
-    },
-    {
-      "word": "10110",
-      "width": 5,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CADAR"
-    },
-    {
-      "word": "10111",
-      "width": 5,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CADDR"
-    },
-    {
-      "word": "11000",
-      "width": 5,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CDAAR"
-    },
-    {
-      "word": "11001",
-      "width": 5,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CDADR"
-    },
-    {
-      "word": "11010",
-      "width": 5,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CDDAR"
-    },
-    {
-      "word": "11011",
-      "width": 5,
-      "role": "selector",
-      "status": "generated",
-      "family": "selector",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": "#1968/#2329",
-      "human_label_optional": "CDDDR"
-    },
-    {
-      "word": "11100",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "11101",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "11110",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
-    },
-    {
-      "word": "11111",
-      "width": 5,
-      "role": "unallocated",
-      "status": "unallocated",
-      "family": "unallocated",
-      "authority_ref": "#2175/#2329",
-      "generator_ref": null,
-      "human_label_optional": null
+      "human_label_optional": "APPEND"
     }
   ]
 }
