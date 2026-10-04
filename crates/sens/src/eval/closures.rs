@@ -44,6 +44,9 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             canon::ensure_bindable_sid(*sid, expr.span)?;
             Ok((Vec::new(), Some(sid.to_string().into())))
         }
+        ExprKind::DomainIdentity(identity) => {
+            Err(canon::immutable_domain_binding_error(*identity, expr.span))
+        }
         ExprKind::List(parameter_forms) => {
             let mut parameters = Vec::with_capacity(parameter_forms.len());
             let mut unique = HashSet::new();
@@ -56,6 +59,12 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                     ExprKind::Sid(sid) => {
                         canon::ensure_bindable_sid(*sid, parameter.span)?;
                         sid.to_string().into()
+                    }
+                    ExprKind::DomainIdentity(identity) => {
+                        return Err(canon::immutable_domain_binding_error(
+                            *identity,
+                            parameter.span,
+                        ));
                     }
                     _ => {
                         return Err(LanguageError::new(
@@ -92,6 +101,12 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                                 canon::ensure_bindable_sid(*sid, head.span)?;
                                 sid.to_string().into()
                             }
+                            ExprKind::DomainIdentity(identity) => {
+                                return Err(canon::immutable_domain_binding_error(
+                                    *identity,
+                                    head.span,
+                                ));
+                            }
                             _ => {
                                 return Err(LanguageError::new(
                                     ErrorKind::InvalidForm,
@@ -124,6 +139,12 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                     ExprKind::Sid(sid) => {
                         canon::ensure_bindable_sid(*sid, current.span)?;
                         break sid.to_string().into();
+                    }
+                    ExprKind::DomainIdentity(identity) => {
+                        return Err(canon::immutable_domain_binding_error(
+                            *identity,
+                            current.span,
+                        ));
                     }
                     _ => {
                         return Err(LanguageError::new(
