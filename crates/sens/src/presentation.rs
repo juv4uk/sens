@@ -175,7 +175,22 @@ fn render_sa(value: &Value) -> String {
             let items = vector.borrow().iter().map(render_sa).collect::<Vec<_>>();
             format!("#({})", items.join(" "))
         }
-        _ => value.to_string(),
+        Value::Nil
+        | Value::Bool(_)
+        | Value::Number(_, _)
+        | Value::Rational(_)
+        | Value::BinaryNumber(_)
+        | Value::Sid(_)
+        | Value::String(_)
+        | Value::Text7(_)
+        | Value::Symbol(_)
+        | Value::Closure(_)
+        | Value::Macro(_)
+        | Value::Builtin(_)
+        | Value::HostHandle { .. }
+        | Value::NumericBuffer(_)
+        | Value::TcpConnection(_)
+        | Value::TcpListener(_) => value.to_string(),
     }
 }
 
