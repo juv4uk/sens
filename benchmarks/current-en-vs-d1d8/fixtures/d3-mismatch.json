@@ -6,7 +6,7 @@
       "id": "d3-car-vs-cdr-mismatch",
       "status": "ready",
       "english_source": "(car (quote (())))",
-      "canonical_source": "10 110 00 10 001 00 10 10 01 01 01 01",
+      "canonical_source": "10 011 00 10 001 00 10 10 01 01 01 01",
       "expected_value": "()",
       "expected_output": ""
     }
