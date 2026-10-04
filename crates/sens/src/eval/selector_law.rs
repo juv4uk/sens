@@ -67,6 +67,10 @@ fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     })
 }
 
+pub(super) fn supports(identity: CoreDomainIdentity) -> bool {
+    decode(identity).is_some()
+}
+
 pub(super) fn invoke(
     identity: CoreDomainIdentity,
     args: &[Value],
