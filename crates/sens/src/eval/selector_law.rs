@@ -194,6 +194,15 @@ mod tests {
                 .unwrap(),
             leaf(20.0)
         );
+
+        assert_eq!(invoke(d5(0b10000), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(1.0)); // CAAAR
+        assert_eq!(invoke(d5(0b10001), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(5.0)); // CAADR
+        assert_eq!(invoke(d5(0b10010), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(3.0)); // CADAR
+        assert_eq!(invoke(d5(0b10011), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(7.0)); // CADDR
+        assert_eq!(invoke(d5(0b01100), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(2.0)); // CDAAR
+        assert_eq!(invoke(d5(0b01101), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(6.0)); // CDADR
+        assert_eq!(invoke(d5(0b01110), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(4.0)); // CDDAR
+        assert_eq!(invoke(d5(0b01111), &[x], span).unwrap().unwrap(), leaf(8.0)); // CDDDR
     }
 
     #[test]
@@ -210,7 +219,7 @@ mod tests {
     }
 
     #[test]
-    fn exactly_two_d3_roots_and_four_d4_descendants_are_admitted() {
+    fn exactly_two_d3_four_d4_and_eight_d5_selectors_are_admitted() {
         let mut generated = 0usize;
         for raw in 0u8..8 {
             generated += usize::from(decode(d3(raw)).is_some());
@@ -218,6 +227,9 @@ mod tests {
         for raw in 0u8..16 {
             generated += usize::from(decode(d4(raw)).is_some());
         }
-        assert_eq!(generated, 6);
+        for raw in 0u8..32 {
+            generated += usize::from(decode(d5(raw)).is_some());
+        }
+        assert_eq!(generated, 14);
     }
 }
