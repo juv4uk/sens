@@ -27,6 +27,9 @@ jobs:
           import json
           d=json.load(open('/tmp/cond3170/inventory.json'))
           print(json.dumps(d['summary'], ensure_ascii=False, indent=2))
+          active_errors=d['summary']['active_parse_error_count']
+          if active_errors:
+              raise SystemExit(f"migration-active parse errors: {active_errors}")
           PY
       - uses: actions/upload-artifact@v4
         with:
