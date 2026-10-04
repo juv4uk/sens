@@ -1,0 +1,43 @@
+{
+  "schema": "d5-fexpr-macro-pair/1",
+  "domain": "Core.D5",
+  "owner_map_authority": "owner-directive-2026-10-03",
+  "owner_map_mutation": "NONE",
+  "pair": {
+    "prefix_d4": "0001",
+    "child0": {
+      "coordinate": "00010",
+      "historical_name": "FEXPR",
+      "protocol_donor": "fexpr-fsubr"
+    },
+    "child1": {
+      "coordinate": "00011",
+      "historical_name": "MACRO",
+      "protocol_donor": "hart-macro"
+    }
+  },
+  "shared_axes": [
+    "raw-form-input"
+  ],
+  "independent_deltas": [
+    "expansion-timing",
+    "explicit-caller-env",
+    "invocation-packaging",
+    "returned-form-protocol"
+  ],
+  "delta_count": 4,
+  "classification": "PROTOCOL-PRODUCT/MULTI-DELTA",
+  "relation_class": "SEMANTIC-LAW",
+  "local_one_bit_sibling_law": false,
+  "d4_parenthood": "NOT-INFERRED",
+  "global_d5_suffix_theorem": "NOT-PROVED",
+  "runtime_requirement": "NO-NEW-D5-RUNTIME; REPLAY-MERGED-PROTOCOL-DONORS",
+  "legacy_function8_execution": "FORBIDDEN",
+  "evidence": [
+    "#2522/#2528",
+    "#2591/#2602",
+    "#3019",
+    "#2508"
+  ],
+  "falsifier": "a merged donor replay that collapses the four independently witnessed deltas to one admitted semantic axis without hidden mechanism/table authority"
+}
