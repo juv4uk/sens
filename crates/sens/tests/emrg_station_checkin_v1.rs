@@ -90,3 +90,24 @@ fn station_checkin_v1_exports_three_projection_surfaces_without_wire_authority()
         assert!(!WIRE.contains(required));
     }
 }
+
+
+#[test]
+fn station_checkin_v1_projection_coordinates_are_language_neutral() {
+    let mut lines = SURFACES.lines();
+    assert_eq!(lines.next(), Some("p\tuk\tpl\ten"));
+
+    for line in lines {
+        let coordinate = line
+            .split('\t')
+            .next()
+            .expect("surface row must begin with a projection coordinate");
+        assert!(!coordinate.is_empty());
+        assert!(
+            coordinate
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || byte == b'/'),
+            "projection identity must be positional/numeric, got: {coordinate}"
+        );
+    }
+}
