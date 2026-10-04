@@ -196,7 +196,7 @@ fn expt_is_repeated_multiplication_over_nonnegative_integers() {
           (lambda (base exponent)
             (cond
               ((тотожне? exponent 0) 1)
-              ((не (тотожне? exponent 0))
+              ((атом? 0)
                (* base (d6-expt base (- exponent 1)))))))
     "#;
 
@@ -220,7 +220,7 @@ fn gcd_is_euclidean_fold_over_remainder() {
           (lambda (a b)
             (cond
               ((тотожне? b 0) (abs a))
-              ((не (тотожне? b 0))
+              ((атом? 0)
                (d6-gcd b (mod a b))))))
     "#;
 
@@ -350,14 +350,14 @@ fn take_drop_form_a_lossless_list_split() {
             (cond
               ((тотожне? n 0) (quote ()))
               ((атом? xs) (quote ()))
-              ((не (атом? xs))
+              ((атом? 0)
                (cons (car xs) (d6-take (- n 1) (cdr xs)))))))
         (define d6-drop
           (lambda (n xs)
             (cond
               ((тотожне? n 0) xs)
               ((атом? xs) (quote ()))
-              ((не (атом? xs))
+              ((атом? 0)
                (d6-drop (- n 1) (cdr xs))))))
     "#;
 
@@ -389,18 +389,18 @@ fn while_and_do_are_tail_iteration_laws() {
           (lambda (pred step state)
             (cond
               ((pred state) (d6-while pred step (step state)))
-              ((не (pred state)) state))))
+              ((атом? 0) state))))
         (define d6-do
           (lambda (step done result state)
             (cond
               ((done state) (result state))
-              ((не (done state))
+              ((атом? 0)
                (d6-do step done result (step state))))))
     "#;
 
     assert_same(
         &format!(
-            "{prelude} (d6-while (lambda (x) (не (тотожне? x 5))) (lambda (x) (+ x 1)) 0)"
+            "{prelude} (d6-while (lambda (x) (cond ((тотожне? x 5) (тотожне? 0 1)) ((атом? 0) (тотожне? 0 0)))) (lambda (x) (+ x 1)) 0)"
         ),
         "5",
     );
@@ -426,7 +426,7 @@ fn zip_unzip_are_product_inverses_on_equal_length_lists() {
             (cond
               ((атом? xs) (quote ()))
               ((атом? ys) (quote ()))
-              ((не (атом? xs))
+              ((атом? 0)
                (cons
                  (list (car xs) (car ys))
                  (d6-zip (cdr xs) (cdr ys)))))))
@@ -456,7 +456,7 @@ fn scan_exposes_prefix_reductions_and_ends_at_reduce() {
           (lambda (f acc xs)
             (cond
               ((атом? xs) (quote ()))
-              ((не (атом? xs))
+              ((атом? 0)
                ((lambda (next)
                   (cons next (d6-scan f next (cdr xs))))
                 (f acc (car xs)))))))
@@ -495,14 +495,14 @@ fn any_all_form_a_predicate_dual_pair() {
             (cond
               ((атом? xs) (тотожне? 0 1))
               ((pred (car xs)) (тотожне? 0 0))
-              ((не (pred (car xs)))
+              ((атом? 0)
                (d6-any pred (cdr xs))))))
         (define d6-all
           (lambda (pred xs)
             (cond
               ((атом? xs) (тотожне? 0 0))
               ((pred (car xs)) (d6-all pred (cdr xs)))
-              ((не (pred (car xs))) (тотожне? 0 1)))))
+              ((атом? 0) (тотожне? 0 1)))))
     "#;
 
     for (xs, all_nonzero, any_zero) in [
@@ -513,7 +513,7 @@ fn any_all_form_a_predicate_dual_pair() {
     ] {
         assert_same(
             &format!(
-                "{prelude} (d6-all (lambda (x) (не (тотожне? x 0))) (quote {xs}))"
+                "{prelude} (d6-all (lambda (x) (cond ((тотожне? x 0) (тотожне? 0 1)) ((атом? 0) (тотожне? 0 0)))) (quote {xs}))"
             ),
             all_nonzero,
         );
@@ -552,10 +552,10 @@ fn integerp_rationalp_derive_from_canonical_exact_q_wire() {
                     ((тотожне? (string-first rest) "1")
                      (cond
                        ((тотожне? (string-rest rest) "") (d6-yes))
-                       ((не (тотожне? (string-rest rest) "")) (d6-no))))
-                    ((не (тотожне? (string-first rest) "1")) (d6-no))))
+                       ((атом? 0) (d6-no))))
+                    ((атом? 0) (d6-no))))
                 (string-rest text)))
-              ((не (тотожне? (string-first text) "/"))
+              ((атом? 0)
                (d6-wire-denominator-one? (string-rest text))))))
         (define d6-rationalp
           (lambda (value)
@@ -567,7 +567,7 @@ fn integerp_rationalp_derive_from_canonical_exact_q_wire() {
             (cond
               ((d6-rationalp value)
                (d6-wire-denominator-one? (write-to-string value)))
-              ((не (d6-rationalp value)) (d6-no)))))
+              ((атом? 0) (d6-no)))))
     "##;
 
     for x in ["0", "1", "-7", "42", "3.00"] {
