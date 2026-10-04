@@ -329,17 +329,20 @@ fn canonicalize_domain_result(
         return Ok(value);
     }
 
-    match value {
-        Value::Symbol(symbol) if symbol.as_ref() == "t" => Ok(Value::predicate_bit(true)),
-        Value::Nil => Ok(Value::predicate_bit(false)),
-        other => Err(LanguageError::new(
-            ErrorKind::Type,
-            format!(
-                "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {other}"
-            ),
-            span,
-        )),
+    if matches!(&value, Value::Symbol(symbol) if symbol.as_ref() == "t") {
+        return Ok(Value::predicate_bit(true));
     }
+    if matches!(&value, Value::Nil) {
+        return Ok(Value::predicate_bit(false));
+    }
+
+    Err(LanguageError::new(
+        ErrorKind::Type,
+        format!(
+            "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {value}"
+        ),
+        span,
+    ))
 }
 
 pub(crate) fn invoke_domain_identity(
