@@ -43,7 +43,11 @@
       "enum": [
         "decoder",
         "alu-add-xor",
-        "ram1024"
+        "ram1024",
+        "ram-packed",
+        "limb-add",
+        "limb-mul",
+        "multi-limb"
       ]
     },
     "semantic_subject": {
@@ -51,7 +55,10 @@
       "minLength": 1
     },
     "semantic_width": {
-      "type": "integer",
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 1
     },
     "physical_word_width": {
@@ -162,6 +169,147 @@
     },
     "notes": {
       "type": "string"
+    },
+    "semantic_width_mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "fixed",
+        "mixed",
+        "unbounded",
+        null
+      ]
+    },
+    "packing_strategy": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "naive-byte",
+        "word-aligned-32",
+        "tight-32",
+        "tagged-mixed",
+        null
+      ]
+    },
+    "depth_values": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "physical_bits": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "operation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "add",
+        "sub",
+        "cmp",
+        "mul",
+        "add-multi",
+        "mul-multi",
+        null
+      ]
+    },
+    "limb_width": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "limb_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "cycles": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "timing_slack_ns": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "clock_constraint_hz": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "temporary_width": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "state_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "memory_reads": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "memory_writes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "correctness": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "pass",
+        "fail",
+        null
+      ]
+    },
+    "input_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "board": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
     }
   }
 }
