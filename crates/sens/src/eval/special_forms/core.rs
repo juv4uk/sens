@@ -222,11 +222,13 @@ pub(crate) fn cons_values(
     Ok(Value::Pair(std::rc::Rc::new(head), std::rc::Rc::new(tail)))
 }
 
-pub(crate) fn eq_values(left: Value, right: Value, _span: Span) -> Result<Value, LanguageError> {
+pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, LanguageError> {
     if !left.is_atom() || !right.is_atom() {
-        // #3161: EQ is a partial predicate. Outside its admitted atom domain,
-        // structural EMPTY means no witness; it is neither FALSE nor an error.
-        return Ok(Value::Nil);
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "eq expects two admitted atoms",
+            span,
+        ));
     }
     Ok(Value::predicate_bit(left == right))
 }
@@ -258,7 +260,7 @@ mod tests {
     }
 
     #[test]
-    fn atom_is_total_but_eq_can_return_empty_no_witness() {
+    fn atom_and_eq_remain_exact_d1_predicates_on_their_admitted_domains() {
         let env = Environment::root();
         assert_eq!(atom_value(&Value::Nil, &env).as_predicate_bit(), Some(true));
         let pair = Value::Pair(Rc::new(Value::Nil), Rc::new(Value::Nil));
@@ -278,9 +280,8 @@ mod tests {
             .as_predicate_bit(),
             Some(false)
         );
-        assert!(matches!(
-            eq_values(pair, Value::Nil, span()).unwrap(),
-            Value::Nil
-        ));
+        let error = eq_values(pair, Value::Nil, span())
+            .expect_err("EQ outside its admitted atom domain must fail closed");
+        assert_eq!(error.kind, ErrorKind::Type);
     }
 }
